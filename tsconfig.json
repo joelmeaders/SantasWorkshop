@@ -23,7 +23,8 @@
       "@env": ["environments/environment.ts"],
       "@app/shared": ["app/shared"],
       "@app/forms": ["app/shared/forms"],
-    }
+    },
+    "resolveJsonModule": true
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

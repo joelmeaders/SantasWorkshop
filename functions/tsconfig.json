@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "sourceMap": true,
+    "strict": true,
+    // "lib": ["ES2017"],
+    "target": "ES2017",
+    "declaration": true,
+    // "allowJs": true,
+    // "moduleResolution": "node", 
+    "typeRoots": [
+      "node_modules/@types",
+    ],
+    // "esModuleInterop": true,
+    // "resolveJsonModule": true
+  },
+  "compileOnSave": true,
+  "include": [
+    "src"
+  ],
+}

@@ -1,0 +1,266 @@
+<ion-content [fullscreen]="true" *appLet="$customer | async as customer" color="xmasred">
+  <ion-header class="ion-no-border">
+    <ion-toolbar color="xmasred">
+      <img src="../../../assets/santaclausshop.jpg" alt="santa claus shop logo" width="90px" height="90px" class="ion-margin" />
+      <ion-item slot="primary" color="clear" lines="none">
+        <div>
+          <h1 color="light" class="ion-no-margin ion-no-padding">{{ customer?.firstName }} {{ customer?.lastName }}</h1>
+          <ion-card-subtitle color="light"> Your Profile </ion-card-subtitle>
+        </div>
+        <ion-button fill="light" slot="end" size="medium" (click)="profileMenu($event)">
+          <ion-icon name="menu" slot="end" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col sizeXl="4" sizeLg="5" sizeMd="6" sizeSm="8" sizeXs="12">
+        <ion-col *ngIf="!($hasRegistered | async) || ($isModify | async)" class="ion-no-padding" size="12">
+          <ion-toolbar color="xmasred">
+            <ion-title slot="start"> Registration Status</ion-title>
+          </ion-toolbar>
+          <ion-card>
+            <ion-card-content class="ion-text-center">
+              <ion-list>
+                <ion-item>
+                  <ion-icon slot="start" name="checkmark-circle-outline" color="success"></ion-icon>
+                  <ion-label>Create Account</ion-label>
+                </ion-item>
+                <ion-item *appLet="$registrationDate | async as registrationDate">
+                  <ion-icon
+                    slot="start"
+                    [name]="!!registrationDate ? 'checkmark-circle-outline' : 'chevron-forward-circle-outline'"
+                    [color]="!!registrationDate ? 'success' : 'medium'"
+                  ></ion-icon>
+                  <ion-label>Choose arrival date and time</ion-label>
+                </ion-item>
+                <ion-item *appLet="$children | async as children">
+                  <ion-icon
+                    slot="start"
+                    [name]="children?.length ? 'checkmark-circle-outline' : 'chevron-forward-circle-outline'"
+                    [color]="children?.length ? 'success' : 'medium'"
+                  ></ion-icon>
+                  <ion-label>Add your children ages 0-11</ion-label>
+                </ion-item>
+                <ion-item *appLet="$children | async as children">
+                  <ion-icon
+                    slot="start"
+                    [name]="children?.length ? 'chevron-forward-circle-outline' : 'close-circle-outline'"
+                    color="medium"
+                  ></ion-icon>
+                  <ion-label>Register for event</ion-label>
+                </ion-item>
+              </ion-list>
+              <ion-button color="primary" [disabled]="!($registrationEnabled | async)" (click)="confirmRegistration()">
+                <ion-icon name="paper-plane" slot="end"></ion-icon>
+                <ion-label *appLet="$hasRegistered | async as hasRegistered">
+                  <strong>{{ hasRegistered ? 'Update Registration' : 'Submit Registration' }}</strong>
+                </ion-label>
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" *ngIf="($hasRegistered | async) && !($isModify | async)">
+          <ion-toolbar color="xmasred">
+            <ion-title slot="start"> Registration Status </ion-title>
+          </ion-toolbar>
+          <ion-card color="success" *appLet="($customer | async) as customer">
+            <ion-card-header color="success">
+              <div class="ion-text-center">
+                <h4 class="ion-no-padding ion-no-margin">You're ready for the event!</h4>
+              </div>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="qrcode-container ion-margin-bottom ion-text-center">
+                <img *ngIf="$qrCode | async as qrcode" [src]="qrcode" alt="Registration QR Code">
+                <div class="qrcode-text">
+                  {{ $registrationCode | async }}
+                </div>
+              </div>
+              <div class="ion-text-center">
+              </div>
+              <div class="ion-text-center ion-padding-top">
+                <h1>December 11-12 & 14-15, 2020</h1>
+                <h1>9:00am - 3:00pm</h1>
+                <h3>2150 S Monaco Parkway</h3>
+                <h4>Denver, CO 80222</h4>
+              </div>
+              <div class="ion-text-center ion-padding-top">
+                <ion-label color="dark"> Need to change your registration details? </ion-label><br />
+                <ion-button color="danger" (click)="modifyRegistration()">
+                  <ion-text color="light">
+                    <strong>Modify Registration</strong>
+                  </ion-text>
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" *ngIf="!($hasRegistered | async) || ($isModify | async)">
+          <ion-toolbar color="xmasred">
+            <ion-title slot="start"> Instructions </ion-title>
+          </ion-toolbar>
+          <ion-card>
+            <ion-card-content>
+              <ion-list>
+                <ion-item>
+                  <ion-icon name="caret-forward-outline" slot="start"></ion-icon>
+                  <p class="padding-bottom-md padding-top-sm">Please add your children, ages 11 and under using the "Add Child" button.</p>
+                </ion-item>
+                <ion-item>
+                  <ion-icon name="caret-forward-outline" slot="start"></ion-icon>
+                  <p class="padding-bottom-md padding-top-sm">
+                    If you mis-typed your child's information, click their name to edit the record
+                  </p>
+                </ion-item>
+                <ion-item>
+                  <ion-icon name="caret-forward-outline" slot="start"></ion-icon>
+                  <p class="padding-bottom-md padding-top-sm">
+                    When you are finished adding your children click the blue "Submit Registration" button above these instructions to
+                    confirm your registration.
+                  </p>
+                </ion-item>
+                <ion-item>
+                  <ion-icon name="caret-forward-outline" slot="start"></ion-icon>
+                  <p class="padding-bottom-md padding-top-sm">
+                    This will give you a special QR Code we use to reserve toys for your children. Print or take a screenshot of this code
+                    so we can easily look up your registration on the day of the event.
+                  </p>
+                </ion-item>
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+
+        <ion-col size="12" *ngIf="($hasRegistered | async) && !($isModify | async)">
+          <ion-toolbar color="xmasred">
+            <ion-title slot="start"> Instructions </ion-title>
+          </ion-toolbar>
+          <ion-card>
+            <ion-card-content>
+              <ion-list>
+                <ion-item>
+                  <ion-icon name="caret-forward-outline" slot="start"></ion-icon>
+                  <p class="padding-bottom-md padding-top-sm">
+                    Please take a screenshot, or print this barcode. We use this to quickly get your toys at the event.
+                  </p>
+                </ion-item>
+                <ion-item>
+                  <ion-icon name="caret-forward-outline" slot="start"></ion-icon>
+                  <p class="padding-bottom-md padding-top-sm">
+                    If you forgot to add a child or need to change anything, press the "Modify Registration" button and make changes. Don't
+                    forget to submit your registration again!
+                  </p>
+                </ion-item>
+              </ion-list>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-col>
+
+      <ion-col size="12" size-sm>
+        <ion-toolbar color="xmasred">
+          <ion-title slot="start"> Choose an arrival date/time </ion-title>
+        </ion-toolbar>
+        <ion-card>
+          <form [formGroup]="dateTimeForm" novalidate>
+            <ion-card-header>
+              <ion-label>Please use the first letter of your last name to choose your date</ion-label>
+              <br />
+              <div>
+                <table>
+                  <tr>
+                    <td>A-?</td>
+                    <td>Dec. 11th</td>
+                  </tr>
+                  <tr>
+                    <td>?-?</td>
+                    <td>Dec. 12th</td>
+                  </tr>
+                  <tr>
+                    <td>?-?</td>
+                    <td>Dec. 14th</td>
+                  </tr>
+                  <tr>
+                    <td>?-Z</td>
+                    <td>Dec. 15th</td>
+                  </tr>
+                </table>
+              </div>
+            </ion-card-header>
+            <ion-list>
+              <ion-item>
+                <ion-label position="stacked">Date</ion-label>
+                <ion-select formControlName="date" placeholder="Choose Date" interface="popover">
+                  <ion-select-option [value]="11"> December 11th, 2020 </ion-select-option>
+                  <ion-select-option [value]="12"> December 12th, 2020 </ion-select-option>
+                  <ion-select-option [value]="14"> December 14th, 2020 </ion-select-option>
+                  <ion-select-option [value]="15"> December 15th, 2020 </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Time</ion-label>
+                <ion-select formControlName="time" placeholder="Choose Time" interface="popover">
+                  <ion-select-option [value]="9"> 9am </ion-select-option>
+                  <ion-select-option [value]="10"> 10am </ion-select-option>
+                  <ion-select-option [value]="11"> 11am </ion-select-option>
+                  <ion-select-option [value]="12"> 12pm </ion-select-option>
+                  <ion-select-option [value]="13"> 1pm </ion-select-option>
+                  <ion-select-option [value]="14"> 2pm </ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label>Save Date & Time</ion-label>
+                <ion-button slot="end" [disabled]="!this.dateTimeForm.valid" (click)="saveDateTime()">Save Date/Time</ion-button>
+              </ion-item>
+            </ion-list>
+          </form>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-sm *appLet="!($hasRegistered | async) || ($isModify | async) as allowEdit">
+        <ion-toolbar color="xmasred">
+          <ion-title slot="start"> Add Your Children </ion-title>
+          <ion-button (click)="addEditChild()" slot="end" color="primary" class="padding-right-md" [disabled]="!allowEdit">
+            <ion-label>Add Child</ion-label>
+            <ion-icon name="add-circle" slot="end"></ion-icon>
+          </ion-button>
+        </ion-toolbar>
+        <div *ngIf="!($children | async)?.length" class="ion-text-center" class="padding-top-lg" (click)="addEditChild()">
+          <ion-item color="primary" lines="none" button tappable>
+            <ion-title>Start adding your children</ion-title>
+            <ion-icon name="add-circle" slot="end" size="large"></ion-icon>
+          </ion-item>
+        </div>
+        <ion-card>
+          <ion-card-header *ngIf="$isModify | async">
+            <ion-note>Don't forget to update your registration if you add or change children!</ion-note>
+          </ion-card-header>
+          <ion-list class="ion-no-padding">
+            <ion-item
+              *ngFor="let child of ($children | async)"
+              (click)="addEditChild(child)"
+              [disabled]="!allowEdit"
+              tappable
+              button
+              lines="full"
+              class="child-item"
+              detail
+              detail-icon="create"
+              [ngClass]="{'infant-style' : child.toyType == 'infant', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+            >
+              <div class="padding-bottom-md">
+                <h1>{{ child.firstName }}</h1>
+                <ion-card-subtitle> Age {{ child.ageGroup }} </ion-card-subtitle>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

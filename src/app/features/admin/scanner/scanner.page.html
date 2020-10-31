@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>scanner</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content fullscreen="true" [hidden]="!hasDevices">
+  <ion-item>
+    <ion-label>Device</ion-label>
+    <ion-select [value]="deviceSelected">
+      <ion-select-option [value]="">No Device Selected</ion-select-option>
+      <ion-select-option *ngFor="let device of availableDevices" [value]="device.deviceId" (ionChange)="onDeviceSelectChange($event)">
+        {{ device.label }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+  <span>
+    <zxing-scanner
+      [torch]="torchEnabled"
+      [device]="deviceCurrent"
+      (deviceChange)="onDeviceChange($event)"
+      (scanSuccess)="onCodeResult($event)"
+      [formats]="formatsEnabled"
+      (permissionResponse)="onHasPermission($event)"
+      (camerasFound)="onCamerasFound($event)"
+      (torchCompatible)="onTorchCompatible($event)"
+      [tryHarder]="true"
+    ></zxing-scanner>
+  </span>
+</ion-content>
+
+<ng-container *ngIf="hasPermission === undefined">
+
+  <h2>Waiting for permissions.</h2>
+
+  <blockquote>
+    If your device does not has cameras, no permissions will be asked.
+  </blockquote>
+
+</ng-container>
+
+<ng-container *ngIf="hasPermission === false">
+
+  <h2>You denied the camera permission, we can't scan anything without it. 😪</h2>
+
+</ng-container>
+
+<ng-container *ngIf="hasDevices === undefined">
+
+  <h2>Couldn't check for devices.</h2>
+
+  <blockquote>
+    This may be caused by some security error.
+  </blockquote>
+
+</ng-container>
+
+<ng-container *ngIf="hasDevices === false">
+
+  <h2>No devices were found.</h2>
+
+  <blockquote>
+    I believe your device has no media devices attached to.
+  </blockquote>
+
+</ng-container>

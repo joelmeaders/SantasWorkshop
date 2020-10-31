@@ -1,0 +1,59 @@
+.icon-xl {
+  font-size: 48px;
+}
+
+.input-style {
+  border-color: rgba(106, 90, 205, .3);
+  border-style: solid;
+  border-radius: 3px;
+  border-width: .1em;
+  border-top-style: hidden;
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+
+.boys-style {
+  border-left-color: var(--ion-color-boy) !important;
+  border-left-width: 24px !important;
+  border-left-style: solid !important;
+}
+
+.girls-style {
+  border-left-color: var(--ion-color-girl);
+  border-left-width: 24px;
+  border-left-style: solid;
+}
+
+.infant-style {
+  border-left-color: var(--ion-color-warning);
+  border-left-width: 24px;
+  border-left-style: solid;
+}
+
+.child-item {
+  --detail-icon-color: var(--ion-color-primary);
+  --detail-icon-font-size: 32px;
+  --detail-icon-opacity: .7
+}
+
+.qrcode-container {
+  background-color: #FFF;
+  border-radius: 12px;
+  border-width: 1px;
+  border-style: solid;
+  overflow-y: visible;
+  overflow-x: hidden;
+  width: 300px;
+  // height: 300px;
+  position: relative;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+.qrcode-text {
+  position: relative;
+  top: -10px;
+  font-weight: bold;
+  color: #000000 !important;
+  font-size: 16px !important;
+}

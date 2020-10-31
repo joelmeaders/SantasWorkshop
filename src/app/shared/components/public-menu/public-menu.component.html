@@ -1,0 +1,29 @@
+<span *appLet="$isLoggedIn | async as isLoggedIn">
+  <ion-list>
+    <ion-item button tappable (click)="home()">
+      <ion-label>
+        Home
+      </ion-label>
+    </ion-item>
+    <ion-item button tappable (click)="createAccount()" *ngIf="!isLoggedIn">
+      <ion-label>
+        Create Account
+      </ion-label>
+    </ion-item>
+    <ion-item button tappable (click)="signIn()" *ngIf="!isLoggedIn">
+      <ion-label>
+        Sign In
+      </ion-label>
+    </ion-item>
+    <ion-item button tappable (click)="profile()" *ngIf="isLoggedIn">
+      <ion-label>
+        Your Profile
+      </ion-label>
+    </ion-item>
+    <ion-item button tappable (click)="logout()" *ngIf="isLoggedIn">
+      <ion-label>
+        Log Out
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</span>

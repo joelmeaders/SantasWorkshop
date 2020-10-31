@@ -1,0 +1,7 @@
+{
+  "name": "Registration-Sample",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

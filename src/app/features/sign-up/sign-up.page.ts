@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IError } from '@app/core/models/base/i-errors';
@@ -43,7 +44,8 @@ export class SignUpPage implements OnDestroy {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly alertController: AlertController,
-    private readonly modalController: ModalController
+    private readonly modalController: ModalController,
+    private readonly analyticsService: AngularFireAnalytics
   ) {}
 
   public async ngOnDestroy() {
@@ -71,6 +73,7 @@ export class SignUpPage implements OnDestroy {
       .registerAccount(info)
       .then((resolve: UserProfile) => {
         this._$loading.next(false);
+        this.analyticsService.logEvent('sign_up');
         return true;
       })
       .catch(async (error: IError) => {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';
 import { PopoverController } from '@ionic/angular';
 
@@ -8,11 +8,11 @@ import { PopoverController } from '@ionic/angular';
   styleUrls: ['home.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomePage {
+export class HomePage implements OnInit {
 
   constructor(
     private readonly popoverController: PopoverController
-  ) {}
+  ) { }
 
   public async profileMenu($event: any) {
     const popover = await this.popoverController.create({
@@ -20,6 +20,10 @@ export class HomePage {
       event: $event
     });
     return await popover.present();
+  }
+
+  ngOnInit() {
+
   }
 
 }

@@ -6,6 +6,7 @@ import { AlertController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { differenceInDays } from 'date-fns';
 import { shareReplay, takeUntil } from 'rxjs/operators';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 @Component({
   selector: 'app-create-child-modal',
   templateUrl: './create-child-modal.component.html',
@@ -25,7 +26,8 @@ export class CreateChildModalComponent implements OnInit {
   constructor(
     private readonly modalController: ModalController,
     private readonly changeDetector: ChangeDetectorRef,
-    private readonly alertController: AlertController
+    private readonly alertController: AlertController,
+    private readonly analyticsService: AngularFireAnalytics
   ) {}
 
   public ngOnInit() {
@@ -38,6 +40,14 @@ export class CreateChildModalComponent implements OnInit {
   }
 
   public cancel() {
+    let didAdd = false;
+
+    if (!!this.item?.id) {
+      didAdd = false;
+    } else {
+      didAdd = true;
+    }
+    this.analyticsService.logEvent(didAdd ? 'child_add_cancel' : 'child_edit_cancel');
     this.modalController.dismiss();
   }
 

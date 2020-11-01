@@ -1,6 +1,8 @@
 import { writeFile } from 'fs';
 import { name, version } from './package.json';
 
+require('dotenv').load();
+
 const targetPath = './src/environments/environment.ts';
 
 const envConfigFile = `

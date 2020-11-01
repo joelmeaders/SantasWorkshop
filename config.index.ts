@@ -21,9 +21,6 @@ const envConfigFile = `export const environment = {
   };
 `;
 
-console.log('The file `environment.ts` will be written with the following content: \n');
-console.log(envConfigFile);
-
 writeFile(targetPath, envConfigFile, 'utf8', function (err) {
    if (err) {
        throw console.error(err);

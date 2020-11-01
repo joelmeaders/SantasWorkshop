@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true" *appLet="$customer | async as customer" color="xmasred">
-  <ion-header class="ion-no-border">
+  <ion-header id="top" class="ion-no-border">
     <ion-toolbar color="xmasred">
       <img src="../../../assets/santaclausshop.jpg" alt="santa claus shop logo" width="90px" height="90px" class="ion-margin" />
       <ion-item slot="primary" color="clear" lines="none">
@@ -16,7 +16,7 @@
 
   <ion-grid>
     <ion-row>
-      <ion-col sizeXl="4" sizeLg="5" sizeMd="6" sizeSm="8" sizeXs="12">
+      <ion-col size="12" size-xs>
         <ion-col *ngIf="!($hasRegistered | async) || ($isModify | async)" class="ion-no-padding" size="12">
           <ion-toolbar color="xmasred">
             <ion-title slot="start"> Registration Status</ion-title>
@@ -28,7 +28,7 @@
                   <ion-icon slot="start" name="checkmark-circle-outline" color="success"></ion-icon>
                   <ion-label>Create Account</ion-label>
                 </ion-item>
-                <ion-item *appLet="$registrationDate | async as registrationDate">
+                <ion-item *appLet="$registrationDate | async as registrationDate" href="./profile#arrival-date">
                   <ion-icon
                     slot="start"
                     [name]="!!registrationDate ? 'checkmark-circle-outline' : 'chevron-forward-circle-outline'"
@@ -36,7 +36,7 @@
                   ></ion-icon>
                   <ion-label>Choose arrival date and time</ion-label>
                 </ion-item>
-                <ion-item *appLet="$children | async as children">
+                <ion-item *appLet="$children | async as children" href="./profile#add-children">
                   <ion-icon
                     slot="start"
                     [name]="children?.length ? 'checkmark-circle-outline' : 'chevron-forward-circle-outline'"
@@ -63,7 +63,7 @@
           </ion-card>
         </ion-col>
 
-        <ion-col size="12" *ngIf="($hasRegistered | async) && !($isModify | async)">
+        <ion-col size="12" size-xs *ngIf="($hasRegistered | async) && !($isModify | async)">
           <ion-toolbar color="xmasred">
             <ion-title slot="start"> Registration Status </ion-title>
           </ion-toolbar>
@@ -75,7 +75,11 @@
             </ion-card-header>
             <ion-card-content>
               <div class="qrcode-container ion-margin-bottom ion-text-center">
-                <img *ngIf="$qrCode | async as qrcode" [src]="qrcode" alt="Registration QR Code">
+                <div *ngIf="($qrLoading | async) === true">
+                  <ion-text>Loading ticket...</ion-text><br/>
+                  <ion-spinner></ion-spinner>
+                </div>
+                <img *ngIf="($qrLoading | async) === false" [src]="$qrCode | async" alt="Registration QR Code">
                 <div class="qrcode-text">
                   {{ $registrationCode | async }}
                 </div>
@@ -84,7 +88,7 @@
               </div>
               <div class="ion-text-center ion-padding-top">
                 <h1>December 11-12 & 14-15, 2020</h1>
-                <h1>9:00am - 3:00pm</h1>
+                <h1>10am - 3pm</h1>
                 <h3>2150 S Monaco Parkway</h3>
                 <h4>Denver, CO 80222</h4>
               </div>
@@ -136,7 +140,7 @@
           </ion-card>
         </ion-col>
 
-        <ion-col size="12" *ngIf="($hasRegistered | async) && !($isModify | async)">
+        <ion-col size="12" size-xs *ngIf="($hasRegistered | async) && !($isModify | async)">
           <ion-toolbar color="xmasred">
             <ion-title slot="start"> Instructions </ion-title>
           </ion-toolbar>
@@ -162,7 +166,7 @@
         </ion-col>
       </ion-col>
 
-      <ion-col size="12" size-sm>
+      <ion-col id="arrival-date" size="12" size-sm >
         <ion-toolbar color="xmasred">
           <ion-title slot="start"> Choose an arrival date/time </ion-title>
         </ion-toolbar>
@@ -205,7 +209,6 @@
               <ion-item>
                 <ion-label position="stacked">Time</ion-label>
                 <ion-select formControlName="time" placeholder="Choose Time" interface="popover">
-                  <ion-select-option [value]="9"> 9am </ion-select-option>
                   <ion-select-option [value]="10"> 10am </ion-select-option>
                   <ion-select-option [value]="11"> 11am </ion-select-option>
                   <ion-select-option [value]="12"> 12pm </ion-select-option>
@@ -222,7 +225,7 @@
         </ion-card>
       </ion-col>
 
-      <ion-col size="12" size-sm *appLet="!($hasRegistered | async) || ($isModify | async) as allowEdit">
+      <ion-col id="add-children" size="12" size-sm *appLet="!($hasRegistered | async) || ($isModify | async) as allowEdit">
         <ion-toolbar color="xmasred">
           <ion-title slot="start"> Add Your Children </ion-title>
           <ion-button (click)="addEditChild()" slot="end" color="primary" class="padding-right-md" [disabled]="!allowEdit">
@@ -260,6 +263,11 @@
             </ion-item>
           </ion-list>
         </ion-card>
+      </ion-col>
+    </ion-row>
+    <ion-row class="ion-hide-lg-up">
+      <ion-col class="ion-text-center">
+        <ion-button href="./profile#top">Back to top</ion-button>
       </ion-col>
     </ion-row>
   </ion-grid>

@@ -12,6 +12,7 @@ import { AlertController, LoadingController, ModalController, PopoverController 
 import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwError } from 'rxjs';
 import { catchError, concatMap, delay, filter, map, mapTo, mergeMap, publishReplay, refCount, retry, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AngularFireStorage } from '@angular/fire/storage';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 
 @Component({
   selector: 'app-profile',
@@ -54,6 +55,7 @@ export class ProfilePage implements OnDestroy {
     takeUntil(this.$destroy),
     switchMap(customer =>
       this.registrationService.getRegistrationByParent(customer.id)),
+    tap(v => console.log('registrationQuery', v)),
     publishReplay(1),
     refCount()
   );
@@ -61,6 +63,7 @@ export class ProfilePage implements OnDestroy {
   public readonly $registrationCode = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
     filter(response => !!response?.code),
+    tap(v => console.log('registrationCode', v)),
     map((response: Registration) => response.code),
     publishReplay(1),
     refCount()
@@ -93,16 +96,24 @@ export class ProfilePage implements OnDestroy {
     shareReplay(1)
   );
 
+  private readonly _$qrLoading = new BehaviorSubject<boolean>(false);
+  public readonly $qrLoading = this._$qrLoading.pipe(
+    takeUntil(this.$destroy),
+    shareReplay(1)
+  );
+
   public $qrCode = this.$registrationCode.pipe(
     takeUntil(this.$destroy),
     filter(code => !!code),
+    tap(() => this._$qrLoading.next(true)),
     mergeMap(code => this.storage.ref(`registrations/${code}.png`).getDownloadURL().pipe(
       retryWhen(errors => errors.pipe(
         delay(3000),
-        take(3),
+        take(10),
       )),
       catchError((error) => of('Refresh Page'))
     )),
+    tap(() => this._$qrLoading.next(false)),
     shareReplay(1)
   );
 
@@ -124,7 +135,8 @@ export class ProfilePage implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly loadingController: LoadingController,
     private readonly popoverController: PopoverController,
-    private readonly storage: AngularFireStorage
+    private readonly storage: AngularFireStorage,
+    private readonly analyticsService: AngularFireAnalytics
   ) { }
 
   public async ngOnDestroy() {
@@ -137,6 +149,7 @@ export class ProfilePage implements OnDestroy {
   }
 
   public async addEditChild(inputChild?: ChildProfile): Promise<void> {
+
     const modal = await this.modalController.create({
       component: CreateChildModalComponent,
       cssClass: 'modal-md',
@@ -156,7 +169,17 @@ export class ProfilePage implements OnDestroy {
           child.parentId = parent.id;
         }
 
+        let didAdd = false;
+
+        if (!!child?.id) {
+          didAdd = false;
+        } else {
+          didAdd = true;
+        }
+
         await this.saveChild(child).toPromise();
+
+        this.analyticsService.logEvent(didAdd ? 'child_add' : 'child_edit');
       }
     });
   }
@@ -197,6 +220,7 @@ export class ProfilePage implements OnDestroy {
         this._$loading.next(false);
       });
 
+    this.analyticsService.logEvent('save_datetime');
     this.changeDetection.detectChanges();
 
     await this.savedDateTimeAlert();
@@ -229,6 +253,7 @@ export class ProfilePage implements OnDestroy {
         this._$loading.next(false);
       });
 
+    this.analyticsService.logEvent('submit_registration');
     this._$isModify.next(false);
 
     await this.emailAlert();
@@ -263,6 +288,8 @@ export class ProfilePage implements OnDestroy {
     if (choice?.role === 'cancel') {
       return;
     }
+
+    this.analyticsService.logEvent('_edit_registration');
 
     this._$isModify.next(true);
     this.changeDetection.detectChanges();

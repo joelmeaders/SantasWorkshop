@@ -44,7 +44,10 @@ export class SignInPage implements OnDestroy {
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly analyticsService: AngularFireAnalytics
-  ) {}
+  ) {
+    analyticsService.setCurrentScreen('sign-in');
+    analyticsService.logEvent('screen_view');
+  }
 
   public async ngOnDestroy() {
     this.$destroy.next();

@@ -55,7 +55,6 @@ export class ProfilePage implements OnDestroy {
     takeUntil(this.$destroy),
     switchMap(customer =>
       this.registrationService.getRegistrationByParent(customer.id)),
-    tap(v => console.log('registrationQuery', v)),
     publishReplay(1),
     refCount()
   );
@@ -63,7 +62,6 @@ export class ProfilePage implements OnDestroy {
   public readonly $registrationCode = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
     filter(response => !!response?.code),
-    tap(v => console.log('registrationCode', v)),
     map((response: Registration) => response.code),
     publishReplay(1),
     refCount()
@@ -137,7 +135,10 @@ export class ProfilePage implements OnDestroy {
     private readonly popoverController: PopoverController,
     private readonly storage: AngularFireStorage,
     private readonly analyticsService: AngularFireAnalytics
-  ) { }
+  ) {
+    analyticsService.setCurrentScreen('profile');
+    analyticsService.logEvent('screen_view');
+   }
 
   public async ngOnDestroy() {
     this.$destroy.next();

@@ -75,7 +75,11 @@
             </ion-card-header>
             <ion-card-content>
               <div class="qrcode-container ion-margin-bottom ion-text-center">
-                <img *ngIf="$qrCode | async as qrcode" [src]="qrcode" alt="Registration QR Code">
+                <div *ngIf="($qrLoading | async) === true">
+                  <ion-text>Loading ticket...</ion-text><br/>
+                  <ion-spinner></ion-spinner>
+                </div>
+                <img *ngIf="($qrLoading | async) === false" [src]="$qrCode | async" alt="Registration QR Code">
                 <div class="qrcode-text">
                   {{ $registrationCode | async }}
                 </div>

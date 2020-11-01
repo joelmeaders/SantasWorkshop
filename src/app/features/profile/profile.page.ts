@@ -55,6 +55,7 @@ export class ProfilePage implements OnDestroy {
     takeUntil(this.$destroy),
     switchMap(customer =>
       this.registrationService.getRegistrationByParent(customer.id)),
+    tap(v => console.log('registrationQuery', v)),
     publishReplay(1),
     refCount()
   );
@@ -62,6 +63,7 @@ export class ProfilePage implements OnDestroy {
   public readonly $registrationCode = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
     filter(response => !!response?.code),
+    tap(v => console.log('registrationCode', v)),
     map((response: Registration) => response.code),
     publishReplay(1),
     refCount()
@@ -94,16 +96,24 @@ export class ProfilePage implements OnDestroy {
     shareReplay(1)
   );
 
+  private readonly _$qrLoading = new BehaviorSubject<boolean>(false);
+  public readonly $qrLoading = this._$qrLoading.pipe(
+    takeUntil(this.$destroy),
+    shareReplay(1)
+  );
+
   public $qrCode = this.$registrationCode.pipe(
     takeUntil(this.$destroy),
     filter(code => !!code),
+    tap(() => this._$qrLoading.next(true)),
     mergeMap(code => this.storage.ref(`registrations/${code}.png`).getDownloadURL().pipe(
       retryWhen(errors => errors.pipe(
         delay(3000),
-        take(3),
+        take(10),
       )),
       catchError((error) => of('Refresh Page'))
     )),
+    tap(() => this._$qrLoading.next(false)),
     shareReplay(1)
   );
 

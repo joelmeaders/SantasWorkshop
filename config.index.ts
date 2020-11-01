@@ -3,9 +3,7 @@ import { name, version } from './package.json';
 
 const targetPath = './src/environments/environment.prod.ts';
 
-const envConfigFile = `
-
-  export const environment = {
+const envConfigFile = `export const environment = {
     production: true,
     name: '${name}',
     version: '${version}'
@@ -25,7 +23,8 @@ const envConfigFile = `
 
 console.log('The file `environment.ts` will be written with the following content: \n');
 console.log(envConfigFile);
-writeFile(targetPath, envConfigFile, function (err) {
+
+writeFile(targetPath, envConfigFile, 'utf8', function (err) {
    if (err) {
        throw console.error(err);
    } else {

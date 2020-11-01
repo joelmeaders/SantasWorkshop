@@ -33,14 +33,6 @@ export class CounterService {
 
   public updateCounter(byValue: number): Observable<boolean> {
     const cloudFunction = this.functions.httpsCallable('modCounter');
-    // return cloudFunction({ shardCount: this.shardCount, collection: this.collectionPath, adjustBy: byValue }).pipe(
-    //   take(1),
-    //   mapTo(true),
-    //   catchError(error => {
-    //     console.log(error.code, error.message, error.details);
-    //     return throwError(error);
-    //   })
-    // );
 
     return cloudFunction({ shardCount: this.shardCount, collection: this.collectionPath, adjustBy: byValue }).pipe(
       take(1)

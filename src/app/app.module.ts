@@ -14,7 +14,7 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/storage';
 import { firebaseConfig } from '@env';
-import { AngularFireAnalyticsModule, ScreenTrackingService } from '@angular/fire/analytics';
+import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 
 @NgModule({
   declarations: [AppComponent],
@@ -35,8 +35,7 @@ import { AngularFireAnalyticsModule, ScreenTrackingService } from '@angular/fire
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com'},
-    ScreenTrackingService
+    { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com'}
   ],
   bootstrap: [AppComponent],
   schemas: [

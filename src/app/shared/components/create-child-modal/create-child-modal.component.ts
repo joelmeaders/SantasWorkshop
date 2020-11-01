@@ -34,7 +34,6 @@ export class CreateChildModalComponent implements OnInit {
     this.form = ChildProfileForm.form(this.item);
 
     if (this.item && this.isInfant()) {
-      console.log('isfinant')
       this.setInfant(true);
     }
   }

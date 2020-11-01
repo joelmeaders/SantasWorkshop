@@ -46,7 +46,10 @@ export class SignUpPage implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly analyticsService: AngularFireAnalytics
-  ) {}
+  ) {
+    analyticsService.setCurrentScreen('sign-up');
+    analyticsService.logEvent('screen_view');
+  }
 
   public async ngOnDestroy() {
     this.$destroy.next();
@@ -82,11 +85,9 @@ export class SignUpPage implements OnDestroy {
         return false;
       });
 
-      console.log(result);
-
-      if (result) {
-        this.redirectToAccount();
-      }
+    if (result) {
+      this.redirectToAccount();
+    }
   }
 
   private redirectToAccount() {

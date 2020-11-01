@@ -8,6 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - master
 env: 
   FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest

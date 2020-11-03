@@ -13,6 +13,7 @@ import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwEr
 import { catchError, concatMap, delay, filter, map, mapTo, mergeMap, publishReplay, refCount, retry, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -134,7 +135,8 @@ export class ProfilePage implements OnDestroy {
     private readonly loadingController: LoadingController,
     private readonly popoverController: PopoverController,
     private readonly storage: AngularFireStorage,
-    private readonly analyticsService: AngularFireAnalytics
+    private readonly analyticsService: AngularFireAnalytics,
+    private readonly router: Router
   ) {
     analyticsService.setCurrentScreen('profile');
     analyticsService.logEvent('screen_view');
@@ -214,6 +216,8 @@ export class ProfilePage implements OnDestroy {
       return;
     }
 
+    this._$loading.next(true);
+
     const customer = await this.$customer.pipe(take(1)).toPromise();
 
     await this.registrationService.storePartialRegistration(customer, dateTime)
@@ -260,6 +264,7 @@ export class ProfilePage implements OnDestroy {
     await this.emailAlert();
 
     this.changeDetection.detectChanges();
+    this.router.navigateByUrl('/profile#top');
   }
 
   private async proceedWithRegistration() {

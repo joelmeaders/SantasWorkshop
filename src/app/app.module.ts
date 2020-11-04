@@ -15,12 +15,27 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/storage';
 import { firebaseConfig } from '@env';
 import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+export function httpLoaderFactory(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
   imports: [
+    HttpClientModule,
     BrowserModule,
+    TranslateModule.forRoot({
+      loader: {
+        provide: TranslateLoader,
+        useFactory: httpLoaderFactory,
+        deps: [HttpClient]
+      }
+    }),
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFirestoreModule,
     AngularFireAuthModule,

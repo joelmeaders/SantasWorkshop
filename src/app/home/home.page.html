@@ -7,7 +7,7 @@
             <img src="../../assets/santaclausshop.jpg" alt="santa claus shop icon" />
           </ion-col>
           <ion-col size="12">
-            <ion-title class="ion-text-center"> Santa Claus Shop Registration </ion-title>
+            <ion-title class="ion-text-center"> {{ 'HOME.TITLE' | translate }} </ion-title>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -17,12 +17,22 @@
   <ion-grid>
     <ion-row>
       <ion-col>
-        <ion-buttons class="ion-justify-content-center">
+        <!-- <ion-buttons class="ion-justify-content-center">
           <ion-button fill="light" slot="end" size="medium" (click)="profileMenu($event)">
             <ion-label color="dark">Menu</ion-label>
             <ion-icon name="menu" slot="end" color="dark"></ion-icon>
           </ion-button>
-        </ion-buttons>
+        </ion-buttons> -->
+        <ion-toolbar>
+          <ion-buttons>
+            <ion-button (click)="setLanguage('en')">
+              English
+            </ion-button>
+            <ion-button (click)="setLanguage('es')">
+              Español
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
       </ion-col>
     </ion-row>
     <ion-row class="ion-align-items-center ion-justify-content-center">

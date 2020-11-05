@@ -17,16 +17,16 @@
         <ion-col sizeXl="4" sizeLg="5" sizeMd="6" sizeSm="8" sizeXs="12">
           <ion-card>
             <ion-card-header>
-              <ion-card-title> Sign in to your account </ion-card-title>
+              <ion-card-title> {{ 'SIGNIN.HEADER' | translate }} </ion-card-title>
             </ion-card-header>
             <ion-card-content>
               <ion-item>
-                <ion-label position="stacked" class="ion-padding-bottom"> Email Address </ion-label>
-                <ion-input placeholder="Email Address" formControlName="emailAddress" type="email" (keyup.enter)="login()"></ion-input>
+                <ion-label position="stacked" class="ion-padding-bottom"> {{ 'COMMON.EMAIL_ADDRESS' | translate }} </ion-label>
+                <ion-input [placeholder]="'COMMON.EMAIL_PH' | translate" formControlName="emailAddress" type="email" (keyup.enter)="login()"></ion-input>
               </ion-item>
               <ion-item>
-                <ion-label position="stacked" class="ion-padding-bottom"> Password </ion-label>
-                <ion-input placeholder="Password" formControlName="password" type="password" (keyup.enter)="login()"></ion-input>
+                <ion-label position="stacked" class="ion-padding-bottom"> {{ 'COMMON.PASSWORD' | translate }} </ion-label>
+                <ion-input [placeholder]="'COMMON.PASSWORD_PH' | translate" formControlName="password" type="password" (keyup.enter)="login()"></ion-input>
               </ion-item>
 
               <ion-col size="12" class="ion-align-items-center ion-justify-content-center">
@@ -36,11 +36,11 @@
                   (click)="login()"
                   size="large">
                   <ion-icon name="lock-open" slot="start"></ion-icon>
-                  <ion-label>Sign In</ion-label>
+                  <ion-label>{{ 'COMMON.SIGN_IN' | translate }}</ion-label>
                 </ion-button>
                 <div class="ion-padding-top"></div>
                 <ion-button class="ion-align-self-center login-buttons" fill="clear" (click)="forgotPassword()">
-                  Forgot Password?
+                  {{ 'SIGNIN.FORGOT_PASSWORD' | translate }}
                 </ion-button>
               </ion-col>
             </ion-card-content>
@@ -49,7 +49,7 @@
             <ion-buttons class="ion-justify-content-center">
               <ion-button [routerLink]="['/']">
                 <ion-icon name="arrow-back-circle-outline" slot="start"></ion-icon>
-                <ion-label>Go Back</ion-label>
+                <ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
               </ion-button>
             </ion-buttons>
           </ion-toolbar>

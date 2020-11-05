@@ -46,6 +46,9 @@ export function httpLoaderFactory(http: HttpClient) {
     }),
     AppRoutingModule
   ],
+  exports: [
+    TranslateModule
+  ],
   providers: [
     StatusBar,
     SplashScreen,

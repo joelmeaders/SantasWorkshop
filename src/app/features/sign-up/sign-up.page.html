@@ -6,9 +6,6 @@
           <ion-col size="12" class="ion-text-center">
             <img src="../../assets/santaclausshop.jpg" alt="santa claus shop icon" />
           </ion-col>
-          <ion-col size="12">
-            <ion-title class="ion-text-center"> Santa Claus Shop Registration </ion-title>
-          </ion-col>
         </ion-row>
       </ion-grid>
     </ion-toolbar>
@@ -23,18 +20,16 @@
               <ion-row>
                 <ion-col>
                   <ion-text color="primary">
-                    <h4 class="ion-margin-horizontal">
-                      Create your account by filling out the information below
-                    </h4>
+                    <h4 class="ion-margin-horizontal">{{ 'SIGNUP.HEADER' | translate }}</h4>
                   </ion-text>
                 </ion-col>
               </ion-row>
               <ion-row>
                 <ion-col>
                   <ion-item *appLet="'firstName' as controlName">
-                    <ion-label position="stacked" class="ion-padding-bottom"> First Name </ion-label>
+                    <ion-label position="stacked" class="ion-padding-bottom"> {{ 'SIGNUP.FIRST_NAME' | translate }} </ion-label>
                     <ion-input
-                      placeholder="Enter your first name"
+                      [placeholder]="'SIGNUP.FIRST_NAME_PH' | translate"
                       [formControlName]="controlName"
                       debounce="750"
                       #firstNameField
@@ -52,8 +47,8 @@
                   </ion-item>
 
                   <ion-item *appLet="'lastName' as controlName">
-                    <ion-label position="stacked" class="ion-padding-bottom"> Last Name </ion-label>
-                    <ion-input placeholder="Enter your last name" [formControlName]="controlName" debounce="750"></ion-input>
+                    <ion-label position="stacked" class="ion-padding-bottom"> {{ 'SIGNUP.LAST_NAME' | translate }} </ion-label>
+                    <ion-input [placeholder]="'SIGNUP.LAST_NAME_PH' | translate" [formControlName]="controlName" debounce="750"></ion-input>
                     <p
                       *ngIf="form.controls[controlName].dirty && form.controls[controlName].invalid"
                       class="ion-no-padding ion-no-margin padding-bottom-sm"
@@ -67,7 +62,7 @@
                   </ion-item>
 
                   <ion-item *appLet="'zipCode' as controlName">
-                    <ion-label position="stacked" class="ion-padding-bottom"> Zip Code </ion-label>
+                    <ion-label position="stacked" class="ion-padding-bottom"> {{ 'SIGNUP.ZIP_CODE' | translate }} </ion-label>
                     <ion-input placeholder="#####" [formControlName]="controlName" debounce="750"></ion-input>
                     <p
                       *ngIf="form.controls[controlName].dirty && form.controls[controlName].invalid"
@@ -82,8 +77,12 @@
                   </ion-item>
 
                   <ion-item *appLet="'emailAddress' as controlName">
-                    <ion-label position="stacked" class="ion-padding-bottom"> Email Address </ion-label>
-                    <ion-input placeholder="example@gmail.com" [formControlName]="controlName" debounce="750"></ion-input>
+                    <ion-label position="stacked" class="ion-padding-bottom"> {{ 'COMMON.EMAIL_ADDRESS' | translate }} </ion-label>
+                    <ion-input
+                      [placeholder]="'SIGNUP.EMAIL_EXAMPLE' | translate"
+                      [formControlName]="controlName"
+                      debounce="750"
+                    ></ion-input>
                     <p
                       *ngIf="form.controls[controlName].dirty && form.controls[controlName].invalid"
                       class="ion-no-padding ion-no-margin padding-bottom-sm"
@@ -98,9 +97,9 @@
 
                   <span *appLet="$showPassword | async as showPassword">
                     <ion-item *appLet="'password' as controlName">
-                      <ion-label position="stacked" class="ion-padding-bottom"> Create Password </ion-label>
+                      <ion-label position="stacked" class="ion-padding-bottom"> {{ 'COMMON.PASSWORD' | translate }} </ion-label>
                       <ion-input
-                        placeholder="At least 8 characters"
+                        placeholder="'SIGNUP.CREATE_PASSWORD'"
                         [formControlName]="controlName"
                         [type]="showPassword ? 'text' : 'password'"
                         debounce="750"
@@ -118,39 +117,49 @@
                     </ion-item>
                   </span>
 
-                  <div button tappable (click)="togglePassword()" *appLet="$showPassword | async as showPassword" class="padding-top-md ion-text-center">
+                  <div
+                    button
+                    tappable
+                    (click)="togglePassword()"
+                    *appLet="$showPassword | async as showPassword"
+                    class="padding-top-md ion-text-center"
+                  >
                     <ion-text color="primary" class="ion-text-center">
-                        (Click to {{showPassword ? 'hide' : 'show'}} password)
+                      <!-- (Click to {{showPassword ? 'hide' : 'show'}} password) -->
+                      {{ showPassword ? ('SIGNUP.SHOW_PASSWORD' | translate) : ('SIGNUP.HIDE_PASSWORD' | translate) }}
                     </ion-text>
                   </div>
                 </ion-col>
                 <ion-col>
                   <ion-toolbar>
                     <ion-buttons class="ion-justify-content-center">
-                      <ion-button color="primary" (click)="terms()">Terms & Conditions</ion-button>
-                      <ion-button color="primary" (click)="privacy()">Privacy Policy</ion-button>
+                      <ion-button color="primary" (click)="terms()">{{ 'SIGNUP.TERMS_AND_CONDITIONS' | translate }}</ion-button>
+                      <ion-button color="primary" (click)="privacy()"> {{ 'SIGNUP.PRIVACY_POLICY' | translate }} </ion-button>
                     </ion-buttons>
                   </ion-toolbar>
                   <span> </span>
                   <ion-item lines="none">
                     <ion-checkbox slot="start" formControlName="termsConditions"></ion-checkbox>
                     <p class="ion-no-margin ion-no-padding">
-                      <ion-label>I agree to the terms and conditions</ion-label>
-                      <ion-note color="danger" *ngIf="!form.controls['termsConditions'].value">This is required</ion-note>
+                      <ion-label>{{ 'SIGNUP.TERMS_AND_CONDITIONS_AGREE' | translate }}</ion-label>
+                      <ion-note color="danger" *ngIf="!form.controls['termsConditions'].value">{{ 'COMMON.REQUIRED_FIELD' | translate }}</ion-note>
                     </p>
                   </ion-item>
                   <ion-item lines="none">
                     <ion-checkbox slot="start" formControlName="privacyPolicy"></ion-checkbox>
                     <p class="ion-no-margin ion-no-padding">
-                      <ion-label>I have read the privacy policy</ion-label>
-                      <ion-note color="danger" *ngIf="!form.controls['privacyPolicy'].value">This is required</ion-note>
+                      <ion-label>{{ 'SIGNUP.PRIVACY_POLICY_AGREE' | translate }}</ion-label>
+                      <ion-note color="danger" *ngIf="!form.controls['privacyPolicy'].value">{{ 'COMMON.REQUIRED_FIELD' | translate }}</ion-note>
                     </p>
                   </ion-item>
                 </ion-col>
-                <ion-col size="12" class="ion-align-items-center ion-justify-content-center ion-text-center ion-padding-top ion-padding-bottom">
+                <ion-col
+                  size="12"
+                  class="ion-align-items-center ion-justify-content-center ion-text-center ion-padding-top ion-padding-bottom"
+                >
                   <ion-button size="large" color="success" [disabled]="!form.valid || ($loading | async)" (click)="createAccount()">
                     <ion-icon name="person-add" slot="end"></ion-icon>
-                    <ion-label>Create Account</ion-label>
+                    <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
                   </ion-button>
                 </ion-col>
               </ion-row>
@@ -161,7 +170,7 @@
           <ion-buttons class="ion-justify-content-center">
             <ion-button [routerLink]="['/']">
               <ion-icon name="arrow-back-circle-outline" slot="start"></ion-icon>
-              <ion-label>Go Back</ion-label>
+              <ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
             </ion-button>
           </ion-buttons>
         </ion-toolbar>

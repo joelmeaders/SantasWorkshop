@@ -19,12 +19,6 @@ export class HomePage {
   ) {
     analyticsService.setCurrentScreen('home');
     analyticsService.logEvent('screen_view');
-
-    translate.addLangs(['en', 'es']);
-    translate.setDefaultLang('en');
-
-    const browserLang = translate.getBrowserLang();
-    translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
   }
 
   public async profileMenu($event: any) {

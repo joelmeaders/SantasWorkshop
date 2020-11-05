@@ -303,7 +303,7 @@ export class ProfilePage implements OnDestroy {
 
   private async proceedWithCancellation() {
     const alert = await this.alertController.create({
-      header: 'This will delete your registration?',
+      header: 'This will delete your registration',
       message: `Remember to register again once you're done making changes`,
       buttons: [
         {

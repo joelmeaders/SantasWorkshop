@@ -1,7 +1,7 @@
-<ion-content [fullscreen]="true" color="xmasred">
-  <ion-header class="ion-no-border ion-padding-bottom">
-    <ion-toolbar color="xmasred">
-      <ion-grid class="ion-no-padding ion-padding-top">
+<ion-content fullscreen="true" color="xmasred">
+
+  <ion-header>
+      <ion-grid>
         <ion-row class="ion-align-items-center ion-justify-content-center">
           <ion-col size="12" class="ion-text-center">
             <img src="../../assets/santaclausshop.jpg" alt="santa claus shop icon" />
@@ -11,56 +11,68 @@
           </ion-col>
         </ion-row>
       </ion-grid>
+    <ion-toolbar color="light">
+      <ion-buttons class="ion-justify-content-center">
+        <ion-button (click)="setLanguage('en')">
+          <ion-label color="dark">
+            English
+          </ion-label>
+        </ion-button>
+        <ion-button (click)="setLanguage('es')">
+          <ion-label color="dark">
+            Español
+          </ion-label>
+        </ion-button>
+        <ion-button slot="end" size="medium" (click)="profileMenu($event)">
+          <ion-label color="dark">Menu</ion-label>
+          <ion-icon name="menu" slot="end" color="dark"></ion-icon>
+        </ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
-  <ion-grid>
+  <ion-grid fixed>
     <ion-row>
-      <ion-col>
-        <!-- <ion-buttons class="ion-justify-content-center">
-          <ion-button fill="light" slot="end" size="medium" (click)="profileMenu($event)">
-            <ion-label color="dark">Menu</ion-label>
-            <ion-icon name="menu" slot="end" color="dark"></ion-icon>
-          </ion-button>
-        </ion-buttons> -->
-        <ion-toolbar>
-          <ion-buttons>
-            <ion-button (click)="setLanguage('en')">
-              English
-            </ion-button>
-            <ion-button (click)="setLanguage('es')">
-              Español
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-col>
-    </ion-row>
-    <ion-row class="ion-align-items-center ion-justify-content-center">
-      <ion-col sizeXl="4" sizeLg="5" sizeMd="6" sizeSm="8" sizeXs="12">
-        <ion-card class="ion-margin-top">
-          <ion-card-header>
-            <ion-card-title color="primary" class="ion-padding-bottom"> A catchy title, maybe a photo </ion-card-title>
-            <ion-label class="ion-padding-top">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-              in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-              proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </ion-label>
-            <ion-card-content class="ion-text-center">
-              <div class="width-md ion-text-center">
-                <div>
-                  <ion-button expand="block" [routerLink]="['/sign-in']">
-                    <ion-label>Sign In</ion-label>
-                  </ion-button>
-                  <ion-button expand="block" color="purple" [routerLink]="['/sign-up']">
-                    <ion-label>Create Account</ion-label>
-                  </ion-button>
-                </div>
-              </div>
-            </ion-card-content>
-          </ion-card-header>
+      <ion-col size="12">
+        <ion-card>
+          <ion-grid>
+            <ion-row>
+              <ion-col class="ion-text-center">
+                <h1>
+                  A Toy for Every Girl and Boy
+                </h1>
+              </ion-col>
+            </ion-row>
+            <ion-row class="ion-padding-horizontal ion-padding-bottom ion-text-justify">
+              <ion-col class="ion-padding-horizontal">
+                <h4>
+                Welcome to the Denver Santa Claus Shop Pre-registration where we plan on fulfilling our mission even during the pandemic! This toy give-away program is available to Denver residents on Dec. 11, 12, 14, & 15. <br /><br />
+                Please follow the prompts to pre-register so that the distribution process can go quickly and save you time the day of the event. This year will be a mobile drive through toy distribution. You will receive toys based on your child’s age and gender. <br /><br />
+                If this is your first visit to the preregistration page, select "Create Account" and follow the instructions. <br /><br />
+                If you have already created an account and are visiting to change an existing registration, you will need to select "Sign In" and follow those instructions.  Any change or addition will delete the first entry, so be sure to re-enter all information. <br /><br />
+                We look forward to providing your family with some Holiday cheer during these trying times.
+                </h4>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size-sm size="12" class="ion-padding-horizontal">
+                <ion-button [routerLink]="['/sign-in']" size="large" expand="block">
+                  <ion-label>Sign In</ion-label>
+                </ion-button>
+              </ion-col>
+              <ion-col size-xs class="ion-hide-md-down">
+
+              </ion-col>
+              <ion-col size-sm size="12" class="ion-padding-horizontal">
+                <ion-button color="purple" [routerLink]="['/sign-up']" size="large"expand="block">
+                  <ion-label>Create Account</ion-label>
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
+
 </ion-content>

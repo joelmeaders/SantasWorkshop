@@ -5,7 +5,7 @@
       <ion-item slot="primary" color="clear" lines="none">
         <div>
           <h1 color="light" class="ion-no-margin ion-no-padding">{{ customer?.firstName }} {{ customer?.lastName }}</h1>
-          <ion-card-subtitle color="light"> Your Profile </ion-card-subtitle>
+          <ion-card-subtitle color="light"> {{ 'COMMON.PROFILE'| translate }} </ion-card-subtitle>
         </div>
         <ion-button fill="light" slot="end" size="medium" (click)="profileMenu($event)">
           <ion-icon name="menu" slot="end" slot="icon-only"></ion-icon>
@@ -19,7 +19,7 @@
       <!-- Registration Status -->
       <ion-col size-xs>
         <ion-toolbar color="xmasred">
-          <ion-title slot="start"> Registration Status</ion-title>
+          <ion-title slot="start"> {{ 'REGISTRATION.HEADER' | translate }} </ion-title>
         </ion-toolbar>
         <ion-card>
           <ion-card-content>
@@ -30,7 +30,7 @@
                   <ion-card color="success" *appLet="($customer | async) as customer">
                     <ion-card-header color="success">
                       <div class="ion-text-center">
-                        <h4 class="ion-no-padding ion-no-margin">You're ready for the event!</h4>
+                        <h4 class="ion-no-padding ion-no-margin"> {{ 'REGISTRATION.READY' | translate }} </h4>
                       </div>
                     </ion-card-header>
                     <ion-card-content>
@@ -39,24 +39,24 @@
                           <ion-spinner></ion-spinner>
                         </div>
                         <div *ngIf="($qrLoading | async) === true">
-                          Loading code...<br/>
-                          If your code doesn't show up here don't worry! Just check your email and print it from there or try coming back in a few minutes
+                          {{ 'REGISTRATION.LOADING' | translate }}<br/>
+                          {{ 'REGISTRATION.CODE_HELP' | translate }}
                         </div>
                         <img *ngIf="($qrLoading | async) === false" [src]="$qrCode | async" alt="Registration QR Code" />
                         <div class="qrcode-text">{{ $registrationCode | async }}</div>
                       </div>
                       <div class="ion-text-center"></div>
                       <div class="ion-text-center ion-padding-top">
-                        <h1>December 11-12 & 14-15, 2020</h1>
-                        <h1>10am - 3pm</h1>
-                        <h3>2150 S Monaco Parkway</h3>
-                        <h4>Denver, CO 80222</h4>
+                        <h1>{{ 'REGISTRATION.EVENT_DATES' | translate }}</h1>
+                        <h1>{{ 'REGISTRATION.EVENT_TIME' | translate }}</h1>
+                        <h3>{{ 'REGISTRATION.EVENT_ADDRESS1' | translate }}</h3>
+                        <h4>{{ 'REGISTRATION.EVENT_ADDRESS2' | translate }}</h4>
                       </div>
                       <div class="ion-text-center ion-padding-top">
-                        <ion-label color="dark"> Need to change your registration details? </ion-label><br />
+                        <ion-label color="dark"> {{ 'REGISTRATION.CHANGE_DETAILS' | translate }} </ion-label><br />
                         <ion-button color="danger" (click)="modifyRegistration()">
                           <ion-text color="light">
-                            <strong>Modify Registration</strong>
+                            <strong> {{ 'REGISTRATION.MODIFY' | translate }} </strong>
                           </ion-text>
                         </ion-button>
                       </div>
@@ -68,7 +68,7 @@
                   <ion-list>
                     <ion-item>
                       <ion-icon slot="start" name="checkmark-circle-outline" color="success"></ion-icon>
-                      <ion-label>Create Account</ion-label>
+                      <ion-label> {{ 'COMMON.CREATE_ACCOUNT' | translate }} </ion-label>
                     </ion-item>
                     <ion-item *appLet="$registrationDate | async as registrationDate" href="./profile#arrival-date">
                       <ion-icon
@@ -76,7 +76,7 @@
                         [name]="!!registrationDate ? 'checkmark-circle-outline' : 'chevron-forward-circle-outline'"
                         [color]="!!registrationDate ? 'success' : 'medium'"
                       ></ion-icon>
-                      <ion-label>Choose arrival date and time</ion-label>
+                      <ion-label> {{ 'REGISTRATION.CHOOSE_DATETIME' | translate }} </ion-label>
                     </ion-item>
                     <ion-item *appLet="$children | async as children" href="./profile#add-children">
                       <ion-icon
@@ -84,7 +84,7 @@
                         [name]="children?.length ? 'checkmark-circle-outline' : 'chevron-forward-circle-outline'"
                         [color]="children?.length ? 'success' : 'medium'"
                       ></ion-icon>
-                      <ion-label>Add your children ages 0-11</ion-label>
+                      <ion-label> {{ 'REGISTRATION.ADD_CHILDREN' | translate }} </ion-label>
                     </ion-item>
                     <ion-item *appLet="($hasRegistered | async) && !($isModify | async) as registered" href="./profile#submit-registration">
                       <ion-icon
@@ -93,7 +93,7 @@
                         [name]="registered ? 'chevron-forward-circle-outline' : 'close-circle-outline'"
                         [color]="registered ? 'success' : 'medium'"
                       ></ion-icon>
-                      <ion-label>Register for event</ion-label>
+                      <ion-label> {{ 'REGISTRATION.REGISTER' | translate }} </ion-label>
                     </ion-item>
                   </ion-list>
 
@@ -101,24 +101,24 @@
                     <ion-item>
                       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
                       <ion-text color="primary">
-                        <strong>Print or save this page or the email we sent you!</strong>
+                        <strong> {{ 'REGISTRATION.PRINT_PAGE' | translate }} </strong>
                       </ion-text>
                     </ion-item>
                     <ion-item>
                       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
-                      <ion-text color="primary">This is your ticket to the event</ion-text>
+                      <ion-text color="primary"> {{ 'REGISTRATION.YOUR_TICKET' | translate }} </ion-text>
                     </ion-item>
                     <ion-item>
                       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
-                      <ion-text>Enter parking lot of Monaco at light All other entrances<br /> will be blocked off to DSCS traffic.</ion-text>
+                      <ion-text><div [innerHTML]> {{ 'REGISTRATION.ENTRY_INSTRUCTIONS' | translate }} </div></ion-text>
                     </ion-item>
                     <ion-item>
                       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
-                      <ion-text>Gates will open at 9am each day to begin line formation</ion-text>
+                      <ion-text> {{ 'REGISTRATION.GATES_OPEN' | translate }} </ion-text>
                     </ion-item>
                     <ion-item>
                       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
-                      <ion-text>Bring your ID and children's birth certificates <br />(or other form of id)</ion-text>
+                      <ion-text> <div [innerHTML]> {{ 'REGISTRATION.BRING_ID' | translate }} </div> </ion-text>
                     </ion-item>
                   </ion-list>
                   
@@ -134,7 +134,7 @@
     <ion-row>
       <ion-col id="arrival-date" size="12">
         <ion-toolbar color="xmasred">
-          <ion-title slot="start"> Choose an arrival date/time </ion-title>
+          <ion-title slot="start"> {{ 'REGISTRATION.CHOOSE_DATETIME' | translate }} </ion-title>
         </ion-toolbar>
         <ion-card>
           <ion-card-content>
@@ -144,30 +144,28 @@
                   <ion-list>
                     <ion-item>
                       <strong>
-                        Date/Time instructions
+                        {{ 'REGISTRATION.DATETIME_INSTRUCTIONS' | translate }}
                       </strong>
                     </ion-item>
                     <ion-item lines="none">
-                      Please use the first letter of your last name to choose your date
+                      {{ 'REGISTRATION.LETTER_LASTNAME_0' | translate }}
                     </ion-item>
 
                     <!-- TODO: Auto-pick date based on last name -->
                     <ion-item>
-                      <span>
                         <ul>
-                          <li><strong>T-Z: </strong>Dec. 11th</li>
-                          <li><strong>A-G: </strong>Dec. 12th</li>
-                          <li><strong>H-M: </strong>Dec. 14th</li>
-                          <li><strong>N-S: </strong>Dec. 15th</li>
+                          <li><div [innerHTML]="'REGISTRATION.LETTER_LASTNAME_1' | translate"></div></li>
+                          <li><div [innerHTML]="'REGISTRATION.LETTER_LASTNAME_2' | translate"></div></li>
+                          <li><div [innerHTML]="'REGISTRATION.LETTER_LASTNAME_3' | translate"></div></li>
+                          <li><div [innerHTML]="'REGISTRATION.LETTER_LASTNAME_4' | translate"></div></li>
                         </ul>
-                      </span>
                     </ion-item>
 
                     <ion-item>
-                      Choosing a date and time will allow the "Save Date/Time" button to be pressable
+                      {{ 'REGISTRATION.CHOOSE_DATETIME_INSTRUCTIONS' | translate }}
                     </ion-item>
                     <ion-item>
-                      If you change the date and time remember to save again
+                      {{ 'REGISTRATION.DATETIME_REMINDER' | translate }}
                     </ion-item>
                   </ion-list>
                 </ion-col>
@@ -176,28 +174,28 @@
                   <form [formGroup]="dateTimeForm" novalidate>
                     <ion-list>
                       <ion-item>
-                        <ion-label position="stacked"><strong>Date</strong></ion-label>
+                        <ion-label position="stacked"><strong> {{ 'REGISTRATION.DATE' | translate }} </strong></ion-label>
                         <ion-select formControlName="date" placeholder="Choose Date" interface="popover">
-                          <ion-select-option [value]="11"> December 11th, 2020 </ion-select-option>
-                          <ion-select-option [value]="12"> December 12th, 2020 </ion-select-option>
-                          <ion-select-option [value]="14"> December 14th, 2020 </ion-select-option>
-                          <ion-select-option [value]="15"> December 15th, 2020 </ion-select-option>
+                          <ion-select-option [value]="11"> {{ 'REGISTRATION.DATE_VALUE_1' | translate }} </ion-select-option>
+                          <ion-select-option [value]="12"> {{ 'REGISTRATION.DATE_VALUE_2' | translate }} </ion-select-option>
+                          <ion-select-option [value]="14"> {{ 'REGISTRATION.DATE_VALUE_3' | translate }} </ion-select-option>
+                          <ion-select-option [value]="15"> {{ 'REGISTRATION.DATE_VALUE_4' | translate }} </ion-select-option>
                         </ion-select>
                       </ion-item>
                       <ion-item>
                         <ion-label position="stacked"><strong>Time</strong></ion-label>
                         <ion-select formControlName="time" placeholder="Choose Time" interface="popover">
-                          <ion-select-option [value]="10"> 10am </ion-select-option>
-                          <ion-select-option [value]="11"> 11am </ion-select-option>
-                          <ion-select-option [value]="12"> 12pm </ion-select-option>
-                          <ion-select-option [value]="13"> 1pm </ion-select-option>
-                          <ion-select-option [value]="14"> 2pm </ion-select-option>
+                          <ion-select-option [value]="10"> {{ 'REGISTRATION.TIME_VALUE_1' | translate }} </ion-select-option>
+                          <ion-select-option [value]="11"> {{ 'REGISTRATION.TIME_VALUE_2' | translate }} </ion-select-option>
+                          <ion-select-option [value]="12"> {{ 'REGISTRATION.TIME_VALUE_3' | translate }} </ion-select-option>
+                          <ion-select-option [value]="13"> {{ 'REGISTRATION.TIME_VALUE_4' | translate }} </ion-select-option>
+                          <ion-select-option [value]="14"> {{ 'REGISTRATION.TIME_VALUE_5' | translate }} </ion-select-option>
                         </ion-select>
                       </ion-item>
                       <ion-item>
-                        <ion-label *ngIf="!this.dateTimeForm.valid" class="ion-text-wrap">Pick a date/time, then save</ion-label>
-                        <ion-label *ngIf="this.dateTimeForm.valid" class="ion-text-wrap">Save Date & Time</ion-label>
-                        <ion-button slot="end" [disabled]="!this.dateTimeForm.valid" (click)="saveDateTime()" size="medium">Save Date/Time</ion-button>
+                        <ion-label *ngIf="!this.dateTimeForm.valid" class="ion-text-wrap">{{ 'REGISTRATION.PICK_DATETIME_END' | translate }}</ion-label>
+                        <ion-label *ngIf="this.dateTimeForm.valid" class="ion-text-wrap">{{ 'REGISTRATION.SAVE_DATETIME' | translate }}</ion-label>
+                        <ion-button slot="end" [disabled]="!this.dateTimeForm.valid" (click)="saveDateTime()" size="medium">{{ 'REGISTRATION.SAVE_DATETIME' | translate }}</ion-button>
                       </ion-item>
                     </ion-list>
                   </form>
@@ -214,9 +212,9 @@
       <ion-col size="12" *appLet="!($hasRegistered | async) || ($isModify | async) as allowEdit">
 
         <ion-toolbar color="xmasred">
-          <ion-title slot="start"> Add Your Children </ion-title>
+          <ion-title slot="start"> {{ 'REGISTRATION.ADD_CHILDREN_HEADER' | translate }} </ion-title>
           <ion-button (click)="addEditChild()" slot="end" color="primary" class="padding-right-md" [disabled]="!allowEdit">
-            <ion-label>Add Child</ion-label>
+            <ion-label>{{ 'REGISTRATION.ADD_CHILD' | translate }}</ion-label>
             <ion-icon name="add-circle" slot="end"></ion-icon>
           </ion-button>
         </ion-toolbar>
@@ -229,17 +227,17 @@
                   <ion-list>
                     <ion-item>
                       <strong>
-                        Instructions to add children
+                        {{ 'REGISTRATION.ADD_CHILD_INSTRUCTIONS_HEADER' | translate }}
                       </strong>
                     </ion-item>
                     <ion-item>
-                      Press the blue "Add Child" button to start adding your children 
+                      {{ 'REGISTRATION.ADD_CHILD_INSTRUCTIONS_1' | translate }}
                     </ion-item>
                     <ion-item>
-                      We only have toys for children ages 11 and under
+                      {{ 'REGISTRATION.ADD_CHILD_INSTRUCTIONS_2' | translate }}
                     </ion-item>
                     <ion-item>
-                      After you add a child you can edit them by clicking on them
+                      {{ 'REGISTRATION.ADD_CHILD_INSTRUCTIONS_3' | translate }}
                     </ion-item>
                   </ion-list>
                 </ion-col>
@@ -248,13 +246,13 @@
                   
                   <div *ngIf="!($children | async)?.length" class="ion-text-center" class="padding-top-lg" (click)="addEditChild()">
                     <ion-button size="large">
-                      <ion-label>Start adding your children</ion-label>
+                      <ion-label>{{ 'REGISTRATION.START_ADD_CHILD' | translate }}</ion-label>
                       <ion-icon name="add-circle" slot="end" size="large"></ion-icon>
                     </ion-button>
                   </div>
                   <ion-card>
                     <ion-card-header *ngIf="$isModify | async">
-                      <ion-note>Don't forget to update your registration if you add or change children!</ion-note>
+                      <ion-note>{{ 'REGISTRATION.UPDATE_REGISTRATION_REMINDER' | translate }}</ion-note>
                     </ion-card-header>
                     <ion-list class="ion-no-padding">
                       <ion-item
@@ -271,7 +269,7 @@
                       >
                         <div class="padding-bottom-md">
                           <h1>{{ child.firstName }}</h1>
-                          <ion-card-subtitle> Age {{ child.ageGroup }} </ion-card-subtitle>
+                          <ion-card-subtitle> {{ 'REGISTRATION.AGE' | translate }} {{ child.ageGroup }} </ion-card-subtitle>
                         </div>
                       </ion-item>
                     </ion-list>
@@ -289,7 +287,7 @@
       <ion-col size="12">
 
         <ion-toolbar color="xmasred">
-          <ion-title slot="start"> Submit Registration </ion-title>
+          <ion-title slot="start"> {{ 'REGISTER.SUBMIT_REGISTRATION' | translate }} </ion-title>
         </ion-toolbar>
 
         <ion-card>
@@ -300,13 +298,13 @@
                 <ion-col size-md size="12" class="ion-padding-bottom">
                   <ion-list>
                     <ion-item>
-                      <strong>Are you ready to submit?</strong>
+                      <strong>{{ 'REGISTRATION.ARE_YOU_READY' | translate }}</strong>
                     </ion-item>
                     <ion-item>
-                      Make sure you picked your arrival date and time 
+                      {{ 'REGISTRATION.MAKE_SURE_DATETIME' | translate }}
                     </ion-item>
                     <ion-item>
-                      Double-Check that all of your children (ages 11 and under) are added 
+                      {{ 'REGISTRATION.DOUBLE_CHECK_CHILDREN' | translate }}
                     </ion-item>
                   </ion-list>
                 </ion-col>
@@ -315,7 +313,7 @@
                   <ion-button color="primary" [disabled]="!($registrationEnabled | async)" (click)="confirmRegistration()" size="large">
                     <ion-icon name="paper-plane" slot="end"></ion-icon>
                     <ion-label *appLet="$hasRegistered | async as hasRegistered">
-                      <strong>{{ hasRegistered ? 'Update Registration' : 'Submit Registration' }}</strong>
+                      <strong>{{ hasRegistered ? ('REGISTRATION.UPDATE_REGISTRATION' | translate) : ('REGISTRATION.SUBMIT_REGISTRATION' | translate) }}</strong>
                     </ion-label>
                   </ion-button>
                 </ion-col>                
@@ -329,7 +327,7 @@
 
     <ion-row>
       <ion-col class="ion-text-center">
-        <ion-button href="./profile#top">Back to top</ion-button>
+        <ion-button href="./profile#top">{{ 'COMMON.BACK_TO_TOP' | translate }}</ion-button>
       </ion-col>
     </ion-row>
   </ion-grid>

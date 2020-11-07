@@ -8,6 +8,7 @@ import { SignUpPageRoutingModule } from './sign-up-routing.module';
 
 import { SignUpPage } from './sign-up.page';
 import { CoreDirectivesModule } from '@app/core/directives/core-directives.module';
+import { SharedModule } from '@app/shared/components/shared.module';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { CoreDirectivesModule } from '@app/core/directives/core-directives.modul
     ReactiveFormsModule,
     IonicModule,
     SignUpPageRoutingModule,
-    CoreDirectivesModule
+    CoreDirectivesModule,
+    SharedModule
   ],
   declarations: [
     SignUpPage

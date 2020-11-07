@@ -1,9 +1,22 @@
 {
+  "COMMON": {
+    "MENU": "PendingTranslation",
+    "SIGN_IN": "PendingTranslation",
+    "SIGN_OUT": "PendingTranslation",
+    "CREATE_ACCOUNT": "PendingTranslation",
+    "HOME": "Casa",
+    "PROFILE": "PendingTranslation",
+    "EMAIL_ADDRESS": "PendingTranslation",
+    "EMAIL_PH": "PendingTranslation"
+  },
   "HOME": {
-    "TITLE": "Registro de la tienda de Santa Claus"
+    "TITLE": "Registro de la tienda de Santa Claus",
+    "HEADER": "PendingTranslation",
+    "MESSAGE": "PendingTranslation"
   },
   "SIGNIN": {
-
+    "HEADER": "PendingTranslation",
+    "EMAIL_PH": "PendingTranslation"
   },
   "SIGNUP": {
 

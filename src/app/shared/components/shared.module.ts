@@ -8,9 +8,7 @@ import { ResetPasswordComponent } from '@app/shared/components/reset-password/re
 import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';
 import { PrivacyPolicyModalComponent } from '@app/shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '@app/shared/components/terms-of-service-modal/terms-of-service-modal.component';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { httpLoaderFactory } from '@app/app.module';
+import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
   declarations: [
@@ -21,19 +19,11 @@ import { httpLoaderFactory } from '@app/app.module';
     TermsOfServiceModalComponent
   ],
   imports: [
-    HttpClientModule,
     CommonModule,
     ReactiveFormsModule,
     IonicModule,
     CoreDirectivesModule,
-    TranslateModule.forChild({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: httpLoaderFactory,
-        deps: [HttpClient]
-      },
-      isolate: false
-    })
+    TranslateModule
   ],
   exports: [
     CreateChildModalComponent,

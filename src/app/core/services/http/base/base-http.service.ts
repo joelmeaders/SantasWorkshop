@@ -1,23 +1,20 @@
-import 'firebase/firestore';
-import { firestore } from 'firebase';
-import { AngularFirestoreCollection, AngularFirestore, DocumentReference, CollectionReference } from '@angular/fire/firestore';
+import { AngularFirestoreCollection, AngularFirestore, DocumentReference, CollectionReference, Query, DocumentData } from '@angular/fire/firestore';
 import { AngularFireFunctions } from '@angular/fire/functions';
 import { collectionData, docData, collection } from 'rxfire/firestore';
-
 import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
 import { mapTo, take, catchError, mergeMap, publishReplay, refCount, map, tap, takeUntil } from 'rxjs/operators';
-
 import { IBaseEntity } from '@app/core/models/base/base-entity';
 import { CounterService } from './counter.service';
+import { firestore } from 'firebase-admin';
 
 export interface IBaseHttpService<T> {
+  collectionRef: CollectionReference;
   save(entity: T, mergeIfUpdate: boolean): Observable<T>;
   readOne(pathOrId: string): Observable<T>;
-  readMany(query?: firestore.Query<firestore.DocumentData>): Observable<T[]>;
+  readMany(query?: Query): Observable<T[]>;
   readMeta(field?: string): Observable<Date>;
   delete(id: string): Observable<boolean>;
   generateId(): string;
-  collectionRef: CollectionReference;
   getCollectionPath(): string;
 }
 
@@ -28,12 +25,6 @@ export enum QueryDirection {
 }
 
 export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHttpService<T> {
-  private readonly _$destroy = new Subject<void>();
-  public readonly $destroy = this._$destroy.asObservable().pipe(publishReplay(1), refCount());
-
-  private readonly afCollection: AngularFirestoreCollection<T>;
-  public readonly collectionRef: CollectionReference;
-  protected readonly counterService: CounterService;
 
   constructor(
     private readonly firestoreDb: AngularFirestore,
@@ -48,6 +39,37 @@ export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHtt
       this.counterService = new CounterService(this.firestoreDb, this.fireFunctions, this.collectionPath, counterShards);
     }
   }
+  private readonly _$destroy = new Subject<void>();
+  public readonly $destroy = this._$destroy.asObservable().pipe(publishReplay(1), refCount());
+
+  private readonly afCollection: AngularFirestoreCollection<T>;
+  public readonly collectionRef: CollectionReference;
+  protected readonly counterService: CounterService;
+
+  private readonly _$queryLastDoc = new BehaviorSubject<firebase.default.firestore.DocumentSnapshot>(undefined);
+  private readonly _$queryFirstDoc = new BehaviorSubject<firebase.default.firestore.DocumentSnapshot>(undefined);
+  private readonly _$queryPageIndex = new BehaviorSubject<number>(0);
+
+  public readonly $queryCurrentPage = this._$queryPageIndex.asObservable().pipe(
+    takeUntil(this.$destroy),
+    map(index => index + 1),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $queryAtFirstPage = this._$queryPageIndex.asObservable().pipe(
+    takeUntil(this.$destroy),
+    map(index => index === 0),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $queryAtLastPage = this._$queryLastDoc.asObservable().pipe(
+    takeUntil(this.$destroy),
+    map(page => !page),
+    publishReplay(1),
+    refCount()
+  );
 
   public save(entity: T, mergeIfUpdate = false): Observable<T> {
     let action: Promise<void | DocumentReference>;
@@ -85,7 +107,7 @@ export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHtt
     return docData<T>(documentReference, 'id');
   }
 
-  public readMany(query?: firestore.Query): Observable<T[]> {
+  public readMany(query?: Query): Observable<T[]> {
     if (!query) {
       query = this.afCollection.ref.limit(50);
     }
@@ -110,33 +132,8 @@ export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHtt
     );
   }
 
-  private readonly _$queryLastDoc = new BehaviorSubject<firestore.DocumentSnapshot>(undefined);
-  private readonly _$queryFirstDoc = new BehaviorSubject<firestore.DocumentSnapshot>(undefined);
-  private readonly _$queryPageIndex = new BehaviorSubject<number>(0);
-
-  public readonly $queryCurrentPage = this._$queryPageIndex.asObservable().pipe(
-    takeUntil(this.$destroy),
-    map(index => index + 1),
-    publishReplay(1),
-    refCount()
-  );
-
-  public readonly $queryAtFirstPage = this._$queryPageIndex.asObservable().pipe(
-    takeUntil(this.$destroy),
-    map(index => index === 0),
-    publishReplay(1),
-    refCount()
-  );
-
-  public readonly $queryAtLastPage = this._$queryLastDoc.asObservable().pipe(
-    takeUntil(this.$destroy),
-    map(page => !page),
-    publishReplay(1),
-    refCount()
-  );
-
-  public query(query: firestore.Query, action: QueryDirection, pageSize = 10): Observable<T[]> {
-    let fsQuery: firestore.Query;
+  public query(query: Query, action: QueryDirection, pageSize = 10): Observable<T[]> {
+    let fsQuery: Query;
 
     if (action === QueryDirection.Initial) {
       fsQuery = query.limit(pageSize);

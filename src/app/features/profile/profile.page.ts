@@ -42,6 +42,7 @@ export class ProfilePage implements OnDestroy {
 
   public readonly $customer = this.authService.$userProfile.pipe(
     takeUntil(this.$destroy),
+    filter(profile => !!profile),
     shareReplay(1)
   );
 

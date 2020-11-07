@@ -207,3 +207,27 @@ export const sendRegistrationEmail = functions.firestore.document('{registration
   await transporter.sendMail(mailOptions);
 
 });
+
+export const deleteAccount = functions.https.onCall(async (data, context) => {
+
+  const userId = context.auth?.uid;
+
+  // If there is a uid, delete account
+  if (!!userId) {
+    await admin.auth().deleteUser(userId);
+    return Promise.resolve();
+  }
+
+  // otherwise look look up account
+  const email = data?.email;
+
+  if (!!email) {
+    return;
+  }
+
+  const account = await admin.auth().getUserByEmail(email);
+  await admin.auth().deleteUser(account.uid);
+
+  return Promise.resolve();
+
+});

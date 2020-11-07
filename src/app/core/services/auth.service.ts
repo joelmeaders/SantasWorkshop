@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, of, Observable } from 'rxjs';
-import { takeUntil, publishReplay, refCount, defaultIfEmpty, mergeMap, distinctUntilChanged, mapTo } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, defaultIfEmpty, mergeMap, distinctUntilChanged, mapTo, tap, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { UserProfileService } from './http/user-profile.service';
 
@@ -31,6 +31,14 @@ export class AuthService implements OnDestroy {
     publishReplay(1),
     refCount()
   );
+
+  public readonly $emailAndUid = this.$currentUser.pipe(
+    takeUntil(this.$destroy),
+    map((res: any) => ({ email: res?.email, id: res?.uid })),
+    distinctUntilChanged(),
+    publishReplay(1),
+    refCount()
+  )
 
   public readonly $userProfile: Observable<UserProfile> = this.$currentUser.pipe(
     takeUntil(this.$destroy),

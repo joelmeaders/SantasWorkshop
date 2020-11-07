@@ -1,14 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { IError } from '@app/core/models/base/i-errors';
 import { ChildProfile } from '@app/core/models/child-profile.model';
 import { IChildrenInfo } from '@app/core/models/registration.model';
 import { UserRegistrationService } from '@app/core/services/user-registration.service';
 import { QuickRegistrationForms } from '@app/shared/forms/quick-registration';
-import { SignUpForm } from '@app/shared/forms/sign-up';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil, publishReplay, refCount, shareReplay } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount } from 'rxjs/operators';
 
 @Component({
   selector: 'app-quick-registration',

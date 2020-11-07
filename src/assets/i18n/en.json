@@ -26,15 +26,30 @@
     "MAKE_ACCOUNT1": "If you haven't created an account with us yet you can make one",
     "MAKE_ACCOUNT2": "by clicking here"
   },
-  "SIGNUP": {
-    "HEADER": "Create your account by filling out the information below",
+  "SIGNUP_ACCOUNT": {
+    "HEADER": "Create your account",
+    "EMAIL_ADDRESS": "Enter your email address",
+    "EMAIL_EXAMPLE": "example@gmail.com",
+    "CREATE_PASSWORD": "Create a password",
+    "CREATE_PASSWORD_PH": "At least 8 characters",
+    "SHOW_PASSWORD": "(Click to show password)",
+    "HIDE_PASSWORD": "(Click to hide password)",
+    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and read our privacy policy "
+  },
+  "SIGNUP_INFO": {
+    "HEADER": "Add your information to continue",
     "FIRST_NAME": "First Name",
     "FIRST_NAME_PH": "Enter your first name",
     "LAST_NAME": "Last Name",
     "LAST_NAME_PH": "Enter your last Name",
     "ZIP_CODE": "Zip Code",
+    "NEXT_STEP": "Go to registration"
+  },
+  "SIGNUP": {
+    
     "EMAIL_EXAMPLE": "example@gmail.com",
-    "CREATE_PASSWORD": "At least 8 characters",
+    "CREATE_PASSWORD": "Create a password",
+    "CREATE_PASSWORD_PH": "At least 8 characters",
     "SHOW_PASSWORD": "(Click to show password)",
     "HIDE_PASSWORD": "(Click to hide password)",
     "TERMS_AND_CONDITIONS": "Terms & Conditions",

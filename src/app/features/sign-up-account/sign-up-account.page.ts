@@ -1,26 +1,26 @@
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IError } from '@app/core/models/base/i-errors';
-import { UserProfile } from '@app/core/models/user-profile.model';
 import { AuthService } from '@app/core/services/auth.service';
 import { IRegistration, UserRegistrationService } from '@app/core/services/user-registration.service';
-import { SignUpForm } from '@app/shared/forms/sign-up';
+import { SignUpAccountForm } from '@app/shared/forms/sign-up-account';
 import { LegalHelpers } from '@app/shared/legal';
-import { AlertController, LoadingController, ModalController } from '@ionic/angular';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { takeUntil, publishReplay, refCount, filter, shareReplay, take } from 'rxjs/operators';
+import { LoadingController, AlertController, ModalController } from '@ionic/angular';
+import { Subject, BehaviorSubject } from 'rxjs';
+import { takeUntil, publishReplay, refCount, shareReplay } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-sign-up',
-  templateUrl: './sign-up.page.html',
-  styleUrls: ['./sign-up.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-sign-up-account',
+  templateUrl: './sign-up-account.page.html',
+  styleUrls: ['./sign-up-account.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignUpPage implements OnDestroy {
-  public readonly form: FormGroup = SignUpForm.form();
-  public readonly formValidationMessages = SignUpForm.validationMessages();
+export class SignUpAccountPage implements OnDestroy {
+
+  public readonly form: FormGroup = SignUpAccountForm.form();
+  public readonly formValidationMessages = SignUpAccountForm.validationMessages();
 
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
@@ -31,13 +31,6 @@ export class SignUpPage implements OnDestroy {
   private readonly _$showPassword = new BehaviorSubject<boolean>(false);
   public readonly $showPassword = this._$showPassword.pipe(takeUntil(this.$destroy), shareReplay(1));
 
-  private readonly isLoggedInRedirect = this.authService.$currentUser
-    .pipe(
-      take(2),
-      filter((user) => !!user && !!user.uid)
-    )
-    .subscribe(() => this.router.navigate(['/profile']));
-
   constructor(
     private readonly userRegistrationService: UserRegistrationService,
     private readonly loadingController: LoadingController,
@@ -45,9 +38,9 @@ export class SignUpPage implements OnDestroy {
     private readonly router: Router,
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
-    private readonly analyticsService: AngularFireAnalytics
-  ) {
-    analyticsService.setCurrentScreen('sign-up');
+    private readonly analyticsService: AngularFireAnalytics,
+  ) { 
+    analyticsService.setCurrentScreen('sign-up-account');
     analyticsService.logEvent('screen_view');
   }
 
@@ -74,24 +67,47 @@ export class SignUpPage implements OnDestroy {
 
     const result = await this.userRegistrationService
       .registerAccount(info)
-      .then((resolve: UserProfile) => {
+      .then((resolve: firebase.default.auth.UserCredential) => {
         this._$loading.next(false);
-        this.analyticsService.logEvent('sign_up');
+        this.analyticsService.logEvent('sign_up_1');
         return true;
       })
       .catch(async (error: IError) => {
+
         this._$loading.next(false);
+
+        if (error.code == '11') {
+          await this.signInNeeded();
+
+          this.router.navigate(['/sign-in'], {
+            queryParams: { email: `${this.form.get('emailAddress').value}` },
+          });
+
+          return false;
+        }
+
+        if (error.code === 'auth/email-already-in-use') {
+          const tryLogIn = await this.authService.login(info.emailAddress, info.password)
+            .then(response => true)
+            .catch(response => false);
+          
+          if (tryLogIn) {
+            return true;
+          }
+        }
+
         await this.handleError(error);
+
         return false;
       });
 
     if (result) {
-      this.redirectToAccount();
+      this.redirectToStepTwo();
     }
   }
 
-  private redirectToAccount() {
-    this.router.navigate(['/profile']);
+  private redirectToStepTwo() {
+    this.router.navigate(['/sign-up-info']);
   }
 
   private readonly showLoadingSubscription = this.$loading
@@ -123,6 +139,16 @@ export class SignUpPage implements OnDestroy {
     await alert.present();
   }
 
+  private async signInNeeded() {
+    const alert = await this.alertController.create({
+      header: 'Account Created',
+      message: 'Now sign into the account you just created',
+      buttons: ['Ok'],
+    });
+
+    await alert.present();
+  }
+
   public async privacy() {
     await LegalHelpers.privacyPolicy(this.modalController);
   }
@@ -130,4 +156,5 @@ export class SignUpPage implements OnDestroy {
   public async terms() {
     await LegalHelpers.termsOfService(this.modalController);
   }
+
 }

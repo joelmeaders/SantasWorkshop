@@ -14,50 +14,45 @@ export interface IRegistration {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserRegistrationService {
+  constructor(private readonly fireAuth: AngularFireAuth, private readonly userProfileService: UserProfileService) {}
 
-  constructor(
-    private readonly fireAuth: AngularFireAuth,
-    private readonly userProfileService: UserProfileService
-  ) { }
-
-  public async registerAccount(registration: IRegistration): Promise<UserProfile> {
-
-    return this.fireAuth.createUserWithEmailAndPassword(registration.emailAddress, registration.password).then(
-      response => this.initializeNewAccount(response, registration)
-    ).catch((error: IError) => {
-      error.additionalInfo = "UserRegistrationService.registerAccount()"
+  public async registerAccount(registration: IRegistration): Promise<firebase.default.auth.UserCredential> {
+    return this.fireAuth.createUserWithEmailAndPassword(registration.emailAddress, registration.password)
+    .catch((error: IError) => {
+      error.additionalInfo = 'UserRegistrationService.registerAccount()';
       throw error;
     });
-
   }
 
-  public initializeNewAccount(response: firebase.default.auth.UserCredential, registration: IRegistration): Promise<UserProfile> {
+  public initializeNewAccount(emailAddress: string, uid: string, registration: IRegistration): Promise<UserProfile> {
+    const profile = this.newUserProfile(emailAddress, uid, registration);
 
-    const profile = this.newUserProfile(response, registration);
-
-    return this.userProfileService.save(profile, true).pipe(take(1)).toPromise().then(
-      (userProfile: UserProfile) => userProfile // ANALYTICS SIGNUP
-    ).catch((error: IError) => {
-      error.additionalInfo = "UserRegistrationService.initializeNewAccount()"
-      throw error;
-    });
-
+    return this.userProfileService
+      .save(profile, true)
+      .pipe(take(1))
+      .toPromise()
+      .then(
+        (userProfile: UserProfile) => userProfile // ANALYTICS SIGNUP
+      )
+      .catch((error: IError) => {
+        error.additionalInfo = 'UserRegistrationService.initializeNewAccount()';
+        throw error;
+      });
   }
 
-  private readonly newUserProfile = (response: firebase.default.auth.UserCredential, registration: IRegistration): UserProfile => {
-
+  private readonly newUserProfile = (emailAddress: string, uid: string, registration: IRegistration): UserProfile => {
     return {
-      id: response.user.uid,
-      emailAddress: response.user.email,
+      id: uid,
+      emailAddress: emailAddress,
       firstName: registration.firstName,
       lastName: registration.lastName,
       zipCode: registration.zipCode,
-      registeredOn: new Date().getTime(),
-      acceptedPrivacyPolicy: new Date().getTime(),
-      acceptedTermsOfService: new Date().getTime(),
+      registeredOn: null,
+      acceptedPrivacyPolicy: new Date(),
+      acceptedTermsOfService: new Date(),
     };
-  }
+  };
 }

@@ -18,18 +18,23 @@ const routes: Routes = [
     loadChildren: () => import('./features/sign-in/sign-in.module').then((m) => m.SignInPageModule),
   },
   {
-    path: 'sign-up',
-    loadChildren: () => import('./features/sign-up/sign-up.module').then((m) => m.SignUpPageModule),
-  },
-  {
     path: 'admin',
     loadChildren: () => import('./features/admin/admin-routing.module').then((m) => m.AdminRoutingModule),
   },
+  {
+    path: 'sign-up-account',
+    loadChildren: () => import('./features/sign-up-account/sign-up-account.module').then( m => m.SignUpAccountPageModule)
+  },
+  {
+    path: 'sign-up-info',
+    loadChildren: () => import('./features/sign-up-info/sign-up-info.module').then( m => m.SignUpInfoPageModule)
+  },
+
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, anchorScrolling: 'enabled' }),
+    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, anchorScrolling: 'enabled', onSameUrlNavigation: 'reload' }),
   ],
   exports: [RouterModule],
   providers: [AuthGuard],

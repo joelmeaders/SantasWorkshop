@@ -51,7 +51,7 @@ export class PublicMenuComponent implements OnDestroy {
   }
 
   public async createAccount() {
-    await this.router.navigate(['/sign-up']);
+    await this.router.navigate(['/sign-up-account']);
     await this.closeMenu();
   }
 

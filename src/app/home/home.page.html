@@ -50,21 +50,35 @@
                 </h4>
               </ion-col>
             </ion-row>
-            <ion-row>
-              <ion-col size-sm size="12" class="ion-padding-horizontal">
-                <ion-button [routerLink]="['/sign-in']" size="large" expand="block">
-                  <ion-label>{{ 'COMMON.SIGN_IN' | translate }}</ion-label>
-                </ion-button>
-              </ion-col>
-              <ion-col size-xs class="ion-hide-md-down">
+            <ng-container *appLet="$customer | async as customer">
 
-              </ion-col>
-              <ion-col size-sm size="12" class="ion-padding-horizontal">
-                <ion-button color="purple" [routerLink]="['/sign-up']" size="large"expand="block">
-                  <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
-                </ion-button>
-              </ion-col>
-            </ion-row>
+              <ion-row *ngIf="!customer?.id">
+                <ion-col size-sm size="12" class="ion-padding-horizontal">
+                  <ion-button [routerLink]="['/sign-in']" size="large" expand="block">
+                    <ion-label>{{ 'COMMON.SIGN_IN' | translate }}</ion-label>
+                  </ion-button>
+                </ion-col>
+                <ion-col size-xs class="ion-hide-md-down">
+  
+                </ion-col>
+                <ion-col size-sm size="12" class="ion-padding-horizontal">
+                  <ion-button color="purple" [routerLink]="['/sign-up']" size="large"expand="block">
+                    <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+
+              <ion-row *ngIf="customer?.id">
+                <ion-col></ion-col>
+                <ion-col>
+                  <ion-button color="purple" [routerLink]="['/profile']" size="large"expand="block">
+                    <ion-label>{{ 'COMMON.PROFILE' | translate }}</ion-label>
+                  </ion-button>
+                </ion-col>
+                <ion-col></ion-col>
+              </ion-row>
+            </ng-container>
+            
           </ion-grid>
         </ion-card>
       </ion-col>

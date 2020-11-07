@@ -22,7 +22,9 @@
   },
   "SIGNIN": {
     "HEADER": "Sign in to your account",
-    "FORGOT_PASSWORD": "Forgot Password?"
+    "FORGOT_PASSWORD": "Forgot Password?",
+    "MAKE_ACCOUNT1": "If you haven't created an account with us yet you can make one",
+    "MAKE_ACCOUNT2": "by clicking here"
   },
   "SIGNUP": {
     "HEADER": "Create your account by filling out the information below",

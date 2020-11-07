@@ -24,7 +24,8 @@
       "@app/shared": ["app/shared"],
       "@app/forms": ["app/shared/forms"],
     },
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

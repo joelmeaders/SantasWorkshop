@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-
 import { AngularFireAuth } from '@angular/fire/auth';
 import { IError } from '@app/core/models/base/i-errors';
 import { UserProfile } from '@app/core/models/user-profile.model';
 import { UserProfileService } from '@app/core/services/http/user-profile.service';
-
 import { take } from 'rxjs/operators';
 
 export interface IRegistration {
@@ -12,8 +10,7 @@ export interface IRegistration {
   lastName: string;
   emailAddress: string;
   password: string;
-  zipCode: string
-  // trackingOptOut: boolean;
+  zipCode: string;
 }
 
 @Injectable({
@@ -37,7 +34,7 @@ export class UserRegistrationService {
 
   }
 
-  public initializeNewAccount(response: firebase.auth.UserCredential, registration: IRegistration): Promise<UserProfile> {
+  public initializeNewAccount(response: firebase.default.auth.UserCredential, registration: IRegistration): Promise<UserProfile> {
 
     const profile = this.newUserProfile(response, registration);
 
@@ -50,7 +47,8 @@ export class UserRegistrationService {
 
   }
 
-  private readonly newUserProfile = (response: firebase.auth.UserCredential, registration: IRegistration): UserProfile => {
+  private readonly newUserProfile = (response: firebase.default.auth.UserCredential, registration: IRegistration): UserProfile => {
+
     return {
       id: response.user.uid,
       emailAddress: response.user.email,

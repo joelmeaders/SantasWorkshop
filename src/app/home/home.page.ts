@@ -1,5 +1,4 @@
-import { templateJitUrl } from '@angular/compiler';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { AuthService } from '@app/core/services/auth.service';
 import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';

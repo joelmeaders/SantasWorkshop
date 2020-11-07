@@ -120,6 +120,10 @@
                       <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
                       <ion-text> <div [innerHTML]> {{ 'REGISTRATION.BRING_ID' | translate }} </div> </ion-text>
                     </ion-item>
+                    <ion-item>
+                      <ion-icon name="alert-circle-outline" color="danger" slot="start"></ion-icon>
+                      {{ 'REGISTRATION.CHECK_WEBSITE' | translate }}
+                    </ion-item>
                   </ion-list>
                   
                 </ion-col>
@@ -196,6 +200,12 @@
                         <ion-label *ngIf="!this.dateTimeForm.valid" class="ion-text-wrap">{{ 'REGISTRATION.PICK_DATETIME_END' | translate }}</ion-label>
                         <ion-label *ngIf="this.dateTimeForm.valid" class="ion-text-wrap">{{ 'REGISTRATION.SAVE_DATETIME' | translate }}</ion-label>
                         <ion-button slot="end" [disabled]="!this.dateTimeForm.valid" (click)="saveDateTime()" size="medium">{{ 'REGISTRATION.SAVE_DATETIME' | translate }}</ion-button>
+                      </ion-item>
+                      <ion-item lines="none">
+                        <ion-icon name="alert-circle-outline" color="danger" slot="start"></ion-icon>
+                        <ion-text class="ion-padding-vertical">
+                          {{ 'REGISTRATION.CHECK_WEBSITE' | translate }}
+                        </ion-text>
                       </ion-item>
                     </ion-list>
                   </form>

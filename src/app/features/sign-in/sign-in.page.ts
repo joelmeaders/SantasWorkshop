@@ -72,7 +72,6 @@ export class SignInPage implements OnDestroy {
       .login(loginInfo.emailAddress, loginInfo.password)
       .then(async (response) => {
         this._$loading.next(false);
-        this.analyticsService.logEvent('sign_in');
         return true;
       }).catch(async (error: IError) => {
         this._$loading.next(false);
@@ -81,6 +80,7 @@ export class SignInPage implements OnDestroy {
       });
 
     if (result) {
+      this.analyticsService.logEvent('sign_in');
       this.router.navigate(['/profile']);
     }
 

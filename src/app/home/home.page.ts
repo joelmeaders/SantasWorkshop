@@ -1,12 +1,12 @@
 import { templateJitUrl } from '@angular/compiler';
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { AuthService } from '@app/core/services/auth.service';
 import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { takeUntil, filter, shareReplay } from 'rxjs/operators';
+import { takeUntil, filter, shareReplay, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -28,7 +28,7 @@ export class HomePage implements OnDestroy {
     private readonly popoverController: PopoverController,
     private readonly analyticsService: AngularFireAnalytics,
     private readonly translate: TranslateService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {
     analyticsService.setCurrentScreen('home');
     analyticsService.logEvent('screen_view');

@@ -52,7 +52,7 @@
             </ion-row>
             <ng-container *appLet="$customer | async as customer">
 
-              <ion-row *ngIf="!customer?.id">
+              <ion-row *ngIf="!customer?.uid">
                 <ion-col size-sm size="12" class="ion-padding-horizontal">
                   <ion-button [routerLink]="['/sign-in']" size="large" expand="block">
                     <ion-label>{{ 'COMMON.SIGN_IN' | translate }}</ion-label>
@@ -68,7 +68,7 @@
                 </ion-col>
               </ion-row>
 
-              <ion-row *ngIf="customer?.id">
+              <ion-row *ngIf="customer?.uid">
                 <ion-col></ion-col>
                 <ion-col>
                   <ion-button color="purple" [routerLink]="['/profile']" size="large"expand="block">

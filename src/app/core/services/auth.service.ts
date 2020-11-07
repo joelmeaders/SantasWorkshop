@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subject, of, Observable } from 'rxjs';
+import { Subject, of, Observable, BehaviorSubject } from 'rxjs';
 import { takeUntil, publishReplay, refCount, defaultIfEmpty, mergeMap, distinctUntilChanged, mapTo } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { UserProfileService } from './http/user-profile.service';

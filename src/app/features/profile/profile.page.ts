@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ChildProfile } from '@app/core/models/child-profile.model';
 import { IRegistrationDateTime, Registration } from '@app/core/models/registration.model';
 import { AuthService } from '@app/core/services/auth.service';
@@ -73,16 +73,22 @@ export class ProfilePage implements OnDestroy {
     takeUntil(this.$destroy),
     map(response => !!response?.children?.length && !!response.date && !!response.code),
     shareReplay(1)
-  )
+  );
 
   public readonly $registrationDate = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
-    map(response => (response?.date && response?.time) ? response : null),
+    map(response => (response?.date && response?.time) ? ({ date: response.date, time: response.time }) : null),
     tap(response => {
       if (response) {
         this.dateTimeForm.controls['date'].setValue(response.date);
         this.dateTimeForm.controls['time'].setValue(response.time);
       }
+    }),
+    map(dateTime => {
+      if (!dateTime.date || !dateTime.time) {
+        return null;
+      }
+      return this.formatDateTime(Number(dateTime.date), Number(dateTime.time));
     }),
     publishReplay(1),
     refCount()
@@ -118,13 +124,20 @@ export class ProfilePage implements OnDestroy {
   );
 
   // Because of rxjs bug with change detection
-  private cdSubscription = merge(
+  private readonly cdSubscription = merge(
     this.$customer, this.$children, this.$registrationCode
   ).pipe(
     takeUntil(this.$destroy),
     switchMap(() => of(undefined).pipe(delay(200))),
     tap(() => this.changeDetection.detectChanges())
   ).subscribe();
+
+  private readonly profileInfoRedirectSubscription = this.authService.$userProfile.pipe(
+    takeUntil(this.$destroy),
+    filter(profile => !profile || !profile.firstName || !profile.lastName || !profile.zipCode)
+  ).subscribe(() => {
+    this.ngzone.run(() => this.router.navigate(['/sign-up-info']));
+  });
 
   constructor(
     private readonly authService: AuthService,
@@ -137,7 +150,8 @@ export class ProfilePage implements OnDestroy {
     private readonly popoverController: PopoverController,
     private readonly storage: AngularFireStorage,
     private readonly analyticsService: AngularFireAnalytics,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly ngzone: NgZone
   ) {
     analyticsService.setCurrentScreen('profile');
     analyticsService.logEvent('screen_view');
@@ -150,6 +164,26 @@ export class ProfilePage implements OnDestroy {
     } catch {
       // Do nothing
     }
+  }
+
+  public formatDateTime(date: number, time: number) {
+
+    const formattedDate = `December ${date}th`;
+
+    let formattedTime = '';
+
+    if (time <= 12) {
+      formattedTime = `${time}am`;
+    }
+    else if (time === 13) {
+      formattedTime = `1pm`;
+    }
+    else if (time === 14) {
+      formattedTime = `2pm`;
+    }
+
+    return `${formattedDate} at ${formattedTime}`;
+
   }
 
   public async addEditChild(inputChild?: ChildProfile): Promise<void> {

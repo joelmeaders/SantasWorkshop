@@ -22,7 +22,7 @@ export class ResetPasswordComponent {
   });
 
   public async resetPassword() {
-    const email = this.form.get('email').value;
+    const email = this.form.get('emailAddress').value;
 
     const alert = await this.alertController.create({
       header: 'Success',

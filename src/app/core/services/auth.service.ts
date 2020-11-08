@@ -1,13 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, of, Observable } from 'rxjs';
-import { takeUntil, publishReplay, refCount, defaultIfEmpty, mergeMap, distinctUntilChanged, mapTo } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, defaultIfEmpty, mergeMap, distinctUntilChanged, mapTo, tap, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { UserProfileService } from './http/user-profile.service';
 
 import 'firebase/auth';
 import { FirebaseApp } from '@angular/fire';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { authState } from 'rxfire/auth';
+import { user } from 'rxfire/auth';
 import { UserProfile } from '@app/core/models/user-profile.model';
 
 
@@ -25,12 +25,20 @@ export class AuthService implements OnDestroy {
     private readonly router: Router
   ) { }
 
-  public readonly $currentUser = authState(this.firebase.auth()).pipe(
+  public readonly $currentUser = user(this.firebase.auth()).pipe(
     takeUntil(this.$destroy),
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
   );
+
+  public readonly $emailAndUid = this.$currentUser.pipe(
+    takeUntil(this.$destroy),
+    map((res: any) => ({ email: res?.email, id: res?.uid })),
+    distinctUntilChanged(),
+    publishReplay(1),
+    refCount()
+  )
 
   public readonly $userProfile: Observable<UserProfile> = this.$currentUser.pipe(
     takeUntil(this.$destroy),

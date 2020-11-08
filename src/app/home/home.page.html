@@ -50,7 +50,7 @@
                 </h4>
               </ion-col>
             </ion-row>
-            <ng-container *appLet="$customer | async as customer">
+            <ng-container *appLet="$user | async as customer">
 
               <ion-row *ngIf="!customer?.uid">
                 <ion-col size-sm size="12" class="ion-padding-horizontal">
@@ -62,7 +62,7 @@
   
                 </ion-col>
                 <ion-col size-sm size="12" class="ion-padding-horizontal">
-                  <ion-button color="purple" [routerLink]="['/sign-up']" size="large"expand="block">
+                  <ion-button color="purple" [routerLink]="['/sign-up-account']" size="large"expand="block">
                     <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
                   </ion-button>
                 </ion-col>

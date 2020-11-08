@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IError } from '@app/core/models/base/i-errors';
 import { AuthService } from '@app/core/services/auth.service';
 import { ResetPasswordComponent } from '@app/shared/components/reset-password/reset-password.component';
 import { SignInForm } from '@app/shared/forms/sign-in';
 import { ModalController, LoadingController, AlertController } from '@ionic/angular';
 import { Subject } from 'rxjs';
-import { takeUntil, publishReplay, refCount, filter, take } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, filter, take, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-sign-in',
@@ -30,17 +30,37 @@ export class SignInPage implements OnDestroy {
     refCount()
   );
 
-  private readonly isLoggedInRedirect = this.authService.$currentUser.pipe(
-    take(2),
-    filter(user => !!user && !!user.uid)
-  ).subscribe(
-    () => this.router.navigate(['/profile'])
-  );
+  public readonly $reload = this.route.queryParamMap.pipe(
+    take(1),
+    map(params => {
+      const email = params.get('email');
+      const reloaded = params.get('reloaded');
+      return { email, reloaded };
+    }),
+    filter(res => !!res && !!res.email && res.reloaded !== '1'),
+  ).subscribe(response => {
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.onSameUrlNavigation = 'reload';
+    this.router.navigate([], {
+      queryParams: { reloaded: '1' },
+      queryParamsHandling: 'merge',
+    }).then(() => location.reload());
+  });
+
+  // This only triggers on an idb transaction error
+  public readonly $email = this.route.queryParamMap.pipe(
+    take(1),
+    map(params => params.get('email')),
+    filter(res => !!res),
+  ).subscribe(email => {
+    this.form.get('emailAddress').setValue(email);
+  });
 
   constructor(
     private readonly authService: AuthService,
     private readonly loadingController: LoadingController,
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly analyticsService: AngularFireAnalytics
@@ -75,13 +95,28 @@ export class SignInPage implements OnDestroy {
         return true;
       }).catch(async (error: IError) => {
         this._$loading.next(false);
-        await this.handleError(error);
+
+        if (error.code == '11') {
+          this.handleIDBFatalError();
+        } else {
+          await this.handleError(error);
+        }
+
         return false;
       });
 
-    if (result) {
-      this.analyticsService.logEvent('sign_in');
+    if (!result) {
+      return;
+    }
+
+    this.analyticsService.logEvent('sign_in');
+
+    const profile = await this.authService.$userProfile.pipe(take(1)).toPromise();
+
+    if (!!profile?.emailAddress && !!profile?.firstName && !!profile?.lastName && !!profile?.zipCode) {
       this.router.navigate(['/profile']);
+    } else {
+      this.router.navigate(['/sign-up-info']);
     }
 
   }
@@ -101,6 +136,16 @@ export class SignInPage implements OnDestroy {
     });
     
     await loading.present();
+  }
+
+  private async handleIDBFatalError() {
+    const alert = await this.alertController.create({
+      header: `Device Issue`,
+      message: `Please try again using a different browser or device. We apologize for the inconvenience`,
+      buttons: ['Ok'],
+    });
+
+    await alert.present();
   }
 
   private async destroyLoading() {

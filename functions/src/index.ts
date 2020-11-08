@@ -164,6 +164,24 @@ export const sendRegistrationEmail = functions.firestore.document('{registration
   const name = newDocument['name'];
   const email = newDocument['email'];
 
+  const date = Number(newDocument['date']);
+  const time = Number(newDocument['time']);
+
+  const formattedDate = `December ${date}th`;
+  let formattedTime = '';
+
+  if (time <= 12) {
+    formattedTime = `${time}am`;
+  }
+  else if (time === 13) {
+    formattedTime = `1pm`;
+  }
+  else if (time === 14) {
+    formattedTime = `2pm`;
+  }
+
+  const specificDateTime = `${formattedDate} at ${formattedTime}`;
+
   // Don't proceed
   if (!code || !email?.length || code === oldCode) {
     return;
@@ -193,17 +211,40 @@ export const sendRegistrationEmail = functions.firestore.document('{registration
      <h2>Confirmation Code: ${code}</h2>
      <img src="https://storage.googleapis.com/santas-workshop-193b5.appspot.com/registrations/${code}.png" alt="scannable qr code">
      <p>
-      <h4>December 11-12 & 14-15, 2020</h4>
-      <h4>9:00am - 3:00pm</h4>
+      <h4>Please check our website prior to your date for any weather or covid updates</h4>
+      <h4>Don't forget to print this email, this is your ticket to the event. You may need to "Show trimmed content" for the QR code to show. Please also note that if you make updates to your registration a new email with a new QR code will trigger!</h4>
+      <h4>${specificDateTime}</h4>
       <h4>2150 S Monaco Parkway</h4>
       <h4>Denver, CO 80222</h4>
-     </p>
-     <p>
-      NEED INSTRUCTIONS
-     </p>
-     `
+      <h4>Enter the parking the lot off Monaco at light. All other entrances will be blocked off to DSCS traffic!</h4>
+      <h2> REMEMBER TO WEAR  YOUR MASK!</h2>
+     </p>`
   };
 
   await transporter.sendMail(mailOptions);
+
+});
+
+export const deleteAccount = functions.https.onCall(async (data, context) => {
+
+  const userId = context.auth?.uid;
+
+  // If there is a uid, delete account
+  if (!!userId) {
+    await admin.auth().deleteUser(userId);
+    return Promise.resolve();
+  }
+
+  // otherwise look look up account
+  const email = data?.email;
+
+  if (!!email) {
+    return;
+  }
+
+  const account = await admin.auth().getUserByEmail(email);
+  await admin.auth().deleteUser(account.uid);
+
+  return Promise.resolve();
 
 });

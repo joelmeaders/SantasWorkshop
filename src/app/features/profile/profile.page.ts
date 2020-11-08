@@ -73,16 +73,22 @@ export class ProfilePage implements OnDestroy {
     takeUntil(this.$destroy),
     map(response => !!response?.children?.length && !!response.date && !!response.code),
     shareReplay(1)
-  )
+  );
 
   public readonly $registrationDate = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
-    map(response => (response?.date && response?.time) ? response : null),
+    map(response => (response?.date && response?.time) ? ({ date: response.date, time: response.time }) : null),
     tap(response => {
       if (response) {
         this.dateTimeForm.controls['date'].setValue(response.date);
         this.dateTimeForm.controls['time'].setValue(response.time);
       }
+    }),
+    map(dateTime => {
+      if (!dateTime.date || !dateTime.time) {
+        return null;
+      }
+      return this.formatDateTime(Number(dateTime.date), Number(dateTime.time));
     }),
     publishReplay(1),
     refCount()
@@ -158,6 +164,26 @@ export class ProfilePage implements OnDestroy {
     } catch {
       // Do nothing
     }
+  }
+
+  public formatDateTime(date: number, time: number) {
+
+    const formattedDate = `December ${date}th`;
+
+    let formattedTime = '';
+
+    if (time <= 12) {
+      formattedTime = `${time}am`;
+    }
+    else if (time === 13) {
+      formattedTime = `1pm`;
+    }
+    else if (time === 14) {
+      formattedTime = `2pm`;
+    }
+
+    return `${formattedDate} at ${formattedTime}`;
+
   }
 
   public async addEditChild(inputChild?: ChildProfile): Promise<void> {

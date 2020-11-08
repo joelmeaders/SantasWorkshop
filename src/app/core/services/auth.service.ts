@@ -7,7 +7,7 @@ import { UserProfileService } from './http/user-profile.service';
 import 'firebase/auth';
 import { FirebaseApp } from '@angular/fire';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { authState } from 'rxfire/auth';
+import { user } from 'rxfire/auth';
 import { UserProfile } from '@app/core/models/user-profile.model';
 
 
@@ -25,7 +25,7 @@ export class AuthService implements OnDestroy {
     private readonly router: Router
   ) { }
 
-  public readonly $currentUser = authState(this.firebase.auth()).pipe(
+  public readonly $currentUser = user(this.firebase.auth()).pipe(
     takeUntil(this.$destroy),
     distinctUntilChanged(),
     publishReplay(1),

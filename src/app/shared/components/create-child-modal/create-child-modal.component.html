@@ -49,6 +49,15 @@
             </p>
           </ion-item>
 
+          <div class="ion-padding-top ion-text-wrap" *ngIf="$isInfant | async">
+            <ion-item lines="none">
+              <ion-icon name="gift" color="success" slot="start"></ion-icon>
+              <ion-text>
+                We have pre-packaged, gender neutral toys for children ages 0-2!
+              </ion-text>
+            </ion-item>
+          </div>
+
           <div class="ion-padding-top" *ngIf="!($isInfant | async)">
             <ion-radio-group *appLet="'toyType' as controlName" [formControlName]="controlName">
               <ion-list-header>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy } from '@angular/core';
 import { ChildProfile } from '@app/core/models/child-profile.model';
 import { IRegistrationDateTime, Registration } from '@app/core/models/registration.model';
 import { AuthService } from '@app/core/services/auth.service';
@@ -7,10 +7,9 @@ import { RegistrationService } from '@app/core/services/http/registration.servic
 import { CreateChildModalComponent } from '@app/shared/components/create-child-modal/create-child-modal.component';
 import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';
 import { ArrivalDateForm } from '@app/shared/forms/arrival-date';
-import { Helpers } from '@app/shared/helpers';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwError } from 'rxjs';
-import { catchError, concatMap, delay, filter, map, mapTo, mergeMap, publishReplay, refCount, retry, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { catchError, delay, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
@@ -75,19 +74,28 @@ export class ProfilePage implements OnDestroy {
     shareReplay(1)
   );
 
-  public readonly $registrationDate = this.$registrationQuery.pipe(
+  private readonly _$registrationDateTime = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
     map(response => (response?.date && response?.time) ? ({ date: response.date, time: response.time }) : null),
+    shareReplay(1)
+  );
+
+  // Set the date/time on the form, if in database
+  private readonly _setDateTimeFormSubscription = this._$registrationDateTime.pipe(
+    takeUntil(this.$destroy),
     tap(response => {
       if (response) {
-        this.dateTimeForm.controls['date'].setValue(response.date);
-        this.dateTimeForm.controls['time'].setValue(response.time);
+        this.dateTimeForm.controls['date'].setValue(response?.date);
+        this.dateTimeForm.controls['time'].setValue(response?.time);
       }
-    }),
+    })
+  ).subscribe();
+
+  // Human friendly date/time format
+  public readonly $registrationDate = this._$registrationDateTime.pipe(
+    takeUntil(this.$destroy),
     map(dateTime => {
-      if (!dateTime.date || !dateTime.time) {
-        return null;
-      }
+      if (!dateTime?.date || !dateTime?.time) { return null; }
       return this.formatDateTime(Number(dateTime.date), Number(dateTime.time));
     }),
     publishReplay(1),
@@ -155,7 +163,8 @@ export class ProfilePage implements OnDestroy {
   ) {
     analyticsService.setCurrentScreen('profile');
     analyticsService.logEvent('screen_view');
-   }
+    this.autoDatePicker();
+  }
 
   public async ngOnDestroy() {
     this.$destroy.next();
@@ -223,7 +232,7 @@ export class ProfilePage implements OnDestroy {
   }
 
   public saveChild(child: ChildProfile): Observable<ChildProfile> {
-    
+
     window.addEventListener('beforeunload', (event) => {
       if (this._$isModify.getValue()) {
         event.returnValue = 'Did you remember to submit/update your registration?';
@@ -240,30 +249,52 @@ export class ProfilePage implements OnDestroy {
       );
   }
 
-  public async saveDateTime() {
+  private async autoDatePicker() {
 
-    const dateTime: IRegistrationDateTime = {
-      ...this.dateTimeForm.value
-    };
+    const dateTime = await this._$registrationDateTime.pipe(take(1)).toPromise();
 
-    if (!dateTime.date || !dateTime.time) {
-      await this.missingDateTimeAlert();
+    if (!!dateTime?.date) {
       return;
     }
 
-    this._$loading.next(true);
+    const customer = await this.$customer.pipe(take(1)).toPromise();
+    const letter = customer.lastName[0].toLowerCase();
+    const control = this.dateTimeForm.get('date');
 
+    if (letter >= 'a' && letter <= 'g') {
+      control.setValue(12);
+    }
+    else if (letter >= 'h' && letter <= 'm') {
+      control.setValue(14);
+    }
+    else if (letter >= 'n' && letter <= 's') {
+      control.setValue(15);
+    }
+    else if (letter >= 't' && letter <= 'z') {
+      control.setValue(11)
+    }
+
+  }
+
+  public async onDateTimeChange() {
+    const dateTime = await this._$registrationDateTime.pipe(take(1)).toPromise();
     const customer = await this.$customer.pipe(take(1)).toPromise();
 
-    await this.registrationService.storePartialRegistration(customer, dateTime)
-      .pipe(take(1)).toPromise().finally(() => {
-        this._$loading.next(false);
-      });
+    const partialRegistration: IRegistrationDateTime = {
+      ...this.dateTimeForm.value
+    };
+
+    const dateTimeValid = !!partialRegistration.date && !!partialRegistration.time;
+    const dateTimeUnchanged = dateTime?.date === partialRegistration.date && dateTime?.time === partialRegistration.time;
+
+    if (!dateTimeValid || dateTimeUnchanged) {
+      return;
+    }
+
+    await this.registrationService.storePartialRegistration(customer, partialRegistration)
+      .pipe(take(1)).toPromise();
 
     this.analyticsService.logEvent('save_datetime');
-    this.changeDetection.detectChanges();
-
-    await this.savedDateTimeAlert();
   }
 
   public async confirmRegistration() {

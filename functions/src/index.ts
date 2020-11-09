@@ -170,8 +170,11 @@ export const sendRegistrationEmail = functions.firestore.document('{registration
   const formattedDate = `December ${date}th`;
   let formattedTime = '';
 
-  if (time <= 12) {
+  if (time <= 11) {
     formattedTime = `${time}am`;
+  }
+  if (time === 12) {
+    formattedTime = `${time}pm`;
   }
   else if (time === 13) {
     formattedTime = `1pm`;

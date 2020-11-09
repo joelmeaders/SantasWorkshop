@@ -34,7 +34,7 @@
     "CREATE_PASSWORD_PH": "At least 8 characters",
     "SHOW_PASSWORD": "(Click to show password)",
     "HIDE_PASSWORD": "(Click to hide password)",
-    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and read our privacy policy "
+    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy "
   },
   "SIGNUP_INFO": {
     "HEADER": "Add your information to continue",

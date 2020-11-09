@@ -43,7 +43,7 @@
                         </div>
                         <img *ngIf="($qrLoading | async) === false" [src]="$qrCode | async" alt="Registration QR Code" />
                         <div class="qrcode-text">{{ $registrationCode | async }}</div>
-                        <div><ion-note> If your QR Code isn't loading<br/>check your email or come back later </ion-note></div>
+                        <div class="padding-bottom-md ion-padding-horizontal"><ion-note> If your QR Code isn't loading try refreshing the page. Also check your email. </ion-note></div>
                       </div>
                       <div class="ion-text-center"></div>
                       <div class="ion-text-center ion-padding-top">
@@ -149,7 +149,6 @@
                     </ion-item>
                     <ion-item lines="none"> {{ 'REGISTRATION.LETTER_LASTNAME_0' | translate }} </ion-item>
 
-                    <!-- TODO: Auto-pick date based on last name -->
                     <ion-item>
                       <ul>
                         <li><div [innerHTML]="'REGISTRATION.LETTER_LASTNAME_1' | translate"></div></li>
@@ -158,9 +157,6 @@
                         <li><div [innerHTML]="'REGISTRATION.LETTER_LASTNAME_4' | translate"></div></li>
                       </ul>
                     </ion-item>
-
-                    <ion-item> {{ 'REGISTRATION.CHOOSE_DATETIME_INSTRUCTIONS' | translate }} </ion-item>
-                    <ion-item> {{ 'REGISTRATION.DATETIME_REMINDER' | translate }} </ion-item>
                   </ion-list>
                 </ion-col>
 
@@ -169,7 +165,7 @@
                     <ion-list>
                       <ion-item>
                         <ion-label position="stacked"><strong> {{ 'REGISTRATION.DATE' | translate }} </strong></ion-label>
-                        <ion-select formControlName="date" placeholder="Choose Date" interface="popover">
+                        <ion-select formControlName="date" placeholder="Choose Date" interface="popover" (ionChange)="onDateTimeChange()">
                           <ion-select-option [value]="11"> {{ 'REGISTRATION.DATE_VALUE_1' | translate }} </ion-select-option>
                           <ion-select-option [value]="12"> {{ 'REGISTRATION.DATE_VALUE_2' | translate }} </ion-select-option>
                           <ion-select-option [value]="14"> {{ 'REGISTRATION.DATE_VALUE_3' | translate }} </ion-select-option>
@@ -178,24 +174,13 @@
                       </ion-item>
                       <ion-item>
                         <ion-label position="stacked"><strong>Time</strong></ion-label>
-                        <ion-select formControlName="time" placeholder="Choose Time" interface="popover">
+                        <ion-select formControlName="time" placeholder="Choose Time" interface="popover" (ionChange)="onDateTimeChange()">
                           <ion-select-option [value]="10"> {{ 'REGISTRATION.TIME_VALUE_1' | translate }} </ion-select-option>
                           <ion-select-option [value]="11"> {{ 'REGISTRATION.TIME_VALUE_2' | translate }} </ion-select-option>
                           <ion-select-option [value]="12"> {{ 'REGISTRATION.TIME_VALUE_3' | translate }} </ion-select-option>
                           <ion-select-option [value]="13"> {{ 'REGISTRATION.TIME_VALUE_4' | translate }} </ion-select-option>
                           <ion-select-option [value]="14"> {{ 'REGISTRATION.TIME_VALUE_5' | translate }} </ion-select-option>
                         </ion-select>
-                      </ion-item>
-                      <ion-item>
-                        <ion-label *ngIf="!this.dateTimeForm.valid" class="ion-text-wrap"
-                          >{{ 'REGISTRATION.PICK_DATETIME_END' | translate }}</ion-label
-                        >
-                        <ion-label *ngIf="this.dateTimeForm.valid" class="ion-text-wrap"
-                          >{{ 'REGISTRATION.SAVE_DATETIME' | translate }}</ion-label
-                        >
-                        <ion-button slot="end" [disabled]="!this.dateTimeForm.valid" (click)="saveDateTime()" size="medium"
-                          >{{ 'REGISTRATION.SAVE_DATETIME' | translate }}</ion-button
-                        >
                       </ion-item>
                       <ion-item lines="none">
                         <ion-icon name="alert-circle-outline" color="danger" slot="start"></ion-icon>

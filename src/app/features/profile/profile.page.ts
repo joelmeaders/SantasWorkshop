@@ -181,8 +181,11 @@ export class ProfilePage implements OnDestroy {
 
     let formattedTime = '';
 
-    if (time <= 12) {
+    if (time <= 11) {
       formattedTime = `${time}am`;
+    }
+    else if (time === 12) {
+      formattedTime = `${time}pm`;
     }
     else if (time === 13) {
       formattedTime = `1pm`;

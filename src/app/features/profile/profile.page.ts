@@ -284,7 +284,8 @@ export class ProfilePage implements OnDestroy {
     const customer = await this.$customer.pipe(take(1)).toPromise();
 
     const partialRegistration: IRegistrationDateTime = {
-      ...this.dateTimeForm.value
+      ...this.dateTimeForm.value,
+      formattedDateTime: null
     };
 
     const dateTimeValid = !!partialRegistration.date && !!partialRegistration.time;
@@ -294,11 +295,12 @@ export class ProfilePage implements OnDestroy {
       return;
     }
 
+    const formatDateTime = this.formatDateTime(Number(partialRegistration.date), Number(partialRegistration.time));
+    partialRegistration.formattedDateTime = formatDateTime;
+
     await this.registrationService.storePartialRegistration(customer, partialRegistration)
       .pipe(take(1)).toPromise();
-
-    this.analyticsService.logEvent('save_datetime');
-  }
+    }
 
   public async confirmRegistration() {
 
@@ -316,6 +318,9 @@ export class ProfilePage implements OnDestroy {
       await this.missingDateTimeAlert();
       return;
     }
+
+    const formatDateTime = this.formatDateTime(Number(dateTime.date), Number(dateTime.time));
+    dateTime.formattedDateTime = formatDateTime;
 
     this._$loading.next(true);
 

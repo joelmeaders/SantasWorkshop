@@ -12,8 +12,7 @@ export class Registration extends BaseEntity {
   children?: IChildrenInfo[];    // Children info
   date: string;                 // Arrival Date: DD
   time: string;                 // Arrival Time
-  formattedDate: string;
-  formattedTime: string;
+  formattedDateTime: string;
 }
 
 // Need to keep this as lightweight as possible to prevent
@@ -27,6 +26,5 @@ export interface IChildrenInfo {
 export interface IRegistrationDateTime {
   date: string;
   time: string;
-  formattedDate: string;
-  formattedTime: string;
+  formattedDateTime: string;
 }

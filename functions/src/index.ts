@@ -168,10 +168,7 @@ export const sendRegistrationEmail2 = functions.firestore.document('{registratio
   const code = document['code'];
   const name = document['firstName'];
   const email = document['email'];
-  const date = document['formattedDate'];
-  const time = document['formattedTime'];
-
-  const specificDateTime = `December ${date}th at ${time}`;
+  const formattedDateTime = document['formattedDateTime'];
 
   let isNewCode = false;
 
@@ -192,7 +189,7 @@ export const sendRegistrationEmail2 = functions.firestore.document('{registratio
     templateId: 'd-5a8e2828b2c64284965bc4e244026abf',
     dynamic_template_data: {
       registrationCode: code,
-      dateTime: specificDateTime,
+      dateTime: formattedDateTime,
       displayName: name
     }
   };

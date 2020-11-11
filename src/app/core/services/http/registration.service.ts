@@ -27,8 +27,7 @@ export class RegistrationService extends BaseHttpService<Registration> {
       id: parent.id,
       date: dateTime.date,
       time: dateTime.time,
-      formattedDate: dateTime.formattedDate,
-      formattedTime: dateTime.formattedTime
+      formattedDateTime: dateTime.formattedDateTime
     };
 
     return this.save(registration, true);
@@ -47,8 +46,7 @@ export class RegistrationService extends BaseHttpService<Registration> {
       children: this.mapChildToChildInfo(childrenArray),
       date: dateTime.date,
       time: dateTime.time,
-      formattedDate: dateTime.formattedDate,
-      formattedTime: dateTime.formattedTime
+      formattedDateTime: dateTime.formattedDateTime
     };
 
     return this.save(registration, true);

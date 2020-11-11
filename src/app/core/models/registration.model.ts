@@ -5,11 +5,14 @@ import { BaseEntity } from '@app/core/models/base/base-entity';
 export class Registration extends BaseEntity {
   // id is parent id
   code?: string;                // Unique Code
-  name?: string;                 // Parent name
+  fullName?: string;                 // Parent name,
+  firstName?: string;
+  lastName?: string;
   email?: string;               // Email Address
   children?: IChildrenInfo[];    // Children info
   date: string;                 // Arrival Date: DD
   time: string;                 // Arrival Time
+  formattedDateTime: string;
 }
 
 // Need to keep this as lightweight as possible to prevent
@@ -23,4 +26,5 @@ export interface IChildrenInfo {
 export interface IRegistrationDateTime {
   date: string;
   time: string;
+  formattedDateTime: string;
 }

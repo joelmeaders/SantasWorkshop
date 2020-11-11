@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { CheckInService } from '@app/core/services/check-in.service';
 import { BarcodeFormat } from '@zxing/library';
+import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -8,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
   styleUrls: ['./scanner.page.scss'],
   // changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScannerPage implements OnInit {
+export class ScannerPage {
   availableDevices: MediaDeviceInfo[];
   deviceCurrent: MediaDeviceInfo;
   deviceSelected: string;
@@ -17,48 +19,60 @@ export class ScannerPage implements OnInit {
 
   hasDevices: boolean;
   hasPermission: boolean;
+  tryHarder: boolean;
 
-  qrResultString: string;
+  cameraEnabled = false;
 
   torchEnabled = false;
   torchAvailable$ = new BehaviorSubject<boolean>(false);
 
-  constructor() {
+  @ViewChild('scanner') scanner: ZXingScannerComponent;
+
+  constructor(
+    private readonly checkInService: CheckInService
+  ) {
     this.deviceCurrent = null;
   }
 
-  ngOnInit() {}
+//  async delayAndTryHarder() {
+//      await this.delay(1000);
+//      this.toggleTryHarder();
+//   }
 
-  clearResult(): void {
-    this.qrResultString = null;
-  }
+//   delay(ms: number) {
+//     return new Promise( resolve => setTimeout(resolve, ms) );
+//   }
+
+//   toggleTryHarder(): void {
+//     this.tryHarder = !this.tryHarder;
+//  }
 
   onCamerasFound(devices: MediaDeviceInfo[]): void {
     this.availableDevices = devices;
-
-    console.log('CamerasFound')
-
-    if (this.availableDevices && this.availableDevices.length > 0) {
-      this.hasDevices = true;
-      this.deviceCurrent = this.availableDevices[0];
-    }
+    this.hasDevices = Boolean(devices && devices.length);
   }
 
   onCodeResult(resultString: string) {
-    this.qrResultString = resultString;
+    console.log(resultString)
+    this.cameraEnabled = false;
+    this.checkInService.setQrCode(resultString);
   }
 
-  onDeviceSelectChange(selected: string) {
-    console.log('SelectChange', selected)
-    this.deviceSelected = selected || '';
-    const device = this.availableDevices.find((x) => x.deviceId === selected);
-    this.deviceCurrent = device;
+  onDeviceSelectChange(selected: any) {
+    const selectedStr = selected || '';
+    if (this.deviceSelected === selectedStr) { return; }
+    this.deviceSelected = selectedStr;
+    const device = this.availableDevices.find(x => x.deviceId === selected);
+    this.deviceCurrent = device || undefined;
+    this.cameraEnabled = true;
   }
 
   onDeviceChange(device: MediaDeviceInfo) {
-    console.log('DeviceChange', device)
-    this.deviceSelected = device?.deviceId;
-    this.deviceCurrent = device;
+    const selectedStr = device?.deviceId || '';
+    if (this.deviceSelected === selectedStr) { return; }
+    this.deviceSelected = selectedStr;
+    this.deviceCurrent = device || undefined;
+    this.cameraEnabled = true;
   }
 
   onHasPermission(has: boolean) {

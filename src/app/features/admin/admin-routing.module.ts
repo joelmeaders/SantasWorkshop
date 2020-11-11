@@ -10,13 +10,18 @@ const routes: Routes = [
         loadChildren: () =>
           import('./quick-registration/quick-registration.module')
             .then(m => m.QuickRegistrationPageModule)
+      },
+      {
+        path: 'scanner',
+        loadChildren: () => import('./scanner/scanner.module').then( m => m.ScannerPageModule)
+      },
+      {
+        path: 'check-in',
+        loadChildren: () => import('./check-in/check-in.module').then( m => m.CheckInPageModule)
       }
     ]
   },
-  {
-    path: 'scanner',
-    loadChildren: () => import('./scanner/scanner.module').then( m => m.ScannerPageModule)
-  }
+  
 ];
 
 @NgModule({

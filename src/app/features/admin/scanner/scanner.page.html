@@ -5,28 +5,37 @@
 </ion-header>
 
 <ion-content fullscreen="true" [hidden]="!hasDevices">
-  <ion-item>
-    <ion-label>Device</ion-label>
-    <ion-select [value]="deviceSelected">
-      <ion-select-option [value]="">No Device Selected</ion-select-option>
-      <ion-select-option *ngFor="let device of availableDevices" [value]="device.deviceId" (ionChange)="onDeviceSelectChange($event)">
-        {{ device.label }}
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
-  <span>
-    <zxing-scanner
-      [torch]="torchEnabled"
-      [device]="deviceCurrent"
-      (deviceChange)="onDeviceChange($event)"
-      (scanSuccess)="onCodeResult($event)"
-      [formats]="formatsEnabled"
-      (permissionResponse)="onHasPermission($event)"
-      (camerasFound)="onCamerasFound($event)"
-      (torchCompatible)="onTorchCompatible($event)"
-      [tryHarder]="true"
-    ></zxing-scanner>
-  </span>
+  <ion-grid fixed>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label>Device</ion-label>
+          <ion-select [value]="deviceSelected" (ionChange)="onDeviceSelectChange($event.detail.value)">
+            <ion-select-option [value]="">No Device Selected</ion-select-option>
+            <ion-select-option *ngFor="let device of availableDevices" [value]="device.deviceId">
+              {{ device.label }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <span>
+          <zxing-scanner
+            #scanner
+            [enable]="cameraEnabled"
+            [torch]="torchEnabled"
+            [device]="deviceCurrent"
+            (deviceChange)="onDeviceChange($event)"
+            (scanSuccess)="onCodeResult($event)"
+            [formats]="formatsEnabled"
+            (permissionResponse)="onHasPermission($event)"
+            (camerasFound)="onCamerasFound($event)"
+            (torchCompatible)="onTorchCompatible($event)"
+            [tryHarder]="tryHarder"
+            [autostart]="true"
+          ></zxing-scanner>
+        </span>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
 
 <ng-container *ngIf="hasPermission === undefined">

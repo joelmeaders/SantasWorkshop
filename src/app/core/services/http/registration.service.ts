@@ -6,7 +6,7 @@ import { AngularFireFunctions } from '@angular/fire/functions';
 import { UserProfile } from '@app/core/models/user-profile.model';
 import { ChildProfile } from '@app/core/models/child-profile.model';
 import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Helpers } from '@app/shared/helpers';
 
 @Injectable({
@@ -26,7 +26,9 @@ export class RegistrationService extends BaseHttpService<Registration> {
     const registration: Registration = {
       id: parent.id,
       date: dateTime.date,
-      time: dateTime.time
+      time: dateTime.time,
+      formattedDate: dateTime.formattedDate,
+      formattedTime: dateTime.formattedTime
     };
 
     return this.save(registration, true);
@@ -39,10 +41,14 @@ export class RegistrationService extends BaseHttpService<Registration> {
       id: parent.id,
       code: Helpers.generateId(8),
       email: parent.emailAddress,
-      name: `${parent.firstName} ${parent.lastName}`,
+      firstName: parent.firstName,
+      lastName: parent.lastName,
+      fullName: `${parent.firstName} ${parent.lastName}`,
       children: this.mapChildToChildInfo(childrenArray),
       date: dateTime.date,
-      time: dateTime.time
+      time: dateTime.time,
+      formattedDate: dateTime.formattedDate,
+      formattedTime: dateTime.formattedTime
     };
 
     return this.save(registration, true);

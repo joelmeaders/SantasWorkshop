@@ -2,9 +2,12 @@ import * as functions from 'firebase-functions';
 import * as firestore from '@google-cloud/firestore';
 import * as admin from 'firebase-admin';
 import * as qrcode from 'qrcode';
-import * as nodeMailer from 'nodemailer';
+import * as sendgrid from '@sendgrid/mail';
 
 admin.initializeApp();
+
+const MAIL_API_KEY = functions.config().sendgrid.key;
+sendgrid.setApiKey(MAIL_API_KEY);
 
 export const trackCollectionMeta = functions.firestore.document('{collection}/{docId}').onWrite(async (change, context) => {
 
@@ -108,7 +111,7 @@ export const generateQrCode = functions.firestore.document('{registrations}/{doc
   const oldDocument: any = change.before.data();
   const newDocument: any = change.after.data();
 
-  const oldCode = !!oldDocument ? oldDocument['code'] : undefined;
+  const oldCode = change.before.exists ? (oldDocument['code'] ?? undefined) : undefined;
 
   const storage = admin.storage().bucket('gs://santas-workshop-193b5.appspot.com');
 
@@ -135,11 +138,15 @@ export const generateQrCode = functions.firestore.document('{registrations}/{doc
 
   if (!!oldCode && oldCode !== newCode) {
     const oldFile = storage.file(`registrations/${oldCode}.png`);
-    await oldFile.exists().then(async (exists) => {
-      if (exists) {
-        await oldFile.delete();
-      }
-    });
+    try {
+      await oldFile.exists().then(async (exists) => {
+        if (exists) {
+          await oldFile.delete();
+        }
+      });
+    } catch {
+      // Do nothing
+    }
   }
 
   const file = storage.file(`registrations/${newCode}.png`);
@@ -147,107 +154,49 @@ export const generateQrCode = functions.firestore.document('{registrations}/{doc
   const codeContent = JSON.stringify(codeObject);
 
   await qrcode.toFileStream(fileStream, codeContent, { errorCorrectionLevel: 'medium', width: 600, margin: 3 });
-
 });
 
-export const sendRegistrationEmail = functions.firestore.document('{registrations}/{docId}').onWrite(async (change, context) => {
-  
-  const oldDocument: any = change.before.data();
-  const newDocument: any = change.after.data();
-  const oldCode = !!oldDocument ? oldDocument['code'] : undefined;
+export const sendRegistrationEmail2 = functions.firestore.document('{registrations}/{docId}').onWrite((change, context) => {
+
+  const oldDocument: any = change.before.exists ? change.before.data() : undefined;
+  const document: any = change.after.data();
 
   if (context.eventType === 'google.firestore.document.delete') {
     return;
   }
 
-  const code = newDocument['code'];
-  const name = newDocument['name'];
-  const email = newDocument['email'];
+  const code = document['code'];
+  const name = document['firstName'];
+  const email = document['email'];
+  const date = document['formattedDate'];
+  const time = document['formattedTime'];
 
-  const date = Number(newDocument['date']);
-  const time = Number(newDocument['time']);
+  const specificDateTime = `December ${date}th at ${time}`;
 
-  const formattedDate = `December ${date}th`;
-  let formattedTime = '';
+  let isNewCode = false;
 
-  if (time <= 11) {
-    formattedTime = `${time}am`;
+  if (!!oldDocument && !!oldDocument['code']) {
+    isNewCode = oldDocument['code'] !== code;
+  } else {
+    isNewCode = false;
   }
-  if (time === 12) {
-    formattedTime = `${time}pm`;
-  }
-  else if (time === 13) {
-    formattedTime = `1pm`;
-  }
-  else if (time === 14) {
-    formattedTime = `2pm`;
-  }
-
-  const specificDateTime = `${formattedDate} at ${formattedTime}`;
 
   // Don't proceed
-  if (!code || !email?.length || code === oldCode) {
+  if (!code || !email?.length || !isNewCode) {
     return;
   }
 
-  // Send Email
-  const transporter = nodeMailer.createTransport({
-    host: 'mail.denversantaclausshop.org',
-    port: 465,
-    secure: true,
-    auth: {
-      user: 'noreply@denversantaclausshop.org',
-      pass: `()*&*theLongwindingRoadyouredriving75`
-    },
-    pool: true,
-    tls: {
-      // do not fail on invalid certs
-      rejectUnauthorized: false
-    }
-  });
-
-  const mailOptions = {
-    from: `noreply@denversantaclausshop.org`,
+  const msg = {
     to: email,
-    subject: 'Santa Claus Shop Registration Confirmation',
-    html: `<h1>You're registered, ${name}!</h1>
-     <h2>Confirmation Code: ${code}</h2>
-     <img src="https://storage.googleapis.com/santas-workshop-193b5.appspot.com/registrations/${code}.png" alt="scannable qr code">
-     <p>
-      <h4>Please check our website prior to your date for any weather or covid updates</h4>
-      <h4>Don't forget to print this email, this is your ticket to the event. You may need to "Show trimmed content" for the QR code to show. Please also note that if you make updates to your registration a new email with a new QR code will trigger!</h4>
-      <h4>${specificDateTime}</h4>
-      <h4>2150 S Monaco Parkway</h4>
-      <h4>Denver, CO 80222</h4>
-      <h4>Enter the parking the lot off Monaco at light. All other entrances will be blocked off to DSCS traffic!</h4>
-      <h2> REMEMBER TO WEAR  YOUR MASK!</h2>
-     </p>`
+    from: `noreply@denversantaclausshop.org`,
+    templateId: 'd-5a8e2828b2c64284965bc4e244026abf',
+    dynamic_template_data: {
+      registrationCode: code,
+      dateTime: specificDateTime,
+      displayName: name
+    }
   };
 
-  await transporter.sendMail(mailOptions);
-
-});
-
-export const deleteAccount = functions.https.onCall(async (data, context) => {
-
-  const userId = context.auth?.uid;
-
-  // If there is a uid, delete account
-  if (!!userId) {
-    await admin.auth().deleteUser(userId);
-    return Promise.resolve();
-  }
-
-  // otherwise look look up account
-  const email = data?.email;
-
-  if (!!email) {
-    return;
-  }
-
-  const account = await admin.auth().getUserByEmail(email);
-  await admin.auth().deleteUser(account.uid);
-
-  return Promise.resolve();
+  return sendgrid.send(msg);
 
 });

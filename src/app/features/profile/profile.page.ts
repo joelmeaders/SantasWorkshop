@@ -328,9 +328,14 @@ export class ProfilePage implements OnDestroy {
       });
 
     this.analyticsService.logEvent('submit_registration');
-    this._$isModify.next(false);
 
-    await this.emailAlert();
+    if (this._$isModify.getValue()) {
+      await this.updatedRegistrationEmailAlert();
+    } else {
+      await this.newRegistrationEmailAlert();
+    }
+
+    this._$isModify.next(false);
 
     this.changeDetection.detectChanges();
     this.router.navigateByUrl('/profile#top');
@@ -372,8 +377,8 @@ export class ProfilePage implements OnDestroy {
 
   private async proceedWithCancellation() {
     const alert = await this.alertController.create({
-      header: 'This will delete your registration',
-      message: `Remember to register again once you're done making changes`,
+      header: 'This will change your registration',
+      message: `Press the blue "Update Registration" at the bottom once you're done to save your changes`,
       buttons: [
         {
           text: 'Go Back',
@@ -404,7 +409,22 @@ export class ProfilePage implements OnDestroy {
     return alert.onDidDismiss();
   }
 
-  private async emailAlert() {
+  private async updatedRegistrationEmailAlert() {
+    const alert = await this.alertController.create({
+      header: 'Registration Updated',
+      subHeader: 'You will get a new email, check your spam folder',
+      message: `If you updated your children your old code is no longer valid. Remember to print the new email.`,
+      buttons: [
+        { text: 'Ok'}
+      ]
+    });
+
+    await alert.present();
+
+    return alert.onDidDismiss();
+  }
+
+  private async newRegistrationEmailAlert() {
     const alert = await this.alertController.create({
       header: 'Email Confirmation Sent',
       subHeader: 'Check your spam folder',

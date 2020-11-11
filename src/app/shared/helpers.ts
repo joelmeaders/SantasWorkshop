@@ -5,14 +5,19 @@ export abstract class Helpers {
   public static qrCodeString(registration: Registration): string {
     const clone: Registration = JSON.parse(JSON.stringify(registration));
     delete clone.date;
+    delete clone.time;
     delete clone.email;
+    delete clone.formattedDate;
+    delete clone.formattedTime;
+    delete clone.firstName;
+    delete clone.lastName;
 
     const obj = {
       id: clone.id,
-      n: clone.name,
+      n: clone.fullName,
       d: clone.date,
       c: clone.children
-    }
+    };
 
     return JSON.stringify(obj);
   }

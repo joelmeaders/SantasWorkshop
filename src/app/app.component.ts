@@ -26,10 +26,10 @@ export class AppComponent {
       this.splashScreen.hide();
     });
 
-    this.translate.addLangs(['en', 'es']);
+    // this.translate.addLangs(['en', 'es']);
     this.translate.setDefaultLang('en');
 
-    const browserLang = this.translate.getBrowserLang();
-    this.translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
+    // const browserLang = this.translate.getBrowserLang();
+    // this.translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
   }
 }

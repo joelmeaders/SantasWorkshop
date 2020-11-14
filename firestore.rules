@@ -19,7 +19,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && get(/databases/$(database)/documents/userprofiles/$(request.auth.uid)).data.roles['administrator'] == true;
+      return isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/parameters/admin).data.adminusers;
     }
 
     match /collection-meta/{document=**} {
@@ -54,7 +54,7 @@ service cloud.firestore {
     }
 
     match /registrations/{documentId} {
-      allow read: if isUser(resource.data.id) || isAdmin() == true;
+      allow read: if isAdmin() || isUser(resource.data.id);
       allow create: if isUser(request.resource.data.id) || isAdmin();
       allow update: if (isUser(request.resource.data.id) && isUser(resource.data.id)) || isAdmin();
       allow delete: if isUser(resource.data.id) || isAdmin();

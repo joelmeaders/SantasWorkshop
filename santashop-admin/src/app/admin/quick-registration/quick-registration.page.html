@@ -1,0 +1,83 @@
+<!-- <ion-content fullscreen="true" color="xmasred">
+  <ion-title class="ion-padding-top"> Customer Registration </ion-title>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-card>
+          <ion-card-header>
+            <ion-text> Fill out the information below </ion-text>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <form [formGroup]="customerForm" novalidate>
+                <ion-item *appLet="'firstName' as controlName">
+                  <ion-label position="stacked" class="ion-padding-bottom">Parent's first name</ion-label>
+                  <ion-input placeholder="Enter here" [formControlName]="controlName" debounce="750" #firstNameField></ion-input>
+                </ion-item>
+              </form>
+
+              <ion-item *ngFor="let child of $children | async">
+                <ion-label>
+                  {{ child | json }}
+                </ion-label>
+              </ion-item>
+
+              <ion-item class="ion-margin-top">
+                <ion-label>
+                  Children Information
+                </ion-label>
+              </ion-item>
+              <ion-segment>
+                <ion-segment-button value="i">
+                  <ion-label>
+                    Infant
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="b">
+                  <ion-label>
+                    Boy
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="g">
+                  <ion-label>
+                    Girl
+                  </ion-label>
+                </ion-segment-button>
+              </ion-segment>
+              <ion-segment value="0">
+                <ion-segment-button>
+                  <ion-label>
+                    0-2
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="3">
+                  <ion-label>
+                    3-5
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="6">
+                  <ion-label>
+                    6-8
+                  </ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="9">
+                  <ion-label>
+                    9-11
+                  </ion-label>
+                </ion-segment-button>
+              </ion-segment>
+              <ion-item button tappable lines="none" color="primary" class="ion-margin-top" (click)="addChild()">
+                <ion-label>Add Child</ion-label>
+                <ion-icon slot="end" name="add-circle"></ion-icon>
+              </ion-item>
+              <ion-item button tappable lines="none" color="success" class="ion-margin-top">
+                <ion-label>Done, Save Registration</ion-label>
+                <ion-icon slot="end" name="save"></ion-icon>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content> -->

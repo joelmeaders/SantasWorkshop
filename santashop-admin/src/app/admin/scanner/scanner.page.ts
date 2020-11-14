@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
-import { CheckInService } from '@app/core/services/check-in.service';
-import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.component';
+// import { CheckInService } from '@app/core/services/check-in.service';
+// import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.component';
 import { ModalController } from '@ionic/angular';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -76,7 +76,7 @@ export class ScannerPage implements AfterViewInit, OnDestroy {
   @ViewChild('scanner') scanner: ZXingScannerComponent;
 
   constructor(
-    private readonly checkInService: CheckInService,
+    // private readonly checkInService: CheckInService,
     private readonly modalController: ModalController
   ) { }
 
@@ -97,7 +97,7 @@ export class ScannerPage implements AfterViewInit, OnDestroy {
 
   public async onCodeResult(resultString: string) {
     this._$cameraEnabled.next(false);
-    this.checkInService.setQrCode(resultString);
+    // this.checkInService.setQrCode(resultString);
     await this.openModal();
   }
 
@@ -147,11 +147,11 @@ export class ScannerPage implements AfterViewInit, OnDestroy {
   }
 
   private async openModal() {
-    const modal = await this.modalController.create({
-      component: QrModalComponent,
-      cssClass: 'modal-md',
-    });
+  //   const modal = await this.modalController.create({
+  //     component: QrModalComponent,
+  //     cssClass: 'modal-md',
+  //   });
 
-    await modal.present();
+  //   await modal.present();
   }
 }

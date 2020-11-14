@@ -7,7 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { QuickRegistrationPageRoutingModule } from './quick-registration-routing.module';
 
 import { QuickRegistrationPage } from './quick-registration.page';
-import { CoreDirectivesModule } from '@app/core/directives/core-directives.module';
+// import { CoreDirectivesModule } from '@app/core/directives/core-directives.module';
 
 @NgModule({
   imports: [
@@ -15,7 +15,7 @@ import { CoreDirectivesModule } from '@app/core/directives/core-directives.modul
     ReactiveFormsModule,
     IonicModule,
     QuickRegistrationPageRoutingModule,
-    CoreDirectivesModule
+    // CoreDirectivesModule
   ],
   declarations: [QuickRegistrationPage]
 })

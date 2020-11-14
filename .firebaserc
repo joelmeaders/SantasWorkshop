@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "santas-workshop-193b5"
+  },
+  "targets": {
+    "santas-workshop-193b5": {
+      "hosting": {
+        "app": [
+          "santashop-app"
+        ],
+        "admin": [
+          "santashop-admin"
+        ]
+      }
+    }
   }
 }

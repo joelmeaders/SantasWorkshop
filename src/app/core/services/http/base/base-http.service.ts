@@ -1,22 +1,8 @@
-import { AngularFirestoreCollection, AngularFirestore, DocumentReference, CollectionReference, Query, DocumentData } from '@angular/fire/firestore';
-import { AngularFireFunctions } from '@angular/fire/functions';
+import { AngularFirestoreCollection, AngularFirestore, DocumentReference, CollectionReference, Query } from '@angular/fire/firestore';
 import { collectionData, docData, collection } from 'rxfire/firestore';
 import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
-import { mapTo, take, catchError, mergeMap, publishReplay, refCount, map, tap, takeUntil } from 'rxjs/operators';
+import { mapTo, take, catchError, publishReplay, refCount, map, tap, takeUntil } from 'rxjs/operators';
 import { IBaseEntity } from '@app/core/models/base/base-entity';
-import { CounterService } from './counter.service';
-import { firestore } from 'firebase-admin';
-
-export interface IBaseHttpService<T> {
-  collectionRef: CollectionReference;
-  save(entity: T, mergeIfUpdate: boolean): Observable<T>;
-  readOne(pathOrId: string): Observable<T>;
-  readMany(query?: Query): Observable<T[]>;
-  readMeta(field?: string): Observable<Date>;
-  delete(id: string): Observable<boolean>;
-  generateId(): string;
-  getCollectionPath(): string;
-}
 
 export enum QueryDirection {
   Initial = 0,
@@ -24,27 +10,21 @@ export enum QueryDirection {
   Forward = 1
 }
 
-export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHttpService<T> {
+export abstract class BaseHttpService<T extends IBaseEntity> {
 
   constructor(
     private readonly firestoreDb: AngularFirestore,
-    private readonly fireFunctions: AngularFireFunctions,
     public readonly collectionPath: string,
-    private readonly counterShards = 0
   ) {
     this.afCollection = firestoreDb.collection(collectionPath);
     this.collectionRef = this.afCollection.ref;
-
-    if (counterShards) {
-      this.counterService = new CounterService(this.firestoreDb, this.fireFunctions, this.collectionPath, counterShards);
-    }
   }
+
   private readonly _$destroy = new Subject<void>();
   public readonly $destroy = this._$destroy.asObservable().pipe(publishReplay(1), refCount());
 
   private readonly afCollection: AngularFirestoreCollection<T>;
   public readonly collectionRef: CollectionReference;
-  protected readonly counterService: CounterService;
 
   private readonly _$queryLastDoc = new BehaviorSubject<firebase.default.firestore.DocumentSnapshot>(undefined);
   private readonly _$queryFirstDoc = new BehaviorSubject<firebase.default.firestore.DocumentSnapshot>(undefined);
@@ -86,11 +66,7 @@ export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHtt
 
     return of(action).pipe(
       take(1),
-      mergeMap(() => {
-        if (this.counterShards > 0) return this.counterService.updateCounter(1);
-        return of();
-      }),
-      mapTo(entity),
+      mapTo(entity)
     );
   }
 
@@ -112,24 +88,6 @@ export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHtt
       query = this.afCollection.ref.limit(50);
     }
     return collectionData<T>(query, 'id');
-  }
-
-  public readMeta(field = 'collectionLastUpdated'): Observable<Date> {
-    const documentReference = this.firestoreDb.doc(`collection-meta/${this.collectionPath}`).ref;
-
-    return docData(documentReference).pipe(
-      take(1),
-      map(response => {
-        if (!response) {
-          return undefined;
-        }
-
-        if (field === 'collectionLastUpdated') {
-          return (response[field] as firestore.Timestamp).toDate();
-          // return new Date(response[field]);
-        }
-      })
-    );
   }
 
   public query(query: Query, action: QueryDirection, pageSize = 10): Observable<T[]> {
@@ -170,27 +128,9 @@ export abstract class BaseHttpService<T extends IBaseEntity> implements IBaseHtt
   public delete(id: string): Observable<boolean> {
     return of(this.afCollection.doc<T>(id).delete()).pipe(
       take(1),
-      mergeMap(() => {
-        if (this.counterShards > 0) return this.counterService.updateCounter(-1);
-        return of(false);
-      }),
+      mapTo(true),
       catchError(() => of(false))
     );
-  }
-
-  public getCount(): Observable<number> {
-    if (this.counterShards <= 0) {
-      throw new Error(`${this.collectionPath}: No counter shards in this collection`);
-    }
-
-    return this.counterService.getCount();
-  }
-
-  public updateCount(byValue: number): Observable<boolean> {
-    if (this.counterShards <= 0) {
-      throw new Error(`${this.collectionPath}: No counter shards in this collection`);
-    }
-    return this.counterService.updateCounter(byValue);
   }
 
   public generateId = () => this.firestoreDb.createId();

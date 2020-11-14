@@ -5,7 +5,6 @@ export class UserProfile extends BaseEntity {
   lastName: string;
   emailAddress: string;
   zipCode: string;
-  registeredOn: Date;
   acceptedTermsOfService: Date;
   acceptedPrivacyPolicy: Date;
   analyticsDisabled?: number;

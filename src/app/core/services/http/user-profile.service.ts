@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireFunctions } from '@angular/fire/functions';
 import { UserProfile } from '@app/core/models/user-profile.model';
 import { BaseHttpService } from '@app/core/services/http/base';
 
@@ -11,8 +10,7 @@ export class UserProfileService extends BaseHttpService<UserProfile> {
 
   constructor(
     private readonly db: AngularFirestore,
-    private readonly functions: AngularFireFunctions
   ) {
-    super(db, functions, 'customers', 10);
+    super(db, 'customers');
   }
 }

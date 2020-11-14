@@ -1,82 +1,141 @@
-import { Component, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { CheckInService } from '@app/core/services/check-in.service';
-import { BarcodeFormat } from '@zxing/library';
+import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.component';
+import { ModalController } from '@ionic/angular';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { distinctUntilChanged, map, publishReplay, refCount, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-scanner',
   templateUrl: './scanner.page.html',
   styleUrls: ['./scanner.page.scss'],
-  // changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScannerPage {
-  availableDevices: MediaDeviceInfo[];
-  deviceCurrent: MediaDeviceInfo;
-  deviceSelected: string;
+export class ScannerPage implements AfterViewInit, OnDestroy {
+  private readonly $destroy = new Subject<void>();
 
-  formatsEnabled: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
+  // public readonly formatsEnabled: BarcodeFormat[] = [BarcodeFormat.QR_CODE];
+  public readonly formatsEnabled: any = 11;
 
-  hasDevices: boolean;
-  hasPermission: boolean;
+  private readonly _$hasPermissions = new BehaviorSubject<boolean>(false);
+  public readonly $hasPermissions = this._$hasPermissions.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(1),
+    refCount()
+  );
+
+  private readonly _$availableDevices = new BehaviorSubject<MediaDeviceInfo[]>(undefined);
+  public readonly $availableDevices = this._$availableDevices.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(1),
+    refCount()
+  );
+
+  // private readonly _$selectedDevice = new BehaviorSubject<string>('');
+  // public readonly $selectedDevice = this._$selectedDevice.pipe(
+  //   takeUntil(this.$destroy),
+  //   publishReplay(1),
+  //   refCount()
+  // );
+
+  private readonly _$currentDevice = new BehaviorSubject<MediaDeviceInfo>(undefined);
+  public readonly $currentDevice = this._$currentDevice.pipe(
+    takeUntil(this.$destroy),
+    distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $deviceToUse = this.$currentDevice.pipe(
+    takeUntil(this.$destroy),
+    map(current => current ?? undefined),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $deviceId = this._$currentDevice.pipe(
+    takeUntil(this.$destroy),
+    map(current => !!current ? current.deviceId : ''),
+    publishReplay(1),
+    refCount()
+  )
+
   tryHarder: boolean;
 
-  cameraEnabled = false;
+  private readonly _$cameraEnabled = new BehaviorSubject<boolean>(true);
+  public readonly $cameraEnabled = this._$cameraEnabled.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(1),
+    refCount()
+  );
 
   torchEnabled = false;
-  torchAvailable$ = new BehaviorSubject<boolean>(false);
+  torchAvailable$ = new BehaviorSubject<boolean>(undefined);
 
   @ViewChild('scanner') scanner: ZXingScannerComponent;
 
   constructor(
-    private readonly checkInService: CheckInService
-  ) {
-    this.deviceCurrent = null;
+    private readonly checkInService: CheckInService,
+    private readonly modalController: ModalController
+  ) { }
+
+  public async ngAfterViewInit() {
+    // var permission = await this.scanner.askForPermission();
+    // if (permission) {
+    //   this.scanner.updateVideoInputDevices();
+    // }
   }
 
-//  async delayAndTryHarder() {
-//      await this.delay(1000);
-//      this.toggleTryHarder();
-//   }
-
-//   delay(ms: number) {
-//     return new Promise( resolve => setTimeout(resolve, ms) );
-//   }
-
-//   toggleTryHarder(): void {
-//     this.tryHarder = !this.tryHarder;
-//  }
-
-  onCamerasFound(devices: MediaDeviceInfo[]): void {
-    this.availableDevices = devices;
-    this.hasDevices = Boolean(devices && devices.length);
+  public async ngOnDestroy() {
+    this.$destroy.next();
   }
 
-  onCodeResult(resultString: string) {
-    console.log(resultString)
-    this.cameraEnabled = false;
+  public onCamerasFound(devices: MediaDeviceInfo[]): void {
+    this._$availableDevices.next(devices);
+  }
+
+  public async onCodeResult(resultString: string) {
+    this._$cameraEnabled.next(false);
     this.checkInService.setQrCode(resultString);
+    await this.openModal();
   }
 
-  onDeviceSelectChange(selected: any) {
-    const selectedStr = selected || '';
-    if (this.deviceSelected === selectedStr) { return; }
-    this.deviceSelected = selectedStr;
-    const device = this.availableDevices.find(x => x.deviceId === selected);
-    this.deviceCurrent = device || undefined;
-    this.cameraEnabled = true;
+  public onDeviceSelectChange(deviceId: string) {
+
+    if (!deviceId) {
+      return;
+    }
+
+    const currentDevice = this._$currentDevice.getValue();
+
+    if (currentDevice?.deviceId === deviceId) {
+      return;
+    }
+
+    console.log('setting device', deviceId)
+
+    const devices = this._$availableDevices.getValue();
+    const device = devices.find(d => d.deviceId === deviceId);
+
+    console.log(device);
+
+    this._$currentDevice.next(device);
+    // this._$cameraEnabled.next(true);
   }
 
   onDeviceChange(device: MediaDeviceInfo) {
-    const selectedStr = device?.deviceId || '';
-    if (this.deviceSelected === selectedStr) { return; }
-    this.deviceSelected = selectedStr;
-    this.deviceCurrent = device || undefined;
-    this.cameraEnabled = true;
+    this._$currentDevice.next(device);
+    // this._$cameraEnabled.next(true);
+    // console.log('onDeviceChange');
+    // const selectedStr = device?.deviceId || '';
+    // if (this.selectedDevice === selectedStr) { return; }
+    // this.selectedDevice = selectedStr;
+    // this.deviceCurrent = device || undefined;
   }
 
-  onHasPermission(has: boolean) {
-    this.hasPermission = has;
+  onHasPermission(value: boolean) {
+    this._$hasPermissions.next(value);
   }
 
   onTorchCompatible(isCompatible: boolean): void {
@@ -85,5 +144,14 @@ export class ScannerPage {
 
   toggleTorch(): void {
     this.torchEnabled = !this.torchEnabled;
+  }
+
+  private async openModal() {
+    const modal = await this.modalController.create({
+      component: QrModalComponent,
+      cssClass: 'modal-md',
+    });
+
+    await modal.present();
   }
 }

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { IChildrenInfo, IRegistrationDateTime, Registration } from '@app/core/models/registration.model';
 import { BaseHttpService } from '@app/core/services/http/base';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireFunctions } from '@angular/fire/functions';
 import { UserProfile } from '@app/core/models/user-profile.model';
 import { ChildProfile } from '@app/core/models/child-profile.model';
 import { Observable } from 'rxjs';
@@ -16,9 +15,8 @@ export class RegistrationService extends BaseHttpService<Registration> {
 
   constructor(
     private readonly db: AngularFirestore,
-    private readonly functions: AngularFireFunctions
   ) {
-    super(db, functions, 'registrations', 10);
+    super(db, 'registrations');
   }
 
   public storePartialRegistration(parent: UserProfile, dateTime: IRegistrationDateTime): Observable<Registration> {
@@ -46,7 +44,8 @@ export class RegistrationService extends BaseHttpService<Registration> {
       children: this.mapChildToChildInfo(childrenArray),
       date: dateTime.date,
       time: dateTime.time,
-      formattedDateTime: dateTime.formattedDateTime
+      formattedDateTime: dateTime.formattedDateTime,
+      dateTimeRegistered: new Date()
     };
 
     return this.save(registration, true);

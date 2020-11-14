@@ -83,13 +83,13 @@ export class QuickRegistrationPage implements OnDestroy {
     const current = this._$children.getValue();
     const newChild = this.customerForm.value as ChildProfile;
 
-    const childInfo: IChildrenInfo = {
-      n: null,
-      t: newChild.toyType,
-      a: newChild.ageGroup
-    };
+    // const childInfo: IChildrenInfo = {
+    //   n: null,
+    //   t: newChild.toyType,
+    //   a: newChild.ageGroup
+    // };
 
-    current.push(childInfo);
+    // current.push(childInfo);
 
     this._$children.next(current);
   }

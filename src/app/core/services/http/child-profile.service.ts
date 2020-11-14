@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireFunctions } from '@angular/fire/functions';
 import { ChildProfile } from '@app/core/models/child-profile.model';
 import { BaseHttpService } from '@app/core/services/http/base';
 import { publishReplay, refCount } from 'rxjs/operators';
@@ -12,9 +11,8 @@ export class ChildProfileService extends BaseHttpService<ChildProfile> {
   
   constructor(
     private readonly db: AngularFirestore,
-    private readonly functions: AngularFireFunctions
   ) {
-    super(db, functions, 'children', 10);
+    super(db, 'children');
   }
 
   private readonly getChildrenByParentQuery = (parentId: string) => 

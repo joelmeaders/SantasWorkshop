@@ -50,7 +50,6 @@ export class UserRegistrationService {
       firstName: registration.firstName,
       lastName: registration.lastName,
       zipCode: registration.zipCode,
-      registeredOn: null,
       acceptedPrivacyPolicy: new Date(),
       acceptedTermsOfService: new Date(),
     };

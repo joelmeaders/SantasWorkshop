@@ -13,6 +13,7 @@ export class Registration extends BaseEntity {
   date: string;                 // Arrival Date: DD
   time: string;                 // Arrival Time
   formattedDateTime: string;
+  dateTimeRegistered?: Date;
 }
 
 // Need to keep this as lightweight as possible to prevent

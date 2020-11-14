@@ -3,8 +3,9 @@ import { Query } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Registration } from '@app/core/models/registration.model';
 import { FireCRUDStateless } from '@app/core/services/http/base';
+import { RegistrationHelpers } from '@app/shared/registration-helpers';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map, pluck, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { filter, map, pluck, publishReplay, refCount, switchMap, take, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -40,8 +41,10 @@ export class CheckInService {
   public readonly $registration = this.$registrationCode.pipe(
     filter(id => !!id),
     switchMap(id => this.lookupRegistration(id)),
-    tap(console.log)
-  ).subscribe();
+    map(registration => this.hydrateRegistration(registration)),
+    publishReplay(1),
+    refCount()
+  );
 
   constructor(
     private readonly httpService: FireCRUDStateless,
@@ -61,6 +64,15 @@ export class CheckInService {
 
   public lookupRegistration(id: string) {
     const query: Query = this.httpService.collectionRef(this.REGISTRATION_COLLECTION).where('code', '==', id);
-    return this.httpService.readMany(this.REGISTRATION_COLLECTION, query, 'id');
+    return this.httpService.readMany<Registration>(this.REGISTRATION_COLLECTION, query, 'id')
+      .pipe(take(1),map(response => response[0] ?? undefined));
+  }
+
+  public hydrateRegistration(registration: Registration) {
+    registration.children.forEach(child => {
+      child.a = RegistrationHelpers.expandA(child.a);
+      child.t = RegistrationHelpers.expandT(child.t);
+    });
+    return registration;
   }
 }

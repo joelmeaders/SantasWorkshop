@@ -9,6 +9,7 @@ import { PublicMenuComponent } from '@app/shared/components/public-menu/public-m
 import { PrivacyPolicyModalComponent } from '@app/shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '@app/shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { TranslateModule } from '@ngx-translate/core';
     ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent
+    TermsOfServiceModalComponent,
+    QrModalComponent
   ],
   imports: [
     CommonModule,
@@ -31,14 +33,16 @@ import { TranslateModule } from '@ngx-translate/core';
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
-    TranslateModule
+    TranslateModule,
+    QrModalComponent
   ],
   entryComponents: [
     CreateChildModalComponent,
     ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent
+    TermsOfServiceModalComponent,
+    QrModalComponent
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

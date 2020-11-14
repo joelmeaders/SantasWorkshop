@@ -9,7 +9,7 @@ import { PublicMenuComponent } from '@app/shared/components/public-menu/public-m
 import { PrivacyPolicyModalComponent } from '@app/shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '@app/shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { TranslateModule } from '@ngx-translate/core';
-import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.component';
+// import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +18,7 @@ import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.compo
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
-    QrModalComponent
+    // QrModalComponent
   ],
   imports: [
     CommonModule,
@@ -34,7 +34,7 @@ import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.compo
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
     TranslateModule,
-    QrModalComponent
+    // QrModalComponent
   ],
   entryComponents: [
     CreateChildModalComponent,
@@ -42,7 +42,7 @@ import { QrModalComponent } from '@app/shared/components/qr-modal/qr-modal.compo
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
-    QrModalComponent
+    // QrModalComponent
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

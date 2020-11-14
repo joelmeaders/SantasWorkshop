@@ -2,9 +2,10 @@
 # https://github.com/firebase/firebase-tools
 
 name: Deploy to Firebase Hosting on PR
-'on': pull_request
-  paths:
-    - 'santashop-app/**'
+on: 
+  pull_request:
+    paths:
+      - 'santashop-app/**'
 
 env: 
   FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}

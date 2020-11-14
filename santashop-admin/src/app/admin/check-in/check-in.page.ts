@@ -1,18 +1,15 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CheckInService } from '@app/core/services/check-in.service';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-check-in',
   templateUrl: './check-in.page.html',
   styleUrls: ['./check-in.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CheckInPage {
+export class CheckInPage implements OnInit {
 
-  constructor(
-    private readonly checkInService: CheckInService
-  ) { }
+  constructor() { }
 
-  
+  ngOnInit() {
+  }
 
 }

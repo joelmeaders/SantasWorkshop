@@ -6,9 +6,11 @@
     "santas-workshop-193b5": {
       "hosting": {
         "app": [
+          "santas-workshop-193b5",
           "santashop-app"
         ],
         "admin": [
+          "santas-workshop-admin",
           "santashop-admin"
         ]
       }

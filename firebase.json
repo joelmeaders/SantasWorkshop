@@ -2,7 +2,7 @@
   "hosting": [
     {
       "target": "app",
-      "public": "santashop-app/www",
+      "public": "dist/santashop-app",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -17,7 +17,7 @@
     },
     {
       "target": "admin",
-      "public": "santashop-admin/www",
+      "public": "dist/santashop-admin",
       "ignore": [
         "firebase.json",
         "**/.*",

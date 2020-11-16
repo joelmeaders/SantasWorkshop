@@ -57,7 +57,7 @@
               }
             ],
             "styles": [
-              "santashop-admin/src/styles.scss",
+              "santashop-admin/src/global.scss",
               {
                 "input": "node_modules/@ionic/angular/css/normalize.css"
               },
@@ -86,7 +86,7 @@
                 "input": "node_modules/@ionic/angular/css/flex-utils.css"
               },
               {
-                "input": "santashop-admin/src/theme/variables.css"
+                "input": "santashop-admin/src/theme/variables.scss"
               }
             ],
             "scripts": []

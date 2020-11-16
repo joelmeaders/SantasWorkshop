@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
-import { SharedComponentsModule } from 'app/shared/components/shared-components.module';
-import { CoreDirectivesModule } from 'santashop-core-lib';
+import { SharedComponentsModule } from 'santashop-admin/src/app/shared/components/shared-components.module';
 import { ScannerPageRoutingModule } from './scanner-routing.module';
 import { ScannerPage } from './scanner.page';
 
@@ -13,7 +12,6 @@ import { ScannerPage } from './scanner.page';
     CommonModule,
     ScannerPageRoutingModule,
     ZXingScannerModule,
-    CoreDirectivesModule,
     SharedComponentsModule
   ],
   declarations: [ScannerPage],

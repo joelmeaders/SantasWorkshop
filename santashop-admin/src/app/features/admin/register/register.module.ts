@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
-import { SharedComponentsModule } from 'app/shared/components/shared-components.module';
+import { SharedComponentsModule } from 'santashop-admin/src/app/shared/components/shared-components.module';
 import { RegisterPageRoutingModule } from './register-routing.module';
 import { RegisterPage } from './register.page';
 

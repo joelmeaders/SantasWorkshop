@@ -1,11 +1,11 @@
-import { BaseEntity } from '@app/core/models/base/base-entity';
+import { BaseEntity } from './base-entity';
 
 export class ICheckIn extends BaseEntity {
   customerId?: string;
   registrationCode?: string;
   checkInDateTime: Date = new Date();
-  children: ICheckInChildren[];
-  stats: ICheckInStats;
+  children: ICheckInChildren[] | undefined;
+  stats: ICheckInStats | undefined;
 }
 
 export interface ICheckInChildren {
@@ -23,4 +23,6 @@ export interface ICheckInStats {
   toyTypeInfant: number;
   toyTypeBoy: number;
   toyTypeGirl: number;
+  zipCode: number;
+  modifiedAtCheckIn: boolean;
 }

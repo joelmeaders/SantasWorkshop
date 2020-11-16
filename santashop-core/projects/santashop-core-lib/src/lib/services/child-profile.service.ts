@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { ChildProfile } from '@app/core/models/child-profile.model';
-import { BaseHttpService } from '@app/core/services/http/base';
+import { ChildProfile } from '../models/child-profile.model';
+import { BaseHttpService } from './base-http.service';
 import { publishReplay, refCount } from 'rxjs/operators';
 
 @Injectable({

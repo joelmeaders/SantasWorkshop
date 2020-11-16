@@ -1,6 +1,6 @@
 import { FormGroup, Validators } from '@angular/forms';
 import { CommonForms } from '@app/core/helpers/common-forms';
-import { ChildProfile } from '@app/core/models/child-profile.model';
+import { ChildProfile } from 'santashop-core-lib/lib/models';
 
 export abstract class ChildProfileForm {
 

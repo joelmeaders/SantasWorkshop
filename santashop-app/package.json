@@ -33,6 +33,7 @@
     "firebase-functions": "^3.11.0",
     "rxfire": "^4.0.0",
     "rxjs": "~6.6.3",
+    "santashop-core-lib": "file:../santashop-core/packages/santashop-core-lib-0.0.6.tgz",
     "tslib": "^2.0.3",
     "zone.js": "~0.11.3"
   },

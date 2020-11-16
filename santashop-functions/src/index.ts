@@ -9,101 +9,26 @@ admin.initializeApp();
 const MAIL_API_KEY = functions.config().sendgrid.key;
 sendgrid.setApiKey(MAIL_API_KEY);
 
-export const trackCollectionMeta = functions.firestore.document('{collection}/{docId}').onWrite(async (change, context) => {
-
-  if (change.before.exists && change.after.exists) {
-    return;
-  }
+export const documentCounter = functions.firestore.document('{collection}/{docId}').onWrite((change, context) => {
 
   const collection = context.params.collection;
+  const increment = admin.firestore.FieldValue.increment(1);
+  const decrement = admin.firestore.FieldValue.increment(-1);
+  const shardIndex = Math.floor(Math.random() * 10); 
+  let action: firestore.FieldValue;
 
-  if (collection === 'counters' || collection === 'errors' || collection === 'collection-meta') {
+  if (!change.before.exists) {
+    action = increment
+  }
+  else if (!change.after.exists) {
+    action = decrement;
+  } else {
+    // This is an update. Don't continue
     return;
   }
 
-  // if (!change.before.exists) {
-  //   // Created
-  // }
-
-  // if (!change.after.exists) {
-  //   // Deleted
-  // }
-
-  const metaDoc = admin.firestore().doc(`collection-meta/${collection}`);
-
-  const data = {
-    collectionLastUpdated: firestore.FieldValue.serverTimestamp()
-  };
-
-  await metaDoc.set(data, { merge: true });
-
-});
-
-export const modCounter = functions.https.onCall(async (data, context) => {
-
-  let shardCount = data.shardCount;
-  let collection = data.collection;
-  let modCountBy = Number(data.adjustBy);
-
-  const errorDoc = admin.firestore().doc(`errors/counters/${collection}/${new Date().toISOString()}`);
-
-  if (!(shardCount && collection && modCounter) || isNaN(modCountBy) || shardCount <= 0) {
-    shardCount = shardCount || null;
-    collection = collection || null;
-    modCountBy = modCountBy || NaN;
-    await errorDoc.set(
-      {
-        action: 'changeCounter',
-        error: 'shardCount, collection, ',
-        timestamp: new Date().toISOString(),
-        info: { shardCount, collection, modCounter }
-      }
-    ).then(() => {
-      throw new functions.https.HttpsError(
-        'failed-precondition',
-        'shardCount, collection or modCounter error',
-        { shardCount, collection, modCounter }
-      );
-    });
-  }
-
-  try {
-    const split = Math.floor(modCountBy / shardCount);
-    const remainder = modCountBy - (split * shardCount);
-    const modValuesArray = new Array<number>();
-
-    for (let index = 0; index < shardCount; index++) {
-      modValuesArray[index] = split;
-    }
-
-    if (remainder) {
-      modValuesArray[0] += remainder;
-    }
-
-    const batch = admin.firestore().batch();
-
-    modValuesArray.forEach((value, index) => {
-      const doc = admin.firestore().doc(`counters/${collection}/shards/${index}`);
-      batch.set(doc, { count: firestore.FieldValue.increment(value) }, { merge: true });
-    });
-
-    await batch.commit().then(res => {
-      return { status: res };
-    }).catch(e => {
-      throw new functions.https.HttpsError('aborted', JSON.stringify(e), { shardCount, collection, modCountBy });
-    });
-
-  } catch (e) {
-
-    await errorDoc.set({ 
-      action: 'modCounter',
-      error: JSON.stringify(e), timestamp: new Date().toISOString(),
-      info: { shardCount, collection, modCountBy } 
-    }, { merge: true }).then(() => {
-      throw new functions.https.HttpsError('unknown', e, { shardCount, collection, modCountBy });
-    });
-  }
-
+  const doc = admin.firestore().doc(`counters/${collection}/shards/${shardIndex}`);
+  return doc.set({ count: action }, { merge: true });
 });
 
 export const generateQrCode = functions.firestore.document('{registrations}/{docId}').onWrite(async (change, context) => {

@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { IError } from '@app/core/models/base/i-errors';
-import { UserProfile } from '@app/core/models/user-profile.model';
-import { UserProfileService } from '@app/core/services/http/user-profile.service';
 import { take } from 'rxjs/operators';
+import { IError, UserProfile, UserProfileService } from 'santashop-core-lib';
 
 export interface IRegistration {
   firstName: string;

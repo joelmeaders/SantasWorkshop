@@ -1,14 +1,14 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, of, Observable } from 'rxjs';
-import { takeUntil, publishReplay, refCount, defaultIfEmpty, mergeMap, distinctUntilChanged, mapTo, tap, map } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, mergeMap, distinctUntilChanged, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { UserProfileService } from './http/user-profile.service';
 
 import 'firebase/auth';
 import { FirebaseApp } from '@angular/fire';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { user } from 'rxfire/auth';
-import { UserProfile } from '@app/core/models/user-profile.model';
+import { UserProfile } from '../models/user-profile.model';
+import { UserProfileService } from './user-profile.service';
 
 
 @Injectable({
@@ -49,24 +49,12 @@ export class AuthService implements OnDestroy {
     refCount()
   );
 
-  public readonly $isAdmin = this.$userProfile.pipe(
-    takeUntil(this.$destroy),
-    // TODO
-    // map(userProfile => userProfile.roles && userProfile.roles.administrator),
-    mapTo(false),
-    defaultIfEmpty(false),
-    publishReplay(1),
-    refCount()
-  );
-
   public resetPassword(email: string) {
     return this.angularFireAuth.sendPasswordResetEmail(email);
   }
 
   public login(email: string, password: string) {
     return this.angularFireAuth.signInWithEmailAndPassword(email, password);
-    // TODO: analytics
-    //  () => firebase.analytics().logEvent('login', { type: 'email'})
   }
 
   public async logout() {

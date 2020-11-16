@@ -25,13 +25,14 @@ export class FireCRUDStateless {
     return collectionData<T>(query, idProperty);
   }
 
-  public save<T>(collectionPath: string, document: T, idProperty?: Extract<keyof T, string>, mergeIfUpdate = false): Observable<DocumentReference> {
-    const id: string = document[idProperty.toString()];
+  // public save<T>(collectionPath: string, document: T, idProperty?: Extract<keyof T, string>, mergeIfUpdate = false): Observable<DocumentReference> {
 
-    return !!id
-      ? this.add<T>(collectionPath, document)
-      : this.update<T>(collectionPath, document, id, mergeIfUpdate);
-  }
+  //   const id: string = this.getProperty(document, idProperty);
+
+  //   return !!id
+  //     ? this.add<T>(collectionPath, document)
+  //     : this.update<T>(collectionPath, document, id, mergeIfUpdate);
+  // }
 
   public add<T>(collectionPath: string, document: T): Observable<DocumentReference> {
     const collection = this.firestoreDb.collection<T>(collectionPath);

@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
-import { ChildProfile } from '@app/core/models/child-profile.model';
 import { ChildProfileForm } from '@app/shared/forms/child-profile';
 import { AlertController, ModalController } from '@ionic/angular';
-import { BehaviorSubject, Subject } from 'rxjs';
 import { differenceInDays } from 'date-fns';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { ChildProfile } from 'santashop-core-lib';
 @Component({
   selector: 'app-create-child-modal',
   templateUrl: './create-child-modal.component.html',

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { IChildrenInfo, IRegistrationDateTime, Registration } from '@app/core/models/registration.model';
-import { BaseHttpService } from '@app/core/services/http/base';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { UserProfile } from '@app/core/models/user-profile.model';
-import { ChildProfile } from '@app/core/models/child-profile.model';
+import { RegistrationHelpers } from '../helpers/registration-helpers';
+import { ChildProfile } from '../models/child-profile.model';
+import { Registration, IRegistrationDateTime, IChildrenInfo } from '../models/registration.model';
+import { UserProfile } from '../models/user-profile.model';
+import { BaseHttpService } from '../services/base-http.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Helpers } from '@app/shared/helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -29,14 +29,13 @@ export class RegistrationService extends BaseHttpService<Registration> {
     };
 
     return this.save(registration, true);
-
   }
 
   public storeRegistration(parent: UserProfile, childrenArray: ChildProfile[], dateTime: IRegistrationDateTime): Observable<Registration> {
 
     const registration: Registration = {
       id: parent.id,
-      code: Helpers.generateId(8),
+      code: RegistrationHelpers.generateId(8),
       email: parent.emailAddress,
       firstName: parent.firstName,
       lastName: parent.lastName,

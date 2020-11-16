@@ -1,8 +1,8 @@
 import { AngularFirestoreCollection, AngularFirestore, DocumentReference, CollectionReference, Query } from '@angular/fire/firestore';
+import { IBaseEntity } from '../models/base-entity';
 import { collectionData, docData, collection } from 'rxfire/firestore';
 import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
 import { mapTo, take, catchError, publishReplay, refCount, map, tap, takeUntil } from 'rxjs/operators';
-import { IBaseEntity } from '@app/core/models/base/base-entity';
 
 export enum QueryDirection {
   Initial = 0,

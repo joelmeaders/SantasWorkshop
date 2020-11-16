@@ -1,7 +1,5 @@
-import { BaseEntity } from '@app/core/models/base/base-entity';
+import { BaseEntity } from './base-entity';
 
-// Need to keep this as lightweight as possible to prevent
-// overly complex QR codes
 export class Registration extends BaseEntity {
   // id is parent id
   code?: string;                // Unique Code
@@ -10,9 +8,9 @@ export class Registration extends BaseEntity {
   lastName?: string;
   email?: string;               // Email Address
   children?: IChildrenInfo[];    // Children info
-  date: string;                 // Arrival Date: DD
-  time: string;                 // Arrival Time
-  formattedDateTime: string;
+  date: string | undefined;                 // Arrival Date: DD
+  time: string | undefined;                 // Arrival Time
+  formattedDateTime: string | undefined;
   dateTimeRegistered?: Date;
 }
 

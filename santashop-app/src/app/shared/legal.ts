@@ -1,6 +1,6 @@
-import { PrivacyPolicyModalComponent } from '@app/shared/components/privacy-policy-modal/privacy-policy-modal.component';
-import { TermsOfServiceModalComponent } from '@app/shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { ModalController } from '@ionic/angular';
+import { PrivacyPolicyModalComponent } from './components/privacy-policy-modal/privacy-policy-modal.component';
+import { TermsOfServiceModalComponent } from './components/terms-of-service-modal/terms-of-service-modal.component';
 
 export abstract class LegalHelpers {
 

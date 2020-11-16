@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '@app/core/services/auth.service';
 import { AlertController, ModalController } from '@ionic/angular';
+import { AuthService } from 'santashop-core/src/public-api';
 
 @Component({
   selector: 'app-reset-password',

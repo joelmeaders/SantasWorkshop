@@ -1,18 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy } from '@angular/core';
-import { ChildProfile } from '@app/core/models/child-profile.model';
-import { IRegistrationDateTime, Registration } from '@app/core/models/registration.model';
-import { AuthService } from '@app/core/services/auth.service';
-import { ChildProfileService } from '@app/core/services/http/child-profile.service';
-import { RegistrationService } from '@app/core/services/http/registration.service';
-import { CreateChildModalComponent } from '@app/shared/components/create-child-modal/create-child-modal.component';
-import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';
-import { ArrivalDateForm } from '@app/shared/forms/arrival-date';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwError } from 'rxjs';
 import { catchError, delay, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { AngularFireStorage } from '@angular/fire/storage';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
-import { Router } from '@angular/router';
+import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService } from 'santashop-core/src/public-api';
+import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
+import { PublicMenuComponent } from '../../shared/components/public-menu/public-menu.component';
+import { ArrivalDateForm } from '../../shared/forms/arrival-date';
 
 @Component({
   selector: 'app-profile',

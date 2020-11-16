@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
-import { AuthService } from '@app/core/services/auth.service';
-import { IRegistration } from '@app/core/services/user-registration.service';
-import { PublicMenuComponent } from '@app/shared/components/public-menu/public-menu.component';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
+import { AuthService } from 'santashop-core/src/public-api';
+import { PublicMenuComponent } from '../shared/components/public-menu/public-menu.component';
 
 @Component({
   selector: 'app-home',

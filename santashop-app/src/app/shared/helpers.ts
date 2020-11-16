@@ -1,4 +1,4 @@
-import { Registration } from '@app/core/models/registration.model';
+import { Registration } from 'santashop-core/src/public-api';
 
 export abstract class Helpers {
   public static qrCodeString(registration: Registration): string {

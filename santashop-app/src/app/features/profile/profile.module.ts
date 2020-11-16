@@ -1,14 +1,10 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-
 import { IonicModule } from '@ionic/angular';
-
+import { SharedModule } from '../../shared/components/shared.module';
 import { ProfilePageRoutingModule } from './profile-routing.module';
-
 import { ProfilePage } from './profile.page';
-import { CoreDirectivesModule } from '@app/core/directives/core-directives.module';
-import { SharedModule } from '@app/shared/components/shared.module';
 
 @NgModule({
   imports: [
@@ -16,7 +12,6 @@ import { SharedModule } from '@app/shared/components/shared.module';
     ReactiveFormsModule,
     IonicModule,
     ProfilePageRoutingModule,
-    CoreDirectivesModule,
     SharedModule,
   ],
   declarations: [ProfilePage],

@@ -1,6 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { CommonForms } from '@app/core/helpers/common-forms';
-import { Registration } from '@app/core/models/registration.model';
+import { CommonForms, Registration } from 'santashop-core/src/public-api';
 
 export abstract class ArrivalDateForm {
 

@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      {{ (checkInService.$registration | async)?.fullName }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="outline" (click)="dismiss()">
+        <ion-label>Cancel</ion-label>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid fixed *ngIf="checkInService.$registration | async as registration">
+    <ion-row>
+      <ion-col class="ion-text-center small-title">
+        Children: {{ registration?.children.length }}
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size-xs size="12" *ngFor="let child of registration?.children">
+        <ion-card>
+          <ion-grid>
+            <ion-row>
+              <ion-col class="ion-text-start ion-text-capitalize big-bold-text">
+                <ion-text color="dark"> {{ child.t }} </ion-text>
+              </ion-col>
+              <ion-col class="ion-text-end ion-text-capitalize big-bold-text">
+                <ion-text color="dark"> {{ child.a }} </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col class="ion-text-capitalize medium-text">
+                {{ child.n }}
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+      <ion-buttons class="ion-justify-content-around ion-padding-vertical">
+        <ion-button (click)="editRegistration()" expand="block">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          <ion-label>Edit</ion-label>
+        </ion-button>
+    
+        <ion-button (click)="checkIn()" expand="block">
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          <ion-label>Check In</ion-label>
+        </ion-button>
+      </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

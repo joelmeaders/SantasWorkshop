@@ -1,6 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { CommonForms } from '@app/core/helpers/common-forms';
-import { UserProfile } from '@app/core/models/user-profile.model';
+import { CommonForms, UserProfile } from 'santashop-core/src/public-api';
 
 export abstract class CustomerProfileForm {
 

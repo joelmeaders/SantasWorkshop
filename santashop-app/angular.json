@@ -49,6 +49,11 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
+              "assets": [
+                {
+                  "ignore": "**.tgz"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,

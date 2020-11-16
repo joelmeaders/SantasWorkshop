@@ -5,10 +5,10 @@
   "targets": {
     "santas-workshop-193b5": {
       "hosting": {
-        "app": [
+        "santashop-app": [
           "santas-workshop-193b5"
         ],
-        "admin": [
+        "santashop-admin": [
           "santas-workshop-admin"
         ]
       }

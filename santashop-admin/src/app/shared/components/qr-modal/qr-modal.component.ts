@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { CheckInService } from 'app/shared/services/check-in.service';
+import { CheckInService } from '../../services/check-in.service';
 
 @Component({
   selector: 'app-qr-modal',

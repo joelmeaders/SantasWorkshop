@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { LoadingController, AlertController } from '@ionic/angular';
-import { QuickRegistrationForms } from 'app/shared/forms/quick-registration';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil, publishReplay, refCount } from 'rxjs/operators';
-import { IError, IChildrenInfo, ChildProfile } from 'santashop-core-lib';
+import { QuickRegistrationForms } from 'santashop-admin/src/app/shared/forms/quick-registration';
+import { IChildrenInfo, IError } from 'santashop-core/src/public-api';
 
 @Component({
   selector: 'app-register',

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Query } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CheckInHelpers } from 'app/shared/helpers/registration-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, pluck, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
-import { FireCRUDStateless, ICheckIn, ICheckInChildren, ICheckInStats, IChildrenInfo, Registration } from 'santashop-core-lib';
+import { FireCRUDStateless, ICheckIn, ICheckInChildren, ICheckInStats, IChildrenInfo, Registration } from 'santashop-core/src/public-api';
+import { CheckInHelpers } from '../helpers/registration-helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -134,6 +134,8 @@ export class CheckInService {
       toyTypeInfant: registration.children.filter(c => c.t === 'infant').length,
       toyTypeBoy: registration.children.filter(c => c.t === 'boy').length,
       toyTypeGirl: registration.children.filter(c => c.t === 'girl').length,
+      modifiedAtCheckIn: null, // TODO
+      zipCode: null // TODO
     }
     return stats;
   }

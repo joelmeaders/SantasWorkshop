@@ -3,10 +3,10 @@ import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { SignInForm } from 'app/shared/forms/sign-in';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
-import { AuthService, IError } from 'santashop-core-lib';
+import { AuthService, IError } from 'santashop-core/src/public-api';
+import { SignInForm } from '../../shared/forms/sign-in';
 
 @Component({
   selector: 'app-sign-in',

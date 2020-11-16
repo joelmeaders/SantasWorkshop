@@ -59,5 +59,10 @@ service cloud.firestore {
       allow update: if (isUser(request.resource.data.id) && isUser(resource.data.id)) || isAdmin();
       allow delete: if isUser(resource.data.id) || isAdmin();
     }
+
+    match /checkins/{documentId} {
+      allow create: if isAdmin();
+      allow read: if isAdmin();
+    }
   }
 }

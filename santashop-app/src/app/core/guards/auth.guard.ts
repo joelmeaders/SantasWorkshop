@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot, CanLoad, Route, UrlSegment, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UserProfile } from 'santashop-core-lib';
-import { AuthService } from 'santashop-core-lib';
+import { AuthService, UserProfile } from 'santashop-core/src/public-api';
 
 @Injectable({
   providedIn: 'root'

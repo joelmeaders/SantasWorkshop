@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "santashop-admin": {
+      "name": "santashop-admin",
+      "integrations": {},
+      "type": "angular",
+      "root": "santashop-admin"
+    },
+    "santashop-app": {
+      "name": "santashop-app",
+      "integrations": {},
+      "type": "angular",
+      "root": "santashop-app"
+    }
+  },
+  "defaultProject": "santashop-app"
+}

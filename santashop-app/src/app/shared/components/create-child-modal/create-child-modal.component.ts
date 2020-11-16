@@ -1,16 +1,18 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
-import { ChildProfileForm } from '@app/shared/forms/child-profile';
 import { AlertController, ModalController } from '@ionic/angular';
 import { differenceInDays } from 'date-fns';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { ChildProfile } from 'santashop-core-lib';
+import { ChildProfile } from 'santashop-core/src/public-api';
+import { ChildProfileForm } from '../../forms/child-profile';
+
 @Component({
   selector: 'app-create-child-modal',
   templateUrl: './create-child-modal.component.html',
   styleUrls: ['./create-child-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateChildModalComponent implements OnInit {
   @Input() item: ChildProfile;

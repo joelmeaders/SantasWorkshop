@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IRegistration, UserRegistrationService } from '@app/core/services/user-registration.service';
-import { SignUpAccountForm } from '@app/shared/forms/sign-up-account';
-import { LegalHelpers } from '@app/shared/legal';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { publishReplay, refCount, shareReplay, takeUntil } from 'rxjs/operators';
-import { AuthService, IError } from 'santashop-core-lib';
+import { AuthService, IError } from 'santashop-core/src/public-api';
+import { UserRegistrationService, IRegistration } from '../../core/services/user-registration.service';
+import { SignUpAccountForm } from '../../shared/forms/sign-up-account';
+import { LegalHelpers } from '../../shared/legal';
 
 @Component({
   selector: 'app-sign-up-account',

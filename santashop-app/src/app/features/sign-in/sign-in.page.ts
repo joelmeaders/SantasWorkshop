@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ResetPasswordComponent } from '@app/shared/components/reset-password/reset-password.component';
-import { SignInForm } from '@app/shared/forms/sign-in';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { filter, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
-import { AuthService, IError } from 'santashop-core-lib';
+import { AuthService, IError } from 'santashop-core/src/public-api';
+import { ResetPasswordComponent } from '../../shared/components/reset-password/reset-password.component';
+import { SignInForm } from '../../shared/forms/sign-in';
 
 @Component({
   selector: 'app-sign-in',

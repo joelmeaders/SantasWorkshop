@@ -1,6 +1,7 @@
 {
   "name": "santashop",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "author": "Joel Meaders",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,7 +9,11 @@
     "test": "ng test",
     "lint": "ng lint",
     "start:admin": "ng serve --project=santashop-admin --port=4000",
-    "start:app": "ng serve --project=santashop-app --port=4100"
+    "start:app": "ng serve --project=santashop-app --port=4100",
+    "config:admin": "ts-node -O '{\"module\": \"commonjs\"}' ./config.admin.ts",
+    "config:app": "ts-node -O '{\"module\": \"commonjs\"}' ./config.app.ts",
+    "build:admin": "npm run config:admin && ng build --prod --project santashop-admin",
+    "build:app": "npm run config:app && ng build --prod --project santashop-app"
   },
   "private": true,
   "dependencies": {

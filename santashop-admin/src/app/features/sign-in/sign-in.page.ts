@@ -6,7 +6,7 @@ import { AlertController, LoadingController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
-import { SignInForm } from '../../shared/forms/sign-in';
+import { SignInForm } from '../../forms/sign-in';
 
 @Component({
   selector: 'app-sign-in',

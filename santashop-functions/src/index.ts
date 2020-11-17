@@ -122,3 +122,12 @@ export const sendRegistrationEmail2 = functions.firestore.document('{registratio
   return sendgrid.send(msg);
 
 });
+
+export const isAdmin = functions.https.onCall((data, context) => {
+  return admin.firestore().doc(`parameters/admin`).get().then(
+    response => {
+      const adminUsers = response.data()?.adminusers as string[];
+      return adminUsers.findIndex(user => user === context.auth?.uid) > -1;
+    }
+  );
+});

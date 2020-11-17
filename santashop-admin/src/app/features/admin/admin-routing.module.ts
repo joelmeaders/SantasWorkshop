@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AdminGuard } from '../../guards/admin.guard';
 import { AdminPage } from './admin.page';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminPage,
+    canActivateChild: [AdminGuard],
     children: [
       {
         path: 'scanner',

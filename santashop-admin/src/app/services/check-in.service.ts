@@ -79,7 +79,7 @@ export class CheckInService {
   }
 
   public hydrateRegistration(registration: Registration) {
-    console.log(registration.children)
+    console.log(registration)
     registration.children.forEach(child => {
       child.a = CheckInHelpers.expandA(child.a);
       child.t = CheckInHelpers.expandT(child.t);

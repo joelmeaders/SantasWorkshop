@@ -19,14 +19,14 @@
       </ion-col>
     </ion-row>
     <ion-row>
-      <ion-col size-xs size="12" *ngFor="let child of registration?.children">
+      <ion-col size-md size="12" *ngFor="let child of registration?.children">
         <ion-card>
           <ion-grid>
             <ion-row>
-              <ion-col class="ion-text-start ion-text-capitalize big-bold-text">
+              <ion-col size="6" class="ion-text-start ion-text-capitalize big-bold-text">
                 <ion-text color="dark"> {{ child.t }} </ion-text>
               </ion-col>
-              <ion-col class="ion-text-end ion-text-capitalize big-bold-text">
+              <ion-col size="6" class="ion-text-end ion-text-capitalize big-bold-text">
                 <ion-text color="dark"> {{ child.a }} </ion-text>
               </ion-col>
             </ion-row>

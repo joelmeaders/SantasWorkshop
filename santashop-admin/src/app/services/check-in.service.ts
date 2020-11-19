@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Query } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { race, Subject } from 'rxjs';
 import { filter, map, pluck, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 import { FireCRUDStateless, ICheckIn, ICheckInChildren, ICheckInStats, IChildrenInfo, Registration } from 'santashop-core/src/public-api';
 import { CheckInHelpers } from '../helpers/registration-helpers';
@@ -14,16 +14,21 @@ export class CheckInService {
   private readonly REGISTRATION_COLLECTION = 'registrations';
   private readonly CHECKIN_COLLECTION = 'checkins';
 
-  private readonly _$qrCode = new BehaviorSubject<Registration>(null);
+  private readonly _$qrCode = new Subject<Registration>();
   public readonly $qrCode = this._$qrCode.pipe(
-    publishReplay(1),
-    refCount()
+    filter(value => !!value)
   );
 
-  public readonly $registrationCode = this._$qrCode.pipe(
-    pluck('id'),
-    publishReplay(1),
-    refCount()
+  private readonly _$registrationCodeFromQr = this._$qrCode.pipe(
+    pluck('id')
+  );
+
+  private readonly _$registrationCode = new Subject<string>();
+
+  public readonly $registrationCode = race(
+    this._$registrationCodeFromQr, this._$registrationCode
+  ).pipe(
+    filter(value => !!value)
   );
 
   // public readonly $customerId = this._$qrCode.pipe(
@@ -32,11 +37,11 @@ export class CheckInService {
   //   refCount()
   // );
 
-  public readonly $children = this._$qrCode.pipe(
-    pluck('children'),
-    publishReplay(1),
-    refCount()
-  );
+  // public readonly $children = this._$qrCode.pipe(
+  //   pluck('children'),
+  //   publishReplay(1),
+  //   refCount()
+  // );
 
   public readonly $registration = this.$registrationCode.pipe(
     filter(id => !!id),
@@ -45,6 +50,8 @@ export class CheckInService {
     publishReplay(1),
     refCount()
   );
+
+  private test = this.$registration.subscribe();
 
   public readonly storeCheckIn = (checkIn: ICheckIn) =>
     this.httpService.add<ICheckIn>(this.CHECKIN_COLLECTION, checkIn)
@@ -68,6 +75,10 @@ export class CheckInService {
     // this.router.navigate(['/admin/check-in', registration.id]);
   }
 
+  public setRegistrationCode(code: string) {
+    this._$registrationCode.next(code);
+  }
+
   public resetQrCode(): void {
     this._$qrCode.next(null);
   }
@@ -79,11 +90,11 @@ export class CheckInService {
   }
 
   public hydrateRegistration(registration: Registration) {
-    console.log(registration)
     registration.children.forEach(child => {
       child.a = CheckInHelpers.expandA(child.a);
       child.t = CheckInHelpers.expandT(child.t);
     });
+    console.log(registration)
     return registration;
   }
 

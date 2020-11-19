@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Query } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map, mergeMap, publishReplay, refCount, shareReplay, switchMap, take, tap } from 'rxjs/operators';
-import { FireCRUDStateless, Registration, RegistrationSearchIndex } from 'santashop-core/src/public-api';
-import { chain, sortBy } from 'underscore';
+import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
+import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src/public-api';
+import { chain } from 'underscore';
 import { RegistrationSearch } from '../models/registration-search.model';
 
 @Injectable({
@@ -31,17 +31,22 @@ export class RegistrationSearchService {
     refCount()
   );
 
-  public readonly $searchResults = this._$searchNext.pipe(
-    mergeMap(() => this._$searchStateValid),
-    filter(isValid => !!isValid),
-    mergeMap(() => this.$searchState),
-    switchMap(state => !!state.registrationCode
-      ? this.queryByCode(state.registrationCode)
-      : this.queryByName(state.firstName, state.lastName)
-    ),
+  private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[]>(undefined);
+  public readonly $searchResults = this._$searchResults.pipe(
     publishReplay(1),
     refCount()
   );
+
+  private readonly _$searchResultsSubscription = this.$searchNext.pipe(
+    switchMap(() => this.$searchStateValid),
+    filter(isValid => isValid === true),
+    switchMap(() => this.$searchState),
+    filter(state => this.isSearchStateValid(state)),
+    switchMap(state => !!state.registrationCode
+      ? this.queryByCode(state.registrationCode)
+      : this.queryByName(state.firstName, state.lastName)
+    )
+  ).subscribe(results => this._$searchResults.next(results));
 
   constructor(
     private readonly httpService: FireCRUDStateless
@@ -79,7 +84,11 @@ export class RegistrationSearchService {
   public setSearchState(search: RegistrationSearch) {
     this._$searchState.next(search);
     const isValid = this.isSearchStateValid(search);
-    this.formatSearchStrings(search);
+
+    if (isValid) {
+      this.formatSearchStrings(search);
+    }
+
     this._$searchStateValid.next(isValid);
   }
 
@@ -99,8 +108,8 @@ export class RegistrationSearchService {
 
   private isSearchStateValid(search: RegistrationSearch): boolean {
 
-    if (!search) {
-      this._$searchStateValid.next(false);
+    if (search == undefined) {
+      return false;
     }
 
     const hasNames = search.firstName?.length > 1 && search.lastName?.length > 1;
@@ -110,7 +119,8 @@ export class RegistrationSearchService {
   }
 
   public resetSearchState() {
+    this._$searchStateValid.next(false);
     this._$searchState.next(undefined);
-    this._$searchStateValid.next(undefined);
+    this._$searchResults.next(undefined);
   }
 }

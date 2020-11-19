@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      {{ (checkInService.$registration | async)?.fullName || "Error reading record" }}
+      {{ ($registration | async)?.fullName }}
     </ion-title>
     <ion-buttons slot="end">
       <ion-button fill="outline" (click)="dismiss()">
@@ -12,14 +12,14 @@
 </ion-header>
 
 <ion-content>
-  <ion-grid fixed *ngIf="checkInService.$registration | async as registration">
+  <ion-grid *appLet="$registration | async as registration">
     <ion-row>
       <ion-col class="ion-text-center small-title">
         Children: {{ registration?.children.length }}
       </ion-col>
     </ion-row>
     <ion-row>
-      <ion-col size-md size="12" *ngFor="let child of registration?.children">
+      <ion-col size-md size="12" size-lg-up="4" *ngFor="let child of registration?.children">
         <ion-card>
           <ion-grid>
             <ion-row>

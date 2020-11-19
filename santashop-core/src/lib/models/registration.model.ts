@@ -12,6 +12,7 @@ export class Registration extends BaseEntity {
   time: string | undefined;                 // Arrival Time
   formattedDateTime: string | undefined;
   dateTimeRegistered?: Date;
+  zipCode: string;
 }
 
 // Need to keep this as lightweight as possible to prevent
@@ -26,4 +27,11 @@ export interface IRegistrationDateTime {
   date: string;
   time: string;
   formattedDateTime: string;
+}
+
+export class RegistrationSearchIndex {
+  firstName: string;
+  lastName: string;
+  customerId: string;
+  code: string;
 }

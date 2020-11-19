@@ -38,7 +38,6 @@ export class ProfilePage implements OnDestroy {
   public readonly $customer = this.authService.$userProfile.pipe(
     takeUntil(this.$destroy),
     distinctUntilChanged((prev, curr) => prev.id === curr.id),
-    tap(console.log),
     switchMap(customer => this.validateCustomer(customer)),
     filter(customer => !!customer),
     publishReplay(1),

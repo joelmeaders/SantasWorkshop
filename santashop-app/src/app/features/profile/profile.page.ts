@@ -4,8 +4,8 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwError } from 'rxjs';
-import { catchError, delay, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService } from 'santashop-core/src/public-api';
+import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
 import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
 import { PublicMenuComponent } from '../../shared/components/public-menu/public-menu.component';
 import { ArrivalDateForm } from '../../shared/forms/arrival-date';
@@ -37,8 +37,12 @@ export class ProfilePage implements OnDestroy {
 
   public readonly $customer = this.authService.$userProfile.pipe(
     takeUntil(this.$destroy),
-    filter(profile => !!profile),
-    shareReplay(1)
+    distinctUntilChanged((prev, curr) => prev.id === curr.id),
+    tap(console.log),
+    switchMap(customer => this.validateCustomer(customer)),
+    filter(customer => !!customer),
+    publishReplay(1),
+    refCount()
   );
 
   public readonly $children = this.$customer.pipe(
@@ -170,6 +174,18 @@ export class ProfilePage implements OnDestroy {
       // Do nothing
     }
   }
+  
+  private async validateCustomer(customer: UserProfile): Promise<UserProfile> {
+    // In rare cases customer accounts don't get created for some reason.
+      // Send them back to collect their information and create the customer record.
+      if (!customer || !customer.firstName || !customer.lastName || !customer.zipCode) {
+        this.customerAccountMissingAlert().then(() => {
+          return this.router.navigate(['/sign-up-info']);
+        });
+      }
+
+      return customer;
+  }
 
   public formatDateTime(date: number, time: number) {
 
@@ -296,7 +312,7 @@ export class ProfilePage implements OnDestroy {
 
     await this.registrationService.storePartialRegistration(customer, partialRegistration)
       .pipe(take(1)).toPromise();
-    }
+  }
 
   public async confirmRegistration() {
 
@@ -321,6 +337,15 @@ export class ProfilePage implements OnDestroy {
     this._$loading.next(true);
 
     const customer = await this.$customer.pipe(take(1)).toPromise();
+
+    // In rare cases customer accounts don't get created for some reason.
+    // Send them back to collect their information and create the customer record.
+    if (!customer || !customer.firstName || !customer.lastName || !customer.zipCode) {
+      await this.customerAccountMissingAlert();
+      this.router.navigate(['/sign-up-info']);
+      return;
+    }
+
     const children = await this.$children.pipe(take(1)).toPromise();
 
     await this.registrationService.storeRegistration(customer, children, dateTime)
@@ -387,6 +412,22 @@ export class ProfilePage implements OnDestroy {
         },
         {
           text: 'I Understand'
+        }
+      ]
+    });
+
+    await alert.present();
+
+    return alert.onDidDismiss();
+  }
+
+  private async customerAccountMissingAlert() {
+    const alert = await this.alertController.create({
+      header: `We're missing some information`,
+      message: `We're going to bring you back one step.`,
+      buttons: [
+        {
+          text: 'Ok'
         }
       ]
     });

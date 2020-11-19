@@ -31,27 +31,71 @@ export const documentCounter = functions.firestore.document('{collection}/{docId
   return doc.set({ count: action }, { merge: true });
 });
 
-export const generateQrCode = functions.firestore.document('{registrations}/{docId}').onWrite(async (change, context) => {
+export const registrationSearchIndex = functions.firestore.document('{registrations}/{docId}').onWrite(async (change, context) => {
 
-  const oldDocument: any = change.before.data();
-  const newDocument: any = change.after.data();
+  const indexDoc = admin.firestore().doc(`registrationsearchindex/${change.before.data()?.id}`);
 
-  const oldCode = change.before.exists ? (oldDocument['code'] ?? undefined) : undefined;
+  if (!change.after.exists) {
+    try {
+      return indexDoc.delete();
+    }
+    catch {
+      return;
+    }
+  }
 
-  const storage = admin.storage().bucket('gs://santas-workshop-193b5.appspot.com');
+  const docData: any = change.after.data();
 
-  if (context.eventType === 'google.firestore.document.delete') {
-    const oldFile = storage.file(`registrations/${oldCode}.png`);
-    await oldFile.exists().then(async (exists) => exists ?? await oldFile.delete());
+  if (!docData?.code) {
     return;
   }
 
+  const searchIndex: any = {
+    customerId: docData.id
+  };
+
+  if (!!docData.firstName?.length) {
+    searchIndex.firstName = docData.firstName.toLowerCase();
+  }
+
+  if (!!docData.lastName?.length) {
+    searchIndex.lastName = docData.lastName.toLowerCase();
+  }
+
+  if (!!docData.code?.length) {
+    searchIndex.code = docData.code;
+  }
+
+  return indexDoc.set(searchIndex, { merge: true });
+});
+
+export const generateQrCode = functions.firestore.document('{registrations}/{docId}').onWrite(async (change, context) => {
+
+  const oldDocument: any = change.before?.data() || undefined;
+  const oldCode = oldDocument?.code || undefined;
+  const storage = admin.storage().bucket('gs://santas-workshop-193b5.appspot.com');
+
+  if (!change.after.exists) {
+    if (oldCode === undefined) {
+      return;
+    }
+    try {
+      const oldFile = storage.file(`registrations/${oldCode}.png`);
+      await oldFile.exists().then(async (exists) => exists ?? await oldFile.delete());
+      return;
+    }
+    catch {
+      return;
+    }
+  }
+
+  const newDocument: any = change.after.data();
   const newCode = newDocument['code'];
   const name = newDocument['name'];
   const children = newDocument['children'];
 
   // Don't proceed
-  if (!newCode || !children?.length || newCode === oldCode) {
+  if (!newCode || !children?.length || newCode === oldDocument?.code) {
     return;
   }
 

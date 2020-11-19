@@ -28,3 +28,10 @@ export interface IRegistrationDateTime {
   time: string;
   formattedDateTime: string;
 }
+
+export class RegistrationSearchIndex {
+  firstName: string;
+  lastName: string;
+  customerId: string;
+  code: string;
+}

@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      {{ (checkInService.$registration | async)?.fullName }}
+      {{ (checkInService.$registration | async)?.fullName || "Error reading record" }}
     </ion-title>
     <ion-buttons slot="end">
       <ion-button fill="outline" (click)="dismiss()">

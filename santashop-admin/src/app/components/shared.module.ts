@@ -4,12 +4,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { CoreDirectivesModule, LetDirective } from 'santashop-core/src/public-api';
 import { QrModalComponent } from './qr-modal/qr-modal.component';
-import { GlobalMessageModalComponent } from './global-message-modal/global-message-modal.component';
 
 @NgModule({
   declarations: [
     QrModalComponent,
-    GlobalMessageModalComponent
   ],
   imports: [
     CommonModule,
@@ -20,11 +18,9 @@ import { GlobalMessageModalComponent } from './global-message-modal/global-messa
   exports: [
     QrModalComponent,
     LetDirective,
-    GlobalMessageModalComponent
   ],
   entryComponents: [
     QrModalComponent,
-    GlobalMessageModalComponent
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

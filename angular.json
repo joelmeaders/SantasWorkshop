@@ -364,6 +364,46 @@
           }
         }
       }
+    },
+    "zxing-scanner": {
+      "projectType": "library",
+      "root": "zxing-scanner",
+      "sourceRoot": "zxing-scanner/src",
+      "prefix": "zxing",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "zxing-scanner/tsconfig.lib.json",
+            "project": "zxing-scanner/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "zxing-scanner/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "zxing-scanner/src/test.ts",
+            "tsConfig": "zxing-scanner/tsconfig.spec.json",
+            "karmaConfig": "zxing-scanner/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "zxing-scanner/tsconfig.lib.json",
+              "zxing-scanner/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "santashop-admin"

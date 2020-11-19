@@ -3,9 +3,10 @@ import { CommonForms } from 'santashop-core/src/public-api';
 
 export abstract class RegistrationSearchForm {
 
-  public static customerForm(): FormGroup {
+  public static registrationSearchForm(): FormGroup {
     return CommonForms.formBuilder().group({
       firstName: [undefined],
+      lastName: [undefined],
       registrationCode: [undefined],
     });
   }

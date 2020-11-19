@@ -8,13 +8,13 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "start:admin": "ng serve --project=santashop-admin --port=4000 --hmr",
+    "start:admin": "ng serve --project=santashop-admin --port=4000",
     "start:app": "ng serve --project=santashop-app --port=4100",
     "config:admin": "ts-node -O '{\"module\": \"commonjs\"}' ./config.admin.ts",
     "config:app": "ts-node -O '{\"module\": \"commonjs\"}' ./config.app.ts",
     "build:admin": "npm run config:admin && ng build --prod --project santashop-admin",
     "build:app": "npm run config:app && ng build --prod --project santashop-app",
-    "deploy:fbrules": "firebase deploy --only firestore:rules"
+    "deploy:fsrules": "firebase deploy --only firestore:rules"
   },
   "private": true,
   "dependencies": {
@@ -33,6 +33,7 @@
     "@ionic/angular": "^5.4.4",
     "@ngx-translate/core": "^13.0.0",
     "@ngx-translate/http-loader": "^6.0.0",
+    "@types/underscore": "^1.10.24",
     "@zxing/browser": "0.0.5",
     "@zxing/library": "^0.18.3",
     "date-fns": "^2.16.1",
@@ -42,6 +43,7 @@
     "rxfire": "^4.0.0",
     "rxjs": "~6.6.3",
     "tslib": "^2.0.3",
+    "underscore": "^1.11.0",
     "zone.js": "~0.11.3"
   },
   "devDependencies": {

@@ -1,15 +1,86 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Registration Search
-    </ion-title>
+    <ion-title> Registration Search </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="3">
+        <ion-list-header>
+          <ion-icon name="search" slot="start"></ion-icon>
+          <ion-label>Search</ion-label>
+        </ion-list-header>
+        <ion-list>
+          <form [formGroup]="form" novalidate>
+            <ion-item *appLet="'registrationCode' as controlName">
+              <ion-label position="floating"> Registration Code </ion-label>
+              <ion-input
+                [formControlName]="controlName"
+                debounce="1000"
+                (ionChange)="onInputChange()"
+              ></ion-input>
+            </ion-item>
+
+            <ion-note class="ion-padding">
+              <em>
+                Enter the full registration code, <strong>OR</strong> both first and last name
+              </em>
+            </ion-note>
+
+            <ion-item *appLet="'firstName' as controlName">
+              <ion-label position="floating"> First Name <em>(entire first name)</em></ion-label>
+              <ion-input
+                [formControlName]="controlName"
+                debounce="1000"
+                (ionChange)="onInputChange()"
+              ></ion-input>
+            </ion-item>
+
+            <ion-item *appLet="'lastName' as controlName">
+              <ion-label position="floating"> Last Name <em>(Partial: ie 'wash' returns 'washington')</em></ion-label>
+              <ion-input
+                [formControlName]="controlName"
+                debounce="1000"
+                (ionChange)="onInputChange()"
+              ></ion-input>
+            </ion-item>
+
+            <ion-item
+              button
+              tappable
+              color="tertiary"
+              color="primary"
+              class="ion-margin-top"
+              [disabled]="!($searchValid | async)"
+              (click)="search()"
+            >
+              <ion-label>Search</ion-label>
+              <ion-icon name="search" slot="end"></ion-icon>
+            </ion-item>
+          </form>
+        </ion-list>
+      </ion-col>
+
+      <ion-col size="12" size-lg>
+
+        <!-- <ion-list-header>
+          Search Results
+        </ion-list-header> -->
+
+        <ion-list *appLet="($searchResults | async) as results">
+          <ion-item
+            button
+            tappable
+            *ngFor="let result of results"
+          >
+            <ion-label class="ion-float-start"> {{ result.lastName }}, {{ result.firstName }} </ion-label>
+            <ion-label class="ion-float-end ion-padding-horizontal" style="max-width: fit-content;"> {{ result.zip || 00000 }} </ion-label>
+            <ion-label class="ion-float-end" style="max-width: fit-content;"> {{ result.code }} </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

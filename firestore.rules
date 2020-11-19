@@ -74,5 +74,10 @@ service cloud.firestore {
       allow write: if isAdmin();
       allow read: if true;
     }
+
+    match /registrationsearchindex/{documentId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
   }
 }

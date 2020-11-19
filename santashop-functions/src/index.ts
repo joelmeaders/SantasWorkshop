@@ -66,6 +66,10 @@ export const registrationSearchIndex = functions.firestore.document('{registrati
     searchIndex.code = docData.code;
   }
 
+  if (!!docData.zipCode?.length) {
+    searchIndex.zip = docData.zipCode;
+  }
+
   return indexDoc.set(searchIndex, { merge: true });
 });
 

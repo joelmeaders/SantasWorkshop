@@ -26,4 +26,4 @@ import { QrModalComponent } from './qr-modal/qr-modal.component';
     CUSTOM_ELEMENTS_SCHEMA
   ]
 })
-export class SharedModule { }
+export class SharedComponentsModule { }

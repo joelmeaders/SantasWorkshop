@@ -1,6 +1,6 @@
 {
   "name": "santashop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Joel Meaders",
   "scripts": {
     "ng": "ng",

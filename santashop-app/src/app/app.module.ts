@@ -49,7 +49,7 @@ export function httpLoaderFactory(http: HttpClient) {
   providers: [
     StatusBar,
     SplashScreen,
-    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, 
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com'},
     ScreenTrackingService,
     AuthService

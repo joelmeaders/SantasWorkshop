@@ -32,7 +32,6 @@ export class HomePage implements OnDestroy {
     private readonly zone: NgZone
   ) {
     analyticsService.setCurrentScreen('home');
-    analyticsService.logEvent('screen_view');
   }
 
   ngOnDestroy() {

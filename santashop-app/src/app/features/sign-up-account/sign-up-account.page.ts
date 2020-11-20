@@ -40,7 +40,6 @@ export class SignUpAccountPage implements OnDestroy {
     private readonly analyticsService: AngularFireAnalytics,
   ) { 
     analyticsService.setCurrentScreen('sign-up-account');
-    analyticsService.logEvent('screen_view');
   }
 
   public async ngOnDestroy() {

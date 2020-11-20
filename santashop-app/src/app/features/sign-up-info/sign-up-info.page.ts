@@ -47,7 +47,6 @@ export class SignUpInfoPage implements OnDestroy {
     private readonly alertController: AlertController
   ) { 
     analyticsService.setCurrentScreen('sign-up-info');
-    analyticsService.logEvent('screen_view');
   }
 
   public async ngOnDestroy() {

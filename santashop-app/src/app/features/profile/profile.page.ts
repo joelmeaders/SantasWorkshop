@@ -161,7 +161,6 @@ export class ProfilePage implements OnDestroy {
     private readonly ngzone: NgZone
   ) {
     analyticsService.setCurrentScreen('profile');
-    analyticsService.logEvent('screen_view');
     this.autoDatePicker();
   }
 

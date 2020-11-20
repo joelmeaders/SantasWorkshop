@@ -1,7 +1,7 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire';
-import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
+import { AngularFireAnalyticsModule, ScreenTrackingService } from '@angular/fire/analytics';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/storage';
@@ -51,6 +51,7 @@ export function httpLoaderFactory(http: HttpClient) {
     SplashScreen,
     // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com'},
+    ScreenTrackingService,
     AuthService
   ],
   bootstrap: [AppComponent],

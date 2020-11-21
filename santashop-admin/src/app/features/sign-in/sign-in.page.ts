@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { Subject } from 'rxjs';
-import { publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, publishReplay, refCount, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
 import { SignInForm } from '../../forms/sign-in';
 
@@ -26,6 +26,14 @@ export class SignInPage implements OnDestroy {
     publishReplay(1),
     refCount()
   );
+
+  private readonly authRedirectionSubscription = this.authService.$isAdmin.pipe(
+    takeUntil(this.$destroy),
+    distinctUntilChanged(),
+    filter(response => !!response)
+  ).subscribe(() => {
+    this.router.navigate(['/admin']);
+  });
 
   constructor(
     private readonly authService: AuthService,

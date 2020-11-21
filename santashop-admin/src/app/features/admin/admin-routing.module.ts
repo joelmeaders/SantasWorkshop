@@ -24,12 +24,17 @@ const routes: Routes = [
       {
         path: 'stats',
         loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
+      },
+      {
+        path: '',
+        redirectTo: '/admin/stats',
+        pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/admin/scanner',
+    redirectTo: '/admin/stats',
     pathMatch: 'full'
   }
 ];

@@ -1,15 +1,115 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Registration Search
-    </ion-title>
+    <ion-title> Registration Search </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-grid>
+    <ion-row>
+      <ion-col size-lg-down size="12" size-lg="4">
+        <ion-list>
+          <form [formGroup]="form" novalidate>
+            <ion-item *appLet="'registrationCode' as controlName">
+              <ion-label position="floating" color="medium" class="padding-top-sm"> Registration Code </ion-label>
+              <ion-input
+                [formControlName]="controlName"
+                debounce="750"
+                (ionChange)="onInputChange()"
+                clearInput
+              ></ion-input>
+            </ion-item>
+
+            <div class="ion-padding-top ion-padding-horizontal">
+              <ion-text color="medium" style="font-size: .85em;">
+                <em>
+                  Enter the full registration code, <strong>OR</strong> both first and last name
+                </em>
+              </ion-text>
+            </div>
+
+            <ion-item *appLet="'firstName' as controlName">
+              <ion-label position="floating" color="medium" class="padding-top-sm"> First Name <em>(entire first name)</em></ion-label>
+              <ion-input
+                [formControlName]="controlName"
+                debounce="750"
+                (ionChange)="onInputChange()"
+                clearInput
+              ></ion-input>
+            </ion-item>
+
+            <ion-item *appLet="'lastName' as controlName">
+              <ion-label position="floating" color="medium" class="padding-top-sm"> Last Name <em>(Partial: ie 'wash' returns 'washington')</em></ion-label>
+              <ion-input
+                [formControlName]="controlName"
+                debounce="750"
+                (ionChange)="onInputChange()"
+                clearInput
+              ></ion-input>
+            </ion-item>
+
+            <ion-item
+              button
+              tappable
+              color="primary"
+              class="ion-margin-top"
+              [disabled]="!($searchValid | async)"
+              (click)="search()"
+            >
+              <ion-label>Search</ion-label>
+              <ion-icon name="search" slot="end"></ion-icon>
+            </ion-item>
+
+            <ion-item
+              button
+              tappable
+              color="secondary"
+              class="ion-margin-top"
+              (click)="reset()"
+            >
+              <ion-label>Reset</ion-label>
+              <ion-icon name="close" slot="end"></ion-icon>
+            </ion-item>
+          </form>
+        </ion-list>
+      </ion-col>
+
+      <ion-col size-lg-down size="12" size-lg="8" *appLet="($searchResults | async) as results">
+
+        <ion-list-header>
+          Search Results
+        </ion-list-header>
+
+        <ion-item *ngIf="!results && ($loading | async) === false" lines="none">
+          <ion-title>
+            Run a search to see the results
+          </ion-title>
+        </ion-item>
+
+        <ion-item *ngIf="!!results && !results.length" lines="none">
+          <ion-title>
+            No results were found
+          </ion-title>
+        </ion-item>
+
+        <div class="width-max ion-text-center ion-padding-vertical" *ngIf="($loading | async) === true">
+          <ion-text color="primary" class="ion-padding-vertical">Loading...</ion-text>
+          <ion-spinner color="primary"></ion-spinner>
+        </div>
+
+        <ion-list *ngIf="!!results && results.length">
+          <ion-item
+            button
+            tappable
+            *ngFor="let result of results"
+            (click)="onSelect(result.code)"
+          >
+            <ion-label class="ion-float-start"> {{ result.lastName }}, {{ result.firstName }} </ion-label>
+            <ion-label class="ion-float-end ion-padding-horizontal" style="max-width: fit-content;"> {{ result.zip || 00000 }} </ion-label>
+            <ion-label class="ion-float-end" style="max-width: fit-content;"> {{ result.code }} </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

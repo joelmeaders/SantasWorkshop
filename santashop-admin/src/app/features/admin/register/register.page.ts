@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { LoadingController, AlertController } from '@ionic/angular';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil, publishReplay, refCount } from 'rxjs/operators';
-import { QuickRegistrationForms } from 'santashop-admin/src/app/shared/forms/quick-registration';
+import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { IChildrenInfo, IError } from 'santashop-core/src/public-api';
 
 @Component({

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { QrModalComponent } from 'santashop-admin/src/app/shared/components/qr-modal/qr-modal.component';
-import { CheckInService } from 'santashop-admin/src/app/shared/services/check-in.service';
+import { QrModalComponent } from 'santashop-admin/src/app/components/qr-modal/qr-modal.component';
+import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
+import { ZXingScannerComponent } from 'zxing-scanner/src/public_api';
 
 @Component({
   selector: 'app-scanner',

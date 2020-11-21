@@ -5,13 +5,15 @@ import { SearchPage } from './search.page';
 
 import { SearchPageRoutingModule } from './search-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SharedComponentsModule } from 'santashop-admin/src/components/shared-components.module';
 
 @NgModule({
   imports: [
-    IonicModule,
     CommonModule,
+    IonicModule,
     ReactiveFormsModule,
     SearchPageRoutingModule,
+    SharedComponentsModule
   ],
   declarations: [SearchPage],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]

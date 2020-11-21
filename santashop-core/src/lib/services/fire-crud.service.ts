@@ -20,9 +20,10 @@ export class FireCRUDStateless {
   }
 
   public readMany<T>(collectionPath: string, query?: Query, idProperty?: Extract<keyof T, string>): Observable<T[]> {
-    const collectionReference = this.firestoreDb.collection<T>(collectionPath).ref;
-    query = query ?? collectionReference.limit(50);
-    return collectionData<T>(query, idProperty);
+    // const collectionReference = this.firestoreDb.collection<T>(collectionPath).ref;
+    // query = query ?? collectionReference.limit(50);
+    // return collectionData<T>(query, idProperty);
+    return this.firestoreDb.collection<T>(collectionPath).valueChanges();
   }
 
   // public save<T>(collectionPath: string, document: T, idProperty?: Extract<keyof T, string>, mergeIfUpdate = false): Observable<DocumentReference> {

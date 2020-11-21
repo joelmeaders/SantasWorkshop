@@ -33,5 +33,6 @@ export class RegistrationSearchIndex {
   firstName: string;
   lastName: string;
   customerId: string;
+  zip: string;
   code: string;
 }

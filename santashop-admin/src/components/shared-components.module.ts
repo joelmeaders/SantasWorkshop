@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CoreDirectivesModule, LetDirective } from 'santashop-core/src/public-api';
-import { QrModalComponent } from './qr-modal/qr-modal.component';
+import { QrModalComponent } from '../app/components/qr-modal/qr-modal.component';
 
 @NgModule({
   imports: [
@@ -18,4 +18,4 @@ import { QrModalComponent } from './qr-modal/qr-modal.component';
     QrModalComponent
   ]
 })
-export class SharedComponentsModule {}
+export class SharedComponentsModule { }

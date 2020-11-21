@@ -6,6 +6,8 @@ import * as sendgrid from '@sendgrid/mail';
 
 admin.initializeApp();
 
+const client = new admin.firestore.v1.FirestoreAdminClient();
+
 const MAIL_API_KEY = functions.config().sendgrid.key;
 sendgrid.setApiKey(MAIL_API_KEY);
 
@@ -64,6 +66,10 @@ export const registrationSearchIndex = functions.firestore.document('{registrati
 
   if (!!docData.code?.length) {
     searchIndex.code = docData.code;
+  }
+
+  if (!!docData.zipCode?.length) {
+    searchIndex.zip = docData.zipCode;
   }
 
   return indexDoc.set(searchIndex, { merge: true });
@@ -164,5 +170,39 @@ export const sendRegistrationEmail2 = functions.firestore.document('{registratio
   };
 
   return sendgrid.send(msg);
+
+});
+
+export const isAdmin = functions.https.onCall((data, context) => {
+  return admin.firestore().doc(`parameters/admin`).get().then(
+    response => {
+      const adminUsers = response.data()?.adminusers as string[];
+      return adminUsers.findIndex(user => user === context.auth?.uid) > -1;
+    }
+  );
+});
+
+export const scheduledFirestoreBackup = functions.pubsub.schedule('every 1 hours').onRun((context) => {
+
+  const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT;
+  const databaseName = client.databasePath(projectId, '(default)');
+  const bucket = 'gs://santashop-backups';
+
+  return client.exportDocuments({
+    name: databaseName,
+    outputUriPrefix: bucket,
+    // Leave collectionIds empty to export all collections
+    // or set to a list of collection IDs to export,
+    // collectionIds: ['users', 'posts']
+    collectionIds: []
+    })
+  .then((responses: any) => {
+    const response = responses[0];
+    console.log(`Operation Name: ${response.name}`);
+  })
+  .catch((err: any) => {
+    console.error(`Error: ${projectId}, ${databaseName}: ${err}`);
+    throw new Error('Export operation failed');
+  });
 
 });

@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AdminGuard } from '../../guards/admin.guard';
 import { AdminPage } from './admin.page';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminPage,
+    canActivateChild: [AdminGuard],
     children: [
       {
         path: 'scanner',
@@ -20,15 +22,19 @@ const routes: Routes = [
         loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
       },
       {
+        path: 'stats',
+        loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
+      },
+      {
         path: '',
-        redirectTo: '/admin/scanner',
+        redirectTo: '/admin/stats',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/admin/scanner',
+    redirectTo: '/admin/stats',
     pathMatch: 'full'
   }
 ];

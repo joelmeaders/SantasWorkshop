@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
+import { of } from 'rxjs';
+import { delay, publishReplay, refCount } from 'rxjs/operators';
 import { CheckInService } from '../../services/check-in.service';
 
 @Component({
@@ -8,18 +10,30 @@ import { CheckInService } from '../../services/check-in.service';
   styleUrls: ['./qr-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QrModalComponent implements OnInit {
+export class QrModalComponent {
+
+  public readonly $registration = this.checkInService.$registration;
+
+  private readonly subscription = this.$registration.subscribe(async (value) => {
+    console.log(value);
+    await this.refresh();
+  });
 
   constructor(
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
-    public readonly checkInService: CheckInService
+    private readonly checkInService: CheckInService,
+    private readonly cd: ChangeDetectorRef
   ) { }
 
-  ngOnInit() {}
-
   public editRegistration() {
+    
+  }
 
+  public async refresh() {
+    of().pipe(delay(1000)).toPromise().then(() => {
+      this.cd.detectChanges();
+    });
   }
 
   public async checkIn() {

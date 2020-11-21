@@ -64,5 +64,20 @@ service cloud.firestore {
       allow create: if isAdmin();
       allow read: if isAdmin();
     }
+
+    match /parameters/admin {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    match /parameters/public {
+      allow write: if isAdmin();
+      allow read: if true;
+    }
+
+    match /registrationsearchindex/{documentId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
   }
 }

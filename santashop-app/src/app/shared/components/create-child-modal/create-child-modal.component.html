@@ -14,13 +14,13 @@
     <ion-grid fixed="true">
       <ion-row>
         <ion-col>
-          <ion-note> Create your account by filling out the information below </ion-note>
+          <ion-note> Add your child below and save </ion-note>
         </ion-col>
       </ion-row>
       <ion-row>
         <ion-col>
           <ion-item *appLet="'firstName' as controlName">
-            <ion-label position="stacked" class="ion-padding-bottom"> First Name </ion-label>
+            <ion-label position="stacked" class="ion-padding-bottom"> First Name <em>(Only first name)</em> </ion-label>
             <ion-input placeholder="Your child's first name" [formControlName]="controlName" debounce="750" #firstNameField></ion-input>
             <p
               *ngIf="form.controls[controlName].dirty && form.controls[controlName].invalid"

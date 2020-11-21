@@ -65,7 +65,6 @@ export class SignInPage implements OnDestroy {
     private readonly analyticsService: AngularFireAnalytics
   ) {
     analyticsService.setCurrentScreen('sign-in');
-    analyticsService.logEvent('screen_view');
   }
 
   public async ngOnDestroy() {

@@ -40,7 +40,6 @@ export class SignUpAccountPage implements OnDestroy {
     private readonly analyticsService: AngularFireAnalytics,
   ) { 
     analyticsService.setCurrentScreen('sign-up-account');
-    analyticsService.logEvent('screen_view');
   }
 
   public async ngOnDestroy() {
@@ -58,11 +57,18 @@ export class SignUpAccountPage implements OnDestroy {
   }
 
   public async createAccount() {
-    this._$loading.next(true);
 
     const info: IRegistration = {
       ...this.form.value,
     };
+
+    const shouldContinue = await this.verifyEmail(info.emailAddress);
+
+    if (shouldContinue.role === 'cancel') {
+      return;
+    }
+
+    this._$loading.next(true);
 
     const result = await this.userRegistrationService
       .registerAccount(info)
@@ -146,6 +152,26 @@ export class SignUpAccountPage implements OnDestroy {
     });
 
     await alert.present();
+  }
+
+  private async verifyEmail(email: string) {
+    const alert = await this.alertController.create({
+      header: 'Is your email correct?',
+      subHeader: email,
+      message: `It cannot be changed after this step. After registration, we send your ticket to this email address.`,
+      buttons: [
+        {
+          text: 'Go Back',
+          role: 'cancel'
+        },
+        {
+          text: 'Yes'
+        }
+      ],
+    });
+
+    await alert.present();
+    return alert.onDidDismiss();
   }
 
   public async privacy() {

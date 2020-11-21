@@ -15,6 +15,8 @@ export class StatsPage implements OnDestroy {
 
   private readonly $destroy = new Subject<void>();
 
+  public readonly now = new Date().toLocaleString();
+
   private readonly _$loading = new Subject<boolean>();
   public readonly $loading = this._$loading.pipe(
     takeUntil(this.$destroy),

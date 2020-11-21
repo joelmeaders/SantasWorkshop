@@ -53,6 +53,7 @@ export class AuthService implements OnDestroy {
     takeUntil(this.$destroy),
     filter(user => !!user),
     switchMap(() => this.angularFireFunctions.httpsCallable('isAdmin')({})),
+    map((response: boolean) => response),
     publishReplay(1),
     refCount()
   );

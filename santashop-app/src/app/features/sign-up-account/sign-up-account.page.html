@@ -95,12 +95,14 @@
                   </ion-col>
                 </ion-row>
 
+                <re-captcha #captchaRef="reCaptcha" (resolved)="$event && createAccount($event)" size="invisible"></re-captcha>
+
                 <ion-row class="ion-padding-bottom">
                   <ion-col
                     size="12"
                     class="ion-align-items-center ion-justify-content-center ion-text-center ion-padding-top ion-padding-bottom"
                   >
-                    <ion-button size="large" color="success" [disabled]="!form.valid || ($loading | async)" (click)="createAccount()">
+                    <ion-button size="large" color="success" [disabled]="!form.valid || ($loading | async)" (click)="captchaRef.execute()">
                       <ion-icon name="person-add" slot="end"></ion-icon>
                       <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
                     </ion-button>

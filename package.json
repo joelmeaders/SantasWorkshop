@@ -40,6 +40,7 @@
     "dotenv": "^8.2.0",
     "firebase": "^8.1.1",
     "firebase-functions": "^3.11.0",
+    "ng-recaptcha": "^6.0.2",
     "rxfire": "^4.0.0",
     "rxjs": "~6.6.3",
     "tslib": "^2.0.3",

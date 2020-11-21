@@ -5,10 +5,11 @@ import { Router } from '@angular/router';
 import 'firebase/auth';
 import { user } from 'rxfire/auth';
 import { Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, mergeMap, publishReplay, refCount, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, switchMap, takeUntil } from 'rxjs/operators';
 import { UserProfile } from '../models/user-profile.model';
 import { UserProfileService } from './user-profile.service';
 import { AngularFireFunctions } from '@angular/fire/functions';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 
 
 @Injectable({
@@ -21,7 +22,8 @@ export class AuthService implements OnDestroy {
   constructor(
     private readonly firebase: FirebaseApp,
     private readonly angularFireAuth: AngularFireAuth,
-    private readonly angularFireFunctions: AngularFireFunctions, 
+    private readonly angularFireFunctions: AngularFireFunctions,
+    private readonly analytics: AngularFireAnalytics,
     private readonly userProfileService: UserProfileService,
     private readonly router: Router
   ) { }
@@ -49,6 +51,7 @@ export class AuthService implements OnDestroy {
     publishReplay(1),
     refCount()
   );
+  
   public readonly $isAdmin = this.$currentUser.pipe(
     takeUntil(this.$destroy),
     filter(user => !!user),
@@ -57,6 +60,14 @@ export class AuthService implements OnDestroy {
     publishReplay(1),
     refCount()
   );
+
+  private readonly setAnalyticsId = this.$emailAndUid.pipe(
+    takeUntil(this.$destroy),
+    filter(response => !!response?.id),
+    pluck('id'),
+  ).subscribe(async id => {
+    await this.analytics.setUserId(id);
+  });
 
   public resetPassword(email: string) {
     return this.angularFireAuth.sendPasswordResetEmail(email);
@@ -71,6 +82,7 @@ export class AuthService implements OnDestroy {
   }
 
   ngOnDestroy() {
+    this.setAnalyticsId.unsubscribe();
     this.$destroy.next();
   }
 }

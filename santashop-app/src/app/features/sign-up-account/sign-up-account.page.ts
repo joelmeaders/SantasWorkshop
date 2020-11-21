@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -21,6 +22,8 @@ export class SignUpAccountPage implements OnDestroy {
   public readonly form: FormGroup = SignUpAccountForm.form();
   public readonly formValidationMessages = SignUpAccountForm.validationMessages();
 
+  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha;
+
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
 
@@ -31,6 +34,7 @@ export class SignUpAccountPage implements OnDestroy {
   public readonly $showPassword = this._$showPassword.pipe(takeUntil(this.$destroy), shareReplay(1));
 
   constructor(
+    private readonly httpClient: HttpClient,
     private readonly userRegistrationService: UserRegistrationService,
     private readonly loadingController: LoadingController,
     private readonly authService: AuthService,
@@ -56,7 +60,9 @@ export class SignUpAccountPage implements OnDestroy {
     this._$showPassword.next(!current);
   }
 
-  public async createAccount() {
+  public async createAccount($event: any) {
+
+    await this.httpClient.post('https://www.google.com/recaptcha/api/siteverify', { captcha: $event }).toPromise().then(console.log);
 
     const info: IRegistration = {
       ...this.form.value,
@@ -65,6 +71,7 @@ export class SignUpAccountPage implements OnDestroy {
     const shouldContinue = await this.verifyEmail(info.emailAddress);
 
     if (shouldContinue.role === 'cancel') {
+      this.captchaRef.reset();
       return;
     }
 

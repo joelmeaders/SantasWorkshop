@@ -22,9 +22,8 @@ const routes: Routes = [
         loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
       },
       {
-        path: '',
-        redirectTo: '/admin/scanner',
-        pathMatch: 'full'
+        path: 'stats',
+        loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
       }
     ]
   },

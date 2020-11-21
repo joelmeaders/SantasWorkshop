@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
@@ -33,11 +32,7 @@ export class SignInPage implements OnDestroy {
     private readonly loadingController: LoadingController,
     private readonly router: Router,
     private readonly alertController: AlertController,
-    private readonly analyticsService: AngularFireAnalytics
-  ) {
-    analyticsService.setCurrentScreen('sign-in-admin');
-    analyticsService.logEvent('screen_view');
-  }
+  ) { }
 
   public async ngOnDestroy() {
     this.$destroy.next();
@@ -79,9 +74,7 @@ export class SignInPage implements OnDestroy {
       return;
     }
 
-    this.analyticsService.logEvent('sign_in_admin');
-
-    const profile = await this.authService.$userProfile.pipe(take(1)).toPromise();
+    // const profile = await this.authService.$userProfile.pipe(take(1)).toPromise();
     this.router.navigate(['/admin']);
 
   }

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } 
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { AlertController, ModalController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { differenceInDays } from 'date-fns';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
@@ -29,7 +30,8 @@ export class CreateChildModalComponent implements OnInit {
     private readonly modalController: ModalController,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly alertController: AlertController,
-    private readonly analyticsService: AngularFireAnalytics
+    private readonly analyticsService: AngularFireAnalytics,
+    private readonly translateService: TranslateService
   ) {}
 
   public ngOnInit() {
@@ -125,8 +127,8 @@ export class CreateChildModalComponent implements OnInit {
 
   private async tooOld() {
     const alert = await this.alertController.create({
-      header: `We're sorry`,
-      message: `We only have toys for children ages 11 and under`,
+      header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
+      message: this.translateService.instant('REGISTRATION.ADD_CHILD_INSTRUCTIONS_2'),
       buttons: [
         {
           text: 'Ok',

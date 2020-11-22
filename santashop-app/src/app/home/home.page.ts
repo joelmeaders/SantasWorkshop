@@ -46,7 +46,8 @@ export class HomePage implements OnDestroy {
     return await popover.present();
   }
 
-  public setLanguage(value: 'en' | 'es') {
+  public async setLanguage(value: 'en' | 'es') {
     this.translate.use(value);
+    await this.analyticsService.logEvent(`set_language_${value}`);
   }
 }

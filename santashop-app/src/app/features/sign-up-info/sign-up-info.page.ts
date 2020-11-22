@@ -3,6 +3,7 @@ import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { filter, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError, UserProfile } from 'santashop-core/src/public-api';
@@ -44,7 +45,8 @@ export class SignUpInfoPage implements OnDestroy {
     private readonly registrationService: UserRegistrationService,
     private readonly router: Router,
     private readonly analyticsService: AngularFireAnalytics,
-    private readonly alertController: AlertController
+    private readonly alertController: AlertController,
+    private readonly translateService: TranslateService
   ) { 
     analyticsService.setCurrentScreen('sign-up-info');
   }
@@ -88,10 +90,10 @@ export class SignUpInfoPage implements OnDestroy {
 
   private async handleError(error: IError) {
     const alert = await this.alertController.create({
-      header: 'Error',
+      header: this.translateService.instant('COMMON.ERROR'),
       subHeader: error.code,
       message: error.message,
-      buttons: ['Ok'],
+      buttons: [this.translateService.instant('COMMON.OK')],
     });
 
     await alert.present();

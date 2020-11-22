@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import { PopoverController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, takeUntil } from 'rxjs/operators';
 import { AuthService } from 'santashop-core/src/public-api';
@@ -24,7 +26,9 @@ export class PublicMenuComponent implements OnDestroy {
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router,
-    private readonly popoverController: PopoverController
+    private readonly popoverController: PopoverController,
+    private readonly translateService: TranslateService,
+    private readonly analyticsService: AngularFireAnalytics
   ) { }
 
   public ngOnDestroy(): void {
@@ -59,6 +63,12 @@ export class PublicMenuComponent implements OnDestroy {
     await this.authService.logout();
     await this.closeMenu();
     location.reload();
+  }
+
+  public async setLanguage(value: 'en' | 'es') {
+    this.translateService.use(value);
+    await this.analyticsService.logEvent(`set_language_${value}`);
+    await this.closeMenu();
   }
 
 }

@@ -3,6 +3,7 @@ import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { filter, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
@@ -62,7 +63,8 @@ export class SignInPage implements OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
-    private readonly analyticsService: AngularFireAnalytics
+    private readonly analyticsService: AngularFireAnalytics,
+    private readonly translateService: TranslateService
   ) {
     analyticsService.setCurrentScreen('sign-in');
   }
@@ -128,7 +130,7 @@ export class SignInPage implements OnDestroy {
   private async presentLoading() {
     const loading = await this.loadingController.create({
       duration: 3000,
-      message: 'Signing in...',
+      message: this.translateService.instant('SIGNIN.SIGNING_IN'),
       translucent: true,
       backdropDismiss: true,
     });
@@ -138,9 +140,9 @@ export class SignInPage implements OnDestroy {
 
   private async handleIDBFatalError() {
     const alert = await this.alertController.create({
-      header: `Device Issue`,
-      message: `Please try again using a different browser or device. We apologize for the inconvenience`,
-      buttons: ['Ok'],
+      header: this.translateService.instant('SIGNIN.DEVICE_ISSUE'),
+      message: this.translateService.instant('SIGNIN.DEVICE_ISSUE_MSG'),
+      buttons: [this.translateService.instant('COMMON.OK')],
     });
 
     await alert.present();
@@ -161,10 +163,10 @@ export class SignInPage implements OnDestroy {
   private async handleError(error: IError) {
 
     const alert = await this.alertController.create({
-      header: 'Error',
+      header: this.translateService.instant('COMMON.ERROR'),
       subHeader: error.code,
       message: error.message,
-      buttons: ['Ok']
+      buttons: [this.translateService.instant('COMMON.OK')]
     });
 
     await alert.present();

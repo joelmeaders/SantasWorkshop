@@ -48,5 +48,6 @@ export class HomePage implements OnDestroy {
 
   public setLanguage(value: 'en' | 'es') {
     this.translate.use(value);
+    this.analyticsService.logEvent(`set_language_${value}`);
   }
 }

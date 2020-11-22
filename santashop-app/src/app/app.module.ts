@@ -51,8 +51,8 @@ export function httpLoaderFactory(http: HttpClient) {
     SplashScreen,
     // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, 
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com'},
-    ScreenTrackingService,
-    AuthService
+    // ScreenTrackingService,
+    // AuthService
   ],
   bootstrap: [AppComponent],
   schemas: [

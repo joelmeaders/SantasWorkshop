@@ -67,7 +67,7 @@ export class PublicMenuComponent implements OnDestroy {
 
   public async setLanguage(value: 'en' | 'es') {
     this.translateService.use(value);
-    this.analyticsService.logEvent(`set_language_${value}`);
+    await this.analyticsService.logEvent(`set_language_${value}`);
     await this.closeMenu();
   }
 

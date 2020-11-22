@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { AngularFireFunctions } from '@angular/fire/functions';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { publishReplay, refCount, shareReplay, takeUntil } from 'rxjs/operators';
+import { publishReplay, refCount, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
 import { UserRegistrationService, IRegistration } from '../../core/services/user-registration.service';
 import { SignUpAccountForm } from '../../shared/forms/sign-up-account';
@@ -21,6 +23,8 @@ export class SignUpAccountPage implements OnDestroy {
   public readonly form: FormGroup = SignUpAccountForm.form();
   public readonly formValidationMessages = SignUpAccountForm.validationMessages();
 
+  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha;
+
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
 
@@ -31,6 +35,7 @@ export class SignUpAccountPage implements OnDestroy {
   public readonly $showPassword = this._$showPassword.pipe(takeUntil(this.$destroy), shareReplay(1));
 
   constructor(
+    private readonly httpClient: HttpClient,
     private readonly userRegistrationService: UserRegistrationService,
     private readonly loadingController: LoadingController,
     private readonly authService: AuthService,
@@ -38,6 +43,7 @@ export class SignUpAccountPage implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly analyticsService: AngularFireAnalytics,
+    private readonly angularFireFunctions: AngularFireFunctions
   ) { 
     analyticsService.setCurrentScreen('sign-up-account');
   }
@@ -56,7 +62,15 @@ export class SignUpAccountPage implements OnDestroy {
     this._$showPassword.next(!current);
   }
 
-  public async createAccount() {
+  public async createAccount($event: any) {
+
+    const status = 
+      await this.angularFireFunctions.httpsCallable('verifyRecaptcha')({value: $event}).pipe(take(1)).toPromise();
+
+    if (!status) {
+      await this.failedVerification();
+      return;
+    }
 
     const info: IRegistration = {
       ...this.form.value,
@@ -65,6 +79,7 @@ export class SignUpAccountPage implements OnDestroy {
     const shouldContinue = await this.verifyEmail(info.emailAddress);
 
     if (shouldContinue.role === 'cancel') {
+      this.captchaRef.reset();
       return;
     }
 
@@ -172,6 +187,16 @@ export class SignUpAccountPage implements OnDestroy {
 
     await alert.present();
     return alert.onDidDismiss();
+  }
+
+  private async failedVerification() {
+    const alert = await this.alertController.create({
+      header: 'Verification Failed',
+      message: 'You need to refresh the page to try again',
+      buttons: ['Ok'],
+    });
+
+    await alert.present();
   }
 
   public async privacy() {

@@ -1,11 +1,13 @@
-<ion-content>
-  <ion-content color="xmasred">
+<ion-content color="xmasred">
     <ion-header class="ion-no-border ion-padding-bottom">
       <ion-toolbar color="xmasred">
         <ion-grid class="ion-no-padding ion-padding-top">
           <ion-row class="ion-align-items-center ion-justify-content-center">
             <ion-col size="12" class="ion-text-center">
-              <img src="../../assets/santaclausshop.jpg" alt="santa claus shop icon" />
+              <img
+                src="../../assets/santaclausshop.jpg"
+                alt="santa claus shop icon"
+              />
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -20,16 +22,20 @@
               <ion-grid>
                 <ion-row>
                   <ion-col size="12" class="ion-text-center">
-                      <ion-text color="primary">
-                        <h4 class="ion-margin-horizontal">{{ 'SIGNUP_ACCOUNT.HEADER' | translate }}</h4>
-                      </ion-text>
+                    <ion-text color="primary">
+                      <h4 class="ion-margin-horizontal">
+                        {{ 'SIGNUP_ACCOUNT.HEADER' | translate }}
+                      </h4>
+                    </ion-text>
                   </ion-col>
                 </ion-row>
 
                 <ion-row class="ion-justify-content-center">
-                  <ion-col size-md size="12" style="max-width: 400px;">
+                  <ion-col size-md size="12" style="max-width: 400px">
                     <ion-item *appLet="'emailAddress' as controlName">
-                      <ion-label position="stacked" class="ion-padding-bottom"> {{ 'SIGNUP_ACCOUNT.EMAIL_ADDRESS' | translate }} </ion-label>
+                      <ion-label position="stacked" class="ion-padding-bottom">
+                        {{ 'SIGNUP_ACCOUNT.EMAIL_ADDRESS' | translate }}
+                      </ion-label>
                       <ion-input
                         [placeholder]="'SIGNUP_ACCOUNT.EMAIL_EXAMPLE' | translate"
                         [formControlName]="controlName"
@@ -39,9 +45,15 @@
                         *ngIf="form.controls[controlName].dirty && form.controls[controlName].invalid"
                         class="ion-no-padding ion-no-margin padding-bottom-sm"
                       >
-                        <span *ngFor="let message of formValidationMessages[controlName]">
-                          <span *ngIf="form.controls[controlName].hasError(message.type)">
-                            <ion-note color="danger">{{ message.message }}</ion-note>
+                        <span
+                          *ngFor="let message of formValidationMessages[controlName]"
+                        >
+                          <span
+                            *ngIf="form.controls[controlName].hasError(message.type)"
+                          >
+                            <ion-note color="danger"
+                              >{{ message.message }}</ion-note
+                            >
                           </span>
                         </span>
                       </p>
@@ -49,7 +61,12 @@
 
                     <span *appLet="$showPassword | async as showPassword">
                       <ion-item *appLet="'password' as controlName">
-                        <ion-label position="stacked" class="ion-padding-bottom"> {{ 'SIGNUP_ACCOUNT.CREATE_PASSWORD' | translate }} </ion-label>
+                        <ion-label
+                          position="stacked"
+                          class="ion-padding-bottom"
+                        >
+                          {{ 'SIGNUP_ACCOUNT.CREATE_PASSWORD' | translate }}
+                        </ion-label>
                         <ion-input
                           [placeholder]="'SIGNUP_ACCOUNT.CREATE_PASSWORD_PH' | translate"
                           [formControlName]="controlName"
@@ -60,9 +77,15 @@
                           *ngIf="form.controls[controlName].dirty && form.controls[controlName].invalid"
                           class="ion-no-padding ion-no-margin padding-bottom-sm"
                         >
-                          <span *ngFor="let message of formValidationMessages[controlName]">
-                            <span *ngIf="form.controls[controlName].hasError(message.type)">
-                              <ion-note color="danger">{{ message.message }}</ion-note>
+                          <span
+                            *ngFor="let message of formValidationMessages[controlName]"
+                          >
+                            <span
+                              *ngIf="form.controls[controlName].hasError(message.type)"
+                            >
+                              <ion-note color="danger"
+                                >{{ message.message }}</ion-note
+                              >
                             </span>
                           </span>
                         </p>
@@ -77,7 +100,8 @@
                       class="padding-top-md ion-text-center ion-padding-bottom"
                     >
                       <ion-text color="primary" class="ion-text-center">
-                        {{ showPassword ? ('SIGNUP.HIDE_PASSWORD' | translate) : ('SIGNUP.SHOW_PASSWORD' | translate) }}
+                        {{ showPassword ? ('SIGNUP.HIDE_PASSWORD' | translate) :
+                        ('SIGNUP.SHOW_PASSWORD' | translate) }}
                       </ion-text>
                     </div>
                   </ion-col>
@@ -88,8 +112,13 @@
                     {{ 'SIGNUP_ACCOUNT.LEGAL_AGREEMENT' | translate }}
                     <ion-toolbar>
                       <ion-buttons class="ion-justify-content-center">
-                        <ion-button color="primary" (click)="terms()">{{ 'SIGNUP.TERMS_AND_CONDITIONS' | translate }}</ion-button>
-                        <ion-button color="primary" (click)="privacy()"> {{ 'SIGNUP.PRIVACY_POLICY' | translate }} </ion-button>
+                        <ion-button color="primary" (click)="terms()"
+                          >{{ 'SIGNUP.TERMS_AND_CONDITIONS' | translate
+                          }}</ion-button
+                        >
+                        <ion-button color="primary" (click)="privacy()">
+                          {{ 'SIGNUP.PRIVACY_POLICY' | translate }}
+                        </ion-button>
                       </ion-buttons>
                     </ion-toolbar>
                   </ion-col>
@@ -100,9 +129,16 @@
                     size="12"
                     class="ion-align-items-center ion-justify-content-center ion-text-center ion-padding-top ion-padding-bottom"
                   >
-                    <ion-button size="large" color="success" [disabled]="!form.valid || ($loading | async)" (click)="createAccount()">
+                    <ion-button
+                      size="large"
+                      color="success"
+                      [disabled]="!form.valid || ($loading | async)"
+                      (click)="captchaRef.execute()"
+                    >
                       <ion-icon name="person-add" slot="end"></ion-icon>
-                      <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
+                      <ion-label
+                        >{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label
+                      >
                     </ion-button>
                   </ion-col>
                 </ion-row>
@@ -111,6 +147,17 @@
           </ion-card>
         </ion-col>
       </ion-row>
+      <ion-row>
+        <ion-col></ion-col>
+        <ion-col>
+          <re-captcha
+            class="ion-align-self-center"
+            #captchaRef="reCaptcha"
+            (resolved)="$event && createAccount($event)"
+            size="invisible"
+          ></re-captcha>
+        </ion-col>
+        <ion-col></ion-col>
+      </ion-row>
     </ion-grid>
-  </ion-content></ion-content
->
+</ion-content>

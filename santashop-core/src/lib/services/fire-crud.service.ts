@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentReference, Query } from '@angular/fire/firestore';
 import { collectionData, docData } from 'rxfire/firestore';
 import { from, Observable } from 'rxjs';
-import { mapTo } from 'rxjs/operators';
+import { map, mapTo } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -14,9 +14,10 @@ export class FireCRUDStateless {
   ) { }
 
   public readOne<T>(collectionPath: string, documentId: string, idProperty?: Extract<keyof T, string>): Observable<T> {
-    const collection = this.firestoreDb.collection<T>(collectionPath);
-    const documentReference = collection.doc(documentId).ref;
-    return docData<T>(documentReference, idProperty);
+    // const collection = this.firestoreDb.collection<T>(collectionPath);
+    // const documentReference = collection.doc(documentId).ref;
+    // return docData<T>(documentReference, idProperty);
+    return this.firestoreDb.collection<T>(collectionPath).doc(documentId).valueChanges({ idField: idProperty });
   }
 
   public readMany<T>(collectionPath: string, query?: Query, idProperty?: Extract<keyof T, string>): Observable<T[]> {
@@ -26,14 +27,11 @@ export class FireCRUDStateless {
     return this.firestoreDb.collection<T>(collectionPath).valueChanges();
   }
 
-  // public save<T>(collectionPath: string, document: T, idProperty?: Extract<keyof T, string>, mergeIfUpdate = false): Observable<DocumentReference> {
-
-  //   const id: string = this.getProperty(document, idProperty);
-
-  //   return !!id
-  //     ? this.add<T>(collectionPath, document)
-  //     : this.update<T>(collectionPath, document, id, mergeIfUpdate);
-  // }
+  public save<T>(collectionPath: string, docId: string = undefined, document: T, mergeIfUpdate = false): Observable<DocumentReference> {
+    return !!docId
+      ? this.add<T>(collectionPath, document)
+      : this.update<T>(collectionPath, document, docId, mergeIfUpdate);
+  }
 
   public add<T>(collectionPath: string, document: T): Observable<DocumentReference> {
     const collection = this.firestoreDb.collection<T>(collectionPath);

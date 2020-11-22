@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { AngularFireFunctions } from '@angular/fire/functions';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { publishReplay, refCount, shareReplay, takeUntil } from 'rxjs/operators';
+import { publishReplay, refCount, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
 import { UserRegistrationService, IRegistration } from '../../core/services/user-registration.service';
 import { SignUpAccountForm } from '../../shared/forms/sign-up-account';
@@ -42,6 +43,7 @@ export class SignUpAccountPage implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly analyticsService: AngularFireAnalytics,
+    private readonly angularFireFunctions: AngularFireFunctions
   ) { 
     analyticsService.setCurrentScreen('sign-up-account');
   }
@@ -62,7 +64,13 @@ export class SignUpAccountPage implements OnDestroy {
 
   public async createAccount($event: any) {
 
-    await this.httpClient.post('https://www.google.com/recaptcha/api/siteverify', { captcha: $event }).toPromise().then(console.log);
+    const status = 
+      await this.angularFireFunctions.httpsCallable('verifyRecaptcha')({value: $event}).pipe(take(1)).toPromise();
+
+    if (!status) {
+      await this.failedVerification();
+      return;
+    }
 
     const info: IRegistration = {
       ...this.form.value,
@@ -179,6 +187,16 @@ export class SignUpAccountPage implements OnDestroy {
 
     await alert.present();
     return alert.onDidDismiss();
+  }
+
+  private async failedVerification() {
+    const alert = await this.alertController.create({
+      header: 'Verification Failed',
+      message: 'You need to refresh the page to try again',
+      buttons: ['Ok'],
+    });
+
+    await alert.present();
   }
 
   public async privacy() {

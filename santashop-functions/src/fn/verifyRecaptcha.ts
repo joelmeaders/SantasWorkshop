@@ -19,10 +19,12 @@ export default (data: any): Promise<boolean> => {
       if (result.success) {
         return true;
       } else {
+        console.log(`failed recaptcha verification`);
         return false;
       }
     })
     .catch((reason: any) => {
+      console.error(`error: ${JSON.stringify(reason)}`);
       return false;
     });
 };

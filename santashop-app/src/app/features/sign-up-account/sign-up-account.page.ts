@@ -1,10 +1,10 @@
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { AngularFireFunctions } from '@angular/fire/functions';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { publishReplay, refCount, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
@@ -35,7 +35,6 @@ export class SignUpAccountPage implements OnDestroy {
   public readonly $showPassword = this._$showPassword.pipe(takeUntil(this.$destroy), shareReplay(1));
 
   constructor(
-    private readonly httpClient: HttpClient,
     private readonly userRegistrationService: UserRegistrationService,
     private readonly loadingController: LoadingController,
     private readonly authService: AuthService,
@@ -43,7 +42,8 @@ export class SignUpAccountPage implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly modalController: ModalController,
     private readonly analyticsService: AngularFireAnalytics,
-    private readonly angularFireFunctions: AngularFireFunctions
+    private readonly angularFireFunctions: AngularFireFunctions,
+    private readonly translateService: TranslateService
   ) { 
     analyticsService.setCurrentScreen('sign-up-account');
   }
@@ -137,7 +137,7 @@ export class SignUpAccountPage implements OnDestroy {
   private async presentLoading() {
     const loading = await this.loadingController.create({
       duration: 3000,
-      message: 'Creating your account!',
+      message: this.translateService.instant('SIGNUP_ACCOUNT.CREATING'),
       translucent: true,
       backdropDismiss: true,
     });
@@ -150,10 +150,10 @@ export class SignUpAccountPage implements OnDestroy {
 
   private async handleError(error: IError) {
     const alert = await this.alertController.create({
-      header: 'Error',
+      header: this.translateService.instant('COMMON.ERROR'),
       subHeader: error.code,
       message: error.message,
-      buttons: ['Ok'],
+      buttons: [this.translateService.instant('COMMON.OK')],
     });
 
     await alert.present();
@@ -161,9 +161,9 @@ export class SignUpAccountPage implements OnDestroy {
 
   private async signInNeeded() {
     const alert = await this.alertController.create({
-      header: 'Account Created',
-      message: 'Now sign into the account you just created',
-      buttons: ['Ok'],
+      header: this.translateService.instant('SIGNUP_ACCOUNT.CREATED'),
+      message: this.translateService.instant('SIGNUP_ACCOUNT.NOW_SIGN_IN'),
+      buttons: [this.translateService.instant('COMMON.OK')],
     });
 
     await alert.present();
@@ -171,16 +171,16 @@ export class SignUpAccountPage implements OnDestroy {
 
   private async verifyEmail(email: string) {
     const alert = await this.alertController.create({
-      header: 'Is your email correct?',
+      header: this.translateService.instant('SIGNUP_ACCOUNT.CONFIRM_EMAIL'),
       subHeader: email,
-      message: `It cannot be changed after this step. After registration, we send your ticket to this email address.`,
+      message: this.translateService.instant('SIGNUP_ACCOUNT.CONFIRM_EMAIL_MSG'),
       buttons: [
         {
-          text: 'Go Back',
+          text: this.translateService.instant('COMMON.GO_BACK'),
           role: 'cancel'
         },
         {
-          text: 'Yes'
+          text: this.translateService.instant('COMMON.YES')
         }
       ],
     });
@@ -191,9 +191,9 @@ export class SignUpAccountPage implements OnDestroy {
 
   private async failedVerification() {
     const alert = await this.alertController.create({
-      header: 'Verification Failed',
-      message: 'You need to refresh the page to try again',
-      buttons: ['Ok'],
+      header: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED'),
+      message: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED_MSG'),
+      buttons: [this.translateService.instant('COMMON.OK')],
     });
 
     await alert.present();

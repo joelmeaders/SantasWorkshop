@@ -3,6 +3,7 @@ import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwError } from 'rxjs';
 import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
@@ -158,7 +159,8 @@ export class ProfilePage implements OnDestroy {
     private readonly storage: AngularFireStorage,
     private readonly analyticsService: AngularFireAnalytics,
     private readonly router: Router,
-    private readonly ngzone: NgZone
+    private readonly ngzone: NgZone,
+    private readonly translateService: TranslateService
   ) {
     analyticsService.setCurrentScreen('profile');
     this.autoDatePicker();
@@ -367,9 +369,9 @@ export class ProfilePage implements OnDestroy {
 
   private async proceedWithRegistration() {
     const alert = await this.alertController.create({
-      header: 'Are you finished adding your children?',
-      subHeader: 'Click "Go Back" if your are not done',
-      message: `If you're finished adding your children click "Register" to finish registering`,
+      header: this.translateService.instant('REGISTRATION.PROCEED_1'),
+      subHeader: this.translateService.instant('REGISTRATION.PROCEED_2'),
+      message: this.translateService.instant('REGISTRATION.PROCEED_3'),
       buttons: [
         {
           text: 'Go Back',
@@ -401,15 +403,15 @@ export class ProfilePage implements OnDestroy {
 
   private async proceedWithCancellation() {
     const alert = await this.alertController.create({
-      header: 'This will change your registration',
-      message: `Press the blue "Update Registration" at the bottom once you're done to save your changes`,
+      header: this.translateService.instant('REGISTRATION.MODIFY_1'),
+      message: this.translateService.instant('REGISTRATION.MODIFY_2'),
       buttons: [
         {
-          text: 'Go Back',
+          text: this.translateService.instant('COMMON.GO_BACK'),
           role: 'cancel'
         },
         {
-          text: 'I Understand'
+          text: this.translateService.instant('REGISTRATION.I_UNDERSTAND')
         }
       ]
     });
@@ -421,11 +423,11 @@ export class ProfilePage implements OnDestroy {
 
   private async customerAccountMissingAlert() {
     const alert = await this.alertController.create({
-      header: `We're missing some information`,
-      message: `We're going to bring you back one step.`,
+      header: this.translateService.instant('REGISTRATION.MISSING_1'),
+      message: this.translateService.instant('REGISTRATION.MISSING_1_MSG'),
       buttons: [
         {
-          text: 'Ok'
+          text: this.translateService.instant('COMMON.OK')
         }
       ]
     });
@@ -437,10 +439,10 @@ export class ProfilePage implements OnDestroy {
 
   private async missingDateTimeAlert() {
     const alert = await this.alertController.create({
-      header: 'Missing Information',
-      message: `You need to choose your arrival date and time`,
+      header: this.translateService.instant('REGISTRATION.MISSING_2'),
+      message: this.translateService.instant('REGISTRATION.MISSING_2_MSG'),
       buttons: [
-        { text: 'Ok'}
+        { text: this.translateService.instant('COMMON.OK')}
       ]
     });
 
@@ -451,11 +453,11 @@ export class ProfilePage implements OnDestroy {
 
   private async updatedRegistrationEmailAlert() {
     const alert = await this.alertController.create({
-      header: 'Registration Updated',
-      subHeader: 'You will get a new email, check your spam folder',
-      message: `If you updated your children your old code is no longer valid. Remember to print the new email.`,
+      header: this.translateService.instant('REGISTRATION.UPDATED'),
+      subHeader: this.translateService.instant('REGISTRATION.UPDATED_MSG_1'),
+      message: this.translateService.instant('REGISTRATION.UPDATED_MSG_2'),
       buttons: [
-        { text: 'Ok'}
+        { text: this.translateService.instant('COMMON.OK')}
       ]
     });
 
@@ -466,25 +468,11 @@ export class ProfilePage implements OnDestroy {
 
   private async newRegistrationEmailAlert() {
     const alert = await this.alertController.create({
-      header: 'Email Confirmation Sent',
-      subHeader: 'Check your spam folder',
-      message: `Save or print the email we sent you. You will need it on the day of the event to check in.`,
+      header: this.translateService.instant('REGISTRATION.REGISTERED_1'),
+      subHeader: this.translateService.instant('REGISTRATION.REGISTERED_2'),
+      message: this.translateService.instant('REGISTRATION.REGISTERED_3'),
       buttons: [
-        { text: 'Ok'}
-      ]
-    });
-
-    await alert.present();
-
-    return alert.onDidDismiss();
-  }
-  
-  private async savedDateTimeAlert() {
-    const alert = await this.alertController.create({
-      header: 'Date/Time Saved',
-      message: `Our system is updated with your new date and time.`,
-      buttons: [
-        { text: 'Ok'}
+        { text: this.translateService.instant('COMMON.OK')}
       ]
     });
 

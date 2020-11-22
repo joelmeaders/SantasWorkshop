@@ -17,6 +17,7 @@ export class FireCRUDStateless {
     const collection = this.firestoreDb.collection<T>(collectionPath);
     const documentReference = collection.doc(documentId).ref;
     return docData<T>(documentReference, idProperty);
+    // return this.firestoreDb.collection<T>(collectionPath).doc(documentId).valueChanges({ idField: idProperty });
   }
 
   public readMany<T>(collectionPath: string, query?: Query, idProperty?: Extract<keyof T, string>): Observable<T[]> {

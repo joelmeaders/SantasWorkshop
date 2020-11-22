@@ -1,11 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { FirebaseApp } from '@angular/fire';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import 'firebase/auth';
-import { user } from 'rxfire/auth';
 import { Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { UserProfile } from '../models/user-profile.model';
 import { UserProfileService } from './user-profile.service';
 import { AngularFireFunctions } from '@angular/fire/functions';
@@ -20,7 +18,6 @@ export class AuthService implements OnDestroy {
   private readonly $destroy = new Subject<void>();
 
   constructor(
-    private readonly firebase: FirebaseApp,
     private readonly angularFireAuth: AngularFireAuth,
     private readonly angularFireFunctions: AngularFireFunctions,
     private readonly analytics: AngularFireAnalytics,
@@ -28,7 +25,7 @@ export class AuthService implements OnDestroy {
     private readonly router: Router
   ) { }
 
-  public readonly $currentUser = user(this.firebase.auth()).pipe(
+  public readonly $currentUser = this.angularFireAuth.user.pipe(
     takeUntil(this.$destroy),
     distinctUntilChanged(),
     publishReplay(1),
@@ -51,7 +48,7 @@ export class AuthService implements OnDestroy {
     publishReplay(1),
     refCount()
   );
-  
+
   public readonly $isAdmin = this.$currentUser.pipe(
     takeUntil(this.$destroy),
     filter(user => !!user),

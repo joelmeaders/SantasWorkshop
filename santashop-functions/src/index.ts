@@ -64,48 +64,22 @@ export const verifyRecaptcha =
     return (await import('./fn/verifyRecaptcha')).default(request);
   });
 
-export const registrationSearchIndex = functions.firestore
-  .document('{registrations}/{docId}')
-  .onWrite(async (change, context) => {
-    const indexDoc = admin
-      .firestore()
-      .doc(`registrationsearchindex/${change.before.data()?.id}`);
+export const qrCodesOnCreate =
+  functions.firestore.document('{qrcodes}/{docId}')
+    .onCreate(async (change) => {
+      await (await import('./fn/qrcodes-OnCreate')).default(change);
+  });
 
-    if (!change.after.exists) {
-      try {
-        return indexDoc.delete();
-      } catch {
-        return;
-      }
-    }
+export const qrCodesOnUpdate =
+  functions.firestore.document('{qrcodes}/{docId}')
+    .onUpdate(async (change) => {
+      await (await import('./fn/qrCodes-OnUpdate')).default(change);
+  });
 
-    const docData: any = change.after.data();
-
-    if (!docData?.code) {
-      return;
-    }
-
-    const searchIndex: any = {
-      customerId: docData.id,
-    };
-
-    if (!!docData.firstName?.length) {
-      searchIndex.firstName = docData.firstName.toLowerCase();
-    }
-
-    if (!!docData.lastName?.length) {
-      searchIndex.lastName = docData.lastName.toLowerCase();
-    }
-
-    if (!!docData.code?.length) {
-      searchIndex.code = docData.code;
-    }
-
-    if (!!docData.zipCode?.length) {
-      searchIndex.zip = docData.zipCode;
-    }
-
-    return indexDoc.set(searchIndex, { merge: true });
+export const qrCodesOnDelete =
+  functions.firestore.document('{qrcodes}/{docId}')
+    .onDelete(async (change, context) => {
+      await (await import('./fn/qrcodes-OnDelete')).default(change);
   });
 
 export const generateQrCode = functions.firestore

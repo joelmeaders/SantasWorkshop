@@ -16,6 +16,8 @@ export default async (
     return null;
   }
 
+  const batch = admin.firestore().batch();
+
   // QR Code Record
   const qrCodeDocRef = admin.firestore().doc(`qrcodes/${record.customerId}`);
   const qrCodeDoc = { id: record.code, n: record.fullName, c: record.children };
@@ -31,7 +33,12 @@ export default async (
   const indexDoc = { code: record.code, customerId: record.customerId, firstName: record.firstName, lastName: record.lastName, zip: record.zipCode };
   await indexDocRef.set(indexDoc);
 
-  return;
+  return await batch.commit().then(
+    response => response[0].isEqual
+  ).catch((error: any) => {
+    console.error(error);
+    throw new Error(error);
+  });
 };
 
 function isComplete(data: CompletedRegistration): boolean {
@@ -58,7 +65,7 @@ const getAllData = (data: DocumentData): CompletedRegistration => {
     code: data.code,
     dateTime: data.formattedDateTime,
     zipCode: data.zipCode,
-    children: data.children
+    children: data.children,
   };
 };
 

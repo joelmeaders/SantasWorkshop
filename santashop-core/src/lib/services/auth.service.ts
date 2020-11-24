@@ -3,11 +3,10 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import 'firebase/auth';
 import { Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, switchMap, takeUntil } from 'rxjs/operators';
 import { UserProfile } from '../models/user-profile.model';
-import { UserProfileService } from './user-profile.service';
 import { AngularFireFunctions } from '@angular/fire/functions';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { FireCRUDStateless } from './fire-crud.service';
 
 
 @Injectable({
@@ -15,13 +14,13 @@ import { AngularFireAnalytics } from '@angular/fire/analytics';
 })
 export class AuthService implements OnDestroy {
 
+  private readonly PROFILE_COLLECTION = 'customers';
   private readonly $destroy = new Subject<void>();
 
   constructor(
     private readonly angularFireAuth: AngularFireAuth,
     private readonly angularFireFunctions: AngularFireFunctions,
-    private readonly analytics: AngularFireAnalytics,
-    private readonly userProfileService: UserProfileService,
+    private readonly httpService: FireCRUDStateless,
     private readonly router: Router
   ) { }
 
@@ -38,12 +37,12 @@ export class AuthService implements OnDestroy {
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
-  )
+  );
 
-  public readonly $userProfile: Observable<UserProfile> = this.$currentUser.pipe(
+  public readonly $userProfile: Observable<UserProfile> = this.$emailAndUid.pipe(
     takeUntil(this.$destroy),
-    mergeMap(currentUser =>
-      currentUser ? this.userProfileService.readOne(currentUser.uid) : of(undefined)),
+    switchMap(currentUser =>
+      currentUser ? this.getProfile(currentUser.id) : of(undefined)),
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
@@ -58,13 +57,8 @@ export class AuthService implements OnDestroy {
     refCount()
   );
 
-  private readonly setAnalyticsId = this.$emailAndUid.pipe(
-    takeUntil(this.$destroy),
-    filter(response => !!response?.id),
-    pluck('id'),
-  ).subscribe(async id => {
-    await this.analytics.setUserId(id);
-  });
+  private readonly getProfile = (uid: string) =>
+    this.httpService.readOne<UserProfile>(this.PROFILE_COLLECTION, uid, 'id')
 
   public resetPassword(email: string) {
     return this.angularFireAuth.sendPasswordResetEmail(email);
@@ -79,7 +73,6 @@ export class AuthService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.setAnalyticsId.unsubscribe();
     this.$destroy.next();
   }
 }

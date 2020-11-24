@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Platform } from '@ionic/angular';
@@ -14,7 +15,8 @@ export class AppComponent {
     private platform: Platform,
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
-    private readonly translate: TranslateService
+    private readonly translate: TranslateService,
+    private readonly analyticsService: AngularFireAnalytics
   ) {
     this.initializeApp();
   }
@@ -29,5 +31,6 @@ export class AppComponent {
     this.translate.setDefaultLang('en');
     const browserLang = this.translate.getBrowserLang();
     this.translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
+    this.analyticsService.logEvent('default_language', { value: browserLang });
   }
 }

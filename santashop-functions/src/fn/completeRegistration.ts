@@ -2,14 +2,15 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
 
-if (!admin.apps.length) {
+try {
   admin.initializeApp();
-}
+} catch { }
 
 export default async (
   change: functions.Change<functions.firestore.QueryDocumentSnapshot>,
   context: functions.EventContext
 ) => {
+
   const record = getAllData(change.after.data());
 
   if (!isComplete(record)) {
@@ -33,8 +34,8 @@ export default async (
   const indexDoc = { code: record.code, customerId: record.customerId, firstName: record.firstName, lastName: record.lastName, zip: record.zipCode };
   await indexDocRef.set(indexDoc);
 
-  return await batch.commit().then(
-    response => response[0].isEqual
+  return batch.commit().then(
+    () => true
   ).catch((error: any) => {
     console.error(error);
     throw new Error(error);

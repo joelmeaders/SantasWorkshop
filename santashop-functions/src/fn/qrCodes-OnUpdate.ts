@@ -2,13 +2,13 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as qrcode from 'qrcode';
 
+try {
+  admin.initializeApp();
+} catch { }
+
 export default async (
   change: functions.Change<functions.firestore.DocumentSnapshot>
 ) => {
-
-  if (!admin.apps.length) {
-    admin.initializeApp();
-  }
 
   const storage = admin.storage().bucket('gs://santas-workshop-193b5.appspot.com');
 
@@ -52,11 +52,5 @@ export default async (
     errorCorrectionLevel: 'medium',
     width: 600,
     margin: 3,
-  }).then(() => {
-    console.log(`generated qrcode ${newCode}`);
-    return true;
-  }).catch(error => {
-    console.error(`error creating qrcode ${codeObject.id} for ${newDocument.id}`);
-    throw new error(error);
   });
 };

@@ -1,11 +1,10 @@
 import { EventContext } from 'firebase-functions';
 import { firestore } from 'firebase-admin';
 
-const IGNORE_COLLECTIONS = ['counters', 'qrcodes', 'registrationemails'];
-
 export default async (
   context: EventContext
   ) => {
+    const IGNORE_COLLECTIONS = ['counters', 'qrcodes', 'registrationemails'];
     const collection = context.params.collection;
 
     if (IGNORE_COLLECTIONS.includes(collection)) {

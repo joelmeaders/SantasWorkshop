@@ -1,14 +1,15 @@
 import * as admin from 'firebase-admin';
 
+try {
+  admin.initializeApp();
+} catch { }
 const client = new admin.firestore.v1.FirestoreAdminClient();
-const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT;
-const databaseName = client.databasePath(projectId, '(default)');
-const bucket = 'gs://santashop-backups';
 
 export default async () => {
-  if (!admin.apps.length) {
-    admin.initializeApp();
-  }
+
+  const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT;
+  const databaseName = client.databasePath(projectId, '(default)');
+  const bucket = 'gs://santashop-backups';
 
   return client
     .exportDocuments({

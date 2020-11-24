@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentReference, Query } from '@angular/fire/firestore';
-import { collectionData, docData } from 'rxfire/firestore';
 import { from, Observable } from 'rxjs';
-import { map, mapTo } from 'rxjs/operators';
+import { mapTo } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'

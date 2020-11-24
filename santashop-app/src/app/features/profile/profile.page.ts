@@ -4,7 +4,7 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, merge, Observable, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError } from 'rxjs';
 import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
 import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
@@ -130,15 +130,6 @@ export class ProfilePage implements OnDestroy {
     tap(() => this._$qrLoading.next(false)),
     shareReplay(1)
   );
-
-  // Because of rxjs bug with change detection
-  private readonly cdSubscription = merge(
-    this.$customer, this.$children, this.$registrationCode
-  ).pipe(
-    takeUntil(this.$destroy),
-    switchMap(() => of(undefined).pipe(delay(200))),
-    tap(() => this.changeDetection.detectChanges())
-  ).subscribe();
 
   private readonly profileInfoRedirectSubscription = this.authService.$userProfile.pipe(
     takeUntil(this.$destroy),

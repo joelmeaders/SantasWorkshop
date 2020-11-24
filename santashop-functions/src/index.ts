@@ -3,32 +3,45 @@ import * as admin from 'firebase-admin';
 import * as qrcode from 'qrcode';
 import * as sendgrid from '@sendgrid/mail';
 
-if (!admin.apps.length) {
-  admin.initializeApp();
-}
-
-// const client = new admin.firestore.v1.FirestoreAdminClient();
-
 const MAIL_API_KEY = functions.config().sendgrid.key;
 sendgrid.setApiKey(MAIL_API_KEY);
 
+admin.initializeApp();
+
 /**
- * Sharded count updater for all collections
+ * Validate recaptcha response.
+ *
+ * @remarks
+ * Callable functions need to specify return instead of await
  */
-export const documentCounterOnCreate =
-  functions.firestore.document('{collection}/{docId}')
-    .onCreate(async (snapshot, context) => {
-      await (await import('./fn/documentCounterOnCreate')).default(context);
-    });
+export const verifyRecaptcha =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/verifyRecaptcha')).default(request);
+  }
+);
+
+export const isAdmin =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/isAdmin')).default(request, context);
+});
 
 /**
  * Sharded count updater for all collections
  */
-export const documentCounterOnDelete =
-  functions.firestore.document('{collection}/{docId}')
-    .onDelete(async (snapshot, context) => {
-      await (await import('./fn/documentCounterOnDelete')).default(context);
-    });
+export const documentCounterOnCreate = functions.firestore
+  .document('{collection}/{docId}')
+  .onCreate(async (snapshot, context) => {
+    await (await import('./fn/documentCounterOnCreate')).default(context);
+  });
+
+/**
+ * Sharded count updater for all collections
+ */
+export const documentCounterOnDelete = functions.firestore
+  .document('{collection}/{docId}')
+  .onDelete(async (snapshot, context) => {
+    await (await import('./fn/documentCounterOnDelete')).default(context);
+  });
 
 /**
  * Backs up firestore db every hour to storage bucket
@@ -47,70 +60,37 @@ export const scheduledFirestoreBackup = functions.pubsub
  * @remarks
  * registration-email, qrcode, RegistrationSearchIndex
  */
-export const completeRegistration =
-  functions.firestore.document('{registrations}/{docId}')
-    .onUpdate(async (snapshot, context) => {
-      await (await import('./fn/completeRegistration')).default(snapshot, context);
-    });
-
-/**
- * Validate recaptcha response.
- * 
- * @remarks
- * Callable functions need to specify return instead of await
- */
-export const verifyRecaptcha =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/verifyRecaptcha')).default(request);
+export const completeRegistration = functions.firestore
+  .document('registrations/{docId}')
+  .onUpdate(async (snapshot, context) => {
+    await (await import('./fn/completeRegistration')).default(
+      snapshot,
+      context
+    );
   });
 
-export const registrationSearchIndex = functions.firestore
-  .document('{registrations}/{docId}')
-  .onWrite(async (change, context) => {
-    const indexDoc = admin
-      .firestore()
-      .doc(`registrationsearchindex/${change.before.data()?.id}`);
+export const qrCodesOnCreate = functions.firestore
+  .document('qrcodes/{docId}')
+  .onCreate(async (change, context) => {
+    await (await import('./fn/qrcodes-OnCreate')).default(change, context);
+  });
 
-    if (!change.after.exists) {
-      try {
-        return indexDoc.delete();
-      } catch {
-        return;
-      }
-    }
+export const qrCodesOnUpdate = functions.firestore
+  .document('qrcodes/{docId}')
+  .onUpdate(async (change) => {
+    await (await import('./fn/qrCodes-OnUpdate')).default(change);
+  });
 
-    const docData: any = change.after.data();
-
-    if (!docData?.code) {
-      return;
-    }
-
-    const searchIndex: any = {
-      customerId: docData.id,
-    };
-
-    if (!!docData.firstName?.length) {
-      searchIndex.firstName = docData.firstName.toLowerCase();
-    }
-
-    if (!!docData.lastName?.length) {
-      searchIndex.lastName = docData.lastName.toLowerCase();
-    }
-
-    if (!!docData.code?.length) {
-      searchIndex.code = docData.code;
-    }
-
-    if (!!docData.zipCode?.length) {
-      searchIndex.zip = docData.zipCode;
-    }
-
-    return indexDoc.set(searchIndex, { merge: true });
+export const qrCodesOnDelete = functions.firestore
+  .document('qrcodes/{docId}')
+  .onDelete(async (change, context) => {
+    await (await import('./fn/qrcodes-OnDelete')).default(change);
   });
 
 export const generateQrCode = functions.firestore
-  .document('{registrations}/{docId}')
+  .document('registrations/{docId}')
   .onWrite(async (change, context) => {
+
     const oldDocument: any = change.before?.data() || undefined;
     const oldCode = oldDocument?.code || undefined;
     const storage = admin
@@ -177,8 +157,9 @@ export const generateQrCode = functions.firestore
   });
 
 export const sendRegistrationEmail2 = functions.firestore
-  .document('{registrations}/{docId}')
+  .document('registrations/{docId}')
   .onWrite((change, context) => {
+
     const oldDocument: any = change.before.exists
       ? change.before.data()
       : undefined;
@@ -219,14 +200,3 @@ export const sendRegistrationEmail2 = functions.firestore
 
     return sendgrid.send(msg);
   });
-
-export const isAdmin = functions.https.onCall((data, context) => {
-  return admin
-    .firestore()
-    .doc(`parameters/admin`)
-    .get()
-    .then((response) => {
-      const adminUsers = response.data()?.adminusers as string[];
-      return adminUsers.findIndex((user) => user === context.auth?.uid) > -1;
-    });
-});

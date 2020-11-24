@@ -3,6 +3,7 @@ import * as functions from 'firebase-functions';
 const rp = require('request-promise');
 
 export default (data: any): Promise<boolean> => {
+
   const key = functions.config().recaptcha.key;
   const value = data.value;
 

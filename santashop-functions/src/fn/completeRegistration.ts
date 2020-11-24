@@ -2,19 +2,22 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
 
-if (!admin.apps.length) {
+try {
   admin.initializeApp();
-}
+} catch { }
 
 export default async (
   change: functions.Change<functions.firestore.QueryDocumentSnapshot>,
   context: functions.EventContext
 ) => {
+
   const record = getAllData(change.after.data());
 
   if (!isComplete(record)) {
     return null;
   }
+
+  const batch = admin.firestore().batch();
 
   // QR Code Record
   const qrCodeDocRef = admin.firestore().doc(`qrcodes/${record.customerId}`);
@@ -31,7 +34,12 @@ export default async (
   const indexDoc = { code: record.code, customerId: record.customerId, firstName: record.firstName, lastName: record.lastName, zip: record.zipCode };
   await indexDocRef.set(indexDoc);
 
-  return;
+  return batch.commit().then(
+    () => true
+  ).catch((error: any) => {
+    console.error(error);
+    throw new Error(error);
+  });
 };
 
 function isComplete(data: CompletedRegistration): boolean {
@@ -58,7 +66,7 @@ const getAllData = (data: DocumentData): CompletedRegistration => {
     code: data.code,
     dateTime: data.formattedDateTime,
     zipCode: data.zipCode,
-    children: data.children
+    children: data.children,
   };
 };
 

@@ -12,6 +12,11 @@ if (!admin.apps.length) {
 const MAIL_API_KEY = functions.config().sendgrid.key;
 sendgrid.setApiKey(MAIL_API_KEY);
 
+export const testStatsByDate =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/isAdmin')).default(request, context);
+});
+
 /**
  * Sharded count updater for all collections
  */

@@ -2,8 +2,7 @@ import { ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { AuthService } from 'santashop-core/src/public-api';
 import { PublicMenuComponent } from '../shared/components/public-menu/public-menu.component';
 
@@ -13,30 +12,16 @@ import { PublicMenuComponent } from '../shared/components/public-menu/public-men
   styleUrls: ['home.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomePage implements OnDestroy {
+export class HomePage {
 
-  private readonly $destroy = new Subject<void>();
-
-  public readonly $user = new BehaviorSubject<any>(undefined);
-
-  private readonly setUserSubscription = this.authService.$currentUser.pipe(
-    takeUntil(this.$destroy),
-    tap(v => this.zone.run(() => this.$user.next(v))),
-  ).subscribe();
+  public readonly $user = this.authService.$currentUser;
 
   constructor(
     private readonly popoverController: PopoverController,
-    private readonly analyticsService: AngularFireAnalytics,
     private readonly translate: TranslateService,
     private readonly authService: AuthService,
-    private readonly zone: NgZone
-  ) {
-    analyticsService.setCurrentScreen('home');
-  }
-
-  ngOnDestroy() {
-    this.$destroy.next();
-  }
+    private readonly analyticsService: AngularFireAnalytics
+  ) { }
 
   public async profileMenu($event: any) {
     const popover = await this.popoverController.create({
@@ -47,7 +32,7 @@ export class HomePage implements OnDestroy {
   }
 
   public async setLanguage(value: 'en' | 'es') {
-    this.translate.use(value);
-    await this.analyticsService.logEvent(`set_language_${value}`);
+    await this.translate.use(value).pipe(first()).toPromise();
+    this.analyticsService.logEvent('set_language', { value });
   }
 }

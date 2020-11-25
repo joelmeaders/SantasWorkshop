@@ -17,7 +17,7 @@ export class PublicMenuComponent implements OnDestroy {
 
   private readonly $destroy = new Subject<boolean>();
 
-  public readonly $isLoggedIn = this.authService.$userProfile.pipe(
+  public readonly $isLoggedIn = this.authService.$currentUser.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
     refCount()

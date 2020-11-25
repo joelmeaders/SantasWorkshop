@@ -1,7 +1,13 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire';
-import { AngularFireAnalyticsModule, ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
+import {
+  AngularFireAnalytics,
+  AngularFireAnalyticsModule,
+  CONFIG,
+  ScreenTrackingService,
+  UserTrackingService,
+} from '@angular/fire/analytics';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/storage';
@@ -12,7 +18,7 @@ import { IonicModule } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AuthService } from 'santashop-core/src/public-api';
-import { firebaseConfig } from '../environments/environment';
+import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
@@ -30,8 +36,8 @@ export function httpLoaderFactory(http: HttpClient) {
       loader: {
         provide: TranslateLoader,
         useFactory: httpLoaderFactory,
-        deps: [HttpClient]
-      }
+        deps: [HttpClient],
+      },
     }),
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFirestoreModule,
@@ -39,25 +45,30 @@ export function httpLoaderFactory(http: HttpClient) {
     AngularFireStorageModule,
     AngularFireAnalyticsModule,
     IonicModule.forRoot({
-      mode: 'md'
+      mode: 'md',
     }),
-    AppRoutingModule
+    AppRoutingModule,
   ],
-  exports: [
-    TranslateModule
-  ],
+  exports: [TranslateModule],
   providers: [
     StatusBar,
     SplashScreen,
-    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, 
-    { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com'},
+    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
+    {
+      provide: CONFIG,
+      useValue: {
+        debug_mode: !environment.production,
+        app_name: environment.name,
+        app_version: environment.version,
+      },
+    },
+    AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
     AuthService
   ],
   bootstrap: [AppComponent],
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA
-  ]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}

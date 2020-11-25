@@ -1,4 +1,4 @@
-import { name, version } from '../../../package.json';
+import { name, version } from './config.json';
 
 export const environment = {
   production: true,

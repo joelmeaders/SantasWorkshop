@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore, DocumentReference, Query } from '@angular/fire/firestore';
-import { collectionData, docData } from 'rxfire/firestore';
 import { from, Observable } from 'rxjs';
-import { map, mapTo } from 'rxjs/operators';
+import { mapTo } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -13,18 +12,16 @@ export class FireCRUDStateless {
     private readonly firestoreDb: AngularFirestore
   ) { }
 
-  public readOne<T>(collectionPath: string, documentId: string, idProperty?: Extract<keyof T, string>): Observable<T> {
-    // const collection = this.firestoreDb.collection<T>(collectionPath);
-    // const documentReference = collection.doc(documentId).ref;
-    // return docData<T>(documentReference, idProperty);
-    return this.firestoreDb.collection<T>(collectionPath).doc(documentId).valueChanges({ idField: idProperty });
+  public readOne<T>(collectionPath: string, documentId: string, idField?: Extract<keyof T, string>): Observable<T> {
+    return this.firestoreDb.collection(collectionPath).doc<T>(documentId)
+      .valueChanges({ idField });
   }
 
-  public readMany<T>(collectionPath: string, query?: Query, idProperty?: Extract<keyof T, string>): Observable<T[]> {
+  public readMany<T>(collectionPath: string, query?: Query, idField?: Extract<keyof T, string>): Observable<T[]> {
     // const collectionReference = this.firestoreDb.collection<T>(collectionPath).ref;
     // query = query ?? collectionReference.limit(50);
     // return collectionData<T>(query, idProperty);
-    return this.firestoreDb.collection<T>(collectionPath).valueChanges();
+    return this.firestoreDb.collection<T>(collectionPath, ).valueChanges({ idField });
   }
 
   public save<T>(collectionPath: string, docId: string = undefined, document: T, mergeIfUpdate = false): Observable<DocumentReference> {

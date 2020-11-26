@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
-import { mergeMap, pluck, reduce, take } from 'rxjs/operators';
-import { FireCRUDStateless } from 'santashop-core/src/public-api';
+import { map, mergeMap, pluck, reduce, take, tap } from 'rxjs/operators';
+import { FireCRUDStateless, IDateTimeCount, IZipCodeCount } from 'santashop-core/src/public-api';
+import { chain, sortBy } from 'underscore';
 import { Counter } from '../models/counter.model';
 
 @Injectable({
@@ -10,6 +11,27 @@ import { Counter } from '../models/counter.model';
 export class StatsService {
 
   private readonly COUNTER_COLLECTION = 'counters';
+
+  private readonly $stats = this.httpService.readOne('stats', 'registration-2020').pipe(
+    take(1)
+  );
+
+  public readonly $completedRegistrations = this.$stats.pipe(
+    take(1),
+    map((stats: any) => stats.completedRegistrations as number)
+  );
+
+  public readonly $dateTimeCounts = this.$stats.pipe(
+    take(1),
+    map((stats: any) => stats.dateTimeCount as IDateTimeCount),
+    map((stats) => chain(stats).sortBy('time').groupBy('date').value()),
+  );
+
+  public readonly $zipCodeCounts = this.$stats.pipe(
+    take(1),
+    map((stats: any) => stats.zipCodeCount as IZipCodeCount),
+    map((stats: IZipCodeCount) => sortBy(stats, 'childCount').reverse() as IZipCodeCount[])
+  );
 
   constructor(
     private readonly httpService: FireCRUDStateless
@@ -23,27 +45,27 @@ export class StatsService {
   }
 
   public customers(): Observable<number> {
-    return this.baseQuery('customers').pipe(
+    return this.baseCountQuery('customers').pipe(
       take(1),
       mergeMap(this.$getCount)
     );
   }
 
   public registrations(): Observable<number> {
-    return this.baseQuery('registrations').pipe(
+    return this.baseCountQuery('registrations').pipe(
       take(1),
       mergeMap(this.$getCount)
     );
   }
 
   public children(): Observable<number> {
-    return this.baseQuery('children').pipe(
+    return this.baseCountQuery('children').pipe(
       take(1),
       mergeMap(this.$getCount)
     );
   }
 
-  private baseQuery(path: string): Observable<Counter[]> {
+  private baseCountQuery(path: string): Observable<Counter[]> {
     return this.httpService.readMany<Counter>(`${this.COUNTER_COLLECTION}/${path}/shards`);
   }
 }

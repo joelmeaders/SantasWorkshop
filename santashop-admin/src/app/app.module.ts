@@ -11,6 +11,7 @@ import { AuthService } from 'santashop-core/src/public-api';
 import { firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { FriendlyTimePipe } from './pipes/friendly-time.pipe';
 
 @NgModule({
   declarations: [AppComponent],

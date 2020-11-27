@@ -22,7 +22,7 @@ export default async (
     c: document.children,
   };
 
-  const imageToCreate = storage.file(`registrations/test/${codeObject.id}.png`);
+  const imageToCreate = storage.file(`registrations/${codeObject.id}.png`);
   const fileStream = imageToCreate.createWriteStream({
     public: true,
     contentType: 'auto',

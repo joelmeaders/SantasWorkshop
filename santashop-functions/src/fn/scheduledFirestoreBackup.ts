@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 try {
   admin.initializeApp();
 } catch { }
+
 const client = new admin.firestore.v1.FirestoreAdminClient();
 
 export default async () => {

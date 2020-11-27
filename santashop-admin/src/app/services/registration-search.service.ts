@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Query } from '@angular/fire/firestore';
+import { Query, QueryFn } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src/public-api';
@@ -53,7 +53,7 @@ export class RegistrationSearchService {
   ) { }
 
   public queryByCode(id: string): Observable<RegistrationSearchIndex[]> {
-    const query: Query = this.httpService.collectionRef(this.INDEX_COLLECTION)
+    const query: QueryFn = qry => qry
       .where('code', '==', id)
       .orderBy('lastName', 'asc')
       .orderBy('firstName', 'asc');
@@ -62,7 +62,7 @@ export class RegistrationSearchService {
   }
 
   public queryByName(firstName: string, lastName: string): Observable<RegistrationSearchIndex[]> {
-    const query: Query = this.httpService.collectionRef(this.INDEX_COLLECTION)
+    const query: QueryFn = qry => qry
       .where('firstName', '==', firstName)
       .where('lastName', '>=', lastName)
       .limit(50);

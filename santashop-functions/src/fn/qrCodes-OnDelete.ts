@@ -10,7 +10,7 @@ export default async (
 ) => {
 
   const storage = admin.storage().bucket('gs://santas-workshop-193b5.appspot.com');
-  const imageToDelete = storage.file(`registrations/test/${document.data().code}.png`);
+  const imageToDelete = storage.file(`registrations/${document.data().code}.png`);
 
   const exists = await imageToDelete.exists();
   if (!exists[0]) return;

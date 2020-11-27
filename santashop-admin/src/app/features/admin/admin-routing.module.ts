@@ -26,6 +26,10 @@ const routes: Routes = [
         loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
       },
       {
+        path: 'test',
+        loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)
+      },
+      {
         path: '',
         redirectTo: '/admin/stats',
         pathMatch: 'full'
@@ -37,6 +41,7 @@ const routes: Routes = [
     redirectTo: '/admin/stats',
     pathMatch: 'full'
   }
+
 ];
 
 @NgModule({

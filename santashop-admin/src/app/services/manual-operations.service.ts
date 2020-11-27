@@ -51,11 +51,15 @@ export class ManualOperationsService {
     }
 
     if (registration.firstName) {
-      index.firstName = registration.firstName.toLowerCase();
+      index.firstName = registration.firstName.toLowerCase().trim();
     }
 
     if (registration.lastName) {
-      index.lastName = registration.lastName.toLowerCase();
+      index.lastName = registration.lastName.toLowerCase().trim();
+    }
+
+    if (registration.zipCode) {
+      index.zip = registration.zipCode;
     }
 
     return index;

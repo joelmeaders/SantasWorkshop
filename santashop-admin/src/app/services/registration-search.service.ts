@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Query, QueryFn } from '@angular/fire/firestore';
+import { QueryFn } from '@angular/fire/firestore';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src/public-api';
 import { chain } from 'underscore';
 import { RegistrationSearch } from '../models/registration-search.model';
@@ -25,20 +25,13 @@ export class RegistrationSearchService {
     refCount()
   );
 
-  private readonly _$searchNext = new Subject<void>();
-  public readonly $searchNext = this._$searchNext.pipe(
-    publishReplay(1),
-    refCount()
-  );
-
   private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[]>(undefined);
   public readonly $searchResults = this._$searchResults.pipe(
     publishReplay(1),
     refCount()
   );
 
-  private readonly _$searchResultsSubscription = this.$searchNext.pipe(
-    switchMap(() => this.$searchStateValid),
+  private readonly getSearchResults = () => this.$searchStateValid.pipe(
     filter(isValid => isValid === true),
     switchMap(() => this.$searchState),
     filter(state => this.isSearchStateValid(state)),
@@ -46,7 +39,7 @@ export class RegistrationSearchService {
       ? this.queryByCode(state.registrationCode)
       : this.queryByName(state.firstName, state.lastName)
     )
-  ).subscribe(results => this._$searchResults.next(results));
+  )
 
   constructor(
     private readonly httpService: FireCRUDStateless
@@ -64,7 +57,7 @@ export class RegistrationSearchService {
   public queryByName(firstName: string, lastName: string): Observable<RegistrationSearchIndex[]> {
     const query: QueryFn = qry => qry
       .where('firstName', '==', firstName)
-      .where('lastName', '>=', lastName)
+      .where('lastName', '>=', lastName).where('lastName', '<=', lastName + '\uf8ff')
       .limit(50);
     return this.httpService.readMany<RegistrationSearchIndex>(this.INDEX_COLLECTION, query, 'customerId')
       .pipe(take(1),map(results => this.orderNameResults(results)));
@@ -77,8 +70,9 @@ export class RegistrationSearchService {
     return chain(results).sortBy('lastName').sortBy('firstName').value();
   }
 
-  public search(): void {
-    this._$searchNext.next();
+  public async search(): Promise<void> {
+    const results = await this.getSearchResults().pipe(take(1)).toPromise();
+    this._$searchResults.next(results);
   }
 
   public setSearchState(search: RegistrationSearch) {

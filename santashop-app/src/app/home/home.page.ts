@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, NgZone, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';

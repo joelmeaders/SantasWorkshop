@@ -21,6 +21,7 @@ import { AuthService } from 'santashop-core/src/public-api';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { MaintenanceService } from './services/maintenance.service';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -66,7 +67,8 @@ export function httpLoaderFactory(http: HttpClient) {
     AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
-    AuthService
+    AuthService,
+    MaintenanceService
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

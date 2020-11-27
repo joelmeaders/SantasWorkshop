@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { filter, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
 import { AuthService, IError, UserProfile } from 'santashop-core/src/public-api';
-import { IRegistration, UserRegistrationService } from '../../core/services/user-registration.service';
+import { IRegistration, UserRegistrationService } from '../../services/user-registration.service';
 import { SignUpInfoForm } from '../../shared/forms/sign-up info';
 
 @Component({

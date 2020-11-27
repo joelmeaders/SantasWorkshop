@@ -4,6 +4,7 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { MaintenanceService } from './services/maintenance.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,8 @@ export class AppComponent {
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
     private readonly translate: TranslateService,
-    private readonly analyticsService: AngularFireAnalytics
+    private readonly analyticsService: AngularFireAnalytics,
+    private readonly maintenance: MaintenanceService
   ) {
     this.initializeApp();
   }

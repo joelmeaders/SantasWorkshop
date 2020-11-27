@@ -1,0 +1,28 @@
+<ion-content>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <ion-title>
+          Undergoing maintenance
+        </ion-title>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        {{ service.$messageEn | async }}
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        {{ service.$messageEs | async }}
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <img src="../../../assets/robots.jpg" alt="maintenance image">
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>

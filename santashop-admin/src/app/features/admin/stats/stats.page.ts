@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { LoadingController, AlertController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, switchMap, map } from 'rxjs/operators';
 import { StatsService } from 'santashop-admin/src/app/services/stats.service';
@@ -51,8 +50,6 @@ export class StatsPage implements OnDestroy {
 
   constructor(
     private readonly statsService: StatsService,
-    private readonly loadingController: LoadingController,
-    private readonly alertController: AlertController
   ) { }
 
   public async ngOnDestroy() {

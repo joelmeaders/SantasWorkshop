@@ -16,8 +16,7 @@ export class ManualOperationsService {
   ) { }
 
   private allRegistrations() {
-    const query: Query = this.httpService.collectionRef(this.REGISTRATION_COLLECTION);
-    return this.httpService.readMany<Registration>(this.REGISTRATION_COLLECTION, query, 'id')
+    return this.httpService.readMany<Registration>(this.REGISTRATION_COLLECTION, undefined, 'id')
       .pipe(take(1));
   }
 

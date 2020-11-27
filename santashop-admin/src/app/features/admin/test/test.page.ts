@@ -55,12 +55,12 @@ export class TestPage {
   }
 
   private loadAllRegistrations(): Observable<Registration[]> {
-    const query: QueryFn = q => q.limit(50);
-    return this.httpService.readMany<Registration>(this.REGISTRATIONS, query);
+    return this.httpService.readMany<Registration>(this.REGISTRATIONS);
   }
 
   private isRegistrationComplete(registration: Registration): boolean {
     if (!registration) return false;
+    if (!registration.code) return false;
     if (!registration.date) return false;
     if (!registration.time) return false;
     if (!registration.zipCode) return false;

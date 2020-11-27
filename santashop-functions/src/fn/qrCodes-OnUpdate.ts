@@ -2,9 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as qrcode from 'qrcode';
 
-try {
-  admin.initializeApp();
-} catch { }
+admin.initializeApp();
 
 export default async (
   change: functions.Change<functions.firestore.DocumentSnapshot>
@@ -15,8 +13,8 @@ export default async (
   const oldDocument: any = change.before.data();
   const newDocument: any = change.after.data();
 
-  const oldCode = oldDocument.code;
-  const newCode = newDocument.code;
+  const oldCode = oldDocument.id;
+  const newCode = newDocument.id;
 
   // Delete the old image file if it exists
   if (oldCode !== newCode) {
@@ -35,8 +33,8 @@ export default async (
 
   const codeObject: any = {
     id: newCode,
-    n: newDocument.name,
-    c: newDocument.children,
+    n: newDocument.n,
+    c: newDocument.c,
   };
 
   const imageToCreate = storage.file(`registrations/${newCode}.png`);
@@ -47,6 +45,8 @@ export default async (
   });
 
   const codeContent = JSON.stringify(codeObject);
+
+  console.log(`creating new code ${newCode}`);
 
   return qrcode.toFileStream(fileStream, codeContent, {
     errorCorrectionLevel: 'medium',

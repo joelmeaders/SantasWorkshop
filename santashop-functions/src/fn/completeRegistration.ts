@@ -2,9 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
 
-try {
-  admin.initializeApp();
-} catch { }
+admin.initializeApp();
 
 export default async (
   change: functions.Change<functions.firestore.QueryDocumentSnapshot>,
@@ -14,6 +12,7 @@ export default async (
   const record = getAllData(change.after.data());
 
   if (!isComplete(record)) {
+    console.log('not complete')
     return null;
   }
 

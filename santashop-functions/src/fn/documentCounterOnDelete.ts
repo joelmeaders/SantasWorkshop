@@ -1,9 +1,7 @@
 import { EventContext } from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-try {
-  admin.initializeApp();
-} catch { }
+admin.initializeApp();
 
 export default async (
   context: EventContext

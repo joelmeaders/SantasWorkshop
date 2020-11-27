@@ -1,9 +1,7 @@
 import * as admin from 'firebase-admin';
 import { CallableContext } from 'firebase-functions/lib/providers/https';
 
-try {
-  admin.initializeApp();
-} catch { }
+admin.initializeApp();
 
 export default async (
   request: any,

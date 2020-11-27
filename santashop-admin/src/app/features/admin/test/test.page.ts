@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { QueryFn } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { ManualOperationsService } from 'santashop-admin/src/app/services/manual-operations.service';
 import { FireCRUDStateless, IDateTimeCount, IZipCodeCount, Registration } from 'santashop-core/src/public-api';
 
 @Component({
@@ -19,8 +19,13 @@ export class TestPage {
   private zipCodeCount: IZipCodeCount[] = [];
 
   constructor(
-    private readonly httpService: FireCRUDStateless
+    private readonly httpService: FireCRUDStateless,
+    private readonly manualOperations: ManualOperationsService
   ) { }
+
+  public async buildSearchIndex() {
+    await this.manualOperations.buildRegistrationIndex();
+  }
 
   private async storeRegistrations() {
 

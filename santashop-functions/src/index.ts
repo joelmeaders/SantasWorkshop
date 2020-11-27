@@ -59,7 +59,7 @@ export const completeRegistration = functions.firestore
   });
 
 export const sendRegistrationEmail = functions.firestore
-  .document('registrationemails')
+  .document('registrationemails/{docId}')
   .onWrite(async (snapshot, context) => {
     await (await import('./fn/sendRegistrationEmail')).default(snapshot, context);
   });

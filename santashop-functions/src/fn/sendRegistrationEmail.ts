@@ -1,12 +1,11 @@
 import * as functions from 'firebase-functions';
 import * as sendgrid from '@sendgrid/mail';
-import { Change, EventContext } from 'firebase-functions';
 
 let MAIL_API_KEY: string;
 
 export default async (
-  change: Change<functions.firestore.DocumentSnapshot>,
-  context: EventContext
+  change: functions.Change<functions.firestore.DocumentSnapshot>,
+  context: functions.EventContext
 ) => {
 
   if (!change.after.exists) {

@@ -6,7 +6,7 @@ export abstract class SignUpInfoForm {
   private static validators = {
     firstName: Validators.compose([Validators.required, Validators.minLength(2), Validators.maxLength(25)]),
     lastName: Validators.compose([Validators.required, Validators.minLength(2), Validators.maxLength(25)]),
-    zipCode: Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(10)]),
+    zipCode: Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(5)]),
   };
 
   public static form(): FormGroup {
@@ -21,7 +21,7 @@ export abstract class SignUpInfoForm {
     return {
       firstName: [CommonForms.messages().required, CommonForms.messages(2, 50).minLength, CommonForms.messages(2, 50).maxLength],
       lastName: [CommonForms.messages().required, CommonForms.messages(2, 50).minLength, CommonForms.messages(2, 50).maxLength],
-      zipCode: [CommonForms.messages().required, CommonForms.messages(5, 10).minLength, CommonForms.messages(5, 10).maxLength],
+      zipCode: [CommonForms.messages().required, CommonForms.messages(5, 10).minLength, CommonForms.messages(5, 5).maxLength],
     };
   }
 }

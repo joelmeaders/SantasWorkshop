@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { filter, map, mergeMap, take, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, take } from 'rxjs/operators';
 import { AuthService, FireCRUDStateless } from 'santashop-core/src/public-api';
 
 @Injectable({

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { filter, map, take, tap } from 'rxjs/operators';
-import { FireCRUDStateless } from 'santashop-core/src/public-api';
+import { filter, map, mergeMap, take, tap } from 'rxjs/operators';
+import { AuthService, FireCRUDStateless } from 'santashop-core/src/public-api';
 
 @Injectable({
   providedIn: 'root'
@@ -28,13 +28,15 @@ export class MaintenanceService {
     map((response: any) => response.esnotification as string)
   );
 
-
   public readonly subscription = this.$isMaintenance.pipe(
-    filter((response: boolean) => !!response)
+    filter((response: boolean) => !!response),
+    mergeMap(() => this.authService.$isAdmin),
+    filter((response: boolean) => !response)
   ).subscribe(() => this.router.navigate(['/maintenance']));
 
   constructor(
     private readonly httpService: FireCRUDStateless,
+    private readonly authService: AuthService,
     private readonly router: Router
   ) { }
 }

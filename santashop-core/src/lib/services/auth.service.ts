@@ -57,6 +57,11 @@ export class AuthService implements OnDestroy {
     refCount()
   );
 
+  public readonly $IsAdminNoAuth =
+    this.angularFireFunctions.httpsCallable('isAdmin')({}).pipe(
+      map((response: boolean) => response)
+    );
+
   private readonly getProfile = (uid: string) =>
     this.httpService.readOne<UserProfile>(this.PROFILE_COLLECTION, uid, 'id')
 

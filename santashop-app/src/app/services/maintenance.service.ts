@@ -30,7 +30,7 @@ export class MaintenanceService {
 
   public readonly subscription = this.$isMaintenance.pipe(
     filter((response: boolean) => !!response),
-    mergeMap(() => this.authService.$isAdmin),
+    mergeMap(() => this.authService.$IsAdminNoAuth),
     filter((response: boolean) => !response)
   ).subscribe(() => this.router.navigate(['/maintenance']));
 

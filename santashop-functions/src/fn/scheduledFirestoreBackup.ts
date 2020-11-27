@@ -1,8 +1,6 @@
 import * as admin from 'firebase-admin';
 
-try {
-  admin.initializeApp();
-} catch { }
+admin.initializeApp();
 
 const client = new admin.firestore.v1.FirestoreAdminClient();
 

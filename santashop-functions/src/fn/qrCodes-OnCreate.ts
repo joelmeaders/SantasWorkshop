@@ -2,24 +2,20 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as qrcode from 'qrcode';
 
-try {
-  admin.initializeApp();
-} catch { }
+admin.initializeApp();
 
 export default async (
   change: functions.firestore.DocumentSnapshot,
   context: functions.EventContext
 ) => {
 
-  console.log(`QRONCREATE: ${JSON.stringify(context)}`)
-
   const storage = admin.storage().bucket('gs://santas-workshop-193b5.appspot.com');
   const document: any = change.data();
 
   const codeObject: any = {
-    id: document.code,
-    n: document.name,
-    c: document.children,
+    id: document.id,
+    n: document.n,
+    c: document.c,
   };
 
   const imageToCreate = storage.file(`registrations/${codeObject.id}.png`);

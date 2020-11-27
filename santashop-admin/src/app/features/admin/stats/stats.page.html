@@ -1,23 +1,16 @@
 <ion-content [fullscreen]="true" color="primary">
-  <ion-title class="ion-padding-top">
-    DSCS Stats: {{ now }}
-  </ion-title>
+  <ion-title class="ion-padding-top"> DSCS Stats: {{ now }} </ion-title>
+
   <ion-grid>
     <ion-row>
       <ion-col size-sm size="12">
         <ion-card class="ion-text-center">
           <ion-card-header>
-            <ion-text class="stat-value">
-              {{ $customers | async }}
-            </ion-text>
+            <ion-text class="stat-value"> {{ $customers | async }} </ion-text>
           </ion-card-header>
           <ion-card-content>
-            <ion-card-title>
-              Customers
-            </ion-card-title>
-            <ion-card-subtitle>
-              Created an account
-            </ion-card-subtitle>
+            <ion-card-title> Customers </ion-card-title>
+            <ion-card-subtitle> Created an account </ion-card-subtitle>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -30,12 +23,8 @@
             </ion-text>
           </ion-card-header>
           <ion-card-content>
-            <ion-card-title>
-              Registrations*
-            </ion-card-title>
-            <ion-card-subtitle>
-              Includes incomplete
-            </ion-card-subtitle>
+            <ion-card-title> Registrations </ion-card-title>
+            <ion-card-subtitle> Completed Registrations </ion-card-subtitle>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -43,17 +32,11 @@
       <ion-col size-sm size="12">
         <ion-card class="ion-text-center">
           <ion-card-header>
-            <ion-text class="stat-value">
-              {{ $children | async }}
-            </ion-text>
+            <ion-text class="stat-value"> {{ $children | async }} </ion-text>
           </ion-card-header>
           <ion-card-content>
-            <ion-card-title>
-              Children
-            </ion-card-title>
-            <ion-card-subtitle>
-              Total children
-            </ion-card-subtitle>
+            <ion-card-title> Children </ion-card-title>
+            <ion-card-subtitle> Total children </ion-card-subtitle>
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -66,15 +49,93 @@
             </ion-text>
           </ion-card-header>
           <ion-card-content>
-            <ion-card-title>
-              Children / Customer
-            </ion-card-title>
-            <ion-card-subtitle>
-              Avg Children per customer
-            </ion-card-subtitle>
+            <ion-card-title> Children / Customer </ion-card-title>
+            <ion-card-subtitle> Avg Children per customer </ion-card-subtitle>
           </ion-card-content>
         </ion-card>
       </ion-col>
     </ion-row>
-  </ion-grid>  
+
+    <ion-row>
+      <ion-col
+        size-md
+        size="12"
+        *ngIf="$dateTimeStats | async as dateTimeStats"
+      >
+        <ion-card class="ion-text-center">
+          <ion-card-header>
+            <ion-card-title> Schedule </ion-card-title>
+            <ion-card-subtitle> Counts by Date/Time </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="3" class="table-header ion-text-start">
+                  Date
+                </ion-col>
+                <ion-col size="3" class="table-header"> Time </ion-col>
+                <ion-col size="3" class="table-header"> Customers </ion-col>
+                <ion-col size="3" class="table-header"> Children </ion-col>
+              </ion-row>
+              <ion-row
+                *ngFor="let stat of dateTimeStats | keyvalue; let i = index;"
+              >
+                <ion-col size="12" class="ion-text-start"
+                  ><ion-text color="primary" class="table-header"
+                    >December {{ stat.key }}th, 2020
+                  </ion-text></ion-col
+                >
+                <ion-col size="12" *ngFor="let value of stat.value">
+                  <ion-row>
+                    <ion-col size="3"> </ion-col>
+                    <ion-col size="3">
+                      {{ value.time | friendlyTime }}
+                    </ion-col>
+                    <ion-col size="3"> {{ value.count }} </ion-col>
+                    <ion-col size="3"> {{ value.childCount }} </ion-col>
+                  </ion-row>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col
+        size-xs
+        size="12"
+        *ngIf="$zipCodeStats | async as zipCodeStats"
+      >
+        <ion-card class="ion-text-center">
+          <ion-card-header>
+            <ion-card-title> Location </ion-card-title>
+            <ion-card-subtitle> Counts by Zip Code </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="4" class="table-header ion-text-start">
+                  Zip Code
+                </ion-col>
+                <ion-col size="4" class="table-header"> Customers </ion-col>
+                <ion-col size="4" class="table-header"> Children </ion-col>
+              </ion-row>
+              <ion-row
+                *ngFor="let stat of zipCodeStats; let i = index;"
+                [ngClass]="(i % 2 == 0) ? 'alt-row' : ''"
+              >
+                <ion-col size="4" class="ion-text-start">
+                  <ion-text color="primary" class="table-header">
+                    {{ stat.zip }}
+                  </ion-text>
+                </ion-col>
+                <ion-col size="4"> {{ stat.count }} </ion-col>
+                <ion-col size="4"> {{ stat.childCount }} </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

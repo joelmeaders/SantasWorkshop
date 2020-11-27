@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Query } from '@angular/fire/firestore';
+import { Query, QueryFn } from '@angular/fire/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
 import { race, Subject } from 'rxjs';
 import { filter, map, pluck, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
@@ -84,7 +84,7 @@ export class CheckInService {
   }
 
   public lookupRegistration(id: string) {
-    const query: Query = this.httpService.collectionRef(this.REGISTRATION_COLLECTION).where('code', '==', id);
+    const query: QueryFn = qry => qry.where('code', '==', id);
     return this.httpService.readMany<Registration>(this.REGISTRATION_COLLECTION, query, 'id')
       .pipe(take(1),map(response => response[0] ?? undefined));
   }

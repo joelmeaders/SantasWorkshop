@@ -20,7 +20,7 @@ export default async (
 
   // Delete the old image file if it exists
   if (oldCode !== newCode) {
-    const oldFile = storage.file(`registrations/test/${oldCode}.png`);
+    const oldFile = storage.file(`registrations/${oldCode}.png`);
     try {
       await oldFile.exists().then(async (exists) => {
         if (exists) {
@@ -39,7 +39,7 @@ export default async (
     c: newDocument.children,
   };
 
-  const imageToCreate = storage.file(`registrations/test/${newCode}.png`);
+  const imageToCreate = storage.file(`registrations/${newCode}.png`);
   const fileStream = imageToCreate.createWriteStream({
     public: true,
     contentType: 'auto',

@@ -31,7 +31,7 @@ export default async (
 
   // Registration Search Index Record
   const indexDocRef = admin.firestore().doc(`registrationsearchindex/${record.customerId}`);
-  const indexDoc = { code: record.code, customerId: record.customerId, firstName: record.firstName, lastName: record.lastName, zip: record.zipCode };
+  const indexDoc = { code: record.code, customerId: record.customerId, firstName: record.firstName.toLowerCase(), lastName: record.lastName.toLowerCase(), zip: record.zipCode };
   await indexDocRef.set(indexDoc);
 
   return batch.commit().then(

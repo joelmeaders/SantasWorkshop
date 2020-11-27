@@ -4,18 +4,18 @@ import { ChildProfile, CommonForms, UserProfile } from 'santashop-core/src/publi
 export abstract class QuickRegistrationForms {
 
   public static customerValidators = {
-    firstName: Validators.compose([Validators.required, Validators.minLength(2), Validators.maxLength(25)]),
+    zipCode: Validators.compose([Validators.required, Validators.minLength(2), Validators.maxLength(25)]),
   };
 
   public static customerForm(value: UserProfile): FormGroup {
     return CommonForms.formBuilder().group({
-      firstName: [value?.firstName ?? undefined, this.customerValidators.firstName],
+      zipCode: [value?.zipCode ?? undefined, this.customerValidators.zipCode],
     });
   }
 
   public static customerValidationMessages() {
     return {
-      firstName: [CommonForms.messages().required, CommonForms.messages(2, 50).minLength, CommonForms.messages(2, 50).maxLength],
+      zipCode: [CommonForms.messages().required, CommonForms.messages(5).length],
     };
   }
 

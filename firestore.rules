@@ -6,14 +6,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function emailVerified() {
-      return request.auth.token.email_verified;
-    }
-
-    function userExists() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
     function isUser(userId) {
       return request.auth.uid == userId;
     }
@@ -22,47 +14,37 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/parameters/admin).data.adminusers;
     }
 
-    match /collection-meta/{document=**} {
-      allow read: if isSignedIn() == true;
-      allow write: if isAdmin() == true;
-    }
-
-    match /counters/{document=**} {
-      allow read: if isSignedIn() == true;
-      allow write: if isAdmin() == true;
-    }
-
-    match /errors/{document=**} {
-      allow read: if isAdmin() == true;
-      allow write: if isAdmin() == true;
-    }
-
     match /customers/{userId} {
       allow get: if isUser(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isUser(userId);
-      allow update: if isAdmin() || isUser(userId);
+      allow update: if isUser(userId);
       allow delete: if isUser(userId) || isAdmin();
     }
 
     match /children/{childId} {
       allow get: if isUser(resource.data.parentId) || isAdmin();
       allow list: if isUser(resource.data.parentId) || isAdmin();
-      allow create: if isUser(request.resource.data.parentId) || isAdmin();
-      allow update: if isUser(request.resource.data.parentId) || isAdmin();
+      allow create: if isUser(request.resource.data.parentId);
+      allow update: if isUser(request.resource.data.parentId);
       allow delete: if isUser(resource.data.parentId) || isAdmin();
     }
 
     match /registrations/{documentId} {
-      allow read: if isAdmin() || isUser(resource.data.id);
-      allow create: if isUser(request.resource.data.id) || isAdmin();
-      allow update: if (isUser(request.resource.data.id) && isUser(resource.data.id)) || isAdmin();
+      allow read: if isUser(resource.data.id) || isAdmin();
+      allow create: if isUser(request.resource.data.id);
+      allow update: if (isUser(request.resource.data.id) && isUser(resource.data.id));
       allow delete: if isUser(resource.data.id) || isAdmin();
     }
 
     match /checkins/{documentId} {
       allow create: if isAdmin();
       allow read: if isAdmin();
+    }
+
+    match /counters/{document=**} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     match /parameters/admin {
@@ -76,6 +58,11 @@ service cloud.firestore {
     }
 
     match /registrationsearchindex/{documentId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /stats/{document=**} {
       allow read: if isAdmin();
       allow write: if isAdmin();
     }

@@ -7,8 +7,6 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "inlineTemplate": true,
-          "inlineStyle": true,
           "style": "scss",
           "skipTests": true
         },
@@ -171,8 +169,6 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "inlineTemplate": true,
-          "inlineStyle": true,
           "style": "scss",
           "skipTests": true
         },
@@ -412,5 +408,16 @@
       }
     }
   },
-  "defaultProject": "santashop-admin"
+  "defaultProject": "santashop-admin",
+  "cli": {
+    "defaultCollection": "@ionic/angular-toolkit"
+  },
+  "schematics": {
+    "@ionic/angular-toolkit:component": {
+      "styleext": "scss"
+    },
+    "@ionic/angular-toolkit:page": {
+      "styleext": "scss"
+    }
+  }
 }

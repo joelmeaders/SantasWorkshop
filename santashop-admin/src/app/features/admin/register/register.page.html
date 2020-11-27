@@ -17,9 +17,9 @@
           <ion-card-content>
             <ion-list>
               <form [formGroup]="customerForm" novalidate>
-                <ion-item *appLet="'firstName' as controlName">
-                  <ion-label position="stacked" class="ion-padding-bottom">Parent's first name</ion-label>
-                  <ion-input placeholder="Enter here" [formControlName]="controlName" debounce="750" #firstNameField></ion-input>
+                <ion-item *appLet="'zipCode' as controlName">
+                  <ion-label position="stacked" class="ion-padding-bottom">Zip Code</ion-label>
+                  <ion-input placeholder="#####" [formControlName]="controlName" debounce="750"></ion-input>
                 </ion-item>
               </form>
 
@@ -34,45 +34,77 @@
                   Children Information
                 </ion-label>
               </ion-item>
-              <ion-segment>
-                <ion-segment-button value="i">
-                  <ion-label>
-                    Infant
-                  </ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="b">
-                  <ion-label>
-                    Boy
-                  </ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="g">
-                  <ion-label>
-                    Girl
-                  </ion-label>
-                </ion-segment-button>
-              </ion-segment>
-              <ion-segment value="0">
-                <ion-segment-button>
-                  <ion-label>
-                    0-2
-                  </ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="3">
-                  <ion-label>
-                    3-5
-                  </ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="6">
-                  <ion-label>
-                    6-8
-                  </ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="9">
-                  <ion-label>
-                    9-11
-                  </ion-label>
-                </ion-segment-button>
-              </ion-segment>
+
+              <ion-radio-group>
+                <ion-grid>
+                  <ion-row>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="0"></ion-radio>
+                        <ion-label>
+                          0-2
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="3"></ion-radio>
+                        <ion-label>
+                          3-5
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="6"></ion-radio>
+                        <ion-label>
+                          6-8
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="9"></ion-radio>
+                        <ion-label>
+                          9-11
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-radio-group>
+
+              <ion-radio-group>
+                <ion-grid>
+                  <ion-row>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="i"></ion-radio>
+                        <ion-label>
+                          Infant
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="b"></ion-radio>
+                        <ion-label>
+                          Boy
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                    <ion-col>
+                      <ion-item lines="none">
+                        <ion-radio slot="start" value="g"></ion-radio>
+                        <ion-label>
+                          Infant
+                        </ion-label>
+                      </ion-item>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-radio-group>
+
               <ion-item button tappable lines="none" color="primary" class="ion-margin-top" (click)="addChild()">
                 <ion-label>Add Child</ion-label>
                 <ion-icon slot="end" name="add-circle"></ion-icon>

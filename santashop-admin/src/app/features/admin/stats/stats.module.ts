@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { FriendlyTimePipe } from 'santashop-admin/src/app/pipes/friendly-time.pipe';
 import { SharedComponentsModule } from 'santashop-admin/src/components/shared-components.module';
 import { StatsPageRoutingModule } from './stats-routing.module';
 import { StatsPage } from './stats.page';
@@ -16,6 +17,7 @@ import { StatsPage } from './stats.page';
     StatsPageRoutingModule,
     SharedComponentsModule
   ],
-  declarations: [StatsPage]
+  declarations: [StatsPage, FriendlyTimePipe],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class StatsPageModule {}

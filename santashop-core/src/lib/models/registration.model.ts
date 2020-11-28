@@ -18,7 +18,7 @@ export class Registration extends BaseEntity {
 // Need to keep this as lightweight as possible to prevent
 // overly complex QR codes
 export interface IChildrenInfo {
-  n: string; // Name
+  n?: string; // Name
   t: string; // Toy Type
   a: string; // Age Group
 }

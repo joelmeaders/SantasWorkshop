@@ -20,6 +20,7 @@ import {
 } from 'santashop-core/src/public-api';
 import { CheckInHelpers } from '../helpers/registration-helpers';
 import firebase from 'firebase/app';
+import { AlertController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +49,10 @@ export class CheckInService {
     distinctUntilChanged((prev, curr) => prev === curr),
     filter((id) => !!id),
     switchMap((id) => this.lookupRegistration(id)),
-    map((registration) => this.hydrateRegistration(registration)),
+    map(response => {
+      response.children = CheckInHelpers.sortChildren(response.children);
+      return response;
+    }),
     publishReplay(1),
     refCount()
   );
@@ -61,7 +65,7 @@ export class CheckInService {
     refCount()
   );
 
-  public readonly storeCheckIn = (checkIn: ICheckIn) =>
+  private readonly storeCheckIn = (checkIn: ICheckIn) =>
     this.httpService
       .save<ICheckIn>(
         this.CHECKIN_COLLECTION,
@@ -71,7 +75,10 @@ export class CheckInService {
       )
       .pipe(take(1));
 
-  constructor(private readonly httpService: FireCRUDStateless) {}
+  constructor(
+    private readonly httpService: FireCRUDStateless,
+    private readonly alertController: AlertController
+  ) {}
 
   public reset() {}
 
@@ -104,27 +111,35 @@ export class CheckInService {
       .pipe(take(1));
   }
 
-  public hydrateRegistration(registration: Registration) {
-    registration.children.forEach((child) => {
-      child.a = CheckInHelpers.expandA(child.a);
-      child.t = CheckInHelpers.expandT(child.t);
-    });
-    return registration;
-  }
-
   public async saveCheckIn(registration?: Registration) {
     if (!registration) {
       registration = await this.$registration.pipe(take(1)).toPromise();
     }
 
     const checkin = this.registrationToCheckIn(registration);
-    return await this.storeCheckIn(checkin).toPromise();
+    await this.storeCheckIn(checkin).toPromise();
+  }
+
+  public async checkinCompleteAlert() {
+    const alert = await this.alertController.create({
+      header: 'Check-In Complete',
+      message: 'Instruct the customer to....',
+      buttons: [
+        {
+          text: 'Ok',
+        }
+      ]
+    });
+
+    await alert.present();
+
+    return await alert.onDidDismiss();
   }
 
   private registrationToCheckIn(registration: Registration): ICheckIn {
     const checkin: ICheckIn = {
-      customerId: registration.id,
-      registrationCode: registration.code,
+      customerId: registration.id ?? null,
+      registrationCode: registration.code || null,
       checkInDateTime: firebase.firestore.Timestamp.now(),
       stats: this.registrationStats(registration),
     };

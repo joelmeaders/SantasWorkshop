@@ -7,27 +7,21 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-grid fixed>
+  <ion-grid>
     <ion-row>
-      <ion-col>
+      <ion-col size="12" size-lg="8">
         <ion-card>
           <ion-card-header>
-            <ion-text> Fill out the information below </ion-text>
+            <ion-card-title> Fill out the information below </ion-card-title>
           </ion-card-header>
           <ion-card-content>
             <ion-list>
               <form [formGroup]="customerForm" novalidate>
                 <ion-item *appLet="'zipCode' as controlName">
-                  <ion-label position="stacked" class="ion-padding-bottom">Zip Code</ion-label>
-                  <ion-input placeholder="#####" [formControlName]="controlName" debounce="750"></ion-input>
+                  <ion-label position="floating" class="ion-padding-bottom">Zip Code</ion-label>
+                  <ion-input [formControlName]="controlName" debounce="750" (ionChange)="setZip($event.detail.value)" debounce="750"></ion-input>
                 </ion-item>
               </form>
-
-              <ion-item *ngFor="let child of $children | async">
-                <ion-label>
-                  {{ child | json }}
-                </ion-label>
-              </ion-item>
 
               <ion-item class="ion-margin-top">
                 <ion-label>
@@ -35,82 +29,123 @@
                 </ion-label>
               </ion-item>
 
-              <ion-radio-group>
-                <ion-grid>
-                  <ion-row>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="0"></ion-radio>
-                        <ion-label>
-                          0-2
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="3"></ion-radio>
-                        <ion-label>
-                          3-5
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="6"></ion-radio>
-                        <ion-label>
-                          6-8
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="9"></ion-radio>
-                        <ion-label>
-                          9-11
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-radio-group>
+              <form [formGroup]="childForm" novalidate>
+                <ion-radio-group *appLet="'ageGroup' as controlName" [formControlName]="controlName" (ionChange)="onAgeChange($event.detail.value)">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="0"></ion-radio>
+                          <ion-label>
+                            0-2
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="3"></ion-radio>
+                          <ion-label>
+                            3-5
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="6"></ion-radio>
+                          <ion-label>
+                            6-8
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="9"></ion-radio>
+                          <ion-label>
+                            9-11
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </ion-radio-group>
+  
+                <ion-radio-group *appLet="'toyType' as controlName" [formControlName]="controlName">
+                  <ion-grid>
+                    <ion-row>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="i"></ion-radio>
+                          <ion-label>
+                            Infant
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="b"></ion-radio>
+                          <ion-label>
+                            Boy
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                      <ion-col>
+                        <ion-item lines="none">
+                          <ion-radio slot="start" value="g"></ion-radio>
+                          <ion-label>
+                            Girl
+                          </ion-label>
+                        </ion-item>
+                      </ion-col>
+                    </ion-row>
+                  </ion-grid>
+                </ion-radio-group>
+              </form>
 
-              <ion-radio-group>
-                <ion-grid>
-                  <ion-row>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="i"></ion-radio>
-                        <ion-label>
-                          Infant
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="b"></ion-radio>
-                        <ion-label>
-                          Boy
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                    <ion-col>
-                      <ion-item lines="none">
-                        <ion-radio slot="start" value="g"></ion-radio>
-                        <ion-label>
-                          Infant
-                        </ion-label>
-                      </ion-item>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-radio-group>
-
-              <ion-item button tappable lines="none" color="primary" class="ion-margin-top" (click)="addChild()">
+              <ion-item button tappable lines="none" color="primary" class="ion-margin-top" (click)="addChild()" [disabled]="!customerForm.valid || !childForm.valid">
                 <ion-label>Add Child</ion-label>
                 <ion-icon slot="end" name="add-circle"></ion-icon>
               </ion-item>
-              <ion-item button tappable lines="none" color="success" class="ion-margin-top">
-                <ion-label>Done, Save Registration</ion-label>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              Current Registration
+            </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <div class="width-max">
+                  <ion-title class="ion-float-start">
+                    Zip Code
+                  </ion-title>
+                  <ion-title class="ion-float-end">
+                    {{ $zipCode | async }}
+                  </ion-title>
+                </div>
+              </ion-item>
+
+              <ion-list-header>
+                Children
+              </ion-list-header>
+              <ion-item *ngFor="let child of ($children | async)" [color]="childColor(child.t)">
+                <div class="width-max">
+                  <ion-title class="ion-float-start">
+                    {{ child.a | hydrateAgeGroup }}
+                  </ion-title>
+                  <ion-title class="ion-float-end">
+                    {{ child.t | hydrateToyType }}
+                  </ion-title>
+                </div>
+              </ion-item>
+
+              <ion-item button tappable lines="none" color="success" class="ion-margin-top" (click)="completeRegistration()" [disabled]="!($canCheckIn | async)">
+                <ion-label>Done, Check In</ion-label>
                 <ion-icon slot="end" name="save"></ion-icon>
               </ion-item>
             </ion-list>

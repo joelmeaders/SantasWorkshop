@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { delay, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
+import { format } from 'date-fns';
+import { BehaviorSubject, from, Subject } from 'rxjs';
+import { filter, finalize, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
 import { ICheckIn } from 'santashop-core/src/lib/models';
 import { CheckInService } from '../../services/check-in.service';
 
@@ -24,11 +25,17 @@ export class QrModalComponent implements OnDestroy {
 
   public readonly $existingCheckin = this.checkInService.$checkinRecord.pipe(
     takeUntil(this.$destroy),
-    mergeMap(v => of(v).pipe(delay(3000))),
     tap(() => this.$loading.next(false)),
     publishReplay(1),
     refCount()
   );
+
+  private readonly existingAlertSubcription = this.$existingCheckin.pipe(
+    takeUntil(this.$destroy),
+    filter(response => !!response?.customerId),
+    mergeMap(response => from(this.alreadyCheckedIn(response))),
+    finalize(() => console.log('Sequence complete'))
+  ).subscribe();
 
   constructor(
     private readonly modalController: ModalController,
@@ -78,9 +85,9 @@ export class QrModalComponent implements OnDestroy {
   }
 
   private async alreadyCheckedIn(checkin: ICheckIn) {
-    return await this.alertController.create({
+    const alert = await this.alertController.create({
       header: 'Existing Check-In',
-      subHeader: checkin.checkInDateTime.toLocaleDateString(),
+      subHeader: format(checkin.checkInDateTime.toDate(), 'MMM dd, YYY h:mm a'),
       message: 'This registration code was already used on the date/time specified. Unable to continue.',
       buttons: [
         {
@@ -88,6 +95,10 @@ export class QrModalComponent implements OnDestroy {
         }
       ]
     });
+
+    await alert.present();
+
+    return await alert.onDidDismiss();
   }
 
   public async dismiss() {

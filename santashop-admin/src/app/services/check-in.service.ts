@@ -10,6 +10,7 @@ import {
   refCount,
   switchMap,
   take,
+  tap,
 } from 'rxjs/operators';
 import {
   FireCRUDStateless,
@@ -18,6 +19,7 @@ import {
   Registration,
 } from 'santashop-core/src/public-api';
 import { CheckInHelpers } from '../helpers/registration-helpers';
+import * as firebase from 'firebase';
 
 @Injectable({
   providedIn: 'root',
@@ -123,7 +125,7 @@ export class CheckInService {
     const checkin: ICheckIn = {
       customerId: registration.id,
       registrationCode: registration.code,
-      checkInDateTime: new Date(),
+      checkInDateTime: firebase.default.firestore.Timestamp.now(),
       stats: this.registrationStats(registration),
     };
 

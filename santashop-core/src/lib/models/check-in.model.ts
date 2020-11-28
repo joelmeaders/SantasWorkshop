@@ -1,9 +1,10 @@
+import * as firebase from 'firebase';
 import { BaseEntity } from './base-entity';
 
 export class ICheckIn extends BaseEntity {
   customerId?: string;
   registrationCode?: string;
-  checkInDateTime: Date = new Date();
+  checkInDateTime: firebase.default.firestore.Timestamp;
   stats: ICheckInStats | undefined;
 }
 

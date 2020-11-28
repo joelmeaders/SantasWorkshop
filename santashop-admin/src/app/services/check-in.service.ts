@@ -19,7 +19,7 @@ import {
   Registration,
 } from 'santashop-core/src/public-api';
 import { CheckInHelpers } from '../helpers/registration-helpers';
-import * as firebase from 'firebase';
+import firebase from 'firebase/app';
 
 @Injectable({
   providedIn: 'root',
@@ -125,7 +125,7 @@ export class CheckInService {
     const checkin: ICheckIn = {
       customerId: registration.id,
       registrationCode: registration.code,
-      checkInDateTime: firebase.default.firestore.Timestamp.now(),
+      checkInDateTime: firebase.firestore.Timestamp.now(),
       stats: this.registrationStats(registration),
     };
 

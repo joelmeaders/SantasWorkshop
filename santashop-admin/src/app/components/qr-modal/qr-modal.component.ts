@@ -34,7 +34,6 @@ export class QrModalComponent implements OnDestroy {
     takeUntil(this.$destroy),
     filter(response => !!response?.customerId),
     mergeMap(response => from(this.alreadyCheckedIn(response))),
-    finalize(() => console.log('Sequence complete'))
   ).subscribe();
 
   constructor(

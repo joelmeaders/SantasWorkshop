@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { of } from 'rxjs';
-import { delay, publishReplay, refCount } from 'rxjs/operators';
+import { BehaviorSubject, of, Subject } from 'rxjs';
+import { delay, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
+import { ICheckIn } from 'santashop-core/src/lib/models';
 import { CheckInService } from '../../services/check-in.service';
 
 @Component({
@@ -10,30 +11,37 @@ import { CheckInService } from '../../services/check-in.service';
   styleUrls: ['./qr-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class QrModalComponent {
+export class QrModalComponent implements OnDestroy {
 
-  public readonly $registration = this.checkInService.$registration;
+  private readonly $destroy = new Subject<void>();
+  public readonly $loading = new BehaviorSubject<boolean>(true);
 
-  private readonly subscription = this.$registration.subscribe(async (value) => {
-    console.log(value);
-    await this.refresh();
-  });
+  public readonly $registration = this.checkInService.$registration.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $existingCheckin = this.checkInService.$checkinRecord.pipe(
+    takeUntil(this.$destroy),
+    mergeMap(v => of(v).pipe(delay(3000))),
+    tap(() => this.$loading.next(false)),
+    publishReplay(1),
+    refCount()
+  );
 
   constructor(
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly checkInService: CheckInService,
-    private readonly cd: ChangeDetectorRef
   ) { }
+
+  ngOnDestroy() {
+    this.$destroy.next();
+  }
 
   public editRegistration() {
     
-  }
-
-  public async refresh() {
-    of().pipe(delay(1000)).toPromise().then(() => {
-      this.cd.detectChanges();
-    });
   }
 
   public async checkIn() {
@@ -68,6 +76,20 @@ export class QrModalComponent {
       ]
     });
   }
+
+  private async alreadyCheckedIn(checkin: ICheckIn) {
+    return await this.alertController.create({
+      header: 'Existing Check-In',
+      subHeader: checkin.checkInDateTime.toLocaleDateString(),
+      message: 'This registration code was already used on the date/time specified. Unable to continue.',
+      buttons: [
+        {
+          text: 'Ok',
+        }
+      ]
+    });
+  }
+
   public async dismiss() {
     await this.modalController.dismiss();
   }

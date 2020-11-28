@@ -25,7 +25,7 @@ export class FireCRUDStateless {
   }
 
   public save<T>(collectionPath: string, docId: string = undefined, document: T, mergeIfUpdate = false): Observable<DocumentReference> {
-    return !!docId
+    return !docId
       ? this.add<T>(collectionPath, document)
       : this.update<T>(collectionPath, document, docId, mergeIfUpdate);
   }

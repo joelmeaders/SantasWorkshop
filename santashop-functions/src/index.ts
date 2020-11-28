@@ -44,6 +44,13 @@ export const scheduledFirestoreBackup = functions.pubsub
     await (await import('./fn/scheduledFirestoreBackup')).default();
   });
 
+export const scheduledRegistrationStats = functions.pubsub
+  .schedule('0 0 * * *')
+  .timeZone('America/Denver')
+  .onRun(async (context) => {
+    await (await import('./fn/scheduledFirestoreBackup')).default();
+  });
+
 /**
  * Watches registrations collections for completed registrations
  * and kicks off various document creations and updates to trigger

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, from, Subject } from 'rxjs';
-import { filter, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
+import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
 import { ICheckIn } from 'santashop-core/src/lib/models';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
@@ -43,14 +44,18 @@ export class QrModalComponent implements OnDestroy {
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly checkInService: CheckInService,
+    private readonly router: Router
   ) { }
 
   ngOnDestroy() {
     this.$destroy.next();
   }
 
-  public editRegistration() {
-    
+  public async editRegistration() {
+    const registration = await this.$registration.pipe(take(1)).toPromise();
+    this.checkInService.setRegistrationToEdit(registration);
+    this.router.navigate(['/admin/register']);
+    await this.modalController.dismiss();
   }
 
   public async checkIn() {

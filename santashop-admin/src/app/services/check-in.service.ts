@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { QueryFn } from '@angular/fire/firestore';
-import { race, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, race, ReplaySubject } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -34,6 +34,12 @@ export class CheckInService {
 
   private readonly _$registrationCodeFromScan = this._$qrCode.pipe(pluck('id'));
   private readonly _$registrationCodeFromSearch = new ReplaySubject<string>(1);
+
+  private readonly _$manualRegistrationEdit = new BehaviorSubject<Registration>(undefined);
+  public readonly $manualRegistrationEdit = this._$manualRegistrationEdit.pipe(
+    publishReplay(1),
+    refCount()
+  );
 
   public readonly $registrationCode = race(
     this._$registrationCodeFromScan,
@@ -80,7 +86,13 @@ export class CheckInService {
     private readonly alertController: AlertController
   ) {}
 
-  public reset() {}
+  public reset() {
+
+  }
+
+  public setRegistrationToEdit(registration: Registration) {
+    this._$manualRegistrationEdit.next(registration);
+  }
 
   public setQrCode(code: string): void {
     const registration: Registration = JSON.parse(code);
@@ -111,12 +123,12 @@ export class CheckInService {
       .pipe(take(1));
   }
 
-  public async saveCheckIn(registration?: Registration) {
+  public async saveCheckIn(registration?: Registration, isEdit = false) {
     if (!registration) {
       registration = await this.$registration.pipe(take(1)).toPromise();
     }
 
-    const checkin = this.registrationToCheckIn(registration);
+    const checkin = this.registrationToCheckIn(registration, isEdit);
     await this.storeCheckIn(checkin).toPromise();
   }
 
@@ -136,30 +148,29 @@ export class CheckInService {
     return await alert.onDidDismiss();
   }
 
-  private registrationToCheckIn(registration: Registration): ICheckIn {
+  private registrationToCheckIn(registration: Registration, isEdit: boolean): ICheckIn {
     const checkin: ICheckIn = {
       customerId: registration.id ?? null,
       registrationCode: registration.code || null,
       checkInDateTime: firebase.firestore.Timestamp.now(),
-      stats: this.registrationStats(registration),
+      stats: this.registrationStats(registration, isEdit),
     };
 
     return checkin;
   }
 
-  private registrationStats(registration: Registration): ICheckInStats {
+  private registrationStats(registration: Registration, isEdit: boolean): ICheckInStats {
     const stats: ICheckInStats = {
       preregistered: (!!registration.code && !!registration.id) || false,
       children: registration.children?.length || 0,
-      ageGroup02: registration.children.filter((c) => c.a === '0-2').length,
-      ageGroup35: registration.children.filter((c) => c.a === '3-5').length,
-      ageGroup68: registration.children.filter((c) => c.a === '6-8').length,
-      ageGroup911: registration.children.filter((c) => c.a === '9-11').length,
-      toyTypeInfant: registration.children.filter((c) => c.t === 'infant')
-        .length,
-      toyTypeBoy: registration.children.filter((c) => c.t === 'boy').length,
-      toyTypeGirl: registration.children.filter((c) => c.t === 'girl').length,
-      modifiedAtCheckIn: null, // TODO
+      ageGroup02: registration.children.filter((c) => c.a === '0').length,
+      ageGroup35: registration.children.filter((c) => c.a === '3').length,
+      ageGroup68: registration.children.filter((c) => c.a === '6').length,
+      ageGroup911: registration.children.filter((c) => c.a === '9').length,
+      toyTypeInfant: registration.children.filter((c) => c.t === 'i').length,
+      toyTypeBoy: registration.children.filter((c) => c.t === 'b').length,
+      toyTypeGirl: registration.children.filter((c) => c.t === 'g').length,
+      modifiedAtCheckIn: isEdit,
       zipCode: registration.zipCode,
     };
     return stats;

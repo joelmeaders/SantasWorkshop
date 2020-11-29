@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { takeUntil, publishReplay, refCount, map } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, map, switchMap, filter, take } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
@@ -55,17 +55,41 @@ export class RegisterPage implements OnDestroy {
     refCount()
   );
 
+  private readonly _$isEdit = new BehaviorSubject<boolean>(false);
+
+  public readonly registrationEditSubscription = this.checkInService.$manualRegistrationEdit.pipe(
+    takeUntil(this.$destroy),
+    filter(response => !!response),
+    switchMap(registration => this.initRegistrationEdit(registration))
+  ).subscribe();
+
   constructor(
     private readonly loadingController: LoadingController,
-    private readonly checkInService: CheckInService
+    private readonly checkInService: CheckInService,
+    private readonly alertController: AlertController
   ) { }
 
+  public async initRegistrationEdit(registration: Registration): Promise<void> {
+    this.setZip(registration.zipCode);
+    this.customerForm.get('zipCode').setValue(registration.zipCode);
+    this._$children.next(registration.children);
+    this._$isEdit.next(true);
+  }
+
   public async completeRegistration() {
+
+    if (this._$zipCode.getValue().length !== 5) {
+      await this.invalidZipAlert();
+      return;
+    }
+
     this.presentLoading();
-    await this.checkInService.saveCheckIn(this.createRegistration());
+    const registration = await this.createRegistration();
+    await this.checkInService.saveCheckIn(registration, this._$isEdit.getValue());
     this.reset();
     this.dismissLoading();
     await this.checkInService.checkinCompleteAlert();
+    this.checkInService.reset();
   }
 
   public async ngOnDestroy() {
@@ -77,12 +101,19 @@ export class RegisterPage implements OnDestroy {
     }
   }
 
-  private reset(): void {
+  public reset(): void {
     this._$zipCode.next(undefined);
     this._$children.next(new Array<IChildrenInfo>());
     this.checkInService.reset();
     this.customerForm.reset();
     this.childForm.reset();
+    this._$isEdit.next(false);
+  }
+
+  public deleteChild(index: number) {
+    const current = this._$children.getValue();
+    current.splice(index, 1);
+    this._$children.next(CheckInHelpers.sortChildren(current));
   }
 
   public setZip(value: string) {
@@ -119,15 +150,31 @@ export class RegisterPage implements OnDestroy {
 
   public onAgeChange(value: any) {
     if (value === '0') {
-      this.childForm.get('toyType').setValue('i')
+      this.childForm.get('toyType').setValue('i');
     }
   }
 
-  private createRegistration(): Registration {
-    const registration = new Registration();
+  private async createRegistration(): Promise<Registration> {
+    const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || new Registration();
     registration.zipCode = this._$zipCode.getValue();
     registration.children = this._$children.getValue();
     return registration;
+  }
+
+  private async invalidZipAlert() {
+    const alert = await this.alertController.create({
+      header: 'Invalid Zip Code',
+      message: 'Must be 5 digits long',
+      buttons: [
+        {
+          text: 'Ok',
+        }
+      ]
+    });
+
+    await alert.present();
+
+    return await alert.onDidDismiss();
   }
 
 }

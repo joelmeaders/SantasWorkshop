@@ -3,6 +3,9 @@
     <ion-title>
       Quick Registration
     </ion-title>
+    <ion-button fill="outline" slot="end" class="padding-right-md" (click)="reset()">
+      Reset
+    </ion-button>
   </ion-toolbar>
 </ion-header>
 
@@ -133,7 +136,7 @@
               <ion-list-header>
                 Children
               </ion-list-header>
-              <ion-item *ngFor="let child of ($children | async)" [color]="childColor(child.t)">
+              <ion-item *ngFor="let child of ($children | async); let i = index;" [color]="childColor(child.t)" class="ion-margin-top" lines="none">
                 <div class="width-max">
                   <ion-title class="ion-float-start">
                     {{ child.a | hydrateAgeGroup }}
@@ -142,11 +145,14 @@
                     {{ child.t | hydrateToyType }}
                   </ion-title>
                 </div>
+                <ion-button slot="end" size="medium" color="white" (click)="deleteChild(i)">
+                  <ion-icon name="close-circle" slot="icon-only" color="danger"></ion-icon>
+                </ion-button>
               </ion-item>
 
               <ion-item button tappable lines="none" color="success" class="ion-margin-top" (click)="completeRegistration()" [disabled]="!($canCheckIn | async)">
                 <ion-label>Done, Check In</ion-label>
-                <ion-icon slot="end" name="save"></ion-icon>
+                <ion-icon slot="end" name="save" button tappable></ion-icon>
               </ion-item>
             </ion-list>
           </ion-card-content>

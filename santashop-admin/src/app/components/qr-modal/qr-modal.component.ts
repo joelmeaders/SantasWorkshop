@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { format } from 'date-fns';
 import { BehaviorSubject, from, Subject } from 'rxjs';
 import { filter, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
 import { ICheckIn } from 'santashop-core/src/lib/models';
@@ -17,6 +16,9 @@ export class QrModalComponent implements OnDestroy {
 
   private readonly $destroy = new Subject<void>();
   public readonly $loading = new BehaviorSubject<boolean>(true);
+
+  public friendlyTimestamp = CheckInHelpers.friendlyTimestamp;
+  public cardColor = CheckInHelpers.childColor;
 
   public readonly $registration = this.checkInService.$registration.pipe(
     takeUntil(this.$destroy),
@@ -100,8 +102,6 @@ export class QrModalComponent implements OnDestroy {
 
     return await alert.onDidDismiss();
   }
-
-  public friendlyTimestamp = CheckInHelpers.friendlyTimestamp;
 
   public async dismiss() {
     await this.modalController.dismiss();

@@ -8,35 +8,34 @@
   <ion-grid fixed>
     <ion-row>
       <ion-col>
-        <ion-item>
-          <ion-label>Device</ion-label>
-          <ion-select [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event.detail.value)">
-            <ion-select-option [value]="''">No Device Selected</ion-select-option>
-            <ion-select-option *ngFor="let device of ($availableDevices | async)" [value]="device.deviceId">
-              {{ device.label }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
+
+        <ion-segment [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event.detail.value)" scrollable="true">
+          <ion-segment-button [value]="''">None</ion-segment-button>
+            <ion-segment-button *ngFor="let device of ($availableDevices | async)" [value]="device.deviceId">
+              {{ device.label | deviceNameOnly }}
+            </ion-segment-button>
+        </ion-segment>
+
         <span>
           <zxing-scanner
             #scanner
             [enable]="$cameraEnabled | async"
             [formats]="formatsEnabled"
             [device]="$deviceToUse | async"
-            [tryHarder]="false"
             [autostart]="true"
             (camerasFound)="onCamerasFound($event)"
             (deviceChange)="onDeviceChange($event)"
             (scanSuccess)="onCodeResult($event)"
             (permissionResponse)="onHasPermission($event)"
-            (torchCompatible)="onTorchCompatible($event)"
+            (scanError)="onScanError($event)"
           ></zxing-scanner>
         </span>
       </ion-col>
     </ion-row>
   </ion-grid>
 </ion-content>
-<!-- 
+
+
 <ng-container *appLet="$hasPermissions | async as hasPermission">
   <ng-container *ngIf="hasPermission === undefined">
     <h2>Waiting for permissions.</h2>
@@ -55,4 +54,4 @@
       This may be caused by some security error.
     </blockquote>
   </ng-container>
-</ng-container> -->
+</ng-container>

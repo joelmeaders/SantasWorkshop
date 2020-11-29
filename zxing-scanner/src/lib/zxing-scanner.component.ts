@@ -16,7 +16,7 @@ import {
   Exception,
   Result
 } from '@zxing/library';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { BrowserMultiFormatContinuousReader } from './browser-multi-format-continuous-reader';
 import { ResultAndError } from './ResultAndError';
 
@@ -520,7 +520,7 @@ export class ZXingScannerComponent implements OnInit, OnDestroy {
     // from this point, things gonna need permissions
     if (hasPermission) {
       const devices = await this.updateVideoInputDevices();
-      // await this.autostartScanner([...devices]);
+      await this.autostartScanner([...devices]);
     }
 
     this.isAutostarting = false;
@@ -620,7 +620,7 @@ export class ZXingScannerComponent implements OnInit, OnDestroy {
 
     // const matcher = ({ label }) => /back|trás|rear|traseira|environment|ambiente/gi.test(label);
 
-    // select the rear camera by default, otherwise take the last camera.
+    // // select the rear camera by default, otherwise take the last camera.
     // const device = devices.find(matcher) || devices.pop();
 
     // if (!device) {
@@ -774,7 +774,14 @@ export class ZXingScannerComponent implements OnInit, OnDestroy {
 
     const codeReader = this.getCodeReader();
 
-    const scanStream = await codeReader.scanFromDeviceObservable(deviceId, videoElement);
+    let scanStream: Observable<ResultAndError>;
+
+    try {
+      scanStream = await codeReader.scanFromDeviceObservable(deviceId, videoElement);
+    } catch (error) {
+      this.dispatchScanError(error);
+      return;
+    }
 
     if (!scanStream) {
       throw new Error('Undefined decoding stream, aborting.');
@@ -801,7 +808,7 @@ export class ZXingScannerComponent implements OnInit, OnDestroy {
    */
   private _onDecodeError(err: any) {
     this.dispatchScanError(err);
-    // this.reset();
+    this.reset();
   }
 
   /**

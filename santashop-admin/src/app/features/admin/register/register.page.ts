@@ -4,7 +4,7 @@ import { LoadingController } from '@ionic/angular';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { takeUntil, publishReplay, refCount, map } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
-import { CheckInHelpers } from 'santashop-admin/src/app/helpers/registration-helpers';
+import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
 import { IChildrenInfo, IError, Registration } from 'santashop-core/src/public-api';
 

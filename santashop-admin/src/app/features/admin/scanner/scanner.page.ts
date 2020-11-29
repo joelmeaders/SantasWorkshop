@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, takeUntil } from 'rxjs/operators';
 import { QrModalComponent } from 'santashop-admin/src/app/components/qr-modal/qr-modal.component';
@@ -53,8 +53,6 @@ export class ScannerPage implements OnDestroy {
     refCount()
   );
 
-  tryHarder: boolean;
-
   private readonly _$cameraEnabled = new BehaviorSubject<boolean>(true);
   public readonly $cameraEnabled = this._$cameraEnabled.pipe(
     takeUntil(this.$destroy),
@@ -62,46 +60,13 @@ export class ScannerPage implements OnDestroy {
     refCount()
   );
 
-  torchEnabled = false;
-  torchAvailable$ = new BehaviorSubject<boolean>(undefined);
-
   @ViewChild('scanner') scanner: ZXingScannerComponent;
-
-  // private readonly autoStartCameraSubscription = this.$availableDevices.pipe(
-  //   takeUntil(this.$destroy),
-  //   filter(devices => !!devices?.length),
-  //   // distinctUntilChanged((prev, curr) => prev.length !== curr.length),
-  //   switchMap(devices => of(devices).pipe(delay(1000))),
-  //   tap(console.log),
-  //   tap(devices => this.autostartScanner(devices))
-  // ).subscribe();
 
   constructor(
     private readonly checkInService: CheckInService,
-    private readonly modalController: ModalController
-  ) {
-    // this.onCodeResult(`{"id":"TDC8SWZF","n":"Joel Meaders","c":[{"a":"3","n":"Benny Boo000","t":"b"}]}`);
-  }
-
-  public fakeCodeTest() {
-    this.onCodeResult(`{"id":"TDC8SWZF","n":"Joel Meaders","c":[{"a":"3","n":"Benny Boo","t":"b"},{"a":"9","n":"Sasha Posh","t":"g"}]}`);
-  }
-
-  // public async autostartScanner(devices: MediaDeviceInfo[]): Promise<void> {
-
-  //   const matcher = ({ label }) => /back|trás|rear|traseira|environment|ambiente/gi.test(label);
-
-  //   // select the rear camera by default, otherwise take the last camera.
-  //   const device = devices.find(matcher) || devices.pop();
-
-  //   if (!device) {
-  //     throw new Error('Impossible to autostart, no input devices available.');
-  //   }
-
-  //   console.log(device)
-
-  //   this._$currentDevice.next(device);
-  // }
+    private readonly modalController: ModalController,
+    private readonly alertController: AlertController
+  ) { }
 
   public async ngOnDestroy() {
     this.$destroy.next();
@@ -112,14 +77,14 @@ export class ScannerPage implements OnDestroy {
   }
 
   public async onCodeResult(resultString: string) {
-    // this._$cameraEnabled.next(false);
+    this.onDeviceSelectChange('');
     this.checkInService.setQrCode(resultString);
     await this.openModal();
   }
 
   public onDeviceSelectChange(deviceId: string) {
 
-    if (!deviceId) {
+    if (deviceId === undefined || null) {
       return;
     }
 
@@ -129,15 +94,10 @@ export class ScannerPage implements OnDestroy {
       return;
     }
 
-    console.log('setting device', deviceId)
-
     const devices = this._$availableDevices.getValue();
     const device = devices.find(d => d.deviceId === deviceId);
 
-    console.log(device);
-
     this._$currentDevice.next(device);
-    // this._$cameraEnabled.next(true);
   }
 
   onDeviceChange(device: MediaDeviceInfo) {
@@ -146,20 +106,29 @@ export class ScannerPage implements OnDestroy {
     if (!!currentDevice && device?.deviceId === currentDevice.deviceId)
       return;
 
-    console.log('onDeviceChange', device);
     this._$currentDevice.next(device);
   }
 
-  onHasPermission(value: boolean) {
+  onHasPermission(value: boolean): void {
     this._$hasPermissions.next(value);
   }
 
-  onTorchCompatible(isCompatible: boolean): void {
-    this.torchAvailable$.next(isCompatible || false);
+  public async onScanError(error: any) {
+    await this.handleError(error);
+    this.onDeviceSelectChange('');
   }
 
-  toggleTorch(): void {
-    this.torchEnabled = !this.torchEnabled;
+  private async handleError(error: any) {
+
+    const alert = await this.alertController.create({
+      header: 'Error',
+      subHeader: error.name,
+      message: error.message,
+      buttons: ['Ok']
+    });
+
+    await alert.present();
+
   }
 
   private async openModal() {
@@ -173,6 +142,7 @@ export class ScannerPage implements OnDestroy {
     });
 
     await modal.present();
+    await modal.onDidDismiss();
   }
 
 }

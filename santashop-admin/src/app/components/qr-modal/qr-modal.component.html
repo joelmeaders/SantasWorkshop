@@ -67,7 +67,14 @@
 </ng-container>
 
 <ng-template #existingCheckin>
-  <ion-content>
-    Already checked in
+  <ion-content class="ion-text-center ion-padding-top" *ngIf="$existingCheckin | async as existingCheckin">
+    <ion-title>
+      Already checked in
+    </ion-title>
+    <div class="ion-padding-vertical">
+      <ion-text>
+        {{ friendlyTimestamp(existingCheckin.checkInDateTime) }}
+      </ion-text>
+    </div>
   </ion-content>
 </ng-template>

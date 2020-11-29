@@ -18,7 +18,7 @@ import {
   ICheckInStats,
   Registration,
 } from 'santashop-core/src/public-api';
-import { CheckInHelpers } from '../helpers/registration-helpers';
+import { CheckInHelpers } from '../helpers/checkin-helpers';
 import firebase from 'firebase/app';
 import { AlertController } from '@ionic/angular';
 

@@ -56,7 +56,8 @@ export class BrowserMultiFormatContinuousReader extends BrowserMultiFormatReader
           // scan Error - found the QR but got error on decoding
           errorName === ChecksumException.name ||
           errorName === FormatException.name ||
-          error.message.includes('No MultiFormat Readers were able to detect the code.')
+          error.message.includes('No MultiFormat Readers were able to detect the code.') ||
+          error.message.includes('Could not start')
         ) {
           scan$.next({ error });
           return;

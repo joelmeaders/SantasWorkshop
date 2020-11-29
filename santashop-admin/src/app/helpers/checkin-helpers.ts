@@ -1,5 +1,7 @@
 import { IChildrenInfo } from 'santashop-core/src/lib/models';
 import { chain } from 'underscore';
+import firebase from 'firebase/app';
+import { format } from 'date-fns';
 
 export abstract class CheckInHelpers {
 
@@ -14,9 +16,13 @@ export abstract class CheckInHelpers {
 
       case 'g':
         return 'girl';
-      
+
         case 'i':
         return 'infant';
     }
+  }
+
+  public static friendlyTimestamp(timestamp: firebase.firestore.Timestamp): string {
+    return format(timestamp.toDate(), 'MMM dd, YYY h:mm a');
   }
 }

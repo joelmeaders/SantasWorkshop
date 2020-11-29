@@ -2,8 +2,9 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
 import { format } from 'date-fns';
 import { BehaviorSubject, from, Subject } from 'rxjs';
-import { filter, finalize, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
+import { filter, mergeMap, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
 import { ICheckIn } from 'santashop-core/src/lib/models';
+import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 
 @Component({
@@ -86,7 +87,7 @@ export class QrModalComponent implements OnDestroy {
   private async alreadyCheckedIn(checkin: ICheckIn) {
     const alert = await this.alertController.create({
       header: 'Existing Check-In',
-      subHeader: format(checkin.checkInDateTime.toDate(), 'MMM dd, YYY h:mm a'),
+      subHeader: CheckInHelpers.friendlyTimestamp(checkin.checkInDateTime),
       message: 'This registration code was already used on the date/time specified. Unable to continue.',
       buttons: [
         {
@@ -99,6 +100,8 @@ export class QrModalComponent implements OnDestroy {
 
     return await alert.onDidDismiss();
   }
+
+  public friendlyTimestamp = CheckInHelpers.friendlyTimestamp;
 
   public async dismiss() {
     await this.modalController.dismiss();

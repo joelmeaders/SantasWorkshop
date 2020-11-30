@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, filter, publishReplay, refCount, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { AuthService, IError } from 'santashop-core/src/public-api';
 import { SignInForm } from '../../forms/sign-in';
 
@@ -20,16 +20,8 @@ export class SignInPage implements OnDestroy {
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
 
-  private readonly _$loading = new Subject<boolean>();
-  public readonly $loading = this._$loading.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(1),
-    refCount()
-  );
-
   private readonly authRedirectionSubscription = this.authService.$isAdmin.pipe(
     takeUntil(this.$destroy),
-    distinctUntilChanged(),
     filter(response => !!response)
   ).subscribe(() => {
     this.router.navigate(['/admin']);
@@ -44,11 +36,6 @@ export class SignInPage implements OnDestroy {
 
   public async ngOnDestroy() {
     this.$destroy.next();
-    try {
-      await this.loadingController.dismiss();
-    } catch {
-      // Do nothing
-    }
   }
 
   public async login() {
@@ -59,39 +46,24 @@ export class SignInPage implements OnDestroy {
       return;
     }
 
-    this._$loading.next(true);
+    await this.presentLoading();
 
     const result = await this.authService
       .login(loginInfo.emailAddress, loginInfo.password)
-      .then(async (response) => {
-        this._$loading.next(false);
-        return true;
-      }).catch(async (error: IError) => {
-        this._$loading.next(false);
-
-        if (error.code == '11') {
-          this.handleIDBFatalError();
-        } else {
-          await this.handleError(error);
-        }
-
+      .then(async (response) => true)
+      .catch(async (error: IError) => {
+        this.handleError(error);
         return false;
       });
 
     if (!result) {
+      await this.destroyLoading();
       return;
     }
 
-    // const profile = await this.authService.$userProfile.pipe(take(1)).toPromise();
     this.router.navigate(['/admin']);
-
+    await this.destroyLoading();
   }
-
-  private readonly showLoadingSubscription = this.$loading
-    .pipe(
-      takeUntil(this.$destroy),
-    )
-    .subscribe((loading) => (loading ? this.presentLoading() : this.destroyLoading()));
 
   private async presentLoading() {
     const loading = await this.loadingController.create({
@@ -100,18 +72,8 @@ export class SignInPage implements OnDestroy {
       translucent: true,
       backdropDismiss: true,
     });
-    
+
     await loading.present();
-  }
-
-  private async handleIDBFatalError() {
-    const alert = await this.alertController.create({
-      header: `Device Issue`,
-      message: `Please try again using a different browser or device. We apologize for the inconvenience`,
-      buttons: ['Ok'],
-    });
-
-    await alert.present();
   }
 
   private async handleError(error: IError) {
@@ -128,6 +90,8 @@ export class SignInPage implements OnDestroy {
   }
 
   private async destroyLoading() {
-    await this.loadingController.dismiss();
+    try {
+      await this.loadingController.dismiss();
+    } catch { }
   }
 }

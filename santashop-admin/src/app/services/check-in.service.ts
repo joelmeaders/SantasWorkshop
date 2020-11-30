@@ -1,82 +1,106 @@
 import { Injectable } from '@angular/core';
-import { Query, QueryFn } from '@angular/fire/firestore';
-import { ActivatedRoute, Router } from '@angular/router';
-import { race, Subject } from 'rxjs';
-import { filter, map, pluck, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
-import { FireCRUDStateless, ICheckIn, ICheckInChildren, ICheckInStats, IChildrenInfo, Registration } from 'santashop-core/src/public-api';
-import { CheckInHelpers } from '../helpers/registration-helpers';
+import { QueryFn } from '@angular/fire/firestore';
+import { BehaviorSubject, race, ReplaySubject } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pluck,
+  publishReplay,
+  refCount,
+  switchMap,
+  take,
+  tap,
+} from 'rxjs/operators';
+import {
+  FireCRUDStateless,
+  ICheckIn,
+  ICheckInStats,
+  Registration,
+} from 'santashop-core/src/public-api';
+import { CheckInHelpers } from '../helpers/checkin-helpers';
+import firebase from 'firebase/app';
+import { AlertController } from '@ionic/angular';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CheckInService {
-
   private readonly REGISTRATION_COLLECTION = 'registrations';
   private readonly CHECKIN_COLLECTION = 'checkins';
 
-  private readonly _$qrCode = new Subject<Registration>();
-  public readonly $qrCode = this._$qrCode.pipe(
-    filter(value => !!value)
-  );
+  private readonly _$qrCode = new ReplaySubject<Registration>(1);
+  public readonly $qrCode = this._$qrCode.pipe(filter((value) => !!value));
 
-  private readonly _$registrationCodeFromQr = this._$qrCode.pipe(
-    pluck('id')
-  );
+  private readonly _$registrationCodeFromScan = this._$qrCode.pipe(pluck('id'));
+  private readonly _$registrationCodeFromSearch = new ReplaySubject<string>(1);
 
-  private readonly _$registrationCode = new Subject<string>();
-
-  public readonly $registrationCode = race(
-    this._$registrationCodeFromQr, this._$registrationCode
-  ).pipe(
-    filter(value => !!value)
-  );
-
-  // public readonly $customerId = this._$qrCode.pipe(
-  //   pluck('id'),
-  //   publishReplay(1),
-  //   refCount()
-  // );
-
-  // public readonly $children = this._$qrCode.pipe(
-  //   pluck('children'),
-  //   publishReplay(1),
-  //   refCount()
-  // );
-
-  public readonly $registration = this.$registrationCode.pipe(
-    filter(id => !!id),
-    switchMap(id => this.lookupRegistration(id)),
-    map(registration => this.hydrateRegistration(registration)),
+  private readonly _$manualRegistrationEdit = new BehaviorSubject<Registration>(undefined);
+  public readonly $manualRegistrationEdit = this._$manualRegistrationEdit.pipe(
     publishReplay(1),
     refCount()
   );
 
-  private test = this.$registration.subscribe();
+  public readonly $registrationCode = race(
+    this._$registrationCodeFromScan,
+    this._$registrationCodeFromSearch
+  ).pipe(
+    distinctUntilChanged((prev, curr) => prev === curr),
+    filter((value) => !!value),
+    publishReplay(1),
+    refCount()
+  );
 
-  public readonly storeCheckIn = (checkIn: ICheckIn) =>
-    this.httpService.add<ICheckIn>(this.CHECKIN_COLLECTION, checkIn)
+  public readonly $registration = this.$registrationCode.pipe(
+    distinctUntilChanged((prev, curr) => prev === curr),
+    filter((id) => !!id),
+    switchMap((id) => this.lookupRegistration(id)),
+    map(response => {
+      response.children = CheckInHelpers.sortChildren(response.children);
+      return response;
+    }),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkinRecord = this.$registration.pipe(
+    distinctUntilChanged((prev, curr) => prev?.id === curr.id),
+    pluck('id'),
+    switchMap((customerId) => this.lookupCheckIn(customerId)),
+    publishReplay(1),
+    refCount()
+  );
+
+  private readonly storeCheckIn = (checkIn: ICheckIn) =>
+    this.httpService
+      .save<ICheckIn>(
+        this.CHECKIN_COLLECTION,
+        checkIn.customerId,
+        checkIn,
+        true
+      )
       .pipe(take(1));
 
   constructor(
     private readonly httpService: FireCRUDStateless,
-    private readonly router: Router,
-    private readonly route: ActivatedRoute
-  ) {
-    console.log('started checkin')
-  }
+    private readonly alertController: AlertController
+  ) {}
 
   public reset() {
 
   }
 
+  public setRegistrationToEdit(registration: Registration) {
+    this._$manualRegistrationEdit.next(registration);
+  }
+
   public setQrCode(code: string): void {
     const registration: Registration = JSON.parse(code);
     this._$qrCode.next(registration);
-    // this.router.navigate(['/admin/check-in', registration.id]);
   }
 
-  public setRegistrationCode(code: string) {
-    this._$registrationCode.next(code);
+  public setRegistrationCode(code: string): void {
+    this._$registrationCodeFromSearch.next(code);
   }
 
   public resetQrCode(): void {
@@ -84,70 +108,71 @@ export class CheckInService {
   }
 
   public lookupRegistration(id: string) {
-    const query: QueryFn = qry => qry.where('code', '==', id);
-    return this.httpService.readMany<Registration>(this.REGISTRATION_COLLECTION, query, 'id')
-      .pipe(take(1),map(response => response[0] ?? undefined));
+    const query: QueryFn = (qry) => qry.where('code', '==', id);
+    return this.httpService
+      .readMany<Registration>(this.REGISTRATION_COLLECTION, query, 'id')
+      .pipe(
+        take(1),
+        map((response) => response[0] ?? undefined)
+      );
   }
 
-  public hydrateRegistration(registration: Registration) {
-    registration.children.forEach(child => {
-      child.a = CheckInHelpers.expandA(child.a);
-      child.t = CheckInHelpers.expandT(child.t);
-    });
-    console.log(registration)
-    return registration;
+  public lookupCheckIn(customerId: string) {
+    return this.httpService
+      .readOne<ICheckIn>(this.CHECKIN_COLLECTION, customerId, 'id')
+      .pipe(take(1));
   }
 
-  public async saveCheckIn(registration?: Registration) {
+  public async saveCheckIn(registration?: Registration, isEdit = false) {
     if (!registration) {
       registration = await this.$registration.pipe(take(1)).toPromise();
     }
 
-    const checkin = this.registrationToCheckIn(registration);
-    return await this.storeCheckIn(checkin).toPromise();
+    const checkin = this.registrationToCheckIn(registration, isEdit);
+    await this.storeCheckIn(checkin).toPromise();
   }
 
-  private registrationToCheckIn(registration: Registration): ICheckIn {
+  public async checkinCompleteAlert() {
+    const alert = await this.alertController.create({
+      header: 'Check-In Complete',
+      message: 'Instruct the customer to....',
+      buttons: [
+        {
+          text: 'Ok',
+        }
+      ]
+    });
 
+    await alert.present();
+
+    return await alert.onDidDismiss();
+  }
+
+  private registrationToCheckIn(registration: Registration, isEdit: boolean): ICheckIn {
     const checkin: ICheckIn = {
-      customerId: registration.id ?? undefined,
-      registrationCode: registration.code ?? undefined,
-      checkInDateTime: new Date(),
-      children: this.registrationChildren(registration.children),
-      stats: this.registrationStats(registration)
+      customerId: registration.id ?? null,
+      registrationCode: registration.code || null,
+      checkInDateTime: firebase.firestore.Timestamp.now(),
+      stats: this.registrationStats(registration, isEdit),
     };
 
     return checkin;
   }
 
-  private registrationChildren(children: IChildrenInfo[]): ICheckInChildren[] {
-    const registrationChildren: ICheckInChildren[] = [];
-
-    children.forEach(child => {
-      const childToAdd: ICheckInChildren = {
-        toyType: child.t,
-        ageGroup: child.a
-      };
-      registrationChildren.push(childToAdd);
-    });
-
-    return registrationChildren;
-  }
-
-  private registrationStats(registration: Registration): ICheckInStats {
+  private registrationStats(registration: Registration, isEdit: boolean): ICheckInStats {
     const stats: ICheckInStats = {
       preregistered: (!!registration.code && !!registration.id) || false,
       children: registration.children?.length || 0,
-      ageGroup02: registration.children.filter(c => c.a === '0-2').length,
-      ageGroup35: registration.children.filter(c => c.a === '3-5').length,
-      ageGroup68: registration.children.filter(c => c.a === '6-8').length,
-      ageGroup911: registration.children.filter(c => c.a === '9-11').length,
-      toyTypeInfant: registration.children.filter(c => c.t === 'infant').length,
-      toyTypeBoy: registration.children.filter(c => c.t === 'boy').length,
-      toyTypeGirl: registration.children.filter(c => c.t === 'girl').length,
-      modifiedAtCheckIn: null, // TODO
-      zipCode: null // TODO
-    }
+      ageGroup02: registration.children.filter((c) => c.a === '0').length,
+      ageGroup35: registration.children.filter((c) => c.a === '3').length,
+      ageGroup68: registration.children.filter((c) => c.a === '6').length,
+      ageGroup911: registration.children.filter((c) => c.a === '9').length,
+      toyTypeInfant: registration.children.filter((c) => c.t === 'i').length,
+      toyTypeBoy: registration.children.filter((c) => c.t === 'b').length,
+      toyTypeGirl: registration.children.filter((c) => c.t === 'g').length,
+      modifiedAtCheckIn: isEdit,
+      zipCode: registration.zipCode,
+    };
     return stats;
   }
 }

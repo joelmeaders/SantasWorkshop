@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { SharedModule } from 'santashop-admin/src/app/components/shared.module';
 import { FriendlyTimePipe } from 'santashop-admin/src/app/pipes/friendly-time.pipe';
-import { SharedComponentsModule } from 'santashop-admin/src/components/shared-components.module';
 import { StatsPageRoutingModule } from './stats-routing.module';
 import { StatsPage } from './stats.page';
 
@@ -15,9 +15,11 @@ import { StatsPage } from './stats.page';
     ReactiveFormsModule,
     RouterModule.forChild([{ path: '', component: StatsPage }]),
     StatsPageRoutingModule,
-    SharedComponentsModule
+    SharedModule
   ],
-  declarations: [StatsPage, FriendlyTimePipe],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  providers: [
+    FriendlyTimePipe
+  ],
+  declarations: [StatsPage]
 })
 export class StatsPageModule {}

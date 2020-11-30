@@ -35,7 +35,6 @@ export class SearchPage implements OnDestroy {
   public readonly $searchResults = this.searchService.$searchResults.pipe(
     takeUntil(this.$destroy),
     tap(() => this._$loading.next(false)),
-    tap(() => this.refresh()),
     publishReplay(1),
     refCount()
   );
@@ -44,27 +43,20 @@ export class SearchPage implements OnDestroy {
     private readonly searchService: RegistrationSearchService,
     private readonly checkInService: CheckInService,
     private readonly modalController: ModalController,
-    private readonly cd: ChangeDetectorRef
   ) { }
 
   public ngOnDestroy(): void {
     this.$destroy.next();
   }
-  
-  public async refresh() {
-    of().pipe(delay(1000)).toPromise().then(() => {
-      this.cd.detectChanges();
-    });
-  }
 
-  public async reset() {
+  public async reset(): Promise<void> {
     this.searchService.resetSearchState();
     this.form.get('registrationCode').setValue(undefined);
     this.form.get('firstName').setValue(undefined);
     this.form.get('lastName').setValue(undefined);
   }
 
-  public search() {
+  public search(): void {
     this._$loading.next(true);
     this.searchService.search();
   }

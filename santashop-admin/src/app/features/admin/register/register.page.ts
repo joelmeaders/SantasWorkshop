@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { LoadingController, AlertController } from '@ionic/angular';
-import { Subject, BehaviorSubject } from 'rxjs';
-import { takeUntil, publishReplay, refCount } from 'rxjs/operators';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
+import { takeUntil, publishReplay, refCount, map, switchMap, filter, take } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
-import { IChildrenInfo, IError } from 'santashop-core/src/public-api';
+import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
+import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
+import { IChildrenInfo, IError, Registration } from 'santashop-core/src/public-api';
 
 @Component({
   selector: 'app-register',
@@ -17,11 +19,21 @@ export class RegisterPage implements OnDestroy {
   public readonly customerForm: FormGroup = QuickRegistrationForms.customerForm(null);
   public readonly customerFormValidationMessages = QuickRegistrationForms.customerValidationMessages();
 
+  public readonly childForm: FormGroup = QuickRegistrationForms.childForm(null);
+  public readonly childFormValidationMessages = QuickRegistrationForms.childValidationMessages();
+
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
 
-  private readonly _$loading = new Subject<boolean>();
+  private readonly _$loading = new BehaviorSubject<boolean>(false);
   public readonly $loading = this._$loading.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(1),
+    refCount()
+  );
+
+  private readonly _$zipCode = new BehaviorSubject<string>(undefined);
+  public readonly $zipCode = this._$zipCode.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
     refCount()
@@ -34,10 +46,51 @@ export class RegisterPage implements OnDestroy {
     refCount()
   );
 
+  public readonly $canCheckIn = combineLatest([
+    this.$zipCode, this.$children
+  ]).pipe(
+    takeUntil(this.$destroy),
+    map(([zip, children]) => !!zip && !!children?.length),
+    publishReplay(1),
+    refCount()
+  );
+
+  private readonly _$isEdit = new BehaviorSubject<boolean>(false);
+
+  public readonly registrationEditSubscription = this.checkInService.$manualRegistrationEdit.pipe(
+    takeUntil(this.$destroy),
+    filter(response => !!response),
+    switchMap(registration => this.initRegistrationEdit(registration))
+  ).subscribe();
+
   constructor(
     private readonly loadingController: LoadingController,
+    private readonly checkInService: CheckInService,
     private readonly alertController: AlertController
   ) { }
+
+  public async initRegistrationEdit(registration: Registration): Promise<void> {
+    this.setZip(registration.zipCode);
+    this.customerForm.get('zipCode').setValue(registration.zipCode);
+    this._$children.next(registration.children);
+    this._$isEdit.next(true);
+  }
+
+  public async completeRegistration() {
+
+    if (this._$zipCode.getValue().length !== 5) {
+      await this.invalidZipAlert();
+      return;
+    }
+
+    this.presentLoading();
+    const registration = await this.createRegistration();
+    await this.checkInService.saveCheckIn(registration, this._$isEdit.getValue());
+    this.reset();
+    this.dismissLoading();
+    await this.checkInService.checkinCompleteAlert();
+    this.checkInService.reset();
+  }
 
   public async ngOnDestroy() {
     this.$destroy.next();
@@ -48,9 +101,27 @@ export class RegisterPage implements OnDestroy {
     }
   }
 
+  public reset(): void {
+    this._$zipCode.next(undefined);
+    this._$children.next(new Array<IChildrenInfo>());
+    this.checkInService.reset();
+    this.customerForm.reset();
+    this.childForm.reset();
+    this._$isEdit.next(false);
+  }
+
+  public deleteChild(index: number) {
+    const current = this._$children.getValue();
+    current.splice(index, 1);
+    this._$children.next(CheckInHelpers.sortChildren(current));
+  }
+
+  public setZip(value: string) {
+    this._$zipCode.next(value);
+  }
+
   private async presentLoading() {
     const loading = await this.loadingController.create({
-      duration: 3000,
       message: 'Saving registration...',
       translucent: true,
       backdropDismiss: true
@@ -58,28 +129,52 @@ export class RegisterPage implements OnDestroy {
     await loading.present();
   }
 
-  private async destroyLoading() {
+  private async dismissLoading() {
     await this.loadingController.dismiss();
-  }
-
-  private async handleError(error: IError) {
-
-    const alert = await this.alertController.create({
-      header: 'Error',
-      subHeader: error.code,
-      message: error.message,
-      buttons: ['Ok']
-    });
-
-    await alert.present();
-
   }
 
   public addChild() {
     const current = this._$children.getValue();
-    const newChild = this.customerForm.value as IChildrenInfo;
+    const childValue = this.childForm.value;
+    const newChild: IChildrenInfo = {
+      a: childValue.ageGroup,
+      t: childValue.toyType
+    };
+
     current.push(newChild);
-    this._$children.next(current);
+    this._$children.next(CheckInHelpers.sortChildren(current));
+    this.childForm.reset();
+  }
+
+  public childColor = (value: string) => CheckInHelpers.childColor(value);
+
+  public onAgeChange(value: any) {
+    if (value === '0') {
+      this.childForm.get('toyType').setValue('i');
+    }
+  }
+
+  private async createRegistration(): Promise<Registration> {
+    const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || new Registration();
+    registration.zipCode = this._$zipCode.getValue();
+    registration.children = this._$children.getValue();
+    return registration;
+  }
+
+  private async invalidZipAlert() {
+    const alert = await this.alertController.create({
+      header: 'Invalid Zip Code',
+      message: 'Must be 5 digits long',
+      buttons: [
+        {
+          text: 'Ok',
+        }
+      ]
+    });
+
+    await alert.present();
+
+    return await alert.onDidDismiss();
   }
 
 }

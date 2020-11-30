@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { DocumentData } from '@google-cloud/firestore';
+import { getAllRegistrationData, isRegistrationComplete } from '../utility/registrations';
 
 admin.initializeApp();
 
@@ -9,9 +9,9 @@ export default async (
   context: functions.EventContext
 ) => {
 
-  const record = getAllData(change.after.data());
+  const record = getAllRegistrationData(change.after.data());
 
-  if (!isComplete(record)) {
+  if (!isRegistrationComplete(record)) {
     console.log('not complete')
     return null;
   }
@@ -40,43 +40,3 @@ export default async (
     throw new Error(error);
   });
 };
-
-function isComplete(data: CompletedRegistration): boolean {
-  if (!data) return false;
-  if (!data.customerId) return false;
-  if (!data.email) return false;
-  if (!data.firstName) return false;
-  if (!data.lastName) return false;
-  if (!data.fullName) return false;
-  if (!data.code) return false;
-  if (!data.dateTime) return false;
-  if (!data.zipCode) return false;
-  if (!data.children || !data.children.length) return false;
-  return true;
-}
-
-const getAllData = (data: DocumentData): CompletedRegistration => {
-  return {
-    customerId: data.id,
-    email: data.email,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    fullName: data.fullName,
-    code: data.code,
-    dateTime: data.formattedDateTime,
-    zipCode: data.zipCode,
-    children: data.children,
-  };
-};
-
-interface CompletedRegistration {
-  customerId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  code: string;
-  dateTime: string;
-  zipCode: string;
-  children: any[];
-}

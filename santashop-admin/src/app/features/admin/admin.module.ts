@@ -10,6 +10,8 @@ import { AdminPage } from './admin.page';
     CommonModule,
     AdminPageRoutingModule
   ],
-  declarations: [AdminPage]
+  declarations: [
+    AdminPage
+  ]
 })
 export class AdminPageModule {}

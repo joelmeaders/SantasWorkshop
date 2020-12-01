@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import {
+  CompletedRegistration,
   getAllRegistrationData,
   isRegistrationComplete,
 } from '../utility/registrations';
@@ -46,7 +47,7 @@ export default async () => {
   return null;
 };
 
-function updateDateTimeCount(registration: any): void {
+function updateDateTimeCount(registration: CompletedRegistration): void {
   const index = dateTimeCount.findIndex(
     (e) => e.date === registration.date && e.time === registration.time
   );
@@ -67,7 +68,7 @@ function updateDateTimeCount(registration: any): void {
   dateTimeCount.push(newItem);
 }
 
-function updateZipCodeCount(registration: any): void {
+function updateZipCodeCount(registration: CompletedRegistration): void {
   const index = zipCodeCount.findIndex((e) => e.zip === registration.zipCode);
 
   if (index > -1) {

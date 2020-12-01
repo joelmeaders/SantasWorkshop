@@ -48,7 +48,7 @@ export const scheduledRegistrationStats = functions.pubsub
   .schedule('0 0 * * *')
   .timeZone('America/Denver')
   .onRun(async (context) => {
-    await (await import('./fn/scheduledFirestoreBackup')).default();
+    await (await import('./fn/scheduledRegistrationStats')).default();
   });
 
 /**

@@ -7,6 +7,8 @@ export interface CompletedRegistration {
   lastName: string;
   fullName: string;
   code: string;
+  date: string;
+  time: string;
   dateTime: string;
   zipCode: string;
   children: any[];
@@ -20,6 +22,8 @@ export const isRegistrationComplete = (data: CompletedRegistration): boolean => 
   if (!data.lastName) return false;
   if (!data.fullName) return false;
   if (!data.code) return false;
+  if (!data.date) return false;
+  if (!data.time) return false;
   if (!data.dateTime) return false;
   if (!data.zipCode) return false;
   if (!data.children || !data.children.length) return false;
@@ -34,6 +38,8 @@ export const getAllRegistrationData = (data: DocumentData): CompletedRegistratio
     lastName: data.lastName,
     fullName: data.fullName,
     code: data.code,
+    date: data.date,
+    time: data.time,
     dateTime: data.formattedDateTime,
     zipCode: data.zipCode,
     children: data.children,

@@ -14,6 +14,8 @@
     "config:app": "ts-node -O '{\"module\": \"commonjs\"}' ./config.app.ts",
     "build:admin": "npm run config:admin && ng build --prod --project santashop-admin",
     "build:app": "npm run config:app && ng build --prod --project santashop-app",
+    "build:admin:local": "ng build --prod --project santashop-admin",
+    "build:app:local": "ng build --prod --project santashop-app",
     "deploy:fsrules": "firebase deploy --only firestore:rules"
   },
   "private": true,

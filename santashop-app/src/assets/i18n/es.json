@@ -95,7 +95,7 @@
     "DATETIME_INSTRUCTIONS": "Instrucciones de fecha/hora",
     "LETTER_LASTNAME_0": "Use la primera letra de su apellido para elegir la fecha",
     "LETTER_LASTNAME_1": "<strong>T-Z: </strong>11 de dic",
-    "LETTER_LASTNAME_2": "<strong>A-G: </strong>12 de dic",
+    "LETTER_LASTNAME_2": "<strong>A-G VENDIDO FUERA</strong> Elija una fecha diferente",
     "LETTER_LASTNAME_3": "<strong>H-M: </strong>14 de dic",
     "LETTER_LASTNAME_4": "<strong>N-S: </strong>15 de dic",
     "DATE": "Fecha",

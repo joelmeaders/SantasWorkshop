@@ -267,10 +267,11 @@ export class ProfilePage implements OnDestroy {
     const letter = customer.lastName[0].toLowerCase();
     const control = this.dateTimeForm.get('date');
 
-    if (letter >= 'a' && letter <= 'g') {
-      control.setValue(12);
-    }
-    else if (letter >= 'h' && letter <= 'm') {
+    // Saturday sold out. Removed
+    // if (letter >= 'a' && letter <= 'g') {
+    //   control.setValue(12);
+    // }
+    if (letter >= 'h' && letter <= 'm') {
       control.setValue(14);
     }
     else if (letter >= 'n' && letter <= 's') {

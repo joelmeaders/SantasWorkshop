@@ -22,6 +22,8 @@ import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MaintenanceService } from './services/maintenance.service';
+import { AngularFireRemoteConfigModule, DEFAULTS, SETTINGS } from '@angular/fire/remote-config';
+import { SignUpStatusService } from './services/sign-up-status.service';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -45,6 +47,7 @@ export function httpLoaderFactory(http: HttpClient) {
     AngularFireAuthModule,
     AngularFireStorageModule,
     AngularFireAnalyticsModule,
+    AngularFireRemoteConfigModule,
     IonicModule.forRoot({
       mode: 'md',
     }),
@@ -64,11 +67,18 @@ export function httpLoaderFactory(http: HttpClient) {
         app_version: environment.version,
       },
     },
+    {
+      provide: DEFAULTS, useValue: true
+    },
+    {
+      provide: SETTINGS,
+      useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {}
+    },
     AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
     AuthService,
-    MaintenanceService
+    MaintenanceService,
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

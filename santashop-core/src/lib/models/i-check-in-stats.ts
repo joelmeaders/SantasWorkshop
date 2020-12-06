@@ -1,5 +1,7 @@
+import firebase from 'firebase/app';
+
 export interface ICheckInAggregatedStats {
-  lastUpdated: Date;
+  lastUpdated: firebase.firestore.Timestamp;
   dateTimeCount: ICheckInDateTimeCount[];
 }
 

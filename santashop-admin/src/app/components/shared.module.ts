@@ -3,6 +3,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { CoreDirectivesModule, LetDirective } from 'santashop-core/src/public-api';
+import { ConvertHour24To12Pipe } from '../pipes/convert-hour-24-to-12.pipe';
 import { DeviceNameOnlyPipe } from '../pipes/device-name-only.pipe';
 import { FriendlyTimePipe } from '../pipes/friendly-time.pipe';
 import { HydrateAgeGroupPipe } from '../pipes/hydrate-age-group.pipe';
@@ -15,7 +16,8 @@ import { QrModalComponent } from './qr-modal/qr-modal.component';
     FriendlyTimePipe,
     HydrateAgeGroupPipe,
     HydrateToyTypePipe,
-    DeviceNameOnlyPipe
+    DeviceNameOnlyPipe,
+    ConvertHour24To12Pipe
   ],
   imports: [
     CommonModule,
@@ -29,7 +31,8 @@ import { QrModalComponent } from './qr-modal/qr-modal.component';
     FriendlyTimePipe,
     HydrateAgeGroupPipe,
     HydrateToyTypePipe,
-    DeviceNameOnlyPipe
+    DeviceNameOnlyPipe,
+    ConvertHour24To12Pipe
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

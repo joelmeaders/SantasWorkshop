@@ -153,6 +153,7 @@ export class CheckInService {
       customerId: registration.id ?? null,
       registrationCode: registration.code || null,
       checkInDateTime: firebase.firestore.Timestamp.now(),
+      inStats: false,
       stats: this.registrationStats(registration, isEdit),
     };
 

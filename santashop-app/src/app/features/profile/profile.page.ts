@@ -263,23 +263,26 @@ export class ProfilePage implements OnDestroy {
       return;
     }
 
-    const customer = await this.$customer.pipe(take(1)).toPromise();
-    const letter = customer.lastName[0].toLowerCase();
+    // const customer = await this.$customer.pipe(take(1)).toPromise();
+    // const letter = customer.lastName[0].toLowerCase();
     const control = this.dateTimeForm.get('date');
+
+    // Select last available day
+    control.setValue(15);
 
     // Saturday sold out. Removed
     // if (letter >= 'a' && letter <= 'g') {
     //   control.setValue(12);
     // }
-    if (letter >= 'h' && letter <= 'm') {
-      control.setValue(14);
-    }
-    else if (letter >= 'n' && letter <= 's') {
-      control.setValue(15);
-    }
-    else if (letter >= 't' && letter <= 'z') {
-      control.setValue(11)
-    }
+    // if (letter >= 'h' && letter <= 'm') {
+    //   control.setValue(14);
+    // }
+    // else if (letter >= 'n' && letter <= 's') {
+    //   control.setValue(15);
+    // }
+    // else if (letter >= 't' && letter <= 'z') {
+    //   control.setValue(11)
+    // }
 
   }
 

@@ -5,6 +5,7 @@ export class ICheckIn extends BaseEntity {
   customerId?: string;
   registrationCode?: string;
   checkInDateTime: firebase.firestore.Timestamp;
+  inStats: boolean = false;
   stats: ICheckInStats | undefined;
 }
 

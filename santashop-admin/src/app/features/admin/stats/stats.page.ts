@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Subject } from 'rxjs';
 import { publishReplay, refCount, switchMap, map } from 'rxjs/operators';
 import { StatsService } from 'santashop-admin/src/app/services/stats.service';
 
@@ -12,6 +12,12 @@ import { StatsService } from 'santashop-admin/src/app/services/stats.service';
 export class StatsPage implements OnDestroy {
 
   private readonly $destroy = new Subject<void>();
+
+  private readonly _$view = new BehaviorSubject<'registration' | 'checkin'>('registration');
+  public readonly $view = this._$view.pipe(
+    publishReplay(1),
+    refCount()
+  );
 
   public readonly now = new Date().toLocaleString();
 
@@ -38,12 +44,51 @@ export class StatsPage implements OnDestroy {
     refCount()
   );
 
-  public readonly $dateTimeStats = this.statsService.$dateTimeCounts.pipe(
+  public readonly $dateTimeStats = this.statsService.$registrationDateTimeCounts.pipe(
     publishReplay(1),
     refCount()
   );
 
   public readonly $zipCodeStats = this.statsService.$zipCodeCounts.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInLastUpdated = this.statsService.$checkInLastUpdated.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInDateTimeCounts = this.statsService.$checkInDateTimeCounts.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInTotalCustomerCount = this.statsService.$checkInTotalCustomerCount.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInTotalChildCount = this.statsService.$checkInTotalChildCount.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInTotalPreregisteredCount = this.statsService.$checkInTotalPreregisteredCount.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInOnSiteRegistration = forkJoin([
+    this.$checkInTotalCustomerCount,
+    this.$checkInTotalPreregisteredCount
+  ]).pipe(
+    map(([total, prereg]) => total - prereg),
+    publishReplay(1),
+    refCount()
+  );
+
+  public readonly $checkInTotalModifiedCount = this.statsService.$checkInTotalModifiedCount.pipe(
     publishReplay(1),
     refCount()
   );
@@ -54,5 +99,9 @@ export class StatsPage implements OnDestroy {
 
   public async ngOnDestroy() {
     this.$destroy.next();
+  }
+
+  public changeView(value: 'registration' | 'checkin') {
+    this._$view.next(value);
   }
 }

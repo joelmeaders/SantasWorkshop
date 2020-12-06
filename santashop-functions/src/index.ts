@@ -51,6 +51,14 @@ export const scheduledRegistrationStats = functions.pubsub
     await (await import('./fn/scheduledRegistrationStats')).default();
   });
 
+// Runs every 5 minutes between 10am-4pm, on the 11th, 12th, 14th, 15th of December
+export const scheduledCheckInStats = functions.pubsub
+  .schedule('*/5 10,11,12,13,14,15,16 11,12,14,15 12 *')
+  .timeZone('America/Denver')
+  .onRun(async (context) => {
+    await (await import('./fn/scheduledCheckInStats')).default();
+  });
+
 /**
  * Watches registrations collections for completed registrations
  * and kicks off various document creations and updates to trigger

@@ -28,15 +28,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
 
   private isAuthenticated() {
     return this.authService.$userProfile.pipe(
-      map((user: UserProfile) => !!user ? true : false),
-      // tap(isAuth => {
-      //   if (!isAuth) {
-      //     this.router.navigate(['/']);
-      //   }
-      // })
+      map((user: UserProfile) => !!user ? true : false)
     );
   }
-
-  
-  
 }

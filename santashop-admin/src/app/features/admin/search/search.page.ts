@@ -68,7 +68,9 @@ export class SearchPage implements OnDestroy {
 
   public async onSelect(code: string) {
     this.checkInService.setRegistrationCode(code);
-    await this.openModal();
+    const modal = await this.qrModal();
+    await modal.present();
+    await modal.onDidDismiss();
   }
 
   private formToSearchModel(): RegistrationSearch {
@@ -77,14 +79,12 @@ export class SearchPage implements OnDestroy {
     } as RegistrationSearch;
   }
 
-  private async openModal() {
+  private async qrModal() {
 
-    const modal = await this.modalController.create({
+    return await this.modalController.create({
       component: QrModalComponent,
       cssClass: 'modal-lg',
       backdropDismiss: false
     });
-
-    await modal.present();
   }
 }

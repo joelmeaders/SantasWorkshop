@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { QueryFn } from '@angular/fire/firestore';
-import { BehaviorSubject, race, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -86,7 +86,6 @@ export class CheckInService {
   ) {}
 
   public reset() {
-    console.log('reset called')
     this._$qrCode.next(undefined);
     this._$manualRegistrationEdit.next(undefined);
     this._$registrationCodeFromSearch.next(undefined);

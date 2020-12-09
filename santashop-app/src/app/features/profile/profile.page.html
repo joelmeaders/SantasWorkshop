@@ -34,6 +34,14 @@
   </ion-header>
 
   <ion-grid fixed>
+    <ion-row *ngIf="!($signupEnabled | async)">
+      <ion-col class="ion-text-center">
+        <ion-title>
+          We're sorry, registrations are closed<br />
+          Lo sentimos, las inscripciones están cerradas
+        </ion-title>
+      </ion-col>
+    </ion-row>
     <ion-row>
       <!-- Registration Status -->
       <ion-col size-xs>
@@ -100,6 +108,7 @@
                         <ion-button
                           color="danger"
                           (click)="modifyRegistration()"
+                          [disabled]="!($signupEnabled | async)"
                         >
                           <ion-text color="light">
                             <strong>
@@ -301,6 +310,7 @@
                           placeholder="Choose Date"
                           interface="popover"
                           (ionChange)="onDateTimeChange()"
+                          [disabled]="!($signupEnabled | async)"
                         >
                           <!-- <ion-select-option [value]="11">
                             {{ 'REGISTRATION.DATE_VALUE_1' | translate }}
@@ -326,6 +336,7 @@
                           placeholder="Choose Time"
                           interface="popover"
                           (ionChange)="onDateTimeChange()"
+                          [disabled]="!($signupEnabled | async)"
                         >
                           <ion-select-option [value]="10">
                             {{ 'REGISTRATION.TIME_VALUE_1' | translate }}
@@ -379,7 +390,7 @@
             slot="end"
             color="primary"
             class="padding-right-md"
-            [disabled]="!allowEdit"
+            [disabled]="!allowEdit || !($signupEnabled | async)"
           >
             <ion-label>{{ 'REGISTRATION.ADD_CHILD' | translate }}</ion-label>
             <ion-icon name="add-circle" slot="end"></ion-icon>
@@ -422,7 +433,7 @@
                     class="padding-top-lg"
                     (click)="addEditChild()"
                   >
-                    <ion-button size="large">
+                    <ion-button size="large" [disabled]="!($signupEnabled | async)">
                       <ion-label
                         >{{ 'REGISTRATION.START_ADD_CHILD' | translate
                         }}</ion-label
@@ -445,7 +456,7 @@
                       <ion-item
                         *ngFor="let child of ($children | async)"
                         (click)="addEditChild(child)"
-                        [disabled]="!allowEdit"
+                        [disabled]="!allowEdit || !($signupEnabled | async)"
                         tappable
                         button
                         lines="full"
@@ -511,7 +522,7 @@
                 >
                   <ion-button
                     color="primary"
-                    [disabled]="!($registrationEnabled | async)"
+                    [disabled]="!($registrationEnabled | async) || !($signupEnabled | async)"
                     (click)="confirmRegistration()"
                     size="large"
                   >

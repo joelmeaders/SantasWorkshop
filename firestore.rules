@@ -15,31 +15,28 @@ service cloud.firestore {
     }
 
     match /customers/{userId} {
-      // allow get: if isUser(userId) || isAdmin();
-      // allow list: if isAdmin();
+      allow get: if isUser(userId) || isAdmin();
+      allow list: if isAdmin();
       // allow create: if isUser(userId);
       // allow update: if isUser(userId);
       // allow delete: if isUser(userId) || isAdmin();
-      allow read: if isAdmin();
       allow write: if false;
     }
 
     match /children/{childId} {
-      // allow get: if isUser(resource.data.parentId) || isAdmin();
-      // allow list: if isUser(resource.data.parentId) || isAdmin();
+      allow get: if isUser(resource.data.parentId) || isAdmin();
+      allow list: if isUser(resource.data.parentId) || isAdmin();
       // allow create: if isUser(request.resource.data.parentId);
       // allow update: if isUser(request.resource.data.parentId);
       // allow delete: if isUser(resource.data.parentId) || isAdmin();
-      allow read: if isAdmin();
       allow write: if false;
     }
 
     match /registrations/{documentId} {
-      // allow read: if isUser(resource.data.id) || isAdmin();
+      allow read: if isUser(resource.data.id) || isAdmin();
       // allow create: if isUser(request.resource.data.id);
       // allow update: if (isUser(request.resource.data.id) && isUser(resource.data.id));
       // allow delete: if isUser(resource.data.id) || isAdmin();
-      allow read: if isAdmin();
       allow write: if false;
     }
 

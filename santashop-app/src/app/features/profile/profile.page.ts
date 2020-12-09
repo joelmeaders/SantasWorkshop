@@ -4,9 +4,10 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, Observable, of, Subject, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, of, Subject, throwError } from 'rxjs';
 import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
+import { SignUpStatusService } from '../../services/sign-up-status.service';
 import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
 import { PublicMenuComponent } from '../../shared/components/public-menu/public-menu.component';
 import { ArrivalDateForm } from '../../shared/forms/arrival-date';
@@ -22,6 +23,12 @@ export class ProfilePage implements OnDestroy {
 
   public readonly dateTimeForm = ArrivalDateForm.form();
   public readonly dateTimeValidationMessages = ArrivalDateForm.validationMessages();
+
+  public readonly $signupEnabled = this.signUpStatusService.$signupEnabled.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(),
+    refCount()
+  );
 
   private readonly _$isModify = new BehaviorSubject<boolean>(false);
   public readonly $isModify = this._$isModify.pipe(
@@ -151,7 +158,8 @@ export class ProfilePage implements OnDestroy {
     private readonly analyticsService: AngularFireAnalytics,
     private readonly router: Router,
     private readonly ngzone: NgZone,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
+    private readonly signUpStatusService: SignUpStatusService
   ) {
     analyticsService.setCurrentScreen('profile');
     this.autoDatePicker();
@@ -164,6 +172,12 @@ export class ProfilePage implements OnDestroy {
     } catch {
       // Do nothing
     }
+  }
+
+  private async isReadOnlyGuard() {
+    const signupEnabled = await this.$signupEnabled.pipe(take(1)).toPromise();
+    if (!signupEnabled)
+      throw Error('Signup disabled');
   }
   
   private async validateCustomer(customer: UserProfile): Promise<UserProfile> {
@@ -203,6 +217,8 @@ export class ProfilePage implements OnDestroy {
 
   public async addEditChild(inputChild?: ChildProfile): Promise<void> {
 
+    await this.isReadOnlyGuard();
+
     const modal = await this.modalController.create({
       component: CreateChildModalComponent,
       cssClass: 'modal-md',
@@ -230,14 +246,16 @@ export class ProfilePage implements OnDestroy {
           didAdd = true;
         }
 
-        await this.saveChild(child).toPromise();
+        await this.saveChild(child);
 
         this.analyticsService.logEvent(didAdd ? 'child_add' : 'child_edit');
       }
     });
   }
 
-  public saveChild(child: ChildProfile): Observable<ChildProfile> {
+  public async saveChild(child: ChildProfile): Promise<ChildProfile> {
+
+    await this.isReadOnlyGuard();
 
     window.addEventListener('beforeunload', (event) => {
       if (this._$isModify.getValue()) {
@@ -252,10 +270,12 @@ export class ProfilePage implements OnDestroy {
         catchError((error) => {
           return throwError(error);
         })
-      );
+      ).toPromise();
   }
 
   private async autoDatePicker() {
+
+    await this.isReadOnlyGuard();
 
     const dateTime = await this._$registrationDateTime.pipe(take(1)).toPromise();
 
@@ -287,6 +307,9 @@ export class ProfilePage implements OnDestroy {
   }
 
   public async onDateTimeChange() {
+
+    await this.isReadOnlyGuard();
+
     const dateTime = await this._$registrationDateTime.pipe(take(1)).toPromise();
     const customer = await this.$customer.pipe(take(1)).toPromise();
 
@@ -310,6 +333,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   public async confirmRegistration() {
+
+    await this.isReadOnlyGuard();
 
     const choice = await this.proceedWithRegistration();
 
@@ -363,6 +388,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   private async proceedWithRegistration() {
+    await this.isReadOnlyGuard();
+
     const alert = await this.alertController.create({
       header: this.translateService.instant('REGISTRATION.PROCEED_1'),
       subHeader: this.translateService.instant('REGISTRATION.PROCEED_2'),
@@ -384,6 +411,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   public async modifyRegistration() {
+    await this.isReadOnlyGuard();
+
     const choice = await this.proceedWithCancellation();
 
     if (choice?.role === 'cancel') {
@@ -397,6 +426,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   private async proceedWithCancellation() {
+    await this.isReadOnlyGuard();
+
     const alert = await this.alertController.create({
       header: this.translateService.instant('REGISTRATION.MODIFY_1'),
       message: this.translateService.instant('REGISTRATION.MODIFY_2'),
@@ -447,6 +478,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   private async updatedRegistrationEmailAlert() {
+    await this.isReadOnlyGuard();
+
     const alert = await this.alertController.create({
       header: this.translateService.instant('REGISTRATION.UPDATED'),
       subHeader: this.translateService.instant('REGISTRATION.UPDATED_MSG_1'),
@@ -462,6 +495,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   private async newRegistrationEmailAlert() {
+    await this.isReadOnlyGuard();
+
     const alert = await this.alertController.create({
       header: this.translateService.instant('REGISTRATION.REGISTERED_1'),
       subHeader: this.translateService.instant('REGISTRATION.REGISTERED_2'),

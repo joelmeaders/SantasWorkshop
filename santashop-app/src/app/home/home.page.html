@@ -32,6 +32,14 @@
   </ion-header>
 
   <ion-grid fixed>
+    <ion-row *ngIf="!($signupEnabled | async)">
+      <ion-col class="ion-text-center">
+        <ion-title>
+          We're sorry, registrations are closed<br />
+          Lo sentimos, las inscripciones están cerradas
+        </ion-title>
+      </ion-col>
+    </ion-row>
     <ion-row>
       <ion-col size="12">
         <ion-card>
@@ -62,7 +70,7 @@
   
                 </ion-col>
                 <ion-col size-sm size="12" class="ion-padding-horizontal">
-                  <ion-button color="purple" [routerLink]="['/sign-up-account']" size="large"expand="block">
+                  <ion-button color="purple" [routerLink]="['/sign-up-account']" size="large"expand="block" [disabled]="!($signupEnabled | async)">
                     <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
                   </ion-button>
                 </ion-col>

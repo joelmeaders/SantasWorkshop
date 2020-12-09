@@ -5,6 +5,7 @@ import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, takeUntil } from 'rxjs/operators';
+import { SignUpStatusService } from 'santashop-app/src/app/services/sign-up-status.service';
 import { AuthService } from 'santashop-core/src/public-api';
 
 @Component({
@@ -15,11 +16,17 @@ import { AuthService } from 'santashop-core/src/public-api';
 })
 export class PublicMenuComponent implements OnDestroy {
 
-  private readonly $destroy = new Subject<boolean>();
+  private readonly $destroy = new Subject<void>();
 
   public readonly $isLoggedIn = this.authService.$currentUser.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
+    refCount()
+  );
+
+  public readonly $signupEnabled = this.signUpStatusService.$signupEnabled.pipe(
+    takeUntil(this.$destroy),
+    publishReplay(),
     refCount()
   );
 
@@ -28,11 +35,12 @@ export class PublicMenuComponent implements OnDestroy {
     private readonly router: Router,
     private readonly popoverController: PopoverController,
     private readonly translateService: TranslateService,
-    private readonly analyticsService: AngularFireAnalytics
+    private readonly analyticsService: AngularFireAnalytics,
+    private readonly signUpStatusService: SignUpStatusService
   ) { }
 
   public ngOnDestroy(): void {
-    this.$destroy.next(true);
+    this.$destroy.next();
   }
 
   public async closeMenu() {

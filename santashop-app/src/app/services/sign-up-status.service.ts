@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireRemoteConfig, budget } from '@angular/fire/remote-config';
-import { Router, Event as NavigationEvent, NavigationEnd } from '@angular/router';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -20,17 +19,7 @@ export class SignUpStatusService {
     refCount()
   );
 
-  public readonly navigationSub = this.router.events.pipe(
-      filter((event: NavigationEvent) => event instanceof NavigationEnd),
-      filter((event: NavigationEnd) => event.url !== '/registration-closed'),
-      switchMap(() => this.$signupEnabled),
-      filter((response: boolean) => !response),
-    ).subscribe(value => {
-      this.router.navigate(['/registration-closed']);
-    });
-
   constructor(
-    private readonly remoteConfig: AngularFireRemoteConfig,
-    private readonly router: Router
+    private readonly remoteConfig: AngularFireRemoteConfig
   ) { }
 }

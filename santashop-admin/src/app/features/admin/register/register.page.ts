@@ -83,11 +83,11 @@ export class RegisterPage implements OnDestroy {
       return;
     }
 
-    this.presentLoading();
+    await this.presentLoading();
     const registration = await this.createRegistration();
     await this.checkInService.saveCheckIn(registration, this._$isEdit.getValue());
     this.reset();
-    this.dismissLoading();
+    await this.dismissLoading();
     await this.checkInService.checkinCompleteAlert();
     this.checkInService.reset();
   }

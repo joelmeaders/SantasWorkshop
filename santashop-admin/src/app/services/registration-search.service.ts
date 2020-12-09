@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { QueryFn } from '@angular/fire/firestore';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src/public-api';
 import { chain } from 'underscore';
 import { RegistrationSearch } from '../models/registration-search.model';

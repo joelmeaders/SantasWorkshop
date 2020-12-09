@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { QueryFn } from '@angular/fire/firestore';
-import { BehaviorSubject, race, ReplaySubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -9,8 +9,7 @@ import {
   publishReplay,
   refCount,
   switchMap,
-  take,
-  tap,
+  take
 } from 'rxjs/operators';
 import {
   FireCRUDStateless,
@@ -29,24 +28,28 @@ export class CheckInService {
   private readonly REGISTRATION_COLLECTION = 'registrations';
   private readonly CHECKIN_COLLECTION = 'checkins';
 
-  private readonly _$qrCode = new ReplaySubject<Registration>(1);
+  private readonly _$qrCode = new BehaviorSubject<Registration>(undefined);
   public readonly $qrCode = this._$qrCode.pipe(filter((value) => !!value));
 
-  private readonly _$registrationCodeFromScan = this._$qrCode.pipe(pluck('id'));
-  private readonly _$registrationCodeFromSearch = new ReplaySubject<string>(1);
+  private readonly _$registrationCodeFromScan = this.$qrCode.pipe(pluck('id'));
+  private readonly _$registrationCodeFromSearch = new BehaviorSubject<string>(undefined);
+  public readonly $registrationCodeFromSearch = this._$registrationCodeFromSearch.pipe(filter((value) => !!value));
 
   private readonly _$manualRegistrationEdit = new BehaviorSubject<Registration>(undefined);
-  public readonly $manualRegistrationEdit = this._$manualRegistrationEdit.pipe(
-    publishReplay(1),
-    refCount()
-  );
+  public readonly $manualRegistrationEdit = this._$manualRegistrationEdit.asObservable();
 
-  public readonly $registrationCode = race(
-    this._$registrationCodeFromScan,
-    this._$registrationCodeFromSearch
-  ).pipe(
-    distinctUntilChanged((prev, curr) => prev === curr),
+  public readonly registrationFromScanSubscription = this._$registrationCodeFromScan.subscribe(value => {
+    this._$registrationCode.next(value);
+  });
+
+  public readonly registrationFromSearchSubscription = this.$registrationCodeFromSearch.subscribe(value => {
+    this._$registrationCode.next(value);
+  });
+
+  private readonly _$registrationCode = new BehaviorSubject<string>(undefined);
+  public readonly $registrationCode = this._$registrationCode.pipe(
     filter((value) => !!value),
+    distinctUntilChanged((prev, curr) => prev === curr),
     publishReplay(1),
     refCount()
   );
@@ -58,17 +61,13 @@ export class CheckInService {
     map(response => {
       response.children = CheckInHelpers.sortChildren(response.children);
       return response;
-    }),
-    publishReplay(1),
-    refCount()
+    })
   );
 
   public readonly $checkinRecord = this.$registration.pipe(
     distinctUntilChanged((prev, curr) => prev?.id === curr.id),
     pluck('id'),
-    switchMap((customerId) => this.lookupCheckIn(customerId)),
-    publishReplay(1),
-    refCount()
+    switchMap((customerId) => this.lookupCheckIn(customerId))
   );
 
   private readonly storeCheckIn = (checkIn: ICheckIn) =>
@@ -87,7 +86,9 @@ export class CheckInService {
   ) {}
 
   public reset() {
-
+    this._$qrCode.next(undefined);
+    this._$manualRegistrationEdit.next(undefined);
+    this._$registrationCodeFromSearch.next(undefined);
   }
 
   public setRegistrationToEdit(registration: Registration) {
@@ -135,7 +136,7 @@ export class CheckInService {
   public async checkinCompleteAlert() {
     const alert = await this.alertController.create({
       header: 'Check-In Complete',
-      message: 'Instruct the customer to....',
+      // message: 'Instruct the customer to move forward',
       buttons: [
         {
           text: 'Ok',

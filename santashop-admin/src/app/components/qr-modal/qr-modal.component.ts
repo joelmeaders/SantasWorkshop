@@ -48,6 +48,8 @@ export class QrModalComponent implements OnDestroy {
   ) { }
 
   ngOnDestroy() {
+    this.checkInService.reset();
+    this.existingAlertSubcription.unsubscribe();
     this.$destroy.next();
   }
 

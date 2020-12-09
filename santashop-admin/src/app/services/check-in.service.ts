@@ -136,7 +136,7 @@ export class CheckInService {
   public async checkinCompleteAlert() {
     const alert = await this.alertController.create({
       header: 'Check-In Complete',
-      message: 'Instruct the customer to....',
+      // message: 'Instruct the customer to move forward',
       buttons: [
         {
           text: 'Ok',

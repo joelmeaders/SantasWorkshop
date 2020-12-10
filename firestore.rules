@@ -65,6 +65,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /registrationemails/{documentId} {
+      allow read: if isUser(resource.id);
+      allow update: if request.resource.data.resend != null && !("resend" in resource.data) &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(["resend"])
+    }
+
     match /stats/{document=**} {
       allow read: if isAdmin();
       allow write: if isAdmin();

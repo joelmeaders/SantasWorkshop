@@ -4,8 +4,9 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { send } from 'process';
 import { BehaviorSubject, combineLatest, of, Subject, throwError } from 'rxjs';
-import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
 import { SignUpStatusService } from '../../services/sign-up-status.service';
 import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
@@ -136,6 +137,15 @@ export class ProfilePage implements OnDestroy {
     )),
     tap(() => this._$qrLoading.next(false)),
     shareReplay(1)
+  );
+
+  public readonly $sentEmail = this.$customer.pipe(
+    takeUntil(this.$destroy),
+    pluck('id'),
+    switchMap(uid => this.registrationService.$sentEmail(uid)),
+    map((response: any) => response),
+    publishReplay(1),
+    refCount()
   );
 
   private readonly profileInfoRedirectSubscription = this.authService.$userProfile.pipe(
@@ -517,5 +527,16 @@ export class ProfilePage implements OnDestroy {
       event: $event
     });
     return await popover.present();
+  }
+
+  public async resendEmail() {
+    const uid = await (await this.$customer.pipe(take(1)).toPromise()).id;
+    const sentEmail: any = await (await this.$sentEmail.pipe(take(1)).toPromise());
+
+    if (!sentEmail.resend) {
+      await this.registrationService.$sendEmail({ resend: new Date() }, uid).pipe(take(1)).toPromise();
+      await this.newRegistrationEmailAlert();
+      return;
+    }
   }
 }

@@ -505,6 +505,8 @@ export class ProfilePage implements OnDestroy {
   }
 
   private async newRegistrationEmailAlert() {
+    await this.isReadOnlyGuard();
+
     const alert = await this.alertController.create({
       header: this.translateService.instant('REGISTRATION.REGISTERED_1'),
       subHeader: this.translateService.instant('REGISTRATION.REGISTERED_2'),

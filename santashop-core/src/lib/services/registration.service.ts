@@ -7,14 +7,22 @@ import { UserProfile } from '../models/user-profile.model';
 import { BaseHttpService } from '../services/base-http.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { FireCRUDStateless } from './fire-crud.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegistrationService extends BaseHttpService<Registration> {
 
+  public readonly $sentEmail = (uid: string) =>
+    this.httpService.readOne('registrationemails', uid);
+
+  public readonly $sendEmail = (email: any, uid: string) =>
+    this.httpService.update('registrationemails', email, uid, true);
+
   constructor(
     private readonly db: AngularFirestore,
+    private readonly httpService: FireCRUDStateless
   ) {
     super(db, 'registrations');
   }

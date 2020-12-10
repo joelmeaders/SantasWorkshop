@@ -105,6 +105,15 @@
                         <ion-label color="dark">
                           {{ 'REGISTRATION.CHANGE_DETAILS' | translate }} </ion-label
                         ><br />
+                        <ng-container *ngIf="$sentEmail | async as sentEmail">
+                          <ion-button  *ngIf="!sentEmail.resend" color="danger" (click)="resendEmail()">
+                            <ion-text color="light">
+                              <strong>
+                                {{ 'REGISTRATION.RESEND_EMAIL' | translate }}
+                              </strong>
+                            </ion-text>
+                          </ion-button><br />
+                        </ng-container>
                         <ion-button
                           color="danger"
                           (click)="modifyRegistration()"

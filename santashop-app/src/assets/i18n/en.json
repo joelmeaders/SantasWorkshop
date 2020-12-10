@@ -74,6 +74,7 @@
     "SEND_RESET_EMAIL": "Send Reset Email"
   },
   "REGISTRATION": {
+    "RESEND_EMAIL": "Resend Email",
     "HEADER": "Registration Status",
     "READY": "You're ready for the event!",
     "LOADING": "Loading code...",

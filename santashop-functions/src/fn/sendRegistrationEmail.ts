@@ -10,6 +10,7 @@ export default async (
 
   if (!change.after.exists) {
     // Deleted, exit
+    console.log('deleted')
     return null;
   }
 
@@ -37,10 +38,14 @@ export default async (
     isNewCode = false;
   }
 
+  const isResend = !oldDocument.resend && !!document.resend; 
+
   // Don't proceed
-  if (!code || !email?.length || !isNewCode) {
+  if (!isResend && (!code || !email?.length || !isNewCode)) {
     return;
   }
+
+  console.log(`sending email to ${email}`);
 
   const msg = {
     to: email,

@@ -74,6 +74,7 @@
     "SEND_RESET_EMAIL": "Enviar correo electrónico de restablecimiento"
   },
   "REGISTRATION": {
+    "RESEND_EMAIL": "Reenviar el correo electrónico",
     "HEADER": "Estado de registro",
     "READY": "¡Estás listo para el evento!",
     "LOADING": "Código de carga",

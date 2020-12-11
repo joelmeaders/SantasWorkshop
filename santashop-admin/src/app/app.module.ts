@@ -16,7 +16,9 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    IonicModule.forRoot(),
+    IonicModule.forRoot({
+      mode: 'md',
+    }),
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFirestoreModule,
     AngularFireAuthModule,

@@ -274,9 +274,9 @@
                         {{ 'REGISTRATION.DATETIME_INSTRUCTIONS' | translate }}
                       </strong>
                     </ion-item>
-                    <ion-item lines="none">
+                    <!-- <ion-item lines="none">
                       {{ 'REGISTRATION.LETTER_LASTNAME_0' | translate }}
-                    </ion-item>
+                    </ion-item> -->
 
                     <ion-item>
                       <ul>
@@ -321,9 +321,9 @@
                           (ionChange)="onDateTimeChange()"
                           [disabled]="!($signupEnabled | async)"
                         >
-                          <ion-select-option [value]="11">
+                          <!-- <ion-select-option [value]="11">
                             {{ 'REGISTRATION.DATE_VALUE_1' | translate }}
-                          </ion-select-option>
+                          </ion-select-option> -->
                           <ion-select-option [value]="12">
                             {{ 'REGISTRATION.DATE_VALUE_2' | translate }}
                           </ion-select-option>

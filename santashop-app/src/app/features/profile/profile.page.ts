@@ -172,7 +172,7 @@ export class ProfilePage implements OnDestroy {
     private readonly signUpStatusService: SignUpStatusService
   ) {
     analyticsService.setCurrentScreen('profile');
-    this.autoDatePicker();
+    // this.autoDatePicker();
   }
 
   public async ngOnDestroy() {
@@ -530,7 +530,7 @@ export class ProfilePage implements OnDestroy {
   }
 
   public async resendEmail() {
-    const uid = await (await this.$customer.pipe(take(1)).toPromise()).id;
+    const uid = (await this.$customer.pipe(take(1)).toPromise()).id;
     const sentEmail: any = await (await this.$sentEmail.pipe(take(1)).toPromise());
 
     if (!sentEmail.resend) {

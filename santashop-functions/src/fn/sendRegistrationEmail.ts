@@ -38,7 +38,7 @@ export default async (
     isNewCode = false;
   }
 
-  const isResend = !oldDocument.resend && !!document.resend; 
+  const isResend = !oldDocument?.resend && !!document.resend; 
 
   // Don't proceed
   if (!isResend && (!code || !email?.length || !isNewCode)) {

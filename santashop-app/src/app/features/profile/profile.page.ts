@@ -4,10 +4,9 @@ import { AngularFireStorage } from '@angular/fire/storage';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { send } from 'process';
 import { BehaviorSubject, combineLatest, of, Subject, throwError } from 'rxjs';
 import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { AuthService, ChildProfile, ChildProfileService, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
+import { AuthService, ChildProfile, ChildProfileService, FireCRUDStateless, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
 import { SignUpStatusService } from '../../services/sign-up-status.service';
 import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
 import { PublicMenuComponent } from '../../shared/components/public-menu/public-menu.component';
@@ -51,6 +50,12 @@ export class ProfilePage implements OnDestroy {
     filter(customer => !!customer),
     publishReplay(1),
     refCount()
+  );
+
+  public readonly $isCheckedIn = this.$customer.pipe(
+    takeUntil(this.$destroy),
+    switchMap(customer => this.httpService.readOne('checkins', customer.id)),
+    tap(v => console.log(v))
   );
 
   public readonly $children = this.$customer.pipe(
@@ -169,7 +174,8 @@ export class ProfilePage implements OnDestroy {
     private readonly router: Router,
     private readonly ngzone: NgZone,
     private readonly translateService: TranslateService,
-    private readonly signUpStatusService: SignUpStatusService
+    private readonly signUpStatusService: SignUpStatusService,
+    private readonly httpService: FireCRUDStateless
   ) {
     analyticsService.setCurrentScreen('profile');
     // this.autoDatePicker();

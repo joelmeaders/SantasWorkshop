@@ -33,7 +33,7 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-grid fixed>
+  <ion-grid fixed *ngIf="!($isCheckedIn | async); else checkedIn">
     <ion-row *ngIf="!($signupEnabled | async)">
       <ion-col class="ion-text-center">
         <ion-title>
@@ -561,4 +561,11 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+  
+  <ng-template #checkedIn>
+    <ion-title>
+      Thank you for coming!<br />
+      ¡Gracias por venir!
+    </ion-title>
+  </ng-template>
 </ion-content>

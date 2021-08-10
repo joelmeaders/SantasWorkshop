@@ -24,7 +24,11 @@ export class TestPage {
   ) { }
 
   public async buildSearchIndex() {
-    await this.manualOperations.buildRegistrationIndex();
+    // await this.manualOperations.buildRegistrationIndex();
+  }
+
+  public async statsAgg() {
+    await this.manualOperations.aggregateAgeGroups();
   }
 
   private async storeRegistrations() {

@@ -154,6 +154,9 @@
 
   <ng-container *ngIf="($view | async) === 'checkin'">
     <ion-title class="ion-padding-top"> Checkin Stats: {{ $checkInLastUpdated | async }} </ion-title>
+    <ion-button (click)="manualAgeStats()">
+      stats
+    </ion-button>
 
     <ion-grid>
       <ion-row>

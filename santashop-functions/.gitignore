@@ -13,3 +13,4 @@ node_modules/
 
 # ts compilation directory
 lib/
+dist/

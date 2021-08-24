@@ -26,3 +26,73 @@
 @import "~@ionic/angular/css/flex-utils.css";
 
 @import "theme/styling.css";
+
+.title-font {
+  font-family: 'Libre Baskerville', serif;
+  font-weight: bold;
+}
+
+.ion-card-title-lg {
+  font-family: 'Libre Baskerville', serif;
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.ion-card-title-sm {
+  font-family: 'Libre Baskerville', serif;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.ion-card-subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+$es-size-definitions: (
+  xs: 2px,
+  sm: 4px,
+  md: 8px,
+  lg: 16px,
+  xl: 24px,
+  xxl: 32px
+) !default;
+
+$es-direction-definitions: (
+  top,
+  bottom,
+  right,
+  left
+) !default;
+
+@mixin es-margin-list {
+  @each $direction in $es-direction-definitions {
+    @each $key, $value in $es-size-definitions {
+      .es-mg-#{$direction}-#{$key} { margin-#{$direction}: $value; }
+    }
+  }
+}
+@include es-margin-list();
+
+
+@mixin es-padding-list {
+  @each $direction in $es-direction-definitions {
+    @each $key, $value in $es-size-definitions {
+      .es-pd-#{$direction}-#{$key} { padding-#{$direction}: $value; }
+    }
+  }
+}
+@include es-padding-list();
+
+
+:root {
+  --es-px-xs: 2px;
+  --es-px-sm: 4px;
+  --es-px-md: 8px;
+  --es-px-lg: 16px;
+  --es-px-xl: 24px;
+  --es-px-xxl: 32px;
+}
+
+.firebase-emulator-warning { display: none; }

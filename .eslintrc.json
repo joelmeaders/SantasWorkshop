@@ -1,0 +1,58 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "!**/*",
+    "*.spec.ts",
+    "**/dist/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "tsconfigRootDir": ".",
+        "project": [
+          "tsconfig.json",
+          // "e2e/tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
+      "plugins": [
+        "@typescript-eslint",
+        "@ngneat/reactive-forms",
+        "@angular-eslint"
+      ],
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/ng-cli-compat",
+        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "prettier"
+      ],
+      "rules": {
+        "@angular-eslint/component-class-suffix": "off",
+        "@angular-eslint/component-selector": "warn",
+        "@angular-eslint/directive-selector": "warn",
+        "@ngneat/reactive-forms/no-angular-forms-imports": "error",
+        "@typescript-eslint/no-empty-interface": "warn",
+        "@typescript-eslint/member-ordering": "warn",
+        "no-shadow": "warn"
+      }
+    },
+    {
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
+      "rules": {
+        "no-console": "warn"
+      }
+    }
+  ]
+}

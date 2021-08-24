@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Choose an available date/time</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <p class="ion-margin ion-padding">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur.
+  </p>
+
+  <ion-card *ngIf="registrationSlot$ | async as slot">
+    <ion-card-header> Your Chosen Date/Time </ion-card-header>
+    <ion-card-content>
+      <!-- TODO: Loading animation -->
+      <ion-item lines="none">
+        {{ slot.dateTime.toDate() | date:'MMMM d, h:mm a' }}
+        <ion-button slot="end" (click)="selectDateTime()"> Cancel </ion-button>
+      </ion-item>
+      <p class="ion-padding">
+        Please arrive on time. If you are late or show up on the wrong date
+        <strong>you will be given a lump of coal.</strong> TODO: Change this
+        before it goes live =)
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list>
+    <ion-list-header> Available Dates/Times </ion-list-header>
+    <ng-container *ngFor="let slot of availableSlots$ | async">
+      <ion-item button="true" detail="true" (click)="selectDateTime(slot)">
+        {{ slot.dateTime.toDate() | date:'MMMM d, h:mm a' }}
+      </ion-item>
+    </ng-container>
+  </ion-list>
+</ion-content>

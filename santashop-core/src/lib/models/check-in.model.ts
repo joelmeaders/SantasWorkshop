@@ -1,11 +1,10 @@
-import { BaseEntity } from './base-entity';
 import firebase from 'firebase/app';
 
-export class ICheckIn extends BaseEntity {
+export interface ICheckIn {
   customerId?: string;
   registrationCode?: string;
-  checkInDateTime: firebase.firestore.Timestamp;
-  inStats: boolean = false;
+  checkInDateTime: firebase.firestore.Timestamp | undefined;
+  inStats: boolean;
   stats: ICheckInStats | undefined;
 }
 

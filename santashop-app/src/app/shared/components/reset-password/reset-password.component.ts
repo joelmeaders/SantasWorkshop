@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, ModalController } from '@ionic/angular';
-import { AuthService } from 'santashop-core/src/public-api';
+import { AuthService } from 'santashop-core/src';
 
 @Component({
   selector: 'app-reset-password',
@@ -22,7 +22,7 @@ export class ResetPasswordComponent {
   });
 
   public async resetPassword() {
-    const email = this.form.get('emailAddress').value;
+    const email = this.form.get('emailAddress')?.value;
 
     const alert = await this.alertController.create({
       header: 'Success',

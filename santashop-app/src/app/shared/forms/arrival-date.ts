@@ -1,5 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { CommonForms, Registration } from 'santashop-core/src/public-api';
+import { CommonForms, IRegistration } from 'santashop-core/src';
 
 export abstract class ArrivalDateForm {
 
@@ -8,7 +8,7 @@ export abstract class ArrivalDateForm {
     time: Validators.compose([Validators.required])
   };
 
-  public static form(value?: Registration): FormGroup {
+  public static form(value?: IRegistration): FormGroup {
     return CommonForms.formBuilder().group({
       date: [value?.date ?? undefined, this.validators.date],
       time: [value?.time ?? undefined, this.validators.time]

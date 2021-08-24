@@ -1,5 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { ChildProfile, CommonForms } from 'santashop-core/src/public-api';
+import { IChild, CommonForms } from 'santashop-core/src';
 
 export abstract class ChildProfileForm {
 
@@ -10,10 +10,10 @@ export abstract class ChildProfileForm {
     dateOfBirth: Validators.compose([Validators.required])
   };
 
-  public static form(value: ChildProfile): FormGroup {
+  public static form(value: IChild | undefined): FormGroup {
     return CommonForms.formBuilder().group({
-      id: [value?.id ?? undefined],
-      parentId: [value?.parentId ?? undefined],
+      id: [value?.uid ?? undefined],
+      parentId: [value?.uid ?? undefined],
       firstName: [value?.firstName ?? undefined, this.validators.firstName],
       toyType: [value?.toyType ?? undefined, this.validators.toyType],
       ageGroup: [value?.ageGroup ?? undefined, this.validators.ageGroup],

@@ -1,10 +1,8 @@
-import { CommonModule } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
-import { CoreDirectivesModule, LetDirective } from 'santashop-core/src/public-api';
+import { CoreModule } from 'santashop-core/src';
 import { CreateChildModalComponent } from './create-child-modal/create-child-modal.component';
+import { PreRegistrationMenuComponent } from './pre-registration-menu/pre-registration-menu.component';
 import { PrivacyPolicyModalComponent } from './privacy-policy-modal/privacy-policy-modal.component';
 import { PublicMenuComponent } from './public-menu/public-menu.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
@@ -16,14 +14,12 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent
+    TermsOfServiceModalComponent,
+    PreRegistrationMenuComponent
   ],
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    IonicModule,
+    CoreModule,
     TranslateModule,
-    CoreDirectivesModule
   ],
   exports: [
     CreateChildModalComponent,
@@ -32,14 +28,7 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
     TranslateModule,
-    LetDirective
-  ],
-  entryComponents: [
-    CreateChildModalComponent,
-    ResetPasswordComponent,
-    PublicMenuComponent,
-    PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent,
+    PreRegistrationMenuComponent
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

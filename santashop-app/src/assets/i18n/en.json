@@ -7,9 +7,7 @@
     "HOME": "Home",
     "PROFILE": "Your Profile",
     "EMAIL_ADDRESS": "Email Address",
-    "EMAIL_PH": "Enter your email address",
     "PASSWORD": "Password",
-    "PASSWORD_PH": "Enter your password",
     "GO_BACK": "Go Back",
     "REQUIRED_FIELD": "This field is required",
     "AGE": "Age",
@@ -23,8 +21,24 @@
     "OK": "Ok",
     "ERROR": "Error",
     "YES": "Yes",
-    "REGISTER": "Register"
+    "REGISTER": "Register",
+    "TERMS_AND_CONDITIONS": "Terms & Conditions",
+    "PRIVACY_POLICY": "Privacy Policy"
   },
+  "SIGNUP": {
+    "TITLE1": "Set up your account...",
+    "TITLE2": "This will only take a minute",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "ZIP_CODE": "Zip Code",
+    "PASSWORD2": "Re-enter Password",
+    "PASSWORD_MATCH": "The passwords don't match",
+    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy",
+    "SUBMIT_BUTTON": "Create Account"
+  },
+
+
+
   "HOME": {
     "TITLE": "Santa Claus Shop Registration",
     "HEADER": "A Toy for Every Girl and Boy",
@@ -45,7 +59,6 @@
     "EMAIL_EXAMPLE": "example@gmail.com",
     "CREATE_PASSWORD": "Create a password",
     "CREATE_PASSWORD_PH": "At least 8 characters",
-    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy",
     "CREATING": "Creating your account!",
     "CREATED": "Account Created",
     "NOW_SIGN_IN": "Now sign into the account you just created",
@@ -56,16 +69,8 @@
   },
   "SIGNUP_INFO": {
     "HEADER": "Add your information to continue",
-    "FIRST_NAME": "First Name",
-    "FIRST_NAME_PH": "Enter your first name",
-    "LAST_NAME": "Last Name",
-    "LAST_NAME_PH": "Enter your last Name",
-    "ZIP_CODE": "Zip Code",
+    
     "NEXT_STEP": "Go to registration"
-  },
-  "SIGNUP": {
-    "TERMS_AND_CONDITIONS": "Terms & Conditions",
-    "PRIVACY_POLICY": "Privacy Policy"
   },
   "FORGOTPASS": {
     "HEADER": "Password Reset",

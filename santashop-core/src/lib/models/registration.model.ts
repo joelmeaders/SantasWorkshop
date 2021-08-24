@@ -1,38 +1,37 @@
-import { BaseEntity } from './base-entity';
+import { IDateTimeSlot } from './date-time-slot.model';
+import firebase from 'firebase';
 
-export class Registration extends BaseEntity {
-  // id is parent id
+export interface IRegistration {
+  uid?: string;
   code?: string;                // Unique Code
-  fullName?: string;                 // Parent name,
   firstName?: string;
   lastName?: string;
-  email?: string;               // Email Address
+  emailAddress?: string;               // Email Address
   children?: IChildrenInfo[];    // Children info
-  date: string | undefined;                 // Arrival Date: DD
-  time: string | undefined;                 // Arrival Time
-  formattedDateTime: string | undefined;
-  dateTimeRegistered?: Date;
-  zipCode: string;
+  programYear?: number;          // ie 2021
+  dateTimeSlot?: Partial<IDateTimeSlot>;
+  dateTimeRegistered?: firebase.firestore.Timestamp;
+  zipCode?: number;
 }
 
 // Need to keep this as lightweight as possible to prevent
 // overly complex QR codes
 export interface IChildrenInfo {
-  n?: string; // Name
-  t: string; // Toy Type
-  a: string; // Age Group
+  n?: string | undefined; // Name
+  t: string | undefined; // Toy Type
+  a: string | undefined; // Age Group
 }
 
 export interface IRegistrationDateTime {
-  date: string;
-  time: string;
-  formattedDateTime: string;
+  date: string | undefined;
+  time: string | undefined;
+  formattedDateTime: string | undefined;
 }
 
-export class RegistrationSearchIndex {
-  firstName: string;
-  lastName: string;
-  customerId: string;
-  zip: string;
-  code: string;
+export interface RegistrationSearchIndex {
+  firstName: string | undefined;
+  lastName: string | undefined;
+  customerId: string | undefined;
+  zip: string | undefined;
+  code: string | undefined;
 }

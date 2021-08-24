@@ -1,83 +1,103 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Router } from '@angular/router';
-import 'firebase/auth';
-import { Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, switchMap, takeUntil } from 'rxjs/operators';
-import { UserProfile } from '../models/user-profile.model';
+import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount } from 'rxjs/operators';
 import { AngularFireFunctions } from '@angular/fire/functions';
-import { FireCRUDStateless } from './fire-crud.service';
-
+import { Observable } from 'rxjs';
+import { ErrorHandlerService } from './error-handler.service';
+import { IAuth, IUserEmailUid } from '../models/auth.model';
+import firebase from 'firebase/app';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService implements OnDestroy {
-
-  private readonly PROFILE_COLLECTION = 'customers';
-  private readonly $destroy = new Subject<void>();
+export class AuthService {
 
   constructor(
     private readonly angularFireAuth: AngularFireAuth,
     private readonly angularFireFunctions: AngularFireFunctions,
-    private readonly httpService: FireCRUDStateless,
-    private readonly router: Router
+    private readonly errorHandler: ErrorHandlerService
   ) { }
 
-  public readonly $currentUser = this.angularFireAuth.user.pipe(
-    takeUntil(this.$destroy),
+  public readonly currentUser$ = this.angularFireAuth.user.pipe(
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
   );
 
-  public readonly $emailAndUid = this.$currentUser.pipe(
-    takeUntil(this.$destroy),
-    map((res: any) => ({ email: res?.email, id: res?.uid })),
+  public readonly emailAndUid$: Observable<IUserEmailUid> = this.currentUser$.pipe(
+    map((res: any) => ({ emailAddress: res?.email, uid: res?.uid }) as IUserEmailUid),
     distinctUntilChanged(),
     publishReplay(1),
     refCount()
   );
 
-  public readonly $userProfile: Observable<UserProfile> = this.$emailAndUid.pipe(
-    takeUntil(this.$destroy),
-    switchMap(currentUser =>
-      currentUser ? this.getProfile(currentUser.id) : of(undefined)),
-    distinctUntilChanged(),
+  public readonly uid$: Observable<string> = this.currentUser$.pipe(
+    pluck('uid'),
+    filter(uid => !!uid),
+    map(uid => uid as string),
     publishReplay(1),
     refCount()
   );
 
-  public readonly $isAdmin = this.$currentUser.pipe(
-    takeUntil(this.$destroy),
-    filter(user => !!user),
-    switchMap(() => this.angularFireFunctions.httpsCallable('isAdmin')({})),
-    map((response: boolean) => response),
-    publishReplay(1),
-    refCount()
-  );
-
-  public readonly $IsAdminNoAuth =
+  // TODO: Replace with custom claims
+  // https://fireship.io/lessons/firebase-custom-claims-role-based-auth/
+  public readonly isAdmin$ =
     this.angularFireFunctions.httpsCallable('isAdmin')({}).pipe(
       map((response: boolean) => response)
     );
 
-  private readonly getProfile = (uid: string) =>
-    this.httpService.readOne<UserProfile>(this.PROFILE_COLLECTION, uid, 'id')
-
-  public resetPassword(email: string) {
+  public resetPassword(email: string): Promise<void> {
     return this.angularFireAuth.sendPasswordResetEmail(email);
   }
 
-  public login(email: string, password: string) {
-    return this.angularFireAuth.signInWithEmailAndPassword(email, password);
+  public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+    const user = await this.angularFireAuth.currentUser;
+    const auth: IAuth = {
+      emailAddress: user?.email as string,
+      password: oldPassword
+    }
+
+    try {
+      await this.login(auth);
+      await user?.updatePassword(newPassword)
+      return Promise.resolve();
+    }
+    catch (error) {
+      await this.errorHandler.handleError(error);
+      return Promise.reject(error);
+    }
   }
 
-  public async logout() {
-    await this.angularFireAuth.signOut().then(() => this.router.navigate(['/']));
+  public async changeEmailAddress(password: string, newEmailAddress: string): Promise<void> {
+    const user = await this.angularFireAuth.currentUser;
+    const auth: IAuth = {
+      emailAddress: user?.email as string,
+      password
+    }
+
+    try {
+      await this.login(auth);
+      user?.updateEmail(newEmailAddress);
+      return Promise.resolve();
+    }
+    catch (error) {
+      await this.errorHandler.handleError(error);
+      return Promise.reject(error);
+    }
   }
 
-  ngOnDestroy() {
-    this.$destroy.next();
+  public async login(auth: IAuth): Promise<firebase.auth.UserCredential> {
+    try {
+      return await this.angularFireAuth.signInWithEmailAndPassword(auth.emailAddress, auth.password);
+    }
+    catch (error) {
+      await this.errorHandler.handleError(error);
+      return Promise.reject(error)
+    }
+  }
+
+  public async logout(): Promise<void> {
+    await this.angularFireAuth.signOut();
+    document.location.reload();
   }
 }

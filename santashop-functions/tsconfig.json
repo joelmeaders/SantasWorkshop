@@ -3,14 +3,13 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "lib",
+    "outDir": "dist",
     "sourceMap": true,
     "strict": true,
-    "target": "ES2017",
+    "target": "es2017",
     "declaration": true,
-    "typeRoots": [
-      "node_modules/@types",
-    ]
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true
   },
   "compileOnSave": true,
   "include": [

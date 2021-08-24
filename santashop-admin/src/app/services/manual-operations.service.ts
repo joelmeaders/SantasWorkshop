@@ -6,9 +6,9 @@ import {
   FireCRUDStateless,
   ICheckIn,
   ICheckInAgeStats,
-  Registration,
+  IRegistration,
   RegistrationSearchIndex,
-} from 'santashop-core/src/public-api';
+} from 'santashop-core/src';
 
 @Injectable({
   providedIn: 'root',

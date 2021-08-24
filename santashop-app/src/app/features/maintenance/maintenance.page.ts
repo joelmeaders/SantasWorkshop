@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { MaintenanceService } from '../../services/maintenance.service';
+import { MaintenanceService } from '../../core/services/maintenance.service';
 
 @Component({
   selector: 'app-maintenance',

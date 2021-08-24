@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ManualOperationsService } from 'santashop-admin/src/app/services/manual-operations.service';
-import { FireCRUDStateless, IDateTimeCount, IZipCodeCount, Registration } from 'santashop-core/src/public-api';
+import { FireCRUDStateless, IDateTimeCount, IZipCodeCount, IRegistration } from 'santashop-core/src';
 
 @Component({
   selector: 'admin-test',
@@ -63,11 +63,11 @@ export class TestPage {
     await this.storeRegistrations();
   }
 
-  private loadAllRegistrations(): Observable<Registration[]> {
-    return this.httpService.readMany<Registration>(this.REGISTRATIONS);
+  private loadAllRegistrations(): Observable<IRegistration[]> {
+    return this.httpService.readMany<IRegistration>(this.REGISTRATIONS);
   }
 
-  private isRegistrationComplete(registration: Registration): boolean {
+  private isRegistrationComplete(registration: IRegistration): boolean {
     if (!registration) return false;
     if (!registration.code) return false;
     if (!registration.date) return false;
@@ -77,7 +77,7 @@ export class TestPage {
     return true;
   }
 
-  private updateDateTimeCount(registration: Registration): void {
+  private updateDateTimeCount(registration: IRegistration): void {
 
     const index = this.dateTimeCount.findIndex(e =>
       e.date === registration.date
@@ -100,7 +100,7 @@ export class TestPage {
 
   }
 
-  private updateZipCodeCount(registration: Registration) {
+  private updateZipCodeCount(registration: IRegistration) {
 
     const index = this.zipCodeCount.findIndex(e =>
       e.zip === registration.zipCode);

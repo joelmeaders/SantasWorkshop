@@ -4,8 +4,8 @@ import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { first, publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { AuthService } from 'santashop-core/src/public-api';
-import { SignUpStatusService } from '../services/sign-up-status.service';
+import { AuthService } from 'santashop-core/src';
+import { SignUpStatusService } from '../core/services/sign-up-status.service';
 import { PublicMenuComponent } from '../shared/components/public-menu/public-menu.component';
 
 @Component({

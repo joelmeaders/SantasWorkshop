@@ -3,6 +3,46 @@
   "version": 1,
   "newProjectRoot": ".",
   "projects": {
+    "santashop-core": {
+      "projectType": "library",
+      "root": "santashop-core",
+      "sourceRoot": "santashop-core/src",
+      "prefix": "core",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "tsConfig": "santashop-core/tsconfig.lib.json",
+            "project": "santashop-core/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "santashop-core/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "santashop-core/src/test.ts",
+            "tsConfig": "santashop-core/tsconfig.spec.json",
+            "karmaConfig": "santashop-core/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "santashop-core/tsconfig.lib.json",
+              "santashop-core/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
     "santashop-admin": {
       "projectType": "application",
       "schematics": {
@@ -23,7 +63,6 @@
           "skipTests": true
         },
         "@schematics/angular:module": {
-          "skipTests": true
         },
         "@schematics/angular:pipe": {
           "skipTests": true
@@ -44,7 +83,6 @@
             "main": "santashop-admin/src/main.ts",
             "polyfills": "santashop-admin/src/polyfills.ts",
             "tsConfig": "santashop-admin/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "santashop-admin/src/favicon.ico",
               "santashop-admin/src/assets",
@@ -90,7 +128,13 @@
                 "input": "santashop-admin/src/theme/variables.scss"
               }
             ],
-            "scripts": []
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -120,7 +164,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -185,7 +230,6 @@
           "skipTests": true
         },
         "@schematics/angular:module": {
-          "skipTests": true
         },
         "@schematics/angular:pipe": {
           "skipTests": true
@@ -206,7 +250,6 @@
             "main": "santashop-app/src/main.ts",
             "polyfills": "santashop-app/src/polyfills.ts",
             "tsConfig": "santashop-app/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "santashop-app/src/favicon.ico",
               "santashop-app/src/assets",
@@ -252,7 +295,13 @@
                 "input": "santashop-app/src/theme/variables.scss"
               }
             ],
-            "scripts": []
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -282,7 +331,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -326,86 +376,6 @@
           }
         }
       }
-    },
-    "santashop-core": {
-      "projectType": "library",
-      "root": "santashop-core",
-      "sourceRoot": "santashop-core/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
-          "options": {
-            "tsConfig": "santashop-core/tsconfig.lib.json",
-            "project": "santashop-core/ng-package.json"
-          },
-          "configurations": {
-            "production": {
-              "tsConfig": "santashop-core/tsconfig.lib.prod.json"
-            }
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "santashop-core/src/test.ts",
-            "tsConfig": "santashop-core/tsconfig.spec.json",
-            "karmaConfig": "santashop-core/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "santashop-core/tsconfig.lib.json",
-              "santashop-core/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
-      }
-    },
-    "zxing-scanner": {
-      "projectType": "library",
-      "root": "zxing-scanner",
-      "sourceRoot": "zxing-scanner/src",
-      "prefix": "zxing",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
-          "options": {
-            "tsConfig": "zxing-scanner/tsconfig.lib.json",
-            "project": "zxing-scanner/ng-package.json"
-          },
-          "configurations": {
-            "production": {
-              "tsConfig": "zxing-scanner/tsconfig.lib.prod.json"
-            }
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "zxing-scanner/src/test.ts",
-            "tsConfig": "zxing-scanner/tsconfig.spec.json",
-            "karmaConfig": "zxing-scanner/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "zxing-scanner/tsconfig.lib.json",
-              "zxing-scanner/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
-      }
     }
   },
   "defaultProject": "santashop-admin",
@@ -413,6 +383,9 @@
     "defaultCollection": "@ionic/angular-toolkit"
   },
   "schematics": {
+    "@schematics/angular:component": {
+      "changeDetection": "OnPush"
+    },
     "@ionic/angular-toolkit:component": {
       "styleext": "scss"
     },

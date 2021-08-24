@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { differenceInDays } from 'date-fns';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { ChildProfile } from 'santashop-core/src/public-api';
+import { IChild } from 'santashop-core/src';
 import { ChildProfileForm } from '../../forms/child-profile';
 
 @Component({
@@ -16,11 +16,11 @@ import { ChildProfileForm } from '../../forms/child-profile';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateChildModalComponent implements OnInit {
-  @Input() item: ChildProfile;
+  @Input() item?: IChild;
 
   private readonly $destroy = new Subject<void>();
 
-  public form: FormGroup;
+  public form?: FormGroup;
   public readonly formValidationMessages = ChildProfileForm.validationMessages();
 
   private readonly _$isInfant = new BehaviorSubject<boolean>(false);
@@ -35,7 +35,7 @@ export class CreateChildModalComponent implements OnInit {
   ) {}
 
   public ngOnInit() {
-    this.form = ChildProfileForm.form(this.item);
+    this.form = ChildProfileForm.form(this.item ?? undefined);
 
     if (this.item && this.isInfant()) {
       this.setInfant(true);
@@ -45,7 +45,7 @@ export class CreateChildModalComponent implements OnInit {
   public cancel() {
     let didAdd = false;
 
-    if (!!this.item?.id) {
+    if (!!this.item?.uid) {
       didAdd = false;
     } else {
       didAdd = true;
@@ -55,8 +55,8 @@ export class CreateChildModalComponent implements OnInit {
   }
 
   public returnChild() {
-    const child: ChildProfile = {
-      ...this.form.value,
+    const child: IChild = {
+      ...this.form?.value,
     };
 
     this.modalController.dismiss(child);
@@ -72,7 +72,7 @@ export class CreateChildModalComponent implements OnInit {
 
   private isInfant(): boolean {
 
-    const dateOfBirth = this.form.controls['dateOfBirth'].value;
+    const dateOfBirth = this.form?.controls['dateOfBirth'].value;
 
     if (!dateOfBirth?.length) {
       return false;
@@ -89,12 +89,12 @@ export class CreateChildModalComponent implements OnInit {
 
     this._$isInfant.next(true);
 
-    const toyTypeControl = this.form.controls['toyType'];
-    const ageGroupControl = this.form.controls['ageGroup'];
+    const toyTypeControl = this.form?.controls['toyType'];
+    const ageGroupControl = this.form?.controls['ageGroup'];
 
     if (value) {
-      toyTypeControl.setValue('infant');
-      ageGroupControl.setValue('0-2');
+      toyTypeControl?.setValue('infant');
+      ageGroupControl?.setValue('0-2');
     }
 
     this.changeDetector.detectChanges();
@@ -107,17 +107,17 @@ export class CreateChildModalComponent implements OnInit {
 
     const ageInYears = differenceInDays(this.aroundEventDate(), new Date(date?.detail?.value)) / 365;
 
-    const control = this.form.controls['ageGroup'];
+    const control = this.form?.controls['ageGroup'];
 
     if (ageInYears >= 0 && ageInYears < 3) {
       this.setInfant(true);
       return;
     } else if (ageInYears >= 3 && ageInYears < 6) {
-      control.setValue('3-5');
+      control?.setValue('3-5');
     } else if (ageInYears >= 6 && ageInYears < 9) {
-      control.setValue('6-8');
+      control?.setValue('6-8');
     } else if (ageInYears >= 9 && ageInYears < 12) {
-      control.setValue('9-11');
+      control?.setValue('9-11');
     } else {
       await this.tooOld().then(() => this.modalController.dismiss());
     }

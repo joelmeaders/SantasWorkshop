@@ -6,7 +6,7 @@ import { AlertController, LoadingController, ModalController } from '@ionic/angu
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { filter, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
-import { AuthService, IError } from 'santashop-core/src/public-api';
+import { AuthService, IError } from 'santashop-core/src';
 import { ResetPasswordComponent } from '../../shared/components/reset-password/reset-password.component';
 import { SignInForm } from '../../shared/forms/sign-in';
 

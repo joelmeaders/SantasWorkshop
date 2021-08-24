@@ -1,11 +1,8 @@
 import { Component } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { MaintenanceService } from './services/maintenance.service';
-import { SignUpStatusService } from './services/sign-up-status.service';
 
 @Component({
   selector: 'app-root',
@@ -18,9 +15,9 @@ export class AppComponent {
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
     private readonly translate: TranslateService,
-    private readonly analyticsService: AngularFireAnalytics,
-    private readonly maintenance: MaintenanceService,
-    private readonly signUpStatusService: SignUpStatusService
+    // private readonly analyticsService: AngularFireAnalytics,
+    // private readonly maintenance: MaintenanceService,
+    // private readonly signUpStatusService: SignUpStatusService
   ) {
     this.initializeApp();
   }
@@ -35,6 +32,6 @@ export class AppComponent {
     this.translate.setDefaultLang('en');
     const browserLang = this.translate.getBrowserLang();
     this.translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
-    this.analyticsService.logEvent('default_language', { value: browserLang });
+    // this.analyticsService.logEvent('default_language', { value: browserLang });
   }
 }

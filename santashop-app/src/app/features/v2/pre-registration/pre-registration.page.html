@@ -1,0 +1,38 @@
+<!-- <ion-menu-button menu="registration"></ion-menu-button> -->
+
+<ion-content id="main">
+
+  <ion-tabs>
+
+    <ion-tab-bar slot="bottom">
+
+      <ion-tab-button tab="information">
+        <ion-icon name="information-circle"></ion-icon>
+        <ion-label>Overview</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="date-time">
+        <ion-icon name="calendar"></ion-icon>
+        <ion-label>Schedule</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="children">
+        <ion-icon name="people"></ion-icon>
+        <ion-label>Your Children</ion-label>
+        <ion-badge>6</ion-badge>
+      </ion-tab-button>
+  
+      <ion-tab-button tab="confirmation">
+        <ion-icon name="bag-check"></ion-icon>
+        <ion-label>Confirmation</ion-label>
+      </ion-tab-button>
+      
+    </ion-tab-bar>
+    
+  </ion-tabs>
+
+</ion-content>
+
+<ion-menu side="start" menuId="registration" contentId="main">
+  <app-pre-registration-menu></app-pre-registration-menu>
+</ion-menu>

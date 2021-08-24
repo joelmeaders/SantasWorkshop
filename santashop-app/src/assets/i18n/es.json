@@ -7,9 +7,7 @@
     "HOME": "Principal",
     "PROFILE": "Su perfil",
     "EMAIL_ADDRESS": "Dirección de correo electrónico",
-    "EMAIL_PH": "Ingrese su dirección de correo electrónico",
     "PASSWORD": "Contraseña",
-    "PASSWORD_PH": "Introduzca su contraseña",
     "GO_BACK": "Volver",
     "REQUIRED_FIELD": "Esto es obligatorio",
     "AGE": "Edad",
@@ -23,8 +21,30 @@
     "OK": "Ok",
     "ERROR": "Error",
     "YES": "Sí",
-    "REGISTER": "Registro"
+    "REGISTER": "Registro",
+    "TERMS_AND_CONDITIONS": "Términos y condiciones",
+    "PRIVACY_POLICY": "Política de privacidad"
   },
+  "SIGN-UP": {
+    "TITLE1": "Configura tu cuenta...",
+    "TITLE2": "Esto solo tomará un minuto",
+    "FIRST_NAME": "Nombre",
+    "LAST_NAME": "Apellido",
+    "ZIP_CODE": "Código postal",
+    "PASSWORD2": "Volver a introducir la contraseña",
+    "PASSWORD_MATCH": "Las contraseñas no coinciden",
+    "LEGAL_AGREEMENT": "Al registrarse, usted acepta nuestros términos de servicio y ha leído nuestra política de privacidad",
+    "SUBMIT_BUTTON": "Crear cuenta"
+  },
+
+
+
+
+
+
+
+
+
   "HOME": {
     "TITLE": "Registro en la tienda Denver Santa Claus Shop",
     "HEADER": "Un juguete para cada niña y cada niño",
@@ -45,7 +65,6 @@
     "EMAIL_EXAMPLE": "ejemplo@gmail.com",
     "CREATE_PASSWORD": "Crear contraseña",
     "CREATE_PASSWORD_PH": "Mínimo de 8 caracteres",
-    "LEGAL_AGREEMENT": "Al registrarse, usted acepta nuestros términos de servicio y ha leído nuestra política de privacidad",
     "CREATING": "¡Creando tu cuenta!",
     "CREATED": "Cuenta creada",
     "NOW_SIGN_IN": "Ahora inicia sesión en la cuenta que acabas de crear",
@@ -62,10 +81,6 @@
     "LAST_NAME_PH": "Escriba su apellido",
     "ZIP_CODE": "Código postal",
     "NEXT_STEP": "Ir al registro"
-  },
-  "SIGNUP": {
-    "TERMS_AND_CONDITIONS": "Términos y condiciones",
-    "PRIVACY_POLICY": "Política de privacidad"
   },
   "FORGOTPASS": {
     "HEADER": "Restablezca contraseña",

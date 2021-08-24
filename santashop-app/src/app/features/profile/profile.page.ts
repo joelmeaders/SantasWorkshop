@@ -6,8 +6,8 @@ import { AlertController, LoadingController, ModalController, PopoverController 
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, of, Subject, throwError } from 'rxjs';
 import { catchError, delay, distinctUntilChanged, filter, map, mergeMap, pluck, publishReplay, refCount, retryWhen, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { AuthService, ChildProfile, ChildProfileService, FireCRUDStateless, IRegistrationDateTime, Registration, RegistrationService, UserProfile } from 'santashop-core/src/public-api';
-import { SignUpStatusService } from '../../services/sign-up-status.service';
+import { AuthService, IChild, ChildProfileService, FireCRUDStateless, IRegistrationDateTime, IRegistration, RegistrationService, IUser } from 'santashop-core/src';
+import { SignUpStatusService } from '../../core/services/sign-up-status.service';
 import { CreateChildModalComponent } from '../../shared/components/create-child-modal/create-child-modal.component';
 import { PublicMenuComponent } from '../../shared/components/public-menu/public-menu.component';
 import { ArrivalDateForm } from '../../shared/forms/arrival-date';
@@ -76,7 +76,7 @@ export class ProfilePage implements OnDestroy {
   public readonly $registrationCode = this.$registrationQuery.pipe(
     takeUntil(this.$destroy),
     filter(response => !!response?.code),
-    map((response: Registration) => response.code),
+    map((response: IRegistration) => response.code),
     publishReplay(1),
     refCount()
   );
@@ -196,7 +196,7 @@ export class ProfilePage implements OnDestroy {
       throw Error('Signup disabled');
   }
   
-  private async validateCustomer(customer: UserProfile): Promise<UserProfile> {
+  private async validateCustomer(customer: IUser): Promise<IUser> {
     // In rare cases customer accounts don't get created for some reason.
       // Send them back to collect their information and create the customer record.
       if (!customer || !customer.firstName || !customer.lastName || !customer.zipCode) {
@@ -231,7 +231,7 @@ export class ProfilePage implements OnDestroy {
 
   }
 
-  public async addEditChild(inputChild?: ChildProfile): Promise<void> {
+  public async addEditChild(inputChild?: IChild): Promise<void> {
 
     await this.isReadOnlyGuard();
 
@@ -247,11 +247,11 @@ export class ProfilePage implements OnDestroy {
 
     await modal.onDidDismiss().then(async (response) => {
       if (response && response.data) {
-        const child = response.data as ChildProfile;
+        const child = response.data as IChild;
 
-        if (!child.parentId) {
+        if (!child.uid) {
           const parent = await this.$customer.pipe(take(1)).toPromise();
-          child.parentId = parent.id;
+          child.uid = parent.id;
         }
 
         let didAdd = false;
@@ -269,7 +269,7 @@ export class ProfilePage implements OnDestroy {
     });
   }
 
-  public async saveChild(child: ChildProfile): Promise<ChildProfile> {
+  public async saveChild(child: IChild): Promise<IChild> {
 
     await this.isReadOnlyGuard();
 

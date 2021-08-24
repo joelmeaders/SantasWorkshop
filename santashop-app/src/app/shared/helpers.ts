@@ -1,8 +1,8 @@
-import { Registration } from 'santashop-core/src/public-api';
+import { IRegistration } from 'santashop-core/src';
 
 export abstract class Helpers {
-  public static qrCodeString(registration: Registration): string {
-    const clone: Registration = JSON.parse(JSON.stringify(registration));
+  public static qrCodeString(registration: IRegistration): string {
+    const clone: IRegistration = JSON.parse(JSON.stringify(registration));
 
     const obj = {
       id: clone.id,

@@ -1,5 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { CommonForms, UserProfile } from 'santashop-core/src/public-api';
+import { CommonForms, IUser } from 'santashop-core/src';
 
 export abstract class CustomerProfileForm {
 
@@ -10,7 +10,7 @@ export abstract class CustomerProfileForm {
     zipCode: Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(10)])
   };
 
-  public static form(value: UserProfile): FormGroup {
+  public static form(value: IUser): FormGroup {
     return CommonForms.formBuilder().group({
       firstName: [value?.firstName ?? undefined, this.validators.firstName],
       lastName: [value?.lastName ?? undefined, this.validators.lastName],

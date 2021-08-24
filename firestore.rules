@@ -33,10 +33,10 @@ service cloud.firestore {
     }
 
     match /registrations/{documentId} {
-      allow read: if isUser(resource.data.id) || isAdmin();
-      allow create: if isUser(request.resource.data.id);
-      allow update: if (isUser(request.resource.data.id) && isUser(resource.data.id));
-      allow delete: if isUser(resource.data.id) || isAdmin();
+      allow read: if isUser(resource.data.uid) || isAdmin();
+      allow create: if isUser(request.resource.data.uid);
+      allow update: if (isUser(request.resource.data.uid) && isUser(resource.data.uid));
+      allow delete: if isUser(resource.data.uid) || isAdmin();
       // allow write: if false;
     }
 

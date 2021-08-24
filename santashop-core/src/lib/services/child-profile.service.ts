@@ -1,30 +1,38 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { ChildProfile } from '../models/child-profile.model';
-import { BaseHttpService } from './base-http.service';
-import { publishReplay, refCount } from 'rxjs/operators';
+import { IChild } from '../models/child.model';
+import { FireRepoLite } from './fire-repo-lite.service';
+import { COLLECTION_SCHEMA } from '../helpers';
+import { ArgumentUndefinedError } from '../models/error.model';
+import { Observable } from 'rxjs';
+import { DocumentReference } from '@angular/fire/firestore';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ChildProfileService extends BaseHttpService<ChildProfile> {
+@Injectable()
+export class ChildProfileService {
+
+  private readonly childrenCollection = 
+    this.fireRepo.collection(COLLECTION_SCHEMA.children);
   
-  constructor(
-    private readonly db: AngularFirestore,
-  ) {
-    super(db, 'children');
+  constructor(private readonly fireRepo: FireRepoLite) {
   }
 
-  private readonly getChildrenByParentQuery = (parentId: string) => 
-    this.collectionRef
-      .orderBy('firstName')
-      .where('parentId', '==', parentId)
-      .limit(15);
+  public saveChild(child: IChild): Observable<DocumentReference<IChild>> {
 
-  public getChildrenByParent(parentId: string) {
-    return this.readMany(this.getChildrenByParentQuery(parentId)).pipe(
-      publishReplay(1),
-      refCount()
-    );
+    if (child.uid == undefined)
+      throw new ArgumentUndefinedError(`child`);
+
+    return this.childrenCollection.addById<IChild>(child.uid, child);
+  }
+
+  public getChildrenByUid(uid: string) {
+
+    if (uid == undefined)
+      throw new ArgumentUndefinedError(`registration`);
+      
+    return this.childrenCollection.readMany<IChild>(
+      (query) => query
+        .orderBy('firstName')
+        .where('uid', '==', uid)
+        .limit(15)
+    )
   }
 }

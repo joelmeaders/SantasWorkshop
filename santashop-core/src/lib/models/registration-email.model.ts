@@ -1,6 +1,6 @@
-export class RegistrationEmail {
-  public code: string;
-  public name: string;
-  public email: string;
-  public formattedDateTime: string;
+export interface IRegistrationEmail {
+  code: string | undefined;
+  name: string | undefined;
+  email: string | undefined;
+  formattedDateTime: string | undefined;
 }

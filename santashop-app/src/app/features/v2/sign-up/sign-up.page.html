@@ -1,0 +1,160 @@
+<!-- TODO: Mobile -->
+<ion-content>
+  <ion-grid class="height-max img-div ion-no-padding ion-no-margin">
+    <ion-row class="height-max ion-align-items-center">
+      <!-- Information -->
+      <ion-col sizeXs="12" sizeSm="10" offsetXs="0" offsetSm="1" offsetMd="2">
+        <ion-card class="sign-up-card">
+          <ion-card-header>
+            <ion-card-title class="ion-card-title-lg">
+              {{ 'SIGNUP.TITLE1' | translate }}
+            </ion-card-title>
+            <ion-card-subtitle class="ion-card-subtitle">
+              {{ 'SIGNUP.TITLE2' | translate }}
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <form [formGroup]="form" novalidate>
+              <ion-list>
+                <ion-item>
+                  <ion-label position="floating">
+                    {{ 'SIGNUP.FIRST_NAME' | translate }}
+                  </ion-label>
+                  <ion-input
+                    #firstName
+                    formControlName="firstName"
+                    [debounce]="500"
+                    autocomplete="given-name"
+                    inputmode="text"
+                    autofocus="true"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.firstName"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label position="floating">
+                    {{ 'SIGNUP.LAST_NAME' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="lastName"
+                    [debounce]="500"
+                    autocomplete="family-name"
+                    inputmode="text"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.lastName"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label position="floating">
+                    {{ 'COMMON.EMAIL_ADDRESS' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="emailAddress"
+                    [debounce]="500"
+                    type="email"
+                    autocomplete="email"
+                    inputmode="email"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.emailAddress"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label position="floating">
+                    {{ 'COMMON.PASSWORD' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="password"
+                    [debounce]="500"
+                    type="password"
+                    autocomplete="new-password"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.password"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label position="floating">
+                    {{ 'SIGNUP.PASSWORD2' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="password2"
+                    [debounce]="500"
+                    type="password"
+                    autocomplete="new-password"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.password2"
+                ></app-control-errors>
+                <ng-container *ngIf="form.errors?.fieldsMatch">
+                  <ul>
+                    <li>
+                      <ion-note color="danger">
+                        {{ 'SIGNUP.PASSWORD_MATCH' | translate }}
+                      </ion-note>
+                    </li>
+                  </ul>
+                </ng-container>
+
+                <ion-item>
+                  <ion-label position="floating">
+                    {{ 'SIGNUP.ZIP_CODE' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="zipCode"
+                    [debounce]="500"
+                    type="text"
+                    autocomplete="postal-code"
+                    inputmode="numeric"
+                    maxlength="5"
+                    minlength="5"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.zipCode"
+                ></app-control-errors>
+              </ion-list>
+
+              <ion-list>
+                <div class="ion-text-center">
+                  <ion-button size="default" fill="clear">
+                    {{ 'COMMON.PRIVACY_POLICY' | translate }}
+                  </ion-button>
+
+                  <ion-button size="default" fill="clear">
+                    {{ 'COMMON.TERMS_AND_CONDITIONS' | translate }}
+                  </ion-button>
+                </div>
+
+                <ion-item>
+                  <ion-label class="ion-text-wrap es-mg-right-md">
+                    <em>
+                      {{ 'SIGNUP.LEGAL_AGREEMENT' | translate }}
+                    </em>
+                  </ion-label>
+                  <ion-checkbox formControlName="legal"></ion-checkbox>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.legal"
+                ></app-control-errors>
+              </ion-list>
+            </form>
+          </ion-card-content>
+          <ion-card-content class="ion-text-center">
+            <ion-button size="large" class="title-font" [disabled]="!form.valid" (click)="onCreateAccount()">
+              {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
+              <ion-icon slot="end" name="person-add" class="es-mg-left-xl"></ion-icon>
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

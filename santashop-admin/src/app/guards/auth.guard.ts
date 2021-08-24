@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot, CanLoad, Route, UrlSegment, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { AuthService, UserProfile } from 'santashop-core/src/public-api';
+import { AuthService, IUser } from 'santashop-core/src';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
 
   private isAuthenticated() {
     return this.authService.$userProfile.pipe(
-      map((user: UserProfile) => !!user ? true : false),
+      map((user: IUser) => !!user ? true : false),
       mergeMap(response => !!response ? of(response) : this.router.navigate(['sign-in']))
     );
   }

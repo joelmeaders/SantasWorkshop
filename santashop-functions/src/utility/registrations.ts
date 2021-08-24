@@ -1,4 +1,4 @@
-import { DocumentData } from '@google-cloud/firestore';
+import {DocumentData} from "@google-cloud/firestore";
 
 export interface CompletedRegistration {
   customerId: string;

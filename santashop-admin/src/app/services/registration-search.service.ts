@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { QueryFn } from '@angular/fire/firestore';
+import { QueryFn } from '@angular/fire/compat/firestore';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src';

@@ -9,7 +9,7 @@ module.exports = {
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "google",
+    // "google", // This one is fucking annoying
     "plugin:@typescript-eslint/recommended",
   ],
   parser: "@typescript-eslint/parser",
@@ -29,6 +29,7 @@ module.exports = {
     "quotes": ["error", "single"],
     "import/no-unresolved": 0,
     "max-len": [2, {"code": 160, "tabWidth": 2, "ignoreUrls": true}],
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "linebreak-style": ["error", "windows"]
   },
 };

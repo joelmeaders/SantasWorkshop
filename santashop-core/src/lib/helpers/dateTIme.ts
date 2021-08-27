@@ -1,5 +1,5 @@
-import firebase from 'firebase';
+import { Timestamp } from 'firebase/firestore'
 
-export function dateToTimestamp(date: Date = new Date()): firebase.firestore.Timestamp {
-  return firebase.firestore.Timestamp.fromDate(date);
+export function dateToTimestamp(date: Date = new Date()): Timestamp {
+  return Timestamp.fromDate(date);
 }

@@ -20,6 +20,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "es2017",
     "module": "es2020",
+    "skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
     "lib": [
       "es2018",
       "dom"

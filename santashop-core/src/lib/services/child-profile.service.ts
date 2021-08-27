@@ -4,7 +4,7 @@ import { FireRepoLite } from './fire-repo-lite.service';
 import { COLLECTION_SCHEMA } from '../helpers';
 import { ArgumentUndefinedError } from '../models/error.model';
 import { Observable } from 'rxjs';
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from '@angular/fire/compat/firestore';
 
 @Injectable()
 export class ChildProfileService {

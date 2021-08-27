@@ -1,6 +1,6 @@
 import { IChildrenInfo } from 'santashop-core/src/lib/models';
 import { chain } from 'underscore';
-import firebase from 'firebase/app';
+import firebase from 'firebase/compat/app';
 import { format } from 'date-fns';
 
 export abstract class CheckInHelpers {

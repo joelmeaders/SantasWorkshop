@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from '@angular/fire/compat/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { COLLECTION_SCHEMA } from '../helpers/schema.model';

@@ -1,11 +1,11 @@
-import firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore'
 
 export interface ICheckIn {
   customerId?: string;
   registrationCode?: string;
-  checkInDateTime: firebase.firestore.Timestamp | undefined;
+  checkInDateTime?: Timestamp;
   inStats: boolean;
-  stats: ICheckInStats | undefined;
+  stats?: ICheckInStats;
 }
 
 export interface ICheckInStats {

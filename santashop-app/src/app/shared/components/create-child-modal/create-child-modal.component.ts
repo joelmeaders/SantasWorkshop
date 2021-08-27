@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { FormGroup } from '@angular/forms';
 import { AlertController, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { Router } from '@angular/router';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';

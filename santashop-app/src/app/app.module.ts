@@ -1,14 +1,14 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, isDevMode, NgModule } from '@angular/core';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule } from '@angular/fire/compat';
 import {
   AngularFireAnalytics,
   AngularFireAnalyticsModule,
   CONFIG,
   ScreenTrackingService,
   UserTrackingService,
-} from '@angular/fire/analytics';
-import { AngularFireStorageModule, BUCKET } from '@angular/fire/storage';
+} from '@angular/fire/compat/analytics';
+import { AngularFireStorageModule, BUCKET } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
@@ -18,11 +18,11 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AngularFireRemoteConfigModule, DEFAULTS, SETTINGS } from '@angular/fire/remote-config';
+import { AngularFireRemoteConfigModule, DEFAULTS, SETTINGS } from '@angular/fire/compat/remote-config';
 import { RouteReuseStrategy } from '@angular/router';
-import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR } from '@angular/fire/auth';
-import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/firestore';
-import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN, NEW_ORIGIN_BEHAVIOR } from '@angular/fire/functions';
+import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
+import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { DEMO_MODE, PROGRAM_YEAR } from '@core/*';
 
 export function httpLoaderFactory(http: HttpClient) {
@@ -83,7 +83,6 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: USE_AUTH_EMULATOR, useValue: environment.useEmulators ? ['localhost', 9099] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: environment.useEmulators ? ['localhost', 8080] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: environment.useEmulators ? ['localhost', 5001] : undefined },
-    { provide: NEW_ORIGIN_BEHAVIOR, useValue: true },
     { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },
   ],
   bootstrap: [AppComponent],

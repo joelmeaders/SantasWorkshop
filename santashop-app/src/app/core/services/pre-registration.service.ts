@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from '@angular/fire/compat/firestore';
 import { AuthService, COLLECTION_SCHEMA, FireRepoLite, IFireRepoCollection, IRegistration } from '@core/*';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, mergeMap, shareReplay, switchMap, take, takeUntil } from 'rxjs/operators';

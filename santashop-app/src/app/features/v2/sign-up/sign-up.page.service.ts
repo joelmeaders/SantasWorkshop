@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { AngularFireFunctions } from '@angular/fire/functions';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, IError, IOnboardUser } from '@core/*';
 import { LoadingController } from '@ionic/angular';

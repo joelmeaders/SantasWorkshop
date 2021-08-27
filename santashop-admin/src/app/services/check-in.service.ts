@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { QueryFn } from '@angular/fire/firestore';
+import { QueryFn } from '@angular/fire/compat/firestore';
 import { BehaviorSubject } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -18,7 +18,7 @@ import {
   IRegistration,
 } from 'santashop-core/src';
 import { CheckInHelpers } from '../helpers/checkin-helpers';
-import firebase from 'firebase/app';
+import firebase from 'firebase/compat/app';
 import { AlertController } from '@ionic/angular';
 
 @Injectable({

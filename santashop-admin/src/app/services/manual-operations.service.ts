@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Query } from '@angular/fire/firestore';
+import { Query } from '@angular/fire/compat/firestore';
 import { of } from 'rxjs';
 import { delay, take } from 'rxjs/operators';
 import {

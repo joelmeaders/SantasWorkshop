@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount } from 'rxjs/operators';
-import { AngularFireFunctions } from '@angular/fire/functions';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { IAuth, IUserEmailUid } from '../models/auth.model';
-import firebase from 'firebase/app';
+import firebase from 'firebase/compat/app';
 
 @Injectable({
   providedIn: 'root'

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DocumentReference, QueryFn } from '@angular/fire/firestore';
+import { DocumentReference, QueryFn } from '@angular/fire/compat/firestore';
 import { FireRepoBase } from './fire-repo-base.service';
 
 @Injectable({

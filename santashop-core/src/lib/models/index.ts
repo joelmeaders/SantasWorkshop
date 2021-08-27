@@ -8,3 +8,4 @@ export * from './user.model';
 export * from './registration.model';
 export * from './registration-email.model';
 export * from './onboard-user.model';
+export * from './registration-search-index.model';

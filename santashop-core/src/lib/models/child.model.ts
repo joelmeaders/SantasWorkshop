@@ -1,8 +1,10 @@
 export interface IChild {
-  uid: string | undefined;
-  firstName: string | undefined;
-  lastName: string | undefined;
-  dateOfBirth: Date | undefined;
-  toyType: string | undefined;
-  ageGroup: string | undefined;
+  uid?: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  toyType?: string;
+  ageGroup?: string;
+  programYearAdded: number;
+  enabled: boolean;
 }

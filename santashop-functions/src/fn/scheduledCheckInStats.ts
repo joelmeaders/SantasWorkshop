@@ -1,4 +1,5 @@
 // import * as admin from "firebase-admin";
+// import { Timestamp } from 'firebase/firestore'
 
 // admin.initializeApp();
 
@@ -96,7 +97,7 @@
 // interface ICheckIn {
 //   customerId?: string;
 //   registrationCode?: string;
-//   checkInDateTime: admin.firestore.Timestamp;
+//   checkInDateTime: Timestamp;
 //   inStats: boolean;
 //   stats: ICheckInStats;
 // }

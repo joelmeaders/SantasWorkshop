@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFireRemoteConfig, budget } from '@angular/fire/remote-config';
+import { AngularFireRemoteConfig, budget } from '@angular/fire/compat/remote-config';
 import { distinctUntilChanged, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 @Injectable({

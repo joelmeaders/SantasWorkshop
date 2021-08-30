@@ -1,4 +1,3 @@
-export * from './child-profile.service';
 export * from './user-profile.service';
 export * from './auth.service';
 export * from './error-handler.service';

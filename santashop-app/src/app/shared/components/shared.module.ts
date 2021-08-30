@@ -1,7 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { CoreModule } from 'santashop-core/src';
-import { CreateChildModalComponent } from './create-child-modal/create-child-modal.component';
 import { PreRegistrationMenuComponent } from './pre-registration-menu/pre-registration-menu.component';
 import { PrivacyPolicyModalComponent } from './privacy-policy-modal/privacy-policy-modal.component';
 import { PublicMenuComponent } from './public-menu/public-menu.component';
@@ -10,7 +9,6 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
 
 @NgModule({
   declarations: [
-    CreateChildModalComponent,
     ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
@@ -22,7 +20,6 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     TranslateModule,
   ],
   exports: [
-    CreateChildModalComponent,
     ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,

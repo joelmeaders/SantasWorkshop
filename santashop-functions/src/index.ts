@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import { EventContext } from 'firebase-functions';
 
-const PROGRAM_YEAR = 2021;
+// const PROGRAM_YEAR = 2021;
 
 /**
  * Validate recaptcha response.

@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase/firestore'
 
 admin.initializeApp();
@@ -9,8 +9,8 @@ export default async () => {
   // Get existing stats
   const statsDoc = await admin
       .firestore()
-      .collection("stats")
-      .doc("checkin-2020")
+      .collection('stats')
+      .doc('checkin-2020')
       .get();
 
   if (statsDoc.exists) {
@@ -26,8 +26,8 @@ export default async () => {
   // Get unprocessed checkins
   await admin
       .firestore()
-      .collection("checkins")
-      .where("inStats", "==", false)
+      .collection('checkins')
+      .where('inStats', '==', false)
       .get()
       .then(async (snapshot) => {
         snapshot.forEach(async (doc) => {
@@ -39,8 +39,8 @@ export default async () => {
 
   await admin
       .firestore()
-      .collection("stats")
-      .doc("checkin-2020")
+      .collection('stats')
+      .doc('checkin-2020')
       .set(stats, {merge: false});
 
   stats = {} as ICheckInAggregatedStats;
@@ -48,7 +48,7 @@ export default async () => {
 };
 
 function updateStats(checkIn: ICheckIn): void {
-  const localDate = checkIn.checkInDateTime.toDate().toLocaleString("en-US", {timeZone: "America/Denver"});
+  const localDate = checkIn.checkInDateTime.toDate().toLocaleString('en-US', {timeZone: 'America/Denver'});
   const checkInDate = new Date(localDate).getDate();
   const checkInHour = new Date(localDate).getHours();
 

@@ -80,7 +80,7 @@ export function httpLoaderFactory(http: HttpClient) {
     UserTrackingService,
     // AuthService,
     // MaintenanceService,
-    { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['localhost', 9099] : undefined },
+    { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['https://localhost', 9099] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: isDevMode() ? ['localhost', 8080] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: isDevMode() ? ['localhost', 5001] : undefined },
     { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },

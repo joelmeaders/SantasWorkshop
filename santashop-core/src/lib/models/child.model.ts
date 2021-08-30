@@ -1,10 +1,9 @@
 export interface IChild {
-  uid?: string;
+  id?: number;
   firstName: string;
   lastName: string;
   dateOfBirth: Date;
-  toyType?: string;
   ageGroup?: string;
-  programYearAdded: number;
+  programYearAdded?: number;
   enabled: boolean;
 }

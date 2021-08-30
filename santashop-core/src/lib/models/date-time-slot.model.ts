@@ -1,16 +1,17 @@
-import { Timestamp } from 'firebase/firestore'
+import { Timestamp } from "firebase/firestore";
 
 export interface IDateTimeSlot {
     id?: string;
 
-    // Year of event
     programYear: number;
 
     dateTime: Timestamp;
 
-    // Max number of slots
     maxSlots: number;
 
-    // Enabled
+    slotsReserved?: number;
+
     enabled: boolean;
+
+    lastUpdated?: Timestamp;
 }

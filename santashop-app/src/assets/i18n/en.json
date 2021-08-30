@@ -36,6 +36,15 @@
     "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy",
     "SUBMIT_BUTTON": "Create Account"
   },
+  "ADD_CHILDREN": {
+    "ERROR_HEADER": "Unable to save child",
+    "INVALID_AGE": "We only have toys for children ages 11 and under",
+    "INVALID_FIRSTNAME": "First name must be between 2 and 20 characters",
+    "INVALID_LASTNAME": "Last name must be between 2 and 30 characters"
+  },
+
+
+
 
 
 

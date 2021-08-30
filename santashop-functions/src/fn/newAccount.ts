@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import {HttpsError} from 'firebase-functions/lib/providers/https';
-import {COLLECTION_SCHEMA, IOnboardUser, IUser, IRegistration} from '../../../santashop-core/src';
+import {COLLECTION_SCHEMA, IOnboardUser, IUser, IRegistration, IDateTimeSlot} from '../../../santashop-core/src';
 
 admin.initializeApp();
 
@@ -17,6 +17,8 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     console.error(error);
     throw handleAuthError(error);
   });
+
+  // await testData();
 
   const user: IUser = {
     firstName: data.firstName,
@@ -57,6 +59,46 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
             'Account created but something else went wrong', JSON.stringify(error));
       });
 };
+
+const testData = async () => {
+  const collection = admin.firestore()
+    .collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
+
+  const programYear = 2021;
+
+  const demoValues: IDateTimeSlot[] = [
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 09:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 10:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 11:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 12:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 13:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 14:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 15:00')), maxSlots: 40, enabled: true },
+
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 09:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 10:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 11:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 12:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 13:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 14:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 15:00')), maxSlots: 40, enabled: true },
+
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 09:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 10:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 11:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 12:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 13:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 14:00')), maxSlots: 40, enabled: true },
+    // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 15:00')), maxSlots: 40, enabled: true },
+  ];
+  
+  demoValues.forEach(async v => 
+    {
+      console.log(v);
+      await collection.add(v);
+    });
+  return Promise.resolve();
+}
 
 const generateId = (length: number): string => {
   const customLib = lib.alpha.concat(lib.number);

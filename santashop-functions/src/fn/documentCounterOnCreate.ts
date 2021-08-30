@@ -1,13 +1,13 @@
-import {EventContext} from "firebase-functions";
-import * as admin from "firebase-admin";
+import {EventContext} from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
 export default async (
     context: EventContext
 ) => {
-  const IGNORE_COLLECTIONS = ["counters", "qrcodes", "registrationemails",
-    "registrationsearchindex", "stats", "parameters"];
+  const IGNORE_COLLECTIONS = ['counters', 'qrcodes', 'registrationemails',
+    'registrationsearchindex', 'stats', 'parameters'];
   const collection: string = context.params.collection;
 
   if (IGNORE_COLLECTIONS.includes(collection)) {

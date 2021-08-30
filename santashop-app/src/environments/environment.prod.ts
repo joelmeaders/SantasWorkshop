@@ -1,7 +1,8 @@
+import config from './config.json';
+
 export const environment = {
   production: true,
-  useEmulators: false,
-  version: '0.0.0',
+  ...config
 };
 
 export const firebaseConfig = {

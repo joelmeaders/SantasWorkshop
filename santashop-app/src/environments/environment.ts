@@ -2,7 +2,6 @@ import config from './config.json';
 import firebaseConfigDev from '../../../firebase.environment.json';
 
 export const environment = {
-  useEmulators: true,
   production: false,
   ...config,
 };

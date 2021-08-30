@@ -1,4 +1,7 @@
 import * as functions from 'firebase-functions';
+import { EventContext } from 'firebase-functions';
+
+const PROGRAM_YEAR = 2021;
 
 /**
  * Validate recaptcha response.
@@ -15,24 +18,6 @@ export const newAccount =
   functions.https.onCall(async (request, context) => {
     return (await import('./fn/newAccount')).default(request);
   });
-
-/**
- * Sharded count updater for all collections
- */
-export const dateTimeSlotCounterOnUpdate =
-  functions.firestore
-      .document('registrations/{docId}')
-      .onUpdate(async (snapshot, context) => {
-        await (await import('./fn/documentCounterOnCreate')).default(context);
-      });
-
-// TODO:
-export const dateTimeSlotCounterOnDelete =
-  functions.firestore
-      .document('registrations/{docId}')
-      .onUpdate(async (snapshot, context) => {
-        await (await import('./fn/documentCounterOnCreate')).default(context);
-      });
 
 // export const isAdmin =
 //   functions.https.onCall(async (request, context) => {
@@ -125,3 +110,11 @@ export const documentCounterOnDelete = functions.firestore
 //   .onDelete(async (change, context) => {
 //     await (await import('./fn/qrcodes-OnDelete')).default(change);
 //   });
+
+// ------------------------------------- SCHEDULED FUNCTIONS
+
+export const scheduledDateTimeSlotCounters = 
+  functions.pubsub.schedule('every 15 minutes')
+  .onRun(async (context: EventContext) => {
+    await (await import('./fn/dateTimeSlotCountersLite')).default(context);
+  });

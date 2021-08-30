@@ -62,7 +62,7 @@ export class AuthService {
       await user?.updatePassword(newPassword)
       return Promise.resolve();
     }
-    catch (error) {
+    catch (error: any) {
       await this.errorHandler.handleError(error);
       return Promise.reject(error);
     }
@@ -80,7 +80,7 @@ export class AuthService {
       user?.updateEmail(newEmailAddress);
       return Promise.resolve();
     }
-    catch (error) {
+    catch (error: any) {
       await this.errorHandler.handleError(error);
       return Promise.reject(error);
     }
@@ -90,7 +90,7 @@ export class AuthService {
     try {
       return await this.angularFireAuth.signInWithEmailAndPassword(auth.emailAddress, auth.password);
     }
-    catch (error) {
+    catch (error: any) {
       await this.errorHandler.handleError(error);
       return Promise.reject(error)
     }

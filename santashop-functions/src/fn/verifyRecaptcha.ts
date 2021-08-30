@@ -1,18 +1,18 @@
-import * as functions from "firebase-functions";
+import * as functions from 'firebase-functions';
 
 let rp: any;
 
 export default (data: any): Promise<boolean> => {
   if (!rp) {
-    rp = require("request-promise");
+    rp = require('request-promise');
   }
 
   const key = functions.config().recaptcha.key;
   const value = data.value;
 
   return rp({
-    uri: "https://www.google.com/recaptcha/api/siteverify",
-    method: "POST",
+    uri: 'https://www.google.com/recaptcha/api/siteverify',
+    method: 'POST',
     formData: {
       secret: key,
       response: value,
@@ -23,7 +23,7 @@ export default (data: any): Promise<boolean> => {
         if (result.success) {
           return true;
         } else {
-          console.log("failed recaptcha verification");
+          console.log('failed recaptcha verification');
           return false;
         }
       })

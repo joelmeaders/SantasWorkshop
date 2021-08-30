@@ -15,7 +15,6 @@ export class AccountCreationError extends Error implements IError {
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = AccountCreationError.name;
   }
-  
 }
 
 export class ArgumentUndefinedError extends Error implements IError {
@@ -29,5 +28,16 @@ export class ArgumentUndefinedError extends Error implements IError {
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = ArgumentUndefinedError.name;
   }
+}
+
+export class ChildValidationError extends Error implements IError {
+  public code: "invalid_age" | "invalid_firstname" | "invalid_lastname";
+  public details?: string;
   
+  constructor(code: "invalid_age" | "invalid_firstname" | "invalid_lastname") {
+    super("Error validating child");
+    this.code = code;
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = ChildValidationError.name;
+  }
 }

@@ -36,7 +36,12 @@
     "LEGAL_AGREEMENT": "Al registrarse, usted acepta nuestros términos de servicio y ha leído nuestra política de privacidad",
     "SUBMIT_BUTTON": "Crear cuenta"
   },
-
+  "ADD_CHILDREN": {
+    "HEADER": "No se puede salvar a un niño",
+    "MESSAGE": "Solo tenemos juguetes para niños menores de 11 años",
+    "INVALID_FIRSTNAME": "El nombre debe tener entre 2 y 20 caracteres",
+    "INVALID_LASTNAME": "El apellido debe tener entre 2 y 30 caracteres"
+  },
 
 
 

@@ -1,3 +1,4 @@
+export * from './auth.model';
 export * from './zip-code-stats';
 export * from './error.model';
 export * from './date-time-slot.model';

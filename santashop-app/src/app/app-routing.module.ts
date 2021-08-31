@@ -38,14 +38,17 @@ const routes: Routes = [
   //   loadChildren: () => import('./features/registration-closed/registration-closed.module').then( m => m.RegistrationClosedPageModule)
   // },
   {
+    path: 'sign-in',
+    loadChildren: () => import('./features/v2/sign-in/sign-in.module').then( m => m.SignInPageModule)
+  },
+  {
     path: 'sign-up',
     loadChildren: () => import('./features/v2/sign-up/sign-up.module').then( m => m.SignUpPageModule)
   },
   {
     path: 'pre-registration',
     loadChildren: () => import('./features/v2/pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule)
-  },
-
+  }
 ];
 
 @NgModule({

@@ -4,26 +4,24 @@ import { AngularFireModule } from '@angular/fire/compat';
 import {
   AngularFireAnalytics,
   AngularFireAnalyticsModule,
-  CONFIG,
+  CONFIG as ANALYTICS_CONFIG,
   ScreenTrackingService,
   UserTrackingService,
 } from '@angular/fire/compat/analytics';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AngularFireRemoteConfigModule, DEFAULTS, SETTINGS } from '@angular/fire/compat/remote-config';
+import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as USE_REMOTE_EMULATOR } from '@angular/fire/compat/remote-config';
 import { RouteReuseStrategy } from '@angular/router';
-import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR } from '@angular/fire/compat/auth';
+import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as AUTH_SETTINGS } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
-import { DEMO_MODE, PROGRAM_YEAR } from '@core/*';
+import { AuthService, DEMO_MODE, PROGRAM_YEAR } from '@core/*';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -55,8 +53,6 @@ export function httpLoaderFactory(http: HttpClient) {
   ],
   // exports: [TranslateModule],
   providers: [
-    StatusBar,
-    SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     // App settings
     { provide: PROGRAM_YEAR, useValue: 2021 },
@@ -65,7 +61,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
     // Analytics
     {
-      provide: CONFIG,
+      provide: ANALYTICS_CONFIG,
       useValue: {
         debug_mode: isDevMode(),
         app_name: environment.name ?? "",
@@ -73,14 +69,15 @@ export function httpLoaderFactory(http: HttpClient) {
       },
     },
     // Remote Config
-    { provide: DEFAULTS, useValue: { valueName: "valueValue" } },
-    { provide: SETTINGS, useFactory: () => isDevMode() ? { minimumFetchIntervalMillis: 10_000 } : {} },
+    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { valueName: "valueValue" } },
+    { provide: USE_REMOTE_EMULATOR, useFactory: () => isDevMode() ? { minimumFetchIntervalMillis: 10_000 } : {} },
+    { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !isDevMode() } },
     AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
-    // AuthService,
+    AuthService,
     // MaintenanceService,
-    { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['https://localhost', 9099] : undefined },
+    { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['http://localhost:9099'] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: isDevMode() ? ['localhost', 8080] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: isDevMode() ? ['localhost', 5001] : undefined },
     { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },

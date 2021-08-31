@@ -2,8 +2,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, IError, IOnboardUser } from '@core/*';
-import { LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { ControlsValue } from '@ngneat/reactive-forms/lib/types';
+import { TranslateService } from '@ngx-translate/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 import { IAuth } from 'santashop-core/src/lib/models/auth.model';
@@ -40,8 +41,7 @@ export class SignUpPageService implements OnDestroy {
   private readonly redirectIfLoggedInSubscription =
     this.authService.currentUser$.pipe(
       filter(user => !!user),
-      // TODO
-      tap(() => this.router.navigate(['TODO']))
+      tap(() => this.router.navigate(['pre-registration/information']))
     );
 
   constructor(
@@ -49,7 +49,9 @@ export class SignUpPageService implements OnDestroy {
     private readonly afFunctions: AngularFireFunctions,
     private readonly router: Router,
     private readonly loadingController: LoadingController,
+    private readonly alertController: AlertController,
     private readonly errorHandler: ErrorHandlerService,
+    private readonly translateService: TranslateService
   ) {
     this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
     this.form.validateOn(this.passwordMatchValidator$);
@@ -82,7 +84,6 @@ export class SignUpPageService implements OnDestroy {
   }
 
   private async createAccount(value: ControlsValue<IOnboardUser>): Promise<void> {
-    // TODO: Centralize and type functions;
     const accountStatusFunction = this.afFunctions.httpsCallable('newAccount');
     return accountStatusFunction({ ...value })
       .pipe(take(1)).toPromise();

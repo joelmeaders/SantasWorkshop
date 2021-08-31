@@ -36,6 +36,14 @@
     "LEGAL_AGREEMENT": "Al registrarse, usted acepta nuestros términos de servicio y ha leído nuestra política de privacidad",
     "SUBMIT_BUTTON": "Crear cuenta"
   },
+  "SIGNIN": {
+    "TITLE1": "Iniciar sesión en su cuenta",
+    "FORGOT_PASSWORD": "¿Olvidó su contraseña?",
+    "MAKE_ACCOUNT1": "Si aún no ha creado una cuenta con nosotros, puede hacer una haciendo clic aquí",
+    "SIGNING_IN": "Iniciar sesión...",
+    "DEVICE_ISSUE": "Problema del dispositivo",
+    "DEVICE_ISSUE_MSG": "Inténtelo de nuevo con otro navegador o dispositivo. Pedimos disculpas por las molestias"
+  },
   "ADD_CHILDREN": {
     "HEADER": "No se puede salvar a un niño",
     "MESSAGE": "Solo tenemos juguetes para niños menores de 11 años",
@@ -55,15 +63,7 @@
     "HEADER": "Un juguete para cada niña y cada niño",
     "MESSAGE": "¡Bienvenido al registro previo de la tienda Denver Santa Claus Shop de 2020! Este año cumpliremos nuestra misión de una forma nueva y emocionante: con nuestro primer obsequio promocional de un juguete móvil.<br/><br/>Los residentes de Denver podrán participar del evento de entrega del juguete móvil los días 11, 12, 14 y 15 de diciembre. En lugar de compras, obtendrá un paquete de juguetes según el género y la edad de los niños que registre previamente.<br/><br/>Complete el formulario de registro previo antes del evento. Esto le ahorrará tiempo el día de la compra.<br/><br/>Si es la primera vez que visita la página web, seleccione “Crear cuenta” y siga las instrucciones.<br/><br/>Seleccione “Iniciar sesión” si ya ha creado una cuenta y desea cambiar su registro. Asegúrese de volver a ingresar TODA la información para TODOS los niños.<br/><br/>Esperamos ansiosos poder compartir la alegría de las fiestas con usted y su familia durante esta época difícil."
   },
-  "SIGNIN": {
-    "HEADER": "Iniciar sesión en su cuenta",
-    "FORGOT_PASSWORD": "¿Olvidó su contraseña?",
-    "MAKE_ACCOUNT1": "Si aún no ha creado una cuenta con nosotros, puede hacer una",
-    "MAKE_ACCOUNT2": "haciendo clic aquí",
-    "SIGNING_IN": "Iniciar sesión...",
-    "DEVICE_ISSUE": "Problema del dispositivo",
-    "DEVICE_ISSUE_MSG": "Inténtelo de nuevo con otro navegador o dispositivo. Pedimos disculpas por las molestias"
-  },
+  
   "SIGNUP_ACCOUNT": {
     "HEADER": "Crea tu cuenta",
     "EMAIL_ADDRESS": "Dirección de correo electrónico",

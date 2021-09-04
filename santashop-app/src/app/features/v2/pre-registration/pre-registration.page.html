@@ -1,5 +1,3 @@
-<!-- <ion-menu-button menu="registration"></ion-menu-button> -->
-
 <ion-content id="main">
 
   <ion-tabs>
@@ -11,18 +9,25 @@
         <ion-label>Overview</ion-label>
       </ion-tab-button>
 
-      <ion-tab-button tab="date-time">
-        <ion-icon name="calendar"></ion-icon>
-        <ion-label>Schedule</ion-label>
-      </ion-tab-button>
-
       <ion-tab-button tab="children">
         <ion-icon name="people"></ion-icon>
         <ion-label>Your Children</ion-label>
-        <ion-badge>6</ion-badge>
+        <ng-container *appLet="childCount$ | async as count">
+          <ion-badge [color]="count > 0 ? 'success' : 'danger'">{{ count }}</ion-badge>
+        </ng-container>
+      </ion-tab-button>
+
+      <ion-tab-button tab="date-time" [disabled]="!(childCount$ | async)">
+        <ion-icon name="calendar"></ion-icon>
+        <ion-label>Schedule</ion-label>
+        <ng-container *appLet="chosenSlot$ | async as slot">
+          <ion-badge [color]="!!slot ? 'success' : 'danger'">
+            <ion-icon name="checkmark"></ion-icon>
+          </ion-badge>
+        </ng-container>
       </ion-tab-button>
   
-      <ion-tab-button tab="confirmation">
+      <ion-tab-button tab="confirmation" [disabled]="!(childCount$ | async) && !(chosenSlot$ | async)">
         <ion-icon name="bag-check"></ion-icon>
         <ion-label>Confirmation</ion-label>
       </ion-tab-button>
@@ -32,7 +37,3 @@
   </ion-tabs>
 
 </ion-content>
-
-<ion-menu side="start" menuId="registration" contentId="main">
-  <app-pre-registration-menu></app-pre-registration-menu>
-</ion-menu>

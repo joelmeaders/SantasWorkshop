@@ -1,4 +1,3 @@
-export * from './user-profile.service';
 export * from './auth.service';
 export * from './error-handler.service';
 export * from './fire-repo-base.service';

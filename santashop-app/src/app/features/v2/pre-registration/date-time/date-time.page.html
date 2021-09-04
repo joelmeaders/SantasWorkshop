@@ -13,7 +13,7 @@
     cillum dolore eu fugiat nulla pariatur.
   </p>
 
-  <ion-card *ngIf="registrationSlot$ | async as slot">
+  <ion-card *ngIf="chosenSlot$ | async as slot">
     <ion-card-header> Your Chosen Date/Time </ion-card-header>
     <ion-card-content>
       <!-- TODO: Loading animation -->

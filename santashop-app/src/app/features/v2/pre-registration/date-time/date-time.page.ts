@@ -23,7 +23,7 @@ export class DateTimePage implements OnDestroy {
       shareReplay(1)
     );
 
-  public readonly registrationSlot$ =
+  public readonly chosenSlot$ =
     this.viewService.registrationSlot$.pipe(
       takeUntil(this.destroy$),
       shareReplay(1)
@@ -55,7 +55,7 @@ export class DateTimePage implements OnDestroy {
   }
 
   private alreadyChoseSlot(): Promise<boolean> {
-    return this.viewService.registrationSlot$.pipe(
+    return this.chosenSlot$.pipe(
       take(1),
       map(slot => !!slot)
     ).toPromise();

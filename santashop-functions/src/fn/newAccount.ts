@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {COLLECTION_SCHEMA, IOnboardUser, IUser, IRegistration} from '../../../santashop-core/src';
+import {COLLECTION_SCHEMA, IOnboardUser, IUser, IRegistration, IDateTimeSlot} from '../../../santashop-core/src';
 import { HttpsError } from 'firebase-functions/v1/https';
 
 admin.initializeApp();
@@ -18,11 +18,13 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     throw handleAuthError(error);
   });
 
-  // try {
-  //   await testData();
-  // } catch (e) {
-  //   console.log(e);
-  // }
+  try {
+    if ((await dateTimSlotCollection.get()).empty) {
+      await testData();
+    }
+  } catch (e) {
+    console.log(e);
+  }
 
   const acceptedLegal = data.legal as Date;
 
@@ -66,45 +68,48 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
   });
 };
 
-// const testData = async () => {
-//   const collection = admin.firestore()
-//     .collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
+const dateTimSlotCollection = admin.firestore()
+  .collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
 
-//   const programYear = 2021;
-
-//   const demoValues: IDateTimeSlotServer[] = [
-//     { programYear: programYear, dateTime: new Date('12-10-2021 09:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-10-2021 10:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-10-2021 11:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-10-2021 12:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-10-2021 13:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-10-2021 14:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-10-2021 15:00'), maxSlots: 40, enabled: true },
-
-//     { programYear: programYear, dateTime: new Date('12-11-2021 09:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-11-2021 10:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-11-2021 11:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-11-2021 12:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-11-2021 13:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-11-2021 14:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-11-2021 15:00'), maxSlots: 40, enabled: true },
-
-//     { programYear: programYear, dateTime: new Date('12-12-2021 09:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-12-2021 10:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-12-2021 11:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-12-2021 12:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-12-2021 13:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-12-2021 14:00'), maxSlots: 40, enabled: true },
-//     { programYear: programYear, dateTime: new Date('12-12-2021 15:00'), maxSlots: 40, enabled: true },
-//   ];
+const testData = async () => {
   
-//   demoValues.forEach(async v => 
-//     {
-//       console.log(v);
-//       await collection.add(v);
-//     });
-//   return Promise.resolve();
-// }
+  const collection = dateTimSlotCollection;
+
+  const programYear = 2021;
+
+  const demoValues: IDateTimeSlot[] = [
+    { programYear: programYear, dateTime: new Date('12-10-2021 09:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-10-2021 10:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-10-2021 11:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-10-2021 12:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-10-2021 13:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-10-2021 14:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-10-2021 15:00'), maxSlots: 40, enabled: true },
+
+    { programYear: programYear, dateTime: new Date('12-11-2021 09:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-11-2021 10:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-11-2021 11:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-11-2021 12:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-11-2021 13:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-11-2021 14:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-11-2021 15:00'), maxSlots: 40, enabled: true },
+
+    { programYear: programYear, dateTime: new Date('12-12-2021 09:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-12-2021 10:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-12-2021 11:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-12-2021 12:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-12-2021 13:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-12-2021 14:00'), maxSlots: 40, enabled: true },
+    { programYear: programYear, dateTime: new Date('12-12-2021 15:00'), maxSlots: 40, enabled: true },
+  ];
+  
+  demoValues.forEach(async v => 
+    {
+      console.log(v);
+      await collection.add(v);
+    });
+  return Promise.resolve();
+}
 
 const generateId = (length: number): string => {
   const customLib = lib.alpha.concat(lib.number);

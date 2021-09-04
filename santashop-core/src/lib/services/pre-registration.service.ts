@@ -3,9 +3,11 @@ import { DocumentReference } from '@angular/fire/compat/firestore';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, mergeMap, shareReplay, switchMap, take, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA } from '../helpers/schema.model';
+import { IDateTimeSlot } from '../models/date-time-slot.model';
 import { IRegistration } from '../models/registration.model';
 import { AuthService } from './auth.service';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
+import { Timestamp } from '@firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +27,29 @@ export class PreRegistrationService implements OnDestroy {
   public readonly registrationComplete$ =
     this.userRegistration$.pipe(
       takeUntil(this.destroy$),
-      map(registration => this.isRegistrationComplete(registration))
-    )
+      map(registration => this.isRegistrationComplete(registration)),
+      shareReplay(1)
+    );
+
+  public readonly childCount$ = 
+    this.userRegistration$.pipe(
+      takeUntil(this.destroy$),
+      map(registration => !!registration?.children ? registration.children.length : 0),
+      shareReplay(1)
+    );
+
+  public readonly dateTimeSlot$: Observable<IDateTimeSlot | undefined> =
+    this.userRegistration$.pipe(
+      takeUntil(this.destroy$),
+      map(registration => registration?.dateTimeSlot as IDateTimeSlot),
+      filter(registration => !!registration),
+      // TODO: Make this map a shared reusable method
+      map(data => {
+        data.dateTime = (<any>data.dateTime as Timestamp).toDate()
+        return data;
+      }),
+      shareReplay(1)
+    );
 
   constructor(
     private readonly fireRepo: FireRepoLite,
@@ -65,10 +88,5 @@ export class PreRegistrationService implements OnDestroy {
   // TODO: This method
   private validateRegistration(registration: IRegistration): void {
     registration = registration;
-  }
-
-  // TODO: This method
-  public friendlyDateTime(dateTime: Date) {
-    return `TODO: Formatted Date/Time ${dateTime}`;
   }
 }

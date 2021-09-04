@@ -1,8 +1,8 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { COLLECTION_SCHEMA, FireRepoLite, IDateTimeSlot, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
-import { Timestamp } from '@firebase/firestore';
 import { Observable, Subject } from 'rxjs';
-import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { Timestamp } from '@firebase/firestore';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
@@ -22,18 +22,11 @@ export class DateTimePageService implements OnDestroy {
       shareReplay(1)
     );
 
-  public readonly registrationSlot$: Observable<IDateTimeSlot> =
-    this.preRegistrationService.userRegistration$.pipe(
+  public readonly registrationSlot$ = 
+    this.preRegistrationService.dateTimeSlot$.pipe(
       takeUntil(this.destroy$),
-      map(registration => registration?.dateTimeSlot as IDateTimeSlot),
-      filter(registration => !!registration),
-      // TODO: Make this map a shared reusable method
-      map(data => {
-        data.dateTime = (<any>data.dateTime as Timestamp).toDate()
-        return data;
-      }),
       shareReplay(1)
-    );
+  );
 
   constructor(
     @Inject(PROGRAM_YEAR) private readonly programYear: number,

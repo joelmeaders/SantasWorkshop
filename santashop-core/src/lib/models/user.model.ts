@@ -1,3 +1,5 @@
+// import { Timestamp } from "@firebase/firestore";
+
 export interface IUser {
   uid?: string;
 
@@ -9,7 +11,7 @@ export interface IUser {
 
   zipCode: number;
 
-  acceptedTermsOfService: Date;
+  acceptedTermsOfService?: Date;
 
-  acceptedPrivacyPolicy: Date;
+  acceptedPrivacyPolicy?: Date;
 }

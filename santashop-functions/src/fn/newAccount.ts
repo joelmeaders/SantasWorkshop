@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {HttpsError} from 'firebase-functions/lib/providers/https';
 import {COLLECTION_SCHEMA, IOnboardUser, IUser, IRegistration} from '../../../santashop-core/src';
+import { HttpsError } from 'firebase-functions/v1/https';
 
 admin.initializeApp();
 
@@ -18,15 +18,21 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     throw handleAuthError(error);
   });
 
-  // await testData();
+  // try {
+  //   await testData();
+  // } catch (e) {
+  //   console.log(e);
+  // }
+
+  const acceptedLegal = data.legal as Date;
 
   const user: IUser = {
     firstName: data.firstName,
     lastName: data.lastName,
     emailAddress: data.emailAddress,
     zipCode: data.zipCode,
-    acceptedTermsOfService: new Date(),
-    acceptedPrivacyPolicy: new Date(),
+    acceptedTermsOfService: acceptedLegal,
+    acceptedPrivacyPolicy: acceptedLegal
   };
 
   const registration: IRegistration = {
@@ -64,32 +70,32 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
 //   const collection = admin.firestore()
 //     .collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
 
-//   // const programYear = 2021;
+//   const programYear = 2021;
 
-//   const demoValues: IDateTimeSlot[] = [
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 09:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 10:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 11:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 12:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 13:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 14:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-10-2021 15:00')), maxSlots: 40, enabled: true },
+//   const demoValues: IDateTimeSlotServer[] = [
+//     { programYear: programYear, dateTime: new Date('12-10-2021 09:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-10-2021 10:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-10-2021 11:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-10-2021 12:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-10-2021 13:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-10-2021 14:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-10-2021 15:00'), maxSlots: 40, enabled: true },
 
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 09:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 10:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 11:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 12:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 13:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 14:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-11-2021 15:00')), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 09:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 10:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 11:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 12:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 13:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 14:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-11-2021 15:00'), maxSlots: 40, enabled: true },
 
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 09:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 10:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 11:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 12:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 13:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 14:00')), maxSlots: 40, enabled: true },
-//     // { programYear: programYear, dateTime: admin.firestore.Timestamp.fromDate(new Date('12-12-2021 15:00')), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 09:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 10:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 11:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 12:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 13:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 14:00'), maxSlots: 40, enabled: true },
+//     { programYear: programYear, dateTime: new Date('12-12-2021 15:00'), maxSlots: 40, enabled: true },
 //   ];
   
 //   demoValues.forEach(async v => 

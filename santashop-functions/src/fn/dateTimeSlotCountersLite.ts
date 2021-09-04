@@ -33,7 +33,7 @@ export default async (context: EventContext): Promise<void> => {
     if (slot !== undefined) {
       slot.slotsReserved = (slot.slotsReserved ?? 0) + 1;
       slot.enabled = slot.slotsReserved < slot.maxSlots;
-      // registration.includedInCounts = admin.firestore.Timestamp.now();
+      registration.includedInCounts = new Date();
     }
   });
 

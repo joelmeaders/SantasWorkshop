@@ -18,7 +18,7 @@
     <ion-card-content>
       <!-- TODO: Loading animation -->
       <ion-item lines="none">
-        {{ slot.dateTime.toDate() | date:'MMMM d, h:mm a' }}
+        {{ slot.dateTime | date:'MMMM d, h:mm a' }}
         <ion-button slot="end" (click)="selectDateTime()"> Cancel </ion-button>
       </ion-item>
       <p class="ion-padding">
@@ -33,7 +33,7 @@
     <ion-list-header> Available Dates/Times </ion-list-header>
     <ng-container *ngFor="let slot of availableSlots$ | async">
       <ion-item button="true" detail="true" (click)="selectDateTime(slot)">
-        {{ slot.dateTime.toDate() | date:'MMMM d, h:mm a' }}
+        {{ slot.dateTime | date:'MMMM d, h:mm a' }}
       </ion-item>
     </ng-container>
   </ion-list>

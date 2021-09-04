@@ -1,11 +1,11 @@
-import { Timestamp } from "firebase/firestore";
+// import { Timestamp } from "@firebase/firestore";
 
 export interface IDateTimeSlot {
     id?: string;
 
     programYear: number;
 
-    dateTime: Timestamp;
+    dateTime: Date;
 
     maxSlots: number;
 
@@ -13,5 +13,5 @@ export interface IDateTimeSlot {
 
     enabled: boolean;
 
-    lastUpdated?: Timestamp;
+    lastUpdated?: Date;
 }

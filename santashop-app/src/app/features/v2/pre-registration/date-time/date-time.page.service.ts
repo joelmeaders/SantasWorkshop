@@ -1,7 +1,8 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { COLLECTION_SCHEMA, FireRepoLite, IDateTimeSlot, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
+import { Timestamp } from '@firebase/firestore';
 import { Observable, Subject } from 'rxjs';
-import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
@@ -11,13 +12,26 @@ export class DateTimePageService implements OnDestroy {
   public readonly availableSlots$ =
     this.availableSlotsQuery(this.programYear).pipe(
       takeUntil(this.destroy$),
+      // TODO: Make this map a shared reusable method
+      map(data => {
+        data.forEach(s => s.dateTime = (<any>s.dateTime as Timestamp).toDate())
+        return data;
+      }),
+      map(data => data.slice()
+        .sort((a,b) => a.dateTime.valueOf() - b.dateTime.valueOf())),
       shareReplay(1)
     );
 
-  public readonly registrationSlot$: Observable<IDateTimeSlot | undefined> =
+  public readonly registrationSlot$: Observable<IDateTimeSlot> =
     this.preRegistrationService.userRegistration$.pipe(
       takeUntil(this.destroy$),
-      map(registration => registration?.dateTimeSlot as IDateTimeSlot ?? undefined),
+      map(registration => registration?.dateTimeSlot as IDateTimeSlot),
+      filter(registration => !!registration),
+      // TODO: Make this map a shared reusable method
+      map(data => {
+        data.dateTime = (<any>data.dateTime as Timestamp).toDate()
+        return data;
+      }),
       shareReplay(1)
     );
 
@@ -33,12 +47,18 @@ export class DateTimePageService implements OnDestroy {
   }
 
   public async updateRegistration(slot?: IDateTimeSlot) {
+    
+    if (!slot) {
+      // TODO: Make error
+      return;
+    }
+
     const registration = 
       await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
     
     registration.dateTimeSlot = {
-      dateTime: slot!.dateTime,
-      id: slot!.id
+      dateTime: slot.dateTime,
+      id: slot.id
     };
     
     // TODO: Error handling

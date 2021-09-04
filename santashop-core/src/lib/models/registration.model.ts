@@ -1,5 +1,5 @@
 import { IDateTimeSlot } from './date-time-slot.model';
-import { Timestamp } from 'firebase/firestore'
+// import { Timestamp } from "@firebase/firestore";
 import { IChild } from './child.model';
 
 export interface IRegistration {
@@ -10,8 +10,8 @@ export interface IRegistration {
   emailAddress?: string;
   programYear?: number;
   dateTimeSlot?: Partial<IDateTimeSlot>;
-  dateTimeRegistered?: Timestamp;
-  includedInCounts?: false | Timestamp;
+  dateTimeRegistered?: Date;
+  includedInCounts?: false | Date;
   zipCode?: number;
   children?: IChild[];
 }

@@ -105,7 +105,6 @@ const testData = async () => {
   
   demoValues.forEach(async v => 
     {
-      console.log(v);
       await collection.add(v);
     });
   return Promise.resolve();

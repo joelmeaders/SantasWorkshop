@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { deepCopy } from '../helpers/methods';
 import { ChildValidationError } from '../models';
 import { IChild } from '../models/child.model';
-import { CALCULATE_AGE_FROM } from '../parameters';
+import { MIN_BIRTHDATE } from '../parameters';
 
 @Injectable()
 export class ChildValidationService {
@@ -25,8 +25,7 @@ export class ChildValidationService {
   }
 
   private ageValid(birthdate: Date): boolean {
-    const latestBirthDate: Date = new Date(CALCULATE_AGE_FROM.setFullYear(-12));
-    return birthdate > latestBirthDate;
+    return birthdate > MIN_BIRTHDATE();
   }
 
   private firstNameValid(firstName: string): boolean {

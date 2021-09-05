@@ -81,10 +81,8 @@ export class DateTimePage implements OnDestroy {
 
     await alert.present();
 
-    return alert.onDidDismiss().then(e => {
-      console.log(e);
-      return true;
-    });
+    return alert.onDidDismiss()
+      .then(e => e.role != 'cancel');
   }
 
 }

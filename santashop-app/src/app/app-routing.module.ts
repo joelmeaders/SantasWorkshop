@@ -1,5 +1,9 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AngularFireAuthGuard, redirectUnauthorizedTo, redirectLoggedInTo } from '@angular/fire/compat/auth-guard';
+
+const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['sign-in']);
+const redirectLoggedInToRegistration = () => redirectLoggedInTo(['pre-registration/information']);
 
 const routes: Routes = [
   {
@@ -43,11 +47,15 @@ const routes: Routes = [
   },
   {
     path: 'sign-up',
-    loadChildren: () => import('./features/v2/sign-up/sign-up.module').then( m => m.SignUpPageModule)
+    loadChildren: () => import('./features/v2/sign-up/sign-up.module').then( m => m.SignUpPageModule),
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectLoggedInToRegistration }
   },
   {
     path: 'pre-registration',
-    loadChildren: () => import('./features/v2/pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule)
+    loadChildren: () => import('./features/v2/pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule),
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin }
   }
 ];
 

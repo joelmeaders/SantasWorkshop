@@ -10,18 +10,18 @@ import {
 } from '@angular/fire/compat/analytics';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as USE_REMOTE_EMULATOR } from '@angular/fire/compat/remote-config';
-import { RouteReuseStrategy } from '@angular/router';
 import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as AUTH_SETTINGS } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
-import { AuthService, DEMO_MODE, PROGRAM_YEAR } from '@core/*';
+import { AuthService, DEMO_MODE, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
+import { customAnimation } from './core';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -43,6 +43,7 @@ export function httpLoaderFactory(http: HttpClient) {
     }),
     IonicModule.forRoot({
       mode: 'md',
+      navAnimation: customAnimation
     }),
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFirestoreModule,
@@ -53,9 +54,10 @@ export function httpLoaderFactory(http: HttpClient) {
   ],
   // exports: [TranslateModule],
   providers: [
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     // App settings
     { provide: PROGRAM_YEAR, useValue: 2021 },
+    { provide: MOBILE_EVENT, useValue: false },
     { provide: DEMO_MODE, useValue: true },
     // Storage
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },

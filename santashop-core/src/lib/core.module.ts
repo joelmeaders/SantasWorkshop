@@ -1,11 +1,12 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { ReactiveFormsModule } from '@angular/forms';
 import { NiceFormErrorPipe } from './pipes/nice-form-error.pipe';
 import { AppLetDirective } from './directives/let.directive';
 import { ControlErrorsComponent } from './components/control-errors/control-errors.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ChildInitialsPipe } from './pipes/child-initials.pipe';
 
 const modules = [
   CommonModule,
@@ -20,6 +21,7 @@ const directives = [
 
 const pipes = [
   NiceFormErrorPipe,
+  ChildInitialsPipe,
 ];
 
 const components = [

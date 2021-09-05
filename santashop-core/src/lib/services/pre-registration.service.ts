@@ -8,6 +8,7 @@ import { IRegistration } from '../models/registration.model';
 import { AuthService } from './auth.service';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
 import { Timestamp } from '@firebase/firestore';
+import { IChild } from '../models/child.model';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,18 @@ export class PreRegistrationService implements OnDestroy {
       shareReplay(1)
     );
 
+  public readonly children$ = this.userRegistration$.pipe(
+    takeUntil(this.destroy$),
+    map(data => {
+      data.children?.forEach(child => {
+        child.dateOfBirth = (<any>child.dateOfBirth as Timestamp).toDate();
+      })
+      return data;
+    }),
+      map(registration => registration.children as IChild[] ?? new Array<IChild>()),
+      shareReplay(1)
+  );
+
   public readonly childCount$ = 
     this.userRegistration$.pipe(
       takeUntil(this.destroy$),
@@ -42,10 +55,13 @@ export class PreRegistrationService implements OnDestroy {
     this.userRegistration$.pipe(
       takeUntil(this.destroy$),
       map(registration => registration?.dateTimeSlot as IDateTimeSlot),
-      filter(registration => !!registration),
+      // filter(registration => !!registration?.dateTime),
       // TODO: Make this map a shared reusable method
       map(data => {
-        data.dateTime = (<any>data.dateTime as Timestamp).toDate()
+        if (data) {
+          data.dateTime = (<any>data.dateTime as Timestamp).toDate()
+          return data;
+        }
         return data;
       }),
       shareReplay(1)
@@ -68,7 +84,7 @@ export class PreRegistrationService implements OnDestroy {
 
     return this.authService.uid$.pipe(take(1)).pipe(
       take(1),
-      switchMap(uid => this.registrationCollection().update(uid, registration, true))
+      switchMap(uid => this.registrationCollection().update(uid, registration, false))
     );
   }
 

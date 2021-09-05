@@ -8,31 +8,25 @@ import { PreRegistrationPageService } from './pre-registration.page.service';
   templateUrl: './pre-registration.page.html',
   styleUrls: ['./pre-registration.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ PreRegistrationPageService ]
+  providers: [PreRegistrationPageService],
 })
 export class PreRegistrationPage implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
-  public readonly childCount$ = 
-    this.viewService.childCount$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+  public readonly childCount$ = this.viewService.childCount$.pipe(
+    takeUntil(this.destroy$),
+    shareReplay(1)
+  );
 
-  public readonly chosenSlot$ = 
-    this.viewService.chosenSlot$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+  public readonly chosenSlot$ = this.viewService.chosenSlot$.pipe(
+    takeUntil(this.destroy$),
+    shareReplay(1)
+  );
 
-  constructor(
-    private readonly viewService: PreRegistrationPageService
-  ) { }
+  constructor(private readonly viewService: PreRegistrationPageService) {}
 
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 }

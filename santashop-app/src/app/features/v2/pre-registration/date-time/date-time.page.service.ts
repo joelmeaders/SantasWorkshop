@@ -41,19 +41,19 @@ export class DateTimePageService implements OnDestroy {
 
   public async updateRegistration(slot?: IDateTimeSlot) {
     
-    if (!slot) {
-      // TODO: Make error
-      return;
-    }
-
     const registration = 
       await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
-    
-    registration.dateTimeSlot = {
-      dateTime: slot.dateTime,
-      id: slot.id
-    };
-    
+
+    if (!slot) {
+      delete registration.dateTimeSlot;
+    } 
+    else {
+      registration.dateTimeSlot = {
+        dateTime: slot.dateTime,
+        id: slot.id
+      };
+    }
+
     // TODO: Error handling
     const storeRegistration = 
       this.preRegistrationService.saveRegistration(registration)
@@ -64,7 +64,7 @@ export class DateTimePageService implements OnDestroy {
     } 
     catch (error) 
     { 
-      // Do something
+      console.error(error)
     }
   }
 

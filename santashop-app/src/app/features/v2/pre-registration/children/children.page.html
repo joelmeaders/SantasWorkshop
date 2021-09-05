@@ -1,9 +1,49 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>children</ion-title>
+    <ion-title>Your Children</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="es-pd-bottom-xxl">
+  <p class="ion-margin ion-padding">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur.
+  </p>
 
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Your Children</ion-label>
+      <ion-button (click)="addChild()">
+        Add Child
+        <ion-icon name="add-circle" slot="end"></ion-icon>
+      </ion-button>
+    </ion-list-header>
+
+    <ng-container *ngIf="children$ | async as children">
+      <ion-item
+        *ngFor="let child of children"
+        [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+      >
+        <div class="res-circle" slot="start">
+          <div class="circle-txt ion-card-subtitle-lg">
+            {{ child | childInitials }}
+          </div>
+        </div>
+        <ion-card-header>
+          <ion-card-title>
+            {{ child.firstName }} {{ child.lastName }}
+          </ion-card-title>
+          <ion-card-subtitle>
+            {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
+          </ion-card-subtitle>
+        </ion-card-header>
+        <ion-button color="danger" fill="clear" slot="end" (click)="removeChild(child)">
+          <ion-icon slot="icon-only" name="trash"></ion-icon>
+        </ion-button>
+      </ion-item>
+    </ng-container>
+  </ion-list>
 </ion-content>

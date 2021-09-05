@@ -11,7 +11,7 @@
 
       <ion-tab-button tab="children">
         <ion-icon name="people"></ion-icon>
-        <ion-label>Your Children</ion-label>
+        <ion-label>Children</ion-label>
         <ng-container *appLet="childCount$ | async as count">
           <ion-badge [color]="count > 0 ? 'success' : 'danger'">{{ count }}</ion-badge>
         </ng-container>
@@ -27,9 +27,9 @@
         </ng-container>
       </ion-tab-button>
   
-      <ion-tab-button tab="confirmation" [disabled]="!(childCount$ | async) && !(chosenSlot$ | async)">
+      <ion-tab-button tab="confirmation" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)">
         <ion-icon name="bag-check"></ion-icon>
-        <ion-label>Confirmation</ion-label>
+        <ion-label>Submit</ion-label>
       </ion-tab-button>
       
     </ion-tab-bar>

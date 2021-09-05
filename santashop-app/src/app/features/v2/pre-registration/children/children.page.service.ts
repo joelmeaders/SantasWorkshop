@@ -4,7 +4,7 @@ import { AlertController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, map, shareReplay, take } from 'rxjs/operators';
+import { takeUntil, shareReplay, take } from 'rxjs/operators';
 
 @Injectable()
 export class ChildrenPageService implements OnDestroy {
@@ -12,9 +12,8 @@ export class ChildrenPageService implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   public readonly children$: Observable<IChild[] | undefined> =
-    this.preRegistrationService.userRegistration$.pipe(
+    this.preRegistrationService.children$.pipe(
       takeUntil(this.destroy$),
-      map(registration => registration.children as IChild[] ?? new Array<IChild>()),
       shareReplay(1)
     );
 
@@ -65,12 +64,13 @@ export class ChildrenPageService implements OnDestroy {
       await this.children$.pipe(take(1)).toPromise();
 
     const updatedChildren = children?.filter(
-      child => child.id === childToRemove.id);
+      child => child.id !== childToRemove.id);
 
     return this.updateRegistration(updatedChildren);
   }
 
   private async updateRegistration(children?: IChild[]) {
+
     const registration = 
       await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
     
@@ -80,13 +80,13 @@ export class ChildrenPageService implements OnDestroy {
     const storeRegistration = 
       this.preRegistrationService.saveRegistration(registration)
         .pipe(take(1)).toPromise();
-    
+
     try {
       await storeRegistration;
     } 
     catch (error) 
     { 
-      // Do something
+      // TODO: Do something
     }
   }
 

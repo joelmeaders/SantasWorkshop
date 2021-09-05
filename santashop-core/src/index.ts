@@ -12,3 +12,5 @@ export * from './lib/directives';
 // This has to be exported for some reason: NG3001: Unsupported private class ControlErrorsComponent
 export * from './lib/components/control-errors/control-errors.component';
 export * from './lib/tokens';
+
+export * from './lib/parameters'; 

@@ -93,23 +93,17 @@ export const documentCounterOnDelete = functions.firestore
 //       await (await import("./fn/sendRegistrationEmail")).default(snapshot, context);
 //     });
 
-// export const qrCodesOnCreate = functions.firestore
-//   .document('qrcodes/{docId}')
-//   .onCreate(async (change, context) => {
-//     await (await import('./fn/qrcodes-OnCreate')).default(change, context);
-//   });
+export const qrCodesOnCreate = functions.firestore
+  .document('registrations/{docId}')
+  .onCreate(async (change) => {
+    await (await import('./fn/qrcodes-OnCreate')).default(change);
+  });
 
-// export const qrCodesOnUpdate = functions.firestore
-//     .document("qrcodes/{docId}")
-//     .onUpdate(async (change) => {
-//       await (await import("./fn/qrCodes-OnUpdate")).default(change);
-//     });
-
-// export const qrCodesOnDelete = functions.firestore
-//   .document('qrcodes/{docId}')
-//   .onDelete(async (change, context) => {
-//     await (await import('./fn/qrcodes-OnDelete')).default(change);
-//   });
+export const qrCodesOnDelete = functions.firestore
+  .document('qrcodes/{docId}')
+  .onDelete(async (change) => {
+    await (await import('./fn/qrcodes-OnDelete')).default(change);
+  });
 
 // ------------------------------------- SCHEDULED FUNCTIONS
 

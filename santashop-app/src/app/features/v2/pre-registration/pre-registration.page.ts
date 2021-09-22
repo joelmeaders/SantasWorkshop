@@ -23,6 +23,12 @@ export class PreRegistrationPage implements OnDestroy {
     shareReplay(1)
   );
 
+  public readonly isRegistrationComplete$ = 
+    this.viewService.isRegistrationComplete$.pipe(
+      takeUntil(this.destroy$),
+      shareReplay(1)
+    );
+
   constructor(private readonly viewService: PreRegistrationPageService) {}
 
   public ngOnDestroy(): void {

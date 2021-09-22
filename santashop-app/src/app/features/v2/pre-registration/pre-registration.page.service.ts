@@ -20,6 +20,12 @@ export class PreRegistrationPageService implements OnDestroy {
       shareReplay(1)
     );
 
+  public readonly isRegistrationComplete$ = 
+    this.preregistrationService.registrationComplete$.pipe(
+      takeUntil(this.destroy$),
+      shareReplay(1)
+    );
+
   constructor(
     private readonly preregistrationService: PreRegistrationService
   ) { }

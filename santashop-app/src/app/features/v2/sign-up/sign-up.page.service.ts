@@ -73,7 +73,7 @@ export class SignUpPageService implements OnDestroy {
       await this.signIn(onboardInfo);
     } 
     catch(error) {
-      this.errorHandler.handleError(error);
+      this.errorHandler.handleError(error as IError);
     }
     finally {
       await loader.dismiss();

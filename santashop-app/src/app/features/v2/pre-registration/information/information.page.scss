@@ -3,10 +3,11 @@
 }
 
 .status-tile ion-card-title {
-  position: relative;
-  top: 60%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative !important;
+  // top: 60% !important;
+  // left: 50%;
+  // transform: translate(-50%, -50%) !important;
+  transform: translate(0, 100%) !important;
   padding: 10px;
 }
 

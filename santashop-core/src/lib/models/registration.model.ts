@@ -10,7 +10,7 @@ export interface IRegistration {
   programYear?: number;
   children?: IChild[];
   dateTimeSlot?: Partial<IDateTimeSlot>;
-  dateTimeRegistered?: Date;
+  registrationSubmittedOn?: Date;
   includedInCounts?: false | Date;
   zipCode?: number;
 }

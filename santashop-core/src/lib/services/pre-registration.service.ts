@@ -28,20 +28,21 @@ export class PreRegistrationService implements OnDestroy {
   public readonly registrationComplete$ =
     this.userRegistration$.pipe(
       takeUntil(this.destroy$),
-      map(registration => this.isRegistrationComplete(registration)),
+      mergeMap(() => this.isRegistrationComplete()),
+      shareReplay(1)
+    );
+
+  public readonly registrationSubmitted$ =
+    this.userRegistration$.pipe(
+      takeUntil(this.destroy$),
+      map(registration => !!registration.registrationSubmittedOn),
       shareReplay(1)
     );
 
   public readonly children$ = this.userRegistration$.pipe(
     takeUntil(this.destroy$),
-    map(data => {
-      data.children?.forEach(child => {
-        child.dateOfBirth = (<any>child.dateOfBirth as Timestamp).toDate();
-      })
-      return data;
-    }),
-      map(registration => registration.children as IChild[] ?? new Array<IChild>()),
-      shareReplay(1)
+    map(registration => this.getChildren(registration)),
+    shareReplay(1)
   );
 
   public readonly childCount$ = 
@@ -54,16 +55,7 @@ export class PreRegistrationService implements OnDestroy {
   public readonly dateTimeSlot$: Observable<IDateTimeSlot | undefined> =
     this.userRegistration$.pipe(
       takeUntil(this.destroy$),
-      map(registration => registration?.dateTimeSlot as IDateTimeSlot),
-      // filter(registration => !!registration?.dateTime),
-      // TODO: Make this map a shared reusable method
-      map(data => {
-        if (data) {
-          data.dateTime = (<any>data.dateTime as Timestamp).toDate()
-          return data;
-        }
-        return data;
-      }),
+      map(registration => this.getDateTimeSlot(registration)),
       shareReplay(1)
     );
 
@@ -96,13 +88,37 @@ export class PreRegistrationService implements OnDestroy {
     return this.registrationCollection().read<IRegistration>(uid, 'uid');
   }
 
-  // TODO: This method
-  private isRegistrationComplete(registration: IRegistration): boolean {
-    return !!registration;
+  private async isRegistrationComplete(): Promise<boolean> {
+    const hasChildren = !!(await this.childCount$.pipe(take(1)).toPromise());
+    const hasDateTime = !!(await this.dateTimeSlot$.pipe(take(1)).toPromise());
+    const isSubmitted = await this.registrationSubmitted$.pipe(take(1)).toPromise();
+    return hasChildren && hasDateTime && isSubmitted;
   }
 
-  // TODO: This method
+  // TODO: Make cloud function to handle this
   private validateRegistration(registration: IRegistration): void {
     registration = registration;
+  }
+  
+  private getDateTimeSlot(registration: IRegistration): IDateTimeSlot | undefined {
+    const slot = registration?.dateTimeSlot as IDateTimeSlot;
+
+    // Convert the timestamp to a date. Firebase (or angularfire) seems to be 
+    // setting all dates to timestamps in the database now.
+    if (slot) {
+      slot.dateTime = (<any>slot.dateTime as Timestamp).toDate()
+      return slot;
+    }
+
+    return slot;
+  }
+
+  private getChildren(registration: IRegistration): IChild[] {
+
+    registration.children?.forEach(child => {
+      child.dateOfBirth = (<any>child.dateOfBirth as Timestamp).toDate();
+    });
+
+    return registration.children as IChild[] ?? new Array<IChild>()
   }
 }

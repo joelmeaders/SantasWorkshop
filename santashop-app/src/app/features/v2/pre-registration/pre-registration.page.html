@@ -9,7 +9,7 @@
         <ion-label>Overview</ion-label>
       </ion-tab-button>
 
-      <ion-tab-button tab="children">
+      <ion-tab-button tab="children" *ngIf="!(isRegistrationComplete$ | async)">
         <ion-icon name="people"></ion-icon>
         <ion-label>Children</ion-label>
         <ng-container *appLet="childCount$ | async as count">
@@ -17,7 +17,7 @@
         </ng-container>
       </ion-tab-button>
 
-      <ion-tab-button tab="date-time" [disabled]="!(childCount$ | async)">
+      <ion-tab-button tab="date-time" [disabled]="!(childCount$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
         <ion-icon name="calendar"></ion-icon>
         <ion-label>Schedule</ion-label>
         <ng-container *appLet="chosenSlot$ | async as slot">
@@ -27,9 +27,14 @@
         </ng-container>
       </ion-tab-button>
   
-      <ion-tab-button tab="confirmation" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)">
+      <ion-tab-button tab="submit" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
         <ion-icon name="bag-check"></ion-icon>
         <ion-label>Submit</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="confirmation" *ngIf="(isRegistrationComplete$ | async)">
+        <ion-icon name="gift"></ion-icon>
+        <ion-label>Confirmation</ion-label>
       </ion-tab-button>
       
     </ion-tab-bar>

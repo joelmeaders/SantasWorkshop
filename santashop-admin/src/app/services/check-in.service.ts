@@ -152,7 +152,7 @@ export class CheckInService {
   private registrationToCheckIn(registration: IRegistration, isEdit: boolean): ICheckIn {
     const checkin: ICheckIn = {
       customerId: registration.id ?? null,
-      registrationCode: registration.code || null,
+      registrationCode: registration.qrcode || null,
       checkInDateTime: firebase.firestore.Timestamp.now(),
       inStats: false,
       stats: this.registrationStats(registration, isEdit),
@@ -163,7 +163,7 @@ export class CheckInService {
 
   private registrationStats(registration: IRegistration, isEdit: boolean): ICheckInStats {
     const stats: ICheckInStats = {
-      preregistered: (!!registration.code && !!registration.id) || false,
+      preregistered: (!!registration.qrcode && !!registration.id) || false,
       children: registration.children?.length || 0,
       ageGroup02: registration.children.filter((c) => c.a === '0').length,
       ageGroup35: registration.children.filter((c) => c.a === '3').length,

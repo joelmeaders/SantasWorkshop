@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions';
 
+// TODO: Get rid of request-promise, replace with something else:
+// https://github.com/request/request/issues/3143
 let rp: any;
 
 export default (data: any): Promise<boolean> => {
@@ -19,16 +21,16 @@ export default (data: any): Promise<boolean> => {
     },
     json: true,
   })
-      .then((result: any) => {
-        if (result.success) {
-          return true;
-        } else {
-          console.log('failed recaptcha verification');
-          return false;
-        }
-      })
-      .catch((reason: any) => {
-        console.error(`error: ${JSON.stringify(reason)}`);
+    .then((result: any) => {
+      if (result.success) {
+        return true;
+      } else {
+        console.log('failed recaptcha verification');
         return false;
-      });
+      }
+    })
+    .catch((reason: any) => {
+      console.error(`error: ${JSON.stringify(reason)}`);
+      return false;
+    });
 };

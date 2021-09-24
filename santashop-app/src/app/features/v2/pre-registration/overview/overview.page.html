@@ -9,6 +9,9 @@
     <ion-row>
       <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
         <ion-card class="status-tile ion-text-center" routerLink="#" tappable>
+          <ion-card-subtitle>
+            (Not sure if time/budget to add this step)
+          </ion-card-subtitle>
           <ion-card-title class="ion-card-title-sm">
             Verify Account
           </ion-card-title>
@@ -16,7 +19,22 @@
       </ion-col>
 
       <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="./date-time" tappable>
+        <ion-card class="status-tile ion-text-center" routerLink="../children" tappable>
+          <ion-card-subtitle>
+            (Do this step first....todo)
+          </ion-card-subtitle>
+          <ion-card-title class="ion-card-title-sm">
+            Add Children
+          </ion-card-title>
+          
+        </ion-card>
+      </ion-col>
+
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
+        <ion-card class="status-tile ion-text-center" routerLink="../date-time" tappable>
+          <ion-card-subtitle>
+            (Do this step after children....todo)
+          </ion-card-subtitle>
           <ion-card-title class="ion-card-title-sm">
             Choose Date & Time
           </ion-card-title>
@@ -24,15 +42,10 @@
       </ion-col>
 
       <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="./children" tappable>
-          <ion-card-title class="ion-card-title-sm">
-            Add Children
-          </ion-card-title>
-        </ion-card>
-      </ion-col>
-
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="./submit" tappable>
+        <ion-card class="status-tile ion-text-center" routerLink="../submit" tappable>
+          <ion-card-subtitle>
+            (Do this step last....todo)
+          </ion-card-subtitle>
           <ion-card-title class="ion-card-title-sm">
             Submit Registration
           </ion-card-title>

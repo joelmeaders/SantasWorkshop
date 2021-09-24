@@ -11,8 +11,8 @@ const routes: Routes = [
     children: [
       {
         // Additional information such as zip, etc...
-        path: 'information',
-        loadChildren: () => import('./information/information.module').then( m => m.InformationPageModule)
+        path: 'overview',
+        loadChildren: () => import('./overview/overview.module').then( m => m.InformationPageModule)
       },
       {
         // Manage children

@@ -3,7 +3,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AngularFireAuthGuard, redirectUnauthorizedTo, redirectLoggedInTo } from '@angular/fire/compat/auth-guard';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['sign-in']);
-const redirectLoggedInToRegistration = () => redirectLoggedInTo(['pre-registration/information']);
+const redirectLoggedInToRegistration = () => redirectLoggedInTo(['pre-registration/overview']);
 
 const routes: Routes = [
   {

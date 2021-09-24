@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions';
-import { EventContext } from 'firebase-functions';
 
 // const PROGRAM_YEAR = 2021;
 
@@ -93,22 +92,10 @@ export const documentCounterOnDelete = functions.firestore
 //       await (await import("./fn/sendRegistrationEmail")).default(snapshot, context);
 //     });
 
-export const qrCodesOnCreate = functions.firestore
-  .document('registrations/{docId}')
-  .onCreate(async (change) => {
-    await (await import('./fn/qrcodes-OnCreate')).default(change);
-  });
-
-export const qrCodesOnDelete = functions.firestore
-  .document('qrcodes/{docId}')
-  .onDelete(async (change) => {
-    await (await import('./fn/qrcodes-OnDelete')).default(change);
-  });
-
 // ------------------------------------- SCHEDULED FUNCTIONS
 
 export const scheduledDateTimeSlotCounters = 
   functions.pubsub.schedule('every 15 minutes')
-  .onRun(async (context: EventContext) => {
+  .onRun(async (context: functions.EventContext) => {
     await (await import('./fn/dateTimeSlotCountersLite')).default(context);
   });

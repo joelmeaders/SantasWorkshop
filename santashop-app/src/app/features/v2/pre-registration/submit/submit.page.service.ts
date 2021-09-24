@@ -6,7 +6,8 @@ import { take } from 'rxjs/operators';
 @Injectable()
 export class SubmitPageService {
 
-  
+  public readonly children$ = this.preregistrationService.children$;
+  public readonly dateTimeSlot = this.preregistrationService.dateTimeSlot$;
 
   constructor(
     private readonly preregistrationService: PreRegistrationService,
@@ -19,9 +20,9 @@ export class SubmitPageService {
       await this.preregistrationService.userRegistration$
         .pipe(take(1)).toPromise();
 
-    const accountStatusFunction = this.afFunctions.httpsCallable('submitRegistration');
+    const completeRegistrationFunction = this.afFunctions.httpsCallable('completeRegistration');
 
-    return accountStatusFunction({ ...registration })
+    const completionResult = await completeRegistrationFunction(registration)
       .pipe(take(1)).toPromise();
   }
 

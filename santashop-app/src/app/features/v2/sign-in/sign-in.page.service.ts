@@ -19,7 +19,7 @@ export class SignInPageService implements OnDestroy {
    private readonly redirectIfLoggedInSubscription =
    this.authService.currentUser$.pipe(
      filter(user => !!user),
-     tap(() => this.router.navigate(['pre-registration/information']))
+     tap(() => this.router.navigate(['pre-registration/overview']))
    );
   constructor(
     private readonly authService: AuthService,

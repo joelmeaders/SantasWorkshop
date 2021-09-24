@@ -69,7 +69,7 @@ export class TestPage {
 
   private isRegistrationComplete(registration: IRegistration): boolean {
     if (!registration) return false;
-    if (!registration.code) return false;
+    if (!registration.qrcode) return false;
     if (!registration.date) return false;
     if (!registration.time) return false;
     if (!registration.zipCode) return false;

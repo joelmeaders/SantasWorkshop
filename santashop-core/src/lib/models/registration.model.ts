@@ -3,7 +3,7 @@ import { IChild } from './child.model';
 
 export interface IRegistration {
   uid?: string;
-  code?: string;
+  qrcode?: string;
   firstName?: string;
   lastName?: string;
   emailAddress?: string;

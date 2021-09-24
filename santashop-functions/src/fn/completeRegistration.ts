@@ -17,25 +17,13 @@ export default async (
 
   const batch = admin.firestore().batch();
 
-  // QR Code Record
-  const qrCodeDocRef = admin.firestore().doc(`tmp_gen_qrcodes/${record.code}`);
-  // TODO: May not need all of this.
-  const qrCodeDoc = {
-    uid: record.uid,
-    firstName: record.firstName,
-    lastName: record.lastName,
-    children: record.children,
-  };
-
-  await qrCodeDocRef.set(qrCodeDoc);
-
   // Email Record
   const emailDocRef = admin
     .firestore()
-    .doc(`tmp_gen_registrationemails/${record.uid}`);
+    .doc(`tmp_registrationemails/${record.uid}`);
   // TODO: Format date/time
   const emailDoc = {
-    code: record.code,
+    code: record.qrcode,
     email: record.emailAddress,
     name: record.firstName,
     formattedDateTime: record.dateTimeSlot?.dateTime,
@@ -49,12 +37,12 @@ export default async (
     .doc(`registrationsearchindex/${record.uid}`);
 
   const indexDoc = {
-    code: record.code,
+    code: record.qrcode,
     customerId: record.uid,
     firstName: record.firstName!.toLowerCase(),
     lastName: record.lastName!.toLowerCase(),
     emailAddress: record.emailAddress,
-    zip: record.zipCode
+    zip: record.zipCode,
   };
 
   await indexDocRef.set(indexDoc);

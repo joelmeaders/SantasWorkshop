@@ -83,7 +83,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['http://localhost:9099'] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: isDevMode() ? ['localhost', 8080] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: isDevMode() ? ['localhost', 5001] : undefined },
-    { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? location.origin : undefined },
+    { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

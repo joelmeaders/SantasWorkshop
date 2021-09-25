@@ -2,17 +2,18 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { IRegistration } from '../../../santashop-core/src';
+import { HttpsError } from 'firebase-functions/v1/https';
 
 admin.initializeApp();
 
-// TODO: CHange to callable http function
-export default async (
-  change: functions.Change<functions.firestore.QueryDocumentSnapshot>
-) => {
-  const record: IRegistration = change.after.data();
+export default async (record: IRegistration): Promise<boolean | HttpsError> => {
 
   if (!isRegistrationComplete(record)) {
-    return null;
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      '-10',
+      'Incomplete registration. Cannot continue.'
+    );
   }
 
   const batch = admin.firestore().batch();

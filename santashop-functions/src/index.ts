@@ -9,13 +9,26 @@ import * as functions from 'firebase-functions';
  * Callable functions need to specify return instead of await
  */
 export const verifyRecaptcha =
-  functions.https.onCall(async (request, context) => {
+  functions.https.onCall(async (request) => {
     return (await import('./fn/verifyRecaptcha')).default(request);
   });
 
 export const newAccount =
-  functions.https.onCall(async (request, context) => {
+  functions.https.onCall(async (request) => {
     return (await import('./fn/newAccount')).default(request);
+  });
+
+  /**
+ * Runs a method to validate and complete a user registration record.
+ * This process locks down their selected dateTimeSlot, sends an email
+ * and sets the submitted timestamp on their record.
+ *
+ * @remarks
+ * registration-email, RegistrationSearchIndex
+ */
+export const completeRegistration =
+  functions.https.onCall(async (request) => {
+    return (await import('./fn/completeRegistration')).default(request);
   });
 
 // export const isAdmin =
@@ -72,25 +85,7 @@ export const documentCounterOnDelete = functions.firestore
 //       await (await import("./fn/scheduledCheckInStats")).default();
 //     });
 
-/**
- * Watches registrations collections for completed registrations
- * and kicks off various document creations and updates to trigger
- * further events.
- *
- * @remarks
- * registration-email, qrcode, RegistrationSearchIndex
- */
-// export const completeRegistration = functions.firestore
-//     .document("registrations/{docId}")
-//     .onUpdate(async (snapshot, context) => {
-//       await (await import("./fn/completeRegistration")).default(snapshot, context);
-//     });
 
-// export const sendRegistrationEmail = functions.firestore
-//     .document("registrationemails/{docId}")
-//     .onWrite(async (snapshot, context) => {
-//       await (await import("./fn/sendRegistrationEmail")).default(snapshot, context);
-//     });
 
 // ------------------------------------- SCHEDULED FUNCTIONS
 

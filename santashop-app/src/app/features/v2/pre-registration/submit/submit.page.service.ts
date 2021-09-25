@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { PreRegistrationService } from '@core/*';
-import { take } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
 
 @Injectable()
 export class SubmitPageService {
@@ -23,15 +24,20 @@ export class SubmitPageService {
       await this.preregistrationService.userRegistration$
         .pipe(take(1)).toPromise();
 
-    const completeRegistrationFunction = this.afFunctions.httpsCallable('completeRegistration');
+    const completeRegistrationFunction = 
+      this.afFunctions.httpsCallable('completeRegistration');
 
     const completionResult = await completeRegistrationFunction(registration)
-      .pipe(take(1)).toPromise();
-
-    console.log(completionResult);
+      .pipe(
+        take(1),
+        catchError(err => {
+          console.error('error!!', err);
+          return of(false)
+        })
+      ).toPromise();
 
     // TODO: Set up completion result
-    return completionResult 
+    return completionResult
       ? this.sendToConfirmation()
       : Promise.reject(completionResult);
   }

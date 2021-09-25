@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-// import { Router } from '@angular/router';
 import { SubmitPageService } from './submit.page.service';
 
 @Component({
@@ -11,12 +10,16 @@ import { SubmitPageService } from './submit.page.service';
 })
 export class SubmitPage {
 
+  // TODO: Check for memory leaks using passthrough obs
+  public readonly children$ = this.viewService.children$;
+  public readonly childCount$ = this.viewService.childCount$;
+  public readonly dateTimeSlot$ = this.viewService.dateTimeSlot$;
+
   constructor(
-    // private readonly viewService: SubmitPageService,
-    // private readonly router: Router
+    private readonly viewService: SubmitPageService,
   ) { }
 
-  // public async submit(): Promise<void> {
-
-  // }
+  public async submit(): Promise<void> {
+    await this.viewService.submitRegistration();
+  }
 }

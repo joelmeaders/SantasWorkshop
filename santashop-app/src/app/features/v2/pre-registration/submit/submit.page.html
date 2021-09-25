@@ -9,6 +9,23 @@
     Need to add children, datetime here along with additional information about
     event, how to change/cancel reservation etc...
   </p>
+  <p>
+    Child Count: {{ childCount$ | async }}
+  </p>
+  <p>
+    Children:
+    <ion-list>
+      <ion-item *ngFor="let child of children$ | async">
+        Name: {{ child.firstName }} {{ child.lastName }} <br/>
+        DOB: {{ child.dateOfBirth }}
+        <!-- Maybe show age in years? -->
+      </ion-item>
+    </ion-list>
+  </p>
+  <p *ngIf="dateTimeSlot$ | async as dateTime">
+    Date/Time: {{ dateTime.dateTime | date }}
+    <!-- TODO: Formatting -->
+  </p>
   <ion-button (click)="submit()">
     Submit
   </ion-button>

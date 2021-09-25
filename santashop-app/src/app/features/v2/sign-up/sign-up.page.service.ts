@@ -40,7 +40,7 @@ export class SignUpPageService implements OnDestroy {
   private readonly redirectIfLoggedInSubscription =
     this.authService.currentUser$.pipe(
       filter(user => !!user),
-      tap(() => this.router.navigate(['pre-registration/overview']))
+      tap(() => this.router.navigate(['/pre-registration/overview']))
     );
 
   constructor(

@@ -10,7 +10,7 @@ import {
 } from '@angular/fire/compat/analytics';
 import { AngularFireStorageModule, BUCKET } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment, firebaseConfig } from '../environments/environment';
@@ -22,6 +22,7 @@ import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { AuthService, DEMO_MODE, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
 import { customAnimation } from './core';
+import { RouteReuseStrategy } from '@angular/router';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -54,7 +55,7 @@ export function httpLoaderFactory(http: HttpClient) {
   ],
   // exports: [TranslateModule],
   providers: [
-    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     // App settings
     { provide: PROGRAM_YEAR, useValue: 2021 },
     { provide: MOBILE_EVENT, useValue: false },
@@ -82,7 +83,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['http://localhost:9099'] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: isDevMode() ? ['localhost', 8080] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: isDevMode() ? ['localhost', 5001] : undefined },
-    { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },
+    { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? location.origin : undefined },
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

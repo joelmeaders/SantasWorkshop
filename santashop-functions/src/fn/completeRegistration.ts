@@ -1,13 +1,12 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
-import { IRegistration } from '../../../santashop-core/src';
-import { HttpsError } from 'firebase-functions/v1/https';
+import { COLLECTION_SCHEMA, IRegistration } from '../../../santashop-core/src';
+import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 
 admin.initializeApp();
 
-export default async (record: IRegistration): Promise<boolean | HttpsError> => {
-
+export default async (record: IRegistration, context: CallableContext): Promise<boolean | HttpsError> => {
   if (!isRegistrationComplete(record)) {
     throw new functions.https.HttpsError(
       'failed-precondition',
@@ -16,7 +15,27 @@ export default async (record: IRegistration): Promise<boolean | HttpsError> => {
     );
   }
 
+  if (record.uid !== context.auth?.uid) {
+    throw new functions.https.HttpsError(
+      'permission-denied',
+      '-99',
+      'You can only update your own records'
+    );
+  }
+
   const batch = admin.firestore().batch();
+
+  // Registration
+  const registrationDocRef = admin
+    .firestore()
+    .doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
+
+  const updateRegistrationFields = {
+    registrationSubmittedOn: new Date(),
+    includedInCounts: new Date()
+  } as Partial<IRegistration>;
+
+  batch.set(registrationDocRef, updateRegistrationFields, { merge: true });
 
   // Email Record
   const emailDocRef = admin
@@ -30,7 +49,8 @@ export default async (record: IRegistration): Promise<boolean | HttpsError> => {
     formattedDateTime: record.dateTimeSlot?.dateTime,
   };
 
-  await emailDocRef.set(emailDoc);
+  // await emailDocRef.set(emailDoc);
+  batch.create(emailDocRef, emailDoc);
 
   // Registration Search Index Record
   const indexDocRef = admin
@@ -46,11 +66,11 @@ export default async (record: IRegistration): Promise<boolean | HttpsError> => {
     zip: record.zipCode,
   };
 
-  await indexDocRef.set(indexDoc);
+  await batch.create(indexDocRef, indexDoc);
 
   return batch
     .commit()
-    .then(() => true)
+    .then(() => true) // UPDATE SLOTS TAKEN
     .catch((error: any) => {
       console.error(error);
       throw new Error(error);

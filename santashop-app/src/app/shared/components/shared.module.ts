@@ -4,12 +4,10 @@ import { CoreModule } from 'santashop-core/src';
 import { PreRegistrationMenuComponent } from './pre-registration-menu/pre-registration-menu.component';
 import { PrivacyPolicyModalComponent } from './privacy-policy-modal/privacy-policy-modal.component';
 import { PublicMenuComponent } from './public-menu/public-menu.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-service-modal.component';
 
 @NgModule({
   declarations: [
-    ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
@@ -20,7 +18,6 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     TranslateModule,
   ],
   exports: [
-    ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,

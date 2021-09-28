@@ -56,7 +56,15 @@ const routes: Routes = [
     loadChildren: () => import('./features/v2/pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule),
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin }
+  },  {
+    path: 'profile',
+    loadChildren: () => import('./features/v2/profile/profile.module').then( m => m.ProfilePageModule)
+  },
+  {
+    path: 'reset-password',
+    loadChildren: () => import('./features/v2/reset-password/reset-password.module').then( m => m.ResetPasswordPageModule)
   }
+
 ];
 
 @NgModule({

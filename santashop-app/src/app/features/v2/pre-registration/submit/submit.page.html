@@ -10,19 +10,19 @@
     event, how to change/cancel reservation etc...
   </p>
   <p>
-    Child Count: {{ childCount$ | async }}
+    Child Count: {{ viewService.childCount$ | async }}
   </p>
   <p>
     Children:
     <ion-list>
-      <ion-item *ngFor="let child of children$ | async">
+      <ion-item *ngFor="let child of viewService.children$ | async">
         Name: {{ child.firstName }} {{ child.lastName }} <br/>
         DOB: {{ child.dateOfBirth }}
         <!-- Maybe show age in years? -->
       </ion-item>
     </ion-list>
   </p>
-  <p *ngIf="dateTimeSlot$ | async as dateTime">
+  <p *ngIf="viewService.dateTimeSlot$ | async as dateTime">
     Date/Time: {{ dateTime.dateTime | date }}
     <!-- TODO: Formatting -->
   </p>

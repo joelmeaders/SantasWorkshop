@@ -1,14 +1,15 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '@core/*';
 import { AlertController, ModalController } from '@ionic/angular';
-import { AuthService } from 'santashop-core/src';
 
 @Component({
   selector: 'app-reset-password',
-  templateUrl: './reset-password.component.html',
-  styleUrls: ['./reset-password.component.scss'],
+  templateUrl: './reset-password.page.html',
+  styleUrls: ['./reset-password.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ResetPasswordComponent {
+export class ResetPasswordPage {
 
   constructor(
     private readonly formBuilder: FormBuilder,

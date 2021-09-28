@@ -27,8 +27,8 @@ export const newAccount =
  * registration-email, RegistrationSearchIndex
  */
 export const completeRegistration =
-  functions.https.onCall(async (request) => {
-    return (await import('./fn/completeRegistration')).default(request);
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/completeRegistration')).default(request, context);
   });
 
 // export const isAdmin =

@@ -14,6 +14,8 @@ export class SignUpPage {
   public readonly form = this.viewService.form;
 
   @ViewChild('firstName') firstName?: HTMLIonInputElement;
+  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha | null = null;
+
 
   constructor(
     private readonly viewService: SignUpPageService,
@@ -25,9 +27,9 @@ export class SignUpPage {
     setTimeout(() => this.firstName?.setFocus(), 300);
   }
 
-  public async onCreateAccount(): Promise<void> {
+  public async onCreateAccount($event: any): Promise<void> {
     if (await this.userConfirmedEmail())
-      await this.viewService.onboardUser();
+      await this.viewService.onboardUser($event);
   }
 
   private async userConfirmedEmail(): Promise<boolean> {

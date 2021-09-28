@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { SignInPageService } from './sign-in.page.service';
 
 @Component({
@@ -12,12 +12,14 @@ export class SignInPage {
 
   public readonly form = this.viewService.form;
 
+  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha | null = null;
+
   constructor(
     private readonly viewService: SignInPageService
   ) { }
 
-  public async onSignIn(): Promise<void> {
-    await this.viewService.signIn()
+  public async onSignIn($event: any): Promise<void> {
+    await this.viewService.signIn($event)
   }
 
 }

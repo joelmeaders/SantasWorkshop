@@ -51,7 +51,7 @@
               size="large"
               class="title-font"
               [disabled]="!form.valid"
-              (click)="onSignIn()"
+              (click)="captchaRef.execute()"
             >
               {{ 'COMMON.SIGN_IN' | translate }}
               <ion-icon
@@ -62,7 +62,11 @@
             </ion-button>
           </ion-card-content>
           <p class="ion-text-center">
-            <ion-button fill="clear" color="tertiary" [routerLink]="['/forgot-password']">
+            <ion-button
+              fill="clear"
+              color="tertiary"
+              [routerLink]="['/forgot-password']"
+            >
               {{ 'SIGNIN.FORGOT_PASSWORD' | translate }}
             </ion-button>
           </p>
@@ -91,4 +95,11 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+
+  <re-captcha
+    class="ion-align-self-center"
+    #captchaRef="reCaptcha"
+    (resolved)="$event && onSignIn($event)"
+    size="invisible"
+  ></re-captcha>
 </ion-content>

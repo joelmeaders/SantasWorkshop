@@ -135,9 +135,7 @@
 
                 <ion-item>
                   <ion-label class="ion-text-wrap es-mg-right-md">
-                    <em>
-                      {{ 'SIGNUP.LEGAL_AGREEMENT' | translate }}
-                    </em>
+                    <em> {{ 'SIGNUP.LEGAL_AGREEMENT' | translate }} </em>
                   </ion-label>
                   <ion-checkbox formControlName="legal"></ion-checkbox>
                 </ion-item>
@@ -148,13 +146,29 @@
             </form>
           </ion-card-content>
           <ion-card-content class="ion-text-center">
-            <ion-button size="large" class="title-font" [disabled]="!form.valid" (click)="onCreateAccount()">
+            <ion-button
+              size="large"
+              class="title-font"
+              [disabled]="!form.valid"
+              (click)="captchaRef.execute()"
+            >
               {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
-              <ion-icon slot="end" name="person-add" class="es-mg-left-xl"></ion-icon>
+              <ion-icon
+                slot="end"
+                name="person-add"
+                class="es-mg-left-xl"
+              ></ion-icon>
             </ion-button>
           </ion-card-content>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
+
+  <re-captcha
+    class="ion-align-self-center"
+    #captchaRef="reCaptcha"
+    (resolved)="$event && onCreateAccount($event)"
+    size="invisible"
+  ></re-captcha>
 </ion-content>

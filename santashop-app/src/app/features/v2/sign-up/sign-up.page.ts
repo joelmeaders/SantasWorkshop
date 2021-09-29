@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
+import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { SignUpPageService } from './sign-up.page.service';
 
 @Component({
@@ -20,7 +22,8 @@ export class SignUpPage {
   constructor(
     private readonly viewService: SignUpPageService,
     private readonly alertController: AlertController,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
+    private readonly modalController: ModalController
   ) {}
 
   ionViewWillEnter() {
@@ -58,6 +61,20 @@ export class SignUpPage {
     await alert.present();
     const shouldContinue = await alert.onDidDismiss();
     return shouldContinue.role === 'confirm'
+  }
+
+  public async showPrivacyPolicyModal() {
+    const modal = await this.modalController.create({
+      component: PrivacyPolicyModalComponent,
+    });
+    return modal.present();
+  }
+
+  public async showTermsConditionsModal() {
+    const modal = await this.modalController.create({
+      component: TermsOfServiceModalComponent,
+    });
+    return modal.present();
   }
     
 }

@@ -124,11 +124,11 @@
 
               <ion-list>
                 <div class="ion-text-center">
-                  <ion-button size="default" fill="clear">
+                  <ion-button size="default" fill="clear" (click)="showPrivacyPolicyModal()">
                     {{ 'COMMON.PRIVACY_POLICY' | translate }}
                   </ion-button>
 
-                  <ion-button size="default" fill="clear">
+                  <ion-button size="default" fill="clear" (click)="showTermsConditionsModal()">
                     {{ 'COMMON.TERMS_AND_CONDITIONS' | translate }}
                   </ion-button>
                 </div>

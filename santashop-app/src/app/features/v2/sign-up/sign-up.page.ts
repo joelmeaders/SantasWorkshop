@@ -24,7 +24,7 @@ export class SignUpPage {
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
     private readonly modalController: ModalController
-  ) {}
+  ) { }
 
   ionViewWillEnter() {
     setTimeout(() => this.firstName?.setFocus(), 300);

@@ -20,6 +20,7 @@ import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETT
 import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as AUTH_SETTINGS } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
+import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
 import { AuthService, DEMO_MODE, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
 import { customAnimation } from './core';
 import { RouteReuseStrategy } from '@angular/router';
@@ -29,6 +30,7 @@ export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
+  // TODO: THis is a huge fucking mess. Make these into functions and use here instead
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -83,6 +85,7 @@ export function httpLoaderFactory(http: HttpClient) {
     // MaintenanceService,
     { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['http://localhost:9099'] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: isDevMode() ? ['localhost', 8080] : undefined },
+    { provide: USE_DATABASE_EMULATOR, useValue: isDevMode() ? ['localhost', 9000] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: isDevMode() ? ['localhost', 5001] : undefined },
     { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },
     {

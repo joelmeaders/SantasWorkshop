@@ -1,4 +1,4 @@
-import { writeFile } from 'fs';
+import { writeFile } from 'node:fs';
 import { name, version } from './package.json';
 
 const targetPath = './santashop-app/src/environments/environment.prod.ts';

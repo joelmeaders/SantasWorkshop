@@ -27,7 +27,8 @@
     ],
     "paths": {
       "@core/*": [
-        "santashop-core/src"
+        "santashop-core/src",
+        "dist/santashop-core"
       ],
       "@registration/*": [
         "santashop-app/src"

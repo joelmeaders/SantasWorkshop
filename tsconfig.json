@@ -36,7 +36,12 @@
         "santashop-admin/src"
       ]
     },
-    "types": []
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
   },
   "exclude": [
     "**dist/*"

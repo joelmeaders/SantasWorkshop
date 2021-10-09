@@ -3,7 +3,6 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, IError, IOnboardUser } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { ControlsValue } from '@ngneat/reactive-forms/lib/types';
 import { TranslateService } from '@ngx-translate/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
@@ -23,7 +22,8 @@ export class SignUpPageService implements OnDestroy {
    * @private
    * @returns Observable<{fieldsMatch:boolean}>
    */
-  private readonly passwordMatchValidator$: Observable<{fieldsMatch:boolean}> = combineLatest([
+  // TODO: Refactor?
+  public readonly passwordMatchValidator$: Observable<{fieldsMatch:boolean}> = combineLatest([
     this.form.select(state => state.password),
     this.form.select(state => state.password2)
   ]).pipe(
@@ -54,7 +54,7 @@ export class SignUpPageService implements OnDestroy {
     private readonly translateService: TranslateService
   ) {
     this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
-    this.form.validateOn(this.passwordMatchValidator$);
+    // this.form.addValidators() .validateOn(this.passwordMatchValidator$);
   }
 
   public ngOnDestroy(): void {
@@ -87,13 +87,13 @@ export class SignUpPageService implements OnDestroy {
     }
   }
 
-  private async createAccount(value: ControlsValue<IOnboardUser>): Promise<void> {
+  private async createAccount(value: IOnboardUser): Promise<void> {
     const accountStatusFunction = this.afFunctions.httpsCallable('newAccount');
     return accountStatusFunction({ ...value })
       .pipe(take(1)).toPromise();
   }
 
-  private async signIn(value: ControlsValue<IOnboardUser>): Promise<void | IError> {
+  private async signIn(value: IOnboardUser): Promise<void | IError> {
 
     const auth: IAuth = {
       emailAddress: value.emailAddress,

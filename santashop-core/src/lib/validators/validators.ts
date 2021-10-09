@@ -1,9 +1,8 @@
-import { ValidationErrors } from '@angular/forms';
-import { AbstractControl } from '@ngneat/reactive-forms';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 
 export abstract class Validators {
    
-  public static url(control: AbstractControl<string, ValidationErrors>): ValidationErrors | null {
+  public static url(control: AbstractControl): ValidationErrors | null {
     if (Validators.isEmptyInputValue(control.value as string)) {
       return null;
     }
@@ -12,7 +11,7 @@ export abstract class Validators {
     return URL_REGEXP.test(control.value) ? null : { 'url': false };
   }
 
-  public static zipCode(control: AbstractControl<string, ValidationErrors>): ValidationErrors | null {
+  public static zipCode(control: AbstractControl): ValidationErrors | null {
     if (Validators.isEmptyInputValue(control.value)) {
       return null;
     }

@@ -35,7 +35,8 @@
       "@admin/*": [
         "santashop-admin/src"
       ]
-    }
+    },
+    "types": []
   },
   "exclude": [
     "**dist/*"

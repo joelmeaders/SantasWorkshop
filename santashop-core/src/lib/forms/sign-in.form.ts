@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 import { IAuth } from '../models/auth.model';
 
 const validators = {
@@ -7,8 +7,8 @@ const validators = {
   password: Validators.compose([Validators.required, Validators.minLength(8), Validators.maxLength(40)]),
 };
 
-export const newAuthForm = (): FormGroup<IAuth> =>
-  new FormGroup<IAuth>({
+export const newAuthForm = (): FormGroup<ControlsOf<IAuth>> =>
+  new FormGroup<ControlsOf<IAuth>>({
     emailAddress: new FormControl<string>(undefined, validators.emailAddress),
     password: new FormControl<string>(undefined, validators.password)
   });

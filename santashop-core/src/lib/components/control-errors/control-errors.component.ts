@@ -10,5 +10,5 @@ import { FormControl } from '@ngneat/reactive-forms';
 export class ControlErrorsComponent {
   // Not sure why I had to add 'any' here to this project
   // and not to the other I've done...
-  @Input() public control?: FormControl | any;
+  @Input() public control?: FormControl<any> | any;
 }

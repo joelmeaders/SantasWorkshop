@@ -1,15 +1,15 @@
 import { Validators } from "@angular/forms";
-import { AgeGroup, IChild, ToyType } from "@core/*";
+import { AgeGroup, ToyType } from "@core/*";
 import { FormControl, FormGroup } from "@ngneat/reactive-forms";
 
 // TECHDEBT: This inheritence fixes an issue with strict templates
 // and optional parameters caused by @ngneat/reactive-forms
-export interface IChildForm extends IChild {
-  id: number;
-  ageGroup: AgeGroup;
-  toyType: ToyType;
-  programYearAdded: number;
-}
+// export interface IChildForm extends IChild {
+//   id: number;
+//   ageGroup: AgeGroup;
+//   toyType: ToyType;
+//   programYearAdded: number;
+// }
 
 const validators = {
   firstName: Validators.compose([Validators.required, Validators.minLength(2), Validators.maxLength(25)]),
@@ -21,8 +21,8 @@ const validators = {
   enabled: Validators.compose([Validators.requiredTrue]),
 };
 
-export const newChildForm = (programYear: number): FormGroup<IChildForm> => 
-  new FormGroup<IChildForm>({
+export const newChildForm = (programYear: number) => 
+  new FormGroup({
     id: new FormControl<number>(Math.floor(Math.random() * 100000)), // Random child id
     firstName: new FormControl<string>(undefined, validators.firstName),
     lastName: new FormControl<string>(undefined, validators.lastName),

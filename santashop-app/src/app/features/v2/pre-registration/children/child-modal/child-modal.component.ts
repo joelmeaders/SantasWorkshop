@@ -76,21 +76,22 @@ export class ChildModalComponent implements OnDestroy {
 
     const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
     const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
-    const control = this.form.controls['ageGroup'];
+    var ageGroup: AgeGroup | undefined = undefined;
 
     if (ageInYears >= 0 && ageInYears < 3) {
       this.setInfant(true);
       return;
     } else if (ageInYears >= 3 && ageInYears < 6) {
-      control.setValue(AgeGroup.age35);
+      ageGroup = AgeGroup.age35;
     } else if (ageInYears >= 6 && ageInYears < 9) {
-      control.setValue(AgeGroup.age68);
+      ageGroup = AgeGroup.age68;
     } else if (ageInYears >= 9 && ageInYears < 12) {
-      control.setValue(AgeGroup.age911);
+      ageGroup = AgeGroup.age911;
     } else {
       await this.childTooOldAlert().then(() => this.modalController.dismiss());
     }
 
+    this.form.controls.ageGroup.setValue(ageGroup!);
     this._$isInfant.next(false);
   }
 

@@ -8,7 +8,7 @@
     "test": "ng test",
     "e2e": "ng e2e",
     "core:lint": "ng lint --cache --fix --project=santashop-core",
-    "core:build": "ng build santashop-core --configuration santashop-core",
+    "core:build": "ng build --project=santashop-core",
     "admin:lint": "npm run core:lint && ng lint --fix --cache --project=santashop-admin",
     "admin:start": "ng serve --project=santashop-admin --port=4000",
     "admin:config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",

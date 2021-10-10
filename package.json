@@ -21,7 +21,7 @@
     "app:analyze": "ng build --configuration production --named-chunks=true --project=santashop-app --stats-json && webpack-bundle-analyzer dist/santashop-app/stats.json",
     "ci:admin:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
     "ci:admin:build": "npm run core:build && ci:admin:config && ng build --configuration production --project=santashop-admin",
-    "ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' config.app.ts",
+    "ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' ./config.app.ts",
     "ci:app:build": "npm run core:build && ci:app:config && ng build --configuration production --project=santashop-app",
     "emulators:start": "firebase emulators:start --import .firebase --export-on-exit",
     "fsrules:deploy": "firebase deploy --only firestore:rules"

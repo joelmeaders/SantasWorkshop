@@ -69,25 +69,25 @@ export function httpLoaderFactory(http: HttpClient) {
     {
       provide: ANALYTICS_CONFIG,
       useValue: {
-        debug_mode: isDevMode(),
+        debug_mode: !environment.production,
         app_name: environment.name ?? "",
         app_version: environment.version ?? "",
       },
     },
     // Remote Config
     { provide: REMOTE_CONFIG_DEFAULTS, useValue: { valueName: "valueValue" } },
-    { provide: USE_REMOTE_EMULATOR, useFactory: () => isDevMode() ? { minimumFetchIntervalMillis: 10_000 } : {} },
-    { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !isDevMode() } },
+    { provide: USE_REMOTE_EMULATOR, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
+    { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
     AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
     AuthService,
     // MaintenanceService,
-    { provide: USE_AUTH_EMULATOR, useValue: isDevMode() ? ['http://localhost:9099'] : undefined },
-    { provide: USE_FIRESTORE_EMULATOR, useValue: isDevMode() ? ['localhost', 8080] : undefined },
-    { provide: USE_DATABASE_EMULATOR, useValue: isDevMode() ? ['localhost', 9000] : undefined },
-    { provide: USE_FUNCTIONS_EMULATOR, useValue: isDevMode() ? ['localhost', 5001] : undefined },
-    { provide: FUNCTIONS_ORIGIN, useFactory: () => isDevMode() ? undefined : location.origin },
+    { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
+    { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
+    { provide: USE_DATABASE_EMULATOR, useValue: !environment.production ? ['localhost', 9000] : undefined },
+    { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
+    { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
     {
       provide: RECAPTCHA_SETTINGS,
       useValue: { siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN', badge: 'inline' } as RecaptchaSettings

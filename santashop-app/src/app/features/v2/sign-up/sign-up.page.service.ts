@@ -65,6 +65,7 @@ export class SignUpPageService implements OnDestroy {
 
     if (!await this.validateRecaptcha($event)) {
       await this.failedVerification();
+      return;
     }
 
     const onboardInfo = this.form.value;
@@ -105,12 +106,12 @@ export class SignUpPageService implements OnDestroy {
 
   private async validateRecaptcha($event: any): Promise<boolean> {
     const status = await this.afFunctions
-      .httpsCallable('verifyRecaptcha')({ value: $event })
+      .httpsCallable('verifyRecaptcha2')({ value: $event })
       .pipe(take(1))
       .toPromise();
 
       return status 
-        ? Promise.resolve(status) 
+        ? Promise.resolve(status.success) 
         : Promise.reject(false);
   }
 

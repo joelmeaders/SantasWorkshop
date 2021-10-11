@@ -50,6 +50,7 @@ export class SignInPageService implements OnDestroy {
 
     if (!await this.validateRecaptcha($event)) {
       await this.failedVerification();
+      return;
     }
 
     const auth: IAuth = {
@@ -73,13 +74,16 @@ export class SignInPageService implements OnDestroy {
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {
+
+    console.log($event)
+
     const status = await this.afFunctions
-      .httpsCallable('verifyRecaptcha')({ value: $event })
+      .httpsCallable('verifyRecaptcha2')({ value: $event })
       .pipe(take(1))
       .toPromise();
 
       return status 
-        ? Promise.resolve(status) 
+        ? Promise.resolve(status.success) 
         : Promise.reject(false);
   }
 

@@ -8,9 +8,9 @@ import * as functions from 'firebase-functions';
  * @remarks
  * Callable functions need to specify return instead of await
  */
-export const verifyRecaptcha =
+export const verifyRecaptcha2 =
   functions.https.onCall(async (request) => {
-    return (await import('./fn/verifyRecaptcha')).default(request);
+    return (await import('./fn/verifyRecaptcha2')).default(request);
   });
 
 export const newAccount =

@@ -2,6 +2,13 @@
 // http://ionicframework.com/docs/theming/
 
 /** Ionic CSS Variables **/
+
+// Override globals here.
+:root {
+  --ion-background-color: var(--ion-color-light-blue);
+  --ion-background-color-rgb: 204,237,252;
+}
+
 :root {
   /** primary **/
   --ion-color-primary: #3880ff;

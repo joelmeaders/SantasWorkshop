@@ -1,7 +1,7 @@
 {
   "COMMON": {
     "MENU": "Menu",
-    "SIGN_IN": "Sign In",
+    "SIGN_IN": "Login",
     "SIGN_OUT": "Sign Out",
     "CREATE_ACCOUNT": "Create Acount",
     "HOME": "Home",

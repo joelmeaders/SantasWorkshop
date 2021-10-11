@@ -1,20 +1,22 @@
-<!-- TODO: Mobile -->
 <ion-content>
   <ion-grid class="height-max img-div ion-no-padding ion-no-margin">
-    <ion-row class="height-max ion-align-items-center">
-      <!-- Information -->
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <img
+          src="assets/DSCS-Santa-Body_Red.png"
+          class="logo ion-padding ion-margin"
+          alt="logo with santa claus"
+        />
+      </ion-col>
+    </ion-row>
+    <ion-row class="ion-align-items-center">
       <ion-col sizeXs="12" sizeSm="10" offsetXs="0" offsetSm="1" offsetMd="2">
         <ion-card class="sign-up-card">
-          <ion-card-header>
-            <ion-card-title class="ion-card-title-lg">
-              {{ 'SIGNIN.TITLE1' | translate }}
-            </ion-card-title>
-          </ion-card-header>
           <ion-card-content>
             <form [formGroup]="form" novalidate>
               <ion-list>
                 <ion-item>
-                  <ion-label position="floating">
+                  <ion-label>
                     {{ 'COMMON.EMAIL_ADDRESS' | translate }}
                   </ion-label>
                   <ion-input
@@ -30,7 +32,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label position="floating">
+                  <ion-label>
                     {{ 'COMMON.PASSWORD' | translate }}
                   </ion-label>
                   <ion-input
@@ -48,20 +50,29 @@
           </ion-card-content>
           <ion-card-content class="ion-text-center">
             <ion-button
-              size="large"
-              class="title-font"
+              size="default"
+              fill="outline"
+              expand="block"
+              color="dark"
               [disabled]="!form.valid"
               (click)="captchaRef.execute()"
             >
               {{ 'COMMON.SIGN_IN' | translate }}
-              <ion-icon
-                slot="end"
-                name="log-in-outline"
-                class="es-mg-left-md"
-              ></ion-icon>
             </ion-button>
           </ion-card-content>
+
           <p class="ion-text-center">
+            
+          </p>
+          <p class="ion-text-center">
+            <ion-button
+              fill="clear"
+              color="tertiary"
+              [routerLink]="['/sign-up']"
+            >
+              {{ 'COMMON.CREATE_ACCOUNT' | translate }}
+            </ion-button>
+            <br/>
             <ion-button
               fill="clear"
               color="tertiary"
@@ -70,6 +81,7 @@
               {{ 'SIGNIN.FORGOT_PASSWORD' | translate }}
             </ion-button>
           </p>
+
         </ion-card>
         <ion-buttons class="sign-up-card ion-justify-content-center">
           <p>
@@ -79,16 +91,6 @@
                 slot="start"
               ></ion-icon>
               <ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
-            </ion-button>
-          </p>
-        </ion-buttons>
-        <ion-buttons class="sign-up-card ion-justify-content-center">
-          <p>
-            <ion-button fill="clear" color="dark">
-              {{ 'COMMON.PRIVACY_POLICY' | translate }}
-            </ion-button>
-            <ion-button fill="clear" color="dark">
-              {{ 'COMMON.TERMS_AND_CONDITIONS' | translate }}
             </ion-button>
           </p>
         </ion-buttons>

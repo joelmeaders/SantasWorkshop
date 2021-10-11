@@ -27,19 +27,44 @@
 
 @import "theme/styling.css";
 
+ion-title {
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+ion-card, ion-list, ion-item {
+  --background: var(--ion-color-white);
+  background-color: var(--ion-color-white) !important; // This one is for the list
+}
+
+.round-button {
+  --border-radius: 50%;
+  width: 56px;
+  height: 56px;
+}
+
+.even-ratio-button {
+  --border-radius: 30%;
+  width: 46px;
+  height: 46px;
+  padding-inline-start: 6px;
+  padding-inline-end: 6px;
+}
+
 .title-font {
-  font-family: 'Libre Baskerville', serif;
+  // font-family: 'Libre Baskerville', serif;
   font-weight: bold;
 }
 
 .ion-card-title-lg {
-  font-family: 'Libre Baskerville', serif;
+  // font-family: 'Libre Baskerville', serif;
   font-weight: bold;
   font-size: 2rem;
 }
 
 .ion-card-title-sm {
-  font-family: 'Libre Baskerville', serif;
+  // font-family: 'Libre Baskerville', serif;
   font-weight: bold;
   font-size: 1.2rem;
 }

@@ -1,3 +1,11 @@
 {
-  "signupEnabled": true
+  "parameters": {
+    "signupEnabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Allow registrations in the app",
+      "valueType": "STRING"
+    }
+  }
 }

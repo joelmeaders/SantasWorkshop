@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, CanLoad, Router, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SignUpStatusService } from '../services/sign-up-status.service';
+import { RemoteConfigService } from '../services/remote-config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ import { SignUpStatusService } from '../services/sign-up-status.service';
 export class SignUpStatusGuard implements CanActivate, CanLoad {
 
   constructor(
-    private readonly signUpStatusService: SignUpStatusService,
+    private readonly signUpStatusService: RemoteConfigService,
     private readonly router: Router
   ) { } 
 
@@ -22,7 +22,7 @@ export class SignUpStatusGuard implements CanActivate, CanLoad {
   }
 
   private readonly signupEnabled = () => 
-    this.signUpStatusService.$signupEnabled.pipe(
+    this.signUpStatusService.signupEnabled$.pipe(
       map(enabled => enabled || this.router.parseUrl('/registration-closed'))
     )
 }

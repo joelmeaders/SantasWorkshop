@@ -1,2 +1,2 @@
 export * from './maintenance.service';
-export * from './sign-up-status.service';
+export * from './remote-config.service';

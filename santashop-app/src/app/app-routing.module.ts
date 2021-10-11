@@ -8,39 +8,9 @@ const redirectLoggedInToRegistration = () => redirectLoggedInTo(['/pre-registrat
 const routes: Routes = [
   {
     path: '',
-    // loadChildren: () => import('./home/home.module').then((m) => m.HomePageModule),
+    loadChildren: () => import('./home/home.module').then((m) => m.HomePageModule),
     pathMatch: 'full',
-    redirectTo: '/sign-up'
   },
-  // {
-  //   path: 'profile',
-  //   loadChildren: () => import('./features/profile/profile.module').then((m) => m.ProfilePageModule),
-  //   canLoad: [AuthGuard],
-  //   canActivate: [AuthGuard]
-  // },
-  // {
-  //   path: 'sign-in',
-  //   loadChildren: () => import('./features/sign-in/sign-in.module').then((m) => m.SignInPageModule),
-  // },
-  // {
-  //   path: 'sign-up-account',
-  //   loadChildren: () => import('./features/sign-up-account/sign-up-account.module').then( m => m.SignUpAccountPageModule),
-  //   canLoad: [SignUpStatusGuard],
-  //   canActivate: [SignUpStatusGuard]
-  // },
-  // {
-  //   path: 'sign-up-info',
-  //   loadChildren: () => import('./features/sign-up-info/sign-up-info.module').then( m => m.SignUpInfoPageModule),
-  //   canActivate: [AuthGuard, SignUpStatusGuard],
-  // },
-  // {
-  //   path: 'maintenance',
-  //   loadChildren: () => import('./features/maintenance/maintenance.module').then( m => m.MaintenancePageModule)
-  // },
-  // {
-  //   path: 'registration-closed',
-  //   loadChildren: () => import('./features/registration-closed/registration-closed.module').then( m => m.RegistrationClosedPageModule)
-  // },
   {
     path: 'sign-in',
     loadChildren: () => import('./features/v2/sign-in/sign-in.module').then( m => m.SignInPageModule)
@@ -56,7 +26,8 @@ const routes: Routes = [
     loadChildren: () => import('./features/v2/pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule),
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin }
-  },  {
+  },
+  {
     path: 'profile',
     loadChildren: () => import('./features/v2/profile/profile.module').then( m => m.ProfilePageModule)
   },

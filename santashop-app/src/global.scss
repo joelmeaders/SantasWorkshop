@@ -56,6 +56,10 @@
   font-weight: 400;
 }
 
+.remove-shadow {
+  --box-shadow:none;
+}
+
 $es-size-definitions: (
   xs: 2px,
   sm: 4px,

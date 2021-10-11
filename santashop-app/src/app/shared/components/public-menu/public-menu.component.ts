@@ -5,7 +5,7 @@ import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { SignUpStatusService } from 'santashop-app/src/app/core/services/sign-up-status.service';
+import { RemoteConfigService } from 'santashop-app/src/app/core/services/remote-config.service';
 import { AuthService } from 'santashop-core/src';
 
 @Component({
@@ -24,7 +24,7 @@ export class PublicMenuComponent implements OnDestroy {
     refCount()
   );
 
-  public readonly $signupEnabled = this.signUpStatusService.$signupEnabled.pipe(
+  public readonly $signupEnabled = this.remoteConfigService.signupEnabled$.pipe(
     takeUntil(this.$destroy),
     publishReplay(),
     refCount()
@@ -36,7 +36,7 @@ export class PublicMenuComponent implements OnDestroy {
     private readonly popoverController: PopoverController,
     private readonly translateService: TranslateService,
     private readonly analyticsService: AngularFireAnalytics,
-    private readonly signUpStatusService: SignUpStatusService
+    private readonly remoteConfigService: RemoteConfigService
   ) { }
 
   public ngOnDestroy(): void {

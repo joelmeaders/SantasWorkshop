@@ -10,7 +10,7 @@
         <strong>Welcome, {{ registration.firstName }} {{ registration.lastName }}</strong>
       </ion-card-title>
     </ion-item>
-    <ion-button slot="end" fill="clear">
+    <ion-button slot="end" fill="clear" (click)="menu($event)">
       <ion-icon slot="icon-only" name="menu-sharp" color="dark" size="large"></ion-icon>
     </ion-button>
   </ion-toolbar>
@@ -22,7 +22,7 @@
       <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
         <ion-card routerLink="#" tappable>
           <ion-card-header>
-            <ion-item>
+            <ion-item class="inset-ion-item-title">
               <ion-card-title lines="full"> Children </ion-card-title>
             </ion-item>
           </ion-card-header>
@@ -42,7 +42,7 @@
       <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
         <ion-card routerLink="#" tappable>
           <ion-card-header>
-            <ion-item>
+            <ion-item class="inset-ion-item-title">
               <ion-card-title lines="full"> Schedule </ion-card-title>
             </ion-item>
           </ion-card-header>
@@ -62,7 +62,7 @@
       <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
         <ion-card routerLink="#" tappable>
           <ion-card-header>
-            <ion-item>
+            <ion-item class="inset-ion-item-title">
               <ion-card-title lines="full"> Submit </ion-card-title>
             </ion-item>
           </ion-card-header>

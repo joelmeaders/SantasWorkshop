@@ -1,49 +1,79 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Your Children</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="ion-padding">
+  <ion-button
+    class="ion-no-padding even-ratio-button remove-shadow"
+    color="white"
+    [routerLink]="['../overview']"
+  >
+    <ion-icon
+      slot="icon-only"
+      name="arrow-back-sharp"
+      class="even-ratio-button"
+    ></ion-icon>
+  </ion-button>
 
-<ion-content class="es-pd-bottom-xxl">
-  <p class="ion-margin ion-padding">
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-    cillum dolore eu fugiat nulla pariatur.
-  </p>
-
-  <ion-list>
-    <ion-list-header>
-      <ion-label>Your Children</ion-label>
-      <ion-button (click)="addChild()">
-        Add Child
-        <ion-icon name="add-circle" slot="end"></ion-icon>
-      </ion-button>
-    </ion-list-header>
-
-    <ng-container *ngIf="children$ | async as children">
-      <ion-item
-        *ngFor="let child of children"
-        [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
-      >
-        <div class="res-circle" slot="start">
-          <div class="circle-txt ion-card-subtitle-lg">
-            {{ child | childInitials }}
+  <div class="ion-padding">
+    <ion-item class="inset-ion-item-title" color="none">
+      <ion-card-title lines="full"> Your Children </ion-card-title>
+    </ion-item>
+  
+    <div class="ion-padding-horizontal ion-padding-top">
+      <p>
+        Children must be between the ages of 0-11 years old. Proof of ID is required when picking up toys.    
+      </p>
+    
+      <p>
+        Add all of your Children below. 
+      </p>
+    </div>
+  
+    <ion-item color="none" lines="full" class="inset-ion-item-title"></ion-item>
+  
+    <ion-list color="none">
+      <ion-fab vertical="top" horizontal="end" slot="fixed" class="ion-margin-top">
+        <ion-fab-button>
+          <ion-icon name="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+  
+      <ng-container *ngIf="children$ | async as children">
+        <div class="es-pd-bottom-xxl es-pd-top-xxl"></div>
+        <ion-item
+          *ngFor="let child of children"
+          [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+        >
+          <div class="res-circle" slot="start">
+            <div class="circle-txt ion-card-subtitle-lg">
+              {{ child | childInitials }}
+            </div>
           </div>
-        </div>
-        <ion-card-header>
-          <ion-card-title>
-            {{ child.firstName }} {{ child.lastName }}
+          <ion-card-header>
+            <ion-card-title>
+              {{ child.firstName }} {{ child.lastName }}
+            </ion-card-title>
+            <ion-card-subtitle>
+              {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-button
+            color="danger"
+            fill="clear"
+            slot="end"
+            (click)="removeChild(child)"
+          >
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ng-container>
+
+      <ng-container *ngIf="!(childCount$ | async)">
+        <div class="ion-text-center es-pd-top-xxl">
+          <ion-card-title color="medium">
+            <strong>
+              No Children. Add One.
+            </strong>
           </ion-card-title>
-          <ion-card-subtitle>
-            {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
-          </ion-card-subtitle>
-        </ion-card-header>
-        <ion-button color="danger" fill="clear" slot="end" (click)="removeChild(child)">
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-button>
-      </ion-item>
-    </ng-container>
-  </ion-list>
+        </div>
+      </ng-container>
+    </ion-list>
+  </div>
 </ion-content>

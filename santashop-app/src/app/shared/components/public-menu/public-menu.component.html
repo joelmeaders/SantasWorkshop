@@ -1,40 +1,34 @@
-<span *appLet="$isLoggedIn | async as isLoggedIn">
-  <ion-list>
-    <ion-item button tappable (click)="home()">
-      <ion-label>
-        {{ 'COMMON.HOME' | translate }}
-      </ion-label>
-    </ion-item>
-    <ion-item button tappable (click)="createAccount()" *ngIf="!isLoggedIn" [disabled]="!($signupEnabled | async)">
-      <ion-label>
-        {{ 'COMMON.CREATE_ACCOUNT' | translate }}
-      </ion-label>
-    </ion-item>
-    <ion-item button tappable (click)="signIn()" *ngIf="!isLoggedIn">
-      <ion-label>
-        {{ 'COMMON.SIGN_IN' | translate }}
-      </ion-label>
-    </ion-item>
-    <ion-item button tappable (click)="profile()" *ngIf="isLoggedIn">
-      <ion-label>
-        {{ 'COMMON.PROFILE' | translate }}
-      </ion-label>
-    </ion-item>
-    <ion-item button tappable (click)="logout()" *ngIf="isLoggedIn">
-      <ion-label>
-        {{ 'COMMON.SIGN_OUT' | translate }}
-      </ion-label>
-    </ion-item>
-    <ion-item button tappable href="https://denversantaclausshop.org/" target="_blank">
-      <ion-label>
-        Our Website
-      </ion-label>
-    </ion-item>
-    <ion-item button tappable (click)="setLanguage('en')" >
-      English
-    </ion-item>
-    <ion-item button tappable (click)="setLanguage('es')" >
-      Español
-    </ion-item>
-  </ion-list>
-</span>
+<ion-list lines="none">
+  <ion-item button tappable [routerLink]="['/profile']">
+    <ion-label>
+      {{ 'COMMON.MY_ACCOUNT' | translate }}
+    </ion-label>
+  </ion-item>
+  <ion-item button tappable>
+    <ion-label>
+      {{ 'COMMON.VIDEO_TUTORIAL' | translate }}
+    </ion-label>
+  </ion-item>
+  <ion-item button tappable>
+    <ion-label>
+      {{ 'COMMON.HELP' | translate }}
+    </ion-label>
+  </ion-item>
+  <ion-item button tappable (click)="logout()">
+    <ion-label>
+      {{ 'COMMON.SIGN_OUT' | translate }}
+    </ion-label>
+  </ion-item>
+  <!-- TODO: Include these? -->
+  <!-- <ion-item button tappable href="https://denversantaclausshop.org/" target="_blank">
+    <ion-label>
+      Our Website
+    </ion-label>
+  </ion-item>
+  <ion-item button tappable (click)="setLanguage('en')" >
+    English
+  </ion-item>
+  <ion-item button tappable (click)="setLanguage('es')" >
+    Español
+  </ion-item> -->
+</ion-list>

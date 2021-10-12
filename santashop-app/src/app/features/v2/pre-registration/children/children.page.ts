@@ -18,6 +18,9 @@ export class ChildrenPage {
   public readonly children$: Observable<IChild[] | undefined> =
     this.viewService.children$;
 
+  public readonly childCount$: Observable<number> =
+    this.viewService.childCount$;
+
   constructor(
     private readonly viewService: ChildrenPageService,
     private readonly modalController: ModalController,

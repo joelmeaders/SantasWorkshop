@@ -27,15 +27,36 @@
 
 @import "theme/styling.css";
 
+ion-content {
+  padding-bottom: 100px;
+}
+
 ion-title {
   font-family: 'Inter', 'Roboto', sans-serif;
   font-size: 1.2em;
   font-weight: 600;
 }
 
-ion-card, ion-list, ion-item {
+ion-card, ion-list {
   --background: var(--ion-color-white);
-  background-color: var(--ion-color-white) !important; // This one is for the list
+  background-color: var(--ion-color-white); // This one is for the list
+}
+
+ion-item {
+  background-color: unset;
+}
+
+.inset-ion-item-title {
+  --inner-padding-start: 0px;
+  --padding-start: 0px;
+  --background: var(--ion-color-white);
+  background-color: var(--ion-color-white);
+  --border-color: var(--ion-color-medium);
+
+  ion-card-title {
+    --color: var(--ion-color-xmasred);
+    padding-left: 12px;
+  }
 }
 
 .round-button {

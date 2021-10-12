@@ -17,6 +17,12 @@ export class ChildrenPageService implements OnDestroy {
       shareReplay(1)
     );
 
+  public readonly childCount$: Observable<number> =
+    this.preRegistrationService.childCount$.pipe(
+      takeUntil(this.destroy$),
+      shareReplay(1)
+    );
+
   constructor(
     private readonly preRegistrationService: PreRegistrationService,
     private readonly childValidationService: ChildValidationService,

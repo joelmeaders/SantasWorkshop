@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ChildValidationService, IChild } from '@core/*';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
-import { ChildModalComponent } from './child-modal/child-modal.component';
 import { ChildrenPageService } from './children.page.service';
 
 @Component({
@@ -23,24 +22,9 @@ export class ChildrenPage {
 
   constructor(
     private readonly viewService: ChildrenPageService,
-    private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService
   ) { }
-
-  public async addChild() {
-    const modal = await this.modalController.create({
-      component: ChildModalComponent
-    });
-    
-    await modal.present();
-
-    var result = await modal.onDidDismiss();
-
-    if (result.data) {
-      await this.viewService.addChild(result.data as IChild);
-    }
-  }
 
   public async removeChild(child: IChild): Promise<void> {
     if (await this.confirmDeleteChild()) {

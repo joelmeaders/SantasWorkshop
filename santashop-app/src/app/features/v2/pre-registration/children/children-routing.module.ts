@@ -7,7 +7,11 @@ const routes: Routes = [
   {
     path: '',
     component: ChildrenPage
+  },  {
+    path: 'add-child',
+    loadChildren: () => import('./add-child/add-child.module').then( m => m.AddChildPageModule)
   }
+
 ];
 
 @NgModule({

@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { ChildModalComponent } from './child-modal.component';
+import { AddChildPage } from './add-child.page';
 
-describe('ChildModalComponent', () => {
-  let component: ChildModalComponent;
-  let fixture: ComponentFixture<ChildModalComponent>;
+describe('AddChildPage', () => {
+  let component: AddChildPage;
+  let fixture: ComponentFixture<AddChildPage>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ChildModalComponent ],
+      declarations: [ AddChildPage ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ChildModalComponent);
+    fixture = TestBed.createComponent(AddChildPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

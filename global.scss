@@ -29,18 +29,6 @@
   box-shadow: none;
 }
 
-.item-router-link-active {
-  border-left-width: 4px;
-  border-left-style: solid;
-  border-left-color: var(--ion-color-primary);
-}
-
-.button-router-link-active {
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: var(--ion-color-primary);
-}
-
 .date-time-modal {
   --max-width: 350px;
   --max-height: 570px;

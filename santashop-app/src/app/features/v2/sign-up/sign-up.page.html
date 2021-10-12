@@ -4,8 +4,16 @@
     <ion-row class="height-max ion-align-items-center">
       <!-- Information -->
       <ion-col sizeXs="12" sizeSm="10" offsetXs="0" offsetSm="1" offsetMd="2">
-        <ion-button class="ion-no-padding even-ratio-button remove-shadow" color="white">
-          <ion-icon slot="icon-only" name="arrow-back-sharp" class="even-ratio-button"></ion-icon>
+        <ion-button
+          class="ion-no-padding even-ratio-button remove-shadow"
+          color="white"
+          [routerLink]="['/']"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="arrow-back-sharp"
+            class="even-ratio-button"
+          ></ion-icon>
         </ion-button>
         <ion-card class="sign-up-card">
           <ion-card-header>
@@ -20,9 +28,7 @@
             <form [formGroup]="form" novalidate>
               <ion-list>
                 <ion-item>
-                  <ion-label>
-                    {{ 'SIGNUP.FIRST_NAME' | translate }}
-                  </ion-label>
+                  <ion-label> {{ 'SIGNUP.FIRST_NAME' | translate }} </ion-label>
                   <ion-input
                     #firstName
                     formControlName="firstName"
@@ -37,15 +43,13 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label>
-                    {{ 'SIGNUP.LAST_NAME' | translate }}
-                  </ion-label>
+                  <ion-label> {{ 'SIGNUP.LAST_NAME' | translate }} </ion-label>
                   <ion-input
                     formControlName="lastName"
                     [debounce]="500"
                     autocomplete="family-name"
                     inputmode="text"
-                    ></ion-input>
+                  ></ion-input>
                 </ion-item>
                 <app-control-errors
                   [control]="form.controls.lastName"
@@ -68,9 +72,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label>
-                    {{ 'COMMON.PASSWORD' | translate }}
-                  </ion-label>
+                  <ion-label> {{ 'COMMON.PASSWORD' | translate }} </ion-label>
                   <ion-input
                     formControlName="password"
                     [debounce]="500"
@@ -83,9 +85,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label>
-                    {{ 'SIGNUP.PASSWORD2' | translate }}
-                  </ion-label>
+                  <ion-label> {{ 'SIGNUP.PASSWORD2' | translate }} </ion-label>
                   <ion-input
                     formControlName="password2"
                     [debounce]="500"
@@ -107,9 +107,7 @@
                 </ng-container>
 
                 <ion-item>
-                  <ion-label>
-                    {{ 'SIGNUP.ZIP_CODE' | translate }}
-                  </ion-label>
+                  <ion-label> {{ 'SIGNUP.ZIP_CODE' | translate }} </ion-label>
                   <ion-input
                     formControlName="zipCode"
                     [debounce]="500"
@@ -127,7 +125,10 @@
 
               <ion-list>
                 <ion-item lines="none">
-                  <ion-label class="ion-text-wrap es-mg-right-md" color="medium">
+                  <ion-label
+                    class="ion-text-wrap es-mg-right-md"
+                    color="medium"
+                  >
                     {{ 'SIGNUP.LEGAL_AGREEMENT' | translate }}
                   </ion-label>
                   <ion-checkbox formControlName="legal"></ion-checkbox>
@@ -143,22 +144,28 @@
               size="default"
               expand="block"
               color="xmasred"
+              class="es-pd-left-lg es-pd-right-lg"
               [disabled]="!form.valid"
               (click)="captchaRef.execute()"
             >
               {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
-              <ion-icon
-                slot="end"
-                name="person-add"
-                class="es-mg-left-xl"
-              ></ion-icon>
             </ion-button>
             <div class="ion-text-center ion-padding-top">
-              <ion-button size="default" fill="clear" type="button" (click)="showPrivacyPolicyModal()">
+              <ion-button
+                size="default"
+                fill="clear"
+                type="button"
+                (click)="showPrivacyPolicyModal()"
+              >
                 {{ 'COMMON.PRIVACY_POLICY' | translate }}
               </ion-button>
 
-              <ion-button size="default" fill="clear" type="button" (click)="showTermsConditionsModal()">
+              <ion-button
+                size="default"
+                fill="clear"
+                type="button"
+                (click)="showTermsConditionsModal()"
+              >
                 {{ 'COMMON.TERMS_AND_CONDITIONS' | translate }}
               </ion-button>
             </div>

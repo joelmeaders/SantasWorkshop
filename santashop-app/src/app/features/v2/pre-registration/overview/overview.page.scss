@@ -1,18 +1,16 @@
-.status-tile {
-  height: 140px;
+.logo {
+  max-width: 60px;
+  height: auto;
+  padding: 6px
 }
 
-.status-tile ion-card-title {
-  position: relative !important;
-  // top: 60% !important;
-  // left: 50%;
-  // transform: translate(-50%, -50%) !important;
-  transform: translate(0, 100%) !important;
-  padding: 10px;
-}
+ion-item {
+  --inner-padding-start: 0px;
+  --padding-start: 0px;
+  background-color: unset !important;
 
-.image-placeholder {
-  width: 500px;
-  height: 300px;
-  background-color: bisque;
+  ion-card-title {
+    --color: var(--ion-color-xmasred);
+    padding-left: 12px;
+  }
 }

@@ -52,8 +52,7 @@ export class PreRegistrationService implements OnDestroy {
 
   public readonly childCount$ = this.userRegistration$.pipe(
     takeUntil(this.destroy$),
-    map((registration) =>
-      !!registration?.children ? registration.children.length : 0
+    map((registration) => registration?.children?.length ?? 0
     ),
     shareReplay(1)
   );

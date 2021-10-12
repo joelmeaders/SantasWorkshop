@@ -1,92 +1,83 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Overview</ion-title>
+<ion-header color="none" class="ion-no-border">
+  <ion-toolbar color="none">
+    <ion-item lines="none" color="none">
+      <img
+        src="assets/DSCS-Santa-Body_Red.png"
+        class="logo"
+        alt="logo with santa claus"
+      />
+      <ion-card-title *ngIf="userRegistration$ | async as registration">
+        <strong>Welcome, {{ registration.firstName }} {{ registration.lastName }}</strong>
+      </ion-card-title>
+    </ion-item>
+    <ion-button slot="end" fill="clear">
+      <ion-icon slot="icon-only" name="menu-sharp" color="dark" size="large"></ion-icon>
+    </ion-button>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-grid>
+  <ion-grid class="ion-no-padding">
     <ion-row>
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="#" tappable>
-          <ion-card-subtitle>
-            (Not sure if time/budget to add this step)
-          </ion-card-subtitle>
-          <ion-card-title class="ion-card-title-sm">
-            Verify Account
-          </ion-card-title>
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
+        <ion-card routerLink="#" tappable>
+          <ion-card-header>
+            <ion-item>
+              <ion-card-title lines="full"> Children </ion-card-title>
+            </ion-item>
+          </ion-card-header>
+          <ion-card-content class="ion-text-center">
+            <p *ngIf="(childCount$ | async) === 0">
+              <strong> No Children. </strong>
+              <br />
+              Add all Children, then Select a Time.
+            </p>
+            <p class="ion-text-end es-pd-top-sm">
+              <ion-button color="xmasred"> Add Child </ion-button>
+            </p>
+          </ion-card-content>
         </ion-card>
       </ion-col>
 
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="../children" tappable>
-          <ion-card-subtitle>
-            (Do this step first....todo)
-          </ion-card-subtitle>
-          <ion-card-title class="ion-card-title-sm">
-            Add Children
-          </ion-card-title>
-          
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
+        <ion-card routerLink="#" tappable>
+          <ion-card-header>
+            <ion-item>
+              <ion-card-title lines="full"> Schedule </ion-card-title>
+            </ion-item>
+          </ion-card-header>
+          <ion-card-content class="ion-text-center">
+            <p *ngIf="(childCount$ | async) === 0">
+              <strong> No Time Selected. </strong>
+              <br />
+              After you Add Children, Select a Time.
+            </p>
+            <p class="ion-text-end es-pd-top-sm">
+              <ion-button color="xmasred"> Select Time </ion-button>
+            </p>
+          </ion-card-content>
         </ion-card>
       </ion-col>
 
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="../date-time" tappable>
-          <ion-card-subtitle>
-            (Do this step after children....todo)
-          </ion-card-subtitle>
-          <ion-card-title class="ion-card-title-sm">
-            Choose Date & Time
-          </ion-card-title>
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
+        <ion-card routerLink="#" tappable>
+          <ion-card-header>
+            <ion-item>
+              <ion-card-title lines="full"> Submit </ion-card-title>
+            </ion-item>
+          </ion-card-header>
+          <ion-card-content class="ion-text-center">
+            <p *ngIf="(childCount$ | async) === 0">
+              <strong> Not Submitted. </strong>
+              <br />
+              After you Add Children and Select a Time, Submit to get your QR
+              Code for the Event.
+            </p>
+            <p class="ion-text-end es-pd-top-sm">
+              <ion-button color="xmasred"> Submit </ion-button>
+            </p>
+          </ion-card-content>
         </ion-card>
-      </ion-col>
-
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="3">
-        <ion-card class="status-tile ion-text-center" routerLink="../submit" tappable>
-          <ion-card-subtitle>
-            (Do this step last....todo)
-          </ion-card-subtitle>
-          <ion-card-title class="ion-card-title-sm">
-            Submit Registration
-          </ion-card-title>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-
-    <ion-row class="ion-padding">
-      <ion-col>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-        mollit anim id est laborum.
-      </ion-col>
-
-      <ion-col size="auto">
-        <div class="image-placeholder">Image here</div>
-      </ion-col>
-    </ion-row>
-
-    <ion-row>
-      <ion-col>
-        <p>
-          Location<br/>
-          12345 S Something Way<br/>
-          Denver, CO 80000
-        </p>
-      </ion-col>
-
-      <ion-col>
-        <p>
-          Hours<br/>
-          9:00am-4:00pm
-        </p>
-      </ion-col>
-
-      <ion-col>
-        For all children 11 and under
       </ion-col>
     </ion-row>
   </ion-grid>

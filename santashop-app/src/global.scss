@@ -29,6 +29,7 @@
 
 ion-content {
   padding-bottom: 100px;
+  margin-bottom: -90px !important;
 }
 
 ion-title {
@@ -61,8 +62,10 @@ ion-item {
 
 .round-button {
   --border-radius: 50%;
-  width: 56px;
-  height: 56px;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  width: 46px;
+  height: 46px;
 }
 
 .even-ratio-button {

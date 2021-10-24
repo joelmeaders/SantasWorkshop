@@ -9,8 +9,8 @@
         />
       </ion-col>
     </ion-row>
-    <ion-row class="ion-align-items-center">
-      <ion-col sizeXs="12" sizeSm="10" offsetXs="0" offsetSm="1" offsetMd="2">
+    <ion-row class="ion-text-center">
+      <ion-col class="ion-text-center">
         <ion-card class="sign-up-card">
           <ion-card-content>
             <form [formGroup]="form" novalidate>
@@ -51,9 +51,8 @@
           <ion-card-content class="ion-text-center">
             <ion-button
               size="default"
-              fill="outline"
               expand="block"
-              color="dark"
+              color="xmasred"
               [disabled]="!form.valid"
               (click)="captchaRef.execute()"
             >

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { AgeGroup, ChildValidationError, ChildValidationService, getAgeFromDate, IChild, MAX_BIRTHDATE, MIN_BIRTHDATE, MOBILE_EVENT, PreRegistrationService, PROGRAM_YEAR, ToyType, yyyymmddToLocalDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
@@ -37,7 +38,8 @@ export class AddChildPage implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
     private readonly preRegistrationService: PreRegistrationService,
-    private readonly childValidationService: ChildValidationService
+    private readonly childValidationService: ChildValidationService,
+    private readonly router: Router
 
   ) { }
 
@@ -117,6 +119,7 @@ export class AddChildPage implements OnDestroy {
   public async addChild(): Promise<void> {
 
     const child = this.form.value as IChild;
+    child.dateOfBirth = yyyymmddToLocalDate(child.dateOfBirth as any);
 
     const children = 
       await this.children$.pipe(take(1)).toPromise();
@@ -141,9 +144,8 @@ export class AddChildPage implements OnDestroy {
       }
       
       await this.invalidEntryAlert(message);
+      return;
     }
-
-    // TODO: Navigate back
   }
 
   public async removeChild(childToRemove: IChild): Promise<void> {
@@ -176,6 +178,8 @@ export class AddChildPage implements OnDestroy {
     { 
       // TODO: Do something
     }
+
+    this.router.navigate(['pre-registration/children']);
   }
 
   private async invalidEntryAlert(message: string): Promise<OverlayEventDetail<any>> {

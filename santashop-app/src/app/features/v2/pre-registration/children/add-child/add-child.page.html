@@ -1,4 +1,4 @@
-<ion-content class="ion-padding">
+<ion-content class="ion-padding" color="light">
   <ion-button
     class="ion-no-padding even-ratio-button remove-shadow"
     color="white"
@@ -19,10 +19,8 @@
     <div class="ion-padding-top">
       <form [formGroup]="form" novalidate>
         <ion-list>
-          <ion-item>
-            <ion-label>
-              {{ 'ADDCHILD.FIRST_NAME' | translate }}
-            </ion-label>
+          <ion-item color="light">
+            <ion-label> {{ 'ADDCHILD.FIRST_NAME' | translate }} </ion-label>
             <ion-input
               #firstName
               formControlName="firstName"
@@ -34,11 +32,9 @@
           <app-control-errors
             [control]="form.controls.firstName"
           ></app-control-errors>
-    
-          <ion-item>
-            <ion-label>
-              {{ 'ADDCHILD.LAST_NAME' | translate }}
-            </ion-label>
+
+          <ion-item color="light">
+            <ion-label> {{ 'ADDCHILD.LAST_NAME' | translate }} </ion-label>
             <ion-input
               formControlName="lastName"
               [debounce]="500"
@@ -49,11 +45,30 @@
           <app-control-errors
             [control]="form.controls.lastName"
           ></app-control-errors>
-    
-          <ion-item>
-            <ion-label position="stacked">
-              {{ 'ADDCHILD.BIRTH_DATE' | translate }}
-            </ion-label>
+
+          <ion-item color="light">
+            <ion-label> {{ 'ADDCHILD.BIRTH_DATE' | translate }} </ion-label>
+            <!-- <ion-button id="open-modal">Open Datetime Modal</ion-button>
+            <ion-modal #birthdate trigger="open-modal">
+              <ng-template>
+                <ion-content>
+                  <ion-datetime
+                    (ionChange)="birthdaySelected()"
+                    [min]="minBirthDate"
+                    [max]="maxBirthDate"
+                    formControlName="dateOfBirth"
+                    presentation="date"
+                    size="cover"
+                    mode="ios"
+                  >
+                  <div slot="title">Choose Birth Date</div>
+                  <ion-buttons slot="buttons">
+                    <ion-button (click)="dismiss()">Ok</ion-button>
+                  </ion-buttons>
+                </ion-datetime>
+                </ion-content>
+              </ng-template>
+            </ion-modal> -->
             <ion-input
               (ionChange)="birthdaySelected()"
               formControlName="dateOfBirth"
@@ -61,89 +76,108 @@
               type="date"
               [min]="minBirthDate"
               [max]="maxBirthDate"
-            ></ion-input>
+            >
+            </ion-input>
+
+            <!-- TODO: DateTime Picker -->
+            <!-- <ion-button fill="clear" class="ion-float-end" slot="end">
+              <ion-icon name="calendar-outline" slot="icon-only"></ion-icon>
+            </ion-button> -->
           </ion-item>
           <app-control-errors
             [control]="form.controls.dateOfBirth"
           ></app-control-errors>
-    
-          <div class="ion-padding-top ion-text-wrap" *ngIf="mobileEvent && ($isInfant | async)">
+
+          <div
+            class="ion-padding-top ion-text-wrap"
+            *ngIf="mobileEvent && ($isInfant | async)"
+          >
             <ion-item lines="none">
               <ion-icon name="gift" color="success" slot="start"></ion-icon>
-              <ion-text>
-                {{ 'ADDCHILD.INFANT_MSG' | translate }}
-              </ion-text>
+              <ion-text> {{ 'ADDCHILD.INFANT_MSG' | translate }} </ion-text>
             </ion-item>
           </div>
-    
+
           <div class="ion-padding-top">
-            <ion-radio-group formControlName="toyType">
+            <ion-radio-group formControlName="toyType" color="light">
               <ion-list-header>
                 <ion-label>{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-label>
-                <p *ngIf="form.controls.toyType.invalid" class="ion-no-padding ion-no-margin">
+                <p
+                  *ngIf="form.controls.toyType.invalid"
+                  class="ion-no-padding ion-no-margin"
+                >
                   <span>
                     <br />
-                    <ion-note color="danger">{{ 'COMMON.REQUIRED_CHOICE' | translate }}</ion-note>
+                    <ion-note color="danger"
+                      >{{ 'COMMON.REQUIRED_CHOICE' | translate }}</ion-note
+                    >
                   </span>
                 </p>
               </ion-list-header>
-    
-              <ion-item>
+
+              <ion-item color="light">
                 <ion-label>{{ 'ADDCHILD.BABIES' | translate }}</ion-label>
                 <ion-radio slot="start" value="infants"></ion-radio>
               </ion-item>
-    
-              <ion-item *ngIf="!($isInfant | async)">
+
+              <ion-item *ngIf="!($isInfant | async)" color="light">
                 <ion-label>{{ 'ADDCHILD.BOYS' | translate }}</ion-label>
                 <ion-radio slot="start" value="boys"></ion-radio>
               </ion-item>
-    
-              <ion-item *ngIf="!($isInfant | async)">
+
+              <ion-item *ngIf="!($isInfant | async)" color="light">
                 <ion-label>{{ 'ADDCHILD.GIRLS' | translate }}</ion-label>
                 <ion-radio slot="start" value="girls"></ion-radio>
               </ion-item>
             </ion-radio-group>
           </div>
-    
-          <div class="ion-padding-top" *ngIf="mobileEvent && !($isInfant | async)">
-            <ion-radio-group formControlName="ageGroup">
+
+          <div
+            class="ion-padding-top"
+            *ngIf="mobileEvent && !($isInfant | async)"
+          >
+            <ion-radio-group formControlName="ageGroup" color="light">
               <ion-list-header>
                 <ion-label>{{ 'ADDCHILD.AGE_GROUP' | translate }}</ion-label>
-                <p *ngIf="form.controls.ageGroup.invalid" class="ion-no-padding ion-no-margin">
+                <p
+                  *ngIf="form.controls.ageGroup.invalid"
+                  class="ion-no-padding ion-no-margin"
+                >
                   <span>
                     <br />
-                    <ion-note color="danger">{{ 'COMMON.REQUIRED_CHOICE' | translate }}</ion-note>
+                    <ion-note color="danger"
+                      >{{ 'COMMON.REQUIRED_CHOICE' | translate }}</ion-note
+                    >
                   </span>
                 </p>
               </ion-list-header>
-    
-              <ion-item (click)="setInfant(true)">
+
+              <ion-item (click)="setInfant(true)" color="light">
                 <ion-label>{{ 'ADDCHILD.AGE0' | translate }}</ion-label>
                 <ion-radio slot="start" value="0-2"></ion-radio>
               </ion-item>
-    
-              <ion-item>
+
+              <ion-item color="light">
                 <ion-label>{{ 'ADDCHILD.AGE3' | translate }}</ion-label>
                 <ion-radio slot="start" value="3-5"></ion-radio>
               </ion-item>
-    
-              <ion-item>
+
+              <ion-item color="light">
                 <ion-label>{{ 'ADDCHILD.AGE6' | translate }}</ion-label>
                 <ion-radio slot="start" value="6-8"></ion-radio>
               </ion-item>
-    
+
               <ion-item>
                 <ion-label>{{ 'ADDCHILD.AGE9' | translate }}</ion-label>
                 <ion-radio slot="start" value="9-11"></ion-radio>
               </ion-item>
             </ion-radio-group>
           </div>
-    
         </ion-list>
       </form>
     </div>
     <div class="ion-text-end ion-padding-top">
-      <ion-button color="xmasred" (click)="addChild()">
+      <ion-button color="xmasred" (click)="addChild()" [disabled]="!form.valid">
         Add Child
       </ion-button>
     </div>

@@ -20,6 +20,22 @@ export class DateTimePage implements OnDestroy {
   public readonly availableSlots$ =
     this.viewService.availableSlots$.pipe(
       takeUntil(this.destroy$),
+      map(slots => slots.filter(slot => slot.enabled)),
+      shareReplay(1)
+    );
+
+  public readonly availableDays$ = 
+    this.availableSlots$.pipe(
+      takeUntil(this.destroy$),
+      map(slots => slots.map(slot => Date.parse(slot.dateTime.toDateString()))),
+      map(dates => [...new Set(dates)]),
+      shareReplay(1)
+    );
+
+  public readonly availableSlotsByDay$ = (date: number) =>
+    this.availableSlots$.pipe(
+      takeUntil(this.destroy$),
+      map(slots => slots.filter(slot => Date.parse(slot.dateTime.toDateString()) === date)),
       shareReplay(1)
     );
 

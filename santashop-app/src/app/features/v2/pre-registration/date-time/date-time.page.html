@@ -1,40 +1,88 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Choose an available date/time</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="es-pd-bottom-xxl" color="light">
+  <ion-button
+    class="ion-no-padding even-ratio-button remove-shadow"
+    color="white"
+    [routerLink]="['../overview']"
+  >
+    <ion-icon
+      slot="icon-only"
+      name="arrow-back-sharp"
+      class="even-ratio-button"
+    ></ion-icon>
+  </ion-button>
 
-<ion-content>
-  <p class="ion-margin ion-padding">
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-    cillum dolore eu fugiat nulla pariatur.
-  </p>
+  <div class="ion-padding es-mg-bottom-xxl">
+    <ion-item class="inset-ion-item-title" color="none">
+      <ion-card-title lines="full"> Schedule </ion-card-title>
+    </ion-item>
 
-  <ion-card *ngIf="chosenSlot$ | async as slot">
-    <ion-card-header> Your Chosen Date/Time </ion-card-header>
-    <ion-card-content>
-      <!-- TODO: Loading animation -->
-      <ion-item lines="none">
-        {{ slot.dateTime | date:'MMMM d, h:mm a' }}
-        <ion-button slot="end" (click)="selectDateTime()"> Cancel </ion-button>
-      </ion-item>
-      <p class="ion-padding">
-        Please arrive on time. If you are late or show up on the wrong date
-        <strong>you will be given a lump of coal.</strong> TODO: Change this
-        before it goes live =)
-      </p>
-    </ion-card-content>
-  </ion-card>
+    <div class="ion-padding-horizontal ion-padding-top">
+      <p>Choose an available date and time to pick up your toys.</p>
+    </div>
 
-  <ion-list>
-    <ion-list-header> Available Dates/Times </ion-list-header>
-    <ng-container *ngFor="let slot of availableSlots$ | async">
-      <ion-item button="true" detail="true" (click)="selectDateTime(slot)">
-        {{ slot.dateTime | date:'MMMM d, h:mm a' }}
-      </ion-item>
+    <ion-item color="none" lines="full" class="inset-ion-item-title"></ion-item>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title color="xmasred"> Your Date/Time </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content class="ion-text-center">
+        <p class="ion-padding" *ngIf="!(chosenSlot$ | async)">
+          <ion-title> No Time Selected. </ion-title>
+          <ion-label> Add one below. </ion-label>
+        </p>
+
+        <ion-item lines="none" *ngIf="chosenSlot$ | async as slot">
+          {{ slot.dateTime | date:'MMMM d, h:mm a' }}
+          <ion-button slot="end" (click)="selectDateTime()">
+            Cancel
+          </ion-button>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ng-container *ngIf="chosenSlot$ | async">
+      <div class="on-time-note ion-text-center">
+        <ion-text color="dark">
+          <strong>
+            Please arrive on time. If you are late or show up on the wrong date,
+            it will take longer for everyone to get toys.
+          </strong>
+        </ion-text>
+      </div>
     </ng-container>
-  </ion-list>
+
+    <ng-container *ngIf="!(chosenSlot$ | async)">
+      <ion-list-header color="light"> Available Dates/Times </ion-list-header>
+
+      <ion-accordion-group color="light">
+        <ion-accordion *ngFor="let day of availableDays$ | async">
+          <ion-item slot="header" color="light">
+            <ion-label>
+              <strong> {{ day | date:'EEEE, MMMM d'}} </strong>
+            </ion-label>
+          </ion-item>
+          <ion-list slot="content" color="light">
+            <ion-item
+              *ngFor="let slot of (availableSlotsByDay$(day) | async)"
+              color="light"
+              detail="true"
+              (click)="selectDateTime(slot)"
+            >
+              <ion-label>{{ slot.dateTime | date:'h:mm a' }}</ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-accordion>
+      </ion-accordion-group>
+    </ng-container>
+
+    <ion-button
+      color="xmasred"
+      [routerLink]="['../overview']"
+      class="ion-float-end es-mg-top-xxl"
+    >
+      Done
+    </ion-button>
+  </div>
 </ion-content>

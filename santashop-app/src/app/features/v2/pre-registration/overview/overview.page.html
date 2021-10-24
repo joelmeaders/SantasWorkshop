@@ -1,5 +1,5 @@
-<ion-header color="none" class="ion-no-border">
-  <ion-toolbar color="none">
+<ion-header class="ion-no-border" color="light">
+  <ion-toolbar color="light">
     <ion-item lines="none" color="none">
       <img
         src="assets/DSCS-Santa-Body_Red.png"
@@ -7,74 +7,121 @@
         alt="logo with santa claus"
       />
       <ion-card-title *ngIf="userRegistration$ | async as registration">
-        <strong>Welcome, {{ registration.firstName }} {{ registration.lastName }}</strong>
+        <strong
+          >Welcome, {{ registration.firstName }} {{ registration.lastName
+          }}</strong
+        >
       </ion-card-title>
     </ion-item>
     <ion-button slot="end" fill="clear" (click)="menu($event)">
-      <ion-icon slot="icon-only" name="menu-sharp" color="dark" size="large"></ion-icon>
+      <ion-icon
+        slot="icon-only"
+        name="menu-sharp"
+        color="dark"
+        size="large"
+      ></ion-icon>
     </ion-button>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content color="light">
   <ion-grid class="ion-no-padding">
     <ion-row>
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
-        <ion-card routerLink="#" tappable>
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="6">
+        <ion-card>
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
               <ion-card-title lines="full"> Children </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
-            <p *ngIf="(childCount$ | async) === 0">
-              <strong> No Children. </strong>
-              <br />
-              Add all Children, then Select a Time.
-            </p>
-            <p class="ion-text-end es-pd-top-sm">
-              <ion-button color="xmasred"> Add Child </ion-button>
-            </p>
+            <ng-container *ngIf="(childCount$ | async) === 0; else hasChildren">
+              <p>
+                <strong> No Children. </strong>
+                <br />
+                Add all Children, then Select a Time.
+              </p>
+              <p class="ion-text-end es-pd-top-sm">
+                <ion-button color="xmasred" [routerLink]="['../children']">
+                  Add Child
+                </ion-button>
+              </p>
+            </ng-container>
+
+            <ng-template #hasChildren>
+              <ion-list>
+                <ion-item *ngFor="let child of children$ | async">
+                  <ion-icon name="man-outline" slot="start" *ngIf="child.toyType === 'boys'"></ion-icon>
+                  <ion-icon name="woman-outline" slot="start" *ngIf="child.toyType === 'girls'"></ion-icon>
+                  <ion-icon name="happy-outline" slot="start" *ngIf="child.toyType === 'infants'"></ion-icon>
+                  <ion-label> {{ child.firstName }} {{ child.lastName }} </ion-label>
+                </ion-item>
+              </ion-list>
+
+              <p class="ion-text-end es-pd-top-sm">
+                <ion-button color="xmasred" [routerLink]="['../children']">
+                  Add or Edit Child
+                </ion-button>
+              </p>
+            </ng-template>
           </ion-card-content>
         </ion-card>
       </ion-col>
 
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
-        <ion-card routerLink="#" tappable>
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="6">
+        <ion-card [disabled]="!(canChooseDateTime$ | async)">
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
               <ion-card-title lines="full"> Schedule </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
-            <p *ngIf="(childCount$ | async) === 0">
-              <strong> No Time Selected. </strong>
-              <br />
-              After you Add Children, Select a Time.
-            </p>
-            <p class="ion-text-end es-pd-top-sm">
-              <ion-button color="xmasred"> Select Time </ion-button>
-            </p>
+
+            <ng-container *ngIf="!(dateTimeSlot$ | async); else hasDateTimeSlot">
+              <p *ngIf="(childCount$ | async) === 0">
+                <strong> No Time Selected. </strong>
+                <br />
+                After you Add Children, Select a Time.
+              </p>
+
+              <p class="ion-text-end es-pd-top-sm">
+                <ion-button color="xmasred" [routerLink]="['../date-time']"> Select Time </ion-button>
+              </p>
+            </ng-container>
+
+            <ng-template #hasDateTimeSlot>
+              <ion-item>
+                <ion-label *ngIf="dateTimeSlot$ | async as dateTimeSlot" class="ion-text-wrap">
+                  {{ dateTimeSlot.dateTime | date:'fullDate' }}, {{ dateTimeSlot.dateTime | date:'shortTime' }}
+                </ion-label>
+              </ion-item>
+              <p class="ion-text-end es-pd-top-sm">
+                <ion-button color="xmasred" [routerLink]="['../date-time']"> Change Time </ion-button>
+              </p>
+            </ng-template>
+
+            
+            
           </ion-card-content>
         </ion-card>
       </ion-col>
 
-      <ion-col sizeXs="12" sizeSm="6" sizeMd="4">
-        <ion-card routerLink="#" tappable>
+      <ion-col sizeXs="12" sizeSm="6" sizeMd="6">
+        <ion-card [disabled]="!(canSubmit$ | async)">
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
               <ion-card-title lines="full"> Submit </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
-            <p *ngIf="(childCount$ | async) === 0">
+            <p>
               <strong> Not Submitted. </strong>
               <br />
               After you Add Children and Select a Time, Submit to get your QR
               Code for the Event.
             </p>
             <p class="ion-text-end es-pd-top-sm">
-              <ion-button color="xmasred"> Submit </ion-button>
+              <ion-button color="xmasred" [routerLink]="['../submit']"> Submit </ion-button>
             </p>
           </ion-card-content>
         </ion-card>

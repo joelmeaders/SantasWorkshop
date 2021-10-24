@@ -1,10 +1,12 @@
-<ion-content fullscreen="true" color="light-blue">
+<ion-content fullscreen="true" color="light">
   <ion-header class="ion-no-border">
     <ion-toolbar color="none">
       <div slot="end" class="center ion-padding">
-        Spanish / English
-        <br />
-        <ion-toggle checked color="xmasred"></ion-toggle>
+        <ion-text color="xmasred" class="language">
+            Español
+            <ion-toggle checked mode="ios"></ion-toggle>
+            English
+        </ion-text>
       </div>
     </ion-toolbar>
   </ion-header>
@@ -32,7 +34,7 @@
       <ion-col size="12" class="ion-text-center">
         <ion-button
           color="white"
-          class="remove-shadow"
+          class="remove-shadow dark-border"
           [routerLink]="['/sign-up']"
         >
           <div class="button-text-padding">Create An Account</div>
@@ -41,7 +43,7 @@
       <ion-col size="12" class="ion-text-center">
         <ion-button
           color="white"
-          class="remove-shadow"
+          class="remove-shadow dark-border"
           [routerLink]="['/sign-in']"
         >
           <div class="button-text-padding">Sign In</div>
@@ -52,16 +54,35 @@
     <ion-row class="es-pd-top-xxl">
       <ion-col class="ion-text-center">
         <a href="https://www.facebook.com/denversantaclausshop" target="_blank">
-          <ion-button color="white" class="remove-shadow round-button" size="default">
-            <ion-icon slot="icon-only" name="logo-facebook" color="medium"></ion-icon>
+          <ion-button
+            color="white"
+            class="remove-shadow round-button ion-margin-end dark-border"
+            size="default"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="logo-facebook"
+              color="medium"
+            ></ion-icon>
           </ion-button>
         </a>
 
-        <a href="https://www.instagram.com/denversantaclausshop/" target="_blank">
-          <ion-button color="white" class="remove-shadow round-button" size="default">
-            <ion-icon slot="icon-only" name="logo-instagram" color="medium"></ion-icon>
+        <a
+          href="https://www.instagram.com/denversantaclausshop/"
+          target="_blank"
+        >
+          <ion-button
+            color="white"
+            class="remove-shadow round-button dark-border"
+            size="default"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="logo-instagram"
+              color="medium"
+            ></ion-icon>
           </ion-button>
-        </a>        
+        </a>
       </ion-col>
     </ion-row>
   </ion-grid>

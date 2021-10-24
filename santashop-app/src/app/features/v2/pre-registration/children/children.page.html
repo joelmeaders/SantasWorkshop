@@ -1,4 +1,4 @@
-<ion-content class="ion-padding">
+<ion-content class="es-pd-bottom-xxl" color="light">
   <ion-button
     class="ion-no-padding even-ratio-button remove-shadow"
     color="white"
@@ -11,7 +11,7 @@
     ></ion-icon>
   </ion-button>
 
-  <div class="ion-padding">
+  <div class="ion-padding es-mg-bottom-xxl">
     <ion-item class="inset-ion-item-title" color="none">
       <ion-card-title lines="full"> Your Children </ion-card-title>
     </ion-item>
@@ -29,11 +29,10 @@
     <ion-item color="none" lines="full" class="inset-ion-item-title"></ion-item>
   
     <ion-list color="none">
-      <ion-fab vertical="top" horizontal="end" slot="fixed" class="ion-margin-top">
-        <ion-fab-button [routerLink]="['add-child']">
-          <ion-icon name="add"></ion-icon>
-        </ion-fab-button>
-      </ion-fab>
+      <ion-button fill="clear" [routerLink]="['add-child']" class="ion-float-end">
+        <ion-label> Add a Child </ion-label>
+        <ion-icon name="add-circle"size="large" slot="end"></ion-icon>
+      </ion-button>
   
       <ng-container *ngIf="children$ | async as children">
         <div class="es-pd-bottom-xxl es-pd-top-xxl"></div>
@@ -41,11 +40,9 @@
           *ngFor="let child of children"
           [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
         >
-          <div class="res-circle" slot="start">
-            <div class="circle-txt ion-card-subtitle-lg">
-              {{ child | childInitials }}
-            </div>
-          </div>
+          <ion-icon name="man-outline" size="large" slot="start" *ngIf="child.toyType === 'boys'"></ion-icon>
+          <ion-icon name="woman-outline" size="large" slot="start" *ngIf="child.toyType === 'girls'"></ion-icon>
+          <ion-icon name="happy-outline" size="large" slot="start" *ngIf="child.toyType === 'infants'"></ion-icon>
           <ion-card-header>
             <ion-card-title>
               {{ child.firstName }} {{ child.lastName }}
@@ -55,12 +52,12 @@
             </ion-card-subtitle>
           </ion-card-header>
           <ion-button
-            color="danger"
+            color="medium"
             fill="clear"
             slot="end"
             (click)="removeChild(child)"
           >
-            <ion-icon slot="icon-only" name="trash"></ion-icon>
+            <ion-icon slot="icon-only" size="large" name="trash-outline"></ion-icon>
           </ion-button>
         </ion-item>
       </ng-container>
@@ -75,5 +72,9 @@
         </div>
       </ng-container>
     </ion-list>
+
+    <ion-button color="xmasred" [routerLink]="['../overview']" class="ion-float-end">
+      Done
+    </ion-button>
   </div>
 </ion-content>

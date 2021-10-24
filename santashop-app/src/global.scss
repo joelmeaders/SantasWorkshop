@@ -25,8 +25,6 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-@import "theme/styling.css";
-
 ion-content {
   padding-bottom: 100px;
   margin-bottom: -90px !important;
@@ -45,6 +43,14 @@ ion-card, ion-list {
 
 ion-item {
   background-color: unset;
+}
+
+.dark-border {
+  --border-color: var(--ion-color-dark);
+  --border-radius: 8px;
+  --border-style: solid;
+  --border-width: 1px;
+  box-sizing: border-box;
 }
 
 .inset-ion-item-title {
@@ -108,6 +114,25 @@ ion-item {
 .remove-shadow {
   --box-shadow:none;
 }
+
+.modal-md {
+	--min-height: 70%;
+	--min-width: 60%;
+}
+
+.width-max {
+  width: 100%;
+}
+
+.height-max {
+  height: 100%;
+}
+
+.no-shadow {
+  box-shadow: none !important;
+  --webkit-box-shadow: none;
+}
+
 
 $es-size-definitions: (
   xs: 2px,

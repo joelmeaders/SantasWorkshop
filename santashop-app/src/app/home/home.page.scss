@@ -15,3 +15,30 @@
   padding-left: 100px;
   padding-right: 100px;
 }
+
+ion-toggle {
+  position: relative;
+  top: 10px;
+  --background: var(--ion-color-white);
+  --background-checked: var(--ion-color-white);
+  --handle-box-shadow: none;
+  --handle-background: var(--ion-color-xmasred);
+  --handle-background-checked: var(--ion-color-xmasred);
+  --handle-height: 21px;
+  --handle-width: 21px;
+  --handle-spacing: 4px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+ion-toggle::part(track) {
+  border-width: 1px;
+  border-color: var(--ion-color-dark);
+  border-style:solid;
+  box-sizing: border-box;
+}
+
+.language {
+  font-weight: 500;
+  font-size: 14px;
+}

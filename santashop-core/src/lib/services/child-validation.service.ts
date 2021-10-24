@@ -25,6 +25,7 @@ export class ChildValidationService {
   }
 
   private ageValid(birthdate: Date): boolean {
+    console.log(birthdate, MIN_BIRTHDATE(), birthdate > MIN_BIRTHDATE());
     return birthdate > MIN_BIRTHDATE();
   }
 

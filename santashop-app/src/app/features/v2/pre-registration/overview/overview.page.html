@@ -31,7 +31,7 @@
         <ion-card>
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
-              <ion-card-title lines="full"> Children </ion-card-title>
+              <ion-card-title> Children </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
@@ -50,7 +50,7 @@
 
             <ng-template #hasChildren>
               <ion-list>
-                <ion-item *ngFor="let child of children$ | async">
+                <ion-item *ngFor="let child of children$ | async" lines="none">
                   <ion-icon name="man-outline" slot="start" *ngIf="child.toyType === 'boys'"></ion-icon>
                   <ion-icon name="woman-outline" slot="start" *ngIf="child.toyType === 'girls'"></ion-icon>
                   <ion-icon name="happy-outline" slot="start" *ngIf="child.toyType === 'infants'"></ion-icon>
@@ -72,13 +72,13 @@
         <ion-card [disabled]="!(canChooseDateTime$ | async)">
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
-              <ion-card-title lines="full"> Schedule </ion-card-title>
+              <ion-card-title> Schedule </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
 
             <ng-container *ngIf="!(dateTimeSlot$ | async); else hasDateTimeSlot">
-              <p *ngIf="(childCount$ | async) === 0">
+              <p>
                 <strong> No Time Selected. </strong>
                 <br />
                 After you Add Children, Select a Time.
@@ -90,7 +90,7 @@
             </ng-container>
 
             <ng-template #hasDateTimeSlot>
-              <ion-item>
+              <ion-item lines="none">
                 <ion-label *ngIf="dateTimeSlot$ | async as dateTimeSlot" class="ion-text-wrap">
                   {{ dateTimeSlot.dateTime | date:'fullDate' }}, {{ dateTimeSlot.dateTime | date:'shortTime' }}
                 </ion-label>

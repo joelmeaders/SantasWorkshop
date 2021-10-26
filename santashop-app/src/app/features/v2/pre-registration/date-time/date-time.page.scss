@@ -8,3 +8,8 @@
   padding-bottom: 16px;
   background: var(--ion-color-warning, #FFC409);
 }
+
+.small-padding {
+  --padding-start: 8px;
+  --padding-end: 8px;
+}

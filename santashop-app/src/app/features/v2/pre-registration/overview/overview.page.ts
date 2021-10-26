@@ -41,6 +41,7 @@ export class OverviewPage implements OnDestroy {
     private readonly preregistrationService: PreRegistrationService,
     private readonly popoverController: PopoverController
   ) { }
+  
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

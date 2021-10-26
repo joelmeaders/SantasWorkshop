@@ -1,32 +1,99 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>submit</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content>
-  <p>
-    Need to add children, datetime here along with additional information about
-    event, how to change/cancel reservation etc...
-  </p>
-  <p>
-    Child Count: {{ viewService.childCount$ | async }}
-  </p>
-  <p>
-    Children:
-    <ion-list>
-      <ion-item *ngFor="let child of viewService.children$ | async">
-        Name: {{ child.firstName }} {{ child.lastName }} <br/>
-        DOB: {{ child.dateOfBirth }}
-        <!-- Maybe show age in years? -->
-      </ion-item>
-    </ion-list>
-  </p>
-  <p *ngIf="viewService.dateTimeSlot$ | async as dateTime">
-    Date/Time: {{ dateTime.dateTime | date }}
-    <!-- TODO: Formatting -->
-  </p>
-  <ion-button (click)="submit()">
-    Submit
+<ion-content class="es-pd-bottom-xxl" color="light">
+  <ion-button
+    class="ion-no-padding even-ratio-button ion-margin"
+    color="white"
+    [routerLink]="['../overview']"
+  >
+    <ion-icon
+      slot="icon-only"
+      name="arrow-back-sharp"
+      class="even-ratio-button"
+    ></ion-icon>
   </ion-button>
+
+  <div class="ion-padding es-mg-bottom-xxl">
+    <ion-item class="inset-ion-item-title" color="none">
+      <ion-card-title lines="full"> Submit </ion-card-title>
+    </ion-item>
+
+    <div class="ion-padding">
+      <p>Have you added all children? Is children information correct?</p>
+    </div>
+
+    <ng-container *ngIf="viewService.children$ | async as children">
+      <ion-item
+        *ngFor="let child of children"
+        [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+        lines="none"
+      >
+        <ion-icon
+          name="man-outline"
+          size="large"
+          slot="start"
+          *ngIf="child.toyType === 'boys'"
+        ></ion-icon>
+        <ion-icon
+          name="woman-outline"
+          size="large"
+          slot="start"
+          *ngIf="child.toyType === 'girls'"
+        ></ion-icon>
+        <ion-icon
+          name="happy-outline"
+          size="large"
+          slot="start"
+          *ngIf="child.toyType === 'infants'"
+        ></ion-icon>
+        <ion-card-header>
+          <ion-card-title>
+            {{ child.firstName }} {{ child.lastName }}
+          </ion-card-title>
+          <ion-card-subtitle>
+            {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
+          </ion-card-subtitle>
+        </ion-card-header>
+      </ion-item>
+    </ng-container>
+
+    <div class="ion-padding">
+      <p>Is date and time correct?</p>
+    </div>
+
+    <ion-item lines="none">
+      <div>
+        <ion-card-subtitle class="es-pd-top-md es-pd-bottom-sm">
+          Date & Time
+        </ion-card-subtitle>
+        <ion-label
+          *ngIf="viewService.dateTimeSlot$ | async as slot"
+          class="es-pd-bottom-md"
+        >
+          {{ slot.dateTime | date:'fullDate' }}, {{ slot.dateTime |
+          date:'shortTime' }}
+        </ion-label>
+      </div>
+    </ion-item>
+
+    <div class="ion-padding">
+      <p>
+        Before Submitting, make sure everything on this page is correct. A DSCS
+        Volunteer will have to manually unlock your registration for you to make
+        any changes.
+      </p>
+    </div>
+
+    <div class="width-max ion-text-center">
+      <ion-button
+        fill="clear"
+        class="ion-padding-end"
+        [routerLink]="['../overview']"
+      >
+        Make Changes
+      </ion-button>
+
+      <ion-button color="xmasred" class="ion-padding-start" (click)="submit()">
+        Submit
+      </ion-button>
+    </div>
+  </div>
 </ion-content>

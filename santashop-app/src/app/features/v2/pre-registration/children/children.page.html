@@ -1,6 +1,6 @@
 <ion-content class="es-pd-bottom-xxl" color="light">
   <ion-button
-    class="ion-no-padding even-ratio-button remove-shadow"
+    class="ion-no-padding even-ratio-button ion-margin"
     color="white"
     [routerLink]="['../overview']"
   >
@@ -15,34 +15,53 @@
     <ion-item class="inset-ion-item-title" color="none">
       <ion-card-title lines="full"> Your Children </ion-card-title>
     </ion-item>
-  
+
     <div class="ion-padding-horizontal ion-padding-top">
       <p>
-        Children must be between the ages of 0-11 years old. Proof of ID is required when picking up toys.    
+        Children must be between the ages of 0-11 years old. Proof of ID is
+        required when picking up toys.
       </p>
-    
-      <p>
-        Add all of your Children below.
-      </p>
+
+      <p>Add all of your Children below.</p>
     </div>
-  
+
     <ion-item color="none" lines="full" class="inset-ion-item-title"></ion-item>
-  
+
     <ion-list color="none">
-      <ion-button fill="clear" [routerLink]="['add-child']" class="ion-float-end">
+      <ion-button
+        fill="clear"
+        [routerLink]="['add-child']"
+        class="ion-float-end"
+      >
         <ion-label> Add a Child </ion-label>
-        <ion-icon name="add-circle"size="large" slot="end"></ion-icon>
+        <ion-icon name="add-circle" size="large" slot="end"></ion-icon>
       </ion-button>
-  
+
       <ng-container *ngIf="children$ | async as children">
         <div class="es-pd-bottom-xxl es-pd-top-xxl"></div>
         <ion-item
           *ngFor="let child of children"
           [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+          lines="none"
         >
-          <ion-icon name="man-outline" size="large" slot="start" *ngIf="child.toyType === 'boys'"></ion-icon>
-          <ion-icon name="woman-outline" size="large" slot="start" *ngIf="child.toyType === 'girls'"></ion-icon>
-          <ion-icon name="happy-outline" size="large" slot="start" *ngIf="child.toyType === 'infants'"></ion-icon>
+          <ion-icon
+            name="man-outline"
+            size="large"
+            slot="start"
+            *ngIf="child.toyType === 'boys'"
+          ></ion-icon>
+          <ion-icon
+            name="woman-outline"
+            size="large"
+            slot="start"
+            *ngIf="child.toyType === 'girls'"
+          ></ion-icon>
+          <ion-icon
+            name="happy-outline"
+            size="large"
+            slot="start"
+            *ngIf="child.toyType === 'infants'"
+          ></ion-icon>
           <ion-card-header>
             <ion-card-title>
               {{ child.firstName }} {{ child.lastName }}
@@ -57,23 +76,28 @@
             slot="end"
             (click)="removeChild(child)"
           >
-            <ion-icon slot="icon-only" size="large" name="trash-outline"></ion-icon>
+            <ion-icon
+              slot="icon-only"
+              size="large"
+              name="trash-outline"
+            ></ion-icon>
           </ion-button>
         </ion-item>
       </ng-container>
 
       <ng-container *ngIf="!(childCount$ | async)">
         <div class="ion-text-center es-pd-top-xxl">
-          <ion-card-title color="medium">
-            <strong>
-              No Children. Add One.
-            </strong>
-          </ion-card-title>
+          <ion-card-title color="medium"> No Children. </ion-card-title>
         </div>
       </ng-container>
     </ion-list>
 
-    <ion-button color="xmasred" [routerLink]="['../overview']" class="ion-float-end">
+    <ion-button
+      color="xmasred"
+      [routerLink]="['../overview']"
+      class="ion-float-end ion-margin-top"
+      *ngIf="childCount$ | async"
+    >
       Done
     </ion-button>
   </div>

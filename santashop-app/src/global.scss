@@ -36,13 +36,35 @@ ion-title {
   font-weight: 600;
 }
 
-ion-card, ion-list {
+ion-card, ion-button {
+  --border-radius: 8px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+ion-card {
   --background: var(--ion-color-white);
-  background-color: var(--ion-color-white); // This one is for the list
+  background-color: var(--ion-color-white);
+}
+
+ion-list {
+  border-style: none;
 }
 
 ion-item {
   background-color: unset;
+}
+
+ion-button {
+  --box-shadow: none;
+}
+
+.logo {
+  max-width: 60px;
+  height: auto;
+  padding: 6px 12px 6px 0px;
+  position: relative;
+  overflow: visible;
 }
 
 .dark-border {

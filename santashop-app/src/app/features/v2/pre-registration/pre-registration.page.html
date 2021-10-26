@@ -2,38 +2,41 @@
   <ion-tabs>
     <ion-tab-bar slot="bottom">
 
-      <ion-tab-button tab="overview">
-        <ion-icon name="home"></ion-icon>
-        <ion-label>Home</ion-label>
-      </ion-tab-button>
-
-      <ion-tab-button tab="children" *ngIf="!(isRegistrationComplete$ | async)">
-        <ion-icon name="accessibility"></ion-icon>
-        <ion-label>Children</ion-label>
-        <ng-container *appLet="childCount$ | async as count">
-          <ion-badge [color]="count > 0 ? 'success' : 'danger'">{{ count }}</ion-badge>
-        </ng-container>
-      </ion-tab-button>
-
-      <ion-tab-button tab="date-time" [disabled]="!(childCount$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
-        <ion-icon name="calendar-outline"></ion-icon>
-        <ion-label>Schedule</ion-label>
-        <ng-container *appLet="chosenSlot$ | async as slot">
-          <ion-badge [color]="!!slot ? 'success' : 'danger'">
-            <ion-icon name="checkmark"></ion-icon>
-          </ion-badge>
-        </ng-container>
-      </ion-tab-button>
+      <ng-container *ngIf="!(isRegistrationComplete$ | async); else registrationComplete;">
+        <ion-tab-button tab="overview">
+          <ion-icon name="home"></ion-icon>
+          <ion-label>Home</ion-label>
+        </ion-tab-button>
   
-      <ion-tab-button tab="submit" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
-        <ion-icon name="send-outline"></ion-icon>
-        <ion-label>Submit</ion-label>
-      </ion-tab-button>
+        <ion-tab-button tab="children" *ngIf="!(isRegistrationComplete$ | async)">
+          <ion-icon name="accessibility"></ion-icon>
+          <ion-label>Children</ion-label>
+          <ng-container *appLet="childCount$ | async as count">
+            <ion-badge [color]="count > 0 ? 'success' : 'danger'">{{ count }}</ion-badge>
+          </ng-container>
+        </ion-tab-button>
+  
+        <ion-tab-button tab="date-time" [disabled]="!(childCount$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <ion-label>Schedule</ion-label>
+          <ng-container *appLet="chosenSlot$ | async as slot">
+            <ion-badge [color]="!!slot ? 'success' : 'danger'">
+              <ion-icon name="checkmark"></ion-icon>
+            </ion-badge>
+          </ng-container>
+        </ion-tab-button>
+    
+        <ion-tab-button tab="submit" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
+          <ion-icon name="send-outline"></ion-icon>
+          <ion-label>Submit</ion-label>
+        </ion-tab-button>
+      </ng-container>
 
-      <ion-tab-button tab="confirmation" *ngIf="(isRegistrationComplete$ | async)">
-        <ion-icon name="gift"></ion-icon>
-        <ion-label>Confirmation</ion-label>
-      </ion-tab-button>
+      <ng-template #registrationComplete>
+        <ion-button fill="clear">
+          Request To Change
+        </ion-button>
+      </ng-template>
       
     </ion-tab-bar>
   </ion-tabs>

@@ -34,6 +34,7 @@ ion-tab-bar {
 
 ion-tab-button {
     border-radius: 16px !important;
+    --color-selected: var(--ion-color-xmasred);
 }
 
 :root {

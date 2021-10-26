@@ -8,7 +8,7 @@ import {
   ScreenTrackingService,
   UserTrackingService,
 } from '@angular/fire/compat/analytics';
-import { AngularFireStorageModule, BUCKET } from '@angular/fire/compat/storage';
+import { AngularFireStorageModule, BUCKET, USE_EMULATOR as USE_STORAGE_EMULATOR } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -65,6 +65,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: DEMO_MODE, useValue: true },
     // Storage
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
+    { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },
     // Analytics
     {
       provide: ANALYTICS_CONFIG,

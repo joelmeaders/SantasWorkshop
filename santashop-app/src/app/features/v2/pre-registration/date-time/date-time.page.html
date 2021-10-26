@@ -1,6 +1,6 @@
 <ion-content class="es-pd-bottom-xxl" color="light">
   <ion-button
-    class="ion-no-padding even-ratio-button remove-shadow"
+  class="ion-no-padding even-ratio-button ion-margin"
     color="white"
     [routerLink]="['../overview']"
   >
@@ -16,11 +16,9 @@
       <ion-card-title lines="full"> Schedule </ion-card-title>
     </ion-item>
 
-    <div class="ion-padding-horizontal ion-padding-top">
+    <div class="ion-padding">
       <p>Choose an available date and time to pick up your toys.</p>
     </div>
-
-    <ion-item color="none" lines="full" class="inset-ion-item-title"></ion-item>
 
     <ion-card>
       <ion-card-header>
@@ -54,23 +52,28 @@
     </ng-container>
 
     <ng-container *ngIf="!(chosenSlot$ | async)">
-      <ion-list-header color="light"> Available Dates/Times </ion-list-header>
+      <ion-list-header color="light" class="ion-padding-top">
+        <ion-title class="ion-no-padding">
+          Available Dates/Times
+        </ion-title>
+      </ion-list-header>
 
-      <ion-accordion-group color="light">
+      <ion-accordion-group color="light" class="es-pd-left-xl es-pd-right-xl">
         <ion-accordion *ngFor="let day of availableDays$ | async">
           <ion-item slot="header" color="light">
             <ion-label>
-              <strong> {{ day | date:'EEEE, MMMM d'}} </strong>
+              {{ day | date:'EEEE, MMMM d'}}
             </ion-label>
           </ion-item>
-          <ion-list slot="content" color="light">
+          <ion-list slot="content" color="light" class="ion-no-padding es-pd-left-xxl">
             <ion-item
               *ngFor="let slot of (availableSlotsByDay$(day) | async)"
               color="light"
-              detail="true"
-              (click)="selectDateTime(slot)"
             >
               <ion-label>{{ slot.dateTime | date:'h:mm a' }}</ion-label>
+              <ion-button slot="end" (click)="selectDateTime(slot)" size="default" class="small-padding">
+                Select
+              </ion-button>
             </ion-item>
           </ion-list>
         </ion-accordion>

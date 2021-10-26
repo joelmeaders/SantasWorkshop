@@ -24,7 +24,7 @@ export class PublicMenuComponent implements OnDestroy {
     refCount()
   );
 
-  public readonly $signupEnabled = this.remoteConfigService.signupEnabled$.pipe(
+  public readonly $signupEnabled = this.remoteConfigService.registrationEnabled$.pipe(
     takeUntil(this.$destroy),
     publishReplay(),
     refCount()

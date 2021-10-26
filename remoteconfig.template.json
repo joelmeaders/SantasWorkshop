@@ -1,11 +1,26 @@
 {
-  "parameters": {
-    "signupEnabled": {
+  "parameter": [
+    {
+      "key": "signupEnabled",
       "defaultValue": {
-        "value": "true"
+        "value": "false"
       },
       "description": "Allow registrations in the app",
       "valueType": "STRING"
+    },
+    {
+      "key": "registrationEnabled",
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
+    },
+    {
+      "key": "maintenanceModeEnabled",
+      "defaultValue": {
+        "value": "false"
+      },
+      "valueType": "BOOLEAN"
     }
-  }
+  ]
 }

@@ -34,6 +34,14 @@ const routes: Routes = [
   {
     path: 'reset-password',
     loadChildren: () => import('./features/v2/reset-password/reset-password.module').then( m => m.ResetPasswordPageModule)
+  },
+  {
+    path: 'registration-closed',
+    loadChildren: () => import('./features/registration-closed/registration-closed.module').then( m => m.RegistrationClosedPageModule)
+  },
+  {
+    path: 'maintenance',
+    loadChildren: () => import('./features/maintenance/maintenance.module').then( m => m.MaintenancePageModule)
   }
 
 ];

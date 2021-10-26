@@ -1,24 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { MaintenanceService } from '../../core/services/maintenance.service';
+import { AppStateService } from '../../core/services/app-state.service';
 
 @Component({
   selector: 'app-maintenance',
   templateUrl: './maintenance.page.html',
   styleUrls: ['./maintenance.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MaintenancePage implements OnInit {
 
   constructor(
-    public readonly service: MaintenanceService,
+    public readonly service: AppStateService,
     private readonly router: Router
   ) { }
 
   async ngOnInit() {
-    const isMaintenance = await this.service.$isMaintenance.pipe(take(1)).toPromise();
+    const isMaintenanceModeEnabled = await this.service.isMaintenanceModeEnabled$.pipe(take(1)).toPromise();
 
-    if (!isMaintenance) {
+    if (!isMaintenanceModeEnabled) {
       this.router.navigate(['/']);
     }
   }

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { first, publishReplay, refCount, takeUntil } from 'rxjs/operators';
+import { first, map, publishReplay, refCount, takeUntil } from 'rxjs/operators';
 import { AuthService } from 'santashop-core/src';
 import { RemoteConfigService } from '../core/services/remote-config.service';
 import { PublicMenuComponent } from '../shared/components/public-menu/public-menu.component';
@@ -20,8 +20,9 @@ export class HomePage implements OnDestroy {
   public readonly $user = this.authService.currentUser$;
 
   // TODO: Remote config
-  public readonly $signupEnabled = this.remoteConfigService.signupEnabled$.pipe(
+  public readonly $signupEnabled = this.remoteConfigService.registrationEnabled$.pipe(
     takeUntil(this.$destroy),
+    map(value => !value),
     publishReplay(),
     refCount()
   );

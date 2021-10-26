@@ -1,18 +1,20 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { AppStateService } from './core';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss']
+  styleUrls: ['app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   constructor(
     private platform: Platform,
     private readonly translate: TranslateService,
+    private readonly appStateService: AppStateService
     // private readonly analyticsService: AngularFireAnalytics,
-    // private readonly maintenance: MaintenanceService,
     // private readonly signUpStatusService: SignUpStatusService
   ) {
     this.initializeApp();
@@ -20,7 +22,7 @@ export class AppComponent {
 
   initializeApp() {
     this.platform.ready().then(() => {
-      // do something?
+      console.log('AppStateService Injected', !!this.appStateService)
     });
 
     this.translate.addLangs(['en', 'es']);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireRemoteConfig, budget } from '@angular/fire/compat/remote-config';
-import { distinctUntilChanged, filter, last, map, publishReplay, refCount } from 'rxjs/operators';
+import { distinctUntilChanged, filter, last, map, shareReplay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -14,11 +14,16 @@ export class RemoteConfigService {
       last()
     );
 
-  public readonly signupEnabled$ = this.valueFromConfig$('signupEnabled').pipe(
+  public readonly registrationEnabled$ = this.valueFromConfig$('registrationEnabled').pipe(
     map(param => param.asBoolean()),
     distinctUntilChanged(),
-    publishReplay(1),
-    refCount()
+    shareReplay(1)
+  );
+
+  public readonly maintenanceModeEnabled$ = this.valueFromConfig$('maintenanceModeEnabled').pipe(
+    map(param => param.asBoolean()),
+    distinctUntilChanged(),
+    shareReplay(1)
   );
 
   constructor(

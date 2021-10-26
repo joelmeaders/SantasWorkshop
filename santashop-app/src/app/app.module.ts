@@ -76,7 +76,7 @@ export function httpLoaderFactory(http: HttpClient) {
       },
     },
     // Remote Config
-    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { signupEnabled: true } },
+    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { registrationEnabled: true, maintenanceModeEnabled: false } },
     { provide: USE_REMOTE_EMULATOR, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
     { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
     AngularFireAnalytics,

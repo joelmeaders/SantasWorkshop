@@ -22,7 +22,8 @@ export class SignUpStatusGuard implements CanActivate, CanLoad {
   }
 
   private readonly signupEnabled = () => 
-    this.signUpStatusService.signupEnabled$.pipe(
+    this.signUpStatusService.registrationEnabled$.pipe(
+      map(value => !value),
       map(enabled => enabled || this.router.parseUrl('/registration-closed'))
     )
 }

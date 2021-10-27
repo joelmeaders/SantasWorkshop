@@ -1,20 +1,23 @@
-<ion-list lines="none">
-  <ion-item button tappable [routerLink]="['/profile']">
+<ion-list lines="none" class="ion-text-center">
+  <ion-item button tappable [routerLink]="['/profile']" class="ion-text-center">
     <ion-label>
       {{ 'COMMON.MY_ACCOUNT' | translate }}
     </ion-label>
   </ion-item>
-  <ion-item button tappable>
+  <ion-item class="ion-text-center">
+    <app-language-toggle></app-language-toggle>
+  </ion-item>
+  <ion-item button tappable class="ion-text-center">
     <ion-label>
       {{ 'COMMON.VIDEO_TUTORIAL' | translate }}
     </ion-label>
   </ion-item>
-  <ion-item button tappable>
+  <ion-item button tappable class="ion-text-center">
     <ion-label>
       {{ 'COMMON.HELP' | translate }}
     </ion-label>
   </ion-item>
-  <ion-item button tappable (click)="logout()">
+  <ion-item button tappable (click)="logout()" class="ion-text-center">
     <ion-label>
       {{ 'COMMON.SIGN_OUT' | translate }}
     </ion-label>
@@ -24,11 +27,5 @@
     <ion-label>
       Our Website
     </ion-label>
-  </ion-item>
-  <ion-item button tappable (click)="setLanguage('en')" >
-    English
-  </ion-item>
-  <ion-item button tappable (click)="setLanguage('es')" >
-    Español
   </ion-item> -->
 </ion-list>

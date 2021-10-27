@@ -1,13 +1,7 @@
-<ion-content fullscreen="true" color="light">
+<ion-content color="light">
   <ion-header class="ion-no-border">
     <ion-toolbar color="none">
-      <div slot="end" class="center ion-padding">
-        <ion-text color="xmasred" class="language">
-            Español
-            <ion-toggle checked mode="ios"></ion-toggle>
-            English
-        </ion-text>
-      </div>
+      <app-language-toggle slot="end" class="ion-padding-end"></app-language-toggle>
     </ion-toolbar>
   </ion-header>
 
@@ -25,7 +19,7 @@
     <ion-row class="ion-padding-bottom">
       <ion-col class="ion-text-center">
         <ion-title color="xmasred">
-          <strong> Welcome to the<br />Denver Santa Claus Shop App! </strong>
+          <strong innerHtml="{{ 'HOME.WELCOME_MESSAGE' | translate }}"></strong>
         </ion-title>
       </ion-col>
     </ion-row>
@@ -37,7 +31,9 @@
           class="remove-shadow dark-border"
           [routerLink]="['/sign-up']"
         >
-          <div class="button-text-padding">Create An Account</div>
+          <div class="button-text-padding">
+            {{ 'HOME.CREATE_ACCOUNT' | translate }}
+          </div>
         </ion-button>
       </ion-col>
       <ion-col size="12" class="ion-text-center">
@@ -46,7 +42,9 @@
           class="remove-shadow dark-border"
           [routerLink]="['/sign-in']"
         >
-          <div class="button-text-padding">Sign In</div>
+          <div class="button-text-padding">
+            {{ 'COMMON.SIGN_IN' | translate }}
+          </div>
         </ion-button>
       </ion-col>
     </ion-row>

@@ -61,7 +61,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     // App settings
     { provide: PROGRAM_YEAR, useValue: 2021 },
-    { provide: MOBILE_EVENT, useValue: false },
+    { provide: MOBILE_EVENT, useValue: true },
     { provide: DEMO_MODE, useValue: true },
     // Storage
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },

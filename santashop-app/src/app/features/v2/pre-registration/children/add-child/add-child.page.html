@@ -13,7 +13,7 @@
 
   <div class="ion-padding">
     <ion-item class="inset-ion-item-title" color="none">
-      <ion-card-title lines="full"> Add Child </ion-card-title>
+      <ion-card-title lines="full"> {{ 'ADDCHILD.ADD_TITLE' | translate }} </ion-card-title>
     </ion-item>
 
     <div class="ion-padding-top">
@@ -90,9 +90,9 @@
 
           <div
             class="ion-padding-top ion-text-wrap"
-            *ngIf="mobileEvent && ($isInfant | async)"
+            *ngIf="mobileEvent && (isInfant$ | async)"
           >
-            <ion-item lines="none">
+            <ion-item lines="none" color="light">
               <ion-icon name="gift" color="success" slot="start"></ion-icon>
               <ion-text> {{ 'ADDCHILD.INFANT_MSG' | translate }} </ion-text>
             </ion-item>
@@ -120,21 +120,23 @@
                 <ion-radio slot="start" value="infants"></ion-radio>
               </ion-item>
 
-              <ion-item *ngIf="!($isInfant | async)" color="light">
+              <ion-item *ngIf="!(isInfant$ | async)" color="light">
                 <ion-label>{{ 'ADDCHILD.BOYS' | translate }}</ion-label>
                 <ion-radio slot="start" value="boys"></ion-radio>
               </ion-item>
 
-              <ion-item *ngIf="!($isInfant | async)" color="light">
+              <ion-item *ngIf="!(isInfant$ | async)" color="light">
                 <ion-label>{{ 'ADDCHILD.GIRLS' | translate }}</ion-label>
                 <ion-radio slot="start" value="girls"></ion-radio>
               </ion-item>
             </ion-radio-group>
+            
           </div>
 
+          <!-- TODO: Check with Kelsey -->
           <div
             class="ion-padding-top"
-            *ngIf="mobileEvent && !($isInfant | async)"
+            *ngIf="mobileEvent && !(isInfant$ | async)"
           >
             <ion-radio-group formControlName="ageGroup" color="light">
               <ion-list-header>
@@ -167,7 +169,7 @@
                 <ion-radio slot="start" value="6-8"></ion-radio>
               </ion-item>
 
-              <ion-item>
+              <ion-item color="light">
                 <ion-label>{{ 'ADDCHILD.AGE9' | translate }}</ion-label>
                 <ion-radio slot="start" value="9-11"></ion-radio>
               </ion-item>
@@ -178,7 +180,7 @@
     </div>
     <div class="ion-text-end ion-padding-top">
       <ion-button color="xmasred" (click)="addChild()" [disabled]="!form.valid">
-        Add Child
+        {{ 'OVERVIEW.ADD_CHILD' | translate }}
       </ion-button>
     </div>
   </div>

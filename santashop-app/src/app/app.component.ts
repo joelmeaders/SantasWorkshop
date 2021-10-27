@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { AppStateService } from './core';
@@ -13,9 +14,8 @@ export class AppComponent {
   constructor(
     private platform: Platform,
     private readonly translate: TranslateService,
-    private readonly appStateService: AppStateService
-    // private readonly analyticsService: AngularFireAnalytics,
-    // private readonly signUpStatusService: SignUpStatusService
+    private readonly appStateService: AppStateService,
+    private readonly analyticsService: AngularFireAnalytics,
   ) {
     this.initializeApp();
   }
@@ -29,6 +29,6 @@ export class AppComponent {
     this.translate.setDefaultLang('en');
     const browserLang = this.translate.getBrowserLang();
     this.translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
-    // this.analyticsService.logEvent('default_language', { value: browserLang });
+    this.analyticsService.logEvent('default_language', { value: browserLang });
   }
 }

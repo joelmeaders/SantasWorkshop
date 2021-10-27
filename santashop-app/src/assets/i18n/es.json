@@ -1,20 +1,34 @@
 {
-  "COMMON": {
-    "MENU": "Menú",
-    "SIGN_IN": "Iniciar sesión",
-    "SIGN_OUT": "Cerrar sesión",
-    "CREATE_ACCOUNT": "Crear cuenta",
+  "MENU": {
     "HOME": "Principal",
-    "PROFILE": "Su perfil",
+    "CHILDREN": "Niños",
+    "SCHEDULE": "Horario",
+    "SUBMIT": "Enviar",
+    "REQUEST_CHANGE": "Solicitud de cambio"
+  },
+  "HOME": {
+    "WELCOME_MESSAGE": "¡Bienvenido a la<br/>aplicación Denver Santa Claus Shop!",
+    "CREATE_ACCOUNT": "Crear una cuenta"
+  },
+  "COMMON": {
     "EMAIL_ADDRESS": "Dirección de correo electrónico",
     "PASSWORD": "Contraseña",
+    "SIGN_IN": "Inicia sesión",
+    "CREATE_ACCOUNT": "Crear cuenta",
+    "WELCOME": "Bienvenido",
+    "MY_ACCOUNT": "Mi cuenta",
+    "VIDEO_TUTORIAL": "Vídeo Tutorial",
+    "HELP": "Ayuda",
+    "SIGN_OUT": "Cerrar sesión",
+
+    
+    "MENU": "Menú",
+    "PROFILE": "Su perfil",
     "GO_BACK": "Volver",
     "REQUIRED_FIELD": "Esto es obligatorio",
     "AGE": "Edad",
     "BACK_TO_TOP": "Volver arriba",
     "CANCEL": "Cancelar",
-    "SHOW_PASSWORD": "(Hacer clic para mostrar contraseña)",
-    "HIDE_PASSWORD": "(Hacer clic para ocultar contraseña)",
     "REQUIRED_CHOICE": "Selección requerida",
     "SAVE_CHANGES": "Guardar cambios",
     "CLOSE": "Cerca",
@@ -25,6 +39,10 @@
     "TERMS_AND_CONDITIONS": "Términos y condiciones",
     "PRIVACY_POLICY": "Política de privacidad"
   },
+  "SIGNIN": {
+    "FORGOT_PASSWORD": "¿Olvidó su contraseña?",
+    "SIGNING_IN": "Iniciar sesión..."
+  },
   "SIGN-UP": {
     "TITLE1": "Configura tu cuenta...",
     "TITLE2": "Esto solo tomará un minuto",
@@ -34,59 +52,48 @@
     "PASSWORD2": "Volver a introducir la contraseña",
     "PASSWORD_MATCH": "Las contraseñas no coinciden",
     "LEGAL_AGREEMENT": "Al registrarse, usted acepta nuestros términos de servicio y ha leído nuestra política de privacidad",
-    "SUBMIT_BUTTON": "Crear cuenta"
+    "SUBMIT_BUTTON": "Crear cuenta",
+    "CHANGE_TIME": "Cambiar hora"
   },
-  "SIGNIN": {
-    "TITLE1": "Iniciar sesión en su cuenta",
-    "FORGOT_PASSWORD": "¿Olvidó su contraseña?",
-    "MAKE_ACCOUNT1": "Si aún no ha creado una cuenta con nosotros, puede hacer una haciendo clic aquí",
-    "SIGNING_IN": "Iniciar sesión...",
-    "DEVICE_ISSUE": "Problema del dispositivo",
-    "DEVICE_ISSUE_MSG": "Inténtelo de nuevo con otro navegador o dispositivo. Pedimos disculpas por las molestias"
+  "OVERVIEW": {
+    "NO_CHILDREN": "Sin niños.",
+    "NO_CHILDREN_MESSAGE": "Agregue todos los niños y, a continuación, seleccione una hora.",
+    "ADD_CHILD": "Agregar hijo",
+    "ADD_EDIT_CHILD": "Agregar o editar hijo",
+    "SCHEDULE": "Horario",
+    "NO_TIME_SELECTED.": "No hay hora seleccionada.",
+    "NO_TIME_MESSAGE": "Después de agregar hijos, seleccione una hora.",
+    "SELECT_TIME": "Seleccione la hora",
+    "NOT_SUBMITTED.": "No presentado.",
+    "NOT_SUBMITTED_MESSAGE": "Después de agregar niños y seleccionar una hora, envíe para obtener su código QR para el evento."
   },
-  "ADD_CHILDREN": {
-    "HEADER": "No se puede salvar a un niño",
-    "MESSAGE": "Solo tenemos juguetes para niños menores de 11 años",
-    "INVALID_FIRSTNAME": "El nombre debe tener entre 2 y 20 caracteres",
-    "INVALID_LASTNAME": "El apellido debe tener entre 2 y 30 caracteres"
+  "CHILDREN": {
+    "CHILD_LINE_1": "Los niños deben tener entre 0 y 11 años de edad. Se requiere prueba de identificación al recoger juguetes.",
+    "CHILD_LINE_2": "Agregue todos sus hijos a continuación.",
+    "ADD_A_CHILD": "Agregar un niño",
+    "NO_CHILDREN": "No hay niños."
   },
-
-
-
-
-
-
-
-
-  "HOME": {
-    "TITLE": "Registro en la tienda Denver Santa Claus Shop",
-    "HEADER": "Un juguete para cada niña y cada niño",
-    "MESSAGE": "¡Bienvenido al registro previo de la tienda Denver Santa Claus Shop de 2020! Este año cumpliremos nuestra misión de una forma nueva y emocionante: con nuestro primer obsequio promocional de un juguete móvil.<br/><br/>Los residentes de Denver podrán participar del evento de entrega del juguete móvil los días 11, 12, 14 y 15 de diciembre. En lugar de compras, obtendrá un paquete de juguetes según el género y la edad de los niños que registre previamente.<br/><br/>Complete el formulario de registro previo antes del evento. Esto le ahorrará tiempo el día de la compra.<br/><br/>Si es la primera vez que visita la página web, seleccione “Crear cuenta” y siga las instrucciones.<br/><br/>Seleccione “Iniciar sesión” si ya ha creado una cuenta y desea cambiar su registro. Asegúrese de volver a ingresar TODA la información para TODOS los niños.<br/><br/>Esperamos ansiosos poder compartir la alegría de las fiestas con usted y su familia durante esta época difícil."
-  },
-  
-  "SIGNUP_ACCOUNT": {
-    "HEADER": "Crea tu cuenta",
-    "EMAIL_ADDRESS": "Dirección de correo electrónico",
-    "EMAIL_EXAMPLE": "ejemplo@gmail.com",
-    "CREATE_PASSWORD": "Crear contraseña",
-    "CREATE_PASSWORD_PH": "Mínimo de 8 caracteres",
-    "CREATING": "¡Creando tu cuenta!",
-    "CREATED": "Cuenta creada",
-    "NOW_SIGN_IN": "Ahora inicia sesión en la cuenta que acabas de crear",
-    "CONFIRM_EMAIL": "¿Su correo electrónico es correcto?",
-    "CONFIRM_EMAIL_MSG": "No se puede cambiar después de este paso. Después del registro, enviamos su billete a esta dirección de correo electrónico.",
-    "VERIFICATION_FAILED": "Error en la verificación",
-    "VERIFICATION_FAILED_MSG": "Es necesario actualizar la página para intentarlo de nuevo"
-  },
-  "SIGNUP_INFO": {
-    "HEADER": "Ingrese su información para continuar",
+  "ADDCHILD": {
+    "ADD_TITLE": "Agregar niño",
     "FIRST_NAME": "Nombre",
-    "FIRST_NAME_PH": "Escriba su nombre",
     "LAST_NAME": "Apellido",
-    "LAST_NAME_PH": "Escriba su apellido",
-    "ZIP_CODE": "Código postal",
-    "NEXT_STEP": "Ir al registro"
+    "BIRTH_DATE": "Fecha de nacimiento",
+    "TOY_TYPE": "Tipo de juguetes",
+
+    "EDIT_TITLE": "Editar niño",
+    "INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",
+    "BABIES": "For Babies (0-2)",
+    "BOYS": "Para niños",
+    "GIRLS": "Para niñas",
+    "AGE_GROUP": "Grupo etario",
+    "AGE0": "De 0 a 2 años",
+    "AGE3": "De 3 a 5 años",
+    "AGE6": "De 6 a 8 años",
+    "AGE9": "De 9 a 11 años",
+    "TOO_OLD_1": "Lo sentimos.",
+    "TOO_OLD_2": "Solo tenemos juguetes para niños menores de 11 años."
   },
+
   "FORGOTPASS": {
     "HEADER": "Restablezca contraseña",
     "RESET_YOUR_PASSWORD": "Restablezca su contraseña",
@@ -163,26 +170,7 @@
     "REGISTERED_3": "Guarde o imprima el correo electrónico que le enviamos. Lo necesitará el día del evento para hacer el check-in.",
     "QR_INFO": "Si tu código QR no se está cargando, prueba a actualizar la página. También revise su correo electrónico."
   },
-  "ADDCHILD": {
-    "ADD_TITLE": "Agregar niño",
-    "EDIT_TITLE": "Editar niño",
-    "INSTRUCTIONS": "Agregue a su hijo a continuación y ahorre",
-    "CHILD_NAME": "Nombre del niño",
-    "FIRST_EM": "(Sólo nombre)",
-    "BIRTH_DATE": "Fecha de nacimiento",
-    "INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",
-    "TOY_TYPE": "Tipo de juguetes",
-    "BABIES": "For Babies (0-2)",
-    "BOYS": "Para niños",
-    "GIRLS": "Para niñas",
-    "AGE_GROUP": "Grupo etario",
-    "AGE0": "De 0 a 2 años",
-    "AGE3": "De 3 a 5 años",
-    "AGE6": "De 6 a 8 años",
-    "AGE9": "De 9 a 11 años",
-    "TOO_OLD_1": "Lo sentimos.",
-    "TOO_OLD_2": "Solo tenemos juguetes para niños menores de 11 años."
-  },
+  
   "PRIVACY": {
     "PRIVACY_&_COOKIES": "Privacidad y cookies",
     "TITLE": "Política de privacidad de la tienda Denver Santa Claus Shop",

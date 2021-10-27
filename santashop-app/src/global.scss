@@ -25,10 +25,10 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-ion-content {
-  padding-bottom: 100px;
-  margin-bottom: -90px !important;
-}
+// ion-content {
+//   padding-bottom: 100px;
+//   margin-bottom: -90px !important;
+// }
 
 ion-title {
   font-family: 'Inter', 'Roboto', sans-serif;
@@ -39,7 +39,6 @@ ion-title {
 ion-card, ion-button {
   --border-radius: 8px;
   border-radius: 8px;
-  box-sizing: border-box;
 }
 
 ion-card {

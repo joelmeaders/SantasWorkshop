@@ -7,10 +7,9 @@
         alt="logo with santa claus"
       />
       <ion-card-title *ngIf="userRegistration$ | async as registration">
-        <strong
-          >Welcome, {{ registration.firstName }} {{ registration.lastName
-          }}</strong
-        >
+        <strong>
+          {{ 'COMMON.WELCOME' | translate }}, {{ registration.firstName }} {{ registration.lastName }}
+        </strong>
       </ion-card-title>
     </ion-item>
     <ion-button slot="end" fill="clear" (click)="menu($event)">
@@ -31,19 +30,19 @@
         <ion-card>
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
-              <ion-card-title> Children </ion-card-title>
+              <ion-card-title> {{ 'MENU.CHILDREN' | translate }} </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
             <ng-container *ngIf="(childCount$ | async) === 0; else hasChildren">
               <p>
-                <strong> No Children. </strong>
+                <strong> {{ 'OVERVIEW.NO_CHILDREN' | translate }} </strong>
                 <br />
-                Add all Children, then Select a Time.
+                {{ 'OVERVIEW.NO_CHILDREN_MESSAGE' | translate }}
               </p>
               <p class="ion-text-end es-pd-top-sm">
                 <ion-button color="xmasred" [routerLink]="['../children']">
-                  Add Child
+                  {{ 'OVERVIEW.ADD_CHILD' | translate }}
                 </ion-button>
               </p>
             </ng-container>
@@ -60,7 +59,7 @@
 
               <p class="ion-text-end es-pd-top-sm">
                 <ion-button color="xmasred" [routerLink]="['../children']">
-                  Add or Edit Child
+                  {{ 'OVERVIEW.ADD_EDIT_CHILD' | translate }}
                 </ion-button>
               </p>
             </ng-template>
@@ -72,20 +71,20 @@
         <ion-card [disabled]="!(canChooseDateTime$ | async)">
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
-              <ion-card-title> Schedule </ion-card-title>
+              <ion-card-title> {{ 'OVERVIEW.SCHEDULE' | translate }} </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
 
             <ng-container *ngIf="!(dateTimeSlot$ | async); else hasDateTimeSlot">
               <p>
-                <strong> No Time Selected. </strong>
+                <strong> {{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }} </strong>
                 <br />
-                After you Add Children, Select a Time.
+                {{ 'OVERVIEW.NO_TIME_MESSAGE' | translate }}
               </p>
 
               <p class="ion-text-end es-pd-top-sm">
-                <ion-button color="xmasred" [routerLink]="['../date-time']"> Select Time </ion-button>
+                <ion-button color="xmasred" [routerLink]="['../date-time']"> {{ 'OVERVIEW.SELECT_TIME' | translate }} </ion-button>
               </p>
             </ng-container>
 
@@ -96,7 +95,7 @@
                 </ion-label>
               </ion-item>
               <p class="ion-text-end es-pd-top-sm">
-                <ion-button color="xmasred" [routerLink]="['../date-time']"> Change Time </ion-button>
+                <ion-button color="xmasred" [routerLink]="['../date-time']"> {{ 'OVERVIEW.CHANGE_TIME' | translate }} </ion-button>
               </p>
             </ng-template>
 
@@ -110,18 +109,17 @@
         <ion-card [disabled]="!(canSubmit$ | async)">
           <ion-card-header>
             <ion-item class="inset-ion-item-title">
-              <ion-card-title lines="full"> Submit </ion-card-title>
+              <ion-card-title lines="full"> {{ 'MENU.SUBMIT' | translate }} </ion-card-title>
             </ion-item>
           </ion-card-header>
           <ion-card-content class="ion-text-center">
             <p>
-              <strong> Not Submitted. </strong>
+              <strong> {{ 'OVERVIEW.NOT_SUBMITTED' | translate }} </strong>
               <br />
-              After you Add Children and Select a Time, Submit to get your QR
-              Code for the Event.
+              {{ 'OVERVIEW.NOT_SUBMITTED_MESSAGE' | translate }}
             </p>
             <p class="ion-text-end es-pd-top-sm">
-              <ion-button color="xmasred" [routerLink]="['../submit']"> Submit </ion-button>
+              <ion-button color="xmasred" [routerLink]="['../submit']"> {{ 'MENU.SUBMIT' | translate }} </ion-button>
             </p>
           </ion-card-content>
         </ion-card>

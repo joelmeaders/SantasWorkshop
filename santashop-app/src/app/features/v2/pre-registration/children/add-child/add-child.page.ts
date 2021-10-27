@@ -30,7 +30,7 @@ export class AddChildPage implements OnDestroy {
   public readonly maxBirthDate = MAX_BIRTHDATE().toISOString();
 
   private readonly _$isInfant = new BehaviorSubject<boolean>(false);
-  public readonly $isInfant = this._$isInfant.pipe(takeUntil(this.destroy$), shareReplay(1));
+  public readonly isInfant$ = this._$isInfant.pipe(takeUntil(this.destroy$), shareReplay(1));
 
   constructor(
     @Inject(PROGRAM_YEAR) private readonly programYear: number,

@@ -18,11 +18,10 @@
 
     <div class="ion-padding-horizontal ion-padding-top">
       <p>
-        Children must be between the ages of 0-11 years old. Proof of ID is
-        required when picking up toys.
+        {{ 'CHILDREN.CHILD_LINE_1' | translate }}
       </p>
 
-      <p>Add all of your Children below.</p>
+      <p>{{ 'CHILDREN.CHILD_LINE_2' | translate }}</p>
     </div>
 
     <ion-item color="none" lines="full" class="inset-ion-item-title"></ion-item>
@@ -33,7 +32,7 @@
         [routerLink]="['add-child']"
         class="ion-float-end"
       >
-        <ion-label> Add a Child </ion-label>
+        <ion-label> {{ 'CHILDREN.ADD_A_CHILD' | translate }} </ion-label>
         <ion-icon name="add-circle" size="large" slot="end"></ion-icon>
       </ion-button>
 
@@ -87,7 +86,7 @@
 
       <ng-container *ngIf="!(childCount$ | async)">
         <div class="ion-text-center es-pd-top-xxl">
-          <ion-card-title color="medium"> No Children. </ion-card-title>
+          <ion-card-title color="medium"> {{ 'CHILDREN.NO_CHILDREN' | translate }} </ion-card-title>
         </div>
       </ng-container>
     </ion-list>

@@ -29,8 +29,6 @@ export class ChildrenPageService implements OnDestroy {
     this.destroy$.complete();
   }
 
-  
-
   public async removeChild(childToRemove: IChild): Promise<void> {
 
     const children = 

@@ -28,10 +28,6 @@ const routes: Routes = [
     data: { authGuardPipe: redirectUnauthorizedToLogin }
   },
   {
-    path: 'profile',
-    loadChildren: () => import('./features/v2/profile/profile.module').then( m => m.ProfilePageModule)
-  },
-  {
     path: 'reset-password',
     loadChildren: () => import('./features/v2/reset-password/reset-password.module').then( m => m.ResetPasswordPageModule)
   },

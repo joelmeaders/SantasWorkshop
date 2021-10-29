@@ -10,13 +10,14 @@ import {
 } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, take, tap } from 'rxjs/operators';
 
 @Injectable()
 export class SignInPageService implements OnDestroy {
   public readonly form = newAuthForm();
   private readonly subscriptions = new Array<Subscription>();
+  public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
 
   /**
    * Redirects a user if they're already signed in.
@@ -29,6 +30,7 @@ export class SignInPageService implements OnDestroy {
       filter((user) => !!user),
       tap(() => this.router.navigate(['/pre-registration/overview']))
     );
+
   constructor(
     private readonly authService: AuthService,
     private readonly afFunctions: AngularFireFunctions,
@@ -46,12 +48,10 @@ export class SignInPageService implements OnDestroy {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
-  public async signIn($event: any): Promise<void | IError> {
+  public async signIn(): Promise<void | IError> {
 
-    if (!await this.validateRecaptcha($event)) {
-      await this.failedVerification();
+    if (!this.recaptchaValid$.getValue())
       return;
-    }
 
     const auth: IAuth = {
       ...this.form.value,
@@ -71,6 +71,16 @@ export class SignInPageService implements OnDestroy {
     } finally {
       await loader.dismiss();
     }
+  }
+
+  public async onValidateRecaptcha($event: any) {
+    if (!await this.validateRecaptcha($event)) {
+      this.recaptchaValid$.next(false);
+      await this.failedVerification();
+      return;
+    }
+
+    this.recaptchaValid$.next(true);
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {

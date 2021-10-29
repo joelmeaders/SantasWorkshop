@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, IError, IOnboardUser } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { combineLatest, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 import { IAuth } from 'santashop-core/src/lib/models/auth.model';
 import { newOnboardUserForm } from './sign-up.form';
@@ -13,6 +13,7 @@ import { newOnboardUserForm } from './sign-up.form';
 export class SignUpPageService implements OnDestroy {
 
   public readonly form = newOnboardUserForm();
+  public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
   private readonly subscriptions = new Array<Subscription>();
 
   /**
@@ -61,12 +62,45 @@ export class SignUpPageService implements OnDestroy {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
-  public async onboardUser($event: any): Promise<void> {
-
+  public async onValidateRecaptcha($event: any) {
     if (!await this.validateRecaptcha($event)) {
+      this.recaptchaValid$.next(false);
       await this.failedVerification();
       return;
     }
+
+    this.recaptchaValid$.next(true);
+  }
+
+  private async validateRecaptcha($event: any): Promise<boolean> {
+
+    console.log($event)
+
+    const status = await this.afFunctions
+      .httpsCallable('verifyRecaptcha2')({ value: $event })
+      .pipe(take(1))
+      .toPromise();
+
+      return status 
+        ? Promise.resolve(status.success) 
+        : Promise.reject(false);
+  }
+
+  // Move to UI service
+  private async failedVerification() {
+    const alert = await this.alertController.create({
+      header: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED'),
+      message: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED_MSG'),
+      buttons: [this.translateService.instant('COMMON.OK')],
+    });
+
+    await alert.present();
+  }
+
+  public async onboardUser(): Promise<void> {
+
+    if (!this.recaptchaValid$.getValue())
+      return;
 
     const onboardInfo = this.form.value;
 
@@ -102,27 +136,5 @@ export class SignUpPageService implements OnDestroy {
     };
 
     await this.authService.login(auth);
-  }
-
-  private async validateRecaptcha($event: any): Promise<boolean> {
-    const status = await this.afFunctions
-      .httpsCallable('verifyRecaptcha2')({ value: $event })
-      .pipe(take(1))
-      .toPromise();
-
-      return status 
-        ? Promise.resolve(status.success) 
-        : Promise.reject(false);
-  }
-
-  // Move to UI service
-  private async failedVerification() {
-    const alert = await this.alertController.create({
-      header: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED'),
-      message: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED_MSG'),
-      buttons: [this.translateService.instant('COMMON.OK')],
-    });
-
-    await alert.present();
   }
 }

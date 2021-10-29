@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { shareReplay } from 'rxjs/operators';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { SignUpPageService } from './sign-up.page.service';
@@ -18,6 +19,9 @@ export class SignUpPage {
   @ViewChild('firstName') firstName?: HTMLIonInputElement;
   @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha | null = null;
 
+  public readonly recaptchaValid$ = this.viewService.recaptchaValid$.asObservable().pipe(
+    shareReplay(1)
+  );
 
   constructor(
     private readonly viewService: SignUpPageService,
@@ -30,9 +34,13 @@ export class SignUpPage {
     setTimeout(() => this.firstName?.setFocus(), 300);
   }
 
-  public async onCreateAccount($event: any): Promise<void> {
+  public async onValidateRecaptcha($event: any) {
+    await this.viewService.onValidateRecaptcha($event);
+  }
+
+  public async onCreateAccount(): Promise<void> {
     if (await this.userConfirmedEmail())
-      await this.viewService.onboardUser($event);
+      await this.viewService.onboardUser();
   }
 
   private async userConfirmedEmail(): Promise<boolean> {

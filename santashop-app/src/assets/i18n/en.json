@@ -95,10 +95,8 @@
   },
 
   "FORGOTPASS": {
-    "HEADER": "Password Reset",
-    "RESET_YOUR_PASSWORD": "Reset your password",
-    "INSTRUCTIONS": "Enter your email address below and click the \"Send Reset Email\" button",
-    "SEND_RESET_EMAIL": "Send Reset Email"
+    "RESET_YOUR_PASSWORD": "Forgot your Password?",
+    "INSTRUCTIONS": "Enter your registered email to reset your password."
   },
   "REGISTRATION": {
     "RESEND_EMAIL": "Resend Email",

@@ -17,10 +17,10 @@
         </ion-button>
         <ion-card class="sign-up-card">
           <ion-card-header>
-            <ion-card-title class="ion-card-title-lg">
+            <ion-card-title>
               {{ 'SIGNUP.TITLE1' | translate }}
             </ion-card-title>
-            <ion-card-subtitle class="ion-card-subtitle">
+            <ion-card-subtitle>
               {{ 'SIGNUP.TITLE2' | translate }}
             </ion-card-subtitle>
           </ion-card-header>
@@ -28,7 +28,7 @@
             <form [formGroup]="form" novalidate>
               <ion-list>
                 <ion-item>
-                  <ion-label> {{ 'SIGNUP.FIRST_NAME' | translate }} </ion-label>
+                  <ion-label color="xmasred"> {{ 'SIGNUP.FIRST_NAME' | translate }} </ion-label>
                   <ion-input
                     #firstName
                     formControlName="firstName"
@@ -43,7 +43,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label> {{ 'SIGNUP.LAST_NAME' | translate }} </ion-label>
+                  <ion-label color="xmasred"> {{ 'SIGNUP.LAST_NAME' | translate }} </ion-label>
                   <ion-input
                     formControlName="lastName"
                     [debounce]="500"
@@ -56,7 +56,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label>
+                  <ion-label color="xmasred">
                     {{ 'COMMON.EMAIL_ADDRESS' | translate }}
                   </ion-label>
                   <ion-input
@@ -72,7 +72,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label> {{ 'COMMON.PASSWORD' | translate }} </ion-label>
+                  <ion-label color="xmasred"> {{ 'COMMON.PASSWORD' | translate }} </ion-label>
                   <ion-input
                     formControlName="password"
                     [debounce]="500"
@@ -85,7 +85,7 @@
                 ></app-control-errors>
 
                 <ion-item>
-                  <ion-label> {{ 'SIGNUP.PASSWORD2' | translate }} </ion-label>
+                  <ion-label color="xmasred"> {{ 'SIGNUP.PASSWORD2' | translate }} </ion-label>
                   <ion-input
                     formControlName="password2"
                     [debounce]="500"
@@ -107,7 +107,7 @@
                 </ng-container>
 
                 <ion-item>
-                  <ion-label> {{ 'SIGNUP.ZIP_CODE' | translate }} </ion-label>
+                  <ion-label color="xmasred"> {{ 'SIGNUP.ZIP_CODE' | translate }} </ion-label>
                   <ion-input
                     formControlName="zipCode"
                     [debounce]="500"
@@ -138,15 +138,24 @@
                 ></app-control-errors>
               </ion-list>
             </form>
-          </ion-card-content>
-          <ion-card-content class="ion-text-center">
+
+            <ng-container>
+              <ion-item [disabled]="!form.valid" lines="none">
+                <re-captcha
+                  class="ion-align-self-center ion-padding-vertical"
+                  #captchaRef="reCaptcha"
+                  (resolved)="$event && onValidateRecaptcha($event)"
+                ></re-captcha>
+              </ion-item>
+            </ng-container>
+
             <ion-button
               size="default"
               expand="block"
               color="xmasred"
               class="es-pd-left-lg es-pd-right-lg"
-              [disabled]="!form.valid"
-              (click)="captchaRef.execute()"
+              [disabled]="!form.valid || !(recaptchaValid$ | async)"
+              (click)="onCreateAccount()"
             >
               {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
             </ion-button>
@@ -174,11 +183,4 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-
-  <re-captcha
-    class="ion-align-self-center"
-    #captchaRef="reCaptcha"
-    (resolved)="$event && onCreateAccount($event)"
-    size="invisible"
-  ></re-captcha>
 </ion-content>

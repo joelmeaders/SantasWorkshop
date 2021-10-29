@@ -12,7 +12,7 @@
           <ion-icon name="accessibility"></ion-icon>
           <ion-label>{{ 'MENU.CHILDREN' | translate }}</ion-label>
           <ng-container *appLet="childCount$ | async as count">
-            <ion-badge [color]="count > 0 ? 'success' : 'danger'">{{ count }}</ion-badge>
+            <ion-badge color="success" *ngIf="count >= 1">{{ count }}</ion-badge>
           </ng-container>
         </ion-tab-button>
   
@@ -20,7 +20,7 @@
           <ion-icon name="calendar-outline"></ion-icon>
           <ion-label>{{ 'MENU.SCHEDULE' | translate }}</ion-label>
           <ng-container *appLet="chosenSlot$ | async as slot">
-            <ion-badge [color]="!!slot ? 'success' : 'danger'">
+            <ion-badge color="success" *ngIf="!!slot">
               <ion-icon name="checkmark"></ion-icon>
             </ion-badge>
           </ng-container>

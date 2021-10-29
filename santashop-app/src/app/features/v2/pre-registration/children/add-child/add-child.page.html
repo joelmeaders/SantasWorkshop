@@ -20,7 +20,7 @@
       <form [formGroup]="form" novalidate>
         <ion-list>
           <ion-item color="light">
-            <ion-label> {{ 'ADDCHILD.FIRST_NAME' | translate }} </ion-label>
+            <ion-label color="xmasred"> {{ 'ADDCHILD.FIRST_NAME' | translate }} </ion-label>
             <ion-input
               #firstName
               formControlName="firstName"
@@ -34,7 +34,7 @@
           ></app-control-errors>
 
           <ion-item color="light">
-            <ion-label> {{ 'ADDCHILD.LAST_NAME' | translate }} </ion-label>
+            <ion-label color="xmasred"> {{ 'ADDCHILD.LAST_NAME' | translate }} </ion-label>
             <ion-input
               formControlName="lastName"
               [debounce]="500"
@@ -47,7 +47,8 @@
           ></app-control-errors>
 
           <ion-item color="light">
-            <ion-label> {{ 'ADDCHILD.BIRTH_DATE' | translate }} </ion-label>
+            <ion-label color="xmasred"> {{ 'ADDCHILD.BIRTH_DATE' | translate }} </ion-label>
+
             <!-- <ion-button id="open-modal">Open Datetime Modal</ion-button>
             <ion-modal #birthdate trigger="open-modal">
               <ng-template>
@@ -69,6 +70,7 @@
                 </ion-content>
               </ng-template>
             </ion-modal> -->
+
             <ion-input
               (ionChange)="birthdaySelected()"
               formControlName="dateOfBirth"
@@ -101,7 +103,7 @@
           <div class="ion-padding-top">
             <ion-radio-group formControlName="toyType" color="light">
               <ion-list-header>
-                <ion-label>{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-label>
+                <ion-label color="xmasred">{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-label>
                 <p
                   *ngIf="form.controls.toyType.invalid"
                   class="ion-no-padding ion-no-margin"
@@ -140,7 +142,7 @@
           >
             <ion-radio-group formControlName="ageGroup" color="light">
               <ion-list-header>
-                <ion-label>{{ 'ADDCHILD.AGE_GROUP' | translate }}</ion-label>
+                <ion-label color="xmasred">{{ 'ADDCHILD.AGE_GROUP' | translate }}</ion-label>
                 <p
                   *ngIf="form.controls.ageGroup.invalid"
                   class="ion-no-padding ion-no-margin"

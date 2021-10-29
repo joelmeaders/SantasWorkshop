@@ -58,7 +58,21 @@ ion-button {
   --box-shadow: none;
 }
 
+re-captcha {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  display: inline-block;
+}
+
 .logo {
+  max-width: 200px;
+  width: 60%;
+  height: auto;
+  padding-bottom: 20px;
+}
+
+.sm-logo {
   max-width: 60px;
   height: auto;
   padding: 6px 12px 6px 0px;

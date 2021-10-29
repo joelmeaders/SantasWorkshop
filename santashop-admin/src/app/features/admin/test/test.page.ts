@@ -57,9 +57,6 @@ export class TestPage {
       this.updateZipCodeCount(registration);
     });
 
-    console.log(this.completedRegistrations);
-    console.log(this.dateTimeCount);
-    console.log(this.zipCodeCount);
     await this.storeRegistrations();
   }
 

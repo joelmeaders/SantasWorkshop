@@ -21,7 +21,7 @@ import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as A
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
-import { AuthService, DEMO_MODE, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
+import { AuthService, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
 import { customAnimation } from './core';
 import { RouteReuseStrategy } from '@angular/router';
 import { RecaptchaSettings, RECAPTCHA_NONCE, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
@@ -62,7 +62,6 @@ export function httpLoaderFactory(http: HttpClient) {
     // App settings
     { provide: PROGRAM_YEAR, useValue: 2021 },
     { provide: MOBILE_EVENT, useValue: true },
-    { provide: DEMO_MODE, useValue: true },
     // Storage
     { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
     { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },

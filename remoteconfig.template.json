@@ -11,7 +11,7 @@
     {
       "key": "registrationEnabled",
       "defaultValue": {
-        "value": "false"
+        "value": "true"
       },
       "valueType": "BOOLEAN"
     },

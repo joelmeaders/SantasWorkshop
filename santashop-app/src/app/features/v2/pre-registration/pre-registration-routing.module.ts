@@ -38,7 +38,11 @@ const routes: Routes = [
         // QR Code and event information
         path: 'confirmation',
         loadChildren: () => import('./confirmation/confirmation.module').then( m => m.ConfirmationPageModule)
-      }
+      },
+      {
+        path: 'profile',
+        loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
+      },
     ]
   },
 ];

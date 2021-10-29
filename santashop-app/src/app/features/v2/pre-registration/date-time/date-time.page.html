@@ -33,7 +33,7 @@
 
         <ion-item lines="none" *ngIf="chosenSlot$ | async as slot">
           {{ slot.dateTime | date:'MMMM d, h:mm a' }}
-          <ion-button slot="end" (click)="selectDateTime()">
+          <ion-button slot="end" (click)="selectDateTime()" fill="clear">
             Cancel
           </ion-button>
         </ion-item>

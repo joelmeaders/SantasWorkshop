@@ -95,10 +95,8 @@
   },
 
   "FORGOTPASS": {
-    "HEADER": "Restablezca contraseña",
-    "RESET_YOUR_PASSWORD": "Restablezca su contraseña",
-    "INSTRUCTIONS": "Ingrese su dirección de correo electrónico a continuación y haga clic en el botón “Enviar correo electrónico de restablecimiento”",
-    "SEND_RESET_EMAIL": "Enviar correo electrónico de restablecimiento"
+    "RESET_YOUR_PASSWORD": "¿Olvidó su contraseña?",
+    "INSTRUCTIONS": "Ingrese su correo electrónico registrado para restablecer su contraseña."
   },
   "REGISTRATION": {
     "RESEND_EMAIL": "Reenviar el correo electrónico",

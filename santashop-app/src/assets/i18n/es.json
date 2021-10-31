@@ -20,11 +20,11 @@
     "VIDEO_TUTORIAL": "Vídeo Tutorial",
     "HELP": "Ayuda",
     "SIGN_OUT": "Cerrar sesión",
+    "GO_BACK": "Volver",
 
     
     "MENU": "Menú",
     "PROFILE": "Su perfil",
-    "GO_BACK": "Volver",
     "REQUIRED_FIELD": "Esto es obligatorio",
     "AGE": "Edad",
     "BACK_TO_TOP": "Volver arriba",
@@ -79,6 +79,10 @@
     "LAST_NAME": "Apellido",
     "BIRTH_DATE": "Fecha de nacimiento",
     "TOY_TYPE": "Tipo de juguetes",
+    "DELETE_CHILD_TITLE": "¿Eliminar hijo?",
+    "DELETE_CHILD_MSG": "Al presionar el botón Eliminar, este niño eliminará a este niño de su cuenta",
+
+
 
     "EDIT_TITLE": "Editar niño",
     "INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",

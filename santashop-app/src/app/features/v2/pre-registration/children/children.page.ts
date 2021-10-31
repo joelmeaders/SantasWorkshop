@@ -27,25 +27,26 @@ export class ChildrenPage {
   ) { }
 
   public async removeChild(child: IChild): Promise<void> {
-    if (await this.confirmDeleteChild()) {
+    if (await this.confirmDeleteChild(child)) {
       return this.viewService.removeChild(child);
     }
   }
 
-  private async confirmDeleteChild(): Promise<boolean> {
+  private async confirmDeleteChild(child: IChild): Promise<boolean> {
 
     const alert = await this.alertController.create({
       // TODO: This stuff
-      header: this.translateService.instant('Confirm Changes'),
-      subHeader: this.translateService.instant('Are you sure you want to do this?'),
-      message: this.translateService.instant('The slot you already have may no longer be available if you continue.'),
+      header: this.translateService.instant('ADDCHILD.DELETE_CHILD_TITLE'),
+      subHeader: `${child.firstName} ${child.lastName}`,
+      message: this.translateService.instant('ADDCHILD.DELETE_CHILD_MSG'),
       buttons: [
         {
           text: 'Go Back',
           role: 'cancel'
         },
         {
-          text: 'Continue'
+          text: 'Delete',
+          role: 'destructive'
         }
       ]
     });

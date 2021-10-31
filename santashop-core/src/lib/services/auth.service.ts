@@ -87,13 +87,7 @@ export class AuthService {
   }
 
   public async login(auth: IAuth): Promise<firebase.auth.UserCredential> {
-    try {
-      return await this.angularFireAuth.signInWithEmailAndPassword(auth.emailAddress, auth.password);
-    }
-    catch (error: any) {
-      await this.errorHandler.handleError(error);
-      return Promise.reject(error)
-    }
+    return this.angularFireAuth.signInWithEmailAndPassword(auth.emailAddress, auth.password);
   }
 
   public async logout(): Promise<void> {

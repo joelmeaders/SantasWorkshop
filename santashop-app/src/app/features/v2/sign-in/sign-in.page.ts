@@ -27,8 +27,8 @@ export class SignInPage {
     await this.viewService.onValidateRecaptcha($event);
   }
 
-  public async onSignIn(): Promise<void> {
-    await this.viewService.signIn()
+  public onSignIn() {
+    this.viewService.signIn()
   }
 
 }

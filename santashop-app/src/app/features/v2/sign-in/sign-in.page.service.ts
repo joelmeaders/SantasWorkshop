@@ -85,8 +85,6 @@ export class SignInPageService implements OnDestroy {
 
   private async validateRecaptcha($event: any): Promise<boolean> {
 
-    console.log($event)
-
     const status = await this.afFunctions
       .httpsCallable('verifyRecaptcha2')({ value: $event })
       .pipe(take(1))

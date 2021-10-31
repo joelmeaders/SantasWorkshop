@@ -32,3 +32,8 @@ $RECYCLE.BIN/
 **firebase.environment.json
 
 .firebase/**
+environment.test.ts
+# Firebase
+.firebase
+*-debug.log
+.runtimeconfig.json

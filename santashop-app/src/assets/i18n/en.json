@@ -20,11 +20,11 @@
     "VIDEO_TUTORIAL": "Video Tutorial",
     "HELP": "Help",
     "SIGN_OUT": "Sign Out",
-
+    "GO_BACK": "Go Back",
     
     "MENU": "Menu",
     "PROFILE": "Your Profile",
-    "GO_BACK": "Go Back",
+    
     "REQUIRED_FIELD": "This field is required",
     "AGE": "Age",
     "BACK_TO_TOP": "Back to top",
@@ -79,6 +79,8 @@
     "LAST_NAME": "Last Name",
     "BIRTH_DATE": "Birth Date",
     "TOY_TYPE": "Type of Toys",
+    "DELETE_CHILD_TITLE": "Delete Child?",
+    "DELETE_CHILD_MSG": "Pressing the delete button will remove this child from your account",
 
     "EDIT_TITLE": "Edit child",
     "INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",

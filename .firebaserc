@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "santas-workshop-193b5"
+    "default": "santas-workshop-193b5",
+    "qa": "santas-workshop-test"
   },
   "targets": {
     "santas-workshop-193b5": {
@@ -10,6 +11,16 @@
         ],
         "santashop-admin": [
           "santas-workshop-admin"
+        ]
+      }
+    },
+    "santas-workshop-test": {
+      "hosting": {
+        "santashop-app": [
+          "santas-workshop-test"
+        ],
+        "santashop-admin": [
+          "santashop-app-test"
         ]
       }
     }

@@ -30,6 +30,30 @@
       ],
       "rewrites": [
         {
+          "source": "/completeRegistration",
+          "function": "completeRegistration"
+        },
+        {
+          "source": "/documentCounterOnCreate",
+          "function": "documentCounterOnCreate"
+        },
+        {
+          "source": "/documentCounterOnDelete",
+          "function": "documentCounterOnDelete"
+        },
+        {
+          "source": "/newAccount",
+          "function": "newAccount"
+        },
+        {
+          "source": "/scheduledDateTimeSlotCounters",
+          "function": "scheduledDateTimeSlotCounters"
+        },
+        {
+          "source": "/verifyRecaptcha2",
+          "function": "verifyRecaptcha2"
+        },
+        {
           "source": "**",
           "destination": "/index.html"
         }
@@ -44,6 +68,30 @@
         "**/node_modules/**"
       ],
       "rewrites": [
+        {
+          "source": "/completeRegistration",
+          "function": "completeRegistration"
+        },
+        {
+          "source": "/documentCounterOnCreate",
+          "function": "documentCounterOnCreate"
+        },
+        {
+          "source": "/documentCounterOnDelete",
+          "function": "documentCounterOnDelete"
+        },
+        {
+          "source": "/newAccount",
+          "function": "newAccount"
+        },
+        {
+          "source": "/scheduledDateTimeSlotCounters",
+          "function": "scheduledDateTimeSlotCounters"
+        },
+        {
+          "source": "/verifyRecaptcha2",
+          "function": "verifyRecaptcha2"
+        },
         {
           "source": "**",
           "destination": "/index.html"

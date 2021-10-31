@@ -88,6 +88,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: USE_DATABASE_EMULATOR, useValue: !environment.production ? ['localhost', 9000] : undefined },
     { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
     { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
+    // { provide: REGION, useValue: 'us-central1'},
     {
       provide: RECAPTCHA_SETTINGS,
       useValue: { siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN', badge: 'inline' } as RecaptchaSettings

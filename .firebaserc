@@ -17,10 +17,10 @@
     "santas-workshop-test": {
       "hosting": {
         "santashop-app": [
-          "santas-workshop-test"
+          "santashop-app-test"
         ],
         "santashop-admin": [
-          "santashop-app-test"
+          "santas-workshop-test"
         ]
       }
     }

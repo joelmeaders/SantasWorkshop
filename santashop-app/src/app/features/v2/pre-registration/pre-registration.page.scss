@@ -6,41 +6,32 @@ ion-menu-button {
 }
 
 :root {
-  --ion-tab-bar-color: var(--tab-color);
-  --ion-tab-bar-color-selected: var(--tab-color-selected);
-}
-
-ion-tab-bar {
-
-	--background: var(--tab-background);
-  background-color: var(--tab-background);
-	box-shadow: 0px 1px 8px rgba(0, 0, 0, 0.4);
-	border-radius: 16px 16px 0px 0px !important;
-
-	height: 60px;
-  min-width: 340px;
-	width: 90%;
-  max-width: 690px;
-	padding-top: 5px;
-	padding-bottom: 5px;
-
-	bottom: 0px;
-	position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-	border-top: none;
-  z-index: 9999;
-}
-
-ion-tab-button {
-    border-radius: 16px !important;
-    --color-selected: var(--ion-color-xmasred);
-}
-
-:root {
 
   /* Custom tab bar */
   --tab-background: rgb(251, 251, 251);
   --tab-color: rgb(153, 153, 153);
   --tab-color-selected: black;
+}
+
+
+ion-tabs{
+	ion-tab-bar {
+		--background: transparent;
+		position: absolute;
+		bottom: 0;
+		left:0; right: 0;
+		width: 100%;
+		&:after{
+			content: " ";
+			width: 100%;
+			bottom: 0;
+			background: var(--ion-color-light);
+			height: env(safe-area-inset-bottom);
+			position: absolute;
+		}
+		ion-tab-button {
+			--background: var(--ion-color-light);
+      --color-selected: var(--ion-color-xmasred);
+		}
+	}
 }

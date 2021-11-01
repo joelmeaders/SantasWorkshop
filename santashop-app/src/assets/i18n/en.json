@@ -21,6 +21,8 @@
     "HELP": "Help",
     "SIGN_OUT": "Sign Out",
     "GO_BACK": "Go Back",
+    "DONE": "Done",
+    "SELECT": "Select",
     
     "MENU": "Menu",
     "PROFILE": "Your Profile",
@@ -37,7 +39,9 @@
     "YES": "Yes",
     "REGISTER": "Register",
     "TERMS_AND_CONDITIONS": "Terms & Conditions",
-    "PRIVACY_POLICY": "Privacy Policy"
+    "PRIVACY_POLICY": "Privacy Policy",
+    "VERIFICATION_FAILED": "Verification Failed",
+    "VERIFICATION_FAILED_MSG": "You need to refresh the page to try again"
   },
   "SIGNIN": {
     "FORGOT_PASSWORD": "Forgot Password?",
@@ -52,7 +56,9 @@
     "PASSWORD2": "Re-enter Password",
     "PASSWORD_MATCH": "The passwords don't match",
     "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy",
-    "SUBMIT_BUTTON": "Create Account"
+    "SUBMIT_BUTTON": "Create Account",
+    "CONFIRM_EMAIL": "Is your email correct?",
+    "CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address."
   },
   "OVERVIEW": {
     "NO_CHILDREN": "No Children.",
@@ -71,7 +77,8 @@
     "CHILD_LINE_1": "Children must be between the ages of 0-11 years old. Proof of ID is required when picking up toys.",
     "CHILD_LINE_2": "Add all of your Children below.",
     "ADD_A_CHILD": "Add a Child",
-    "NO_CHILDREN": "No Children."
+    "NO_CHILDREN": "No Children.",
+    "YOUR_CHILDREN": "Your Children"
   },
   "ADDCHILD": {
     "ADD_TITLE": "Add child",
@@ -82,9 +89,8 @@
     "DELETE_CHILD_TITLE": "Delete Child?",
     "DELETE_CHILD_MSG": "Pressing the delete button will remove this child from your account",
 
-    "EDIT_TITLE": "Edit child",
     "INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",
-    "BABIES": "For Babies (0-2)",
+    "BABIES": "For Babies (Ages 0-2)",
     "BOYS": "For Boys",
     "GIRLS": "For Girls",
     "AGE_GROUP": "Age Group",
@@ -93,7 +99,27 @@
     "AGE6": "Age 6-8",
     "AGE9": "Age 9-11",
     "TOO_OLD_1": "We're sorry",
-    "TOO_OLD_2": "We only have toys for children ages 11 and under"
+    "TOO_OLD_2": "We only have toys for children ages 11 and under",
+    "EDIT_TITLE": "Edit child"
+  },
+  "SCHEDULE": {
+    "CHOOSE_DATE_TIME": "Choose an available date and time to pick up your toys.",
+    "YOUR_DATE/TIME": "Your Date/Time",
+    "NO_TIME_SELECTED.": "No Time Selected.",
+    "ADD_ONE_BELOW.": "Add one below.",
+    "ON_TIME": "Please arrive on time. If you are late or show up on the wrong date, it will take longer for everyone to get toys.",
+    "AVAILABLE_DATES/TIMES": "Available Dates/Times"
+  },
+  "SUBMIT": {
+    "CONFIRM_ADDED_CHILDREN": "Have you added all children? Is children information correct?",
+    "CONFIRM_DATE_TIME": "Is date and time correct?",
+    "PRESUBMIT": "Before Submitting, make sure everything on this page is correct. A DSCS Volunteer will have to manually unlock your registration for you to make any changes.",
+    "MAKE_CHANGES": "Make Changes"
+  },
+  "CONFIRMATION": {
+    "EVENT_INFORMATION": "Event Information",
+    "QR_CODE": "QR Code",
+    "THIS_IS_YOUR_TICKET": "This is your ticket to the event"
   },
 
   "FORGOTPASS": {

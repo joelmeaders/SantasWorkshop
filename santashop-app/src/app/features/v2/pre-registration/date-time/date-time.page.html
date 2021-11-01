@@ -13,28 +13,28 @@
 
   <div class="ion-padding es-mg-bottom-xxl">
     <ion-item class="inset-ion-item-title" color="none">
-      <ion-card-title lines="full"> Schedule </ion-card-title>
+      <ion-card-title lines="full"> {{ 'MENU.SCHEDULE' | translate }} </ion-card-title>
     </ion-item>
 
     <div class="ion-padding">
-      <p>Choose an available date and time to pick up your toys.</p>
+      <p>{{ 'SCHEDULE.CHOOSE_DATE_TIME' | translate }}</p>
     </div>
 
     <ion-card>
       <ion-card-header>
-        <ion-card-title color="xmasred"> Your Date/Time </ion-card-title>
+        <ion-card-title color="xmasred"> {{ 'SCHEDULE.YOUR_DATE/TIME' | translate }} </ion-card-title>
       </ion-card-header>
 
       <ion-card-content class="ion-text-center">
         <p class="ion-padding" *ngIf="!(chosenSlot$ | async)">
-          <ion-title> No Time Selected. </ion-title>
-          <ion-label> Add one below. </ion-label>
+          <ion-title> {{ 'SCHEDULE.NO_TIME_SELECTED.' | translate }} </ion-title>
+          <ion-label> {{ 'SCHEDULE.ADD_ONE_BELOW.' | translate }} </ion-label>
         </p>
 
         <ion-item lines="none" *ngIf="chosenSlot$ | async as slot">
           {{ slot.dateTime | date:'MMMM d, h:mm a' }}
           <ion-button slot="end" (click)="selectDateTime()" fill="clear">
-            Cancel
+            {{ 'COMMON.CANCEL' | translate }}
           </ion-button>
         </ion-item>
       </ion-card-content>
@@ -44,8 +44,7 @@
       <div class="on-time-note ion-text-center">
         <ion-text color="dark">
           <strong>
-            Please arrive on time. If you are late or show up on the wrong date,
-            it will take longer for everyone to get toys.
+            {{ 'SCHEDULE.ON_TIME' | translate }}
           </strong>
         </ion-text>
       </div>
@@ -54,7 +53,7 @@
     <ng-container *ngIf="!(chosenSlot$ | async)">
       <ion-list-header color="light" class="ion-padding-top">
         <ion-title class="ion-no-padding">
-          Available Dates/Times
+          {{ 'SCHEDULE.AVAILABLE_DATES/TIMES' | translate }}
         </ion-title>
       </ion-list-header>
 
@@ -72,7 +71,7 @@
             >
               <ion-label>{{ slot.dateTime | date:'h:mm a' }}</ion-label>
               <ion-button slot="end" (click)="selectDateTime(slot)" size="default" class="small-padding">
-                Select
+                {{ 'COMMON.SELECT' | translate }}
               </ion-button>
             </ion-item>
           </ion-list>
@@ -85,7 +84,7 @@
       [routerLink]="['../overview']"
       class="ion-float-end es-mg-top-xxl"
     >
-      Done
+      {{ 'COMMON.DONE' | translate }}
     </ion-button>
   </div>
 </ion-content>

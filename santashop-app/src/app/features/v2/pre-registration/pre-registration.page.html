@@ -1,6 +1,6 @@
 <ion-content id="main">
   <ion-tabs>
-    <ion-tab-bar slot="bottom">
+    <ion-tab-bar slot="bottom" class="ion-hide-xl-up">
 
       <ng-container *ngIf="!(isRegistrationComplete$ | async); else registrationComplete;">
         <ion-tab-button tab="overview">
@@ -26,7 +26,7 @@
           </ng-container>
         </ion-tab-button>
     
-        <ion-tab-button tab="submit" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
+        <ion-tab-button class="submit" tab="submit" [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)" *ngIf="!(isRegistrationComplete$ | async)">
           <ion-icon name="send-outline"></ion-icon>
           <ion-label>{{ 'MENU.SUBMIT' | translate }}</ion-label>
         </ion-tab-button>

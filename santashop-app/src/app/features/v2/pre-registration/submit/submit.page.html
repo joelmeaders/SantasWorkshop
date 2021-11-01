@@ -13,11 +13,11 @@
 
   <div class="ion-padding es-mg-bottom-xxl">
     <ion-item class="inset-ion-item-title" color="none">
-      <ion-card-title lines="full"> Submit </ion-card-title>
+      <ion-card-title lines="full"> {{ 'MENU.SUBMIT' | translate }} </ion-card-title>
     </ion-item>
 
     <div class="ion-padding">
-      <p>Have you added all children? Is children information correct?</p>
+      <p>{{ 'SUBMIT.CONFIRM_ADDED_CHILDREN' | translate }}</p>
     </div>
 
     <ng-container *ngIf="viewService.children$ | async as children">
@@ -56,13 +56,13 @@
     </ng-container>
 
     <div class="ion-padding">
-      <p>Is date and time correct?</p>
+      <p>{{ 'CONFIRM_DATE_TIME' | translate }}</p>
     </div>
 
     <ion-item lines="none">
       <div>
         <ion-card-subtitle class="es-pd-top-md es-pd-bottom-sm">
-          Date & Time
+          {{ 'SCHEDULE.YOUR_DATE/TIME' | translate }}
         </ion-card-subtitle>
         <ion-label
           *ngIf="viewService.dateTimeSlot$ | async as slot"
@@ -76,9 +76,7 @@
 
     <div class="ion-padding">
       <p>
-        Before Submitting, make sure everything on this page is correct. A DSCS
-        Volunteer will have to manually unlock your registration for you to make
-        any changes.
+        {{ 'SUBMIT.PRESUBMIT' | translate }}
       </p>
     </div>
 
@@ -88,11 +86,11 @@
         class="ion-padding-end"
         [routerLink]="['../overview']"
       >
-        Make Changes
+        {{ 'SUBMIT.MAKE_CHANGES' | translate }}
       </ion-button>
 
       <ion-button color="xmasred" class="ion-padding-start" (click)="submit()">
-        Submit
+        {{ 'MENU.SUBMIT' | translate }}
       </ion-button>
     </div>
   </div>

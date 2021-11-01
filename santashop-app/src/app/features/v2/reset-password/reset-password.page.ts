@@ -85,8 +85,8 @@ export class ResetPasswordPage {
   private async failedVerification() {
     // TODO: CHange the words
     const alert = await this.alertController.create({
-      header: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED'),
-      message: this.translateService.instant('SIGNUP_ACCOUNT.VERIFICATION_FAILED_MSG'),
+      header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
+      message: this.translateService.instant('COMMON.VERIFICATION_FAILED_MSG'),
       buttons: [this.translateService.instant('COMMON.OK')],
     });
 

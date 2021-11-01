@@ -71,7 +71,7 @@
         }
       },
       "root": "santashop-admin",
-      "sourceRoot": "src",
+      "sourceRoot": "santashop-admin/src",
       "prefix": "admin",
       "architect": {
         "build": {
@@ -213,7 +213,7 @@
         }
       },
       "root": "santashop-app",
-      "sourceRoot": "src",
+      "sourceRoot": "santashop-app/src",
       "prefix": "app",
       "architect": {
         "build": {

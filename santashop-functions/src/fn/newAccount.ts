@@ -89,9 +89,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
 };
 
 function generateQrCode(uid: string, code: string): Promise<any> {
-  const storage = admin
-    .storage()
-    .bucket('gs://santas-workshop-193b5.appspot.com');
+  const storage = admin.storage().bucket();
   const imageToCreate = storage.file(`registrations/${uid}.png`);
   const fileStream = imageToCreate.createWriteStream({
     public: true,

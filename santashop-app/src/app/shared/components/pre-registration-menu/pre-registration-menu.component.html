@@ -1,32 +1,20 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Denver Santa Claus Shop</ion-title>
-  </ion-toolbar>
-</ion-header>
 
-<ion-list>
-  <ion-item>Event Information</ion-item>
-  <ion-item>Arrival Date & Time</ion-item>
-  <ion-item>Your Children</ion-item>
-  <ion-item>Your Tickets</ion-item>
-</ion-list>
+  <ion-tab-bar>
+    <ion-tab-button tab="overview" layout="icon-start">
+      <ion-icon name="home"></ion-icon>
+      <ion-label>{{ "MENU.HOME" | translate }}</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="children" layout="icon-start">
+      <ion-icon name="accessibility"></ion-icon>
+      <ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="date-time" layout="icon-start">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <ion-label>{{ "MENU.SCHEDULE" | translate }}</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="submit" layout="icon-start">
+      <ion-icon name="send-outline"></ion-icon>
+      <ion-label>{{ "MENU.SUBMIT" | translate }}</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
 
-<ion-footer>
-  <ion-segment>
-    <ion-segment-button>English</ion-segment-button>
-    <ion-segment-button>Spanish</ion-segment-button>
-  </ion-segment>
-  
-  <ion-item>
-    <ion-icon slot="start" name="person-circle"></ion-icon>
-    Your Account
-  </ion-item>
-  <ion-item>
-    <ion-icon slot="start" name="log-out"></ion-icon>
-    Sign Out
-  </ion-item>
-  <ion-item>
-    <ion-icon slot="start" name="mail"></ion-icon>
-    Contact Us
-  </ion-item>
-</ion-footer>

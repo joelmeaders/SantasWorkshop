@@ -1,7 +1,10 @@
 <ion-content color="light">
   <ion-header class="ion-no-border">
     <ion-toolbar color="none">
-      <app-language-toggle slot="end" class="ion-padding-end"></app-language-toggle>
+      <app-language-toggle
+        slot="end"
+        class="ion-padding-end"
+      ></app-language-toggle>
     </ion-toolbar>
   </ion-header>
 
@@ -81,6 +84,16 @@
             ></ion-icon>
           </ion-button>
         </a>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <p>
+          <ion-note>
+            {{ environmentName }}<br />
+            {{ environmentVersion }}
+          </ion-note>
+        </p>
       </ion-col>
     </ion-row>
   </ion-grid>

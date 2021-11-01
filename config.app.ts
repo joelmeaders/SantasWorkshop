@@ -5,6 +5,7 @@ const targetPath = './santashop-app/src/environments/environment.prod.ts';
 
 const envConfigFile = `export const environment = {
     production: true,
+    label: PROD
     name: '${name}',
     version: '${version}'
   };

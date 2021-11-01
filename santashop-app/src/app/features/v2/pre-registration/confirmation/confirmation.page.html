@@ -10,9 +10,9 @@
         <ion-card-title
           *ngIf="viewService.userRegistration$ | async as registration"
         >
-          <strong
-            >Welcome, {{ registration.firstName }} {{ registration.lastName
-            }}</strong
+          <strong>
+            {{ 'COMMON.WELCOME' | translate }}, {{ registration.firstName }} {{ registration.lastName }}
+          </strong
           >
         </ion-card-title>
       </ion-item>
@@ -28,14 +28,14 @@
   </ion-header>
 
   <div class="ion-text-center width-max">
-    <ion-button color="xmasred"> What to bring </ion-button>
+    <ion-button color="xmasred"> {{ 'CONFIRMATION.EVENT_INFORMATION' | translate }} </ion-button>
   </div>
 
   <ion-card class="ion-margin-horizontal ion-text-center">
     <ion-text color="xmasred" class="ion-text-center">
       <p>
-        <ion-title>QR Code</ion-title>
-        This is your ticket to the event
+        <ion-title>{{ 'CONFIRMATION.QR_CODE' | translate }}</ion-title>
+        {{ 'CONFIRMATION.THIS_IS_YOUR_TICKET' | translate }}
       </p>
     </ion-text>
 
@@ -45,7 +45,7 @@
       <div>
         <p>
           <ion-text color="xmasred">
-            <strong>Date & Time</strong>
+            <strong>{{ 'SCHEDULE.YOUR_DATE/TIME' | translate }}</strong>
           </ion-text>
           <br/>
         </p>
@@ -53,8 +53,8 @@
             *ngIf="viewService.dateTimeSlot$ | async as slot"
             class="es-pd-bottom-md"
           >
-            {{ slot.dateTime | date:'fullDate' }}, {{ slot.dateTime |
-            date:'shortTime' }}
+          <!-- TODO: Single formatting pipe format -->
+            {{ slot.dateTime | date:'fullDate' }}, {{ slot.dateTime | date:'shortTime' }}
           </ion-text>
       </div>
     </ion-item>
@@ -63,7 +63,7 @@
       <ion-item lines="none">
         <p>
           <ion-text color="xmasred">
-            <strong>Your Children</strong>
+            <strong>{{ 'CHILDREN.YOUR_CHILDREN' | translate }}</strong>
           </ion-text>
           <br/>
         </p>

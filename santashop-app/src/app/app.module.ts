@@ -22,7 +22,6 @@ import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
 import { AuthService, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
-import { customAnimation } from './core';
 import { RouteReuseStrategy } from '@angular/router';
 import { RecaptchaSettings, RECAPTCHA_NONCE, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
 
@@ -47,7 +46,7 @@ export function httpLoaderFactory(http: HttpClient) {
     }),
     IonicModule.forRoot({
       mode: 'md',
-      navAnimation: customAnimation
+      animated: true
     }),
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFirestoreModule,
@@ -56,7 +55,6 @@ export function httpLoaderFactory(http: HttpClient) {
     AngularFireAnalyticsModule,
     AngularFireRemoteConfigModule,
   ],
-  // exports: [TranslateModule],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     // App settings

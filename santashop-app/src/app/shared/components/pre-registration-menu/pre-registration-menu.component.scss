@@ -2,3 +2,45 @@ ion-footer {
   position: absolute;
   bottom: 0px;
 }
+
+ion-tab-bar {
+
+  height: 100%;
+  align-items:flex-start;
+  justify-content:space-around;
+  flex-wrap: wrap;
+  align-content: flex-start;
+
+  border-top: 0px;
+  
+  border-right-color: rgba(102, 102, 102, .2);
+  border-right-style: solid;
+  border-right-width: 1px;
+
+  ion-tab-button::part(native) {
+    justify-content:flex-start;
+    padding-left: 36px;
+    align-items: flex-start;
+    text-indent: 12px;
+  }
+
+  &:after{
+    content: " ";
+    width: 100%;
+    bottom: 0;
+    background: var(--ion-color-light);
+    height: env(safe-area-inset-bottom);
+    position: absolute;
+  }
+
+  ion-tab-button {
+    height: 70px;
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: 100%;
+    --color-selected: var(--ion-color-xmasred);
+    border-bottom-color: rgba(102, 102, 102, .2);
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+  }
+}

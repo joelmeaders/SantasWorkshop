@@ -21,7 +21,8 @@
     "HELP": "Ayuda",
     "SIGN_OUT": "Cerrar sesión",
     "GO_BACK": "Volver",
-
+    "DONE": "Hecho",
+    "SELECT": "Escoger",
     
     "MENU": "Menú",
     "PROFILE": "Su perfil",
@@ -37,13 +38,15 @@
     "YES": "Sí",
     "REGISTER": "Registro",
     "TERMS_AND_CONDITIONS": "Términos y condiciones",
-    "PRIVACY_POLICY": "Política de privacidad"
+    "PRIVACY_POLICY": "Política de privacidad",
+    "VERIFICATION_FAILED": "Error en la verificación",
+    "VERIFICATION_FAILED_MSG": "Es necesario actualizar la página para intentarlo de nuevo"
   },
   "SIGNIN": {
     "FORGOT_PASSWORD": "¿Olvidó su contraseña?",
     "SIGNING_IN": "Iniciar sesión..."
   },
-  "SIGN-UP": {
+  "SIGNUP": {
     "TITLE1": "Configura tu cuenta...",
     "TITLE2": "Esto solo tomará un minuto",
     "FIRST_NAME": "Nombre",
@@ -53,7 +56,8 @@
     "PASSWORD_MATCH": "Las contraseñas no coinciden",
     "LEGAL_AGREEMENT": "Al registrarse, usted acepta nuestros términos de servicio y ha leído nuestra política de privacidad",
     "SUBMIT_BUTTON": "Crear cuenta",
-    "CHANGE_TIME": "Cambiar hora"
+    "CONFIRM_EMAIL": "¿Su correo electrónico es correcto?",
+    "CONFIRM_EMAIL_MSG": "No se puede cambiar después de este paso. Después del registro, enviamos su billete a esta dirección de correo electrónico."
   },
   "OVERVIEW": {
     "NO_CHILDREN": "Sin niños.",
@@ -64,6 +68,7 @@
     "NO_TIME_SELECTED.": "No hay hora seleccionada.",
     "NO_TIME_MESSAGE": "Después de agregar hijos, seleccione una hora.",
     "SELECT_TIME": "Seleccione la hora",
+    "CHANGE_TIME": "Cambiar hora",
     "NOT_SUBMITTED.": "No presentado.",
     "NOT_SUBMITTED_MESSAGE": "Después de agregar niños y seleccionar una hora, envíe para obtener su código QR para el evento."
   },
@@ -71,7 +76,8 @@
     "CHILD_LINE_1": "Los niños deben tener entre 0 y 11 años de edad. Se requiere prueba de identificación al recoger juguetes.",
     "CHILD_LINE_2": "Agregue todos sus hijos a continuación.",
     "ADD_A_CHILD": "Agregar un niño",
-    "NO_CHILDREN": "No hay niños."
+    "NO_CHILDREN": "No hay niños.",
+    "YOUR_CHILDREN": "Sus hijos"
   },
   "ADDCHILD": {
     "ADD_TITLE": "Agregar niño",
@@ -82,11 +88,8 @@
     "DELETE_CHILD_TITLE": "¿Eliminar hijo?",
     "DELETE_CHILD_MSG": "Al presionar el botón Eliminar, este niño eliminará a este niño de su cuenta",
 
-
-
-    "EDIT_TITLE": "Editar niño",
     "INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",
-    "BABIES": "For Babies (0-2)",
+    "BABIES": "Para bebés (Edades 0-2)",
     "BOYS": "Para niños",
     "GIRLS": "Para niñas",
     "AGE_GROUP": "Grupo etario",
@@ -95,7 +98,27 @@
     "AGE6": "De 6 a 8 años",
     "AGE9": "De 9 a 11 años",
     "TOO_OLD_1": "Lo sentimos.",
-    "TOO_OLD_2": "Solo tenemos juguetes para niños menores de 11 años."
+    "TOO_OLD_2": "Solo tenemos juguetes para niños menores de 11 años.",
+    "EDIT_TITLE": "Editar niño"
+  },
+  "SCHEDULE": {
+    "CHOOSE_DATE_TIME": "Elija una fecha y hora disponible para recoger sus juguetes.",
+    "YOUR_DATE/TIME": "Su fecha/hora",
+    "NO_TIME_SELECTED.": "No hay hora seleccionada.",
+    "ADD_ONE_BELOW.": "Agregue uno a continuación.",
+    "ON_TIME": "Por favor, llegue a tiempo. Si llega tarde o se presenta en la fecha equivocada, todos tardarán más en obtener juguetes.",
+    "AVAILABLE_DATES/TIMES": "Fechas/Horas Disponibles"
+  },
+  "SUBMIT": {
+    "CONFIRM_ADDED_CHILDREN": "¿Ha agregado a todos los niños? ¿Es correcta la información de los niños?",
+    "CONFIRM_DATE_TIME": "¿Es correcta la fecha y la hora?",
+    "PRESUBMIT": "Antes de enviar, asegúrese de que todo en esta página sea correcto. Un voluntario de DSCS tendrá que desbloquear manualmente su registro para que pueda realizar cualquier cambio.",
+    "MAKE_CHANGES": "Realizar cambios"
+  },
+  "CONFIRMATION": {
+    "EVENT_INFORMATION": "Información del evento",
+    "QR_CODE": "Código QR",
+    "THIS_IS_YOUR_TICKET": "Esta es tu entrada al evento"
   },
 
   "FORGOTPASS": {

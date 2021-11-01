@@ -51,9 +51,9 @@ export class SignUpPage {
       return false;
     
     const alert = await this.alertController.create({
-      header: this.translateService.instant('SIGNUP_ACCOUNT.CONFIRM_EMAIL'),
+      header: this.translateService.instant('SIGNUP.CONFIRM_EMAIL'),
       subHeader: emailAddress,
-      message: this.translateService.instant('SIGNUP_ACCOUNT.CONFIRM_EMAIL_MSG'),
+      message: this.translateService.instant('SIGNUP.CONFIRM_EMAIL_MSG'),
       buttons: [
         {
           text: this.translateService.instant('COMMON.GO_BACK'),

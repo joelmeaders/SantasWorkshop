@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 import { RemoteConfigService } from '../core/services/remote-config.service';
 
 @Component({
@@ -13,6 +14,9 @@ import { RemoteConfigService } from '../core/services/remote-config.service';
 export class HomePage implements OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
+
+  public readonly environmentName = `${environment.name}_${environment.label}`;
+  public readonly environmentVersion = environment.version;
 
   public readonly $signupEnabled = 
     this.remoteConfigService.registrationEnabled$.pipe(

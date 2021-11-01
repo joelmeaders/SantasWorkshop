@@ -2,6 +2,7 @@ import config from './config.json';
 
 export const environment = {
   production: true,
+  label: 'TEST/QA',
   ...config
 };
 

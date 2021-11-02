@@ -7,6 +7,10 @@ const routes: Routes = [
   {
     path: '',
     component: AddChildPage
+  },
+  {
+    path: ':id',
+    component: AddChildPage
   }
 ];
 

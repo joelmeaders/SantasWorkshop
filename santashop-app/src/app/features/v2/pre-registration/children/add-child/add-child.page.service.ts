@@ -11,10 +11,17 @@ import { newChildForm } from './child.form';
 @Injectable()
 export class AddChildPageService implements OnDestroy {
 
-  private readonly destroy$ = new Subject<void>();
+  public readonly destroy$ = new Subject<void>();
   public readonly form = newChildForm(this.programYear);
+
   private readonly _isInfant$ = new BehaviorSubject<boolean>(false);
   public readonly isInfant$ = this._isInfant$.pipe(
+    takeUntil(this.destroy$), 
+    shareReplay(1)
+  );
+
+  private readonly _isEdit$ = new BehaviorSubject<boolean>(false);
+  public readonly isEdit$ = this._isEdit$.pipe(
     takeUntil(this.destroy$), 
     shareReplay(1)
   );
@@ -39,6 +46,68 @@ export class AddChildPageService implements OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+  
+
+  public async setChildToEdit(id: number) {
+
+    const children = 
+      await this.children$.pipe(take(1)).toPromise();
+
+    if (!children || children.length < 1) {
+      return;
+    }
+    
+    const child = children.filter(c => c.id == id)[0];
+
+    if (!child) {
+      return;
+    }
+
+    this.form.patchValue({...child});
+    // TODO: Do we need to update program year? Possibly not
+    this.form.controls.programYearAdded.setValue(this.programYear);
+
+    // Set birth date
+    const date = `${child.dateOfBirth.getFullYear()}-${child.dateOfBirth.getMonth()+1}-${child.dateOfBirth.getDate()}`
+    this.form.controls.dateOfBirth.setValue(date as any as Date);
+    
+    await this.birthdaySelected();
+    this._isEdit$.next(true);
+
+  }
+
+  public async editChild() {
+
+    const updatedChild = this.form.value as IChild;
+    updatedChild.dateOfBirth = yyyymmddToLocalDate(updatedChild.dateOfBirth as any);
+
+    const children = 
+      await this.children$.pipe(take(1)).toPromise();
+
+    try {
+      const validatedChild = this.childValidationService.validateChild(updatedChild);
+      const updatedChildren = children?.filter(child => child.id !== validatedChild.id);
+      updatedChildren?.push(validatedChild);
+      return this.updateRegistration(updatedChildren);
+    } 
+    catch (ex) {
+      const error = ex as ChildValidationError;
+      let message = "";
+
+      if (error.code === "invalid_age") {
+        message = this.translateService.instant('ADD_CHILDREN.INVALID_AGE');
+      }
+      else if (error.code === "invalid_firstname") {
+        message = this.translateService.instant('ADD_CHILDREN.INVALID_FIRSTNAME');
+      }
+      else if (error.code === "invalid_lastname") {
+        message = this.translateService.instant('ADD_CHILDREN.INVALID_LASTNAME');
+      }
+      
+      await this.invalidEntryAlert(message);
+      return;
+    }
+  }
 
   public setInfant(value: boolean) {
 
@@ -54,6 +123,8 @@ export class AddChildPageService implements OnDestroy {
   }
 
   public async birthdaySelected() {
+
+    console.log(this.form.controls.dateOfBirth.value)
 
     const yyyymmdd: any = this.form.controls.dateOfBirth.value;
     if (!yyyymmdd) return;

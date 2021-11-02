@@ -25,11 +25,6 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-// ion-content {
-//   padding-bottom: 100px;
-//   margin-bottom: -90px !important;
-// }
-
 ion-title {
   font-family: 'Inter', 'Roboto', sans-serif;
   font-size: 1.2em;
@@ -119,6 +114,10 @@ re-captcha {
   height: 46px;
   padding-inline-start: 6px;
   padding-inline-end: 6px;
+}
+
+.icon-reduced-margin {
+  margin-inline-end: 0px;
 }
 
 .title-font {

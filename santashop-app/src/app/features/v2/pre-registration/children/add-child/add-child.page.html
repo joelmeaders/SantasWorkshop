@@ -212,12 +212,22 @@
               </div>
               <div class="ion-text-end ion-padding-top es-pd-bottom-xxl">
                 <ion-button
+                  *ngIf="!(isEdit$ | async); else edit"
                   color="xmasred"
                   (click)="addChild()"
                   [disabled]="!form.valid"
                 >
                   {{ 'OVERVIEW.ADD_CHILD' | translate }}
                 </ion-button>
+                <ng-template #edit>
+                  <ion-button
+                    color="xmasred"
+                    (click)="editChild()"
+                    [disabled]="!form.valid"
+                  >
+                    {{ 'OVERVIEW.ADD_CHILD' | translate }}
+                  </ion-button>
+                </ng-template>
               </div>
             </div>
           </ion-col>

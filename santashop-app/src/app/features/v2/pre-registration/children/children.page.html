@@ -1,5 +1,6 @@
 <ion-content color="light">
-  
+
+  <app-internal-header></app-internal-header>
 
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max">
@@ -78,18 +79,21 @@
                     lines="none"
                   >
                     <ion-icon
+                      class="icon-reduced-margin"
                       name="man-outline"
                       size="large"
                       slot="start"
                       *ngIf="child.toyType === 'boys'"
                     ></ion-icon>
                     <ion-icon
+                      class="icon-reduced-margin"
                       name="woman-outline"
                       size="large"
                       slot="start"
                       *ngIf="child.toyType === 'girls'"
                     ></ion-icon>
                     <ion-icon
+                      class="icon-reduced-margin"
                       name="happy-outline"
                       size="large"
                       slot="start"
@@ -103,6 +107,19 @@
                         {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
                       </ion-card-subtitle>
                     </ion-card-header>
+                    <div slot="end">
+                      <ion-button
+                      color="medium"
+                      fill="clear"
+                      slot="end"
+                      [routerLink]="['./add-child']"
+                      [queryParams]="{ id: child.id }"
+                    >
+                      <ion-icon
+                        size="large"
+                        name="create-outline"
+                      ></ion-icon>
+                    </ion-button>
                     <ion-button
                       color="medium"
                       fill="clear"
@@ -110,11 +127,11 @@
                       (click)="removeChild(child)"
                     >
                       <ion-icon
-                        slot="icon-only"
                         size="large"
                         name="trash-outline"
                       ></ion-icon>
                     </ion-button>
+                    </div>
                   </ion-item>
                 </ng-container>
 

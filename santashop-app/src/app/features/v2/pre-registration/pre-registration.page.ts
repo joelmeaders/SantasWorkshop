@@ -12,6 +12,12 @@ import { takeUntil, shareReplay } from 'rxjs/operators';
 export class PreRegistrationPage implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
+  public readonly userRegistration$ = 
+    this.viewService.userRegistration$.pipe(
+      takeUntil(this.destroy$),
+      shareReplay(1)
+    );
+
   public readonly childCount$ = 
     this.viewService.childCount$.pipe(
       takeUntil(this.destroy$),
@@ -38,4 +44,6 @@ export class PreRegistrationPage implements OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  
 }

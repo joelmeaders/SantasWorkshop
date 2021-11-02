@@ -80,6 +80,10 @@ re-captcha {
   overflow: visible;
 }
 
+.side-menu {
+  min-width: 200px;
+}
+
 .dark-border {
   --border-color: var(--ion-color-dark);
   --border-radius: 8px;

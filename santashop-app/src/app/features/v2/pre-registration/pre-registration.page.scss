@@ -16,10 +16,10 @@ ion-menu-button {
 
 ion-tabs{
 	ion-tab-bar {
-		--background: transparent;
 		position: absolute;
 		bottom: 0;
-		left:0; right: 0;
+		left:0; 
+    right: 0;
 		width: 100%;
 		&:after{
 			content: " ";
@@ -30,7 +30,6 @@ ion-tabs{
 			position: absolute;
 		}
 		ion-tab-button {
-			--background: var(--ion-color-light);
       --color-selected: var(--ion-color-xmasred);
 		}
 	}

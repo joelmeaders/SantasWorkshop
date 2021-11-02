@@ -1,0 +1,24 @@
+<ion-header color="light">
+  <ion-toolbar color="light">
+    <ion-item lines="none" color="none">
+      <img
+        src="assets/DSCS-Santa-Body_Red.png"
+        class="sm-logo"
+        alt="logo with santa claus"
+      />
+      <ion-card-title *ngIf="userRegistration$ | async as registration">
+        <strong>
+          {{ 'COMMON.WELCOME' | translate }}, {{ registration.firstName }} {{ registration.lastName }}
+        </strong>
+      </ion-card-title>
+    </ion-item>
+    <ion-button slot="end" fill="clear" (click)="menu($event)">
+      <ion-icon
+        slot="icon-only"
+        name="menu-sharp"
+        color="dark"
+        size="large"
+      ></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>

@@ -1,6 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { CoreModule } from 'santashop-core/src';
+import { InternalHeaderComponent } from './internal-header/internal-header.component';
 import { LanguageToggleComponent } from './language-toggle/language-toggle.component';
 import { PreRegistrationMenuComponent } from './pre-registration-menu/pre-registration-menu.component';
 import { PrivacyPolicyModalComponent } from './privacy-policy-modal/privacy-policy-modal.component';
@@ -13,7 +14,8 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
     PreRegistrationMenuComponent,
-    LanguageToggleComponent
+    LanguageToggleComponent,
+    InternalHeaderComponent
   ],
   imports: [
     CoreModule,
@@ -24,7 +26,8 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     TermsOfServiceModalComponent,
     TranslateModule,
     PreRegistrationMenuComponent,
-    LanguageToggleComponent
+    LanguageToggleComponent,
+    InternalHeaderComponent
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

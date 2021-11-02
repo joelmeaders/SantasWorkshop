@@ -1,97 +1,130 @@
 <ion-content class="es-pd-bottom-xxl" color="light">
-  <ion-button
-    class="ion-no-padding even-ratio-button ion-margin"
-    color="white"
-    [routerLink]="['../overview']"
-  >
-    <ion-icon
-      slot="icon-only"
-      name="arrow-back-sharp"
-      class="even-ratio-button"
-    ></ion-icon>
-  </ion-button>
+  <app-internal-header class="ion-hide-xl-down"></app-internal-header>
 
-  <div class="ion-padding es-mg-bottom-xxl">
-    <ion-item class="inset-ion-item-title" color="none">
-      <ion-card-title lines="full"> {{ 'MENU.SUBMIT' | translate }} </ion-card-title>
-    </ion-item>
-
-    <div class="ion-padding">
-      <p>{{ 'SUBMIT.CONFIRM_ADDED_CHILDREN' | translate }}</p>
-    </div>
-
-    <ng-container *ngIf="viewService.children$ | async as children">
-      <ion-item
-        *ngFor="let child of children"
-        [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
-        lines="none"
+  <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+    <ion-row class="height-max">
+      <ion-col
+        class="
+          side-menu
+          height-max
+          ion-hide-xl-down ion-no-padding ion-no-margin
+        "
+        size="auto"
       >
-        <ion-icon
-          name="man-outline"
-          size="large"
-          slot="start"
-          *ngIf="child.toyType === 'boys'"
-        ></ion-icon>
-        <ion-icon
-          name="woman-outline"
-          size="large"
-          slot="start"
-          *ngIf="child.toyType === 'girls'"
-        ></ion-icon>
-        <ion-icon
-          name="happy-outline"
-          size="large"
-          slot="start"
-          *ngIf="child.toyType === 'infants'"
-        ></ion-icon>
-        <ion-card-header>
-          <ion-card-title>
-            {{ child.firstName }} {{ child.lastName }}
-          </ion-card-title>
-          <ion-card-subtitle>
-            {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
-          </ion-card-subtitle>
-        </ion-card-header>
-      </ion-item>
-    </ng-container>
-
-    <div class="ion-padding">
-      <p>{{ 'CONFIRM_DATE_TIME' | translate }}</p>
-    </div>
-
-    <ion-item lines="none">
-      <div>
-        <ion-card-subtitle class="es-pd-top-md es-pd-bottom-sm">
-          {{ 'SCHEDULE.YOUR_DATE/TIME' | translate }}
-        </ion-card-subtitle>
-        <ion-label
-          *ngIf="viewService.dateTimeSlot$ | async as slot"
-          class="es-pd-bottom-md"
-        >
-          {{ slot.dateTime | date:'fullDate' }}, {{ slot.dateTime |
-          date:'shortTime' }}
-        </ion-label>
-      </div>
-    </ion-item>
-
-    <div class="ion-padding">
-      <p>
-        {{ 'SUBMIT.PRESUBMIT' | translate }}
-      </p>
-    </div>
-
-    <div class="width-max ion-text-center">
-      <ion-button
-        fill="clear"
-        class="ion-padding-end"
-        [routerLink]="['../overview']"
+        <app-pre-registration-menu></app-pre-registration-menu>
+      </ion-col>
+      <ion-col
+        sizeXl="9"
+        sizeLg="12"
+        sizeMd="12"
+        sizeSm="12"
+        sizeXs="12"
+        size="12"
       >
-        {{ 'SUBMIT.MAKE_CHANGES' | translate }}
-      </ion-button>
+        <ion-row class="ion-justify-content-center">
+          <ion-col sizeXs="12" sizeSm="7">
+            <ion-button
+              class="ion-no-padding even-ratio-button ion-margin"
+              color="white"
+              [routerLink]="['../overview']"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="arrow-back-sharp"
+                class="even-ratio-button"
+              ></ion-icon>
+            </ion-button>
 
-      <ion-button color="xmasred" class="ion-padding-start" (click)="submit()">
-        {{ 'MENU.SUBMIT' | translate }}
-      </ion-button>
-    </div>
-  </div>
+            <div class="ion-padding es-mg-bottom-xxl">
+              <ion-item class="inset-ion-item-title" color="none">
+                <ion-card-title lines="full">
+                  {{ 'MENU.SUBMIT' | translate }}
+                </ion-card-title>
+              </ion-item>
+
+              <div class="ion-padding">
+                <p>{{ 'SUBMIT.CONFIRM_ADDED_CHILDREN' | translate }}</p>
+              </div>
+
+              <ng-container *ngIf="viewService.children$ | async as children">
+                <ion-item
+                  *ngFor="let child of children"
+                  [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+                  lines="none"
+                >
+                  <ion-icon
+                    name="man-outline"
+                    size="large"
+                    slot="start"
+                    *ngIf="child.toyType === 'boys'"
+                  ></ion-icon>
+                  <ion-icon
+                    name="woman-outline"
+                    size="large"
+                    slot="start"
+                    *ngIf="child.toyType === 'girls'"
+                  ></ion-icon>
+                  <ion-icon
+                    name="happy-outline"
+                    size="large"
+                    slot="start"
+                    *ngIf="child.toyType === 'infants'"
+                  ></ion-icon>
+                  <ion-card-header>
+                    <ion-card-title>
+                      {{ child.firstName }} {{ child.lastName }}
+                    </ion-card-title>
+                    <ion-card-subtitle>
+                      {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
+                    </ion-card-subtitle>
+                  </ion-card-header>
+                </ion-item>
+              </ng-container>
+
+              <div class="ion-padding">
+                <p>{{ 'SUBMIT.CONFIRM_DATE_TIME' | translate }}</p>
+              </div>
+
+              <ion-item lines="none">
+                <div>
+                  <ion-card-subtitle class="es-pd-top-md es-pd-bottom-sm">
+                    {{ 'SCHEDULE.YOUR_DATE/TIME' | translate }}
+                  </ion-card-subtitle>
+                  <ion-label
+                    *ngIf="viewService.dateTimeSlot$ | async as slot"
+                    class="es-pd-bottom-md"
+                  >
+                    {{ slot.dateTime | date:'fullDate' }}, {{ slot.dateTime |
+                    date:'shortTime' }}
+                  </ion-label>
+                </div>
+              </ion-item>
+
+              <div class="ion-padding">
+                <p>{{ 'SUBMIT.PRESUBMIT' | translate }}</p>
+              </div>
+
+              <div class="width-max ion-text-center es-mg-bottom-xxl">
+                <ion-button
+                  fill="clear"
+                  class="ion-padding-end"
+                  [routerLink]="['../overview']"
+                >
+                  {{ 'SUBMIT.MAKE_CHANGES' | translate }}
+                </ion-button>
+
+                <ion-button
+                  color="xmasred"
+                  class="ion-padding-start"
+                  (click)="submit()"
+                >
+                  {{ 'MENU.SUBMIT' | translate }}
+                </ion-button>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

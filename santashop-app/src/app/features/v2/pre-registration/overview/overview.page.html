@@ -1,30 +1,8 @@
-<ion-header color="light">
-  <ion-toolbar color="light">
-    <ion-item lines="none" color="none">
-      <img
-        src="assets/DSCS-Santa-Body_Red.png"
-        class="sm-logo"
-        alt="logo with santa claus"
-      />
-      <ion-card-title *ngIf="userRegistration$ | async as registration">
-        <strong>
-          {{ 'COMMON.WELCOME' | translate }}, {{ registration.firstName }} {{ registration.lastName }}
-        </strong>
-      </ion-card-title>
-    </ion-item>
-    <ion-button slot="end" fill="clear" (click)="menu($event)">
-      <ion-icon
-        slot="icon-only"
-        name="menu-sharp"
-        color="dark"
-        size="large"
-      ></ion-icon>
-    </ion-button>
-  </ion-toolbar>
-</ion-header>
+<ion-content color="light" size="fullscreen">
 
-<ion-content color="light">
-  <ion-grid class="height-max ion-no-padding">
+  <app-internal-header></app-internal-header>
+
+  <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max">
       <ion-col class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin" size="auto">
         <app-pre-registration-menu></app-pre-registration-menu>
@@ -104,14 +82,12 @@
                   </p>
                 </ng-template>
     
-                
-                
               </ion-card-content>
             </ion-card>
           </ion-col>
     
-          <ion-col sizeXs="12" sizeSm="7">
-            <ion-card [disabled]="!(canSubmit$ | async)">
+          <ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
+            <ion-card [disabled]="!(canSubmit$ | async)" class="es-mg-bottom-xxl">
               <ion-card-header>
                 <ion-item class="inset-ion-item-title">
                   <ion-card-title lines="full"> {{ 'MENU.SUBMIT' | translate }} </ion-card-title>

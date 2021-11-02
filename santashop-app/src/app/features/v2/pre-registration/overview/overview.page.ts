@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { PreRegistrationService } from '@core/*';
-import { PopoverController } from '@ionic/angular';
 import { combineLatest, Subject } from 'rxjs';
 import { map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
-import { PublicMenuComponent } from '../../../../shared/components/public-menu/public-menu.component';
 
 @Component({
   selector: 'app-overview',
@@ -39,20 +37,10 @@ export class OverviewPage implements OnDestroy {
 
   constructor(
     private readonly preregistrationService: PreRegistrationService,
-    private readonly popoverController: PopoverController
   ) { }
   
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  public async menu($event: any) {
-    const popover = await this.popoverController.create({
-      component: PublicMenuComponent,
-      event: $event,
-      translucent: true
-    });
-    await popover.present();
   }
 }

@@ -74,7 +74,7 @@
     "NOT_SUBMITTED_MESSAGE": "After you Add Children and Select a Time, Submit to get your QR Code for the Event."
   },
   "CHILDREN": {
-    "CHILD_LINE_1": "Children must be between the ages of 0-11 years old. Proof of ID is required when picking up toys.",
+    "CHILD_LINE_1": "Children must be between the ages of 0-11 years old.",
     "CHILD_LINE_2": "Add all of your Children below.",
     "ADD_A_CHILD": "Add a Child",
     "NO_CHILDREN": "No Children.",
@@ -107,7 +107,7 @@
     "YOUR_DATE/TIME": "Your Date/Time",
     "NO_TIME_SELECTED.": "No Time Selected.",
     "ADD_ONE_BELOW.": "Add one below.",
-    "ON_TIME": "Please arrive on time. If you are late or show up on the wrong date, it will take longer for everyone to get toys.",
+    "ON_TIME": "Please arrive during your assigned time. Wait times will vary.",
     "AVAILABLE_DATES/TIMES": "Available Dates/Times"
   },
   "SUBMIT": {

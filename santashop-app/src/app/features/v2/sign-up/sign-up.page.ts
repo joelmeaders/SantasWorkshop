@@ -61,7 +61,8 @@ export class SignUpPage {
         },
         {
           text: this.translateService.instant('COMMON.YES'),
-          role: 'confirm'
+          role: 'confirm',
+          cssClass: 'confirm-delete-button'
         }
       ],
     });

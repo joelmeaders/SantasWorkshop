@@ -73,7 +73,7 @@
     "NOT_SUBMITTED_MESSAGE": "Después de agregar niños y seleccionar una hora, envíe para obtener su código QR para el evento."
   },
   "CHILDREN": {
-    "CHILD_LINE_1": "Los niños deben tener entre 0 y 11 años de edad. Se requiere prueba de identificación al recoger juguetes.",
+    "CHILD_LINE_1": "Los niños deben tener entre 0 y 11 años de edad.",
     "CHILD_LINE_2": "Agregue todos sus hijos a continuación.",
     "ADD_A_CHILD": "Agregar un niño",
     "NO_CHILDREN": "No hay niños.",
@@ -106,7 +106,7 @@
     "YOUR_DATE/TIME": "Su fecha/hora",
     "NO_TIME_SELECTED.": "No hay hora seleccionada.",
     "ADD_ONE_BELOW.": "Agregue uno a continuación.",
-    "ON_TIME": "Por favor, llegue a tiempo. Si llega tarde o se presenta en la fecha equivocada, todos tardarán más en obtener juguetes.",
+    "ON_TIME": "Por favor, llegue durante la hora asignada. Los tiempos de espera variarán.",
     "AVAILABLE_DATES/TIMES": "Fechas/Horas Disponibles"
   },
   "SUBMIT": {

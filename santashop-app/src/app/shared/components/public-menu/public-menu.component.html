@@ -1,6 +1,6 @@
 <ion-content>
   <ion-list lines="none" class="ion-text-center" *ngIf="isLoggedIn$ | async">
-    <ion-item button tappable [routerLink]="['./profile']" class="ion-text-center">
+    <ion-item button tappable (click)="profile()" class="ion-text-center">
       <ion-label>
         {{ 'COMMON.MY_ACCOUNT' | translate }}
       </ion-label>

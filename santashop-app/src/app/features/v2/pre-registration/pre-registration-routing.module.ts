@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { RegistrationCompleteGuard } from '../../../core/guards/registration-complete.guard';
-
 import { PreRegistrationPage } from './pre-registration.page';
 
 const routes: Routes = [
@@ -42,7 +41,7 @@ const routes: Routes = [
       {
         path: 'profile',
         loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
-      },
+      }
     ]
   },
 ];

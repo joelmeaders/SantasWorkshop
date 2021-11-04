@@ -60,6 +60,11 @@ re-captcha {
   display: inline-block;
 }
 
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+}
+
 .logo {
   max-width: 200px;
   width: 60%;
@@ -114,6 +119,7 @@ re-captcha {
   height: 46px;
   padding-inline-start: 6px;
   padding-inline-end: 6px;
+  --box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px ;
 }
 
 .icon-reduced-margin {
@@ -171,6 +177,13 @@ re-captcha {
   --webkit-box-shadow: none;
 }
 
+.confirm-delete-button {
+  background-color: var(--ion-color-xmasred) !important;
+  color: #FFF !important;
+  border-radius: 8px !important;
+  padding-inline-start: 16px !important;
+  padding-inline-end: 16px !important;
+}
 
 $es-size-definitions: (
   xs: 2px,

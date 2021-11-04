@@ -45,7 +45,7 @@ export class PublicMenuComponent implements OnDestroy {
   }
 
   public async profile() {
-    await this.router.navigate(['/profile']);
+    await this.router.navigate(['/pre-registration/profile']);
     await this.closeMenu();
   }
 

@@ -45,14 +45,20 @@ export class ChildrenPage {
           role: 'cancel'
         },
         {
-          text: 'Delete',
-          role: 'destructive'
+          text: 'Yes',
+          role: 'destructive',
+          cssClass: 'confirm-delete-button'
         }
       ]
     });
 
     await alert.present();
+
     return alert.onDidDismiss()
-      .then(e => e.role != 'cancel');
+      .then(e => {
+        console.log(e)
+        return false;
+        return e.role === 'destructive'
+      });
   }
 }

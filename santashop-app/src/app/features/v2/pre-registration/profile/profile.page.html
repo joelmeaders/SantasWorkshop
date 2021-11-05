@@ -2,7 +2,7 @@
   <app-internal-header></app-internal-header>
 
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
-    <ion-row class="height-max ion-justify-content-center">
+    <ion-row class="height-max">
       <ion-col
         class="
           side-menu
@@ -23,10 +23,115 @@
         size="12"
       >
         <ion-row class="ion-justify-content-center">
-          <ion-col sizeXs="12" sizeSm="7">
-            <ion-card class="ion-margin-horizontal">
-                
-            </ion-card>
+          <ion-col sizeXs="12" sizeSm="7" *ngIf="userProfile$ | async as user">
+            <ion-button
+              class="ion-no-padding even-ratio-button ion-margin"
+              color="white"
+              [routerLink]="['../overview']"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="arrow-back-sharp"
+                class="even-ratio-button"
+              ></ion-icon>
+            </ion-button>
+
+            <div class="ion-padding es-mg-bottom-xxl">
+              <ion-item class="inset-ion-item-title" color="none">
+                <ion-card-title lines="full"> My Account </ion-card-title>
+              </ion-item>
+
+              <ion-card class="ion-margin-top">
+                <ion-card-content>
+                  <ion-button fill="clear" class="ion-float-end">
+                    <ion-icon name="create-outline" color="dark"></ion-icon>
+                  </ion-button>
+
+                  <ion-list lines="none">
+                    <ion-item class="locked-item">
+                      <ion-label color="xmasred">
+                        {{ 'SIGNUP.FIRST_NAME' | translate }}
+                      </ion-label>
+                      <ion-input [value]="user.firstName" disabled></ion-input>
+                    </ion-item>
+                    <app-control-errors
+                      [control]="profileForm.controls.firstName"
+                    ></app-control-errors>
+
+                    <ion-item class="locked-item">
+                      <ion-label color="xmasred">
+                        {{ 'SIGNUP.LAST_NAME' | translate }}
+                      </ion-label>
+                      <ion-input [value]="user.lastName" disabled></ion-input>
+                    </ion-item>
+                    <app-control-errors
+                      [control]="profileForm.controls.lastName"
+                    ></app-control-errors>
+
+                    <ion-item class="locked-item">
+                      <ion-label color="xmasred">
+                        {{ 'SIGNUP.ZIP_CODE' | translate }}
+                      </ion-label>
+                      <ion-input [value]="user.zipCode" disabled></ion-input>
+                    </ion-item>
+                    <app-control-errors
+                      [control]="profileForm.controls.zipCode"
+                    ></app-control-errors>
+                  </ion-list>
+                </ion-card-content>
+              </ion-card>
+
+              <ion-card class="ion-margin-top">
+                <ion-card-content>
+                  <ion-button fill="clear" class="ion-float-end">
+                    <ion-icon name="create-outline" color="dark"></ion-icon>
+                  </ion-button>
+
+                  <ion-list lines="none">
+                    <ion-item class="locked-item">
+                      <ion-label color="xmasred">
+                        {{ 'COMMON.EMAIL_ADDRESS' | translate }}
+                      </ion-label>
+                      <ion-input
+                        [value]="user.emailAddress"
+                        disabled
+                      ></ion-input>
+                    </ion-item>
+                  </ion-list>
+                </ion-card-content>
+              </ion-card>
+
+              <ion-card class="ion-margin-top">
+                <ion-card-content>
+                  <ion-button fill="clear" class="ion-float-end">
+                    <ion-icon name="create-outline" color="dark"></ion-icon>
+                  </ion-button>
+
+                  <ion-list lines="none">
+                    <ion-item class="locked-item">
+                      <ion-label color="xmasred">
+                        {{ 'COMMON.PASSWORD' | translate }}
+                      </ion-label>
+                      <ion-input
+                        [value]="user.emailAddress"
+                        type="password"
+                        disabled
+                      ></ion-input>
+                    </ion-item>
+                  </ion-list>
+                </ion-card-content>
+              </ion-card>
+
+              <ion-button
+                color="xmasred"
+                [routerLink]="['../overview']"
+                class="ion-float-end ion-margin-top es-mg-bottom-xxl"
+              >
+                {{ 'COMMON.DONE' | translate }}
+              </ion-button>
+            </div>
+
+            <ion-card class="ion-margin-horizontal"> </ion-card>
           </ion-col>
         </ion-row>
       </ion-col>

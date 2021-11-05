@@ -3,7 +3,7 @@ import { IUser } from '@core/*';
 import { ErrorHandlerService, AuthService, FireRepoLite, COLLECTION_SCHEMA } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { Subject } from 'rxjs';
-import { switchMap, take, takeUntil } from 'rxjs/operators';
+import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { changeEmailForm, changePasswordForm, editProfileForm } from './profile.form';
 
 @Injectable()
@@ -23,6 +23,17 @@ export class ProfilePageService implements OnDestroy {
     takeUntil(this.destroy$),
     switchMap(user => this.getUser$(user!.uid))
   );
+
+  public readonly setUserFormSubscription = this.userProfile$.pipe(
+    takeUntil(this.destroy$),
+    tap(user => {
+      this.profileForm.patchValue({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        zipCode: user.zipCode
+      })
+    })
+  ).subscribe();
 
   constructor(
     private readonly httpService: FireRepoLite,

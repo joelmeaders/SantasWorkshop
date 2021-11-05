@@ -15,7 +15,7 @@ export class ProfilePage {
   public readonly changeEmailForm = this.viewService.changeEmailForm;
   public readonly changePasswordForm = this.viewService.changePasswordForm;
 
-  public readonly publicProfile$ = this.viewService.userProfile$;
+  public readonly userProfile$ = this.viewService.userProfile$;
   public readonly isRegistrationComplete$ = this.preregistrationService.registrationComplete$;
 
 

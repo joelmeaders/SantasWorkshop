@@ -39,7 +39,7 @@ export class SignUpPageService implements OnDestroy {
    * @private
    * @memberof SignInPageService
    */
-  private readonly redirectIfLoggedInSubscription =
+  public readonly redirectIfLoggedInSubscription =
     this.authService.currentUser$.pipe(
       filter(user => !!user),
       tap(() => this.router.navigate(['/pre-registration/overview']))
@@ -54,7 +54,7 @@ export class SignUpPageService implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService
   ) {
-    this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
+    // this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
     // this.form.addValidators() .validateOn(this.passwordMatchValidator$);
   }
 

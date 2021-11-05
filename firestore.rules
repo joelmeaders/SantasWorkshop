@@ -14,7 +14,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/parameters/admin).data.adminusers;
     }
 
-    match /customers/{userId} {
+    match /users/{userId} {
       allow get: if isUser(userId) || isAdmin();
       allow list: if isAdmin();
       allow create: if isUser(userId);

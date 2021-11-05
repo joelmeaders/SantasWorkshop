@@ -185,6 +185,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding-inline-end: 16px !important;
 }
 
+.div-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 16px;
+}
+
+h1 {
+  font-size: 5em !important;
+  text-transform: uppercase;
+  font-weight: 600 !important;
+}
+
+h2 {
+  font-size: 2em !important;
+  font-weight: 600 !important;
+}
+
 $es-size-definitions: (
   xs: 2px,
   sm: 4px,

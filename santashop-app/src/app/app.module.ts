@@ -16,7 +16,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as USE_REMOTE_EMULATOR } from '@angular/fire/compat/remote-config';
+import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as REMOTE_CONFIG_SETTINGS } from '@angular/fire/compat/remote-config';
 import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as AUTH_SETTINGS } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
@@ -73,14 +73,13 @@ export function httpLoaderFactory(http: HttpClient) {
       },
     },
     // Remote Config
-    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { registrationEnabled: true, maintenanceModeEnabled: false } },
-    { provide: USE_REMOTE_EMULATOR, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
+    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
+    { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
     { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
     AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
     AuthService,
-    // MaintenanceService,
     { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
     { provide: USE_DATABASE_EMULATOR, useValue: !environment.production ? ['localhost', 9000] : undefined },

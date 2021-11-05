@@ -5,17 +5,18 @@ import { filter, takeUntil, tap } from 'rxjs/operators';
 import { AppStateService } from '../../core/services/app-state.service';
 
 @Component({
-  selector: 'app-maintenance',
-  templateUrl: './maintenance.page.html',
-  styleUrls: ['./maintenance.page.scss'],
+  selector: 'app-bad-weather',
+  templateUrl: './bad-weather.page.html',
+  styleUrls: ['./bad-weather.page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
+
 })
-export class MaintenancePage implements OnDestroy {
+export class BadWeatherPage implements OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
 
-  public readonly isMaintenanceDisabledSubscription = 
-    this.service.isRegistrationEnabled$.pipe(
+  public readonly isShopClosedSubscription = 
+    this.service.shopClosedWeather$.pipe(
       takeUntil(this.destroy$),
       filter(enabled => enabled),
       tap(() => this.router.navigate(['/']))

@@ -56,7 +56,7 @@
               <ion-card-header>
                 <ion-item class="inset-ion-item-title">
                   <ion-card-title> {{ 'OVERVIEW.SCHEDULE' | translate }} </ion-card-title>
-                  <ion-badge color="success" slot="end" *ngIf="(childCount$ | async) ?? 0 > 0;">Complete</ion-badge>
+                  <ion-badge color="success" slot="end" *ngIf="!!(dateTimeSlot$ | async);">Complete</ion-badge>
                 </ion-item>
               </ion-card-header>
               <ion-card-content class="ion-text-center">

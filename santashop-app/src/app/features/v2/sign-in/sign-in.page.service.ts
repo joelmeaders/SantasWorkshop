@@ -25,7 +25,7 @@ export class SignInPageService implements OnDestroy {
    * @private
    * @memberof SignInPageService
    */
-  private readonly redirectIfLoggedInSubscription =
+  public readonly redirectIfLoggedInSubscription =
     this.authService.currentUser$.pipe(
       filter((user) => !!user),
       tap(() => this.router.navigate(['/pre-registration/overview']))
@@ -44,7 +44,6 @@ export class SignInPageService implements OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    console.log('destroyed sign-in');
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 

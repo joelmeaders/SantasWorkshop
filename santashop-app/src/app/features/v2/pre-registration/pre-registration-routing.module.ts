@@ -1,13 +1,18 @@
 import { NgModule } from '@angular/core';
+import { AngularFireAuthGuard, redirectUnauthorizedTo } from '@angular/fire/compat/auth-guard';
 import { Routes, RouterModule } from '@angular/router';
 import { RegistrationCompleteGuard } from '../../../core/guards/registration-complete.guard';
 import { PreRegistrationPage } from './pre-registration.page';
+
+const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/sign-in']);
 
 const routes: Routes = [
   {
     // Main page, status, info, etc...
     path: '',
     component: PreRegistrationPage,
+    canLoad: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin },
     children: [
       {
         // Additional information such as zip, etc...
@@ -39,8 +44,14 @@ const routes: Routes = [
         loadChildren: () => import('./confirmation/confirmation.module').then( m => m.ConfirmationPageModule)
       },
       {
+        // My account
         path: 'profile',
         loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
+      },
+      {
+        // Event info, where to go, what to bring
+        path: 'event-information',
+        loadChildren: () => import('./event-information/event-information.module').then( m => m.EventInformationPageModule)
       }
     ]
   },

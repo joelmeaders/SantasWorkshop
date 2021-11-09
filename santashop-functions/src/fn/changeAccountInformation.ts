@@ -1,0 +1,57 @@
+import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+import {
+  COLLECTION_SCHEMA,
+  IChangeUserInfo,
+} from '../../../santashop-core/src';
+import { HttpsError } from 'firebase-functions/v1/https';
+
+admin.initializeApp();
+
+export default async (
+  data: IChangeUserInfo,
+  context: functions.https.CallableContext
+): Promise<boolean | HttpsError> => {
+
+  const uid = context.auth?.uid;
+
+  if (!uid) {
+    return new functions.https.HttpsError('not-found', 'uid null');
+  }
+
+  await admin.auth().updateUser(uid, {
+      displayName: `${data.firstName} ${data.lastName}`
+  });
+
+  const batch = admin.firestore().batch();
+
+  const userDocumentRef = admin
+    .firestore()
+    .doc(`${COLLECTION_SCHEMA.users}/${uid}`);
+
+  batch.set(userDocumentRef, data, { merge: true });
+
+  const indexDocRef = admin
+    .firestore()
+    .doc(`registrationsearchindex/${uid}`);
+
+  const indexDoc = {
+    firstName: data.firstName.toLowerCase(),
+    lastName: data.lastName.toLowerCase(),
+    zip: data.zipCode
+  };
+
+  batch.set(indexDocRef, indexDoc, { merge: true });
+
+  return batch
+    .commit()
+    .then(() => true)
+    .catch((error: any) => {
+      console.error(`Error updating user document ${uid} with ${JSON.stringify(data)}`, error);
+      return new functions.https.HttpsError(
+        'internal',
+        'Error updating user document',
+        JSON.stringify(error)
+      );
+    });
+};

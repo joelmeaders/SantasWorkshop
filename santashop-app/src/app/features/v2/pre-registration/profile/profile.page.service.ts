@@ -1,17 +1,21 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { IUser } from '@core/*';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Router } from '@angular/router';
+import { IChangeUserInfo, IUser } from '@core/*';
+import { IError } from '@core/*';
 import { ErrorHandlerService, AuthService, FireRepoLite, COLLECTION_SCHEMA } from '@core/*';
-import { AlertController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { changeEmailForm, changePasswordForm, editProfileForm } from './profile.form';
+import { newChangeInfoForm } from './change-info/change-info.form';
+import { changeEmailForm, changePasswordForm } from './profile.form';
 
 @Injectable()
 export class ProfilePageService implements OnDestroy {
 
   private readonly destroy$ = new Subject<void>();
 
-  public readonly profileForm = editProfileForm();
+  public readonly profileForm = newChangeInfoForm();
   public readonly changeEmailForm = changeEmailForm();
   public readonly changePasswordForm = changePasswordForm();
 
@@ -38,8 +42,11 @@ export class ProfilePageService implements OnDestroy {
   constructor(
     private readonly httpService: FireRepoLite,
     private readonly authService: AuthService,
+    private readonly afFunctions: AngularFireFunctions,
     private readonly errorHandler: ErrorHandlerService,
-    private readonly alertController: AlertController
+    private readonly alertController: AlertController,
+    private readonly loadingController: LoadingController,
+    private readonly router: Router
   ) { }
 
   ngOnDestroy(): void {
@@ -47,16 +54,34 @@ export class ProfilePageService implements OnDestroy {
     this.destroy$.complete();
   }
 
-  // TODO: Cloud Function
-  public async updatePublicProfile() {
-    // const profile: IUser = this.profileForm.value;
-    // this.profileForm.markAsPristine();
-    // return await this.profileService.updatePublicProfile(profile).pipe(take(1)).toPromise();
+  public async updatePublicProfile(): Promise<void> {
+
+    const newInfo: IChangeUserInfo = this.profileForm.value;
+
+    const loader = await this.loadingController.create(
+      { message: 'Updating account...' });
+
+    await loader.present();
+
+    const accountStatusFunction = this.afFunctions.httpsCallable('changeAccountInformation');
+
+    try {
+      await accountStatusFunction(newInfo)
+        .pipe(take(1)).toPromise();
+      
+      this.router.navigate(['..']);
+    }
+    catch (error) {
+      this.errorHandler.handleError(error as IError);
+    }
+    finally {
+      await loader.dismiss();
+    }
   }
 
   public async changeEmailAddress(): Promise<void> {
     const value = this.changeEmailForm.value;
-    await this.authService.changeEmailAddress(value.password, value.newEmailAddress)
+    await this.authService.changeEmailAddress(value.password, value.emailAddress)
       .then(() => this.emailChangedAlert())
       .catch(error => this.errorHandler.handleError(error));
     this.changeEmailForm.reset();

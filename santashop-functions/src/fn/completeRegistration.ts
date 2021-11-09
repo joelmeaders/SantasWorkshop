@@ -7,6 +7,7 @@ import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 admin.initializeApp();
 
 export default async (record: IRegistration, context: CallableContext): Promise<boolean | HttpsError> => {
+  
   if (!isRegistrationComplete(record)) {
     throw new functions.https.HttpsError(
       'failed-precondition',
@@ -41,6 +42,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   const emailDocRef = admin
     .firestore()
     .doc(`tmp_registrationemails/${record.uid}`);
+
   // TODO: Format date/time
   const emailDoc = {
     code: record.qrcode,
@@ -49,8 +51,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
     formattedDateTime: record.dateTimeSlot?.dateTime,
   };
 
-  // await emailDocRef.set(emailDoc);
-  batch.create(emailDocRef, emailDoc);
+  batch.set(emailDocRef, emailDoc, { merge: true });
 
   // Registration Search Index Record
   const indexDocRef = admin
@@ -63,10 +64,10 @@ export default async (record: IRegistration, context: CallableContext): Promise<
     firstName: record.firstName!.toLowerCase(),
     lastName: record.lastName!.toLowerCase(),
     emailAddress: record.emailAddress,
-    zip: record.zipCode,
+    zip: record.zipCode
   };
 
-  await batch.create(indexDocRef, indexDoc);
+  batch.set(indexDocRef, indexDoc, { merge: true });
 
   return batch
     .commit()

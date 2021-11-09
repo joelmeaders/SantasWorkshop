@@ -1,6 +1,5 @@
 import { Validators } from '@angular/forms';
-import { IOnboardUser } from '@core/*';
-import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {
   firstName: Validators.compose([
@@ -31,17 +30,10 @@ const validators = {
   ]),
 };
 
-export const editProfileForm = () => new FormGroup<ControlsOf<Partial<IOnboardUser>>>({
-  firstName: new FormControl<string>('', validators.firstName),
-  lastName: new FormControl<string>('', validators.lastName),
-  zipCode: new FormControl<number>(undefined, validators.zipCode)
-});
-
 export const changeEmailForm = () => new FormGroup(
   {
     password: new FormControl<string>(undefined, Validators.required),
-    oldEmailAddress: new FormControl<string>(undefined, validators.emailAddress),
-    newEmailAddress: new FormControl<string>(undefined, validators.emailAddress)
+    emailAddress: new FormControl<string>(undefined, validators.emailAddress)
   }
 );
 

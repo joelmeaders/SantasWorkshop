@@ -7,6 +7,11 @@ const routes: Routes = [
   {
     path: '',
     component: ConfirmationPage
+  },
+  {
+    // Event info, where to go, what to bring
+    path: 'event-information',
+    loadChildren: () => import('./event-information/event-information.module').then( m => m.EventInformationPageModule)
   }
 ];
 

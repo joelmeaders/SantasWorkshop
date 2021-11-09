@@ -47,11 +47,6 @@ const routes: Routes = [
         // My account
         path: 'profile',
         loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
-      },
-      {
-        // Event info, where to go, what to bring
-        path: 'event-information',
-        loadChildren: () => import('./event-information/event-information.module').then( m => m.EventInformationPageModule)
       }
     ]
   },

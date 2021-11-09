@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount, take } from 'rxjs/operators';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
@@ -69,15 +69,22 @@ export class AuthService {
   }
 
   public async changeEmailAddress(password: string, newEmailAddress: string): Promise<void> {
+
+    
     const user = await this.angularFireAuth.currentUser;
     const auth: IAuth = {
       emailAddress: user?.email as string,
       password
     }
 
+    const accountStatusFunction = this.angularFireFunctions.httpsCallable('updateEmailAddress');
+
     try {
       await this.login(auth);
-      user?.updateEmail(newEmailAddress);
+
+      await accountStatusFunction({emailAddress:newEmailAddress})
+        .pipe(take(1)).toPromise();
+
       return Promise.resolve();
     }
     catch (error: any) {

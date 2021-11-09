@@ -7,3 +7,9 @@ export interface IOnboardUser {
   zipCode: number;
   legal: boolean | Date;
 }
+
+export interface IChangeUserInfo {
+  firstName: string;
+  lastName: string;
+  zipCode: number;
+}

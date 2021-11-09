@@ -18,6 +18,16 @@ export const newAccount =
     return (await import('./fn/newAccount')).default(request);
   });
 
+export const changeAccountInformation =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/changeAccountInformation')).default(request, context);
+  });
+
+export const updateEmailAddress =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/updateEmailAddress')).default(request, context);
+  });
+
   /**
  * Runs a method to validate and complete a user registration record.
  * This process locks down their selected dateTimeSlot, sends an email

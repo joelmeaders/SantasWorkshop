@@ -1,12 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, IError, IOnboardUser } from '@core/*';
+import { AuthService, ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { IError, IOnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
-import { IAuth } from 'santashop-core/src/lib/models/auth.model';
+import { IAuth } from 'santashop-models/src/lib/models/auth.model';
 import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()

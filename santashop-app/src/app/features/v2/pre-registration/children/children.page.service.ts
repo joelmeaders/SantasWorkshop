@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { IChild, PreRegistrationService } from '@core/*';
+import { PreRegistrationService } from '@core/*';
+import { IChild } from '@models/*';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
 

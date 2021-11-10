@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { IDateTimeSlot } from '@core/*';
 import { AlertController } from '@ionic/angular';
+import { IDateTimeSlot } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, take, map, takeUntil } from 'rxjs/operators';

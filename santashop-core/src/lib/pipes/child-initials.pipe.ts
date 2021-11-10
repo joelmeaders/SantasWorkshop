@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IChild } from '../models/child.model';
+import { IChild } from '@models/*';
 
 @Pipe({
   name: 'childInitials'

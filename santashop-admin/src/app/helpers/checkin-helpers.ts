@@ -1,4 +1,4 @@
-import { IChildrenInfo } from 'santashop-core/src/lib/models';
+import { IChildrenInfo } from 'santashop-models/src/lib/models';
 import { chain } from 'underscore';
 import firebase from 'firebase/compat/app';
 import { format } from 'date-fns';

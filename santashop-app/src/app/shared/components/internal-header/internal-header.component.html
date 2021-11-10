@@ -6,9 +6,9 @@
         class="sm-logo"
         alt="logo with santa claus"
       />
-      <ion-card-title *ngIf="userRegistration$ | async as registration">
+      <ion-card-title *ngIf="user$ | async as user">
         <strong>
-          {{ 'COMMON.WELCOME' | translate }}, {{ registration.firstName }} {{ registration.lastName }}
+          {{ 'COMMON.WELCOME' | translate }}, {{ user.displayName }}
         </strong>
       </ion-card-title>
     </ion-item>

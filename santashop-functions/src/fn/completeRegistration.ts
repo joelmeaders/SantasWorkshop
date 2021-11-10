@@ -1,8 +1,8 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
-import { COLLECTION_SCHEMA, IRegistration } from '../../../santashop-core/src';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
+import { COLLECTION_SCHEMA, IRegistration } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -33,7 +33,8 @@ export default async (record: IRegistration, context: CallableContext): Promise<
 
   const updateRegistrationFields = {
     registrationSubmittedOn: new Date(),
-    includedInCounts: new Date()
+    includedInCounts: false,
+    programYear: 2021
   } as Partial<IRegistration>;
 
   batch.set(registrationDocRef, updateRegistrationFields, { merge: true });

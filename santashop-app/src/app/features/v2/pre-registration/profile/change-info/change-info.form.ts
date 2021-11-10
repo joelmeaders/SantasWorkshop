@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { IChangeUserInfo } from '@core/*';
+import { IChangeUserInfo } from '@models/*';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {

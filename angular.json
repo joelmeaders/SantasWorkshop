@@ -359,6 +359,37 @@
           }
         }
       }
+    },
+    "santashop-models": {
+      "projectType": "library",
+      "root": "santashop-models",
+      "sourceRoot": "santashop-models/src",
+      "prefix": "models",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "santashop-models/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "santashop-models/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "santashop-models/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "santashop-models/src/test.ts",
+            "tsConfig": "santashop-models/tsconfig.spec.json",
+            "karmaConfig": "santashop-models/karma.conf.js"
+          }
+        }
+      }
     }
   },
   "defaultProject": "santashop-app",

@@ -4,8 +4,8 @@ import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount, take
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
-import { IAuth, IUserEmailUid } from '../models/auth.model';
 import firebase from 'firebase/compat/app';
+import { IAuth, IUserEmailUid } from '@models/*';
 
 @Injectable({
   providedIn: 'root'

@@ -4,11 +4,10 @@ import { Router } from '@angular/router';
 import {
   AuthService,
   ErrorHandlerService,
-  IAuth,
-  IError,
   newAuthForm,
 } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { IAuth, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, take, tap } from 'rxjs/operators';

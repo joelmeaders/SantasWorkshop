@@ -1,10 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
-import { IChangeUserInfo, IUser } from '@core/*';
-import { IError } from '@core/*';
-import { ErrorHandlerService, AuthService, FireRepoLite, COLLECTION_SCHEMA } from '@core/*';
+import { ErrorHandlerService, AuthService, FireRepoLite } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { COLLECTION_SCHEMA, IUser, IChangeUserInfo, IError } from '@models/*';
 import { Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { newChangeInfoForm } from './change-info/change-info.form';
@@ -69,7 +68,7 @@ export class ProfilePageService implements OnDestroy {
       await accountStatusFunction(newInfo)
         .pipe(take(1)).toPromise();
       
-      this.router.navigate(['..']);
+      this.router.navigate(['../']);
     }
     catch (error) {
       this.errorHandler.handleError(error as IError);
@@ -85,6 +84,7 @@ export class ProfilePageService implements OnDestroy {
       .then(() => this.emailChangedAlert())
       .catch(error => this.errorHandler.handleError(error));
     this.changeEmailForm.reset();
+    this.router.navigate(['../']);
   }
 
   public async changePassword(): Promise<void> {
@@ -92,6 +92,7 @@ export class ProfilePageService implements OnDestroy {
     await this.authService.changePassword(value.oldPassword, value.newPassword)
       .then(() => this.passwordChangedAlert())
       .catch(error => this.errorHandler.handleError(error));
+      this.router.navigate(['../']);
   }
 
   public async emailChangedAlert(): Promise<any> {

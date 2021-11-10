@@ -10,14 +10,11 @@ import {
   take,
   takeUntil,
 } from 'rxjs/operators';
-import { COLLECTION_SCHEMA } from '../helpers/schema.model';
-import { IDateTimeSlot } from '../models/date-time-slot.model';
-import { IRegistration } from '../models/registration.model';
 import { AuthService } from './auth.service';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
 import { Timestamp } from '@firebase/firestore';
-import { IChild } from '../models/child.model';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { IDateTimeSlot, IRegistration, IChild, COLLECTION_SCHEMA } from '@models/*';
 
 @Injectable({
   providedIn: 'root',

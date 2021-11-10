@@ -35,6 +35,9 @@
       ],
       "@admin/*": [
         "santashop-admin/src"
+      ],
+      "@models/*": [
+        "dist/santashop-models"
       ]
     },
     "types": [
@@ -44,6 +47,13 @@
       "./node_modules/@types"
     ]
   },
+  "references": [
+    { "path": "santashop-models" },
+    { "path": "santashop-core" },
+    { "path": "santashop-app" },
+    { "path": "santashop-admin" },
+    { "path": "santashop-functions" }
+  ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,

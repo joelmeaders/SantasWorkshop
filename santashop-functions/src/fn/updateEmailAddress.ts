@@ -1,26 +1,23 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {
-  COLLECTION_SCHEMA,
-  IAuth,
-} from '../../../santashop-core/src';
-import { HttpsError } from 'firebase-functions/v1/https';
+import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
+import { IAuth, COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async (
   data: IAuth,
-  context: functions.https.CallableContext
+  context: CallableContext
 ): Promise<boolean | HttpsError> => {
 
   const uid = context.auth?.uid;
 
   if (!uid) {
-    return new functions.https.HttpsError('not-found', 'uid null');
+    return new HttpsError('not-found', 'uid null');
   }
 
   await admin.auth().updateUser(uid, {
-      email: data.emailAddress
+      email: data.emailAddress.toLowerCase()
   });
 
   const docData = {
@@ -37,9 +34,15 @@ export default async (
 
   const indexDocRef = admin
     .firestore()
-    .doc(`registrationsearchindex/${uid}`);
+    .doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
 
   batch.set(indexDocRef, docData, { merge: true });
+
+  const registrationDocRef = admin
+    .firestore()
+    .doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+
+  batch.set(registrationDocRef, docData, { merge: true });
 
   return batch
     .commit()

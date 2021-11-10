@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { IError } from '../models/error.model';
+import { IError } from '@models/*';
 
 @Injectable({
   providedIn: 'root'

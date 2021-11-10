@@ -1,22 +1,19 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import {
-  COLLECTION_SCHEMA,
-  IChangeUserInfo,
-} from '../../../santashop-core/src';
-import { HttpsError } from 'firebase-functions/v1/https';
+import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
+import { COLLECTION_SCHEMA, IChangeUserInfo } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async (
   data: IChangeUserInfo,
-  context: functions.https.CallableContext
+  context: CallableContext
 ): Promise<boolean | HttpsError> => {
 
   const uid = context.auth?.uid;
 
   if (!uid) {
-    return new functions.https.HttpsError('not-found', 'uid null');
+    return new HttpsError('not-found', 'uid null');
   }
 
   await admin.auth().updateUser(uid, {
@@ -33,7 +30,7 @@ export default async (
 
   const indexDocRef = admin
     .firestore()
-    .doc(`registrationsearchindex/${uid}`);
+    .doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
 
   const indexDoc = {
     firstName: data.firstName.toLowerCase(),
@@ -42,6 +39,18 @@ export default async (
   };
 
   batch.set(indexDocRef, indexDoc, { merge: true });
+
+  const registrationDocRef = admin
+    .firestore()
+    .doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+
+  const registrationDoc = {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    zip: data.zipCode
+  };
+
+  batch.set(registrationDocRef, registrationDoc, { merge: true });
 
   return batch
     .commit()

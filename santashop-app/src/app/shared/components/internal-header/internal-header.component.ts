@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
+import { AuthService } from '@core/*';
 import { PopoverController } from '@ionic/angular';
 import { PublicMenuComponent } from '../public-menu/public-menu.component';
 
@@ -11,10 +11,10 @@ import { PublicMenuComponent } from '../public-menu/public-menu.component';
 })
 export class InternalHeaderComponent {
 
-  public readonly userRegistration$ = this.preregistrationService.userRegistration$;
+  public readonly user$ = this.authService.currentUser$;
 
   constructor(
-    private readonly preregistrationService: PreRegistrationService,
+    private readonly authService: AuthService,
     private readonly popoverController: PopoverController
   ) { }
 

@@ -1,8 +1,9 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AgeGroup, ChildValidationError, ChildValidationService, getAgeFromDate, IChild, MAX_BIRTHDATE, PreRegistrationService, PROGRAM_YEAR, ToyType, yyyymmddToLocalDate } from '@core/*';
+import { ChildValidationService, getAgeFromDate, MAX_BIRTHDATE, PreRegistrationService, PROGRAM_YEAR, yyyymmddToLocalDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
+import { IChild, ChildValidationError, ToyType, AgeGroup } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
@@ -129,8 +130,10 @@ export class AddChildPageService implements OnDestroy {
     const yyyymmdd: any = this.form.controls.dateOfBirth.value;
     if (!yyyymmdd) return;
     
-    if (!this.form.controls.dateOfBirth.valid)
+    if (!this.form.controls.dateOfBirth.valid) {
+      this.form.controls.dateOfBirth.reset();
       return;
+    }
 
     const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
     const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
@@ -148,11 +151,18 @@ export class AddChildPageService implements OnDestroy {
     } else {
       // TODO:
       await this.childTooOldAlert();
+      this.form.controls.dateOfBirth.reset();
     }
 
     this.form.controls.ageGroup.setValue(ageGroup!);
     this._isInfant$.next(false);
   }
+
+  edit child > birthday not loading
+add_children error popup translation
+add children error pops up twice
+prevent saving with future child birth date
+my account permissions not working
 
   private async childTooOldAlert() {
     const alert = await this.alertController.create({

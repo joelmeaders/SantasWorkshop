@@ -1,9 +1,7 @@
-import { Timestamp } from 'firebase/firestore'
-
 export interface ICheckIn {
   customerId?: string;
   registrationCode?: string;
-  checkInDateTime?: Timestamp;
+  checkInDateTime?: Date;
   inStats: boolean;
   stats?: ICheckInStats;
 }

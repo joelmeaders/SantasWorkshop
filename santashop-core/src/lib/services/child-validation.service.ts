@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
+import { ChildValidationError, IChild } from '@models/*';
 import { deepCopy } from '../helpers/methods';
-import { ChildValidationError } from '../models';
-import { IChild } from '../models/child.model';
 import { MIN_BIRTHDATE } from '../parameters';
 
 @Injectable()

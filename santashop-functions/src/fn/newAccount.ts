@@ -1,14 +1,8 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as qrcode from 'qrcode';
-import {
-  COLLECTION_SCHEMA,
-  IOnboardUser,
-  IUser,
-  IRegistration,
-  IDateTimeSlot,
-} from '../../../santashop-core/src';
 import { HttpsError } from 'firebase-functions/v1/https';
+import { IOnboardUser, IUser, IRegistration, COLLECTION_SCHEMA, IDateTimeSlot } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -18,7 +12,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
   const newUserAccount = await admin
     .auth()
     .createUser({
-      email: data.emailAddress,
+      email: data.emailAddress.toLowerCase(),
       password: data.password,
       disabled: false,
       displayName: `${data.firstName} ${data.lastName}`,
@@ -41,7 +35,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
   const user: IUser = {
     firstName: data.firstName,
     lastName: data.lastName,
-    emailAddress: data.emailAddress,
+    emailAddress: data.emailAddress.toLowerCase(),
     zipCode: data.zipCode,
     acceptedTermsOfService: acceptedLegal,
     acceptedPrivacyPolicy: acceptedLegal,
@@ -51,7 +45,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     uid: newUserAccount.uid,
     firstName: data.firstName,
     lastName: data.lastName,
-    emailAddress: data.emailAddress,
+    emailAddress: data.emailAddress.toLowerCase(),
     zipCode: data.zipCode,
     qrcode: generateId(8),
   };

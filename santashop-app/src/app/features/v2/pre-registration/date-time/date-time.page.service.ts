@@ -1,8 +1,9 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { COLLECTION_SCHEMA, FireRepoLite, IDateTimeSlot, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
+import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
 import { Observable, Subject } from 'rxjs';
 import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { Timestamp } from '@firebase/firestore';
+import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {

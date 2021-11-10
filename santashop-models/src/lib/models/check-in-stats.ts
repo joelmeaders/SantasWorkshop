@@ -1,7 +1,5 @@
-import { Timestamp } from "@firebase/firestore";
-
 export interface ICheckInAggregatedStats {
-  lastUpdated: Timestamp;
+  lastUpdated: Date;
   dateTimeCount: ICheckInDateTimeCount[];
 }
 

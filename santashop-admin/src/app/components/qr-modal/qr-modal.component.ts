@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
 import { BehaviorSubject, from, Subject } from 'rxjs';
 import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
-import { ICheckIn } from 'santashop-core/src/lib/models';
+import { ICheckIn } from 'santashop-models/src/lib/models';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 

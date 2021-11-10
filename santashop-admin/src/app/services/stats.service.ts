@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { from, Observable } from 'rxjs';
 import { map, mergeMap, pluck, reduce, switchMap, take, tap } from 'rxjs/operators';
-import { ICheckInAggregatedStats } from 'santashop-core/src/lib/models/check-in-stats';
+import { ICheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
 import { FireCRUDStateless, IDateTimeCount, IZipCodeCount } from 'santashop-core/src';
 import { chain, sortBy } from 'underscore';
 import { Counter } from '../models/counter.model';

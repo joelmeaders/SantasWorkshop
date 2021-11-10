@@ -1,6 +1,6 @@
 import { EventContext } from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { IDateTimeSlot, IRegistration } from '../../../santashop-core/src';
+import { IDateTimeSlot, IRegistration } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -17,13 +17,21 @@ admin.initializeApp();
  * @param context: EventContext
  * @returns 
  */
-export default async (context: EventContext): Promise<void> => {
+export default async (context: EventContext): Promise<string> => {
   
   const dateTimeSlots: IDateTimeSlot[] =
     await loadDateTimeSlots();
 
+  if (!dateTimeSlots.length) {
+    return Promise.resolve('No date time slots');
+  }
+
   const registrations: IRegistration[] =
     await loadRegistrations();
+
+  if (!registrations.length) {
+    return Promise.resolve('No registrations');
+  }
 
   registrations.forEach(registration => {
 
@@ -40,7 +48,7 @@ export default async (context: EventContext): Promise<void> => {
   return admin.firestore().runTransaction((transaction) => {
     
     dateTimeSlots.forEach(slot =>{
-      const doc = admin.firestore().collection('dateTimeslots').doc(slot.id!.toString());
+      const doc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
       transaction.update(doc, slot);
     });
 
@@ -49,7 +57,7 @@ export default async (context: EventContext): Promise<void> => {
       transaction.update(doc, registration);
     });
 
-    return Promise.resolve();
+    return Promise.resolve('Updated date time slots');
   });
 };
 
@@ -77,8 +85,9 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
     });
 
     pageOffset = snapshotDocs.docs.length - 1;
+    console.info(`DateTimeSlots: Page Offset: ${pageOffset}, Page Size ${pageSize}`);
   } 
-  while (pageSize % pageOffset === 0);
+  while (pageSize % pageOffset === 0 && pageOffset >= 0);
 
   return allDateTimeSlots;
 };
@@ -86,8 +95,8 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
 const registrationQuery = (limit: number, offset: number) =>
   admin.firestore().collection('registrations')
   .where('programYear', '==', 2021)
-  .where('dateTimeSlot', '!=', undefined)
-  .where('includedInCount', '==', false)
+  .where('dateTimeSlot', '!=', '')
+  .where('includedInCounts', '==', false)
   .limit(limit).offset(offset);
 
 const loadRegistrations = async (): Promise<IRegistration[]> => {
@@ -107,8 +116,9 @@ const loadRegistrations = async (): Promise<IRegistration[]> => {
     });
 
     pageOffset = snapshotDocs.docs.length - 1;
+    console.info(`Registrations: Page Offset: ${pageOffset}, Page Size ${pageSize}`);
   } 
-  while (pageSize % pageOffset === 0);
+  while (pageSize % pageOffset === 0 && pageOffset >= 0);
 
   return allRegistrations;
 };

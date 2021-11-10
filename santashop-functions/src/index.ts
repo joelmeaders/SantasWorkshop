@@ -71,14 +71,22 @@ export const documentCounterOnDelete = functions.firestore
       await (await import('./fn/documentCounterOnDelete')).default(context);
     });
 
+// ------------------------------------- SCHEDULED FUNCTIONS
+
 /**
  * Backs up firestore db every hour to storage bucket
  */
 // export const scheduledFirestoreBackup = functions.pubsub
-//     .schedule("every 2 hours")
+//     .schedule("every 12 hours")
 //     .onRun(async (context) => {
 //       await (await import("./fn/scheduledFirestoreBackup")).default();
 //     });
+
+export const scheduledDateTimeSlotCounters = 
+  functions.pubsub.schedule('every 15 minutes')
+  .onRun(async (context: functions.EventContext) => {
+    await (await import('./fn/scheduledDateTimeSlotCounters')).default(context);
+  });
 
 // export const scheduledRegistrationStats = functions.pubsub
 //     .schedule("0 0 * * *")
@@ -94,13 +102,3 @@ export const documentCounterOnDelete = functions.firestore
 //     .onRun(async (context) => {
 //       await (await import("./fn/scheduledCheckInStats")).default();
 //     });
-
-
-
-// ------------------------------------- SCHEDULED FUNCTIONS
-
-export const scheduledDateTimeSlotCounters = 
-  functions.pubsub.schedule('every 15 minutes')
-  .onRun(async (context: functions.EventContext) => {
-    await (await import('./fn/dateTimeSlotCountersLite')).default(context);
-  });

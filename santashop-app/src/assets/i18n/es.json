@@ -87,6 +87,9 @@
     "TOY_TYPE": "Tipo de juguetes",
     "DELETE_CHILD_TITLE": "¿Eliminar hijo?",
     "DELETE_CHILD_MSG": "Al presionar el botón Eliminar, este niño eliminará a este niño de su cuenta",
+    "INVALID_AGE": "La edad debe estar entre 0 y 11 años",
+    "INVALID_FIRSTNAME": "El nombre debe tener entre 2 y 20 caracteres",
+    "INVALID_LASTNAME": "El nombre debe tener entre 2 y 25 caracteres",
 
     "INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",
     "BABIES": "Para bebés (Edades 0-2)",

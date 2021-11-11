@@ -88,6 +88,9 @@
     "TOY_TYPE": "Type of Toys",
     "DELETE_CHILD_TITLE": "Delete Child?",
     "DELETE_CHILD_MSG": "Pressing the delete button will remove this child from your account",
+    "INVALID_AGE": "Age must be between 0 and 11 years old",
+    "INVALID_FIRSTNAME": "First name must be between 2 and 20 characters",
+    "INVALID_LASTNAME": "First name must be between 2 and 25 characters",
 
     "INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",
     "BABIES": "For Babies (Ages 0-2)",

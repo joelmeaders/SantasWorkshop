@@ -68,8 +68,19 @@ export class AddChildPageService implements OnDestroy {
     // TODO: Do we need to update program year? Possibly not
     this.form.controls.programYearAdded.setValue(this.programYear);
 
+    // TODO: Improve this horrible date stuff at some point.
+    // I opted not to use a 3rd party library this time, and
+    // JS dates don't play well with Firebase Timestamps.
+    const year = child.dateOfBirth.getFullYear();
+    var month = (child.dateOfBirth.getMonth()+1).toString();
+    var day = child.dateOfBirth.getDate().toString();
+
+    month = month.length === 2 ? month : `0${month}`;
+    day = day.length === 2 ? day : `0${day}`;
+
     // Set birth date
-    const date = `${child.dateOfBirth.getFullYear()}-${child.dateOfBirth.getMonth()+1}-${child.dateOfBirth.getDate()}`
+    const date = `${year}-${month}-${day}`
+    console.log(date)
     this.form.controls.dateOfBirth.setValue(date as any as Date);
     
     await this.birthdaySelected();
@@ -157,12 +168,6 @@ export class AddChildPageService implements OnDestroy {
     this.form.controls.ageGroup.setValue(ageGroup!);
     this._isInfant$.next(false);
   }
-
-  edit child > birthday not loading
-add_children error popup translation
-add children error pops up twice
-prevent saving with future child birth date
-my account permissions not working
 
   private async childTooOldAlert() {
     const alert = await this.alertController.create({

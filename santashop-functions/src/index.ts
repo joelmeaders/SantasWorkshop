@@ -28,6 +28,11 @@ export const updateEmailAddress =
     return (await import('./fn/updateEmailAddress')).default(request, context);
   });
 
+export const migrateProfile_V0_To_V1 =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/migrateProfile_V0_To_V1')).default(request, context);
+  });
+
   /**
  * Runs a method to validate and complete a user registration record.
  * This process locks down their selected dateTimeSlot, sends an email

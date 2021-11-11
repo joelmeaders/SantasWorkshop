@@ -32,6 +32,7 @@
     "ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' config.app.ts",
     "ci:app:build": "npm run core:build && ng build --configuration production --project=santashop-app",
     "emulators:start": "firebase emulators:start --import .firebase --export-on-exit",
+    "emulators:start:noexport": "firebase emulators:start --import .firebase",
     "fsrules:deploy": "firebase deploy --only firestore:rules"
   },
   "dependencies": {

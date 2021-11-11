@@ -78,7 +78,8 @@
     "CHILD_LINE_2": "Add all of your Children below.",
     "ADD_A_CHILD": "Add a Child",
     "NO_CHILDREN": "No Children.",
-    "YOUR_CHILDREN": "Your Children"
+    "YOUR_CHILDREN": "Your Children",
+    "INVALID_TOYTYPE": "Error. Edit child and set toy type to fix"
   },
   "ADDCHILD": {
     "ADD_TITLE": "Add child",

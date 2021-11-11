@@ -37,7 +37,13 @@
                       <ion-icon name="man-outline" slot="start" *ngIf="child.toyType === 'boys'"></ion-icon>
                       <ion-icon name="woman-outline" slot="start" *ngIf="child.toyType === 'girls'"></ion-icon>
                       <ion-icon name="happy-outline" slot="start" *ngIf="child.toyType === 'infants'"></ion-icon>
-                      <ion-label> {{ child.firstName }} {{ child.lastName }} </ion-label>
+                      <ion-icon name="alert-circle" color="danger" slot="start" *ngIf="!child.toyType"></ion-icon>
+                      <div>
+                        <ion-label> {{ child.firstName }} {{ child.lastName }} </ion-label>
+                        <ion-note *ngIf="!child.toyType" color="danger">
+                          {{ 'CHILDREN.INVALID_TOYTYPE' | translate }} 
+                        </ion-note>
+                      </div>
                     </ion-item>
                   </ion-list>
     

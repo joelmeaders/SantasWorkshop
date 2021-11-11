@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
+import { PreRegistrationService, ProfileMigrationService } from '@core/*';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 
@@ -37,8 +37,9 @@ export class PreRegistrationPage implements OnDestroy {
     );
 
   constructor(
-    private readonly viewService: PreRegistrationService
-  ) {}
+    private readonly viewService: PreRegistrationService,
+    public readonly migrationService: ProfileMigrationService // Entrypoint for migration service
+  ) { }
 
   public ngOnDestroy(): void {
     this.destroy$.next();

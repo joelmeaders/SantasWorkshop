@@ -77,7 +77,8 @@
     "CHILD_LINE_2": "Agregue todos sus hijos a continuación.",
     "ADD_A_CHILD": "Agregar un niño",
     "NO_CHILDREN": "No hay niños.",
-    "YOUR_CHILDREN": "Sus hijos"
+    "YOUR_CHILDREN": "Sus hijos",
+    "INVALID_TOYTYPE": "Error. Editar el niño y establecer el tipo de juego para corregir"
   },
   "ADDCHILD": {
     "ADD_TITLE": "Agregar niño",

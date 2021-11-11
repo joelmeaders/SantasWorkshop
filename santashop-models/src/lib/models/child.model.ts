@@ -7,6 +7,7 @@ export interface IChild {
   toyType?: ToyType;
   programYearAdded?: number;
   enabled: boolean;
+  error?: string
 }
 
 export enum AgeGroup {

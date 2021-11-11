@@ -54,6 +54,13 @@ export class PreRegistrationService implements OnDestroy {
     shareReplay(1)
   );
 
+  public readonly noErrorsInChildren$ = this.children$.pipe(
+    takeUntil(this.destroy$),
+    map(children => children.filter(c => !!c.error)),
+    map(errors => errors.length === 0),
+    shareReplay(1)
+  );
+
   public readonly dateTimeSlot$: Observable<IDateTimeSlot | undefined> =
     this.userRegistration$.pipe(
       takeUntil(this.destroy$),

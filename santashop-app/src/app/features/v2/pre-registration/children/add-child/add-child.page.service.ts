@@ -98,6 +98,7 @@ export class AddChildPageService implements OnDestroy {
 
     try {
       const validatedChild = this.childValidationService.validateChild(updatedChild);
+      delete validatedChild.error;
       const updatedChildren = children?.filter(child => child.id !== validatedChild.id);
       updatedChildren?.push(validatedChild);
       return this.updateRegistration(updatedChildren);
@@ -142,7 +143,6 @@ export class AddChildPageService implements OnDestroy {
     if (!yyyymmdd) return;
     
     if (!this.form.controls.dateOfBirth.valid) {
-      this.form.controls.dateOfBirth.reset();
       return;
     }
 

@@ -21,7 +21,7 @@ import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as A
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
-import { AuthService, MOBILE_EVENT, PROGRAM_YEAR } from '@core/*';
+import { AuthService, MOBILE_EVENT, PROFILE_VERSION, PROGRAM_YEAR } from '@core/*';
 import { RouteReuseStrategy } from '@angular/router';
 import { RecaptchaSettings, RECAPTCHA_NONCE, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
 
@@ -59,6 +59,7 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     // App settings
     { provide: PROGRAM_YEAR, useValue: 2021 },
+    { provide: PROFILE_VERSION, useValue: 1 },
     { provide: MOBILE_EVENT, useValue: true },
     // Storage
     // { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },

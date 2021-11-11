@@ -10,8 +10,8 @@ export function yyyymmddToLocalDate(isoString: string) {
 }
 
 export function getAgeFromDate(birthday: Date, fromDate: Date) {
-  var today = fromDate;
-  var thisYear = 0;
+  let today = fromDate;
+  let thisYear = 0;
 
   const monthCheck = today.getMonth() < birthday.getMonth();
   const noTimeForThis = (today.getMonth() == birthday.getMonth()) && today.getDate() < birthday.getDate();

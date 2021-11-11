@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { PreRegistrationService } from '@core/*';
 import { combineLatest, Subject } from 'rxjs';
-import { map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
+import { filter, map, shareReplay, startWith, switchMap, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-overview',
@@ -23,6 +23,9 @@ export class OverviewPage implements OnDestroy {
     startWith(0),
     takeUntil(this.destroy$),
     map(value => value >= 1),
+    filter(isTrue => !!isTrue),
+    switchMap(() => this.preregistrationService.noErrorsInChildren$),
+    filter(errorFree => !!errorFree),
     shareReplay(1)
   );
 

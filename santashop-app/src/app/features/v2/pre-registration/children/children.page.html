@@ -75,7 +75,6 @@
                   <div class="es-pd-bottom-xxl es-pd-top-xxl"></div>
                   <ion-item
                     *ngFor="let child of children"
-                    [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
                     lines="none"
                   >
                     <ion-icon
@@ -99,12 +98,23 @@
                       slot="start"
                       *ngIf="child.toyType === 'infants'"
                     ></ion-icon>
+                    <ion-icon
+                      class="icon-reduced-margin"
+                      name="alert-circle"
+                      color="danger"
+                      size="large"
+                      slot="start"
+                      *ngIf="!child.toyType"
+                    ></ion-icon>
                     <ion-card-header>
                       <ion-card-title>
                         {{ child.firstName }} {{ child.lastName }}
                       </ion-card-title>
                       <ion-card-subtitle>
                         {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
+                      </ion-card-subtitle>
+                      <ion-card-subtitle color="danger" *ngIf="!child.toyType">
+                        {{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
                       </ion-card-subtitle>
                     </ion-card-header>
                     <div slot="end">

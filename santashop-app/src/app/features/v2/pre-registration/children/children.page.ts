@@ -36,17 +36,16 @@ export class ChildrenPage {
   private async confirmDeleteChild(child: IChild): Promise<boolean> {
 
     const alert = await this.alertController.create({
-      // TODO: This stuff
       header: this.translateService.instant('ADDCHILD.DELETE_CHILD_TITLE'),
       subHeader: `${child.firstName} ${child.lastName}`,
       message: this.translateService.instant('ADDCHILD.DELETE_CHILD_MSG'),
       buttons: [
         {
-          text: 'Go Back',
+          text: this.translateService.instant('COMMON.GO_BACK'),
           role: 'cancel'
         },
         {
-          text: 'Yes',
+          text: this.translateService.instant('COMMON.OK'),
           role: 'destructive',
           cssClass: 'confirm-delete-button'
         }

@@ -17,7 +17,7 @@ export class ErrorHandlerService {
 
     const alert = await this.alertController.create({
       header: 'Error Encountered',
-      subHeader: `code: ${error.code}`,
+      subHeader: `Code: ${error.code}`,
       message: error.details,
       buttons: ['Ok']
     });

@@ -158,7 +158,6 @@ export class AddChildPageService implements OnDestroy {
     } else if (ageInYears >= 9 && ageInYears < 12) {
       ageGroup = AgeGroup.age911;
     } else {
-      // TODO:
       await this.childTooOldAlert();
       this.form.controls.dateOfBirth.reset();
     }

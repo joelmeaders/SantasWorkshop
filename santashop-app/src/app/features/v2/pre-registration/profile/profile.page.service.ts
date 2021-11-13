@@ -112,8 +112,8 @@ export class ProfilePageService implements OnDestroy {
 
   public async passwordChangedAlert(): Promise<any> {
     const alert = await this.alertController.create({
-      header: this.translateService.instant('PROFILE.DONE'),
-      message: this.translateService.instant('PROFILE.DONE'),
+      header: this.translateService.instant('PROFILE.PASSWORD_CHANGED'),
+      message: this.translateService.instant('PROFILE.PASSWORD_CHANGED_TEXT'),
       buttons: ['Ok']
     });
 

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ErrorHandlerService, AuthService, FireRepoLite } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { COLLECTION_SCHEMA, IUser, IChangeUserInfo, IError } from '@models/*';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { newChangeInfoForm } from './change-info/change-info.form';
@@ -45,7 +46,8 @@ export class ProfilePageService implements OnDestroy {
     private readonly errorHandler: ErrorHandlerService,
     private readonly alertController: AlertController,
     private readonly loadingController: LoadingController,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly translateService: TranslateService
   ) { }
 
   ngOnDestroy(): void {
@@ -97,10 +99,12 @@ export class ProfilePageService implements OnDestroy {
 
   public async emailChangedAlert(): Promise<any> {
     const alert = await this.alertController.create({
-      header: 'Email Verification Sent',
-      message: 'An email has been sent to your existing address to verify the change.',
+      header: this.translateService.instant('PROFILE.DONE'),
+      message: this.translateService.instant('PROFILE.EMAIL_UPDATED'),
       buttons: ['Ok']
     });
+
+    
 
     await alert.present();
     return alert.onDidDismiss();
@@ -108,8 +112,8 @@ export class ProfilePageService implements OnDestroy {
 
   public async passwordChangedAlert(): Promise<any> {
     const alert = await this.alertController.create({
-      header: 'Password Changed',
-      message: 'Remember to use your new password next time you sign in',
+      header: this.translateService.instant('PROFILE.DONE'),
+      message: this.translateService.instant('PROFILE.DONE'),
       buttons: ['Ok']
     });
 

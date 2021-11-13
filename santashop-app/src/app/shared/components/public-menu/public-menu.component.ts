@@ -54,6 +54,11 @@ export class PublicMenuComponent implements OnDestroy {
     await this.closeMenu();
   }
 
+  public async help() {
+    await this.router.navigate(['/pre-registration/help']);
+    await this.closeMenu();
+  }
+
   public async createAccount() {
     await this.router.navigate(['/sign-up-account']);
     await this.closeMenu();

@@ -96,7 +96,7 @@
                 <app-control-errors
                   [control]="form.controls.password2"
                 ></app-control-errors>
-                <ng-container *ngIf="form.errors?.fieldsMatch">
+                <ng-container *ngIf="form.errors?.passwordMismatch">
                   <ul>
                     <li>
                       <ion-note color="danger">

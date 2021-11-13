@@ -65,8 +65,6 @@ export class AddChildPageService implements OnDestroy {
     }
 
     this.form.patchValue({...child});
-    // TODO: Do we need to update program year? Possibly not
-    this.form.controls.programYearAdded.setValue(this.programYear);
 
     // TODO: Improve this horrible date stuff at some point.
     // I opted not to use a 3rd party library this time, and

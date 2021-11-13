@@ -38,13 +38,12 @@
             <div class="ion-padding es-mg-bottom-xxl">
               <ion-item class="inset-ion-item-title" color="none">
                 <ion-card-title lines="full">
-                  Change Name & Zip Code
+                  {{ 'PROFILE.CHANGE_INFO' | translate }}
                 </ion-card-title>
               </ion-item>
 
               <div class="ion-margin ion-padding">
-                <p>
-                  Make changes to your First Name below. Be sure to click the <strong>Save Changes</strong> button when you are done.
+                <p innerHtml="{{ 'PROFILE.CHANGE_INFO_TEXT' | translate }}">
                 </p>
               </div>
 
@@ -100,7 +99,7 @@
                   </form>
 
                   <ion-button color="xmasred" class="ion-float-end ion-margin-bottom" (click)="updateProfile()"  [disabled]="!form.valid">
-                    Save Changes
+                    {{ 'PROFILE.SAVE_CHANGES' | translate }}
                   </ion-button>
 
                 </ion-card-content>

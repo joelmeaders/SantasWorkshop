@@ -15,6 +15,24 @@
       ]
     },
     {
+      "collectionGroup": "registrations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "includedInCounts",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "programYear",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dateTimeSlot",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "registrationsearchindex",
       "queryScope": "COLLECTION",
       "fields": [

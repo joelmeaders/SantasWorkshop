@@ -1,21 +1,25 @@
 <ion-content size="fullscreen" color="light" class="ion-text-center">
   <div class="div-container">
-
     <ion-text color="xmasred">
-      <div class="h2alt"> Oh No!<br />Registration is </div>
+      <div class="h2alt">
+        {{ 'REG_CLOSED.1' | translate }}<br />
+        {{ 'REG_CLOSED.2' | translate }}
+      </div>
     </ion-text>
 
-    <div class="h1alt"> Closed </div>
+    <div class="h1alt">{{ 'REG_CLOSED.3' | translate }}</div>
 
     <div class="es-mg-bottom-xxl es-mg-top-xxl es-pd-bottom-xxl es-pd-top-xxl">
-      <img src="assets/images/registration-closed.png" alt="shop closed image">
+      <img
+        src="assets/images/registration-closed.png"
+        alt="shop closed image"
+      />
     </div>
 
     <div class="es-mg-top-xxl">
       <ion-text color="xmasred">
         <h3>
-          Sorry, Santa’s Sleigh is full and all Dates & Times have been filled.
-            Please visit our social sites for more information.
+          {{ 'REG_CLOSED.4' | translate }}
         </h3>
       </ion-text>
     </div>
@@ -34,11 +38,8 @@
           ></ion-icon>
         </ion-button>
       </a>
-  
-      <a
-        href="https://www.instagram.com/denversantaclausshop/"
-        target="_blank"
-      >
+
+      <a href="https://www.instagram.com/denversantaclausshop/" target="_blank">
         <ion-button
           color="white"
           class="remove-shadow round-button dark-border"
@@ -52,6 +53,5 @@
         </ion-button>
       </a>
     </div>
-
   </div>
 </ion-content>

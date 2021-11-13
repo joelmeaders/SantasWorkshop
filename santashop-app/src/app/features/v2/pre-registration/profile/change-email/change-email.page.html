@@ -38,13 +38,13 @@
             <div class="ion-padding es-mg-bottom-xxl">
               <ion-item class="inset-ion-item-title" color="none">
                 <ion-card-title lines="full">
-                  Change Email
+                  {{ 'PROFILE.CHANGE_EMAIL' | translate }}
                 </ion-card-title>
               </ion-item>
 
               <div class="ion-margin ion-padding">
                 <p>
-                  To change your email, complete the form below.
+                  {{ 'PROFILE.CHANGE_EMAIL_TEXT' | translate }}
                 </p>
               </div>
 
@@ -54,7 +54,7 @@
                   <form [formGroup]="form" novalidate>
 
                     <p class="ion-padding">
-                      Your current email is: <strong>{{ email$ | async }}</strong>
+                      {{ 'CURRENT_EMAIL' | translate }} <strong>{{ email$ | async }}</strong>
                     </p>
 
                     <ion-list>
@@ -90,7 +90,7 @@
                   </form>
 
                   <ion-button color="xmasred" class="ion-float-end ion-margin-bottom" (click)="changeEmail()" [disabled]="!form.valid">
-                    Save Changes
+                    {{ 'PROFILE.SAVE_CHANGES' | translate }}
                   </ion-button>
 
                 </ion-card-content>

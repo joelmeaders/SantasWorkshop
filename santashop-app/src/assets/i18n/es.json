@@ -23,20 +23,14 @@
     "GO_BACK": "Volver",
     "DONE": "Hecho",
     "SELECT": "Escoger",
-    
-    "MENU": "Menú",
-    "PROFILE": "Su perfil",
+    "OUR_WEBSITE": "Nuestro sitio web",
     "REQUIRED_FIELD": "Esto es obligatorio",
-    "AGE": "Edad",
-    "BACK_TO_TOP": "Volver arriba",
     "CANCEL": "Cancelar",
     "REQUIRED_CHOICE": "Selección requerida",
-    "SAVE_CHANGES": "Guardar cambios",
     "CLOSE": "Cerca",
     "OK": "Ok",
     "ERROR": "Error",
     "YES": "Sí",
-    "REGISTER": "Registro",
     "TERMS_AND_CONDITIONS": "Términos y condiciones",
     "PRIVACY_POLICY": "Política de privacidad",
     "VERIFICATION_FAILED": "Error en la verificación",
@@ -91,7 +85,6 @@
     "INVALID_AGE": "La edad debe estar entre 0 y 11 años",
     "INVALID_FIRSTNAME": "El nombre debe tener entre 2 y 20 caracteres",
     "INVALID_LASTNAME": "El nombre debe tener entre 2 y 25 caracteres",
-
     "INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",
     "BABIES": "Para bebés (Edades 0-2)",
     "BOYS": "Para niños",
@@ -101,9 +94,7 @@
     "AGE3": "De 3 a 5 años",
     "AGE6": "De 6 a 8 años",
     "AGE9": "De 9 a 11 años",
-    "TOO_OLD_1": "Lo sentimos.",
-    "TOO_OLD_2": "Solo tenemos juguetes para niños menores de 11 años.",
-    "EDIT_TITLE": "Editar niño"
+    "TOO_OLD_1": "Lo sentimos."
   },
   "SCHEDULE": {
     "CHOOSE_DATE_TIME": "Elija una fecha y hora disponible para recoger sus juguetes.",
@@ -124,11 +115,57 @@
     "QR_CODE": "Código QR",
     "THIS_IS_YOUR_TICKET": "Esta es tu entrada al evento"
   },
-
+  "HELP": {
+    "TITLE": "Ayuda",
+    "VISIT_TEXT": "Visite la página Contáctenos de nuestro sitio web para obtener ayuda con el registro.",
+    "VISIT_BUTTON": "Visite el sitio web",
+    "PDF_GUIDE_TEXT": "Descargue una guía de ayuda en PDF paso a paso aquí.",
+    "PDF_GUIDE_BUTTON": "Descargar la guía de ayuda en PDF"
+  },
+  "PROFILE": {
+    "CHANGE_EMAIL": "Cambiar correo electrónico",
+    "CHANGE_EMAIL_TEXT": "Para cambiar su correo electrónico, complete el siguiente formulario.",
+    "CURRENT_EMAIL": "Su correo electrónico actual es:",
+    "SAVE_CHANGES": "Guardar cambios",
+    "CHANGE_INFO": "Cambiar nombre y código postal",
+    "CHANGE_INFO_TEXT": "Realice cambios en su nombre de pila a continuación. Asegúrese de hacer clic en el botón <strong>Guardar cambios</strong> cuando haya terminado.",
+    "CHANGE_PASSWORD": "Cambiar contraseña",
+    "CHANGE_PASSWORD_TEXT": "Para cambiar su contraseña, rellene este formulario.",
+    "CURRENT_PASSWORD": "Contraseña actual",
+    "NEW_PASSWORD": "Nueva contraseña",
+    "RE-ENTER_NEW_PASSWORD": "Vuelva a introducir una nueva contraseña",
+    "DONE": "¡Cambios guardados!",
+    "EMAIL_UPDATED": "Su dirección de correo electrónico se actualizó",
+    "PASSWORD_CHANGED": "Contraseña cambiada",
+    "PASSWORD_CHANGED_TEXT": "Recuerda usar tu nueva contraseña la próxima vez que inicies sesión"
+  },
   "FORGOTPASS": {
     "RESET_YOUR_PASSWORD": "¿Olvidó su contraseña?",
-    "INSTRUCTIONS": "Ingrese su correo electrónico registrado para restablecer su contraseña."
+    "INSTRUCTIONS": "Ingrese su correo electrónico registrado para restablecer su contraseña.",
+    "RESET_PASSWORD": "Restablecer contraseña",
+    "REMEMBER_YOUR_PASSWORD": "¿Recuerdas tu contraseña?",
+    "EMAIL_SENT": "¡Se ha enviado un correo electrónico!",
+    "EMAIL_SENT_2": "Revise su correo electrónico para obtener instrucciones para restablecer su contraseña.",
+    "EMAIL_SENT_3": "Puede tardar un par de minutos en recibirse y revisar su spam si no lo ve.",
+    "NO_EMAIL": "¿No recibió un correo electrónico?",
+    "RESET_PASSWORD_AGAIN": "Restablecer contraseña de nuevo"
   },
+  "REG_CLOSED": {
+    "1": "¡No!",
+    "2": "La inscripción es",
+    "3": "Cerrado",
+    "4": "Lo sentimos, el trineo de Papá Noel está lleno y todas las fechas y horas se han llenado. Visite nuestros sitios sociales para obtener más información."
+  },
+  "BAD_WEATHER": {
+    "1": "Nuestro evento de entrega de regalos se ha pospuesto debido al mal tiempo.",
+    "2": "Visite nuestra página de Facebook para obtener actualizaciones."
+  },
+  "MAINTENANCE": {
+    "1": "¡Uh oh!",
+    "2": "El mantenimiento está en curso.",
+    "3": "Visite nuestros sitios sociales para obtener más información."
+  },
+
   "REGISTRATION": {
     "RESEND_EMAIL": "Reenviar el correo electrónico",
     "HEADER": "Estado de registro",

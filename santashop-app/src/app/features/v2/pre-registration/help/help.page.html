@@ -1,0 +1,87 @@
+<ion-content color="light">
+  <app-internal-header></app-internal-header>
+
+  <ion-grid class="height-max es-mg-bottom-xxl">
+    <ion-row class="height-max">
+      <ion-col
+        class="
+          side-menu
+          height-max
+          ion-hide-xl-down ion-no-padding ion-no-margin
+        "
+        size="auto"
+        *ngIf="!(isRegistrationComplete$ | async)"
+      >
+        <app-pre-registration-menu></app-pre-registration-menu>
+      </ion-col>
+      <ion-col
+        sizeXl="9"
+        sizeLg="12"
+        sizeMd="12"
+        sizeSm="12"
+        sizeXs="12"
+        size="12"
+      >
+        <ion-row class="ion-justify-content-center">
+          <ion-col sizeXs="12" sizeSm="7">
+            <ion-button
+              class="ion-no-padding even-ratio-button ion-margin"
+              color="white"
+              [routerLink]="['../overview']"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="arrow-back-sharp"
+                class="even-ratio-button"
+              ></ion-icon>
+            </ion-button>
+
+            <ion-card>
+              <ion-card-header>
+                <ion-item class="inset-ion-item-title" color="white">
+                  <ion-card-title lines="full">
+                    {{ 'HELP.TITLE' | translate }}
+                  </ion-card-title>
+                </ion-item>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="ion-padding">
+                  {{ 'HELP.VISIT_TEXT' | translate }}
+                </div>
+  
+                <div class="ion-padding ion-text-center es-mg-bottom-xxl">
+                  <ion-button color="xmasred" href="https://www.denversantaclausshop.org/contact/" target="_blank">
+                    {{ 'HELP.VISIT_BUTTON' | translate }}
+                  </ion-button>
+                </div>
+  
+                <div class="ion-text-center es-mg-top-xxl es-mg-bottom-xxl">
+                  <ion-text color="xmasred">
+                    <strong> OR </strong>
+                  </ion-text>
+                </div>
+  
+                <div class="ion-padding">
+                  {{ 'HELP.PDF_GUIDE_TEXT' | translate }}
+                </div>
+  
+                <div class="ion-text-center es-pd-bottom-xxl">
+                  <ion-button color="xmasred" href="https://www.denversantaclausshop.org/wp-content/uploads/2021/11/DSCS-App-Help-Guide-1.pdf" target="_blank">
+                    {{ 'HELP.PDF_GUIDE_BUTTON' | translate }}
+                  </ion-button>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <div class="ion-padding es-mg-bottom-xxl">
+              
+
+              
+
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

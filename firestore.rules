@@ -19,16 +19,7 @@ service cloud.firestore {
       allow list: if isAdmin();
       allow create: if isUser(userId);
       allow update: if isUser(userId);
-      allow delete: if isUser(userId) || isAdmin();
-      // allow write: if false;
-    }
-
-    match /children/{childId} {
-      allow get: if isUser(resource.data.parentId) || isAdmin();
-      allow list: if isUser(resource.data.parentId) || isAdmin();
-      allow create: if isUser(request.resource.data.parentId);
-      allow update: if isUser(request.resource.data.parentId);
-      allow delete: if isUser(resource.data.parentId) || isAdmin();
+      allow delete: if isAdmin();
       // allow write: if false;
     }
 

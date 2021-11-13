@@ -39,6 +39,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     zipCode: data.zipCode,
     acceptedTermsOfService: acceptedLegal,
     acceptedPrivacyPolicy: acceptedLegal,
+    version: 1
   };
 
   const registration: IRegistration = {

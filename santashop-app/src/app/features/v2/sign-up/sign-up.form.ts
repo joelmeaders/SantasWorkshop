@@ -22,12 +22,12 @@ const validators = {
   password: Validators.compose([
     Validators.required,
     Validators.minLength(8),
-    Validators.maxLength(40),
+    Validators.maxLength(40)
   ]),
   zipCode: Validators.compose([
     Validators.required,
     Validators.maxLength(5),
-    Validators.pattern(/^\d{5}/),
+    Validators.pattern(/^\d{5}/)
   ]),
   legal: Validators.compose([Validators.requiredTrue]),
 };
@@ -41,4 +41,14 @@ export const newOnboardUserForm = (): FormGroup<ControlsOf<IOnboardUser>> =>
     password2: new FormControl<string>(undefined, validators.password),
     zipCode: new FormControl<number>(undefined, validators.zipCode),
     legal: new FormControl<boolean | Date>(false, validators.legal),
-  });
+  }, passwordMatchValidator);
+
+function passwordMatchValidator(formGroup: any) {
+
+  if (!formGroup.controls.password.value || !formGroup.controls.password2.value) {
+    return null;
+  }
+
+  return formGroup.controls.password.value === formGroup.controls.password2.value
+      ? null : { 'passwordMismatch': true };
+}

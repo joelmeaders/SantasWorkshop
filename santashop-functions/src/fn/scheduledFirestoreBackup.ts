@@ -1,13 +1,13 @@
-// import * as admin from "firebase-admin";
+// import * as admin from 'firebase-admin';
 
 // admin.initializeApp();
 
 // const client = new admin.firestore.v1.FirestoreAdminClient();
 
 // export default async () => {
-//   const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || "";
-//   const databaseName = client.databasePath(projectId, "(default)");
-//   const bucket = "gs://santashop-backups";
+//   const projectId = process.env.GCP_PROJECT || process.env.GCLOUD_PROJECT || '';
+//   const databaseName = client.databasePath(projectId, '(default)');
+//   const bucket = 'gs://santashop-backups';
 
 //   return client
 //       .exportDocuments({
@@ -24,6 +24,6 @@
 //       })
 //       .catch((err: any) => {
 //         console.error(`Error: ${projectId}, ${databaseName}: ${err}`);
-//         throw new Error("Export operation failed");
+//         throw new Error('Export operation failed');
 //       });
 // };

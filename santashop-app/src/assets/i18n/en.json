@@ -23,21 +23,14 @@
     "GO_BACK": "Go Back",
     "DONE": "Done",
     "SELECT": "Select",
-    
-    "MENU": "Menu",
-    "PROFILE": "Your Profile",
-    
+    "OUR_WEBSITE": "Our Website",
     "REQUIRED_FIELD": "This field is required",
-    "AGE": "Age",
-    "BACK_TO_TOP": "Back to top",
     "CANCEL": "Cancel",
     "REQUIRED_CHOICE": "Selection Required",
-    "SAVE_CHANGES": "Save Changes",
     "CLOSE": "Close",
     "OK": "Ok",
     "ERROR": "Error",
     "YES": "Yes",
-    "REGISTER": "Register",
     "TERMS_AND_CONDITIONS": "Terms & Conditions",
     "PRIVACY_POLICY": "Privacy Policy",
     "VERIFICATION_FAILED": "Verification Failed",
@@ -92,7 +85,6 @@
     "INVALID_AGE": "Age must be between 0 and 11 years old",
     "INVALID_FIRSTNAME": "First name must be between 2 and 20 characters",
     "INVALID_LASTNAME": "First name must be between 2 and 25 characters",
-
     "INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",
     "BABIES": "For Babies (Ages 0-2)",
     "BOYS": "For Boys",
@@ -102,9 +94,7 @@
     "AGE3": "Age 3-5",
     "AGE6": "Age 6-8",
     "AGE9": "Age 9-11",
-    "TOO_OLD_1": "We're sorry",
-    "TOO_OLD_2": "We only have toys for children ages 11 and under",
-    "EDIT_TITLE": "Edit child"
+    "TOO_OLD_1": "We're sorry"
   },
   "SCHEDULE": {
     "CHOOSE_DATE_TIME": "Choose an available date and time to pick up your toys.",
@@ -125,11 +115,57 @@
     "QR_CODE": "QR Code",
     "THIS_IS_YOUR_TICKET": "This is your ticket to the event"
   },
-
+  "HELP": {
+    "TITLE": "Help",
+    "VISIT_TEXT": "Visit the Contact Us page of our website for help with registration.",
+    "VISIT_BUTTON": "Visit Website",
+    "PDF_GUIDE_TEXT": "Download a Step-By-Step PDF Help Guide here.",
+    "PDF_GUIDE_BUTTON": "Download PDF Help Guide"
+  },
+  "PROFILE": {
+    "CHANGE_EMAIL": "Change Email",
+    "CHANGE_EMAIL_TEXT": "To change your email, complete the form below.",
+    "CURRENT_EMAIL": "Your current email is:",
+    "SAVE_CHANGES": "Save Changes",
+    "CHANGE_INFO": "Change Name & Zip Code",
+    "CHANGE_INFO_TEXT": "Make changes to your First Name below. Be sure to click the <strong>Save Changes</strong> button when you are done.",
+    "CHANGE_PASSWORD": "Change Password",
+    "CHANGE_PASSWORD_TEXT": "To change your password, fill out this form.",
+    "CURRENT_PASSWORD": "Current Password",
+    "NEW_PASSWORD": "New Password",
+    "RE-ENTER_NEW_PASSWORD": "Re-enter new password",
+    "DONE": "Changes Saved!",
+    "EMAIL_UPDATED": "Your email address was updated",
+    "PASSWORD_CHANGED": "Password Changed",
+    "PASSWORD_CHANGED_TEXT": "Remember to use your new password next time you sign in"
+  },
   "FORGOTPASS": {
     "RESET_YOUR_PASSWORD": "Forgot your Password?",
-    "INSTRUCTIONS": "Enter your registered email to reset your password."
+    "INSTRUCTIONS": "Enter your registered email to reset your password.",
+    "RESET_PASSWORD": "Reset password",
+    "REMEMBER_YOUR_PASSWORD": "Remember your password?",
+    "EMAIL_SENT": "Email has been sent!",
+    "EMAIL_SENT_2": "Check your email for instructions to reset your password.",
+    "EMAIL_SENT_3": "It might take a couple of minutes to receive, and check your spam if you don’t see it.",
+    "NO_EMAIL": "Didn't get an email?",
+    "RESET_PASSWORD_AGAIN": "Reset password again"
   },
+  "REG_CLOSED": {
+    "1": "Oh No!",
+    "2": "Registration is ",
+    "3": "Closed",
+    "4": "Sorry, Santa’s Sleigh is full and all Dates & Times have been filled. Please visit our social sites for more information."
+  },
+  "BAD_WEATHER": {
+    "1": "Our toy giving event has been postponed due to bad weather.",
+    "2": "Please visit our Facebook page for updates."
+  },
+  "MAINTENANCE": {
+    "1": "Uh oh!",
+    "2": "Maintenance is in progress.",
+    "3": "Please visit our social sites for more information."
+  },
+
   "REGISTRATION": {
     "RESEND_EMAIL": "Resend Email",
     "HEADER": "Registration Status",

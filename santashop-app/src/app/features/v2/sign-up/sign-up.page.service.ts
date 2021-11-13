@@ -3,11 +3,10 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IError, IOnboardUser } from '@models/*';
+import { IAuth, IError, IOnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
-import { filter, map, take, tap } from 'rxjs/operators';
-import { IAuth } from 'santashop-models/src/lib/models/auth.model';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { filter, take, tap } from 'rxjs/operators';
 import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()
@@ -16,23 +15,6 @@ export class SignUpPageService implements OnDestroy {
   public readonly form = newOnboardUserForm();
   public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
   private readonly subscriptions = new Array<Subscription>();
-
-  /**
-   * Returns a value indicating if the passwords 
-   * entered by the user match.
-   * 
-   * @private
-   * @returns Observable<{fieldsMatch:boolean}>
-   */
-  // TODO: Refactor?
-  public readonly passwordMatchValidator$: Observable<{fieldsMatch:boolean}> = combineLatest([
-    this.form.select(state => state.password),
-    this.form.select(state => state.password2)
-  ]).pipe(
-    filter(([password, repeat]) => !!password && !!repeat),
-    map(([password, repeat]) => 
-      password === repeat ? { fieldsMatch: false } : { fieldsMatch: true })
-  );
 
   /**
    * Redirects a user if they're already signed in.
@@ -55,8 +37,8 @@ export class SignUpPageService implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService
   ) {
-    // this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
-    // this.form.addValidators() .validateOn(this.passwordMatchValidator$);
+    this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
+    this.form.errors$.pipe(tap(v => console.log(v))).subscribe();
   }
 
   public ngOnDestroy(): void {
@@ -120,6 +102,7 @@ export class SignUpPageService implements OnDestroy {
     }
     finally {
       await loader.dismiss();
+      this.router.navigate(['pre-registration/overview']);
     }
   }
 

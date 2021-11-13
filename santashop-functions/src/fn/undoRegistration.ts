@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import { COLLECTION_SCHEMA, IChangeUserInfo } from '../../../santashop-models/src/lib/models';
+import { COLLECTION_SCHEMA, IChangeUserInfo, IDateTimeSlot, IRegistration } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -15,44 +15,39 @@ export default async (
   if (!uid)
     throw new HttpsError('not-found', 'uid null');
 
-  if (!data || !data.firstName || !data.lastName || !data.zipCode)
-    throw new HttpsError('data-loss', 'missing request information');
-
-  await admin.auth().updateUser(uid, {
-      displayName: `${data.firstName} ${data.lastName}`
-  });
-
   const batch = admin.firestore().batch();
-
-  const userDocumentRef = admin
-    .firestore()
-    .doc(`${COLLECTION_SCHEMA.users}/${uid}`);
-
-  batch.set(userDocumentRef, data, { merge: true });
 
   const indexDocRef = admin
     .firestore()
     .doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
 
-  const indexDoc = {
-    firstName: data.firstName.toLowerCase(),
-    lastName: data.lastName.toLowerCase(),
-    zip: data.zipCode
-  };
-
-  batch.set(indexDocRef, indexDoc, { merge: true });
+  batch.delete(indexDocRef);
 
   const registrationDocRef = admin
     .firestore()
     .doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 
-  const registrationDoc = {
-    firstName: data.firstName,
-    lastName: data.lastName,
-    zip: data.zipCode
-  };
+  const registrationDoc = await registrationDocRef.get().then(snapshot => {
+    if (snapshot.exists) {
+      return { ...snapshot.data() } as IRegistration;
+    } else {
+      throw new HttpsError('not-found', `registration not found for uid ${uid}`);
+    }
+  });
 
-  batch.set(registrationDocRef, registrationDoc, { merge: true });
+  // If counts weren't done already, no need to set data
+  // for the method that decrements counts
+  if (!!registrationDoc.includedInCounts) {
+    registrationDoc.previousDateTimeSlot = {
+      ...registrationDoc.dateTimeSlot
+    } as IDateTimeSlot;
+  }
+
+  registrationDoc.includedInCounts = false;
+  delete registrationDoc.dateTimeSlot;
+  delete registrationDoc.registrationSubmittedOn;
+
+  batch.set(registrationDocRef, registrationDoc);
 
   return batch
     .commit()

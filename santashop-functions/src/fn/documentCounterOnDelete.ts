@@ -7,7 +7,11 @@ export default async (context: EventContext) => {
   const IGNORE_COLLECTIONS = [
     'counters',
     'qrcodes',
+    'children',
+    'customers',
+    'dateTimeSlots',
     'registrationemails',
+    'tmp_registrationemails',
     'registrationsearchindex',
     'stats',
     'parameters',

@@ -3,6 +3,7 @@ import * as functions from 'firebase-functions';
 import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
 import { IAuth, COLLECTION_SCHEMA, IUser, IChild, IRegistration } from '../../../santashop-models/src/lib/models';
 import { getAgeFromDate, getAgeGroupFromAge } from '../utility/dates';
+import { generateQrCode } from '../utility/qrcodes';
 
 admin.initializeApp();
 
@@ -152,7 +153,8 @@ export default async (
     return Promise.resolve(true);
 
 
-  }).then(() => {
+  }).then(async () => {
+    await generateQrCode(uid, registration.qrcode!);
     return Promise.resolve(true);
   }).catch((error) => {
     console.error(error)

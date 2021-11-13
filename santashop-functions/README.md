@@ -9,3 +9,7 @@ firebase functions:config:get > .runtimeconfig.json
 # firebase functions:config:get | ac .runtimeconfig.json
 
 if prompted for webpack cli install, cancel and then run 'npm link webpack' in the console
+
+Running pub/sub manually during development:
+user@laptop:~$ firebase functions:shell
+firebase > myCronFunction()

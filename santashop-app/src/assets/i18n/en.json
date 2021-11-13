@@ -34,7 +34,8 @@
     "TERMS_AND_CONDITIONS": "Terms & Conditions",
     "PRIVACY_POLICY": "Privacy Policy",
     "VERIFICATION_FAILED": "Verification Failed",
-    "VERIFICATION_FAILED_MSG": "You need to refresh the page to try again"
+    "VERIFICATION_FAILED_MSG": "You need to refresh the page to try again",
+    "CONFIRM": "Confirm"
   },
   "SIGNIN": {
     "FORGOT_PASSWORD": "Forgot Password?",
@@ -113,7 +114,10 @@
   "CONFIRMATION": {
     "EVENT_INFORMATION": "Event Information",
     "QR_CODE": "QR Code",
-    "THIS_IS_YOUR_TICKET": "This is your ticket to the event"
+    "THIS_IS_YOUR_TICKET": "This is your ticket to the event",
+    "CHANGE_REGISTRATION": "Change Registration",
+    "ARE_YOU_SURE": "Are you sure?",
+    "CONFIRM_CHANGE_MSG": "Requesting to make a change to your registration will forfeit your current Date & Time.<br/>After you confirm, submit your new registration as soon as possible. Availability is limited and registration fills up quickly."
   },
   "HELP": {
     "TITLE": "Help",

@@ -64,7 +64,7 @@
                   </p>
 
                   <ion-item lines="none" *ngIf="chosenSlot$ | async as slot">
-                    {{ slot.dateTime | date:'MMMM d, h:mm a' }}
+                    {{ slot.dateTime | date:'MMMM d, h:mm a':'MST' }}
                     <ion-button
                       slot="end"
                       (click)="selectDateTime()"
@@ -108,9 +108,9 @@
                         *ngFor="let slot of (availableSlotsByDay$(day) | async)"
                         color="light"
                       >
-                        <ion-label
-                          >{{ slot.dateTime | date:'h:mm a' }}</ion-label
-                        >
+                        <ion-label>
+                          {{ slot.dateTime | date:'h:mm a':'MST' }}
+                        </ion-label>
                         <ion-button
                           slot="end"
                           (click)="selectDateTime(slot)"

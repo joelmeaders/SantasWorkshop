@@ -1,30 +1,25 @@
 import * as admin from 'firebase-admin';
+import { HttpsError } from 'firebase-functions/v1/https';
 import { IDateTimeSlot, IRegistration } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 /**
- * This method loads uncounted registrations and updates
- * dateTimeSlots based on the values within. This is the 
- * lite version that won't use as many reads.
- * 
- * @remarks
- * The downside of this method is it won't decrement the
- * reserved spots in each slot if a customer changes
- * their registration.
+ * This method loads rescheduled registrations and updates
+ * dateTimeSlots based on the values within.
  * 
  * @returns 
  */
 export default async (): Promise<string> => {
-  
-  // Load all registrations that need to be calculated
+
+  // Load all rescheduled registrations
   const registrations: IRegistration[] =
     await loadRegistrations();
 
   if (!registrations.length)
     return Promise.resolve('No registrations');
   
-  // Load all date/time slots 
+   // Load all date/time slots 
   const dateTimeSlots: IDateTimeSlot[] =
     await loadDateTimeSlots();
 
@@ -33,13 +28,13 @@ export default async (): Promise<string> => {
 
   registrations.forEach(registration => {
 
-    const slotId = registration.dateTimeSlot?.id;
+    const slotId = registration.previousDateTimeSlot?.id;
     const slot = dateTimeSlots.find(e => e.id === slotId);
 
     if (slot !== undefined) {
-      slot.slotsReserved = (slot.slotsReserved ?? 0) + 1;
+      slot.slotsReserved = (slot.slotsReserved ?? 0) - 1;
       slot.enabled = slot.slotsReserved < slot.maxSlots;
-      registration.includedInCounts = new Date();
+      delete registration.previousDateTimeSlot;
     }
   });
 
@@ -47,22 +42,26 @@ export default async (): Promise<string> => {
     
     dateTimeSlots.forEach(slot =>{
       const doc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
-      transaction.update(doc, slot);
+      transaction.set(doc, slot);
     });
 
     registrations.forEach(registration => {
       const doc = admin.firestore().collection('registrations').doc(registration.uid!.toString());
-      transaction.update(doc, registration);
+      transaction.set(doc, registration);
     });
 
     return Promise.resolve('Updated date time slots');
+  })
+  .catch(error => {
+    throw new HttpsError('aborted', `transaction to update reschedules failed: ${JSON.stringify(error)}`);
   });
 };
 
 const dateTimeSlotQuery = (limit: number, offset: number) =>
   admin.firestore().collection('dateTimeSlots')
   .where('programYear', '==', 2021)
-  .limit(limit).offset(offset);
+  .limit(limit)
+  .offset(offset);
 
 const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
   const pageSize = 50;
@@ -92,9 +91,9 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
 const registrationQuery = (limit: number, offset: number) =>
   admin.firestore().collection('registrations')
   .where('programYear', '==', 2021)
-  .where('dateTimeSlot', '!=', '')
-  .where('includedInCounts', '==', false)
-  .limit(limit).offset(offset);
+  .where('previousDateTimeSlot', '!=', '')
+  .limit(limit)
+  .offset(offset);
 
 const loadRegistrations = async (): Promise<IRegistration[]> => {
   const pageSize = 50;

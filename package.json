@@ -18,8 +18,6 @@
     "app:lint": "npm run core:lint && ng lint --fix --project=santashop-app",
     "app:start": "firebase use santas-workshop-193b5 && ng serve --project=santashop-app --port=4100",
     "app:start:qa": "firebase use santas-workshop-test && ng serve --project=santashop-app --port=4100",
-    "app:i18n:init": "ngx-translate-extract --input ./santashop-app/src --output ./santashop-app/src/assets/i18n/template.json --key-as-default-value --replace --format json",
-    "app:i18n:extract": "ngx-translate-extract --input ./santashop-app/src --output ./santashop-app/src/assets/i18n/{en,es}.json --clean --format json",
     "app:config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.client.ts",
     "app:build:local": "ng build --configuration=production --project=santashop-app",
     "app:build:qa": "ng build --configuration=qa --project=santashop-app",

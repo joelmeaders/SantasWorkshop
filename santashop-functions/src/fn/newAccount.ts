@@ -1,8 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import * as qrcode from 'qrcode';
 import { HttpsError } from 'firebase-functions/v1/https';
 import { IOnboardUser, IUser, IRegistration, COLLECTION_SCHEMA, IDateTimeSlot } from '../../../santashop-models/src/lib/models';
+import { generateId } from '../utility/id-generation';
+import { generateQrCode } from '../utility/qrcodes';
 
 admin.initializeApp();
 
@@ -82,22 +83,6 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
       );
     });
 };
-
-function generateQrCode(uid: string, code: string): Promise<any> {
-  const storage = admin.storage().bucket();
-  const imageToCreate = storage.file(`registrations/${uid}.png`);
-  const fileStream = imageToCreate.createWriteStream({
-    public: true,
-    contentType: 'auto',
-    resumable: false,
-  });
-
-  return qrcode.toFileStream(fileStream, code, {
-    errorCorrectionLevel: 'high',
-    width: 600,
-    margin: 3,
-  });
-}
 
 const dateTimSlotCollection = admin
   .firestore()
@@ -243,55 +228,6 @@ const testData = async () => {
     await collection.add(v);
   });
   return Promise.resolve();
-};
-
-const generateId = (length: number): string => {
-  const customLib = lib.alpha.concat(lib.number);
-  const n: number = customLib.length;
-
-  const generatedId: string[] = [];
-
-  while (length > 0) {
-    generatedId.push(customLib[Math.round(Math.random() * n)]);
-    length -= 1;
-  }
-
-  return generatedId.join('');
-};
-
-interface ILib {
-  alpha: string[];
-  number: string[];
-}
-
-const lib: ILib = {
-  alpha: [
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-    'P',
-    'Q',
-    'R',
-    'S',
-    'T',
-    'U',
-    'V',
-    'W',
-    'X',
-    'Y',
-    'Z',
-  ],
-  number: ['2', '3', '4', '5', '6', '7', '8', '9'],
 };
 
 const handleAuthError = (error: any) => {

@@ -15,6 +15,7 @@ import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
 import { Timestamp } from '@firebase/firestore';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { IDateTimeSlot, IRegistration, IChild, COLLECTION_SCHEMA } from '@models/*';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 @Injectable({
   providedIn: 'root',
@@ -82,7 +83,8 @@ export class PreRegistrationService implements OnDestroy {
   constructor(
     private readonly fireRepo: FireRepoLite,
     private readonly authService: AuthService,
-    private readonly afStorage: AngularFireStorage
+    private readonly afStorage: AngularFireStorage,
+    private readonly afFunctions: AngularFireFunctions
   ) {}
 
   public ngOnDestroy(): void {
@@ -102,6 +104,13 @@ export class PreRegistrationService implements OnDestroy {
         this.registrationCollection().update(uid, registration, false)
       )
     );
+  }
+
+  public undoRegistration() {
+    const accountStatusFunction = 
+      this.afFunctions.httpsCallable('undoRegistration');
+    
+    return accountStatusFunction({}) as Observable<boolean>;
   }
 
   private registrationCollection(): IFireRepoCollection {

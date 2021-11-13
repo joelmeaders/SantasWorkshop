@@ -55,7 +55,7 @@
                     *ngIf="viewService.dateTimeSlot$ | async as slot"
                     class="es-pd-bottom-md"
                   >
-                    {{ slot.dateTime | date:'EEEE, MMMM d, h:mm a' }}
+                    {{ slot.dateTime | date:'EEEE, MMMM d, h:mm a':'MST' }}
                   </ion-text>
                 </div>
               </ion-item>
@@ -109,7 +109,9 @@
             </ion-card>
 
             <div class="ion-text-center es-mg-bottom-xxl">
-              <ion-button fill="clear"> Request to change </ion-button>
+              <ion-button fill="clear" (click)="undoRegistration()">
+                {{ 'CONFIRMATION.CHANGE_REGISTRATION' | translate }}
+              </ion-button>
             </div>
           </ion-col>
         </ion-row>

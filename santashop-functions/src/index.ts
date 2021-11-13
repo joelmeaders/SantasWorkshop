@@ -1,6 +1,42 @@
 import * as functions from 'firebase-functions';
 
-// const PROGRAM_YEAR = 2021;
+export const changeAccountInformation =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/changeAccountInformation')).default(request, context);
+  });
+
+/**
+ * Runs a method to validate and complete a user registration record.
+ * This process locks down their selected dateTimeSlot, sends an email
+ * and sets the submitted timestamp on their record.
+ *
+ * @remarks
+ * registration-email, RegistrationSearchIndex
+ */
+export const completeRegistration =
+functions.https.onCall(async (request, context) => {
+  return (await import('./fn/completeRegistration')).default(request, context);
+});
+
+export const migrateProfile_V0_To_V1 =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/migrateProfile_V0_To_V1')).default(request, context);
+  });
+
+export const newAccount =
+  functions.https.onCall(async (request) => {
+    return (await import('./fn/newAccount')).default(request);
+  });
+
+export const undoRegistration =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/undoRegistration')).default(request, context);
+  });
+
+export const updateEmailAddress =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/updateEmailAddress')).default(request, context);
+  });
 
 /**
  * Validate recaptcha response.
@@ -11,39 +47,6 @@ import * as functions from 'firebase-functions';
 export const verifyRecaptcha2 =
   functions.https.onCall(async (request) => {
     return (await import('./fn/verifyRecaptcha2')).default(request);
-  });
-
-export const newAccount =
-  functions.https.onCall(async (request) => {
-    return (await import('./fn/newAccount')).default(request);
-  });
-
-export const changeAccountInformation =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/changeAccountInformation')).default(request, context);
-  });
-
-export const updateEmailAddress =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/updateEmailAddress')).default(request, context);
-  });
-
-export const migrateProfile_V0_To_V1 =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/migrateProfile_V0_To_V1')).default(request, context);
-  });
-
-  /**
- * Runs a method to validate and complete a user registration record.
- * This process locks down their selected dateTimeSlot, sends an email
- * and sets the submitted timestamp on their record.
- *
- * @remarks
- * registration-email, RegistrationSearchIndex
- */
-export const completeRegistration =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/completeRegistration')).default(request, context);
   });
 
 // export const isAdmin =
@@ -57,6 +60,8 @@ export const completeRegistration =
 //       return (await import("./fn/exportCsv")).default();
 //     });
 
+
+// ------------------------------------- TRIGGER FUNCTIONS
 
 /**
  * Sharded count updater for all collections
@@ -89,10 +94,17 @@ export const documentCounterOnDelete = functions.firestore
 
 export const scheduledDateTimeSlotCounters = 
   functions.pubsub.schedule('every 15 minutes')
-  .onRun(async (context: functions.EventContext) => {
-    await (await import('./fn/scheduledDateTimeSlotCounters')).default(context);
+  .onRun(async () => {
+    await (await import('./fn/scheduledDateTimeSlotCounters')).default();
   });
 
+export const scheduledDateTimeSlotReschedules = 
+  functions.pubsub.schedule('every 60 minutes')
+  .onRun(async () => {
+    await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
+  });
+
+  
 // export const scheduledRegistrationStats = functions.pubsub
 //     .schedule("0 0 * * *")
 //     .timeZone("America/Denver")

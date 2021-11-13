@@ -30,24 +30,28 @@
       ],
       "rewrites": [
         {
+          "source": "/changeAccountInformation",
+          "function": "changeAccountInformation"
+        },
+        {
           "source": "/completeRegistration",
           "function": "completeRegistration"
         },
         {
-          "source": "/documentCounterOnCreate",
-          "function": "documentCounterOnCreate"
-        },
-        {
-          "source": "/documentCounterOnDelete",
-          "function": "documentCounterOnDelete"
+          "source": "/migrateProfile_V0_To_V1",
+          "function": "migrateProfile_V0_To_V1"
         },
         {
           "source": "/newAccount",
           "function": "newAccount"
         },
         {
-          "source": "/scheduledDateTimeSlotCounters",
-          "function": "scheduledDateTimeSlotCounters"
+          "source": "/undoRegistration",
+          "function": "undoRegistration"
+        },
+        {
+          "source": "/updateEmailAddress",
+          "function": "updateEmailAddress"
         },
         {
           "source": "/verifyRecaptcha2",
@@ -68,30 +72,6 @@
         "**/node_modules/**"
       ],
       "rewrites": [
-        {
-          "source": "/completeRegistration",
-          "function": "completeRegistration"
-        },
-        {
-          "source": "/documentCounterOnCreate",
-          "function": "documentCounterOnCreate"
-        },
-        {
-          "source": "/documentCounterOnDelete",
-          "function": "documentCounterOnDelete"
-        },
-        {
-          "source": "/newAccount",
-          "function": "newAccount"
-        },
-        {
-          "source": "/scheduledDateTimeSlotCounters",
-          "function": "scheduledDateTimeSlotCounters"
-        },
-        {
-          "source": "/verifyRecaptcha2",
-          "function": "verifyRecaptcha2"
-        },
         {
           "source": "**",
           "destination": "/index.html"

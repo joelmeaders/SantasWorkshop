@@ -1,5 +1,10 @@
 import * as functions from 'firebase-functions';
 
+export const addDateTimeSlots =
+  functions.https.onCall(async () => {
+    return (await import('./fn/addDateTimeSlots')).default();
+  });
+
 export const changeAccountInformation =
   functions.https.onCall(async (request, context) => {
     return (await import('./fn/changeAccountInformation')).default(request, context);

@@ -1,42 +1,80 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { getAllRegistrationData, isRegistrationComplete } from '../utility/registrations';
+import { isRegistrationComplete } from '../utility/registrations';
+import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
+import { COLLECTION_SCHEMA, IRegistration } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
-export default async (
-  change: functions.Change<functions.firestore.QueryDocumentSnapshot>,
-  context: functions.EventContext
-) => {
-
-  const record = getAllRegistrationData(change.after.data());
-
+export default async (record: IRegistration, context: CallableContext): Promise<boolean | HttpsError> => {
+  
   if (!isRegistrationComplete(record)) {
-    console.log('not complete')
-    return null;
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      '-10',
+      'Incomplete registration. Cannot continue.'
+    );
+  }
+
+  if (record.uid !== context.auth?.uid) {
+    throw new functions.https.HttpsError(
+      'permission-denied',
+      '-99',
+      'You can only update your own records'
+    );
   }
 
   const batch = admin.firestore().batch();
 
-  // QR Code Record
-  const qrCodeDocRef = admin.firestore().doc(`qrcodes/${record.customerId}`);
-  const qrCodeDoc = { id: record.code, n: record.fullName, c: record.children };
-  await qrCodeDocRef.set(qrCodeDoc);
+  // Registration
+  const registrationDocRef = admin
+    .firestore()
+    .doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
+
+  const updateRegistrationFields = {
+    registrationSubmittedOn: new Date(),
+    includedInCounts: false,
+    programYear: 2021
+  } as Partial<IRegistration>;
+
+  batch.set(registrationDocRef, updateRegistrationFields, { merge: true });
 
   // Email Record
-  const emailDocRef = admin.firestore().doc(`registrationemails/${record.customerId}`);
-  const emailDoc = { code: record.code, email: record.email, name: record.firstName, formattedDateTime: record.dateTime };
-  await emailDocRef.set(emailDoc);
+  const emailDocRef = admin
+    .firestore()
+    .doc(`tmp_registrationemails/${record.uid}`);
+
+  // TODO: Format date/time
+  const emailDoc = {
+    code: record.qrcode,
+    email: record.emailAddress,
+    name: record.firstName,
+    formattedDateTime: record.dateTimeSlot?.dateTime,
+  };
+
+  batch.set(emailDocRef, emailDoc, { merge: true });
 
   // Registration Search Index Record
-  const indexDocRef = admin.firestore().doc(`registrationsearchindex/${record.customerId}`);
-  const indexDoc = { code: record.code, customerId: record.customerId, firstName: record.firstName.toLowerCase(), lastName: record.lastName.toLowerCase(), zip: record.zipCode };
-  await indexDocRef.set(indexDoc);
+  const indexDocRef = admin
+    .firestore()
+    .doc(`registrationsearchindex/${record.uid}`);
 
-  return batch.commit().then(
-    () => true
-  ).catch((error: any) => {
-    console.error(error);
-    throw new Error(error);
-  });
+  const indexDoc = {
+    code: record.qrcode,
+    customerId: record.uid,
+    firstName: record.firstName!.toLowerCase(),
+    lastName: record.lastName!.toLowerCase(),
+    emailAddress: record.emailAddress,
+    zip: record.zipCode
+  };
+
+  batch.set(indexDocRef, indexDoc, { merge: true });
+
+  return batch
+    .commit()
+    .then(() => true) // UPDATE SLOTS TAKEN
+    .catch((error: any) => {
+      console.error(error);
+      throw new Error(error);
+    });
 };

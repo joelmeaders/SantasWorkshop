@@ -1,0 +1,238 @@
+<ion-content color="light">
+  <app-internal-header class="ion-hide-xl-down"></app-internal-header>
+
+  <ion-grid class="height-max es-mg-bottom-xxl">
+    <ion-row class="height-max">
+      <ion-col
+        class="
+          side-menu
+          height-max
+          ion-hide-xl-down ion-no-padding ion-no-margin
+        "
+        size="auto"
+      >
+        <app-pre-registration-menu></app-pre-registration-menu>
+      </ion-col>
+      <ion-col
+        sizeXl="9"
+        sizeLg="12"
+        sizeMd="12"
+        sizeSm="12"
+        sizeXs="12"
+        size="12"
+      >
+        <ion-row class="ion-justify-content-center">
+          <ion-col sizeXs="12" sizeSm="7">
+            <ion-button
+              class="ion-no-padding even-ratio-button ion-margin"
+              color="white"
+              [routerLink]="['..']"
+            >
+              <ion-icon
+                slot="icon-only"
+                name="arrow-back-sharp"
+                class="even-ratio-button"
+              ></ion-icon>
+            </ion-button>
+
+            <div class="ion-padding es-mg-bottom-xxl">
+              <ion-item class="inset-ion-item-title" color="none">
+                <ion-card-title lines="full">
+                  {{ 'ADDCHILD.ADD_TITLE' | translate }}
+                </ion-card-title>
+              </ion-item>
+
+              <div>
+                <form [formGroup]="form" novalidate>
+                  <ion-list>
+                    <ion-item color="light">
+                      <ion-label color="xmasred">
+                        {{ 'ADDCHILD.FIRST_NAME' | translate }}
+                      </ion-label>
+                      <ion-input
+                        #firstName
+                        formControlName="firstName"
+                        [debounce]="500"
+                        inputmode="text"
+                        autofocus="true"
+                      ></ion-input>
+                    </ion-item>
+                    <app-control-errors
+                      [control]="form.controls.firstName"
+                    ></app-control-errors>
+
+                    <ion-item color="light">
+                      <ion-label color="xmasred">
+                        {{ 'ADDCHILD.LAST_NAME' | translate }}
+                      </ion-label>
+                      <ion-input
+                        formControlName="lastName"
+                        [debounce]="500"
+                        autocomplete="family-name"
+                        inputmode="text"
+                      ></ion-input>
+                    </ion-item>
+                    <app-control-errors
+                      [control]="form.controls.lastName"
+                    ></app-control-errors>
+
+                    <ion-item color="light">
+                      <ion-label color="xmasred">
+                        {{ 'ADDCHILD.BIRTH_DATE' | translate }}
+                      </ion-label>
+
+                      <ion-input
+                        (ionChange)="birthdaySelected()"
+                        formControlName="dateOfBirth"
+                        [debounce]="500"
+                        type="date"
+                        [min]="minBirthDate"
+                        [max]="maxBirthDate"
+                      >
+                      </ion-input>
+                    </ion-item>
+                    <app-control-errors
+                      [control]="form.controls.dateOfBirth"
+                    ></app-control-errors>
+
+                    <div
+                      class="ion-padding-top ion-text-wrap"
+                      *ngIf="mobileEvent && (isInfant$ | async)"
+                    >
+                      <ion-item lines="none" color="light">
+                        <ion-icon
+                          name="gift"
+                          color="success"
+                          slot="start"
+                        ></ion-icon>
+                        <ion-text>
+                          {{ 'ADDCHILD.INFANT_MSG' | translate }}
+                        </ion-text>
+                      </ion-item>
+                    </div>
+
+                    <div class="ion-padding-top">
+                      <ion-radio-group formControlName="toyType" color="light">
+                        <ion-list-header>
+                          <ion-label color="xmasred"
+                            >{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-label
+                          >
+                          <p
+                            *ngIf="form.controls.toyType.invalid"
+                            class="ion-no-padding ion-no-margin"
+                          >
+                            <span>
+                              <br />
+                              <ion-note color="danger"
+                                >{{ 'COMMON.REQUIRED_CHOICE' | translate
+                                }}</ion-note
+                              >
+                            </span>
+                          </p>
+                        </ion-list-header>
+
+                        <ion-item color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.BABIES' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="infants"></ion-radio>
+                        </ion-item>
+
+                        <ion-item *ngIf="!(isInfant$ | async)" color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.BOYS' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="boys"></ion-radio>
+                        </ion-item>
+
+                        <ion-item *ngIf="!(isInfant$ | async)" color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.GIRLS' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="girls"></ion-radio>
+                        </ion-item>
+                      </ion-radio-group>
+                    </div>
+
+                    <!-- TODO: Check with Kelsey -->
+                    <div
+                      class="ion-padding-top"
+                      *ngIf="mobileEvent && !(isInfant$ | async)"
+                    >
+                      <ion-radio-group formControlName="ageGroup" color="light">
+                        <ion-list-header>
+                          <ion-label color="xmasred"
+                            >{{ 'ADDCHILD.AGE_GROUP' | translate }}</ion-label
+                          >
+                          <p
+                            *ngIf="form.controls.ageGroup.invalid"
+                            class="ion-no-padding ion-no-margin"
+                          >
+                            <span>
+                              <br />
+                              <ion-note color="danger"
+                                >{{ 'COMMON.REQUIRED_CHOICE' | translate
+                                }}</ion-note
+                              >
+                            </span>
+                          </p>
+                        </ion-list-header>
+
+                        <ion-item (click)="setInfant(true)" color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.AGE0' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="0-2"></ion-radio>
+                        </ion-item>
+
+                        <ion-item color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.AGE3' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="3-5"></ion-radio>
+                        </ion-item>
+
+                        <ion-item color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.AGE6' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="6-8"></ion-radio>
+                        </ion-item>
+
+                        <ion-item color="light">
+                          <ion-label
+                            >{{ 'ADDCHILD.AGE9' | translate }}</ion-label
+                          >
+                          <ion-radio slot="start" value="9-11"></ion-radio>
+                        </ion-item>
+                      </ion-radio-group>
+                    </div>
+                  </ion-list>
+                </form>
+              </div>
+              <div class="ion-text-end ion-padding-top es-pd-bottom-xxl">
+                <ion-button
+                  *ngIf="!(isEdit$ | async); else edit"
+                  color="xmasred"
+                  (click)="addChild()"
+                  [disabled]="!form.valid"
+                >
+                  {{ 'OVERVIEW.ADD_CHILD' | translate }}
+                </ion-button>
+                <ng-template #edit>
+                  <ion-button
+                    color="xmasred"
+                    (click)="editChild()"
+                    [disabled]="!form.valid"
+                  >
+                    {{ 'OVERVIEW.ADD_CHILD' | translate }}
+                  </ion-button>
+                </ng-template>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

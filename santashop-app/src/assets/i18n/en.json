@@ -1,78 +1,175 @@
 {
-  "COMMON": {
-    "MENU": "Menu",
-    "SIGN_IN": "Sign In",
-    "SIGN_OUT": "Sign Out",
-    "CREATE_ACCOUNT": "Create Acount",
+  "MENU": {
     "HOME": "Home",
-    "PROFILE": "Your Profile",
+    "CHILDREN": "Children",
+    "SCHEDULE": "Schedule",
+    "SUBMIT": "Submit",
+    "REQUEST_CHANGE": "Request To Change"
+  },
+  "HOME": {
+    "WELCOME_MESSAGE": "Welcome to the<br />Denver Santa Claus Shop App!",
+    "CREATE_ACCOUNT": "Create An Account"
+  },
+  "COMMON": {
     "EMAIL_ADDRESS": "Email Address",
-    "EMAIL_PH": "Enter your email address",
     "PASSWORD": "Password",
-    "PASSWORD_PH": "Enter your password",
+    "SIGN_IN": "Sign In",
+    "CREATE_ACCOUNT": "Create Acount",
+    "WELCOME": "Welcome",
+    "MY_ACCOUNT": "My Account",
+    "VIDEO_TUTORIAL": "Video Tutorial",
+    "HELP": "Help",
+    "SIGN_OUT": "Sign Out",
     "GO_BACK": "Go Back",
+    "DONE": "Done",
+    "SELECT": "Select",
+    "OUR_WEBSITE": "Our Website",
     "REQUIRED_FIELD": "This field is required",
-    "AGE": "Age",
-    "BACK_TO_TOP": "Back to top",
     "CANCEL": "Cancel",
-    "SHOW_PASSWORD": "(Click to show password)",
-    "HIDE_PASSWORD": "(Click to hide password)",
     "REQUIRED_CHOICE": "Selection Required",
-    "SAVE_CHANGES": "Save Changes",
     "CLOSE": "Close",
     "OK": "Ok",
     "ERROR": "Error",
     "YES": "Yes",
-    "REGISTER": "Register"
-  },
-  "HOME": {
-    "TITLE": "Santa Claus Shop Registration",
-    "HEADER": "A Toy for Every Girl and Boy",
-    "MESSAGE": "Welcome to the Denver Santa Claus Shop Pre-registration where we plan on fulfilling our mission even during the pandemic! This toy give-away program is available to Denver residents on Dec. 11, 12, 14, & 15.<br /><br />Please follow the prompts to pre-register so that the distribution process can go quickly and save you time the day of the event. This year will be a mobile drive through toy distribution. You will receive toys based on your child’s age and gender. <br /><br />If this is your first visit to the preregistration page, select \"Create Account\" and follow the instructions. <br /><br />If you have already created an account and are visiting to change an existing registration, you will need to select \"Sign In\" and follow those instructions.  Any change or addition will delete the first entry, so be sure to re-enter all information. <br /><br />We look forward to providing your family with some Holiday cheer during these trying times."
+    "TERMS_AND_CONDITIONS": "Terms & Conditions",
+    "PRIVACY_POLICY": "Privacy Policy",
+    "VERIFICATION_FAILED": "Verification Failed",
+    "VERIFICATION_FAILED_MSG": "You need to refresh the page to try again",
+    "CONFIRM": "Confirm"
   },
   "SIGNIN": {
-    "HEADER": "Sign in to your account",
     "FORGOT_PASSWORD": "Forgot Password?",
-    "MAKE_ACCOUNT1": "If you haven't created an account with us yet you can make one",
-    "MAKE_ACCOUNT2": "by clicking here",
-    "SIGNING_IN": "Signing in...",
-    "DEVICE_ISSUE": "Device Issue",
-    "DEVICE_ISSUE_MSG": "Please try again using a different browser or device. We apologize for the inconvenience"
-  },
-  "SIGNUP_ACCOUNT": {
-    "HEADER": "Create your account",
-    "EMAIL_ADDRESS": "Enter your email address",
-    "EMAIL_EXAMPLE": "example@gmail.com",
-    "CREATE_PASSWORD": "Create a password",
-    "CREATE_PASSWORD_PH": "At least 8 characters",
-    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy",
-    "CREATING": "Creating your account!",
-    "CREATED": "Account Created",
-    "NOW_SIGN_IN": "Now sign into the account you just created",
-    "CONFIRM_EMAIL": "Is your email correct?",
-    "CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address.",
-    "VERIFICATION_FAILED": "Verification Failed",
-    "VERIFICATION_FAILED_MSG": "You need to refresh the page to try again"
-  },
-  "SIGNUP_INFO": {
-    "HEADER": "Add your information to continue",
-    "FIRST_NAME": "First Name",
-    "FIRST_NAME_PH": "Enter your first name",
-    "LAST_NAME": "Last Name",
-    "LAST_NAME_PH": "Enter your last Name",
-    "ZIP_CODE": "Zip Code",
-    "NEXT_STEP": "Go to registration"
+    "SIGNING_IN": "Signing in..."
   },
   "SIGNUP": {
-    "TERMS_AND_CONDITIONS": "Terms & Conditions",
-    "PRIVACY_POLICY": "Privacy Policy"
+    "TITLE1": "Set up your account...",
+    "TITLE2": "This will only take a minute",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "ZIP_CODE": "Zip Code",
+    "PASSWORD2": "Re-enter Password",
+    "PASSWORD_MATCH": "The passwords don't match",
+    "LEGAL_AGREEMENT": "By signing up you agree to our terms of service and have read our privacy policy",
+    "SUBMIT_BUTTON": "Create Account",
+    "CONFIRM_EMAIL": "Is your email correct?",
+    "CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address."
+  },
+  "OVERVIEW": {
+    "NO_CHILDREN": "No Children.",
+    "NO_CHILDREN_MESSAGE": "Add all Children, then Select a Time.",
+    "ADD_CHILD": "Add Child",
+    "ADD_EDIT_CHILD": "Add or Edit Child",
+    "SCHEDULE": "Schedule",
+    "NO_TIME_SELECTED.": "No Time Selected.",
+    "NO_TIME_MESSAGE": "After you Add Children, Select a Time.",
+    "SELECT_TIME": "Select Time",
+    "CHANGE_TIME": "Change Time",
+    "NOT_SUBMITTED": "Not Submitted.",
+    "NOT_SUBMITTED_MESSAGE": "After you Add Children and Select a Time, Submit to get your QR Code for the Event."
+  },
+  "CHILDREN": {
+    "CHILD_LINE_1": "Children must be between the ages of 0-11 years old.",
+    "CHILD_LINE_2": "Add all of your Children below.",
+    "ADD_A_CHILD": "Add a Child",
+    "NO_CHILDREN": "No Children.",
+    "YOUR_CHILDREN": "Your Children",
+    "INVALID_TOYTYPE": "Error. Edit child and set toy type to fix"
+  },
+  "ADDCHILD": {
+    "ADD_TITLE": "Add child",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "BIRTH_DATE": "Birth Date",
+    "TOY_TYPE": "Type of Toys",
+    "DELETE_CHILD_TITLE": "Delete Child?",
+    "DELETE_CHILD_MSG": "Pressing the delete button will remove this child from your account",
+    "INVALID_AGE": "Age must be between 0 and 11 years old",
+    "INVALID_FIRSTNAME": "First name must be between 2 and 20 characters",
+    "INVALID_LASTNAME": "First name must be between 2 and 25 characters",
+    "INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",
+    "BABIES": "For Babies (Ages 0-2)",
+    "BOYS": "For Boys",
+    "GIRLS": "For Girls",
+    "AGE_GROUP": "Age Group",
+    "AGE0": "Age 0-2",
+    "AGE3": "Age 3-5",
+    "AGE6": "Age 6-8",
+    "AGE9": "Age 9-11",
+    "TOO_OLD_1": "We're sorry"
+  },
+  "SCHEDULE": {
+    "CHOOSE_DATE_TIME": "Choose an available date and time to pick up your toys.",
+    "YOUR_DATE/TIME": "Your Date/Time",
+    "NO_TIME_SELECTED.": "No Time Selected.",
+    "ADD_ONE_BELOW.": "Add one below.",
+    "ON_TIME": "Please arrive during your assigned time. Wait times will vary.",
+    "AVAILABLE_DATES/TIMES": "Available Dates/Times"
+  },
+  "SUBMIT": {
+    "CONFIRM_ADDED_CHILDREN": "Have you added all children? Is children information correct?",
+    "CONFIRM_DATE_TIME": "Is date and time correct?",
+    "PRESUBMIT": "Before Submitting, make sure everything on this page is correct. A DSCS Volunteer will have to manually unlock your registration for you to make any changes.",
+    "MAKE_CHANGES": "Make Changes"
+  },
+  "CONFIRMATION": {
+    "EVENT_INFORMATION": "Event Information",
+    "QR_CODE": "QR Code",
+    "THIS_IS_YOUR_TICKET": "This is your ticket to the event",
+    "CHANGE_REGISTRATION": "Change Registration",
+    "ARE_YOU_SURE": "Are you sure?",
+    "CONFIRM_CHANGE_MSG": "Requesting to make a change to your registration will forfeit your current Date & Time.<br/>After you confirm, submit your new registration as soon as possible. Availability is limited and registration fills up quickly."
+  },
+  "HELP": {
+    "TITLE": "Help",
+    "VISIT_TEXT": "Visit the Contact Us page of our website for help with registration.",
+    "VISIT_BUTTON": "Visit Website",
+    "PDF_GUIDE_TEXT": "Download a Step-By-Step PDF Help Guide here.",
+    "PDF_GUIDE_BUTTON": "Download PDF Help Guide"
+  },
+  "PROFILE": {
+    "CHANGE_EMAIL": "Change Email",
+    "CHANGE_EMAIL_TEXT": "To change your email, complete the form below.",
+    "CURRENT_EMAIL": "Your current email is:",
+    "SAVE_CHANGES": "Save Changes",
+    "CHANGE_INFO": "Change Name & Zip Code",
+    "CHANGE_INFO_TEXT": "Make changes to your First Name below. Be sure to click the <strong>Save Changes</strong> button when you are done.",
+    "CHANGE_PASSWORD": "Change Password",
+    "CHANGE_PASSWORD_TEXT": "To change your password, fill out this form.",
+    "CURRENT_PASSWORD": "Current Password",
+    "NEW_PASSWORD": "New Password",
+    "RE-ENTER_NEW_PASSWORD": "Re-enter new password",
+    "DONE": "Changes Saved!",
+    "EMAIL_UPDATED": "Your email address was updated",
+    "PASSWORD_CHANGED": "Password Changed",
+    "PASSWORD_CHANGED_TEXT": "Remember to use your new password next time you sign in"
   },
   "FORGOTPASS": {
-    "HEADER": "Password Reset",
-    "RESET_YOUR_PASSWORD": "Reset your password",
-    "INSTRUCTIONS": "Enter your email address below and click the \"Send Reset Email\" button",
-    "SEND_RESET_EMAIL": "Send Reset Email"
+    "RESET_YOUR_PASSWORD": "Forgot your Password?",
+    "INSTRUCTIONS": "Enter your registered email to reset your password.",
+    "RESET_PASSWORD": "Reset password",
+    "REMEMBER_YOUR_PASSWORD": "Remember your password?",
+    "EMAIL_SENT": "Email has been sent!",
+    "EMAIL_SENT_2": "Check your email for instructions to reset your password.",
+    "EMAIL_SENT_3": "It might take a couple of minutes to receive, and check your spam if you don’t see it.",
+    "NO_EMAIL": "Didn't get an email?",
+    "RESET_PASSWORD_AGAIN": "Reset password again"
   },
+  "REG_CLOSED": {
+    "1": "Oh No!",
+    "2": "Registration is ",
+    "3": "Closed",
+    "4": "Sorry, Santa’s Sleigh is full and all Dates & Times have been filled. Please visit our social sites for more information."
+  },
+  "BAD_WEATHER": {
+    "1": "Our toy giving event has been postponed due to bad weather.",
+    "2": "Please visit our Facebook page for updates."
+  },
+  "MAINTENANCE": {
+    "1": "Uh oh!",
+    "2": "Maintenance is in progress.",
+    "3": "Please visit our social sites for more information."
+  },
+
   "REGISTRATION": {
     "RESEND_EMAIL": "Resend Email",
     "HEADER": "Registration Status",
@@ -140,26 +237,7 @@
     "REGISTERED_3": "Save or print the email we sent you. You will need it on the day of the event to check in.",
     "QR_INFO": "If your QR Code isn't loading try refreshing the page. Also check your email."
   },
-  "ADDCHILD": {
-    "ADD_TITLE": "Add your child",
-    "EDIT_TITLE": "Edit your child",
-    "INSTRUCTIONS": "Add your child below and save",
-    "CHILD_NAME": "Child's name",
-    "FIRST_EM": "(Only first name)",
-    "BIRTH_DATE": "Birth Date (Children 11 and younger)",
-    "INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",
-    "TOY_TYPE": "Type of Toys",
-    "BABIES": "For Babies (0-2)",
-    "BOYS": "For Boys",
-    "GIRLS": "For Girls",
-    "AGE_GROUP": "Age Group",
-    "AGE0": "Age 0-2",
-    "AGE3": "Age 3-5",
-    "AGE6": "Age 6-8",
-    "AGE9": "Age 9-11",
-    "TOO_OLD_1": "We're sorry",
-    "TOO_OLD_2": "We only have toys for children ages 11 and under"
-  },
+  
   "PRIVACY": {
     "PRIVACY_&_COOKIES": "Privacy & Cookies",
     "TITLE": "Privacy Policy for Denver Santa Claus Shop",

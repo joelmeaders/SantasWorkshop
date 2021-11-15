@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { Router } from '@angular/router';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { SignUpStatusService } from 'santashop-app/src/app/services/sign-up-status.service';
-import { AuthService } from 'santashop-core/src/public-api';
+import { AuthService } from 'santashop-core/src';
 
 @Component({
   selector: 'app-public-menu',
@@ -16,17 +15,11 @@ import { AuthService } from 'santashop-core/src/public-api';
 })
 export class PublicMenuComponent implements OnDestroy {
 
-  private readonly $destroy = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
-  public readonly $isLoggedIn = this.authService.$currentUser.pipe(
-    takeUntil(this.$destroy),
+  public readonly isLoggedIn$ = this.authService.currentUser$.pipe(
+    takeUntil(this.destroy$),
     publishReplay(1),
-    refCount()
-  );
-
-  public readonly $signupEnabled = this.signUpStatusService.$signupEnabled.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(),
     refCount()
   );
 
@@ -36,11 +29,10 @@ export class PublicMenuComponent implements OnDestroy {
     private readonly popoverController: PopoverController,
     private readonly translateService: TranslateService,
     private readonly analyticsService: AngularFireAnalytics,
-    private readonly signUpStatusService: SignUpStatusService
   ) { }
 
   public ngOnDestroy(): void {
-    this.$destroy.next();
+    this.destroy$.next();
   }
 
   public async closeMenu() {
@@ -53,12 +45,17 @@ export class PublicMenuComponent implements OnDestroy {
   }
 
   public async profile() {
-    await this.router.navigate(['/profile']);
+    await this.router.navigate(['/pre-registration/profile']);
     await this.closeMenu();
   }
 
   public async signIn() {
     await this.router.navigate(['/sign-in']);
+    await this.closeMenu();
+  }
+
+  public async help() {
+    await this.router.navigate(['/pre-registration/help']);
     await this.closeMenu();
   }
 

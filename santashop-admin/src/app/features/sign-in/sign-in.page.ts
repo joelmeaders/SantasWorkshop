@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
-import { AuthService, IError } from 'santashop-core/src/public-api';
+import { AuthService, IError } from 'santashop-core/src';
 import { SignInForm } from '../../forms/sign-in';
 
 @Component({

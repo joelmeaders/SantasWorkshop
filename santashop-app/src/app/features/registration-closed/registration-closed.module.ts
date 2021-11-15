@@ -1,18 +1,13 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { IonicModule } from '@ionic/angular';
-
 import { RegistrationClosedPageRoutingModule } from './registration-closed-routing.module';
-
 import { RegistrationClosedPage } from './registration-closed.page';
+import { CoreModule } from '@core/*';
+import { SharedModule } from '../../shared/components/shared.module';
 
 @NgModule({
   imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
+    CoreModule,
+    SharedModule,
     RegistrationClosedPageRoutingModule
   ],
   declarations: [RegistrationClosedPage]

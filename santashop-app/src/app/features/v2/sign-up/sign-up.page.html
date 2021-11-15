@@ -1,0 +1,202 @@
+<!-- TODO: Mobile -->
+<ion-content color="light">
+  <ion-grid class="height-max ion-no-padding ion-no-margin">
+    <ion-row
+      class="height-max ion-align-items-center ion-justify-content-center"
+    >
+      <!-- Information -->
+      <ion-col sizeXs="12" sizeSm="10" sizeMd="auto">
+        <ion-button
+          class="ion-no-padding even-ratio-button remove-shadow"
+          color="white"
+          [routerLink]="['/']"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="arrow-back-sharp"
+            class="even-ratio-button"
+          ></ion-icon>
+        </ion-button>
+        <ion-card class="sign-up-card">
+          <ion-card-header>
+            <ion-card-title> {{ 'SIGNUP.TITLE1' | translate }} </ion-card-title>
+            <ion-card-subtitle>
+              {{ 'SIGNUP.TITLE2' | translate }}
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <form [formGroup]="form" novalidate>
+              <ion-list>
+                <ion-item>
+                  <ion-label color="xmasred">
+                    {{ 'SIGNUP.FIRST_NAME' | translate }}
+                  </ion-label>
+                  <ion-input
+                    #firstName
+                    formControlName="firstName"
+                    [debounce]="500"
+                    autocomplete="given-name"
+                    inputmode="text"
+                    autofocus="true"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.firstName"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label color="xmasred">
+                    {{ 'SIGNUP.LAST_NAME' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="lastName"
+                    [debounce]="500"
+                    autocomplete="family-name"
+                    inputmode="text"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.lastName"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label color="xmasred">
+                    {{ 'COMMON.EMAIL_ADDRESS' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="emailAddress"
+                    [debounce]="500"
+                    type="email"
+                    autocomplete="email"
+                    inputmode="email"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.emailAddress"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label color="xmasred">
+                    {{ 'COMMON.PASSWORD' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="password"
+                    [debounce]="500"
+                    type="password"
+                    autocomplete="new-password"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.password"
+                ></app-control-errors>
+
+                <ion-item>
+                  <ion-label color="xmasred">
+                    {{ 'SIGNUP.PASSWORD2' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="password2"
+                    [debounce]="500"
+                    type="password"
+                    autocomplete="new-password"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.password2"
+                ></app-control-errors>
+                <ng-container *ngIf="form.errors?.passwordMismatch">
+                  <ul>
+                    <li>
+                      <ion-note color="danger">
+                        {{ 'SIGNUP.PASSWORD_MATCH' | translate }}
+                      </ion-note>
+                    </li>
+                  </ul>
+                </ng-container>
+
+                <ion-item>
+                  <ion-label color="xmasred">
+                    {{ 'SIGNUP.ZIP_CODE' | translate }}
+                  </ion-label>
+                  <ion-input
+                    formControlName="zipCode"
+                    [debounce]="500"
+                    type="text"
+                    autocomplete="postal-code"
+                    inputmode="numeric"
+                    maxlength="5"
+                    minlength="5"
+                  ></ion-input>
+                </ion-item>
+                <app-control-errors
+                  [control]="form.controls.zipCode"
+                ></app-control-errors>
+              </ion-list>
+
+                <div class="ion-margin">
+                  <div class="ion-float-right legal-check-container">
+                    <ion-checkbox formControlName="legal" class="legal-check"></ion-checkbox>
+                  </div>
+                  <ion-text color="medium">
+                    <!-- {{ 'SIGNUP.LEGAL_AGREEMENT' | translate }} -->
+                    By signing up you agree to our
+                    <ion-text color="primary" (click)="showTermsConditionsModal()" tappable>
+                      Terms and Conditions
+                    </ion-text>
+                    and have read our
+                    <ion-text color="primary" (click)="showPrivacyPolicyModal()" tappable> 
+                      Privacy Policy
+                    </ion-text>
+                  </ion-text>
+                </div>
+
+                <app-control-errors
+                  [control]="form.controls.legal"
+                ></app-control-errors>
+            </form>
+
+            <ng-container>
+              <ion-item [disabled]="!form.valid" lines="none">
+                <re-captcha
+                  class="ion-align-self-center ion-padding-vertical"
+                  #captchaRef="reCaptcha"
+                  (resolved)="$event && onValidateRecaptcha($event)"
+                ></re-captcha>
+              </ion-item>
+            </ng-container>
+
+            <ion-button
+              size="default"
+              expand="block"
+              color="xmasred"
+              class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xl"
+              [disabled]="!form.valid || !(recaptchaValid$ | async)"
+              (click)="onCreateAccount()"
+            >
+              {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
+            </ion-button>
+            <!-- <div class="ion-text-center ion-padding-top">
+              <ion-button
+                size="default"
+                fill="clear"
+                type="button"
+                (click)="showPrivacyPolicyModal()"
+              >
+                {{ 'COMMON.PRIVACY_POLICY' | translate }}
+              </ion-button>
+
+              <ion-button
+                size="default"
+                fill="clear"
+                type="button"
+                (click)="showTermsConditionsModal()"
+              >
+                {{ 'COMMON.TERMS_AND_CONDITIONS' | translate }}
+              </ion-button>
+            </div> -->
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

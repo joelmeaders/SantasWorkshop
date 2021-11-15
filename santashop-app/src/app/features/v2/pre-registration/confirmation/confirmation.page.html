@@ -1,0 +1,121 @@
+<ion-content color="light">
+  <app-internal-header></app-internal-header>
+
+  <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+    <ion-row class="height-max ion-justify-content-center">
+      <ion-col
+        class="
+          side-menu
+          height-max
+          ion-hide-xl-down ion-no-padding ion-no-margin
+        "
+        size="auto"
+        *ngIf="!(isRegistrationComplete$ | async)"
+      >
+        <app-pre-registration-menu></app-pre-registration-menu>
+      </ion-col>
+      <ion-col size="auto">
+        <ion-row class="ion-justify-content-center">
+          <ion-col>
+            <div class="ion-text-center width-max ion-margin-top">
+              <ion-button color="xmasred" [routerLink]="['event-information']">
+                {{ 'CONFIRMATION.EVENT_INFORMATION' | translate }}
+              </ion-button>
+            </div>
+
+            <ion-card
+              class="ion-margin-horizontal ion-text-center es-mg-bottom-xxl"
+            >
+              <ion-text color="xmasred" class="ion-text-center">
+                <p>
+                  <ion-title
+                    >{{ 'CONFIRMATION.QR_CODE' | translate }}</ion-title
+                  >
+                  {{ 'CONFIRMATION.THIS_IS_YOUR_TICKET' | translate }}
+                </p>
+              </ion-text>
+
+              <img
+                [src]="viewService.qrCode$ | async"
+                alt="Registration QR Code"
+                class="qr-code"
+              />
+
+              <ion-item lines="none">
+                <div>
+                  <p>
+                    <ion-text color="xmasred">
+                      <strong
+                        >{{ 'SCHEDULE.YOUR_DATE/TIME' | translate }}</strong
+                      >
+                    </ion-text>
+                    <br />
+                  </p>
+                  <ion-text
+                    *ngIf="viewService.dateTimeSlot$ | async as slot"
+                    class="es-pd-bottom-md"
+                  >
+                    {{ slot.dateTime | date:'EEEE, MMMM d, h:mm a':'MST' }}
+                  </ion-text>
+                </div>
+              </ion-item>
+
+              <ion-list>
+                <ion-item lines="none">
+                  <p>
+                    <ion-text color="xmasred">
+                      <strong
+                        >{{ 'CHILDREN.YOUR_CHILDREN' | translate }}</strong
+                      >
+                    </ion-text>
+                    <br />
+                  </p>
+                </ion-item>
+                <ng-container *ngIf="viewService.children$ | async as children">
+                  <ion-item
+                    *ngFor="let child of children"
+                    [ngClass]="{'infant-style' : child.toyType == 'infants', 'boys-style': child.toyType == 'boys', 'girls-style': child.toyType == 'girls'}"
+                    lines="none"
+                  >
+                    <ion-icon
+                      name="man-outline"
+                      size="large"
+                      slot="start"
+                      *ngIf="child.toyType === 'boys'"
+                    ></ion-icon>
+                    <ion-icon
+                      name="woman-outline"
+                      size="large"
+                      slot="start"
+                      *ngIf="child.toyType === 'girls'"
+                    ></ion-icon>
+                    <ion-icon
+                      name="happy-outline"
+                      size="large"
+                      slot="start"
+                      *ngIf="child.toyType === 'infants'"
+                    ></ion-icon>
+                    <ion-card-header>
+                      <ion-card-title>
+                        {{ child.firstName }} {{ child.lastName }}
+                      </ion-card-title>
+                      <ion-card-subtitle>
+                        {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
+                      </ion-card-subtitle>
+                    </ion-card-header>
+                  </ion-item>
+                </ng-container>
+              </ion-list>
+            </ion-card>
+
+            <div class="ion-text-center es-mg-bottom-xxl">
+              <ion-button fill="clear" (click)="undoRegistration()">
+                {{ 'CONFIRMATION.CHANGE_REGISTRATION' | translate }}
+              </ion-button>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

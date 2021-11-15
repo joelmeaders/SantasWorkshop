@@ -3,26 +3,61 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitAny": true,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2015",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
     "module": "es2020",
+    "skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
     "lib": [
       "es2018",
       "dom"
     ],
     "paths": {
-      "santashop-core": [
-        "dist/santashop-core/santashop-core",
+      "@core/*": [
+        "santashop-core/src",
         "dist/santashop-core"
+      ],
+      "@registration/*": [
+        "santashop-app/src"
+      ],
+      "@admin/*": [
+        "santashop-admin/src"
+      ],
+      "@models/*": [
+        "dist/santashop-models"
       ]
     },
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "emitDecoratorMetadata": true
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
+  },
+  "references": [
+    { "path": "santashop-models" },
+    { "path": "santashop-core" },
+    { "path": "santashop-app" },
+    { "path": "santashop-admin" },
+    { "path": "santashop-functions" }
+  ],
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }

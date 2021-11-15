@@ -1,28 +1,54 @@
-<ion-content>
+<ion-content size="fullscreen" color="light" class="ion-text-center">
+  <div class="div-container">
 
-  <ion-grid>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <ion-title>
-          Undergoing maintenance
-        </ion-title>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        {{ service.$messageEn | async }}
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        {{ service.$messageEs | async }}
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <img src="../../../assets/robots.jpg" alt="maintenance image">
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    <div class="es-mg-top-xxl es-pd-top-xxl">
+      <img src="assets/images/maintenance.png" alt="maintenance mode image">
+    </div>    
 
+    <div>
+      <ion-text color="xmasred">
+        <h3> 
+          {{ '1' | translate }}
+          <br />
+          {{ '2' | translate }}
+          <br />
+          {{ '3' | translate }}
+        </h3>
+      </ion-text>
+    </div>
+
+    <div class="es-mg-bottom-xxl es-mg-top-xxl">
+      <a href="https://www.facebook.com/denversantaclausshop" target="_blank">
+        <ion-button
+          color="white"
+          class="remove-shadow round-button ion-margin-end dark-border"
+          size="default"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="logo-facebook"
+            color="medium"
+          ></ion-icon>
+        </ion-button>
+      </a>
+  
+      <a
+        href="https://www.instagram.com/denversantaclausshop/"
+        target="_blank"
+      >
+        <ion-button
+          color="white"
+          class="remove-shadow round-button dark-border"
+          size="default"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="logo-instagram"
+            color="medium"
+          ></ion-icon>
+        </ion-button>
+      </a>
+    </div>
+
+  </div>
 </ion-content>

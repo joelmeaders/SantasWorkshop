@@ -1,34 +1,28 @@
-import { Component } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { MaintenanceService } from './services/maintenance.service';
-import { SignUpStatusService } from './services/sign-up-status.service';
+import { AppStateService } from './core';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss']
+  styleUrls: ['app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   constructor(
     private platform: Platform,
-    private splashScreen: SplashScreen,
-    private statusBar: StatusBar,
     private readonly translate: TranslateService,
+    private readonly appStateService: AppStateService,
     private readonly analyticsService: AngularFireAnalytics,
-    private readonly maintenance: MaintenanceService,
-    private readonly signUpStatusService: SignUpStatusService
   ) {
     this.initializeApp();
   }
 
   initializeApp() {
     this.platform.ready().then(() => {
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
+      console.log('AppStateService Injected', !!this.appStateService)
     });
 
     this.translate.addLangs(['en', 'es']);

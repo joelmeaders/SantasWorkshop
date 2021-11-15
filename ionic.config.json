@@ -11,6 +11,12 @@
       "integrations": {},
       "type": "angular",
       "root": "./santashop-app"
+    },
+    "santashop-core": {
+      "name": "santashop-core",
+      "integrations": {},
+      "type": "angular",
+      "root": "./santashop-core"
     }
   },
   "defaultProject": "santashop-app"

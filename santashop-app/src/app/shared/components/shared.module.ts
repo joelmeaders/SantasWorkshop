@@ -1,45 +1,33 @@
-import { CommonModule } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
-import { CoreDirectivesModule, LetDirective } from 'santashop-core/src/public-api';
-import { CreateChildModalComponent } from './create-child-modal/create-child-modal.component';
+import { CoreModule } from 'santashop-core/src';
+import { InternalHeaderComponent } from './internal-header/internal-header.component';
+import { LanguageToggleComponent } from './language-toggle/language-toggle.component';
+import { PreRegistrationMenuComponent } from './pre-registration-menu/pre-registration-menu.component';
 import { PrivacyPolicyModalComponent } from './privacy-policy-modal/privacy-policy-modal.component';
 import { PublicMenuComponent } from './public-menu/public-menu.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-service-modal.component';
 
 @NgModule({
   declarations: [
-    CreateChildModalComponent,
-    ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent
+    TermsOfServiceModalComponent,
+    PreRegistrationMenuComponent,
+    LanguageToggleComponent,
+    InternalHeaderComponent
   ],
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    IonicModule,
-    TranslateModule,
-    CoreDirectivesModule
+    CoreModule,
   ],
   exports: [
-    CreateChildModalComponent,
-    ResetPasswordComponent,
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
     TermsOfServiceModalComponent,
     TranslateModule,
-    LetDirective
-  ],
-  entryComponents: [
-    CreateChildModalComponent,
-    ResetPasswordComponent,
-    PublicMenuComponent,
-    PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent,
+    PreRegistrationMenuComponent,
+    LanguageToggleComponent,
+    InternalHeaderComponent
   ],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

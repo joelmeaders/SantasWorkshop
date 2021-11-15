@@ -13,3 +13,7 @@ node_modules/
 
 # ts compilation directory
 lib/
+dist/
+
+#config
+.runtimeconfig.json

@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import { Timestamp } from 'firebase/firestore'
 
 admin.initializeApp();
 
@@ -7,10 +8,10 @@ let stats: ICheckInAggregatedStats;
 export default async () => {
   // Get existing stats
   const statsDoc = await admin
-    .firestore()
-    .collection('stats')
-    .doc('checkin-2020')
-    .get();
+      .firestore()
+      .collection('stats')
+      .doc('checkin-2020')
+      .get();
 
   if (statsDoc.exists) {
     stats = statsDoc.data() as ICheckInAggregatedStats;
@@ -24,44 +25,46 @@ export default async () => {
 
   // Get unprocessed checkins
   await admin
-    .firestore()
-    .collection('checkins')
-    .where('inStats', '==', false)
-    .get()
-    .then(async (snapshot) => {
-      snapshot.forEach(async (doc) => {
-        const docData = doc.data() as ICheckIn;
-        updateStats(docData);
-        await doc.ref.set({ inStats: true }, { merge: true });
+      .firestore()
+      .collection('checkins')
+      .where('inStats', '==', false)
+      .get()
+      .then(async (snapshot) => {
+        snapshot.forEach(async (doc) => {
+          const docData = doc.data() as ICheckIn;
+          updateStats(docData);
+          await doc.ref.set({inStats: true}, {merge: true});
+        });
       });
-    });
 
   await admin
-    .firestore()
-    .collection('stats')
-    .doc('checkin-2020')
-    .set(stats, { merge: false });
+      .firestore()
+      .collection('stats')
+      .doc('checkin-2020')
+      .set(stats, {merge: false});
 
   stats = {} as ICheckInAggregatedStats;
   return null;
 };
 
 function updateStats(checkIn: ICheckIn): void {
-  const localDate = checkIn.checkInDateTime.toDate().toLocaleString('en-US', { timeZone: 'America/Denver' });
+  const localDate = checkIn.checkInDateTime.toDate().toLocaleString('en-US', {timeZone: 'America/Denver'});
   const checkInDate = new Date(localDate).getDate();
   const checkInHour = new Date(localDate).getHours();
 
   const index = stats.dateTimeCount.findIndex(
-    (e) => e.date === checkInDate && e.hour === checkInHour
+      (e) => e.date === checkInDate && e.hour === checkInHour
   );
 
   if (index > -1) {
     stats.dateTimeCount[index].customerCount += 1;
     stats.dateTimeCount[index].childCount += checkIn.stats.children;
-    if (checkIn.stats.preregistered)
+    if (checkIn.stats.preregistered) {
       stats.dateTimeCount[index].pregisteredCount += 1;
-    if (checkIn.stats.modifiedAtCheckIn)
+    }
+    if (checkIn.stats.modifiedAtCheckIn) {
       stats.dateTimeCount[index].modifiedCount += 1;
+    }
     return;
   }
 
@@ -94,7 +97,7 @@ interface ICheckInDateTimeCount {
 interface ICheckIn {
   customerId?: string;
   registrationCode?: string;
-  checkInDateTime: admin.firestore.Timestamp;
+  checkInDateTime: Timestamp;
   inStats: boolean;
   stats: ICheckInStats;
 }

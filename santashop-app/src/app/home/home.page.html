@@ -1,96 +1,100 @@
-<ion-content fullscreen="true" color="xmasred">
-
-  <ion-header>
-      <ion-grid>
-        <ion-row class="ion-align-items-center ion-justify-content-center">
-          <ion-col size="12" class="ion-text-center">
-            <img src="../../assets/santaclausshop.jpg" alt="santa claus shop icon" />
-          </ion-col>
-          <ion-col size="12">
-            <ion-title class="ion-text-center"> {{ 'HOME.TITLE' | translate }} </ion-title>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    <ion-toolbar color="light">
-      <ion-buttons class="ion-justify-content-center">
-        <ion-button (click)="setLanguage('en')">
-          <ion-label color="dark">
-            English
-          </ion-label>
-        </ion-button>
-        <ion-button (click)="setLanguage('es')">
-          <ion-label color="dark">
-            Español
-          </ion-label>
-        </ion-button>
-        <ion-button slot="end" size="medium" (click)="profileMenu($event)">
-          <ion-label color="dark">{{ "COMMON.MENU" | translate }}</ion-label>
-          <ion-icon name="menu" slot="end" color="dark"></ion-icon>
-        </ion-button>
-      </ion-buttons>
+<ion-content color="light">
+  <ion-header class="ion-no-border">
+    <ion-toolbar color="none">
+      <app-language-toggle
+        slot="end"
+        class="ion-padding-end"
+      ></app-language-toggle>
     </ion-toolbar>
   </ion-header>
 
   <ion-grid fixed>
-    <ion-row *ngIf="!($signupEnabled | async)">
+    <ion-row>
       <ion-col class="ion-text-center">
-        <ion-title>
-          We're sorry, registrations are closed<br />
-          Lo sentimos, las inscripciones están cerradas
+        <img
+          src="assets/DSCS-Santa-Body_Red.png"
+          class="logo"
+          alt="logo with santa claus"
+        />
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="ion-padding-bottom">
+      <ion-col class="ion-text-center">
+        <ion-title color="xmasred">
+          <strong innerHtml="{{ 'HOME.WELCOME_MESSAGE' | translate }}"></strong>
         </ion-title>
       </ion-col>
     </ion-row>
+
+    <ion-row class="ion-margin-top">
+      <ion-col size="12" class="ion-text-center">
+        <ion-button
+          color="white"
+          class="remove-shadow dark-border"
+          [routerLink]="['/sign-up']"
+        >
+          <div class="button-text-padding">
+            {{ 'HOME.CREATE_ACCOUNT' | translate }}
+          </div>
+        </ion-button>
+      </ion-col>
+      <ion-col size="12" class="ion-text-center">
+        <ion-button
+          color="white"
+          class="remove-shadow dark-border"
+          [routerLink]="['/sign-in']"
+        >
+          <div class="button-text-padding">
+            {{ 'COMMON.SIGN_IN' | translate }}
+          </div>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="es-pd-top-xxl">
+      <ion-col class="ion-text-center">
+        <a href="https://www.facebook.com/denversantaclausshop" target="_blank">
+          <ion-button
+            color="white"
+            class="remove-shadow round-button ion-margin-end dark-border"
+            size="default"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="logo-facebook"
+              color="medium"
+            ></ion-icon>
+          </ion-button>
+        </a>
+
+        <a
+          href="https://www.instagram.com/denversantaclausshop/"
+          target="_blank"
+        >
+          <ion-button
+            color="white"
+            class="remove-shadow round-button dark-border"
+            size="default"
+          >
+            <ion-icon
+              slot="icon-only"
+              name="logo-instagram"
+              color="medium"
+            ></ion-icon>
+          </ion-button>
+        </a>
+      </ion-col>
+    </ion-row>
     <ion-row>
-      <ion-col size="12">
-        <ion-card>
-          <ion-grid>
-            <ion-row>
-              <ion-col class="ion-text-center">
-                <h1>
-                  {{ 'HOME.HEADER' | translate }}
-                </h1>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-padding-horizontal ion-padding-bottom ion-text-justify">
-              <ion-col class="ion-padding-horizontal">
-                <h4>
-                  <div [innerHTML]="'HOME.MESSAGE' | translate"></div>
-                </h4>
-              </ion-col>
-            </ion-row>
-            <ng-container *appLet="$user | async as customer">
-
-              <ion-row *ngIf="!customer?.uid">
-                <ion-col size-sm size="12" class="ion-padding-horizontal">
-                  <ion-button [routerLink]="['/sign-in']" size="large" expand="block">
-                    <ion-label>{{ 'COMMON.SIGN_IN' | translate }}</ion-label>
-                  </ion-button>
-                </ion-col>
-                <ion-col size-xs class="ion-hide-md-down">
-  
-                </ion-col>
-                <ion-col size-sm size="12" class="ion-padding-horizontal">
-                  <ion-button color="purple" [routerLink]="['/sign-up-account']" size="large"expand="block" [disabled]="!($signupEnabled | async)">
-                    <ion-label>{{ 'COMMON.CREATE_ACCOUNT' | translate }}</ion-label>
-                  </ion-button>
-                </ion-col>
-              </ion-row>
-
-              <ion-row *ngIf="customer?.uid">
-                <ion-col></ion-col>
-                <ion-col>
-                  <ion-button color="purple" [routerLink]="['/profile']" size="large"expand="block">
-                    <ion-label>{{ 'COMMON.PROFILE' | translate }}</ion-label>
-                  </ion-button>
-                </ion-col>
-                <ion-col></ion-col>
-              </ion-row>
-            </ng-container>
-            
-          </ion-grid>
-        </ion-card>
+      <ion-col class="ion-text-center">
+        <p>
+          <ion-note>
+            {{ environmentName }}<br />
+            {{ environmentVersion }}
+          </ion-note>
+        </p>
       </ion-col>
     </ion-row>
   </ion-grid>
-
 </ion-content>

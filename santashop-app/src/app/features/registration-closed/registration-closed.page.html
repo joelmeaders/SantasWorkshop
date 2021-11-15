@@ -1,30 +1,57 @@
-<ion-content>
+<ion-content size="fullscreen" color="light" class="ion-text-center">
+  <div class="div-container">
+    <ion-text color="xmasred">
+      <div class="h2alt">
+        {{ 'REG_CLOSED.1' | translate }}<br />
+        {{ 'REG_CLOSED.2' | translate }}
+      </div>
+    </ion-text>
 
-  <ion-grid>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <ion-title class="ion-padding-top">
-          Pre-Registration Closed
-        </ion-title>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        We're sorry. We are not accepting new registrations at this time.<br />
-        <a href="https://denversantaclausshop.org/receive-a-toy/">Click here here for more information</a>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        Lo lamentamos. No estamos aceptando nuevos registros en este momento.<br />
-        <a href="https://denversantaclausshop.org/receive-a-toy/">Haga clic aquí para obtener más información</a>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <img src="../../../assets/robots.jpg" alt="maintenance image">
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+    <div class="h1alt">{{ 'REG_CLOSED.3' | translate }}</div>
 
+    <div class="es-mg-bottom-xxl es-mg-top-xxl es-pd-bottom-xxl es-pd-top-xxl">
+      <img
+        src="assets/images/registration-closed.png"
+        alt="shop closed image"
+      />
+    </div>
+
+    <div class="es-mg-top-xxl">
+      <ion-text color="xmasred">
+        <h3>
+          {{ 'REG_CLOSED.4' | translate }}
+        </h3>
+      </ion-text>
+    </div>
+
+    <div class="es-mg-bottom-xxl es-mg-top-xxl">
+      <a href="https://www.facebook.com/denversantaclausshop" target="_blank">
+        <ion-button
+          color="white"
+          class="remove-shadow round-button ion-margin-end dark-border"
+          size="default"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="logo-facebook"
+            color="medium"
+          ></ion-icon>
+        </ion-button>
+      </a>
+
+      <a href="https://www.instagram.com/denversantaclausshop/" target="_blank">
+        <ion-button
+          color="white"
+          class="remove-shadow round-button dark-border"
+          size="default"
+        >
+          <ion-icon
+            slot="icon-only"
+            name="logo-instagram"
+            color="medium"
+          ></ion-icon>
+        </ion-button>
+      </a>
+    </div>
+  </div>
 </ion-content>

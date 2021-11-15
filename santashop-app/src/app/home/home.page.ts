@@ -1,12 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/analytics';
-import { PopoverController } from '@ionic/angular';
-import { TranslateService } from '@ngx-translate/core';
+import { ToastController } from '@ionic/angular';
 import { Subject } from 'rxjs';
-import { first, publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { AuthService } from 'santashop-core/src/public-api';
-import { SignUpStatusService } from '../services/sign-up-status.service';
-import { PublicMenuComponent } from '../shared/components/public-menu/public-menu.component';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { RemoteConfigService } from '../core/services/remote-config.service';
 
 @Component({
   selector: 'app-home',
@@ -16,37 +13,36 @@ import { PublicMenuComponent } from '../shared/components/public-menu/public-men
 })
 export class HomePage implements OnDestroy {
 
-  private readonly $destroy = new Subject<void>();
-  public readonly $user = this.authService.$currentUser;
+  private readonly destroy$ = new Subject<void>();
 
-  public readonly $signupEnabled = this.signUpStatusService.$signupEnabled.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(),
-    refCount()
-  );
+  public readonly environmentName = `${environment.name}_${environment.label}`;
+  public readonly environmentVersion = environment.version;
+
+  public readonly $signupEnabled = 
+    this.remoteConfigService.registrationEnabled$.pipe(
+      takeUntil(this.destroy$),
+      map(value => !value),
+      shareReplay(1)
+    );
 
   constructor(
-    private readonly popoverController: PopoverController,
-    private readonly translate: TranslateService,
-    private readonly authService: AuthService,
-    private readonly analyticsService: AngularFireAnalytics,
-    private readonly signUpStatusService: SignUpStatusService
+    
+    private readonly remoteConfigService: RemoteConfigService,
+    private readonly toastController: ToastController
   ) { }
 
   ngOnDestroy(): void {
-    this.$destroy.next();
-  }
+    this.destroy$.next();
+    this.destroy$.complete();
+  }  
 
-  public async profileMenu($event: any) {
-    const popover = await this.popoverController.create({
-      component: PublicMenuComponent,
-      event: $event,
+  async presentToast() {
+    const toast = await this.toastController.create({
+      message: 'Your settings have been saved.',
+      duration: 2000,
+      color: 'success',
+      position: "middle",
     });
-    return await popover.present();
-  }
-
-  public async setLanguage(value: 'en' | 'es') {
-    await this.translate.use(value).pipe(first()).toPromise();
-    this.analyticsService.logEvent('set_language', { value });
+    toast.present();
   }
 }

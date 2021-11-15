@@ -1,26 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
-import { MaintenanceService } from '../../services/maintenance.service';
+import { Subject } from 'rxjs';
+import { filter, takeUntil, tap } from 'rxjs/operators';
+import { AppStateService } from '../../core/services/app-state.service';
 
 @Component({
   selector: 'app-maintenance',
   templateUrl: './maintenance.page.html',
   styleUrls: ['./maintenance.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MaintenancePage implements OnInit {
+export class MaintenancePage implements OnDestroy {
+
+  private readonly destroy$ = new Subject<void>();
+
+  public readonly isMaintenanceDisabledSubscription = 
+    this.service.isRegistrationEnabled$.pipe(
+      takeUntil(this.destroy$),
+      filter(enabled => enabled),
+      tap(() => this.router.navigate(['/']))
+    ).subscribe();
 
   constructor(
-    public readonly service: MaintenanceService,
+    public readonly service: AppStateService,
     private readonly router: Router
   ) { }
 
-  async ngOnInit() {
-    const isMaintenance = await this.service.$isMaintenance.pipe(take(1)).toPromise();
-
-    if (!isMaintenance) {
-      this.router.navigate(['/']);
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
-
 }

@@ -1,20 +1,20 @@
 import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
 
-interface LetContext <T> {
+export interface AppLetContext <T> {
   appLet: T | null;
 }
 
 @Directive({
   selector: '[appLet]',
 })
-export class LetDirective <T> {
+export class AppLetDirective <T> {
   @Input() set appLet(value: T) {
-    this._context.appLet = value;
+    this.context.appLet = value;
   }
 
-  private readonly _context: LetContext <T> = { appLet: null };
+  private readonly context: AppLetContext <T> = { appLet: null };
 
-  constructor(_viewContainer: ViewContainerRef, _templateRef: TemplateRef <LetContext<T>>) {
-    _viewContainer.createEmbeddedView(_templateRef, this._context);
+  constructor(_viewContainer: ViewContainerRef, _templateRef: TemplateRef<AppLetContext<T>>) {
+    _viewContainer.createEmbeddedView(_templateRef, this.context);
   }
 }

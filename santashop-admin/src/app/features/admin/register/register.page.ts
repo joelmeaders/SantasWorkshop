@@ -6,7 +6,7 @@ import { takeUntil, publishReplay, refCount, map, switchMap, filter, take } from
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
-import { IChildrenInfo, IError, Registration } from 'santashop-core/src/public-api';
+import { IChildrenInfo, IError, IRegistration } from 'santashop-core/src';
 
 @Component({
   selector: 'app-register',
@@ -69,7 +69,7 @@ export class RegisterPage implements OnDestroy {
     private readonly alertController: AlertController
   ) { }
 
-  public async initRegistrationEdit(registration: Registration): Promise<void> {
+  public async initRegistrationEdit(registration: IRegistration): Promise<void> {
     this.setZip(registration.zipCode);
     this.customerForm.get('zipCode').setValue(registration.zipCode);
     this._$children.next(registration.children);
@@ -154,7 +154,7 @@ export class RegisterPage implements OnDestroy {
     }
   }
 
-  private async createRegistration(): Promise<Registration> {
+  private async createRegistration(): Promise<IRegistration> {
     const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || new Registration();
     registration.zipCode = this._$zipCode.getValue();
     registration.children = this._$children.getValue();

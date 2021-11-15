@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { QueryFn } from '@angular/fire/firestore';
+import { QueryFn } from '@angular/fire/compat/firestore';
 import { BehaviorSubject } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -15,10 +15,10 @@ import {
   FireCRUDStateless,
   ICheckIn,
   ICheckInStats,
-  Registration,
-} from 'santashop-core/src/public-api';
+  IRegistration,
+} from 'santashop-core/src';
 import { CheckInHelpers } from '../helpers/checkin-helpers';
-import firebase from 'firebase/app';
+import firebase from 'firebase/compat/app';
 import { AlertController } from '@ionic/angular';
 
 @Injectable({
@@ -28,14 +28,14 @@ export class CheckInService {
   private readonly REGISTRATION_COLLECTION = 'registrations';
   private readonly CHECKIN_COLLECTION = 'checkins';
 
-  private readonly _$qrCode = new BehaviorSubject<Registration>(undefined);
+  private readonly _$qrCode = new BehaviorSubject<IRegistration>(undefined);
   public readonly $qrCode = this._$qrCode.pipe(filter((value) => !!value));
 
   private readonly _$registrationCodeFromScan = this.$qrCode.pipe(pluck('id'));
   private readonly _$registrationCodeFromSearch = new BehaviorSubject<string>(undefined);
   public readonly $registrationCodeFromSearch = this._$registrationCodeFromSearch.pipe(filter((value) => !!value));
 
-  private readonly _$manualRegistrationEdit = new BehaviorSubject<Registration>(undefined);
+  private readonly _$manualRegistrationEdit = new BehaviorSubject<IRegistration>(undefined);
   public readonly $manualRegistrationEdit = this._$manualRegistrationEdit.asObservable();
 
   public readonly registrationFromScanSubscription = this._$registrationCodeFromScan.subscribe(value => {
@@ -91,12 +91,12 @@ export class CheckInService {
     this._$registrationCodeFromSearch.next(undefined);
   }
 
-  public setRegistrationToEdit(registration: Registration) {
+  public setRegistrationToEdit(registration: IRegistration) {
     this._$manualRegistrationEdit.next(registration);
   }
 
   public setQrCode(code: string): void {
-    const registration: Registration = JSON.parse(code);
+    const registration: IRegistration = JSON.parse(code);
     this._$qrCode.next(registration);
   }
 
@@ -111,7 +111,7 @@ export class CheckInService {
   public lookupRegistration(id: string) {
     const query: QueryFn = (qry) => qry.where('code', '==', id);
     return this.httpService
-      .readMany<Registration>(this.REGISTRATION_COLLECTION, query, 'id')
+      .readMany<IRegistration>(this.REGISTRATION_COLLECTION, query, 'id')
       .pipe(
         take(1),
         map((response) => response[0] ?? undefined)
@@ -124,7 +124,7 @@ export class CheckInService {
       .pipe(take(1));
   }
 
-  public async saveCheckIn(registration?: Registration, isEdit = false) {
+  public async saveCheckIn(registration?: IRegistration, isEdit = false) {
     if (!registration) {
       registration = await this.$registration.pipe(take(1)).toPromise();
     }
@@ -149,10 +149,10 @@ export class CheckInService {
     return await alert.onDidDismiss();
   }
 
-  private registrationToCheckIn(registration: Registration, isEdit: boolean): ICheckIn {
+  private registrationToCheckIn(registration: IRegistration, isEdit: boolean): ICheckIn {
     const checkin: ICheckIn = {
       customerId: registration.id ?? null,
-      registrationCode: registration.code || null,
+      registrationCode: registration.qrcode || null,
       checkInDateTime: firebase.firestore.Timestamp.now(),
       inStats: false,
       stats: this.registrationStats(registration, isEdit),
@@ -161,9 +161,9 @@ export class CheckInService {
     return checkin;
   }
 
-  private registrationStats(registration: Registration, isEdit: boolean): ICheckInStats {
+  private registrationStats(registration: IRegistration, isEdit: boolean): ICheckInStats {
     const stats: ICheckInStats = {
-      preregistered: (!!registration.code && !!registration.id) || false,
+      preregistered: (!!registration.qrcode && !!registration.id) || false,
       children: registration.children?.length || 0,
       ageGroup02: registration.children.filter((c) => c.a === '0').length,
       ageGroup35: registration.children.filter((c) => c.a === '3').length,

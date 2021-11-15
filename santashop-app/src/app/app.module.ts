@@ -1,39 +1,42 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { AngularFireModule } from '@angular/fire';
+import { AngularFireModule } from '@angular/fire/compat';
 import {
   AngularFireAnalytics,
   AngularFireAnalyticsModule,
-  CONFIG,
+  CONFIG as ANALYTICS_CONFIG,
   ScreenTrackingService,
   UserTrackingService,
-} from '@angular/fire/analytics';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { AngularFireStorageModule, BUCKET } from '@angular/fire/storage';
+} from '@angular/fire/compat/analytics';
+import { AngularFireStorageModule, USE_EMULATOR as USE_STORAGE_EMULATOR } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { AuthService } from 'santashop-core/src/public-api';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { MaintenanceService } from './services/maintenance.service';
-import { AngularFireRemoteConfigModule, DEFAULTS, SETTINGS } from '@angular/fire/remote-config';
+import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as REMOTE_CONFIG_SETTINGS } from '@angular/fire/compat/remote-config';
+import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as AUTH_SETTINGS } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
+import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
+import { USE_EMULATOR as USE_DATABASE_EMULATOR } from '@angular/fire/compat/database';
+import { AuthService, MOBILE_EVENT, PROFILE_VERSION, PROGRAM_YEAR } from '@core/*';
+import { RouteReuseStrategy } from '@angular/router';
+import { RecaptchaSettings, RECAPTCHA_NONCE, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
 
+  // TODO: THis is a huge fucking mess. Make these into functions and use here instead
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
   imports: [
-    HttpClientModule,
     BrowserModule,
+    HttpClientModule,
+    AppRoutingModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -41,43 +44,57 @@ export function httpLoaderFactory(http: HttpClient) {
         deps: [HttpClient],
       },
     }),
+    IonicModule.forRoot({
+      mode: 'md',
+      animated: true
+    }),
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFirestoreModule,
     AngularFireAuthModule,
     AngularFireStorageModule,
     AngularFireAnalyticsModule,
     AngularFireRemoteConfigModule,
-    IonicModule.forRoot({
-      mode: 'md',
-    }),
-    AppRoutingModule,
   ],
-  exports: [TranslateModule],
   providers: [
-    StatusBar,
-    SplashScreen,
-    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    // App settings
+    { provide: PROGRAM_YEAR, useValue: 2021 },
+    { provide: PROFILE_VERSION, useValue: 1 },
+    { provide: MOBILE_EVENT, useValue: true },
+    // Storage
+    // { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
+    { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },
+    // Analytics
     {
-      provide: CONFIG,
+      provide: ANALYTICS_CONFIG,
       useValue: {
         debug_mode: !environment.production,
-        app_name: environment.name,
-        app_version: environment.version,
+        app_name: environment.name ?? "",
+        app_version: environment.version ?? "",
       },
     },
-    {
-      provide: DEFAULTS, useValue: true
-    },
-    {
-      provide: SETTINGS,
-      useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {}
-    },
+    // Remote Config
+    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
+    { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
+    { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
     AngularFireAnalytics,
     ScreenTrackingService,
     UserTrackingService,
     AuthService,
-    MaintenanceService,
+    { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
+    { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
+    { provide: USE_DATABASE_EMULATOR, useValue: !environment.production ? ['localhost', 9000] : undefined },
+    { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
+    { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
+    // { provide: REGION, useValue: 'us-central1'},
+    {
+      provide: RECAPTCHA_SETTINGS,
+      useValue: { siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN', badge: 'inline' } as RecaptchaSettings
+    },
+    { 
+      provide: RECAPTCHA_NONCE,
+      useValue: '8wiehfsdncil8wKUyla8inkiygseteifnkcnkjsdnosidhf8iehf'
+    }
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

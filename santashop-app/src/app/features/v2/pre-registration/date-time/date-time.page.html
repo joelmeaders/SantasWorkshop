@@ -108,14 +108,18 @@
                         *ngFor="let slot of (availableSlotsByDay$(day) | async)"
                         color="light"
                       >
-                        <ion-label>
-                          {{ slot.dateTime | date:'h:mm a':'MST' }}
+                        <ion-label class="es-mg-left-lg">
+                          {{ slot.dateTime | date:'h:mm a':'MST' }} <br />
+                          <ion-text color="xmasred" class="es-mg-left-md">
+                            {{ spotsRemaining(slot) }}
+                          </ion-text>
                         </ion-label>
                         <ion-button
                           slot="end"
                           (click)="selectDateTime(slot)"
                           size="default"
                           class="small-padding"
+                          [disabled]="!slot.enabled"
                         >
                           {{ 'COMMON.SELECT' | translate }}
                         </ion-button>

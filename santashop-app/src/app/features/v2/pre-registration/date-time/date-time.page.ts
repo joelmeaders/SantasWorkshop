@@ -66,8 +66,18 @@ export class DateTimePage implements OnDestroy {
 
     if (!hasSlot || shouldChange)
       await this.viewService.updateRegistration(slot);
+  }
 
-    // TODO: SHow msg and ask to move to next step
+  public spotsRemaining(slot: IDateTimeSlot): string {
+
+    const slots = slot.maxSlots - (slot.slotsReserved ?? 0);
+
+    if (!slot.enabled || slots <= 0)
+      return 'Unavailable';
+
+    return slots === 1 
+      ? `${slots} spot`
+      : `${slots} spots`;
   }
 
   private alreadyChoseSlot(): Promise<boolean> {

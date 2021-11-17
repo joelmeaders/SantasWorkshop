@@ -16,4 +16,6 @@ export interface IUser {
   // Profile version: Increment on field changes, add changes to 
   // profile migration service in @core
   version: number;
+
+  bhp?: number;
 }

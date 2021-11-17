@@ -3,7 +3,8 @@ export const COLLECTION_SCHEMA = {
   registrations: 'registrations',
   children: 'children',
   dateTimeSlots: 'dateTimeSlots',
-  registrationSearchIndex: 'registrationsearchindex'
+  registrationSearchIndex: 'registrationsearchindex',
+  tmpRegistrationEmails: 'tmp_registrationemails'
   // campaigns: (organizationId: string): string =>
   //   `${COLLECTION_SCHEMA.organizations}/${organizationId}/campaigns`
 }

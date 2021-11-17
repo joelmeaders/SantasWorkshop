@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import { COLLECTION_SCHEMA } from '../../santashop-models/src/lib/models';
 
 export const addDateTimeSlots =
   functions.https.onCall(async () => {
@@ -85,6 +86,12 @@ export const documentCounterOnDelete = functions.firestore
     .onDelete(async (snapshot, context) => {
       await (await import('./fn/documentCounterOnDelete')).default(context);
     });
+
+export const sendRegistrationEmail = functions.firestore
+  .document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
+  .onCreate(async (snapshot) => {
+    await (await import('./fn/sendRegistrationEmail')).default(snapshot);
+  });
 
 // ------------------------------------- SCHEDULED FUNCTIONS
 

@@ -1,30 +1,37 @@
 import { Injectable } from '@angular/core';
-import { AngularFireRemoteConfig, budget } from '@angular/fire/compat/remote-config';
-import { shareReplay, tap } from 'rxjs/operators';
+import { AngularFireRemoteConfig } from '@angular/fire/compat/remote-config';
+import { distinctUntilChanged, filter, map, shareReplay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RemoteConfigService {
 
-  public readonly registrationEnabled$ = 
-    this.remoteConfig.booleans.registrationEnabled.pipe(
-      tap(v => console.log('registrationEnabled', v)),
-      budget(800),
+  public readonly config$ = this.remoteConfig.changes.pipe(
+    shareReplay(1)
+  );
+
+  public readonly registrationEnabled$ =
+    this.config$.pipe(
+      filter(param => param.key === 'registrationEnabled'),
+      map(param => param.asBoolean()),
+      distinctUntilChanged(),
       shareReplay(1)
     );
 
   public readonly maintenanceModeEnabled$ =
-    this.remoteConfig.booleans.maintenanceModeEnabled.pipe(
-      tap(v => console.log('maintenanceEnabled', v)),
-      budget(800),
+    this.config$.pipe(
+      filter(param => param.key === 'maintenanceModeEnabled'),
+      map(param => param.asBoolean()),
+      distinctUntilChanged(),
       shareReplay(1)
     );
 
   public readonly shopClosedWeather$ =
-    this.remoteConfig.booleans.shopClosedWeather.pipe(
-      tap(v => console.log('shopClosedWeather', v)),
-      budget(800),
+    this.config$.pipe(
+      filter(param => param.key === 'shopClosedWeather'),
+      map(param => param.asBoolean()),
+      distinctUntilChanged(),
       shareReplay(1)
     );
 

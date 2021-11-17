@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 import { COLLECTION_SCHEMA, IRegistration } from '../../../santashop-models/src/lib/models';
+import * as formatDateTime from 'dateformat';
 
 admin.initializeApp();
 
@@ -42,14 +43,17 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   // Email Record
   const emailDocRef = admin
     .firestore()
-    .doc(`tmp_registrationemails/${record.uid}`);
+    .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${record.uid}`);
 
-  // TODO: Format date/time
+  const date = record.dateTimeSlot?.dateTime;
+  const dateZ = date!.toLocaleString('en-US', { timeZone: 'MST' });
+  const dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
+
   const emailDoc = {
     code: record.qrcode,
     email: record.emailAddress,
     name: record.firstName,
-    formattedDateTime: record.dateTimeSlot?.dateTime,
+    formattedDateTime: dateTime,
   };
 
   batch.set(emailDocRef, emailDoc, { merge: true });
@@ -57,7 +61,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   // Registration Search Index Record
   const indexDocRef = admin
     .firestore()
-    .doc(`registrationsearchindex/${record.uid}`);
+    .doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${record.uid}`);
 
   const indexDoc = {
     code: record.qrcode,

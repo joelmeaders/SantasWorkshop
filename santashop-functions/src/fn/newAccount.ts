@@ -27,7 +27,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
       throw handleAuthError(error);
     });
 
-  const acceptedLegal = data.legal as Date;
+  const acceptedLegal = new Date();
 
   const user: IUser = {
     firstName: data.firstName,
@@ -36,7 +36,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     zipCode: data.zipCode,
     acceptedTermsOfService: acceptedLegal,
     acceptedPrivacyPolicy: acceptedLegal,
-    version: 1,
+    version: 1
   };
 
   const registration: IRegistration = {
@@ -47,6 +47,11 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     zipCode: data.zipCode,
     qrcode: generateId(8),
   };
+
+  if ((data as any).bhp) {
+    user.bhp = (data as any).bhp;
+    registration.bhp = (data as any).bhp;
+  }
 
   const userDocument = admin
     .firestore()

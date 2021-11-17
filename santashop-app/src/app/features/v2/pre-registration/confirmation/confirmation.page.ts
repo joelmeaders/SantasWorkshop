@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { Router } from '@angular/router';
 import { ErrorHandlerService, PreRegistrationService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
@@ -22,7 +23,8 @@ export class ConfirmationPage {
     private readonly alertController: AlertController,
     private readonly router: Router,
     private readonly errorHandler: ErrorHandlerService,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
+    private readonly analytics: AngularFireAnalytics
     ) { }
 
     public async undoRegistration(): Promise<void> {
@@ -55,14 +57,15 @@ export class ConfirmationPage {
       await loader.present();
   
       try {
+        await this.analytics.logEvent('delete-registration');
         await this.viewService.undoRegistration().pipe(take(1)).toPromise();
-        this.router.navigate(['/pre-registration/overview']);
       }
       catch (error) {
-        this.errorHandler.handleError(error as IError);
+        await this.errorHandler.handleError(error as IError);
       }
       finally {
         await loader.dismiss();
+        this.router.navigate(['/pre-registration/overview']);
       }
     }
 }

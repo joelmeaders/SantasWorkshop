@@ -133,26 +133,43 @@
                 ></app-control-errors>
               </ion-list>
 
-                <div class="ion-margin">
-                  <div class="ion-float-right legal-check-container">
-                    <ion-checkbox formControlName="legal" class="legal-check"></ion-checkbox>
-                  </div>
-                  <ion-text color="medium">
-                    <!-- {{ 'SIGNUP.LEGAL_AGREEMENT' | translate }} -->
-                    By signing up you agree to our
-                    <ion-text color="primary" (click)="showTermsConditionsModal()" tappable>
-                      Terms and Conditions
-                    </ion-text>
-                    and have read our
-                    <ion-text color="primary" (click)="showPrivacyPolicyModal()" tappable> 
-                      Privacy Policy
-                    </ion-text>
-                  </ion-text>
-                </div>
+              <div id="pw" class="ion-margin bhp" #pw>
+                <ion-label color="xmasred">
+                  {{ 'COMMON.PASSWORD' | translate }}
+                </ion-label>
+                <input type="text" name="password" autocomplete="off" />
+              </div>
 
-                <app-control-errors
-                  [control]="form.controls.legal"
-                ></app-control-errors>
+              <div class="ion-margin">
+                <div class="ion-float-right legal-check-container">
+                  <ion-checkbox
+                    formControlName="legal"
+                    class="legal-check"
+                  ></ion-checkbox>
+                </div>
+                <ion-text color="medium">
+                  {{ 'SIGNUP.LEGAL1' | translate }}
+                  <ion-text
+                    color="primary"
+                    (click)="showTermsConditionsModal()"
+                    tappable
+                  >
+                    {{ 'SIGNUP.LEGAL2' | translate }}
+                  </ion-text>
+                  {{ 'SIGNUP.LEGAL2' | translate }}
+                  <ion-text
+                    color="primary"
+                    (click)="showPrivacyPolicyModal()"
+                    tappable
+                  >
+                    {{ 'SIGNUP.LEGAL3' | translate }}
+                  </ion-text>
+                </ion-text>
+              </div>
+
+              <app-control-errors
+                [control]="form.controls.legal"
+              ></app-control-errors>
             </form>
 
             <ng-container>
@@ -175,25 +192,6 @@
             >
               {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
             </ion-button>
-            <!-- <div class="ion-text-center ion-padding-top">
-              <ion-button
-                size="default"
-                fill="clear"
-                type="button"
-                (click)="showPrivacyPolicyModal()"
-              >
-                {{ 'COMMON.PRIVACY_POLICY' | translate }}
-              </ion-button>
-
-              <ion-button
-                size="default"
-                fill="clear"
-                type="button"
-                (click)="showTermsConditionsModal()"
-              >
-                {{ 'COMMON.TERMS_AND_CONDITIONS' | translate }}
-              </ion-button>
-            </div> -->
           </ion-card-content>
         </ion-card>
       </ion-col>

@@ -155,6 +155,11 @@ export default async (
 
   }).then(async () => {
     await generateQrCode(uid, registration.qrcode!);
+
+    await admin.auth().updateUser(uid, {
+      displayName: `${registration.firstName} ${registration.lastName}`
+  });
+
     return Promise.resolve(true);
   }).catch((error) => {
     console.error(error)

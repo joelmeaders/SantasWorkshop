@@ -4,9 +4,10 @@ import { AngularFireModule } from '@angular/fire/compat';
 import {
   AngularFireAnalytics,
   AngularFireAnalyticsModule,
-  CONFIG as ANALYTICS_CONFIG,
   ScreenTrackingService,
   UserTrackingService,
+  DEBUG_MODE as ANALYTICS_DEBUG_MODE,
+  APP_NAME, APP_VERSION
 } from '@angular/fire/compat/analytics';
 import { AngularFireStorageModule, USE_EMULATOR as USE_STORAGE_EMULATOR } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
@@ -66,20 +67,24 @@ export function httpLoaderFactory(http: HttpClient) {
     { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },
     // Analytics
     {
-      provide: ANALYTICS_CONFIG,
-      useValue: {
-        debug_mode: !environment.production,
-        app_name: environment.name ?? "",
-        app_version: environment.version ?? "",
-      },
+      provide: ANALYTICS_DEBUG_MODE,
+      useValue: !environment.production
     },
+    {
+      provide: APP_NAME,
+      useValue: environment.name ?? ""
+    },
+    {
+      provide: APP_VERSION,
+      useValue: environment.version ?? ""
+    },
+    AngularFireAnalytics,
+    ScreenTrackingService,
+    UserTrackingService,
     // Remote Config
     { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
     { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
     { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
-    AngularFireAnalytics,
-    ScreenTrackingService,
-    UserTrackingService,
     AuthService,
     { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
     { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },

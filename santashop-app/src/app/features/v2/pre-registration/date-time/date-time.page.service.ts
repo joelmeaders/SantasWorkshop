@@ -32,7 +32,7 @@ export class DateTimePageService implements OnDestroy {
   constructor(
     @Inject(PROGRAM_YEAR) private readonly programYear: number,
     private readonly fireRepo: FireRepoLite,
-    private readonly preRegistrationService: PreRegistrationService
+    private readonly preRegistrationService: PreRegistrationService,
   ) { }
 
   public ngOnDestroy(): void {

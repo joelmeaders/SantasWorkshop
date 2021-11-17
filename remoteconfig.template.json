@@ -1,12 +1,5 @@
 {
   "parameters": {
-    "signupEnabled": {
-      "defaultValue": {
-        "value": "false"
-      },
-      "description": "Allow registrations in the app",
-      "valueType": "STRING"
-    },
     "registrationEnabled": {
       "defaultValue": {
         "value": "false"
@@ -18,6 +11,13 @@
         "value": "false"
       },
       "valueType": "BOOLEAN"
+    },
+    "shopClosedWeather": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "description": "Allow registrations in the app",
+      "valueType": "STRING"
     }
   }
 }

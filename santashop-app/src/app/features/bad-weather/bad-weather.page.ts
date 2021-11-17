@@ -18,8 +18,11 @@ export class BadWeatherPage implements OnDestroy {
   public readonly isShopClosedSubscription = 
     this.service.shopClosedWeather$.pipe(
       takeUntil(this.destroy$),
-      filter(enabled => enabled),
-      tap(() => this.router.navigate(['/']))
+      filter(enabled => !enabled),
+      tap(() => {
+        console.log('weather disabled, navigating');
+        this.router.navigate(['/']);
+      })
     ).subscribe();
 
   constructor(

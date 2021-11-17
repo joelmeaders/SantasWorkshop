@@ -26,4 +26,6 @@ export interface IRegistration {
   includedInCounts?: false | Date;
   
   zipCode?: number;
+
+  bhp?: number;
 }

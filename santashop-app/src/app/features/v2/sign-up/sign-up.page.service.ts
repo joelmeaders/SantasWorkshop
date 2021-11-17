@@ -15,6 +15,7 @@ export class SignUpPageService implements OnDestroy {
   public readonly form = newOnboardUserForm();
   public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
   private readonly subscriptions = new Array<Subscription>();
+  private bhpValue?: string = undefined;
 
   /**
    * Redirects a user if they're already signed in.
@@ -45,7 +46,10 @@ export class SignUpPageService implements OnDestroy {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
-  public async onValidateRecaptcha($event: any) {
+  public async onValidateRecaptcha($event: any, bhp?: string) {
+
+    this.bhpValue = bhp;
+
     if (!await this.validateRecaptcha($event)) {
       this.recaptchaValid$.next(false);
       await this.failedVerification();
@@ -108,7 +112,7 @@ export class SignUpPageService implements OnDestroy {
 
   private async createAccount(value: IOnboardUser): Promise<void> {
     const accountStatusFunction = this.afFunctions.httpsCallable('newAccount');
-    return accountStatusFunction({ ...value })
+    return accountStatusFunction({ ...value, bhp: this.bhpValue })
       .pipe(take(1)).toPromise();
   }
 

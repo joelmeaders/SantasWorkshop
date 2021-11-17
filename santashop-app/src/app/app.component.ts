@@ -20,7 +20,7 @@ export class AppComponent {
     this.initializeApp();
   }
 
-  initializeApp() {
+  async initializeApp() {
     this.platform.ready().then(() => {
       console.log('AppStateService Injected', !!this.appStateService)
     });
@@ -29,6 +29,6 @@ export class AppComponent {
     this.translate.setDefaultLang('en');
     const browserLang = this.translate.getBrowserLang();
     this.translate.use(browserLang.match(/en|es/) ? browserLang : 'en');
-    this.analyticsService.logEvent('default_language', { value: browserLang });
+    await this.analyticsService.logEvent('default_language', { value: browserLang });
   }
 }

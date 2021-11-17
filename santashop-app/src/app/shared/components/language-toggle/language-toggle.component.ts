@@ -52,7 +52,7 @@ export class LanguageToggleComponent implements OnDestroy {
   private async setLanguage(value: 'en' | 'es') {
     await this.translate.use(value).pipe(first()).toPromise();
     this._currentLangauge$.next(value);
-    this.analyticsService.logEvent('set_language', { value });
+    await this.analyticsService.logEvent('set_language', { value });
   }
 
 }

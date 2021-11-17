@@ -49,7 +49,7 @@ export default async (
   const registrationDoc = {
     firstName: data.firstName,
     lastName: data.lastName,
-    zip: data.zipCode
+    zipCode: data.zipCode
   };
 
   batch.set(registrationDocRef, registrationDoc, { merge: true });

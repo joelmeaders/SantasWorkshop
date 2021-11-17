@@ -51,7 +51,7 @@ export default async (
 
   return batch
     .commit()
-    .then(() => true)
+    .then(() => Promise.resolve(true))
     .catch((error: any) => {
       console.error(`Error updating user document ${uid} with ${JSON.stringify(data)}`, error);
       return new functions.https.HttpsError(

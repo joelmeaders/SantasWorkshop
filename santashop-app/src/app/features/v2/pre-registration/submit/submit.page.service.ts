@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { PreRegistrationService } from '@core/*';
@@ -15,10 +16,13 @@ export class SubmitPageService {
   constructor(
     private readonly preregistrationService: PreRegistrationService,
     private readonly afFunctions: AngularFireFunctions,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly analytics: AngularFireAnalytics
   ) { }
 
   public async submitRegistration(): Promise<boolean> {
+
+    await this.analytics.logEvent('submit-registration');
 
     const registration = 
       await this.preregistrationService.userRegistration$
@@ -36,7 +40,6 @@ export class SubmitPageService {
         })
       ).toPromise();
 
-    // TODO: Set up completion result
     return completionResult
       ? this.sendToConfirmation()
       : Promise.reject(completionResult);

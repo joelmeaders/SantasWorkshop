@@ -1,61 +1,55 @@
-// import * as functions from "firebase-functions";
-// import * as sendgrid from "@sendgrid/mail";
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models';
 
-// let MAIL_API_KEY: string;
+const mailchimpClient = require('@mailchimp/mailchimp_transactional')(
+  functions.config().mailchimp.key
+);
 
-// export default async (
-//     change: functions.Change<functions.firestore.DocumentSnapshot>,
-//     context: functions.EventContext
-// ) => {
-//   if (!change.after.exists) {
-//     // Deleted, exit
-//     console.log("deleted");
-//     return null;
-//   }
+export default async (
+  change: functions.firestore.QueryDocumentSnapshot
+) => {
 
-//   if (!MAIL_API_KEY) {
-//     MAIL_API_KEY = functions.config().sendgrid.key;
-//   }
+  const document: any = change.data();
+  const code = document.code;
+  const qrCode = `https://storage.googleapis.com/santas-workshop-193b5.appspot.com/registrations/${change.after.id}.png`;
+  const firstName = document.name;
+  const email = document.email;
+  const dateTime = document.formattedDateTime;
 
-//   sendgrid.setApiKey(MAIL_API_KEY);
+  const message = {
+    to: [
+      {
+        email: email,
+        type: 'to',
+      },
+    ],
+    merge_language: 'mailchimp',
+    global_merge_vars: [
+      { name: 'NAME', content: firstName },
+      { name: 'QRCODE_URL', content: qrCode },
+      { name: 'CODE', content: code },
+      { name: 'DATETIME', content: dateTime },
+    ],
+  };
 
-//   const oldDocument: any = change.before.exists ?
-//     change.before.data() :
-//     undefined;
+  const response = await mailchimpClient.messages.sendTemplate({
+    template_name: 'registration-confirmation',
+    template_content: [],
+    message: message
+  });
 
-//   const document: any = change.after.data();
-//   const code = document.code;
-//   const name = document.firstName;
-//   const email = document.email;
-//   const formattedDateTime = document.formattedDateTime;
+  const emailDocRef = admin
+      .firestore()
+      .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${change.id}`);
 
-//   let isNewCode = false;
-
-//   if (!!oldDocument && !!oldDocument.code) {
-//     isNewCode = oldDocument.code !== code;
-//   } else {
-//     isNewCode = false;
-//   }
-
-//   const isResend = !oldDocument?.resend && !!document.resend;
-
-//   // Don't proceed
-//   if (!isResend && (!code || !email?.length || !isNewCode)) {
-//     return;
-//   }
-
-//   console.log(`sending email to ${email}`);
-
-//   const msg = {
-//     to: email,
-//     from: "noreply@denversantaclausshop.org",
-//     templateId: "d-5a8e2828b2c64284965bc4e244026abf",
-//     dynamic_template_data: {
-//       registrationCode: code,
-//       dateTime: formattedDateTime,
-//       displayName: name,
-//     },
-//   };
-
-//   return sendgrid.send(msg);
-// };
+  if (response.status === 'sent') {
+    await emailDocRef.delete();
+  } else {
+    const failure = {
+      ...response
+    };
+    delete failure.email;
+    await emailDocRef.set(failure, {merge: true});
+  }
+};

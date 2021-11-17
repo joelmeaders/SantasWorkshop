@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import {
@@ -37,7 +38,8 @@ export class SignInPageService implements OnDestroy {
     private readonly loadingController: LoadingController,
     private readonly errorHandler: ErrorHandlerService,
     private readonly alertController: AlertController,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
+    private readonly analytics: AngularFireAnalytics
   ) {
     this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
   }
@@ -78,6 +80,7 @@ export class SignInPageService implements OnDestroy {
       return;
     }
 
+    await this.analytics.logEvent('validated-recaptcha');
     this.recaptchaValid$.next(true);
   }
 
@@ -88,9 +91,7 @@ export class SignInPageService implements OnDestroy {
       .pipe(take(1))
       .toPromise();
 
-      return status 
-        ? Promise.resolve(status.success) 
-        : Promise.reject(false);
+      return Promise.resolve(status.success as boolean);
   }
 
   // Move to UI service

@@ -15,10 +15,13 @@ export class MaintenancePage implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   public readonly isMaintenanceDisabledSubscription = 
-    this.service.isRegistrationEnabled$.pipe(
+    this.service.isMaintenanceModeEnabled$.pipe(
       takeUntil(this.destroy$),
-      filter(enabled => enabled),
-      tap(() => this.router.navigate(['/']))
+      filter(enabled => !enabled),
+      tap(() => {
+        console.log('maintenance disabled, navigating');
+        this.router.navigate(['/']);
+      })
     ).subscribe();
 
   constructor(

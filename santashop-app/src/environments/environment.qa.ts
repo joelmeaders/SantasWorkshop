@@ -1,9 +1,10 @@
-import config from './config.json';
+import config from '../../../package.json';
 
 export const environment = {
   production: true,
   label: 'TEST/QA',
-  ...config
+  name: config.name,
+  version: config.version
 };
 
 export const firebaseConfig = {

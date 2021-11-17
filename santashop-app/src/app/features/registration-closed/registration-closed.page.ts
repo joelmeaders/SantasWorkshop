@@ -17,8 +17,11 @@ export class RegistrationClosedPage implements OnDestroy {
   public readonly isRegistrationEnabledSubscription = 
     this.service.isRegistrationEnabled$.pipe(
       takeUntil(this.destroy$),
-      filter(enabled => enabled === true),
-      tap(() => this.router.navigate(['/']))
+      filter(enabled => enabled),
+      tap(() => {
+        console.log('registration enabled, navigating');
+        this.router.navigate(['/']);
+      })
     ).subscribe();
 
   constructor(

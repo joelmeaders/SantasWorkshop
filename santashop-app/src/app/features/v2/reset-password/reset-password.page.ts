@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '@core/*';
@@ -36,7 +37,8 @@ export class ResetPasswordPage {
     private readonly authService: AuthService,
     private readonly afFunctions: AngularFireFunctions,
     private readonly alertController: AlertController,
-    private readonly translateService: TranslateService
+    private readonly translateService: TranslateService,
+    private readonly analytics: AngularFireAnalytics
   ) {}
 
   public resetPage() {
@@ -54,6 +56,7 @@ export class ResetPasswordPage {
       return;
     }
 
+    await this.analytics.logEvent('validated-recaptcha');
     this._recaptchaValid$.next(true);
   }
 
@@ -63,6 +66,8 @@ export class ResetPasswordPage {
       return;
 
     const email = this.form.get('emailAddress')?.value;
+
+    await this.analytics.logEvent('reset-password');
 
     await this.authService.resetPassword(email).then(() => {
       this._resetEmailSent$.next(true);
@@ -76,14 +81,11 @@ export class ResetPasswordPage {
       .pipe(take(1))
       .toPromise();
 
-      return status 
-        ? Promise.resolve(status.success) 
-        : Promise.reject(false);
+      return Promise.resolve(status.success);
   }
 
   // Move to UI service
   private async failedVerification() {
-    // TODO: CHange the words
     const alert = await this.alertController.create({
       header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
       message: this.translateService.instant('COMMON.VERIFICATION_FAILED_MSG'),

@@ -1,6 +1,6 @@
 {
-  "name": "santashop",
-  "version": "2.0.0",
+  "name": "sw",
+  "version": "2.0.1",
   "author": "Joel Meaders",
   "private": true,
   "scripts": {

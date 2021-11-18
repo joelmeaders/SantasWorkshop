@@ -55,7 +55,9 @@
     "LEGAL4": "Privacy Policy",
     "SUBMIT_BUTTON": "Create Account",
     "CONFIRM_EMAIL": "Is your email correct?",
-    "CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address."
+    "CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address.",
+    "ACCOUNT_EXISTS": "Account in use",
+    "ACCOUNT_EXISTS_MESSAGE": "It looks like you already have an account. Sign in using your account, or reset the password if you don't remember it."
   },
   "OVERVIEW": {
     "NO_CHILDREN": "No Children.",

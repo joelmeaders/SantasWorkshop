@@ -55,7 +55,9 @@
     "LEGAL4": "Política de Privacidad",
     "SUBMIT_BUTTON": "Crear cuenta",
     "CONFIRM_EMAIL": "¿Su correo electrónico es correcto?",
-    "CONFIRM_EMAIL_MSG": "No se puede cambiar después de este paso. Después del registro, enviamos su billete a esta dirección de correo electrónico."
+    "CONFIRM_EMAIL_MSG": "No se puede cambiar después de este paso. Después del registro, enviamos su billete a esta dirección de correo electrónico.",
+    "ACCOUNT_EXISTS": "Cuenta en uso",
+    "ACCOUNT_EXISTS_MESSAGE": "Parece que ya tienes una cuenta. Inicia sesión con tu cuenta o restablece la contraseña si no la recuerdas."
   },
   "OVERVIEW": {
     "NO_CHILDREN": "Sin niños.",

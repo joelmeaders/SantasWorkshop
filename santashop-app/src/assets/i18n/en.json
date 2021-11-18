@@ -42,6 +42,9 @@
     "SIGNING_IN": "Signing in..."
   },
   "SIGNUP": {
+    "ACCOUNT_REMINDER": "If you signed up last year then you already have an account.",
+    "SIGN_IN_HERE": "Click Here to sign in",
+    "HAVE_ACCOUNT": "Already have an account?",
     "TITLE1": "Set up your account...",
     "TITLE2": "This will only take a minute",
     "FIRST_NAME": "First Name",
@@ -57,7 +60,7 @@
     "CONFIRM_EMAIL": "Is your email correct?",
     "CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address.",
     "ACCOUNT_EXISTS": "Account in use",
-    "ACCOUNT_EXISTS_MESSAGE": "It looks like you already have an account. Sign in using your account, or reset the password if you don't remember it."
+    "ACCOUNT_EXISTS_MESSAGE": "It looks like you already have an account. Sign in using your email address, or reset the password if you don't remember it."
   },
   "OVERVIEW": {
     "NO_CHILDREN": "No Children.",

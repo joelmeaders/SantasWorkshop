@@ -2,17 +2,25 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models';
 
+admin.initializeApp();
+
 const mailchimpClient = require('@mailchimp/mailchimp_transactional')(
   functions.config().mailchimp.key
 );
 
 export default async (
-  change: functions.firestore.QueryDocumentSnapshot
+  change: functions.Change<functions.firestore.DocumentSnapshot>
 ) => {
 
-  const document: any = change.data();
+  const document: any = change.after.data();
+  const uid = change.after.id;
+
+  if (document.rejected) {
+    throw new Error(`Email for ${uid} previously failed`);
+  }
+
   const code = document.code;
-  const qrCode = `https://storage.googleapis.com/santas-workshop-193b5.appspot.com/registrations/${change.after.id}.png`;
+  const qrCode = `https://storage.googleapis.com/santas-workshop-193b5.appspot.com/registrations/${uid}.png`;
   const firstName = document.name;
   const email = document.email;
   const dateTime = document.formattedDateTime;
@@ -41,15 +49,15 @@ export default async (
 
   const emailDocRef = admin
       .firestore()
-      .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${change.id}`);
+      .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
 
-  if (response.status === 'sent') {
+  if (response[0].status === 'sent') {
     await emailDocRef.delete();
-  } else {
+  }
+  else {
     const failure = {
-      ...response
+      ...response[0]
     };
-    delete failure.email;
-    await emailDocRef.set(failure, {merge: true});
+    await emailDocRef.set({rejected: failure}, {merge: true});
   }
 };

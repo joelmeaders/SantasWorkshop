@@ -1,4 +1,3 @@
-<!-- TODO: Mobile -->
 <ion-content color="light">
   <ion-grid class="height-max ion-no-padding ion-no-margin">
     <ion-row
@@ -23,6 +22,15 @@
             <ion-card-subtitle>
               {{ 'SIGNUP.TITLE2' | translate }}
             </ion-card-subtitle>
+            <p>
+              <ion-note color="danger" [routerLink]="['/sign-in']" button tappable>
+                {{ 'ACCOUNT_REMINDER' | translate }}
+                <br/>
+                <strong><ion-text color="primary">
+                  {{ 'SIGN_IN_HERE' | translate }}
+                </ion-text></strong>
+              </ion-note>
+            </p>
           </ion-card-header>
           <ion-card-content>
             <form [formGroup]="form" novalidate>
@@ -192,6 +200,25 @@
             >
               {{ 'SIGNUP.SUBMIT_BUTTON' | translate }}
             </ion-button>
+
+            <p class="ion-text-center"></p>
+            <p class="ion-text-center">
+              <ion-button
+                fill="clear"
+                color="tertiary"
+                [routerLink]="['/sign-in']"
+              >
+                {{ 'SIGNUP.HAVE_ACCOUNT' | translate }}
+              </ion-button>
+              <br />
+              <ion-button
+                fill="clear"
+                color="tertiary"
+                [routerLink]="['/reset-password']"
+              >
+                {{ 'SIGNIN.FORGOT_PASSWORD' | translate }}
+              </ion-button>
+            </p>
           </ion-card-content>
         </ion-card>
       </ion-col>

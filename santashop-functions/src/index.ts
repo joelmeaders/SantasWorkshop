@@ -87,10 +87,16 @@ export const documentCounterOnDelete = functions.firestore
       await (await import('./fn/documentCounterOnDelete')).default(context);
     });
 
-export const sendRegistrationEmail = functions.firestore
+// export const retryFailedRegistrationEmails = functions.firestore
+//   .document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
+//   .onUpdate(async (snapshot) => {
+//     await (await import('./fn/retryFailedRegistrationEmails')).default(snapshot);
+//   });
+
+export const sendNewRegistrationEmails = functions.firestore
   .document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
   .onCreate(async (snapshot) => {
-    await (await import('./fn/sendRegistrationEmail')).default(snapshot);
+    await (await import('./fn/sendNewRegistrationEmails')).default(snapshot);
   });
 
 // ------------------------------------- SCHEDULED FUNCTIONS

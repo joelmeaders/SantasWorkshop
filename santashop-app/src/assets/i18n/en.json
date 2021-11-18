@@ -8,7 +8,9 @@
   },
   "HOME": {
     "WELCOME_MESSAGE": "Welcome to the<br />Denver Santa Claus Shop App!",
-    "CREATE_ACCOUNT": "Create An Account"
+    "CREATE_ACCOUNT": "Create An Account",
+    "SIGN_IN_INST": "If you got toys with us last year, sign in.",
+    "CREATE_ACCOUNT_INST": "If you're new, create an account here."
   },
   "COMMON": {
     "EMAIL_ADDRESS": "Email Address",

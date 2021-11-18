@@ -106,13 +106,29 @@ export class SignUpPageService implements OnDestroy {
       error = error as IError;
 
       if ((error as IError).code === 'functions/already-exists') {
+        await loader.dismiss();
         const alert = await this.alertController.create({
           header: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS'),
           subHeader: onboardInfo.emailAddress,
           message: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS_MESSAGE'),
-          buttons: [this.translateService.instant('COMMON.OK')],
+          buttons: [
+            {
+              text: this.translateService.instant('FORGOTPASS.RESET_PASSWORD'),
+              role: '/reset-password'
+            },
+            {
+              text: this.translateService.instant('COMMON.SIGN_IN'),
+              role: '/sign-in'
+            }
+          ],
+          backdropDismiss: false
         });
+
         await alert.present();
+
+        await alert.onDidDismiss().then(response => {
+          this.router.navigate([response.role])
+        });
 
       }
       else {

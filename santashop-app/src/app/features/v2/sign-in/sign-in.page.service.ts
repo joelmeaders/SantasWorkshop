@@ -80,7 +80,7 @@ export class SignInPageService implements OnDestroy {
       return;
     }
 
-    await this.analytics.logEvent('validated-recaptcha');
+    await this.analytics.logEvent('validated_recaptcha');
     this.recaptchaValid$.next(true);
   }
 

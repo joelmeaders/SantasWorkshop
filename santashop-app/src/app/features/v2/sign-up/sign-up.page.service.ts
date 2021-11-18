@@ -102,11 +102,25 @@ export class SignUpPageService implements OnDestroy {
       await this.signIn(onboardInfo);
     } 
     catch(error) {
-      this.errorHandler.handleError(error as IError);
+
+      error = error as IError;
+
+      if ((error as IError).code === 'functions/already-exists') {
+        const alert = await this.alertController.create({
+          header: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS'),
+          subHeader: onboardInfo.emailAddress,
+          message: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS_MESSAGE'),
+          buttons: [this.translateService.instant('COMMON.OK')],
+        });
+        await alert.present();
+
+      }
+      else {
+        this.errorHandler.handleError(error as IError);
+      }
     }
     finally {
       await loader.dismiss();
-      this.router.navigate(['pre-registration/overview']);
     }
   }
 
@@ -124,5 +138,6 @@ export class SignUpPageService implements OnDestroy {
     };
 
     await this.authService.login(auth);
+    this.router.navigate(['pre-registration/overview']);
   }
 }

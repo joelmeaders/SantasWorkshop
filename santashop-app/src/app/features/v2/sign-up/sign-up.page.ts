@@ -41,7 +41,7 @@ export class SignUpPage {
 
   public async onValidateRecaptcha($event: any) {
     await this.viewService.onValidateRecaptcha($event, this.pwField?.value);
-    await this.analytics.logEvent('validated-recaptcha');
+    await this.analytics.logEvent('validated_recaptcha');
   }
 
   public async onCreateAccount(): Promise<void> {
@@ -75,12 +75,12 @@ export class SignUpPage {
 
     await alert.present();
     const shouldContinue = await alert.onDidDismiss();
-    await this.analytics.logEvent('confirmed-email', { value: shouldContinue.role });
+    await this.analytics.logEvent('confirmed_email', { value: shouldContinue.role });
     return shouldContinue.role === 'confirm'
   }
 
   public async showPrivacyPolicyModal() {
-    await this.analytics.logEvent('viewed-privacypolicy');
+    await this.analytics.logEvent('viewed_privacypolicy');
     const modal = await this.modalController.create({
       component: PrivacyPolicyModalComponent,
     });
@@ -88,7 +88,7 @@ export class SignUpPage {
   }
 
   public async showTermsConditionsModal() {
-    await this.analytics.logEvent('viewed-termsofservice');
+    await this.analytics.logEvent('viewed_termsofservice');
     const modal = await this.modalController.create({
       component: TermsOfServiceModalComponent,
     });

@@ -67,10 +67,10 @@ export class DateTimePage implements OnDestroy {
       shouldChange = await this.confirmChangeDate();
 
     if (shouldChange)
-      await this.analytics.logEvent('cancelled-datetime');
+      await this.analytics.logEvent('cancelled_datetime');
 
     if (!hasSlot || shouldChange) {
-      await this.analytics.logEvent('chose-datetime');
+      await this.analytics.logEvent('chose_datetime');
       await this.viewService.updateRegistration(slot);
     }
   }

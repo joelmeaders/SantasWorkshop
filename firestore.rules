@@ -25,7 +25,6 @@ service cloud.firestore {
     match /registrations/{documentId} {
       allow read: if isUser(resource.data.uid) || isAdmin();
       allow update: if (isUser(request.resource.data.uid) && isUser(resource.data.uid));
-      // allow write: if false;
     }
 
     match /dateTimeSlots/{document=**} {

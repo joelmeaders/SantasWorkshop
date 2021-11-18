@@ -66,6 +66,7 @@ export class SignInPageService implements OnDestroy {
     try {
       await this.authService.login(auth);
       loader.message = 'Almost there...';
+      this.router.navigate(['/pre-registration/overview']);
     } catch (error) {
       this.errorHandler.handleError(error as IError);
     } finally {

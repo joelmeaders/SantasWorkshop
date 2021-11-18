@@ -56,7 +56,7 @@ export class ResetPasswordPage {
       return;
     }
 
-    await this.analytics.logEvent('validated-recaptcha');
+    await this.analytics.logEvent('validated_recaptcha');
     this._recaptchaValid$.next(true);
   }
 
@@ -67,7 +67,7 @@ export class ResetPasswordPage {
 
     const email = this.form.get('emailAddress')?.value;
 
-    await this.analytics.logEvent('reset-password');
+    await this.analytics.logEvent('reset_password');
 
     await this.authService.resetPassword(email).then(() => {
       this._resetEmailSent$.next(true);

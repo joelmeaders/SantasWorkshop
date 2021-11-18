@@ -22,7 +22,7 @@ export class SubmitPageService {
 
   public async submitRegistration(): Promise<boolean> {
 
-    await this.analytics.logEvent('submit-registration');
+    await this.analytics.logEvent('submit_registration');
 
     const registration = 
       await this.preregistrationService.userRegistration$

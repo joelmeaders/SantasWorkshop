@@ -53,7 +53,7 @@ export class AddChildPageService implements OnDestroy {
 
   public async setChildToEdit(id: number) {
 
-    await this.analytics.logEvent('view-child', { id: id });
+    await this.analytics.logEvent('view_child', { id: id });
 
     const children = 
       await this.children$.pipe(take(1)).toPromise();
@@ -103,7 +103,7 @@ export class AddChildPageService implements OnDestroy {
       delete validatedChild.error;
       const updatedChildren = children?.filter(child => child.id !== validatedChild.id);
       updatedChildren?.push(validatedChild);
-      await this.analytics.logEvent('edit-child', { id: updatedChild.id });
+      await this.analytics.logEvent('edit_child', { id: updatedChild.id });
       return this.updateRegistration(updatedChildren);
     } 
     catch (ex) {
@@ -112,15 +112,15 @@ export class AddChildPageService implements OnDestroy {
 
       if (error.code === "invalid_age") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_AGE');
-        await this.analytics.logEvent('edit-child-error', { id: updatedChild, error: error.code });
+        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
       }
       else if (error.code === "invalid_firstname") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_FIRSTNAME');
-        await this.analytics.logEvent('edit-child-error', { id: updatedChild, error: error.code });
+        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
       }
       else if (error.code === "invalid_lastname") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_LASTNAME');
-        await this.analytics.logEvent('edit-child-error', { id: updatedChild, error: error.code });
+        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
       }
       
       await this.invalidEntryAlert(message);
@@ -166,7 +166,7 @@ export class AddChildPageService implements OnDestroy {
     } else if (ageInYears >= 9 && ageInYears < 12) {
       ageGroup = AgeGroup.age911;
     } else {
-      await this.analytics.logEvent('child-invalid-age-entry', { age: ageInYears });
+      await this.analytics.logEvent('child_invalid_age_entry', { age: ageInYears });
       await this.childTooOldAlert();
       this.form.controls.dateOfBirth.reset();
     }
@@ -201,7 +201,7 @@ export class AddChildPageService implements OnDestroy {
     try {
       const validatedChild = this.childValidationService.validateChild(child);
       children?.push(validatedChild);
-      await this.analytics.logEvent('add-child');
+      await this.analytics.logEvent('add_child');
       return this.updateRegistration(children);
     } 
     catch (ex) {
@@ -210,15 +210,15 @@ export class AddChildPageService implements OnDestroy {
 
       if (error.code === "invalid_age") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_AGE');
-        await this.analytics.logEvent('add-child-error', { id: child, error: error.code });
+        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
       }
       else if (error.code === "invalid_firstname") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_FIRSTNAME');
-        await this.analytics.logEvent('add-child-error', { id: child, error: error.code });
+        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
       }
       else if (error.code === "invalid_lastname") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_LASTNAME');
-        await this.analytics.logEvent('add-child-error', { id: child, error: error.code });
+        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
       }
       
       await this.invalidEntryAlert(message);
@@ -234,7 +234,7 @@ export class AddChildPageService implements OnDestroy {
     const updatedChildren = children?.filter(
       child => child.id !== childToRemove.id);
 
-    await this.analytics.logEvent('remove-child', { id: childToRemove.id });
+    await this.analytics.logEvent('remove_child', { id: childToRemove.id });
     return this.updateRegistration(updatedChildren);
   }
 

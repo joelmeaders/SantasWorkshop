@@ -59,7 +59,7 @@ export class ProfilePageService implements OnDestroy {
 
   public async updatePublicProfile(): Promise<void> {
 
-    await this.analytics.logEvent('profile-update-info');
+    await this.analytics.logEvent('profile_update_info');
 
     const newInfo: IChangeUserInfo = this.profileForm.value;
 
@@ -85,7 +85,7 @@ export class ProfilePageService implements OnDestroy {
   }
 
   public async changeEmailAddress(): Promise<void> {
-    await this.analytics.logEvent('profile-update-email');
+    await this.analytics.logEvent('profile_update_email');
     const value = this.changeEmailForm.value;
     await this.authService.changeEmailAddress(value.password, value.emailAddress)
       .then(() => this.emailChangedAlert())
@@ -95,7 +95,7 @@ export class ProfilePageService implements OnDestroy {
   }
 
   public async changePassword(): Promise<void> {
-    await this.analytics.logEvent('profile-update-password');
+    await this.analytics.logEvent('profile_update_password');
     const value = this.changePasswordForm.value;
     await this.authService.changePassword(value.oldPassword, value.newPassword)
       .then(() => this.passwordChangedAlert())

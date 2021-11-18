@@ -57,7 +57,7 @@ export class ConfirmationPage {
       await loader.present();
   
       try {
-        await this.analytics.logEvent('delete-registration');
+        await this.analytics.logEvent('delete_registration');
         await this.viewService.undoRegistration().pipe(take(1)).toPromise();
       }
       catch (error) {

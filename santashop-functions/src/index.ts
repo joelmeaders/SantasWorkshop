@@ -1,11 +1,6 @@
 import * as functions from 'firebase-functions';
 import { COLLECTION_SCHEMA } from '../../santashop-models/src/lib/models';
 
-export const addDateTimeSlots =
-  functions.https.onCall(async () => {
-    return (await import('./fn/addDateTimeSlots')).default();
-  });
-
 export const changeAccountInformation =
   functions.https.onCall(async (request, context) => {
     return (await import('./fn/changeAccountInformation')).default(request, context);
@@ -72,20 +67,20 @@ export const verifyRecaptcha2 =
 /**
  * Sharded count updater for all collections
  */
-export const documentCounterOnCreate = functions.firestore
-    .document('{collection}/{docId}')
-    .onCreate(async (snapshot, context) => {
-      await (await import('./fn/documentCounterOnCreate')).default(context);
-    });
+// export const documentCounterOnCreate = functions.firestore
+//     .document('{collection}/{docId}')
+//     .onCreate(async (snapshot, context) => {
+//       await (await import('./fn/documentCounterOnCreate')).default(context);
+//     });
 
-/**
- * Sharded count updater for all collections
- */
-export const documentCounterOnDelete = functions.firestore
-    .document('{collection}/{docId}')
-    .onDelete(async (snapshot, context) => {
-      await (await import('./fn/documentCounterOnDelete')).default(context);
-    });
+// /**
+//  * Sharded count updater for all collections
+//  */
+// export const documentCounterOnDelete = functions.firestore
+//     .document('{collection}/{docId}')
+//     .onDelete(async (snapshot, context) => {
+//       await (await import('./fn/documentCounterOnDelete')).default(context);
+//     });
 
 // export const retryFailedRegistrationEmails = functions.firestore
 //   .document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
@@ -99,16 +94,22 @@ export const sendNewRegistrationEmails = functions.firestore
     await (await import('./fn/sendNewRegistrationEmails')).default(snapshot);
   });
 
+// export const sendCorrectRegistrationEmail = functions.firestore
+//   .document(`${COLLECTION_SCHEMA.tmpResendRegistrationEmails}/{docId}`)
+//   .onUpdate(async (snapshot) => {
+//     await (await import('./fn/sendCorrectRegistrationEmail')).default(snapshot);
+//   });
+
 // ------------------------------------- SCHEDULED FUNCTIONS
 
 /**
  * Backs up firestore db every hour to storage bucket
  */
-// export const scheduledFirestoreBackup = functions.pubsub
-//     .schedule("every 12 hours")
-//     .onRun(async (context) => {
-//       await (await import("./fn/scheduledFirestoreBackup")).default();
-//     });
+export const scheduledFirestoreBackup = functions.pubsub
+    .schedule('every 12 hours')
+    .onRun(async () => {
+      await (await import('./fn/scheduledFirestoreBackup')).default();
+    });
 
 export const scheduledDateTimeSlotCounters = 
   functions.pubsub.schedule('every 15 minutes')
@@ -121,6 +122,24 @@ export const scheduledDateTimeSlotReschedules =
   .onRun(async () => {
     await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
   });
+
+// export const scheduledAddDateTimeSlots =
+//   functions.pubsub.schedule('every day')
+//   .onRun(async () => {
+//     await (await import('./fn/addDateTimeSlots')).default();
+//   });
+
+// export const requeueRegistrationEmails = 
+//   functions.pubsub.schedule('every 60 minutes')
+//   .onRun(async () => {
+//     await (await import('./fn/requeueRegistrationEmails')).default();
+//   });
+
+// export const recalculateAllDateTimeSlots = 
+//   functions.pubsub.schedule('every 60 minutes')
+//   .onRun(async () => {
+//     await (await import('./fn/recalculateAllDateTimeSlots')).default();
+//   });
 
   
 // export const scheduledRegistrationStats = functions.pubsub

@@ -162,7 +162,7 @@ export default async (
 
     return Promise.resolve(true);
   }).catch((error) => {
-    console.error(error)
+    console.error(`Error updating profile ${context.auth?.uid} to version 1`, error)
     return new functions.https.HttpsError(
       'internal',
       `Error updating profile ${context.auth?.uid} to version 1`,

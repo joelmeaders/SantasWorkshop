@@ -39,8 +39,6 @@ export class AuthService {
     refCount()
   );
 
-  // TODO: Replace with custom claims
-  // https://fireship.io/lessons/firebase-custom-claims-role-based-auth/
   public readonly isAdmin$ =
     this.angularFireFunctions.httpsCallable('isAdmin')({}).pipe(
       map((response: boolean) => response)

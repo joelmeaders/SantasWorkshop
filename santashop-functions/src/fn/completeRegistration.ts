@@ -45,9 +45,12 @@ export default async (record: IRegistration, context: CallableContext): Promise<
     .firestore()
     .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${record.uid}`);
 
-  const date = record.dateTimeSlot?.dateTime;
-  const dateZ = date!.toLocaleString('en-US', { timeZone: 'MST' });
-  const dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
+    let dateTime: string;
+
+    dateTime = record.dateTimeSlot?.dateTime as any as string;
+    const tmp = new Date(dateTime);
+    const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
+    dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
 
   const emailDoc = {
     code: record.qrcode,

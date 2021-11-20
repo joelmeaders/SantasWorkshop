@@ -24,6 +24,11 @@ export const migrateProfile_V0_To_V1 =
     return (await import('./fn/migrateProfile_V0_To_V1')).default(request, context);
   });
 
+export const manualMigrate =
+  functions.https.onCall(async (request, context) => {
+    return (await import('./fn/manualMigrate')).default(request, context);
+  });
+
 export const newAccount =
   functions.https.onCall(async (request) => {
     return (await import('./fn/newAccount')).default(request);

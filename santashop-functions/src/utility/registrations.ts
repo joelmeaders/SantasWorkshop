@@ -1,4 +1,4 @@
-import { IRegistration } from '../../../santashop-core/src';
+import { IRegistration } from '../../../santashop-models/src/lib/models';
 
 export const isRegistrationComplete = (registration: IRegistration): boolean => {
   if (!registration) return false;

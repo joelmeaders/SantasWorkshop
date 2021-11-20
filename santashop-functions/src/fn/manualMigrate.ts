@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
-import { IAuth, COLLECTION_SCHEMA, IUser, IChild, IRegistration } from '../../../santashop-models/src/lib/models';
+import { COLLECTION_SCHEMA, IUser, IChild, IRegistration } from '../../../santashop-models/src/lib/models';
 import { getAgeFromDate, getAgeGroupFromAge } from '../utility/dates';
 import { generateId } from '../utility/id-generation';
 import { generateQrCode } from '../utility/qrcodes';
@@ -9,24 +9,26 @@ import { generateQrCode } from '../utility/qrcodes';
 admin.initializeApp();
 
 export default async (
-  data: IAuth,
+  uid: string,
   context: CallableContext
-): Promise<boolean | HttpsError> => {
+): Promise<string> => {
 
-  const uid = context.auth?.uid;
-
-  const emailData = {
-    emailAddress: context.auth?.token.email?.toLowerCase()
-  };
-
-  if (!uid || !emailData.emailAddress) {
-    console.error(new Error(`uid (${uid ?? ''}) or email (${emailData?.emailAddress ?? ''}) null`))
-    throw new HttpsError('not-found', 'uid or email null');
+  if (context.auth?.uid !== 'Qyvgav7d9Ye0RyJYCG2ZgQPppKt1'){
+    console.error(new Error('user not an admin'))
+    throw new HttpsError('permission-denied', 'user not an admin');
   }
 
-  // Get old customers document
   const customersDocRef = admin.firestore()
     .doc(`${'customers'}/${uid}`);
+
+  const registrationDocRef = admin.firestore()
+    .doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+
+  const childDocsQueryRef = admin.firestore()
+    .collection('children').where('parentId', '==', uid);
+
+  const userDocumentRef = admin.firestore()
+    .doc(`${COLLECTION_SCHEMA.users}/${uid}`);
 
   const customer = await customersDocRef.get().then(snapshot => {
     if (snapshot.exists) {
@@ -37,47 +39,20 @@ export default async (
     }
   });
 
-  // Get old registration
-  const registrationDocRef = admin.firestore()
-    .doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-
   const oldRegistration = await registrationDocRef.get().then(snapshot => {
     if (snapshot.exists) {
       return snapshot.data() as any;
     } else {
-      console.error('not-found', new Error(`record not found in collection registrations: ${uid}`));
-      throw new HttpsError('not-found', `record not found in collection registrations: ${uid}`);
+      return null;
     }
   });
 
-  // Set up user doc
-  const userDocumentRef = admin.firestore()
-    .doc(`${COLLECTION_SCHEMA.users}/${uid}`);
-
-  let parsedZipCode: number;
-
-  try {
-    const leftSide = (customer.zipCode as string).substr(0,5);
-    parsedZipCode = Number.parseInt(leftSide);
-  }
-  catch {
-    parsedZipCode = 0;
-  }
-
-  const newUser: IUser = {
-    acceptedPrivacyPolicy: new Date(),
-    acceptedTermsOfService: new Date(),
-    emailAddress: emailData.emailAddress,
-    firstName: customer.firstName ?? oldRegistration.firstName ?? 'ERROR',
-    lastName: customer.lastName ?? oldRegistration.lastName ?? 'ERROR',
-    zipCode: parsedZipCode,
-    version: 1
+  if (oldRegistration?.programYear || oldRegistration?.registrationSubmittedOn || oldRegistration?.qrcode) {
+    console.error(new Error(`New registration data found. Cannot migrate: ${uid}`));
+    throw new HttpsError('aborted', `New registration data found. Cannot migrate: ${uid}`);
   }
 
   // Get children for user
-  const childDocsQueryRef = admin.firestore()
-    .collection('children').where('parentId', '==', uid);
-
   const childDocs: admin.firestore.DocumentReference<admin.firestore.DocumentData>[] = [];
 
   const children = await childDocsQueryRef.get().then(snapshot => {
@@ -122,21 +97,72 @@ export default async (
       }
     });
 
+  if (!oldRegistration?.children || !children) {
+
+    try {
+      await admin.auth().deleteUser(uid);
+    }
+    catch {
+      // Do nothing
+    }
+    
+    const batch = admin.firestore().batch();
+
+    batch.delete(customersDocRef);
+
+    if (oldRegistration) batch.delete(registrationDocRef);
+
+    if (children && children?.length > 0) {
+      childDocs.forEach(childDoc => batch.delete(childDoc));
+    }
+
+    return batch.commit()
+    .then(() => {
+      return Promise.resolve(`Removed ${uid}`);
+    })
+    .catch((error) => {
+      console.error(`Failed to delete ${uid}`, { ...error });
+      throw new HttpsError('unknown', `Failed to delete ${uid}`)
+    });
+  }
+
+  // Set up user doc
+  let parsedZipCode: number;
+
+  try {
+    const leftSide = (customer.zipCode as string).substr(0,5);
+    parsedZipCode = Number.parseInt(leftSide);
+  }
+  catch {
+    parsedZipCode = 0;
+  }
+
+  const newUser: IUser = {
+    acceptedPrivacyPolicy: new Date(),
+    acceptedTermsOfService: new Date(),
+    emailAddress: customer.emailAddress,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    zipCode: parsedZipCode,
+    version: 1,
+    manuallyMigrated: true
+  }
+
   // Set up new registration doc
   const registration: IRegistration = {
     uid: uid,
     qrcode: oldRegistration.code ?? generateId(8),
-    firstName: newUser.firstName,
-    lastName: newUser.lastName,
-    emailAddress: emailData.emailAddress ?? oldRegistration.email?.toLower() ?? 'ERROR',
+    firstName: customer.firstName ?? oldRegistration.firstName ?? 'ERROR',
+    lastName: customer.lastName ?? oldRegistration.lastName ?? 'ERROR',
+    emailAddress: customer.emailAddress ?? oldRegistration.email ?? 'ERROR',
     programYear: 2021,
     includedInCounts: false,
     zipCode: parsedZipCode,
   };
 
   if (registration.firstName === 'ERROR' || registration.lastName === 'ERROR' || registration.emailAddress === 'ERROR') {
-    console.error(context.auth?.token.email, new Error(`MIGRATION FAILED FOR ${uid}`));
-    throw new HttpsError('failed-precondition', `MIGRATION FAILED FOR ${uid}`);
+    console.error(new Error(`Invalid registration for ${uid}`));
+    throw new HttpsError('unknown', `Invalid registration for ${uid}`);
   }
 
   // Add children to registration doc
@@ -149,16 +175,16 @@ export default async (
     .doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
 
   const indexData = {
-    code: registration.qrcode!,
+    code: registration.qrcode,
     firstName: newUser.firstName,
     lastName: newUser.lastName,
     emailAddress: registration.emailAddress,
     zip: parsedZipCode.toString(),
     customerId: uid
   }
-
+  
   await admin.auth().updateUser(uid, {
-    displayName: `${newUser.firstName} ${newUser.lastName}`
+    displayName: `${registration.firstName} ${registration.lastName}`
   });
 
   const batch = admin.firestore().batch();
@@ -171,12 +197,13 @@ export default async (
   childDocs.forEach((childDoc) => { 
     batch.delete(childDoc); 
   });
-
-  return batch.commit().then(async () => {
+  
+  return batch.commit()
+  .then(async () => {
     await generateQrCode(uid, registration.qrcode!);
-    return Promise.resolve(true);
+    return Promise.resolve(`Migrated ${uid}`);
   }).catch((error) => {
-    console.error(`Error updating profile ${context.auth?.uid} to version 1`, error)
+    console.error(`Error migrating profile ${context.auth?.uid} to version 1`, {...error})
     throw new functions.https.HttpsError(
       'internal',
       `Error updating profile ${context.auth?.uid} to version 1`,

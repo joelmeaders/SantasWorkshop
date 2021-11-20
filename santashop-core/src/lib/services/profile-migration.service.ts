@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ErrorHandlerService } from '@core/*';
-import { LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { COLLECTION_SCHEMA, IError, IUser } from '@models/*';
 import { of, Subject } from 'rxjs';
 import { filter, map, pluck, switchMap, take, takeUntil } from 'rxjs/operators';
@@ -48,7 +48,8 @@ export class ProfileMigrationService implements OnDestroy {
     @Inject(PROFILE_VERSION) public readonly latestProfileVersion: number,
     private readonly loadingController: LoadingController,
     private readonly errorHandler: ErrorHandlerService,
-    private readonly afFunctions: AngularFireFunctions
+    private readonly afFunctions: AngularFireFunctions,
+    private readonly alertController: AlertController
   ) { }
 
   ngOnDestroy(): void {
@@ -72,7 +73,19 @@ export class ProfileMigrationService implements OnDestroy {
       // Append later versions as needed
     } 
     catch(error) {
-      this.errorHandler.handleError(error as IError);
+      const account = await this.currentUserDocument$.pipe(take(1)).toPromise();
+      await loader.dismiss();
+
+      const alert = await this.alertController.create({
+        header: 'ACCOUNT MIGRATION ERROR',
+        subHeader: account.emailAddress,
+        message: 'Please contact us from our website to resolve this problem.'
+      });
+
+      await alert.present();
+      await alert.onDidDismiss();
+
+      this.errorHandler.handleError(error as IError, false);
     }
     finally {
       await loader.dismiss();

@@ -10,6 +10,7 @@ admin.initializeApp();
 export default async (record: IRegistration, context: CallableContext): Promise<boolean | HttpsError> => {
   
   if (!isRegistrationComplete(record)) {
+    console.error(new Error(`Registration incomplete. Unable to submit registration for uid ${record.uid}`));
     throw new functions.https.HttpsError(
       'failed-precondition',
       '-10',
@@ -18,10 +19,20 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   }
 
   if (record.uid !== context.auth?.uid) {
+    console.error(new Error(`${context.auth?.uid} attempted to update registration for uid ${record.uid}`));
     throw new functions.https.HttpsError(
       'permission-denied',
       '-99',
       'You can only update your own records'
+    );
+  }
+
+  if (record.registrationSubmittedOn) {
+    console.error(new Error(`Registration already submitted for uid ${record.uid}`));
+    throw new functions.https.HttpsError(
+      'cancelled',
+      '-98',
+      'Already Submitted'
     );
   }
 
@@ -79,7 +90,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
 
   return batch
     .commit()
-    .then(() => true) // UPDATE SLOTS TAKEN
+    .then(() => true)
     .catch((error: any) => {
       console.error(error);
       throw new Error(error);

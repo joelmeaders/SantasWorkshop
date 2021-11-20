@@ -1,12 +1,12 @@
 import { writeFile } from 'node:fs';
-import { name, version } from './package.json';
+import { version } from './package.json';
 
 const targetPath = './santashop-app/src/environments/environment.prod.ts';
 
 const envConfigFile = `export const environment = {
     production: true,
     label: 'PROD',
-    name: '${name}',
+    name: 'SWApp',
     version: '${version}'
   };
 

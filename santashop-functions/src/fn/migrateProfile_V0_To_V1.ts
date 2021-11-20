@@ -3,6 +3,7 @@ import * as functions from 'firebase-functions';
 import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
 import { IAuth, COLLECTION_SCHEMA, IUser, IChild, IRegistration } from '../../../santashop-models/src/lib/models';
 import { getAgeFromDate, getAgeGroupFromAge } from '../utility/dates';
+import { generateId } from '../utility/id-generation';
 import { generateQrCode } from '../utility/qrcodes';
 
 admin.initializeApp();
@@ -19,6 +20,7 @@ export default async (
   };
 
   if (!uid || !emailData.emailAddress) {
+    console.error('not-found', new Error(`uid (${uid ?? ''}) or email (${emailData?.emailAddress ?? ''}) null`))
     return new HttpsError('not-found', 'uid or email null');
   }
 
@@ -30,6 +32,7 @@ export default async (
     if (snapshot.exists) {
       return snapshot.data() as any;
     } else {
+      console.error('not-found', new Error(`record not found in collection customers: ${uid}`));
       return new HttpsError('not-found', `record not found in collection customers: ${uid}`);
     }
   });
@@ -114,20 +117,26 @@ export default async (
     if (snapshot.exists) {
       return snapshot.data() as any;
     } else {
+      console.error('not-found', new Error(`record not found in collection registrations: ${uid}`));
       return new HttpsError('not-found', `record not found in collection registrations: ${uid}`);
     }
   });
 
   const registration: IRegistration = {
     uid: uid,
-    qrcode: oldRegistration.code,
-    firstName: customer.firstName,
-    lastName: customer.lastName,
-    emailAddress: emailData.emailAddress,
+    qrcode: oldRegistration.code ?? generateId(8),
+    firstName: customer.firstName ?? oldRegistration.firstName ?? 'ERROR',
+    lastName: customer.lastName ?? oldRegistration.lastName ?? 'ERROR',
+    emailAddress: emailData.emailAddress ?? oldRegistration.email ?? 'ERROR',
     programYear: 2021,
     includedInCounts: false,
     zipCode: parsedZipCode,
   };
+
+  if (registration.firstName === 'ERROR' || registration.lastName === 'ERROR' || registration.emailAddress === 'ERROR') {
+    console.error(context.auth?.token.email, new Error(`MIGRATION FAILED FOR ${uid}`));
+    return new HttpsError('failed-precondition', 'MIGRATION FAILED');
+  }
 
   // Add children to registration doc
   if (children?.length) {
@@ -152,10 +161,8 @@ export default async (
 
     return Promise.resolve(true);
 
-
   }).then(async () => {
     await generateQrCode(uid, registration.qrcode!);
-
     await admin.auth().updateUser(uid, {
       displayName: `${registration.firstName} ${registration.lastName}`
   });

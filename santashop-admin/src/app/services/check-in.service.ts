@@ -9,17 +9,12 @@ import {
   publishReplay,
   refCount,
   switchMap,
-  take
+  take,
 } from 'rxjs/operators';
-import {
-  FireCRUDStateless,
-  ICheckIn,
-  ICheckInStats,
-  IRegistration,
-} from 'santashop-core/src';
 import { CheckInHelpers } from '../helpers/checkin-helpers';
 import firebase from 'firebase/compat/app';
 import { AlertController } from '@ionic/angular';
+import { ICheckIn, ICheckInStats, IRegistration } from '@models/*';
 
 @Injectable({
   providedIn: 'root',
@@ -28,25 +23,43 @@ export class CheckInService {
   private readonly REGISTRATION_COLLECTION = 'registrations';
   private readonly CHECKIN_COLLECTION = 'checkins';
 
-  private readonly _$qrCode = new BehaviorSubject<IRegistration>(undefined);
+  private readonly _$qrCode = new BehaviorSubject<IRegistration | undefined>(
+    undefined
+  );
   public readonly $qrCode = this._$qrCode.pipe(filter((value) => !!value));
 
-  private readonly _$registrationCodeFromScan = this.$qrCode.pipe(pluck('id'));
-  private readonly _$registrationCodeFromSearch = new BehaviorSubject<string>(undefined);
-  public readonly $registrationCodeFromSearch = this._$registrationCodeFromSearch.pipe(filter((value) => !!value));
+  private readonly _$registrationCodeFromScan = this.$qrCode.pipe(
+    pluck('id'),
+    map((value) => value as string)
+  );
+  private readonly _$registrationCodeFromSearch = new BehaviorSubject<
+    string | undefined
+  >(undefined);
+  public readonly $registrationCodeFromSearch =
+    this._$registrationCodeFromSearch.pipe(
+      filter((value) => !!value),
+      map((value) => value as string)
+    );
 
-  private readonly _$manualRegistrationEdit = new BehaviorSubject<IRegistration>(undefined);
-  public readonly $manualRegistrationEdit = this._$manualRegistrationEdit.asObservable();
+  private readonly _$manualRegistrationEdit = new BehaviorSubject<
+    IRegistration | undefined
+  >(undefined);
+  public readonly $manualRegistrationEdit =
+    this._$manualRegistrationEdit.asObservable();
 
-  public readonly registrationFromScanSubscription = this._$registrationCodeFromScan.subscribe(value => {
-    this._$registrationCode.next(value);
-  });
+  public readonly registrationFromScanSubscription =
+    this._$registrationCodeFromScan.subscribe((value) => {
+      this._$registrationCode.next(value);
+    });
 
-  public readonly registrationFromSearchSubscription = this.$registrationCodeFromSearch.subscribe(value => {
-    this._$registrationCode.next(value);
-  });
+  public readonly registrationFromSearchSubscription =
+    this.$registrationCodeFromSearch.subscribe((value) => {
+      this._$registrationCode.next(value);
+    });
 
-  private readonly _$registrationCode = new BehaviorSubject<string>(undefined);
+  private readonly _$registrationCode = new BehaviorSubject<string | undefined>(
+    undefined
+  );
   public readonly $registrationCode = this._$registrationCode.pipe(
     filter((value) => !!value),
     distinctUntilChanged((prev, curr) => prev === curr),
@@ -57,8 +70,8 @@ export class CheckInService {
   public readonly $registration = this.$registrationCode.pipe(
     distinctUntilChanged((prev, curr) => prev === curr),
     filter((id) => !!id),
-    switchMap((id) => this.lookupRegistration(id)),
-    map(response => {
+    switchMap((id) => this.lookupRegistration(id!)),
+    map((response) => {
       response.children = CheckInHelpers.sortChildren(response.children);
       return response;
     })
@@ -105,7 +118,7 @@ export class CheckInService {
   }
 
   public resetQrCode(): void {
-    this._$qrCode.next(null);
+    this._$qrCode.next(undefined);
   }
 
   public lookupRegistration(id: string) {
@@ -140,8 +153,8 @@ export class CheckInService {
       buttons: [
         {
           text: 'Ok',
-        }
-      ]
+        },
+      ],
     });
 
     await alert.present();
@@ -149,7 +162,10 @@ export class CheckInService {
     return await alert.onDidDismiss();
   }
 
-  private registrationToCheckIn(registration: IRegistration, isEdit: boolean): ICheckIn {
+  private registrationToCheckIn(
+    registration: IRegistration,
+    isEdit: boolean
+  ): ICheckIn {
     const checkin: ICheckIn = {
       customerId: registration.id ?? null,
       registrationCode: registration.qrcode || null,
@@ -161,7 +177,10 @@ export class CheckInService {
     return checkin;
   }
 
-  private registrationStats(registration: IRegistration, isEdit: boolean): ICheckInStats {
+  private registrationStats(
+    registration: IRegistration,
+    isEdit: boolean
+  ): ICheckInStats {
     const stats: ICheckInStats = {
       preregistered: (!!registration.qrcode && !!registration.id) || false,
       children: registration.children?.length || 0,

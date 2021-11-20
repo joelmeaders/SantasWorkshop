@@ -1,14 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Query } from '@angular/fire/compat/firestore';
-import { of } from 'rxjs';
-import { delay, take } from 'rxjs/operators';
-import {
-  FireCRUDStateless,
-  ICheckIn,
-  ICheckInAgeStats,
-  IRegistration,
-  RegistrationSearchIndex,
-} from 'santashop-core/src';
+import { ICheckIn, ICheckInAgeStats } from '@models/*';
+import { take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',

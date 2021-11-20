@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { QueryFn } from '@angular/fire/compat/firestore';
+import { RegistrationSearchIndex } from '@models/*';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
-import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src';
 import { chain } from 'underscore';
 import { RegistrationSearch } from '../models/registration-search.model';
 
@@ -13,7 +13,7 @@ export class RegistrationSearchService {
 
   private readonly INDEX_COLLECTION = 'registrationsearchindex';
 
-  private readonly _$searchState = new BehaviorSubject<RegistrationSearch>(undefined);
+  private readonly _$searchState = new BehaviorSubject<RegistrationSearch | undefined>(undefined);
   public readonly $searchState = this._$searchState.pipe(
     publishReplay(1),
     refCount()
@@ -25,7 +25,7 @@ export class RegistrationSearchService {
     refCount()
   );
 
-  private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[]>(undefined);
+  private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[] | undefined>(undefined);
   public readonly $searchResults = this._$searchResults.pipe(
     publishReplay(1),
     refCount()

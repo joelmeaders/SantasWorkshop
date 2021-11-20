@@ -1,15 +1,16 @@
-import { IChildrenInfo } from '@models/*';
 import { chain } from 'underscore';
-import firebase from 'firebase/compat/app';
+import { Timestamp } from '@firebase/firestore';
 import { format } from 'date-fns';
+import { IChild } from '@models/*';
 
 export abstract class CheckInHelpers {
 
-  public static sortChildren(children: IChildrenInfo[]) {
+  public static sortChildren(children: IChild | Partial<IChild>[]) {
     return chain(children).sortBy('a').value();
   }
 
   public static childColor(value: string): string | undefined {
+
     switch (value) {
       case 'b':
         return 'boy';
@@ -24,7 +25,7 @@ export abstract class CheckInHelpers {
     return undefined;
   }
 
-  public static friendlyTimestamp(timestamp: firebase.firestore.Timestamp): string {
+  public static friendlyTimestamp(timestamp: Timestamp | any): string {
     return format(timestamp.toDate(), 'MMM dd, YYY h:mm a');
   }
 }

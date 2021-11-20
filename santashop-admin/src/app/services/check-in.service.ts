@@ -12,7 +12,7 @@ import {
 } from 'rxjs/operators';
 import { CheckInHelpers } from '../helpers/checkin-helpers';
 import { AlertController } from '@ionic/angular';
-import { AgeGroup, COLLECTION_SCHEMA, ICheckIn, ICheckInStats, IRegistration, ToyType } from '@models/*';
+import { AgeGroup, COLLECTION_SCHEMA, ICheckIn, ICheckInStats, IChild, IRegistration, ToyType } from '@models/*';
 import { FireRepoLite } from '@core/*';
 
 @Injectable({
@@ -67,7 +67,7 @@ export class CheckInService {
     filter((id) => !!id),
     switchMap((id) => this.lookupRegistration(id!)),
     map((response) => {
-      response.children = CheckInHelpers.sortChildren(response.children!);
+      response.children = CheckInHelpers.sortChildren(response.children!) as any[] as IChild[];
       return response;
     })
   );

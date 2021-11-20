@@ -22,7 +22,7 @@
               <form [formGroup]="customerForm" novalidate>
                 <ion-item *appLet="'zipCode' as controlName">
                   <ion-label position="floating" class="ion-padding-bottom">Zip Code</ion-label>
-                  <ion-input [formControlName]="controlName" debounce="750" (ionChange)="setZip($event.detail.value)" debounce="750"></ion-input>
+                  <ion-input [formControlName]="controlName" debounce="750" (ionChange)="setZip($event)" debounce="750"></ion-input>
                 </ion-item>
               </form>
 
@@ -33,7 +33,7 @@
               </ion-item>
 
               <form [formGroup]="childForm" novalidate>
-                <ion-radio-group *appLet="'ageGroup' as controlName" [formControlName]="controlName" (ionChange)="onAgeChange($event.detail.value)">
+                <ion-radio-group *appLet="'ageGroup' as controlName" [formControlName]="controlName" (ionChange)="onAgeChange($event)">
                   <ion-grid>
                     <ion-row>
                       <ion-col>
@@ -136,13 +136,13 @@
               <ion-list-header>
                 Children
               </ion-list-header>
-              <ion-item *ngFor="let child of ($children | async); let i = index;" [color]="childColor(child.t)" class="ion-margin-top" lines="none">
+              <ion-item *ngFor="let child of ($children | async); let i = index;" [color]="childColor(child.toyType!)" class="ion-margin-top" lines="none">
                 <div class="width-max">
                   <ion-title class="ion-float-start">
-                    {{ child.a | hydrateAgeGroup }}
+                    {{ child.ageGroup }}
                   </ion-title>
                   <ion-title class="ion-float-end">
-                    {{ child.t | hydrateToyType }}
+                    {{ child.toyType }}
                   </ion-title>
                 </div>
                 <ion-button slot="end" size="medium" color="white" (click)="deleteChild(i)">

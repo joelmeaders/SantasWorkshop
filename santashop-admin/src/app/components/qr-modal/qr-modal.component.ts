@@ -6,6 +6,7 @@ import { BehaviorSubject, from, Subject } from 'rxjs';
 import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
+import { Timestamp } from '@firebase/firestore';
 
 @Component({
   selector: 'app-qr-modal',
@@ -70,7 +71,7 @@ export class QrModalComponent implements OnDestroy {
       return;
     }
 
-    await this.checkInService.saveCheckIn().then(response => {
+    await this.checkInService.saveCheckIn().then(() => {
       this.checkInService.reset();
       this.dismiss();
     });
@@ -96,7 +97,7 @@ export class QrModalComponent implements OnDestroy {
   private async alreadyCheckedIn(checkin: ICheckIn) {
     const alert = await this.alertController.create({
       header: 'Existing Check-In',
-      subHeader: CheckInHelpers.friendlyTimestamp(checkin.checkInDateTime),
+      subHeader: CheckInHelpers.friendlyTimestamp(<any>checkin.checkInDateTime as Timestamp),
       message: 'This registration code was already used on the date/time specified. Unable to continue.',
       buttons: [
         {

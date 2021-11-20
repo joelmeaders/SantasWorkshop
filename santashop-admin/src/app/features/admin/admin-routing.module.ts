@@ -1,13 +1,17 @@
 import { NgModule } from '@angular/core';
+import { AngularFireAuthGuard, hasCustomClaim } from '@angular/fire/compat/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
-import { AdminGuard } from '../../guards/admin.guard';
 import { AdminPage } from './admin.page';
+
+const adminOnly = () => hasCustomClaim('admin');
+
 
 const routes: Routes = [
   {
     path: '',
     component: AdminPage,
-    canActivateChild: [AdminGuard],
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: adminOnly },
     children: [
       // {
       //   path: 'scanner',
@@ -17,10 +21,10 @@ const routes: Routes = [
       //   path: 'search',
       //   loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)
       // },
-      // {
-      //   path: 'register',
-      //   loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
-      // },
+      {
+        path: 'register',
+        loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
+      },
       // {
       //   path: 'stats',
       //   loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
@@ -31,14 +35,14 @@ const routes: Routes = [
       // },
       {
         path: '',
-        redirectTo: '/admin/stats',
+        redirectTo: '/admin/register',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/admin/stats',
+    redirectTo: '/admin/register',
     pathMatch: 'full'
   }
 

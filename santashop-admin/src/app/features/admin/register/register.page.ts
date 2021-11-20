@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IError, IRegistration } from '@models/*';
+import { IChild, IError, IRegistration, ToyType } from '@models/*';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { takeUntil, publishReplay, refCount, map, switchMap, filter, take } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
@@ -16,10 +16,10 @@ import { CheckInService } from 'santashop-admin/src/app/services/check-in.servic
 })
 export class RegisterPage implements OnDestroy {
 
-  public readonly customerForm: FormGroup = QuickRegistrationForms.customerForm(null);
+  public readonly customerForm: FormGroup = QuickRegistrationForms.customerForm(undefined);
   public readonly customerFormValidationMessages = QuickRegistrationForms.customerValidationMessages();
 
-  public readonly childForm: FormGroup = QuickRegistrationForms.childForm(null);
+  public readonly childForm: FormGroup = QuickRegistrationForms.childForm(undefined);
   public readonly childFormValidationMessages = QuickRegistrationForms.childValidationMessages();
 
   public readonly $error = new Subject<IError>();
@@ -39,7 +39,7 @@ export class RegisterPage implements OnDestroy {
     refCount()
   );
 
-  private readonly _$children = new BehaviorSubject<IChildrenInfo[]>([]);
+  private readonly _$children = new BehaviorSubject<Partial<IChild>[]>([]);
   public readonly $children = this._$children.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
@@ -60,7 +60,7 @@ export class RegisterPage implements OnDestroy {
   public readonly registrationEditSubscription = this.checkInService.$manualRegistrationEdit.pipe(
     takeUntil(this.$destroy),
     filter(response => !!response),
-    switchMap(registration => this.initRegistrationEdit(registration))
+    switchMap(registration => this.initRegistrationEdit(registration!))
   ).subscribe();
 
   constructor(
@@ -70,15 +70,15 @@ export class RegisterPage implements OnDestroy {
   ) { }
 
   public async initRegistrationEdit(registration: IRegistration): Promise<void> {
-    this.setZip(registration.zipCode);
-    this.customerForm.get('zipCode').setValue(registration.zipCode);
-    this._$children.next(registration.children);
+    this.setZip(registration.zipCode!);
+    this.customerForm.get('zipCode')?.setValue(registration.zipCode);
+    this._$children.next(registration.children!);
     this._$isEdit.next(true);
   }
 
   public async completeRegistration() {
 
-    if (this._$zipCode.getValue().length !== 5) {
+    if (this._$zipCode.getValue()?.toString().length !== 5) {
       await this.invalidZipAlert();
       return;
     }
@@ -103,7 +103,7 @@ export class RegisterPage implements OnDestroy {
 
   public reset(): void {
     this._$zipCode.next(undefined);
-    this._$children.next(new Array<IChildrenInfo>());
+    this._$children.next(new Array<IChild>());
     this.checkInService.reset();
     this.customerForm.reset();
     this.childForm.reset();
@@ -116,7 +116,9 @@ export class RegisterPage implements OnDestroy {
     this._$children.next(CheckInHelpers.sortChildren(current));
   }
 
-  public setZip(value: number) {
+  public setZip(value: any) {
+    // TODO:
+    console.log(value)
     this._$zipCode.next(value);
   }
 
@@ -135,10 +137,10 @@ export class RegisterPage implements OnDestroy {
 
   public addChild() {
     const current = this._$children.getValue();
-    const childValue = this.childForm.value;
-    const newChild: IChildrenInfo = {
-      a: childValue.ageGroup,
-      t: childValue.toyType
+    const childValue = this.childForm.value as IChild;
+    const newChild: Partial<IChild> = {
+      ageGroup: childValue.ageGroup,
+      toyType: childValue.toyType
     };
 
     current.push(newChild);
@@ -146,18 +148,20 @@ export class RegisterPage implements OnDestroy {
     this.childForm.reset();
   }
 
-  public childColor = (value: string) => CheckInHelpers.childColor(value);
+  public childColor = (value: ToyType) => CheckInHelpers.childColor(value);
 
   public onAgeChange(value: any) {
+    // TODO:
+    console.log(value)
     if (value === '0') {
-      this.childForm.get('toyType').setValue('i');
+      this.childForm.get('toyType')?.setValue(ToyType.infant);
     }
   }
 
   private async createRegistration(): Promise<IRegistration> {
-    const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || new Registration();
+    const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || {} as IRegistration;
     registration.zipCode = this._$zipCode.getValue();
-    registration.children = this._$children.getValue();
+    registration.children = this._$children.getValue() as any[] as IChild[];
     return registration;
   }
 

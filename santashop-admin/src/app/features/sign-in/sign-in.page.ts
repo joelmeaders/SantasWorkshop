@@ -22,7 +22,7 @@ export class SignInPage implements OnDestroy {
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
 
-  private readonly authRedirectionSubscription = this.authService.isAdmin$.pipe(
+  public readonly authRedirectionSubscription = this.authService.isAdmin$.pipe(
     takeUntil(this.$destroy),
     filter(response => !!response)
   ).subscribe(() => {
@@ -54,7 +54,7 @@ export class SignInPage implements OnDestroy {
 
     const result = await this.authService
       .login(loginInfo)
-      .then(async (response) => true)
+      .then(() => true)
       .catch(async (error: IError) => {
         this.handleError(error);
         return false;

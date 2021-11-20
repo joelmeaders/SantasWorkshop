@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { IError, IRegistration } from '@models/*';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import { takeUntil, publishReplay, refCount, map, switchMap, filter, take } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
-import { IChildrenInfo, IError, IRegistration } from 'santashop-core/src';
 
 @Component({
   selector: 'app-register',
@@ -32,14 +32,14 @@ export class RegisterPage implements OnDestroy {
     refCount()
   );
 
-  private readonly _$zipCode = new BehaviorSubject<string>(undefined);
+  private readonly _$zipCode = new BehaviorSubject<number | undefined>(undefined);
   public readonly $zipCode = this._$zipCode.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
     refCount()
   );
 
-  private readonly _$children = new BehaviorSubject<Array<IChildrenInfo>>(new Array<IChildrenInfo>());
+  private readonly _$children = new BehaviorSubject<IChildrenInfo[]>([]);
   public readonly $children = this._$children.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
@@ -116,7 +116,7 @@ export class RegisterPage implements OnDestroy {
     this._$children.next(CheckInHelpers.sortChildren(current));
   }
 
-  public setZip(value: string) {
+  public setZip(value: number) {
     this._$zipCode.next(value);
   }
 

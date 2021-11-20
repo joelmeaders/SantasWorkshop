@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
+import { FireRepoLite } from '@core/*';
+import { IDateTimeCount, IZipCodeCount, IRegistration } from '@models/*';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ManualOperationsService } from 'santashop-admin/src/app/services/manual-operations.service';
-import { FireCRUDStateless, IDateTimeCount, IZipCodeCount, IRegistration } from 'santashop-core/src';
 
 @Component({
   selector: 'admin-test',
@@ -19,8 +19,8 @@ export class TestPage {
   private zipCodeCount: IZipCodeCount[] = [];
 
   constructor(
-    private readonly httpService: FireCRUDStateless,
-    private readonly manualOperations: ManualOperationsService
+    private readonly httpService: FireRepoLite,
+    // private readonly manualOperations: ManualOperationsService
   ) { }
 
   public async buildSearchIndex() {
@@ -28,7 +28,7 @@ export class TestPage {
   }
 
   public async statsAgg() {
-    await this.manualOperations.aggregateAgeGroups();
+    // await this.manualOperations.aggregateAgeGroups();
   }
 
   private async storeRegistrations() {
@@ -39,7 +39,7 @@ export class TestPage {
       zipCodeCount: this.zipCodeCount
     };
 
-    await this.httpService.update(this.STATS, doc, 'registration-2020', true).pipe(take(1)).toPromise();
+    await this.httpService.collection(COLLECTIONNAME).update(this.STATS, doc, 'registration-2020', true).pipe(take(1)).toPromise();
 
   }
 

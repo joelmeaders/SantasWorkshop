@@ -1,4 +1,4 @@
-import { IChildrenInfo } from 'santashop-models/src/lib/models';
+import { IChildrenInfo } from '@models/*';
 import { chain } from 'underscore';
 import firebase from 'firebase/compat/app';
 import { format } from 'date-fns';
@@ -9,7 +9,7 @@ export abstract class CheckInHelpers {
     return chain(children).sortBy('a').value();
   }
 
-  public static childColor(value: string): string {
+  public static childColor(value: string): string | undefined {
     switch (value) {
       case 'b':
         return 'boy';
@@ -20,6 +20,8 @@ export abstract class CheckInHelpers {
         case 'i':
         return 'infant';
     }
+
+    return undefined;
   }
 
   public static friendlyTimestamp(timestamp: firebase.firestore.Timestamp): string {

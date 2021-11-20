@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
-import { BehaviorSubject, of, Subject } from 'rxjs';
-import { delay, publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
 import { QrModalComponent } from 'santashop-admin/src/app/components/qr-modal/qr-modal.component';
 import { RegistrationSearchForm } from 'santashop-admin/src/app/forms/registration-search';
-import { RegistrationSearch } from 'santashop-admin/src/app/models/registration-search.model';
+import { IRegistrationSearch } from 'santashop-admin/src/app/models/registration-search.model';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
 import { RegistrationSearchService } from 'santashop-admin/src/app/services/registration-search.service';
 
@@ -73,15 +73,14 @@ export class SearchPage implements OnDestroy {
     await modal.onDidDismiss();
   }
 
-  private formToSearchModel(): RegistrationSearch {
+  private formToSearchModel(): IRegistrationSearch {
     return {
       ...this.form.value
-    } as RegistrationSearch;
+    } as IRegistrationSearch;
   }
 
-  private async qrModal() {
-
-    return await this.modalController.create({
+  private qrModal() {
+    return this.modalController.create({
       component: QrModalComponent,
       cssClass: 'modal-lg',
       backdropDismiss: false

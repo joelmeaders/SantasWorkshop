@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
+import { ICheckIn } from '@models/*';
 import { BehaviorSubject, from, Subject } from 'rxjs';
 import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
-import { ICheckIn } from 'santashop-models/src/lib/models';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 
@@ -77,7 +77,7 @@ export class QrModalComponent implements OnDestroy {
   }
 
   private async confirmCheckInAlert() {
-    return await this.alertController.create({
+    return this.alertController.create({
       header: 'Confirm Action',
       subHeader: 'A check-in cannot be undone',
       message: 'Are you sure there are no changes? Once checked in, the customer code is no longer valid',

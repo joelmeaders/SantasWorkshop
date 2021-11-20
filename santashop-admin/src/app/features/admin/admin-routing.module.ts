@@ -9,26 +9,26 @@ const routes: Routes = [
     component: AdminPage,
     canActivateChild: [AdminGuard],
     children: [
-      {
-        path: 'scanner',
-        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
-      },
-      {
-        path: 'search',
-        loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)
-      },
-      {
-        path: 'register',
-        loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
-      },
-      {
-        path: 'stats',
-        loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
-      },
-      {
-        path: 'test',
-        loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)
-      },
+      // {
+      //   path: 'scanner',
+      //   loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
+      // },
+      // {
+      //   path: 'search',
+      //   loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)
+      // },
+      // {
+      //   path: 'register',
+      //   loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
+      // },
+      // {
+      //   path: 'stats',
+      //   loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
+      // },
+      // {
+      //   path: 'test',
+      //   loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)
+      // },
       {
         path: '',
         redirectTo: '/admin/stats',

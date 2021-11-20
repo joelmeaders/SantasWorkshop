@@ -24,6 +24,6 @@ export class AdminGuard implements CanActivate, CanActivateChild, CanLoad {
   }
 
   private isAuthenticated() {
-    return this.authService.$isAdmin;
+    return this.authService.isAdmin$;
   }
 }

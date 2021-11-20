@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
+import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, map, publishReplay, refCount, takeUntil } from 'rxjs/operators';
 import { QrModalComponent } from 'santashop-admin/src/app/components/qr-modal/qr-modal.component';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
-import { ZXingScannerComponent } from 'zxing-scanner/src/public_api';
 
 @Component({
   selector: 'app-scanner',
@@ -24,14 +24,14 @@ export class ScannerPage implements OnDestroy {
     refCount()
   );
 
-  private readonly _$availableDevices = new BehaviorSubject<MediaDeviceInfo[]>(undefined);
+  private readonly _$availableDevices = new BehaviorSubject<MediaDeviceInfo[] | undefined>(undefined);
   public readonly $availableDevices = this._$availableDevices.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
     refCount()
   );
 
-  private readonly _$currentDevice = new BehaviorSubject<MediaDeviceInfo>(undefined);
+  private readonly _$currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(undefined);
   public readonly $currentDevice = this._$currentDevice.pipe(
     takeUntil(this.$destroy),
     distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
@@ -60,7 +60,7 @@ export class ScannerPage implements OnDestroy {
     refCount()
   );
 
-  @ViewChild('scanner') scanner: ZXingScannerComponent;
+  @ViewChild('scanner') scanner?: ZXingScannerComponent = undefined;
 
   constructor(
     private readonly checkInService: CheckInService,
@@ -78,11 +78,13 @@ export class ScannerPage implements OnDestroy {
 
   public async onCodeResult(resultString: string) {
     this.onDeviceSelectChange('');
-    this.checkInService.setQrCode(resultString);
+    this.checkInService.setRegistrationCode(resultString);
     await this.openModal();
   }
 
-  public onDeviceSelectChange(deviceId: string) {
+  public onDeviceSelectChange($event: any) { // deviceId
+
+    const deviceId = $event?.detail?.value;
 
     if (deviceId === undefined || null) {
       return;
@@ -95,7 +97,7 @@ export class ScannerPage implements OnDestroy {
     }
 
     const devices = this._$availableDevices.getValue();
-    const device = devices.find(d => d.deviceId === deviceId);
+    const device = devices?.find(d => d.deviceId === deviceId);
 
     this._$currentDevice.next(device);
   }

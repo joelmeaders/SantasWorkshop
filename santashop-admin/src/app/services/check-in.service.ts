@@ -4,7 +4,6 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  pluck,
   publishReplay,
   refCount,
   switchMap,
@@ -20,15 +19,6 @@ import { FireRepoLite } from '@core/*';
 })
 export class CheckInService {
 
-  private readonly _$qrCode = new BehaviorSubject<IRegistration | undefined>(
-    undefined
-  );
-  public readonly $qrCode = this._$qrCode.pipe(filter((value) => !!value));
-
-  private readonly _$registrationCodeFromScan = this.$qrCode.pipe(
-    pluck('id'),
-    map((value) => value as string)
-  );
   private readonly _$registrationCodeFromSearch = 
     new BehaviorSubject<string | undefined>(undefined);
   public readonly $registrationCodeFromSearch =
@@ -41,11 +31,6 @@ export class CheckInService {
     new BehaviorSubject<IRegistration | undefined>(undefined);
   public readonly $manualRegistrationEdit =
     this._$manualRegistrationEdit.asObservable();
-
-  public readonly registrationFromScanSubscription =
-    this._$registrationCodeFromScan.subscribe((value) => {
-      this._$registrationCode.next(value);
-    });
 
   public readonly registrationFromSearchSubscription =
     this.$registrationCodeFromSearch.subscribe((value) => {
@@ -65,7 +50,7 @@ export class CheckInService {
   public readonly $registration = this.$registrationCode.pipe(
     distinctUntilChanged((prev, curr) => prev === curr),
     filter((id) => !!id),
-    switchMap((id) => this.lookupRegistration(id!)),
+    switchMap((id) => this.lookupRegistrationByQrCode(id!)),
     map((response) => {
       response.children = CheckInHelpers.sortChildren(response.children!) as any[] as IChild[];
       return response;
@@ -89,7 +74,6 @@ export class CheckInService {
   ) {}
 
   public reset() {
-    this._$qrCode.next(undefined);
     this._$manualRegistrationEdit.next(undefined);
     this._$registrationCodeFromSearch.next(undefined);
   }
@@ -98,23 +82,15 @@ export class CheckInService {
     this._$manualRegistrationEdit.next(registration);
   }
 
-  public setQrCode(code: string): void {
-    const registration: IRegistration = JSON.parse(code);
-    this._$qrCode.next(registration);
-  }
-
   public setRegistrationCode(code: string): void {
     this._$registrationCodeFromSearch.next(code);
   }
 
-  public resetQrCode(): void {
-    this._$qrCode.next(undefined);
-  }
-
-  public lookupRegistration(code: string) {
+  public lookupRegistrationByQrCode(qrcode: string) {
+    console.log(qrcode)
     return this.httpService
       .collection(COLLECTION_SCHEMA.registrations)
-      .readMany<IRegistration>((qry) => qry.where('qrcode', '==', code), 'uid')
+      .readMany<IRegistration>((qry) => qry.where('qrcode', '==', qrcode))
       .pipe(
         take(1),
         map((response) => response[0] ?? undefined)
@@ -122,6 +98,7 @@ export class CheckInService {
   }
 
   public lookupCheckIn(customerId: string) {
+    console.log('lookupCheckIn', customerId)
     return this.httpService
       .collection(COLLECTION_SCHEMA.registrations)
       .read<ICheckIn>(customerId, 'customerId')

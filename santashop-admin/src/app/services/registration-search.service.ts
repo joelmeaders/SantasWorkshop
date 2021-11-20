@@ -12,8 +12,6 @@ import { IRegistrationSearch } from '../models/registration-search.model';
 })
 export class RegistrationSearchService {
 
-  private readonly INDEX_COLLECTION = 'registrationsearchindex';
-
   private readonly _$searchState = new BehaviorSubject<IRegistrationSearch | undefined>(undefined);
   public readonly $searchState = this._$searchState.pipe(
     publishReplay(1),

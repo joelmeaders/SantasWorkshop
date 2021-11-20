@@ -13,10 +13,10 @@ const routes: Routes = [
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: adminOnly },
     children: [
-      // {
-      //   path: 'scanner',
-      //   loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
-      // },
+      {
+        path: 'scanner',
+        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
+      },
       // {
       //   path: 'search',
       //   loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)

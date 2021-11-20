@@ -9,7 +9,7 @@
     <ion-row>
       <ion-col>
 
-        <ion-segment [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event.detail.value)" scrollable="true">
+        <ion-segment [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event)" scrollable="true">
           <ion-segment-button [value]="''">None</ion-segment-button>
             <ion-segment-button *ngFor="let device of ($availableDevices | async)" [value]="device.deviceId">
               {{ device.label | deviceNameOnly }}
@@ -19,7 +19,7 @@
         <span>
           <zxing-scanner
             #scanner
-            [enable]="$cameraEnabled | async"
+            [enabled]="$cameraEnabled | async"
             [formats]="formatsEnabled"
             [device]="$deviceToUse | async"
             [autostart]="true"

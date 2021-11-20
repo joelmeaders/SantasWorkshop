@@ -6,10 +6,12 @@ import { IChild } from '@models/*';
 export abstract class CheckInHelpers {
 
   public static sortChildren(children: IChild | Partial<IChild>[]) {
-    return chain(children).sortBy('a').value();
+    return chain(children).sortBy('ageGroup').value();
   }
 
   public static childColor(value: string): string | undefined {
+
+    console.log('TODO1', value)
 
     switch (value) {
       case 'b':

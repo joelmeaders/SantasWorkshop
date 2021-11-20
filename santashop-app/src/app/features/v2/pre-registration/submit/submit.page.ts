@@ -11,7 +11,7 @@ import { SubmitPageService } from './submit.page.service';
 export class SubmitPage {
 
   constructor(
-    public readonly viewService: SubmitPageService,
+    public readonly viewService: SubmitPageService
   ) { }
 
   public async submit(): Promise<void> {

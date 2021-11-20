@@ -23,7 +23,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
       displayName: `${data.firstName} ${data.lastName}`,
     })
     .catch((error) => {
-      console.error(error);
+      console.error(`${data.emailAddress}`, new Error(JSON.stringify(error)));
       throw handleAuthError(error);
     });
 

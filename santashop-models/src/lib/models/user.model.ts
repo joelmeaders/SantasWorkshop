@@ -18,4 +18,6 @@ export interface IUser {
   version: number;
 
   bhp?: number;
+  
+  manuallyMigrated: boolean;
 }

@@ -11,7 +11,7 @@ const routes: Routes = [
     // Main page, status, info, etc...
     path: '',
     component: PreRegistrationPage,
-    canLoad: [AngularFireAuthGuard],
+    canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin },
     children: [
       {

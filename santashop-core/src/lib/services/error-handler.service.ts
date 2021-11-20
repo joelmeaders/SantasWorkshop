@@ -13,7 +13,7 @@ export class ErrorHandlerService {
     private readonly analytics: AngularFireAnalytics
   ) { }
 
-  public async handleError(error: IError): Promise<any> {
+  public async handleError(error: IError, showAlert: boolean = true): Promise<any> {
 
     const alert = await this.alertController.create({
       header: 'Error Encountered',
@@ -22,7 +22,8 @@ export class ErrorHandlerService {
       buttons: ['Ok']
     });
 
-    await alert.present();
+    if (showAlert)
+      await alert.present();
 
     try {
       await this.analytics.logEvent(error.code, { message: error.message })
@@ -31,6 +32,7 @@ export class ErrorHandlerService {
       // Do nothing
     }
 
-    return alert.onDidDismiss();
+    if (showAlert)
+      return alert.onDidDismiss();
   }
 }

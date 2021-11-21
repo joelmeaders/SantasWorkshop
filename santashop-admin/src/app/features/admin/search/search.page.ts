@@ -1,13 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ModalController } from '@ionic/angular';
+import { RegistrationSearchIndex } from '@models/*';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { publishReplay, refCount, takeUntil, tap } from 'rxjs/operators';
-import { QrModalComponent } from 'santashop-admin/src/app/components/qr-modal/qr-modal.component';
+import { publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
 import { RegistrationSearchForm } from 'santashop-admin/src/app/forms/registration-search';
 import { IRegistrationSearch } from 'santashop-admin/src/app/models/registration-search.model';
-import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
 import { RegistrationSearchService } from 'santashop-admin/src/app/services/registration-search.service';
+import { RegistrationContextService } from '../../../services/registration-context.service';
 
 @Component({
   selector: 'app-search',
@@ -41,8 +40,7 @@ export class SearchPage implements OnDestroy {
 
   constructor(
     private readonly searchService: RegistrationSearchService,
-    private readonly checkInService: CheckInService,
-    private readonly modalController: ModalController,
+    private readonly registrationContext: RegistrationContextService
   ) { }
 
   public ngOnDestroy(): void {
@@ -51,9 +49,9 @@ export class SearchPage implements OnDestroy {
 
   public async reset(): Promise<void> {
     this.searchService.resetSearchState();
-    this.form.get('registrationCode').setValue(undefined);
-    this.form.get('firstName').setValue(undefined);
-    this.form.get('lastName').setValue(undefined);
+    this.form.get('registrationCode')?.setValue(undefined);
+    this.form.get('firstName')?.setValue(undefined);
+    this.form.get('lastName')?.setValue(undefined);
   }
 
   public search(): void {
@@ -66,11 +64,18 @@ export class SearchPage implements OnDestroy {
     this.searchService.setSearchState(model);
   }
 
-  public async onSelect(code: string) {
-    this.checkInService.setRegistrationCode(code);
-    const modal = await this.qrModal();
-    await modal.present();
-    await modal.onDidDismiss();
+  public async onSelect(index: RegistrationSearchIndex) {
+
+    const registration = await this.searchService.getRegistrationByUid$(index.customerId).pipe(
+      take(1)
+    ).toPromise();
+
+    if (registration) {
+      this.registrationContext.setCurrentRegistration(registration);
+    }
+    else {
+      // TODO: Error handling
+    }
   }
 
   private formToSearchModel(): IRegistrationSearch {
@@ -79,11 +84,5 @@ export class SearchPage implements OnDestroy {
     } as IRegistrationSearch;
   }
 
-  private qrModal() {
-    return this.modalController.create({
-      component: QrModalComponent,
-      cssClass: 'modal-lg',
-      backdropDismiss: false
-    });
-  }
+  
 }

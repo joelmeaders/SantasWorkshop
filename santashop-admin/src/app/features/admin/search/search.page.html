@@ -138,7 +138,7 @@
             button
             tappable
             *ngFor="let result of results"
-            (click)="onSelect(result.code)"
+            (click)="onSelect(result)"
           >
             <ion-label class="ion-float-start">
               {{ result.lastName }}, {{ result.firstName }}

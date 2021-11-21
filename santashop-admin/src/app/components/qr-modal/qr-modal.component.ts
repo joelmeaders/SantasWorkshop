@@ -7,6 +7,7 @@ import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 import { Timestamp } from '@firebase/firestore';
+import { RegistrationContextService } from '../../services/registration-context.service';
 
 @Component({
   selector: 'app-qr-modal',
@@ -22,13 +23,13 @@ export class QrModalComponent implements OnDestroy {
   public friendlyTimestamp = CheckInHelpers.friendlyTimestamp;
   public cardColor = CheckInHelpers.childColor;
 
-  public readonly $registration = this.checkInService.$registration.pipe(
+  public readonly $registration = this.registrationContext.registration$.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
     refCount()
   );
 
-  public readonly $existingCheckin = this.checkInService.$checkinRecord.pipe(
+  public readonly $existingCheckin = this.registrationContext.checkin$.pipe(
     takeUntil(this.$destroy),
     tap(() => this.$loading.next(false)),
     publishReplay(1),
@@ -42,6 +43,7 @@ export class QrModalComponent implements OnDestroy {
   ).subscribe();
 
   constructor(
+    private readonly registrationContext: RegistrationContextService,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly checkInService: CheckInService,
@@ -49,14 +51,15 @@ export class QrModalComponent implements OnDestroy {
   ) { }
 
   ngOnDestroy() {
-    this.checkInService.reset();
+    // this.checkInService.reset();
     this.existingAlertSubcription.unsubscribe();
     this.$destroy.next();
   }
 
   public async editRegistration() {
-    const registration = await this.$registration.pipe(take(1)).toPromise();
-    this.checkInService.setRegistrationToEdit(registration);
+    // TOOD: EDIT
+    // const registration = await this.$registration.pipe(take(1)).toPromise();
+    // this.checkInService.setRegistrationToEdit(registration);
     this.router.navigate(['/admin/register']);
     await this.modalController.dismiss();
   }
@@ -71,10 +74,22 @@ export class QrModalComponent implements OnDestroy {
       return;
     }
 
-    await this.checkInService.saveCheckIn().then(() => {
-      this.checkInService.reset();
-      this.dismiss();
-    });
+    const registration = await this.$registration.pipe(take(1)).toPromise();
+
+    if (!registration) {
+      // TODO: ERROR
+      return;
+    }
+
+    try {
+      await this.checkInService.checkIn(registration, false);
+    }
+    catch (error) {
+      console.error(error);
+      //TODO: Handle this shit
+    }
+
+    await this.modalController.dismiss(undefined, 'checkin');
   }
 
   private async confirmCheckInAlert() {
@@ -94,10 +109,14 @@ export class QrModalComponent implements OnDestroy {
     });
   }
 
-  private async alreadyCheckedIn(checkin: ICheckIn) {
+  private async alreadyCheckedIn(checkin?: ICheckIn) {
+
+    if (!checkin)
+      return;
+
     const alert = await this.alertController.create({
       header: 'Existing Check-In',
-      subHeader: CheckInHelpers.friendlyTimestamp(<any>checkin.checkInDateTime as Timestamp),
+      subHeader: CheckInHelpers.friendlyTimestamp(<any>checkin!.checkInDateTime as Timestamp),
       message: 'This registration code was already used on the date/time specified. Unable to continue.',
       buttons: [
         {
@@ -108,11 +127,11 @@ export class QrModalComponent implements OnDestroy {
 
     await alert.present();
 
-    return await alert.onDidDismiss();
+    return alert.onDidDismiss();
   }
 
-  public async dismiss() {
-    await this.modalController.dismiss();
+  public async cancel() {
+    await this.modalController.dismiss(undefined, 'cancel')
   }
 
 }

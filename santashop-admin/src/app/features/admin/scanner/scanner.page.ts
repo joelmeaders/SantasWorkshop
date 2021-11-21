@@ -63,7 +63,7 @@ export class ScannerPage implements OnDestroy {
   @ViewChild('scanner') scanner?: ZXingScannerComponent = undefined;
 
   constructor(
-    private readonly checkInService: CheckInService,
+    public readonly checkInService: CheckInService,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController
   ) { }
@@ -78,7 +78,10 @@ export class ScannerPage implements OnDestroy {
 
   public async onCodeResult(resultString: string) {
     this.onDeviceSelectChange('');
-    this.checkInService.setRegistrationCode(resultString);
+    console.log(`got result ${resultString} but some asshole didn't finish this method`)
+    // TODO: DO THIS!!!
+    // this.checkInService.setRegistrationCode(resultString);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     await this.openModal();
   }
 

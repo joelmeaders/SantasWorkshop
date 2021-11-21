@@ -13,7 +13,7 @@
     "admin:lint": "npm run core:lint && ng lint --fix --cache --project=santashop-admin",
     "admin:start": "firebase use santas-workshop-193b5 && ng serve --project=santashop-admin --port=4100",
     "admin:config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",
-    "admin:build:local": "ng build --project=santashop-admin",
+    "admin:build:local": "ng build --configuration=production --project=santashop-admin",
     "admin:analyze": "ng build --configuration production --named-chunks=true --project=santashop-admin --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
     "app:lint": "npm run core:lint && ng lint --fix --project=santashop-app",
     "app:start": "firebase use santas-workshop-193b5 && ng serve --project=santashop-app --port=4100",

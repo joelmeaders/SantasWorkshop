@@ -17,10 +17,10 @@ const routes: Routes = [
         path: 'scanner',
         loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
       },
-      // {
-      //   path: 'search',
-      //   loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)
-      // },
+      {
+        path: 'search',
+        loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)
+      },
       {
         path: 'register',
         loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)

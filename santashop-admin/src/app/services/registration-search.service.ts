@@ -1,16 +1,19 @@
 import { Injectable } from '@angular/core';
-import { QueryFn } from '@angular/fire/compat/firestore';
-import { FireRepoLite } from '@core/*';
-import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@models/*';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { RegistrationSearchIndex } from '@models/*';
+import { BehaviorSubject } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 import { chain } from 'underscore';
 import { IRegistrationSearch } from '../models/registration-search.model';
+import { LookupService } from './lookup.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegistrationSearchService {
+
+  // Passthrough function
+  public readonly getRegistrationByUid$ = 
+    this.lookupService.getRegistrationByUid$; 
 
   private readonly _$searchState = new BehaviorSubject<IRegistrationSearch | undefined>(undefined);
   public readonly $searchState = this._$searchState.pipe(
@@ -35,34 +38,17 @@ export class RegistrationSearchService {
     switchMap(() => this.$searchState),
     filter(state => this.isSearchStateValid(state)),
     switchMap(state => !!state?.registrationCode
-      ? this.queryByCode(state.registrationCode)
-      : this.queryByName(state?.firstName!, state?.lastName!)
-    )
+      ? this.lookupService.searchIndexByQrCode$(state.registrationCode)
+      : this.lookupService.searchIndexByName$(state?.firstName!, state?.lastName!)
+    ),
+    map(results => this.orderResultsByName(results))
   )
 
   constructor(
-    private readonly httpService: FireRepoLite
+    private readonly lookupService: LookupService
   ) { }
 
-  public queryByCode(id: string): Observable<RegistrationSearchIndex[]> {
-    const query: QueryFn = qry => qry
-      .where('code', '==', id)
-      .orderBy('lastName', 'asc')
-      .orderBy('firstName', 'asc');
-    return this.httpService.collection(COLLECTION_SCHEMA.registrationSearchIndex).readMany<RegistrationSearchIndex>(query, 'customerId')
-      .pipe(take(1));
-  }
-
-  public queryByName(firstName: string, lastName: string): Observable<RegistrationSearchIndex[]> {
-    const query: QueryFn = qry => qry
-      .where('firstName', '==', firstName)
-      .where('lastName', '>=', lastName).where('lastName', '<=', lastName + '\uf8ff')
-      .limit(50);
-    return this.httpService.collection(COLLECTION_SCHEMA.registrationSearchIndex).readMany<RegistrationSearchIndex>(query, 'customerId')
-      .pipe(take(1),map(results => this.orderNameResults(results)));
-  }
-
-  private orderNameResults(results: RegistrationSearchIndex[]) {
+  private orderResultsByName(results: RegistrationSearchIndex[]) {
     if (!results?.length) {
       return results;
     }

@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IChild, IError, IRegistration, ToyType } from '@models/*';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { takeUntil, publishReplay, refCount, map, switchMap, filter, take } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, map } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
@@ -57,15 +57,15 @@ export class RegisterPage implements OnDestroy {
 
   private readonly _$isEdit = new BehaviorSubject<boolean>(false);
 
-  public readonly registrationEditSubscription = this.checkInService.$manualRegistrationEdit.pipe(
-    takeUntil(this.$destroy),
-    filter(response => !!response),
-    switchMap(registration => this.initRegistrationEdit(registration!))
-  ).subscribe();
+  // public readonly registrationEditSubscription = this.checkInService.$manualRegistrationEdit.pipe(
+  //   takeUntil(this.$destroy),
+  //   filter(response => !!response),
+  //   switchMap(registration => this.initRegistrationEdit(registration!))
+  // ).subscribe();
 
   constructor(
     private readonly loadingController: LoadingController,
-    private readonly checkInService: CheckInService,
+    public readonly checkInService: CheckInService,
     private readonly alertController: AlertController
   ) { }
 
@@ -83,13 +83,13 @@ export class RegisterPage implements OnDestroy {
       return;
     }
 
-    await this.presentLoading();
-    const registration = await this.createRegistration();
-    await this.checkInService.saveCheckIn(registration, this._$isEdit.getValue());
-    this.reset();
-    await this.dismissLoading();
-    await this.checkInService.checkinCompleteAlert();
-    this.checkInService.reset();
+    // await this.presentLoading();
+    // const registration = await this.createRegistration();
+    // await this.checkInService.saveCheckIn(registration, this._$isEdit.getValue());
+    // this.reset();
+    // await this.dismissLoading();
+    // await this.checkInService.checkinCompleteAlert();
+    // this.checkInService.reset();
   }
 
   public async ngOnDestroy() {
@@ -102,12 +102,12 @@ export class RegisterPage implements OnDestroy {
   }
 
   public reset(): void {
-    this._$zipCode.next(undefined);
-    this._$children.next(new Array<IChild>());
-    this.checkInService.reset();
-    this.customerForm.reset();
-    this.childForm.reset();
-    this._$isEdit.next(false);
+    // this._$zipCode.next(undefined);
+    // this._$children.next(new Array<IChild>());
+    // this.checkInService.reset();
+    // this.customerForm.reset();
+    // this.childForm.reset();
+    // this._$isEdit.next(false);
   }
 
   public deleteChild(index: number) {
@@ -122,7 +122,7 @@ export class RegisterPage implements OnDestroy {
     this._$zipCode.next(value);
   }
 
-  private async presentLoading() {
+  public async presentLoading() {
     const loading = await this.loadingController.create({
       message: 'Saving registration...',
       translucent: true,
@@ -131,7 +131,7 @@ export class RegisterPage implements OnDestroy {
     await loading.present();
   }
 
-  private async dismissLoading() {
+  public async dismissLoading() {
     await this.loadingController.dismiss();
   }
 
@@ -158,12 +158,12 @@ export class RegisterPage implements OnDestroy {
     }
   }
 
-  private async createRegistration(): Promise<IRegistration> {
-    const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || {} as IRegistration;
-    registration.zipCode = this._$zipCode.getValue();
-    registration.children = this._$children.getValue() as any[] as IChild[];
-    return registration;
-  }
+  // private async createRegistration(): Promise<IRegistration> {
+  //   const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || {} as IRegistration;
+  //   registration.zipCode = this._$zipCode.getValue();
+  //   registration.children = this._$children.getValue() as any[] as IChild[];
+  //   return registration;
+  // }
 
   private async invalidZipAlert() {
     const alert = await this.alertController.create({

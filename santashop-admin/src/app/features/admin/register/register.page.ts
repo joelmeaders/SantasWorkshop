@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IChild, IError, IRegistration, ToyType } from '@models/*';
+import { AgeGroup, IChild, IError, IRegistration, ToyType } from '@models/*';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { takeUntil, publishReplay, refCount, map } from 'rxjs/operators';
+import { takeUntil, publishReplay, refCount, map, take, filter, switchMap } from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
+import { RegistrationContextService } from '../../../services/registration-context.service';
 
 @Component({
   selector: 'app-register',
@@ -57,19 +58,21 @@ export class RegisterPage implements OnDestroy {
 
   private readonly _$isEdit = new BehaviorSubject<boolean>(false);
 
-  // public readonly registrationEditSubscription = this.checkInService.$manualRegistrationEdit.pipe(
-  //   takeUntil(this.$destroy),
-  //   filter(response => !!response),
-  //   switchMap(registration => this.initRegistrationEdit(registration!))
-  // ).subscribe();
+  public readonly registrationEditSubscription = this.registrationContext.registration$.pipe(
+    takeUntil(this.$destroy),
+    filter(response => !!response),
+    switchMap(registration => this.initRegistrationEdit(registration))
+  ).subscribe();
 
   constructor(
     private readonly loadingController: LoadingController,
+    private readonly registrationContext: RegistrationContextService,
     public readonly checkInService: CheckInService,
     private readonly alertController: AlertController
   ) { }
 
-  public async initRegistrationEdit(registration: IRegistration): Promise<void> {
+  public async initRegistrationEdit(registration?: IRegistration): Promise<void> {
+    if (!registration) return;
     this.setZip(registration.zipCode!);
     this.customerForm.get('zipCode')?.setValue(registration.zipCode);
     this._$children.next(registration.children!);
@@ -83,13 +86,12 @@ export class RegisterPage implements OnDestroy {
       return;
     }
 
-    // await this.presentLoading();
-    // const registration = await this.createRegistration();
-    // await this.checkInService.saveCheckIn(registration, this._$isEdit.getValue());
-    // this.reset();
-    // await this.dismissLoading();
-    // await this.checkInService.checkinCompleteAlert();
-    // this.checkInService.reset();
+    await this.presentLoading();
+    const registration = await this.createRegistration();
+    await this.checkInService.checkIn(registration, this._$isEdit.getValue());
+    this.reset();
+    this.registrationContext.reset();
+    await this.dismissLoading();
   }
 
   public async ngOnDestroy() {
@@ -102,12 +104,12 @@ export class RegisterPage implements OnDestroy {
   }
 
   public reset(): void {
-    // this._$zipCode.next(undefined);
-    // this._$children.next(new Array<IChild>());
-    // this.checkInService.reset();
-    // this.customerForm.reset();
-    // this.childForm.reset();
-    // this._$isEdit.next(false);
+    this._$zipCode.next(undefined);
+    this._$children.next(new Array<IChild>());
+    this.registrationContext.reset();
+    this.customerForm.reset();
+    this.childForm.reset();
+    this._$isEdit.next(false);
   }
 
   public deleteChild(index: number) {
@@ -116,9 +118,13 @@ export class RegisterPage implements OnDestroy {
     this._$children.next(CheckInHelpers.sortChildren(current));
   }
 
-  public setZip(value: any) {
-    // TODO:
-    console.log(value)
+  public setZip($event: any) {
+
+    if (!$event.detail?.value || ($event.detail.value).toString().length !== 5) {
+      return;
+    }
+
+    const value = Number.parseInt($event.detail.value);
     this._$zipCode.next(value);
   }
 
@@ -150,20 +156,22 @@ export class RegisterPage implements OnDestroy {
 
   public childColor = (value: ToyType) => CheckInHelpers.childColor(value);
 
-  public onAgeChange(value: any) {
-    // TODO:
+  public onAgeChange($event: any) {
+    const value = $event.detail.value as AgeGroup;
     console.log(value)
-    if (value === '0') {
+    if (value === AgeGroup.age02) {
       this.childForm.get('toyType')?.setValue(ToyType.infant);
     }
   }
 
-  // private async createRegistration(): Promise<IRegistration> {
-  //   const registration = await this.checkInService.$manualRegistrationEdit.pipe(take(1)).toPromise() || {} as IRegistration;
-  //   registration.zipCode = this._$zipCode.getValue();
-  //   registration.children = this._$children.getValue() as any[] as IChild[];
-  //   return registration;
-  // }
+  private async createRegistration(): Promise<IRegistration> {
+    const registration = await this.registrationContext.registration$.pipe(take(1)).toPromise()
+      ?? {} as IRegistration;
+    registration.zipCode = this._$zipCode.getValue();
+    const children = CheckInHelpers.sortChildren(this._$children.getValue());
+    registration.children = children as any[] as IChild[];
+    return registration;
+  }
 
   private async invalidZipAlert() {
     const alert = await this.alertController.create({
@@ -178,7 +186,7 @@ export class RegisterPage implements OnDestroy {
 
     await alert.present();
 
-    return await alert.onDidDismiss();
+    return alert.onDidDismiss();
   }
 
 }

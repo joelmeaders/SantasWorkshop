@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
-import { ICheckIn } from '@models/*';
+import { ICheckIn, IError } from '@models/*';
 import { BehaviorSubject, from, Subject } from 'rxjs';
 import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 import { Timestamp } from '@firebase/firestore';
 import { RegistrationContextService } from '../../services/registration-context.service';
+import { ErrorHandlerService } from '@core/*';
 
 @Component({
   selector: 'app-qr-modal',
@@ -47,19 +48,17 @@ export class QrModalComponent implements OnDestroy {
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly checkInService: CheckInService,
+    private readonly errorHandler: ErrorHandlerService,
     private readonly router: Router
   ) { }
 
   ngOnDestroy() {
-    // this.checkInService.reset();
+    this.registrationContext.reset();
     this.existingAlertSubcription.unsubscribe();
     this.$destroy.next();
   }
 
   public async editRegistration() {
-    // TOOD: EDIT
-    // const registration = await this.$registration.pipe(take(1)).toPromise();
-    // this.checkInService.setRegistrationToEdit(registration);
     this.router.navigate(['/admin/register']);
     await this.modalController.dismiss();
   }
@@ -77,16 +76,20 @@ export class QrModalComponent implements OnDestroy {
     const registration = await this.$registration.pipe(take(1)).toPromise();
 
     if (!registration) {
-      // TODO: ERROR
+      const error: IError = {
+        code: 'no-reg',
+        message: 'No registraiton is loaded'
+      };
+      await this.errorHandler.handleError(error)
       return;
     }
 
     try {
       await this.checkInService.checkIn(registration, false);
+      this.registrationContext.reset();
     }
     catch (error) {
-      console.error(error);
-      //TODO: Handle this shit
+      await this.errorHandler.handleError(error as IError);
     }
 
     await this.modalController.dismiss(undefined, 'checkin');

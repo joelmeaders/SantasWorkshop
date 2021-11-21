@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, map, publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { QrModalComponent } from 'santashop-admin/src/app/components/qr-modal/qr-modal.component';
-import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
+import { distinctUntilChanged, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
+import { LookupService } from '../../../services/lookup.service';
+import { RegistrationContextService } from '../../../services/registration-context.service';
 
 @Component({
   selector: 'app-scanner',
@@ -63,8 +63,8 @@ export class ScannerPage implements OnDestroy {
   @ViewChild('scanner') scanner?: ZXingScannerComponent = undefined;
 
   constructor(
-    public readonly checkInService: CheckInService,
-    private readonly modalController: ModalController,
+    private readonly lookupService: LookupService,
+    private readonly registrationContext: RegistrationContextService,
     private readonly alertController: AlertController
   ) { }
 
@@ -78,11 +78,20 @@ export class ScannerPage implements OnDestroy {
 
   public async onCodeResult(resultString: string) {
     this.onDeviceSelectChange('');
-    console.log(`got result ${resultString} but some asshole didn't finish this method`)
-    // TODO: DO THIS!!!
-    // this.checkInService.setRegistrationCode(resultString);
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    await this.openModal();
+
+    const registration = await this.lookupService.getRegistrationByQrCode$(resultString)
+      .pipe(take(1)).toPromise();
+
+    console.log(registration);
+    
+    if (registration) {
+      this.registrationContext.setCurrentRegistration(registration);
+      this._$currentDevice.next(undefined);
+    }
+    else {
+      //TODO: Throw Error
+      console.error('oh fuck')
+    }
   }
 
   public onDeviceSelectChange($event: any) { // deviceId
@@ -135,19 +144,4 @@ export class ScannerPage implements OnDestroy {
     await alert.present();
 
   }
-
-  private async openModal() {
-
-    this._$currentDevice.next(undefined);
-
-    const modal = await this.modalController.create({
-      component: QrModalComponent,
-      cssClass: 'modal-lg',
-      backdropDismiss: false
-    });
-
-    await modal.present();
-    await modal.onDidDismiss();
-  }
-
 }

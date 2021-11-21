@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount, shareReplay, switchMap, take } from 'rxjs/operators';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import firebase from 'firebase/compat/app';
 import { IAuth, IUserEmailUid } from '@models/*';
@@ -39,10 +39,11 @@ export class AuthService {
     refCount()
   );
 
-  public readonly isAdmin$ =
-    this.angularFireFunctions.httpsCallable('isAdmin')({}).pipe(
-      map((response: boolean) => response)
-    );
+  public readonly isAdmin$ = this.currentUser$.pipe(
+    switchMap(user => from(user!.getIdTokenResult())),
+    map(token => token.claims.admin),
+    shareReplay(1)
+  );
 
   public resetPassword(email: string): Promise<void> {
     return this.angularFireAuth.sendPasswordResetEmail(email);

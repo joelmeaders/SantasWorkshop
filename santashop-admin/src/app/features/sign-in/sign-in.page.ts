@@ -6,7 +6,6 @@ import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth } from '@models/*';
 import { IError } from '@models/*';
 import { Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
 import { SignInForm } from '../../forms/sign-in';
 
 @Component({
@@ -21,13 +20,6 @@ export class SignInPage implements OnDestroy {
 
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
-
-  public readonly authRedirectionSubscription = this.authService.isAdmin$.pipe(
-    takeUntil(this.$destroy),
-    filter(response => !!response)
-  ).subscribe(() => {
-    this.router.navigate(['/admin']);
-  });
 
   constructor(
     private readonly authService: AuthService,

@@ -31,7 +31,7 @@ export class LookupService {
     );
 
   public readonly getRegistrationByQrCode$ = (qrcode: string): Observable<IRegistration | undefined> => 
-    this.collections.searchIndex.readMany<IRegistration>(
+    this.collections.registrations.readMany<IRegistration>(
       q => this.queryRegistrationsByQrCode(q, qrcode)
     ).pipe(
       map(results => results[0] ?? undefined)
@@ -65,7 +65,7 @@ export class LookupService {
   }
 
   private queryRegistrationsByQrCode(q: CollectionReference<DocumentData>, qrCode: string) {
-    return q.where('code', '==', qrCode)
+    return q.where('qrcode', '==', qrCode)
       .orderBy('lastName', 'asc')
       .orderBy('firstName', 'asc');
   }

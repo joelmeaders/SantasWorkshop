@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
 import { ICheckIn, IRegistration } from '@models/*';
 import { BehaviorSubject, of } from 'rxjs';
@@ -25,7 +26,8 @@ export class RegistrationContextService {
     this.modalController.create({
       component: QrModalComponent,
       cssClass: 'modal-lg',
-      backdropDismiss: false
+      backdropDismiss: false,
+      id: 'qr-modal'
     });
 
   public readonly setCheckinSubscription = 
@@ -47,14 +49,24 @@ export class RegistrationContextService {
 
   constructor(
     private readonly modalController: ModalController,
-    private readonly lookupService: LookupService
+    private readonly lookupService: LookupService,
+    private readonly router: Router
   ) { }
 
   public setCurrentRegistration(registration?: IRegistration) {
     this._registration$.next(registration);
   }
 
+  public reset() {
+    this._registration$.next(undefined);
+    this._checkin$.next(undefined);
+  }
+
   private async displayRegistrationModal() {
+
+    const currentModal = await this.modalController.getTop();
+    console.log(currentModal);
+    // if (currentModal || currentModal?.id )
 
     const modal = await this.newModal(); 
     await modal.present();
@@ -70,7 +82,7 @@ export class RegistrationContextService {
       }
 
       if (dismiss.role === 'edit') {
-        // TODO: Edit functionality
+        this.router.navigate(['/admin/register'])
       }
 
     });

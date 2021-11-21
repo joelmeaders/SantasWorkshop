@@ -1,8 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { AngularFireModule } from '@angular/fire/compat';
-import {
-  AngularFireAnalyticsModule,
-} from '@angular/fire/compat/analytics';
+import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { environment, firebaseConfig } from '../environments/environment';

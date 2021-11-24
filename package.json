@@ -26,7 +26,7 @@
     "app:deploy:qa:hosting": "firebase use santas-workshop-test && firebase target santashop-app && ng build --configuration=qa --project=santashop-app && firebase deploy --only hosting",
     "app:deploy:qa:functions": "firebase use santas-workshop-test && firebase deploy --only functions",
     "ci:admin:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
-    "ci:admin:build": "npm run core:build && ci:admin:config && ng build --configuration production --project=santashop-admin",
+    "ci:admin:build": "npm run models:build && npm run core:build && ng build --configuration production --project=santashop-admin",
     "ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' config.app.ts",
     "ci:app:build": "npm run models:build && npm run core:build && ng build --configuration production --project=santashop-app",
     "emulators:start": "firebase emulators:start --import .firebase --export-on-exit",

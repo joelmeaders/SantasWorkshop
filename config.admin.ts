@@ -5,7 +5,7 @@ const targetPath = './santashop-admin/src/environments/environment.prod.ts';
 
 const envConfigFile = `export const environment = {
     production: true,
-    label: PROD
+    label: 'PROD',
     name: 'SWAdmin',
     version: '${version}'
   };

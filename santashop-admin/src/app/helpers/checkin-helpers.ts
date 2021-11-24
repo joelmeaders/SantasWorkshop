@@ -1,7 +1,7 @@
 import { chain } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
 import { format } from 'date-fns';
-import { IChild } from '@models/*';
+import { IChild, ToyType } from '@models/*';
 
 export abstract class CheckInHelpers {
 
@@ -9,22 +9,21 @@ export abstract class CheckInHelpers {
     return chain(children).sortBy('ageGroup').value();
   }
 
-  public static childColor(value: string): string | undefined {
-
-    console.log('TODO1', value)
+  public static childColor(value: ToyType): string | undefined {
 
     switch (value) {
-      case 'b':
+      case ToyType.boy:
         return 'boy';
 
-      case 'g':
+      case ToyType.girl:
         return 'girl';
 
-        case 'i':
+      case ToyType.infant:
         return 'infant';
-    }
 
-    return undefined;
+      default: 
+        return undefined
+    }
   }
 
   public static friendlyTimestamp(timestamp: Timestamp | any): string {

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { AngularFireAuthGuard, hasCustomClaim } from '@angular/fire/compat/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
+import { ConfirmDeactivateGuard } from '../../guards/disable-camera.guard';
 import { AdminPage } from './admin.page';
 
 const adminOnly = () => hasCustomClaim('admin');
@@ -15,7 +16,8 @@ const routes: Routes = [
     children: [
       {
         path: 'scanner',
-        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
+        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule),
+        canDeactivate: [ ConfirmDeactivateGuard ]
       },
       {
         path: 'search',

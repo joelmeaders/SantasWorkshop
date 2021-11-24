@@ -1,147 +1,54 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
-import { AlertController } from '@ionic/angular';
-import { ZXingScannerComponent } from '@zxing/ngx-scanner';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, map, publishReplay, refCount, take, takeUntil } from 'rxjs/operators';
-import { LookupService } from '../../../services/lookup.service';
-import { RegistrationContextService } from '../../../services/registration-context.service';
+import { Component } from '@angular/core';
+import { ScannerService } from '../../../services/scanner.service';
 
 @Component({
   selector: 'app-scanner',
   templateUrl: 'scanner.page.html',
-  styleUrls: ['scanner.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['scanner.page.scss']
 })
-export class ScannerPage implements OnDestroy {
-  private readonly $destroy = new Subject<void>();
+export class ScannerPage  {
 
-  public readonly formatsEnabled: any = [11];
-
-  private readonly _$hasPermissions = new BehaviorSubject<boolean>(false);
-  public readonly $hasPermissions = this._$hasPermissions.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(1),
-    refCount()
-  );
-
-  private readonly _$availableDevices = new BehaviorSubject<MediaDeviceInfo[] | undefined>(undefined);
-  public readonly $availableDevices = this._$availableDevices.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(1),
-    refCount()
-  );
-
-  private readonly _$currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(undefined);
-  public readonly $currentDevice = this._$currentDevice.pipe(
-    takeUntil(this.$destroy),
-    distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
-    publishReplay(1),
-    refCount()
-  );
-
-  public readonly $deviceToUse = this.$currentDevice.pipe(
-    takeUntil(this.$destroy),
-    map(current => current ?? undefined),
-    publishReplay(1),
-    refCount()
-  );
-
-  public readonly $deviceId = this._$currentDevice.pipe(
-    takeUntil(this.$destroy),
-    map(current => !!current ? current.deviceId : ''),
-    publishReplay(1),
-    refCount()
-  );
-
-  private readonly _$cameraEnabled = new BehaviorSubject<boolean>(true);
-  public readonly $cameraEnabled = this._$cameraEnabled.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(1),
-    refCount()
-  );
-
-  @ViewChild('scanner') scanner?: ZXingScannerComponent = undefined;
+  public readonly formatsEnabled = this.scannerService.formatsEnabled;
+  public readonly $hasPermissions = this.scannerService.$hasPermissions;
+  public readonly $availableDevices = this.scannerService.$availableDevices;
+  public readonly $currentDevice = this.scannerService.$currentDevice;
+  public readonly $deviceToUse = this.scannerService.$deviceToUse;
+  public readonly $deviceId = this.scannerService.$deviceId;
+  public readonly $cameraEnabled = this.scannerService.$cameraEnabled;
 
   constructor(
-    private readonly lookupService: LookupService,
-    private readonly registrationContext: RegistrationContextService,
-    private readonly alertController: AlertController
+    private readonly scannerService: ScannerService
   ) { }
 
-  public async ngOnDestroy() {
-    this.$destroy.next();
+  public ionViewWillLeave() {
+    this.scannerService.navigatedAway();
+  }
+
+  public ionViewDidLeave() {
+    this.scannerService.navigatedAway();
   }
 
   public onCamerasFound(devices: MediaDeviceInfo[]): void {
-    this._$availableDevices.next(devices);
+    this.scannerService.onCamerasFound(devices);
   }
 
   public async onCodeResult(resultString: string) {
-    this.onDeviceSelectChange('');
-
-    const registration = await this.lookupService.getRegistrationByQrCode$(resultString)
-      .pipe(take(1)).toPromise();
-
-    console.log(registration);
-    
-    if (registration) {
-      this.registrationContext.setCurrentRegistration(registration);
-      this._$currentDevice.next(undefined);
-    }
-    else {
-      //TODO: Throw Error
-      console.error('oh fuck')
-    }
+    this.scannerService.onCodeResult(resultString);
   }
 
   public onDeviceSelectChange($event: any) { // deviceId
-
-    const deviceId = $event?.detail?.value;
-
-    if (deviceId === undefined || null) {
-      return;
-    }
-
-    const currentDevice = this._$currentDevice.getValue();
-
-    if (currentDevice?.deviceId === deviceId) {
-      return;
-    }
-
-    const devices = this._$availableDevices.getValue();
-    const device = devices?.find(d => d.deviceId === deviceId);
-
-    this._$currentDevice.next(device);
+    this.scannerService.onDeviceSelectChange($event);
   }
 
-  onDeviceChange(device: MediaDeviceInfo) {
-    const currentDevice = this._$currentDevice.getValue();
-
-    if (!!currentDevice && device?.deviceId === currentDevice.deviceId)
-      return;
-
-    this._$currentDevice.next(device);
+  public onDeviceChange(device: MediaDeviceInfo) {
+    this.scannerService.onDeviceChange(device);
   }
 
-  onHasPermission(value: boolean): void {
-    this._$hasPermissions.next(value);
+  public onHasPermission(value: boolean): void {
+    this.scannerService.onHasPermission(value)
   }
 
   public async onScanError(error: any) {
-    await this.handleError(error);
-    this.onDeviceSelectChange('');
-  }
-
-  private async handleError(error: any) {
-
-    const alert = await this.alertController.create({
-      header: 'Error',
-      subHeader: error.name,
-      message: error.message,
-      buttons: ['Ok']
-    });
-
-    await alert.present();
-
+    this.scannerService.onScanError(error);
   }
 }

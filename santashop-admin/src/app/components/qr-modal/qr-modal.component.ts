@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
 import { ICheckIn, IError } from '@models/*';
 import { BehaviorSubject, from, Subject } from 'rxjs';
-import { filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 import { Timestamp } from '@firebase/firestore';
@@ -39,6 +38,7 @@ export class QrModalComponent implements OnDestroy {
 
   private readonly existingAlertSubcription = this.$existingCheckin.pipe(
     takeUntil(this.$destroy),
+    distinctUntilChanged(),
     filter(response => !!response?.customerId),
     mergeMap(response => from(this.alreadyCheckedIn(response))),
   ).subscribe();
@@ -49,23 +49,22 @@ export class QrModalComponent implements OnDestroy {
     private readonly alertController: AlertController,
     private readonly checkInService: CheckInService,
     private readonly errorHandler: ErrorHandlerService,
-    private readonly router: Router
   ) { }
 
   ngOnDestroy() {
-    this.registrationContext.reset();
     this.existingAlertSubcription.unsubscribe();
     this.$destroy.next();
+    this.$destroy.complete();
   }
 
   public async editRegistration() {
-    this.router.navigate(['/admin/register']);
-    await this.modalController.dismiss();
+    await this.modalController.dismiss(undefined, 'edit')
   }
 
   public async checkIn() {
 
     const alert = await this.confirmCheckInAlert();
+
     await alert.present();
     const response = await alert.onDidDismiss().then(res => res.role);
 
@@ -78,15 +77,16 @@ export class QrModalComponent implements OnDestroy {
     if (!registration) {
       const error: IError = {
         code: 'no-reg',
-        message: 'No registraiton is loaded'
+        message: 'No registration is loaded'
       };
       await this.errorHandler.handleError(error)
       return;
     }
 
     try {
-      await this.checkInService.checkIn(registration, false);
+      this.$destroy.next();
       this.registrationContext.reset();
+      await this.checkInService.checkIn(registration, false);
     }
     catch (error) {
       await this.errorHandler.handleError(error as IError);
@@ -96,6 +96,7 @@ export class QrModalComponent implements OnDestroy {
   }
 
   private async confirmCheckInAlert() {
+
     return this.alertController.create({
       header: 'Confirm Action',
       subHeader: 'A check-in cannot be undone',

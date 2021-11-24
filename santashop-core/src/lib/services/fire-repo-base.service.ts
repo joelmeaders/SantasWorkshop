@@ -13,6 +13,10 @@ import { map, mapTo } from 'rxjs/operators';
 export class FireRepoBase {
   constructor(private readonly firestore: AngularFirestore) { }
 
+  public randomId(): string {
+    return this.firestore.createId();
+  }
+
   public read<T>(
     collectionPath: string,
     documentId: string,

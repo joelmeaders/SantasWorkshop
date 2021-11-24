@@ -9,8 +9,8 @@
     <ion-row>
       <ion-col>
 
-        <ion-segment [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event)" scrollable="true">
-          <ion-segment-button [value]="''">None</ion-segment-button>
+        <ion-segment #deviceSelection [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event)" scrollable="true">
+          <ion-segment-button #selection [value]="''">None</ion-segment-button>
             <ion-segment-button *ngFor="let device of ($availableDevices | async)" [value]="device.deviceId">
               {{ device.label | deviceNameOnly }}
             </ion-segment-button>
@@ -18,8 +18,6 @@
 
         <span>
           <zxing-scanner
-            #scanner
-            [enabled]="$cameraEnabled | async"
             [formats]="formatsEnabled"
             [device]="$deviceToUse | async"
             [autostart]="true"
@@ -40,7 +38,7 @@
   <ng-container *ngIf="hasPermission === undefined">
     <h2>Waiting for permissions.</h2>
     <blockquote>
-      If your device does not has cameras, no permissions will be asked.
+      If your device does not have cameras, no permissions will be asked.
     </blockquote>
   </ng-container>
   

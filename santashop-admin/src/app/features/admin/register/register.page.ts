@@ -3,7 +3,15 @@ import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { AgeGroup, IChild, IError, IRegistration, ToyType } from '@models/*';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
-import { takeUntil, publishReplay, refCount, map, take, filter, switchMap } from 'rxjs/operators';
+import {
+  takeUntil,
+  publishReplay,
+  refCount,
+  map,
+  take,
+  filter,
+  switchMap,
+} from 'rxjs/operators';
 import { QuickRegistrationForms } from 'santashop-admin/src/app/forms/quick-registration';
 import { CheckInHelpers } from 'santashop-admin/src/app/helpers/checkin-helpers';
 import { CheckInService } from 'santashop-admin/src/app/services/check-in.service';
@@ -13,15 +21,18 @@ import { RegistrationContextService } from '../../../services/registration-conte
   selector: 'app-register',
   templateUrl: 'register.page.html',
   styleUrls: ['register.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterPage implements OnDestroy {
+  public readonly customerForm: FormGroup =
+    QuickRegistrationForms.customerForm(undefined);
+  public readonly customerFormValidationMessages =
+    QuickRegistrationForms.customerValidationMessages();
 
-  public readonly customerForm: FormGroup = QuickRegistrationForms.customerForm(undefined);
-  public readonly customerFormValidationMessages = QuickRegistrationForms.customerValidationMessages();
-
-  public readonly childForm: FormGroup = QuickRegistrationForms.childForm(undefined);
-  public readonly childFormValidationMessages = QuickRegistrationForms.childValidationMessages();
+  public readonly childForm: FormGroup =
+    QuickRegistrationForms.childForm(undefined);
+  public readonly childFormValidationMessages =
+    QuickRegistrationForms.childValidationMessages();
 
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
@@ -33,7 +44,9 @@ export class RegisterPage implements OnDestroy {
     refCount()
   );
 
-  private readonly _$zipCode = new BehaviorSubject<number | undefined>(undefined);
+  private readonly _$zipCode = new BehaviorSubject<number | undefined>(
+    undefined
+  );
   public readonly $zipCode = this._$zipCode.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
@@ -48,7 +61,8 @@ export class RegisterPage implements OnDestroy {
   );
 
   public readonly $canCheckIn = combineLatest([
-    this.$zipCode, this.$children
+    this.$zipCode,
+    this.$children,
   ]).pipe(
     takeUntil(this.$destroy),
     map(([zip, children]) => !!zip && !!children?.length),
@@ -58,40 +72,49 @@ export class RegisterPage implements OnDestroy {
 
   private readonly _$isEdit = new BehaviorSubject<boolean>(false);
 
-  public readonly registrationEditSubscription = this.registrationContext.registration$.pipe(
-    takeUntil(this.$destroy),
-    filter(response => !!response),
-    switchMap(registration => this.initRegistrationEdit(registration))
-  ).subscribe();
+  public readonly registrationEditSubscription =
+    this.registrationContext.registration$
+      .pipe(
+        takeUntil(this.$destroy),
+        filter((response) => !!response),
+        switchMap((registration) => this.initRegistrationEdit(registration))
+      )
+      .subscribe();
 
   constructor(
     private readonly loadingController: LoadingController,
     private readonly registrationContext: RegistrationContextService,
     public readonly checkInService: CheckInService,
     private readonly alertController: AlertController
-  ) { }
+  ) {}
 
-  public async initRegistrationEdit(registration?: IRegistration): Promise<void> {
+  public async initRegistrationEdit(
+    registration?: IRegistration
+  ): Promise<void> {
     if (!registration) return;
-    this.setZip(registration.zipCode!);
+
     this.customerForm.get('zipCode')?.setValue(registration.zipCode);
+    this._$zipCode.next(registration.zipCode);
     this._$children.next(registration.children!);
     this._$isEdit.next(true);
   }
 
-  public async completeRegistration() {
-
+  public async checkIn() {
     if (this._$zipCode.getValue()?.toString().length !== 5) {
       await this.invalidZipAlert();
       return;
     }
 
-    await this.presentLoading();
     const registration = await this.createRegistration();
-    await this.checkInService.checkIn(registration, this._$isEdit.getValue());
-    this.reset();
-    this.registrationContext.reset();
-    await this.dismissLoading();
+
+    try {
+      await this.checkInService.checkIn(registration, this._$isEdit.getValue());
+    } catch {
+      // TODO: Error handling
+    } finally {
+      this.reset();
+      this.registrationContext.reset();
+    }
   }
 
   public async ngOnDestroy() {
@@ -119,8 +142,7 @@ export class RegisterPage implements OnDestroy {
   }
 
   public setZip($event: any) {
-
-    if (!$event.detail?.value || ($event.detail.value).toString().length !== 5) {
+    if (!$event.detail?.value || $event.detail.value.toString().length !== 5) {
       return;
     }
 
@@ -128,25 +150,16 @@ export class RegisterPage implements OnDestroy {
     this._$zipCode.next(value);
   }
 
-  public async presentLoading() {
-    const loading = await this.loadingController.create({
-      message: 'Saving registration...',
-      translucent: true,
-      backdropDismiss: true
-    });
-    await loading.present();
-  }
+  public async addChild() {
+    if (!(await this.infantAgeGroupValid())) {
+      return;
+    }
 
-  public async dismissLoading() {
-    await this.loadingController.dismiss();
-  }
-
-  public addChild() {
     const current = this._$children.getValue();
     const childValue = this.childForm.value as IChild;
     const newChild: Partial<IChild> = {
       ageGroup: childValue.ageGroup,
-      toyType: childValue.toyType
+      toyType: childValue.toyType,
     };
 
     current.push(newChild);
@@ -154,22 +167,51 @@ export class RegisterPage implements OnDestroy {
     this.childForm.reset();
   }
 
+  public async infantAgeGroupValid(): Promise<boolean> {
+    const ageGroup = this.childForm.get('ageGroup')?.value as AgeGroup;
+    const toyType = this.childForm.get('toyType')?.value as ToyType;
+    const invalidSelection =
+      toyType === ToyType.infant && ageGroup !== AgeGroup.age02;
+
+    if (!invalidSelection) {
+      return true;
+    }
+
+    const alert = await this.alertController.create({
+      header: 'Invalid Selection',
+      message:
+        'You can only choose <strong>Infant</strong> with the age group <strong>0-2</strong>. Change this and try again.',
+      buttons: ['OK'],
+    });
+
+    await alert.present();
+    await alert.onDidDismiss();
+    return false;
+  }
+
   public childColor = (value: ToyType) => CheckInHelpers.childColor(value);
 
   public onAgeChange($event: any) {
     const value = $event.detail.value as AgeGroup;
-    console.log(value)
+
     if (value === AgeGroup.age02) {
       this.childForm.get('toyType')?.setValue(ToyType.infant);
     }
   }
 
   private async createRegistration(): Promise<IRegistration> {
-    const registration = await this.registrationContext.registration$.pipe(take(1)).toPromise()
-      ?? {} as IRegistration;
-    registration.zipCode = this._$zipCode.getValue();
+
+    let registration: IRegistration | undefined = await this.registrationContext.registration$
+        .pipe(take(1)).toPromise();
+
+    if (!registration)
+      registration = {} as IRegistration;
+      
     const children = CheckInHelpers.sortChildren(this._$children.getValue());
+
+    registration.zipCode = this._$zipCode.getValue();
     registration.children = children as any[] as IChild[];
+
     return registration;
   }
 
@@ -180,13 +222,12 @@ export class RegisterPage implements OnDestroy {
       buttons: [
         {
           text: 'Ok',
-        }
-      ]
+        },
+      ],
     });
 
     await alert.present();
 
     return alert.onDidDismiss();
   }
-
 }

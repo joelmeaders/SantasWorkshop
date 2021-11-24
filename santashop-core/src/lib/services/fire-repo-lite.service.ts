@@ -12,6 +12,10 @@ export class FireRepoLite {
     private readonly fireRepoBase: FireRepoBase
   ) { }
 
+  public randomId(): string {
+    return this.fireRepoBase.randomId();
+  }
+
   public readonly collection = (collectionPath: string): IFireRepoCollection => ({
 
     collection: collectionPath,

@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { ErrorHandler, Injectable } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { AlertController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import {
   AgeGroup,
   COLLECTION_SCHEMA,
@@ -10,79 +10,61 @@ import {
   ToyType,
 } from '@models/*';
 import { FireRepoLite } from '@core/*';
+import { DocumentReference } from '@angular/fire/compat/firestore';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CheckInService {
-  // private readonly _$uidFromSearch =
-  //   new BehaviorSubject<string | undefined>(undefined);
-  // public readonly $uidFromSearch =
-  //   this._$uidFromSearch.pipe(
-  //     filter((value) => !!value),
-  //     map((value) => value as string)
-  //   );
-
-  // private readonly _$manualRegistrationEdit =
-  //   new BehaviorSubject<IRegistration | undefined>(undefined);
-  // public readonly $manualRegistrationEdit =
-  //   this._$manualRegistrationEdit.asObservable();
-
-  // public readonly registrationFromSearchSubscription =
-  //   this.$uidFromSearch.subscribe((value) => {
-  //     this._$registrationCode.next(value);
-  //   });
-
-  // private readonly _$registrationCode = new BehaviorSubject<string | undefined>(
-  //   undefined
-  // );
-  // public readonly $registrationCode = this._$registrationCode.pipe(
-  //   filter((value) => !!value),
-  //   distinctUntilChanged((prev, curr) => prev === curr),
-  //   publishReplay(1),
-  //   refCount()
-  // );
-
-  // public readonly $registration = this.$registrationCode.pipe(
-  //   distinctUntilChanged((prev, curr) => prev === curr),
-  //   filter((id) => !!id),
-  //   switchMap((id) => this.lookupRegistrationByQrCode(id!)),
-  //   map((response) => {
-  //     response.children = CheckInHelpers.sortChildren(response.children!) as any[] as IChild[];
-  //     return response;
-  //   })
-  // );
-
-  // public readonly $checkinRecord = this.$registration.pipe(
-  //   distinctUntilChanged((prev, curr) => prev?.uid === curr.uid),
-  //   switchMap((registration) => this.lookupCheckIn(registration.uid!))
-  // );
 
   constructor(
     private readonly repoService: FireRepoLite,
-    private readonly alertController: AlertController
+    private readonly alertController: AlertController,
+    private readonly loadingController: LoadingController,
+    private readonly errorHandler: ErrorHandler
   ) {}
 
   public async checkIn(registration: IRegistration, isEdit = false) {
-    const checkin = this.convertRegistrationToCheckIn(registration, isEdit);
 
-    const result = await this.repoService
-      .collection(COLLECTION_SCHEMA.registrationSearchIndex)
-      .addById(checkin.customerId!, checkin)
-      .pipe(take(1))
-      .toPromise();
-
-    const alert = await this.alertController.create({
-      header: 'Check-In Complete',
-      buttons: [
-        {
-          text: 'Ok',
-        },
-      ],
+    const loading = await this.loadingController.create({
+      message: 'Saving check-in...',
+      translucent: true,
+      backdropDismiss: true
     });
 
-    await alert.present();
-    await alert.onDidDismiss();
+    await loading.present();
+
+    let alert: HTMLIonAlertElement | undefined = undefined;
+    let result: DocumentReference<ICheckIn> | undefined = undefined; 
+
+    try {
+      const checkin = this.convertRegistrationToCheckIn(registration, isEdit);
+
+      const saveMethod = checkin.stats?.preregistered
+        ? this.repoService.collection(COLLECTION_SCHEMA.checkins).addById(checkin.customerId!, checkin)
+        : this.repoService.collection(COLLECTION_SCHEMA.checkins).add(checkin)
+      
+        result = await saveMethod.pipe(take(1)).toPromise();
+
+        alert = await this.alertController.create({
+          header: 'Check-In Complete',
+          buttons: [
+            {
+              text: 'Ok',
+            },
+          ],
+        });
+
+        await alert.present();
+    }
+    catch (error) {
+      await this.loadingController.dismiss();
+      this.errorHandler.handleError(error);
+    }
+    finally {
+      await this.loadingController.dismiss();
+    }
+
     return Promise.resolve(result);
   }
 
@@ -90,13 +72,19 @@ export class CheckInService {
     registration: IRegistration,
     isEdit: boolean
   ): ICheckIn {
+
     const checkin: ICheckIn = {
-      customerId: registration.uid!,
-      registrationCode: registration.qrcode!,
       checkInDateTime: new Date(),
       inStats: false,
-      stats: this.registrationStats(registration, isEdit),
     };
+
+    if (registration.uid)
+      checkin.customerId = registration.uid;
+    
+    if (registration.qrcode)
+      checkin.registrationCode = registration.qrcode;
+    
+    checkin.stats = this.registrationStats(registration, isEdit);
 
     return checkin;
   }

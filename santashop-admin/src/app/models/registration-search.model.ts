@@ -1,9 +1,9 @@
-export class RegistrationSearch {
+export interface IRegistrationSearch {
 
-  public firstName?: string;
+  firstName?: string;
 
-  public lastName?: string;
+  lastName?: string;
 
-  public registrationCode?: string;
+  registrationCode?: string;
 
 }

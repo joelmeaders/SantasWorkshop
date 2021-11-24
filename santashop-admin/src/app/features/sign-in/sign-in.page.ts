@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { IAuth } from '@models/*';
+import { IError } from '@models/*';
 import { Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
-import { AuthService, IError } from 'santashop-core/src';
 import { SignInForm } from '../../forms/sign-in';
 
 @Component({
@@ -20,13 +21,6 @@ export class SignInPage implements OnDestroy {
   public readonly $error = new Subject<IError>();
   private readonly $destroy = new Subject<void>();
 
-  private readonly authRedirectionSubscription = this.authService.$isAdmin.pipe(
-    takeUntil(this.$destroy),
-    filter(response => !!response)
-  ).subscribe(() => {
-    this.router.navigate(['/admin']);
-  });
-
   constructor(
     private readonly authService: AuthService,
     private readonly loadingController: LoadingController,
@@ -40,7 +34,9 @@ export class SignInPage implements OnDestroy {
 
   public async login() {
 
-    const loginInfo = { ...this.form.value };
+    const loginInfo: IAuth = {
+      ...this.form.value
+    };
 
     if (loginInfo.emailAddress == null || loginInfo.password == null) {
       return;
@@ -49,8 +45,8 @@ export class SignInPage implements OnDestroy {
     await this.presentLoading();
 
     const result = await this.authService
-      .login(loginInfo.emailAddress, loginInfo.password)
-      .then(async (response) => true)
+      .login(loginInfo)
+      .then(() => true)
       .catch(async (error: IError) => {
         this.handleError(error);
         return false;

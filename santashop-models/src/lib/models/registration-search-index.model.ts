@@ -2,7 +2,7 @@ export interface RegistrationSearchIndex {
   firstName: string;
   lastName: string;
   email: string;
-  userId: string;
+  customerId: string;
   zipCode: number;
   qrCode?: string;
 }

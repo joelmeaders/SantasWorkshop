@@ -1,5 +1,6 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { IChild, CommonForms, IUser } from 'santashop-core/src';
+import { CommonForms } from '@core/*';
+import { IUser, IChild } from '@models/*';
 
 export abstract class QuickRegistrationForms {
 
@@ -7,7 +8,7 @@ export abstract class QuickRegistrationForms {
     zipCode: Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(5)]),
   };
 
-  public static customerForm(value: IUser): FormGroup {
+  public static customerForm(value: IUser | undefined): FormGroup {
     return CommonForms.formBuilder().group({
       zipCode: [value?.zipCode ?? undefined, this.customerValidators.zipCode],
     });
@@ -24,7 +25,7 @@ export abstract class QuickRegistrationForms {
     ageGroup: Validators.compose([Validators.required]),
   };
 
-  public static childForm(value: IChild): FormGroup {
+  public static childForm(value: IChild | undefined): FormGroup {
     return CommonForms.formBuilder().group({
       toyType: [value?.toyType ?? undefined, this.childValidators.toyType],
       ageGroup: [value?.ageGroup ?? undefined, this.childValidators.ageGroup],

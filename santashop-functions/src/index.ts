@@ -128,6 +128,12 @@ export const scheduledDateTimeSlotReschedules =
     await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
   });
 
+export const scheduledSetAdminRights = 
+  functions.pubsub.schedule('59 23 * * *')
+  .onRun(async () => {
+    await (await import('./fn/scheduledSetAdminRights')).default();
+  });
+
 // export const scheduledAddDateTimeSlots =
 //   functions.pubsub.schedule('every day')
 //   .onRun(async () => {

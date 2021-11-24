@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
-import { QueryFn } from '@angular/fire/compat/firestore';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { RegistrationSearchIndex } from '@models/*';
+import { BehaviorSubject } from 'rxjs';
 import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
-import { FireCRUDStateless, RegistrationSearchIndex } from 'santashop-core/src';
 import { chain } from 'underscore';
-import { RegistrationSearch } from '../models/registration-search.model';
+import { IRegistrationSearch } from '../models/registration-search.model';
+import { LookupService } from './lookup.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RegistrationSearchService {
 
-  private readonly INDEX_COLLECTION = 'registrationsearchindex';
+  // Passthrough function
+  public readonly getRegistrationByUid$ = 
+    this.lookupService.getRegistrationByUid$; 
 
-  private readonly _$searchState = new BehaviorSubject<RegistrationSearch>(undefined);
+  private readonly _$searchState = new BehaviorSubject<IRegistrationSearch | undefined>(undefined);
   public readonly $searchState = this._$searchState.pipe(
     publishReplay(1),
     refCount()
@@ -25,7 +27,7 @@ export class RegistrationSearchService {
     refCount()
   );
 
-  private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[]>(undefined);
+  private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[] | undefined>(undefined);
   public readonly $searchResults = this._$searchResults.pipe(
     publishReplay(1),
     refCount()
@@ -35,35 +37,18 @@ export class RegistrationSearchService {
     filter(isValid => isValid === true),
     switchMap(() => this.$searchState),
     filter(state => this.isSearchStateValid(state)),
-    switchMap(state => !!state.registrationCode
-      ? this.queryByCode(state.registrationCode)
-      : this.queryByName(state.firstName, state.lastName)
-    )
+    switchMap(state => !!state?.registrationCode
+      ? this.lookupService.searchIndexByQrCode$(state.registrationCode)
+      : this.lookupService.searchIndexByName$(state?.firstName!, state?.lastName!)
+    ),
+    map(results => this.orderResultsByName(results))
   )
 
   constructor(
-    private readonly httpService: FireCRUDStateless
+    private readonly lookupService: LookupService
   ) { }
 
-  public queryByCode(id: string): Observable<RegistrationSearchIndex[]> {
-    const query: QueryFn = qry => qry
-      .where('code', '==', id)
-      .orderBy('lastName', 'asc')
-      .orderBy('firstName', 'asc');
-    return this.httpService.readMany<RegistrationSearchIndex>(this.INDEX_COLLECTION, query, 'customerId')
-      .pipe(take(1));
-  }
-
-  public queryByName(firstName: string, lastName: string): Observable<RegistrationSearchIndex[]> {
-    const query: QueryFn = qry => qry
-      .where('firstName', '==', firstName)
-      .where('lastName', '>=', lastName).where('lastName', '<=', lastName + '\uf8ff')
-      .limit(50);
-    return this.httpService.readMany<RegistrationSearchIndex>(this.INDEX_COLLECTION, query, 'customerId')
-      .pipe(take(1),map(results => this.orderNameResults(results)));
-  }
-
-  private orderNameResults(results: RegistrationSearchIndex[]) {
+  private orderResultsByName(results: RegistrationSearchIndex[]) {
     if (!results?.length) {
       return results;
     }
@@ -75,7 +60,7 @@ export class RegistrationSearchService {
     this._$searchResults.next(results);
   }
 
-  public setSearchState(search: RegistrationSearch) {
+  public setSearchState(search: IRegistrationSearch) {
     this._$searchState.next(search);
     const isValid = this.isSearchStateValid(search);
 
@@ -86,7 +71,7 @@ export class RegistrationSearchService {
     this._$searchStateValid.next(isValid);
   }
 
-  private formatSearchStrings(search: RegistrationSearch) {
+  private formatSearchStrings(search: IRegistrationSearch) {
     if (!!search.registrationCode) {
       search.registrationCode = search.registrationCode.toUpperCase();
     }
@@ -100,13 +85,13 @@ export class RegistrationSearchService {
     }
   }
 
-  private isSearchStateValid(search: RegistrationSearch): boolean {
+  private isSearchStateValid(search?: IRegistrationSearch): boolean {
 
     if (search == undefined) {
       return false;
     }
 
-    const hasNames = search.firstName?.length > 1 && search.lastName?.length > 1;
+    const hasNames = (search?.firstName?.length ?? 0) > 1 && (search?.lastName?.length ?? 0) > 1;
     const hasCode = !!search.registrationCode && search.registrationCode.length === 8;
 
     return hasNames || hasCode;

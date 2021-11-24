@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, forkJoin, Subject } from 'rxjs';
 import { publishReplay, refCount, switchMap, map } from 'rxjs/operators';
-import { ManualOperationsService } from 'santashop-admin/src/app/services/manual-operations.service';
 import { StatsService } from 'santashop-admin/src/app/services/stats.service';
 
 @Component({
@@ -96,11 +95,11 @@ export class StatsPage implements OnDestroy {
 
   constructor(
     private readonly statsService: StatsService,
-    private readonly manualService: ManualOperationsService
+    // private readonly manualService: ManualOperationsService
   ) { }
 
   public async manualAgeStats() {
-    await this.manualService.aggregateAgeGroups();
+    // await this.manualService.aggregateAgeGroups();
   }
 
   public async ngOnDestroy() {

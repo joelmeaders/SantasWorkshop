@@ -1,12 +1,12 @@
 import { writeFile } from 'fs';
-import { name, version } from './package.json';
+import { version } from './package.json';
 
 const targetPath = './santashop-admin/src/environments/environment.prod.ts';
 
 const envConfigFile = `export const environment = {
     production: true,
-    label: PROD
-    name: '${name}',
+    label: 'PROD',
+    name: 'SWAdmin',
     version: '${version}'
   };
 

@@ -1,19 +1,23 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { AdminGuard } from './guards/admin.guard';
-import { AuthGuard } from './guards/auth.guard';
+import { AngularFireAuthGuard, redirectLoggedInTo, hasCustomClaim } from '@angular/fire/compat/auth-guard';
+
+const adminOnly = () => hasCustomClaim('admin');
+const redirectLoggedInToItems = () => redirectLoggedInTo(['admin']);
 
 const routes: Routes = [
   {
     path: '',
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectLoggedInToItems },
     loadChildren: () => import('./features/sign-in/sign-in.module').then(m => m.SignInPageModule),
     pathMatch: 'full'
   },
   {
     path: 'admin',
-    canLoad: [AuthGuard],
-    canActivate: [AdminGuard],
-    loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminPageModule),
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: adminOnly },
+    loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminPageModule)
   }
 ];
 @NgModule({

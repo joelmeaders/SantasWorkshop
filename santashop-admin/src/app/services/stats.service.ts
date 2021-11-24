@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { from, Observable } from 'rxjs';
-import { map, mergeMap, pluck, reduce, switchMap, take, tap } from 'rxjs/operators';
+import { FireRepoLite } from '@core/*';
+import { COLLECTION_SCHEMA, IDateTimeCount, IZipCodeCount } from '@models/*';
+import { from } from 'rxjs';
+import { map, pluck, reduce, switchMap, take } from 'rxjs/operators';
 import { ICheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
-import { FireCRUDStateless, IDateTimeCount, IZipCodeCount } from 'santashop-core/src';
 import { chain, sortBy } from 'underscore';
-import { Counter } from '../models/counter.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class StatsService {
 
   private readonly COUNTER_COLLECTION = 'counters';
 
-  private readonly $registrationStats = this.httpService.readOne('stats', 'registration-2020').pipe(
+  private readonly $registrationStats = this.httpService.collection(COLLECTION_SCHEMA.stats).read<MISSINGTYPE>('registration-2020').pipe(
     take(1)
   );
 
@@ -34,7 +34,7 @@ export class StatsService {
     map((stats: IZipCodeCount) => sortBy(stats, 'childCount').reverse() as IZipCodeCount[])
   );
 
-  private readonly $checkInStats = this.httpService.readOne<ICheckInAggregatedStats>('stats', 'checkin-2020').pipe(
+  private readonly $checkInStats = this.httpService.collection(COLLECTION_SCHEMA.stats).read<ICheckInAggregatedStats>('checkin-2020').pipe(
     take(1)
   );
 
@@ -73,38 +73,6 @@ export class StatsService {
   );
 
   constructor(
-    private readonly httpService: FireCRUDStateless
+    private readonly httpService: FireRepoLite
   ) { }
-
-  private $getCount<Counter>(results: Counter[]): Observable<number> {
-    return from(results).pipe(
-      pluck('count'),
-      reduce((acc: number, curr) => acc + curr)
-    );
-  }
-
-  public customers(): Observable<number> {
-    return this.baseCountQuery('customers').pipe(
-      take(1),
-      mergeMap(this.$getCount)
-    );
-  }
-
-  public registrations(): Observable<number> {
-    return this.baseCountQuery('registrations').pipe(
-      take(1),
-      mergeMap(this.$getCount)
-    );
-  }
-
-  public children(): Observable<number> {
-    return this.baseCountQuery('children').pipe(
-      take(1),
-      mergeMap(this.$getCount)
-    );
-  }
-
-  private baseCountQuery(path: string): Observable<Counter[]> {
-    return this.httpService.readMany<Counter>(`${this.COUNTER_COLLECTION}/${path}/shards`);
-  }
 }

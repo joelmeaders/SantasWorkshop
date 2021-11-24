@@ -1,28 +1,32 @@
-import { IChildrenInfo } from 'santashop-models/src/lib/models';
 import { chain } from 'underscore';
-import firebase from 'firebase/compat/app';
+import { Timestamp } from '@firebase/firestore';
 import { format } from 'date-fns';
+import { IChild, ToyType } from '@models/*';
 
 export abstract class CheckInHelpers {
 
-  public static sortChildren(children: IChildrenInfo[]) {
-    return chain(children).sortBy('a').value();
+  public static sortChildren(children: IChild | Partial<IChild>[]) {
+    return chain(children).sortBy('ageGroup').value();
   }
 
-  public static childColor(value: string): string {
+  public static childColor(value: ToyType): string | undefined {
+
     switch (value) {
-      case 'b':
+      case ToyType.boy:
         return 'boy';
 
-      case 'g':
+      case ToyType.girl:
         return 'girl';
 
-        case 'i':
+      case ToyType.infant:
         return 'infant';
+
+      default: 
+        return undefined
     }
   }
 
-  public static friendlyTimestamp(timestamp: firebase.firestore.Timestamp): string {
+  public static friendlyTimestamp(timestamp: Timestamp | any): string {
     return format(timestamp.toDate(), 'MMM dd, YYY h:mm a');
   }
 }

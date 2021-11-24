@@ -1,17 +1,23 @@
 import { NgModule } from '@angular/core';
+import { AngularFireAuthGuard, hasCustomClaim } from '@angular/fire/compat/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
-import { AdminGuard } from '../../guards/admin.guard';
+import { ConfirmDeactivateGuard } from '../../guards/disable-camera.guard';
 import { AdminPage } from './admin.page';
+
+const adminOnly = () => hasCustomClaim('admin');
+
 
 const routes: Routes = [
   {
     path: '',
     component: AdminPage,
-    canActivateChild: [AdminGuard],
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: adminOnly },
     children: [
       {
         path: 'scanner',
-        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule)
+        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule),
+        canDeactivate: [ ConfirmDeactivateGuard ]
       },
       {
         path: 'search',
@@ -21,24 +27,24 @@ const routes: Routes = [
         path: 'register',
         loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
       },
-      {
-        path: 'stats',
-        loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
-      },
-      {
-        path: 'test',
-        loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)
-      },
+      // {
+      //   path: 'stats',
+      //   loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
+      // },
+      // {
+      //   path: 'test',
+      //   loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)
+      // },
       {
         path: '',
-        redirectTo: '/admin/stats',
+        redirectTo: '/admin/register',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/admin/stats',
+    redirectTo: '/admin/register',
     pathMatch: 'full'
   }
 

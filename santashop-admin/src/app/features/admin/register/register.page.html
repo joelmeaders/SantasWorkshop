@@ -21,9 +21,13 @@
             <ion-list>
               <form [formGroup]="customerForm" novalidate>
                 <ion-item *appLet="'zipCode' as controlName">
-                  <ion-label position="floating" class="ion-padding-bottom">Zip Code</ion-label>
-                  <ion-input [formControlName]="controlName" debounce="750" (ionChange)="setZip($event.detail.value)" debounce="750"></ion-input>
+                  <ion-label>
+                    Zip Code 
+                  </ion-label>
+                  <ion-input [formControlName]="controlName" debounce="750" (ionChange)="setZip($event)" debounce="750"></ion-input>
                 </ion-item>
+                <ion-note color="danger" class="ion-padding-start"> (Required) </ion-note>
+
               </form>
 
               <ion-item class="ion-margin-top">
@@ -33,12 +37,12 @@
               </ion-item>
 
               <form [formGroup]="childForm" novalidate>
-                <ion-radio-group *appLet="'ageGroup' as controlName" [formControlName]="controlName" (ionChange)="onAgeChange($event.detail.value)">
+                <ion-radio-group *appLet="'ageGroup' as controlName" [formControlName]="controlName" (ionChange)="onAgeChange($event)">
                   <ion-grid>
                     <ion-row>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="0"></ion-radio>
+                          <ion-radio slot="start" value="0-2"></ion-radio>
                           <ion-label>
                             0-2
                           </ion-label>
@@ -46,7 +50,7 @@
                       </ion-col>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="3"></ion-radio>
+                          <ion-radio slot="start" value="3-5"></ion-radio>
                           <ion-label>
                             3-5
                           </ion-label>
@@ -54,7 +58,7 @@
                       </ion-col>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="6"></ion-radio>
+                          <ion-radio slot="start" value="6-8"></ion-radio>
                           <ion-label>
                             6-8
                           </ion-label>
@@ -62,7 +66,7 @@
                       </ion-col>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="9"></ion-radio>
+                          <ion-radio slot="start" value="9-11"></ion-radio>
                           <ion-label>
                             9-11
                           </ion-label>
@@ -77,7 +81,7 @@
                     <ion-row>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="i"></ion-radio>
+                          <ion-radio slot="start" value="infants"></ion-radio>
                           <ion-label>
                             Infant
                           </ion-label>
@@ -85,7 +89,7 @@
                       </ion-col>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="b"></ion-radio>
+                          <ion-radio slot="start" value="boys"></ion-radio>
                           <ion-label>
                             Boy
                           </ion-label>
@@ -93,7 +97,7 @@
                       </ion-col>
                       <ion-col>
                         <ion-item lines="none">
-                          <ion-radio slot="start" value="g"></ion-radio>
+                          <ion-radio slot="start" value="girls"></ion-radio>
                           <ion-label>
                             Girl
                           </ion-label>
@@ -127,22 +131,27 @@
                   <ion-title class="ion-float-start">
                     Zip Code
                   </ion-title>
-                  <ion-title class="ion-float-end">
+                  <ion-title class="ion-float-end" *ngIf="$zipCode | async; else missingZipCode">
                     {{ $zipCode | async }}
                   </ion-title>
+                  <ng-template #missingZipCode>
+                    <ion-title class="ion-float-end" color="danger">
+                      MISSING!
+                    </ion-title>
+                  </ng-template>
                 </div>
               </ion-item>
 
               <ion-list-header>
                 Children
               </ion-list-header>
-              <ion-item *ngFor="let child of ($children | async); let i = index;" [color]="childColor(child.t)" class="ion-margin-top" lines="none">
+              <ion-item *ngFor="let child of ($children | async); let i = index;" [color]="childColor(child.toyType!)" class="ion-margin-top" lines="none">
                 <div class="width-max">
                   <ion-title class="ion-float-start">
-                    {{ child.a | hydrateAgeGroup }}
+                    {{ child.ageGroup }}
                   </ion-title>
                   <ion-title class="ion-float-end">
-                    {{ child.t | hydrateToyType }}
+                    {{ child.toyType! | friendlyToyType }}
                   </ion-title>
                 </div>
                 <ion-button slot="end" size="medium" color="white" (click)="deleteChild(i)">
@@ -150,7 +159,7 @@
                 </ion-button>
               </ion-item>
 
-              <ion-item button tappable lines="none" color="primary" class="ion-margin-top" (click)="completeRegistration()" [disabled]="!($canCheckIn | async)">
+              <ion-item button tappable lines="none" color="primary" class="ion-margin-top" (click)="checkIn()" [disabled]="!($canCheckIn | async)">
                 <ion-label>Done, Check In</ion-label>
                 <ion-icon slot="end" name="save" button tappable></ion-icon>
               </ion-item>

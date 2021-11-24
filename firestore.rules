@@ -11,7 +11,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/parameters/admin).data.adminusers;
+      return isSignedIn() && request.auth.token.admin;
     }
 
     match /users/{userId} {

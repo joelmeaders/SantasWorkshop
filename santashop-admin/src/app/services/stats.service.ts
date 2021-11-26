@@ -36,11 +36,15 @@ export class StatsService {
 
   public readonly $registrationDateTimeCounts = this.$registrationStats.pipe(
     take(1),
-    map((stats: any) => stats.dateTimeCount as IDateTimeCount),
+    map((stats) => stats.dateTimeCount),
+    map(stats => {
+      stats.forEach(stat => stat.dateTime = (<any>stat.dateTime as Timestamp).toDate());
+      return stats;
+    }),
     map((stats) => {
       const sorted: IDateTimeCount[] = sortBy(stats, 'dateTime')
-      const grouped = groupBy(sorted, 'dateTime');
-      return grouped;
+      // const grouped = groupBy(sorted, 'dateTime');
+      return sorted;
     }),
   );
 

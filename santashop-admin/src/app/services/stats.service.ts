@@ -1,31 +1,47 @@
 import { Injectable } from '@angular/core';
 import { FireRepoLite } from '@core/*';
-import { COLLECTION_SCHEMA, IDateTimeCount, IZipCodeCount } from '@models/*';
+import { COLLECTION_SCHEMA, IDateTimeCount, IRegistrationStats, IZipCodeCount } from '@models/*';
 import { from } from 'rxjs';
 import { map, pluck, reduce, switchMap, take } from 'rxjs/operators';
 import { ICheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
-import { chain, sortBy } from 'underscore';
+import { groupBy, sortBy } from 'underscore';
+import { Timestamp } from '@firebase/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StatsService {
 
-  private readonly COUNTER_COLLECTION = 'counters';
+  private readonly statsCollection = this.httpService.collection(COLLECTION_SCHEMA.stats);
 
-  private readonly $registrationStats = this.httpService.collection(COLLECTION_SCHEMA.stats).read<MISSINGTYPE>('registration-2020').pipe(
-    take(1)
-  );
+  private readonly $registrationStats = this.statsCollection
+    .read<IRegistrationStats>('registration-2021').pipe(
+      take(1)
+    );
 
   public readonly $completedRegistrations = this.$registrationStats.pipe(
     take(1),
     map((stats: any) => stats.completedRegistrations as number)
   );
 
+  public readonly $registeredChildrenCount = this.$registrationStats.pipe(
+    take(1),
+    map((stats) => stats.dateTimeCount.map(e => e.childCount)),
+    map(counts => {
+      let value = 0;
+      counts.forEach(c => value += c);
+      return value;
+    })
+  );
+
   public readonly $registrationDateTimeCounts = this.$registrationStats.pipe(
     take(1),
     map((stats: any) => stats.dateTimeCount as IDateTimeCount),
-    map((stats) => chain(stats).sortBy('time').groupBy('date').value()),
+    map((stats) => {
+      const sorted: IDateTimeCount[] = sortBy(stats, 'dateTime')
+      const grouped = groupBy(sorted, 'dateTime');
+      return grouped;
+    }),
   );
 
   public readonly $zipCodeCounts = this.$registrationStats.pipe(
@@ -34,18 +50,27 @@ export class StatsService {
     map((stats: IZipCodeCount) => sortBy(stats, 'childCount').reverse() as IZipCodeCount[])
   );
 
-  private readonly $checkInStats = this.httpService.collection(COLLECTION_SCHEMA.stats).read<ICheckInAggregatedStats>('checkin-2020').pipe(
-    take(1)
-  );
+  private readonly $checkInStats = this.statsCollection
+    .read<ICheckInAggregatedStats>('checkin-2021').pipe(
+      take(1),
+      map(stats => {
+        stats.lastUpdated = (<any>stats.lastUpdated as Timestamp).toDate();
+        return stats;
+      })
+    );
 
   public readonly $checkInLastUpdated = this.$checkInStats.pipe(
-    pluck('lastUpdated'),
-    map((updated) => updated.toDate().toLocaleString())
+    map((updated) => updated.lastUpdated.toLocaleString())
   );
 
   public readonly $checkInDateTimeCounts = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
-    map(counts => chain(counts).sortBy('hour').reverse().groupBy('date').value()),
+    // map(counts => chain(counts).sortBy('hour').reverse().groupBy('date').value()),
+    map(counts => {
+      const sorted = sortBy(counts, 'dateTime').reverse();
+      const grouped = groupBy(sorted, 'dateTime');
+      return grouped;
+    })
   );
 
   public readonly $checkInTotalCustomerCount = this.$checkInStats.pipe(

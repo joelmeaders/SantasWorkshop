@@ -4,7 +4,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { SharedModule } from 'santashop-admin/src/app/components/shared.module';
-import { FriendlyTimePipe } from 'santashop-admin/src/app/pipes/friendly-time.pipe';
 import { StatsPageRoutingModule } from './stats-routing.module';
 import { StatsPage } from './stats.page';
 
@@ -18,7 +17,6 @@ import { StatsPage } from './stats.page';
     SharedModule
   ],
   providers: [
-    FriendlyTimePipe
   ],
   declarations: [StatsPage]
 })

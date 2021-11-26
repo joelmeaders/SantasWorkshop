@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-segment value="$view | async" (ionChange)="changeView($event.detail.value)">
+    <ion-segment value="$view | async" (ionChange)="changeView($event)">
       <ion-segment-button value="registration">
         Registrations
       </ion-segment-button>
@@ -18,7 +18,7 @@
         <ion-col size-sm size="12">
           <ion-card class="ion-text-center">
             <ion-card-header>
-              <ion-text class="stat-value"> {{ $customers | async }} </ion-text>
+              <ion-text class="stat-value"> {{ $registrations | async }} </ion-text>
             </ion-card-header>
             <ion-card-content>
               <ion-card-title> Customers </ion-card-title>
@@ -57,7 +57,7 @@
           <ion-card class="ion-text-center">
             <ion-card-header>
               <ion-text class="stat-value">
-                {{ $childrenPerCustomer | async }}
+                {{ $childrenPerRegistration | async }}
               </ion-text>
             </ion-card-header>
             <ion-card-content>
@@ -101,7 +101,7 @@
                     <ion-row>
                       <ion-col size="3"> </ion-col>
                       <ion-col size="3">
-                        {{ value.time | friendlyTime }}
+                        {{ value.dateTime | date:'d, h:mm a':'MST' }}
                       </ion-col>
                       <ion-col size="3"> {{ value.count }} </ion-col>
                       <ion-col size="3"> {{ value.childCount }} </ion-col>

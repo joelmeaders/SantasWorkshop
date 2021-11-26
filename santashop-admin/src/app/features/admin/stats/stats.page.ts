@@ -21,23 +21,18 @@ export class StatsPage implements OnDestroy {
 
   public readonly now = new Date().toLocaleString();
 
-  public readonly $customers = this.statsService.customers().pipe(
-    publishReplay(1),
-    refCount()
-  );
-
   public readonly $registrations = this.statsService.$completedRegistrations.pipe(
     publishReplay(1),
     refCount()
   );
 
-  public readonly $children = this.statsService.children().pipe(
+  public readonly $children = this.statsService.$registeredChildrenCount.pipe(
     publishReplay(1),
     refCount()
   );
 
-  public readonly $childrenPerCustomer = this.$children.pipe(
-    switchMap(children => this.$customers.pipe(
+  public readonly $childrenPerRegistration = this.$children.pipe(
+    switchMap(children => this.$registrations.pipe(
       map(customers => (children / customers).toFixed(2))
     )),
     publishReplay(1),
@@ -106,7 +101,8 @@ export class StatsPage implements OnDestroy {
     this.$destroy.next();
   }
 
-  public changeView(value: 'registration' | 'checkin') {
+  public changeView($event: any) {
+    const value: 'registration' | 'checkin' = $event.detail.value;
     this._$view.next(value);
   }
 }

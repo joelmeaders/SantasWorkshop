@@ -31,20 +31,16 @@ const routes: Routes = [
         path: 'stats',
         loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
       },
-      // {
-      //   path: 'test',
-      //   loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)
-      // },
       {
         path: '',
-        redirectTo: '/admin/register',
+        redirectTo: '/admin/stats',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/admin/register',
+    redirectTo: '/admin/stats',
     pathMatch: 'full'
   }
 

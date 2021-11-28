@@ -153,12 +153,12 @@ export const scheduledSetAdminRights =
 //   });
 
   
-// export const scheduledRegistrationStats = functions.pubsub
-//     .schedule("0 0 * * *")
-//     .timeZone("America/Denver")
-//     .onRun(async (context) => {
-//       await (await import("./fn/scheduledRegistrationStats")).default();
-//     });
+export const scheduledRegistrationStats = functions.pubsub
+  .schedule('59 23 * * *')
+  .timeZone('America/Denver')
+  .onRun(async () => {
+    await (await import('./fn/scheduledRegistrationStats')).default();
+  });
 
 // Runs every 5 minutes between 10am-4pm, on the 11th, 12th, 14th, 15th of December
 // export const scheduledCheckInStats = functions.pubsub

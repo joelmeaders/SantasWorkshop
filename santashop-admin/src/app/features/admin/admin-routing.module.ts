@@ -27,10 +27,10 @@ const routes: Routes = [
         path: 'register',
         loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
       },
-      // {
-      //   path: 'stats',
-      //   loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
-      // },
+      {
+        path: 'stats',
+        loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
+      },
       // {
       //   path: 'test',
       //   loadChildren: () => import('./test/test.module').then( m => m.TestPageModule)

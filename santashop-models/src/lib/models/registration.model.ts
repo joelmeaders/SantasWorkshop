@@ -24,6 +24,10 @@ export interface IRegistration {
   // This value is false until a scheduled function updates
   // slot counts with this record.
   includedInCounts?: false | Date;
+
+  // This value is false until a scheduled function updates
+  // registration with this record.
+  includedInRegistrationStats?: false | Date;
   
   zipCode?: number;
 

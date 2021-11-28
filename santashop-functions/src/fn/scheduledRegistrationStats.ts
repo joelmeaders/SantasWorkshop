@@ -1,100 +1,100 @@
-// import * as admin from "firebase-admin";
-// import {
-//   CompletedRegistration,
-//   getAllRegistrationData,
-//   isRegistrationComplete,
-// } from "../utility/registrations";
+import * as admin from 'firebase-admin';
+import { IDateTimeCount, IRegistration, IZipCodeCount } from '../../../santashop-models/src/lib/models';
 
-// admin.initializeApp();
+admin.initializeApp();
 
-// let completedRegistrations = 0;
-// let dateTimeCount: IDateTimeCount[] = [];
-// let zipCodeCount: IZipCodeCount[] = [];
+export default async () => {
+  
+  const registrationsSnapshots = await registrationQuery().get();
+  const registrations: IRegistration[] = [];
 
-// export default async () => {
-//   await admin
-//       .firestore()
-//       .collection("registrations")
-//       .get()
-//       .then((snapshot) =>
-//         snapshot.forEach((doc) => {
-//           const docData = getAllRegistrationData(doc.data());
+  registrationsSnapshots.forEach(doc => {
+    const registration = {
+      ...doc.data()
+    } as IRegistration;
+    registrations.push(registration);
+  });
 
-//           if (isRegistrationComplete(docData)) {
-//             completedRegistrations += 1;
-//             updateDateTimeCount(docData);
-//             updateZipCodeCount(docData);
-//           }
-//         })
-//       );
+  const completedRegistrations = registrations.length;
 
-//   const stats: any = {
-//     completedRegistrations: completedRegistrations,
-//     dateTimeCount: dateTimeCount,
-//     zipCodeCount: zipCodeCount,
-//   };
+  // TODO: Read stats record instead of making new one
+  const stats: any = {
+    completedRegistrations: completedRegistrations,
+    dateTimeCount: getDateTimeStats(registrations),
+    zipCodeCount: getZipCodeStats(registrations),
+  };
 
-//   await admin
-//       .firestore()
-//       .collection("stats")
-//       .doc("registration-2020")
-//       .set(stats, {merge: false});
+  return admin
+      .firestore()
+      .collection('stats')
+      .doc('registration-2021')
+      .set(stats, {merge: false});
+};
 
-//   completedRegistrations = 0;
-//   dateTimeCount = [];
-//   zipCodeCount = [];
+function getDateTimeStats(registrations: IRegistration[]): IDateTimeCount[] {
 
-//   return null;
-// };
+  const stats: IDateTimeCount[] = [];
 
-// function updateDateTimeCount(registration: CompletedRegistration): void {
-//   const index = dateTimeCount.findIndex(
-//       (e) => e.date === registration.date && e.time === registration.time
-//   );
+  const getIndex = (dateTime: Date) => 
+    stats.findIndex(e => dateTime.getTime() == e.dateTime.getTime());
 
-//   if (index > -1) {
-//     dateTimeCount[index].count += 1;
-//     dateTimeCount[index].childCount += registration.children.length;
-//     return;
-//   }
+  registrations.forEach(registration => {
 
-//   const newItem: IDateTimeCount = {
-//     date: registration.date,
-//     time: registration.time,
-//     count: 1,
-//     childCount: registration.children.length,
-//   };
+    const timestamp: admin.firestore.Timestamp = registration.dateTimeSlot!.dateTime! as any;
+    const dateTime = timestamp.toDate();
+    const index = getIndex(dateTime);
+    let stat: IDateTimeCount;
 
-//   dateTimeCount.push(newItem);
-// }
+    if (index === -1) {
+      stat = {
+        dateTime: dateTime,
+        count: 1,
+        childCount: registration.children!.length
+      } as IDateTimeCount;
+      stats.push(stat);
+    }
+    else {
+      stats[index].count += 1;
+      stats[index].childCount += registration.children!.length;
+    }
+  });
 
-// function updateZipCodeCount(registration: CompletedRegistration): void {
-//   const index = zipCodeCount.findIndex((e) => e.zip === registration.zipCode);
+  return stats;
+}
 
-//   if (index > -1) {
-//     zipCodeCount[index].count += 1;
-//     zipCodeCount[index].childCount += registration.children.length;
-//     return;
-//   }
+function getZipCodeStats(registrations: IRegistration[]): IZipCodeCount[] {
 
-//   const newItem: IZipCodeCount = {
-//     zip: registration.zipCode,
-//     count: 1,
-//     childCount: registration.children.length,
-//   };
+  const stats: IZipCodeCount[] = [];
 
-//   zipCodeCount.push(newItem);
-// }
+  const getIndex = (zipCode: number) => 
+    stats.findIndex(e => zipCode === e.zip);
 
-// interface IDateTimeCount {
-//   date: string;
-//   time: string;
-//   count: number;
-//   childCount: number;
-// }
+  registrations.forEach(registration => {
 
-// interface IZipCodeCount {
-//   zip: string;
-//   count: number;
-//   childCount: number;
-// }
+    const zipString = registration.zipCode!.toString().substr(0, 5);
+    const zipCode = Number.parseInt(zipString);
+    const index = getIndex(zipCode);
+    let stat: IZipCodeCount;
+
+    if (index === -1) {
+      stat = {
+        zip: zipCode,
+        count: 1,
+        childCount: registration.children!.length
+      } as IZipCodeCount;
+      stats.push(stat);
+    }
+    else {
+      stats[index].count += 1;
+      stats[index].childCount += registration.children!.length;
+    }
+  });
+
+  return stats;
+}
+
+const registrationQuery = () =>
+  admin.firestore().collection('registrations')
+  .where('programYear', '==', 2021)
+  .where('registrationSubmittedOn', '!=', '');
+  // .where('includedInRegistrationStats', '==', false);

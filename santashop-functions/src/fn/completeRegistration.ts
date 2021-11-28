@@ -46,6 +46,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   const updateRegistrationFields = {
     registrationSubmittedOn: new Date(),
     includedInCounts: false,
+    includedInRegistrationStats: false,
     programYear: 2021
   } as Partial<IRegistration>;
 

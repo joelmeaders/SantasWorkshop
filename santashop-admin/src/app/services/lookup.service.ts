@@ -63,7 +63,7 @@ export class LookupService {
     .orderBy('lastName', 'asc')
     .orderBy('firstName', 'asc')
     .limit(1);
-}
+  }
 
   private queryRegistrationsByQrCode(q: CollectionReference<DocumentData>, qrCode: string) {
     return q.where('qrcode', '==', qrCode)

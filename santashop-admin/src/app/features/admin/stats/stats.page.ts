@@ -44,6 +44,11 @@ export class StatsPage implements OnDestroy {
     refCount()
   );
 
+  public readonly $typeAgeStats = this.statsService.$registrationGenderAgeByDateCounts.pipe(
+    publishReplay(1),
+    refCount()
+  );
+
   public readonly $zipCodeStats = this.statsService.$zipCodeCounts.pipe(
     publishReplay(1),
     refCount()

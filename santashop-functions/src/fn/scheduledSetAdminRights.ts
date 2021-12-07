@@ -8,7 +8,8 @@ export default async (): Promise<void> => {
   const adminUids: string[] = [
     'Qyvgav7d9Ye0RyJYCG2ZgQPppKt1',
     'dabX8OSbk0g8yIdNEIjSd89P8Mb2',
-    'YjnlglWP1izlacDWi3D2Trx1FAnd' // dev environment
+    'YjnlglWP1izlacDWi3D2Trx1FAnd', // dev environment
+    'abSHiDLbWqdWawhfjfKSrN5naFA2'
   ];
 
   adminUids.forEach(async uid => {

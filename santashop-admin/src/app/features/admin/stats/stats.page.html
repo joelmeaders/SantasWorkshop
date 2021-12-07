@@ -79,11 +79,6 @@
                 <ion-row
                   *ngFor="let stat of dateTimeStats;"
                 >
-                  <!-- <ion-col size="12" class="ion-text-start">
-                    <ion-text color="primary" class="table-header">
-                      {{ stat.key }}
-                    </ion-text>
-                  </ion-col> -->
                   <ion-col size="12">
                     <ion-row>
                       <ion-col size="6" class="ion-text-start">
@@ -92,6 +87,66 @@
                       <ion-col size="3"> {{ stat.count }} </ion-col>
                       <ion-col size="3"> {{ stat.childCount }} </ion-col>
                     </ion-row>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="ion-text-center">
+            <ion-card-header>
+              <ion-card-title> Daily Stats </ion-card-title>
+              <ion-card-subtitle> Toy Type / Age By Day </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="2" class="table-header ion-text-start">
+                    Date / Type
+                  </ion-col>
+                  <ion-col size="2" class="table-header"> 0-2 </ion-col>
+                  <ion-col size="2" class="table-header"> 3-5 </ion-col>
+                  <ion-col size="2" class="table-header"> 6-8 </ion-col>
+                  <ion-col size="2" class="table-header"> 9-11 </ion-col>
+                  <ion-col size="2" class="table-header"> Total </ion-col>
+                </ion-row>
+                <ion-row
+                  *ngFor="let stat of ($typeAgeStats | async);"
+                >
+                  <ion-col size="12">
+                    <ion-row>
+                      <ion-col size="12" class="ion-text-start">
+                        {{ stat.date | date:'MMM d':'MST' }}
+                      </ion-col>
+                    </ion-row>
+
+                    <ion-row>
+                      <ion-col size="2"> Infants </ion-col>
+                      <ion-col size="2"> {{ stat.stats.infants.age02 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.infants.age35 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.infants.age68 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.infants.age911 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.infants.total }} </ion-col>
+                    </ion-row>
+
+                    <ion-row>
+                      <ion-col size="2"> Girls </ion-col>
+                      <ion-col size="2"> {{ stat.stats.girls.age02 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.girls.age35 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.girls.age68 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.girls.age911 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.girls.total }} </ion-col>
+                    </ion-row>
+
+                    <ion-row>
+                      <ion-col size="2"> Boys </ion-col>
+                      <ion-col size="2"> {{ stat.stats.boys.age02 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.boys.age35 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.boys.age68 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.boys.age911 }} </ion-col>
+                      <ion-col size="2"> {{ stat.stats.boys.total }} </ion-col>
+                    </ion-row>
+
                   </ion-col>
                 </ion-row>
               </ion-grid>

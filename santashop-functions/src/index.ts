@@ -134,6 +134,12 @@ export const scheduledSetAdminRights =
     await (await import('./fn/scheduledSetAdminRights')).default();
   });
 
+export const scheduledExportEmails = 
+  functions.pubsub.schedule('59 23 * * *')
+  .onRun(async () => {
+    await (await import('./fn/scheduledExportEmails')).default();
+  });
+
 // export const scheduledAddDateTimeSlots =
 //   functions.pubsub.schedule('every day')
 //   .onRun(async () => {

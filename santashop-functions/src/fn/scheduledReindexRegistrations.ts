@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { IRegistration, RegistrationSearchIndex } from '../../../santashop-models/src/lib/models';
+import { RegistrationSearchIndex } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -17,10 +17,14 @@ export default async (): Promise<string> => {
     registration.lastName = registration.lastName?.toLowerCase();
   });
 
-  return admin.firestore().runTransaction((transaction) => {
+  const batch = 
+
+  admin.firestore().runTransaction((transaction) => {
     registrations.forEach(registration => {
-      const doc = admin.firestore().collection('registrationsearchindex').doc(registration.customerId.toString());
-      transaction.update(doc, registration);
+      if (registration.customerId) {
+        const doc = admin.firestore().collection('registrationsearchindex').doc(registration.customerId.toString());
+        transaction.update(doc, registration);
+      }
     });
 
     return Promise.resolve('Updatedindex');

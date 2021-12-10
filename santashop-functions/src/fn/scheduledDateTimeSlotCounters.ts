@@ -92,7 +92,7 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
 const registrationQuery = (limit: number, offset: number) =>
   admin.firestore().collection('registrations')
   .where('programYear', '==', 2021)
-  .where('dateTimeSlot', '!=', '')
+  .where('registrationSubmittedOn', '!=', '')
   .where('includedInCounts', '==', false)
   .limit(limit).offset(offset);
 

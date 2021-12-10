@@ -158,11 +158,11 @@ export const scheduledReindexRegistrations =
 //     await (await import('./fn/requeueRegistrationEmails')).default();
 //   });
 
-// export const recalculateAllDateTimeSlots = 
-//   functions.pubsub.schedule('every 60 minutes')
-//   .onRun(async () => {
-//     await (await import('./fn/recalculateAllDateTimeSlots')).default();
-//   });
+export const recalculateAllDateTimeSlots = 
+  functions.pubsub.schedule('59 23 * * *')
+  .onRun(async () => {
+    await (await import('./fn/recalculateAllDateTimeSlots')).default();
+  });
 
   
 export const scheduledRegistrationStats = functions.pubsub

@@ -3,18 +3,6 @@ import { IDateTimeSlot, IRegistration } from '../../../santashop-models/src/lib/
 
 admin.initializeApp();
 
-/**
- * This method loads uncounted registrations and updates
- * dateTimeSlots based on the values within. This is the 
- * lite version that won't use as many reads.
- * 
- * @remarks
- * The downside of this method is it won't decrement the
- * reserved spots in each slot if a customer changes
- * their registration.
- * 
- * @returns 
- */
 export default async (): Promise<string> => {
   
   // Load all registrations that need to be calculated
@@ -43,20 +31,35 @@ export default async (): Promise<string> => {
     }
   });
 
-  return admin.firestore().runTransaction((transaction) => {
-    
-    dateTimeSlots.forEach(slot =>{
+  await admin.firestore().runTransaction((transaction) => {
+    dateTimeSlots.forEach(slot => {
       const doc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
       transaction.update(doc, slot);
     });
-
-    registrations.forEach(registration => {
-      const doc = admin.firestore().collection('registrations').doc(registration.uid!.toString());
-      transaction.update(doc, registration);
-    });
-
-    return Promise.resolve('Updated date time slots');
+    return Promise.resolve();
   });
+
+  // let index = 0;
+  // const pageSize = 499;
+  // const total = registrations.length;
+
+  // while (index <= total) {
+  //   const batch = registrations.slice(index, pageSize);
+
+  //   await admin.firestore().runTransaction((transaction) => {
+  //     batch.forEach(registration => {
+  //       const doc = admin.firestore().collection('registrations').doc(registration.uid!.toString());
+  //       transaction.update(doc, registration);
+  //     });
+  //     return Promise.resolve();
+  //   });
+
+  //   index += pageSize;
+  // }
+
+  
+
+  return Promise.resolve('Updated date time slots');
 };
 
 const dateTimeSlotQuery = () =>
@@ -86,7 +89,7 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
 const registrationQuery = () =>
   admin.firestore().collection('registrations')
   .where('programYear', '==', 2021)
-  .where('dateTimeSlot', '!=', '');
+  .where('registrationSubmittedOn', '!=', '');
 
 const loadRegistrations = async (): Promise<IRegistration[]> => {
   let allRegistrations: IRegistration[] = [];

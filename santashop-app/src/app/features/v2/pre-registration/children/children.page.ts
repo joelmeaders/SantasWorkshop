@@ -56,8 +56,6 @@ export class ChildrenPage {
 
     return alert.onDidDismiss()
       .then(e => {
-        console.log(e)
-        return false;
         return e.role === 'destructive'
       });
   }

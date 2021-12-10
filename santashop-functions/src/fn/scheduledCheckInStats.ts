@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { Timestamp } from 'firebase/firestore'
+import { Timestamp } from 'firebase/firestore';
 
 admin.initializeApp();
 
@@ -8,10 +8,10 @@ let stats: ICheckInAggregatedStats;
 export default async () => {
   // Get existing stats
   const statsDoc = await admin
-      .firestore()
-      .collection('stats')
-      .doc('checkin-2020')
-      .get();
+    .firestore()
+    .collection('stats')
+    .doc('checkin-2021')
+    .get();
 
   if (statsDoc.exists) {
     stats = statsDoc.data() as ICheckInAggregatedStats;
@@ -25,35 +25,37 @@ export default async () => {
 
   // Get unprocessed checkins
   await admin
-      .firestore()
-      .collection('checkins')
-      .where('inStats', '==', false)
-      .get()
-      .then(async (snapshot) => {
-        snapshot.forEach(async (doc) => {
-          const docData = doc.data() as ICheckIn;
-          updateStats(docData);
-          await doc.ref.set({inStats: true}, {merge: true});
-        });
+    .firestore()
+    .collection('checkins')
+    .where('inStats', '==', false)
+    .get()
+    .then(async (snapshot) => {
+      snapshot.forEach(async (doc) => {
+        const docData = doc.data() as ICheckIn;
+        updateStats(docData);
+        await doc.ref.set({ inStats: true }, { merge: true });
       });
+    });
 
   await admin
-      .firestore()
-      .collection('stats')
-      .doc('checkin-2020')
-      .set(stats, {merge: false});
+    .firestore()
+    .collection('stats')
+    .doc('checkin-2021')
+    .set(stats, { merge: false });
 
   stats = {} as ICheckInAggregatedStats;
-  return null;
+  return Promise.resolve();
 };
 
 function updateStats(checkIn: ICheckIn): void {
-  const localDate = checkIn.checkInDateTime.toDate().toLocaleString('en-US', {timeZone: 'America/Denver'});
+  const localDate = checkIn.checkInDateTime
+    .toDate()
+    .toLocaleString('en-US', { timeZone: 'America/Denver' });
   const checkInDate = new Date(localDate).getDate();
   const checkInHour = new Date(localDate).getHours();
 
   const index = stats.dateTimeCount.findIndex(
-      (e) => e.date === checkInDate && e.hour === checkInHour
+    (e) => e.date === checkInDate && e.hour === checkInHour
   );
 
   if (index > -1) {

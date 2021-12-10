@@ -11,7 +11,7 @@
 
 <ion-content [fullscreen]="true" color="primary">
   <ng-container *ngIf="($view | async) === 'registration'">
-    <ion-title class="ion-padding-top"> DSCS Stats: {{ now }} </ion-title>
+    <ion-title class="ion-padding-top"> DSCS Stats: (Calculated 12:00 AM) </ion-title>
 
     <ion-grid>
       <ion-row>
@@ -195,9 +195,6 @@
 
   <ng-container *ngIf="($view | async) === 'checkin'">
     <ion-title class="ion-padding-top"> Checkin Stats: {{ $checkInLastUpdated | async }} </ion-title>
-    <ion-button (click)="manualAgeStats()">
-      stats
-    </ion-button>
 
     <ion-grid>
       <ion-row>
@@ -281,7 +278,7 @@
                 >
                   <ion-col size="12" class="ion-text-start"
                     ><ion-text color="primary" class="table-header"
-                      >December {{ stat.key }}th, 2020
+                      >December {{ stat.key }}th, 2021
                     </ion-text></ion-col
                   >
                   <ion-col size="12">

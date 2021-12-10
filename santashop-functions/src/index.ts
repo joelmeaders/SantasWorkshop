@@ -140,6 +140,12 @@ export const scheduledExportEmails =
     await (await import('./fn/scheduledExportEmails')).default();
   });
 
+export const scheduledReindexRegistrations = 
+  functions.pubsub.schedule('59 23 * * *')
+  .onRun(async () => {
+    await (await import('./fn/scheduledReindexRegistrations')).default();
+  });
+
 // export const scheduledAddDateTimeSlots =
 //   functions.pubsub.schedule('every day')
 //   .onRun(async () => {
@@ -166,10 +172,11 @@ export const scheduledRegistrationStats = functions.pubsub
     await (await import('./fn/scheduledRegistrationStats')).default();
   });
 
-// Runs every 5 minutes between 10am-4pm, on the 11th, 12th, 14th, 15th of December
-// export const scheduledCheckInStats = functions.pubsub
-//     .schedule("*/5 10,11,12,13,14,15,16 11,12,14,15 12 *")
-//     .timeZone("America/Denver")
-//     .onRun(async (context) => {
-//       await (await import("./fn/scheduledCheckInStats")).default();
-//     });
+// Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
+export const scheduledCheckInStats = functions.pubsub
+    .schedule('*/5 10,11,12,13,14,15,16 10,11,13,14 12 *')
+    .timeZone('America/Denver')
+    .onRun(async () => {
+      await (await import('./fn/scheduledCheckInStats')).default();
+    });
+  

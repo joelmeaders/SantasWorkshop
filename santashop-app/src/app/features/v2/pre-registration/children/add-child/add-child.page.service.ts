@@ -111,7 +111,7 @@ export class AddChildPageService implements OnDestroy {
       let message = "";
 
       if (error.code === "invalid_age") {
-        message = this.translateService.instant('ADD_CHILDREN.INVALID_AGE');
+        message = this.translateService.instant('ADDCHILD.INVALID_AGE');
         await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
       }
       else if (error.code === "invalid_firstname") {
@@ -178,7 +178,7 @@ export class AddChildPageService implements OnDestroy {
   private async childTooOldAlert() {
     const alert = await this.alertController.create({
       header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
-      message: this.translateService.instant('REGISTRATION.ADD_CHILD_INSTRUCTIONS_2'),
+      message: this.translateService.instant('ADDCHILD.INVALID_AGE'),
       buttons: [
         {
           text: 'Ok',
@@ -209,15 +209,15 @@ export class AddChildPageService implements OnDestroy {
       let message = "";
 
       if (error.code === "invalid_age") {
-        message = this.translateService.instant('ADD_CHILDREN.INVALID_AGE');
+        message = this.translateService.instant('ADDCHILD.INVALID_AGE');
         await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
       }
       else if (error.code === "invalid_firstname") {
-        message = this.translateService.instant('ADD_CHILDREN.INVALID_FIRSTNAME');
+        message = this.translateService.instant('ADDCHILD.INVALID_FIRSTNAME');
         await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
       }
       else if (error.code === "invalid_lastname") {
-        message = this.translateService.instant('ADD_CHILDREN.INVALID_LASTNAME');
+        message = this.translateService.instant('ADDCHILD.INVALID_LASTNAME');
         await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
       }
       
@@ -263,7 +263,7 @@ export class AddChildPageService implements OnDestroy {
 
   private async invalidEntryAlert(message: string): Promise<OverlayEventDetail<any>> {
     const alert = await this.alertController.create({
-      header: this.translateService.instant('ADD_CHILDREN.ERROR_HEADER'),
+      header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
       message: message,
       buttons: [
         { text: this.translateService.instant('COMMON.OK')}

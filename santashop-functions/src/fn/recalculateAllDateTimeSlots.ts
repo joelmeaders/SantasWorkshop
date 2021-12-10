@@ -39,24 +39,23 @@ export default async (): Promise<string> => {
     return Promise.resolve();
   });
 
-  // let index = 0;
-  // const pageSize = 499;
-  // const total = registrations.length;
+  const batchSize = 499;
+  let processed = 0;
+  
+  do {
+    const batchRegs = registrations.splice(0, batchSize);
 
-  // while (index <= total) {
-  //   const batch = registrations.slice(index, pageSize);
-
-  //   await admin.firestore().runTransaction((transaction) => {
-  //     batch.forEach(registration => {
-  //       const doc = admin.firestore().collection('registrations').doc(registration.uid!.toString());
-  //       transaction.update(doc, registration);
-  //     });
-  //     return Promise.resolve();
-  //   });
-
-  //   index += pageSize;
-  // }
-
+    await admin.firestore().runTransaction((transaction) => {
+      batchRegs.forEach(registration => {
+        const doc = admin.firestore().collection('registrations').doc(registration.uid!.toString());
+        transaction.update(doc, registration);
+      });
+      return Promise.resolve();
+    });
+    processed += batchRegs.length;
+    console.info('Processed ', processed);
+  }
+  while (registrations.length > 0)
   
 
   return Promise.resolve('Updated date time slots');

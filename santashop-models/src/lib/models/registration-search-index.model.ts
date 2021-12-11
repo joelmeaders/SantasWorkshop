@@ -1,8 +1,8 @@
 export interface RegistrationSearchIndex {
   firstName: string;
   lastName: string;
-  email: string;
+  emailAddress: string;
   customerId: string;
-  zipCode: number;
-  qrCode?: string;
+  zip: number;
+  code?: string;
 }

@@ -59,7 +59,7 @@ export class LookupService {
   }
 
   private queryIndexByQrCode(q: CollectionReference<DocumentData>, qrCode: string) {
-    return q.where('qrCode', '==', qrCode)
+    return q.where('code', '==', qrCode)
     .orderBy('lastName', 'asc')
     .orderBy('firstName', 'asc')
     .limit(1);

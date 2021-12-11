@@ -1,51 +1,73 @@
 import * as admin from 'firebase-admin';
-import { RegistrationSearchIndex } from '../../../santashop-models/src/lib/models';
+import { IRegistration, RegistrationSearchIndex } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async (): Promise<string> => {
-  
   // Load all registrations
-  const registrations: RegistrationSearchIndex[] =
-    await loadRegistrations();
+  const registrations: IRegistration[] = await loadRegistrations();
+  if (!registrations.length) return Promise.resolve('No registrations');
 
-  if (!registrations.length)
-    return Promise.resolve('No registrations');
+  const rsi: RegistrationSearchIndex[] = [];
 
-  registrations.forEach(registration => {
-    registration.firstName = registration.firstName?.toLowerCase();
-    registration.lastName = registration.lastName?.toLowerCase();
+  registrations.forEach((registration) => {
+
+    try {
+      const newRsi: RegistrationSearchIndex = {
+        code: registration.qrcode,
+        customerId: registration.uid!,
+        emailAddress: registration.emailAddress!.toLowerCase(),
+        firstName: registration.firstName!.toLowerCase(),
+        lastName: registration.lastName!.toLowerCase(),
+        zip: registration.zipCode!
+      };
+      rsi.push(newRsi);
+    }
+    catch {
+      // Do nothing
+    }
   });
 
-  const batch = 
+  const batchSize = 499;
+  let processed = 0;
 
-  admin.firestore().runTransaction((transaction) => {
-    registrations.forEach(registration => {
-      if (registration.customerId) {
-        const doc = admin.firestore().collection('registrationsearchindex').doc(registration.customerId.toString());
-        transaction.update(doc, registration);
-      }
+  do {
+    const batchRegs = rsi.splice(0, batchSize);
+
+    admin.firestore().runTransaction((transaction) => {
+      batchRegs.forEach((registration) => {
+        if (registration.customerId) {
+          const doc = admin
+            .firestore()
+            .collection('registrationsearchindex')
+            .doc(registration.customerId);
+          transaction.set(doc, registration, { merge: true });
+        }
+      });
+      return Promise.resolve();
     });
+    processed += batchRegs.length;
+    console.info('Processed ', processed);
+  } while (rsi.length > 0);
 
-    return Promise.resolve('Updatedindex');
-  });
+  return Promise.resolve('Updated index');
 };
 
 const indexQuery = () =>
-  admin.firestore().collection('registrationsearchindex');
+  admin.firestore().collection('registrations');
 
-const loadRegistrations = async (): Promise<RegistrationSearchIndex[]> => {
-  let allRegistrations: RegistrationSearchIndex[] = [];
+const loadRegistrations = async (): Promise<IRegistration[]> => {
+  let allRegistrations: IRegistration[] = [];
 
   const snapshotDocs = await indexQuery().get();
-    
-    snapshotDocs.docs.forEach((doc) => {
-        const slot = {
-            ...doc.data()
-        } as RegistrationSearchIndex;
 
-        allRegistrations = allRegistrations.concat(slot);
-    });
+  snapshotDocs.docs.forEach((doc) => {
+    const slot = {
+      ...doc.data(),
+    } as IRegistration;
+
+    allRegistrations = allRegistrations.concat(slot);
+  });
 
   return allRegistrations;
 };

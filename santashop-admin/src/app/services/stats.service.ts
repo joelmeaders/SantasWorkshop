@@ -79,9 +79,8 @@ export class StatsService {
   public readonly $checkInDateTimeCounts = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
     map(counts => {
-      const sorted = sortBy(counts, 'dateTime').reverse();
-      const grouped = groupBy(sorted, 'dateTime');
-      return grouped;
+      const sorted = sortBy(counts, 'hour').reverse();
+      return groupBy(sorted, 'date');
     })
   );
 

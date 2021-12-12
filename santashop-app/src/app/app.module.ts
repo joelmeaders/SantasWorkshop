@@ -31,74 +31,73 @@ export function httpLoaderFactory(http: HttpClient) {
 
   // TODO: THis is a huge fucking mess. Make these into functions and use here instead
 @NgModule({
-  declarations: [AppComponent],
-  entryComponents: [],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule,
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: httpLoaderFactory,
-        deps: [HttpClient],
-      },
-    }),
-    IonicModule.forRoot({
-      mode: 'md',
-      animated: true
-    }),
-    AngularFireModule.initializeApp(firebaseConfig),
-    AngularFirestoreModule,
-    AngularFireAuthModule,
-    AngularFireStorageModule,
-    AngularFireAnalyticsModule,
-    AngularFireRemoteConfigModule,
-  ],
-  providers: [
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    // App settings
-    { provide: PROGRAM_YEAR, useValue: 2021 },
-    { provide: PROFILE_VERSION, useValue: 1 },
-    { provide: MOBILE_EVENT, useValue: true },
-    // Storage
-    // { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
-    { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },
-    // Analytics
-    {
-      provide: ANALYTICS_DEBUG_MODE,
-      useValue: !environment.production
-    },
-    {
-      provide: APP_NAME,
-      useValue: environment.name ?? ""
-    },
-    {
-      provide: APP_VERSION,
-      useValue: environment.version ?? ""
-    },
-    AngularFireAnalytics,
-    ScreenTrackingService,
-    UserTrackingService,
-    // Remote Config
-    { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
-    { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10_000 } : {} },
-    { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
-    AuthService,
-    { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
-    { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
-    { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
-    { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
-    {
-      provide: RECAPTCHA_SETTINGS,
-      useValue: { siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN', badge: 'inline' } as RecaptchaSettings
-    },
-    { 
-      provide: RECAPTCHA_NONCE,
-      useValue: '8wiehfsdncil8wKUyla8inkiygseteifnkcnkjsdnosidhf8iehf'
-    }
-  ],
-  bootstrap: [AppComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    declarations: [AppComponent],
+    imports: [
+        BrowserModule,
+        HttpClientModule,
+        AppRoutingModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: httpLoaderFactory,
+                deps: [HttpClient],
+            },
+        }),
+        IonicModule.forRoot({
+            mode: 'md',
+            animated: true
+        }),
+        AngularFireModule.initializeApp(firebaseConfig),
+        AngularFirestoreModule,
+        AngularFireAuthModule,
+        AngularFireStorageModule,
+        AngularFireAnalyticsModule,
+        AngularFireRemoteConfigModule,
+    ],
+    providers: [
+        { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+        // App settings
+        { provide: PROGRAM_YEAR, useValue: 2021 },
+        { provide: PROFILE_VERSION, useValue: 1 },
+        { provide: MOBILE_EVENT, useValue: true },
+        // Storage
+        // { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
+        { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },
+        // Analytics
+        {
+            provide: ANALYTICS_DEBUG_MODE,
+            useValue: !environment.production
+        },
+        {
+            provide: APP_NAME,
+            useValue: environment.name ?? ""
+        },
+        {
+            provide: APP_VERSION,
+            useValue: environment.version ?? ""
+        },
+        AngularFireAnalytics,
+        ScreenTrackingService,
+        UserTrackingService,
+        // Remote Config
+        { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
+        { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10000 } : {} },
+        { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
+        AuthService,
+        { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
+        { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
+        { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
+        { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
+        {
+            provide: RECAPTCHA_SETTINGS,
+            useValue: { siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN', badge: 'inline' } as RecaptchaSettings
+        },
+        {
+            provide: RECAPTCHA_NONCE,
+            useValue: '8wiehfsdncil8wKUyla8inkiygseteifnkcnkjsdnosidhf8iehf'
+        }
+    ],
+    bootstrap: [AppComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {}

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { distinctUntilChanged, filter, map, pluck, shareReplay, switchMap } from 'rxjs/operators';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { firstValueFrom, from, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { IAuth, IUserEmailUid } from '@models/*';
 
 import { Auth, authState, signInWithEmailAndPassword, UserCredential, sendPasswordResetEmail, updatePassword } from '@angular/fire/auth';
 import { traceUntilFirst } from '@angular/fire/performance';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class AuthService {
 
   constructor(
     private readonly angularFireAuth: Auth,
-    private readonly angularFireFunctions: AngularFireFunctions,
+    private readonly angularFireFunctions: Functions,
     private readonly errorHandler: ErrorHandlerService
   ) { }
 
@@ -77,11 +77,11 @@ export class AuthService {
       password
     }
 
-    const accountStatusFunction = this.angularFireFunctions.httpsCallable('updateEmailAddress');
+    const accountStatusFunction = httpsCallable(this.angularFireFunctions, 'updateEmailAddress');
 
     try {
       await this.login(auth);
-      await firstValueFrom(accountStatusFunction({emailAddress:newEmailAddress}))
+      await accountStatusFunction({emailAddress:newEmailAddress});
       return Promise.resolve();
     }
     catch (error: any) {

@@ -1,12 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth, IError, IOnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class SignUpPageService implements OnDestroy {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly afFunctions: AngularFireFunctions,
+    private readonly afFunctions: Functions,
     private readonly router: Router,
     private readonly loadingController: LoadingController,
     private readonly errorHandler: ErrorHandlerService,
@@ -63,13 +63,10 @@ export class SignUpPageService implements OnDestroy {
 
     console.log($event)
 
-    const status = await this.afFunctions
-      .httpsCallable('verifyRecaptcha2')({ value: $event })
-      .pipe(take(1))
-      .toPromise();
+    const status = await httpsCallable(this.afFunctions, 'verifyRecaptcha2')({ value: $event });
 
       return status 
-        ? Promise.resolve(status.success) 
+        ? Promise.resolve((<any>status.data).success as boolean) 
         : Promise.reject(false);
   }
 
@@ -141,9 +138,8 @@ export class SignUpPageService implements OnDestroy {
   }
 
   private async createAccount(value: IOnboardUser): Promise<void> {
-    const accountStatusFunction = this.afFunctions.httpsCallable('newAccount');
-    return accountStatusFunction({ ...value, bhp: this.bhpValue })
-      .pipe(take(1)).toPromise();
+    const accountStatusFunction = httpsCallable(this.afFunctions, 'newAccount');
+    await accountStatusFunction({ ...value, bhp: this.bhpValue });
   }
 
   private async signIn(value: IOnboardUser): Promise<void | IError> {

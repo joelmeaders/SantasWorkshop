@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { ErrorHandlerService, PreRegistrationService } from '@core/*';
 import { LoadingController } from '@ionic/angular';
 import { IError } from '@models/*';
 import { of } from 'rxjs';
-import { catchError, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 
 @Injectable()
 export class SubmitPageService {
@@ -16,7 +16,7 @@ export class SubmitPageService {
 
   constructor(
     private readonly preregistrationService: PreRegistrationService,
-    private readonly afFunctions: AngularFireFunctions,
+    private readonly afFunctions: Functions,
     private readonly router: Router,
     private readonly analytics: AngularFireAnalytics,
     private readonly loadingController: LoadingController,
@@ -37,19 +37,14 @@ export class SubmitPageService {
         .pipe(take(1))
         .toPromise();
 
-      const completeRegistrationFunction = this.afFunctions.httpsCallable(
-        'completeRegistration'
-      );
+      const completeRegistrationFunction = httpsCallable(this.afFunctions, 'completeRegistration');
 
       const completionResult = await completeRegistrationFunction(registration)
-        .pipe(
-          take(1),
-          catchError((err) => {
-            console.error('error!!', err);
-            return of(false);
-          })
-        )
-        .toPromise();
+        .catch((err) => {
+          // TODO:
+          console.error('error!!', err);
+          return of(false);
+        });
 
       return completionResult
         ? this.sendToConfirmation()

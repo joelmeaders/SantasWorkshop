@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import {
   AuthService,
@@ -11,7 +11,7 @@ import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { filter, take, tap } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 
 @Injectable()
 export class SignInPageService implements OnDestroy {
@@ -33,7 +33,7 @@ export class SignInPageService implements OnDestroy {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly afFunctions: AngularFireFunctions,
+    private readonly afFunctions: Functions,
     private readonly router: Router,
     private readonly loadingController: LoadingController,
     private readonly errorHandler: ErrorHandlerService,
@@ -85,13 +85,8 @@ export class SignInPageService implements OnDestroy {
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {
-
-    const status = await this.afFunctions
-      .httpsCallable('verifyRecaptcha2')({ value: $event })
-      .pipe(take(1))
-      .toPromise();
-
-      return Promise.resolve(status.success as boolean);
+    const status = await httpsCallable(this.afFunctions, 'verifyRecaptcha2')({ value: $event });
+    return Promise.resolve((<any>status.data).success as boolean);
   }
 
   // Move to UI service

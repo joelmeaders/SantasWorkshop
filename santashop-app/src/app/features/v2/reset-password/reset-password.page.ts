@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
-import { shareReplay, take } from 'rxjs/operators';
+import { shareReplay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-reset-password',
@@ -35,7 +35,7 @@ export class ResetPasswordPage {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
-    private readonly afFunctions: AngularFireFunctions,
+    private readonly afFunctions: Functions,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
     private readonly analytics: AngularFireAnalytics
@@ -75,13 +75,8 @@ export class ResetPasswordPage {
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {
-
-    const status = await this.afFunctions
-      .httpsCallable('verifyRecaptcha2')({ value: $event })
-      .pipe(take(1))
-      .toPromise();
-
-      return Promise.resolve(status.success);
+    const status = await httpsCallable(this.afFunctions, 'verifyRecaptcha2')({ value: $event })
+    return Promise.resolve((<any>status.data).success);
   }
 
   // Move to UI service

@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { ErrorHandlerService, AuthService, FireRepoLite } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
@@ -43,7 +43,7 @@ export class ProfilePageService implements OnDestroy {
   constructor(
     private readonly httpService: FireRepoLite,
     private readonly authService: AuthService,
-    private readonly afFunctions: AngularFireFunctions,
+    private readonly afFunctions: Functions,
     private readonly errorHandler: ErrorHandlerService,
     private readonly alertController: AlertController,
     private readonly loadingController: LoadingController,
@@ -68,12 +68,10 @@ export class ProfilePageService implements OnDestroy {
 
     await loader.present();
 
-    const accountStatusFunction = this.afFunctions.httpsCallable('changeAccountInformation');
+    const accountStatusFunction = httpsCallable(this.afFunctions, 'changeAccountInformation');
 
     try {
-      await accountStatusFunction(newInfo)
-        .pipe(take(1)).toPromise();
-      
+      await accountStatusFunction(newInfo);
       this.router.navigate(['../']);
     }
     catch (error) {

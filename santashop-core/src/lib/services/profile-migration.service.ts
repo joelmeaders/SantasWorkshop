@@ -1,5 +1,4 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { of, Subject } from 'rxjs';
@@ -8,6 +7,8 @@ import { COLLECTION_SCHEMA, IError, IUser } from '@models/*';
 import { PROFILE_VERSION } from '../tokens';
 import { AuthService } from './auth.service';
 import { FireRepoLite } from './fire-repo-lite.service';
+import { Functions } from '@angular/fire/functions';
+import { httpsCallable } from 'rxfire/functions';
 
 @Injectable({
   providedIn: 'root'
@@ -48,7 +49,7 @@ export class ProfileMigrationService implements OnDestroy {
     @Inject(PROFILE_VERSION) public readonly latestProfileVersion: number,
     private readonly loadingController: LoadingController,
     private readonly errorHandler: ErrorHandlerService,
-    private readonly afFunctions: AngularFireFunctions,
+    private readonly afFunctions: Functions,
     private readonly alertController: AlertController
   ) { }
 
@@ -97,6 +98,6 @@ export class ProfileMigrationService implements OnDestroy {
   }
 
   private update_V0_To_V1() {
-    return this.afFunctions.httpsCallable('migrateProfile_V0_To_V1')({});
+    return httpsCallable(this.afFunctions, 'migrateProfile_V0_To_V1')({});
   }
 }

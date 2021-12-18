@@ -9,7 +9,6 @@ import {
   DEBUG_MODE as ANALYTICS_DEBUG_MODE,
   APP_NAME, APP_VERSION
 } from '@angular/fire/compat/analytics';
-import { AngularFireStorageModule, USE_EMULATOR as USE_STORAGE_EMULATOR } from '@angular/fire/compat/storage';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -17,15 +16,16 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as REMOTE_CONFIG_SETTINGS } from '@angular/fire/compat/remote-config';
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
-import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { AuthService, MOBILE_EVENT, PROFILE_VERSION, PROGRAM_YEAR } from '@core/*';
 import { RouteReuseStrategy } from '@angular/router';
 import { RecaptchaSettings, RECAPTCHA_NONCE, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
 
-import { provideAuth, connectAuthEmulator, getAuth } from '@angular/fire/auth';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { provideAuth, connectAuthEmulator, getAuth } from '@angular/fire/auth';
+import { connectStorageEmulator, getStorage, provideStorage } from '@angular/fire/storage';
+import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-config';
+import { connectFunctionsEmulator, getFunctions, provideFunctions } from '@angular/fire/functions';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -59,9 +59,29 @@ export function httpLoaderFactory(http: HttpClient) {
           }
           return auth;
         }),
-        AngularFireStorageModule,
+        provideStorage(() => {
+          const storage = getStorage();
+          if (!environment.production) {
+              connectStorageEmulator(storage, 'localhost', 9199);
+          }
+          return storage;
+        }),
+        provideRemoteConfig(() => {
+          const remoteConfig = getRemoteConfig();
+          remoteConfig.defaultConfig = { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' };
+          remoteConfig.settings.minimumFetchIntervalMillis = 10000;
+          return remoteConfig;
+        }),
+        provideFunctions(() => {
+          const functions = getFunctions();
+          functions.customDomain = location.origin;
+          if (!environment.production) {
+            connectFunctionsEmulator(functions, 'localhost', 5001);
+            functions.customDomain = null;
+        }
+          return functions;
+        }),
         AngularFireAnalyticsModule,
-        AngularFireRemoteConfigModule,
     ],
     providers: [
         { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
@@ -69,9 +89,6 @@ export function httpLoaderFactory(http: HttpClient) {
         { provide: PROGRAM_YEAR, useValue: 2021 },
         { provide: PROFILE_VERSION, useValue: 1 },
         { provide: MOBILE_EVENT, useValue: true },
-        // Storage
-        // { provide: BUCKET, useValue: 'gs://santas-workshop-193b5.appspot.com' },
-        { provide: USE_STORAGE_EMULATOR, useValue: !environment.production ? ['localhost', 9199] : undefined },
         // Analytics
         {
             provide: ANALYTICS_DEBUG_MODE,
@@ -88,15 +105,8 @@ export function httpLoaderFactory(http: HttpClient) {
         AngularFireAnalytics,
         ScreenTrackingService,
         UserTrackingService,
-        // Remote Config
-        { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
-        { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10000 } : {} },
-        // { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
         AuthService,
-        // { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
         { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
-        { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
-        { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
         {
             provide: RECAPTCHA_SETTINGS,
             useValue: { siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN', badge: 'inline' } as RecaptchaSettings

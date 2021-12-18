@@ -13,9 +13,10 @@ import {
 import { AuthService } from './auth.service';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
 import { Timestamp } from '@firebase/firestore';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { IDateTimeSlot, IRegistration, IChild, COLLECTION_SCHEMA } from '@models/*';
-import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { ref, Storage, getDownloadURL } from '@angular/fire/storage';
+import { Functions } from '@angular/fire/functions';
+import { httpsCallable } from 'rxfire/functions';
 
 @Injectable({
   providedIn: 'root',
@@ -72,19 +73,16 @@ export class PreRegistrationService implements OnDestroy {
   public qrCode$ = this.userRegistration$.pipe(
     takeUntil(this.destroy$),
     filter((registration) => !!registration?.uid),
-    mergeMap((registration) =>
-      this.afStorage
-        .ref(`registrations/${registration.uid}.png`)
-        .getDownloadURL()
-    ),
+    map(registration => ref(this.afStorage, `registrations/${registration.uid}.png`)),
+    mergeMap((storageRef) => getDownloadURL(storageRef)),
     shareReplay(1)
   );
 
   constructor(
     private readonly fireRepo: FireRepoLite,
     private readonly authService: AuthService,
-    private readonly afStorage: AngularFireStorage,
-    private readonly afFunctions: AngularFireFunctions
+    private readonly afStorage: Storage,
+    private readonly afFunctions: Functions
   ) {}
 
   public ngOnDestroy(): void {
@@ -108,9 +106,8 @@ export class PreRegistrationService implements OnDestroy {
 
   public undoRegistration() {
     const accountStatusFunction = 
-      this.afFunctions.httpsCallable('undoRegistration');
-    
-    return accountStatusFunction({}) as Observable<boolean>;
+      httpsCallable<any, boolean>(this.afFunctions, 'undoRegistration');
+    return accountStatusFunction({});
   }
 
   private registrationCollection(): IFireRepoCollection {

@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
-import { Observable, Subject } from 'rxjs';
-import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { Timestamp } from '@firebase/firestore';
 import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
 
@@ -43,7 +43,7 @@ export class DateTimePageService implements OnDestroy {
   public async updateRegistration(slot?: IDateTimeSlot) {
     
     const registration = 
-      await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
+      await firstValueFrom(this.preRegistrationService.userRegistration$);
 
     if (!slot) {
       delete registration.dateTimeSlot;
@@ -57,8 +57,7 @@ export class DateTimePageService implements OnDestroy {
 
     // TODO: Error handling
     const storeRegistration = 
-      this.preRegistrationService.saveRegistration(registration)
-        .pipe(take(1)).toPromise();
+      firstValueFrom(this.preRegistrationService.saveRegistration(registration));
     
     try {
       await storeRegistration;

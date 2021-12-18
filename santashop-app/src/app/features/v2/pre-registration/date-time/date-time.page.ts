@@ -3,7 +3,7 @@ import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { AlertController } from '@ionic/angular';
 import { IDateTimeSlot } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { shareReplay, take, map, takeUntil } from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
 
@@ -88,10 +88,11 @@ export class DateTimePage implements OnDestroy {
   }
 
   private alreadyChoseSlot(): Promise<boolean> {
-    return this.chosenSlot$.pipe(
+    var source = this.chosenSlot$.pipe(
       take(1),
       map(slot => !!slot)
-    ).toPromise();
+    );
+    return firstValueFrom(source);
   }
 
   private async confirmChangeDate(): Promise<boolean> {

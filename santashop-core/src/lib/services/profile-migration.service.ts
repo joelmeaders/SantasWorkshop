@@ -76,6 +76,9 @@ export class ProfileMigrationService implements OnDestroy {
       const account = await this.currentUserDocument$.pipe(take(1)).toPromise();
       await loader.dismiss();
 
+      if (!account)
+        return;
+
       const alert = await this.alertController.create({
         header: 'ACCOUNT MIGRATION ERROR',
         subHeader: account.emailAddress,

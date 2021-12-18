@@ -3,10 +3,9 @@ import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { Router } from '@angular/router';
 import { ChildValidationService, getAgeFromDate, MAX_BIRTHDATE, PreRegistrationService, PROGRAM_YEAR, yyyymmddToLocalDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
-import { OverlayEventDetail } from '@ionic/core';
 import { IChild, ChildValidationError, ToyType, AgeGroup } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
 import { newChildForm } from './child.form';
 
@@ -241,14 +240,13 @@ export class AddChildPageService implements OnDestroy {
   private async updateRegistration(children?: IChild[]) {
 
     const registration = 
-      await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
+      await firstValueFrom(this.preRegistrationService.userRegistration$);
     
     registration.children = children;
     
     // TODO: Error handling
     const storeRegistration = 
-      this.preRegistrationService.saveRegistration(registration)
-        .pipe(take(1)).toPromise();
+      firstValueFrom(this.preRegistrationService.saveRegistration(registration));
 
     try {
       await storeRegistration;
@@ -261,7 +259,7 @@ export class AddChildPageService implements OnDestroy {
     this.router.navigate(['pre-registration/children']);
   }
 
-  private async invalidEntryAlert(message: string): Promise<OverlayEventDetail<any>> {
+  private async invalidEntryAlert(message: string): Promise<any> {
     const alert = await this.alertController.create({
       header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
       message: message,

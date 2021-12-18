@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { PreRegistrationService } from '@core/*';
 import { IChild } from '@models/*';
-import { Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
 
 @Injectable()
@@ -44,7 +44,7 @@ export class ChildrenPageService implements OnDestroy {
   public async updateRegistration(children?: IChild[]) {
 
     const registration = 
-      await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
+      await firstValueFrom(this.preRegistrationService.userRegistration$);
     
     registration.children = children;
     

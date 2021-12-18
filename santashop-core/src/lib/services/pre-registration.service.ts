@@ -127,7 +127,7 @@ export class PreRegistrationService implements OnDestroy {
     const isSubmitted = await this.registrationSubmitted$
       .pipe(take(1))
       .toPromise();
-    return hasChildren && hasDateTime && isSubmitted;
+    return !!hasChildren && !!hasDateTime && !!isSubmitted;
   }
 
   // TODO: Make cloud function to handle this

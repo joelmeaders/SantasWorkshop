@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { SkeletonStateService } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { IDateTimeSlot } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subject } from 'rxjs';
-import { shareReplay, take, map, takeUntil } from 'rxjs/operators';
+import { shareReplay, take, map, takeUntil, tap } from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
 
 @Component({
@@ -30,6 +31,7 @@ export class DateTimePage implements OnDestroy {
       takeUntil(this.destroy$),
       map(slots => slots.map(slot => Date.parse(slot.dateTime.toDateString()))),
       map(dates => [...new Set(dates)]),
+      tap(() => this.dateTimeSlotsState.setState(true)),
       shareReplay(1)
     );
 
@@ -43,19 +45,31 @@ export class DateTimePage implements OnDestroy {
   public readonly chosenSlot$ =
     this.viewService.registrationSlot$.pipe(
       takeUntil(this.destroy$),
+      tap(() => this.dateTimeSlotState.setState(true)),
       shareReplay(1)
     );
+
+  public readonly dateTimeSlotState =
+    this.skeletonState.getState('dateTimeSlot', 'dateTimePage');
+
+  public readonly dateTimeSlotsState =
+    this.skeletonState.getState('dateTimeSlots', 'dateTimePage');
 
   constructor(
     private readonly viewService: DateTimePageService,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: AngularFireAnalytics,
+    public readonly skeletonState: SkeletonStateService
     ) { }
 
-  public ngOnDestroy(): void {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ionViewDidLeave() {
+    this.skeletonState.removeStatesByGroup('dateTimePage');
   }
 
   public async selectDateTime(slot?: IDateTimeSlot) {

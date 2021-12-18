@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CoreModule } from '@core/*';
+import { CoreModule, SkeletonStateService } from '@core/*';
 import { SharedModule } from '../../../shared/components/shared.module';
 import { PreRegistrationPageRoutingModule } from './pre-registration-routing.module';
 import { PreRegistrationPage } from './pre-registration.page';
@@ -11,5 +11,8 @@ import { PreRegistrationPage } from './pre-registration.page';
     PreRegistrationPageRoutingModule
   ],
   declarations: [PreRegistrationPage],
+  providers: [
+    SkeletonStateService
+  ]
 })
 export class PreRegistrationPageModule {}

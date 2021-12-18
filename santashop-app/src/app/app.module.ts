@@ -66,7 +66,7 @@ export function httpLoaderFactory(http: HttpClient) {
         // Analytics
         {
             provide: ANALYTICS_DEBUG_MODE,
-            useValue: !environment.production
+            useValue: false // !environment.production
         },
         {
             provide: APP_NAME,

@@ -1,8 +1,7 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
+import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR, timestampToDate } from '@core/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import { Timestamp } from '@firebase/firestore';
 import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
 
 @Injectable()
@@ -13,9 +12,8 @@ export class DateTimePageService implements OnDestroy {
   public readonly availableSlots$ =
     this.availableSlotsQuery(this.programYear).pipe(
       takeUntil(this.destroy$),
-      // TODO: Make this map a shared reusable method
       map(data => {
-        data.forEach(s => s.dateTime = (<any>s.dateTime as Timestamp).toDate())
+        data.forEach(s => s.dateTime = timestampToDate(s.dateTime))
         return data;
       }),
       map(data => data.slice()

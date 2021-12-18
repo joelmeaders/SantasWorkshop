@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { distinctUntilChanged, filter, map, pluck, publishReplay, refCount, shareReplay, switchMap, take } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pluck, shareReplay, switchMap } from 'rxjs/operators';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { from, Observable } from 'rxjs';
+import { firstValueFrom, from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
-import firebase from 'firebase/compat/app';
 import { IAuth, IUserEmailUid } from '@models/*';
+
+import { Auth, authState, signInWithEmailAndPassword, UserCredential, sendPasswordResetEmail, updatePassword } from '@angular/fire/auth';
+import { traceUntilFirst } from '@angular/fire/performance';
 
 @Injectable({
   providedIn: 'root'
@@ -13,30 +14,28 @@ import { IAuth, IUserEmailUid } from '@models/*';
 export class AuthService {
 
   constructor(
-    private readonly angularFireAuth: AngularFireAuth,
+    private readonly angularFireAuth: Auth,
     private readonly angularFireFunctions: AngularFireFunctions,
     private readonly errorHandler: ErrorHandlerService
   ) { }
 
-  public readonly currentUser$ = this.angularFireAuth.user.pipe(
+  public readonly currentUser$ = authState(this.angularFireAuth).pipe(
     distinctUntilChanged(),
-    publishReplay(1),
-    refCount()
+    traceUntilFirst('auth'),
+    shareReplay(1)
   );
 
   public readonly emailAndUid$: Observable<IUserEmailUid> = this.currentUser$.pipe(
     map((res: any) => ({ emailAddress: res?.email, uid: res?.uid }) as IUserEmailUid),
     distinctUntilChanged(),
-    publishReplay(1),
-    refCount()
+    shareReplay(1)
   );
 
   public readonly uid$: Observable<string> = this.currentUser$.pipe(
     pluck('uid'),
     filter(uid => !!uid),
     map(uid => uid as string),
-    publishReplay(1),
-    refCount()
+    shareReplay(1)
   );
 
   public readonly isAdmin$ = this.currentUser$.pipe(
@@ -46,11 +45,16 @@ export class AuthService {
   );
 
   public resetPassword(email: string): Promise<void> {
-    return this.angularFireAuth.sendPasswordResetEmail(email);
+    return sendPasswordResetEmail(this.angularFireAuth, email);
   }
 
   public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
-    const user = await this.angularFireAuth.currentUser;
+    const user = this.angularFireAuth.currentUser;
+
+    // TODO: Throw error here
+    if (!user)
+      return;
+
     const auth: IAuth = {
       emailAddress: user?.email as string,
       password: oldPassword
@@ -58,8 +62,7 @@ export class AuthService {
 
     try {
       await this.login(auth);
-      await user?.updatePassword(newPassword)
-      return Promise.resolve();
+      return updatePassword(user, newPassword)
     }
     catch (error: any) {
       await this.errorHandler.handleError(error);
@@ -68,8 +71,6 @@ export class AuthService {
   }
 
   public async changeEmailAddress(password: string, newEmailAddress: string): Promise<void> {
-
-    
     const user = await this.angularFireAuth.currentUser;
     const auth: IAuth = {
       emailAddress: user?.email as string,
@@ -80,10 +81,7 @@ export class AuthService {
 
     try {
       await this.login(auth);
-
-      await accountStatusFunction({emailAddress:newEmailAddress})
-        .pipe(take(1)).toPromise();
-
+      await firstValueFrom(accountStatusFunction({emailAddress:newEmailAddress}))
       return Promise.resolve();
     }
     catch (error: any) {
@@ -92,12 +90,12 @@ export class AuthService {
     }
   }
 
-  public async login(auth: IAuth): Promise<firebase.auth.UserCredential> {
-    return this.angularFireAuth.signInWithEmailAndPassword(auth.emailAddress, auth.password);
+  public async login(auth: IAuth): Promise<UserCredential> {
+    return signInWithEmailAndPassword(this.angularFireAuth, auth.emailAddress, auth.password)
   }
 
   public async logout(): Promise<void> {
-    await this.angularFireAuth.signOut();
-    document.location.reload();
+    await this.angularFireAuth.signOut()
+      .then(() => document.location.reload());
   }
 }

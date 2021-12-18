@@ -18,12 +18,14 @@ import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AngularFireRemoteConfigModule, DEFAULTS as REMOTE_CONFIG_DEFAULTS, SETTINGS as REMOTE_CONFIG_SETTINGS } from '@angular/fire/compat/remote-config';
-import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR, SETTINGS as AUTH_SETTINGS } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
 import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
 import { AuthService, MOBILE_EVENT, PROFILE_VERSION, PROGRAM_YEAR } from '@core/*';
 import { RouteReuseStrategy } from '@angular/router';
 import { RecaptchaSettings, RECAPTCHA_NONCE, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
+
+import { provideAuth, connectAuthEmulator, getAuth } from '@angular/fire/auth';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -49,7 +51,14 @@ export function httpLoaderFactory(http: HttpClient) {
         }),
         AngularFireModule.initializeApp(firebaseConfig),
         AngularFirestoreModule,
-        AngularFireAuthModule,
+        provideFirebaseApp(() => initializeApp(firebaseConfig)),
+        provideAuth(() => {
+          const auth = getAuth();
+          if (!environment.production) {
+            connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+          }
+          return auth;
+        }),
         AngularFireStorageModule,
         AngularFireAnalyticsModule,
         AngularFireRemoteConfigModule,
@@ -82,9 +91,9 @@ export function httpLoaderFactory(http: HttpClient) {
         // Remote Config
         { provide: REMOTE_CONFIG_DEFAULTS, useValue: { 'registrationEnabled': 'true', 'maintenanceModeEnabled': 'false', 'shopClosedWeather': 'false' } },
         { provide: REMOTE_CONFIG_SETTINGS, useFactory: () => !environment.production ? { minimumFetchIntervalMillis: 10000 } : {} },
-        { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
+        // { provide: AUTH_SETTINGS, useValue: { appVerificationDisabledForTesting: !environment.production } },
         AuthService,
-        { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
+        // { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
         { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
         { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
         { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },

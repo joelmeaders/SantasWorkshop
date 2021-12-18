@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { AngularFireAuthGuard, redirectUnauthorizedTo, redirectLoggedInTo } from '@angular/fire/compat/auth-guard';
+import { AuthGuard, redirectUnauthorizedTo, redirectLoggedInTo } from '@angular/fire/auth-guard';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/sign-in']);
 const redirectLoggedInToRegistration = () => redirectLoggedInTo(['/pre-registration/overview']);
@@ -19,13 +19,13 @@ const routes: Routes = [
   {
     path: 'sign-up',
     loadChildren: () => import('./features/v2/sign-up/sign-up.module').then( m => m.SignUpPageModule),
-    canActivate: [AngularFireAuthGuard],
+    canActivate: [AuthGuard],
     data: { authGuardPipe: redirectLoggedInToRegistration }
   },
   {
     path: 'pre-registration',
     loadChildren: () => import('./features/v2/pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule),
-    canActivate: [AngularFireAuthGuard],
+    canActivate: [AuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin }
   },
   {
@@ -39,7 +39,8 @@ const routes: Routes = [
   {
     path: 'maintenance',
     loadChildren: () => import('./features/maintenance/maintenance.module').then( m => m.MaintenancePageModule)
-  },  {
+  },
+  {
     path: 'bad-weather',
     loadChildren: () => import('./features/bad-weather/bad-weather.module').then( m => m.BadWeatherPageModule)
   }

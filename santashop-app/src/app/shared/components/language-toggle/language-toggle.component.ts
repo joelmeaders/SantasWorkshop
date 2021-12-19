@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { first, shareReplay, takeUntil } from 'rxjs/operators';
@@ -25,7 +25,7 @@ export class LanguageToggleComponent implements OnDestroy {
 
   constructor(
     private readonly translate: TranslateService,
-    private readonly analyticsService: AngularFireAnalytics,
+    private readonly analyticsService: Analytics,
   ) { }
 
   ngOnDestroy(): void {
@@ -52,7 +52,7 @@ export class LanguageToggleComponent implements OnDestroy {
   private async setLanguage(value: 'en' | 'es') {
     await this.translate.use(value).pipe(first()).toPromise();
     this._currentLangauge$.next(value);
-    await this.analyticsService.logEvent('set_language', { value });
+    await logEvent(this.analyticsService, 'set_language', { value });
   }
 
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { SkeletonStateService } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { IDateTimeSlot } from '@models/*';
@@ -59,7 +59,7 @@ export class DateTimePage implements OnDestroy {
     private readonly viewService: DateTimePageService,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
-    private readonly analytics: AngularFireAnalytics,
+    private readonly analytics: Analytics,
     public readonly skeletonState: SkeletonStateService
     ) { }
 
@@ -81,10 +81,10 @@ export class DateTimePage implements OnDestroy {
       shouldChange = await this.confirmChangeDate();
 
     if (shouldChange)
-      await this.analytics.logEvent('cancelled_datetime');
+      await logEvent(this.analytics, 'cancelled_datetime');
 
     if (!hasSlot || shouldChange) {
-      await this.analytics.logEvent('chose_datetime');
+      await logEvent(this.analytics, 'chose_datetime');
       await this.viewService.updateRegistration(slot);
     }
   }

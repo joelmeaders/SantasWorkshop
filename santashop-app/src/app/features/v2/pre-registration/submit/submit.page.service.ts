@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { ErrorHandlerService, PreRegistrationService } from '@core/*';
@@ -18,7 +18,7 @@ export class SubmitPageService {
     private readonly preregistrationService: PreRegistrationService,
     private readonly afFunctions: Functions,
     private readonly router: Router,
-    private readonly analytics: AngularFireAnalytics,
+    private readonly analytics: Analytics,
     private readonly loadingController: LoadingController,
     private readonly errorHandler: ErrorHandlerService
   ) {}
@@ -30,7 +30,7 @@ export class SubmitPageService {
 
     await loader.present();
 
-    await this.analytics.logEvent('submit_registration');
+    await logEvent(this.analytics, 'submit_registration');
 
     try {
       const registration = await this.preregistrationService.userRegistration$

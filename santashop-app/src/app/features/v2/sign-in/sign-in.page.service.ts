@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import {
@@ -39,7 +39,7 @@ export class SignInPageService implements OnDestroy {
     private readonly errorHandler: ErrorHandlerService,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
   ) {
     this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
   }
@@ -80,7 +80,7 @@ export class SignInPageService implements OnDestroy {
       return;
     }
 
-    await this.analytics.logEvent('validated_recaptcha');
+    await logEvent(this.analytics, 'validated_recaptcha');
     this.recaptchaValid$.next(true);
   }
 

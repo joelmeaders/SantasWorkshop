@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { AlertController } from '@ionic/angular';
 import { IError } from '@models/*';
 
@@ -10,7 +10,7 @@ export class ErrorHandlerService {
 
   constructor(
     private readonly alertController: AlertController,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
   ) { }
 
   public async handleError(error: IError, showAlert: boolean = true): Promise<any> {
@@ -26,7 +26,7 @@ export class ErrorHandlerService {
       await alert.present();
 
     try {
-      await this.analytics.logEvent(error.code, { message: error.message })
+      await logEvent(this.analytics, error.code, { message: error.message })
     }
     catch {
       // Do nothing

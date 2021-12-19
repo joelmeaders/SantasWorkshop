@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { AlertController, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { shareReplay } from 'rxjs/operators';
@@ -32,7 +32,7 @@ export class SignUpPage {
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
     private readonly modalController: ModalController,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
   ) { }
 
   ionViewWillEnter() {
@@ -41,7 +41,7 @@ export class SignUpPage {
 
   public async onValidateRecaptcha($event: any) {
     await this.viewService.onValidateRecaptcha($event, this.pwField?.value);
-    await this.analytics.logEvent('validated_recaptcha');
+    await logEvent(this.analytics, 'validated_recaptcha');
   }
 
   public async onCreateAccount(): Promise<void> {
@@ -75,12 +75,12 @@ export class SignUpPage {
 
     await alert.present();
     const shouldContinue = await alert.onDidDismiss();
-    await this.analytics.logEvent('confirmed_email', { value: shouldContinue.role });
+    await logEvent(this.analytics, 'confirmed_email', { value: shouldContinue.role });
     return shouldContinue.role === 'confirm'
   }
 
   public async showPrivacyPolicyModal() {
-    await this.analytics.logEvent('viewed_privacypolicy');
+    await logEvent(this.analytics, 'viewed_privacypolicy');
     const modal = await this.modalController.create({
       component: PrivacyPolicyModalComponent,
     });
@@ -88,7 +88,7 @@ export class SignUpPage {
   }
 
   public async showTermsConditionsModal() {
-    await this.analytics.logEvent('viewed_termsofservice');
+    await logEvent(this.analytics, 'viewed_termsofservice');
     const modal = await this.modalController.create({
       component: TermsOfServiceModalComponent,
     });

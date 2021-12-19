@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '@core/*';
@@ -38,7 +38,7 @@ export class ResetPasswordPage {
     private readonly afFunctions: Functions,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
   ) {}
 
   public resetPage() {
@@ -56,7 +56,7 @@ export class ResetPasswordPage {
       return;
     }
 
-    await this.analytics.logEvent('validated_recaptcha');
+    await logEvent(this.analytics, 'validated_recaptcha');
     this._recaptchaValid$.next(true);
   }
 
@@ -67,7 +67,7 @@ export class ResetPasswordPage {
 
     const email = this.form.get('emailAddress')?.value;
 
-    await this.analytics.logEvent('reset_password');
+    await logEvent(this.analytics, 'reset_password');
 
     await this.authService.resetPassword(email).then(() => {
       this._resetEmailSent$.next(true);

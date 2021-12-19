@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { ErrorHandlerService, AuthService, FireRepoLite } from '@core/*';
@@ -49,7 +49,7 @@ export class ProfilePageService implements OnDestroy {
     private readonly loadingController: LoadingController,
     private readonly router: Router,
     private readonly translateService: TranslateService,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
   ) { }
 
   ngOnDestroy(): void {
@@ -59,7 +59,7 @@ export class ProfilePageService implements OnDestroy {
 
   public async updatePublicProfile(): Promise<void> {
 
-    await this.analytics.logEvent('profile_update_info');
+    await logEvent(this.analytics, 'profile_update_info');
 
     const newInfo: IChangeUserInfo = this.profileForm.value;
 
@@ -83,7 +83,7 @@ export class ProfilePageService implements OnDestroy {
   }
 
   public async changeEmailAddress(): Promise<void> {
-    await this.analytics.logEvent('profile_update_email');
+    await logEvent(this.analytics, 'profile_update_email');
     const value = this.changeEmailForm.value;
     await this.authService.changeEmailAddress(value.password, value.emailAddress)
       .then(() => this.emailChangedAlert())
@@ -93,7 +93,7 @@ export class ProfilePageService implements OnDestroy {
   }
 
   public async changePassword(): Promise<void> {
-    await this.analytics.logEvent('profile_update_password');
+    await logEvent(this.analytics, 'profile_update_password');
     const value = this.changePasswordForm.value;
     await this.authService.changePassword(value.oldPassword, value.newPassword)
       .then(() => this.passwordChangedAlert())

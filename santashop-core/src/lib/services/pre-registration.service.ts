@@ -1,5 +1,4 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { DocumentReference } from '@angular/fire/compat/firestore';
 import { Observable, Subject } from 'rxjs';
 import {
   filter,
@@ -17,6 +16,7 @@ import { IDateTimeSlot, IRegistration, IChild, COLLECTION_SCHEMA } from '@models
 import { ref, Storage, getDownloadURL } from '@angular/fire/storage';
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
+import { DocumentReference } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',

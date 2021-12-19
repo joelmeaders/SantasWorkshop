@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import { ErrorHandlerService, PreRegistrationService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
@@ -24,7 +24,7 @@ export class ConfirmationPage {
     private readonly router: Router,
     private readonly errorHandler: ErrorHandlerService,
     private readonly translateService: TranslateService,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
     ) { }
 
     public async undoRegistration(): Promise<void> {
@@ -57,7 +57,7 @@ export class ConfirmationPage {
       await loader.present();
   
       try {
-        await this.analytics.logEvent('delete_registration');
+        await logEvent(this.analytics, 'delete_registration');
         await this.viewService.undoRegistration().pipe(take(1)).toPromise();
       }
       catch (error) {

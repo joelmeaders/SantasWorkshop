@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import { ChildValidationService, getAgeFromDate, MAX_BIRTHDATE, PreRegistrationService, PROGRAM_YEAR, yyyymmddToLocalDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
@@ -41,7 +41,7 @@ export class AddChildPageService implements OnDestroy {
     private readonly translateService: TranslateService,
     private readonly childValidationService: ChildValidationService,
     private readonly router: Router,
-    private readonly analytics: AngularFireAnalytics
+    private readonly analytics: Analytics
   ) { }
 
   public ngOnDestroy(): void {
@@ -52,7 +52,7 @@ export class AddChildPageService implements OnDestroy {
 
   public async setChildToEdit(id: number) {
 
-    await this.analytics.logEvent('view_child', { id: id });
+    await logEvent(this.analytics, 'view_child', { id: id });
 
     const children = 
       await this.children$.pipe(take(1)).toPromise();
@@ -102,7 +102,7 @@ export class AddChildPageService implements OnDestroy {
       delete validatedChild.error;
       const updatedChildren = children?.filter(child => child.id !== validatedChild.id);
       updatedChildren?.push(validatedChild);
-      await this.analytics.logEvent('edit_child', { id: updatedChild.id });
+      await logEvent(this.analytics, 'edit_child', { id: updatedChild.id });
       return this.updateRegistration(updatedChildren);
     } 
     catch (ex) {
@@ -111,15 +111,15 @@ export class AddChildPageService implements OnDestroy {
 
       if (error.code === "invalid_age") {
         message = this.translateService.instant('ADDCHILD.INVALID_AGE');
-        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
+        await logEvent(this.analytics, 'edit_child_error', { id: updatedChild, error: error.code });
       }
       else if (error.code === "invalid_firstname") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_FIRSTNAME');
-        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
+        await logEvent(this.analytics, 'edit_child_error', { id: updatedChild, error: error.code });
       }
       else if (error.code === "invalid_lastname") {
         message = this.translateService.instant('ADD_CHILDREN.INVALID_LASTNAME');
-        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
+        await logEvent(this.analytics, 'edit_child_error', { id: updatedChild, error: error.code });
       }
       
       await this.invalidEntryAlert(message);
@@ -165,7 +165,7 @@ export class AddChildPageService implements OnDestroy {
     } else if (ageInYears >= 9 && ageInYears < 12) {
       ageGroup = AgeGroup.age911;
     } else {
-      await this.analytics.logEvent('child_invalid_age_entry', { age: ageInYears });
+      await logEvent(this.analytics, 'child_invalid_age_entry', { age: ageInYears });
       await this.childTooOldAlert();
       this.form.controls.dateOfBirth.reset();
     }
@@ -200,7 +200,7 @@ export class AddChildPageService implements OnDestroy {
     try {
       const validatedChild = this.childValidationService.validateChild(child);
       children?.push(validatedChild);
-      await this.analytics.logEvent('add_child');
+      await logEvent(this.analytics, 'add_child');
       return this.updateRegistration(children);
     } 
     catch (ex) {
@@ -209,15 +209,15 @@ export class AddChildPageService implements OnDestroy {
 
       if (error.code === "invalid_age") {
         message = this.translateService.instant('ADDCHILD.INVALID_AGE');
-        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
+        await logEvent(this.analytics, 'add_child_error', { id: child, error: error.code });
       }
       else if (error.code === "invalid_firstname") {
         message = this.translateService.instant('ADDCHILD.INVALID_FIRSTNAME');
-        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
+        await logEvent(this.analytics, 'add_child_error', { id: child, error: error.code });
       }
       else if (error.code === "invalid_lastname") {
         message = this.translateService.instant('ADDCHILD.INVALID_LASTNAME');
-        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
+        await logEvent(this.analytics, 'add_child_error', { id: child, error: error.code });
       }
       
       await this.invalidEntryAlert(message);
@@ -233,7 +233,7 @@ export class AddChildPageService implements OnDestroy {
     const updatedChildren = children?.filter(
       child => child.id !== childToRemove.id);
 
-    await this.analytics.logEvent('remove_child', { id: childToRemove.id });
+    await logEvent(this.analytics, 'remove_child', { id: childToRemove.id });
     return this.updateRegistration(updatedChildren);
   }
 

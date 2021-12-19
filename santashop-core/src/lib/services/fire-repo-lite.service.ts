@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DocumentReference, QueryFn } from '@angular/fire/compat/firestore';
 import { FireRepoBase } from './fire-repo-base.service';
+import { DocumentReference, QueryConstraint } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +23,8 @@ export class FireRepoLite {
     read: <T>(documentId: string, idField?: Extract<keyof T, string>) => 
       this.fireRepoBase.read<T>(collectionPath, documentId, idField),
     
-    readMany: <T>(query?: QueryFn, idField?: Extract<keyof T, string>) =>
-      this.fireRepoBase.readMany<T>(collectionPath, query, idField),
+    readMany: <T>(queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>) =>
+      this.fireRepoBase.readMany<T>(collectionPath, queryConstraints, idField),
 
     add: <T>(document: T) =>
       this.fireRepoBase.add<T>(collectionPath, document),
@@ -39,7 +39,7 @@ export class FireRepoLite {
 export interface IFireRepoCollection {
   collection: string;
   read<T>(documentId: string, idField?: Extract<keyof T, string>): Observable<T>;
-  readMany<T>(query?: QueryFn, idField?: Extract<keyof T, string>): Observable<T[]>;
+  readMany<T>(queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>): Observable<T[]>;
   add<T>(document: T): Observable<DocumentReference<T>>;
   addById<T>(documentId: string, document: T ): Observable<DocumentReference<T>>;
   update<T>(documentId: string, document: T, merge: boolean): Observable<DocumentReference>;

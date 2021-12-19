@@ -3,6 +3,8 @@ import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
+import { QueryConstraint } from 'firebase/firestore';
+import { where } from '@angular/fire/firestore';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
@@ -80,10 +82,11 @@ export class DateTimePageService implements OnDestroy {
    * @memberof DateTimePageService
    */
   private availableSlotsQuery(programYear: number): Observable<IDateTimeSlot[]> {
-    return this.dateTimeSlotCollection().readMany<IDateTimeSlot>(
-      (query) => query.where('programYear', '==', programYear)
-                      .where('enabled', '==', true),
-      'id'
-    );
+    const queryConstraints: QueryConstraint[] = [
+      where('programYear', '==', programYear),
+      where('enabled', '==', true)
+    ];
+
+    return this.dateTimeSlotCollection().readMany<IDateTimeSlot>(queryConstraints, 'id')
   }
 }

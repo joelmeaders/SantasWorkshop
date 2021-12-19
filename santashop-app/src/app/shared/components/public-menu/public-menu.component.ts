@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -28,7 +28,7 @@ export class PublicMenuComponent implements OnDestroy {
     private readonly router: Router,
     private readonly popoverController: PopoverController,
     private readonly translateService: TranslateService,
-    private readonly analyticsService: AngularFireAnalytics,
+    private readonly analyticsService: Analytics,
   ) { }
 
   public ngOnDestroy(): void {
@@ -72,7 +72,7 @@ export class PublicMenuComponent implements OnDestroy {
 
   public async setLanguage(value: 'en' | 'es') {
     this.translateService.use(value);
-    await this.analyticsService.logEvent(`set_language_${value}`);
+    await logEvent(this.analyticsService, `set_language_${value}`);
     await this.closeMenu();
   }
 

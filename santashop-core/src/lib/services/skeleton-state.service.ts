@@ -1,24 +1,55 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, shareReplay, Subject, takeUntil } from 'rxjs';
+import { SkeletonStateError } from '../errors/skeleton-state-service';
 
 @Injectable()
 export class SkeletonStateService implements OnDestroy {
 
+  /**
+   * Internal state array
+   *
+   * @private
+   * @type {SkeletonState[]}
+   * @memberof SkeletonStateService
+   */
   private readonly state: SkeletonState[] = [];
 
+  /**
+   * Runs on destroy and clears out states 
+   * and subscriptions to those states.
+   *
+   * @memberof SkeletonStateService
+   */
   ngOnDestroy(): void {
     this.state.forEach((state) => {
       state.destroy();
     });
   }
 
+  /**
+   * Adds a new state
+   *
+   * @param {string} id
+   * @param {string} [groupId]
+   * @return {*}  {SkeletonState}
+   * @memberof SkeletonStateService
+   */
   public addState(id: string, groupId?: string): SkeletonState {
     const newState = new SkeletonState(id, groupId);
     this.state.push(newState);
     return newState;
   }
 
-  public getState(id: string, groupId?: string): SkeletonState {
+  /**
+   * Returns a state by id and group. If the state 
+   * doesn't exist it will be created and returned.
+   *
+   * @param {string} id
+   * @param {string} [groupId]
+   * @return {*}  {SkeletonState}
+   * @memberof SkeletonStateService
+   */
+  public getState(id: string, groupId?: string, createIfNotFound = true): SkeletonState {
 
     let states: SkeletonState[] = [];
 
@@ -29,13 +60,34 @@ export class SkeletonStateService implements OnDestroy {
     let requestedState = states.find(s => s.id === id);
 
     if (!requestedState) {
-      requestedState = this.addState(id, groupId)
+      if (createIfNotFound) {
+        requestedState = this.addState(id, groupId)
+      } else {
+        throw new SkeletonStateError(`getState(): State with id "${id}" and group "${groupId}" not found`);
+      }
     }
 
     return requestedState;
   }
 
-  public removeState(id: string, groupId?: string): void {
+  /**
+   * Remove a state from the state stack.
+   *
+   * @param {string} id
+   * @param {string} [groupId]
+   * @memberof SkeletonStateService
+   */
+  public removeState(id?: string, groupId?: string): void {
+
+    if (!id && !groupId) 
+      throw new RangeError("Both id and groupId cannot be undefined");
+
+    if (id && !groupId) 
+      return this.removeStateById(id);
+
+    if (!id && groupId) 
+      return this.removeStatesByGroup(groupId);
+
     const toDelete: number[] = [];
 
     this.state.forEach((state, index) => {
@@ -45,33 +97,21 @@ export class SkeletonStateService implements OnDestroy {
       }
     });
 
-    toDelete.forEach(index => this.state.splice(index));
+    toDelete.forEach(index => this.state.splice(index, 1));
   }
 
   public removeStateById(id: string): void {
-    const toDelete: number[] = [];
-
-    this.state.forEach((state, index) => {
-      if (state.id === id) {
-        state.destroy();
-        toDelete.push(index);
-      }
-    });
-
-    toDelete.forEach(index => this.state.splice(index));
+    const index = this.state.findIndex(s => s.id === id);
+    if (index > -1) this.state.splice(index, 1)
   }
 
   public removeStatesByGroup(groupId: string): void {
-    const toDelete: number[] = [];
-
     this.state.forEach((state, index) => {
       if (state.groupId === groupId) {
         state.destroy();
-        toDelete.push(index);
+        this.state.splice(index, 1)
       }
     });
-
-    toDelete.forEach(index => this.state.splice(index));
   }
 }
 

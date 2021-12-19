@@ -1,5 +1,5 @@
 {
-  "name": "santashop-core-lib",
+  "name": "santashop-core",
   "version": "0.0.6",
   "author": "Joel Meaders",
   "peerDependencies": {

@@ -4,7 +4,7 @@ import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { IAuth, IUserEmailUid } from '@models/*';
 
-import { Auth, authState, signInWithEmailAndPassword, UserCredential, sendPasswordResetEmail, updatePassword } from '@angular/fire/auth';
+import { Auth, authState, signInWithEmailAndPassword, UserCredential, sendPasswordResetEmail, updatePassword, User } from '@angular/fire/auth';
 import { traceUntilFirst } from '@angular/fire/performance';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 
@@ -13,13 +13,7 @@ import { Functions, httpsCallable } from '@angular/fire/functions';
 })
 export class AuthService {
 
-  constructor(
-    private readonly angularFireAuth: Auth,
-    private readonly angularFireFunctions: Functions,
-    private readonly errorHandler: ErrorHandlerService
-  ) { }
-
-  public readonly currentUser$ = authState(this.angularFireAuth).pipe(
+  public readonly currentUser$: Observable<User | null> = authState(this.angularFireAuth).pipe(
     distinctUntilChanged(),
     traceUntilFirst('auth'),
     shareReplay(1)
@@ -43,6 +37,12 @@ export class AuthService {
     map(token => token.claims.admin),
     shareReplay(1)
   );
+
+  constructor(
+    private readonly angularFireAuth: Auth,
+    private readonly angularFireFunctions: Functions,
+    private readonly errorHandler: ErrorHandlerService
+  ) { }
 
   public resetPassword(email: string): Promise<void> {
     return sendPasswordResetEmail(this.angularFireAuth, email);

@@ -18,7 +18,7 @@ export class ProfileMigrationService implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   private readonly getCurrentUserDocument$ = (uid: string) =>
-    this.fireRepo.collection(COLLECTION_SCHEMA.users).read<IUser>(uid, 'uid').pipe(
+    this.fireRepo.collection<IUser>(COLLECTION_SCHEMA.users).read(uid, 'uid').pipe(
       takeUntil(this.destroy$)
     );
 

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MAX_BIRTHDATE } from '@core/*';
 import { ChildValidationError, IChild } from '@models/*';
-import { deepCopy } from '../helpers/methods';
-import { MIN_BIRTHDATE } from '../parameters';
+import { deepCopy } from '../../../../../santashop-core/src/lib/helpers/methods';
+import { MIN_BIRTHDATE } from '../../../../../santashop-core/src/lib/parameters';
 
 @Injectable()
 export class ChildValidationService {

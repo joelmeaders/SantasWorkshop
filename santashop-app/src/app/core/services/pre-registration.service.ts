@@ -9,13 +9,12 @@ import {
   take,
   takeUntil,
 } from 'rxjs/operators';
-import { AuthService } from './auth.service';
-import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
 import { Timestamp } from '@firebase/firestore';
 import { IDateTimeSlot, IRegistration, IChild, COLLECTION_SCHEMA } from '@models/*';
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
+import { AuthService, FireRepoLite, IFireRepoCollection } from '@core/*';
 import { QrCodeService } from './qrcode.service';
 
 @Injectable({

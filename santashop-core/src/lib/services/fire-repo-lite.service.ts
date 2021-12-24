@@ -17,8 +17,9 @@ export class FireRepoLite {
   }
 
   public collection<T>(collectionPath: string): IFireRepoCollection<T> {
+    
     return {
-      collection: collectionPath,
+      collectionPathName: collectionPath,
 
       read: (documentId: string, idField?: Extract<keyof T, string>) => 
         this.read<T>(collectionPath, documentId, idField),
@@ -59,7 +60,7 @@ export class FireRepoLite {
 }
 
 export interface IFireRepoCollection<T> {
-  collection: string;
+  collectionPathName: string;
   read(documentId: string, idField?: Extract<keyof T, string>): Observable<T>;
   readMany(queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>): Observable<T[]>;
   add(document: T): Observable<DocumentReference<T>>;

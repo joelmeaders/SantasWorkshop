@@ -1,38 +1,50 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService,  FireRepoLite,  fireRepoLiteTestProvider, PreRegistrationService } from '@core/*';
+import {
+  AuthService,
+  FireRepoLite,
+  fireRepoLiteTestProvider,
+} from '@core/*';
 import { Functions } from '@angular/fire/functions';
 import { provideMock, Spied } from 'test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';
 import { IRegistration } from '@models/*';
 import { QrCodeService } from './qrcode.service';
+import { PreRegistrationService } from './pre-registration.service';
 
 describe('PreRegistrationService', () => {
-
   let service: PreRegistrationService;
   let fireRepo: FireRepoLite;
   let qrCodeService: Spied<QrCodeService>;
 
   const userId = '12345';
-  const registration = { uid: userId, children: [ { id: '1' }, { id: '2' } ] as any[], dateTimeSlot: { id: '1' } } as IRegistration;
+  const registration = {
+    uid: userId,
+    children: [{ id: '1' }, { id: '2' }] as any[],
+    dateTimeSlot: { id: '1' },
+  } as IRegistration;
   let registrationMock = of(registration);
   let readRegistrationSpy: jasmine.Spy;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ 
+    TestBed.configureTestingModule({
       teardown: { destroyAfterEach: false },
       providers: [
         fireRepoLiteTestProvider(),
-        { provide: AuthService, useValue: { uid$: of(userId) }},
+        { provide: AuthService, useValue: { uid$: of(userId) } },
         provideMock(QrCodeService),
         provideMock(Functions),
-      ]
+      ],
     });
 
     service = TestBed.inject(PreRegistrationService);
     fireRepo = TestBed.inject(FireRepoLite);
-    qrCodeService = TestBed.inject(QrCodeService) as jasmine.SpyObj<QrCodeService>;
+    qrCodeService = TestBed.inject(
+      QrCodeService
+    ) as jasmine.SpyObj<QrCodeService>;
 
-    readRegistrationSpy = spyOn(fireRepo, 'read').and.returnValue(registrationMock);
+    readRegistrationSpy = spyOn(fireRepo, 'read').and.returnValue(
+      registrationMock
+    );
   });
 
   it('should be created', () => {
@@ -48,7 +60,11 @@ describe('PreRegistrationService', () => {
 
     // Assert
     expect(collectionSpy).toHaveBeenCalledWith('registrations');
-    expect(readRegistrationSpy).toHaveBeenCalledWith('registrations', userId, <any>'uid');
+    expect(readRegistrationSpy).toHaveBeenCalledWith(
+      'registrations',
+      userId,
+      <any>'uid'
+    );
     expect(registration.uid).toEqual(userId);
   });
 
@@ -122,8 +138,20 @@ describe('PreRegistrationService', () => {
   it('qrCode$: should make expected call', async () => {
     // Arrange
     const spy = qrCodeService.registrationQrCodeUrl;
-    spy.and.resolveTo('someurl')    
-    
+    spy.and.resolveTo('someurl');
+
+    // Act
+    const value = await firstValueFrom(service.qrCode$);
+
+    // Assert
+    expect(value).toEqual('someurl');
+    expect(spy).toHaveBeenCalledWith(userId);
+  });
+
+  it('qrCode$: should make expected call', async () => {
+    // Arrange
+    const spy = qrCodeService.registrationQrCodeUrl;
+    spy.and.resolveTo('someurl');
 
     // Act
     const value = await firstValueFrom(service.qrCode$);

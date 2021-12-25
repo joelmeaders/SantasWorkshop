@@ -4,27 +4,44 @@ import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { IAuth, IUserEmailUid } from '@models/*';
 
-import { Auth, authState, signInWithEmailAndPassword, UserCredential, sendPasswordResetEmail, updatePassword, User } from '@angular/fire/auth';
-import { traceUntilFirst } from '@angular/fire/performance';
-import { Functions, httpsCallable } from '@angular/fire/functions';
+import { UserCredential, User } from '@angular/fire/auth';
+import { AfAuthService } from './af-auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  public readonly currentUser$: Observable<User | null> = authState(this.angularFireAuth).pipe(
+  /**
+   * Stream of the auth state, triggered on login/logout
+   *
+   * @type {(Observable<User | null>)}
+   * @memberof AuthService
+   */
+  public readonly currentUser$: Observable<User | null> = this.afAuthService.authState$.pipe(
     distinctUntilChanged(),
-    traceUntilFirst('auth'),
     shareReplay(1)
   );
 
+  /**
+   * Stream of user email and uid
+   *
+   * @type {Observable<IUserEmailUid>}
+   * @memberof AuthService
+   */
   public readonly emailAndUid$: Observable<IUserEmailUid> = this.currentUser$.pipe(
     map((res: any) => ({ emailAddress: res?.email, uid: res?.uid }) as IUserEmailUid),
     distinctUntilChanged(),
     shareReplay(1)
   );
 
+  /**
+   * Stream of uid. Will not fire/complete if user is
+   * not logged in.
+   *
+   * @type {Observable<string>}
+   * @memberof AuthService
+   */
   public readonly uid$: Observable<string> = this.currentUser$.pipe(
     pluck('uid'),
     filter(uid => !!uid),
@@ -32,37 +49,58 @@ export class AuthService {
     shareReplay(1)
   );
 
+  /**
+   * Checks token claims to see if the user has an admin
+   * claim. Will not fire/complete unless user is signed in.
+   *
+   * @memberof AuthService
+   */
   public readonly isAdmin$ = this.currentUser$.pipe(
-    switchMap(user => from(user!.getIdTokenResult())),
-    map(token => token.claims.admin),
+    filter(user => !!user),
+    switchMap(user => from(user!.getIdTokenResult(false))),
+    map(token => token.claims?.admin ?? false),
     shareReplay(1)
   );
 
   constructor(
-    private readonly angularFireAuth: Auth,
-    private readonly angularFireFunctions: Functions,
+    private readonly afAuthService: AfAuthService,
     private readonly errorHandler: ErrorHandlerService
   ) { }
 
-  public resetPassword(email: string): Promise<void> {
-    return sendPasswordResetEmail(this.angularFireAuth, email);
+  /**
+   * Reset user password, sends an email.
+   *
+   * @param {string} emailAddress
+   * @return {*}  {Promise<void>}
+   * @memberof AuthService
+   */
+  public resetPassword(emailAddress: string): Promise<void> {
+    // TODO: Add email validation
+    return this.afAuthService.sendPasswordResetEmail(emailAddress);
   }
 
+  /**
+   * Change user password. Logs in, then changes password.
+   *
+   * @param {string} oldPassword
+   * @param {string} newPassword
+   * @return {*}  {Promise<void>}
+   * @memberof AuthService
+   */
   public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
-    const user = this.angularFireAuth.currentUser;
+    const user = this.afAuthService.currentUser();
 
-    // TODO: Throw error here
     if (!user)
-      return;
+      return Promise.reject(new Error('User cannot be null'));
 
     const auth: IAuth = {
-      emailAddress: user?.email as string,
+      emailAddress: user.email as string,
       password: oldPassword
     }
 
     try {
       await this.login(auth);
-      return updatePassword(user, newPassword)
+      return this.afAuthService.updateUserPassword(user, newPassword)
     }
     catch (error: any) {
       await this.errorHandler.handleError(error);
@@ -70,19 +108,29 @@ export class AuthService {
     }
   }
 
+  /**
+   * Changes the user email address. Logs the user
+   * in first, then changes their email address.
+   *
+   * @param {string} password
+   * @param {string} newEmailAddress
+   * @return {*}  {Promise<void>}
+   * @memberof AuthService
+   */
   public async changeEmailAddress(password: string, newEmailAddress: string): Promise<void> {
-    const user = await this.angularFireAuth.currentUser;
+    const user = await this.afAuthService.currentUser();
+
+    if (!user)
+      return Promise.reject(new Error('User cannot be null'));
+
     const auth: IAuth = {
       emailAddress: user?.email as string,
       password
     }
 
-    const accountStatusFunction = httpsCallable(this.angularFireFunctions, 'updateEmailAddress');
-
     try {
       await this.login(auth);
-      await accountStatusFunction({emailAddress:newEmailAddress});
-      return Promise.resolve();
+      return await this.afAuthService.updateUserEmailAddress(newEmailAddress);
     }
     catch (error: any) {
       await this.errorHandler.handleError(error);
@@ -90,12 +138,29 @@ export class AuthService {
     }
   }
 
+  /**
+   * Logs the user in via email/password
+   *
+   * @param {IAuth} auth
+   * @return {*}  {Promise<UserCredential>}
+   * @memberof AuthService
+   */
   public async login(auth: IAuth): Promise<UserCredential> {
-    return signInWithEmailAndPassword(this.angularFireAuth, auth.emailAddress, auth.password)
+    return this.afAuthService.signInWithEmailAndPassword(auth.emailAddress, auth.password);
   }
 
-  public async logout(): Promise<void> {
-    await this.angularFireAuth.signOut()
-      .then(() => document.location.reload());
+  /**
+   * Logs the user out, then triggers browser reload.
+   *
+   * @param {boolean} [reload=true]
+   * @return {*}  {Promise<void>}
+   * @memberof AuthService
+   */
+  public async logout(reload = true): Promise<void> {
+    await this.afAuthService.signOut()
+      .then(() => {
+        // TODO: Replace this with something else
+        if (reload) document.location.reload()
+      });
   }
 }

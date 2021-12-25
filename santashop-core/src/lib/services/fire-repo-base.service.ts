@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { addDoc, doc, docData, DocumentReference, Firestore, query, setDoc } from '@angular/fire/firestore';
+import { addDoc, deleteDoc, doc, docData, DocumentReference, Firestore, query, setDoc } from '@angular/fire/firestore';
 import { collection, DocumentData, QueryConstraint, QueryDocumentSnapshot, SnapshotOptions } from 'firebase/firestore';
 import { collection as rxCollection } from 'rxfire/firestore';
 import { from, map, mapTo, Observable } from 'rxjs';
@@ -61,9 +61,7 @@ export class FireRepoBase {
         options: SnapshotOptions
       ): T {
         const data = snapshot.data(options)!;
-        return {
-          ...data
-        } as T;
+        return { ...data } as T;
       }
     }
   }
@@ -101,5 +99,15 @@ export class FireRepoBase {
     const docRef = doc<T>(colRef as any, documentId)
     const action = setDoc(docRef, document, { merge });
     return from(action).pipe(mapTo(docRef));
+  }
+
+  public delete(
+    collectionPath: string,
+    documentId: string
+  ): Observable<void> {
+    const colRef = collection(this.firestore, collectionPath);
+    const docRef = doc(colRef as any, documentId)
+    const action = deleteDoc(docRef);
+    return from(action);
   }
 }

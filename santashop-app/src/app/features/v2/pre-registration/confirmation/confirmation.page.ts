@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { ErrorHandlerService, PreRegistrationService } from '@core/*';
+import { ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { take } from 'rxjs/operators';
+import { PreRegistrationService } from '../../../../core';
 
 @Component({
   selector: 'app-confirmation',

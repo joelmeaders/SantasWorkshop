@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
+import { PreRegistrationService } from '../../../../core';
 import { ProfilePageService } from './profile.page.service';
 
 @Component({

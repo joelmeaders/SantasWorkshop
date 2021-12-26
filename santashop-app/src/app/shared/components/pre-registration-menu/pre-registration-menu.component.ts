@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
+import { PreRegistrationService } from '../../../core';
 
 @Component({
   selector: 'app-pre-registration-menu',

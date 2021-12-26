@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ChildValidationService } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { IChild } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { ChildValidationService } from '../../../../core';
 import { ChildrenPageService } from './children.page.service';
 
 @Component({

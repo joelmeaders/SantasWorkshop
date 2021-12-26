@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { ErrorHandlerService, PreRegistrationService } from '@core/*';
+import { ErrorHandlerService } from '@core/*';
 import { LoadingController } from '@ionic/angular';
 import { IError } from '@models/*';
 import { of } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class SubmitPageService {

@@ -21,8 +21,8 @@ export class ProfilePageService implements OnDestroy {
   public readonly changePasswordForm = changePasswordForm();
 
   private readonly getUser$ = (uuid: string) =>
-    this.httpService.collection(COLLECTION_SCHEMA.users)
-      .read<IUser>(uuid).pipe(take(1));
+    this.httpService.collection<IUser>(COLLECTION_SCHEMA.users)
+      .read(uuid).pipe(take(1));
 
   public readonly userProfile$ = this.authService.currentUser$.pipe(
     takeUntil(this.destroy$),

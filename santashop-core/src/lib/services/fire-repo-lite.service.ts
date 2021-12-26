@@ -252,11 +252,3 @@ export interface IFireRepoCollection<T> {
    */
   delete(documentId: string): Observable<void>;
 }
-
-export function fireRepoLiteTestProvider() {
-  const spy = jasmine.createSpy('fs');
-  return [
-    { provide: FireRepoLite },
-    { provide: FireRepoBase, useValue: spy }
-  ]
-}

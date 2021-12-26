@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, map, shareReplay, startWith, switchMap, takeUntil } from 'rxjs/operators';
+import { PreRegistrationService } from '../../../../core';
 
 @Component({
   selector: 'app-overview',

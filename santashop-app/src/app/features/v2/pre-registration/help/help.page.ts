@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
+import { PreRegistrationService } from '../../../../core';
 
 @Component({
   selector: 'app-help',

@@ -1,10 +1,11 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR, timestampToDate } from '@core/*';
+import { FireRepoLite, IFireRepoCollection, PROGRAM_YEAR, timestampToDate } from '@core/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
 import { QueryConstraint } from 'firebase/firestore';
 import { where } from '@angular/fire/firestore';
+import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
@@ -68,8 +69,8 @@ export class DateTimePageService implements OnDestroy {
     }
   }
 
-  private dateTimeSlotCollection(): IFireRepoCollection {
-    return this.fireRepo.collection(COLLECTION_SCHEMA.dateTimeSlots);
+  private dateTimeSlotCollection(): IFireRepoCollection<IDateTimeSlot> {
+    return this.fireRepo.collection<IDateTimeSlot>(COLLECTION_SCHEMA.dateTimeSlots);
   }
 
   /**
@@ -87,6 +88,6 @@ export class DateTimePageService implements OnDestroy {
       where('enabled', '==', true)
     ];
 
-    return this.dateTimeSlotCollection().readMany<IDateTimeSlot>(queryConstraints, 'id')
+    return this.dateTimeSlotCollection().readMany(queryConstraints, 'id')
   }
 }

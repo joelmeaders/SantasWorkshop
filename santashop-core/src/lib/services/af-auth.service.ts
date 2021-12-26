@@ -56,12 +56,3 @@ export class AfAuthService implements OnDestroy {
     return this.afAuth.signOut();
   }
 }
-
-export function afAuthServiceTestProvider() {
-  const spy = jasmine.createSpy('a');
-  return [
-    { provide: AfAuthService, useClass: AfAuthService },
-    { provide: Auth, useValue: spy },
-    
-  ]
-}

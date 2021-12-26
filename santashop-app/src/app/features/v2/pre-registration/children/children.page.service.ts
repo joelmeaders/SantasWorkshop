@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { PreRegistrationService } from '@core/*';
 import { IChild } from '@models/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
+import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class ChildrenPageService implements OnDestroy {

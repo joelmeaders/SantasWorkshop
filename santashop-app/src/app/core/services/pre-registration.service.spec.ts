@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import {
   AuthService,
   FireRepoLite,
-  fireRepoLiteTestProvider,
 } from '@core/*';
 import { Functions } from '@angular/fire/functions';
 import { provideMock, Spied } from 'test-helpers/jasmine';
@@ -10,6 +9,7 @@ import { firstValueFrom, of } from 'rxjs';
 import { IRegistration } from '@models/*';
 import { QrCodeService } from './qrcode.service';
 import { PreRegistrationService } from './pre-registration.service';
+import { fireRepoLiteTestProvider } from 'santashop-core/src/lib/test-helpers/test-helpers';
 
 describe('PreRegistrationService', () => {
   let service: PreRegistrationService;

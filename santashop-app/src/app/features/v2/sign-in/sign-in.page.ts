@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { shareReplay } from 'rxjs/operators';
 import { SignInPageService } from './sign-in.page.service';
 
@@ -12,8 +12,6 @@ import { SignInPageService } from './sign-in.page.service';
 export class SignInPage {
 
   public readonly form = this.viewService.form;
-
-  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha | null = null;
 
   public readonly recaptchaValid$ = this.viewService.recaptchaValid$.asObservable().pipe(
     shareReplay(1)

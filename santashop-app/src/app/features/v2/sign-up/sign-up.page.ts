@@ -18,7 +18,6 @@ export class SignUpPage {
   public readonly form = this.viewService.form;
 
   @ViewChild('firstName') firstName?: HTMLIonInputElement;
-  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha | null = null;
   
   // This field is a bot honeytrap.
   @ViewChild('pw') pwField: HTMLInputElement | null = null;

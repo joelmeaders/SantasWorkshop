@@ -1,24 +1,24 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+// import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+// import { IonicModule } from '@ionic/angular';
 
-import { PreRegistrationMenuComponent } from './pre-registration-menu.component';
+// import { PreRegistrationMenuComponent } from './pre-registration-menu.component';
 
-describe('PreRegistrationMenuComponent', () => {
-  let component: PreRegistrationMenuComponent;
-  let fixture: ComponentFixture<PreRegistrationMenuComponent>;
+// describe('PreRegistrationMenuComponent', () => {
+//   let component: PreRegistrationMenuComponent;
+//   let fixture: ComponentFixture<PreRegistrationMenuComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ PreRegistrationMenuComponent ],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents();
+//   beforeEach(waitForAsync(() => {
+//     TestBed.configureTestingModule({
+//       declarations: [ PreRegistrationMenuComponent ],
+//       imports: [IonicModule.forRoot()]
+//     }).compileComponents();
 
-    fixture = TestBed.createComponent(PreRegistrationMenuComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+//     fixture = TestBed.createComponent(PreRegistrationMenuComponent);
+//     component = fixture.componentInstance;
+//     fixture.detectChanges();
+//   }));
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+//   it('should create', () => {
+//     expect(component).toBeTruthy();
+//   });
+// });

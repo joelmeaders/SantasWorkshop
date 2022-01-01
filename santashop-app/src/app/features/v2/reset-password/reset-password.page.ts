@@ -20,7 +20,9 @@ export class ResetPasswordPage {
     emailAddress: [undefined, Validators.compose([Validators.required, Validators.email])]
   });
   
-  @ViewChild('captchaRef') captchaRef: ReCaptchaV2.ReCaptcha | null = null;
+  // TODO: ReCaptchaV2.ReCaptcha namespace does not allow testing to work
+  // even though @types/greptcha is installed. Try again later.
+  @ViewChild('captchaRef') captchaRef: any | null = null;
 
   private readonly _resetEmailSent$ = new BehaviorSubject<boolean>(false);
   public readonly resetEmailSent$ = this._resetEmailSent$.asObservable().pipe(

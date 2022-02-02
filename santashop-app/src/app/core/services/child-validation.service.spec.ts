@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { IChild } from '@models/*';
+import { ChildValidationError, IChild } from '@models/*';
 import { ChildValidationService, MAX_BIRTHDATE, MAX_CHILD_AGE_IN_YEARS, MIN_BIRTHDATE } from './child-validation.service';
 
 describe('ChildValidationService', () => {
@@ -95,6 +95,54 @@ describe('ChildValidationService', () => {
     expect(result.lastName).toEqual(validChild.lastName);
     expect(result.dateOfBirth).toEqual(validChild.dateOfBirth);
     expect(result.enabled).toBeTrue();
+  });
+
+  it('validateChild(): should throw invalid_age error', () => {
+    // Arrange
+    const child: IChild = {
+      firstName: 'Josh',
+      lastName: 'Henrison',
+      dateOfBirth: new Date('6/17/1918'),
+      enabled: false
+    };
+
+    // Act
+    const result = () => service.validateChild(child);
+
+    // Assert
+    expect(result).toThrow(new ChildValidationError("invalid_age"));
+  });
+
+  it('validateChild(): should throw invalid_firstname error', () => {
+    // Arrange
+    const child: IChild = {
+      firstName: 'J',
+      lastName: 'Henrison',
+      dateOfBirth: new Date('6/17/1918'),
+      enabled: false
+    };
+
+    // Act
+    const result = () => service.validateChild(child);
+
+    // Assert
+    expect(result).toThrow(new ChildValidationError("invalid_firstname"));
+  });
+
+  it('validateChild(): should throw invalid_lastname error', () => {
+    // Arrange
+    const child: IChild = {
+      firstName: 'Josh',
+      lastName: 'H',
+      dateOfBirth: new Date('6/17/1918'),
+      enabled: false
+    };
+
+    // Act
+    const result = () => service.validateChild(child);
+
+    // Assert
+    expect(result).toThrow(new ChildValidationError("invalid_lastname"));
   });
 
   it('MAX_BIRTHDATE: should be expected value', () => {

@@ -33,8 +33,7 @@ export class AppStateService implements OnDestroy {
     .pipe(
       tap(([maintenance, weather, registration]) => {
 
-        console.log(window.location.host)
-
+        // TODO: Change window to an injected service for testability 
         if (window.location.hostname === 'localhost:4100')
           return;
 

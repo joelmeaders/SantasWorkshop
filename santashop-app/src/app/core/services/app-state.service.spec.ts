@@ -27,7 +27,7 @@ describe('AppStateService', () => {
           }),
         },
         { provide: Router, useValue: jasmine.createSpyObj<Router>('router', ['navigate']) }
-      ],
+      ]
     });
 
     service = TestBed.inject(AppStateService);

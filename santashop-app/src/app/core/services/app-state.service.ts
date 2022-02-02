@@ -10,33 +10,32 @@ import { RemoteConfigService } from './remote-config.service';
 export class AppStateService implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  public readonly isMaintenanceModeEnabled$ =
-    this.configService.maintenanceModeEnabled$;
-  public readonly isRegistrationEnabled$ =
-    this.configService.registrationEnabled$;
-  public readonly shopClosedWeather$ = this.configService.shopClosedWeather$;
+  public readonly isMaintenanceModeEnabled$ = 
+    this.configService.maintenanceModeEnabled$.pipe(
+      takeUntil(this.destroy$)
+    );
 
-  public readonly maintenance = this.isMaintenanceModeEnabled$.pipe(
-    takeUntil(this.destroy$)
-  );
+  public readonly isRegistrationEnabled$ = 
+    this.configService.registrationEnabled$.pipe(
+      takeUntil(this.destroy$)
+    );
 
-  public readonly registrationClosed = this.isRegistrationEnabled$.pipe(
-    takeUntil(this.destroy$)
-  );
-
-  public readonly shopClosedWeather = this.shopClosedWeather$.pipe(
-    takeUntil(this.destroy$)
-  );
+  public readonly shopClosedWeather$ = 
+    this.configService.shopClosedWeather$.pipe(
+      takeUntil(this.destroy$)
+    );
 
   public readonly appClosureSubscription = combineLatest([
-    this.maintenance,
-    this.shopClosedWeather,
-    this.registrationClosed,
+    this.isMaintenanceModeEnabled$,
+    this.shopClosedWeather$,
+    this.isRegistrationEnabled$,
   ])
     .pipe(
       tap(([maintenance, weather, registration]) => {
 
-        if (window.location.hostname === 'localhost')
+        console.log(window.location.host)
+
+        if (window.location.hostname === 'localhost:4100')
           return;
 
         if (maintenance) {

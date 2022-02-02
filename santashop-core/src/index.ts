@@ -8,5 +8,3 @@ export * from './lib/directives';
 export * from './lib/components/control-errors/control-errors.component';
 export * from './lib/pipes';
 export * from './lib/tokens';
-
-export * from './lib/parameters'; 

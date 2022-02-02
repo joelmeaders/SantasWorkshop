@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MAX_BIRTHDATE, MIN_BIRTHDATE, MOBILE_EVENT } from '@core/*';
+import { MOBILE_EVENT } from '@core/*';
 import { filter, map, takeUntil, tap } from 'rxjs/operators';
-import { ChildValidationService } from '../../../../../core';
+import { ChildValidationService, MAX_BIRTHDATE, MIN_BIRTHDATE } from '../../../../../core';
 import { AddChildPageService } from './add-child.page.service';
 
 @Component({

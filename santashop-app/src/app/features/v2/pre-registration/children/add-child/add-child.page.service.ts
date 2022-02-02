@@ -1,13 +1,13 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { getAgeFromDate, MAX_BIRTHDATE, PROGRAM_YEAR, yyyymmddToLocalDate } from '@core/*';
+import { PROGRAM_YEAR, yyyymmddToLocalDate, getAgeFromDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { IChild, ChildValidationError, ToyType, AgeGroup } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
-import { ChildValidationService, PreRegistrationService } from '../../../../../core';
+import { ChildValidationService, MAX_BIRTHDATE, PreRegistrationService } from '../../../../../core';
 import { newChildForm } from './child.form';
 
 @Injectable()

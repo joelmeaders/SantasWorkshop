@@ -30,7 +30,8 @@
           "options": {
             "main": "santashop-core/src/test.ts",
             "tsConfig": "santashop-core/tsconfig.spec.json",
-            "karmaConfig": "santashop-core/karma.conf.js"
+            "karmaConfig": "santashop-core/karma.conf.js",
+            "codeCoverage": true
           }
         }
       }
@@ -204,7 +205,8 @@
           "options": {
             "main": "santashop-admin/src/test.ts",
             "tsConfig": "santashop-admin/tsconfig.spec.json",
-            "karmaConfig": "santashop-admin/karma.conf.js"
+            "karmaConfig": "santashop-admin/karma.conf.js",
+            "codeCoverage": true
           }
         }
       }
@@ -381,7 +383,8 @@
           "options": {
             "main": "santashop-app/src/test.ts",
             "tsConfig": "santashop-app/tsconfig.spec.json",
-            "karmaConfig": "santashop-app/karma.conf.js"
+            "karmaConfig": "santashop-app/karma.conf.js",
+            "codeCoverage": true
           }
         }
       }
@@ -412,7 +415,8 @@
           "options": {
             "main": "santashop-models/src/test.ts",
             "tsConfig": "santashop-models/tsconfig.spec.json",
-            "karmaConfig": "santashop-models/karma.conf.js"
+            "karmaConfig": "santashop-models/karma.conf.js",
+            "codeCoverage": true
           }
         }
       }

@@ -2,16 +2,18 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
+    "composite": true,
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "noEmit": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitAny": true,
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
@@ -48,11 +50,11 @@
     ]
   },
   "references": [
-    { "path": "santashop-models" },
-    { "path": "santashop-core" },
-    { "path": "santashop-app" },
-    { "path": "santashop-admin" },
-    { "path": "santashop-functions" }
+    { "path": "santashop-models/tsconfig.lib.json" },
+    { "path": "santashop-core/tsconfig.lib.json" },
+    { "path": "santashop-app/tsconfig.app.json" },
+    { "path": "santashop-admin/tsconfig.app.json" },
+    { "path": "santashop-functions/tsconfig.json" }
   ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

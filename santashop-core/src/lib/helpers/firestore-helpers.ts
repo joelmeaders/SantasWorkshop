@@ -9,12 +9,12 @@ import { Timestamp } from '@firebase/firestore';
  * of the interface) but it's a Timestamp.
  * 
  * @export
- * @param {Date} timestampAsDate
- * @return {*}  {Date}
+ * @param timestampAsDate
+ * @return
  */
-export function timestampToDate(timestampAsDate: Date): Date {
+export const timestampToDate = (timestampAsDate: Date): Date => {
   try {
-    return (<any>timestampAsDate as Timestamp).toDate();
+    return (timestampAsDate as any as Timestamp).toDate();
   }
   catch {
     return timestampAsDate;

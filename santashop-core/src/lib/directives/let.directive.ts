@@ -5,7 +5,7 @@ export interface AppLetContext <T> {
 }
 
 @Directive({
-  selector: '[appLet]',
+  selector: '[coreLet]',
 })
 export class AppLetDirective <T> {
   @Input() set appLet(value: T) {

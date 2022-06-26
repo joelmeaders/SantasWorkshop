@@ -70,8 +70,8 @@ export class AuthService {
   /**
    * Reset user password, sends an email.
    *
-   * @param {string} emailAddress
-   * @return {*}  {Promise<void>}
+   * @param emailAddress
+   * @return
    * @memberof AuthService
    */
   public resetPassword(emailAddress: string): Promise<void> {
@@ -82,9 +82,9 @@ export class AuthService {
   /**
    * Change user password. Logs in, then changes password.
    *
-   * @param {string} oldPassword
-   * @param {string} newPassword
-   * @return {*}  {Promise<void>}
+   * @param oldPassword
+   * @param newPassword
+   * @return
    * @memberof AuthService
    */
   public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
@@ -112,9 +112,9 @@ export class AuthService {
    * Changes the user email address. Logs the user
    * in first, then changes their email address.
    *
-   * @param {string} password
-   * @param {string} newEmailAddress
-   * @return {*}  {Promise<void>}
+   * @param password
+   * @param newEmailAddress
+   * @return
    * @memberof AuthService
    */
   public async changeEmailAddress(password: string, newEmailAddress: string): Promise<void> {
@@ -141,8 +141,8 @@ export class AuthService {
   /**
    * Logs the user in via email/password
    *
-   * @param {IAuth} auth
-   * @return {*}  {Promise<UserCredential>}
+   * @param auth
+   * @return
    * @memberof AuthService
    */
   public async login(auth: IAuth): Promise<UserCredential> {
@@ -152,8 +152,8 @@ export class AuthService {
   /**
    * Logs the user out, then triggers browser reload.
    *
-   * @param {boolean} [reload=true]
-   * @return {*}  {Promise<void>}
+   * @param [reload=true]
+   * @return
    * @memberof AuthService
    */
   public async logout(reload = true): Promise<void> {

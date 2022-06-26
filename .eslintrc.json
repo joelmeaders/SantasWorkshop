@@ -39,7 +39,9 @@
       "rules": {
         "prettier/prettier": "off",
         "no-floating-decimal": "error",
+        "prefer-arrow/prefer-arrow-functions": "warn",
         "@typescript-eslint/member-ordering": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
 				"@angular-eslint/component-class-suffix": [
 					"error",
 					{

@@ -29,9 +29,9 @@ export class SkeletonStateService implements OnDestroy {
   /**
    * Adds a new state
    *
-   * @param {string} id
-   * @param {string} [groupId]
-   * @return {*}  {SkeletonState}
+   * @param id
+   * @param [groupId]
+   * @return
    * @memberof SkeletonStateService
    */
   public addState(id: string, groupId?: string): SkeletonState {
@@ -44,9 +44,9 @@ export class SkeletonStateService implements OnDestroy {
    * Returns a state by id and group. If the state 
    * doesn't exist it will be created and returned.
    *
-   * @param {string} id
-   * @param {string} [groupId]
-   * @return {*}  {SkeletonState}
+   * @param id
+   * @param [groupId]
+   * @return
    * @memberof SkeletonStateService
    */
   public getState(id: string, groupId?: string, createIfNotFound = true): SkeletonState {
@@ -73,8 +73,8 @@ export class SkeletonStateService implements OnDestroy {
   /**
    * Remove a state from the state stack.
    *
-   * @param {string} id
-   * @param {string} [groupId]
+   * @param id
+   * @param [groupId]
    * @memberof SkeletonStateService
    */
   public removeState(id?: string, groupId?: string): void {

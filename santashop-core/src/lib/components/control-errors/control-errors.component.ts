@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { FormControl } from '@ngneat/reactive-forms';
 
 @Component({
-  selector: 'app-control-errors',
+  selector: 'core-control-errors',
   templateUrl: './control-errors.component.html',
   styleUrls: ['./control-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

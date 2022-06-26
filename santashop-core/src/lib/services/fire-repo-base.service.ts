@@ -42,7 +42,7 @@ export class FireRepoBase {
             ...snapshot.data()
           } as T;
           if (idField) {
-            (<any>data)[idField] = snapshot.id;
+            (data as any)[idField] = snapshot.id;
           }
           datas.push(data);
         })
@@ -60,8 +60,7 @@ export class FireRepoBase {
         snapshot: QueryDocumentSnapshot,
         options: SnapshotOptions
       ): T {
-        const data = snapshot.data(options)!;
-        return { ...data } as T;
+        return { ...snapshot.data(options) } as T;
       }
     }
   }

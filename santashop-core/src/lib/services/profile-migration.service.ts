@@ -68,7 +68,7 @@ export class ProfileMigrationService implements OnDestroy {
     try {
       // Upgrade logic here
       if (version === undefined) {
-        await this.update_V0_To_V1().pipe(take(1)).toPromise().then(v => console.log(v));
+        await this.updateV0ToV1().pipe(take(1)).toPromise().then(v => console.log(v));
         version = 1;
       }
       // Append later versions as needed
@@ -97,7 +97,7 @@ export class ProfileMigrationService implements OnDestroy {
 
   }
 
-  private update_V0_To_V1() {
+  private updateV0ToV1() {
     return httpsCallable(this.afFunctions, 'migrateProfile_V0_To_V1')({});
   }
 }

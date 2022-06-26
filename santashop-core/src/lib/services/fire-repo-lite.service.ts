@@ -15,7 +15,7 @@ export class FireRepoLite {
   /**
    * Generates a random id
    *
-   * @return {*}  {string}
+   * @return
    * @memberof FireRepoLite
    */
   public randomId(): string {
@@ -28,8 +28,8 @@ export class FireRepoLite {
    * reuse by consumers.
    *
    * @template T
-   * @param {string} collectionPath Path to document
-   * @return {*}  {IFireRepoCollection<T>}
+   * @param collectionPath Path to document
+   * @return
    * @memberof FireRepoLite
    */
   public collection<T>(collectionPath: string): IFireRepoCollection<T> {
@@ -67,10 +67,10 @@ export class FireRepoLite {
    * store.
    *
    * @template T
-   * @param {string} collectionPath Path to document
-   * @param {string} documentId Id of document
-   * @param {Extract<keyof T, string>} [idField] Optional
-   * @return {*}  {Observable<T>}
+   * @param collectionPath Path to document
+   * @param documentId Id of document
+   * @param [idField] Optional
+   * @return
    * @memberof FireRepoLite
    */
   public read<T>(collectionPath: string, documentId: string, idField?: Extract<keyof T, string>): Observable<T> {
@@ -87,10 +87,10 @@ export class FireRepoLite {
    * store.
    *
    * @template T
-   * @param {string} collectionPath Path to document
-   * @param {QueryConstraint[]} [queryConstraints] Optional
-   * @param {Extract<keyof T, string>} [idField] Optional
-   * @return {*}  {Observable<T[]>}
+   * @param collectionPath Path to document
+   * @param [queryConstraints] Optional
+   * @param [idField] Optional
+   * @return
    * @memberof FireRepoLite
    */
   public readMany<T>(collectionPath: string, queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>): Observable<T[]> {
@@ -101,9 +101,9 @@ export class FireRepoLite {
    * Add a new document to the specified collection path
    *
    * @template T
-   * @param {string} collectionPath Path to document
-   * @param {T} document Document to store
-   * @return {*}  {Observable<DocumentReference<T>>}
+   * @param collectionPath Path to document
+   * @param document Document to store
+   * @return
    * @memberof FireRepoLite
    */
   public add<T>(collectionPath: string, document: T): Observable<DocumentReference<T>> {
@@ -115,10 +115,10 @@ export class FireRepoLite {
    * with the specified id.
    *
    * @template T
-   * @param {string} collectionPath Path to document
-   * @param {string} documentId Id to use
-   * @param {T} document
-   * @return {*}  {Observable<DocumentReference<T>>}
+   * @param collectionPath Path to document
+   * @param documentId Id to use
+   * @param document
+   * @return
    * @memberof FireRepoLite
    */
   public addById<T>(collectionPath: string, documentId: string, document: T): Observable<DocumentReference<T>> {
@@ -134,11 +134,11 @@ export class FireRepoLite {
    * update documents by only replacing specified fields.
    *
    * @template T
-   * @param {string} collectionPath Path to document
-   * @param {string} documentId Document id
-   * @param {T} document
-   * @param {boolean} [merge=false] True = Upsert / Merge data
-   * @return {*}  {Observable<DocumentReference<DocumentData>>}
+   * @param collectionPath Path to document
+   * @param documentId Document id
+   * @param document
+   * @param [merge=false] True = Upsert / Merge data
+   * @return
    * @memberof FireRepoLite
    */
   public update<T>(collectionPath: string, documentId: string, document: T, merge = false): Observable<DocumentReference<DocumentData>> {
@@ -148,9 +148,9 @@ export class FireRepoLite {
   /**
    * Deletes the specified document
    *
-   * @param {string} collectionPath Path to document
-   * @param {string} documentId Document id
-   * @return {*}  {Observable<void>}
+   * @param collectionPath Path to document
+   * @param documentId Document id
+   * @return
    * @memberof FireRepoLite
    */
   public delete(collectionPath: string, documentId: string): Observable<void> {

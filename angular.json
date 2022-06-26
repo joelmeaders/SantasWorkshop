@@ -33,6 +33,15 @@
             "karmaConfig": "santashop-core/karma.conf.js",
             "codeCoverage": true
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "santashop-core/**/*.ts",
+              "santashop-core/**/*.html"
+            ]
+          }
         }
       }
     },
@@ -207,6 +216,15 @@
             "tsConfig": "santashop-admin/tsconfig.spec.json",
             "karmaConfig": "santashop-admin/karma.conf.js",
             "codeCoverage": true
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "santashop-admin/**/*.ts",
+              "santashop-admin/**/*.html"
+            ]
           }
         }
       }
@@ -386,6 +404,15 @@
             "karmaConfig": "santashop-app/karma.conf.js",
             "codeCoverage": true
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "santashop-app/**/*.ts",
+              "santashop-app/**/*.html"
+            ]
+          }
         }
       }
     },
@@ -417,6 +444,15 @@
             "tsConfig": "santashop-models/tsconfig.spec.json",
             "karmaConfig": "santashop-models/karma.conf.js",
             "codeCoverage": true
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "santashop-models/**/*.ts",
+              "santashop-models/**/*.html"
+            ]
           }
         }
       }

@@ -1,8 +1,7 @@
 {
-  "extends": "../.eslintrc.json",
+  "extends": "../../.eslintrc.json",
   "ignorePatterns": [
-    "!**/*",
-    "*.spec.ts"
+    "!**/*"
   ],
   "overrides": [
     {
@@ -11,8 +10,8 @@
       ],
       "parserOptions": {
         "project": [
-          "santashop-core/tsconfig.lib.json",
-          "santashop-core/tsconfig.spec.json"
+          "santashop-admin/tsconfig.app.json",
+          "santashop-admin/tsconfig.spec.json"
         ],
         "createDefaultProgram": true
       },
@@ -21,7 +20,7 @@
           "error",
           {
             "type": "attribute",
-            "prefix": "core",
+            "prefix": "admin",
             "style": "camelCase"
           }
         ],
@@ -29,7 +28,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "core",
+            "prefix": "admin",
             "style": "kebab-case"
           }
         ]

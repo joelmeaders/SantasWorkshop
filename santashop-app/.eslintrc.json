@@ -13,7 +13,6 @@
         "project": [
           "santashop-app/tsconfig.app.json",
           "santashop-app/tsconfig.spec.json",
-          // "santashop-app/e2e/tsconfig.json"
         ],
         "createDefaultProgram": true
       },

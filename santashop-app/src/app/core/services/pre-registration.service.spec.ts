@@ -38,7 +38,9 @@ describe('PreRegistrationService', () => {
 		qrCodeService = TestBed.inject(
 			QrCodeService
 		) as jasmine.SpyObj<QrCodeService>;
+	});
 
+	beforeEach(() => {
 		readRegistrationSpy = spyOn(fireRepo, 'read').and.returnValue(
 			registrationMock
 		);

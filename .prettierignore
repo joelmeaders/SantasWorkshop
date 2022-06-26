@@ -1,8 +1,8 @@
-build
+.angular
+.firebase
+.github
+.storage
+.vscode
 coverage
 dist
-www
 node_modules
-.angular
-.vscode
-playwright-report

@@ -1,0 +1,8 @@
+build
+coverage
+dist
+www
+node_modules
+.angular
+.vscode
+playwright-report

@@ -3,13 +3,13 @@
   "version": "0.0.6",
   "author": "Joel Meaders",
   "peerDependencies": {
-    "@angular/common": "~12.0.0",
-    "@angular/core": "~12.0.0",
-    "@angular/fire": ">=7.0.0",
-    "firebase": ">=9.0.0",
-    "rxjs": "~6.6.0"
+    "@angular/common": "~14.0.2",
+    "@angular/core": "~14.0.2",
+    "@angular/fire": ">=7.4.0",
+    "firebase": ">=9.8.0",
+    "rxjs": "~7.5.5"
   },
   "dependencies": {
-    "tslib": ">=2.0.0"
+    "tslib": ">=2.4.0"
   }
 }

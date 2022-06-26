@@ -13,18 +13,17 @@ const dateTimeSlotCollection = admin
   .collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
 
 export default async (): Promise<void | HttpsError> => {
-
   try {
     if ((await dateTimeSlotCollection.get()).empty) {
       return addDateTimeSlots();
     }
   } catch (error) {
     console.error('Error creating date/time slot documents', error);
-      throw new functions.https.HttpsError(
-        'internal',
-        'Something went terribly wrong...',
-        JSON.stringify(error)
-      );
+    throw new functions.https.HttpsError(
+      'internal',
+      'Something went terribly wrong...',
+      JSON.stringify(error)
+    );
   }
 };
 

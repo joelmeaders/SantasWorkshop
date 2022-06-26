@@ -8,12 +8,19 @@
   <ion-grid fixed>
     <ion-row>
       <ion-col>
-
-        <ion-segment #deviceSelection [value]="($deviceId | async)" (ionChange)="onDeviceSelectChange($event)" scrollable="true">
+        <ion-segment
+          #deviceSelection
+          [value]="($deviceId | async)"
+          (ionChange)="onDeviceSelectChange($event)"
+          scrollable="true"
+        >
           <ion-segment-button #selection [value]="''">None</ion-segment-button>
-            <ion-segment-button *ngFor="let device of ($availableDevices | async)" [value]="device.deviceId">
-              {{ device.label | deviceNameOnly }}
-            </ion-segment-button>
+          <ion-segment-button
+            *ngFor="let device of ($availableDevices | async)"
+            [value]="device.deviceId"
+          >
+            {{ device.label | deviceNameOnly }}
+          </ion-segment-button>
         </ion-segment>
 
         <span>
@@ -33,7 +40,6 @@
   </ion-grid>
 </ion-content>
 
-
 <ng-container *appLet="$hasPermissions | async as hasPermission">
   <ng-container *ngIf="hasPermission === undefined">
     <h2>Waiting for permissions.</h2>
@@ -41,15 +47,15 @@
       If your device does not have cameras, no permissions will be asked.
     </blockquote>
   </ng-container>
-  
+
   <ng-container *ngIf="hasPermission === false">
-    <h2>You denied the camera permission, we can't scan anything without it. 😪</h2>
+    <h2>
+      You denied the camera permission, we can't scan anything without it. 😪
+    </h2>
   </ng-container>
-  
+
   <ng-container *ngIf="($availableDevices | async) === undefined">
     <h2>Couldn't check for devices.</h2>
-    <blockquote>
-      This may be caused by some security error.
-    </blockquote>
+    <blockquote>This may be caused by some security error.</blockquote>
   </ng-container>
 </ng-container>

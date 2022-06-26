@@ -10,7 +10,12 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { Timestamp } from '@firebase/firestore';
-import { IDateTimeSlot, IRegistration, IChild, COLLECTION_SCHEMA } from '@models/*';
+import {
+  IDateTimeSlot,
+  IRegistration,
+  IChild,
+  COLLECTION_SCHEMA,
+} from '@models/*';
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
@@ -50,15 +55,14 @@ export class PreRegistrationService implements OnDestroy {
 
   public readonly childCount$ = this.userRegistration$.pipe(
     takeUntil(this.destroy$),
-    map((registration) => registration?.children?.length ?? 0
-    ),
+    map((registration) => registration?.children?.length ?? 0),
     shareReplay(1)
   );
 
   public readonly noErrorsInChildren$ = this.children$.pipe(
     takeUntil(this.destroy$),
-    map(children => children.filter(c => !!c.error)),
-    map(errors => errors.length === 0),
+    map((children) => children.filter((c) => !!c.error)),
+    map((errors) => errors.length === 0),
     shareReplay(1)
   );
 
@@ -72,7 +76,9 @@ export class PreRegistrationService implements OnDestroy {
   public qrCode$ = this.userRegistration$.pipe(
     takeUntil(this.destroy$),
     filter((registration) => !!registration?.uid),
-    mergeMap((registration) => this.qrCodeService.registrationQrCodeUrl(registration.uid!)),
+    mergeMap((registration) =>
+      this.qrCodeService.registrationQrCodeUrl(registration.uid!)
+    ),
     shareReplay(1)
   );
 
@@ -103,8 +109,10 @@ export class PreRegistrationService implements OnDestroy {
   }
 
   public undoRegistration() {
-    const accountStatusFunction = 
-      httpsCallable<any, boolean>(this.afFunctions, 'undoRegistration');
+    const accountStatusFunction = httpsCallable<any, boolean>(
+      this.afFunctions,
+      'undoRegistration'
+    );
     return accountStatusFunction({});
   }
 
@@ -135,8 +143,7 @@ export class PreRegistrationService implements OnDestroy {
 
     // Convert the timestamp to a date. Firebase (or angularfire) seems to be
     // setting all dates to timestamps in the database now.
-    if (slot)
-      slot.dateTime = ((<any>slot.dateTime) as Timestamp)?.toDate();
+    if (slot) slot.dateTime = ((<any>slot.dateTime) as Timestamp)?.toDate();
 
     return slot;
   }

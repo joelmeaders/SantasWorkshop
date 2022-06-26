@@ -16,18 +16,17 @@ export const MIN_BIRTHDATE = (): Date =>
 
 @Injectable()
 export class ChildValidationService {
-
   public validateChild(inputChild: IChild): IChild {
     const outputChild = deepCopy(inputChild);
-  
+
     if (!this.ageValid(outputChild.dateOfBirth))
-      throw new ChildValidationError("invalid_age"); 
+      throw new ChildValidationError('invalid_age');
 
     if (!this.firstNameValid(outputChild.firstName))
-      throw new ChildValidationError("invalid_firstname"); 
+      throw new ChildValidationError('invalid_firstname');
 
     if (!this.lastNameValid(outputChild.lastName))
-      throw new ChildValidationError("invalid_lastname"); 
+      throw new ChildValidationError('invalid_lastname');
 
     outputChild.enabled = true;
 

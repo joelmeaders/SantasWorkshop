@@ -2,15 +2,25 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import { COLLECTION_SCHEMA, IRegistration, RegistrationSearchIndex } from '../../../santashop-models/src/lib/models';
+import {
+  COLLECTION_SCHEMA,
+  IRegistration,
+  RegistrationSearchIndex,
+} from '../../../santashop-models/src/lib/models';
 import * as formatDateTime from 'dateformat';
 
 admin.initializeApp();
 
-export default async (record: IRegistration, context: CallableContext): Promise<boolean | HttpsError> => {
-  
+export default async (
+  record: IRegistration,
+  context: CallableContext
+): Promise<boolean | HttpsError> => {
   if (!isRegistrationComplete(record)) {
-    console.error(new Error(`Registration incomplete. Unable to submit registration for uid ${record.uid}`));
+    console.error(
+      new Error(
+        `Registration incomplete. Unable to submit registration for uid ${record.uid}`
+      )
+    );
     throw new functions.https.HttpsError(
       'failed-precondition',
       '-10',
@@ -19,7 +29,11 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   }
 
   if (record.uid !== context.auth?.uid) {
-    console.error(new Error(`${context.auth?.uid} attempted to update registration for uid ${record.uid}`));
+    console.error(
+      new Error(
+        `${context.auth?.uid} attempted to update registration for uid ${record.uid}`
+      )
+    );
     throw new functions.https.HttpsError(
       'permission-denied',
       '-99',
@@ -28,7 +42,9 @@ export default async (record: IRegistration, context: CallableContext): Promise<
   }
 
   if (record.registrationSubmittedOn) {
-    console.error(new Error(`Registration already submitted for uid ${record.uid}`));
+    console.error(
+      new Error(`Registration already submitted for uid ${record.uid}`)
+    );
     throw new functions.https.HttpsError(
       'cancelled',
       '-98',
@@ -47,7 +63,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
     registrationSubmittedOn: new Date(),
     includedInCounts: false,
     includedInRegistrationStats: false,
-    programYear: 2021
+    programYear: 2021,
   } as Partial<IRegistration>;
 
   batch.set(registrationDocRef, updateRegistrationFields, { merge: true });
@@ -57,12 +73,12 @@ export default async (record: IRegistration, context: CallableContext): Promise<
     .firestore()
     .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${record.uid}`);
 
-    let dateTime: string;
+  let dateTime: string;
 
-    dateTime = record.dateTimeSlot?.dateTime as any as string;
-    const tmp = new Date(dateTime);
-    const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
-    dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
+  dateTime = record.dateTimeSlot?.dateTime as any as string;
+  const tmp = new Date(dateTime);
+  const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
+  dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
 
   const emailDoc = {
     code: record.qrcode,
@@ -84,7 +100,7 @@ export default async (record: IRegistration, context: CallableContext): Promise<
     firstName: record.firstName!.toLowerCase(),
     lastName: record.lastName!.toLowerCase(),
     emailAddress: record.emailAddress!.toLowerCase(),
-    zip: record.zipCode!
+    zip: record.zipCode!,
   };
 
   batch.set(indexDocRef, indexDoc, { merge: true });

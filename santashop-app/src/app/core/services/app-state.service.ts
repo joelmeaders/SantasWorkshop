@@ -10,20 +10,14 @@ import { RemoteConfigService } from './remote-config.service';
 export class AppStateService implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  public readonly isMaintenanceModeEnabled$ = 
-    this.configService.maintenanceModeEnabled$.pipe(
-      takeUntil(this.destroy$)
-    );
+  public readonly isMaintenanceModeEnabled$ =
+    this.configService.maintenanceModeEnabled$.pipe(takeUntil(this.destroy$));
 
-  public readonly isRegistrationEnabled$ = 
-    this.configService.registrationEnabled$.pipe(
-      takeUntil(this.destroy$)
-    );
+  public readonly isRegistrationEnabled$ =
+    this.configService.registrationEnabled$.pipe(takeUntil(this.destroy$));
 
-  public readonly shopClosedWeather$ = 
-    this.configService.shopClosedWeather$.pipe(
-      takeUntil(this.destroy$)
-    );
+  public readonly shopClosedWeather$ =
+    this.configService.shopClosedWeather$.pipe(takeUntil(this.destroy$));
 
   public readonly appClosureSubscription = combineLatest([
     this.isMaintenanceModeEnabled$,
@@ -32,10 +26,8 @@ export class AppStateService implements OnDestroy {
   ])
     .pipe(
       tap(([maintenance, weather, registration]) => {
-
-        // TODO: Change window to an injected service for testability 
-        if (window.location.hostname === 'localhost:4100')
-          return;
+        // TODO: Change window to an injected service for testability
+        if (window.location.hostname === 'localhost:4100') return;
 
         if (maintenance) {
           this.router.navigate(['/maintenance']);

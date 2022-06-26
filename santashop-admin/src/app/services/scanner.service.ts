@@ -2,15 +2,21 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { IError } from '@models/*';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil, publishReplay, refCount, distinctUntilChanged, map, take } from 'rxjs/operators';
+import {
+  takeUntil,
+  publishReplay,
+  refCount,
+  distinctUntilChanged,
+  map,
+  take,
+} from 'rxjs/operators';
 import { LookupService } from './lookup.service';
 import { RegistrationContextService } from './registration-context.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ScannerService implements OnDestroy {
-
   private readonly $destroy = new Subject<void>();
 
   public readonly formatsEnabled: any = [11];
@@ -22,16 +28,22 @@ export class ScannerService implements OnDestroy {
     refCount()
   );
 
-  private readonly _$availableDevices = new BehaviorSubject<MediaDeviceInfo[] | undefined>(undefined);
+  private readonly _$availableDevices = new BehaviorSubject<
+    MediaDeviceInfo[] | undefined
+  >(undefined);
   public readonly $availableDevices = this._$availableDevices.pipe(
     takeUntil(this.$destroy),
     publishReplay(1),
     refCount()
   );
 
-  private readonly _$previousDevice = new BehaviorSubject<MediaDeviceInfo | any>(undefined);
+  private readonly _$previousDevice = new BehaviorSubject<
+    MediaDeviceInfo | any
+  >(undefined);
 
-  private readonly _$currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(undefined);
+  private readonly _$currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(
+    undefined
+  );
   public readonly $currentDevice = this._$currentDevice.pipe(
     takeUntil(this.$destroy),
     distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
@@ -41,14 +53,14 @@ export class ScannerService implements OnDestroy {
 
   public readonly $deviceToUse = this.$currentDevice.pipe(
     takeUntil(this.$destroy),
-    map(current => current ?? undefined),
+    map((current) => current ?? undefined),
     publishReplay(1),
     refCount()
   );
 
   public readonly $deviceId = this._$currentDevice.pipe(
     takeUntil(this.$destroy),
-    map(current => !!current ? current.deviceId : ''),
+    map((current) => (!!current ? current.deviceId : '')),
     publishReplay(1),
     refCount()
   );
@@ -64,19 +76,18 @@ export class ScannerService implements OnDestroy {
     private readonly lookupService: LookupService,
     private readonly registrationContext: RegistrationContextService,
     private readonly alertController: AlertController
-  ) { }
+  ) {}
 
   public async ngOnDestroy() {
     this.$destroy.next();
   }
 
   public navigatedAway() {
-    console.log('left scanner')
-    this.onDeviceSelectChange({detail:{value: ''}});
+    console.log('left scanner');
+    this.onDeviceSelectChange({ detail: { value: '' } });
   }
 
   public setCameraEnabled(value: boolean) {
-
     this._$cameraEnabled.next(value);
 
     if (!value) {
@@ -90,7 +101,6 @@ export class ScannerService implements OnDestroy {
   }
 
   public setCurrentDevice(device: MediaDeviceInfo | any) {
-
     if (!device && this._$currentDevice.getValue()) {
       this._$previousDevice.next(this._$currentDevice.getValue());
     }
@@ -103,24 +113,27 @@ export class ScannerService implements OnDestroy {
   }
 
   public async onCodeResult(resultString: string) {
-
     try {
-      const registration = await this.lookupService.getRegistrationByQrCode$(resultString)
-        .pipe(take(1)).toPromise();
+      const registration = await this.lookupService
+        .getRegistrationByQrCode$(resultString)
+        .pipe(take(1))
+        .toPromise();
 
       if (registration) {
         this.registrationContext.setCurrentRegistration(registration);
-      }
-      else {
-        throw new Error(`Unable to find registration by qr code ${resultString}`);
+      } else {
+        throw new Error(
+          `Unable to find registration by qr code ${resultString}`
+        );
       }
     } catch (error: any) {
-      error.code = 'find-reg'
+      error.code = 'find-reg';
       await this.handleError(error as IError);
     }
   }
 
-  public onDeviceSelectChange($event: any) { // deviceId
+  public onDeviceSelectChange($event: any) {
+    // deviceId
 
     const deviceId = $event?.detail?.value;
 
@@ -135,7 +148,7 @@ export class ScannerService implements OnDestroy {
     }
 
     const devices = this._$availableDevices.getValue();
-    const device = devices?.find(d => d.deviceId === deviceId);
+    const device = devices?.find((d) => d.deviceId === deviceId);
 
     this.setCurrentDevice(device);
   }
@@ -143,8 +156,7 @@ export class ScannerService implements OnDestroy {
   onDeviceChange(device: MediaDeviceInfo) {
     const currentDevice = this._$currentDevice.getValue();
 
-    if (!!currentDevice && device?.deviceId === currentDevice.deviceId)
-      return;
+    if (!!currentDevice && device?.deviceId === currentDevice.deviceId) return;
 
     this.setCurrentDevice(device);
   }
@@ -155,19 +167,17 @@ export class ScannerService implements OnDestroy {
 
   public async onScanError(error: any) {
     await this.handleError(error);
-    this.onDeviceSelectChange({detail:{value: ''}});
+    this.onDeviceSelectChange({ detail: { value: '' } });
   }
 
   private async handleError(error: any) {
-
     const alert = await this.alertController.create({
       header: 'Error',
       subHeader: error.name,
       message: error.message,
-      buttons: ['Ok']
+      buttons: ['Ok'],
     });
 
     await alert.present();
-
   }
 }

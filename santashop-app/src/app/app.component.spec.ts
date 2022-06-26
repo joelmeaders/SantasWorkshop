@@ -9,13 +9,19 @@ import { AppComponent } from './app.component';
 import { AppStateService } from './core';
 
 describe('AppComponent', () => {
-
   let platformSpy: jasmine.SpyObj<Platform>;
   let translateSpy: jasmine.SpyObj<TranslateService>;
 
   beforeEach(() => {
-    platformSpy = jasmine.createSpyObj('Platform', { ready: Promise.resolve() });
-    translateSpy = jasmine.createSpyObj('Translate', [ 'addLangs', 'setDefaultLang', 'getBrowserLang', 'use' ]);
+    platformSpy = jasmine.createSpyObj('Platform', {
+      ready: Promise.resolve(),
+    });
+    translateSpy = jasmine.createSpyObj('Translate', [
+      'addLangs',
+      'setDefaultLang',
+      'getBrowserLang',
+      'use',
+    ]);
 
     TestBed.configureTestingModule({
       declarations: [AppComponent],
@@ -24,7 +30,7 @@ describe('AppComponent', () => {
         { provide: Platform, useValue: platformSpy },
         { provide: TranslateService, useValue: translateSpy },
         { provide: AppStateService, useValue: jasmine.createSpy() },
-        { provide: Analytics, useValue: jasmine.createSpy() }
+        { provide: Analytics, useValue: jasmine.createSpy() },
       ],
     }).compileComponents();
   });
@@ -39,5 +45,4 @@ describe('AppComponent', () => {
     TestBed.createComponent(AppComponent);
     expect(platformSpy.ready).toHaveBeenCalled();
   });
-
 });

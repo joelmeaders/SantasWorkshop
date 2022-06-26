@@ -19,19 +19,27 @@ describe('AppStateService', () => {
       providers: [
         {
           provide: RemoteConfigService,
-          useValue: jasmine.createSpyObj<RemoteConfigService>('RemoteConfigService', {}, 
-          {
-            maintenanceModeEnabled$: maintenanceMock.asObservable(),
-            registrationEnabled$: registrationMock.asObservable(),
-            shopClosedWeather$: weatherMock.asObservable(),
-          }),
+          useValue: jasmine.createSpyObj<RemoteConfigService>(
+            'RemoteConfigService',
+            {},
+            {
+              maintenanceModeEnabled$: maintenanceMock.asObservable(),
+              registrationEnabled$: registrationMock.asObservable(),
+              shopClosedWeather$: weatherMock.asObservable(),
+            }
+          ),
         },
-        { provide: Router, useValue: jasmine.createSpyObj<Router>('router', ['navigate']) }
-      ]
+        {
+          provide: Router,
+          useValue: jasmine.createSpyObj<Router>('router', ['navigate']),
+        },
+      ],
     });
 
     service = TestBed.inject(AppStateService);
-    remoteConfigSpy = TestBed.inject(RemoteConfigService) as jasmine.SpyObj<RemoteConfigService>;
+    remoteConfigSpy = TestBed.inject(
+      RemoteConfigService
+    ) as jasmine.SpyObj<RemoteConfigService>;
     routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
@@ -45,7 +53,7 @@ describe('AppStateService', () => {
       remoteConfigSpy,
       'maintenanceModeEnabled$'
     )?.get as jasmine.Spy;
-    
+
     // Act
     const value = firstValueFrom(service.isMaintenanceModeEnabled$);
 

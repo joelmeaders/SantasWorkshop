@@ -12,8 +12,8 @@ import { SignInPage } from './sign-in.page';
     ReactiveFormsModule,
     IonicModule,
     SignInPageRoutingModule,
-    SharedModule
+    SharedModule,
   ],
-  declarations: [SignInPage]
+  declarations: [SignInPage],
 })
 export class SignInPageModule {}

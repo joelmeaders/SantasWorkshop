@@ -7,23 +7,19 @@ import { ProfilePageService } from '../profile.page.service';
   templateUrl: './change-email.page.html',
   styleUrls: ['./change-email.page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ProfilePageService]
+  providers: [ProfilePageService],
 })
 export class ChangeEmailPage {
-
   public readonly form = this.viewService.changeEmailForm;
 
   public readonly email$ = this.viewService.userProfile$.pipe(
-    map(profile => profile.emailAddress),
+    map((profile) => profile.emailAddress),
     shareReplay(1)
   );
 
-  constructor(
-    private readonly viewService: ProfilePageService
-  ) { }
+  constructor(private readonly viewService: ProfilePageService) {}
 
   public changeEmail() {
     this.viewService.changeEmailAddress();
   }
-
 }

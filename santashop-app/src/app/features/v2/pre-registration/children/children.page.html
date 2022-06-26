@@ -1,15 +1,10 @@
 <ion-content color="light">
-
   <app-internal-header></app-internal-header>
 
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max">
       <ion-col
-        class="
-          side-menu
-          height-max
-          ion-hide-xl-down ion-no-padding ion-no-margin
-        "
+        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
         size="auto"
       >
         <app-pre-registration-menu></app-pre-registration-menu>
@@ -73,10 +68,7 @@
 
                 <ng-container *ngIf="children$ | async as children">
                   <div class="es-pd-bottom-xxl es-pd-top-xxl"></div>
-                  <ion-item
-                    *ngFor="let child of children"
-                    lines="none"
-                  >
+                  <ion-item *ngFor="let child of children" lines="none">
                     <ion-icon
                       class="icon-reduced-margin"
                       name="man-outline"
@@ -119,28 +111,22 @@
                     </ion-card-header>
                     <div slot="end">
                       <ion-button
-                      color="medium"
-                      fill="clear"
-                      slot="end"
-                      [routerLink]="['./add-child']"
-                      [queryParams]="{ id: child.id }"
-                    >
-                      <ion-icon
-                        size="large"
-                        name="create-outline"
-                      ></ion-icon>
-                    </ion-button>
-                    <ion-button
-                      color="medium"
-                      fill="clear"
-                      slot="end"
-                      (click)="removeChild(child)"
-                    >
-                      <ion-icon
-                        size="large"
-                        name="trash-outline"
-                      ></ion-icon>
-                    </ion-button>
+                        color="medium"
+                        fill="clear"
+                        slot="end"
+                        [routerLink]="['./add-child']"
+                        [queryParams]="{ id: child.id }"
+                      >
+                        <ion-icon size="large" name="create-outline"></ion-icon>
+                      </ion-button>
+                      <ion-button
+                        color="medium"
+                        fill="clear"
+                        slot="end"
+                        (click)="removeChild(child)"
+                      >
+                        <ion-icon size="large" name="trash-outline"></ion-icon>
+                      </ion-button>
                     </div>
                   </ion-item>
                 </ng-container>

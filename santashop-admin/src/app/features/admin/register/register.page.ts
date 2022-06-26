@@ -200,13 +200,11 @@ export class RegisterPage implements OnDestroy {
   }
 
   private async createRegistration(): Promise<IRegistration> {
+    let registration: IRegistration | undefined =
+      await this.registrationContext.registration$.pipe(take(1)).toPromise();
 
-    let registration: IRegistration | undefined = await this.registrationContext.registration$
-        .pipe(take(1)).toPromise();
+    if (!registration) registration = {} as IRegistration;
 
-    if (!registration)
-      registration = {} as IRegistration;
-      
     const children = CheckInHelpers.sortChildren(this._$children.getValue());
 
     registration.zipCode = this._$zipCode.getValue();

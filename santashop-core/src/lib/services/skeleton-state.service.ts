@@ -4,7 +4,6 @@ import { SkeletonStateError } from '../errors/skeleton-state-service';
 
 @Injectable()
 export class SkeletonStateService implements OnDestroy {
-
   /**
    * Internal state array
    *
@@ -15,7 +14,7 @@ export class SkeletonStateService implements OnDestroy {
   private readonly state: SkeletonState[] = [];
 
   /**
-   * Runs on destroy and clears out states 
+   * Runs on destroy and clears out states
    * and subscriptions to those states.
    *
    * @memberof SkeletonStateService
@@ -41,7 +40,7 @@ export class SkeletonStateService implements OnDestroy {
   }
 
   /**
-   * Returns a state by id and group. If the state 
+   * Returns a state by id and group. If the state
    * doesn't exist it will be created and returned.
    *
    * @param id
@@ -49,21 +48,26 @@ export class SkeletonStateService implements OnDestroy {
    * @return
    * @memberof SkeletonStateService
    */
-  public getState(id: string, groupId?: string, createIfNotFound = true): SkeletonState {
-
+  public getState(
+    id: string,
+    groupId?: string,
+    createIfNotFound = true
+  ): SkeletonState {
     let states: SkeletonState[] = [];
 
-    states = groupId 
-      ? this.state.filter(s => s.groupId === groupId)
+    states = groupId
+      ? this.state.filter((s) => s.groupId === groupId)
       : this.state;
 
-    let requestedState = states.find(s => s.id === id);
+    let requestedState = states.find((s) => s.id === id);
 
     if (!requestedState) {
       if (createIfNotFound) {
-        requestedState = this.addState(id, groupId)
+        requestedState = this.addState(id, groupId);
       } else {
-        throw new SkeletonStateError(`getState(): State with id "${id}" and group "${groupId}" not found`);
+        throw new SkeletonStateError(
+          `getState(): State with id "${id}" and group "${groupId}" not found`
+        );
       }
     }
 
@@ -78,15 +82,12 @@ export class SkeletonStateService implements OnDestroy {
    * @memberof SkeletonStateService
    */
   public removeState(id?: string, groupId?: string): void {
+    if (!id && !groupId)
+      throw new RangeError('Both id and groupId cannot be undefined');
 
-    if (!id && !groupId) 
-      throw new RangeError("Both id and groupId cannot be undefined");
+    if (id && !groupId) return this.removeStateById(id);
 
-    if (id && !groupId) 
-      return this.removeStateById(id);
-
-    if (!id && groupId) 
-      return this.removeStatesByGroup(groupId);
+    if (!id && groupId) return this.removeStatesByGroup(groupId);
 
     const toDelete: number[] = [];
 
@@ -97,19 +98,19 @@ export class SkeletonStateService implements OnDestroy {
       }
     });
 
-    toDelete.forEach(index => this.state.splice(index, 1));
+    toDelete.forEach((index) => this.state.splice(index, 1));
   }
 
   public removeStateById(id: string): void {
-    const index = this.state.findIndex(s => s.id === id);
-    if (index > -1) this.state.splice(index, 1)
+    const index = this.state.findIndex((s) => s.id === id);
+    if (index > -1) this.state.splice(index, 1);
   }
 
   public removeStatesByGroup(groupId: string): void {
     this.state.forEach((state, index) => {
       if (state.groupId === groupId) {
         state.destroy();
-        this.state.splice(index, 1)
+        this.state.splice(index, 1);
       }
     });
   }
@@ -121,10 +122,9 @@ export class SkeletonState {
   private readonly _isLoaded$ = new BehaviorSubject<boolean>(false);
   private readonly destroy$ = new Subject<void>();
 
-  public readonly isLoaded$ = this._isLoaded$.asObservable().pipe(
-    takeUntil(this.destroy$),
-    shareReplay(1)
-  );
+  public readonly isLoaded$ = this._isLoaded$
+    .asObservable()
+    .pipe(takeUntil(this.destroy$), shareReplay(1));
 
   constructor(id: string, groupId?: string) {
     this.id = id;

@@ -10,8 +10,8 @@ import { RegisterPage } from './register.page';
     CoreModule,
     RouterModule.forChild([{ path: '', component: RegisterPage }]),
     RegisterPageRoutingModule,
-    SharedModule
+    SharedModule,
   ],
-  declarations: [RegisterPage]
+  declarations: [RegisterPage],
 })
 export class RegisterPageModule {}

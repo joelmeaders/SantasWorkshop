@@ -13,25 +13,22 @@ import { PreRegistrationService } from '../../../core';
 export class PreRegistrationPage implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
-  public readonly userRegistration$ = 
-    this.viewService.userRegistration$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+  public readonly userRegistration$ = this.viewService.userRegistration$.pipe(
+    takeUntil(this.destroy$),
+    shareReplay(1)
+  );
 
-  public readonly childCount$ = 
-    this.viewService.childCount$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+  public readonly childCount$ = this.viewService.childCount$.pipe(
+    takeUntil(this.destroy$),
+    shareReplay(1)
+  );
 
-  public readonly chosenSlot$ = 
-    this.viewService.dateTimeSlot$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+  public readonly chosenSlot$ = this.viewService.dateTimeSlot$.pipe(
+    takeUntil(this.destroy$),
+    shareReplay(1)
+  );
 
-  public readonly isRegistrationComplete$ = 
+  public readonly isRegistrationComplete$ =
     this.viewService.registrationComplete$.pipe(
       takeUntil(this.destroy$),
       shareReplay(1)
@@ -40,12 +37,10 @@ export class PreRegistrationPage implements OnDestroy {
   constructor(
     private readonly viewService: PreRegistrationService,
     public readonly migrationService: ProfileMigrationService // Entrypoint for migration service
-  ) { }
+  ) {}
 
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  
 }

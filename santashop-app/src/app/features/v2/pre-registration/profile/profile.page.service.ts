@@ -13,7 +13,6 @@ import { changeEmailForm, changePasswordForm } from './profile.form';
 
 @Injectable()
 export class ProfilePageService implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
   public readonly profileForm = newChangeInfoForm();
@@ -21,24 +20,28 @@ export class ProfilePageService implements OnDestroy {
   public readonly changePasswordForm = changePasswordForm();
 
   private readonly getUser$ = (uuid: string) =>
-    this.httpService.collection<IUser>(COLLECTION_SCHEMA.users)
-      .read(uuid).pipe(take(1));
+    this.httpService
+      .collection<IUser>(COLLECTION_SCHEMA.users)
+      .read(uuid)
+      .pipe(take(1));
 
   public readonly userProfile$ = this.authService.currentUser$.pipe(
     takeUntil(this.destroy$),
-    switchMap(user => this.getUser$(user!.uid))
+    switchMap((user) => this.getUser$(user!.uid))
   );
 
-  public readonly setUserFormSubscription = this.userProfile$.pipe(
-    takeUntil(this.destroy$),
-    tap(user => {
-      this.profileForm.patchValue({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        zipCode: user.zipCode
+  public readonly setUserFormSubscription = this.userProfile$
+    .pipe(
+      takeUntil(this.destroy$),
+      tap((user) => {
+        this.profileForm.patchValue({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          zipCode: user.zipCode,
+        });
       })
-    })
-  ).subscribe();
+    )
+    .subscribe();
 
   constructor(
     private readonly httpService: FireRepoLite,
@@ -50,7 +53,7 @@ export class ProfilePageService implements OnDestroy {
     private readonly router: Router,
     private readonly translateService: TranslateService,
     private readonly analytics: Analytics
-  ) { }
+  ) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -58,26 +61,27 @@ export class ProfilePageService implements OnDestroy {
   }
 
   public async updatePublicProfile(): Promise<void> {
-
     await logEvent(this.analytics, 'profile_update_info');
 
     const newInfo: IChangeUserInfo = this.profileForm.value;
 
-    const loader = await this.loadingController.create(
-      { message: 'Updating account...' });
+    const loader = await this.loadingController.create({
+      message: 'Updating account...',
+    });
 
     await loader.present();
 
-    const accountStatusFunction = httpsCallable(this.afFunctions, 'changeAccountInformation');
+    const accountStatusFunction = httpsCallable(
+      this.afFunctions,
+      'changeAccountInformation'
+    );
 
     try {
       await accountStatusFunction(newInfo);
       this.router.navigate(['../']);
-    }
-    catch (error) {
+    } catch (error) {
       this.errorHandler.handleError(error as IError);
-    }
-    finally {
+    } finally {
       await loader.dismiss();
     }
   }
@@ -85,9 +89,10 @@ export class ProfilePageService implements OnDestroy {
   public async changeEmailAddress(): Promise<void> {
     await logEvent(this.analytics, 'profile_update_email');
     const value = this.changeEmailForm.value;
-    await this.authService.changeEmailAddress(value.password, value.emailAddress)
+    await this.authService
+      .changeEmailAddress(value.password, value.emailAddress)
       .then(() => this.emailChangedAlert())
-      .catch(error => this.errorHandler.handleError(error));
+      .catch((error) => this.errorHandler.handleError(error));
     this.changeEmailForm.reset();
     this.router.navigate(['../']);
   }
@@ -95,20 +100,19 @@ export class ProfilePageService implements OnDestroy {
   public async changePassword(): Promise<void> {
     await logEvent(this.analytics, 'profile_update_password');
     const value = this.changePasswordForm.value;
-    await this.authService.changePassword(value.oldPassword, value.newPassword)
+    await this.authService
+      .changePassword(value.oldPassword, value.newPassword)
       .then(() => this.passwordChangedAlert())
-      .catch(error => this.errorHandler.handleError(error));
-      this.router.navigate(['../']);
+      .catch((error) => this.errorHandler.handleError(error));
+    this.router.navigate(['../']);
   }
 
   public async emailChangedAlert(): Promise<any> {
     const alert = await this.alertController.create({
       header: this.translateService.instant('PROFILE.DONE'),
       message: this.translateService.instant('PROFILE.EMAIL_UPDATED'),
-      buttons: ['Ok']
+      buttons: ['Ok'],
     });
-
-    
 
     await alert.present();
     return alert.onDidDismiss();
@@ -118,7 +122,7 @@ export class ProfilePageService implements OnDestroy {
     const alert = await this.alertController.create({
       header: this.translateService.instant('PROFILE.PASSWORD_CHANGED'),
       message: this.translateService.instant('PROFILE.PASSWORD_CHANGED_TEXT'),
-      buttons: ['Ok']
+      buttons: ['Ok'],
     });
 
     await alert.present();

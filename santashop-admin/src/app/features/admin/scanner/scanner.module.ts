@@ -10,9 +10,9 @@ import { ScannerPage } from './scanner.page';
     CoreModule,
     ScannerPageRoutingModule,
     ZXingScannerModule,
-    SharedModule
+    SharedModule,
   ],
   declarations: [ScannerPage],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ScannerPageModule {}

@@ -6,13 +6,16 @@ import { ConfirmationPage } from './confirmation.page';
 const routes: Routes = [
   {
     path: '',
-    component: ConfirmationPage
+    component: ConfirmationPage,
   },
   {
     // Event info, where to go, what to bring
     path: 'event-information',
-    loadChildren: () => import('./event-information/event-information.module').then( m => m.EventInformationPageModule)
-  }
+    loadChildren: () =>
+      import('./event-information/event-information.module').then(
+        (m) => m.EventInformationPageModule
+      ),
+  },
 ];
 
 @NgModule({

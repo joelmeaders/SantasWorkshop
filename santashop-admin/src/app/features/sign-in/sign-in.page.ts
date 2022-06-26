@@ -25,17 +25,16 @@ export class SignInPage implements OnDestroy {
     private readonly authService: AuthService,
     private readonly loadingController: LoadingController,
     private readonly router: Router,
-    private readonly alertController: AlertController,
-  ) { }
+    private readonly alertController: AlertController
+  ) {}
 
   public async ngOnDestroy() {
     this.$destroy.next();
   }
 
   public async login() {
-
     const loginInfo: IAuth = {
-      ...this.form.value
+      ...this.form.value,
     };
 
     if (loginInfo.emailAddress == null || loginInfo.password == null) {
@@ -73,21 +72,19 @@ export class SignInPage implements OnDestroy {
   }
 
   private async handleError(error: IError) {
-
     const alert = await this.alertController.create({
       header: 'Error',
       subHeader: error.code,
       message: error.message,
-      buttons: ['Ok']
+      buttons: ['Ok'],
     });
 
     await alert.present();
-
   }
 
   private async destroyLoading() {
     try {
       await this.loadingController.dismiss();
-    } catch { }
+    } catch {}
   }
 }

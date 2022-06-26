@@ -1,24 +1,33 @@
 import { Injectable } from '@angular/core';
 import { FireRepoLite } from '@core/*';
-import { COLLECTION_SCHEMA, IDateTimeCount, IRegistrationStats, IZipCodeCount } from '@models/*';
+import {
+  COLLECTION_SCHEMA,
+  IDateTimeCount,
+  IRegistrationStats,
+  IZipCodeCount,
+} from '@models/*';
 import { from } from 'rxjs';
 import { map, pluck, reduce, switchMap, take } from 'rxjs/operators';
 import { ICheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
 import { groupBy, sortBy } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
-import { IAgeGroupBreakdown, IGenderAgeStats, IGenderAgeStatsDisplay } from 'santashop-models/src';
+import {
+  IAgeGroupBreakdown,
+  IGenderAgeStats,
+  IGenderAgeStatsDisplay,
+} from 'santashop-models/src';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StatsService {
-
-  private readonly statsCollection = this.httpService.collection(COLLECTION_SCHEMA.stats);
+  private readonly statsCollection = this.httpService.collection(
+    COLLECTION_SCHEMA.stats
+  );
 
   private readonly $registrationStats = this.statsCollection
-    .read<IRegistrationStats>('registration-2021').pipe(
-      take(1)
-    );
+    .read<IRegistrationStats>('registration-2021')
+    .pipe(take(1));
 
   public readonly $completedRegistrations = this.$registrationStats.pipe(
     take(1),
@@ -27,10 +36,10 @@ export class StatsService {
 
   public readonly $registeredChildrenCount = this.$registrationStats.pipe(
     take(1),
-    map((stats) => stats.dateTimeCount.map(e => e.childCount)),
-    map(counts => {
+    map((stats) => stats.dateTimeCount.map((e) => e.childCount)),
+    map((counts) => {
       let value = 0;
-      counts.forEach(c => value += c);
+      counts.forEach((c) => (value += c));
       return value;
     })
   );
@@ -38,36 +47,43 @@ export class StatsService {
   public readonly $registrationDateTimeCounts = this.$registrationStats.pipe(
     take(1),
     map((stats) => stats.dateTimeCount),
-    map(stats => {
-      stats.forEach(stat => stat.dateTime = (<any>stat.dateTime as Timestamp).toDate());
+    map((stats) => {
+      stats.forEach(
+        (stat) => (stat.dateTime = ((<any>stat.dateTime) as Timestamp).toDate())
+      );
       return stats;
     }),
     map((stats) => {
-      const sorted: IDateTimeCount[] = sortBy(stats, 'dateTime')
+      const sorted: IDateTimeCount[] = sortBy(stats, 'dateTime');
       return sorted;
-    }),
+    })
   );
 
-  public readonly $registrationGenderAgeByDateCounts = this.$registrationDateTimeCounts.pipe(
-    take(1),
-    map(stats => this.parseDateTimeCountsForDisplay(stats)),
-    map((stats) => {
-      const sorted: IGenderAgeStatsDisplay[] = sortBy(stats, 'date')
-      return sorted;
-    }),
-  );
+  public readonly $registrationGenderAgeByDateCounts =
+    this.$registrationDateTimeCounts.pipe(
+      take(1),
+      map((stats) => this.parseDateTimeCountsForDisplay(stats)),
+      map((stats) => {
+        const sorted: IGenderAgeStatsDisplay[] = sortBy(stats, 'date');
+        return sorted;
+      })
+    );
 
   public readonly $zipCodeCounts = this.$registrationStats.pipe(
     take(1),
     map((stats: any) => stats.zipCodeCount as IZipCodeCount),
-    map((stats: IZipCodeCount) => sortBy(stats, 'childCount').reverse() as IZipCodeCount[])
+    map(
+      (stats: IZipCodeCount) =>
+        sortBy(stats, 'childCount').reverse() as IZipCodeCount[]
+    )
   );
 
   private readonly $checkInStats = this.statsCollection
-    .read<ICheckInAggregatedStats>('checkin-2021').pipe(
+    .read<ICheckInAggregatedStats>('checkin-2021')
+    .pipe(
       take(1),
-      map(stats => {
-        stats.lastUpdated = (<any>stats.lastUpdated as Timestamp).toDate();
+      map((stats) => {
+        stats.lastUpdated = ((<any>stats.lastUpdated) as Timestamp).toDate();
         return stats;
       })
     );
@@ -78,7 +94,7 @@ export class StatsService {
 
   public readonly $checkInDateTimeCounts = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
-    map(counts => {
+    map((counts) => {
       const sorted = sortBy(counts, 'hour').reverse();
       return groupBy(sorted, 'date');
     })
@@ -86,31 +102,37 @@ export class StatsService {
 
   public readonly $checkInTotalCustomerCount = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
-    switchMap(dateTimeCounts => from(dateTimeCounts.map(dtc => dtc.customerCount))),
+    switchMap((dateTimeCounts) =>
+      from(dateTimeCounts.map((dtc) => dtc.customerCount))
+    ),
     reduce((acc, val) => acc + val)
   );
 
   public readonly $checkInTotalChildCount = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
-    switchMap(dateTimeCounts => from(dateTimeCounts.map(dtc => dtc.childCount))),
+    switchMap((dateTimeCounts) =>
+      from(dateTimeCounts.map((dtc) => dtc.childCount))
+    ),
     reduce((acc, val) => acc + val)
   );
 
   public readonly $checkInTotalPreregisteredCount = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
-    switchMap(dateTimeCounts => from(dateTimeCounts.map(dtc => dtc.pregisteredCount))),
+    switchMap((dateTimeCounts) =>
+      from(dateTimeCounts.map((dtc) => dtc.pregisteredCount))
+    ),
     reduce((acc, val) => acc + val)
   );
 
   public readonly $checkInTotalModifiedCount = this.$checkInStats.pipe(
     pluck('dateTimeCount'),
-    switchMap(dateTimeCounts => from(dateTimeCounts.map(dtc => dtc.modifiedCount))),
+    switchMap((dateTimeCounts) =>
+      from(dateTimeCounts.map((dtc) => dtc.modifiedCount))
+    ),
     reduce((acc, val) => acc + val)
   );
 
-  constructor(
-    private readonly httpService: FireRepoLite
-  ) { }
+  constructor(private readonly httpService: FireRepoLite) {}
 
   private newParsedStat(dayOfMonth: number): IGenderAgeStatsDisplay {
     const parsedStat: IGenderAgeStatsDisplay = {
@@ -121,37 +143,37 @@ export class StatsService {
           age02: 0,
           age35: 0,
           age68: 0,
-          age911: 0
+          age911: 0,
         } as IAgeGroupBreakdown,
         girls: {
           total: 0,
           age02: 0,
           age35: 0,
           age68: 0,
-          age911: 0
+          age911: 0,
         } as IAgeGroupBreakdown,
         boys: {
           total: 0,
           age02: 0,
           age35: 0,
           age68: 0,
-          age911: 0
-        } as IAgeGroupBreakdown
-      } as IGenderAgeStats
+          age911: 0,
+        } as IAgeGroupBreakdown,
+      } as IGenderAgeStats,
     };
 
     return parsedStat;
   }
 
-  private parseDateTimeCountsForDisplay(stats: IDateTimeCount[]): IGenderAgeStatsDisplay[] {
-  
+  private parseDateTimeCountsForDisplay(
+    stats: IDateTimeCount[]
+  ): IGenderAgeStatsDisplay[] {
     const parsedStats: IGenderAgeStatsDisplay[] = [];
 
-    const getIndex = (date: Date) => 
-      parsedStats.findIndex(e => e.date.getDate() === date.getDate());
+    const getIndex = (date: Date) =>
+      parsedStats.findIndex((e) => e.date.getDate() === date.getDate());
 
-    stats.forEach(stat => {
-
+    stats.forEach((stat) => {
       const index = getIndex(stat.dateTime);
 
       if (index > -1) {
@@ -166,14 +188,13 @@ export class StatsService {
         parsedStats[index].stats.girls.age68 += stat.stats.girls.age68;
         parsedStats[index].stats.girls.age911 += stat.stats.girls.age911;
         parsedStats[index].stats.girls.total += stat.stats.girls.total;
-        
+
         parsedStats[index].stats.boys.age02 += stat.stats.boys.age02;
         parsedStats[index].stats.boys.age35 += stat.stats.boys.age35;
         parsedStats[index].stats.boys.age68 += stat.stats.boys.age68;
         parsedStats[index].stats.boys.age911 += stat.stats.boys.age911;
         parsedStats[index].stats.boys.total += stat.stats.boys.total;
-      }
-      else {
+      } else {
         const newParsedStat = this.newParsedStat(stat.dateTime.getDate());
 
         newParsedStat.stats.infants.age02 += stat.stats.infants.age02;
@@ -187,7 +208,7 @@ export class StatsService {
         newParsedStat.stats.girls.age68 += stat.stats.girls.age68;
         newParsedStat.stats.girls.age911 += stat.stats.girls.age911;
         newParsedStat.stats.girls.total += stat.stats.girls.total;
-        
+
         newParsedStat.stats.boys.age02 += stat.stats.boys.age02;
         newParsedStat.stats.boys.age35 += stat.stats.boys.age35;
         newParsedStat.stats.boys.age68 += stat.stats.boys.age68;
@@ -199,9 +220,5 @@ export class StatsService {
     });
 
     return parsedStats;
-
   }
 }
-
-
-

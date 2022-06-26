@@ -5,11 +5,7 @@ import { CoreModule } from '@core/*';
 import { SharedModule } from '../../shared/components/shared.module';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SharedModule,
-    BadWeatherPageRoutingModule
-  ],
-  declarations: [BadWeatherPage]
+  imports: [CoreModule, SharedModule, BadWeatherPageRoutingModule],
+  declarations: [BadWeatherPage],
 })
 export class BadWeatherPageModule {}

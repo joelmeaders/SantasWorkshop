@@ -17,7 +17,12 @@
   </div>
 </ng-container>
 
-<ng-container *ngIf="!($existingCheckin | async)?.customerId && ($loading | async) === false; else existingCheckin">
+<ng-container
+  *ngIf="
+    !($existingCheckin | async)?.customerId && ($loading | async) === false;
+    else existingCheckin
+  "
+>
   <ion-content>
     <ion-grid *appLet="$registration | async as registration">
       <ion-row>
@@ -26,14 +31,25 @@
         </ion-col>
       </ion-row>
       <ion-row>
-        <ion-col size="12" size-md="6" size-lg="4" *ngFor="let child of registration?.children">
+        <ion-col
+          size="12"
+          size-md="6"
+          size-lg="4"
+          *ngFor="let child of registration?.children"
+        >
           <ion-card [color]="cardColor(child.toyType)">
             <ion-grid>
               <ion-row>
-                <ion-col size="6" class="ion-text-start ion-text-capitalize big-bold-text">
+                <ion-col
+                  size="6"
+                  class="ion-text-start ion-text-capitalize big-bold-text"
+                >
                   <ion-text color="dark"> {{ child.toyType }} </ion-text>
                 </ion-col>
-                <ion-col size="6" class="ion-text-end ion-text-capitalize big-bold-text">
+                <ion-col
+                  size="6"
+                  class="ion-text-end ion-text-capitalize big-bold-text"
+                >
                   <ion-text color="dark"> {{ child.ageGroup }} </ion-text>
                 </ion-col>
               </ion-row>
@@ -48,29 +64,30 @@
       </ion-row>
     </ion-grid>
   </ion-content>
-  
+
   <ion-footer>
     <ion-toolbar>
-        <ion-buttons class="ion-justify-content-around ion-padding-vertical">
-          <ion-button (click)="editRegistration()" expand="block">
-            <ion-icon name="create-outline" slot="start"></ion-icon>
-            <ion-label>Edit</ion-label>
-          </ion-button>
-      
-          <ion-button (click)="checkIn()" expand="block">
-            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-            <ion-label>Check In</ion-label>
-          </ion-button>
-        </ion-buttons>
+      <ion-buttons class="ion-justify-content-around ion-padding-vertical">
+        <ion-button (click)="editRegistration()" expand="block">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          <ion-label>Edit</ion-label>
+        </ion-button>
+
+        <ion-button (click)="checkIn()" expand="block">
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          <ion-label>Check In</ion-label>
+        </ion-button>
+      </ion-buttons>
     </ion-toolbar>
   </ion-footer>
 </ng-container>
 
 <ng-template #existingCheckin>
-  <ion-content class="ion-text-center ion-padding-top" *ngIf="$existingCheckin | async as existingCheckin">
-    <ion-title>
-      Already checked in
-    </ion-title>
+  <ion-content
+    class="ion-text-center ion-padding-top"
+    *ngIf="$existingCheckin | async as existingCheckin"
+  >
+    <ion-title> Already checked in </ion-title>
     <div class="ion-padding-vertical">
       <ion-text>
         {{ friendlyTimestamp(existingCheckin.checkInDateTime) }}

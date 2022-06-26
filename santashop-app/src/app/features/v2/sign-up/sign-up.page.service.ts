@@ -11,7 +11,6 @@ import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()
 export class SignUpPageService implements OnDestroy {
-
   public readonly form = newOnboardUserForm();
   public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
   private readonly subscriptions = new Array<Subscription>();
@@ -25,7 +24,7 @@ export class SignUpPageService implements OnDestroy {
    */
   public readonly redirectIfLoggedInSubscription =
     this.authService.currentUser$.pipe(
-      filter(user => !!user),
+      filter((user) => !!user),
       tap(() => this.router.navigate(['/pre-registration/overview']))
     );
 
@@ -39,18 +38,17 @@ export class SignUpPageService implements OnDestroy {
     private readonly translateService: TranslateService
   ) {
     this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
-    this.form.errors$.pipe(tap(v => console.log(v))).subscribe();
+    this.form.errors$.pipe(tap((v) => console.log(v))).subscribe();
   }
 
   public ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   public async onValidateRecaptcha($event: any, bhp?: string) {
-
     this.bhpValue = bhp;
 
-    if (!await this.validateRecaptcha($event)) {
+    if (!(await this.validateRecaptcha($event))) {
       this.recaptchaValid$.next(false);
       await this.failedVerification();
       return;
@@ -60,14 +58,16 @@ export class SignUpPageService implements OnDestroy {
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {
+    console.log($event);
 
-    console.log($event)
+    const status = await httpsCallable(
+      this.afFunctions,
+      'verifyRecaptcha2'
+    )({ value: $event });
 
-    const status = await httpsCallable(this.afFunctions, 'verifyRecaptcha2')({ value: $event });
-
-      return status 
-        ? Promise.resolve((<any>status.data).success as boolean) 
-        : Promise.reject(false);
+    return status
+      ? Promise.resolve((<any>status.data).success as boolean)
+      : Promise.reject(false);
   }
 
   // Move to UI service
@@ -82,14 +82,13 @@ export class SignUpPageService implements OnDestroy {
   }
 
   public async onboardUser(): Promise<void> {
-
-    if (!this.recaptchaValid$.getValue())
-      return;
+    if (!this.recaptchaValid$.getValue()) return;
 
     const onboardInfo = this.form.value;
 
-    const loader = await this.loadingController.create(
-      { message: 'Creating account...' });
+    const loader = await this.loadingController.create({
+      message: 'Creating account...',
+    });
 
     await loader.present();
 
@@ -97,9 +96,7 @@ export class SignUpPageService implements OnDestroy {
       await this.createAccount(onboardInfo);
       loader.message = 'Logging you in';
       await this.signIn(onboardInfo);
-    } 
-    catch(error) {
-
+    } catch (error) {
       error = error as IError;
 
       if ((error as IError).code === 'functions/already-exists') {
@@ -107,32 +104,31 @@ export class SignUpPageService implements OnDestroy {
         const alert = await this.alertController.create({
           header: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS'),
           subHeader: onboardInfo.emailAddress,
-          message: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS_MESSAGE'),
+          message: this.translateService.instant(
+            'SIGNUP.ACCOUNT_EXISTS_MESSAGE'
+          ),
           buttons: [
             {
               text: this.translateService.instant('FORGOTPASS.RESET_PASSWORD'),
-              role: '/reset-password'
+              role: '/reset-password',
             },
             {
               text: this.translateService.instant('COMMON.SIGN_IN'),
-              role: '/sign-in'
-            }
+              role: '/sign-in',
+            },
           ],
-          backdropDismiss: false
+          backdropDismiss: false,
         });
 
         await alert.present();
 
-        await alert.onDidDismiss().then(response => {
-          this.router.navigate([response.role])
+        await alert.onDidDismiss().then((response) => {
+          this.router.navigate([response.role]);
         });
-
-      }
-      else {
+      } else {
         this.errorHandler.handleError(error as IError);
       }
-    }
-    finally {
+    } finally {
       await loader.dismiss();
     }
   }
@@ -143,10 +139,9 @@ export class SignUpPageService implements OnDestroy {
   }
 
   private async signIn(value: IOnboardUser): Promise<void | IError> {
-
     const auth: IAuth = {
       emailAddress: value.emailAddress,
-      password: value.password
+      password: value.password,
     };
 
     await this.authService.login(auth);

@@ -9,10 +9,10 @@ describe('ControlErrorsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-    declarations: [ControlErrorsComponent],
-    imports: [IonicModule.forRoot()],
-    teardown: { destroyAfterEach: false }
-}).compileComponents();
+      declarations: [ControlErrorsComponent],
+      imports: [IonicModule.forRoot()],
+      teardown: { destroyAfterEach: false },
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ControlErrorsComponent);
     component = fixture.componentInstance;

@@ -8,10 +8,7 @@ const mailchimpClient = require('@mailchimp/mailchimp_transactional')(
   functions.config().mailchimp.key
 );
 
-export default async (
-  change: functions.firestore.QueryDocumentSnapshot
-) => {
-
+export default async (change: functions.firestore.QueryDocumentSnapshot) => {
   const document: any = change.data();
   const uid = change.id;
   const code = document.code;
@@ -39,21 +36,20 @@ export default async (
   const response = await mailchimpClient.messages.sendTemplate({
     template_name: 'registration-confirmation',
     template_content: [],
-    message: message
+    message: message,
   });
 
   const emailDocRef = admin
-      .firestore()
-      .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
+    .firestore()
+    .doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
 
   if (response[0].status === 'sent') {
     await emailDocRef.delete();
-  }
-  else {
+  } else {
     const failure = {
-      ...response[0]
+      ...response[0],
     };
     delete failure.email;
-    await emailDocRef.set({rejected: failure}, {merge: true});
+    await emailDocRef.set({ rejected: failure }, { merge: true });
   }
 };

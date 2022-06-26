@@ -10,20 +10,20 @@ export default async () => {
   const bucket = 'gs://santashop-backups';
 
   return client
-      .exportDocuments({
-        name: databaseName,
-        outputUriPrefix: bucket,
-        // Leave collectionIds empty to export all collections
-        // or set to a list of collection IDs to export,
-        // collectionIds: ['users', 'posts']
-        collectionIds: [],
-      })
-      .then((responses: any) => {
-        const response = responses[0];
-        console.log(`Operation Name: ${response.name}`);
-      })
-      .catch((err: any) => {
-        console.error(`Error: ${projectId}, ${databaseName}: ${err}`);
-        throw new Error('Export operation failed');
-      });
+    .exportDocuments({
+      name: databaseName,
+      outputUriPrefix: bucket,
+      // Leave collectionIds empty to export all collections
+      // or set to a list of collection IDs to export,
+      // collectionIds: ['users', 'posts']
+      collectionIds: [],
+    })
+    .then((responses: any) => {
+      const response = responses[0];
+      console.log(`Operation Name: ${response.name}`);
+    })
+    .catch((err: any) => {
+      console.error(`Error: ${projectId}, ${databaseName}: ${err}`);
+      throw new Error('Export operation failed');
+    });
 };

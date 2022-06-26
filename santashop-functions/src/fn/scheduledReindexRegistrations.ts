@@ -1,5 +1,8 @@
 import * as admin from 'firebase-admin';
-import { IRegistration, RegistrationSearchIndex } from '../../../santashop-models/src/lib/models';
+import {
+  IRegistration,
+  RegistrationSearchIndex,
+} from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -11,7 +14,6 @@ export default async (): Promise<string> => {
   const rsi: RegistrationSearchIndex[] = [];
 
   registrations.forEach((registration) => {
-
     try {
       const newRsi: RegistrationSearchIndex = {
         code: registration.qrcode,
@@ -19,11 +21,10 @@ export default async (): Promise<string> => {
         emailAddress: registration.emailAddress!.toLowerCase(),
         firstName: registration.firstName!.toLowerCase(),
         lastName: registration.lastName!.toLowerCase(),
-        zip: registration.zipCode!
+        zip: registration.zipCode!,
       };
       rsi.push(newRsi);
-    }
-    catch {
+    } catch {
       // Do nothing
     }
   });
@@ -53,8 +54,7 @@ export default async (): Promise<string> => {
   return Promise.resolve('Updated index');
 };
 
-const indexQuery = () =>
-  admin.firestore().collection('registrations');
+const indexQuery = () => admin.firestore().collection('registrations');
 
 const loadRegistrations = async (): Promise<IRegistration[]> => {
   let allRegistrations: IRegistration[] = [];

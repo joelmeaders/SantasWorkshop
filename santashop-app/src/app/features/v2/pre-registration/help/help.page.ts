@@ -5,14 +5,11 @@ import { PreRegistrationService } from '../../../../core';
   selector: 'app-help',
   templateUrl: './help.page.html',
   styleUrls: ['./help.page.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HelpPage {
+  public readonly isRegistrationComplete$ =
+    this.viewService.registrationComplete$;
 
-  public readonly isRegistrationComplete$ = this.viewService.registrationComplete$;
-
-  constructor(
-    public readonly viewService: PreRegistrationService,
-    ) { }
-  }
-  
+  constructor(public readonly viewService: PreRegistrationService) {}
+}

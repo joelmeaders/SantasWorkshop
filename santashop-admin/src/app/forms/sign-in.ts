@@ -2,10 +2,13 @@ import { FormGroup, Validators } from '@angular/forms';
 import { CommonForms } from 'santashop-core/src';
 
 export abstract class SignInForm {
-
   private static validators = {
     emailAddress: Validators.compose([Validators.required, Validators.email]),
-    password: Validators.compose([Validators.required, Validators.minLength(8), Validators.maxLength(50)]),
+    password: Validators.compose([
+      Validators.required,
+      Validators.minLength(8),
+      Validators.maxLength(50),
+    ]),
   };
 
   public static form(): FormGroup {
@@ -17,8 +20,15 @@ export abstract class SignInForm {
 
   public static validationMessages() {
     return {
-      emailAddress: [CommonForms.messages().required, { type: 'email', message: 'Must be a valid email address' }],
-      password: [CommonForms.messages().required, CommonForms.messages(8, 50).minLength, CommonForms.messages(8, 50).maxLength]
+      emailAddress: [
+        CommonForms.messages().required,
+        { type: 'email', message: 'Must be a valid email address' },
+      ],
+      password: [
+        CommonForms.messages().required,
+        CommonForms.messages(8, 50).minLength,
+        CommonForms.messages(8, 50).maxLength,
+      ],
     };
   }
 }

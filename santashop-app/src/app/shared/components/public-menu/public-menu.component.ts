@@ -11,10 +11,9 @@ import { AuthService } from 'santashop-core/src';
   selector: 'app-public-menu',
   templateUrl: './public-menu.component.html',
   styleUrls: ['./public-menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicMenuComponent implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
   public readonly isLoggedIn$ = this.authService.currentUser$.pipe(
@@ -28,8 +27,8 @@ export class PublicMenuComponent implements OnDestroy {
     private readonly router: Router,
     private readonly popoverController: PopoverController,
     private readonly translateService: TranslateService,
-    private readonly analyticsService: Analytics,
-  ) { }
+    private readonly analyticsService: Analytics
+  ) {}
 
   public ngOnDestroy(): void {
     this.destroy$.next();
@@ -75,5 +74,4 @@ export class PublicMenuComponent implements OnDestroy {
     await logEvent(this.analyticsService, `set_language_${value}`);
     await this.closeMenu();
   }
-
 }

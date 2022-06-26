@@ -10,7 +10,7 @@ describe('SkeletonStateService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [SkeletonStateService]
+      providers: [SkeletonStateService],
     });
     service = TestBed.inject(SkeletonStateService);
   });
@@ -36,7 +36,6 @@ describe('SkeletonStateService', () => {
   });
 
   describe('getState', () => {
-
     beforeEach(() => {
       service.addState('a', 'b');
     });
@@ -54,7 +53,7 @@ describe('SkeletonStateService', () => {
       expect(state.groupId).toEqual('b');
     });
 
-    it('should add state if it doesn\'t exist', () => {
+    it("should add state if it doesn't exist", () => {
       const state = service.getState('c', 'd');
       expect(state).toBeTruthy();
       expect(state.id).toEqual('c');
@@ -62,8 +61,13 @@ describe('SkeletonStateService', () => {
     });
 
     it('should throw error on missing state', () => {
-      expect(function() {service.getState('c', 'd', false);})
-        .toThrow(new SkeletonStateError(`getState(): State with id "c" and group "d" not found`));
+      expect(function () {
+        service.getState('c', 'd', false);
+      }).toThrow(
+        new SkeletonStateError(
+          `getState(): State with id "c" and group "d" not found`
+        )
+      );
     });
   });
 
@@ -88,13 +92,13 @@ describe('SkeletonStateService', () => {
 
     it('should remove state from stack', () => {
       const spy = spyOn(service['state'], 'splice').and.callThrough();
-      service.removeState('a','b');
+      service.removeState('a', 'b');
       expect(spy).toHaveBeenCalledOnceWith(0, 1);
       expect(service['state']).toHaveSize(2);
     });
 
     it('should do nothing', () => {
-      service.removeState('f','h');
+      service.removeState('f', 'h');
       expect(service['state']).toHaveSize(3);
     });
   });
@@ -143,7 +147,6 @@ describe('SkeletonStateService', () => {
 });
 
 describe('SkeletonState', () => {
-
   it('should be initialized with correct values', () => {
     const state = new SkeletonState('a', 'b');
     expect(state.id).toBe('a');
@@ -154,27 +157,22 @@ describe('SkeletonState', () => {
   it('setState should cause true emission', () => {
     const state = new SkeletonState('a', 'b');
     let done = false;
-    
-    state.isLoaded$.pipe(
-      skip(1)
-    ).subscribe(value => done = value);
+
+    state.isLoaded$.pipe(skip(1)).subscribe((value) => (done = value));
 
     state.setState(true);
     state.destroy();
 
     expect(done).toBeTrue();
-  })
+  });
 
   it('should kill _isLoaded$', () => {
     const state = new SkeletonState('a', 'b');
     let done = false;
-    
-    state.isLoaded$.pipe(
-      finalize(() => done = true)
-    ).subscribe();
+
+    state.isLoaded$.pipe(finalize(() => (done = true))).subscribe();
 
     state.destroy();
     expect(done).toBeTrue();
   });
-
 });

@@ -16,7 +16,7 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import '~@ionic/angular/css/display.css';
+@import "~@ionic/angular/css/display.css";
 
 /* Optional CSS utils that can be commented out */
 @import "~@ionic/angular/css/padding.css";
@@ -26,12 +26,13 @@
 @import "~@ionic/angular/css/flex-utils.css";
 
 ion-title {
-  font-family: 'Inter', 'Roboto', sans-serif;
+  font-family: "Inter", "Roboto", sans-serif;
   font-size: 1.2em;
   font-weight: 600;
 }
 
-ion-card, ion-button {
+ion-card,
+ion-button {
   --border-radius: 8px;
   border-radius: 8px;
 }
@@ -62,7 +63,7 @@ re-captcha {
 
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0;
+  opacity: 0;
 }
 
 .logo {
@@ -119,7 +120,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   height: 46px;
   padding-inline-start: 6px;
   padding-inline-end: 6px;
-  --box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px ;
+  --box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px,
+    rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
 }
 
 .icon-reduced-margin {
@@ -144,24 +146,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .ion-card-subtitle {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 1.4rem;
   font-weight: 400;
 }
 
 .ion-card-subtitle-lg {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 2rem;
   font-weight: 400;
 }
 
 .remove-shadow {
-  --box-shadow:none;
+  --box-shadow: none;
 }
 
 .modal-md {
-	--min-height: 70%;
-	--min-width: 60%;
+  --min-height: 70%;
+  --min-width: 60%;
 }
 
 .width-max {
@@ -179,7 +181,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .confirm-delete-button {
   background-color: var(--ion-color-xmasred) !important;
-  color: #FFF !important;
+  color: #fff !important;
   border-radius: 8px !important;
   padding-inline-start: 16px !important;
   padding-inline-end: 16px !important;
@@ -209,7 +211,7 @@ h2alt {
   padding-right: 32px;
   padding-top: 16px;
   padding-bottom: 16px;
-  background: var(--ion-color-warning, #FFC409);
+  background: var(--ion-color-warning, #ffc409);
 }
 
 $es-size-definitions: (
@@ -218,35 +220,32 @@ $es-size-definitions: (
   md: 8px,
   lg: 16px,
   xl: 24px,
-  xxl: 32px
+  xxl: 32px,
 ) !default;
 
-$es-direction-definitions: (
-  top,
-  bottom,
-  right,
-  left
-) !default;
+$es-direction-definitions: (top, bottom, right, left) !default;
 
 @mixin es-margin-list {
   @each $direction in $es-direction-definitions {
     @each $key, $value in $es-size-definitions {
-      .es-mg-#{$direction}-#{$key} { margin-#{$direction}: $value; }
+      .es-mg-#{$direction}-#{$key} {
+        margin-#{$direction}: $value;
+      }
     }
   }
 }
 @include es-margin-list();
 
-
 @mixin es-padding-list {
   @each $direction in $es-direction-definitions {
     @each $key, $value in $es-size-definitions {
-      .es-pd-#{$direction}-#{$key} { padding-#{$direction}: $value; }
+      .es-pd-#{$direction}-#{$key} {
+        padding-#{$direction}: $value;
+      }
     }
   }
 }
 @include es-padding-list();
-
 
 :root {
   --es-px-xs: 2px;
@@ -257,5 +256,9 @@ $es-direction-definitions: (
   --es-px-xxl: 32px;
 }
 
-.firebase-emulator-warning { display: none; }
-#ghostery-tracker-tally { display: none;}
+.firebase-emulator-warning {
+  display: none;
+}
+#ghostery-tracker-tally {
+  display: none;
+}

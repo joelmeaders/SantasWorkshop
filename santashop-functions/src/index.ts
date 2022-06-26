@@ -1,10 +1,14 @@
 import * as functions from 'firebase-functions';
 import { COLLECTION_SCHEMA } from '../../santashop-models/src/lib/models';
 
-export const changeAccountInformation =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/changeAccountInformation')).default(request, context);
-  });
+export const changeAccountInformation = functions.https.onCall(
+  async (request, context) => {
+    return (await import('./fn/changeAccountInformation')).default(
+      request,
+      context
+    );
+  }
+);
 
 /**
  * Runs a method to validate and complete a user registration record.
@@ -14,35 +18,45 @@ export const changeAccountInformation =
  * @remarks
  * registration-email, RegistrationSearchIndex
  */
-export const completeRegistration =
-functions.https.onCall(async (request, context) => {
-  return (await import('./fn/completeRegistration')).default(request, context);
+export const completeRegistration = functions.https.onCall(
+  async (request, context) => {
+    return (await import('./fn/completeRegistration')).default(
+      request,
+      context
+    );
+  }
+);
+
+export const migrateProfile_V0_To_V1 = functions.https.onCall(
+  async (request, context) => {
+    return (await import('./fn/migrateProfile_V0_To_V1')).default(
+      request,
+      context
+    );
+  }
+);
+
+export const manualMigrate = functions.https.onCall(
+  async (request, context) => {
+    return (await import('./fn/manualMigrate')).default(request, context);
+  }
+);
+
+export const newAccount = functions.https.onCall(async (request) => {
+  return (await import('./fn/newAccount')).default(request);
 });
 
-export const migrateProfile_V0_To_V1 =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/migrateProfile_V0_To_V1')).default(request, context);
-  });
-
-export const manualMigrate =
-  functions.https.onCall(async (request, context) => {
-    return (await import('./fn/manualMigrate')).default(request, context);
-  });
-
-export const newAccount =
-  functions.https.onCall(async (request) => {
-    return (await import('./fn/newAccount')).default(request);
-  });
-
-export const undoRegistration =
-  functions.https.onCall(async (request, context) => {
+export const undoRegistration = functions.https.onCall(
+  async (request, context) => {
     return (await import('./fn/undoRegistration')).default(request, context);
-  });
+  }
+);
 
-export const updateEmailAddress =
-  functions.https.onCall(async (request, context) => {
+export const updateEmailAddress = functions.https.onCall(
+  async (request, context) => {
     return (await import('./fn/updateEmailAddress')).default(request, context);
-  });
+  }
+);
 
 /**
  * Validate recaptcha response.
@@ -50,10 +64,9 @@ export const updateEmailAddress =
  * @remarks
  * Callable functions need to specify return instead of await
  */
-export const verifyRecaptcha2 =
-  functions.https.onCall(async (request) => {
-    return (await import('./fn/verifyRecaptcha2')).default(request);
-  });
+export const verifyRecaptcha2 = functions.https.onCall(async (request) => {
+  return (await import('./fn/verifyRecaptcha2')).default(request);
+});
 
 // export const isAdmin =
 //   functions.https.onCall(async (request, context) => {
@@ -65,7 +78,6 @@ export const verifyRecaptcha2 =
 //     .onRun(async () => {
 //       return (await import("./fn/exportCsv")).default();
 //     });
-
 
 // ------------------------------------- TRIGGER FUNCTIONS
 
@@ -111,37 +123,37 @@ export const sendNewRegistrationEmails = functions.firestore
  * Backs up firestore db every hour to storage bucket
  */
 export const scheduledFirestoreBackup = functions.pubsub
-    .schedule('every 12 hours')
-    .onRun(async () => {
-      await (await import('./fn/scheduledFirestoreBackup')).default();
-    });
+  .schedule('every 12 hours')
+  .onRun(async () => {
+    await (await import('./fn/scheduledFirestoreBackup')).default();
+  });
 
-export const scheduledDateTimeSlotCounters = 
-  functions.pubsub.schedule('every 15 minutes')
+export const scheduledDateTimeSlotCounters = functions.pubsub
+  .schedule('every 15 minutes')
   .onRun(async () => {
     await (await import('./fn/scheduledDateTimeSlotCounters')).default();
   });
 
-export const scheduledDateTimeSlotReschedules = 
-  functions.pubsub.schedule('every 60 minutes')
+export const scheduledDateTimeSlotReschedules = functions.pubsub
+  .schedule('every 60 minutes')
   .onRun(async () => {
     await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
   });
 
-export const scheduledSetAdminRights = 
-  functions.pubsub.schedule('59 23 * * *')
+export const scheduledSetAdminRights = functions.pubsub
+  .schedule('59 23 * * *')
   .onRun(async () => {
     await (await import('./fn/scheduledSetAdminRights')).default();
   });
 
-export const scheduledExportEmails = 
-  functions.pubsub.schedule('59 23 * * *')
+export const scheduledExportEmails = functions.pubsub
+  .schedule('59 23 * * *')
   .onRun(async () => {
     await (await import('./fn/scheduledExportEmails')).default();
   });
 
-export const scheduledReindexRegistrations = 
-  functions.pubsub.schedule('59 23 * * *')
+export const scheduledReindexRegistrations = functions.pubsub
+  .schedule('59 23 * * *')
   .onRun(async () => {
     await (await import('./fn/scheduledReindexRegistrations')).default();
   });
@@ -152,19 +164,18 @@ export const scheduledReindexRegistrations =
 //     await (await import('./fn/addDateTimeSlots')).default();
 //   });
 
-// export const requeueRegistrationEmails = 
+// export const requeueRegistrationEmails =
 //   functions.pubsub.schedule('every 60 minutes')
 //   .onRun(async () => {
 //     await (await import('./fn/requeueRegistrationEmails')).default();
 //   });
 
-export const recalculateAllDateTimeSlots = 
-  functions.pubsub.schedule('59 23 * * *')
+export const recalculateAllDateTimeSlots = functions.pubsub
+  .schedule('59 23 * * *')
   .onRun(async () => {
     await (await import('./fn/recalculateAllDateTimeSlots')).default();
   });
 
-  
 export const scheduledRegistrationStats = functions.pubsub
   .schedule('59 23 * * *')
   .timeZone('America/Denver')
@@ -174,9 +185,8 @@ export const scheduledRegistrationStats = functions.pubsub
 
 // Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
 export const scheduledCheckInStats = functions.pubsub
-    .schedule('*/5 10,11,12,13,14,15,16 10,11,13,14 12 *')
-    .timeZone('America/Denver')
-    .onRun(async () => {
-      await (await import('./fn/scheduledCheckInStats')).default();
-    });
-  
+  .schedule('*/5 10,11,12,13,14,15,16 10,11,13,14 12 *')
+  .timeZone('America/Denver')
+  .onRun(async () => {
+    await (await import('./fn/scheduledCheckInStats')).default();
+  });

@@ -7,7 +7,7 @@ export interface IError {
 export class AccountCreationError extends Error implements IError {
   public code: string;
   public details?: string;
-  
+
   constructor(code: string, message: string, details?: string) {
     super(message);
     this.code = code;
@@ -20,7 +20,7 @@ export class AccountCreationError extends Error implements IError {
 export class ArgumentUndefinedError extends Error implements IError {
   public code: string;
   public argument: string;
-  
+
   constructor(argument: string) {
     super(`Argument with name of ${argument} cannot be undefined`);
     this.code = `UndefinedArgument`;
@@ -31,11 +31,11 @@ export class ArgumentUndefinedError extends Error implements IError {
 }
 
 export class ChildValidationError extends Error implements IError {
-  public code: "invalid_age" | "invalid_firstname" | "invalid_lastname";
+  public code: 'invalid_age' | 'invalid_firstname' | 'invalid_lastname';
   public details?: string;
-  
-  constructor(code: "invalid_age" | "invalid_firstname" | "invalid_lastname") {
-    super("Error validating child");
+
+  constructor(code: 'invalid_age' | 'invalid_firstname' | 'invalid_lastname') {
+    super('Error validating child');
     this.code = code;
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = ChildValidationError.name;

@@ -13,7 +13,6 @@ import { generateQrCode } from '../utility/qrcodes';
 admin.initializeApp();
 
 export default async (data: IOnboardUser): Promise<string | HttpsError> => {
-
   const newUserAccount = await admin
     .auth()
     .createUser({
@@ -36,7 +35,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
     zipCode: data.zipCode,
     acceptedTermsOfService: acceptedLegal,
     acceptedPrivacyPolicy: acceptedLegal,
-    version: 1
+    version: 1,
   };
 
   const registration: IRegistration = {

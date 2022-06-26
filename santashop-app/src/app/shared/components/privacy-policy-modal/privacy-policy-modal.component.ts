@@ -5,13 +5,10 @@ import { ModalController } from '@ionic/angular';
   selector: 'privacy-policy-modal',
   templateUrl: './privacy-policy-modal.component.html',
   styleUrls: ['./privacy-policy-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PrivacyPolicyModalComponent {
-
-  constructor(
-    private readonly modalController: ModalController
-  ) { }
+  constructor(private readonly modalController: ModalController) {}
 
   public onDismiss() {
     this.modalController.dismiss();

@@ -6,13 +6,10 @@ import { SubmitPageService } from './submit.page.service';
   templateUrl: './submit.page.html',
   styleUrls: ['./submit.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ SubmitPageService ]
+  providers: [SubmitPageService],
 })
 export class SubmitPage {
-
-  constructor(
-    public readonly viewService: SubmitPageService
-  ) { }
+  constructor(public readonly viewService: SubmitPageService) {}
 
   public async submit(): Promise<void> {
     await this.viewService.submitRegistration();

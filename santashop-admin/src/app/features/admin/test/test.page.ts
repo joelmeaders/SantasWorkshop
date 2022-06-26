@@ -10,7 +10,6 @@ import { take } from 'rxjs/operators';
   styleUrls: ['./test.page.scss'],
 })
 export class TestPage {
-
   private readonly REGISTRATIONS = 'registrations';
   private readonly STATS = 'stats';
 
@@ -19,9 +18,9 @@ export class TestPage {
   private zipCodeCount: IZipCodeCount[] = [];
 
   constructor(
-    private readonly httpService: FireRepoLite,
-    // private readonly manualOperations: ManualOperationsService
-  ) { }
+    private readonly httpService: FireRepoLite
+  ) // private readonly manualOperations: ManualOperationsService
+  {}
 
   public async buildSearchIndex() {
     // await this.manualOperations.buildRegistrationIndex();
@@ -32,22 +31,25 @@ export class TestPage {
   }
 
   private async storeRegistrations() {
-
     const doc: any = {
       completedRegistrations: this.completedRegistrations,
       dateTimeCount: this.dateTimeCount,
-      zipCodeCount: this.zipCodeCount
+      zipCodeCount: this.zipCodeCount,
     };
 
-    await this.httpService.collection(COLLECTIONNAME).update(this.STATS, doc, 'registration-2020', true).pipe(take(1)).toPromise();
-
+    await this.httpService
+      .collection(COLLECTIONNAME)
+      .update(this.STATS, doc, 'registration-2020', true)
+      .pipe(take(1))
+      .toPromise();
   }
 
   public async processRegistrations() {
+    const allRegistrations = await this.loadAllRegistrations()
+      .pipe(take(1))
+      .toPromise();
 
-    const allRegistrations = await this.loadAllRegistrations().pipe(take(1)).toPromise();
-
-    allRegistrations.forEach(registration => {
+    allRegistrations.forEach((registration) => {
       if (!this.isRegistrationComplete(registration)) {
         return;
       }
@@ -75,10 +77,9 @@ export class TestPage {
   }
 
   private updateDateTimeCount(registration: IRegistration): void {
-
-    const index = this.dateTimeCount.findIndex(e =>
-      e.date === registration.date
-      && e.time === registration.time);
+    const index = this.dateTimeCount.findIndex(
+      (e) => e.date === registration.date && e.time === registration.time
+    );
 
     if (index > -1) {
       this.dateTimeCount[index].count += 1;
@@ -90,17 +91,16 @@ export class TestPage {
       date: registration.date,
       time: registration.time,
       count: 1,
-      childCount: registration.children.length
+      childCount: registration.children.length,
     };
 
     this.dateTimeCount.push(newItem);
-
   }
 
   private updateZipCodeCount(registration: IRegistration) {
-
-    const index = this.zipCodeCount.findIndex(e =>
-      e.zip === registration.zipCode);
+    const index = this.zipCodeCount.findIndex(
+      (e) => e.zip === registration.zipCode
+    );
 
     if (index > -1) {
       this.zipCodeCount[index].count += 1;
@@ -111,10 +111,9 @@ export class TestPage {
     const newItem: IZipCodeCount = {
       zip: registration.zipCode,
       count: 1,
-      childCount: registration.children.length
+      childCount: registration.children.length,
     };
 
     this.zipCodeCount.push(newItem);
   }
-
 }

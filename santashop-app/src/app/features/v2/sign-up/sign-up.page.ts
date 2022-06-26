@@ -18,13 +18,13 @@ export class SignUpPage {
   public readonly form = this.viewService.form;
 
   @ViewChild('firstName') firstName?: HTMLIonInputElement;
-  
+
   // This field is a bot honeytrap.
   @ViewChild('pw') pwField: HTMLInputElement | null = null;
 
-  public readonly recaptchaValid$ = this.viewService.recaptchaValid$.asObservable().pipe(
-    shareReplay(1)
-  );
+  public readonly recaptchaValid$ = this.viewService.recaptchaValid$
+    .asObservable()
+    .pipe(shareReplay(1));
 
   constructor(
     private readonly viewService: SignUpPageService,
@@ -32,7 +32,7 @@ export class SignUpPage {
     private readonly translateService: TranslateService,
     private readonly modalController: ModalController,
     private readonly analytics: Analytics
-  ) { }
+  ) {}
 
   ionViewWillEnter() {
     setTimeout(() => this.firstName?.setFocus(), 300);
@@ -44,17 +44,14 @@ export class SignUpPage {
   }
 
   public async onCreateAccount(): Promise<void> {
-    if (await this.userConfirmedEmail())
-      await this.viewService.onboardUser();
+    if (await this.userConfirmedEmail()) await this.viewService.onboardUser();
   }
 
   private async userConfirmedEmail(): Promise<boolean> {
-
     const emailAddress = this.form.controls.emailAddress.value;
 
-    if (!emailAddress)
-      return false;
-    
+    if (!emailAddress) return false;
+
     const alert = await this.alertController.create({
       header: this.translateService.instant('SIGNUP.CONFIRM_EMAIL'),
       subHeader: emailAddress,
@@ -62,20 +59,22 @@ export class SignUpPage {
       buttons: [
         {
           text: this.translateService.instant('COMMON.GO_BACK'),
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: this.translateService.instant('COMMON.YES'),
           role: 'confirm',
-          cssClass: 'confirm-delete-button'
-        }
+          cssClass: 'confirm-delete-button',
+        },
       ],
     });
 
     await alert.present();
     const shouldContinue = await alert.onDidDismiss();
-    await logEvent(this.analytics, 'confirmed_email', { value: shouldContinue.role });
-    return shouldContinue.role === 'confirm'
+    await logEvent(this.analytics, 'confirmed_email', {
+      value: shouldContinue.role,
+    });
+    return shouldContinue.role === 'confirm';
   }
 
   public async showPrivacyPolicyModal() {
@@ -93,5 +92,4 @@ export class SignUpPage {
     });
     return modal.present();
   }
-    
 }

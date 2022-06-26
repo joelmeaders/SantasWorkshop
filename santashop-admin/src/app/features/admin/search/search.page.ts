@@ -12,13 +12,13 @@ import { RegistrationContextService } from '../../../services/registration-conte
   selector: 'app-search',
   templateUrl: 'search.page.html',
   styleUrls: ['search.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchPage implements OnDestroy {
-
   private readonly $destroy = new Subject<void>();
 
-  public readonly form: FormGroup = RegistrationSearchForm.registrationSearchForm();
+  public readonly form: FormGroup =
+    RegistrationSearchForm.registrationSearchForm();
 
   private readonly _$loading = new BehaviorSubject<boolean>(false);
   public readonly $loading = this._$loading.pipe(
@@ -41,7 +41,7 @@ export class SearchPage implements OnDestroy {
   constructor(
     private readonly searchService: RegistrationSearchService,
     private readonly registrationContext: RegistrationContextService
-  ) { }
+  ) {}
 
   public ngOnDestroy(): void {
     this.$destroy.next();
@@ -65,24 +65,21 @@ export class SearchPage implements OnDestroy {
   }
 
   public async onSelect(index: RegistrationSearchIndex) {
-
-    const registration = await this.searchService.getRegistrationByUid$(index.customerId).pipe(
-      take(1)
-    ).toPromise();
+    const registration = await this.searchService
+      .getRegistrationByUid$(index.customerId)
+      .pipe(take(1))
+      .toPromise();
 
     if (registration) {
       this.registrationContext.setCurrentRegistration(registration);
-    }
-    else {
+    } else {
       // TODO: Error handling
     }
   }
 
   private formToSearchModel(): IRegistrationSearch {
     return {
-      ...this.form.value
+      ...this.form.value,
     } as IRegistrationSearch;
   }
-
-  
 }

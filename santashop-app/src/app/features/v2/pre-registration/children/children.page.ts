@@ -11,10 +11,9 @@ import { ChildrenPageService } from './children.page.service';
   templateUrl: './children.page.html',
   styleUrls: ['./children.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ ChildrenPageService, ChildValidationService ]
+  providers: [ChildrenPageService, ChildValidationService],
 })
 export class ChildrenPage {
-
   public readonly children$: Observable<IChild[] | undefined> =
     this.viewService.children$;
 
@@ -25,7 +24,7 @@ export class ChildrenPage {
     private readonly viewService: ChildrenPageService,
     private readonly alertController: AlertController,
     private readonly translateService: TranslateService
-  ) { }
+  ) {}
 
   public async removeChild(child: IChild): Promise<void> {
     if (await this.confirmDeleteChild(child)) {
@@ -34,7 +33,6 @@ export class ChildrenPage {
   }
 
   private async confirmDeleteChild(child: IChild): Promise<boolean> {
-
     const alert = await this.alertController.create({
       header: this.translateService.instant('ADDCHILD.DELETE_CHILD_TITLE'),
       subHeader: `${child.firstName} ${child.lastName}`,
@@ -42,21 +40,20 @@ export class ChildrenPage {
       buttons: [
         {
           text: this.translateService.instant('COMMON.GO_BACK'),
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: this.translateService.instant('COMMON.OK'),
           role: 'destructive',
-          cssClass: 'confirm-delete-button'
-        }
-      ]
+          cssClass: 'confirm-delete-button',
+        },
+      ],
     });
 
     await alert.present();
 
-    return alert.onDidDismiss()
-      .then(e => {
-        return e.role === 'destructive'
-      });
+    return alert.onDidDismiss().then((e) => {
+      return e.role === 'destructive';
+    });
   }
 }

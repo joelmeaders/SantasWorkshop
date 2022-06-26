@@ -4,11 +4,7 @@
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max ion-justify-content-center">
       <ion-col
-        class="
-          side-menu
-          height-max
-          ion-hide-xl-down ion-no-padding ion-no-margin
-        "
+        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
         size="auto"
         *ngIf="!(isRegistrationComplete$ | async)"
       >
@@ -21,13 +17,14 @@
               class="ion-margin-horizontal ion-text-center es-mg-bottom-xxl"
             >
               <ion-text color="xmasred" class="ion-text-center">
-                <h1>
-                  {{ 'CONFIRMATION.THIS_IS_YOUR_TICKET' | translate }}
-                </h1>
+                <h1>{{ 'CONFIRMATION.THIS_IS_YOUR_TICKET' | translate }}</h1>
               </ion-text>
 
               <div class="ion-text-center width-max ion-margin-top">
-                <ion-button color="xmasred" [routerLink]="['event-information']">
+                <ion-button
+                  color="xmasred"
+                  [routerLink]="['event-information']"
+                >
                   {{ 'CONFIRMATION.EVENT_INFORMATION' | translate }}
                 </ion-button>
               </div>
@@ -72,8 +69,13 @@
                     {{ "EVENT_INFO.EVENT_ADDRESS1" | translate }} <br />
                     {{ "EVENT_INFO.EVENT_ADDRESS2" | translate }}
                   </ion-text>
-                  <br/>
-                  <ion-text color="primary" [routerLink]="['event-information']" button tappable>
+                  <br />
+                  <ion-text
+                    color="primary"
+                    [routerLink]="['event-information']"
+                    button
+                    tappable
+                  >
                     <em>
                       {{ 'CONFIRMATION.EVENT_INFORMATION' | translate }}
                     </em>

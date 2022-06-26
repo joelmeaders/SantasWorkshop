@@ -6,8 +6,8 @@ import { EventInformationPage } from './event-information.page';
 const routes: Routes = [
   {
     path: '',
-    component: EventInformationPage
-  }
+    component: EventInformationPage,
+  },
 ];
 
 @NgModule({

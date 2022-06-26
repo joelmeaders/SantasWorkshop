@@ -3,9 +3,12 @@ import { CommonForms } from '@core/*';
 import { IUser, IChild } from '@models/*';
 
 export abstract class QuickRegistrationForms {
-
   public static customerValidators = {
-    zipCode: Validators.compose([Validators.required, Validators.minLength(5), Validators.maxLength(5)]),
+    zipCode: Validators.compose([
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(5),
+    ]),
   };
 
   public static customerForm(value: IUser | undefined): FormGroup {
@@ -16,7 +19,10 @@ export abstract class QuickRegistrationForms {
 
   public static customerValidationMessages() {
     return {
-      zipCode: [CommonForms.messages().required, CommonForms.messages(5).length],
+      zipCode: [
+        CommonForms.messages().required,
+        CommonForms.messages(5).length,
+      ],
     };
   }
 
@@ -38,5 +44,4 @@ export abstract class QuickRegistrationForms {
       ageGroup: [CommonForms.messages().required],
     };
   }
-
 }

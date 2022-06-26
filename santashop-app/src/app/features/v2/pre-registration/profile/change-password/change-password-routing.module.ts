@@ -6,8 +6,8 @@ import { ChangePasswordPage } from './change-password.page';
 const routes: Routes = [
   {
     path: '',
-    component: ChangePasswordPage
-  }
+    component: ChangePasswordPage,
+  },
 ];
 
 @NgModule({

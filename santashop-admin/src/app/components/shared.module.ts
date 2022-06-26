@@ -10,19 +10,15 @@ import { QrModalComponent } from './qr-modal/qr-modal.component';
     QrModalComponent,
     DeviceNameOnlyPipe,
     ConvertHour24To12Pipe,
-    FriendlyToyTypePipe
+    FriendlyToyTypePipe,
   ],
-  imports: [
-    CoreModule
-  ],
+  imports: [CoreModule],
   exports: [
     QrModalComponent,
     DeviceNameOnlyPipe,
     ConvertHour24To12Pipe,
-    FriendlyToyTypePipe
+    FriendlyToyTypePipe,
   ],
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA
-  ]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class SharedModule { }
+export class SharedModule {}

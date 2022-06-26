@@ -6,7 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['admin.page.scss'],
 })
 export class AdminPage {
-
   constructor() {}
-
 }

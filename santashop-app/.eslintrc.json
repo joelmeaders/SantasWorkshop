@@ -1,18 +1,13 @@
 {
   "extends": "../.eslintrc.json",
-  "ignorePatterns": [
-    "!**/*",
-    "*.spec.ts"
-  ],
+  "ignorePatterns": ["!**/*", "*.spec.ts"],
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+      "files": ["*.ts"],
       "parserOptions": {
         "project": [
           "santashop-app/tsconfig.app.json",
-          "santashop-app/tsconfig.spec.json",
+          "santashop-app/tsconfig.spec.json"
         ],
         "createDefaultProgram": true
       },
@@ -36,9 +31,7 @@
       }
     },
     {
-      "files": [
-        "*.html"
-      ],
+      "files": ["*.html"],
       "rules": {}
     }
   ]

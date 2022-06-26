@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
 import { RegistrationSearchIndex } from '@models/*';
 import { BehaviorSubject } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
+import {
+  filter,
+  map,
+  publishReplay,
+  refCount,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 import { chain } from 'underscore';
 import { IRegistrationSearch } from '../models/registration-search.model';
 import { LookupService } from './lookup.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RegistrationSearchService {
-
   // Passthrough function
-  public readonly getRegistrationByUid$ = 
-    this.lookupService.getRegistrationByUid$; 
+  public readonly getRegistrationByUid$ =
+    this.lookupService.getRegistrationByUid$;
 
-  private readonly _$searchState = new BehaviorSubject<IRegistrationSearch | undefined>(undefined);
+  private readonly _$searchState = new BehaviorSubject<
+    IRegistrationSearch | undefined
+  >(undefined);
   public readonly $searchState = this._$searchState.pipe(
     publishReplay(1),
     refCount()
@@ -27,26 +35,31 @@ export class RegistrationSearchService {
     refCount()
   );
 
-  private readonly _$searchResults = new BehaviorSubject<RegistrationSearchIndex[] | undefined>(undefined);
+  private readonly _$searchResults = new BehaviorSubject<
+    RegistrationSearchIndex[] | undefined
+  >(undefined);
   public readonly $searchResults = this._$searchResults.pipe(
     publishReplay(1),
     refCount()
   );
 
-  private readonly getSearchResults = () => this.$searchStateValid.pipe(
-    filter(isValid => isValid === true),
-    switchMap(() => this.$searchState),
-    filter(state => this.isSearchStateValid(state)),
-    switchMap(state => !!state?.registrationCode
-      ? this.lookupService.searchIndexByQrCode$(state.registrationCode)
-      : this.lookupService.searchIndexByName$(state?.firstName!, state?.lastName!)
-    ),
-    map(results => this.orderResultsByName(results))
-  )
+  private readonly getSearchResults = () =>
+    this.$searchStateValid.pipe(
+      filter((isValid) => isValid === true),
+      switchMap(() => this.$searchState),
+      filter((state) => this.isSearchStateValid(state)),
+      switchMap((state) =>
+        !!state?.registrationCode
+          ? this.lookupService.searchIndexByQrCode$(state.registrationCode)
+          : this.lookupService.searchIndexByName$(
+              state?.firstName!,
+              state?.lastName!
+            )
+      ),
+      map((results) => this.orderResultsByName(results))
+    );
 
-  constructor(
-    private readonly lookupService: LookupService
-  ) { }
+  constructor(private readonly lookupService: LookupService) {}
 
   private orderResultsByName(results: RegistrationSearchIndex[]) {
     if (!results?.length) {
@@ -86,13 +99,15 @@ export class RegistrationSearchService {
   }
 
   private isSearchStateValid(search?: IRegistrationSearch): boolean {
-
     if (search == undefined) {
       return false;
     }
 
-    const hasNames = (search?.firstName?.length ?? 0) > 1 && (search?.lastName?.length ?? 0) > 1;
-    const hasCode = !!search.registrationCode && search.registrationCode.length === 8;
+    const hasNames =
+      (search?.firstName?.length ?? 0) > 1 &&
+      (search?.lastName?.length ?? 0) > 1;
+    const hasCode =
+      !!search.registrationCode && search.registrationCode.length === 8;
 
     return hasNames || hasCode;
   }

@@ -4,11 +4,7 @@
   <ion-grid class="height-max es-mg-bottom-xxl">
     <ion-row class="height-max">
       <ion-col
-        class="
-          side-menu
-          height-max
-          ion-hide-xl-down ion-no-padding ion-no-margin
-        "
+        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
         size="auto"
       >
         <app-pre-registration-menu></app-pre-registration-menu>
@@ -43,18 +39,15 @@
               </ion-item>
 
               <div class="ion-margin ion-padding">
-                <p>
-                  {{ 'PROFILE.CHANGE_EMAIL_TEXT' | translate }}
-                </p>
+                <p>{{ 'PROFILE.CHANGE_EMAIL_TEXT' | translate }}</p>
               </div>
 
               <ion-card>
                 <ion-card-content>
-
                   <form [formGroup]="form" novalidate>
-
                     <p class="ion-padding">
-                      {{ 'CURRENT_EMAIL' | translate }} <strong>{{ email$ | async }}</strong>
+                      {{ 'CURRENT_EMAIL' | translate }}
+                      <strong>{{ email$ | async }}</strong>
                     </p>
 
                     <ion-list>
@@ -75,7 +68,9 @@
                       ></app-control-errors>
 
                       <ion-item>
-                        <ion-label color="xmasred"> {{ 'COMMON.PASSWORD' | translate }} </ion-label>
+                        <ion-label color="xmasred">
+                          {{ 'COMMON.PASSWORD' | translate }}
+                        </ion-label>
                         <ion-input
                           formControlName="password"
                           [debounce]="500"
@@ -89,13 +84,16 @@
                     </ion-list>
                   </form>
 
-                  <ion-button color="xmasred" class="ion-float-end ion-margin-bottom" (click)="changeEmail()" [disabled]="!form.valid">
+                  <ion-button
+                    color="xmasred"
+                    class="ion-float-end ion-margin-bottom"
+                    (click)="changeEmail()"
+                    [disabled]="!form.valid"
+                  >
                     {{ 'PROFILE.SAVE_CHANGES' | translate }}
                   </ion-button>
-
                 </ion-card-content>
               </ion-card>
-              
             </div>
           </ion-col>
         </ion-row>

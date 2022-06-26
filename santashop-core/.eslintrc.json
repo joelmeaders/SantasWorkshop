@@ -1,14 +1,9 @@
 {
   "extends": "../.eslintrc.json",
-  "ignorePatterns": [
-    "!**/*",
-    "*.spec.ts"
-  ],
+  "ignorePatterns": ["!**/*", "*.spec.ts"],
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+      "files": ["*.ts"],
       "parserOptions": {
         "project": [
           "santashop-core/tsconfig.lib.json",
@@ -36,9 +31,7 @@
       }
     },
     {
-      "files": [
-        "*.html"
-      ],
+      "files": ["*.html"],
       "rules": {}
     }
   ]

@@ -5,11 +5,7 @@ import { CoreModule } from '@core/*';
 import { RecaptchaModule } from 'ng-recaptcha';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    ResetPasswordPageRoutingModule,
-    RecaptchaModule
-  ],
-  declarations: [ResetPasswordPage]
+  imports: [CoreModule, ResetPasswordPageRoutingModule, RecaptchaModule],
+  declarations: [ResetPasswordPage],
 })
 export class ResetPasswordPageModule {}

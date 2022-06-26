@@ -10,15 +10,25 @@ describe('RegistrationCompleteGuard', () => {
   let router: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ 
+    TestBed.configureTestingModule({
       teardown: { destroyAfterEach: false },
       providers: [
-        { provide: Router, useValue: jasmine.createSpyObj<Router>('Router', ['parseUrl']) },
-        { provide: PreRegistrationService, useValue: jasmine.createSpyObj<PreRegistrationService>('prs', {}, ['registrationComplete$']) }
-      ]
+        {
+          provide: Router,
+          useValue: jasmine.createSpyObj<Router>('Router', ['parseUrl']),
+        },
+        {
+          provide: PreRegistrationService,
+          useValue: jasmine.createSpyObj<PreRegistrationService>('prs', {}, [
+            'registrationComplete$',
+          ]),
+        },
+      ],
     });
     guard = TestBed.inject(RegistrationCompleteGuard);
-    preregistrationService = TestBed.inject(PreRegistrationService) as jasmine.SpyObj<PreRegistrationService>;
+    preregistrationService = TestBed.inject(
+      PreRegistrationService
+    ) as jasmine.SpyObj<PreRegistrationService>;
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 

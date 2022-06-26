@@ -16,7 +16,6 @@ import { DocumentReference } from '@angular/fire/compat/firestore';
   providedIn: 'root',
 })
 export class CheckInService {
-
   constructor(
     private readonly repoService: FireRepoLite,
     private readonly alertController: AlertController,
@@ -25,43 +24,42 @@ export class CheckInService {
   ) {}
 
   public async checkIn(registration: IRegistration, isEdit = false) {
-
     const loading = await this.loadingController.create({
       message: 'Saving check-in...',
       translucent: true,
-      backdropDismiss: true
+      backdropDismiss: true,
     });
 
     await loading.present();
 
     let alert: HTMLIonAlertElement | undefined = undefined;
-    let result: DocumentReference<ICheckIn> | undefined = undefined; 
+    let result: DocumentReference<ICheckIn> | undefined = undefined;
 
     try {
       const checkin = this.convertRegistrationToCheckIn(registration, isEdit);
 
       const saveMethod = checkin.stats?.preregistered
-        ? this.repoService.collection(COLLECTION_SCHEMA.checkins).addById(checkin.customerId!, checkin)
-        : this.repoService.collection(COLLECTION_SCHEMA.checkins).add(checkin)
-      
-        result = await saveMethod.pipe(take(1)).toPromise();
+        ? this.repoService
+            .collection(COLLECTION_SCHEMA.checkins)
+            .addById(checkin.customerId!, checkin)
+        : this.repoService.collection(COLLECTION_SCHEMA.checkins).add(checkin);
 
-        alert = await this.alertController.create({
-          header: 'Check-In Complete',
-          buttons: [
-            {
-              text: 'Ok',
-            },
-          ],
-        });
+      result = await saveMethod.pipe(take(1)).toPromise();
 
-        await alert.present();
-    }
-    catch (error) {
+      alert = await this.alertController.create({
+        header: 'Check-In Complete',
+        buttons: [
+          {
+            text: 'Ok',
+          },
+        ],
+      });
+
+      await alert.present();
+    } catch (error) {
       await this.loadingController.dismiss();
       this.errorHandler.handleError(error);
-    }
-    finally {
+    } finally {
       await this.loadingController.dismiss();
     }
 
@@ -72,18 +70,15 @@ export class CheckInService {
     registration: IRegistration,
     isEdit: boolean
   ): ICheckIn {
-
     const checkin: ICheckIn = {
       checkInDateTime: new Date(),
       inStats: false,
     };
 
-    if (registration.uid)
-      checkin.customerId = registration.uid;
-    
-    if (registration.qrcode)
-      checkin.registrationCode = registration.qrcode;
-    
+    if (registration.uid) checkin.customerId = registration.uid;
+
+    if (registration.qrcode) checkin.registrationCode = registration.qrcode;
+
     checkin.stats = this.registrationStats(registration, isEdit);
 
     return checkin;

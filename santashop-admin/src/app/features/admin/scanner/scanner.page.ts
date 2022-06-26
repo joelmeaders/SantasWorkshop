@@ -4,10 +4,9 @@ import { ScannerService } from '../../../services/scanner.service';
 @Component({
   selector: 'app-scanner',
   templateUrl: 'scanner.page.html',
-  styleUrls: ['scanner.page.scss']
+  styleUrls: ['scanner.page.scss'],
 })
-export class ScannerPage  {
-
+export class ScannerPage {
   public readonly formatsEnabled = this.scannerService.formatsEnabled;
   public readonly $hasPermissions = this.scannerService.$hasPermissions;
   public readonly $availableDevices = this.scannerService.$availableDevices;
@@ -16,9 +15,7 @@ export class ScannerPage  {
   public readonly $deviceId = this.scannerService.$deviceId;
   public readonly $cameraEnabled = this.scannerService.$cameraEnabled;
 
-  constructor(
-    private readonly scannerService: ScannerService
-  ) { }
+  constructor(private readonly scannerService: ScannerService) {}
 
   public ionViewWillLeave() {
     this.scannerService.navigatedAway();
@@ -36,7 +33,8 @@ export class ScannerPage  {
     this.scannerService.onCodeResult(resultString);
   }
 
-  public onDeviceSelectChange($event: any) { // deviceId
+  public onDeviceSelectChange($event: any) {
+    // deviceId
     this.scannerService.onDeviceSelectChange($event);
   }
 
@@ -45,7 +43,7 @@ export class ScannerPage  {
   }
 
   public onHasPermission(value: boolean): void {
-    this.scannerService.onHasPermission(value)
+    this.scannerService.onHasPermission(value);
   }
 
   public async onScanError(error: any) {

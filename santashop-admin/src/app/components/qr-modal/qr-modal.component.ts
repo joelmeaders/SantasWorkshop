@@ -2,7 +2,16 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
 import { ICheckIn, IError } from '@models/*';
 import { BehaviorSubject, from, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  mergeMap,
+  publishReplay,
+  refCount,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 import { Timestamp } from '@firebase/firestore';
@@ -13,10 +22,9 @@ import { ErrorHandlerService } from '@core/*';
   selector: 'app-qr-modal',
   templateUrl: './qr-modal.component.html',
   styleUrls: ['./qr-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QrModalComponent implements OnDestroy {
-
   private readonly $destroy = new Subject<void>();
   public readonly $loading = new BehaviorSubject<boolean>(true);
 
@@ -36,20 +44,22 @@ export class QrModalComponent implements OnDestroy {
     refCount()
   );
 
-  private readonly existingAlertSubcription = this.$existingCheckin.pipe(
-    takeUntil(this.$destroy),
-    distinctUntilChanged(),
-    filter(response => !!response?.customerId),
-    mergeMap(response => from(this.alreadyCheckedIn(response))),
-  ).subscribe();
+  private readonly existingAlertSubcription = this.$existingCheckin
+    .pipe(
+      takeUntil(this.$destroy),
+      distinctUntilChanged(),
+      filter((response) => !!response?.customerId),
+      mergeMap((response) => from(this.alreadyCheckedIn(response)))
+    )
+    .subscribe();
 
   constructor(
     private readonly registrationContext: RegistrationContextService,
     private readonly modalController: ModalController,
     private readonly alertController: AlertController,
     private readonly checkInService: CheckInService,
-    private readonly errorHandler: ErrorHandlerService,
-  ) { }
+    private readonly errorHandler: ErrorHandlerService
+  ) {}
 
   ngOnDestroy() {
     this.existingAlertSubcription.unsubscribe();
@@ -58,15 +68,14 @@ export class QrModalComponent implements OnDestroy {
   }
 
   public async editRegistration() {
-    await this.modalController.dismiss(undefined, 'edit')
+    await this.modalController.dismiss(undefined, 'edit');
   }
 
   public async checkIn() {
-
     const alert = await this.confirmCheckInAlert();
 
     await alert.present();
-    const response = await alert.onDidDismiss().then(res => res.role);
+    const response = await alert.onDidDismiss().then((res) => res.role);
 
     if (response !== 'confirm') {
       return;
@@ -77,9 +86,9 @@ export class QrModalComponent implements OnDestroy {
     if (!registration) {
       const error: IError = {
         code: 'no-reg',
-        message: 'No registration is loaded'
+        message: 'No registration is loaded',
       };
-      await this.errorHandler.handleError(error)
+      await this.errorHandler.handleError(error);
       return;
     }
 
@@ -87,8 +96,7 @@ export class QrModalComponent implements OnDestroy {
       this.$destroy.next();
       this.registrationContext.reset();
       await this.checkInService.checkIn(registration, false);
-    }
-    catch (error) {
+    } catch (error) {
       await this.errorHandler.handleError(error as IError);
     }
 
@@ -96,37 +104,39 @@ export class QrModalComponent implements OnDestroy {
   }
 
   private async confirmCheckInAlert() {
-
     return this.alertController.create({
       header: 'Confirm Action',
       subHeader: 'A check-in cannot be undone',
-      message: 'Are you sure there are no changes? Once checked in, the customer code is no longer valid',
+      message:
+        'Are you sure there are no changes? Once checked in, the customer code is no longer valid',
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
-        }, {
+        },
+        {
           text: 'Confirm',
-          role: 'confirm'
-        }
-      ]
+          role: 'confirm',
+        },
+      ],
     });
   }
 
   private async alreadyCheckedIn(checkin?: ICheckIn) {
-
-    if (!checkin)
-      return;
+    if (!checkin) return;
 
     const alert = await this.alertController.create({
       header: 'Existing Check-In',
-      subHeader: CheckInHelpers.friendlyTimestamp(<any>checkin!.checkInDateTime as Timestamp),
-      message: 'This registration code was already used on the date/time specified. Unable to continue.',
+      subHeader: CheckInHelpers.friendlyTimestamp(
+        (<any>checkin!.checkInDateTime) as Timestamp
+      ),
+      message:
+        'This registration code was already used on the date/time specified. Unable to continue.',
       buttons: [
         {
           text: 'Ok',
-        }
-      ]
+        },
+      ],
     });
 
     await alert.present();
@@ -135,7 +145,6 @@ export class QrModalComponent implements OnDestroy {
   }
 
   public async cancel() {
-    await this.modalController.dismiss(undefined, 'cancel')
+    await this.modalController.dismiss(undefined, 'cancel');
   }
-
 }

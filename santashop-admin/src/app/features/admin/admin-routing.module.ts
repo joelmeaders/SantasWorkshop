@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
-import { AngularFireAuthGuard, hasCustomClaim } from '@angular/fire/compat/auth-guard';
+import {
+  AngularFireAuthGuard,
+  hasCustomClaim,
+} from '@angular/fire/compat/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
 import { ConfirmDeactivateGuard } from '../../guards/disable-camera.guard';
 import { AdminPage } from './admin.page';
 
 const adminOnly = () => hasCustomClaim('admin');
-
 
 const routes: Routes = [
   {
@@ -16,38 +18,43 @@ const routes: Routes = [
     children: [
       {
         path: 'scanner',
-        loadChildren: () => import('./scanner/scanner.module').then(m => m.ScannerPageModule),
-        canDeactivate: [ ConfirmDeactivateGuard ]
+        loadChildren: () =>
+          import('./scanner/scanner.module').then((m) => m.ScannerPageModule),
+        canDeactivate: [ConfirmDeactivateGuard],
       },
       {
         path: 'search',
-        loadChildren: () => import('./search/search.module').then(m => m.SearchPageModule)
+        loadChildren: () =>
+          import('./search/search.module').then((m) => m.SearchPageModule),
       },
       {
         path: 'register',
-        loadChildren: () => import('./register/register.module').then(m => m.RegisterPageModule)
+        loadChildren: () =>
+          import('./register/register.module').then(
+            (m) => m.RegisterPageModule
+          ),
       },
       {
         path: 'stats',
-        loadChildren: () => import('./stats/stats.module').then(m => m.StatsPageModule)
+        loadChildren: () =>
+          import('./stats/stats.module').then((m) => m.StatsPageModule),
       },
       {
         path: '',
         redirectTo: '/admin/stats',
-        pathMatch: 'full'
-      }
-    ]
+        pathMatch: 'full',
+      },
+    ],
   },
   {
     path: '',
     redirectTo: '/admin/stats',
-    pathMatch: 'full'
-  }
-
+    pathMatch: 'full',
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AdminPageRoutingModule {}

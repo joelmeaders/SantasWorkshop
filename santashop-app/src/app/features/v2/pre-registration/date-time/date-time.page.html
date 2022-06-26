@@ -4,11 +4,7 @@
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max">
       <ion-col
-        class="
-          side-menu
-          height-max
-          ion-hide-xl-down ion-no-padding ion-no-margin
-        "
+        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
         size="auto"
       >
         <app-pre-registration-menu></app-pre-registration-menu>
@@ -54,12 +50,15 @@
                 </ion-card-header>
 
                 <ion-card-content class="ion-text-center">
-
                   <ng-container *appLet="chosenSlot$ | async as chosenSlot">
-                    <ng-container *appLet="dateTimeSlotState.isLoaded$ | async as dateTimeSlotLoaded">
-                    
+                    <ng-container
+                      *appLet="dateTimeSlotState.isLoaded$ | async as dateTimeSlotLoaded"
+                    >
                       <ion-item lines="none" *ngIf="!dateTimeSlotLoaded">
-                        <ion-skeleton-text class="skeleton-datetime" animated></ion-skeleton-text>
+                        <ion-skeleton-text
+                          class="skeleton-datetime"
+                          animated
+                        ></ion-skeleton-text>
                       </ion-item>
 
                       <ng-container *ngIf="dateTimeSlotLoaded">
@@ -71,7 +70,7 @@
                             {{ 'SCHEDULE.ADD_ONE_BELOW.' | translate }}
                           </ion-label>
                         </p>
-    
+
                         <ion-item lines="none" *ngIf="chosenSlot as slot">
                           {{ slot.dateTime | date:'MMMM d, h:mm a':'MST' }}
                           <ion-button
@@ -83,11 +82,8 @@
                           </ion-button>
                         </ion-item>
                       </ng-container>
-  
                     </ng-container>
                   </ng-container>
-                  
-                  
                 </ion-card-content>
               </ion-card>
 
@@ -107,59 +103,69 @@
                 </ion-list-header>
 
                 <ng-container *appLet="availableDays$ | async as availableDays">
-                  <ng-container *appLet="dateTimeSlotsState.isLoaded$ | async as dateTimeSlotsLoaded">
-
-                    <div class="es-pd-left-xl es-pd-right-xl" *ngIf="!dateTimeSlotsLoaded">
+                  <ng-container
+                    *appLet="dateTimeSlotsState.isLoaded$ | async as dateTimeSlotsLoaded"
+                  >
+                    <div
+                      class="es-pd-left-xl es-pd-right-xl"
+                      *ngIf="!dateTimeSlotsLoaded"
+                    >
                       <span *ngFor="let item of [0,0,0,0]">
                         <ion-item color="light" lines="full">
-                          <ion-skeleton-text class="skeleton-schedule" animated></ion-skeleton-text>
-                          <ion-spinner slot="end" color="medium" name="lines-small"></ion-spinner>
+                          <ion-skeleton-text
+                            class="skeleton-schedule"
+                            animated
+                          ></ion-skeleton-text>
+                          <ion-spinner
+                            slot="end"
+                            color="medium"
+                            name="lines-small"
+                          ></ion-spinner>
                         </ion-item>
                       </span>
                     </div>
 
-                  <ion-accordion-group
-                    color="light"
-                    class="es-pd-left-xl es-pd-right-xl"
-                    *ngIf="availableDays"
-                  >
-                    <ion-accordion *ngFor="let day of availableDays">
-                      <ion-item slot="header" color="light">
-                        <ion-label> {{ day | date:'EEEE, MMMM d'}} </ion-label>
-                      </ion-item>
-                      <ion-list
-                        slot="content"
-                        color="light"
-                        class="ion-no-padding es-pd-left-xxl"
-                      >
-                        <ion-item
-                          *ngFor="let slot of (availableSlotsByDay$(day) | async)"
-                          color="light"
-                        >
-                          <ion-label class="es-mg-left-lg">
-                            {{ slot.dateTime | date:'h:mm a':'MST' }} <br />
-                            <ion-text color="xmasred" class="es-mg-left-md">
-                              {{ spotsRemaining(slot) }}
-                            </ion-text>
+                    <ion-accordion-group
+                      color="light"
+                      class="es-pd-left-xl es-pd-right-xl"
+                      *ngIf="availableDays"
+                    >
+                      <ion-accordion *ngFor="let day of availableDays">
+                        <ion-item slot="header" color="light">
+                          <ion-label>
+                            {{ day | date:'EEEE, MMMM d'}}
                           </ion-label>
-                          <ion-button
-                            slot="end"
-                            (click)="selectDateTime(slot)"
-                            size="default"
-                            class="small-padding"
-                            [disabled]="!slot.enabled"
-                          >
-                            {{ 'COMMON.SELECT' | translate }}
-                          </ion-button>
                         </ion-item>
-                      </ion-list>
-                    </ion-accordion>
-                  </ion-accordion-group>
-
+                        <ion-list
+                          slot="content"
+                          color="light"
+                          class="ion-no-padding es-pd-left-xxl"
+                        >
+                          <ion-item
+                            *ngFor="let slot of (availableSlotsByDay$(day) | async)"
+                            color="light"
+                          >
+                            <ion-label class="es-mg-left-lg">
+                              {{ slot.dateTime | date:'h:mm a':'MST' }} <br />
+                              <ion-text color="xmasred" class="es-mg-left-md">
+                                {{ spotsRemaining(slot) }}
+                              </ion-text>
+                            </ion-label>
+                            <ion-button
+                              slot="end"
+                              (click)="selectDateTime(slot)"
+                              size="default"
+                              class="small-padding"
+                              [disabled]="!slot.enabled"
+                            >
+                              {{ 'COMMON.SELECT' | translate }}
+                            </ion-button>
+                          </ion-item>
+                        </ion-list>
+                      </ion-accordion>
+                    </ion-accordion-group>
                   </ng-container>
                 </ng-container>
-
-                
               </ng-template>
 
               <ion-button

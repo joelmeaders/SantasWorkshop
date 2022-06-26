@@ -10,7 +10,7 @@ export interface IDateTimeCount {
   dateTime: Date;
   count: number;
   childCount: number;
-  stats: IGenderAgeStats
+  stats: IGenderAgeStats;
 }
 
 export interface IZipCodeCount {
@@ -20,11 +20,9 @@ export interface IZipCodeCount {
 }
 
 export interface IGenderAgeStats {
-
   infants: IAgeGroupBreakdown;
   girls: IAgeGroupBreakdown;
   boys: IAgeGroupBreakdown;
-
 }
 
 export interface IAgeGroupBreakdown {

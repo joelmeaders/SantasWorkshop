@@ -2,11 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import {
-  AuthService,
-  ErrorHandlerService,
-  newAuthForm,
-} from '@core/*';
+import { AuthService, ErrorHandlerService, newAuthForm } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
@@ -49,9 +45,7 @@ export class SignInPageService implements OnDestroy {
   }
 
   public async signIn(): Promise<void | IError> {
-
-    if (!this.recaptchaValid$.getValue())
-      return;
+    if (!this.recaptchaValid$.getValue()) return;
 
     const auth: IAuth = {
       ...this.form.value,
@@ -74,7 +68,7 @@ export class SignInPageService implements OnDestroy {
   }
 
   public async onValidateRecaptcha($event: any) {
-    if (!await this.validateRecaptcha($event)) {
+    if (!(await this.validateRecaptcha($event))) {
       this.recaptchaValid$.next(false);
       await this.failedVerification();
       return;
@@ -85,7 +79,10 @@ export class SignInPageService implements OnDestroy {
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {
-    const status = await httpsCallable(this.afFunctions, 'verifyRecaptcha2')({ value: $event });
+    const status = await httpsCallable(
+      this.afFunctions,
+      'verifyRecaptcha2'
+    )({ value: $event });
     return Promise.resolve((<any>status.data).success as boolean);
   }
 

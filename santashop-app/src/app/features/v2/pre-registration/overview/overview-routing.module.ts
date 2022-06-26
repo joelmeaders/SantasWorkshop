@@ -6,8 +6,8 @@ import { OverviewPage } from './overview.page';
 const routes: Routes = [
   {
     path: '',
-    component: OverviewPage
-  }
+    component: OverviewPage,
+  },
 ];
 
 @NgModule({

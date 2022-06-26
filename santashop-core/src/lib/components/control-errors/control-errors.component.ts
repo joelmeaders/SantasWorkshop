@@ -5,7 +5,7 @@ import { FormControl } from '@ngneat/reactive-forms';
   selector: 'core-control-errors',
   templateUrl: './control-errors.component.html',
   styleUrls: ['./control-errors.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ControlErrorsComponent {
   // Not sure why I had to add 'any' here to this project

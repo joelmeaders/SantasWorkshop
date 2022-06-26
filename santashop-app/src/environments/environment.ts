@@ -5,7 +5,7 @@ export const environment = {
   production: false,
   label: 'DEV',
   name: config.name,
-  version: config.version
+  version: config.version,
 };
 
 export const firebaseConfig = { ...firebaseConfigDev };

@@ -6,18 +6,14 @@ import { ProfilePageService } from '../profile.page.service';
   templateUrl: './change-info.page.html',
   styleUrls: ['./change-info.page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ProfilePageService]
+  providers: [ProfilePageService],
 })
 export class ChangeInfoPage {
-
   public readonly form = this.viewService.profileForm;
 
-  constructor(
-    private readonly viewService: ProfilePageService
-  ) { }
+  constructor(private readonly viewService: ProfilePageService) {}
 
   public updateProfile() {
     this.viewService.updatePublicProfile();
   }
-
 }

@@ -23,12 +23,19 @@
               {{ 'SIGNUP.TITLE2' | translate }}
             </ion-card-subtitle>
             <p>
-              <ion-note color="danger" [routerLink]="['/sign-in']" button tappable>
+              <ion-note
+                color="danger"
+                [routerLink]="['/sign-in']"
+                button
+                tappable
+              >
                 {{ 'SIGNUP.ACCOUNT_REMINDER' | translate }}
-                <br/>
-                <strong><ion-text color="primary">
-                  {{ 'SIGNUP.SIGN_IN_HERE' | translate }}
-                </ion-text></strong>
+                <br />
+                <strong
+                  ><ion-text color="primary">
+                    {{ 'SIGNUP.SIGN_IN_HERE' | translate }}
+                  </ion-text></strong
+                >
               </ion-note>
             </p>
           </ion-card-header>

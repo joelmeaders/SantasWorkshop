@@ -8,22 +8,21 @@ import { AppStateService } from './core';
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   constructor(
     private readonly platform: Platform,
     private readonly translateService: TranslateService,
     private readonly appStateService: AppStateService,
-    private readonly analyticsService: Analytics,
+    private readonly analyticsService: Analytics
   ) {
     this.initializeApp();
   }
 
   async initializeApp() {
-
     await this.platform.ready().then(() => {
-      console.log('AppStateService Injected', !!this.appStateService)
+      console.log('AppStateService Injected', !!this.appStateService);
     });
 
     this.translateService.addLangs(['en', 'es']);
@@ -31,7 +30,9 @@ export class AppComponent {
 
     const browserLang = this.translateService.getBrowserLang() ?? 'en';
     this.translateService.use(browserLang.match(/en|es/) ? browserLang : 'en');
-    
-    await logEvent(this.analyticsService, 'default_language', { value: browserLang });
+
+    await logEvent(this.analyticsService, 'default_language', {
+      value: browserLang,
+    });
   }
 }

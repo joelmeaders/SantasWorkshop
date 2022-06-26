@@ -1,8 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  AuthService,
-  FireRepoLite,
-} from '@core/*';
+import { AuthService, FireRepoLite } from '@core/*';
 import { Functions } from '@angular/fire/functions';
 import { provideMock, Spied } from 'test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';

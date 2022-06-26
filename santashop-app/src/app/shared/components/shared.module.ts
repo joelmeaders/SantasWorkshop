@@ -15,11 +15,9 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     TermsOfServiceModalComponent,
     PreRegistrationMenuComponent,
     LanguageToggleComponent,
-    InternalHeaderComponent
+    InternalHeaderComponent,
   ],
-  imports: [
-    CoreModule,
-  ],
+  imports: [CoreModule],
   exports: [
     PublicMenuComponent,
     PrivacyPolicyModalComponent,
@@ -27,10 +25,8 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
     TranslateModule,
     PreRegistrationMenuComponent,
     LanguageToggleComponent,
-    InternalHeaderComponent
+    InternalHeaderComponent,
   ],
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA
-  ]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class SharedModule { }
+export class SharedModule {}

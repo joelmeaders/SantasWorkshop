@@ -1,16 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { ChildValidationError, IChild } from '@models/*';
-import { ChildValidationService, MAX_BIRTHDATE, MAX_CHILD_AGE_IN_YEARS, MIN_BIRTHDATE } from './child-validation.service';
+import {
+  ChildValidationService,
+  MAX_BIRTHDATE,
+  MAX_CHILD_AGE_IN_YEARS,
+  MIN_BIRTHDATE,
+} from './child-validation.service';
 
 describe('ChildValidationService', () => {
   let service: ChildValidationService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ 
+    TestBed.configureTestingModule({
       teardown: { destroyAfterEach: false },
-      providers: [
-        { provide: ChildValidationService }
-      ]
+      providers: [{ provide: ChildValidationService }],
     });
     service = TestBed.inject(ChildValidationService);
   });
@@ -28,7 +31,8 @@ describe('ChildValidationService', () => {
 
     // Act
     const shouldBeTrue = service.ageValid(ageZero) && service.ageValid(age12);
-    const shouldBefalse = service.ageValid(negativeAge) && service.ageValid(age13);
+    const shouldBefalse =
+      service.ageValid(negativeAge) && service.ageValid(age13);
 
     // Assert
     expect(shouldBeTrue).toBeTrue();
@@ -42,7 +46,8 @@ describe('ChildValidationService', () => {
     const justRight = 'Emily';
 
     // Act
-    const shouldBefalse = service.firstNameValid(tooShort) && service.firstNameValid(tooLong);
+    const shouldBefalse =
+      service.firstNameValid(tooShort) && service.firstNameValid(tooLong);
     const shouldBeTrue = service.firstNameValid(justRight);
 
     // Assert
@@ -57,7 +62,8 @@ describe('ChildValidationService', () => {
     const justRight = 'Lattenshire';
 
     // Act
-    const shouldBefalse = service.firstNameValid(tooShort) && service.firstNameValid(tooLong);
+    const shouldBefalse =
+      service.firstNameValid(tooShort) && service.firstNameValid(tooLong);
     const shouldBeTrue = service.firstNameValid(justRight);
 
     // Assert
@@ -71,7 +77,7 @@ describe('ChildValidationService', () => {
       firstName: 'Josh',
       lastName: 'Henrison',
       dateOfBirth: new Date('6/17/2018'),
-      enabled: false
+      enabled: false,
     };
 
     const ageValidSpy = spyOn(service, 'ageValid');
@@ -103,14 +109,14 @@ describe('ChildValidationService', () => {
       firstName: 'Josh',
       lastName: 'Henrison',
       dateOfBirth: new Date('6/17/1918'),
-      enabled: false
+      enabled: false,
     };
 
     // Act
     const result = () => service.validateChild(child);
 
     // Assert
-    expect(result).toThrow(new ChildValidationError("invalid_age"));
+    expect(result).toThrow(new ChildValidationError('invalid_age'));
   });
 
   it('validateChild(): should throw invalid_firstname error', () => {
@@ -119,14 +125,14 @@ describe('ChildValidationService', () => {
       firstName: 'J',
       lastName: 'Henrison',
       dateOfBirth: new Date('6/17/1918'),
-      enabled: false
+      enabled: false,
     };
 
     // Act
     const result = () => service.validateChild(child);
 
     // Assert
-    expect(result).toThrow(new ChildValidationError("invalid_firstname"));
+    expect(result).toThrow(new ChildValidationError('invalid_firstname'));
   });
 
   it('validateChild(): should throw invalid_lastname error', () => {
@@ -135,18 +141,20 @@ describe('ChildValidationService', () => {
       firstName: 'Josh',
       lastName: 'H',
       dateOfBirth: new Date('6/17/1918'),
-      enabled: false
+      enabled: false,
     };
 
     // Act
     const result = () => service.validateChild(child);
 
     // Assert
-    expect(result).toThrow(new ChildValidationError("invalid_lastname"));
+    expect(result).toThrow(new ChildValidationError('invalid_lastname'));
   });
 
   it('MAX_BIRTHDATE: should be expected value', () => {
-    expect(MAX_BIRTHDATE().toDateString()).toEqual(new Date('12/31/2021').toDateString());
+    expect(MAX_BIRTHDATE().toDateString()).toEqual(
+      new Date('12/31/2021').toDateString()
+    );
   });
 
   it('MAX_CHILD_AGE_IN_YEARS: should be expected value', () => {
@@ -154,7 +162,8 @@ describe('ChildValidationService', () => {
   });
 
   it('MIN_BIRTHDATE: should be expected value', () => {
-    expect(MIN_BIRTHDATE().toDateString()).toEqual(new Date('12/31/2009').toDateString());
+    expect(MIN_BIRTHDATE().toDateString()).toEqual(
+      new Date('12/31/2009').toDateString()
+    );
   });
-
 });

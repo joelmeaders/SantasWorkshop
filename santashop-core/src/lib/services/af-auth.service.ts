@@ -1,5 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Auth, authState, sendPasswordResetEmail, signInWithEmailAndPassword, updatePassword, User, UserCredential } from '@angular/fire/auth';
+import {
+  Auth,
+  authState,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  updatePassword,
+  User,
+  UserCredential,
+} from '@angular/fire/auth';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { shareReplay, Subject } from 'rxjs';
 
@@ -11,20 +19,17 @@ import { shareReplay, Subject } from 'rxjs';
  * @class AfAuthService
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AfAuthService implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
-  public readonly authState$ = authState(this.afAuth).pipe(
-    shareReplay(1)
-  );
+  public readonly authState$ = authState(this.afAuth).pipe(shareReplay(1));
 
   constructor(
     private readonly afAuth: Auth,
-    private readonly afFunctions: Functions,
-  ) { }
+    private readonly afFunctions: Functions
+  ) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -39,7 +44,10 @@ export class AfAuthService implements OnDestroy {
     return sendPasswordResetEmail(this.afAuth, emailAddress);
   }
 
-  public signInWithEmailAndPassword(emailAddress: string, password: string): Promise<UserCredential> {
+  public signInWithEmailAndPassword(
+    emailAddress: string,
+    password: string
+  ): Promise<UserCredential> {
     return signInWithEmailAndPassword(this.afAuth, emailAddress, password);
   }
 
@@ -48,8 +56,11 @@ export class AfAuthService implements OnDestroy {
   }
 
   public async updateUserEmailAddress(newEmailAddress: string): Promise<void> {
-    const accountStatusFunction = httpsCallable(this.afFunctions, 'updateEmailAddress');
-    await accountStatusFunction({emailAddress:newEmailAddress});
+    const accountStatusFunction = httpsCallable(
+      this.afFunctions,
+      'updateEmailAddress'
+    );
+    await accountStatusFunction({ emailAddress: newEmailAddress });
   }
 
   public signOut(): Promise<void> {

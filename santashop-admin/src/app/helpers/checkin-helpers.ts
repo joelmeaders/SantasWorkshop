@@ -4,13 +4,11 @@ import { format } from 'date-fns';
 import { IChild, ToyType } from '@models/*';
 
 export abstract class CheckInHelpers {
-
   public static sortChildren(children: IChild | Partial<IChild>[]) {
     return chain(children).sortBy('ageGroup').value();
   }
 
   public static childColor(value: ToyType): string | undefined {
-
     switch (value) {
       case ToyType.boy:
         return 'boy';
@@ -21,8 +19,8 @@ export abstract class CheckInHelpers {
       case ToyType.infant:
         return 'infant';
 
-      default: 
-        return undefined
+      default:
+        return undefined;
     }
   }
 

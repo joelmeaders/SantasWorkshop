@@ -1,7 +1,10 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
-import { IAuth, COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models';
+import {
+  IAuth,
+  COLLECTION_SCHEMA,
+} from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -9,7 +12,6 @@ export default async (
   data: IAuth,
   context: CallableContext
 ): Promise<boolean | HttpsError> => {
-
   const uid = context.auth?.uid;
 
   if (!uid) {
@@ -17,11 +19,11 @@ export default async (
   }
 
   await admin.auth().updateUser(uid, {
-      email: data.emailAddress.toLowerCase()
+    email: data.emailAddress.toLowerCase(),
   });
 
   const docData = {
-    emailAddress: data.emailAddress.toLowerCase()
+    emailAddress: data.emailAddress.toLowerCase(),
   };
 
   const batch = admin.firestore().batch();
@@ -48,7 +50,10 @@ export default async (
     .commit()
     .then(() => true)
     .catch((error: any) => {
-      console.error(`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`, error);
+      console.error(
+        `Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
+        error
+      );
       return new functions.https.HttpsError(
         'internal',
         `Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,

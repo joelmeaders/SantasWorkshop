@@ -1,26 +1,20 @@
 {
   "root": true,
-  "ignorePatterns": [
-    "!**/*",
-    "*.spec.ts",
-    "**/dist/*"
-  ],
+  "ignorePatterns": ["!**/*", "*.spec.ts", "**/dist/*"],
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+      "files": ["*.ts"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
-				"ecmaVersion": 2020,
-				"sourceType": "module",
-				"project": [
-					"tsconfig.app.json",
-					"tsconfig.spec.json",
-					"e2e/tsconfig.json"
-				],
-				"createDefaultProgram": true
-			},
+        "ecmaVersion": 2020,
+        "sourceType": "module",
+        "project": [
+          "tsconfig.app.json",
+          "tsconfig.spec.json",
+          "e2e/tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
       "plugins": [
         "@typescript-eslint",
         "@ngneat/reactive-forms",
@@ -28,13 +22,13 @@
       ],
       "extends": [
         "eslint:recommended",
-				"plugin:@typescript-eslint/eslint-recommended",
-				"plugin:@typescript-eslint/recommended",
-				"plugin:@angular-eslint/recommended",
-				"plugin:@angular-eslint/ng-cli-compat",
-				"plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
-				"plugin:@angular-eslint/template/process-inline-templates",
-				"plugin:prettier/recommended"
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/ng-cli-compat",
+        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "plugin:@angular-eslint/template/process-inline-templates",
+        "plugin:prettier/recommended"
       ],
       "rules": {
         "prettier/prettier": "off",
@@ -42,42 +36,42 @@
         "prefer-arrow/prefer-arrow-functions": "warn",
         "@typescript-eslint/member-ordering": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
-				"@angular-eslint/component-class-suffix": [
-					"error",
-					{
-						"suffixes": ["Page", "Component"]
-					}
-				],
-				"@angular-eslint/component-selector": [
-					"error",
-					{
-						"type": "element",
-						"prefix": "app",
-						"style": "kebab-case"
-					}
-				],
-				"@angular-eslint/directive-selector": [
-					"error",
-					{
-						"type": "attribute",
-						"prefix": "app",
-						"style": "camelCase"
-					}
-				]
+        "@angular-eslint/component-class-suffix": [
+          "error",
+          {
+            "suffixes": ["Page", "Component"]
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
+          }
+        ],
+        "@angular-eslint/directive-selector": [
+          "error",
+          {
+            "type": "attribute",
+            "prefix": "app",
+            "style": "camelCase"
+          }
+        ]
       }
     },
     {
-			"files": ["*.html"],
-			"extends": ["plugin:@angular-eslint/template/recommended"],
-			"rules": {}
-		},
-		{
-			"files": ["*.html"],
-			"excludedFiles": ["*inline-template-*.component.html"],
-			"extends": ["plugin:prettier/recommended"],
-			"rules": {
-				"prettier/prettier": ["error", { "parser": "angular" }]
-			}
-		}
+      "files": ["*.html"],
+      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "rules": {}
+    },
+    {
+      "files": ["*.html"],
+      "excludedFiles": ["*inline-template-*.component.html"],
+      "extends": ["plugin:prettier/recommended"],
+      "rules": {
+        "prettier/prettier": ["error", { "parser": "angular" }]
+      }
+    }
   ]
 }

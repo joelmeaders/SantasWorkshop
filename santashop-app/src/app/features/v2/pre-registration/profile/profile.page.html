@@ -4,11 +4,7 @@
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max">
       <ion-col
-        class="
-          side-menu
-          height-max
-          ion-hide-xl-down ion-no-padding ion-no-margin ion-float-start
-        "
+        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin ion-float-start"
         size="auto"
         *ngIf="!(isRegistrationComplete$ | async)"
       >
@@ -38,12 +34,18 @@
 
             <div class="ion-padding es-mg-bottom-xxl">
               <ion-item class="inset-ion-item-title" color="none">
-                <ion-card-title lines="full"> {{ "COMMON.MY_ACCOUNT" | translate }} </ion-card-title>
+                <ion-card-title lines="full">
+                  {{ "COMMON.MY_ACCOUNT" | translate }}
+                </ion-card-title>
               </ion-item>
 
               <ion-card class="ion-margin-top">
                 <ion-card-content>
-                  <ion-button fill="clear" class="ion-float-end" [routerLink]="['change-info']">
+                  <ion-button
+                    fill="clear"
+                    class="ion-float-end"
+                    [routerLink]="['change-info']"
+                  >
                     <ion-icon name="create-outline" color="dark"></ion-icon>
                   </ion-button>
 
@@ -83,7 +85,11 @@
 
               <ion-card class="ion-margin-top">
                 <ion-card-content>
-                  <ion-button fill="clear" class="ion-float-end" [routerLink]="['change-email']">
+                  <ion-button
+                    fill="clear"
+                    class="ion-float-end"
+                    [routerLink]="['change-email']"
+                  >
                     <ion-icon name="create-outline" color="dark"></ion-icon>
                   </ion-button>
 
@@ -103,7 +109,11 @@
 
               <ion-card class="ion-margin-top">
                 <ion-card-content>
-                  <ion-button fill="clear" class="ion-float-end" [routerLink]="['change-password']">
+                  <ion-button
+                    fill="clear"
+                    class="ion-float-end"
+                    [routerLink]="['change-password']"
+                  >
                     <ion-icon name="create-outline" color="dark"></ion-icon>
                   </ion-button>
 

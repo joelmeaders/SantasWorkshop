@@ -5,11 +5,7 @@ import { CoreModule } from '@core/*';
 import { SharedModule } from '../../../../shared/components/shared.module';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SharedModule,
-    DateTimePageRoutingModule
-  ],
-  declarations: [DateTimePage]
+  imports: [CoreModule, SharedModule, DateTimePageRoutingModule],
+  declarations: [DateTimePage],
 })
 export class DateTimePageModule {}

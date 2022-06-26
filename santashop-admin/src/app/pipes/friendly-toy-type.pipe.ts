@@ -6,7 +6,6 @@ import { ToyType } from '@models/*';
 })
 export class FriendlyToyTypePipe implements PipeTransform {
   transform(value: ToyType): string | undefined {
-    
     switch (value) {
       case ToyType.infant:
         return 'Infant';

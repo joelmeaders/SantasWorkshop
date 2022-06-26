@@ -6,7 +6,6 @@ import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class ChildrenPageService implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
   public readonly children$: Observable<IChild[] | undefined> =
@@ -22,42 +21,40 @@ export class ChildrenPageService implements OnDestroy {
     );
 
   constructor(
-    private readonly preRegistrationService: PreRegistrationService,
-  ) { }
+    private readonly preRegistrationService: PreRegistrationService
+  ) {}
 
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
-  public async removeChild(childToRemove: IChild): Promise<void> {
 
-    const children = 
-      await this.children$.pipe(take(1)).toPromise();
+  public async removeChild(childToRemove: IChild): Promise<void> {
+    const children = await this.children$.pipe(take(1)).toPromise();
 
     const updatedChildren = children?.filter(
-      child => child.id !== childToRemove.id);
+      (child) => child.id !== childToRemove.id
+    );
 
     return this.updateRegistration(updatedChildren);
   }
 
   public async updateRegistration(children?: IChild[]) {
+    const registration = await firstValueFrom(
+      this.preRegistrationService.userRegistration$
+    );
 
-    const registration = 
-      await firstValueFrom(this.preRegistrationService.userRegistration$);
-    
     registration.children = children;
-    
+
     // TODO: Error handling
-    const storeRegistration = 
-      this.preRegistrationService.saveRegistration(registration)
-        .pipe(take(1)).toPromise();
+    const storeRegistration = this.preRegistrationService
+      .saveRegistration(registration)
+      .pipe(take(1))
+      .toPromise();
 
     try {
       await storeRegistration;
-    } 
-    catch (error) 
-    { 
+    } catch (error) {
       // TODO: Do something
     }
   }

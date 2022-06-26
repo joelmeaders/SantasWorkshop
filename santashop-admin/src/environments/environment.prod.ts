@@ -4,7 +4,7 @@ export const environment = {
   production: true,
   label: 'PROD',
   name: config.name,
-  version: config.version
+  version: config.version,
 };
 
 export const firebaseConfig = {
@@ -15,5 +15,5 @@ export const firebaseConfig = {
   storageBucket: 'undefined',
   messagingSenderId: 'undefined',
   appId: 'undefined',
-  measurementId: 'undefined'
+  measurementId: 'undefined',
 };

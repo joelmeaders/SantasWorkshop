@@ -17,44 +17,58 @@ const routes: Routes = [
       {
         // Additional information such as zip, etc...
         path: 'overview',
-        loadChildren: () => import('./overview/overview.module').then( m => m.InformationPageModule),
-        canActivate: [ RegistrationCompleteGuard ]
+        loadChildren: () =>
+          import('./overview/overview.module').then(
+            (m) => m.InformationPageModule
+          ),
+        canActivate: [RegistrationCompleteGuard],
       },
       {
         // Manage children
         path: 'children',
-        loadChildren: () => import('./children/children.module').then( m => m.ChildrenPageModule),
-        canActivate: [ RegistrationCompleteGuard ]
+        loadChildren: () =>
+          import('./children/children.module').then(
+            (m) => m.ChildrenPageModule
+          ),
+        canActivate: [RegistrationCompleteGuard],
       },
       {
         // Choose date and time
         path: 'date-time',
-        loadChildren: () => import('./date-time/date-time.module').then( m => m.DateTimePageModule),
-        canActivate: [ RegistrationCompleteGuard ]
+        loadChildren: () =>
+          import('./date-time/date-time.module').then(
+            (m) => m.DateTimePageModule
+          ),
+        canActivate: [RegistrationCompleteGuard],
       },
       {
         // Submit
         path: 'submit',
-        loadChildren: () => import('./submit/submit.module').then( m => m.SubmitPageModule),
-        canActivate: [ RegistrationCompleteGuard ]
+        loadChildren: () =>
+          import('./submit/submit.module').then((m) => m.SubmitPageModule),
+        canActivate: [RegistrationCompleteGuard],
       },
       {
         // QR Code and event information
         path: 'confirmation',
-        loadChildren: () => import('./confirmation/confirmation.module').then( m => m.ConfirmationPageModule)
+        loadChildren: () =>
+          import('./confirmation/confirmation.module').then(
+            (m) => m.ConfirmationPageModule
+          ),
       },
       {
         // My account
         path: 'profile',
-        loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
+        loadChildren: () =>
+          import('./profile/profile.module').then((m) => m.ProfilePageModule),
       },
       {
         path: 'help',
-        loadChildren: () => import('./help/help.module').then( m => m.HelpPageModule)
+        loadChildren: () =>
+          import('./help/help.module').then((m) => m.HelpPageModule),
       },
-    
-    ]
-  }
+    ],
+  },
 ];
 
 @NgModule({

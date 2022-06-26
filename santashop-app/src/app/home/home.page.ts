@@ -11,26 +11,22 @@ import { RemoteConfigService } from '../core/services/remote-config.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
   public readonly environmentName = `${environment.name}_${environment.label}`;
   public readonly environmentVersion = environment.version;
 
-  public readonly $signupEnabled = 
+  public readonly $signupEnabled =
     this.remoteConfigService.registrationEnabled$.pipe(
       takeUntil(this.destroy$),
-      map(value => !value),
+      map((value) => !value),
       shareReplay(1)
     );
 
-  constructor(
-    
-    private readonly remoteConfigService: RemoteConfigService,
-  ) { }
+  constructor(private readonly remoteConfigService: RemoteConfigService) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }  
+  }
 }

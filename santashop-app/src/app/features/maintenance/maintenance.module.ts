@@ -5,11 +5,7 @@ import { CoreModule } from '@core/*';
 import { SharedModule } from '../../shared/components/shared.module';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SharedModule,
-    MaintenancePageRoutingModule
-  ],
-  declarations: [MaintenancePage]
+  imports: [CoreModule, SharedModule, MaintenancePageRoutingModule],
+  declarations: [MaintenancePage],
 })
 export class MaintenancePageModule {}

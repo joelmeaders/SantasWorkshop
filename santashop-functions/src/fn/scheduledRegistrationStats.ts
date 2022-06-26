@@ -104,7 +104,6 @@ function setChildAgeStatsByGender(
   stat: IAgeGroupBreakdown,
   ageGroup: AgeGroup
 ): void {
-
   if (!stat) return;
 
   stat.total += 1;

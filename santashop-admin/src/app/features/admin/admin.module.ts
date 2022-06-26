@@ -6,14 +6,8 @@ import { AdminPageRoutingModule } from './admin-routing.module';
 import { AdminPage } from './admin.page';
 
 @NgModule({
-  imports: [
-    IonicModule,
-    CommonModule,
-    AdminPageRoutingModule
-  ],
-  declarations: [
-    AdminPage
-  ],
-  providers: [ConfirmDeactivateGuard]
+  imports: [IonicModule, CommonModule, AdminPageRoutingModule],
+  declarations: [AdminPage],
+  providers: [ConfirmDeactivateGuard],
 })
 export class AdminPageModule {}

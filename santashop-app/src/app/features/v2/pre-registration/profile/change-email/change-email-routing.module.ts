@@ -6,8 +6,8 @@ import { ChangeEmailPage } from './change-email.page';
 const routes: Routes = [
   {
     path: '',
-    component: ChangeEmailPage
-  }
+    component: ChangeEmailPage,
+  },
 ];
 
 @NgModule({

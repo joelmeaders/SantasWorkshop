@@ -6,8 +6,8 @@ import { DateTimePage } from './date-time.page';
 const routes: Routes = [
   {
     path: '',
-    component: DateTimePage
-  }
+    component: DateTimePage,
+  },
 ];
 
 @NgModule({

@@ -8,7 +8,6 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-
   let statusBarSpy;
   let splashScreenSpy;
   let platformReadySpy;
@@ -46,5 +45,4 @@ describe('AppComponent', () => {
   });
 
   // TODO: add more tests!
-
 });

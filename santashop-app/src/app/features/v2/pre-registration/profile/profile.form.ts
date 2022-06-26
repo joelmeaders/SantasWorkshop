@@ -30,17 +30,15 @@ const validators = {
   ]),
 };
 
-export const changeEmailForm = () => new FormGroup(
-  {
+export const changeEmailForm = () =>
+  new FormGroup({
     password: new FormControl<string>(undefined, Validators.required),
-    emailAddress: new FormControl<string>(undefined, validators.emailAddress)
-  }
-);
+    emailAddress: new FormControl<string>(undefined, validators.emailAddress),
+  });
 
-export const changePasswordForm = () => new FormGroup(
-  {
+export const changePasswordForm = () =>
+  new FormGroup({
     oldPassword: new FormControl<string>(undefined, Validators.required),
     newPassword: new FormControl<string>(undefined, validators.password),
-    newPassword2: new FormControl<string>(undefined, validators.password)
-  }
-);
+    newPassword2: new FormControl<string>(undefined, validators.password),
+  });

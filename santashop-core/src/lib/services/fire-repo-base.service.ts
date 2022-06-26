@@ -1,14 +1,29 @@
 import { Injectable } from '@angular/core';
-import { addDoc, deleteDoc, doc, docData, DocumentReference, Firestore, query, setDoc } from '@angular/fire/firestore';
-import { collection, DocumentData, QueryConstraint, QueryDocumentSnapshot, SnapshotOptions } from 'firebase/firestore';
+import {
+  addDoc,
+  deleteDoc,
+  doc,
+  docData,
+  DocumentReference,
+  Firestore,
+  query,
+  setDoc,
+} from '@angular/fire/firestore';
+import {
+  collection,
+  DocumentData,
+  QueryConstraint,
+  QueryDocumentSnapshot,
+  SnapshotOptions,
+} from 'firebase/firestore';
 import { collection as rxCollection } from 'rxfire/firestore';
 import { from, map, mapTo, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FireRepoBase {
-  constructor(private readonly firestore: Firestore) { }
+  constructor(private readonly firestore: Firestore) {}
 
   public randomId(): string {
     const colRef = collection(this.firestore, '_');
@@ -22,7 +37,7 @@ export class FireRepoBase {
     idField?: Extract<keyof T, string>
   ): Observable<T> {
     const colRef = collection(this.firestore, collectionPath);
-    const docRef = doc<T>(colRef as any, documentId)
+    const docRef = doc<T>(colRef as any, documentId);
     return docData(docRef, { idField });
   }
 
@@ -32,20 +47,22 @@ export class FireRepoBase {
     idField?: Extract<keyof T, string>
   ): Observable<T[]> {
     const colRef = collection(this.firestore, collectionPath);
-    const qry = queryConstraints ? query(colRef, ...queryConstraints) : query(colRef);
+    const qry = queryConstraints
+      ? query(colRef, ...queryConstraints)
+      : query(colRef);
 
     return rxCollection(qry).pipe(
-      map(snapshots => {
+      map((snapshots) => {
         const datas: T[] = [];
-        snapshots.forEach(snapshot => {
+        snapshots.forEach((snapshot) => {
           const data = {
-            ...snapshot.data()
+            ...snapshot.data(),
           } as T;
           if (idField) {
             (data as any)[idField] = snapshot.id;
           }
           datas.push(data);
-        })
+        });
         return datas;
       })
     );
@@ -61,8 +78,8 @@ export class FireRepoBase {
         options: SnapshotOptions
       ): T {
         return { ...snapshot.data(options) } as T;
-      }
-    }
+      },
+    };
   }
 
   public add<T>(
@@ -70,11 +87,10 @@ export class FireRepoBase {
     document: T
   ): Observable<DocumentReference<T>> {
     const colRef = collection(this.firestore, collectionPath);
-    const action = addDoc(colRef, document).then(
-      response => response.withConverter(this.genericConverter<T>())
+    const action = addDoc(colRef, document).then((response) =>
+      response.withConverter(this.genericConverter<T>())
     );
     return from(action);
-
   }
 
   public addById<T>(
@@ -83,7 +99,7 @@ export class FireRepoBase {
     document: T
   ): Observable<DocumentReference<T>> {
     const colRef = collection(this.firestore, collectionPath);
-    const docRef = doc<T>(colRef as any, documentId)
+    const docRef = doc<T>(colRef as any, documentId);
     const action = setDoc(docRef, document);
     return from(action).pipe(mapTo(docRef));
   }
@@ -95,17 +111,14 @@ export class FireRepoBase {
     merge = false
   ): Observable<DocumentReference> {
     const colRef = collection(this.firestore, collectionPath);
-    const docRef = doc<T>(colRef as any, documentId)
+    const docRef = doc<T>(colRef as any, documentId);
     const action = setDoc(docRef, document, { merge });
     return from(action).pipe(mapTo(docRef));
   }
 
-  public delete(
-    collectionPath: string,
-    documentId: string
-  ): Observable<void> {
+  public delete(collectionPath: string, documentId: string): Observable<void> {
     const colRef = collection(this.firestore, collectionPath);
-    const docRef = doc(colRef as any, documentId)
+    const docRef = doc(colRef as any, documentId);
     const action = deleteDoc(docRef);
     return from(action);
   }

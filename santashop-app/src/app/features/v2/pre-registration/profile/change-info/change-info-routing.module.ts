@@ -6,8 +6,8 @@ import { ChangeInfoPage } from './change-info.page';
 const routes: Routes = [
   {
     path: '',
-    component: ChangeInfoPage
-  }
+    component: ChangeInfoPage,
+  },
 ];
 
 @NgModule({

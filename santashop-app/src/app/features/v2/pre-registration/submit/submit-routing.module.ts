@@ -6,8 +6,8 @@ import { SubmitPage } from './submit.page';
 const routes: Routes = [
   {
     path: '',
-    component: SubmitPage
-  }
+    component: SubmitPage,
+  },
 ];
 
 @NgModule({

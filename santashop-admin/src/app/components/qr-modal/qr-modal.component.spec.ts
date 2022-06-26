@@ -9,8 +9,8 @@ describe('QrModalComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ QrModalComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [QrModalComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(QrModalComponent);

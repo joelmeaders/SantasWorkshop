@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { distinctUntilChanged, filter, map, pluck, shareReplay, switchMap } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  pluck,
+  shareReplay,
+  switchMap,
+} from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { IAuth, IUserEmailUid } from '@models/*';
@@ -8,20 +15,17 @@ import { UserCredential, User } from '@angular/fire/auth';
 import { AfAuthService } from './af-auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-
   /**
    * Stream of the auth state, triggered on login/logout
    *
    * @type {(Observable<User | null>)}
    * @memberof AuthService
    */
-  public readonly currentUser$: Observable<User | null> = this.afAuthService.authState$.pipe(
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
+  public readonly currentUser$: Observable<User | null> =
+    this.afAuthService.authState$.pipe(distinctUntilChanged(), shareReplay(1));
 
   /**
    * Stream of user email and uid
@@ -29,11 +33,15 @@ export class AuthService {
    * @type {Observable<IUserEmailUid>}
    * @memberof AuthService
    */
-  public readonly emailAndUid$: Observable<IUserEmailUid> = this.currentUser$.pipe(
-    map((res: any) => ({ emailAddress: res?.email, uid: res?.uid }) as IUserEmailUid),
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
+  public readonly emailAndUid$: Observable<IUserEmailUid> =
+    this.currentUser$.pipe(
+      map(
+        (res: any) =>
+          ({ emailAddress: res?.email, uid: res?.uid } as IUserEmailUid)
+      ),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
 
   /**
    * Stream of uid. Will not fire/complete if user is
@@ -44,8 +52,8 @@ export class AuthService {
    */
   public readonly uid$: Observable<string> = this.currentUser$.pipe(
     pluck('uid'),
-    filter(uid => !!uid),
-    map(uid => uid as string),
+    filter((uid) => !!uid),
+    map((uid) => uid as string),
     shareReplay(1)
   );
 
@@ -56,16 +64,16 @@ export class AuthService {
    * @memberof AuthService
    */
   public readonly isAdmin$ = this.currentUser$.pipe(
-    filter(user => !!user),
-    switchMap(user => from(user!.getIdTokenResult(false))),
-    map(token => token.claims?.admin ?? false),
+    filter((user) => !!user),
+    switchMap((user) => from(user!.getIdTokenResult(false))),
+    map((token) => token.claims?.admin ?? false),
     shareReplay(1)
   );
 
   constructor(
     private readonly afAuthService: AfAuthService,
     private readonly errorHandler: ErrorHandlerService
-  ) { }
+  ) {}
 
   /**
    * Reset user password, sends an email.
@@ -87,22 +95,23 @@ export class AuthService {
    * @return
    * @memberof AuthService
    */
-  public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+  public async changePassword(
+    oldPassword: string,
+    newPassword: string
+  ): Promise<void> {
     const user = this.afAuthService.currentUser();
 
-    if (!user)
-      return Promise.reject(new Error('User cannot be null'));
+    if (!user) return Promise.reject(new Error('User cannot be null'));
 
     const auth: IAuth = {
       emailAddress: user.email as string,
-      password: oldPassword
-    }
+      password: oldPassword,
+    };
 
     try {
       await this.login(auth);
-      return this.afAuthService.updateUserPassword(user, newPassword)
-    }
-    catch (error: any) {
+      return this.afAuthService.updateUserPassword(user, newPassword);
+    } catch (error: any) {
       await this.errorHandler.handleError(error);
       return Promise.reject(error);
     }
@@ -117,22 +126,23 @@ export class AuthService {
    * @return
    * @memberof AuthService
    */
-  public async changeEmailAddress(password: string, newEmailAddress: string): Promise<void> {
+  public async changeEmailAddress(
+    password: string,
+    newEmailAddress: string
+  ): Promise<void> {
     const user = await this.afAuthService.currentUser();
 
-    if (!user)
-      return Promise.reject(new Error('User cannot be null'));
+    if (!user) return Promise.reject(new Error('User cannot be null'));
 
     const auth: IAuth = {
       emailAddress: user?.email as string,
-      password
-    }
+      password,
+    };
 
     try {
       await this.login(auth);
       return await this.afAuthService.updateUserEmailAddress(newEmailAddress);
-    }
-    catch (error: any) {
+    } catch (error: any) {
       await this.errorHandler.handleError(error);
       return Promise.reject(error);
     }
@@ -146,7 +156,10 @@ export class AuthService {
    * @memberof AuthService
    */
   public async login(auth: IAuth): Promise<UserCredential> {
-    return this.afAuthService.signInWithEmailAndPassword(auth.emailAddress, auth.password);
+    return this.afAuthService.signInWithEmailAndPassword(
+      auth.emailAddress,
+      auth.password
+    );
   }
 
   /**
@@ -157,10 +170,9 @@ export class AuthService {
    * @memberof AuthService
    */
   public async logout(reload = true): Promise<void> {
-    await this.afAuthService.signOut()
-      .then(() => {
-        // TODO: Replace this with something else
-        if (reload) document.location.reload()
-      });
+    await this.afAuthService.signOut().then(() => {
+      // TODO: Replace this with something else
+      if (reload) document.location.reload();
+    });
   }
 }

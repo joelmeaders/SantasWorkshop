@@ -14,7 +14,7 @@ export interface IRegistration {
   dateTimeSlot?: Partial<IDateTimeSlot>;
 
   // Due to how slot capacity is calculated, this value
-  // holds the slot the person cancelled until another 
+  // holds the slot the person cancelled until another
   // scheduled function consumes and removes it.
   previousDateTimeSlot?: Partial<IDateTimeSlot>;
 
@@ -28,7 +28,7 @@ export interface IRegistration {
   // This value is false until a scheduled function updates
   // registration with this record.
   includedInRegistrationStats?: false | Date;
-  
+
   zipCode?: number;
 
   bhp?: number;

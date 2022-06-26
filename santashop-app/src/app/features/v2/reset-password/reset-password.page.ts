@@ -12,27 +12,29 @@ import { shareReplay } from 'rxjs/operators';
   selector: 'app-reset-password',
   templateUrl: './reset-password.page.html',
   styleUrls: ['./reset-password.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordPage {
-
   public readonly form: FormGroup = this.formBuilder.group({
-    emailAddress: [undefined, Validators.compose([Validators.required, Validators.email])]
+    emailAddress: [
+      undefined,
+      Validators.compose([Validators.required, Validators.email]),
+    ],
   });
-  
+
   // TODO: ReCaptchaV2.ReCaptcha namespace does not allow testing to work
   // even though @types/greptcha is installed. Try again later.
   @ViewChild('captchaRef') captchaRef: any | null = null;
 
   private readonly _resetEmailSent$ = new BehaviorSubject<boolean>(false);
-  public readonly resetEmailSent$ = this._resetEmailSent$.asObservable().pipe(
-    shareReplay(1)
-  );
+  public readonly resetEmailSent$ = this._resetEmailSent$
+    .asObservable()
+    .pipe(shareReplay(1));
 
   private readonly _recaptchaValid$ = new BehaviorSubject<boolean>(false);
-  public readonly recaptchaValid$ = this._recaptchaValid$.asObservable().pipe(
-    shareReplay(1)
-  );
+  public readonly recaptchaValid$ = this._recaptchaValid$
+    .asObservable()
+    .pipe(shareReplay(1));
 
   constructor(
     private readonly formBuilder: FormBuilder,
@@ -52,7 +54,7 @@ export class ResetPasswordPage {
   }
 
   public async onValidateRecaptcha($event: any) {
-    if (!await this.validateRecaptcha($event)) {
+    if (!(await this.validateRecaptcha($event))) {
       this._recaptchaValid$.next(false);
       await this.failedVerification();
       return;
@@ -63,9 +65,7 @@ export class ResetPasswordPage {
   }
 
   public async resetPassword() {
-
-    if (!this._recaptchaValid$.getValue())
-      return;
+    if (!this._recaptchaValid$.getValue()) return;
 
     const email = this.form.get('emailAddress')?.value;
 
@@ -77,7 +77,10 @@ export class ResetPasswordPage {
   }
 
   private async validateRecaptcha($event: any): Promise<boolean> {
-    const status = await httpsCallable(this.afFunctions, 'verifyRecaptcha2')({ value: $event })
+    const status = await httpsCallable(
+      this.afFunctions,
+      'verifyRecaptcha2'
+    )({ value: $event });
     return Promise.resolve((<any>status.data).success);
   }
 

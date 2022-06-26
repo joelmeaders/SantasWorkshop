@@ -1,24 +1,42 @@
 <ion-content color="light" size="fullscreen">
-
   <app-internal-header></app-internal-header>
 
   <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
     <ion-row class="height-max">
-      <ion-col class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin" size="auto">
+      <ion-col
+        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
+        size="auto"
+      >
         <app-pre-registration-menu></app-pre-registration-menu>
       </ion-col>
-      <ion-col sizeXl="9" sizeLg="12" sizeMd="12" sizeSm="12" sizeXs="12" size="12">
+      <ion-col
+        sizeXl="9"
+        sizeLg="12"
+        sizeMd="12"
+        sizeSm="12"
+        sizeXs="12"
+        size="12"
+      >
         <ion-row class="ion-justify-content-center">
           <ion-col sizeXs="12" sizeSm="7">
             <ion-card>
               <ion-card-header>
                 <ion-item class="inset-ion-item-title">
-                  <ion-card-title> {{ 'MENU.CHILDREN' | translate }} </ion-card-title>
-                  <ion-badge color="success" slot="end" *ngIf="(childCount$ | async) ?? 0 > 0;">Complete</ion-badge>
+                  <ion-card-title>
+                    {{ 'MENU.CHILDREN' | translate }}
+                  </ion-card-title>
+                  <ion-badge
+                    color="success"
+                    slot="end"
+                    *ngIf="(childCount$ | async) ?? 0 > 0;"
+                    >Complete</ion-badge
+                  >
                 </ion-item>
               </ion-card-header>
               <ion-card-content class="ion-text-center">
-                <ng-container *ngIf="(childCount$ | async) === 0; else hasChildren">
+                <ng-container
+                  *ngIf="(childCount$ | async) === 0; else hasChildren"
+                >
                   <p>
                     <strong> {{ 'OVERVIEW.NO_CHILDREN' | translate }} </strong>
                     <br />
@@ -30,23 +48,45 @@
                     </ion-button>
                   </p>
                 </ng-container>
-    
+
                 <ng-template #hasChildren>
                   <ion-list>
-                    <ion-item *ngFor="let child of children$ | async" lines="none">
-                      <ion-icon name="man-outline" slot="start" *ngIf="child.toyType === 'boys'"></ion-icon>
-                      <ion-icon name="woman-outline" slot="start" *ngIf="child.toyType === 'girls'"></ion-icon>
-                      <ion-icon name="happy-outline" slot="start" *ngIf="child.toyType === 'infants'"></ion-icon>
-                      <ion-icon name="alert-circle" color="danger" slot="start" *ngIf="!child.toyType"></ion-icon>
+                    <ion-item
+                      *ngFor="let child of children$ | async"
+                      lines="none"
+                    >
+                      <ion-icon
+                        name="man-outline"
+                        slot="start"
+                        *ngIf="child.toyType === 'boys'"
+                      ></ion-icon>
+                      <ion-icon
+                        name="woman-outline"
+                        slot="start"
+                        *ngIf="child.toyType === 'girls'"
+                      ></ion-icon>
+                      <ion-icon
+                        name="happy-outline"
+                        slot="start"
+                        *ngIf="child.toyType === 'infants'"
+                      ></ion-icon>
+                      <ion-icon
+                        name="alert-circle"
+                        color="danger"
+                        slot="start"
+                        *ngIf="!child.toyType"
+                      ></ion-icon>
                       <div>
-                        <ion-label> {{ child.firstName }} {{ child.lastName }} </ion-label>
+                        <ion-label>
+                          {{ child.firstName }} {{ child.lastName }}
+                        </ion-label>
                         <ion-note *ngIf="!child.toyType" color="danger">
-                          {{ 'CHILDREN.INVALID_TOYTYPE' | translate }} 
+                          {{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
                         </ion-note>
                       </div>
                     </ion-item>
                   </ion-list>
-    
+
                   <p class="ion-text-end es-pd-top-sm">
                     <ion-button color="xmasred" [routerLink]="['../children']">
                       {{ 'OVERVIEW.ADD_EDIT_CHILD' | translate }}
@@ -56,49 +96,71 @@
               </ion-card-content>
             </ion-card>
           </ion-col>
-    
+
           <ion-col sizeXs="12" sizeSm="7">
             <ion-card [disabled]="!(canChooseDateTime$ | async)">
               <ion-card-header>
                 <ion-item class="inset-ion-item-title">
-                  <ion-card-title> {{ 'OVERVIEW.SCHEDULE' | translate }} </ion-card-title>
-                  <ion-badge color="success" slot="end" *ngIf="!!(dateTimeSlot$ | async);">Complete</ion-badge>
+                  <ion-card-title>
+                    {{ 'OVERVIEW.SCHEDULE' | translate }}
+                  </ion-card-title>
+                  <ion-badge
+                    color="success"
+                    slot="end"
+                    *ngIf="!!(dateTimeSlot$ | async);"
+                    >Complete</ion-badge
+                  >
                 </ion-item>
               </ion-card-header>
               <ion-card-content class="ion-text-center">
-    
-                <ng-container *ngIf="!(dateTimeSlot$ | async); else hasDateTimeSlot">
+                <ng-container
+                  *ngIf="!(dateTimeSlot$ | async); else hasDateTimeSlot"
+                >
                   <p>
-                    <strong> {{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }} </strong>
+                    <strong>
+                      {{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }}
+                    </strong>
                     <br />
                     {{ 'OVERVIEW.NO_TIME_MESSAGE' | translate }}
                   </p>
-    
+
                   <p class="ion-text-end es-pd-top-sm">
-                    <ion-button color="xmasred" [routerLink]="['../date-time']"> {{ 'OVERVIEW.SELECT_TIME' | translate }} </ion-button>
+                    <ion-button color="xmasred" [routerLink]="['../date-time']">
+                      {{ 'OVERVIEW.SELECT_TIME' | translate }}
+                    </ion-button>
                   </p>
                 </ng-container>
-    
+
                 <ng-template #hasDateTimeSlot>
                   <ion-item lines="none">
-                    <ion-label *ngIf="dateTimeSlot$ | async as dateTimeSlot" class="ion-text-wrap">
-                      {{ dateTimeSlot.dateTime | date:'fullDate' }}, {{ dateTimeSlot.dateTime | date:'shortTime' }}
+                    <ion-label
+                      *ngIf="dateTimeSlot$ | async as dateTimeSlot"
+                      class="ion-text-wrap"
+                    >
+                      {{ dateTimeSlot.dateTime | date:'fullDate' }}, {{
+                      dateTimeSlot.dateTime | date:'shortTime' }}
                     </ion-label>
                   </ion-item>
                   <p class="ion-text-end es-pd-top-sm">
-                    <ion-button color="xmasred" [routerLink]="['../date-time']"> {{ 'OVERVIEW.CHANGE_TIME' | translate }} </ion-button>
+                    <ion-button color="xmasred" [routerLink]="['../date-time']">
+                      {{ 'OVERVIEW.CHANGE_TIME' | translate }}
+                    </ion-button>
                   </p>
                 </ng-template>
-    
               </ion-card-content>
             </ion-card>
           </ion-col>
-    
+
           <ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
-            <ion-card [disabled]="!(canSubmit$ | async)" class="es-mg-bottom-xxl">
+            <ion-card
+              [disabled]="!(canSubmit$ | async)"
+              class="es-mg-bottom-xxl"
+            >
               <ion-card-header>
                 <ion-item class="inset-ion-item-title">
-                  <ion-card-title lines="full"> {{ 'MENU.SUBMIT' | translate }} </ion-card-title>
+                  <ion-card-title lines="full">
+                    {{ 'MENU.SUBMIT' | translate }}
+                  </ion-card-title>
                 </ion-item>
               </ion-card-header>
               <ion-card-content class="ion-text-center">
@@ -108,14 +170,15 @@
                   {{ 'OVERVIEW.NOT_SUBMITTED_MESSAGE' | translate }}
                 </p>
                 <p class="ion-text-end es-pd-top-sm">
-                  <ion-button color="xmasred" [routerLink]="['../submit']"> {{ 'MENU.SUBMIT' | translate }} </ion-button>
+                  <ion-button color="xmasred" [routerLink]="['../submit']">
+                    {{ 'MENU.SUBMIT' | translate }}
+                  </ion-button>
                 </p>
               </ion-card-content>
             </ion-card>
           </ion-col>
         </ion-row>
       </ion-col>
-      
     </ion-row>
   </ion-grid>
 </ion-content>

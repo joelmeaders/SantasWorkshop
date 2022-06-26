@@ -1,7 +1,10 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import { COLLECTION_SCHEMA, IChangeUserInfo } from '../../../santashop-models/src/lib/models';
+import {
+  COLLECTION_SCHEMA,
+  IChangeUserInfo,
+} from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
@@ -9,17 +12,15 @@ export default async (
   data: IChangeUserInfo,
   context: CallableContext
 ): Promise<boolean | HttpsError> => {
-
   const uid = context.auth?.uid;
 
-  if (!uid)
-    throw new HttpsError('not-found', 'uid null');
+  if (!uid) throw new HttpsError('not-found', 'uid null');
 
   if (!data || !data.firstName || !data.lastName || !data.zipCode)
     throw new HttpsError('data-loss', 'missing request information');
 
   await admin.auth().updateUser(uid, {
-      displayName: `${data.firstName} ${data.lastName}`
+    displayName: `${data.firstName} ${data.lastName}`,
   });
 
   const batch = admin.firestore().batch();
@@ -37,7 +38,7 @@ export default async (
   const indexDoc = {
     firstName: data.firstName.toLowerCase(),
     lastName: data.lastName.toLowerCase(),
-    zip: data.zipCode
+    zip: data.zipCode,
   };
 
   batch.set(indexDocRef, indexDoc, { merge: true });
@@ -49,7 +50,7 @@ export default async (
   const registrationDoc = {
     firstName: data.firstName,
     lastName: data.lastName,
-    zipCode: data.zipCode
+    zipCode: data.zipCode,
   };
 
   batch.set(registrationDocRef, registrationDoc, { merge: true });
@@ -58,7 +59,10 @@ export default async (
     .commit()
     .then(() => true)
     .catch((error: any) => {
-      console.error(`Error updating user document ${uid} with ${JSON.stringify(data)}`, error);
+      console.error(
+        `Error updating user document ${uid} with ${JSON.stringify(data)}`,
+        error
+      );
       return new functions.https.HttpsError(
         'internal',
         'Error updating user document',

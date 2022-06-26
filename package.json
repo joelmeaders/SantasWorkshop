@@ -7,7 +7,7 @@
     "ng": "ng",
     "test": "ng test",
     "e2e": "ng e2e",
-    "core:lint": "ng lint --project=santashop-core --fix",
+    "core:lint": "ng lint --santashop-core --fix",
     "core:build": "ng build --project=santashop-core",
     "models:build": "ng build --project=santashop-models",
     "models:lint": "ng lint santashop-models --fix",

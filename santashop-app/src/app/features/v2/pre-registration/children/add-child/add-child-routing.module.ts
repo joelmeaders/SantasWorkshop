@@ -6,12 +6,12 @@ import { AddChildPage } from './add-child.page';
 const routes: Routes = [
   {
     path: '',
-    component: AddChildPage
+    component: AddChildPage,
   },
   {
     path: ':id',
-    component: AddChildPage
-  }
+    component: AddChildPage,
+  },
 ];
 
 @NgModule({

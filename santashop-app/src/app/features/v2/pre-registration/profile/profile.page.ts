@@ -7,22 +7,21 @@ import { ProfilePageService } from './profile.page.service';
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ ProfilePageService ]
+  providers: [ProfilePageService],
 })
 export class ProfilePage {
-
   public readonly profileForm = this.viewService.profileForm;
   public readonly changeEmailForm = this.viewService.changeEmailForm;
   public readonly changePasswordForm = this.viewService.changePasswordForm;
 
   public readonly userProfile$ = this.viewService.userProfile$;
-  public readonly isRegistrationComplete$ = this.preregistrationService.registrationComplete$;
-
+  public readonly isRegistrationComplete$ =
+    this.preregistrationService.registrationComplete$;
 
   constructor(
     private readonly viewService: ProfilePageService,
     public readonly preregistrationService: PreRegistrationService
-    ) { }
+  ) {}
 
   public async updateProfile(): Promise<void> {
     await this.viewService.updatePublicProfile();

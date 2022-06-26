@@ -16,7 +16,9 @@ export abstract class Helpers {
 
   public static generateId(index: number): string {
     const keys: string[] = defaultKeys;
-    const customLib: string[] = keys.map((a: Key) => lib[a]).reduce((a, b) => a.concat(b));
+    const customLib: string[] = keys
+      .map((a: Key) => lib[a])
+      .reduce((a, b) => a.concat(b));
     const n: number = customLib.length;
 
     let generatedId: string[] = [];
@@ -38,7 +40,32 @@ interface ILib {
 type Key = keyof ILib;
 
 const lib: ILib = {
-  alpha: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+  alpha: [
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G',
+    'H',
+    'J',
+    'K',
+    'L',
+    'M',
+    'N',
+    'P',
+    'Q',
+    'R',
+    'S',
+    'T',
+    'U',
+    'V',
+    'W',
+    'X',
+    'Y',
+    'Z',
+  ],
   number: ['2', '3', '4', '5', '6', '7', '8', '9'],
 };
 

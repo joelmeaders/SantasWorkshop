@@ -11,7 +11,9 @@
 
 <ion-content [fullscreen]="true" color="primary">
   <ng-container *ngIf="($view | async) === 'registration'">
-    <ion-title class="ion-padding-top"> DSCS Stats: (Calculated 12:00 AM) </ion-title>
+    <ion-title class="ion-padding-top">
+      DSCS Stats: (Calculated 12:00 AM)
+    </ion-title>
 
     <ion-grid>
       <ion-row>
@@ -76,9 +78,7 @@
                   <ion-col size="3" class="table-header"> Customers </ion-col>
                   <ion-col size="3" class="table-header"> Children </ion-col>
                 </ion-row>
-                <ion-row
-                  *ngFor="let stat of dateTimeStats;"
-                >
+                <ion-row *ngFor="let stat of dateTimeStats;">
                   <ion-col size="12">
                     <ion-row>
                       <ion-col size="6" class="ion-text-start">
@@ -110,9 +110,7 @@
                   <ion-col size="2" class="table-header"> 9-11 </ion-col>
                   <ion-col size="2" class="table-header"> Total </ion-col>
                 </ion-row>
-                <ion-row
-                  *ngFor="let stat of ($typeAgeStats | async);"
-                >
+                <ion-row *ngFor="let stat of ($typeAgeStats | async);">
                   <ion-col size="12">
                     <ion-row>
                       <ion-col size="12" class="ion-text-start">
@@ -122,11 +120,21 @@
 
                     <ion-row>
                       <ion-col size="2"> Infants </ion-col>
-                      <ion-col size="2"> {{ stat.stats.infants.age02 }} </ion-col>
-                      <ion-col size="2"> {{ stat.stats.infants.age35 }} </ion-col>
-                      <ion-col size="2"> {{ stat.stats.infants.age68 }} </ion-col>
-                      <ion-col size="2"> {{ stat.stats.infants.age911 }} </ion-col>
-                      <ion-col size="2"> {{ stat.stats.infants.total }} </ion-col>
+                      <ion-col size="2">
+                        {{ stat.stats.infants.age02 }}
+                      </ion-col>
+                      <ion-col size="2">
+                        {{ stat.stats.infants.age35 }}
+                      </ion-col>
+                      <ion-col size="2">
+                        {{ stat.stats.infants.age68 }}
+                      </ion-col>
+                      <ion-col size="2">
+                        {{ stat.stats.infants.age911 }}
+                      </ion-col>
+                      <ion-col size="2">
+                        {{ stat.stats.infants.total }}
+                      </ion-col>
                     </ion-row>
 
                     <ion-row>
@@ -134,7 +142,9 @@
                       <ion-col size="2"> {{ stat.stats.girls.age02 }} </ion-col>
                       <ion-col size="2"> {{ stat.stats.girls.age35 }} </ion-col>
                       <ion-col size="2"> {{ stat.stats.girls.age68 }} </ion-col>
-                      <ion-col size="2"> {{ stat.stats.girls.age911 }} </ion-col>
+                      <ion-col size="2">
+                        {{ stat.stats.girls.age911 }}
+                      </ion-col>
                       <ion-col size="2"> {{ stat.stats.girls.total }} </ion-col>
                     </ion-row>
 
@@ -146,7 +156,6 @@
                       <ion-col size="2"> {{ stat.stats.boys.age911 }} </ion-col>
                       <ion-col size="2"> {{ stat.stats.boys.total }} </ion-col>
                     </ion-row>
-
                   </ion-col>
                 </ion-row>
               </ion-grid>
@@ -194,14 +203,18 @@
   </ng-container>
 
   <ng-container *ngIf="($view | async) === 'checkin'">
-    <ion-title class="ion-padding-top"> Checkin Stats: {{ $checkInLastUpdated | async }} </ion-title>
+    <ion-title class="ion-padding-top">
+      Checkin Stats: {{ $checkInLastUpdated | async }}
+    </ion-title>
 
     <ion-grid>
       <ion-row>
         <ion-col size-sm size="12">
           <ion-card class="ion-text-center">
             <ion-card-header>
-              <ion-text class="stat-value"> {{ $checkInTotalCustomerCount | async }} </ion-text>
+              <ion-text class="stat-value">
+                {{ $checkInTotalCustomerCount | async }}
+              </ion-text>
             </ion-card-header>
             <ion-card-content>
               <ion-card-title> Customers </ion-card-title>
@@ -213,7 +226,9 @@
         <ion-col size-sm size="12">
           <ion-card class="ion-text-center">
             <ion-card-header>
-              <ion-text class="stat-value"> {{ $checkInTotalChildCount | async }} </ion-text>
+              <ion-text class="stat-value">
+                {{ $checkInTotalChildCount | async }}
+              </ion-text>
             </ion-card-header>
             <ion-card-content>
               <ion-card-title> Children </ion-card-title>
@@ -225,7 +240,9 @@
         <ion-col size-sm size="12">
           <ion-card class="ion-text-center">
             <ion-card-header>
-              <ion-text class="stat-value"> {{ $checkInTotalPreregisteredCount | async }} </ion-text>
+              <ion-text class="stat-value">
+                {{ $checkInTotalPreregisteredCount | async }}
+              </ion-text>
             </ion-card-header>
             <ion-card-content>
               <ion-card-title> Preregistered </ion-card-title>
@@ -237,7 +254,9 @@
         <ion-col size-sm size="12">
           <ion-card class="ion-text-center">
             <ion-card-header>
-              <ion-text class="stat-value"> {{ $checkInOnSiteRegistration | async }} </ion-text>
+              <ion-text class="stat-value">
+                {{ $checkInOnSiteRegistration | async }}
+              </ion-text>
             </ion-card-header>
             <ion-card-content>
               <ion-card-title> On Site </ion-card-title>
@@ -249,7 +268,9 @@
         <ion-col size-sm size="12">
           <ion-card class="ion-text-center">
             <ion-card-header>
-              <ion-text class="stat-value"> {{ $checkInTotalModifiedCount | async }} </ion-text>
+              <ion-text class="stat-value">
+                {{ $checkInTotalModifiedCount | async }}
+              </ion-text>
             </ion-card-header>
             <ion-card-content>
               <ion-card-title> Modifications </ion-card-title>
@@ -257,7 +278,6 @@
             </ion-card-content>
           </ion-card>
         </ion-col>
-
       </ion-row>
 
       <ion-row>
@@ -283,16 +303,32 @@
                   </ion-col>
                   <ion-col size="12">
                     <ion-row class="ion-no-padding ion-no-margin">
-                      <ion-col size="2" class="table-header ion-text-start"> Time </ion-col>
-                      <ion-col size="2" class="table-header"> Customers </ion-col>
-                      <ion-col size="2" class="table-header"> Children </ion-col>
-                      <ion-col size="2" class="table-header"> Preregistered </ion-col>
-                      <ion-col size="2" class="table-header"> Modified </ion-col>
+                      <ion-col size="2" class="table-header ion-text-start">
+                        Time
+                      </ion-col>
+                      <ion-col size="2" class="table-header">
+                        Customers
+                      </ion-col>
+                      <ion-col size="2" class="table-header">
+                        Children
+                      </ion-col>
+                      <ion-col size="2" class="table-header">
+                        Preregistered
+                      </ion-col>
+                      <ion-col size="2" class="table-header">
+                        Modified
+                      </ion-col>
                       <ion-col size="2" class="table-header"> On Site </ion-col>
                     </ion-row>
                   </ion-col>
-                  <ion-col size="12" *ngFor="let value of stat.value; let i = index;">
-                    <ion-row [ngClass]="(i % 2 == 0) ? 'alt-row' : ''" class="ion-no-padding ion-no-margin">
+                  <ion-col
+                    size="12"
+                    *ngFor="let value of stat.value; let i = index;"
+                  >
+                    <ion-row
+                      [ngClass]="(i % 2 == 0) ? 'alt-row' : ''"
+                      class="ion-no-padding ion-no-margin"
+                    >
                       <ion-col size="2">
                         {{ value.hour | convertHour24To12 }}
                       </ion-col>
@@ -300,7 +336,9 @@
                       <ion-col size="2"> {{ value.childCount }} </ion-col>
                       <ion-col size="2"> {{ value.pregisteredCount }} </ion-col>
                       <ion-col size="2"> {{ value.modifiedCount }} </ion-col>
-                      <ion-col size="2"> {{ value.customerCount - value.pregisteredCount }} </ion-col>
+                      <ion-col size="2">
+                        {{ value.customerCount - value.pregisteredCount }}
+                      </ion-col>
                     </ion-row>
                   </ion-col>
                 </ion-row>

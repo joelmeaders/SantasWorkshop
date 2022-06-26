@@ -6,18 +6,14 @@ import { ProfilePageService } from '../profile.page.service';
   templateUrl: './change-password.page.html',
   styleUrls: ['./change-password.page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ProfilePageService]
+  providers: [ProfilePageService],
 })
 export class ChangePasswordPage {
-
   public readonly form = this.viewService.changePasswordForm;
 
-  constructor(
-    private readonly viewService: ProfilePageService
-  ) { }
+  constructor(private readonly viewService: ProfilePageService) {}
 
   public changePassword() {
     this.viewService.changePassword();
   }
-
 }

@@ -11,37 +11,18 @@ const modules = [
   CommonModule,
   IonicModule,
   ReactiveFormsModule,
-  TranslateModule
+  TranslateModule,
 ];
 
-const directives = [
-  AppLetDirective
-];
+const directives = [AppLetDirective];
 
-const pipes = [
-  NiceFormErrorPipe,
-];
+const pipes = [NiceFormErrorPipe];
 
-const components = [
-  ControlErrorsComponent,
-]
+const components = [ControlErrorsComponent];
 @NgModule({
-  imports: [
-    ...modules
-  ],
-  declarations: [
-    ...directives,
-    ...pipes,
-    ...components,
-  ],
-  exports: [
-    ...modules,
-    ...directives,
-    ...pipes,
-    ...components,
-  ],
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA
-  ]
+  imports: [...modules],
+  declarations: [...directives, ...pipes, ...components],
+  exports: [...modules, ...directives, ...pipes, ...components],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class CoreModule { }
+export class CoreModule {}

@@ -6,8 +6,8 @@ import { RegistrationClosedPage } from './registration-closed.page';
 const routes: Routes = [
   {
     path: '',
-    component: RegistrationClosedPage
-  }
+    component: RegistrationClosedPage,
+  },
 ];
 
 @NgModule({

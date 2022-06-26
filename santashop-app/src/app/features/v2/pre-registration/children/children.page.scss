@@ -15,13 +15,13 @@ ion-list {
   line-height: 0;
   position: relative;
 }
- 
+
 .res-circle::after {
   content: "";
   display: block;
   padding-bottom: 100%;
 }
- 
+
 .circle-txt {
   position: absolute;
   bottom: 50%;

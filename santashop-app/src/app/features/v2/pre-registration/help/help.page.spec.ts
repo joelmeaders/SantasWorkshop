@@ -14,8 +14,8 @@
 //     TestBed.configureTestingModule({
 //       declarations: [ HelpPage ],
 //       providers: [
-//         { 
-//           provide: PreRegistrationService, 
+//         {
+//           provide: PreRegistrationService,
 //           useValue: jasmine.createSpyObj<PreRegistrationService>('PreRegistrationService', {}, ['registrationComplete$'])
 //         }
 //       ],

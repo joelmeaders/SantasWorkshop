@@ -11,22 +11,20 @@ import { first, shareReplay, takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LanguageToggleComponent implements OnDestroy {
-
   private readonly destroy$ = new Subject<void>();
 
-  private readonly _currentLangauge$ = 
-    new BehaviorSubject<"en" | "es">(this.translate.currentLang as any);
+  private readonly _currentLangauge$ = new BehaviorSubject<'en' | 'es'>(
+    this.translate.currentLang as any
+  );
 
-  public readonly currentLanguage$ = 
-    this._currentLangauge$.asObservable().pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+  public readonly currentLanguage$ = this._currentLangauge$
+    .asObservable()
+    .pipe(takeUntil(this.destroy$), shareReplay(1));
 
   constructor(
     private readonly translate: TranslateService,
-    private readonly analyticsService: Analytics,
-  ) { }
+    private readonly analyticsService: Analytics
+  ) {}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -34,18 +32,16 @@ export class LanguageToggleComponent implements OnDestroy {
   }
 
   public toggleLanguage($event: any) {
-
     const current = this.translate.currentLang;
 
     // This toggle value thing is because toggle fires ionChange twice
     const toggleValue = $event.detail.checked ? 'en' : 'es';
-    if (toggleValue === current)
-      return;
+    if (toggleValue === current) return;
 
     if (current === 'en') {
-      this.setLanguage("es")
+      this.setLanguage('es');
     } else {
-      this.setLanguage("en")
+      this.setLanguage('en');
     }
   }
 
@@ -54,5 +50,4 @@ export class LanguageToggleComponent implements OnDestroy {
     this._currentLangauge$.next(value);
     await logEvent(this.analyticsService, 'set_language', { value });
   }
-
 }

@@ -14,10 +14,9 @@ import { StatsPage } from './stats.page';
     ReactiveFormsModule,
     RouterModule.forChild([{ path: '', component: StatsPage }]),
     StatsPageRoutingModule,
-    SharedModule
+    SharedModule,
   ],
-  providers: [
-  ],
-  declarations: [StatsPage]
+  providers: [],
+  declarations: [StatsPage],
 })
 export class StatsPageModule {}

@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
-import { DocumentData, DocumentReference, QueryConstraint } from '@angular/fire/firestore';
+import {
+  DocumentData,
+  DocumentReference,
+  QueryConstraint,
+} from '@angular/fire/firestore';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FireRepoLite {
-
-  constructor(
-    private readonly fireRepoBase: FireRepoBase
-  ) { }
+  constructor(private readonly fireRepoBase: FireRepoBase) {}
 
   /**
    * Generates a random id
@@ -24,7 +25,7 @@ export class FireRepoLite {
 
   /**
    * This helper method wraps the FireRepoLite methods
-   * with a collection path and type, allowing easy 
+   * with a collection path and type, allowing easy
    * reuse by consumers.
    *
    * @template T
@@ -33,18 +34,18 @@ export class FireRepoLite {
    * @memberof FireRepoLite
    */
   public collection<T>(collectionPath: string): IFireRepoCollection<T> {
-    
     return {
       collectionPathName: collectionPath,
 
-      read: (documentId: string, idField?: Extract<keyof T, string>) => 
+      read: (documentId: string, idField?: Extract<keyof T, string>) =>
         this.read<T>(collectionPath, documentId, idField),
-      
-      readMany: (queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>) =>
-        this.readMany<T>(collectionPath, queryConstraints, idField),
 
-      add: (document: T) =>
-        this.add<T>(collectionPath, document),
+      readMany: (
+        queryConstraints?: QueryConstraint[],
+        idField?: Extract<keyof T, string>
+      ) => this.readMany<T>(collectionPath, queryConstraints, idField),
+
+      add: (document: T) => this.add<T>(collectionPath, document),
 
       addById: (documentId: string, document: T) =>
         this.addById<T>(collectionPath, documentId, document),
@@ -52,18 +53,17 @@ export class FireRepoLite {
       update: (documentId: string, document: T, merge = false) =>
         this.update(collectionPath, documentId, document, merge),
 
-      delete: (documentId: string) =>
-        this.delete(collectionPath, documentId),
-    }
+      delete: (documentId: string) => this.delete(collectionPath, documentId),
+    };
   }
 
   /**
-   * Returns a document from the collection path by 
-   * document id. 
-   * 
+   * Returns a document from the collection path by
+   * document id.
+   *
    * If you specify an idField the document
    * id will be populated into that field. The id field
-   * does not need to exist on the document in the data 
+   * does not need to exist on the document in the data
    * store.
    *
    * @template T
@@ -73,17 +73,21 @@ export class FireRepoLite {
    * @return
    * @memberof FireRepoLite
    */
-  public read<T>(collectionPath: string, documentId: string, idField?: Extract<keyof T, string>): Observable<T> {
+  public read<T>(
+    collectionPath: string,
+    documentId: string,
+    idField?: Extract<keyof T, string>
+  ): Observable<T> {
     return this.fireRepoBase.read<T>(collectionPath, documentId, idField);
   }
 
   /**
    * Read many documents from the collection path with
    * optional query constraints.
-   * 
+   *
    * If you specify an idField the document
    * id will be populated into that field. The id field
-   * does not need to exist on the document in the data 
+   * does not need to exist on the document in the data
    * store.
    *
    * @template T
@@ -93,8 +97,16 @@ export class FireRepoLite {
    * @return
    * @memberof FireRepoLite
    */
-  public readMany<T>(collectionPath: string, queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>): Observable<T[]> {
-    return this.fireRepoBase.readMany<T>(collectionPath, queryConstraints, idField);
+  public readMany<T>(
+    collectionPath: string,
+    queryConstraints?: QueryConstraint[],
+    idField?: Extract<keyof T, string>
+  ): Observable<T[]> {
+    return this.fireRepoBase.readMany<T>(
+      collectionPath,
+      queryConstraints,
+      idField
+    );
   }
 
   /**
@@ -106,7 +118,10 @@ export class FireRepoLite {
    * @return
    * @memberof FireRepoLite
    */
-  public add<T>(collectionPath: string, document: T): Observable<DocumentReference<T>> {
+  public add<T>(
+    collectionPath: string,
+    document: T
+  ): Observable<DocumentReference<T>> {
     return this.fireRepoBase.add<T>(collectionPath, document);
   }
 
@@ -121,16 +136,20 @@ export class FireRepoLite {
    * @return
    * @memberof FireRepoLite
    */
-  public addById<T>(collectionPath: string, documentId: string, document: T): Observable<DocumentReference<T>> {
-    return this.fireRepoBase.addById<T>(collectionPath, documentId, document)
+  public addById<T>(
+    collectionPath: string,
+    documentId: string,
+    document: T
+  ): Observable<DocumentReference<T>> {
+    return this.fireRepoBase.addById<T>(collectionPath, documentId, document);
   }
 
   /**
    * Update a specified document at the specified collection
    * path and id.
-   * 
+   *
    * Setting merge to true will allow upserts if the document
-   * doesn't doesn't exist. It will also non-destructively 
+   * doesn't doesn't exist. It will also non-destructively
    * update documents by only replacing specified fields.
    *
    * @template T
@@ -141,8 +160,18 @@ export class FireRepoLite {
    * @return
    * @memberof FireRepoLite
    */
-  public update<T>(collectionPath: string, documentId: string, document: T, merge = false): Observable<DocumentReference<DocumentData>> {
-    return this.fireRepoBase.update(collectionPath, documentId, document, merge);
+  public update<T>(
+    collectionPath: string,
+    documentId: string,
+    document: T,
+    merge = false
+  ): Observable<DocumentReference<DocumentData>> {
+    return this.fireRepoBase.update(
+      collectionPath,
+      documentId,
+      document,
+      merge
+    );
   }
 
   /**
@@ -159,7 +188,6 @@ export class FireRepoLite {
 }
 
 export interface IFireRepoCollection<T> {
-
   /**
    * Collection path this collection was initialized with
    *
@@ -169,12 +197,12 @@ export interface IFireRepoCollection<T> {
   collectionPathName: string;
 
   /**
-   * Returns a document from the collection path by 
-   * document id. 
-   * 
+   * Returns a document from the collection path by
+   * document id.
+   *
    * If you specify an idField the document
    * id will be populated into that field. The id field
-   * does not need to exist on the document in the data 
+   * does not need to exist on the document in the data
    * store.
    *
    * @template T
@@ -189,10 +217,10 @@ export interface IFireRepoCollection<T> {
   /**
    * Read many documents from the collection path with
    * optional query constraints.
-   * 
+   *
    * If you specify an idField the document
    * id will be populated into that field. The id field
-   * does not need to exist on the document in the data 
+   * does not need to exist on the document in the data
    * store.
    *
    * @template T
@@ -201,7 +229,10 @@ export interface IFireRepoCollection<T> {
    * @return {*}  {Observable<T[]>}
    * @memberof FireRepoLite
    */
-  readMany(queryConstraints?: QueryConstraint[], idField?: Extract<keyof T, string>): Observable<T[]>;
+  readMany(
+    queryConstraints?: QueryConstraint[],
+    idField?: Extract<keyof T, string>
+  ): Observable<T[]>;
 
   /**
    * Add a new document to the specified collection path
@@ -224,14 +255,14 @@ export interface IFireRepoCollection<T> {
    * @return {*}  {Observable<DocumentReference<T>>}
    * @memberof FireRepoLite
    */
-  addById(documentId: string, document: T ): Observable<DocumentReference<T>>;
+  addById(documentId: string, document: T): Observable<DocumentReference<T>>;
 
   /**
    * Update a specified document at the specified collection
    * path and id.
-   * 
+   *
    * Setting merge to true will allow upserts if the document
-   * doesn't doesn't exist. It will also non-destructively 
+   * doesn't doesn't exist. It will also non-destructively
    * update documents by only replacing specified fields.
    *
    * @template T
@@ -241,7 +272,11 @@ export interface IFireRepoCollection<T> {
    * @return {*}  {Observable<DocumentReference<DocumentData>>}
    * @memberof FireRepoLite
    */
-  update(documentId: string, document: T, merge: boolean): Observable<DocumentReference>;
+  update(
+    documentId: string,
+    document: T,
+    merge: boolean
+  ): Observable<DocumentReference>;
 
   /**
    * Deletes the specified document

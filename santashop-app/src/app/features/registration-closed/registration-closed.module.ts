@@ -5,11 +5,7 @@ import { CoreModule } from '@core/*';
 import { SharedModule } from '../../shared/components/shared.module';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SharedModule,
-    RegistrationClosedPageRoutingModule
-  ],
-  declarations: [RegistrationClosedPage]
+  imports: [CoreModule, SharedModule, RegistrationClosedPageRoutingModule],
+  declarations: [RegistrationClosedPage],
 })
 export class RegistrationClosedPageModule {}

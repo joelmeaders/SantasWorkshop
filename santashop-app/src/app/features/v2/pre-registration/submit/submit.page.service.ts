@@ -38,14 +38,18 @@ export class SubmitPageService {
         .pipe(take(1))
         .toPromise();
 
-      const completeRegistrationFunction = httpsCallable(this.afFunctions, 'completeRegistration');
+      const completeRegistrationFunction = httpsCallable(
+        this.afFunctions,
+        'completeRegistration'
+      );
 
-      const completionResult = await completeRegistrationFunction(registration)
-        .catch((err) => {
-          // TODO:
-          console.error('error!!', err);
-          return of(false);
-        });
+      const completionResult = await completeRegistrationFunction(
+        registration
+      ).catch((err) => {
+        // TODO:
+        console.error('error!!', err);
+        return of(false);
+      });
 
       return completionResult
         ? this.sendToConfirmation()

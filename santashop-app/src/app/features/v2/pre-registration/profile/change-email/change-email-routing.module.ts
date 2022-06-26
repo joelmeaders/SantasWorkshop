@@ -4,14 +4,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { ChangeEmailPage } from './change-email.page';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: ChangeEmailPage,
-  },
+	{
+		path: '',
+		component: ChangeEmailPage,
+	},
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+	imports: [RouterModule.forChild(routes)],
+	exports: [RouterModule],
 })
 export class ChangeEmailPageRoutingModule {}

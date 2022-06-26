@@ -1,105 +1,109 @@
 <ion-content color="light">
-  <ion-button
-    class="ion-no-padding even-ratio-button ion-margin"
-    color="white"
-    [routerLink]="['..']"
-  >
-    <ion-icon
-      slot="icon-only"
-      name="arrow-back-sharp"
-      class="even-ratio-button"
-    ></ion-icon>
-  </ion-button>
-  <ion-grid>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <img
-          src="assets/DSCS-Santa-Body_Red.png"
-          class="logo"
-          alt="logo with santa claus"
-        />
-      </ion-col>
-    </ion-row>
-    <ion-row class="ion-justify-content-center">
-      <ion-col size="auto">
-        <ion-card class="sign-up-card">
-          <ion-card-content>
-            <form [formGroup]="form" novalidate>
-              <ion-list>
-                <ion-item>
-                  <ion-label color="xmasred">
-                    {{ 'COMMON.EMAIL_ADDRESS' | translate }}
-                  </ion-label>
-                  <ion-input
-                    formControlName="emailAddress"
-                    [debounce]="500"
-                    type="email"
-                    autocomplete="email"
-                    inputmode="email"
-                  ></ion-input>
-                </ion-item>
-                <app-control-errors
-                  [control]="form.controls.emailAddress"
-                ></app-control-errors>
+	<ion-button
+		class="ion-no-padding even-ratio-button ion-margin"
+		color="white"
+		[routerLink]="['..']"
+	>
+		<ion-icon
+			slot="icon-only"
+			name="arrow-back-sharp"
+			class="even-ratio-button"
+		></ion-icon>
+	</ion-button>
+	<ion-grid>
+		<ion-row>
+			<ion-col class="ion-text-center">
+				<img
+					src="assets/DSCS-Santa-Body_Red.png"
+					class="logo"
+					alt="logo with santa claus"
+				/>
+			</ion-col>
+		</ion-row>
+		<ion-row class="ion-justify-content-center">
+			<ion-col size="auto">
+				<ion-card class="sign-up-card">
+					<ion-card-content>
+						<form [formGroup]="form" novalidate>
+							<ion-list>
+								<ion-item>
+									<ion-label color="xmasred">
+										{{ "COMMON.EMAIL_ADDRESS" | translate }}
+									</ion-label>
+									<ion-input
+										formControlName="emailAddress"
+										[debounce]="500"
+										type="email"
+										autocomplete="email"
+										inputmode="email"
+									></ion-input>
+								</ion-item>
+								<core-control-errors
+									[control]="form.controls.emailAddress"
+								></core-control-errors>
 
-                <ion-item>
-                  <ion-label color="xmasred">
-                    {{ 'COMMON.PASSWORD' | translate }}
-                  </ion-label>
-                  <ion-input
-                    formControlName="password"
-                    [debounce]="500"
-                    type="password"
-                    autocomplete="new-password"
-                  ></ion-input>
-                </ion-item>
-                <app-control-errors
-                  [control]="form.controls.password"
-                ></app-control-errors>
-              </ion-list>
-            </form>
+								<ion-item>
+									<ion-label color="xmasred">
+										{{ "COMMON.PASSWORD" | translate }}
+									</ion-label>
+									<ion-input
+										formControlName="password"
+										[debounce]="500"
+										type="password"
+										autocomplete="new-password"
+									></ion-input>
+								</ion-item>
+								<core-control-errors
+									[control]="form.controls.password"
+								></core-control-errors>
+							</ion-list>
+						</form>
 
-            <ng-container>
-              <ion-item [disabled]="!form.valid" lines="none">
-                <re-captcha
-                  class="ion-align-self-center ion-padding-vertical"
-                  #captchaRef="reCaptcha"
-                  (resolved)="$event && onValidateRecaptcha($event)"
-                ></re-captcha>
-              </ion-item>
-            </ng-container>
+						<ng-container>
+							<ion-item [disabled]="!form.valid" lines="none">
+								<re-captcha
+									class="ion-align-self-center ion-padding-vertical"
+									#captchaRef="reCaptcha"
+									(resolved)="
+										$event && onValidateRecaptcha($event)
+									"
+								></re-captcha>
+							</ion-item>
+						</ng-container>
 
-            <ion-button
-              size="default"
-              expand="block"
-              color="xmasred"
-              [disabled]="!form.valid || !(recaptchaValid$ | async)"
-              (click)="onSignIn()"
-            >
-              {{ 'COMMON.SIGN_IN' | translate }}
-            </ion-button>
-          </ion-card-content>
+						<ion-button
+							size="default"
+							expand="block"
+							color="xmasred"
+							[disabled]="
+								!form.valid || (recaptchaValid$ | async) === false
+							"
+							(click)="onSignIn()"
+						>
+							{{ "COMMON.SIGN_IN" | translate }}
+						</ion-button>
+					</ion-card-content>
 
-          <p class="ion-text-center"></p>
-          <p class="ion-text-center">
-            <ion-button
-              fill="clear"
-              color="tertiary"
-              [routerLink]="['/sign-up']"
-            >
-              {{ 'COMMON.CREATE_ACCOUNT' | translate }}
-            </ion-button>
-            <br />
-            <ion-button
-              fill="clear"
-              color="tertiary"
-              [routerLink]="['/reset-password']"
-            >
-              {{ 'SIGNIN.FORGOT_PASSWORD' | translate }}
-            </ion-button>
-          </p>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+					<p class="ion-text-center"></p>
+					<p class="ion-text-center">
+						<ion-button
+							fill="clear"
+							color="tertiary"
+							[routerLink]="['/sign-up']"
+						>
+							{{ "COMMON.CREATE_ACCOUNT" | translate }}
+						</ion-button>
+						<br />
+						<ion-button
+							fill="clear"
+							color="tertiary"
+							[routerLink]="['/reset-password']"
+						>
+							{{ "SIGNIN.FORGOT_PASSWORD" | translate }}
+						</ion-button>
+					</p>
+				</ion-card>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

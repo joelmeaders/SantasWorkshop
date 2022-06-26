@@ -2,7 +2,6 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
-    "composite": true,
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -16,6 +15,7 @@
     "declaration": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
+    "esModuleInterop": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "resolveJsonModule": true,

@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import {
-  FireRepoLite,
-  IFireRepoCollection,
-  PROGRAM_YEAR,
-  timestampToDate,
+	FireRepoLite,
+	IFireRepoCollection,
+	PROGRAM_YEAR,
+	timestampToDate,
 } from '@core/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
@@ -14,88 +14,90 @@ import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
-  private readonly destroy$ = new Subject<void>();
+	private readonly destroy$ = new Subject<void>();
 
-  public readonly availableSlots$ = this.availableSlotsQuery(
-    this.programYear
-  ).pipe(
-    takeUntil(this.destroy$),
-    map((data) => {
-      data.forEach((s) => (s.dateTime = timestampToDate(s.dateTime)));
-      return data;
-    }),
-    map((data) =>
-      data.slice().sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf())
-    ),
-    shareReplay(1)
-  );
+	public readonly availableSlots$ = this.availableSlotsQuery(
+		this.programYear
+	).pipe(
+		takeUntil(this.destroy$),
+		map((data) => {
+			data.forEach((s) => (s.dateTime = timestampToDate(s.dateTime)));
+			return data;
+		}),
+		map((data) =>
+			data
+				.slice()
+				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf())
+		),
+		shareReplay(1)
+	);
 
-  public readonly registrationSlot$ =
-    this.preRegistrationService.dateTimeSlot$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+	public readonly registrationSlot$ =
+		this.preRegistrationService.dateTimeSlot$.pipe(
+			takeUntil(this.destroy$),
+			shareReplay(1)
+		);
 
-  constructor(
-    @Inject(PROGRAM_YEAR) private readonly programYear: number,
-    private readonly fireRepo: FireRepoLite,
-    private readonly preRegistrationService: PreRegistrationService
-  ) {}
+	constructor(
+		@Inject(PROGRAM_YEAR) private readonly programYear: number,
+		private readonly fireRepo: FireRepoLite,
+		private readonly preRegistrationService: PreRegistrationService
+	) {}
 
-  public ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+	public ngOnDestroy(): void {
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
 
-  public async updateRegistration(slot?: IDateTimeSlot) {
-    const registration = await firstValueFrom(
-      this.preRegistrationService.userRegistration$
-    );
+	public async updateRegistration(slot?: IDateTimeSlot) {
+		const registration = await firstValueFrom(
+			this.preRegistrationService.userRegistration$
+		);
 
-    if (!slot) {
-      delete registration.dateTimeSlot;
-    } else {
-      registration.dateTimeSlot = {
-        dateTime: slot.dateTime,
-        id: slot.id,
-      };
-    }
+		if (!slot) {
+			delete registration.dateTimeSlot;
+		} else {
+			registration.dateTimeSlot = {
+				dateTime: slot.dateTime,
+				id: slot.id,
+			};
+		}
 
-    // TODO: Error handling
-    const storeRegistration = firstValueFrom(
-      this.preRegistrationService.saveRegistration(registration)
-    );
+		// TODO: Error handling
+		const storeRegistration = firstValueFrom(
+			this.preRegistrationService.saveRegistration(registration)
+		);
 
-    try {
-      await storeRegistration;
-    } catch (error) {
-      console.error(error);
-    }
-  }
+		try {
+			await storeRegistration;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
-  private dateTimeSlotCollection(): IFireRepoCollection<IDateTimeSlot> {
-    return this.fireRepo.collection<IDateTimeSlot>(
-      COLLECTION_SCHEMA.dateTimeSlots
-    );
-  }
+	private dateTimeSlotCollection(): IFireRepoCollection<IDateTimeSlot> {
+		return this.fireRepo.collection<IDateTimeSlot>(
+			COLLECTION_SCHEMA.dateTimeSlots
+		);
+	}
 
-  /**
-   * Returns all time slots for the specified program year
-   * where the field 'enabled' is true.
-   *
-   * @private
-   * @param {number} programYear
-   * @return {*}  {Observable<IDateTimeSlot[]>}
-   * @memberof DateTimePageService
-   */
-  private availableSlotsQuery(
-    programYear: number
-  ): Observable<IDateTimeSlot[]> {
-    const queryConstraints: QueryConstraint[] = [
-      where('programYear', '==', programYear),
-      where('enabled', '==', true),
-    ];
+	/**
+	 * Returns all time slots for the specified program year
+	 * where the field 'enabled' is true.
+	 *
+	 * @private
+	 * @param {number} programYear
+	 * @return {*}  {Observable<IDateTimeSlot[]>}
+	 * @memberof DateTimePageService
+	 */
+	private availableSlotsQuery(
+		programYear: number
+	): Observable<IDateTimeSlot[]> {
+		const queryConstraints: QueryConstraint[] = [
+			where('programYear', '==', programYear),
+			where('enabled', '==', true),
+		];
 
-    return this.dateTimeSlotCollection().readMany(queryConstraints, 'id');
-  }
+		return this.dateTimeSlotCollection().readMany(queryConstraints, 'id');
+	}
 }

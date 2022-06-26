@@ -1,53 +1,55 @@
 <ion-content id="main" size="fullscreen">
-  <ion-tabs>
-    <ion-tab-bar
-      slot="bottom"
-      class="ion-hide-xl-up"
-      *ngIf="!(isRegistrationComplete$ | async)"
-    >
-      <ng-container>
-        <ion-tab-button tab="overview">
-          <ion-icon name="home"></ion-icon>
-          <ion-label>{{ 'MENU.HOME' | translate }}</ion-label>
-        </ion-tab-button>
+	<ion-tabs>
+		<ion-tab-bar
+			slot="bottom"
+			class="ion-hide-xl-up"
+			*ngIf="!(isRegistrationComplete$ | async)"
+		>
+			<ng-container>
+				<ion-tab-button tab="overview">
+					<ion-icon name="home"></ion-icon>
+					<ion-label>{{ "MENU.HOME" | translate }}</ion-label>
+				</ion-tab-button>
 
-        <ion-tab-button
-          tab="children"
-          *ngIf="!(isRegistrationComplete$ | async)"
-        >
-          <ion-icon name="accessibility"></ion-icon>
-          <ion-label>{{ 'MENU.CHILDREN' | translate }}</ion-label>
-          <ng-container *appLet="childCount$ | async as count">
-            <ion-badge color="success" *ngIf="count >= 1"
-              >{{ count }}</ion-badge
-            >
-          </ng-container>
-        </ion-tab-button>
+				<ion-tab-button
+					tab="children"
+					*ngIf="!(isRegistrationComplete$ | async)"
+				>
+					<ion-icon name="accessibility"></ion-icon>
+					<ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
+					<ng-container *appLet="childCount$ | async as count">
+						<ion-badge color="success" *ngIf="count >= 1">{{
+							count
+						}}</ion-badge>
+					</ng-container>
+				</ion-tab-button>
 
-        <ion-tab-button
-          tab="date-time"
-          [disabled]="!(childCount$ | async)"
-          *ngIf="!(isRegistrationComplete$ | async)"
-        >
-          <ion-icon name="calendar-outline"></ion-icon>
-          <ion-label>{{ 'MENU.SCHEDULE' | translate }}</ion-label>
-          <ng-container *appLet="chosenSlot$ | async as slot">
-            <ion-badge color="success" *ngIf="!!slot">
-              <ion-icon name="checkmark"></ion-icon>
-            </ion-badge>
-          </ng-container>
-        </ion-tab-button>
+				<ion-tab-button
+					tab="date-time"
+					[disabled]="!(childCount$ | async)"
+					*ngIf="!(isRegistrationComplete$ | async)"
+				>
+					<ion-icon name="calendar-outline"></ion-icon>
+					<ion-label>{{ "MENU.SCHEDULE" | translate }}</ion-label>
+					<ng-container *appLet="chosenSlot$ | async as slot">
+						<ion-badge color="success" *ngIf="!!slot">
+							<ion-icon name="checkmark"></ion-icon>
+						</ion-badge>
+					</ng-container>
+				</ion-tab-button>
 
-        <ion-tab-button
-          class="submit"
-          tab="submit"
-          [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)"
-          *ngIf="!(isRegistrationComplete$ | async)"
-        >
-          <ion-icon name="send-outline"></ion-icon>
-          <ion-label>{{ 'MENU.SUBMIT' | translate }}</ion-label>
-        </ion-tab-button>
-      </ng-container>
-    </ion-tab-bar>
-  </ion-tabs>
+				<ion-tab-button
+					class="submit"
+					tab="submit"
+					[disabled]="
+						!(childCount$ | async) || !(chosenSlot$ | async)
+					"
+					*ngIf="!(isRegistrationComplete$ | async)"
+				>
+					<ion-icon name="send-outline"></ion-icon>
+					<ion-label>{{ "MENU.SUBMIT" | translate }}</ion-label>
+				</ion-tab-button>
+			</ng-container>
+		</ion-tab-bar>
+	</ion-tabs>
 </ion-content>

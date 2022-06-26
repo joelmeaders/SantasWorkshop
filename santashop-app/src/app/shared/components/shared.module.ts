@@ -9,24 +9,24 @@ import { PublicMenuComponent } from './public-menu/public-menu.component';
 import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-service-modal.component';
 
 @NgModule({
-  declarations: [
-    PublicMenuComponent,
-    PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent,
-    PreRegistrationMenuComponent,
-    LanguageToggleComponent,
-    InternalHeaderComponent,
-  ],
-  imports: [CoreModule],
-  exports: [
-    PublicMenuComponent,
-    PrivacyPolicyModalComponent,
-    TermsOfServiceModalComponent,
-    TranslateModule,
-    PreRegistrationMenuComponent,
-    LanguageToggleComponent,
-    InternalHeaderComponent,
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+	declarations: [
+		PublicMenuComponent,
+		PrivacyPolicyModalComponent,
+		TermsOfServiceModalComponent,
+		PreRegistrationMenuComponent,
+		LanguageToggleComponent,
+		InternalHeaderComponent,
+	],
+	imports: [CoreModule],
+	exports: [
+		PublicMenuComponent,
+		PrivacyPolicyModalComponent,
+		TermsOfServiceModalComponent,
+		TranslateModule,
+		PreRegistrationMenuComponent,
+		LanguageToggleComponent,
+		InternalHeaderComponent,
+	],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule {}

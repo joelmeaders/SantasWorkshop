@@ -5,7 +5,7 @@ import { CoreModule } from '@core/*';
 import { SharedModule } from 'santashop-app/src/app/shared/components/shared.module';
 
 @NgModule({
-  imports: [CoreModule, SharedModule, InformationPageRoutingModule],
-  declarations: [OverviewPage],
+	imports: [CoreModule, SharedModule, InformationPageRoutingModule],
+	declarations: [OverviewPage],
 })
 export class InformationPageModule {}

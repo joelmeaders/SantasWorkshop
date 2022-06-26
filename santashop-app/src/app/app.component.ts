@@ -5,34 +5,36 @@ import { TranslateService } from '@ngx-translate/core';
 import { AppStateService } from './core';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'app-root',
+	templateUrl: 'app.component.html',
+	styleUrls: ['app.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  constructor(
-    private readonly platform: Platform,
-    private readonly translateService: TranslateService,
-    private readonly appStateService: AppStateService,
-    private readonly analyticsService: Analytics
-  ) {
-    this.initializeApp();
-  }
+	constructor(
+		private readonly platform: Platform,
+		private readonly translateService: TranslateService,
+		private readonly appStateService: AppStateService,
+		private readonly analyticsService: Analytics
+	) {
+		this.initializeApp();
+	}
 
-  async initializeApp() {
-    await this.platform.ready().then(() => {
-      console.log('AppStateService Injected', !!this.appStateService);
-    });
+	async initializeApp() {
+		await this.platform.ready().then(() => {
+			console.log('AppStateService Injected', !!this.appStateService);
+		});
 
-    this.translateService.addLangs(['en', 'es']);
-    this.translateService.setDefaultLang('en');
+		this.translateService.addLangs(['en', 'es']);
+		this.translateService.setDefaultLang('en');
 
-    const browserLang = this.translateService.getBrowserLang() ?? 'en';
-    this.translateService.use(browserLang.match(/en|es/) ? browserLang : 'en');
+		const browserLang = this.translateService.getBrowserLang() ?? 'en';
+		this.translateService.use(
+			browserLang.match(/en|es/) ? browserLang : 'en'
+		);
 
-    await logEvent(this.analyticsService, 'default_language', {
-      value: browserLang,
-    });
-  }
+		await logEvent(this.analyticsService, 'default_language', {
+			value: browserLang,
+		});
+	}
 }

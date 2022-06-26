@@ -9,61 +9,63 @@ import { take } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../../core';
 
 @Component({
-  selector: 'app-confirmation',
-  templateUrl: './confirmation.page.html',
-  styleUrls: ['./confirmation.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'app-confirmation',
+	templateUrl: './confirmation.page.html',
+	styleUrls: ['./confirmation.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmationPage {
-  public readonly isRegistrationComplete$ =
-    this.viewService.registrationComplete$;
+	public readonly isRegistrationComplete$ =
+		this.viewService.registrationComplete$;
 
-  constructor(
-    public readonly viewService: PreRegistrationService,
-    private readonly loadingController: LoadingController,
-    private readonly alertController: AlertController,
-    private readonly router: Router,
-    private readonly errorHandler: ErrorHandlerService,
-    private readonly translateService: TranslateService,
-    private readonly analytics: Analytics
-  ) {}
+	constructor(
+		public readonly viewService: PreRegistrationService,
+		private readonly loadingController: LoadingController,
+		private readonly alertController: AlertController,
+		private readonly router: Router,
+		private readonly errorHandler: ErrorHandlerService,
+		private readonly translateService: TranslateService,
+		private readonly analytics: Analytics
+	) {}
 
-  public async undoRegistration(): Promise<void> {
-    const alert = await this.alertController.create({
-      header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
-      message: this.translateService.instant('CONFIRMATION.CONFIRM_CHANGE_MSG'),
-      buttons: [
-        {
-          text: this.translateService.instant('COMMON.GO_BACK'),
-          role: 'cancel',
-          cssClass: 'confirm-delete-button',
-        },
-        {
-          text: this.translateService.instant('COMMON.CONFIRM'),
-          role: 'confirm',
-        },
-      ],
-    });
+	public async undoRegistration(): Promise<void> {
+		const alert = await this.alertController.create({
+			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
+			message: this.translateService.instant(
+				'CONFIRMATION.CONFIRM_CHANGE_MSG'
+			),
+			buttons: [
+				{
+					text: this.translateService.instant('COMMON.GO_BACK'),
+					role: 'cancel',
+					cssClass: 'confirm-delete-button',
+				},
+				{
+					text: this.translateService.instant('COMMON.CONFIRM'),
+					role: 'confirm',
+				},
+			],
+		});
 
-    await alert.present();
-    const shouldContinue = await alert.onDidDismiss();
+		await alert.present();
+		const shouldContinue = await alert.onDidDismiss();
 
-    if (shouldContinue.role !== 'confirm') return;
+		if (shouldContinue.role !== 'confirm') return;
 
-    const loader = await this.loadingController.create({
-      message: 'Deleting registration...',
-    });
+		const loader = await this.loadingController.create({
+			message: 'Deleting registration...',
+		});
 
-    await loader.present();
+		await loader.present();
 
-    try {
-      await logEvent(this.analytics, 'delete_registration');
-      await this.viewService.undoRegistration().pipe(take(1)).toPromise();
-    } catch (error) {
-      await this.errorHandler.handleError(error as IError);
-    } finally {
-      await loader.dismiss();
-      this.router.navigate(['/pre-registration/overview']);
-    }
-  }
+		try {
+			await logEvent(this.analytics, 'delete_registration');
+			await this.viewService.undoRegistration().pipe(take(1)).toPromise();
+		} catch (error) {
+			await this.errorHandler.handleError(error as IError);
+		} finally {
+			await loader.dismiss();
+			this.router.navigate(['/pre-registration/overview']);
+		}
+	}
 }

@@ -11,140 +11,155 @@ import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()
 export class SignUpPageService implements OnDestroy {
-  public readonly form = newOnboardUserForm();
-  public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
-  private readonly subscriptions = new Array<Subscription>();
-  private bhpValue?: string = undefined;
+	public readonly form = newOnboardUserForm();
+	public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
+	private readonly subscriptions = new Array<Subscription>();
+	private bhpValue?: string = undefined;
 
-  /**
-   * Redirects a user if they're already signed in.
-   *
-   * @private
-   * @memberof SignInPageService
-   */
-  public readonly redirectIfLoggedInSubscription =
-    this.authService.currentUser$.pipe(
-      filter((user) => !!user),
-      tap(() => this.router.navigate(['/pre-registration/overview']))
-    );
+	/**
+	 * Redirects a user if they're already signed in.
+	 *
+	 * @private
+	 * @memberof SignInPageService
+	 */
+	public readonly redirectIfLoggedInSubscription =
+		this.authService.currentUser$.pipe(
+			filter((user) => !!user),
+			tap(() => this.router.navigate(['/pre-registration/overview']))
+		);
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly afFunctions: Functions,
-    private readonly router: Router,
-    private readonly loadingController: LoadingController,
-    private readonly errorHandler: ErrorHandlerService,
-    private readonly alertController: AlertController,
-    private readonly translateService: TranslateService
-  ) {
-    this.subscriptions.push(this.redirectIfLoggedInSubscription.subscribe());
-    this.form.errors$.pipe(tap((v) => console.log(v))).subscribe();
-  }
+	constructor(
+		private readonly authService: AuthService,
+		private readonly afFunctions: Functions,
+		private readonly router: Router,
+		private readonly loadingController: LoadingController,
+		private readonly errorHandler: ErrorHandlerService,
+		private readonly alertController: AlertController,
+		private readonly translateService: TranslateService
+	) {
+		this.subscriptions.push(
+			this.redirectIfLoggedInSubscription.subscribe()
+		);
+		this.form.errors$.pipe(tap((v) => console.log(v))).subscribe();
+	}
 
-  public ngOnDestroy(): void {
-    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-  }
+	public ngOnDestroy(): void {
+		this.subscriptions.forEach((subscription) =>
+			subscription.unsubscribe()
+		);
+	}
 
-  public async onValidateRecaptcha($event: any, bhp?: string) {
-    this.bhpValue = bhp;
+	public async onValidateRecaptcha($event: any, bhp?: string) {
+		this.bhpValue = bhp;
 
-    if (!(await this.validateRecaptcha($event))) {
-      this.recaptchaValid$.next(false);
-      await this.failedVerification();
-      return;
-    }
+		if (!(await this.validateRecaptcha($event))) {
+			this.recaptchaValid$.next(false);
+			await this.failedVerification();
+			return;
+		}
 
-    this.recaptchaValid$.next(true);
-  }
+		this.recaptchaValid$.next(true);
+	}
 
-  private async validateRecaptcha($event: any): Promise<boolean> {
-    console.log($event);
+	private async validateRecaptcha($event: any): Promise<boolean> {
+		console.log($event);
 
-    const status = await httpsCallable(
-      this.afFunctions,
-      'verifyRecaptcha2'
-    )({ value: $event });
+		const status = await httpsCallable(
+			this.afFunctions,
+			'verifyRecaptcha2'
+		)({ value: $event });
 
-    return status
-      ? Promise.resolve((<any>status.data).success as boolean)
-      : Promise.reject(false);
-  }
+		return status
+			? Promise.resolve((<any>status.data).success as boolean)
+			: Promise.reject(false);
+	}
 
-  // Move to UI service
-  private async failedVerification() {
-    const alert = await this.alertController.create({
-      header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
-      message: this.translateService.instant('COMMON.VERIFICATION_FAILED_MSG'),
-      buttons: [this.translateService.instant('COMMON.OK')],
-    });
+	// Move to UI service
+	private async failedVerification() {
+		const alert = await this.alertController.create({
+			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
+			message: this.translateService.instant(
+				'COMMON.VERIFICATION_FAILED_MSG'
+			),
+			buttons: [this.translateService.instant('COMMON.OK')],
+		});
 
-    await alert.present();
-  }
+		await alert.present();
+	}
 
-  public async onboardUser(): Promise<void> {
-    if (!this.recaptchaValid$.getValue()) return;
+	public async onboardUser(): Promise<void> {
+		if (!this.recaptchaValid$.getValue()) return;
 
-    const onboardInfo = this.form.value;
+		const onboardInfo = this.form.value;
 
-    const loader = await this.loadingController.create({
-      message: 'Creating account...',
-    });
+		const loader = await this.loadingController.create({
+			message: 'Creating account...',
+		});
 
-    await loader.present();
+		await loader.present();
 
-    try {
-      await this.createAccount(onboardInfo);
-      loader.message = 'Logging you in';
-      await this.signIn(onboardInfo);
-    } catch (error) {
-      error = error as IError;
+		try {
+			await this.createAccount(onboardInfo);
+			loader.message = 'Logging you in';
+			await this.signIn(onboardInfo);
+		} catch (error) {
+			error = error as IError;
 
-      if ((error as IError).code === 'functions/already-exists') {
-        await loader.dismiss();
-        const alert = await this.alertController.create({
-          header: this.translateService.instant('SIGNUP.ACCOUNT_EXISTS'),
-          subHeader: onboardInfo.emailAddress,
-          message: this.translateService.instant(
-            'SIGNUP.ACCOUNT_EXISTS_MESSAGE'
-          ),
-          buttons: [
-            {
-              text: this.translateService.instant('FORGOTPASS.RESET_PASSWORD'),
-              role: '/reset-password',
-            },
-            {
-              text: this.translateService.instant('COMMON.SIGN_IN'),
-              role: '/sign-in',
-            },
-          ],
-          backdropDismiss: false,
-        });
+			if ((error as IError).code === 'functions/already-exists') {
+				await loader.dismiss();
+				const alert = await this.alertController.create({
+					header: this.translateService.instant(
+						'SIGNUP.ACCOUNT_EXISTS'
+					),
+					subHeader: onboardInfo.emailAddress,
+					message: this.translateService.instant(
+						'SIGNUP.ACCOUNT_EXISTS_MESSAGE'
+					),
+					buttons: [
+						{
+							text: this.translateService.instant(
+								'FORGOTPASS.RESET_PASSWORD'
+							),
+							role: '/reset-password',
+						},
+						{
+							text: this.translateService.instant(
+								'COMMON.SIGN_IN'
+							),
+							role: '/sign-in',
+						},
+					],
+					backdropDismiss: false,
+				});
 
-        await alert.present();
+				await alert.present();
 
-        await alert.onDidDismiss().then((response) => {
-          this.router.navigate([response.role]);
-        });
-      } else {
-        this.errorHandler.handleError(error as IError);
-      }
-    } finally {
-      await loader.dismiss();
-    }
-  }
+				await alert.onDidDismiss().then((response) => {
+					this.router.navigate([response.role]);
+				});
+			} else {
+				this.errorHandler.handleError(error as IError);
+			}
+		} finally {
+			await loader.dismiss();
+		}
+	}
 
-  private async createAccount(value: IOnboardUser): Promise<void> {
-    const accountStatusFunction = httpsCallable(this.afFunctions, 'newAccount');
-    await accountStatusFunction({ ...value, bhp: this.bhpValue });
-  }
+	private async createAccount(value: IOnboardUser): Promise<void> {
+		const accountStatusFunction = httpsCallable(
+			this.afFunctions,
+			'newAccount'
+		);
+		await accountStatusFunction({ ...value, bhp: this.bhpValue });
+	}
 
-  private async signIn(value: IOnboardUser): Promise<void | IError> {
-    const auth: IAuth = {
-      emailAddress: value.emailAddress,
-      password: value.password,
-    };
+	private async signIn(value: IOnboardUser): Promise<void | IError> {
+		const auth: IAuth = {
+			emailAddress: value.emailAddress,
+			password: value.password,
+		};
 
-    await this.authService.login(auth);
-    this.router.navigate(['pre-registration/overview']);
-  }
+		await this.authService.login(auth);
+		this.router.navigate(['pre-registration/overview']);
+	}
 }

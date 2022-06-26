@@ -1,103 +1,119 @@
 <ion-content color="light">
-  <app-internal-header class="ion-hide-xl-down"></app-internal-header>
+	<app-internal-header class="ion-hide-xl-down"></app-internal-header>
 
-  <ion-grid class="height-max es-mg-bottom-xxl">
-    <ion-row class="height-max">
-      <ion-col
-        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-        size="auto"
-      >
-        <app-pre-registration-menu></app-pre-registration-menu>
-      </ion-col>
-      <ion-col
-        sizeXl="9"
-        sizeLg="12"
-        sizeMd="12"
-        sizeSm="12"
-        sizeXs="12"
-        size="12"
-      >
-        <ion-row class="ion-justify-content-center">
-          <ion-col sizeXs="12" sizeSm="7">
-            <ion-button
-              class="ion-no-padding even-ratio-button ion-margin"
-              color="white"
-              [routerLink]="['..']"
-            >
-              <ion-icon
-                slot="icon-only"
-                name="arrow-back-sharp"
-                class="even-ratio-button"
-              ></ion-icon>
-            </ion-button>
+	<ion-grid class="height-max es-mg-bottom-xxl">
+		<ion-row class="height-max">
+			<ion-col
+				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
+				size="auto"
+			>
+				<app-pre-registration-menu></app-pre-registration-menu>
+			</ion-col>
+			<ion-col
+				sizeXl="9"
+				sizeLg="12"
+				sizeMd="12"
+				sizeSm="12"
+				sizeXs="12"
+				size="12"
+			>
+				<ion-row class="ion-justify-content-center">
+					<ion-col sizeXs="12" sizeSm="7">
+						<ion-button
+							class="ion-no-padding even-ratio-button ion-margin"
+							color="white"
+							[routerLink]="['..']"
+						>
+							<ion-icon
+								slot="icon-only"
+								name="arrow-back-sharp"
+								class="even-ratio-button"
+							></ion-icon>
+						</ion-button>
 
-            <div class="ion-padding es-mg-bottom-xxl">
-              <ion-item class="inset-ion-item-title" color="none">
-                <ion-card-title lines="full">
-                  {{ 'PROFILE.CHANGE_EMAIL' | translate }}
-                </ion-card-title>
-              </ion-item>
+						<div class="ion-padding es-mg-bottom-xxl">
+							<ion-item class="inset-ion-item-title" color="none">
+								<ion-card-title lines="full">
+									{{ "PROFILE.CHANGE_EMAIL" | translate }}
+								</ion-card-title>
+							</ion-item>
 
-              <div class="ion-margin ion-padding">
-                <p>{{ 'PROFILE.CHANGE_EMAIL_TEXT' | translate }}</p>
-              </div>
+							<div class="ion-margin ion-padding">
+								<p>
+									{{
+										"PROFILE.CHANGE_EMAIL_TEXT" | translate
+									}}
+								</p>
+							</div>
 
-              <ion-card>
-                <ion-card-content>
-                  <form [formGroup]="form" novalidate>
-                    <p class="ion-padding">
-                      {{ 'CURRENT_EMAIL' | translate }}
-                      <strong>{{ email$ | async }}</strong>
-                    </p>
+							<ion-card>
+								<ion-card-content>
+									<form [formGroup]="form" novalidate>
+										<p class="ion-padding">
+											{{ "CURRENT_EMAIL" | translate }}
+											<strong>{{
+												email$ | async
+											}}</strong>
+										</p>
 
-                    <ion-list>
-                      <ion-item>
-                        <ion-label color="xmasred">
-                          {{ 'COMMON.EMAIL_ADDRESS' | translate }}
-                        </ion-label>
-                        <ion-input
-                          formControlName="emailAddress"
-                          [debounce]="500"
-                          type="email"
-                          autocomplete="email"
-                          inputmode="email"
-                        ></ion-input>
-                      </ion-item>
-                      <app-control-errors
-                        [control]="form.controls.emailAddress"
-                      ></app-control-errors>
+										<ion-list>
+											<ion-item>
+												<ion-label color="xmasred">
+													{{
+														"COMMON.EMAIL_ADDRESS"
+															| translate
+													}}
+												</ion-label>
+												<ion-input
+													formControlName="emailAddress"
+													[debounce]="500"
+													type="email"
+													autocomplete="email"
+													inputmode="email"
+												></ion-input>
+											</ion-item>
+											<core-control-errors
+												[control]="
+													form.controls.emailAddress
+												"
+											></core-control-errors>
 
-                      <ion-item>
-                        <ion-label color="xmasred">
-                          {{ 'COMMON.PASSWORD' | translate }}
-                        </ion-label>
-                        <ion-input
-                          formControlName="password"
-                          [debounce]="500"
-                          type="password"
-                          autocomplete="new-password"
-                        ></ion-input>
-                      </ion-item>
-                      <app-control-errors
-                        [control]="form.controls.password"
-                      ></app-control-errors>
-                    </ion-list>
-                  </form>
+											<ion-item>
+												<ion-label color="xmasred">
+													{{
+														"COMMON.PASSWORD"
+															| translate
+													}}
+												</ion-label>
+												<ion-input
+													formControlName="password"
+													[debounce]="500"
+													type="password"
+													autocomplete="new-password"
+												></ion-input>
+											</ion-item>
+											<core-control-errors
+												[control]="
+													form.controls.password
+												"
+											></core-control-errors>
+										</ion-list>
+									</form>
 
-                  <ion-button
-                    color="xmasred"
-                    class="ion-float-end ion-margin-bottom"
-                    (click)="changeEmail()"
-                    [disabled]="!form.valid"
-                  >
-                    {{ 'PROFILE.SAVE_CHANGES' | translate }}
-                  </ion-button>
-                </ion-card-content>
-              </ion-card>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+									<ion-button
+										color="xmasred"
+										class="ion-float-end ion-margin-bottom"
+										(click)="changeEmail()"
+										[disabled]="!form.valid"
+									>
+										{{ "PROFILE.SAVE_CHANGES" | translate }}
+									</ion-button>
+								</ion-card-content>
+							</ion-card>
+						</div>
+					</ion-col>
+				</ion-row>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

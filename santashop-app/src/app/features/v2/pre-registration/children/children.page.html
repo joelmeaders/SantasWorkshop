@@ -1,159 +1,185 @@
 <ion-content color="light">
-  <app-internal-header></app-internal-header>
+	<app-internal-header></app-internal-header>
 
-  <ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
-    <ion-row class="height-max">
-      <ion-col
-        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-        size="auto"
-      >
-        <app-pre-registration-menu></app-pre-registration-menu>
-      </ion-col>
-      <ion-col
-        sizeXl="9"
-        sizeLg="12"
-        sizeMd="12"
-        sizeSm="12"
-        sizeXs="12"
-        size="12"
-      >
-        <ion-row class="ion-justify-content-center">
-          <ion-col sizeXs="12" sizeSm="7" class="ed-pd-bottom-xxl">
-            <ion-button
-              class="ion-no-padding even-ratio-button ion-margin"
-              color="white"
-              [routerLink]="['../overview']"
-            >
-              <ion-icon
-                slot="icon-only"
-                name="arrow-back-sharp"
-                class="even-ratio-button"
-              ></ion-icon>
-            </ion-button>
+	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+		<ion-row class="height-max">
+			<ion-col
+				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
+				size="auto"
+			>
+				<app-pre-registration-menu></app-pre-registration-menu>
+			</ion-col>
+			<ion-col
+				sizeXl="9"
+				sizeLg="12"
+				sizeMd="12"
+				sizeSm="12"
+				sizeXs="12"
+				size="12"
+			>
+				<ion-row class="ion-justify-content-center">
+					<ion-col sizeXs="12" sizeSm="7" class="ed-pd-bottom-xxl">
+						<ion-button
+							class="ion-no-padding even-ratio-button ion-margin"
+							color="white"
+							[routerLink]="['../overview']"
+						>
+							<ion-icon
+								slot="icon-only"
+								name="arrow-back-sharp"
+								class="even-ratio-button"
+							></ion-icon>
+						</ion-button>
 
-            <div class="ion-padding es-mg-bottom-xxl">
-              <ion-item class="inset-ion-item-title" color="none">
-                <ion-card-title lines="full">
-                  {{ 'CHILDREN.YOUR_CHILDREN' | translate }}
-                </ion-card-title>
-              </ion-item>
+						<div class="ion-padding es-mg-bottom-xxl">
+							<ion-item class="inset-ion-item-title" color="none">
+								<ion-card-title lines="full">
+									{{ "CHILDREN.YOUR_CHILDREN" | translate }}
+								</ion-card-title>
+							</ion-item>
 
-              <div class="ion-padding-horizontal ion-padding-top">
-                <p>{{ 'CHILDREN.CHILD_LINE_1' | translate }}</p>
+							<div class="ion-padding-horizontal ion-padding-top">
+								<p>{{ "CHILDREN.CHILD_LINE_1" | translate }}</p>
 
-                <p>{{ 'CHILDREN.CHILD_LINE_2' | translate }}</p>
-              </div>
+								<p>{{ "CHILDREN.CHILD_LINE_2" | translate }}</p>
+							</div>
 
-              <ion-item
-                color="none"
-                lines="full"
-                class="inset-ion-item-title"
-              ></ion-item>
+							<ion-item
+								color="none"
+								lines="full"
+								class="inset-ion-item-title"
+							></ion-item>
 
-              <ion-list color="none">
-                <ion-button
-                  fill="clear"
-                  [routerLink]="['add-child']"
-                  class="ion-float-end"
-                >
-                  <ion-label>
-                    {{ 'CHILDREN.ADD_A_CHILD' | translate }}
-                  </ion-label>
-                  <ion-icon
-                    name="add-circle"
-                    size="large"
-                    slot="end"
-                  ></ion-icon>
-                </ion-button>
+							<ion-list color="none">
+								<ion-button
+									fill="clear"
+									[routerLink]="['add-child']"
+									class="ion-float-end"
+								>
+									<ion-label>
+										{{ "CHILDREN.ADD_A_CHILD" | translate }}
+									</ion-label>
+									<ion-icon
+										name="add-circle"
+										size="large"
+										slot="end"
+									></ion-icon>
+								</ion-button>
 
-                <ng-container *ngIf="children$ | async as children">
-                  <div class="es-pd-bottom-xxl es-pd-top-xxl"></div>
-                  <ion-item *ngFor="let child of children" lines="none">
-                    <ion-icon
-                      class="icon-reduced-margin"
-                      name="man-outline"
-                      size="large"
-                      slot="start"
-                      *ngIf="child.toyType === 'boys'"
-                    ></ion-icon>
-                    <ion-icon
-                      class="icon-reduced-margin"
-                      name="woman-outline"
-                      size="large"
-                      slot="start"
-                      *ngIf="child.toyType === 'girls'"
-                    ></ion-icon>
-                    <ion-icon
-                      class="icon-reduced-margin"
-                      name="happy-outline"
-                      size="large"
-                      slot="start"
-                      *ngIf="child.toyType === 'infants'"
-                    ></ion-icon>
-                    <ion-icon
-                      class="icon-reduced-margin"
-                      name="alert-circle"
-                      color="danger"
-                      size="large"
-                      slot="start"
-                      *ngIf="!child.toyType"
-                    ></ion-icon>
-                    <ion-card-header>
-                      <ion-card-title>
-                        {{ child.firstName }} {{ child.lastName }}
-                      </ion-card-title>
-                      <ion-card-subtitle>
-                        {{ child.dateOfBirth | date:'MMMM dd, yyyy' }}
-                      </ion-card-subtitle>
-                      <ion-card-subtitle color="danger" *ngIf="!child.toyType">
-                        {{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
-                      </ion-card-subtitle>
-                    </ion-card-header>
-                    <div slot="end">
-                      <ion-button
-                        color="medium"
-                        fill="clear"
-                        slot="end"
-                        [routerLink]="['./add-child']"
-                        [queryParams]="{ id: child.id }"
-                      >
-                        <ion-icon size="large" name="create-outline"></ion-icon>
-                      </ion-button>
-                      <ion-button
-                        color="medium"
-                        fill="clear"
-                        slot="end"
-                        (click)="removeChild(child)"
-                      >
-                        <ion-icon size="large" name="trash-outline"></ion-icon>
-                      </ion-button>
-                    </div>
-                  </ion-item>
-                </ng-container>
+								<ng-container
+									*ngIf="children$ | async as children"
+								>
+									<div
+										class="es-pd-bottom-xxl es-pd-top-xxl"
+									></div>
+									<ion-item
+										*ngFor="let child of children"
+										lines="none"
+									>
+										<ion-icon
+											class="icon-reduced-margin"
+											name="man-outline"
+											size="large"
+											slot="start"
+											*ngIf="child.toyType === 'boys'"
+										></ion-icon>
+										<ion-icon
+											class="icon-reduced-margin"
+											name="woman-outline"
+											size="large"
+											slot="start"
+											*ngIf="child.toyType === 'girls'"
+										></ion-icon>
+										<ion-icon
+											class="icon-reduced-margin"
+											name="happy-outline"
+											size="large"
+											slot="start"
+											*ngIf="child.toyType === 'infants'"
+										></ion-icon>
+										<ion-icon
+											class="icon-reduced-margin"
+											name="alert-circle"
+											color="danger"
+											size="large"
+											slot="start"
+											*ngIf="!child.toyType"
+										></ion-icon>
+										<ion-card-header>
+											<ion-card-title>
+												{{ child.firstName }}
+												{{ child.lastName }}
+											</ion-card-title>
+											<ion-card-subtitle>
+												{{
+													child.dateOfBirth
+														| date: "MMMM dd, yyyy"
+												}}
+											</ion-card-subtitle>
+											<ion-card-subtitle
+												color="danger"
+												*ngIf="!child.toyType"
+											>
+												{{
+													"CHILDREN.INVALID_TOYTYPE"
+														| translate
+												}}
+											</ion-card-subtitle>
+										</ion-card-header>
+										<div slot="end">
+											<ion-button
+												color="medium"
+												fill="clear"
+												slot="end"
+												[routerLink]="['./add-child']"
+												[queryParams]="{ id: child.id }"
+											>
+												<ion-icon
+													size="large"
+													name="create-outline"
+												></ion-icon>
+											</ion-button>
+											<ion-button
+												color="medium"
+												fill="clear"
+												slot="end"
+												(click)="removeChild(child)"
+											>
+												<ion-icon
+													size="large"
+													name="trash-outline"
+												></ion-icon>
+											</ion-button>
+										</div>
+									</ion-item>
+								</ng-container>
 
-                <ng-container *ngIf="!(childCount$ | async)">
-                  <div class="ion-text-center es-pd-top-xxl">
-                    <ion-card-title color="medium">
-                      {{ 'CHILDREN.NO_CHILDREN' | translate }}
-                    </ion-card-title>
-                  </div>
-                </ng-container>
-              </ion-list>
+								<ng-container *ngIf="!(childCount$ | async)">
+									<div class="ion-text-center es-pd-top-xxl">
+										<ion-card-title color="medium">
+											{{
+												"CHILDREN.NO_CHILDREN"
+													| translate
+											}}
+										</ion-card-title>
+									</div>
+								</ng-container>
+							</ion-list>
 
-              <ion-button
-                color="xmasred"
-                [routerLink]="['../overview']"
-                class="ion-float-end ion-margin-top es-mg-bottom-xxl"
-                *ngIf="childCount$ | async"
-              >
-                {{ 'COMMON.DONE' | translate }}
-              </ion-button>
+							<ion-button
+								color="xmasred"
+								[routerLink]="['../overview']"
+								class="ion-float-end ion-margin-top es-mg-bottom-xxl"
+								*ngIf="childCount$ | async"
+							>
+								{{ "COMMON.DONE" | translate }}
+							</ion-button>
 
-              <div class="filler">&nbsp;</div>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+							<div class="filler">&nbsp;</div>
+						</div>
+					</ion-col>
+				</ion-row>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

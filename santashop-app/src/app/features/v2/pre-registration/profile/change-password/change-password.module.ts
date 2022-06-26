@@ -5,7 +5,7 @@ import { CoreModule } from '@core/*';
 import { SharedModule } from 'santashop-app/src/app/shared/components/shared.module';
 
 @NgModule({
-  imports: [CoreModule, SharedModule, ChangePasswordPageRoutingModule],
-  declarations: [ChangePasswordPage],
+	imports: [CoreModule, SharedModule, ChangePasswordPageRoutingModule],
+	declarations: [ChangePasswordPage],
 })
 export class ChangePasswordPageModule {}

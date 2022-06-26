@@ -19,6 +19,7 @@ const directives = [AppLetDirective];
 const pipes = [NiceFormErrorPipe];
 
 const components = [ControlErrorsComponent];
+
 @NgModule({
   imports: [...modules],
   declarations: [...directives, ...pipes, ...components],

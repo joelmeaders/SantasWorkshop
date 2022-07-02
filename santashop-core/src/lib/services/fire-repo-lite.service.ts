@@ -1,11 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
-import {
-	DocumentData,
-	DocumentReference,
-	QueryConstraint,
-} from '@angular/fire/firestore';
+import { DocumentReference, QueryConstraint } from './_firestore-wrapper';
 
 @Injectable({
 	providedIn: 'root',
@@ -51,7 +47,7 @@ export class FireRepoLite {
 				this.addById<T>(collectionPath, documentId, document),
 
 			update: (documentId: string, document: T, merge = false) =>
-				this.update(collectionPath, documentId, document, merge),
+				this.update<T>(collectionPath, documentId, document, merge),
 
 			delete: (documentId: string) =>
 				this.delete(collectionPath, documentId),
@@ -170,7 +166,7 @@ export class FireRepoLite {
 		documentId: string,
 		document: T,
 		merge = false
-	): Observable<DocumentReference<DocumentData>> {
+	): Observable<DocumentReference<T>> {
 		return this.fireRepoBase.update(
 			collectionPath,
 			documentId,
@@ -284,7 +280,7 @@ export interface IFireRepoCollection<T> {
 		documentId: string,
 		document: T,
 		merge: boolean
-	): Observable<DocumentReference>;
+	): Observable<DocumentReference<T>>;
 
 	/**
 	 * Deletes the specified document

@@ -9,82 +9,82 @@ import { Subject } from 'rxjs';
 import { SignInForm } from '../../forms/sign-in';
 
 @Component({
-  selector: 'app-sign-in',
-  templateUrl: './sign-in.page.html',
-  styleUrls: ['./sign-in.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+	selector: 'app-sign-in',
+	templateUrl: './sign-in.page.html',
+	styleUrls: ['./sign-in.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInPage implements OnDestroy {
-  public readonly form: FormGroup = SignInForm.form();
-  public readonly formValidationMessages = SignInForm.validationMessages();
+	public readonly form: FormGroup = SignInForm.form();
+	public readonly formValidationMessages = SignInForm.validationMessages();
 
-  public readonly $error = new Subject<IError>();
-  private readonly $destroy = new Subject<void>();
+	public readonly $error = new Subject<IError>();
+	private readonly $destroy = new Subject<void>();
 
-  constructor(
-    private readonly authService: AuthService,
-    private readonly loadingController: LoadingController,
-    private readonly router: Router,
-    private readonly alertController: AlertController
-  ) {}
+	constructor(
+		private readonly authService: AuthService,
+		private readonly loadingController: LoadingController,
+		private readonly router: Router,
+		private readonly alertController: AlertController
+	) {}
 
-  public async ngOnDestroy() {
-    this.$destroy.next();
-  }
+	public async ngOnDestroy() {
+		this.$destroy.next();
+	}
 
-  public async login() {
-    const loginInfo: IAuth = {
-      ...this.form.value,
-    };
+	public async login() {
+		const loginInfo: IAuth = {
+			...this.form.value,
+		};
 
-    if (loginInfo.emailAddress == null || loginInfo.password == null) {
-      return;
-    }
+		if (loginInfo.emailAddress == null || loginInfo.password == null) {
+			return;
+		}
 
-    await this.presentLoading();
+		await this.presentLoading();
 
-    const result = await this.authService
-      .login(loginInfo)
-      .then(() => true)
-      .catch(async (error: IError) => {
-        this.handleError(error);
-        return false;
-      });
+		const result = await this.authService
+			.login(loginInfo)
+			.then(() => true)
+			.catch(async (error: IError) => {
+				this.handleError(error);
+				return false;
+			});
 
-    if (!result) {
-      await this.destroyLoading();
-      return;
-    }
+		if (!result) {
+			await this.destroyLoading();
+			return;
+		}
 
-    this.router.navigate(['/admin']);
-    await this.destroyLoading();
-  }
+		this.router.navigate(['/admin']);
+		await this.destroyLoading();
+	}
 
-  private async presentLoading() {
-    const loading = await this.loadingController.create({
-      duration: 3000,
-      message: 'Signing in...',
-      translucent: true,
-      backdropDismiss: true,
-    });
+	private async presentLoading() {
+		const loading = await this.loadingController.create({
+			duration: 3000,
+			message: 'Signing in...',
+			translucent: true,
+			backdropDismiss: true,
+		});
 
-    await loading.present();
-  }
+		await loading.present();
+	}
 
-  private async handleError(error: IError) {
-    const alert = await this.alertController.create({
-      header: 'Error',
-      subHeader: error.code,
-      message: error.message,
-      buttons: ['Ok'],
-    });
+	private async handleError(error: IError) {
+		const alert = await this.alertController.create({
+			header: 'Error',
+			subHeader: error.code,
+			message: error.message,
+			buttons: ['Ok'],
+		});
 
-    await alert.present();
-  }
+		await alert.present();
+	}
 
-  private async destroyLoading() {
-    try {
-      await this.loadingController.dismiss();
-    } catch {}
-  }
+	private async destroyLoading() {
+		try {
+			await this.loadingController.dismiss();
+		} catch {}
+	}
 }

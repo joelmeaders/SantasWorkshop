@@ -1,9 +1,9 @@
 export interface IAuth {
-  emailAddress: string;
-  password: string;
+	emailAddress: string;
+	password: string;
 }
 
 export interface IUserEmailUid {
-  emailAddress: string;
-  uid: string;
+	emailAddress: string;
+	uid: string;
 }

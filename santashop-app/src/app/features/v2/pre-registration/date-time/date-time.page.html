@@ -40,8 +40,7 @@
 
 							<div class="ion-padding">
 								<p>
-									{{
-										"SCHEDULE.CHOOSE_DATE_TIME" | translate
+									{{ "SCHEDULE.CHOOSE_DATE_TIME" | translate
 									}}
 								</p>
 							</div>
@@ -49,9 +48,7 @@
 							<ion-card>
 								<ion-card-header>
 									<ion-card-title color="xmasred">
-										{{
-											"SCHEDULE.YOUR_DATE/TIME"
-												| translate
+										{{ "SCHEDULE.YOUR_DATE/TIME" | translate
 										}}
 									</ion-card-title>
 								</ion-card-header>
@@ -87,15 +84,13 @@
 												>
 													<ion-title>
 														{{
-															"SCHEDULE.NO_TIME_SELECTED."
-																| translate
-														}}
+														"SCHEDULE.NO_TIME_SELECTED."
+														| translate }}
 													</ion-title>
 													<ion-label>
 														{{
-															"SCHEDULE.ADD_ONE_BELOW."
-																| translate
-														}}
+														"SCHEDULE.ADD_ONE_BELOW."
+														| translate }}
 													</ion-label>
 												</p>
 
@@ -103,12 +98,8 @@
 													lines="none"
 													*ngIf="chosenSlot as slot"
 												>
-													{{
-														slot.dateTime
-															| date
-																: "MMMM d, h:mm a"
-																: "MST"
-													}}
+													{{ slot.dateTime | date :
+													"MMMM d, h:mm a" : "MST" }}
 													<ion-button
 														slot="end"
 														(click)="
@@ -116,10 +107,8 @@
 														"
 														fill="clear"
 													>
-														{{
-															"COMMON.CANCEL"
-																| translate
-														}}
+														{{ "COMMON.CANCEL" |
+														translate }}
 													</ion-button>
 												</ion-item>
 											</ng-container>
@@ -148,10 +137,8 @@
 									class="ion-padding-top"
 								>
 									<ion-title class="ion-no-padding">
-										{{
-											"SCHEDULE.AVAILABLE_DATES/TIMES"
-												| translate
-										}}
+										{{ "SCHEDULE.AVAILABLE_DATES/TIMES" |
+										translate }}
 									</ion-title>
 								</ion-list-header>
 
@@ -207,12 +194,8 @@
 													color="light"
 												>
 													<ion-label>
-														{{
-															day
-																| date
-																	: "EEEE,
-														MMMM d"
-														}}
+														{{ day | date : "EEEE,
+														MMMM d" }}
 													</ion-label>
 												</ion-item>
 												<ion-list
@@ -231,22 +214,17 @@
 														<ion-label
 															class="es-mg-left-lg"
 														>
-															{{
-																slot.dateTime
-																	| date
-																		: "h:mm a"
-																		: "MST"
-															}}
+															{{ slot.dateTime |
+															date : "h:mm a" :
+															"MST" }}
 															<br />
 															<ion-text
 																color="xmasred"
 																class="es-mg-left-md"
 															>
 																{{
-																	spotsRemaining(
-																		slot
-																	)
-																}}
+																spotsRemaining(
+																slot ) }}
 															</ion-text>
 														</ion-label>
 														<ion-button
@@ -262,10 +240,8 @@
 																!slot.enabled
 															"
 														>
-															{{
-																"COMMON.SELECT"
-																	| translate
-															}}
+															{{ "COMMON.SELECT" |
+															translate }}
 														</ion-button>
 													</ion-item>
 												</ion-list>

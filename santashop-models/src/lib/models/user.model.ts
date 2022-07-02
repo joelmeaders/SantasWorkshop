@@ -1,23 +1,23 @@
 export interface IUser {
-  uid?: string;
+	uid?: string;
 
-  firstName: string;
+	firstName: string;
 
-  lastName: string;
+	lastName: string;
 
-  emailAddress: string;
+	emailAddress: string;
 
-  zipCode: number;
+	zipCode: number;
 
-  acceptedTermsOfService?: Date;
+	acceptedTermsOfService?: Date;
 
-  acceptedPrivacyPolicy?: Date;
+	acceptedPrivacyPolicy?: Date;
 
-  // Profile version: Increment on field changes, add changes to
-  // profile migration service in @core
-  version: number;
+	// Profile version: Increment on field changes, add changes to
+	// profile migration service in @core
+	version: number;
 
-  bhp?: number;
+	bhp?: number;
 
-  manuallyMigrated: boolean;
+	manuallyMigrated: boolean;
 }

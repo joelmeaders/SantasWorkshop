@@ -6,13 +6,13 @@ import { ScannerPageRoutingModule } from './scanner-routing.module';
 import { ScannerPage } from './scanner.page';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    ScannerPageRoutingModule,
-    ZXingScannerModule,
-    SharedModule,
-  ],
-  declarations: [ScannerPage],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+	imports: [
+		CoreModule,
+		ScannerPageRoutingModule,
+		ZXingScannerModule,
+		SharedModule,
+	],
+	declarations: [ScannerPage],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ScannerPageModule {}

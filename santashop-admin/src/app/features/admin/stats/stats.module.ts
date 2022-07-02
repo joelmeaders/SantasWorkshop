@@ -8,15 +8,15 @@ import { StatsPageRoutingModule } from './stats-routing.module';
 import { StatsPage } from './stats.page';
 
 @NgModule({
-  imports: [
-    IonicModule,
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule.forChild([{ path: '', component: StatsPage }]),
-    StatsPageRoutingModule,
-    SharedModule,
-  ],
-  providers: [],
-  declarations: [StatsPage],
+	imports: [
+		IonicModule,
+		CommonModule,
+		ReactiveFormsModule,
+		RouterModule.forChild([{ path: '', component: StatsPage }]),
+		StatsPageRoutingModule,
+		SharedModule,
+	],
+	providers: [],
+	declarations: [StatsPage],
 })
 export class StatsPageModule {}

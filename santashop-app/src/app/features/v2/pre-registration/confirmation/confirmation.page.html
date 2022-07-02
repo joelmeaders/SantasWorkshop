@@ -18,10 +18,8 @@
 						>
 							<ion-text color="xmasred" class="ion-text-center">
 								<h1>
-									{{
-										"CONFIRMATION.THIS_IS_YOUR_TICKET"
-											| translate
-									}}
+									{{ "CONFIRMATION.THIS_IS_YOUR_TICKET" |
+									translate }}
 								</h1>
 							</ion-text>
 
@@ -32,10 +30,8 @@
 									color="xmasred"
 									[routerLink]="['event-information']"
 								>
-									{{
-										"CONFIRMATION.EVENT_INFORMATION"
-											| translate
-									}}
+									{{ "CONFIRMATION.EVENT_INFORMATION" |
+									translate }}
 								</ion-button>
 							</div>
 
@@ -49,10 +45,10 @@
 								<div>
 									<p>
 										<ion-text color="xmasred">
-											<strong>{{
-												"SCHEDULE.YOUR_DATE/TIME"
-													| translate
-											}}</strong>
+											<strong
+												>{{ "SCHEDULE.YOUR_DATE/TIME" |
+												translate }}</strong
+											>
 										</ion-text>
 										<br />
 									</p>
@@ -63,13 +59,8 @@
 										"
 										class="es-pd-bottom-md"
 									>
-										{{
-											slot.dateTime
-												| date
-													: "EEEE, MMMM d,
-										h:mm a"
-													: "MST"
-										}}
+										{{ slot.dateTime | date : "EEEE, MMMM d,
+										h:mm a" : "MST" }}
 									</ion-text>
 								</div>
 							</ion-item>
@@ -78,10 +69,10 @@
 								<div>
 									<p>
 										<ion-text color="xmasred">
-											<strong>{{
-												"EVENT_INFO.LOCATION"
-													| translate
-											}}</strong>
+											<strong
+												>{{ "EVENT_INFO.LOCATION" |
+												translate }}</strong
+											>
 										</ion-text>
 										<br />
 									</p>
@@ -92,15 +83,11 @@
 										"
 										class="es-pd-bottom-md"
 									>
-										{{
-											"EVENT_INFO.EVENT_ADDRESS1"
-												| translate
-										}}
+										{{ "EVENT_INFO.EVENT_ADDRESS1" |
+										translate }}
 										<br />
-										{{
-											"EVENT_INFO.EVENT_ADDRESS2"
-												| translate
-										}}
+										{{ "EVENT_INFO.EVENT_ADDRESS2" |
+										translate }}
 									</ion-text>
 									<br />
 									<ion-text
@@ -110,10 +97,8 @@
 										tappable
 									>
 										<em>
-											{{
-												"CONFIRMATION.EVENT_INFORMATION"
-													| translate
-											}}
+											{{ "CONFIRMATION.EVENT_INFORMATION"
+											| translate }}
 										</em>
 									</ion-text>
 								</div>
@@ -123,10 +108,10 @@
 								<ion-item lines="none">
 									<p>
 										<ion-text color="xmasred">
-											<strong>{{
-												"CHILDREN.YOUR_CHILDREN"
-													| translate
-											}}</strong>
+											<strong
+												>{{ "CHILDREN.YOUR_CHILDREN" |
+												translate }}</strong
+											>
 										</ion-text>
 										<br />
 									</p>
@@ -169,14 +154,12 @@
 										></ion-icon>
 										<ion-card-header>
 											<ion-card-title>
-												{{ child.firstName }}
-												{{ child.lastName }}
+												{{ child.firstName }} {{
+												child.lastName }}
 											</ion-card-title>
 											<ion-card-subtitle>
-												{{
-													child.dateOfBirth
-														| date: "MMMM dd, yyyy"
-												}}
+												{{ child.dateOfBirth | date:
+												"MMMM dd, yyyy" }}
 											</ion-card-subtitle>
 										</ion-card-header>
 									</ion-item>
@@ -189,10 +172,8 @@
 								fill="clear"
 								(click)="undoRegistration()"
 							>
-								{{
-									"CONFIRMATION.CHANGE_REGISTRATION"
-										| translate
-								}}
+								{{ "CONFIRMATION.CHANGE_REGISTRATION" |
+								translate }}
 							</ion-button>
 						</div>
 					</ion-col>

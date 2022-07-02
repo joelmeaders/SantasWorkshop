@@ -1,39 +1,39 @@
 export interface IRegistrationStats {
-  completedRegistrations: number;
+	completedRegistrations: number;
 
-  dateTimeCount: IDateTimeCount[];
+	dateTimeCount: IDateTimeCount[];
 
-  zipCodeCount: IZipCodeCount[];
+	zipCodeCount: IZipCodeCount[];
 }
 
 export interface IDateTimeCount {
-  dateTime: Date;
-  count: number;
-  childCount: number;
-  stats: IGenderAgeStats;
+	dateTime: Date;
+	count: number;
+	childCount: number;
+	stats: IGenderAgeStats;
 }
 
 export interface IZipCodeCount {
-  zip: number;
-  count: number;
-  childCount: number;
+	zip: number;
+	count: number;
+	childCount: number;
 }
 
 export interface IGenderAgeStats {
-  infants: IAgeGroupBreakdown;
-  girls: IAgeGroupBreakdown;
-  boys: IAgeGroupBreakdown;
+	infants: IAgeGroupBreakdown;
+	girls: IAgeGroupBreakdown;
+	boys: IAgeGroupBreakdown;
 }
 
 export interface IAgeGroupBreakdown {
-  total: number;
-  age02: number;
-  age35: number;
-  age68: number;
-  age911: number;
+	total: number;
+	age02: number;
+	age35: number;
+	age68: number;
+	age911: number;
 }
 
 export interface IGenderAgeStatsDisplay {
-  date: Date;
-  stats: IGenderAgeStats;
+	date: Date;
+	stats: IGenderAgeStats;
 }

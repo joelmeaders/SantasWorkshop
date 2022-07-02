@@ -1,23 +1,23 @@
 {
-  "parameters": {
-    "registrationEnabled": {
-      "defaultValue": {
-        "value": "false"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "maintenanceModeEnabled": {
-      "defaultValue": {
-        "value": "false"
-      },
-      "valueType": "BOOLEAN"
-    },
-    "shopClosedWeather": {
-      "defaultValue": {
-        "value": "false"
-      },
-      "description": "Allow registrations in the app",
-      "valueType": "STRING"
-    }
-  }
+	"parameters": {
+		"registrationEnabled": {
+			"defaultValue": {
+				"value": "false"
+			},
+			"valueType": "BOOLEAN"
+		},
+		"maintenanceModeEnabled": {
+			"defaultValue": {
+				"value": "false"
+			},
+			"valueType": "BOOLEAN"
+		},
+		"shopClosedWeather": {
+			"defaultValue": {
+				"value": "false"
+			},
+			"description": "Allow registrations in the app",
+			"valueType": "STRING"
+		}
+	}
 }

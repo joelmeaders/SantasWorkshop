@@ -18,9 +18,9 @@
 					<ion-icon name="accessibility"></ion-icon>
 					<ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
 					<ng-container *appLet="childCount$ | async as count">
-						<ion-badge color="success" *ngIf="count >= 1">{{
-							count
-						}}</ion-badge>
+						<ion-badge color="success" *ngIf="count >= 1"
+							>{{ count }}</ion-badge
+						>
 					</ng-container>
 				</ion-tab-button>
 

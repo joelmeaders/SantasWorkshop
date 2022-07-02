@@ -7,13 +7,13 @@ import { SignInPageRoutingModule } from './sign-in-routing.module';
 import { SignInPage } from './sign-in.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    IonicModule,
-    SignInPageRoutingModule,
-    SharedModule,
-  ],
-  declarations: [SignInPage],
+	imports: [
+		CommonModule,
+		ReactiveFormsModule,
+		IonicModule,
+		SignInPageRoutingModule,
+		SharedModule,
+	],
+	declarations: [SignInPage],
 })
 export class SignInPageModule {}

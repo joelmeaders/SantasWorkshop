@@ -86,8 +86,8 @@ export class DateTimePageService implements OnDestroy {
 	 * where the field 'enabled' is true.
 	 *
 	 * @private
-	 * @param {number} programYear
-	 * @return {*}  {Observable<IDateTimeSlot[]>}
+	 * @param programYear
+	 * @return
 	 * @memberof DateTimePageService
 	 */
 	private availableSlotsQuery(

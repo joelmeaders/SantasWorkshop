@@ -80,7 +80,7 @@ export class DateTimePage implements OnDestroy {
 
 	public async selectDateTime(slot?: IDateTimeSlot) {
 		const hasSlot = await this.alreadyChoseSlot();
-		var shouldChange = false;
+		let shouldChange = false;
 
 		if (hasSlot) shouldChange = await this.confirmChangeDate();
 
@@ -101,7 +101,7 @@ export class DateTimePage implements OnDestroy {
 	}
 
 	private alreadyChoseSlot(): Promise<boolean> {
-		var source = this.chosenSlot$.pipe(
+		const source = this.chosenSlot$.pipe(
 			take(1),
 			map((slot) => !!slot)
 		);

@@ -40,8 +40,7 @@
 
 							<div class="ion-margin ion-padding">
 								<p>
-									{{
-										"PROFILE.CHANGE_EMAIL_TEXT" | translate
+									{{ "PROFILE.CHANGE_EMAIL_TEXT" | translate
 									}}
 								</p>
 							</div>
@@ -51,18 +50,16 @@
 									<form [formGroup]="form" novalidate>
 										<p class="ion-padding">
 											{{ "CURRENT_EMAIL" | translate }}
-											<strong>{{
-												email$ | async
-											}}</strong>
+											<strong
+												>{{ email$ | async }}</strong
+											>
 										</p>
 
 										<ion-list>
 											<ion-item>
 												<ion-label color="xmasred">
-													{{
-														"COMMON.EMAIL_ADDRESS"
-															| translate
-													}}
+													{{ "COMMON.EMAIL_ADDRESS" |
+													translate }}
 												</ion-label>
 												<ion-input
 													formControlName="emailAddress"
@@ -80,10 +77,8 @@
 
 											<ion-item>
 												<ion-label color="xmasred">
-													{{
-														"COMMON.PASSWORD"
-															| translate
-													}}
+													{{ "COMMON.PASSWORD" |
+													translate }}
 												</ion-label>
 												<ion-input
 													formControlName="password"

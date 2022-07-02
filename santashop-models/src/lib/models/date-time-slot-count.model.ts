@@ -1,14 +1,14 @@
 export interface IProgramYearCount {
-  programYear: IDateTimeSlotCount;
+	programYear: IDateTimeSlotCount;
 }
 
 export interface IDateTimeSlotCount {
-  id: string;
-  totalSlots: number;
-  slotsReserved: number;
+	id: string;
+	totalSlots: number;
+	slotsReserved: number;
 }
 
 export interface IUsersInSlot {
-  id: string;
-  users: string[];
+	id: string;
+	users: string[];
 }

@@ -13,19 +13,19 @@ export class RemoteConfigService {
 	);
 
 	public readonly registrationEnabled$ = this.config$.pipe(
-		map((param) => param['registrationEnabled'].asBoolean()),
+		map((param) => param.registrationEnabled.asBoolean()),
 		distinctUntilChanged(),
 		shareReplay(1)
 	);
 
 	public readonly maintenanceModeEnabled$ = this.config$.pipe(
-		map((param) => param['maintenanceModeEnabled'].asBoolean()),
+		map((param) => param.maintenanceModeEnabled.asBoolean()),
 		distinctUntilChanged(),
 		shareReplay(1)
 	);
 
 	public readonly shopClosedWeather$ = this.config$.pipe(
-		map((param) => param['shopClosedWeather'].asBoolean()),
+		map((param) => param.shopClosedWeather.asBoolean()),
 		distinctUntilChanged(),
 		shareReplay(1)
 	);

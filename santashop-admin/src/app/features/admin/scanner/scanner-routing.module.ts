@@ -3,14 +3,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { ScannerPage } from './scanner.page';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: ScannerPage,
-  },
+	{
+		path: '',
+		component: ScannerPage,
+	},
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+	imports: [RouterModule.forChild(routes)],
+	exports: [RouterModule],
 })
 export class ScannerPageRoutingModule {}

@@ -1,7 +1,7 @@
 export interface IRegistrationSearch {
-  firstName?: string;
+	firstName?: string;
 
-  lastName?: string;
+	lastName?: string;
 
-  registrationCode?: string;
+	registrationCode?: string;
 }

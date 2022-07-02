@@ -42,24 +42,19 @@
 								>
 									<p>
 										<strong>
-											{{
-												"OVERVIEW.NO_CHILDREN"
-													| translate
-											}}
+											{{ "OVERVIEW.NO_CHILDREN" |
+											translate }}
 										</strong>
 										<br />
-										{{
-											"OVERVIEW.NO_CHILDREN_MESSAGE"
-												| translate
-										}}
+										{{ "OVERVIEW.NO_CHILDREN_MESSAGE" |
+										translate }}
 									</p>
 									<p class="ion-text-end es-pd-top-sm">
 										<ion-button
 											color="xmasred"
 											[routerLink]="['../children']"
 										>
-											{{
-												"OVERVIEW.ADD_CHILD" | translate
+											{{ "OVERVIEW.ADD_CHILD" | translate
 											}}
 										</ion-button>
 									</p>
@@ -100,17 +95,16 @@
 											></ion-icon>
 											<div>
 												<ion-label>
-													{{ child.firstName }}
-													{{ child.lastName }}
+													{{ child.firstName }} {{
+													child.lastName }}
 												</ion-label>
 												<ion-note
 													*ngIf="!child.toyType"
 													color="danger"
 												>
 													{{
-														"CHILDREN.INVALID_TOYTYPE"
-															| translate
-													}}
+													"CHILDREN.INVALID_TOYTYPE" |
+													translate }}
 												</ion-note>
 											</div>
 										</ion-item>
@@ -121,10 +115,8 @@
 											color="xmasred"
 											[routerLink]="['../children']"
 										>
-											{{
-												"OVERVIEW.ADD_EDIT_CHILD"
-													| translate
-											}}
+											{{ "OVERVIEW.ADD_EDIT_CHILD" |
+											translate }}
 										</ion-button>
 									</p>
 								</ng-template>
@@ -156,16 +148,12 @@
 								>
 									<p>
 										<strong>
-											{{
-												"OVERVIEW.NO_TIME_SELECTED."
-													| translate
-											}}
+											{{ "OVERVIEW.NO_TIME_SELECTED." |
+											translate }}
 										</strong>
 										<br />
-										{{
-											"OVERVIEW.NO_TIME_MESSAGE"
-												| translate
-										}}
+										{{ "OVERVIEW.NO_TIME_MESSAGE" |
+										translate }}
 									</p>
 
 									<p class="ion-text-end es-pd-top-sm">
@@ -173,10 +161,8 @@
 											color="xmasred"
 											[routerLink]="['../date-time']"
 										>
-											{{
-												"OVERVIEW.SELECT_TIME"
-													| translate
-											}}
+											{{ "OVERVIEW.SELECT_TIME" |
+											translate }}
 										</ion-button>
 									</p>
 								</ng-container>
@@ -190,14 +176,10 @@
 											"
 											class="ion-text-wrap"
 										>
-											{{
-												dateTimeSlot.dateTime
-													| date: "fullDate"
-											}},
-											{{
-												dateTimeSlot.dateTime
-													| date: "shortTime"
-											}}
+											{{ dateTimeSlot.dateTime | date:
+											"fullDate" }}, {{
+											dateTimeSlot.dateTime | date:
+											"shortTime" }}
 										</ion-label>
 									</ion-item>
 									<p class="ion-text-end es-pd-top-sm">
@@ -205,10 +187,8 @@
 											color="xmasred"
 											[routerLink]="['../date-time']"
 										>
-											{{
-												"OVERVIEW.CHANGE_TIME"
-													| translate
-											}}
+											{{ "OVERVIEW.CHANGE_TIME" |
+											translate }}
 										</ion-button>
 									</p>
 								</ng-template>
@@ -231,15 +211,12 @@
 							<ion-card-content class="ion-text-center">
 								<p>
 									<strong>
-										{{
-											"OVERVIEW.NOT_SUBMITTED" | translate
+										{{ "OVERVIEW.NOT_SUBMITTED" | translate
 										}}
 									</strong>
 									<br />
-									{{
-										"OVERVIEW.NOT_SUBMITTED_MESSAGE"
-											| translate
-									}}
+									{{ "OVERVIEW.NOT_SUBMITTED_MESSAGE" |
+									translate }}
 								</p>
 								<p class="ion-text-end es-pd-top-sm">
 									<ion-button

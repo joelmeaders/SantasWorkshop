@@ -13,9 +13,9 @@ import { Timestamp } from '@firebase/firestore';
  * @return
  */
 export const timestampToDate = (timestampAsDate: Date): Date => {
-  try {
-    return (timestampAsDate as any as Timestamp).toDate();
-  } catch {
-    return timestampAsDate;
-  }
+	try {
+		return (timestampAsDate as any as Timestamp).toDate();
+	} catch {
+		return timestampAsDate;
+	}
 };

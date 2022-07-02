@@ -107,23 +107,19 @@
 										></ion-icon>
 										<ion-card-header>
 											<ion-card-title>
-												{{ child.firstName }}
-												{{ child.lastName }}
+												{{ child.firstName }} {{
+												child.lastName }}
 											</ion-card-title>
 											<ion-card-subtitle>
-												{{
-													child.dateOfBirth
-														| date: "MMMM dd, yyyy"
-												}}
+												{{ child.dateOfBirth | date:
+												"MMMM dd, yyyy" }}
 											</ion-card-subtitle>
 											<ion-card-subtitle
 												color="danger"
 												*ngIf="!child.toyType"
 											>
-												{{
-													"CHILDREN.INVALID_TOYTYPE"
-														| translate
-												}}
+												{{ "CHILDREN.INVALID_TOYTYPE" |
+												translate }}
 											</ion-card-subtitle>
 										</ion-card-header>
 										<div slot="end">
@@ -157,10 +153,8 @@
 								<ng-container *ngIf="!(childCount$ | async)">
 									<div class="ion-text-center es-pd-top-xxl">
 										<ion-card-title color="medium">
-											{{
-												"CHILDREN.NO_CHILDREN"
-													| translate
-											}}
+											{{ "CHILDREN.NO_CHILDREN" |
+											translate }}
 										</ion-card-title>
 									</div>
 								</ng-container>

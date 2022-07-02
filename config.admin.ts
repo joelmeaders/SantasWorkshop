@@ -23,11 +23,11 @@ const envConfigFile = `export const environment = {
 `;
 
 writeFile(targetPath, envConfigFile, 'utf8', function (err) {
-  if (err) {
-    throw console.error(err);
-  } else {
-    console.log(
-      `Angular environment.ts file generated correctly at ${targetPath} \n`
-    );
-  }
+	if (err) {
+		throw console.error(err);
+	} else {
+		console.log(
+			`Angular environment.ts file generated correctly at ${targetPath} \n`
+		);
+	}
 });

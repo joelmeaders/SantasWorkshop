@@ -8,10 +8,10 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
 const modules = [
-  CommonModule,
-  IonicModule,
-  ReactiveFormsModule,
-  TranslateModule,
+	CommonModule,
+	IonicModule,
+	ReactiveFormsModule,
+	TranslateModule,
 ];
 
 const directives = [AppLetDirective];
@@ -21,9 +21,9 @@ const pipes = [NiceFormErrorPipe];
 const components = [ControlErrorsComponent];
 
 @NgModule({
-  imports: [...modules],
-  declarations: [...directives, ...pipes, ...components],
-  exports: [...modules, ...directives, ...pipes, ...components],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+	imports: [...modules],
+	declarations: [...directives, ...pipes, ...components],
+	exports: [...modules, ...directives, ...pipes, ...components],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class CoreModule {}

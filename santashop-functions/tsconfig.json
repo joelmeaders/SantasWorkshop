@@ -1,19 +1,19 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "composite": true,
-    "noEmit": false,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "outDir": "dist",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017",
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true
-  },
-  "compileOnSave": true,
-  "include": ["src/**/*"],
-  "exclude": ["dist/**"]
+	"compilerOptions": {
+		"module": "commonjs",
+		"composite": true,
+		"noEmit": false,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"outDir": "dist",
+		"sourceMap": true,
+		"strict": true,
+		"target": "es2017",
+		"declaration": true,
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true
+	},
+	"compileOnSave": true,
+	"include": ["src/**/*"],
+	"exclude": ["dist/**"]
 }

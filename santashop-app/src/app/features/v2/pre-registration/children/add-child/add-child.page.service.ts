@@ -53,7 +53,7 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async setChildToEdit(id: number) {
-		await logEvent(this.analytics, 'view_child', { id: id });
+		await logEvent(this.analytics, 'view_child', { id });
 
 		const children = await this.children$.pipe(take(1)).toPromise();
 
@@ -73,8 +73,8 @@ export class AddChildPageService implements OnDestroy {
 		// I opted not to use a 3rd party library this time, and
 		// JS dates don't play well with Firebase Timestamps.
 		const year = child.dateOfBirth.getFullYear();
-		var month = (child.dateOfBirth.getMonth() + 1).toString();
-		var day = child.dateOfBirth.getDate().toString();
+		let month = (child.dateOfBirth.getMonth() + 1).toString();
+		let day = child.dateOfBirth.getDate().toString();
 
 		month = month.length === 2 ? month : `0${month}`;
 		day = day.length === 2 ? day : `0${day}`;
@@ -144,8 +144,8 @@ export class AddChildPageService implements OnDestroy {
 	public setInfant(value: boolean) {
 		this._isInfant$.next(true);
 
-		const toyTypeControl = this.form.controls['toyType'];
-		const ageGroupControl = this.form.controls['ageGroup'];
+		const toyTypeControl = this.form.controls.toyType;
+		const ageGroupControl = this.form.controls.ageGroup;
 
 		if (value) {
 			toyTypeControl.setValue(ToyType.infant);
@@ -165,7 +165,7 @@ export class AddChildPageService implements OnDestroy {
 
 		const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
 		const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
-		var ageGroup: AgeGroup | undefined = undefined;
+		let ageGroup: AgeGroup | undefined;
 
 		if (ageInYears >= 0 && ageInYears < 3) {
 			this.setInfant(true);
@@ -285,7 +285,7 @@ export class AddChildPageService implements OnDestroy {
 	private async invalidEntryAlert(message: string): Promise<any> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
-			message: message,
+			message,
 			buttons: [{ text: this.translateService.instant('COMMON.OK') }],
 		});
 

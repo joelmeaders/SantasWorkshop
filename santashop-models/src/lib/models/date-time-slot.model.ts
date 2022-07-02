@@ -1,15 +1,15 @@
 export interface IDateTimeSlot {
-  id?: string;
+	id?: string;
 
-  programYear: number;
+	programYear: number;
 
-  dateTime: Date;
+	dateTime: Date;
 
-  maxSlots: number;
+	maxSlots: number;
 
-  slotsReserved?: number;
+	slotsReserved?: number;
 
-  enabled: boolean;
+	enabled: boolean;
 
-  lastUpdated?: Date;
+	lastUpdated?: Date;
 }

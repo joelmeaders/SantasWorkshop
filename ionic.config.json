@@ -1,29 +1,29 @@
 {
-  "projects": {
-    "santashop-admin": {
-      "name": "santashop-admin",
-      "integrations": {},
-      "type": "angular",
-      "root": "./santashop-admin"
-    },
-    "santashop-app": {
-      "name": "santashop-app",
-      "integrations": {},
-      "type": "angular",
-      "root": "./santashop-app"
-    },
-    "santashop-core": {
-      "name": "santashop-core",
-      "integrations": {},
-      "type": "angular",
-      "root": "./santashop-core"
-    },
-    "santashop-models": {
-      "name": "santashop-models",
-      "integrations": {},
-      "type": "angular",
-      "root": "./santashop-models"
-    }
-  },
-  "defaultProject": "santashop-app"
+	"projects": {
+		"santashop-admin": {
+			"name": "santashop-admin",
+			"integrations": {},
+			"type": "angular",
+			"root": "./santashop-admin"
+		},
+		"santashop-app": {
+			"name": "santashop-app",
+			"integrations": {},
+			"type": "angular",
+			"root": "./santashop-app"
+		},
+		"santashop-core": {
+			"name": "santashop-core",
+			"integrations": {},
+			"type": "angular",
+			"root": "./santashop-core"
+		},
+		"santashop-models": {
+			"name": "santashop-models",
+			"integrations": {},
+			"type": "angular",
+			"root": "./santashop-models"
+		}
+	},
+	"defaultProject": "santashop-app"
 }

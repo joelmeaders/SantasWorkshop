@@ -1,77 +1,68 @@
 {
-  "root": true,
-  "ignorePatterns": ["!**/*", "*.spec.ts", "**/dist/*"],
-  "overrides": [
-    {
-      "files": ["*.ts"],
-      "parser": "@typescript-eslint/parser",
-      "parserOptions": {
-        "ecmaVersion": 2020,
-        "sourceType": "module",
-        "project": [
-          "tsconfig.app.json",
-          "tsconfig.spec.json",
-          "e2e/tsconfig.json"
-        ],
-        "createDefaultProgram": true
-      },
-      "plugins": [
-        "@typescript-eslint",
-        "@ngneat/reactive-forms",
-        "@angular-eslint"
-      ],
-      "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:@angular-eslint/recommended",
-        "plugin:@angular-eslint/ng-cli-compat",
-        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
-        "plugin:@angular-eslint/template/process-inline-templates",
-        "plugin:prettier/recommended"
-      ],
-      "rules": {
-        "prettier/prettier": "off",
-        "no-floating-decimal": "error",
-        "prefer-arrow/prefer-arrow-functions": "warn",
-        "@typescript-eslint/member-ordering": "off",
-        "@typescript-eslint/no-non-null-assertion": "off",
-        "@angular-eslint/component-class-suffix": [
-          "error",
-          {
-            "suffixes": ["Page", "Component"]
-          }
-        ],
-        "@angular-eslint/component-selector": [
-          "error",
-          {
-            "type": "element",
-            "prefix": "app",
-            "style": "kebab-case"
-          }
-        ],
-        "@angular-eslint/directive-selector": [
-          "error",
-          {
-            "type": "attribute",
-            "prefix": "app",
-            "style": "camelCase"
-          }
-        ]
-      }
-    },
-    {
-      "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
-      "rules": {}
-    },
-    {
-      "files": ["*.html"],
-      "excludedFiles": ["*inline-template-*.component.html"],
-      "extends": ["plugin:prettier/recommended"],
-      "rules": {
-        "prettier/prettier": ["error", { "parser": "angular" }]
-      }
-    }
-  ]
+	"root": true,
+	"ignorePatterns": ["projects/**/*", "!**/*", "*.spec.ts", "**/dist/*"],
+	"overrides": [
+		{
+			"files": ["*.ts"],
+			"parser": "@typescript-eslint/parser",
+			"parserOptions": {
+				"ecmaVersion": 2020,
+				"sourceType": "module",
+				"project": ["tsconfig.app.json", "tsconfig.spec.json"],
+				"createDefaultProgram": true
+			},
+			"plugins": ["@typescript-eslint", "@angular-eslint"],
+			"extends": [
+				"eslint:recommended",
+				"plugin:@typescript-eslint/eslint-recommended",
+				"plugin:@typescript-eslint/recommended",
+				"plugin:@angular-eslint/recommended",
+				"plugin:@angular-eslint/ng-cli-compat",
+				"plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+				"plugin:@angular-eslint/template/process-inline-templates",
+				"plugin:prettier/recommended"
+			],
+			"rules": {
+				"prettier/prettier": ["off", { "endOfLine": "auto" }],
+				"no-floating-decimal": "error",
+				"@typescript-eslint/member-ordering": "off",
+				"@typescript-eslint/no-unused-vars": "error",
+				"@angular-eslint/component-class-suffix": [
+					"error",
+					{
+						"suffixes": ["Page", "Component"]
+					}
+				],
+				"@angular-eslint/component-selector": [
+					"error",
+					{
+						"type": "element",
+						"prefix": "perm",
+						"style": "kebab-case"
+					}
+				],
+				"@angular-eslint/directive-selector": [
+					"error",
+					{
+						"type": "attribute",
+						"prefix": "perm",
+						"style": "camelCase"
+					}
+				]
+			}
+		},
+		{
+			"files": ["*.html"],
+			"extends": ["plugin:@angular-eslint/template/recommended"],
+			"rules": {}
+		},
+		{
+			"files": ["*.html"],
+			"excludedFiles": ["*inline-template-*.component.html"],
+			"extends": ["plugin:prettier/recommended"],
+			"rules": {
+				"prettier/prettier": ["off", { "parser": "angular" }]
+			}
+		}
+	]
 }

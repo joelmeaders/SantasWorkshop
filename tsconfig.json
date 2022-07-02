@@ -1,49 +1,49 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noEmit": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitAny": true,
-    "sourceMap": true,
-    "declaration": true,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2020",
-    "module": "es2020",
-    "skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
-    "lib": ["es2018", "dom"],
-    "paths": {
-      "@core/*": ["santashop-core/src", "dist/santashop-core"],
-      "@registration/*": ["santashop-app/src"],
-      "@admin/*": ["santashop-admin/src"],
-      "@models/*": ["dist/santashop-models"]
-    },
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types"]
-  },
-  "references": [
-    { "path": "santashop-models/tsconfig.lib.json" },
-    { "path": "santashop-core/tsconfig.lib.json" },
-    { "path": "santashop-app/tsconfig.app.json" },
-    { "path": "santashop-admin/tsconfig.app.json" },
-    { "path": "santashop-functions/tsconfig.json" }
-  ],
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
+	"compileOnSave": false,
+	"compilerOptions": {
+		"baseUrl": "./",
+		"outDir": "./dist/out-tsc",
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noEmit": false,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitAny": true,
+		"sourceMap": true,
+		"declaration": false,
+		"downlevelIteration": true,
+		"experimentalDecorators": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"target": "es2020",
+		"module": "es2020",
+		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
+		"lib": ["es2018", "dom"],
+		"paths": {
+			"@core/*": ["santashop-core/src", "dist/santashop-core"],
+			"@registration/*": ["santashop-app/src"],
+			"@admin/*": ["santashop-admin/src"],
+			"@models/*": ["dist/santashop-models"]
+		},
+		"types": ["node"],
+		"typeRoots": ["./node_modules/@types"]
+	},
+	"references": [
+		{ "path": "santashop-models/tsconfig.lib.json" },
+		{ "path": "santashop-core/tsconfig.lib.json" },
+		{ "path": "santashop-app/tsconfig.app.json" },
+		{ "path": "santashop-admin/tsconfig.app.json" },
+		{ "path": "santashop-functions/tsconfig.json" }
+	],
+	"angularCompilerOptions": {
+		"enableI18nLegacyMessageIdFormat": false,
+		"strictInjectionParameters": true,
+		"strictInputAccessModifiers": true,
+		"strictTemplates": true
+	}
 }

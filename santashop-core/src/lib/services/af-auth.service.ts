@@ -1,15 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import {
-	Auth,
-	authState,
-	sendPasswordResetEmail,
-	signInWithEmailAndPassword,
-	updatePassword,
-	User,
-	UserCredential,
-} from '@angular/fire/auth';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { shareReplay, Subject } from 'rxjs';
+import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
+import { FunctionsWrapper } from './_functions-wrapper';
 
 /**
  * This class abstracts firebase auth methods
@@ -24,11 +16,13 @@ import { shareReplay, Subject } from 'rxjs';
 export class AfAuthService implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
-	public readonly authState$ = authState(this.afAuth).pipe(shareReplay(1));
+	public readonly authState$ = this.authWrapper
+		.authState()
+		.pipe(shareReplay(1));
 
 	constructor(
-		private readonly afAuth: Auth,
-		private readonly afFunctions: Functions
+		private readonly authWrapper: AuthWrapper,
+		private readonly functionsWrapper: FunctionsWrapper
 	) {}
 
 	ngOnDestroy(): void {
@@ -37,35 +31,34 @@ export class AfAuthService implements OnDestroy {
 	}
 
 	public currentUser(): User | null {
-		return this.afAuth.currentUser;
+		return this.authWrapper.currentUser();
 	}
 
 	public sendPasswordResetEmail(emailAddress: string) {
-		return sendPasswordResetEmail(this.afAuth, emailAddress);
+		return this.authWrapper.sendPasswordResetEmail(emailAddress);
 	}
 
 	public signInWithEmailAndPassword(
 		emailAddress: string,
 		password: string
 	): Promise<UserCredential> {
-		return signInWithEmailAndPassword(this.afAuth, emailAddress, password);
+		return this.authWrapper.signInWithEmailAndPassword(
+			emailAddress,
+			password
+		);
 	}
 
 	public updateUserPassword(user: User, newPassword: string): Promise<void> {
-		return updatePassword(user, newPassword);
+		return this.authWrapper.updatePassword(user, newPassword);
 	}
 
 	public async updateUserEmailAddress(
 		newEmailAddress: string
 	): Promise<void> {
-		const accountStatusFunction = httpsCallable(
-			this.afFunctions,
-			'updateEmailAddress'
-		);
-		await accountStatusFunction({ emailAddress: newEmailAddress });
+		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 	}
 
 	public signOut(): Promise<void> {
-		return this.afAuth.signOut();
+		return this.authWrapper.signOut();
 	}
 }

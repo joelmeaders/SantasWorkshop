@@ -22,7 +22,6 @@ import { collection as rxCollection } from 'rxfire/firestore';
 import { Query } from 'rxfire/firestore/interfaces';
 
 // Re-export types to ensure no references to these libraries exist outside of this file
-export { Firestore };
 export type CollectionReference<T> = _CollectionReference<T>;
 export type DocumentReference<T> = _DocumentReference<T>;
 export type SetOptions = _SetOptions;
@@ -40,9 +39,11 @@ export type SnapshotOptions = _SnapshotOptions;
  * @class FirestoreMethods
  */
 export class FirestoreWrapper {
+	constructor(private readonly firestore: Firestore) {}
+
 	// firebase/firestore methods
-	public readonly collection = (firestore: Firestore, path: string) =>
-		collection(firestore, path);
+	public readonly collection = (path: string) =>
+		collection(this.firestore, path);
 
 	public readonly doc = <T>(
 		reference: CollectionReference<T>,

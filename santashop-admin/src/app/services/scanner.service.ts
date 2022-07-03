@@ -83,7 +83,6 @@ export class ScannerService implements OnDestroy {
 	}
 
 	public navigatedAway() {
-		console.log('left scanner');
 		this.onDeviceSelectChange({ detail: { value: '' } });
 	}
 

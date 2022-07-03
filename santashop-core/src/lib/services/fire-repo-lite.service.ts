@@ -19,6 +19,7 @@ export class FireRepoLite {
 		return this.fireRepoBase.randomId();
 	}
 
+	/** @inheritdoc */
 	public collection<T>(collectionPath: string): IFireRepoCollection<T> {
 		return {
 			collectionPathName: collectionPath,

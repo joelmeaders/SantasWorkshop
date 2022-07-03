@@ -33,19 +33,16 @@ export class AppStateService implements OnDestroy {
 
 				if (maintenance) {
 					this.router.navigate(['/maintenance']);
-					console.log('maintenance');
 					return;
 				}
 
 				if (weather) {
 					this.router.navigate(['/bad-weather']);
-					console.log('weather');
 					return;
 				}
 
 				if (!registration) {
 					this.router.navigate(['/registration-closed']);
-					console.log('registration');
 				}
 			})
 		)

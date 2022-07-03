@@ -22,6 +22,7 @@ export class AppComponent {
 
 	async initializeApp() {
 		await this.platform.ready().then(() => {
+			// This is here to kick off the appstateservice
 			console.log('AppStateService Injected', !!this.appStateService);
 		});
 

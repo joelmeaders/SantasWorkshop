@@ -154,8 +154,6 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async birthdaySelected() {
-		console.log(this.form.controls.dateOfBirth.value);
-
 		const yyyymmdd: any = this.form.controls.dateOfBirth.value;
 		if (!yyyymmdd) return;
 

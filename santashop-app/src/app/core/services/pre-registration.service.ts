@@ -1,7 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import {
-	filter,
 	map,
 	mergeMap,
 	shareReplay,
@@ -19,7 +18,7 @@ import {
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
-import { AuthService, filterNilProp, FireRepoLite } from '@core/*';
+import { AuthService, filterNil, filterNilProp, FireRepoLite } from '@core/*';
 
 @Injectable({
 	providedIn: 'root',
@@ -34,7 +33,7 @@ export class PreRegistrationService implements OnDestroy {
 
 	public readonly userRegistration$ = this.authService.uid$.pipe(
 		takeUntil(this.destroy$),
-		filter((value) => !!value),
+		filterNil(),
 		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
 		shareReplay(1)
 	);

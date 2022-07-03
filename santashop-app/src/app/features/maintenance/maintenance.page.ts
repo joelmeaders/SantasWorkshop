@@ -19,7 +19,6 @@ export class MaintenancePage implements OnDestroy {
 				takeUntil(this.destroy$),
 				filter((enabled) => !enabled),
 				tap(() => {
-					console.log('maintenance disabled, navigating');
 					this.router.navigate(['/']);
 				})
 			)

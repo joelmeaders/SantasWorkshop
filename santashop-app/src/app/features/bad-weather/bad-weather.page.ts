@@ -18,7 +18,6 @@ export class BadWeatherPage implements OnDestroy {
 			takeUntil(this.destroy$),
 			filter((enabled) => !enabled),
 			tap(() => {
-				console.log('weather disabled, navigating');
 				this.router.navigate(['/']);
 			})
 		)

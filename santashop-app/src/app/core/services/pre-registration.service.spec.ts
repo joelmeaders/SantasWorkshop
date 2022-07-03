@@ -59,15 +59,15 @@ describe('PreRegistrationService', () => {
 		expect(registration.uid).toEqual(userId);
 	});
 
-	// it('registrationComplete$: should make expected call', async () => {
-	// 	// Arrange
+	it('registrationComplete$: should make expected call', async () => {
+		// Arrange
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.registrationComplete$);
+		// Act
+		const value = await firstValueFrom(service.registrationComplete$);
 
-	// 	// Assert
-	// 	expect(value).toBeTrue();
-	// });
+		// Assert
+		expect(value).toBeTrue();
+	});
 
 	// // TODO: Make a true version
 	// it('registrationSubmitted$: should return false', async () => {

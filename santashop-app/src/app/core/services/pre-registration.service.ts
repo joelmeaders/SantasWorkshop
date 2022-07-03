@@ -19,24 +19,29 @@ import {
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
-import { AuthService, FireRepoLite, IFireRepoCollection } from '@core/*';
-import { QrCodeService } from './qrcode.service';
+import { AuthService, filterNilProp, FireRepoLite } from '@core/*';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class PreRegistrationService implements OnDestroy {
+	private readonly registrationCollection = () =>
+		this.fireRepo.collection<IRegistration>(
+			COLLECTION_SCHEMA.registrations
+		);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly userRegistration$ = this.authService.uid$.pipe(
 		takeUntil(this.destroy$),
 		filter((value) => !!value),
-		mergeMap((uid) => this.userRegistration(uid)),
+		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
 		shareReplay(1)
 	);
 
 	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
+		filterNilProp('uid'),
 		mergeMap(() => this.isRegistrationComplete()),
 		shareReplay(1)
 	);
@@ -75,17 +80,18 @@ export class PreRegistrationService implements OnDestroy {
 
 	public qrCode$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		filter((registration) => !!registration?.uid),
-		mergeMap((registration) =>
-			this.qrCodeService.registrationQrCodeUrl(registration.uid!)
-		),
+		map(() => 'dscsddsf'),
+		// filterNilProp('uid'),
+		// mergeMap((registration) =>
+		// 	this.qrCodeService.registrationQrCodeUrl(registration.uid)
+		// ),
 		shareReplay(1)
 	);
 
 	constructor(
 		private readonly fireRepo: FireRepoLite,
 		private readonly authService: AuthService,
-		private readonly qrCodeService: QrCodeService,
+		// private readonly qrCodeService: QrCodeService,
 		private readonly afFunctions: Functions
 	) {}
 
@@ -114,14 +120,6 @@ export class PreRegistrationService implements OnDestroy {
 			'undoRegistration'
 		);
 		return accountStatusFunction({});
-	}
-
-	private registrationCollection(): IFireRepoCollection<IRegistration> {
-		return this.fireRepo.collection(COLLECTION_SCHEMA.registrations);
-	}
-
-	private userRegistration(uid: string): Observable<IRegistration> {
-		return this.registrationCollection().read(uid, 'uid');
 	}
 
 	public async isRegistrationComplete(): Promise<boolean> {

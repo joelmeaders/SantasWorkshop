@@ -3,21 +3,20 @@ import { AuthService, FireRepoLite } from '@core/*';
 import { Functions } from '@angular/fire/functions';
 import { provideMock, Spied } from 'test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';
-import { IRegistration } from '@models/*';
 import { PreRegistrationService } from './pre-registration.service';
+import { repoCollectionStub } from '../../../../../test-helpers';
+import { mockRegistrations } from '../../../../../test-helpers/mock-data';
+import { QrCodeService } from './qrcode.service';
 
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
 	let fireRepo: Spied<FireRepoLite>;
-	// let qrCodeService: Spied<QrCodeService>;
+	let qrCodeService: Spied<QrCodeService>;
+
+	let collectionSpy: jasmine.Spy;
+	const collectionStub = repoCollectionStub();
 
 	const userId = '12345';
-	const mockRegistration = {
-		uid: userId,
-		children: [{ id: '1' }, { id: '2' }] as any[],
-		dateTimeSlot: { id: '1' },
-	} as IRegistration;
-	const mockRegistration$ = of(mockRegistration);
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -25,16 +24,21 @@ describe('PreRegistrationService', () => {
 			providers: [
 				provideMock(FireRepoLite),
 				{ provide: AuthService, useValue: { uid$: of(userId) } },
-				// provideMock(QrCodeService),
+				provideMock(QrCodeService),
 				provideMock(Functions),
 			],
 		});
 
 		service = TestBed.inject(PreRegistrationService);
 		fireRepo = TestBed.inject(FireRepoLite) as jasmine.SpyObj<FireRepoLite>;
-		// qrCodeService = TestBed.inject(
-		// 	QrCodeService
-		// ) as jasmine.SpyObj<QrCodeService>;
+		qrCodeService = TestBed.inject(
+			QrCodeService
+		) as jasmine.SpyObj<QrCodeService>;
+	});
+
+	beforeEach(() => {
+		collectionSpy = fireRepo.collection;
+		collectionSpy.and.returnValue(collectionStub);
 	});
 
 	it('should be created', () => {
@@ -43,12 +47,10 @@ describe('PreRegistrationService', () => {
 
 	it('userRegistration$: should make expected calls', async () => {
 		// Arrange
-		const readStub = { read: () => {} } as any;
-		const collectionSpy = fireRepo.collection;
-		collectionSpy.and.returnValue(readStub);
-
-		const readSpy = spyOn(readStub, 'read');
-		readSpy.and.returnValue(mockRegistration$);
+		const readSpy = spyOn(collectionStub, 'read');
+		readSpy.and.returnValue(
+			of(mockRegistrations(userId).complete.mockRegistration1)
+		);
 
 		// Act
 		const registration = await firstValueFrom(service.userRegistration$);
@@ -59,94 +61,169 @@ describe('PreRegistrationService', () => {
 		expect(registration.uid).toEqual(userId);
 	});
 
-	it('registrationComplete$: should make expected call', async () => {
+	it('registrationComplete$: should return true', async () => {
 		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().complete.mockRegistration1)
+		);
 
 		// Act
 		const value = await firstValueFrom(service.registrationComplete$);
 
 		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
 		expect(value).toBeTrue();
 	});
 
-	// // TODO: Make a true version
-	// it('registrationSubmitted$: should return false', async () => {
-	// 	// Arrange
+	it('registrationComplete$: should return false', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().incomplete.noRegistrationSubmittedOn)
+		);
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.registrationSubmitted$);
+		// Act
+		const value = await firstValueFrom(service.registrationComplete$);
 
-	// 	// Assert
-	// 	expect(value).toBeFalse();
-	// });
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBeFalse();
+	});
 
-	// // TODO: Try with no children
-	// it('children$: should get both children', async () => {
-	// 	// Arrange
+	it('registrationSubmitted$: should return true', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().complete.mockRegistration1)
+		);
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.children$);
+		// Act
+		const value = await firstValueFrom(service.registrationSubmitted$);
 
-	// 	// Assert
-	// 	expect(value.length).toBe(2);
-	// });
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBeTrue();
+	});
 
-	// // TODO: Try with no children
-	// it('childCount$: should return 2', async () => {
-	// 	// Arrange
+	it('registrationSubmitted$: should return false with no submitted on field', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().incomplete.noRegistrationSubmittedOn)
+		);
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.childCount$);
+		// Act
+		const value = await firstValueFrom(service.registrationSubmitted$);
 
-	// 	// Assert
-	// 	expect(value).toBe(2);
-	// });
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBeFalse();
+	});
 
-	// // TODO: Add another test that shows errors
-	// it('noErrorsInChildren$: should return true', async () => {
-	// 	// Arrange
+	it('children$: should get two children', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().complete.mockRegistration1)
+		);
+		// Act
+		const value = await firstValueFrom(service.children$);
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.noErrorsInChildren$);
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value.length).toBe(2);
+	});
 
-	// 	// Assert
-	// 	expect(value).toBeTrue();
-	// });
+	it('children$: should get no children', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().incomplete.noChildren)
+		);
+		// Act
+		const value = await firstValueFrom(service.children$);
 
-	// // TODO: Add another test that shows errors
-	// it('dateTimeSlot$: should return dateTimeSlot', async () => {
-	// 	// Arrange
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value.length).toBe(0);
+	});
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.dateTimeSlot$);
+	it('childCount$: should return 0', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().incomplete.noChildren)
+		);
+		// Act
+		const value = await firstValueFrom(service.childCount$);
 
-	// 	// Assert
-	// 	expect(value).toBeTruthy();
-	// });
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBe(0);
+	});
 
-	// it('qrCode$: should make expected call', async () => {
-	// 	// Arrange
-	// 	const spy = qrCodeService.registrationQrCodeUrl;
-	// 	spy.and.resolveTo('someurl');
+	it('childCount$: should return 2', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().complete.mockRegistration1)
+		);
+		// Act
+		const value = await firstValueFrom(service.childCount$);
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.qrCode$);
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBe(2);
+	});
 
-	// 	// Assert
-	// 	expect(value).toEqual('someurl');
-	// 	expect(spy).toHaveBeenCalledWith(userId);
-	// });
+	it('noErrorsInChildren$: should return true', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().complete.mockRegistration1)
+		);
+		// Act
+		const value = await firstValueFrom(service.noErrorsInChildren$);
 
-	// it('qrCode$: should make expected call', async () => {
-	// 	// Arrange
-	// 	const spy = qrCodeService.registrationQrCodeUrl;
-	// 	spy.and.resolveTo('someurl');
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBeTrue();
+	});
 
-	// 	// Act
-	// 	const value = await firstValueFrom(service.qrCode$);
+	it('noErrorsInChildren$: should return false', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().incomplete.withChildrenError)
+		);
+		// Act
+		const value = await firstValueFrom(service.noErrorsInChildren$);
 
-	// 	// Assert
-	// 	expect(value).toEqual('someurl');
-	// 	expect(spy).toHaveBeenCalledWith(userId);
-	// });
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBeFalse();
+	});
+
+	it('dateTimeSlot$: should return dateTimeSlot', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations().complete.mockRegistration1)
+		);
+
+		// Act
+		const value = await firstValueFrom(service.dateTimeSlot$);
+
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(value).toBeDefined();
+	});
+
+	it('qrCode$: should make expected call', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(
+			of(mockRegistrations(userId).complete.mockRegistration1)
+		);
+
+		const spy = qrCodeService.registrationQrCodeUrl;
+		spy.and.resolveTo('someurl');
+
+		// Act
+		const value = await firstValueFrom(service.qrCode$);
+
+		// Assert
+		expect(collectionSpy).toHaveBeenCalledWith('registrations');
+		expect(spy).toHaveBeenCalledWith(userId);
+		expect(value).toEqual('someurl');
+	});
 });

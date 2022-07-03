@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import {
 	map,
 	mergeMap,
@@ -7,6 +7,7 @@ import {
 	switchMap,
 	take,
 	takeUntil,
+	tap,
 } from 'rxjs/operators';
 import { Timestamp } from '@firebase/firestore';
 import {
@@ -18,7 +19,8 @@ import {
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
-import { AuthService, filterNil, filterNilProp, FireRepoLite } from '@core/*';
+import { AuthService, filterNil, FireRepoLite, pluckFilterNil } from '@core/*';
+import { QrCodeService } from './qrcode.service';
 
 @Injectable({
 	providedIn: 'root',
@@ -40,8 +42,7 @@ export class PreRegistrationService implements OnDestroy {
 
 	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		filterNilProp('uid'),
-		mergeMap(() => this.isRegistrationComplete()),
+		map(this.isRegistrationComplete),
 		shareReplay(1)
 	);
 
@@ -79,18 +80,15 @@ export class PreRegistrationService implements OnDestroy {
 
 	public qrCode$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		map(() => 'dscsddsf'),
-		// filterNilProp('uid'),
-		// mergeMap((registration) =>
-		// 	this.qrCodeService.registrationQrCodeUrl(registration.uid)
-		// ),
+		pluckFilterNil('uid'),
+		mergeMap((uid) => this.qrCodeService.registrationQrCodeUrl(uid)),
 		shareReplay(1)
 	);
 
 	constructor(
 		private readonly fireRepo: FireRepoLite,
 		private readonly authService: AuthService,
-		// private readonly qrCodeService: QrCodeService,
+		private readonly qrCodeService: QrCodeService,
 		private readonly afFunctions: Functions
 	) {}
 
@@ -121,10 +119,10 @@ export class PreRegistrationService implements OnDestroy {
 		return accountStatusFunction({});
 	}
 
-	public async isRegistrationComplete(): Promise<boolean> {
-		const hasChildren = !!(await firstValueFrom(this.childCount$));
-		const hasDateTime = !!(await firstValueFrom(this.dateTimeSlot$));
-		const isSubmitted = await firstValueFrom(this.registrationSubmitted$);
+	public isRegistrationComplete(registration: IRegistration): boolean {
+		const hasChildren = registration.children?.length;
+		const hasDateTime = registration.dateTimeSlot?.dateTime;
+		const isSubmitted = registration.registrationSubmittedOn;
 		return !!hasChildren && !!hasDateTime && !!isSubmitted;
 	}
 

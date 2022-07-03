@@ -1,8 +1,6 @@
 import { filter, map, Observable } from 'rxjs';
 import { IRegistration } from '../../../../dist/santashop-models';
 
-type KT<T> = keyof T | undefined | null;
-
 /**
  * Avoids the "no non null assertion operator" issue after filter statements
  * https://github.com/typescript-eslint/typescript-eslint/issues/3866
@@ -10,32 +8,6 @@ type KT<T> = keyof T | undefined | null;
  * @remarks
  * Use in place of filter(e => ...)
  */
-export const filterNilProp =
-	<T>(key: keyof T) =>
-	(source$: Observable<null | undefined | T>) =>
-		source$
-			.pipe(
-				filter(
-					(implied) =>
-						inputIsNotNullOrUndefinedTypeGuard(implied) &&
-						(implied[key]
-							? inputIsNotNullOrUndefinedTypeGuard(implied[key])
-							: true)
-				)
-			)
-			.pipe(
-				map((implied) => {
-					const src: KT<IRegistration> = 'uid';
-					console.log(src, src);
-
-					implied as NonNullable<T>;
-					if (implied && implied[key]) {
-						type I = typeof key;
-						implied[key] as NonNullable<T[I]>;
-					}
-				})
-			);
-
 export const filterNil =
 	<T>() =>
 	(source$: Observable<null | undefined | T>) =>
@@ -44,6 +16,15 @@ export const filterNil =
 				filter((implied) => inputIsNotNullOrUndefinedTypeGuard(implied))
 			)
 			.pipe(map((implied) => implied as NonNullable<T>));
+
+export const pluckFilterNil =
+	<T, K extends keyof T>(key: K) =>
+	(source$: Observable<null | undefined | T>) =>
+		source$.pipe(
+			filter((implied) => inputIsNotNullOrUndefinedTypeGuard(implied)),
+			map((implied) => (implied as NonNullable<T>)[key]),
+			filterNil()
+		);
 
 // TypeGuard
 export const inputIsNotNullOrUndefinedTypeGuard = <T>(

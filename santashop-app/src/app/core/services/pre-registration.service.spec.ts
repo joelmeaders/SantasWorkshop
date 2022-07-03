@@ -10,7 +10,7 @@ import { QrCodeService } from './qrcode.service';
 
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
-	let fireRepo: Spied<FireRepoLite>;
+	let repository: Spied<FireRepoLite>;
 	let qrCodeService: Spied<QrCodeService>;
 
 	let collectionSpy: jasmine.Spy;
@@ -30,14 +30,16 @@ describe('PreRegistrationService', () => {
 		});
 
 		service = TestBed.inject(PreRegistrationService);
-		fireRepo = TestBed.inject(FireRepoLite) as jasmine.SpyObj<FireRepoLite>;
+		repository = TestBed.inject(
+			FireRepoLite
+		) as jasmine.SpyObj<FireRepoLite>;
 		qrCodeService = TestBed.inject(
 			QrCodeService
 		) as jasmine.SpyObj<QrCodeService>;
 	});
 
 	beforeEach(() => {
-		collectionSpy = fireRepo.collection;
+		collectionSpy = repository.collection;
 		collectionSpy.and.returnValue(collectionStub);
 	});
 

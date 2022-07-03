@@ -7,7 +7,6 @@ import {
 	switchMap,
 	take,
 	takeUntil,
-	tap,
 } from 'rxjs/operators';
 import { Timestamp } from '@firebase/firestore';
 import {

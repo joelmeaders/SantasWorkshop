@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
 import { AlertController } from '@ionic/angular';
 import { IError } from '@models/*';
+import { AnalyticsWrapper } from './_analytics-wrapper';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class ErrorHandlerService {
 	constructor(
-		private readonly alertController: AlertController,
-		private readonly analytics: Analytics
+		private readonly analyticsWrapper: AnalyticsWrapper,
+		private readonly alertController: AlertController
 	) {}
 
 	public async handleError(
@@ -26,9 +26,7 @@ export class ErrorHandlerService {
 		if (showAlert) await alert.present();
 
 		try {
-			await logEvent(this.analytics, error.code, {
-				message: error.message,
-			});
+			this.analyticsWrapper.logEvent(error.code, error.message);
 		} catch {
 			// Do nothing
 		}

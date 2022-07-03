@@ -2,12 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { FireRepoBase } from './fire-repo-base.service';
 import { IRegistration } from '@models/*';
 import { of } from 'rxjs';
-import {
-	DocumentData,
-	DocumentReference,
-	Firestore,
-} from './_firestore-wrapper';
+import { DocumentData, DocumentReference } from './_firestore-wrapper';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
+import { Firestore } from '@angular/fire/firestore';
 
 describe('FireRepoLite', () => {
 	let service: FireRepoLite;

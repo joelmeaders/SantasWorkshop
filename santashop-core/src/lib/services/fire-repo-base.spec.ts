@@ -12,7 +12,6 @@ interface TestRecord {
 
 describe('FireRepoBase', () => {
 	let service: FireRepoBase;
-	let firestore: Firestore;
 	let firestoreMethods: jasmine.SpyObj<FirestoreWrapper>;
 
 	beforeEach(() => {
@@ -43,7 +42,6 @@ describe('FireRepoBase', () => {
 		});
 
 		service = TestBed.inject(FireRepoBase);
-		firestore = TestBed.inject(Firestore);
 		firestoreMethods = TestBed.inject(
 			FirestoreWrapper
 		) as jasmine.SpyObj<FirestoreWrapper>;
@@ -64,7 +62,7 @@ describe('FireRepoBase', () => {
 		const response = service.randomId();
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledOnceWith(firestore as any, '_');
+		expect(collectionSpy).toHaveBeenCalledOnceWith('_');
 		expect(documentSpy).toHaveBeenCalledWith(collectionReference);
 		expect(response).toBe('12345ABCDE');
 	});
@@ -90,10 +88,7 @@ describe('FireRepoBase', () => {
 		await firstValueFrom(service.read(collectionPath, documentId, idField));
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledWith(
-			firestore as any,
-			collectionPath
-		);
+		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(documentSpy).toHaveBeenCalledWith(
 			collectionReference,
 			documentId
@@ -143,10 +138,7 @@ describe('FireRepoBase', () => {
 		);
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledWith(
-			firestore as any,
-			collectionPath
-		);
+		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(querySpy).toHaveBeenCalledWith(
 			collectionReference,
 			queryConstraints
@@ -200,10 +192,7 @@ describe('FireRepoBase', () => {
 		await firstValueFrom(service.add(collectionPath, doc));
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledWith(
-			firestore as any,
-			collectionPath
-		);
+		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(addDocSpy).toHaveBeenCalledWith(collectionReference, doc);
 	});
 
@@ -231,10 +220,7 @@ describe('FireRepoBase', () => {
 		await firstValueFrom(service.addById(collectionPath, doc.id!, doc));
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledWith(
-			firestore as any,
-			collectionPath
-		);
+		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(documentSpy).toHaveBeenCalledWith(collectionReference, doc.id);
 		expect(setDocSpy).toHaveBeenCalledWith(docRefStub, doc);
 	});
@@ -265,10 +251,7 @@ describe('FireRepoBase', () => {
 		);
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledWith(
-			firestore as any,
-			collectionPath
-		);
+		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(documentSpy).toHaveBeenCalledWith(collectionReference, doc.id);
 		expect(setDocSpy).toHaveBeenCalledWith(docRefStub, doc, {
 			merge: true,
@@ -297,10 +280,7 @@ describe('FireRepoBase', () => {
 		await firstValueFrom(service.delete(collectionPath, doc.id!));
 
 		// Assert
-		expect(collectionSpy).toHaveBeenCalledWith(
-			firestore as any,
-			collectionPath
-		);
+		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(documentSpy).toHaveBeenCalledWith(collectionReference, doc.id);
 		expect(deleteDocSpy).toHaveBeenCalledWith(docRefStub);
 	});

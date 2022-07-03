@@ -10,9 +10,8 @@ import {
 import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { IAuth, IUserEmailUid } from '@models/*';
-
-import { UserCredential, User } from '@angular/fire/auth';
-import { AfAuthService } from './af-auth.service';
+import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
+import { FunctionsWrapper } from './_functions-wrapper';
 
 @Injectable({
 	providedIn: 'root',
@@ -24,11 +23,9 @@ export class AuthService {
 	 * @type {(Observable<User | null>)}
 	 * @memberof AuthService
 	 */
-	public readonly currentUser$: Observable<User | null> =
-		this.afAuthService.authState$.pipe(
-			distinctUntilChanged(),
-			shareReplay(1)
-		);
+	public readonly currentUser$: Observable<User | null> = this.authWrapper
+		.authState()
+		.pipe(distinctUntilChanged(), shareReplay(1));
 
 	/**
 	 * Stream of user email and uid
@@ -71,13 +68,16 @@ export class AuthService {
 	 */
 	public readonly isAdmin$ = this.currentUser$.pipe(
 		filter((user) => !!user),
+		// TODO: Find alternative
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		switchMap((user) => from(user!.getIdTokenResult(false))),
 		map((token) => token.claims?.admin ?? false),
 		shareReplay(1)
 	);
 
 	constructor(
-		private readonly afAuthService: AfAuthService,
+		private readonly authWrapper: AuthWrapper,
+		private readonly functionsWrapper: FunctionsWrapper,
 		private readonly errorHandler: ErrorHandlerService
 	) {}
 
@@ -90,7 +90,7 @@ export class AuthService {
 	 */
 	public resetPassword(emailAddress: string): Promise<void> {
 		// TODO: Add email validation
-		return this.afAuthService.sendPasswordResetEmail(emailAddress);
+		return this.authWrapper.sendPasswordResetEmail(emailAddress);
 	}
 
 	/**
@@ -105,7 +105,7 @@ export class AuthService {
 		oldPassword: string,
 		newPassword: string
 	): Promise<void> {
-		const user = this.afAuthService.currentUser();
+		const user = this.authWrapper.currentUser();
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
@@ -116,7 +116,7 @@ export class AuthService {
 
 		try {
 			await this.login(auth);
-			return this.afAuthService.updateUserPassword(user, newPassword);
+			return this.authWrapper.updatePassword(user, newPassword);
 		} catch (error: any) {
 			await this.errorHandler.handleError(error);
 			return Promise.reject(error);
@@ -136,7 +136,7 @@ export class AuthService {
 		password: string,
 		newEmailAddress: string
 	): Promise<void> {
-		const user = await this.afAuthService.currentUser();
+		const user = await this.authWrapper.currentUser();
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
@@ -147,9 +147,7 @@ export class AuthService {
 
 		try {
 			await this.login(auth);
-			return await this.afAuthService.updateUserEmailAddress(
-				newEmailAddress
-			);
+			await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		} catch (error: any) {
 			await this.errorHandler.handleError(error);
 			return Promise.reject(error);
@@ -164,7 +162,7 @@ export class AuthService {
 	 * @memberof AuthService
 	 */
 	public async login(auth: IAuth): Promise<UserCredential> {
-		return this.afAuthService.signInWithEmailAndPassword(
+		return this.authWrapper.signInWithEmailAndPassword(
 			auth.emailAddress,
 			auth.password
 		);
@@ -178,8 +176,8 @@ export class AuthService {
 	 * @memberof AuthService
 	 */
 	public async logout(reload = true): Promise<void> {
-		await this.afAuthService.signOut().then(() => {
-			// TODO: Replace this with something else
+		await this.authWrapper.signOut().then(() => {
+			// TODO: Replace this with something testable
 			if (reload) document.location.reload();
 		});
 	}

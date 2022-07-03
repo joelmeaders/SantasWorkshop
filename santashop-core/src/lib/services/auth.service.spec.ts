@@ -1,15 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { Functions } from '@angular/fire/functions';
 import { ErrorHandlerService } from '@core/*';
 import { User, UserCredential } from 'firebase/auth';
 import { firstValueFrom, of } from 'rxjs';
-import { AfAuthService } from './af-auth.service';
 import { AuthService } from './auth.service';
+import { AuthWrapper } from './_auth-wrapper';
+import { FunctionsWrapper } from './_functions-wrapper';
 
 describe('AuthService', () => {
 	let service: AuthService;
-	let afAuthService: jasmine.SpyObj<AfAuthService>;
+	let authWrapperService: jasmine.SpyObj<AuthWrapper>;
+	let functionsWrapperService: jasmine.SpyObj<FunctionsWrapper>;
 	let errorHandlerService: jasmine.SpyObj<ErrorHandlerService>;
+
+	let authStateSpy: any;
 
 	const mockUser = {
 		email: 'test@test.com',
@@ -24,23 +27,22 @@ describe('AuthService', () => {
 			teardown: { destroyAfterEach: false },
 			providers: [
 				{
-					provide: AfAuthService,
-					useValue: jasmine.createSpyObj<AfAuthService>(
-						'AfAuthService',
-						[
-							'sendPasswordResetEmail',
-							'currentUser',
-							'updateUserPassword',
-							'signInWithEmailAndPassword',
-							'updateUserEmailAddress',
-							'signOut',
-						],
-						{ authState$: of(mockUser) }
-					),
+					provide: AuthWrapper,
+					useValue: jasmine.createSpyObj<AuthWrapper>('AuthWrapper', [
+						'authState',
+						'sendPasswordResetEmail',
+						'currentUser',
+						'updatePassword',
+						'signInWithEmailAndPassword',
+						'signOut',
+					]),
 				},
 				{
-					provide: Functions,
-					useValue: jasmine.createSpy('functions'),
+					provide: FunctionsWrapper,
+					useValue: jasmine.createSpyObj<FunctionsWrapper>(
+						'FunctionsWrapper',
+						['updateEmailAddress']
+					),
 				},
 				{
 					provide: ErrorHandlerService,
@@ -52,13 +54,21 @@ describe('AuthService', () => {
 			],
 		});
 
-		service = TestBed.inject(AuthService);
-		afAuthService = TestBed.inject(
-			AfAuthService
-		) as jasmine.SpyObj<AfAuthService>;
+		authWrapperService = TestBed.inject(
+			AuthWrapper
+		) as jasmine.SpyObj<AuthWrapper>;
+		functionsWrapperService = TestBed.inject(
+			FunctionsWrapper
+		) as jasmine.SpyObj<FunctionsWrapper>;
 		errorHandlerService = TestBed.inject(
 			ErrorHandlerService
 		) as jasmine.SpyObj<ErrorHandlerService>;
+	});
+
+	beforeEach(() => {
+		authStateSpy = authWrapperService.authState;
+		authStateSpy.and.returnValue(of(mockUser));
+		service = TestBed.inject(AuthService);
 	});
 
 	it('should be created', () => {
@@ -67,16 +77,12 @@ describe('AuthService', () => {
 
 	it('currentUser$: should make expected calls', async () => {
 		// Arrange
-		const spy = Object.getOwnPropertyDescriptor(
-			afAuthService,
-			'authState$'
-		)?.get;
 
 		// Act
 		await firstValueFrom(service.currentUser$);
 
 		// Assert
-		expect(spy).toHaveBeenCalledTimes(1);
+		expect(authStateSpy).toHaveBeenCalledTimes(1);
 	});
 
 	it('emailAndUid$: should return expected value', async () => {
@@ -127,7 +133,7 @@ describe('AuthService', () => {
 
 	it('resetPassword(): should make expected call', async () => {
 		// Arrange
-		const spy = afAuthService.sendPasswordResetEmail;
+		const spy = authWrapperService.sendPasswordResetEmail;
 		spy.and.resolveTo();
 
 		// Act
@@ -140,7 +146,7 @@ describe('AuthService', () => {
 	describe('changePassword()', () => {
 		it('should make expected call', async () => {
 			// Arrange
-			const spy = afAuthService.currentUser;
+			const spy = authWrapperService.currentUser;
 			spy.and.returnValue(null);
 
 			// Act
@@ -154,9 +160,9 @@ describe('AuthService', () => {
 
 		it('should handle and return error', async () => {
 			// Arrange
-			afAuthService.currentUser.and.returnValue(mockUser);
+			authWrapperService.currentUser.and.returnValue(mockUser);
 
-			const signInSpy = afAuthService.signInWithEmailAndPassword;
+			const signInSpy = authWrapperService.signInWithEmailAndPassword;
 			signInSpy.and.rejectWith(new Error());
 
 			const errorHandlerSpy = errorHandlerService.handleError;
@@ -172,12 +178,12 @@ describe('AuthService', () => {
 
 		it('should make expected calls', async () => {
 			// Arrange
-			afAuthService.currentUser.and.returnValue(mockUser);
+			authWrapperService.currentUser.and.returnValue(mockUser);
 
-			const signInSpy = afAuthService.signInWithEmailAndPassword;
+			const signInSpy = authWrapperService.signInWithEmailAndPassword;
 			signInSpy.and.resolveTo({} as UserCredential);
 
-			const updateSpy = afAuthService.updateUserPassword;
+			const updateSpy = authWrapperService.updatePassword;
 			updateSpy.and.resolveTo();
 
 			// Act
@@ -194,7 +200,7 @@ describe('AuthService', () => {
 		describe('changeEmailAddress()', () => {
 			it('should make expected call', async () => {
 				// Arrange
-				const spy = afAuthService.currentUser;
+				const spy = authWrapperService.currentUser;
 				spy.and.returnValue(null);
 
 				// Act
@@ -211,9 +217,9 @@ describe('AuthService', () => {
 
 			it('should handle and return error', async () => {
 				// Arrange
-				afAuthService.currentUser.and.returnValue(mockUser);
+				authWrapperService.currentUser.and.returnValue(mockUser);
 
-				const signInSpy = afAuthService.signInWithEmailAndPassword;
+				const signInSpy = authWrapperService.signInWithEmailAndPassword;
 				signInSpy.and.rejectWith(new Error());
 
 				const errorHandlerSpy = errorHandlerService.handleError;
@@ -232,12 +238,12 @@ describe('AuthService', () => {
 
 			it('should make expected calls', async () => {
 				// Arrange
-				afAuthService.currentUser.and.returnValue(mockUser);
+				authWrapperService.currentUser.and.returnValue(mockUser);
 
-				const signInSpy = afAuthService.signInWithEmailAndPassword;
+				const signInSpy = authWrapperService.signInWithEmailAndPassword;
 				signInSpy.and.resolveTo({} as UserCredential);
 
-				const updateSpy = afAuthService.updateUserEmailAddress;
+				const updateSpy = functionsWrapperService.updateEmailAddress;
 				updateSpy.and.resolveTo();
 
 				// Act
@@ -255,7 +261,7 @@ describe('AuthService', () => {
 
 	it('login(): should make expected call', async () => {
 		// Arrange
-		const signInSpy = afAuthService.signInWithEmailAndPassword;
+		const signInSpy = authWrapperService.signInWithEmailAndPassword;
 		signInSpy.and.resolveTo({} as UserCredential);
 
 		// Act
@@ -267,7 +273,7 @@ describe('AuthService', () => {
 
 	it('logout(): should make expected call', async () => {
 		// Arrange
-		const signInSpy = afAuthService.signOut;
+		const signInSpy = authWrapperService.signOut;
 		signInSpy.and.resolveTo();
 
 		// Act

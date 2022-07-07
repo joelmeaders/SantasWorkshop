@@ -20,6 +20,7 @@ import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
 import { AuthService, filterNil, FireRepoLite, pluckFilterNil } from '@core/*';
 import { QrCodeService } from './qrcode.service';
+import { automock } from '../../../../../test-helpers';
 
 @Injectable({
 	providedIn: 'root',
@@ -32,6 +33,7 @@ export class PreRegistrationService implements OnDestroy {
 
 	private readonly destroy$ = new Subject<void>();
 
+	@automock
 	public readonly userRegistration$ = this.authService.uid$.pipe(
 		takeUntil(this.destroy$),
 		filterNil(),
@@ -39,30 +41,35 @@ export class PreRegistrationService implements OnDestroy {
 		shareReplay(1)
 	);
 
+	@automock
 	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map(this.isRegistrationComplete),
 		shareReplay(1)
 	);
 
+	@automock
 	public readonly registrationSubmitted$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => !!registration.registrationSubmittedOn),
 		shareReplay(1)
 	);
 
+	@automock
 	public readonly children$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => this.getChildren(registration)),
 		shareReplay(1)
 	);
 
+	@automock
 	public readonly childCount$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => registration?.children?.length ?? 0),
 		shareReplay(1)
 	);
 
+	@automock
 	public readonly noErrorsInChildren$ = this.children$.pipe(
 		takeUntil(this.destroy$),
 		map((children) => children.filter((c) => !!c.error)),
@@ -70,6 +77,7 @@ export class PreRegistrationService implements OnDestroy {
 		shareReplay(1)
 	);
 
+	@automock
 	public readonly dateTimeSlot$: Observable<IDateTimeSlot | undefined> =
 		this.userRegistration$.pipe(
 			takeUntil(this.destroy$),
@@ -77,7 +85,8 @@ export class PreRegistrationService implements OnDestroy {
 			shareReplay(1)
 		);
 
-	public qrCode$ = this.userRegistration$.pipe(
+	@automock
+	public readonly qrCode$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		pluckFilterNil('uid'),
 		mergeMap((uid) => this.qrCodeService.registrationQrCodeUrl(uid)),

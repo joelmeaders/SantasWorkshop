@@ -19,7 +19,6 @@ export class RegistrationClosedPage implements OnDestroy {
 				takeUntil(this.destroy$),
 				filter((enabled) => enabled),
 				tap(() => {
-					console.log('registration enabled, navigating');
 					this.router.navigate(['/']);
 				})
 			)

@@ -63,7 +63,7 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of(mockData));
 
 		// Act
-		service.read<IRegistration>('registrations', '12345', 'uid');
+		service.collection<IRegistration>('registrations').read('12345', 'uid');
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith(
@@ -80,7 +80,9 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of([mockData]));
 
 		// Act
-		service.readMany<IRegistration>('registrations', undefined, 'uid');
+		service
+			.collection<IRegistration>('registrations')
+			.readMany(undefined, 'uid');
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith(
@@ -97,7 +99,7 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of({} as DocumentReference<IRegistration>));
 
 		// Act
-		service.add('registrations', mockData);
+		service.collection<IRegistration>('registrations').add(mockData);
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith('registrations', mockData);
@@ -110,7 +112,9 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of({} as DocumentReference<IRegistration>));
 
 		// Act
-		service.addById('registrations', '12345', mockData);
+		service
+			.collection<IRegistration>('registrations')
+			.addById('12345', mockData);
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith(
@@ -127,7 +131,9 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of({} as DocumentReference<DocumentData>));
 
 		// Act
-		service.update('registrations', '12345', mockData, true);
+		service
+			.collection<IRegistration>('registrations')
+			.update('12345', mockData, true);
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith(
@@ -145,7 +151,7 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of());
 
 		// Act
-		service.delete('registrations', '12345');
+		service.collection<IRegistration>('registrations').delete('12345');
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith('registrations', '12345');

@@ -81,7 +81,6 @@ export class AddChildPageService implements OnDestroy {
 
 		// Set birth date
 		const date = `${year}-${month}-${day}`;
-		console.log(date);
 		this.form.controls.dateOfBirth.setValue(date as any as Date);
 
 		await this.birthdaySelected();

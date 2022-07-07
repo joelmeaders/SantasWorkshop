@@ -14,8 +14,8 @@ export class AppComponent {
 	constructor(
 		private readonly platform: Platform,
 		private readonly translateService: TranslateService,
-		private readonly appStateService: AppStateService,
-		private readonly analyticsService: Analytics
+		private readonly analyticsService: Analytics,
+		private readonly appStateService: AppStateService
 	) {
 		this.initializeApp();
 	}
@@ -23,7 +23,7 @@ export class AppComponent {
 	async initializeApp() {
 		await this.platform.ready().then(() => {
 			// This is here to kick off the appstateservice
-			console.log('AppStateService Injected', !!this.appStateService);
+			if (!this.appStateService) throw new Error('Placeholder');
 		});
 
 		this.translateService.addLangs(['en', 'es']);

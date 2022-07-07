@@ -4,7 +4,7 @@ import { IRegistration } from '../../../../../../../dist/santashop-models';
 import {
 	getFunctionSpy,
 	getPropertySpy,
-	provideMock,
+	autoSpyProvider,
 	Spied,
 } from '../../../../../../../test-helpers';
 import {
@@ -24,7 +24,7 @@ describe('ChildrenPageService', () => {
 		TestBed.configureTestingModule({
 			teardown: { destroyAfterEach: false },
 			providers: [
-				provideMock(PreRegistrationService),
+				autoSpyProvider(PreRegistrationService),
 				ChildrenPageService,
 			],
 		});

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { AuthService, FireRepoLite } from '@core/*';
 import { Functions } from '@angular/fire/functions';
-import { provideMock, Spied } from 'test-helpers/jasmine';
+import { autoSpyProvider, Spied } from 'test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';
 import { PreRegistrationService } from './pre-registration.service';
 import { repoCollectionStub } from '../../../../../test-helpers';
@@ -22,10 +22,10 @@ describe('PreRegistrationService', () => {
 		TestBed.configureTestingModule({
 			teardown: { destroyAfterEach: false },
 			providers: [
-				provideMock(FireRepoLite),
+				autoSpyProvider(FireRepoLite),
 				{ provide: AuthService, useValue: { uid$: of(userId) } },
-				provideMock(QrCodeService),
-				provideMock(Functions),
+				autoSpyProvider(QrCodeService),
+				autoSpyProvider(Functions),
 			],
 		});
 

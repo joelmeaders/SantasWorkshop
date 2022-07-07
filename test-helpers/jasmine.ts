@@ -36,7 +36,7 @@ function getPrototypeFunctions(
 		.map(([name]) => name);
 }
 
-function spyOnClass<T>(spiedClass: Type<T>) {
+function autoSpyOnClass<T>(spiedClass: Type<T>) {
 	const prototype = spiedClass.prototype;
 	const methods = getPrototypeFunctions(prototype);
 	const properties: string[] = prototype[autoMockCollection];
@@ -48,10 +48,10 @@ function spyOnClass<T>(spiedClass: Type<T>) {
 	);
 }
 
-export function provideMock<T>(spiedClass: Type<T>) {
+export function autoSpyProvider<T>(spiedClass: Type<T>) {
 	return {
 		provide: spiedClass,
-		useValue: spyOnClass(spiedClass),
+		useValue: autoSpyOnClass(spiedClass),
 	};
 }
 

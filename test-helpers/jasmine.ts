@@ -1,34 +1,70 @@
 import { Type } from '@angular/core';
+import 'reflect-metadata';
 
-export type Spied<T> = SpiedMethods<T> & SpiedProperties<T>;
-
-export type SpiedMethods<T> = {
-	[Method in keyof T]: T[Method] & jasmine.Spy;
+export type Spied<T> = T & {
+	[K in keyof T]: T[K] extends jasmine.Func ? T[K] & jasmine.Spy<T[K]> : T[K];
 };
 
-export type SpiedProperties<T> = {
-	[P in keyof T]: T[P] & jasmine.Spy;
-};
+const autoMockCollection = '__autoMockCollection';
 
-export function spyOnClass<T>(spiedClass: Type<T>, properties: string[]) {
-	const prototype = spiedClass.prototype;
+export function automock(target: any, memberName: string): any {
+	const autoMocks = (): string[] => Reflect.get(target, autoMockCollection);
 
-	const methods = Object.getOwnPropertyNames(prototype)
-		// Object.getOwnPropertyDescriptor is required to filter functions
-		.map((name) => [name, Object.getOwnPropertyDescriptor(prototype, name)])
-		.filter(([__name, descriptor]) => {
-			// select only functions
+	if (!autoMocks()) {
+		Reflect.defineProperty(target, autoMockCollection, {
+			value: [memberName],
+			writable: true,
+			enumerable: true,
+		});
+		return;
+	}
+
+	Reflect.set(target, autoMockCollection, autoMocks().concat(memberName));
+}
+
+function getPrototypeFunctions(
+	prototype: any
+): (string | PropertyDescriptor | undefined)[] {
+	return Object.getOwnPropertyNames(prototype)
+		.map((objectName) => [
+			objectName,
+			Object.getOwnPropertyDescriptor(prototype, objectName),
+		])
+		.filter(([_objectName, descriptor]) => {
 			return (descriptor as PropertyDescriptor).value instanceof Function;
 		})
 		.map(([name]) => name);
-
-	// return spy object
-	return jasmine.createSpyObj('spy', [...methods], [...properties]);
 }
 
-export function provideMock<T>(spiedClass: Type<T>, ...properties: string[]) {
+function spyOnClass<T>(spiedClass: Type<T>) {
+	const prototype = spiedClass.prototype;
+	const methods = getPrototypeFunctions(prototype);
+	const properties: string[] = prototype[autoMockCollection];
+
+	return jasmine.createSpyObj<T>(
+		spiedClass.prototype.name,
+		methods as any,
+		properties as any
+	);
+}
+
+export function provideMock<T>(spiedClass: Type<T>) {
 	return {
 		provide: spiedClass,
-		useValue: spyOnClass(spiedClass, properties),
+		useValue: spyOnClass(spiedClass),
 	};
+}
+
+export function getPropertySpy<T>(
+	service: Spied<T>,
+	key: keyof T
+): jasmine.Spy {
+	return Object.getOwnPropertyDescriptor(service, key)?.get as jasmine.Spy;
+}
+
+export function getFunctionSpy<T>(
+	service: Spied<T>,
+	functionName: keyof T
+): jasmine.Spy {
+	return (service as any)[functionName] as jasmine.Spy;
 }

@@ -5,7 +5,6 @@
 	"private": true,
 	"scripts": {
 		"ng": "ng",
-		"test": "ng test",
 		"core:lint": "ng lint santashop-core --fix",
 		"core:test": "ng test santashop-core",
 		"core:test:coverage": "ng test santashop-core --no-watch --code-coverage",

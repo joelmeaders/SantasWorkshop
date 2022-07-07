@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { IChild } from '@models/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { takeUntil, shareReplay, take } from 'rxjs/operators';
+import { takeUntil, shareReplay, map } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
@@ -14,14 +14,14 @@ export class ChildrenPageService implements OnDestroy {
 			shareReplay(1)
 		);
 
-	public readonly childCount$: Observable<number> =
-		this.preRegistrationService.childCount$.pipe(
-			takeUntil(this.destroy$),
-			shareReplay(1)
-		);
+	public readonly childCount$: Observable<number> = this.children$.pipe(
+		map((children) => children?.length ?? 0),
+		takeUntil(this.destroy$),
+		shareReplay(1)
+	);
 
 	constructor(
-		private readonly preRegistrationService: PreRegistrationService
+		public readonly preRegistrationService: PreRegistrationService
 	) {}
 
 	public ngOnDestroy(): void {
@@ -30,7 +30,7 @@ export class ChildrenPageService implements OnDestroy {
 	}
 
 	public async removeChild(childToRemove: IChild): Promise<void> {
-		const children = await this.children$.pipe(take(1)).toPromise();
+		const children = await firstValueFrom(this.children$);
 
 		const updatedChildren = children?.filter(
 			(child) => child.id !== childToRemove.id
@@ -47,10 +47,9 @@ export class ChildrenPageService implements OnDestroy {
 		registration.children = children;
 
 		// TODO: Error handling
-		const storeRegistration = this.preRegistrationService
-			.saveRegistration(registration)
-			.pipe(take(1))
-			.toPromise();
+		const storeRegistration = firstValueFrom(
+			this.preRegistrationService.saveRegistration(registration)
+		);
 
 		try {
 			await storeRegistration;

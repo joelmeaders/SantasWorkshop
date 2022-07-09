@@ -9,6 +9,7 @@ import { PublicMenuComponent } from './public-menu/public-menu.component';
 import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-service-modal.component';
 
 @NgModule({
+	imports: [CoreModule],
 	declarations: [
 		PublicMenuComponent,
 		PrivacyPolicyModalComponent,
@@ -17,7 +18,6 @@ import { TermsOfServiceModalComponent } from './terms-of-service-modal/terms-of-
 		LanguageToggleComponent,
 		InternalHeaderComponent,
 	],
-	imports: [CoreModule],
 	exports: [
 		PublicMenuComponent,
 		PrivacyPolicyModalComponent,

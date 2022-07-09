@@ -9,6 +9,7 @@ import {
 	FunctionsWrapper,
 } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { OverlayEventDetail } from '@ionic/core';
 import { COLLECTION_SCHEMA, IUser, IChangeUserInfo, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
@@ -95,26 +96,33 @@ export class ProfilePageService implements OnDestroy {
 
 	public async changeEmailAddress(): Promise<void> {
 		await this.analytics.logEvent('profile_update_email');
+
 		const value = this.changeEmailForm.value;
+
 		await this.authService
 			.changeEmailAddress(value.password, value.emailAddress)
 			.then(() => this.emailChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
+
 		this.changeEmailForm.reset();
+
 		this.router.navigate(['../']);
 	}
 
 	public async changePassword(): Promise<void> {
 		await this.analytics.logEvent('profile_update_password');
+
 		const value = this.changePasswordForm.value;
+
 		await this.authService
 			.changePassword(value.oldPassword, value.newPassword)
 			.then(() => this.passwordChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
+
 		this.router.navigate(['../']);
 	}
 
-	public async emailChangedAlert(): Promise<any> {
+	public async emailChangedAlert(): Promise<OverlayEventDetail<any>> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('PROFILE.DONE'),
 			message: this.translateService.instant('PROFILE.EMAIL_UPDATED'),
@@ -125,7 +133,7 @@ export class ProfilePageService implements OnDestroy {
 		return alert.onDidDismiss();
 	}
 
-	public async passwordChangedAlert(): Promise<any> {
+	public async passwordChangedAlert(): Promise<OverlayEventDetail<any>> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('PROFILE.PASSWORD_CHANGED'),
 			message: this.translateService.instant(

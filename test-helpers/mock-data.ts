@@ -3,8 +3,23 @@ import {
 	AgeGroup,
 	IChild,
 	IRegistration,
+	IUser,
 	ToyType,
 } from '../santashop-models/src';
+
+export const mockUsers = (id?: string) => ({
+	user1: {
+		uid: id,
+		firstName: 'Jesse',
+		lastName: 'Doe',
+		emailAddress: 'jesse.doe@gmail.com',
+		zipCode: 90210,
+		acceptedTermsOfService: new Date(),
+		acceptedPrivacyPolicy: new Date(),
+		version: 1,
+		manuallyMigrated: false,
+	} as IUser,
+});
 
 export const mockRegistrations = (id?: string) => ({
 	complete: {

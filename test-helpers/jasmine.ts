@@ -31,10 +31,10 @@ function autoSpyOnClass<T>(spiedClass: Type<T>) {
 	);
 }
 
-export function autoSpyProvider<T>(spiedClass: Type<T>) {
+export function autoSpyProvider<T>(spiedClassType: Type<T>) {
 	return {
-		provide: spiedClass,
-		useValue: autoSpyOnClass(spiedClass),
+		provide: spiedClassType,
+		useValue: autoSpyOnClass(spiedClassType),
 	};
 }
 

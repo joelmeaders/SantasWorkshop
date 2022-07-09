@@ -22,7 +22,7 @@
 					<ion-col
 						sizeXs="12"
 						sizeSm="7"
-						*ngIf="userProfile$ | async as user"
+						*ngIf="(userProfile$ | async) as user"
 					>
 						<ion-button
 							class="ion-no-padding even-ratio-button ion-margin"
@@ -69,7 +69,7 @@
 										</ion-item>
 										<core-control-errors
 											[control]="
-												profileForm.controls.firstName
+												profileForm?.controls?.firstName
 											"
 										></core-control-errors>
 
@@ -85,7 +85,7 @@
 										</ion-item>
 										<core-control-errors
 											[control]="
-												profileForm.controls.lastName
+												profileForm?.controls?.lastName
 											"
 										></core-control-errors>
 
@@ -101,7 +101,7 @@
 										</ion-item>
 										<core-control-errors
 											[control]="
-												profileForm.controls.zipCode
+												profileForm?.controls?.zipCode
 											"
 										></core-control-errors>
 									</ion-list>

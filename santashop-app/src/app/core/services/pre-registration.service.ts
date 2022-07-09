@@ -18,9 +18,14 @@ import {
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { DocumentReference } from '@angular/fire/firestore';
-import { AuthService, filterNil, FireRepoLite, pluckFilterNil } from '@core/*';
+import {
+	AuthService,
+	automock,
+	filterNil,
+	FireRepoLite,
+	pluckFilterNil,
+} from '@core/*';
 import { QrCodeService } from './qrcode.service';
-import { automock } from '../../../../../test-helpers';
 
 @Injectable({
 	providedIn: 'root',

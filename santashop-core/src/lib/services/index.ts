@@ -1,3 +1,7 @@
+export * from './_analytics-wrapper';
+export * from './_auth-wrapper';
+export * from './_firestore-wrapper';
+export * from './_functions-wrapper';
 export * from './auth.service';
 export * from './error-handler.service';
 export * from './fire-repo-base.service';

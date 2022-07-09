@@ -58,7 +58,7 @@ describe('ErrorHandlerService', () => {
 		} as HTMLIonAlertElement;
 		createAlertSpy.and.resolveTo(alertStub);
 
-		const logSpy = analyticsWrapper.logEvent;
+		const logSpy = analyticsWrapper.logErrorEvent;
 
 		// Act
 		await service.handleError(error, true);

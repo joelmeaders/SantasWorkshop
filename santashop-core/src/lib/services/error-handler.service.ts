@@ -26,7 +26,7 @@ export class ErrorHandlerService {
 		if (showAlert) await alert.present();
 
 		try {
-			this.analyticsWrapper.logEvent(error.code, error.message);
+			this.analyticsWrapper.logErrorEvent(error.code, error.message);
 		} catch {
 			// Do nothing
 		}

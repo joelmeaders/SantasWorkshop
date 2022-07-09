@@ -1,4 +1,5 @@
 import { Functions, httpsCallable } from '@angular/fire/functions';
+import { IChangeUserInfo } from '../../../../dist/santashop-models';
 
 export class FunctionsWrapper {
 	constructor(private readonly functions: Functions) {}
@@ -10,4 +11,7 @@ export class FunctionsWrapper {
 		this.httpsCallable('updateEmailAddress')({
 			emailAddress: newEmailAddress,
 		});
+
+	public readonly changeAccountInformation = (newInfo: IChangeUserInfo) =>
+		this.httpsCallable('changeAccountInformation')(newInfo);
 }

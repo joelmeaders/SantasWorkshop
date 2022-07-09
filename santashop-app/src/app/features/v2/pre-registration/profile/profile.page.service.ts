@@ -1,8 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { ErrorHandlerService, AuthService, FireRepoLite } from '@core/*';
+import {
+	ErrorHandlerService,
+	AuthService,
+	FireRepoLite,
+	automock,
+	AnalyticsWrapper,
+	FunctionsWrapper,
+} from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { COLLECTION_SCHEMA, IUser, IChangeUserInfo, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
@@ -15,16 +20,23 @@ import { changeEmailForm, changePasswordForm } from './profile.form';
 export class ProfilePageService implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
+	@automock
 	public readonly profileForm = newChangeInfoForm();
+
+	@automock
 	public readonly changeEmailForm = changeEmailForm();
+
+	@automock
 	public readonly changePasswordForm = changePasswordForm();
 
+	@automock
 	private readonly getUser$ = (uuid: string) =>
 		this.httpService
 			.collection<IUser>(COLLECTION_SCHEMA.users)
 			.read(uuid)
 			.pipe(take(1));
 
+	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
 		takeUntil(this.destroy$),
 		switchMap((user) => this.getUser$(user!.uid))
@@ -46,13 +58,13 @@ export class ProfilePageService implements OnDestroy {
 	constructor(
 		private readonly httpService: FireRepoLite,
 		private readonly authService: AuthService,
-		private readonly afFunctions: Functions,
+		private readonly functions: FunctionsWrapper,
 		private readonly errorHandler: ErrorHandlerService,
 		private readonly alertController: AlertController,
 		private readonly loadingController: LoadingController,
 		private readonly router: Router,
 		private readonly translateService: TranslateService,
-		private readonly analytics: Analytics
+		private readonly analytics: AnalyticsWrapper
 	) {}
 
 	ngOnDestroy(): void {
@@ -61,7 +73,7 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async updatePublicProfile(): Promise<void> {
-		await logEvent(this.analytics, 'profile_update_info');
+		await this.analytics.logEvent('profile_update_info');
 
 		const newInfo: IChangeUserInfo = this.profileForm.value;
 
@@ -71,13 +83,8 @@ export class ProfilePageService implements OnDestroy {
 
 		await loader.present();
 
-		const accountStatusFunction = httpsCallable(
-			this.afFunctions,
-			'changeAccountInformation'
-		);
-
 		try {
-			await accountStatusFunction(newInfo);
+			await this.functions.changeAccountInformation(newInfo);
 			this.router.navigate(['../']);
 		} catch (error) {
 			this.errorHandler.handleError(error as IError);
@@ -87,7 +94,7 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changeEmailAddress(): Promise<void> {
-		await logEvent(this.analytics, 'profile_update_email');
+		await this.analytics.logEvent('profile_update_email');
 		const value = this.changeEmailForm.value;
 		await this.authService
 			.changeEmailAddress(value.password, value.emailAddress)
@@ -98,7 +105,7 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changePassword(): Promise<void> {
-		await logEvent(this.analytics, 'profile_update_password');
+		await this.analytics.logEvent('profile_update_password');
 		const value = this.changePasswordForm.value;
 		await this.authService
 			.changePassword(value.oldPassword, value.newPassword)

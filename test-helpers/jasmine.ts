@@ -1,26 +1,9 @@
 import { Type } from '@angular/core';
-import 'reflect-metadata';
+import { AUTOMOCK_COLLECTION } from '../santashop-core/src';
 
 export type Spied<T> = T & {
 	[K in keyof T]: T[K] extends jasmine.Func ? T[K] & jasmine.Spy<T[K]> : T[K];
 };
-
-const autoMockCollection = '__autoMockCollection';
-
-export function automock(target: any, memberName: string): any {
-	const autoMocks = (): string[] => Reflect.get(target, autoMockCollection);
-
-	if (!autoMocks()) {
-		Reflect.defineProperty(target, autoMockCollection, {
-			value: [memberName],
-			writable: true,
-			enumerable: true,
-		});
-		return;
-	}
-
-	Reflect.set(target, autoMockCollection, autoMocks().concat(memberName));
-}
 
 function getPrototypeFunctions(
 	prototype: any
@@ -39,7 +22,7 @@ function getPrototypeFunctions(
 function autoSpyOnClass<T>(spiedClass: Type<T>) {
 	const prototype = spiedClass.prototype;
 	const methods = getPrototypeFunctions(prototype);
-	const properties: string[] = prototype[autoMockCollection];
+	const properties: string[] = prototype[AUTOMOCK_COLLECTION];
 
 	return jasmine.createSpyObj<T>(
 		spiedClass.prototype.name,

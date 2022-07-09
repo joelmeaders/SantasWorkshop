@@ -20,7 +20,7 @@ export class ProfilePage {
 
 	constructor(
 		private readonly viewService: ProfilePageService,
-		public readonly preregistrationService: PreRegistrationService
+		private readonly preregistrationService: PreRegistrationService
 	) {}
 
 	public async updateProfile(): Promise<void> {

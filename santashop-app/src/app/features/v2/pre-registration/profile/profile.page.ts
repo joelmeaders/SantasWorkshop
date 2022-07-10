@@ -33,8 +33,5 @@ export class ProfilePage {
 	constructor(
 		private readonly viewService: ProfilePageService,
 		private readonly preregistrationService: PreRegistrationService
-	) {
-		console.log('view', viewService);
-		console.log('registration', preregistrationService);
-	}
+	) {}
 }

@@ -71,6 +71,10 @@ const routes: Routes = [
 				(m) => m.BadWeatherPageModule
 			),
 	},
+  {
+    path: 'testpage',
+    loadChildren: () => import('./testpage/testpage.module').then( m => m.TestpagePageModule)
+  },
 ];
 
 @NgModule({

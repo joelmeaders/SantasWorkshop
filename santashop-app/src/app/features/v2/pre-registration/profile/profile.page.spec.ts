@@ -1,8 +1,5 @@
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 import { firstValueFrom, of } from 'rxjs';
-import { CoreModule } from '../../../../../../../santashop-core/src';
 import {
 	autoSpyProvider,
 	getFunctionSpy,
@@ -10,8 +7,8 @@ import {
 	Spied,
 } from '../../../../../../../test-helpers';
 import { mockUsers } from '../../../../../../../test-helpers/mock-data';
+import { TranslateTestingModule } from '../../../../../../../test-helpers/ngx-translate';
 import { PreRegistrationService } from '../../../../core';
-import { SharedModule } from '../../../../shared/components/shared.module';
 
 import { ProfilePage } from './profile.page';
 import { ProfilePageService } from './profile.page.service';
@@ -20,54 +17,40 @@ describe('ProfilePage', () => {
 	let component: ProfilePage;
 	let fixture: ComponentFixture<ProfilePage>;
 
-	// This service spy is created here to be injected into
-	// an overridden component because the service is provided
-	// from the component and not from a module.
 	let viewService: Spied<ProfilePageService> =
 		autoSpyProvider(ProfilePageService).useValue;
 
-	let preregistrationService: Spied<PreRegistrationService>;
+	let preregistrationService: Spied<PreRegistrationService> = autoSpyProvider(
+		PreRegistrationService
+	).useValue;
 
-	let userProfile$Spy: jasmine.Spy;
-	let isRegistrationComplete$Spy: jasmine.Spy;
+	const providers = [
+		{ provide: ProfilePageService, useValue: viewService },
+		{ provide: PreRegistrationService, useValue: preregistrationService },
+	];
+
+	let userProfile$Spy: jasmine.Spy = getPropertySpy(
+		viewService,
+		'userProfile$'
+	).and.returnValue(of(mockUsers().user1));
+
+	let isRegistrationComplete$Spy: jasmine.Spy = getPropertySpy(
+		preregistrationService,
+		'registrationComplete$'
+	).and.returnValue(of(true));
 
 	beforeEach(waitForAsync(() => {
+		TestBed.overrideComponent(ProfilePage, {
+			set: {
+				providers: providers,
+			},
+		});
 		TestBed.configureTestingModule({
-			imports: [
-				IonicModule.forRoot(),
-				CoreModule,
-				SharedModule,
-				CommonModule,
-			],
-			providers: [autoSpyProvider(PreRegistrationService)],
-			declarations: [],
-		})
-			// IMPORTANT: Use this for future testing
-			.overrideComponent(ProfilePage, {
-				set: {
-					providers: [
-						{ provide: ProfilePageService, useValue: viewService },
-					],
-				},
-			})
-			.compileComponents();
-
-		preregistrationService = TestBed.inject(
-			PreRegistrationService
-		) as jasmine.SpyObj<PreRegistrationService>;
-
-		userProfile$Spy = getPropertySpy(
-			viewService,
-			'userProfile$'
-		).and.returnValue(of(mockUsers().user1));
-
-		isRegistrationComplete$Spy = getPropertySpy(
-			preregistrationService,
-			'registrationComplete$'
-		).and.returnValue(of(true));
+			imports: [TranslateTestingModule],
+			declarations: [ProfilePage],
+		}).compileComponents();
 
 		fixture = TestBed.createComponent(ProfilePage);
-
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	}));

@@ -4,7 +4,6 @@
 	"compilerOptions": {
 		"composite": true,
 		"outDir": "../out-tsc/lib",
-		"outFile": "outfile",
 		"target": "es2020",
 		"noEmit": false,
 		"declaration": true,

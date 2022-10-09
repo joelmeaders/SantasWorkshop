@@ -1,7 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService } from '@core/*';
+import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth, IError, IOnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
@@ -30,7 +29,7 @@ export class SignUpPageService implements OnDestroy {
 
 	constructor(
 		private readonly authService: AuthService,
-		private readonly afFunctions: Functions,
+		private readonly afFunctions: FunctionsWrapper,
 		private readonly router: Router,
 		private readonly loadingController: LoadingController,
 		private readonly errorHandler: ErrorHandlerService,

@@ -18,6 +18,9 @@
 		"enableResourceInlining": true,
 		"enableIvy": true
 	},
+	"references": [
+		{ "path": "santashop-models/tsconfig.lib.json", "prepend": true },
+	],
 	"include": ["**/*.ts", "**/*.html", "**/*.scss"],
 	"exclude": ["src/test.ts", "**/*.spec.ts"]
 }

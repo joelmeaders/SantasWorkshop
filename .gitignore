@@ -33,6 +33,7 @@ $RECYCLE.BIN/
 **/plugins
 **/www
 **firebase.environment.json
+**firebase.environment.test.json
 
 .firebase/**
 environment.test.ts

@@ -25,10 +25,10 @@
 		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
 		"lib": ["es2018", "dom"],
 		"paths": {
-			"@core/*": ["santashop-core/src", "dist/santashop-core"],
+			"@core/*": ["santashop-core/src"],
 			"@registration/*": ["santashop-app/src"],
 			"@admin/*": ["santashop-admin/src"],
-			"@models/*": ["dist/santashop-models"]
+			"@models/*": ["santashop-models/src"]
 		},
 		"types": ["node"],
 		"typeRoots": ["./node_modules/@types"]

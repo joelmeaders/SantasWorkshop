@@ -61,13 +61,13 @@ export class FireRepoBase {
 
 	private genericConverter<T>(): FirestoreDataConverter<T> {
 		return {
-			toFirestore(post: T): DocumentData {
-				return post;
+			toFirestore: (post: T): DocumentData => {
+				return post as DocumentData;
 			},
-			fromFirestore(
+			fromFirestore: (
 				snapshot: QueryDocumentSnapshot,
 				options: SnapshotOptions
-			): T {
+			): T => {
 				return { ...snapshot.data(options) } as T;
 			},
 		};

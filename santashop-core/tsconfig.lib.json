@@ -2,6 +2,7 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"composite": true,
 		"outDir": "../out-tsc/lib",
 		"target": "es2020",
 		"noEmit": false,
@@ -9,7 +10,7 @@
 		"declarationMap": true,
 		"inlineSources": false,
 		"types": [],
-		"lib": ["dom", "es2018"]
+		"lib": ["dom", "es2018"],
 	},
 	"angularCompilerOptions": {
 		"skipTemplateCodegen": true,

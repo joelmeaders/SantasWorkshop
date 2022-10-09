@@ -1,5 +1,5 @@
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { IChangeUserInfo } from '../../../../dist/santashop-models';
+import { IChangeUserInfo } from '@models/*';
 
 export class FunctionsWrapper {
 	constructor(private readonly functions: Functions) {}

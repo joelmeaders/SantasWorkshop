@@ -1,5 +1,5 @@
 <span *ngIf="control && (control.dirty$ | async) && (control.touch$ | async)">
-	<span *ngIf="control?.errors$ | async | keyvalue as controlErrors">
+	<span *ngIf="(control?.errors$ | async)! | keyvalue as controlErrors">
 		<ion-note color="danger">
 			<ul class="es-mg-top-sm">
 				<li *ngFor="let item of controlErrors">

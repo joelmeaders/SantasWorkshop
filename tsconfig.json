@@ -34,11 +34,9 @@
 		"typeRoots": ["./node_modules/@types"]
 	},
 	"references": [
-		{ "path": "santashop-models/tsconfig.lib.json" },
-		{ "path": "santashop-core/tsconfig.lib.json" },
-		{ "path": "santashop-app/tsconfig.app.json" },
-		{ "path": "santashop-admin/tsconfig.app.json" },
-		{ "path": "santashop-functions/tsconfig.json" }
+		{ "path": "santashop-models/tsconfig.lib.json", "prepend": true },
+		{ "path": "santashop-core/tsconfig.lib.json", "prepend": true },
+		{ "path": "santashop-functions/tsconfig.json", "prepend": true }
 	],
 	"angularCompilerOptions": {
 		"enableI18nLegacyMessageIdFormat": false,

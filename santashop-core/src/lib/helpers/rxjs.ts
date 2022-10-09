@@ -1,5 +1,5 @@
+import { IRegistration } from '@models/*';
 import { filter, map, Observable } from 'rxjs';
-import { IRegistration } from '../../../../dist/santashop-models';
 
 /**
  * Avoids the "no non null assertion operator" issue after filter statements

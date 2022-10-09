@@ -2,15 +2,17 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"composite": true,
 		"outDir": "../out-tsc/lib",
-		"target": "es2020",
-		"noEmit": false,
 		"declaration": true,
 		"declarationMap": true,
-		"inlineSources": false,
+		"inlineSources": true,
 		"types": [],
-		"lib": ["dom", "es2018"]
 	},
-	"exclude": ["src/test.ts", "**/*.spec.ts"]
+	"angularCompilerOptions": {
+		"compilationMode": "partial"
+	},
+	"exclude": [
+		"src/test.ts",
+		"**/*.spec.ts"
+	  ]
 }

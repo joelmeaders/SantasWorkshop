@@ -430,10 +430,9 @@
 					}
 				}
 			}
-		}
+    	}
 	},
 	"cli": {
-    "defaultCollection": "@ionic/angular-toolkit",
-    "analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13"
+	    "analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13"
 	}
 }

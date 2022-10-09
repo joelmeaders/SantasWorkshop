@@ -6,8 +6,8 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
 		"noFallthroughCasesInSwitch": true,
-		"noEmit": false,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noImplicitAny": true,
@@ -20,24 +20,19 @@
 		"importHelpers": true,
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
 		"target": "es2020",
 		"module": "es2020",
-		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
-		"lib": ["es2018", "dom"],
+		"lib": ["es2020", "dom"],
 		"paths": {
-			"@core/*": ["santashop-core/src"],
-			"@registration/*": ["santashop-app/src"],
-			"@admin/*": ["santashop-admin/src"],
-			"@models/*": ["santashop-models/src"]
+			"@models/*": ["./santashop-models/src/lib/index.ts"],
+			"@core/*": ["./santashop-core/src"],
+			"@registration/*": ["./santashop-app/src"],
+			"@admin/*": ["./santashop-admin/src"],
 		},
 		"types": ["node"],
 		"typeRoots": ["./node_modules/@types"]
 	},
-	"references": [
-		{ "path": "santashop-models/tsconfig.lib.json", "prepend": true },
-		{ "path": "santashop-core/tsconfig.lib.json", "prepend": true },
-		{ "path": "santashop-functions/tsconfig.json", "prepend": true }
-	],
 	"angularCompilerOptions": {
 		"enableI18nLegacyMessageIdFormat": false,
 		"strictInjectionParameters": true,

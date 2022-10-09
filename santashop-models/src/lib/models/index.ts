@@ -8,7 +8,7 @@ export * from './error.model';
 export * from './onboard-user.model';
 export * from './registration-email.model';
 export * from './registration-search-index.model';
+export * from './registration-stats.model';
 export * from './registration.model';
 export * from './schema.model';
 export * from './user.model';
-export * from './registration-stats.model';

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { IError } from '@models/*';
+import { IError } from 'santashop-models/src/lib/models/error.model';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 
 @Injectable({

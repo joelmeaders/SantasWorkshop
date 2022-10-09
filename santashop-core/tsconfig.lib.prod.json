@@ -5,6 +5,10 @@
 		"declarationMap": false
 	},
 	"angularCompilerOptions": {
-		"enableIvy": true
-	}
+		"skipTemplateCodegen": true,
+		"strictMetadataEmit": true,
+		"enableResourceInlining": true,
+		"enableIvy": true,
+		"compilationMode": "partial"
+	},
 }

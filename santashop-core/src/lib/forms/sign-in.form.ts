@@ -1,6 +1,6 @@
 import { Validators } from '@angular/forms';
-import { IAuth } from '@models/*';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { IAuth } from 'dist/santashop-models/lib/models';
 
 const validators = {
 	emailAddress: Validators.compose([

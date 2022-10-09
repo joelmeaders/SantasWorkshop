@@ -6,7 +6,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"noImplicitReturns": true,
-		"noPropertyAccessFromIndexSignature": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
@@ -25,8 +24,8 @@
 		"module": "es2020",
 		"lib": ["es2020", "dom"],
 		"paths": {
-			"@models/*": ["./santashop-models/src/lib/index.ts"],
-			"@core/*": ["./santashop-core/src"],
+			"@models/*": ["./dist/santashop-models"],
+			"@core/*": ["./santashop-core/src", "./dist/santashop-core"],
 			"@registration/*": ["./santashop-app/src"],
 			"@admin/*": ["./santashop-admin/src"],
 		},

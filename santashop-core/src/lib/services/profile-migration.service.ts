@@ -8,9 +8,7 @@ import { AuthService } from './auth.service';
 import { FireRepoLite } from './fire-repo-lite.service';
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
-import { IUser } from 'santashop-models/src/lib/models/user.model';
-import { COLLECTION_SCHEMA } from 'santashop-models/src/lib/models/schema.model';
-import { IError } from 'santashop-models/src/lib/models/error.model';
+import { IUser, COLLECTION_SCHEMA, IError } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',

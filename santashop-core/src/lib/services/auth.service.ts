@@ -11,8 +11,7 @@ import { from, Observable } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
 import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
 import { FunctionsWrapper } from './_functions-wrapper';
-import { IUserEmailUid } from 'santashop-models/src/lib/models/auth.model';
-import { IAuth } from 'dist/santashop-models/lib/models/auth.model';
+import { IUserEmailUid, IAuth } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',

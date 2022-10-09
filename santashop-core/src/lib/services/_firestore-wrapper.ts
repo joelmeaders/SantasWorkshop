@@ -20,6 +20,7 @@ import {
 } from '@angular/fire/firestore';
 import { collection as rxCollection } from 'rxfire/firestore';
 import { Query } from 'rxfire/firestore/interfaces';
+import { Observable } from 'rxjs';
 
 // Re-export types to ensure no references to these libraries exist outside of this file
 export type CollectionReference<T> = _CollectionReference<T>;
@@ -42,49 +43,49 @@ export class FirestoreWrapper {
 	constructor(private readonly firestore: Firestore) {}
 
 	// firebase/firestore methods
-	public readonly collection = (path: string) =>
-		collection(this.firestore, path);
+	public readonly collection = <T = DocumentData>(path: string): CollectionReference<T> =>
+		collection(this.firestore, path) as CollectionReference<T>;
 
-	public readonly doc = <T>(
+	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,
 		path?: string
-	) => (path ? doc<T>(reference, path) : doc(reference));
+	): DocumentReference<T> => (path ? doc<T>(reference, path) : doc(reference));
 
 	// @angular/fire/firestore Methods
-	public readonly docData = <T>(
+	public readonly docData = <T = DocumentData>(
 		ref: DocumentReference<T>,
 		options?: {
 			idField?: string;
 		}
-	) => docData(ref, options);
+	): Observable<T> => docData<T>(ref, options);
 
-	public readonly query = (
-		collectionReference: CollectionReference<DocumentData>,
+	public readonly query = <T = DocumentData>(
+		collectionReference: CollectionReference<T>,
 		constraints?: QueryConstraint[]
-	) =>
+	): Query<T> =>
 		constraints
-			? query(collectionReference, ...constraints)
-			: query(collectionReference);
+			? query<T>(collectionReference, ...constraints)
+			: query<T>(collectionReference);
 
 	public readonly addDoc = <T>(
-		collectionReference: CollectionReference<DocumentData>,
+		collectionReference: CollectionReference<T>,
 		document: T
-	) => addDoc(collectionReference, document);
+	): Promise<DocumentReference<T>> => addDoc<T>(collectionReference, document);
 
-	public readonly setDoc = <T>(
-		documentReference: DocumentReference<DocumentData>,
+	public readonly setDoc = <T = DocumentData>(
+		documentReference: DocumentReference<T>,
 		document: T,
 		options?: SetOptions
-	) =>
+	): Promise<void> =>
 		options
-			? setDoc(documentReference, document, options)
-			: setDoc(documentReference, document);
+			? setDoc<T>(documentReference, document, options)
+			: setDoc<T>(documentReference, document);
 
-	public readonly deleteDoc = (
-		documentReference: DocumentReference<unknown>
-	) => deleteDoc(documentReference);
+	public readonly deleteDoc = <T = DocumentData>(
+		documentReference: DocumentReference<T>
+	): Promise<void> => deleteDoc(documentReference);
 
 	// rxfire/firestore Methods
-	public readonly rxCollection = (qry: Query<DocumentData>) =>
+	public readonly rxCollection = <T = DocumentData>(qry: Query<T>) =>
 		rxCollection(qry);
 }

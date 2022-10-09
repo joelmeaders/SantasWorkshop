@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
-import { DocumentReference, QueryConstraint } from './_firestore-wrapper';
+import { DocumentData, DocumentReference, QueryConstraint } from './_firestore-wrapper';
 
 @Injectable({
 	providedIn: 'root',
@@ -20,7 +20,7 @@ export class FireRepoLite {
 	}
 
 	/** @inheritdoc */
-	public collection<T>(collectionPath: string): IFireRepoCollection<T> {
+	public collection<T = DocumentData>(collectionPath: string): IFireRepoCollection<T> {
 		return {
 			collectionPathName: collectionPath,
 
@@ -74,7 +74,7 @@ export class FireRepoLite {
  * @interface IFireRepoCollection
  * @template T
  */
-export interface IFireRepoCollection<T> {
+export interface IFireRepoCollection<T = DocumentData> {
 	/**
 	 * Collection path this collection was initialized with
 	 *

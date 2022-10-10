@@ -23,7 +23,8 @@ export class HomePage implements OnDestroy {
 			shareReplay(1)
 		);
 
-	constructor(private readonly remoteConfigService: RemoteConfigService) {}
+	constructor(private readonly remoteConfigService: RemoteConfigService) {
+	}
 
 	ngOnDestroy(): void {
 		this.destroy$.next();

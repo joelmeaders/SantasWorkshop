@@ -21,6 +21,7 @@ import {
 import { collection as rxCollection } from 'rxfire/firestore';
 import { Query } from 'rxfire/firestore/interfaces';
 import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
 
 // Re-export types to ensure no references to these libraries exist outside of this file
 export type CollectionReference<T> = _CollectionReference<T>;
@@ -39,6 +40,9 @@ export type SnapshotOptions = _SnapshotOptions;
  * @export
  * @class FirestoreMethods
  */
+ @Injectable({
+	providedIn: 'root',
+})
 export class FirestoreWrapper {
 	constructor(private readonly firestore: Firestore) {}
 

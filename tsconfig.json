@@ -24,10 +24,11 @@
 		"module": "es2020",
 		"lib": ["es2020", "dom"],
 		"paths": {
-			"@models/*": ["./dist/santashop-models"],
-			"@core/*": ["./santashop-core/src", "./dist/santashop-core"],
-			"@registration/*": ["./santashop-app/src"],
-			"@admin/*": ["./santashop-admin/src"],
+			"@models/*": ["dist/santashop-models"],
+			"@core/*": ["santashop-core/src",
+			"dist/santashop-core"],
+			"@registration/*": ["santashop-app/src"],
+			"@admin/*": ["santashop-admin/src"],
 		},
 		"types": ["node"],
 		"typeRoots": ["./node_modules/@types"]

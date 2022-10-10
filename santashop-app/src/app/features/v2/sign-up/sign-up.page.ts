@@ -32,7 +32,7 @@ export class SignUpPage {
 		private readonly translateService: TranslateService,
 		private readonly modalController: ModalController,
 		private readonly analytics: Analytics
-	) {}
+	) { }
 
 	ionViewWillEnter() {
 		setTimeout(() => this.firstName?.setFocus(), 300);

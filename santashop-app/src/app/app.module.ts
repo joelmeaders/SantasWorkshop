@@ -8,7 +8,7 @@ import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {
-	AuthService,
+	AuthWrapper,
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
@@ -38,7 +38,6 @@ import {
 } from '@angular/fire/remote-config';
 import {
 	connectFunctionsEmulator,
-	Functions,
 	getFunctions,
 	provideFunctions,
 } from '@angular/fire/functions';
@@ -54,6 +53,7 @@ import {
 	ScreenTrackingService,
 	UserTrackingService,
 } from '@angular/fire/analytics';
+
 export function httpLoaderFactory(http: HttpClient) {
 	return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
@@ -141,11 +141,10 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 		ScreenTrackingService,
-		UserTrackingService,
 		{
-			provide: AuthService,
-			deps: [Auth, Functions],
+			provide: AuthWrapper, deps: [ Auth ]
 		},
+		UserTrackingService,
 		{
 			provide: RECAPTCHA_SETTINGS,
 			useValue: {
@@ -156,7 +155,7 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		{
 			provide: RECAPTCHA_NONCE,
 			useValue: '8wiehfsdncil8wKUyla8inkiygseteifnkcnkjsdnosidhf8iehf',
-		},
+		}
 	],
 	bootstrap: [AppComponent],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],

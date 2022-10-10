@@ -66,7 +66,7 @@ describe('AuthService', () => {
 	});
 
 	beforeEach(() => {
-		authStateSpy = authWrapperService.authState;
+		authStateSpy = authWrapperService.authState();
 		authStateSpy.and.returnValue(of(mockUser));
 		service = TestBed.inject(AuthService);
 	});

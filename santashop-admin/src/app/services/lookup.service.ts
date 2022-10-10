@@ -64,7 +64,7 @@ export class LookupService {
 
 	// TODO: Separate by program year?
 	public readonly getCheckinByUid$ = (
-		uid: string
+		uid?: string
 	): Observable<ICheckIn | undefined> =>
 		this.collections.checkins
 			.read<ICheckIn>(uid)

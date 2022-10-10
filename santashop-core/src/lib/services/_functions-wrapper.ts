@@ -1,6 +1,10 @@
+import { Injectable } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { IChangeUserInfo } from '@models/*';
+import { IChangeUserInfo } from 'dist/santashop-models/lib';
 
+@Injectable({
+	providedIn: 'root',
+})
 export class FunctionsWrapper {
 	constructor(private readonly functions: Functions) {}
 

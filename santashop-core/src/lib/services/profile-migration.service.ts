@@ -1,5 +1,4 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { of, Subject } from 'rxjs';
 import { filter, map, pluck, switchMap, take, takeUntil } from 'rxjs/operators';
@@ -8,7 +7,8 @@ import { AuthService } from './auth.service';
 import { FireRepoLite } from './fire-repo-lite.service';
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
-import { IUser, COLLECTION_SCHEMA, IError } from '@models/*';
+import { ErrorHandlerService } from './error-handler.service';
+import { COLLECTION_SCHEMA, IError, IUser } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',

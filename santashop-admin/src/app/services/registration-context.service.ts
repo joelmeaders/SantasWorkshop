@@ -17,18 +17,16 @@ import { LookupService } from './lookup.service';
 	providedIn: 'root',
 })
 export class RegistrationContextService {
-	private readonly _registration$ = new BehaviorSubject<
-		IRegistration | undefined
-	>(undefined);
-	public readonly registration$ = this._registration$.asObservable().pipe(
+	private readonly registration = new BehaviorSubject<IRegistration | undefined>(undefined);
+	public readonly registration$ = this.registration.asObservable().pipe(
 		distinctUntilChanged((p, c) => p?.uid === c?.uid),
 		shareReplay(1)
 	);
 
-	private readonly _checkin$ = new BehaviorSubject<ICheckIn | undefined>(
+	private readonly checkin = new BehaviorSubject<ICheckIn | undefined>(
 		undefined
 	);
-	public readonly checkin$ = this._checkin$
+	public readonly checkin$ = this.checkin
 		.asObservable()
 		.pipe(shareReplay(1));
 
@@ -43,13 +41,13 @@ export class RegistrationContextService {
 	public readonly setCheckinSubscription = this.registration$
 		.pipe(
 			tap((registration) => {
-				if (!registration) this._checkin$.next(undefined);
+				if (!registration) this.checkin.next(undefined);
 			}),
 			filter((registration) => !!registration),
 			switchMap((registration) =>
-				this.lookupService.getCheckinByUid$(registration?.uid!)
+				this.lookupService.getCheckinByUid$(registration?.uid)
 			),
-			tap((checkin) => this._checkin$.next(checkin))
+			tap((checkin) => this.checkin.next(checkin))
 		)
 		.subscribe();
 
@@ -67,12 +65,12 @@ export class RegistrationContextService {
 	) {}
 
 	public setCurrentRegistration(registration?: IRegistration) {
-		this._registration$.next(registration);
+		this.registration.next(registration);
 	}
 
 	public reset() {
-		this._registration$.next(undefined);
-		this._checkin$.next(undefined);
+		this.registration.next(undefined);
+		this.checkin.next(undefined);
 	}
 
 	private async displayRegistrationModal() {

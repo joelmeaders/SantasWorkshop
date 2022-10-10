@@ -8,9 +8,7 @@ import {
 	switchMap,
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
-import { ErrorHandlerService } from './error-handler.service';
 import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
-import { FunctionsWrapper } from './_functions-wrapper';
 import { IUserEmailUid, IAuth } from '@models/*';
 
 @Injectable({
@@ -77,8 +75,7 @@ export class AuthService {
 
 	constructor(
 		private readonly authWrapper: AuthWrapper,
-		private readonly functionsWrapper: FunctionsWrapper,
-		private readonly errorHandler: ErrorHandlerService
+		// private readonly functionsWrapper: FunctionsWrapper,
 	) {}
 
 	/**
@@ -118,7 +115,7 @@ export class AuthService {
 			await this.login(auth);
 			return this.authWrapper.updatePassword(user, newPassword);
 		} catch (error: any) {
-			await this.errorHandler.handleError(error);
+			// await this.errorHandler.handleError(error);
 			return Promise.reject(error);
 		}
 	}
@@ -147,9 +144,10 @@ export class AuthService {
 
 		try {
 			await this.login(auth);
-			await this.functionsWrapper.updateEmailAddress(newEmailAddress);
+			console.log(newEmailAddress)
+			// await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		} catch (error: any) {
-			await this.errorHandler.handleError(error);
+			// await this.errorHandler.handleError(error);
 			return Promise.reject(error);
 		}
 	}

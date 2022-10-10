@@ -1,4 +1,3 @@
-import { IRegistration } from '@models/*';
 import { filter, map, Observable } from 'rxjs';
 
 /**
@@ -30,14 +29,3 @@ export const pluckFilterNil =
 export const inputIsNotNullOrUndefinedTypeGuard = <T>(
 	input: null | undefined | T
 ): input is T => input !== null && input !== undefined;
-
-// RxJs operator
-
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function test<T extends IRegistration, K extends keyof T>(
-	value: T,
-	key: K
-) {
-	console.log(key);
-	return value;
-}

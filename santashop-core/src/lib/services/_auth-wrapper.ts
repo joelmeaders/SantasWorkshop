@@ -6,15 +6,18 @@ import {
 	signInWithEmailAndPassword,
 	updatePassword,
 } from '@angular/fire/auth';
-import { authState } from 'rxfire/auth';
+import { Observable, of } from 'rxjs';
 
 export type User = _User;
 export type UserCredential = _UserCredential;
 
+
 export class AuthWrapper {
 	constructor(private readonly auth: Auth) {}
 
-	public readonly authState = () => authState(this.auth);
+	public authState = (): Observable<User | null> => {
+		return of({} as User)
+	};
 
 	public readonly currentUser = () => this.auth.currentUser;
 

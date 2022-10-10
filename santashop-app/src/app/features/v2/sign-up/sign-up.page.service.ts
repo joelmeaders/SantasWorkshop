@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
+import { AuthService, ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth, IError, IOnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
@@ -13,7 +13,7 @@ export class SignUpPageService implements OnDestroy {
 	public readonly form = newOnboardUserForm();
 	public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
 	private readonly subscriptions = new Array<Subscription>();
-	private bhpValue?: string = undefined;
+	protected bhpValue?: string = undefined;
 
 	/**
 	 * Redirects a user if they're already signed in.
@@ -29,7 +29,6 @@ export class SignUpPageService implements OnDestroy {
 
 	constructor(
 		private readonly authService: AuthService,
-		private readonly afFunctions: FunctionsWrapper,
 		private readonly router: Router,
 		private readonly loadingController: LoadingController,
 		private readonly errorHandler: ErrorHandlerService,
@@ -61,14 +60,16 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async validateRecaptcha($event: any): Promise<boolean> {
-		const status = await httpsCallable(
-			this.afFunctions,
-			'verifyRecaptcha2'
-		)({ value: $event });
+		// const status = await httpsCallable(
+		// 	this.afFunctions,
+		// 	'verifyRecaptcha2'
+		// )({ value: $event });
+		console.log($event);
+		throw new Error('')
 
-		return status
-			? Promise.resolve((<any>status.data).success as boolean)
-			: Promise.reject(false);
+		// return status
+		// 	? Promise.resolve((status.data as any).success as boolean)
+		// 	: Promise.reject(false);
 	}
 
 	// Move to UI service
@@ -99,8 +100,8 @@ export class SignUpPageService implements OnDestroy {
 			await this.createAccount(onboardInfo);
 			loader.message = 'Logging you in';
 			await this.signIn(onboardInfo);
-		} catch (error) {
-			error = error as IError;
+		} catch (incomingError) {
+			const error = incomingError as IError;
 
 			if ((error as IError).code === 'functions/already-exists') {
 				await loader.dismiss();
@@ -143,11 +144,13 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async createAccount(value: IOnboardUser): Promise<void> {
-		const accountStatusFunction = httpsCallable(
-			this.afFunctions,
-			'newAccount'
-		);
-		await accountStatusFunction({ ...value, bhp: this.bhpValue });
+		// const accountStatusFunction = httpsCallable(
+		// 	this.afFunctions,
+		// 	'newAccount'
+		// );
+		// await accountStatusFunction({ ...value, bhp: this.bhpValue });
+		console.log(value)
+		throw new Error('');
 	}
 
 	private async signIn(value: IOnboardUser): Promise<void | IError> {

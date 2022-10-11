@@ -60,16 +60,14 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async validateRecaptcha($event: any): Promise<boolean> {
-		// const status = await httpsCallable(
-		// 	this.afFunctions,
-		// 	'verifyRecaptcha2'
-		// )({ value: $event });
-		console.log($event);
-		throw new Error('')
+		const status = await httpsCallable(
+			this.afFunctions,
+			'verifyRecaptcha2'
+		)({ value: $event });
 
-		// return status
-		// 	? Promise.resolve((status.data as any).success as boolean)
-		// 	: Promise.reject(false);
+		return status
+			? Promise.resolve((status.data as any).success as boolean)
+			: Promise.reject(false);
 	}
 
 	// Move to UI service

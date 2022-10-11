@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService } from '@core/*';
+import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IAuth, IError, IOnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
@@ -29,6 +29,7 @@ export class SignUpPageService implements OnDestroy {
 
 	constructor(
 		private readonly authService: AuthService,
+		private readonly functions: FunctionsWrapper,
 		private readonly router: Router,
 		private readonly loadingController: LoadingController,
 		private readonly errorHandler: ErrorHandlerService,
@@ -60,8 +61,7 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async validateRecaptcha($event: any): Promise<boolean> {
-		const status = await httpsCallable(
-			this.afFunctions,
+		const status = await this.functions.httpsCallable(
 			'verifyRecaptcha2'
 		)({ value: $event });
 
@@ -142,13 +142,10 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async createAccount(value: IOnboardUser): Promise<void> {
-		// const accountStatusFunction = httpsCallable(
-		// 	this.afFunctions,
-		// 	'newAccount'
-		// );
-		// await accountStatusFunction({ ...value, bhp: this.bhpValue });
-		console.log(value)
-		throw new Error('');
+		const accountStatusFunction = this.functions.httpsCallable(
+			'newAccount'
+		);
+		await accountStatusFunction({ ...value, bhp: this.bhpValue });
 	}
 
 	private async signIn(value: IOnboardUser): Promise<void | IError> {

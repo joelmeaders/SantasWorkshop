@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import { deflateSync } from 'zlib';
 import { COLLECTION_SCHEMA } from '../../santashop-models/src/lib/models';
 
 export const changeAccountInformation = functions.https.onCall(
@@ -157,11 +158,13 @@ export const scheduledReindexRegistrations = functions.pubsub
 		await (await import('./fn/scheduledReindexRegistrations')).default();
 	});
 
-// export const scheduledAddDateTimeSlots =
-//   functions.pubsub.schedule('every day')
-//   .onRun(async () => {
-//     await (await import('./fn/addDateTimeSlots')).default();
-//   });
+// This method checks for existing dates/times. 
+// If there are none it adds them
+export const scheduledAddDateTimeSlots = functions.pubsub
+	.schedule('59 23 * * *')
+	.onRun(async () => {
+		await (await import('./fn/addDateTimeSlots')).default();
+	});
 
 // export const requeueRegistrationEmails =
 //   functions.pubsub.schedule('every 60 minutes')

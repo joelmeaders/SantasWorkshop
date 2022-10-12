@@ -1,10 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import {
-	COLLECTION_SCHEMA,
-	IChangeUserInfo,
-} from '../../../santashop-models/src/lib/models';
+import { IChangeUserInfo } from '../../../santashop-models/src/lib/models/onboard-user.model';
+import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models/schema.model';
+
 
 admin.initializeApp();
 

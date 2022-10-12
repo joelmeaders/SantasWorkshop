@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import {
-	COLLECTION_SCHEMA,
-	IRegistration,
-	RegistrationSearchIndex,
-} from '../../../santashop-models/src/lib/models';
 import * as formatDateTime from 'dateformat';
+import { IRegistration } from '../../../santashop-models/src/lib/models/registration.model';
+import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models/schema.model';
+import { RegistrationSearchIndex } from '../../../santashop-models/src/lib/models/registration-search-index.model';
 
 admin.initializeApp();
 

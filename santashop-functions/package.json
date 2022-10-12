@@ -10,7 +10,7 @@
 		"logs": "firebase functions:log"
 	},
 	"engines": {
-		"node": "14"
+		"node": "16"
 	},
 	"main": "dist/index.js",
 	"dependencies": {
@@ -37,6 +37,7 @@
 		"@typescript-eslint/eslint-plugin": "^5.2.0",
 		"@typescript-eslint/parser": "^5.2.0",
 		"babel-loader": "^8.2.3",
+		"core-js": "3.25.5",
 		"eslint": "^8.1.0",
 		"eslint-config-google": "^0.14.0",
 		"eslint-plugin-import": "^2.25.2",
@@ -46,11 +47,6 @@
 		"webpack": "^5.65.0",
 		"webpack-cli": "^4.9.1",
 		"webpack-sources": "^3.2.2"
-	},
-	"babel": {
-		"presets": [
-			"@babel/preset-env"
-		]
 	},
 	"private": true
 }

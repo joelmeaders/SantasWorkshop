@@ -13,6 +13,9 @@
 		"allowSyntheticDefaultImports": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			"models": ["../santashop-models/src"]
+		}
 	},
 	"compileOnSave": true,
 	"include": ["src/"],

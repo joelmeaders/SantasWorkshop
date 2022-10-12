@@ -27,7 +27,7 @@ export default {
 					presets: [
 						[
 							'@babel/preset-env',
-							{ useBuiltIns: 'usage', corejs: 3 },
+							{ useBuiltIns: 'entry', corejs: '3.25' },
 						],
 						['@babel/preset-typescript', { allowNamespaces: true }],
 					],
@@ -36,7 +36,7 @@ export default {
 		],
 	},
 	resolve: {
-		extensions: ['.tsx', '.ts', '.js', '.json'],
+		extensions: ['.tsx', '.ts', '.js', '.json', '.mjs'],
 	},
 	output: {
 		filename: 'index.js',

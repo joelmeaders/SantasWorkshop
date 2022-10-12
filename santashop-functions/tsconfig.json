@@ -1,7 +1,6 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
-		"composite": true,
 		"noEmit": false,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
@@ -10,11 +9,12 @@
 		"strict": true,
 		"target": "es2017",
 		"declaration": true,
+    	"declarationMap": true,
 		"allowSyntheticDefaultImports": true,
 		"experimentalDecorators": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
 	},
 	"compileOnSave": true,
-	"include": ["src/**/*"],
-	"exclude": ["dist/**"]
+	"include": ["src/"],
+	"exclude": ["dist/"]
 }

@@ -27,15 +27,6 @@ export const completeRegistration = functions.https.onCall(
 	}
 );
 
-export const migrateProfile_V0_To_V1 = functions.https.onCall(
-	async (request, context) => {
-		return (await import('./fn/migrateProfile_V0_To_V1')).default(
-			request,
-			context
-		);
-	}
-);
-
 export const manualMigrate = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/manualMigrate')).default(request, context);

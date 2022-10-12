@@ -39,6 +39,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
 		acceptedTermsOfService: acceptedLegal,
 		acceptedPrivacyPolicy: acceptedLegal,
 		version: 1,
+		manuallyMigrated: false
 	};
 
 	const registration: IRegistration = {

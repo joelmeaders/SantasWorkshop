@@ -1,5 +1,4 @@
 import * as functions from 'firebase-functions';
-import { deflateSync } from 'zlib';
 import { COLLECTION_SCHEMA } from '../../santashop-models/src/lib/models';
 
 export const changeAccountInformation = functions.https.onCall(

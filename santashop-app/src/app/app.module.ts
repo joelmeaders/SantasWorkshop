@@ -112,10 +112,12 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		provideFunctions(() => {
 			const functions = getFunctions();
 			functions.customDomain = location.origin;
+
 			if (!environment.production) {
 				connectFunctionsEmulator(functions, 'localhost', 5001);
 				functions.customDomain = null;
 			}
+
 			return functions;
 		}),
 		provideFirestore(() => {

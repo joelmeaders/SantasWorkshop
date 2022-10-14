@@ -1,32 +1,34 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite } from '@core/*';
+import { FireRepoLite, Only } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
+	IAgeGroupBreakdown,
+	ICheckInDateTimeCount,
 	IDateTimeCount,
+	IGenderAgeStats,
+	IGenderAgeStatsDisplay,
 	IRegistrationStats,
 	IZipCodeCount,
 } from '@models/*';
 import { from } from 'rxjs';
-import { map, pluck, reduce, switchMap, take } from 'rxjs/operators';
+import { map, reduce, shareReplay, switchMap, take } from 'rxjs/operators';
 import { ICheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
 import { groupBy, sortBy } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
-import {
-	IAgeGroupBreakdown,
-	IGenderAgeStats,
-	IGenderAgeStatsDisplay,
-} from 'santashop-models/src';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class StatsService {
-	private readonly statsCollection = this.httpService.collection(
+	private readonly statsCollection = <T>() => this.httpService.collection<T>(
 		COLLECTION_SCHEMA.stats
 	);
 
-	private readonly $registrationStats = this.statsCollection
-		.read<IRegistrationStats>('registration-2021')
+	private readonly registrationStats = this.statsCollection<IRegistrationStats>();
+	private readonly checkinStats = this.statsCollection<ICheckInAggregatedStats>();
+
+	private readonly $registrationStats = this.registrationStats
+		.read('registration-2022')
 		.pipe(take(1));
 
 	public readonly $completedRegistrations = this.$registrationStats.pipe(
@@ -51,7 +53,7 @@ export class StatsService {
 			stats.forEach(
 				(stat) =>
 					(stat.dateTime = (
-						(<any>stat.dateTime) as Timestamp
+						(stat.dateTime as any) as Timestamp
 					).toDate())
 			);
 			return stats;
@@ -81,61 +83,46 @@ export class StatsService {
 		)
 	);
 
-	private readonly $checkInStats = this.statsCollection
-		.read<ICheckInAggregatedStats>('checkin-2021')
+	private readonly checkInStats$ = this.checkinStats
+		.read('checkin-2022')
 		.pipe(
 			take(1),
 			map((stats) => {
 				stats.lastUpdated = (
-					(<any>stats.lastUpdated) as Timestamp
+					(stats.lastUpdated as any) as Timestamp
 				).toDate();
 				return stats;
 			})
 		);
 
-	public readonly $checkInLastUpdated = this.$checkInStats.pipe(
+	public readonly $checkInLastUpdated = this.checkInStats$.pipe(
 		map((updated) => updated.lastUpdated.toLocaleString())
 	);
 
-	public readonly $checkInDateTimeCounts = this.$checkInStats.pipe(
-		pluck('dateTimeCount'),
+	private readonly dateTimeCount$ = this.checkInStats$.pipe(
+		map(value => value.dateTimeCount),
+		shareReplay(1)
+	);
+
+	private readonly mapCount$ = (prop: Only<ICheckInDateTimeCount, number>) => 
+		this.dateTimeCount$.pipe(
+			switchMap((dateTimeCounts) =>
+				from(dateTimeCounts.map((dtc) => dtc[prop]))
+			),
+			reduce((acc, val) => acc + val)
+		);
+
+	public readonly $checkInDateTimeCounts = this.dateTimeCount$.pipe(
 		map((counts) => {
 			const sorted = sortBy(counts, 'hour').reverse();
 			return groupBy(sorted, 'date');
 		})
 	);
 
-	public readonly $checkInTotalCustomerCount = this.$checkInStats.pipe(
-		pluck('dateTimeCount'),
-		switchMap((dateTimeCounts) =>
-			from(dateTimeCounts.map((dtc) => dtc.customerCount))
-		),
-		reduce((acc, val) => acc + val)
-	);
-
-	public readonly $checkInTotalChildCount = this.$checkInStats.pipe(
-		pluck('dateTimeCount'),
-		switchMap((dateTimeCounts) =>
-			from(dateTimeCounts.map((dtc) => dtc.childCount))
-		),
-		reduce((acc, val) => acc + val)
-	);
-
-	public readonly $checkInTotalPreregisteredCount = this.$checkInStats.pipe(
-		pluck('dateTimeCount'),
-		switchMap((dateTimeCounts) =>
-			from(dateTimeCounts.map((dtc) => dtc.pregisteredCount))
-		),
-		reduce((acc, val) => acc + val)
-	);
-
-	public readonly $checkInTotalModifiedCount = this.$checkInStats.pipe(
-		pluck('dateTimeCount'),
-		switchMap((dateTimeCounts) =>
-			from(dateTimeCounts.map((dtc) => dtc.modifiedCount))
-		),
-		reduce((acc, val) => acc + val)
-	);
+	public readonly checkInTotalCustomerCount$ = this.mapCount$('customerCount');
+	public readonly checkInTotalChildCount$ = this.mapCount$('childCount');
+	public readonly $checkInTotalPreregisteredCount = this.mapCount$('pregisteredCount');
+	public readonly $checkInTotalModifiedCount = this.mapCount$('modifiedCount');
 
 	constructor(private readonly httpService: FireRepoLite) {}
 

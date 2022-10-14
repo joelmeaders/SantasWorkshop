@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { IChangeUserInfo } from 'dist/santashop-models/lib';
+import { IChangeUserInfo } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',

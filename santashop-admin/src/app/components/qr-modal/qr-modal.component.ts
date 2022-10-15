@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { ICheckIn, IError } from '@models/*';
+import { CheckIn, IError } from '@models/*';
 import { BehaviorSubject, from, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
@@ -122,7 +122,7 @@ export class QrModalComponent implements OnDestroy {
 		});
 	}
 
-	private async alreadyCheckedIn(checkin?: ICheckIn) {
+	private async alreadyCheckedIn(checkin?: CheckIn) {
 		if (!checkin) return;
 
 		const alert = await this.alertController.create({

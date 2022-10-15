@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IAuth, IError, IOnboardUser } from '@models/*';
+import { IAuth, IError, OnboardUser } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -141,14 +141,14 @@ export class SignUpPageService implements OnDestroy {
 		}
 	}
 
-	private async createAccount(value: IOnboardUser): Promise<void> {
+	private async createAccount(value: OnboardUser): Promise<void> {
 		const accountStatusFunction = this.functions.httpsCallable(
 			'newAccount'
 		);
 		await accountStatusFunction({ ...value, bhp: this.bhpValue });
 	}
 
-	private async signIn(value: IOnboardUser): Promise<void | IError> {
+	private async signIn(value: OnboardUser): Promise<void | IError> {
 		const auth: IAuth = {
 			emailAddress: value.emailAddress,
 			password: value.password,

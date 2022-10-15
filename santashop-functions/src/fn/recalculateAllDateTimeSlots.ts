@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import {
-	IDateTimeSlot,
-	IRegistration,
+	DateTimeSlot,
+	Registration,
 } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async (): Promise<string> => {
 	// Load all registrations that need to be calculated
-	const registrations: IRegistration[] = await loadRegistrations();
+	const registrations: Registration[] = await loadRegistrations();
 
 	if (!registrations.length) return Promise.resolve('No registrations');
 
 	// Load all date/time slots
-	const dateTimeSlots: IDateTimeSlot[] = await loadDateTimeSlots();
+	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
 
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
 
@@ -69,8 +69,8 @@ const dateTimeSlotQuery = () =>
 		.collection('dateTimeSlots')
 		.where('programYear', '==', 2021);
 
-const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
-	let allDateTimeSlots: IDateTimeSlot[] = [];
+const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
+	let allDateTimeSlots: DateTimeSlot[] = [];
 
 	const snapshotDocs = await dateTimeSlotQuery().get();
 
@@ -78,7 +78,7 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
 		const slot = {
 			id: doc.id,
 			...doc.data(),
-		} as IDateTimeSlot;
+		} as DateTimeSlot;
 
 		slot.slotsReserved = 0;
 
@@ -95,15 +95,15 @@ const registrationQuery = () =>
 		.where('programYear', '==', 2021)
 		.where('registrationSubmittedOn', '!=', '');
 
-const loadRegistrations = async (): Promise<IRegistration[]> => {
-	let allRegistrations: IRegistration[] = [];
+const loadRegistrations = async (): Promise<Registration[]> => {
+	let allRegistrations: Registration[] = [];
 
 	const snapshotDocs = await registrationQuery().get();
 
 	snapshotDocs.docs.forEach((doc) => {
 		const slot = {
 			...doc.data(),
-		} as IRegistration;
+		} as Registration;
 
 		allRegistrations = allRegistrations.concat(slot);
 	});

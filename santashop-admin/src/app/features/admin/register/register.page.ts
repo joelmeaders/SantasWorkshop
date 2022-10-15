@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { AgeGroup, IChild, IError, IRegistration, ToyType } from '@models/*';
+import { AgeGroup, Child, IError, Registration, ToyType } from '@models/*';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import {
 	takeUntil,
@@ -53,7 +53,7 @@ export class RegisterPage implements OnDestroy {
 		refCount()
 	);
 
-	private readonly _$children = new BehaviorSubject<Partial<IChild>[]>([]);
+	private readonly _$children = new BehaviorSubject<Partial<Child>[]>([]);
 	public readonly $children = this._$children.pipe(
 		takeUntil(this.$destroy),
 		publishReplay(1),
@@ -91,7 +91,7 @@ export class RegisterPage implements OnDestroy {
 	) {}
 
 	public async initRegistrationEdit(
-		registration?: IRegistration
+		registration?: Registration
 	): Promise<void> {
 		if (!registration) return;
 
@@ -133,7 +133,7 @@ export class RegisterPage implements OnDestroy {
 
 	public reset(): void {
 		this._$zipCode.next(undefined);
-		this._$children.next(new Array<IChild>());
+		this._$children.next(new Array<Child>());
 		this.registrationContext.reset();
 		this.customerForm.reset();
 		this.childForm.reset();
@@ -164,8 +164,8 @@ export class RegisterPage implements OnDestroy {
 		}
 
 		const current = this._$children.getValue();
-		const childValue = this.childForm.value as IChild;
-		const newChild: Partial<IChild> = {
+		const childValue = this.childForm.value as Child;
+		const newChild: Partial<Child> = {
 			ageGroup: childValue.ageGroup,
 			toyType: childValue.toyType,
 		};
@@ -207,20 +207,20 @@ export class RegisterPage implements OnDestroy {
 		}
 	}
 
-	private async createRegistration(): Promise<IRegistration> {
-		let registration: IRegistration | undefined =
+	private async createRegistration(): Promise<Registration> {
+		let registration: Registration | undefined =
 			await this.registrationContext.registration$
 				.pipe(take(1))
 				.toPromise();
 
-		if (!registration) registration = {} as IRegistration;
+		if (!registration) registration = {} as Registration;
 
 		const children = CheckInHelpers.sortChildren(
 			this._$children.getValue()
 		);
 
 		registration.zipCode = this._$zipCode.getValue();
-		registration.children = children as any[] as IChild[];
+		registration.children = children as any[] as Child[];
 
 		return registration;
 	}

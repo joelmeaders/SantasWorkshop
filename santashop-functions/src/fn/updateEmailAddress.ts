@@ -2,14 +2,14 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
 import {
-	IAuth,
+	Auth,
 	COLLECTION_SCHEMA,
 } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async (
-	data: IAuth,
+	data: Auth,
 	context: CallableContext
 ): Promise<boolean | HttpsError> => {
 	const uid = context.auth?.uid;

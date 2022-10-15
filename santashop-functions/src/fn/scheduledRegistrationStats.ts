@@ -2,23 +2,23 @@
 import * as admin from 'firebase-admin';
 import {
 	AgeGroup,
-	IAgeGroupBreakdown,
-	IDateTimeCount,
-	IGenderAgeStats,
-	IRegistration,
-	IZipCodeCount,
+	AgeGroupBreakdown,
+	DateTimeCount,
+	GenderAgeStats,
+	Registration,
+	ZipCodeCount,
 } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async () => {
 	const registrationsSnapshots = await registrationQuery().get();
-	const registrations: IRegistration[] = [];
+	const registrations: Registration[] = [];
 
 	registrationsSnapshots.forEach((doc) => {
 		const registration = {
 			...doc.data(),
-		} as IRegistration;
+		} as Registration;
 		registrations.push(registration);
 	});
 
@@ -38,8 +38,8 @@ export default async () => {
 		.set(stats, { merge: false });
 };
 
-function getDateTimeStats(registrations: IRegistration[]): IDateTimeCount[] {
-	const stats: IDateTimeCount[] = [];
+function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
+	const stats: DateTimeCount[] = [];
 
 	const getIndex = (dateTime: Date) =>
 		stats.findIndex((e) => dateTime.getTime() == e.dateTime.getTime());
@@ -49,7 +49,7 @@ function getDateTimeStats(registrations: IRegistration[]): IDateTimeCount[] {
 			.dateTime! as any;
 		const dateTime = timestamp.toDate();
 		const index = getIndex(dateTime);
-		let stat: IDateTimeCount;
+		let stat: DateTimeCount;
 
 		if (index === -1) {
 			stat = {
@@ -78,8 +78,8 @@ function getDateTimeStats(registrations: IRegistration[]): IDateTimeCount[] {
 						age68: 0,
 						age911: 0,
 					},
-				} as IGenderAgeStats,
-			} as IDateTimeCount;
+				} as GenderAgeStats,
+			} as DateTimeCount;
 			setChildGenderStats(stat.stats, registration);
 			stats.push(stat);
 		} else {
@@ -93,8 +93,8 @@ function getDateTimeStats(registrations: IRegistration[]): IDateTimeCount[] {
 }
 
 function setChildGenderStats(
-	stats: IGenderAgeStats,
-	registration: IRegistration
+	stats: GenderAgeStats,
+	registration: Registration
 ): void {
 	registration.children?.forEach((child) => {
 		setChildAgeStatsByGender(stats[child.toyType!], child.ageGroup!);
@@ -102,7 +102,7 @@ function setChildGenderStats(
 }
 
 function setChildAgeStatsByGender(
-	stat: IAgeGroupBreakdown,
+	stat: AgeGroupBreakdown,
 	ageGroup: AgeGroup
 ): void {
 	if (!stat) return;
@@ -128,8 +128,8 @@ function setChildAgeStatsByGender(
 	}
 }
 
-function getZipCodeStats(registrations: IRegistration[]): IZipCodeCount[] {
-	const stats: IZipCodeCount[] = [];
+function getZipCodeStats(registrations: Registration[]): ZipCodeCount[] {
+	const stats: ZipCodeCount[] = [];
 
 	const getIndex = (zipCode: number) =>
 		stats.findIndex((e) => zipCode === e.zip);
@@ -138,14 +138,14 @@ function getZipCodeStats(registrations: IRegistration[]): IZipCodeCount[] {
 		const zipString = registration.zipCode!.toString().substr(0, 5);
 		const zipCode = Number.parseInt(zipString);
 		const index = getIndex(zipCode);
-		let stat: IZipCodeCount;
+		let stat: ZipCodeCount;
 
 		if (index === -1) {
 			stat = {
 				zip: zipCode,
 				count: 1,
 				childCount: registration.children!.length,
-			} as IZipCodeCount;
+			} as ZipCodeCount;
 			stats.push(stat);
 		} else {
 			stats[index].count += 1;

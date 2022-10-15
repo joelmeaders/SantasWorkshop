@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
-import { ICheckIn, IRegistration } from '@models/*';
+import { CheckIn, Registration } from '@models/*';
 import { BehaviorSubject, of } from 'rxjs';
 import {
 	distinctUntilChanged,
@@ -17,13 +17,13 @@ import { LookupService } from './lookup.service';
 	providedIn: 'root',
 })
 export class RegistrationContextService {
-	private readonly registration = new BehaviorSubject<IRegistration | undefined>(undefined);
+	private readonly registration = new BehaviorSubject<Registration | undefined>(undefined);
 	public readonly registration$ = this.registration.asObservable().pipe(
 		distinctUntilChanged((p, c) => p?.uid === c?.uid),
 		shareReplay(1)
 	);
 
-	private readonly checkin = new BehaviorSubject<ICheckIn | undefined>(
+	private readonly checkin = new BehaviorSubject<CheckIn | undefined>(
 		undefined
 	);
 	public readonly checkin$ = this.checkin
@@ -43,9 +43,9 @@ export class RegistrationContextService {
 			tap((registration) => {
 				if (!registration) this.checkin.next(undefined);
 			}),
-			filter((registration) => !!registration),
+			filter((registration) => !!registration?.uid),
 			switchMap((registration) =>
-				this.lookupService.getCheckinByUid$(registration?.uid)
+				this.lookupService.getCheckinByUid$(registration!.uid!)
 			),
 			tap((checkin) => this.checkin.next(checkin))
 		)
@@ -64,7 +64,7 @@ export class RegistrationContextService {
 		private readonly router: Router
 	) {}
 
-	public setCurrentRegistration(registration?: IRegistration) {
+	public setCurrentRegistration(registration?: Registration) {
 		this.registration.next(registration);
 	}
 

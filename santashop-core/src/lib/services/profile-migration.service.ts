@@ -8,7 +8,7 @@ import { FireRepoLite } from './fire-repo-lite.service';
 import { Functions } from '@angular/fire/functions';
 import { httpsCallable } from 'rxfire/functions';
 import { ErrorHandlerService } from './error-handler.service';
-import { COLLECTION_SCHEMA, IError, IUser } from '@models/*';
+import { COLLECTION_SCHEMA, IError, User } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',
@@ -18,7 +18,7 @@ export class ProfileMigrationService implements OnDestroy {
 
 	private readonly getCurrentUserDocument$ = (uid: string) =>
 		this.fireRepo
-			.collection<IUser>(COLLECTION_SCHEMA.users)
+			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uid, 'uid')
 			.pipe(takeUntil(this.destroy$));
 

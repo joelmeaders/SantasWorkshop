@@ -4,14 +4,14 @@ import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 import * as formatDateTime from 'dateformat';
-import { IRegistration } from '../../../santashop-models/src/lib/models/registration.model';
+import { Registration } from '../../../santashop-models/src/lib/models/registration.model';
 import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models/schema.model';
 import { RegistrationSearchIndex } from '../../../santashop-models/src/lib/models/registration-search-index.model';
 
 admin.initializeApp();
 
 export default async (
-	record: IRegistration,
+	record: Registration,
 	context: CallableContext
 ): Promise<boolean | HttpsError> => {
 	if (!isRegistrationComplete(record)) {
@@ -63,7 +63,7 @@ export default async (
 		includedInCounts: false,
 		includedInRegistrationStats: false,
 		programYear: 2021,
-	} as Partial<IRegistration>;
+	} as Partial<Registration>;
 
 	batch.set(registrationDocRef, updateRegistrationFields, { merge: true });
 

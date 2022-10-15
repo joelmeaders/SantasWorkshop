@@ -27,6 +27,7 @@
 				"no-floating-decimal": "error",
 				"@typescript-eslint/member-ordering": "off",
 				"@typescript-eslint/no-unused-vars": "error",
+				"@typescript-eslint/no-non-null-assertion": "warn",
 				"@angular-eslint/component-class-suffix": [
 					"error",
 					{

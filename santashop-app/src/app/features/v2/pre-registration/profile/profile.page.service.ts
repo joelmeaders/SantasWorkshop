@@ -10,7 +10,7 @@ import {
 } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
-import { COLLECTION_SCHEMA, IUser, IChangeUserInfo, IError } from '@models/*';
+import { COLLECTION_SCHEMA, User, ChangeUserInfo, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
@@ -33,7 +33,7 @@ export class ProfilePageService implements OnDestroy {
 	@automock
 	private readonly getUser$ = (uuid: string) =>
 		this.httpService
-			.collection<IUser>(COLLECTION_SCHEMA.users)
+			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
 			.pipe(take(1));
 
@@ -76,7 +76,7 @@ export class ProfilePageService implements OnDestroy {
 	public async updatePublicProfile(): Promise<void> {
 		await this.analytics.logEvent('profile_update_info');
 
-		const newInfo: IChangeUserInfo = this.profileForm.value;
+		const newInfo: ChangeUserInfo = this.profileForm.value;
 
 		const loader = await this.loadingController.create({
 			message: 'Updating account...',

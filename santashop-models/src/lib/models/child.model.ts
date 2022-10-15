@@ -1,4 +1,4 @@
-export interface IChild {
+export interface Child {
 	id?: number;
 	firstName: string;
 	lastName: string;
@@ -23,7 +23,7 @@ export enum ToyType {
 	girl = 'girls',
 }
 
-export interface IChildAlt {
+export interface ChildAlt {
 	id: number;
 	firstName: string;
 	lastName: string;

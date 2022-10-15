@@ -9,7 +9,7 @@ import {
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
-import { IUserEmailUid, IAuth } from '@models/*';
+import { UserEmailUid, Auth } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',
@@ -28,17 +28,17 @@ export class AuthService {
 	/**
 	 * Stream of user email and uid
 	 *
-	 * @type {Observable<IUserEmailUid>}
+	 * @type {Observable<UserEmailUid>}
 	 * @memberof AuthService
 	 */
-	public readonly emailAndUid$: Observable<IUserEmailUid> =
+	public readonly emailAndUid$: Observable<UserEmailUid> =
 		this.currentUser$.pipe(
 			map(
 				(res: any) =>
 					({
 						emailAddress: res?.email,
 						uid: res?.uid,
-					} as IUserEmailUid)
+					} as UserEmailUid)
 			),
 			distinctUntilChanged(),
 			shareReplay(1)
@@ -106,7 +106,7 @@ export class AuthService {
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
-		const auth: IAuth = {
+		const auth: Auth = {
 			emailAddress: user.email as string,
 			password: oldPassword,
 		};
@@ -137,7 +137,7 @@ export class AuthService {
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
-		const auth: IAuth = {
+		const auth: Auth = {
 			emailAddress: user?.email as string,
 			password,
 		};
@@ -159,7 +159,7 @@ export class AuthService {
 	 * @return
 	 * @memberof AuthService
 	 */
-	public async login(auth: IAuth): Promise<UserCredential> {
+	public async login(auth: Auth): Promise<UserCredential> {
 		return this.authWrapper.signInWithEmailAndPassword(
 			auth.emailAddress,
 			auth.password

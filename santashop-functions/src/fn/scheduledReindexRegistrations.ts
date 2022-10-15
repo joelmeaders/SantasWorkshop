@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import {
-	IRegistration,
+	Registration,
 	RegistrationSearchIndex,
 } from '../../../santashop-models/src/lib/models';
 
@@ -9,7 +9,7 @@ admin.initializeApp();
 
 export default async (): Promise<string> => {
 	// Load all registrations
-	const registrations: IRegistration[] = await loadRegistrations();
+	const registrations: Registration[] = await loadRegistrations();
 	if (!registrations.length) return Promise.resolve('No registrations');
 
 	const rsi: RegistrationSearchIndex[] = [];
@@ -57,15 +57,15 @@ export default async (): Promise<string> => {
 
 const indexQuery = () => admin.firestore().collection('registrations');
 
-const loadRegistrations = async (): Promise<IRegistration[]> => {
-	let allRegistrations: IRegistration[] = [];
+const loadRegistrations = async (): Promise<Registration[]> => {
+	let allRegistrations: Registration[] = [];
 
 	const snapshotDocs = await indexQuery().get();
 
 	snapshotDocs.docs.forEach((doc) => {
 		const slot = {
 			...doc.data(),
-		} as IRegistration;
+		} as Registration;
 
 		allRegistrations = allRegistrations.concat(slot);
 	});

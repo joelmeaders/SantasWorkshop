@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { IChangeUserInfo } from '@models/*';
+import { ChangeUserInfo } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',
@@ -16,6 +16,6 @@ export class FunctionsWrapper {
 			emailAddress: newEmailAddress,
 		});
 
-	public readonly changeAccountInformation = (newInfo: IChangeUserInfo) =>
+	public readonly changeAccountInformation = (newInfo: ChangeUserInfo) =>
 		this.httpsCallable('changeAccountInformation')(newInfo);
 }

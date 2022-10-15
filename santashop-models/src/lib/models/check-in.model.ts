@@ -1,12 +1,12 @@
-export interface ICheckIn {
+export interface CheckIn {
 	customerId?: string;
 	registrationCode?: string;
 	checkInDateTime?: Date;
 	inStats: boolean;
-	stats?: ICheckInStats;
+	stats?: CheckInStats;
 }
 
-export interface ICheckInStats {
+export interface CheckInStats {
 	preregistered: boolean;
 	children: number;
 	ageGroup02: number;
@@ -20,7 +20,7 @@ export interface ICheckInStats {
 	modifiedAtCheckIn: boolean;
 }
 
-export interface ICheckInAgeStats {
+export interface CheckInAgeStats {
 	ageGroup02: number;
 	ageGroup35: number;
 	ageGroup68: number;

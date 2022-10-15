@@ -10,9 +10,9 @@ import {
 } from 'rxjs/operators';
 import { Timestamp } from '@firebase/firestore';
 import {
-	IDateTimeSlot,
-	IRegistration,
-	IChild,
+	DateTimeSlot,
+	Registration,
+	Child,
 	COLLECTION_SCHEMA,
 } from '@models/*';
 import { Functions } from '@angular/fire/functions';
@@ -32,7 +32,7 @@ import { QrCodeService } from './qrcode.service';
 })
 export class PreRegistrationService implements OnDestroy {
 	private readonly registrationCollection = () =>
-		this.fireRepo.collection<IRegistration>(
+		this.fireRepo.collection<Registration>(
 			COLLECTION_SCHEMA.registrations
 		);
 
@@ -83,7 +83,7 @@ export class PreRegistrationService implements OnDestroy {
 	);
 
 	@automock
-	public readonly dateTimeSlot$: Observable<IDateTimeSlot | undefined> =
+	public readonly dateTimeSlot$: Observable<DateTimeSlot | undefined> =
 		this.userRegistration$.pipe(
 			takeUntil(this.destroy$),
 			map((registration) => this.getDateTimeSlot(registration)),
@@ -112,7 +112,7 @@ export class PreRegistrationService implements OnDestroy {
 
 	// TODO: Convert to function
 	public saveRegistration(
-		registration: IRegistration
+		registration: Registration
 	): Observable<DocumentReference> {
 		this.validateRegistration(registration);
 
@@ -132,7 +132,7 @@ export class PreRegistrationService implements OnDestroy {
 		return accountStatusFunction({});
 	}
 
-	public isRegistrationComplete(registration: IRegistration): boolean {
+	public isRegistrationComplete(registration: Registration): boolean {
 		const hasChildren = registration.children?.length;
 		const hasDateTime = registration.dateTimeSlot?.dateTime;
 		const isSubmitted = registration.registrationSubmittedOn;
@@ -140,14 +140,14 @@ export class PreRegistrationService implements OnDestroy {
 	}
 
 	// TODO: Make cloud function to handle this
-	private validateRegistration(registration: IRegistration): void {
+	private validateRegistration(registration: Registration): void {
 		registration = registration;
 	}
 
 	private getDateTimeSlot(
-		registration: IRegistration
-	): IDateTimeSlot | undefined {
-		const slot = registration?.dateTimeSlot as IDateTimeSlot;
+		registration: Registration
+	): DateTimeSlot | undefined {
+		const slot = registration?.dateTimeSlot as DateTimeSlot;
 
 		// Convert the timestamp to a date. Firebase (or angularfire) seems to be
 		// setting all dates to timestamps in the database now.
@@ -156,13 +156,13 @@ export class PreRegistrationService implements OnDestroy {
 		return slot;
 	}
 
-	private getChildren(registration: IRegistration): IChild[] {
+	private getChildren(registration: Registration): Child[] {
 		registration.children?.forEach((child) => {
 			child.dateOfBirth = (
 				(<any>child.dateOfBirth) as Timestamp
 			)?.toDate();
 		});
 
-		return (registration.children as IChild[]) ?? new Array<IChild>();
+		return (registration.children as Child[]) ?? new Array<Child>();
 	}
 }

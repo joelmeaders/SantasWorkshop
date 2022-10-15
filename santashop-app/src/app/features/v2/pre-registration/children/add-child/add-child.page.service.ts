@@ -3,7 +3,7 @@ import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import { PROGRAM_YEAR, yyyymmddToLocalDate, getAgeFromDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
-import { IChild, ChildValidationError, ToyType, AgeGroup } from '@models/*';
+import { Child, ChildValidationError, ToyType, AgeGroup } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
@@ -31,7 +31,7 @@ export class AddChildPageService implements OnDestroy {
 		shareReplay(1)
 	);
 
-	public readonly children$: Observable<IChild[] | undefined> =
+	public readonly children$: Observable<Child[] | undefined> =
 		this.preRegistrationService.children$.pipe(
 			takeUntil(this.destroy$),
 			shareReplay(1)
@@ -88,7 +88,7 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async editChild() {
-		const updatedChild = this.form.value as IChild;
+		const updatedChild = this.form.value as Child;
 		updatedChild.dateOfBirth = yyyymmddToLocalDate(
 			updatedChild.dateOfBirth as any
 		);
@@ -201,7 +201,7 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async addChild(): Promise<void> {
-		const child = this.form.value as IChild;
+		const child = this.form.value as Child;
 		child.dateOfBirth = yyyymmddToLocalDate(child.dateOfBirth as any);
 
 		const children = await this.children$.pipe(take(1)).toPromise();
@@ -245,7 +245,7 @@ export class AddChildPageService implements OnDestroy {
 		}
 	}
 
-	public async removeChild(childToRemove: IChild): Promise<void> {
+	public async removeChild(childToRemove: Child): Promise<void> {
 		const children = await this.children$.pipe(take(1)).toPromise();
 
 		const updatedChildren = children?.filter(
@@ -258,7 +258,7 @@ export class AddChildPageService implements OnDestroy {
 		return this.updateRegistration(updatedChildren);
 	}
 
-	private async updateRegistration(children?: IChild[]) {
+	private async updateRegistration(children?: Child[]) {
 		const registration = await firstValueFrom(
 			this.preRegistrationService.userRegistration$
 		);

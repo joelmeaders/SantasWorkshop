@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { FireRepoBase } from './fire-repo-base.service';
-import { IRegistration } from '@models/*';
+import { Registration } from '@models/*';
 import { of } from 'rxjs';
 import { DocumentData, DocumentReference } from './_firestore-wrapper';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
@@ -10,7 +10,7 @@ describe('FireRepoLite', () => {
 	let service: FireRepoLite;
 	let fireRepoBase: jasmine.SpyObj<FireRepoBase>;
 
-	const mockData = { uid: '12345' } as IRegistration;
+	const mockData = { uid: '12345' } as Registration;
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -63,7 +63,7 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of(mockData));
 
 		// Act
-		service.collection<IRegistration>('registrations').read('12345', 'uid');
+		service.collection<Registration>('registrations').read('12345', 'uid');
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith(
@@ -81,7 +81,7 @@ describe('FireRepoLite', () => {
 
 		// Act
 		service
-			.collection<IRegistration>('registrations')
+			.collection<Registration>('registrations')
 			.readMany(undefined, 'uid');
 
 		// Assert
@@ -96,10 +96,10 @@ describe('FireRepoLite', () => {
 		// Arrange
 		const spy = fireRepoBase.add;
 
-		spy.and.returnValue(of({} as DocumentReference<IRegistration>));
+		spy.and.returnValue(of({} as DocumentReference<Registration>));
 
 		// Act
-		service.collection<IRegistration>('registrations').add(mockData);
+		service.collection<Registration>('registrations').add(mockData);
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith('registrations', mockData);
@@ -109,11 +109,11 @@ describe('FireRepoLite', () => {
 		// Arrange
 		const spy = fireRepoBase.addById;
 
-		spy.and.returnValue(of({} as DocumentReference<IRegistration>));
+		spy.and.returnValue(of({} as DocumentReference<Registration>));
 
 		// Act
 		service
-			.collection<IRegistration>('registrations')
+			.collection<Registration>('registrations')
 			.addById('12345', mockData);
 
 		// Assert
@@ -132,7 +132,7 @@ describe('FireRepoLite', () => {
 
 		// Act
 		service
-			.collection<IRegistration>('registrations')
+			.collection<Registration>('registrations')
 			.update('12345', mockData, true);
 
 		// Assert
@@ -151,17 +151,17 @@ describe('FireRepoLite', () => {
 		spy.and.returnValue(of());
 
 		// Act
-		service.collection<IRegistration>('registrations').delete('12345');
+		service.collection<Registration>('registrations').delete('12345');
 
 		// Assert
 		expect(spy).toHaveBeenCalledOnceWith('registrations', '12345');
 	});
 
 	describe('collection<T>()', () => {
-		let collection: IFireRepoCollection<IRegistration>;
+		let collection: IFireRepoCollection<Registration>;
 
 		beforeEach(() => {
-			collection = service.collection<IRegistration>('registrations');
+			collection = service.collection<Registration>('registrations');
 		});
 
 		it('should return collection with matching collectionPathName', () => {
@@ -207,7 +207,7 @@ describe('FireRepoLite', () => {
 			// Arrange
 			const spy = fireRepoBase.add;
 
-			spy.and.returnValue(of({} as DocumentReference<IRegistration>));
+			spy.and.returnValue(of({} as DocumentReference<Registration>));
 
 			// Act
 			collection.add(mockData);
@@ -220,7 +220,7 @@ describe('FireRepoLite', () => {
 			// Arrange
 			const spy = fireRepoBase.addById;
 
-			spy.and.returnValue(of({} as DocumentReference<IRegistration>));
+			spy.and.returnValue(of({} as DocumentReference<Registration>));
 
 			// Act
 			collection.addById('12345', mockData);

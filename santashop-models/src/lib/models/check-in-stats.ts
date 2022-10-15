@@ -1,9 +1,9 @@
-export interface ICheckInAggregatedStats {
+export interface CheckInAggregatedStats {
 	lastUpdated: Date;
-	dateTimeCount: ICheckInDateTimeCount[];
+	dateTimeCount: CheckInDateTimeCount[];
 }
 
-export interface ICheckInDateTimeCount {
+export interface CheckInDateTimeCount {
 	date: number;
 	hour: number;
 	customerCount: number;

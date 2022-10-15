@@ -1,4 +1,4 @@
-export interface IOnboardUser {
+export interface OnboardUser {
 	firstName: string;
 	lastName: string;
 	emailAddress: string;
@@ -8,7 +8,7 @@ export interface IOnboardUser {
 	legal: boolean | Date;
 }
 
-export interface IChangeUserInfo {
+export interface ChangeUserInfo {
 	firstName: string;
 	lastName: string;
 	zipCode: number;

@@ -1,4 +1,4 @@
-export interface IDateTimeSlot {
+export interface DateTimeSlot {
 	id?: string;
 
 	programYear: number;

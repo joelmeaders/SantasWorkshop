@@ -2,17 +2,17 @@ import { Injectable } from '@angular/core';
 import { FireRepoLite, Only } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
-	IAgeGroupBreakdown,
-	ICheckInDateTimeCount,
-	IDateTimeCount,
-	IGenderAgeStats,
+	AgeGroupBreakdown,
+	CheckInDateTimeCount,
+	DateTimeCount,
+	GenderAgeStats,
 	IGenderAgeStatsDisplay,
-	IRegistrationStats,
-	IZipCodeCount,
+	RegistrationStats,
+	ZipCodeCount,
 } from '@models/*';
 import { from } from 'rxjs';
 import { map, reduce, shareReplay, switchMap, take } from 'rxjs/operators';
-import { ICheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
+import { CheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
 import { groupBy, sortBy } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
 
@@ -24,8 +24,8 @@ export class StatsService {
 		COLLECTION_SCHEMA.stats
 	);
 
-	private readonly registrationStats = this.statsCollection<IRegistrationStats>();
-	private readonly checkinStats = this.statsCollection<ICheckInAggregatedStats>();
+	private readonly registrationStats = this.statsCollection<RegistrationStats>();
+	private readonly checkinStats = this.statsCollection<CheckInAggregatedStats>();
 
 	private readonly $registrationStats = this.registrationStats
 		.read('registration-2022')
@@ -59,7 +59,7 @@ export class StatsService {
 			return stats;
 		}),
 		map((stats) => {
-			const sorted: IDateTimeCount[] = sortBy(stats, 'dateTime');
+			const sorted: DateTimeCount[] = sortBy(stats, 'dateTime');
 			return sorted;
 		})
 	);
@@ -76,10 +76,10 @@ export class StatsService {
 
 	public readonly $zipCodeCounts = this.$registrationStats.pipe(
 		take(1),
-		map((stats: any) => stats.zipCodeCount as IZipCodeCount),
+		map((stats: any) => stats.zipCodeCount as ZipCodeCount),
 		map(
-			(stats: IZipCodeCount) =>
-				sortBy(stats, 'childCount').reverse() as IZipCodeCount[]
+			(stats: ZipCodeCount) =>
+				sortBy(stats, 'childCount').reverse() as ZipCodeCount[]
 		)
 	);
 
@@ -104,7 +104,7 @@ export class StatsService {
 		shareReplay(1)
 	);
 
-	private readonly mapCount$ = (prop: Only<ICheckInDateTimeCount, number>) => 
+	private readonly mapCount$ = (prop: Only<CheckInDateTimeCount, number>) => 
 		this.dateTimeCount$.pipe(
 			switchMap((dateTimeCounts) =>
 				from(dateTimeCounts.map((dtc) => dtc[prop]))
@@ -136,29 +136,29 @@ export class StatsService {
 					age35: 0,
 					age68: 0,
 					age911: 0,
-				} as IAgeGroupBreakdown,
+				} as AgeGroupBreakdown,
 				girls: {
 					total: 0,
 					age02: 0,
 					age35: 0,
 					age68: 0,
 					age911: 0,
-				} as IAgeGroupBreakdown,
+				} as AgeGroupBreakdown,
 				boys: {
 					total: 0,
 					age02: 0,
 					age35: 0,
 					age68: 0,
 					age911: 0,
-				} as IAgeGroupBreakdown,
-			} as IGenderAgeStats,
+				} as AgeGroupBreakdown,
+			} as GenderAgeStats,
 		};
 
 		return parsedStat;
 	}
 
 	private parseDateTimeCountsForDisplay(
-		stats: IDateTimeCount[]
+		stats: DateTimeCount[]
 	): IGenderAgeStatsDisplay[] {
 		const parsedStats: IGenderAgeStatsDisplay[] = [];
 

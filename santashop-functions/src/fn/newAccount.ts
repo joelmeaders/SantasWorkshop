@@ -3,9 +3,9 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/v1/https';
 import {
-	IOnboardUser,
-	IUser,
-	IRegistration,
+	OnboardUser,
+	User,
+	Registration,
 	COLLECTION_SCHEMA,
 } from '../../../santashop-models/src/lib/models';
 import { generateId } from '../utility/id-generation';
@@ -13,7 +13,7 @@ import { generateQrCode } from '../utility/qrcodes';
 
 admin.initializeApp();
 
-export default async (data: IOnboardUser): Promise<string | HttpsError> => {
+export default async (data: OnboardUser): Promise<string | HttpsError> => {
 	const newUserAccount = await admin
 		.auth()
 		.createUser({
@@ -32,7 +32,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
 
 	const acceptedLegal = new Date();
 
-	const user: IUser = {
+	const user: User = {
 		firstName: data.firstName,
 		lastName: data.lastName,
 		emailAddress: data.emailAddress.toLowerCase(),
@@ -43,7 +43,7 @@ export default async (data: IOnboardUser): Promise<string | HttpsError> => {
 		manuallyMigrated: false
 	};
 
-	const registration: IRegistration = {
+	const registration: Registration = {
 		uid: newUserAccount.uid,
 		firstName: data.firstName,
 		lastName: data.lastName,

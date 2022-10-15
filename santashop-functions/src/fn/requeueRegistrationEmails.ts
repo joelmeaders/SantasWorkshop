@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import {
 	COLLECTION_SCHEMA,
-	IRegistration,
+	Registration,
 } from '../../../santashop-models/src/lib/models';
 import * as formatDateTime from 'dateformat';
 
@@ -20,13 +20,13 @@ export default async (): Promise<void> => {
 		.then((snapshotDocs) => {
 			if (snapshotDocs.empty) throw new Error('No registrations');
 
-			const regs: IRegistration[] = [];
+			const regs: Registration[] = [];
 
 			snapshotDocs.forEach((doc) => {
 				const registration = {
 					uid: doc.id,
 					...doc.data(),
-				} as IRegistration;
+				} as Registration;
 
 				regs.push(registration);
 			});

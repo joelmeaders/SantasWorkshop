@@ -7,7 +7,7 @@ import {
 } from '@core/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
+import { COLLECTION_SCHEMA, DateTimeSlot } from '@models/*';
 import { QueryConstraint } from 'firebase/firestore';
 import { where } from '@angular/fire/firestore';
 import { PreRegistrationService } from '../../../../core';
@@ -49,7 +49,7 @@ export class DateTimePageService implements OnDestroy {
 		this.destroy$.complete();
 	}
 
-	public async updateRegistration(slot?: IDateTimeSlot) {
+	public async updateRegistration(slot?: DateTimeSlot) {
 		const registration = await firstValueFrom(
 			this.preRegistrationService.userRegistration$
 		);
@@ -75,8 +75,8 @@ export class DateTimePageService implements OnDestroy {
 		}
 	}
 
-	private dateTimeSlotCollection(): IFireRepoCollection<IDateTimeSlot> {
-		return this.fireRepo.collection<IDateTimeSlot>(
+	private dateTimeSlotCollection(): IFireRepoCollection<DateTimeSlot> {
+		return this.fireRepo.collection<DateTimeSlot>(
 			COLLECTION_SCHEMA.dateTimeSlots
 		);
 	}
@@ -92,7 +92,7 @@ export class DateTimePageService implements OnDestroy {
 	 */
 	private availableSlotsQuery(
 		programYear: number
-	): Observable<IDateTimeSlot[]> {
+	): Observable<DateTimeSlot[]> {
 		const queryConstraints: QueryConstraint[] = [
 			where('programYear', '==', programYear),
 			where('enabled', '==', true),

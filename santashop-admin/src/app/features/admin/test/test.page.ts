@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FireRepoLite } from '@core/*';
-import { IDateTimeCount, IZipCodeCount, IRegistration } from '@models/*';
+import { DateTimeCount, ZipCodeCount, Registration } from '@models/*';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -14,8 +14,8 @@ export class TestPage {
 	private readonly STATS = 'stats';
 
 	private completedRegistrations = 0;
-	private dateTimeCount: IDateTimeCount[] = [];
-	private zipCodeCount: IZipCodeCount[] = [];
+	private dateTimeCount: DateTimeCount[] = [];
+	private zipCodeCount: ZipCodeCount[] = [];
 
 	constructor(
 		private readonly httpService: FireRepoLite // private readonly manualOperations: ManualOperationsService
@@ -61,11 +61,11 @@ export class TestPage {
 		await this.storeRegistrations();
 	}
 
-	private loadAllRegistrations(): Observable<IRegistration[]> {
-		return this.httpService.readMany<IRegistration>(this.REGISTRATIONS);
+	private loadAllRegistrations(): Observable<Registration[]> {
+		return this.httpService.readMany<Registration>(this.REGISTRATIONS);
 	}
 
-	private isRegistrationComplete(registration: IRegistration): boolean {
+	private isRegistrationComplete(registration: Registration): boolean {
 		if (!registration) return false;
 		if (!registration.qrcode) return false;
 		if (!registration.date) return false;
@@ -76,7 +76,7 @@ export class TestPage {
 		return true;
 	}
 
-	private updateDateTimeCount(registration: IRegistration): void {
+	private updateDateTimeCount(registration: Registration): void {
 		const index = this.dateTimeCount.findIndex(
 			(e) => e.date === registration.date && e.time === registration.time
 		);
@@ -88,7 +88,7 @@ export class TestPage {
 			return;
 		}
 
-		const newItem: IDateTimeCount = {
+		const newItem: DateTimeCount = {
 			date: registration.date,
 			time: registration.time,
 			count: 1,
@@ -98,7 +98,7 @@ export class TestPage {
 		this.dateTimeCount.push(newItem);
 	}
 
-	private updateZipCodeCount(registration: IRegistration) {
+	private updateZipCodeCount(registration: Registration) {
 		const index = this.zipCodeCount.findIndex(
 			(e) => e.zip === registration.zipCode
 		);
@@ -109,7 +109,7 @@ export class TestPage {
 			return;
 		}
 
-		const newItem: IZipCodeCount = {
+		const newItem: ZipCodeCount = {
 			zip: registration.zipCode,
 			count: 1,
 			childCount: registration.children.length,

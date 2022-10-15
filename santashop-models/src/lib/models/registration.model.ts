@@ -1,22 +1,22 @@
-import { IChild } from './child.model';
-import { IDateTimeSlot } from './date-time-slot.model';
+import { Child } from './child.model';
+import { DateTimeSlot } from './date-time-slot.model';
 
-export interface IRegistration {
+export interface Registration {
 	uid?: string;
 	qrcode?: string;
 	firstName?: string;
 	lastName?: string;
 	emailAddress?: string;
 	programYear?: number;
-	children?: IChild[];
+	children?: Child[];
 
 	// Date/Time slot chosen by the user
-	dateTimeSlot?: Partial<IDateTimeSlot>;
+	dateTimeSlot?: Partial<DateTimeSlot>;
 
 	// Due to how slot capacity is calculated, this value
 	// holds the slot the person cancelled until another
 	// scheduled function consumes and removes it.
-	previousDateTimeSlot?: Partial<IDateTimeSlot>;
+	previousDateTimeSlot?: Partial<DateTimeSlot>;
 
 	// Date/Time registration submitted
 	registrationSubmittedOn?: Date;

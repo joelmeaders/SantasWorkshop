@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ChildValidationError, IChild } from '@models/*';
+import { ChildValidationError, Child } from '@models/*';
 import { deepCopy } from '../../../../../santashop-core/src/lib/helpers/methods';
 
 // TODO: Injectable tokens
@@ -16,7 +16,7 @@ export const MIN_BIRTHDATE = (): Date =>
 
 @Injectable()
 export class ChildValidationService {
-	public validateChild(inputChild: IChild): IChild {
+	public validateChild(inputChild: Child): Child {
 		const outputChild = deepCopy(inputChild);
 
 		if (!this.ageValid(outputChild.dateOfBirth))

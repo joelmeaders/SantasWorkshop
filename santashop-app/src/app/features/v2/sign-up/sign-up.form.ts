@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { IOnboardUser } from '@models/*';
+import { OnboardUser } from '@models/*';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {
@@ -32,8 +32,8 @@ const validators = {
 	legal: Validators.compose([Validators.requiredTrue]),
 };
 
-export const newOnboardUserForm = (): FormGroup<ControlsOf<IOnboardUser>> =>
-	new FormGroup<ControlsOf<IOnboardUser>>(
+export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
+	new FormGroup<ControlsOf<OnboardUser>>(
 		{
 			firstName: new FormControl<string>(undefined, validators.firstName),
 			lastName: new FormControl<string>(undefined, validators.lastName),

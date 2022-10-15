@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { IChild } from '@models/*';
+import { Child } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ChildValidationService } from '../../../../core';
@@ -14,7 +14,7 @@ import { ChildrenPageService } from './children.page.service';
 	providers: [ChildrenPageService, ChildValidationService],
 })
 export class ChildrenPage {
-	public readonly children$: Observable<IChild[] | undefined> =
+	public readonly children$: Observable<Child[] | undefined> =
 		this.viewService.children$;
 
 	public readonly childCount$: Observable<number> =
@@ -26,13 +26,13 @@ export class ChildrenPage {
 		private readonly translateService: TranslateService
 	) {}
 
-	public async removeChild(child: IChild): Promise<void> {
+	public async removeChild(child: Child): Promise<void> {
 		if (await this.confirmDeleteChild(child)) {
 			return this.viewService.removeChild(child);
 		}
 	}
 
-	private async confirmDeleteChild(child: IChild): Promise<boolean> {
+	private async confirmDeleteChild(child: Child): Promise<boolean> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant(
 				'ADDCHILD.DELETE_CHILD_TITLE'

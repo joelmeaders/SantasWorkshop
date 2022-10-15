@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ChildValidationError, IChild } from '@models/*';
+import { ChildValidationError, Child } from '@models/*';
 import {
 	ChildValidationService,
 	MAX_BIRTHDATE,
@@ -74,7 +74,7 @@ describe('ChildValidationService', () => {
 
 	it('validateChild(): should make expected calls and return valid child', () => {
 		// Arrange
-		const validChild: IChild = {
+		const validChild: Child = {
 			firstName: 'Josh',
 			lastName: 'Henrison',
 			dateOfBirth: new Date('6/17/2018'),
@@ -106,7 +106,7 @@ describe('ChildValidationService', () => {
 
 	it('validateChild(): should throw invalid_age error', () => {
 		// Arrange
-		const child: IChild = {
+		const child: Child = {
 			firstName: 'Josh',
 			lastName: 'Henrison',
 			dateOfBirth: new Date('6/17/1918'),
@@ -122,7 +122,7 @@ describe('ChildValidationService', () => {
 
 	it('validateChild(): should throw invalid_firstname error', () => {
 		// Arrange
-		const child: IChild = {
+		const child: Child = {
 			firstName: 'J',
 			lastName: 'Henrison',
 			dateOfBirth: new Date('6/17/1918'),
@@ -138,7 +138,7 @@ describe('ChildValidationService', () => {
 
 	it('validateChild(): should throw invalid_lastname error', () => {
 		// Arrange
-		const child: IChild = {
+		const child: Child = {
 			firstName: 'Josh',
 			lastName: 'H',
 			dateOfBirth: new Date('6/17/1918'),

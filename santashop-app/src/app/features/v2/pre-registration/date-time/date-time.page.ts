@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { SkeletonStateService } from '@core/*';
 import { AlertController } from '@ionic/angular';
-import { IDateTimeSlot } from '@models/*';
+import { DateTimeSlot } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subject } from 'rxjs';
 import { shareReplay, take, map, takeUntil, tap } from 'rxjs/operators';
@@ -78,7 +78,7 @@ export class DateTimePage implements OnDestroy {
 		this.skeletonState.removeStatesByGroup('dateTimePage');
 	}
 
-	public async selectDateTime(slot?: IDateTimeSlot) {
+	public async selectDateTime(slot?: DateTimeSlot) {
 		const hasSlot = await this.alreadyChoseSlot();
 		let shouldChange = false;
 
@@ -92,7 +92,7 @@ export class DateTimePage implements OnDestroy {
 		}
 	}
 
-	public spotsRemaining(slot: IDateTimeSlot): string {
+	public spotsRemaining(slot: DateTimeSlot): string {
 		const slots = slot.maxSlots - (slot.slotsReserved ?? 0);
 
 		if (!slot.enabled || slots <= 0) return 'Unavailable';

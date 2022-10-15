@@ -25,11 +25,11 @@
 		"lib": ["es2020", "dom"],
 		"paths": {
 			"@models/*": [
-				"dist/santashop-models",
+				// "dist/santashop-models",
 				"santashop-models/src",
 			],
 			"@core/*": [
-				"dist/santashop-core",
+				// "dist/santashop-core",
 				"santashop-core/src",
 			],
 			"@registration/*": ["santashop-app/src"],

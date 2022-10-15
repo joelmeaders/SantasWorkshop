@@ -6,8 +6,8 @@ import {
 import { FireRepoLite } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
-	ICheckIn,
-	IRegistration,
+	CheckIn,
+	Registration,
 	RegistrationSearchIndex,
 } from '@models/*';
 import { Observable } from 'rxjs';
@@ -18,13 +18,13 @@ import { map } from 'rxjs/operators';
 })
 export class LookupService {
 	private readonly collections = {
-		searchIndex: this.repoService.collection(
+		searchIndex: this.repoService.collection<RegistrationSearchIndex>(
 			COLLECTION_SCHEMA.registrationSearchIndex
 		),
-		registrations: this.repoService.collection(
+		registrations: this.repoService.collection<Registration>(
 			COLLECTION_SCHEMA.registrations
 		),
-		checkins: this.repoService.collection(COLLECTION_SCHEMA.checkins),
+		checkins: this.repoService.collection<CheckIn>(COLLECTION_SCHEMA.checkins),
 	};
 
 	public readonly searchIndexByName$ = (
@@ -32,7 +32,7 @@ export class LookupService {
 		lastName: string
 	): Observable<RegistrationSearchIndex[]> =>
 		this.collections.searchIndex
-			.readMany<RegistrationSearchIndex>((q) =>
+			.readMany((q) =>
 				this.queryIndexByName(q, firstName, lastName)
 			)
 			.pipe(map((results) => results ?? []));
@@ -41,33 +41,33 @@ export class LookupService {
 		qrCode: string
 	): Observable<RegistrationSearchIndex[]> =>
 		this.collections.searchIndex
-			.readMany<RegistrationSearchIndex>((q) =>
+			.readMany((q) =>
 				this.queryIndexByQrCode(q, qrCode)
 			)
 			.pipe(map((results) => results ?? []));
 
 	public readonly getRegistrationByQrCode$ = (
 		qrcode: string
-	): Observable<IRegistration | undefined> =>
+	): Observable<Registration | undefined> =>
 		this.collections.registrations
-			.readMany<IRegistration>((q) =>
+			.readMany((q) =>
 				this.queryRegistrationsByQrCode(q, qrcode)
 			)
 			.pipe(map((results) => results[0] ?? undefined));
 
 	public readonly getRegistrationByUid$ = (
 		uid: string
-	): Observable<IRegistration | undefined> =>
+	): Observable<Registration | undefined> =>
 		this.collections.registrations
-			.read<IRegistration>(uid)
+			.read(uid)
 			.pipe(map((results) => results ?? undefined));
 
 	// TODO: Separate by program year?
 	public readonly getCheckinByUid$ = (
-		uid?: string
-	): Observable<ICheckIn | undefined> =>
+		uid: string
+	): Observable<CheckIn | undefined> =>
 		this.collections.checkins
-			.read<ICheckIn>(uid)
+			.read(uid)
 			.pipe(map((results) => results ?? undefined));
 
 	constructor(private readonly repoService: FireRepoLite) {}

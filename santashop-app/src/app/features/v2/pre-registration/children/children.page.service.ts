@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { IChild } from '@models/*';
+import { Child } from '@models/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, map } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../../core';
@@ -8,7 +8,7 @@ import { PreRegistrationService } from '../../../../core';
 export class ChildrenPageService implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
-	public readonly children$: Observable<IChild[] | undefined> =
+	public readonly children$: Observable<Child[] | undefined> =
 		this.preRegistrationService.children$.pipe(
 			takeUntil(this.destroy$),
 			shareReplay(1)
@@ -29,7 +29,7 @@ export class ChildrenPageService implements OnDestroy {
 		this.destroy$.complete();
 	}
 
-	public async removeChild(childToRemove: IChild): Promise<void> {
+	public async removeChild(childToRemove: Child): Promise<void> {
 		const children = await firstValueFrom(this.children$);
 
 		const updatedChildren = children?.filter(
@@ -39,7 +39,7 @@ export class ChildrenPageService implements OnDestroy {
 		return this.updateRegistration(updatedChildren);
 	}
 
-	public async updateRegistration(children?: IChild[]) {
+	public async updateRegistration(children?: Child[]) {
 		const registration = await firstValueFrom(
 			this.preRegistrationService.userRegistration$
 		);

@@ -1,14 +1,14 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import { IChangeUserInfo } from '../../../santashop-models/src/lib/models/onboard-user.model';
+import { ChangeUserInfo } from '../../../santashop-models/src/lib/models/onboard-user.model';
 import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models/schema.model';
 
 
 admin.initializeApp();
 
 export default async (
-	data: IChangeUserInfo,
+	data: ChangeUserInfo,
 	context: CallableContext
 ): Promise<boolean | HttpsError> => {
 	const uid = context.auth?.uid;

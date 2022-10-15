@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/v1/https';
-import { IDateTimeSlot } from '../../../santashop-models/src/lib/models/date-time-slot.model';
+import { DateTimeSlot } from '../../../santashop-models/src/lib/models/date-time-slot.model';
 import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models/schema.model';
 
 
@@ -30,7 +30,7 @@ const addDateTimeSlots = async () => {
 	const collection = dateTimeSlotCollection;
 	const programYear = 2022;
 
-	const demoValues: IDateTimeSlot[] = [
+	const demoValues: DateTimeSlot[] = [
 		{
 			programYear: programYear,
 			dateTime: new Date(`12-09-${programYear} 10:00 MST`),

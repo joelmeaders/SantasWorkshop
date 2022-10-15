@@ -4,9 +4,9 @@ import { AlertController, LoadingController } from '@ionic/angular';
 import {
 	AgeGroup,
 	COLLECTION_SCHEMA,
-	ICheckIn,
-	ICheckInStats,
-	IRegistration,
+	CheckIn,
+	CheckInStats,
+	Registration,
 	ToyType,
 } from '@models/*';
 import { FireRepoLite } from '@core/*';
@@ -23,7 +23,7 @@ export class CheckInService {
 		private readonly errorHandler: ErrorHandler
 	) {}
 
-	public async checkIn(registration: IRegistration, isEdit = false) {
+	public async checkIn(registration: Registration, isEdit = false) {
 		const loading = await this.loadingController.create({
 			message: 'Saving check-in...',
 			translucent: true,
@@ -33,7 +33,7 @@ export class CheckInService {
 		await loading.present();
 
 		let alert: HTMLIonAlertElement | undefined = undefined;
-		let result: DocumentReference<ICheckIn> | undefined = undefined;
+		let result: DocumentReference<CheckIn> | undefined = undefined;
 
 		try {
 			const checkin = this.convertRegistrationToCheckIn(
@@ -72,10 +72,10 @@ export class CheckInService {
 	}
 
 	private convertRegistrationToCheckIn(
-		registration: IRegistration,
+		registration: Registration,
 		isEdit: boolean
-	): ICheckIn {
-		const checkin: ICheckIn = {
+	): CheckIn {
+		const checkin: CheckIn = {
 			checkInDateTime: new Date(),
 			inStats: false,
 		};
@@ -90,10 +90,10 @@ export class CheckInService {
 	}
 
 	private registrationStats(
-		registration: IRegistration,
+		registration: Registration,
 		isEdit: boolean
-	): ICheckInStats {
-		const stats: ICheckInStats = {
+	): CheckInStats {
+		const stats: CheckInStats = {
 			preregistered:
 				(!!registration.qrcode && !!registration.uid) || false,
 			children: registration.children?.length || 0,

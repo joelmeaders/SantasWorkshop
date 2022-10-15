@@ -2,8 +2,8 @@
 import * as admin from 'firebase-admin';
 import { HttpsError } from 'firebase-functions/v1/https';
 import {
-	IDateTimeSlot,
-	IRegistration,
+	DateTimeSlot,
+	Registration,
 } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
@@ -16,12 +16,12 @@ admin.initializeApp();
  */
 export default async (): Promise<string> => {
 	// Load all rescheduled registrations
-	const registrations: IRegistration[] = await loadRegistrations();
+	const registrations: Registration[] = await loadRegistrations();
 
 	if (!registrations.length) return Promise.resolve('No registrations');
 
 	// Load all date/time slots
-	const dateTimeSlots: IDateTimeSlot[] = await loadDateTimeSlots();
+	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
 
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
 
@@ -75,10 +75,10 @@ const dateTimeSlotQuery = (limit: number, offset: number) =>
 		.limit(limit)
 		.offset(offset);
 
-const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
+const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
 	const pageSize = 50;
 	let pageOffset = 0;
-	let allDateTimeSlots: IDateTimeSlot[] = [];
+	let allDateTimeSlots: DateTimeSlot[] = [];
 
 	do {
 		const snapshotDocs = await dateTimeSlotQuery(
@@ -90,7 +90,7 @@ const loadDateTimeSlots = async (): Promise<IDateTimeSlot[]> => {
 			const slot = {
 				id: doc.id,
 				...doc.data(),
-			} as IDateTimeSlot;
+			} as DateTimeSlot;
 
 			allDateTimeSlots = allDateTimeSlots.concat(slot);
 		});
@@ -110,10 +110,10 @@ const registrationQuery = (limit: number, offset: number) =>
 		.limit(limit)
 		.offset(offset);
 
-const loadRegistrations = async (): Promise<IRegistration[]> => {
+const loadRegistrations = async (): Promise<Registration[]> => {
 	const pageSize = 50;
 	let pageOffset = 0;
-	let allRegistrations: IRegistration[] = [];
+	let allRegistrations: Registration[] = [];
 
 	do {
 		const snapshotDocs = await registrationQuery(
@@ -124,7 +124,7 @@ const loadRegistrations = async (): Promise<IRegistration[]> => {
 		snapshotDocs.docs.forEach((doc) => {
 			const slot = {
 				...doc.data(),
-			} as IRegistration;
+			} as Registration;
 
 			allRegistrations = allRegistrations.concat(slot);
 		});

@@ -4,9 +4,9 @@ import * as functions from 'firebase-functions';
 import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
 import {
 	COLLECTION_SCHEMA,
-	IUser,
-	IChild,
-	IRegistration,
+	User,
+	Child,
+	Registration,
 } from '../../../santashop-models/src/lib/models';
 import { getAgeFromDate, getAgeGroupFromAge } from '../utility/dates';
 import { generateId } from '../utility/id-generation';
@@ -82,14 +82,14 @@ export default async (
 		if (snapshot.empty) {
 			return null;
 		} else {
-			const childrenList: Partial<IChild>[] = [];
+			const childrenList: Partial<Child>[] = [];
 
 			snapshot.forEach((doc) => {
 				childDocs.push(doc.ref);
 
 				const childData = doc.data();
 
-				const child: Partial<IChild> = {
+				const child: Partial<Child> = {
 					id: Math.floor(Math.random() * (999999 + 1)),
 					firstName: childData.firstName,
 					dateOfBirth: new Date(Date.parse(childData.dateOfBirth)),
@@ -162,7 +162,7 @@ export default async (
 		parsedZipCode = 0;
 	}
 
-	const newUser: IUser = {
+	const newUser: User = {
 		acceptedPrivacyPolicy: new Date(),
 		acceptedTermsOfService: new Date(),
 		emailAddress: customer.emailAddress,
@@ -174,7 +174,7 @@ export default async (
 	};
 
 	// Set up new registration doc
-	const registration: IRegistration = {
+	const registration: Registration = {
 		uid: uid,
 		qrcode: oldRegistration.code ?? generateId(8),
 		firstName: customer.firstName ?? oldRegistration.firstName ?? 'ERROR',
@@ -196,7 +196,7 @@ export default async (
 
 	// Add children to registration doc
 	if (children?.length) {
-		registration.children = children as IChild[];
+		registration.children = children as Child[];
 	}
 
 	// Set up registrationSearchIndex doc

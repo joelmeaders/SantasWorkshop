@@ -1,9 +1,9 @@
 import { Timestamp } from 'firebase/firestore';
 import {
 	AgeGroup,
-	IChild,
-	IRegistration,
-	IUser,
+	Child,
+	Registration,
+	User,
 	ToyType,
 } from '../santashop-models/src';
 
@@ -18,7 +18,7 @@ export const mockUsers = (id?: string) => ({
 		acceptedPrivacyPolicy: new Date(),
 		version: 1,
 		manuallyMigrated: false,
-	} as IUser,
+	} as User,
 });
 
 export const mockRegistrations = (id?: string) => ({
@@ -28,7 +28,7 @@ export const mockRegistrations = (id?: string) => ({
 			children: [{ id: '1' }, { id: '2' }] as any[],
 			dateTimeSlot: { id: '1', dateTime: Timestamp.now() as any },
 			registrationSubmittedOn: new Date(),
-		} as IRegistration,
+		} as Registration,
 	},
 
 	incomplete: {
@@ -36,12 +36,12 @@ export const mockRegistrations = (id?: string) => ({
 			uid: id,
 			children: [{ id: '1' }, { id: '2' }] as any[],
 			dateTimeSlot: { id: '1', dateTime: Timestamp.now() as any },
-		} as IRegistration,
+		} as Registration,
 		noChildren: {
 			uid: id,
 			dateTimeSlot: { id: '1', dateTime: Timestamp.now() as any },
 			registrationSubmittedOn: new Date(),
-		} as IRegistration,
+		} as Registration,
 		withChildrenError: {
 			uid: id,
 			children: [
@@ -49,7 +49,7 @@ export const mockRegistrations = (id?: string) => ({
 				{ id: '2', error: 'missing age or something' },
 			] as any[],
 			dateTimeSlot: { id: '1', dateTime: Timestamp.now() as any },
-		} as IRegistration,
+		} as Registration,
 	},
 });
 
@@ -65,7 +65,7 @@ export const mockChildren = {
 			programYearAdded: new Date().getFullYear(),
 			enabled: true,
 			error: undefined,
-		} as IChild,
+		} as Child,
 		age35: {
 			id: 2,
 			firstName: 'Jane',
@@ -76,7 +76,7 @@ export const mockChildren = {
 			programYearAdded: new Date().getFullYear(),
 			enabled: true,
 			error: undefined,
-		} as IChild,
+		} as Child,
 		age68: {
 			id: 3,
 			firstName: 'Jesse',
@@ -87,7 +87,7 @@ export const mockChildren = {
 			programYearAdded: new Date().getFullYear(),
 			enabled: true,
 			error: undefined,
-		} as IChild,
+		} as Child,
 		age911: {
 			id: 3,
 			firstName: 'Jesse',
@@ -98,6 +98,6 @@ export const mockChildren = {
 			programYearAdded: new Date().getFullYear(),
 			enabled: true,
 			error: undefined,
-		} as IChild,
+		} as Child,
 	},
 };

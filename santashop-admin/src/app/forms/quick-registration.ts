@@ -1,6 +1,6 @@
 import { FormGroup, Validators } from '@angular/forms';
 import { CommonForms } from '@core/*';
-import { IUser, IChild } from '@models/*';
+import { User, Child } from '@models/*';
 
 export abstract class QuickRegistrationForms {
 	public static customerValidators = {
@@ -11,7 +11,7 @@ export abstract class QuickRegistrationForms {
 		]),
 	};
 
-	public static customerForm(value: IUser | undefined): FormGroup {
+	public static customerForm(value: User | undefined): FormGroup {
 		return CommonForms.formBuilder().group({
 			zipCode: [
 				value?.zipCode ?? undefined,
@@ -34,7 +34,7 @@ export abstract class QuickRegistrationForms {
 		ageGroup: Validators.compose([Validators.required]),
 	};
 
-	public static childForm(value: IChild | undefined): FormGroup {
+	public static childForm(value: Child | undefined): FormGroup {
 		return CommonForms.formBuilder().group({
 			toyType: [
 				value?.toyType ?? undefined,

@@ -1,31 +1,31 @@
-export interface IRegistrationStats {
+export interface RegistrationStats {
 	completedRegistrations: number;
 
-	dateTimeCount: IDateTimeCount[];
+	dateTimeCount: DateTimeCount[];
 
-	zipCodeCount: IZipCodeCount[];
+	zipCodeCount: ZipCodeCount[];
 }
 
-export interface IDateTimeCount {
+export interface DateTimeCount {
 	dateTime: Date;
 	count: number;
 	childCount: number;
-	stats: IGenderAgeStats;
+	stats: GenderAgeStats;
 }
 
-export interface IZipCodeCount {
+export interface ZipCodeCount {
 	zip: number;
 	count: number;
 	childCount: number;
 }
 
-export interface IGenderAgeStats {
-	infants: IAgeGroupBreakdown;
-	girls: IAgeGroupBreakdown;
-	boys: IAgeGroupBreakdown;
+export interface GenderAgeStats {
+	infants: AgeGroupBreakdown;
+	girls: AgeGroupBreakdown;
+	boys: AgeGroupBreakdown;
 }
 
-export interface IAgeGroupBreakdown {
+export interface AgeGroupBreakdown {
 	total: number;
 	age02: number;
 	age35: number;
@@ -35,5 +35,5 @@ export interface IAgeGroupBreakdown {
 
 export interface IGenderAgeStatsDisplay {
 	date: Date;
-	stats: IGenderAgeStats;
+	stats: GenderAgeStats;
 }

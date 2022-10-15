@@ -3,15 +3,15 @@ import * as functions from 'firebase-functions';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 import {
 	COLLECTION_SCHEMA,
-	IChangeUserInfo,
-	IDateTimeSlot,
-	IRegistration,
+	ChangeUserInfo,
+	DateTimeSlot,
+	Registration,
 } from '../../../santashop-models/src/lib/models';
 
 admin.initializeApp();
 
 export default async (
-	data: IChangeUserInfo,
+	data: ChangeUserInfo,
 	context: CallableContext
 ): Promise<boolean | HttpsError> => {
 	const uid = context.auth?.uid;
@@ -32,7 +32,7 @@ export default async (
 
 	const registrationDoc = await registrationDocRef.get().then((snapshot) => {
 		if (snapshot.exists) {
-			return { ...snapshot.data() } as IRegistration;
+			return { ...snapshot.data() } as Registration;
 		} else {
 			throw new HttpsError(
 				'not-found',
@@ -46,7 +46,7 @@ export default async (
 	if (registrationDoc.includedInCounts) {
 		registrationDoc.previousDateTimeSlot = {
 			...registrationDoc.dateTimeSlot,
-		} as IDateTimeSlot;
+		} as DateTimeSlot;
 	}
 
 	registrationDoc.includedInCounts = false;

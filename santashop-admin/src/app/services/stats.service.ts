@@ -9,10 +9,10 @@ import {
 	IGenderAgeStatsDisplay,
 	RegistrationStats,
 	ZipCodeCount,
+	CheckInAggregatedStats,
 } from '@models/*';
 import { from } from 'rxjs';
 import { map, reduce, shareReplay, switchMap, take } from 'rxjs/operators';
-import { CheckInAggregatedStats } from 'santashop-models/src/lib/models/check-in-stats';
 import { groupBy, sortBy } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
 

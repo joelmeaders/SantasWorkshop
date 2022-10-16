@@ -22,5 +22,5 @@ export class FunctionsWrapper {
 		this.httpsCallable('changeAccountInformation')(newInfo);
 
 	public readonly undoRegistration = () => 
-		this.httpsCallable('undoRegistration')({})
+		this.httpsCallable('')
 }

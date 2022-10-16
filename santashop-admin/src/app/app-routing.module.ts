@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import {
-	AngularFireAuthGuard,
 	redirectLoggedInTo,
 	hasCustomClaim,
-} from '@angular/fire/compat/auth-guard';
+	AuthGuard,
+} from '@angular/fire/auth-guard';
 
 const adminOnly = () => hasCustomClaim('admin');
 const redirectLoggedInToItems = () => redirectLoggedInTo(['admin']);
@@ -12,7 +12,7 @@ const redirectLoggedInToItems = () => redirectLoggedInTo(['admin']);
 const routes: Routes = [
 	{
 		path: '',
-		canActivate: [AngularFireAuthGuard],
+		canActivate: [AuthGuard],
 		data: { authGuardPipe: redirectLoggedInToItems },
 		loadChildren: () =>
 			import('./features/sign-in/sign-in.module').then(
@@ -22,7 +22,7 @@ const routes: Routes = [
 	},
 	{
 		path: 'admin',
-		canActivate: [AngularFireAuthGuard],
+		canActivate: [AuthGuard],
 		data: { authGuardPipe: adminOnly },
 		loadChildren: () =>
 			import('./features/admin/admin.module').then(

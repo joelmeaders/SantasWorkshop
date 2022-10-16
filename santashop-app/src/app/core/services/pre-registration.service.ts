@@ -8,22 +8,21 @@ import {
 	take,
 	takeUntil,
 } from 'rxjs/operators';
-import { Timestamp } from '@firebase/firestore';
 import {
 	DateTimeSlot,
 	Registration,
 	Child,
 	COLLECTION_SCHEMA,
 } from '@models/*';
-import { Functions } from '@angular/fire/functions';
-import { httpsCallable } from 'rxfire/functions';
-import { DocumentReference } from '@angular/fire/firestore';
 import {
 	AuthService,
 	automock,
+	DocumentReference,
 	filterNil,
 	FireRepoLite,
+	FunctionsWrapper,
 	pluckFilterNil,
+	Timestamp,
 } from '@core/*';
 import { QrCodeService } from './qrcode.service';
 
@@ -102,7 +101,7 @@ export class PreRegistrationService implements OnDestroy {
 		private readonly fireRepo: FireRepoLite,
 		private readonly authService: AuthService,
 		private readonly qrCodeService: QrCodeService,
-		private readonly afFunctions: Functions
+		private readonly afFunctions: FunctionsWrapper
 	) {}
 
 	public ngOnDestroy(): void {
@@ -113,9 +112,7 @@ export class PreRegistrationService implements OnDestroy {
 	// TODO: Convert to function
 	public saveRegistration(
 		registration: Registration
-	): Observable<DocumentReference> {
-		this.validateRegistration(registration);
-
+	): Observable<DocumentReference<Registration>> {
 		return this.authService.uid$.pipe(take(1)).pipe(
 			take(1),
 			switchMap((uid) =>
@@ -125,11 +122,7 @@ export class PreRegistrationService implements OnDestroy {
 	}
 
 	public undoRegistration() {
-		const accountStatusFunction = httpsCallable<any, boolean>(
-			this.afFunctions,
-			'undoRegistration'
-		);
-		return accountStatusFunction({});
+		return this.afFunctions.undoRegistration();
 	}
 
 	public isRegistrationComplete(registration: Registration): boolean {
@@ -139,11 +132,6 @@ export class PreRegistrationService implements OnDestroy {
 		return !!hasChildren && !!hasDateTime && !!isSubmitted;
 	}
 
-	// TODO: Make cloud function to handle this
-	private validateRegistration(registration: Registration): void {
-		registration = registration;
-	}
-
 	private getDateTimeSlot(
 		registration: Registration
 	): DateTimeSlot | undefined {
@@ -151,7 +139,7 @@ export class PreRegistrationService implements OnDestroy {
 
 		// Convert the timestamp to a date. Firebase (or angularfire) seems to be
 		// setting all dates to timestamps in the database now.
-		if (slot) slot.dateTime = ((<any>slot.dateTime) as Timestamp)?.toDate();
+		if (slot) slot.dateTime = ((slot.dateTime as any) as Timestamp)?.toDate();
 
 		return slot;
 	}
@@ -159,7 +147,7 @@ export class PreRegistrationService implements OnDestroy {
 	private getChildren(registration: Registration): Child[] {
 		registration.children?.forEach((child) => {
 			child.dateOfBirth = (
-				(<any>child.dateOfBirth) as Timestamp
+				(child.dateOfBirth as any) as Timestamp
 			)?.toDate();
 		});
 

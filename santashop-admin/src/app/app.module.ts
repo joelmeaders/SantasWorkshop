@@ -1,25 +1,38 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicModule } from '@ionic/angular';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import {
-	AngularFireAuthModule,
-	USE_EMULATOR as USE_AUTH_EMULATOR,
-} from '@angular/fire/compat/auth';
-import {
-	AngularFirestoreModule,
-	USE_EMULATOR as USE_FIRESTORE_EMULATOR,
-} from '@angular/fire/compat/firestore';
-import {
-	AuthService,
+	AuthWrapper,
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
 } from '@core/*';
 import { AppComponent } from './app.component';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import {
+	provideAuth,
+	connectAuthEmulator,
+	getAuth,
+	Auth,
+} from '@angular/fire/auth';
+import {
+	connectFirestoreEmulator,
+	getFirestore,
+	provideFirestore,
+	enableMultiTabIndexedDbPersistence,
+} from '@angular/fire/firestore';
+import {
+	getAnalytics,
+	provideAnalytics,
+} from '@angular/fire/analytics';
+
+let resolvePersistenceEnabled: (enabled: boolean) => void;
+
+export const persistenceEnabled = new Promise<boolean>((resolve) => {
+	resolvePersistenceEnabled = resolve;
+});
 
 @NgModule({
 	declarations: [AppComponent],
@@ -29,26 +42,39 @@ import { AppComponent } from './app.component';
 		IonicModule.forRoot({
 			mode: 'md',
 		}),
-		AngularFireModule.initializeApp(firebaseConfig),
-		AngularFirestoreModule,
-		AngularFireAuthModule,
-		AngularFireAnalyticsModule,
+		provideFirebaseApp(() => initializeApp(firebaseConfig)),
+		provideAuth(() => {
+			const auth = getAuth();
+			if (!environment.production) {
+				connectAuthEmulator(auth, 'http://localhost:9099', {
+					disableWarnings: true,
+				});
+			}
+			return auth;
+		}),
+		provideFirestore(() => {
+			const firestore = getFirestore();
+			if (!environment.production) {
+				connectFirestoreEmulator(firestore, 'localhost', 8080);
+			}
+			enableMultiTabIndexedDbPersistence(firestore).then(
+				() => resolvePersistenceEnabled(true),
+				() => resolvePersistenceEnabled(false)
+			);
+			return firestore;
+		}),
+		provideAnalytics(() => {
+			const analytics = getAnalytics();
+			return analytics;
+		}),
 	],
 	providers: [
 		// { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		{ provide: PROGRAM_YEAR, useValue: 2021 },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
-		AuthService,
 		{
-			provide: USE_AUTH_EMULATOR,
-			useValue: !environment.production
-				? ['http://localhost:9099']
-				: undefined,
-		},
-		{
-			provide: USE_FIRESTORE_EMULATOR,
-			useValue: !environment.production ? ['localhost', 8080] : undefined,
+			provide: AuthWrapper, deps: [ Auth ]
 		},
 	],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],

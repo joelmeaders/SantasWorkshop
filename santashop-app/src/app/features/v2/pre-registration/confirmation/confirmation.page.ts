@@ -5,7 +5,6 @@ import { ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
-import { take } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../../core';
 
 @Component({
@@ -59,8 +58,8 @@ export class ConfirmationPage {
 		await loader.present();
 
 		try {
-			await logEvent(this.analytics, 'delete_registration');
-			await this.viewService.undoRegistration().pipe(take(1)).toPromise();
+			logEvent(this.analytics, 'delete_registration');
+			await this.viewService.undoRegistration();
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {

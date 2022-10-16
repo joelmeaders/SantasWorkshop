@@ -1,15 +1,12 @@
 import { Injectable } from '@angular/core';
-import {
-	CollectionReference,
-	DocumentData,
-} from '@angular/fire/compat/firestore';
-import { FireRepoLite } from '@core/*';
+import { FireRepoLite, QueryConstraint } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
 	CheckIn,
 	Registration,
 	RegistrationSearchIndex,
 } from '@models/*';
+import { limit, orderBy, where } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -30,29 +27,21 @@ export class LookupService {
 	public readonly searchIndexByName$ = (
 		firstName: string,
 		lastName: string
-	): Observable<RegistrationSearchIndex[]> =>
-		this.collections.searchIndex
-			.readMany((q) =>
-				this.queryIndexByName(q, firstName, lastName)
-			)
-			.pipe(map((results) => results ?? []));
+	): Observable<RegistrationSearchIndex[]> => 
+	this.queryIndexByName(firstName, lastName).pipe(
+		map(results => results ?? []));
+		
 
 	public readonly searchIndexByQrCode$ = (
 		qrCode: string
 	): Observable<RegistrationSearchIndex[]> =>
-		this.collections.searchIndex
-			.readMany((q) =>
-				this.queryIndexByQrCode(q, qrCode)
-			)
+		this.queryIndexByQrCode(qrCode)
 			.pipe(map((results) => results ?? []));
 
 	public readonly getRegistrationByQrCode$ = (
 		qrcode: string
 	): Observable<Registration | undefined> =>
-		this.collections.registrations
-			.readMany((q) =>
-				this.queryRegistrationsByQrCode(q, qrcode)
-			)
+	this.queryRegistrationsByQrCode(qrcode)
 			.pipe(map((results) => results[0] ?? undefined));
 
 	public readonly getRegistrationByUid$ = (
@@ -73,35 +62,41 @@ export class LookupService {
 	constructor(private readonly repoService: FireRepoLite) {}
 
 	private queryIndexByName(
-		q: CollectionReference<DocumentData>,
 		firstName: string,
 		lastName: string
-	) {
-		return q
-			.where('firstName', '==', firstName)
-			.where('lastName', '>=', lastName)
-			.where('lastName', '<=', lastName + '\uf8ff')
-			.limit(50);
+	): Observable<RegistrationSearchIndex[]> {
+		const queryConstraints: QueryConstraint[] = [
+			where('firstName', '==', firstName),
+			where('lastName', '>=', lastName),
+			where('lastName', '<=', lastName + '\uf8ff'),
+			limit(50)
+		];
+
+		return this.collections.searchIndex.readMany(queryConstraints);
 	}
 
 	private queryIndexByQrCode(
-		q: CollectionReference<DocumentData>,
 		qrCode: string
-	) {
-		return q
-			.where('code', '==', qrCode)
-			.orderBy('lastName', 'asc')
-			.orderBy('firstName', 'asc')
-			.limit(1);
+	): Observable<RegistrationSearchIndex[]> {
+		const queryConstraints: QueryConstraint[] = [
+			where('code', '==', qrCode),
+			orderBy('lastName', 'asc'),
+			orderBy('firstName', 'asc'),
+			limit(1)
+		];
+
+		return this.collections.searchIndex.readMany(queryConstraints);
 	}
 
 	private queryRegistrationsByQrCode(
-		q: CollectionReference<DocumentData>,
 		qrCode: string
-	) {
-		return q
-			.where('qrcode', '==', qrCode)
-			.orderBy('lastName', 'asc')
-			.orderBy('firstName', 'asc');
+	): Observable<Registration[]> {
+		const queryConstraints: QueryConstraint[] = [
+			where('qrcode', '==', qrCode),
+			orderBy('lastName', 'asc'),
+			orderBy('firstName', 'asc')
+		];
+
+		return this.collections.registrations.readMany(queryConstraints);
 	}
 }

@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IAuth } from '@models/*';
+import { Auth } from '@models/*';
 import { IError } from '@models/*';
 import { Subject } from 'rxjs';
 import { SignInForm } from '../../forms/sign-in';
@@ -33,7 +33,7 @@ export class SignInPage implements OnDestroy {
 	}
 
 	public async login() {
-		const loginInfo: IAuth = {
+		const loginInfo: Auth = {
 			...this.form.value,
 		};
 

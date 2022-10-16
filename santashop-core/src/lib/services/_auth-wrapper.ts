@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import {
 	Auth,
 	User as _User,
@@ -11,7 +12,9 @@ import { authState } from 'rxfire/auth';
 export type User = _User;
 export type UserCredential = _UserCredential;
 
-
+@Injectable({
+	providedIn: 'root',
+})
 export class AuthWrapper {
 	constructor(private readonly auth: Auth) {}
 

@@ -4,7 +4,7 @@ import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, newAuthForm } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IAuth, IError } from '@models/*';
+import { Auth, IError } from '@models/*';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -51,7 +51,7 @@ export class SignInPageService implements OnDestroy {
 	public async signIn(): Promise<void | IError> {
 		if (!this.recaptchaValid$.getValue()) return;
 
-		const auth: IAuth = {
+		const auth: Auth = {
 			...this.form.value,
 		};
 
@@ -78,7 +78,7 @@ export class SignInPageService implements OnDestroy {
 			return;
 		}
 
-		await logEvent(this.analytics, 'validated_recaptcha');
+		logEvent(this.analytics, 'validated_recaptcha');
 		this.recaptchaValid$.next(true);
 	}
 
@@ -87,7 +87,7 @@ export class SignInPageService implements OnDestroy {
 			this.afFunctions,
 			'verifyRecaptcha2'
 		)({ value: $event });
-		return Promise.resolve((<any>status.data).success as boolean);
+		return Promise.resolve((status.data as any).success as boolean);
 	}
 
 	// Move to UI service

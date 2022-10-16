@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { CollectionReference } from 'firebase/firestore';
 import { from, map, Observable } from 'rxjs';
 import {
+	CollectionReference,
 	DocumentData,
 	DocumentReference,
 	FirestoreDataConverter,

@@ -1,5 +1,4 @@
 import { ErrorHandler, Injectable } from '@angular/core';
-import { take } from 'rxjs/operators';
 import { AlertController, LoadingController } from '@ionic/angular';
 import {
 	AgeGroup,
@@ -9,8 +8,8 @@ import {
 	Registration,
 	ToyType,
 } from '@models/*';
-import { FireRepoLite } from '@core/*';
-import { DocumentReference } from '@angular/fire/compat/firestore';
+import { DocumentReference, FireRepoLite } from '@core/*';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
 	providedIn: 'root',
@@ -32,8 +31,8 @@ export class CheckInService {
 
 		await loading.present();
 
-		let alert: HTMLIonAlertElement | undefined = undefined;
-		let result: DocumentReference<CheckIn> | undefined = undefined;
+		let alert: HTMLIonAlertElement | undefined;
+		let result: DocumentReference<CheckIn> | undefined;
 
 		try {
 			const checkin = this.convertRegistrationToCheckIn(
@@ -43,13 +42,13 @@ export class CheckInService {
 
 			const saveMethod = checkin.stats?.preregistered
 				? this.repoService
-						.collection(COLLECTION_SCHEMA.checkins)
+						.collection<CheckIn>(COLLECTION_SCHEMA.checkins)
 						.addById(checkin.customerId!, checkin)
 				: this.repoService
-						.collection(COLLECTION_SCHEMA.checkins)
+						.collection<CheckIn>(COLLECTION_SCHEMA.checkins)
 						.add(checkin);
 
-			result = await saveMethod.pipe(take(1)).toPromise();
+			result = await firstValueFrom(saveMethod);
 
 			alert = await this.alertController.create({
 				header: 'Check-In Complete',

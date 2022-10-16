@@ -8,6 +8,7 @@ import {
 	QueryConstraint as _QueryConstraint,
 	QueryDocumentSnapshot as _QueryDocumentSnapshot,
 	SnapshotOptions as _SnapshotOptions,
+	Timestamp as _Timestamp,
 } from 'firebase/firestore';
 import {
 	addDoc,
@@ -32,6 +33,7 @@ export type FirestoreDataConverter<T> = _FirestoreDataConverter<T>;
 export type QueryConstraint = _QueryConstraint;
 export type QueryDocumentSnapshot = _QueryDocumentSnapshot;
 export type SnapshotOptions = _SnapshotOptions;
+export type Timestamp = _Timestamp;
 
 /**
  * The entire reason for this class is to make

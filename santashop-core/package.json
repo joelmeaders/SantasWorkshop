@@ -3,16 +3,16 @@
 	"version": "0.0.6",
 	"author": "Joel Meaders",
 	"peerDependencies": {
-		"@angular/common": "~14.0.2",
-		"@angular/core": "~14.0.2",
-		"@angular/fire": ">=7.4.0",
-		"firebase": ">=9.10.0",
-		"rxjs": "~7.5.5"
+		"@angular/common": "^14.2.6",
+		"@angular/core": "^14.2.6",
+		"@angular/fire": "^7.4.1",
+		"firebase": "^9.12.1",
+		"rxjs": "^7.5.7"
 	},
 	"dependencies": {
-		"tslib": ">=2.4.0"
+		"tslib": "~2.4.0"
 	},
 	"devDependencies": {
-		"eslint": "^8.18.0"
+		"eslint": "^8.25.0"
 	}
 }

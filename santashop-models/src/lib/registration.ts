@@ -1,5 +1,5 @@
-import { Child } from './child.model';
-import { DateTimeSlot } from './date-time-slot.model';
+import { Child } from './child';
+import { DateTimeSlot } from './date-time-slot';
 
 export interface Registration {
 	uid?: string;

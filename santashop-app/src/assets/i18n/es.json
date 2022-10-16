@@ -7,15 +7,15 @@
 		"REQUEST_CHANGE": "Solicitud de cambio"
 	},
 	"HOME": {
-		"WELCOME_MESSAGE": "¡Bienvenido a la<br/>aplicación Denver Santa Claus Shop!",
+		"WELCOME_MESSAGE": "¡Registro en<br/>Denver Santa Claus Shop!",
 		"CREATE_ACCOUNT": "Crear una cuenta",
-		"SIGN_IN_INST": "Si conseguiste juguetes con nosotros el año pasado, inicia sesión.",
-		"CREATE_ACCOUNT_INST": "Si eres nuevo, crea una cuenta aquí."
+		"SIGN_IN_INST": "¿Tiene una cuenta 2022? Inicia sesión"
 	},
 	"COMMON": {
-		"EMAIL_ADDRESS": "Dirección de correo electrónico",
+		"EMAIL_ADDRESS": "Correo electrónico",
 		"PASSWORD": "Contraseña",
 		"SIGN_IN": "Inicia sesión",
+		"EXISTING_ACCOUNT": "Cuenta Existente",
 		"CREATE_ACCOUNT": "Crear cuenta",
 		"WELCOME": "Bienvenido",
 		"MY_ACCOUNT": "Mi cuenta",
@@ -44,10 +44,8 @@
 		"SIGNING_IN": "Iniciar sesión..."
 	},
 	"SIGNUP": {
-		"ACCOUNT_REMINDER": "Si se registró el año pasado, entonces ya tiene una cuenta.",
-		"SIGN_IN_HERE": "Haga clic aquí para iniciar sesión",
 		"HAVE_ACCOUNT": "¿Ya tienes una cuenta?",
-		"TITLE1": "Configura tu cuenta...",
+		"TITLE1": "Configura tu cuenta",
 		"TITLE2": "Esto solo tomará un minuto",
 		"FIRST_NAME": "Nombre",
 		"LAST_NAME": "Apellido",

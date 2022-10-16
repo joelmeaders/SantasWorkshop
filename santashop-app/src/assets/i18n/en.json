@@ -7,15 +7,15 @@
 		"REQUEST_CHANGE": "Request To Change"
 	},
 	"HOME": {
-		"WELCOME_MESSAGE": "Welcome to the<br />Denver Santa Claus Shop App!",
+		"WELCOME_MESSAGE": "Denver Santa Claus Shop<br/>Registration!",
 		"CREATE_ACCOUNT": "Create An Account",
-		"SIGN_IN_INST": "If you got toys with us last year, sign in.",
-		"CREATE_ACCOUNT_INST": "If you're new, create an account here."
+		"SIGN_IN_INST": "Have a 2022 account? Sign in"
 	},
 	"COMMON": {
-		"EMAIL_ADDRESS": "Email Address",
+		"EMAIL_ADDRESS": "Email",
 		"PASSWORD": "Password",
 		"SIGN_IN": "Sign In",
+		"EXISTING_ACCOUNT": "Existing Account",
 		"CREATE_ACCOUNT": "Create Acount",
 		"WELCOME": "Welcome",
 		"MY_ACCOUNT": "My Account",
@@ -44,10 +44,8 @@
 		"SIGNING_IN": "Signing in..."
 	},
 	"SIGNUP": {
-		"ACCOUNT_REMINDER": "If you signed up last year then you already have an account.",
-		"SIGN_IN_HERE": "Click Here to sign in",
 		"HAVE_ACCOUNT": "Already have an account?",
-		"TITLE1": "Set up your account...",
+		"TITLE1": "Set up your account",
 		"TITLE2": "This will only take a minute",
 		"FIRST_NAME": "First Name",
 		"LAST_NAME": "Last Name",

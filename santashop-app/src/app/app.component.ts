@@ -34,7 +34,7 @@ export class AppComponent {
 			browserLang.match(/en|es/) ? browserLang : 'en'
 		);
 
-		await logEvent(this.analyticsService, 'default_language', {
+		logEvent(this.analyticsService, 'default_language', {
 			value: browserLang,
 		});
 	}

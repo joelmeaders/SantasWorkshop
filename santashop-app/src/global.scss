@@ -25,9 +25,22 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-ion-title {
-	font-family: "Inter", "Roboto", sans-serif;
-	font-size: 1.2em;
+ion-title, ion-card-title {
+	font-family: 'lora', sans-serif;
+	font-size: 1.6em;
+	font-weight: 600;
+}
+
+h1, ion-title, ion-card-title {
+	font-family: 'lora', sans-serif;
+	color: var(--ion-color-xmasred);
+	text-transform: uppercase;
+	letter-spacing: .03em;
+}
+
+h3, ion-card-subtitle {
+	font-size: 1.4em;
+	font-family: brandon-grotesque, sans-serif;
 	font-weight: 600;
 }
 
@@ -145,18 +158,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 	font-size: 1.2rem;
 }
 
-.ion-card-subtitle {
-	font-family: "Roboto", sans-serif;
-	font-size: 1.4rem;
-	font-weight: 400;
-}
-
-.ion-card-subtitle-lg {
-	font-family: "Roboto", sans-serif;
-	font-size: 2rem;
-	font-weight: 400;
-}
-
 .remove-shadow {
 	--box-shadow: none;
 }
@@ -259,6 +260,13 @@ $es-direction-definitions: (top, bottom, right, left) !default;
 .firebase-emulator-warning {
 	display: none;
 }
+
 #ghostery-tracker-tally {
 	display: none;
 }
+
+// Disable autofill color
+input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    transition: background-color 600000s 0s, color 600000s 0s;
+  }

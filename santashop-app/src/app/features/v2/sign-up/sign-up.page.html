@@ -24,28 +24,12 @@
 						<ion-card-subtitle>
 							{{ "SIGNUP.TITLE2" | translate }}
 						</ion-card-subtitle>
-						<p>
-							<ion-note
-								color="danger"
-								[routerLink]="['/sign-in']"
-								button
-								tappable
-							>
-								{{ "SIGNUP.ACCOUNT_REMINDER" | translate }}
-								<br />
-								<strong
-									><ion-text color="primary">
-										{{ "SIGNUP.SIGN_IN_HERE" | translate }}
-									</ion-text></strong
-								>
-							</ion-note>
-						</p>
 					</ion-card-header>
 					<ion-card-content>
 						<form [formGroup]="form" novalidate>
 							<ion-list>
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label slot="start">
 										{{ "SIGNUP.FIRST_NAME" | translate }}
 									</ion-label>
 									<ion-input
@@ -53,7 +37,7 @@
 										formControlName="firstName"
 										[debounce]="500"
 										autocomplete="given-name"
-										inputmode="text"
+										type="text"
 										autofocus="true"
 									></ion-input>
 								</ion-item>
@@ -62,14 +46,14 @@
 								></core-control-errors>
 
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label slot="start">
 										{{ "SIGNUP.LAST_NAME" | translate }}
 									</ion-label>
 									<ion-input
 										formControlName="lastName"
 										[debounce]="500"
 										autocomplete="family-name"
-										inputmode="text"
+										type="text"
 									></ion-input>
 								</ion-item>
 								<core-control-errors
@@ -77,15 +61,14 @@
 								></core-control-errors>
 
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label slot="start">
 										{{ "COMMON.EMAIL_ADDRESS" | translate }}
 									</ion-label>
 									<ion-input
 										formControlName="emailAddress"
 										[debounce]="500"
-										type="email"
 										autocomplete="email"
-										inputmode="email"
+										type="email"
 									></ion-input>
 								</ion-item>
 								<core-control-errors
@@ -93,7 +76,7 @@
 								></core-control-errors>
 
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label slot="start">
 										{{ "COMMON.PASSWORD" | translate }}
 									</ion-label>
 									<ion-input
@@ -108,7 +91,7 @@
 								></core-control-errors>
 
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label slot="start">
 										{{ "SIGNUP.PASSWORD2" | translate }}
 									</ion-label>
 									<ion-input
@@ -135,7 +118,7 @@
 								</ng-container>
 
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label slot="start">
 										{{ "SIGNUP.ZIP_CODE" | translate }}
 									</ion-label>
 									<ion-input
@@ -143,7 +126,7 @@
 										[debounce]="500"
 										type="text"
 										autocomplete="postal-code"
-										inputmode="numeric"
+										type="numeric"
 										maxlength="5"
 										minlength="5"
 									></ion-input>
@@ -154,7 +137,7 @@
 							</ion-list>
 
 							<div id="pw" class="ion-margin bhp" #pw>
-								<ion-label color="xmasred">
+								<ion-label slot="start">
 									{{ "COMMON.PASSWORD" | translate }}
 								</ion-label>
 								<input

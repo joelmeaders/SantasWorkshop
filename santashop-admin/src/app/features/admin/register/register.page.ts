@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { AgeGroup, Child, IError, Registration, ToyType } from '@models/*';
+import { AgeGroup, Child, IError, Registration, ToyType } from '../../../../../../santashop-models/src/public-api';
 import { Subject, BehaviorSubject, combineLatest } from 'rxjs';
 import {
 	takeUntil,

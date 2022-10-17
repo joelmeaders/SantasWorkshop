@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AuthService } from '@core/*';
+import { AuthService } from 'santashop-core/src/public-api';
 import { PopoverController } from '@ionic/angular';
 import { PublicMenuComponent } from '../public-menu/public-menu.component';
 

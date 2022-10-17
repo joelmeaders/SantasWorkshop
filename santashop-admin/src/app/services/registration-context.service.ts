@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
-import { CheckIn, Registration } from '@models/*';
+import { CheckIn, Registration } from '../../../../santashop-models/src/public-api';
 import { BehaviorSubject, of } from 'rxjs';
 import {
 	distinctUntilChanged,

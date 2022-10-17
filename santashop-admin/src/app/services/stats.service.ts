@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, Only } from '@core/*';
+import { FireRepoLite, Only } from 'santashop-core/src/public-api';
 import {
 	COLLECTION_SCHEMA,
 	AgeGroupBreakdown,
@@ -10,7 +10,7 @@ import {
 	RegistrationStats,
 	ZipCodeCount,
 	CheckInAggregatedStats,
-} from '@models/*';
+} from '../../../../santashop-models/src/public-api';
 import { from } from 'rxjs';
 import { map, reduce, shareReplay, switchMap, take } from 'rxjs/operators';
 import { groupBy, sortBy } from 'underscore';

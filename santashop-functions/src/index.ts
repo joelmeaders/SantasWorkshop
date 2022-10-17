@@ -1,4 +1,4 @@
-import { COLLECTION_SCHEMA } from '@models/*';
+import { COLLECTION_SCHEMA } from '../../santashop-models/src/public-api';
 import * as functions from 'firebase-functions';
 
 export const changeAccountInformation = functions.https.onCall(

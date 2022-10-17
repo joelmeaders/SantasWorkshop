@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { IError } from '@models/*';
+import { IError } from '../../../../santashop-models/src/public-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
 	takeUntil,

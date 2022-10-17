@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MOBILE_EVENT } from '@core/*';
+import { MOBILE_EVENT } from 'santashop-core/src/public-api';
 import { filter, map, takeUntil, tap } from 'rxjs/operators';
 import {
 	ChildValidationService,

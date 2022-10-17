@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
-import { SkeletonStateService } from '@core/*';
+import { SkeletonStateService } from 'santashop-core/src/public-api';
 import { AlertController } from '@ionic/angular';
-import { DateTimeSlot } from '@models/*';
+import { DateTimeSlot } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subject } from 'rxjs';
 import { shareReplay, take, map, takeUntil, tap } from 'rxjs/operators';

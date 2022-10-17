@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '@core/*';
+import { AuthService } from 'santashop-core/src/public-api';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { Auth } from '@models/*';
-import { IError } from '@models/*';
+import { Auth } from '../../../../../santashop-models/src/public-api';
+import { IError } from '../../../../../santashop-models/src/public-api';
 import { Subject } from 'rxjs';
 import { SignInForm } from '../../forms/sign-in';
 

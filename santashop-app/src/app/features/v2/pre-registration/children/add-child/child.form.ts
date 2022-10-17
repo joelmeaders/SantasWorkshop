@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { AgeGroup, ToyType } from '@models/*';
+import { AgeGroup, ToyType } from '../../../../../../../../santashop-models/src/public-api';
 import { FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {

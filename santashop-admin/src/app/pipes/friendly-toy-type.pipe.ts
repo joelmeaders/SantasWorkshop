@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ToyType } from '@models/*';
+import { ToyType } from '../../../../santashop-models/src/public-api';
 
 @Pipe({
 	name: 'friendlyToyType',

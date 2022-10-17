@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ChildValidationError, Child } from '@models/*';
+import { ChildValidationError, Child } from '../../../../../santashop-models/src/public-api';
 import {
 	ChildValidationService,
 	MAX_BIRTHDATE,

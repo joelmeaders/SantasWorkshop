@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { CheckIn, IError } from '@models/*';
+import { CheckIn, IError } from '../../../../../santashop-models/src/public-api';
 import { BehaviorSubject, from, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
@@ -16,7 +16,7 @@ import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 import { Timestamp } from '@firebase/firestore';
 import { RegistrationContextService } from '../../services/registration-context.service';
-import { ErrorHandlerService } from '@core/*';
+import { ErrorHandlerService } from 'santashop-core/src/public-api';
 
 @Component({
 	selector: 'app-qr-modal',

@@ -5,7 +5,7 @@ import {
 	Registration,
 	User,
 	ToyType,
-} from '../santashop-models/src';
+} from '../santashop-models/src/public-api';
 
 export const mockUsers = (id?: string) => ({
 	user1: {

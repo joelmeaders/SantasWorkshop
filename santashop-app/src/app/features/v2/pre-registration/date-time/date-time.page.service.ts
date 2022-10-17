@@ -4,10 +4,10 @@ import {
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 	timestampToDate,
-} from '@core/*';
+} from 'santashop-core/src/public-api';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import { COLLECTION_SCHEMA, DateTimeSlot } from '@models/*';
+import { COLLECTION_SCHEMA, DateTimeSlot } from '../../../../../../../santashop-models/src/public-api';
 import { QueryConstraint } from 'firebase/firestore';
 import { where } from '@angular/fire/firestore';
 import { PreRegistrationService } from '../../../../core';

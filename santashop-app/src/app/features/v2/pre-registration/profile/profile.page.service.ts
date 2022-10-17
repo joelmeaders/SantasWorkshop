@@ -7,10 +7,10 @@ import {
 	automock,
 	AnalyticsWrapper,
 	FunctionsWrapper,
-} from '@core/*';
+} from 'santashop-core/src/public-api';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
-import { COLLECTION_SCHEMA, User, ChangeUserInfo, IError } from '@models/*';
+import { COLLECTION_SCHEMA, User, ChangeUserInfo, IError } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';

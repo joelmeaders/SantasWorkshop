@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ChildValidationError, Child } from '@models/*';
+import { ChildValidationError, Child } from '../../../../../santashop-models/src/public-api';
 import { deepCopy } from '../../../../../santashop-core/src/lib/helpers/methods';
 
 // TODO: Injectable tokens

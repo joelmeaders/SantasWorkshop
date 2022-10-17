@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, QueryConstraint } from '@core/*';
+import { FireRepoLite, QueryConstraint } from 'santashop-core/src/public-api';
 import {
 	COLLECTION_SCHEMA,
 	CheckIn,
 	Registration,
 	RegistrationSearchIndex,
-} from '@models/*';
+} from '../../../../santashop-models/src/public-api';
 import { limit, orderBy, where } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';

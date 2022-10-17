@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { RegistrationSearchIndex } from '@models/*';
+import { RegistrationSearchIndex } from '../../../../santashop-models/src/public-api';
 import { BehaviorSubject } from 'rxjs';
 import {
 	filter,

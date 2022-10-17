@@ -8,7 +8,7 @@
 		"core:lint": "ng lint santashop-core --fix",
 		"core:test": "ng test santashop-core",
 		"core:test:coverage": "ng test santashop-core --no-watch --code-coverage",
-		"core:build": "npm run models:build && ng build santashop-core",
+		"core:build": "ng build santashop-core",
 		"models:build": "ng build santashop-models",
 		"models:lint": "ng lint santashop-models --fix --cache",
 		"admin:lint": "ng lint santashop-admin --fix --cache",

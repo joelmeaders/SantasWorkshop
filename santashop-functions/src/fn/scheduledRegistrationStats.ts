@@ -7,7 +7,7 @@ import {
 	GenderAgeStats,
 	Registration,
 	ZipCodeCount,
-} from '@models/*';
+} from '../../../santashop-models/src/public-api';
 
 admin.initializeApp();
 

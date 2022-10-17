@@ -1,7 +1,7 @@
 import { chain } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
 import { format } from 'date-fns';
-import { Child, ToyType } from '@models/*';
+import { Child, ToyType } from '../../../../santashop-models/src/public-api';
 
 export abstract class CheckInHelpers {
 	public static sortChildren(children: Child | Partial<Child>[]) {

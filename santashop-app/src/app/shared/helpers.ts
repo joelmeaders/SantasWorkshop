@@ -1,4 +1,4 @@
-import { IRegistration } from 'santashop-core/src';
+import { IRegistration } from 'santashop-core/src/public-api';
 
 export abstract class Helpers {
 	public static qrCodeString(registration: IRegistration): string {

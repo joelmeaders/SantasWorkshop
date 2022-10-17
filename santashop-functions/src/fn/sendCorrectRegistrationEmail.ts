@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { COLLECTION_SCHEMA } from '@models/*';
+import { COLLECTION_SCHEMA } from '../../../santashop-models/src/public-api';
 
 admin.initializeApp();
 

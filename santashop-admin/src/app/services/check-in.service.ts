@@ -7,8 +7,8 @@ import {
 	CheckInStats,
 	Registration,
 	ToyType,
-} from '@models/*';
-import { DocumentReference, FireRepoLite } from '@core/*';
+} from '../../../../santashop-models/src/public-api';
+import { DocumentReference, FireRepoLite } from 'santashop-core/src/public-api';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({

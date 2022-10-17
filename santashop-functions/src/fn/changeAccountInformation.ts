@@ -1,4 +1,4 @@
-import { ChangeUserInfo, COLLECTION_SCHEMA } from '@models/*';
+import { ChangeUserInfo, COLLECTION_SCHEMA } from '../../../santashop-models/src/public-api';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';

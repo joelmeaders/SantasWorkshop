@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ErrorHandlerService } from '@core/*';
+import { ErrorHandlerService } from 'santashop-core/src/public-api';
 import { User, UserCredential } from 'firebase/auth';
 import { firstValueFrom, of } from 'rxjs';
 import { AuthService } from './auth.service';

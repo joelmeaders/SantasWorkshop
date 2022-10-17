@@ -9,7 +9,7 @@ import {
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
-import { UserEmailUid, Auth } from '@models/*';
+import { SWAuth, UserEmailUid } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',
@@ -106,7 +106,7 @@ export class AuthService {
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
-		const auth: Auth = {
+		const auth: SWAuth = {
 			emailAddress: user.email as string,
 			password: oldPassword,
 		};
@@ -137,7 +137,7 @@ export class AuthService {
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
-		const auth: Auth = {
+		const auth: SWAuth = {
 			emailAddress: user?.email as string,
 			password,
 		};
@@ -159,7 +159,7 @@ export class AuthService {
 	 * @return
 	 * @memberof AuthService
 	 */
-	public async login(auth: Auth): Promise<UserCredential> {
+	public async login(auth: SWAuth): Promise<UserCredential> {
 		return this.authWrapper.signInWithEmailAndPassword(
 			auth.emailAddress,
 			auth.password

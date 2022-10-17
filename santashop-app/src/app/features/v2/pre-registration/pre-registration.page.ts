@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { ProfileMigrationService } from '@core/*';
+import { ProfileMigrationService } from 'santashop-core/src/public-api';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';

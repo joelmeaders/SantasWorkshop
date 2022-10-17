@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { RegistrationSearchIndex } from '@models/*';
+import { RegistrationSearchIndex } from '../../../../../../santashop-models/src/public-api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
 import { RegistrationSearchForm } from 'santashop-admin/src/app/forms/registration-search';

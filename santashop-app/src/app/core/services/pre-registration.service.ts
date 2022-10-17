@@ -13,7 +13,7 @@ import {
 	Registration,
 	Child,
 	COLLECTION_SCHEMA,
-} from '@models/*';
+} from '../../../../../santashop-models/src/public-api';
 import {
 	AuthService,
 	automock,
@@ -23,7 +23,7 @@ import {
 	FunctionsWrapper,
 	pluckFilterNil,
 	Timestamp,
-} from '@core/*';
+} from 'santashop-core/src/public-api';
 import { QrCodeService } from './qrcode.service';
 
 @Injectable({

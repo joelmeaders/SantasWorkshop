@@ -1,4 +1,4 @@
-import { AgeGroup } from '@models/*';
+import { AgeGroup } from '../../../santashop-models/src/public-api';
 
 export function getAgeFromDate(birthday: Date, fromDate: Date) {
 	const today = fromDate;

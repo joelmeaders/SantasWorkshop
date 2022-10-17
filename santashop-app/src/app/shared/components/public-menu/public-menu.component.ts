@@ -5,7 +5,7 @@ import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { AuthService } from 'santashop-core/src';
+import { AuthService } from 'santashop-core/src/public-api';
 
 @Component({
 	selector: 'app-public-menu',

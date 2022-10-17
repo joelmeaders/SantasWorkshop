@@ -8,7 +8,7 @@ import {
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
-} from '@core/*';
+} from 'santashop-core/src/public-api';
 import { AppComponent } from './app.component';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import {

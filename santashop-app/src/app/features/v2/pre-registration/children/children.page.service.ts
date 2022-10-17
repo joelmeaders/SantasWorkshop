@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Child } from '@models/*';
+import { Child } from '../../../../../../../santashop-models/src/public-api';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, map } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../../core';

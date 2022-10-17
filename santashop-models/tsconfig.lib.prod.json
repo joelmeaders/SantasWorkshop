@@ -4,8 +4,4 @@
 	"compilerOptions": {
 		"declarationMap": false
 	},
-	"angularCompilerOptions": {
-		"compilationMode": "partial"
-	},
-	"include": [ "**/*", "package.json", "C:/_dev/SantasWorkshop/santashop-models/src/lib/index.ts"],
 }

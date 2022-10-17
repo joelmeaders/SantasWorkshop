@@ -7,7 +7,7 @@ import {
 	User,
 	Child,
 	Registration,
-} from '@models/*';
+} from '../../../santashop-models/src/public-api';
 import { getAgeFromDate, getAgeGroupFromAge } from '../utility/dates';
 import { generateId } from '../utility/id-generation';
 import { generateQrCode } from '../utility/qrcodes';

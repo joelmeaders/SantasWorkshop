@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService, FireRepoLite } from '@core/*';
+import { AuthService, FireRepoLite } from 'santashop-core/src/public-api';
 import { Functions } from '@angular/fire/functions';
 import { autoSpyProvider, Spied } from 'test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';

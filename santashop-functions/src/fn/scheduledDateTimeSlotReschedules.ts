@@ -4,7 +4,7 @@ import { HttpsError } from 'firebase-functions/v1/https';
 import {
 	DateTimeSlot,
 	Registration,
-} from '@models/*';
+} from '../../../santashop-models/src/public-api';
 
 admin.initializeApp();
 

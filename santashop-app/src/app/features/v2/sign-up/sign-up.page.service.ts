@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
+import { AuthService, ErrorHandlerService, FunctionsWrapper } from 'santashop-core/src/public-api';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { Auth, IError, OnboardUser } from '@models/*';
+import { Auth, IError, OnboardUser } from '../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';

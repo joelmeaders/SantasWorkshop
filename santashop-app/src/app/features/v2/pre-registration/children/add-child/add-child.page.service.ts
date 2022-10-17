@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { PROGRAM_YEAR, yyyymmddToLocalDate, getAgeFromDate } from '@core/*';
+import { PROGRAM_YEAR, yyyymmddToLocalDate, getAgeFromDate } from 'santashop-core/src/public-api';
 import { AlertController } from '@ionic/angular';
-import { Child, ChildValidationError, ToyType, AgeGroup } from '@models/*';
+import { Child, ChildValidationError, ToyType, AgeGroup } from '../../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';

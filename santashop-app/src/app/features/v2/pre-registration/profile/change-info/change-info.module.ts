@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ChangeInfoPageRoutingModule } from './change-info-routing.module';
 import { ChangeInfoPage } from './change-info.page';
-import { CoreModule } from '@core/*';
+import { CoreModule } from 'santashop-core/src/public-api';
 import { SharedModule } from 'santashop-app/src/app/shared/components/shared.module';
 
 @NgModule({

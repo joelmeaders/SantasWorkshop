@@ -1,5 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { CoreModule } from '@core/*';
+import { CoreModule } from 'santashop-core/src/public-api';
 import { ConvertHour24To12Pipe } from '../pipes/convert-hour-24-to-12.pipe';
 import { DeviceNameOnlyPipe } from '../pipes/device-name-only.pipe';
 import { FriendlyToyTypePipe } from '../pipes/friendly-toy-type.pipe';

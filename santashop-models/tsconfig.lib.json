@@ -2,16 +2,11 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"baseUrl": "src",
 		"outDir": "../out-tsc/lib",
-		"composite": true,
 		"declaration": true,
 		"declarationMap": true,
 		"inlineSources": true,
 		"types": [],
-	},
-	"angularCompilerOptions": {
-		"compilationMode": "partial"
 	},
 	"exclude": [
 		"src/test.ts",

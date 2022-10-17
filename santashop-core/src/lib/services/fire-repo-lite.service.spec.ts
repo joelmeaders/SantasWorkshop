@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { FireRepoBase } from './fire-repo-base.service';
-import { Registration } from '@models/*';
+import { Registration } from '../../../../santashop-models/src/public-api';
 import { of } from 'rxjs';
 import { DocumentData, DocumentReference } from './_firestore-wrapper';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';

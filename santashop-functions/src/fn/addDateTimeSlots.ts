@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/v1/https';
-import { COLLECTION_SCHEMA, DateTimeSlot } from '@models/*';
+import { COLLECTION_SCHEMA, DateTimeSlot } from '../../../santashop-models/src/public-api';
 
 
 admin.initializeApp();

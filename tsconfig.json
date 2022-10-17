@@ -1,6 +1,8 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
+		"baseUrl": "./",
+		"rootDir": ".",
 		"outDir": "./dist/out-tsc",
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
@@ -19,7 +21,7 @@
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
-		"target": "es2020",
+		"target": "es2017",
 		"module": "es2020",
 		"lib": ["es2020", "dom"],
 		"paths": {
@@ -34,7 +36,7 @@
 			"@admin/*": ["santashop-admin/src"],
 		},
 		"types": ["node"],
-		"typeRoots": ["./node_modules/@types"]
+		"typeRoots": ["node_modules/@types"]
 	},
 	"angularCompilerOptions": {
 		"enableI18nLegacyMessageIdFormat": false,

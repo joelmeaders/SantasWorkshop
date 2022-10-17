@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { Child } from '@models/*';
+import { Child } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
 import { ChildValidationService } from '../../../../core';

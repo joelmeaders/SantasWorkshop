@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '@core/*';
+import { AuthService } from 'santashop-core/src/public-api';
 import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';

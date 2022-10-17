@@ -1,7 +1,8 @@
 import { ChangeUserInfo, COLLECTION_SCHEMA } from '../../../santashop-models/src/public-api';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
+import { CallableContext } from 'firebase-functions/lib/common/providers/https';
+import { HttpsError } from 'firebase-functions/v1/auth';
 
 
 admin.initializeApp();

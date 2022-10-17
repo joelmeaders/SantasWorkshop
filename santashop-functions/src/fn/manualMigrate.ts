@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
+import { CallableContext } from 'firebase-functions/lib/common/providers/https';
+import { HttpsError } from 'firebase-functions/v1/auth';
 import {
 	COLLECTION_SCHEMA,
 	User,

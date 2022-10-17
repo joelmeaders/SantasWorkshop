@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
-import { HttpsError } from 'firebase-functions/v1/https';
+import { HttpsError } from 'firebase-functions/v1/auth';
 import {
 	DateTimeSlot,
 	Registration,

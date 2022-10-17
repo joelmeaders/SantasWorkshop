@@ -1,5 +1,7 @@
 {
 	"compilerOptions": {
+		"baseUrl": "./",
+		"rootDir": "./",
 		"module": "commonjs",
 		"noEmit": false,
 		"noImplicitReturns": true,
@@ -14,10 +16,12 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"paths": {
-			"models": ["../santashop-models/src"]
-		}
+			"@models/*": ["../santashop-models/src", "../dist/santashop-models/"]
+		},
 	},
 	"compileOnSave": true,
-	"include": ["src/"],
+	"references": [
+		{ "path": "../santashop-models/tsconfig.lib.json" }
+	],
 	"exclude": ["dist/"]
 }

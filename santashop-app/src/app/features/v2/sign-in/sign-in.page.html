@@ -22,12 +22,12 @@
 		</ion-row>
 		<ion-row class="ion-justify-content-center">
 			<ion-col size="auto">
-				<ion-card class="sign-up-card">
+				<ion-card class="sign-up-card ion-text-center">
 					<ion-card-content>
 						<form [formGroup]="form" novalidate>
 							<ion-list>
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label>
 										{{ "COMMON.EMAIL_ADDRESS" | translate }}
 									</ion-label>
 									<ion-input
@@ -43,7 +43,7 @@
 								></core-control-errors>
 
 								<ion-item>
-									<ion-label color="xmasred">
+									<ion-label>
 										{{ "COMMON.PASSWORD" | translate }}
 									</ion-label>
 									<ion-input
@@ -72,8 +72,7 @@
 						</ng-container>
 
 						<ion-button
-							size="default"
-							expand="block"
+							size="large"
 							color="xmasred"
 							[disabled]="
 								!form.valid || (recaptchaValid$ | async) === false
@@ -84,8 +83,7 @@
 						</ion-button>
 					</ion-card-content>
 
-					<p class="ion-text-center"></p>
-					<p class="ion-text-center">
+					<div class="ion-text-center es-mg-top-lg">
 						<ion-button
 							fill="clear"
 							color="tertiary"
@@ -101,7 +99,7 @@
 						>
 							{{ "SIGNIN.FORGOT_PASSWORD" | translate }}
 						</ion-button>
-					</p>
+					</div>
 				</ion-card>
 			</ion-col>
 		</ion-row>

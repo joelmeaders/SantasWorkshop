@@ -66,6 +66,7 @@
 		"NO_CHILDREN": "No Children.",
 		"NO_CHILDREN_MESSAGE": "Add all Children, then Select a Time.",
 		"ADD_CHILD": "Add Child",
+		"EDIT_CHILD": "Save Changes",
 		"ADD_EDIT_CHILD": "Add or Edit Child",
 		"SCHEDULE": "Schedule",
 		"NO_TIME_SELECTED.": "No Time Selected.",
@@ -85,6 +86,7 @@
 	},
 	"ADDCHILD": {
 		"ADD_TITLE": "Add child",
+		"EDIT_TITLE": "Edit child",
 		"FIRST_NAME": "First Name",
 		"LAST_NAME": "Last Name",
 		"BIRTH_DATE": "Birth Date",

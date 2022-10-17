@@ -6,11 +6,11 @@
 				class="sm-logo"
 				alt="logo with santa claus"
 			/>
-			<ion-card-title *ngIf="user$ | async as user">
+			<h2 *ngIf="user$ | async as user">
 				<strong>
-					{{ "COMMON.WELCOME" | translate }}, {{ user.displayName }}
+					{{ user.displayName }}
 				</strong>
-			</ion-card-title>
+			</h2>
 		</ion-item>
 		<ion-button slot="end" fill="clear" (click)="menu($event)">
 			<ion-icon

@@ -19,9 +19,6 @@ export class SignUpPage {
 
 	@ViewChild('firstName') firstName?: HTMLIonInputElement;
 
-	// This field is a bot honeytrap.
-	@ViewChild('pw') pwField: HTMLInputElement | null = null;
-
 	public readonly recaptchaValid$ = this.viewService.recaptchaValid$
 		.asObservable()
 		.pipe(shareReplay(1));
@@ -39,7 +36,7 @@ export class SignUpPage {
 	}
 
 	public async onValidateRecaptcha($event: any) {
-		await this.viewService.onValidateRecaptcha($event, this.pwField?.value);
+		await this.viewService.onValidateRecaptcha($event);
 		await logEvent(this.analytics, 'validated_recaptcha');
 	}
 

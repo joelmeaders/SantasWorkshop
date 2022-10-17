@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import {
 	COLLECTION_SCHEMA,
 	Registration,
-} from '../../../santashop-models/src/lib/models';
+} from '@models/*';
 import * as formatDateTime from 'dateformat';
 
 admin.initializeApp();

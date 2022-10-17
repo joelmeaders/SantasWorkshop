@@ -25,7 +25,7 @@
 							{{ "SIGNUP.TITLE2" | translate }}
 						</ion-card-subtitle>
 					</ion-card-header>
-					<ion-card-content>
+					<ion-card-content class="ion-text-center">
 						<form [formGroup]="form" novalidate>
 							<ion-list>
 								<ion-item>
@@ -136,17 +136,6 @@
 								></core-control-errors>
 							</ion-list>
 
-							<div id="pw" class="ion-margin bhp" #pw>
-								<ion-label slot="start">
-									{{ "COMMON.PASSWORD" | translate }}
-								</ion-label>
-								<input
-									type="text"
-									name="password"
-									autocomplete="off"
-								/>
-							</div>
-
 							<div class="ion-margin">
 								<div
 									class="ion-float-right legal-check-container"
@@ -194,10 +183,9 @@
 						</ng-container>
 
 						<ion-button
-							size="default"
-							expand="block"
+							size="large"
 							color="xmasred"
-							class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xl"
+							class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xlr"
 							[disabled]="
 								!form.valid ||
 								(recaptchaValid$ | async) === false
@@ -207,8 +195,7 @@
 							{{ "SIGNUP.SUBMIT_BUTTON" | translate }}
 						</ion-button>
 
-						<p class="ion-text-center"></p>
-						<p class="ion-text-center">
+						<div class="ion-text-center es-mg-top-lg">
 							<ion-button
 								fill="clear"
 								color="tertiary"
@@ -224,7 +211,7 @@
 							>
 								{{ "SIGNIN.FORGOT_PASSWORD" | translate }}
 							</ion-button>
-						</p>
+						</div>
 					</ion-card-content>
 				</ion-card>
 			</ion-col>

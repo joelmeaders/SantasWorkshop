@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import {
 	DateTimeSlot,
 	Registration,
-} from '../../../santashop-models/src/lib/models';
+} from '@models/*';
 
 admin.initializeApp();
 

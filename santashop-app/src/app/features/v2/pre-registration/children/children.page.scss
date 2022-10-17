@@ -2,6 +2,19 @@ ion-item {
 	--background: unset !important;
 	background-color: unset !important;
 	--inner-padding-end: 0px;
+
+	ion-card-header {
+		padding-inline-end: 0;
+	}
+
+	h2 {
+		margin: unset;
+		margin-bottom: 4px;
+	}
+
+	.item-options {
+		margin: unset;
+	}
 }
 
 ion-list {

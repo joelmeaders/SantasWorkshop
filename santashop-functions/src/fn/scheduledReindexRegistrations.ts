@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import {
 	Registration,
 	RegistrationSearchIndex,
-} from '../../../santashop-models/src/lib/models';
+} from '@models/*';
 
 admin.initializeApp();
 

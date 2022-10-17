@@ -17,7 +17,5 @@ export interface User {
 	// profile migration service in @core
 	version: number;
 
-	bhp?: number;
-
 	manuallyMigrated: boolean;
 }

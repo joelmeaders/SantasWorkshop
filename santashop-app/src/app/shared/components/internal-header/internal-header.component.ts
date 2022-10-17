@@ -6,7 +6,7 @@ import { PublicMenuComponent } from '../public-menu/public-menu.component';
 @Component({
 	selector: 'app-internal-header',
 	templateUrl: './internal-header.component.html',
-	styleUrls: ['./internal-header.component.css'],
+	styleUrls: ['./internal-header.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InternalHeaderComponent {

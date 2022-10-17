@@ -1,4 +1,4 @@
-import { Registration } from '../../../santashop-models/src/lib/models';
+import { Registration } from '@models/*';
 
 export const isRegistrationComplete = (
 	registration: Registration

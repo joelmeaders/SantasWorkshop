@@ -7,7 +7,7 @@ import {
 	User,
 	Registration,
 	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src/lib/models';
+} from '@models/*';
 import { generateId } from '../utility/id-generation';
 import { generateQrCode } from '../utility/qrcodes';
 

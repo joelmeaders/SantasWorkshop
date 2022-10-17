@@ -34,7 +34,7 @@
 						<div class="ion-padding es-mg-bottom-xxl">
 							<ion-item class="inset-ion-item-title" color="none">
 								<ion-card-title lines="full">
-									{{ "ADDCHILD.ADD_TITLE" | translate }}
+									{{ ((isEdit$ | async) ? "ADDCHILD.EDIT_TITLE" : "ADDCHILD.ADD_TITLE") | translate }}
 								</ion-card-title>
 							</ion-item>
 
@@ -43,8 +43,7 @@
 									<ion-list>
 										<ion-item color="light">
 											<ion-label color="xmasred">
-												{{ "ADDCHILD.FIRST_NAME" |
-												translate }}
+												{{ "ADDCHILD.FIRST_NAME" | translate }}
 											</ion-label>
 											<ion-input
 												#firstName
@@ -282,25 +281,16 @@
 								</form>
 							</div>
 							<div
+								*appLet="isEdit$ | async as isEditing"
 								class="ion-text-end ion-padding-top es-pd-bottom-xxl"
 							>
 								<ion-button
-									*ngIf="!(isEdit$ | async); else edit"
 									color="xmasred"
-									(click)="addChild()"
+									(click)="isEditing ? editChild() : addChild()"
 									[disabled]="!form.valid"
 								>
-									{{ "OVERVIEW.ADD_CHILD" | translate }}
+									{{ (isEditing ? "OVERVIEW.EDIT_CHILD" : "OVERVIEW.ADD_CHILD") | translate }}
 								</ion-button>
-								<ng-template #edit>
-									<ion-button
-										color="xmasred"
-										(click)="editChild()"
-										[disabled]="!form.valid"
-									>
-										{{ "OVERVIEW.ADD_CHILD" | translate }}
-									</ion-button>
-								</ng-template>
 							</div>
 						</div>
 					</ion-col>

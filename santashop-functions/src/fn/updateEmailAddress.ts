@@ -4,7 +4,7 @@ import { HttpsError, CallableContext } from 'firebase-functions/v1/https';
 import {
 	Auth,
 	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src/lib/models';
+} from '@models/*';
 
 admin.initializeApp();
 

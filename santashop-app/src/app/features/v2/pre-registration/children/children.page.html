@@ -1,6 +1,4 @@
 <ion-content color="light">
-	<app-internal-header></app-internal-header>
-
 	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
 		<ion-row class="height-max">
 			<ion-col
@@ -106,14 +104,14 @@
 											*ngIf="!child.toyType"
 										></ion-icon>
 										<ion-card-header>
-											<ion-card-title>
-												{{ child.firstName }} {{
-												child.lastName }}
-											</ion-card-title>
-											<ion-card-subtitle>
-												{{ child.dateOfBirth | date:
-												"MMMM dd, yyyy" }}
-											</ion-card-subtitle>
+											<h2>
+												<strong>
+													{{ child.firstName }} {{ child.lastName }}
+												</strong>
+											</h2>
+											<ion-text>
+												{{ child.dateOfBirth | date:"MMMM dd, yyyy" }}
+											</ion-text>
 											<ion-card-subtitle
 												color="danger"
 												*ngIf="!child.toyType"
@@ -122,7 +120,7 @@
 												translate }}
 											</ion-card-subtitle>
 										</ion-card-header>
-										<div slot="end">
+										<div slot="end" class="item-options">
 											<ion-button
 												color="medium"
 												fill="clear"
@@ -144,6 +142,7 @@
 												<ion-icon
 													size="large"
 													name="trash-outline"
+													color="danger"
 												></ion-icon>
 											</ion-button>
 										</div>

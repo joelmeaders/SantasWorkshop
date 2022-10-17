@@ -4,9 +4,7 @@ import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 import * as formatDateTime from 'dateformat';
-import { Registration } from '../../../santashop-models/src/lib/models/registration.model';
-import { COLLECTION_SCHEMA } from '../../../santashop-models/src/lib/models/schema.model';
-import { RegistrationSearchIndex } from '../../../santashop-models/src/lib/models/registration-search-index.model';
+import { COLLECTION_SCHEMA, Registration, RegistrationSearchIndex } from '@models/*';
 
 admin.initializeApp();
 

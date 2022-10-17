@@ -66,6 +66,7 @@
 		"NO_CHILDREN": "Sin niños.",
 		"NO_CHILDREN_MESSAGE": "Agregue todos los niños y, a continuación, seleccione una hora.",
 		"ADD_CHILD": "Agregar hijo",
+		"EDIT_CHILD": "Guardar Cambios",
 		"ADD_EDIT_CHILD": "Agregar o editar hijo",
 		"SCHEDULE": "Horario",
 		"NO_TIME_SELECTED.": "No hay hora seleccionada.",
@@ -85,6 +86,7 @@
 	},
 	"ADDCHILD": {
 		"ADD_TITLE": "Agregar niño",
+		"EDIT_TITLE": "Editar hijo",
 		"FIRST_NAME": "Nombre",
 		"LAST_NAME": "Apellido",
 		"BIRTH_DATE": "Fecha de nacimiento",

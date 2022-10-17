@@ -6,7 +6,7 @@ import {
 	ChangeUserInfo,
 	DateTimeSlot,
 	Registration,
-} from '../../../santashop-models/src/lib/models';
+} from '@models/*';
 
 admin.initializeApp();
 

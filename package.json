@@ -18,6 +18,7 @@
 		"admin:start:qa": "firebase use santas-workshop-test && ng serve santashop-admin --port=4100",
 		"admin:config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",
 		"admin:build:local": "ng build santashop-admin --configuration=production",
+		"admin:build:qa": "ng build santashop-admin --configuration=qa",
 		"admin:analyze": "ng build santashop-admin --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
 		"app:lint": "ng lint santashop-app --fix --cache",
 		"app:lint:fix": "ng lint santashop-app --fix --cache",

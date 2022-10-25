@@ -17,7 +17,7 @@ export default async () => {
 	const applications = applicationsSnapshot.docs.map((doc) => doc.data());
 
 	// csv field headers
-	const fields = ['emailAddress'];
+	const fields = ['emailAddress', 'firstName', 'lastName'];
 
 	// get csv output
 	const output = await parseAsync(applications, { fields });

@@ -1,56 +1,62 @@
 <ion-content color="light">
-	<ion-button
-		class="ion-no-padding even-ratio-button ion-margin"
-		color="white"
-		[routerLink]="['..']"
-	>
-		<ion-icon
-			slot="icon-only"
-			name="arrow-back-sharp"
-			class="even-ratio-button"
-		></ion-icon>
-	</ion-button>
+	
 	<ion-grid>
-		<ion-row>
-			<ion-col class="ion-text-center">
-				<img
-					src="assets/DSCS-Santa-Body_Red.png"
-					class="logo"
-					alt="logo with santa claus"
-				/>
-			</ion-col>
-		</ion-row>
 		<ion-row class="ion-justify-content-center">
 			<ion-col size="auto">
-				<ion-card class="sign-up-card ion-text-center">
+				<ion-card class="sign-up-card ion-text-center ion-padding-bottom remove-shadow no-shadow">
+					<ion-card-header>
+						<ion-button
+							class="remove-shadow go-back"
+							color="light"
+							[routerLink]="['..']"
+						>
+							<ion-icon
+								slot="start"
+								name="arrow-back-sharp"
+							></ion-icon>
+							<ion-label>
+								Back TODO
+							</ion-label>
+						</ion-button>
+						<img
+							src="assets/DSCS-Santa-Body_Red.png"
+							class="logo"
+							alt="logo with santa claus"
+						/>
+						<ion-card-title>
+							Sign In TODO
+						</ion-card-title>
+					</ion-card-header>
 					<ion-card-content>
 						<form [formGroup]="form" novalidate>
 							<ion-list>
 								<ion-item>
-									<ion-label>
+									<ion-label slot="start">
 										{{ "COMMON.EMAIL_ADDRESS" | translate }}
 									</ion-label>
 									<ion-input
+										[autofocus]="true"
 										formControlName="emailAddress"
 										[debounce]="500"
 										type="email"
-										autocomplete="email"
-										inputmode="email"
+										autocomplete="true"
 									></ion-input>
+									<ion-note slot="error">
+										Must be a valid email address
+									</ion-note>
 								</ion-item>
-								<core-control-errors
+								<!-- <core-control-errors
 									[control]="form.controls.emailAddress"
-								></core-control-errors>
+								></core-control-errors> -->
 
 								<ion-item>
-									<ion-label>
+									<ion-label slot="start">
 										{{ "COMMON.PASSWORD" | translate }}
 									</ion-label>
 									<ion-input
 										formControlName="password"
 										[debounce]="500"
 										type="password"
-										autocomplete="new-password"
 									></ion-input>
 								</ion-item>
 								<core-control-errors

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { ProfileMigrationService } from 'santashop-core/src/public-api';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';
@@ -36,7 +35,6 @@ export class PreRegistrationPage implements OnDestroy {
 
 	constructor(
 		private readonly viewService: PreRegistrationService,
-		public readonly migrationService: ProfileMigrationService // Entrypoint for migration service
 	) {}
 
 	public ngOnDestroy(): void {

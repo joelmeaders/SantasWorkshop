@@ -74,8 +74,7 @@ export class AuthService {
 	);
 
 	constructor(
-		private readonly authWrapper: AuthWrapper,
-		// private readonly functionsWrapper: FunctionsWrapper,
+		private readonly authWrapper: AuthWrapper // private readonly functionsWrapper: FunctionsWrapper,
 	) {}
 
 	/**
@@ -144,7 +143,7 @@ export class AuthService {
 
 		try {
 			await this.login(auth);
-			console.log(newEmailAddress)
+			console.log(newEmailAddress);
 			// await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		} catch (error: any) {
 			// await this.errorHandler.handleError(error);

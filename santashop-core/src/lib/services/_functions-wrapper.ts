@@ -44,5 +44,5 @@ export class FunctionsWrapper {
 		);
 
 	// TODO
-	public readonly undoRegistration = () => this.httpsCallable('');
+	// public readonly undoRegistration = () => this.httpsCallable('');
 }

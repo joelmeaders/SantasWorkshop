@@ -93,7 +93,10 @@ export class FireRepoBase {
 		document: T
 	): Observable<DocumentReference<T>> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
-		const docRef = this.firestoreWrapper.doc<T>(colRef as CollectionReference<T>, documentId);
+		const docRef = this.firestoreWrapper.doc<T>(
+			colRef as CollectionReference<T>,
+			documentId
+		);
 		const action = this.firestoreWrapper.setDoc<T>(docRef, document);
 		return from(action).pipe(map(() => docRef));
 	}
@@ -105,7 +108,10 @@ export class FireRepoBase {
 		merge = false
 	): Observable<DocumentReference<T>> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
-		const docRef = this.firestoreWrapper.doc<T>(colRef as CollectionReference<T>, documentId);
+		const docRef = this.firestoreWrapper.doc<T>(
+			colRef as CollectionReference<T>,
+			documentId
+		);
 		const action = this.firestoreWrapper.setDoc<T>(docRef, document, {
 			merge,
 		});

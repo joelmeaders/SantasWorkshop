@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"ng": "ng",
-		"core:lint": "ng lint santashop-core --fix",
+		"core:lint": "ng lint santashop-core --fix --cache && prettier --end-of-line auto --check santashop-core",
 		"core:test": "ng test santashop-core",
 		"core:test:coverage": "ng test santashop-core --no-watch --code-coverage",
 		"core:build": "ng build santashop-core",

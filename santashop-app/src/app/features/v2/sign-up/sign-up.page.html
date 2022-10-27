@@ -6,15 +6,17 @@
 			<!-- Information -->
 			<ion-col sizeXs="12" sizeSm="10" sizeMd="auto">
 				<ion-button
-					class="ion-no-padding even-ratio-button remove-shadow"
+					class="remove-shadow back-button"
 					color="white"
 					[routerLink]="['/']"
 				>
 					<ion-icon
-						slot="icon-only"
+						slot="start"
 						name="arrow-back-sharp"
-						class="even-ratio-button"
 					></ion-icon>
+					<ion-label>
+						Back TODO
+					</ion-label>
 				</ion-button>
 				<ion-card class="sign-up-card">
 					<ion-card-header>
@@ -38,7 +40,7 @@
 										[debounce]="500"
 										autocomplete="given-name"
 										type="text"
-										autofocus="true"
+										[autofocus]="true"
 									></ion-input>
 								</ion-item>
 								<core-control-errors

@@ -42,20 +42,23 @@ export type Timestamp = _Timestamp;
  * @export
  * @class FirestoreMethods
  */
- @Injectable({
+@Injectable({
 	providedIn: 'root',
 })
 export class FirestoreWrapper {
 	constructor(private readonly firestore: Firestore) {}
 
 	// firebase/firestore methods
-	public readonly collection = <T = DocumentData>(path: string): CollectionReference<T> =>
+	public readonly collection = <T = DocumentData>(
+		path: string
+	): CollectionReference<T> =>
 		collection(this.firestore, path) as CollectionReference<T>;
 
 	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,
 		path?: string
-	): DocumentReference<T> => (path ? doc<T>(reference, path) : doc(reference));
+	): DocumentReference<T> =>
+		path ? doc<T>(reference, path) : doc(reference);
 
 	// @angular/fire/firestore Methods
 	public readonly docData = <T = DocumentData>(
@@ -76,7 +79,8 @@ export class FirestoreWrapper {
 	public readonly addDoc = <T>(
 		collectionReference: CollectionReference<T>,
 		document: T
-	): Promise<DocumentReference<T>> => addDoc<T>(collectionReference, document);
+	): Promise<DocumentReference<T>> =>
+		addDoc<T>(collectionReference, document);
 
 	public readonly setDoc = <T = DocumentData>(
 		documentReference: DocumentReference<T>,
@@ -92,6 +96,7 @@ export class FirestoreWrapper {
 	): Promise<void> => deleteDoc(documentReference);
 
 	// rxfire/firestore Methods
-	public readonly rxCollection = <T = DocumentData>(qry: Query<T>) =>
-		rxCollection(qry);
+	public readonly rxCollection = <T = DocumentData>(
+		qry: Query<T>
+	): Observable<_QueryDocumentSnapshot<T>[]> => rxCollection(qry);
 }

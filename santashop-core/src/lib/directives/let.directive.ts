@@ -9,16 +9,16 @@ export interface AppLetContext<T> {
 	selector: '[appLet]',
 })
 export class AppLetDirective<T> {
-	@Input() set appLet(value: T) {
+	@Input() public set appLet(value: T) {
 		this.context.appLet = value;
 	}
 
 	private readonly context: AppLetContext<T> = { appLet: null };
 
 	constructor(
-		_viewContainer: ViewContainerRef,
-		_templateRef: TemplateRef<AppLetContext<T>>
+		viewContainer: ViewContainerRef,
+		templateRef: TemplateRef<AppLetContext<T>>
 	) {
-		_viewContainer.createEmbeddedView(_templateRef, this.context);
+		viewContainer.createEmbeddedView(templateRef, this.context);
 	}
 }

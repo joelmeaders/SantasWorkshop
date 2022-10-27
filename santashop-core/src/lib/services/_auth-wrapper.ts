@@ -18,20 +18,23 @@ export type UserCredential = _UserCredential;
 export class AuthWrapper {
 	constructor(private readonly auth: Auth) {}
 
-	public readonly authState = () => authState(this.auth);
+	public readonly authState = authState(this.auth);
 
-	public readonly currentUser = () => this.auth.currentUser;
+	public readonly currentUser = (): _User | null => this.auth.currentUser;
 
-	public readonly sendPasswordResetEmail = (email: string) =>
+	public readonly sendPasswordResetEmail = (email: string): Promise<void> =>
 		sendPasswordResetEmail(this.auth, email);
 
 	public readonly signInWithEmailAndPassword = (
 		email: string,
 		password: string
-	) => signInWithEmailAndPassword(this.auth, email, password);
+	): Promise<_UserCredential> =>
+		signInWithEmailAndPassword(this.auth, email, password);
 
-	public readonly updatePassword = (user: User, newPassword: string) =>
-		updatePassword(user, newPassword);
+	public readonly updatePassword = (
+		user: User,
+		newPassword: string
+	): Promise<void> => updatePassword(user, newPassword);
 
-	public readonly signOut = () => this.auth.signOut();
+	public readonly signOut = (): Promise<void> => this.auth.signOut();
 }

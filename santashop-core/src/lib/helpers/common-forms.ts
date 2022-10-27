@@ -1,7 +1,7 @@
 import { FormBuilder } from '@angular/forms';
 
 export abstract class CommonForms {
-	public static readonly formBuilder = () => new FormBuilder();
+	public static readonly formBuilder = (): FormBuilder => new FormBuilder();
 
 	public static messages(
 		minLength?: string | number,

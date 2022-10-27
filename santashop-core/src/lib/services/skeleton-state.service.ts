@@ -19,7 +19,7 @@ export class SkeletonStateService implements OnDestroy {
 	 *
 	 * @memberof SkeletonStateService
 	 */
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.state.forEach((state) => {
 			state.destroy();
 		});
@@ -119,10 +119,10 @@ export class SkeletonStateService implements OnDestroy {
 export class SkeletonState {
 	public readonly id: string;
 	public readonly groupId?: string;
-	private readonly _isLoaded$ = new BehaviorSubject<boolean>(false);
+	private readonly isLoaded = new BehaviorSubject<boolean>(false);
 	private readonly destroy$ = new Subject<void>();
 
-	public readonly isLoaded$ = this._isLoaded$
+	public readonly isLoaded$ = this.isLoaded
 		.asObservable()
 		.pipe(takeUntil(this.destroy$), shareReplay(1));
 
@@ -131,11 +131,11 @@ export class SkeletonState {
 		this.groupId = groupId;
 	}
 
-	public setState(isLoaded: boolean) {
-		this._isLoaded$.next(isLoaded);
+	public setState(isLoaded: boolean): void {
+		this.isLoaded.next(isLoaded);
 	}
 
-	public destroy() {
+	public destroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}

@@ -4,7 +4,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 	name: 'niceFormError',
 })
 export class NiceFormErrorPipe implements PipeTransform {
-	transform(key: string | any, args: string | any): string {
+	public transform(key: string | any, args: string | any): string {
 		switch (key as string) {
 			case 'required':
 				return this.required();

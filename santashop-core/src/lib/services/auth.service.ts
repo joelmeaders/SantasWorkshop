@@ -113,7 +113,7 @@ export class AuthService {
 
 		try {
 			await this.login(auth);
-			return this.authWrapper.updatePassword(user, newPassword);
+			return await this.authWrapper.updatePassword(user, newPassword);
 		} catch (error: any) {
 			// await this.errorHandler.handleError(error);
 			return Promise.reject(error);

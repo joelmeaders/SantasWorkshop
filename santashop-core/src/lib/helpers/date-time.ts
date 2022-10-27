@@ -4,12 +4,14 @@ export const dateToTimestamp = (date: Date = new Date()): Timestamp => {
 	return Timestamp.fromDate(date);
 };
 
-export const yyyymmddToLocalDate = (isoString: string) => {
+// TODO: Siimplify
+export const yyyymmddToLocalDate = (isoString: string): Date => {
 	const [year, month, day] = isoString.split('-').map(Number);
 	return new Date(year, month - 1, day);
 };
 
-export const getAgeFromDate = (birthday: Date, fromDate: Date) => {
+// TODO: Siimplify
+export const getAgeFromDate = (birthday: Date, fromDate: Date): number => {
 	const today = fromDate;
 	let thisYear = 0;
 

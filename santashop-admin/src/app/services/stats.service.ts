@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, Only } from 'santashop-core/src/public-api';
+import { FireRepoLite, Only } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
 	AgeGroupBreakdown,
@@ -20,12 +20,13 @@ import { Timestamp } from '@firebase/firestore';
 	providedIn: 'root',
 })
 export class StatsService {
-	private readonly statsCollection = <T>() => this.httpService.collection<T>(
-		COLLECTION_SCHEMA.stats
-	);
+	private readonly statsCollection = <T>() =>
+		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
-	private readonly registrationStats = this.statsCollection<RegistrationStats>();
-	private readonly checkinStats = this.statsCollection<CheckInAggregatedStats>();
+	private readonly registrationStats =
+		this.statsCollection<RegistrationStats>();
+	private readonly checkinStats =
+		this.statsCollection<CheckInAggregatedStats>();
 
 	private readonly $registrationStats = this.registrationStats
 		.read('registration-2022')
@@ -53,7 +54,7 @@ export class StatsService {
 			stats.forEach(
 				(stat) =>
 					(stat.dateTime = (
-						(stat.dateTime as any) as Timestamp
+						stat.dateTime as any as Timestamp
 					).toDate())
 			);
 			return stats;
@@ -89,7 +90,7 @@ export class StatsService {
 			take(1),
 			map((stats) => {
 				stats.lastUpdated = (
-					(stats.lastUpdated as any) as Timestamp
+					stats.lastUpdated as any as Timestamp
 				).toDate();
 				return stats;
 			})
@@ -100,11 +101,11 @@ export class StatsService {
 	);
 
 	private readonly dateTimeCount$ = this.checkInStats$.pipe(
-		map(value => value.dateTimeCount),
+		map((value) => value.dateTimeCount),
 		shareReplay(1)
 	);
 
-	private readonly mapCount$ = (prop: Only<CheckInDateTimeCount, number>) => 
+	private readonly mapCount$ = (prop: Only<CheckInDateTimeCount, number>) =>
 		this.dateTimeCount$.pipe(
 			switchMap((dateTimeCounts) =>
 				from(dateTimeCounts.map((dtc) => dtc[prop]))
@@ -119,10 +120,13 @@ export class StatsService {
 		})
 	);
 
-	public readonly checkInTotalCustomerCount$ = this.mapCount$('customerCount');
+	public readonly checkInTotalCustomerCount$ =
+		this.mapCount$('customerCount');
 	public readonly checkInTotalChildCount$ = this.mapCount$('childCount');
-	public readonly $checkInTotalPreregisteredCount = this.mapCount$('pregisteredCount');
-	public readonly $checkInTotalModifiedCount = this.mapCount$('modifiedCount');
+	public readonly $checkInTotalPreregisteredCount =
+		this.mapCount$('pregisteredCount');
+	public readonly $checkInTotalModifiedCount =
+		this.mapCount$('modifiedCount');
 
 	constructor(private readonly httpService: FireRepoLite) {}
 

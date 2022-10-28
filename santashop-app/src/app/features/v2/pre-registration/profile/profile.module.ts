@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ProfilePageRoutingModule } from './profile-routing.module';
 import { ProfilePage } from './profile.page';
-import { CoreModule } from 'santashop-core/src/public-api';
+import { CoreModule } from '@core/*';
 import { SharedModule } from 'santashop-app/src/app/shared/components/shared.module';
 
 @NgModule({

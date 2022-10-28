@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { ErrorHandlerService } from 'santashop-core/src/public-api';
+import { ErrorHandlerService } from '@core/*';
 import { LoadingController } from '@ionic/angular';
 import { IError } from '../../../../../../../santashop-models/src/public-api';
 import { of } from 'rxjs';
@@ -53,11 +53,11 @@ export class SubmitPageService {
 			});
 
 			return completionResult
-				? this.sendToConfirmation()
-				: Promise.reject(completionResult);
+				? await this.sendToConfirmation()
+				: await Promise.reject(completionResult);
 		} catch (error) {
 			this.errorHandler.handleError(error as IError);
-			return Promise.resolve(false);
+			return await Promise.resolve(false);
 		} finally {
 			await loader.dismiss();
 		}

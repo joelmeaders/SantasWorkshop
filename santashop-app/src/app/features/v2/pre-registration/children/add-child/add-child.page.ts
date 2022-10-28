@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MOBILE_EVENT } from 'santashop-core/src/public-api';
+import { MOBILE_EVENT } from '@core/*';
 import { filter, map, takeUntil, tap } from 'rxjs/operators';
 import {
 	ChildValidationService,
@@ -38,19 +38,19 @@ export class AddChildPage {
 		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean
 	) {}
 
-	public async birthdaySelected() {
+	public async birthdaySelected(): Promise<void> {
 		await this.viewService.birthdaySelected();
 	}
 
-	public setInfant(isInfant: boolean) {
+	public setInfant(isInfant: boolean): void {
 		this.viewService.setInfant(isInfant);
 	}
 
-	public async addChild() {
+	public async addChild(): Promise<void> {
 		await this.viewService.addChild();
 	}
 
-	public editChild() {
+	public editChild(): Promise<void> {
 		return this.viewService.editChild();
 	}
 }

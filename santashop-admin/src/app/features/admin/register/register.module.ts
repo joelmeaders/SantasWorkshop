@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { CoreModule } from 'santashop-core/src/public-api';
+import { CoreModule } from '@core/*';
 import { SharedModule } from 'santashop-admin/src/app/components/shared.module';
 import { RegisterPageRoutingModule } from './register-routing.module';
 import { RegisterPage } from './register.page';

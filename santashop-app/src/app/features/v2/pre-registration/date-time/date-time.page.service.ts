@@ -4,10 +4,13 @@ import {
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 	timestampToDate,
-} from 'santashop-core/src/public-api';
+} from '@core/*';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import { COLLECTION_SCHEMA, DateTimeSlot } from '../../../../../../../santashop-models/src/public-api';
+import {
+	COLLECTION_SCHEMA,
+	DateTimeSlot,
+} from '../../../../../../../santashop-models/src/public-api';
 import { QueryConstraint } from 'firebase/firestore';
 import { where } from '@angular/fire/firestore';
 import { PreRegistrationService } from '../../../../core';
@@ -49,7 +52,7 @@ export class DateTimePageService implements OnDestroy {
 		this.destroy$.complete();
 	}
 
-	public async updateRegistration(slot?: DateTimeSlot) {
+	public async updateRegistration(slot?: DateTimeSlot): Promise<void> {
 		const registration = await firstValueFrom(
 			this.preRegistrationService.userRegistration$
 		);

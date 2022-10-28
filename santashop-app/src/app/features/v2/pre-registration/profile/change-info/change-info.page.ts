@@ -13,7 +13,7 @@ export class ChangeInfoPage {
 
 	constructor(private readonly viewService: ProfilePageService) {}
 
-	public updateProfile() {
+	public updateProfile(): void {
 		this.viewService.updatePublicProfile();
 	}
 }

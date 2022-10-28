@@ -25,20 +25,24 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-ion-title, ion-card-title {
-	font-family: 'lora', sans-serif;
+ion-title,
+ion-card-title {
+	font-family: "lora", sans-serif;
 	font-size: 1.6em;
 	font-weight: 600;
 }
 
-h1, ion-title, ion-card-title {
-	font-family: 'lora', sans-serif;
+h1,
+ion-title,
+ion-card-title {
+	font-family: "lora", sans-serif;
 	color: var(--ion-color-xmasred);
 	text-transform: uppercase;
-	letter-spacing: .02em;
+	letter-spacing: 0.02em;
 }
 
-h3, ion-card-subtitle {
+h3,
+ion-card-subtitle {
 	font-size: 1.4em;
 	font-family: brandon-grotesque, sans-serif;
 	font-weight: 600;
@@ -268,7 +272,7 @@ $es-direction-definitions: (top, bottom, right, left) !default;
 // Disable autofill color
 input:-webkit-autofill,
 input:-webkit-autofill:focus {
-    transition: background-color 600000s 0s, color 600000s 0s;
+	transition: background-color 600000s 0s, color 600000s 0s;
 	background-color: transparent !important;
 }
 

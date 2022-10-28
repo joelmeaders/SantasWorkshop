@@ -1,8 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, FunctionsWrapper } from 'santashop-core/src/public-api';
+import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { Auth, IError, OnboardUser } from '../../../../../../santashop-models/src/public-api';
+import {
+	Auth,
+	IError,
+	OnboardUser,
+} from '../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -47,7 +51,7 @@ export class SignUpPageService implements OnDestroy {
 		);
 	}
 
-	public async onValidateRecaptcha($event: any) {
+	public async onValidateRecaptcha($event: any): Promise<void> {
 		if (!(await this.validateRecaptcha($event))) {
 			this.recaptchaValid$.next(false);
 			await this.failedVerification();
@@ -58,9 +62,11 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async validateRecaptcha($event: any): Promise<boolean> {
-		const status = await this.functions.httpsCallable(
-			'verifyRecaptcha2'
-		)({ value: $event });
+		const status = await this.functions.callableWrapper('verifyRecaptcha2')(
+			{
+				value: $event,
+			}
+		);
 
 		return status
 			? Promise.resolve((status.data as any).success as boolean)
@@ -68,7 +74,7 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	// Move to UI service
-	private async failedVerification() {
+	private async failedVerification(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
 			message: this.translateService.instant(
@@ -139,9 +145,8 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async createAccount(value: OnboardUser): Promise<void> {
-		const accountStatusFunction = this.functions.httpsCallable(
-			'newAccount'
-		);
+		const accountStatusFunction =
+			this.functions.callableWrapper('newAccount');
 		await accountStatusFunction({ ...value });
 	}
 

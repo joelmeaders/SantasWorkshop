@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
-import { SkeletonStateService } from 'santashop-core/src/public-api';
+import { SkeletonStateService } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { DateTimeSlot } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
-import { firstValueFrom, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { shareReplay, take, map, takeUntil, tap } from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
 
@@ -34,7 +34,9 @@ export class DateTimePage implements OnDestroy {
 		shareReplay(1)
 	);
 
-	public readonly availableSlotsByDay$ = (date: number) =>
+	public readonly availableSlotsByDay$ = (
+		date: number
+	): Observable<DateTimeSlot[]> =>
 		this.availableSlots$.pipe(
 			takeUntil(this.destroy$),
 			map((slots) =>
@@ -69,25 +71,25 @@ export class DateTimePage implements OnDestroy {
 		public readonly skeletonState: SkeletonStateService
 	) {}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
 
-	ionViewDidLeave() {
+	public ionViewDidLeave(): void {
 		this.skeletonState.removeStatesByGroup('dateTimePage');
 	}
 
-	public async selectDateTime(slot?: DateTimeSlot) {
+	public async selectDateTime(slot?: DateTimeSlot): Promise<void> {
 		const hasSlot = await this.alreadyChoseSlot();
 		let shouldChange = false;
 
 		if (hasSlot) shouldChange = await this.confirmChangeDate();
 
-		if (shouldChange) await logEvent(this.analytics, 'cancelled_datetime');
+		if (shouldChange) logEvent(this.analytics, 'cancelled_datetime');
 
 		if (!hasSlot || shouldChange) {
-			await logEvent(this.analytics, 'chose_datetime');
+			logEvent(this.analytics, 'chose_datetime');
 			await this.viewService.updateRegistration(slot);
 		}
 	}
@@ -131,6 +133,6 @@ export class DateTimePage implements OnDestroy {
 
 		await alert.present();
 
-		return alert.onDidDismiss().then((e) => e.role != 'cancel');
+		return alert.onDidDismiss().then((e) => e.role !== 'cancel');
 	}
 }

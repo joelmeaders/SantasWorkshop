@@ -21,19 +21,22 @@ import {
 	filterNil,
 	FireRepoLite,
 	FunctionsWrapper,
+	HttpsCallableResult,
+	IFireRepoCollection,
 	pluckFilterNil,
 	Timestamp,
-} from 'santashop-core/src/public-api';
+} from '@core/*';
 import { QrCodeService } from './qrcode.service';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class PreRegistrationService implements OnDestroy {
-	private readonly registrationCollection = () =>
-		this.fireRepo.collection<Registration>(
-			COLLECTION_SCHEMA.registrations
-		);
+	private readonly registrationCollection =
+		(): IFireRepoCollection<Registration> =>
+			this.fireRepo.collection<Registration>(
+				COLLECTION_SCHEMA.registrations
+			);
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -121,7 +124,7 @@ export class PreRegistrationService implements OnDestroy {
 		);
 	}
 
-	public undoRegistration() {
+	public undoRegistration(): Promise<HttpsCallableResult<unknown>> {
 		return this.afFunctions.undoRegistration();
 	}
 
@@ -139,7 +142,7 @@ export class PreRegistrationService implements OnDestroy {
 
 		// Convert the timestamp to a date. Firebase (or angularfire) seems to be
 		// setting all dates to timestamps in the database now.
-		if (slot) slot.dateTime = ((slot.dateTime as any) as Timestamp)?.toDate();
+		if (slot) slot.dateTime = (slot.dateTime as any as Timestamp)?.toDate();
 
 		return slot;
 	}
@@ -147,7 +150,7 @@ export class PreRegistrationService implements OnDestroy {
 	private getChildren(registration: Registration): Child[] {
 		registration.children?.forEach((child) => {
 			child.dateOfBirth = (
-				(child.dateOfBirth as any) as Timestamp
+				child.dateOfBirth as any as Timestamp
 			)?.toDate();
 		});
 

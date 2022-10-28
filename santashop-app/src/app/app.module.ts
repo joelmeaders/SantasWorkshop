@@ -12,7 +12,7 @@ import {
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
-} from 'santashop-core/src/public-api';
+} from '@core/*';
 import { RouteReuseStrategy } from '@angular/router';
 import {
 	RecaptchaSettings,
@@ -54,9 +54,8 @@ import {
 	UserTrackingService,
 } from '@angular/fire/analytics';
 
-export function httpLoaderFactory(http: HttpClient) {
-	return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
+export const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
+	new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
 
@@ -144,7 +143,8 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		{ provide: MOBILE_EVENT, useValue: true },
 		ScreenTrackingService,
 		{
-			provide: AuthWrapper, deps: [ Auth ]
+			provide: AuthWrapper,
+			deps: [Auth],
 		},
 		UserTrackingService,
 		{
@@ -157,7 +157,7 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		{
 			provide: RECAPTCHA_NONCE,
 			useValue: '8wiehfsdncil8wKUyla8inkiygseteifnkcnkjsdnosidhf8iehf',
-		}
+		},
 	],
 	bootstrap: [AppComponent],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],

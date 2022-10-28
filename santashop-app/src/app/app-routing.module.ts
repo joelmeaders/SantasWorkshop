@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
+import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import {
-	AuthGuard,
-	redirectUnauthorizedTo,
-	redirectLoggedInTo,
-} from '@angular/fire/auth-guard';
 
-const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/sign-in']);
-const redirectLoggedInToRegistration = () =>
+import { redirectLoggedInTo, redirectUnauthorizedTo } from '@core/*';
+
+const redirectUnauthorizedToLogin = (): AuthPipe =>
+	redirectUnauthorizedTo(['/sign-in']);
+
+const redirectLoggedInToRegistration = (): AuthPipe =>
 	redirectLoggedInTo(['/pre-registration/overview']);
 
 const routes: Routes = [

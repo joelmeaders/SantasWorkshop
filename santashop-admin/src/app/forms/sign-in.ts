@@ -1,5 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { CommonForms } from 'santashop-core/src/public-api';
+import { CommonForms } from '@core/*';
 
 export abstract class SignInForm {
 	private static validators = {

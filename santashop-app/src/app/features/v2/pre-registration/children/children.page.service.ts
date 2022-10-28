@@ -39,7 +39,7 @@ export class ChildrenPageService implements OnDestroy {
 		return this.updateRegistration(updatedChildren);
 	}
 
-	public async updateRegistration(children?: Child[]) {
+	public async updateRegistration(children?: Child[]): Promise<void> {
 		const registration = await firstValueFrom(
 			this.preRegistrationService.userRegistration$
 		);

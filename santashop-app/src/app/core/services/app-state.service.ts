@@ -53,7 +53,7 @@ export class AppStateService implements OnDestroy {
 		private readonly router: Router
 	) {}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import {
 	Functions as _Functions,
+	httpsCallable,
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from '@angular/fire/functions';
-import { httpsCallable } from '@firebase/functions';
 import { ChangeUserInfo } from '@models/*';
 
 export type Functions = _Functions;
@@ -22,7 +22,7 @@ export type HttpsCallableResult<ResponseData> =
 export class FunctionsWrapper {
 	constructor(private readonly functions: _Functions) {}
 
-	public readonly httpsCallable = <RequestData, ResponseData>(
+	public readonly callableWrapper = <RequestData, ResponseData>(
 		name: string
 	): HttpsCallable<RequestData, ResponseData> =>
 		httpsCallable(this.functions, name);
@@ -30,7 +30,7 @@ export class FunctionsWrapper {
 	public readonly updateEmailAddress = <ResponseData>(
 		newEmailAddress: string
 	): Promise<_HttpsCallableResult<ResponseData>> =>
-		this.httpsCallable<{ emailAddress: string }, ResponseData>(
+		this.callableWrapper<{ emailAddress: string }, ResponseData>(
 			'updateEmailAddress'
 		)({
 			emailAddress: newEmailAddress,
@@ -39,10 +39,11 @@ export class FunctionsWrapper {
 	public readonly changeAccountInformation = (
 		newInfo: ChangeUserInfo
 	): Promise<_HttpsCallableResult<unknown>> =>
-		this.httpsCallable<ChangeUserInfo, unknown>('changeAccountInformation')(
-			newInfo
-		);
+		this.callableWrapper<ChangeUserInfo, unknown>(
+			'changeAccountInformation'
+		)(newInfo);
 
-	// TODO
-	// public readonly undoRegistration = () => this.httpsCallable('');
+	public readonly undoRegistration = (): Promise<
+		_HttpsCallableResult<unknown>
+	> => this.callableWrapper<unknown, unknown>('undoRegistration')({});
 }

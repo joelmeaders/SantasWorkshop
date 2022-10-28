@@ -123,7 +123,9 @@
 					</ion-col>
 
 					<ion-col sizeXs="12" sizeSm="7">
-						<ion-card [disabled]="!(canChooseDateTime$ | async)">
+						<ion-card
+							[disabled]="(canChooseDateTime$ | async) === false"
+						>
 							<ion-card-header>
 								<ion-item class="inset-ion-item-title">
 									<ion-card-title>
@@ -138,9 +140,10 @@
 								</ion-item>
 							</ion-card-header>
 							<ion-card-content class="ion-text-center">
+								<!-- TODO: Does this work? -->
 								<ng-container
 									*ngIf="
-										!(dateTimeSlot$ | async);
+										(dateTimeSlot$ | async) === (null || undefined);
 										else hasDateTimeSlot
 									"
 								>
@@ -196,7 +199,7 @@
 
 					<ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
 						<ion-card
-							[disabled]="!(canSubmit$ | async)"
+							[disabled]="(canSubmit$ | async) === false"
 							class="es-mg-bottom-xxl"
 						>
 							<ion-card-header>

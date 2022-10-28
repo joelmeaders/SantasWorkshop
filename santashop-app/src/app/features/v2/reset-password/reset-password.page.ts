@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from 'santashop-core/src/public-api';
+import { AuthService } from '@core/*';
 import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
@@ -24,15 +24,15 @@ export class ResetPasswordPage {
 
 	// TODO: ReCaptchaV2.ReCaptcha namespace does not allow testing to work
 	// even though @types/greptcha is installed. Try again later.
-	@ViewChild('captchaRef') captchaRef: any | null = null;
+	@ViewChild('captchaRef') public captchaRef: any | null = null;
 
-	private readonly _resetEmailSent$ = new BehaviorSubject<boolean>(false);
-	public readonly resetEmailSent$ = this._resetEmailSent$
+	private readonly resetEmailSent = new BehaviorSubject<boolean>(false);
+	public readonly resetEmailSent$ = this.resetEmailSent
 		.asObservable()
 		.pipe(shareReplay(1));
 
-	private readonly _recaptchaValid$ = new BehaviorSubject<boolean>(false);
-	public readonly recaptchaValid$ = this._recaptchaValid$
+	private readonly recaptchaValid = new BehaviorSubject<boolean>(false);
+	public readonly recaptchaValid$ = this.recaptchaValid
 		.asObservable()
 		.pipe(shareReplay(1));
 
@@ -45,34 +45,34 @@ export class ResetPasswordPage {
 		private readonly analytics: Analytics
 	) {}
 
-	public resetPage() {
+	public resetPage(): void {
 		this.form.controls.emailAddress.setValue(undefined);
 		this.form.markAsPristine();
-		this._resetEmailSent$.next(false);
-		this._recaptchaValid$.next(false);
+		this.resetEmailSent.next(false);
+		this.recaptchaValid.next(false);
 		this.captchaRef?.reset();
 	}
 
-	public async onValidateRecaptcha($event: any) {
+	public async onValidateRecaptcha($event: any): Promise<void> {
 		if (!(await this.validateRecaptcha($event))) {
-			this._recaptchaValid$.next(false);
+			this.recaptchaValid.next(false);
 			await this.failedVerification();
 			return;
 		}
 
-		await logEvent(this.analytics, 'validated_recaptcha');
-		this._recaptchaValid$.next(true);
+		logEvent(this.analytics, 'validated_recaptcha');
+		this.recaptchaValid.next(true);
 	}
 
-	public async resetPassword() {
-		if (!this._recaptchaValid$.getValue()) return;
+	public async resetPassword(): Promise<void> {
+		if (!this.recaptchaValid.getValue()) return;
 
 		const email = this.form.get('emailAddress')?.value;
 
-		await logEvent(this.analytics, 'reset_password');
+		logEvent(this.analytics, 'reset_password');
 
 		await this.authService.resetPassword(email).then(() => {
-			this._resetEmailSent$.next(true);
+			this.resetEmailSent.next(true);
 		});
 	}
 
@@ -81,11 +81,11 @@ export class ResetPasswordPage {
 			this.afFunctions,
 			'verifyRecaptcha2'
 		)({ value: $event });
-		return Promise.resolve((<any>status.data).success);
+		return Promise.resolve((status.data as any).success);
 	}
 
 	// Move to UI service
-	private async failedVerification() {
+	private async failedVerification(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
 			message: this.translateService.instant(

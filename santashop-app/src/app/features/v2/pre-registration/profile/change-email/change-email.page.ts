@@ -19,7 +19,7 @@ export class ChangeEmailPage {
 
 	constructor(private readonly viewService: ProfilePageService) {}
 
-	public changeEmail() {
+	public changeEmail(): void {
 		this.viewService.changeEmailAddress();
 	}
 }

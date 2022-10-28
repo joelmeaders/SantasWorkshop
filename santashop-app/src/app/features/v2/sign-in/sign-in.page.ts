@@ -18,11 +18,11 @@ export class SignInPage {
 
 	constructor(private readonly viewService: SignInPageService) {}
 
-	public async onValidateRecaptcha($event: any) {
+	public async onValidateRecaptcha($event: any): Promise<void> {
 		await this.viewService.onValidateRecaptcha($event);
 	}
 
-	public onSignIn() {
+	public onSignIn(): void {
 		this.viewService.signIn();
 	}
 }

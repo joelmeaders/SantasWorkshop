@@ -7,12 +7,17 @@ import {
 	automock,
 	AnalyticsWrapper,
 	FunctionsWrapper,
-} from 'santashop-core/src/public-api';
+} from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
-import { COLLECTION_SCHEMA, User, ChangeUserInfo, IError } from '../../../../../../../santashop-models/src/public-api';
+import {
+	COLLECTION_SCHEMA,
+	User,
+	ChangeUserInfo,
+	IError,
+} from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { newChangeInfoForm } from './change-info/change-info.form';
 import { changeEmailForm, changePasswordForm } from './profile.form';
@@ -31,7 +36,7 @@ export class ProfilePageService implements OnDestroy {
 	public readonly changePasswordForm = changePasswordForm();
 
 	@automock
-	private readonly getUser$ = (uuid: string) =>
+	private readonly getUser$ = (uuid: string): Observable<User> =>
 		this.httpService
 			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
@@ -68,13 +73,13 @@ export class ProfilePageService implements OnDestroy {
 		private readonly analytics: AnalyticsWrapper
 	) {}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
 
 	public async updatePublicProfile(): Promise<void> {
-		await this.analytics.logEvent('profile_update_info');
+		this.analytics.logEvent('profile_update_info');
 
 		const newInfo: ChangeUserInfo = this.profileForm.value;
 
@@ -95,7 +100,7 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changeEmailAddress(): Promise<void> {
-		await this.analytics.logEvent('profile_update_email');
+		this.analytics.logEvent('profile_update_email');
 
 		const value = this.changeEmailForm.value;
 
@@ -110,7 +115,7 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changePassword(): Promise<void> {
-		await this.analytics.logEvent('profile_update_password');
+		this.analytics.logEvent('profile_update_password');
 
 		const value = this.changePasswordForm.value;
 

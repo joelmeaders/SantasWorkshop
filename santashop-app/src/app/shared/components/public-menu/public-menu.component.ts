@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { publishReplay, refCount, takeUntil } from 'rxjs/operators';
-import { AuthService } from 'santashop-core/src/public-api';
+import { shareReplay, takeUntil } from 'rxjs/operators';
+import { AuthService } from '@core/*';
 
 @Component({
 	selector: 'app-public-menu',
@@ -18,8 +18,7 @@ export class PublicMenuComponent implements OnDestroy {
 
 	public readonly isLoggedIn$ = this.authService.currentUser$.pipe(
 		takeUntil(this.destroy$),
-		publishReplay(1),
-		refCount()
+		shareReplay(1)
 	);
 
 	constructor(
@@ -34,42 +33,42 @@ export class PublicMenuComponent implements OnDestroy {
 		this.destroy$.next();
 	}
 
-	public async closeMenu() {
+	public async closeMenu(): Promise<void> {
 		await this.popoverController.dismiss();
 	}
 
-	public async home() {
+	public async home(): Promise<void> {
 		await this.router.navigate(['/']);
 		await this.closeMenu();
 	}
 
-	public async profile() {
+	public async profile(): Promise<void> {
 		await this.router.navigate(['/pre-registration/profile']);
 		await this.closeMenu();
 	}
 
-	public async signIn() {
+	public async signIn(): Promise<void> {
 		await this.router.navigate(['/sign-in']);
 		await this.closeMenu();
 	}
 
-	public async help() {
+	public async help(): Promise<void> {
 		await this.router.navigate(['/pre-registration/help']);
 		await this.closeMenu();
 	}
 
-	public async createAccount() {
+	public async createAccount(): Promise<void> {
 		await this.router.navigate(['/sign-up-account']);
 		await this.closeMenu();
 	}
 
-	public async logout() {
+	public async logout(): Promise<void> {
 		await this.authService.logout();
 		await this.closeMenu();
 		location.reload();
 	}
 
-	public async setLanguage(value: 'en' | 'es') {
+	public async setLanguage(value: 'en' | 'es'): Promise<void> {
 		this.translateService.use(value);
 		await logEvent(this.analyticsService, `set_language_${value}`);
 		await this.closeMenu();

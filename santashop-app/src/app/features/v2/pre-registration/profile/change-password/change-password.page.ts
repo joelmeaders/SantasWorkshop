@@ -13,7 +13,7 @@ export class ChangePasswordPage {
 
 	constructor(private readonly viewService: ProfilePageService) {}
 
-	public changePassword() {
+	public changePassword(): void {
 		this.viewService.changePassword();
 	}
 }

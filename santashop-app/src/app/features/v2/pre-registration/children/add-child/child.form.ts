@@ -1,5 +1,8 @@
 import { Validators } from '@angular/forms';
-import { AgeGroup, ToyType } from '../../../../../../../../santashop-models/src/public-api';
+import {
+	AgeGroup,
+	ToyType,
+} from '../../../../../../../../santashop-models/src/public-api';
 import { FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {
@@ -29,7 +32,18 @@ const validators = {
 	enabled: Validators.compose([Validators.requiredTrue]),
 };
 
-export const newChildForm = (programYear: number) =>
+export const newChildForm = (
+	programYear: number
+): FormGroup<{
+	id: FormControl<number>; // Random child id
+	firstName: FormControl<string>;
+	lastName: FormControl<string>;
+	dateOfBirth: FormControl<Date>;
+	ageGroup: FormControl<AgeGroup>;
+	toyType: FormControl<ToyType>;
+	programYearAdded: FormControl<number>;
+	enabled: FormControl<boolean>;
+}> =>
 	new FormGroup({
 		id: new FormControl<number>(Math.floor(Math.random() * 100000)), // Random child id
 		firstName: new FormControl<string>(undefined, validators.firstName),

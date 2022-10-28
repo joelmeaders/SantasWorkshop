@@ -1,5 +1,5 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { CoreModule } from 'santashop-core/src/public-api';
+import { CoreModule } from '@core/*';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { SharedModule } from 'santashop-admin/src/app/components/shared.module';
 import { ScannerPageRoutingModule } from './scanner-routing.module';

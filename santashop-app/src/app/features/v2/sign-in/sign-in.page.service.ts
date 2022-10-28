@@ -2,9 +2,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, newAuthForm } from 'santashop-core/src/public-api';
+import { AuthService, ErrorHandlerService, newAuthForm } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { Auth, IError } from '../../../../../../santashop-models/src/public-api';
+import {
+	Auth,
+	IError,
+} from '../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -71,7 +74,7 @@ export class SignInPageService implements OnDestroy {
 		}
 	}
 
-	public async onValidateRecaptcha($event: any) {
+	public async onValidateRecaptcha($event: any): Promise<void> {
 		if (!(await this.validateRecaptcha($event))) {
 			this.recaptchaValid$.next(false);
 			await this.failedVerification();
@@ -91,7 +94,7 @@ export class SignInPageService implements OnDestroy {
 	}
 
 	// Move to UI service
-	private async failedVerification() {
+	private async failedVerification(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
 			message: this.translateService.instant(

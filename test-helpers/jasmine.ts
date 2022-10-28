@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { AUTOMOCK_COLLECTION } from '../santashop-core/src/public-api';
+import { AUTOMOCK_COLLECTION } from '../santashop-core/src';
 
 export type Spied<T> = T & {
 	[K in keyof T]: T[K] extends jasmine.Func ? T[K] & jasmine.Spy<T[K]> : T[K];

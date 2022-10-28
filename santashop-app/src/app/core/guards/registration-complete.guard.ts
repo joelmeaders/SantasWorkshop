@@ -13,7 +13,7 @@ export class RegistrationCompleteGuard implements CanActivate {
 		private readonly router: Router
 	) {}
 
-	canActivate(): Observable<boolean | UrlTree> {
+	public canActivate(): Observable<boolean | UrlTree> {
 		return this.service.registrationComplete$.pipe(
 			take(1),
 			map((isComplete) =>

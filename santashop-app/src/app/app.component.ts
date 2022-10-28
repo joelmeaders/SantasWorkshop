@@ -20,7 +20,7 @@ export class AppComponent {
 		this.initializeApp();
 	}
 
-	async initializeApp() {
+	public async initializeApp(): Promise<void> {
 		await this.platform.ready().then(() => {
 			// This is here to kick off the appstateservice
 			if (!this.appStateService) throw new Error('Placeholder');

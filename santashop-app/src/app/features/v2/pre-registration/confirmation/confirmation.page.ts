@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { ErrorHandlerService } from 'santashop-core/src/public-api';
+import { ErrorHandlerService } from '@core/*';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IError } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';

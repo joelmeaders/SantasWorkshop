@@ -7,10 +7,16 @@ import {
 	signInWithEmailAndPassword,
 	updatePassword,
 } from '@angular/fire/auth';
+import {
+	redirectUnauthorizedTo as _redirectUnauthorizedTo,
+	redirectLoggedInTo as _redirectLoggedInTo,
+} from '@angular/fire/auth-guard';
 import { authState } from 'rxfire/auth';
 
 export type User = _User;
 export type UserCredential = _UserCredential;
+export const redirectUnauthorizedTo = _redirectUnauthorizedTo;
+export const redirectLoggedInTo = _redirectLoggedInTo;
 
 @Injectable({
 	providedIn: 'root',

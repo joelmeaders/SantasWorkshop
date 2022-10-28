@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, QueryConstraint } from 'santashop-core/src/public-api';
+import { FireRepoLite, QueryConstraint } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
 	CheckIn,
@@ -21,28 +21,30 @@ export class LookupService {
 		registrations: this.repoService.collection<Registration>(
 			COLLECTION_SCHEMA.registrations
 		),
-		checkins: this.repoService.collection<CheckIn>(COLLECTION_SCHEMA.checkins),
+		checkins: this.repoService.collection<CheckIn>(
+			COLLECTION_SCHEMA.checkins
+		),
 	};
 
 	public readonly searchIndexByName$ = (
 		firstName: string,
 		lastName: string
-	): Observable<RegistrationSearchIndex[]> => 
-	this.queryIndexByName(firstName, lastName).pipe(
-		map(results => results ?? []));
-		
+	): Observable<RegistrationSearchIndex[]> =>
+		this.queryIndexByName(firstName, lastName).pipe(
+			map((results) => results ?? [])
+		);
 
 	public readonly searchIndexByQrCode$ = (
 		qrCode: string
 	): Observable<RegistrationSearchIndex[]> =>
-		this.queryIndexByQrCode(qrCode)
-			.pipe(map((results) => results ?? []));
+		this.queryIndexByQrCode(qrCode).pipe(map((results) => results ?? []));
 
 	public readonly getRegistrationByQrCode$ = (
 		qrcode: string
 	): Observable<Registration | undefined> =>
-	this.queryRegistrationsByQrCode(qrcode)
-			.pipe(map((results) => results[0] ?? undefined));
+		this.queryRegistrationsByQrCode(qrcode).pipe(
+			map((results) => results[0] ?? undefined)
+		);
 
 	public readonly getRegistrationByUid$ = (
 		uid: string
@@ -69,7 +71,7 @@ export class LookupService {
 			where('firstName', '==', firstName),
 			where('lastName', '>=', lastName),
 			where('lastName', '<=', lastName + '\uf8ff'),
-			limit(50)
+			limit(50),
 		];
 
 		return this.collections.searchIndex.readMany(queryConstraints);
@@ -82,7 +84,7 @@ export class LookupService {
 			where('code', '==', qrCode),
 			orderBy('lastName', 'asc'),
 			orderBy('firstName', 'asc'),
-			limit(1)
+			limit(1),
 		];
 
 		return this.collections.searchIndex.readMany(queryConstraints);
@@ -94,7 +96,7 @@ export class LookupService {
 		const queryConstraints: QueryConstraint[] = [
 			where('qrcode', '==', qrCode),
 			orderBy('lastName', 'asc'),
-			orderBy('firstName', 'asc')
+			orderBy('firstName', 'asc'),
 		];
 
 		return this.collections.registrations.readMany(queryConstraints);

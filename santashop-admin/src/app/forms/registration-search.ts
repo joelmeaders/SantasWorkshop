@@ -1,5 +1,5 @@
 import { FormGroup } from '@angular/forms';
-import { CommonForms } from 'santashop-core/src/public-api';
+import { CommonForms } from '@core/*';
 
 export abstract class RegistrationSearchForm {
 	public static registrationSearchForm(): FormGroup {

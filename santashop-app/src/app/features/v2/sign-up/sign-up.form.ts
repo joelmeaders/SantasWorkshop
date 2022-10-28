@@ -49,7 +49,10 @@ export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
 		passwordMatchValidator
 	);
 
-function passwordMatchValidator(formGroup: any) {
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function passwordMatchValidator(
+	formGroup: any
+): { passwordMismatch: boolean } | null {
 	if (
 		!formGroup.controls.password.value ||
 		!formGroup.controls.password2.value

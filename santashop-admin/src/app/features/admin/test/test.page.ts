@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
-import { FireRepoLite } from 'santashop-core/src/public-api';
-import { DateTimeCount, ZipCodeCount, Registration } from '../../../../../../santashop-models/src/public-api';
+import { FireRepoLite } from '@core/*';
+import {
+	DateTimeCount,
+	ZipCodeCount,
+	Registration,
+} from '../../../../../../santashop-models/src/public-api';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 

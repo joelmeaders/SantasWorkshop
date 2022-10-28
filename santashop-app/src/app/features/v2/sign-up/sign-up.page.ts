@@ -17,7 +17,7 @@ import { SignUpPageService } from './sign-up.page.service';
 export class SignUpPage {
 	public readonly form = this.viewService.form;
 
-	@ViewChild('firstName') firstName?: HTMLIonInputElement;
+	@ViewChild('firstName') private readonly firstName?: HTMLIonInputElement;
 
 	public readonly recaptchaValid$ = this.viewService.recaptchaValid$
 		.asObservable()
@@ -29,13 +29,13 @@ export class SignUpPage {
 		private readonly translateService: TranslateService,
 		private readonly modalController: ModalController,
 		private readonly analytics: Analytics
-	) { }
+	) {}
 
-	ionViewWillEnter() {
+	public ionViewWillEnter(): void {
 		setTimeout(() => this.firstName?.setFocus(), 300);
 	}
 
-	public async onValidateRecaptcha($event: any) {
+	public async onValidateRecaptcha($event: any): Promise<void> {
 		await this.viewService.onValidateRecaptcha($event);
 		logEvent(this.analytics, 'validated_recaptcha');
 	}
@@ -77,7 +77,7 @@ export class SignUpPage {
 		return shouldContinue.role === 'confirm';
 	}
 
-	public async showPrivacyPolicyModal() {
+	public async showPrivacyPolicyModal(): Promise<void> {
 		logEvent(this.analytics, 'viewed_privacypolicy');
 		const modal = await this.modalController.create({
 			component: PrivacyPolicyModalComponent,
@@ -85,7 +85,7 @@ export class SignUpPage {
 		return modal.present();
 	}
 
-	public async showTermsConditionsModal() {
+	public async showTermsConditionsModal(): Promise<void> {
 		logEvent(this.analytics, 'viewed_termsofservice');
 		const modal = await this.modalController.create({
 			component: TermsOfServiceModalComponent,

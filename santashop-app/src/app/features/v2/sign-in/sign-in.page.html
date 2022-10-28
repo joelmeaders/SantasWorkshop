@@ -1,9 +1,10 @@
 <ion-content color="light">
-	
 	<ion-grid>
 		<ion-row class="ion-justify-content-center">
 			<ion-col size="auto">
-				<ion-card class="sign-up-card ion-text-center ion-padding-bottom remove-shadow no-shadow">
+				<ion-card
+					class="sign-up-card ion-text-center ion-padding-bottom remove-shadow no-shadow"
+				>
 					<ion-card-header>
 						<ion-button
 							class="remove-shadow go-back"
@@ -14,18 +15,14 @@
 								slot="start"
 								name="arrow-back-sharp"
 							></ion-icon>
-							<ion-label>
-								Back TODO
-							</ion-label>
+							<ion-label> Back TODO </ion-label>
 						</ion-button>
 						<img
 							src="assets/DSCS-Santa-Body_Red.png"
 							class="logo"
 							alt="logo with santa claus"
 						/>
-						<ion-card-title>
-							Sign In TODO
-						</ion-card-title>
+						<ion-card-title> Sign In TODO </ion-card-title>
 					</ion-card-header>
 					<ion-card-content>
 						<form [formGroup]="form" novalidate>

@@ -106,11 +106,13 @@
 										<ion-card-header>
 											<h2>
 												<strong>
-													{{ child.firstName }} {{ child.lastName }}
+													{{ child.firstName }} {{
+													child.lastName }}
 												</strong>
 											</h2>
 											<ion-text>
-												{{ child.dateOfBirth | date:"MMMM dd, yyyy" }}
+												{{ child.dateOfBirth |
+												date:"MMMM dd, yyyy" }}
 											</ion-text>
 											<ion-card-subtitle
 												color="danger"
@@ -149,7 +151,10 @@
 									</ion-item>
 								</ng-container>
 
-								<ng-container *ngIf="!(childCount$ | async)">
+								<!-- TODO: Does this work? -->
+								<ng-container
+									*ngIf="(childCount$ | async) === (0 || null)"
+								>
 									<div class="ion-text-center es-pd-top-xxl">
 										<ion-card-title color="medium">
 											{{ "CHILDREN.NO_CHILDREN" |

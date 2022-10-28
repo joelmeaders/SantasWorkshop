@@ -8,7 +8,7 @@ import {
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
-} from 'santashop-core/src/public-api';
+} from '@core/*';
 import { AppComponent } from './app.component';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import {
@@ -23,10 +23,7 @@ import {
 	provideFirestore,
 	enableMultiTabIndexedDbPersistence,
 } from '@angular/fire/firestore';
-import {
-	getAnalytics,
-	provideAnalytics,
-} from '@angular/fire/analytics';
+import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
 
@@ -74,7 +71,8 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 		{
-			provide: AuthWrapper, deps: [ Auth ]
+			provide: AuthWrapper,
+			deps: [Auth],
 		},
 	],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],

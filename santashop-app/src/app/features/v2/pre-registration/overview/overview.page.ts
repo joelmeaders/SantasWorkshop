@@ -50,7 +50,7 @@ export class OverviewPage implements OnDestroy {
 		private readonly preregistrationService: PreRegistrationService
 	) {}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}

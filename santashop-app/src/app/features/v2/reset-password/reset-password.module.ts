@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { ResetPasswordPageRoutingModule } from './reset-password-routing.module';
 import { ResetPasswordPage } from './reset-password.page';
-import { CoreModule } from 'santashop-core/src/public-api';
+import { CoreModule } from '@core/*';
 import { RecaptchaModule } from 'ng-recaptcha';
 
 @NgModule({

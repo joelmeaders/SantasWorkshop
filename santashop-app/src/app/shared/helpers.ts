@@ -1,4 +1,4 @@
-import { IRegistration } from 'santashop-core/src/public-api';
+import { IRegistration } from '@core/*';
 
 export abstract class Helpers {
 	public static qrCodeString(registration: IRegistration): string {
@@ -34,7 +34,7 @@ export abstract class Helpers {
 
 interface ILib {
 	alpha: string[];
-	number: string[];
+	numeric: string[];
 }
 
 type Key = keyof ILib;
@@ -66,7 +66,7 @@ const lib: ILib = {
 		'Y',
 		'Z',
 	],
-	number: ['2', '3', '4', '5', '6', '7', '8', '9'],
+	numeric: ['2', '3', '4', '5', '6', '7', '8', '9'],
 };
 
-const defaultKeys: Key[] = ['alpha', 'number'];
+const defaultKeys: Key[] = ['alpha', 'numeric'];

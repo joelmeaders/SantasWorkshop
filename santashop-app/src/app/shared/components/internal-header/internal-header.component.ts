@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AuthService } from 'santashop-core/src/public-api';
+import { AuthService } from '@core/*';
 import { PopoverController } from '@ionic/angular';
 import { PublicMenuComponent } from '../public-menu/public-menu.component';
 
@@ -17,7 +17,7 @@ export class InternalHeaderComponent {
 		private readonly popoverController: PopoverController
 	) {}
 
-	public async menu($event: any) {
+	public async menu($event: any): Promise<void> {
 		const popover = await this.popoverController.create({
 			component: PublicMenuComponent,
 			event: $event,

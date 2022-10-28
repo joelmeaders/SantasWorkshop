@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
-import { AuthGuard, redirectUnauthorizedTo } from '@angular/fire/auth-guard';
+import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 import { Routes, RouterModule } from '@angular/router';
 import { RegistrationCompleteGuard } from '../../../core/guards/registration-complete.guard';
 import { PreRegistrationPage } from './pre-registration.page';
+import { redirectUnauthorizedTo } from '@core/*';
 
-const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['/sign-in']);
+const redirectUnauthorizedToLogin = (): AuthPipe =>
+	redirectUnauthorizedTo(['/sign-in']);
 
 const routes: Routes = [
 	{

@@ -1,5 +1,5 @@
 import { FormGroup, Validators } from '@angular/forms';
-import { CommonForms } from 'santashop-core/src/public-api';
+import { CommonForms } from '@core/*';
 import { User, Child } from '../../../../santashop-models/src/public-api';
 
 export abstract class QuickRegistrationForms {

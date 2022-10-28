@@ -12,6 +12,7 @@ import {
 	redirectLoggedInTo as _redirectLoggedInTo,
 } from '@angular/fire/auth-guard';
 import { authState } from 'rxfire/auth';
+import { Observable } from 'rxjs';
 
 export type User = _User;
 export type UserCredential = _UserCredential;
@@ -24,7 +25,8 @@ export const redirectLoggedInTo = _redirectLoggedInTo;
 export class AuthWrapper {
 	constructor(private readonly auth: Auth) {}
 
-	public readonly authState = authState(this.auth);
+	public readonly authState = (): Observable<_User | null> =>
+		authState(this.auth);
 
 	public readonly currentUser = (): _User | null => this.auth.currentUser;
 

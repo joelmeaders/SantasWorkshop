@@ -29,7 +29,7 @@
 		"app:config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.client.ts",
 		"app:build:local": "ng build santashop-app --configuration=production",
 		"app:build:qa": "ng build santashop-app --configuration=qa",
-		"app:analyze": "ng build santashop-app --configuration=production --named-chunks=true--stats-json && webpack-bundle-analyzer dist/santashop-app/stats.json",
+		"app:analyze": "ng build santashop-app --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-app/stats.json",
 		"app:deploy:qa": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=qa && firebase deploy",
 		"app:deploy:qa:hosting": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=qa && firebase deploy --only hosting",
 		"app:deploy:qa:functions": "firebase use santas-workshop-test && firebase deploy --only functions",

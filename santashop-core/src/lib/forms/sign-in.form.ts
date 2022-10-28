@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { SWAuth } from '@models/*';
+import { Auth } from '@models/*';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {
@@ -16,8 +16,8 @@ const validators = {
 	]),
 };
 
-export const newAuthForm = (): FormGroup<ControlsOf<SWAuth>> =>
-	new FormGroup<ControlsOf<SWAuth>>({
+export const newAuthForm = (): FormGroup<ControlsOf<Auth>> =>
+	new FormGroup<ControlsOf<Auth>>({
 		emailAddress: new FormControl<string>(
 			undefined,
 			validators.emailAddress

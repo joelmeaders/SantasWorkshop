@@ -9,7 +9,8 @@ import {
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
-import { SWAuth, UserEmailUid } from '@models/*';
+import { Auth, UserEmailUid } from '@models/*';
+import { FunctionsWrapper } from './_functions-wrapper';
 
 @Injectable({
 	providedIn: 'root',
@@ -74,7 +75,8 @@ export class AuthService {
 	);
 
 	constructor(
-		private readonly authWrapper: AuthWrapper // private readonly functionsWrapper: FunctionsWrapper,
+		private readonly authWrapper: AuthWrapper,
+		private readonly functionsWrapper: FunctionsWrapper
 	) {}
 
 	/**
@@ -105,7 +107,7 @@ export class AuthService {
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
-		const auth: SWAuth = {
+		const auth: Auth = {
 			emailAddress: user.email as string,
 			password: oldPassword,
 		};
@@ -136,7 +138,7 @@ export class AuthService {
 
 		if (!user) return Promise.reject(new Error('User cannot be null'));
 
-		const auth: SWAuth = {
+		const auth: Auth = {
 			emailAddress: user?.email as string,
 			password,
 		};
@@ -144,7 +146,8 @@ export class AuthService {
 		try {
 			await this.login(auth);
 			console.log(newEmailAddress);
-			// await this.functionsWrapper.updateEmailAddress(newEmailAddress);
+			// TODO:
+			await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		} catch (error: any) {
 			// await this.errorHandler.handleError(error);
 			return Promise.reject(error);
@@ -158,7 +161,7 @@ export class AuthService {
 	 * @return
 	 * @memberof AuthService
 	 */
-	public async login(auth: SWAuth): Promise<UserCredential> {
+	public async login(auth: Auth): Promise<UserCredential> {
 		return this.authWrapper.signInWithEmailAndPassword(
 			auth.emailAddress,
 			auth.password

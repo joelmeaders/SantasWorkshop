@@ -31,5 +31,5 @@ export interface Registration {
 
 	zipCode?: number;
 
-	bhp?: number;
+	referredBy?: string;
 }

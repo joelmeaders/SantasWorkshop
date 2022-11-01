@@ -146,7 +146,6 @@ export class AuthService {
 		try {
 			await this.login(auth);
 			console.log(newEmailAddress);
-			// TODO:
 			await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		} catch (error: any) {
 			// await this.errorHandler.handleError(error);

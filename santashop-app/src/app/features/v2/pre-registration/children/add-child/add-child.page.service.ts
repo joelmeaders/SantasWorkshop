@@ -22,7 +22,7 @@ import { newChildForm } from './child.form';
 @Injectable()
 export class AddChildPageService implements OnDestroy {
 	public readonly destroy$ = new Subject<void>();
-	public readonly form = newChildForm(this.programYear);
+	public form = newChildForm(this.programYear);
 
 	private readonly isInfant = new BehaviorSubject<boolean>(false);
 	public readonly isInfant$ = this.isInfant.pipe(
@@ -58,19 +58,15 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async setChildToEdit(id: number): Promise<void> {
-		logEvent(this.analytics, 'view_child', { id });
+		const children = await firstValueFrom(this.children$);
+		if (!children || children.length < 1) return;
 
-		const children = await this.children$.pipe(take(1)).toPromise();
-
-		if (!children || children.length < 1) {
-			return;
-		}
-
-		const child = children.filter((c) => c.id === id)[0];
-
-		if (!child) {
-			return;
-		}
+		// Searching by number doesn't work. Converting to string
+		// seems to work for some reason
+		const child = children.filter(
+			(c) => !!c.id && c.id.toString() === id.toString()
+		)[0];
+		if (!child) return;
 
 		this.form.patchValue({ ...child });
 
@@ -98,7 +94,7 @@ export class AddChildPageService implements OnDestroy {
 			updatedChild.dateOfBirth as any
 		);
 
-		const children = await this.children$.pipe(take(1)).toPromise();
+		const children = await firstValueFrom(this.children$);
 
 		try {
 			const validatedChild =
@@ -293,5 +289,9 @@ export class AddChildPageService implements OnDestroy {
 
 		await alert.present();
 		return alert.onDidDismiss();
+	}
+
+	public resetForm(): void {
+		this.form = newChildForm(this.programYear);
 	}
 }

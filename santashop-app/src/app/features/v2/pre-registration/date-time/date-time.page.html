@@ -76,21 +76,23 @@
 											<ng-container
 												*ngIf="dateTimeSlotLoaded"
 											>
-												<p
-													class="ion-padding"
+												<div
+													class="ion-padding-vertical"
 													*ngIf="!chosenSlot"
 												>
-													<ion-title>
-														{{
-														"SCHEDULE.NO_TIME_SELECTED."
-														| translate }}
-													</ion-title>
+													<h2>
+														<strong>
+															{{
+															"SCHEDULE.NO_TIME_SELECTED."
+															| translate }}
+														</strong>
+													</h2>
 													<ion-label>
 														{{
 														"SCHEDULE.ADD_ONE_BELOW."
 														| translate }}
 													</ion-label>
-												</p>
+												</div>
 
 												<ion-item
 													lines="none"

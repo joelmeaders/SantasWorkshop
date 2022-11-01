@@ -152,7 +152,10 @@
 													</p>
 												</ion-list-header>
 
-												<ion-item color="light">
+												<ion-item
+													color="light"
+													*ngIf="(isInfant$ | async)"
+												>
 													<ion-label>
 														{{ "ADDCHILD.BABIES" |
 														translate }}

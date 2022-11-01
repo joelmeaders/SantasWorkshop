@@ -40,7 +40,7 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 		acceptedTermsOfService: acceptedLegal,
 		acceptedPrivacyPolicy: acceptedLegal,
 		version: 1,
-		manuallyMigrated: false
+		manuallyMigrated: false,
 	};
 
 	const registration: Registration = {
@@ -51,11 +51,6 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 		zipCode: data.zipCode,
 		qrcode: generateId(8),
 	};
-
-	if ((data as any).bhp) {
-		user.bhp = (data as any).bhp;
-		registration.bhp = (data as any).bhp;
-	}
 
 	const userDocument = admin
 		.firestore()

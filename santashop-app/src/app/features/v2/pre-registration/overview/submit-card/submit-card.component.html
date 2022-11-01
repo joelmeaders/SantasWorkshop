@@ -1,0 +1,24 @@
+<ion-card [disabled]="!canSubmit" class="es-mg-bottom-xxl">
+	<ion-card-header>
+		<ion-item class="inset-ion-item-title">
+			<ion-card-title lines="full">
+				{{ "MENU.SUBMIT" | translate }}
+			</ion-card-title>
+		</ion-item>
+	</ion-card-header>
+	<ion-card-content class="ion-text-center ion-padding">
+		<h2>
+			<strong>
+				{{ "OVERVIEW.NOT_SUBMITTED" | translate }}
+			</strong>
+		</h2>
+		<p>
+			{{ "OVERVIEW.NOT_SUBMITTED_MESSAGE" | translate }}
+		</p>
+		<p class="ion-text-end es-pd-top-lg">
+			<ion-button color="xmasred" [routerLink]="['../submit']">
+				{{ "MENU.SUBMIT" | translate }}
+			</ion-button>
+		</p>
+	</ion-card-content>
+</ion-card>

@@ -21,9 +21,13 @@
 								</h1>
 							</ion-text>
 
-							<div
-								class="ion-text-center width-max ion-margin-top"
-							>
+							<img
+								[src]="viewService.qrCode$ | async"
+								alt="Registration QR Code"
+								class="qr-code"
+							/>
+
+							<div class="ion-text-center width-max">
 								<ion-button
 									color="xmasred"
 									[routerLink]="['event-information']"
@@ -32,12 +36,6 @@
 									translate }}
 								</ion-button>
 							</div>
-
-							<img
-								[src]="viewService.qrCode$ | async"
-								alt="Registration QR Code"
-								class="qr-code"
-							/>
 
 							<ion-item lines="none">
 								<div>

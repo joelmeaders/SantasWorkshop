@@ -12,7 +12,7 @@ export default async (): Promise<void> => {
 	const registrationDocQuery = admin
 		.firestore()
 		.collection(`${COLLECTION_SCHEMA.registrations}`)
-		.where('programYear', '==', 2021)
+		.where('programYear', '==', 2022)
 		.orderBy('registrationSubmittedOn');
 
 	const registrations = await registrationDocQuery

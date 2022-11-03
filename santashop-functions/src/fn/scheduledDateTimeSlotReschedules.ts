@@ -71,7 +71,7 @@ const dateTimeSlotQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('dateTimeSlots')
-		.where('programYear', '==', 2021)
+		.where('programYear', '==', 2022)
 		.limit(limit)
 		.offset(offset);
 
@@ -105,7 +105,7 @@ const registrationQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2021)
+		.where('programYear', '==', 2022)
 		.where('previousDateTimeSlot', '!=', '')
 		.limit(limit)
 		.offset(offset);

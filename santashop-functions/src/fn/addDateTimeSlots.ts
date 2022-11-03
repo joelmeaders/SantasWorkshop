@@ -1,8 +1,10 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { HttpsError } from 'firebase-functions/v1/https';
-import { COLLECTION_SCHEMA, DateTimeSlot } from '../../../santashop-models/src/public-api';
-
+import {
+	COLLECTION_SCHEMA,
+	DateTimeSlot,
+} from '../../../santashop-models/src/public-api';
 
 admin.initializeApp();
 
@@ -126,7 +128,7 @@ const addDateTimeSlots = async () => {
 		{
 			programYear: programYear,
 			dateTime: new Date(`12-13-${programYear} 10:00 MST`),
-			maxSlots: 425000,
+			maxSlots: 250,
 			enabled: true,
 		},
 		{

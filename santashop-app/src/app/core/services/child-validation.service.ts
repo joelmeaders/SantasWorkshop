@@ -6,7 +6,7 @@ import {
 import { deepCopy } from '../../../../../santashop-core/src/lib/helpers/methods';
 
 // TODO: Injectable tokens
-export const MAX_BIRTHDATE = (): Date => new Date('12/31/2021');
+export const MAX_BIRTHDATE = (): Date => new Date('12/31/2022');
 
 export const MAX_CHILD_AGE_IN_YEARS = (): number => 12;
 

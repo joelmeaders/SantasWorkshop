@@ -127,8 +127,9 @@ export const scheduledFirestoreBackup = functions.pubsub
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
 
+// Every 1 min (should be 15)
 export const scheduledDateTimeSlotCounters = functions.pubsub
-	.schedule('every 15 minutes')
+	.schedule('*/60 * * * *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
 	});
@@ -157,7 +158,7 @@ export const scheduledReindexRegistrations = functions.pubsub
 		await (await import('./fn/scheduledReindexRegistrations')).default();
 	});
 
-// This method checks for existing dates/times. 
+// This method checks for existing dates/times.
 // If there are none it adds them
 export const scheduledAddDateTimeSlots = functions.pubsub
 	.schedule('59 23 * * *')

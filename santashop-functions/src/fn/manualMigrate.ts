@@ -105,7 +105,7 @@ export default async (
 
 				const childAge = getAgeFromDate(
 					child.dateOfBirth!,
-					new Date('12/10/2021')
+					new Date('12/10/2022')
 				);
 
 				if (child.toyType === 'infants' && childAge > 2) {
@@ -181,7 +181,7 @@ export default async (
 		firstName: customer.firstName ?? oldRegistration.firstName ?? 'ERROR',
 		lastName: customer.lastName ?? oldRegistration.lastName ?? 'ERROR',
 		emailAddress: customer.emailAddress ?? oldRegistration.email ?? 'ERROR',
-		programYear: 2021,
+		programYear: 2022,
 		includedInCounts: false,
 		zipCode: parsedZipCode,
 	};

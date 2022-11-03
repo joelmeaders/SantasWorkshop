@@ -4,7 +4,11 @@ import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
 import * as formatDateTime from 'dateformat';
-import { COLLECTION_SCHEMA, Registration, RegistrationSearchIndex } from '../../../santashop-models/src/public-api';
+import {
+	COLLECTION_SCHEMA,
+	Registration,
+	RegistrationSearchIndex,
+} from '../../../santashop-models/src/public-api';
 
 admin.initializeApp();
 
@@ -60,7 +64,7 @@ export default async (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2021,
+		programYear: 2022,
 	} as Partial<Registration>;
 
 	batch.set(registrationDocRef, updateRegistrationFields, { merge: true });

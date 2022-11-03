@@ -23,10 +23,14 @@ export default async (): Promise<string> => {
 	// Load all registrations that need to be calculated
 	const registrations: Registration[] = await loadRegistrations();
 
+	console.log(registrations);
+
 	if (!registrations.length) return Promise.resolve('No registrations');
 
 	// Load all date/time slots
 	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
+
+	console.log(dateTimeSlots);
 
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
 
@@ -47,7 +51,8 @@ export default async (): Promise<string> => {
 				.firestore()
 				.collection('dateTimeSlots')
 				.doc(slot.id!.toString());
-			transaction.update(doc, slot);
+
+			transaction.update(doc, { ...slot });
 		});
 
 		registrations.forEach((registration) => {
@@ -55,7 +60,7 @@ export default async (): Promise<string> => {
 				.firestore()
 				.collection('registrations')
 				.doc(registration.uid!.toString());
-			transaction.update(doc, registration);
+			transaction.update(doc, { ...registration });
 		});
 
 		return Promise.resolve('Updated date time slots');
@@ -66,7 +71,7 @@ const dateTimeSlotQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('dateTimeSlots')
-		.where('programYear', '==', 2021)
+		.where('programYear', '==', 2022)
 		.limit(limit)
 		.offset(offset);
 
@@ -100,7 +105,7 @@ const registrationQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2021)
+		.where('programYear', '==', 2022)
 		.where('registrationSubmittedOn', '!=', '')
 		.where('includedInCounts', '==', false)
 		.limit(limit)

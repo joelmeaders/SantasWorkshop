@@ -34,7 +34,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('registration-2021')
+		.doc('registration-2022')
 		.set(stats, { merge: false });
 };
 
@@ -160,7 +160,7 @@ const registrationQuery = () =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2021)
+		.where('programYear', '==', 2022)
 		.where('registrationSubmittedOn', '!=', '');
 // .where('includedInRegistrationStats', '==', false);
 

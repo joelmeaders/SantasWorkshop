@@ -37,11 +37,129 @@
 			"queryScope": "COLLECTION",
 			"fields": [
 				{
+					"fieldPath": "includedInCounts",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "dateTimeSlot",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "dateTimeSlot",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "dateTimeSlot",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "includedInCounts",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "includedInCounts",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
 					"fieldPath": "programYear",
 					"order": "ASCENDING"
 				},
 				{
 					"fieldPath": "previousDateTimeSlot",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "qrcode",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "lastName",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "firstName",
 					"order": "ASCENDING"
 				}
 			]
@@ -74,6 +192,24 @@
 				},
 				{
 					"fieldPath": "lastName",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrationsearchindex",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "qrCode",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "lastName",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "firstName",
 					"order": "ASCENDING"
 				}
 			]

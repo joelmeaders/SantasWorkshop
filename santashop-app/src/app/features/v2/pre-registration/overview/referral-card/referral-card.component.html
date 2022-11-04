@@ -1,1 +1,44 @@
-<p>referral-card works!</p>
+<ion-card>
+	<ion-card-header>
+		<ion-card-title> How did you hear about us? </ion-card-title>
+	</ion-card-header>
+	<ion-card-content>
+		<ion-list *ngIf="(referralChoice$ | async) === undefined">
+			<ion-searchbar
+				(ionChange)="filter($event)"
+				animated="true"
+				placeholder="Search list"
+			></ion-searchbar>
+
+			<ion-item-group>
+				<ion-item
+					*ngFor="let ref of referrals$ | async"
+					button
+					detail
+					(click)="setChoice(ref)"
+				>
+					<ion-label>{{ ref }}</ion-label>
+				</ion-item>
+			</ion-item-group>
+		</ion-list>
+
+		<ion-item-group *ngIf="referralChoice$ | async as choice">
+			<ion-item>
+				<ion-label position="stacked">You selected</ion-label>
+				<ion-text> {{ choice }} </ion-text>
+				<ion-button
+					slot="end"
+					size="default"
+					color="danger"
+					(click)="setChoice()"
+				>
+					<ion-icon name="close-circle" slot="start"></ion-icon>
+					Reset
+				</ion-button>
+			</ion-item>
+			<ion-item lines="none" class="ion-padding-top">
+				<ion-button slot="end" size="default"> Save choice </ion-button>
+			</ion-item>
+		</ion-item-group>
+	</ion-card-content>
+</ion-card>

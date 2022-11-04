@@ -6,6 +6,7 @@ export interface OnboardUser {
 	password2: string;
 	zipCode: number;
 	legal: boolean | Date;
+	newsletter: boolean;
 }
 
 export interface ChangeUserInfo {

@@ -45,6 +45,7 @@ export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
 			password2: new FormControl<string>(undefined, validators.password),
 			zipCode: new FormControl<number>(undefined, validators.zipCode),
 			legal: new FormControl<boolean | Date>(false, validators.legal),
+			newsletter: new FormControl<boolean>(false),
 		},
 		passwordMatchValidator
 	);

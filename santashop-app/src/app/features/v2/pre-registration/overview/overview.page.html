@@ -1,35 +1,61 @@
 <ion-content color="light" size="fullscreen">
-	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
-		<ion-row class="height-max">
-			<ion-col
-				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-				size="auto"
-			>
-				<app-pre-registration-menu></app-pre-registration-menu>
-			</ion-col>
-			<ion-col sizeXl="9" size="12">
-				<ion-row class="ion-justify-content-center">
-					<ion-col sizeXs="12" sizeSm="7">
-						<app-children-card
-							[children]="(children$ | async)!"
-							[childCount]="(childCount$ | async)!"
-						></app-children-card>
-					</ion-col>
+	<ng-container
+		*ngIf="(referredBy$ | async) === (null || undefined); else registrationMode"
+	>
+		<ion-grid class="height-max">
+			<ion-row class="ion-justify-content-center">
+				<ion-col sizeXl="9" size="12">
+					<ion-row class="ion-justify-content-center">
+						<ion-col sizeXs="12" sizeSm="7" class="ion-padding-top">
+							<app-referral-card></app-referral-card>
+						</ion-col>
+					</ion-row>
+				</ion-col>
+			</ion-row>
+		</ion-grid>
+	</ng-container>
+	<ng-template #registrationMode>
+		<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+			<ion-row class="height-max">
+				<ion-col
+					class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
+					size="auto"
+				>
+					<app-pre-registration-menu></app-pre-registration-menu>
+				</ion-col>
 
-					<ion-col sizeXs="12" sizeSm="7">
-						<app-schedule-card
-							[dateTimeSlot]="(dateTimeSlot$ | async)!"
-							[canChooseDateTime]="(canChooseDateTime$ | async)!"
-						></app-schedule-card>
-					</ion-col>
+				<ion-col sizeXl="9" size="12">
+					<ion-row class="ion-justify-content-center">
+						<ion-col sizeXs="12" sizeSm="7">
+							<app-referral-card></app-referral-card>
+						</ion-col>
 
-					<ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
-						<app-submit-card
-							[canSubmit]="(canSubmit$ | async)!"
-						></app-submit-card>
-					</ion-col>
-				</ion-row>
-			</ion-col>
-		</ion-row>
-	</ion-grid>
+						<ion-col sizeXs="12" sizeSm="7">
+							<app-children-card
+								[children]="(children$ | async)!"
+								[childCount]="(childCount$ | async)!"
+							></app-children-card>
+						</ion-col>
+
+						<ion-col sizeXs="12" sizeSm="7">
+							<app-schedule-card
+								[dateTimeSlot]="(dateTimeSlot$ | async)!"
+								[canChooseDateTime]="(canChooseDateTime$ | async)!"
+							></app-schedule-card>
+						</ion-col>
+
+						<ion-col
+							sizeXs="12"
+							sizeSm="7"
+							class="es-mg-bottom-xxl"
+						>
+							<app-submit-card
+								[canSubmit]="(canSubmit$ | async)!"
+							></app-submit-card>
+						</ion-col>
+					</ion-row>
+				</ion-col>
+			</ion-row>
+		</ion-grid>
+	</ng-template>
 </ion-content>

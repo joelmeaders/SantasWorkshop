@@ -41,6 +41,7 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 		acceptedPrivacyPolicy: acceptedLegal,
 		version: 1,
 		manuallyMigrated: false,
+		newsletter: data.newsletter,
 	};
 
 	const registration: Registration = {

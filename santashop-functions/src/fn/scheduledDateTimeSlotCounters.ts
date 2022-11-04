@@ -105,7 +105,6 @@ const registrationQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2022)
 		.where('registrationSubmittedOn', '!=', '')
 		.where('includedInCounts', '==', false)
 		.limit(limit)

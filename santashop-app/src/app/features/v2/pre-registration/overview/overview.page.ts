@@ -21,6 +21,10 @@ export class OverviewPage implements OnDestroy {
 
 	public readonly userRegistration$ =
 		this.preregistrationService.userRegistration$;
+
+	public readonly referredBy$ = this.userRegistration$.pipe(
+		map((data) => data.referredBy)
+	);
 	public readonly children$ = this.preregistrationService.children$;
 	public readonly childCount$ = this.preregistrationService.childCount$;
 	public readonly dateTimeSlot$ = this.preregistrationService.dateTimeSlot$;

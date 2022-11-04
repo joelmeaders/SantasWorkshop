@@ -129,7 +129,7 @@ export const scheduledFirestoreBackup = functions.pubsub
 
 // Every 1 min (should be 15)
 export const scheduledDateTimeSlotCounters = functions.pubsub
-	.schedule('*/60 * * * *')
+	.schedule('every 15 minutes')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
 	});

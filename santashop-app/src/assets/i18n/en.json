@@ -37,7 +37,10 @@
 		"PRIVACY_POLICY": "Privacy Policy",
 		"VERIFICATION_FAILED": "Verification Failed",
 		"VERIFICATION_FAILED_MSG": "You need to refresh the page to try again",
-		"CONFIRM": "Confirm"
+		"CONFIRM": "Confirm",
+		"RESET": "Reset",
+		"SAVE_CHOICE": "Save choice",
+		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "Forgot Password?",
@@ -60,7 +63,10 @@
 		"CONFIRM_EMAIL": "Is your email correct?",
 		"CONFIRM_EMAIL_MSG": "It cannot be changed after this step. After registration, we send your ticket to this email address.",
 		"ACCOUNT_EXISTS": "Account in use",
-		"ACCOUNT_EXISTS_MESSAGE": "It looks like you already have an account. Sign in using your email address, or reset the password if you don't remember it."
+		"ACCOUNT_EXISTS_MESSAGE": "It looks like you already have an account. Sign in using your email address, or reset the password if you don't remember it.",
+		"YOUR_INFO": "Your Information",
+		"ACCOUNT_INFO": "Account Information",
+		"LEGAL_NEWS": "Legal & Newsletter"
 	},
 	"OVERVIEW": {
 		"NO_CHILDREN": "No Children.",
@@ -181,8 +187,8 @@
 	},
 	"EVENT_INFO": {
 		"RESEND_EMAIL": "Resend Email",
-		"EVENT_ADDRESS1": "2150 S Monaco Parkway",
-		"EVENT_ADDRESS2": "Denver, CO 80222",
+		"EVENT_ADDRESS1": "2500 E 1st Ave",
+		"EVENT_ADDRESS2": "Denver, CO 80206",
 		"PRINT_PAGE": "Print or save this page or the email we sent you!",
 		"YOUR_TICKET": "This is your ticket to the event",
 		"FACEMASK": "Please wear a face mask to ensure the safety of our Volunteers.",
@@ -197,7 +203,7 @@
 		"ARRIVE_ON_TIME": "In an effort to help reduce your wait time, please arrive at your assigned time.",
 		"CHECK_WEBSITE": "Check our website the morning you are coming for any changes or weather updates.",
 		"ENTRY_INSTRUCTIONS": "Entry Instructions",
-		"DIRECTIONS": "Turn East off Monaco at the light just south of Evans. There is a car wash at light and the street is Memorial Way."
+		"DIRECTIONS": "// TODO:"
 	},
 	"PRIVACY": {
 		"PRIVACY_&_COOKIES": "Privacy & Cookies",
@@ -255,5 +261,10 @@
 		"7A": "denversantaclausshop.org may revise these terms of service for its website at any time without notice. By using this website you are agreeing to be bound by the then current version of these terms of service.",
 		"8": "8. Governing Law",
 		"8A": "These terms and conditions are governed by and construed in accordance with the laws of Colorado and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location."
+	},
+	"REFERRAL": {
+		"REFERRED_BY": "How did you hear about us?",
+		"SEARCH_PLACEHOLDER": "Type to search",
+		"YOU_SELECTED": "You selected"
 	}
 }

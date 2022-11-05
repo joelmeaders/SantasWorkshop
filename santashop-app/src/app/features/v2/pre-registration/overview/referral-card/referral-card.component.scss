@@ -2,3 +2,9 @@
 	font-size: 1.3rem;
 	line-height: 2em;
 }
+
+.buttons {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+}

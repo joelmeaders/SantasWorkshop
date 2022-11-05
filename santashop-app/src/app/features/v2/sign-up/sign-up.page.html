@@ -11,7 +11,7 @@
 					[routerLink]="['/']"
 				>
 					<ion-icon slot="start" name="arrow-back-sharp"></ion-icon>
-					<ion-label> Back TODO </ion-label>
+					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
 				</ion-button>
 				<ion-card class="sign-up-card">
 					<ion-card-header>
@@ -28,7 +28,10 @@
 								<ion-item-group class="es-pd-bottom-xl">
 									<ion-item-divider color="light">
 										<ion-label>
-											<strong> Your Information </strong>
+											<strong>
+												{{ 'SIGNUP.YOUR_INFO' |
+												translate }}
+											</strong>
 										</ion-label>
 									</ion-item-divider>
 
@@ -87,7 +90,10 @@
 								<ion-item-group class="es-pd-bottom-xl">
 									<ion-item-divider color="light">
 										<ion-label>
-											<strong>Account Information</strong>
+											<strong>
+												{{ 'SIGNUP.ACCOUNT_INFO' |
+												translate }}
+											</strong>
 										</ion-label>
 									</ion-item-divider>
 
@@ -153,7 +159,10 @@
 								<ion-item-group>
 									<ion-item-divider color="light">
 										<ion-label>
-											<strong>Legal & Newsletter</strong>
+											<strong>
+												{{ 'SIGNUP.LEGAL_NEWS' |
+												translate }}
+											</strong>
 										</ion-label>
 									</ion-item-divider>
 									<div class="ion-padding-top">
@@ -204,9 +213,8 @@
 											></ion-checkbox>
 										</div>
 										<ion-text color="medium">
-											Would you like to recieve our
-											periodic newsletter and be notified
-											of future events?
+											{{ 'COMMON.NEWSLETTER' | translate
+											}}
 										</ion-text>
 									</div>
 								</ion-item-group>

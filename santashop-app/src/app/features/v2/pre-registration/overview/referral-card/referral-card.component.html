@@ -1,13 +1,15 @@
 <ion-card>
 	<ion-card-header>
-		<ion-card-title> How did you hear about us? </ion-card-title>
+		<ion-card-title>
+			{{ "REFERRAL.REFERRED_BY" | translate }}
+		</ion-card-title>
 	</ion-card-header>
 	<ion-card-content>
 		<ion-list *ngIf="(referralChoice$ | async) === undefined">
 			<ion-searchbar
 				(ionChange)="filter($event)"
 				animated="true"
-				placeholder="Search list"
+				placeholder="{{ 'REFERRAL.SEARCH_PLACEHOLDER' | translate }}"
 			></ion-searchbar>
 
 			<ion-item-group>
@@ -25,24 +27,24 @@
 		<ion-item-group *ngIf="referralChoice$ | async as choice">
 			<ion-item>
 				<ion-label position="stacked" class="ref-choice">
-					You selected
+					{{ "REFERRAL.YOU_SELECTED" | translate }}
 				</ion-label>
 				<ion-text class="ref-choice"> {{ choice }} </ion-text>
 			</ion-item>
 
-			<ion-item lines="none" class="ion-padding-top">
+			<div class="ion-padding-top buttons">
 				<ion-button
 					slot="start"
 					size="default"
 					color="danger"
 					(click)="setChoice()"
 				>
-					Reset
+					{{ "COMMON.RESET" | translate }}
 				</ion-button>
 				<ion-button slot="end" size="default" (click)="submit()">
-					Save choice
+					{{ "COMMON.SAVE_CHOICE" | translate }}
 				</ion-button>
-			</ion-item>
+			</div>
 		</ion-item-group>
 	</ion-card-content>
 </ion-card>

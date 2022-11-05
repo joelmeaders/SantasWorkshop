@@ -46,9 +46,7 @@ export class FunctionsWrapper {
 	public readonly updateReferredBy = (
 		data: UpdateReferredBy
 	): Promise<_HttpsCallableResult<unknown>> =>
-		this.callableWrapper<UpdateReferredBy, boolean>('updateReferredBy')(
-			data
-		);
+		this.callableWrapper<UpdateReferredBy, any>('updateReferredBy')(data);
 
 	public readonly undoRegistration = (): Promise<
 		_HttpsCallableResult<unknown>

@@ -15,3 +15,6 @@ if prompted for webpack cli install, cancel and then run 'npm link webpack' in t
 Running pub/sub manually during development:
 user@laptop:~$ firebase functions:shell
 firebase > myCronFunction()
+
+// NEW CALLABLE FUNCTIONS
+Make sure to add them to firebase.json, otherwise you get a "response not valid json" error due to the redirect to the site instead of the function

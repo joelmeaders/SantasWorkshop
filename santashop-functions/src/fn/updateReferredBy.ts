@@ -12,7 +12,7 @@ admin.initializeApp();
 export default async (
 	data: UpdateReferredBy,
 	context: CallableContext
-): Promise<boolean | HttpsError> => {
+): Promise<any | HttpsError> => {
 	const uid = context.auth?.uid;
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 
@@ -25,7 +25,7 @@ export default async (
 
 	return userDocumentRef
 		.update({ referredBy: data.referredBy })
-		.then(() => true)
+		.then(() => ({ saved: true }))
 		.catch((error: any) => {
 			console.error(
 				`Error updating user document ${uid} with ${JSON.stringify(

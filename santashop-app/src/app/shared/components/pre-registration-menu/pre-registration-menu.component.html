@@ -1,4 +1,6 @@
-<ng-container *ngIf="isRegistrationComplete$ | async as isRegistrationComplete">
+<ng-container
+	*appLet="isRegistrationComplete$ | async as isRegistrationComplete"
+>
 	<ion-tab-bar *ngIf="!isRegistrationComplete">
 		<ion-tab-button tab="overview" layout="icon-start">
 			<ion-icon name="home"></ion-icon>

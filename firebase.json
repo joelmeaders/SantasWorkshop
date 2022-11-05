@@ -34,10 +34,6 @@
 					"function": "completeRegistration"
 				},
 				{
-					"source": "/migrateProfile_V0_To_V1",
-					"function": "migrateProfile_V0_To_V1"
-				},
-				{
 					"source": "/newAccount",
 					"function": "newAccount"
 				},
@@ -50,7 +46,7 @@
 					"function": "updateEmailAddress"
 				},
 				{
-					"source": "/updatedReferredBy",
+					"source": "/updateReferredBy",
 					"function": "updateReferredBy"
 				},
 				{

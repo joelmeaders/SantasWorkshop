@@ -25,7 +25,7 @@ export default async (
 
 	return userDocumentRef
 		.update({ referredBy: data.referredBy })
-		.then(() => ({ saved: true }))
+		.then(() => true)
 		.catch((error: any) => {
 			console.error(
 				`Error updating user document ${uid} with ${JSON.stringify(

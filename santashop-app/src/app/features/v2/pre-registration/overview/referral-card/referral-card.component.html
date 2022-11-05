@@ -17,27 +17,31 @@
 					detail
 					(click)="setChoice(ref)"
 				>
-					<ion-label>{{ ref }}</ion-label>
+					<ion-label class="ref-choice">{{ ref }}</ion-label>
 				</ion-item>
 			</ion-item-group>
 		</ion-list>
 
 		<ion-item-group *ngIf="referralChoice$ | async as choice">
 			<ion-item>
-				<ion-label position="stacked">You selected</ion-label>
-				<ion-text> {{ choice }} </ion-text>
+				<ion-label position="stacked" class="ref-choice">
+					You selected
+				</ion-label>
+				<ion-text class="ref-choice"> {{ choice }} </ion-text>
+			</ion-item>
+
+			<ion-item lines="none" class="ion-padding-top">
 				<ion-button
-					slot="end"
+					slot="start"
 					size="default"
 					color="danger"
 					(click)="setChoice()"
 				>
-					<ion-icon name="close-circle" slot="start"></ion-icon>
 					Reset
 				</ion-button>
-			</ion-item>
-			<ion-item lines="none" class="ion-padding-top">
-				<ion-button slot="end" size="default"> Save choice </ion-button>
+				<ion-button slot="end" size="default" (click)="submit()">
+					Save choice
+				</ion-button>
 			</ion-item>
 		</ion-item-group>
 	</ion-card-content>

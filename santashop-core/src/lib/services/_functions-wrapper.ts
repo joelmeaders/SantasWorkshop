@@ -5,7 +5,7 @@ import {
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from '@angular/fire/functions';
-import { ChangeUserInfo } from '@models/*';
+import { ChangeUserInfo, UpdateReferredBy } from '@models/*';
 
 export type Functions = _Functions;
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
@@ -37,11 +37,18 @@ export class FunctionsWrapper {
 		});
 
 	public readonly changeAccountInformation = (
-		newInfo: ChangeUserInfo
+		data: ChangeUserInfo
 	): Promise<_HttpsCallableResult<unknown>> =>
 		this.callableWrapper<ChangeUserInfo, unknown>(
 			'changeAccountInformation'
-		)(newInfo);
+		)(data);
+
+	public readonly updateReferredBy = (
+		data: UpdateReferredBy
+	): Promise<_HttpsCallableResult<unknown>> =>
+		this.callableWrapper<UpdateReferredBy, boolean>('updateReferredBy')(
+			data
+		);
 
 	public readonly undoRegistration = (): Promise<
 		_HttpsCallableResult<unknown>

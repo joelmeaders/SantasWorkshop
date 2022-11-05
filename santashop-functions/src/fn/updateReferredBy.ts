@@ -1,6 +1,6 @@
 import {
-	ChangeUserInfo,
 	COLLECTION_SCHEMA,
+	UpdateReferredBy,
 } from '../../../santashop-models/src/public-api';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
@@ -10,54 +10,21 @@ import { HttpsError } from 'firebase-functions/v1/auth';
 admin.initializeApp();
 
 export default async (
-	data: ChangeUserInfo,
+	data: UpdateReferredBy,
 	context: CallableContext
 ): Promise<boolean | HttpsError> => {
 	const uid = context.auth?.uid;
-
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 
-	if (!data || !data.firstName || !data.lastName || !data.zipCode)
+	if (!data?.referredBy)
 		throw new HttpsError('data-loss', 'missing request information');
-
-	await admin.auth().updateUser(uid, {
-		displayName: `${data.firstName} ${data.lastName}`,
-	});
-
-	const batch = admin.firestore().batch();
 
 	const userDocumentRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
 
-	batch.set(userDocumentRef, data, { merge: true });
-
-	const indexDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
-
-	const indexDoc = {
-		firstName: data.firstName.toLowerCase(),
-		lastName: data.lastName.toLowerCase(),
-		zip: data.zipCode,
-	};
-
-	batch.set(indexDocRef, indexDoc, { merge: true });
-
-	const registrationDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-
-	const registrationDoc = {
-		firstName: data.firstName,
-		lastName: data.lastName,
-		zipCode: data.zipCode,
-	};
-
-	batch.set(registrationDocRef, registrationDoc, { merge: true });
-
-	return batch
-		.commit()
+	return userDocumentRef
+		.update({ referredBy: data.referredBy })
 		.then(() => true)
 		.catch((error: any) => {
 			console.error(

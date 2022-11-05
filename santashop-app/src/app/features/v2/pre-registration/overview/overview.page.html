@@ -6,7 +6,7 @@
 			<ion-row class="ion-justify-content-center">
 				<ion-col sizeXl="9" size="12">
 					<ion-row class="ion-justify-content-center">
-						<ion-col sizeXs="12" sizeSm="7" class="ion-padding-top">
+						<ion-col sizeXs="12" sizeSm="7">
 							<app-referral-card></app-referral-card>
 						</ion-col>
 					</ion-row>
@@ -26,10 +26,6 @@
 
 				<ion-col sizeXl="9" size="12">
 					<ion-row class="ion-justify-content-center">
-						<ion-col sizeXs="12" sizeSm="7">
-							<app-referral-card></app-referral-card>
-						</ion-col>
-
 						<ion-col sizeXs="12" sizeSm="7">
 							<app-children-card
 								[children]="(children$ | async)!"

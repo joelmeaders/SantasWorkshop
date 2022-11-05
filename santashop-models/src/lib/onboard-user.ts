@@ -14,3 +14,7 @@ export interface ChangeUserInfo {
 	lastName: string;
 	zipCode: number;
 }
+
+export interface UpdateReferredBy {
+	referredBy: string;
+}

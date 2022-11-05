@@ -10,6 +10,15 @@ export const changeAccountInformation = functions.https.onCall(
 	}
 );
 
+export const updateReferredBy = functions.https.onCall(
+	async (request, context) => {
+		return (await import('./fn/updateReferredBy')).default(
+			request,
+			context
+		);
+	}
+);
+
 /**
  * Runs a method to validate and complete a user registration record.
  * This process locks down their selected dateTimeSlot, sends an email

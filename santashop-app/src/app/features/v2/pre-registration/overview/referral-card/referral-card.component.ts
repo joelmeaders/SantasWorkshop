@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
+import { FunctionsWrapper } from '@core/*';
 
 @Component({
 	selector: 'app-referral-card',
@@ -37,6 +38,8 @@ export class ReferralCardComponent {
 	);
 	public readonly referralChoice$ = this.referralChoice.asObservable();
 
+	constructor(private readonly functions: FunctionsWrapper) {}
+
 	public filter($event: any): void {
 		const input = $event.detail?.value;
 		this.searchText.next(input ? input.toUpperCase() : undefined);
@@ -45,5 +48,17 @@ export class ReferralCardComponent {
 	public setChoice(choice?: string): void {
 		this.referralChoice.next(choice);
 		this.searchText.next(undefined);
+	}
+
+	public async submit(): Promise<void> {
+		const value = this.referralChoice.getValue();
+		if (!value?.length) return;
+
+		const result = await this.functions.updateReferredBy({
+			referredBy: value,
+		});
+
+		if (result.data === true) {
+		}
 	}
 }

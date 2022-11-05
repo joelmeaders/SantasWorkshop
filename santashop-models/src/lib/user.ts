@@ -18,5 +18,8 @@ export interface User {
 	version: number;
 
 	manuallyMigrated: boolean;
+
 	newsletter: boolean;
+
+	referredBy?: string;
 }

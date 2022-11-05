@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';
+import { ProfileService } from '../../../core/services/profile.service';
 
 @Component({
 	selector: 'app-pre-registration',
@@ -11,6 +12,10 @@ import { PreRegistrationService } from '../../../core';
 })
 export class PreRegistrationPage implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
+
+	public readonly referredBy$ = this.profileService.referredBy$.pipe(
+		shareReplay(1)
+	);
 
 	public readonly userRegistration$ = this.viewService.userRegistration$.pipe(
 		takeUntil(this.destroy$),
@@ -33,7 +38,10 @@ export class PreRegistrationPage implements OnDestroy {
 			shareReplay(1)
 		);
 
-	constructor(private readonly viewService: PreRegistrationService) {}
+	constructor(
+		private readonly viewService: PreRegistrationService,
+		private readonly profileService: ProfileService
+	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

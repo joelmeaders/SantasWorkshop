@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Subject } from 'rxjs';
 import {
 	filter,
 	map,
@@ -8,12 +8,8 @@ import {
 	switchMap,
 	takeUntil,
 } from 'rxjs/operators';
-import {
-	COLLECTION_SCHEMA,
-	User,
-} from '../../../../../../../dist/santashop-models';
-import { FireRepoLite } from '../../../../../../../santashop-core/src';
 import { PreRegistrationService } from '../../../../core';
+import { ProfileService } from '../../../../core/services/profile.service';
 
 @Component({
 	selector: 'app-overview',
@@ -27,18 +23,10 @@ export class OverviewPage implements OnDestroy {
 	public readonly userRegistration$ =
 		this.preregistrationService.userRegistration$;
 
-	private readonly getUser$ = (uuid: string): Observable<User> =>
-		this.httpService.collection<User>(COLLECTION_SCHEMA.users).read(uuid);
-
-	private readonly userProfile$ = this.userRegistration$.pipe(
-		switchMap((profile) => this.getUser$(profile.uid!)),
+	public readonly referredBy$ = this.profileService.referredBy$.pipe(
 		shareReplay(1)
 	);
 
-	public readonly referredBy$ = this.userProfile$.pipe(
-		map((data) => data.referredBy),
-		shareReplay(1)
-	);
 	public readonly children$ = this.preregistrationService.children$;
 	public readonly childCount$ = this.preregistrationService.childCount$;
 	public readonly dateTimeSlot$ = this.preregistrationService.dateTimeSlot$;
@@ -66,7 +54,7 @@ export class OverviewPage implements OnDestroy {
 
 	constructor(
 		private readonly preregistrationService: PreRegistrationService,
-		private readonly httpService: FireRepoLite
+		private readonly profileService: ProfileService
 	) {}
 
 	public ngOnDestroy(): void {

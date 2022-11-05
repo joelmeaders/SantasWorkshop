@@ -1,6 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { FunctionsWrapper } from '@core/*';
+import referringAgencies from '../../../../../../assets/referring-agencies.json';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { IError } from '../../../../../../../../dist/santashop-models';
 
 @Component({
 	selector: 'app-referral-card',
@@ -9,12 +12,7 @@ import { FunctionsWrapper } from '@core/*';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReferralCardComponent {
-	public readonly allReferrals: string[] = [
-		'Denver Human Services (DHS)',
-		'Colorado Food Bank',
-		'Friend or Family',
-		'Other',
-	];
+	public readonly allReferrals: string[] = referringAgencies.agencies;
 
 	private readonly searchText = new BehaviorSubject<string | undefined>(
 		undefined
@@ -38,7 +36,14 @@ export class ReferralCardComponent {
 	);
 	public readonly referralChoice$ = this.referralChoice.asObservable();
 
-	constructor(private readonly functions: FunctionsWrapper) {}
+	@ViewChild('otherInput')
+	private readonly otherInput?: HTMLIonInputElement;
+
+	constructor(
+		private readonly functions: FunctionsWrapper,
+		private readonly loadingController: LoadingController,
+		private readonly alertController: AlertController
+	) {}
 
 	public filter($event: any): void {
 		const input = $event.detail?.value;
@@ -46,19 +51,53 @@ export class ReferralCardComponent {
 	}
 
 	public setChoice(choice?: string): void {
+		console.log(this.otherInput?.value);
 		this.referralChoice.next(choice);
 		this.searchText.next(undefined);
 	}
 
 	public async submit(): Promise<void> {
-		const value = this.referralChoice.getValue();
+		let value = this.referralChoice.getValue();
 		if (!value?.length) return;
 
-		const result = await this.functions.updateReferredBy({
-			referredBy: value,
+		if (value === 'Other') {
+			const otherValue = this.otherInput?.value as string;
+			if (otherValue.length > 3) value = `Other:${otherValue}`;
+		}
+
+		await this.presentLoading();
+
+		try {
+			await this.functions.updateReferredBy({
+				referredBy: value,
+			});
+		} catch (ex: any) {
+			await this.loadingController.dismiss();
+			await this.handleError(ex);
+		} finally {
+			await this.loadingController.dismiss();
+		}
+	}
+
+	private async presentLoading(): Promise<void> {
+		const loading = await this.loadingController.create({
+			duration: 3000,
+			message: 'Please wait...',
+			translucent: true,
+			backdropDismiss: false,
 		});
 
-		if (result.data === true) {
-		}
+		await loading.present();
+	}
+
+	private async handleError(error: IError): Promise<void> {
+		const alert = await this.alertController.create({
+			header: 'Error',
+			subHeader: error.code,
+			message: error.message,
+			buttons: ['Ok'],
+		});
+
+		await alert.present();
 	}
 }

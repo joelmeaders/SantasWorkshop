@@ -1,15 +1,11 @@
-<ion-content color="light" size="fullscreen">
+<ion-content color="light">
 	<ng-container
 		*ngIf="(referredBy$ | async) === (null || undefined); else registrationMode"
 	>
 		<ion-grid class="height-max">
 			<ion-row class="ion-justify-content-center">
-				<ion-col sizeXl="9" size="12">
-					<ion-row class="ion-justify-content-center">
-						<ion-col sizeXs="12" sizeSm="7">
-							<app-referral-card></app-referral-card>
-						</ion-col>
-					</ion-row>
+				<ion-col size="auto">
+					<app-referral-card></app-referral-card>
 				</ion-col>
 			</ion-row>
 		</ion-grid>

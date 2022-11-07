@@ -49,8 +49,8 @@
 						slot="start"
 						*ngIf="!child.toyType"
 					></ion-icon>
-					<div>
-						<ion-label>
+					<div class="width-max">
+						<ion-label class="width-max ion-text-wrap">
 							{{ child.firstName }} {{ child.lastName }}
 						</ion-label>
 						<ion-note *ngIf="!child.toyType" color="danger">

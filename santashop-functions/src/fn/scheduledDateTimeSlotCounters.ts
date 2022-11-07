@@ -22,16 +22,10 @@ admin.initializeApp();
 export default async (): Promise<string> => {
 	// Load all registrations that need to be calculated
 	const registrations: Registration[] = await loadRegistrations();
-
-	console.log(registrations);
-
 	if (!registrations.length) return Promise.resolve('No registrations');
 
 	// Load all date/time slots
 	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
-
-	console.log(dateTimeSlots);
-
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
 
 	registrations.forEach((registration) => {

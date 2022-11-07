@@ -14,12 +14,22 @@
 						<ion-card
 							class="ion-margin-horizontal ion-text-center es-mg-bottom-xxl"
 						>
-							<ion-text color="xmasred" class="ion-text-center">
-								<h1>
-									{{ "CONFIRMATION.THIS_IS_YOUR_TICKET" |
+							<div class="ion-padding-horizontal">
+								<ion-text
+									color="xmasred"
+									class="ion-text-center"
+								>
+									<h1>
+										{{ "CONFIRMATION.THIS_IS_YOUR_TICKET" |
+										translate }}
+									</h1>
+								</ion-text>
+
+								<p>
+									{{ 'CONFIRMATION.EMAIL_REMEMBER_TICKET' |
 									translate }}
-								</h1>
-							</ion-text>
+								</p>
+							</div>
 
 							<img
 								[src]="viewService.qrCode$ | async"
@@ -34,6 +44,13 @@
 								>
 									{{ "CONFIRMATION.EVENT_INFORMATION" |
 									translate }}
+								</ion-button>
+								<br />
+								<ion-button
+									href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}"
+									target="_new"
+								>
+									{{ "EVENT_INFO.FAQ_TITLE" | translate }}
 								</ion-button>
 							</div>
 
@@ -70,7 +87,6 @@
 												translate }}</strong
 											>
 										</ion-text>
-										<br />
 									</p>
 									<ion-text
 										*ngIf="
@@ -84,7 +100,13 @@
 										<br />
 										{{ "EVENT_INFO.EVENT_ADDRESS2" |
 										translate }}
+										<br />
+										<em
+											>{{ "CONFIRMATION.FREE_PARKING" |
+											translate }}</em
+										>
 									</ion-text>
+									<br />
 									<br />
 									<ion-text
 										color="primary"

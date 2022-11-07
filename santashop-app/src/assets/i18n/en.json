@@ -40,14 +40,15 @@
 		"CONFIRM": "Confirm",
 		"RESET": "Reset",
 		"SAVE_CHOICE": "Save choice",
-		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?"
+		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?",
+		"VALID_EMAIL": "Must be a valid email address"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "Forgot Password?",
 		"SIGNING_IN": "Signing in..."
 	},
 	"SIGNUP": {
-		"HAVE_ACCOUNT": "Already have an account?",
+		"NEW_ACCOUNT_NOTICE": "Everyone must make a new account this year",
 		"TITLE1": "Set up your account",
 		"TITLE2": "This will only take a minute",
 		"FIRST_NAME": "First Name",
@@ -84,7 +85,7 @@
 	},
 	"CHILDREN": {
 		"CHILD_LINE_1": "Children must be between the ages of 0-11 years old.",
-		"CHILD_LINE_2": "Add all of your Children below.",
+		"CHILD_LINE_2": "Add each child 11 years old and younger below",
 		"ADD_A_CHILD": "Add a Child",
 		"NO_CHILDREN": "No Children.",
 		"YOUR_CHILDREN": "Your Children",
@@ -103,7 +104,7 @@
 		"INVALID_FIRSTNAME": "First name must be between 2 and 20 characters",
 		"INVALID_LASTNAME": "First name must be between 2 and 25 characters",
 		"INFANT_MSG": "We have pre-packaged, gender neutral toys for children ages 0-2!",
-		"BABIES": "For Babies (Ages 0-2)",
+		"BABIES": "For Infants",
 		"BOYS": "For Boys",
 		"GIRLS": "For Girls",
 		"AGE_GROUP": "Age Group",
@@ -124,13 +125,15 @@
 	"SUBMIT": {
 		"CONFIRM_ADDED_CHILDREN": "Have you added all children? Is children information correct?",
 		"CONFIRM_DATE_TIME": "Is date and time correct?",
-		"PRESUBMIT": "Before Submitting, make sure everything on this page is correct. A DSCS Volunteer will have to manually unlock your registration for you to make any changes.",
+		"PRESUBMIT": "Before submitting make sure everything on this page is correct. If not, make your changes now by clicking 'Make Changes'",
 		"MAKE_CHANGES": "Make Changes"
 	},
 	"CONFIRMATION": {
+		"FREE_PARKING": "Parking will be free",
 		"EVENT_INFORMATION": "Click here for event Information",
 		"QR_CODE": "QR Code",
 		"THIS_IS_YOUR_TICKET": "This is your ticket to the event",
+		"EMAIL_REMEMBER_TICKET": "We are also sending it to your email.",
 		"CHANGE_REGISTRATION": "Change Registration",
 		"ARE_YOU_SURE": "Are you sure?",
 		"CONFIRM_CHANGE_MSG": "Requesting to make a change to your registration will forfeit your current Date & Time.<br/>After you confirm, submit your new registration as soon as possible. Availability is limited and registration fills up quickly."
@@ -190,8 +193,8 @@
 		"EVENT_ADDRESS1": "2500 E 1st Ave",
 		"EVENT_ADDRESS2": "Denver, CO 80206",
 		"PRINT_PAGE": "Print or save this page or the email we sent you!",
-		"YOUR_TICKET": "This is your ticket to the event",
-		"FACEMASK": "Please wear a face mask to ensure the safety of our Volunteers.",
+		"YOUR_TICKET": "This is your ticket to the event.",
+		"FACEMASK": "Face masks are recommended",
 		"EVENT_INFO_TITLE": "Event information",
 		"LOCATION": "Location:",
 		"WHAT_TO_BRING": "What to bring",
@@ -203,7 +206,10 @@
 		"ARRIVE_ON_TIME": "In an effort to help reduce your wait time, please arrive at your assigned time.",
 		"CHECK_WEBSITE": "Check our website the morning you are coming for any changes or weather updates.",
 		"ENTRY_INSTRUCTIONS": "Entry Instructions",
-		"DIRECTIONS": "// TODO:"
+		"DIRECTIONS": "// TODO:",
+		"FAQ_TITLE": "Frequently Asked Questions",
+		"FAQ_LINK": "https://www.denversantaclausshop.org/faq-english/",
+		"FAQ_BUTTON": "Click here"
 	},
 	"PRIVACY": {
 		"PRIVACY_&_COOKIES": "Privacy & Cookies",

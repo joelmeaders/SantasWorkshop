@@ -81,20 +81,20 @@
 											</ion-label>
 
 											<ion-input
-												(ionChange)="birthdaySelected()"
+												(ionChange)="birthdaySelected($event)"
 												formControlName="dateOfBirth"
-												[debounce]="500"
 												type="date"
 												[min]="minBirthDate"
 												[max]="maxBirthDate"
+											></ion-input>
+											<ion-note
+												*ngIf="this.form.dirty && this.form.controls.dateOfBirth.invalid"
+												slot="error"
+												color="danger"
 											>
-											</ion-input>
+												Invalid date.
+											</ion-note>
 										</ion-item>
-										<core-control-errors
-											[control]="
-												form.controls.dateOfBirth
-											"
-										></core-control-errors>
 
 										<div
 											class="ion-padding-top ion-text-wrap"

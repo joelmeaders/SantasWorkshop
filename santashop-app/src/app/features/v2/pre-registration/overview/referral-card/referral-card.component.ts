@@ -51,7 +51,6 @@ export class ReferralCardComponent {
 	}
 
 	public setChoice(choice?: string): void {
-		console.log(this.otherInput?.value);
 		this.referralChoice.next(choice);
 		this.searchText.next(undefined);
 	}

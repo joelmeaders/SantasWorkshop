@@ -15,20 +15,24 @@
 								slot="start"
 								name="arrow-back-sharp"
 							></ion-icon>
-							<ion-label> Back TODO </ion-label>
+							<ion-label>
+								{{ "COMMON.GO_BACK" | translate }}
+							</ion-label>
 						</ion-button>
 						<img
 							src="assets/DSCS-Santa-Body_Red.png"
 							class="logo"
 							alt="logo with santa claus"
 						/>
-						<ion-card-title> Sign In TODO </ion-card-title>
+						<ion-card-title>
+							{{ "COMMON.SIGN_IN" | translate }}
+						</ion-card-title>
 					</ion-card-header>
 					<ion-card-content>
 						<form [formGroup]="form" novalidate>
 							<ion-list>
 								<ion-item>
-									<ion-label slot="start">
+									<ion-label>
 										{{ "COMMON.EMAIL_ADDRESS" | translate }}
 									</ion-label>
 									<ion-input
@@ -39,15 +43,12 @@
 										autocomplete="true"
 									></ion-input>
 									<ion-note slot="error">
-										Must be a valid email address
+										{{ 'COMMON.VALID_EMAIL' | translate }}
 									</ion-note>
 								</ion-item>
-								<!-- <core-control-errors
-									[control]="form.controls.emailAddress"
-								></core-control-errors> -->
 
 								<ion-item>
-									<ion-label slot="start">
+									<ion-label>
 										{{ "COMMON.PASSWORD" | translate }}
 									</ion-label>
 									<ion-input

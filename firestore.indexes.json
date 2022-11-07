@@ -55,6 +55,20 @@
 			"queryScope": "COLLECTION",
 			"fields": [
 				{
+					"fieldPath": "includedInCounts",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
 					"fieldPath": "programYear",
 					"order": "ASCENDING"
 				},

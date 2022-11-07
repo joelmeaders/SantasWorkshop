@@ -38,13 +38,12 @@ export class AddChildPage {
 		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean
 	) {}
 
-	public ionViewDidLeave() {
-		console.log('did leave');
+	public ionViewDidLeave(): void {
 		this.viewService.resetForm();
 	}
 
-	public async birthdaySelected(): Promise<void> {
-		await this.viewService.birthdaySelected();
+	public async birthdaySelected($event: any): Promise<void> {
+		await this.viewService.birthdaySelected($event.detail?.value);
 	}
 
 	public setInfant(isInfant: boolean): void {

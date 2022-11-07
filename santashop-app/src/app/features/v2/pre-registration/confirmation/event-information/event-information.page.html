@@ -29,17 +29,18 @@
 							</ion-item>
 
 							<div class="ion-margin">
-								<h2>December 10, 11, 13, 14, 10am - 3pm</h2>
+								<h2>December 9, 10, 12, 13 at 10am - 3pm</h2>
 
-								<p>
+								<strong>
 									{{ "EVENT_INFO.LOCATION" | translate }}
+								</strong>
 
-									<br />
-									<br />
-
-									{{ "EVENT_INFO.ENTRY_INSTRUCTIONS" |
-									translate }}
-								</p>
+								<address>
+									{{ "EVENT_INFO.EVENT_ADDRESS1" | translate
+									}} <br />
+									{{ "EVENT_INFO.EVENT_ADDRESS2" | translate
+									}}
+								</address>
 
 								<h2>
 									{{ "EVENT_INFO.WHAT_TO_BRING" | translate }}
@@ -78,6 +79,17 @@
 								</h2>
 
 								<p>{{ "EVENT_INFO.DIRECTIONS" | translate }}</p>
+
+								<h2>
+									{{ "EVENT_INFO.FAQ_TITLE" | translate }}
+								</h2>
+								<ion-button
+									href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}"
+									target="_new"
+								>
+									{{ "EVENT_INFO.FAQ_BUTTON" | translate }}
+									(FAQ)
+								</ion-button>
 							</div>
 						</div>
 					</ion-col>

@@ -40,14 +40,15 @@
 		"CONFIRM": "Confirmar",
 		"RESET": "Restablecimiento",
 		"SAVE_CHOICE": "Guardar elección",
-		"NEWSLETTER": "¿Le gustaría recibir nuestro boletín de noticias y ser notificado de futuros eventos?"
+		"NEWSLETTER": "¿Le gustaría recibir nuestro boletín de noticias y ser notificado de futuros eventos?",
+		"VALID_EMAIL": "Must be a valid email address"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "¿Olvidó su contraseña?",
 		"SIGNING_IN": "Iniciar sesión..."
 	},
 	"SIGNUP": {
-		"HAVE_ACCOUNT": "¿Ya tienes una cuenta?",
+		"NEW_ACCOUNT_NOTICE": "Todos deben crear una nueva cuenta este año",
 		"TITLE1": "Configura tu cuenta",
 		"TITLE2": "Esto solo tomará un minuto",
 		"FIRST_NAME": "Nombre",
@@ -84,7 +85,7 @@
 	},
 	"CHILDREN": {
 		"CHILD_LINE_1": "Los niños deben tener entre 0 y 11 años de edad.",
-		"CHILD_LINE_2": "Agregue todos sus hijos a continuación.",
+		"CHILD_LINE_2": "Agregue a cada niño de 11 años o menos a continuación",
 		"ADD_A_CHILD": "Agregar un niño",
 		"NO_CHILDREN": "No hay niños.",
 		"YOUR_CHILDREN": "Sus hijos",
@@ -103,7 +104,7 @@
 		"INVALID_FIRSTNAME": "El nombre debe tener entre 2 y 20 caracteres",
 		"INVALID_LASTNAME": "El nombre debe tener entre 2 y 25 caracteres",
 		"INFANT_MSG": "¡Tenemos juguetes neutros de género preenvasados para niños de 0 a 2 años!",
-		"BABIES": "Para bebés (Edades 0-2)",
+		"BABIES": "Para bebés",
 		"BOYS": "Para niños",
 		"GIRLS": "Para niñas",
 		"AGE_GROUP": "Grupo etario",
@@ -124,13 +125,15 @@
 	"SUBMIT": {
 		"CONFIRM_ADDED_CHILDREN": "¿Ha agregado a todos los niños? ¿Es correcta la información de los niños?",
 		"CONFIRM_DATE_TIME": "¿Es correcta la fecha y la hora?",
-		"PRESUBMIT": "Antes de enviar, asegúrese de que todo en esta página sea correcto. Un voluntario de DSCS tendrá que desbloquear manualmente su registro para que pueda realizar cualquier cambio.",
+		"PRESUBMIT": "Antes de enviar, asegúrese de que todo en esta página sea correcto. Si no es así, realice sus cambios ahora haciendo clic en 'Hacer cambios'",
 		"MAKE_CHANGES": "Realizar cambios"
 	},
 	"CONFIRMATION": {
+		"FREE_PARKING": "El aparcamiento será gratuito",
 		"EVENT_INFORMATION": "Haga clic aquí para obtener información sobre el evento",
 		"QR_CODE": "Código QR",
 		"THIS_IS_YOUR_TICKET": "Esta es tu entrada al evento",
+		"EMAIL_REMEMBER_TICKET": "También lo estamos enviando a su correo electrónico.",
 		"CHANGE_REGISTRATION": "Cambiar registro",
 		"ARE_YOU_SURE": "¿Estás seguro?",
 		"CONFIRM_CHANGE_MSG": "Solicitar hacer un cambio en su registro perderá su fecha y hora actuales.<br/> Después de confirmar, envíe su nuevo registro lo antes posible. La disponibilidad es limitada y el registro se llena rápidamente."
@@ -191,7 +194,7 @@
 		"EVENT_ADDRESS2": "Denver, CO 80206",
 		"PRINT_PAGE": "Imprima o guarde esta página y el correo electrónico que le enviamos.",
 		"YOUR_TICKET": "Este es su boleto para el evento",
-		"FACEMASK": "Por favor, use una máscara facial para garantizar la seguridad de nuestros voluntarios.",
+		"FACEMASK": "Se recomiendan máscaras faciales",
 		"EVENT_INFO_TITLE": "Información del evento",
 		"LOCATION": "Ubicación:",
 		"WHAT_TO_BRING": "Qué llevar",
@@ -203,7 +206,10 @@
 		"ARRIVE_ON_TIME": "En un esfuerzo por ayudar a reducir su tiempo de espera, llegue a la hora asignada.",
 		"CHECK_WEBSITE": "Visite nuestro sitio web la mañana en que viene para cualquier cambio o actualización del clima.",
 		"ENTRY_INSTRUCTIONS": "Instrucciones de entrada",
-		"DIRECTIONS": "Gire hacia el este de Mónaco en la luz justo al sur de Evans. Hay un lavado de coches a la luz y la calle es Memorial Way."
+		"DIRECTIONS": "Gire hacia el este de Mónaco en la luz justo al sur de Evans. Hay un lavado de coches a la luz y la calle es Memorial Way.",
+		"FAQ_TITLE": "Preguntas Frecuentes",
+		"FAQ_LINK": "https://www.denversantaclausshop.org/faq-espanol/",
+		"FAQ_BUTTON": "Haga clic aquí"
 	},
 	"PRIVACY": {
 		"PRIVACY_&_COOKIES": "Privacidad y cookies",

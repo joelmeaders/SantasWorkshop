@@ -84,7 +84,7 @@ export class AddChildPageService implements OnDestroy {
 		const date = `${year}-${month}-${day}`;
 		this.form.controls.dateOfBirth.setValue(date as any as Date);
 
-		await this.birthdaySelected();
+		await this.birthdaySelected(this.form.controls.dateOfBirth.value);
 		this.isEdit.next(true);
 	}
 
@@ -153,13 +153,9 @@ export class AddChildPageService implements OnDestroy {
 		}
 	}
 
-	public async birthdaySelected(): Promise<void> {
-		const yyyymmdd: any = this.form.controls.dateOfBirth.value;
+	public async birthdaySelected(yyyymmdd: any): Promise<void> {
 		if (!yyyymmdd) return;
-
-		if (!this.form.controls.dateOfBirth.valid) {
-			return;
-		}
+		if (yyyymmdd[0]?.toString() !== '2') return;
 
 		const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
 		const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());

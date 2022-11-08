@@ -1,19 +1,17 @@
 import { NgModule } from '@angular/core';
-import {
-	AngularFireAuthGuard,
-	hasCustomClaim,
-} from '@angular/fire/compat/auth-guard';
 import { RouterModule, Routes } from '@angular/router';
 import { ConfirmDeactivateGuard } from '../../guards/disable-camera.guard';
 import { AdminPage } from './admin.page';
+import { hasCustomClaim } from '@core/*';
+import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 
-const adminOnly = () => hasCustomClaim('admin');
+const adminOnly = (): AuthPipe => hasCustomClaim('admin');
 
 const routes: Routes = [
 	{
 		path: '',
 		component: AdminPage,
-		canActivate: [AngularFireAuthGuard],
+		canActivate: [AuthGuard],
 		data: { authGuardPipe: adminOnly },
 		children: [
 			{

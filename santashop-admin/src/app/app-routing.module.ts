@@ -1,11 +1,8 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import {
-	redirectLoggedInTo,
-	hasCustomClaim,
-	AuthGuard,
-	AuthPipe,
-} from '@angular/fire/auth-guard';
+
+import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
+import { redirectLoggedInTo, hasCustomClaim } from '@core/*';
 
 const adminOnly = (): AuthPipe => hasCustomClaim('admin');
 const redirectLoggedInToItems = (): AuthPipe => redirectLoggedInTo(['admin']);

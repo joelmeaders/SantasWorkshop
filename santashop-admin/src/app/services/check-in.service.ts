@@ -22,7 +22,10 @@ export class CheckInService {
 		private readonly errorHandler: ErrorHandler
 	) {}
 
-	public async checkIn(registration: Registration, isEdit = false) {
+	public async checkIn(
+		registration: Registration,
+		isEdit = false
+	): Promise<DocumentReference<CheckIn> | undefined> {
 		const loading = await this.loadingController.create({
 			message: 'Saving check-in...',
 			translucent: true,

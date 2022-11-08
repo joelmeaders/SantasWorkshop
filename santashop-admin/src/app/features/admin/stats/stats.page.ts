@@ -20,12 +20,10 @@ export class StatsPage implements OnDestroy {
 	public readonly now = new Date().toLocaleString();
 
 	public readonly $registrations =
-		this.statsService.$completedRegistrations.pipe(
-			shareReplay(1)
-		);
+		this.statsService.$completedRegistrations.pipe(shareReplay(1));
 
 	public readonly $children = this.statsService.$registeredChildrenCount.pipe(
-			shareReplay(1)
+		shareReplay(1)
 	);
 
 	public readonly $childrenPerRegistration = this.$children.pipe(
@@ -34,13 +32,11 @@ export class StatsPage implements OnDestroy {
 				map((customers) => (children / customers).toFixed(2))
 			)
 		),
-			shareReplay(1)
+		shareReplay(1)
 	);
 
 	public readonly $dateTimeStats =
-		this.statsService.$registrationDateTimeCounts.pipe(
-			shareReplay(1)
-		);
+		this.statsService.$registrationDateTimeCounts.pipe(shareReplay(1));
 
 	public readonly $typeAgeStats =
 		this.statsService.$registrationGenderAgeByDateCounts.pipe(
@@ -48,60 +44,48 @@ export class StatsPage implements OnDestroy {
 		);
 
 	public readonly $zipCodeStats = this.statsService.$zipCodeCounts.pipe(
-			shareReplay(1)
+		shareReplay(1)
 	);
 
 	public readonly $checkInLastUpdated =
-		this.statsService.$checkInLastUpdated.pipe(
-			shareReplay(1)
-		);
+		this.statsService.$checkInLastUpdated.pipe(shareReplay(1));
 
 	public readonly $checkInDateTimeCounts =
-		this.statsService.$checkInDateTimeCounts.pipe(
-			shareReplay(1)
-		);
+		this.statsService.$checkInDateTimeCounts.pipe(shareReplay(1));
 
 	public readonly $checkInTotalCustomerCount =
-		this.statsService.checkInTotalCustomerCount$.pipe(
-			shareReplay(1)
-		);
+		this.statsService.checkInTotalCustomerCount$.pipe(shareReplay(1));
 
 	public readonly $checkInTotalChildCount =
-		this.statsService.checkInTotalChildCount$.pipe(
-			shareReplay(1)
-		);
+		this.statsService.checkInTotalChildCount$.pipe(shareReplay(1));
 
 	public readonly $checkInTotalPreregisteredCount =
-		this.statsService.$checkInTotalPreregisteredCount.pipe(
-			shareReplay(1)
-		);
+		this.statsService.$checkInTotalPreregisteredCount.pipe(shareReplay(1));
 
 	public readonly $checkInOnSiteRegistration = forkJoin([
 		this.$checkInTotalCustomerCount,
 		this.$checkInTotalPreregisteredCount,
 	]).pipe(
 		map(([total, prereg]) => total - prereg!),
-			shareReplay(1)
+		shareReplay(1)
 	);
 
 	public readonly $checkInTotalModifiedCount =
-		this.statsService.$checkInTotalModifiedCount.pipe(
-			shareReplay(1)
-		);
+		this.statsService.$checkInTotalModifiedCount.pipe(shareReplay(1));
 
 	constructor(
 		private readonly statsService: StatsService // private readonly manualService: ManualOperationsService
 	) {}
 
-	public async manualAgeStats() {
+	public async manualAgeStats(): Promise<void> {
 		// await this.manualService.aggregateAgeGroups();
 	}
 
-	public async ngOnDestroy() {
+	public async ngOnDestroy(): Promise<void> {
 		this.destroy$.next();
 	}
 
-	public changeView($event: any) {
+	public changeView($event: any): void {
 		const value: 'registration' | 'checkin' = $event.detail.value;
 		this.view.next(value);
 	}

@@ -12,7 +12,7 @@ export class ConfirmDeactivateGuard implements CanDeactivate<ScannerPage> {
 	) {}
 	// Navigating away from scanner page won't shut off camera due
 	// to library bug. This solves that, mostly.
-	async canDeactivate(): Promise<boolean> {
+	public async canDeactivate(): Promise<boolean> {
 		this.scannerService.navigatedAway();
 
 		const loading = await this.loadingController.create({

@@ -20,7 +20,7 @@ export abstract class QuickRegistrationForms {
 		});
 	}
 
-	public static customerValidationMessages() {
+	public static customerValidationMessages(): { zipCode: any[] } {
 		return {
 			zipCode: [
 				CommonForms.messages().required,
@@ -29,7 +29,7 @@ export abstract class QuickRegistrationForms {
 		};
 	}
 
-	private static childValidators = {
+	private static readonly childValidators = {
 		toyType: Validators.compose([Validators.required]),
 		ageGroup: Validators.compose([Validators.required]),
 	};
@@ -47,7 +47,10 @@ export abstract class QuickRegistrationForms {
 		});
 	}
 
-	public static childValidationMessages() {
+	public static childValidationMessages(): {
+		toyType: any[];
+		ageGroup: any[];
+	} {
 		return {
 			toyType: [CommonForms.messages().required],
 			ageGroup: [CommonForms.messages().required],

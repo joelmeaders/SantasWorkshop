@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
-import { CheckIn, Registration } from '../../../../santashop-models/src/public-api';
+import {
+	CheckIn,
+	Registration,
+} from '../../../../santashop-models/src/public-api';
 import { BehaviorSubject, of } from 'rxjs';
 import {
 	distinctUntilChanged,
@@ -17,7 +20,9 @@ import { LookupService } from './lookup.service';
 	providedIn: 'root',
 })
 export class RegistrationContextService {
-	private readonly registration = new BehaviorSubject<Registration | undefined>(undefined);
+	private readonly registration = new BehaviorSubject<
+		Registration | undefined
+	>(undefined);
 	public readonly registration$ = this.registration.asObservable().pipe(
 		distinctUntilChanged((p, c) => p?.uid === c?.uid),
 		shareReplay(1)
@@ -26,11 +31,9 @@ export class RegistrationContextService {
 	private readonly checkin = new BehaviorSubject<CheckIn | undefined>(
 		undefined
 	);
-	public readonly checkin$ = this.checkin
-		.asObservable()
-		.pipe(shareReplay(1));
+	public readonly checkin$ = this.checkin.asObservable().pipe(shareReplay(1));
 
-	private readonly newModal = () =>
+	private readonly newModal = (): Promise<HTMLIonModalElement> =>
 		this.modalController.create({
 			component: QrModalComponent,
 			cssClass: 'modal-md',
@@ -45,7 +48,7 @@ export class RegistrationContextService {
 			}),
 			filter((registration) => !!registration?.uid),
 			switchMap((registration) =>
-				this.lookupService.getCheckinByUid$(registration!.uid!)
+				this.lookupService.getCheckinByUid$(registration?.uid!)
 			),
 			tap((checkin) => this.checkin.next(checkin))
 		)
@@ -64,16 +67,16 @@ export class RegistrationContextService {
 		private readonly router: Router
 	) {}
 
-	public setCurrentRegistration(registration?: Registration) {
+	public setCurrentRegistration(registration?: Registration): void {
 		this.registration.next(registration);
 	}
 
-	public reset() {
+	public reset(): void {
 		this.registration.next(undefined);
 		this.checkin.next(undefined);
 	}
 
-	private async displayRegistrationModal() {
+	private async displayRegistrationModal(): Promise<void> {
 		const currentModal = await this.modalController.getTop();
 
 		if (currentModal && currentModal?.id === 'qr-modal') {

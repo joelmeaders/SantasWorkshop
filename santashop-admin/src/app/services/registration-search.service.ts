@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { RegistrationSearchIndex } from '../../../../santashop-models/src/public-api';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {
 	filter,
 	map,
@@ -21,35 +21,37 @@ export class RegistrationSearchService {
 	public readonly getRegistrationByUid$ =
 		this.lookupService.getRegistrationByUid$;
 
-	private readonly _$searchState = new BehaviorSubject<
+	private readonly searchState = new BehaviorSubject<
 		IRegistrationSearch | undefined
 	>(undefined);
-	public readonly $searchState = this._$searchState.pipe(
+	public readonly $searchState = this.searchState.pipe(
 		publishReplay(1),
 		refCount()
 	);
 
-	private readonly _$searchStateValid = new BehaviorSubject<boolean>(false);
-	public readonly $searchStateValid = this._$searchStateValid.pipe(
+	private readonly searchStateValid = new BehaviorSubject<boolean>(false);
+	public readonly $searchStateValid = this.searchStateValid.pipe(
 		publishReplay(1),
 		refCount()
 	);
 
-	private readonly _$searchResults = new BehaviorSubject<
+	private readonly searchResults = new BehaviorSubject<
 		RegistrationSearchIndex[] | undefined
 	>(undefined);
-	public readonly $searchResults = this._$searchResults.pipe(
+	public readonly $searchResults = this.searchResults.pipe(
 		publishReplay(1),
 		refCount()
 	);
 
-	private readonly getSearchResults = () =>
+	private readonly getSearchResults = (): Observable<
+		RegistrationSearchIndex[]
+	> =>
 		this.$searchStateValid.pipe(
 			filter((isValid) => isValid === true),
 			switchMap(() => this.$searchState),
 			filter((state) => this.isSearchStateValid(state)),
 			switchMap((state) =>
-				!!state?.registrationCode
+				state?.registrationCode
 					? this.lookupService.searchIndexByQrCode$(
 							state.registrationCode
 					  )
@@ -63,7 +65,9 @@ export class RegistrationSearchService {
 
 	constructor(private readonly lookupService: LookupService) {}
 
-	private orderResultsByName(results: RegistrationSearchIndex[]) {
+	private orderResultsByName(
+		results: RegistrationSearchIndex[]
+	): RegistrationSearchIndex[] {
 		if (!results?.length) {
 			return results;
 		}
@@ -72,22 +76,22 @@ export class RegistrationSearchService {
 
 	public async search(): Promise<void> {
 		const results = await this.getSearchResults().pipe(take(1)).toPromise();
-		this._$searchResults.next(results);
+		this.searchResults.next(results);
 	}
 
-	public setSearchState(search: IRegistrationSearch) {
-		this._$searchState.next(search);
+	public setSearchState(search: IRegistrationSearch): void {
+		this.searchState.next(search);
 		const isValid = this.isSearchStateValid(search);
 
 		if (isValid) {
 			this.formatSearchStrings(search);
 		}
 
-		this._$searchStateValid.next(isValid);
+		this.searchStateValid.next(isValid);
 	}
 
-	private formatSearchStrings(search: IRegistrationSearch) {
-		if (!!search.registrationCode) {
+	private formatSearchStrings(search: IRegistrationSearch): void {
+		if (search.registrationCode) {
 			search.registrationCode = search.registrationCode.toUpperCase();
 		}
 
@@ -101,7 +105,7 @@ export class RegistrationSearchService {
 	}
 
 	private isSearchStateValid(search?: IRegistrationSearch): boolean {
-		if (search == undefined) {
+		if (!search) {
 			return false;
 		}
 
@@ -114,9 +118,9 @@ export class RegistrationSearchService {
 		return hasNames || hasCode;
 	}
 
-	public resetSearchState() {
-		this._$searchStateValid.next(false);
-		this._$searchState.next(undefined);
-		this._$searchResults.next(undefined);
+	public resetSearchState(): void {
+		this.searchStateValid.next(false);
+		this.searchState.next(undefined);
+		this.searchResults.next(undefined);
 	}
 }

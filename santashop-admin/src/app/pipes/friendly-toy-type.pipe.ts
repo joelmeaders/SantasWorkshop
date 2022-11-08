@@ -5,7 +5,7 @@ import { ToyType } from '../../../../santashop-models/src/public-api';
 	name: 'friendlyToyType',
 })
 export class FriendlyToyTypePipe implements PipeTransform {
-	transform(value: ToyType): string | undefined {
+	public transform(value: ToyType): string | undefined {
 		switch (value) {
 			case ToyType.infant:
 				return 'Infant';

@@ -24,6 +24,11 @@ import {
 	enableMultiTabIndexedDbPersistence,
 } from '@angular/fire/firestore';
 import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
+import {
+	provideFunctions,
+	getFunctions,
+	connectFunctionsEmulator,
+} from '@angular/fire/functions';
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
 
@@ -59,6 +64,17 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 				() => resolvePersistenceEnabled(false)
 			);
 			return firestore;
+		}),
+		provideFunctions(() => {
+			const functions = getFunctions();
+			functions.customDomain = location.origin;
+
+			if (!environment.production) {
+				connectFunctionsEmulator(functions, 'localhost', 5001);
+				functions.customDomain = null;
+			}
+
+			return functions;
 		}),
 		provideAnalytics(() => {
 			const analytics = getAnalytics();

@@ -7,11 +7,11 @@ import { Platform } from '@ionic/angular';
 	styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-	constructor(private platform: Platform) {
+	constructor(private readonly platform: Platform) {
 		this.initializeApp();
 	}
 
-	initializeApp() {
+	public initializeApp(): void {
 		this.platform.ready().then(() => {});
 	}
 }

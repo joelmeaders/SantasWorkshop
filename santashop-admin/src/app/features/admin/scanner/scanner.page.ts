@@ -17,11 +17,11 @@ export class ScannerPage {
 
 	constructor(private readonly scannerService: ScannerService) {}
 
-	public ionViewWillLeave() {
+	public ionViewWillLeave(): void {
 		this.scannerService.navigatedAway();
 	}
 
-	public ionViewDidLeave() {
+	public ionViewDidLeave(): void {
 		this.scannerService.navigatedAway();
 	}
 
@@ -29,16 +29,16 @@ export class ScannerPage {
 		this.scannerService.onCamerasFound(devices);
 	}
 
-	public async onCodeResult(resultString: string) {
+	public async onCodeResult(resultString: string): Promise<void> {
 		this.scannerService.onCodeResult(resultString);
 	}
 
-	public onDeviceSelectChange($event: any) {
+	public onDeviceSelectChange($event: any): void {
 		// deviceId
 		this.scannerService.onDeviceSelectChange($event);
 	}
 
-	public onDeviceChange(device: MediaDeviceInfo) {
+	public onDeviceChange(device: MediaDeviceInfo): void {
 		this.scannerService.onDeviceChange(device);
 	}
 
@@ -46,7 +46,7 @@ export class ScannerPage {
 		this.scannerService.onHasPermission(value);
 	}
 
-	public async onScanError(error: any) {
+	public async onScanError(error: any): Promise<void> {
 		this.scannerService.onScanError(error);
 	}
 }

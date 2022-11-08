@@ -21,30 +21,30 @@ export class ScannerService implements OnDestroy {
 
 	public readonly formatsEnabled: any = [11];
 
-	private readonly _$hasPermissions = new BehaviorSubject<boolean>(false);
-	public readonly $hasPermissions = this._$hasPermissions.pipe(
+	private readonly hasPermissions = new BehaviorSubject<boolean>(false);
+	public readonly $hasPermissions = this.hasPermissions.pipe(
 		takeUntil(this.$destroy),
 		publishReplay(1),
 		refCount()
 	);
 
-	private readonly _$availableDevices = new BehaviorSubject<
+	private readonly availableDevices = new BehaviorSubject<
 		MediaDeviceInfo[] | undefined
 	>(undefined);
-	public readonly $availableDevices = this._$availableDevices.pipe(
+	public readonly $availableDevices = this.availableDevices.pipe(
 		takeUntil(this.$destroy),
 		publishReplay(1),
 		refCount()
 	);
 
-	private readonly _$previousDevice = new BehaviorSubject<
+	private readonly previousDevice = new BehaviorSubject<
 		MediaDeviceInfo | any
 	>(undefined);
 
-	private readonly _$currentDevice = new BehaviorSubject<
-		MediaDeviceInfo | any
-	>(undefined);
-	public readonly $currentDevice = this._$currentDevice.pipe(
+	private readonly currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(
+		undefined
+	);
+	public readonly $currentDevice = this.currentDevice.pipe(
 		takeUntil(this.$destroy),
 		distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
 		publishReplay(1),
@@ -58,15 +58,15 @@ export class ScannerService implements OnDestroy {
 		refCount()
 	);
 
-	public readonly $deviceId = this._$currentDevice.pipe(
+	public readonly $deviceId = this.currentDevice.pipe(
 		takeUntil(this.$destroy),
-		map((current) => (!!current ? current.deviceId : '')),
+		map((current) => (current ? current.deviceId : '')),
 		publishReplay(1),
 		refCount()
 	);
 
-	private readonly _$cameraEnabled = new BehaviorSubject<boolean>(true);
-	public readonly $cameraEnabled = this._$cameraEnabled.pipe(
+	private readonly cameraEnabled = new BehaviorSubject<boolean>(true);
+	public readonly $cameraEnabled = this.cameraEnabled.pipe(
 		takeUntil(this.$destroy),
 		publishReplay(1),
 		refCount()
@@ -78,40 +78,40 @@ export class ScannerService implements OnDestroy {
 		private readonly alertController: AlertController
 	) {}
 
-	public async ngOnDestroy() {
+	public async ngOnDestroy(): Promise<void> {
 		this.$destroy.next();
 	}
 
-	public navigatedAway() {
+	public navigatedAway(): void {
 		this.onDeviceSelectChange({ detail: { value: '' } });
 	}
 
-	public setCameraEnabled(value: boolean) {
-		this._$cameraEnabled.next(value);
+	public setCameraEnabled(value: boolean): void {
+		this.cameraEnabled.next(value);
 
 		if (!value) {
-			this._$currentDevice.next(undefined);
+			this.currentDevice.next(undefined);
 			return;
 		}
 
-		if (this._$previousDevice.getValue()) {
-			this._$currentDevice.next(this._$previousDevice.getValue());
+		if (this.previousDevice.getValue()) {
+			this.currentDevice.next(this.previousDevice.getValue());
 		}
 	}
 
-	public setCurrentDevice(device: MediaDeviceInfo | any) {
-		if (!device && this._$currentDevice.getValue()) {
-			this._$previousDevice.next(this._$currentDevice.getValue());
+	public setCurrentDevice(device: MediaDeviceInfo | any): void {
+		if (!device && this.currentDevice.getValue()) {
+			this.previousDevice.next(this.currentDevice.getValue());
 		}
 
-		this._$currentDevice.next(device);
+		this.currentDevice.next(device);
 	}
 
 	public onCamerasFound(devices: MediaDeviceInfo[]): void {
-		this._$availableDevices.next(devices);
+		this.availableDevices.next(devices);
 	}
 
-	public async onCodeResult(resultString: string) {
+	public async onCodeResult(resultString: string): Promise<void> {
 		try {
 			const registration = await this.lookupService
 				.getRegistrationByQrCode$(resultString)
@@ -131,7 +131,7 @@ export class ScannerService implements OnDestroy {
 		}
 	}
 
-	public onDeviceSelectChange($event: any) {
+	public onDeviceSelectChange($event: any): void {
 		// deviceId
 
 		const deviceId = $event?.detail?.value;
@@ -140,20 +140,20 @@ export class ScannerService implements OnDestroy {
 			return;
 		}
 
-		const currentDevice = this._$currentDevice.getValue();
+		const currentDevice = this.currentDevice.getValue();
 
 		if (currentDevice?.deviceId === deviceId) {
 			return;
 		}
 
-		const devices = this._$availableDevices.getValue();
+		const devices = this.availableDevices.getValue();
 		const device = devices?.find((d) => d.deviceId === deviceId);
 
 		this.setCurrentDevice(device);
 	}
 
-	onDeviceChange(device: MediaDeviceInfo) {
-		const currentDevice = this._$currentDevice.getValue();
+	public onDeviceChange(device: MediaDeviceInfo): void {
+		const currentDevice = this.currentDevice.getValue();
 
 		if (!!currentDevice && device?.deviceId === currentDevice.deviceId)
 			return;
@@ -161,16 +161,16 @@ export class ScannerService implements OnDestroy {
 		this.setCurrentDevice(device);
 	}
 
-	onHasPermission(value: boolean): void {
-		this._$hasPermissions.next(value);
+	public onHasPermission(value: boolean): void {
+		this.hasPermissions.next(value);
 	}
 
-	public async onScanError(error: any) {
+	public async onScanError(error: any): Promise<void> {
 		await this.handleError(error);
 		this.onDeviceSelectChange({ detail: { value: '' } });
 	}
 
-	private async handleError(error: any) {
+	private async handleError(error: any): Promise<void> {
 		const alert = await this.alertController.create({
 			header: 'Error',
 			subHeader: error.name,

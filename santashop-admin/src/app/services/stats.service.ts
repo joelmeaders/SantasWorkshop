@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, Only } from '@core/*';
+import { FireRepoLite, IFireRepoCollection, Only } from '@core/*';
 import {
 	COLLECTION_SCHEMA,
 	AgeGroupBreakdown,
@@ -11,7 +11,7 @@ import {
 	ZipCodeCount,
 	CheckInAggregatedStats,
 } from '../../../../santashop-models/src/public-api';
-import { from } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { map, reduce, shareReplay, switchMap, take } from 'rxjs/operators';
 import { groupBy, sortBy } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
@@ -20,7 +20,7 @@ import { Timestamp } from '@firebase/firestore';
 	providedIn: 'root',
 })
 export class StatsService {
-	private readonly statsCollection = <T>() =>
+	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly registrationStats =
@@ -105,7 +105,9 @@ export class StatsService {
 		shareReplay(1)
 	);
 
-	private readonly mapCount$ = (prop: Only<CheckInDateTimeCount, number>) =>
+	private readonly mapCount$ = (
+		prop: Only<CheckInDateTimeCount, number>
+	): Observable<number> =>
 		this.dateTimeCount$.pipe(
 			switchMap((dateTimeCounts) =>
 				from(dateTimeCounts.map((dtc) => dtc[prop]))
@@ -166,7 +168,7 @@ export class StatsService {
 	): IGenderAgeStatsDisplay[] {
 		const parsedStats: IGenderAgeStatsDisplay[] = [];
 
-		const getIndex = (date: Date) =>
+		const getIndex = (date: Date): number =>
 			parsedStats.findIndex((e) => e.date.getDate() === date.getDate());
 
 		stats.forEach((stat) => {

@@ -28,11 +28,11 @@ export class SignInPage implements OnDestroy {
 		private readonly alertController: AlertController
 	) {}
 
-	public async ngOnDestroy() {
+	public async ngOnDestroy(): Promise<void> {
 		this.$destroy.next();
 	}
 
-	public async login() {
+	public async login(): Promise<void> {
 		const loginInfo: Auth = {
 			...this.form.value,
 		};
@@ -60,7 +60,7 @@ export class SignInPage implements OnDestroy {
 		await this.destroyLoading();
 	}
 
-	private async presentLoading() {
+	private async presentLoading(): Promise<void> {
 		const loading = await this.loadingController.create({
 			duration: 3000,
 			message: 'Signing in...',
@@ -71,7 +71,7 @@ export class SignInPage implements OnDestroy {
 		await loading.present();
 	}
 
-	private async handleError(error: IError) {
+	private async handleError(error: IError): Promise<void> {
 		const alert = await this.alertController.create({
 			header: 'Error',
 			subHeader: error.code,
@@ -82,7 +82,7 @@ export class SignInPage implements OnDestroy {
 		await alert.present();
 	}
 
-	private async destroyLoading() {
+	private async destroyLoading(): Promise<void> {
 		try {
 			await this.loadingController.dismiss();
 		} catch {}

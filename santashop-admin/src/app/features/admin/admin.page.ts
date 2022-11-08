@@ -5,6 +5,4 @@ import { Component } from '@angular/core';
 	templateUrl: 'admin.page.html',
 	styleUrls: ['admin.page.scss'],
 })
-export class AdminPage {
-	constructor() {}
-}
+export class AdminPage {}

@@ -20,8 +20,8 @@ export class SearchPage implements OnDestroy {
 	public readonly form: FormGroup =
 		RegistrationSearchForm.registrationSearchForm();
 
-	private readonly _$loading = new BehaviorSubject<boolean>(false);
-	public readonly $loading = this._$loading.pipe(
+	private readonly loading = new BehaviorSubject<boolean>(false);
+	public readonly $loading = this.loading.pipe(
 		takeUntil(this.$destroy),
 		publishReplay(1),
 		refCount()
@@ -33,7 +33,7 @@ export class SearchPage implements OnDestroy {
 
 	public readonly $searchResults = this.searchService.$searchResults.pipe(
 		takeUntil(this.$destroy),
-		tap(() => this._$loading.next(false)),
+		tap(() => this.loading.next(false)),
 		publishReplay(1),
 		refCount()
 	);
@@ -55,7 +55,7 @@ export class SearchPage implements OnDestroy {
 	}
 
 	public search(): void {
-		this._$loading.next(true);
+		this.loading.next(true);
 		this.searchService.search();
 	}
 
@@ -64,7 +64,7 @@ export class SearchPage implements OnDestroy {
 		this.searchService.setSearchState(model);
 	}
 
-	public async onSelect(index: RegistrationSearchIndex) {
+	public async onSelect(index: RegistrationSearchIndex): Promise<void> {
 		const registration = await this.searchService
 			.getRegistrationByUid$(index.customerId)
 			.pipe(take(1))

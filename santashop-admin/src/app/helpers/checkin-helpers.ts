@@ -4,7 +4,9 @@ import { format } from 'date-fns';
 import { Child, ToyType } from '../../../../santashop-models/src/public-api';
 
 export abstract class CheckInHelpers {
-	public static sortChildren(children: Child | Partial<Child>[]) {
+	public static sortChildren(
+		children: Child | Partial<Child>[]
+	): Partial<Child>[] {
 		return chain(children).sortBy('ageGroup').value();
 	}
 

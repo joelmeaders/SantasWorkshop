@@ -4,10 +4,11 @@ import {
 	redirectLoggedInTo,
 	hasCustomClaim,
 	AuthGuard,
+	AuthPipe,
 } from '@angular/fire/auth-guard';
 
-const adminOnly = () => hasCustomClaim('admin');
-const redirectLoggedInToItems = () => redirectLoggedInTo(['admin']);
+const adminOnly = (): AuthPipe => hasCustomClaim('admin');
+const redirectLoggedInToItems = (): AuthPipe => redirectLoggedInTo(['admin']);
 
 const routes: Routes = [
 	{

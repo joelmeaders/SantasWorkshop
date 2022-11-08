@@ -64,17 +64,17 @@ export class QrModalComponent implements OnDestroy {
 		private readonly errorHandler: ErrorHandlerService
 	) {}
 
-	ngOnDestroy() {
+	public ngOnDestroy(): void {
 		this.existingAlertSubcription.unsubscribe();
 		this.$destroy.next();
 		this.$destroy.complete();
 	}
 
-	public async editRegistration() {
+	public async editRegistration(): Promise<void> {
 		await this.modalController.dismiss(undefined, 'edit');
 	}
 
-	public async checkIn() {
+	public async checkIn(): Promise<void> {
 		const alert = await this.confirmCheckInAlert();
 
 		await alert.present();
@@ -106,7 +106,7 @@ export class QrModalComponent implements OnDestroy {
 		await this.modalController.dismiss(undefined, 'checkin');
 	}
 
-	private async confirmCheckInAlert() {
+	private async confirmCheckInAlert(): Promise<HTMLIonAlertElement> {
 		return this.alertController.create({
 			header: 'Confirm Action',
 			subHeader: 'A check-in cannot be undone',
@@ -125,13 +125,13 @@ export class QrModalComponent implements OnDestroy {
 		});
 	}
 
-	private async alreadyCheckedIn(checkin?: CheckIn) {
+	private async alreadyCheckedIn(checkin?: CheckIn): Promise<any> {
 		if (!checkin) return;
 
 		const alert = await this.alertController.create({
 			header: 'Existing Check-In',
 			subHeader: CheckInHelpers.friendlyTimestamp(
-				(<any>checkin!.checkInDateTime) as Timestamp
+				checkin!.checkInDateTime as any as Timestamp
 			),
 			message:
 				'This registration code was already used on the date/time specified. Unable to continue.',
@@ -147,7 +147,7 @@ export class QrModalComponent implements OnDestroy {
 		return alert.onDidDismiss();
 	}
 
-	public async cancel() {
+	public async cancel(): Promise<void> {
 		await this.modalController.dismiss(undefined, 'cancel');
 	}
 }

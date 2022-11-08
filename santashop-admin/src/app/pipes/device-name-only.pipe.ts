@@ -4,7 +4,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 	name: 'deviceNameOnly',
 })
 export class DeviceNameOnlyPipe implements PipeTransform {
-	transform(value: string): string {
+	public transform(value: string): string {
 		return value.split(' (')[0];
 	}
 }

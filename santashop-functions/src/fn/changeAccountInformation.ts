@@ -1,68 +1,75 @@
+import {
+	ChangeUserInfo,
+	COLLECTION_SCHEMA,
+} from '../../../santashop-models/src/public-api';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import { COLLECTION_SCHEMA, IChangeUserInfo } from '../../../santashop-models/src/lib/models';
+import { CallableContext } from 'firebase-functions/lib/common/providers/https';
+import { HttpsError } from 'firebase-functions/v1/auth';
 
 admin.initializeApp();
 
 export default async (
-  data: IChangeUserInfo,
-  context: CallableContext
+	data: ChangeUserInfo,
+	context: CallableContext
 ): Promise<boolean | HttpsError> => {
+	const uid = context.auth?.uid;
 
-  const uid = context.auth?.uid;
+	if (!uid) throw new HttpsError('not-found', 'uid null');
 
-  if (!uid)
-    throw new HttpsError('not-found', 'uid null');
+	if (!data || !data.firstName || !data.lastName || !data.zipCode)
+		throw new HttpsError('data-loss', 'missing request information');
 
-  if (!data || !data.firstName || !data.lastName || !data.zipCode)
-    throw new HttpsError('data-loss', 'missing request information');
+	await admin.auth().updateUser(uid, {
+		displayName: `${data.firstName} ${data.lastName}`,
+	});
 
-  await admin.auth().updateUser(uid, {
-      displayName: `${data.firstName} ${data.lastName}`
-  });
+	const batch = admin.firestore().batch();
 
-  const batch = admin.firestore().batch();
+	const userDocumentRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
 
-  const userDocumentRef = admin
-    .firestore()
-    .doc(`${COLLECTION_SCHEMA.users}/${uid}`);
+	batch.set(userDocumentRef, data, { merge: true });
 
-  batch.set(userDocumentRef, data, { merge: true });
+	const indexDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
 
-  const indexDocRef = admin
-    .firestore()
-    .doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
+	const indexDoc = {
+		firstName: data.firstName.toLowerCase(),
+		lastName: data.lastName.toLowerCase(),
+		zip: data.zipCode,
+	};
 
-  const indexDoc = {
-    firstName: data.firstName.toLowerCase(),
-    lastName: data.lastName.toLowerCase(),
-    zip: data.zipCode
-  };
+	batch.set(indexDocRef, indexDoc, { merge: true });
 
-  batch.set(indexDocRef, indexDoc, { merge: true });
+	const registrationDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 
-  const registrationDocRef = admin
-    .firestore()
-    .doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+	const registrationDoc = {
+		firstName: data.firstName,
+		lastName: data.lastName,
+		zipCode: data.zipCode,
+	};
 
-  const registrationDoc = {
-    firstName: data.firstName,
-    lastName: data.lastName,
-    zipCode: data.zipCode
-  };
+	batch.set(registrationDocRef, registrationDoc, { merge: true });
 
-  batch.set(registrationDocRef, registrationDoc, { merge: true });
-
-  return batch
-    .commit()
-    .then(() => true)
-    .catch((error: any) => {
-      console.error(`Error updating user document ${uid} with ${JSON.stringify(data)}`, error);
-      return new functions.https.HttpsError(
-        'internal',
-        'Error updating user document',
-        JSON.stringify(error)
-      );
-    });
+	return batch
+		.commit()
+		.then(() => true)
+		.catch((error: any) => {
+			console.error(
+				`Error updating user document ${uid} with ${JSON.stringify(
+					data
+				)}`,
+				error
+			);
+			return new functions.https.HttpsError(
+				'internal',
+				'Error updating user document',
+				JSON.stringify(error)
+			);
+		});
 };

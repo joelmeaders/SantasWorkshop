@@ -4,21 +4,21 @@ import { IonicModule } from '@ionic/angular';
 import { EventInformationPage } from './event-information.page';
 
 describe('EventInformationPage', () => {
-  let component: EventInformationPage;
-  let fixture: ComponentFixture<EventInformationPage>;
+	let component: EventInformationPage;
+	let fixture: ComponentFixture<EventInformationPage>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ EventInformationPage ],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents();
+	beforeEach(waitForAsync(() => {
+		TestBed.configureTestingModule({
+			declarations: [EventInformationPage],
+			imports: [IonicModule.forRoot()],
+		}).compileComponents();
 
-    fixture = TestBed.createComponent(EventInformationPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+		fixture = TestBed.createComponent(EventInformationPage);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	}));
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

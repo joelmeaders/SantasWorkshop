@@ -1,114 +1,128 @@
 <ion-content color="light">
-  <app-internal-header class="ion-hide-xl-down"></app-internal-header>
+	<ion-grid class="height-max es-mg-bottom-xxl">
+		<ion-row class="height-max">
+			<ion-col
+				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
+				size="auto"
+			>
+				<app-pre-registration-menu></app-pre-registration-menu>
+			</ion-col>
+			<ion-col
+				sizeXl="9"
+				sizeLg="12"
+				sizeMd="12"
+				sizeSm="12"
+				sizeXs="12"
+				size="12"
+			>
+				<ion-row class="ion-justify-content-center">
+					<ion-col sizeXs="12" sizeSm="7">
+						<ion-button
+							class="ion-no-padding even-ratio-button ion-margin"
+							color="white"
+							[routerLink]="['..']"
+						>
+							<ion-icon
+								slot="icon-only"
+								name="arrow-back-sharp"
+								class="even-ratio-button"
+							></ion-icon>
+						</ion-button>
 
-  <ion-grid class="height-max es-mg-bottom-xxl">
-    <ion-row class="height-max">
-      <ion-col
-        class="
-          side-menu
-          height-max
-          ion-hide-xl-down ion-no-padding ion-no-margin
-        "
-        size="auto"
-      >
-        <app-pre-registration-menu></app-pre-registration-menu>
-      </ion-col>
-      <ion-col
-        sizeXl="9"
-        sizeLg="12"
-        sizeMd="12"
-        sizeSm="12"
-        sizeXs="12"
-        size="12"
-      >
-        <ion-row class="ion-justify-content-center">
-          <ion-col sizeXs="12" sizeSm="7">
-            <ion-button
-              class="ion-no-padding even-ratio-button ion-margin"
-              color="white"
-              [routerLink]="['..']"
-            >
-              <ion-icon
-                slot="icon-only"
-                name="arrow-back-sharp"
-                class="even-ratio-button"
-              ></ion-icon>
-            </ion-button>
+						<div class="ion-padding es-mg-bottom-xxl">
+							<ion-item class="inset-ion-item-title" color="none">
+								<ion-card-title lines="full">
+									{{ "PROFILE.CHANGE_INFO" | translate }}
+								</ion-card-title>
+							</ion-item>
 
-            <div class="ion-padding es-mg-bottom-xxl">
-              <ion-item class="inset-ion-item-title" color="none">
-                <ion-card-title lines="full">
-                  {{ 'PROFILE.CHANGE_INFO' | translate }}
-                </ion-card-title>
-              </ion-item>
+							<div class="ion-margin ion-padding">
+								<p
+									innerHtml="{{
+										'PROFILE.CHANGE_INFO_TEXT' | translate
+									}}"
+								></p>
+							</div>
 
-              <div class="ion-margin ion-padding">
-                <p innerHtml="{{ 'PROFILE.CHANGE_INFO_TEXT' | translate }}">
-                </p>
-              </div>
+							<ion-card>
+								<ion-card-content>
+									<form [formGroup]="form" novalidate>
+										<ion-list>
+											<ion-item>
+												<ion-label color="xmasred">
+													{{ "SIGNUP.FIRST_NAME" |
+													translate }}
+												</ion-label>
+												<ion-input
+													#firstName
+													formControlName="firstName"
+													[debounce]="500"
+													autocomplete="given-name"
+													inputmode="text"
+													autofocus="true"
+												></ion-input>
+											</ion-item>
+											<core-control-errors
+												[control]="
+													form.controls.firstName
+												"
+											></core-control-errors>
 
-              <ion-card>
-                <ion-card-content>
+											<ion-item>
+												<ion-label color="xmasred">
+													{{ "SIGNUP.LAST_NAME" |
+													translate }}
+												</ion-label>
+												<ion-input
+													formControlName="lastName"
+													[debounce]="500"
+													autocomplete="family-name"
+													inputmode="text"
+												></ion-input>
+											</ion-item>
+											<core-control-errors
+												[control]="
+													form.controls.lastName
+												"
+											></core-control-errors>
 
-                  <form [formGroup]="form" novalidate>
-                    <ion-list>
-                      <ion-item>
-                        <ion-label color="xmasred"> {{ 'SIGNUP.FIRST_NAME' | translate }} </ion-label>
-                        <ion-input
-                          #firstName
-                          formControlName="firstName"
-                          [debounce]="500"
-                          autocomplete="given-name"
-                          inputmode="text"
-                          autofocus="true"
-                        ></ion-input>
-                      </ion-item>
-                      <app-control-errors
-                        [control]="form.controls.firstName"
-                      ></app-control-errors>
-      
-                      <ion-item>
-                        <ion-label color="xmasred"> {{ 'SIGNUP.LAST_NAME' | translate }} </ion-label>
-                        <ion-input
-                          formControlName="lastName"
-                          [debounce]="500"
-                          autocomplete="family-name"
-                          inputmode="text"
-                        ></ion-input>
-                      </ion-item>
-                      <app-control-errors
-                        [control]="form.controls.lastName"
-                      ></app-control-errors>
-      
-                      <ion-item>
-                        <ion-label color="xmasred"> {{ 'SIGNUP.ZIP_CODE' | translate }} </ion-label>
-                        <ion-input
-                          formControlName="zipCode"
-                          [debounce]="500"
-                          type="text"
-                          autocomplete="postal-code"
-                          inputmode="numeric"
-                          maxlength="5"
-                          minlength="5"
-                        ></ion-input>
-                      </ion-item>
-                      <app-control-errors
-                        [control]="form.controls.zipCode"
-                      ></app-control-errors>
-                    </ion-list>
-                  </form>
+											<ion-item>
+												<ion-label color="xmasred">
+													{{ "SIGNUP.ZIP_CODE" |
+													translate }}
+												</ion-label>
+												<ion-input
+													formControlName="zipCode"
+													[debounce]="500"
+													type="text"
+													autocomplete="postal-code"
+													inputmode="numeric"
+													maxlength="5"
+													minlength="5"
+												></ion-input>
+											</ion-item>
+											<core-control-errors
+												[control]="
+													form.controls.zipCode
+												"
+											></core-control-errors>
+										</ion-list>
+									</form>
 
-                  <ion-button color="xmasred" class="ion-float-end ion-margin-bottom" (click)="updateProfile()"  [disabled]="!form.valid">
-                    {{ 'PROFILE.SAVE_CHANGES' | translate }}
-                  </ion-button>
-
-                </ion-card-content>
-              </ion-card>
-              
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+									<ion-button
+										color="xmasred"
+										class="ion-float-end ion-margin-bottom"
+										(click)="updateProfile()"
+										[disabled]="!form.valid"
+									>
+										{{ "PROFILE.SAVE_CHANGES" | translate }}
+									</ion-button>
+								</ion-card-content>
+							</ion-card>
+						</div>
+					</ion-col>
+				</ion-row>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

@@ -6,44 +6,24 @@ import { AppLetDirective } from './directives/let.directive';
 import { ControlErrorsComponent } from './components/control-errors/control-errors.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ChildInitialsPipe } from './pipes/child-initials.pipe';
 
 const modules = [
-  CommonModule,
-  IonicModule,
-  ReactiveFormsModule,
-  TranslateModule
+	CommonModule,
+	IonicModule,
+	ReactiveFormsModule,
+	TranslateModule,
 ];
 
-const directives = [
-  AppLetDirective
-];
+const directives = [AppLetDirective];
 
-const pipes = [
-  NiceFormErrorPipe,
-  ChildInitialsPipe,
-];
+const pipes = [NiceFormErrorPipe];
 
-const components = [
-  ControlErrorsComponent,
-]
+const components = [ControlErrorsComponent];
+
 @NgModule({
-  imports: [
-    ...modules
-  ],
-  declarations: [
-    ...directives,
-    ...pipes,
-    ...components,
-  ],
-  exports: [
-    ...modules,
-    ...directives,
-    ...pipes,
-    ...components,
-  ],
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA
-  ]
+	imports: [...modules],
+	declarations: [...directives, ...pipes, ...components],
+	exports: [...modules, ...directives, ...pipes, ...components],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class CoreModule { }
+export class CoreModule {}

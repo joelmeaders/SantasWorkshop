@@ -1,81 +1,100 @@
 <ion-content color="light">
-  <app-internal-header class="ion-hide-xl-down"></app-internal-header>
+	<ion-grid class="height-max es-mg-bottom-xxl">
+		<ion-row class="height-max">
+			<ion-col size="12">
+				<ion-row class="ion-justify-content-center">
+					<ion-col sizeXs="12" sizeSm="7">
+						<ion-button
+							class="ion-no-padding even-ratio-button ion-margin"
+							color="white"
+							[routerLink]="['..']"
+						>
+							<ion-icon
+								slot="icon-only"
+								name="arrow-back-sharp"
+								class="even-ratio-button"
+							></ion-icon>
+						</ion-button>
 
-  <ion-grid class="height-max es-mg-bottom-xxl">
-    <ion-row class="height-max">
-      <ion-col size="12">
-        <ion-row class="ion-justify-content-center">
-          <ion-col sizeXs="12" sizeSm="7">
-            <ion-button
-              class="ion-no-padding even-ratio-button ion-margin"
-              color="white"
-              [routerLink]="['..']"
-            >
-              <ion-icon
-                slot="icon-only"
-                name="arrow-back-sharp"
-                class="even-ratio-button"
-              ></ion-icon>
-            </ion-button>
+						<div class="full-width-alert ion-text-center">
+							{{ "EVENT_INFO.FACEMASK" | translate }}
+						</div>
 
-            <div class="full-width-alert ion-text-center">
-              {{ 'EVENT_INFO.FACEMASK' | translate }}
-            </div>
+						<div class="ion-padding es-mg-bottom-xxl">
+							<ion-item class="inset-ion-item-title" color="none">
+								<ion-card-title lines="full">
+									{{ "EVENT_INFO.EVENT_INFO_TITLE" | translate
+									}}
+								</ion-card-title>
+							</ion-item>
 
-            <div class="ion-padding es-mg-bottom-xxl">
-              <ion-item class="inset-ion-item-title" color="none">
-                <ion-card-title lines="full">
-                  {{ 'EVENT_INFO.EVENT_INFO_TITLE' | translate }}
-                </ion-card-title>
-              </ion-item>
+							<div class="ion-margin">
+								<h2>December 9, 10, 12, 13 at 10am - 3pm</h2>
 
-              <div class="ion-margin">
+								<strong>
+									{{ "EVENT_INFO.LOCATION" | translate }}
+								</strong>
 
-                <h2>December 10, 11, 13, 14, 10am - 3pm</h2>
+								<address>
+									{{ "EVENT_INFO.EVENT_ADDRESS1" | translate
+									}} <br />
+									{{ "EVENT_INFO.EVENT_ADDRESS2" | translate
+									}}
+								</address>
 
-                <p>
-                  {{ 'EVENT_INFO.LOCATION' | translate }}
+								<h2>
+									{{ "EVENT_INFO.WHAT_TO_BRING" | translate }}
+								</h2>
 
-                  <br />
-                  <br />
+								<p>
+									{{ "EVENT_INFO.WHAT_TO_BRING_TEXT" |
+									translate }}
+								</p>
 
-                  {{ "EVENT_INFO.ENTRY_INSTRUCTIONS" | translate }}
+								<ul>
+									<li>{{ "EVENT_INFO.ID" | translate }}</li>
+									<li>
+										{{ "EVENT_INFO.QR_CODE" | translate }}
+									</li>
+									<li>{{ "EVENT_INFO.AGES" | translate }}</li>
+								</ul>
 
-                  
-                </p>
+								<h2>
+									{{ "EVENT_INFO.WHAT_TO_EXPECT" | translate
+									}}
+								</h2>
 
-                <h2> {{ 'EVENT_INFO.WHAT_TO_BRING' | translate }} </h2>
+								<p>
+									{{ "EVENT_INFO.ARRIVE_ON_TIME" | translate
+									}}
+								</p>
 
-                <p>
-                  {{ 'EVENT_INFO.WHAT_TO_BRING_TEXT' | translate }}
-                </p>
+								<p>
+									{{ "EVENT_INFO.CHECK_WEBSITE" | translate }}
+								</p>
 
-                <ul>
-                  <li>{{ 'EVENT_INFO.ID' | translate }}</li>
-                  <li>{{ 'EVENT_INFO.QR_CODE' | translate }}</li>
-                  <li>{{ 'EVENT_INFO.AGES' | translate }}</li>
-                </ul>
+								<h2>
+									{{ "EVENT_INFO.ENTRY_INSTRUCTIONS" |
+									translate }}
+								</h2>
 
-                <h2> {{ 'EVENT_INFO.WHAT_TO_EXPECT' | translate }} </h2>
+								<p>{{ "EVENT_INFO.DIRECTIONS" | translate }}</p>
 
-                <p>
-                  {{ 'EVENT_INFO.ARRIVE_ON_TIME' | translate }}
-                </p>
-
-                <p>
-                  {{ 'EVENT_INFO.CHECK_WEBSITE' | translate }}
-                </p>
-
-                <h2> {{ 'EVENT_INFO.ENTRY_INSTRUCTIONS' | translate }} </h2>
-
-                <p>
-                  {{ 'EVENT_INFO.DIRECTIONS' | translate }}
-                </p>
-              </div>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+								<h2>
+									{{ "EVENT_INFO.FAQ_TITLE" | translate }}
+								</h2>
+								<ion-button
+									href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}"
+									target="_new"
+								>
+									{{ "EVENT_INFO.FAQ_BUTTON" | translate }}
+									(FAQ)
+								</ion-button>
+							</div>
+						</div>
+					</ion-col>
+				</ion-row>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

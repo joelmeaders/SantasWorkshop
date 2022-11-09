@@ -1,38 +1,36 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
 import { AlertController } from '@ionic/angular';
 import { IError } from '@models/*';
+import { AnalyticsWrapper } from './_analytics-wrapper';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root',
 })
 export class ErrorHandlerService {
+	constructor(
+		private readonly analyticsWrapper: AnalyticsWrapper,
+		private readonly alertController: AlertController
+	) {}
 
-  constructor(
-    private readonly alertController: AlertController,
-    private readonly analytics: AngularFireAnalytics
-  ) { }
+	public async handleError(
+		error: IError,
+		showAlert: boolean = true
+	): Promise<any> {
+		const alert = await this.alertController.create({
+			header: 'Error Encountered',
+			subHeader: `Code: ${error.code}`,
+			message: error.details,
+			buttons: ['Ok'],
+		});
 
-  public async handleError(error: IError, showAlert: boolean = true): Promise<any> {
+		if (showAlert) await alert.present();
 
-    const alert = await this.alertController.create({
-      header: 'Error Encountered',
-      subHeader: `Code: ${error.code}`,
-      message: error.details,
-      buttons: ['Ok']
-    });
+		try {
+			this.analyticsWrapper.logErrorEvent(error.code, error.message);
+		} catch {
+			// Do nothing
+		}
 
-    if (showAlert)
-      await alert.present();
-
-    try {
-      await this.analytics.logEvent(error.code, { message: error.message })
-    }
-    catch {
-      // Do nothing
-    }
-
-    if (showAlert)
-      return alert.onDidDismiss();
-  }
+		if (showAlert) return alert.onDidDismiss();
+	}
 }

@@ -16,6 +16,9 @@ $RECYCLE.BIN/
 **.log
 **log.txt
 **npm-debug.log*
+.eslintcache
+
+/.angular/cache
 
 **/.idea
 **/.ionic
@@ -30,6 +33,7 @@ $RECYCLE.BIN/
 **/plugins
 **/www
 **firebase.environment.json
+**firebase.environment.test.json
 
 .firebase/**
 environment.test.ts

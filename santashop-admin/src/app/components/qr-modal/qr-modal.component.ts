@@ -1,8 +1,20 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { ICheckIn, IError } from '@models/*';
+import {
+	CheckIn,
+	IError,
+} from '../../../../../santashop-models/src/public-api';
 import { BehaviorSubject, from, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, mergeMap, publishReplay, refCount, take, takeUntil, tap } from 'rxjs/operators';
+import {
+	distinctUntilChanged,
+	filter,
+	mergeMap,
+	publishReplay,
+	refCount,
+	take,
+	takeUntil,
+	tap,
+} from 'rxjs/operators';
 import { CheckInHelpers } from '../../helpers/checkin-helpers';
 import { CheckInService } from '../../services/check-in.service';
 import { Timestamp } from '@firebase/firestore';
@@ -10,132 +22,132 @@ import { RegistrationContextService } from '../../services/registration-context.
 import { ErrorHandlerService } from '@core/*';
 
 @Component({
-  selector: 'app-qr-modal',
-  templateUrl: './qr-modal.component.html',
-  styleUrls: ['./qr-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+	selector: 'app-qr-modal',
+	templateUrl: './qr-modal.component.html',
+	styleUrls: ['./qr-modal.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QrModalComponent implements OnDestroy {
+	private readonly $destroy = new Subject<void>();
+	public readonly $loading = new BehaviorSubject<boolean>(true);
 
-  private readonly $destroy = new Subject<void>();
-  public readonly $loading = new BehaviorSubject<boolean>(true);
+	public friendlyTimestamp = CheckInHelpers.friendlyTimestamp;
+	public cardColor = CheckInHelpers.childColor;
 
-  public friendlyTimestamp = CheckInHelpers.friendlyTimestamp;
-  public cardColor = CheckInHelpers.childColor;
+	public readonly $registration = this.registrationContext.registration$.pipe(
+		takeUntil(this.$destroy),
+		publishReplay(1),
+		refCount()
+	);
 
-  public readonly $registration = this.registrationContext.registration$.pipe(
-    takeUntil(this.$destroy),
-    publishReplay(1),
-    refCount()
-  );
+	public readonly $existingCheckin = this.registrationContext.checkin$.pipe(
+		takeUntil(this.$destroy),
+		tap(() => this.$loading.next(false)),
+		publishReplay(1),
+		refCount()
+	);
 
-  public readonly $existingCheckin = this.registrationContext.checkin$.pipe(
-    takeUntil(this.$destroy),
-    tap(() => this.$loading.next(false)),
-    publishReplay(1),
-    refCount()
-  );
+	private readonly existingAlertSubcription = this.$existingCheckin
+		.pipe(
+			takeUntil(this.$destroy),
+			distinctUntilChanged(),
+			filter((response) => !!response?.customerId),
+			mergeMap((response) => from(this.alreadyCheckedIn(response)))
+		)
+		.subscribe();
 
-  private readonly existingAlertSubcription = this.$existingCheckin.pipe(
-    takeUntil(this.$destroy),
-    distinctUntilChanged(),
-    filter(response => !!response?.customerId),
-    mergeMap(response => from(this.alreadyCheckedIn(response))),
-  ).subscribe();
+	constructor(
+		private readonly registrationContext: RegistrationContextService,
+		private readonly modalController: ModalController,
+		private readonly alertController: AlertController,
+		private readonly checkInService: CheckInService,
+		private readonly errorHandler: ErrorHandlerService
+	) {}
 
-  constructor(
-    private readonly registrationContext: RegistrationContextService,
-    private readonly modalController: ModalController,
-    private readonly alertController: AlertController,
-    private readonly checkInService: CheckInService,
-    private readonly errorHandler: ErrorHandlerService,
-  ) { }
+	public ngOnDestroy(): void {
+		this.existingAlertSubcription.unsubscribe();
+		this.$destroy.next();
+		this.$destroy.complete();
+	}
 
-  ngOnDestroy() {
-    this.existingAlertSubcription.unsubscribe();
-    this.$destroy.next();
-    this.$destroy.complete();
-  }
+	public async editRegistration(): Promise<void> {
+		await this.modalController.dismiss(undefined, 'edit');
+	}
 
-  public async editRegistration() {
-    await this.modalController.dismiss(undefined, 'edit')
-  }
+	public async checkIn(): Promise<void> {
+		const alert = await this.confirmCheckInAlert();
 
-  public async checkIn() {
+		await alert.present();
+		const response = await alert.onDidDismiss().then((res) => res.role);
 
-    const alert = await this.confirmCheckInAlert();
+		if (response !== 'confirm') {
+			return;
+		}
 
-    await alert.present();
-    const response = await alert.onDidDismiss().then(res => res.role);
+		const registration = await this.$registration.pipe(take(1)).toPromise();
 
-    if (response !== 'confirm') {
-      return;
-    }
+		if (!registration) {
+			const error: IError = {
+				code: 'no-reg',
+				message: 'No registration is loaded',
+			};
+			await this.errorHandler.handleError(error);
+			return;
+		}
 
-    const registration = await this.$registration.pipe(take(1)).toPromise();
+		try {
+			this.$destroy.next();
+			this.registrationContext.reset();
+			await this.checkInService.checkIn(registration, false);
+		} catch (error) {
+			await this.errorHandler.handleError(error as IError);
+		}
 
-    if (!registration) {
-      const error: IError = {
-        code: 'no-reg',
-        message: 'No registration is loaded'
-      };
-      await this.errorHandler.handleError(error)
-      return;
-    }
+		await this.modalController.dismiss(undefined, 'checkin');
+	}
 
-    try {
-      this.$destroy.next();
-      this.registrationContext.reset();
-      await this.checkInService.checkIn(registration, false);
-    }
-    catch (error) {
-      await this.errorHandler.handleError(error as IError);
-    }
+	private async confirmCheckInAlert(): Promise<HTMLIonAlertElement> {
+		return this.alertController.create({
+			header: 'Confirm Action',
+			subHeader: 'A check-in cannot be undone',
+			message:
+				'Are you sure there are no changes? Once checked in, the customer code is no longer valid',
+			buttons: [
+				{
+					text: 'Cancel',
+					role: 'cancel',
+				},
+				{
+					text: 'Confirm',
+					role: 'confirm',
+				},
+			],
+		});
+	}
 
-    await this.modalController.dismiss(undefined, 'checkin');
-  }
+	private async alreadyCheckedIn(checkin?: CheckIn): Promise<any> {
+		if (!checkin) return;
 
-  private async confirmCheckInAlert() {
+		const alert = await this.alertController.create({
+			header: 'Existing Check-In',
+			subHeader: CheckInHelpers.friendlyTimestamp(
+				checkin!.checkInDateTime as any as Timestamp
+			),
+			message:
+				'This registration code was already used on the date/time specified. Unable to continue.',
+			buttons: [
+				{
+					text: 'Ok',
+				},
+			],
+		});
 
-    return this.alertController.create({
-      header: 'Confirm Action',
-      subHeader: 'A check-in cannot be undone',
-      message: 'Are you sure there are no changes? Once checked in, the customer code is no longer valid',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-        }, {
-          text: 'Confirm',
-          role: 'confirm'
-        }
-      ]
-    });
-  }
+		await alert.present();
 
-  private async alreadyCheckedIn(checkin?: ICheckIn) {
+		return alert.onDidDismiss();
+	}
 
-    if (!checkin)
-      return;
-
-    const alert = await this.alertController.create({
-      header: 'Existing Check-In',
-      subHeader: CheckInHelpers.friendlyTimestamp(<any>checkin!.checkInDateTime as Timestamp),
-      message: 'This registration code was already used on the date/time specified. Unable to continue.',
-      buttons: [
-        {
-          text: 'Ok',
-        }
-      ]
-    });
-
-    await alert.present();
-
-    return alert.onDidDismiss();
-  }
-
-  public async cancel() {
-    await this.modalController.dismiss(undefined, 'cancel')
-  }
-
+	public async cancel(): Promise<void> {
+		await this.modalController.dismiss(undefined, 'cancel');
+	}
 }

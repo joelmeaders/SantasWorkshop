@@ -1,27 +1,25 @@
 ion-menu-button {
-  position: relative;
-  top: 0px;
-  left: 0px;
-  width: fit-content;
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: fit-content;
 }
 
 :root {
-
-  /* Custom tab bar */
-  --tab-background: rgb(251, 251, 251);
-  --tab-color: rgb(153, 153, 153);
-  --tab-color-selected: black;
+	/* Custom tab bar */
+	--tab-background: rgb(251, 251, 251);
+	--tab-color: rgb(153, 153, 153);
+	--tab-color-selected: black;
 }
 
-
-ion-tabs{
+ion-tabs {
 	ion-tab-bar {
 		position: absolute;
 		bottom: 0;
-		left:0; 
-    right: 0;
+		left: 0;
+		right: 0;
 		width: 100%;
-		&:after{
+		&:after {
 			content: " ";
 			width: 100%;
 			bottom: 0;
@@ -30,7 +28,7 @@ ion-tabs{
 			position: absolute;
 		}
 		ion-tab-button {
-      --color-selected: var(--ion-color-xmasred);
+			--color-selected: var(--ion-color-xmasred);
 		}
 	}
 }

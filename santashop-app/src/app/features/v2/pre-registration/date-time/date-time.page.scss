@@ -1,4 +1,16 @@
 .small-padding {
-  --padding-start: 8px;
-  --padding-end: 8px;
+	--padding-start: 8px;
+	--padding-end: 8px;
+}
+
+.skeleton-datetime {
+	line-height: 22px;
+	width: 240px;
+	--border-radius: 20px;
+}
+
+.skeleton-schedule {
+	line-height: 22px;
+	width: 200px;
+	--border-radius: 20px;
 }

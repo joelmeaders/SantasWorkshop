@@ -1,167 +1,167 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import {
-  AgeGroup,
-  IAgeGroupBreakdown,
-  IDateTimeCount,
-  IGenderAgeStats,
-  IRegistration,
-  IZipCodeCount,
-} from '../../../santashop-models/src/lib/models';
+	AgeGroup,
+	AgeGroupBreakdown,
+	DateTimeCount,
+	GenderAgeStats,
+	Registration,
+	ZipCodeCount,
+} from '../../../santashop-models/src/public-api';
 
 admin.initializeApp();
 
 export default async () => {
-  const registrationsSnapshots = await registrationQuery().get();
-  const registrations: IRegistration[] = [];
+	const registrationsSnapshots = await registrationQuery().get();
+	const registrations: Registration[] = [];
 
-  registrationsSnapshots.forEach((doc) => {
-    const registration = {
-      ...doc.data(),
-    } as IRegistration;
-    registrations.push(registration);
-  });
+	registrationsSnapshots.forEach((doc) => {
+		const registration = {
+			...doc.data(),
+		} as Registration;
+		registrations.push(registration);
+	});
 
-  const completedRegistrations = registrations.length;
+	const completedRegistrations = registrations.length;
 
-  // TODO: Read stats record instead of making new one
-  const stats: any = {
-    completedRegistrations: completedRegistrations,
-    dateTimeCount: getDateTimeStats(registrations),
-    zipCodeCount: getZipCodeStats(registrations),
-  };
+	// TODO: Read stats record instead of making new one
+	const stats: any = {
+		completedRegistrations: completedRegistrations,
+		dateTimeCount: getDateTimeStats(registrations),
+		zipCodeCount: getZipCodeStats(registrations),
+	};
 
-  return admin
-    .firestore()
-    .collection('stats')
-    .doc('registration-2021')
-    .set(stats, { merge: false });
+	return admin
+		.firestore()
+		.collection('stats')
+		.doc('registration-2022')
+		.set(stats, { merge: false });
 };
 
-function getDateTimeStats(registrations: IRegistration[]): IDateTimeCount[] {
-  const stats: IDateTimeCount[] = [];
+function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
+	const stats: DateTimeCount[] = [];
 
-  const getIndex = (dateTime: Date) =>
-    stats.findIndex((e) => dateTime.getTime() == e.dateTime.getTime());
+	const getIndex = (dateTime: Date) =>
+		stats.findIndex((e) => dateTime.getTime() == e.dateTime.getTime());
 
-  registrations.forEach((registration) => {
-    const timestamp: admin.firestore.Timestamp = registration.dateTimeSlot!
-      .dateTime! as any;
-    const dateTime = timestamp.toDate();
-    const index = getIndex(dateTime);
-    let stat: IDateTimeCount;
+	registrations.forEach((registration) => {
+		const timestamp: admin.firestore.Timestamp = registration.dateTimeSlot!
+			.dateTime! as any;
+		const dateTime = timestamp.toDate();
+		const index = getIndex(dateTime);
+		let stat: DateTimeCount;
 
-    if (index === -1) {
-      stat = {
-        dateTime: dateTime,
-        count: 1,
-        childCount: registration.children!.length,
-        stats: {
-          infants: {
-            total: 0,
-            age02: 0,
-            age35: 0,
-            age68: 0,
-            age911: 0,
-          },
-          girls: {
-            total: 0,
-            age02: 0,
-            age35: 0,
-            age68: 0,
-            age911: 0,
-          },
-          boys: {
-            total: 0,
-            age02: 0,
-            age35: 0,
-            age68: 0,
-            age911: 0,
-          },
-        } as IGenderAgeStats,
-      } as IDateTimeCount;
-      setChildGenderStats(stat.stats, registration);
-      stats.push(stat);
-    } else {
-      stats[index].count += 1;
-      stats[index].childCount += registration.children!.length;
-      setChildGenderStats(stats[index].stats, registration);
-    }
-  });
+		if (index === -1) {
+			stat = {
+				dateTime: dateTime,
+				count: 1,
+				childCount: registration.children!.length,
+				stats: {
+					infants: {
+						total: 0,
+						age02: 0,
+						age35: 0,
+						age68: 0,
+						age911: 0,
+					},
+					girls: {
+						total: 0,
+						age02: 0,
+						age35: 0,
+						age68: 0,
+						age911: 0,
+					},
+					boys: {
+						total: 0,
+						age02: 0,
+						age35: 0,
+						age68: 0,
+						age911: 0,
+					},
+				} as GenderAgeStats,
+			} as DateTimeCount;
+			setChildGenderStats(stat.stats, registration);
+			stats.push(stat);
+		} else {
+			stats[index].count += 1;
+			stats[index].childCount += registration.children!.length;
+			setChildGenderStats(stats[index].stats, registration);
+		}
+	});
 
-  return stats;
+	return stats;
 }
 
 function setChildGenderStats(
-  stats: IGenderAgeStats,
-  registration: IRegistration
+	stats: GenderAgeStats,
+	registration: Registration
 ): void {
-  registration.children?.forEach((child) => {
-    setChildAgeStatsByGender(stats[child.toyType!], child.ageGroup!);
-  });
+	registration.children?.forEach((child) => {
+		setChildAgeStatsByGender(stats[child.toyType!], child.ageGroup!);
+	});
 }
 
 function setChildAgeStatsByGender(
-  stat: IAgeGroupBreakdown,
-  ageGroup: AgeGroup
+	stat: AgeGroupBreakdown,
+	ageGroup: AgeGroup
 ): void {
+	if (!stat) return;
 
-  if (!stat) return;
+	stat.total += 1;
 
-  stat.total += 1;
+	switch (ageGroup) {
+		case AgeGroup.age02:
+			stat.age02 += 1;
+			break;
 
-  switch (ageGroup) {
-    case AgeGroup.age02:
-      stat.age02 += 1;
-      break;
+		case AgeGroup.age35:
+			stat.age35 += 1;
+			break;
 
-    case AgeGroup.age35:
-      stat.age35 += 1;
-      break;
+		case AgeGroup.age68:
+			stat.age68 += 1;
+			break;
 
-    case AgeGroup.age68:
-      stat.age68 += 1;
-      break;
-
-    case AgeGroup.age911:
-      stat.age911 += 1;
-      break;
-  }
+		case AgeGroup.age911:
+			stat.age911 += 1;
+			break;
+	}
 }
 
-function getZipCodeStats(registrations: IRegistration[]): IZipCodeCount[] {
-  const stats: IZipCodeCount[] = [];
+function getZipCodeStats(registrations: Registration[]): ZipCodeCount[] {
+	const stats: ZipCodeCount[] = [];
 
-  const getIndex = (zipCode: number) =>
-    stats.findIndex((e) => zipCode === e.zip);
+	const getIndex = (zipCode: number) =>
+		stats.findIndex((e) => zipCode === e.zip);
 
-  registrations.forEach((registration) => {
-    const zipString = registration.zipCode!.toString().substr(0, 5);
-    const zipCode = Number.parseInt(zipString);
-    const index = getIndex(zipCode);
-    let stat: IZipCodeCount;
+	registrations.forEach((registration) => {
+		const zipString = registration.zipCode!.toString().substr(0, 5);
+		const zipCode = Number.parseInt(zipString);
+		const index = getIndex(zipCode);
+		let stat: ZipCodeCount;
 
-    if (index === -1) {
-      stat = {
-        zip: zipCode,
-        count: 1,
-        childCount: registration.children!.length,
-      } as IZipCodeCount;
-      stats.push(stat);
-    } else {
-      stats[index].count += 1;
-      stats[index].childCount += registration.children!.length;
-    }
-  });
+		if (index === -1) {
+			stat = {
+				zip: zipCode,
+				count: 1,
+				childCount: registration.children!.length,
+			} as ZipCodeCount;
+			stats.push(stat);
+		} else {
+			stats[index].count += 1;
+			stats[index].childCount += registration.children!.length;
+		}
+	});
 
-  return stats;
+	return stats;
 }
 
 const registrationQuery = () =>
-  admin
-    .firestore()
-    .collection('registrations')
-    .where('programYear', '==', 2021)
-    .where('registrationSubmittedOn', '!=', '');
+	admin
+		.firestore()
+		.collection('registrations')
+		.where('programYear', '==', 2022)
+		.where('registrationSubmittedOn', '!=', '');
 // .where('includedInRegistrationStats', '==', false);
 
 // DATE

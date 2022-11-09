@@ -1,21 +1,27 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "outDir": "dist",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017",
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true
-  },
-  "compileOnSave": true,
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "dist/**"
-  ]
+	"compilerOptions": {
+		"baseUrl": "./",
+		"rootDir": "./",
+		"module": "commonjs",
+		"noEmit": false,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"outDir": "dist",
+		"sourceMap": true,
+		"strict": true,
+		"target": "es2017",
+		"declaration": true,
+    	"declarationMap": true,
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true,
+		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			"@models/*": ["../santashop-models/src", "../dist/santashop-models/"]
+		},
+	},
+	"compileOnSave": true,
+	"references": [
+		{ "path": "../santashop-models/tsconfig.lib.json" }
+	],
+	"exclude": ["dist/"]
 }

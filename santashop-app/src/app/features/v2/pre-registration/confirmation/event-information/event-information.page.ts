@@ -1,15 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'app-event-information',
-  templateUrl: './event-information.page.html',
-  styleUrls: ['./event-information.page.css'],
+	selector: 'app-event-information',
+	templateUrl: './event-information.page.html',
+	styleUrls: ['./event-information.page.css'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EventInformationPage implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class EventInformationPage {}

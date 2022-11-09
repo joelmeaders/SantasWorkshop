@@ -1,0 +1,80 @@
+<ion-card class="ion-no-padding ion-no-margin es-pd-bottom-xxl">
+	<ion-card-header>
+		<ion-card-title>
+			{{ "REFERRAL.REFERRED_BY" | translate }}
+		</ion-card-title>
+	</ion-card-header>
+	<ion-card-content>
+		<ion-list *ngIf="(referralChoice$ | async) === undefined">
+			<ion-searchbar
+				(ionChange)="filter($event)"
+				animated="true"
+				placeholder="{{ 'REFERRAL.SEARCH_PLACEHOLDER' | translate }}"
+			></ion-searchbar>
+
+			<ion-item-group>
+				<ion-item-divider color="light" disabled>
+					<ion-label> Common </ion-label>
+				</ion-item-divider>
+				<ng-container
+					*ngFor="let ref of referrals$ | async; let i = index"
+				>
+					<ion-item-divider
+						*ngIf="ref === '----------'; else agency"
+						disabled
+						color="light"
+					>
+						<ion-label>
+							{{ i < 10 ? "Alphabetical" : "" }}
+						</ion-label>
+					</ion-item-divider>
+					<ng-template #agency>
+						<ion-item
+							button
+							detail
+							lines="full"
+							(click)="setChoice(ref)"
+							[disabled]="ref === '----------'"
+						>
+							<ion-label class="ref-choices">{{ ref }}</ion-label>
+						</ion-item>
+					</ng-template>
+				</ng-container>
+			</ion-item-group>
+		</ion-list>
+
+		<ion-item-group *ngIf="referralChoice$ | async as choice">
+			<ion-item>
+				<ion-label position="stacked" class="ref-choice">
+					{{ "REFERRAL.YOU_SELECTED" | translate }}
+				</ion-label>
+				<ion-text class="ref-choice"> {{ choice }} </ion-text>
+			</ion-item>
+			<ion-item *ngIf="choice === 'Other'" lines="none">
+				<ion-label position="stacked" class="ref-choice">
+					Type name of referral:
+				</ion-label>
+				<ion-input
+					#otherInput
+					class="other-input"
+					maxlength="20"
+					minlength="3"
+				></ion-input>
+			</ion-item>
+
+			<div class="ion-padding-top buttons">
+				<ion-button
+					slot="start"
+					size="default"
+					color="danger"
+					(click)="setChoice()"
+				>
+					{{ "COMMON.RESET" | translate }}
+				</ion-button>
+				<ion-button slot="end" size="default" (click)="submit()">
+					{{ "COMMON.SAVE_CHOICE" | translate }}
+				</ion-button>
+			</div>
+		</ion-item-group>
+	</ion-card-content>
+</ion-card>

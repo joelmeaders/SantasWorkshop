@@ -1,10 +1,14 @@
 .logo {
-  max-width: 350px;
-  width: 60%;
-  height: auto;
+	max-width: 350px;
+	width: 60%;
+	height: auto;
 }
 
-.button-text-padding {
-  padding-left: 80px;
-  padding-right: 80px;
+ion-button .custom-button {
+	font-family: brandon-grotesque, sans-serif;
+	font-size: 1.2em;
+}
+
+p {
+	margin-block-end: 0.5em;
 }

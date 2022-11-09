@@ -1,32 +1,32 @@
 import { chain } from 'underscore';
 import { Timestamp } from '@firebase/firestore';
 import { format } from 'date-fns';
-import { IChild, ToyType } from '@models/*';
+import { Child, ToyType } from '../../../../santashop-models/src/public-api';
 
 export abstract class CheckInHelpers {
+	public static sortChildren(
+		children: Child | Partial<Child>[]
+	): Partial<Child>[] {
+		return chain(children).sortBy('ageGroup').value();
+	}
 
-  public static sortChildren(children: IChild | Partial<IChild>[]) {
-    return chain(children).sortBy('ageGroup').value();
-  }
+	public static childColor(value: ToyType): string | undefined {
+		switch (value) {
+			case ToyType.boy:
+				return 'boy';
 
-  public static childColor(value: ToyType): string | undefined {
+			case ToyType.girl:
+				return 'girl';
 
-    switch (value) {
-      case ToyType.boy:
-        return 'boy';
+			case ToyType.infant:
+				return 'infant';
 
-      case ToyType.girl:
-        return 'girl';
+			default:
+				return undefined;
+		}
+	}
 
-      case ToyType.infant:
-        return 'infant';
-
-      default: 
-        return undefined
-    }
-  }
-
-  public static friendlyTimestamp(timestamp: Timestamp | any): string {
-    return format(timestamp.toDate(), 'MMM dd, YYY h:mm a');
-  }
+	public static friendlyTimestamp(timestamp: Timestamp | any): string {
+		return format(timestamp.toDate(), 'MMM dd, YYY h:mm a');
+	}
 }

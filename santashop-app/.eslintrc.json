@@ -1,45 +1,14 @@
 {
-  "extends": "../.eslintrc.json",
-  "ignorePatterns": [
-    "!**/*"
-  ],
-  "overrides": [
-    {
-      "files": [
-        "*.ts"
-      ],
-      "parserOptions": {
-        "project": [
-          "santashop-app/tsconfig.app.json",
-          "santashop-app/tsconfig.spec.json",
-          // "santashop-app/e2e/tsconfig.json"
-        ],
-        "createDefaultProgram": true
-      },
-      "rules": {
-        "@angular-eslint/component-selector": [
-          "error",
-          {
-            "type": "element",
-            "prefix": "app",
-            "style": "kebab-case"
-          }
-        ],
-        "@angular-eslint/directive-selector": [
-          "warn",
-          {
-            "type": "attribute",
-            "prefix": "app",
-            "style": "camelCase"
-          }
-        ]
-      }
-    },
-    {
-      "files": [
-        "*.html"
-      ],
-      "rules": {}
-    }
-  ]
+	"extends": "../.eslintrc.json",
+	"overrides": [
+		{
+			"files": ["*.ts"],
+			"parserOptions": {
+				"project": [
+					"santashop-app/tsconfig.app.json",
+					"santashop-app/tsconfig.spec.json"
+				]
+			}
+		}
+	]
 }

@@ -1,11 +1,11 @@
 import config from '../../../package.json';
-import firebaseConfigDev from '../../../firebase.environment.json';
+import firebaseConfigDev from '../../../firebase.environment.test.json';
 
 export const environment = {
-  production: false,
-  label: 'DEV',
-  name: config.name,
-  version: config.version
+	production: false,
+	label: 'DEV',
+	name: config.name,
+	version: config.version,
 };
 
 export const firebaseConfig = { ...firebaseConfigDev };

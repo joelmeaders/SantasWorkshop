@@ -1,111 +1,99 @@
 <ion-content color="light">
-  <ion-header class="ion-no-border">
-    <ion-toolbar color="none">
-      <app-language-toggle
-        slot="end"
-        class="ion-padding-end"
-      ></app-language-toggle>
-    </ion-toolbar>
-  </ion-header>
+	<ion-grid fixed class="ion-margin-top ion-padding-top">
+		<ion-row>
+			<ion-col class="ion-text-center">
+				<img
+					src="assets/DSCS-Santa-Body_Red.png"
+					class="logo"
+					alt="logo with santa claus"
+				/>
+			</ion-col>
+		</ion-row>
 
-  <ion-grid fixed>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <img
-          src="assets/DSCS-Santa-Body_Red.png"
-          class="logo"
-          alt="logo with santa claus"
-        />
-      </ion-col>
-    </ion-row>
+		<ion-row class="ion-padding-bottom">
+			<ion-col size="12" class="ion-text-center">
+				<app-language-toggle></app-language-toggle>
+			</ion-col>
+			<ion-col class="ion-text-center es-mg-top-xl">
+				<h1>
+					<strong
+						innerHtml="{{ 'HOME.WELCOME_MESSAGE' | translate }}"
+					></strong>
+				</h1>
+			</ion-col>
+		</ion-row>
 
-    <ion-row class="ion-padding-bottom">
-      <ion-col class="ion-text-center">
-        <ion-title color="xmasred">
-          <strong innerHtml="{{ 'HOME.WELCOME_MESSAGE' | translate }}"></strong>
-        </ion-title>
-      </ion-col>
-    </ion-row>
+		<ion-row>
+			<ion-col size="12" class="ion-text-center">
+				<ion-button
+					size="large"
+					color="xmasred"
+					class="custom-button remove-shadow"
+					[routerLink]="['/sign-up']"
+				>
+					<strong>{{ "HOME.CREATE_ACCOUNT" | translate }}</strong>
+				</ion-button>
+				<p>{{ "SIGNUP.NEW_ACCOUNT_NOTICE" | translate }}</p>
+			</ion-col>
 
-    <ion-row class="ion-margin-top">
+			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
+				<p>{{ "HOME.SIGN_IN_INST" | translate }}</p>
+				<ion-button
+					color="white"
+					class="custom-button remove-shadow"
+					[routerLink]="['/sign-in']"
+				>
+					{{ "COMMON.EXISTING_ACCOUNT" | translate }}
+				</ion-button>
+			</ion-col>
+		</ion-row>
 
-      <ion-col size="12" class="ion-text-center">
-        <ion-label>
-          {{ 'HOME.SIGN_IN_INST' | translate }}
-        </ion-label>
-        <br/>
-        <ion-button
-          color="white"
-          class="remove-shadow dark-border"
-          [routerLink]="['/sign-in']"
-        >
-          <div class="button-text-padding">
-            {{ 'COMMON.SIGN_IN' | translate }}
-          </div>
-        </ion-button>
-      </ion-col>
+		<ion-row class="es-pd-top-xxl">
+			<ion-col class="ion-text-center">
+				<a
+					href="https://www.facebook.com/denversantaclausshop"
+					target="_blank"
+				>
+					<ion-button
+						color="white"
+						class="remove-shadow round-button ion-margin-end dark-border"
+						size="default"
+					>
+						<ion-icon
+							slot="icon-only"
+							name="logo-facebook"
+							color="medium"
+						></ion-icon>
+					</ion-button>
+				</a>
 
-      <ion-col size="12" class="ion-text-center es-pd-top-xl">
-        <ion-label>
-          {{ 'HOME.CREATE_ACCOUNT_INST' | translate }}
-        </ion-label>
-        <br/>
-        <ion-button
-          color="white"
-          class="remove-shadow dark-border"
-          [routerLink]="['/sign-up']"
-        >
-          <div class="button-text-padding">
-            {{ 'HOME.CREATE_ACCOUNT' | translate }}
-          </div>
-        </ion-button>
-      </ion-col>
-
-    </ion-row>
-
-    <ion-row class="es-pd-top-xxl">
-      <ion-col class="ion-text-center">
-        <a href="https://www.facebook.com/denversantaclausshop" target="_blank">
-          <ion-button
-            color="white"
-            class="remove-shadow round-button ion-margin-end dark-border"
-            size="default"
-          >
-            <ion-icon
-              slot="icon-only"
-              name="logo-facebook"
-              color="medium"
-            ></ion-icon>
-          </ion-button>
-        </a>
-
-        <a
-          href="https://www.instagram.com/denversantaclausshop/"
-          target="_blank"
-        >
-          <ion-button
-            color="white"
-            class="remove-shadow round-button dark-border"
-            size="default"
-          >
-            <ion-icon
-              slot="icon-only"
-              name="logo-instagram"
-              color="medium"
-            ></ion-icon>
-          </ion-button>
-        </a>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <p>
-          <ion-note>
-            {{ environmentName }}<br />
-            {{ environmentVersion }}
-          </ion-note>
-        </p>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+				<a
+					href="https://www.instagram.com/denversantaclausshop/"
+					target="_blank"
+				>
+					<ion-button
+						color="white"
+						class="remove-shadow round-button dark-border"
+						size="default"
+					>
+						<ion-icon
+							slot="icon-only"
+							name="logo-instagram"
+							color="medium"
+						></ion-icon>
+					</ion-button>
+				</a>
+			</ion-col>
+		</ion-row>
+		<ion-row>
+			<ion-col class="ion-text-center">
+				<p>
+					<ion-note>
+						{{ environmentName }}<br />
+						{{ environmentVersion }}
+					</ion-note>
+				</p>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

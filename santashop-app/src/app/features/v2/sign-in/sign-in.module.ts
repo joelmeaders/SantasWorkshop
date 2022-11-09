@@ -5,11 +5,7 @@ import { CoreModule } from '@core/*';
 import { RecaptchaModule } from 'ng-recaptcha';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SignInPageRoutingModule,
-    RecaptchaModule
-  ],
-  declarations: [SignInPage]
+	imports: [CoreModule, SignInPageRoutingModule, RecaptchaModule],
+	declarations: [SignInPage],
 })
 export class SignInPageModule {}

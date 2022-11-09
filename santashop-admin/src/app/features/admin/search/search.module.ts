@@ -5,12 +5,8 @@ import { SharedModule } from 'santashop-admin/src/app/components/shared.module';
 import { CoreModule } from '@core/*';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SearchPageRoutingModule,
-    SharedModule
-  ],
-  declarations: [SearchPage],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+	imports: [CoreModule, SearchPageRoutingModule, SharedModule],
+	declarations: [SearchPage],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SearchPageModule {}

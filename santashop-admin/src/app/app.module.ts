@@ -1,41 +1,97 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicModule } from '@ionic/angular';
 import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
-import { AngularFireAuthModule, USE_EMULATOR as USE_AUTH_EMULATOR } from '@angular/fire/compat/auth';
-import { AngularFirestoreModule, USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/compat/firestore';
-import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR, ORIGIN as FUNCTIONS_ORIGIN } from '@angular/fire/compat/functions';
-import { AuthService, MOBILE_EVENT, PROFILE_VERSION, PROGRAM_YEAR } from '@core/*';
+import {
+	AuthWrapper,
+	MOBILE_EVENT,
+	PROFILE_VERSION,
+	PROGRAM_YEAR,
+} from '@core/*';
 import { AppComponent } from './app.component';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import {
+	provideAuth,
+	connectAuthEmulator,
+	getAuth,
+	Auth,
+} from '@angular/fire/auth';
+import {
+	connectFirestoreEmulator,
+	getFirestore,
+	provideFirestore,
+	enableMultiTabIndexedDbPersistence,
+} from '@angular/fire/firestore';
+import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
+import {
+	provideFunctions,
+	getFunctions,
+	connectFunctionsEmulator,
+} from '@angular/fire/functions';
+
+let resolvePersistenceEnabled: (enabled: boolean) => void;
+
+export const persistenceEnabled = new Promise<boolean>((resolve) => {
+	resolvePersistenceEnabled = resolve;
+});
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    IonicModule.forRoot({
-      mode: 'md',
-    }),
-    AngularFireModule.initializeApp(firebaseConfig),
-    AngularFirestoreModule,
-    AngularFireAuthModule,
-    AngularFireAnalyticsModule,
-    ],
-  providers: [
-    // { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    { provide: PROGRAM_YEAR, useValue: 2021 },
-    { provide: PROFILE_VERSION, useValue: 1 },
-    { provide: MOBILE_EVENT, useValue: true },
-    AuthService,
-    { provide: USE_AUTH_EMULATOR, useValue: !environment.production ? ['http://localhost:9099'] : undefined },
-    { provide: USE_FIRESTORE_EMULATOR, useValue: !environment.production ? ['localhost', 8080] : undefined },
-    { provide: USE_FUNCTIONS_EMULATOR, useValue: !environment.production ? ['localhost', 5001] : undefined },
-    { provide: FUNCTIONS_ORIGIN, useFactory: () => !environment.production ? undefined : location.origin },
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  bootstrap: [AppComponent]
+	declarations: [AppComponent],
+	imports: [
+		BrowserModule,
+		AppRoutingModule,
+		IonicModule.forRoot({
+			mode: 'md',
+		}),
+		provideFirebaseApp(() => initializeApp(firebaseConfig)),
+		provideAuth(() => {
+			const auth = getAuth();
+			if (!environment.production) {
+				connectAuthEmulator(auth, 'http://localhost:9099', {
+					disableWarnings: true,
+				});
+			}
+			return auth;
+		}),
+		provideFirestore(() => {
+			const firestore = getFirestore();
+			if (!environment.production) {
+				connectFirestoreEmulator(firestore, 'localhost', 8080);
+			}
+			enableMultiTabIndexedDbPersistence(firestore).then(
+				() => resolvePersistenceEnabled(true),
+				() => resolvePersistenceEnabled(false)
+			);
+			return firestore;
+		}),
+		provideFunctions(() => {
+			const functions = getFunctions();
+			functions.customDomain = location.origin;
+
+			if (!environment.production) {
+				connectFunctionsEmulator(functions, 'localhost', 5001);
+				functions.customDomain = null;
+			}
+
+			return functions;
+		}),
+		provideAnalytics(() => {
+			const analytics = getAnalytics();
+			return analytics;
+		}),
+	],
+	providers: [
+		// { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+		{ provide: PROGRAM_YEAR, useValue: 2022 },
+		{ provide: PROFILE_VERSION, useValue: 1 },
+		{ provide: MOBILE_EVENT, useValue: true },
+		{
+			provide: AuthWrapper,
+			deps: [Auth],
+		},
+	],
+	schemas: [CUSTOM_ELEMENTS_SCHEMA],
+	bootstrap: [AppComponent],
 })
 export class AppModule {}

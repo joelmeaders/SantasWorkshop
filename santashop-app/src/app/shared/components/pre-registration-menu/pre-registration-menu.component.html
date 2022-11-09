@@ -1,32 +1,40 @@
-<ion-tab-bar *ngIf="!(isRegistrationComplete$ | async)">
-  <ion-tab-button tab="overview" layout="icon-start">
-    <ion-icon name="home"></ion-icon>
-    <ion-label>{{ "MENU.HOME" | translate }}</ion-label>
-  </ion-tab-button>
-  <ion-tab-button
-    tab="children"
-    layout="icon-start"
-    *ngIf="!(isRegistrationComplete$ | async)"
-  >
-    <ion-icon name="accessibility"></ion-icon>
-    <ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
-  </ion-tab-button>
-  <ion-tab-button
-    tab="date-time"
-    layout="icon-start"
-    [disabled]="!(childCount$ | async)"
-    *ngIf="!(isRegistrationComplete$ | async)"
-  >
-    <ion-icon name="calendar-outline"></ion-icon>
-    <ion-label>{{ "MENU.SCHEDULE" | translate }}</ion-label>
-  </ion-tab-button>
-  <ion-tab-button
-    tab="submit"
-    layout="icon-start"
-    [disabled]="!(childCount$ | async) || !(chosenSlot$ | async)"
-    *ngIf="!(isRegistrationComplete$ | async)"
-  >
-    <ion-icon name="send-outline"></ion-icon>
-    <ion-label>{{ "MENU.SUBMIT" | translate }}</ion-label>
-  </ion-tab-button>
-</ion-tab-bar>
+<ng-container
+	*appLet="isRegistrationComplete$ | async as isRegistrationComplete"
+>
+	<ion-tab-bar *ngIf="!isRegistrationComplete">
+		<ng-container *appLet="childCount$ | async as childCount">
+			<ion-tab-button tab="overview" layout="icon-start">
+				<ion-icon name="home"></ion-icon>
+				<ion-label>{{ "MENU.HOME" | translate }}</ion-label>
+			</ion-tab-button>
+			<ion-tab-button
+				tab="children"
+				layout="icon-start"
+				*ngIf="!isRegistrationComplete"
+			>
+				<ion-icon name="accessibility"></ion-icon>
+				<ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
+			</ion-tab-button>
+			<ion-tab-button
+				tab="date-time"
+				layout="icon-start"
+				[disabled]="!childCount"
+				*ngIf="!isRegistrationComplete"
+			>
+				<ion-icon name="calendar-outline"></ion-icon>
+				<ion-label>{{ "MENU.SCHEDULE" | translate }}</ion-label>
+			</ion-tab-button>
+			<ng-container *appLet="chosenSlot$ | async as chosenSlot">
+				<ion-tab-button
+					tab="submit"
+					layout="icon-start"
+					[disabled]="!childCount || !chosenSlot"
+					*ngIf="!isRegistrationComplete"
+				>
+					<ion-icon name="send-outline"></ion-icon>
+					<ion-label>{{ "MENU.SUBMIT" | translate }}</ion-label>
+				</ion-tab-button>
+			</ng-container>
+		</ng-container>
+	</ion-tab-bar>
+</ng-container>

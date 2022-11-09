@@ -1,276 +1,293 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { AngularFireAnalytics } from '@angular/fire/compat/analytics';
+import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { ChildValidationService, getAgeFromDate, MAX_BIRTHDATE, PreRegistrationService, PROGRAM_YEAR, yyyymmddToLocalDate } from '@core/*';
+import { PROGRAM_YEAR, yyyymmddToLocalDate, getAgeFromDate } from '@core/*';
 import { AlertController } from '@ionic/angular';
-import { OverlayEventDetail } from '@ionic/core';
-import { IChild, ChildValidationError, ToyType, AgeGroup } from '@models/*';
+import {
+	Child,
+	ChildValidationError,
+	ToyType,
+	AgeGroup,
+} from '../../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, take } from 'rxjs/operators';
+import {
+	ChildValidationService,
+	MAX_BIRTHDATE,
+	PreRegistrationService,
+} from '../../../../../core';
 import { newChildForm } from './child.form';
 
 @Injectable()
 export class AddChildPageService implements OnDestroy {
+	public readonly destroy$ = new Subject<void>();
+	public form = newChildForm(this.programYear);
 
-  public readonly destroy$ = new Subject<void>();
-  public readonly form = newChildForm(this.programYear);
+	private readonly isInfant = new BehaviorSubject<boolean>(false);
+	public readonly isInfant$ = this.isInfant.pipe(
+		takeUntil(this.destroy$),
+		shareReplay(1)
+	);
 
-  private readonly _isInfant$ = new BehaviorSubject<boolean>(false);
-  public readonly isInfant$ = this._isInfant$.pipe(
-    takeUntil(this.destroy$), 
-    shareReplay(1)
-  );
+	private readonly isEdit = new BehaviorSubject<boolean>(false);
+	public readonly isEdit$ = this.isEdit.pipe(
+		takeUntil(this.destroy$),
+		shareReplay(1)
+	);
 
-  private readonly _isEdit$ = new BehaviorSubject<boolean>(false);
-  public readonly isEdit$ = this._isEdit$.pipe(
-    takeUntil(this.destroy$), 
-    shareReplay(1)
-  );
+	public readonly children$: Observable<Child[] | undefined> =
+		this.preRegistrationService.children$.pipe(
+			takeUntil(this.destroy$),
+			shareReplay(1)
+		);
 
-  public readonly children$: Observable<IChild[] | undefined> =
-    this.preRegistrationService.children$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-    );
+	constructor(
+		@Inject(PROGRAM_YEAR) private readonly programYear: number,
+		private readonly preRegistrationService: PreRegistrationService,
+		private readonly alertController: AlertController,
+		private readonly translateService: TranslateService,
+		private readonly childValidationService: ChildValidationService,
+		private readonly router: Router,
+		private readonly analytics: Analytics
+	) {}
 
+	public ngOnDestroy(): void {
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
 
-  constructor(
-    @Inject(PROGRAM_YEAR) private readonly programYear: number,
-    private readonly preRegistrationService: PreRegistrationService,
-    private readonly alertController: AlertController,
-    private readonly translateService: TranslateService,
-    private readonly childValidationService: ChildValidationService,
-    private readonly router: Router,
-    private readonly analytics: AngularFireAnalytics
-  ) { }
+	public async setChildToEdit(id: number): Promise<void> {
+		const children = await firstValueFrom(this.children$);
+		if (!children || children.length < 1) return;
 
-  public ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-  
+		// Searching by number doesn't work. Converting to string
+		// seems to work for some reason
+		const child = children.filter(
+			(c) => !!c.id && c.id.toString() === id.toString()
+		)[0];
+		if (!child) return;
 
-  public async setChildToEdit(id: number) {
+		this.form.patchValue({ ...child });
 
-    await this.analytics.logEvent('view_child', { id: id });
+		// TODO: Improve this horrible date stuff at some point.
+		// I opted not to use a 3rd party library this time, and
+		// JS dates don't play well with Firebase Timestamps.
+		const year = child.dateOfBirth.getFullYear();
+		let month = (child.dateOfBirth.getMonth() + 1).toString();
+		let day = child.dateOfBirth.getDate().toString();
 
-    const children = 
-      await this.children$.pipe(take(1)).toPromise();
+		month = month.length === 2 ? month : `0${month}`;
+		day = day.length === 2 ? day : `0${day}`;
 
-    if (!children || children.length < 1) {
-      return;
-    }
-    
-    const child = children.filter(c => c.id == id)[0];
+		// Set birth date
+		const date = `${year}-${month}-${day}`;
+		this.form.controls.dateOfBirth.setValue(date as any as Date);
 
-    if (!child) {
-      return;
-    }
+		await this.birthdaySelected(this.form.controls.dateOfBirth.value);
+		this.isEdit.next(true);
+	}
 
-    this.form.patchValue({...child});
+	public async editChild(): Promise<void> {
+		const updatedChild = this.form.value as Child;
+		updatedChild.dateOfBirth = yyyymmddToLocalDate(
+			updatedChild.dateOfBirth as any
+		);
 
-    // TODO: Improve this horrible date stuff at some point.
-    // I opted not to use a 3rd party library this time, and
-    // JS dates don't play well with Firebase Timestamps.
-    const year = child.dateOfBirth.getFullYear();
-    var month = (child.dateOfBirth.getMonth()+1).toString();
-    var day = child.dateOfBirth.getDate().toString();
+		const children = await firstValueFrom(this.children$);
 
-    month = month.length === 2 ? month : `0${month}`;
-    day = day.length === 2 ? day : `0${day}`;
+		try {
+			const validatedChild =
+				this.childValidationService.validateChild(updatedChild);
+			delete validatedChild.error;
+			const updatedChildren = children?.filter(
+				(child) => child.id !== validatedChild.id
+			);
+			updatedChildren?.push(validatedChild);
+			logEvent(this.analytics, 'edit_child', {
+				id: updatedChild.id,
+			});
+			return await this.updateRegistration(updatedChildren);
+		} catch (ex) {
+			const error = ex as ChildValidationError;
+			let message = '';
 
-    // Set birth date
-    const date = `${year}-${month}-${day}`
-    console.log(date)
-    this.form.controls.dateOfBirth.setValue(date as any as Date);
-    
-    await this.birthdaySelected();
-    this._isEdit$.next(true);
+			if (error.code === 'invalid_age') {
+				message = this.translateService.instant('ADDCHILD.INVALID_AGE');
+				logEvent(this.analytics, 'edit_child_error', {
+					id: updatedChild,
+					error: error.code,
+				});
+			} else if (error.code === 'invalid_firstname') {
+				message = this.translateService.instant(
+					'ADD_CHILDREN.INVALID_FIRSTNAME'
+				);
+				logEvent(this.analytics, 'edit_child_error', {
+					id: updatedChild,
+					error: error.code,
+				});
+			} else if (error.code === 'invalid_lastname') {
+				message = this.translateService.instant(
+					'ADD_CHILDREN.INVALID_LASTNAME'
+				);
+				logEvent(this.analytics, 'edit_child_error', {
+					id: updatedChild,
+					error: error.code,
+				});
+			}
 
-  }
+			await this.invalidEntryAlert(message);
+			return;
+		}
+	}
 
-  public async editChild() {
+	public setInfant(value: boolean): void {
+		this.isInfant.next(true);
 
-    const updatedChild = this.form.value as IChild;
-    updatedChild.dateOfBirth = yyyymmddToLocalDate(updatedChild.dateOfBirth as any);
+		const toyTypeControl = this.form.controls.toyType;
+		const ageGroupControl = this.form.controls.ageGroup;
 
-    const children = 
-      await this.children$.pipe(take(1)).toPromise();
+		if (value) {
+			toyTypeControl.setValue(ToyType.infant);
+			ageGroupControl.setValue(AgeGroup.age02);
+		}
+	}
 
-    try {
-      const validatedChild = this.childValidationService.validateChild(updatedChild);
-      delete validatedChild.error;
-      const updatedChildren = children?.filter(child => child.id !== validatedChild.id);
-      updatedChildren?.push(validatedChild);
-      await this.analytics.logEvent('edit_child', { id: updatedChild.id });
-      return this.updateRegistration(updatedChildren);
-    } 
-    catch (ex) {
-      const error = ex as ChildValidationError;
-      let message = "";
+	public async birthdaySelected(yyyymmdd: any): Promise<void> {
+		if (!yyyymmdd) return;
+		if (yyyymmdd[0]?.toString() !== '2') return;
 
-      if (error.code === "invalid_age") {
-        message = this.translateService.instant('ADDCHILD.INVALID_AGE');
-        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
-      }
-      else if (error.code === "invalid_firstname") {
-        message = this.translateService.instant('ADD_CHILDREN.INVALID_FIRSTNAME');
-        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
-      }
-      else if (error.code === "invalid_lastname") {
-        message = this.translateService.instant('ADD_CHILDREN.INVALID_LASTNAME');
-        await this.analytics.logEvent('edit_child_error', { id: updatedChild, error: error.code });
-      }
-      
-      await this.invalidEntryAlert(message);
-      return;
-    }
-  }
+		const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
+		const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
+		let ageGroup: AgeGroup | undefined;
 
-  public setInfant(value: boolean) {
+		if (ageInYears >= 0 && ageInYears < 3) {
+			this.setInfant(true);
+			return;
+		} else if (ageInYears >= 3 && ageInYears < 6) {
+			ageGroup = AgeGroup.age35;
+		} else if (ageInYears >= 6 && ageInYears < 9) {
+			ageGroup = AgeGroup.age68;
+		} else if (ageInYears >= 9 && ageInYears < 12) {
+			ageGroup = AgeGroup.age911;
+		} else {
+			logEvent(this.analytics, 'child_invalid_age_entry', {
+				age: ageInYears,
+			});
+			await this.childTooOldAlert();
+			this.form.controls.dateOfBirth.reset();
+		}
 
-    this._isInfant$.next(true);
+		this.form.controls.ageGroup.setValue(ageGroup!);
+		this.isInfant.next(false);
+	}
 
-    const toyTypeControl = this.form.controls['toyType'];
-    const ageGroupControl = this.form.controls['ageGroup'];
+	private async childTooOldAlert(): Promise<any> {
+		const alert = await this.alertController.create({
+			header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
+			message: this.translateService.instant('ADDCHILD.INVALID_AGE'),
+			buttons: [
+				{
+					text: 'Ok',
+				},
+			],
+		});
 
-    if (value) {
-      toyTypeControl.setValue(ToyType.infant);
-      ageGroupControl.setValue(AgeGroup.age02);
-    }
-  }
+		await alert.present();
+		return alert.onDidDismiss();
+	}
 
-  public async birthdaySelected() {
+	public async addChild(): Promise<void> {
+		const child = this.form.value as Child;
+		child.dateOfBirth = yyyymmddToLocalDate(child.dateOfBirth as any);
 
-    console.log(this.form.controls.dateOfBirth.value)
+		const children = await this.children$.pipe(take(1)).toPromise();
 
-    const yyyymmdd: any = this.form.controls.dateOfBirth.value;
-    if (!yyyymmdd) return;
-    
-    if (!this.form.controls.dateOfBirth.valid) {
-      return;
-    }
+		try {
+			const validatedChild =
+				this.childValidationService.validateChild(child);
+			children?.push(validatedChild);
+			logEvent(this.analytics, 'add_child');
+			return await this.updateRegistration(children);
+		} catch (ex) {
+			const error = ex as ChildValidationError;
+			let message = '';
 
-    const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
-    const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
-    var ageGroup: AgeGroup | undefined = undefined;
+			if (error.code === 'invalid_age') {
+				message = this.translateService.instant('ADDCHILD.INVALID_AGE');
+				logEvent(this.analytics, 'add_child_error', {
+					id: child,
+					error: error.code,
+				});
+			} else if (error.code === 'invalid_firstname') {
+				message = this.translateService.instant(
+					'ADDCHILD.INVALID_FIRSTNAME'
+				);
+				logEvent(this.analytics, 'add_child_error', {
+					id: child,
+					error: error.code,
+				});
+			} else if (error.code === 'invalid_lastname') {
+				message = this.translateService.instant(
+					'ADDCHILD.INVALID_LASTNAME'
+				);
+				logEvent(this.analytics, 'add_child_error', {
+					id: child,
+					error: error.code,
+				});
+			}
 
-    if (ageInYears >= 0 && ageInYears < 3) {
-      this.setInfant(true);
-      return;
-    } else if (ageInYears >= 3 && ageInYears < 6) {
-      ageGroup = AgeGroup.age35;
-    } else if (ageInYears >= 6 && ageInYears < 9) {
-      ageGroup = AgeGroup.age68;
-    } else if (ageInYears >= 9 && ageInYears < 12) {
-      ageGroup = AgeGroup.age911;
-    } else {
-      await this.analytics.logEvent('child_invalid_age_entry', { age: ageInYears });
-      await this.childTooOldAlert();
-      this.form.controls.dateOfBirth.reset();
-    }
+			await this.invalidEntryAlert(message);
+			return;
+		}
+	}
 
-    this.form.controls.ageGroup.setValue(ageGroup!);
-    this._isInfant$.next(false);
-  }
+	public async removeChild(childToRemove: Child): Promise<void> {
+		const children = await this.children$.pipe(take(1)).toPromise();
 
-  private async childTooOldAlert() {
-    const alert = await this.alertController.create({
-      header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
-      message: this.translateService.instant('ADDCHILD.INVALID_AGE'),
-      buttons: [
-        {
-          text: 'Ok',
-        },
-      ],
-    });
+		const updatedChildren = children?.filter(
+			(child) => child.id !== childToRemove.id
+		);
 
-    await alert.present();
-    return alert.onDidDismiss();
-  }
+		logEvent(this.analytics, 'remove_child', {
+			id: childToRemove.id,
+		});
+		return this.updateRegistration(updatedChildren);
+	}
 
-  public async addChild(): Promise<void> {
+	private async updateRegistration(children?: Child[]): Promise<void> {
+		const registration = await firstValueFrom(
+			this.preRegistrationService.userRegistration$
+		);
 
-    const child = this.form.value as IChild;
-    child.dateOfBirth = yyyymmddToLocalDate(child.dateOfBirth as any);
+		registration.children = children;
 
-    const children = 
-      await this.children$.pipe(take(1)).toPromise();
+		// TODO: Error handling
+		const storeRegistration = firstValueFrom(
+			this.preRegistrationService.saveRegistration(registration)
+		);
 
-    try {
-      const validatedChild = this.childValidationService.validateChild(child);
-      children?.push(validatedChild);
-      await this.analytics.logEvent('add_child');
-      return this.updateRegistration(children);
-    } 
-    catch (ex) {
-      const error = ex as ChildValidationError;
-      let message = "";
+		try {
+			await storeRegistration;
+		} catch (error) {
+			// TODO: Do something
+		}
 
-      if (error.code === "invalid_age") {
-        message = this.translateService.instant('ADDCHILD.INVALID_AGE');
-        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
-      }
-      else if (error.code === "invalid_firstname") {
-        message = this.translateService.instant('ADDCHILD.INVALID_FIRSTNAME');
-        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
-      }
-      else if (error.code === "invalid_lastname") {
-        message = this.translateService.instant('ADDCHILD.INVALID_LASTNAME');
-        await this.analytics.logEvent('add_child_error', { id: child, error: error.code });
-      }
-      
-      await this.invalidEntryAlert(message);
-      return;
-    }
-  }
+		this.router.navigate(['pre-registration/children']);
+	}
 
-  public async removeChild(childToRemove: IChild): Promise<void> {
+	private async invalidEntryAlert(message: string): Promise<any> {
+		const alert = await this.alertController.create({
+			header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
+			message,
+			buttons: [{ text: this.translateService.instant('COMMON.OK') }],
+		});
 
-    const children = 
-      await this.children$.pipe(take(1)).toPromise();
+		await alert.present();
+		return alert.onDidDismiss();
+	}
 
-    const updatedChildren = children?.filter(
-      child => child.id !== childToRemove.id);
-
-    await this.analytics.logEvent('remove_child', { id: childToRemove.id });
-    return this.updateRegistration(updatedChildren);
-  }
-
-  private async updateRegistration(children?: IChild[]) {
-
-    const registration = 
-      await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
-    
-    registration.children = children;
-    
-    // TODO: Error handling
-    const storeRegistration = 
-      this.preRegistrationService.saveRegistration(registration)
-        .pipe(take(1)).toPromise();
-
-    try {
-      await storeRegistration;
-    } 
-    catch (error) 
-    { 
-      // TODO: Do something
-    }
-
-    this.router.navigate(['pre-registration/children']);
-  }
-
-  private async invalidEntryAlert(message: string): Promise<OverlayEventDetail<any>> {
-    const alert = await this.alertController.create({
-      header: this.translateService.instant('ADDCHILD.TOO_OLD_1'),
-      message: message,
-      buttons: [
-        { text: this.translateService.instant('COMMON.OK')}
-      ]
-    });
-
-    await alert.present();
-    return alert.onDidDismiss();
-  }
+	public resetForm(): void {
+		this.form = newChildForm(this.programYear);
+	}
 }

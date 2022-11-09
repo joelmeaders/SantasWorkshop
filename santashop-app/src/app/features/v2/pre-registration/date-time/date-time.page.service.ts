@@ -1,92 +1,106 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection, PreRegistrationService, PROGRAM_YEAR } from '@core/*';
-import { Observable, Subject } from 'rxjs';
-import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
-import { Timestamp } from '@firebase/firestore';
-import { COLLECTION_SCHEMA, IDateTimeSlot } from '@models/*';
+import {
+	FireRepoLite,
+	IFireRepoCollection,
+	PROGRAM_YEAR,
+	timestampToDate,
+} from '@core/*';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import {
+	COLLECTION_SCHEMA,
+	DateTimeSlot,
+} from '../../../../../../../santashop-models/src/public-api';
+import { QueryConstraint } from 'firebase/firestore';
+import { where } from '@angular/fire/firestore';
+import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
+	private readonly destroy$ = new Subject<void>();
 
-  private readonly destroy$ = new Subject<void>();
+	public readonly availableSlots$ = this.availableSlotsQuery(
+		this.programYear
+	).pipe(
+		takeUntil(this.destroy$),
+		map((data) => {
+			data.forEach((s) => (s.dateTime = timestampToDate(s.dateTime)));
+			return data;
+		}),
+		map((data) =>
+			data
+				.slice()
+				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf())
+		),
+		shareReplay(1)
+	);
 
-  public readonly availableSlots$ =
-    this.availableSlotsQuery(this.programYear).pipe(
-      takeUntil(this.destroy$),
-      // TODO: Make this map a shared reusable method
-      map(data => {
-        data.forEach(s => s.dateTime = (<any>s.dateTime as Timestamp).toDate())
-        return data;
-      }),
-      map(data => data.slice()
-        .sort((a,b) => a.dateTime.valueOf() - b.dateTime.valueOf())),
-      shareReplay(1)
-    );
+	public readonly registrationSlot$ =
+		this.preRegistrationService.dateTimeSlot$.pipe(
+			takeUntil(this.destroy$),
+			shareReplay(1)
+		);
 
-  public readonly registrationSlot$ = 
-    this.preRegistrationService.dateTimeSlot$.pipe(
-      takeUntil(this.destroy$),
-      shareReplay(1)
-  );
+	constructor(
+		@Inject(PROGRAM_YEAR) private readonly programYear: number,
+		private readonly fireRepo: FireRepoLite,
+		private readonly preRegistrationService: PreRegistrationService
+	) {}
 
-  constructor(
-    @Inject(PROGRAM_YEAR) private readonly programYear: number,
-    private readonly fireRepo: FireRepoLite,
-    private readonly preRegistrationService: PreRegistrationService,
-  ) { }
+	public ngOnDestroy(): void {
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
 
-  public ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+	public async updateRegistration(slot?: DateTimeSlot): Promise<void> {
+		const registration = await firstValueFrom(
+			this.preRegistrationService.userRegistration$
+		);
 
-  public async updateRegistration(slot?: IDateTimeSlot) {
-    
-    const registration = 
-      await this.preRegistrationService.userRegistration$.pipe(take(1)).toPromise();
+		if (!slot) {
+			delete registration.dateTimeSlot;
+		} else {
+			registration.dateTimeSlot = {
+				dateTime: slot.dateTime,
+				id: slot.id,
+			};
+		}
 
-    if (!slot) {
-      delete registration.dateTimeSlot;
-    } 
-    else {
-      registration.dateTimeSlot = {
-        dateTime: slot.dateTime,
-        id: slot.id
-      };
-    }
+		// TODO: Error handling
+		const storeRegistration = firstValueFrom(
+			this.preRegistrationService.saveRegistration(registration)
+		);
 
-    // TODO: Error handling
-    const storeRegistration = 
-      this.preRegistrationService.saveRegistration(registration)
-        .pipe(take(1)).toPromise();
-    
-    try {
-      await storeRegistration;
-    } 
-    catch (error) 
-    { 
-      console.error(error)
-    }
-  }
+		try {
+			await storeRegistration;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
-  private dateTimeSlotCollection(): IFireRepoCollection {
-    return this.fireRepo.collection(COLLECTION_SCHEMA.dateTimeSlots);
-  }
+	private dateTimeSlotCollection(): IFireRepoCollection<DateTimeSlot> {
+		return this.fireRepo.collection<DateTimeSlot>(
+			COLLECTION_SCHEMA.dateTimeSlots
+		);
+	}
 
-  /**
-   * Returns all time slots for the specified program year
-   * where the field 'enabled' is true.
-   *
-   * @private
-   * @param {number} programYear
-   * @return {*}  {Observable<IDateTimeSlot[]>}
-   * @memberof DateTimePageService
-   */
-  private availableSlotsQuery(programYear: number): Observable<IDateTimeSlot[]> {
-    return this.dateTimeSlotCollection().readMany<IDateTimeSlot>(
-      (query) => query.where('programYear', '==', programYear)
-                      .where('enabled', '==', true),
-      'id'
-    );
-  }
+	/**
+	 * Returns all time slots for the specified program year
+	 * where the field 'enabled' is true.
+	 *
+	 * @private
+	 * @param programYear
+	 * @return
+	 * @memberof DateTimePageService
+	 */
+	private availableSlotsQuery(
+		programYear: number
+	): Observable<DateTimeSlot[]> {
+		const queryConstraints: QueryConstraint[] = [
+			where('programYear', '==', programYear),
+			where('enabled', '==', true),
+		];
+
+		return this.dateTimeSlotCollection().readMany(queryConstraints, 'id');
+	}
 }

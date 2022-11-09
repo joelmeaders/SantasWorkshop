@@ -6,12 +6,12 @@ import { RegisterPageRoutingModule } from './register-routing.module';
 import { RegisterPage } from './register.page';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    RouterModule.forChild([{ path: '', component: RegisterPage }]),
-    RegisterPageRoutingModule,
-    SharedModule
-  ],
-  declarations: [RegisterPage]
+	imports: [
+		CoreModule,
+		RouterModule.forChild([{ path: '', component: RegisterPage }]),
+		RegisterPageRoutingModule,
+		SharedModule,
+	],
+	declarations: [RegisterPage],
 })
 export class RegisterPageModule {}

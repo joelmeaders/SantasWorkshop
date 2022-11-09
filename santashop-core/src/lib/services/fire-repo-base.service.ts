@@ -1,76 +1,130 @@
 import { Injectable } from '@angular/core';
+import { from, map, Observable } from 'rxjs';
 import {
-  AngularFirestore,
-  DocumentReference,
-  QueryFn,
-} from '@angular/fire/compat/firestore';
-import { from, Observable } from 'rxjs';
-import { map, mapTo } from 'rxjs/operators';
+	CollectionReference,
+	DocumentData,
+	DocumentReference,
+	FirestoreDataConverter,
+	FirestoreWrapper,
+	QueryConstraint,
+	QueryDocumentSnapshot,
+	SnapshotOptions,
+} from './_firestore-wrapper';
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root',
 })
 export class FireRepoBase {
-  constructor(private readonly firestore: AngularFirestore) { }
+	constructor(private readonly firestoreWrapper: FirestoreWrapper) {}
 
-  public randomId(): string {
-    return this.firestore.createId();
-  }
+	public randomId(): string {
+		const colRef = this.firestoreWrapper.collection('_');
+		const docRef = this.firestoreWrapper.doc(colRef);
+		return docRef.id;
+	}
 
-  public read<T>(
-    collectionPath: string,
-    documentId: string,
-    idField?: Extract<keyof T, string>
-  ): Observable<T> {
-    return this.firestore
-      .collection(collectionPath)
-      .doc<T>(documentId)
-      .valueChanges({ idField })
-      .pipe(
-        map(response => response as T),
-      );
-  }
+	public read<T = DocumentData>(
+		collectionPath: string,
+		documentId: string,
+		idField?: Extract<keyof T, string>
+	): Observable<T> {
+		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const docRef = this.firestoreWrapper.doc<T>(colRef as any, documentId);
+		return this.firestoreWrapper.docData(docRef, { idField });
+	}
 
-  public readMany<T>(
-    collectionPath: string,
-    query?: QueryFn,
-    idField?: Extract<keyof T, string>
-  ): Observable<T[]> {
-    return this.firestore
-      .collection<T>(collectionPath, query)
-      .valueChanges({ idField });
-  }
+	public readMany<T = DocumentData>(
+		collectionPath: string,
+		queryConstraints?: QueryConstraint[],
+		idField?: Extract<keyof T, string>
+	): Observable<T[]> {
+		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const qry = queryConstraints
+			? this.firestoreWrapper.query(colRef, queryConstraints)
+			: this.firestoreWrapper.query(colRef);
 
-  public add<T>(
-    collectionPath: string,
-    document: T
-  ): Observable<DocumentReference<T>> {
-    const action = this.firestore.collection<T>(collectionPath).add(document);
-    return from(action);
-  }
+		return this.firestoreWrapper.rxCollection(qry).pipe(
+			map((snapshots) => {
+				const datas: T[] = [];
+				snapshots.forEach((snapshot) => {
+					const data = {
+						...snapshot.data(),
+					} as T;
+					if (idField) {
+						(data as any)[idField] = snapshot.id;
+					}
+					datas.push(data);
+				});
+				return datas;
+			})
+		);
+	}
 
-  public addById<T>(
-    collectionPath: string,
-    documentId: string,
-    document: T
-  ): Observable<DocumentReference<T>> {
-    const afsDocument = this.firestore
-      .collection(collectionPath)
-      .doc<T>(documentId);
-    const action = afsDocument.set(document);
-    return from(action).pipe(mapTo(afsDocument.ref));
-  }
+	private genericConverter<T>(): FirestoreDataConverter<T> {
+		return {
+			toFirestore: (post: T): DocumentData => {
+				return post as DocumentData;
+			},
+			fromFirestore: (
+				snapshot: QueryDocumentSnapshot,
+				options: SnapshotOptions
+			): T => {
+				return { ...snapshot.data(options) } as T;
+			},
+		};
+	}
 
-  public update<T>(
-    collectionPath: string,
-    documentId: string,
-    document: T,
-    merge = false
-  ): Observable<DocumentReference> {
-    const afsDocument = this.firestore
-      .collection(collectionPath)
-      .doc<T>(documentId);
-    const action = afsDocument.set(document, { merge });
-    return from(action).pipe(mapTo(afsDocument.ref));
-  }
+	public add<T = DocumentData>(
+		collectionPath: string,
+		document: T
+	): Observable<DocumentReference<T>> {
+		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const action = this.firestoreWrapper
+			.addDoc<T>(colRef as CollectionReference<T>, document)
+			.then((response) =>
+				response.withConverter(this.genericConverter<T>())
+			);
+		return from(action);
+	}
+
+	public addById<T = DocumentData>(
+		collectionPath: string,
+		documentId: string,
+		document: T
+	): Observable<DocumentReference<T>> {
+		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const docRef = this.firestoreWrapper.doc<T>(
+			colRef as CollectionReference<T>,
+			documentId
+		);
+		const action = this.firestoreWrapper.setDoc<T>(docRef, document);
+		return from(action).pipe(map(() => docRef));
+	}
+
+	public update<T = DocumentData>(
+		collectionPath: string,
+		documentId: string,
+		document: T,
+		merge = false
+	): Observable<DocumentReference<T>> {
+		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const docRef = this.firestoreWrapper.doc<T>(
+			colRef as CollectionReference<T>,
+			documentId
+		);
+		const action = this.firestoreWrapper.setDoc<T>(docRef, document, {
+			merge,
+		});
+		return from(action).pipe(map(() => docRef));
+	}
+
+	public delete(
+		collectionPath: string,
+		documentId: string
+	): Observable<void> {
+		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const docRef = this.firestoreWrapper.doc(colRef, documentId);
+		const action = this.firestoreWrapper.deleteDoc(docRef);
+		return from(action);
+	}
 }

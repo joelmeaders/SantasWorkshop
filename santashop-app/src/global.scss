@@ -16,7 +16,7 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import '~@ionic/angular/css/display.css';
+@import "~@ionic/angular/css/display.css";
 
 /* Optional CSS utils that can be commented out */
 @import "~@ionic/angular/css/padding.css";
@@ -25,138 +25,148 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-ion-title {
-  font-family: 'Inter', 'Roboto', sans-serif;
-  font-size: 1.2em;
-  font-weight: 600;
+ion-title,
+ion-card-title {
+	font-family: "lora", sans-serif;
+	font-size: 1.6em;
+	font-weight: 600;
 }
 
-ion-card, ion-button {
-  --border-radius: 8px;
-  border-radius: 8px;
+h1,
+ion-title,
+ion-card-title {
+	font-family: "lora", sans-serif;
+	color: var(--ion-color-xmasred);
+	text-transform: uppercase;
+	letter-spacing: 0.02em;
+}
+
+h3,
+ion-card-subtitle {
+	font-size: 1.4em;
+	font-family: brandon-grotesque, sans-serif;
+	font-weight: 600;
+}
+
+ion-card,
+ion-button {
+	--border-radius: 8px;
+	border-radius: 8px;
 }
 
 ion-card {
-  --background: var(--ion-color-white);
-  background-color: var(--ion-color-white);
+	--background: var(--ion-color-white);
+	background-color: var(--ion-color-white);
+	box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 12px 0px,
+		rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 }
 
 ion-list {
-  border-style: none;
+	border-style: none;
 }
 
 ion-item {
-  background-color: unset;
+	background-color: unset;
 }
 
 ion-button {
-  --box-shadow: none;
+	--box-shadow: none;
 }
 
 re-captcha {
-  position: relative;
-  margin-left: auto;
-  margin-right: auto;
-  display: inline-block;
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	display: inline-block;
 }
 
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0;
+	opacity: 1;
+	filter: invert(1);
 }
 
 .logo {
-  max-width: 200px;
-  width: 60%;
-  height: auto;
-  padding-bottom: 20px;
+	max-width: 200px;
+	width: 60%;
+	height: auto;
+	padding-bottom: 20px;
 }
 
 .sm-logo {
-  max-width: 60px;
-  height: auto;
-  padding: 6px 12px 6px 0px;
-  position: relative;
-  overflow: visible;
+	max-width: 60px;
+	height: auto;
+	padding: 6px 12px 6px 0px;
+	position: relative;
+	overflow: visible;
 }
 
 .side-menu {
-  min-width: 200px;
+	min-width: 200px;
 }
 
 .dark-border {
-  --border-color: var(--ion-color-dark);
-  --border-radius: 8px;
-  --border-style: solid;
-  --border-width: 1px;
-  box-sizing: border-box;
+	--border-color: var(--ion-color-dark);
+	--border-radius: 8px;
+	--border-style: solid;
+	--border-width: 1px;
+	box-sizing: border-box;
 }
 
 .inset-ion-item-title {
-  --inner-padding-start: 0px;
-  --padding-start: 0px;
-  --background: var(--ion-color-white);
-  background-color: var(--ion-color-white);
-  --border-color: var(--ion-color-medium);
+	--inner-padding-start: 0px;
+	--padding-start: 0px;
+	--background: var(--ion-color-white);
+	background-color: var(--ion-color-white);
+	--border-color: var(--ion-color-medium);
 
-  ion-card-title {
-    --color: var(--ion-color-xmasred);
-    padding-left: 12px;
-  }
+	ion-card-title {
+		--color: var(--ion-color-xmasred);
+		padding-left: 12px;
+	}
 }
 
 .round-button {
-  --border-radius: 50%;
-  --padding-start: 6px;
-  --padding-end: 6px;
-  width: 46px;
-  height: 46px;
+	--border-radius: 50%;
+	--padding-start: 6px;
+	--padding-end: 6px;
+	width: 46px;
+	height: 46px;
 }
 
 .even-ratio-button {
-  --border-radius: 30%;
-  width: 46px;
-  height: 46px;
-  padding-inline-start: 6px;
-  padding-inline-end: 6px;
-  --box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px ;
+	--border-radius: 30%;
+	width: 46px;
+	height: 46px;
+	padding-inline-start: 6px;
+	padding-inline-end: 6px;
+	--box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px,
+		rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
 }
 
 .icon-reduced-margin {
-  margin-inline-end: 0px;
+	margin-inline-end: 0px;
 }
 
 .title-font {
-  // font-family: 'Libre Baskerville', serif;
-  font-weight: bold;
+	// font-family: 'Libre Baskerville', serif;
+	font-weight: bold;
 }
 
 .ion-card-title-lg {
-  // font-family: 'Libre Baskerville', serif;
-  font-weight: bold;
-  font-size: 2rem;
+	// font-family: 'Libre Baskerville', serif;
+	font-weight: bold;
+	font-size: 2rem;
 }
 
 .ion-card-title-sm {
-  // font-family: 'Libre Baskerville', serif;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.ion-card-subtitle {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 400;
-}
-
-.ion-card-subtitle-lg {
-  font-family: 'Roboto', sans-serif;
-  font-size: 2rem;
-  font-weight: 400;
+	// font-family: 'Libre Baskerville', serif;
+	font-weight: bold;
+	font-size: 1.2rem;
 }
 
 .remove-shadow {
-  --box-shadow:none;
+	--box-shadow: none;
 }
 
 .modal-md {
@@ -165,97 +175,111 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .width-max {
-  width: 100%;
+	width: 100%;
 }
 
 .height-max {
-  height: 100%;
+	height: 100%;
 }
 
 .no-shadow {
-  box-shadow: none !important;
-  --webkit-box-shadow: none;
+	box-shadow: none !important;
+	--webkit-box-shadow: none;
 }
 
 .confirm-delete-button {
-  background-color: var(--ion-color-xmasred) !important;
-  color: #FFF !important;
-  border-radius: 8px !important;
-  padding-inline-start: 16px !important;
-  padding-inline-end: 16px !important;
+	background-color: var(--ion-color-xmasred) !important;
+	color: #fff !important;
+	border-radius: 8px !important;
+	padding-inline-start: 16px !important;
+	padding-inline-end: 16px !important;
 }
 
 .div-container {
-  max-width: 400px;
-  margin: auto;
-  padding: 16px;
+	max-width: 400px;
+	margin: auto;
+	padding: 16px;
 }
 
 h1alt {
-  font-size: 5em !important;
-  text-transform: uppercase;
-  font-weight: 600 !important;
+	font-size: 5em !important;
+	text-transform: uppercase;
+	font-weight: 600 !important;
 }
 
 h2alt {
-  font-size: 2em !important;
-  font-weight: 600 !important;
+	font-size: 2em !important;
+	font-weight: 600 !important;
 }
 
 .full-width-alert {
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  padding-left: 32px;
-  padding-right: 32px;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  background: var(--ion-color-warning, #FFC409);
+	margin-left: calc(-50vw + 50%);
+	margin-right: calc(-50vw + 50%);
+	padding-left: 32px;
+	padding-right: 32px;
+	padding-top: 16px;
+	padding-bottom: 16px;
+	background: var(--ion-color-warning, #ffc409);
 }
 
 $es-size-definitions: (
-  xs: 2px,
-  sm: 4px,
-  md: 8px,
-  lg: 16px,
-  xl: 24px,
-  xxl: 32px
+	xs: 2px,
+	sm: 4px,
+	md: 8px,
+	lg: 16px,
+	xl: 24px,
+	xxl: 32px,
 ) !default;
 
-$es-direction-definitions: (
-  top,
-  bottom,
-  right,
-  left
-) !default;
+$es-direction-definitions: (top, bottom, right, left) !default;
 
 @mixin es-margin-list {
-  @each $direction in $es-direction-definitions {
-    @each $key, $value in $es-size-definitions {
-      .es-mg-#{$direction}-#{$key} { margin-#{$direction}: $value; }
-    }
-  }
+	@each $direction in $es-direction-definitions {
+		@each $key, $value in $es-size-definitions {
+			.es-mg-#{$direction}-#{$key} {
+				margin-#{$direction}: $value;
+			}
+		}
+	}
 }
 @include es-margin-list();
 
-
 @mixin es-padding-list {
-  @each $direction in $es-direction-definitions {
-    @each $key, $value in $es-size-definitions {
-      .es-pd-#{$direction}-#{$key} { padding-#{$direction}: $value; }
-    }
-  }
+	@each $direction in $es-direction-definitions {
+		@each $key, $value in $es-size-definitions {
+			.es-pd-#{$direction}-#{$key} {
+				padding-#{$direction}: $value;
+			}
+		}
+	}
 }
 @include es-padding-list();
 
-
 :root {
-  --es-px-xs: 2px;
-  --es-px-sm: 4px;
-  --es-px-md: 8px;
-  --es-px-lg: 16px;
-  --es-px-xl: 24px;
-  --es-px-xxl: 32px;
+	--es-px-xs: 2px;
+	--es-px-sm: 4px;
+	--es-px-md: 8px;
+	--es-px-lg: 16px;
+	--es-px-xl: 24px;
+	--es-px-xxl: 32px;
 }
 
-.firebase-emulator-warning { display: none; }
-#ghostery-tracker-tally { display: none;}
+.firebase-emulator-warning {
+	display: none;
+}
+
+#ghostery-tracker-tally {
+	display: none;
+}
+
+// Disable autofill color
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+	transition: background-color 600000s 0s, color 600000s 0s;
+	background-color: transparent !important;
+}
+
+input:-internal-autofill-selected {
+	background-color: transparent !important;
+	color: transparent !important;
+}

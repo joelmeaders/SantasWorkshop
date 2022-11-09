@@ -4,14 +4,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { ChangePasswordPage } from './change-password.page';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: ChangePasswordPage
-  }
+	{
+		path: '',
+		component: ChangePasswordPage,
+	},
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
+	imports: [RouterModule.forChild(routes)],
+	exports: [RouterModule],
 })
 export class ChangePasswordPageRoutingModule {}

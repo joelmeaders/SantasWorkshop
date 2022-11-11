@@ -174,9 +174,8 @@
 		"RESET_PASSWORD_AGAIN": "Restablecer contraseña de nuevo"
 	},
 	"REG_CLOSED": {
-		"1": "¡No!",
-		"2": "La inscripción es",
-		"3": "Cerrado",
+		"1": "Lo sentimos",
+		"2": "La inscripción está cerrada",
 		"4": "Lo sentimos, el trineo de Papá Noel está lleno y todas las fechas y horas se han llenado. Visite nuestros sitios sociales para obtener más información."
 	},
 	"BAD_WEATHER": {

@@ -197,8 +197,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .div-container {
 	max-width: 400px;
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	width: 100%;
+	height: 100%;
+	align-items: center;
 	margin: auto;
-	padding: 16px;
+	justify-content: center;
 }
 
 h1alt {
@@ -282,4 +288,13 @@ input:-webkit-autofill:focus {
 input:-internal-autofill-selected {
 	background-color: transparent !important;
 	color: transparent !important;
+}
+
+.disabled-backdrop {
+	--ion-backdrop-color: var(--ion-color-xmasred);
+	--backdrop-opacity: 1;
+
+	&::part(content) {
+		box-shadow: rgb(255, 172, 94) 0px 20px 30px -10px;
+	}
 }

@@ -1,37 +1,36 @@
-<ion-content size="fullscreen" color="light" class="ion-text-center">
+<ion-content>
 	<div class="div-container">
-		<ion-text color="xmasred">
-			<div class="h2alt">
-				{{ "REG_CLOSED.1" | translate }}<br />
-				{{ "REG_CLOSED.2" | translate }}
-			</div>
-		</ion-text>
+		<h1 class="ion-padding">
+			{{ "REG_CLOSED.1" | translate }}<br />
+			{{ "REG_CLOSED.2" | translate }}
+		</h1>
 
-		<div class="h1alt">{{ "REG_CLOSED.3" | translate }}</div>
-
-		<div
-			class="es-mg-bottom-xxl es-mg-top-xxl es-pd-bottom-xxl es-pd-top-xxl"
-		>
+		<div class="ion-padding">
 			<img
 				src="assets/images/registration-closed.png"
 				alt="shop closed image"
 			/>
 		</div>
 
-		<div class="es-mg-top-xxl">
-			<ion-text color="xmasred">
-				<h3>{{ "REG_CLOSED.4" | translate }}</h3>
-			</ion-text>
+		<div class="ion-padding" *appLet="message$ | async as message">
+			<h3 *ngIf="message === null; else serverMessage">
+				{{ "REG_CLOSED.4" | translate }}
+			</h3>
+			<ng-template #serverMessage>
+				<h3>{{ message }}</h3>
+			</ng-template>
 		</div>
 
-		<div class="es-mg-bottom-xxl es-mg-top-xxl">
+		<div class="ion-padding">
 			<a
+				title="Visit us on Facebook"
+				rel="noopener"
 				href="https://www.facebook.com/denversantaclausshop"
 				target="_blank"
 			>
 				<ion-button
 					color="white"
-					class="remove-shadow round-button ion-margin-end dark-border"
+					class="remove-shadow round-button ion-margin-end"
 					size="default"
 				>
 					<ion-icon
@@ -43,12 +42,14 @@
 			</a>
 
 			<a
+				title="Visit us on instagram"
+				rel="noopener"
 				href="https://www.instagram.com/denversantaclausshop/"
 				target="_blank"
 			>
 				<ion-button
 					color="white"
-					class="remove-shadow round-button dark-border"
+					class="remove-shadow round-button"
 					size="default"
 				>
 					<ion-icon

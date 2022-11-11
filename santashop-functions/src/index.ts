@@ -36,11 +36,11 @@ export const completeRegistration = functions.https.onCall(
 	}
 );
 
-export const manualMigrate = functions.https.onCall(
-	async (request, context) => {
-		return (await import('./fn/manualMigrate')).default(request, context);
-	}
-);
+// export const manualMigrate = functions.https.onCall(
+// 	async (request, context) => {
+// 		return (await import('./fn/manualMigrate')).default(request, context);
+// 	}
+// );
 
 export const newAccount = functions.https.onCall(async (request) => {
 	return (await import('./fn/newAccount')).default(request);
@@ -131,7 +131,7 @@ export const sendNewRegistrationEmails = functions.firestore
  * Backs up firestore db every hour to storage bucket
  */
 export const scheduledFirestoreBackup = functions.pubsub
-	.schedule('every 12 hours')
+	.schedule('every 24 hours')
 	.onRun(async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
@@ -144,7 +144,7 @@ export const scheduledDateTimeSlotCounters = functions.pubsub
 	});
 
 export const scheduledDateTimeSlotReschedules = functions.pubsub
-	.schedule('every 60 minutes')
+	.schedule('every 6 hours')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
@@ -155,17 +155,17 @@ export const scheduledSetAdminRights = functions.pubsub
 		await (await import('./fn/scheduledSetAdminRights')).default();
 	});
 
-export const scheduledExportEmails = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
-		await (await import('./fn/scheduledExportEmails')).default();
-	});
+// export const scheduledExportEmails = functions.pubsub
+// 	.schedule('59 23 * * *')
+// 	.onRun(async () => {
+// 		await (await import('./fn/scheduledExportEmails')).default();
+// 	});
 
-export const scheduledReindexRegistrations = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
-		await (await import('./fn/scheduledReindexRegistrations')).default();
-	});
+// export const scheduledReindexRegistrations = functions.pubsub
+// 	.schedule('59 23 * * *')
+// 	.onRun(async () => {
+// 		await (await import('./fn/scheduledReindexRegistrations')).default();
+// 	});
 
 // This method checks for existing dates/times.
 // If there are none it adds them
@@ -181,11 +181,17 @@ export const scheduledAddDateTimeSlots = functions.pubsub
 //     await (await import('./fn/requeueRegistrationEmails')).default();
 //   });
 
-export const recalculateAllDateTimeSlots = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
-		await (await import('./fn/recalculateAllDateTimeSlots')).default();
-	});
+// export const deleteAllUsers = functions.pubsub
+// 	.schedule('59 23 * * *')
+// 	.onRun(async () => {
+// 		await (await import('./fn/deleteAllUsers')).default();
+// 	});
+
+// export const recalculateAllDateTimeSlots = functions.pubsub
+// 	.schedule('59 23 * * *')
+// 	.onRun(async () => {
+// 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
+// 	});
 
 export const scheduledRegistrationStats = functions.pubsub
 	.schedule('59 23 * * *')
@@ -195,9 +201,9 @@ export const scheduledRegistrationStats = functions.pubsub
 	});
 
 // Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
-export const scheduledCheckInStats = functions.pubsub
-	.schedule('*/5 10,11,12,13,14,15,16 10,11,13,14 12 *')
-	.timeZone('America/Denver')
-	.onRun(async () => {
-		await (await import('./fn/scheduledCheckInStats')).default();
-	});
+// export const scheduledCheckInStats = functions.pubsub
+// 	.schedule('*/5 10,11,12,13,14,15,16 10,11,13,14 12 *')
+// 	.timeZone('America/Denver')
+// 	.onRun(async () => {
+// 		await (await import('./fn/scheduledCheckInStats')).default();
+// 	});

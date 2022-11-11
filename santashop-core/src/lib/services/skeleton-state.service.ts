@@ -34,6 +34,7 @@ export class SkeletonStateService implements OnDestroy {
 	 * @memberof SkeletonStateService
 	 */
 	public addState(id: string, groupId?: string): SkeletonState {
+		console.log('add state', id, groupId);
 		const newState = new SkeletonState(id, groupId);
 		this.state.push(newState);
 		return newState;
@@ -53,6 +54,7 @@ export class SkeletonStateService implements OnDestroy {
 		groupId?: string,
 		createIfNotFound = true
 	): SkeletonState {
+		console.log('get state', id, groupId);
 		let states: SkeletonState[] = [];
 
 		states = groupId
@@ -71,6 +73,8 @@ export class SkeletonStateService implements OnDestroy {
 			}
 		}
 
+		console.log('returning state', requestedState);
+
 		return requestedState;
 	}
 
@@ -82,6 +86,8 @@ export class SkeletonStateService implements OnDestroy {
 	 * @memberof SkeletonStateService
 	 */
 	public removeState(id?: string, groupId?: string): void {
+		console.log('removing state', id, groupId);
+
 		if (!id && !groupId)
 			throw new RangeError('Both id and groupId cannot be undefined');
 
@@ -132,6 +138,7 @@ export class SkeletonState {
 	}
 
 	public setState(isLoaded: boolean): void {
+		console.log('setting state', this.id, isLoaded);
 		this.isLoaded.next(isLoaded);
 	}
 

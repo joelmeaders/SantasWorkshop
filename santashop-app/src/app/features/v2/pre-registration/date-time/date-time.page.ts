@@ -5,7 +5,14 @@ import { AlertController } from '@ionic/angular';
 import { DateTimeSlot } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { shareReplay, take, map, takeUntil, tap } from 'rxjs/operators';
+import {
+	shareReplay,
+	take,
+	map,
+	takeUntil,
+	tap,
+	distinctUntilChanged,
+} from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
 
 @Component({
@@ -21,6 +28,9 @@ export class DateTimePage implements OnDestroy {
 	public readonly availableSlots$ = this.viewService.availableSlots$.pipe(
 		takeUntil(this.destroy$),
 		map((slots) => slots.filter((slot) => slot.enabled)),
+		distinctUntilChanged(
+			(prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+		),
 		shareReplay(1)
 	);
 
@@ -30,9 +40,16 @@ export class DateTimePage implements OnDestroy {
 			slots.map((slot) => Date.parse(slot.dateTime.toDateString()))
 		),
 		map((dates) => [...new Set(dates)]),
-		tap(() => this.dateTimeSlotsState.setState(true)),
+
 		shareReplay(1)
 	);
+
+	public readonly slotsSubcription = this.availableDays$
+		.pipe(
+			take(1),
+			tap(() => this.dateTimeSlotsState.setState(true))
+		)
+		.subscribe();
 
 	public readonly availableSlotsByDay$ = (
 		date: number
@@ -52,6 +69,13 @@ export class DateTimePage implements OnDestroy {
 		tap(() => this.dateTimeSlotState.setState(true)),
 		shareReplay(1)
 	);
+
+	public readonly chosenSlotSubscription = this.chosenSlot$
+		.pipe(
+			take(1),
+			tap(() => this.dateTimeSlotState.setState(true))
+		)
+		.subscribe();
 
 	public readonly dateTimeSlotState = this.skeletonState.getState(
 		'dateTimeSlot',

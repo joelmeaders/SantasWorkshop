@@ -49,6 +49,7 @@
 	},
 	"SIGNUP": {
 		"NEW_ACCOUNT_NOTICE": "Todos deben crear una nueva cuenta este año",
+		"HAVE_ACCOUNT": "¿Ya tienes una cuenta?",
 		"TITLE1": "Configura tu cuenta",
 		"TITLE2": "Esto solo tomará un minuto",
 		"FIRST_NAME": "Nombre",

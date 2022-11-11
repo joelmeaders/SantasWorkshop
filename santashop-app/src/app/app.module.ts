@@ -33,10 +33,6 @@ import {
 	provideStorage,
 } from '@angular/fire/storage';
 import {
-	getRemoteConfig,
-	provideRemoteConfig,
-} from '@angular/fire/remote-config';
-import {
 	connectFunctionsEmulator,
 	getFunctions,
 	provideFunctions,
@@ -97,16 +93,6 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 				connectStorageEmulator(storage, 'localhost', 9199);
 			}
 			return storage;
-		}),
-		provideRemoteConfig(() => {
-			const remoteConfig = getRemoteConfig();
-			remoteConfig.defaultConfig = {
-				registrationEnabled: 'true',
-				maintenanceModeEnabled: 'false',
-				shopClosedWeather: 'false',
-			};
-			remoteConfig.settings.minimumFetchIntervalMillis = 10000;
-			return remoteConfig;
 		}),
 		provideFunctions(() => {
 			const functions = getFunctions();

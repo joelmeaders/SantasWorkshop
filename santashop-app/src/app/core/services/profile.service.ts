@@ -6,8 +6,8 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
-import { AuthService, FireRepoLite } from '../../../../../dist/santashop-core';
-import { COLLECTION_SCHEMA, User } from '../../../../../dist/santashop-models';
+import { AuthService, FireRepoLite } from '@core/*';
+import { COLLECTION_SCHEMA, User } from '@models/*';
 
 @Injectable({
 	providedIn: 'root',

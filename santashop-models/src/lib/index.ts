@@ -6,6 +6,7 @@ export * from './date-time-slot-count';
 export * from './date-time-slot';
 export * from './error';
 export * from './onboard-user';
+export * from './parameters';
 export * from './registration-email';
 export * from './registration-search-index';
 export * from './registration-stats';

@@ -174,9 +174,8 @@
 		"RESET_PASSWORD_AGAIN": "Reset password again"
 	},
 	"REG_CLOSED": {
-		"1": "Oh No!",
-		"2": "Registration is ",
-		"3": "Closed",
+		"1": "We're Sorry",
+		"2": "Registration is closed",
 		"4": "Sorry, Santa’s Sleigh is full and all Dates & Times have been filled. Please visit our social sites for more information."
 	},
 	"BAD_WEATHER": {

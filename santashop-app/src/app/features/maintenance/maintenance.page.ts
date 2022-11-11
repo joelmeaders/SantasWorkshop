@@ -1,7 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { filter, takeUntil, tap } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AppStateService } from '../../core/services/app-state.service';
 
 @Component({
@@ -10,27 +7,8 @@ import { AppStateService } from '../../core/services/app-state.service';
 	styleUrls: ['./maintenance.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MaintenancePage implements OnDestroy {
-	private readonly destroy$ = new Subject<void>();
+export class MaintenancePage {
+	public readonly message$ = this.service.message$;
 
-	public readonly isMaintenanceDisabledSubscription =
-		this.service.isMaintenanceModeEnabled$
-			.pipe(
-				takeUntil(this.destroy$),
-				filter((enabled) => !enabled),
-				tap(() => {
-					this.router.navigate(['/']);
-				})
-			)
-			.subscribe();
-
-	constructor(
-		public readonly service: AppStateService,
-		private readonly router: Router
-	) {}
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
+	constructor(public readonly service: AppStateService) {}
 }

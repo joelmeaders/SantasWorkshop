@@ -10,7 +10,6 @@ import {
 	take,
 	map,
 	takeUntil,
-	tap,
 	distinctUntilChanged,
 } from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
@@ -44,13 +43,6 @@ export class DateTimePage implements OnDestroy {
 		shareReplay(1)
 	);
 
-	public readonly slotsSubcription = this.availableDays$
-		.pipe(
-			take(1),
-			tap(() => this.dateTimeSlotsState.setState(true))
-		)
-		.subscribe();
-
 	public readonly availableSlotsByDay$ = (
 		date: number
 	): Observable<DateTimeSlot[]> =>
@@ -66,25 +58,7 @@ export class DateTimePage implements OnDestroy {
 
 	public readonly chosenSlot$ = this.viewService.registrationSlot$.pipe(
 		takeUntil(this.destroy$),
-		tap(() => this.dateTimeSlotState.setState(true)),
 		shareReplay(1)
-	);
-
-	public readonly chosenSlotSubscription = this.chosenSlot$
-		.pipe(
-			take(1),
-			tap(() => this.dateTimeSlotState.setState(true))
-		)
-		.subscribe();
-
-	public readonly dateTimeSlotState = this.skeletonState.getState(
-		'dateTimeSlot',
-		'dateTimePage'
-	);
-
-	public readonly dateTimeSlotsState = this.skeletonState.getState(
-		'dateTimeSlots',
-		'dateTimePage'
 	);
 
 	constructor(

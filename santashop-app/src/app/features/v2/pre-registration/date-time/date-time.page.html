@@ -58,60 +58,42 @@
 										"
 									>
 										<ng-container
-											*appLet="
-												dateTimeSlotState.isLoaded$
-													| async as dateTimeSlotLoaded
-											"
+											*ngIf="chosenSlot$ | async as chosenSlot"
 										>
+											<div
+												class="ion-padding-vertical"
+												*ngIf="!chosenSlot"
+											>
+												<h2>
+													<strong>
+														{{
+														"SCHEDULE.NO_TIME_SELECTED."
+														| translate }}
+													</strong>
+												</h2>
+												<ion-label>
+													{{ "SCHEDULE.ADD_ONE_BELOW."
+													| translate }}
+												</ion-label>
+											</div>
+
 											<ion-item
 												lines="none"
-												*ngIf="!dateTimeSlotLoaded"
+												*ngIf="chosenSlot as slot"
 											>
-												<ion-skeleton-text
-													class="skeleton-datetime"
-													animated
-												></ion-skeleton-text>
-											</ion-item>
-
-											<ng-container
-												*ngIf="dateTimeSlotLoaded"
-											>
-												<div
-													class="ion-padding-vertical"
-													*ngIf="!chosenSlot"
-												>
-													<h2>
-														<strong>
-															{{
-															"SCHEDULE.NO_TIME_SELECTED."
-															| translate }}
-														</strong>
-													</h2>
-													<ion-label>
-														{{
-														"SCHEDULE.ADD_ONE_BELOW."
-														| translate }}
-													</ion-label>
-												</div>
-
-												<ion-item
-													lines="none"
-													*ngIf="chosenSlot as slot"
-												>
-													{{ slot.dateTime | date :
-													"MMMM d, h:mm a" : "MST" }}
-													<ion-button
-														slot="end"
-														(click)="
+												{{ slot.dateTime | date : "MMMM
+												d, h:mm a" : "MST" }}
+												<ion-button
+													slot="end"
+													(click)="
 															selectDateTime()
 														"
-														fill="clear"
-													>
-														{{ "COMMON.CANCEL" |
-														translate }}
-													</ion-button>
-												</ion-item>
-											</ng-container>
+													fill="clear"
+												>
+													{{ "COMMON.CANCEL" |
+													translate }}
+												</ion-button>
+											</ion-item>
 										</ng-container>
 									</ng-container>
 								</ion-card-content>
@@ -147,107 +129,72 @@
 										availableDays$ | async as availableDays
 									"
 								>
-									<ng-container
-										*appLet="
-											dateTimeSlotsState.isLoaded$
-												| async as dateTimeSlotsLoaded
-										"
+									<ion-accordion-group
+										color="light"
+										class="es-pd-left-xl es-pd-right-xl"
+										*ngIf="availableDays"
 									>
-										<div
-											class="es-pd-left-xl es-pd-right-xl"
-											*ngIf="!dateTimeSlotsLoaded"
-										>
-											<span
-												*ngFor="
-													let item of [0, 0, 0, 0]
-												"
-											>
-												<ion-item
-													color="light"
-													lines="full"
-												>
-													<ion-skeleton-text
-														class="skeleton-schedule"
-														animated
-													></ion-skeleton-text>
-													<ion-spinner
-														slot="end"
-														color="medium"
-														name="lines-small"
-													></ion-spinner>
-												</ion-item>
-											</span>
-										</div>
-
-										<ion-accordion-group
-											color="light"
-											class="es-pd-left-xl es-pd-right-xl"
-											*ngIf="availableDays"
-										>
-											<ion-accordion
-												*ngFor="
+										<ion-accordion
+											*ngFor="
 													let day of availableDays
 												"
+										>
+											<ion-item
+												slot="header"
+												color="light"
+											>
+												<ion-label>
+													{{ day | date : "EEEE, MMMM
+													d" }}
+												</ion-label>
+											</ion-item>
+											<ion-list
+												slot="content"
+												color="light"
+												class="ion-no-padding es-pd-left-xxl"
 											>
 												<ion-item
-													slot="header"
-													color="light"
-												>
-													<ion-label>
-														{{ day | date : "EEEE,
-														MMMM d" }}
-													</ion-label>
-												</ion-item>
-												<ion-list
-													slot="content"
-													color="light"
-													class="ion-no-padding es-pd-left-xxl"
-												>
-													<ion-item
-														*ngFor="
+													*ngFor="
 															let slot of availableSlotsByDay$(
 																day
 															) | async
 														"
-														color="light"
+													color="light"
+												>
+													<ion-label
+														class="es-mg-left-lg"
 													>
-														<ion-label
-															class="es-mg-left-lg"
+														{{ slot.dateTime | date
+														: "h:mm a" : "MST" }}
+														<br />
+														<ion-text
+															color="xmasred"
+															class="es-mg-left-md"
 														>
-															{{ slot.dateTime |
-															date : "h:mm a" :
-															"MST" }}
-															<br />
-															<ion-text
-																color="xmasred"
-																class="es-mg-left-md"
-															>
-																{{
-																spotsRemaining(
-																slot ) }}
-															</ion-text>
-														</ion-label>
-														<ion-button
-															slot="end"
-															(click)="
+															{{ spotsRemaining(
+															slot ) }}
+														</ion-text>
+													</ion-label>
+													<ion-button
+														slot="end"
+														(click)="
 																selectDateTime(
 																	slot
 																)
 															"
-															size="default"
-															class="small-padding"
-															[disabled]="
+														size="default"
+														class="small-padding"
+														[disabled]="
 																!slot.enabled
 															"
-														>
-															{{ "COMMON.SELECT" |
-															translate }}
-														</ion-button>
-													</ion-item>
-												</ion-list>
-											</ion-accordion>
-										</ion-accordion-group>
-									</ng-container>
+													>
+														{{ "COMMON.SELECT" |
+														translate }}
+													</ion-button>
+												</ion-item>
+											</ion-list>
+										</ion-accordion>
+									</ion-accordion-group>
 								</ng-container>
 							</ng-template>
 

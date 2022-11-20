@@ -2,7 +2,7 @@ import config from '../../../package.json';
 import firebaseConfigDev from '../../../firebase.environment.json';
 
 export const environment = {
-	production: false,
+	production: true,
 	label: 'DEV',
 	name: config.name,
 	version: config.version,

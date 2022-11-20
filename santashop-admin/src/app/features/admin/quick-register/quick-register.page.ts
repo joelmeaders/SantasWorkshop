@@ -25,11 +25,11 @@ import { RegistrationContextService } from '../../../services/registration-conte
 
 @Component({
 	selector: 'app-register',
-	templateUrl: 'register.page.html',
-	styleUrls: ['register.page.scss'],
+	templateUrl: 'quick-register.page.html',
+	styleUrls: ['quick-register.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RegisterPage implements OnDestroy {
+export class QuickRegisterPage implements OnDestroy {
 	public readonly customerForm: FormGroup =
 		QuickRegistrationForms.customerForm(undefined);
 	public readonly customerFormValidationMessages =
@@ -160,7 +160,7 @@ export class RegisterPage implements OnDestroy {
 			return;
 		}
 
-		const value = Number.parseInt($event.detail.value);
+		const value = Number.parseInt($event.detail.value, 5);
 		this.zipCode.next(value);
 	}
 

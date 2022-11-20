@@ -32,7 +32,7 @@ const routes: Routes = [
 			{
 				path: 'register',
 				loadChildren: () =>
-					import('./register/register.module').then(
+					import('./quick-register/quick-register.module').then(
 						(m) => m.RegisterPageModule
 					),
 			},

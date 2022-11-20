@@ -21,7 +21,6 @@ import {
 	connectFirestoreEmulator,
 	getFirestore,
 	provideFirestore,
-	enableMultiTabIndexedDbPersistence,
 } from '@angular/fire/firestore';
 import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import {
@@ -29,12 +28,6 @@ import {
 	getFunctions,
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
-
-let resolvePersistenceEnabled: (enabled: boolean) => void;
-
-export const persistenceEnabled = new Promise<boolean>((resolve) => {
-	resolvePersistenceEnabled = resolve;
-});
 
 @NgModule({
 	declarations: [AppComponent],
@@ -59,10 +52,6 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 			if (!environment.production) {
 				connectFirestoreEmulator(firestore, 'localhost', 8080);
 			}
-			enableMultiTabIndexedDbPersistence(firestore).then(
-				() => resolvePersistenceEnabled(true),
-				() => resolvePersistenceEnabled(false)
-			);
 			return firestore;
 		}),
 		provideFunctions(() => {
@@ -85,13 +74,12 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 		// { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		{ provide: PROGRAM_YEAR, useValue: 2022 },
 		{ provide: PROFILE_VERSION, useValue: 1 },
-		{ provide: MOBILE_EVENT, useValue: true },
+		{ provide: MOBILE_EVENT, useValue: false },
 		{
 			provide: AuthWrapper,
 			deps: [Auth],
 		},
 	],
-	schemas: [CUSTOM_ELEMENTS_SCHEMA],
 	bootstrap: [AppComponent],
 })
 export class AppModule {}

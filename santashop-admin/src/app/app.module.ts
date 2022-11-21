@@ -1,42 +1,33 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { IonicModule } from '@ionic/angular';
-import { environment, firebaseConfig } from '../environments/environment';
-import { AppRoutingModule } from './app-routing.module';
+import { NgModule } from '@angular/core';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import {
-	AuthWrapper,
-	MOBILE_EVENT,
-	PROFILE_VERSION,
-	PROGRAM_YEAR,
-} from '@core/*';
-import { AppComponent } from './app.component';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import {
-	provideAuth,
-	connectAuthEmulator,
-	getAuth,
-	Auth,
-} from '@angular/fire/auth';
-import {
-	connectFirestoreEmulator,
-	getFirestore,
 	provideFirestore,
+	getFirestore,
+	connectFirestoreEmulator,
 } from '@angular/fire/firestore';
-import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import {
 	provideFunctions,
 	getFunctions,
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { IonicModule } from '@ionic/angular';
+import { firebaseConfig } from '../../src-old/environments/environment';
+import { environment } from '../environments/environment';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
 
 @NgModule({
 	declarations: [AppComponent],
 	imports: [
 		BrowserModule,
-		AppRoutingModule,
 		IonicModule.forRoot({
 			mode: 'md',
 		}),
+		AppRoutingModule,
 		provideFirebaseApp(() => initializeApp(firebaseConfig)),
 		provideAuth(() => {
 			const auth = getAuth();
@@ -65,20 +56,6 @@ import {
 
 			return functions;
 		}),
-		provideAnalytics(() => {
-			const analytics = getAnalytics();
-			return analytics;
-		}),
-	],
-	providers: [
-		// { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-		{ provide: PROGRAM_YEAR, useValue: 2022 },
-		{ provide: PROFILE_VERSION, useValue: 1 },
-		{ provide: MOBILE_EVENT, useValue: false },
-		{
-			provide: AuthWrapper,
-			deps: [Auth],
-		},
 	],
 	bootstrap: [AppComponent],
 })

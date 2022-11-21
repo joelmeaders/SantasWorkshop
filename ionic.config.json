@@ -25,5 +25,5 @@
 			"root": "./santashop-models"
 		}
 	},
-	"defaultProject": "santashop-app"
+	"defaultProject": "santashop-admin"
 }

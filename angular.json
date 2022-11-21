@@ -50,14 +50,7 @@
 			"schematics": {
 				"@schematics/angular:component": {
 					"style": "scss"
-				},
-				"@schematics/angular:class": {},
-				"@schematics/angular:directive": {},
-				"@schematics/angular:guard": {},
-				"@schematics/angular:interceptor": {},
-				"@schematics/angular:module": {},
-				"@schematics/angular:pipe": {},
-				"@schematics/angular:service": {}
+				}
 			},
 			"root": "santashop-admin",
 			"sourceRoot": "santashop-admin/src",
@@ -72,8 +65,11 @@
 						"polyfills": "santashop-admin/src/polyfills.ts",
 						"tsConfig": "santashop-admin/tsconfig.app.json",
 						"assets": [
-							"santashop-admin/src/favicon.ico",
-							"santashop-admin/src/assets",
+							{
+								"glob": "**/*",
+								"input": "src/assets",
+								"output": "assets"
+							},
 							{
 								"glob": "**/*.svg",
 								"input": "node_modules/ionicons/dist/ionicons/svg",
@@ -82,47 +78,9 @@
 						],
 						"styles": [
 							"santashop-admin/src/global.scss",
-							{
-								"input": "node_modules/@ionic/angular/css/normalize.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/structure.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/typography.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/display.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/core.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/padding.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/float-elements.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/text-alignment.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/text-transformation.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/flex-utils.css"
-							},
-							{
-								"input": "santashop-admin/src/theme/variables.scss"
-							}
+							"santashop-admin/src/theme/variables.scss"
 						],
-						"scripts": [],
-						"vendorChunk": true,
-						"extractLicenses": false,
-						"buildOptimizer": false,
-						"sourceMap": true,
-						"optimization": false,
-						"namedChunks": true
+						"scripts": []
 					},
 					"configurations": {
 						"production": {
@@ -132,13 +90,7 @@
 									"with": "santashop-admin/src/environments/environment.prod.ts"
 								}
 							],
-							"optimization": true,
 							"outputHashing": "all",
-							"sourceMap": false,
-							"namedChunks": false,
-							"extractLicenses": true,
-							"vendorChunk": false,
-							"buildOptimizer": true,
 							"budgets": [
 								{
 									"type": "initial",
@@ -147,8 +99,8 @@
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "6kb",
-									"maximumError": "10kb"
+									"maximumWarning": "2kb",
+									"maximumError": "4kb"
 								}
 							]
 						},
@@ -178,9 +130,20 @@
 									"maximumError": "10kb"
 								}
 							]
+						},
+						"development": {
+							"buildOptimizer": false,
+							"optimization": false,
+							"vendorChunk": true,
+							"extractLicenses": false,
+							"sourceMap": true,
+							"namedChunks": true
+						},
+						"ci": {
+							"progress": false
 						}
 					},
-					"defaultConfiguration": ""
+					"defaultConfiguration": "production"
 				},
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
@@ -193,8 +156,12 @@
 						},
 						"qa": {
 							"browserTarget": "santashop-admin:build:qa"
+						},
+						"development": {
+							"browserTarget": "santashop-admin:build:development"
 						}
-					}
+					},
+					"defaultConfiguration": "development"
 				},
 				"test": {
 					"builder": "@angular-devkit/build-angular:karma",
@@ -256,39 +223,7 @@
 						],
 						"styles": [
 							"santashop-app/src/global.scss",
-							{
-								"input": "node_modules/@ionic/angular/css/normalize.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/structure.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/typography.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/display.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/core.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/padding.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/float-elements.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/text-alignment.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/text-transformation.css"
-							},
-							{
-								"input": "node_modules/@ionic/angular/css/flex-utils.css"
-							},
-							{
-								"input": "santashop-app/src/theme/variables.scss"
-							}
+							"santashop-app/src/theme/variables.scss"
 						],
 						"scripts": [],
 						"vendorChunk": true,
@@ -348,13 +283,13 @@
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "6kb",
-									"maximumError": "10kb"
+									"maximumWarning": "2kb",
+									"maximumError": "4kb"
 								}
 							]
 						}
 					},
-					"defaultConfiguration": ""
+					"defaultConfiguration": "production"
 				},
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
@@ -430,9 +365,18 @@
 					}
 				}
 			}
-    	}
+		}
 	},
 	"cli": {
-	    "analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13"
+		"analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13",
+		"schematicCollections": ["@ionic/angular-toolkit"]
+	},
+	"schematics": {
+		"@ionic/angular-toolkit:component": {
+			"styleext": "scss"
+		},
+		"@ionic/angular-toolkit:page": {
+			"styleext": "scss"
+		}
 	}
 }

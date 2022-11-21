@@ -25,14 +25,14 @@
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
 
-.modal-md {
-	--min-height: 70%;
-	--min-width: 60%;
+// Disable autofill color
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+	transition: background-color 600000s 0s, color 600000s 0s;
+	background-color: transparent !important;
 }
 
-.firebase-emulator-warning {
-	display: none;
-}
-#ghostery-tracker-tally {
-	display: none;
+input:-internal-autofill-selected {
+	background-color: transparent !important;
+	color: transparent !important;
 }

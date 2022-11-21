@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PopoverOptions } from '@ionic/angular';
 import { ScannerService } from './services/scanner.service';
 
 @Component({
@@ -11,6 +12,13 @@ export class CheckinPage {
 	public readonly $availableDevices = this.scannerService.$availableDevices;
 	public readonly formatsEnabled = this.scannerService.formatsEnabled;
 	public readonly $deviceToUse = this.scannerService.$deviceToUse;
+
+	protected readonly interfaceOptions: PopoverOptions = {
+		alignment: 'center',
+		side: 'top',
+		showBackdrop: true,
+		backdropDismiss: true,
+	} as any;
 
 	constructor(private readonly scannerService: ScannerService) {}
 

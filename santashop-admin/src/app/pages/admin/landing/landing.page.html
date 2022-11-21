@@ -1,9 +1,63 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>landing</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content
+	class="ion-padding ion-text-center"
+	[fullscreen]="true"
+	[scrollY]="false"
+>
+	<ion-list>
+		<ion-list-header> DSCS Event Administration </ion-list-header>
+		<ion-item detail routerLink="../checkin">
+			<ion-icon
+				name="bag-check-outline"
+				color="success"
+				slot="start"
+			></ion-icon>
+			Check in customers
+		</ion-item>
+		<ion-item detail routerLink="../search">
+			<ion-icon
+				name="search-outline"
+				color="warning"
+				slot="start"
+			></ion-icon>
+			Search for customers
+		</ion-item>
+		<ion-item detail routerLink="../registration">
+			<ion-icon
+				name="person-add-outline"
+				color="primary"
+				slot="start"
+			></ion-icon>
+			Register customers
+		</ion-item>
 
-<ion-content>
+		<ion-list-header> DSCS Data </ion-list-header>
+		<ion-item detail routerLink="stats">
+			<ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+			Registration Stats
+		</ion-item>
+		<ion-item detail routerLink="stats">
+			<ion-icon
+				name="cart-outline"
+				color="secondary"
+				slot="start"
+			></ion-icon>
+			Check-In Stats
+		</ion-item>
 
+		<ion-list-header> Other </ion-list-header>
+		<ion-item detail>
+			<ion-icon
+				name="exit-outline"
+				color="danger"
+				slot="start"
+			></ion-icon>
+			Sign Out
+		</ion-item>
+		<ion-item>
+			<ion-toggle
+				slot="end"
+				(ionChange)="toggleTheme($event)"
+			></ion-toggle>
+		</ion-item>
+	</ion-list>
 </ion-content>

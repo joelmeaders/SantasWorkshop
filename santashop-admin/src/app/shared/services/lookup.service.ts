@@ -10,9 +10,7 @@ import { limit, orderBy, where } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-@Injectable({
-	providedIn: 'root',
-})
+@Injectable()
 export class LookupService {
 	private readonly collections = {
 		searchIndex: this.repoService.collection<RegistrationSearchIndex>(

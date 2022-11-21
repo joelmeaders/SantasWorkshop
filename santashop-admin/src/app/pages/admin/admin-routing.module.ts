@@ -9,7 +9,7 @@ const routes: Routes = [
 		component: AdminPage,
 		children: [
 			{
-				path: '',
+				path: 'landing',
 				loadChildren: () =>
 					import('./landing/landing.module').then(
 						(m) => m.LandingPageModule
@@ -35,6 +35,11 @@ const routes: Routes = [
 					import('./registration/registration.module').then(
 						(m) => m.RegistrationPageModule
 					),
+			},
+			{
+				path: '',
+				redirectTo: 'landing',
+				pathMatch: 'full',
 			},
 		],
 	},

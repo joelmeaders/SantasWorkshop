@@ -1,37 +1,52 @@
 <ion-header>
-	<ion-toolbar>
-		<ion-segment
-			#deviceSelection
-			[value]="($deviceId | async)"
-			(ionChange)="onDeviceSelectChange($event)"
-			scrollable="true"
-		>
-			<ion-segment-button #selection [value]="''">
-				None
-			</ion-segment-button>
-			<ion-segment-button
-				*ngFor="let device of ($availableDevices | async)"
-				[value]="device.deviceId"
-			>
-				{{ device.label.split(' (')[0] }}
-			</ion-segment-button>
-		</ion-segment>
+	<ion-toolbar color="light">
+		<ion-buttons slot="start">
+			<ion-back-button defaultHref="/admin"></ion-back-button>
+		</ion-buttons>
+		<ion-title> Check in </ion-title>
 	</ion-toolbar>
 </ion-header>
 
-<ion-content [hidden]="!($availableDevices | async)?.length">
-	<span>
-		<zxing-scanner
-			[formats]="formatsEnabled"
-			[device]="$deviceToUse | async"
-			[autostart]="true"
-			(camerasFound)="onCamerasFound($event)"
-			(deviceChange)="onDeviceChange($event)"
-			(scanSuccess)="onCodeResult($event)"
-			(permissionResponse)="onHasPermission($event)"
-			(scanError)="onScanError($event)"
-		></zxing-scanner>
-	</span>
+<ion-content
+	[hidden]="!($availableDevices | async)?.length"
+	[fullscreen]="true"
+	[scrollX]="false"
+	[scrollY]="false"
+>
+	<zxing-scanner
+		[formats]="formatsEnabled"
+		[device]="$deviceToUse | async"
+		[autostart]="true"
+		(camerasFound)="onCamerasFound($event)"
+		(deviceChange)="onDeviceChange($event)"
+		(scanSuccess)="onCodeResult($event)"
+		(permissionResponse)="onHasPermission($event)"
+		(scanError)="onScanError($event)"
+	></zxing-scanner>
+
+	<div class="selection-container">
+		<ion-item lines="none" color="tertiary">
+			<ion-icon name="camera" slot="start"></ion-icon>
+			<ion-select
+				#deviceSelection
+				[value]="($deviceId | async)"
+				(ionChange)="onDeviceSelectChange($event)"
+				scrollable="true"
+				interface="popover"
+				[interfaceOptions]="interfaceOptions"
+			>
+				<ion-select-option #selection [value]="''" disabled>
+					No Camera Selected
+				</ion-select-option>
+				<ion-select-option
+					*ngFor="let device of ($availableDevices | async)"
+					[value]="device.deviceId"
+				>
+					{{ device.label.split(' (')[0] }}
+				</ion-select-option>
+			</ion-select>
+		</ion-item>
+	</div>
 </ion-content>
 
 <ng-container *appLet="$hasPermissions | async as hasPermission">

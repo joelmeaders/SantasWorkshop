@@ -1,0 +1,25 @@
+zxing-scanner {
+	height: 100%;
+}
+
+:host zxing-scanner::ng-deep video {
+	height: 100%;
+	width: 100vw;
+	object-fit: cover;
+}
+
+.selection-container {
+	position: absolute;
+	border-radius: 36px;
+	border-width: 0.3em;
+	border-style: solid;
+	border-color: var(--ion-color-light);
+	left: 50%;
+	transform: translate(-50%, -150%);
+	max-width: 90%;
+	box-shadow: rgb(0, 0, 0) 0px 20px 30px -10px;
+}
+
+ion-item {
+	--border-radius: 24px;
+}

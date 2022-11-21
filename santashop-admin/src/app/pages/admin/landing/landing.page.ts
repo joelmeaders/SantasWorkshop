@@ -1,15 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { AuthService } from '@core/*';
 
 @Component({
-  selector: 'admin-landing',
-  templateUrl: './landing.page.html',
-  styleUrls: ['./landing.page.scss'],
+	selector: 'admin-landing',
+	templateUrl: './landing.page.html',
+	styleUrls: ['./landing.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LandingPage implements OnInit {
+export class LandingPage {
+	constructor(private readonly authService: AuthService) {}
 
-  constructor() { }
+	public async logout(): Promise<void> {
+		await this.authService.logout();
+	}
 
-  ngOnInit() {
-  }
-
+	public toggleTheme($event: any): void {
+		document.body.classList.toggle('dark', $event.detail.checked);
+	}
 }

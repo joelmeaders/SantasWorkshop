@@ -1,135 +1,19 @@
 <admin-header title="Search"></admin-header>
 
-<ion-content fullscreen class="ion-padding" scroll-y="false">
-	<ion-slides id="slider" #slider [options]="swiperOptions" pager>
-		<!-- Search Type -->
-		<ion-slide>
-			<div class="slide">
-				<ion-list>
-					<ion-list-header> Choose search option </ion-list-header>
-					<ion-item
-						detail
-						button
-						class="search-item"
-						(click)="setSearchType('name')"
-					>
-						Name & Zip Code
-					</ion-item>
-					<ion-item
-						detail
-						button
-						class="search-item"
-						(click)="setSearchType('email')"
-					>
-						Email Address
-					</ion-item>
-					<ion-item
-						detail
-						button
-						class="search-item"
-						(click)="setSearchType('code')"
-					>
-						Registration Code
-					</ion-item>
-				</ion-list>
-			</div>
-		</ion-slide>
-		<ion-slide>
-			<div class="slide">
-				<div [ngSwitch]="searchType$ | async">
-					<div *ngSwitchCase="'name'">
-						<form [formGroup]="nameForm">
-							<ion-list>
-								<ion-list-header>
-									Enter last name and zip code
-								</ion-list-header>
-								<ion-item>
-									<ion-label position="floating">
-										Last name
-									</ion-label>
-									<ion-input
-										formControlName="lastName"
-									></ion-input>
-								</ion-item>
-								<ion-item>
-									<ion-label position="floating">
-										Zip code
-									</ion-label>
-									<ion-input
-										formControlName="zipCode"
-									></ion-input>
-								</ion-item>
-							</ion-list>
-						</form>
-						<ng-container
-							[ngTemplateOutlet]="searchButtonTemplate"
-						></ng-container>
-					</div>
-					<div *ngSwitchCase="'email'">
-						<form [formGroup]="emailForm">
-							<ion-list>
-								<ion-list-header color="light">
-									Enter email address
-								</ion-list-header>
-								<ion-item>
-									<ion-label position="floating">
-										Email Address
-									</ion-label>
-									<ion-input
-										formControlName="emailAddress"
-									></ion-input>
-								</ion-item>
-							</ion-list>
-						</form>
-						<ng-container
-							[ngTemplateOutlet]="searchButtonTemplate"
-						></ng-container>
-					</div>
-					<div *ngSwitchCase="'code'">
-						<form [formGroup]="codeForm">
-							<ion-list>
-								<ion-list-header>
-									Enter 8 character code
-								</ion-list-header>
-								<ion-item>
-									<ion-label position="floating">
-										Registration Code
-									</ion-label>
-									<ion-input
-										formControlName="code"
-									></ion-input>
-								</ion-item>
-							</ion-list>
-						</form>
-						<ng-container
-							[ngTemplateOutlet]="searchButtonTemplate"
-						></ng-container>
-					</div>
-				</div>
-			</div>
-		</ion-slide>
-		<ion-slide>
-			<div class="slide">
-				<ion-list>
-					<ion-list-header> Search Results </ion-list-header>
-					<ion-item *ngFor="let result of searchResults$ | async">
-						{{ result.firstName }}
-					</ion-item>
-				</ion-list>
-			</div>
-		</ion-slide>
-	</ion-slides>
+<ion-content fullscreen class="ion-padding">
+	<ion-card-header>
+		<ion-card-title> Step 1 </ion-card-title>
+		<ion-card-subtitle> How do you want to search? </ion-card-subtitle>
+	</ion-card-header>
+	<ion-list>
+		<ion-item detail button class="search-item" routerLink="by-name">
+			Name & Zip Code
+		</ion-item>
+		<ion-item detail button class="search-item" routerLink="by-email">
+			Email Address
+		</ion-item>
+		<ion-item detail button class="search-item" routerLink="by-code">
+			Registration Code
+		</ion-item>
+	</ion-list>
 </ion-content>
-
-<ng-template #searchButtonTemplate>
-	<div class="buttons">
-		<ion-button color="danger" (click)="reset()">
-			<ion-icon name="backspace-outline" slot="start"></ion-icon>
-			<ion-label> Reset </ion-label>
-		</ion-button>
-		<ion-button (click)="search()">
-			<ion-icon name="search-outline" slot="start"></ion-icon>
-			<ion-label> Search </ion-label>
-		</ion-button>
-	</div>
-</ng-template>

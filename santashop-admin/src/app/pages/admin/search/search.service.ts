@@ -2,18 +2,20 @@ import { Injectable } from '@angular/core';
 import { FireRepoLite, QueryConstraint } from '@core/*';
 import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@models/*';
 import { limit, orderBy, where } from 'firebase/firestore';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class SearchService {
+	public searchResults$: Observable<RegistrationSearchIndex[]> | null = null;
+
 	private readonly index =
 		this.repoService.collection<RegistrationSearchIndex>(
 			COLLECTION_SCHEMA.registrationSearchIndex
 		);
 
-	private readonly constaintLastNameZip = (
+	private readonly queryLastNameZip = (
 		lastName: string,
 		zipCode: string
 	): QueryConstraint[] =>
@@ -25,27 +27,38 @@ export class SearchService {
 			limit(50),
 		] as QueryConstraint[];
 
-	private readonly sort = (
-		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex
-	): number =>
-		a.lastName.localeCompare(b.lastName) ||
-		a.firstName.localeCompare(b.firstName) ||
-		a.zip.localeCompare(b.zip);
+	private readonly queryEmail = (emailAddress: string): QueryConstraint[] =>
+		[
+			where('emailAddress', '>=', emailAddress),
+			where('emailAddress', '<=', emailAddress + '\uf8ff'),
+			orderBy('emailAddress', 'asc'),
+			limit(50),
+		] as QueryConstraint[];
 
-	private readonly sortResults = (
-		results: RegistrationSearchIndex[]
-	): RegistrationSearchIndex[] => results.sort(this.sort);
-
-	public readonly searchByLastNameZip = (
-		lastName: string,
-		zipCode: string
-	): Observable<RegistrationSearchIndex[]> =>
-		this.index
-			.readMany(
-				this.constaintLastNameZip(lastName.toLowerCase(), zipCode)
-			)
-			.pipe(map(this.sortResults));
+	private readonly queryCode = (code: string): QueryConstraint[] =>
+		[where('code', '==', code), limit(50)] as QueryConstraint[];
 
 	constructor(private readonly repoService: FireRepoLite) {}
+
+	public searchByLastNameZip(lastName: string, zipCode: string): void {
+		this.searchResults$ = this.index.readMany(
+			this.queryLastNameZip(lastName.toLowerCase(), zipCode)
+		);
+	}
+
+	public searchByEmail(emailAddress: string): void {
+		this.searchResults$ = this.index.readMany(
+			this.queryEmail(emailAddress.toLowerCase())
+		);
+	}
+
+	public searchByCode(code: string): void {
+		this.searchResults$ = this.index.readMany(
+			this.queryCode(code.toUpperCase())
+		);
+	}
+
+	public reset(): void {
+		this.searchResults$ = null;
+	}
 }

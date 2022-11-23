@@ -1,13 +1,3 @@
-ion-slides,
-ion-slide {
-	height: 100%;
-}
-
-.slide {
-	width: 100%;
-	height: 100%;
-}
-
 ion-list {
 	width: 100%;
 }
@@ -16,12 +6,4 @@ ion-item.search-item {
 	--inner-padding-top: 24px;
 	--inner-padding-bottom: 24px;
 	font-size: 1.1rem;
-}
-
-.buttons {
-	bottom: 0;
-	padding-top: 24px;
-	width: 100%;
-	display: flex;
-	justify-content: space-evenly;
 }

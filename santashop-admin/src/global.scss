@@ -36,3 +36,11 @@ input:-internal-autofill-selected {
 	background-color: transparent !important;
 	color: transparent !important;
 }
+
+.search-buttons {
+	bottom: 0;
+	padding-top: 24px;
+	width: 100%;
+	display: flex;
+	justify-content: space-evenly;
+}

@@ -1,0 +1,22 @@
+h1 {
+	font-size: 3em;
+	font-weight: 700;
+	color: var(--ion-color-dark);
+	text-align: center;
+	margin-bottom: 0;
+	width: auto;
+}
+
+h3 {
+	margin-top: 0;
+	text-align: center;
+	width: auto;
+}
+
+.count-container {
+	padding: 12px;
+	text-align: center;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+		rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+	border-radius: 24px;
+}

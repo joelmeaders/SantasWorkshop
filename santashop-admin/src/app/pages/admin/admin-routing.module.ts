@@ -45,8 +45,22 @@ const routes: Routes = [
 	},
 	{
 		path: 'stats',
-		loadChildren: () =>
-			import('./stats/stats.module').then((m) => m.StatsPageModule),
+		children: [
+			{
+				path: 'registration',
+				loadChildren: () =>
+					import('./stats/registration/registration.module').then(
+						(m) => m.RegistrationPageModule
+					),
+			},
+			{
+				path: 'check-in',
+				loadChildren: () =>
+					import('./stats/check-in/check-in.module').then(
+						(m) => m.CheckInPageModule
+					),
+			},
+		],
 	},
 ];
 

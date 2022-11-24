@@ -1,0 +1,81 @@
+<admin-header title="Registration Stats"></admin-header>
+
+<ion-content fullscreen class="ion-padding">
+	<ion-grid>
+		<ion-row>
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="4" sizeLg="3">
+				<div
+					class="count-container"
+					*ngIf="registrationCount$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>Registrations</h3>
+				</div>
+			</ion-col>
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="4" sizeLg="3">
+				<div
+					class="count-container"
+					*ngIf="childCount$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>Children</h3>
+				</div>
+			</ion-col>
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="4" sizeLg="3">
+				<div
+					class="count-container"
+					*ngIf="childrenPerCustomer$ | async as count"
+				>
+					<h1>{{ count | number:'1.0-2' }}</h1>
+					<h3>Children per Customer</h3>
+				</div>
+			</ion-col>
+		</ion-row>
+		<ion-row *ngIf="girlBoyInfantCounts$ | async as gender">
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="4">
+				<h1>Gender</h1>
+				<canvas
+					baseChart
+					[datasets]="[ { data: gender, datalabels: { font: { size: 24, weight: 700 } } } ]"
+					[labels]="[ 'Girls', 'Boys', 'Infants' ]"
+					[legend]="true"
+					type="doughnut"
+				></canvas>
+			</ion-col>
+
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="6"
+				sizeLg="4"
+				*ngIf="topTenZipCodesCountData$ | async as pieData"
+			>
+				<h1>Top Zip Codes</h1>
+				<canvas
+					baseChart
+					[data]="pieData"
+					[options]="pieChartOptions"
+					[legend]="false"
+					type="pie"
+				></canvas>
+			</ion-col>
+
+			<ion-col
+				sizeXs="12"
+				sizeSm="12"
+				sizeMd="12"
+				sizeLg="8"
+				*ngIf="familiesBySlotsChartData$ | async as data"
+			>
+				<h1>Registration Schedule</h1>
+				<canvas
+					baseChart
+					[datasets]="data"
+					[labels]="['Dec 9', 'Dec 10', 'Dec 12', 'Dec 13']"
+					[legend]="true"
+					type="bar"
+				></canvas>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
+</ion-content>

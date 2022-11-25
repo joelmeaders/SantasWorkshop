@@ -14,3 +14,9 @@
 	width: 200px;
 	--border-radius: 20px;
 }
+
+.inset-list {
+	ion-item {
+		--inner-padding-start: 12px;
+	}
+}

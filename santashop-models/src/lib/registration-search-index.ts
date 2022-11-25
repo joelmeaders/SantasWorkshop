@@ -3,6 +3,6 @@ export interface RegistrationSearchIndex {
 	lastName: string;
 	emailAddress: string;
 	customerId: string;
-	zip: number;
+	zip: string;
 	code?: string;
 }

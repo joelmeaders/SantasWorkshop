@@ -5,19 +5,12 @@ admin.initializeApp();
 export default async (): Promise<void> => {
 	// TODO: Put these in an anvironment variable
 	const adminUids: string[] = [
-		'Qyvgav7d9Ye0RyJYCG2ZgQPppKt1',
-		'dabX8OSbk0g8yIdNEIjSd89P8Mb2',
-		'YjnlglWP1izlacDWi3D2Trx1FAnd', // dev environment
-		'abSHiDLbWqdWawhfjfKSrN5naFA2',
+		'KF2cN3wX3bawCJaghN9JjLvdbB32', // dev
+		'dabX8OSbk0g8yIdNEIjSd89P8Mb2', // admin
 	];
 
 	adminUids.forEach(async (uid) => {
-		try {
-			await admin.auth().setCustomUserClaims(uid, { admin: true });
-		} catch {
-			// Do nothing.
-			// Failures will happen between environments
-		}
+		await admin.auth().setCustomUserClaims(uid, { admin: true });
 	});
 
 	return Promise.resolve();

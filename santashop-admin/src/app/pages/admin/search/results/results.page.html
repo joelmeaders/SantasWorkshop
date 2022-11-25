@@ -1,0 +1,98 @@
+<admin-header title="Search Results" defaultHref="admin/search"></admin-header>
+
+<ion-content>
+	<ng-container *appLet="searchResults$ | async as results">
+		<div
+			*ngIf="results === null; else showResults"
+			class="center-100 searching"
+		>
+			<ion-spinner name="crescent"></ion-spinner>
+			<ion-card-subtitle> Searching, please wait... </ion-card-subtitle>
+			<ion-button
+				color="medium"
+				class="ion-padding ion-margin"
+				routerLink=".."
+				(click)="reset()"
+			>
+				Cancel
+			</ion-button>
+		</div>
+
+		<ng-template #showResults>
+			<span *ngIf="results.length > 0; else noResults">
+				<div class="ion-padding-top ion-text-center">
+					Click any name to continue ({{ results?.length }} results)
+				</div>
+				<ion-list>
+					<ion-list-header *appLet="sortBy$ | async as sortFn">
+						Sort By
+						<ion-chip
+							(click)="setSortType(sortLast)"
+							[color]="sortFn === sortLast ? 'primary' : 'medium'"
+						>
+							Last, First, Zip
+						</ion-chip>
+						<ion-chip
+							(click)="setSortType(sortFirst)"
+							[color]="sortFn === sortFirst ? 'primary' : 'medium'"
+						>
+							First, Last
+						</ion-chip>
+						<ion-chip
+							(click)="setSortType(sortEmail)"
+							[color]="sortFn === sortEmail ? 'primary' : 'medium'"
+						>
+							Email
+						</ion-chip>
+					</ion-list-header>
+					<ion-item
+						*ngFor="let result of results"
+						detail
+						button
+						class="result-item"
+						lines="full"
+					>
+						<div class="result-label">
+							<h3>
+								{{ result.firstName }} {{ result.lastName }}
+							</h3>
+							<ion-label> {{ result.emailAddress }} </ion-label>
+							<ion-label> Zip: {{ result.zip }} </ion-label>
+						</div>
+					</ion-item>
+				</ion-list>
+				<div class="center-100">
+					<ion-button
+						color="danger"
+						(click)="reset()"
+						routerLink=".."
+					>
+						<ion-icon
+							name="backspace-outline"
+							slot="start"
+						></ion-icon>
+						<ion-label> Start Over </ion-label>
+					</ion-button>
+				</div>
+			</span>
+
+			<ng-template #noResults>
+				<div class="center-100 searching">
+					<h2>No results found</h2>
+
+					<ion-button
+						color="danger"
+						(click)="reset()"
+						routerLink=".."
+					>
+						<ion-icon
+							name="backspace-outline"
+							slot="start"
+						></ion-icon>
+						<ion-label> Start Over </ion-label>
+					</ion-button>
+				</div>
+			</ng-template>
+		</ng-template>
+	</ng-container>
+</ion-content>

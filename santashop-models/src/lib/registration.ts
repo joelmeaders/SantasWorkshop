@@ -29,7 +29,7 @@ export interface Registration {
 	// registration with this record.
 	includedInRegistrationStats?: false | Date;
 
-	zipCode?: number;
+	zipCode?: string;
 
 	referredBy?: string;
 }

@@ -12,12 +12,10 @@
 				"createDefaultProgram": true
 			},
 			"rules": {
-				"@angular-eslint/directive-selector": [
+				"@angular-eslint/component-class-suffix": [
 					"error",
 					{
-						"type": "attribute",
-						"prefix": "admin",
-						"style": "camelCase"
+						"suffixes": ["Page", "Component"]
 					}
 				],
 				"@angular-eslint/component-selector": [
@@ -26,6 +24,14 @@
 						"type": "element",
 						"prefix": "admin",
 						"style": "kebab-case"
+					}
+				],
+				"@angular-eslint/directive-selector": [
+					"error",
+					{
+						"type": "attribute",
+						"prefix": "admin",
+						"style": "camelCase"
 					}
 				]
 			}

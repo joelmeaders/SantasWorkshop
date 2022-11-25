@@ -1,0 +1,64 @@
+<admin-header title="Check In"></admin-header>
+
+<ion-content
+	[hidden]="!($availableDevices | async)?.length"
+	[fullscreen]="true"
+	[scrollX]="false"
+	[scrollY]="false"
+>
+	<zxing-scanner
+		[formats]="formatsEnabled"
+		[device]="$deviceToUse | async"
+		[autostart]="true"
+		(camerasFound)="onCamerasFound($event)"
+		(deviceChange)="onDeviceChange($event)"
+		(scanSuccess)="onCodeResult($event)"
+		(permissionResponse)="onHasPermission($event)"
+		(scanError)="onScanError($event)"
+	></zxing-scanner>
+
+	<div class="selection-container">
+		<ion-item lines="none" color="tertiary">
+			<ion-icon name="camera" slot="start"></ion-icon>
+			<ion-select
+				#deviceSelection
+				[value]="($deviceId | async)"
+				(ionChange)="onDeviceSelectChange($event)"
+				scrollable="true"
+				interface="popover"
+				[interfaceOptions]="interfaceOptions"
+			>
+				<ion-select-option #selection [value]="''" disabled>
+					No Camera Selected
+				</ion-select-option>
+				<ion-select-option
+					*ngFor="let device of ($availableDevices | async)"
+					[value]="device.deviceId"
+				>
+					{{ device.label.split(' (')[0] }}
+				</ion-select-option>
+			</ion-select>
+		</ion-item>
+	</div>
+</ion-content>
+
+<ng-container *appLet="$hasPermissions | async as hasPermission">
+	<ng-container *ngIf="hasPermission === undefined">
+		<h2>Waiting for permissions.</h2>
+		<blockquote>
+			If your device does not have cameras, no permissions will be asked.
+		</blockquote>
+	</ng-container>
+
+	<ng-container *ngIf="hasPermission === false">
+		<h2>
+			You denied the camera permission, we can't scan anything without it.
+			😪
+		</h2>
+	</ng-container>
+
+	<ng-container *ngIf="($availableDevices | async) === undefined">
+		<h2>Couldn't check for devices.</h2>
+		<blockquote>This may be caused by some security error.</blockquote>
+	</ng-container>
+</ng-container>

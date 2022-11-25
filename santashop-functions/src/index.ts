@@ -149,9 +149,9 @@ export const scheduledDateTimeSlotReschedules = functions.pubsub
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
 
-export const scheduledSetAdminRights = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
+export const pubsubSetAdminRights = functions.pubsub
+	.topic('set-admin-rights')
+	.onPublish(async () => {
 		await (await import('./fn/scheduledSetAdminRights')).default();
 	});
 

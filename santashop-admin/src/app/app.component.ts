@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Platform } from '@ionic/angular';
 
 @Component({
 	selector: 'app-root',
@@ -7,11 +6,5 @@ import { Platform } from '@ionic/angular';
 	styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-	constructor(private readonly platform: Platform) {
-		this.initializeApp();
-	}
-
-	public initializeApp(): void {
-		this.platform.ready().then(() => {});
-	}
+	constructor() {}
 }

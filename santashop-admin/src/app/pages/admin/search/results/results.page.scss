@@ -1,0 +1,29 @@
+.center-100 {
+	width: 100%;
+	padding: 24px;
+	text-align: center;
+}
+
+.searching {
+	margin-top: 140px;
+}
+
+h3 {
+	margin-top: 2px;
+	margin-bottom: 0;
+	font-weight: 600;
+	text-transform: capitalize;
+}
+
+ion-item.result-item {
+	--inner-padding-top: 12px;
+	--inner-padding-bottom: 12px;
+
+	.result-label {
+		line-height: 1.5em;
+	}
+
+	&:nth-child(even) {
+		--background: rgba(var(--ion-color-medium-rgb), 0.2);
+	}
+}

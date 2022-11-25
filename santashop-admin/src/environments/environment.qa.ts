@@ -1,5 +1,5 @@
 import config from '../../../package.json';
-import firebaseConfigDev from '../../../firebase.environment.json';
+import firebaseConfigDev from '../../../firebase.environment.test.json';
 
 export const environment = {
 	production: true,

@@ -107,8 +107,8 @@
 						"qa": {
 							"fileReplacements": [
 								{
-									"replace": "santashop-app/src/environments/environment.ts",
-									"with": "santashop-app/src/environments/environment.qa.ts"
+									"replace": "santashop-admin/src/environments/environment.ts",
+									"with": "santashop-admin/src/environments/environment.qa.ts"
 								}
 							],
 							"budgets": [
@@ -119,8 +119,8 @@
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "6kb",
-									"maximumError": "10kb"
+									"maximumWarning": "2kb",
+									"maximumError": "4kb"
 								}
 							]
 						},
@@ -181,14 +181,7 @@
 			"schematics": {
 				"@schematics/angular:component": {
 					"style": "scss"
-				},
-				"@schematics/angular:class": {},
-				"@schematics/angular:directive": {},
-				"@schematics/angular:guard": {},
-				"@schematics/angular:interceptor": {},
-				"@schematics/angular:module": {},
-				"@schematics/angular:pipe": {},
-				"@schematics/angular:service": {}
+				}
 			},
 			"root": "santashop-app",
 			"sourceRoot": "santashop-app/src",
@@ -218,13 +211,7 @@
 							"santashop-app/src/global.scss",
 							"santashop-app/src/theme/variables.scss"
 						],
-						"scripts": [],
-						"vendorChunk": true,
-						"extractLicenses": false,
-						"buildOptimizer": false,
-						"sourceMap": true,
-						"optimization": false,
-						"namedChunks": true
+						"scripts": []
 					},
 					"configurations": {
 						"production": {
@@ -234,40 +221,6 @@
 									"with": "santashop-app/src/environments/environment.prod.ts"
 								}
 							],
-							"optimization": true,
-							"outputHashing": "all",
-							"sourceMap": false,
-							"namedChunks": false,
-							"extractLicenses": true,
-							"vendorChunk": false,
-							"buildOptimizer": true,
-							"budgets": [
-								{
-									"type": "initial",
-									"maximumWarning": "2mb",
-									"maximumError": "5mb"
-								},
-								{
-									"type": "anyComponentStyle",
-									"maximumWarning": "6kb",
-									"maximumError": "10kb"
-								}
-							]
-						},
-						"qa": {
-							"fileReplacements": [
-								{
-									"replace": "santashop-app/src/environments/environment.ts",
-									"with": "santashop-app/src/environments/environment.qa.ts"
-								}
-							],
-							"optimization": true,
-							"outputHashing": "all",
-							"sourceMap": false,
-							"namedChunks": false,
-							"extractLicenses": true,
-							"vendorChunk": false,
-							"buildOptimizer": true,
 							"budgets": [
 								{
 									"type": "initial",
@@ -280,6 +233,37 @@
 									"maximumError": "4kb"
 								}
 							]
+						},
+						"qa": {
+							"fileReplacements": [
+								{
+									"replace": "santashop-app/src/environments/environment.ts",
+									"with": "santashop-app/src/environments/environment.qa.ts"
+								}
+							],
+							"budgets": [
+								{
+									"type": "initial",
+									"maximumWarning": "2mb",
+									"maximumError": "5mb"
+								},
+								{
+									"type": "anyComponentStyle",
+									"maximumWarning": "2kb",
+									"maximumError": "4kb"
+								}
+							]
+						},
+						"development": {
+							"buildOptimizer": false,
+							"optimization": false,
+							"vendorChunk": true,
+							"extractLicenses": false,
+							"sourceMap": true,
+							"namedChunks": true
+						},
+						"ci": {
+							"progress": false
 						}
 					},
 					"defaultConfiguration": "production"
@@ -295,8 +279,12 @@
 						},
 						"qa": {
 							"browserTarget": "santashop-app:build:qa"
+						},
+						"development": {
+							"browserTarget": "santashop-app:build:development"
 						}
-					}
+					},
+					"defaultConfiguration": "development"
 				},
 				"test": {
 					"builder": "@angular-devkit/build-angular:karma",

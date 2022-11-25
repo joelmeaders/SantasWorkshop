@@ -29,7 +29,10 @@
 							></ion-icon>
 						</ion-button>
 
-						<div class="ion-padding es-mg-bottom-xxl">
+						<div
+							class="ion-padding es-mg-bottom-xxl"
+							*appLet="chosenSlot$ | async as chosenSlot"
+						>
 							<ion-item class="inset-ion-item-title" color="none">
 								<ion-card-title lines="full">
 									{{ "MENU.SCHEDULE" | translate }}
@@ -43,7 +46,7 @@
 								</p>
 							</div>
 
-							<ion-card>
+							<ion-card *ngIf="chosenSlot">
 								<ion-card-header>
 									<ion-card-title color="xmasred">
 										{{ "SCHEDULE.YOUR_DATE/TIME" | translate
@@ -52,11 +55,7 @@
 								</ion-card-header>
 
 								<ion-card-content class="ion-text-center">
-									<ng-container
-										*appLet="
-											chosenSlot$ | async as chosenSlot
-										"
-									>
+									<ng-container>
 										<ng-container
 											*ngIf="chosenSlot$ | async as chosenSlot"
 										>
@@ -67,12 +66,12 @@
 												<h2>
 													<strong>
 														{{
-														"SCHEDULE.NO_TIME_SELECTED."
+														"SCHEDULE.NO_TIME_SELECTED"
 														| translate }}
 													</strong>
 												</h2>
 												<ion-label>
-													{{ "SCHEDULE.ADD_ONE_BELOW."
+													{{ "SCHEDULE.ADD_ONE_BELOW"
 													| translate }}
 												</ion-label>
 											</div>
@@ -151,7 +150,7 @@
 											<ion-list
 												slot="content"
 												color="light"
-												class="ion-no-padding es-pd-left-xxl"
+												class="ion-no-padding inset-list"
 											>
 												<ion-item
 													*ngFor="

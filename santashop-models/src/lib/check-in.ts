@@ -16,7 +16,7 @@ export interface CheckInStats {
 	toyTypeInfant: number;
 	toyTypeBoy: number;
 	toyTypeGirl: number;
-	zipCode: number;
+	zipCode: string;
 	modifiedAtCheckIn: boolean;
 }
 

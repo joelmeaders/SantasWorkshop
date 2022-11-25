@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
 import { CheckIn, Registration } from '@models/';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import {
 	distinctUntilChanged,
 	filter,
@@ -69,6 +69,21 @@ export class RegistrationContextService {
 		this.registration.next(registration);
 	}
 
+	public async setCurrentRegistrationByCode(
+		code: string
+	): Promise<Registration> {
+		const registration = await firstValueFrom(
+			this.lookupService.getRegistrationByQrCode$(code)
+		);
+
+		if (registration) {
+			this.setCurrentRegistration(registration);
+			return registration;
+		} else {
+			throw new Error(`Unable to find registration by qr code ${code}`);
+		}
+	}
+
 	public reset(): void {
 		this.registration.next(undefined);
 		this.checkin.next(undefined);
@@ -95,6 +110,7 @@ export class RegistrationContextService {
 				this.reset();
 			}
 
+			// TODO: THis
 			if (dismiss.role === 'edit') {
 				this.router.navigate(['/admin/register']);
 			}

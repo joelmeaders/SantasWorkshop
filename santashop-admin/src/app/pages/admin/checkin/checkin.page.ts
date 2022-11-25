@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
-import { PopoverOptions } from '@ionic/angular';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { AlertController, PopoverOptions } from '@ionic/angular';
+import { RegistrationContextService } from '../../../shared/services/registration-context.service';
 import { ScannerService } from './services/scanner.service';
 
 @Component({
 	selector: 'admin-checkin',
 	templateUrl: './checkin.page.html',
 	styleUrls: ['./checkin.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckinPage {
 	public readonly $deviceId = this.scannerService.$deviceId;
@@ -20,7 +22,11 @@ export class CheckinPage {
 		backdropDismiss: true,
 	} as any;
 
-	constructor(private readonly scannerService: ScannerService) {}
+	constructor(
+		private readonly scannerService: ScannerService,
+		private readonly registrationContext: RegistrationContextService,
+		private readonly alertController: AlertController
+	) {}
 
 	public ionViewWillLeave(): void {
 		this.scannerService.navigatedAway();
@@ -35,8 +41,14 @@ export class CheckinPage {
 	}
 
 	public async onCodeResult(resultString: string): Promise<void> {
-		// this.scannerService.onCodeResult(resultString);
-		console.log(resultString);
+		try {
+			await this.registrationContext.setCurrentRegistrationByCode(
+				resultString
+			);
+		} catch (error: any) {
+			error.code = 'find-reg';
+			await this.handleError(error);
+		}
 	}
 
 	public onDeviceSelectChange($event: any): void {
@@ -54,5 +66,16 @@ export class CheckinPage {
 
 	public async onScanError(error: any): Promise<void> {
 		this.scannerService.onScanError(error);
+	}
+
+	private async handleError(error: any): Promise<void> {
+		const alert = await this.alertController.create({
+			header: 'Error',
+			subHeader: error.name,
+			message: error.message,
+			buttons: ['Ok'],
+		});
+
+		await alert.present();
 	}
 }

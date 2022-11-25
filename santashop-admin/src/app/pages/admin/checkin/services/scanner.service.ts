@@ -94,29 +94,8 @@ export class ScannerService implements OnDestroy {
 		this.availableDevices.next(devices);
 	}
 
-	// public async onCodeResult(resultString: string): Promise<void> {
-	// 	try {
-	// 		const registration = await this.lookupService
-	// 			.getRegistrationByQrCode$(resultString)
-	// 			.pipe(take(1))
-	// 			.toPromise();
-
-	// 		if (registration) {
-	// 			this.registrationContext.setCurrentRegistration(registration);
-	// 		} else {
-	// 			throw new Error(
-	// 				`Unable to find registration by qr code ${resultString}`
-	// 			);
-	// 		}
-	// 	} catch (error: any) {
-	// 		error.code = 'find-reg';
-	// 		await this.handleError(error as IError);
-	// 	}
-	// }
-
 	public onDeviceSelectChange($event: any): void {
 		// deviceId
-
 		const deviceId = $event?.detail?.value;
 
 		if (deviceId === undefined || null) {

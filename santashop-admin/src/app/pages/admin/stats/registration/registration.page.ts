@@ -78,7 +78,7 @@ export class RegistrationPage {
 	);
 
 	public readonly familiesBySlotsChartData$ = this.familiesBySlots$.pipe(
-		map((data) => this.mapFamiliesByDateToChart(data))
+		map((data) => this.mapFamiliesByDateToChart2(data))
 	);
 
 	private readonly zipCodeStats$ = this.registrationStats$.pipe(
@@ -116,6 +116,28 @@ export class RegistrationPage {
 		})
 	);
 
+	public readonly colorSettings = {
+		backgroundColor: [
+			'rgba(255, 99, 132, 0.2)',
+			'rgba(255, 159, 64, 0.2)',
+			'rgba(255, 205, 86, 0.2)',
+			'rgba(75, 192, 192, 0.2)',
+			'rgba(54, 162, 235, 0.2)',
+			'rgba(153, 102, 255, 0.2)',
+			'rgba(201, 203, 207, 0.2)',
+		],
+		borderColor: [
+			'rgb(255, 99, 132)',
+			'rgb(255, 159, 64)',
+			'rgb(255, 205, 86)',
+			'rgb(75, 192, 192)',
+			'rgb(54, 162, 235)',
+			'rgb(153, 102, 255)',
+			'rgb(201, 203, 207)',
+		],
+		borderWidth: 1,
+	};
+
 	public pieChartOptions: ChartConfiguration['options'] = {
 		responsive: true,
 		plugins: {
@@ -133,26 +155,64 @@ export class RegistrationPage {
 		},
 	};
 
+	public barChartOptions: ChartConfiguration['options'] = {
+		responsive: true,
+		// We use these empty structures as placeholders for dynamic theming.
+		scales: {
+			x: {},
+			y: {
+				min: 0,
+				max: 350,
+			},
+		},
+		plugins: {
+			legend: {
+				display: false,
+			},
+			datalabels: {
+				anchor: 'end',
+				align: 'end',
+			},
+		},
+	};
+
 	constructor(private readonly httpService: FireRepoLite) {}
 
-	private mapFamiliesByDateToChart(
+	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[]
-	): { data: number[]; label: string }[] {
-		const arr: { data: number[]; label: string }[] = [
-			{ data: [], label: '10am' },
-			{ data: [], label: '11am' },
-			{ data: [], label: '12pm' },
-			{ data: [], label: '1pm' },
-			{ data: [], label: '2pm' },
+	): ChartData<'bar'>[] {
+		const arr: {
+			datasets: { data: number[]; label: string }[];
+		}[] = [
+			{
+				datasets: [
+					{ data: [], label: 'Dec 9th', ...this.colorSettings },
+				],
+			},
+			{
+				datasets: [
+					{ data: [], label: 'Dec 10th', ...this.colorSettings },
+				],
+			},
+			{
+				datasets: [
+					{ data: [], label: 'Dec 11th', ...this.colorSettings },
+				],
+			},
+			{
+				datasets: [
+					{ data: [], label: 'Dec 12th', ...this.colorSettings },
+				],
+			},
 		];
 
 		let days = 0;
 
 		data.forEach((e, i) => {
-			if (i > 0 && i % 5 === 0) days++;
-			arr[i - days * 5].data.push(e.count);
+			if (i > 0 && i % 4 === 0) days++;
+			arr[i - days * 4].datasets[0].data.push(e.count);
 			console.log(
-				`adding ${e.count} to day ${days} slot ${i - days * 5}`
+				`adding ${e.count} to day ${days} slot ${i - days * 3}`
 			);
 		});
 

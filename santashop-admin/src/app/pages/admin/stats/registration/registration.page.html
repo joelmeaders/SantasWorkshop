@@ -1,9 +1,15 @@
 <admin-header title="Registration Stats"></admin-header>
 
-<ion-content fullscreen class="ion-padding">
+<ion-content class="ion-padding">
 	<ion-grid>
-		<ion-row>
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="4" sizeLg="3">
+		<ion-row class="ion-justify-content-center">
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="4"
+				sizeLg="3"
+				class="ion-margin-horizontal"
+			>
 				<div
 					class="count-container"
 					*ngIf="registrationCount$ | async as count"
@@ -12,7 +18,13 @@
 					<h3>Registrations</h3>
 				</div>
 			</ion-col>
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="4" sizeLg="3">
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="4"
+				sizeLg="3"
+				class="ion-margin-horizontal"
+			>
 				<div
 					class="count-container"
 					*ngIf="childCount$ | async as count"
@@ -21,7 +33,13 @@
 					<h3>Children</h3>
 				</div>
 			</ion-col>
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="4" sizeLg="3">
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="4"
+				sizeLg="3"
+				class="ion-margin-horizontal"
+			>
 				<div
 					class="count-container"
 					*ngIf="childrenPerCustomer$ | async as count"
@@ -31,9 +49,12 @@
 				</div>
 			</ion-col>
 		</ion-row>
-		<ion-row *ngIf="girlBoyInfantCounts$ | async as gender">
+		<ion-row
+			*ngIf="girlBoyInfantCounts$ | async as gender"
+			class="ion-justify-content-evenly"
+		>
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="4">
-				<h1>Gender</h1>
+				<h2>Gender</h2>
 				<canvas
 					baseChart
 					[datasets]="[ { data: gender, datalabels: { font: { size: 24, weight: 700 } } } ]"
@@ -50,29 +71,35 @@
 				sizeLg="4"
 				*ngIf="topTenZipCodesCountData$ | async as pieData"
 			>
-				<h1>Top Zip Codes</h1>
+				<h2>Top Zip Codes</h2>
 				<canvas
 					baseChart
 					[data]="pieData"
 					[options]="pieChartOptions"
 					[legend]="false"
-					type="pie"
+					type="doughnut"
 				></canvas>
 			</ion-col>
+		</ion-row>
 
+		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
+			<ion-col size="12">
+				<h2>Schedules by Day</h2>
+			</ion-col>
 			<ion-col
 				sizeXs="12"
 				sizeSm="12"
-				sizeMd="12"
-				sizeLg="8"
-				*ngIf="familiesBySlotsChartData$ | async as data"
+				sizeMd="6"
+				sizeLg="6"
+				*ngFor="let slot of slots; index as i;"
 			>
-				<h1>Registration Schedule</h1>
+				<h3>{{ slot.datasets[0].label }}</h3>
 				<canvas
 					baseChart
-					[datasets]="data"
-					[labels]="['Dec 9', 'Dec 10', 'Dec 12', 'Dec 13']"
-					[legend]="true"
+					[options]="barChartOptions"
+					[datasets]="slot.datasets"
+					[labels]="['10am', '11am', '12pm', '1pm', '2pm']"
+					[legend]="false"
 					type="bar"
 				></canvas>
 			</ion-col>

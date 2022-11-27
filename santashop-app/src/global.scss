@@ -221,11 +221,12 @@ h2alt {
 .full-width-alert {
 	margin-left: calc(-50vw + 50%);
 	margin-right: calc(-50vw + 50%);
-	padding-left: 32px;
-	padding-right: 32px;
-	padding-top: 16px;
-	padding-bottom: 16px;
+	padding-inline-start: 32px;
+	padding-inline-end: 32px;
+	padding-block-start: 16px;
+	padding-block-end: 16px;
 	background: var(--ion-color-warning, #ffc409);
+	min-width: 100vw;
 }
 
 $es-size-definitions: (

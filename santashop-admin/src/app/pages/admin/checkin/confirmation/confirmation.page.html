@@ -1,0 +1,25 @@
+<admin-header
+	title="Check-In: Review Info"
+	defaultHref="admin/checkin/scan"
+></admin-header>
+
+<ion-content fullscreen class="ion-padding-horizontal">
+	<ng-container *ngIf="checkin$ | async as checkin; else fail">
+		<h1>
+			<ion-text color="success"> Success! </ion-text>
+		</h1>
+
+		<div class="ticket-count">{{ checkin?.stats?.children ?? 0 }}</div>
+
+		<h2>Give the shopper {{ checkin?.stats?.children ?? 0 }} tickets.</h2>
+
+		<h3>{{ checkin?.registrationCode }}</h3>
+	</ng-container>
+
+	<ng-template #fail>
+		<h1>
+			<ion-text color="danger"> Error </ion-text>
+		</h1>
+		<h2>Unable to load record</h2>
+	</ng-template>
+</ion-content>

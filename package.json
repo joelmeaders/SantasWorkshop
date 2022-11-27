@@ -33,7 +33,8 @@
 		"app:analyze": "ng build santashop-app --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-app/stats.json",
 		"app:deploy:qa": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=qa && firebase deploy",
 		"app:deploy:qa:hosting": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=qa && firebase deploy --only hosting",
-		"app:deploy:qa:functions": "firebase use santas-workshop-test && firebase deploy --only functions",
+		"functions:deploy:test": "firebase use santas-workshop-test && firebase deploy --only functions",
+		"functions:deploy:prod": "firebase use santas-workshop-193b5 && firebase deploy --only functions",
 		"ci:admin:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
 		"ci:admin:build": "npm run models:build && npm run core:build && ng build santashop-admin --configuration=production",
 		"ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' config.app.ts",
@@ -67,7 +68,6 @@
 		"ng2-charts": "^4.0.2",
 		"rxjs": "^7.5.7",
 		"tslib": "~2.4.1",
-		"underscore": "^1.13.6",
 		"zone.js": "~0.11.8"
 	},
 	"devDependencies": {

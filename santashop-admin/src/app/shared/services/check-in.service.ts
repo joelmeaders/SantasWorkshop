@@ -1,29 +1,21 @@
-import { ErrorHandler, Injectable } from '@angular/core';
-import { AlertController, LoadingController } from '@ionic/angular';
-import {
-	AgeGroup,
-	COLLECTION_SCHEMA,
-	CheckIn,
-	CheckInStats,
-	Registration,
-	ToyType,
-} from '@models/*';
-import { DocumentReference, FireRepoLite } from '@core/*';
-import { firstValueFrom } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { LoadingController } from '@ionic/angular';
+import { CheckIn, Registration } from '@models/*';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 
 @Injectable()
 export class CheckInService {
 	constructor(
-		private readonly repoService: FireRepoLite,
-		private readonly alertController: AlertController,
-		private readonly loadingController: LoadingController,
-		private readonly errorHandler: ErrorHandler
+		private readonly functions: Functions,
+		private readonly loadingController: LoadingController
 	) {}
 
 	public async checkIn(
 		registration: Registration,
 		isEdit = false
-	): Promise<DocumentReference<CheckIn> | undefined> {
+	): Promise<CheckIn> {
+		if (!registration?.uid) throw new Error('Invalid registration');
+
 		const loading = await this.loadingController.create({
 			message: 'Saving check-in...',
 			translucent: true,
@@ -32,95 +24,41 @@ export class CheckInService {
 
 		await loading.present();
 
-		let alert: HTMLIonAlertElement | undefined;
-		let result: DocumentReference<CheckIn> | undefined;
+		let result: CheckIn;
 
 		try {
-			const checkin = this.convertRegistrationToCheckIn(
-				registration,
-				isEdit
-			);
+			console.log('isedit', isEdit);
+			if (isEdit) {
+				const partialRegistration = {
+					uid: registration.uid,
+					qrcode: registration.qrcode,
+					zipCode: registration.zipCode,
+					children: registration.children,
+				} as Partial<Registration>;
 
-			const saveMethod = checkin.stats?.preregistered
-				? this.repoService
-						.collection<CheckIn>(COLLECTION_SCHEMA.checkins)
-						.addById(checkin.customerId!, checkin)
-				: this.repoService
-						.collection<CheckIn>(COLLECTION_SCHEMA.checkins)
-						.add(checkin);
-
-			result = await firstValueFrom(saveMethod);
-
-			alert = await this.alertController.create({
-				header: 'Check-In Complete',
-				buttons: [
-					{
-						text: 'Ok',
-					},
-				],
-			});
-
-			await alert.present();
+				const response = await httpsCallable<
+					Partial<Registration>,
+					CheckIn
+				>(
+					this.functions,
+					'checkInWithEdit'
+				)(partialRegistration);
+				result = response.data;
+			} else {
+				const response = await httpsCallable<Registration, CheckIn>(
+					this.functions,
+					'checkIn'
+				)(registration);
+				result = response.data;
+				console.log(response);
+			}
 		} catch (error) {
 			await this.loadingController.dismiss();
-			this.errorHandler.handleError(error);
+			throw error;
 		} finally {
 			await this.loadingController.dismiss();
 		}
 
-		return Promise.resolve(result);
-	}
-
-	private convertRegistrationToCheckIn(
-		registration: Registration,
-		isEdit: boolean
-	): CheckIn {
-		const checkin: CheckIn = {
-			checkInDateTime: new Date(),
-			inStats: false,
-		};
-
-		if (registration.uid) checkin.customerId = registration.uid;
-
-		if (registration.qrcode) checkin.registrationCode = registration.qrcode;
-
-		checkin.stats = this.registrationStats(registration, isEdit);
-
-		return checkin;
-	}
-
-	private registrationStats(
-		registration: Registration,
-		isEdit: boolean
-	): CheckInStats {
-		const stats: CheckInStats = {
-			preregistered:
-				(!!registration.qrcode && !!registration.uid) || false,
-			children: registration.children?.length || 0,
-			ageGroup02: registration.children!.filter(
-				(c) => c.ageGroup === AgeGroup.age02
-			).length,
-			ageGroup35: registration.children!.filter(
-				(c) => c.ageGroup === AgeGroup.age35
-			).length,
-			ageGroup68: registration.children!.filter(
-				(c) => c.ageGroup === AgeGroup.age68
-			).length,
-			ageGroup911: registration.children!.filter(
-				(c) => c.ageGroup === AgeGroup.age911
-			).length,
-			toyTypeInfant: registration.children!.filter(
-				(c) => c.toyType === ToyType.infant
-			).length,
-			toyTypeBoy: registration.children!.filter(
-				(c) => c.toyType === ToyType.boy
-			).length,
-			toyTypeGirl: registration.children!.filter(
-				(c) => c.toyType === ToyType.girl
-			).length,
-			modifiedAtCheckIn: isEdit,
-			zipCode: registration.zipCode!,
-		};
-		return stats;
+		return result;
 	}
 }

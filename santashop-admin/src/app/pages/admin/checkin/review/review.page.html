@@ -1,0 +1,118 @@
+<admin-header
+	title="Check-In: Review Info"
+	defaultHref="admin/checkin/scan"
+></admin-header>
+
+<ion-content fullscreen class="ion-padding-horizontal">
+	<ion-list
+		*ngIf="registration$ | async as registration; else noRegistration"
+	>
+		<ion-list-header color="none" class="review-instructions">
+			<span>
+				<h3>Instructions</h3>
+				<ion-note>
+					Review all registration information. Validate children names
+					and birth dates with documentation. Add, edit and remove
+					children if needed before continuing.
+				</ion-note>
+			</span>
+		</ion-list-header>
+
+		<ion-item-divider>
+			<ion-label> Parent / Guardian </ion-label>
+		</ion-item-divider>
+
+		<ion-item lines="none">
+			<ion-label>
+				<h1>
+					{{ registration.firstName }} {{ registration.lastName }}
+				</h1>
+				<p>{{ registration.emailAddress }}</p>
+				<p>Zip: {{ registration.zipCode }}</p>
+			</ion-label>
+		</ion-item>
+
+		<ion-item-divider>
+			<ion-label>
+				Children
+				<ion-badge>{{ registration.children?.length }}</ion-badge>
+			</ion-label>
+			<ion-button
+				slot="end"
+				fill="clear"
+				shape="round"
+				(click)="addEditChild()"
+			>
+				<ion-icon name="add-circle" slot="end"></ion-icon>
+				Add Child
+			</ion-button>
+		</ion-item-divider>
+
+		<ion-item-sliding #slider *ngFor="let child of registration.children">
+			<ion-item
+				(click)="slider.open('end')"
+				detail
+				detailIcon="menu-outline"
+			>
+				<ion-label>
+					<h2>{{ child.firstName }} {{ child.lastName }}</h2>
+					<p>
+						<ion-badge color="dark">
+							Age: {{ child.ageGroup }}
+						</ion-badge>
+						{{ child.dateOfBirth | date }}
+					</p>
+				</ion-label>
+			</ion-item>
+			<ion-item-options>
+				<ion-item-option color="primary" (click)="addEditChild(child)">
+					<ion-icon
+						slot="start"
+						name="create-outline"
+						slot="top"
+					></ion-icon>
+					<ion-label slot="bottom"> Edit </ion-label>
+				</ion-item-option>
+				<ion-item-option
+					color="danger"
+					(click)="removeChild(child.id!)"
+				>
+					<ion-icon
+						slot="start"
+						name="trash-outline"
+						slot="top"
+					></ion-icon>
+					<ion-label slot="bottom"> Delete </ion-label>
+				</ion-item-option>
+			</ion-item-options>
+		</ion-item-sliding>
+
+		<ion-item-divider class="success-divider">
+			<ion-label> Is all information correct and accurate? </ion-label>
+		</ion-item-divider>
+
+		<ion-item
+			lines="none"
+			button
+			color="success"
+			class="confirm-button"
+			(click)="checkIn()"
+		>
+			<ion-label>
+				<h1>Yes, continue</h1>
+			</ion-label>
+			<ion-icon
+				name="checkmark-circle"
+				slot="end"
+				size="large"
+			></ion-icon>
+		</ion-item>
+	</ion-list>
+
+	<ng-template #noRegistration>
+		<div class="no-info">
+			<h1>No info loaded...</h1>
+			<ion-button [routerLink]="['..']"> Go Back </ion-button>
+		</div>
+	</ng-template>
+</ion-content>

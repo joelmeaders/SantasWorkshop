@@ -54,14 +54,6 @@
 					"function": "verifyRecaptcha2"
 				},
 				{
-					"source": "/checkIn",
-					"function": "checkIn"
-				},
-				{
-					"source": "/checkInWithEdit",
-					"function": "checkInWithEdit"
-				},
-				{
 					"source": "**",
 					"destination": "/index.html"
 				}
@@ -72,6 +64,14 @@
 			"public": "dist/santashop-admin",
 			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
 			"rewrites": [
+				{
+					"source": "/checkIn",
+					"function": "checkIn"
+				},
+				{
+					"source": "/checkInWithEdit",
+					"function": "checkInWithEdit"
+				},
 				{
 					"source": "**",
 					"destination": "/index.html"

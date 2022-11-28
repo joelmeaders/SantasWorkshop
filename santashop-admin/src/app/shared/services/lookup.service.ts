@@ -7,7 +7,7 @@ import {
 	RegistrationSearchIndex,
 } from '@models/*';
 import { limit, orderBy, where } from 'firebase/firestore';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable()
@@ -39,9 +39,17 @@ export class LookupService {
 
 	public readonly getRegistrationByQrCode$ = (
 		qrcode: string
-	): Observable<Registration | undefined> =>
+	): Observable<Registration> =>
 		this.queryRegistrationsByQrCode(qrcode).pipe(
-			map((results) => results[0] ?? undefined)
+			map((results) => {
+				console.log('looked up results');
+				return (
+					results[0] ??
+					throwError(
+						() => new Error('Unable to find this registration')
+					)
+				);
+			})
 		);
 
 	public readonly getRegistrationByUid$ = (

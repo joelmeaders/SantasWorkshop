@@ -1,0 +1,127 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title> Add/Edit Child </ion-title>
+		<ion-button
+			slot="end"
+			fill="outline"
+			color="danger"
+			(click)="dismiss()"
+		>
+			Cancel
+		</ion-button>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-horizontal">
+	<ion-list *ngIf="form">
+		<ion-list-header color="none" class="review-instructions">
+			<span>
+				<h3>Instructions</h3>
+				<ion-note>
+					Add all child information below. Ensure the information is
+					accurate. Only children who are ages 11 and under can
+					recieve toys
+				</ion-note>
+			</span>
+		</ion-list-header>
+
+		<ion-item-divider>
+			<ion-label>Child Information</ion-label>
+		</ion-item-divider>
+
+		<form [formGroup]="form">
+			<ion-item>
+				<ion-label position="floating">First Name</ion-label>
+				<ion-input
+					formControlName="firstName"
+					type="text"
+					inputmode="text"
+				></ion-input>
+				<ion-note
+					*ngIf="
+						this.form.controls.firstName.dirty &&
+						this.form.controls.firstName.invalid
+					"
+					slot="error"
+					color="danger"
+				>
+					Invalid name
+				</ion-note>
+			</ion-item>
+
+			<ion-item>
+				<ion-label position="floating">Last Name</ion-label>
+				<ion-input
+					formControlName="lastName"
+					type="text"
+					inputmode="text"
+				></ion-input>
+				<ion-note
+					*ngIf="
+						this.form.controls.lastName.dirty &&
+						this.form.controls.lastName.invalid
+					"
+					slot="error"
+					color="danger"
+				>
+					Invalid name
+				</ion-note>
+			</ion-item>
+
+			<ion-item>
+				<ion-label position="floating">Birth Date</ion-label>
+				<ion-input
+					(ionChange)="birthdaySelected($event)"
+					formControlName="dateOfBirth"
+					type="date"
+					inputmode="date"
+					[min]="minBirthDate"
+					[max]="maxBirthDate"
+				></ion-input>
+				<ion-note
+					*ngIf="
+						this.form.controls.dateOfBirth.dirty &&
+						this.form.controls.dateOfBirth.invalid
+					"
+					slot="error"
+					color="danger"
+				>
+					Invalid date. Only ages 9-11 allowed.
+				</ion-note>
+			</ion-item>
+
+			<ion-radio-group
+				formControlName="toyType"
+				*ngIf="(isInfant$ | async) !== true"
+			>
+				<ion-item-divider>
+					<ion-label>Choose Toy Type</ion-label>
+				</ion-item-divider>
+
+				<ion-item>
+					<ion-label>Girls</ion-label>
+					<ion-radio slot="start" value="girls"></ion-radio>
+				</ion-item>
+
+				<ion-item>
+					<ion-label>Boys</ion-label>
+					<ion-radio slot="start" value="boys"></ion-radio>
+				</ion-item>
+			</ion-radio-group>
+		</form>
+
+		<ion-item-divider class="success-divider">
+			<ion-label> Is all information correct and accurate? </ion-label>
+		</ion-item-divider>
+
+		<ion-button
+			shape="round"
+			expand="block"
+			class="confirm-button"
+			[disabled]="!form.valid"
+			(click)="saveChild()"
+		>
+			Save Child
+		</ion-button>
+	</ion-list>
+</ion-content>

@@ -53,33 +53,10 @@ export class ScannerService implements OnDestroy {
 		shareReplay(1)
 	);
 
-	private readonly cameraEnabled = new BehaviorSubject<boolean>(true);
-	public readonly $cameraEnabled = this.cameraEnabled.pipe(
-		takeUntil(this.$destroy),
-		shareReplay(1)
-	);
-
 	constructor(private readonly alertController: AlertController) {}
 
 	public async ngOnDestroy(): Promise<void> {
 		this.$destroy.next();
-	}
-
-	public navigatedAway(): void {
-		this.onDeviceSelectChange({ detail: { value: '' } });
-	}
-
-	public setCameraEnabled(value: boolean): void {
-		this.cameraEnabled.next(value);
-
-		if (!value) {
-			this.currentDevice.next(undefined);
-			return;
-		}
-
-		if (this.previousDevice.getValue()) {
-			this.currentDevice.next(this.previousDevice.getValue());
-		}
 	}
 
 	public setCurrentDevice(device: MediaDeviceInfo | any): void {

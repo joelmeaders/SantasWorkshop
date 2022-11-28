@@ -1,0 +1,45 @@
+h1 {
+	font-size: 1.6em;
+	font-weight: 600;
+}
+
+h2 {
+	font-size: 1.2em;
+	font-weight: 600;
+}
+
+ion-list {
+	background: none;
+}
+
+ion-item-option {
+	width: 74px;
+
+	ion-icon {
+		font-size: 24px;
+		margin-bottom: 6px;
+	}
+}
+
+.review-instructions {
+	margin-bottom: 16px;
+}
+
+.success-divider {
+	margin-top: 32px;
+}
+
+.confirm-button {
+	margin-top: 12px;
+	margin-bottom: 32px;
+	--border-radius: 18px;
+}
+
+ion-badge {
+	position: relative;
+	top: 5px;
+}
+
+.no-info {
+	text-align: center;
+}

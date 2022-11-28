@@ -12,8 +12,9 @@ import {
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
 import { BrowserModule } from '@angular/platform-browser';
+import { RouteReuseStrategy } from '@angular/router';
 
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { environment, firebaseConfig } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -57,5 +58,6 @@ import { AppComponent } from './app.component';
 		}),
 	],
 	bootstrap: [AppComponent],
+	providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
 })
 export class AppModule {}

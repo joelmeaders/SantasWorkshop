@@ -64,6 +64,16 @@ export const updateEmailAddress = functions.https.onCall(
 	}
 );
 
+export const checkIn = functions.https.onCall(async (request, context) => {
+	return (await import('./fn/checkIn')).default(request, context);
+});
+
+export const checkInWithEdit = functions.https.onCall(
+	async (request, context) => {
+		return (await import('./fn/checkInWithEdit')).default(request, context);
+	}
+);
+
 /**
  * Validate recaptcha response.
  *

@@ -2,6 +2,8 @@ export const COLLECTION_SCHEMA = {
 	checkins: 'checkins',
 	users: 'users',
 	registrations: 'registrations',
+	editedRegistrations: 'editedregistrations',
+	noRegistrations: 'noregistrations',
 	children: 'children',
 	dateTimeSlots: 'dateTimeSlots',
 	registrationSearchIndex: 'registrationsearchindex',

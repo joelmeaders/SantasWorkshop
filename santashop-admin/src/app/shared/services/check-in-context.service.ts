@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
 import { BehaviorSubject, filter, map, shareReplay } from 'rxjs';
-import { CheckIn, Registration } from '@models/*';
+import { Registration } from '@models/*';
 
 @Injectable()
 export class CheckInContextService {
@@ -9,9 +9,9 @@ export class CheckInContextService {
 		Registration | undefined
 	>(undefined);
 
-	private readonly checkin = new BehaviorSubject<CheckIn | undefined>(
-		undefined
-	);
+	private readonly checkin = new BehaviorSubject<
+		{ code: string; count: number } | undefined
+	>(undefined);
 	public readonly checkin$ = this.checkin.asObservable();
 
 	public readonly currentRegistration$ = this.registration
@@ -50,6 +50,10 @@ export class CheckInContextService {
 
 	public resetRegistration(): void {
 		this.registration.next(undefined);
+	}
+
+	public setCheckIn(count: number, code: string): void {
+		this.checkin.next({ count, code });
 	}
 
 	public reset(): void {

@@ -23,7 +23,11 @@ const routes: Routes = [
 			import('./confirmation/confirmation.module').then(
 				(m) => m.ConfirmationPageModule
 			),
-	},
+	},  {
+    path: 'duplicate',
+    loadChildren: () => import('./duplicate/duplicate.module').then( m => m.DuplicatePageModule)
+  },
+
 ];
 
 @NgModule({

@@ -1,10 +1,27 @@
 import { Injectable } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
-import { CheckIn, Registration } from '@models/*';
+import { Registration } from '@models/*';
 import { Functions, httpsCallable } from '@angular/fire/functions';
+import { HttpsCallableResult } from '../../../../../santashop-core/src';
 
 @Injectable()
 export class CheckInService {
+	private readonly checkInFn = (
+		registration: Registration
+	): Promise<HttpsCallableResult<number>> =>
+		httpsCallable<Registration, number>(
+			this.functions,
+			'checkIn'
+		)(registration);
+
+	private readonly checkInWithEditFn = (
+		registration: Partial<Registration>
+	): Promise<HttpsCallableResult<number>> =>
+		httpsCallable<Registration, number>(
+			this.functions,
+			'checkInWithEdit'
+		)(registration);
+
 	constructor(
 		private readonly functions: Functions,
 		private readonly loadingController: LoadingController
@@ -13,7 +30,7 @@ export class CheckInService {
 	public async checkIn(
 		registration: Registration,
 		isEdit = false
-	): Promise<CheckIn> {
+	): Promise<number> {
 		if (!registration?.uid) throw new Error('Invalid registration');
 
 		const loading = await this.loadingController.create({
@@ -24,41 +41,22 @@ export class CheckInService {
 
 		await loading.present();
 
-		let result: CheckIn;
-
 		try {
-			console.log('isedit', isEdit);
-			if (isEdit) {
-				const partialRegistration = {
-					uid: registration.uid,
-					qrcode: registration.qrcode,
-					zipCode: registration.zipCode,
-					children: registration.children,
-				} as Partial<Registration>;
+			const partialRegistration = {
+				uid: registration.uid,
+				qrcode: registration.qrcode,
+				zipCode: registration.zipCode,
+				children: registration.children,
+			} as Partial<Registration>;
 
-				const response = await httpsCallable<
-					Partial<Registration>,
-					CheckIn
-				>(
-					this.functions,
-					'checkInWithEdit'
-				)(partialRegistration);
-				result = response.data;
-			} else {
-				const response = await httpsCallable<Registration, CheckIn>(
-					this.functions,
-					'checkIn'
-				)(registration);
-				result = response.data;
-				console.log(response);
-			}
-		} catch (error) {
-			await this.loadingController.dismiss();
-			throw error;
+			const response = isEdit
+				? await this.checkInWithEditFn(partialRegistration)
+				: await this.checkInFn(partialRegistration);
+
+			return response.data;
 		} finally {
-			await this.loadingController.dismiss();
+			if (await this.loadingController.getTop())
+				await this.loadingController.dismiss();
 		}
-
-		return result;
 	}
 }

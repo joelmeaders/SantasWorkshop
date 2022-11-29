@@ -7,10 +7,11 @@ import { LookupService } from './services/lookup.service';
 import { AddEditChildModalComponent } from './components/add-edit-child-modal/add-edit-child-modal.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ChildValidationService } from './services/child-validation.service';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
 	declarations: [HeaderComponent, AddEditChildModalComponent],
-	imports: [CommonModule, IonicModule, ReactiveFormsModule],
+	imports: [CommonModule, IonicModule, ReactiveFormsModule, RouterModule],
 	exports: [HeaderComponent, AddEditChildModalComponent],
 	providers: [LookupService, CheckInService, ChildValidationService],
 })

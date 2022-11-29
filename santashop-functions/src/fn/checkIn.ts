@@ -17,11 +17,11 @@ admin.initializeApp();
 export default async (
 	record: Partial<Registration>,
 	context: CallableContext
-): Promise<CheckIn | HttpsError> => {
-	if (!context.auth?.token.claims?.admin) {
+): Promise<number | HttpsError> => {
+	if (!context.auth?.token?.admin) {
 		console.error(
 			new Error(
-				`${context.auth?.uid} attempted to check in for uid ${record.uid}`
+				`${context.auth?.uid} attempted to check in for uid ${record.uid} but is not an admin`
 			)
 		);
 		throw new functions.https.HttpsError(
@@ -44,8 +44,6 @@ export default async (
 		);
 	}
 
-	const batch = admin.firestore().batch();
-
 	// Check In
 	const checkinDocRef = admin
 		.firestore()
@@ -59,13 +57,26 @@ export default async (
 		stats: calculateRegistrationStats(record, false),
 	} as CheckIn;
 
-	batch.set(checkinDocRef, checkin);
+	try {
+		await checkinDocRef.create(checkin);
+	} catch (error: any) {
+		throw new functions.https.HttpsError(
+			error.code,
+			error.status,
+			JSON.stringify(error)
+		);
+	}
 
-	return batch
-		.commit()
-		.then(() => checkin)
-		.catch((error: any) => {
-			console.error(error);
-			throw new Error(error);
-		});
+	// batch.create(checkinDocRef, checkin);
+
+	// return batch
+	// 	.commit()
+	// 	.then(() => checkin.stats!.children)
+	// 	.catch((error: any) => {
+	// 		// console.error(error);
+	// 		throw new functions.https.HttpsError(
+	// 			error.code === 6 ? 'already-exists' : 'internal',
+	// 			error.message
+	// 		);
+	// 	});
 };

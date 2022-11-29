@@ -12,6 +12,7 @@ import {
 	switchMap,
 	tap,
 	throttleTime,
+	timer,
 } from 'rxjs';
 import { Registration } from '@models/*';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -80,7 +81,12 @@ export class ScanPage {
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
 		private readonly router: Router
-	) {}
+	) {
+		timer(3000).subscribe(() => {
+			this.scanResult.next('GD96NRCM');
+			console.log('faked scan result');
+		});
+	}
 
 	public ionViewWillEnter(): void {
 		this.cameraEnabled$.next(true);

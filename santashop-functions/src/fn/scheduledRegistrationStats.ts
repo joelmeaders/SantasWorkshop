@@ -45,8 +45,16 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 		stats.findIndex((e) => dateTime.getTime() == e.dateTime.getTime());
 
 	registrations.forEach((registration) => {
-		const timestamp: admin.firestore.Timestamp = registration.dateTimeSlot!
-			.dateTime! as any;
+		const timestamp: admin.firestore.Timestamp = registration.dateTimeSlot
+			?.dateTime as any;
+
+		if (!timestamp) {
+			console.log(
+				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`
+			);
+			return;
+		}
+
 		const dateTime = timestamp.toDate();
 		const index = getIndex(dateTime);
 		let stat: DateTimeCount;
@@ -144,12 +152,12 @@ function getZipCodeStats(registrations: Registration[]): ZipCodeCount[] {
 			stat = {
 				zip: zipCode,
 				count: 1,
-				childCount: registration.children!.length,
+				childCount: registration.children?.length ?? 0,
 			} as ZipCodeCount;
 			stats.push(stat);
 		} else {
 			stats[index].count += 1;
-			stats[index].childCount += registration.children!.length;
+			stats[index].childCount += registration.children?.length ?? 0;
 		}
 	});
 

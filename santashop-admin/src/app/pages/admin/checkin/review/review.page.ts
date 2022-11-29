@@ -32,6 +32,7 @@ export class ReviewPage {
 
 	public ionViewWillLeave(): void {
 		this.checkinContext.resetRegistration();
+		this.wasEdited = false;
 	}
 
 	public async removeChild(childId: number): Promise<void> {
@@ -93,8 +94,6 @@ export class ReviewPage {
 			);
 		}
 
-		console.log(result);
-
 		registration?.children?.push(result.data);
 		this.checkinContext.setRegistration(registration);
 	}
@@ -104,14 +103,30 @@ export class ReviewPage {
 		if (!registration) return;
 
 		try {
-			const result = await this.checkinService.checkIn(
+			const result: number = await this.checkinService.checkIn(
 				registration,
 				this.wasEdited
 			);
-			await this.router.navigate(['admin/checkin/confirmation'], {
-				state: result,
-			});
+
+			console.log(result);
+
+			this.checkinContext.setCheckIn(
+				result,
+				registration.qrcode ?? 'nocode'
+			);
+			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {
+			console.log(JSON.stringify(error));
+
+			if (error.code === 'functions/already-exists') {
+				this.checkinContext.reset();
+				this.router.navigate([
+					'admin/checkin/duplicate',
+					registration.uid,
+				]);
+				return;
+			}
+
 			const alert = await this.alertController.create({
 				header: 'Error checking in',
 				subHeader: `code: ${registration.qrcode}`,
@@ -119,8 +134,9 @@ export class ReviewPage {
 			});
 
 			await alert.present();
+			this.checkinContext.reset();
 			await alert.onDidDismiss();
-			await this.router.navigate(['admin/checkin']);
+			await this.router.navigate(['admin/checkin/scan']);
 		}
 	}
 }

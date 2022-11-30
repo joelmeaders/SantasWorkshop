@@ -1,18 +1,17 @@
 import { Component, ChangeDetectionStrategy, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, PopoverOptions } from '@ionic/angular';
 import {
 	BehaviorSubject,
 	catchError,
 	filter,
+	firstValueFrom,
 	from,
 	Observable,
 	Subject,
 	Subscription,
 	switchMap,
-	tap,
 	throttleTime,
-	timer,
 } from 'rxjs';
 import { Registration } from '@models/*';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -35,18 +34,25 @@ export class ScanPage {
 	public readonly hasPermissions$ = this.scannerService.$hasPermissions;
 
 	private readonly scanResult = new Subject<string>();
+	private readonly scanResultFilter$ = this.scanResult
+		.asObservable()
+		.pipe(switchMap((code) => this.filterCodes(code)));
 	private readonly scanResult$ = (): Observable<Registration | undefined> =>
-		this.scanResult.asObservable().pipe(
+		this.scanResultFilter$.pipe(
 			filter((value) => !!value),
 			throttleTime(5000),
 			switchMap((code) =>
 				this.lookupService.getRegistrationByQrCode$(code!)
 			),
 			filter((registration) => !!registration),
-			tap((registration) =>
-				this.checkinContext.setRegistration(registration)
+			switchMap((registration) =>
+				from(this.setRegistration(registration!))
 			),
-			catchError((error) => from(this.handleError(error)))
+			catchError((error) =>
+				from(this.missingRegistrationError(error)).pipe(
+					filter((v) => !!v)
+				)
+			)
 		);
 
 	public readonly scanError = new Subject<Error>();
@@ -58,7 +64,7 @@ export class ScanPage {
 	private readonly routeToReviewPage$ = (): Observable<boolean> =>
 		this.scanResult$().pipe(
 			switchMap(() =>
-				from(this.router.navigate(['admin/checkin/review']))
+				from(this.router.navigate(['/admin/checkin/review']))
 			)
 		);
 
@@ -80,20 +86,29 @@ export class ScanPage {
 		private readonly lookupService: LookupService,
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
-		private readonly router: Router
+		private readonly router: Router,
+		private readonly route: ActivatedRoute
 	) {
-		timer(3000).subscribe(() => {
-			this.scanResult.next('GD96NRCM');
-			console.log('faked scan result');
-		});
+		// timer(3000).subscribe(() => {
+		// 	this.scanResult.next('XE7UBKJC');
+		// 	console.log('faked scan result');
+		// });
 	}
 
 	public ionViewWillEnter(): void {
-		this.cameraEnabled$.next(true);
-		console.log('init scanner');
 		this.scanErrorSubscription = this.scanError$.subscribe();
 		this.routeToReviewPageSubscription =
 			this.routeToReviewPage$().subscribe();
+
+		// This would be set by the search service
+		const code = this.route.snapshot?.params?.qrcode;
+
+		if (code) {
+			this.scanResult.next(code);
+			return;
+		}
+
+		this.cameraEnabled$.next(true);
 	}
 
 	public ionViewWillLeave(): void {
@@ -127,18 +142,73 @@ export class ScanPage {
 		this.scannerService.onHasPermission(value);
 	}
 
+	public async filterCodes(code?: string): Promise<string | undefined> {
+		if (code?.length) code = code.toUpperCase();
+		if (code !== 'XE7UBKJC') return code;
+
+		const alert = await this.alertController.create({
+			header: 'Invalid code scanned',
+			message: 'Manually type the code located below the QR image',
+			buttons: [
+				{ text: 'Cancel', role: 'cancel', cssClass: 'cancel-button' },
+				{ text: 'OK', role: 'ok' },
+			],
+			inputs: [
+				{
+					type: 'text',
+					placeholder: 'Code (7-8 characters)',
+					attributes: {
+						minlength: 7,
+						maxlength: 8,
+					},
+				},
+			],
+			backdropDismiss: false,
+		});
+
+		await alert.present();
+		const result = await alert.onDidDismiss();
+
+		const value: string | undefined = result.data?.values[0];
+
+		if (result.role === 'ok' && (value?.length ?? 0) >= 7) return value;
+
+		return undefined;
+	}
+
 	public onScanResult(code: string): void {
 		this.scanResult.next(code);
 	}
 
-	private async handleError(error: any): Promise<undefined> {
+	private async setRegistration(
+		registration: Registration | Observable<undefined>
+	): Promise<Registration | undefined> {
+		if (isRegistration(registration)) {
+			this.checkinContext.setRegistration(registration);
+			return registration;
+		}
+
+		try {
+			await firstValueFrom(registration);
+		} catch {}
+
+		return undefined;
+	}
+
+	private async missingRegistrationError(error: any): Promise<undefined> {
 		const alert = await this.alertController.create({
 			header: 'Error',
 			message: error.message,
-			buttons: ['Ok'],
+			buttons: [{ text: 'OK' }, { text: 'Try Search', role: 'search' }],
 		});
 
 		await alert.present();
+		const { role } = await alert.onDidDismiss();
+
+		if (role === 'search') this.router.navigate(['admin/search']);
 		return undefined;
 	}
 }
+
+export const isRegistration = (input: any): input is Registration =>
+	!!(input as Registration).uid;

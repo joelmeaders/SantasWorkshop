@@ -6,6 +6,7 @@ import {
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
+	IdTokenResult as _IdTokenResult,
 } from '@angular/fire/auth';
 import {
 	redirectUnauthorizedTo as _redirectUnauthorizedTo,
@@ -17,6 +18,7 @@ import { Observable } from 'rxjs';
 
 export type User = _User;
 export type UserCredential = _UserCredential;
+export type IdTokenResult = _IdTokenResult;
 export const redirectUnauthorizedTo = _redirectUnauthorizedTo;
 export const redirectLoggedInTo = _redirectLoggedInTo;
 export const hasCustomClaim = _hasCustomClaim;
@@ -31,6 +33,9 @@ export class AuthWrapper {
 		authState(this.auth);
 
 	public readonly currentUser = (): _User | null => this.auth.currentUser;
+
+	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
+		this.currentUser()?.getIdTokenResult() ?? Promise.resolve(null);
 
 	public readonly sendPasswordResetEmail = (email: string): Promise<void> =>
 		sendPasswordResetEmail(this.auth, email);

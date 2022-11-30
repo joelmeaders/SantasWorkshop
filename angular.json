@@ -105,6 +105,12 @@
 							]
 						},
 						"qa": {
+							"buildOptimizer": false,
+							"optimization": false,
+							"vendorChunk": true,
+							"extractLicenses": false,
+							"sourceMap": true,
+							"namedChunks": true,
 							"fileReplacements": [
 								{
 									"replace": "santashop-admin/src/environments/environment.ts",

@@ -35,7 +35,7 @@ export default async (): Promise<string> => {
 				.firestore()
 				.collection('dateTimeSlots')
 				.doc(slot.id!.toString());
-			transaction.update(doc, slot);
+			transaction.update(doc, { ...slot });
 		});
 		return Promise.resolve();
 	});
@@ -52,7 +52,7 @@ export default async (): Promise<string> => {
 					.firestore()
 					.collection('registrations')
 					.doc(registration.uid!.toString());
-				transaction.update(doc, registration);
+				transaction.update(doc, { ...registration });
 			});
 			return Promise.resolve();
 		});

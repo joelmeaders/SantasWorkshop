@@ -12,7 +12,7 @@ export class ConfirmationPage {
 
 	constructor(private readonly checkinContext: CheckInContextService) {}
 
-	public ionViewDidLeave(): void {
+	public ionViewWillLeave(): void {
 		this.checkinContext.reset();
 	}
 }

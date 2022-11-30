@@ -7,15 +7,18 @@ import {
 	COLLECTION_SCHEMA,
 	Registration,
 } from '../../../santashop-models/src/public-api';
-import { calculateRegistrationStats } from '../utility/registrations';
+import {
+	calculateRegistrationStats,
+	isPartialRegistrationComplete,
+} from '../utility/registrations';
 
 admin.initializeApp();
 
-export default async (
-	record: Registration,
+export default (
+	record: Partial<Registration>,
 	context: CallableContext
-): Promise<CheckIn | HttpsError> => {
-	if (!context.auth?.token.claims?.admin) {
+): Promise<number | HttpsError> => {
+	if (!context.auth?.token?.admin) {
 		console.error(
 			new Error(
 				`${context.auth?.uid} attempted to check in for uid ${record.uid}`
@@ -28,7 +31,7 @@ export default async (
 		);
 	}
 
-	if (!record?.children?.length || !record.uid) {
+	if (!isPartialRegistrationComplete(record)) {
 		console.error(
 			new Error(
 				`Registration incomplete. Unable to check in for uid ${record.uid}`
@@ -36,7 +39,7 @@ export default async (
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
-			'-12',
+			'-11',
 			'Incomplete registration. Cannot continue.'
 		);
 	}
@@ -56,7 +59,7 @@ export default async (
 		programYear: 2022,
 	} as Partial<Registration>;
 
-	batch.set(registrationDocRef, partialRegistration);
+	batch.create(registrationDocRef, partialRegistration);
 
 	// Check In
 	const checkinDocRef = admin
@@ -71,13 +74,13 @@ export default async (
 		stats: calculateRegistrationStats(record, true),
 	} as CheckIn;
 
-	batch.set(checkinDocRef, checkin);
+	batch.create(checkinDocRef, checkin);
 
 	return batch
 		.commit()
-		.then(() => checkin)
+		.then(() => checkin.stats!.children)
 		.catch((error: any) => {
 			console.error(error);
-			throw new Error(error);
+			throw error;
 		});
 };

@@ -1,10 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
 	BehaviorSubject,
-	combineLatest,
+	delay,
+	filter,
 	map,
 	Observable,
+	of,
+	race,
 	shareReplay,
+	Subject,
+	switchMap,
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@models/';
 import { SearchService } from '../search.service';
@@ -45,13 +50,33 @@ export class ResultsPage {
 	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
 	protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));
 
-	protected readonly searchResults$: Observable<RegistrationSearchIndex[]> =
-		combineLatest({
-			sortFn: this.sortBy$,
-			results: this.searchService.searchResults$ ?? [],
-		}).pipe(map((data) => data.results.sort(data.sortFn)));
+	private readonly searchTrigger = new Subject<Date>();
+	public readonly searchInput$ = this.searchService.searchResults$;
+
+	private readonly search$: Observable<RegistrationSearchIndex[]> =
+		this.searchService.searchResults$.pipe(
+			filter((query) => query !== null),
+			switchMap((query) => query!),
+			switchMap((results) =>
+				this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? []))
+			)
+		);
+
+	private readonly timeout$ = of(undefined).pipe(delay(5000));
+
+	public readonly searchResults$ = this.searchTrigger.pipe(
+		switchMap(() => race([this.search$, this.timeout$]))
+	);
 
 	constructor(private readonly searchService: SearchService) {}
+
+	public async ionViewWillEnter(): Promise<void> {
+		this.searchTrigger.next(new Date());
+	}
+
+	public ionViewWillLeave(): void {
+		this.searchService.reset();
+	}
 
 	public setSortType(sort: SortFnType): void {
 		this.sortBy.next(sort);

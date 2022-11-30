@@ -74,6 +74,7 @@ export class RegistrationPage {
 				count: e.count,
 			}))
 		),
+
 		map((data) => data.sort((a, b) => Number(a.date) - Number(b.date)))
 	);
 
@@ -196,24 +197,35 @@ export class RegistrationPage {
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 11th', ...this.colorSettings },
+					{ data: [], label: 'Dec 12th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 12th', ...this.colorSettings },
+					{ data: [], label: 'Dec 13th', ...this.colorSettings },
 				],
 			},
 		];
 
-		let days = 0;
+		const getDayIndex = (date: Date): number => {
+			switch (date.getDate()) {
+				case 9:
+					return 0;
+				case 10:
+					return 1;
+				case 12:
+					return 2;
+				case 13:
+					return 3;
 
-		data.forEach((e, i) => {
-			if (i > 0 && i % 4 === 0) days++;
-			arr[i - days * 4].datasets[0].data.push(e.count);
-			console.log(
-				`adding ${e.count} to day ${days} slot ${i - days * 3}`
-			);
+				default:
+					throw new Error('invalid date');
+			}
+		};
+
+		data.forEach((e) => {
+			const dayIndex = getDayIndex(e.date);
+			arr[dayIndex].datasets[0].data.push(e.count);
 		});
 
 		return arr;

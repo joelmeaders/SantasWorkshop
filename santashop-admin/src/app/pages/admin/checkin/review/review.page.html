@@ -1,6 +1,6 @@
 <admin-header
 	title="Check-In: Review Info"
-	defaultHref="admin/checkin/scan"
+	backRoute="/admin/checkin/scan"
 ></admin-header>
 
 <ion-content fullscreen class="ion-padding-horizontal">
@@ -25,67 +25,25 @@
 		<ion-item lines="none">
 			<ion-label>
 				<h1>
-					{{ registration.firstName }} {{ registration.lastName }}
+					{{ registration?.firstName }} {{ registration?.lastName }}
 				</h1>
-				<p>{{ registration.emailAddress }}</p>
-				<p>Zip: {{ registration.zipCode }}</p>
+				<p>{{ registration?.emailAddress }}</p>
+				<p>Zip: {{ registration?.zipCode }}</p>
+				<p *ngIf="registration?.dateTimeSlot?.dateTime">
+					<ion-text color="primary">
+						Reservation: {{ registration.dateTimeSlot?.dateTime |
+						date:'medium' }}
+					</ion-text>
+				</p>
 			</ion-label>
 		</ion-item>
 
-		<ion-item-divider>
-			<ion-label>
-				Children
-				<ion-badge>{{ registration.children?.length }}</ion-badge>
-			</ion-label>
-			<ion-button
-				slot="end"
-				fill="clear"
-				shape="round"
-				(click)="addEditChild()"
-			>
-				<ion-icon name="add-circle" slot="end"></ion-icon>
-				Add Child
-			</ion-button>
-		</ion-item-divider>
-
-		<ion-item-sliding #slider *ngFor="let child of registration.children">
-			<ion-item
-				(click)="slider.open('end')"
-				detail
-				detailIcon="menu-outline"
-			>
-				<ion-label>
-					<h2>{{ child.firstName }} {{ child.lastName }}</h2>
-					<p>
-						<ion-badge color="dark">
-							Age: {{ child.ageGroup }}
-						</ion-badge>
-						{{ child.dateOfBirth | date }}
-					</p>
-				</ion-label>
-			</ion-item>
-			<ion-item-options>
-				<ion-item-option color="primary" (click)="addEditChild(child)">
-					<ion-icon
-						slot="start"
-						name="create-outline"
-						slot="top"
-					></ion-icon>
-					<ion-label slot="bottom"> Edit </ion-label>
-				</ion-item-option>
-				<ion-item-option
-					color="danger"
-					(click)="removeChild(child.id!)"
-				>
-					<ion-icon
-						slot="start"
-						name="trash-outline"
-						slot="top"
-					></ion-icon>
-					<ion-label slot="bottom"> Delete </ion-label>
-				</ion-item-option>
-			</ion-item-options>
-		</ion-item-sliding>
+		<admin-manage-children
+			[children]="registration?.children ?? []"
+			(adddedChild)="addChild"
+			(editedChild)="editChild"
+			(removedChild)="removeChild"
+		></admin-manage-children>
 
 		<ion-item-divider class="success-divider">
 			<ion-label> Is all information correct and accurate? </ion-label>
@@ -110,8 +68,9 @@
 	</ion-list>
 
 	<ng-template #noRegistration>
-		<div class="no-info">
-			<h1>No info loaded...</h1>
+		<div class="no-info ion-text-center ion-padding-top">
+			<h1>No information loaded...</h1>
+			<p>Did you get here by mistake?</p>
 			<ion-button [routerLink]="['..']"> Go Back </ion-button>
 		</div>
 	</ng-template>

@@ -197,11 +197,11 @@ export const scheduledAddDateTimeSlots = functions.pubsub
 // 		await (await import('./fn/deleteAllUsers')).default();
 // 	});
 
-// export const recalculateAllDateTimeSlots = functions.pubsub
-// 	.schedule('59 23 * * *')
-// 	.onRun(async () => {
-// 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
-// 	});
+export const recalculateAllDateTimeSlots = functions.pubsub
+	.topic('recalc-all-slots')
+	.onPublish(async () => {
+		await (await import('./fn/recalculateAllDateTimeSlots')).default();
+	});
 
 export const scheduledRegistrationStats = functions.pubsub
 	.schedule('59 23 * * *')

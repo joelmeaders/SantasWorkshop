@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { Child } from '@models/*';
 import { firstValueFrom } from 'rxjs';
-import { AddEditChildModalComponent } from '../../../../shared/components/add-edit-child-modal/add-edit-child-modal.component';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 
@@ -21,7 +20,6 @@ export class ReviewPage {
 	constructor(
 		private readonly checkinContext: CheckInContextService,
 		private readonly checkinService: CheckInService,
-		private readonly modalController: ModalController,
 		private readonly alertController: AlertController,
 		private readonly router: Router
 	) {}
@@ -32,38 +30,12 @@ export class ReviewPage {
 
 	public ionViewWillLeave(): void {
 		this.checkinContext.resetRegistration();
+		this.wasEdited = false;
 	}
 
 	public async removeChild(childId: number): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
 		if (!registration) return;
-
-		const child = registration.children?.find((e) => e.id === childId);
-		if (!child) return;
-
-		const alert = await this.alertController.create({
-			header: 'Are you sure?',
-			subHeader: `${child.firstName} ${child.lastName}`,
-			message: 'This child will be deleted',
-			buttons: [
-				{
-					text: 'Cancel',
-					role: 'cancel',
-					cssClass: '',
-				},
-				{
-					text: 'OK',
-					role: 'confirm',
-					cssClass: '',
-				},
-			],
-		});
-
-		await alert.present();
-
-		const result = await alert.onDidDismiss();
-
-		if (result.role === 'cancel') return;
 
 		registration.children = registration.children?.filter(
 			(e) => e.id !== childId
@@ -72,30 +44,23 @@ export class ReviewPage {
 		this.wasEdited = true;
 	}
 
-	public async addEditChild(child?: Child): Promise<void> {
-		const modal = await this.modalController.create({
-			component: AddEditChildModalComponent,
-			componentProps: {
-				child,
-			},
-		});
-
-		await modal.present();
-		const result = await modal.onDidDismiss();
-		if (!result.data || result.role === 'cancelled') return;
-
+	public async editChild(child: Child): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
 		if (!registration) return;
 
-		if (result.role === 'edit') {
-			registration.children = registration.children?.filter(
-				(e) => e.id !== result.data.id
-			);
-		}
+		registration.children = registration.children?.filter(
+			(e) => e.id !== child.id
+		);
 
-		console.log(result);
+		registration?.children?.push(child);
+		this.checkinContext.setRegistration(registration);
+	}
 
-		registration?.children?.push(result.data);
+	public async addChild(child: Child): Promise<void> {
+		const registration = await firstValueFrom(this.registration$);
+		if (!registration) return;
+
+		registration?.children?.push(child);
 		this.checkinContext.setRegistration(registration);
 	}
 
@@ -104,14 +69,26 @@ export class ReviewPage {
 		if (!registration) return;
 
 		try {
-			const result = await this.checkinService.checkIn(
+			const result: number = await this.checkinService.checkIn(
 				registration,
 				this.wasEdited
 			);
-			await this.router.navigate(['admin/checkin/confirmation'], {
-				state: result,
-			});
+
+			this.checkinContext.setCheckIn(
+				result,
+				registration.qrcode ?? 'nocode'
+			);
+			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {
+			if (error.code === 'functions/already-exists') {
+				this.checkinContext.reset();
+				this.router.navigate([
+					'admin/checkin/duplicate',
+					registration.uid,
+				]);
+				return;
+			}
+
 			const alert = await this.alertController.create({
 				header: 'Error checking in',
 				subHeader: `code: ${registration.qrcode}`,
@@ -119,8 +96,9 @@ export class ReviewPage {
 			});
 
 			await alert.present();
+			this.checkinContext.reset();
 			await alert.onDidDismiss();
-			await this.router.navigate(['admin/checkin']);
+			await this.router.navigate(['admin/checkin/scan']);
 		}
 	}
 }

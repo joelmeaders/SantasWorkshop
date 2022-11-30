@@ -11,9 +11,9 @@ zxing-scanner {
 .selection-container {
 	position: absolute;
 	border-radius: 36px;
-	border-width: 0.3em;
+	border-width: 0.2em;
 	border-style: solid;
-	border-color: var(--ion-color-light);
+	border-color: #fff;
 	left: 50%;
 	transform: translate(-50%, -150%);
 	max-width: 90%;
@@ -22,4 +22,8 @@ zxing-scanner {
 
 ion-item {
 	--border-radius: 24px;
+}
+
+.cancel-button {
+	color: var(--ion-color-danger);
 }

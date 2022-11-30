@@ -1,0 +1,22 @@
+<admin-header
+	title="ERROR: PREVIOUS ENTRY"
+	backRoute="/admin/checkin/scan"
+></admin-header>
+
+<ion-content class="ion-padding-horizontal ion-text-center" color="danger">
+	<ng-container *ngIf="checkin$ | async as checkin">
+		<h1>THIS CUSTOMER HAS ALREADY CHECKED IN!</h1>
+
+		<br />
+		Checked in on:
+		<h2>{{ checkin.checkInDateTime | date:'short' }}</h2>
+
+		<div class="ion-padding-top">
+			<ion-note color="dark">
+				<span *ngFor="let field of checkin.stats | keyvalue">
+					{{ field.key }}: {{ field.value }} <br />
+				</span>
+			</ion-note>
+		</div>
+	</ng-container>
+</ion-content>

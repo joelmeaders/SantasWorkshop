@@ -1,37 +1,67 @@
 <admin-header
 	title="Search: Last Name & Zip"
-	defaultHref="admin/search"
+	backRoute="/admin/search"
 ></admin-header>
 
 <ion-content fullscreen class="ion-padding">
-	<ion-card-header>
-		<ion-card-title> Step 2 </ion-card-title>
-		<ion-card-subtitle> Enter last name and zip code </ion-card-subtitle>
-	</ion-card-header>
-	<form [formGroup]="form">
-		<ion-list>
-			<ion-item>
-				<ion-label position="floating"> Last name </ion-label>
-				<ion-input formControlName="lastName"></ion-input>
-			</ion-item>
-			<ion-item>
-				<ion-label position="floating"> Zip code </ion-label>
-				<ion-input formControlName="zipCode"></ion-input>
-			</ion-item>
-		</ion-list>
-	</form>
-	<div class="search-buttons">
-		<ion-button color="danger" (click)="reset()" routerLink="..">
-			<ion-icon name="backspace-outline" slot="start"></ion-icon>
-			<ion-label> Reset </ion-label>
-		</ion-button>
-		<ion-button
-			(click)="search()"
-			routerLink="../results"
-			[disabled]="!form.valid"
-		>
-			<ion-icon name="search-outline" slot="start"></ion-icon>
-			<ion-label> Search </ion-label>
-		</ion-button>
-	</div>
+	<main class="limited-container">
+		<ion-card-header>
+			<ion-card-title> Step 2 </ion-card-title>
+			<ion-card-subtitle>
+				Enter last name and zip code
+			</ion-card-subtitle>
+		</ion-card-header>
+		<form [formGroup]="form">
+			<ion-list>
+				<ion-item>
+					<ion-label position="fixed"> Last name </ion-label>
+					<ion-input
+						type="text"
+						formControlName="lastName"
+						maxlength="20"
+						minlength="2"
+						autocomplete="off"
+						placeholder="required"
+					></ion-input>
+					<ion-note
+						slot="error"
+						*ngIf="form.controls.lastName.touched && form.controls.lastName.invalid"
+					>
+						Invalid last name. 2-20 characters
+					</ion-note>
+				</ion-item>
+				<ion-item counter>
+					<ion-label position="fixed"> Zip code </ion-label>
+					<ion-input
+						type="number"
+						maxlength="5"
+						minlength="5"
+						formControlName="zipCode"
+						autocomplete="off"
+						placeholder="required"
+					></ion-input>
+					<ion-note
+						slot="error"
+						*ngIf="form.controls.zipCode.touched && form.controls.zipCode.invalid"
+					>
+						Invalid zip code. Must have 5 digits
+					</ion-note>
+				</ion-item>
+			</ion-list>
+		</form>
+		<div class="search-buttons">
+			<ion-button color="danger" (click)="reset()" routerLink="..">
+				<ion-icon name="backspace-outline" slot="start"></ion-icon>
+				<ion-label> Reset </ion-label>
+			</ion-button>
+			<ion-button
+				(click)="search()"
+				routerLink="../results"
+				[disabled]="!form.valid"
+			>
+				<ion-icon name="search-outline" slot="start"></ion-icon>
+				<ion-label> Search </ion-label>
+			</ion-button>
+		</div>
+	</main>
 </ion-content>

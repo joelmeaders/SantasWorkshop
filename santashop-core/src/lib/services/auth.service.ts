@@ -8,7 +8,12 @@ import {
 	switchMap,
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
-import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
+import {
+	AuthWrapper,
+	IdTokenResult,
+	User,
+	UserCredential,
+} from './_auth-wrapper';
 import { Auth, UserEmailUid } from '@models/*';
 import { FunctionsWrapper } from './_functions-wrapper';
 
@@ -25,6 +30,9 @@ export class AuthService {
 	public readonly currentUser$: Observable<User | null> = this.authWrapper
 		.authState()
 		.pipe(distinctUntilChanged(), shareReplay(1));
+
+	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
+		this.authWrapper.getCurrentUserToken();
 
 	/**
 	 * Stream of user email and uid

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FireRepoLite, IFireRepoCollection } from '@core/*';
 import { COLLECTION_SCHEMA, RegistrationStats } from '@models/*';
-import { combineLatest, map, Observable, shareReplay, tap } from 'rxjs';
+import { combineLatest, map, Observable, shareReplay } from 'rxjs';
 import { Timestamp } from '@firebase/firestore';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';

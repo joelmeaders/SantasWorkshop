@@ -10,7 +10,6 @@ import {
 	shareReplay,
 	Subject,
 	switchMap,
-	tap,
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@models/';
 import { SearchService } from '../search.service';

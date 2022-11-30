@@ -44,3 +44,8 @@ input:-internal-autofill-selected {
 	display: flex;
 	justify-content: space-evenly;
 }
+
+.limited-container {
+	max-width: 800px;
+	margin: auto;
+}

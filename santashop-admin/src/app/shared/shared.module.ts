@@ -8,11 +8,23 @@ import { AddEditChildModalComponent } from './components/add-edit-child-modal/ad
 import { ReactiveFormsModule } from '@angular/forms';
 import { ChildValidationService } from './services/child-validation.service';
 import { RouterModule } from '@angular/router';
+import { ManageChildrenComponent } from './components/manage-children/manage-children.component';
+import { ReferralModalComponent } from './components/referral-modal/referral-modal.component';
 
 @NgModule({
-	declarations: [HeaderComponent, AddEditChildModalComponent],
+	declarations: [
+		HeaderComponent,
+		ManageChildrenComponent,
+		AddEditChildModalComponent,
+		ReferralModalComponent,
+	],
 	imports: [CommonModule, IonicModule, ReactiveFormsModule, RouterModule],
-	exports: [HeaderComponent, AddEditChildModalComponent],
+	exports: [
+		HeaderComponent,
+		ManageChildrenComponent,
+		AddEditChildModalComponent,
+		ReferralModalComponent,
+	],
 	providers: [LookupService, CheckInService, ChildValidationService],
 })
 export class SharedModule {}

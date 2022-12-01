@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AlertController, PopoverOptions } from '@ionic/angular';
 import {
 	BehaviorSubject,
@@ -32,11 +32,13 @@ export class ScanPage {
 	public readonly formatsEnabled$ = this.scannerService.formatsEnabled;
 	public readonly deviceToUse$ = this.scannerService.$deviceToUse;
 	public readonly hasPermissions$ = this.scannerService.$hasPermissions;
-
 	private readonly scanResult = new Subject<string>();
-	private readonly scanResultFilter$ = this.scanResult
-		.asObservable()
-		.pipe(switchMap((code) => this.filterCodes(code)));
+
+	private readonly scanResultFilter$ = this.scanResult.asObservable().pipe(
+		throttleTime(5000),
+		switchMap((code) => this.filterCodes(code))
+	);
+
 	private readonly scanResult$ = (): Observable<Registration | undefined> =>
 		this.scanResultFilter$.pipe(
 			filter((value) => !!value),
@@ -86,8 +88,7 @@ export class ScanPage {
 		private readonly lookupService: LookupService,
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
-		private readonly router: Router,
-		private readonly route: ActivatedRoute
+		private readonly router: Router
 	) {
 		// timer(3000).subscribe(() => {
 		// 	this.scanResult.next('XE7UBKJC');
@@ -100,14 +101,6 @@ export class ScanPage {
 		this.routeToReviewPageSubscription =
 			this.routeToReviewPage$().subscribe();
 
-		// This would be set by the search service
-		const code = this.route.snapshot?.params?.qrcode;
-
-		if (code) {
-			this.scanResult.next(code);
-			return;
-		}
-
 		this.cameraEnabled$.next(true);
 	}
 
@@ -116,7 +109,10 @@ export class ScanPage {
 		this.scanErrorSubscription = undefined;
 		this.routeToReviewPageSubscription?.unsubscribe();
 		this.routeToReviewPageSubscription = undefined;
+		this.disableScanner();
+	}
 
+	private disableScanner(): void {
 		if (this.scanner) {
 			this.scanner.scanStop();
 			this.scanner.enable = false;
@@ -165,6 +161,8 @@ export class ScanPage {
 			],
 			backdropDismiss: false,
 		});
+
+		this.disableScanner();
 
 		await alert.present();
 		const result = await alert.onDidDismiss();

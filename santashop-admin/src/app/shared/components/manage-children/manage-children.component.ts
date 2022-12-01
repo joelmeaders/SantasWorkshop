@@ -39,7 +39,7 @@ export class ManageChildrenComponent {
 		const result = await modal.onDidDismiss();
 		if (!result.data || result.role === 'cancelled') return;
 
-		if (result.role === 'added') {
+		if (result.role === 'add') {
 			this.adddedChild.emit(result.data);
 		} else {
 			this.editedChild.emit(result.data);

@@ -4,10 +4,13 @@ import {
 	UntypedFormGroup,
 	Validators,
 } from '@angular/forms';
-import { ModalController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { AlertController, ModalController } from '@ionic/angular';
 import { BehaviorSubject } from 'rxjs';
-import { Child } from '../../../../../../dist/santashop-models';
+import { Child, Registration } from '../../../../../../dist/santashop-models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
+import { CheckInContextService } from '../../../shared/services/check-in-context.service';
+import { CheckInService } from '../../../shared/services/check-in.service';
 
 @Component({
 	selector: 'admin-registration',
@@ -62,7 +65,13 @@ export class RegistrationPage {
 		newsletter: new UntypedFormControl(false),
 	});
 
-	constructor(private readonly modalController: ModalController) {}
+	constructor(
+		private readonly modalController: ModalController,
+		private readonly checkinService: CheckInService,
+		private readonly checkinContext: CheckInContextService,
+		private readonly router: Router,
+		private readonly alertController: AlertController
+	) {}
 
 	public ionViewWillLeave(): void {
 		this.reset();
@@ -99,6 +108,51 @@ export class RegistrationPage {
 		if (result.data) {
 			this.form.controls.referral.setValue(result.data);
 			this.referrer.next(result.data);
+		}
+	}
+
+	public async checkIn(): Promise<void> {
+		const registration = {
+			...this.form.value,
+			children: this.childrenList.getValue(),
+			uid: 'onsite',
+			qrcode: 'onsite',
+			dateTimeSlot: { id: 'onsite' },
+		} as Registration;
+
+		console.log(registration);
+
+		try {
+			const result: number = await this.checkinService.onSiteRegistration(
+				registration
+			);
+
+			this.checkinContext.setCheckIn(
+				result,
+				registration.qrcode ?? 'onsite'
+			);
+			this.router.navigate(['admin/checkin/confirmation']);
+		} catch (error: any) {
+			console.log(error);
+			if (error.details.code === 6) {
+				this.checkinContext.reset();
+				this.router.navigate([
+					'admin/checkin/duplicate',
+					registration.uid,
+				]);
+				return;
+			}
+
+			const alert = await this.alertController.create({
+				header: 'Error registering',
+				subHeader: `code: ${error.code}`,
+				message: error?.message ?? error,
+			});
+
+			await alert.present();
+			this.checkinContext.reset();
+			await alert.onDidDismiss();
+			await this.router.navigate(['/admin']);
 		}
 	}
 

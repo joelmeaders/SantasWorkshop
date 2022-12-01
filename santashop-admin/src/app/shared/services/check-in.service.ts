@@ -22,6 +22,14 @@ export class CheckInService {
 			'checkInWithEdit'
 		)(registration);
 
+	private readonly onSiteRegistrationFn = (
+		registration: Registration
+	): Promise<HttpsCallableResult<number>> =>
+		httpsCallable<Registration, number>(
+			this.functions,
+			'onSiteRegistration'
+		)(registration);
+
 	constructor(
 		private readonly functions: Functions,
 		private readonly loadingController: LoadingController
@@ -36,7 +44,7 @@ export class CheckInService {
 		const loading = await this.loadingController.create({
 			message: 'Saving check-in...',
 			translucent: true,
-			backdropDismiss: true,
+			backdropDismiss: false,
 		});
 
 		await loading.present();
@@ -53,6 +61,26 @@ export class CheckInService {
 				? await this.checkInWithEditFn(partialRegistration)
 				: await this.checkInFn(partialRegistration);
 
+			return response.data;
+		} finally {
+			if (await this.loadingController.getTop())
+				await this.loadingController.dismiss();
+		}
+	}
+
+	public async onSiteRegistration(
+		registration: Registration
+	): Promise<number> {
+		const loading = await this.loadingController.create({
+			message: 'Saving registration...',
+			translucent: true,
+			backdropDismiss: false,
+		});
+
+		await loading.present();
+
+		try {
+			const response = await this.onSiteRegistrationFn(registration);
 			return response.data;
 		} finally {
 			if (await this.loadingController.getTop())

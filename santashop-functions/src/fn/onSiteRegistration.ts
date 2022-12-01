@@ -9,13 +9,13 @@ import {
 } from '../../../santashop-models/src/public-api';
 import {
 	calculateRegistrationStats,
-	isPartialRegistrationComplete,
+	isRegistrationComplete,
 } from '../utility/registrations';
 
 admin.initializeApp();
 
 export default (
-	record: Partial<Registration>,
+	record: Registration,
 	context: CallableContext
 ): Promise<number> => {
 	if (!context.auth?.token?.admin) {
@@ -29,44 +29,51 @@ export default (
 		);
 	}
 
-	if (!isPartialRegistrationComplete(record)) {
+	if (!isRegistrationComplete(record)) {
 		console.error(
 			`Registration incomplete. Unable to check in for uid ${record.uid}`
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
-			'-11',
+
 			'Incomplete registration. Cannot continue.'
 		);
 	}
+
+	const id = admin
+		.firestore()
+		.collection(COLLECTION_SCHEMA.onSiteRegistrations)
+		.doc().id;
 
 	const batch = admin.firestore().batch();
 
 	// Registration
 	const registrationDocRef = admin
 		.firestore()
-		.doc(`${COLLECTION_SCHEMA.editedRegistrations}/${record.uid}`);
+		.doc(`${COLLECTION_SCHEMA.onSiteRegistrations}/${id}`);
 
-	const partialRegistration = {
-		uid: record.uid,
-		children: record.children,
+	const updatedRegistration = {
+		...record,
+		uid: id,
+		qrcode: 'onsite',
 		registrationSubmittedOn: new Date(),
+		includedInCounts: false,
 		includedInRegistrationStats: false,
 		programYear: 2022,
-	} as Partial<Registration>;
+	};
 
-	batch.create(registrationDocRef, partialRegistration);
+	batch.create(registrationDocRef, updatedRegistration);
 
 	// Check In
 	const checkinDocRef = admin
 		.firestore()
-		.doc(`${COLLECTION_SCHEMA.checkins}/${record.uid}`);
+		.doc(`${COLLECTION_SCHEMA.checkins}/${id}`);
 
 	const checkin = {
 		checkInDateTime: new Date(),
 		customerId: record.uid,
 		inStats: false,
-		registrationCode: record.qrcode,
+		registrationCode: 'onsite',
 		stats: calculateRegistrationStats(record, true),
 	} as CheckIn;
 
@@ -77,7 +84,7 @@ export default (
 		.then(() => checkin.stats!.children)
 		.catch((error: any) => {
 			throw new functions.https.HttpsError(
-				error.code === 6 ? 'already-exists' : 'internal',
+				error.status,
 				error.message,
 				error
 			);

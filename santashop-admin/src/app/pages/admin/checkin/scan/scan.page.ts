@@ -32,11 +32,13 @@ export class ScanPage {
 	public readonly formatsEnabled$ = this.scannerService.formatsEnabled;
 	public readonly deviceToUse$ = this.scannerService.$deviceToUse;
 	public readonly hasPermissions$ = this.scannerService.$hasPermissions;
-
 	private readonly scanResult = new Subject<string>();
-	private readonly scanResultFilter$ = this.scanResult
-		.asObservable()
-		.pipe(switchMap((code) => this.filterCodes(code)));
+
+	private readonly scanResultFilter$ = this.scanResult.asObservable().pipe(
+		throttleTime(5000),
+		switchMap((code) => this.filterCodes(code))
+	);
+
 	private readonly scanResult$ = (): Observable<Registration | undefined> =>
 		this.scanResultFilter$.pipe(
 			filter((value) => !!value),

@@ -118,7 +118,9 @@ export class ScanPage {
 		this.scanErrorSubscription = undefined;
 		this.routeToReviewPageSubscription?.unsubscribe();
 		this.routeToReviewPageSubscription = undefined;
+	}
 
+	private disableScanner(): void {
 		if (this.scanner) {
 			this.scanner.scanStop();
 			this.scanner.enable = false;
@@ -167,6 +169,8 @@ export class ScanPage {
 			],
 			backdropDismiss: false,
 		});
+
+		this.disableScanner();
 
 		await alert.present();
 		const result = await alert.onDidDismiss();

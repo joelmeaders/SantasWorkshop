@@ -14,15 +14,13 @@ import {
 
 admin.initializeApp();
 
-export default (
+export default async (
 	record: Partial<Registration>,
 	context: CallableContext
 ): Promise<number | HttpsError> => {
 	if (!context.auth?.token?.admin) {
 		console.error(
-			new Error(
-				`${context.auth?.uid} attempted to check in for uid ${record.uid}`
-			)
+			`${context.auth?.uid} attempted to check in for uid ${record.uid}`
 		);
 		throw new functions.https.HttpsError(
 			'permission-denied',
@@ -33,9 +31,7 @@ export default (
 
 	if (!isPartialRegistrationComplete(record)) {
 		console.error(
-			new Error(
-				`Registration incomplete. Unable to check in for uid ${record.uid}`
-			)
+			`Registration incomplete. Unable to check in for uid ${record.uid}`
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
@@ -76,11 +72,22 @@ export default (
 
 	batch.create(checkinDocRef, checkin);
 
-	return batch
-		.commit()
-		.then(() => checkin.stats!.children)
-		.catch((error: any) => {
-			console.error(error);
-			throw error;
-		});
+	try {
+		await batch.commit();
+		return checkin.stats!.children;
+	} catch (error: any) {
+		throw new functions.https.HttpsError(
+			error.code,
+			error.status,
+			JSON.stringify(error)
+		);
+	}
+
+	// return batch
+	// 	.commit()
+	// 	.then(() => checkin.stats!.children)
+	// 	.catch((error: any) => {
+	// 		console.error(error);
+	// 		throw error;
+	// 	});
 };

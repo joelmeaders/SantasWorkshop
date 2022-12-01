@@ -20,9 +20,7 @@ export default async (
 ): Promise<number | HttpsError> => {
 	if (!context.auth?.token?.admin) {
 		console.error(
-			new Error(
-				`${context.auth?.uid} attempted to check in for uid ${record.uid} but is not an admin`
-			)
+			`${context.auth?.uid} attempted to check in for uid ${record.uid} but is not an admin`
 		);
 		throw new functions.https.HttpsError(
 			'permission-denied',
@@ -33,9 +31,7 @@ export default async (
 
 	if (!isPartialRegistrationComplete(record)) {
 		console.error(
-			new Error(
-				`Registration incomplete. Unable to check in for uid ${record.uid}`
-			)
+			`Registration incomplete. Unable to check in for uid ${record.uid}`
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
@@ -59,6 +55,7 @@ export default async (
 
 	try {
 		await checkinDocRef.create(checkin);
+		return checkin.stats!.children;
 	} catch (error: any) {
 		throw new functions.https.HttpsError(
 			error.code,

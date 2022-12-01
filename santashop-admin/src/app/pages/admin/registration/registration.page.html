@@ -153,6 +153,7 @@
 				color="success"
 				class="confirm-button"
 				[disabled]="form.invalid || !(children$ | async)?.length"
+				(click)="checkIn()"
 			>
 				<ion-label>
 					<h1>Yes, continue</h1>

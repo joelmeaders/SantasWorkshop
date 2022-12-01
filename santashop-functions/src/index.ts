@@ -74,6 +74,15 @@ export const checkInWithEdit = functions.https.onCall(
 	}
 );
 
+export const onSiteRegistration = functions.https.onCall(
+	async (request, context) => {
+		return (await import('./fn/onSiteRegistration')).default(
+			request,
+			context
+		);
+	}
+);
+
 /**
  * Validate recaptcha response.
  *

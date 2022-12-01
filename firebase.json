@@ -73,6 +73,10 @@
 					"function": "checkInWithEdit"
 				},
 				{
+					"source": "/onSiteRegistration",
+					"function": "onSiteRegistration"
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}

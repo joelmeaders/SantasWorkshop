@@ -3,7 +3,7 @@ export const COLLECTION_SCHEMA = {
 	users: 'users',
 	registrations: 'registrations',
 	editedRegistrations: 'editedregistrations',
-	noRegistrations: 'noregistrations',
+	onSiteRegistrations: 'onsiteregistrations',
 	children: 'children',
 	dateTimeSlots: 'dateTimeSlots',
 	registrationSearchIndex: 'registrationsearchindex',

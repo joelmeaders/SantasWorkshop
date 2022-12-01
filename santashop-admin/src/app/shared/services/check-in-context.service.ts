@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
-import { BehaviorSubject, filter, map, shareReplay } from 'rxjs';
+import { BehaviorSubject, map, shareReplay } from 'rxjs';
 import { Registration } from '@models/*';
+import { filterNullish } from '../helpers';
 
 @Injectable()
 export class CheckInContextService {
@@ -17,7 +18,7 @@ export class CheckInContextService {
 	public readonly currentRegistration$ = this.registration
 		.asObservable()
 		.pipe(
-			filter((registration) => !!registration),
+			filterNullish<Registration>(),
 			map((registration) => {
 				if (!registration) return;
 				// Convert timestamp to date

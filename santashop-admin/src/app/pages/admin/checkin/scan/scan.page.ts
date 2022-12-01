@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AlertController, PopoverOptions } from '@ionic/angular';
 import {
 	BehaviorSubject,
@@ -88,8 +88,7 @@ export class ScanPage {
 		private readonly lookupService: LookupService,
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
-		private readonly router: Router,
-		private readonly route: ActivatedRoute
+		private readonly router: Router
 	) {
 		// timer(3000).subscribe(() => {
 		// 	this.scanResult.next('XE7UBKJC');
@@ -101,14 +100,6 @@ export class ScanPage {
 		this.scanErrorSubscription = this.scanError$.subscribe();
 		this.routeToReviewPageSubscription =
 			this.routeToReviewPage$().subscribe();
-
-		// This would be set by the search service
-		const code = this.route.snapshot?.params?.qrcode;
-
-		if (code) {
-			this.scanResult.next(code);
-			return;
-		}
 
 		this.cameraEnabled$.next(true);
 	}

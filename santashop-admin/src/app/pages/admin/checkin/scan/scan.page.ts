@@ -109,6 +109,7 @@ export class ScanPage {
 		this.scanErrorSubscription = undefined;
 		this.routeToReviewPageSubscription?.unsubscribe();
 		this.routeToReviewPageSubscription = undefined;
+		this.disableScanner();
 	}
 
 	private disableScanner(): void {

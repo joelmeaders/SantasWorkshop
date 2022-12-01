@@ -31,11 +31,14 @@
 
 		<form [formGroup]="form">
 			<ion-item>
-				<ion-label position="floating">First Name</ion-label>
+				<ion-label position="fixed">First Name</ion-label>
 				<ion-input
-					formControlName="firstName"
 					type="text"
-					inputmode="text"
+					autocomplete="off"
+					formControlName="firstName"
+					placeholder="required"
+					minlength="2"
+					maxlength="20"
 				></ion-input>
 				<ion-note
 					*ngIf="
@@ -50,11 +53,14 @@
 			</ion-item>
 
 			<ion-item>
-				<ion-label position="floating">Last Name</ion-label>
+				<ion-label position="fixed">Last Name</ion-label>
 				<ion-input
-					formControlName="lastName"
 					type="text"
-					inputmode="text"
+					autocomplete="off"
+					formControlName="lastName"
+					placeholder="required"
+					minlength="2"
+					maxlength="25"
 				></ion-input>
 				<ion-note
 					*ngIf="
@@ -69,12 +75,12 @@
 			</ion-item>
 
 			<ion-item>
-				<ion-label position="floating">Birth Date</ion-label>
+				<ion-label position="fixed">Birth Date</ion-label>
 				<ion-input
 					(ionChange)="birthdaySelected($event)"
 					formControlName="dateOfBirth"
+					autocomplete="off"
 					type="date"
-					inputmode="date"
 					[min]="minBirthDate"
 					[max]="maxBirthDate"
 				></ion-input>

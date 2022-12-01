@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
+import { CallableContext } from 'firebase-functions/v1/https';
 import {
 	CheckIn,
 	COLLECTION_SCHEMA,
@@ -14,10 +14,10 @@ import {
 
 admin.initializeApp();
 
-export default async (
+export default (
 	record: Partial<Registration>,
 	context: CallableContext
-): Promise<number | HttpsError> => {
+): Promise<number> => {
 	if (!context.auth?.token?.admin) {
 		console.error(
 			`${context.auth?.uid} attempted to check in for uid ${record.uid} but is not an admin`
@@ -53,27 +53,14 @@ export default async (
 		stats: calculateRegistrationStats(record, false),
 	} as CheckIn;
 
-	try {
-		await checkinDocRef.create(checkin);
-		return checkin.stats!.children;
-	} catch (error: any) {
-		throw new functions.https.HttpsError(
-			error.code,
-			error.status,
-			JSON.stringify(error)
-		);
-	}
-
-	// batch.create(checkinDocRef, checkin);
-
-	// return batch
-	// 	.commit()
-	// 	.then(() => checkin.stats!.children)
-	// 	.catch((error: any) => {
-	// 		// console.error(error);
-	// 		throw new functions.https.HttpsError(
-	// 			error.code === 6 ? 'already-exists' : 'internal',
-	// 			error.message
-	// 		);
-	// 	});
+	return checkinDocRef
+		.create(checkin)
+		.then(() => checkin.stats?.children ?? 0)
+		.catch((error) => {
+			throw new functions.https.HttpsError(
+				error.code === 6 ? 'already-exists' : 'internal',
+				error.message,
+				error
+			);
+		});
 };

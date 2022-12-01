@@ -39,9 +39,10 @@ export class ReviewPage {
 
 	protected readonly setRegistrationSubscription = this.lookupRegistration$
 		.pipe(
-			tap((registration) =>
-				this.checkinContext.setRegistration(registration)
-			),
+			tap((registration) => {
+				this.checkinContext.setRegistration(registration);
+				this.scanResult.next(undefined);
+			}),
 			catchError((error) =>
 				from(this.missingRegistrationError(error)).pipe(
 					filterNullish<Registration>()
@@ -69,6 +70,7 @@ export class ReviewPage {
 
 	public ionViewWillLeave(): void {
 		this.checkinContext.resetRegistration();
+		this.scanResult.next(undefined);
 		this.wasEdited = false;
 	}
 
@@ -119,7 +121,8 @@ export class ReviewPage {
 			);
 			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {
-			if (error.code === 'functions/already-exists') {
+			console.log(error);
+			if (error.details.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([
 					'admin/checkin/duplicate',

@@ -9,25 +9,32 @@ const routes: Routes = [
 	},
 	{
 		path: 'scan',
+		title: 'DSCS: Scan Registration Codes',
 		loadChildren: () =>
 			import('./scan/scan.module').then((m) => m.ScanPageModule),
 	},
 	{
 		path: 'review',
+		title: 'DSCS: Review Information',
 		loadChildren: () =>
 			import('./review/review.module').then((m) => m.ReviewPageModule),
 	},
 	{
 		path: 'confirmation',
+		title: 'DSCS: Checked In',
 		loadChildren: () =>
 			import('./confirmation/confirmation.module').then(
 				(m) => m.ConfirmationPageModule
 			),
-	},  {
-    path: 'duplicate',
-    loadChildren: () => import('./duplicate/duplicate.module').then( m => m.DuplicatePageModule)
-  },
-
+	},
+	{
+		path: 'duplicate',
+		title: 'DSCS: Duplicate Check-In',
+		loadChildren: () =>
+			import('./duplicate/duplicate.module').then(
+				(m) => m.DuplicatePageModule
+			),
+	},
 ];
 
 @NgModule({

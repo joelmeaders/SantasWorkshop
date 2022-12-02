@@ -9,6 +9,7 @@ const redirectLoggedInToAdmin = (): AuthPipe => redirectLoggedInTo(['admin']);
 const routes: Routes = [
 	{
 		path: '',
+		title: 'DSCS Sign In',
 		canActivate: [AuthGuard],
 		data: { authGuardPipe: redirectLoggedInToAdmin },
 		loadChildren: () =>
@@ -18,6 +19,7 @@ const routes: Routes = [
 	},
 	{
 		path: 'admin',
+		title: 'DSCS Home',
 		canActivate: [AuthGuard],
 		data: { authGuardPipe: adminOnly },
 		loadChildren: () =>

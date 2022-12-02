@@ -8,14 +8,14 @@
 >
 	<zxing-scanner
 		#scanner
-		[formats]="formatsEnabled$"
+		[formats]="formatsEnabled"
 		[device]="deviceToUse$ | async"
 		[autostart]="true"
 		[enable]="(cameraEnabled$ | async) ?? false"
 		(camerasFound)="onCamerasFound($event)"
 		(deviceChange)="onDeviceChange($event)"
 		(permissionResponse)="onHasPermission($event)"
-		(scanSuccess)="onScanResult($event)"
+		(scanSuccess)="scanResult.next($event)"
 		(scanError)="scanError.next($event)"
 		[delayBetweenScanSuccess]="5000"
 	></zxing-scanner>

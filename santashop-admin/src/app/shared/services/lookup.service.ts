@@ -41,14 +41,7 @@ export class LookupService {
 		qrcode: string
 	): Observable<Registration | undefined> =>
 		this.queryRegistrationsByQrCode(qrcode).pipe(
-			map((results) => {
-				if (!results?.length)
-					throw new Error(
-						`Unable to find registration for code ${qrcode}`
-					);
-
-				return results.pop();
-			})
+			map((results) => results.pop())
 		);
 
 	public readonly getRegistrationByUid$ = (

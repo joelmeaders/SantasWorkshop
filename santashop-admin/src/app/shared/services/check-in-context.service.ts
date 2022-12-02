@@ -43,7 +43,7 @@ export class CheckInContextService {
 			shareReplay(1)
 		);
 
-	public setRegistration(registration: Registration): void {
+	public setRegistration(registration?: Registration): void {
 		this.registration.next(registration);
 	}
 

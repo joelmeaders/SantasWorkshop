@@ -4,7 +4,9 @@ import { Registration } from '@models/*';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { HttpsCallableResult } from '../../../../../santashop-core/src';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root',
+})
 export class CheckInService {
 	private readonly checkInFn = (
 		registration: Registration

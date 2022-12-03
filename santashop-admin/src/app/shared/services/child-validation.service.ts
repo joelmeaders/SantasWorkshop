@@ -17,7 +17,9 @@ export const MIN_BIRTHDATE = (): Date =>
 		)
 	);
 
-@Injectable()
+@Injectable({
+	providedIn: 'root',
+})
 export class ChildValidationService {
 	public validateChild(inputChild: Child): Child {
 		const outputChild = deepCopy(inputChild);

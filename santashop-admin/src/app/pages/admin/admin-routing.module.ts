@@ -17,6 +17,7 @@ const routes: Routes = [
 			},
 			{
 				path: 'checkin',
+				title: 'DSCS: Check In',
 				loadChildren: () =>
 					import('./checkin/checkin.module').then(
 						(m) => m.CheckinPageModule
@@ -24,6 +25,7 @@ const routes: Routes = [
 			},
 			{
 				path: 'search',
+				title: 'DSCS: Search',
 				loadChildren: () =>
 					import('./search/search.module').then(
 						(m) => m.SearchPageModule
@@ -31,6 +33,7 @@ const routes: Routes = [
 			},
 			{
 				path: 'registration',
+				title: 'DSCS: Register',
 				loadChildren: () =>
 					import('./registration/registration.module').then(
 						(m) => m.RegistrationPageModule

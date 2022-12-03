@@ -128,7 +128,7 @@ export class AddEditChildModalComponent implements OnInit {
 			ageGroup = AgeGroup.age911;
 		} else {
 			await this.childTooOldAlert();
-			await this.dismiss();
+			this.form.controls.dateOfBirth.setValue(undefined);
 			return;
 		}
 

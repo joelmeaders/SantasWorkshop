@@ -1,18 +1,36 @@
-<ion-tabs>
-	<ion-tab-bar slot="bottom">
-		<ion-tab-button tab="checkin">
-			<ion-icon name="bag-check-outline" color="success"></ion-icon>
-			<ion-label>Check-In</ion-label>
-		</ion-tab-button>
+<ion-content>
+	<ion-router-outlet></ion-router-outlet>
+</ion-content>
 
-		<ion-tab-button tab="search">
-			<ion-icon name="search-outline" color="warning"></ion-icon>
-			<ion-label>Search</ion-label>
-		</ion-tab-button>
+<ion-footer>
+	<ion-toolbar>
+		<ion-tab-bar>
+			<ion-tab-button
+				[routerLink]="['/admin/checkin']"
+				routerLinkActive="tab-selected"
+				routerDirection="root"
+			>
+				<ion-icon name="bag-check-outline" color="success"></ion-icon>
+				<ion-label>Check-In</ion-label>
+			</ion-tab-button>
 
-		<ion-tab-button tab="registration">
-			<ion-icon name="person-add-outline" color="primary"></ion-icon>
-			<ion-label>Register</ion-label>
-		</ion-tab-button>
-	</ion-tab-bar>
-</ion-tabs>
+			<ion-tab-button
+				[routerLink]="['/admin/search']"
+				routerLinkActive="tab-selected"
+				routerDirection="root"
+			>
+				<ion-icon name="search-outline" color="warning"></ion-icon>
+				<ion-label>Search</ion-label>
+			</ion-tab-button>
+
+			<ion-tab-button
+				[routerLink]="['/admin/registration']"
+				routerLinkActive="tab-selected"
+				routerDirection="root"
+			>
+				<ion-icon name="person-add-outline" color="primary"></ion-icon>
+				<ion-label>Register</ion-label>
+			</ion-tab-button>
+		</ion-tab-bar>
+	</ion-toolbar>
+</ion-footer>

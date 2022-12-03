@@ -4,7 +4,9 @@ import { BehaviorSubject, map, shareReplay } from 'rxjs';
 import { Registration } from '@models/*';
 import { filterNullish } from '../helpers';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root',
+})
 export class CheckInContextService {
 	private readonly registration = new BehaviorSubject<
 		Registration | undefined
@@ -43,7 +45,7 @@ export class CheckInContextService {
 			shareReplay(1)
 		);
 
-	public setRegistration(registration: Registration): void {
+	public setRegistration(registration?: Registration): void {
 		this.registration.next(registration);
 	}
 

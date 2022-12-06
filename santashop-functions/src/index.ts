@@ -138,12 +138,6 @@ export const sendNewRegistrationEmails = functions.firestore
 		).default(snapshot);
 	});
 
-// export const sendCorrectRegistrationEmail = functions.firestore
-//   .document(`${COLLECTION_SCHEMA.tmpResendRegistrationEmails}/{docId}`)
-//   .onUpdate(async (snapshot) => {
-//     await (await import('./fn/sendCorrectRegistrationEmail')).default(snapshot);
-//   });
-
 // ------------------------------------- SCHEDULED FUNCTIONS
 
 /**
@@ -172,6 +166,18 @@ export const pubsubSetAdminRights = functions.pubsub
 	.topic('set-admin-rights')
 	.onPublish(async () => {
 		await (await import('./fn/scheduledSetAdminRights')).default();
+	});
+
+export const pubsubQueueReminderDocuments = functions.pubsub
+	.topic('queue-reminder-documents')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubQueueReminderDocuments')).default();
+	});
+
+export const pubsubSendReminderEmails = functions.pubsub
+	.topic('send-reminder-emails')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubSendReminderEmails')).default();
 	});
 
 // export const scheduledExportEmails = functions.pubsub

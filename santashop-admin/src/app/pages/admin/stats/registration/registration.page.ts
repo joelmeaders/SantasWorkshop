@@ -163,7 +163,7 @@ export class RegistrationPage {
 			x: {},
 			y: {
 				min: 0,
-				max: 350,
+				max: 450,
 			},
 		},
 		plugins: {

@@ -1,9 +1,96 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>check-in</ion-title>
-  </ion-toolbar>
-</ion-header>
+<admin-header title="Check-In Stats"></admin-header>
 
-<ion-content>
+<ion-content class="ion-padding">
+	Updated {{ checkinLastUpdated$ | async | date:'short' }}
+	<ion-grid>
+		<ion-row class="ion-justify-content-center">
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="3"
+				sizeLg="3"
+				sizeXl="2"
+				class="ion-margin-horizontal"
+			>
+				<div
+					class="count-container"
+					*ngIf="totalCustomers$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>Customers</h3>
+				</div>
+			</ion-col>
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="3"
+				sizeLg="3"
+				sizeXl="2"
+				class="ion-margin-horizontal"
+			>
+				<div
+					class="count-container"
+					*ngIf="totalChildren$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>Children</h3>
+				</div>
+			</ion-col>
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="3"
+				sizeLg="3"
+				sizeXl="2"
+				class="ion-margin-horizontal"
+			>
+				<div
+					class="count-container"
+					*ngIf="totalPreregistered$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>Pre-Registered</h3>
+				</div>
+			</ion-col>
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="3"
+				sizeLg="3"
+				sizeXl="2"
+				class="ion-margin-horizontal"
+			>
+				<div
+					class="count-container"
+					*ngIf="totalModifiedRegistrations$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>Modified Registrations</h3>
+				</div>
+			</ion-col>
+		</ion-row>
 
+		<ion-row *appLet="checkInsByDayHour$ | async as slots">
+			<ion-col size="12">
+				<h2>Check-Ins by Day/Hour</h2>
+			</ion-col>
+			<ion-col
+				sizeXs="12"
+				sizeSm="12"
+				sizeMd="6"
+				sizeLg="6"
+				*ngFor="let slot of slots; index as i;"
+			>
+				<h3>{{ slot.datasets[0].label }}</h3>
+				<canvas
+					baseChart
+					[options]="barChartOptions"
+					[datasets]="slot.datasets"
+					[labels]="['9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm']"
+					[legend]="false"
+					type="bar"
+				></canvas>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
 </ion-content>

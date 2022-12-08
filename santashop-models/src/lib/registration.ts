@@ -32,4 +32,6 @@ export interface Registration {
 	zipCode?: string;
 
 	referredBy?: string;
+
+	reminderEmailSentOn?: false | Date;
 }

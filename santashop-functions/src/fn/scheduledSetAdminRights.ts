@@ -6,7 +6,10 @@ export default async (): Promise<void> => {
 	// TODO: Put these in an anvironment variable
 	const adminUids: string[] = [
 		'KF2cN3wX3bawCJaghN9JjLvdbB32', // dev
-		'dabX8OSbk0g8yIdNEIjSd89P8Mb2', // admin
+		'R8YIhtdS7qeV65aYF3jec2plLto1', // admin@denversantaclausshop.org
+		'wBgrMMPo59abiHfMqArNr6YxP8o2', // santa@northpole.com
+		'hHXDyGDTROXMhSNUSF9paJuKhXl2', // admin@santa.com
+		'p9jlQ7aRngO3BWWa1q088nYtdva2', // admin2@santa.com
 	];
 
 	adminUids.forEach(async (uid) => {

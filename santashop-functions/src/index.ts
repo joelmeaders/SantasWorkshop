@@ -226,9 +226,9 @@ export const scheduledRegistrationStats = functions.pubsub
 	});
 
 // Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
-// export const scheduledCheckInStats = functions.pubsub
-// 	.schedule('*/5 10,11,12,13,14,15,16 10,11,13,14 12 *')
-// 	.timeZone('America/Denver')
-// 	.onRun(async () => {
-// 		await (await import('./fn/scheduledCheckInStats')).default();
-// 	});
+export const scheduledCheckInStats = functions.pubsub
+	.schedule('*/5 10,11,12,13,14,15,16 9,10,12,13 12 *')
+	.timeZone('America/Denver')
+	.onRun(async () => {
+		await (await import('./fn/scheduledCheckInStats')).default();
+	});

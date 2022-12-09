@@ -19,7 +19,7 @@ export class ByCodePage {
 			validators: [
 				Validators.required,
 				Validators.maxLength(8),
-				Validators.minLength(8),
+				Validators.minLength(7),
 			],
 		}),
 	});

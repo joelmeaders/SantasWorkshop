@@ -21,6 +21,7 @@
 		"firebase-functions": "^4.0.2",
 		"json2csv": "^5.0.7",
 		"qrcode": "^1.5.1",
+		"request": "^2.88.2",
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {

@@ -6,6 +6,10 @@ admin.initializeApp();
 let stats: ICheckInAggregatedStats;
 
 export default async () => {
+	// Load all checkins
+	const checkins: ICheckIn[] = await loadCheckIns();
+	if (!checkins.length) return Promise.resolve('No checkins');
+
 	// Get existing stats
 	const statsDoc = await admin
 		.firestore()
@@ -23,19 +27,28 @@ export default async () => {
 		};
 	}
 
-	// Get unprocessed checkins
-	await admin
-		.firestore()
-		.collection('checkins')
-		.where('inStats', '==', false)
-		.get()
-		.then(async (snapshot) => {
-			snapshot.forEach(async (doc) => {
-				const docData = doc.data() as ICheckIn;
-				updateStats(docData);
-				await doc.ref.set({ inStats: true }, { merge: true });
+	const batchSize = 499;
+	let processed = 0;
+
+	do {
+		const batchRegs = checkins.splice(0, batchSize);
+
+		await admin.firestore().runTransaction((transaction) => {
+			batchRegs.forEach((record) => {
+				const doc = admin
+					.firestore()
+					.collection('checkins')
+					.doc(record.customerId!.toString());
+
+				updateStats(record);
+
+				transaction.set(doc, { inStats: true }, { merge: true });
 			});
+			return Promise.resolve();
 		});
+		processed += batchRegs.length;
+		console.info('Processed check-ins', processed);
+	} while (checkins.length > 0);
 
 	await admin
 		.firestore()
@@ -44,7 +57,8 @@ export default async () => {
 		.set(stats, { merge: false });
 
 	stats = {} as ICheckInAggregatedStats;
-	return Promise.resolve();
+
+	return Promise.resolve('Reset Checkins');
 };
 
 function updateStats(checkIn: ICheckIn): void {
@@ -61,7 +75,7 @@ function updateStats(checkIn: ICheckIn): void {
 	if (index > -1) {
 		stats.dateTimeCount[index].customerCount += 1;
 		stats.dateTimeCount[index].childCount += checkIn.stats.children;
-		if (checkIn.stats.preregistered) {
+		if (checkIn.registrationCode !== 'onsite') {
 			stats.dateTimeCount[index].pregisteredCount += 1;
 		}
 		if (checkIn.stats.modifiedAtCheckIn) {
@@ -75,12 +89,33 @@ function updateStats(checkIn: ICheckIn): void {
 		hour: checkInHour,
 		customerCount: 1,
 		childCount: checkIn.stats.children,
-		pregisteredCount: checkIn.stats.preregistered ? 1 : 0,
+		pregisteredCount: checkIn.registrationCode !== 'onsite' ? 1 : 0,
 		modifiedCount: checkIn.stats.modifiedAtCheckIn ? 1 : 0,
 	};
 
 	stats.dateTimeCount.push(newItem);
 }
+
+const loadCheckIns = async (): Promise<ICheckIn[]> => {
+	let allRecords: ICheckIn[] = [];
+
+	const snapshotDocs = await admin
+		.firestore()
+		.collection('checkins')
+		.where('inStats', '==', false)
+		.get();
+
+	snapshotDocs.docs.forEach((doc) => {
+		const record = {
+			...doc.data(),
+			customerId: doc.id,
+		} as ICheckIn;
+
+		allRecords = allRecords.concat(record);
+	});
+
+	return allRecords;
+};
 
 interface ICheckInAggregatedStats {
 	lastUpdated: Date;

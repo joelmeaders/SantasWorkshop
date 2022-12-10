@@ -36,12 +36,6 @@ export const completeRegistration = functions.https.onCall(
 	}
 );
 
-// export const manualMigrate = functions.https.onCall(
-// 	async (request, context) => {
-// 		return (await import('./fn/manualMigrate')).default(request, context);
-// 	}
-// );
-
 export const newAccount = functions.https.onCall(async (request) => {
 	return (await import('./fn/newAccount')).default(request);
 });
@@ -93,42 +87,7 @@ export const verifyRecaptcha2 = functions.https.onCall(async (request) => {
 	return (await import('./fn/verifyRecaptcha2')).default(request);
 });
 
-// export const isAdmin =
-//   functions.https.onCall(async (request, context) => {
-//     return (await import("./fn/isAdmin")).default(request, context);
-//   });
-
-// export const exportCsv3 = functions.pubsub
-//     .schedule("never")
-//     .onRun(async () => {
-//       return (await import("./fn/exportCsv")).default();
-//     });
-
 // ------------------------------------- TRIGGER FUNCTIONS
-
-/**
- * Sharded count updater for all collections
- */
-// export const documentCounterOnCreate = functions.firestore
-//     .document('{collection}/{docId}')
-//     .onCreate(async (snapshot, context) => {
-//       await (await import('./fn/documentCounterOnCreate')).default(context);
-//     });
-
-// /**
-//  * Sharded count updater for all collections
-//  */
-// export const documentCounterOnDelete = functions.firestore
-//     .document('{collection}/{docId}')
-//     .onDelete(async (snapshot, context) => {
-//       await (await import('./fn/documentCounterOnDelete')).default(context);
-//     });
-
-// export const retryFailedRegistrationEmails = functions.firestore
-//   .document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
-//   .onUpdate(async (snapshot) => {
-//     await (await import('./fn/retryFailedRegistrationEmails')).default(snapshot);
-//   });
 
 export const sendNewRegistrationEmails = functions.firestore
 	.document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
@@ -162,6 +121,36 @@ export const scheduledDateTimeSlotReschedules = functions.pubsub
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
 
+export const scheduledRegistrationStats = functions.pubsub
+	.schedule('59 23 * * *')
+	.timeZone('America/Denver')
+	.onRun(async () => {
+		await (await import('./fn/scheduledRegistrationStats')).default();
+	});
+
+// Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
+export const scheduledCheckInStats = functions.pubsub
+	.schedule('*/5 10,11,12,13,14,15,16 9,10,12,13 12 *')
+	.timeZone('America/Denver')
+	.onRun(async () => {
+		await (await import('./fn/scheduledCheckInStats')).default();
+	});
+
+// This method checks for existing dates/times.
+// If there are none it adds them
+export const scheduledAddDateTimeSlots = functions.pubsub
+	.schedule('59 23 * * *')
+	.onRun(async () => {
+		await (await import('./fn/addDateTimeSlots')).default();
+	});
+
+// ------------------------------------- PUBSUB FUNCTIONS
+export const pubsubResetCheckInStats = functions.pubsub
+	.topic('reset-checkin-stats')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubResetCheckInStats')).default();
+	});
+
 export const pubsubSetAdminRights = functions.pubsub
 	.topic('set-admin-rights')
 	.onPublish(async () => {
@@ -180,55 +169,8 @@ export const pubsubSendReminderEmails = functions.pubsub
 		await (await import('./fn/pubsubSendReminderEmails')).default();
 	});
 
-// export const scheduledExportEmails = functions.pubsub
-// 	.schedule('59 23 * * *')
-// 	.onRun(async () => {
-// 		await (await import('./fn/scheduledExportEmails')).default();
-// 	});
-
-// export const scheduledReindexRegistrations = functions.pubsub
-// 	.schedule('59 23 * * *')
-// 	.onRun(async () => {
-// 		await (await import('./fn/scheduledReindexRegistrations')).default();
-// 	});
-
-// This method checks for existing dates/times.
-// If there are none it adds them
-export const scheduledAddDateTimeSlots = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
-		await (await import('./fn/addDateTimeSlots')).default();
-	});
-
-// export const requeueRegistrationEmails =
-//   functions.pubsub.schedule('every 60 minutes')
-//   .onRun(async () => {
-//     await (await import('./fn/requeueRegistrationEmails')).default();
-//   });
-
-// export const deleteAllUsers = functions.pubsub
-// 	.schedule('59 23 * * *')
-// 	.onRun(async () => {
-// 		await (await import('./fn/deleteAllUsers')).default();
-// 	});
-
 export const recalculateAllDateTimeSlots = functions.pubsub
 	.topic('recalc-all-slots')
 	.onPublish(async () => {
 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
-	});
-
-export const scheduledRegistrationStats = functions.pubsub
-	.schedule('59 23 * * *')
-	.timeZone('America/Denver')
-	.onRun(async () => {
-		await (await import('./fn/scheduledRegistrationStats')).default();
-	});
-
-// Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
-export const scheduledCheckInStats = functions.pubsub
-	.schedule('*/5 10,11,12,13,14,15,16 9,10,12,13 12 *')
-	.timeZone('America/Denver')
-	.onRun(async () => {
-		await (await import('./fn/scheduledCheckInStats')).default();
 	});

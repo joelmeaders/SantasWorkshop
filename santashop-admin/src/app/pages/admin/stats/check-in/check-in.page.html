@@ -62,6 +62,22 @@
 			>
 				<div
 					class="count-container"
+					*ngIf="onSiteRegistrations$ | async as count"
+				>
+					<h1>{{ count }}</h1>
+					<h3>On-Site Registrations</h3>
+				</div>
+			</ion-col>
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="3"
+				sizeLg="3"
+				sizeXl="2"
+				class="ion-margin-horizontal"
+			>
+				<div
+					class="count-container"
 					*ngIf="totalModifiedRegistrations$ | async as count"
 				>
 					<h1>{{ count }}</h1>

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { Registration } from '../../../santashop-models/src/public-api';
+import { Registration } from '@models/*';
 import * as formatDateTime from 'dateformat';
 import { Timestamp } from 'firebase-admin/firestore';
 

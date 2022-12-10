@@ -36,7 +36,7 @@ export const calculateRegistrationStats = (
 	isEdit: boolean
 ): CheckInStats => {
 	const stats: CheckInStats = {
-		preregistered: (!!registration.qrcode && !!registration.uid) || false,
+		preregistered: registration.qrcode !== 'onsite',
 		children: registration.children?.length || 0,
 		ageGroup02: registration.children!.filter(
 			(c) => c.ageGroup === AgeGroup.age02

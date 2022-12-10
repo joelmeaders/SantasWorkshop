@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
 import { ChartConfiguration, ChartData } from 'chart.js';
-import { map, shareReplay } from 'rxjs';
+import { map, shareReplay, switchMap } from 'rxjs';
 import {
 	IFireRepoCollection,
 	FireRepoLite,
@@ -56,6 +57,12 @@ export class CheckInPage {
 			data
 				.map((e) => e.pregisteredCount)
 				.reduce((prev, curr) => prev + curr)
+		)
+	);
+
+	public readonly onSiteRegistrations$ = this.totalCustomers$.pipe(
+		switchMap((total) =>
+			this.totalPreregistered$.pipe(map((pre) => total - pre))
 		)
 	);
 
@@ -143,26 +150,51 @@ export class CheckInPage {
 			},
 		];
 
-		const getDayIndex = (date: number): number => {
-			console.log(date);
-			switch (date) {
-				case 9:
-					return 0;
-				case 10:
-					return 1;
-				case 12:
-					return 2;
-				case 13:
-					return 3;
+		const indexToDay = (index: number): number => {
+			switch (index) {
+				case 0:
+					return 9;
+				case 1:
+					return 10;
+				case 2:
+					return 12;
+				case 3:
+					return 13;
 
 				default:
 					throw new Error('invalid date');
 			}
 		};
 
-		data.forEach((e) => {
-			const dayIndex = getDayIndex(e.date);
-			arr[dayIndex].datasets[0].data.push(e.customerCount);
+		const structure = [
+			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
+			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
+			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
+			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
+		];
+
+		const getCountForDayHour = (day: number, hour: number): number =>
+			data.find((e) => e.date === day && e.hour === hour)
+				?.customerCount ?? 0;
+
+		structure.forEach((day, index) => {
+			day[9] = getCountForDayHour(indexToDay(index), 9);
+			day[10] = getCountForDayHour(indexToDay(index), 10);
+			day[11] = getCountForDayHour(indexToDay(index), 11);
+			day[12] = getCountForDayHour(indexToDay(index), 12);
+			day[13] = getCountForDayHour(indexToDay(index), 13);
+			day[14] = getCountForDayHour(indexToDay(index), 14);
+			day[15] = getCountForDayHour(indexToDay(index), 15);
+		});
+
+		structure.forEach((day, index) => {
+			arr[index].datasets[0].data.push(day[9]);
+			arr[index].datasets[0].data.push(day[10]);
+			arr[index].datasets[0].data.push(day[11]);
+			arr[index].datasets[0].data.push(day[12]);
+			arr[index].datasets[0].data.push(day[13]);
+			arr[index].datasets[0].data.push(day[14]);
+			arr[index].datasets[0].data.push(day[15]);
 		});
 
 		return arr;

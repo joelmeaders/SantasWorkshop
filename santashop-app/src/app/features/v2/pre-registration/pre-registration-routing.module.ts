@@ -4,6 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { RegistrationCompleteGuard } from '../../../core/guards/registration-complete.guard';
 import { PreRegistrationPage } from './pre-registration.page';
 import { redirectUnauthorizedTo } from '@core/*';
+import { CheckedInGuard } from '../../../core/guards/checked-in.guard';
 
 const redirectUnauthorizedToLogin = (): AuthPipe =>
 	redirectUnauthorizedTo(['/sign-in']);
@@ -14,6 +15,7 @@ const routes: Routes = [
 		path: '',
 		component: PreRegistrationPage,
 		canActivate: [AuthGuard],
+		canActivateChild: [CheckedInGuard],
 		data: { authGuardPipe: redirectUnauthorizedToLogin },
 		children: [
 			{

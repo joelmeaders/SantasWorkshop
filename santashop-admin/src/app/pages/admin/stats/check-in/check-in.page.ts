@@ -173,7 +173,7 @@ export class CheckInPage {
 			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
 		];
 
-		const getCountForDayHour = (day: number, hour: number) =>
+		const getCountForDayHour = (day: number, hour: number): number =>
 			data.find((e) => e.date === day && e.hour === hour)
 				?.customerCount ?? 0;
 

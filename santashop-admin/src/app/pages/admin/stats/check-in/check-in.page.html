@@ -1,94 +1,77 @@
 <admin-header title="Check-In Stats"></admin-header>
 
-<ion-content class="ion-padding">
-	Updated {{ checkinLastUpdated$ | async | date:'short' }}
+<ion-content>
 	<ion-grid>
+		<ion-row>
+			<ion-col>
+				Updated {{ checkinLastUpdated$ | async | date:'short' }}
+			</ion-col>
+		</ion-row>
 		<ion-row class="ion-justify-content-center">
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="3"
-				sizeLg="3"
-				sizeXl="2"
-				class="ion-margin-horizontal"
-			>
+			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				<div
 					class="count-container"
-					*ngIf="totalCustomers$ | async as count"
+					*appLet="totalCustomers$ | async as count"
 				>
 					<h1>{{ count }}</h1>
 					<h3>Customers</h3>
 				</div>
 			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="3"
-				sizeLg="3"
-				sizeXl="2"
-				class="ion-margin-horizontal"
-			>
+			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				<div
 					class="count-container"
-					*ngIf="totalChildren$ | async as count"
+					*appLet="totalChildren$ | async as count"
 				>
 					<h1>{{ count }}</h1>
 					<h3>Children</h3>
 				</div>
 			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="3"
-				sizeLg="3"
-				sizeXl="2"
-				class="ion-margin-horizontal"
-			>
+			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				<div
 					class="count-container"
-					*ngIf="totalPreregistered$ | async as count"
+					*appLet="totalPreregistered$ | async as count"
 				>
 					<h1>{{ count }}</h1>
 					<h3>Pre-Registered</h3>
 				</div>
 			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="3"
-				sizeLg="3"
-				sizeXl="2"
-				class="ion-margin-horizontal"
-			>
+			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				<div
 					class="count-container"
-					*ngIf="onSiteRegistrations$ | async as count"
+					*appLet="onSiteRegistrations$ | async as count"
 				>
 					<h1>{{ count }}</h1>
-					<h3>On-Site Registrations</h3>
+					<h3>On-Site</h3>
 				</div>
 			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="3"
-				sizeLg="3"
-				sizeXl="2"
-				class="ion-margin-horizontal"
-			>
+			<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
 				<div
 					class="count-container"
-					*ngIf="totalModifiedRegistrations$ | async as count"
+					*appLet="totalModifiedRegistrations$ | async as count"
 				>
 					<h1>{{ count }}</h1>
-					<h3>Modified Registrations</h3>
+					<h3>Modified</h3>
 				</div>
 			</ion-col>
 		</ion-row>
 
 		<ion-row *appLet="checkInsByDayHour$ | async as slots">
 			<ion-col size="12">
-				<h2>Check-Ins by Day/Hour</h2>
+				<ion-toolbar color="none">
+					<h2 slot="start" class="ion-text-left">
+						{{ (graphView$ | async) === 'customerCount' ?
+						'Check-Ins' : 'Children' }} by Day/Hour
+					</h2>
+					<div slot="end">
+						<ion-button (click)="switchView()">
+							<ion-icon
+								name="refresh-sharp"
+								slot="start"
+							></ion-icon>
+							{{ viewButtonText$ | async }}
+						</ion-button>
+					</div>
+				</ion-toolbar>
 			</ion-col>
 			<ion-col
 				sizeXs="12"
@@ -97,7 +80,13 @@
 				sizeLg="6"
 				*ngFor="let slot of slots; index as i;"
 			>
-				<h3>{{ slot.datasets[0].label }}</h3>
+				<ion-toolbar color="none" class="ion-padding-horizontal">
+					<h3 slot="start">{{ slot.datasets[0].label }}</h3>
+					<ion-text slot="end">
+						Total: {{ addValues(slot.datasets[0].data) }}
+					</ion-text>
+				</ion-toolbar>
+
 				<canvas
 					baseChart
 					[options]="barChartOptions"

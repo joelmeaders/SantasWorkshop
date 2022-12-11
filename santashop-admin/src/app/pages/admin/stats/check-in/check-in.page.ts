@@ -2,7 +2,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
 import { ChartConfiguration, ChartData } from 'chart.js';
-import { map, shareReplay, switchMap } from 'rxjs';
+import {
+	BehaviorSubject,
+	combineLatest,
+	map,
+	shareReplay,
+	switchMap,
+} from 'rxjs';
 import {
 	IFireRepoCollection,
 	FireRepoLite,
@@ -69,13 +75,28 @@ export class CheckInPage {
 	public readonly totalModifiedRegistrations$ = this.dateTimeStats$.pipe(
 		map((data) =>
 			data.map((e) => e.modifiedCount).reduce((prev, curr) => prev + curr)
+		),
+		switchMap((count) =>
+			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite))
 		)
 	);
 
-	// TODO: These should be redone to not need udated every year...
-	public readonly checkInsByDayHour$ = this.dateTimeStats$.pipe(
-		map((data) => this.mapDaysHoursToChart(data))
+	private readonly graphView = new BehaviorSubject<
+		'customerCount' | 'childCount'
+	>('customerCount');
+	public readonly graphView$ = this.graphView
+		.asObservable()
+		.pipe(shareReplay(1));
+
+	public readonly viewButtonText$ = this.graphView$.pipe(
+		map((value) => (value === 'customerCount' ? 'Children' : 'Check-Ins'))
 	);
+
+	// TODO: These should be redone to not need udated every year...
+	public readonly checkInsByDayHour$ = combineLatest([
+		this.dateTimeStats$,
+		this.graphView$,
+	]).pipe(map(([data, view]) => this.mapDaysHoursToChart(data, view)));
 
 	public barChartOptions: ChartConfiguration['options'] = {
 		responsive: true,
@@ -84,7 +105,6 @@ export class CheckInPage {
 			x: {},
 			y: {
 				min: 0,
-				max: 350,
 			},
 		},
 		plugins: {
@@ -123,7 +143,8 @@ export class CheckInPage {
 	constructor(private readonly httpService: FireRepoLite) {}
 
 	private mapDaysHoursToChart(
-		data: CheckInDateTimeCount[]
+		data: CheckInDateTimeCount[],
+		view: 'customerCount' | 'childCount'
 	): ChartData<'bar'>[] {
 		const arr: {
 			datasets: { data: number[]; label: string }[];
@@ -174,8 +195,7 @@ export class CheckInPage {
 		];
 
 		const getCountForDayHour = (day: number, hour: number): number =>
-			data.find((e) => e.date === day && e.hour === hour)
-				?.customerCount ?? 0;
+			data.find((e) => e.date === day && e.hour === hour)?.[view] ?? 0;
 
 		structure.forEach((day, index) => {
 			day[9] = getCountForDayHour(indexToDay(index), 9);
@@ -198,5 +218,18 @@ export class CheckInPage {
 		});
 
 		return arr;
+	}
+
+	public switchView(): void {
+		if (this.graphView.getValue() === 'customerCount') {
+			this.graphView.next('childCount');
+		} else {
+			this.graphView.next('customerCount');
+		}
+	}
+
+	public addValues(values?: number[]): number {
+		if (!values) return 0;
+		return values.reduce((a, b) => a + b);
 	}
 }

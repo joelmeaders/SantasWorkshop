@@ -12,15 +12,13 @@ import { PreRegistrationService } from '../services/pre-registration.service';
 @Injectable({
 	providedIn: 'root',
 })
-export class RegistrationCompleteGuard
+export class RegistrationReadyToSubmitGuard
 	implements CanActivate, CanActivateChild
 {
-	public readonly isComplete$ = this.service.registrationComplete$.pipe(
+	public readonly isReady$ = this.service.registrationReadyToSubmit$.pipe(
 		take(1),
-		map((isComplete) =>
-			isComplete
-				? this.router.parseUrl('pre-registration/confirmation')
-				: true
+		map((isReady) =>
+			isReady ? true : this.router.parseUrl('pre-registration/overview')
 		)
 	);
 
@@ -30,10 +28,10 @@ export class RegistrationCompleteGuard
 	) {}
 
 	public canActivate(): Observable<boolean | UrlTree> {
-		return this.isComplete$;
+		return this.isReady$;
 	}
 
 	public canActivateChild(): Observable<boolean | UrlTree> {
-		return this.isComplete$;
+		return this.isReady$;
 	}
 }

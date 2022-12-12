@@ -9,6 +9,9 @@ import { SubmitPageService } from './submit.page.service';
 	providers: [SubmitPageService],
 })
 export class SubmitPage {
+	public readonly registrationReadyToSubmit$ =
+		this.viewService.registrationReadyToSubmit$;
+
 	constructor(public readonly viewService: SubmitPageService) {}
 
 	public async submit(): Promise<void> {

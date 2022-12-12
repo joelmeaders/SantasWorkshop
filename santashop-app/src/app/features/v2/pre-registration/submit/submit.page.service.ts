@@ -14,6 +14,8 @@ export class SubmitPageService {
 	public readonly children$ = this.preregistrationService.children$;
 	public readonly childCount$ = this.preregistrationService.childCount$;
 	public readonly dateTimeSlot$ = this.preregistrationService.dateTimeSlot$;
+	public readonly registrationReadyToSubmit$ =
+		this.preregistrationService.registrationReadyToSubmit$;
 
 	constructor(
 		private readonly preregistrationService: PreRegistrationService,

@@ -49,6 +49,13 @@ export class PreRegistrationService implements OnDestroy {
 	);
 
 	@automock
+	public readonly registrationReadyToSubmit$ = this.userRegistration$.pipe(
+		takeUntil(this.destroy$),
+		map(this.isRegistrationReadyToSubmit),
+		shareReplay(1)
+	);
+
+	@automock
 	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map(this.isRegistrationComplete),
@@ -133,6 +140,14 @@ export class PreRegistrationService implements OnDestroy {
 		const hasDateTime = registration.dateTimeSlot?.dateTime;
 		const isSubmitted = registration.registrationSubmittedOn;
 		return !!hasChildren && !!hasDateTime && !!isSubmitted;
+	}
+
+	public isRegistrationReadyToSubmit(registration: Registration): boolean {
+		const hasChildren = registration.children?.length;
+		const hasDateTime = registration.dateTimeSlot?.dateTime;
+		const isSubmitted = registration.registrationSubmittedOn;
+		console.log(!!hasChildren && !!hasDateTime && !isSubmitted);
+		return !!hasChildren && !!hasDateTime && !isSubmitted;
 	}
 
 	private getDateTimeSlot(

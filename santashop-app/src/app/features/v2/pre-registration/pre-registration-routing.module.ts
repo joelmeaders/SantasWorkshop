@@ -5,6 +5,8 @@ import { RegistrationCompleteGuard } from '../../../core/guards/registration-com
 import { PreRegistrationPage } from './pre-registration.page';
 import { redirectUnauthorizedTo } from '@core/*';
 import { CheckedInGuard } from '../../../core/guards/checked-in.guard';
+import { RegistrationReadyToSubmitGuard } from '../../../core/guards/registration-ready-to-submit.guard';
+import { RegistrationIncompleteGuard } from '../../../core/guards/registration-incomplete.guard';
 
 const redirectUnauthorizedToLogin = (): AuthPipe =>
 	redirectUnauthorizedTo(['/sign-in']);
@@ -21,42 +23,46 @@ const routes: Routes = [
 			{
 				// Additional information such as zip, etc...
 				path: 'overview',
+				canActivateChild: [RegistrationCompleteGuard],
 				loadChildren: () =>
 					import('./overview/overview.module').then(
 						(m) => m.InformationPageModule
 					),
-				canActivate: [RegistrationCompleteGuard],
 			},
 			{
 				// Manage children
 				path: 'children',
+				canActivateChild: [RegistrationCompleteGuard],
 				loadChildren: () =>
 					import('./children/children.module').then(
 						(m) => m.ChildrenPageModule
 					),
-				canActivate: [RegistrationCompleteGuard],
 			},
 			{
 				// Choose date and time
 				path: 'date-time',
+				canActivateChild: [RegistrationCompleteGuard],
 				loadChildren: () =>
 					import('./date-time/date-time.module').then(
 						(m) => m.DateTimePageModule
 					),
-				canActivate: [RegistrationCompleteGuard],
 			},
 			{
 				// Submit
 				path: 'submit',
+				canActivateChild: [
+					RegistrationReadyToSubmitGuard,
+					RegistrationCompleteGuard,
+				],
 				loadChildren: () =>
 					import('./submit/submit.module').then(
 						(m) => m.SubmitPageModule
 					),
-				canActivate: [RegistrationCompleteGuard],
 			},
 			{
 				// QR Code and event information
 				path: 'confirmation',
+				canActivateChild: [RegistrationIncompleteGuard],
 				loadChildren: () =>
 					import('./confirmation/confirmation.module').then(
 						(m) => m.ConfirmationPageModule

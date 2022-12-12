@@ -12,15 +12,15 @@ import { PreRegistrationService } from '../services/pre-registration.service';
 @Injectable({
 	providedIn: 'root',
 })
-export class RegistrationCompleteGuard
+export class RegistrationIncompleteGuard
 	implements CanActivate, CanActivateChild
 {
 	public readonly isComplete$ = this.service.registrationComplete$.pipe(
 		take(1),
 		map((isComplete) =>
 			isComplete
-				? this.router.parseUrl('pre-registration/confirmation')
-				: true
+				? true
+				: this.router.parseUrl('pre-registration/overview')
 		)
 	);
 

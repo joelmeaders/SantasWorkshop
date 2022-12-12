@@ -122,6 +122,7 @@
 
 							<div
 								class="width-max ion-text-center es-mg-bottom-xxl"
+								*appLet="registrationReadyToSubmit$ | async as ready"
 							>
 								<ion-button
 									fill="clear"
@@ -135,6 +136,7 @@
 									color="xmasred"
 									class="ion-padding-start"
 									(click)="submit()"
+									[disabled]="!ready"
 								>
 									{{ "MENU.SUBMIT" | translate }}
 								</ion-button>

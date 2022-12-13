@@ -149,6 +149,17 @@ export class CheckInPage {
 
 	constructor(private readonly httpService: FireRepoLite) {}
 
+	private getDays(data: CheckInDateTimeCount[]): number[] {
+		return Array.from(new Set(data.map((e) => e.date)));
+	}
+
+	private getHourLabels(data: CheckInDateTimeCount[]): string[] {
+		const amPm = (hour: number) => {
+			return hour < 12 ? 'am' : 'pm';
+		};
+		return data.map((e) => `${e.hour}${amPm(e.hour)}`);
+	}
+
 	private mapDaysHoursToChart(
 		data: CheckInDateTimeCount[],
 		view: 'customerCount' | 'childCount'
@@ -157,7 +168,8 @@ export class CheckInPage {
 
 		const chartStructure = (
 			inputData: number[],
-			label: string
+			chartLabel: string,
+			dataSeriesLabels: string[]
 		): {
 			datasets: {
 				backgroundColor: string[];
@@ -165,23 +177,37 @@ export class CheckInPage {
 				borderWidth: number;
 				data: number[];
 				label: string;
+				dataSeriesLabels?: string[];
 			}[];
 		} => ({
-			datasets: [{ data: inputData, label, ...this.colorSettings }],
+			datasets: [
+				{
+					data: inputData,
+					label: chartLabel,
+					...this.colorSettings,
+					dataSeriesLabels,
+				},
+			],
 		});
 
 		const outputData: {
-			datasets: { data: number[]; label: string }[];
+			datasets: {
+				data: number[];
+				label: string;
+				dataSeriesLabels?: string[];
+			}[];
 		}[] = [];
 
-		const days: number[] = Array.from(new Set(data.map((e) => e.date)));
+		const days: number[] = this.getDays(data);
 
 		days.forEach((day) => {
 			const today = data.filter((e) => e.date === day);
 			const dayData = today.map((e) => e[view]);
+			const hours = this.getHourLabels(today);
 			const chartData = chartStructure(
 				dayData,
-				`Dec ${day}, ${this.year}`
+				`Dec ${day}, ${this.year}`,
+				hours ?? []
 			);
 			outputData.push(chartData);
 		});

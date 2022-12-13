@@ -2,12 +2,14 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MOBILE_EVENT } from '@core/*';
 import { filter, map, takeUntil, tap } from 'rxjs/operators';
+import { AddChildPageService } from './add-child.page.service';
 import {
+	AppStateService,
 	ChildValidationService,
 	MAX_BIRTHDATE,
 	MIN_BIRTHDATE,
 } from '../../../../../core';
-import { AddChildPageService } from './add-child.page.service';
+import { RegistrationClosedPage } from '../../../../registration-closed/registration-closed.page';
 
 @Component({
 	selector: 'app-add-child',
@@ -32,10 +34,21 @@ export class AddChildPage {
 	public readonly isInfant$ = this.viewService.isInfant$;
 	public readonly isEdit$ = this.viewService.isEdit$;
 
+	protected readonly closedSubscription =
+		this.appStateService.isRegistrationEnabled$
+			.pipe(
+				tap((enabled) => {
+					if (!enabled)
+						this.appStateService.setModal(RegistrationClosedPage);
+				})
+			)
+			.subscribe();
+
 	constructor(
 		private readonly viewService: AddChildPageService,
 		private readonly route: ActivatedRoute,
-		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean
+		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean,
+		private readonly appStateService: AppStateService
 	) {}
 
 	public ionViewDidLeave(): void {

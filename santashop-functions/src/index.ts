@@ -174,3 +174,9 @@ export const recalculateAllDateTimeSlots = functions.pubsub
 	.onPublish(async () => {
 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
 	});
+
+export const pubsubMarkRegistrationsCheckedIn = functions.pubsub
+	.topic('recalc-all-slots')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
+	});

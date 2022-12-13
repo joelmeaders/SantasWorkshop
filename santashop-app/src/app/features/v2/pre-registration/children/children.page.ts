@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Child } from '../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable } from 'rxjs';
-import { ChildValidationService } from '../../../../core';
+import { Observable, tap } from 'rxjs';
+import { AppStateService, ChildValidationService } from '../../../../core';
 import { ChildrenPageService } from './children.page.service';
+import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 
 @Component({
 	selector: 'app-children',
@@ -20,10 +21,21 @@ export class ChildrenPage {
 	public readonly childCount$: Observable<number> =
 		this.viewService.childCount$;
 
+	protected readonly closedSubscription =
+		this.appStateService.isRegistrationEnabled$
+			.pipe(
+				tap((enabled) => {
+					if (!enabled)
+						this.appStateService.setModal(RegistrationClosedPage);
+				})
+			)
+			.subscribe();
+
 	constructor(
 		private readonly viewService: ChildrenPageService,
 		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService
+		private readonly translateService: TranslateService,
+		private readonly appStateService: AppStateService
 	) {}
 
 	public async removeChild(child: Child): Promise<void> {

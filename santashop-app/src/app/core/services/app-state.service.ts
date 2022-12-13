@@ -1,19 +1,15 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { combineLatest, from, Observable, Subject } from 'rxjs';
+import { from, Observable, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
 	map,
 	shareReplay,
 	switchMap,
 	takeUntil,
-	tap,
 } from 'rxjs/operators';
 import { FireRepoLite } from '@core/*';
 import { COLLECTION_SCHEMA, PublicParameters } from '@models/*';
-import { BadWeatherPage } from '../../features/bad-weather/bad-weather.page';
-import { MaintenancePage } from '../../features/maintenance/maintenance.page';
-import { RegistrationClosedPage } from '../../features/registration-closed/registration-closed.page';
 import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
@@ -64,33 +60,33 @@ export class AppStateService implements OnDestroy {
 		takeUntil(this.destroy$)
 	);
 
-	public readonly appClosureSubscription = combineLatest([
-		this.isMaintenanceModeEnabled$,
-		this.shopClosedWeather$,
-		this.isRegistrationEnabled$,
-	])
-		.pipe(
-			takeUntil(this.destroy$),
-			tap(([maintenance, weather, registration]) => {
-				if (maintenance) {
-					this.setModal(MaintenancePage);
-					return;
-				}
+	// public readonly appClosureSubscription = combineLatest([
+	// 	this.isMaintenanceModeEnabled$,
+	// 	this.shopClosedWeather$,
+	// 	this.isRegistrationEnabled$,
+	// ])
+	// 	.pipe(
+	// 		takeUntil(this.destroy$),
+	// 		tap(([maintenance, weather, registration]) => {
+	// 			if (maintenance) {
+	// 				this.setModal(MaintenancePage);
+	// 				return;
+	// 			}
 
-				if (weather) {
-					this.setModal(BadWeatherPage);
-					return;
-				}
+	// 			if (weather) {
+	// 				this.setModal(BadWeatherPage);
+	// 				return;
+	// 			}
 
-				if (!registration) {
-					this.setModal(RegistrationClosedPage);
-					return;
-				}
+	// 			if (!registration) {
+	// 				this.setModal(RegistrationClosedPage);
+	// 				return;
+	// 			}
 
-				this.setModal(undefined);
-			})
-		)
-		.subscribe();
+	// 			this.setModal(undefined);
+	// 		})
+	// 	)
+	// 	.subscribe();
 
 	public readonly modalSubscription = this.currentModal$
 		.pipe(

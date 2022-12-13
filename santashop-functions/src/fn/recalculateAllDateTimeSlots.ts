@@ -27,6 +27,8 @@ export default async (): Promise<string> => {
 			slot.enabled = slot.slotsReserved < slot.maxSlots;
 			registration.includedInCounts = new Date();
 		}
+
+		if (!registration.hasCheckedIn) registration.hasCheckedIn = false;
 	});
 
 	await admin.firestore().runTransaction((transaction) => {

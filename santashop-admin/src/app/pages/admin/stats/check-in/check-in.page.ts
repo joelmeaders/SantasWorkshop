@@ -27,13 +27,19 @@ import { filterNil } from '@core/*';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckInPage {
+	public year = 2022;
+	public refreshYear = new BehaviorSubject<void>(undefined);
+
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
-	private readonly checkInRecord$ =
-		this.statsCollection<CheckInAggregatedStats>()
-			.read('checkin-2022')
-			.pipe(shareReplay(1));
+	private readonly checkInRecord$ = this.refreshYear.pipe(
+		switchMap(() =>
+			this.statsCollection<CheckInAggregatedStats>()
+				.read(`checkin-${this.year}`)
+				.pipe(shareReplay(1))
+		)
+	);
 
 	private readonly dateTimeStats$ = this.checkInRecord$.pipe(
 		filterNil(),
@@ -78,7 +84,8 @@ export class CheckInPage {
 		),
 		switchMap((count) =>
 			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite))
-		)
+		),
+		map((count) => (count > 0 ? count : count * -1))
 	);
 
 	private readonly graphView = new BehaviorSubject<
@@ -146,78 +153,40 @@ export class CheckInPage {
 		data: CheckInDateTimeCount[],
 		view: 'customerCount' | 'childCount'
 	): ChartData<'bar'>[] {
-		const arr: {
+		data = data.sort((a, b) => a.date - b.date || a.hour - b.hour);
+
+		const chartStructure = (
+			inputData: number[],
+			label: string
+		): {
+			datasets: {
+				backgroundColor: string[];
+				borderColor: string[];
+				borderWidth: number;
+				data: number[];
+				label: string;
+			}[];
+		} => ({
+			datasets: [{ data: inputData, label, ...this.colorSettings }],
+		});
+
+		const outputData: {
 			datasets: { data: number[]; label: string }[];
-		}[] = [
-			{
-				datasets: [
-					{ data: [], label: 'Dec 9th', ...this.colorSettings },
-				],
-			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 10th', ...this.colorSettings },
-				],
-			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 12th', ...this.colorSettings },
-				],
-			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 13th', ...this.colorSettings },
-				],
-			},
-		];
+		}[] = [];
 
-		const indexToDay = (index: number): number => {
-			switch (index) {
-				case 0:
-					return 9;
-				case 1:
-					return 10;
-				case 2:
-					return 12;
-				case 3:
-					return 13;
+		const days: number[] = Array.from(new Set(data.map((e) => e.date)));
 
-				default:
-					throw new Error('invalid date');
-			}
-		};
-
-		const structure = [
-			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
-			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
-			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
-			{ '9': 0, '10': 0, '11': 0, '12': 0, '13': 0, '14': 0, '15': 0 },
-		];
-
-		const getCountForDayHour = (day: number, hour: number): number =>
-			data.find((e) => e.date === day && e.hour === hour)?.[view] ?? 0;
-
-		structure.forEach((day, index) => {
-			day[9] = getCountForDayHour(indexToDay(index), 9);
-			day[10] = getCountForDayHour(indexToDay(index), 10);
-			day[11] = getCountForDayHour(indexToDay(index), 11);
-			day[12] = getCountForDayHour(indexToDay(index), 12);
-			day[13] = getCountForDayHour(indexToDay(index), 13);
-			day[14] = getCountForDayHour(indexToDay(index), 14);
-			day[15] = getCountForDayHour(indexToDay(index), 15);
+		days.forEach((day) => {
+			const today = data.filter((e) => e.date === day);
+			const dayData = today.map((e) => e[view]);
+			const chartData = chartStructure(
+				dayData,
+				`Dec ${day}, ${this.year}`
+			);
+			outputData.push(chartData);
 		});
 
-		structure.forEach((day, index) => {
-			arr[index].datasets[0].data.push(day[9]);
-			arr[index].datasets[0].data.push(day[10]);
-			arr[index].datasets[0].data.push(day[11]);
-			arr[index].datasets[0].data.push(day[12]);
-			arr[index].datasets[0].data.push(day[13]);
-			arr[index].datasets[0].data.push(day[14]);
-			arr[index].datasets[0].data.push(day[15]);
-		});
-
-		return arr;
+		return outputData;
 	}
 
 	public switchView(): void {

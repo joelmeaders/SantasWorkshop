@@ -3,8 +3,27 @@
 <ion-content>
 	<ion-grid>
 		<ion-row>
-			<ion-col>
+			<ion-col size="12" class="ion-text-center">
 				Updated {{ checkinLastUpdated$ | async | date:'short' }}
+			</ion-col>
+			<ion-col>
+				<ion-item>
+					<ion-label>Show data for</ion-label>
+					<ion-select
+						[(ngModel)]="year"
+						(ionChange)="refreshYear.next()"
+					>
+						<ion-select-option [value]="2022">
+							2022
+						</ion-select-option>
+						<ion-select-option [value]="2021">
+							2021
+						</ion-select-option>
+						<ion-select-option [value]="2020">
+							2020
+						</ion-select-option>
+					</ion-select>
+				</ion-item>
 			</ion-col>
 		</ion-row>
 		<ion-row class="ion-justify-content-center">

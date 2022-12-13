@@ -11,8 +11,11 @@ import {
 	map,
 	takeUntil,
 	distinctUntilChanged,
+	tap,
 } from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
+import { AppStateService } from '../../../../core';
+import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 
 @Component({
 	selector: 'app-date-time',
@@ -61,12 +64,23 @@ export class DateTimePage implements OnDestroy {
 		shareReplay(1)
 	);
 
+	protected readonly closedSubscription =
+		this.appStateService.isRegistrationEnabled$
+			.pipe(
+				tap((enabled) => {
+					if (!enabled)
+						this.appStateService.setModal(RegistrationClosedPage);
+				})
+			)
+			.subscribe();
+
 	constructor(
 		private readonly viewService: DateTimePageService,
 		private readonly alertController: AlertController,
 		private readonly translateService: TranslateService,
 		private readonly analytics: Analytics,
-		public readonly skeletonState: SkeletonStateService
+		public readonly skeletonState: SkeletonStateService,
+		private readonly appStateService: AppStateService
 	) {}
 
 	public ngOnDestroy(): void {

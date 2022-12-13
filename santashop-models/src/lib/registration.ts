@@ -34,4 +34,6 @@ export interface Registration {
 	referredBy?: string;
 
 	reminderEmailSentOn?: false | Date;
+
+	hasCheckedIn?: boolean;
 }

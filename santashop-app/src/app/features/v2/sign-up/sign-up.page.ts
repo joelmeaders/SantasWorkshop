@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { AlertController, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay, tap } from 'rxjs/operators';
+import { AppStateService } from '../../../core';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
+import { RegistrationClosedPage } from '../../registration-closed/registration-closed.page';
 import { SignUpPageService } from './sign-up.page.service';
 
 @Component({
@@ -23,12 +25,23 @@ export class SignUpPage {
 		.asObservable()
 		.pipe(shareReplay(1));
 
+	protected readonly closedSubscription =
+		this.appStateService.isRegistrationEnabled$
+			.pipe(
+				tap((enabled) => {
+					if (!enabled)
+						this.appStateService.setModal(RegistrationClosedPage);
+				})
+			)
+			.subscribe();
+
 	constructor(
 		private readonly viewService: SignUpPageService,
 		private readonly alertController: AlertController,
 		private readonly translateService: TranslateService,
 		private readonly modalController: ModalController,
-		private readonly analytics: Analytics
+		private readonly analytics: Analytics,
+		private readonly appStateService: AppStateService
 	) {}
 
 	public ionViewWillEnter(): void {

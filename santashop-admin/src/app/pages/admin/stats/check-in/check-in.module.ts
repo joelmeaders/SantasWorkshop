@@ -9,6 +9,7 @@ import { CheckInPage } from './check-in.page';
 import { SharedModule } from '../../../../shared/shared.module';
 import { NgChartsModule } from 'ng2-charts';
 import { CoreModule } from '@core/*';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
 	imports: [
@@ -18,6 +19,7 @@ import { CoreModule } from '@core/*';
 		CheckInPageRoutingModule,
 		SharedModule,
 		NgChartsModule,
+		FormsModule,
 	],
 	declarations: [CheckInPage],
 })

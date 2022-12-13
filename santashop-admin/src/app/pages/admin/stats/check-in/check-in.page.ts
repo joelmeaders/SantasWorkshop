@@ -154,10 +154,12 @@ export class CheckInPage {
 	}
 
 	private getHourLabels(data: CheckInDateTimeCount[]): string[] {
-		const amPm = (hour: number) => {
+		const hourFix = (hour: number): number =>
+			hour <= 12 ? hour : hour - 12;
+		const amPm = (hour: number): string => {
 			return hour < 12 ? 'am' : 'pm';
 		};
-		return data.map((e) => `${e.hour}${amPm(e.hour)}`);
+		return data.map((e) => `${hourFix(e.hour)}${amPm(e.hour)}`);
 	}
 
 	private mapDaysHoursToChart(

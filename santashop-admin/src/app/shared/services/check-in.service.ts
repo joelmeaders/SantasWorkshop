@@ -57,6 +57,7 @@ export class CheckInService {
 				qrcode: registration.qrcode,
 				zipCode: registration.zipCode,
 				children: registration.children,
+				hasCheckedIn: true,
 			} as Partial<Registration>;
 
 			const response = isEdit

@@ -175,6 +175,12 @@ export const recalculateAllDateTimeSlots = functions.pubsub
 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
 	});
 
+export const pubsubUserStats = functions.pubsub
+	.topic('user-stats')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubUserStats')).default();
+	});
+
 export const pubsubMarkRegistrationsCheckedIn = functions.pubsub
 	.topic('recalc-all-slots')
 	.onPublish(async () => {

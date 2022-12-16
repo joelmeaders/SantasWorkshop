@@ -63,6 +63,13 @@ const routes: Routes = [
 						(m) => m.CheckInPageModule
 					),
 			},
+			{
+				path: 'user',
+				loadChildren: () =>
+					import('./stats/user/user.module').then(
+						(m) => m.UserPageModule
+					),
+			},
 		],
 	},
 ];

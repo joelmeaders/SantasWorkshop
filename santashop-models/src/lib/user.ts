@@ -7,7 +7,7 @@ export interface User {
 
 	emailAddress: string;
 
-	zipCode: number;
+	zipCode: string;
 
 	acceptedTermsOfService?: Date;
 

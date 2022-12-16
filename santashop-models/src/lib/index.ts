@@ -12,4 +12,5 @@ export * from './registration-search-index';
 export * from './registration-stats';
 export * from './registration';
 export * from './schema';
+export * from './user-stats';
 export * from './user';

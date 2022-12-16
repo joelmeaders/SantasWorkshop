@@ -1,0 +1,51 @@
+<admin-header title="User Stats"></admin-header>
+
+<ion-content class="ion-padding-vertical">
+	<ion-grid>
+		<ion-row>
+			<ion-col
+				sizeXs="12"
+				sizeSm="12"
+				sizeMd="6"
+				sizeLg="6"
+				*ngIf="referrers$ | async as referrers"
+			>
+				<ion-toolbar color="none" class="ion-padding-horizontal">
+					<h3 slot="start">Top 10 Referrers</h3>
+				</ion-toolbar>
+				<div class="referrer-container">
+					<canvas
+						baseChart
+						[options]="barChartOptions"
+						[datasets]="referrers"
+						[legend]="false"
+						[labels]="['']"
+						type="bar"
+					></canvas>
+				</div>
+			</ion-col>
+
+			<ion-col
+				sizeXs="12"
+				sizeSm="12"
+				sizeMd="6"
+				sizeLg="6"
+				*ngIf="zipCodes$ | async as zipCodes"
+			>
+				<ion-toolbar color="none" class="ion-padding-horizontal">
+					<h3 slot="start">Top 10 Zip Codes</h3>
+				</ion-toolbar>
+				<div class="referrer-container">
+					<canvas
+						baseChart
+						[options]="zipCodeChartOptions"
+						[datasets]="zipCodes"
+						[legend]="false"
+						[labels]="['']"
+						type="bar"
+					></canvas>
+				</div>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
+</ion-content>

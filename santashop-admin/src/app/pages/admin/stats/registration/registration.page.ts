@@ -21,7 +21,7 @@ export class RegistrationPage {
 
 	private readonly registrationStats$ =
 		this.statsCollection<RegistrationStats>()
-			.read('registration-2022')
+			.read('registration-2023')
 			.pipe(shareReplay(1));
 
 	public readonly registrationCount$ = this.registrationStats$.pipe(

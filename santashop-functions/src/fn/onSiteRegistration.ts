@@ -59,7 +59,7 @@ export default (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2022,
+		programYear: 2023,
 	};
 
 	batch.create(registrationDocRef, updatedRegistration);

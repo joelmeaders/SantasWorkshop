@@ -29,9 +29,40 @@ export default async (): Promise<void | HttpsError> => {
 
 const addDateTimeSlots = async () => {
 	const collection = dateTimeSlotCollection;
-	const programYear = 2022;
+	const programYear = 2023;
 
 	const demoValues: DateTimeSlot[] = [
+		{
+			programYear: programYear,
+			dateTime: new Date(`12-08-${programYear} 10:00 MST`),
+			maxSlots: 300,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`12-08-${programYear} 11:00 MST`),
+			maxSlots: 300,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`12-08-${programYear} 12:00 MST`),
+			maxSlots: 300,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`12-08-${programYear} 13:00 MST`),
+			maxSlots: 300,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`12-08-${programYear} 14:00 MST`),
+			maxSlots: 300,
+			enabled: true,
+		},
+
 		{
 			programYear: programYear,
 			dateTime: new Date(`12-09-${programYear} 10:00 MST`),
@@ -65,32 +96,32 @@ const addDateTimeSlots = async () => {
 
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-10-${programYear} 10:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`12-11-${programYear} 10:00 MST`),
+			maxSlots: 250,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-10-${programYear} 11:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`12-11-${programYear} 11:00 MST`),
+			maxSlots: 250,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-10-${programYear} 12:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`12-11-${programYear} 12:00 MST`),
+			maxSlots: 250,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-10-${programYear} 13:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`12-11-${programYear} 13:00 MST`),
+			maxSlots: 250,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-10-${programYear} 14:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`12-11-${programYear} 14:00 MST`),
+			maxSlots: 250,
 			enabled: true,
 		},
 
@@ -121,37 +152,6 @@ const addDateTimeSlots = async () => {
 		{
 			programYear: programYear,
 			dateTime: new Date(`12-12-${programYear} 14:00 MST`),
-			maxSlots: 250,
-			enabled: true,
-		},
-
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-13-${programYear} 10:00 MST`),
-			maxSlots: 250,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-13-${programYear} 11:00 MST`),
-			maxSlots: 250,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-13-${programYear} 12:00 MST`),
-			maxSlots: 250,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-13-${programYear} 13:00 MST`),
-			maxSlots: 250,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-13-${programYear} 14:00 MST`),
 			maxSlots: 250,
 			enabled: true,
 		},

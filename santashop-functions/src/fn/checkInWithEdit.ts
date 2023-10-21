@@ -52,7 +52,7 @@ export default (
 		children: record.children,
 		registrationSubmittedOn: new Date(),
 		includedInRegistrationStats: false,
-		programYear: 2022,
+		programYear: 2023,
 	} as Partial<Registration>;
 
 	batch.create(registrationDocRef, partialRegistration);

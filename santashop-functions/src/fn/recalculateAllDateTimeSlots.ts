@@ -69,7 +69,7 @@ const dateTimeSlotQuery = () =>
 	admin
 		.firestore()
 		.collection('dateTimeSlots')
-		.where('programYear', '==', 2022);
+		.where('programYear', '==', 2023);
 
 const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
 	let allDateTimeSlots: DateTimeSlot[] = [];
@@ -94,7 +94,7 @@ const registrationQuery = () =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2022)
+		.where('programYear', '==', 2023)
 		.where('registrationSubmittedOn', '!=', '');
 
 const loadRegistrations = async (): Promise<Registration[]> => {

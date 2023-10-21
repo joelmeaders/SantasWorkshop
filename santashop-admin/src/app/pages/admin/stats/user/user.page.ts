@@ -18,7 +18,7 @@ export class UserPage {
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly userRecord$ = this.statsCollection<UserStats>()
-		.read(`user-2022`)
+		.read(`user-2023`)
 		.pipe(shareReplay(1));
 
 	public readonly referrers$ = this.userRecord$.pipe(

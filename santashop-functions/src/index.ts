@@ -103,7 +103,7 @@ export const sendNewRegistrationEmails = functions.firestore
  * Backs up firestore db every hour to storage bucket
  */
 export const scheduledFirestoreBackup = functions.pubsub
-	.schedule('every 24 hours')
+	.schedule('every 7 days')
 	.onRun(async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});

@@ -27,10 +27,10 @@ describe('ChildValidationService', () => {
 
 	it('ageValid(): should return expected results', () => {
 		// Arrange
-		const ageZero = new Date('12/15/2022');
-		const age12 = new Date('12/15/2022');
-		const age13 = new Date('12/15/2022');
-		const negativeAge = new Date('1/1/2023');
+		const ageZero = new Date('12/15/2023');
+		const age12 = new Date('12/15/2023');
+		const age13 = new Date('12/15/2023');
+		const negativeAge = new Date('1/1/2024');
 
 		// Act
 		const shouldBeTrue =
@@ -157,7 +157,7 @@ describe('ChildValidationService', () => {
 
 	it('MAX_BIRTHDATE: should be expected value', () => {
 		expect(MAX_BIRTHDATE().toDateString()).toEqual(
-			new Date('12/31/2022').toDateString()
+			new Date('12/31/2023').toDateString()
 		);
 	});
 

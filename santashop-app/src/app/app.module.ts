@@ -124,7 +124,7 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 	providers: [
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
-		{ provide: PROGRAM_YEAR, useValue: 2022 },
+		{ provide: PROGRAM_YEAR, useValue: 2023 },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 		ScreenTrackingService,

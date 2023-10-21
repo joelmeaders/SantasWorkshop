@@ -16,7 +16,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('user-2022')
+		.doc('user-2023')
 		.set(stats, { merge: false });
 };
 

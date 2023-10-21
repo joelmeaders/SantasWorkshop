@@ -27,7 +27,7 @@ import { filterNil } from '@core/*';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckInPage {
-	public year = 2022;
+	public year = 2023;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>

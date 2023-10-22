@@ -7,7 +7,7 @@ import * as os from 'os';
 
 admin.initializeApp();
 
-export default async () => {
+export default async (): Promise<string> => {
 	// gets the documents from the firestore collection
 	const applicationsSnapshot = await admin
 		.firestore()
@@ -49,7 +49,7 @@ export default async () => {
 						},
 					},
 				})
-				.then(() => resolve(undefined))
+				.then(() => resolve('Upload successful'))
 				.catch((errorr) => reject(errorr));
 		});
 	});

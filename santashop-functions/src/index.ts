@@ -100,27 +100,30 @@ export const sendNewRegistrationEmails = functions.firestore
 // ------------------------------------- SCHEDULED FUNCTIONS
 
 /**
- * Backs up firestore db every hour to storage bucket
+ * Backs up firestore db every night to storage bucket
+ * At 00:00 in November and December
  */
 export const scheduledFirestoreBackup = functions.pubsub
-	.schedule('every 7 days')
+	.schedule('0 0 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
 
-// Every 1 min (should be 15)
+// At every 15th minute in November and December.
 export const scheduledDateTimeSlotCounters = functions.pubsub
-	.schedule('every 15 minutes')
+	.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
 	});
 
+// At minute 0 past every 6th hour in November and December.
 export const scheduledDateTimeSlotReschedules = functions.pubsub
-	.schedule('every 6 hours')
+	.schedule('0 */6 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
 
+	// “At 23:59.” (11:59 PM) every day.
 export const scheduledRegistrationStats = functions.pubsub
 	.schedule('59 23 * * *')
 	.timeZone('America/Denver')
@@ -128,20 +131,12 @@ export const scheduledRegistrationStats = functions.pubsub
 		await (await import('./fn/scheduledRegistrationStats')).default();
 	});
 
-// Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
+// At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
 export const scheduledCheckInStats = functions.pubsub
-	.schedule('*/5 10,11,12,13,14,15,16 9,10,12,13 12 *')
+	.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
-	});
-
-// This method checks for existing dates/times.
-// If there are none it adds them
-export const scheduledAddDateTimeSlots = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
-		await (await import('./fn/addDateTimeSlots')).default();
 	});
 
 // ------------------------------------- PUBSUB FUNCTIONS
@@ -182,7 +177,28 @@ export const pubsubUserStats = functions.pubsub
 	});
 
 export const pubsubMarkRegistrationsCheckedIn = functions.pubsub
-	.topic('recalc-all-slots')
+	.topic('mark-registrations-checked-in')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
+	});
+
+export const pubsubExportEmails = functions.pubsub
+	.topic('export-emails')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubExportEmails')).default();
+	});
+
+// This method checks for existing dates/times.
+// If there are none it adds them
+export const pubsubAddDateTimeSlots = functions.pubsub
+	.topic('create-datetime-slots')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubAddDateTimeSlots')).default();
+	});
+
+// Deletes all users except for disabled accounts
+export const pubsubDeleteUsers = functions.pubsub
+	.topic('delete-users')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubDeleteUsers')).default();
 	});

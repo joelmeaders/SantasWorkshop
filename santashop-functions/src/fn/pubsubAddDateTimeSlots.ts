@@ -1,6 +1,4 @@
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
-import { HttpsError } from 'firebase-functions/v1/https';
 import {
 	COLLECTION_SCHEMA,
 	DateTimeSlot,
@@ -12,18 +10,23 @@ const dateTimeSlotCollection = admin
 	.firestore()
 	.collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
 
-export default async (): Promise<void | HttpsError> => {
+export default async (): Promise<void> => {
+
+	const hasDateTimeSlots = !(await dateTimeSlotCollection.get()).empty
+
+	if (hasDateTimeSlots) {
+		console.log('DateTimeSlots already exist. None added.')
+		return Promise.resolve();
+	}
+
 	try {
-		if ((await dateTimeSlotCollection.get()).empty) {
-			return addDateTimeSlots();
-		}
-	} catch (error) {
-		console.error('Error creating date/time slot documents', error);
-		throw new functions.https.HttpsError(
-			'internal',
-			'Something went terribly wrong...',
-			JSON.stringify(error)
-		);
+		console.log('Adding DateTimeSlots...');
+		await addDateTimeSlots();
+		console.log('DateTimeSlots added.');
+		return Promise.resolve();
+	}
+	catch (error: unknown) {
+		throw new Error(`Error adding DateTimeSlots: ${error}`);
 	}
 };
 
@@ -31,7 +34,7 @@ const addDateTimeSlots = async () => {
 	const collection = dateTimeSlotCollection;
 	const programYear = 2023;
 
-	const demoValues: DateTimeSlot[] = [
+	const dateTimeSlots: DateTimeSlot[] = [
 		{
 			programYear: programYear,
 			dateTime: new Date(`12-08-${programYear} 10:00 MST`),
@@ -157,9 +160,7 @@ const addDateTimeSlots = async () => {
 		},
 	];
 
-	demoValues.forEach(async (v) => {
-		await collection.add(v);
-	});
-
-	return Promise.resolve();
+	return Promise.all(dateTimeSlots.map(async (slot) => {
+		await collection.add(slot);
+	}));
 };

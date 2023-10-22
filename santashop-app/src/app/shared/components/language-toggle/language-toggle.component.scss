@@ -8,7 +8,7 @@
 ion-toggle {
 	position: relative;
 	top: 10px;
-	--background: var(--ion-color-white);
+	width: 51px;
 	--background-checked: var(--ion-color-white);
 	--handle-box-shadow: none;
 	--handle-background: var(--ion-color-xmasred);
@@ -21,6 +21,7 @@ ion-toggle {
 }
 
 ion-toggle::part(track) {
+	background: var(--ion-color-white);
 	border-width: 1px;
 	border-color: var(--ion-color-dark);
 	border-style: solid;

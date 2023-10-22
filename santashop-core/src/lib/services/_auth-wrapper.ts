@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
 	Auth,
+	authState,
 	User as _User,
 	UserCredential as _UserCredential,
 	sendPasswordResetEmail,
@@ -13,7 +14,6 @@ import {
 	redirectLoggedInTo as _redirectLoggedInTo,
 	hasCustomClaim as _hasCustomClaim,
 } from '@angular/fire/auth-guard';
-import { authState } from 'rxfire/auth';
 import { Observable } from 'rxjs';
 
 export type User = _User;

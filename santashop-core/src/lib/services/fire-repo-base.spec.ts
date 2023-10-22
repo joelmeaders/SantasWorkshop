@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Firestore } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore/lite';
 import { firstValueFrom, of } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
 import { FirestoreWrapper } from './_firestore-wrapper';

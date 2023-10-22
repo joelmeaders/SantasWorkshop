@@ -36,28 +36,14 @@ export class FireRepoBase {
 	public readMany<T = DocumentData>(
 		collectionPath: string,
 		queryConstraints?: QueryConstraint[],
-		idField?: Extract<keyof T, string>
+		_idField?: Extract<keyof T, string>
 	): Observable<T[]> {
-		const colRef = this.firestoreWrapper.collection(collectionPath);
+		const colRef = this.firestoreWrapper.collection<T>(collectionPath);
 		const qry = queryConstraints
 			? this.firestoreWrapper.query(colRef, queryConstraints)
 			: this.firestoreWrapper.query(colRef);
 
-		return this.firestoreWrapper.rxCollection(qry).pipe(
-			map((snapshots) => {
-				const datas: T[] = [];
-				snapshots.forEach((snapshot) => {
-					const data = {
-						...snapshot.data(),
-					} as T;
-					if (idField) {
-						(data as any)[idField] = snapshot.id;
-					}
-					datas.push(data);
-				});
-				return datas;
-			})
-		);
+		return this.firestoreWrapper.collectionQuery(qry, _idField);
 	}
 
 	private genericConverter<T>(): FirestoreDataConverter<T> {

@@ -24,7 +24,7 @@ import {
 	HttpsCallableResult,
 	IFireRepoCollection,
 	pluckFilterNil,
-	Timestamp,
+	timestampDateFix,
 } from '@core/*';
 import { QrCodeService } from './qrcode.service';
 
@@ -154,19 +154,13 @@ export class PreRegistrationService implements OnDestroy {
 		registration: Registration
 	): DateTimeSlot | undefined {
 		const slot = registration?.dateTimeSlot as DateTimeSlot;
-
-		// Convert the timestamp to a date. Firebase (or angularfire) seems to be
-		// setting all dates to timestamps in the database now.
-		if (slot) slot.dateTime = (slot.dateTime as any as Timestamp)?.toDate();
-
+		if (slot) slot.dateTime = timestampDateFix(slot.dateTime);
 		return slot;
 	}
 
 	private getChildren(registration: Registration): Child[] {
 		registration.children?.forEach((child) => {
-			child.dateOfBirth = (
-				child.dateOfBirth as any as Timestamp
-			)?.toDate();
+			child.dateOfBirth = timestampDateFix(child.dateOfBirth)
 		});
 
 		return (registration.children as Child[]) ?? new Array<Child>();

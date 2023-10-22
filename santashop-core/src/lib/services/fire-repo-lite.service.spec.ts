@@ -4,7 +4,7 @@ import { Registration } from '../../../../santashop-models/src/public-api';
 import { of } from 'rxjs';
 import { DocumentData, DocumentReference } from './_firestore-wrapper';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
-import { Firestore } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore/lite';
 
 describe('FireRepoLite', () => {
 	let service: FireRepoLite;

@@ -1,9 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandlerService } from '@core/*';
-import { User, UserCredential } from 'firebase/auth';
 import { firstValueFrom, of } from 'rxjs';
 import { AuthService } from './auth.service';
-import { AuthWrapper } from './_auth-wrapper';
+import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
 import { FunctionsWrapper } from './_functions-wrapper';
 
 describe('AuthService', () => {

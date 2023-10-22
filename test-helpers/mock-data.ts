@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 import {
 	AgeGroup,
 	Child,
@@ -6,6 +5,7 @@ import {
 	User,
 	ToyType,
 } from '../santashop-models/src/public-api';
+import { Timestamp } from '../santashop-core/src';
 
 export const mockUsers = (id?: string) => ({
 	user1: {
@@ -13,11 +13,12 @@ export const mockUsers = (id?: string) => ({
 		firstName: 'Jesse',
 		lastName: 'Doe',
 		emailAddress: 'jesse.doe@gmail.com',
-		zipCode: 90210,
+		zipCode: '90210',
 		acceptedTermsOfService: new Date(),
 		acceptedPrivacyPolicy: new Date(),
 		version: 1,
 		manuallyMigrated: false,
+		newsletter: false,
 	} as User,
 });
 

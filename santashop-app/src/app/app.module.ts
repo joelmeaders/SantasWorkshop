@@ -9,9 +9,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {
 	AuthWrapper,
+	connectFirestoreEmulator,
+	getFirestore,
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
+	provideFirestore,
 } from '@core/*';
 import { RouteReuseStrategy } from '@angular/router';
 import {
@@ -38,9 +41,6 @@ import {
 	provideFunctions,
 } from '@angular/fire/functions';
 import {
-	connectFirestoreEmulator,
-	getFirestore,
-	provideFirestore,
 	enableMultiTabIndexedDbPersistence,
 } from '@angular/fire/firestore';
 import {

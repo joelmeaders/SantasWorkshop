@@ -4,7 +4,7 @@ export interface OnboardUser {
 	emailAddress: string;
 	password: string;
 	password2: string;
-	zipCode: string;
+	zipCode: number;
 	legal: boolean | Date;
 	newsletter: boolean;
 }
@@ -12,7 +12,7 @@ export interface OnboardUser {
 export interface ChangeUserInfo {
 	firstName: string;
 	lastName: string;
-	zipCode: string;
+	zipCode: number;
 }
 
 export interface UpdateReferredBy {

@@ -95,7 +95,7 @@
 								{
 									"type": "initial",
 									"maximumWarning": "2mb",
-									"maximumError": "5mb"
+									"maximumError": "6mb"
 								},
 								{
 									"type": "anyComponentStyle",
@@ -104,7 +104,7 @@
 								}
 							]
 						},
-						"qa": {
+						"test": {
 							"buildOptimizer": false,
 							"optimization": false,
 							"vendorChunk": true,
@@ -114,14 +114,14 @@
 							"fileReplacements": [
 								{
 									"replace": "santashop-admin/src/environments/environment.ts",
-									"with": "santashop-admin/src/environments/environment.qa.ts"
+									"with": "santashop-admin/src/environments/environment.test.ts"
 								}
 							],
 							"budgets": [
 								{
 									"type": "initial",
 									"maximumWarning": "2mb",
-									"maximumError": "5mb"
+									"maximumError": "6mb"
 								},
 								{
 									"type": "anyComponentStyle",
@@ -153,8 +153,8 @@
 						"production": {
 							"browserTarget": "santashop-admin:build:production"
 						},
-						"qa": {
-							"browserTarget": "santashop-admin:build:qa"
+						"test": {
+							"browserTarget": "santashop-admin:build:test"
 						},
 						"development": {
 							"browserTarget": "santashop-admin:build:development"
@@ -240,11 +240,11 @@
 								}
 							]
 						},
-						"qa": {
+						"test": {
 							"fileReplacements": [
 								{
 									"replace": "santashop-app/src/environments/environment.ts",
-									"with": "santashop-app/src/environments/environment.qa.ts"
+									"with": "santashop-app/src/environments/environment.test.ts"
 								}
 							],
 							"budgets": [
@@ -283,8 +283,8 @@
 						"production": {
 							"browserTarget": "santashop-app:build:production"
 						},
-						"qa": {
-							"browserTarget": "santashop-app:build:qa"
+						"test": {
+							"browserTarget": "santashop-app:build:test"
 						},
 						"development": {
 							"browserTarget": "santashop-app:build:development"

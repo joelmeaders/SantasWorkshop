@@ -21,9 +21,9 @@
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
-		"target": "es2015",
-		"module": "es2020",
-		"lib": ["es2018", "dom"],
+		"target": "ES2022",
+		"module": "ES2022",
+		"lib": ["es2020", "dom"],
 		"useDefineForClassFields": false,
 		"paths": {
 			"@models/*": ["santashop-models/src", "dist/santashop-models"],

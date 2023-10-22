@@ -55,7 +55,7 @@ export class ProfilePageService implements OnDestroy {
 				this.profileForm.patchValue({
 					firstName: user.firstName,
 					lastName: user.lastName,
-					zipCode: user.zipCode,
+					zipCode: Number.parseInt(user.zipCode, 10),
 				});
 			})
 		)

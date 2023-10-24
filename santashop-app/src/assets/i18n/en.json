@@ -9,13 +9,14 @@
 	"HOME": {
 		"WELCOME_MESSAGE": "Denver Santa Claus Shop<br/>Registration!",
 		"CREATE_ACCOUNT": "Create An Account",
-		"SIGN_IN_INST": "Have a 2023 account? Sign in"
+		"SIGN_IN_INST": "Already created an account for 2023?"
 	},
 	"COMMON": {
 		"EMAIL_ADDRESS": "Email",
+		"NEW_EMAIL_ADDRESS": "New Email",
 		"PASSWORD": "Password",
 		"SIGN_IN": "Sign In",
-		"EXISTING_ACCOUNT": "Existing Account",
+		"EXISTING_ACCOUNT": "Sign In",
 		"CREATE_ACCOUNT": "Create Acount",
 		"WELCOME": "Welcome",
 		"MY_ACCOUNT": "My Account",
@@ -41,14 +42,15 @@
 		"RESET": "Reset",
 		"SAVE_CHOICE": "Save choice",
 		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?",
-		"VALID_EMAIL": "Must be a valid email address"
+		"VALID_EMAIL": "Must be a valid email address",
+		"VALID_PASSWORD": "Enter your password"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "Forgot Password?",
 		"SIGNING_IN": "Signing in..."
 	},
 	"SIGNUP": {
-		"NEW_ACCOUNT_NOTICE": "Everyone must make a new account this year",
+		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2023, even if you have shopped with us in the past.",
 		"HAVE_ACCOUNT": "Already have an account?",
 		"TITLE1": "Set up your account",
 		"TITLE2": "This will only take a minute",
@@ -272,5 +274,14 @@
 		"REFERRED_BY": "How did you hear about us?",
 		"SEARCH_PLACEHOLDER": "Type to search",
 		"YOU_SELECTED": "You selected"
+	},
+	"FORM_ERRORS": {
+		"REQUIRED": "This field is required",
+		"MINLENGTH": "Minimum length is ",
+		"MAXLENGTH": "Maximum length is ",
+		"EMAIL": "Must be a valid email address",
+		"URL": "Must be a valid website address",
+		"ZIPCODE": "Must be a valid zip code",
+		"FIELDSMATCH": "The passwords don't match"
 	}
 }

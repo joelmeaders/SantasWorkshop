@@ -47,19 +47,25 @@
 								<ion-card-content>
 									<form [formGroup]="form" novalidate>
 										<p class="ion-padding">
-											{{ "CURRENT_EMAIL" | translate }}
-											<strong
-												>{{ email$ | async }}</strong
-											>
+											{{ "PROFILE.CURRENT_EMAIL" |
+											translate }}
+											<strong>
+												{{ email$ | async }}
+											</strong>
 										</p>
 
-										<ion-list>
+										<ion-list lines="none">
 											<ion-item>
-												<ion-label color="xmasred">
-													{{ "COMMON.EMAIL_ADDRESS" |
-													translate }}
-												</ion-label>
 												<ion-input
+													class="red-label"
+													[label]="'COMMON.NEW_EMAIL_ADDRESS' |
+													translate"
+													labelPlacement="floating"
+													[errorText]="
+														form.controls
+															.emailAddress
+															| niceFormError
+															| translate"
 													formControlName="emailAddress"
 													[debounce]="500"
 													type="email"
@@ -67,29 +73,24 @@
 													inputmode="email"
 												></ion-input>
 											</ion-item>
-											<core-control-errors
-												[control]="
-													form.controls.emailAddress
-												"
-											></core-control-errors>
 
 											<ion-item>
-												<ion-label color="xmasred">
-													{{ "COMMON.PASSWORD" |
-													translate }}
-												</ion-label>
 												<ion-input
+													class="red-label"
+													[label]="'COMMON.PASSWORD' |
+													translate"
+													labelPlacement="floating"
+													[errorText]="
+														form.controls
+															.password
+															| niceFormError
+															| translate"
 													formControlName="password"
 													[debounce]="500"
 													type="password"
 													autocomplete="new-password"
 												></ion-input>
 											</ion-item>
-											<core-control-errors
-												[control]="
-													form.controls.password
-												"
-											></core-control-errors>
 										</ion-list>
 									</form>
 

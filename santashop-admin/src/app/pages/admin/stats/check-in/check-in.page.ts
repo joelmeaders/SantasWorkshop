@@ -12,13 +12,13 @@ import {
 import {
 	IFireRepoCollection,
 	FireRepoLite,
-} from '../../../../../../../dist/santashop-core';
+	filterNil
+} from '@core/*';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
 	COLLECTION_SCHEMA,
-} from '../../../../../../../dist/santashop-models';
-import { filterNil } from '@core/*';
+} from '@models/*';
 
 @Component({
 	selector: 'admin-check-in',

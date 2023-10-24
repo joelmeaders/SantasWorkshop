@@ -1,49 +1,17 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { FormControl } from '@angular/forms';
 
 @Pipe({
 	name: 'niceFormError',
 })
 export class NiceFormErrorPipe implements PipeTransform {
-	public transform(key: string | any, args: string | any): string {
-		switch (key as string) {
-			case 'required':
-				return this.required();
+	public transform(control: FormControl): string {
 
-			case 'minlength':
-				return this.minLength(args as string);
+		if (!control?.errors) return '';
 
-			case 'maxlength':
-				return this.maxLength(args as string);
+		const firstError = Object
+			.entries(control.errors)[0][0];
 
-			case 'email':
-				return this.email();
-
-			case 'url':
-				return this.website();
-
-			case 'zipCode':
-				return this.zipCode();
-
-			case 'fieldsMatch':
-				return this.fieldsMatch();
-		}
-
-		return 'errorrrrrrr';
+		return `FORM_ERRORS.${firstError.toUpperCase()}`;
 	}
-
-	private readonly minLength = (args: any): string =>
-		`Must have at least ${args.requiredLength} characters`;
-
-	private readonly maxLength = (args: any): string =>
-		`Must have less than ${args.requiredLength} characters`;
-
-	private readonly required = (): string => `This field is required`;
-
-	private readonly email = (): string => `Must be valid email address`;
-
-	private readonly website = (): string => `Must be valid website address`;
-
-	private readonly zipCode = (): string => `Must be valid zip code (######)`;
-
-	private readonly fieldsMatch = (): string => `The passwords don't match`;
 }

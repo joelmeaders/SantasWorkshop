@@ -10,7 +10,6 @@ const routes: Routes = [
 	{
 		path: '',
 		title: 'DSCS Sign In',
-		canActivate: [AuthGuard],
 		data: { authGuardPipe: redirectLoggedInToAdmin },
 		loadChildren: () =>
 			import('./pages/sign-in/sign-in.module').then(

@@ -38,7 +38,6 @@
 
 							<div class="ion-padding-horizontal ion-padding-top">
 								<p>{{ "CHILDREN.CHILD_LINE_1" | translate }}</p>
-
 								<p>{{ "CHILDREN.CHILD_LINE_2" | translate }}</p>
 							</div>
 
@@ -73,6 +72,10 @@
 									<ion-item
 										*ngFor="let child of children"
 										lines="none"
+										[routerLink]="['./add-child']"
+										[queryParams]="{ id: child.id }"
+										button
+										tappable
 									>
 										<ion-icon
 											class="icon-reduced-margin"

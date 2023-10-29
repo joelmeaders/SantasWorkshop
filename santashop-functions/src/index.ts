@@ -89,11 +89,12 @@ export const verifyRecaptcha2 = functions.https.onCall(async (request) => {
 
 // ------------------------------------- TRIGGER FUNCTIONS
 
-export const sendNewRegistrationEmails = functions.firestore
-	.document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
+export const sendNewRegistrationEmails = functions
+	.runWith({ secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] })
+	.firestore.document('tmp_registrationemails/{docId}')
 	.onCreate(async (snapshot) => {
 		await (
-			await import('./fn/sendNewRegistrationEmails')
+			await import('./fn/sendNewRegistrationEmails2')
 		).default(snapshot);
 	});
 
@@ -201,4 +202,12 @@ export const pubsubDeleteUsers = functions.pubsub
 	.topic('delete-users')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubDeleteUsers')).default();
+	});
+
+// Creates a new email template in AWS SES
+export const pubsubCreateNewEmailTemplate = functions
+	.runWith({ secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] })
+	.pubsub.topic('create-email-template')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubCreateNewEmailTemplate')).default();
 	});

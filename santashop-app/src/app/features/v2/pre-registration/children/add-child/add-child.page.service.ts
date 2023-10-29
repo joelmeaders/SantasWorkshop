@@ -11,7 +11,7 @@ import {
 } from '../../../../../../../../santashop-models/src/public-api';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
-import { takeUntil, shareReplay, take } from 'rxjs/operators';
+import { takeUntil, shareReplay } from 'rxjs/operators';
 import {
 	ChildValidationService,
 	MAX_BIRTHDATE,
@@ -201,7 +201,7 @@ export class AddChildPageService implements OnDestroy {
 		const child = this.form.value as Child;
 		child.dateOfBirth = yyyymmddToLocalDate(child.dateOfBirth as any);
 
-		const children = await this.children$.pipe(take(1)).toPromise();
+		const children = await firstValueFrom(this.children$);
 
 		try {
 			const validatedChild =
@@ -243,7 +243,7 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async removeChild(childToRemove: Child): Promise<void> {
-		const children = await this.children$.pipe(take(1)).toPromise();
+		const children = await firstValueFrom(this.children$);
 
 		const updatedChildren = children?.filter(
 			(child) => child.id !== childToRemove.id

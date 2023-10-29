@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
-import { IRegistration } from '../../../../../../../dist/santashop-models';
+import { Registration } from '../../../../../../../dist/santashop-models';
 import {
 	getFunctionSpy,
 	getPropertySpy,
@@ -98,7 +98,7 @@ describe('ChildrenPageService', () => {
 
 		const registrationMock = {
 			...mockRegistrations('1').complete.mockRegistration1,
-		} as IRegistration;
+		} as Registration;
 
 		const registrationSpy = getPropertySpy(
 			preregistrationService,

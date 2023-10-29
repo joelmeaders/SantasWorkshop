@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
+import { Spied } from '../../../../../../test-helpers';
 
 import { LanguageToggleComponent } from './language-toggle.component';
 
@@ -7,11 +9,21 @@ describe('LanguageToggleComponent', () => {
 	let component: LanguageToggleComponent;
 	let fixture: ComponentFixture<LanguageToggleComponent>;
 
+	let translateService: Spied<TranslateService>;
+
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			declarations: [LanguageToggleComponent],
+			providers: [
+				{
+					provide: TranslateService,
+					useValue: translateService,
+				},
+			],
 			imports: [IonicModule.forRoot()],
 		}).compileComponents();
+
+		translateService = TestBed.inject(TranslateService) as jasmine.SpyObj<TranslateService>;
 
 		fixture = TestBed.createComponent(LanguageToggleComponent);
 		component = fixture.componentInstance;
@@ -20,5 +32,15 @@ describe('LanguageToggleComponent', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('should toggle language', () => {
+		const currentLang = 'en';
+		const newLang = 'es';
+		translateService.currentLang = currentLang;
+
+		component.toggleLanguage({ detail: { checked: true } });
+
+		expect(translateService.use).toHaveBeenCalledWith(newLang);
 	});
 });

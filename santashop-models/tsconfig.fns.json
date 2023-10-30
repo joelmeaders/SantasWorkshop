@@ -2,9 +2,12 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "../out-tsc/app"
+		"outDir": "../out-tsc/lib",
+		"declaration": true,
+		"declarationMap": true,
+		"inlineSources": true,
+		"composite": true,
+		"types": []
 	},
-	"files": ["src/main.ts", "src/polyfills.ts"],
-	"include": ["src/**/*.ts"],
 	"exclude": ["src/test.ts", "**/*.spec.ts"]
 }

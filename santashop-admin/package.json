@@ -1,0 +1,25 @@
+{
+	"name": "@santashop/admin",
+	"version": "1.0.0",
+	"description": "",
+	"scripts": {
+		"lint": "ng lint santashop-admin --fix --cache",
+		"test": "ng test santashop-admin",
+		"start": "firebase use santas-workshop-193b5 && ng serve santashop-admin --port=4100",
+		"start:test": "firebase use santas-workshop-test && ng serve santashop-admin --port=4100",
+		"config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",
+		"postinstall": "npm run build -w @santashop/models && npm run build -w @santashop/core",
+		"build:test": "npm run prebuild && ng build santashop-admin --configuration=test",
+		"build:prod": "npm run prebuild && ng build santashop-admin --configuration=production",
+		"analyze": "ng build santashop-admin --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
+		"deploy:test": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy",
+		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy --only hosting",
+		"ci:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
+		"ci:build": "npm run models:build && npm run core:build && ng build santashop-admin --configuration=production"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@santashop/models": "*"
+	}
+}

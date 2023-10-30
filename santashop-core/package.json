@@ -1,17 +1,16 @@
 {
-	"name": "santashop-core",
-	"version": "0.0.6",
+	"name": "@santashop/core",
+	"version": "1.0.0",
 	"author": "Joel Meaders",
+	"scripts": {
+		"lint": "ng lint santashop-core --fix --cache && prettier --end-of-line auto --write santashop-core",
+		"test": "ng test santashop-core",
+		"build": "ng build santashop-core"
+	},
 	"peerDependencies": {
-		"@angular/common": "^16.0.0",
-		"@angular/core": "^16.0.0",
-		"@angular/fire": "^7.6.1",
-		"rxjs": "^7.8.1"
+		"@santashop/models": "*"
 	},
 	"dependencies": {
 		"tslib": "~2.4.0"
-	},
-	"devDependencies": {
-		"eslint": "^8.26.0"
 	}
 }

@@ -2,7 +2,7 @@
 	"name": "@santashop/models",
 	"version": "1.0.0",
 	"scripts": {
-		"lint": "ng lint santashop-models --fix --cache && prettier --end-of-line auto --write santashop-models",
+		"lint": "ng lint santashop-models --fix --cache",
 		"build": "ng build santashop-models"
 	},
 	"peerDependencies": {},

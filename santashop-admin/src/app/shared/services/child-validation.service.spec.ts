@@ -114,7 +114,7 @@ describe('ChildValidationService', () => {
 		};
 
 		// Act
-		const result = () => service.validateChild(child);
+		const result = (): Child => service.validateChild(child);
 
 		// Assert
 		expect(result).toThrow(new ChildValidationError('invalid_age'));
@@ -130,7 +130,7 @@ describe('ChildValidationService', () => {
 		};
 
 		// Act
-		const result = () => service.validateChild(child);
+		const result = (): Child => service.validateChild(child);
 
 		// Assert
 		expect(result).toThrow(new ChildValidationError('invalid_firstname'));
@@ -146,7 +146,7 @@ describe('ChildValidationService', () => {
 		};
 
 		// Act
-		const result = () => service.validateChild(child);
+		const result = (): Child => service.validateChild(child);
 
 		// Assert
 		expect(result).toThrow(new ChildValidationError('invalid_lastname'));

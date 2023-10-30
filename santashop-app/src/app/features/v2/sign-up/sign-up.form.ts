@@ -50,7 +50,6 @@ export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
 		passwordMatchValidator,
 	);
 
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function passwordMatchValidator(
 	formGroup: any,
 ): { passwordMismatch: boolean } | null {

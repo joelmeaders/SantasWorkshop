@@ -6,7 +6,7 @@ import {
 	CheckIn,
 	COLLECTION_SCHEMA,
 	Registration,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 import {
 	calculateRegistrationStats,
 	isRegistrationComplete,
@@ -16,27 +16,27 @@ admin.initializeApp();
 
 export default (
 	record: Registration,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<number> => {
 	if (!context.auth?.token?.admin) {
 		console.error(
-			`${context.auth?.uid} attempted to check in for uid ${record.uid}`
+			`${context.auth?.uid} attempted to check in for uid ${record.uid}`,
 		);
 		throw new functions.https.HttpsError(
 			'permission-denied',
 			'-99',
-			'You can only update your own records'
+			'You can only update your own records',
 		);
 	}
 
 	if (!isRegistrationComplete(record)) {
 		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`
+			`Registration incomplete. Unable to check in for uid ${record.uid}`,
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
 
-			'Incomplete registration. Cannot continue.'
+			'Incomplete registration. Cannot continue.',
 		);
 	}
 
@@ -86,7 +86,7 @@ export default (
 			throw new functions.https.HttpsError(
 				error.status,
 				error.message,
-				error
+				error,
 			);
 		});
 };

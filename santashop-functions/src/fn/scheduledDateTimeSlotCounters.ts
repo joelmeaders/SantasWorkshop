@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
-import {
-	DateTimeSlot,
-	Registration,
-} from '../../../santashop-models/src/public-api';
+import { DateTimeSlot, Registration } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -77,7 +74,7 @@ const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
 	do {
 		const snapshotDocs = await dateTimeSlotQuery(
 			pageSize,
-			pageOffset
+			pageOffset,
 		).get();
 
 		snapshotDocs.docs.forEach((doc) => {
@@ -112,7 +109,7 @@ const loadRegistrations = async (): Promise<Registration[]> => {
 	do {
 		const snapshotDocs = await registrationQuery(
 			pageSize,
-			pageOffset
+			pageOffset,
 		).get();
 
 		snapshotDocs.docs.forEach((doc) => {

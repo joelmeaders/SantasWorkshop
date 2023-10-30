@@ -26,7 +26,7 @@ export class FireRepoBase {
 	public read<T = DocumentData>(
 		collectionPath: string,
 		documentId: string,
-		idField?: Extract<keyof T, string>
+		idField?: Extract<keyof T, string>,
 	): Observable<T> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
 		const docRef = this.firestoreWrapper.doc<T>(colRef as any, documentId);
@@ -36,14 +36,14 @@ export class FireRepoBase {
 	public readMany<T = DocumentData>(
 		collectionPath: string,
 		queryConstraints?: QueryConstraint[],
-		_idField?: Extract<keyof T, string>
+		idField?: Extract<keyof T, string>,
 	): Observable<T[]> {
 		const colRef = this.firestoreWrapper.collection<T>(collectionPath);
 		const qry = queryConstraints
 			? this.firestoreWrapper.query(colRef, queryConstraints)
 			: this.firestoreWrapper.query(colRef);
 
-		return this.firestoreWrapper.collectionQuery(qry, _idField);
+		return this.firestoreWrapper.collectionQuery(qry, idField);
 	}
 
 	private genericConverter<T>(): FirestoreDataConverter<T> {
@@ -53,7 +53,7 @@ export class FireRepoBase {
 			},
 			fromFirestore: (
 				snapshot: QueryDocumentSnapshot,
-				options: SnapshotOptions
+				options: SnapshotOptions,
 			): T => {
 				return { ...snapshot.data(options) } as T;
 			},
@@ -62,13 +62,13 @@ export class FireRepoBase {
 
 	public add<T = DocumentData>(
 		collectionPath: string,
-		document: T
+		document: T,
 	): Observable<DocumentReference<T>> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
 		const action = this.firestoreWrapper
 			.addDoc<T>(colRef as CollectionReference<T>, document)
 			.then((response) =>
-				response.withConverter(this.genericConverter<T>())
+				response.withConverter(this.genericConverter<T>()),
 			);
 		return from(action);
 	}
@@ -76,12 +76,12 @@ export class FireRepoBase {
 	public addById<T = DocumentData>(
 		collectionPath: string,
 		documentId: string,
-		document: T
+		document: T,
 	): Observable<DocumentReference<T>> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
 		const docRef = this.firestoreWrapper.doc<T>(
 			colRef as CollectionReference<T>,
-			documentId
+			documentId,
 		);
 		const action = this.firestoreWrapper.setDoc<T>(docRef, document);
 		return from(action).pipe(map(() => docRef));
@@ -91,12 +91,12 @@ export class FireRepoBase {
 		collectionPath: string,
 		documentId: string,
 		document: T,
-		merge = false
+		merge = false,
 	): Observable<DocumentReference<T>> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
 		const docRef = this.firestoreWrapper.doc<T>(
 			colRef as CollectionReference<T>,
-			documentId
+			documentId,
 		);
 		const action = this.firestoreWrapper.setDoc<T>(docRef, document, {
 			merge,
@@ -106,7 +106,7 @@ export class FireRepoBase {
 
 	public delete(
 		collectionPath: string,
-		documentId: string
+		documentId: string,
 	): Observable<void> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
 		const docRef = this.firestoreWrapper.doc(colRef, documentId);

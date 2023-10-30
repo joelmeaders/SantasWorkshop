@@ -7,7 +7,7 @@ import {
 	automock,
 	AnalyticsWrapper,
 	FunctionsWrapper,
-} from '@core/*';
+} from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
 import {
@@ -15,7 +15,7 @@ import {
 	User,
 	ChangeUserInfo,
 	IError,
-} from '../../../../../../../santashop-models/src/public-api';
+} from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, Subject } from 'rxjs';
 import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
@@ -45,7 +45,7 @@ export class ProfilePageService implements OnDestroy {
 	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
 		takeUntil(this.destroy$),
-		switchMap((user) => this.getUser$(user!.uid))
+		switchMap((user) => this.getUser$(user!.uid)),
 	);
 
 	public readonly setUserFormSubscription = this.userProfile$
@@ -57,7 +57,7 @@ export class ProfilePageService implements OnDestroy {
 					lastName: user.lastName,
 					zipCode: Number.parseInt(user.zipCode, 10),
 				});
-			})
+			}),
 		)
 		.subscribe();
 
@@ -70,7 +70,7 @@ export class ProfilePageService implements OnDestroy {
 		private readonly loadingController: LoadingController,
 		private readonly router: Router,
 		private readonly translateService: TranslateService,
-		private readonly analytics: AnalyticsWrapper
+		private readonly analytics: AnalyticsWrapper,
 	) {}
 
 	public ngOnDestroy(): void {
@@ -142,7 +142,7 @@ export class ProfilePageService implements OnDestroy {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('PROFILE.PASSWORD_CHANGED'),
 			message: this.translateService.instant(
-				'PROFILE.PASSWORD_CHANGED_TEXT'
+				'PROFILE.PASSWORD_CHANGED_TEXT',
 			),
 			buttons: ['Ok'],
 		});

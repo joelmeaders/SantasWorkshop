@@ -27,7 +27,7 @@ writeFile(targetPath, envConfigFile, 'utf8', function (err) {
 		throw console.error(err);
 	} else {
 		console.log(
-			`Angular environment.ts file generated correctly at ${targetPath} \n`
+			`Angular environment.ts file generated correctly at ${targetPath} \n`,
 		);
 	}
 });

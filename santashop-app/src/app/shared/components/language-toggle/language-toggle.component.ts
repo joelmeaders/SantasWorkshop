@@ -14,7 +14,7 @@ export class LanguageToggleComponent implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
 	private readonly currentLangauge = new BehaviorSubject<'en' | 'es'>(
-		this.translate.currentLang as any
+		this.translate.currentLang as any,
 	);
 
 	public readonly currentLanguage$ = this.currentLangauge
@@ -23,7 +23,7 @@ export class LanguageToggleComponent implements OnDestroy {
 
 	constructor(
 		private readonly translate: TranslateService,
-		private readonly analyticsService: Analytics
+		private readonly analyticsService: Analytics,
 	) {}
 
 	public ngOnDestroy(): void {

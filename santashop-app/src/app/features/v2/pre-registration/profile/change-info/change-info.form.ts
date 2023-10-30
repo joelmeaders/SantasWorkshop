@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { ChangeUserInfo } from '../../../../../../../../santashop-models/src/public-api';
+import { ChangeUserInfo } from '@santashop/models';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {

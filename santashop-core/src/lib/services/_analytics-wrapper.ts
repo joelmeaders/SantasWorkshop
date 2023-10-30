@@ -9,7 +9,7 @@ export class AnalyticsWrapper {
 
 	public readonly logErrorEvent = (
 		errorCode: string,
-		message?: string
+		message?: string,
 	): void =>
 		message
 			? logEvent(this.analytics, errorCode, { message })

@@ -12,7 +12,7 @@ export default async (): Promise<void> => {
 
 	const deleteAllUsers = async (
 		nextPageToken?: string,
-		abortCount?: number
+		abortCount?: number,
 	) => {
 		if (abortCount && abortCount > 10) {
 			throw new Error('ABORTING: COUNT EXCEEDED');
@@ -41,7 +41,7 @@ export default async (): Promise<void> => {
 			throw new functions.https.HttpsError(
 				'internal',
 				'Unable to delete all users',
-				JSON.stringify(error)
+				JSON.stringify(error),
 			);
 		});
 };

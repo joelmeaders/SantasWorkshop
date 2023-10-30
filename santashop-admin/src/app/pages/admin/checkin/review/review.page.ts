@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { Child, Registration } from '@models/*';
+import { Child, Registration } from '@santashop/models';
 import {
 	catchError,
 	firstValueFrom,
@@ -32,9 +32,9 @@ export class ReviewPage {
 		this.scanResult.asObservable().pipe(
 			filterNullish<string>(),
 			switchMap((code) =>
-				this.lookupService.getRegistrationByQrCode$(code)
+				this.lookupService.getRegistrationByQrCode$(code),
 			),
-			filterNullish<Registration>()
+			filterNullish<Registration>(),
 		);
 
 	protected readonly setRegistrationSubscription = this.lookupRegistration$
@@ -45,9 +45,9 @@ export class ReviewPage {
 			}),
 			catchError((error) =>
 				from(this.missingRegistrationError(error)).pipe(
-					filterNullish<Registration>()
-				)
-			)
+					filterNullish<Registration>(),
+				),
+			),
 		)
 		.subscribe();
 
@@ -57,7 +57,7 @@ export class ReviewPage {
 		private readonly checkinService: CheckInService,
 		private readonly alertController: AlertController,
 		private readonly router: Router,
-		private readonly route: ActivatedRoute
+		private readonly route: ActivatedRoute,
 	) {}
 
 	public async ionViewDidEnter(): Promise<void> {
@@ -79,7 +79,7 @@ export class ReviewPage {
 		if (!registration) return;
 
 		registration.children = registration.children?.filter(
-			(e) => e.id !== childId
+			(e) => e.id !== childId,
 		);
 		this.checkinContext.setRegistration(registration);
 		this.wasEdited = true;
@@ -90,7 +90,7 @@ export class ReviewPage {
 		if (!registration) return;
 
 		registration.children = registration.children?.filter(
-			(e) => e.id !== child.id
+			(e) => e.id !== child.id,
 		);
 
 		registration?.children?.push(child);
@@ -112,12 +112,12 @@ export class ReviewPage {
 		try {
 			const result: number = await this.checkinService.checkIn(
 				registration,
-				this.wasEdited
+				this.wasEdited,
 			);
 
 			this.checkinContext.setCheckIn(
 				result,
-				registration.qrcode ?? 'nocode'
+				registration.qrcode ?? 'nocode',
 			);
 			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {

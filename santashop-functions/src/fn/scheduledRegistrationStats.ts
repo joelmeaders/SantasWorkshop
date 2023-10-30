@@ -7,7 +7,7 @@ import {
 	GenderAgeStats,
 	Registration,
 	ZipCodeCount,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -50,7 +50,7 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 
 		if (!timestamp) {
 			console.log(
-				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`
+				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`,
 			);
 			return;
 		}
@@ -102,7 +102,7 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 
 function setChildGenderStats(
 	stats: GenderAgeStats,
-	registration: Registration
+	registration: Registration,
 ): void {
 	registration.children?.forEach((child) => {
 		setChildAgeStatsByGender(stats[child.toyType!], child.ageGroup!);
@@ -111,7 +111,7 @@ function setChildGenderStats(
 
 function setChildAgeStatsByGender(
 	stat: AgeGroupBreakdown,
-	ageGroup: AgeGroup
+	ageGroup: AgeGroup,
 ): void {
 	if (!stat) return;
 

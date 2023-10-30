@@ -31,7 +31,7 @@ export class SignUpPage {
 				tap((enabled) => {
 					if (!enabled)
 						this.appStateService.setModal(RegistrationClosedPage);
-				})
+				}),
 			)
 			.subscribe();
 
@@ -41,7 +41,7 @@ export class SignUpPage {
 		private readonly translateService: TranslateService,
 		private readonly modalController: ModalController,
 		private readonly analytics: Analytics,
-		private readonly appStateService: AppStateService
+		private readonly appStateService: AppStateService,
 	) {}
 
 	public ionViewWillEnter(): void {

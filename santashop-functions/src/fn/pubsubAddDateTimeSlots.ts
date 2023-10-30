@@ -1,8 +1,5 @@
 import * as admin from 'firebase-admin';
-import {
-	COLLECTION_SCHEMA,
-	DateTimeSlot,
-} from '../../../santashop-models/src/public-api';
+import { COLLECTION_SCHEMA, DateTimeSlot } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -11,11 +8,10 @@ const dateTimeSlotCollection = admin
 	.collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
 
 export default async (): Promise<void> => {
-
-	const hasDateTimeSlots = !(await dateTimeSlotCollection.get()).empty
+	const hasDateTimeSlots = !(await dateTimeSlotCollection.get()).empty;
 
 	if (hasDateTimeSlots) {
-		console.log('DateTimeSlots already exist. None added.')
+		console.log('DateTimeSlots already exist. None added.');
 		return Promise.resolve();
 	}
 
@@ -24,8 +20,7 @@ export default async (): Promise<void> => {
 		await addDateTimeSlots();
 		console.log('DateTimeSlots added.');
 		return Promise.resolve();
-	}
-	catch (error: unknown) {
+	} catch (error: unknown) {
 		throw new Error(`Error adding DateTimeSlots: ${error}`);
 	}
 };
@@ -160,7 +155,9 @@ const addDateTimeSlots = async () => {
 		},
 	];
 
-	return Promise.all(dateTimeSlots.map(async (slot) => {
-		await collection.add(slot);
-	}));
+	return Promise.all(
+		dateTimeSlots.map(async (slot) => {
+			await collection.add(slot);
+		}),
+	);
 };

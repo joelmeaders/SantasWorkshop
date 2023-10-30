@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
-import { redirectLoggedInTo, redirectUnauthorizedTo } from '@core/*';
+import { redirectLoggedInTo, redirectUnauthorizedTo } from '@santashop/core';
 
 const redirectUnauthorizedToLogin = (): AuthPipe =>
 	redirectUnauthorizedTo(['/sign-in']);
@@ -21,7 +21,7 @@ const routes: Routes = [
 		path: 'sign-in',
 		loadChildren: () =>
 			import('./features/v2/sign-in/sign-in.module').then(
-				(m) => m.SignInPageModule
+				(m) => m.SignInPageModule,
 			),
 		data: { authGuardPipe: redirectLoggedInToRegistration },
 	},
@@ -29,7 +29,7 @@ const routes: Routes = [
 		path: 'sign-up',
 		loadChildren: () =>
 			import('./features/v2/sign-up/sign-up.module').then(
-				(m) => m.SignUpPageModule
+				(m) => m.SignUpPageModule,
 			),
 		canActivate: [AuthGuard],
 		data: { authGuardPipe: redirectLoggedInToRegistration },
@@ -47,7 +47,7 @@ const routes: Routes = [
 		path: 'reset-password',
 		loadChildren: () =>
 			import('./features/v2/reset-password/reset-password.module').then(
-				(m) => m.ResetPasswordPageModule
+				(m) => m.ResetPasswordPageModule,
 			),
 	},
 	{
@@ -61,14 +61,14 @@ const routes: Routes = [
 		path: 'maintenance',
 		loadChildren: () =>
 			import('./features/maintenance/maintenance.module').then(
-				(m) => m.MaintenancePageModule
+				(m) => m.MaintenancePageModule,
 			),
 	},
 	{
 		path: 'bad-weather',
 		loadChildren: () =>
 			import('./features/bad-weather/bad-weather.module').then(
-				(m) => m.BadWeatherPageModule
+				(m) => m.BadWeatherPageModule,
 			),
 	},
 ];

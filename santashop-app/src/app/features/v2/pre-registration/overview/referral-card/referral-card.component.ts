@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { FunctionsWrapper } from '@core/*';
+import { FunctionsWrapper } from '@santashop/core';
 import referringAgencies from '../../../../../../assets/referring-agencies.json';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IError } from '../../../../../../../../dist/santashop-models';
+import { IError } from '@santashop/models';
 
 @Component({
 	selector: 'app-referral-card',
@@ -15,7 +15,7 @@ export class ReferralCardComponent {
 	public readonly allReferrals: string[] = referringAgencies.agencies;
 
 	private readonly searchText = new BehaviorSubject<string | undefined>(
-		undefined
+		undefined,
 	);
 
 	private readonly filteredReferrals$: Observable<string[]> =
@@ -23,16 +23,16 @@ export class ReferralCardComponent {
 			map((search) =>
 				!!search && search.length
 					? this.allReferrals.filter((ref) =>
-							ref.toUpperCase().includes(search)
+							ref.toUpperCase().includes(search),
 					  )
-					: this.allReferrals
-			)
+					: this.allReferrals,
+			),
 		);
 
 	public readonly referrals$ = this.filteredReferrals$;
 
 	private readonly referralChoice = new BehaviorSubject<string | undefined>(
-		undefined
+		undefined,
 	);
 	public readonly referralChoice$ = this.referralChoice.asObservable();
 
@@ -42,7 +42,7 @@ export class ReferralCardComponent {
 	constructor(
 		private readonly functions: FunctionsWrapper,
 		private readonly loadingController: LoadingController,
-		private readonly alertController: AlertController
+		private readonly alertController: AlertController,
 	) {}
 
 	public filter($event: any): void {

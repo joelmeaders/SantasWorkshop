@@ -69,7 +69,7 @@ function updateStats(checkIn: ICheckIn): void {
 	const checkInHour = new Date(localDate).getHours();
 
 	const index = stats.dateTimeCount.findIndex(
-		(e) => e.date === checkInDate && e.hour === checkInHour
+		(e) => e.date === checkInDate && e.hour === checkInHour,
 	);
 
 	if (index > -1) {

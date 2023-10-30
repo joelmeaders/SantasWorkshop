@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { Registration } from '../../../santashop-models/src/public-api';
+import { Registration } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -25,7 +25,7 @@ export default async (): Promise<string> => {
 				transaction.set(
 					doc,
 					{ reminderEmailSentOn: false },
-					{ merge: true }
+					{ merge: true },
 				);
 			});
 			return Promise.resolve();

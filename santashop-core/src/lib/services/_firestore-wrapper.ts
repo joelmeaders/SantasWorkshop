@@ -45,7 +45,7 @@ export const provideFirestore = _provideFirestore;
 // Solves an issue where dates are being converted to timestamps
 // in the database, but not being converted back to dates when read.
 export const timestampDateFix = (date: Date): Date => {
-	const timestamp = (date as unknown as Timestamp);
+	const timestamp = date as unknown as Timestamp;
 	return timestamp?.toDate() ?? date;
 };
 
@@ -63,18 +63,18 @@ export class FirestoreWrapper {
 	constructor(private readonly firestore: Firestore) {}
 
 	public readonly collection = <T = DocumentData>(
-		path: string
+		path: string,
 	): CollectionReference<T> =>
 		collection(this.firestore, path) as CollectionReference<T>;
 
 	public readonly collectionQuery = <T = DocumentData>(
 		query: Query<T>,
-		idField?: Extract<keyof T, string>
+		idField?: Extract<keyof T, string>,
 	) => collectionData(query, { idField });
 
 	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,
-		path?: string
+		path?: string,
 	): DocumentReference<T> =>
 		path ? doc<T>(reference, path) : doc(reference);
 
@@ -82,12 +82,12 @@ export class FirestoreWrapper {
 		ref: DocumentReference<T>,
 		options?: {
 			idField?: string;
-		}
+		},
 	): Observable<T> => docData<T>(ref, options);
 
 	public readonly query = <T = DocumentData>(
 		collectionReference: CollectionReference<T>,
-		constraints?: QueryConstraint[]
+		constraints?: QueryConstraint[],
 	): Query<T> =>
 		constraints
 			? query<T>(collectionReference, ...constraints)
@@ -95,20 +95,20 @@ export class FirestoreWrapper {
 
 	public readonly addDoc = <T>(
 		collectionReference: CollectionReference<T>,
-		document: T
+		document: T,
 	): Promise<DocumentReference<T>> =>
 		addDoc<T>(collectionReference, document);
 
 	public readonly setDoc = <T = DocumentData>(
 		documentReference: DocumentReference<T>,
 		document: T,
-		options?: SetOptions
+		options?: SetOptions,
 	): Promise<void> =>
 		options
 			? setDoc<T>(documentReference, document, options)
 			: setDoc<T>(documentReference, document);
 
 	public readonly deleteDoc = <T = DocumentData>(
-		documentReference: DocumentReference<T>
+		documentReference: DocumentReference<T>,
 	): Promise<void> => deleteDoc(documentReference);
 }

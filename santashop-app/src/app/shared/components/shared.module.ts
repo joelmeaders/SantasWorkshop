@@ -1,6 +1,6 @@
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { CoreModule } from '@core/*';
+import { CoreModule } from '@santashop/core';
 import { InternalHeaderComponent } from './internal-header/internal-header.component';
 import { LanguageToggleComponent } from './language-toggle/language-toggle.component';
 import { PreRegistrationMenuComponent } from './pre-registration-menu/pre-registration-menu.component';

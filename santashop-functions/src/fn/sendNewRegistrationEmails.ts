@@ -1,11 +1,11 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { COLLECTION_SCHEMA } from '../../../santashop-models/src/public-api';
+import { COLLECTION_SCHEMA } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
 const mailchimpClient = require('@mailchimp/mailchimp_transactional')(
-	functions.config().mailchimp.key
+	functions.config().mailchimp.key,
 );
 
 export default async (change: functions.firestore.QueryDocumentSnapshot) => {

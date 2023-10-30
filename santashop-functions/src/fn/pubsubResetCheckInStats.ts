@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { CheckIn } from '../../../santashop-models/src/public-api';
+import { CheckIn } from '../../../santashop-models/src';
 
 admin.initializeApp();
 

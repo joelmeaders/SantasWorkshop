@@ -1,12 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, FunctionsWrapper } from '@core/*';
-import { AlertController, LoadingController } from '@ionic/angular';
 import {
-	Auth,
-	IError,
-	OnboardUser,
-} from '../../../../../../santashop-models/src/public-api';
+	AuthService,
+	ErrorHandlerService,
+	FunctionsWrapper,
+} from '@santashop/core';
+import { AlertController, LoadingController } from '@ionic/angular';
+import { Auth, IError, OnboardUser } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -27,7 +27,7 @@ export class SignUpPageService implements OnDestroy {
 	public readonly redirectIfLoggedInSubscription =
 		this.authService.currentUser$.pipe(
 			filter((user) => !!user),
-			tap(() => this.router.navigate(['/pre-registration/overview']))
+			tap(() => this.router.navigate(['/pre-registration/overview'])),
 		);
 
 	constructor(
@@ -37,17 +37,17 @@ export class SignUpPageService implements OnDestroy {
 		private readonly loadingController: LoadingController,
 		private readonly errorHandler: ErrorHandlerService,
 		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService
+		private readonly translateService: TranslateService,
 	) {
 		this.subscriptions.push(
-			this.redirectIfLoggedInSubscription.subscribe()
+			this.redirectIfLoggedInSubscription.subscribe(),
 		);
 		this.form.errors$.pipe(tap((v) => console.log(v))).subscribe();
 	}
 
 	public ngOnDestroy(): void {
 		this.subscriptions.forEach((subscription) =>
-			subscription.unsubscribe()
+			subscription.unsubscribe(),
 		);
 	}
 
@@ -65,7 +65,7 @@ export class SignUpPageService implements OnDestroy {
 		const status = await this.functions.callableWrapper('verifyRecaptcha2')(
 			{
 				value: $event,
-			}
+			},
 		);
 
 		return status
@@ -78,7 +78,7 @@ export class SignUpPageService implements OnDestroy {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
 			message: this.translateService.instant(
-				'COMMON.VERIFICATION_FAILED_MSG'
+				'COMMON.VERIFICATION_FAILED_MSG',
 			),
 			buttons: [this.translateService.instant('COMMON.OK')],
 		});
@@ -108,22 +108,22 @@ export class SignUpPageService implements OnDestroy {
 				await loader.dismiss();
 				const alert = await this.alertController.create({
 					header: this.translateService.instant(
-						'SIGNUP.ACCOUNT_EXISTS'
+						'SIGNUP.ACCOUNT_EXISTS',
 					),
 					subHeader: onboardInfo.emailAddress,
 					message: this.translateService.instant(
-						'SIGNUP.ACCOUNT_EXISTS_MESSAGE'
+						'SIGNUP.ACCOUNT_EXISTS_MESSAGE',
 					),
 					buttons: [
 						{
 							text: this.translateService.instant(
-								'FORGOTPASS.RESET_PASSWORD'
+								'FORGOTPASS.RESET_PASSWORD',
 							),
 							role: '/reset-password',
 						},
 						{
 							text: this.translateService.instant(
-								'COMMON.SIGN_IN'
+								'COMMON.SIGN_IN',
 							),
 							role: '/sign-in',
 						},

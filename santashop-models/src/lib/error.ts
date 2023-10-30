@@ -35,7 +35,7 @@ export class ChildValidationError extends Error implements IError {
 	public details?: string;
 
 	constructor(
-		code: 'invalid_age' | 'invalid_firstname' | 'invalid_lastname'
+		code: 'invalid_age' | 'invalid_firstname' | 'invalid_lastname',
 	) {
 		super('Error validating child');
 		this.code = code;

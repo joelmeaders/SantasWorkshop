@@ -11,12 +11,12 @@ import {
 	Subject,
 	switchMap,
 } from 'rxjs';
-import { RegistrationSearchIndex } from '@models/';
+import { RegistrationSearchIndex } from '@santashop/models';
 import { SearchService } from '../search.service';
 
 declare type SortFnType = (
 	a: RegistrationSearchIndex,
-	b: RegistrationSearchIndex
+	b: RegistrationSearchIndex,
 ) => number;
 
 @Component({
@@ -28,7 +28,7 @@ declare type SortFnType = (
 export class ResultsPage {
 	public readonly sortLast = (
 		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex
+		b: RegistrationSearchIndex,
 	): number =>
 		a.lastName.localeCompare(b.lastName) ||
 		a.firstName.localeCompare(b.firstName) ||
@@ -36,7 +36,7 @@ export class ResultsPage {
 
 	public readonly sortFirst = (
 		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex
+		b: RegistrationSearchIndex,
 	): number =>
 		a.lastName.localeCompare(b.firstName) ||
 		a.firstName.localeCompare(b.lastName) ||
@@ -44,7 +44,7 @@ export class ResultsPage {
 
 	public readonly sortEmail = (
 		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex
+		b: RegistrationSearchIndex,
 	): number => a.lastName.localeCompare(b.emailAddress);
 
 	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
@@ -58,14 +58,14 @@ export class ResultsPage {
 			filter((query) => query !== null),
 			switchMap((query) => query!),
 			switchMap((results) =>
-				this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? []))
-			)
+				this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
+			),
 		);
 
 	private readonly timeout$ = of(undefined).pipe(delay(5000));
 
 	public readonly searchResults$ = this.searchTrigger.pipe(
-		switchMap(() => race([this.search$, this.timeout$]))
+		switchMap(() => race([this.search$, this.timeout$])),
 	);
 
 	constructor(private readonly searchService: SearchService) {}

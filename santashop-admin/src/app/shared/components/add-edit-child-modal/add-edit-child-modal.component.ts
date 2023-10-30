@@ -10,9 +10,9 @@ import {
 	Validators,
 } from '@angular/forms';
 import { AlertController, ModalController } from '@ionic/angular';
-import { AgeGroup, Child, ToyType } from '@models/*';
+import { AgeGroup, Child, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
-import { yyyymmddToLocalDate, getAgeFromDate } from '@core/*';
+import { yyyymmddToLocalDate, getAgeFromDate } from '@santashop/core';
 import {
 	ChildValidationService,
 	MAX_BIRTHDATE,
@@ -40,7 +40,7 @@ export class AddEditChildModalComponent implements OnInit {
 	constructor(
 		private readonly modalController: ModalController,
 		private readonly alertController: AlertController,
-		protected readonly childValidationService: ChildValidationService
+		protected readonly childValidationService: ChildValidationService,
 	) {}
 
 	public ngOnInit(): void {
@@ -63,7 +63,7 @@ export class AddEditChildModalComponent implements OnInit {
 					Validators.required,
 					Validators.minLength(2),
 					Validators.maxLength(20),
-				])
+				]),
 			),
 			lastName: new UntypedFormControl(
 				child?.lastName,
@@ -71,7 +71,7 @@ export class AddEditChildModalComponent implements OnInit {
 					Validators.required,
 					Validators.minLength(2),
 					Validators.maxLength(20),
-				])
+				]),
 			),
 			dateOfBirth: new UntypedFormControl(
 				child?.dateOfBirth
@@ -80,14 +80,14 @@ export class AddEditChildModalComponent implements OnInit {
 				Validators.compose([
 					Validators.required,
 					Validators.pattern(
-						/20\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/
+						/20\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/,
 					),
-				])
+				]),
 			),
 			ageGroup: new UntypedFormControl(undefined, Validators.required),
 			toyType: new UntypedFormControl(
 				child?.toyType,
-				Validators.required
+				Validators.required,
 			),
 		});
 	}

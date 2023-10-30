@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { CheckIn } from '@models/*';
+import { CheckIn } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -25,7 +25,7 @@ export default async (): Promise<string> => {
 				transaction.set(
 					registrationDoc,
 					{ hasCheckedIn: true },
-					{ merge: true }
+					{ merge: true },
 				);
 			});
 			return Promise.resolve();

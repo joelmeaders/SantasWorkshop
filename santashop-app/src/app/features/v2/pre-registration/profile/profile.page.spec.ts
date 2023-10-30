@@ -13,6 +13,7 @@ import { PreRegistrationService } from '../../../../core';
 import { ProfilePage } from './profile.page';
 import { ProfilePageService } from './profile.page.service';
 
+
 describe('ProfilePage', () => {
 	let component: ProfilePage;
 	let fixture: ComponentFixture<ProfilePage>;

@@ -4,21 +4,21 @@ import { IonicModule } from '@ionic/angular';
 import { UserPage } from './user.page';
 
 describe('UserPage', () => {
-  let component: UserPage;
-  let fixture: ComponentFixture<UserPage>;
+	let component: UserPage;
+	let fixture: ComponentFixture<UserPage>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ UserPage ],
-      imports: [IonicModule.forRoot()]
-    }).compileComponents();
+	beforeEach(waitForAsync(() => {
+		TestBed.configureTestingModule({
+			declarations: [UserPage],
+			imports: [IonicModule.forRoot()],
+		}).compileComponents();
 
-    fixture = TestBed.createComponent(UserPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+		fixture = TestBed.createComponent(UserPage);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	}));
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

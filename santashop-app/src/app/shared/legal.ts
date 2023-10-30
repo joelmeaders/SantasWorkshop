@@ -4,7 +4,7 @@ import { TermsOfServiceModalComponent } from './components/terms-of-service-moda
 
 export abstract class LegalHelpers {
 	public static async privacyPolicy(
-		modalController: ModalController
+		modalController: ModalController,
 	): Promise<void> {
 		const modal = await modalController.create({
 			component: PrivacyPolicyModalComponent,
@@ -13,7 +13,7 @@ export abstract class LegalHelpers {
 	}
 
 	public static async termsOfService(
-		modalController: ModalController
+		modalController: ModalController,
 	): Promise<void> {
 		const modal = await modalController.create({
 			component: TermsOfServiceModalComponent,

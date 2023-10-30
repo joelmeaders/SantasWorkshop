@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { HelpPageRoutingModule } from './help-routing.module';
 import { HelpPage } from './help.page';
-import { CoreModule } from '@core/*';
+import { CoreModule } from '@santashop/core';
 import { SharedModule } from 'santashop-app/src/app/shared/components/shared.module';
 
 @NgModule({

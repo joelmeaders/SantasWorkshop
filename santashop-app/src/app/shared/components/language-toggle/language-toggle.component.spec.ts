@@ -23,7 +23,9 @@ describe('LanguageToggleComponent', () => {
 			imports: [IonicModule.forRoot()],
 		}).compileComponents();
 
-		translateService = TestBed.inject(TranslateService) as jasmine.SpyObj<TranslateService>;
+		translateService = TestBed.inject(
+			TranslateService,
+		) as jasmine.SpyObj<TranslateService>;
 
 		fixture = TestBed.createComponent(LanguageToggleComponent);
 		component = fixture.componentInstance;

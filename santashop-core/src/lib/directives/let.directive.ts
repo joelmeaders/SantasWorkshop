@@ -17,7 +17,7 @@ export class AppLetDirective<T> {
 
 	constructor(
 		viewContainer: ViewContainerRef,
-		templateRef: TemplateRef<AppLetContext<T>>
+		templateRef: TemplateRef<AppLetContext<T>>,
 	) {
 		viewContainer.createEmbeddedView(templateRef, this.context);
 	}

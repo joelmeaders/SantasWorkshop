@@ -12,7 +12,7 @@ const routes: Routes = [
 		path: 'add-child',
 		loadChildren: () =>
 			import('./add-child/add-child.module').then(
-				(m) => m.AddChildPageModule
+				(m) => m.AddChildPageModule,
 			),
 	},
 ];

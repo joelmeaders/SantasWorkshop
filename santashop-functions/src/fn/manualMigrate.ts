@@ -8,7 +8,7 @@ import {
 	User,
 	Child,
 	Registration,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 import { getAgeFromDate, getAgeGroupFromAge } from '../utility/dates';
 import { generateId } from '../utility/id-generation';
 import { generateQrCode } from '../utility/qrcodes';
@@ -17,7 +17,7 @@ admin.initializeApp();
 
 export default async (
 	uid: string,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<string> => {
 	if (context.auth?.uid !== 'Qyvgav7d9Ye0RyJYCG2ZgQPppKt1') {
 		console.error(new Error('user not an admin'));
@@ -44,11 +44,11 @@ export default async (
 			return snapshot.data() as any;
 		} else {
 			console.error(
-				new Error(`record not found in collection customers: ${uid}`)
+				new Error(`record not found in collection customers: ${uid}`),
 			);
 			throw new HttpsError(
 				'not-found',
-				`record not found in collection customers: ${uid}`
+				`record not found in collection customers: ${uid}`,
 			);
 		}
 	});
@@ -67,11 +67,11 @@ export default async (
 		oldRegistration?.qrcode
 	) {
 		console.error(
-			new Error(`New registration data found. Cannot migrate: ${uid}`)
+			new Error(`New registration data found. Cannot migrate: ${uid}`),
 		);
 		throw new HttpsError(
 			'aborted',
-			`New registration data found. Cannot migrate: ${uid}`
+			`New registration data found. Cannot migrate: ${uid}`,
 		);
 	}
 
@@ -105,7 +105,7 @@ export default async (
 
 				const childAge = getAgeFromDate(
 					child.dateOfBirth!,
-					new Date('12/10/2023')
+					new Date('12/10/2023'),
 				);
 
 				if (child.toyType === 'infants' && childAge > 2) {
@@ -238,12 +238,12 @@ export default async (
 		.catch((error) => {
 			console.error(
 				`Error migrating profile ${context.auth?.uid} to version 1`,
-				{ ...error }
+				{ ...error },
 			);
 			throw new functions.https.HttpsError(
 				'internal',
 				`Error updating profile ${context.auth?.uid} to version 1`,
-				JSON.stringify(error)
+				JSON.stringify(error),
 			);
 		});
 };

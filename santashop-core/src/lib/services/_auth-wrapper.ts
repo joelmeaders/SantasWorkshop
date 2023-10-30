@@ -42,13 +42,13 @@ export class AuthWrapper {
 
 	public readonly signInWithEmailAndPassword = (
 		email: string,
-		password: string
+		password: string,
 	): Promise<_UserCredential> =>
 		signInWithEmailAndPassword(this.auth, email, password);
 
 	public readonly updatePassword = (
 		user: User,
-		newPassword: string
+		newPassword: string,
 	): Promise<void> => updatePassword(user, newPassword);
 
 	public readonly signOut = (): Promise<void> => this.auth.signOut();

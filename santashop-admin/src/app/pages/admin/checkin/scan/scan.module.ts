@@ -6,7 +6,7 @@ import { IonicModule } from '@ionic/angular';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 import { ScanPage } from './scan.page';
 import { SharedModule } from '../../../../shared/shared.module';
-import { CoreModule } from '@core/*';
+import { CoreModule } from '@santashop/core';
 import { ScanPageRoutingModule } from './scan-routing.module';
 import { ScannerService } from './scanner.service';
 

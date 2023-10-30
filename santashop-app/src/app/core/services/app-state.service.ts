@@ -9,8 +9,8 @@ import {
 	takeUntil,
 	tap,
 } from 'rxjs/operators';
-import { FireRepoLite } from '@core/*';
-import { COLLECTION_SCHEMA, PublicParameters } from '@models/*';
+import { FireRepoLite } from '@santashop/core';
+import { COLLECTION_SCHEMA, PublicParameters } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { BadWeatherPage } from '../../features/bad-weather/bad-weather.page';
 import { MaintenancePage } from '../../features/maintenance/maintenance.page';
@@ -35,7 +35,7 @@ export class AppStateService implements OnDestroy {
 			distinctUntilChanged((prev, curr) => {
 				return JSON.stringify(prev) === JSON.stringify(curr);
 			}),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	public readonly message$: Observable<string | null> = this.publicDoc$.pipe(
@@ -46,22 +46,22 @@ export class AppStateService implements OnDestroy {
 					: doc.messageEs;
 			return message?.length ? message : null;
 		}),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly isMaintenanceModeEnabled$ = this.publicDoc$.pipe(
 		map((value) => value.maintenanceModeEnabled),
-		takeUntil(this.destroy$)
+		takeUntil(this.destroy$),
 	);
 
 	public readonly isRegistrationEnabled$ = this.publicDoc$.pipe(
 		map((value) => value.registrationEnabled),
-		takeUntil(this.destroy$)
+		takeUntil(this.destroy$),
 	);
 
 	public readonly shopClosedWeather$ = this.publicDoc$.pipe(
 		map((value) => value.weatherModeEnabled),
-		takeUntil(this.destroy$)
+		takeUntil(this.destroy$),
 	);
 
 	public readonly appClosureSubscription = combineLatest([
@@ -88,21 +88,21 @@ export class AppStateService implements OnDestroy {
 				}
 
 				this.setModal(undefined);
-			})
+			}),
 		)
 		.subscribe();
 
 	public readonly modalSubscription = this.currentModal$
 		.pipe(
 			takeUntil(this.destroy$),
-			switchMap((modal) => from(this.openModal(modal)))
+			switchMap((modal) => from(this.openModal(modal))),
 		)
 		.subscribe();
 
 	constructor(
 		private readonly httpService: FireRepoLite,
 		private readonly modalController: ModalController,
-		private readonly translateService: TranslateService
+		private readonly translateService: TranslateService,
 	) {}
 
 	public ngOnDestroy(): void {

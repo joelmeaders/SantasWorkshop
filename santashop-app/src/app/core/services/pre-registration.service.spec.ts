@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService, FireRepoLite } from '@core/*';
+import { AuthService, FireRepoLite } from '@santashop/core';
 import { Functions } from '@angular/fire/functions';
 import { autoSpyProvider, Spied } from 'test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';
@@ -7,7 +7,6 @@ import { PreRegistrationService } from './pre-registration.service';
 import { repoCollectionStub } from '../../../../../test-helpers';
 import { mockRegistrations } from '../../../../../test-helpers/mock-data';
 import { QrCodeService } from './qrcode.service';
-
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
 	let repository: Spied<FireRepoLite>;

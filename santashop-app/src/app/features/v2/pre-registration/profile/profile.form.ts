@@ -38,7 +38,7 @@ export const changeEmailForm = (): FormGroup<{
 		password: new FormControl<string>(undefined, Validators.required),
 		emailAddress: new FormControl<string>(
 			undefined,
-			validators.emailAddress
+			validators.emailAddress,
 		),
 	});
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, QueryConstraint } from '@core/*';
-import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@models/*';
+import { FireRepoLite, QueryConstraint } from '@santashop/core';
+import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@santashop/models';
 import { limit, orderBy, where } from 'firebase/firestore';
 import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
 
@@ -17,12 +17,12 @@ export class SearchService {
 
 	private readonly index =
 		this.repoService.collection<RegistrationSearchIndex>(
-			COLLECTION_SCHEMA.registrationSearchIndex
+			COLLECTION_SCHEMA.registrationSearchIndex,
 		);
 
 	private readonly queryLastNameZip = (
 		lastName: string,
-		zipCode: string
+		zipCode: string,
 	): QueryConstraint[] =>
 		[
 			where('zip', '==', zipCode.toString()),
@@ -48,20 +48,20 @@ export class SearchService {
 	public searchByLastNameZip(lastName: string, zipCode: string): void {
 		this.searchResults.next(
 			this.index.readMany(
-				this.queryLastNameZip(lastName.toLowerCase(), zipCode)
-			)
+				this.queryLastNameZip(lastName.toLowerCase(), zipCode),
+			),
 		);
 	}
 
 	public searchByEmail(emailAddress: string): void {
 		this.searchResults.next(
-			this.index.readMany(this.queryEmail(emailAddress.toLowerCase()))
+			this.index.readMany(this.queryEmail(emailAddress.toLowerCase())),
 		);
 	}
 
 	public searchByCode(code: string): void {
 		this.searchResults.next(
-			this.index.readMany(this.queryCode(code.toUpperCase()))
+			this.index.readMany(this.queryCode(code.toUpperCase())),
 		);
 	}
 

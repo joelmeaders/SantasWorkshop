@@ -4,18 +4,18 @@ export const changeAccountInformation = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/changeAccountInformation')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 export const updateReferredBy = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/updateReferredBy')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 /**
@@ -30,9 +30,9 @@ export const completeRegistration = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/completeRegistration')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 export const newAccount = functions.https.onCall(async (request) => {
@@ -43,18 +43,18 @@ export const undoRegistration = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/undoRegistration')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 export const updateEmailAddress = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/updateEmailAddress')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 export const checkIn = functions.https.onCall(async (request, context) => {
@@ -64,16 +64,16 @@ export const checkIn = functions.https.onCall(async (request, context) => {
 export const checkInWithEdit = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/checkInWithEdit')).default(request, context);
-	}
+	},
 );
 
 export const onSiteRegistration = functions.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/onSiteRegistration')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 /**
@@ -123,7 +123,7 @@ export const scheduledDateTimeSlotReschedules = functions.pubsub
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
 
-	// “At 23:59.” (11:59 PM) every day.
+// “At 23:59.” (11:59 PM) every day.
 export const scheduledRegistrationStats = functions.pubsub
 	.schedule('59 23 * * *')
 	.timeZone('America/Denver')

@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
-import {
-	DateTimeSlot,
-	Registration,
-} from '../../../santashop-models/src/public-api';
+import { DateTimeSlot, Registration } from '../../../santashop-models/src';
 
 admin.initializeApp();
 

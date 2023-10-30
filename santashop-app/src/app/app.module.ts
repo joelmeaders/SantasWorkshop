@@ -15,7 +15,7 @@ import {
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
 	provideFirestore,
-} from '@core/*';
+} from '@santashop/core';
 import { RouteReuseStrategy } from '@angular/router';
 import {
 	RecaptchaSettings,
@@ -40,9 +40,7 @@ import {
 	getFunctions,
 	provideFunctions,
 } from '@angular/fire/functions';
-import {
-	enableMultiTabIndexedDbPersistence,
-} from '@angular/fire/firestore';
+import { enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
 import {
 	getAnalytics,
 	provideAnalytics,
@@ -112,7 +110,7 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 			}
 			enableMultiTabIndexedDbPersistence(firestore).then(
 				() => resolvePersistenceEnabled(true),
-				() => resolvePersistenceEnabled(false)
+				() => resolvePersistenceEnabled(false),
 			);
 			return firestore;
 		}),

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import { Registration } from '@models/*';
+import { Registration } from '../../../santashop-models/src';
 import * as formatDateTime from 'dateformat';
 import { Timestamp } from 'firebase-admin/firestore';
 
 admin.initializeApp();
 
 const mailchimpClient = require('@mailchimp/mailchimp_transactional')(
-	functions.config().mailchimp.key
+	functions.config().mailchimp.key,
 );
 
 /**
@@ -39,7 +39,7 @@ export default async (): Promise<string> => {
 			};
 			console.error(
 				`failed sending email to: ${registration.uid}`,
-				JSON.stringify(failure)
+				JSON.stringify(failure),
 			);
 		}
 	}
@@ -80,7 +80,7 @@ const getMessage = (registration: Registration) => ({
 const formattedDateTime = (inputDateTime: any) => {
 	const dateTime = new Timestamp(
 		inputDateTime._seconds,
-		inputDateTime._nanoseconds
+		inputDateTime._nanoseconds,
 	).toDate();
 	const dateZ = dateTime.toLocaleString('en-US', { timeZone: 'MST' });
 	return formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');

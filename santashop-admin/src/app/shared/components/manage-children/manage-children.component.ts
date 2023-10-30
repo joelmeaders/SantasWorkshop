@@ -6,7 +6,7 @@ import {
 	Output,
 } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular';
-import { Child } from '@models/*';
+import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
 
 @Component({
@@ -24,7 +24,7 @@ export class ManageChildrenComponent {
 
 	constructor(
 		private readonly modalController: ModalController,
-		private readonly alertController: AlertController
+		private readonly alertController: AlertController,
 	) {}
 
 	public async addEditChild(child?: Child): Promise<void> {

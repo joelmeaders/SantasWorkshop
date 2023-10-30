@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { Child } from '@models/*';
+import { Child } from '@santashop/models';
 
 @Component({
 	selector: 'app-children-card',

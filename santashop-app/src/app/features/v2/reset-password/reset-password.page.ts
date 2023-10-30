@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '@core/*';
+import { AuthService } from '@santashop/core';
 import { AlertController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
@@ -42,7 +42,7 @@ export class ResetPasswordPage {
 		private readonly afFunctions: Functions,
 		private readonly alertController: AlertController,
 		private readonly translateService: TranslateService,
-		private readonly analytics: Analytics
+		private readonly analytics: Analytics,
 	) {}
 
 	public resetPage(): void {
@@ -79,7 +79,7 @@ export class ResetPasswordPage {
 	private async validateRecaptcha($event: any): Promise<boolean> {
 		const status = await httpsCallable(
 			this.afFunctions,
-			'verifyRecaptcha2'
+			'verifyRecaptcha2',
 		)({ value: $event });
 		return Promise.resolve((status.data as any).success);
 	}
@@ -89,7 +89,7 @@ export class ResetPasswordPage {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
 			message: this.translateService.instant(
-				'COMMON.VERIFICATION_FAILED_MSG'
+				'COMMON.VERIFICATION_FAILED_MSG',
 			),
 			buttons: [this.translateService.instant('COMMON.OK')],
 		});

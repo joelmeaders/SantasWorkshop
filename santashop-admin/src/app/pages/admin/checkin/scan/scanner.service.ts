@@ -17,7 +17,7 @@ export class ScannerService implements OnDestroy {
 	private readonly hasPermissions = new BehaviorSubject<boolean>(false);
 	public readonly $hasPermissions = this.hasPermissions.pipe(
 		takeUntil(this.$destroy),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	private readonly availableDevices = new BehaviorSubject<
@@ -25,7 +25,7 @@ export class ScannerService implements OnDestroy {
 	>(undefined);
 	public readonly $availableDevices = this.availableDevices.pipe(
 		takeUntil(this.$destroy),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	private readonly previousDevice = new BehaviorSubject<
@@ -33,24 +33,24 @@ export class ScannerService implements OnDestroy {
 	>(undefined);
 
 	private readonly currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(
-		undefined
+		undefined,
 	);
 	public readonly $currentDevice = this.currentDevice.pipe(
 		takeUntil(this.$destroy),
 		distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly $deviceToUse = this.$currentDevice.pipe(
 		takeUntil(this.$destroy),
 		map((current) => current ?? undefined),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly $deviceId = this.currentDevice.pipe(
 		takeUntil(this.$destroy),
 		map((current) => (current ? current.deviceId : '')),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	constructor(private readonly alertController: AlertController) {}

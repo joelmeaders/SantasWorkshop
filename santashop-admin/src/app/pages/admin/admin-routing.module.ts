@@ -12,7 +12,7 @@ const routes: Routes = [
 				path: 'landing',
 				loadChildren: () =>
 					import('./landing/landing.module').then(
-						(m) => m.LandingPageModule
+						(m) => m.LandingPageModule,
 					),
 			},
 			{
@@ -20,7 +20,7 @@ const routes: Routes = [
 				title: 'DSCS: Check In',
 				loadChildren: () =>
 					import('./checkin/checkin.module').then(
-						(m) => m.CheckinPageModule
+						(m) => m.CheckinPageModule,
 					),
 			},
 			{
@@ -28,7 +28,7 @@ const routes: Routes = [
 				title: 'DSCS: Search',
 				loadChildren: () =>
 					import('./search/search.module').then(
-						(m) => m.SearchPageModule
+						(m) => m.SearchPageModule,
 					),
 			},
 			{
@@ -36,7 +36,7 @@ const routes: Routes = [
 				title: 'DSCS: Register',
 				loadChildren: () =>
 					import('./registration/registration.module').then(
-						(m) => m.RegistrationPageModule
+						(m) => m.RegistrationPageModule,
 					),
 			},
 			{
@@ -53,21 +53,21 @@ const routes: Routes = [
 				path: 'registration',
 				loadChildren: () =>
 					import('./stats/registration/registration.module').then(
-						(m) => m.RegistrationPageModule
+						(m) => m.RegistrationPageModule,
 					),
 			},
 			{
 				path: 'check-in',
 				loadChildren: () =>
 					import('./stats/check-in/check-in.module').then(
-						(m) => m.CheckInPageModule
+						(m) => m.CheckInPageModule,
 					),
 			},
 			{
 				path: 'user',
 				loadChildren: () =>
 					import('./stats/user/user.module').then(
-						(m) => m.UserPageModule
+						(m) => m.UserPageModule,
 					),
 			},
 		],

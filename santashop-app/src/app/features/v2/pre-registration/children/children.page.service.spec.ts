@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
-import { Registration } from '../../../../../../../dist/santashop-models';
+import { Registration } from '../@santashop/models';
 import {
 	getFunctionSpy,
 	getPropertySpy,
@@ -13,6 +13,7 @@ import {
 } from '../../../../../../../test-helpers/mock-data';
 import { PreRegistrationService } from '../../../../core';
 import { ChildrenPageService } from './children.page.service';
+
 
 describe('ChildrenPageService', () => {
 	let service: ChildrenPageService;

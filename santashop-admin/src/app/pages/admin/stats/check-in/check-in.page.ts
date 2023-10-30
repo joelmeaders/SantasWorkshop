@@ -9,16 +9,12 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
-import {
-	IFireRepoCollection,
-	FireRepoLite,
-	filterNil
-} from '@core/*';
+import { IFireRepoCollection, FireRepoLite, filterNil } from '@santashop/core';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
 	COLLECTION_SCHEMA,
-} from '@models/*';
+} from '@santashop/models';
 
 @Component({
 	selector: 'admin-check-in',
@@ -37,55 +33,59 @@ export class CheckInPage {
 		switchMap(() =>
 			this.statsCollection<CheckInAggregatedStats>()
 				.read(`checkin-${this.year}`)
-				.pipe(shareReplay(1))
-		)
+				.pipe(shareReplay(1)),
+		),
 	);
 
 	private readonly dateTimeStats$ = this.checkInRecord$.pipe(
 		filterNil(),
-		map((data) => data.dateTimeCount)
+		map((data) => data.dateTimeCount),
 	);
 
 	public readonly checkinLastUpdated$ = this.checkInRecord$.pipe(
 		map((updated) =>
-			(updated.lastUpdated as any as Timestamp).toDate().toLocaleString()
-		)
+			(updated.lastUpdated as any as Timestamp).toDate().toLocaleString(),
+		),
 	);
 
 	public readonly totalCustomers$ = this.dateTimeStats$.pipe(
 		map((data) =>
-			data.map((e) => e.customerCount).reduce((prev, curr) => prev + curr)
-		)
+			data
+				.map((e) => e.customerCount)
+				.reduce((prev, curr) => prev + curr),
+		),
 	);
 
 	public readonly totalChildren$ = this.dateTimeStats$.pipe(
 		map((data) =>
-			data.map((e) => e.childCount).reduce((prev, curr) => prev + curr)
-		)
+			data.map((e) => e.childCount).reduce((prev, curr) => prev + curr),
+		),
 	);
 
 	public readonly totalPreregistered$ = this.dateTimeStats$.pipe(
 		map((data) =>
 			data
 				.map((e) => e.pregisteredCount)
-				.reduce((prev, curr) => prev + curr)
-		)
+				.reduce((prev, curr) => prev + curr),
+		),
 	);
 
 	public readonly onSiteRegistrations$ = this.totalCustomers$.pipe(
 		switchMap((total) =>
-			this.totalPreregistered$.pipe(map((pre) => total - pre))
-		)
+			this.totalPreregistered$.pipe(map((pre) => total - pre)),
+		),
 	);
 
 	public readonly totalModifiedRegistrations$ = this.dateTimeStats$.pipe(
 		map((data) =>
-			data.map((e) => e.modifiedCount).reduce((prev, curr) => prev + curr)
+			data
+				.map((e) => e.modifiedCount)
+				.reduce((prev, curr) => prev + curr),
 		),
 		switchMap((count) =>
-			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite))
+			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite)),
 		),
-		map((count) => (count > 0 ? count : count * -1))
+		map((count) => (count > 0 ? count : count * -1)),
 	);
 
 	private readonly graphView = new BehaviorSubject<
@@ -96,7 +96,7 @@ export class CheckInPage {
 		.pipe(shareReplay(1));
 
 	public readonly viewButtonText$ = this.graphView$.pipe(
-		map((value) => (value === 'customerCount' ? 'Children' : 'Check-Ins'))
+		map((value) => (value === 'customerCount' ? 'Children' : 'Check-Ins')),
 	);
 
 	// TODO: These should be redone to not need udated every year...
@@ -164,14 +164,14 @@ export class CheckInPage {
 
 	private mapDaysHoursToChart(
 		data: CheckInDateTimeCount[],
-		view: 'customerCount' | 'childCount'
+		view: 'customerCount' | 'childCount',
 	): ChartData<'bar'>[] {
 		data = data.sort((a, b) => a.date - b.date || a.hour - b.hour);
 
 		const chartStructure = (
 			inputData: number[],
 			chartLabel: string,
-			dataSeriesLabels: string[]
+			dataSeriesLabels: string[],
 		): {
 			datasets: {
 				backgroundColor: string[];
@@ -209,7 +209,7 @@ export class CheckInPage {
 			const chartData = chartStructure(
 				dayData,
 				`Dec ${day}, ${this.year}`,
-				hours ?? []
+				hours ?? [],
 			);
 			outputData.push(chartData);
 		});

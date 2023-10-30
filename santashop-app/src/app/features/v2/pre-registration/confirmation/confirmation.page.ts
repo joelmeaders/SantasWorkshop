@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { ErrorHandlerService } from '@core/*';
+import { ErrorHandlerService } from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IError } from '../../../../../../../santashop-models/src/public-api';
+import { IError } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';
 
@@ -24,14 +24,14 @@ export class ConfirmationPage {
 		private readonly router: Router,
 		private readonly errorHandler: ErrorHandlerService,
 		private readonly translateService: TranslateService,
-		private readonly analytics: Analytics
+		private readonly analytics: Analytics,
 	) {}
 
 	public async undoRegistration(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
 			message: this.translateService.instant(
-				'CONFIRMATION.CONFIRM_CHANGE_MSG'
+				'CONFIRMATION.CONFIRM_CHANGE_MSG',
 			),
 			buttons: [
 				{

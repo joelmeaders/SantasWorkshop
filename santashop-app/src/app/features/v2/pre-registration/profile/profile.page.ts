@@ -32,6 +32,6 @@ export class ProfilePage {
 
 	constructor(
 		private readonly viewService: ProfilePageService,
-		private readonly preregistrationService: PreRegistrationService
+		private readonly preregistrationService: PreRegistrationService,
 	) {}
 }

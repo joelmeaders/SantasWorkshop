@@ -25,7 +25,7 @@ export class FireRepoLite {
 
 	/** @inheritdoc */
 	public collection<T = DocumentData>(
-		collectionPath: string
+		collectionPath: string,
 	): IFireRepoCollection<T> {
 		return {
 			collectionPathName: collectionPath,
@@ -37,12 +37,12 @@ export class FireRepoLite {
 			/** @inheritdoc */
 			readMany: (
 				queryConstraints?: QueryConstraint[],
-				idField?: Extract<keyof T, string>
+				idField?: Extract<keyof T, string>,
 			) =>
 				this.fireRepoBase.readMany<T>(
 					collectionPath,
 					queryConstraints,
-					idField
+					idField,
 				),
 
 			/** @inheritdoc */
@@ -54,7 +54,7 @@ export class FireRepoLite {
 				this.fireRepoBase.addById<T>(
 					collectionPath,
 					documentId,
-					document
+					document,
 				),
 
 			/** @inheritdoc */
@@ -63,7 +63,7 @@ export class FireRepoLite {
 					collectionPath,
 					documentId,
 					document,
-					merge
+					merge,
 				),
 
 			/** @inheritdoc */
@@ -124,7 +124,7 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 */
 	readMany(
 		queryConstraints?: QueryConstraint[],
-		idField?: Extract<keyof T, string>
+		idField?: Extract<keyof T, string>,
 	): Observable<T[]>;
 
 	/**
@@ -168,7 +168,7 @@ export interface IFireRepoCollection<T = DocumentData> {
 	update(
 		documentId: string,
 		document: T,
-		merge: boolean
+		merge: boolean,
 	): Observable<DocumentReference<T>>;
 
 	/**

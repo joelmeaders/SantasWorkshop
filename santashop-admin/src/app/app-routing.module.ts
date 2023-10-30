@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
-import { redirectLoggedInTo, hasCustomClaim } from '@core/*';
+import { redirectLoggedInTo, hasCustomClaim } from '@santashop/core';
 
 const adminOnly = (): AuthPipe => hasCustomClaim('admin');
 const redirectLoggedInToAdmin = (): AuthPipe => redirectLoggedInTo(['admin']);
@@ -13,7 +13,7 @@ const routes: Routes = [
 		data: { authGuardPipe: redirectLoggedInToAdmin },
 		loadChildren: () =>
 			import('./pages/sign-in/sign-in.module').then(
-				(m) => m.SignInPageModule
+				(m) => m.SignInPageModule,
 			),
 	},
 	{

@@ -2,12 +2,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { AuthService, ErrorHandlerService, newAuthForm } from '@core/*';
+import { AuthService, ErrorHandlerService, newAuthForm } from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular';
-import {
-	Auth,
-	IError,
-} from '../../../../../../santashop-models/src/public-api';
+import { Auth, IError } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -27,7 +24,7 @@ export class SignInPageService implements OnDestroy {
 	public readonly redirectIfLoggedInSubscription =
 		this.authService.currentUser$.pipe(
 			filter((user) => !!user),
-			tap(() => this.router.navigate(['/pre-registration/overview']))
+			tap(() => this.router.navigate(['/pre-registration/overview'])),
 		);
 
 	constructor(
@@ -38,16 +35,16 @@ export class SignInPageService implements OnDestroy {
 		private readonly errorHandler: ErrorHandlerService,
 		private readonly alertController: AlertController,
 		private readonly translateService: TranslateService,
-		private readonly analytics: Analytics
+		private readonly analytics: Analytics,
 	) {
 		this.subscriptions.push(
-			this.redirectIfLoggedInSubscription.subscribe()
+			this.redirectIfLoggedInSubscription.subscribe(),
 		);
 	}
 
 	public ngOnDestroy(): void {
 		this.subscriptions.forEach((subscription) =>
-			subscription.unsubscribe()
+			subscription.unsubscribe(),
 		);
 	}
 
@@ -88,7 +85,7 @@ export class SignInPageService implements OnDestroy {
 	private async validateRecaptcha($event: any): Promise<boolean> {
 		const status = await httpsCallable(
 			this.afFunctions,
-			'verifyRecaptcha2'
+			'verifyRecaptcha2',
 		)({ value: $event });
 		return Promise.resolve((status.data as any).success as boolean);
 	}
@@ -98,7 +95,7 @@ export class SignInPageService implements OnDestroy {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
 			message: this.translateService.instant(
-				'COMMON.VERIFICATION_FAILED_MSG'
+				'COMMON.VERIFICATION_FAILED_MSG',
 			),
 			buttons: [this.translateService.instant('COMMON.OK')],
 		});

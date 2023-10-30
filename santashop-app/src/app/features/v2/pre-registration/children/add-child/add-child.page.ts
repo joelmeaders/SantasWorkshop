@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MOBILE_EVENT } from '@core/*';
+import { MOBILE_EVENT } from '@santashop/core';
 import { filter, map, takeUntil, tap } from 'rxjs/operators';
 import { AddChildPageService } from './add-child.page.service';
 import {
@@ -24,7 +24,7 @@ export class AddChildPage {
 			takeUntil(this.viewService.destroy$),
 			filter((params) => params.has('id')),
 			map((params) => params.get('id') as any as number),
-			tap((id) => this.viewService.setChildToEdit(id))
+			tap((id) => this.viewService.setChildToEdit(id)),
 		)
 		.subscribe();
 
@@ -40,7 +40,7 @@ export class AddChildPage {
 				tap((enabled) => {
 					if (!enabled)
 						this.appStateService.setModal(RegistrationClosedPage);
-				})
+				}),
 			)
 			.subscribe();
 
@@ -48,7 +48,7 @@ export class AddChildPage {
 		private readonly viewService: AddChildPageService,
 		private readonly route: ActivatedRoute,
 		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean,
-		private readonly appStateService: AppStateService
+		private readonly appStateService: AppStateService,
 	) {}
 
 	public ionViewDidLeave(): void {

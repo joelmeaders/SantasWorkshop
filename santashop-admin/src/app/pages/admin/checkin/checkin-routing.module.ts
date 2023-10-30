@@ -24,7 +24,7 @@ const routes: Routes = [
 		title: 'DSCS: Checked In',
 		loadChildren: () =>
 			import('./confirmation/confirmation.module').then(
-				(m) => m.ConfirmationPageModule
+				(m) => m.ConfirmationPageModule,
 			),
 	},
 	{
@@ -32,7 +32,7 @@ const routes: Routes = [
 		title: 'DSCS: Duplicate Check-In',
 		loadChildren: () =>
 			import('./duplicate/duplicate.module').then(
-				(m) => m.DuplicatePageModule
+				(m) => m.DuplicatePageModule,
 			),
 	},
 ];

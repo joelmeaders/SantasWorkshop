@@ -5,7 +5,7 @@ export abstract class CommonForms {
 
 	public static messages(
 		minLength?: string | number,
-		maxLength?: string | number
+		maxLength?: string | number,
 	): any {
 		return {
 			required: { type: 'required', message: 'This field is required' },

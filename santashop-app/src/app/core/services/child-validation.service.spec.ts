@@ -154,7 +154,7 @@ describe('ChildValidationService', () => {
 
 	it('MAX_BIRTHDATE: should be expected value', () => {
 		expect(MAX_BIRTHDATE().toDateString()).toEqual(
-			new Date('12/31/2023').toDateString()
+			new Date('12/31/2023').toDateString(),
 		);
 	});
 
@@ -164,7 +164,7 @@ describe('ChildValidationService', () => {
 
 	it('MIN_BIRTHDATE: should be expected value', () => {
 		expect(MIN_BIRTHDATE().toDateString()).toEqual(
-			new Date('12/31/2009').toDateString()
+			new Date('12/31/2009').toDateString(),
 		);
 	});
 });

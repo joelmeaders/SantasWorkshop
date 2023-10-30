@@ -13,7 +13,6 @@ import { PreRegistrationService } from '../../../../core';
 import { ProfilePage } from './profile.page';
 import { ProfilePageService } from './profile.page.service';
 
-
 describe('ProfilePage', () => {
 	let component: ProfilePage;
 	let fixture: ComponentFixture<ProfilePage>;
@@ -22,7 +21,7 @@ describe('ProfilePage', () => {
 		autoSpyProvider(ProfilePageService).useValue;
 
 	let preregistrationService: Spied<PreRegistrationService> = autoSpyProvider(
-		PreRegistrationService
+		PreRegistrationService,
 	).useValue;
 
 	const providers = [
@@ -32,12 +31,12 @@ describe('ProfilePage', () => {
 
 	let userProfile$Spy: jasmine.Spy = getPropertySpy(
 		viewService,
-		'userProfile$'
+		'userProfile$',
 	).and.returnValue(of(mockUsers().user1));
 
 	let isRegistrationComplete$Spy: jasmine.Spy = getPropertySpy(
 		preregistrationService,
-		'registrationComplete$'
+		'registrationComplete$',
 	).and.returnValue(of(true));
 
 	beforeEach(waitForAsync(() => {
@@ -121,7 +120,7 @@ describe('ProfilePage', () => {
 		// Arrange
 		const propertySpy = getPropertySpy(
 			preregistrationService,
-			'registrationComplete$'
+			'registrationComplete$',
 		);
 
 		// Act
@@ -145,7 +144,7 @@ describe('ProfilePage', () => {
 		// Arrange
 		const methodSpy = getFunctionSpy(
 			viewService,
-			'updatePublicProfile'
+			'updatePublicProfile',
 		).and.resolveTo();
 
 		// Act
@@ -159,7 +158,7 @@ describe('ProfilePage', () => {
 		// Arrange
 		const methodSpy = getFunctionSpy(
 			viewService,
-			'changeEmailAddress'
+			'changeEmailAddress',
 		).and.resolveTo();
 
 		// Act
@@ -173,7 +172,7 @@ describe('ProfilePage', () => {
 		// Arrange
 		const methodSpy = getFunctionSpy(
 			viewService,
-			'changePassword'
+			'changePassword',
 		).and.resolveTo();
 
 		// Act

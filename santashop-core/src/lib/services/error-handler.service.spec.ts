@@ -17,14 +17,14 @@ describe('ErrorHandlerService', () => {
 					provide: AnalyticsWrapper,
 					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
 						'AnalyticsWrapperSpy',
-						['logEvent']
+						['logEvent'],
 					),
 				},
 				{
 					provide: AlertController,
 					useValue: jasmine.createSpyObj<AlertController>(
 						'AlertControllerSpy',
-						['create']
+						['create'],
 					),
 				},
 			],
@@ -32,10 +32,10 @@ describe('ErrorHandlerService', () => {
 
 		service = TestBed.inject(ErrorHandlerService);
 		analyticsWrapper = TestBed.inject(
-			AnalyticsWrapper
+			AnalyticsWrapper,
 		) as jasmine.SpyObj<AnalyticsWrapper>;
 		alertControllerService = TestBed.inject(
-			AlertController
+			AlertController,
 		) as jasmine.SpyObj<AlertController>;
 	});
 

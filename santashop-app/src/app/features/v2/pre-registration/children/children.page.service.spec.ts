@@ -14,7 +14,6 @@ import {
 import { PreRegistrationService } from '../../../../core';
 import { ChildrenPageService } from './children.page.service';
 
-
 describe('ChildrenPageService', () => {
 	let service: ChildrenPageService;
 	let preregistrationService: Spied<PreRegistrationService>;
@@ -31,7 +30,7 @@ describe('ChildrenPageService', () => {
 		});
 
 		preregistrationService = TestBed.inject(
-			PreRegistrationService
+			PreRegistrationService,
 		) as jasmine.SpyObj<PreRegistrationService>;
 	});
 
@@ -44,7 +43,7 @@ describe('ChildrenPageService', () => {
 				mockChildren.valid.age35,
 				mockChildren.valid.age68,
 				mockChildren.valid.age911,
-			])
+			]),
 		);
 
 		service = TestBed.inject(ChildrenPageService);
@@ -103,13 +102,13 @@ describe('ChildrenPageService', () => {
 
 		const registrationSpy = getPropertySpy(
 			preregistrationService,
-			'userRegistration$'
+			'userRegistration$',
 		);
 		registrationSpy.and.returnValue(of(registrationMock));
 
 		const saveRegistrationSpy = getFunctionSpy(
 			preregistrationService,
-			'saveRegistration'
+			'saveRegistration',
 		);
 		saveRegistrationSpy.and.returnValue(of());
 

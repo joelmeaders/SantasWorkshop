@@ -44,10 +44,10 @@ export class AuthService {
 		this.currentUser$.pipe(
 			map(
 				(res: any) =>
-					(({
-                        emailAddress: res?.email,
-                        uid: res?.uid
-                    }) as UserEmailUid),
+					({
+						emailAddress: res?.email,
+						uid: res?.uid,
+					}) as UserEmailUid,
 			),
 			distinctUntilChanged(),
 			shareReplay(1),

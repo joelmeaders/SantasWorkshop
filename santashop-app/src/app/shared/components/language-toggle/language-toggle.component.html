@@ -1,9 +1,9 @@
 <ion-text color="xmasred" class="language">
-	<ion-label> Español </ion-label>
+	Español
 	<ion-toggle
 		[checked]="(currentLanguage$ | async) === 'en'"
 		mode="ios"
 		(ionChange)="toggleLanguage($event)"
 	></ion-toggle>
-	<ion-label> English </ion-label>
+	English
 </ion-text>

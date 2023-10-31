@@ -36,55 +36,51 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-label position="fixed">
-											{{ "SIGNUP.FIRST_NAME" | translate
-											}}
-										</ion-label>
 										<ion-input
-											#firstName
+											[label]="'SIGNUP.FIRST_NAME' | translate"
+											[errorText]="
+												form.controls.firstName | niceFormError |
+												translate"
+											labelPlacement="floating"
+											type="text"
+											autocomplete="given-name"
 											formControlName="firstName"
 											[debounce]="500"
-											autocomplete="given-name"
-											type="text"
 											[autofocus]="true"
 										></ion-input>
 									</ion-item>
-									<core-control-errors
-										[control]="form.controls.firstName"
-									></core-control-errors>
 
 									<ion-item>
-										<ion-label position="fixed">
-											{{ "SIGNUP.LAST_NAME" | translate }}
-										</ion-label>
 										<ion-input
+											[label]="'SIGNUP.LAST_NAME' | translate"
+											[errorText]="
+												form.controls.lastName |
+												niceFormError |
+												translate"
+											labelPlacement="floating"
+											type="text"
+											autocomplete="family-name"
 											formControlName="lastName"
 											[debounce]="500"
-											autocomplete="family-name"
-											type="text"
 										></ion-input>
 									</ion-item>
-									<core-control-errors
-										[control]="form.controls.lastName"
-									></core-control-errors>
 
 									<ion-item>
-										<ion-label position="fixed">
-											{{ "SIGNUP.ZIP_CODE" | translate }}
-										</ion-label>
 										<ion-input
+											[label]="'SIGNUP.ZIP_CODE' | translate"
+											[errorText]="
+												form.controls.zipCode |
+												niceFormError |
+												translate"
+											labelPlacement="floating"
+											type="number"
+											autocomplete="postal-code"
 											formControlName="zipCode"
 											[debounce]="500"
-											type="text"
-											autocomplete="postal-code"
-											type="numeric"
 											maxlength="5"
 											minlength="5"
 										></ion-input>
 									</ion-item>
-									<core-control-errors
-										[control]="form.controls.zipCode"
-									></core-control-errors>
 								</ion-item-group>
 
 								<ion-item-group class="es-pd-bottom-xl">
@@ -98,50 +94,41 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-label position="fixed">
-											{{ "COMMON.EMAIL_ADDRESS" |
-											translate }}
-										</ion-label>
 										<ion-input
+											[label]="'COMMON.EMAIL_ADDRESS' | translate"
+											[errorText]="form.controls.emailAddress | niceFormError | translate"
+											labelPlacement="floating"
+											type="email"
+											autocomplete="email"
 											formControlName="emailAddress"
 											[debounce]="500"
-											autocomplete="email"
-											type="email"
 										></ion-input>
 									</ion-item>
-									<core-control-errors
-										[control]="form.controls.emailAddress"
-									></core-control-errors>
 
 									<ion-item>
-										<ion-label slot="start">
-											{{ "COMMON.PASSWORD" | translate }}
-										</ion-label>
 										<ion-input
+											[label]="'COMMON.PASSWORD' | translate"
+											[errorText]="form.controls.password | niceFormError | translate"
+											labelPlacement="floating"
+											type="password"
+											autocomplete="new-password"
 											formControlName="password"
 											[debounce]="500"
-											type="password"
-											autocomplete="new-password"
 										></ion-input>
 									</ion-item>
-									<core-control-errors
-										[control]="form.controls.password"
-									></core-control-errors>
 
 									<ion-item>
-										<ion-label slot="start">
-											{{ "SIGNUP.PASSWORD2" | translate }}
-										</ion-label>
 										<ion-input
-											formControlName="password2"
-											[debounce]="500"
+											[label]="'SIGNUP.PASSWORD2' | translate"
+											[errorText]="form.controls.password2 | niceFormError | translate"
+											labelPlacement="floating"
 											type="password"
 											autocomplete="new-password"
+											formControlName="password2"
+											[debounce]="500"
 										></ion-input>
 									</ion-item>
-									<core-control-errors
-										[control]="form.controls.password2"
-									></core-control-errors>
+
 									<ng-container
 										*ngIf="form.errors?.passwordMismatch"
 									>
@@ -192,9 +179,13 @@
 											"SIGNUP.LEGAL3" | translate }} {{
 											"SIGNUP.LEGAL4" | translate }}
 										</ion-text>
-										<core-control-errors
-											[control]="form.controls.legal"
-										></core-control-errors>
+										<ion-text
+											color="danger"
+											*ngIf="!form.controls.legal.value"
+										>
+											({{ form.controls.legal |
+											niceFormError | translate }})
+										</ion-text>
 									</div>
 
 									<div class="ion-padding-horizontal">

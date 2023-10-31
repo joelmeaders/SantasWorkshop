@@ -1,5 +1,3 @@
-export * from './lib/components/control-errors/control-errors.component';
-export * from './lib/components';
 export * from './lib/decorators';
 export * from './lib/directives';
 export * from './lib/errors';

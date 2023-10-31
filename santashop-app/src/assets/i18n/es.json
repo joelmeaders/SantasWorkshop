@@ -273,7 +273,8 @@
 	"REFERRAL": {
 		"REFERRED_BY": "¿Cómo se enteró de nosotros?",
 		"SEARCH_PLACEHOLDER": "Tipo para buscar",
-		"YOU_SELECTED": "Has seleccionado"
+		"YOU_SELECTED": "Has seleccionado",
+		"REFERRED_BY_PLACEHOLDER": "Escriba su respuesta aquí"
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "Este campo es obligatorio",

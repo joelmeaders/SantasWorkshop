@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { FunctionsWrapper } from '@santashop/core';
 import referringAgencies from '../../../../../../assets/referring-agencies.json';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { IError } from '@santashop/models';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
 	selector: 'app-referral-card',
@@ -32,12 +33,13 @@ export class ReferralCardComponent {
 	public readonly referrals$ = this.filteredReferrals$;
 
 	private readonly referralChoice = new BehaviorSubject<string | undefined>(
-		undefined,
+		undefined
 	);
 	public readonly referralChoice$ = this.referralChoice.asObservable();
 
-	@ViewChild('otherInput')
-	private readonly otherInput?: HTMLIonInputElement;
+	public readonly otherForm = new FormGroup({
+		other: new FormControl<string | undefined>(undefined, Validators.required)
+	});
 
 	constructor(
 		private readonly functions: FunctionsWrapper,
@@ -51,6 +53,8 @@ export class ReferralCardComponent {
 	}
 
 	public setChoice(choice?: string): void {
+		if (choice !== 'Other') this.otherForm.controls.other.setValue(choice);
+		
 		this.referralChoice.next(choice);
 		this.searchText.next(undefined);
 	}
@@ -60,8 +64,8 @@ export class ReferralCardComponent {
 		if (!value?.length) return;
 
 		if (value === 'Other') {
-			const otherValue = this.otherInput?.value as string;
-			if (otherValue.length > 3) value = `Other:${otherValue}`;
+			const otherValue = this.otherForm.controls.other.value;
+			if (otherValue && otherValue.length > 3) value = `Other:${otherValue}`;
 		}
 
 		await this.presentLoading();

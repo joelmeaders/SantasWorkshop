@@ -273,7 +273,8 @@
 	"REFERRAL": {
 		"REFERRED_BY": "How did you hear about us?",
 		"SEARCH_PLACEHOLDER": "Type to search",
-		"YOU_SELECTED": "You selected"
+		"YOU_SELECTED": "You selected",
+		"REFERRED_BY_PLACEHOLDER": "Type your answer here"
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "This field is required",

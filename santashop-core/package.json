@@ -5,7 +5,8 @@
 	"scripts": {
 		"lint": "ng lint santashop-core --fix --cache",
 		"test": "ng test santashop-core",
-		"build": "ng build santashop-core"
+		"build": "ng build santashop-core",
+		"build:prod": "ng build santashop-core --configuration=production"
 	},
 	"peerDependencies": {
 		"@santashop/models": "*"

@@ -8,7 +8,7 @@
 		"test": "ng test santashop-app",
 		"start:test": "firebase use santas-workshop-test && ng serve santashop-app --port=4100",
 		"config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.client.ts",
-		"prebuild": "npm run build -w @santashop/models && npm run build -w @santashop/core",
+		"prebuild": "npm run build -w @santashop/models && npm run build:prod -w @santashop/core",
 		"build:test": "npm run prebuild && ng build santashop-app --configuration=test",
 		"build:prod": "npm run prebuild && ng build santashop-app --configuration=production",
 		"analyze": "ng build santashop-app --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-app/stats.json",

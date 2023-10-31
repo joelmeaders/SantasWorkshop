@@ -13,9 +13,7 @@
 		"build:prod": "npm run prebuild && ng build santashop-app --configuration=production",
 		"analyze": "ng build santashop-app --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-app/stats.json",
 		"deploy:test": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=test && firebase deploy",
-		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=test && firebase deploy --only hosting",
-		"ci:config": "ts-node -O '{\"module\": \"commonjs\"}' ../config.app.ts",
-		"ci:build": "npm run build:prod -w @santashop/app"
+		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=test && firebase deploy --only hosting"
 	},
 	"author": "",
 	"license": "ISC",

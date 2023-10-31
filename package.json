@@ -17,7 +17,11 @@
 		"emulators:start": "firebase use santas-workshop-test && firebase emulators:start --import .firebase --export-on-exit",
 		"emulators:start:noexport": "firebase use santas-workshop-test && firebase emulators:start --import .firebase",
 		"fsrules:deploy": "firebase deploy --only firestore:rules",
-		"prettier:format": "npx prettier --end-of-line auto --write ."
+		"prettier:format": "npx prettier --end-of-line auto --write .",
+		"ci:admin:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
+		"ci:admin:build": "npm run build -w @santashop/models && npm run build:prod -w @santashop/core && ng build santashop-admin --configuration=production",
+		"ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' config.app.ts",
+		"ci:app:build": "npm run build -w @santashop/models && npm run build:prod -w @santashop/core && ng build santashop-app --configuration=production"
 	},
 	"dependencies": {
 		"@angular/animations": "^16.2.10",

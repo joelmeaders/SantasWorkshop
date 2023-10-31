@@ -1,7 +1,7 @@
-import { writeFile } from 'node:fs';
+import { writeFile } from 'fs';
 import { version } from './package.json';
 
-const targetPath = '../santashop-app/src/environments/environment.prod.ts';
+const targetPath = 'src/environments/environment.prod.ts';
 
 const envConfigFile = `export const environment = {
     production: true,

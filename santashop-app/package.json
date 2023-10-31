@@ -15,7 +15,7 @@
 		"deploy:test": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=test && firebase deploy",
 		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-app && ng build santashop-app --configuration=test && firebase deploy --only hosting",
 		"ci:config": "ts-node -O '{\"module\": \"commonjs\"}' ../config.app.ts",
-		"ci:build": "npm run models:build && npm run core:build && ng build santashop-app --configuration=production"
+		"ci:build": "npm run build -w @santashop/models && npm run build -w @santashop/core && ng build santashop-app --configuration=production"
 	},
 	"author": "",
 	"license": "ISC",

@@ -15,7 +15,7 @@
 		"analyze": "ng build santashop-admin --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
 		"deploy:test": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy",
 		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy --only hosting",
-		"ci:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
+		"ci:config": "ts-node -O '{\"module\": \"commonjs\"}' ../config.admin.ts",
 		"ci:build": "npm run models:build && npm run core:build && ng build santashop-admin --configuration=production"
 	},
 	"author": "",

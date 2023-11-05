@@ -1,12 +1,19 @@
 # don't ever lint node_modules
+
 node_modules
+
 # don't lint build output (make sure it's set to your correct build folder name)
+
 dist
+
 # don't lint nyc coverage output
+
 coverage
 
-**/*.js
-**/*.json
+**/\*.js
+**/_.json
 .eslintrc.js
 tsconfig.json
-dist/**
+dist/\*\*
+\*\*/_.min.html
+.eslintignore

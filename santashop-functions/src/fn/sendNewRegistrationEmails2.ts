@@ -22,15 +22,11 @@ const createReminderEmailCommand = (
 	toEmailAddress: string,
 ) => {
 	return new SendTemplatedEmailCommand({
-		/**
-		 * Here's an example of how a template would be replaced with user data:
-		 * Template: <h1>Hello {{contact.firstName}},</h1><p>Don't forget about the party gifts!</p>
-		 * Destination: <h1>Hello Bilbo,</h1><p>Don't forget about the party gifts!</p>
-		 */
 		Destination: { ToAddresses: [toEmailAddress] },
 		TemplateData: JSON.stringify(messageDetails),
 		Source: 'noreply@denversantaclausshop.org',
 		Template: 'dscs-registration-confirmation-v1',
+		ReturnPath: 'admin@denversantaclausshop.org'
 	});
 };
 
@@ -44,11 +40,13 @@ export default async (docChange: functions.firestore.QueryDocumentSnapshot) => {
 	const dateTime = document.formattedDateTime;
 
 	const messageDetails = {
-		NAME: firstName,
-		QRCODE_URL: qrCode,
-		CODE: code,
-		DATETIME: dateTime,
+		firstName: firstName,
+		qrCodeUrl: qrCode,
+		code: code,
+		dateTime: dateTime,
 	};
+
+	console.log(email, messageDetails);
 
 	if (!sesClient)
 		sesClient = new SESClient({ credentials, region } as SESClientConfig);
@@ -75,6 +73,7 @@ export default async (docChange: functions.firestore.QueryDocumentSnapshot) => {
 	if ((response?.$metadata.httpStatusCode ?? 999) <= 300) {
 		await emailDocRef.delete();
 	} else {
+		console.log(response)
 		const failure = {
 			...response,
 		};

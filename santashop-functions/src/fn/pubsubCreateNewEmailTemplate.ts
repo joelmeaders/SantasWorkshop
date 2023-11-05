@@ -14,21 +14,22 @@ let sesClient: SESClient | undefined = undefined;
 
 const loadTemplate = async (): Promise<string> => {
 	return await fileSystem.readFile(
-		'src/utility/assets/registration-confirmation.html',
-		'utf8',
+		'src/utility/assets/registration-confirmation-2023.html',
+		{ encoding: 'utf-8' }
 	);
 };
 
 const createCreateTemplateCommand =
 	async (): Promise<CreateTemplateCommand> => {
 		const template = await loadTemplate();
+		const cleanedUpTemplate = template.replace(/(\r\n|\n|\r|\t)/gm, '');
 
 		return new CreateTemplateCommand({
 			Template: {
 				TemplateName: 'dscs-registration-confirmation-v1',
-				HtmlPart: template,
+				HtmlPart: cleanedUpTemplate,
 				SubjectPart:
-					'Thank you for registering for the 2023 Denver Santa Claus Shop event!',
+					'Here\'s your ticket for the 2023 Denver Santa Claus Shop!',
 			},
 		});
 	};

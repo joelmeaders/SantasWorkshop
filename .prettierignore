@@ -6,5 +6,6 @@
 coverage
 dist
 node_modules
+**/assets/**
 **/*.min.html
 .eslintignore

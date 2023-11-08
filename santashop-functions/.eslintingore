@@ -17,3 +17,4 @@ tsconfig.json
 dist/\*\*
 \*\*/_.min.html
 .eslintignore
+**/assets/**

@@ -103,28 +103,36 @@ export const sendNewRegistrationEmails = functions
  * Backs up firestore db every night to storage bucket
  * At 00:00 in November and December
  */
-export const scheduledFirestoreBackup = functions.pubsub
+export const scheduledFirestoreBackup = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1, failurePolicy: false  })
+	.pubsub
 	.schedule('0 0 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
 
 // At every 15th minute in November and December.
-export const scheduledDateTimeSlotCounters = functions.pubsub
+export const scheduledDateTimeSlotCounters = functions
+	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.pubsub
 	.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
 	});
 
 // At minute 0 past every 6th hour in November and December.
-export const scheduledDateTimeSlotReschedules = functions.pubsub
+export const scheduledDateTimeSlotReschedules = functions
+	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.pubsub
 	.schedule('0 */6 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
 
 // “At 23:59.” (11:59 PM) every day.
-export const scheduledRegistrationStats = functions.pubsub
+export const scheduledRegistrationStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1, failurePolicy: false  })
+	.pubsub
 	.schedule('59 23 * * *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
@@ -132,7 +140,9 @@ export const scheduledRegistrationStats = functions.pubsub
 	});
 
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
-export const scheduledCheckInStats = functions.pubsub
+export const scheduledCheckInStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.pubsub
 	.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
 	.timeZone('America/Denver')
 	.onRun(async () => {

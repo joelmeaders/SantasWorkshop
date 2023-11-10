@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
-import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
+import { initializeAppCheck, provideAppCheck, ReCaptchaEnterpriseProvider } from '@angular/fire/app-check';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import {
 	provideFirestore,
@@ -35,7 +35,7 @@ if (!environment.production) {
 		AppRoutingModule,
 		provideFirebaseApp(() => initializeApp(firebaseConfig)),
 		provideAppCheck(() => initializeAppCheck(getApp(), {
-        	provider: new ReCaptchaV3Provider(environment.appCheckKey),
+        	provider: new ReCaptchaEnterpriseProvider(environment.appCheckKey),
 			isTokenAutoRefreshEnabled: true
       	})),
 		provideAuth(() => {

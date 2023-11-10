@@ -24,7 +24,7 @@ import {
 } from 'ng-recaptcha';
 
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
+import { initializeAppCheck, provideAppCheck, ReCaptchaEnterpriseProvider } from '@angular/fire/app-check';
 import {
 	provideAuth,
 	connectAuthEmulator,
@@ -82,7 +82,7 @@ if (!environment.production) {
 		}),
 		provideFirebaseApp(() => initializeApp(firebaseConfig)),
 		provideAppCheck(() => initializeAppCheck(getApp(), {
-        	provider: new ReCaptchaV3Provider(environment.appCheckKey),
+        	provider: new ReCaptchaEnterpriseProvider(environment.appCheckKey),
 			isTokenAutoRefreshEnabled: true
       	})),
 		provideAuth(() => {

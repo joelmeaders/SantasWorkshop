@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions';
 
-export const changeAccountInformation = functions.https.onCall(
+export const changeAccountInformation = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/changeAccountInformation')).default(
 			request,
@@ -9,7 +11,9 @@ export const changeAccountInformation = functions.https.onCall(
 	},
 );
 
-export const updateReferredBy = functions.https.onCall(
+export const updateReferredBy = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/updateReferredBy')).default(
 			request,
@@ -26,7 +30,9 @@ export const updateReferredBy = functions.https.onCall(
  * @remarks
  * registration-email, RegistrationSearchIndex
  */
-export const completeRegistration = functions.https.onCall(
+export const completeRegistration = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/completeRegistration')).default(
 			request,
@@ -35,11 +41,15 @@ export const completeRegistration = functions.https.onCall(
 	},
 );
 
-export const newAccount = functions.https.onCall(async (request) => {
+export const newAccount = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request) => {
 	return (await import('./fn/newAccount')).default(request);
 });
 
-export const undoRegistration = functions.https.onCall(
+export const undoRegistration = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/undoRegistration')).default(
 			request,
@@ -48,7 +58,9 @@ export const undoRegistration = functions.https.onCall(
 	},
 );
 
-export const updateEmailAddress = functions.https.onCall(
+export const updateEmailAddress = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/updateEmailAddress')).default(
 			request,
@@ -57,17 +69,23 @@ export const updateEmailAddress = functions.https.onCall(
 	},
 );
 
-export const checkIn = functions.https.onCall(async (request, context) => {
+export const checkIn = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request, context) => {
 	return (await import('./fn/checkIn')).default(request, context);
 });
 
-export const checkInWithEdit = functions.https.onCall(
+export const checkInWithEdit = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/checkInWithEdit')).default(request, context);
 	},
 );
 
-export const onSiteRegistration = functions.https.onCall(
+export const onSiteRegistration = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/onSiteRegistration')).default(
 			request,
@@ -82,7 +100,9 @@ export const onSiteRegistration = functions.https.onCall(
  * @remarks
  * Callable functions need to specify return instead of await
  */
-export const verifyRecaptcha2 = functions.https.onCall(async (request) => {
+export const verifyRecaptcha2 = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request) => {
 	return (await import('./fn/verifyRecaptcha2')).default(request);
 });
 

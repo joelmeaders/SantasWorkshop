@@ -23,7 +23,8 @@ import {
 	RECAPTCHA_SETTINGS,
 } from 'ng-recaptcha';
 
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
 import {
 	provideAuth,
 	connectAuthEmulator,
@@ -57,6 +58,10 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 	resolvePersistenceEnabled = resolve;
 });
 
+if (!environment.production) {
+	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 // TODO: THis is a huge fucking mess. Make these into functions and use here instead
 @NgModule({
 	declarations: [AppComponent],
@@ -76,6 +81,10 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 			animated: true,
 		}),
 		provideFirebaseApp(() => initializeApp(firebaseConfig)),
+		provideAppCheck(() => initializeAppCheck(getApp(), {
+        	provider: new ReCaptchaV3Provider(environment.appCheckKey),
+			isTokenAutoRefreshEnabled: true
+      	})),
 		provideAuth(() => {
 			const auth = getAuth();
 			if (!environment.production) {

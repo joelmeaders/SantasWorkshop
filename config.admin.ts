@@ -7,7 +7,8 @@ const envConfigFile = `export const environment = {
     production: true,
     label: 'PROD',
     name: 'SWAdmin',
-    version: '${version}'
+    version: '${version}',
+    appCheckKey: '6Lc4vgkpAAAAACOIJc4lTNn4wLzvuJkoz17t_RXH'
   };
 
   export const firebaseConfig = {

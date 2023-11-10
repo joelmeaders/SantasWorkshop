@@ -5,7 +5,7 @@
 				<ion-card
 					class="sign-up-card ion-text-center ion-padding-bottom remove-shadow no-shadow"
 				>
-					<ion-card-header>
+					<ion-card-header class="ion-align-items-center">
 						<ion-button
 							class="remove-shadow go-back"
 							color="light"
@@ -28,38 +28,31 @@
 							{{ "COMMON.SIGN_IN" | translate }}
 						</ion-card-title>
 					</ion-card-header>
+
 					<ion-card-content>
 						<form [formGroup]="form" novalidate>
-							<ion-list>
+							<ion-list lines="none">
 								<ion-item>
-									<ion-label class="ion-text-nowrap">
-										{{ "COMMON.EMAIL_ADDRESS" | translate }}
-									</ion-label>
 									<ion-input
-										[autofocus]="true"
-										formControlName="emailAddress"
-										[debounce]="500"
+										[label]="'COMMON.EMAIL_ADDRESS' | translate"
+										[errorText]="'COMMON.VALID_EMAIL' | translate"
+										labelPlacement="floating"
 										type="email"
 										autocomplete="true"
-									></ion-input>
-									<ion-note slot="error">
-										{{ 'COMMON.VALID_EMAIL' | translate }}
-									</ion-note>
+										formControlName="emailAddress"
+										[debounce]="500"
+									/>
 								</ion-item>
-
 								<ion-item>
-									<ion-label>
-										{{ "COMMON.PASSWORD" | translate }}
-									</ion-label>
 									<ion-input
+										[label]="'COMMON.PASSWORD' | translate"
+										[errorText]="'COMMON.VALID_PASSWORD' | translate"
+										labelPlacement="floating"
 										formControlName="password"
 										[debounce]="500"
 										type="password"
-									></ion-input>
+									/>
 								</ion-item>
-								<core-control-errors
-									[control]="form.controls.password"
-								></core-control-errors>
 							</ion-list>
 						</form>
 

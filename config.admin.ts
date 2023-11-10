@@ -7,7 +7,8 @@ const envConfigFile = `export const environment = {
     production: true,
     label: 'PROD',
     name: 'SWAdmin',
-    version: '${version}'
+    version: '${version}',
+    appCheckKey: '6Lc4vgkpAAAAACOIJc4lTNn4wLzvuJkoz17t_RXH'
   };
 
   export const firebaseConfig = {
@@ -27,7 +28,7 @@ writeFile(targetPath, envConfigFile, 'utf8', function (err) {
 		throw console.error(err);
 	} else {
 		console.log(
-			`Angular environment.ts file generated correctly at ${targetPath} \n`
+			`Angular environment.ts file generated correctly at ${targetPath} \n`,
 		);
 	}
 });

@@ -14,7 +14,7 @@ export default async () => {
 	const statsDoc = await admin
 		.firestore()
 		.collection('stats')
-		.doc('checkin-2022')
+		.doc('checkin-2023')
 		.get();
 
 	if (statsDoc.exists) {
@@ -53,7 +53,7 @@ export default async () => {
 	await admin
 		.firestore()
 		.collection('stats')
-		.doc('checkin-2022')
+		.doc('checkin-2023')
 		.set(stats, { merge: false });
 
 	stats = {} as ICheckInAggregatedStats;
@@ -69,7 +69,7 @@ function updateStats(checkIn: ICheckIn): void {
 	const checkInHour = new Date(localDate).getHours();
 
 	const index = stats.dateTimeCount.findIndex(
-		(e) => e.date === checkInDate && e.hour === checkInHour
+		(e) => e.date === checkInDate && e.hour === checkInHour,
 	);
 
 	if (index > -1) {

@@ -20,7 +20,7 @@ const routes: Routes = [
 		title: 'DSCS: Search By Email',
 		loadChildren: () =>
 			import('./by-email/by-email.module').then(
-				(m) => m.ByEmailPageModule
+				(m) => m.ByEmailPageModule,
 			),
 	},
 	{

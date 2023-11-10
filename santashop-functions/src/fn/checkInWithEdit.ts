@@ -6,7 +6,7 @@ import {
 	CheckIn,
 	COLLECTION_SCHEMA,
 	Registration,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 import {
 	calculateRegistrationStats,
 	isPartialRegistrationComplete,
@@ -16,27 +16,27 @@ admin.initializeApp();
 
 export default (
 	record: Partial<Registration>,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<number> => {
 	if (!context.auth?.token?.admin) {
 		console.error(
-			`${context.auth?.uid} attempted to check in for uid ${record.uid}`
+			`${context.auth?.uid} attempted to check in for uid ${record.uid}`,
 		);
 		throw new functions.https.HttpsError(
 			'permission-denied',
 			'-99',
-			'You can only update your own records'
+			'You can only update your own records',
 		);
 	}
 
 	if (!isPartialRegistrationComplete(record)) {
 		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`
+			`Registration incomplete. Unable to check in for uid ${record.uid}`,
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
 			'-11',
-			'Incomplete registration. Cannot continue.'
+			'Incomplete registration. Cannot continue.',
 		);
 	}
 
@@ -52,7 +52,7 @@ export default (
 		children: record.children,
 		registrationSubmittedOn: new Date(),
 		includedInRegistrationStats: false,
-		programYear: 2022,
+		programYear: 2023,
 	} as Partial<Registration>;
 
 	batch.create(registrationDocRef, partialRegistration);
@@ -79,7 +79,7 @@ export default (
 			throw new functions.https.HttpsError(
 				error.code === 6 ? 'already-exists' : 'internal',
 				error.message,
-				error
+				error,
 			);
 		});
 };

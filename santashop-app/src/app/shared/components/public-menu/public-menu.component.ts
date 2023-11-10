@@ -5,7 +5,7 @@ import { PopoverController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { AuthService } from '@core/*';
+import { AuthService } from '@santashop/core';
 
 @Component({
 	selector: 'app-public-menu',
@@ -18,7 +18,7 @@ export class PublicMenuComponent implements OnDestroy {
 
 	public readonly isLoggedIn$ = this.authService.currentUser$.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	constructor(
@@ -26,7 +26,7 @@ export class PublicMenuComponent implements OnDestroy {
 		private readonly router: Router,
 		private readonly popoverController: PopoverController,
 		private readonly translateService: TranslateService,
-		private readonly analyticsService: Analytics
+		private readonly analyticsService: Analytics,
 	) {}
 
 	public ngOnDestroy(): void {

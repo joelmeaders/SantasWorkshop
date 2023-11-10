@@ -1,7 +1,7 @@
 {
   "projects": {
-    "default": "santas-workshop-193b5",
-    "qa": "santas-workshop-test"
+    "prod": "santas-workshop-193b5",
+    "test": "santas-workshop-test"
   },
   "targets": {
     "santas-workshop-193b5": {

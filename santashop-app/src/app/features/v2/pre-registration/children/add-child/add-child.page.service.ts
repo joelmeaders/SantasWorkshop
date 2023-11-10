@@ -1,17 +1,21 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
-import { PROGRAM_YEAR, yyyymmddToLocalDate, getAgeFromDate } from '@core/*';
+import {
+	PROGRAM_YEAR,
+	yyyymmddToLocalDate,
+	getAgeFromDate,
+} from '@santashop/core';
 import { AlertController } from '@ionic/angular';
 import {
 	Child,
 	ChildValidationError,
 	ToyType,
 	AgeGroup,
-} from '../../../../../../../../santashop-models/src/public-api';
+} from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
-import { takeUntil, shareReplay, take } from 'rxjs/operators';
+import { takeUntil, shareReplay } from 'rxjs/operators';
 import {
 	ChildValidationService,
 	MAX_BIRTHDATE,
@@ -27,19 +31,19 @@ export class AddChildPageService implements OnDestroy {
 	private readonly isInfant = new BehaviorSubject<boolean>(false);
 	public readonly isInfant$ = this.isInfant.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	private readonly isEdit = new BehaviorSubject<boolean>(false);
 	public readonly isEdit$ = this.isEdit.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly children$: Observable<Child[] | undefined> =
 		this.preRegistrationService.children$.pipe(
 			takeUntil(this.destroy$),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	constructor(
@@ -49,7 +53,7 @@ export class AddChildPageService implements OnDestroy {
 		private readonly translateService: TranslateService,
 		private readonly childValidationService: ChildValidationService,
 		private readonly router: Router,
-		private readonly analytics: Analytics
+		private readonly analytics: Analytics,
 	) {}
 
 	public ngOnDestroy(): void {
@@ -64,7 +68,7 @@ export class AddChildPageService implements OnDestroy {
 		// Searching by number doesn't work. Converting to string
 		// seems to work for some reason
 		const child = children.filter(
-			(c) => !!c.id && c.id.toString() === id.toString()
+			(c) => !!c.id && c.id.toString() === id.toString(),
 		)[0];
 		if (!child) return;
 
@@ -91,7 +95,7 @@ export class AddChildPageService implements OnDestroy {
 	public async editChild(): Promise<void> {
 		const updatedChild = this.form.value as Child;
 		updatedChild.dateOfBirth = yyyymmddToLocalDate(
-			updatedChild.dateOfBirth as any
+			updatedChild.dateOfBirth as any,
 		);
 
 		const children = await firstValueFrom(this.children$);
@@ -101,7 +105,7 @@ export class AddChildPageService implements OnDestroy {
 				this.childValidationService.validateChild(updatedChild);
 			delete validatedChild.error;
 			const updatedChildren = children?.filter(
-				(child) => child.id !== validatedChild.id
+				(child) => child.id !== validatedChild.id,
 			);
 			updatedChildren?.push(validatedChild);
 			logEvent(this.analytics, 'edit_child', {
@@ -120,7 +124,7 @@ export class AddChildPageService implements OnDestroy {
 				});
 			} else if (error.code === 'invalid_firstname') {
 				message = this.translateService.instant(
-					'ADD_CHILDREN.INVALID_FIRSTNAME'
+					'ADD_CHILDREN.INVALID_FIRSTNAME',
 				);
 				logEvent(this.analytics, 'edit_child_error', {
 					id: updatedChild,
@@ -128,7 +132,7 @@ export class AddChildPageService implements OnDestroy {
 				});
 			} else if (error.code === 'invalid_lastname') {
 				message = this.translateService.instant(
-					'ADD_CHILDREN.INVALID_LASTNAME'
+					'ADD_CHILDREN.INVALID_LASTNAME',
 				);
 				logEvent(this.analytics, 'edit_child_error', {
 					id: updatedChild,
@@ -201,7 +205,7 @@ export class AddChildPageService implements OnDestroy {
 		const child = this.form.value as Child;
 		child.dateOfBirth = yyyymmddToLocalDate(child.dateOfBirth as any);
 
-		const children = await this.children$.pipe(take(1)).toPromise();
+		const children = await firstValueFrom(this.children$);
 
 		try {
 			const validatedChild =
@@ -221,7 +225,7 @@ export class AddChildPageService implements OnDestroy {
 				});
 			} else if (error.code === 'invalid_firstname') {
 				message = this.translateService.instant(
-					'ADDCHILD.INVALID_FIRSTNAME'
+					'ADDCHILD.INVALID_FIRSTNAME',
 				);
 				logEvent(this.analytics, 'add_child_error', {
 					id: child,
@@ -229,7 +233,7 @@ export class AddChildPageService implements OnDestroy {
 				});
 			} else if (error.code === 'invalid_lastname') {
 				message = this.translateService.instant(
-					'ADDCHILD.INVALID_LASTNAME'
+					'ADDCHILD.INVALID_LASTNAME',
 				);
 				logEvent(this.analytics, 'add_child_error', {
 					id: child,
@@ -243,10 +247,10 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public async removeChild(childToRemove: Child): Promise<void> {
-		const children = await this.children$.pipe(take(1)).toPromise();
+		const children = await firstValueFrom(this.children$);
 
 		const updatedChildren = children?.filter(
-			(child) => child.id !== childToRemove.id
+			(child) => child.id !== childToRemove.id,
 		);
 
 		logEvent(this.analytics, 'remove_child', {
@@ -257,14 +261,14 @@ export class AddChildPageService implements OnDestroy {
 
 	private async updateRegistration(children?: Child[]): Promise<void> {
 		const registration = await firstValueFrom(
-			this.preRegistrationService.userRegistration$
+			this.preRegistrationService.userRegistration$,
 		);
 
 		registration.children = children;
 
 		// TODO: Error handling
 		const storeRegistration = firstValueFrom(
-			this.preRegistrationService.saveRegistration(registration)
+			this.preRegistrationService.saveRegistration(registration),
 		);
 
 		try {

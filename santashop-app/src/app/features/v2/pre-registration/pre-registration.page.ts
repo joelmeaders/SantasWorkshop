@@ -14,33 +14,33 @@ export class PreRegistrationPage implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly referredBy$ = this.profileService.referredBy$.pipe(
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly userRegistration$ = this.viewService.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly childCount$ = this.viewService.childCount$.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly chosenSlot$ = this.viewService.dateTimeSlot$.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly isRegistrationComplete$ =
 		this.viewService.registrationComplete$.pipe(
 			takeUntil(this.destroy$),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	constructor(
 		private readonly viewService: PreRegistrationService,
-		private readonly profileService: ProfileService
+		private readonly profileService: ProfileService,
 	) {}
 
 	public ngOnDestroy(): void {

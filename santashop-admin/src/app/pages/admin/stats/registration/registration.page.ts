@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection } from '@core/*';
-import { COLLECTION_SCHEMA, RegistrationStats } from '@models/*';
+import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
+import { COLLECTION_SCHEMA, RegistrationStats } from '@santashop/models';
 import { combineLatest, map, Observable, shareReplay } from 'rxjs';
 import { Timestamp } from '@firebase/firestore';
 
@@ -21,20 +21,20 @@ export class RegistrationPage {
 
 	private readonly registrationStats$ =
 		this.statsCollection<RegistrationStats>()
-			.read('registration-2022')
+			.read('registration-2023')
 			.pipe(shareReplay(1));
 
 	public readonly registrationCount$ = this.registrationStats$.pipe(
-		map((stats) => stats.completedRegistrations)
+		map((stats) => stats.completedRegistrations),
 	);
 
 	private readonly dateTimeStats$ = this.registrationStats$.pipe(
-		map((allData) => allData.dateTimeCount)
+		map((allData) => allData.dateTimeCount),
 	);
 
 	public readonly childCount$ = this.registrationStats$.pipe(
 		map((stats) => stats.dateTimeCount.map((e) => e.childCount)),
-		map((counts) => counts.reduce((a, b) => a + b, 0))
+		map((counts) => counts.reduce((a, b) => a + b, 0)),
 	);
 
 	public readonly childrenPerCustomer$ = combineLatest([
@@ -43,22 +43,22 @@ export class RegistrationPage {
 	]).pipe(map((data) => data[1] / data[0]));
 
 	private readonly stats$ = this.dateTimeStats$.pipe(
-		map((dateTimes) => dateTimes.map((e) => e.stats))
+		map((dateTimes) => dateTimes.map((e) => e.stats)),
 	);
 
 	public readonly boyCount$ = this.stats$.pipe(
 		map((stats) => stats.map((e) => e.boys)),
-		map((boys) => boys.reduce((a, b) => a + b.total, 0))
+		map((boys) => boys.reduce((a, b) => a + b.total, 0)),
 	);
 
 	public readonly girlCount$ = this.stats$.pipe(
 		map((stats) => stats.map((e) => e.girls)),
-		map((girls) => girls.reduce((a, b) => a + b.total, 0))
+		map((girls) => girls.reduce((a, b) => a + b.total, 0)),
 	);
 
 	public readonly infantCount$ = this.stats$.pipe(
 		map((stats) => stats.map((e) => e.infants)),
-		map((infants) => infants.reduce((a, b) => a + b.total, 0))
+		map((infants) => infants.reduce((a, b) => a + b.total, 0)),
 	);
 
 	public readonly girlBoyInfantCounts$ = combineLatest([
@@ -72,23 +72,23 @@ export class RegistrationPage {
 			dateTimes.map((e) => ({
 				date: (e.dateTime as any as Timestamp).toDate(),
 				count: e.count,
-			}))
+			})),
 		),
 
-		map((data) => data.sort((a, b) => Number(a.date) - Number(b.date)))
+		map((data) => data.sort((a, b) => Number(a.date) - Number(b.date))),
 	);
 
 	public readonly familiesBySlotsChartData$ = this.familiesBySlots$.pipe(
-		map((data) => this.mapFamiliesByDateToChart2(data))
+		map((data) => this.mapFamiliesByDateToChart2(data)),
 	);
 
 	private readonly zipCodeStats$ = this.registrationStats$.pipe(
-		map((allData) => allData.zipCodeCount)
+		map((allData) => allData.zipCodeCount),
 	);
 
 	public readonly topFiveZipCodesCount$ = this.zipCodeStats$.pipe(
 		map((data) => data.sort((a, b) => b.count - a.count)),
-		map((data) => data.slice(0, 4))
+		map((data) => data.slice(0, 4)),
 	);
 
 	public readonly topTenZipCodesCountData$: Observable<
@@ -114,7 +114,7 @@ export class RegistrationPage {
 			});
 
 			return formatted;
-		})
+		}),
 	);
 
 	public readonly colorSettings = {
@@ -179,7 +179,7 @@ export class RegistrationPage {
 	constructor(private readonly httpService: FireRepoLite) {}
 
 	private mapFamiliesByDateToChart2(
-		data: { date: Date; count: number }[]
+		data: { date: Date; count: number }[],
 	): ChartData<'bar'>[] {
 		const arr: {
 			datasets: { data: number[]; label: string }[];

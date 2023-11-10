@@ -15,7 +15,7 @@ export class AppComponent {
 		private readonly platform: Platform,
 		private readonly translateService: TranslateService,
 		private readonly analyticsService: Analytics,
-		private readonly appStateService: AppStateService
+		private readonly appStateService: AppStateService,
 	) {
 		this.initializeApp();
 	}
@@ -31,7 +31,7 @@ export class AppComponent {
 
 		const browserLang = this.translateService.getBrowserLang() ?? 'en';
 		this.translateService.use(
-			browserLang.match(/en|es/) ? browserLang : 'en'
+			browserLang.match(/en|es/) ? browserLang : 'en',
 		);
 
 		logEvent(this.analyticsService, 'default_language', {

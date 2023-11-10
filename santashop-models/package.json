@@ -1,6 +1,10 @@
 {
-	"name": "santashop-models",
-	"version": "0.0.1",
+	"name": "@santashop/models",
+	"version": "1.0.0",
+	"scripts": {
+		"lint": "ng lint santashop-models --fix --cache",
+		"build": "ng build santashop-models"
+	},
 	"peerDependencies": {},
 	"dependencies": {
 		"tslib": "^2.4.0"

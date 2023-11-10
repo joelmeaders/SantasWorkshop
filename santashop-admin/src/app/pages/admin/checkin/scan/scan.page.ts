@@ -17,7 +17,7 @@ import { LookupService } from '../../../../shared/services/lookup.service';
 import { ScannerService } from './scanner.service';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { ZXingScannerComponent } from '@zxing/ngx-scanner';
-import { filterNil } from '@core/*';
+import { filterNil } from '@santashop/core';
 
 @Component({
 	selector: 'admin-scan',
@@ -38,13 +38,13 @@ export class ScanPage {
 		distinctUntilChanged(),
 		throttleTime(3000),
 		switchMap((code) => this.badCodeFilter(code)),
-		filterNil()
+		filterNil(),
 	);
 
 	private readonly setRegistration$ = (): Observable<any> =>
 		this.scanResultFilter$.pipe(
 			switchMap((code) =>
-				this.lookupService.getRegistrationByQrCode$(code)
+				this.lookupService.getRegistrationByQrCode$(code),
 			),
 			switchMap((registration) => {
 				if (registration) {
@@ -53,19 +53,19 @@ export class ScanPage {
 				} else {
 					return this.cannotFindRegistrationAlert();
 				}
-			})
+			}),
 		);
 
 	public readonly scanError = new Subject<Error>();
 	private readonly scanError$ = this.scanError.asObservable().pipe(
 		throttleTime(5000),
-		switchMap((error) => this.scannerService.onScanError(error))
+		switchMap((error) => this.scannerService.onScanError(error)),
 	);
 
 	private readonly invalidCode = new Subject<void>();
 	private readonly notifyInvalidCode$ = this.invalidCode.asObservable().pipe(
 		tap(() => this.disableScanner()),
-		switchMap(() => this.invalidCodeAlert())
+		switchMap(() => this.invalidCodeAlert()),
 	);
 
 	@ViewChild('scanner', { static: true })
@@ -87,11 +87,10 @@ export class ScanPage {
 		private readonly lookupService: LookupService,
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
-		private readonly router: Router
+		private readonly router: Router,
 	) {
 		timer(1000).subscribe(() => {
 			this.scanResult.next('GD96NRCM');
-			// this.scanResult.next('XE7UBKJC');
 			console.log('faked scan result');
 		});
 	}

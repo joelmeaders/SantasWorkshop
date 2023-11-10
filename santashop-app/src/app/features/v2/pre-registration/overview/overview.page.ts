@@ -24,7 +24,7 @@ export class OverviewPage implements OnDestroy {
 		this.preregistrationService.userRegistration$;
 
 	public readonly referredBy$ = this.profileService.referredBy$.pipe(
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly children$ = this.preregistrationService.children$;
@@ -40,7 +40,7 @@ export class OverviewPage implements OnDestroy {
 		filter((isTrue) => !!isTrue),
 		switchMap(() => this.preregistrationService.noErrorsInChildren$),
 		filter((errorFree) => !!errorFree),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly canSubmit$ = combineLatest([
@@ -49,12 +49,12 @@ export class OverviewPage implements OnDestroy {
 	]).pipe(
 		takeUntil(this.destroy$),
 		map(([childCount, dateTimeSlot]) => childCount >= 1 && !!dateTimeSlot),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	constructor(
 		private readonly preregistrationService: PreRegistrationService,
-		private readonly profileService: ProfileService
+		private readonly profileService: ProfileService,
 	) {}
 
 	public ngOnDestroy(): void {

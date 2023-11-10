@@ -13,7 +13,7 @@ import {
 	Registration,
 	Child,
 	COLLECTION_SCHEMA,
-} from '../../../../../santashop-models/src/public-api';
+} from '@santashop/models';
 import {
 	AuthService,
 	automock,
@@ -24,8 +24,8 @@ import {
 	HttpsCallableResult,
 	IFireRepoCollection,
 	pluckFilterNil,
-	Timestamp,
-} from '@core/*';
+	timestampDateFix,
+} from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
 
 @Injectable({
@@ -35,7 +35,7 @@ export class PreRegistrationService implements OnDestroy {
 	private readonly registrationCollection =
 		(): IFireRepoCollection<Registration> =>
 			this.fireRepo.collection<Registration>(
-				COLLECTION_SCHEMA.registrations
+				COLLECTION_SCHEMA.registrations,
 			);
 
 	private readonly destroy$ = new Subject<void>();
@@ -45,42 +45,42 @@ export class PreRegistrationService implements OnDestroy {
 		takeUntil(this.destroy$),
 		filterNil(),
 		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
 	public readonly registrationReadyToSubmit$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map(this.isRegistrationReadyToSubmit),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
 	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map(this.isRegistrationComplete),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
 	public readonly registrationSubmitted$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => !!registration.registrationSubmittedOn),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
 	public readonly children$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => this.getChildren(registration)),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
 	public readonly childCount$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => registration?.children?.length ?? 0),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
@@ -88,7 +88,7 @@ export class PreRegistrationService implements OnDestroy {
 		takeUntil(this.destroy$),
 		map((children) => children.filter((c) => !!c.error)),
 		map((errors) => errors.length === 0),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	@automock
@@ -96,7 +96,7 @@ export class PreRegistrationService implements OnDestroy {
 		this.userRegistration$.pipe(
 			takeUntil(this.destroy$),
 			map((registration) => this.getDateTimeSlot(registration)),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	@automock
@@ -104,14 +104,14 @@ export class PreRegistrationService implements OnDestroy {
 		takeUntil(this.destroy$),
 		pluckFilterNil('uid'),
 		mergeMap((uid) => this.qrCodeService.registrationQrCodeUrl(uid)),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	constructor(
 		private readonly fireRepo: FireRepoLite,
 		private readonly authService: AuthService,
 		private readonly qrCodeService: QrCodeService,
-		private readonly afFunctions: FunctionsWrapper
+		private readonly afFunctions: FunctionsWrapper,
 	) {}
 
 	public ngOnDestroy(): void {
@@ -121,13 +121,13 @@ export class PreRegistrationService implements OnDestroy {
 
 	// TODO: Convert to function
 	public saveRegistration(
-		registration: Registration
+		registration: Registration,
 	): Observable<DocumentReference<Registration>> {
 		return this.authService.uid$.pipe(take(1)).pipe(
 			take(1),
 			switchMap((uid) =>
-				this.registrationCollection().update(uid, registration, false)
-			)
+				this.registrationCollection().update(uid, registration, false),
+			),
 		);
 	}
 
@@ -151,22 +151,16 @@ export class PreRegistrationService implements OnDestroy {
 	}
 
 	private getDateTimeSlot(
-		registration: Registration
+		registration: Registration,
 	): DateTimeSlot | undefined {
 		const slot = registration?.dateTimeSlot as DateTimeSlot;
-
-		// Convert the timestamp to a date. Firebase (or angularfire) seems to be
-		// setting all dates to timestamps in the database now.
-		if (slot) slot.dateTime = (slot.dateTime as any as Timestamp)?.toDate();
-
+		if (slot) slot.dateTime = timestampDateFix(slot.dateTime);
 		return slot;
 	}
 
 	private getChildren(registration: Registration): Child[] {
 		registration.children?.forEach((child) => {
-			child.dateOfBirth = (
-				child.dateOfBirth as any as Timestamp
-			)?.toDate();
+			child.dateOfBirth = timestampDateFix(child.dateOfBirth);
 		});
 
 		return (registration.children as Child[]) ?? new Array<Child>();

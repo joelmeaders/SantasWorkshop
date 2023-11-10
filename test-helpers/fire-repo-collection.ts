@@ -4,4 +4,4 @@ export const repoCollectionStub = <T>(): IFireRepoCollection<T> =>
 	({
 		read: () => {},
 		readMany: () => {},
-	} as any);
+	}) as any;

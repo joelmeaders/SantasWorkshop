@@ -14,7 +14,7 @@ export class ChangeEmailPage {
 
 	public readonly email$ = this.viewService.userProfile$.pipe(
 		map((profile) => profile.emailAddress),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	constructor(private readonly viewService: ProfilePageService) {}

@@ -1,7 +1,7 @@
 import {
 	COLLECTION_SCHEMA,
 	UpdateReferredBy,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext } from 'firebase-functions/lib/common/providers/https';
@@ -11,7 +11,7 @@ admin.initializeApp();
 
 export default async (
 	data: UpdateReferredBy,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<any | HttpsError> => {
 	const uid = context.auth?.uid;
 	if (!uid) throw new HttpsError('not-found', 'uid null');
@@ -29,14 +29,14 @@ export default async (
 		.catch((error: any) => {
 			console.error(
 				`Error updating user document ${uid} with ${JSON.stringify(
-					data
+					data,
 				)}`,
-				error
+				error,
 			);
 			return new functions.https.HttpsError(
 				'internal',
 				'Error updating user document',
-				JSON.stringify(error)
+				JSON.stringify(error),
 			);
 		});
 };

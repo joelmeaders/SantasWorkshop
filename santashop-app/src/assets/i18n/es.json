@@ -9,14 +9,15 @@
 	"HOME": {
 		"WELCOME_MESSAGE": "¡Registro en<br/>Denver Santa Claus Shop!",
 		"CREATE_ACCOUNT": "Crear una cuenta",
-		"SIGN_IN_INST": "¿Tiene una cuenta 2022? Inicia sesión"
+		"SIGN_IN_INST": "¿Ya creaste una cuenta para 2023?"
 	},
 	"COMMON": {
 		"EMAIL_ADDRESS": "Correo electrónico",
+		"NEW_EMAIL_ADDRESS": "Nuevo correo electrónico",
 		"PASSWORD": "Contraseña",
 		"SIGN_IN": "Inicia sesión",
-		"EXISTING_ACCOUNT": "Cuenta Existente",
-		"CREATE_ACCOUNT": "Crear cuenta",
+		"EXISTING_ACCOUNT": "Iniciar sesión",
+		"CREATE_ACCOUNT": "Crear una cuenta",
 		"WELCOME": "Bienvenido",
 		"MY_ACCOUNT": "Mi cuenta",
 		"VIDEO_TUTORIAL": "Vídeo Tutorial",
@@ -41,14 +42,15 @@
 		"RESET": "Restablecimiento",
 		"SAVE_CHOICE": "Guardar elección",
 		"NEWSLETTER": "¿Le gustaría recibir nuestro boletín de noticias y ser notificado de futuros eventos?",
-		"VALID_EMAIL": "Must be a valid email address"
+		"VALID_EMAIL": "Debe ser una dirección de correo electrónico válida",
+		"VALID_PASSWORD": "Ingrese su contraseña"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "¿Olvidó su contraseña?",
 		"SIGNING_IN": "Iniciar sesión..."
 	},
 	"SIGNUP": {
-		"NEW_ACCOUNT_NOTICE": "Todos deben crear una nueva cuenta este año",
+		"NEW_ACCOUNT_NOTICE": "Todos los compradores deben crear una nueva cuenta para 2023, incluso si han comprado con nosotros en el pasado.",
 		"HAVE_ACCOUNT": "¿Ya tienes una cuenta?",
 		"TITLE1": "Configura tu cuenta",
 		"TITLE2": "Esto solo tomará un minuto",
@@ -271,6 +273,16 @@
 	"REFERRAL": {
 		"REFERRED_BY": "¿Cómo se enteró de nosotros?",
 		"SEARCH_PLACEHOLDER": "Tipo para buscar",
-		"YOU_SELECTED": "Has seleccionado"
+		"YOU_SELECTED": "Has seleccionado",
+		"REFERRED_BY_PLACEHOLDER": "Escriba su respuesta aquí"
+	},
+	"FORM_ERRORS": {
+		"REQUIRED": "Este campo es obligatorio",
+		"LONGITUDMINIMA": "La longitud mínima es ",
+		"MAXLENGTH": "La longitud máxima es ",
+		"EMAIL": "Debe ser una dirección de correo electrónico válida",
+		"URL": "Debe ser una dirección web válida",
+		"ZIPCODE": "Debe ser un código postal válido",
+		"FIELDSMATCH": "Las contraseñas no coinciden"
 	}
 }

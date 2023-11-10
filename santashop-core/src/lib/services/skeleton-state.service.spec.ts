@@ -65,8 +65,8 @@ describe('SkeletonStateService', () => {
 				service.getState('c', 'd', false);
 			}).toThrow(
 				new SkeletonStateError(
-					`getState(): State with id "c" and group "d" not found`
-				)
+					`getState(): State with id "c" and group "d" not found`,
+				),
 			);
 		});
 	});

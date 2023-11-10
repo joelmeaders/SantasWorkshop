@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { OnboardUser } from '../../../../../../santashop-models/src/public-api';
+import { OnboardUser } from '@santashop/models';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {
@@ -39,7 +39,7 @@ export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
 			lastName: new FormControl<string>(undefined, validators.lastName),
 			emailAddress: new FormControl<string>(
 				undefined,
-				validators.emailAddress
+				validators.emailAddress,
 			),
 			password: new FormControl<string>(undefined, validators.password),
 			password2: new FormControl<string>(undefined, validators.password),
@@ -47,12 +47,11 @@ export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
 			legal: new FormControl<boolean | Date>(false, validators.legal),
 			newsletter: new FormControl<boolean>(false),
 		},
-		passwordMatchValidator
+		passwordMatchValidator,
 	);
 
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function passwordMatchValidator(
-	formGroup: any
+	formGroup: any,
 ): { passwordMismatch: boolean } | null {
 	if (
 		!formGroup.controls.password.value ||

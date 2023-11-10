@@ -1,8 +1,5 @@
 import * as admin from 'firebase-admin';
-import {
-	COLLECTION_SCHEMA,
-	Registration,
-} from '../../../santashop-models/src/public-api';
+import { COLLECTION_SCHEMA, Registration } from '../../../santashop-models/src';
 import * as formatDateTime from 'dateformat';
 
 admin.initializeApp();
@@ -12,7 +9,7 @@ export default async (): Promise<void> => {
 	const registrationDocQuery = admin
 		.firestore()
 		.collection(`${COLLECTION_SCHEMA.registrations}`)
-		.where('programYear', '==', 2022)
+		.where('programYear', '==', 2023)
 		.orderBy('registrationSubmittedOn');
 
 	const registrations = await registrationDocQuery
@@ -40,7 +37,7 @@ export default async (): Promise<void> => {
 		const emailDocRef = admin
 			.firestore()
 			.doc(
-				`${COLLECTION_SCHEMA.tmpResendRegistrationEmails}/${registration.uid}`
+				`${COLLECTION_SCHEMA.tmpResendRegistrationEmails}/${registration.uid}`,
 			);
 
 		let dateTime: string;

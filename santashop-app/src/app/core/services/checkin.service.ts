@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CheckIn, COLLECTION_SCHEMA } from '@models/*';
+import { CheckIn, COLLECTION_SCHEMA } from '@santashop/models';
 import {
 	AuthService,
 	filterNil,
 	FireRepoLite,
 	IFireRepoCollection,
-} from '@core/*';
+} from '@santashop/core';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs';
 import { AlertController } from '@ionic/angular';
 
@@ -20,21 +20,21 @@ export class CheckinService {
 		filterNil(),
 		switchMap((uid) => this.checkinCollection().read(uid)),
 		distinctUntilChanged(),
-		map((checkin) => !!checkin)
+		map((checkin) => !!checkin),
 	);
 
 	public readonly checkinAlertSubscription = this.hasCheckIn$
 		.pipe(
 			filter((hasCheckIn) => !!hasCheckIn),
 			distinctUntilChanged(),
-			switchMap(() => this.displayAlert())
+			switchMap(() => this.displayAlert()),
 		)
 		.subscribe();
 
 	constructor(
 		private readonly fireRepo: FireRepoLite,
 		private readonly authService: AuthService,
-		private readonly alertController: AlertController
+		private readonly alertController: AlertController,
 	) {}
 
 	private async displayAlert(): Promise<void> {

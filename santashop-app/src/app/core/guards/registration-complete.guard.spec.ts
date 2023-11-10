@@ -24,14 +24,14 @@ describe('RegistrationCompleteGuard', () => {
 					useValue: jasmine.createSpyObj<PreRegistrationService>(
 						'prs',
 						{},
-						['registrationComplete$']
+						['registrationComplete$'],
 					),
 				},
 			],
 		});
 		guard = TestBed.inject(RegistrationCompleteGuard);
 		preregistrationService = TestBed.inject(
-			PreRegistrationService
+			PreRegistrationService,
 		) as jasmine.SpyObj<PreRegistrationService>;
 		router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
 	});
@@ -44,7 +44,7 @@ describe('RegistrationCompleteGuard', () => {
 		// Arrange
 		const spy = Object.getOwnPropertyDescriptor(
 			preregistrationService,
-			'registrationComplete$'
+			'registrationComplete$',
 		)?.get as jasmine.Spy;
 
 		spy.and.returnValue(of(false));
@@ -61,7 +61,7 @@ describe('RegistrationCompleteGuard', () => {
 		// Arrange
 		const registrationSpy = Object.getOwnPropertyDescriptor(
 			preregistrationService,
-			'registrationComplete$'
+			'registrationComplete$',
 		)?.get as jasmine.Spy;
 
 		registrationSpy.and.returnValue(of(true));

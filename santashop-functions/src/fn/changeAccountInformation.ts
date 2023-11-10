@@ -1,7 +1,7 @@
 import {
 	ChangeUserInfo,
 	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext } from 'firebase-functions/lib/common/providers/https';
@@ -11,7 +11,7 @@ admin.initializeApp();
 
 export default async (
 	data: ChangeUserInfo,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<boolean | HttpsError> => {
 	const uid = context.auth?.uid;
 
@@ -62,14 +62,14 @@ export default async (
 		.catch((error: any) => {
 			console.error(
 				`Error updating user document ${uid} with ${JSON.stringify(
-					data
+					data,
 				)}`,
-				error
+				error,
 			);
 			return new functions.https.HttpsError(
 				'internal',
 				'Error updating user document',
-				JSON.stringify(error)
+				JSON.stringify(error),
 			);
 		});
 };

@@ -4,7 +4,7 @@ import { Registration } from '../../../../santashop-models/src/public-api';
 import { of } from 'rxjs';
 import { DocumentData, DocumentReference } from './_firestore-wrapper';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
-import { Firestore } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore/lite';
 
 describe('FireRepoLite', () => {
 	let service: FireRepoLite;
@@ -34,7 +34,7 @@ describe('FireRepoLite', () => {
 
 		service = TestBed.inject(FireRepoLite);
 		fireRepoBase = TestBed.inject(
-			FireRepoBase
+			FireRepoBase,
 		) as jasmine.SpyObj<FireRepoBase>;
 	});
 
@@ -69,7 +69,7 @@ describe('FireRepoLite', () => {
 		expect(spy).toHaveBeenCalledOnceWith(
 			'registrations',
 			'12345',
-			<any>'uid'
+			<any>'uid',
 		);
 	});
 
@@ -88,7 +88,7 @@ describe('FireRepoLite', () => {
 		expect(spy).toHaveBeenCalledOnceWith(
 			'registrations',
 			undefined,
-			<any>'uid'
+			<any>'uid',
 		);
 	});
 
@@ -120,7 +120,7 @@ describe('FireRepoLite', () => {
 		expect(spy).toHaveBeenCalledOnceWith(
 			'registrations',
 			'12345',
-			mockData
+			mockData,
 		);
 	});
 
@@ -140,7 +140,7 @@ describe('FireRepoLite', () => {
 			'registrations',
 			'12345',
 			mockData,
-			true
+			true,
 		);
 	});
 
@@ -182,7 +182,7 @@ describe('FireRepoLite', () => {
 			expect(spy).toHaveBeenCalledOnceWith(
 				'registrations',
 				'12345',
-				<any>'uid'
+				<any>'uid',
 			);
 		});
 
@@ -199,7 +199,7 @@ describe('FireRepoLite', () => {
 			expect(spy).toHaveBeenCalledOnceWith(
 				'registrations',
 				undefined,
-				<any>'uid'
+				<any>'uid',
 			);
 		});
 
@@ -229,7 +229,7 @@ describe('FireRepoLite', () => {
 			expect(spy).toHaveBeenCalledOnceWith(
 				'registrations',
 				'12345',
-				mockData
+				mockData,
 			);
 		});
 
@@ -247,7 +247,7 @@ describe('FireRepoLite', () => {
 				'registrations',
 				'12345',
 				mockData,
-				true
+				true,
 			);
 		});
 

@@ -5,7 +5,7 @@ import {
 	Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../../dist/santashop-core';
+import { AuthService } from '@santashop/core';
 
 @Component({
 	selector: 'admin-sign-in',
@@ -24,7 +24,7 @@ export class SignInPage {
 
 	constructor(
 		private readonly authService: AuthService,
-		private readonly router: Router
+		private readonly router: Router,
 	) {}
 
 	public async login(): Promise<void> {

@@ -14,7 +14,7 @@ import {
 	User,
 	UserCredential,
 } from './_auth-wrapper';
-import { Auth, UserEmailUid } from '@models/*';
+import { Auth, UserEmailUid } from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
 
 @Injectable({
@@ -47,10 +47,10 @@ export class AuthService {
 					({
 						emailAddress: res?.email,
 						uid: res?.uid,
-					} as UserEmailUid)
+					}) as UserEmailUid,
 			),
 			distinctUntilChanged(),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	/**
@@ -64,7 +64,7 @@ export class AuthService {
 		pluck('uid'),
 		filter((uid) => !!uid),
 		map((uid) => uid as string),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	/**
@@ -79,12 +79,12 @@ export class AuthService {
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		switchMap((user) => from(user!.getIdTokenResult(false))),
 		map((token) => token.claims?.admin ?? false),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	constructor(
 		private readonly authWrapper: AuthWrapper,
-		private readonly functionsWrapper: FunctionsWrapper
+		private readonly functionsWrapper: FunctionsWrapper,
 	) {}
 
 	/**
@@ -109,7 +109,7 @@ export class AuthService {
 	 */
 	public async changePassword(
 		oldPassword: string,
-		newPassword: string
+		newPassword: string,
 	): Promise<void> {
 		const user = this.authWrapper.currentUser();
 
@@ -140,7 +140,7 @@ export class AuthService {
 	 */
 	public async changeEmailAddress(
 		password: string,
-		newEmailAddress: string
+		newEmailAddress: string,
 	): Promise<void> {
 		const user = await this.authWrapper.currentUser();
 
@@ -171,7 +171,7 @@ export class AuthService {
 	public async login(auth: Auth): Promise<UserCredential> {
 		return this.authWrapper.signInWithEmailAndPassword(
 			auth.emailAddress,
-			auth.password
+			auth.password,
 		);
 	}
 

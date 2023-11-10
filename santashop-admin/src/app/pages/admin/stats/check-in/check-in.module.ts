@@ -8,7 +8,7 @@ import { CheckInPageRoutingModule } from './check-in-routing.module';
 import { CheckInPage } from './check-in.page';
 import { SharedModule } from '../../../../shared/shared.module';
 import { NgChartsModule } from 'ng2-charts';
-import { CoreModule } from '@core/*';
+import { CoreModule } from '@santashop/core';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({

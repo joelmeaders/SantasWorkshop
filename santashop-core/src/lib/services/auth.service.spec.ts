@@ -1,9 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandlerService } from '@core/*';
-import { User, UserCredential } from 'firebase/auth';
 import { firstValueFrom, of } from 'rxjs';
 import { AuthService } from './auth.service';
-import { AuthWrapper } from './_auth-wrapper';
+import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
 import { FunctionsWrapper } from './_functions-wrapper';
 
 describe('AuthService', () => {
@@ -41,27 +40,27 @@ describe('AuthService', () => {
 					provide: FunctionsWrapper,
 					useValue: jasmine.createSpyObj<FunctionsWrapper>(
 						'FunctionsWrapper',
-						['updateEmailAddress']
+						['updateEmailAddress'],
 					),
 				},
 				{
 					provide: ErrorHandlerService,
 					useValue: jasmine.createSpyObj<ErrorHandlerService>(
 						'ErrorHandlerService',
-						['handleError']
+						['handleError'],
 					),
 				},
 			],
 		});
 
 		authWrapperService = TestBed.inject(
-			AuthWrapper
+			AuthWrapper,
 		) as jasmine.SpyObj<AuthWrapper>;
 		functionsWrapperService = TestBed.inject(
-			FunctionsWrapper
+			FunctionsWrapper,
 		) as jasmine.SpyObj<FunctionsWrapper>;
 		errorHandlerService = TestBed.inject(
-			ErrorHandlerService
+			ErrorHandlerService,
 		) as jasmine.SpyObj<ErrorHandlerService>;
 	});
 
@@ -154,7 +153,7 @@ describe('AuthService', () => {
 
 			// Assert
 			await expectAsync(action).toBeRejectedWithError(
-				'User cannot be null'
+				'User cannot be null',
 			);
 		});
 
@@ -192,7 +191,7 @@ describe('AuthService', () => {
 			// Assert
 			expect(signInSpy).toHaveBeenCalledWith(
 				mockUser.email!,
-				'currentPass'
+				'currentPass',
 			);
 			expect(updateSpy).toHaveBeenCalledWith(mockUser, 'newPass');
 		});
@@ -206,12 +205,12 @@ describe('AuthService', () => {
 				// Act
 				const action = service.changeEmailAddress(
 					'abc',
-					'test2@test.com'
+					'test2@test.com',
 				);
 
 				// Assert
 				await expectAsync(action).toBeRejectedWithError(
-					'User cannot be null'
+					'User cannot be null',
 				);
 			});
 
@@ -228,7 +227,7 @@ describe('AuthService', () => {
 				// Act
 				const action = service.changeEmailAddress(
 					'abc',
-					'test2@test.com'
+					'test2@test.com',
 				);
 
 				// Assert
@@ -252,7 +251,7 @@ describe('AuthService', () => {
 				// Assert
 				expect(signInSpy).toHaveBeenCalledWith(
 					mockUser.email!,
-					'password'
+					'password',
 				);
 				expect(updateSpy).toHaveBeenCalledWith('test2@test.com');
 			});

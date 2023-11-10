@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { Child } from '../../../../../../../santashop-models/src/public-api';
+import { Child } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, tap } from 'rxjs';
 import { AppStateService, ChildValidationService } from '../../../../core';
@@ -27,7 +27,7 @@ export class ChildrenPage {
 				tap((enabled) => {
 					if (!enabled)
 						this.appStateService.setModal(RegistrationClosedPage);
-				})
+				}),
 			)
 			.subscribe();
 
@@ -35,7 +35,7 @@ export class ChildrenPage {
 		private readonly viewService: ChildrenPageService,
 		private readonly alertController: AlertController,
 		private readonly translateService: TranslateService,
-		private readonly appStateService: AppStateService
+		private readonly appStateService: AppStateService,
 	) {}
 
 	public async removeChild(child: Child): Promise<void> {
@@ -47,7 +47,7 @@ export class ChildrenPage {
 	private async confirmDeleteChild(child: Child): Promise<boolean> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant(
-				'ADDCHILD.DELETE_CHILD_TITLE'
+				'ADDCHILD.DELETE_CHILD_TITLE',
 			),
 			subHeader: `${child.firstName} ${child.lastName}`,
 			message: this.translateService.instant('ADDCHILD.DELETE_CHILD_MSG'),

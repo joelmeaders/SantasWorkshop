@@ -44,11 +44,11 @@ export class ReferralModalComponent {
 	];
 
 	private readonly searchText = new BehaviorSubject<string | undefined>(
-		undefined
+		undefined,
 	);
 
 	private readonly referralChoice = new BehaviorSubject<string | undefined>(
-		undefined
+		undefined,
 	);
 	public readonly referralChoice$ = this.referralChoice.asObservable();
 
@@ -57,10 +57,10 @@ export class ReferralModalComponent {
 			map((search) =>
 				!!search && search.length
 					? this.allReferrals.filter((ref) =>
-							ref.toUpperCase().includes(search)
+							ref.toUpperCase().includes(search),
 					  )
-					: this.allReferrals
-			)
+					: this.allReferrals,
+			),
 		);
 
 	public readonly referrals$ = this.filteredReferrals$;

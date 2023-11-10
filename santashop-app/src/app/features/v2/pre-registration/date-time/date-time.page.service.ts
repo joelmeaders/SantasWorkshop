@@ -4,15 +4,12 @@ import {
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 	timestampToDate,
-} from '@core/*';
+	where,
+	QueryConstraint,
+} from '@santashop/core';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
-import {
-	COLLECTION_SCHEMA,
-	DateTimeSlot,
-} from '../../../../../../../santashop-models/src/public-api';
-import { QueryConstraint } from 'firebase/firestore';
-import { where } from '@angular/fire/firestore';
+import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
 import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
@@ -20,7 +17,7 @@ export class DateTimePageService implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly availableSlots$ = this.availableSlotsQuery(
-		this.programYear
+		this.programYear,
 	).pipe(
 		takeUntil(this.destroy$),
 		map((data) => {
@@ -30,21 +27,21 @@ export class DateTimePageService implements OnDestroy {
 		map((data) =>
 			data
 				.slice()
-				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf())
+				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf()),
 		),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly registrationSlot$ =
 		this.preRegistrationService.dateTimeSlot$.pipe(
 			takeUntil(this.destroy$),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	constructor(
 		@Inject(PROGRAM_YEAR) private readonly programYear: number,
 		private readonly fireRepo: FireRepoLite,
-		private readonly preRegistrationService: PreRegistrationService
+		private readonly preRegistrationService: PreRegistrationService,
 	) {}
 
 	public ngOnDestroy(): void {
@@ -54,7 +51,7 @@ export class DateTimePageService implements OnDestroy {
 
 	public async updateRegistration(slot?: DateTimeSlot): Promise<void> {
 		const registration = await firstValueFrom(
-			this.preRegistrationService.userRegistration$
+			this.preRegistrationService.userRegistration$,
 		);
 
 		if (!slot) {
@@ -68,7 +65,7 @@ export class DateTimePageService implements OnDestroy {
 
 		// TODO: Error handling
 		const storeRegistration = firstValueFrom(
-			this.preRegistrationService.saveRegistration(registration)
+			this.preRegistrationService.saveRegistration(registration),
 		);
 
 		try {
@@ -80,7 +77,7 @@ export class DateTimePageService implements OnDestroy {
 
 	private dateTimeSlotCollection(): IFireRepoCollection<DateTimeSlot> {
 		return this.fireRepo.collection<DateTimeSlot>(
-			COLLECTION_SCHEMA.dateTimeSlots
+			COLLECTION_SCHEMA.dateTimeSlots,
 		);
 	}
 
@@ -94,7 +91,7 @@ export class DateTimePageService implements OnDestroy {
 	 * @memberof DateTimePageService
 	 */
 	private availableSlotsQuery(
-		programYear: number
+		programYear: number,
 	): Observable<DateTimeSlot[]> {
 		const queryConstraints: QueryConstraint[] = [
 			where('programYear', '==', programYear),

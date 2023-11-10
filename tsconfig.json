@@ -21,15 +21,27 @@
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
-		"target": "es2015",
-		"module": "es2020",
-		"lib": ["es2018", "dom"],
+		"target": "ES2022",
+		"module": "ES2022",
+		"lib": ["es2020", "dom"],
 		"useDefineForClassFields": false,
 		"paths": {
-			"@models/*": ["santashop-models/src", "dist/santashop-models"],
-			"@core/*": ["santashop-core/src"],
-			"@registration/*": ["santashop-app/src"],
-			"@admin/*": ["santashop-admin/src"]
+			"@santashop/models": [
+				"node_modules/@santashop/models",
+				"dist/@santashop/models"
+			],
+			"@santashop/core": [
+				"node_modules/@santashop/core",
+				"dist/@santashop/core"
+			],
+			"@santashop/app": [
+				"node_modules/@santashop/app",
+				"dist/@santashop/app"
+			],
+			"@santashop/admin": [
+				"node_modules/@santashop/admin",
+				"dist/@santashop/admin"
+			]
 		},
 		"types": ["node"],
 		"typeRoots": ["node_modules/@types"]

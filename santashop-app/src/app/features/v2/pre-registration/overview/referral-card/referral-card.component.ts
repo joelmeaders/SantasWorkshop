@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { FunctionsWrapper } from '@core/*';
+import { FunctionsWrapper } from '@santashop/core';
 import referringAgencies from '../../../../../../assets/referring-agencies.json';
 import { AlertController, LoadingController } from '@ionic/angular';
-import { IError } from '../../../../../../../../dist/santashop-models';
+import { IError } from '@santashop/models';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
 	selector: 'app-referral-card',
@@ -15,7 +16,7 @@ export class ReferralCardComponent {
 	public readonly allReferrals: string[] = referringAgencies.agencies;
 
 	private readonly searchText = new BehaviorSubject<string | undefined>(
-		undefined
+		undefined,
 	);
 
 	private readonly filteredReferrals$: Observable<string[]> =
@@ -23,10 +24,10 @@ export class ReferralCardComponent {
 			map((search) =>
 				!!search && search.length
 					? this.allReferrals.filter((ref) =>
-							ref.toUpperCase().includes(search)
+							ref.toUpperCase().includes(search),
 					  )
-					: this.allReferrals
-			)
+					: this.allReferrals,
+			),
 		);
 
 	public readonly referrals$ = this.filteredReferrals$;
@@ -36,13 +37,14 @@ export class ReferralCardComponent {
 	);
 	public readonly referralChoice$ = this.referralChoice.asObservable();
 
-	@ViewChild('otherInput')
-	private readonly otherInput?: HTMLIonInputElement;
+	public readonly otherForm = new FormGroup({
+		other: new FormControl<string | undefined>(undefined, Validators.required)
+	});
 
 	constructor(
 		private readonly functions: FunctionsWrapper,
 		private readonly loadingController: LoadingController,
-		private readonly alertController: AlertController
+		private readonly alertController: AlertController,
 	) {}
 
 	public filter($event: any): void {
@@ -51,6 +53,8 @@ export class ReferralCardComponent {
 	}
 
 	public setChoice(choice?: string): void {
+		if (choice !== 'Other') this.otherForm.controls.other.setValue(choice);
+		
 		this.referralChoice.next(choice);
 		this.searchText.next(undefined);
 	}
@@ -60,8 +64,8 @@ export class ReferralCardComponent {
 		if (!value?.length) return;
 
 		if (value === 'Other') {
-			const otherValue = this.otherInput?.value as string;
-			if (otherValue.length > 3) value = `Other:${otherValue}`;
+			const otherValue = this.otherForm.controls.other.value;
+			if (otherValue && otherValue.length > 3) value = `Other:${otherValue}`;
 		}
 
 		await this.presentLoading();

@@ -7,7 +7,7 @@ import {
 import { Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular';
 import { BehaviorSubject } from 'rxjs';
-import { Child, Registration } from '../../../../../../dist/santashop-models';
+import { Child, Registration } from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
 import { CheckInContextService } from '../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../shared/services/check-in.service';
@@ -32,7 +32,7 @@ export class RegistrationPage {
 				Validators.required,
 				Validators.minLength(2),
 				Validators.maxLength(20),
-			])
+			]),
 		),
 		lastName: new UntypedFormControl(
 			undefined,
@@ -40,11 +40,11 @@ export class RegistrationPage {
 				Validators.required,
 				Validators.minLength(2),
 				Validators.maxLength(25),
-			])
+			]),
 		),
 		emailAddress: new UntypedFormControl(
 			undefined,
-			Validators.compose([Validators.required, Validators.email])
+			Validators.compose([Validators.required, Validators.email]),
 		),
 		zipCode: new UntypedFormControl(
 			undefined,
@@ -52,7 +52,7 @@ export class RegistrationPage {
 				Validators.required,
 				Validators.minLength(5),
 				Validators.maxLength(5),
-			])
+			]),
 		),
 		referral: new UntypedFormControl(
 			undefined,
@@ -60,7 +60,7 @@ export class RegistrationPage {
 				Validators.required,
 				Validators.minLength(4),
 				Validators.maxLength(50),
-			])
+			]),
 		),
 		newsletter: new UntypedFormControl(false),
 	});
@@ -70,7 +70,7 @@ export class RegistrationPage {
 		private readonly checkinService: CheckInService,
 		private readonly checkinContext: CheckInContextService,
 		private readonly router: Router,
-		private readonly alertController: AlertController
+		private readonly alertController: AlertController,
 	) {}
 
 	public ionViewWillLeave(): void {
@@ -123,13 +123,12 @@ export class RegistrationPage {
 		console.log(registration);
 
 		try {
-			const result: number = await this.checkinService.onSiteRegistration(
-				registration
-			);
+			const result: number =
+				await this.checkinService.onSiteRegistration(registration);
 
 			this.checkinContext.setCheckIn(
 				result,
-				registration.qrcode ?? 'onsite'
+				registration.qrcode ?? 'onsite',
 			);
 			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {

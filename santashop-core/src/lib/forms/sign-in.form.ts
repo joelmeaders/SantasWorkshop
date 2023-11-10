@@ -1,5 +1,5 @@
 import { Validators } from '@angular/forms';
-import { Auth } from '@models/*';
+import { Auth } from '@santashop/models';
 import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
 
 const validators = {
@@ -20,7 +20,7 @@ export const newAuthForm = (): FormGroup<ControlsOf<Auth>> =>
 	new FormGroup<ControlsOf<Auth>>({
 		emailAddress: new FormControl<string>(
 			undefined,
-			validators.emailAddress
+			validators.emailAddress,
 		),
 		password: new FormControl<string>(undefined, validators.password),
 	});

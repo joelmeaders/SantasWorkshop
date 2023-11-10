@@ -65,7 +65,7 @@
 // 		expect(routerSpy.navigate).toHaveBeenCalledWith(['/maintenance']);
 // 	});
 
-// 	it('registration should be disabled', async () => {
+// 	testregistration should be disabled', async () => {
 // 		// Arrange
 // 		const mockedSpy = Object.getOwnPropertyDescriptor(
 // 			remoteConfigSpy,

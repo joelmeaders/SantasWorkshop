@@ -56,52 +56,37 @@
 
 									<ion-list lines="none">
 										<ion-item class="locked-item">
-											<ion-label color="xmasred">
-												{{ "SIGNUP.FIRST_NAME" |
-												translate }}
-											</ion-label>
 											<ion-input
+												class="red-label"
+												[label]="'SIGNUP.FIRST_NAME' |
+												translate"
+												labelPlacement="fixed"
 												[value]="user.firstName"
 												disabled
 											></ion-input>
 										</ion-item>
-										<core-control-errors
-											[control]="
-												profileForm.controls.firstName
-											"
-										></core-control-errors>
 
 										<ion-item class="locked-item">
-											<ion-label color="xmasred">
-												{{ "SIGNUP.LAST_NAME" |
-												translate }}
-											</ion-label>
 											<ion-input
+												class="red-label"
+												[label]="'SIGNUP.LAST_NAME' |
+												translate"
+												labelPlacement="fixed"
 												[value]="user.lastName"
 												disabled
 											></ion-input>
 										</ion-item>
-										<core-control-errors
-											[control]="
-												profileForm.controls.lastName
-											"
-										></core-control-errors>
 
 										<ion-item class="locked-item">
-											<ion-label color="xmasred">
-												{{ "SIGNUP.ZIP_CODE" | translate
-												}}
-											</ion-label>
 											<ion-input
+												class="red-label"
+												[label]="'SIGNUP.ZIP_CODE' |
+												translate"
+												labelPlacement="fixed"
 												[value]="user.zipCode"
 												disabled
 											></ion-input>
 										</ion-item>
-										<core-control-errors
-											[control]="
-												profileForm.controls.zipCode
-											"
-										></core-control-errors>
 									</ion-list>
 								</ion-card-content>
 							</ion-card>
@@ -121,11 +106,11 @@
 
 									<ion-list lines="none">
 										<ion-item class="locked-item">
-											<ion-label color="xmasred">
-												{{ "COMMON.EMAIL_ADDRESS" |
-												translate }}
-											</ion-label>
 											<ion-input
+												class="red-label"
+												[label]="'COMMON.EMAIL_ADDRESS' |
+												translate"
+												labelPlacement="fixed"
 												[value]="user.emailAddress"
 												disabled
 											></ion-input>
@@ -149,11 +134,11 @@
 
 									<ion-list lines="none">
 										<ion-item class="locked-item">
-											<ion-label color="xmasred">
-												{{ "COMMON.PASSWORD" | translate
-												}}
-											</ion-label>
 											<ion-input
+												class="red-label"
+												[label]="'COMMON.PASSWORD' |
+												translate"
+												labelPlacement="fixed"
 												[value]="user.emailAddress"
 												type="password"
 												disabled
@@ -171,8 +156,6 @@
 								{{ "COMMON.DONE" | translate }}
 							</ion-button>
 						</div>
-
-						<ion-card class="ion-margin-horizontal"> </ion-card>
 					</ion-col>
 				</ion-row>
 			</ion-col>

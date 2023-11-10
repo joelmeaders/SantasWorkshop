@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
-import { SkeletonStateService } from '@core/*';
+import { SkeletonStateService } from '@santashop/core';
 import { AlertController } from '@ionic/angular';
-import { DateTimeSlot } from '../../../../../../../santashop-models/src/public-api';
+import { DateTimeSlot } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import {
@@ -31,37 +31,37 @@ export class DateTimePage implements OnDestroy {
 		takeUntil(this.destroy$),
 		map((slots) => slots.filter((slot) => slot.enabled)),
 		distinctUntilChanged(
-			(prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+			(prev, curr) => JSON.stringify(prev) === JSON.stringify(curr),
 		),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly availableDays$ = this.availableSlots$.pipe(
 		takeUntil(this.destroy$),
 		map((slots) =>
-			slots.map((slot) => Date.parse(slot.dateTime.toDateString()))
+			slots.map((slot) => Date.parse(slot.dateTime.toDateString())),
 		),
 		map((dates) => [...new Set(dates)]),
 
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	public readonly availableSlotsByDay$ = (
-		date: number
+		date: number,
 	): Observable<DateTimeSlot[]> =>
 		this.availableSlots$.pipe(
 			takeUntil(this.destroy$),
 			map((slots) =>
 				slots.filter(
-					(slot) => Date.parse(slot.dateTime.toDateString()) === date
-				)
+					(slot) => Date.parse(slot.dateTime.toDateString()) === date,
+				),
 			),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	public readonly chosenSlot$ = this.viewService.registrationSlot$.pipe(
 		takeUntil(this.destroy$),
-		shareReplay(1)
+		shareReplay(1),
 	);
 
 	protected readonly closedSubscription =
@@ -70,7 +70,7 @@ export class DateTimePage implements OnDestroy {
 				tap((enabled) => {
 					if (!enabled)
 						this.appStateService.setModal(RegistrationClosedPage);
-				})
+				}),
 			)
 			.subscribe();
 
@@ -80,7 +80,7 @@ export class DateTimePage implements OnDestroy {
 		private readonly translateService: TranslateService,
 		private readonly analytics: Analytics,
 		public readonly skeletonState: SkeletonStateService,
-		private readonly appStateService: AppStateService
+		private readonly appStateService: AppStateService,
 	) {}
 
 	public ngOnDestroy(): void {
@@ -117,7 +117,7 @@ export class DateTimePage implements OnDestroy {
 	private alreadyChoseSlot(): Promise<boolean> {
 		const source = this.chosenSlot$.pipe(
 			take(1),
-			map((slot) => !!slot)
+			map((slot) => !!slot),
 		);
 		return firstValueFrom(source);
 	}
@@ -127,10 +127,10 @@ export class DateTimePage implements OnDestroy {
 			// TODO: This stuff
 			header: this.translateService.instant('Confirm Changes'),
 			subHeader: this.translateService.instant(
-				'Are you sure you want to do this?'
+				'Are you sure you want to do this?',
 			),
 			message: this.translateService.instant(
-				'The slot you already have may no longer be available if you continue.'
+				'The slot you already have may no longer be available if you continue.',
 			),
 			buttons: [
 				{

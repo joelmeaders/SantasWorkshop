@@ -13,11 +13,12 @@ export const mockUsers = (id?: string) => ({
 		firstName: 'Jesse',
 		lastName: 'Doe',
 		emailAddress: 'jesse.doe@gmail.com',
-		zipCode: 90210,
+		zipCode: '90210',
 		acceptedTermsOfService: new Date(),
 		acceptedPrivacyPolicy: new Date(),
 		version: 1,
 		manuallyMigrated: false,
+		newsletter: false,
 	} as User,
 });
 

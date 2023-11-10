@@ -1,0 +1,11 @@
+.angular
+.firebase
+.github
+.storage
+.vscode
+coverage
+dist
+node_modules
+**/*.min.*
+.eslintignore
+**/assets/**

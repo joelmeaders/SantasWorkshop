@@ -2,12 +2,11 @@ import { Injectable } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { ErrorHandlerService } from '@core/*';
+import { ErrorHandlerService } from '@santashop/core';
 import { LoadingController } from '@ionic/angular';
-import { IError } from '../../../../../../../santashop-models/src/public-api';
-import { of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { IError, Registration } from '@santashop/models';
 import { PreRegistrationService } from '../../../../core';
+import { delay, firstValueFrom, of } from 'rxjs';
 
 @Injectable()
 export class SubmitPageService {
@@ -23,49 +22,71 @@ export class SubmitPageService {
 		private readonly router: Router,
 		private readonly analytics: Analytics,
 		private readonly loadingController: LoadingController,
-		private readonly errorHandler: ErrorHandlerService
+		private readonly errorHandler: ErrorHandlerService,
 	) {}
 
-	public async submitRegistration(): Promise<boolean> {
+	public async submitRegistration(): Promise<void> {
 		const loader = await this.loadingController.create({
 			message: 'Submitting...',
 		});
 
 		await loader.present();
 
-		await logEvent(this.analytics, 'submit_registration');
+		logEvent(this.analytics, 'submit_registration');
 
 		try {
-			const registration =
-				await this.preregistrationService.userRegistration$
-					.pipe(take(1))
-					.toPromise();
-
-			const completeRegistrationFunction = httpsCallable(
-				this.afFunctions,
-				'completeRegistration'
+			const registration = await firstValueFrom(
+				this.preregistrationService.userRegistration$,
 			);
+			const completionResult =
+				await this.completeRegistration(registration);
 
-			const completionResult = await completeRegistrationFunction(
-				registration
-			).catch((err) => {
-				// TODO:
-				console.error('error!!', err);
-				return of(false);
-			});
+			// This exception should never be hit since the function doesn't return false
+			if (!completionResult)
+				throw new Error(
+					'Cloud Function error in completeRegistrationFunction()',
+				);
 
-			return completionResult
-				? await this.sendToConfirmation()
-				: await Promise.reject(completionResult);
+			await this.sendToConfirmation();
 		} catch (error) {
-			this.errorHandler.handleError(error as IError);
-			return await Promise.resolve(false);
+			this.errorHandler.completeRegistrationException(error as IError);
 		} finally {
 			await loader.dismiss();
 		}
 	}
 
-	private sendToConfirmation(): Promise<boolean> {
+	/**
+	 * Completes the registration process for a user.
+	 * @param registration - The registration object to be completed.
+	 * @param attempts - The number of attempts made to complete the registration (default is 0).
+	 * @returns A promise that resolves with the completion result or false if the maximum number of attempts has been reached.
+	 */
+	private async completeRegistration(
+		registration: Registration,
+		attempts = 0,
+	): Promise<boolean> {
+		const completeRegistrationFunction = httpsCallable(
+			this.afFunctions,
+			'completeRegistration',
+		);
+
+		try {
+			if (attempts <= 1) {
+				const completionResult =
+					await completeRegistrationFunction(registration);
+				return completionResult.data as boolean;
+			} else {
+				return false;
+			}
+		} catch (error) {
+			await firstValueFrom(of(1).pipe(delay(2000)));
+			return await this.completeRegistration(registration, attempts + 1);
+		}
+	}
+
+	private async sendToConfirmation(): Promise<boolean> {
+		// Small delay in case funcrtion is sleeping
+		await firstValueFrom(of(1).pipe(delay(2000)));
 		return this.router.navigate(['/pre-registration/confirmation']);
 	}
 }

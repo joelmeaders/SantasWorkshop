@@ -20,13 +20,13 @@ export class RegistrationCompleteGuard
 		map((isComplete) =>
 			isComplete
 				? this.router.parseUrl('pre-registration/confirmation')
-				: true
-		)
+				: true,
+		),
 	);
 
 	constructor(
 		private readonly service: PreRegistrationService,
-		private readonly router: Router
+		private readonly router: Router,
 	) {}
 
 	public canActivate(): Observable<boolean | UrlTree> {

@@ -8,48 +8,48 @@ import {
 	COLLECTION_SCHEMA,
 	Registration,
 	RegistrationSearchIndex,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 
 admin.initializeApp();
 
 export default async (
 	record: Registration,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<boolean | HttpsError> => {
 	if (!isRegistrationComplete(record)) {
 		console.error(
 			new Error(
-				`Registration incomplete. Unable to submit registration for uid ${record.uid}`
-			)
+				`Registration incomplete. Unable to submit registration for uid ${record.uid}`,
+			),
 		);
 		throw new functions.https.HttpsError(
 			'failed-precondition',
 			'-10',
-			'Incomplete registration. Cannot continue.'
+			'Incomplete registration. Cannot continue.',
 		);
 	}
 
 	if (record.uid !== context.auth?.uid) {
 		console.error(
 			new Error(
-				`${context.auth?.uid} attempted to update registration for uid ${record.uid}`
-			)
+				`${context.auth?.uid} attempted to update registration for uid ${record.uid}`,
+			),
 		);
 		throw new functions.https.HttpsError(
 			'permission-denied',
 			'-99',
-			'You can only update your own records'
+			'You can only update your own records',
 		);
 	}
 
 	if (record.registrationSubmittedOn) {
 		console.error(
-			new Error(`Registration already submitted for uid ${record.uid}`)
+			new Error(`Registration already submitted for uid ${record.uid}`),
 		);
 		throw new functions.https.HttpsError(
 			'cancelled',
 			'-98',
-			'Already Submitted'
+			'Already Submitted',
 		);
 	}
 
@@ -64,7 +64,7 @@ export default async (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2022,
+		programYear: 2023,
 	} as Partial<Registration>;
 
 	batch.set(registrationDocRef, updateRegistrationFields, { merge: true });

@@ -3,7 +3,7 @@ import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 import { Routes, RouterModule } from '@angular/router';
 import { RegistrationCompleteGuard } from '../../../core/guards/registration-complete.guard';
 import { PreRegistrationPage } from './pre-registration.page';
-import { redirectUnauthorizedTo } from '@core/*';
+import { redirectUnauthorizedTo } from '@santashop/core';
 import { CheckedInGuard } from '../../../core/guards/checked-in.guard';
 import { RegistrationReadyToSubmitGuard } from '../../../core/guards/registration-ready-to-submit.guard';
 import { RegistrationIncompleteGuard } from '../../../core/guards/registration-incomplete.guard';
@@ -26,7 +26,7 @@ const routes: Routes = [
 				canActivateChild: [RegistrationCompleteGuard],
 				loadChildren: () =>
 					import('./overview/overview.module').then(
-						(m) => m.InformationPageModule
+						(m) => m.InformationPageModule,
 					),
 			},
 			{
@@ -35,7 +35,7 @@ const routes: Routes = [
 				canActivateChild: [RegistrationCompleteGuard],
 				loadChildren: () =>
 					import('./children/children.module').then(
-						(m) => m.ChildrenPageModule
+						(m) => m.ChildrenPageModule,
 					),
 			},
 			{
@@ -44,7 +44,7 @@ const routes: Routes = [
 				canActivateChild: [RegistrationCompleteGuard],
 				loadChildren: () =>
 					import('./date-time/date-time.module').then(
-						(m) => m.DateTimePageModule
+						(m) => m.DateTimePageModule,
 					),
 			},
 			{
@@ -56,7 +56,7 @@ const routes: Routes = [
 				],
 				loadChildren: () =>
 					import('./submit/submit.module').then(
-						(m) => m.SubmitPageModule
+						(m) => m.SubmitPageModule,
 					),
 			},
 			{
@@ -65,7 +65,7 @@ const routes: Routes = [
 				canActivateChild: [RegistrationIncompleteGuard],
 				loadChildren: () =>
 					import('./confirmation/confirmation.module').then(
-						(m) => m.ConfirmationPageModule
+						(m) => m.ConfirmationPageModule,
 					),
 			},
 			{
@@ -73,7 +73,7 @@ const routes: Routes = [
 				path: 'profile',
 				loadChildren: () =>
 					import('./profile/profile.module').then(
-						(m) => m.ProfilePageModule
+						(m) => m.ProfilePageModule,
 					),
 			},
 			{

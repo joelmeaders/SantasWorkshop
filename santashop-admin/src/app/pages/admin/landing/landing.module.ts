@@ -9,12 +9,7 @@ import { LandingPageRoutingModule } from './landing-routing.module';
 import { LandingPage } from './landing.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    LandingPageRoutingModule
-  ],
-  declarations: [LandingPage]
+	imports: [CommonModule, FormsModule, IonicModule, LandingPageRoutingModule],
+	declarations: [LandingPage],
 })
 export class LandingPageModule {}

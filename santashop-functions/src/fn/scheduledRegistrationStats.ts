@@ -7,7 +7,7 @@ import {
 	GenderAgeStats,
 	Registration,
 	ZipCodeCount,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -34,7 +34,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('registration-2022')
+		.doc('registration-2023')
 		.set(stats, { merge: false });
 };
 
@@ -50,7 +50,7 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 
 		if (!timestamp) {
 			console.log(
-				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`
+				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`,
 			);
 			return;
 		}
@@ -102,7 +102,7 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 
 function setChildGenderStats(
 	stats: GenderAgeStats,
-	registration: Registration
+	registration: Registration,
 ): void {
 	registration.children?.forEach((child) => {
 		setChildAgeStatsByGender(stats[child.toyType!], child.ageGroup!);
@@ -111,7 +111,7 @@ function setChildGenderStats(
 
 function setChildAgeStatsByGender(
 	stat: AgeGroupBreakdown,
-	ageGroup: AgeGroup
+	ageGroup: AgeGroup,
 ): void {
 	if (!stat) return;
 
@@ -168,7 +168,7 @@ const registrationQuery = () =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2022)
+		.where('programYear', '==', 2023)
 		.where('registrationSubmittedOn', '!=', '');
 // .where('includedInRegistrationStats', '==', false);
 

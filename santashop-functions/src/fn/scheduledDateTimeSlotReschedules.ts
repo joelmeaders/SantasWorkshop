@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import { HttpsError } from 'firebase-functions/v1/auth';
-import {
-	DateTimeSlot,
-	Registration,
-} from '../../../santashop-models/src/public-api';
+import { DateTimeSlot, Registration } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -61,8 +58,8 @@ export default async (): Promise<string> => {
 			throw new HttpsError(
 				'aborted',
 				`transaction to update reschedules failed: ${JSON.stringify(
-					error
-				)}`
+					error,
+				)}`,
 			);
 		});
 };
@@ -71,7 +68,7 @@ const dateTimeSlotQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('dateTimeSlots')
-		.where('programYear', '==', 2022)
+		.where('programYear', '==', 2023)
 		.limit(limit)
 		.offset(offset);
 
@@ -83,7 +80,7 @@ const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
 	do {
 		const snapshotDocs = await dateTimeSlotQuery(
 			pageSize,
-			pageOffset
+			pageOffset,
 		).get();
 
 		snapshotDocs.docs.forEach((doc) => {
@@ -105,7 +102,7 @@ const registrationQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2022)
+		.where('programYear', '==', 2023)
 		.where('previousDateTimeSlot', '!=', '')
 		.limit(limit)
 		.offset(offset);
@@ -118,7 +115,7 @@ const loadRegistrations = async (): Promise<Registration[]> => {
 	do {
 		const snapshotDocs = await registrationQuery(
 			pageSize,
-			pageOffset
+			pageOffset,
 		).get();
 
 		snapshotDocs.docs.forEach((doc) => {

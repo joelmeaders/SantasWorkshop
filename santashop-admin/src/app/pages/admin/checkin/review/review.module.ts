@@ -7,7 +7,7 @@ import { ReviewPageRoutingModule } from './review-routing.module';
 
 import { ReviewPage } from './review.page';
 import { SharedModule } from '../../../../shared/shared.module';
-import { CoreModule } from '@core/*';
+import { CoreModule } from '@santashop/core';
 
 @NgModule({
 	imports: [

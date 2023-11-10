@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
-import { User, UserStats, UsersByZipCodeCount, ReferrerCount } from '@models/*';
+import {
+	User,
+	UserStats,
+	UsersByZipCodeCount,
+	ReferrerCount,
+} from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -16,7 +21,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('user-2022')
+		.doc('user-2023')
 		.set(stats, { merge: false });
 };
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AuthService } from '@core/*';
+import { AuthService } from '@santashop/core';
 
 @Component({
 	selector: 'admin-landing',

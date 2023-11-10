@@ -13,7 +13,7 @@ const routes: Routes = [
 		path: 'event-information',
 		loadChildren: () =>
 			import('./event-information/event-information.module').then(
-				(m) => m.EventInformationPageModule
+				(m) => m.EventInformationPageModule,
 			),
 	},
 ];

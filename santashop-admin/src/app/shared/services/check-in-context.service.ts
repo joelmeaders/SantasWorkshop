@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
 import { BehaviorSubject, map, shareReplay } from 'rxjs';
-import { Registration } from '@models/*';
+import { Registration } from '@santashop/models';
 import { filterNullish } from '../helpers';
 
 @Injectable({
@@ -29,7 +29,7 @@ export class CheckInContextService {
 					if (!birthDate.seconds) return;
 					child.dateOfBirth = new Timestamp(
 						birthDate.seconds,
-						birthDate.nanoseconds
+						birthDate.nanoseconds,
 					).toDate();
 				});
 
@@ -37,12 +37,12 @@ export class CheckInContextService {
 				const slot = registration.dateTimeSlot!.dateTime as any;
 				registration.dateTimeSlot!.dateTime = new Timestamp(
 					slot.seconds,
-					slot.nanoseconds
+					slot.nanoseconds,
 				).toDate();
 
 				return registration;
 			}),
-			shareReplay(1)
+			shareReplay(1),
 		);
 
 	public setRegistration(registration?: Registration): void {

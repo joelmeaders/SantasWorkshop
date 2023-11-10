@@ -1,22 +1,25 @@
-import { COLLECTION_SCHEMA } from '../../santashop-models/src/public-api';
 import * as functions from 'firebase-functions';
 
-export const changeAccountInformation = functions.https.onCall(
+export const changeAccountInformation = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/changeAccountInformation')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
-export const updateReferredBy = functions.https.onCall(
+export const updateReferredBy = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/updateReferredBy')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 /**
@@ -27,54 +30,68 @@ export const updateReferredBy = functions.https.onCall(
  * @remarks
  * registration-email, RegistrationSearchIndex
  */
-export const completeRegistration = functions.https.onCall(
+export const completeRegistration = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/completeRegistration')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
-export const newAccount = functions.https.onCall(async (request) => {
+export const newAccount = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request) => {
 	return (await import('./fn/newAccount')).default(request);
 });
 
-export const undoRegistration = functions.https.onCall(
+export const undoRegistration = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/undoRegistration')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
-export const updateEmailAddress = functions.https.onCall(
+export const updateEmailAddress = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/updateEmailAddress')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
-export const checkIn = functions.https.onCall(async (request, context) => {
+export const checkIn = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request, context) => {
 	return (await import('./fn/checkIn')).default(request, context);
 });
 
-export const checkInWithEdit = functions.https.onCall(
+export const checkInWithEdit = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/checkInWithEdit')).default(request, context);
-	}
+	},
 );
 
-export const onSiteRegistration = functions.https.onCall(
+export const onSiteRegistration = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
 	async (request, context) => {
 		return (await import('./fn/onSiteRegistration')).default(
 			request,
-			context
+			context,
 		);
-	}
+	},
 );
 
 /**
@@ -83,65 +100,73 @@ export const onSiteRegistration = functions.https.onCall(
  * @remarks
  * Callable functions need to specify return instead of await
  */
-export const verifyRecaptcha2 = functions.https.onCall(async (request) => {
+export const verifyRecaptcha2 = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request) => {
 	return (await import('./fn/verifyRecaptcha2')).default(request);
 });
 
 // ------------------------------------- TRIGGER FUNCTIONS
 
-export const sendNewRegistrationEmails = functions.firestore
-	.document(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/{docId}`)
+export const sendNewRegistrationEmails = functions
+	.runWith({ secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] })
+	.firestore.document('tmp_registrationemails/{docId}')
 	.onCreate(async (snapshot) => {
 		await (
-			await import('./fn/sendNewRegistrationEmails')
+			await import('./fn/sendNewRegistrationEmails2')
 		).default(snapshot);
 	});
 
 // ------------------------------------- SCHEDULED FUNCTIONS
 
 /**
- * Backs up firestore db every hour to storage bucket
+ * Backs up firestore db every night to storage bucket
+ * At 00:00 in November and December
  */
-export const scheduledFirestoreBackup = functions.pubsub
-	.schedule('every 24 hours')
+export const scheduledFirestoreBackup = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1, failurePolicy: false  })
+	.pubsub
+	.schedule('0 0 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
 
-// Every 1 min (should be 15)
-export const scheduledDateTimeSlotCounters = functions.pubsub
-	.schedule('every 15 minutes')
+// At every 15th minute in November and December.
+export const scheduledDateTimeSlotCounters = functions
+	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.pubsub
+	.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
 	});
 
-export const scheduledDateTimeSlotReschedules = functions.pubsub
-	.schedule('every 6 hours')
+// At minute 0 past every 6th hour in November and December.
+export const scheduledDateTimeSlotReschedules = functions
+	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.pubsub
+	.schedule('0 */6 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
 
-export const scheduledRegistrationStats = functions.pubsub
+// “At 23:59.” (11:59 PM) every day.
+export const scheduledRegistrationStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1, failurePolicy: false  })
+	.pubsub
 	.schedule('59 23 * * *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledRegistrationStats')).default();
 	});
 
-// Runs every 5 minutes between 10am-4pm, on the 10th, 11th, 13th, 14th of December
-export const scheduledCheckInStats = functions.pubsub
-	.schedule('*/5 10,11,12,13,14,15,16 9,10,12,13 12 *')
+// At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
+export const scheduledCheckInStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.pubsub
+	.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
-	});
-
-// This method checks for existing dates/times.
-// If there are none it adds them
-export const scheduledAddDateTimeSlots = functions.pubsub
-	.schedule('59 23 * * *')
-	.onRun(async () => {
-		await (await import('./fn/addDateTimeSlots')).default();
 	});
 
 // ------------------------------------- PUBSUB FUNCTIONS
@@ -182,7 +207,36 @@ export const pubsubUserStats = functions.pubsub
 	});
 
 export const pubsubMarkRegistrationsCheckedIn = functions.pubsub
-	.topic('recalc-all-slots')
+	.topic('mark-registrations-checked-in')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
+	});
+
+export const pubsubExportEmails = functions.pubsub
+	.topic('export-emails')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubExportEmails')).default();
+	});
+
+// This method checks for existing dates/times.
+// If there are none it adds them
+export const pubsubAddDateTimeSlots = functions.pubsub
+	.topic('create-datetime-slots')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubAddDateTimeSlots')).default();
+	});
+
+// Deletes all users except for disabled accounts
+export const pubsubDeleteUsers = functions.pubsub
+	.topic('delete-users')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubDeleteUsers')).default();
+	});
+
+// Creates a new email template in AWS SES
+export const pubsubCreateNewEmailTemplate = functions
+	.runWith({ secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] })
+	.pubsub.topic('create-email-template')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubCreateNewEmailTemplate')).default();
 	});

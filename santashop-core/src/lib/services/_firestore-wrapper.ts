@@ -1,26 +1,28 @@
 import {
-	collection,
-	CollectionReference as _CollectionReference,
-	DocumentReference as _DocumentReference,
-	SetOptions as _SetOptions,
-	DocumentData as _DocumentData,
-	FirestoreDataConverter as _FirestoreDataConverter,
-	QueryConstraint as _QueryConstraint,
-	QueryDocumentSnapshot as _QueryDocumentSnapshot,
-	SnapshotOptions as _SnapshotOptions,
-	Timestamp as _Timestamp,
-} from 'firebase/firestore';
-import {
 	addDoc,
+	connectFirestoreEmulator as _connectFirestoreEmulator,
+	collection,
+	collectionData,
+	CollectionReference as _CollectionReference,
 	deleteDoc,
 	doc,
 	docData,
+	DocumentData as _DocumentData,
+	DocumentReference as _DocumentReference,
+	FirestoreDataConverter as _FirestoreDataConverter,
+	getFirestore as _getFirestore,
+	provideFirestore as _provideFirestore,
 	Firestore,
 	query,
+	QueryConstraint as _QueryConstraint,
+	QueryDocumentSnapshot as _QueryDocumentSnapshot,
+	where as _where,
 	setDoc,
+	SetOptions as _SetOptions,
+	SnapshotOptions as _SnapshotOptions,
+	Timestamp as _Timestamp,
+	Query,
 } from '@angular/fire/firestore';
-import { collection as rxCollection } from 'rxfire/firestore';
-import { Query } from 'rxfire/firestore/interfaces';
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 
@@ -31,9 +33,21 @@ export type SetOptions = _SetOptions;
 export type DocumentData = _DocumentData;
 export type FirestoreDataConverter<T> = _FirestoreDataConverter<T>;
 export type QueryConstraint = _QueryConstraint;
-export type QueryDocumentSnapshot = _QueryDocumentSnapshot;
+export type QueryDocumentSnapshot<T = DocumentData> = _QueryDocumentSnapshot<T>;
 export type SnapshotOptions = _SnapshotOptions;
 export type Timestamp = _Timestamp;
+export const TimestampFn = _Timestamp;
+export const where = _where;
+export const connectFirestoreEmulator = _connectFirestoreEmulator;
+export const getFirestore = _getFirestore;
+export const provideFirestore = _provideFirestore;
+
+// Solves an issue where dates are being converted to timestamps
+// in the database, but not being converted back to dates when read.
+export const timestampDateFix = (date: Date): Date => {
+	const timestamp = date as unknown as Timestamp;
+	return timestamp?.toDate() ?? date;
+};
 
 /**
  * The entire reason for this class is to make
@@ -48,29 +62,32 @@ export type Timestamp = _Timestamp;
 export class FirestoreWrapper {
 	constructor(private readonly firestore: Firestore) {}
 
-	// firebase/firestore methods
 	public readonly collection = <T = DocumentData>(
-		path: string
+		path: string,
 	): CollectionReference<T> =>
 		collection(this.firestore, path) as CollectionReference<T>;
 
+	public readonly collectionQuery = <T = DocumentData>(
+		query: Query<T>,
+		idField?: Extract<keyof T, string>,
+	) => collectionData(query, { idField });
+
 	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,
-		path?: string
+		path?: string,
 	): DocumentReference<T> =>
 		path ? doc<T>(reference, path) : doc(reference);
 
-	// @angular/fire/firestore Methods
 	public readonly docData = <T = DocumentData>(
 		ref: DocumentReference<T>,
 		options?: {
 			idField?: string;
-		}
+		},
 	): Observable<T> => docData<T>(ref, options);
 
 	public readonly query = <T = DocumentData>(
 		collectionReference: CollectionReference<T>,
-		constraints?: QueryConstraint[]
+		constraints?: QueryConstraint[],
 	): Query<T> =>
 		constraints
 			? query<T>(collectionReference, ...constraints)
@@ -78,25 +95,20 @@ export class FirestoreWrapper {
 
 	public readonly addDoc = <T>(
 		collectionReference: CollectionReference<T>,
-		document: T
+		document: T,
 	): Promise<DocumentReference<T>> =>
 		addDoc<T>(collectionReference, document);
 
 	public readonly setDoc = <T = DocumentData>(
 		documentReference: DocumentReference<T>,
 		document: T,
-		options?: SetOptions
+		options?: SetOptions,
 	): Promise<void> =>
 		options
 			? setDoc<T>(documentReference, document, options)
 			: setDoc<T>(documentReference, document);
 
 	public readonly deleteDoc = <T = DocumentData>(
-		documentReference: DocumentReference<T>
+		documentReference: DocumentReference<T>,
 	): Promise<void> => deleteDoc(documentReference);
-
-	// rxfire/firestore Methods
-	public readonly rxCollection = <T = DocumentData>(
-		qry: Query<T>
-	): Observable<_QueryDocumentSnapshot<T>[]> => rxCollection(qry);
 }

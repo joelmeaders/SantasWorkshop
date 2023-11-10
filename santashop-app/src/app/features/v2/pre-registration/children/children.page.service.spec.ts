@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
-import { IRegistration } from '../../../../../../../dist/santashop-models';
+import { Registration } from '../@santashop/models';
 import {
 	getFunctionSpy,
 	getPropertySpy,
@@ -30,7 +30,7 @@ describe('ChildrenPageService', () => {
 		});
 
 		preregistrationService = TestBed.inject(
-			PreRegistrationService
+			PreRegistrationService,
 		) as jasmine.SpyObj<PreRegistrationService>;
 	});
 
@@ -43,7 +43,7 @@ describe('ChildrenPageService', () => {
 				mockChildren.valid.age35,
 				mockChildren.valid.age68,
 				mockChildren.valid.age911,
-			])
+			]),
 		);
 
 		service = TestBed.inject(ChildrenPageService);
@@ -98,17 +98,17 @@ describe('ChildrenPageService', () => {
 
 		const registrationMock = {
 			...mockRegistrations('1').complete.mockRegistration1,
-		} as IRegistration;
+		} as Registration;
 
 		const registrationSpy = getPropertySpy(
 			preregistrationService,
-			'userRegistration$'
+			'userRegistration$',
 		);
 		registrationSpy.and.returnValue(of(registrationMock));
 
 		const saveRegistrationSpy = getFunctionSpy(
 			preregistrationService,
-			'saveRegistration'
+			'saveRegistration',
 		);
 		saveRegistrationSpy.and.returnValue(of());
 

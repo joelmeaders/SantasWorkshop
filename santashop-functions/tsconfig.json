@@ -1,7 +1,6 @@
 {
+	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"baseUrl": "./",
-		"rootDir": "./",
 		"module": "commonjs",
 		"noEmit": false,
 		"noImplicitReturns": true,
@@ -11,17 +10,12 @@
 		"strict": true,
 		"target": "es2017",
 		"declaration": true,
-    	"declarationMap": true,
+		"declarationMap": true,
 		"allowSyntheticDefaultImports": true,
 		"experimentalDecorators": true,
-		"forceConsistentCasingInFileNames": true,
-		"paths": {
-			"@models/*": ["../santashop-models/src", "../dist/santashop-models/"]
-		},
+		"forceConsistentCasingInFileNames": true
 	},
 	"compileOnSave": true,
-	"references": [
-		{ "path": "../santashop-models/tsconfig.lib.json" }
-	],
+	"references": [{ "path": "../santashop-models/tsconfig.fns.json" }],
 	"exclude": ["dist/"]
 }

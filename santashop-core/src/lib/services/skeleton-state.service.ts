@@ -52,7 +52,7 @@ export class SkeletonStateService implements OnDestroy {
 	public getState(
 		id: string,
 		groupId?: string,
-		createIfNotFound = true
+		createIfNotFound = true,
 	): SkeletonState {
 		console.log('get state', id, groupId);
 		let states: SkeletonState[] = [];
@@ -68,7 +68,7 @@ export class SkeletonStateService implements OnDestroy {
 				requestedState = this.addState(id, groupId);
 			} else {
 				throw new SkeletonStateError(
-					`getState(): State with id "${id}" and group "${groupId}" not found`
+					`getState(): State with id "${id}" and group "${groupId}" not found`,
 				);
 			}
 		}

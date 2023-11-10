@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { COLLECTION_SCHEMA, UserStats } from '@models/*';
-import { FireRepoLite, IFireRepoCollection } from '@core/*';
+import { COLLECTION_SCHEMA, UserStats } from '@santashop/models';
+import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
 import { map, shareReplay } from 'rxjs';
 
 Chart.register(ChartDataLabels);
@@ -18,21 +18,21 @@ export class UserPage {
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly userRecord$ = this.statsCollection<UserStats>()
-		.read(`user-2022`)
+		.read(`user-2023`)
 		.pipe(shareReplay(1));
 
 	public readonly referrers$ = this.userRecord$.pipe(
 		map((data) => data.referrerCount),
 		map((counts) => counts.sort((a, b) => b.count - a.count)),
 		map((counts) => counts.slice(0, 10)),
-		map((ref) => ref.map((r) => ({ label: r.referrer, data: [r.count] })))
+		map((ref) => ref.map((r) => ({ label: r.referrer, data: [r.count] }))),
 	);
 
 	public readonly zipCodes$ = this.userRecord$.pipe(
 		map((data) => data.zipCodeCount),
 		map((counts) => counts.sort((a, b) => b.count - a.count)),
 		map((counts) => counts.slice(0, 10)),
-		map((ref) => ref.map((r) => ({ label: r.zip, data: [r.count] })))
+		map((ref) => ref.map((r) => ({ label: r.zip, data: [r.count] }))),
 	);
 
 	public barChartOptions: ChartConfiguration['options'] = {

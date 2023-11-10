@@ -18,13 +18,13 @@ export class RegistrationReadyToSubmitGuard
 	public readonly isReady$ = this.service.registrationReadyToSubmit$.pipe(
 		take(1),
 		map((isReady) =>
-			isReady ? true : this.router.parseUrl('pre-registration/overview')
-		)
+			isReady ? true : this.router.parseUrl('pre-registration/overview'),
+		),
 	);
 
 	constructor(
 		private readonly service: PreRegistrationService,
-		private readonly router: Router
+		private readonly router: Router,
 	) {}
 
 	public canActivate(): Observable<boolean | UrlTree> {

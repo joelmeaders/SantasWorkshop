@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { DateTimeSlot } from '@models/*';
+import { DateTimeSlot } from '@santashop/models';
 
 @Component({
 	selector: 'app-schedule-card',

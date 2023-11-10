@@ -7,7 +7,7 @@ import {
 	User,
 	Registration,
 	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 import { generateId } from '../utility/id-generation';
 import { generateQrCode } from '../utility/qrcodes';
 
@@ -25,7 +25,7 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 		.catch((error) => {
 			console.error(
 				`${data.emailAddress}`,
-				new Error(JSON.stringify(error))
+				new Error(JSON.stringify(error)),
 			);
 			throw handleAuthError(error);
 		});
@@ -78,12 +78,12 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 		.catch((error) => {
 			console.error(
 				'Error creating account records in batch process',
-				error
+				error,
 			);
 			throw new functions.https.HttpsError(
 				'internal',
 				'Account created but something else went wrong',
-				JSON.stringify(error)
+				JSON.stringify(error),
 			);
 		});
 };
@@ -94,13 +94,13 @@ const handleAuthError = (error: any) => {
 			throw new functions.https.HttpsError(
 				'already-exists',
 				error.code,
-				error.message
+				error.message,
 			);
 		default:
 			throw new functions.https.HttpsError(
 				'unknown',
 				error.code,
-				error.message
+				error.message,
 			);
 	}
 };

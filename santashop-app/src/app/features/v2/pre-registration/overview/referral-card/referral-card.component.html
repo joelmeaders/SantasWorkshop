@@ -50,17 +50,23 @@
 				</ion-label>
 				<ion-text class="ref-choice"> {{ choice }} </ion-text>
 			</ion-item>
-			<ion-item *ngIf="choice === 'Other'" lines="none">
-				<ion-label position="stacked" class="ref-choice">
-					Type name of referral:
-				</ion-label>
-				<ion-input
-					#otherInput
-					class="other-input"
-					maxlength="20"
-					minlength="3"
-				></ion-input>
-			</ion-item>
+			<form [formGroup]="otherForm">
+				<ion-item *ngIf="choice === 'Other'">
+					<ion-input
+						[autofocus]="true"
+						class="red-label"
+						#otherInput
+						maxlength="20"
+						minlength="3"
+						[label]="'REFERRAL.REFERRED_BY' | translate"
+						labelPlacement="floating"
+						[placeholder]="
+							'REFERRAL.REFERRED_BY_PLACEHOLDER' | translate
+						"
+						formControlName="other"
+					></ion-input>
+				</ion-item>
+			</form>
 
 			<div class="ion-padding-top buttons">
 				<ion-button
@@ -71,7 +77,12 @@
 				>
 					{{ "COMMON.RESET" | translate }}
 				</ion-button>
-				<ion-button slot="end" size="default" (click)="submit()">
+				<ion-button
+					slot="end"
+					size="default"
+					(click)="submit()"
+					[disabled]="otherForm.invalid"
+				>
 					{{ "COMMON.SAVE_CHOICE" | translate }}
 				</ion-button>
 			</div>

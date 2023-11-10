@@ -2,16 +2,13 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { CallableContext } from 'firebase-functions/lib/common/providers/https';
 import { HttpsError } from 'firebase-functions/v1/auth';
-import {
-	Auth,
-	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src/public-api';
+import { Auth, COLLECTION_SCHEMA } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
 export default async (
 	data: Auth,
-	context: CallableContext
+	context: CallableContext,
 ): Promise<boolean | HttpsError> => {
 	const uid = context.auth?.uid;
 
@@ -53,12 +50,12 @@ export default async (
 		.catch((error: any) => {
 			console.error(
 				`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
-				error
+				error,
 			);
 			return new functions.https.HttpsError(
 				'internal',
 				`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
-				JSON.stringify(error)
+				JSON.stringify(error),
 			);
 		});
 };

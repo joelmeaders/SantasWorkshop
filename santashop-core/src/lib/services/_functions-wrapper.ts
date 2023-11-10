@@ -5,7 +5,7 @@ import {
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from '@angular/fire/functions';
-import { ChangeUserInfo, UpdateReferredBy } from '@models/*';
+import { ChangeUserInfo, UpdateReferredBy } from '@santashop/models';
 
 export type Functions = _Functions;
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
@@ -23,28 +23,28 @@ export class FunctionsWrapper {
 	constructor(private readonly functions: _Functions) {}
 
 	public readonly callableWrapper = <RequestData, ResponseData>(
-		name: string
+		name: string,
 	): HttpsCallable<RequestData, ResponseData> =>
 		httpsCallable(this.functions, name);
 
 	public readonly updateEmailAddress = <ResponseData>(
-		newEmailAddress: string
+		newEmailAddress: string,
 	): Promise<_HttpsCallableResult<ResponseData>> =>
 		this.callableWrapper<{ emailAddress: string }, ResponseData>(
-			'updateEmailAddress'
+			'updateEmailAddress',
 		)({
 			emailAddress: newEmailAddress,
 		});
 
 	public readonly changeAccountInformation = (
-		data: ChangeUserInfo
+		data: ChangeUserInfo,
 	): Promise<_HttpsCallableResult<unknown>> =>
 		this.callableWrapper<ChangeUserInfo, unknown>(
-			'changeAccountInformation'
+			'changeAccountInformation',
 		)(data);
 
 	public readonly updateReferredBy = (
-		data: UpdateReferredBy
+		data: UpdateReferredBy,
 	): Promise<_HttpsCallableResult<unknown>> =>
 		this.callableWrapper<UpdateReferredBy, any>('updateReferredBy')({
 			...data,

@@ -3,7 +3,7 @@ import {
 	CheckInStats,
 	Registration,
 	ToyType,
-} from '../../../santashop-models/src/public-api';
+} from '../../../santashop-models/src';
 
 export const isRegistrationComplete = (registration: Registration): boolean => {
 	if (!registration) return false;
@@ -21,7 +21,7 @@ export const isRegistrationComplete = (registration: Registration): boolean => {
 };
 
 export const isPartialRegistrationComplete = (
-	registration: Partial<Registration>
+	registration: Partial<Registration>,
 ): boolean => {
 	if (!registration) return false;
 	if (!registration.uid) return false;
@@ -33,31 +33,31 @@ export const isPartialRegistrationComplete = (
 
 export const calculateRegistrationStats = (
 	registration: Registration,
-	isEdit: boolean
+	isEdit: boolean,
 ): CheckInStats => {
 	const stats: CheckInStats = {
 		preregistered: registration.qrcode !== 'onsite',
 		children: registration.children?.length || 0,
 		ageGroup02: registration.children!.filter(
-			(c) => c.ageGroup === AgeGroup.age02
+			(c) => c.ageGroup === AgeGroup.age02,
 		).length,
 		ageGroup35: registration.children!.filter(
-			(c) => c.ageGroup === AgeGroup.age35
+			(c) => c.ageGroup === AgeGroup.age35,
 		).length,
 		ageGroup68: registration.children!.filter(
-			(c) => c.ageGroup === AgeGroup.age68
+			(c) => c.ageGroup === AgeGroup.age68,
 		).length,
 		ageGroup911: registration.children!.filter(
-			(c) => c.ageGroup === AgeGroup.age911
+			(c) => c.ageGroup === AgeGroup.age911,
 		).length,
 		toyTypeInfant: registration.children!.filter(
-			(c) => c.toyType === ToyType.infant
+			(c) => c.toyType === ToyType.infant,
 		).length,
 		toyTypeBoy: registration.children!.filter(
-			(c) => c.toyType === ToyType.boy
+			(c) => c.toyType === ToyType.boy,
 		).length,
 		toyTypeGirl: registration.children!.filter(
-			(c) => c.toyType === ToyType.girl
+			(c) => c.toyType === ToyType.girl,
 		).length,
 		modifiedAtCheckIn: isEdit,
 		zipCode: registration.zipCode!,

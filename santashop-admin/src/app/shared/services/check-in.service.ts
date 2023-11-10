@@ -1,45 +1,45 @@
 import { Injectable } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
-import { Registration } from '@models/*';
+import { Registration } from '@santashop/models';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { HttpsCallableResult } from '../../../../../santashop-core/src';
+import { HttpsCallableResult } from '@santashop/core';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class CheckInService {
 	private readonly checkInFn = (
-		registration: Registration
+		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
 		httpsCallable<Registration, number>(
 			this.functions,
-			'checkIn'
+			'checkIn',
 		)(registration);
 
 	private readonly checkInWithEditFn = (
-		registration: Partial<Registration>
+		registration: Partial<Registration>,
 	): Promise<HttpsCallableResult<number>> =>
 		httpsCallable<Registration, number>(
 			this.functions,
-			'checkInWithEdit'
+			'checkInWithEdit',
 		)(registration);
 
 	private readonly onSiteRegistrationFn = (
-		registration: Registration
+		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
 		httpsCallable<Registration, number>(
 			this.functions,
-			'onSiteRegistration'
+			'onSiteRegistration',
 		)(registration);
 
 	constructor(
 		private readonly functions: Functions,
-		private readonly loadingController: LoadingController
+		private readonly loadingController: LoadingController,
 	) {}
 
 	public async checkIn(
 		registration: Registration,
-		isEdit = false
+		isEdit = false,
 	): Promise<number> {
 		if (!registration?.uid) throw new Error('Invalid registration');
 
@@ -72,7 +72,7 @@ export class CheckInService {
 	}
 
 	public async onSiteRegistration(
-		registration: Registration
+		registration: Registration,
 	): Promise<number> {
 		const loading = await this.loadingController.create({
 			message: 'Saving registration...',

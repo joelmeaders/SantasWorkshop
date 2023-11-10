@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Firestore } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore/lite';
 import { firstValueFrom, of } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
 import { FirestoreWrapper } from './_firestore-wrapper';
@@ -35,7 +35,7 @@ describe('FireRepoBase', () => {
 							'addDoc',
 							'setDoc',
 							'deleteDoc',
-						]
+						],
 					),
 				},
 			],
@@ -43,7 +43,7 @@ describe('FireRepoBase', () => {
 
 		service = TestBed.inject(FireRepoBase);
 		firestoreMethods = TestBed.inject(
-			FirestoreWrapper
+			FirestoreWrapper,
 		) as jasmine.SpyObj<FirestoreWrapper>;
 	});
 
@@ -91,7 +91,7 @@ describe('FireRepoBase', () => {
 		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(documentSpy).toHaveBeenCalledWith(
 			collectionReference,
-			documentId
+			documentId,
 		);
 		expect(docDataSpy).toHaveBeenCalledWith(docRefStub, { idField });
 	});
@@ -125,7 +125,7 @@ describe('FireRepoBase', () => {
 					id: '2B',
 					data: () => ({ name: 'Test 3', category: 'Unit' }),
 				},
-			] as any)
+			] as any),
 		);
 
 		// Act
@@ -133,15 +133,15 @@ describe('FireRepoBase', () => {
 			service.readMany<TestRecord>(
 				collectionPath,
 				queryConstraints,
-				idField
-			)
+				idField,
+			),
 		);
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith(collectionPath);
 		expect(querySpy).toHaveBeenCalledWith(
 			collectionReference,
-			queryConstraints
+			queryConstraints,
 		);
 		expect(rxCollectionSpy).toHaveBeenCalledWith(queryStub);
 		expect(result.length).toBe(3);
@@ -166,7 +166,7 @@ describe('FireRepoBase', () => {
 
 		// Act
 		const result = await firstValueFrom(
-			service.readMany<TestRecord>(collectionPath)
+			service.readMany<TestRecord>(collectionPath),
 		);
 
 		// Assert
@@ -247,7 +247,7 @@ describe('FireRepoBase', () => {
 
 		// Act
 		await firstValueFrom(
-			service.update(collectionPath, doc.id!, doc, true)
+			service.update(collectionPath, doc.id!, doc, true),
 		);
 
 		// Assert

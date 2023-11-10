@@ -9,10 +9,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {
 	AuthWrapper,
+	connectFirestoreEmulator,
+	getFirestore,
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
-} from '@core/*';
+	provideFirestore,
+} from '@santashop/core';
 import { RouteReuseStrategy } from '@angular/router';
 import {
 	RecaptchaSettings,
@@ -20,7 +23,8 @@ import {
 	RECAPTCHA_SETTINGS,
 } from 'ng-recaptcha';
 
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { initializeAppCheck, provideAppCheck, ReCaptchaV3Provider } from '@angular/fire/app-check';
 import {
 	provideAuth,
 	connectAuthEmulator,
@@ -37,12 +41,7 @@ import {
 	getFunctions,
 	provideFunctions,
 } from '@angular/fire/functions';
-import {
-	connectFirestoreEmulator,
-	getFirestore,
-	provideFirestore,
-	enableMultiTabIndexedDbPersistence,
-} from '@angular/fire/firestore';
+import { enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
 import {
 	getAnalytics,
 	provideAnalytics,
@@ -58,6 +57,10 @@ let resolvePersistenceEnabled: (enabled: boolean) => void;
 export const persistenceEnabled = new Promise<boolean>((resolve) => {
 	resolvePersistenceEnabled = resolve;
 });
+
+if (!environment.production) {
+	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
 
 // TODO: THis is a huge fucking mess. Make these into functions and use here instead
 @NgModule({
@@ -78,6 +81,10 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 			animated: true,
 		}),
 		provideFirebaseApp(() => initializeApp(firebaseConfig)),
+		provideAppCheck(() => initializeAppCheck(getApp(), {
+        	provider: new ReCaptchaV3Provider(environment.appCheckKey),
+			isTokenAutoRefreshEnabled: true
+      	})),
 		provideAuth(() => {
 			const auth = getAuth();
 			if (!environment.production) {
@@ -112,7 +119,7 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 			}
 			enableMultiTabIndexedDbPersistence(firestore).then(
 				() => resolvePersistenceEnabled(true),
-				() => resolvePersistenceEnabled(false)
+				() => resolvePersistenceEnabled(false),
 			);
 			return firestore;
 		}),
@@ -124,7 +131,7 @@ export const persistenceEnabled = new Promise<boolean>((resolve) => {
 	providers: [
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
-		{ provide: PROGRAM_YEAR, useValue: 2022 },
+		{ provide: PROGRAM_YEAR, useValue: 2023 },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 		ScreenTrackingService,

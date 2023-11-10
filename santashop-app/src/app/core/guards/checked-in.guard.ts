@@ -17,18 +17,18 @@ export class CheckedInGuard implements CanActivate, CanActivateChild {
 
 	public canActivate(
 		_route: ActivatedRouteSnapshot,
-		_state: RouterStateSnapshot
+		_state: RouterStateSnapshot,
 	): Observable<boolean> {
 		return this.checkinService.hasCheckIn$.pipe(
-			switchMap((hasCheckIn) => (hasCheckIn ? of(false) : of(true)))
+			switchMap((hasCheckIn) => (hasCheckIn ? of(false) : of(true))),
 		);
 	}
 	public canActivateChild(
 		_childRoute: ActivatedRouteSnapshot,
-		_state: RouterStateSnapshot
+		_state: RouterStateSnapshot,
 	): Observable<boolean> {
 		return this.checkinService.hasCheckIn$.pipe(
-			switchMap((hasCheckIn) => (hasCheckIn ? of(false) : of(true)))
+			switchMap((hasCheckIn) => (hasCheckIn ? of(false) : of(true))),
 		);
 	}
 }

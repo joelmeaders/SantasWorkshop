@@ -4,5 +4,6 @@
 	"compilerOptions": {
 		"outDir": "../out-tsc/app"
 	},
-	"files": ["src/main.ts", "src/polyfills.ts"]
+	"files": ["src/main.ts", "src/polyfills.ts"],
+	"exclude": ["src/test.ts", "**/*.spec.ts"]
 }

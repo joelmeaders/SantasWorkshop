@@ -146,7 +146,6 @@ export class PreRegistrationService implements OnDestroy {
 		const hasChildren = registration.children?.length;
 		const hasDateTime = registration.dateTimeSlot?.dateTime;
 		const isSubmitted = registration.registrationSubmittedOn;
-		console.log(!!hasChildren && !!hasDateTime && !isSubmitted);
 		return !!hasChildren && !!hasDateTime && !isSubmitted;
 	}
 

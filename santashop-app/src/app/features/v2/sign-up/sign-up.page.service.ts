@@ -42,7 +42,6 @@ export class SignUpPageService implements OnDestroy {
 		this.subscriptions.push(
 			this.redirectIfLoggedInSubscription.subscribe(),
 		);
-		this.form.errors$.pipe(tap((v) => console.log(v))).subscribe();
 	}
 
 	public ngOnDestroy(): void {

@@ -134,7 +134,6 @@ export class AppStateService implements OnDestroy {
 			cssClass: 'disabled-backdrop',
 		});
 
-		console.log('presenting', toBeDisplayed.name, new Date());
 		await modal.present();
 	}
 

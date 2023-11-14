@@ -7,9 +7,12 @@ import {
 	BrowserDynamicTestingModule,
 	platformBrowserDynamicTesting,
 } from '@angular/platform-browser-dynamic/testing';
+import { autoUnsubscribe } from '@hirez_io/observer-spy';
 
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
 	BrowserDynamicTestingModule,
 	platformBrowserDynamicTesting(),
 );
+
+autoUnsubscribe();

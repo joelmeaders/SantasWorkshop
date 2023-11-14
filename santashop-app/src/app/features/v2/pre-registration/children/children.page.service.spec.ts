@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
-import { Registration } from '../@santashop/models';
+import { Registration } from '../../../../../../../santashop-models/src';
 import {
 	getFunctionSpy,
 	getPropertySpy,

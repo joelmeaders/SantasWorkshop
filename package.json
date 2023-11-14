@@ -64,6 +64,7 @@
 		"@angular/cli": "^16.2.6",
 		"@angular/compiler-cli": "^16.2.10",
 		"@biesbjerg/ngx-translate-extract": "^7.0.4",
+		"@hirez_io/observer-spy": "^2.2.0",
 		"@ionic/angular-toolkit": "^10.0.0",
 		"@ngneat/eslint-plugin-reactive-forms": "^4.0.0",
 		"@types/grecaptcha": "^3.0.6",

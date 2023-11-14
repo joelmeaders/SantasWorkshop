@@ -46,8 +46,6 @@ export default async (docChange: functions.firestore.QueryDocumentSnapshot) => {
 		dateTime: dateTime,
 	};
 
-	console.log(email, messageDetails);
-
 	if (!sesClient)
 		sesClient = new SESClient({ credentials, region } as SESClientConfig);
 

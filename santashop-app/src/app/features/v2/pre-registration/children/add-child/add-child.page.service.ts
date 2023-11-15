@@ -5,6 +5,9 @@ import {
 	PROGRAM_YEAR,
 	yyyymmddToLocalDate,
 	getAgeFromDate,
+	validateChild,
+	MAX_BIRTHDATE,
+	MIN_BIRTHDATE,
 } from '@santashop/core';
 import { AlertController } from '@ionic/angular';
 import {
@@ -17,8 +20,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import {
-	ChildValidationService,
-	MAX_BIRTHDATE,
 	PreRegistrationService,
 } from '../../../../../core';
 import { newChildForm } from './child.form';
@@ -51,10 +52,12 @@ export class AddChildPageService implements OnDestroy {
 		private readonly preRegistrationService: PreRegistrationService,
 		private readonly alertController: AlertController,
 		private readonly translateService: TranslateService,
-		private readonly childValidationService: ChildValidationService,
 		private readonly router: Router,
 		private readonly analytics: Analytics,
-	) {}
+	) {
+	console.log(MIN_BIRTHDATE())
+
+	}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();
@@ -102,7 +105,7 @@ export class AddChildPageService implements OnDestroy {
 
 		try {
 			const validatedChild =
-				this.childValidationService.validateChild(updatedChild);
+				validateChild(updatedChild);
 			delete validatedChild.error;
 			const updatedChildren = children?.filter(
 				(child) => child.id !== validatedChild.id,
@@ -209,7 +212,7 @@ export class AddChildPageService implements OnDestroy {
 
 		try {
 			const validatedChild =
-				this.childValidationService.validateChild(child);
+				validateChild(child);
 			children?.push(validatedChild);
 			logEvent(this.analytics, 'add_child');
 			return await this.updateRegistration(children);

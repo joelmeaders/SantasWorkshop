@@ -3,7 +3,7 @@ import { AlertController } from '@ionic/angular';
 import { Child } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, tap } from 'rxjs';
-import { AppStateService, ChildValidationService } from '../../../../core';
+import { AppStateService } from '../../../../core';
 import { ChildrenPageService } from './children.page.service';
 import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 
@@ -12,7 +12,7 @@ import { RegistrationClosedPage } from '../../../registration-closed/registratio
 	templateUrl: './children.page.html',
 	styleUrls: ['./children.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ChildrenPageService, ChildValidationService],
+	providers: [ChildrenPageService],
 })
 export class ChildrenPage {
 	public readonly children$: Observable<Child[] | undefined> =

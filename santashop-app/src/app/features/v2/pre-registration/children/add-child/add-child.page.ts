@@ -1,13 +1,10 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MOBILE_EVENT } from '@santashop/core';
+import { MOBILE_EVENT, MAX_BIRTHDATE, MIN_BIRTHDATE } from '@santashop/core';
 import { filter, map, takeUntil, tap } from 'rxjs/operators';
 import { AddChildPageService } from './add-child.page.service';
 import {
 	AppStateService,
-	ChildValidationService,
-	MAX_BIRTHDATE,
-	MIN_BIRTHDATE,
 } from '../../../../../core';
 import { RegistrationClosedPage } from '../../../../registration-closed/registration-closed.page';
 
@@ -16,7 +13,7 @@ import { RegistrationClosedPage } from '../../../../registration-closed/registra
 	templateUrl: './add-child.page.html',
 	styleUrls: ['./add-child.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ChildValidationService, AddChildPageService],
+	providers: [AddChildPageService],
 })
 export class AddChildPage {
 	public readonly setChildSubscription = this.route.queryParamMap

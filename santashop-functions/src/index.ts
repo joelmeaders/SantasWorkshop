@@ -124,7 +124,7 @@ export const sendNewRegistrationEmails = functions
  * At 00:00 in November and December
  */
 export const scheduledFirestoreBackup = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1, failurePolicy: false  })
+	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1 })
 	.pubsub
 	.schedule('0 0 * 11,12 *')
 	.onRun(async () => {
@@ -133,7 +133,7 @@ export const scheduledFirestoreBackup = functions
 
 // At every 15th minute in November and December.
 export const scheduledDateTimeSlotCounters = functions
-	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1 })
 	.pubsub
 	.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
@@ -142,7 +142,7 @@ export const scheduledDateTimeSlotCounters = functions
 
 // At minute 0 past every 6th hour in November and December.
 export const scheduledDateTimeSlotReschedules = functions
-	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1 })
 	.pubsub
 	.schedule('0 */6 * 11,12 *')
 	.onRun(async () => {
@@ -151,7 +151,7 @@ export const scheduledDateTimeSlotReschedules = functions
 
 // “At 23:59.” (11:59 PM) every day.
 export const scheduledRegistrationStats = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1, failurePolicy: false  })
+	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1 })
 	.pubsub
 	.schedule('59 23 * * *')
 	.timeZone('America/Denver')
@@ -161,7 +161,7 @@ export const scheduledRegistrationStats = functions
 
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
 export const scheduledCheckInStats = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1, failurePolicy: false  })
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
 	.pubsub
 	.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
 	.timeZone('America/Denver')
@@ -170,73 +170,76 @@ export const scheduledCheckInStats = functions
 	});
 
 // ------------------------------------- PUBSUB FUNCTIONS
-export const pubsubResetCheckInStats = functions.pubsub
-	.topic('reset-checkin-stats')
+export const pubsubResetCheckInStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('reset-checkin-stats')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubResetCheckInStats')).default();
 	});
 
-export const pubsubSetAdminRights = functions.pubsub
-	.topic('set-admin-rights')
+export const pubsubSetAdminRights = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('set-admin-rights')
 	.onPublish(async () => {
 		await (await import('./fn/scheduledSetAdminRights')).default();
 	});
 
-export const pubsubQueueReminderDocuments = functions.pubsub
-	.topic('queue-reminder-documents')
+export const pubsubQueueReminderDocuments = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('queue-reminder-documents')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubQueueReminderDocuments')).default();
 	});
 
-export const pubsubSendReminderEmails = functions.pubsub
-	.topic('send-reminder-emails')
+export const pubsubSendReminderEmails = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('send-reminder-emails')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubSendReminderEmails')).default();
 	});
 
-export const recalculateAllDateTimeSlots = functions.pubsub
-	.topic('recalc-all-slots')
+export const recalculateAllDateTimeSlots = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('recalc-all-slots')
 	.onPublish(async () => {
 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
 	});
 
-export const pubsubUserStats = functions.pubsub
-	.topic('user-stats')
+export const pubsubUserStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('user-stats')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubUserStats')).default();
 	});
 
-export const pubsubMarkRegistrationsCheckedIn = functions.pubsub
-	.topic('mark-registrations-checked-in')
+export const pubsubMarkRegistrationsCheckedIn = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('mark-registrations-checked-in')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
 	});
 
-export const pubsubExportEmails = functions.pubsub
-	.topic('export-emails')
+export const pubsubExportEmails = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('export-emails')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubExportEmails')).default();
 	});
 
 // This method checks for existing dates/times.
 // If there are none it adds them
-export const pubsubAddDateTimeSlots = functions.pubsub
-	.topic('create-datetime-slots')
+export const pubsubAddDateTimeSlots = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('create-datetime-slots')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubAddDateTimeSlots')).default();
 	});
 
 // Deletes all users except for disabled accounts
-export const pubsubDeleteUsers = functions.pubsub
-	.topic('delete-users')
+export const pubsubDeleteUsers = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('delete-users')
 	.onPublish(async () => {
 		await (await import('./fn/pubsubDeleteUsers')).default();
 	});
 
-// Creates a new email template in AWS SES
-export const pubsubCreateNewEmailTemplate = functions
-	.runWith({ secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] })
-	.pubsub.topic('create-email-template')
-	.onPublish(async () => {
-		await (await import('./fn/pubsubCreateNewEmailTemplate')).default();
-	});

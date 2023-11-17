@@ -38,5 +38,6 @@ $RECYCLE.BIN/
 .firebase/**
 # Firebase
 .firebase
+.firebase*
 *-debug.log
 .runtimeconfig.json

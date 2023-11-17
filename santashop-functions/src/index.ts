@@ -125,8 +125,7 @@ export const sendNewRegistrationEmails = functions
  */
 export const scheduledFirestoreBackup = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1 })
-	.pubsub
-	.schedule('0 0 * 11,12 *')
+	.pubsub.schedule('0 0 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
@@ -134,8 +133,7 @@ export const scheduledFirestoreBackup = functions
 // At every 15th minute in November and December.
 export const scheduledDateTimeSlotCounters = functions
 	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub
-	.schedule('*/15 * * 11,12 *')
+	.pubsub.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
 	});
@@ -143,8 +141,7 @@ export const scheduledDateTimeSlotCounters = functions
 // At minute 0 past every 6th hour in November and December.
 export const scheduledDateTimeSlotReschedules = functions
 	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub
-	.schedule('0 */6 * 11,12 *')
+	.pubsub.schedule('0 */6 * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
 	});
@@ -152,11 +149,18 @@ export const scheduledDateTimeSlotReschedules = functions
 // “At 23:59.” (11:59 PM) every day.
 export const scheduledRegistrationStats = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 240, maxInstances: 1 })
-	.pubsub
-	.schedule('59 23 * * *')
+	.pubsub.schedule('59 23 * * *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledRegistrationStats')).default();
+	});
+
+// “At 23:55.” (11:55 PM) every day in November and December.
+export const scheduledUserStats = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.schedule('55 23 * 11,12 *')
+	.onRun(async () => {
+		await (await import('./fn/scheduledUserStats')).default();
 	});
 
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
@@ -203,13 +207,6 @@ export const recalculateAllDateTimeSlots = functions
 	.pubsub.topic('recalc-all-slots')
 	.onPublish(async () => {
 		await (await import('./fn/recalculateAllDateTimeSlots')).default();
-	});
-
-export const pubsubUserStats = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.topic('user-stats')
-	.onPublish(async () => {
-		await (await import('./fn/pubsubUserStats')).default();
 	});
 
 export const pubsubMarkRegistrationsCheckedIn = functions

@@ -120,8 +120,6 @@ export class RegistrationPage {
 			dateTimeSlot: { id: 'onsite' },
 		} as Registration;
 
-		console.log(registration);
-
 		try {
 			const result: number =
 				await this.checkinService.onSiteRegistration(registration);
@@ -132,7 +130,6 @@ export class RegistrationPage {
 			);
 			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {
-			console.log(error);
 			if (error.details.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([

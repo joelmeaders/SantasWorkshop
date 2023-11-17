@@ -11,7 +11,6 @@ import {
 	switchMap,
 	tap,
 	throttleTime,
-	timer,
 } from 'rxjs';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { ScannerService } from './scanner.service';
@@ -88,12 +87,7 @@ export class ScanPage {
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
 		private readonly router: Router,
-	) {
-		timer(1000).subscribe(() => {
-			this.scanResult.next('GD96NRCM');
-			console.log('faked scan result');
-		});
-	}
+	) {	}
 
 	public ionViewWillEnter(): void {
 		this.scanErrorSubscription = this.scanError$.subscribe();
@@ -149,7 +143,6 @@ export class ScanPage {
 
 	private async invalidCodeAlert(): Promise<any> {
 		const alertOkHandler = (value: { [key: string]: string }): void => {
-			console.log(value[0]);
 			if ((value[0]?.length ?? 0) >= 7) this.scanResult.next(value[0]);
 		};
 

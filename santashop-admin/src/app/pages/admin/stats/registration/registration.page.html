@@ -53,13 +53,14 @@
 			*ngIf="girlBoyInfantCounts$ | async as gender"
 			class="ion-justify-content-evenly"
 		>
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="4">
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
 				<h2>Gender</h2>
 				<canvas
 					baseChart
-					[datasets]="[ { data: gender, datalabels: { font: { size: 24, weight: 700 } } } ]"
+					[options]="chartOptions"
+					[datasets]="[ { data: gender, backgroundColor: colorSettings.backgroundColor, borderColor: colorSettings.borderColor, borderWidth: 1} ]"
 					[labels]="[ 'Girls', 'Boys', 'Infants' ]"
-					[legend]="true"
+					[legend]="false"
 					type="doughnut"
 				></canvas>
 			</ion-col>
@@ -68,14 +69,14 @@
 				sizeXs="12"
 				sizeSm="6"
 				sizeMd="6"
-				sizeLg="4"
+				sizeLg="6"
 				*ngIf="topTenZipCodesCountData$ | async as pieData"
 			>
 				<h2>Top Zip Codes</h2>
 				<canvas
 					baseChart
 					[data]="pieData"
-					[options]="pieChartOptions"
+					[options]="zipCodeOptions"
 					[legend]="false"
 					type="doughnut"
 				></canvas>

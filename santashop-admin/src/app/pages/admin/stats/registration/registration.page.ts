@@ -100,7 +100,7 @@ export class RegistrationPage {
 				datasets: [
 					{
 						data: [],
-						datalabels: { font: { size: 16, weight: 'bold' } },
+						...this.colorSettings
 					},
 				],
 			};
@@ -139,18 +139,51 @@ export class RegistrationPage {
 		borderWidth: 1,
 	};
 
-	public pieChartOptions: ChartConfiguration['options'] = {
+	public zipCodeOptions: ChartConfiguration['options'] = {
 		responsive: true,
 		plugins: {
-			legend: {
-				display: true,
-				position: 'top',
-			},
 			datalabels: {
+				clamp: false,
+				color: '#FFF',
+				align: 'end',
+				anchor: 'start',
+				textAlign: 'start',
+				textShadowColor: '#000',
+				textShadowBlur: 5,
+				textStrokeColor: '#000',
+				textStrokeWidth: 2,
+				font: {
+					size: 20,
+					weight: 'bold'
+				},
 				formatter: (_, ctx) => {
 					if (ctx.chart.data.labels) {
 						return ctx.chart.data.labels[ctx.dataIndex];
 					}
+				},
+			},
+		},
+	};
+
+	public chartOptions: ChartConfiguration['options'] = {
+		responsive: true,
+		plugins: {
+			datalabels: {
+				clamp: false,
+				color: '#FFF',
+				align: 'end',
+				anchor: 'start',
+				textAlign: 'start',
+				textShadowColor: '#000',
+				textShadowBlur: 5,
+				textStrokeColor: '#000',
+				textStrokeWidth: 2,
+				font: {
+					size: 20,
+					weight: 'bold'
+				},
+				formatter: (value, ctx) => {
+					return `${value} ${ctx.chart?.data?.labels![ctx.dataIndex]}`;
 				},
 			},
 		},
@@ -171,7 +204,18 @@ export class RegistrationPage {
 			},
 			datalabels: {
 				anchor: 'end',
-				align: 'end',
+				align: 'bottom',
+				clamp: false,
+				color: '#FFF',
+				textAlign: 'start',
+				textShadowColor: '#000',
+				textShadowBlur: 5,
+				textStrokeColor: '#000',
+				textStrokeWidth: 2,
+				font: {
+					size: 20,
+					weight: 'bold'
+				},
 			},
 		},
 	};
@@ -186,12 +230,17 @@ export class RegistrationPage {
 		}[] = [
 			{
 				datasets: [
+					{ data: [], label: 'Dec 8th', ...this.colorSettings },
+				],
+			},
+			{
+				datasets: [
 					{ data: [], label: 'Dec 9th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 10th', ...this.colorSettings },
+					{ data: [], label: 'Dec 11th', ...this.colorSettings },
 				],
 			},
 			{
@@ -199,22 +248,17 @@ export class RegistrationPage {
 					{ data: [], label: 'Dec 12th', ...this.colorSettings },
 				],
 			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 13th', ...this.colorSettings },
-				],
-			},
 		];
 
 		const getDayIndex = (date: Date): number => {
 			switch (date.getDate()) {
-				case 9:
+				case 8:
 					return 0;
-				case 10:
+				case 9:
 					return 1;
-				case 12:
+				case 11:
 					return 2;
-				case 13:
+				case 12:
 					return 3;
 
 				default:

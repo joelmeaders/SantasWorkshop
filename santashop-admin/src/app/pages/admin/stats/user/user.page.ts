@@ -62,11 +62,13 @@ export class UserPage {
 				textAlign: 'start',
 				textShadowColor: '#000',
 				textShadowBlur: 5,
+				textStrokeColor: '#000',
+				textStrokeWidth: 2,
 				font: {
-					size: 16,
+					size: 20,
+					weight: 'bold'
 				},
 				formatter: (_, ctx) => {
-					console.log(ctx);
 					return `${ctx.dataset?.data[0]} - ${ctx.dataset.label}`;
 				},
 			},
@@ -100,11 +102,13 @@ export class UserPage {
 				textAlign: 'start',
 				textShadowColor: '#000',
 				textShadowBlur: 5,
+				textStrokeColor: '#000',
+				textStrokeWidth: 2,
 				font: {
-					size: 16,
+					size: 20,
+					weight: 'bold'
 				},
 				formatter: (_, ctx) => {
-					console.log(ctx);
 					return `${ctx.dataset?.data[0]} Families - ${ctx.dataset.label}`;
 				},
 			},

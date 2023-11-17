@@ -29,7 +29,15 @@ function getZipCodeCounts(users: User[]): UsersByZipCodeCount[] {
 	const stats: UsersByZipCodeCount[] = [];
 	let valueUndefined = 0;
 
-	const zips = Array.from(new Set(users.map((e) => e.zipCode.slice(0, 5))));
+	let zips: string[] = []; 
+	
+	zips = Array.from(
+		new Set(users.map((e) => {
+			const zip = (e.zipCode as unknown as number).toString();
+			return zip.slice(0, 5);
+		}))
+	);
+
 	zips.forEach((e) => {
 		if (e?.length) {
 			stats.push({ zip: e, count: 0 });
@@ -42,7 +50,7 @@ function getZipCodeCounts(users: User[]): UsersByZipCodeCount[] {
 
 	// Increment zip count
 	users.forEach((user) => {
-		const zipCode = user.zipCode.slice(0, 5) ?? 'not-defined';
+		const zipCode = (user.zipCode as unknown as number).toString().slice(0, 5);
 		const index = getIndex(zipCode);
 
 		if (index === -1) {

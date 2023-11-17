@@ -28,8 +28,12 @@ export class SignInPage {
 	) {}
 
 	public async login(): Promise<void> {
-		await this.authService
+		try {
+			await this.authService
 			.login({ ...this.form.value })
 			.then(() => this.router.navigate(['/admin']));
+		} catch (error) {
+			console.error(error);
+		}
 	}
 }

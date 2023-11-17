@@ -16,6 +16,7 @@
 		"functions:deploy:prod": "firebase use santas-workshop-193b5 && firebase deploy --only functions",
 		"emulators:start": "firebase use santas-workshop-test && firebase emulators:start --import .firebase --export-on-exit",
 		"emulators:start:noexport": "firebase use santas-workshop-test && firebase emulators:start --import .firebase",
+		"emulators:start:sample": "firebase use santas-workshop-test && firebase emulators:start --import .firebase-sample-data --export-on-exit .firebase-sample-data",
 		"fsrules:deploy": "firebase deploy --only firestore:rules",
 		"prettier:format": "npx prettier --end-of-line auto --write .",
 		"ci:admin:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",

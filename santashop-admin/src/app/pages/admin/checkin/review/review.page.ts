@@ -121,7 +121,6 @@ export class ReviewPage {
 			);
 			this.router.navigate(['admin/checkin/confirmation']);
 		} catch (error: any) {
-			console.log(error);
 			if (error.details.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([

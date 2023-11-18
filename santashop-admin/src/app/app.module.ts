@@ -6,6 +6,7 @@ import {
 	provideFirestore,
 	getFirestore,
 	connectFirestoreEmulator,
+	enableMultiTabIndexedDbPersistence,
 } from '@angular/fire/firestore';
 import {
 	provideFunctions,
@@ -20,10 +21,6 @@ import { environment, firebaseConfig } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
-if (!environment.production) {
-	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-}
 
 @NgModule({
 	declarations: [AppComponent],
@@ -52,6 +49,7 @@ if (!environment.production) {
 			if (!environment.production) {
 				connectFirestoreEmulator(firestore, 'localhost', 8080);
 			}
+			enableMultiTabIndexedDbPersistence(firestore);
 			return firestore;
 		}),
 		provideFunctions(() => {

@@ -8,13 +8,20 @@ import { AuthService } from '@santashop/core';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingPage {
-	constructor(private readonly authService: AuthService) {}
 
-	public async logout(): Promise<void> {
-		await this.authService.logout();
+	public prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+	constructor(private readonly authService: AuthService) {
+		document.body.classList.toggle('dark', this.prefersDark);
 	}
 
-	public toggleTheme($event: any): void {
-		document.body.classList.toggle('dark', $event.detail.checked);
+	public async signOut(): Promise<void> {
+		await this.authService.logout();
+		window.location.reload();
+	}
+
+	public toggleTheme(): void {
+		this.prefersDark = !this.prefersDark;
+		document.body.classList.toggle('dark', this.prefersDark);
 	}
 }

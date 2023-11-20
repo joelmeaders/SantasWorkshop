@@ -4,4 +4,9 @@ export interface PublicParameters {
 	weatherModeEnabled: boolean;
 	messageEn: string;
 	messageEs: string;
+	admin: {
+		checkinEnabled: boolean;
+		onsiteRegistrationEnabled: boolean;
+		preRegistrationEnabled: boolean;
+	}
 }

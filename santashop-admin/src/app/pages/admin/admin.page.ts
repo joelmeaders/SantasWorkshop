@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AppStateService } from '../../shared/services/app-state.service';
 
 @Component({
 	selector: 'admin-admin',
@@ -6,4 +7,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 	styleUrls: ['./admin.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminPage {}
+export class AdminPage {
+	private readonly appStateService = inject(AppStateService);
+
+	public readonly preRegistrationEnabled$ = this.appStateService.preRegistrationEnabled$;
+	public readonly onsiteRegistrationEnabled$ = this.appStateService.onsiteRegistrationEnabled$;
+	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+}

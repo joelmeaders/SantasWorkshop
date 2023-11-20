@@ -9,7 +9,7 @@
 				[routerLink]="['/admin/checkin']"
 				routerLinkActive="tab-selected"
 				routerDirection="root"
-				disabled
+				[disabled]="(checkinEnabled$ | async) === false"
 			>
 				<ion-icon name="bag-check-outline" color="success"></ion-icon>
 				<ion-label>Check-In</ion-label>
@@ -28,10 +28,10 @@
 				[routerLink]="['/admin/registration']"
 				routerLinkActive="tab-selected"
 				routerDirection="root"
-				disabled
+				[disabled]="(onsiteRegistrationEnabled$ | async) === false"
 			>
-				<ion-icon name="person-add-outline" color="primary"></ion-icon>
-				<ion-label>Register</ion-label>
+				<ion-icon name="storefront-outline" color="primary"></ion-icon>
+				<ion-label>Registration</ion-label>
 			</ion-tab-button>
 		</ion-tab-bar>
 	</ion-toolbar>

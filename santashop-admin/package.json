@@ -18,6 +18,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@santashop/models": "*"
+		"@santashop/models": "*",
+		"@santashop/core": "*"
 	}
 }

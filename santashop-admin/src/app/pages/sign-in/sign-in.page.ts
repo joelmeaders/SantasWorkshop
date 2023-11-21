@@ -6,6 +6,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '@santashop/core';
+import { environment } from '../../../environments/environment';
 
 @Component({
 	selector: 'admin-sign-in',
@@ -14,6 +15,10 @@ import { AuthService } from '@santashop/core';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInPage {
+
+	public readonly environmentName = `${environment.name}_${environment.label}`;
+	public readonly environmentVersion = environment.version;
+
 	protected readonly form = new UntypedFormGroup({
 		emailAddress: new UntypedFormControl(undefined, [
 			Validators.email,

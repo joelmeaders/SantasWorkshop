@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FireRepoLite, QueryConstraint } from '@santashop/core';
+import { FireRepoLite, QueryConstraint, User } from '@santashop/core';
 import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@santashop/models';
 import { limit, orderBy, where } from 'firebase/firestore';
 import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
@@ -18,6 +18,11 @@ export class SearchService {
 	private readonly index =
 		this.repoService.collection<RegistrationSearchIndex>(
 			COLLECTION_SCHEMA.registrationSearchIndex,
+		);
+
+	private readonly users =
+		this.repoService.collection<User>(
+			COLLECTION_SCHEMA.users,
 		);
 
 	private readonly queryLastNameZip = (
@@ -63,6 +68,12 @@ export class SearchService {
 		this.searchResults.next(
 			this.index.readMany(this.queryCode(code.toUpperCase())),
 		);
+	}
+
+	// This method operates differently than the others. It returns a list of users directly
+	public searchUsersByEmailAddress(emailAddress: string): Observable<User[]> {
+		const queryConstraint = where('emailAddress', '==', emailAddress.toLowerCase());
+		return this.users.readMany([queryConstraint]);
 	}
 
 	public reset(): void {

@@ -9,6 +9,8 @@ export interface Registration {
 	emailAddress?: string;
 	programYear?: number;
 	children?: Child[];
+	// Added in 2023 and used by admin pre-registration
+	newsletter?: boolean;
 
 	// Date/Time slot chosen by the user
 	dateTimeSlot?: Partial<DateTimeSlot>;

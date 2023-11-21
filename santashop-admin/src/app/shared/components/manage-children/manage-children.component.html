@@ -10,7 +10,17 @@
 </ion-item-divider>
 
 <ion-item *ngIf="!children?.length" button detail (click)="addEditChild()">
-	<ion-label> Add children </ion-label>
+	<span>
+		<ion-label> Add children </ion-label>
+		<ion-note
+			color="danger"
+			slot="error"
+			*ngIf="!children.length"
+			class="error-note"
+		>
+			Add all children ages 0-11
+		</ion-note>
+	</span>
 </ion-item>
 
 <ion-item-sliding #slider *ngFor="let child of children">

@@ -1,7 +1,12 @@
 <ion-content class="ion-padding ion-text-center">
 	<ion-list>
 		<ion-list-header> DSCS Event Administration </ion-list-header>
-		<ion-item detail routerLink="../checkin" disabled>
+		<ion-item
+			detail
+			routerLink="../checkin"
+			disabled
+			[disabled]="(checkinEnabled$ | async) === false"
+		>
 			<ion-icon
 				name="bag-check-outline"
 				color="success"
@@ -17,13 +22,29 @@
 			></ion-icon>
 			Search for customers
 		</ion-item>
-		<ion-item detail routerLink="../registration" disabled>
+		<ion-item
+			detail
+			routerLink="../pre-registration"
+			[disabled]="(preRegistrationEnabled$ | async) === false"
+		>
 			<ion-icon
 				name="person-add-outline"
 				color="primary"
 				slot="start"
 			></ion-icon>
-			Register customers
+			Pre-Registration
+		</ion-item>
+		<ion-item
+			detail
+			routerLink="../registration"
+			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
+		>
+			<ion-icon
+				name="storefront-outline"
+				color="primary"
+				slot="start"
+			></ion-icon>
+			On-Site Registration
 		</ion-item>
 
 		<ion-list-header> DSCS Data </ion-list-header>
@@ -67,7 +88,7 @@
 			<ion-toggle
 				slot="end"
 				(ionChange)="toggleTheme()"
-				[checked]="prefersDark"
+				[checked]="appStateService.prefersDark"
 			></ion-toggle>
 		</ion-item>
 	</ion-list>

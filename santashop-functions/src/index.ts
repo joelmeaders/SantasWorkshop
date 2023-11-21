@@ -94,6 +94,17 @@ export const onSiteRegistration = functions
 	},
 );
 
+export const callableAdminPreRegister = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
+	async (request, context) => {
+		return (await import('./fn/callableAdminPreRegister')).default(
+			request,
+			context,
+		);
+	},
+);
+
 /**
  * Validate recaptcha response.
  *

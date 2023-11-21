@@ -71,7 +71,11 @@ const routes: Routes = [
 					),
 			},
 		],
-	},
+	},  {
+    path: 'pre-registration',
+    loadChildren: () => import('./pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule)
+  },
+
 ];
 
 @NgModule({

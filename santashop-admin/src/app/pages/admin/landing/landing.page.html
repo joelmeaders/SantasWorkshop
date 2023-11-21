@@ -88,7 +88,7 @@
 			<ion-toggle
 				slot="end"
 				(ionChange)="toggleTheme()"
-				[checked]="prefersDark"
+				[checked]="appStateService.prefersDark"
 			></ion-toggle>
 		</ion-item>
 	</ion-list>

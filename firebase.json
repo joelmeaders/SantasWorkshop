@@ -97,6 +97,10 @@
 					"function": "onSiteRegistration"
 				},
 				{
+					"source": "/callableAdminPreRegister",
+					"function": "callableAdminPreRegister"
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}

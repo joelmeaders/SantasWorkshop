@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AppStateService } from './shared/services/app-state.service';
 
 @Component({
 	selector: 'admin-root',
@@ -6,4 +7,10 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 	styleUrls: ['app.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {}
+export class AppComponent {
+	private readonly appStateService = inject(AppStateService);
+
+	constructor() {
+		document.body.classList.toggle('dark', this.appStateService.prefersDark);
+	}
+}

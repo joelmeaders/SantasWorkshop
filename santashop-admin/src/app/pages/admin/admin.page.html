@@ -6,6 +6,15 @@
 	<ion-toolbar>
 		<ion-tab-bar>
 			<ion-tab-button
+				[routerLink]="['/admin/landing']"
+				routerLinkActive="tab-selected"
+				routerDirection="root"
+			>
+				<ion-icon name="storefront-outline" color="tertiary"></ion-icon>
+				<ion-label>Home</ion-label>
+			</ion-tab-button>
+
+			<ion-tab-button
 				[routerLink]="['/admin/checkin']"
 				routerLinkActive="tab-selected"
 				routerDirection="root"

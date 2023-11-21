@@ -12,13 +12,7 @@ export class LandingPage {
 
 	private readonly authService = inject(AuthService);
 	
-	private readonly appStateService = inject(AppStateService);
-
-	public prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-	constructor() {
-		document.body.classList.toggle('dark', this.prefersDark);
-	}
+	protected readonly appStateService = inject(AppStateService);
 
 	public readonly preRegistrationEnabled$ = this.appStateService.preRegistrationEnabled$;
 
@@ -32,7 +26,7 @@ export class LandingPage {
 	}
 
 	public toggleTheme(): void {
-		this.prefersDark = !this.prefersDark;
-		document.body.classList.toggle('dark', this.prefersDark);
+		this.appStateService.prefersDark = !this.appStateService.prefersDark;
+		document.body.classList.toggle('dark', this.appStateService.prefersDark);
 	}
 }

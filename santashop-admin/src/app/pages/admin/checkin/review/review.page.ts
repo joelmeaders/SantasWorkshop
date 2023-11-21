@@ -12,6 +12,7 @@ import {
 	tap,
 } from 'rxjs';
 import { filterNullish } from '../../../../shared/helpers';
+import { AppStateService } from '../../../../shared/services/app-state.service';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -23,6 +24,9 @@ import { LookupService } from '../../../../shared/services/lookup.service';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewPage {
+
+	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+
 	public wasEdited = false;
 
 	public readonly registration$ = this.checkinContext.currentRegistration$;
@@ -55,6 +59,7 @@ export class ReviewPage {
 		private readonly checkinContext: CheckInContextService,
 		private readonly lookupService: LookupService,
 		private readonly checkinService: CheckInService,
+		private readonly appStateService: AppStateService,
 		private readonly alertController: AlertController,
 		private readonly router: Router,
 		private readonly route: ActivatedRoute,

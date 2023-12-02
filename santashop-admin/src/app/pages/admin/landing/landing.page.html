@@ -22,7 +22,11 @@
 			></ion-icon>
 			Search for customers
 		</ion-item>
-		<ion-item detail routerLink="../registration">
+		<ion-item
+			detail
+			routerLink="../registration"
+			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
+		>
 			<ion-icon
 				name="storefront-outline"
 				color="primary"

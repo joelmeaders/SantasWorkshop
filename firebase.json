@@ -101,8 +101,8 @@
 					"function": "callableAdminPreRegister"
 				},
 				{
-					"source": "/callableAdminPreRegister",
-					"function": "callableAdminPreRegister"
+					"source": "/callableResendRegistrationEmail",
+					"function": "callableResendRegistrationEmail"
 				},
 				{
 					"source": "**",

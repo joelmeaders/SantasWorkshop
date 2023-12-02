@@ -105,6 +105,17 @@ export const callableAdminPreRegister = functions
 	},
 );
 
+export const callableResendRegistrationEmail = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(
+	async (request, context) => {
+		return (await import('./fn/callableResendRegistrationEmail')).default(
+			request,
+			context,
+		);
+	},
+);
+
 /**
  * Validate recaptcha response.
  *

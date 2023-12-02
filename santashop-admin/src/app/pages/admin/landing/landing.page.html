@@ -22,6 +22,16 @@
 			></ion-icon>
 			Search for customers
 		</ion-item>
+		<ion-item detail routerLink="../registration">
+			<ion-icon
+				name="storefront-outline"
+				color="primary"
+				slot="start"
+			></ion-icon>
+			On-Site Registration
+		</ion-item>
+
+		<ion-list-header> Tools </ion-list-header>
 		<ion-item
 			detail
 			routerLink="../pre-registration"
@@ -32,19 +42,15 @@
 				color="primary"
 				slot="start"
 			></ion-icon>
-			Pre-Registration
+			Pre-Register Customers
 		</ion-item>
-		<ion-item
-			detail
-			routerLink="../registration"
-			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
-		>
+		<ion-item detail routerLink="../resend-email">
 			<ion-icon
-				name="storefront-outline"
-				color="primary"
+				name="mail-outline"
+				color="tertiary"
 				slot="start"
 			></ion-icon>
-			On-Site Registration
+			Resend Registration Emails
 		</ion-item>
 
 		<ion-list-header> DSCS Data </ion-list-header>

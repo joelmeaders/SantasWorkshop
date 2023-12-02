@@ -136,9 +136,7 @@ export class ScanPage {
 
 	public badCodeFilter(code?: string): Observable<string | undefined> {
 		if (code?.length) code = code.toUpperCase();
-		if (code !== 'XE7UBKJC') return of(code);
-		this.invalidCode.next();
-		return of(undefined);
+		return of(code);
 	}
 
 	private async invalidCodeAlert(): Promise<any> {

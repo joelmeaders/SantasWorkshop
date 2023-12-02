@@ -101,6 +101,10 @@
 					"function": "callableAdminPreRegister"
 				},
 				{
+					"source": "/callableAdminPreRegister",
+					"function": "callableAdminPreRegister"
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}

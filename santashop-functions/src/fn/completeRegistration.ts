@@ -13,9 +13,13 @@ import {
 admin.initializeApp();
 
 export default async (
-	record: Registration,
+	data: { emailAddress: string },
 	context: CallableContext,
 ): Promise<boolean | HttpsError> => {
+
+	const registration = admin.firestore().collection(COLLECTION_SCHEMA.registrations)
+		.where('emailAddress', '==', data.emailAddress);
+
 	if (!isRegistrationComplete(record)) {
 		console.error(
 			new Error(

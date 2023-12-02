@@ -40,6 +40,16 @@ const routes: Routes = [
 					),
 			},
 			{
+				path: 'pre-registration',
+				title: 'DSCS: Pre-Registration',
+				loadChildren: () => import('./pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule)
+			},
+			{
+				path: 'resend-email',
+				title: 'DSCS: Resend Email',
+				loadChildren: () => import('./tools/resend-email/resend-email.module').then( m => m.ResendEmailPageModule)
+			},
+			{
 				path: '',
 				redirectTo: 'landing',
 				pathMatch: 'full',
@@ -71,11 +81,7 @@ const routes: Routes = [
 					),
 			},
 		],
-	},  {
-    path: 'pre-registration',
-    loadChildren: () => import('./pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule)
-  },
-
+	},
 ];
 
 @NgModule({

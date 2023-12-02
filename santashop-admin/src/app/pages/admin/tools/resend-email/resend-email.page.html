@@ -1,0 +1,38 @@
+<admin-header title="Resend Email"></admin-header>
+
+<ion-content class="ion-padding-horizontal">
+	<main class="limited-container">
+		<ion-card-header class="ion-padding-vertical">
+			<p>
+				Enter the customer's email address and then press "Send Email"
+			</p>
+			<ion-card-subtitle>
+				This will only send the email if the customer has an account and
+				their registration has been completed.
+			</ion-card-subtitle>
+		</ion-card-header>
+
+		<form [formGroup]="form">
+			<ion-list>
+				<ion-item>
+					<ion-input
+						label="Email"
+						formControlName="emailAddress"
+						type="email"
+						autocomplete="off"
+						placeholder="required"
+					></ion-input>
+				</ion-item>
+				<ion-button
+					(click)="searchAndSend()"
+					expand="block"
+					[disabled]="!form.valid"
+					class="ion-padding-horizontal"
+				>
+					<ion-icon name="mail-outline" slot="start"></ion-icon>
+					<ion-label> Send Email </ion-label>
+				</ion-button>
+			</ion-list>
+		</form>
+	</main>
+</ion-content>

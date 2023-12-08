@@ -87,7 +87,7 @@ export class ScanPage {
 		private readonly checkinContext: CheckInContextService,
 		private readonly alertController: AlertController,
 		private readonly router: Router,
-	) {	}
+	) { }
 
 	public ionViewWillEnter(): void {
 		this.scanErrorSubscription = this.scanError$.subscribe();

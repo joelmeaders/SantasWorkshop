@@ -7,9 +7,9 @@ export default async (): Promise<void> => {
 	const adminUids: string[] = [
 		'KF2cN3wX3bawCJaghN9JjLvdbB32', // dev
 		'R8YIhtdS7qeV65aYF3jec2plLto1', // admin@denversantaclausshop.org
-		'wBgrMMPo59abiHfMqArNr6YxP8o2', // santa@northpole.com
-		'hHXDyGDTROXMhSNUSF9paJuKhXl2', // admin@santa.com
-		'p9jlQ7aRngO3BWWa1q088nYtdva2', // admin2@santa.com
+		'Z2KeTpGq0YanC8elBlUByPBtDJa2', // santa@northpole.com
+		'FtyCYOpCPRMIPMgv3zLrWG7hQNT2', // admin@santa.com
+		'cljKScnujIaMu4V74tF4CUxaFdl2', // admin2@santa.com
 	];
 
 	adminUids.forEach(async (uid) => {

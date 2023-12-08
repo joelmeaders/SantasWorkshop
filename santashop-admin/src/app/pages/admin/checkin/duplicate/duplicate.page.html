@@ -1,11 +1,12 @@
 <admin-header
-	title="ERROR: PREVIOUS ENTRY"
+	title="Contact DSCS Member"
 	backRoute="/admin/checkin/scan"
 ></admin-header>
 
 <ion-content class="ion-padding-horizontal ion-text-center" color="danger">
 	<ng-container *ngIf="checkin$ | async as checkin">
-		<h1>THIS CUSTOMER HAS ALREADY CHECKED IN!</h1>
+		<h1>THIS CUSTOMER ALREADY GOT TOYS!</h1>
+		<h2>Do not give them tickets. Contact DSCS Member to resolve.</h2>
 
 		<br />
 		Checked in on:

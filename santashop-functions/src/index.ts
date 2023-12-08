@@ -154,18 +154,10 @@ export const scheduledFirestoreBackup = functions
 
 // At every 15th minute in November and December.
 export const scheduledDateTimeSlotCounters = functions
-	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1 })
+	.runWith({ memory: '128MB', timeoutSeconds: 25, maxInstances: 1 })
 	.pubsub.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
-		await (await import('./fn/scheduledDateTimeSlotCounters')).default();
-	});
-
-// At minute 0 past every 6th hour in November and December.
-export const scheduledDateTimeSlotReschedules = functions
-	.runWith({ memory: '128MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.schedule('0 */6 * 11,12 *')
-	.onRun(async () => {
-		await (await import('./fn/scheduledDateTimeSlotReschedules')).default();
+		await (await import('./fn/scheduledDateTimeSlotCounters2')).default();
 	});
 
 // “At 23:59.” (11:59 PM) every day.
@@ -208,27 +200,6 @@ export const pubsubSetAdminRights = functions
 	.pubsub.topic('set-admin-rights')
 	.onPublish(async () => {
 		await (await import('./fn/scheduledSetAdminRights')).default();
-	});
-
-export const pubsubQueueReminderDocuments = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.topic('queue-reminder-documents')
-	.onPublish(async () => {
-		await (await import('./fn/pubsubQueueReminderDocuments')).default();
-	});
-
-export const pubsubSendReminderEmails = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.topic('send-reminder-emails')
-	.onPublish(async () => {
-		await (await import('./fn/pubsubSendReminderEmails')).default();
-	});
-
-export const recalculateAllDateTimeSlots = functions
-	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.topic('recalc-all-slots')
-	.onPublish(async () => {
-		await (await import('./fn/recalculateAllDateTimeSlots')).default();
 	});
 
 export const pubsubMarkRegistrationsCheckedIn = functions

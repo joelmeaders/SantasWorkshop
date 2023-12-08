@@ -1,7 +1,7 @@
 <admin-header title="Check-In Stats"></admin-header>
 
 <ion-content>
-	<ion-grid *ngIf="checkinLastUpdated$ | async; else noData">
+	<ion-grid>
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
 				Updated {{ checkinLastUpdated$ | async | date:'short' }}

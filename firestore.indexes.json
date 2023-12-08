@@ -19,6 +19,20 @@
 			"queryScope": "COLLECTION",
 			"fields": [
 				{
+					"fieldPath": "dateTimeSlot.id",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
 					"fieldPath": "includedInCounts",
 					"order": "ASCENDING"
 				},
@@ -179,6 +193,20 @@
 			]
 		},
 		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "reminderEmailSentOn",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "registrationSubmittedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
 			"collectionGroup": "registrationsearchindex",
 			"queryScope": "COLLECTION",
 			"fields": [
@@ -224,6 +252,20 @@
 				},
 				{
 					"fieldPath": "firstName",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrationsearchindex",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "zip",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "lastName",
 					"order": "ASCENDING"
 				}
 			]

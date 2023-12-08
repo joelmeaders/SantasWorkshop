@@ -42,13 +42,9 @@ export default async (
 		}
 	});
 
-	// If counts weren't done already, no need to set data
-	// for the method that decrements counts
-	if (registrationDoc.includedInCounts) {
-		registrationDoc.previousDateTimeSlot = {
-			...registrationDoc.dateTimeSlot,
-		} as DateTimeSlot;
-	}
+	registrationDoc.previousDateTimeSlot = {
+		...registrationDoc.dateTimeSlot,
+	} as DateTimeSlot;
 
 	registrationDoc.includedInCounts = false;
 	delete registrationDoc.dateTimeSlot;

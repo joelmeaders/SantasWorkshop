@@ -30,7 +30,7 @@ export class SearchService {
 		zipCode: string,
 	): QueryConstraint[] =>
 		[
-			where('zip', '==', zipCode.toString()),
+			where('zip', '==', zipCode),
 			where('lastName', '>=', lastName),
 			where('lastName', '<=', lastName + '\uf8ff'),
 			orderBy('lastName', 'asc'),

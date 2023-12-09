@@ -22,6 +22,16 @@ import { environment, firebaseConfig } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+let resolvePersistenceEnabled: (enabled: boolean) => void;
+
+export const persistenceEnabled = new Promise<boolean>((resolve) => {
+	resolvePersistenceEnabled = resolve;
+});
+
+if (!environment.production) {
+	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 @NgModule({
 	declarations: [AppComponent],
 	imports: [
@@ -44,14 +54,6 @@ import { AppComponent } from './app.component';
 			}
 			return auth;
 		}),
-		provideFirestore(() => {
-			const firestore = getFirestore();
-			if (!environment.production) {
-				connectFirestoreEmulator(firestore, 'localhost', 8080);
-			}
-			enableMultiTabIndexedDbPersistence(firestore);
-			return firestore;
-		}),
 		provideFunctions(() => {
 			const functions = getFunctions();
 			functions.customDomain = location.origin;
@@ -62,6 +64,17 @@ import { AppComponent } from './app.component';
 			}
 
 			return functions;
+		}),
+		provideFirestore(() => {
+			const firestore = getFirestore();
+			if (!environment.production) {
+				connectFirestoreEmulator(firestore, 'localhost', 8080);
+			}
+			enableMultiTabIndexedDbPersistence(firestore).then(
+				() => resolvePersistenceEnabled(true),
+				() => resolvePersistenceEnabled(false),
+			);
+			return firestore;
 		}),
 	],
 	bootstrap: [AppComponent],

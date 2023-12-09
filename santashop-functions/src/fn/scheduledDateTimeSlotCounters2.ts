@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
-import { DateTimeSlot } from '../../../santashop-models/src';
+import { DateTimeSlot, ScheduleStats } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
@@ -13,6 +13,10 @@ export default async (): Promise<string> => {
 	// Load all date/time slots
 	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
+
+	const slotDoc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
+	const scheduleStatsDoc = admin.firestore().collection('stats').doc('schedule-2023');
+	const scheduleStats: ScheduleStats = { dateTimeCounts: [] };
 
 	// Loop through each date time slot and get the count of registrations
 	for (const slot of dateTimeSlots) {
@@ -27,11 +31,12 @@ export default async (): Promise<string> => {
 		console.log(`Slot ${slot.id} has ${slot.slotsReserved} registrations`);
 
 		// Update the slot in database
-		const slotDoc = admin.firestore().collection('dateTimeSlots')
-				.doc(slot.id!.toString());
-		
 		await slotDoc.update({ ...slot });
+		scheduleStats.dateTimeCounts.push({ dateTime: slot.dateTime, count: slot.slotsReserved });
 	}
+
+	// Update the schedule stats
+	await scheduleStatsDoc.update({ ...scheduleStats });
 
 	return Promise.resolve('Updated date time slots');
 };

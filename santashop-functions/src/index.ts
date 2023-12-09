@@ -152,10 +152,10 @@ export const scheduledFirestoreBackup = functions
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
 
-// At every 15th minute in November and December.
+// At every 5th minute in November and December.
 export const scheduledDateTimeSlotCounters = functions
-	.runWith({ memory: '128MB', timeoutSeconds: 25, maxInstances: 1 })
-	.pubsub.schedule('*/15 * * 11,12 *')
+	.runWith({ memory: '128MB', timeoutSeconds: 30, maxInstances: 1 })
+	.pubsub.schedule('*/5 * * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters2')).default();
 	});

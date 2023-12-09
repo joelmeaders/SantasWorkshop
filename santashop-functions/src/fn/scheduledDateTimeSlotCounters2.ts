@@ -23,21 +23,24 @@ export default async (): Promise<string> => {
 		const registrationCount = await registrationsByDateTimeSlotQuery(slot.id!)
 			.then((snapshot) => snapshot.data().count);
 
-			// Update the slot data
+		// Update stats data
+		scheduleStats.dateTimeCounts.push({ dateTime: slot.dateTime, count: registrationCount });
+		console.log(`Slot ${slot.id} has ${slot.slotsReserved} registrations`);
+
+		// No need to update if the count is the same
+		if (registrationCount === slot.slotsReserved) continue;
+
+		// Update the slot data
 		slot.slotsReserved = registrationCount;
 		slot.enabled = slot.slotsReserved < slot.maxSlots;
-
-		console.log(`Slot ${slot.id} has ${slot.slotsReserved} registrations`);
 
 		// Update the slot in database
 		const slotDoc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
 		await slotDoc.update({ ...slot });
-
-		scheduleStats.dateTimeCounts.push({ dateTime: slot.dateTime, count: slot.slotsReserved });
 	}
 
 	// Update the schedule stats
-	await scheduleStatsDoc.update({ ...scheduleStats });
+	await scheduleStatsDoc.set({ ...scheduleStats }, { merge: true });
 
 	return Promise.resolve('Updated date time slots');
 };

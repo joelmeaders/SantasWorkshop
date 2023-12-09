@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
-import { COLLECTION_SCHEMA, RegistrationStats } from '@santashop/models';
+import { COLLECTION_SCHEMA, RegistrationStats, ScheduleStats } from '@santashop/models';
 import { combineLatest, map, Observable, shareReplay } from 'rxjs';
 import { Timestamp } from '@firebase/firestore';
 
@@ -28,8 +28,13 @@ export class RegistrationPage {
 		map((stats) => stats.completedRegistrations),
 	);
 
-	private readonly dateTimeStats$ = this.registrationStats$.pipe(
-		map((allData) => allData.dateTimeCount),
+	private readonly scheduleStats$ =
+		this.statsCollection<ScheduleStats>()
+			.read('schedule-2023')
+			.pipe(shareReplay(1));
+
+	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
+		map((allData) => allData.dateTimeCounts),
 	);
 
 	public readonly childCount$ = this.registrationStats$.pipe(
@@ -42,7 +47,8 @@ export class RegistrationPage {
 		this.childCount$,
 	]).pipe(map((data) => data[1] / data[0]));
 
-	private readonly stats$ = this.dateTimeStats$.pipe(
+	private readonly stats$ = this.registrationStats$.pipe(
+		map(stats => stats.dateTimeCount),
 		map((dateTimes) => dateTimes.map((e) => e.stats)),
 	);
 

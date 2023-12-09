@@ -14,7 +14,6 @@ export default async (): Promise<string> => {
 	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
 
-	const slotDoc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
 	const scheduleStatsDoc = admin.firestore().collection('stats').doc('schedule-2023');
 	const scheduleStats: ScheduleStats = { dateTimeCounts: [] };
 
@@ -31,7 +30,9 @@ export default async (): Promise<string> => {
 		console.log(`Slot ${slot.id} has ${slot.slotsReserved} registrations`);
 
 		// Update the slot in database
+		const slotDoc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
 		await slotDoc.update({ ...slot });
+
 		scheduleStats.dateTimeCounts.push({ dateTime: slot.dateTime, count: slot.slotsReserved });
 	}
 

@@ -6,7 +6,7 @@ export const environment = {
 	label: 'DEV',
 	name: config.name,
 	version: config.version,
-	appCheckKey: '06LfQqwkpAAAAAHyIhwZ4v9ZGl6lMdwzsh_maGnSU'
+	appCheckKey: ''
 };
 
 export const firebaseConfig = { ...firebaseConfigDev };

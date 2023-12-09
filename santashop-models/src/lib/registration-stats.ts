@@ -7,7 +7,9 @@ export interface RegistrationStats {
 }
 
 export interface DateTimeCount {
+	// TODO: Remove after 2023. Replaced by ScheduleStats.
 	dateTime: Date;
+	// TODO: Remove after 2023. Replaced by ScheduleStats.
 	count: number;
 	childCount: number;
 	stats: GenderAgeStats;

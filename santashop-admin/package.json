@@ -5,7 +5,6 @@
 	"scripts": {
 		"lint": "ng lint santashop-admin --fix --cache",
 		"test": "ng test santashop-admin",
-		"start": "firebase use santas-workshop-193b5 && ng serve santashop-admin --port=4100",
 		"start:test": "firebase use santas-workshop-test && ng serve santashop-admin --port=4100",
 		"config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",
 		"prebuild": "npm run build -w @santashop/models && npm run build:prod -w @santashop/core",

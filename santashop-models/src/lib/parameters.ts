@@ -1,3 +1,5 @@
+import { GlobalAlert } from "./global-alert";
+
 export interface PublicParameters {
 	registrationEnabled: boolean;
 	maintenanceModeEnabled: boolean;
@@ -9,4 +11,5 @@ export interface PublicParameters {
 		onsiteRegistrationEnabled: boolean;
 		preRegistrationEnabled: boolean;
 	}
+	globalAlert: GlobalAlert;
 }

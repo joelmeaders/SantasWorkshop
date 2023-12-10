@@ -42,7 +42,6 @@ export class DateTimePage implements OnDestroy {
 			slots.map((slot) => Date.parse(slot.dateTime.toDateString())),
 		),
 		map((dates) => [...new Set(dates)]),
-
 		shareReplay(1),
 	);
 

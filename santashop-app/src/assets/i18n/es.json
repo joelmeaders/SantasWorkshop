@@ -123,7 +123,8 @@
 		"NO_TIME_SELECTED.": "No hay hora seleccionada.",
 		"ADD_ONE_BELOW.": "Agregue uno a continuación.",
 		"ON_TIME": "Por favor, llegue durante la hora asignada. Los tiempos de espera variarán.",
-		"AVAILABLE_DATES/TIMES": "Fechas/Horas Disponibles"
+		"AVAILABLE_DATES/TIMES": "Fechas/Horas Disponibles",
+		"FULL": "Todos los cupos han sido ocupados y no hay fechas ni horarios disponibles. Consulta Facebook para obtener actualizaciones."
 	},
 	"SUBMIT": {
 		"CONFIRM_ADDED_CHILDREN": "¿Ha agregado a todos los niños? ¿Es correcta la información de los niños?",

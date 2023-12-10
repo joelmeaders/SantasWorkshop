@@ -123,7 +123,8 @@
 		"NO_TIME_SELECTED.": "No Time Selected.",
 		"ADD_ONE_BELOW.": "Add one below.",
 		"ON_TIME": "Please arrive during your assigned time. Wait times will vary.",
-		"AVAILABLE_DATES/TIMES": "Available Dates/Times"
+		"AVAILABLE_DATES/TIMES": "Available Dates/Times",
+		"FULL": "All spots have been filled and there are no available dates or times. Check Facebook for updates."
 	},
 	"SUBMIT": {
 		"CONFIRM_ADDED_CHILDREN": "Have you added all children? Is children information correct?",

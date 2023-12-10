@@ -131,7 +131,7 @@
 									<ion-accordion-group
 										color="light"
 										class="es-pd-left-xl es-pd-right-xl"
-										*ngIf="availableDays"
+										*ngIf="availableDays?.length; else noDaysAvailable"
 									>
 										<ion-accordion
 											*ngFor="
@@ -195,6 +195,16 @@
 										</ion-accordion>
 									</ion-accordion-group>
 								</ng-container>
+								<ng-template #noDaysAvailable>
+									<ion-card class="danger-card">
+										<ion-card-header>
+											<ion-note>
+												{{ "SCHEDULE.FULL" | translate
+												}}
+											</ion-note>
+										</ion-card-header>
+									</ion-card>
+								</ng-template>
 							</ng-template>
 
 							<ion-button

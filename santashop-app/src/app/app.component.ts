@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
-import { Platform } from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { AppStateService } from './core';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
 	selector: 'app-root',
@@ -11,11 +12,13 @@ import { AppStateService } from './core';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
+
 	constructor(
 		private readonly platform: Platform,
 		private readonly translateService: TranslateService,
 		private readonly analyticsService: Analytics,
 		private readonly appStateService: AppStateService,
+		private readonly alertController: AlertController
 	) {
 		this.initializeApp();
 	}
@@ -37,5 +40,18 @@ export class AppComponent {
 		logEvent(this.analyticsService, 'default_language', {
 			value: browserLang,
 		});
+
+		const alert = await firstValueFrom(this.appStateService.globalAlert$);
+		if (alert.enabled) await this.showGlobalMessage(alert)
+	}
+
+	public async showGlobalMessage(globalAlert: any): Promise<void> {
+		const alert = await this.alertController.create({
+			header: globalAlert.title,
+			message: globalAlert.message,
+			buttons: ['Dismiss'],
+		});
+
+		await alert.present();
 	}
 }

@@ -3,6 +3,7 @@ import { ModalController } from '@ionic/angular';
 import { combineLatest, from, Observable, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
+	filter,
 	map,
 	shareReplay,
 	switchMap,
@@ -37,6 +38,19 @@ export class AppStateService implements OnDestroy {
 			}),
 			shareReplay(1),
 		);
+
+	public readonly globalAlert$ = this.publicDoc$.pipe(
+		map((doc) => doc?.globalAlert ?? undefined),
+		filter((value) => !!value),
+		map((doc) => {
+			const enabled = doc.displayAlert;
+			const isEnglish = this.translateService.currentLang === 'en';
+			const title = isEnglish ? doc.titleEn : doc.titleEs;
+			const message = isEnglish ? doc.messageEn : doc.messageEs;
+			return { enabled, title, message };
+		}),
+		shareReplay(1),
+	);
 
 	public readonly message$: Observable<string | null> = this.publicDoc$.pipe(
 		map((doc) => {

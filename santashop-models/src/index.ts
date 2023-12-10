@@ -5,6 +5,7 @@ export * from './lib/child';
 export * from './lib/date-time-slot-count';
 export * from './lib/date-time-slot';
 export * from './lib/error';
+export * from './lib/global-alert';
 export * from './lib/onboard-user';
 export * from './lib/parameters';
 export * from './lib/registration-email';

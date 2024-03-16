@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { AlertController, ModalController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { shareReplay, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { AppStateService } from '../../../core';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
@@ -20,10 +20,6 @@ export class SignUpPage {
 	public readonly form = this.viewService.form;
 
 	@ViewChild('firstName') private readonly firstName?: HTMLIonInputElement;
-
-	public readonly recaptchaValid$ = this.viewService.recaptchaValid$
-		.asObservable()
-		.pipe(shareReplay(1));
 
 	protected readonly closedSubscription =
 		this.appStateService.isRegistrationEnabled$
@@ -46,11 +42,6 @@ export class SignUpPage {
 
 	public ionViewWillEnter(): void {
 		setTimeout(() => this.firstName?.setFocus(), 300);
-	}
-
-	public async onValidateRecaptcha($event: any): Promise<void> {
-		await this.viewService.onValidateRecaptcha($event);
-		logEvent(this.analytics, 'validated_recaptcha');
 	}
 
 	public async onCreateAccount(): Promise<void> {

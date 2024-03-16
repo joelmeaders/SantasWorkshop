@@ -17,14 +17,13 @@ import {
 	provideFirestore,
 } from '@santashop/core';
 import { RouteReuseStrategy } from '@angular/router';
-import {
-	RecaptchaSettings,
-	RECAPTCHA_NONCE,
-	RECAPTCHA_SETTINGS,
-} from 'ng-recaptcha';
 
 import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { initializeAppCheck, provideAppCheck, ReCaptchaEnterpriseProvider } from '@angular/fire/app-check';
+import {
+	initializeAppCheck,
+	provideAppCheck,
+	ReCaptchaEnterpriseProvider,
+} from '@angular/fire/app-check';
 import {
 	provideAuth,
 	connectAuthEmulator,
@@ -81,10 +80,14 @@ if (!environment.production) {
 			animated: true,
 		}),
 		provideFirebaseApp(() => initializeApp(firebaseConfig)),
-		provideAppCheck(() => initializeAppCheck(getApp(), {
-        	provider: new ReCaptchaEnterpriseProvider(environment.appCheckKey),
-			isTokenAutoRefreshEnabled: true
-      	})),
+		provideAppCheck(() =>
+			initializeAppCheck(getApp(), {
+				provider: new ReCaptchaEnterpriseProvider(
+					environment.appCheckKey,
+				),
+				isTokenAutoRefreshEnabled: true,
+			}),
+		),
 		provideAuth(() => {
 			const auth = getAuth();
 			if (!environment.production) {
@@ -140,17 +143,6 @@ if (!environment.production) {
 			deps: [Auth],
 		},
 		UserTrackingService,
-		{
-			provide: RECAPTCHA_SETTINGS,
-			useValue: {
-				siteKey: '6LeY5ecZAAAAALhmvzhfTcdbzHsYbmHmmk11HbHN',
-				badge: 'inline',
-			} as RecaptchaSettings,
-		},
-		{
-			provide: RECAPTCHA_NONCE,
-			useValue: '8wiehfsdncil8wKUyla8inkiygseteifnkcnkjsdnosidhf8iehf',
-		},
 	],
 	bootstrap: [AppComponent],
 	schemas: [CUSTOM_ELEMENTS_SCHEMA],

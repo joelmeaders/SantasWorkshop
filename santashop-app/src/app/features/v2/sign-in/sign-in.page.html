@@ -56,23 +56,11 @@
 							</ion-list>
 						</form>
 
-						<ng-container>
-							<ion-item [disabled]="!form.valid" lines="none">
-								<re-captcha
-									class="ion-align-self-center ion-padding-vertical"
-									#captchaRef="reCaptcha"
-									(resolved)="
-										$event && onValidateRecaptcha($event)
-									"
-								></re-captcha>
-							</ion-item>
-						</ng-container>
-
 						<ion-button
 							size="large"
 							color="xmasred"
 							[disabled]="
-								!form.valid || (recaptchaValid$ | async) === false
+								!form.valid
 							"
 							(click)="onSignIn()"
 						>

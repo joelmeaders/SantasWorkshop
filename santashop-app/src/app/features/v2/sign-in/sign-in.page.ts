@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { shareReplay } from 'rxjs/operators';
 import { SignInPageService } from './sign-in.page.service';
 
 @Component({
@@ -12,15 +11,7 @@ import { SignInPageService } from './sign-in.page.service';
 export class SignInPage {
 	public readonly form = this.viewService.form;
 
-	public readonly recaptchaValid$ = this.viewService.recaptchaValid$
-		.asObservable()
-		.pipe(shareReplay(1));
-
 	constructor(private readonly viewService: SignInPageService) {}
-
-	public async onValidateRecaptcha($event: any): Promise<void> {
-		await this.viewService.onValidateRecaptcha($event);
-	}
 
 	public onSignIn(): void {
 		this.viewService.signIn();

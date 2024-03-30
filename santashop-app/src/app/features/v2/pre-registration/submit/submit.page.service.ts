@@ -38,6 +38,12 @@ export class SubmitPageService {
 			const registration = await firstValueFrom(
 				this.preregistrationService.userRegistration$,
 			);
+
+			if (!registration) {
+				// FIXME: Add error handling
+				throw new Error('Registration object is undefined');
+			}
+
 			const completionResult =
 				await this.completeRegistration(registration);
 

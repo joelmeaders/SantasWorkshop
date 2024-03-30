@@ -7,6 +7,7 @@ import {
 	automock,
 	AnalyticsWrapper,
 	FunctionsWrapper,
+	filterNil,
 } from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core';
@@ -40,7 +41,7 @@ export class ProfilePageService implements OnDestroy {
 		this.httpService
 			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
-			.pipe(take(1));
+			.pipe(filterNil(), take(1));
 
 	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(

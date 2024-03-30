@@ -54,6 +54,11 @@ export class DateTimePageService implements OnDestroy {
 			this.preRegistrationService.userRegistration$,
 		);
 
+		if (!registration) {
+			// FIXME: Error handling
+			throw new Error('Registration object is undefined');
+		}
+
 		if (!slot) {
 			delete registration.dateTimeSlot;
 		} else {
@@ -63,7 +68,7 @@ export class DateTimePageService implements OnDestroy {
 			};
 		}
 
-		// TODO: Error handling
+		// FIXME: Error handling
 		const storeRegistration = firstValueFrom(
 			this.preRegistrationService.saveRegistration(registration),
 		);

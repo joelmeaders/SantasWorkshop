@@ -49,6 +49,8 @@ export const timestampDateFix = (date: Date): Date => {
 	return timestamp?.toDate() ?? date;
 };
 
+export type idField<T> = keyof T & keyof NonNullable<T>;
+
 /**
  * The entire reason for this class is to make
  * the modular firebase methods unit testable.
@@ -67,37 +69,45 @@ export class FirestoreWrapper {
 	): CollectionReference<T> =>
 		collection(this.firestore, path) as CollectionReference<T>;
 
-	public readonly collectionQuery = <T = DocumentData>(
+	public readonly collectionQuery = <
+		T = DocumentData,
+		U extends string = never,
+	>(
 		query: Query<T>,
-		idField?: Extract<keyof T, string>,
-	) => collectionData(query, { idField });
+		idField?: (U | keyof T) & keyof NonNullable<T>,
+	): Observable<
+		(
+			| (T & {
+					[T in U]: string;
+			  })
+			| NonNullable<T>
+		)[]
+	> => collectionData(query, { idField });
 
 	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,
 		path?: string,
-	): DocumentReference<T> =>
-		path ? doc<T>(reference, path) : doc(reference);
+	): DocumentReference<T> => (path ? doc(reference, path) : doc(reference));
 
 	public readonly docData = <T = DocumentData>(
 		ref: DocumentReference<T>,
 		options?: {
-			idField?: string;
+			idField?: keyof T;
 		},
-	): Observable<T> => docData<T>(ref, options);
+	): Observable<T | undefined> => docData(ref, options);
 
 	public readonly query = <T = DocumentData>(
 		collectionReference: CollectionReference<T>,
 		constraints?: QueryConstraint[],
 	): Query<T> =>
 		constraints
-			? query<T>(collectionReference, ...constraints)
-			: query<T>(collectionReference);
+			? query(collectionReference, ...constraints)
+			: query(collectionReference);
 
 	public readonly addDoc = <T>(
 		collectionReference: CollectionReference<T>,
 		document: T,
-	): Promise<DocumentReference<T>> =>
-		addDoc<T>(collectionReference, document);
+	): Promise<DocumentReference<T>> => addDoc(collectionReference, document);
 
 	public readonly setDoc = <T = DocumentData>(
 		documentReference: DocumentReference<T>,
@@ -105,8 +115,8 @@ export class FirestoreWrapper {
 		options?: SetOptions,
 	): Promise<void> =>
 		options
-			? setDoc<T>(documentReference, document, options)
-			: setDoc<T>(documentReference, document);
+			? setDoc(documentReference, document, options)
+			: setDoc(documentReference, document);
 
 	public readonly deleteDoc = <T = DocumentData>(
 		documentReference: DocumentReference<T>,

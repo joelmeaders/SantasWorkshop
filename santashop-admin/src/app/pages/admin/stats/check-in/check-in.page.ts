@@ -33,7 +33,7 @@ export class CheckInPage {
 		switchMap(() =>
 			this.statsCollection<CheckInAggregatedStats>()
 				.read(`checkin-${this.year}`)
-				.pipe(shareReplay(1)),
+				.pipe(filterNil(), shareReplay(1)),
 		),
 	);
 

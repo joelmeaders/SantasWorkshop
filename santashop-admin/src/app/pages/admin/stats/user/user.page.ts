@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { COLLECTION_SCHEMA, UserStats } from '@santashop/models';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
+import { FireRepoLite, IFireRepoCollection, filterNil } from '@santashop/core';
 import { map, shareReplay } from 'rxjs';
 
 Chart.register(ChartDataLabels);
@@ -19,7 +19,7 @@ export class UserPage {
 
 	private readonly userRecord$ = this.statsCollection<UserStats>()
 		.read(`user-2023`)
-		.pipe(shareReplay(1));
+		.pipe(filterNil(), shareReplay(1));
 
 	public readonly referrers$ = this.userRecord$.pipe(
 		map((data) => data.referrerCount),
@@ -66,7 +66,7 @@ export class UserPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
 					return `${ctx.dataset?.data[0]} - ${ctx.dataset.label}`;
@@ -106,7 +106,7 @@ export class UserPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
 					return `${ctx.dataset?.data[0]} Families - ${ctx.dataset.label}`;

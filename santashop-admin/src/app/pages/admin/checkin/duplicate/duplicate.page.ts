@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FireRepoLite, timestampToDate } from '@santashop/core';
+import { FireRepoLite, filterNil, timestampToDate } from '@santashop/core';
 import { map, switchMap } from 'rxjs';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 
@@ -21,6 +21,7 @@ export class DuplicatePage {
 				.collection(COLLECTION_SCHEMA.checkins)
 				.read(uid, 'customerId'),
 		),
+		filterNil(),
 		map((data) => {
 			data.checkInDateTime = timestampToDate(data.checkInDateTime);
 			return data;

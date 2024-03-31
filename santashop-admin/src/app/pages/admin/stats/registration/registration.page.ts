@@ -1,6 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
-import { COLLECTION_SCHEMA, RegistrationStats, ScheduleStats } from '@santashop/models';
+import { FireRepoLite, IFireRepoCollection, filterNil } from '@santashop/core';
+import {
+	COLLECTION_SCHEMA,
+	RegistrationStats,
+	ScheduleStats,
+} from '@santashop/models';
 import { combineLatest, map, Observable, shareReplay } from 'rxjs';
 import { Timestamp } from '@firebase/firestore';
 
@@ -22,16 +26,15 @@ export class RegistrationPage {
 	private readonly registrationStats$ =
 		this.statsCollection<RegistrationStats>()
 			.read('registration-2023')
-			.pipe(shareReplay(1));
+			.pipe(filterNil(), shareReplay(1));
 
 	public readonly registrationCount$ = this.registrationStats$.pipe(
 		map((stats) => stats.completedRegistrations),
 	);
 
-	private readonly scheduleStats$ =
-		this.statsCollection<ScheduleStats>()
-			.read('schedule-2023')
-			.pipe(shareReplay(1));
+	private readonly scheduleStats$ = this.statsCollection<ScheduleStats>()
+		.read('schedule-2023')
+		.pipe(filterNil(), shareReplay(1));
 
 	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
 		map((allData) => allData.dateTimeCounts),
@@ -48,7 +51,7 @@ export class RegistrationPage {
 	]).pipe(map((data) => data[1] / data[0]));
 
 	private readonly stats$ = this.registrationStats$.pipe(
-		map(stats => stats.dateTimeCount),
+		map((stats) => stats.dateTimeCount),
 		map((dateTimes) => dateTimes.map((e) => e.stats)),
 	);
 
@@ -106,7 +109,7 @@ export class RegistrationPage {
 				datasets: [
 					{
 						data: [],
-						...this.colorSettings
+						...this.colorSettings,
 					},
 				],
 			};
@@ -160,7 +163,7 @@ export class RegistrationPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
 					if (ctx.chart.data.labels) {
@@ -186,10 +189,12 @@ export class RegistrationPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (value, ctx) => {
-					return `${value} ${ctx.chart?.data?.labels![ctx.dataIndex]}`;
+					return `${value} ${ctx.chart?.data?.labels![
+						ctx.dataIndex
+					]}`;
 				},
 			},
 		},
@@ -220,7 +225,7 @@ export class RegistrationPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 			},
 		},

@@ -1,6 +1,10 @@
-import { Validators } from '@angular/forms';
-import { ChangeUserInfo } from '@santashop/models';
-import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+export interface ChangeUserInfoForm {
+	firstName: FormControl<string | undefined>;
+	lastName: FormControl<string | undefined>;
+	zipCode: FormControl<number | undefined>;
+}
 
 const validators = {
 	firstName: Validators.compose([
@@ -20,9 +24,18 @@ const validators = {
 	]),
 };
 
-export const newChangeInfoForm = (): FormGroup<ControlsOf<ChangeUserInfo>> =>
-	new FormGroup<ControlsOf<ChangeUserInfo>>({
-		firstName: new FormControl<string>(undefined, validators.firstName),
-		lastName: new FormControl<string>(undefined, validators.lastName),
-		zipCode: new FormControl<number>(undefined, validators.zipCode),
+export const newChangeInfoForm = (): FormGroup<ChangeUserInfoForm> =>
+	new FormGroup<ChangeUserInfoForm>({
+		firstName: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.firstName,
+		}),
+		lastName: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.lastName,
+		}),
+		zipCode: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.zipCode,
+		}),
 	});

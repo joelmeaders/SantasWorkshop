@@ -41,9 +41,9 @@ export class SignInPageService implements OnDestroy {
 	}
 
 	public async signIn(): Promise<void | IError> {
-		const auth: Auth = {
+		const auth = {
 			...this.form.value,
-		};
+		} as Auth;
 
 		const loader = await this.loadingController.create({
 			message: 'Signing in...',

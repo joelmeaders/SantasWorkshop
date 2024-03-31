@@ -82,7 +82,7 @@ export class ProfilePageService implements OnDestroy {
 	public async updatePublicProfile(): Promise<void> {
 		this.analytics.logEvent('profile_update_info');
 
-		const newInfo: ChangeUserInfo = this.profileForm.value;
+		const newInfo = this.profileForm.value as ChangeUserInfo;
 
 		const loader = await this.loadingController.create({
 			message: 'Updating account...',
@@ -106,7 +106,7 @@ export class ProfilePageService implements OnDestroy {
 		const value = this.changeEmailForm.value;
 
 		await this.authService
-			.changeEmailAddress(value.password, value.emailAddress)
+			.changeEmailAddress(value.password!, value.emailAddress!)
 			.then(() => this.emailChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
 
@@ -121,7 +121,7 @@ export class ProfilePageService implements OnDestroy {
 		const value = this.changePasswordForm.value;
 
 		await this.authService
-			.changePassword(value.oldPassword, value.newPassword)
+			.changePassword(value.oldPassword!, value.newPassword!)
 			.then(() => this.passwordChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
 

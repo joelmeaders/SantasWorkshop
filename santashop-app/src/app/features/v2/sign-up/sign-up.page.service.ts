@@ -50,7 +50,7 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	public async onboardUser(): Promise<void> {
-		const onboardInfo = this.form.value;
+		const onboardInfo = this.form.value as OnboardUser;
 
 		const loader = await this.loadingController.create({
 			message: 'Creating account...',

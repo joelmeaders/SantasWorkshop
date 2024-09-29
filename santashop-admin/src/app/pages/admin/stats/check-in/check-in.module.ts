@@ -7,7 +7,7 @@ import { CheckInPageRoutingModule } from './check-in-routing.module';
 
 import { CheckInPage } from './check-in.page';
 import { SharedModule } from '../../../../shared/shared.module';
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { CoreModule } from '@santashop/core';
 import { FormsModule } from '@angular/forms';
 
@@ -18,8 +18,11 @@ import { FormsModule } from '@angular/forms';
 		CoreModule,
 		CheckInPageRoutingModule,
 		SharedModule,
-		NgChartsModule,
 		FormsModule,
+		BaseChartDirective
+	],
+	providers: [
+		provideCharts(withDefaultRegisterables())
 	],
 	declarations: [CheckInPage],
 })

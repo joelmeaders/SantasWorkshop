@@ -169,6 +169,7 @@ export class RegistrationPage {
 					if (ctx.chart.data.labels) {
 						return ctx.chart.data.labels[ctx.dataIndex];
 					}
+					return '';
 				},
 			},
 		},

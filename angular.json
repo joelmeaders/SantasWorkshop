@@ -147,17 +147,17 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "santashop-admin:build"
+						"buildTarget": "santashop-admin:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "santashop-admin:build:production"
+							"buildTarget": "santashop-admin:build:production"
 						},
 						"test": {
-							"browserTarget": "santashop-admin:build:test"
+							"buildTarget": "santashop-admin:build:test"
 						},
 						"development": {
-							"browserTarget": "santashop-admin:build:development"
+							"buildTarget": "santashop-admin:build:development"
 						}
 					},
 					"defaultConfiguration": "development"
@@ -277,17 +277,17 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "santashop-app:build"
+						"buildTarget": "santashop-app:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "santashop-app:build:production"
+							"buildTarget": "santashop-app:build:production"
 						},
 						"test": {
-							"browserTarget": "santashop-app:build:test"
+							"buildTarget": "santashop-app:build:test"
 						},
 						"development": {
-							"browserTarget": "santashop-app:build:development"
+							"buildTarget": "santashop-app:build:development"
 						}
 					},
 					"defaultConfiguration": "development"

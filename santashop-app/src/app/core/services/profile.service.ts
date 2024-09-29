@@ -13,11 +13,6 @@ import { COLLECTION_SCHEMA, User } from '@santashop/models';
 	providedIn: 'root',
 })
 export class ProfileService {
-	private readonly getUser$ = (uuid: string): Observable<User> =>
-		this.httpService
-			.collection<User>(COLLECTION_SCHEMA.users)
-			.read(uuid)
-			.pipe(filterNil());
 
 	public readonly userProfile$ = this.authService.uid$.pipe(
 		switchMap((id) => this.getUser$(id)),
@@ -28,6 +23,12 @@ export class ProfileService {
 		map((data) => data.referredBy),
 		shareReplay(1),
 	);
+
+	private readonly getUser$ = (uuid: string): Observable<User> =>
+		this.httpService
+			.collection<User>(COLLECTION_SCHEMA.users)
+			.read(uuid)
+			.pipe(filterNil());
 
 	constructor(
 		private readonly authService: AuthService,

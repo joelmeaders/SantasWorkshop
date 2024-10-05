@@ -2,7 +2,10 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "../out-tsc/app"
+		"outDir": "../out-tsc/app",
+		"declaration": true,
+		"declarationMap": true,
+		"inlineSources": true
 	},
 	"files": ["src/main.ts", "src/polyfills.ts"],
 	"exclude": ["src/test.ts", "**/**.spec.ts"]

@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { combineLatest, from, Observable, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,

@@ -7,7 +7,7 @@ import {
 	IFireRepoCollection,
 } from '@santashop/core';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 
 @Injectable({
 	providedIn: 'root',

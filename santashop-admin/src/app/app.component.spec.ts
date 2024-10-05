@@ -6,9 +6,9 @@ import { AppComponent } from './app.component';
 describe('AppComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			declarations: [AppComponent],
-			schemas: [CUSTOM_ELEMENTS_SCHEMA],
-		}).compileComponents();
+    declarations: [AppComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+}).compileComponents();
 	});
 
 	it('should create the app', () => {

@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 @Pipe({
-	name: 'niceFormError',
+    name: 'niceFormError',
+    standalone: true,
 })
 export class NiceFormErrorPipe implements PipeTransform {
 	public transform(control: FormControl): string {

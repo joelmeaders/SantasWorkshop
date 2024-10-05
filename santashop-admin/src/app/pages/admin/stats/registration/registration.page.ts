@@ -1,5 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection, filterNil } from '@santashop/core';
+import {
+	FireRepoLite,
+	IFireRepoCollection,
+	filterNil,
+	CoreModule,
+} from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
 	RegistrationStats,
@@ -10,6 +15,10 @@ import { Timestamp } from '@firebase/firestore';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
 
 Chart.register(ChartDataLabels);
 
@@ -18,6 +27,17 @@ Chart.register(ChartDataLabels);
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+
+		NgIf,
+		BaseChartDirective,
+		CoreModule,
+		NgFor,
+		AsyncPipe,
+		DecimalPipe,
+	],
 })
 export class RegistrationPage {
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
@@ -193,9 +213,9 @@ export class RegistrationPage {
 					weight: 'bold',
 				},
 				formatter: (value, ctx) => {
-					return `${value} ${ctx.chart?.data?.labels![
-						ctx.dataIndex
-					]}`;
+					return `${value} ${
+						ctx.chart?.data?.labels![ctx.dataIndex]
+					}`;
 				},
 			},
 		},

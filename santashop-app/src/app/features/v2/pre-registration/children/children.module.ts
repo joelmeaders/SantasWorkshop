@@ -2,10 +2,9 @@ import { NgModule } from '@angular/core';
 import { ChildrenPageRoutingModule } from './children-routing.module';
 import { ChildrenPage } from './children.page';
 import { CoreModule } from '@santashop/core';
-import { SharedModule } from '../../../../shared/components/shared.module';
+
 
 @NgModule({
-	imports: [CoreModule, SharedModule, ChildrenPageRoutingModule],
-	declarations: [ChildrenPage],
+    imports: [CoreModule, ChildrenPageRoutingModule, ChildrenPage],
 })
 export class ChildrenPageModule {}

@@ -2,10 +2,9 @@ import { NgModule } from '@angular/core';
 import { HelpPageRoutingModule } from './help-routing.module';
 import { HelpPage } from './help.page';
 import { CoreModule } from '@santashop/core';
-import { SharedModule } from 'santashop-app/src/app/shared/components/shared.module';
+
 
 @NgModule({
-	imports: [CoreModule, SharedModule, HelpPageRoutingModule],
-	declarations: [HelpPage],
+    imports: [CoreModule, HelpPageRoutingModule, HelpPage],
 })
 export class HelpPageModule {}

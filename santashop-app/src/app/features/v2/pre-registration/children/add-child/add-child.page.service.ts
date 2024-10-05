@@ -9,7 +9,7 @@ import {
 	MAX_BIRTHDATE,
 	MIN_BIRTHDATE,
 } from '@santashop/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import {
 	Child,
 	ChildValidationError,

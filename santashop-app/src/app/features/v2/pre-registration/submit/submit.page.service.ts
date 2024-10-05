@@ -3,7 +3,7 @@ import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
 import { ErrorHandlerService } from '@santashop/core';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular/standalone';
 import { IError, Registration } from '@santashop/models';
 import { PreRegistrationService } from '../../../../core';
 import { delay, firstValueFrom, of } from 'rxjs';

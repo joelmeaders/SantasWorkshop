@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { IError } from '@santashop/models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 

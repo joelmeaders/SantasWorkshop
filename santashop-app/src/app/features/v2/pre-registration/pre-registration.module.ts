@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CoreModule, SkeletonStateService } from '@santashop/core';
-import { SharedModule } from '../../../shared/components/shared.module';
+
 import { PreRegistrationPageRoutingModule } from './pre-registration-routing.module';
 import { PreRegistrationPage } from './pre-registration.page';
 
 @NgModule({
-	imports: [CoreModule, SharedModule, PreRegistrationPageRoutingModule],
-	declarations: [PreRegistrationPage],
-	providers: [SkeletonStateService],
+    imports: [CoreModule, PreRegistrationPageRoutingModule, PreRegistrationPage],
+    providers: [SkeletonStateService],
 })
 export class PreRegistrationPageModule {}

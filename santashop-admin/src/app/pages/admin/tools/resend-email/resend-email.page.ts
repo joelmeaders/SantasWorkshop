@@ -1,134 +1,140 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import {
+    UntypedFormGroup,
+    UntypedFormControl,
+    Validators,
+    ReactiveFormsModule,
+} from '@angular/forms';
 import { HttpsCallableResult } from '@santashop/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { RegistrationSearchIndex } from '@santashop/models';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { addIcons } from "ionicons";
+import { mailOutline } from "ionicons/icons";
 
 @Component({
-  selector: 'admin-resend-email',
-  templateUrl: './resend-email.page.html',
-  styleUrls: ['./resend-email.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'admin-resend-email',
+    templateUrl: './resend-email.page.html',
+    styleUrls: ['./resend-email.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [HeaderComponent, ReactiveFormsModule, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel],
 })
 export class ResendEmailPage {
+    public readonly form = new UntypedFormGroup({
+        emailAddress: new UntypedFormControl(undefined, {
+            nonNullable: true,
+            validators: [Validators.required, Validators.email],
+        }),
+    });
 
-  public readonly form = new UntypedFormGroup({
-		emailAddress: new UntypedFormControl(undefined, {
-			nonNullable: true,
-			validators: [Validators.required, Validators.email],
-		}),
-	});
+    private readonly sendEmailFn = (
+        customerId: string,
+    ): Promise<HttpsCallableResult<number>> =>
+        httpsCallable<{ customerId: string }, number>(
+            this.functions,
+            'callableResendRegistrationEmail',
+        )({ customerId });
 
-  private readonly sendEmailFn = (
-		customerId: string,
-	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<{ customerId: string }, number>(
-			this.functions,
-			'callableResendRegistrationEmail',
-		)({ customerId });
+    constructor(
+        private readonly lookupService: LookupService,
+        private readonly functions: Functions,
+        private readonly alerts: AlertController,
+        private readonly loading: LoadingController,
+    ) {
+        addIcons({ mailOutline });
+    }
 
-	constructor(
-    private readonly lookupService: LookupService,
-    private readonly functions: Functions,
-    private readonly alerts: AlertController,
-		private readonly loading: LoadingController,
-  ) {}
+    public async searchAndSend(): Promise<void> {
+        const email = this.form.controls.emailAddress.value.toLowerCase();
 
-	public async searchAndSend(): Promise<void> {
+        const index = await this.searchCustomer(email);
+        if (!index) return;
 
-    const email = this.form.controls.emailAddress.value.toLowerCase();
+        await this.sendEmail(index);
 
-    const index = await this.searchCustomer(email);
-    if (!index) return;
-   
-    await this.sendEmail(index);
+        this.form.reset();
+    }
 
-    this.form.reset();
-	}
+    private async searchCustomer(
+        emailAddress: string,
+    ): Promise<RegistrationSearchIndex | undefined> {
+        let index: RegistrationSearchIndex | undefined;
 
-  private async searchCustomer(emailAddress: string): Promise<RegistrationSearchIndex | undefined> {
+        try {
+            const loading = await this.loading.create({
+                message: 'Finding registration...',
+                translucent: true,
+                backdropDismiss: false,
+            });
 
-    let index: RegistrationSearchIndex | undefined;
+            await loading.present();
 
-     try {
-      const loading = await this.loading.create({
-        message: 'Finding registration...',
-        translucent: true,
-        backdropDismiss: false,
-      });
+            index = await firstValueFrom(
+                this.lookupService.getSearchIndexByEmailAddress$(emailAddress),
+            );
 
-      await loading.present();
+            if (!index) {
+                const alert = await this.alerts.create({
+                    header: 'Not Found',
+                    message: `No registration found with email address ${emailAddress}`,
+                    buttons: ['OK'],
+                });
 
-		  index = await firstValueFrom(this.lookupService.getSearchIndexByEmailAddress$(emailAddress));
+                await alert.present();
+            }
+        } catch (error: any) {
+            const alert = await this.alerts.create({
+                header: 'Error - could not find customer',
+                message: `An error occurred: ${error.details ?? error.message}`,
+                buttons: ['OK'],
+            });
+            await alert.present();
+        } finally {
+            if (await this.loading.getTop()) await this.loading.dismiss();
+        }
 
-      if (!index) {
+        return index;
+    }
+
+    private async sendEmail(index: RegistrationSearchIndex): Promise<void> {
+        try {
+            const loading = await this.loading.create({
+                message: 'Creating email...',
+                translucent: true,
+                backdropDismiss: false,
+            });
+
+            await loading.present();
+
+            const result = await this.sendEmailFn(index.customerId);
+            console.log(result);
+        } catch (error: any) {
+            const alert = await this.alerts.create({
+                header: 'Error - could not send email',
+                message: `An error occurred: ${error.details ?? error.message}`,
+                buttons: ['OK'],
+            });
+            await alert.present();
+            return;
+        } finally {
+            if (await this.loading.getTop()) await this.loading.dismiss();
+        }
+
         const alert = await this.alerts.create({
-          header: 'Not Found',
-          message: `No registration found with email address ${emailAddress}`,
-          buttons: ['OK'],
+            header: 'Email sent!',
+            message: `Registration email sent to ${this.form.value}`,
+            buttons: ['OK'],
         });
 
         await alert.present();
-      }
-    }
-    catch (error: any) {
-      const alert = await this.alerts.create({
-        header: 'Error - could not find customer',
-        message: `An error occurred: ${error.details ?? error.message}`,
-        buttons: ['OK'],
-      });
-      await alert.present();
-    }
-    finally {
-      if (await this.loading.getTop())
-				await this.loading.dismiss();
+        await alert.onDidDismiss();
     }
 
-    return index;
-  }
-
-  private async sendEmail(index: RegistrationSearchIndex): Promise<void> {
-    try {
-      const loading = await this.loading.create({
-        message: 'Creating email...',
-        translucent: true,
-        backdropDismiss: false,
-      });
-
-      await loading.present();
-
-      const result = await this.sendEmailFn(index.customerId)
-      console.log(result);
+    public reset(): void {
+        this.form.reset();
     }
-    catch (error: any) {
-      const alert = await this.alerts.create({
-        header: 'Error - could not send email',
-        message: `An error occurred: ${error.details ?? error.message}`,
-        buttons: ['OK'],
-      });
-      await alert.present();
-      return;
-    }
-    finally {
-      if (await this.loading.getTop())
-        await this.loading.dismiss();
-    }
-
-    const alert = await this.alerts.create({
-      header: 'Email sent!',
-      message: `Registration email sent to ${this.form.value}`,
-      buttons: ['OK'],
-    });
-
-    await alert.present();
-    await alert.onDidDismiss();
-  }
-
-	public reset(): void {
-		this.form.reset();
-	}
-
 }

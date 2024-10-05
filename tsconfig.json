@@ -6,42 +6,33 @@
 		"outDir": "./dist/out-tsc",
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
+		"noImplicitOverride": true,
+		"noPropertyAccessFromIndexSignature": false,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noImplicitAny": true,
+		"isolatedModules": true,
+		"esModuleInterop": true,
 		"sourceMap": true,
 		"declaration": false,
 		"downlevelIteration": true,
 		"experimentalDecorators": true,
-		"esModuleInterop": true,
-		"moduleResolution": "Bundler",
+		"moduleResolution": "bundler",
 		"importHelpers": true,
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
 		"skipLibCheck": true, // See https://github.com/angular/angularfire/issues/2901
 		"target": "ES2022",
 		"module": "ES2022",
-		"lib": ["ES2020", "dom"],
+		"lib": ["ES2022", "dom"],
 		"useDefineForClassFields": false,
 		"paths": {
-			"@santashop/models": [
-				"dist/@santashop/models",
-				"node_modules/@santashop/models",
-			],
-			"@santashop/core": [
-				"dist/@santashop/core",
-				"node_modules/@santashop/core",
-			],
-			"@santashop/app": [
-				"dist/@santashop/app",
-				"node_modules/@santashop/app",
-			],
-			"@santashop/admin": [
-				"dist/@santashop/admin",
-				"node_modules/@santashop/admin",
-			]
+			"@santashop/models": ["dist/@santashop/models"],
+			"@santashop/core": ["dist/@santashop/core"],
+			"@santashop/app": ["dist/@santashop/app"],
+			"@santashop/admin": ["dist/@santashop/admin"]
 		},
 		"types": ["node"],
 		"typeRoots": ["node_modules/@types"]

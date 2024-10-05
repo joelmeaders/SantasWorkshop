@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { ReferralModalComponent } from './referral-modal.component';
 
@@ -9,8 +8,7 @@ describe('ReferralModalComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [ReferralModalComponent],
-			imports: [IonicModule.forRoot()],
+			imports: [ReferralModalComponent],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ReferralModalComponent);

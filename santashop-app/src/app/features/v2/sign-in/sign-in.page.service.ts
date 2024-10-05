@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, newAuthForm } from '@santashop/core';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular/standalone';
 import { Auth, IError } from '@santashop/models';
 import { Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';

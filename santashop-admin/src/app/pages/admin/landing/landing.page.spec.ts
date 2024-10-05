@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { LandingPage } from './landing.page';
 
@@ -9,8 +8,7 @@ describe('LandingPage', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [LandingPage],
-			imports: [IonicModule.forRoot()],
+			imports: [LandingPage],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(LandingPage);

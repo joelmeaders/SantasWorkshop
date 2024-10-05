@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { AddEditChildModalComponent } from './add-edit-child-modal.component';
 
@@ -9,8 +8,7 @@ describe('AddEditChildModalComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [AddEditChildModalComponent],
-			imports: [IonicModule.forRoot()],
+			imports: [AddEditChildModalComponent],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(AddEditChildModalComponent);

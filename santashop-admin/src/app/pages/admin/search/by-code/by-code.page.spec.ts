@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { ByCodePage } from './by-code.page';
 
@@ -9,8 +8,7 @@ describe('ByCodePage', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [ByCodePage],
-			imports: [IonicModule.forRoot()],
+			imports: [ByCodePage],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ByCodePage);

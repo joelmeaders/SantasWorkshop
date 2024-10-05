@@ -129,9 +129,7 @@
 										></ion-input>
 									</ion-item>
 
-									<ng-container
-										*ngIf="form.errors?.passwordMismatch"
-									>
+									@if (form.errors?.passwordMismatch) {
 										<ul>
 											<li>
 												<ion-note color="danger">
@@ -140,12 +138,11 @@
 												</ion-note>
 											</li>
 										</ul>
-									</ng-container>
+									}
 								</ion-item-group>
 
 								<ion-item-group>
-									<ion-item-divider color="light">
-									</ion-item-divider>
+									<ion-item-divider color="light" />
 									<div class="ion-padding-top">
 										<ion-text
 											color="primary"

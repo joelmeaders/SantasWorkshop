@@ -2,7 +2,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Analytics } from '@angular/fire/analytics';
 
-import { Platform } from '@ionic/angular';
+import { Platform } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';
@@ -24,7 +24,7 @@ describe('AppComponent', () => {
 		]);
 
 		TestBed.configureTestingModule({
-			declarations: [AppComponent],
+			imports: [AppComponent],
 			schemas: [CUSTOM_ELEMENTS_SCHEMA],
 			providers: [
 				{ provide: Platform, useValue: platformSpy },

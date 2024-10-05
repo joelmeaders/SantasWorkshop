@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LoadingController } from '@ionic/angular';
+import { LoadingController } from '@ionic/angular/standalone';
 import { Registration } from '@santashop/models';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { HttpsCallableResult } from '@santashop/core';

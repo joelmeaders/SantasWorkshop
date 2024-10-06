@@ -21,7 +21,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('user-2023')
+		.doc('user-2024')
 		.set(stats, { merge: false });
 };
 
@@ -29,13 +29,15 @@ function getZipCodeCounts(users: User[]): UsersByZipCodeCount[] {
 	const stats: UsersByZipCodeCount[] = [];
 	let valueUndefined = 0;
 
-	let zips: string[] = []; 
-	
+	let zips: string[] = [];
+
 	zips = Array.from(
-		new Set(users.map((e) => {
-			const zip = (e.zipCode as unknown as number).toString();
-			return zip.slice(0, 5);
-		}))
+		new Set(
+			users.map((e) => {
+				const zip = (e.zipCode as unknown as number).toString();
+				return zip.slice(0, 5);
+			}),
+		),
 	);
 
 	zips.forEach((e) => {
@@ -50,7 +52,9 @@ function getZipCodeCounts(users: User[]): UsersByZipCodeCount[] {
 
 	// Increment zip count
 	users.forEach((user) => {
-		const zipCode = (user.zipCode as unknown as number).toString().slice(0, 5);
+		const zipCode = (user.zipCode as unknown as number)
+			.toString()
+			.slice(0, 5);
 		const index = getIndex(zipCode);
 
 		if (index === -1) {

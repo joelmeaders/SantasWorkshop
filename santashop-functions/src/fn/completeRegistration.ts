@@ -64,7 +64,7 @@ export default async (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2023,
+		programYear: 2024,
 	} as Partial<Registration>;
 
 	batch.set(registrationDocRef, updateRegistrationFields, { merge: true });

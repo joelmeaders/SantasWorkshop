@@ -1,14 +1,14 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "NodeNext",
 		"noEmit": false,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"outDir": "dist",
 		"sourceMap": true,
 		"strict": true,
-		"target": "es2017",
+		"target": "ES2022",
 		"declaration": true,
 		"declarationMap": true,
 		"allowSyntheticDefaultImports": true,

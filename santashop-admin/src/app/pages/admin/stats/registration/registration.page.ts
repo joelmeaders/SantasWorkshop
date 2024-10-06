@@ -45,7 +45,7 @@ export class RegistrationPage {
 
 	private readonly registrationStats$ =
 		this.statsCollection<RegistrationStats>()
-			.read('registration-2023')
+			.read('registration-2024')
 			.pipe(filterNil(), shareReplay(1));
 
 	public readonly registrationCount$ = this.registrationStats$.pipe(
@@ -53,7 +53,7 @@ export class RegistrationPage {
 	);
 
 	private readonly scheduleStats$ = this.statsCollection<ScheduleStats>()
-		.read('schedule-2023')
+		.read('schedule-2024')
 		.pipe(filterNil(), shareReplay(1));
 
 	private readonly dateTimeStats$ = this.scheduleStats$.pipe(

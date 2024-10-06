@@ -9,22 +9,28 @@ admin.initializeApp();
  * If the reserved spots is greater than the max slots, it disables the slot.
  */
 export default async (): Promise<string> => {
-
 	// Load all date/time slots
 	const dateTimeSlots: DateTimeSlot[] = await loadDateTimeSlots();
 	if (!dateTimeSlots.length) return Promise.resolve('No date time slots');
 
-	const scheduleStatsDoc = admin.firestore().collection('stats').doc('schedule-2023');
+	const scheduleStatsDoc = admin
+		.firestore()
+		.collection('stats')
+		.doc('schedule-2024');
 	const scheduleStats: ScheduleStats = { dateTimeCounts: [] };
 
 	// Loop through each date time slot and get the count of registrations
 	for (const slot of dateTimeSlots) {
 		// Get the count of registrations for this slot
-		const registrationCount = await registrationsByDateTimeSlotQuery(slot.id!)
-			.then((snapshot) => snapshot.data().count);
+		const registrationCount = await registrationsByDateTimeSlotQuery(
+			slot.id!,
+		).then((snapshot) => snapshot.data().count);
 
 		// Update stats data
-		scheduleStats.dateTimeCounts.push({ dateTime: slot.dateTime, count: registrationCount });
+		scheduleStats.dateTimeCounts.push({
+			dateTime: slot.dateTime,
+			count: registrationCount,
+		});
 		console.log(`Slot ${slot.id} has ${slot.slotsReserved} registrations`);
 
 		// No need to update if the count is the same
@@ -35,7 +41,10 @@ export default async (): Promise<string> => {
 		slot.enabled = slot.slotsReserved < slot.maxSlots;
 
 		// Update the slot in database
-		const slotDoc = admin.firestore().collection('dateTimeSlots').doc(slot.id!.toString());
+		const slotDoc = admin
+			.firestore()
+			.collection('dateTimeSlots')
+			.doc(slot.id!.toString());
 		await slotDoc.update({ ...slot });
 	}
 
@@ -49,7 +58,7 @@ const dateTimeSlotQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('dateTimeSlots')
-		.where('programYear', '==', 2023)
+		.where('programYear', '==', 2024)
 		.limit(limit)
 		.offset(offset);
 
@@ -87,4 +96,3 @@ const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
 
 	return allDateTimeSlots;
 };
-

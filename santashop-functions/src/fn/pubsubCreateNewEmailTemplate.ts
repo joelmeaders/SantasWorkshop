@@ -29,6 +29,7 @@ const createCreateTemplateCommand =
 				TemplateName: 'dscs-registration-confirmation-v1',
 				HtmlPart: cleanedUpTemplate,
 				SubjectPart:
+					// eslint-disable-next-line quotes
 					"Here's your ticket for the 2024 Denver Santa Claus Shop!",
 			},
 		});

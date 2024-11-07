@@ -26,7 +26,7 @@ const validators = {
 	dateOfBirth: Validators.compose([
 		Validators.required,
 		Validators.pattern(
-			/20\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/,
+			/20\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][/\d]|3[01])/,
 		),
 	]),
 	ageGroup: Validators.compose([Validators.required]),

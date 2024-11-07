@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+
 import { TranslateService } from '@ngx-translate/core';
 import { Spied } from '../../../../../../test-helpers';
 
@@ -13,14 +13,13 @@ describe('LanguageToggleComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [LanguageToggleComponent],
 			providers: [
 				{
 					provide: TranslateService,
 					useValue: translateService,
 				},
 			],
-			imports: [IonicModule.forRoot()],
+			imports: [LanguageToggleComponent],
 		}).compileComponents();
 
 		translateService = TestBed.inject(

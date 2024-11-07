@@ -15,7 +15,7 @@ let sesClient: SESClient | undefined = undefined;
 const loadTemplate = async (): Promise<string> => {
 	return await fileSystem.readFile(
 		'src/utility/assets/registration-confirmation-2023.html',
-		{ encoding: 'utf-8' }
+		{ encoding: 'utf-8' },
 	);
 };
 
@@ -29,7 +29,8 @@ const createCreateTemplateCommand =
 				TemplateName: 'dscs-registration-confirmation-v1',
 				HtmlPart: cleanedUpTemplate,
 				SubjectPart:
-					'Here\'s your ticket for the 2023 Denver Santa Claus Shop!',
+					// eslint-disable-next-line quotes
+					"Here's your ticket for the 2024 Denver Santa Claus Shop!",
 			},
 		});
 	};

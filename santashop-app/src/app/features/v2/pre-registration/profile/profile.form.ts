@@ -1,5 +1,15 @@
-import { Validators } from '@angular/forms';
-import { FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+export interface ChangeEmailForm {
+	password: FormControl<string | undefined>;
+	emailAddress: FormControl<string | undefined>;
+}
+
+export interface ChangePasswordForm {
+	oldPassword: FormControl<string | undefined>;
+	newPassword: FormControl<string | undefined>;
+	newPassword2: FormControl<string | undefined>;
+}
 
 const validators = {
 	firstName: Validators.compose([
@@ -30,25 +40,30 @@ const validators = {
 	]),
 };
 
-export const changeEmailForm = (): FormGroup<{
-	password: FormControl<string>;
-	emailAddress: FormControl<string>;
-}> =>
-	new FormGroup({
-		password: new FormControl<string>(undefined, Validators.required),
-		emailAddress: new FormControl<string>(
-			undefined,
-			validators.emailAddress,
-		),
+export const changeEmailForm = (): FormGroup<ChangeEmailForm> =>
+	new FormGroup<ChangeEmailForm>({
+		password: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.password,
+		}),
+		emailAddress: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.emailAddress,
+		}),
 	});
 
-export const changePasswordForm = (): FormGroup<{
-	oldPassword: FormControl<string>;
-	newPassword: FormControl<string>;
-	newPassword2: FormControl<string>;
-}> =>
-	new FormGroup({
-		oldPassword: new FormControl<string>(undefined, Validators.required),
-		newPassword: new FormControl<string>(undefined, validators.password),
-		newPassword2: new FormControl<string>(undefined, validators.password),
+export const changePasswordForm = (): FormGroup<ChangePasswordForm> =>
+	new FormGroup<ChangePasswordForm>({
+		oldPassword: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.password,
+		}),
+		newPassword: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.password,
+		}),
+		newPassword2: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.password,
+		}),
 	});

@@ -7,8 +7,9 @@ import {
 	automock,
 	AnalyticsWrapper,
 	FunctionsWrapper,
+	filterNil,
 } from '@santashop/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { OverlayEventDetail } from '@ionic/core';
 import {
 	COLLECTION_SCHEMA,
@@ -40,7 +41,7 @@ export class ProfilePageService implements OnDestroy {
 		this.httpService
 			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
-			.pipe(take(1));
+			.pipe(filterNil(), take(1));
 
 	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
@@ -81,7 +82,7 @@ export class ProfilePageService implements OnDestroy {
 	public async updatePublicProfile(): Promise<void> {
 		this.analytics.logEvent('profile_update_info');
 
-		const newInfo: ChangeUserInfo = this.profileForm.value;
+		const newInfo = this.profileForm.value as ChangeUserInfo;
 
 		const loader = await this.loadingController.create({
 			message: 'Updating account...',
@@ -105,7 +106,7 @@ export class ProfilePageService implements OnDestroy {
 		const value = this.changeEmailForm.value;
 
 		await this.authService
-			.changeEmailAddress(value.password, value.emailAddress)
+			.changeEmailAddress(value.password!, value.emailAddress!)
 			.then(() => this.emailChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
 
@@ -120,7 +121,7 @@ export class ProfilePageService implements OnDestroy {
 		const value = this.changePasswordForm.value;
 
 		await this.authService
-			.changePassword(value.oldPassword, value.newPassword)
+			.changePassword(value.oldPassword!, value.newPassword!)
 			.then(() => this.passwordChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
 

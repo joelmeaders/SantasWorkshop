@@ -5,8 +5,9 @@ export interface AppLetContext<T> {
 }
 
 @Directive({
-	// eslint-disable-next-line @angular-eslint/directive-selector
-	selector: '[appLet]',
+    // eslint-disable-next-line @angular-eslint/directive-selector
+    selector: '[appLet]',
+    standalone: true,
 })
 export class AppLetDirective<T> {
 	@Input() public set appLet(value: T) {

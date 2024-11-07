@@ -9,7 +9,7 @@
 	"HOME": {
 		"WELCOME_MESSAGE": "Denver Santa Claus Shop<br/>Registration!",
 		"CREATE_ACCOUNT": "Create An Account",
-		"SIGN_IN_INST": "Already created an account for 2023?"
+		"SIGN_IN_INST": "Already created an account for 2024?"
 	},
 	"COMMON": {
 		"EMAIL_ADDRESS": "Email",
@@ -50,7 +50,7 @@
 		"SIGNING_IN": "Signing in..."
 	},
 	"SIGNUP": {
-		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2023, even if you have shopped with us in the past.",
+		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2024, even if you have shopped with us in the past.",
 		"HAVE_ACCOUNT": "Already have an account?",
 		"TITLE1": "Set up your account",
 		"TITLE2": "This will only take a minute",

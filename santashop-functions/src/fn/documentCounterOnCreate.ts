@@ -1,4 +1,4 @@
-import { EventContext } from 'firebase-functions';
+import { EventContext } from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 
 admin.initializeApp();

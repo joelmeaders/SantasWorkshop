@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { DateTimePage } from './date-time.page';
 
@@ -9,8 +8,7 @@ describe('DateTimePage', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [DateTimePage],
-			imports: [IonicModule.forRoot()],
+			imports: [DateTimePage],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(DateTimePage);

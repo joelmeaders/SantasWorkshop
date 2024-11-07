@@ -4,7 +4,7 @@ import {
 	SESClient,
 	SESClientConfig,
 } from '@aws-sdk/client-ses';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { COLLECTION_SCHEMA } from '../../../santashop-models/src';
 
@@ -26,7 +26,7 @@ const createReminderEmailCommand = (
 		TemplateData: JSON.stringify(messageDetails),
 		Source: 'noreply@denversantaclausshop.org',
 		Template: 'dscs-registration-confirmation-v1',
-		ReturnPath: 'admin@denversantaclausshop.org'
+		ReturnPath: 'admin@denversantaclausshop.org',
 	});
 };
 
@@ -71,7 +71,7 @@ export default async (docChange: functions.firestore.QueryDocumentSnapshot) => {
 	if ((response?.$metadata.httpStatusCode ?? 999) <= 300) {
 		await emailDocRef.delete();
 	} else {
-		console.log(response)
+		console.log(response);
 		const failure = {
 			...response,
 		};

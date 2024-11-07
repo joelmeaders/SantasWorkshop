@@ -2,105 +2,118 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { FunctionsWrapper } from '@santashop/core';
 import referringAgencies from '../../../../../../assets/referring-agencies.json';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonText, IonInput, IonButton } from '@ionic/angular/standalone';
 import { IError } from '@santashop/models';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+    FormControl,
+    FormGroup,
+    Validators,
+    ReactiveFormsModule,
+} from '@angular/forms';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-	selector: 'app-referral-card',
-	templateUrl: './referral-card.component.html',
-	styleUrls: ['./referral-card.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-referral-card',
+    templateUrl: './referral-card.component.html',
+    styleUrls: ['./referral-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgFor, ReactiveFormsModule, AsyncPipe, TranslateModule, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonText, IonInput, IonButton],
 })
 export class ReferralCardComponent {
-	public readonly allReferrals: string[] = referringAgencies.agencies;
+    public readonly allReferrals: string[] = referringAgencies.agencies;
 
-	private readonly searchText = new BehaviorSubject<string | undefined>(
-		undefined,
-	);
+    private readonly searchText = new BehaviorSubject<string | undefined>(
+        undefined,
+    );
 
-	private readonly filteredReferrals$: Observable<string[]> =
-		this.searchText.pipe(
-			map((search) =>
-				!!search && search.length
-					? this.allReferrals.filter((ref) =>
-							ref.toUpperCase().includes(search),
-					  )
-					: this.allReferrals,
-			),
-		);
+    private readonly filteredReferrals$: Observable<string[]> =
+        this.searchText.pipe(
+            map((search) =>
+                !!search && search.length
+                    ? this.allReferrals.filter((ref) =>
+                        ref.toUpperCase().includes(search),
+                    )
+                    : this.allReferrals,
+            ),
+        );
 
-	public readonly referrals$ = this.filteredReferrals$;
+    public readonly referrals$ = this.filteredReferrals$;
 
-	private readonly referralChoice = new BehaviorSubject<string | undefined>(
-		undefined
-	);
-	public readonly referralChoice$ = this.referralChoice.asObservable();
+    private readonly referralChoice = new BehaviorSubject<string | undefined>(
+        undefined,
+    );
+    public readonly referralChoice$ = this.referralChoice.asObservable();
 
-	public readonly otherForm = new FormGroup({
-		other: new FormControl<string | undefined>(undefined, Validators.required)
-	});
+    public readonly otherForm = new FormGroup({
+        other: new FormControl<string | undefined>(
+            undefined,
+            Validators.required,
+        ),
+    });
 
-	constructor(
-		private readonly functions: FunctionsWrapper,
-		private readonly loadingController: LoadingController,
-		private readonly alertController: AlertController,
-	) {}
+    constructor(
+        private readonly functions: FunctionsWrapper,
+        private readonly loadingController: LoadingController,
+        private readonly alertController: AlertController,
+    ) { }
 
-	public filter($event: any): void {
-		const input = $event.detail?.value;
-		this.searchText.next(input ? input.toUpperCase() : undefined);
-	}
+    public filter($event: any): void {
+        const input = $event.detail?.value;
+        this.searchText.next(input ? input.toUpperCase() : undefined);
+    }
 
-	public setChoice(choice?: string): void {
-		if (choice !== 'Other') this.otherForm.controls.other.setValue(choice);
-		
-		this.referralChoice.next(choice);
-		this.searchText.next(undefined);
-	}
+    public setChoice(choice?: string): void {
+        if (choice !== 'Other') this.otherForm.controls.other.setValue(choice);
 
-	public async submit(): Promise<void> {
-		let value = this.referralChoice.getValue();
-		if (!value?.length) return;
+        this.referralChoice.next(choice);
+        this.searchText.next(undefined);
+    }
 
-		if (value === 'Other') {
-			const otherValue = this.otherForm.controls.other.value;
-			if (otherValue && otherValue.length > 3) value = `Other:${otherValue}`;
-		}
+    public async submit(): Promise<void> {
+        let value = this.referralChoice.getValue();
+        if (!value?.length) return;
 
-		await this.presentLoading();
+        if (value === 'Other') {
+            const otherValue = this.otherForm.controls.other.value;
+            if (otherValue && otherValue.length > 3)
+                value = `Other:${otherValue}`;
+        }
 
-		try {
-			await this.functions.updateReferredBy({
-				referredBy: value,
-			});
-		} catch (ex: any) {
-			await this.loadingController.dismiss();
-			await this.handleError(ex);
-		} finally {
-			await this.loadingController.dismiss();
-		}
-	}
+        await this.presentLoading();
 
-	private async presentLoading(): Promise<void> {
-		const loading = await this.loadingController.create({
-			duration: 3000,
-			message: 'Please wait...',
-			translucent: true,
-			backdropDismiss: false,
-		});
+        try {
+            await this.functions.updateReferredBy({
+                referredBy: value,
+            });
+        } catch (ex: any) {
+            await this.loadingController.dismiss();
+            await this.handleError(ex);
+        } finally {
+            await this.loadingController.dismiss();
+        }
+    }
 
-		await loading.present();
-	}
+    private async presentLoading(): Promise<void> {
+        const loading = await this.loadingController.create({
+            duration: 3000,
+            message: 'Please wait...',
+            translucent: true,
+            backdropDismiss: false,
+        });
 
-	private async handleError(error: IError): Promise<void> {
-		const alert = await this.alertController.create({
-			header: 'Error',
-			subHeader: error.code,
-			message: error.message,
-			buttons: ['Ok'],
-		});
+        await loading.present();
+    }
 
-		await alert.present();
-	}
+    private async handleError(error: IError): Promise<void> {
+        const alert = await this.alertController.create({
+            header: 'Error',
+            subHeader: error.code,
+            message: error.message,
+            buttons: ['Ok'],
+        });
+
+        await alert.present();
+    }
 }

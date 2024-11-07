@@ -78,7 +78,7 @@ export class AuthService {
 		// TODO: Find alternative
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		switchMap((user) => from(user!.getIdTokenResult(false))),
-		map((token) => token.claims?.admin ?? false),
+		map((token) => token.claims?.['admin'] ?? false),
 		shareReplay(1),
 	);
 

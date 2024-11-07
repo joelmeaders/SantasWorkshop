@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { combineLatest, from, Observable, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
@@ -10,7 +10,7 @@ import {
 	takeUntil,
 	tap,
 } from 'rxjs/operators';
-import { FireRepoLite } from '@santashop/core';
+import { FireRepoLite, filterNil } from '@santashop/core';
 import { COLLECTION_SCHEMA, PublicParameters } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { BadWeatherPage } from '../../features/bad-weather/bad-weather.page';
@@ -33,6 +33,7 @@ export class AppStateService implements OnDestroy {
 		.read('public')
 		.pipe(
 			takeUntil(this.destroy$),
+			filterNil(),
 			distinctUntilChanged((prev, curr) => {
 				return JSON.stringify(prev) === JSON.stringify(curr);
 			}),

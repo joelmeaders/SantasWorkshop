@@ -44,9 +44,14 @@ export class ChildrenPageService implements OnDestroy {
 			this.preRegistrationService.userRegistration$,
 		);
 
+		if (!registration) {
+			// FIXME: Error handling
+			throw new Error('Registration object is undefined');
+		}
+
 		registration.children = children;
 
-		// TODO: Error handling
+		// FIXME: Error handling
 		const storeRegistration = firstValueFrom(
 			this.preRegistrationService.saveRegistration(registration),
 		);
@@ -54,7 +59,7 @@ export class ChildrenPageService implements OnDestroy {
 		try {
 			await storeRegistration;
 		} catch (error) {
-			// TODO: Do something
+			// FIXME: Do something
 		}
 	}
 }

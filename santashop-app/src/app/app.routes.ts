@@ -10,7 +10,7 @@ const redirectUnauthorizedToLogin = (): AuthPipe =>
 const redirectLoggedInToRegistration = (): AuthPipe =>
 	redirectLoggedInTo(['/pre-registration/overview']);
 
-const routes: Routes = [
+export const routes: Routes = [
 	{
 		path: '',
 		loadChildren: () =>

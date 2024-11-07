@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandlerService } from '@core/*';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { IError } from '../../../../dist/santashop-models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 

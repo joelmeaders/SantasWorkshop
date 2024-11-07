@@ -1,6 +1,15 @@
-import { Validators } from '@angular/forms';
-import { OnboardUser } from '@santashop/models';
-import { ControlsOf, FormControl, FormGroup } from '@ngneat/reactive-forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+export interface OnboardUserForm {
+	firstName: FormControl<string | undefined>;
+	lastName: FormControl<string | undefined>;
+	emailAddress: FormControl<string | undefined>;
+	password: FormControl<string | undefined>;
+	password2: FormControl<string | undefined>;
+	zipCode: FormControl<number | undefined>;
+	legal: FormControl<boolean | Date | undefined>;
+	newsletter: FormControl<boolean | undefined>;
+}
 
 const validators = {
 	firstName: Validators.compose([
@@ -32,22 +41,44 @@ const validators = {
 	legal: Validators.compose([Validators.requiredTrue]),
 };
 
-export const newOnboardUserForm = (): FormGroup<ControlsOf<OnboardUser>> =>
-	new FormGroup<ControlsOf<OnboardUser>>(
+export const newOnboardUserForm = (): FormGroup<OnboardUserForm> =>
+	new FormGroup<OnboardUserForm>(
 		{
-			firstName: new FormControl<string>(undefined, validators.firstName),
-			lastName: new FormControl<string>(undefined, validators.lastName),
-			emailAddress: new FormControl<string>(
-				undefined,
-				validators.emailAddress,
-			),
-			password: new FormControl<string>(undefined, validators.password),
-			password2: new FormControl<string>(undefined, validators.password),
-			zipCode: new FormControl<number>(undefined, validators.zipCode),
-			legal: new FormControl<boolean | Date>(false, validators.legal),
-			newsletter: new FormControl<boolean>(false),
+			firstName: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.firstName,
+			}),
+			lastName: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.lastName,
+			}),
+			emailAddress: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.emailAddress,
+			}),
+			password: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.password,
+			}),
+			password2: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.password,
+			}),
+			zipCode: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.zipCode,
+			}),
+			legal: new FormControl(false, {
+				nonNullable: true,
+				validators: validators.legal,
+			}),
+			newsletter: new FormControl(false, {
+				nonNullable: true,
+			}),
 		},
-		passwordMatchValidator,
+		{
+			validators: passwordMatchValidator,
+		},
 	);
 
 function passwordMatchValidator(

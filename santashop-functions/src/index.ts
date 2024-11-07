@@ -1,26 +1,22 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 
 export const changeAccountInformation = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/changeAccountInformation')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 export const updateReferredBy = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/updateReferredBy')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 /**
  * Runs a method to validate and complete a user registration record.
@@ -32,102 +28,75 @@ export const updateReferredBy = functions
  */
 export const completeRegistration = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/completeRegistration')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 export const newAccount = functions
 	.runWith({ enforceAppCheck: true })
 	.https.onCall(async (request) => {
-	return (await import('./fn/newAccount')).default(request);
-});
+		return (await import('./fn/newAccount')).default(request);
+	});
 
 export const undoRegistration = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/undoRegistration')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 export const updateEmailAddress = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/updateEmailAddress')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 export const checkIn = functions
 	.runWith({ enforceAppCheck: true })
 	.https.onCall(async (request, context) => {
-	return (await import('./fn/checkIn')).default(request, context);
-});
+		return (await import('./fn/checkIn')).default(request, context);
+	});
 
 export const checkInWithEdit = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/checkInWithEdit')).default(request, context);
-	},
-);
+	});
 
 export const onSiteRegistration = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/onSiteRegistration')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 export const callableAdminPreRegister = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/callableAdminPreRegister')).default(
 			request,
 			context,
 		);
-	},
-);
+	});
 
 export const callableResendRegistrationEmail = functions
 	.runWith({ enforceAppCheck: true })
-	.https.onCall(
-	async (request, context) => {
+	.https.onCall(async (request, context) => {
 		return (await import('./fn/callableResendRegistrationEmail')).default(
 			request,
 			context,
 		);
-	},
-);
-
-/**
- * Validate recaptcha response.
- *
- * @remarks
- * Callable functions need to specify return instead of await
- */
-export const verifyRecaptcha2 = functions
-	.runWith({ enforceAppCheck: true })
-	.https.onCall(async (request) => {
-	return (await import('./fn/verifyRecaptcha2')).default(request);
-});
-
+	});
 // ------------------------------------- TRIGGER FUNCTIONS
 
 export const sendNewRegistrationEmails = functions
@@ -180,8 +149,7 @@ export const scheduledUserStats = functions
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
 export const scheduledCheckInStats = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub
-	.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
+	.pubsub.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
@@ -232,4 +200,3 @@ export const pubsubDeleteUsers = functions
 	.onPublish(async () => {
 		await (await import('./fn/pubsubDeleteUsers')).default();
 	});
-

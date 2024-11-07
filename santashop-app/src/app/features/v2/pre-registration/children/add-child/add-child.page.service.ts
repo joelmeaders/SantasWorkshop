@@ -9,7 +9,7 @@ import {
 	MAX_BIRTHDATE,
 	MIN_BIRTHDATE,
 } from '@santashop/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import {
 	Child,
 	ChildValidationError,
@@ -19,9 +19,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
-import {
-	PreRegistrationService,
-} from '../../../../../core';
+import { PreRegistrationService } from '../../../../../core';
 import { newChildForm } from './child.form';
 
 @Injectable()
@@ -55,8 +53,7 @@ export class AddChildPageService implements OnDestroy {
 		private readonly router: Router,
 		private readonly analytics: Analytics,
 	) {
-	console.log(MIN_BIRTHDATE())
-
+		console.log(MIN_BIRTHDATE());
 	}
 
 	public ngOnDestroy(): void {
@@ -104,8 +101,7 @@ export class AddChildPageService implements OnDestroy {
 		const children = await firstValueFrom(this.children$);
 
 		try {
-			const validatedChild =
-				validateChild(updatedChild);
+			const validatedChild = validateChild(updatedChild);
 			delete validatedChild.error;
 			const updatedChildren = children?.filter(
 				(child) => child.id !== validatedChild.id,
@@ -211,8 +207,7 @@ export class AddChildPageService implements OnDestroy {
 		const children = await firstValueFrom(this.children$);
 
 		try {
-			const validatedChild =
-				validateChild(child);
+			const validatedChild = validateChild(child);
 			children?.push(validatedChild);
 			logEvent(this.analytics, 'add_child');
 			return await this.updateRegistration(children);
@@ -266,6 +261,11 @@ export class AddChildPageService implements OnDestroy {
 		const registration = await firstValueFrom(
 			this.preRegistrationService.userRegistration$,
 		);
+
+		if (!registration) {
+			// FIXME: Error handling
+			throw new Error('Registration object is undefined');
+		}
 
 		registration.children = children;
 

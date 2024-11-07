@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { SubmitPage } from './submit.page';
 
@@ -9,8 +8,7 @@ describe('SubmitPage', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [SubmitPage],
-			imports: [IonicModule.forRoot()],
+			imports: [SubmitPage],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(SubmitPage);

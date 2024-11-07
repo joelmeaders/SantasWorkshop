@@ -14,7 +14,7 @@ export default async () => {
 	const statsDoc = await admin
 		.firestore()
 		.collection('stats')
-		.doc('checkin-2023')
+		.doc('checkin-2024')
 		.get();
 
 	if (statsDoc.exists) {
@@ -53,7 +53,7 @@ export default async () => {
 	await admin
 		.firestore()
 		.collection('stats')
-		.doc('checkin-2023')
+		.doc('checkin-2024')
 		.set(stats, { merge: false });
 
 	stats = {} as ICheckInAggregatedStats;

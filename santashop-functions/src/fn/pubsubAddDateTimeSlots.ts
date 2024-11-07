@@ -27,130 +27,132 @@ export default async (): Promise<void> => {
 
 const addDateTimeSlots = async () => {
 	const collection = dateTimeSlotCollection;
-	const programYear = 2023;
+	const shopDays = ['12-13', '12-14', '12-16', '12-17'];
+	const programYear = 2024;
+	const defaultMaxSlots = 350;
 
 	const dateTimeSlots: DateTimeSlot[] = [
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-08-${programYear} 10:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`${shopDays[0]}-${programYear} 10:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-08-${programYear} 11:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`${shopDays[0]}-${programYear} 11:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-08-${programYear} 12:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`${shopDays[0]}-${programYear} 12:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-08-${programYear} 13:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`${shopDays[0]}-${programYear} 13:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-08-${programYear} 14:00 MST`),
-			maxSlots: 300,
-			enabled: true,
-		},
-
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-09-${programYear} 10:00 MST`),
-			maxSlots: 300,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-09-${programYear} 11:00 MST`),
-			maxSlots: 300,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-09-${programYear} 12:00 MST`),
-			maxSlots: 300,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-09-${programYear} 13:00 MST`),
-			maxSlots: 300,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`12-09-${programYear} 14:00 MST`),
-			maxSlots: 300,
+			dateTime: new Date(`${shopDays[0]}-${programYear} 14:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-11-${programYear} 10:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[1]}-${programYear} 10:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-11-${programYear} 11:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[1]}-${programYear} 11:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-11-${programYear} 12:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[1]}-${programYear} 12:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-11-${programYear} 13:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[1]}-${programYear} 13:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-11-${programYear} 14:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[1]}-${programYear} 14:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-12-${programYear} 10:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[2]}-${programYear} 10:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-12-${programYear} 11:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[2]}-${programYear} 11:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-12-${programYear} 12:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[2]}-${programYear} 12:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-12-${programYear} 13:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[2]}-${programYear} 13:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 		{
 			programYear: programYear,
-			dateTime: new Date(`12-12-${programYear} 14:00 MST`),
-			maxSlots: 250,
+			dateTime: new Date(`${shopDays[2]}-${programYear} 14:00 MST`),
+			maxSlots: defaultMaxSlots,
+			enabled: true,
+		},
+
+		{
+			programYear: programYear,
+			dateTime: new Date(`${shopDays[3]}-${programYear} 10:00 MST`),
+			maxSlots: defaultMaxSlots,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`${shopDays[3]}-${programYear} 11:00 MST`),
+			maxSlots: defaultMaxSlots,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`${shopDays[3]}-${programYear} 12:00 MST`),
+			maxSlots: defaultMaxSlots,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`${shopDays[3]}-${programYear} 13:00 MST`),
+			maxSlots: defaultMaxSlots,
+			enabled: true,
+		},
+		{
+			programYear: programYear,
+			dateTime: new Date(`${shopDays[3]}-${programYear} 14:00 MST`),
+			maxSlots: defaultMaxSlots,
 			enabled: true,
 		},
 	];

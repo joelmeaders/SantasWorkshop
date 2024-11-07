@@ -1,5 +1,5 @@
 // import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-// import { IonicModule } from '@ionic/angular';
+//
 // import { firstValueFrom, of } from 'rxjs';
 // import { PreRegistrationService } from '../../../../core';
 
@@ -19,7 +19,7 @@
 //           useValue: jasmine.createSpyObj<PreRegistrationService>('PreRegistrationService', {}, ['registrationComplete$'])
 //         }
 //       ],
-//       imports: [IonicModule.forRoot()]
+//       imports: []
 //     }).compileComponents();
 
 //     fixture = TestBed.createComponent(HelpPage);

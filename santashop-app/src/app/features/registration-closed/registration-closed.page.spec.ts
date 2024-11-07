@@ -1,5 +1,5 @@
 // import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-// import { IonicModule } from '@ionic/angular';
+//
 
 // import { RegistrationClosedPage } from './registration-closed.page';
 
@@ -10,7 +10,7 @@
 //   beforeEach(async(() => {
 //     TestBed.configureTestingModule({
 //       declarations: [ RegistrationClosedPage ],
-//       imports: [IonicModule.forRoot()]
+//       imports: []
 //     }).compileComponents();
 
 //     fixture = TestBed.createComponent(RegistrationClosedPage);

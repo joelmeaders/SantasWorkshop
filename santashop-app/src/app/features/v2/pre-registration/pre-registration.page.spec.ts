@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { PreRegistrationPage } from './pre-registration.page';
 
@@ -9,8 +8,7 @@ describe('PreRegistrationPage', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [PreRegistrationPage],
-			imports: [IonicModule.forRoot()],
+			imports: [PreRegistrationPage],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(PreRegistrationPage);

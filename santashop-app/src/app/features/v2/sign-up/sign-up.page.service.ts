@@ -5,17 +5,16 @@ import {
 	ErrorHandlerService,
 	FunctionsWrapper,
 } from '@santashop/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { Auth, IError, OnboardUser } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()
 export class SignUpPageService implements OnDestroy {
 	public readonly form = newOnboardUserForm();
-	public readonly recaptchaValid$ = new BehaviorSubject<boolean>(false);
 	private readonly subscriptions = new Array<Subscription>();
 
 	/**
@@ -50,45 +49,8 @@ export class SignUpPageService implements OnDestroy {
 		);
 	}
 
-	public async onValidateRecaptcha($event: any): Promise<void> {
-		if (!(await this.validateRecaptcha($event))) {
-			this.recaptchaValid$.next(false);
-			await this.failedVerification();
-			return;
-		}
-
-		this.recaptchaValid$.next(true);
-	}
-
-	private async validateRecaptcha($event: any): Promise<boolean> {
-		const status = await this.functions.callableWrapper('verifyRecaptcha2')(
-			{
-				value: $event,
-			},
-		);
-
-		return status
-			? Promise.resolve((status.data as any).success as boolean)
-			: Promise.reject(false);
-	}
-
-	// Move to UI service
-	private async failedVerification(): Promise<void> {
-		const alert = await this.alertController.create({
-			header: this.translateService.instant('COMMON.VERIFICATION_FAILED'),
-			message: this.translateService.instant(
-				'COMMON.VERIFICATION_FAILED_MSG',
-			),
-			buttons: [this.translateService.instant('COMMON.OK')],
-		});
-
-		await alert.present();
-	}
-
 	public async onboardUser(): Promise<void> {
-		if (!this.recaptchaValid$.getValue()) return;
-
-		const onboardInfo = this.form.value;
+		const onboardInfo = this.form.value as OnboardUser;
 
 		const loader = await this.loadingController.create({
 			message: 'Creating account...',

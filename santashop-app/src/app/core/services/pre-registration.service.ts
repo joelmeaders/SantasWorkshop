@@ -45,6 +45,7 @@ export class PreRegistrationService implements OnDestroy {
 		takeUntil(this.destroy$),
 		filterNil(),
 		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
+		filterNil(),
 		shareReplay(1),
 	);
 

@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { InternalHeaderComponent } from './internal-header.component';
 
@@ -9,8 +8,7 @@ describe('InternalHeaderComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [InternalHeaderComponent],
-			imports: [IonicModule.forRoot()],
+			imports: [InternalHeaderComponent],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(InternalHeaderComponent);

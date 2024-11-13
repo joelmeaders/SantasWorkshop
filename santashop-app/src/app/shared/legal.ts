@@ -1,4 +1,4 @@
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { PrivacyPolicyModalComponent } from './components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from './components/terms-of-service-modal/terms-of-service-modal.component';
 

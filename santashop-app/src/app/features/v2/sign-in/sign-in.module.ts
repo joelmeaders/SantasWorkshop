@@ -2,10 +2,8 @@ import { NgModule } from '@angular/core';
 import { SignInPageRoutingModule } from './sign-in-routing.module';
 import { SignInPage } from './sign-in.page';
 import { CoreModule } from '@santashop/core';
-import { RecaptchaModule } from 'ng-recaptcha';
 
 @NgModule({
-	imports: [CoreModule, SignInPageRoutingModule, RecaptchaModule],
-	declarations: [SignInPage],
+    imports: [CoreModule, SignInPageRoutingModule, SignInPage],
 })
 export class SignInPageModule {}

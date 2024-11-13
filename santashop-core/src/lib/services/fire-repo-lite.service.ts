@@ -105,7 +105,10 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 * @return {*}  {Observable<T>}
 	 * @memberof FireRepoLite
 	 */
-	read(documentId: string, idField?: Extract<keyof T, string>): Observable<T>;
+	read(
+		documentId: string,
+		idField?: Extract<keyof T, string>,
+	): Observable<T | undefined>;
 
 	/**
 	 * Read many documents from the collection path with

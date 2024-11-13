@@ -6,15 +6,13 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
-import { AuthService, FireRepoLite } from '@santashop/core';
+import { AuthService, filterNil, FireRepoLite } from '@santashop/core';
 import { COLLECTION_SCHEMA, User } from '@santashop/models';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class ProfileService {
-	private readonly getUser$ = (uuid: string): Observable<User> =>
-		this.httpService.collection<User>(COLLECTION_SCHEMA.users).read(uuid);
 
 	public readonly userProfile$ = this.authService.uid$.pipe(
 		switchMap((id) => this.getUser$(id)),
@@ -25,6 +23,12 @@ export class ProfileService {
 		map((data) => data.referredBy),
 		shareReplay(1),
 	);
+
+	private readonly getUser$ = (uuid: string): Observable<User> =>
+		this.httpService
+			.collection<User>(COLLECTION_SCHEMA.users)
+			.read(uuid)
+			.pipe(filterNil());
 
 	constructor(
 		private readonly authService: AuthService,

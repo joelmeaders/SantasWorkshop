@@ -8,5 +8,6 @@
 	"peerDependencies": {},
 	"dependencies": {
 		"tslib": "^2.4.0"
-	}
+	},
+	"sideEffects": false
 }

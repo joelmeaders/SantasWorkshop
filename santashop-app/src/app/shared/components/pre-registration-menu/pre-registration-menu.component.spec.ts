@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { PreRegistrationMenuComponent } from './pre-registration-menu.component';
 
@@ -9,8 +8,7 @@ describe('PreRegistrationMenuComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [PreRegistrationMenuComponent],
-			imports: [IonicModule.forRoot()],
+			imports: [PreRegistrationMenuComponent],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(PreRegistrationMenuComponent);

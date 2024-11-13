@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { CallableContext } from 'firebase-functions/v1/https';
 import {
@@ -52,7 +52,7 @@ export default (
 		children: record.children,
 		registrationSubmittedOn: new Date(),
 		includedInRegistrationStats: false,
-		programYear: 2023,
+		programYear: 2024,
 	} as Partial<Registration>;
 
 	batch.create(registrationDocRef, partialRegistration);

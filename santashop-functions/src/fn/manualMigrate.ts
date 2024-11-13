@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { CallableContext } from 'firebase-functions/lib/common/providers/https';
 import { HttpsError } from 'firebase-functions/v1/auth';
 import {
@@ -105,7 +105,7 @@ export default async (
 
 				const childAge = getAgeFromDate(
 					child.dateOfBirth!,
-					new Date('12/10/2023'),
+					new Date('12/10/20243'),
 				);
 
 				if (child.toyType === 'infants' && childAge > 2) {
@@ -181,7 +181,7 @@ export default async (
 		firstName: customer.firstName ?? oldRegistration.firstName ?? 'ERROR',
 		lastName: customer.lastName ?? oldRegistration.lastName ?? 'ERROR',
 		emailAddress: customer.emailAddress ?? oldRegistration.email ?? 'ERROR',
-		programYear: 2023,
+		programYear: 2024,
 		includedInCounts: false,
 		zipCode: parsedZipCode,
 	};

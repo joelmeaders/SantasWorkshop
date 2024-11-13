@@ -12,7 +12,6 @@
 				"build": {
 					"builder": "@angular-devkit/build-angular:ng-packagr",
 					"options": {
-						"tsConfig": "santashop-core/tsconfig.lib.json",
 						"project": "santashop-core/ng-package.json"
 					},
 					"configurations": {
@@ -28,10 +27,8 @@
 				"test": {
 					"builder": "@angular-devkit/build-angular:karma",
 					"options": {
-						"main": "santashop-core/src/test.ts",
 						"tsConfig": "santashop-core/tsconfig.spec.json",
-						"karmaConfig": "santashop-core/karma.conf.js",
-						"codeCoverage": true
+						"polyfills": ["zone.js", "zone.js/testing"]
 					}
 				},
 				"lint": {
@@ -40,6 +37,45 @@
 						"lintFilePatterns": [
 							"santashop-core/**/*.ts",
 							"santashop-core/**/*.html"
+						]
+					}
+				}
+			}
+		},
+		"santashop-models": {
+			"projectType": "library",
+			"root": "santashop-models",
+			"sourceRoot": "santashop-models/src",
+			"prefix": "models",
+			"architect": {
+				"build": {
+					"builder": "@angular-devkit/build-angular:ng-packagr",
+					"options": {
+						"project": "santashop-models/ng-package.json"
+					},
+					"configurations": {
+						"production": {
+							"tsConfig": "santashop-models/tsconfig.lib.prod.json"
+						},
+						"development": {
+							"tsConfig": "santashop-models/tsconfig.lib.json"
+						}
+					},
+					"defaultConfiguration": "production"
+				},
+				"test": {
+					"builder": "@angular-devkit/build-angular:karma",
+					"options": {
+						"tsConfig": "santashop-core/tsconfig.spec.json",
+						"polyfills": ["zone.js", "zone.js/testing"]
+					}
+				},
+				"lint": {
+					"builder": "@angular-eslint/builder:lint",
+					"options": {
+						"lintFilePatterns": [
+							"santashop-models/**/*.ts",
+							"santashop-models/**/*.html"
 						]
 					}
 				}
@@ -77,6 +113,16 @@
 							}
 						],
 						"styles": [
+							"node_modules/@ionic/angular/css/core.css",
+							"node_modules/@ionic/angular/css/normalize.css",
+							"node_modules/@ionic/angular/css/structure.css",
+							"node_modules/@ionic/angular/css/typography.css",
+							"node_modules/@ionic/angular/css/display.css",
+							"node_modules/@ionic/angular/css/padding.css",
+							"node_modules/@ionic/angular/css/float-elements.css",
+							"node_modules/@ionic/angular/css/text-alignment.css",
+							"node_modules/@ionic/angular/css/text-transformation.css",
+							"node_modules/@ionic/angular/css/flex-utils.css",
 							"santashop-admin/src/global.scss",
 							"santashop-admin/src/theme/variables.scss"
 						],
@@ -131,15 +177,9 @@
 							]
 						},
 						"development": {
-							"buildOptimizer": false,
 							"optimization": false,
-							"vendorChunk": true,
 							"extractLicenses": false,
-							"sourceMap": true,
-							"namedChunks": true
-						},
-						"ci": {
-							"progress": false
+							"sourceMap": true
 						}
 					},
 					"defaultConfiguration": "production"
@@ -147,17 +187,17 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "santashop-admin:build"
+						"buildTarget": "santashop-admin:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "santashop-admin:build:production"
+							"buildTarget": "santashop-admin:build:production"
 						},
 						"test": {
-							"browserTarget": "santashop-admin:build:test"
+							"buildTarget": "santashop-admin:build:test"
 						},
 						"development": {
-							"browserTarget": "santashop-admin:build:development"
+							"buildTarget": "santashop-admin:build:development"
 						}
 					},
 					"defaultConfiguration": "development"
@@ -165,10 +205,9 @@
 				"test": {
 					"builder": "@angular-devkit/build-angular:karma",
 					"options": {
-						"main": "santashop-admin/src/test.ts",
+						"polyfills": ["zone.js", "zone.js/testing"],
 						"tsConfig": "santashop-admin/tsconfig.spec.json",
-						"karmaConfig": "santashop-admin/karma.conf.js",
-						"codeCoverage": true
+						"inlineStyleLanguage": "scss"
 					}
 				},
 				"lint": {
@@ -214,6 +253,16 @@
 							}
 						],
 						"styles": [
+							"node_modules/@ionic/angular/css/core.css",
+							"node_modules/@ionic/angular/css/normalize.css",
+							"node_modules/@ionic/angular/css/structure.css",
+							"node_modules/@ionic/angular/css/typography.css",
+							"node_modules/@ionic/angular/css/display.css",
+							"node_modules/@ionic/angular/css/padding.css",
+							"node_modules/@ionic/angular/css/float-elements.css",
+							"node_modules/@ionic/angular/css/text-alignment.css",
+							"node_modules/@ionic/angular/css/text-transformation.css",
+							"node_modules/@ionic/angular/css/flex-utils.css",
 							"santashop-app/src/global.scss",
 							"santashop-app/src/theme/variables.scss"
 						],
@@ -238,7 +287,8 @@
 									"maximumWarning": "2kb",
 									"maximumError": "4kb"
 								}
-							]
+							],
+							"outputHashing": "all"
 						},
 						"test": {
 							"fileReplacements": [
@@ -261,15 +311,9 @@
 							]
 						},
 						"development": {
-							"buildOptimizer": false,
 							"optimization": false,
-							"vendorChunk": true,
 							"extractLicenses": false,
-							"sourceMap": true,
-							"namedChunks": true
-						},
-						"ci": {
-							"progress": false
+							"sourceMap": true
 						}
 					},
 					"defaultConfiguration": "production"
@@ -277,17 +321,17 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "santashop-app:build"
+						"buildTarget": "santashop-app:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "santashop-app:build:production"
+							"buildTarget": "santashop-app:build:production"
 						},
 						"test": {
-							"browserTarget": "santashop-app:build:test"
+							"buildTarget": "santashop-app:build:test"
 						},
 						"development": {
-							"browserTarget": "santashop-app:build:development"
+							"buildTarget": "santashop-app:build:development"
 						}
 					},
 					"defaultConfiguration": "development"
@@ -311,59 +355,10 @@
 					}
 				}
 			}
-		},
-		"santashop-models": {
-			"projectType": "library",
-			"root": "santashop-models",
-			"sourceRoot": "santashop-models/src",
-			"prefix": "models",
-			"architect": {
-				"build": {
-					"builder": "@angular-devkit/build-angular:ng-packagr",
-					"options": {
-						"project": "santashop-models/ng-package.json"
-					},
-					"configurations": {
-						"production": {
-							"tsConfig": "santashop-models/tsconfig.lib.prod.json"
-						},
-						"development": {
-							"tsConfig": "santashop-models/tsconfig.lib.json"
-						}
-					},
-					"defaultConfiguration": "production"
-				},
-				"test": {
-					"builder": "@angular-devkit/build-angular:karma",
-					"options": {
-						"main": "santashop-models/src/test.ts",
-						"tsConfig": "santashop-models/tsconfig.spec.json",
-						"karmaConfig": "santashop-models/karma.conf.js",
-						"codeCoverage": true
-					}
-				},
-				"lint": {
-					"builder": "@angular-eslint/builder:lint",
-					"options": {
-						"lintFilePatterns": [
-							"santashop-models/**/*.ts",
-							"santashop-models/**/*.html"
-						]
-					}
-				}
-			}
 		}
 	},
 	"cli": {
 		"analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13",
 		"schematicCollections": ["@ionic/angular-toolkit"]
-	},
-	"schematics": {
-		"@ionic/angular-toolkit:component": {
-			"styleext": "scss"
-		},
-		"@ionic/angular-toolkit:page": {
-			"styleext": "scss"
-		}
 	}
 }

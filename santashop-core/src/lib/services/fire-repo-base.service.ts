@@ -27,7 +27,7 @@ export class FireRepoBase {
 		collectionPath: string,
 		documentId: string,
 		idField?: Extract<keyof T, string>,
-	): Observable<T> {
+	): Observable<T | undefined> {
 		const colRef = this.firestoreWrapper.collection(collectionPath);
 		const docRef = this.firestoreWrapper.doc<T>(colRef as any, documentId);
 		return this.firestoreWrapper.docData(docRef, { idField });

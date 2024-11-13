@@ -1,166 +1,154 @@
 {
-  "hosting": [
-    {
-      "target": "santashop-app",
-      "public": "dist/santashop-app",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "headers": [
-        {
-          "source": "*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].+(css|js)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "public,max-age=31536000,immutable"
-            }
-          ]
-        },
-        {
-          "source": "/@(ngsw-worker.js|ngsw.json)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "no-cache"
-            }
-          ]
-        }
-      ],
-      "rewrites": [
-        {
-          "source": "/changeAccountInformation",
-          "function": "changeAccountInformation"
-        },
-        {
-          "source": "/completeRegistration",
-          "function": "completeRegistration"
-        },
-        {
-          "source": "/newAccount",
-          "function": "newAccount"
-        },
-        {
-          "source": "/undoRegistration",
-          "function": "undoRegistration"
-        },
-        {
-          "source": "/updateEmailAddress",
-          "function": "updateEmailAddress"
-        },
-        {
-          "source": "/updateReferredBy",
-          "function": "updateReferredBy"
-        },
-        {
-          "source": "/verifyRecaptcha2",
-          "function": "verifyRecaptcha2"
-        },
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    },
-    {
-      "target": "santashop-admin",
-      "public": "dist/santashop-admin",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "headers": [
-        {
-          "source": "*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].+(css|js)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "public,max-age=31536000,immutable"
-            }
-          ]
-        },
-        {
-          "source": "/@(ngsw-worker.js|ngsw.json)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "no-cache"
-            }
-          ]
-        }
-      ],
-      "rewrites": [
-        {
-          "source": "/checkIn",
-          "function": "checkIn"
-        },
-        {
-          "source": "/checkInWithEdit",
-          "function": "checkInWithEdit"
-        },
-        {
-          "source": "/onSiteRegistration",
-          "function": "onSiteRegistration"
-        },
-        {
-          "source": "/callableAdminPreRegister",
-          "function": "callableAdminPreRegister"
-        },
-        {
-          "source": "/callableResendRegistrationEmail",
-          "function": "callableResendRegistrationEmail"
-        },
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    }
-  ],
-  "functions": {
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint",
-      "npm --prefix \"$RESOURCE_DIR\" run build"
-    ],
-    "source": "santashop-functions"
-  },
-  "emulators": {
-    "functions": {
-      "port": 5001
-    },
-    "firestore": {
-      "port": 8080
-    },
-    "hosting": {
-      "port": 5000
-    },
-    "ui": {
-      "enabled": true
-    },
-    "auth": {
-      "port": 9099
-    },
-    "storage": {
-      "port": 9199
-    },
-    "pubsub": {
-      "port": 8085
-    },
-    "database": {
-      "port": 9000
-    },
-    "singleProjectMode": true
-  },
-  "storage": {
-    "rules": "storage.rules"
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "database": {
-    "rules": "database.rules.json"
-  }
+	"hosting": [
+		{
+			"target": "santashop-app",
+			"public": "dist/santashop-app",
+			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+			"headers": [
+				{
+					"source": "*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].+(css|js)",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "public,max-age=31536000,immutable"
+						}
+					]
+				},
+				{
+					"source": "/@(ngsw-worker.js|ngsw.json)",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						}
+					]
+				}
+			],
+			"rewrites": [
+				{
+					"source": "/changeAccountInformation",
+					"function": "changeAccountInformation"
+				},
+				{
+					"source": "/completeRegistration",
+					"function": "completeRegistration"
+				},
+				{
+					"source": "/newAccount",
+					"function": "newAccount"
+				},
+				{
+					"source": "/undoRegistration",
+					"function": "undoRegistration"
+				},
+				{
+					"source": "/updateEmailAddress",
+					"function": "updateEmailAddress"
+				},
+				{
+					"source": "/updateReferredBy",
+					"function": "updateReferredBy"
+				},
+				{
+					"source": "**",
+					"destination": "/index.html"
+				}
+			]
+		},
+		{
+			"target": "santashop-admin",
+			"public": "dist/santashop-admin",
+			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+			"headers": [
+				{
+					"source": "*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].+(css|js)",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "public,max-age=31536000,immutable"
+						}
+					]
+				},
+				{
+					"source": "/@(ngsw-worker.js|ngsw.json)",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						}
+					]
+				}
+			],
+			"rewrites": [
+				{
+					"source": "/checkIn",
+					"function": "checkIn"
+				},
+				{
+					"source": "/checkInWithEdit",
+					"function": "checkInWithEdit"
+				},
+				{
+					"source": "/onSiteRegistration",
+					"function": "onSiteRegistration"
+				},
+				{
+					"source": "/callableAdminPreRegister",
+					"function": "callableAdminPreRegister"
+				},
+				{
+					"source": "/callableResendRegistrationEmail",
+					"function": "callableResendRegistrationEmail"
+				},
+				{
+					"source": "**",
+					"destination": "/index.html"
+				}
+			]
+		}
+	],
+	"functions": {
+		"predeploy": [
+			"npm --prefix \"$RESOURCE_DIR\" run lint",
+			"npm --prefix \"$RESOURCE_DIR\" run build"
+		],
+		"source": "santashop-functions"
+	},
+	"emulators": {
+		"functions": {
+			"port": 5001
+		},
+		"firestore": {
+			"port": 8080
+		},
+		"hosting": {
+			"port": 5000
+		},
+		"ui": {
+			"enabled": true
+		},
+		"auth": {
+			"port": 9099
+		},
+		"storage": {
+			"port": 9199
+		},
+		"pubsub": {
+			"port": 8085
+		},
+		"database": {
+			"port": 9000
+		},
+		"singleProjectMode": true
+	},
+	"storage": {
+		"rules": "storage.rules"
+	},
+	"firestore": {
+		"rules": "firestore.rules",
+		"indexes": "firestore.indexes.json"
+	},
+	"database": {
+		"rules": "database.rules.json"
+	}
 }

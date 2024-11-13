@@ -1,5 +1,5 @@
 // import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-// import { IonicModule } from '@ionic/angular';
+//
 
 // import { AddChildPage } from './add-child.page';
 
@@ -10,7 +10,7 @@
 //   beforeEach(waitForAsync(() => {
 //     TestBed.configureTestingModule({
 //       declarations: [ AddChildPage ],
-//       imports: [IonicModule.forRoot()]
+//       imports: []
 //     }).compileComponents();
 
 //     fixture = TestBed.createComponent(AddChildPage);

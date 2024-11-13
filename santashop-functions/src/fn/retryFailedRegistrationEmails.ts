@@ -1,9 +1,10 @@
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { COLLECTION_SCHEMA } from '../../../santashop-models/src';
 
 admin.initializeApp();
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mailchimpClient = require('@mailchimp/mailchimp_transactional')(
 	functions.config().mailchimp.key,
 );

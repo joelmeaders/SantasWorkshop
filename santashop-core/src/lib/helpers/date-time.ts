@@ -1,9 +1,9 @@
 import { Timestamp } from '@firebase/firestore';
 
 // TODO: Injectable tokens
-export const MAX_BIRTHDATE = (): Date => new Date('12/31/2023');
+export const MAX_BIRTHDATE = (): Date => new Date('12/31/2024');
 
-export const MIN_BIRTHDATE = (): Date => new Date('11/15/2011');
+export const MIN_BIRTHDATE = (): Date => new Date('11/15/2012');
 
 export const dateToTimestamp = (date: Date = new Date()): Timestamp =>
 	Timestamp.fromDate(date);

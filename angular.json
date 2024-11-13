@@ -291,12 +291,6 @@
 							"outputHashing": "all"
 						},
 						"test": {
-							"builder": "@angular-devkit/build-angular:karma",
-							"options": {
-								"polyfills": ["zone.js", "zone.js/testing"],
-								"tsConfig": "projects/default-app/tsconfig.spec.json",
-								"inlineStyleLanguage": "scss"
-							},
 							"fileReplacements": [
 								{
 									"replace": "santashop-app/src/environments/environment.ts",
@@ -366,13 +360,5 @@
 	"cli": {
 		"analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13",
 		"schematicCollections": ["@ionic/angular-toolkit"]
-	},
-	"schematics": {
-		"@ionic/angular-toolkit:component": {
-			"style": "scss"
-		},
-		"@ionic/angular-toolkit:page": {
-			"style": "scss"
-		}
 	}
 }

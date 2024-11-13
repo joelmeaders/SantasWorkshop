@@ -149,7 +149,7 @@ export const scheduledUserStats = functions
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
 export const scheduledCheckInStats = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.schedule('*/5 10,11,12,13,14,15,16 8,9,11,12 12 *')
+	.pubsub.schedule('*/5 10,11,12,13,14,15,16 12,14,16,17 12 *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();

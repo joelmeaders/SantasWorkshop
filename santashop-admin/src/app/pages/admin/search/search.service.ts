@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FireRepoLite, QueryConstraint, User } from '@santashop/core';
 import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@santashop/models';
 import { limit, orderBy, where } from 'firebase/firestore';
@@ -8,6 +8,8 @@ import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
 	providedIn: 'root',
 })
 export class SearchService {
+	private readonly repoService = inject(FireRepoLite);
+
 	private readonly searchResults = new BehaviorSubject<Observable<
 		RegistrationSearchIndex[]
 	> | null>(null);
@@ -47,8 +49,6 @@ export class SearchService {
 
 	private readonly queryCode = (code: string): QueryConstraint[] =>
 		[where('code', '==', code), limit(50)] as QueryConstraint[];
-
-	constructor(private readonly repoService: FireRepoLite) {}
 
 	public searchByLastNameZip(lastName: string, zipCode: string): void {
 		this.searchResults.next(

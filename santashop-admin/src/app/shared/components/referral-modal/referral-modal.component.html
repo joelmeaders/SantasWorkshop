@@ -1,67 +1,78 @@
 <ion-header>
-	<ion-toolbar>
-		<ion-title> Choose Referring Agency</ion-title>
-		<ion-button
-			slot="end"
-			fill="outline"
-			color="danger"
-			(click)="dismiss()"
-		>
-			Cancel
-		</ion-button>
-	</ion-toolbar>
+  <ion-toolbar>
+    <ion-title> Choose Referring Agency</ion-title>
+    <ion-button
+      slot="end"
+      fill="outline"
+      color="danger"
+      (click)="dismiss()"
+      >
+      Cancel
+    </ion-button>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content>
-	<ion-list *ngIf="(referralChoice$ | async) === undefined">
-		<ion-searchbar
-			(ionChange)="filter($event)"
-			animated="true"
-			placeholder="Enter agency name"
-		></ion-searchbar>
+  @if ((referralChoice$ | async) === undefined) {
+    <ion-list>
+      <ion-searchbar
+        (ionChange)="filter($event)"
+        animated="true"
+        placeholder="Enter agency name"
+      ></ion-searchbar>
+      <ion-item-group>
+        <ion-item-divider color="light" disabled>
+          <ion-label> Common </ion-label>
+        </ion-item-divider>
+        @for (ref of referrals$ | async; track ref; let i = $index) {
+          @if (ref === '----------') {
+            <ion-item-divider
+              disabled
+              color="light"
+              >
+              <ion-label>
+                {{ i < 10 ? "Alphabetical" : "" }}
+              </ion-label>
+            </ion-item-divider>
+          } @else {
+            <ion-item
+              button
+              detail
+              lines="full"
+              (click)="setValue(ref)"
+              [disabled]="ref === '----------'"
+              >
+              <ion-label class="ref-choices">{{ ref }}</ion-label>
+            </ion-item>
+          }
+          <ng-template #agency>
+            <ion-item
+              button
+              detail
+              lines="full"
+              (click)="setValue(ref)"
+              [disabled]="ref === '----------'"
+              >
+              <ion-label class="ref-choices">{{ ref }}</ion-label>
+            </ion-item>
+          </ng-template>
+        }
+      </ion-item-group>
+    </ion-list>
+  }
 
-		<ion-item-group>
-			<ion-item-divider color="light" disabled>
-				<ion-label> Common </ion-label>
-			</ion-item-divider>
-			<ng-container *ngFor="let ref of referrals$ | async; let i = index">
-				<ion-item-divider
-					*ngIf="ref === '----------'; else agency"
-					disabled
-					color="light"
-				>
-					<ion-label>
-						{{ i < 10 ? "Alphabetical" : "" }}
-					</ion-label>
-				</ion-item-divider>
-				<ng-template #agency>
-					<ion-item
-						button
-						detail
-						lines="full"
-						(click)="setValue(ref)"
-						[disabled]="ref === '----------'"
-					>
-						<ion-label class="ref-choices">{{ ref }}</ion-label>
-					</ion-item>
-				</ng-template>
-			</ng-container>
-		</ion-item-group>
-	</ion-list>
-
-	<ng-container *ngIf="(referralChoice$ | async) === 'Other'">
-		<ion-item lines="none">
-			<ion-label position="stacked"> Type name of referral: </ion-label>
-			<ion-input
-				#otherInput
-				class="other-input"
-				maxlength="20"
-				minlength="3"
-			></ion-input>
-		</ion-item>
-
-		<ion-button slot="end" size="default" (click)="dismiss()">
-			Save
-		</ion-button>
-	</ng-container>
+  @if ((referralChoice$ | async) === 'Other') {
+    <ion-item lines="none">
+      <ion-label position="stacked"> Type name of referral: </ion-label>
+      <ion-input
+        #otherInput
+        class="other-input"
+        maxlength="20"
+        minlength="3"
+      ></ion-input>
+    </ion-item>
+    <ion-button slot="end" size="default" (click)="dismiss()">
+      Save
+    </ion-button>
+  }
 </ion-content>

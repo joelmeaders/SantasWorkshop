@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ScanPage } from './scan.page';
+
 
 const routes: Routes = [
 	{
 		path: '',
-		component: ScanPage,
+		loadComponent: () => import('./scan.page').then(m => m.ScanPage),
 	},
 ];
 

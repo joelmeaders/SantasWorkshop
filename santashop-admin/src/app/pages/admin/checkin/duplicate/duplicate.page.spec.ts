@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
 
 import { DuplicatePage } from './duplicate.page';
 
@@ -9,8 +8,7 @@ describe('DuplicatePage', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [DuplicatePage],
-			imports: [IonicModule.forRoot()],
+			imports: [DuplicatePage],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(DuplicatePage);

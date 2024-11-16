@@ -1,19 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+
+import {
+	BaseChartDirective,
+	provideCharts,
+	withDefaultRegisterables,
+} from 'ng2-charts';
 import { UserPageRoutingModule } from './user-routing.module';
 import { UserPage } from './user.page';
-import { SharedModule } from '../../../../shared/shared.module';
-import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
 	imports: [
 		CommonModule,
-		IonicModule,
+
 		UserPageRoutingModule,
-		SharedModule,
-		NgChartsModule,
+		BaseChartDirective,
+		UserPage,
 	],
-	declarations: [UserPage],
+	providers: [provideCharts(withDefaultRegisterables())],
 })
 export class UserPageModule {}

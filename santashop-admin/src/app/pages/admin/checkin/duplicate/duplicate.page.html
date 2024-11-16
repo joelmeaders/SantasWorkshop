@@ -1,23 +1,23 @@
 <admin-header
-	title="Contact DSCS Member"
-	backRoute="/admin/checkin/scan"
+  title="Contact DSCS Member"
+  backRoute="/admin/checkin/scan"
 ></admin-header>
 
 <ion-content class="ion-padding-horizontal ion-text-center" color="danger">
-	<ng-container *ngIf="checkin$ | async as checkin">
-		<h1>THIS CUSTOMER ALREADY GOT TOYS!</h1>
-		<h2>Do not give them tickets. Contact DSCS Member to resolve.</h2>
-
-		<br />
-		Checked in on:
-		<h2>{{ checkin.checkInDateTime | date:'short' }}</h2>
-
-		<div class="ion-padding-top">
-			<ion-note color="dark">
-				<span *ngFor="let field of checkin.stats | keyvalue">
-					{{ field.key }}: {{ field.value }} <br />
-				</span>
-			</ion-note>
-		</div>
-	</ng-container>
+  @if (checkin$ | async; as checkin) {
+    <h1>THIS CUSTOMER ALREADY GOT TOYS!</h1>
+    <h2>Do not give them tickets. Contact DSCS Member to resolve.</h2>
+    <br />
+    Checked in on:
+    <h2>{{ checkin.checkInDateTime | date:'short' }}</h2>
+    <div class="ion-padding-top">
+      <ion-note color="dark">
+        @for (field of checkin.stats | keyvalue; track field) {
+          <span>
+            {{ field.key }}: {{ field.value }} <br />
+          </span>
+        }
+      </ion-note>
+    </div>
+  }
 </ion-content>

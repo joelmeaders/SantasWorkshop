@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ByEmailPage } from './by-email.page';
+
 
 const routes: Routes = [
 	{
 		path: '',
-		component: ByEmailPage,
+		loadComponent: () => import('./by-email.page').then(m => m.ByEmailPage),
 	},
 ];
 

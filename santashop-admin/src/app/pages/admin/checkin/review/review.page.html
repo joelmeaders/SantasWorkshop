@@ -1,87 +1,85 @@
 <admin-header
-	title="Check-In: Review Info"
-	backRoute="/admin/checkin/scan"
+  title="Check-In: Review Info"
+  backRoute="/admin/checkin/scan"
 ></admin-header>
 
 <ion-content fullscreen class="ion-padding-horizontal">
-	<div class="limited-container">
-		<ion-list
-			*ngIf="registration$ | async as registration; else noRegistration"
-		>
-			<ion-list-header color="none" class="review-instructions">
-				<span>
-					<h3>Instructions</h3>
-					<ion-note>
-						Review all registration information. Validate children
-						names and birth dates with documentation. Add, edit and
-						remove children if needed before continuing.
-					</ion-note>
-				</span>
-			</ion-list-header>
+  <div class="limited-container">
+    @if (registration$ | async; as registration) {
+      <ion-list
+        >
+        <ion-list-header color="none" class="review-instructions">
+          <span>
+            <h3>Instructions</h3>
+            <ion-note>
+              Review all registration information. Validate children
+              names and birth dates with documentation. Add, edit and
+              remove children if needed before continuing.
+            </ion-note>
+          </span>
+        </ion-list-header>
+        <ion-item-divider>
+          <ion-label> Parent / Guardian </ion-label>
+        </ion-item-divider>
+        <ion-item lines="none">
+          <ion-label>
+            <h1>
+              {{ registration?.firstName }} {{ registration?.lastName
+              }}
+            </h1>
+            <p>{{ registration?.emailAddress }}</p>
+            <p>Zip: {{ registration?.zipCode }}</p>
+            @if (registration?.dateTimeSlot?.dateTime) {
+              <p>
+                <ion-text color="primary">
+                  Reservation: {{ registration.dateTimeSlot?.dateTime
+                  | date:'medium' }}
+                </ion-text>
+              </p>
+            }
+          </ion-label>
+        </ion-item>
+        <admin-manage-children
+          [children]="registration?.children ?? []"
+          (adddedChild)="addChild($event)"
+          (editedChild)="editChild($event)"
+          (removedChild)="removeChild($event)"
+        ></admin-manage-children>
+        <ion-item-divider class="success-divider">
+          <ion-label>
+            Is all information correct and accurate?
+          </ion-label>
+        </ion-item-divider>
+        @if ((checkinEnabled$ | async) !== true) {
+          <ion-note color="danger">
+            Check-In is not available at this time.
+          </ion-note>
+        }
+        <ion-item
+          lines="none"
+          button
+          color="success"
+          class="confirm-button"
+          (click)="checkIn()"
+          [disabled]="(checkinEnabled$ | async) !== true"
+          >
+          <ion-label>
+            <h1>Yes, check in</h1>
+          </ion-label>
+          <ion-icon
+            name="checkmark-circle"
+            slot="end"
+            size="large"
+          ></ion-icon>
+        </ion-item>
+      </ion-list>
+    } @else {
+      <div class="no-info ion-text-center ion-padding-top">
+        <h1>No information loaded...</h1>
+        <p>Did you get here by mistake?</p>
+        <ion-button [routerLink]="['..']"> Go Back </ion-button>
+      </div>
+    }
 
-			<ion-item-divider>
-				<ion-label> Parent / Guardian </ion-label>
-			</ion-item-divider>
-
-			<ion-item lines="none">
-				<ion-label>
-					<h1>
-						{{ registration?.firstName }} {{ registration?.lastName
-						}}
-					</h1>
-					<p>{{ registration?.emailAddress }}</p>
-					<p>Zip: {{ registration?.zipCode }}</p>
-					<p *ngIf="registration?.dateTimeSlot?.dateTime">
-						<ion-text color="primary">
-							Reservation: {{ registration.dateTimeSlot?.dateTime
-							| date:'medium' }}
-						</ion-text>
-					</p>
-				</ion-label>
-			</ion-item>
-
-			<admin-manage-children
-				[children]="registration?.children ?? []"
-				(adddedChild)="addChild($event)"
-				(editedChild)="editChild($event)"
-				(removedChild)="removeChild($event)"
-			></admin-manage-children>
-
-			<ion-item-divider class="success-divider">
-				<ion-label>
-					Is all information correct and accurate?
-				</ion-label>
-			</ion-item-divider>
-
-			<ion-note color="danger" *ngIf="(checkinEnabled$ | async) !== true">
-				Check-In is not available at this time.
-			</ion-note>
-
-			<ion-item
-				lines="none"
-				button
-				color="success"
-				class="confirm-button"
-				(click)="checkIn()"
-				[disabled]="(checkinEnabled$ | async) !== true"
-			>
-				<ion-label>
-					<h1>Yes, check in</h1>
-				</ion-label>
-				<ion-icon
-					name="checkmark-circle"
-					slot="end"
-					size="large"
-				></ion-icon>
-			</ion-item>
-		</ion-list>
-
-		<ng-template #noRegistration>
-			<div class="no-info ion-text-center ion-padding-top">
-				<h1>No information loaded...</h1>
-				<p>Did you get here by mistake?</p>
-				<ion-button [routerLink]="['..']"> Go Back </ion-button>
-			</div>
-		</ng-template>
-	</div>
+  </div>
 </ion-content>

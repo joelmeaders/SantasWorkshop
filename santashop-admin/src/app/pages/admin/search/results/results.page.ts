@@ -1,88 +1,103 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
-	BehaviorSubject,
-	delay,
-	filter,
-	map,
-	Observable,
-	of,
-	race,
-	shareReplay,
-	Subject,
-	switchMap,
+    BehaviorSubject,
+    delay,
+    filter,
+    map,
+    Observable,
+    of,
+    race,
+    shareReplay,
+    Subject,
+    switchMap,
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@santashop/models';
 import { SearchService } from '../search.service';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { AsyncPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { CoreModule } from '@santashop/core';
+import { addIcons } from "ionicons";
+import { backspaceOutline } from "ionicons/icons";
+import { IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon } from "@ionic/angular/standalone";
 
 declare type SortFnType = (
-	a: RegistrationSearchIndex,
-	b: RegistrationSearchIndex,
+    a: RegistrationSearchIndex,
+    b: RegistrationSearchIndex,
 ) => number;
 
 @Component({
-	selector: 'admin-results',
-	templateUrl: './results.page.html',
-	styleUrls: ['./results.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'admin-results',
+    templateUrl: './results.page.html',
+    styleUrls: ['./results.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [HeaderComponent, RouterLink, CoreModule, AsyncPipe, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon],
 })
 export class ResultsPage {
-	public readonly sortLast = (
-		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex,
-	): number =>
-		a.lastName.localeCompare(b.lastName) ||
-		a.firstName.localeCompare(b.firstName) ||
-		a.zip.localeCompare(b.zip);
+    private readonly searchService = inject(SearchService);
 
-	public readonly sortFirst = (
-		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex,
-	): number =>
-		a.lastName.localeCompare(b.firstName) ||
-		a.firstName.localeCompare(b.lastName) ||
-		a.zip.localeCompare(b.zip);
+    public readonly sortLast = (
+        a: RegistrationSearchIndex,
+        b: RegistrationSearchIndex,
+    ): number =>
+        a.lastName.localeCompare(b.lastName) ||
+        a.firstName.localeCompare(b.firstName) ||
+        a.zip.localeCompare(b.zip);
 
-	public readonly sortEmail = (
-		a: RegistrationSearchIndex,
-		b: RegistrationSearchIndex,
-	): number => a.lastName.localeCompare(b.emailAddress);
+    public readonly sortFirst = (
+        a: RegistrationSearchIndex,
+        b: RegistrationSearchIndex,
+    ): number =>
+        a.lastName.localeCompare(b.firstName) ||
+        a.firstName.localeCompare(b.lastName) ||
+        a.zip.localeCompare(b.zip);
 
-	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
-	protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));
+    public readonly sortEmail = (
+        a: RegistrationSearchIndex,
+        b: RegistrationSearchIndex,
+    ): number => a.lastName.localeCompare(b.emailAddress);
 
-	private readonly searchTrigger = new Subject<Date>();
-	public readonly searchInput$ = this.searchService.searchResults$;
+    private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
+    protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));
 
-	private readonly search$: Observable<RegistrationSearchIndex[]> =
-		this.searchService.searchResults$.pipe(
-			filter((query) => query !== null),
-			switchMap((query) => query!),
-			switchMap((results) =>
-				this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
-			),
-		);
+    private readonly searchTrigger = new Subject<Date>();
+    public readonly searchInput$ = this.searchService.searchResults$;
 
-	private readonly timeout$ = of(undefined).pipe(delay(5000));
+    private readonly search$: Observable<RegistrationSearchIndex[]> =
+        this.searchService.searchResults$.pipe(
+            filter((query) => query !== null),
+            switchMap((query) => query!),
+            switchMap((results) =>
+                this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
+            ),
+        );
 
-	public readonly searchResults$ = this.searchTrigger.pipe(
-		switchMap(() => race([this.search$, this.timeout$])),
-	);
+    private readonly timeout$ = of(undefined).pipe(delay(5000));
 
-	constructor(private readonly searchService: SearchService) {}
+    public readonly searchResults$ = this.searchTrigger.pipe(
+        switchMap(() => race([this.search$, this.timeout$])),
+    );
 
-	public async ionViewWillEnter(): Promise<void> {
-		this.searchTrigger.next(new Date());
-	}
+    constructor() {
+        addIcons({ backspaceOutline });
+        addIcons({ backspaceOutline });
+    }
 
-	public ionViewWillLeave(): void {
-		this.searchService.reset();
-	}
+    public async ionViewWillEnter(): Promise<void> {
+        this.searchTrigger.next(new Date());
+    }
 
-	public setSortType(sort: SortFnType): void {
-		this.sortBy.next(sort);
-	}
+    public ionViewWillLeave(): void {
+        this.searchService.reset();
+    }
 
-	public reset(): void {
-		this.searchService.reset();
-	}
+    public setSortType(sort: SortFnType): void {
+        this.sortBy.next(sort);
+    }
+
+    public reset(): void {
+        this.searchService.reset();
+    }
 }

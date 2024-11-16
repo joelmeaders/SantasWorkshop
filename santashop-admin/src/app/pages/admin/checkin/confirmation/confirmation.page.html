@@ -1,29 +1,24 @@
 <admin-header
-	title="Check-In: Review Info"
-	backRoute="/admin/checkin/scan"
+  title="Check-In: Review Info"
+  backRoute="/admin/checkin/scan"
 ></admin-header>
 
 <ion-content fullscreen class="ion-padding-horizontal ion-text-center">
-	<ng-container *ngIf="checkin$ | async as checkin; else fail">
-		<h1>
-			<ion-text color="success"> Success! </ion-text>
-		</h1>
+  @if (checkin$ | async; as checkin) {
+    <h1>
+      <ion-text color="success"> Success! </ion-text>
+    </h1>
+    <div class="ticket-count">{{ checkin?.count ?? 0 }}</div>
+    <h2>Give the shopper {{ checkin?.count ?? 0 }} coupons.</h2>
+    <h3>{{ checkin.code }}</h3>
+    <h3>1 coupon per child</h3>
+    <br />
+    <ion-button routerLink="../scan"> Start Over </ion-button>
+  } @else {
+    <h1>
+      <ion-text color="danger"> Error </ion-text>
+    </h1>
+    <h2>No check in record</h2>
+  }
 
-		<div class="ticket-count">{{ checkin?.count ?? 0 }}</div>
-
-		<h2>Give the shopper {{ checkin?.count ?? 0 }} coupons.</h2>
-
-		<h3>{{ checkin.code }}</h3>
-		<h3>1 coupon per child</h3>
-
-		<br />
-		<ion-button routerLink="../scan"> Start Over </ion-button>
-	</ng-container>
-
-	<ng-template #fail>
-		<h1>
-			<ion-text color="danger"> Error </ion-text>
-		</h1>
-		<h2>No check in record</h2>
-	</ng-template>
 </ion-content>

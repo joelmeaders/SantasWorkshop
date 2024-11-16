@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { AdminPage } from './admin.page';
+
 
 const routes: Routes = [
 	{
 		path: '',
-		component: AdminPage,
+		loadComponent: () => import('./admin.page').then(m => m.AdminPage),
 		children: [
 			{
 				path: 'landing',

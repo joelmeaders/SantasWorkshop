@@ -1,169 +1,176 @@
 <admin-header title="Registration"></admin-header>
 
 <ion-content class="ion-padding-horizontal">
-	<div class="limited-container">
-		<ion-list>
-			<ion-list-header color="none" class="review-instructions">
-				<span>
-					<h3>Instructions</h3>
-					<ion-note>
-						Fill out all information below. Ensure children are
-						validated with documentation and information is entered
-						correctly.
-					</ion-note>
-				</span>
-			</ion-list-header>
+  <div class="limited-container">
+    <ion-list>
+      <ion-list-header color="none" class="review-instructions">
+        <span>
+          <h3>Instructions</h3>
+          <ion-note>
+            Fill out all information below. Ensure children are
+            validated with documentation and information is entered
+            correctly.
+          </ion-note>
+        </span>
+      </ion-list-header>
 
-			<form [formGroup]="form" autocomplete="off">
-				<ion-item-divider>
-					<ion-label> Parent / Guardian </ion-label>
-				</ion-item-divider>
-				<ion-item>
-					<ion-label position="fixed"> First Name </ion-label>
-					<ion-input
-						type="text"
-						autocomplete="off"
-						formControlName="firstName"
-						placeholder="required"
-						minlength="2"
-						maxlength="20"
-					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.firstName.dirty"
-					>
-						Enter between 2-20 characters
-					</ion-note>
-				</ion-item>
-				<ion-item>
-					<ion-label position="fixed"> Last Name </ion-label>
-					<ion-input
-						type="text"
-						autocomplete="off"
-						formControlName="lastName"
-						placeholder="required"
-						minlength="2"
-						maxlength="25"
-					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.lastName.dirty"
-					>
-						Enter between 2-25 characters
-					</ion-note>
-				</ion-item>
-				<ion-item>
-					<ion-label position="fixed"> Email </ion-label>
-					<ion-input
-						type="email"
-						autocomplete="off"
-						formControlName="emailAddress"
-						placeholder="required"
-					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.lastName.dirty"
-					>
-						Must be a valid email address
-					</ion-note>
-				</ion-item>
-				<ion-item>
-					<ion-label position="fixed"> Zip Code </ion-label>
-					<ion-input
-						type="number"
-						autocomplete="off"
-						formControlName="zipCode"
-						placeholder="required"
-						minlength="5"
-						maxlength="5"
-					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.lastName.dirty"
-					>
-						Enter 5 digit zip code
-					</ion-note>
-				</ion-item>
-				<ion-item>
-					<ion-label class="ion-text-wrap">
-						Would you like to get occasional emails about our events
-						& services
-					</ion-label>
-					<ion-checkbox
-						slot="end"
-						formControlName="newsletter"
-					></ion-checkbox>
-				</ion-item>
+      <form [formGroup]="form" autocomplete="off">
+        <ion-item-divider>
+          <ion-label> Parent / Guardian </ion-label>
+        </ion-item-divider>
+        <ion-item>
+          <ion-label position="fixed"> First Name </ion-label>
+          <ion-input
+            type="text"
+            autocomplete="off"
+            formControlName="firstName"
+            placeholder="required"
+            minlength="2"
+            maxlength="20"
+          ></ion-input>
+          @if (form.controls.firstName.dirty) {
+            <ion-note
+              color="danger"
+              slot="error"
+              >
+              Enter between 2-20 characters
+            </ion-note>
+          }
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed"> Last Name </ion-label>
+          <ion-input
+            type="text"
+            autocomplete="off"
+            formControlName="lastName"
+            placeholder="required"
+            minlength="2"
+            maxlength="25"
+          ></ion-input>
+          @if (form.controls.lastName.dirty) {
+            <ion-note
+              color="danger"
+              slot="error"
+              >
+              Enter between 2-25 characters
+            </ion-note>
+          }
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed"> Email </ion-label>
+          <ion-input
+            type="email"
+            autocomplete="off"
+            formControlName="emailAddress"
+            placeholder="required"
+          ></ion-input>
+          @if (form.controls.lastName.dirty) {
+            <ion-note
+              color="danger"
+              slot="error"
+              >
+              Must be a valid email address
+            </ion-note>
+          }
+        </ion-item>
+        <ion-item>
+          <ion-label position="fixed"> Zip Code </ion-label>
+          <ion-input
+            type="number"
+            autocomplete="off"
+            formControlName="zipCode"
+            placeholder="required"
+            minlength="5"
+            maxlength="5"
+          ></ion-input>
+          @if (form.controls.lastName.dirty) {
+            <ion-note
+              color="danger"
+              slot="error"
+              >
+              Enter 5 digit zip code
+            </ion-note>
+          }
+        </ion-item>
+        <ion-item>
+          <ion-label class="ion-text-wrap">
+            Would you like to get occasional emails about our events
+            & services
+          </ion-label>
+          <ion-checkbox
+            slot="end"
+            formControlName="newsletter"
+          ></ion-checkbox>
+        </ion-item>
 
-				<ion-item-divider class="margin-top">
-					<ion-label> Referred By </ion-label>
-					<ion-button
-						slot="end"
-						fill="clear"
-						(click)="chooseReferral()"
-					>
-						Pick Agency
-						<ion-icon slot="end" name="search-outline"></ion-icon>
-					</ion-button>
-				</ion-item-divider>
-				<ion-item (click)="chooseReferral()" button detail>
-					<ion-label> {{ chosenReferrer$ | async }} </ion-label>
-				</ion-item>
-				<ion-note
-					color="danger"
-					slot="error"
-					*ngIf="!form.controls.referral.value"
-					class="error-note"
-				>
-					Choose a referring agency
-				</ion-note>
-			</form>
+        <ion-item-divider class="margin-top">
+          <ion-label> Referred By </ion-label>
+          <ion-button
+            slot="end"
+            fill="clear"
+            (click)="chooseReferral()"
+            >
+            Pick Agency
+            <ion-icon slot="end" name="search-outline"></ion-icon>
+          </ion-button>
+        </ion-item-divider>
+        <ion-item (click)="chooseReferral()" button detail>
+          <ion-label> {{ chosenReferrer$ | async }} </ion-label>
+        </ion-item>
+        @if (!form.controls.referral.value) {
+          <ion-note
+            color="danger"
+            slot="error"
+            class="error-note"
+            >
+            Choose a referring agency
+          </ion-note>
+        }
+      </form>
 
-			<div class="margin-top">
-				<admin-manage-children
-					*ngIf="children$ | async as children"
-					[children]="children"
-					(adddedChild)="addChild($event)"
-					(editedChild)="editChild($event)"
-					(removedChild)="removeChild($event)"
-				></admin-manage-children>
-				<ion-note
-					color="danger"
-					slot="error"
-					*ngIf="!form.controls.referral.value"
-					class="error-note"
-				>
-					Add all children ages 0-11
-				</ion-note>
-			</div>
+      <div class="margin-top">
+        @if (children$ | async; as children) {
+          <admin-manage-children
+            [children]="children"
+            (adddedChild)="addChild($event)"
+            (editedChild)="editChild($event)"
+            (removedChild)="removeChild($event)"
+          ></admin-manage-children>
+        }
+        @if (!form.controls.referral.value) {
+          <ion-note
+            color="danger"
+            slot="error"
+            class="error-note"
+            >
+            Add all children ages 0-11
+          </ion-note>
+        }
+      </div>
 
-			<ion-item-divider class="success-divider">
-				<ion-label>
-					Is all information correct and accurate?
-				</ion-label>
-			</ion-item-divider>
+      <ion-item-divider class="success-divider">
+        <ion-label>
+          Is all information correct and accurate?
+        </ion-label>
+      </ion-item-divider>
 
-			<ion-item
-				lines="none"
-				button
-				color="success"
-				class="confirm-button"
-				[disabled]="form.invalid || !(children$ | async)?.length"
-				(click)="checkIn()"
-			>
-				<ion-label>
-					<h1>Yes, continue</h1>
-				</ion-label>
-				<ion-icon
-					name="checkmark-circle"
-					slot="end"
-					size="large"
-				></ion-icon>
-			</ion-item>
-		</ion-list>
-	</div>
+      <ion-item
+        lines="none"
+        button
+        color="success"
+        class="confirm-button"
+        [disabled]="form.invalid || !(children$ | async)?.length"
+        (click)="checkIn()"
+        >
+        <ion-label>
+          <h1>Yes, continue</h1>
+        </ion-label>
+        <ion-icon
+          name="checkmark-circle"
+          slot="end"
+          size="large"
+        ></ion-icon>
+      </ion-item>
+    </ion-list>
+  </div>
 </ion-content>

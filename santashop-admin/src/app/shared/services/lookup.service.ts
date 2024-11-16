@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FireRepoLite, QueryConstraint } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
@@ -14,6 +14,8 @@ import { map } from 'rxjs/operators';
 	providedIn: 'root',
 })
 export class LookupService {
+	private readonly repoService = inject(FireRepoLite);
+
 	private readonly collections = {
 		searchIndex: this.repoService.collection<RegistrationSearchIndex>(
 			COLLECTION_SCHEMA.registrationSearchIndex,
@@ -63,8 +65,6 @@ export class LookupService {
 
 	public readonly getSearchIndexByEmailAddress$ = (email: string): Observable<RegistrationSearchIndex | undefined> =>
 		this.queryIndexByEmailAddress(email);
-
-	constructor(private readonly repoService: FireRepoLite) {}
 
 	private queryIndexByName(
 		firstName: string,

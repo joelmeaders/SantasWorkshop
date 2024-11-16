@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ConfirmationPage } from './confirmation.page';
+
 
 const routes: Routes = [
 	{
 		path: '',
-		component: ConfirmationPage,
+		loadComponent: () => import('./confirmation.page').then(m => m.ConfirmationPage),
 	},
 ];
 

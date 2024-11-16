@@ -1,174 +1,171 @@
+import { Component, ChangeDetectionStrategy, Input, OnInit, inject } from '@angular/core';
 import {
-	Component,
-	ChangeDetectionStrategy,
-	Input,
-	OnInit,
-} from '@angular/core';
-import {
-	UntypedFormControl,
-	UntypedFormGroup,
-	Validators,
+    UntypedFormControl,
+    UntypedFormGroup,
+    Validators,
+    ReactiveFormsModule,
 } from '@angular/forms';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio } from '@ionic/angular/standalone';
 import { AgeGroup, Child, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
 import { yyyymmddToLocalDate, getAgeFromDate } from '@santashop/core';
 import {
-	ChildValidationService,
-	MAX_BIRTHDATE,
-	MIN_BIRTHDATE,
+    ChildValidationService,
+    MAX_BIRTHDATE,
+    MIN_BIRTHDATE,
 } from '../../services/child-validation.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
-	selector: 'admin-add-edit-child-modal',
-	templateUrl: './add-edit-child-modal.component.html',
-	styleUrls: ['./add-edit-child-modal.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'admin-add-edit-child-modal',
+    templateUrl: './add-edit-child-modal.component.html',
+    styleUrls: ['./add-edit-child-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [ReactiveFormsModule, AsyncPipe, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio],
 })
 export class AddEditChildModalComponent implements OnInit {
-	@Input()
-	public child?: Child;
+    private readonly modalController = inject(ModalController);
+    private readonly alertController = inject(AlertController);
+    protected readonly childValidationService = inject(ChildValidationService);
 
-	public form?: UntypedFormGroup;
+    @Input()
+    public child?: Child;
 
-	public readonly minBirthDate = MIN_BIRTHDATE().toISOString();
-	public readonly maxBirthDate = MAX_BIRTHDATE().toISOString();
+    public form?: UntypedFormGroup;
 
-	private readonly isInfant = new BehaviorSubject<boolean>(false);
-	public readonly isInfant$ = this.isInfant.asObservable();
+    public readonly minBirthDate = MIN_BIRTHDATE().toISOString();
+    public readonly maxBirthDate = MAX_BIRTHDATE().toISOString();
 
-	constructor(
-		private readonly modalController: ModalController,
-		private readonly alertController: AlertController,
-		protected readonly childValidationService: ChildValidationService,
-	) {}
+    private readonly isInfant = new BehaviorSubject<boolean>(false);
+    public readonly isInfant$ = this.isInfant.asObservable();
 
-	public ngOnInit(): void {
-		this.form = this.newForm(this.child);
+    public ngOnInit(): void {
+        this.form = this.newForm(this.child);
 
-		if (this.child?.dateOfBirth) {
-			const dob: string = this.child.dateOfBirth
-				.toISOString()
-				.substring(0, 10);
-			this.birthdaySelected({ detail: { value: dob } });
-		}
-	}
+        if (this.child?.dateOfBirth) {
+            const dob: string = this.child.dateOfBirth
+                .toISOString()
+                .substring(0, 10);
+            this.birthdaySelected({ detail: { value: dob } });
+        }
+    }
 
-	private newForm(child?: Child): UntypedFormGroup {
-		return new UntypedFormGroup({
-			id: new UntypedFormControl(child?.id),
-			firstName: new UntypedFormControl(
-				child?.firstName,
-				Validators.compose([
-					Validators.required,
-					Validators.minLength(2),
-					Validators.maxLength(20),
-				]),
-			),
-			lastName: new UntypedFormControl(
-				child?.lastName,
-				Validators.compose([
-					Validators.required,
-					Validators.minLength(2),
-					Validators.maxLength(20),
-				]),
-			),
-			dateOfBirth: new UntypedFormControl(
-				child?.dateOfBirth
-					? child.dateOfBirth.toISOString().substring(0, 10)
-					: undefined,
-				Validators.compose([
-					Validators.required,
-					Validators.pattern(
-						/20\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/,
-					),
-				]),
-			),
-			ageGroup: new UntypedFormControl(undefined, Validators.required),
-			toyType: new UntypedFormControl(
-				child?.toyType,
-				Validators.required,
-			),
-		});
-	}
+    private newForm(child?: Child): UntypedFormGroup {
+        return new UntypedFormGroup({
+            id: new UntypedFormControl(child?.id),
+            firstName: new UntypedFormControl(
+                child?.firstName,
+                Validators.compose([
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(20),
+                ]),
+            ),
+            lastName: new UntypedFormControl(
+                child?.lastName,
+                Validators.compose([
+                    Validators.required,
+                    Validators.minLength(2),
+                    Validators.maxLength(20),
+                ]),
+            ),
+            dateOfBirth: new UntypedFormControl(
+                child?.dateOfBirth
+                    ? child.dateOfBirth.toISOString().substring(0, 10)
+                    : undefined,
+                Validators.compose([
+                    Validators.required,
+                    Validators.pattern(
+                        /20\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])/,
+                    ),
+                ]),
+            ),
+            ageGroup: new UntypedFormControl(undefined, Validators.required),
+            toyType: new UntypedFormControl(
+                child?.toyType,
+                Validators.required,
+            ),
+        });
+    }
 
-	public setInfant(value: boolean): void {
-		if (!this.form) return;
-		this.isInfant.next(true);
+    public setInfant(value: boolean): void {
+        if (!this.form) return;
+        this.isInfant.next(true);
 
-		const toyTypeControl = this.form.controls.toyType;
-		const ageGroupControl = this.form.controls.ageGroup;
+        const toyTypeControl = this.form.controls.toyType;
+        const ageGroupControl = this.form.controls.ageGroup;
 
-		if (value) {
-			toyTypeControl.setValue(ToyType.infant);
-			ageGroupControl.setValue(AgeGroup.age02);
-		}
-	}
+        if (value) {
+            toyTypeControl.setValue(ToyType.infant);
+            ageGroupControl.setValue(AgeGroup.age02);
+        }
+    }
 
-	public async birthdaySelected(event?: any): Promise<void> {
-		if (!this.form) return;
+    public async birthdaySelected(event?: any): Promise<void> {
+        if (!this.form) return;
 
-		const yyyymmdd = event?.detail?.value;
+        const yyyymmdd = event?.detail?.value;
 
-		if (!yyyymmdd) return;
-		if (yyyymmdd[0]?.toString() !== '2') return;
+        if (!yyyymmdd) return;
+        if (yyyymmdd[0]?.toString() !== '2') return;
 
-		const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
-		const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
-		let ageGroup: AgeGroup | undefined;
+        const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
+        const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
+        let ageGroup: AgeGroup | undefined;
 
-		if (ageInYears >= 0 && ageInYears < 3) {
-			this.setInfant(true);
-			return;
-		} else if (ageInYears >= 3 && ageInYears < 6) {
-			ageGroup = AgeGroup.age35;
-		} else if (ageInYears >= 6 && ageInYears < 9) {
-			ageGroup = AgeGroup.age68;
-		} else if (ageInYears >= 9 && ageInYears < 12) {
-			ageGroup = AgeGroup.age911;
-		} else {
-			await this.childTooOldAlert();
-			this.form.controls.dateOfBirth.setValue(undefined);
-			return;
-		}
+        if (ageInYears >= 0 && ageInYears < 3) {
+            this.setInfant(true);
+            return;
+        } else if (ageInYears >= 3 && ageInYears < 6) {
+            ageGroup = AgeGroup.age35;
+        } else if (ageInYears >= 6 && ageInYears < 9) {
+            ageGroup = AgeGroup.age68;
+        } else if (ageInYears >= 9 && ageInYears < 12) {
+            ageGroup = AgeGroup.age911;
+        } else {
+            await this.childTooOldAlert();
+            this.form.controls.dateOfBirth.setValue(undefined);
+            return;
+        }
 
-		this.form.controls.ageGroup.setValue(ageGroup);
-		this.isInfant.next(false);
-	}
+        this.form.controls.ageGroup.setValue(ageGroup);
+        this.isInfant.next(false);
+    }
 
-	private async childTooOldAlert(): Promise<any> {
-		const alert = await this.alertController.create({
-			header: 'This child is too old',
-			message: 'Children can only be ages 0-11',
-			buttons: [
-				{
-					text: 'Ok',
-				},
-			],
-		});
+    private async childTooOldAlert(): Promise<any> {
+        const alert = await this.alertController.create({
+            header: 'This child is too old',
+            message: 'Children can only be ages 0-11',
+            buttons: [
+                {
+                    text: 'Ok',
+                },
+            ],
+        });
 
-		await alert.present();
-		return alert.onDidDismiss();
-	}
+        await alert.present();
+        return alert.onDidDismiss();
+    }
 
-	public async saveChild(): Promise<void> {
-		const child: Child = this.form?.value;
-		child.dateOfBirth = new Date(this.form?.controls.dateOfBirth.value);
-		await this.dismiss(child);
-	}
+    public async saveChild(): Promise<void> {
+        const child: Child = this.form?.value;
+        child.dateOfBirth = new Date(this.form?.controls.dateOfBirth.value);
+        await this.dismiss(child);
+    }
 
-	public async dismiss(child?: Child): Promise<void> {
-		let role = '';
+    public async dismiss(child?: Child): Promise<void> {
+        let role = '';
 
-		if (!child) {
-			role = 'cancelled';
-		} else if (child?.id) {
-			role = 'edit';
-		} else {
-			child.id = Math.floor(Math.random() * 100000);
-			role = 'add';
-		}
+        if (!child) {
+            role = 'cancelled';
+        } else if (child?.id) {
+            role = 'edit';
+        } else {
+            child.id = Math.floor(Math.random() * 100000);
+            role = 'add';
+        }
 
-		await this.modalController.dismiss(child, role);
-	}
+        await this.modalController.dismiss(child, role);
+    }
 }

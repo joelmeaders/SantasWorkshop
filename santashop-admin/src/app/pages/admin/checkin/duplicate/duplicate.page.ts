@@ -1,34 +1,39 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FireRepoLite, timestampToDate } from '@santashop/core';
+import { FireRepoLite, filterNil, timestampToDate } from '@santashop/core';
 import { map, switchMap } from 'rxjs';
 import { COLLECTION_SCHEMA } from '@santashop/models';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { AsyncPipe, DatePipe, KeyValuePipe } from '@angular/common';
+import { IonContent, IonNote } from "@ionic/angular/standalone";
 
 @Component({
-	selector: 'admin-duplicate',
-	templateUrl: './duplicate.page.html',
-	styleUrls: ['./duplicate.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'admin-duplicate',
+    templateUrl: './duplicate.page.html',
+    styleUrls: ['./duplicate.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [HeaderComponent, AsyncPipe, DatePipe, KeyValuePipe, IonContent, IonNote, IonContent, IonNote],
 })
 export class DuplicatePage {
-	private readonly uid$ = this.route.params.pipe(
-		map((params) => params.uid as string),
-	);
+    private readonly httpService = inject(FireRepoLite);
+    private readonly route = inject(ActivatedRoute);
 
-	public readonly checkin$ = this.uid$.pipe(
-		switchMap((uid) =>
-			this.httpService
-				.collection(COLLECTION_SCHEMA.checkins)
-				.read(uid, 'customerId'),
-		),
-		map((data) => {
-			data.checkInDateTime = timestampToDate(data.checkInDateTime);
-			return data;
-		}),
-	);
+    private readonly uid$ = this.route.params.pipe(
+        map((params) => params.uid as string),
+    );
 
-	constructor(
-		private readonly httpService: FireRepoLite,
-		private readonly route: ActivatedRoute,
-	) {}
+    public readonly checkin$ = this.uid$.pipe(
+        switchMap((uid) =>
+            this.httpService
+                .collection(COLLECTION_SCHEMA.checkins)
+                .read(uid, 'customerId'),
+        ),
+        filterNil(),
+        map((data) => {
+            data.checkInDateTime = timestampToDate(data.checkInDateTime);
+            return data;
+        }),
+    );
 }

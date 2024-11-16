@@ -256,6 +256,7 @@ export class RegistrationPage {
 		},
 	};
 
+	// Update yearly. Last updated 2024
 	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[],
 	): ChartData<'bar'>[] {
@@ -264,35 +265,36 @@ export class RegistrationPage {
 		}[] = [
 			{
 				datasets: [
-					{ data: [], label: 'Dec 8th', ...this.colorSettings },
+					{ data: [], label: 'Dec 13th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 9th', ...this.colorSettings },
+					{ data: [], label: 'Dec 14th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 11th', ...this.colorSettings },
+					{ data: [], label: 'Dec 16th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 12th', ...this.colorSettings },
+					{ data: [], label: 'Dec 17th', ...this.colorSettings },
 				],
 			},
 		];
 
+		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
 			switch (date.getDate()) {
-				case 8:
+				case 13:
 					return 0;
-				case 9:
+				case 14:
 					return 1;
-				case 11:
+				case 16:
 					return 2;
-				case 12:
+				case 17:
 					return 3;
 
 				default:

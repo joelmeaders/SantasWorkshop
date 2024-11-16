@@ -52,16 +52,17 @@ export class RegistrationPage {
 			.read('registration-2024')
 			.pipe(filterNil(), shareReplay(1));
 
-	public readonly registrationCount$ = this.registrationStats$.pipe(
-		map((stats) => stats.completedRegistrations),
-	);
-
 	private readonly scheduleStats$ = this.statsCollection<ScheduleStats>()
 		.read('schedule-2024')
 		.pipe(filterNil(), shareReplay(1));
 
 	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
 		map((allData) => allData.dateTimeCounts),
+	);
+
+	public readonly registrationCount$ = this.dateTimeStats$.pipe(
+		map((stats) => stats.map((s) => s.count)),
+		map((stats) => stats.reduce((a, c) => a + c, 0)),
 	);
 
 	public readonly childCount$ = this.registrationStats$.pipe(
@@ -232,6 +233,7 @@ export class RegistrationPage {
 			x: {},
 			y: {
 				min: 0,
+				max: 450,
 			},
 		},
 		plugins: {

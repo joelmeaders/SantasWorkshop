@@ -46,6 +46,32 @@
 				}
 			</ion-col>
 		</ion-row>
+
+		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
+			<ion-col size="12">
+				<h2>Schedules by Day</h2>
+			</ion-col>
+			@for (slot of slots; track slot; let i = $index) {
+			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
+				<h3>{{ slot.datasets[0].label }}</h3>
+				<canvas
+					baseChart
+					[options]="barChartOptions"
+					[datasets]="slot.datasets"
+					[labels]="['10am', '11am', '12pm', '1pm', '2pm']"
+					[legend]="false"
+					type="bar"
+				></canvas>
+			</ion-col>
+			}
+		</ion-row>
+
+		<ion-row class="ion-margin ion-padding">
+			<ion-col class="ion-text-center">
+				Demographic information is updated once daily
+			</ion-col>
+		</ion-row>
+
 		@if (girlBoyInfantCounts$ | async; as gender) {
 		<ion-row class="ion-justify-content-evenly">
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
@@ -73,24 +99,5 @@
 			}
 		</ion-row>
 		}
-
-		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
-			<ion-col size="12">
-				<h2>Schedules by Day</h2>
-			</ion-col>
-			@for (slot of slots; track slot; let i = $index) {
-			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-				<h3>{{ slot.datasets[0].label }}</h3>
-				<canvas
-					baseChart
-					[options]="barChartOptions"
-					[datasets]="slot.datasets"
-					[labels]="['10am', '11am', '12pm', '1pm', '2pm']"
-					[legend]="false"
-					type="bar"
-				></canvas>
-			</ion-col>
-			}
-		</ion-row>
 	</ion-grid>
 </ion-content>

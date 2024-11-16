@@ -12,7 +12,7 @@ import { IonRouterLink, IonContent, IonText, IonButton } from "@ionic/angular/st
     styleUrls: ['./confirmation.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [HeaderComponent, RouterLink, AsyncPipe, IonRouterLink, IonContent, IonText, IonButton, IonRouterLink, IonContent, IonText, IonButton],
+    imports: [HeaderComponent, RouterLink, AsyncPipe, IonRouterLink, IonContent, IonText, IonButton, IonRouterLink, IonContent, IonText, IonButton, IonRouterLink, IonContent, IonText, IonButton],
 })
 export class ConfirmationPage {
     private readonly checkinContext = inject(CheckInContextService);

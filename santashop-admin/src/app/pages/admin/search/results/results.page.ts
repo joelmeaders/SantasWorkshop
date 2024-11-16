@@ -33,7 +33,7 @@ declare type SortFnType = (
     styleUrls: ['./results.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [HeaderComponent, RouterLink, CoreModule, AsyncPipe, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon],
+    imports: [HeaderComponent, RouterLink, CoreModule, AsyncPipe, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon, IonRouterLink, IonContent, IonButton, IonSpinner, IonCardSubtitle, IonCardHeader, IonCardTitle, IonChip, IonList, IonItem, IonLabel, IonIcon],
 })
 export class ResultsPage {
     private readonly searchService = inject(SearchService);
@@ -81,6 +81,7 @@ export class ResultsPage {
     );
 
     constructor() {
+        addIcons({ backspaceOutline });
         addIcons({ backspaceOutline });
         addIcons({ backspaceOutline });
     }

@@ -14,7 +14,7 @@ import { IonRouterLink, IonContent, IonList, IonListHeader, IonItem, IonIcon, Io
     styleUrls: ['./landing.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [RouterLink, AsyncPipe, IonRouterLink, IonContent, IonList, IonListHeader, IonItem, IonIcon, IonToggle, IonRouterLink, IonContent, IonList, IonListHeader, IonItem, IonIcon, IonToggle],
+    imports: [RouterLink, AsyncPipe, IonRouterLink, IonContent, IonList, IonListHeader, IonItem, IonIcon, IonToggle, IonRouterLink, IonContent, IonList, IonListHeader, IonItem, IonIcon, IonToggle, IonRouterLink, IonContent, IonList, IonListHeader, IonItem, IonIcon, IonToggle],
 })
 export class LandingPage {
     private readonly authService = inject(AuthService);
@@ -43,6 +43,7 @@ export class LandingPage {
     }
 
     constructor() {
+        addIcons({ bagCheckOutline, searchOutline, storefrontOutline, personAddOutline, mailOutline, statsChartOutline, cartOutline, peopleOutline, exitOutline, moonOutline });
         addIcons({ bagCheckOutline, searchOutline, storefrontOutline, personAddOutline, mailOutline, statsChartOutline, cartOutline, peopleOutline, exitOutline, moonOutline });
         addIcons({ bagCheckOutline, searchOutline, storefrontOutline, personAddOutline, mailOutline, statsChartOutline, cartOutline, peopleOutline, exitOutline, moonOutline });
     }

@@ -42,6 +42,11 @@ import { camera } from "ionicons/icons";
         IonItem,
         IonIcon,
         IonSelect,
+        IonSelectOption,
+        IonContent,
+        IonItem,
+        IonIcon,
+        IonSelect,
         IonSelectOption
     ],
 })
@@ -109,6 +114,7 @@ export class ScanPage {
     private invalidCodeSubscription?: Subscription;
 
     constructor() {
+        addIcons({ camera });
         addIcons({ camera });
         addIcons({ camera });
     }

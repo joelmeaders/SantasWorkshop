@@ -82,6 +82,19 @@ import {
         IonButton,
         IonIcon,
         IonText,
+        IonTitle,
+        IonContent,
+        IonGrid,
+        IonRow,
+        IonCol,
+        IonItem,
+        IonLabel,
+        IonSelect,
+        IonSelectOption,
+        IonToolbar,
+        IonButton,
+        IonIcon,
+        IonText,
         IonTitle
     ],
 })
@@ -213,6 +226,7 @@ export class CheckInPage {
     };
 
     constructor() {
+        addIcons({ refreshSharp });
         addIcons({ refreshSharp });
         addIcons({ refreshSharp });
     }

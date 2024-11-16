@@ -21,7 +21,7 @@ import { mailOutline } from "ionicons/icons";
     styleUrls: ['./resend-email.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [HeaderComponent, ReactiveFormsModule, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel],
+    imports: [HeaderComponent, ReactiveFormsModule, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel, IonContent, IonCardHeader, IonCardSubtitle, IonList, IonItem, IonInput, IonButton, IonIcon, IonLabel],
 })
 export class ResendEmailPage {
     private readonly lookupService = inject(LookupService);
@@ -45,6 +45,7 @@ export class ResendEmailPage {
         )({ customerId });
 
     constructor() {
+        addIcons({ mailOutline });
         addIcons({ mailOutline });
         addIcons({ mailOutline });
     }

@@ -53,6 +53,16 @@ import { checkmarkCircle } from "ionicons/icons";
         IonItem,
         IonText,
         IonIcon,
+        IonButton,
+        IonContent,
+        IonList,
+        IonListHeader,
+        IonNote,
+        IonItemDivider,
+        IonLabel,
+        IonItem,
+        IonText,
+        IonIcon,
         IonButton
     ],
 })
@@ -96,6 +106,7 @@ export class ReviewPage {
         .subscribe();
 
     constructor() {
+        addIcons({ checkmarkCircle });
         addIcons({ checkmarkCircle });
         addIcons({ checkmarkCircle });
     }

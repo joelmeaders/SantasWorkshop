@@ -40,6 +40,12 @@ Chart.register(ChartDataLabels);
         IonRow,
         IonCol,
         IonToolbar,
+        IonTitle,
+        IonContent,
+        IonGrid,
+        IonRow,
+        IonCol,
+        IonToolbar,
         IonTitle
     ],
 })

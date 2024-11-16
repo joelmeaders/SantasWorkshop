@@ -20,7 +20,7 @@ import { IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle
     styleUrls: ['./by-name.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [HeaderComponent, ReactiveFormsModule, RouterLink, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonLabel, IonInput, IonNote, IonButton, IonIcon, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonLabel, IonInput, IonNote, IonButton, IonIcon],
+    imports: [HeaderComponent, ReactiveFormsModule, RouterLink, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonLabel, IonInput, IonNote, IonButton, IonIcon, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonLabel, IonInput, IonNote, IonButton, IonIcon, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonLabel, IonInput, IonNote, IonButton, IonIcon],
 })
 export class ByNamePage {
     private readonly searchService = inject(SearchService);
@@ -41,6 +41,7 @@ export class ByNamePage {
     });
 
     constructor() {
+        addIcons({ backspaceOutline, searchOutline });
         addIcons({ backspaceOutline, searchOutline });
         addIcons({ backspaceOutline, searchOutline });
     }

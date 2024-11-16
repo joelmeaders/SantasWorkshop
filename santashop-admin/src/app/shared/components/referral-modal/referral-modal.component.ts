@@ -9,7 +9,7 @@ import { AsyncPipe } from '@angular/common';
     styleUrls: ['./referral-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [AsyncPipe, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonInput, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonInput],
+    imports: [AsyncPipe, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonInput, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonInput, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonSearchbar, IonItemGroup, IonItemDivider, IonLabel, IonItem, IonInput],
 })
 export class ReferralModalComponent {
     private readonly modalController = inject(ModalController);

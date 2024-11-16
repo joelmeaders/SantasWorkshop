@@ -13,7 +13,7 @@ import { IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonT
     styleUrls: ['./admin.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [RouterLinkActive, RouterLink, AsyncPipe, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel],
+    imports: [RouterLinkActive, RouterLink, AsyncPipe, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel],
 })
 export class AdminPage {
     private readonly appStateService = inject(AppStateService);
@@ -25,6 +25,7 @@ export class AdminPage {
     public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
 
     constructor() {
+        addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
         addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
         addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
     }

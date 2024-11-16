@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 import { redirectLoggedInTo, hasCustomClaim } from '@santashop/core';
 
 const adminOnly = (): AuthPipe => hasCustomClaim('admin');
 const redirectLoggedInToAdmin = (): AuthPipe => redirectLoggedInTo(['admin']);
 
-const routes: Routes = [
+export const routes: Routes = [
 	{
 		path: '',
 		title: 'DSCS Sign In',
@@ -28,7 +28,6 @@ const routes: Routes = [
 @NgModule({
 	imports: [
 		RouterModule.forRoot(routes, {
-			preloadingStrategy: PreloadAllModules,
 			onSameUrlNavigation: 'reload',
 		}),
 	],

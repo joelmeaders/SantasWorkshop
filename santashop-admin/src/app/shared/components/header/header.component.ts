@@ -11,7 +11,7 @@ import { IonRouterLink, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, I
     styleUrls: ['./header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [RouterLink, IonRouterLink, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonRouterLink, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle],
+    imports: [RouterLink, IonRouterLink, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonRouterLink, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle, IonRouterLink, IonHeader, IonToolbar, IonButtons, IonButton, IonIcon, IonTitle],
 })
 export class HeaderComponent {
     @Input() public title?: string;
@@ -19,6 +19,7 @@ export class HeaderComponent {
     @Input() public backRoute = '/admin';
 
     constructor() {
+        addIcons({ arrowBackSharp });
         addIcons({ arrowBackSharp });
         addIcons({ arrowBackSharp });
     }

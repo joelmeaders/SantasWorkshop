@@ -58,6 +58,21 @@ import { searchOutline, checkmarkCircle } from "ionicons/icons";
         IonContent,
         IonGrid,
         IonRow,
+        IonCol,
+        IonContent,
+        IonList,
+        IonListHeader,
+        IonNote,
+        IonItemDivider,
+        IonLabel,
+        IonItem,
+        IonInput,
+        IonCheckbox,
+        IonButton,
+        IonIcon,
+        IonContent,
+        IonGrid,
+        IonRow,
         IonCol
     ],
 })
@@ -115,6 +130,7 @@ export class RegistrationPage {
     });
 
     constructor() {
+        addIcons({ searchOutline, checkmarkCircle });
         addIcons({ searchOutline, checkmarkCircle });
         addIcons({ searchOutline, checkmarkCircle });
     }

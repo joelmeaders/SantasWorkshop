@@ -19,6 +19,7 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
 
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
+import { IonCol, IonContent, IonGrid, IonRow } from '@ionic/angular/standalone';
 
 Chart.register(ChartDataLabels);
 
@@ -29,12 +30,16 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 	imports: [
-    HeaderComponent,
-    BaseChartDirective,
-    CoreModule,
-    AsyncPipe,
-    DecimalPipe
-],
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonContent,
+		HeaderComponent,
+		BaseChartDirective,
+		CoreModule,
+		AsyncPipe,
+		DecimalPipe,
+	],
 })
 export class RegistrationPage {
 	private readonly httpService = inject(FireRepoLite);

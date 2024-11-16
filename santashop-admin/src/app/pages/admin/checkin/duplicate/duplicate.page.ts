@@ -14,7 +14,7 @@ import { IonContent, IonNote } from "@ionic/angular/standalone";
     styleUrls: ['./duplicate.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [HeaderComponent, AsyncPipe, DatePipe, KeyValuePipe, IonContent, IonNote, IonContent, IonNote],
+    imports: [HeaderComponent, AsyncPipe, DatePipe, KeyValuePipe, IonContent, IonNote, IonContent, IonNote, IonContent, IonNote],
 })
 export class DuplicatePage {
     private readonly httpService = inject(FireRepoLite);

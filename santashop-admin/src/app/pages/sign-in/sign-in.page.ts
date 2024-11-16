@@ -18,7 +18,7 @@ import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonIt
     styleUrls: ['./sign-in.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonNote, IonToolbar, IonButton, IonGrid, IonRow, IonCol, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonNote, IonToolbar, IonButton, IonGrid, IonRow, IonCol],
+    imports: [ReactiveFormsModule, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonNote, IonToolbar, IonButton, IonGrid, IonRow, IonCol, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonNote, IonToolbar, IonButton, IonGrid, IonRow, IonCol, IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonNote, IonToolbar, IonButton, IonGrid, IonRow, IonCol],
 })
 export class SignInPage {
     private readonly authService = inject(AuthService);

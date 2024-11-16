@@ -6,12 +6,7 @@ import {
 	provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
-import {
-	provideAppCheck,
-	initializeAppCheck,
-	ReCaptchaEnterpriseProvider,
-} from '@angular/fire/app-check';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import {
 	provideAuth,
 	getAuth,
@@ -39,17 +34,11 @@ import {
 	UserTrackingService,
 } from '@angular/fire/analytics';
 import { getAnalytics } from 'firebase/analytics';
-import { routes } from '../../santashop-app/src/app/app.routes';
+import { routes } from './app/app.routes';
 import { AuthWrapper } from '../../santashop-core/src';
 
 const firebaseProviders = [
 	provideFirebaseApp(() => initializeApp(firebaseConfig)),
-	provideAppCheck(() =>
-		initializeAppCheck(getApp(), {
-			provider: new ReCaptchaEnterpriseProvider(environment.appCheckKey),
-			isTokenAutoRefreshEnabled: true,
-		}),
-	),
 	provideAuth(() => {
 		const auth = getAuth();
 		if (!environment.production) {

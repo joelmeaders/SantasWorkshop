@@ -1,44 +1,14 @@
 {
 	"extends": "../.eslintrc.json",
-	"ignorePatterns": ["!**/*"],
 	"overrides": [
 		{
 			"files": ["*.ts"],
 			"parserOptions": {
 				"project": [
-					"santashop-admin/tsconfig.app.json",
-					"santashop-admin/tsconfig.spec.json"
-				],
-				"createDefaultProgram": true
-			},
-			"rules": {
-				"@angular-eslint/component-class-suffix": [
-					"error",
-					{
-						"suffixes": ["Page", "Component"]
-					}
-				],
-				"@angular-eslint/component-selector": [
-					"error",
-					{
-						"type": "element",
-						"prefix": "admin",
-						"style": "kebab-case"
-					}
-				],
-				"@angular-eslint/directive-selector": [
-					"error",
-					{
-						"type": "attribute",
-						"prefix": "admin",
-						"style": "camelCase"
-					}
+					"santashop-app/tsconfig.app.json",
+					"santashop-app/tsconfig.spec.json"
 				]
 			}
-		},
-		{
-			"files": ["*.html"],
-			"rules": {}
 		}
 	]
 }

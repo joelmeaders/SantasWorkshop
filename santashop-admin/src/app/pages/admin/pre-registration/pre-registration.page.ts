@@ -96,6 +96,20 @@ import { searchOutline, checkmarkCircle } from 'ionicons/icons';
         IonIcon,
         IonText,
         IonSelect,
+        IonSelectOption,
+        IonContent,
+        IonList,
+        IonListHeader,
+        IonNote,
+        IonItemDivider,
+        IonLabel,
+        IonItem,
+        IonInput,
+        IonCheckbox,
+        IonButton,
+        IonIcon,
+        IonText,
+        IonSelect,
         IonSelectOption
     ],
 })
@@ -180,6 +194,7 @@ export class PreRegistrationPage implements OnDestroy {
     );
 
     constructor() {
+        addIcons({ searchOutline, checkmarkCircle });
         addIcons({ searchOutline, checkmarkCircle });
         addIcons({ searchOutline, checkmarkCircle });
     }

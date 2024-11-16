@@ -10,6 +10,6 @@ import { IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle
     styleUrls: ['./search.page.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [HeaderComponent, RouterLink, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem],
+    imports: [HeaderComponent, RouterLink, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem, IonRouterLink, IonContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonList, IonItem],
 })
 export class SearchPage { }

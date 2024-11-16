@@ -22,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
     styleUrls: ['./add-edit-child-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, AsyncPipe, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio],
+    imports: [ReactiveFormsModule, AsyncPipe, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio, IonHeader, IonToolbar, IonTitle, IonButton, IonContent, IonList, IonListHeader, IonNote, IonItemDivider, IonLabel, IonItem, IonInput, IonRadioGroup, IonRadio],
 })
 export class AddEditChildModalComponent implements OnInit {
     private readonly modalController = inject(ModalController);

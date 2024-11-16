@@ -12,7 +12,7 @@ import { addCircle, createOutline, trashOutline } from "ionicons/icons";
     styleUrls: ['./manage-children.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [DatePipe, IonItemDivider, IonLabel, IonBadge, IonButton, IonIcon, IonItem, IonNote, IonItemSliding, IonItemOptions, IonItemOption, IonItemDivider, IonLabel, IonBadge, IonButton, IonIcon, IonItem, IonNote, IonItemSliding, IonItemOptions, IonItemOption],
+    imports: [DatePipe, IonItemDivider, IonLabel, IonBadge, IonButton, IonIcon, IonItem, IonNote, IonItemSliding, IonItemOptions, IonItemOption, IonItemDivider, IonLabel, IonBadge, IonButton, IonIcon, IonItem, IonNote, IonItemSliding, IonItemOptions, IonItemOption, IonItemDivider, IonLabel, IonBadge, IonButton, IonIcon, IonItem, IonNote, IonItemSliding, IonItemOptions, IonItemOption],
 })
 export class ManageChildrenComponent {
     private readonly modalController = inject(ModalController);
@@ -25,6 +25,7 @@ export class ManageChildrenComponent {
     @Output() public readonly removedChild = new EventEmitter<number>();
 
     constructor() {
+        addIcons({ addCircle, createOutline, trashOutline });
         addIcons({ addCircle, createOutline, trashOutline });
         addIcons({ addCircle, createOutline, trashOutline });
     }

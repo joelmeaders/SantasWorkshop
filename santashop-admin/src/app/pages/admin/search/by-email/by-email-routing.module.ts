@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-
-
 const routes: Routes = [
 	{
 		path: '',
-		loadComponent: () => import('./by-email.page').then(m => m.ByEmailPage),
+		loadComponent: () =>
+			import('./by-email.page').then((m) => m.ByEmailPage),
 	},
 ];
 

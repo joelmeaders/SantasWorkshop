@@ -2,7 +2,7 @@
 	<ion-card-header>
 		<ion-item class="inset-ion-item-title">
 			<ion-card-title>
-				{{ "MENU.CHILDREN" | translate }}
+				{{ 'MENU.CHILDREN' | translate }}
 			</ion-card-title>
 			<ion-badge color="success" slot="end" *ngIf="childCount">
 				Complete
@@ -13,14 +13,14 @@
 		<ng-container *ngIf="!childCount; else hasChildren">
 			<p>
 				<strong>
-					{{ "OVERVIEW.NO_CHILDREN" | translate }}
+					{{ 'OVERVIEW.NO_CHILDREN' | translate }}
 				</strong>
 				<br />
-				{{ "OVERVIEW.NO_CHILDREN_MESSAGE" | translate }}
+				{{ 'OVERVIEW.NO_CHILDREN_MESSAGE' | translate }}
 			</p>
 			<p class="ion-text-end es-pd-top-sm">
 				<ion-button color="xmasred" [routerLink]="['../children']">
-					{{ "OVERVIEW.ADD_CHILD" | translate }}
+					{{ 'OVERVIEW.ADD_CHILD' | translate }}
 				</ion-button>
 			</p>
 		</ng-container>
@@ -54,7 +54,7 @@
 							{{ child.firstName }} {{ child.lastName }}
 						</ion-label>
 						<ion-note *ngIf="!child.toyType" color="danger">
-							{{ "CHILDREN.INVALID_TOYTYPE" | translate }}
+							{{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
 						</ion-note>
 					</div>
 				</ion-item>
@@ -62,7 +62,7 @@
 
 			<p class="ion-text-end es-pd-top-sm">
 				<ion-button color="xmasred" [routerLink]="['../children']">
-					{{ "OVERVIEW.ADD_EDIT_CHILD" | translate }}
+					{{ 'OVERVIEW.ADD_EDIT_CHILD' | translate }}
 				</ion-button>
 			</p>
 		</ng-template>

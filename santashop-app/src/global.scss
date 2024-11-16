@@ -1,6 +1,6 @@
 ion-title,
 ion-card-title {
-	font-family: "lora", sans-serif;
+	font-family: 'lora', sans-serif;
 	font-size: 1.6em;
 	font-weight: 600;
 }
@@ -8,7 +8,7 @@ ion-card-title {
 h1,
 ion-title,
 ion-card-title {
-	font-family: "lora", sans-serif;
+	font-family: 'lora', sans-serif;
 	color: var(--ion-color-xmasred);
 	text-transform: uppercase;
 	letter-spacing: 0.02em;
@@ -47,8 +47,8 @@ ion-button {
 	--box-shadow: none;
 }
 
-input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-inner-spin-button,
+input[type='date']::-webkit-calendar-picker-indicator {
 	opacity: 1;
 	filter: invert(1);
 }

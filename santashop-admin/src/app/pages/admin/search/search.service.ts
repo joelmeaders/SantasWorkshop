@@ -22,10 +22,9 @@ export class SearchService {
 			COLLECTION_SCHEMA.registrationSearchIndex,
 		);
 
-	private readonly users =
-		this.repoService.collection<User>(
-			COLLECTION_SCHEMA.users,
-		);
+	private readonly users = this.repoService.collection<User>(
+		COLLECTION_SCHEMA.users,
+	);
 
 	private readonly queryLastNameZip = (
 		lastName: string,
@@ -72,7 +71,11 @@ export class SearchService {
 
 	// This method operates differently than the others. It returns a list of users directly
 	public searchUsersByEmailAddress(emailAddress: string): Observable<User[]> {
-		const queryConstraint = where('emailAddress', '==', emailAddress.toLowerCase());
+		const queryConstraint = where(
+			'emailAddress',
+			'==',
+			emailAddress.toLowerCase(),
+		);
 		return this.users.readMany([queryConstraint]);
 	}
 

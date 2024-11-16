@@ -63,7 +63,9 @@ export class LookupService {
 			.read(uid)
 			.pipe(map((results) => results ?? undefined));
 
-	public readonly getSearchIndexByEmailAddress$ = (email: string): Observable<RegistrationSearchIndex | undefined> =>
+	public readonly getSearchIndexByEmailAddress$ = (
+		email: string,
+	): Observable<RegistrationSearchIndex | undefined> =>
 		this.queryIndexByEmailAddress(email);
 
 	private queryIndexByName(
@@ -93,15 +95,17 @@ export class LookupService {
 		return this.collections.searchIndex.readMany(queryConstraints);
 	}
 
-	private queryIndexByEmailAddress(email: string): Observable<RegistrationSearchIndex | undefined> {
+	private queryIndexByEmailAddress(
+		email: string,
+	): Observable<RegistrationSearchIndex | undefined> {
 		const queryConstraints: QueryConstraint[] = [
 			where('emailAddress', '==', email),
 			limit(1),
 		];
 
-		return this.collections.searchIndex.readMany(queryConstraints).pipe(
-			map((results) => results.pop()),
-		);
+		return this.collections.searchIndex
+			.readMany(queryConstraints)
+			.pipe(map((results) => results.pop()));
 	}
 
 	private queryRegistrationsByQrCode(

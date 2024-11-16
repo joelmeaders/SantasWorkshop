@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-
-
 const routes: Routes = [
 	{
 		path: '',
-		loadComponent: () => import('./landing.page').then(m => m.LandingPage),
+		loadComponent: () =>
+			import('./landing.page').then((m) => m.LandingPage),
 	},
 ];
 

@@ -9,9 +9,9 @@ describe('PrivacyPolicyModalComponent', () => {
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
-    imports: [PrivacyPolicyModalComponent],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
-}).compileComponents();
+			imports: [PrivacyPolicyModalComponent],
+			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+		}).compileComponents();
 	}));
 
 	beforeEach(() => {

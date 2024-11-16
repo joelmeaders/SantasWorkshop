@@ -9,9 +9,9 @@ describe('TermsOfServiceModalComponent', () => {
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
-    imports: [TermsOfServiceModalComponent],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
-}).compileComponents();
+			imports: [TermsOfServiceModalComponent],
+			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+		}).compileComponents();
 	});
 
 	beforeEach(() => {

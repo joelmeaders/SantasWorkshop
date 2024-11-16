@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-
-
 const routes: Routes = [
 	{
 		path: '',
-		loadComponent: () => import('./admin.page').then(m => m.AdminPage),
+		loadComponent: () => import('./admin.page').then((m) => m.AdminPage),
 		children: [
 			{
 				path: 'landing',
@@ -42,12 +40,18 @@ const routes: Routes = [
 			{
 				path: 'pre-registration',
 				title: 'DSCS: Pre-Registration',
-				loadChildren: () => import('./pre-registration/pre-registration.module').then( m => m.PreRegistrationPageModule)
+				loadChildren: () =>
+					import('./pre-registration/pre-registration.module').then(
+						(m) => m.PreRegistrationPageModule,
+					),
 			},
 			{
 				path: 'resend-email',
 				title: 'DSCS: Resend Email',
-				loadChildren: () => import('./tools/resend-email/resend-email.module').then( m => m.ResendEmailPageModule)
+				loadChildren: () =>
+					import('./tools/resend-email/resend-email.module').then(
+						(m) => m.ResendEmailPageModule,
+					),
 			},
 			{
 				path: '',

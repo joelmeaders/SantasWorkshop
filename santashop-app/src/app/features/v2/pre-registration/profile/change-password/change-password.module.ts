@@ -3,8 +3,7 @@ import { ChangePasswordPageRoutingModule } from './change-password-routing.modul
 import { ChangePasswordPage } from './change-password.page';
 import { CoreModule } from '@santashop/core';
 
-
 @NgModule({
-    imports: [CoreModule, ChangePasswordPageRoutingModule, ChangePasswordPage],
+	imports: [CoreModule, ChangePasswordPageRoutingModule, ChangePasswordPage],
 })
 export class ChangePasswordPageModule {}

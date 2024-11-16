@@ -3,30 +3,75 @@ import { AppStateService } from '../../shared/services/app-state.service';
 
 import { RouterLinkActive, RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
-import { addIcons } from "ionicons";
-import { storefrontOutline, bagCheckOutline, searchOutline } from "ionicons/icons";
-import { IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel } from "@ionic/angular/standalone";
+import { addIcons } from 'ionicons';
+import {
+	storefrontOutline,
+	bagCheckOutline,
+	searchOutline,
+} from 'ionicons/icons';
+import {
+	IonRouterLink,
+	IonContent,
+	IonRouterOutlet,
+	IonFooter,
+	IonToolbar,
+	IonTabBar,
+	IonTabButton,
+	IonIcon,
+	IonLabel,
+} from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'admin-admin',
-    templateUrl: './admin.page.html',
-    styleUrls: ['./admin.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [RouterLinkActive, RouterLink, AsyncPipe, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterLink, IonContent, IonRouterOutlet, IonFooter, IonToolbar, IonTabBar, IonTabButton, IonIcon, IonLabel],
+	selector: 'admin-admin',
+	templateUrl: './admin.page.html',
+	styleUrls: ['./admin.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		RouterLinkActive,
+		RouterLink,
+		AsyncPipe,
+		IonRouterLink,
+		IonContent,
+		IonRouterOutlet,
+		IonFooter,
+		IonToolbar,
+		IonTabBar,
+		IonTabButton,
+		IonIcon,
+		IonLabel,
+		IonRouterLink,
+		IonContent,
+		IonRouterOutlet,
+		IonFooter,
+		IonToolbar,
+		IonTabBar,
+		IonTabButton,
+		IonIcon,
+		IonLabel,
+		IonRouterLink,
+		IonContent,
+		IonRouterOutlet,
+		IonFooter,
+		IonToolbar,
+		IonTabBar,
+		IonTabButton,
+		IonIcon,
+		IonLabel,
+	],
 })
 export class AdminPage {
-    private readonly appStateService = inject(AppStateService);
+	private readonly appStateService = inject(AppStateService);
 
-    public readonly preRegistrationEnabled$ =
-        this.appStateService.preRegistrationEnabled$;
-    public readonly onsiteRegistrationEnabled$ =
-        this.appStateService.onsiteRegistrationEnabled$;
-    public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+	public readonly preRegistrationEnabled$ =
+		this.appStateService.preRegistrationEnabled$;
+	public readonly onsiteRegistrationEnabled$ =
+		this.appStateService.onsiteRegistrationEnabled$;
+	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
 
-    constructor() {
-        addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
-        addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
-        addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
-    }
+	constructor() {
+		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
+		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
+		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
+	}
 }

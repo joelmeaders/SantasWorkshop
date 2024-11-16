@@ -3,8 +3,11 @@ import { EventInformationPageRoutingModule } from './event-information-routing.m
 import { EventInformationPage } from './event-information.page';
 import { CoreModule } from '@santashop/core';
 
-
 @NgModule({
-    imports: [CoreModule, EventInformationPageRoutingModule, EventInformationPage],
+	imports: [
+		CoreModule,
+		EventInformationPageRoutingModule,
+		EventInformationPage,
+	],
 })
 export class EventInformationPageModule {}

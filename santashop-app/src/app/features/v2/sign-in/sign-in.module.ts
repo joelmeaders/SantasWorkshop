@@ -4,6 +4,6 @@ import { SignInPage } from './sign-in.page';
 import { CoreModule } from '@santashop/core';
 
 @NgModule({
-    imports: [CoreModule, SignInPageRoutingModule, SignInPage],
+	imports: [CoreModule, SignInPageRoutingModule, SignInPage],
 })
 export class SignInPageModule {}

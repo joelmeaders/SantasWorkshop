@@ -9,10 +9,14 @@ import { SubmitCardComponent } from './submit-card/submit-card.component';
 import { ReferralCardComponent } from './referral-card/referral-card.component';
 
 @NgModule({
-    imports: [CoreModule, InformationPageRoutingModule, OverviewPage,
-    ChildrenCardComponent,
-    ScheduleCardComponent,
-    SubmitCardComponent,
-    ReferralCardComponent],
+	imports: [
+		CoreModule,
+		InformationPageRoutingModule,
+		OverviewPage,
+		ChildrenCardComponent,
+		ScheduleCardComponent,
+		SubmitCardComponent,
+		ReferralCardComponent,
+	],
 })
 export class InformationPageModule {}

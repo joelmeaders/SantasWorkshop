@@ -33,11 +33,15 @@ export class CheckInContextService {
 					).toDate();
 				});
 
-				// If the person previously cancelled their registration 
+				// If the person previously cancelled their registration
 				// and did not pick a new slot, use the previous slot.
-				if (!registration.dateTimeSlot && registration.previousDateTimeSlot) {
-					registration.dateTimeSlot = registration.previousDateTimeSlot;
-				};
+				if (
+					!registration.dateTimeSlot &&
+					registration.previousDateTimeSlot
+				) {
+					registration.dateTimeSlot =
+						registration.previousDateTimeSlot;
+				}
 
 				// Convert timestamp to date
 				const slot = registration.dateTimeSlot!.dateTime as any;

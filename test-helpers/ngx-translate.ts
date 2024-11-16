@@ -3,8 +3,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 @Pipe({
-    name: 'translate',
-    standalone: true,
+	name: 'translate',
+	standalone: true,
 })
 export class TranslatePipeMock implements PipeTransform {
 	public transform(query: string, ..._args: any[]): any {
@@ -20,11 +20,11 @@ export class TranslateServiceStub {
 }
 
 @NgModule({
-    imports: [TranslatePipeMock],
-    providers: [
-        { provide: TranslateService, useClass: TranslateServiceStub },
-        { provide: TranslatePipe, useClass: TranslatePipeMock },
-    ],
-    exports: [TranslatePipeMock],
+	imports: [TranslatePipeMock],
+	providers: [
+		{ provide: TranslateService, useClass: TranslateServiceStub },
+		{ provide: TranslatePipe, useClass: TranslatePipeMock },
+	],
+	exports: [TranslatePipeMock],
 })
 export class TranslateTestingModule {}

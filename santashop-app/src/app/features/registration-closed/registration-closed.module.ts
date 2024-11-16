@@ -3,8 +3,11 @@ import { RegistrationClosedPageRoutingModule } from './registration-closed-routi
 import { RegistrationClosedPage } from './registration-closed.page';
 import { CoreModule } from '@santashop/core';
 
-
 @NgModule({
-    imports: [CoreModule, RegistrationClosedPageRoutingModule, RegistrationClosedPage],
+	imports: [
+		CoreModule,
+		RegistrationClosedPageRoutingModule,
+		RegistrationClosedPage,
+	],
 })
 export class RegistrationClosedPageModule {}

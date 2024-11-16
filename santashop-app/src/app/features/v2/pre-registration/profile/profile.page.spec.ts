@@ -46,8 +46,8 @@ describe('ProfilePage', () => {
 			},
 		});
 		TestBed.configureTestingModule({
-    imports: [TranslateTestingModule, ProfilePage],
-}).compileComponents();
+			imports: [TranslateTestingModule, ProfilePage],
+		}).compileComponents();
 
 		fixture = TestBed.createComponent(ProfilePage);
 		component = fixture.componentInstance;

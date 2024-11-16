@@ -1,11 +1,11 @@
 export interface GlobalAlert {
-    displayAlert: boolean;
+	displayAlert: boolean;
 
-    titleEn: string;
+	titleEn: string;
 
-    titleEs: string;
+	titleEs: string;
 
-    messageEn: string;
+	messageEn: string;
 
-    messageEs: string;
+	messageEs: string;
 }

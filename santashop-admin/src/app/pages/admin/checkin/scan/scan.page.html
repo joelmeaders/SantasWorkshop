@@ -1,68 +1,61 @@
 <admin-header title="Check In"></admin-header>
 
 <ion-content
-  [hidden]="!(availableDevices$ | async)?.length"
-  [fullscreen]="true"
-  [scrollX]="false"
-  [scrollY]="false"
-  >
-  <zxing-scanner
-    #scanner
-    [formats]="formatsEnabled"
-    [device]="deviceToUse$ | async"
-    [autostart]="true"
-    [enable]="(cameraEnabled$ | async) ?? false"
-    (camerasFound)="onCamerasFound($event)"
-    (deviceChange)="onDeviceChange($event)"
-    (permissionResponse)="onHasPermission($event)"
-    (scanSuccess)="scanResult.next($event)"
-    (scanError)="scanError.next($event)"
-    [delayBetweenScanSuccess]="5000"
-  ></zxing-scanner>
+	[hidden]="!(availableDevices$ | async)?.length"
+	[fullscreen]="true"
+	[scrollX]="false"
+	[scrollY]="false"
+>
+	<zxing-scanner
+		#scanner
+		[formats]="formatsEnabled"
+		[device]="deviceToUse$ | async"
+		[autostart]="true"
+		[enable]="(cameraEnabled$ | async) ?? false"
+		(camerasFound)="onCamerasFound($event)"
+		(deviceChange)="onDeviceChange($event)"
+		(permissionResponse)="onHasPermission($event)"
+		(scanSuccess)="scanResult.next($event)"
+		(scanError)="scanError.next($event)"
+		[delayBetweenScanSuccess]="5000"
+	></zxing-scanner>
 
-  <div class="selection-container">
-    <ion-item lines="none" color="tertiary">
-      <ion-icon name="camera" slot="start"></ion-icon>
-      <ion-select
-        #deviceSelection
-        [value]="(deviceId$ | async)"
-        (ionChange)="onDeviceSelectChange($event)"
-        scrollable="true"
-        interface="popover"
-        [interfaceOptions]="interfaceOptions"
-        >
-        <ion-select-option #selection [value]="''" disabled>
-          No Camera Selected
-        </ion-select-option>
-        @for (device of (availableDevices$ | async); track device) {
-          <ion-select-option
-            [value]="device.deviceId"
-            >
-            {{ device.label.split(' (')[0] }}
-          </ion-select-option>
-        }
-      </ion-select>
-    </ion-item>
-  </div>
+	<div class="selection-container">
+		<ion-item lines="none" color="tertiary">
+			<ion-icon name="camera" slot="start"></ion-icon>
+			<ion-select
+				#deviceSelection
+				[value]="(deviceId$ | async)"
+				(ionChange)="onDeviceSelectChange($event)"
+				scrollable="true"
+				interface="popover"
+				[interfaceOptions]="interfaceOptions"
+			>
+				<ion-select-option #selection [value]="''" disabled>
+					No Camera Selected
+				</ion-select-option>
+				@for (device of (availableDevices$ | async); track device) {
+				<ion-select-option [value]="device.deviceId">
+					{{ device.label.split(' (')[0] }}
+				</ion-select-option>
+				}
+			</ion-select>
+		</ion-item>
+	</div>
 </ion-content>
 
 <ng-container *appLet="hasPermissions$ | async as hasPermission">
-  @if (hasPermission === undefined) {
-    <h2>Waiting for permissions.</h2>
-    <blockquote>
-      If your device does not have cameras, no permissions will be asked.
-    </blockquote>
-  }
-
-  @if (hasPermission === false) {
-    <h2>
-      You denied the camera permission, we can't scan anything without it.
-      😪
-    </h2>
-  }
-
-  @if ((availableDevices$ | async) === undefined) {
-    <h2>Couldn't check for devices.</h2>
-    <blockquote>This may be caused by some security error.</blockquote>
-  }
+	@if (hasPermission === undefined) {
+	<h2>Waiting for permissions.</h2>
+	<blockquote>
+		If your device does not have cameras, no permissions will be asked.
+	</blockquote>
+	} @if (hasPermission === false) {
+	<h2>
+		You denied the camera permission, we can't scan anything without it. 😪
+	</h2>
+	} @if ((availableDevices$ | async) === undefined) {
+	<h2>Couldn't check for devices.</h2>
+	<blockquote>This may be caused by some security error.</blockquote>
+	}
 </ng-container>

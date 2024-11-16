@@ -4,6 +4,6 @@ import { ResetPasswordPage } from './reset-password.page';
 import { CoreModule } from '@santashop/core';
 
 @NgModule({
-    imports: [CoreModule, ResetPasswordPageRoutingModule, ResetPasswordPage],
+	imports: [CoreModule, ResetPasswordPageRoutingModule, ResetPasswordPage],
 })
 export class ResetPasswordPageModule {}

@@ -1,7 +1,7 @@
 <ion-card class="ion-no-padding ion-no-margin es-pd-bottom-xxl">
 	<ion-card-header>
 		<ion-card-title>
-			{{ "REFERRAL.REFERRED_BY" | translate }}
+			{{ 'REFERRAL.REFERRED_BY' | translate }}
 		</ion-card-title>
 	</ion-card-header>
 	<ion-card-content>
@@ -25,7 +25,7 @@
 						color="light"
 					>
 						<ion-label>
-							{{ i < 10 ? "Alphabetical" : "" }}
+							{{ i < 10 ? 'Alphabetical' : '' }}
 						</ion-label>
 					</ion-item-divider>
 					<ng-template #agency>
@@ -46,7 +46,7 @@
 		<ion-item-group *ngIf="referralChoice$ | async as choice">
 			<ion-item>
 				<ion-label position="stacked" class="ref-choice">
-					{{ "REFERRAL.YOU_SELECTED" | translate }}
+					{{ 'REFERRAL.YOU_SELECTED' | translate }}
 				</ion-label>
 				<ion-text class="ref-choice"> {{ choice }} </ion-text>
 			</ion-item>
@@ -75,7 +75,7 @@
 					color="danger"
 					(click)="setChoice()"
 				>
-					{{ "COMMON.RESET" | translate }}
+					{{ 'COMMON.RESET' | translate }}
 				</ion-button>
 				<ion-button
 					slot="end"
@@ -83,7 +83,7 @@
 					(click)="submit()"
 					[disabled]="otherForm.invalid"
 				>
-					{{ "COMMON.SAVE_CHOICE" | translate }}
+					{{ 'COMMON.SAVE_CHOICE' | translate }}
 				</ion-button>
 			</div>
 		</ion-item-group>

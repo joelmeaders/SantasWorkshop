@@ -1,6 +1,6 @@
 export interface ScheduleStats {
-    dateTimeCounts: {
-        dateTime: Date;
-        count: number;
-    }[];
+	dateTimeCounts: {
+		dateTime: Date;
+		count: number;
+	}[];
 }

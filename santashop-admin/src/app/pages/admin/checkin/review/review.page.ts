@@ -1,6 +1,18 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {
+	AlertController,
+	IonContent,
+	IonList,
+	IonListHeader,
+	IonNote,
+	IonItemDivider,
+	IonLabel,
+	IonItem,
+	IonText,
+	IonIcon,
+	IonButton,
+} from '@ionic/angular/standalone';
 import { Child, Registration } from '@santashop/models';
 import {
 	catchError,
@@ -16,14 +28,64 @@ import { AppStateService } from '../../../../shared/services/app-state.service';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { ManageChildrenComponent } from '../../../../shared/components/manage-children/manage-children.component';
+import { addIcons } from 'ionicons';
+import { checkmarkCircle } from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-review',
 	templateUrl: './review.page.html',
 	styleUrls: ['./review.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		ManageChildrenComponent,
+		RouterLink,
+		AsyncPipe,
+		DatePipe,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonText,
+		IonIcon,
+		IonButton,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonText,
+		IonIcon,
+		IonButton,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonText,
+		IonIcon,
+		IonButton,
+	],
 })
 export class ReviewPage {
+	private readonly checkinContext = inject(CheckInContextService);
+	private readonly lookupService = inject(LookupService);
+	private readonly checkinService = inject(CheckInService);
+	private readonly appStateService = inject(AppStateService);
+	private readonly alertController = inject(AlertController);
+	private readonly router = inject(Router);
+	private readonly route = inject(ActivatedRoute);
 
 	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
 
@@ -55,15 +117,11 @@ export class ReviewPage {
 		)
 		.subscribe();
 
-	constructor(
-		private readonly checkinContext: CheckInContextService,
-		private readonly lookupService: LookupService,
-		private readonly checkinService: CheckInService,
-		private readonly appStateService: AppStateService,
-		private readonly alertController: AlertController,
-		private readonly router: Router,
-		private readonly route: ActivatedRoute,
-	) {}
+	constructor() {
+		addIcons({ checkmarkCircle });
+		addIcons({ checkmarkCircle });
+		addIcons({ checkmarkCircle });
+	}
 
 	public async ionViewDidEnter(): Promise<void> {
 		this.wasEdited = false;

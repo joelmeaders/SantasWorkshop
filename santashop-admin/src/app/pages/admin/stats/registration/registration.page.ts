@@ -1,11 +1,25 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
-import { COLLECTION_SCHEMA, RegistrationStats, ScheduleStats } from '@santashop/models';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+	FireRepoLite,
+	IFireRepoCollection,
+	filterNil,
+	CoreModule,
+} from '@santashop/core';
+import {
+	COLLECTION_SCHEMA,
+	RegistrationStats,
+	ScheduleStats,
+} from '@santashop/models';
 import { combineLatest, map, Observable, shareReplay } from 'rxjs';
 import { Timestamp } from '@firebase/firestore';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
+import { IonCol, IonContent, IonGrid, IonRow } from '@ionic/angular/standalone';
 
 Chart.register(ChartDataLabels);
 
@@ -14,24 +28,37 @@ Chart.register(ChartDataLabels);
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonContent,
+		HeaderComponent,
+		BaseChartDirective,
+		CoreModule,
+		AsyncPipe,
+		DecimalPipe,
+	],
 })
 export class RegistrationPage {
+	private readonly httpService = inject(FireRepoLite);
+
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly registrationStats$ =
 		this.statsCollection<RegistrationStats>()
-			.read('registration-2023')
-			.pipe(shareReplay(1));
+			.read('registration-2024')
+			.pipe(filterNil(), shareReplay(1));
 
 	public readonly registrationCount$ = this.registrationStats$.pipe(
 		map((stats) => stats.completedRegistrations),
 	);
 
-	private readonly scheduleStats$ =
-		this.statsCollection<ScheduleStats>()
-			.read('schedule-2023')
-			.pipe(shareReplay(1));
+	private readonly scheduleStats$ = this.statsCollection<ScheduleStats>()
+		.read('schedule-2024')
+		.pipe(filterNil(), shareReplay(1));
 
 	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
 		map((allData) => allData.dateTimeCounts),
@@ -48,7 +75,7 @@ export class RegistrationPage {
 	]).pipe(map((data) => data[1] / data[0]));
 
 	private readonly stats$ = this.registrationStats$.pipe(
-		map(stats => stats.dateTimeCount),
+		map((stats) => stats.dateTimeCount),
 		map((dateTimes) => dateTimes.map((e) => e.stats)),
 	);
 
@@ -106,7 +133,7 @@ export class RegistrationPage {
 				datasets: [
 					{
 						data: [],
-						...this.colorSettings
+						...this.colorSettings,
 					},
 				],
 			};
@@ -160,12 +187,13 @@ export class RegistrationPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
 					if (ctx.chart.data.labels) {
 						return ctx.chart.data.labels[ctx.dataIndex];
 					}
+					return '';
 				},
 			},
 		},
@@ -186,10 +214,12 @@ export class RegistrationPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (value, ctx) => {
-					return `${value} ${ctx.chart?.data?.labels![ctx.dataIndex]}`;
+					return `${value} ${
+						ctx.chart?.data?.labels![ctx.dataIndex]
+					}`;
 				},
 			},
 		},
@@ -220,14 +250,13 @@ export class RegistrationPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 			},
 		},
 	};
 
-	constructor(private readonly httpService: FireRepoLite) {}
-
+	// Update yearly. Last updated 2024
 	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[],
 	): ChartData<'bar'>[] {
@@ -236,35 +265,36 @@ export class RegistrationPage {
 		}[] = [
 			{
 				datasets: [
-					{ data: [], label: 'Dec 8th', ...this.colorSettings },
+					{ data: [], label: 'Dec 13th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 9th', ...this.colorSettings },
+					{ data: [], label: 'Dec 14th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 11th', ...this.colorSettings },
+					{ data: [], label: 'Dec 16th', ...this.colorSettings },
 				],
 			},
 			{
 				datasets: [
-					{ data: [], label: 'Dec 12th', ...this.colorSettings },
+					{ data: [], label: 'Dec 17th', ...this.colorSettings },
 				],
 			},
 		];
 
+		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
 			switch (date.getDate()) {
-				case 8:
+				case 13:
 					return 0;
-				case 9:
+				case 14:
 					return 1;
-				case 11:
+				case 16:
 					return 2;
-				case 12:
+				case 17:
 					return 3;
 
 				default:

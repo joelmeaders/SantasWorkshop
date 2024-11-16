@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ByNamePage } from './by-name.page';
-
 const routes: Routes = [
 	{
 		path: '',
-		component: ByNamePage,
+		loadComponent: () => import('./by-name.page').then((m) => m.ByNamePage),
 	},
 ];
 

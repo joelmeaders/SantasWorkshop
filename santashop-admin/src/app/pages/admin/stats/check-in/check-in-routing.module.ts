@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { CheckInPage } from './check-in.page';
-
 const routes: Routes = [
 	{
 		path: '',
-		component: CheckInPage,
+		loadComponent: () =>
+			import('./check-in.page').then((m) => m.CheckInPage),
 	},
 ];
 

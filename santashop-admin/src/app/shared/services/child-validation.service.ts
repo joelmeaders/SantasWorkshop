@@ -3,7 +3,7 @@ import { ChildValidationError, Child } from '@santashop/models';
 import { deepCopy } from '../../../../../santashop-core/src/lib/helpers/methods';
 
 // TODO: Injectable tokens
-export const MAX_BIRTHDATE = (): Date => new Date('12/31/2023');
+export const MAX_BIRTHDATE = (): Date => new Date('12/31/2024');
 
 export const MAX_CHILD_AGE_IN_YEARS = (): number => 12;
 

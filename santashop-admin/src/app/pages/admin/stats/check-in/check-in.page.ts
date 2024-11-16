@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import {
@@ -9,21 +9,99 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
-import { IFireRepoCollection, FireRepoLite, filterNil } from '@santashop/core';
+import {
+	IFireRepoCollection,
+	FireRepoLite,
+	filterNil,
+	CoreModule,
+} from '@santashop/core';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
 	COLLECTION_SCHEMA,
 } from '@santashop/models';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
+import { addIcons } from 'ionicons';
+import { refreshSharp } from 'ionicons/icons';
+import {
+	IonContent,
+	IonGrid,
+	IonRow,
+	IonCol,
+	IonItem,
+	IonLabel,
+	IonSelect,
+	IonSelectOption,
+	IonToolbar,
+	IonButton,
+	IonIcon,
+	IonText,
+	IonTitle,
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-check-in',
 	templateUrl: './check-in.page.html',
 	styleUrls: ['./check-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		ReactiveFormsModule,
+		FormsModule,
+		CoreModule,
+		BaseChartDirective,
+		AsyncPipe,
+		DatePipe,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonItem,
+		IonLabel,
+		IonSelect,
+		IonSelectOption,
+		IonToolbar,
+		IonButton,
+		IonIcon,
+		IonText,
+		IonTitle,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonItem,
+		IonLabel,
+		IonSelect,
+		IonSelectOption,
+		IonToolbar,
+		IonButton,
+		IonIcon,
+		IonText,
+		IonTitle,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonItem,
+		IonLabel,
+		IonSelect,
+		IonSelectOption,
+		IonToolbar,
+		IonButton,
+		IonIcon,
+		IonText,
+		IonTitle,
+	],
 })
 export class CheckInPage {
-	public year = 2023;
+	private readonly httpService = inject(FireRepoLite);
+
+	public year = 2024;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
@@ -33,7 +111,7 @@ export class CheckInPage {
 		switchMap(() =>
 			this.statsCollection<CheckInAggregatedStats>()
 				.read(`checkin-${this.year}`)
-				.pipe(shareReplay(1)),
+				.pipe(filterNil(), shareReplay(1)),
 		),
 	);
 
@@ -147,7 +225,11 @@ export class CheckInPage {
 		borderWidth: 1,
 	};
 
-	constructor(private readonly httpService: FireRepoLite) {}
+	constructor() {
+		addIcons({ refreshSharp });
+		addIcons({ refreshSharp });
+		addIcons({ refreshSharp });
+	}
 
 	private getDays(data: CheckInDateTimeCount[]): number[] {
 		return Array.from(new Set(data.map((e) => e.date)));

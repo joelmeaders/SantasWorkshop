@@ -9,38 +9,49 @@
 	</ion-button>
 </ion-item-divider>
 
-<ion-item *ngIf="!children?.length" button detail (click)="addEditChild()">
-	<span>
-		<ion-label> Add children </ion-label>
-		<ion-note
-			color="danger"
-			slot="error"
-			*ngIf="!children.length"
-			class="error-note"
-		>
-			Add all children ages 0-11
-		</ion-note>
-	</span>
-</ion-item>
-
-<ion-item-sliding #slider *ngFor="let child of children">
-	<ion-item (click)="slider.open('end')" detail detailIcon="menu-outline">
-		<ion-label>
-			<h2>{{ child.firstName }} {{ child.lastName }}</h2>
-			<p>
-				<ion-badge color="dark"> Age: {{ child.ageGroup }} </ion-badge>
-				{{ child.dateOfBirth | date }}
-			</p>
-		</ion-label>
+@if (!children.length) {
+	<ion-item button detail (click)="addEditChild()">
+		<span>
+			<ion-label> Add children </ion-label>
+			@if (!children.length) {
+				<ion-note color="danger" slot="error" class="error-note">
+					Add all children ages 0-11
+				</ion-note>
+			}
+		</span>
 	</ion-item>
-	<ion-item-options>
-		<ion-item-option color="primary" (click)="addEditChild(child)">
-			<ion-icon slot="start" name="create-outline" slot="top"></ion-icon>
-			<ion-label slot="bottom"> Edit </ion-label>
-		</ion-item-option>
-		<ion-item-option color="danger" (click)="removeChild(child.id!)">
-			<ion-icon slot="start" name="trash-outline" slot="top"></ion-icon>
-			<ion-label slot="bottom"> Delete </ion-label>
-		</ion-item-option>
-	</ion-item-options>
-</ion-item-sliding>
+}
+
+@for (child of children; track child) {
+	<ion-item-sliding #slider>
+		<ion-item (click)="slider.open('end')" detail detailIcon="menu-outline">
+			<ion-label>
+				<h2>{{ child.firstName }} {{ child.lastName }}</h2>
+				<p>
+					<ion-badge color="dark">
+						Age: {{ child.ageGroup }}
+					</ion-badge>
+					{{ child.dateOfBirth | date }}
+				</p>
+			</ion-label>
+		</ion-item>
+		<ion-item-options>
+			<ion-item-option color="primary" (click)="addEditChild(child)">
+				<ion-icon
+					slot="start"
+					name="create-outline"
+					slot="top"
+				></ion-icon>
+				<ion-label slot="bottom"> Edit </ion-label>
+			</ion-item-option>
+			<ion-item-option color="danger" (click)="removeChild(child.id!)">
+				<ion-icon
+					slot="start"
+					name="trash-outline"
+					slot="top"
+				></ion-icon>
+				<ion-label slot="bottom"> Delete </ion-label>
+			</ion-item-option>
+		</ion-item-options>
+	</ion-item-sliding>
+}

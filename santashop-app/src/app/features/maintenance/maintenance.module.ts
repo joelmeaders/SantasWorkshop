@@ -3,8 +3,7 @@ import { MaintenancePageRoutingModule } from './maintenance-routing.module';
 import { MaintenancePage } from './maintenance.page';
 import { CoreModule } from '@santashop/core';
 
-
 @NgModule({
-    imports: [CoreModule, MaintenancePageRoutingModule, MaintenancePage],
+	imports: [CoreModule, MaintenancePageRoutingModule, MaintenancePage],
 })
 export class MaintenancePageModule {}

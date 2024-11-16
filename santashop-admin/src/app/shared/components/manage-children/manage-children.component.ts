@@ -4,28 +4,83 @@ import {
 	Input,
 	EventEmitter,
 	Output,
+	inject,
 } from '@angular/core';
-import { AlertController, ModalController } from '@ionic/angular';
+import {
+	AlertController,
+	ModalController,
+	IonItemDivider,
+	IonLabel,
+	IonBadge,
+	IonButton,
+	IonIcon,
+	IonItem,
+	IonNote,
+	IonItemSliding,
+	IonItemOptions,
+	IonItemOption,
+} from '@ionic/angular/standalone';
 import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
+import { DatePipe } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { addCircle, createOutline, trashOutline } from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-manage-children',
 	templateUrl: './manage-children.component.html',
 	styleUrls: ['./manage-children.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		DatePipe,
+		IonItemDivider,
+		IonLabel,
+		IonBadge,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonNote,
+		IonItemSliding,
+		IonItemOptions,
+		IonItemOption,
+		IonItemDivider,
+		IonLabel,
+		IonBadge,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonNote,
+		IonItemSliding,
+		IonItemOptions,
+		IonItemOption,
+		IonItemDivider,
+		IonLabel,
+		IonBadge,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonNote,
+		IonItemSliding,
+		IonItemOptions,
+		IonItemOption,
+	],
 })
 export class ManageChildrenComponent {
+	private readonly modalController = inject(ModalController);
+	private readonly alertController = inject(AlertController);
+
 	@Input() public children: Child[] = [];
 
 	@Output() public readonly adddedChild = new EventEmitter<Child>();
 	@Output() public readonly editedChild = new EventEmitter<Child>();
 	@Output() public readonly removedChild = new EventEmitter<number>();
 
-	constructor(
-		private readonly modalController: ModalController,
-		private readonly alertController: AlertController,
-	) {}
+	constructor() {
+		addIcons({ addCircle, createOutline, trashOutline });
+		addIcons({ addCircle, createOutline, trashOutline });
+		addIcons({ addCircle, createOutline, trashOutline });
+	}
 
 	public async addEditChild(child?: Child): Promise<void> {
 		const modal = await this.modalController.create({

@@ -13,6 +13,9 @@
 						[(ngModel)]="year"
 						(ionChange)="refreshYear.next()"
 					>
+						<ion-select-option [value]="2024">
+							2024
+						</ion-select-option>
 						<ion-select-option [value]="2023">
 							2023
 						</ion-select-option>
@@ -95,31 +98,25 @@
 					</div>
 				</ion-toolbar>
 			</ion-col>
-			<ng-container *ngFor="let slot of slots; index as i;">
-				<ion-col
-					sizeXs="12"
-					sizeSm="12"
-					sizeMd="6"
-					sizeLg="6"
-					*ngIf="slot.datasets[0].data"
-				>
-					<ion-toolbar color="none" class="ion-padding-horizontal">
-						<h3 slot="start">{{ slot.datasets[0].label }}</h3>
-						<ion-text slot="end">
-							Total: {{ addValues(slot.datasets[0].data) }}
-						</ion-text>
-					</ion-toolbar>
-
-					<canvas
-						baseChart
-						[options]="barChartOptions"
-						[datasets]="slot.datasets"
-						[labels]="slot.datasets[0].dataSeriesLabels"
-						[legend]="false"
-						type="bar"
-					></canvas>
-				</ion-col>
-			</ng-container>
+			@for (slot of slots; track slot; let i = $index) { @if
+			(slot.datasets[0].data) {
+			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
+				<ion-toolbar color="none" class="ion-padding-horizontal">
+					<h3 slot="start">{{ slot.datasets[0].label }}</h3>
+					<ion-text slot="end">
+						Total: {{ addValues(slot.datasets[0].data) }}
+					</ion-text>
+				</ion-toolbar>
+				<canvas
+					baseChart
+					[options]="barChartOptions"
+					[datasets]="slot.datasets"
+					[labels]="slot.datasets[0].dataSeriesLabels"
+					[legend]="false"
+					type="bar"
+				></canvas>
+			</ion-col>
+			} }
 		</ion-row>
 	</ion-grid>
 	<ng-template #noData>

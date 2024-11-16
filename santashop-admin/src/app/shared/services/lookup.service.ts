@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FireRepoLite, QueryConstraint } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
@@ -14,6 +14,8 @@ import { map } from 'rxjs/operators';
 	providedIn: 'root',
 })
 export class LookupService {
+	private readonly repoService = inject(FireRepoLite);
+
 	private readonly collections = {
 		searchIndex: this.repoService.collection<RegistrationSearchIndex>(
 			COLLECTION_SCHEMA.registrationSearchIndex,
@@ -61,10 +63,10 @@ export class LookupService {
 			.read(uid)
 			.pipe(map((results) => results ?? undefined));
 
-	public readonly getSearchIndexByEmailAddress$ = (email: string): Observable<RegistrationSearchIndex | undefined> =>
+	public readonly getSearchIndexByEmailAddress$ = (
+		email: string,
+	): Observable<RegistrationSearchIndex | undefined> =>
 		this.queryIndexByEmailAddress(email);
-
-	constructor(private readonly repoService: FireRepoLite) {}
 
 	private queryIndexByName(
 		firstName: string,
@@ -93,15 +95,17 @@ export class LookupService {
 		return this.collections.searchIndex.readMany(queryConstraints);
 	}
 
-	private queryIndexByEmailAddress(email: string): Observable<RegistrationSearchIndex | undefined> {
+	private queryIndexByEmailAddress(
+		email: string,
+	): Observable<RegistrationSearchIndex | undefined> {
 		const queryConstraints: QueryConstraint[] = [
 			where('emailAddress', '==', email),
 			limit(1),
 		];
 
-		return this.collections.searchIndex.readMany(queryConstraints).pipe(
-			map((results) => results.pop()),
-		);
+		return this.collections.searchIndex
+			.readMany(queryConstraints)
+			.pipe(map((results) => results.pop()));
 	}
 
 	private queryRegistrationsByQrCode(

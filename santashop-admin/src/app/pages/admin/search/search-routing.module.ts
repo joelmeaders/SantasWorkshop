@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { SearchPage } from './search.page';
-
 const routes: Routes = [
 	{
 		path: '',
-		component: SearchPage,
+		loadComponent: () => import('./search.page').then((m) => m.SearchPage),
 	},
 	{
 		path: 'by-name',

@@ -1,14 +1,76 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	ViewChild,
+	inject,
+} from '@angular/core';
+import {
+	ModalController,
+	IonHeader,
+	IonToolbar,
+	IonTitle,
+	IonButton,
+	IonContent,
+	IonList,
+	IonSearchbar,
+	IonItemGroup,
+	IonItemDivider,
+	IonLabel,
+	IonItem,
+	IonInput,
+} from '@ionic/angular/standalone';
 import { BehaviorSubject, Observable, map } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
 	selector: 'admin-referral-modal',
 	templateUrl: './referral-modal.component.html',
 	styleUrls: ['./referral-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		AsyncPipe,
+		IonHeader,
+		IonToolbar,
+		IonTitle,
+		IonButton,
+		IonContent,
+		IonList,
+		IonSearchbar,
+		IonItemGroup,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonHeader,
+		IonToolbar,
+		IonTitle,
+		IonButton,
+		IonContent,
+		IonList,
+		IonSearchbar,
+		IonItemGroup,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonHeader,
+		IonToolbar,
+		IonTitle,
+		IonButton,
+		IonContent,
+		IonList,
+		IonSearchbar,
+		IonItemGroup,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+	],
 })
 export class ReferralModalComponent {
+	private readonly modalController = inject(ModalController);
+
 	public readonly allReferrals: string[] = [
 		'Denver Human Services DHS',
 		'School - Denver Public Schools (DPS)',
@@ -58,7 +120,7 @@ export class ReferralModalComponent {
 				!!search && search.length
 					? this.allReferrals.filter((ref) =>
 							ref.toUpperCase().includes(search),
-					  )
+						)
 					: this.allReferrals,
 			),
 		);
@@ -67,8 +129,6 @@ export class ReferralModalComponent {
 
 	@ViewChild('otherInput')
 	private readonly otherInput?: HTMLIonInputElement;
-
-	constructor(private readonly modalController: ModalController) {}
 
 	public filter($event: any): void {
 		const input = $event.detail?.value;

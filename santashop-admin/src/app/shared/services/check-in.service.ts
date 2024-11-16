@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { LoadingController } from '@ionic/angular';
+import { Injectable, inject } from '@angular/core';
+import { LoadingController } from '@ionic/angular/standalone';
 import { Registration } from '@santashop/models';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { HttpsCallableResult } from '@santashop/core';
@@ -8,6 +8,9 @@ import { HttpsCallableResult } from '@santashop/core';
 	providedIn: 'root',
 })
 export class CheckInService {
+	private readonly functions = inject(Functions);
+	private readonly loadingController = inject(LoadingController);
+
 	private readonly checkInFn = (
 		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
@@ -31,11 +34,6 @@ export class CheckInService {
 			this.functions,
 			'onSiteRegistration',
 		)(registration);
-
-	constructor(
-		private readonly functions: Functions,
-		private readonly loadingController: LoadingController,
-	) {}
 
 	public async checkIn(
 		registration: Registration,

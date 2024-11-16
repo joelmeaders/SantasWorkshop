@@ -99,51 +99,51 @@
 				<ion-item (click)="chooseReferral()" button detail>
 					<span>
 						<ion-label> {{ chosenReferrer$ | async }} </ion-label>
+						@if (!form.controls.referredBy.value) {
 						<ion-note
 							color="danger"
 							slot="error"
-							*ngIf="!form.controls.referredBy.value"
 							class="error-note"
 						>
 							Choose a referring agency
 						</ion-note>
+						}
 					</span>
 				</ion-item>
 
 				<div class="margin-top">
+					@if (children$ | async; as children) {
 					<admin-manage-children
-						*ngIf="children$ | async as children"
 						[children]="children"
 						(adddedChild)="addChild($event)"
 						(editedChild)="editChild($event)"
 						(removedChild)="removeChild($event)"
 					></admin-manage-children>
+					}
 				</div>
 
 				<ion-item-divider class="margin-top">
 					<ion-label> Reservation </ion-label>
-					<ion-text
-						color="danger"
-						*ngIf="!form.controls.dateTimeSlot.value"
-						class="error-note"
-						slot="end"
-					>
+					@if (!form.controls.dateTimeSlot.value) {
+					<ion-text color="danger" class="error-note" slot="end">
 						Pick a date and time
 					</ion-text>
+					}
 				</ion-item-divider>
-				<ion-item *ngIf="availableSlots$ | async as slots">
+				@if (availableSlots$ | async; as slots) {
+				<ion-item>
 					<ion-select
 						label="Available Days/Times"
 						formControlName="dateTimeSlot"
 					>
-						<ion-select-option
-							*ngFor="let slot of slots; trackBy:slotIndex"
-							[value]="slot"
-						>
+						@for (slot of slots; track slotIndex($index, slot)) {
+						<ion-select-option [value]="slot">
 							{{ slot.dateTime | date: "short" }}
 						</ion-select-option>
+						}
 					</ion-select>
 				</ion-item>
+				}
 			</form>
 
 			<ion-item-divider class="success-divider">

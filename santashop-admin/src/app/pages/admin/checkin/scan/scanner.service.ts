@@ -1,5 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { Injectable, OnDestroy, inject } from '@angular/core';
+import { AlertController } from '@ionic/angular/standalone';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
 	takeUntil,
@@ -10,6 +10,8 @@ import {
 
 @Injectable()
 export class ScannerService implements OnDestroy {
+	private readonly alertController = inject(AlertController);
+
 	private readonly $destroy = new Subject<void>();
 
 	public readonly formatsEnabled: any = [11];
@@ -52,8 +54,6 @@ export class ScannerService implements OnDestroy {
 		map((current) => (current ? current.deviceId : '')),
 		shareReplay(1),
 	);
-
-	constructor(private readonly alertController: AlertController) {}
 
 	public async ngOnDestroy(): Promise<void> {
 		this.$destroy.next();

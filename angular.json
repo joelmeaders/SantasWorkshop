@@ -151,12 +151,6 @@
 							]
 						},
 						"test": {
-							"buildOptimizer": false,
-							"optimization": false,
-							"vendorChunk": true,
-							"extractLicenses": false,
-							"sourceMap": true,
-							"namedChunks": true,
 							"fileReplacements": [
 								{
 									"replace": "santashop-admin/src/environments/environment.ts",
@@ -205,9 +199,10 @@
 				"test": {
 					"builder": "@angular-devkit/build-angular:karma",
 					"options": {
-						"polyfills": ["zone.js", "zone.js/testing"],
+						"main": "santashop-app/src/test.ts",
 						"tsConfig": "santashop-admin/tsconfig.spec.json",
-						"inlineStyleLanguage": "scss"
+						"karmaConfig": "santashop-app/karma.conf.js",
+						"codeCoverage": true
 					}
 				},
 				"lint": {

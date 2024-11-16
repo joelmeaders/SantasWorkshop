@@ -1,6 +1,19 @@
-import { Component, ChangeDetectionStrategy, ViewChild } from '@angular/core';
+import {
+	Component,
+	ChangeDetectionStrategy,
+	ViewChild,
+	inject,
+} from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController, PopoverOptions } from '@ionic/angular';
+import {
+	AlertController,
+	PopoverOptions,
+	IonContent,
+	IonItem,
+	IonIcon,
+	IonSelect,
+	IonSelectOption,
+} from '@ionic/angular/standalone';
 import {
 	BehaviorSubject,
 	distinctUntilChanged,
@@ -15,16 +28,48 @@ import {
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { ScannerService } from './scanner.service';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
-import { ZXingScannerComponent } from '@zxing/ngx-scanner';
-import { filterNil } from '@santashop/core';
+import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
+import { filterNil, CoreModule } from '@santashop/core';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { AsyncPipe } from '@angular/common';
+import { addIcons } from 'ionicons';
+import { camera } from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-scan',
 	templateUrl: './scan.page.html',
 	styleUrls: ['./scan.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		ZXingScannerModule,
+		CoreModule,
+		AsyncPipe,
+		IonContent,
+		IonItem,
+		IonIcon,
+		IonSelect,
+		IonSelectOption,
+		IonContent,
+		IonItem,
+		IonIcon,
+		IonSelect,
+		IonSelectOption,
+		IonContent,
+		IonItem,
+		IonIcon,
+		IonSelect,
+		IonSelectOption,
+	],
 })
 export class ScanPage {
+	private readonly scannerService = inject(ScannerService);
+	private readonly lookupService = inject(LookupService);
+	private readonly checkinContext = inject(CheckInContextService);
+	private readonly alertController = inject(AlertController);
+	private readonly router = inject(Router);
+
 	public readonly cameraEnabled$ = new BehaviorSubject<boolean>(true);
 	public readonly deviceId$ = this.scannerService.$deviceId;
 	public readonly availableDevices$ = this.scannerService.$availableDevices;
@@ -81,13 +126,11 @@ export class ScanPage {
 	private scanErrorSubscription?: Subscription;
 	private invalidCodeSubscription?: Subscription;
 
-	constructor(
-		private readonly scannerService: ScannerService,
-		private readonly lookupService: LookupService,
-		private readonly checkinContext: CheckInContextService,
-		private readonly alertController: AlertController,
-		private readonly router: Router,
-	) { }
+	constructor() {
+		addIcons({ camera });
+		addIcons({ camera });
+		addIcons({ camera });
+	}
 
 	public ionViewWillEnter(): void {
 		this.scanErrorSubscription = this.scanError$.subscribe();

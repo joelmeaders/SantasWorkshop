@@ -23,12 +23,12 @@
 						autocomplete="off"
 						placeholder="required"
 					></ion-input>
-					<ion-note
-						slot="error"
-						*ngIf="form.controls.lastName.touched && form.controls.lastName.invalid"
-					>
+					@if (form.controls.lastName.touched &&
+					form.controls.lastName.invalid) {
+					<ion-note slot="error">
 						Invalid last name. 2-20 characters
 					</ion-note>
+					}
 				</ion-item>
 				<ion-item counter>
 					<ion-label position="fixed"> Zip code </ion-label>
@@ -40,12 +40,12 @@
 						autocomplete="off"
 						placeholder="required"
 					></ion-input>
-					<ion-note
-						slot="error"
-						*ngIf="form.controls.zipCode.touched && form.controls.zipCode.invalid"
-					>
+					@if (form.controls.zipCode.touched &&
+					form.controls.zipCode.invalid) {
+					<ion-note slot="error">
 						Invalid zip code. Must have 5 digits
 					</ion-note>
+					}
 				</ion-item>
 			</ion-list>
 		</form>

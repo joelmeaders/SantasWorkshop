@@ -1,25 +1,131 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+} from '@angular/core';
 import {
 	UntypedFormControl,
 	UntypedFormGroup,
 	Validators,
+	ReactiveFormsModule,
 } from '@angular/forms';
-import { AlertController, LoadingController, ModalController } from '@ionic/angular';
-import { BehaviorSubject, firstValueFrom, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
-import { Child, COLLECTION_SCHEMA, DateTimeSlot, Registration } from '@santashop/models';
+import {
+	AlertController,
+	LoadingController,
+	ModalController,
+	IonContent,
+	IonList,
+	IonListHeader,
+	IonNote,
+	IonItemDivider,
+	IonLabel,
+	IonItem,
+	IonInput,
+	IonCheckbox,
+	IonButton,
+	IonIcon,
+	IonText,
+	IonSelect,
+	IonSelectOption,
+} from '@ionic/angular/standalone';
+import {
+	BehaviorSubject,
+	firstValueFrom,
+	map,
+	Observable,
+	shareReplay,
+	Subject,
+	takeUntil,
+} from 'rxjs';
+import {
+	Child,
+	COLLECTION_SCHEMA,
+	DateTimeSlot,
+	Registration,
+} from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
-import { FireRepoLite, IFireRepoCollection, timestampToDate, QueryConstraint, where, HttpsCallableResult } from '@santashop/core';
+import {
+	FireRepoLite,
+	IFireRepoCollection,
+	timestampToDate,
+	QueryConstraint,
+	where,
+	HttpsCallableResult,
+} from '@santashop/core';
 import { httpsCallable } from 'firebase/functions';
 import { Functions } from '@angular/fire/functions';
 import { SearchService } from '../search/search.service';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
+import { addIcons } from 'ionicons';
+import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-pre-registration',
 	templateUrl: './pre-registration.page.html',
 	styleUrls: ['./pre-registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		ReactiveFormsModule,
+		ManageChildrenComponent,
+		AsyncPipe,
+		DatePipe,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonCheckbox,
+		IonButton,
+		IonIcon,
+		IonText,
+		IonSelect,
+		IonSelectOption,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonCheckbox,
+		IonButton,
+		IonIcon,
+		IonText,
+		IonSelect,
+		IonSelectOption,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonCheckbox,
+		IonButton,
+		IonIcon,
+		IonText,
+		IonSelect,
+		IonSelectOption,
+	],
 })
 export class PreRegistrationPage implements OnDestroy {
+	private readonly modalController = inject(ModalController);
+	private readonly fireRepo = inject(FireRepoLite);
+	private readonly searchService = inject(SearchService);
+	private readonly functions = inject(Functions);
+	private readonly loadingController = inject(LoadingController);
+	private readonly alertController = inject(AlertController);
+
 	private readonly destroy$ = new Subject<void>();
 	private readonly childrenList = new BehaviorSubject<Child[]>([]);
 	public readonly children$ = this.childrenList.asObservable();
@@ -76,13 +182,13 @@ export class PreRegistrationPage implements OnDestroy {
 		dateTimeSlot: new UntypedFormControl(undefined, Validators.required),
 	});
 
-	public readonly availableSlots$ = this.availableSlotsQuery(2023).pipe(
+	public readonly availableSlots$ = this.availableSlotsQuery(2024).pipe(
 		takeUntil(this.destroy$),
-		map((data) => 
-			(data.map((s) => {
+		map((data) =>
+			data.map((s) => {
 				s.dateTime = timestampToDate(s.dateTime);
 				return s;
-			}))
+			}),
 		),
 		map((data) =>
 			data
@@ -92,15 +198,11 @@ export class PreRegistrationPage implements OnDestroy {
 		shareReplay(1),
 	);
 
-	constructor(
-		private readonly modalController: ModalController,
-		private readonly fireRepo: FireRepoLite,
-		private readonly searchService: SearchService,
-		private readonly functions: Functions,
-		private readonly loadingController: LoadingController,
-		// private readonly router: Router,
-		private readonly alertController: AlertController,
-	) {}
+	constructor() {
+		addIcons({ searchOutline, checkmarkCircle });
+		addIcons({ searchOutline, checkmarkCircle });
+		addIcons({ searchOutline, checkmarkCircle });
+	}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();
@@ -150,7 +252,7 @@ export class PreRegistrationPage implements OnDestroy {
 			COLLECTION_SCHEMA.dateTimeSlots,
 		);
 	}
-	
+
 	/**
 	 * Returns all time slots for the specified program year
 	 * where the field 'enabled' is true.
@@ -176,7 +278,6 @@ export class PreRegistrationPage implements OnDestroy {
 	}
 
 	public async register(): Promise<void> {
-
 		const customerExists = await this.checkIfCustomerExists();
 		if (customerExists) return;
 
@@ -193,17 +294,16 @@ export class PreRegistrationPage implements OnDestroy {
 			} as Registration;
 
 			await this.preRegistrationFn(registration);
-		}
-		catch (error: any) {
+		} catch (error: any) {
 			const alert = await this.alertController.create({
 				header: 'Error registering',
-				subHeader: 'Something went wrong and this customer was not registered.',
+				subHeader:
+					'Something went wrong and this customer was not registered.',
 				message: error?.message ?? error,
 			});
 
 			await alert.present();
-		}
-		finally {
+		} finally {
 			loading.dismiss();
 		}
 
@@ -222,18 +322,21 @@ export class PreRegistrationPage implements OnDestroy {
 	public async checkIfCustomerExists(): Promise<boolean> {
 		// Set up search query
 		const email = this.form.value.emailAddress;
-		const results = await firstValueFrom(this.searchService.searchUsersByEmailAddress(email));
+		const results = await firstValueFrom(
+			this.searchService.searchUsersByEmailAddress(email),
+		);
 
 		// If no results, return false
 		if (results.length === 0) return false;
 
 		// If results, alert user and return true
 		const alert = await this.alertController.create({
-				header: 'Error registering',
-				subHeader: 'This customer already has an account.',
-				message: 'You cannot create another account with this email address',
-				buttons: ['OK']
-			});
+			header: 'Error registering',
+			subHeader: 'This customer already has an account.',
+			message:
+				'You cannot create another account with this email address',
+			buttons: ['OK'],
+		});
 
 		await alert.present();
 
@@ -245,5 +348,4 @@ export class PreRegistrationPage implements OnDestroy {
 		this.referrer.next('None Selected');
 		this.form.reset();
 	}
-} 
-
+}

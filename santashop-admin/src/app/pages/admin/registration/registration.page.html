@@ -28,13 +28,11 @@
 						minlength="2"
 						maxlength="20"
 					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.firstName.dirty"
-					>
+					@if (form.controls.firstName.dirty) {
+					<ion-note color="danger" slot="error">
 						Enter between 2-20 characters
 					</ion-note>
+					}
 				</ion-item>
 				<ion-item>
 					<ion-label position="fixed"> Last Name </ion-label>
@@ -46,13 +44,11 @@
 						minlength="2"
 						maxlength="25"
 					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.lastName.dirty"
-					>
+					@if (form.controls.lastName.dirty) {
+					<ion-note color="danger" slot="error">
 						Enter between 2-25 characters
 					</ion-note>
+					}
 				</ion-item>
 				<ion-item>
 					<ion-label position="fixed"> Email </ion-label>
@@ -62,13 +58,11 @@
 						formControlName="emailAddress"
 						placeholder="required"
 					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.lastName.dirty"
-					>
+					@if (form.controls.lastName.dirty) {
+					<ion-note color="danger" slot="error">
 						Must be a valid email address
 					</ion-note>
+					}
 				</ion-item>
 				<ion-item>
 					<ion-label position="fixed"> Zip Code </ion-label>
@@ -80,13 +74,11 @@
 						minlength="5"
 						maxlength="5"
 					></ion-input>
-					<ion-note
-						color="danger"
-						slot="error"
-						*ngIf="form.controls.lastName.dirty"
-					>
+					@if (form.controls.lastName.dirty) {
+					<ion-note color="danger" slot="error">
 						Enter 5 digit zip code
 					</ion-note>
+					}
 				</ion-item>
 				<ion-item>
 					<ion-label class="ion-text-wrap">
@@ -113,32 +105,26 @@
 				<ion-item (click)="chooseReferral()" button detail>
 					<ion-label> {{ chosenReferrer$ | async }} </ion-label>
 				</ion-item>
-				<ion-note
-					color="danger"
-					slot="error"
-					*ngIf="!form.controls.referral.value"
-					class="error-note"
-				>
+				@if (!form.controls.referral.value) {
+				<ion-note color="danger" slot="error" class="error-note">
 					Choose a referring agency
 				</ion-note>
+				}
 			</form>
 
 			<div class="margin-top">
+				@if (children$ | async; as children) {
 				<admin-manage-children
-					*ngIf="children$ | async as children"
 					[children]="children"
 					(adddedChild)="addChild($event)"
 					(editedChild)="editChild($event)"
 					(removedChild)="removeChild($event)"
 				></admin-manage-children>
-				<ion-note
-					color="danger"
-					slot="error"
-					*ngIf="!form.controls.referral.value"
-					class="error-note"
-				>
+				} @if (!form.controls.referral.value) {
+				<ion-note color="danger" slot="error" class="error-note">
 					Add all children ages 0-11
 				</ion-note>
+				}
 			</div>
 
 			<ion-item-divider class="success-divider">

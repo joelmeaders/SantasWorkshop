@@ -10,13 +10,12 @@
 				sizeLg="3"
 				class="ion-margin-horizontal"
 			>
-				<div
-					class="count-container"
-					*ngIf="registrationCount$ | async as count"
-				>
+				@if (registrationCount$ | async; as count) {
+				<div class="count-container">
 					<h1>{{ count }}</h1>
 					<h3>Registrations</h3>
 				</div>
+				}
 			</ion-col>
 			<ion-col
 				sizeXs="12"
@@ -25,13 +24,12 @@
 				sizeLg="3"
 				class="ion-margin-horizontal"
 			>
-				<div
-					class="count-container"
-					*ngIf="childCount$ | async as count"
-				>
+				@if (childCount$ | async; as count) {
+				<div class="count-container">
 					<h1>{{ count }}</h1>
 					<h3>Children</h3>
 				</div>
+				}
 			</ion-col>
 			<ion-col
 				sizeXs="12"
@@ -40,19 +38,16 @@
 				sizeLg="3"
 				class="ion-margin-horizontal"
 			>
-				<div
-					class="count-container"
-					*ngIf="childrenPerCustomer$ | async as count"
-				>
+				@if (childrenPerCustomer$ | async; as count) {
+				<div class="count-container">
 					<h1>{{ count | number:'1.0-2' }}</h1>
 					<h3>Children per Customer</h3>
 				</div>
+				}
 			</ion-col>
 		</ion-row>
-		<ion-row
-			*ngIf="girlBoyInfantCounts$ | async as gender"
-			class="ion-justify-content-evenly"
-		>
+		@if (girlBoyInfantCounts$ | async; as gender) {
+		<ion-row class="ion-justify-content-evenly">
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
 				<h2>Gender</h2>
 				<canvas
@@ -64,14 +59,8 @@
 					type="doughnut"
 				></canvas>
 			</ion-col>
-
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="6"
-				sizeLg="6"
-				*ngIf="topTenZipCodesCountData$ | async as pieData"
-			>
+			@if (topTenZipCodesCountData$ | async; as pieData) {
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
 				<h2>Top Zip Codes</h2>
 				<canvas
 					baseChart
@@ -81,19 +70,16 @@
 					type="doughnut"
 				></canvas>
 			</ion-col>
+			}
 		</ion-row>
+		}
 
 		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
 			<ion-col size="12">
 				<h2>Schedules by Day</h2>
 			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="12"
-				sizeMd="6"
-				sizeLg="6"
-				*ngFor="let slot of slots; index as i;"
-			>
+			@for (slot of slots; track slot; let i = $index) {
+			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
 				<h3>{{ slot.datasets[0].label }}</h3>
 				<canvas
 					baseChart
@@ -104,6 +90,7 @@
 					type="bar"
 				></canvas>
 			</ion-col>
+			}
 		</ion-row>
 	</ion-grid>
 </ion-content>

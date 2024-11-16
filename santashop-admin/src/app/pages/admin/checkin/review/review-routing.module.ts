@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { ReviewPage } from './review.page';
-
 const routes: Routes = [
 	{
 		path: '',
-		component: ReviewPage,
+		loadComponent: () => import('./review.page').then((m) => m.ReviewPage),
 	},
 ];
 

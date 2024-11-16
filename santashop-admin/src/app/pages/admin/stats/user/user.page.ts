@@ -1,10 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { COLLECTION_SCHEMA, UserStats } from '@santashop/models';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
+import { FireRepoLite, IFireRepoCollection, filterNil } from '@santashop/core';
 import { map, shareReplay } from 'rxjs';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { AsyncPipe } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
+import {
+	IonContent,
+	IonGrid,
+	IonRow,
+	IonCol,
+	IonToolbar,
+	IonTitle,
+} from '@ionic/angular/standalone';
 
 Chart.register(ChartDataLabels);
 
@@ -12,14 +24,40 @@ Chart.register(ChartDataLabels);
 	selector: 'admin-user',
 	templateUrl: './user.page.html',
 	styleUrls: ['./user.page.scss'],
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		BaseChartDirective,
+		AsyncPipe,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonToolbar,
+		IonTitle,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonToolbar,
+		IonTitle,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonToolbar,
+		IonTitle,
+	],
 })
 export class UserPage {
+	private readonly httpService = inject(FireRepoLite);
+
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly userRecord$ = this.statsCollection<UserStats>()
-		.read(`user-2023`)
-		.pipe(shareReplay(1));
+		.read(`user-2024`)
+		.pipe(filterNil(), shareReplay(1));
 
 	public readonly referrers$ = this.userRecord$.pipe(
 		map((data) => data.referrerCount),
@@ -66,7 +104,7 @@ export class UserPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
 					return `${ctx.dataset?.data[0]} - ${ctx.dataset.label}`;
@@ -106,7 +144,7 @@ export class UserPage {
 				textStrokeWidth: 2,
 				font: {
 					size: 20,
-					weight: 'bold'
+					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
 					return `${ctx.dataset?.data[0]} Families - ${ctx.dataset.label}`;
@@ -114,6 +152,4 @@ export class UserPage {
 			},
 		},
 	};
-
-	constructor(private readonly httpService: FireRepoLite) {}
 }

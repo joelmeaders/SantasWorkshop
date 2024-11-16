@@ -6,55 +6,55 @@ import { LanguageToggleComponent } from '../shared/components/language-toggle/la
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonButton,
-    IonIcon,
-    IonNote,
+	IonContent,
+	IonGrid,
+	IonRow,
+	IonCol,
+	IonButton,
+	IonIcon,
+	IonNote,
 } from '@ionic/angular/standalone';
-import { addIcons } from "ionicons";
-import { logoFacebook, logoInstagram } from "ionicons/icons";
+import { addIcons } from 'ionicons';
+import { logoFacebook, logoInstagram } from 'ionicons/icons';
 
 @Component({
-    selector: 'app-home',
-    templateUrl: 'home.page.html',
-    styleUrls: ['home.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [
-        IonContent,
-        IonGrid,
-        IonRow,
-        IonCol,
-        IonButton,
-        IonIcon,
-        IonNote,
-        LanguageToggleComponent,
-        RouterLink,
-        TranslateModule,
-        IonContent,
-        IonGrid,
-        IonRow,
-        IonCol,
-        IonButton,
-        IonIcon,
-        IonNote
-    ],
+	selector: 'app-home',
+	templateUrl: 'home.page.html',
+	styleUrls: ['home.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonButton,
+		IonIcon,
+		IonNote,
+		LanguageToggleComponent,
+		RouterLink,
+		TranslateModule,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonButton,
+		IonIcon,
+		IonNote,
+	],
 })
 export class HomePage implements OnDestroy {
-    private readonly destroy$ = new Subject<void>();
+	private readonly destroy$ = new Subject<void>();
 
-    public readonly environmentName = `${environment.name}_${environment.label}`;
-    public readonly environmentVersion = environment.version;
+	public readonly environmentName = `${environment.name}_${environment.label}`;
+	public readonly environmentVersion = environment.version;
 
-    constructor() {
-        addIcons({ logoFacebook, logoInstagram });
-    }
+	constructor() {
+		addIcons({ logoFacebook, logoInstagram });
+	}
 
-    public ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
+	public ngOnDestroy(): void {
+		this.destroy$.next();
+		this.destroy$.complete();
+	}
 }

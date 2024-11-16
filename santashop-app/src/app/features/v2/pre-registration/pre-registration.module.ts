@@ -5,7 +5,11 @@ import { PreRegistrationPageRoutingModule } from './pre-registration-routing.mod
 import { PreRegistrationPage } from './pre-registration.page';
 
 @NgModule({
-    imports: [CoreModule, PreRegistrationPageRoutingModule, PreRegistrationPage],
-    providers: [SkeletonStateService],
+	imports: [
+		CoreModule,
+		PreRegistrationPageRoutingModule,
+		PreRegistrationPage,
+	],
+	providers: [SkeletonStateService],
 })
 export class PreRegistrationPageModule {}

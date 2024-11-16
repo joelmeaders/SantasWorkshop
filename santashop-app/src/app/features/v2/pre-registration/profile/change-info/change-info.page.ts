@@ -6,45 +6,58 @@ import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { CoreModule } from '@santashop/core';
-import { addIcons } from "ionicons";
-import { arrowBackSharp } from "ionicons/icons";
-import { IonContent, IonGrid, IonRow, IonCol, IonButton, IonIcon, IonItem, IonCardTitle, IonCard, IonCardContent, IonList, IonInput } from "@ionic/angular/standalone";
+import { addIcons } from 'ionicons';
+import { arrowBackSharp } from 'ionicons/icons';
+import {
+	IonContent,
+	IonGrid,
+	IonRow,
+	IonCol,
+	IonButton,
+	IonIcon,
+	IonItem,
+	IonCardTitle,
+	IonCard,
+	IonCardContent,
+	IonList,
+	IonInput,
+} from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-change-info',
-    templateUrl: './change-info.page.html',
-    styleUrls: ['./change-info.page.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ProfilePageService],
-    standalone: true,
-    imports: [
-        PreRegistrationMenuComponent,
-        RouterLink,
-        ReactiveFormsModule,
-        TranslateModule,
-        CoreModule,
-        IonContent,
-        IonGrid,
-        IonRow,
-        IonCol,
-        IonButton,
-        IonIcon,
-        IonItem,
-        IonCardTitle,
-        IonCard,
-        IonCardContent,
-        IonList,
-        IonInput
-    ],
+	selector: 'app-change-info',
+	templateUrl: './change-info.page.html',
+	styleUrls: ['./change-info.page.css'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [ProfilePageService],
+	standalone: true,
+	imports: [
+		PreRegistrationMenuComponent,
+		RouterLink,
+		ReactiveFormsModule,
+		TranslateModule,
+		CoreModule,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonCardTitle,
+		IonCard,
+		IonCardContent,
+		IonList,
+		IonInput,
+	],
 })
 export class ChangeInfoPage {
-    public readonly form = this.viewService.profileForm;
+	public readonly form = this.viewService.profileForm;
 
-    constructor(private readonly viewService: ProfilePageService) {
-        addIcons({ arrowBackSharp });
-    }
+	constructor(private readonly viewService: ProfilePageService) {
+		addIcons({ arrowBackSharp });
+	}
 
-    public updateProfile(): void {
-        this.viewService.updatePublicProfile();
-    }
+	public updateProfile(): void {
+		this.viewService.updatePublicProfile();
+	}
 }

@@ -1,34 +1,34 @@
-import { Child, ChildValidationError } from "@santashop/models";
-import { MAX_BIRTHDATE, MIN_BIRTHDATE } from "./date-time";
-import { deepCopy } from "./methods";
+import { Child, ChildValidationError } from '@santashop/models';
+import { MAX_BIRTHDATE, MIN_BIRTHDATE } from './date-time';
+import { deepCopy } from './methods';
 
 export const validateChild = (inputChild: Child): Child => {
-    const outputChild = deepCopy(inputChild);
+	const outputChild = deepCopy(inputChild);
 
-    if (!ageValid(outputChild.dateOfBirth))
-        throw new ChildValidationError('invalid_age');
+	if (!ageValid(outputChild.dateOfBirth))
+		throw new ChildValidationError('invalid_age');
 
-    if (!firstNameValid(outputChild.firstName))
-        throw new ChildValidationError('invalid_firstname');
+	if (!firstNameValid(outputChild.firstName))
+		throw new ChildValidationError('invalid_firstname');
 
-    if (!lastNameValid(outputChild.lastName))
-        throw new ChildValidationError('invalid_lastname');
+	if (!lastNameValid(outputChild.lastName))
+		throw new ChildValidationError('invalid_lastname');
 
-    outputChild.enabled = true;
+	outputChild.enabled = true;
 
-    return outputChild;
-}
+	return outputChild;
+};
 
 export const ageValid = (birthdate: Date): boolean => {
-    return birthdate >= MIN_BIRTHDATE() && birthdate <= MAX_BIRTHDATE();
-}
+	return birthdate >= MIN_BIRTHDATE() && birthdate <= MAX_BIRTHDATE();
+};
 
 export const firstNameValid = (firstName: string): boolean => {
-    const length = firstName?.length;
-    return length >= 2 && length <= 20;
-}
+	const length = firstName?.length;
+	return length >= 2 && length <= 20;
+};
 
 export const lastNameValid = (lastName: string): boolean => {
-    const length = lastName?.length;
-    return length >= 2 && length <= 25;
-}
+	const length = lastName?.length;
+	return length >= 2 && length <= 25;
+};

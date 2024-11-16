@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FireRepoLite, QueryConstraint, User } from '@santashop/core';
 import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@santashop/models';
 import { limit, orderBy, where } from 'firebase/firestore';
@@ -8,6 +8,8 @@ import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
 	providedIn: 'root',
 })
 export class SearchService {
+	private readonly repoService = inject(FireRepoLite);
+
 	private readonly searchResults = new BehaviorSubject<Observable<
 		RegistrationSearchIndex[]
 	> | null>(null);
@@ -20,10 +22,9 @@ export class SearchService {
 			COLLECTION_SCHEMA.registrationSearchIndex,
 		);
 
-	private readonly users =
-		this.repoService.collection<User>(
-			COLLECTION_SCHEMA.users,
-		);
+	private readonly users = this.repoService.collection<User>(
+		COLLECTION_SCHEMA.users,
+	);
 
 	private readonly queryLastNameZip = (
 		lastName: string,
@@ -48,8 +49,6 @@ export class SearchService {
 	private readonly queryCode = (code: string): QueryConstraint[] =>
 		[where('code', '==', code), limit(50)] as QueryConstraint[];
 
-	constructor(private readonly repoService: FireRepoLite) {}
-
 	public searchByLastNameZip(lastName: string, zipCode: string): void {
 		this.searchResults.next(
 			this.index.readMany(
@@ -72,7 +71,11 @@ export class SearchService {
 
 	// This method operates differently than the others. It returns a list of users directly
 	public searchUsersByEmailAddress(emailAddress: string): Observable<User[]> {
-		const queryConstraint = where('emailAddress', '==', emailAddress.toLowerCase());
+		const queryConstraint = where(
+			'emailAddress',
+			'==',
+			emailAddress.toLowerCase(),
+		);
 		return this.users.readMany([queryConstraint]);
 	}
 

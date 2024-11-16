@@ -3,13 +3,32 @@ import {
 	ChangeDetectionStrategy,
 	Input,
 	OnInit,
+	inject,
 } from '@angular/core';
 import {
 	UntypedFormControl,
 	UntypedFormGroup,
 	Validators,
+	ReactiveFormsModule,
 } from '@angular/forms';
-import { AlertController, ModalController } from '@ionic/angular';
+import {
+	AlertController,
+	ModalController,
+	IonHeader,
+	IonToolbar,
+	IonTitle,
+	IonButton,
+	IonContent,
+	IonList,
+	IonListHeader,
+	IonNote,
+	IonItemDivider,
+	IonLabel,
+	IonItem,
+	IonInput,
+	IonRadioGroup,
+	IonRadio,
+} from '@ionic/angular/standalone';
 import { AgeGroup, Child, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
 import { yyyymmddToLocalDate, getAgeFromDate } from '@santashop/core';
@@ -18,14 +37,66 @@ import {
 	MAX_BIRTHDATE,
 	MIN_BIRTHDATE,
 } from '../../services/child-validation.service';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
 	selector: 'admin-add-edit-child-modal',
 	templateUrl: './add-edit-child-modal.component.html',
 	styleUrls: ['./add-edit-child-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		ReactiveFormsModule,
+		AsyncPipe,
+		IonHeader,
+		IonToolbar,
+		IonTitle,
+		IonButton,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonRadioGroup,
+		IonRadio,
+		IonHeader,
+		IonToolbar,
+		IonTitle,
+		IonButton,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonRadioGroup,
+		IonRadio,
+		IonHeader,
+		IonToolbar,
+		IonTitle,
+		IonButton,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonRadioGroup,
+		IonRadio,
+	],
 })
 export class AddEditChildModalComponent implements OnInit {
+	private readonly modalController = inject(ModalController);
+	private readonly alertController = inject(AlertController);
+	protected readonly childValidationService = inject(ChildValidationService);
+
 	@Input()
 	public child?: Child;
 
@@ -36,12 +107,6 @@ export class AddEditChildModalComponent implements OnInit {
 
 	private readonly isInfant = new BehaviorSubject<boolean>(false);
 	public readonly isInfant$ = this.isInfant.asObservable();
-
-	constructor(
-		private readonly modalController: ModalController,
-		private readonly alertController: AlertController,
-		protected readonly childValidationService: ChildValidationService,
-	) {}
 
 	public ngOnInit(): void {
 		this.form = this.newForm(this.child);

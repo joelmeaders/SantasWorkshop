@@ -1,4 +1,4 @@
-import { GlobalAlert } from "./global-alert";
+import { GlobalAlert } from './global-alert';
 
 export interface PublicParameters {
 	registrationEnabled: boolean;
@@ -10,6 +10,6 @@ export interface PublicParameters {
 		checkinEnabled: boolean;
 		onsiteRegistrationEnabled: boolean;
 		preRegistrationEnabled: boolean;
-	}
+	};
 	globalAlert: GlobalAlert;
 }

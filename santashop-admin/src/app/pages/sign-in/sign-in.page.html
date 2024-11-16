@@ -15,13 +15,11 @@
 							autocomplete="email"
 							type="email"
 						></ion-input>
-						<ion-note
-							slot="error"
-							color="danger"
-							*ngIf="form.controls.emailAddress.dirty"
-						>
+						@if (form.controls.emailAddress.dirty) {
+						<ion-note slot="error" color="danger">
 							Invalid email address
 						</ion-note>
+						}
 					</ion-item>
 					<ion-item>
 						<ion-label position="floating">Password</ion-label>
@@ -30,13 +28,11 @@
 							autocomplete="password"
 							type="password"
 						></ion-input>
-						<ion-note
-							slot="error"
-							color="danger"
-							*ngIf="form.controls.password.dirty"
-						>
+						@if (form.controls.password.dirty) {
+						<ion-note slot="error" color="danger">
 							Password is required
 						</ion-note>
+						}
 					</ion-item>
 				</form>
 				<ion-toolbar color="none">

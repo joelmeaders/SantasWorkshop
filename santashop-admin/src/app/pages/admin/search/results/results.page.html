@@ -2,23 +2,21 @@
 
 <ion-content class="ion-text-center">
 	<main class="limited-container">
-		<ng-container *ngIf="(searchInput$ | async) === null">
-			<h1>No search was entered</h1>
-			<ion-button
-				color="danger"
-				class="ion-padding ion-margin"
-				routerLink="/admin/search"
-				(click)="reset()"
-			>
-				Go Back
-			</ion-button>
-		</ng-container>
+		@if ((searchInput$ | async) === null) {
+		<h1>No search was entered</h1>
+		<ion-button
+			color="danger"
+			class="ion-padding ion-margin"
+			routerLink="/admin/search"
+			(click)="reset()"
+		>
+			Go Back
+		</ion-button>
+		}
 
 		<ng-container *appLet="searchResults$ | async as results">
-			<div
-				*ngIf="results === null; else showResults"
-				class="center-100 searching"
-			>
+			@if (results === null) {
+			<div class="center-100 searching">
 				<ion-spinner name="crescent"></ion-spinner>
 				<ion-card-subtitle>
 					Searching, please wait...
@@ -32,89 +30,76 @@
 					Cancel
 				</ion-button>
 			</div>
-
-			<ng-template #showResults>
-				<span *ngIf="results?.length > 0; else noResults">
-					<ion-card-header>
-						<ion-card-title>
-							{{ results.length }} Results
-						</ion-card-title>
-						<ion-card-subtitle *appLet="sortBy$ | async as sortFn">
-							Sort by
-
-							<ion-chip
-								(click)="setSortType(sortLast)"
-								[color]="sortFn === sortLast ? 'primary' : 'medium'"
-							>
-								Last, First, Zip
-							</ion-chip>
-							<ion-chip
-								(click)="setSortType(sortFirst)"
-								[color]="sortFn === sortFirst ? 'primary' : 'medium'"
-							>
-								First, Last
-							</ion-chip>
-							<ion-chip
-								(click)="setSortType(sortEmail)"
-								[color]="sortFn === sortEmail ? 'primary' : 'medium'"
-							>
-								Email
-							</ion-chip>
-						</ion-card-subtitle>
-					</ion-card-header>
-					<ion-list>
-						<ion-item
-							*ngFor="let result of results"
-							detail
-							button
-							class="result-item"
-							lines="full"
-							[routerLink]="['/admin/checkin/review', { qrcode: result.code }]"
+			} @else { @if (results?.length > 0) {
+			<span>
+				<ion-card-header>
+					<ion-card-title>
+						{{ results.length }} Results
+					</ion-card-title>
+					<ion-card-subtitle *appLet="sortBy$ | async as sortFn">
+						Sort by
+						<ion-chip
+							(click)="setSortType(sortLast)"
+							[color]="sortFn === sortLast ? 'primary' : 'medium'"
 						>
-							<div class="result-label">
-								<h3>
-									{{ result.firstName }} {{ result.lastName }}
-								</h3>
-								<ion-label>
-									{{ result.emailAddress }}
-								</ion-label>
-								<ion-label> Zip: {{ result.zip }} </ion-label>
-							</div>
-						</ion-item>
-					</ion-list>
-					<div class="center-100">
-						<ion-button
-							color="danger"
-							(click)="reset()"
-							routerLink=".."
+							Last, First, Zip
+						</ion-chip>
+						<ion-chip
+							(click)="setSortType(sortFirst)"
+							[color]="sortFn === sortFirst ? 'primary' : 'medium'"
 						>
-							<ion-icon
-								name="backspace-outline"
-								slot="start"
-							></ion-icon>
-							<ion-label> Start Over </ion-label>
-						</ion-button>
-					</div>
-				</span>
-
-				<ng-template #noResults>
-					<div class="center-100 searching">
-						<h2>No results found</h2>
-
-						<ion-button
-							color="danger"
-							(click)="reset()"
-							routerLink=".."
+							First, Last
+						</ion-chip>
+						<ion-chip
+							(click)="setSortType(sortEmail)"
+							[color]="sortFn === sortEmail ? 'primary' : 'medium'"
 						>
-							<ion-icon
-								name="backspace-outline"
-								slot="start"
-							></ion-icon>
-							<ion-label> Start Over </ion-label>
-						</ion-button>
-					</div>
-				</ng-template>
-			</ng-template>
+							Email
+						</ion-chip>
+					</ion-card-subtitle>
+				</ion-card-header>
+				<ion-list>
+					@for (result of results; track result) {
+					<ion-item
+						detail
+						button
+						class="result-item"
+						lines="full"
+						[routerLink]="['/admin/checkin/review', { qrcode: result.code }]"
+					>
+						<div class="result-label">
+							<h3>
+								{{ result.firstName }} {{ result.lastName }}
+							</h3>
+							<ion-label> {{ result.emailAddress }} </ion-label>
+							<ion-label> Zip: {{ result.zip }} </ion-label>
+						</div>
+					</ion-item>
+					}
+				</ion-list>
+				<div class="center-100">
+					<ion-button
+						color="danger"
+						(click)="reset()"
+						routerLink=".."
+					>
+						<ion-icon
+							name="backspace-outline"
+							slot="start"
+						></ion-icon>
+						<ion-label> Start Over </ion-label>
+					</ion-button>
+				</div>
+			</span>
+			} @else {
+			<div class="center-100 searching">
+				<h2>No results found</h2>
+				<ion-button color="danger" (click)="reset()" routerLink="..">
+					<ion-icon name="backspace-outline" slot="start"></ion-icon>
+					<ion-label> Start Over </ion-label>
+				</ion-button>
+			</div>
+			} }
 		</ng-container>
 	</main>
 </ion-content>

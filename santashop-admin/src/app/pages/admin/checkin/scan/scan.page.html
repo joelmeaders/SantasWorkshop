@@ -34,34 +34,28 @@
 				<ion-select-option #selection [value]="''" disabled>
 					No Camera Selected
 				</ion-select-option>
-				<ion-select-option
-					*ngFor="let device of (availableDevices$ | async)"
-					[value]="device.deviceId"
-				>
+				@for (device of (availableDevices$ | async); track device) {
+				<ion-select-option [value]="device.deviceId">
 					{{ device.label.split(' (')[0] }}
 				</ion-select-option>
+				}
 			</ion-select>
 		</ion-item>
 	</div>
 </ion-content>
 
 <ng-container *appLet="hasPermissions$ | async as hasPermission">
-	<ng-container *ngIf="hasPermission === undefined">
-		<h2>Waiting for permissions.</h2>
-		<blockquote>
-			If your device does not have cameras, no permissions will be asked.
-		</blockquote>
-	</ng-container>
-
-	<ng-container *ngIf="hasPermission === false">
-		<h2>
-			You denied the camera permission, we can't scan anything without it.
-			😪
-		</h2>
-	</ng-container>
-
-	<ng-container *ngIf="(availableDevices$ | async) === undefined">
-		<h2>Couldn't check for devices.</h2>
-		<blockquote>This may be caused by some security error.</blockquote>
-	</ng-container>
+	@if (hasPermission === undefined) {
+	<h2>Waiting for permissions.</h2>
+	<blockquote>
+		If your device does not have cameras, no permissions will be asked.
+	</blockquote>
+	} @if (hasPermission === false) {
+	<h2>
+		You denied the camera permission, we can't scan anything without it. 😪
+	</h2>
+	} @if ((availableDevices$ | async) === undefined) {
+	<h2>Couldn't check for devices.</h2>
+	<blockquote>This may be caused by some security error.</blockquote>
+	}
 </ng-container>

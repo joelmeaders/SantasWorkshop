@@ -1,24 +1,105 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	UntypedFormControl,
 	UntypedFormGroup,
 	Validators,
+	ReactiveFormsModule,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertController, ModalController } from '@ionic/angular';
+import {
+	AlertController,
+	ModalController,
+	IonContent,
+	IonList,
+	IonListHeader,
+	IonNote,
+	IonItemDivider,
+	IonLabel,
+	IonItem,
+	IonInput,
+	IonCheckbox,
+	IonButton,
+	IonIcon,
+	IonGrid,
+	IonRow,
+	IonCol,
+} from '@ionic/angular/standalone';
 import { BehaviorSubject } from 'rxjs';
 import { Child, Registration } from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
 import { CheckInContextService } from '../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../shared/services/check-in.service';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
+import { AsyncPipe } from '@angular/common';
+import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
+import { addIcons } from 'ionicons';
+import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-registration',
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		ReactiveFormsModule,
+		ManageChildrenComponent,
+		AsyncPipe,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonCheckbox,
+		IonButton,
+		IonIcon,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonCheckbox,
+		IonButton,
+		IonIcon,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonNote,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonInput,
+		IonCheckbox,
+		IonButton,
+		IonIcon,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+	],
 })
 export class RegistrationPage {
+	private readonly modalController = inject(ModalController);
+	private readonly checkinService = inject(CheckInService);
+	private readonly checkinContext = inject(CheckInContextService);
+	private readonly router = inject(Router);
+	private readonly alertController = inject(AlertController);
+
 	private readonly childrenList = new BehaviorSubject<Child[]>([]);
 	public readonly children$ = this.childrenList.asObservable();
 
@@ -65,13 +146,11 @@ export class RegistrationPage {
 		newsletter: new UntypedFormControl(false),
 	});
 
-	constructor(
-		private readonly modalController: ModalController,
-		private readonly checkinService: CheckInService,
-		private readonly checkinContext: CheckInContextService,
-		private readonly router: Router,
-		private readonly alertController: AlertController,
-	) {}
+	constructor() {
+		addIcons({ searchOutline, checkmarkCircle });
+		addIcons({ searchOutline, checkmarkCircle });
+		addIcons({ searchOutline, checkmarkCircle });
+	}
 
 	public ionViewWillLeave(): void {
 		this.reset();

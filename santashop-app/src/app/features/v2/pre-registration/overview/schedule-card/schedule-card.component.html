@@ -2,7 +2,7 @@
 	<ion-card-header>
 		<ion-item class="inset-ion-item-title">
 			<ion-card-title>
-				{{ "OVERVIEW.SCHEDULE" | translate }}
+				{{ 'OVERVIEW.SCHEDULE' | translate }}
 			</ion-card-title>
 			<ion-badge
 				color="success"
@@ -17,15 +17,15 @@
 		<ng-container *ngIf="!slot; else hasDateTimeSlot">
 			<p>
 				<strong>
-					{{ "OVERVIEW.NO_TIME_SELECTED." | translate }}
+					{{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }}
 				</strong>
 				<br />
-				{{ "OVERVIEW.NO_TIME_MESSAGE" | translate }}
+				{{ 'OVERVIEW.NO_TIME_MESSAGE' | translate }}
 			</p>
 
 			<p class="ion-text-end es-pd-top-lg">
 				<ion-button color="xmasred" [routerLink]="['../date-time']">
-					{{ "OVERVIEW.SELECT_TIME" | translate }}
+					{{ 'OVERVIEW.SELECT_TIME' | translate }}
 				</ion-button>
 			</p>
 		</ng-container>
@@ -33,13 +33,13 @@
 		<ng-template #hasDateTimeSlot>
 			<ion-item lines="none" *ngIf="slot">
 				<h2 class="ion-text-wrap">
-					{{ slot.dateTime | date: "fullDate" }},
-					{{ slot.dateTime | date: "shortTime" }}
+					{{ slot.dateTime | date: 'fullDate' }},
+					{{ slot.dateTime | date: 'shortTime' }}
 				</h2>
 			</ion-item>
 			<p class="ion-text-end es-pd-top-lg">
 				<ion-button color="xmasred" [routerLink]="['../date-time']">
-					{{ "OVERVIEW.CHANGE_TIME" | translate }}
+					{{ 'OVERVIEW.CHANGE_TIME' | translate }}
 				</ion-button>
 			</p>
 		</ng-template>

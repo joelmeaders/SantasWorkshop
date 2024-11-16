@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	BehaviorSubject,
 	delay,
@@ -13,6 +13,27 @@ import {
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@santashop/models';
 import { SearchService } from '../search.service';
+import { HeaderComponent } from '../../../../shared/components/header/header.component';
+
+import { AsyncPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { CoreModule } from '@santashop/core';
+import { addIcons } from 'ionicons';
+import { backspaceOutline } from 'ionicons/icons';
+import {
+	IonRouterLink,
+	IonContent,
+	IonButton,
+	IonSpinner,
+	IonCardSubtitle,
+	IonCardHeader,
+	IonCardTitle,
+	IonChip,
+	IonList,
+	IonItem,
+	IonLabel,
+	IonIcon,
+} from '@ionic/angular/standalone';
 
 declare type SortFnType = (
 	a: RegistrationSearchIndex,
@@ -24,8 +45,53 @@ declare type SortFnType = (
 	templateUrl: './results.page.html',
 	styleUrls: ['./results.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		HeaderComponent,
+		RouterLink,
+		CoreModule,
+		AsyncPipe,
+		IonRouterLink,
+		IonContent,
+		IonButton,
+		IonSpinner,
+		IonCardSubtitle,
+		IonCardHeader,
+		IonCardTitle,
+		IonChip,
+		IonList,
+		IonItem,
+		IonLabel,
+		IonIcon,
+		IonRouterLink,
+		IonContent,
+		IonButton,
+		IonSpinner,
+		IonCardSubtitle,
+		IonCardHeader,
+		IonCardTitle,
+		IonChip,
+		IonList,
+		IonItem,
+		IonLabel,
+		IonIcon,
+		IonRouterLink,
+		IonContent,
+		IonButton,
+		IonSpinner,
+		IonCardSubtitle,
+		IonCardHeader,
+		IonCardTitle,
+		IonChip,
+		IonList,
+		IonItem,
+		IonLabel,
+		IonIcon,
+	],
 })
 export class ResultsPage {
+	private readonly searchService = inject(SearchService);
+
 	public readonly sortLast = (
 		a: RegistrationSearchIndex,
 		b: RegistrationSearchIndex,
@@ -68,7 +134,11 @@ export class ResultsPage {
 		switchMap(() => race([this.search$, this.timeout$])),
 	);
 
-	constructor(private readonly searchService: SearchService) {}
+	constructor() {
+		addIcons({ backspaceOutline });
+		addIcons({ backspaceOutline });
+		addIcons({ backspaceOutline });
+	}
 
 	public async ionViewWillEnter(): Promise<void> {
 		this.searchTrigger.next(new Date());

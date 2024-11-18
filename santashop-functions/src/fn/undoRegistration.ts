@@ -1,10 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/lib/common/providers/https';
+import { CallableContext } from 'firebase-functions/v1/https';
 import { HttpsError } from 'firebase-functions/v1/auth';
 import {
 	COLLECTION_SCHEMA,
-	ChangeUserInfo,
 	DateTimeSlot,
 	Registration,
 } from '../../../santashop-models/src';
@@ -12,11 +11,12 @@ import {
 admin.initializeApp();
 
 export default async (
-	data: ChangeUserInfo,
+	data: Registration,
 	context: CallableContext,
 ): Promise<boolean | HttpsError> => {
-	const uid = context.auth?.uid;
-
+	// If admin, use registration data from input, otherwise use own account
+	const isAdmin = context.auth?.token?.admin;
+	const uid = isAdmin ? data.uid : context.auth?.uid;
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 
 	const batch = admin.firestore().batch();

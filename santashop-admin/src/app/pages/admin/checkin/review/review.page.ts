@@ -33,6 +33,8 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../../shared/components/manage-children/manage-children.component';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
+import { Functions, httpsCallable } from '@angular/fire/functions';
+import { HttpsCallableResult } from '@santashop/core';
 
 @Component({
 	selector: 'admin-review',
@@ -84,10 +86,15 @@ export class ReviewPage {
 	private readonly checkinService = inject(CheckInService);
 	private readonly appStateService = inject(AppStateService);
 	private readonly alertController = inject(AlertController);
+	private readonly functions = inject(Functions);
+
 	private readonly router = inject(Router);
 	private readonly route = inject(ActivatedRoute);
 
 	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+
+	public readonly allowCancelRegistration$ =
+		this.appStateService.allowCancelRegistration$;
 
 	public wasEdited = false;
 
@@ -102,6 +109,14 @@ export class ReviewPage {
 			),
 			filterNullish<Registration>(),
 		);
+
+	private readonly cancelRegistrationFn = (
+		registration: Registration,
+	): Promise<HttpsCallableResult<number>> =>
+		httpsCallable<Registration, number>(
+			this.functions,
+			'undoRegistration',
+		)(registration);
 
 	protected readonly setRegistrationSubscription = this.lookupRegistration$
 		.pipe(
@@ -135,6 +150,26 @@ export class ReviewPage {
 		this.checkinContext.resetRegistration();
 		this.scanResult.next(undefined);
 		this.wasEdited = false;
+	}
+
+	public async cancelReservation(): Promise<void> {
+		const registration = await firstValueFrom(this.registration$);
+
+		const alert = await this.alertController.create({
+			header: 'Are you sure you want to do this?',
+			subHeader: registration?.emailAddress,
+			message:
+				'Check that the email address is accurate. Deleting this reservation cannot be undone!',
+			buttons: ['Ok', 'Cancel'],
+		});
+
+		await alert.present();
+		const response = await alert.onDidDismiss();
+		if (response.role == 'cancel') return;
+
+		await this.cancelRegistrationFn(registration!);
+
+		await this.router.navigate(['admin/landing']);
 	}
 
 	public async removeChild(childId: number): Promise<void> {

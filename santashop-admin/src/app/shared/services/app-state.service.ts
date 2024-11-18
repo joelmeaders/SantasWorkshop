@@ -66,6 +66,15 @@ export class AppStateService implements OnDestroy {
 			shareReplay(1),
 		);
 
+	public readonly allowCancelRegistration$: Observable<boolean> =
+		this.parameters$.pipe(
+			takeUntil(this.destroy$),
+			map((value) => value.admin.allowCancelRegistration),
+			startWith(false),
+			catchError(() => of(false)),
+			shareReplay(1),
+		);
+
 	public ngOnDestroy(): void {
 		throw new Error('Method not implemented.');
 	}

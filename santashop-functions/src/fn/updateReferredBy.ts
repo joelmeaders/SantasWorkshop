@@ -4,7 +4,7 @@ import {
 } from '../../../santashop-models/src';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/lib/common/providers/https';
+import { CallableContext } from 'firebase-functions/v1/https';
 import { HttpsError } from 'firebase-functions/v1/auth';
 
 admin.initializeApp();

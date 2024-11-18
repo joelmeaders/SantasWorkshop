@@ -1,7 +1,10 @@
-<admin-header
-	title="Check-In: Review Info"
-	backRoute="/admin/checkin/scan"
-></admin-header>
+<admin-header title="Check-In: Review Info" backRoute="/admin/checkin/scan">
+	@if (allowCancelRegistration$ | async) {
+	<ion-button color="danger" (click)="cancelReservation()">
+		Cancel Reservation
+	</ion-button>
+	}
+</admin-header>
 
 <ion-content fullscreen class="ion-padding-horizontal">
 	<div class="limited-container">

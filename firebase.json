@@ -93,6 +93,10 @@
 					"function": "onSiteRegistration"
 				},
 				{
+					"source": "/undoRegistration",
+					"function": "undoRegistration"
+				},
+				{
 					"source": "/callableAdminPreRegister",
 					"function": "callableAdminPreRegister"
 				},

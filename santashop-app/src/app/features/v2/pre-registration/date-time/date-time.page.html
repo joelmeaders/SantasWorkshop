@@ -208,6 +208,7 @@
 							</ng-template>
 
 							<ion-button
+								*ngIf="chosenSlot$ | async"
 								color="xmasred"
 								[routerLink]="['../overview']"
 								class="ion-float-end es-mg-top-xxl es-mg-bottom-xxl"

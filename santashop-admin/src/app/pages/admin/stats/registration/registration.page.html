@@ -1,7 +1,24 @@
-<admin-header title="Registration Stats"></admin-header>
+<admin-header title="Registration Stats">
+	<ion-item>
+		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
+			@for (years of schedule; track years.year) {
+			<ion-select-option [value]="years.year">
+				{{ years.year }}
+			</ion-select-option>
+			}
+		</ion-select>
+	</ion-item>
+</admin-header>
 
 <ion-content class="ion-padding">
 	<ion-grid>
+		<ion-row>
+			<ion-col size="12" class="ion-text-center">
+				* Children, gender and zip codes update nightly around midnight.
+				Registration count is derived from schedule data, which is
+				updated every 15 minutes.
+			</ion-col>
+		</ion-row>
 		<ion-row class="ion-justify-content-center">
 			<ion-col
 				sizeXs="12"
@@ -27,7 +44,7 @@
 				@if (childCount$ | async; as count) {
 				<div class="count-container">
 					<h1>{{ count }}</h1>
-					<h3>Children</h3>
+					<h3>Children*</h3>
 				</div>
 				}
 			</ion-col>
@@ -41,7 +58,7 @@
 				@if (childrenPerCustomer$ | async; as count) {
 				<div class="count-container">
 					<h1>{{ count | number:'1.0-2' }}</h1>
-					<h3>Children per Customer</h3>
+					<h3>Children per Customer*</h3>
 				</div>
 				}
 			</ion-col>

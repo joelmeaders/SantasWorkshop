@@ -3,8 +3,13 @@ import { Component, inject } from '@angular/core';
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { COLLECTION_SCHEMA, UserStats } from '@santashop/models';
-import { FireRepoLite, IFireRepoCollection, filterNil } from '@santashop/core';
-import { map, shareReplay } from 'rxjs';
+import {
+	FireRepoLite,
+	IFireRepoCollection,
+	filterNil,
+	shopSchedule,
+} from '@santashop/core';
+import { BehaviorSubject, map, shareReplay, switchMap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
 import { AsyncPipe } from '@angular/common';
@@ -16,7 +21,11 @@ import {
 	IonCol,
 	IonToolbar,
 	IonTitle,
+	IonItem,
+	IonSelect,
+	IonSelectOption,
 } from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
 
 Chart.register(ChartDataLabels);
 
@@ -47,17 +56,30 @@ Chart.register(ChartDataLabels);
 		IonCol,
 		IonToolbar,
 		IonTitle,
+		IonItem,
+		IonSelect,
+		IonSelectOption,
+		FormsModule,
 	],
 })
 export class UserPage {
 	private readonly httpService = inject(FireRepoLite);
 
+	public readonly schedule = shopSchedule;
+
+	public year = 2024;
+	public refreshYear = new BehaviorSubject<void>(undefined);
+
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
-	private readonly userRecord$ = this.statsCollection<UserStats>()
-		.read(`user-2024`)
-		.pipe(filterNil(), shareReplay(1));
+	private readonly userRecord$ = this.refreshYear.pipe(
+		switchMap(() =>
+			this.statsCollection<UserStats>()
+				.read(`user-${this.year}`)
+				.pipe(filterNil(), shareReplay(1)),
+		),
+	);
 
 	public readonly referrers$ = this.userRecord$.pipe(
 		map((data) => data.referrerCount),

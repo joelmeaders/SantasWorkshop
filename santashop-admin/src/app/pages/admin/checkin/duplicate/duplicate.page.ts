@@ -21,10 +21,6 @@ import { IonContent, IonNote } from '@ionic/angular/standalone';
 		KeyValuePipe,
 		IonContent,
 		IonNote,
-		IonContent,
-		IonNote,
-		IonContent,
-		IonNote,
 	],
 })
 export class DuplicatePage {

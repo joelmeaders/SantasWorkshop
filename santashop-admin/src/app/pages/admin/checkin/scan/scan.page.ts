@@ -51,16 +51,6 @@ import { camera } from 'ionicons/icons';
 		IonIcon,
 		IonSelect,
 		IonSelectOption,
-		IonContent,
-		IonItem,
-		IonIcon,
-		IonSelect,
-		IonSelectOption,
-		IonContent,
-		IonItem,
-		IonIcon,
-		IonSelect,
-		IonSelectOption,
 	],
 })
 export class ScanPage {

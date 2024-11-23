@@ -167,7 +167,7 @@ export class AuthService {
 	 * @return
 	 * @memberof AuthService
 	 */
-	public async login(auth: Auth): Promise<UserCredential> {
+	public login(auth: Auth): Promise<UserCredential> {
 		return this.authWrapper.signInWithEmailAndPassword(
 			auth.emailAddress,
 			auth.password,

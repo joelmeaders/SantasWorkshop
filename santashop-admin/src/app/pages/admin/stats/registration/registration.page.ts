@@ -13,9 +13,12 @@ import {
 } from '@santashop/models';
 import {
 	BehaviorSubject,
+	catchError,
 	combineLatest,
+	defaultIfEmpty,
 	map,
 	Observable,
+	of,
 	shareReplay,
 	switchMap,
 } from 'rxjs';
@@ -35,6 +38,7 @@ import {
 	IonRow,
 	IonSelect,
 	IonSelectOption,
+	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 
@@ -47,6 +51,7 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 	imports: [
+		IonTitle,
 		IonGrid,
 		IonRow,
 		IonCol,
@@ -85,17 +90,28 @@ export class RegistrationPage {
 		switchMap(() =>
 			this.statsCollection<ScheduleStats>()
 				.read(`schedule-${this.year}`)
-				.pipe(filterNil(), shareReplay(1)),
+				.pipe(shareReplay(1)),
 		),
 	);
 
+	public readonly hasScheduleData$ = this.scheduleStats$.pipe(
+		map((schedule) => !!schedule),
+	);
+
 	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
+		filterNil(),
 		map((allData) => allData.dateTimeCounts),
 	);
 
-	public readonly registrationCount$ = this.dateTimeStats$.pipe(
+	public readonly registrationCount$ = this.registrationStats$.pipe(
+		map((stats) => stats.completedRegistrations),
+		defaultIfEmpty(0),
+	);
+
+	public readonly registrationCountBySchedule$ = this.dateTimeStats$.pipe(
 		map((stats) => stats.map((s) => s.count)),
 		map((stats) => stats.reduce((a, c) => a + c, 0)),
+		defaultIfEmpty(0),
 	);
 
 	public readonly childCount$ = this.registrationStats$.pipe(
@@ -108,24 +124,34 @@ export class RegistrationPage {
 		this.childCount$,
 	]).pipe(map((data) => data[1] / data[0]));
 
-	private readonly stats$ = this.registrationStats$.pipe(
-		map((stats) => stats.dateTimeCount),
+	public readonly stats$ = this.registrationStats$.pipe(
+		map((stats) => stats?.dateTimeCount),
 		map((dateTimes) => dateTimes.map((e) => e.stats)),
+	);
+
+	public readonly statsNull$ = this.stats$.pipe(
+		map((stats) => stats.every((s) => !s)),
 	);
 
 	public readonly boyCount$ = this.stats$.pipe(
 		map((stats) => stats.map((e) => e.boys)),
 		map((boys) => boys.reduce((a, b) => a + b.total, 0)),
+		catchError(() => of(0)),
+		defaultIfEmpty(0),
 	);
 
 	public readonly girlCount$ = this.stats$.pipe(
 		map((stats) => stats.map((e) => e.girls)),
 		map((girls) => girls.reduce((a, b) => a + b.total, 0)),
+		catchError(() => of(0)),
+		defaultIfEmpty(0),
 	);
 
 	public readonly infantCount$ = this.stats$.pipe(
 		map((stats) => stats.map((e) => e.infants)),
 		map((infants) => infants.reduce((a, b) => a + b.total, 0)),
+		catchError(() => of(0)),
+		defaultIfEmpty(0),
 	);
 
 	public readonly girlBoyInfantCounts$ = combineLatest([

@@ -45,18 +45,6 @@ import {
 		IonToggle,
 		IonRouterLink,
 		IonContent,
-		IonList,
-		IonListHeader,
-		IonItem,
-		IonIcon,
-		IonToggle,
-		IonRouterLink,
-		IonContent,
-		IonList,
-		IonListHeader,
-		IonItem,
-		IonIcon,
-		IonToggle,
 	],
 })
 export class LandingPage {

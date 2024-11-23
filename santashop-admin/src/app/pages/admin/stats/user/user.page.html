@@ -1,4 +1,14 @@
-<admin-header title="User Stats"></admin-header>
+<admin-header title="User Stats">
+	<ion-item>
+		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
+			@for (years of schedule; track years.year) {
+			<ion-select-option [value]="years.year">
+				{{ years.year }}
+			</ion-select-option>
+			}
+		</ion-select>
+	</ion-item>
+</admin-header>
 
 <ion-content class="ion-padding-vertical">
 	<ion-grid>

@@ -1,35 +1,27 @@
-<admin-header title="Check-In Stats"></admin-header>
+<admin-header title="Check-In Stats">
+	<ion-item>
+		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
+			@for (years of schedule; track years.year) {
+			<ion-select-option [value]="years.year">
+				{{ years.year }}
+			</ion-select-option>
+			}
+		</ion-select>
+	</ion-item>
+</admin-header>
 
 <ion-content>
 	<ion-grid>
+		@if ((hasData$ | async) === false) {
+		<ion-row>
+			<ion-col class="ion-text-center">
+				<ion-title> No data found for this year </ion-title>
+			</ion-col>
+		</ion-row>
+		} @else {
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
 				Updated {{ checkinLastUpdated$ | async | date:'short' }}
-			</ion-col>
-			<ion-col>
-				<ion-item>
-					<ion-label>Show data for</ion-label>
-					<ion-select
-						[(ngModel)]="year"
-						(ionChange)="refreshYear.next()"
-					>
-						<ion-select-option [value]="2024">
-							2024
-						</ion-select-option>
-						<ion-select-option [value]="2023">
-							2023
-						</ion-select-option>
-						<ion-select-option [value]="2022">
-							2022
-						</ion-select-option>
-						<ion-select-option [value]="2021">
-							2021
-						</ion-select-option>
-						<ion-select-option [value]="2020">
-							2020
-						</ion-select-option>
-					</ion-select>
-				</ion-item>
 			</ion-col>
 		</ion-row>
 		<ion-row class="ion-justify-content-center">
@@ -85,7 +77,7 @@
 				<ion-toolbar color="none">
 					<h2 slot="start" class="ion-text-left">
 						{{ (graphView$ | async) === 'customerCount' ?
-						'Check-Ins' : 'Children' }} by Day/Hour
+						'Check-Ins' : 'Children' }}
 					</h2>
 					<div slot="end">
 						<ion-button (click)="switchView()">
@@ -118,6 +110,7 @@
 			</ion-col>
 			} }
 		</ion-row>
+		}
 	</ion-grid>
 	<ng-template #noData>
 		<div class="ion-padding">

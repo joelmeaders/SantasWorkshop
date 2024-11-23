@@ -4,13 +4,21 @@ import {
 	IFireRepoCollection,
 	filterNil,
 	CoreModule,
+	shopSchedule,
 } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
 	RegistrationStats,
 	ScheduleStats,
 } from '@santashop/models';
-import { combineLatest, map, Observable, shareReplay } from 'rxjs';
+import {
+	BehaviorSubject,
+	combineLatest,
+	map,
+	Observable,
+	shareReplay,
+	switchMap,
+} from 'rxjs';
 import { Timestamp } from '@firebase/firestore';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
@@ -19,7 +27,16 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
 
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
-import { IonCol, IonContent, IonGrid, IonRow } from '@ionic/angular/standalone';
+import {
+	IonCol,
+	IonContent,
+	IonGrid,
+	IonItem,
+	IonRow,
+	IonSelect,
+	IonSelectOption,
+} from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
 
 Chart.register(ChartDataLabels);
 
@@ -35,26 +52,42 @@ Chart.register(ChartDataLabels);
 		IonCol,
 		IonContent,
 		HeaderComponent,
+		IonItem,
+		IonSelect,
+		IonSelectOption,
 		BaseChartDirective,
 		CoreModule,
 		AsyncPipe,
 		DecimalPipe,
+		FormsModule,
 	],
 })
 export class RegistrationPage {
 	private readonly httpService = inject(FireRepoLite);
 
+	public readonly schedule = shopSchedule;
+
+	public year = 2024;
+	public refreshYear = new BehaviorSubject<void>(undefined);
+
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
-	private readonly registrationStats$ =
-		this.statsCollection<RegistrationStats>()
-			.read('registration-2024')
-			.pipe(filterNil(), shareReplay(1));
+	private readonly registrationStats$ = this.refreshYear.pipe(
+		switchMap(() =>
+			this.statsCollection<RegistrationStats>()
+				.read(`registration-${this.year}`)
+				.pipe(filterNil(), shareReplay(1)),
+		),
+	);
 
-	private readonly scheduleStats$ = this.statsCollection<ScheduleStats>()
-		.read('schedule-2024')
-		.pipe(filterNil(), shareReplay(1));
+	private readonly scheduleStats$ = this.refreshYear.pipe(
+		switchMap(() =>
+			this.statsCollection<ScheduleStats>()
+				.read(`schedule-${this.year}`)
+				.pipe(filterNil(), shareReplay(1)),
+		),
+	);
 
 	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
 		map((allData) => allData.dateTimeCounts),
@@ -262,46 +295,27 @@ export class RegistrationPage {
 	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[],
 	): ChartData<'bar'>[] {
+		const defaults = (label: string) => ({
+			datasets: [{ data: [], ...this.colorSettings, label }],
+		});
+
+		const schedule = this.schedule.find((s) => s.year === this.year);
+		if (!schedule) throw new Error('Unable to find schedule');
+
 		const arr: {
 			datasets: { data: number[]; label: string }[];
 		}[] = [
-			{
-				datasets: [
-					{ data: [], label: 'Dec 13th', ...this.colorSettings },
-				],
-			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 14th', ...this.colorSettings },
-				],
-			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 16th', ...this.colorSettings },
-				],
-			},
-			{
-				datasets: [
-					{ data: [], label: 'Dec 17th', ...this.colorSettings },
-				],
-			},
+			{ ...defaults(this.friendlyDay(schedule.days[0])) },
+			{ ...defaults(this.friendlyDay(schedule.days[1])) },
+			{ ...defaults(this.friendlyDay(schedule.days[2])) },
+			{ ...defaults(this.friendlyDay(schedule.days[3])) },
 		];
 
 		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
-			switch (date.getDate()) {
-				case 13:
-					return 0;
-				case 14:
-					return 1;
-				case 16:
-					return 2;
-				case 17:
-					return 3;
+			const day = date.getDate();
 
-				default:
-					throw new Error('invalid date');
-			}
+			return schedule.days.findIndex((d) => d === day);
 		};
 
 		data.forEach((e) => {
@@ -310,5 +324,24 @@ export class RegistrationPage {
 		});
 
 		return arr;
+	}
+
+	private friendlyDay(day: number) {
+		const j = day % 10;
+		const k = day % 100;
+
+		if (j === 1 && k !== 11) {
+			return day + 'st';
+		}
+
+		if (j === 2 && k !== 12) {
+			return day + 'nd';
+		}
+
+		if (j === 3 && k !== 13) {
+			return day + 'rd';
+		}
+
+		return day + 'th';
 	}
 }

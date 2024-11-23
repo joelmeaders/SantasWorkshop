@@ -14,6 +14,7 @@ import {
 	FireRepoLite,
 	filterNil,
 	CoreModule,
+	shopSchedule,
 } from '@santashop/core';
 import {
 	CheckInAggregatedStats,
@@ -101,6 +102,8 @@ import {
 export class CheckInPage {
 	private readonly httpService = inject(FireRepoLite);
 
+	public readonly schedule = shopSchedule;
+
 	public year = 2024;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
@@ -111,9 +114,11 @@ export class CheckInPage {
 		switchMap(() =>
 			this.statsCollection<CheckInAggregatedStats>()
 				.read(`checkin-${this.year}`)
-				.pipe(filterNil(), shareReplay(1)),
+				.pipe(shareReplay(1)),
 		),
 	);
+
+	public readonly hasData$ = this.checkInRecord$.pipe(map((data) => !!data));
 
 	private readonly dateTimeStats$ = this.checkInRecord$.pipe(
 		filterNil(),
@@ -121,6 +126,7 @@ export class CheckInPage {
 	);
 
 	public readonly checkinLastUpdated$ = this.checkInRecord$.pipe(
+		filterNil(),
 		map((updated) =>
 			(updated.lastUpdated as any as Timestamp).toDate().toLocaleString(),
 		),
@@ -174,7 +180,11 @@ export class CheckInPage {
 		.pipe(shareReplay(1));
 
 	public readonly viewButtonText$ = this.graphView$.pipe(
-		map((value) => (value === 'customerCount' ? 'Children' : 'Check-Ins')),
+		map((value) =>
+			value === 'customerCount'
+				? 'View by Children'
+				: 'View by Check-Ins',
+		),
 	);
 
 	// TODO: These should be redone to not need udated every year...

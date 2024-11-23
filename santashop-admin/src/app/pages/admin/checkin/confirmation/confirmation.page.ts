@@ -26,13 +26,6 @@ import {
 		IonText,
 		IonButton,
 		IonRouterLink,
-		IonContent,
-		IonText,
-		IonButton,
-		IonRouterLink,
-		IonContent,
-		IonText,
-		IonButton,
 	],
 })
 export class ConfirmationPage {

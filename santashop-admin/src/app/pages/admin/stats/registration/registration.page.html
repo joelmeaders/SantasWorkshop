@@ -27,9 +27,14 @@
 				sizeLg="3"
 				class="ion-margin-horizontal"
 			>
-				@if (registrationCount$ | async; as count) {
+				@if ((hasScheduleData$ | async) === true) {
 				<div class="count-container">
-					<h1>{{ count }}</h1>
+					<h1>{{ registrationCountBySchedule$ | async }}</h1>
+					<h3>Registrations</h3>
+				</div>
+				} @else {
+				<div class="count-container">
+					<h1>{{ registrationCount$ | async }}</h1>
 					<h3>Registrations</h3>
 				</div>
 				}
@@ -64,6 +69,7 @@
 			</ion-col>
 		</ion-row>
 
+		@if ((hasScheduleData$ | async) === true) {
 		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
 			<ion-col size="12">
 				<h2>Schedules by Day</h2>
@@ -82,6 +88,13 @@
 			</ion-col>
 			}
 		</ion-row>
+		} @else {
+		<ion-row>
+			<ion-col class="ion-text-center">
+				<ion-title> No schedule data for this year </ion-title>
+			</ion-col>
+		</ion-row>
+		}
 
 		<ion-row class="ion-margin ion-padding">
 			<ion-col class="ion-text-center">
@@ -91,8 +104,15 @@
 
 		@if (girlBoyInfantCounts$ | async; as gender) {
 		<ion-row class="ion-justify-content-evenly">
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
+			<ion-col
+				sizeXs="12"
+				sizeSm="6"
+				sizeMd="6"
+				sizeLg="6"
+				class="ion-text-center"
+			>
 				<h2>Gender</h2>
+				@if ((statsNull$ | async) === false) {
 				<canvas
 					baseChart
 					[options]="chartOptions"
@@ -101,6 +121,9 @@
 					[legend]="false"
 					type="doughnut"
 				></canvas>
+				} @else {
+				<ion-title> No gender information for this year </ion-title>
+				}
 			</ion-col>
 			@if (topTenZipCodesCountData$ | async; as pieData) {
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">

@@ -23,7 +23,7 @@ import {
 } from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { addIcons } from 'ionicons';
@@ -34,7 +34,6 @@ import {
 	IonRow,
 	IonCol,
 	IonItem,
-	IonLabel,
 	IonSelect,
 	IonSelectOption,
 	IonToolbar,
@@ -52,7 +51,6 @@ import {
 	standalone: true,
 	imports: [
 		HeaderComponent,
-		ReactiveFormsModule,
 		FormsModule,
 		CoreModule,
 		BaseChartDirective,
@@ -63,33 +61,6 @@ import {
 		IonRow,
 		IonCol,
 		IonItem,
-		IonLabel,
-		IonSelect,
-		IonSelectOption,
-		IonToolbar,
-		IonButton,
-		IonIcon,
-		IonText,
-		IonTitle,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonItem,
-		IonLabel,
-		IonSelect,
-		IonSelectOption,
-		IonToolbar,
-		IonButton,
-		IonIcon,
-		IonText,
-		IonTitle,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonItem,
-		IonLabel,
 		IonSelect,
 		IonSelectOption,
 		IonToolbar,

@@ -79,6 +79,11 @@ export class AppStateService implements OnDestroy {
 		takeUntil(this.destroy$),
 	);
 
+	public readonly createAccountEnabled$ = this.publicDoc$.pipe(
+		map((value) => value.createAccountEnabled),
+		takeUntil(this.destroy$),
+	);
+
 	public readonly appClosureSubscription = combineLatest([
 		this.isMaintenanceModeEnabled$,
 		this.shopClosedWeather$,

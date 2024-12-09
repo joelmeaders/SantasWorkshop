@@ -78,6 +78,9 @@ export class SignUpPage {
 
 	@ViewChild('firstName') private readonly firstName?: HTMLIonInputElement;
 
+	public readonly createAccountEnabled$ =
+		this.appStateService.createAccountEnabled$;
+
 	protected readonly closedSubscription =
 		this.appStateService.isRegistrationEnabled$
 			.pipe(

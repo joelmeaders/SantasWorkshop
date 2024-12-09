@@ -22,6 +22,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
+import { AppStateService } from '../../../core';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
 	selector: 'app-sign-in',
@@ -31,6 +33,7 @@ import { arrowBackSharp } from 'ionicons/icons';
 	providers: [SignInPageService],
 	standalone: true,
 	imports: [
+		AsyncPipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -48,26 +51,18 @@ import { arrowBackSharp } from 'ionicons/icons';
 		RouterLink,
 		ReactiveFormsModule,
 		TranslateModule,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonCard,
-		IonCardHeader,
-		IonButton,
-		IonIcon,
-		IonLabel,
-		IonCardTitle,
-		IonCardContent,
-		IonList,
-		IonItem,
-		IonInput,
 	],
 })
 export class SignInPage {
 	public readonly form = this.viewService.form;
 
-	constructor(private readonly viewService: SignInPageService) {
+	public readonly createAccountEnabled$ =
+		this.appStateService.createAccountEnabled$;
+
+	constructor(
+		private readonly viewService: SignInPageService,
+		private readonly appStateService: AppStateService,
+	) {
 		addIcons({ arrowBackSharp });
 	}
 

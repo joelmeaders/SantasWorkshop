@@ -69,6 +69,7 @@
 					</ion-card-content>
 
 					<div class="ion-text-center es-mg-top-lg">
+						@if ((createAccountEnabled$ | async) === true) {
 						<ion-button
 							fill="clear"
 							color="tertiary"
@@ -77,6 +78,7 @@
 							{{ "COMMON.CREATE_ACCOUNT" | translate }}
 						</ion-button>
 						<br />
+						}
 						<ion-button
 							fill="clear"
 							color="tertiary"

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	OnDestroy,
+} from '@angular/core';
 import { Subject } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -16,6 +21,8 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
+import { AppStateService } from '../core';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
 	selector: 'app-home',
@@ -24,6 +31,7 @@ import { logoFacebook, logoInstagram } from 'ionicons/icons';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 	imports: [
+		AsyncPipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -44,10 +52,13 @@ import { logoFacebook, logoInstagram } from 'ionicons/icons';
 	],
 })
 export class HomePage implements OnDestroy {
+	private readonly appState = inject(AppStateService);
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly environmentName = `${environment.name}_${environment.label}`;
 	public readonly environmentVersion = environment.version;
+
+	public readonly createAccountEnabled$ = this.appState.createAccountEnabled$;
 
 	constructor() {
 		addIcons({ logoFacebook, logoInstagram });

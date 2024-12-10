@@ -4,6 +4,7 @@ export interface PublicParameters {
 	registrationEnabled: boolean;
 	maintenanceModeEnabled: boolean;
 	weatherModeEnabled: boolean;
+	createAccountEnabled: boolean;
 	messageEn: string;
 	messageEs: string;
 	admin: {

@@ -50,6 +50,7 @@
 		"SIGNING_IN": "Iniciar sesión..."
 	},
 	"SIGNUP": {
+		"CREATE_ACCOUNT_DISABLED": "Estamos llenos y no podemos aceptar más inscripciones en este momento. Consulte nuestra página de Facebook para obtener actualizaciones si se abren lugares.",
 		"NEW_ACCOUNT_NOTICE": "Todos los compradores deben crear una nueva cuenta para 2024, incluso si han comprado con nosotros en el pasado.",
 		"HAVE_ACCOUNT": "¿Ya tienes una cuenta?",
 		"TITLE1": "Configura tu cuenta",

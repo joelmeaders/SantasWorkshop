@@ -50,6 +50,7 @@
 		"SIGNING_IN": "Signing in..."
 	},
 	"SIGNUP": {
+		"CREATE_ACCOUNT_DISABLED": "We're full and cannot accept any more sign-ups right now. Please check our Facebook page for updates if any spots open up.",
 		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2024, even if you have shopped with us in the past.",
 		"HAVE_ACCOUNT": "Already have an account?",
 		"TITLE1": "Set up your account",

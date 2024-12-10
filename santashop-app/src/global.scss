@@ -260,3 +260,16 @@ $es-direction-definitions: (top, bottom, right, left) !default;
 		box-shadow: rgb(255, 172, 94) 0px 20px 30px -10px;
 	}
 }
+
+.alert {
+	border-radius: 12px;
+	padding-inline: 16px;
+	padding-block: 12px;
+	width: auto;
+	max-width: 600px;
+	justify-self: center;
+	background-color: rgba(var(--ion-color-warning-rgb), 0.25);
+	border-color: var(--ion-color-warning);
+	border-width: 1px;
+	border-style: solid;
+}

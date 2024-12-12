@@ -20,12 +20,13 @@ let sesClient: SESClient | undefined = undefined;
 const createReminderEmailCommand = (
 	messageDetails: any,
 	toEmailAddress: string,
+	template = 'dscs-registration-confirmation-v1',
 ) => {
 	return new SendTemplatedEmailCommand({
 		Destination: { ToAddresses: [toEmailAddress] },
 		TemplateData: JSON.stringify(messageDetails),
 		Source: 'noreply@denversantaclausshop.org',
-		Template: 'dscs-registration-confirmation-v1',
+		Template: template,
 		ReturnPath: 'admin@denversantaclausshop.org',
 	});
 };
@@ -38,6 +39,7 @@ export default async (docChange: functions.firestore.QueryDocumentSnapshot) => {
 	const firstName = document.name;
 	const email = document.email;
 	const dateTime = document.formattedDateTime;
+	const template = document.template ?? 'dscs-registration-confirmation-v1';
 
 	const messageDetails = {
 		firstName: firstName,
@@ -52,6 +54,7 @@ export default async (docChange: functions.firestore.QueryDocumentSnapshot) => {
 	const sendReminderEmailCommand = createReminderEmailCommand(
 		messageDetails,
 		email,
+		template,
 	);
 
 	let response: SendTemplatedEmailCommandOutput | undefined = undefined;

@@ -90,17 +90,21 @@ export const callableAdminPreRegister = functions
 	});
 
 export const callableResendRegistrationEmail = functions
-	.runWith({ enforceAppCheck: true })
+	.runWith({ enforceAppCheck: true, maxInstances: 2, memory: '128MB' })
 	.https.onCall(async (request, context) => {
 		return (await import('./fn/callableResendRegistrationEmail')).default(
 			request,
 			context,
 		);
 	});
+
 // ------------------------------------- TRIGGER FUNCTIONS
 
 export const sendNewRegistrationEmails = functions
-	.runWith({ secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'] })
+	.runWith({
+		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
+		maxInstances: 1,
+	})
 	.firestore.document('tmp_registrationemails/{docId}')
 	.onCreate(async (snapshot) => {
 		await (
@@ -121,10 +125,10 @@ export const scheduledFirestoreBackup = functions
 		await (await import('./fn/scheduledFirestoreBackup')).default();
 	});
 
-// At every 5th minute in November and December.
+// At every 15th minute in November and December.
 export const scheduledDateTimeSlotCounters = functions
 	.runWith({ memory: '128MB', timeoutSeconds: 30, maxInstances: 1 })
-	.pubsub.schedule('*/5 * * 11,12 *')
+	.pubsub.schedule('*/15 * * 11,12 *')
 	.onRun(async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters2')).default();
 	});
@@ -149,7 +153,7 @@ export const scheduledUserStats = functions
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
 export const scheduledCheckInStats = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.schedule('*/5 10,11,12,13,14,15,16 12,14,16,17 12 *')
+	.pubsub.schedule('*/5 10,11,12,13,14,15,16 13,14,16,17 12 *')
 	.timeZone('America/Denver')
 	.onRun(async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
@@ -163,11 +167,18 @@ export const pubsubResetCheckInStats = functions
 		await (await import('./fn/pubsubResetCheckInStats')).default();
 	});
 
+export const pubsubQueueReminderEmails = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 540, maxInstances: 1 })
+	.pubsub.topic('queue-reminder-emails')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubQueueReminderEmails')).default();
+	});
+
 export const pubsubSetAdminRights = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
 	.pubsub.topic('set-admin-rights')
 	.onPublish(async () => {
-		await (await import('./fn/scheduledSetAdminRights')).default();
+		await (await import('./fn/pubsubSetAdminRights')).default();
 	});
 
 export const pubsubMarkRegistrationsCheckedIn = functions
@@ -177,11 +188,18 @@ export const pubsubMarkRegistrationsCheckedIn = functions
 		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
 	});
 
-export const pubsubExportEmails = functions
+export const pubsubExportMarketingEmails = functions
 	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
-	.pubsub.topic('export-emails')
+	.pubsub.topic('export-marketing-emails')
 	.onPublish(async () => {
-		await (await import('./fn/pubsubExportEmails')).default();
+		await (await import('./fn/pubsubExportMarketingEmails')).default();
+	});
+
+export const pubsubExportRegisteredEmails = functions
+	.runWith({ memory: '256MB', timeoutSeconds: 60, maxInstances: 1 })
+	.pubsub.topic('export-registered-emails')
+	.onPublish(async () => {
+		await (await import('./fn/pubsubExportRegisteredEmails')).default();
 	});
 
 // This method checks for existing dates/times.

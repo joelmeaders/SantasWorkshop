@@ -12,6 +12,7 @@ export default async (): Promise<string> => {
 	const applicationsSnapshot = await admin
 		.firestore()
 		.collection('users')
+		.where('newsletter', '==', true)
 		.get();
 
 	const applications = applicationsSnapshot.docs.map((doc) => doc.data());
@@ -24,7 +25,7 @@ export default async (): Promise<string> => {
 
 	// generate filename
 	const dateTime = new Date().toISOString().replace(/\W/g, '');
-	const filename = `emailList_${dateTime}.csv`;
+	const filename = `newslettersEmailList_${dateTime}.csv`;
 
 	const tempLocalFile = path.join(os.tmpdir(), filename);
 

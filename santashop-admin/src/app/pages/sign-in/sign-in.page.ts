@@ -24,6 +24,7 @@ import {
 	IonGrid,
 	IonRow,
 	IonCol,
+	AlertController,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -52,7 +53,10 @@ import {
 })
 export class SignInPage {
 	private readonly authService = inject(AuthService);
+
 	private readonly router = inject(Router);
+
+	private readonly alertController = inject(AlertController);
 
 	public readonly environmentName = `${environment.name}_${environment.label}`;
 	public readonly environmentVersion = environment.version;
@@ -71,7 +75,29 @@ export class SignInPage {
 				.login({ ...this.form.value })
 				.then(() => this.router.navigate(['/admin']));
 		} catch (error) {
-			console.error(error);
+			console.log(error);
+
+			const errorCast = error as any as Error;
+			const errorString = errorCast.message;
+
+			let header = 'Unknown Error';
+
+			if (errorString.includes('auth/wrong-password'))
+				header = 'Wrong Password';
+
+			if (errorString.includes('auth/user-not-found'))
+				header = 'Wrong Email Address';
+
+			if (errorString.includes('auth/too-many-requests'))
+				header = 'Account locked out';
+
+			const alert = await this.alertController.create({
+				header,
+				message: errorString.replace('Firebase: ', ''),
+				buttons: ['Ok'],
+			});
+
+			await alert.present();
 		}
 	}
 }

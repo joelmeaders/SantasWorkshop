@@ -17,4 +17,9 @@ export class AnalyticsWrapper {
 
 	public readonly logEvent = (eventName: string): void =>
 		logEvent(this.analytics, eventName);
+
+	public readonly logEventWithParams = (
+		eventName: string,
+		eventParams?: { [key: string]: any },
+	): void => logEvent(this.analytics, eventName, eventParams);
 }

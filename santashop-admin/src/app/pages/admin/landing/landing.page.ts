@@ -26,6 +26,7 @@ import {
 	IonIcon,
 	IonToggle,
 } from '@ionic/angular/standalone';
+import { map, shareReplay } from 'rxjs';
 
 @Component({
 	selector: 'admin-landing',
@@ -59,6 +60,12 @@ export class LandingPage {
 		this.appStateService.onsiteRegistrationEnabled$;
 
 	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+
+	public readonly isAdmin$ = this.authService.emailAndUid$.pipe(
+		map((emailUid) => emailUid.emailAddress),
+		map((email) => email.toLowerCase().includes('admin')),
+		shareReplay(1),
+	);
 
 	public async signOut(): Promise<void> {
 		await this.authService.logout();

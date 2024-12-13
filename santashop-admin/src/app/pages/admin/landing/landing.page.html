@@ -35,6 +35,7 @@
 			On-Site Registration
 		</ion-item>
 
+		@if ((isAdmin$ | async) === true) {
 		<ion-list-header> Tools </ion-list-header>
 		<ion-item
 			detail
@@ -78,6 +79,7 @@
 			></ion-icon>
 			User Stats
 		</ion-item>
+		}
 
 		<ion-list-header> Other </ion-list-header>
 		<ion-item (click)="signOut()" detail button tappable>

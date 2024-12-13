@@ -1,7 +1,13 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { FireRepoLite, filterNil, timestampToDate } from '@santashop/core';
-import { map, switchMap } from 'rxjs';
+import {
+	AnalyticsWrapper,
+	FireRepoLite,
+	filterNil,
+	timestampToDate,
+} from '@santashop/core';
+import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
@@ -26,6 +32,7 @@ import { IonContent, IonNote } from '@ionic/angular/standalone';
 export class DuplicatePage {
 	private readonly httpService = inject(FireRepoLite);
 	private readonly route = inject(ActivatedRoute);
+	private readonly analytics = inject(AnalyticsWrapper);
 
 	private readonly uid$ = this.route.params.pipe(
 		map((params) => params.uid as string),
@@ -43,4 +50,17 @@ export class DuplicatePage {
 			return data;
 		}),
 	);
+
+	protected readonly logSubscription = this.uid$
+		.pipe(
+			takeUntilDestroyed(),
+			tap((uid) => {
+				this.analytics.logEventWithParams('admin_checkin_duplicate', {
+					uid,
+					fatal: true,
+				});
+			}),
+			catchError(() => of()),
+		)
+		.subscribe();
 }

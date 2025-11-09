@@ -1,6 +1,6 @@
 {
 	"name": "@santashop/e2e",
-	"version": "1.0.0",
+	"version": "2025.0.0",
 	"description": "End-to-end tests for Santa's Workshop app using Playwright",
 	"scripts": {
 		"test": "playwright test",

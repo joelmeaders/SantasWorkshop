@@ -40,8 +40,8 @@
 						maxlength="20"
 					></ion-input>
 					@if (
-						this.form.controls.firstName.dirty &&
-						this.form.controls.firstName.invalid
+						this.form.controls['firstName'].dirty &&
+						this.form.controls['firstName'].invalid
 					) {
 						<ion-note slot="error" color="danger">
 							Invalid name
@@ -59,8 +59,8 @@
 						maxlength="25"
 					></ion-input>
 					@if (
-						this.form.controls.lastName.dirty &&
-						this.form.controls.lastName.invalid
+						this.form.controls['lastName'].dirty &&
+						this.form.controls['lastName'].invalid
 					) {
 						<ion-note slot="error" color="danger">
 							Invalid name
@@ -78,8 +78,8 @@
 						[max]="maxBirthDate"
 					></ion-input>
 					@if (
-						this.form.controls.dateOfBirth.dirty &&
-						this.form.controls.dateOfBirth.invalid
+						this.form.controls['dateOfBirth'].dirty &&
+						this.form.controls['dateOfBirth'].invalid
 					) {
 						<ion-note slot="error" color="danger">
 							Invalid date. Only ages 0-11 allowed.

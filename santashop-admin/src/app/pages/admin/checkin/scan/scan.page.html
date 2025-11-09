@@ -9,7 +9,7 @@
 	<zxing-scanner
 		#scanner
 		[formats]="formatsEnabled"
-		[device]="deviceToUse$ | async"
+		[device]="(deviceToUse$ | async) || undefined"
 		[autostart]="true"
 		[enable]="(cameraEnabled$ | async) ?? false"
 		(camerasFound)="onCamerasFound($event)"
@@ -29,7 +29,6 @@
 				(ionChange)="onDeviceSelectChange($event)"
 				scrollable="true"
 				interface="popover"
-				[interfaceOptions]="interfaceOptions"
 			>
 				<ion-select-option #selection [value]="''" disabled>
 					No Camera Selected

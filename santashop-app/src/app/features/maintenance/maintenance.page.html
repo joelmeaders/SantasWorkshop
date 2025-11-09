@@ -1,65 +1,66 @@
 <ion-content>
-	<div class="div-container">
-		<h1 class="ion-padding">
-			{{ "REG_CLOSED.1" | translate }}<br />
-			{{ "REG_CLOSED.2" | translate }}
-		</h1>
+  <div class="div-container">
+    <h1 class="ion-padding">
+      {{ "REG_CLOSED.1" | translate }}<br />
+      {{ "REG_CLOSED.2" | translate }}
+    </h1>
 
-		<img
-			id="maintenance-image"
-			src="assets/images/maintenance.png"
-			alt="maintenance mode image"
-		/>
+    <img
+      id="maintenance-image"
+      src="assets/images/maintenance.png"
+      alt="maintenance mode image"
+      />
 
-		<div *appLet="message$ | async as message">
-			<h3 *ngIf="message === null; else serverMessage">
-				{{ "MAINTENANCE.2" | translate }}
-				<br />
-				{{ "MAINTENANCE.3" | translate }}
-			</h3>
-			<ng-template #serverMessage>
-				<h3>{{ message }}</h3>
-			</ng-template>
-		</div>
+      <div *appLet="message$ | async as message">
+        @if (message === null) {
+          <h3>
+            {{ "MAINTENANCE.2" | translate }}
+            <br />
+            {{ "MAINTENANCE.3" | translate }}
+          </h3>
+        } @else {
+          <h3>{{ message }}</h3>
+        }
+      </div>
 
-		<div class="ion-padding">
-			<a
-				title="Visit us on Facebook"
-				rel="noopener"
-				href="https://www.facebook.com/denversantaclausshop"
-				target="_blank"
-			>
-				<ion-button
-					color="white"
-					class="remove-shadow round-button ion-margin-end"
-					size="default"
-				>
-					<ion-icon
-						slot="icon-only"
-						name="logo-facebook"
-						color="medium"
-					></ion-icon>
-				</ion-button>
-			</a>
+      <div class="ion-padding">
+        <a
+          title="Visit us on Facebook"
+          rel="noopener"
+          href="https://www.facebook.com/denversantaclausshop"
+          target="_blank"
+          >
+          <ion-button
+            color="white"
+            class="remove-shadow round-button ion-margin-end"
+            size="default"
+            >
+            <ion-icon
+              slot="icon-only"
+              name="logo-facebook"
+              color="medium"
+            ></ion-icon>
+          </ion-button>
+        </a>
 
-			<a
-				title="Visit us on instagram"
-				rel="noopener"
-				href="https://www.instagram.com/denversantaclausshop/"
-				target="_blank"
-			>
-				<ion-button
-					color="white"
-					class="remove-shadow round-button"
-					size="default"
-				>
-					<ion-icon
-						slot="icon-only"
-						name="logo-instagram"
-						color="medium"
-					></ion-icon>
-				</ion-button>
-			</a>
-		</div>
-	</div>
-</ion-content>
+        <a
+          title="Visit us on instagram"
+          rel="noopener"
+          href="https://www.instagram.com/denversantaclausshop/"
+          target="_blank"
+          >
+          <ion-button
+            color="white"
+            class="remove-shadow round-button"
+            size="default"
+            >
+            <ion-icon
+              slot="icon-only"
+              name="logo-instagram"
+              color="medium"
+            ></ion-icon>
+          </ion-button>
+        </a>
+      </div>
+    </div>
+  </ion-content>

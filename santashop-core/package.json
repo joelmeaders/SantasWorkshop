@@ -1,6 +1,6 @@
 {
 	"name": "@santashop/core",
-	"version": "1.0.0",
+	"version": "2025.0.0",
 	"author": "Joel Meaders",
 	"scripts": {
 		"lint": "ng lint santashop-core --fix --cache",
@@ -8,11 +8,18 @@
 		"build": "ng build santashop-core",
 		"build:prod": "ng build santashop-core --configuration=production"
 	},
-	"peerDependencies": {
-		"@santashop/models": "*"
-	},
 	"dependencies": {
 		"tslib": "~2.4.0"
 	},
-	"sideEffects": false
+	"peerDependencies": {
+		"@angular/common": "*",
+		"@angular/core": "*",
+		"@angular/fire": "*",
+		"firebase": "*",
+		"reflect-metadata": "*"
+	},
+	"sideEffects": false,
+	"volta": {
+		"node": "24.11.0"
+	}
 }

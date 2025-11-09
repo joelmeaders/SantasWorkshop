@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
-import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
+import {
+	AuthGuard,
+	AuthPipe,
+	redirectUnauthorizedTo,
+} from '@angular/fire/auth-guard';
 import { Routes, RouterModule } from '@angular/router';
 import { RegistrationCompleteGuard } from '../../../core/guards/registration-complete.guard';
 import { PreRegistrationPage } from './pre-registration.page';
-import { redirectUnauthorizedTo } from '@santashop/core';
 import { CheckedInGuard } from '../../../core/guards/checked-in.guard';
 import { RegistrationReadyToSubmitGuard } from '../../../core/guards/registration-ready-to-submit.guard';
 import { RegistrationIncompleteGuard } from '../../../core/guards/registration-incomplete.guard';

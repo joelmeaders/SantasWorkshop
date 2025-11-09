@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	Functions as _Functions,
 	httpsCallable,
@@ -20,7 +20,8 @@ export type HttpsCallableResult<ResponseData> =
 	providedIn: 'root',
 })
 export class FunctionsWrapper {
-	constructor(private readonly functions: _Functions) {}
+	private readonly functions = inject(_Functions);
+
 
 	public readonly callableWrapper = <RequestData, ResponseData>(
 		name: string,

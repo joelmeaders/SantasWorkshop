@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-
 import { SearchService } from './search.service';
+import { provideFirestoreWrapperMock } from '../../../../test-helpers';
 
 describe('SearchService', () => {
 	let service: SearchService;
 
 	beforeEach(() => {
-		TestBed.configureTestingModule({});
+		TestBed.configureTestingModule({
+			providers: [provideFirestoreWrapperMock()],
+		});
 		service = TestBed.inject(SearchService);
 	});
 

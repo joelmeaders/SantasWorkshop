@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	CanActivate,
 	CanActivateChild,
@@ -15,17 +15,15 @@ import { PreRegistrationService } from '../services/pre-registration.service';
 export class RegistrationReadyToSubmitGuard
 	implements CanActivate, CanActivateChild
 {
+	private readonly service = inject(PreRegistrationService);
+	private readonly router = inject(Router);
+
 	public readonly isReady$ = this.service.registrationReadyToSubmit$.pipe(
 		take(1),
 		map((isReady) =>
 			isReady ? true : this.router.parseUrl('pre-registration/overview'),
 		),
 	);
-
-	constructor(
-		private readonly service: PreRegistrationService,
-		private readonly router: Router,
-	) {}
 
 	public canActivate(): Observable<boolean | UrlTree> {
 		return this.isReady$;

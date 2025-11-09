@@ -1,11 +1,11 @@
-import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 
 export interface AppLetContext<T> {
 	appLet: T | null;
 }
 
 @Directive({
-	// eslint-disable-next-line @angular-eslint/directive-selector
+	 
 	selector: '[appLet]',
 	standalone: true,
 })
@@ -16,10 +16,10 @@ export class AppLetDirective<T> {
 
 	private readonly context: AppLetContext<T> = { appLet: null };
 
-	constructor(
-		viewContainer: ViewContainerRef,
-		templateRef: TemplateRef<AppLetContext<T>>,
-	) {
+	constructor() {
+		const viewContainer = inject(ViewContainerRef);
+		const templateRef = inject<TemplateRef<AppLetContext<T>>>(TemplateRef);
+
 		viewContainer.createEmbeddedView(templateRef, this.context);
 	}
 }

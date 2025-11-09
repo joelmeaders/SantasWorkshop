@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { SignInPage } from './sign-in.page';
+import {
+	provideAuthMock,
+	provideAlertControllerMock,
+	provideFunctionsMock,
+} from '../../../test-helpers';
+import { provideRouter } from '@angular/router';
 
 describe('SignInPage', () => {
 	let component: SignInPage;
@@ -9,6 +14,12 @@ describe('SignInPage', () => {
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			imports: [SignInPage],
+			providers: [
+				provideAuthMock(),
+				provideAlertControllerMock(),
+				provideFunctionsMock(),
+				provideRouter([]),
+			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(SignInPage);

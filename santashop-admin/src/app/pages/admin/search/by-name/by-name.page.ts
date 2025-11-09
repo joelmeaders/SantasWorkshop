@@ -27,28 +27,27 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'admin-by-name',
-	templateUrl: './by-name.page.html',
-	styleUrls: ['./by-name.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		HeaderComponent,
-		ReactiveFormsModule,
-		RouterLink,
-		IonRouterLink,
-		IonContent,
-		IonCardHeader,
-		IonCardTitle,
-		IonCardSubtitle,
-		IonList,
-		IonItem,
-		IonLabel,
-		IonInput,
-		IonNote,
-		IonButton,
-		IonIcon,
-	],
+    selector: 'admin-by-name',
+    templateUrl: './by-name.page.html',
+    styleUrls: ['./by-name.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        HeaderComponent,
+        ReactiveFormsModule,
+        RouterLink,
+        IonRouterLink,
+        IonContent,
+        IonCardHeader,
+        IonCardTitle,
+        IonCardSubtitle,
+        IonList,
+        IonItem,
+        IonLabel,
+        IonInput,
+        IonNote,
+        IonButton,
+        IonIcon,
+    ]
 })
 export class ByNamePage {
 	private readonly searchService = inject(SearchService);

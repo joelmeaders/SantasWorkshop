@@ -1,22 +1,20 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AppStateService } from '../../core/services/app-state.service';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AppStateService, CoreModule } from '@santashop/core';
 
-import { CoreModule } from '@santashop/core';
-import { NgIf, AsyncPipe } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { AsyncPipe } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
 import { IonContent, IonButton, IonIcon } from '@ionic/angular/standalone';
+import { map } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-maintenance',
 	templateUrl: './maintenance.page.html',
 	styleUrls: ['./maintenance.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		CoreModule,
-		NgIf,
 		AsyncPipe,
 		TranslateModule,
 		IonContent,
@@ -25,9 +23,20 @@ import { IonContent, IonButton, IonIcon } from '@ionic/angular/standalone';
 	],
 })
 export class MaintenancePage {
-	public readonly message$ = this.service.message$;
+	public readonly service = inject(AppStateService);
+	private readonly translateService = inject(TranslateService);
 
-	constructor(public readonly service: AppStateService) {
+	public readonly message$ = this.service.messageDoc$.pipe(
+		map((doc) => {
+			const message =
+				this.translateService.currentLang === 'en'
+					? doc.messageEn
+					: doc.messageEs;
+			return message?.length ? message : null;
+		}),
+	);
+
+	constructor() {
 		addIcons({ logoFacebook, logoInstagram });
 	}
 }

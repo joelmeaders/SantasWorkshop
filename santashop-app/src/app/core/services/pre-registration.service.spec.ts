@@ -58,7 +58,7 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(readSpy).toHaveBeenCalledWith(userId, <any>'uid');
+		expect(readSpy).toHaveBeenCalledWith(userId, ('uid' as any));
 		expect(registration.uid).toEqual(userId);
 	});
 

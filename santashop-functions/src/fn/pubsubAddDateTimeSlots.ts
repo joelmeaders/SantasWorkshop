@@ -12,14 +12,13 @@ export default async (): Promise<void> => {
 
 	if (hasDateTimeSlots) {
 		console.log('DateTimeSlots already exist. None added.');
-		return Promise.resolve();
+		return;
 	}
 
 	try {
 		console.log('Adding DateTimeSlots...');
 		await addDateTimeSlots();
 		console.log('DateTimeSlots added.');
-		return Promise.resolve();
 	} catch (error: unknown) {
 		throw new Error(`Error adding DateTimeSlots: ${error}`);
 	}
@@ -27,8 +26,8 @@ export default async (): Promise<void> => {
 
 const addDateTimeSlots = async () => {
 	const collection = dateTimeSlotCollection;
-	const shopDays = ['12-13', '12-14', '12-16', '12-17'];
-	const programYear = 2024;
+	const shopDays = ['12-12', '12-13', '12-15', '12-16'];
+	const programYear = 2025;
 	const defaultMaxSlots = 350;
 
 	const dateTimeSlots: DateTimeSlot[] = [

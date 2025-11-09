@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { LandingPage } from './landing.page';
+import {
+	provideAuthMock,
+	provideFunctionsMock,
+	provideFirestoreWrapperMock,
+} from '../../../../test-helpers';
+import { provideRouter } from '@angular/router';
 
 describe('LandingPage', () => {
 	let component: LandingPage;
@@ -9,6 +14,12 @@ describe('LandingPage', () => {
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			imports: [LandingPage],
+			providers: [
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideFirestoreWrapperMock(),
+				provideRouter([]),
+			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(LandingPage);

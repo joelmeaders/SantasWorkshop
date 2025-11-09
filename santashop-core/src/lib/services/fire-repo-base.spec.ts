@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { Firestore } from '@angular/fire/firestore/lite';
 import { firstValueFrom, of } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
 import { FirestoreWrapper } from './_firestore-wrapper';
+import { Firestore } from '@angular/fire/firestore';
 
 interface TestRecord {
 	id?: string;
@@ -30,7 +30,7 @@ describe('FireRepoBase', () => {
 							'collection',
 							'doc',
 							'docData',
-							'rxCollection',
+							'collectionQuery',
 							'query',
 							'addDoc',
 							'setDoc',
@@ -40,7 +40,6 @@ describe('FireRepoBase', () => {
 				},
 			],
 		});
-
 		service = TestBed.inject(FireRepoBase);
 		firestoreMethods = TestBed.inject(
 			FirestoreWrapper,
@@ -93,7 +92,10 @@ describe('FireRepoBase', () => {
 			collectionReference,
 			documentId,
 		);
-		expect(docDataSpy).toHaveBeenCalledWith(docRefStub, { idField });
+		expect(docDataSpy).toHaveBeenCalledWith(
+			docRefStub,
+			jasmine.objectContaining({ idField }),
+		);
 	});
 
 	it('readMany(): should make expected calls and return desired result', async () => {
@@ -110,20 +112,23 @@ describe('FireRepoBase', () => {
 		const queryStub = {} as any;
 		querySpy.and.returnValue(queryStub);
 
-		const rxCollectionSpy = firestoreMethods.rxCollection;
-		rxCollectionSpy.and.returnValue(
+		const collectionQuerySpy = firestoreMethods.collectionQuery;
+		collectionQuerySpy.and.returnValue(
 			of([
 				{
 					id: '1A',
-					data: () => ({ name: 'Test 1', category: 'unknown' }),
+					name: 'Test 1',
+					category: 'unknown',
 				},
 				{
 					id: '2A',
-					data: () => ({ name: 'Test 2', category: 'Unit' }),
+					name: 'Test 2',
+					category: 'Unit',
 				},
 				{
 					id: '2B',
-					data: () => ({ name: 'Test 3', category: 'Unit' }),
+					name: 'Test 3',
+					category: 'Unit',
 				},
 			] as any),
 		);
@@ -143,7 +148,10 @@ describe('FireRepoBase', () => {
 			collectionReference,
 			queryConstraints,
 		);
-		expect(rxCollectionSpy).toHaveBeenCalledWith(queryStub);
+		expect(collectionQuerySpy).toHaveBeenCalledWith(
+			queryStub,
+			jasmine.anything(),
+		);
 		expect(result.length).toBe(3);
 		expect(result[0].id).toBe('1A');
 		expect(result[2].id).toBe('2B');
@@ -161,8 +169,8 @@ describe('FireRepoBase', () => {
 		const queryStub = {} as any;
 		querySpy.and.returnValue(queryStub);
 
-		const rxCollectionSpy = firestoreMethods.rxCollection;
-		rxCollectionSpy.and.returnValue(of([] as any));
+		const collectionQuerySpy = firestoreMethods.collectionQuery;
+		collectionQuerySpy.and.returnValue(of([] as any));
 
 		// Act
 		const result = await firstValueFrom(
@@ -186,7 +194,11 @@ describe('FireRepoBase', () => {
 		};
 
 		const addDocSpy = firestoreMethods.addDoc;
-		addDocSpy.and.resolveTo({ withConverter() {} } as any);
+		addDocSpy.and.resolveTo({
+			withConverter() {
+				/* mock */
+			},
+		} as any);
 
 		// Act
 		await firstValueFrom(service.add(collectionPath, doc));

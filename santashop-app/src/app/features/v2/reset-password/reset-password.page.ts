@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
 	FormBuilder,
@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 
 import { RouterLink } from '@angular/router';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import {
 	IonContent,
@@ -34,48 +34,50 @@ import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
 
 @Component({
-	selector: 'app-reset-password',
-	templateUrl: './reset-password.page.html',
-	styleUrls: ['./reset-password.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		IonContent,
-		IonButton,
-		IonIcon,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonCard,
-		IonCardHeader,
-		IonTitle,
-		IonCardSubtitle,
-		IonCardContent,
-		IonList,
-		IonItem,
-		RouterLink,
-		NgIf,
-		ReactiveFormsModule,
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonButton,
-		IonIcon,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonCard,
-		IonCardHeader,
-		IonTitle,
-		IonCardSubtitle,
-		IonCardContent,
-		IonList,
-		IonItem,
-		IonInput,
-		IonText,
-	],
+    selector: 'app-reset-password',
+    templateUrl: './reset-password.page.html',
+    styleUrls: ['./reset-password.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonCard,
+    IonCardHeader,
+    IonTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonList,
+    IonItem,
+    RouterLink,
+    ReactiveFormsModule,
+    AsyncPipe,
+    TranslateModule,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonCard,
+    IonCardHeader,
+    IonTitle,
+    IonCardSubtitle,
+    IonCardContent,
+    IonList,
+    IonItem,
+    IonInput,
+    IonText
+]
 })
 export class ResetPasswordPage {
+	private readonly formBuilder = inject(FormBuilder);
+	private readonly authService = inject(AuthService);
+	private readonly analytics = inject(Analytics);
+
 	public readonly form: FormGroup = this.formBuilder.group({
 		emailAddress: [
 			undefined,
@@ -88,11 +90,7 @@ export class ResetPasswordPage {
 		.asObservable()
 		.pipe(shareReplay(1));
 
-	constructor(
-		private readonly formBuilder: FormBuilder,
-		private readonly authService: AuthService,
-		private readonly analytics: Analytics,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

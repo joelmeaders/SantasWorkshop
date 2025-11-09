@@ -1,6 +1,12 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { RegistrationPage } from './registration.page';
+import {
+	provideFirestoreWrapperMock,
+	provideModalControllerMock,
+	provideFunctionsMock,
+	provideActivatedRouteMock,
+} from '../../../../test-helpers';
+import { provideRouter } from '@angular/router';
 
 describe('RegistrationPage', () => {
 	let component: RegistrationPage;
@@ -9,6 +15,13 @@ describe('RegistrationPage', () => {
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			imports: [RegistrationPage],
+			providers: [
+				provideFirestoreWrapperMock(),
+				provideModalControllerMock(),
+				provideFunctionsMock(),
+				provideActivatedRouteMock(),
+				provideRouter([]),
+			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(RegistrationPage);

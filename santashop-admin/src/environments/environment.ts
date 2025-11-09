@@ -1,4 +1,4 @@
-import config from '../../../package.json';
+import config from '../../package.json';
 import firebaseConfigDev from '../../../firebase.environment.test.json';
 
 export const environment = {
@@ -6,7 +6,7 @@ export const environment = {
 	label: 'DEV',
 	name: config.name,
 	version: config.version,
-	appCheckKey: '',
+	appCheckKey: '2839440c-0a91-4c48-921a-451020157001',
 };
 
 export const firebaseConfig = { ...firebaseConfigDev };
@@ -18,4 +18,3 @@ export const firebaseConfig = { ...firebaseConfigDev };
  * This import should be commented out in production mode because it will have a negative impact
  * on performance if an error is thrown.
  */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

@@ -1,61 +1,68 @@
 <ng-container *appLet="referredBy$ | async as referredBy">
-	<app-internal-header *ngIf="referredBy"></app-internal-header>
+  @if (referredBy) {
+    <app-internal-header></app-internal-header>
+  }
 
-	<ion-content id="main">
-		<ion-tabs
-			*appLet="isRegistrationComplete$ | async as isRegistrationComplete"
-		>
-			<ion-tab-bar
-				slot="bottom"
-				class="ion-hide-xl-up"
-				*ngIf="referredBy && !isRegistrationComplete"
-			>
-				<ng-container *appLet="childCount$ | async as childCount">
-					<ion-tab-button tab="overview">
-						<ion-icon name="home"></ion-icon>
-						<ion-label>{{ "MENU.HOME" | translate }}</ion-label>
-					</ion-tab-button>
-
-					<ion-tab-button
-						tab="children"
-						*ngIf="!isRegistrationComplete"
-					>
-						<ion-icon name="accessibility"></ion-icon>
-						<ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
-						<ng-container *appLet="childCount$ | async as count">
-							<ion-badge color="success" *ngIf="count >= 1">
-								{{ count }}
-							</ion-badge>
-						</ng-container>
-					</ion-tab-button>
-
-					<ion-tab-button
-						tab="date-time"
-						[disabled]="!childCount"
-						*ngIf="!isRegistrationComplete"
-					>
-						<ion-icon name="calendar-outline"></ion-icon>
-						<ion-label>{{ "MENU.SCHEDULE" | translate }}</ion-label>
-						<ng-container *appLet="chosenSlot$ | async as slot">
-							<ion-badge color="success" *ngIf="!!slot">
-								<ion-icon name="checkmark"></ion-icon>
-							</ion-badge>
-						</ng-container>
-					</ion-tab-button>
-
-					<ion-tab-button
-						class="submit"
-						tab="submit"
+  <ion-content id="main">
+    <ion-tabs
+      *appLet="isRegistrationComplete$ | async as isRegistrationComplete"
+      >
+      @if (referredBy && !isRegistrationComplete) {
+        <ion-tab-bar
+          slot="bottom"
+          class="ion-hide-xl-up"
+          >
+          <ng-container *appLet="childCount$ | async as childCount">
+            <ion-tab-button tab="overview">
+              <ion-icon name="home"></ion-icon>
+              <ion-label>{{ "MENU.HOME" | translate }}</ion-label>
+            </ion-tab-button>
+            @if (!isRegistrationComplete) {
+              <ion-tab-button
+                tab="children"
+                >
+                <ion-icon name="accessibility"></ion-icon>
+                <ion-label>{{ "MENU.CHILDREN" | translate }}</ion-label>
+                <ng-container *appLet="childCount$ | async as count">
+                  @if (count >= 1) {
+                    <ion-badge color="success">
+                      {{ count }}
+                    </ion-badge>
+                  }
+                </ng-container>
+              </ion-tab-button>
+            }
+            @if (!isRegistrationComplete) {
+              <ion-tab-button
+                tab="date-time"
+                [disabled]="!childCount"
+                >
+                <ion-icon name="calendar-outline"></ion-icon>
+                <ion-label>{{ "MENU.SCHEDULE" | translate }}</ion-label>
+                <ng-container *appLet="chosenSlot$ | async as slot">
+                  @if (!!slot) {
+                    <ion-badge color="success">
+                      <ion-icon name="checkmark"></ion-icon>
+                    </ion-badge>
+                  }
+                </ng-container>
+              </ion-tab-button>
+            }
+            @if (!isRegistrationComplete) {
+              <ion-tab-button
+                class="submit"
+                tab="submit"
 						[disabled]="
 						!childCount || (chosenSlot$ | async) === undefined
 					"
-						*ngIf="!isRegistrationComplete"
-					>
-						<ion-icon name="send-outline"></ion-icon>
-						<ion-label>{{ "MENU.SUBMIT" | translate }}</ion-label>
-					</ion-tab-button>
-				</ng-container>
-			</ion-tab-bar>
-		</ion-tabs>
-	</ion-content>
+                >
+                <ion-icon name="send-outline"></ion-icon>
+                <ion-label>{{ "MENU.SUBMIT" | translate }}</ion-label>
+              </ion-tab-button>
+            }
+          </ng-container>
+        </ion-tab-bar>
+      }
+    </ion-tabs>
+  </ion-content>
 </ng-container>

@@ -1,252 +1,262 @@
 <ion-content color="light">
-	<ion-grid class="height-max ion-no-padding ion-no-margin">
-		@if ((createAccountEnabled$ | async) === true) {
-		<ion-row
-			class="height-max ion-align-items-center ion-justify-content-center"
-		>
-			<!-- Information -->
-			<ion-col sizeXs="12" sizeSm="10" sizeMd="auto">
-				<ion-button
-					class="remove-shadow back-button"
-					color="white"
-					[routerLink]="['/']"
-				>
-					<ion-icon slot="start" name="arrow-back-sharp"></ion-icon>
-					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
-				</ion-button>
-				<ion-card class="sign-up-card">
-					<ion-card-header>
-						<ion-card-title>
-							{{ "SIGNUP.TITLE1" | translate }}
-						</ion-card-title>
-						<ion-card-subtitle>
-							{{ "SIGNUP.TITLE2" | translate }}
-						</ion-card-subtitle>
-					</ion-card-header>
-					<ion-card-content class="ion-text-center">
-						<form [formGroup]="form" novalidate>
-							<ion-list lines="none">
-								<ion-item-group class="es-pd-bottom-xl">
-									<ion-item-divider color="light">
-										<ion-label>
-											<strong>
-												{{ 'SIGNUP.YOUR_INFO' |
-												translate }}
-											</strong>
-										</ion-label>
-									</ion-item-divider>
+  <ion-grid class="height-max ion-no-padding ion-no-margin">
+    @let createAccountEnabled = createAccountEnabled$ | async;
+    @if (createAccountEnabled === true) {
+      <ion-row
+        class="height-max ion-align-items-center ion-justify-content-center"
+        >
+        <!-- Information -->
+        <ion-col sizeXs="12" sizeSm="10" sizeMd="auto">
+          <ion-button
+            class="remove-shadow back-button"
+            color="white"
+            [routerLink]="['/']"
+            >
+            <ion-icon slot="start" name="arrow-back-sharp"></ion-icon>
+            <ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
+          </ion-button>
+          <ion-card class="sign-up-card">
+            <ion-card-header>
+              <ion-card-title>
+                {{ "SIGNUP.TITLE1" | translate }}
+              </ion-card-title>
+              <ion-card-subtitle>
+                {{ "SIGNUP.TITLE2" | translate }}
+              </ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content class="ion-text-center">
+              <form [formGroup]="form" novalidate>
+                <ion-list lines="none">
+                  <ion-item-group class="es-pd-bottom-xl">
+                    <ion-item-divider color="light">
+                      <ion-label>
+                        <strong>
+                          {{ 'SIGNUP.YOUR_INFO' |
+                          translate }}
+                        </strong>
+                      </ion-label>
+                    </ion-item-divider>
 
-									<ion-item>
-										<ion-input
-											[label]="'SIGNUP.FIRST_NAME' | translate"
-											[errorText]="
-												form.controls.firstName | niceFormError |
-												translate"
-											labelPlacement="floating"
-											type="text"
-											autocomplete="given-name"
-											formControlName="firstName"
-											[debounce]="500"
-											[autofocus]="true"
-										></ion-input>
-									</ion-item>
+                    <ion-item>
+                      <ion-input
+                        id="firstName"
+                        [label]="'SIGNUP.FIRST_NAME' | translate"
+												[errorText]="
+													form.controls.firstName | niceFormError |
+													translate"
+                        labelPlacement="floating"
+                        type="text"
+                        autocomplete="given-name"
+                        formControlName="firstName"
+                        [debounce]="500"
+                        [autofocus]="true"
+                      ></ion-input>
+                    </ion-item>                    <ion-item>
+                      <ion-input
+                        id="lastName"
+                        [label]="'SIGNUP.LAST_NAME' | translate"
+												[errorText]="
+													form.controls.lastName |
+													niceFormError |
+													translate"
+                        labelPlacement="floating"
+                        type="text"
+                        autocomplete="family-name"
+                        formControlName="lastName"
+                        [debounce]="500"
+                      ></ion-input>
+                    </ion-item>                    <ion-item>
+                      <ion-input
+                        id="zipCode"
+                        [label]="'SIGNUP.ZIP_CODE' | translate"
+												[errorText]="
+													form.controls.zipCode |
+													niceFormError |
+													translate"
+                        labelPlacement="floating"
+                        type="number"
+                        autocomplete="postal-code"
+                        formControlName="zipCode"
+                        [debounce]="500"
+                        maxlength="5"
+                        minlength="5"
+                      ></ion-input>
+                    </ion-item>
+                  </ion-item-group>
 
-									<ion-item>
-										<ion-input
-											[label]="'SIGNUP.LAST_NAME' | translate"
-											[errorText]="
-												form.controls.lastName |
-												niceFormError |
-												translate"
-											labelPlacement="floating"
-											type="text"
-											autocomplete="family-name"
-											formControlName="lastName"
-											[debounce]="500"
-										></ion-input>
-									</ion-item>
+                  <ion-item-group class="es-pd-bottom-xl">
+                    <ion-item-divider color="light">
+                      <ion-label>
+                        <strong>
+                          {{ 'SIGNUP.ACCOUNT_INFO' |
+                          translate }}
+                        </strong>
+                      </ion-label>
+                    </ion-item-divider>
 
-									<ion-item>
-										<ion-input
-											[label]="'SIGNUP.ZIP_CODE' | translate"
-											[errorText]="
-												form.controls.zipCode |
-												niceFormError |
-												translate"
-											labelPlacement="floating"
-											type="number"
-											autocomplete="postal-code"
-											formControlName="zipCode"
-											[debounce]="500"
-											maxlength="5"
-											minlength="5"
-										></ion-input>
-									</ion-item>
-								</ion-item-group>
+                    <ion-item>
+                      <ion-input
+                        id="emailAddress"
+                        [label]="'COMMON.EMAIL_ADDRESS' | translate"
+                        [errorText]="form.controls.emailAddress | niceFormError | translate"
+                        labelPlacement="floating"
+                        type="email"
+                        autocomplete="email"
+                        formControlName="emailAddress"
+                        [debounce]="500"
+                      ></ion-input>
+                    </ion-item>
 
-								<ion-item-group class="es-pd-bottom-xl">
-									<ion-item-divider color="light">
-										<ion-label>
-											<strong>
-												{{ 'SIGNUP.ACCOUNT_INFO' |
-												translate }}
-											</strong>
-										</ion-label>
-									</ion-item-divider>
+                    <ion-item>
+                      <ion-input
+                        id="password"
+                        [label]="'COMMON.PASSWORD' | translate"
+                        [errorText]="form.controls.password | niceFormError | translate"
+                        labelPlacement="floating"
+                        type="password"
+                        autocomplete="new-password"
+                        formControlName="password"
+                        [debounce]="500"
+                      ></ion-input>
+                    </ion-item>
 
-									<ion-item>
-										<ion-input
-											[label]="'COMMON.EMAIL_ADDRESS' | translate"
-											[errorText]="form.controls.emailAddress | niceFormError | translate"
-											labelPlacement="floating"
-											type="email"
-											autocomplete="email"
-											formControlName="emailAddress"
-											[debounce]="500"
-										></ion-input>
-									</ion-item>
+                    <ion-item>
+                      <ion-input
+                        id="password2"
+                        [label]="'SIGNUP.PASSWORD2' | translate"
+                        [errorText]="form.controls.password2 | niceFormError | translate"
+                        labelPlacement="floating"
+                        type="password"
+                        autocomplete="new-password"
+                        formControlName="password2"
+                        [debounce]="500"
+                      ></ion-input>
+                    </ion-item>
 
-									<ion-item>
-										<ion-input
-											[label]="'COMMON.PASSWORD' | translate"
-											[errorText]="form.controls.password | niceFormError | translate"
-											labelPlacement="floating"
-											type="password"
-											autocomplete="new-password"
-											formControlName="password"
-											[debounce]="500"
-										></ion-input>
-									</ion-item>
+                    @if (form.errors?.['passwordMismatch']) {
+                      <ul>
+                        <li>
+                          <ion-note color="danger">
+                            {{ "SIGNUP.PASSWORD_MATCH" |
+                            translate }}
+                          </ion-note>
+                        </li>
+                      </ul>
+                    }
+                  </ion-item-group>
 
-									<ion-item>
-										<ion-input
-											[label]="'SIGNUP.PASSWORD2' | translate"
-											[errorText]="form.controls.password2 | niceFormError | translate"
-											labelPlacement="floating"
-											type="password"
-											autocomplete="new-password"
-											formControlName="password2"
-											[debounce]="500"
-										></ion-input>
-									</ion-item>
+                  <ion-item-group>
+                    <ion-item-divider color="light" />
+                    <div class="ion-padding-top">
+                      <ion-text
+                        color="primary"
+                        (click)="showTermsConditionsModal()"
+                        tappable
+                        >
+                        {{ "SIGNUP.LEGAL2" | translate }}
+                      </ion-text>
+                      &nbsp; &nbsp; &nbsp;
+                      <ion-text
+                        color="primary"
+                        (click)="showPrivacyPolicyModal()"
+                        tappable
+                        >
+                        {{ "SIGNUP.LEGAL4" | translate }}
+                      </ion-text>
+                    </div>
 
-									@if (form.errors?.passwordMismatch) {
-									<ul>
-										<li>
-											<ion-note color="danger">
-												{{ "SIGNUP.PASSWORD_MATCH" |
-												translate }}
-											</ion-note>
-										</li>
-									</ul>
-									}
-								</ion-item-group>
+                    <div class="ion-padding">
+                      <div
+                        class="ion-float-right check-container"
+                        >
+                        <ion-checkbox
+                          id="legalCheckbox"
+                          formControlName="legal"
+                          class="check"
+                        ></ion-checkbox>
+                      </div>
+                      <ion-text color="medium">
+                        {{ "SIGNUP.LEGAL1" | translate }} {{
+                        "SIGNUP.LEGAL2" | translate }} {{
+                        "SIGNUP.LEGAL3" | translate }} {{
+                        "SIGNUP.LEGAL4" | translate }}
+                      </ion-text>
+                      @if (!form.controls.legal.value) {
+                        <ion-text
+                          color="danger"
+                          >
+                          ({{ form.controls.legal |
+                          niceFormError | translate }})
+                        </ion-text>
+                      }
+                    </div>
 
-								<ion-item-group>
-									<ion-item-divider color="light" />
-									<div class="ion-padding-top">
-										<ion-text
-											color="primary"
-											(click)="showTermsConditionsModal()"
-											tappable
-										>
-											{{ "SIGNUP.LEGAL2" | translate }}
-										</ion-text>
-										&nbsp; &nbsp; &nbsp;
-										<ion-text
-											color="primary"
-											(click)="showPrivacyPolicyModal()"
-											tappable
-										>
-											{{ "SIGNUP.LEGAL4" | translate }}
-										</ion-text>
-									</div>
+                    <div class="ion-padding-horizontal">
+                      <div
+                        class="ion-float-right check-container"
+                        >
+                        <ion-checkbox
+                          formControlName="newsletter"
+                          class="check"
+                        ></ion-checkbox>
+                      </div>
+                      <ion-text color="medium">
+                        {{ 'COMMON.NEWSLETTER' | translate
+                        }}
+                      </ion-text>
+                    </div>
+                  </ion-item-group>
+                </ion-list>
 
-									<div class="ion-padding">
-										<div
-											class="ion-float-right check-container"
-										>
-											<ion-checkbox
-												formControlName="legal"
-												class="check"
-											></ion-checkbox>
-										</div>
-										<ion-text color="medium">
-											{{ "SIGNUP.LEGAL1" | translate }} {{
-											"SIGNUP.LEGAL2" | translate }} {{
-											"SIGNUP.LEGAL3" | translate }} {{
-											"SIGNUP.LEGAL4" | translate }}
-										</ion-text>
-										<ion-text
-											color="danger"
-											*ngIf="!form.controls.legal.value"
-										>
-											({{ form.controls.legal |
-											niceFormError | translate }})
-										</ion-text>
-									</div>
+                <div class="ion-margin"></div>
+              </form>
 
-									<div class="ion-padding-horizontal">
-										<div
-											class="ion-float-right check-container"
-										>
-											<ion-checkbox
-												formControlName="newsletter"
-												class="check"
-											></ion-checkbox>
-										</div>
-										<ion-text color="medium">
-											{{ 'COMMON.NEWSLETTER' | translate
-											}}
-										</ion-text>
-									</div>
-								</ion-item-group>
-							</ion-list>
-
-							<div class="ion-margin"></div>
-						</form>
-
-						<ion-button
-							size="large"
-							color="xmasred"
-							class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xlr"
-							[disabled]="
-								!form.valid
-							"
-							(click)="onCreateAccount()"
-						>
-							{{ "SIGNUP.SUBMIT_BUTTON" | translate }}
-						</ion-button>
-
-						<div class="ion-text-center es-mg-top-lg">
-							<ion-button
-								fill="clear"
-								color="tertiary"
-								[routerLink]="['/sign-in']"
-							>
-								{{ "SIGNUP.HAVE_ACCOUNT" | translate }}
-							</ion-button>
-							<br />
-							<ion-button
-								fill="clear"
-								color="tertiary"
-								[routerLink]="['/reset-password']"
-							>
-								{{ "SIGNIN.FORGOT_PASSWORD" | translate }}
-							</ion-button>
-						</div>
-					</ion-card-content>
-				</ion-card>
-			</ion-col>
-		</ion-row>
-		} @else {
-		<ion-row>
-			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
-				<div class="alert">
-					<p>{{ "SIGNUP.CREATE_ACCOUNT_DISABLED" | translate }}</p>
-				</div>
-			</ion-col>
-		</ion-row>
-		}
-	</ion-grid>
+              <ion-button
+                id="submitButton"
+                size="large"
+                color="xmasred"
+                class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xlr"
+								[disabled]="
+									!form.valid
+								"
+                (click)="onCreateAccount()"
+                >
+                {{ "SIGNUP.SUBMIT_BUTTON" | translate }}
+              </ion-button>              <div class="ion-text-center es-mg-top-lg">
+                <ion-button
+                  fill="clear"
+                  color="tertiary"
+                  [routerLink]="['/sign-in']"
+                  >
+                  {{ "SIGNUP.HAVE_ACCOUNT" | translate }}
+                </ion-button>
+                <br />
+                <ion-button
+                  fill="clear"
+                  color="tertiary"
+                  [routerLink]="['/reset-password']"
+                  >
+                  {{ "SIGNIN.FORGOT_PASSWORD" | translate }}
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    } @else if (createAccountEnabled === false) {
+      <ion-row>
+        <ion-col size="12" class="ion-text-center es-pd-top-xxl">
+          <div class="alert">
+            <p>{{ "SIGNUP.CREATE_ACCOUNT_DISABLED" | translate }}</p>
+          </div>
+        </ion-col>
+      </ion-row>
+    } @else {
+      <ion-row>
+        <ion-col size="12" class="ion-text-center es-pd-top-xxl">
+          <ion-spinner name="crescent"></ion-spinner>
+        </ion-col>
+      </ion-row>
+    }
+  </ion-grid>
 </ion-content>

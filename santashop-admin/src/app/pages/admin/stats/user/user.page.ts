@@ -30,32 +30,31 @@ import { FormsModule } from '@angular/forms';
 Chart.register(ChartDataLabels);
 
 @Component({
-	selector: 'admin-user',
-	templateUrl: './user.page.html',
-	styleUrls: ['./user.page.scss'],
-	standalone: true,
-	imports: [
-		HeaderComponent,
-		BaseChartDirective,
-		AsyncPipe,
-		FormsModule,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonToolbar,
-		IonTitle,
-		IonItem,
-		IonSelect,
-		IonSelectOption,
-	],
+    selector: 'admin-user',
+    templateUrl: './user.page.html',
+    styleUrls: ['./user.page.scss'],
+    imports: [
+        HeaderComponent,
+        BaseChartDirective,
+        AsyncPipe,
+        FormsModule,
+        IonContent,
+        IonGrid,
+        IonRow,
+        IonCol,
+        IonToolbar,
+        IonTitle,
+        IonItem,
+        IonSelect,
+        IonSelectOption,
+    ]
 })
 export class UserPage {
 	private readonly httpService = inject(FireRepoLite);
 
 	public readonly schedule = shopSchedule;
 
-	public year = 2024;
+	public year = 2025;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>

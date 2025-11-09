@@ -23,8 +23,8 @@
 						autocomplete="off"
 						placeholder="required"
 					></ion-input>
-					@if (form.controls.lastName.touched &&
-					form.controls.lastName.invalid) {
+					@if (form.controls['lastName'].touched &&
+					form.controls['lastName'].invalid) {
 					<ion-note slot="error">
 						Invalid last name. 2-20 characters
 					</ion-note>
@@ -40,8 +40,8 @@
 						autocomplete="off"
 						placeholder="required"
 					></ion-input>
-					@if (form.controls.zipCode.touched &&
-					form.controls.zipCode.invalid) {
+					@if (form.controls['zipCode'].touched &&
+					form.controls['zipCode'].invalid) {
 					<ion-note slot="error">
 						Invalid zip code. Must have 5 digits
 					</ion-note>

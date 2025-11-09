@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import * as admin from 'firebase-admin';
 import {
 	AgeGroup,
@@ -34,7 +34,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('registration-2024')
+		.doc('registration-2025')
 		.set(stats, { merge: false });
 };
 
@@ -168,7 +168,7 @@ const registrationQuery = () =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2024)
+		.where('programYear', '==', 2025)
 		.where('registrationSubmittedOn', '!=', '');
 // .where('includedInRegistrationStats', '==', false);
 

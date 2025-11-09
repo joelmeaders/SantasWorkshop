@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import {
@@ -12,45 +12,41 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 import { AuthService } from '@santashop/core';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
 
 @Component({
-	selector: 'app-public-menu',
-	templateUrl: './public-menu.component.html',
-	styleUrls: ['./public-menu.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		IonContent,
-		IonList,
-		IonItem,
-		IonLabel,
-		NgIf,
-		LanguageToggleComponent,
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonList,
-		IonItem,
-		IonLabel,
-	],
+    selector: 'app-public-menu',
+    templateUrl: './public-menu.component.html',
+    styleUrls: ['./public-menu.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+    IonContent,
+    IonList,
+    IonItem,
+    IonLabel,
+    LanguageToggleComponent,
+    AsyncPipe,
+    TranslateModule,
+    IonContent,
+    IonList,
+    IonItem,
+    IonLabel
+]
 })
 export class PublicMenuComponent implements OnDestroy {
+	private readonly authService = inject(AuthService);
+	private readonly router = inject(Router);
+	private readonly popoverController = inject(PopoverController);
+	private readonly translateService = inject(TranslateService);
+	private readonly analyticsService = inject(Analytics);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly isLoggedIn$ = this.authService.currentUser$.pipe(
 		takeUntil(this.destroy$),
 		shareReplay(1),
 	);
-
-	constructor(
-		private readonly authService: AuthService,
-		private readonly router: Router,
-		private readonly popoverController: PopoverController,
-		private readonly translateService: TranslateService,
-		private readonly analyticsService: Analytics,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

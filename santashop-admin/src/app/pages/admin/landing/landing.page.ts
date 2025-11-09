@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthService } from '@santashop/core';
-import { AppStateService } from '../../../shared/services/app-state.service';
+import { AuthService, AppStateService } from '@santashop/core';
 
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -33,7 +32,6 @@ import { map, shareReplay } from 'rxjs';
 	templateUrl: './landing.page.html',
 	styleUrls: ['./landing.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		RouterLink,
 		AsyncPipe,

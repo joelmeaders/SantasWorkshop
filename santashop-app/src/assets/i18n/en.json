@@ -9,7 +9,7 @@
 	"HOME": {
 		"WELCOME_MESSAGE": "Denver Santa Claus Shop<br/>Registration!",
 		"CREATE_ACCOUNT": "Create An Account",
-		"SIGN_IN_INST": "Already created an account for 2024?"
+		"SIGN_IN_INST": "Already created an account for 2025?"
 	},
 	"COMMON": {
 		"EMAIL_ADDRESS": "Email",
@@ -51,7 +51,7 @@
 	},
 	"SIGNUP": {
 		"CREATE_ACCOUNT_DISABLED": "We're full and cannot accept any more sign-ups right now. Please check our Facebook page for updates if any spots open up.",
-		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2024, even if you have shopped with us in the past.",
+		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2025, even if you have shopped with us in the past.",
 		"HAVE_ACCOUNT": "Already have an account?",
 		"TITLE1": "Set up your account",
 		"TITLE2": "This will only take a minute",
@@ -193,9 +193,10 @@
 		"3": "Please visit our social sites for more information."
 	},
 	"EVENT_INFO": {
+		"DATETIME": "December 12, 13, 15, 16 at 10am - 3pm",
 		"RESEND_EMAIL": "Resend Email",
-		"EVENT_ADDRESS1": "2500 E 1st Ave",
-		"EVENT_ADDRESS2": "Denver, CO 80206",
+		"EVENT_ADDRESS1": "7150 Leetsdale Drive, Unit 380",
+		"EVENT_ADDRESS2": "Denver, CO 80224",
 		"PRINT_PAGE": "Print or save this page or the email we sent you!",
 		"YOUR_TICKET": "This is your ticket to the event.",
 		"FACEMASK": "Face masks are recommended",

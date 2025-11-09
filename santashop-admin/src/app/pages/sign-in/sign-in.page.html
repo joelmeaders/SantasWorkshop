@@ -15,7 +15,7 @@
 							autocomplete="email"
 							type="email"
 						></ion-input>
-						@if (form.controls.emailAddress.dirty) {
+						@if (form.controls['emailAddress'].dirty) {
 						<ion-note slot="error" color="danger">
 							Invalid email address
 						</ion-note>
@@ -28,7 +28,7 @@
 							autocomplete="password"
 							type="password"
 						></ion-input>
-						@if (form.controls.password.dirty) {
+						@if (form.controls['password'].dirty) {
 						<ion-note slot="error" color="danger">
 							Password is required
 						</ion-note>

@@ -1,17 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FireRepoBase } from './fire-repo-base.service';
+import { Injectable, inject } from '@angular/core';
+import { from, map, Observable } from 'rxjs';
+import { FirestoreWrapper } from './_firestore-wrapper';
 import {
+	CollectionReference,
 	DocumentData,
 	DocumentReference,
+	FirestoreDataConverter,
 	QueryConstraint,
-} from './_firestore-wrapper';
+	QueryDocumentSnapshot,
+	SnapshotOptions,
+} from '@angular/fire/firestore';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class FireRepoLite {
-	constructor(private readonly fireRepoBase: FireRepoBase) {}
+	private readonly firestoreWrapper = inject(FirestoreWrapper);
 
 	/**
 	 * Generates a random id
@@ -20,7 +24,23 @@ export class FireRepoLite {
 	 * @memberof FireRepoLite
 	 */
 	public randomId(): string {
-		return this.fireRepoBase.randomId();
+		const colRef = this.firestoreWrapper.collection('_');
+		const docRef = this.firestoreWrapper.doc(colRef);
+		return docRef.id;
+	}
+
+	private genericConverter<T>(): FirestoreDataConverter<T> {
+		return {
+			toFirestore: (post: T): DocumentData => {
+				return post as DocumentData;
+			},
+			fromFirestore: (
+				snapshot: QueryDocumentSnapshot,
+				options: SnapshotOptions,
+			): T => {
+				return { ...snapshot.data(options) } as T;
+			},
+		};
 	}
 
 	/** @inheritdoc */
@@ -31,44 +51,88 @@ export class FireRepoLite {
 			collectionPathName: collectionPath,
 
 			/** @inheritdoc */
-			read: (documentId: string, idField?: Extract<keyof T, string>) =>
-				this.fireRepoBase.read<T>(collectionPath, documentId, idField),
+			read: (
+				documentId: string,
+				idField?: Extract<keyof T, string>,
+			): Observable<T | undefined> => {
+				const colRef = this.firestoreWrapper.collection(collectionPath);
+				const docRef = this.firestoreWrapper.doc<T>(
+					colRef as any,
+					documentId,
+				);
+				return this.firestoreWrapper.docData(docRef, { idField });
+			},
 
 			/** @inheritdoc */
 			readMany: (
 				queryConstraints?: QueryConstraint[],
 				idField?: Extract<keyof T, string>,
-			) =>
-				this.fireRepoBase.readMany<T>(
-					collectionPath,
-					queryConstraints,
-					idField,
-				),
+			): Observable<T[]> => {
+				const colRef =
+					this.firestoreWrapper.collection<T>(collectionPath);
+				const qry = queryConstraints
+					? this.firestoreWrapper.query(colRef, queryConstraints)
+					: this.firestoreWrapper.query(colRef);
+
+				return this.firestoreWrapper.collectionQuery(qry, idField);
+			},
 
 			/** @inheritdoc */
-			add: (document: T) =>
-				this.fireRepoBase.add<T>(collectionPath, document),
+			add: (document: T): Observable<DocumentReference<T>> => {
+				const colRef = this.firestoreWrapper.collection(collectionPath);
+				const action = this.firestoreWrapper
+					.addDoc<T>(colRef as CollectionReference<T>, document)
+					.then((response) =>
+						response.withConverter(this.genericConverter<T>()),
+					);
+				return from(action);
+			},
 
 			/** @inheritdoc */
-			addById: (documentId: string, document: T) =>
-				this.fireRepoBase.addById<T>(
-					collectionPath,
+			addById: (
+				documentId: string,
+				document: T,
+			): Observable<DocumentReference<T>> => {
+				const colRef = this.firestoreWrapper.collection(collectionPath);
+				const docRef = this.firestoreWrapper.doc<T>(
+					colRef as CollectionReference<T>,
 					documentId,
+				);
+				const action = this.firestoreWrapper.setDoc<T>(
+					docRef,
 					document,
-				),
+				);
+				return from(action).pipe(map(() => docRef));
+			},
 
 			/** @inheritdoc */
-			update: (documentId: string, document: T, merge = false) =>
-				this.fireRepoBase.update(
-					collectionPath,
+			update: (
+				documentId: string,
+				document: T,
+				merge = false,
+			): Observable<DocumentReference<T>> => {
+				const colRef = this.firestoreWrapper.collection(collectionPath);
+				const docRef = this.firestoreWrapper.doc<T>(
+					colRef as CollectionReference<T>,
 					documentId,
+				);
+				const action = this.firestoreWrapper.setDoc<T>(
+					docRef,
 					document,
-					merge,
-				),
+					{
+						merge,
+					},
+				);
+				return from(action).pipe(map(() => docRef));
+			},
 
 			/** @inheritdoc */
-			delete: (documentId: string) =>
-				this.fireRepoBase.delete(collectionPath, documentId),
+			delete: (documentId: string): Observable<void> => {
+				const colRef = this.firestoreWrapper.collection(collectionPath);
+				const docRef = this.firestoreWrapper.doc(colRef, documentId);
+				const action = this.firestoreWrapper.deleteDoc(docRef);
+				return from(action);
+			},
 		};
 	}
 }

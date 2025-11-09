@@ -1,8 +1,4 @@
-import {
-	enableProdMode,
-	provideZoneChangeDetection,
-	importProvidersFrom,
-} from '@angular/core';
+import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 
 import { environment, firebaseConfig } from './environments/environment';
 import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
@@ -11,12 +7,7 @@ import {
 	initializeAppCheck,
 	ReCaptchaEnterpriseProvider,
 } from '@angular/fire/app-check';
-import {
-	provideAuth,
-	getAuth,
-	connectAuthEmulator,
-	Auth,
-} from '@angular/fire/auth';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import {
 	provideStorage,
 	getStorage,
@@ -27,15 +18,7 @@ import {
 	getFunctions,
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
-import {
-	provideFirestore,
-	getFirestore,
-	connectFirestoreEmulator,
-	PROGRAM_YEAR,
-	PROFILE_VERSION,
-	MOBILE_EVENT,
-	AuthWrapper,
-} from '@santashop/core';
+import { PROGRAM_YEAR, PROFILE_VERSION, MOBILE_EVENT } from '@santashop/core';
 import {
 	provideAnalytics,
 	getAnalytics,
@@ -46,17 +29,21 @@ import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
 	provideHttpClient,
 	withInterceptorsFromDi,
-	HttpClient,
 } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { routes } from './app/app.routes';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { AppComponent } from './app/app.component';
 import {
 	IonicRouteStrategy,
 	provideIonicAngular,
 } from '@ionic/angular/standalone';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import {
+	connectFirestoreEmulator,
+	getFirestore,
+	provideFirestore,
+} from '@angular/fire/firestore';
 
 const firebaseProviders = [
 	provideFirebaseApp(() => initializeApp(firebaseConfig)),
@@ -84,10 +71,10 @@ const firebaseProviders = [
 	}),
 	provideFunctions(() => {
 		const functions = getFunctions();
-		functions.customDomain = location.origin;
 		if (!environment.production) {
 			connectFunctionsEmulator(functions, 'localhost', 5001);
-			functions.customDomain = null;
+		} else {
+			functions.customDomain = location.origin;
 		}
 		return functions;
 	}),
@@ -100,9 +87,6 @@ const firebaseProviders = [
 	}),
 	provideAnalytics(() => getAnalytics()),
 ];
-
-export const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>
-	new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 if (!environment.production) {
 	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
@@ -121,26 +105,20 @@ bootstrapApplication(AppComponent, {
 			mode: 'md',
 			animated: true,
 		}),
-		importProvidersFrom(
-			TranslateModule.forRoot({
-				loader: {
-					provide: TranslateLoader,
-					useFactory: httpLoaderFactory,
-					deps: [HttpClient],
-				},
+		provideTranslateService({
+			fallbackLang: 'en',
+			loader: provideTranslateHttpLoader({
+				prefix: './assets/i18n/',
+				suffix: '.json',
 			}),
-		),
+		}),
 		...firebaseProviders,
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
-		{ provide: PROGRAM_YEAR, useValue: 2024 },
+		{ provide: PROGRAM_YEAR, useValue: 2025 },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 		ScreenTrackingService,
-		{
-			provide: AuthWrapper,
-			deps: [Auth],
-		},
 		UserTrackingService,
 	],
 }).catch((err) => console.log(err));

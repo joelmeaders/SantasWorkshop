@@ -1,5 +1,13 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+	ModalController,
+	provideIonicAngular,
+} from '@ionic/angular/standalone';
+import {
+	createModalControllerMock,
+	provideTranslateServiceMock,
+} from '../../../../test-helpers';
 
 import { TermsOfServiceModalComponent } from './terms-of-service-modal.component';
 
@@ -11,6 +19,14 @@ describe('TermsOfServiceModalComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [TermsOfServiceModalComponent],
 			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+			providers: [
+				provideIonicAngular(),
+				{
+					provide: ModalController,
+					useValue: createModalControllerMock(),
+				},
+				provideTranslateServiceMock(),
+			],
 		}).compileComponents();
 	});
 

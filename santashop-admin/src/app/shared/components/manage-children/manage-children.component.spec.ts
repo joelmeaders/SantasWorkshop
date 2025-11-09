@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { ManageChildrenComponent } from './manage-children.component';
+import {
+	provideModalControllerMock,
+	provideAlertControllerMock,
+} from '../../../../test-helpers';
 
 describe('ManageChildrenComponent', () => {
 	let component: ManageChildrenComponent;
@@ -9,6 +12,10 @@ describe('ManageChildrenComponent', () => {
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			imports: [ManageChildrenComponent],
+			providers: [
+				provideModalControllerMock(),
+				provideAlertControllerMock(),
+			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ManageChildrenComponent);

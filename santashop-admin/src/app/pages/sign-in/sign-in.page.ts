@@ -32,7 +32,6 @@ import {
 	templateUrl: './sign-in.page.html',
 	styleUrls: ['./sign-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		ReactiveFormsModule,
 		IonContent,
@@ -77,7 +76,7 @@ export class SignInPage {
 		} catch (error) {
 			console.log(error);
 
-			const errorCast = error as any as Error;
+			const errorCast = error as Error;
 			const errorString = errorCast.message;
 
 			let header = 'Unknown Error';

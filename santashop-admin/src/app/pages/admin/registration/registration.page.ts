@@ -37,7 +37,6 @@ import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		ReactiveFormsModule,
@@ -148,7 +147,7 @@ export class RegistrationPage {
 		await modal.present();
 		const result = await modal.onDidDismiss();
 		if (result.data) {
-			this.form.controls.referral.setValue(result.data);
+			this.form.controls['referral'].setValue(result.data);
 			this.referrer.next(result.data);
 		}
 	}
@@ -171,8 +170,13 @@ export class RegistrationPage {
 				registration.qrcode ?? 'onsite',
 			);
 			this.router.navigate(['admin/checkin/confirmation']);
-		} catch (error: any) {
-			if (error.details.code === 6) {
+		} catch (error: unknown) {
+			const err = error as {
+				details?: { code?: number };
+				code?: string;
+				message?: string;
+			};
+			if (err.details?.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([
 					'admin/checkin/duplicate',
@@ -183,8 +187,8 @@ export class RegistrationPage {
 
 			const alert = await this.alertController.create({
 				header: 'Error registering',
-				subHeader: `code: ${error.code}`,
-				message: error?.message ?? error,
+				subHeader: `code: ${err.code ?? 'unknown'}`,
+				message: err?.message ?? String(error),
 			});
 
 			await alert.present();

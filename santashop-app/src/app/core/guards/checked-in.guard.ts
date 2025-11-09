@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	ActivatedRouteSnapshot,
 	CanActivate,
@@ -13,7 +13,7 @@ import { CheckinService } from '../services/checkin.service';
 	providedIn: 'root',
 })
 export class CheckedInGuard implements CanActivate, CanActivateChild {
-	constructor(private readonly checkinService: CheckinService) {}
+	private readonly checkinService = inject(CheckinService);
 
 	public canActivate(
 		_route: ActivatedRouteSnapshot,

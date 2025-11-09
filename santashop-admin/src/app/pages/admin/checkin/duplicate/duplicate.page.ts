@@ -19,7 +19,6 @@ import { IonContent, IonNote } from '@ionic/angular/standalone';
 	templateUrl: './duplicate.page.html',
 	styleUrls: ['./duplicate.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		AsyncPipe,
@@ -35,7 +34,7 @@ export class DuplicatePage {
 	private readonly analytics = inject(AnalyticsWrapper);
 
 	private readonly uid$ = this.route.params.pipe(
-		map((params) => params.uid as string),
+		map((params) => params['uid'] as string),
 	);
 
 	public readonly checkin$ = this.uid$.pipe(
@@ -46,7 +45,7 @@ export class DuplicatePage {
 		),
 		filterNil(),
 		map((data) => {
-			data.checkInDateTime = timestampToDate(data.checkInDateTime);
+			data['checkInDateTime'] = timestampToDate(data['checkInDateTime']);
 			return data;
 		}),
 	);

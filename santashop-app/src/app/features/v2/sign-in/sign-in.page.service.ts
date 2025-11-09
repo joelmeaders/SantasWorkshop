@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, ErrorHandlerService, newAuthForm } from '@santashop/core';
 import { LoadingController } from '@ionic/angular/standalone';
@@ -8,6 +8,11 @@ import { filter, tap } from 'rxjs/operators';
 
 @Injectable()
 export class SignInPageService implements OnDestroy {
+	private readonly authService = inject(AuthService);
+	private readonly router = inject(Router);
+	private readonly loadingController = inject(LoadingController);
+	private readonly errorHandler = inject(ErrorHandlerService);
+
 	public readonly form = newAuthForm();
 	private readonly subscriptions = new Array<Subscription>();
 
@@ -23,12 +28,7 @@ export class SignInPageService implements OnDestroy {
 			tap(() => this.router.navigate(['/pre-registration/overview'])),
 		);
 
-	constructor(
-		private readonly authService: AuthService,
-		private readonly router: Router,
-		private readonly loadingController: LoadingController,
-		private readonly errorHandler: ErrorHandlerService,
-	) {
+	constructor() {
 		this.subscriptions.push(
 			this.redirectIfLoggedInSubscription.subscribe(),
 		);

@@ -45,7 +45,6 @@ declare type SortFnType = (
 	templateUrl: './results.page.html',
 	styleUrls: ['./results.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		RouterLink,
@@ -97,8 +96,11 @@ export class ResultsPage {
 
 	private readonly search$: Observable<RegistrationSearchIndex[]> =
 		this.searchService.searchResults$.pipe(
-			filter((query) => query !== null),
-			switchMap((query) => query!),
+			filter(
+				(query): query is Observable<RegistrationSearchIndex[]> =>
+					query !== null,
+			),
+			switchMap((query) => query),
 			switchMap((results) =>
 				this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
 			),

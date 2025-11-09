@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import {
 	autoSpyProvider,
@@ -7,7 +8,7 @@ import {
 	Spied,
 } from '../../../../../../../test-helpers';
 import { mockUsers } from '../../../../../../../test-helpers/mock-data';
-import { TranslateTestingModule } from '../../../../../../../test-helpers/ngx-translate';
+import { provideTranslateServiceMock } from '../../../../../test-helpers';
 import { PreRegistrationService } from '../../../../core';
 
 import { ProfilePage } from './profile.page';
@@ -17,36 +18,40 @@ describe('ProfilePage', () => {
 	let component: ProfilePage;
 	let fixture: ComponentFixture<ProfilePage>;
 
-	let viewService: Spied<ProfilePageService> =
+	const viewService: Spied<ProfilePageService> =
 		autoSpyProvider(ProfilePageService).useValue;
 
-	let preregistrationService: Spied<PreRegistrationService> = autoSpyProvider(
-		PreRegistrationService,
-	).useValue;
+	const preregistrationService: Spied<PreRegistrationService> =
+		autoSpyProvider(PreRegistrationService).useValue;
 
 	const providers = [
 		{ provide: ProfilePageService, useValue: viewService },
 		{ provide: PreRegistrationService, useValue: preregistrationService },
+		{
+			provide: ActivatedRoute,
+			useValue: { snapshot: { paramMap: { get: (): null => null } } },
+		},
 	];
 
-	let userProfile$Spy: jasmine.Spy = getPropertySpy(
+	const userProfile$Spy: jasmine.Spy = getPropertySpy(
 		viewService,
 		'userProfile$',
 	).and.returnValue(of(mockUsers().user1));
 
-	let isRegistrationComplete$Spy: jasmine.Spy = getPropertySpy(
+	const isRegistrationComplete$Spy: jasmine.Spy = getPropertySpy(
 		preregistrationService,
 		'registrationComplete$',
 	).and.returnValue(of(true));
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(waitForAsync(async (): Promise<void> => {
 		TestBed.overrideComponent(ProfilePage, {
 			set: {
 				providers: providers,
 			},
 		});
-		TestBed.configureTestingModule({
-			imports: [TranslateTestingModule, ProfilePage],
+		await TestBed.configureTestingModule({
+			imports: [ProfilePage],
+			providers: [provideTranslateServiceMock()],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ProfilePage);

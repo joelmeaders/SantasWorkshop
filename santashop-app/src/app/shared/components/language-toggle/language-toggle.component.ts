@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
@@ -12,24 +12,21 @@ import { IonText, IonToggle } from '@ionic/angular/standalone';
 	templateUrl: './language-toggle.component.html',
 	styleUrls: ['./language-toggle.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [IonToggle, IonText, AsyncPipe, IonText, IonToggle],
 })
 export class LanguageToggleComponent implements OnDestroy {
+	private readonly translate = inject(TranslateService);
+	private readonly analyticsService = inject(Analytics);
+
 	private readonly destroy$ = new Subject<void>();
 
 	private readonly currentLangauge = new BehaviorSubject<'en' | 'es'>(
-		this.translate.currentLang as any,
+		this.translate.getCurrentLang() as any,
 	);
 
 	public readonly currentLanguage$ = this.currentLangauge
 		.asObservable()
 		.pipe(takeUntil(this.destroy$), shareReplay(1));
-
-	constructor(
-		private readonly translate: TranslateService,
-		private readonly analyticsService: Analytics,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();
@@ -37,7 +34,7 @@ export class LanguageToggleComponent implements OnDestroy {
 	}
 
 	public toggleLanguage(event: any): void {
-		const current = this.translate.currentLang;
+		const current = this.translate.getCurrentLang();
 
 		// This toggle value thing is because toggle fires ionChange twice
 		const toggleValue = event.detail.checked ? 'en' : 'es';

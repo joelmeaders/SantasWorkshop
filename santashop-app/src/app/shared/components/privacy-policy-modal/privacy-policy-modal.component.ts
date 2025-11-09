@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	ModalController,
 	IonContent,
@@ -13,29 +13,30 @@ import { addIcons } from 'ionicons';
 import { closeCircle } from 'ionicons/icons';
 
 @Component({
-	selector: 'app-privacy-policy-modal',
-	templateUrl: './privacy-policy-modal.component.html',
-	styleUrls: ['./privacy-policy-modal.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		IonContent,
-		IonFooter,
-		IonToolbar,
-		IonButton,
-		IonIcon,
-		IonLabel,
-		TranslateModule,
-		IonContent,
-		IonFooter,
-		IonToolbar,
-		IonButton,
-		IonIcon,
-		IonLabel,
-	],
+    selector: 'app-privacy-policy-modal',
+    templateUrl: './privacy-policy-modal.component.html',
+    styleUrls: ['./privacy-policy-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        IonContent,
+        IonFooter,
+        IonToolbar,
+        IonButton,
+        IonIcon,
+        IonLabel,
+        TranslateModule,
+        IonContent,
+        IonFooter,
+        IonToolbar,
+        IonButton,
+        IonIcon,
+        IonLabel,
+    ]
 })
 export class PrivacyPolicyModalComponent {
-	constructor(private readonly modalController: ModalController) {
+	private readonly modalController = inject(ModalController);
+
+	constructor() {
 		addIcons({ closeCircle });
 	}
 

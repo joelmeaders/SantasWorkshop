@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { FunctionsWrapper } from '@santashop/core';
 import referringAgencies from '../../../../../../assets/referring-agencies.json';
@@ -26,37 +26,38 @@ import {
 	Validators,
 	ReactiveFormsModule,
 } from '@angular/forms';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-	selector: 'app-referral-card',
-	templateUrl: './referral-card.component.html',
-	styleUrls: ['./referral-card.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		NgIf,
-		NgFor,
-		ReactiveFormsModule,
-		AsyncPipe,
-		TranslateModule,
-		IonCard,
-		IonCardHeader,
-		IonCardTitle,
-		IonCardContent,
-		IonList,
-		IonSearchbar,
-		IonItemGroup,
-		IonItemDivider,
-		IonLabel,
-		IonItem,
-		IonText,
-		IonInput,
-		IonButton,
-	],
+    selector: 'app-referral-card',
+    templateUrl: './referral-card.component.html',
+    styleUrls: ['./referral-card.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+    ReactiveFormsModule,
+    AsyncPipe,
+    TranslateModule,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonList,
+    IonSearchbar,
+    IonItemGroup,
+    IonItemDivider,
+    IonLabel,
+    IonItem,
+    IonText,
+    IonInput,
+    IonButton
+]
 })
 export class ReferralCardComponent {
+	private readonly functions = inject(FunctionsWrapper);
+	private readonly loadingController = inject(LoadingController);
+	private readonly alertController = inject(AlertController);
+
 	public readonly allReferrals: string[] = referringAgencies.agencies;
 
 	private readonly searchText = new BehaviorSubject<string | undefined>(
@@ -87,12 +88,6 @@ export class ReferralCardComponent {
 			Validators.required,
 		),
 	});
-
-	constructor(
-		private readonly functions: FunctionsWrapper,
-		private readonly loadingController: LoadingController,
-		private readonly alertController: AlertController,
-	) {}
 
 	public filter($event: any): void {
 		const input = $event.detail?.value;

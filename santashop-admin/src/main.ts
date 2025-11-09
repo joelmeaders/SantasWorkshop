@@ -1,46 +1,50 @@
-import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
+import {
+	enableProdMode,
+	inject,
+	provideZoneChangeDetection,
+} from '@angular/core';
+
 import { environment, firebaseConfig } from './environments/environment';
-import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
-	IonicRouteStrategy,
-	provideIonicAngular,
-} from '@ionic/angular/standalone';
-import { bootstrapApplication } from '@angular/platform-browser';
-import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
+	provideFirebaseApp,
+	initializeApp,
+	getApp,
+	FirebaseApp,
+} from '@angular/fire/app';
 import {
-	provideAuth,
-	getAuth,
-	connectAuthEmulator,
-	Auth,
-} from '@angular/fire/auth';
+	provideAppCheck,
+	initializeAppCheck,
+	ReCaptchaEnterpriseProvider,
+} from '@angular/fire/app-check';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import {
 	provideFunctions,
 	getFunctions,
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
 import {
-	provideFirestore,
-	getFirestore,
-	connectFirestoreEmulator,
-} from '@angular/fire/firestore';
-import { AppComponent } from './app/app.component';
+	provideAnalytics,
+	getAnalytics,
+	ScreenTrackingService,
+	UserTrackingService,
+} from '@angular/fire/analytics';
+import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
 	provideHttpClient,
 	withInterceptorsFromDi,
 } from '@angular/common/http';
-import {
-	provideAnalytics,
-	ScreenTrackingService,
-	UserTrackingService,
-} from '@angular/fire/analytics';
-import { getAnalytics } from 'firebase/analytics';
+import { bootstrapApplication } from '@angular/platform-browser';
 import { routes } from './app/app.routes';
-import { AuthWrapper } from '../../santashop-core/src';
+import { AppComponent } from './app/app.component';
 import {
-	initializeAppCheck,
-	provideAppCheck,
-	ReCaptchaEnterpriseProvider,
-} from '@angular/fire/app-check';
+	IonicRouteStrategy,
+	provideIonicAngular,
+} from '@ionic/angular/standalone';
+import {
+	connectFirestoreEmulator,
+	getFirestore,
+	provideFirestore,
+} from '@angular/fire/firestore';
 
 const firebaseProviders = [
 	provideFirebaseApp(() => initializeApp(firebaseConfig)),
@@ -51,7 +55,7 @@ const firebaseProviders = [
 		}),
 	),
 	provideAuth(() => {
-		const auth = getAuth();
+		const auth = getAuth(inject(FirebaseApp));
 		if (!environment.production) {
 			connectAuthEmulator(auth, 'http://localhost:9099', {
 				disableWarnings: true,
@@ -61,10 +65,10 @@ const firebaseProviders = [
 	}),
 	provideFunctions(() => {
 		const functions = getFunctions();
-		functions.customDomain = location.origin;
 		if (!environment.production) {
 			connectFunctionsEmulator(functions, 'localhost', 5001);
-			functions.customDomain = null;
+		} else {
+			functions.customDomain = location.origin;
 		}
 		return functions;
 	}),
@@ -79,7 +83,9 @@ const firebaseProviders = [
 ];
 
 if (!environment.production) {
-	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+	(
+		self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: boolean }
+	).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
 if (environment.production) {
@@ -99,10 +105,6 @@ bootstrapApplication(AppComponent, {
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
 		ScreenTrackingService,
-		{
-			provide: AuthWrapper,
-			deps: [Auth],
-		},
 		UserTrackingService,
 	],
 }).catch((err) => console.log(err));

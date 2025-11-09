@@ -4,4 +4,5 @@ export const shopSchedule = [
 	{ year: 2022, days: [9, 10, 12, 13] },
 	{ year: 2023, days: [8, 9, 11, 12] },
 	{ year: 2024, days: [13, 14, 16, 17] },
+	{ year: 2025, days: [12, 13, 15, 16] },
 ];

@@ -14,7 +14,7 @@ export class ScannerService implements OnDestroy {
 
 	private readonly $destroy = new Subject<void>();
 
-	public readonly formatsEnabled: any = [11];
+	public readonly formatsEnabled: number[] = [11];
 
 	private readonly hasPermissions = new BehaviorSubject<boolean>(false);
 	public readonly $hasPermissions = this.hasPermissions.pipe(
@@ -31,12 +31,12 @@ export class ScannerService implements OnDestroy {
 	);
 
 	private readonly previousDevice = new BehaviorSubject<
-		MediaDeviceInfo | any
+		MediaDeviceInfo | undefined
 	>(undefined);
 
-	private readonly currentDevice = new BehaviorSubject<MediaDeviceInfo | any>(
-		undefined,
-	);
+	private readonly currentDevice = new BehaviorSubject<
+		MediaDeviceInfo | undefined
+	>(undefined);
 	public readonly $currentDevice = this.currentDevice.pipe(
 		takeUntil(this.$destroy),
 		distinctUntilChanged((prev, curr) => prev?.deviceId === curr?.deviceId),
@@ -59,7 +59,7 @@ export class ScannerService implements OnDestroy {
 		this.$destroy.next();
 	}
 
-	public setCurrentDevice(device: MediaDeviceInfo | any): void {
+	public setCurrentDevice(device: MediaDeviceInfo | undefined): void {
 		if (!device && this.currentDevice.getValue()) {
 			this.previousDevice.next(this.currentDevice.getValue());
 		}
@@ -71,7 +71,7 @@ export class ScannerService implements OnDestroy {
 		this.availableDevices.next(devices);
 	}
 
-	public onDeviceSelectChange($event: any): void {
+	public onDeviceSelectChange($event: { detail?: { value?: string } }): void {
 		// deviceId
 		const deviceId = $event?.detail?.value;
 
@@ -104,12 +104,18 @@ export class ScannerService implements OnDestroy {
 		this.hasPermissions.next(value);
 	}
 
-	public async onScanError(error: any): Promise<void> {
+	public async onScanError(error: {
+		name?: string;
+		message?: string;
+	}): Promise<void> {
 		await this.handleError(error);
 		this.onDeviceSelectChange({ detail: { value: '' } });
 	}
 
-	private async handleError(error: any): Promise<void> {
+	private async handleError(error: {
+		name?: string;
+		message?: string;
+	}): Promise<void> {
 		const alert = await this.alertController.create({
 			header: 'Error',
 			subHeader: error.name,

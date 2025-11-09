@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { ErrorHandlerService } from '@core/*';
+import { ErrorHandlerService } from './error-handler.service';
 import { AlertController } from '@ionic/angular/standalone';
-import { IError } from '../../../../dist/santashop-models';
+import { IError } from '@santashop/models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 
 describe('ErrorHandlerService', () => {
@@ -17,7 +17,7 @@ describe('ErrorHandlerService', () => {
 					provide: AnalyticsWrapper,
 					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
 						'AnalyticsWrapperSpy',
-						['logEvent'],
+						['logEvent', 'logErrorEvent'],
 					),
 				},
 				{
@@ -53,15 +53,19 @@ describe('ErrorHandlerService', () => {
 
 		const createAlertSpy = alertControllerService.create;
 		const alertStub = {
-			present: () => {},
-			onDidDismiss: () => {},
+			present: () => {
+				/* mock */
+			},
+			onDidDismiss: () => {
+				/* mock */
+			},
 		} as HTMLIonAlertElement;
 		createAlertSpy.and.resolveTo(alertStub);
 
 		const logSpy = analyticsWrapper.logErrorEvent;
 
 		// Act
-		await service.handleError(error, true);
+		await service.handleError(error, 'Error Encountered', true);
 
 		// Assert
 		expect(createAlertSpy).toHaveBeenCalled();

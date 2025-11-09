@@ -1,38 +1,46 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	Auth,
-	authState,
-	User as _User,
-	UserCredential as _UserCredential,
+	User,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
-	IdTokenResult as _IdTokenResult,
+	IdTokenResult,
+	UserCredential,
+	onAuthStateChanged,
 } from '@angular/fire/auth';
-import {
-	redirectUnauthorizedTo as _redirectUnauthorizedTo,
-	redirectLoggedInTo as _redirectLoggedInTo,
-	hasCustomClaim as _hasCustomClaim,
-} from '@angular/fire/auth-guard';
-import { Observable } from 'rxjs';
+import { from, Observable, switchMap } from 'rxjs';
+import { ɵzoneWrap } from '@angular/fire';
 
-export type User = _User;
-export type UserCredential = _UserCredential;
-export type IdTokenResult = _IdTokenResult;
-export const redirectUnauthorizedTo = _redirectUnauthorizedTo;
-export const redirectLoggedInTo = _redirectLoggedInTo;
-export const hasCustomClaim = _hasCustomClaim;
+function _authState(auth: Auth): Observable<User | null> {
+	return from(auth.authStateReady()).pipe(
+		switchMap(
+			() =>
+				new Observable<User | null>((subscriber) => {
+					const unsubscribe = onAuthStateChanged(
+						auth,
+						subscriber.next.bind(subscriber),
+						subscriber.error.bind(subscriber),
+						subscriber.complete.bind(subscriber),
+					);
+					return { unsubscribe };
+				}),
+		),
+	);
+}
+
+export const authState = ɵzoneWrap(_authState, true);
 
 @Injectable({
 	providedIn: 'root',
 })
 export class AuthWrapper {
-	constructor(private readonly auth: Auth) {}
+	private readonly auth = inject(Auth);
 
-	public readonly authState = (): Observable<_User | null> =>
+	public readonly authState = (): Observable<User | null> =>
 		authState(this.auth);
 
-	public readonly currentUser = (): _User | null => this.auth.currentUser;
+	public readonly currentUser = (): User | null => this.auth.currentUser;
 
 	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
 		this.currentUser()?.getIdTokenResult() ?? Promise.resolve(null);
@@ -43,7 +51,7 @@ export class AuthWrapper {
 	public readonly signInWithEmailAndPassword = (
 		email: string,
 		password: string,
-	): Promise<_UserCredential> =>
+	): Promise<UserCredential> =>
 		signInWithEmailAndPassword(this.auth, email, password);
 
 	public readonly updatePassword = (

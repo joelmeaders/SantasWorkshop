@@ -22,7 +22,6 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
-import { Timestamp } from '@firebase/firestore';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -41,6 +40,7 @@ import {
 	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
+import { Timestamp } from '@angular/fire/firestore';
 
 Chart.register(ChartDataLabels);
 
@@ -49,7 +49,6 @@ Chart.register(ChartDataLabels);
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		IonTitle,
 		IonGrid,
@@ -72,7 +71,7 @@ export class RegistrationPage {
 
 	public readonly schedule = shopSchedule;
 
-	public year = 2024;
+	public year = 2025;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
@@ -162,10 +161,12 @@ export class RegistrationPage {
 
 	public readonly familiesBySlots$ = this.dateTimeStats$.pipe(
 		map((dateTimes) =>
-			dateTimes.map((e) => ({
-				date: (e.dateTime as any as Timestamp).toDate(),
-				count: e.count,
-			})),
+			dateTimes.map((e) => {
+				const dateTime = e.dateTime as Timestamp | Date;
+				const date =
+					dateTime instanceof Date ? dateTime : dateTime.toDate();
+				return { date, count: e.count };
+			}),
 		),
 
 		map((data) => data.sort((a, b) => Number(a.date) - Number(b.date))),
@@ -199,10 +200,12 @@ export class RegistrationPage {
 			};
 
 			data.forEach((e) => {
-				formatted!.labels!.push([
-					e.zip.toString(),
-					`${e.count.toString()} Families`,
-				]);
+				if (formatted.labels) {
+					formatted.labels.push([
+						e.zip.toString(),
+						`${e.count.toString()} Families`,
+					]);
+				}
 				formatted.datasets[0].data.push(e.count);
 			});
 
@@ -251,7 +254,7 @@ export class RegistrationPage {
 				},
 				formatter: (_, ctx) => {
 					if (ctx.chart.data.labels) {
-						return ctx.chart.data.labels[ctx.dataIndex];
+						return ctx.chart.data.labels[ctx.dataIndex] ?? '';
 					}
 					return '';
 				},
@@ -277,9 +280,8 @@ export class RegistrationPage {
 					weight: 'bold',
 				},
 				formatter: (value, ctx) => {
-					return `${value} ${
-						ctx.chart?.data?.labels![ctx.dataIndex]
-					}`;
+					const label = ctx.chart?.data?.labels?.[ctx.dataIndex];
+					return `${value} ${label ?? ''}`;
 				},
 			},
 		},
@@ -321,7 +323,9 @@ export class RegistrationPage {
 	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[],
 	): ChartData<'bar'>[] {
-		const defaults = (label: string) => ({
+		const defaults = (
+			label: string,
+		): { datasets: { data: number[]; label: string }[] } => ({
 			datasets: [{ data: [], ...this.colorSettings, label }],
 		});
 
@@ -340,7 +344,6 @@ export class RegistrationPage {
 		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
 			const day = date.getDate();
-
 			return schedule.days.findIndex((d) => d === day);
 		};
 
@@ -352,7 +355,7 @@ export class RegistrationPage {
 		return arr;
 	}
 
-	private friendlyDay(day: number) {
+	private friendlyDay(day: number): string {
 		const j = day % 10;
 		const k = day % 100;
 

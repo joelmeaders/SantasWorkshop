@@ -12,7 +12,7 @@ const envConfigFile = `export const environment = {
   };
 
   export const firebaseConfig = {
-    apiKey: '${process.env.FIREBASE_API_KEY}',
+    apiKey: '${process.env['FIREBASE_API_KEY']}',
     authDomain: 'santas-workshop-193b5.firebaseapp.com',
     databaseURL: 'https://santas-workshop-193b5.firebaseio.com',
     projectId: 'santas-workshop-193b5',

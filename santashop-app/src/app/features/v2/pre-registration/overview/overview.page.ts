@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { combineLatest, Subject } from 'rxjs';
 import {
 	filter,
@@ -11,7 +11,7 @@ import {
 import { PreRegistrationService } from '../../../../core';
 import { ProfileService } from '../../../../core/services/profile.service';
 
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ReferralCardComponent } from './referral-card/referral-card.component';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { ChildrenCardComponent } from './children-card/children-card.component';
@@ -20,26 +20,27 @@ import { SubmitCardComponent } from './submit-card/submit-card.component';
 import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'app-overview',
-	templateUrl: './overview.page.html',
-	styleUrls: ['./overview.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		NgIf,
-		ReferralCardComponent,
-		PreRegistrationMenuComponent,
-		ChildrenCardComponent,
-		ScheduleCardComponent,
-		SubmitCardComponent,
-		AsyncPipe,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-	],
+    selector: 'app-overview',
+    templateUrl: './overview.page.html',
+    styleUrls: ['./overview.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+    ReferralCardComponent,
+    PreRegistrationMenuComponent,
+    ChildrenCardComponent,
+    ScheduleCardComponent,
+    SubmitCardComponent,
+    AsyncPipe,
+    IonContent,
+    IonGrid,
+    IonRow,
+    IonCol
+]
 })
 export class OverviewPage implements OnDestroy {
+	private readonly preregistrationService = inject(PreRegistrationService);
+	private readonly profileService = inject(ProfileService);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly userRegistration$ =
@@ -73,11 +74,6 @@ export class OverviewPage implements OnDestroy {
 		map(([childCount, dateTimeSlot]) => childCount >= 1 && !!dateTimeSlot),
 		shareReplay(1),
 	);
-
-	constructor(
-		private readonly preregistrationService: PreRegistrationService,
-		private readonly profileService: ProfileService,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

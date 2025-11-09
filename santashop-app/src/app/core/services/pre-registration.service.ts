@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import {
 	map,
@@ -17,7 +17,6 @@ import {
 import {
 	AuthService,
 	automock,
-	DocumentReference,
 	filterNil,
 	FireRepoLite,
 	FunctionsWrapper,
@@ -27,11 +26,17 @@ import {
 	timestampDateFix,
 } from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
+import { DocumentReference } from '@angular/fire/firestore';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class PreRegistrationService implements OnDestroy {
+	private readonly fireRepo = inject(FireRepoLite);
+	private readonly authService = inject(AuthService);
+	private readonly qrCodeService = inject(QrCodeService);
+	private readonly afFunctions = inject(FunctionsWrapper);
+
 	private readonly registrationCollection =
 		(): IFireRepoCollection<Registration> =>
 			this.fireRepo.collection<Registration>(
@@ -107,13 +112,6 @@ export class PreRegistrationService implements OnDestroy {
 		mergeMap((uid) => this.qrCodeService.registrationQrCodeUrl(uid)),
 		shareReplay(1),
 	);
-
-	constructor(
-		private readonly fireRepo: FireRepoLite,
-		private readonly authService: AuthService,
-		private readonly qrCodeService: QrCodeService,
-		private readonly afFunctions: FunctionsWrapper,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

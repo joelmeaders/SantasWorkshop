@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AppStateService } from '../../shared/services/app-state.service';
+import { AppStateService } from '@santashop/core';
 
 import { RouterLinkActive, RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -26,7 +26,6 @@ import {
 	templateUrl: './admin.page.html',
 	styleUrls: ['./admin.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		RouterLinkActive,
 		RouterLink,

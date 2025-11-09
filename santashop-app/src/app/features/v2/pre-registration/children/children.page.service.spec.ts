@@ -55,7 +55,7 @@ describe('ChildrenPageService', () => {
 
 	it('children$: should make expected call and return 4', async () => {
 		// Arrange & Act
-		var result = await firstValueFrom(service.children$);
+		const result = await firstValueFrom(service.children$);
 
 		// Assert
 		expect(childrenSpy).toHaveBeenCalledTimes(1);
@@ -64,7 +64,7 @@ describe('ChildrenPageService', () => {
 
 	it('childCount$: should return 4', async () => {
 		// Arrange & Act
-		var result = await firstValueFrom(service.childCount$);
+		const result = await firstValueFrom(service.childCount$);
 
 		// Assert
 		expect(childrenSpy).toHaveBeenCalledTimes(1);

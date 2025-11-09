@@ -23,8 +23,9 @@
 			</ion-col>
 		</ion-row>
 
+		@let createAccountEnabled = createAccountEnabled$ | async;
 		<ion-row>
-			@if (createAccountEnabled$ | async) {
+			@if (createAccountEnabled === true) {
 			<ion-col size="12" class="ion-text-center">
 				<p>{{ "SIGNUP.NEW_ACCOUNT_NOTICE" | translate }}</p>
 				<ion-button
@@ -36,11 +37,15 @@
 					<strong>{{ "HOME.CREATE_ACCOUNT" | translate }}</strong>
 				</ion-button>
 			</ion-col>
-			} @else {
+			} @else if (createAccountEnabled === false) {
 			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
 				<div class="alert">
 					<p>{{ "SIGNUP.CREATE_ACCOUNT_DISABLED" | translate }}</p>
 				</div>
+			</ion-col>
+			} @else {
+			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
+				<ion-spinner name="crescent"></ion-spinner>
 			</ion-col>
 			}
 

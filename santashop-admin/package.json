@@ -1,15 +1,15 @@
 {
 	"name": "@santashop/admin",
-	"version": "2.2.0",
+	"version": "2025.0.0",
 	"description": "",
 	"scripts": {
 		"lint": "ng lint santashop-admin --fix --cache",
 		"test": "ng test santashop-admin",
-		"start:test": "firebase use santas-workshop-test && ng serve santashop-admin --port=4100",
+		"start:test": "pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --port=4100",
 		"config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",
-		"prebuild": "npm run build -w @santashop/models && npm run build:prod -w @santashop/core",
-		"build:test": "npm run prebuild && ng build santashop-admin --configuration=test",
-		"build:prod": "npm run prebuild && ng build santashop-admin --configuration=production",
+		"prebuild": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod",
+		"build:test": "pnpm prebuild && ng build santashop-admin --configuration=test",
+		"build:prod": "pnpm prebuild && ng build santashop-admin --configuration=production",
 		"analyze": "ng build santashop-admin --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
 		"deploy:test": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy",
 		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy --only hosting"
@@ -17,7 +17,24 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@santashop/models": "*",
-		"@santashop/core": "*"
+		"@angular/animations": "*",
+		"@angular/common": "*",
+		"@angular/core": "*",
+		"@angular/fire": "*",
+		"@angular/forms": "*",
+		"@angular/platform-browser": "*",
+		"@angular/router": "*",
+		"@ionic/angular": "*",
+		"chart.js": "*",
+		"chartjs-plugin-datalabels": "*",
+		"firebase": "*",
+		"ng2-charts": "*",
+		"rxfire": "*",
+		"rxjs": "*",
+		"tslib": "*",
+		"zone.js": "*"
+	},
+	"volta": {
+		"node": "24.11.0"
 	}
 }

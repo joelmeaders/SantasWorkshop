@@ -32,7 +32,6 @@ import { mailOutline } from 'ionicons/icons';
 	templateUrl: './resend-email.page.html',
 	styleUrls: ['./resend-email.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		ReactiveFormsModule,
@@ -75,7 +74,7 @@ export class ResendEmailPage {
 	}
 
 	public async searchAndSend(): Promise<void> {
-		const email = this.form.controls.emailAddress.value.toLowerCase();
+		const email = this.form.controls['emailAddress'].value.toLowerCase();
 
 		const index = await this.searchCustomer(email);
 		if (!index) return;
@@ -112,10 +111,11 @@ export class ResendEmailPage {
 
 				await alert.present();
 			}
-		} catch (error: any) {
+		} catch (error: unknown) {
+			const err = error as { details?: string; message?: string };
 			const alert = await this.alerts.create({
 				header: 'Error - could not find customer',
-				message: `An error occurred: ${error.details ?? error.message}`,
+				message: `An error occurred: ${err.details ?? err.message}`,
 				buttons: ['OK'],
 			});
 			await alert.present();
@@ -138,10 +138,11 @@ export class ResendEmailPage {
 
 			const result = await this.sendEmailFn(index.customerId);
 			console.log(result);
-		} catch (error: any) {
+		} catch (error: unknown) {
+			const err = error as { details?: string; message?: string };
 			const alert = await this.alerts.create({
 				header: 'Error - could not send email',
-				message: `An error occurred: ${error.details ?? error.message}`,
+				message: `An error occurred: ${err.details ?? err.message}`,
 				buttons: ['OK'],
 			});
 			await alert.present();

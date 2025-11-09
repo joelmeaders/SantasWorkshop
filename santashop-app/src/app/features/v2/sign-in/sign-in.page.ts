@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { SignInPageService } from './sign-in.page.service';
 
 import { RouterLink } from '@angular/router';
@@ -22,7 +22,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
-import { AppStateService } from '../../../core';
+import { AppStateService } from '@santashop/core';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
@@ -31,7 +31,6 @@ import { AsyncPipe } from '@angular/common';
 	styleUrls: ['./sign-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [SignInPageService],
-	standalone: true,
 	imports: [
 		AsyncPipe,
 		IonContent,
@@ -54,15 +53,15 @@ import { AsyncPipe } from '@angular/common';
 	],
 })
 export class SignInPage {
+	private readonly viewService = inject(SignInPageService);
+	private readonly appStateService = inject(AppStateService);
+
 	public readonly form = this.viewService.form;
 
 	public readonly createAccountEnabled$ =
 		this.appStateService.createAccountEnabled$;
 
-	constructor(
-		private readonly viewService: SignInPageService,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

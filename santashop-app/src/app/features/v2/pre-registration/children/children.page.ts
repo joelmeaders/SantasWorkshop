@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	AlertController,
 	IonContent,
@@ -17,13 +17,11 @@ import {
 } from '@ionic/angular/standalone';
 import { Child } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { Observable, tap } from 'rxjs';
-import { AppStateService } from '../../../../core';
+import { Observable } from 'rxjs';
 import { ChildrenPageService } from './children.page.service';
-import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
-import { NgIf, NgFor, AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
 	arrowBackSharp,
@@ -42,12 +40,9 @@ import {
 	styleUrls: ['./children.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [ChildrenPageService],
-	standalone: true,
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
-		NgIf,
-		NgFor,
 		AsyncPipe,
 		DatePipe,
 		TranslateModule,
@@ -67,28 +62,17 @@ import {
 	],
 })
 export class ChildrenPage {
+	private readonly viewService = inject(ChildrenPageService);
+	private readonly alertController = inject(AlertController);
+	private readonly translateService = inject(TranslateService);
+
 	public readonly children$: Observable<Child[] | undefined> =
 		this.viewService.children$;
 
 	public readonly childCount$: Observable<number> =
 		this.viewService.childCount$;
 
-	protected readonly closedSubscription =
-		this.appStateService.isRegistrationEnabled$
-			.pipe(
-				tap((enabled) => {
-					if (!enabled)
-						this.appStateService.setModal(RegistrationClosedPage);
-				}),
-			)
-			.subscribe();
-
-	constructor(
-		private readonly viewService: ChildrenPageService,
-		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({
 			arrowBackSharp,
 			addCircle,

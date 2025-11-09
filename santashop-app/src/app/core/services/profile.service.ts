@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	distinctUntilChanged,
 	map,
@@ -13,6 +13,9 @@ import { COLLECTION_SCHEMA, User } from '@santashop/models';
 	providedIn: 'root',
 })
 export class ProfileService {
+	private readonly authService = inject(AuthService);
+	private readonly httpService = inject(FireRepoLite);
+
 	public readonly userProfile$ = this.authService.uid$.pipe(
 		switchMap((id) => this.getUser$(id)),
 	);
@@ -28,9 +31,4 @@ export class ProfileService {
 			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
 			.pipe(filterNil());
-
-	constructor(
-		private readonly authService: AuthService,
-		private readonly httpService: FireRepoLite,
-	) {}
 }

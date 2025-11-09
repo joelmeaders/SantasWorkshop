@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
 	MOBILE_EVENT,
@@ -6,14 +6,12 @@ import {
 	MIN_BIRTHDATE,
 	CoreModule,
 } from '@santashop/core';
-import { filter, map, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { AddChildPageService } from './add-child.page.service';
-import { AppStateService } from '../../../../../core';
-import { RegistrationClosedPage } from '../../../../registration-closed/registration-closed.page';
 
 import { PreRegistrationMenuComponent } from '../../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp, gift } from 'ionicons/icons';
@@ -41,12 +39,10 @@ import {
 	styleUrls: ['./add-child.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [AddChildPageService],
-	standalone: true,
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
 		ReactiveFormsModule,
-		NgIf,
 		CoreModule,
 		AsyncPipe,
 		TranslateModule,
@@ -68,14 +64,17 @@ import {
 	],
 })
 export class AddChildPage {
+	private readonly viewService = inject(AddChildPageService);
+	private readonly route = inject(ActivatedRoute);
+	public readonly mobileEvent = inject(MOBILE_EVENT);
+
 	public readonly setChildSubscription = this.route.queryParamMap
 		.pipe(
 			takeUntil(this.viewService.destroy$),
 			filter((params) => params.has('id')),
 			map((params) => params.get('id') as any as number),
-			tap((id) => this.viewService.setChildToEdit(id)),
 		)
-		.subscribe();
+		.subscribe((id) => this.viewService.setChildToEdit(id));
 
 	public readonly form = this.viewService.form;
 	public readonly minBirthDate = MIN_BIRTHDATE().toISOString();
@@ -83,22 +82,7 @@ export class AddChildPage {
 	public readonly isInfant$ = this.viewService.isInfant$;
 	public readonly isEdit$ = this.viewService.isEdit$;
 
-	protected readonly closedSubscription =
-		this.appStateService.isRegistrationEnabled$
-			.pipe(
-				tap((enabled) => {
-					if (!enabled)
-						this.appStateService.setModal(RegistrationClosedPage);
-				}),
-			)
-			.subscribe();
-
-	constructor(
-		private readonly viewService: AddChildPageService,
-		private readonly route: ActivatedRoute,
-		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp, gift });
 		console.log('min birth date', this.minBirthDate);
 		console.log('max birth date', this.maxBirthDate);

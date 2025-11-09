@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ProfilePageService } from '../profile.page.service';
 
 import { PreRegistrationMenuComponent } from '../../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
@@ -24,36 +24,37 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'app-change-info',
-	templateUrl: './change-info.page.html',
-	styleUrls: ['./change-info.page.css'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
-	standalone: true,
-	imports: [
-		PreRegistrationMenuComponent,
-		RouterLink,
-		ReactiveFormsModule,
-		TranslateModule,
-		CoreModule,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonButton,
-		IonIcon,
-		IonItem,
-		IonCardTitle,
-		IonCard,
-		IonCardContent,
-		IonList,
-		IonInput,
-	],
+    selector: 'app-change-info',
+    templateUrl: './change-info.page.html',
+    styleUrls: ['./change-info.page.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [ProfilePageService],
+    imports: [
+        PreRegistrationMenuComponent,
+        RouterLink,
+        ReactiveFormsModule,
+        TranslateModule,
+        CoreModule,
+        IonContent,
+        IonGrid,
+        IonRow,
+        IonCol,
+        IonButton,
+        IonIcon,
+        IonItem,
+        IonCardTitle,
+        IonCard,
+        IonCardContent,
+        IonList,
+        IonInput,
+    ]
 })
 export class ChangeInfoPage {
+	private readonly viewService = inject(ProfilePageService);
+
 	public readonly form = this.viewService.profileForm;
 
-	constructor(private readonly viewService: ProfilePageService) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

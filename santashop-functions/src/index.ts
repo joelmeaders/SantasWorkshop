@@ -218,3 +218,51 @@ export const pubsubDeleteUsers = functions
 	.onPublish(async () => {
 		await (await import('./fn/pubsubDeleteUsers')).default();
 	});
+
+// ------------------------------------- TEST HELPER FUNCTIONS (Emulator Only)
+// These functions are only available when running in the Firebase emulator
+// They should NOT be deployed to production
+
+// Only export test functions in non-production environments
+const isProduction =
+	process.env['NODE_ENV'] === 'production' ||
+	process.env['FUNCTIONS_EMULATOR'] !== 'true';
+
+if (!isProduction) {
+	/**
+	 * Seeds the database with test parameters
+	 * @param scenario - The test scenario to seed
+	 */
+	exports.testSeedScenario = functions
+		.runWith({ enforceAppCheck: false })
+		.https.onCall(async (data) => {
+			const { seedTestScenario } = await import('./fn/testHelpers');
+			const scenario = data?.scenario || 'default';
+			await seedTestScenario(scenario);
+			return { success: true };
+		});
+
+	/**
+	 * Seeds public parameters with custom values
+	 * @param params - The parameters to seed
+	 */
+	exports.testSeedPublicParameters = functions
+		.runWith({ enforceAppCheck: false })
+		.https.onCall(async (data) => {
+			const { seedPublicParameters } = await import('./fn/testHelpers');
+			await seedPublicParameters(data || {});
+			return { success: true };
+		});
+
+	/**
+	 * Clears all test data from Firestore and Auth
+	 * WARNING: This will delete all data in the emulator
+	 */
+	exports.testClearAllData = functions
+		.runWith({ enforceAppCheck: false })
+		.https.onCall(async () => {
+			const { clearAllData } = await import('./fn/testHelpers');
+			await clearAllData();
+			return { success: true };
+		});
+}

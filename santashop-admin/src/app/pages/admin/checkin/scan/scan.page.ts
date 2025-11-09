@@ -104,12 +104,12 @@ export class ScanPage {
 	@ViewChild('scanner', { static: true })
 	private readonly scanner?: ZXingScannerComponent;
 
-	protected readonly interfaceOptions: PopoverOptions = {
+	protected readonly interfaceOptions: Partial<PopoverOptions> = {
 		alignment: 'center',
 		side: 'top',
 		showBackdrop: true,
 		backdropDismiss: true,
-	} as any;
+	};
 
 	private routeToReviewPageSubscription?: Subscription;
 	private scanErrorSubscription?: Subscription;

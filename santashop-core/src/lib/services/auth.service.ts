@@ -110,12 +110,8 @@ export class AuthService {
 			password: oldPassword,
 		};
 
-		try {
-			await this.login(auth);
-			return await this.authWrapper.updatePassword(user, newPassword);
-		} catch (error: any) {
-			throw error;
-		}
+		await this.login(auth);
+		return this.authWrapper.updatePassword(user, newPassword);
 	}
 
 	/**
@@ -140,12 +136,8 @@ export class AuthService {
 			password,
 		};
 
-		try {
-			await this.login(auth);
-			await this.functionsWrapper.updateEmailAddress(newEmailAddress);
-		} catch (error: any) {
-			throw error;
-		}
+		await this.login(auth);
+		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 	}
 
 	/**

@@ -194,7 +194,11 @@ describe('FireRepoBase', () => {
 		};
 
 		const addDocSpy = firestoreMethods.addDoc;
-		addDocSpy.and.resolveTo({ withConverter() {} } as any);
+		addDocSpy.and.resolveTo({
+			withConverter() {
+				/* mock */
+			},
+		} as any);
 
 		// Act
 		await firstValueFrom(service.add(collectionPath, doc));

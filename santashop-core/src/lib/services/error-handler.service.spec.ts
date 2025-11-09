@@ -53,8 +53,12 @@ describe('ErrorHandlerService', () => {
 
 		const createAlertSpy = alertControllerService.create;
 		const alertStub = {
-			present: () => {},
-			onDidDismiss: () => {},
+			present: () => {
+				/* mock */
+			},
+			onDidDismiss: () => {
+				/* mock */
+			},
 		} as HTMLIonAlertElement;
 		createAlertSpy.and.resolveTo(alertStub);
 

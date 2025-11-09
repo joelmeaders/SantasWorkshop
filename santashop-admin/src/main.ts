@@ -83,7 +83,7 @@ const firebaseProviders = [
 ];
 
 if (!environment.production) {
-	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+	(self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
 if (environment.production) {

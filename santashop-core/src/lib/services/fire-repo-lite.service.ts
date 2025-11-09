@@ -51,7 +51,10 @@ export class FireRepoLite {
 			collectionPathName: collectionPath,
 
 			/** @inheritdoc */
-			read: (documentId: string, idField?: Extract<keyof T, string>) => {
+			read: (
+				documentId: string,
+				idField?: Extract<keyof T, string>,
+			): Observable<T | undefined> => {
 				const colRef = this.firestoreWrapper.collection(collectionPath);
 				const docRef = this.firestoreWrapper.doc<T>(
 					colRef as any,
@@ -64,7 +67,7 @@ export class FireRepoLite {
 			readMany: (
 				queryConstraints?: QueryConstraint[],
 				idField?: Extract<keyof T, string>,
-			) => {
+			): Observable<T[]> => {
 				const colRef =
 					this.firestoreWrapper.collection<T>(collectionPath);
 				const qry = queryConstraints
@@ -75,7 +78,7 @@ export class FireRepoLite {
 			},
 
 			/** @inheritdoc */
-			add: (document: T) => {
+			add: (document: T): Observable<DocumentReference<T>> => {
 				const colRef = this.firestoreWrapper.collection(collectionPath);
 				const action = this.firestoreWrapper
 					.addDoc<T>(colRef as CollectionReference<T>, document)
@@ -86,7 +89,10 @@ export class FireRepoLite {
 			},
 
 			/** @inheritdoc */
-			addById: (documentId: string, document: T) => {
+			addById: (
+				documentId: string,
+				document: T,
+			): Observable<DocumentReference<T>> => {
 				const colRef = this.firestoreWrapper.collection(collectionPath);
 				const docRef = this.firestoreWrapper.doc<T>(
 					colRef as CollectionReference<T>,
@@ -100,7 +106,11 @@ export class FireRepoLite {
 			},
 
 			/** @inheritdoc */
-			update: (documentId: string, document: T, merge = false) => {
+			update: (
+				documentId: string,
+				document: T,
+				merge = false,
+			): Observable<DocumentReference<T>> => {
 				const colRef = this.firestoreWrapper.collection(collectionPath);
 				const docRef = this.firestoreWrapper.doc<T>(
 					colRef as CollectionReference<T>,
@@ -117,7 +127,7 @@ export class FireRepoLite {
 			},
 
 			/** @inheritdoc */
-			delete: (documentId: string) => {
+			delete: (documentId: string): Observable<void> => {
 				const colRef = this.firestoreWrapper.collection(collectionPath);
 				const docRef = this.firestoreWrapper.doc(colRef, documentId);
 				const action = this.firestoreWrapper.deleteDoc(docRef);

@@ -2,23 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import {
 	Auth,
 	authState,
-	User as _User,
-	UserCredential as _UserCredential,
+	User,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
-	IdTokenResult as _IdTokenResult,
+	IdTokenResult,
+	UserCredential,
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-
-export type User = _User;
-export type UserCredential = _UserCredential;
-export type IdTokenResult = _IdTokenResult;
-export {
-	redirectUnauthorizedTo,
-	redirectLoggedInTo,
-	hasCustomClaim,
-} from '@angular/fire/auth-guard';
 
 @Injectable({
 	providedIn: 'root',
@@ -26,11 +17,10 @@ export {
 export class AuthWrapper {
 	private readonly auth = inject(Auth);
 
-
-	public readonly authState = (): Observable<_User | null> =>
+	public readonly authState = (): Observable<User | null> =>
 		authState(this.auth);
 
-	public readonly currentUser = (): _User | null => this.auth.currentUser;
+	public readonly currentUser = (): User | null => this.auth.currentUser;
 
 	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
 		this.currentUser()?.getIdTokenResult() ?? Promise.resolve(null);
@@ -41,7 +31,7 @@ export class AuthWrapper {
 	public readonly signInWithEmailAndPassword = (
 		email: string,
 		password: string,
-	): Promise<_UserCredential> =>
+	): Promise<UserCredential> =>
 		signInWithEmailAndPassword(this.auth, email, password);
 
 	public readonly updatePassword = (

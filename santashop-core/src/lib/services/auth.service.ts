@@ -7,14 +7,10 @@ import {
 	switchMap,
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
-import {
-	AuthWrapper,
-	IdTokenResult,
-	User,
-	UserCredential,
-} from './_auth-wrapper';
+import { AuthWrapper } from './_auth-wrapper';
 import { Auth, UserEmailUid } from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
+import { IdTokenResult, User, UserCredential } from '@angular/fire/auth';
 
 @Injectable({
 	providedIn: 'root',

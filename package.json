@@ -43,7 +43,7 @@
     "chart.js": "^4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^4.1.0",
-    "firebase": "^12.5.0",
+    "firebase": "^11.10.0",
     "ionicons": "^8.0.13",
     "ng2-charts": "^8.0.0",
     "reflect-metadata": "^0.2.2",
@@ -96,10 +96,5 @@
   },
   "volta": {
     "node": "24.11.0"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "rxfire@6.1.0": "patches/rxfire@6.1.0.patch"
-    }
   }
 }

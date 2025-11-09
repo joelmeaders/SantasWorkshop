@@ -2,6 +2,13 @@
 
 All notable changes to the admin application will be documented in this file.
 
+## [2025.0.1] - 2025-11-09
+
+### Fixed
+- Test suite compatibility: Updated Auth mock with `authStateReady` method
+- Enhanced ActivatedRoute mock with complete snapshot properties
+- Improved test helper implementation for better test reliability
+
 ## [2025.0.0] - 2025-11-09
 
 ### Added

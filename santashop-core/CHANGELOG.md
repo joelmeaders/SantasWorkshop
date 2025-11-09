@@ -2,6 +2,11 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2025.0.1] - 2025-11-09
+
+### Fixed
+- Test suite compatibility: No changes required for this package
+
 ## [2025.0.0] - 2025-11-09
 
 ### Added

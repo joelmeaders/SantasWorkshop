@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2025.0.1] - 2025-11-09
+
+### Fixed
+- Test suite compatibility: Updated test mocks and helpers for better reliability
+- Removed debug console.log statements from test environment configuration
+- Fixed Auth mock to include `authStateReady` method
+- Fixed Analytics mock to include proper app structure
+- Fixed ActivatedRoute mock to include all required snapshot properties
+
 ## [2025.0.0] - 2025-11-09
 
 ### Added

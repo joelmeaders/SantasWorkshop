@@ -9,6 +9,7 @@ import {
 	provideTranslateServiceMock,
 	createAuthMock,
 	createFirestoreMock,
+	createAnalyticsMock,
 } from '../../../../../test-helpers';
 import { SubmitPage } from './submit.page';
 
@@ -40,7 +41,7 @@ describe('SubmitPage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),

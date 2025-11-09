@@ -10,6 +10,3 @@ export const environment = {
 };
 
 export const firebaseConfig = { ...firebaseConfigDev };
-
-console.log('environment.test.ts', environment);
-console.log('firebaseConfigDev', firebaseConfigDev);

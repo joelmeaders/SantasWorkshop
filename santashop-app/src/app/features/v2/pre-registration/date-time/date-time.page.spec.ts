@@ -9,12 +9,13 @@ import {
 	createAppStateServiceMock,
 	provideTranslateServiceMock,
 	provideActivatedRouteMock,
+	createAnalyticsMock,
 } from '../../../../../test-helpers';
 
 import { DateTimePage } from './date-time.page';
 import { DateTimePageService } from './date-time.page.service';
 import { PreRegistrationService } from '../../../../core/services/pre-registration.service';
-import { AppStateService } from '../../../../core';
+import { AppStateService } from '@santashop/core';
 import { AlertController } from '@ionic/angular/standalone';
 import { of } from 'rxjs';
 
@@ -68,7 +69,7 @@ describe('DateTimePage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				{
 					provide: AlertController,

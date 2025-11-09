@@ -44,11 +44,15 @@ export function provideTranslateServiceMock(): Provider {
  * Creates a mock Firebase Auth instance.
  */
 export function createFirebaseAuthMock() {
-	return jasmine.createSpyObj('Auth', [
+	const mock = jasmine.createSpyObj('Auth', [
 		'signInWithEmailAndPassword',
 		'signOut',
 		'createUserWithEmailAndPassword',
+		'authStateReady',
 	]);
+	mock.authStateReady.and.returnValue(Promise.resolve());
+	mock.currentUser = null;
+	return mock;
 }
 
 /**
@@ -76,11 +80,16 @@ export function createFirebaseStorageMock() {
  * Creates a mock Firebase Analytics instance.
  */
 export function createFirebaseAnalyticsMock() {
-	return jasmine.createSpyObj('Analytics', [
-		'logEvent',
-		'setCurrentScreen',
-		'setUserId',
-	]);
+	return {
+		app: {
+			name: 'mock-app',
+			options: {
+				apiKey: 'mock-api-key',
+				projectId: 'mock-project-id',
+			},
+			automaticDataCollectionEnabled: false,
+		},
+	};
 }
 
 /**
@@ -114,7 +123,30 @@ export function createActivatedRouteMock() {
 			params: {},
 			queryParams: {},
 			data: {},
-		},
+			url: [],
+			fragment: null,
+			outlet: 'primary',
+			component: null,
+			routeName: null,
+			title: undefined,
+			paramMap: jasmine.createSpyObj('ParamMap', [
+				'get',
+				'has',
+				'getAll',
+				'keys',
+			]),
+			queryParamMap: jasmine.createSpyObj('ParamMap', [
+				'get',
+				'has',
+				'getAll',
+				'keys',
+			]),
+			root: {} as any,
+			parent: null,
+			firstChild: null,
+			children: [],
+			pathFromRoot: [],
+		} as any,
 		params: of({}),
 		queryParams: of({}),
 		data: of({}),

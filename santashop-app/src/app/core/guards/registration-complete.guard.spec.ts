@@ -48,7 +48,7 @@ describe('RegistrationCompleteGuard', () => {
 		});
 
 		// Recreate guard with updated observable
-		guard = new RegistrationCompleteGuard(preregistrationService, router);
+		guard = TestBed.inject(RegistrationCompleteGuard);
 
 		// Act
 		const value = await firstValueFrom(guard.canActivate());
@@ -62,13 +62,28 @@ describe('RegistrationCompleteGuard', () => {
 		const mockUrlTree = new UrlTree();
 		router.parseUrl.and.returnValue(mockUrlTree);
 
-		Object.defineProperty(preregistrationService, 'registrationComplete$', {
-			get: () => of(true),
-			configurable: true,
+		// Reconfigure TestBed with new PreRegistrationService mock
+		TestBed.resetTestingModule();
+		TestBed.configureTestingModule({
+			teardown: { destroyAfterEach: false },
+			providers: [
+				{
+					provide: Router,
+					useValue: router,
+				},
+				{
+					provide: PreRegistrationService,
+					useValue: jasmine.createSpyObj<PreRegistrationService>(
+						'prs',
+						[],
+						{ registrationComplete$: of(true) },
+					),
+				},
+			],
 		});
 
-		// Recreate guard with updated observable
-		guard = new RegistrationCompleteGuard(preregistrationService, router);
+		// Get new guard instance
+		guard = TestBed.inject(RegistrationCompleteGuard);
 
 		// Act
 		const value = await firstValueFrom(guard.canActivate());

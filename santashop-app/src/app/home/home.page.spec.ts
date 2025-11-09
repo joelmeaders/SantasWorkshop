@@ -4,6 +4,7 @@ import {
 	provideTranslateServiceMock,
 	createAppStateServiceMock,
 	provideActivatedRouteMock,
+	createAnalyticsMock,
 } from '../../test-helpers';
 
 import { HomePage } from './home.page';
@@ -29,7 +30,7 @@ describe('HomePage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				provideTranslateServiceMock(),
 				provideActivatedRouteMock(),

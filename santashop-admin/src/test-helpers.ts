@@ -24,13 +24,14 @@ export function createAuthMock(): jasmine.SpyObj<Auth> {
 		'createUserWithEmailAndPassword',
 		'sendPasswordResetEmail',
 		'onAuthStateChanged',
+		'authStateReady',
 	]) as jasmine.SpyObj<Auth> & { currentUser: null };
 	mock.currentUser = null;
-	mock.onAuthStateChanged = jasmine
+	const authStateChangedSpy = jasmine
 		.createSpy('onAuthStateChanged')
-		.and.returnValue(
-			() => undefined,
-		) as unknown as Auth['onAuthStateChanged'];
+		.and.returnValue(() => undefined);
+	(mock as any).onAuthStateChanged = authStateChangedSpy;
+	mock.authStateReady.and.returnValue(Promise.resolve());
 	return mock;
 }
 
@@ -137,8 +138,13 @@ export function createFirestoreMock(): jasmine.SpyObj<Firestore> {
 		doc: jasmine.createSpy('doc').and.returnValue(docMock),
 		_databaseId: { database: 'mock-database' },
 		type: 'firestore',
-		app: { name: 'mock-app' },
-	} as jasmine.SpyObj<Firestore>;
+		app: {
+			name: 'mock-app',
+			options: {},
+			automaticDataCollectionEnabled: false,
+		},
+		toJSON: () => ({}),
+	} as unknown as jasmine.SpyObj<Firestore>;
 
 	// Set circular references so collection/doc references point back to firestore
 	collectionMock.firestore = firestoreMock;
@@ -333,7 +339,31 @@ export function createActivatedRouteMock(): Partial<ActivatedRoute> {
 			params: {},
 			queryParams: {},
 			data: {},
-		},
+			url: [],
+			fragment: null,
+			outlet: 'primary',
+			component: null,
+			routeName: null,
+			title: undefined,
+			routeConfig: null,
+			root: {} as any,
+			parent: null,
+			firstChild: null,
+			children: [],
+			pathFromRoot: [] as any,
+			paramMap: {
+				get: () => null,
+				has: () => false,
+				getAll: () => [],
+				keys: [],
+			} as any,
+			queryParamMap: {
+				get: () => null,
+				has: () => false,
+				getAll: () => [],
+				keys: [],
+			} as any,
+		} as any,
 		params: of({}),
 		queryParams: of({}),
 		data: of({}),

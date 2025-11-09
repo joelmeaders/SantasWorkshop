@@ -9,6 +9,7 @@ import {
 	provideActivatedRouteMock,
 	createAuthMock,
 	createFirestoreMock,
+	createAnalyticsMock,
 } from '../../../../../../test-helpers';
 
 import { ChangePasswordPage } from './change-password.page';
@@ -41,7 +42,7 @@ describe('ChangePasswordPage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				provideTranslateServiceMock(),
 				provideActivatedRouteMock(),

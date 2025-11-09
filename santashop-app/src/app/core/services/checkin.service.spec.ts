@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Auth } from '@angular/fire/auth';
 import { Firestore } from '@angular/fire/firestore';
 import { Functions } from '@angular/fire/functions';
+import { createAuthMock } from '../../../test-helpers';
 import { CheckinService } from './checkin.service';
 
 describe('CheckinService', () => {
@@ -19,9 +20,7 @@ describe('CheckinService', () => {
 				},
 				{
 					provide: Auth,
-					useValue: jasmine.createSpyObj('Auth', [
-						'signInWithEmailAndPassword',
-					]),
+					useFactory: createAuthMock,
 				},
 				{
 					provide: Functions,

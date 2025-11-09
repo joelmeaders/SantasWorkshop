@@ -7,6 +7,7 @@ import {
 	createAuthMock,
 	provideActivatedRouteMock,
 	provideTranslateServiceMock,
+	createAnalyticsMock,
 } from '../../../../test-helpers';
 import { SignInPage } from './sign-in.page';
 import { SignInPageService } from './sign-in.page.service';
@@ -48,7 +49,7 @@ describe('SignInPage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),

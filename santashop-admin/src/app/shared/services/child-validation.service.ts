@@ -1,18 +1,17 @@
 import { Injectable } from '@angular/core';
 import { ChildValidationError, Child } from '@santashop/models';
-import { deepCopy } from '../../../../../santashop-core/src/lib/helpers/methods';
+import { deepCopy } from '@santashop/core';
 
 // TODO: Injectable tokens
-export const MAX_BIRTHDATE = (): Date => new Date('12/31/2024');
+export const MAX_BIRTHDATE = (): Date => new Date('12/31/2025');
 
 export const MAX_CHILD_AGE_IN_YEARS = (): number => 12;
 
-export const MIN_BIRTHDATE = (): Date =>
-	new Date(
-		MAX_BIRTHDATE().setFullYear(
-			MAX_BIRTHDATE().getFullYear() - MAX_CHILD_AGE_IN_YEARS(),
-		),
-	);
+export const MIN_BIRTHDATE = (): Date => {
+	const maxDate = MAX_BIRTHDATE();
+	const year = maxDate.getFullYear() - MAX_CHILD_AGE_IN_YEARS();
+	return new Date(`1/1/${year}`);
+};
 
 @Injectable({
 	providedIn: 'root',
@@ -36,7 +35,7 @@ export class ChildValidationService {
 	}
 
 	public ageValid(birthdate: Date): boolean {
-		return birthdate >= MIN_BIRTHDATE() && birthdate <= MAX_BIRTHDATE();
+		return birthdate <= MAX_BIRTHDATE() && birthdate >= MIN_BIRTHDATE();
 	}
 
 	public firstNameValid(firstName: string): boolean {

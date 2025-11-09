@@ -29,7 +29,8 @@ import {
 	IonRadioGroup,
 	IonRadio,
 } from '@ionic/angular/standalone';
-import { AgeGroup, Child, ToyType } from '@santashop/models';
+import type { Child } from '@santashop/models';
+import { AgeGroup, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
 import { yyyymmddToLocalDate, getAgeFromDate } from '@santashop/core';
 import {
@@ -44,7 +45,6 @@ import { AsyncPipe } from '@angular/common';
 	templateUrl: './add-edit-child-modal.component.html',
 	styleUrls: ['./add-edit-child-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		ReactiveFormsModule,
 		AsyncPipe,
@@ -161,8 +161,8 @@ export class AddEditChildModalComponent implements OnInit {
 		if (!this.form) return;
 		this.isInfant.next(true);
 
-		const toyTypeControl = this.form.controls.toyType;
-		const ageGroupControl = this.form.controls.ageGroup;
+		const toyTypeControl = this.form.controls['toyType'];
+		const ageGroupControl = this.form.controls['ageGroup'];
 
 		if (value) {
 			toyTypeControl.setValue(ToyType.infant);
@@ -170,7 +170,9 @@ export class AddEditChildModalComponent implements OnInit {
 		}
 	}
 
-	public async birthdaySelected(event?: any): Promise<void> {
+	public async birthdaySelected(event?: {
+		detail?: { value?: string | null };
+	}): Promise<void> {
 		if (!this.form) return;
 
 		const yyyymmdd = event?.detail?.value;
@@ -193,15 +195,15 @@ export class AddEditChildModalComponent implements OnInit {
 			ageGroup = AgeGroup.age911;
 		} else {
 			await this.childTooOldAlert();
-			this.form.controls.dateOfBirth.setValue(undefined);
+			this.form.controls['dateOfBirth'].setValue(undefined);
 			return;
 		}
 
-		this.form.controls.ageGroup.setValue(ageGroup);
+		this.form.controls['ageGroup'].setValue(ageGroup);
 		this.isInfant.next(false);
 	}
 
-	private async childTooOldAlert(): Promise<any> {
+	private async childTooOldAlert(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: 'This child is too old',
 			message: 'Children can only be ages 0-11',
@@ -213,12 +215,12 @@ export class AddEditChildModalComponent implements OnInit {
 		});
 
 		await alert.present();
-		return alert.onDidDismiss();
+		await alert.onDidDismiss();
 	}
 
 	public async saveChild(): Promise<void> {
 		const child: Child = this.form?.value;
-		child.dateOfBirth = new Date(this.form?.controls.dateOfBirth.value);
+		child.dateOfBirth = new Date(this.form?.controls['dateOfBirth'].value);
 		await this.dismiss(child);
 	}
 

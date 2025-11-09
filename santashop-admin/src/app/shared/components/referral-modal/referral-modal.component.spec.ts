@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
 import { ReferralModalComponent } from './referral-modal.component';
+import { provideModalControllerMock } from '../../../../test-helpers';
 
 describe('ReferralModalComponent', () => {
 	let component: ReferralModalComponent;
@@ -9,6 +9,7 @@ describe('ReferralModalComponent', () => {
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			imports: [ReferralModalComponent],
+			providers: [provideModalControllerMock()],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ReferralModalComponent);

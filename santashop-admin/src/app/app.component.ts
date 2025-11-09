@@ -7,8 +7,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 	templateUrl: 'app.component.html',
 	styleUrls: ['app.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [IonApp, IonRouterOutlet, IonApp, IonRouterOutlet],
+	imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
 	private readonly appStateService = inject(AppStateService);

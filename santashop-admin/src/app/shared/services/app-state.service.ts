@@ -76,6 +76,7 @@ export class AppStateService implements OnDestroy {
 		);
 
 	public ngOnDestroy(): void {
-		throw new Error('Method not implemented.');
+		this.destroy$.next();
+		this.destroy$.complete();
 	}
 }

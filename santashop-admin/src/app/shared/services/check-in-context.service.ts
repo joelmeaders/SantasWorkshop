@@ -25,11 +25,14 @@ export class CheckInContextService {
 				if (!registration) return;
 				// Convert timestamp to date
 				registration.children?.forEach((child) => {
-					const birthDate = child.dateOfBirth as any;
+					const birthDate = child.dateOfBirth as {
+						seconds?: number;
+						nanoseconds?: number;
+					};
 					if (!birthDate.seconds) return;
 					child.dateOfBirth = new Timestamp(
 						birthDate.seconds,
-						birthDate.nanoseconds,
+						birthDate.nanoseconds ?? 0,
 					).toDate();
 				});
 
@@ -44,11 +47,17 @@ export class CheckInContextService {
 				}
 
 				// Convert timestamp to date
-				const slot = registration.dateTimeSlot!.dateTime as any;
-				registration.dateTimeSlot!.dateTime = new Timestamp(
-					slot.seconds,
-					slot.nanoseconds,
-				).toDate();
+				if (!registration.dateTimeSlot?.dateTime) return registration;
+				const slot = registration.dateTimeSlot.dateTime as {
+					seconds?: number;
+					nanoseconds?: number;
+				};
+				if (slot.seconds !== undefined) {
+					registration.dateTimeSlot.dateTime = new Timestamp(
+						slot.seconds,
+						slot.nanoseconds ?? 0,
+					).toDate();
+				}
 
 				return registration;
 			}),

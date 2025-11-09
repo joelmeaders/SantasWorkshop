@@ -1,13 +1,15 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-
 import { AppComponent } from './app.component';
+import { provideFirestoreWrapperMock } from '../test-helpers';
+import { provideRouter } from '@angular/router';
 
 describe('AppComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [AppComponent],
 			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+			providers: [provideFirestoreWrapperMock(), provideRouter([])],
 		}).compileComponents();
 	});
 

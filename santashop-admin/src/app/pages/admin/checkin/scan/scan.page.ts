@@ -7,12 +7,12 @@ import {
 import { Router } from '@angular/router';
 import {
 	AlertController,
-	PopoverOptions,
 	IonContent,
 	IonItem,
 	IonIcon,
 	IonSelect,
 	IonSelectOption,
+	PopoverOptions,
 } from '@ionic/angular/standalone';
 import {
 	BehaviorSubject,
@@ -40,7 +40,6 @@ import { camera } from 'ionicons/icons';
 	templateUrl: './scan.page.html',
 	styleUrls: ['./scan.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		ZXingScannerModule,
@@ -75,7 +74,7 @@ export class ScanPage {
 		filterNil(),
 	);
 
-	private readonly setRegistration$ = (): Observable<any> =>
+	private readonly setRegistration$ = (): Observable<void | boolean> =>
 		this.scanResultFilter$.pipe(
 			switchMap((code) =>
 				this.lookupService.getRegistrationByQrCode$(code),
@@ -154,7 +153,7 @@ export class ScanPage {
 		this.scannerService.onCamerasFound(devices);
 	}
 
-	public onDeviceSelectChange($event: any): void {
+	public onDeviceSelectChange($event: { detail?: { value?: string } }): void {
 		// deviceId
 		this.scannerService.onDeviceSelectChange($event);
 	}
@@ -172,8 +171,8 @@ export class ScanPage {
 		return of(code);
 	}
 
-	private async invalidCodeAlert(): Promise<any> {
-		const alertOkHandler = (value: { [key: string]: string }): void => {
+	private async invalidCodeAlert(): Promise<void> {
+		const alertOkHandler = (value: Record<string, string>): void => {
 			if ((value[0]?.length ?? 0) >= 7) this.scanResult.next(value[0]);
 		};
 
@@ -185,7 +184,7 @@ export class ScanPage {
 					text: 'Cancel',
 					role: 'cancel',
 					cssClass: 'cancel-button',
-					handler: async () =>
+					handler: async (): Promise<boolean | undefined> =>
 						(await this.alertController.getTop())?.dismiss(),
 				},
 				{
@@ -207,7 +206,7 @@ export class ScanPage {
 			backdropDismiss: true,
 		});
 		await alert.present();
-		return alert.onDidDismiss();
+		await alert.onDidDismiss();
 	}
 
 	private async cannotFindRegistrationAlert(): Promise<void> {
@@ -219,7 +218,8 @@ export class ScanPage {
 				{
 					text: 'Try Search',
 					role: 'search',
-					handler: () => this.router.navigate(['admin/search']),
+					handler: (): Promise<boolean> =>
+						this.router.navigate(['admin/search']),
 				},
 			],
 		});

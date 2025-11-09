@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
 import { ChartConfiguration, ChartData } from 'chart.js';
@@ -48,7 +47,6 @@ import {
 	templateUrl: './check-in.page.html',
 	styleUrls: ['./check-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		FormsModule,
@@ -75,7 +73,7 @@ export class CheckInPage {
 
 	public readonly schedule = shopSchedule;
 
-	public year = 2024;
+	public year = 2025;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
@@ -98,9 +96,14 @@ export class CheckInPage {
 
 	public readonly checkinLastUpdated$ = this.checkInRecord$.pipe(
 		filterNil(),
-		map((updated) =>
-			(updated.lastUpdated as any as Timestamp).toDate().toLocaleString(),
-		),
+		map((updated) => {
+			const lastUpdated = updated.lastUpdated as Timestamp | Date;
+			const date =
+				lastUpdated instanceof Date
+					? lastUpdated
+					: lastUpdated.toDate();
+			return date.toLocaleString();
+		}),
 	);
 
 	public readonly totalCustomers$ = this.dateTimeStats$.pipe(

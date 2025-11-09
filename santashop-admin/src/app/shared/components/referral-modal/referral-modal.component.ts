@@ -27,7 +27,6 @@ import { AsyncPipe } from '@angular/common';
 	templateUrl: './referral-modal.component.html',
 	styleUrls: ['./referral-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		AsyncPipe,
 		IonHeader,
@@ -106,7 +105,7 @@ export class ReferralModalComponent {
 	@ViewChild('otherInput')
 	private readonly otherInput?: HTMLIonInputElement;
 
-	public filter($event: any): void {
+	public filter($event: { detail?: { value?: string | null } }): void {
 		const input = $event.detail?.value;
 		this.searchText.next(input ? input.toUpperCase() : undefined);
 	}

@@ -22,25 +22,24 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'admin-admin',
-	templateUrl: './admin.page.html',
-	styleUrls: ['./admin.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		RouterLinkActive,
-		RouterLink,
-		AsyncPipe,
-		IonRouterLink,
-		IonContent,
-		IonRouterOutlet,
-		IonFooter,
-		IonToolbar,
-		IonTabBar,
-		IonTabButton,
-		IonIcon,
-		IonLabel,
-	],
+    selector: 'admin-admin',
+    templateUrl: './admin.page.html',
+    styleUrls: ['./admin.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        RouterLinkActive,
+        RouterLink,
+        AsyncPipe,
+        IonRouterLink,
+        IonContent,
+        IonRouterOutlet,
+        IonFooter,
+        IonToolbar,
+        IonTabBar,
+        IonTabButton,
+        IonIcon,
+        IonLabel,
+    ]
 })
 export class AdminPage {
 	private readonly appStateService = inject(AppStateService);

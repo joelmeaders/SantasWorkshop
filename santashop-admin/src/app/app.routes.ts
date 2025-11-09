@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
 import { redirectLoggedInTo, hasCustomClaim } from '@santashop/core';
 
@@ -25,12 +24,3 @@ export const routes: Routes = [
 			import('./pages/admin/admin.module').then((m) => m.AdminPageModule),
 	},
 ];
-@NgModule({
-	imports: [
-		RouterModule.forRoot(routes, {
-			onSameUrlNavigation: 'reload',
-		}),
-	],
-	exports: [RouterModule],
-})
-export class AppRoutingModule {}

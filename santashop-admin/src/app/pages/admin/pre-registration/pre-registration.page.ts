@@ -67,7 +67,6 @@ import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 	templateUrl: './pre-registration.page.html',
 	styleUrls: ['./pre-registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		ReactiveFormsModule,
@@ -154,7 +153,7 @@ export class PreRegistrationPage implements OnDestroy {
 		dateTimeSlot: new UntypedFormControl(undefined, Validators.required),
 	});
 
-	public readonly availableSlots$ = this.availableSlotsQuery(2024).pipe(
+	public readonly availableSlots$ = this.availableSlotsQuery(2025).pipe(
 		takeUntil(this.destroy$),
 		map((data) =>
 			data.map((s) => {
@@ -214,7 +213,7 @@ export class PreRegistrationPage implements OnDestroy {
 		await modal.present();
 		const result = await modal.onDidDismiss();
 		if (result.data) {
-			this.form.controls.referredBy.setValue(result.data);
+			this.form.controls['referredBy'].setValue(result.data);
 			this.referrer.next(result.data);
 		}
 	}
@@ -246,7 +245,7 @@ export class PreRegistrationPage implements OnDestroy {
 	}
 
 	public slotIndex(_: number, slot: DateTimeSlot): string {
-		return slot.id!;
+		return slot.id ?? '';
 	}
 
 	public async register(): Promise<void> {
@@ -266,12 +265,13 @@ export class PreRegistrationPage implements OnDestroy {
 			} as Registration;
 
 			await this.preRegistrationFn(registration);
-		} catch (error: any) {
+		} catch (error: unknown) {
+			const err = error as { message?: string };
 			const alert = await this.alertController.create({
 				header: 'Error registering',
 				subHeader:
 					'Something went wrong and this customer was not registered.',
-				message: error?.message ?? error,
+				message: err?.message ?? String(error),
 			});
 
 			await alert.present();

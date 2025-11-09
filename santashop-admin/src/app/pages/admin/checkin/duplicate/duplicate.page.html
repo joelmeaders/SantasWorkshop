@@ -9,10 +9,10 @@
 	<h2>Do not give them tickets. Contact DSCS Member to resolve.</h2>
 	<br />
 	Checked in on:
-	<h2>{{ checkin.checkInDateTime | date:'short' }}</h2>
+	<h2>{{ checkin['checkInDateTime'] | date:'short' }}</h2>
 	<div class="ion-padding-top">
 		<ion-note color="dark">
-			@for (field of checkin.stats | keyvalue; track field) {
+			@for (field of checkin['stats'] | keyvalue; track field) {
 			<span> {{ field.key }}: {{ field.value }} <br /> </span>
 			}
 		</ion-note>

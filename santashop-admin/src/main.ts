@@ -35,7 +35,7 @@ import {
 } from '@angular/fire/analytics';
 import { getAnalytics } from 'firebase/analytics';
 import { routes } from './app/app.routes';
-import { AuthWrapper } from '../../santashop-core/src';
+import { AuthWrapper } from '@santashop/core';
 import {
 	initializeAppCheck,
 	provideAppCheck,
@@ -79,7 +79,9 @@ const firebaseProviders = [
 ];
 
 if (!environment.production) {
-	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+	(
+		self as { FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean }
+	).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
 if (environment.production) {

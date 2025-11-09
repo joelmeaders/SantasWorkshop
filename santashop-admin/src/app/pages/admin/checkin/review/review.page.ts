@@ -41,7 +41,6 @@ import { HttpsCallableResult } from '@santashop/core';
 	templateUrl: './review.page.html',
 	styleUrls: ['./review.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		HeaderComponent,
 		ManageChildrenComponent,
@@ -122,7 +121,7 @@ export class ReviewPage {
 		this.wasEdited = false;
 
 		// This would be set by the search service
-		const code = this.route.snapshot?.params?.qrcode;
+		const code = this.route.snapshot?.params?.['qrcode'];
 		if (code) this.scanResult.next(code);
 	}
 
@@ -147,7 +146,8 @@ export class ReviewPage {
 		const response = await alert.onDidDismiss();
 		if (response.role == 'cancel') return;
 
-		await this.cancelRegistrationFn(registration!);
+		if (!registration) return;
+		await this.cancelRegistrationFn(registration);
 
 		await this.router.navigate(['admin/landing']);
 	}
@@ -197,9 +197,13 @@ export class ReviewPage {
 				result,
 				registration.qrcode ?? 'nocode',
 			);
-			this.router.navigate(['admin/checkin/confirmation']);
-		} catch (error: any) {
-			if (error.details.code === 6) {
+			await this.router.navigate(['admin/checkin/confirmation']);
+		} catch (error: unknown) {
+			const err = error as {
+				details?: { code?: number };
+				message?: string;
+			};
+			if (err.details?.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([
 					'admin/checkin/duplicate',
@@ -211,7 +215,7 @@ export class ReviewPage {
 			const alert = await this.alertController.create({
 				header: 'Error checking in',
 				subHeader: `code: ${registration.qrcode}`,
-				message: error?.message ?? error,
+				message: err?.message ?? String(error),
 			});
 
 			await alert.present();
@@ -221,10 +225,11 @@ export class ReviewPage {
 		}
 	}
 
-	private async missingRegistrationError(error: any): Promise<undefined> {
+	private async missingRegistrationError(error: unknown): Promise<undefined> {
+		const err = error as { message?: string };
 		const alert = await this.alertController.create({
 			header: 'Error',
-			message: error.message,
+			message: err.message ?? String(error),
 			buttons: [{ text: 'OK' }, { text: 'Try Search', role: 'search' }],
 		});
 

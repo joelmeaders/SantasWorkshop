@@ -29,24 +29,23 @@ import {
 import { map, shareReplay } from 'rxjs';
 
 @Component({
-	selector: 'admin-landing',
-	templateUrl: './landing.page.html',
-	styleUrls: ['./landing.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		RouterLink,
-		AsyncPipe,
-		IonRouterLink,
-		IonContent,
-		IonList,
-		IonListHeader,
-		IonItem,
-		IonIcon,
-		IonToggle,
-		IonRouterLink,
-		IonContent,
-	],
+    selector: 'admin-landing',
+    templateUrl: './landing.page.html',
+    styleUrls: ['./landing.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        RouterLink,
+        AsyncPipe,
+        IonRouterLink,
+        IonContent,
+        IonList,
+        IonListHeader,
+        IonItem,
+        IonIcon,
+        IonToggle,
+        IonRouterLink,
+        IonContent,
+    ]
 })
 export class LandingPage {
 	private readonly authService = inject(AuthService);

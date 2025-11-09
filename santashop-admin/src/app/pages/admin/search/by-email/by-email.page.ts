@@ -26,27 +26,26 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'admin-by-email',
-	templateUrl: './by-email.page.html',
-	styleUrls: ['./by-email.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		HeaderComponent,
-		ReactiveFormsModule,
-		RouterLink,
-		IonRouterLink,
-		IonContent,
-		IonCardHeader,
-		IonCardTitle,
-		IonCardSubtitle,
-		IonList,
-		IonItem,
-		IonLabel,
-		IonInput,
-		IonButton,
-		IonIcon,
-	],
+    selector: 'admin-by-email',
+    templateUrl: './by-email.page.html',
+    styleUrls: ['./by-email.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        HeaderComponent,
+        ReactiveFormsModule,
+        RouterLink,
+        IonRouterLink,
+        IonContent,
+        IonCardHeader,
+        IonCardTitle,
+        IonCardSubtitle,
+        IonList,
+        IonItem,
+        IonLabel,
+        IonInput,
+        IonButton,
+        IonIcon,
+    ]
 })
 export class ByEmailPage {
 	private readonly searchService = inject(SearchService);

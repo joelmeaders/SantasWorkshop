@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index 16245fcf36f2affd4d581a1ba6f77b97cb7dce66..14ccfed6c16f331c945c455ec0108f0aa35ef2af 100644
+--- a/package.json
++++ b/package.json
+@@ -74,7 +74,7 @@
+   },
+   "scripts": {},
+   "peerDependencies": {
+-    "firebase": "^9.0.0 || ^10.0.0 || ^11.0.0",
++    "firebase": "^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0",
+     "rxjs": "^6.0.0 || ^7.0.0"
+   }
+ }

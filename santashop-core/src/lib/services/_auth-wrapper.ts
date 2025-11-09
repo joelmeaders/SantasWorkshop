@@ -1,15 +1,35 @@
 import { Injectable, inject } from '@angular/core';
 import {
 	Auth,
-	authState,
 	User,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
 	IdTokenResult,
 	UserCredential,
+	onAuthStateChanged,
 } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
+import { from, Observable, switchMap } from 'rxjs';
+import { ɵzoneWrap } from '@angular/fire';
+
+function _authState(auth: Auth): Observable<User | null> {
+	return from(auth.authStateReady()).pipe(
+		switchMap(
+			() =>
+				new Observable<User | null>((subscriber) => {
+					const unsubscribe = onAuthStateChanged(
+						auth,
+						subscriber.next.bind(subscriber),
+						subscriber.error.bind(subscriber),
+						subscriber.complete.bind(subscriber),
+					);
+					return { unsubscribe };
+				}),
+		),
+	);
+}
+
+export const authState = ɵzoneWrap(_authState, true);
 
 @Injectable({
 	providedIn: 'root',

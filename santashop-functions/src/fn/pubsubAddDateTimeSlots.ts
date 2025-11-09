@@ -12,14 +12,13 @@ export default async (): Promise<void> => {
 
 	if (hasDateTimeSlots) {
 		console.log('DateTimeSlots already exist. None added.');
-		return Promise.resolve();
+		return;
 	}
 
 	try {
 		console.log('Adding DateTimeSlots...');
 		await addDateTimeSlots();
 		console.log('DateTimeSlots added.');
-		return Promise.resolve();
 	} catch (error: unknown) {
 		throw new Error(`Error adding DateTimeSlots: ${error}`);
 	}

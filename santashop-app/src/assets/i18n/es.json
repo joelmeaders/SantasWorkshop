@@ -193,9 +193,10 @@
 		"3": "Visite nuestros sitios sociales para obtener más información."
 	},
 	"EVENT_INFO": {
+		"DATETIME": "Diciembre 12, 13, 15, 16 de 10am a 3pm",
 		"RESEND_EMAIL": "Reenviar el correo electrónico",
-		"EVENT_ADDRESS1": "2500 E 1st Ave",
-		"EVENT_ADDRESS2": "Denver, CO 80206",
+		"EVENT_ADDRESS1": "7150 Leetsdale Drive, Unit 380",
+		"EVENT_ADDRESS2": "Denver, CO 80224",
 		"PRINT_PAGE": "Imprima o guarde esta página y el correo electrónico que le enviamos.",
 		"YOUR_TICKET": "Este es su boleto para el evento",
 		"FACEMASK": "Se recomiendan máscaras faciales",

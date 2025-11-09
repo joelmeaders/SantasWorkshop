@@ -1,7 +1,7 @@
 {
 	"name": "@santashop/functions",
 	"scripts": {
-		"lint": "eslint --ext .ts . --fix",
+		"lint": "eslint --ext .ts . --fix --cache --quiet",
 		"build": "webpack",
 		"serve": "npm run build && firebase emulators:start --only functions",
 		"shell": "npm run build && firebase functions:shell",

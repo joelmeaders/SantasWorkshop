@@ -25,10 +25,10 @@ export default async (): Promise<{ success: number; failed: number }> => {
 
 		result = await QueueReminderEmails(registrations);
 
-		return Promise.resolve(result);
+		return result;
 	} catch (err) {
 		console.error(err);
-		return Promise.reject(result);
+		throw new Error(`Failed to queue reminder emails: ${err}`);
 	}
 };
 

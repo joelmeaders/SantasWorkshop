@@ -1,5 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
+import webpack from 'webpack';
 
 const __dirname = path.dirname(fileURLToPath(new URL(import.meta.url)));
 
@@ -45,4 +46,9 @@ export default {
 		'firebase-admin': 'firebase-admin',
 		'firebase-functions': 'firebase-functions',
 	},
+	plugins: [
+		new webpack.DefinePlugin({
+			'process.env.NODE_ENV': JSON.stringify('production'),
+		}),
+	],
 };

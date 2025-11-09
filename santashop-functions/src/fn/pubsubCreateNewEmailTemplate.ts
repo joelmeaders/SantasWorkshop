@@ -13,7 +13,7 @@ const credentials = {
 let sesClient: SESClient | undefined = undefined;
 
 const loadTemplate = async (): Promise<string> => {
-	return await fileSystem.readFile(
+	return fileSystem.readFile(
 		'src/utility/assets/registration-confirmation-2023.html',
 		{ encoding: 'utf-8' },
 	);
@@ -29,7 +29,7 @@ const createCreateTemplateCommand =
 				TemplateName: 'dscs-registration-confirmation-v1',
 				HtmlPart: cleanedUpTemplate,
 				SubjectPart:
-					// eslint-disable-next-line quotes
+					 
 					"Here's your ticket for the 2025 Denver Santa Claus Shop!",
 			},
 		});

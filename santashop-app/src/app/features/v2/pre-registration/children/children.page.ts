@@ -17,10 +17,8 @@ import {
 } from '@ionic/angular/standalone';
 import { Child } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { Observable, tap } from 'rxjs';
-import { AppStateService } from '../../../../core';
+import { Observable } from 'rxjs';
 import { ChildrenPageService } from './children.page.service';
-import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -37,53 +35,42 @@ import {
 } from 'ionicons/icons';
 
 @Component({
-    selector: 'app-children',
-    templateUrl: './children.page.html',
-    styleUrls: ['./children.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ChildrenPageService],
-    imports: [
-    PreRegistrationMenuComponent,
-    RouterLink,
-    AsyncPipe,
-    DatePipe,
-    TranslateModule,
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonButton,
-    IonIcon,
-    IonItem,
-    IonCardTitle,
-    IonList,
-    IonLabel,
-    IonCardHeader,
-    IonText,
-    IonCardSubtitle
-]
+	selector: 'app-children',
+	templateUrl: './children.page.html',
+	styleUrls: ['./children.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [ChildrenPageService],
+	imports: [
+		PreRegistrationMenuComponent,
+		RouterLink,
+		AsyncPipe,
+		DatePipe,
+		TranslateModule,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonCardTitle,
+		IonList,
+		IonLabel,
+		IonCardHeader,
+		IonText,
+		IonCardSubtitle,
+	],
 })
 export class ChildrenPage {
 	private readonly viewService = inject(ChildrenPageService);
 	private readonly alertController = inject(AlertController);
 	private readonly translateService = inject(TranslateService);
-	private readonly appStateService = inject(AppStateService);
 
 	public readonly children$: Observable<Child[] | undefined> =
 		this.viewService.children$;
 
 	public readonly childCount$: Observable<number> =
 		this.viewService.childCount$;
-
-	protected readonly closedSubscription =
-		this.appStateService.isRegistrationEnabled$
-			.pipe(
-				tap((enabled) => {
-					if (!enabled)
-						this.appStateService.setModal(RegistrationClosedPage);
-				}),
-			)
-			.subscribe();
 
 	constructor() {
 		addIcons({

@@ -10,7 +10,7 @@ import {
 } from '../../../../test-helpers';
 import { SignInPage } from './sign-in.page';
 import { SignInPageService } from './sign-in.page.service';
-import { AppStateService } from '../../../core';
+import { AppStateService } from '@santashop/core';
 import { of } from 'rxjs';
 
 describe('SignInPage', () => {

@@ -12,7 +12,7 @@ import {
 } from '../../../../test-helpers';
 import { SignUpPage } from './sign-up.page';
 import { SignUpPageService } from './sign-up.page.service';
-import { AppStateService } from '../../../core';
+import { AppStateService } from '@santashop/core';
 import { of } from 'rxjs';
 
 describe('SignUpPage', () => {

@@ -1,8 +1,11 @@
 import { NgModule } from '@angular/core';
-import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
+import {
+	AuthGuard,
+	AuthPipe,
+	redirectLoggedInTo,
+	redirectUnauthorizedTo,
+} from '@angular/fire/auth-guard';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-
-import { redirectLoggedInTo, redirectUnauthorizedTo } from '@santashop/core';
 
 const redirectUnauthorizedToLogin = (): AuthPipe =>
 	redirectUnauthorizedTo(['/sign-in']);

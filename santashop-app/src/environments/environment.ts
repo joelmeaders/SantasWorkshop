@@ -1,4 +1,4 @@
-import config from '../../../package.json';
+import config from '../../package.json';
 import firebaseConfigDev from '../../../firebase.environment.test.json';
 
 export const environment = {

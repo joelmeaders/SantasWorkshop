@@ -8,7 +8,8 @@ import {
 	Platform,
 } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
-import { AppStateService } from './core';
+import { AppStateService } from '@santashop/core';
+import { ApplicationService } from './core/services/application.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -24,6 +25,7 @@ export class AppComponent {
 	private readonly translateService = inject(TranslateService);
 	private readonly analyticsService = inject(Analytics);
 	private readonly appStateService = inject(AppStateService);
+	private readonly applicationService = inject(ApplicationService);
 	private readonly alertController = inject(AlertController);
 
 	constructor() {
@@ -32,8 +34,8 @@ export class AppComponent {
 
 	public async initializeApp(): Promise<void> {
 		await this.platform.ready().then(() => {
-			// This is here to kick off the appstateservice
-			if (!this.appStateService) throw new Error('Placeholder');
+			// Trigger modal management subscriptions
+			if (!this.applicationService) throw new Error('Placeholder');
 		});
 
 		this.translateService.addLangs(['en', 'es']);
@@ -49,10 +51,18 @@ export class AppComponent {
 		});
 
 		const alert = await firstValueFrom(this.appStateService.globalAlert$);
-		if (alert.enabled) await this.showGlobalMessage(alert);
+		if (alert?.displayAlert) {
+			const isEnglish = this.translateService.currentLang === 'en';
+			const title = isEnglish ? alert.titleEn : alert.titleEs;
+			const message = isEnglish ? alert.messageEn : alert.messageEs;
+			await this.showGlobalMessage({ title, message });
+		}
 	}
 
-	public async showGlobalMessage(globalAlert: any): Promise<void> {
+	public async showGlobalMessage(globalAlert: {
+		title: string;
+		message: string;
+	}): Promise<void> {
 		const alert = await this.alertController.create({
 			header: globalAlert.title,
 			message: globalAlert.message,

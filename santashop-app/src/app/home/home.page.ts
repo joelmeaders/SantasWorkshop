@@ -22,7 +22,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
-import { AppStateService } from '../core';
+import { AppStateService } from '@santashop/core';
 import { AsyncPipe } from '@angular/common';
 
 @Component({

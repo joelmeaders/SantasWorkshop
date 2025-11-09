@@ -31,16 +31,13 @@ import {
 	IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { tap } from 'rxjs/operators';
-import { AppStateService } from '../../../core';
+import { AppStateService, CoreModule } from '@santashop/core';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
-import { RegistrationClosedPage } from '../../registration-closed/registration-closed.page';
 import { SignUpPageService } from './sign-up.page.service';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { CoreModule } from '@santashop/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
 
@@ -92,16 +89,6 @@ export class SignUpPage {
 
 	public readonly createAccountEnabled$ =
 		this.appStateService.createAccountEnabled$;
-
-	protected readonly closedSubscription =
-		this.appStateService.isRegistrationEnabled$
-			.pipe(
-				tap((enabled) => {
-					if (!enabled)
-						this.appStateService.setModal(RegistrationClosedPage);
-				}),
-			)
-			.subscribe();
 
 	constructor() {
 		addIcons({ arrowBackSharp });

@@ -37,11 +37,8 @@ import {
 	map,
 	takeUntil,
 	distinctUntilChanged,
-	tap,
 } from 'rxjs/operators';
 import { DateTimePageService } from './date-time.page.service';
-import { AppStateService } from '../../../../core';
-import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -88,7 +85,6 @@ export class DateTimePage implements OnDestroy {
 	private readonly translateService = inject(TranslateService);
 	private readonly analytics = inject(Analytics);
 	public readonly skeletonState = inject(SkeletonStateService);
-	private readonly appStateService = inject(AppStateService);
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -127,16 +123,6 @@ export class DateTimePage implements OnDestroy {
 		takeUntil(this.destroy$),
 		shareReplay(1),
 	);
-
-	protected readonly closedSubscription =
-		this.appStateService.isRegistrationEnabled$
-			.pipe(
-				tap((enabled) => {
-					if (!enabled)
-						this.appStateService.setModal(RegistrationClosedPage);
-				}),
-			)
-			.subscribe();
 
 	constructor() {
 		addIcons({ arrowBackSharp });

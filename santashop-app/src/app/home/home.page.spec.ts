@@ -8,7 +8,7 @@ import {
 
 import { HomePage } from './home.page';
 import { ModalController } from '@ionic/angular/standalone';
-import { AppStateService } from '../core';
+import { AppStateService } from '@santashop/core';
 import { Analytics } from '@angular/fire/analytics';
 
 describe('HomePage', () => {

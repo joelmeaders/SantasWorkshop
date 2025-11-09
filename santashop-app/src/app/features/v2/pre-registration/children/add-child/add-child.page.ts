@@ -6,10 +6,8 @@ import {
 	MIN_BIRTHDATE,
 	CoreModule,
 } from '@santashop/core';
-import { filter, map, takeUntil, tap } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { AddChildPageService } from './add-child.page.service';
-import { AppStateService } from '../../../../../core';
-import { RegistrationClosedPage } from '../../../../registration-closed/registration-closed.page';
 
 import { PreRegistrationMenuComponent } from '../../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -69,32 +67,20 @@ export class AddChildPage {
 	private readonly viewService = inject(AddChildPageService);
 	private readonly route = inject(ActivatedRoute);
 	public readonly mobileEvent = inject(MOBILE_EVENT);
-	private readonly appStateService = inject(AppStateService);
 
 	public readonly setChildSubscription = this.route.queryParamMap
 		.pipe(
 			takeUntil(this.viewService.destroy$),
 			filter((params) => params.has('id')),
 			map((params) => params.get('id') as any as number),
-			tap((id) => this.viewService.setChildToEdit(id)),
 		)
-		.subscribe();
+		.subscribe((id) => this.viewService.setChildToEdit(id));
 
 	public readonly form = this.viewService.form;
 	public readonly minBirthDate = MIN_BIRTHDATE().toISOString();
 	public readonly maxBirthDate = MAX_BIRTHDATE().toISOString();
 	public readonly isInfant$ = this.viewService.isInfant$;
 	public readonly isEdit$ = this.viewService.isEdit$;
-
-	protected readonly closedSubscription =
-		this.appStateService.isRegistrationEnabled$
-			.pipe(
-				tap((enabled) => {
-					if (!enabled)
-						this.appStateService.setModal(RegistrationClosedPage);
-				}),
-			)
-			.subscribe();
 
 	constructor() {
 		addIcons({ arrowBackSharp, gift });

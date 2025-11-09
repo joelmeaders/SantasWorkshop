@@ -5,14 +5,13 @@ import {
 	DocumentData,
 	DocumentReference,
 	QueryConstraint,
-} from './_firestore-wrapper';
+} from '@angular/fire/firestore';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class FireRepoLite {
 	private readonly fireRepoBase = inject(FireRepoBase);
-
 
 	/**
 	 * Generates a random id

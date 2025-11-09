@@ -4,13 +4,12 @@ import {
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 	timestampToDate,
-	where,
-	QueryConstraint,
 } from '@santashop/core';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
 import { PreRegistrationService } from '../../../../core';
+import { QueryConstraint, where } from '@angular/fire/firestore';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {

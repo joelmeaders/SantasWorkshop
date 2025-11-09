@@ -17,7 +17,6 @@ import {
 import {
 	AuthService,
 	automock,
-	DocumentReference,
 	filterNil,
 	FireRepoLite,
 	FunctionsWrapper,
@@ -27,6 +26,7 @@ import {
 	timestampDateFix,
 } from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
+import { DocumentReference } from '@angular/fire/firestore';
 
 @Injectable({
 	providedIn: 'root',

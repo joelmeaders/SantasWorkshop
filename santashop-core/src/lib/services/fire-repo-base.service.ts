@@ -1,22 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { from, map, Observable } from 'rxjs';
+import { FirestoreWrapper } from './_firestore-wrapper';
 import {
 	CollectionReference,
 	DocumentData,
 	DocumentReference,
 	FirestoreDataConverter,
-	FirestoreWrapper,
 	QueryConstraint,
 	QueryDocumentSnapshot,
 	SnapshotOptions,
-} from './_firestore-wrapper';
+} from '@angular/fire/firestore';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class FireRepoBase {
 	private readonly firestoreWrapper = inject(FirestoreWrapper);
-
 
 	public randomId(): string {
 		const colRef = this.firestoreWrapper.collection('_');

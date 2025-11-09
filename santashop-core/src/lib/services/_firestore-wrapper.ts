@@ -1,47 +1,23 @@
 import {
 	addDoc,
-	connectFirestoreEmulator as _connectFirestoreEmulator,
 	collection,
 	collectionData,
-	CollectionReference as _CollectionReference,
+	CollectionReference,
 	deleteDoc,
 	doc,
 	docData,
-	DocumentData as _DocumentData,
-	DocumentReference as _DocumentReference,
-	FirestoreDataConverter as _FirestoreDataConverter,
-	getFirestore as _getFirestore,
-	provideFirestore as _provideFirestore,
 	Firestore,
 	query,
-	QueryConstraint as _QueryConstraint,
-	QueryDocumentSnapshot as _QueryDocumentSnapshot,
-	where as _where,
 	setDoc,
-	SetOptions as _SetOptions,
-	SnapshotOptions as _SnapshotOptions,
-	Timestamp as _Timestamp,
 	Query,
+	Timestamp,
+	DocumentData,
+	DocumentReference,
+	QueryConstraint,
+	SetOptions,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Injectable, inject } from '@angular/core';
-
-// Re-export types to ensure no references to these libraries exist outside of this file
-export type CollectionReference<T> = _CollectionReference<T>;
-export type DocumentReference<T> = _DocumentReference<T>;
-export type SetOptions = _SetOptions;
-export type DocumentData = _DocumentData;
-export type FirestoreDataConverter<T> = _FirestoreDataConverter<T>;
-export type QueryConstraint = _QueryConstraint;
-export type QueryDocumentSnapshot<T = DocumentData> = _QueryDocumentSnapshot<T>;
-export type SnapshotOptions = _SnapshotOptions;
-export type Timestamp = _Timestamp;
-export const TimestampFn = _Timestamp;
-export const where: typeof _where = _where;
-export const connectFirestoreEmulator: typeof _connectFirestoreEmulator =
-	_connectFirestoreEmulator;
-export const getFirestore: typeof _getFirestore = _getFirestore;
-export const provideFirestore: typeof _provideFirestore = _provideFirestore;
 
 // Solves an issue where dates are being converted to timestamps
 // in the database, but not being converted back to dates when read.

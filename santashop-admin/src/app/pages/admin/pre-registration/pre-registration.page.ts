@@ -49,8 +49,6 @@ import {
 	FireRepoLite,
 	IFireRepoCollection,
 	timestampToDate,
-	QueryConstraint,
-	where,
 	HttpsCallableResult,
 } from '@santashop/core';
 import { httpsCallable } from 'firebase/functions';
@@ -61,6 +59,7 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
 import { addIcons } from 'ionicons';
 import { searchOutline, checkmarkCircle } from 'ionicons/icons';
+import { QueryConstraint, where } from '@angular/fire/firestore';
 
 @Component({
 	selector: 'admin-pre-registration',

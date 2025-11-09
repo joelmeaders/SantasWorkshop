@@ -24,9 +24,6 @@ import {
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
 import {
-	provideFirestore,
-	getFirestore,
-	connectFirestoreEmulator,
 	PROGRAM_YEAR,
 	PROFILE_VERSION,
 	MOBILE_EVENT,
@@ -52,6 +49,11 @@ import {
 	provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import {
+	connectFirestoreEmulator,
+	getFirestore,
+	provideFirestore,
+} from '@angular/fire/firestore';
 
 const firebaseProviders = [
 	provideFirebaseApp(() => initializeApp(firebaseConfig)),

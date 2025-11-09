@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { FireRepoLite, QueryConstraint } from '@santashop/core';
+import { QueryConstraint } from '@angular/fire/firestore';
+import { FireRepoLite } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
 	CheckIn,

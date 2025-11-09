@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import {
@@ -24,6 +24,13 @@ import { newChildForm } from './child.form';
 
 @Injectable()
 export class AddChildPageService implements OnDestroy {
+	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly preRegistrationService = inject(PreRegistrationService);
+	private readonly alertController = inject(AlertController);
+	private readonly translateService = inject(TranslateService);
+	private readonly router = inject(Router);
+	private readonly analytics = inject(Analytics);
+
 	public readonly destroy$ = new Subject<void>();
 	public form = newChildForm(this.programYear);
 
@@ -45,14 +52,7 @@ export class AddChildPageService implements OnDestroy {
 			shareReplay(1),
 		);
 
-	constructor(
-		@Inject(PROGRAM_YEAR) private readonly programYear: number,
-		private readonly preRegistrationService: PreRegistrationService,
-		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService,
-		private readonly router: Router,
-		private readonly analytics: Analytics,
-	) {
+	constructor() {
 		console.log(MIN_BIRTHDATE());
 	}
 
@@ -276,7 +276,7 @@ export class AddChildPageService implements OnDestroy {
 
 		try {
 			await storeRegistration;
-		} catch (error) {
+		} catch {
 			// TODO: Do something
 		}
 

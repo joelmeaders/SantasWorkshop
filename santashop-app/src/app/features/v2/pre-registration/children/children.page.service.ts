@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Child } from '@santashop/models';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { takeUntil, shareReplay, map } from 'rxjs/operators';
@@ -6,6 +6,8 @@ import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class ChildrenPageService implements OnDestroy {
+	public readonly preRegistrationService = inject(PreRegistrationService);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly children$: Observable<Child[] | undefined> =
@@ -19,10 +21,6 @@ export class ChildrenPageService implements OnDestroy {
 		takeUntil(this.destroy$),
 		shareReplay(1),
 	);
-
-	constructor(
-		public readonly preRegistrationService: PreRegistrationService,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();
@@ -58,7 +56,7 @@ export class ChildrenPageService implements OnDestroy {
 
 		try {
 			await storeRegistration;
-		} catch (error) {
+		} catch {
 			// FIXME: Do something
 		}
 	}

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import * as admin from 'firebase-admin';
 import { DateTimeSlot, ScheduleStats } from '../../../santashop-models/src';
 
@@ -16,7 +16,7 @@ export default async (): Promise<string> => {
 	const scheduleStatsDoc = admin
 		.firestore()
 		.collection('stats')
-		.doc('schedule-2024');
+		.doc('schedule-2025');
 	const scheduleStats: ScheduleStats = { dateTimeCounts: [] };
 
 	// Loop through each date time slot and get the count of registrations
@@ -58,7 +58,7 @@ const dateTimeSlotQuery = (limit: number, offset: number) =>
 	admin
 		.firestore()
 		.collection('dateTimeSlots')
-		.where('programYear', '==', 2024)
+		.where('programYear', '==', 2025)
 		.limit(limit)
 		.offset(offset);
 

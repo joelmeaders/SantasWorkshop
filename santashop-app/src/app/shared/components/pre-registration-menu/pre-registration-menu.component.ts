@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PreRegistrationService } from '../../../core';
 import { CoreModule } from '@santashop/core';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -19,23 +19,23 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'app-pre-registration-menu',
-	templateUrl: './pre-registration-menu.component.html',
-	styleUrls: ['./pre-registration-menu.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		CoreModule,
-		NgIf,
-		AsyncPipe,
-		TranslateModule,
-		IonTabBar,
-		IonTabButton,
-		IonIcon,
-		IonLabel,
-	],
+    selector: 'app-pre-registration-menu',
+    templateUrl: './pre-registration-menu.component.html',
+    styleUrls: ['./pre-registration-menu.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+    CoreModule,
+    AsyncPipe,
+    TranslateModule,
+    IonTabBar,
+    IonTabButton,
+    IonIcon,
+    IonLabel
+]
 })
 export class PreRegistrationMenuComponent {
+	private readonly viewService = inject(PreRegistrationService);
+
 	public readonly childCount$ = this.viewService.childCount$;
 
 	public readonly chosenSlot$ = this.viewService.dateTimeSlot$;
@@ -43,7 +43,7 @@ export class PreRegistrationMenuComponent {
 	public readonly isRegistrationComplete$ =
 		this.viewService.registrationComplete$;
 
-	constructor(private readonly viewService: PreRegistrationService) {
+	constructor() {
 		addIcons({ home, accessibility, calendarOutline, sendOutline });
 	}
 }

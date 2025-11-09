@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';
 import { ProfileService } from '../../../core/services/profile.service';
 import { CoreModule } from '@santashop/core';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { InternalHeaderComponent } from '../../../shared/components/internal-header/internal-header.component';
 
 import { TranslateModule } from '@ngx-translate/core';
@@ -27,28 +27,28 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'app-pre-registration',
-	templateUrl: './pre-registration.page.html',
-	styleUrls: ['./pre-registration.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
-	imports: [
-		CoreModule,
-		NgIf,
-		InternalHeaderComponent,
-
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonTabs,
-		IonTabBar,
-		IonTabButton,
-		IonIcon,
-		IonLabel,
-		IonBadge,
-	],
+    selector: 'app-pre-registration',
+    templateUrl: './pre-registration.page.html',
+    styleUrls: ['./pre-registration.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+    CoreModule,
+    InternalHeaderComponent,
+    AsyncPipe,
+    TranslateModule,
+    IonContent,
+    IonTabs,
+    IonTabBar,
+    IonTabButton,
+    IonIcon,
+    IonLabel,
+    IonBadge
+]
 })
 export class PreRegistrationPage implements OnDestroy {
+	private readonly viewService = inject(PreRegistrationService);
+	private readonly profileService = inject(ProfileService);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly referredBy$ = this.profileService.referredBy$.pipe(
@@ -76,10 +76,7 @@ export class PreRegistrationPage implements OnDestroy {
 			shareReplay(1),
 		);
 
-	constructor(
-		private readonly viewService: PreRegistrationService,
-		private readonly profileService: ProfileService,
-	) {
+	constructor() {
 		addIcons({
 			home,
 			accessibility,

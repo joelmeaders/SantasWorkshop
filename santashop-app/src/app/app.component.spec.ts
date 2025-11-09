@@ -1,38 +1,59 @@
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Analytics } from '@angular/fire/analytics';
+import {
+	provideActivatedRouteMock,
+	createTranslateServiceMock,
+} from '../test-helpers';
 
-import { Platform } from '@ionic/angular/standalone';
+import { AlertController, Platform } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';
 import { AppStateService } from './core';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
 	let platformSpy: jasmine.SpyObj<Platform>;
-	let translateSpy: jasmine.SpyObj<TranslateService>;
 
 	beforeEach(() => {
 		platformSpy = jasmine.createSpyObj('Platform', {
 			ready: Promise.resolve(),
 		});
-		translateSpy = jasmine.createSpyObj('Translate', [
-			'addLangs',
-			'setDefaultLang',
-			'getBrowserLang',
-			'use',
-		]);
+
+		const appStateSpy = jasmine.createSpyObj('AppStateService', [], {
+			globalAlert$: of({ enabled: false }),
+		});
 
 		TestBed.configureTestingModule({
 			imports: [AppComponent],
-			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+			schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
 			providers: [
+				provideRouter([]),
 				{ provide: Platform, useValue: platformSpy },
-				{ provide: TranslateService, useValue: translateSpy },
-				{ provide: AppStateService, useValue: jasmine.createSpy() },
-				{ provide: Analytics, useValue: jasmine.createSpy() },
+				{
+					provide: TranslateService,
+					useFactory: createTranslateServiceMock,
+				},
+				{ provide: AppStateService, useValue: appStateSpy },
+				{
+					provide: Analytics,
+					useValue: jasmine.createSpyObj('Analytics', ['']),
+				},
+				{
+					provide: AlertController,
+					useValue: jasmine.createSpyObj('AlertController', [
+						'create',
+					]),
+				},
+				provideActivatedRouteMock(),
 			],
-		}).compileComponents();
+		})
+			.overrideComponent(AppComponent, {
+				set: { imports: [] },
+			})
+			.compileComponents();
 	});
 
 	it('should create the app', () => {

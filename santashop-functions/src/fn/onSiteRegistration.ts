@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { CallableContext } from 'firebase-functions/v1/https';
@@ -59,7 +59,7 @@ export default (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2024,
+		programYear: 2025,
 	};
 
 	batch.create(registrationDocRef, updatedRegistration);

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
 	AuthService,
@@ -14,6 +14,14 @@ import { newOnboardUserForm } from './sign-up.form';
 
 @Injectable()
 export class SignUpPageService implements OnDestroy {
+	private readonly authService = inject(AuthService);
+	private readonly functions = inject(FunctionsWrapper);
+	private readonly router = inject(Router);
+	private readonly loadingController = inject(LoadingController);
+	private readonly errorHandler = inject(ErrorHandlerService);
+	private readonly alertController = inject(AlertController);
+	private readonly translateService = inject(TranslateService);
+
 	public readonly form = newOnboardUserForm();
 	private readonly subscriptions = new Array<Subscription>();
 
@@ -29,15 +37,7 @@ export class SignUpPageService implements OnDestroy {
 			tap(() => this.router.navigate(['/pre-registration/overview'])),
 		);
 
-	constructor(
-		private readonly authService: AuthService,
-		private readonly functions: FunctionsWrapper,
-		private readonly router: Router,
-		private readonly loadingController: LoadingController,
-		private readonly errorHandler: ErrorHandlerService,
-		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService,
-	) {
+	constructor() {
 		this.subscriptions.push(
 			this.redirectIfLoggedInSubscription.subscribe(),
 		);

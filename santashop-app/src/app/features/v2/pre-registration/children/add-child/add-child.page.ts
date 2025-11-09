@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
 	MOBILE_EVENT,
@@ -13,7 +13,7 @@ import { RegistrationClosedPage } from '../../../../registration-closed/registra
 
 import { PreRegistrationMenuComponent } from '../../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp, gift } from 'ionicons/icons';
@@ -41,12 +41,10 @@ import {
 	styleUrls: ['./add-child.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [AddChildPageService],
-	standalone: true,
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
 		ReactiveFormsModule,
-		NgIf,
 		CoreModule,
 		AsyncPipe,
 		TranslateModule,
@@ -68,6 +66,11 @@ import {
 	],
 })
 export class AddChildPage {
+	private readonly viewService = inject(AddChildPageService);
+	private readonly route = inject(ActivatedRoute);
+	public readonly mobileEvent = inject(MOBILE_EVENT);
+	private readonly appStateService = inject(AppStateService);
+
 	public readonly setChildSubscription = this.route.queryParamMap
 		.pipe(
 			takeUntil(this.viewService.destroy$),
@@ -93,12 +96,7 @@ export class AddChildPage {
 			)
 			.subscribe();
 
-	constructor(
-		private readonly viewService: AddChildPageService,
-		private readonly route: ActivatedRoute,
-		@Inject(MOBILE_EVENT) public readonly mobileEvent: boolean,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp, gift });
 		console.log('min birth date', this.minBirthDate);
 		console.log('max birth date', this.maxBirthDate);

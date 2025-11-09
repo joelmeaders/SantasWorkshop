@@ -1,4 +1,3 @@
-import {} from 'jasmine';
 import { TestBed } from '@angular/core/testing';
 import { SkeletonStateService } from './skeleton-state.service';
 import { SkeletonStateError } from '../errors/skeleton-state-service';
@@ -147,11 +146,15 @@ describe('SkeletonStateService', () => {
 });
 
 describe('SkeletonState', () => {
-	it('should be initialized with correct values', () => {
+	it('should be initialized with correct values', (done) => {
 		const state = new SkeletonState('a', 'b');
 		expect(state.id).toBe('a');
 		expect(state.groupId).toBe('b');
-		expect(state['_isLoaded$'].getValue()).toBeFalse();
+		state.isLoaded$.subscribe((value) => {
+			expect(value).toBeFalse();
+			state.destroy();
+			done();
+		});
 	});
 
 	it('setState should cause true emission', () => {

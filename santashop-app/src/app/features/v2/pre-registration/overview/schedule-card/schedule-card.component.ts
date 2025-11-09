@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { DateTimeSlot } from '@santashop/models';
+import type { DateTimeSlot } from '@santashop/models';
 import { CoreModule } from '@santashop/core';
 
-import { NgIf, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import {
@@ -20,10 +20,8 @@ import {
 	templateUrl: './schedule-card.component.html',
 	styleUrls: ['./schedule-card.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		CoreModule,
-		NgIf,
 		RouterLink,
 		DatePipe,
 		TranslateModule,

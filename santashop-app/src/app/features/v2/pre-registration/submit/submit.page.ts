@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { SubmitPageService } from './submit.page.service';
 
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
-import { NgIf, NgFor, NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
 import { CoreModule } from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -33,12 +33,9 @@ import {
 	styleUrls: ['./submit.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [SubmitPageService],
-	standalone: true,
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
-		NgIf,
-		NgFor,
 		NgClass,
 		CoreModule,
 		AsyncPipe,
@@ -58,10 +55,12 @@ import {
 	],
 })
 export class SubmitPage {
+	public readonly viewService = inject(SubmitPageService);
+
 	public readonly registrationReadyToSubmit$ =
 		this.viewService.registrationReadyToSubmit$;
 
-	constructor(public readonly viewService: SubmitPageService) {
+	constructor() {
 		addIcons({ arrowBackSharp, manOutline, womanOutline, happyOutline });
 	}
 

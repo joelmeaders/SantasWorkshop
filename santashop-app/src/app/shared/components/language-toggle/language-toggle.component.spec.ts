@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import { Analytics } from '@angular/fire/analytics';
 import { TranslateService } from '@ngx-translate/core';
 import { Spied } from '../../../../../../test-helpers';
 
 import { LanguageToggleComponent } from './language-toggle.component';
+import { of } from 'rxjs';
 
 describe('LanguageToggleComponent', () => {
 	let component: LanguageToggleComponent;
@@ -16,7 +17,14 @@ describe('LanguageToggleComponent', () => {
 			providers: [
 				{
 					provide: TranslateService,
-					useValue: translateService,
+					useValue: jasmine.createSpyObj('TranslateService', {
+						use: of({}),
+						getCurrentLang: 'en',
+					}),
+				},
+				{
+					provide: Analytics,
+					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
 				},
 			],
 			imports: [LanguageToggleComponent],
@@ -36,11 +44,11 @@ describe('LanguageToggleComponent', () => {
 	});
 
 	it('should toggle language', () => {
-		const currentLang = 'en';
 		const newLang = 'es';
-		translateService.currentLang = currentLang;
+		(translateService.getCurrentLang as jasmine.Spy).and.returnValue('en');
 
-		component.toggleLanguage({ detail: { checked: true } });
+		// checked: false should trigger toggle to 'es' when current is 'en'
+		component.toggleLanguage({ detail: { checked: false } });
 
 		expect(translateService.use).toHaveBeenCalledWith(newLang);
 	});

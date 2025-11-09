@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	Auth,
 	authState,
@@ -9,25 +9,23 @@ import {
 	updatePassword,
 	IdTokenResult as _IdTokenResult,
 } from '@angular/fire/auth';
-import {
-	redirectUnauthorizedTo as _redirectUnauthorizedTo,
-	redirectLoggedInTo as _redirectLoggedInTo,
-	hasCustomClaim as _hasCustomClaim,
-} from '@angular/fire/auth-guard';
 import { Observable } from 'rxjs';
 
 export type User = _User;
 export type UserCredential = _UserCredential;
 export type IdTokenResult = _IdTokenResult;
-export const redirectUnauthorizedTo = _redirectUnauthorizedTo;
-export const redirectLoggedInTo = _redirectLoggedInTo;
-export const hasCustomClaim = _hasCustomClaim;
+export {
+	redirectUnauthorizedTo,
+	redirectLoggedInTo,
+	hasCustomClaim,
+} from '@angular/fire/auth-guard';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class AuthWrapper {
-	constructor(private readonly auth: Auth) {}
+	private readonly auth = inject(Auth);
+
 
 	public readonly authState = (): Observable<_User | null> =>
 		authState(this.auth);

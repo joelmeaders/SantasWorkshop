@@ -28,7 +28,11 @@
 					"builder": "@angular-devkit/build-angular:karma",
 					"options": {
 						"tsConfig": "santashop-core/tsconfig.spec.json",
-						"polyfills": ["zone.js", "zone.js/testing"]
+						"polyfills": ["zone.js", "zone.js/testing"],
+						"browsers": "ChromeHeadless",
+						"codeCoverage": true,
+						"watch": false,
+						"reporters": ["progress", "kjhtml"]
 					}
 				},
 				"lint": {
@@ -67,7 +71,11 @@
 					"builder": "@angular-devkit/build-angular:karma",
 					"options": {
 						"tsConfig": "santashop-core/tsconfig.spec.json",
-						"polyfills": ["zone.js", "zone.js/testing"]
+						"polyfills": ["zone.js", "zone.js/testing"],
+						"browsers": "ChromeHeadless",
+						"codeCoverage": true,
+						"watch": false,
+						"reporters": ["progress", "kjhtml"]
 					}
 				},
 				"lint": {
@@ -199,10 +207,17 @@
 				"test": {
 					"builder": "@angular-devkit/build-angular:karma",
 					"options": {
-						"main": "santashop-app/src/test.ts",
+						"main": "santashop-admin/src/test.ts",
 						"tsConfig": "santashop-admin/tsconfig.spec.json",
-						"karmaConfig": "santashop-app/karma.conf.js",
-						"codeCoverage": true
+						"polyfills": ["zone.js", "zone.js/testing"],
+						"browsers": "ChromeHeadless",
+						"codeCoverage": true,
+						"watch": false,
+						"reporters": ["progress", "kjhtml"],
+						"styles": [
+							"node_modules/@ionic/angular/css/core.css",
+							"santashop-admin/src/global.scss"
+						]
 					}
 				},
 				"lint": {
@@ -336,8 +351,22 @@
 					"options": {
 						"main": "santashop-app/src/test.ts",
 						"tsConfig": "santashop-app/tsconfig.spec.json",
-						"karmaConfig": "santashop-app/karma.conf.js",
-						"codeCoverage": true
+						"polyfills": ["zone.js", "zone.js/testing"],
+						"browsers": "ChromeHeadless",
+						"codeCoverage": true,
+						"watch": false,
+						"reporters": ["progress", "kjhtml"],
+						"styles": [
+							"node_modules/@ionic/angular/css/core.css",
+							"santashop-app/src/global.scss"
+						],
+						"assets": [
+							{
+								"glob": "**/*",
+								"input": "santashop-app/src/assets",
+								"output": "./assets"
+							}
+						]
 					}
 				},
 				"lint": {
@@ -355,5 +384,31 @@
 	"cli": {
 		"analytics": "fa8b7a02-8b82-49e4-8561-3c9e78ed7e13",
 		"schematicCollections": ["@ionic/angular-toolkit"]
+	},
+	"schematics": {
+		"@schematics/angular:component": {
+			"type": "component"
+		},
+		"@schematics/angular:directive": {
+			"type": "directive"
+		},
+		"@schematics/angular:service": {
+			"type": "service"
+		},
+		"@schematics/angular:guard": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:interceptor": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:module": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:pipe": {
+			"typeSeparator": "."
+		},
+		"@schematics/angular:resolver": {
+			"typeSeparator": "."
+		}
 	}
 }

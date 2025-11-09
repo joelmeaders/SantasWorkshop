@@ -23,58 +23,60 @@ describe('RegistrationCompleteGuard', () => {
 					provide: PreRegistrationService,
 					useValue: jasmine.createSpyObj<PreRegistrationService>(
 						'prs',
-						{},
-						['registrationComplete$'],
+						[],
+						{ registrationComplete$: of(false) },
 					),
 				},
 			],
 		});
-		guard = TestBed.inject(RegistrationCompleteGuard);
 		preregistrationService = TestBed.inject(
 			PreRegistrationService,
 		) as jasmine.SpyObj<PreRegistrationService>;
 		router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+		guard = TestBed.inject(RegistrationCompleteGuard);
 	});
 
 	it('should be created', () => {
 		expect(guard).toBeTruthy();
 	});
 
-	it('should return true', async () => {
+	it('should return true when registration is not complete', async () => {
 		// Arrange
-		const spy = Object.getOwnPropertyDescriptor(
-			preregistrationService,
-			'registrationComplete$',
-		)?.get as jasmine.Spy;
+		Object.defineProperty(preregistrationService, 'registrationComplete$', {
+			get: () => of(false),
+			configurable: true,
+		});
 
-		spy.and.returnValue(of(false));
+		// Recreate guard with updated observable
+		guard = new RegistrationCompleteGuard(preregistrationService, router);
 
 		// Act
-		const value = firstValueFrom(guard.canActivate());
+		const value = await firstValueFrom(guard.canActivate());
 
 		// Assert
-		await expectAsync(value).toBeResolvedTo(true);
-		expect(spy).toHaveBeenCalled();
+		expect(value).toBe(true);
 	});
 
-	it('should return urlTree', async () => {
+	it('should return urlTree when registration is complete', async () => {
 		// Arrange
-		const registrationSpy = Object.getOwnPropertyDescriptor(
-			preregistrationService,
-			'registrationComplete$',
-		)?.get as jasmine.Spy;
+		const mockUrlTree = new UrlTree();
+		router.parseUrl.and.returnValue(mockUrlTree);
 
-		registrationSpy.and.returnValue(of(true));
+		Object.defineProperty(preregistrationService, 'registrationComplete$', {
+			get: () => of(true),
+			configurable: true,
+		});
 
-		const routerSpy = router.parseUrl;
-		routerSpy.and.returnValue(new UrlTree());
+		// Recreate guard with updated observable
+		guard = new RegistrationCompleteGuard(preregistrationService, router);
 
 		// Act
 		const value = await firstValueFrom(guard.canActivate());
 
 		// Assert
 		expect(value).toBeInstanceOf(UrlTree);
-		expect(registrationSpy).toHaveBeenCalled();
-		expect(routerSpy).toHaveBeenCalled();
+		expect(router.parseUrl).toHaveBeenCalledWith(
+			'pre-registration/confirmation',
+		);
 	});
 });

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router, RouterLink } from '@angular/router';
 import { ErrorHandlerService } from '@santashop/core';
@@ -22,7 +22,7 @@ import {
 import { IError } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';
-import { NgIf, NgFor, NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { addIcons } from 'ionicons';
 import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
@@ -32,12 +32,9 @@ import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 	templateUrl: './confirmation.page.html',
 	styleUrls: ['./confirmation.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
-		NgIf,
 		PreRegistrationMenuComponent,
 		RouterLink,
-		NgFor,
 		NgClass,
 		AsyncPipe,
 		DatePipe,
@@ -58,18 +55,18 @@ import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 	],
 })
 export class ConfirmationPage {
+	public readonly viewService = inject(PreRegistrationService);
+	private readonly loadingController = inject(LoadingController);
+	private readonly alertController = inject(AlertController);
+	private readonly router = inject(Router);
+	private readonly errorHandler = inject(ErrorHandlerService);
+	private readonly translateService = inject(TranslateService);
+	private readonly analytics = inject(Analytics);
+
 	public readonly isRegistrationComplete$ =
 		this.viewService.registrationComplete$;
 
-	constructor(
-		public readonly viewService: PreRegistrationService,
-		private readonly loadingController: LoadingController,
-		private readonly alertController: AlertController,
-		private readonly router: Router,
-		private readonly errorHandler: ErrorHandlerService,
-		private readonly translateService: TranslateService,
-		private readonly analytics: Analytics,
-	) {
+	constructor() {
 		addIcons({ manOutline, womanOutline, happyOutline });
 	}
 

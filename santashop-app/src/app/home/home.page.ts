@@ -18,6 +18,7 @@ import {
 	IonButton,
 	IonIcon,
 	IonNote,
+	IonSpinner,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
@@ -29,7 +30,6 @@ import { AsyncPipe } from '@angular/common';
 	templateUrl: 'home.page.html',
 	styleUrls: ['home.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		AsyncPipe,
 		IonContent,
@@ -39,16 +39,10 @@ import { AsyncPipe } from '@angular/common';
 		IonButton,
 		IonIcon,
 		IonNote,
+		IonSpinner,
 		LanguageToggleComponent,
 		RouterLink,
 		TranslateModule,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonButton,
-		IonIcon,
-		IonNote,
 	],
 })
 export class HomePage implements OnDestroy {

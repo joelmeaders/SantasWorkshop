@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import * as admin from 'firebase-admin';
 import {
 	User,
@@ -21,7 +21,7 @@ export default async () => {
 	return admin
 		.firestore()
 		.collection('stats')
-		.doc('user-2024')
+		.doc('user-2025')
 		.set(stats, { merge: false });
 };
 

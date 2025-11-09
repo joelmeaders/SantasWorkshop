@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { map, shareReplay } from 'rxjs/operators';
 import { ProfilePageService } from '../profile.page.service';
 
@@ -26,34 +26,35 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'app-change-email',
-	templateUrl: './change-email.page.html',
-	styleUrls: ['./change-email.page.css'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
-	standalone: true,
-	imports: [
-		PreRegistrationMenuComponent,
-		RouterLink,
-		ReactiveFormsModule,
-		AsyncPipe,
-		TranslateModule,
-		CoreModule,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonButton,
-		IonIcon,
-		IonItem,
-		IonCardTitle,
-		IonCard,
-		IonCardContent,
-		IonList,
-		IonInput,
-	],
+    selector: 'app-change-email',
+    templateUrl: './change-email.page.html',
+    styleUrls: ['./change-email.page.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [ProfilePageService],
+    imports: [
+        PreRegistrationMenuComponent,
+        RouterLink,
+        ReactiveFormsModule,
+        AsyncPipe,
+        TranslateModule,
+        CoreModule,
+        IonContent,
+        IonGrid,
+        IonRow,
+        IonCol,
+        IonButton,
+        IonIcon,
+        IonItem,
+        IonCardTitle,
+        IonCard,
+        IonCardContent,
+        IonList,
+        IonInput,
+    ]
 })
 export class ChangeEmailPage {
+	private readonly viewService = inject(ProfilePageService);
+
 	public readonly form = this.viewService.changeEmailForm;
 
 	public readonly email$ = this.viewService.userProfile$.pipe(
@@ -61,7 +62,7 @@ export class ChangeEmailPage {
 		shareReplay(1),
 	);
 
-	constructor(private readonly viewService: ProfilePageService) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

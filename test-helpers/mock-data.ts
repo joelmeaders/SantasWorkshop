@@ -9,7 +9,7 @@ import {
 
 export const mockUsers = (id?: string) => ({
 	user1: {
-		uid: id,
+		uid: id ?? 'ABC123',
 		firstName: 'Jesse',
 		lastName: 'Doe',
 		emailAddress: 'jesse.doe@gmail.com',

@@ -1,0 +1,16 @@
+{
+	"name": "@santashop/e2e",
+	"version": "1.0.0",
+	"description": "End-to-end tests for Santa's Workshop app using Playwright",
+	"scripts": {
+		"test": "playwright test",
+		"test:ui": "playwright test --ui",
+		"test:headed": "playwright test --headed",
+		"test:debug": "playwright test --debug",
+		"test:report": "playwright show-report",
+		"test:codegen": "playwright codegen http://localhost:4100"
+	},
+	"keywords": ["e2e", "playwright", "testing"],
+	"author": "",
+	"license": "ISC"
+}

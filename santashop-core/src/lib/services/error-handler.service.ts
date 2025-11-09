@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular/standalone';
 import { IError } from '@santashop/models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
@@ -7,15 +7,14 @@ import { AnalyticsWrapper } from './_analytics-wrapper';
 	providedIn: 'root',
 })
 export class ErrorHandlerService {
-	constructor(
-		private readonly analyticsWrapper: AnalyticsWrapper,
-		private readonly alertController: AlertController,
-	) {}
+	private readonly analyticsWrapper = inject(AnalyticsWrapper);
+	private readonly alertController = inject(AlertController);
+
 
 	public async handleError(
 		error: IError,
-		title: string = 'Error Encountered',
-		showAlert: boolean = true,
+		title = 'Error Encountered',
+		showAlert = true,
 	): Promise<any> {
 		const alert = await this.alertController.create({
 			header: title,

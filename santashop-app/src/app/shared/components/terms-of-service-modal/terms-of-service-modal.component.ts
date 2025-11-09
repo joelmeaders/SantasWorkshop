@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	ModalController,
 	IonLabel,
@@ -7,7 +7,6 @@ import {
 	IonToolbar,
 	IonFooter,
 	IonContent,
-	IonCol,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -18,7 +17,6 @@ import { closeCircle } from 'ionicons/icons';
 	templateUrl: './terms-of-service-modal.component.html',
 	styleUrls: ['./terms-of-service-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		IonLabel,
 		IonIcon,
@@ -27,7 +25,6 @@ import { closeCircle } from 'ionicons/icons';
 		IonFooter,
 		TranslateModule,
 		IonContent,
-		IonCol,
 		IonContent,
 		IonFooter,
 		IonToolbar,
@@ -38,7 +35,9 @@ import { closeCircle } from 'ionicons/icons';
 	providers: [ModalController],
 })
 export class TermsOfServiceModalComponent {
-	constructor(private readonly modalController: ModalController) {
+	private readonly modalController = inject(ModalController);
+
+	constructor() {
 		addIcons({ closeCircle });
 	}
 

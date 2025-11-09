@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PreRegistrationService } from '../../../../core';
 import { ProfilePageService } from './profile.page.service';
 
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -24,33 +24,34 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-	selector: 'app-profile',
-	templateUrl: './profile.page.html',
-	styleUrls: ['./profile.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
-	standalone: true,
-	imports: [
-		NgIf,
-		PreRegistrationMenuComponent,
-		RouterLink,
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonButton,
-		IonIcon,
-		IonItem,
-		IonCardTitle,
-		IonCard,
-		IonCardContent,
-		IonList,
-		IonInput,
-	],
+    selector: 'app-profile',
+    templateUrl: './profile.page.html',
+    styleUrls: ['./profile.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [ProfilePageService],
+    imports: [
+    PreRegistrationMenuComponent,
+    RouterLink,
+    AsyncPipe,
+    TranslateModule,
+    IonContent,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonButton,
+    IonIcon,
+    IonItem,
+    IonCardTitle,
+    IonCard,
+    IonCardContent,
+    IonList,
+    IonInput
+]
 })
 export class ProfilePage {
+	private readonly viewService = inject(ProfilePageService);
+	private readonly preregistrationService = inject(PreRegistrationService);
+
 	public readonly profileForm = this.viewService.profileForm;
 
 	public readonly changeEmailForm = this.viewService.changeEmailForm;
@@ -71,10 +72,7 @@ export class ProfilePage {
 	public readonly changePassword = (): Promise<void> =>
 		this.viewService.changePassword();
 
-	constructor(
-		private readonly viewService: ProfilePageService,
-		private readonly preregistrationService: PreRegistrationService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp, createOutline });
 	}
 }

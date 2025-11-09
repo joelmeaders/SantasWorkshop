@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v1';
 import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
@@ -122,7 +121,7 @@ const createRegistration = async (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2024,
+		programYear: 2025,
 	};
 
 	const registrationDocument = admin

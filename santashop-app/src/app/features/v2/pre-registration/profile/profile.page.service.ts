@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
 	ErrorHandlerService,
@@ -25,6 +25,16 @@ import { changeEmailForm, changePasswordForm } from './profile.form';
 
 @Injectable()
 export class ProfilePageService implements OnDestroy {
+	private readonly httpService = inject(FireRepoLite);
+	private readonly authService = inject(AuthService);
+	private readonly functions = inject(FunctionsWrapper);
+	private readonly errorHandler = inject(ErrorHandlerService);
+	private readonly alertController = inject(AlertController);
+	private readonly loadingController = inject(LoadingController);
+	private readonly router = inject(Router);
+	private readonly translateService = inject(TranslateService);
+	private readonly analytics = inject(AnalyticsWrapper);
+
 	private readonly destroy$ = new Subject<void>();
 
 	@automock
@@ -61,18 +71,6 @@ export class ProfilePageService implements OnDestroy {
 			}),
 		)
 		.subscribe();
-
-	constructor(
-		private readonly httpService: FireRepoLite,
-		private readonly authService: AuthService,
-		private readonly functions: FunctionsWrapper,
-		private readonly errorHandler: ErrorHandlerService,
-		private readonly alertController: AlertController,
-		private readonly loadingController: LoadingController,
-		private readonly router: Router,
-		private readonly translateService: TranslateService,
-		private readonly analytics: AnalyticsWrapper,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

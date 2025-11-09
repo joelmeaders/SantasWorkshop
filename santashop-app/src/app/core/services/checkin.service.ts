@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CheckIn, COLLECTION_SCHEMA } from '@santashop/models';
 import {
 	AuthService,
@@ -13,6 +13,10 @@ import { AlertController } from '@ionic/angular/standalone';
 	providedIn: 'root',
 })
 export class CheckinService {
+	private readonly fireRepo = inject(FireRepoLite);
+	private readonly authService = inject(AuthService);
+	private readonly alertController = inject(AlertController);
+
 	private readonly checkinCollection = (): IFireRepoCollection<CheckIn> =>
 		this.fireRepo.collection<CheckIn>(COLLECTION_SCHEMA.checkins);
 
@@ -30,12 +34,6 @@ export class CheckinService {
 			switchMap(() => this.displayAlert()),
 		)
 		.subscribe();
-
-	constructor(
-		private readonly fireRepo: FireRepoLite,
-		private readonly authService: AuthService,
-		private readonly alertController: AlertController,
-	) {}
 
 	private async displayAlert(): Promise<void> {
 		const alert = await this.alertController.create({

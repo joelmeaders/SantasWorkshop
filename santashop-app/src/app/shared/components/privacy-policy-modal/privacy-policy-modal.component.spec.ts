@@ -1,5 +1,10 @@
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ModalController } from '@ionic/angular/standalone';
+import {
+	createModalControllerMock,
+	provideTranslateServiceMock,
+} from '../../../../test-helpers';
 
 import { PrivacyPolicyModalComponent } from './privacy-policy-modal.component';
 
@@ -7,12 +12,19 @@ describe('PrivacyPolicyModalComponent', () => {
 	let component: PrivacyPolicyModalComponent;
 	let fixture: ComponentFixture<PrivacyPolicyModalComponent>;
 
-	beforeEach(async(() => {
-		TestBed.configureTestingModule({
+	beforeEach(async () => {
+		await TestBed.configureTestingModule({
 			imports: [PrivacyPolicyModalComponent],
 			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+			providers: [
+				{
+					provide: ModalController,
+					useValue: createModalControllerMock(),
+				},
+				provideTranslateServiceMock(),
+			],
 		}).compileComponents();
-	}));
+	});
 
 	beforeEach(() => {
 		fixture = TestBed.createComponent(PrivacyPolicyModalComponent);

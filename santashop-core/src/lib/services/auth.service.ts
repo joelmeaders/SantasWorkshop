@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
 	distinctUntilChanged,
 	filter,
 	map,
-	pluck,
 	shareReplay,
 	switchMap,
 } from 'rxjs/operators';
@@ -21,6 +20,9 @@ import { FunctionsWrapper } from './_functions-wrapper';
 	providedIn: 'root',
 })
 export class AuthService {
+	private readonly authWrapper = inject(AuthWrapper);
+	private readonly functionsWrapper = inject(FunctionsWrapper);
+
 	/**
 	 * Stream of the auth state, triggered on login/logout
 	 *
@@ -61,7 +63,7 @@ export class AuthService {
 	 * @memberof AuthService
 	 */
 	public readonly uid$: Observable<string> = this.currentUser$.pipe(
-		pluck('uid'),
+		map((user) => user?.uid),
 		filter((uid) => !!uid),
 		map((uid) => uid as string),
 		shareReplay(1),
@@ -75,17 +77,10 @@ export class AuthService {
 	 */
 	public readonly isAdmin$ = this.currentUser$.pipe(
 		filter((user) => !!user),
-		// TODO: Find alternative
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		switchMap((user) => from(user!.getIdTokenResult(false))),
+		switchMap((user) => from(user.getIdTokenResult(false))),
 		map((token) => token.claims?.['admin'] ?? false),
 		shareReplay(1),
 	);
-
-	constructor(
-		private readonly authWrapper: AuthWrapper,
-		private readonly functionsWrapper: FunctionsWrapper,
-	) {}
 
 	/**
 	 * Reset user password, sends an email.
@@ -95,7 +90,6 @@ export class AuthService {
 	 * @memberof AuthService
 	 */
 	public resetPassword(emailAddress: string): Promise<void> {
-		// TODO: Add email validation
 		return this.authWrapper.sendPasswordResetEmail(emailAddress);
 	}
 
@@ -113,7 +107,7 @@ export class AuthService {
 	): Promise<void> {
 		const user = this.authWrapper.currentUser();
 
-		if (!user) return Promise.reject(new Error('User cannot be null'));
+		if (!user) throw new Error('User cannot be null');
 
 		const auth: Auth = {
 			emailAddress: user.email as string,
@@ -124,8 +118,7 @@ export class AuthService {
 			await this.login(auth);
 			return await this.authWrapper.updatePassword(user, newPassword);
 		} catch (error: any) {
-			// await this.errorHandler.handleError(error);
-			return Promise.reject(error);
+			throw error;
 		}
 	}
 
@@ -142,9 +135,9 @@ export class AuthService {
 		password: string,
 		newEmailAddress: string,
 	): Promise<void> {
-		const user = await this.authWrapper.currentUser();
+		const user = this.authWrapper.currentUser();
 
-		if (!user) return Promise.reject(new Error('User cannot be null'));
+		if (!user) throw new Error('User cannot be null');
 
 		const auth: Auth = {
 			emailAddress: user?.email as string,
@@ -155,8 +148,7 @@ export class AuthService {
 			await this.login(auth);
 			await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		} catch (error: any) {
-			// await this.errorHandler.handleError(error);
-			return Promise.reject(error);
+			throw error;
 		}
 	}
 
@@ -183,7 +175,6 @@ export class AuthService {
 	 */
 	public async logout(reload = true): Promise<void> {
 		await this.authWrapper.signOut().then(() => {
-			// TODO: Replace this with something testable
 			if (reload) document.location.reload();
 		});
 	}

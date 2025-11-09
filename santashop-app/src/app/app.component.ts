@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
 	AlertController,
@@ -16,18 +16,17 @@ import { firstValueFrom } from 'rxjs';
 	templateUrl: 'app.component.html',
 	styleUrls: ['app.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [IonApp, IonRouterOutlet],
 	providers: [ModalController],
 })
 export class AppComponent {
-	constructor(
-		private readonly platform: Platform,
-		private readonly translateService: TranslateService,
-		private readonly analyticsService: Analytics,
-		private readonly appStateService: AppStateService,
-		private readonly alertController: AlertController,
-	) {
+	private readonly platform = inject(Platform);
+	private readonly translateService = inject(TranslateService);
+	private readonly analyticsService = inject(Analytics);
+	private readonly appStateService = inject(AppStateService);
+	private readonly alertController = inject(AlertController);
+
+	constructor() {
 		this.initializeApp();
 	}
 
@@ -38,7 +37,7 @@ export class AppComponent {
 		});
 
 		this.translateService.addLangs(['en', 'es']);
-		this.translateService.setDefaultLang('en');
+		this.translateService.setFallbackLang('en');
 
 		const browserLang = this.translateService.getBrowserLang() ?? 'en';
 		this.translateService.use(

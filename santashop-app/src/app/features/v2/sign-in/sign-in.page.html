@@ -71,6 +71,7 @@
 					<div class="ion-text-center es-mg-top-lg">
 						@if ((createAccountEnabled$ | async) === true) {
 						<ion-button
+							id="createAccountButton"
 							fill="clear"
 							color="tertiary"
 							[routerLink]="['/sign-up']"

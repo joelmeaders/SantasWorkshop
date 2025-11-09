@@ -24,7 +24,7 @@ import {
 	Query,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 // Re-export types to ensure no references to these libraries exist outside of this file
 export type CollectionReference<T> = _CollectionReference<T>;
@@ -37,10 +37,11 @@ export type QueryDocumentSnapshot<T = DocumentData> = _QueryDocumentSnapshot<T>;
 export type SnapshotOptions = _SnapshotOptions;
 export type Timestamp = _Timestamp;
 export const TimestampFn = _Timestamp;
-export const where = _where;
-export const connectFirestoreEmulator = _connectFirestoreEmulator;
-export const getFirestore = _getFirestore;
-export const provideFirestore = _provideFirestore;
+export const where: typeof _where = _where;
+export const connectFirestoreEmulator: typeof _connectFirestoreEmulator =
+	_connectFirestoreEmulator;
+export const getFirestore: typeof _getFirestore = _getFirestore;
+export const provideFirestore: typeof _provideFirestore = _provideFirestore;
 
 // Solves an issue where dates are being converted to timestamps
 // in the database, but not being converted back to dates when read.
@@ -62,7 +63,7 @@ export type idField<T> = keyof T & keyof NonNullable<T>;
 	providedIn: 'root',
 })
 export class FirestoreWrapper {
-	constructor(private readonly firestore: Firestore) {}
+	private readonly firestore = inject(Firestore);
 
 	public readonly collection = <T = DocumentData>(
 		path: string,
@@ -75,14 +76,8 @@ export class FirestoreWrapper {
 	>(
 		query: Query<T>,
 		idField?: (U | keyof T) & keyof NonNullable<T>,
-	): Observable<
-		(
-			| (T & {
-					[T in U]: string;
-			  })
-			| NonNullable<T>
-		)[]
-	> => collectionData(query, { idField });
+	): Observable<((T & Record<U, string>) | NonNullable<T>)[]> =>
+		collectionData(query, { idField });
 
 	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,

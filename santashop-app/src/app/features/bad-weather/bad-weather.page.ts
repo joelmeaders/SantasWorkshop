@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AppStateService } from '../../core/services/app-state.service';
 import { CoreModule } from '@santashop/core';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
@@ -12,10 +12,8 @@ import { IonContent, IonButton, IonIcon } from '@ionic/angular/standalone';
 	templateUrl: './bad-weather.page.html',
 	styleUrls: ['./bad-weather.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
 		CoreModule,
-		NgIf,
 		AsyncPipe,
 		TranslateModule,
 		IonContent,
@@ -24,9 +22,11 @@ import { IonContent, IonButton, IonIcon } from '@ionic/angular/standalone';
 	],
 })
 export class BadWeatherPage {
+	public readonly service = inject(AppStateService);
+
 	public readonly message$ = this.service.message$;
 
-	constructor(public readonly service: AppStateService) {
+	constructor() {
 		addIcons({ logoFacebook, logoInstagram });
 	}
 }

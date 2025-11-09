@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { SignInPageService } from './sign-in.page.service';
 
 import { RouterLink } from '@angular/router';
@@ -26,43 +26,42 @@ import { AppStateService } from '../../../core';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
-	selector: 'app-sign-in',
-	templateUrl: './sign-in.page.html',
-	styleUrls: ['./sign-in.page.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [SignInPageService],
-	standalone: true,
-	imports: [
-		AsyncPipe,
-		IonContent,
-		IonGrid,
-		IonRow,
-		IonCol,
-		IonCard,
-		IonCardHeader,
-		IonLabel,
-		IonCardTitle,
-		IonCardContent,
-		IonIcon,
-		IonList,
-		IonItem,
-		IonInput,
-		IonButton,
-		RouterLink,
-		ReactiveFormsModule,
-		TranslateModule,
-	],
+    selector: 'app-sign-in',
+    templateUrl: './sign-in.page.html',
+    styleUrls: ['./sign-in.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [SignInPageService],
+    imports: [
+        AsyncPipe,
+        IonContent,
+        IonGrid,
+        IonRow,
+        IonCol,
+        IonCard,
+        IonCardHeader,
+        IonLabel,
+        IonCardTitle,
+        IonCardContent,
+        IonIcon,
+        IonList,
+        IonItem,
+        IonInput,
+        IonButton,
+        RouterLink,
+        ReactiveFormsModule,
+        TranslateModule,
+    ]
 })
 export class SignInPage {
+	private readonly viewService = inject(SignInPageService);
+	private readonly appStateService = inject(AppStateService);
+
 	public readonly form = this.viewService.form;
 
 	public readonly createAccountEnabled$ =
 		this.appStateService.createAccountEnabled$;
 
-	constructor(
-		private readonly viewService: SignInPageService,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

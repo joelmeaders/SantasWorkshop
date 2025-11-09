@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PreRegistrationService } from '../../../../core';
 
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -27,9 +27,7 @@ import {
 	templateUrl: './help.page.html',
 	styleUrls: ['./help.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: true,
 	imports: [
-		NgIf,
 		PreRegistrationMenuComponent,
 		RouterLink,
 		AsyncPipe,
@@ -49,10 +47,12 @@ import {
 	],
 })
 export class HelpPage {
+	public readonly viewService = inject(PreRegistrationService);
+
 	public readonly isRegistrationComplete$ =
 		this.viewService.registrationComplete$;
 
-	constructor(public readonly viewService: PreRegistrationService) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 }

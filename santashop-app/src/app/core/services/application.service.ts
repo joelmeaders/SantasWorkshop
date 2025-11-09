@@ -1,12 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { ProfileService } from './profile.service';
-import { AuthService } from '../../../../../santashop-core/src';
+import { Injectable } from '@angular/core';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class ApplicationService {
-	private readonly authService = inject(AuthService);
-
-	private readonly profileService = inject(ProfileService);
+	// private readonly authService = inject(AuthService);
+	// private readonly profileService = inject(ProfileService);
 }

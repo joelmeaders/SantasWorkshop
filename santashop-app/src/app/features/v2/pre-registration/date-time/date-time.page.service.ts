@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import {
 	FireRepoLite,
 	IFireRepoCollection,
@@ -14,6 +14,10 @@ import { PreRegistrationService } from '../../../../core';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
+	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly fireRepo = inject(FireRepoLite);
+	private readonly preRegistrationService = inject(PreRegistrationService);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly availableSlots$ = this.availableSlotsQuery(
@@ -37,12 +41,6 @@ export class DateTimePageService implements OnDestroy {
 			takeUntil(this.destroy$),
 			shareReplay(1),
 		);
-
-	constructor(
-		@Inject(PROGRAM_YEAR) private readonly programYear: number,
-		private readonly fireRepo: FireRepoLite,
-		private readonly preRegistrationService: PreRegistrationService,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

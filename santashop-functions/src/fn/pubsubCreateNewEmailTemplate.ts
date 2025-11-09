@@ -30,7 +30,7 @@ const createCreateTemplateCommand =
 				HtmlPart: cleanedUpTemplate,
 				SubjectPart:
 					// eslint-disable-next-line quotes
-					"Here's your ticket for the 2024 Denver Santa Claus Shop!",
+					"Here's your ticket for the 2025 Denver Santa Claus Shop!",
 			},
 		});
 	};

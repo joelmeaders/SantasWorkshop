@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import {
+	provideTranslateServiceMock,
+	provideActivatedRouteMock,
+} from '../../../../../../test-helpers';
 import { ScheduleCardComponent } from './schedule-card.component';
 
 describe('ScheduleCardComponent', () => {
@@ -9,6 +12,10 @@ describe('ScheduleCardComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [ScheduleCardComponent],
+			providers: [
+				provideTranslateServiceMock(),
+				provideActivatedRouteMock(),
+			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ScheduleCardComponent);

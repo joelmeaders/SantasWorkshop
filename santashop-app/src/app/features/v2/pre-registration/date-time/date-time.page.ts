@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+} from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { SkeletonStateService, CoreModule } from '@santashop/core';
 import {
@@ -39,7 +44,7 @@ import { AppStateService } from '../../../../core';
 import { RegistrationClosedPage } from '../../../registration-closed/registration-closed.page';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
-import { NgIf, NgFor, AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
 
@@ -49,13 +54,10 @@ import { arrowBackSharp } from 'ionicons/icons';
 	styleUrls: ['./date-time.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [DateTimePageService],
-	standalone: true,
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
 		CoreModule,
-		NgIf,
-		NgFor,
 		AsyncPipe,
 		DatePipe,
 		TranslateModule,
@@ -81,6 +83,13 @@ import { arrowBackSharp } from 'ionicons/icons';
 	],
 })
 export class DateTimePage implements OnDestroy {
+	private readonly viewService = inject(DateTimePageService);
+	private readonly alertController = inject(AlertController);
+	private readonly translateService = inject(TranslateService);
+	private readonly analytics = inject(Analytics);
+	public readonly skeletonState = inject(SkeletonStateService);
+	private readonly appStateService = inject(AppStateService);
+
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly availableSlots$ = this.viewService.availableSlots$.pipe(
@@ -129,14 +138,7 @@ export class DateTimePage implements OnDestroy {
 			)
 			.subscribe();
 
-	constructor(
-		private readonly viewService: DateTimePageService,
-		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService,
-		private readonly analytics: Analytics,
-		public readonly skeletonState: SkeletonStateService,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

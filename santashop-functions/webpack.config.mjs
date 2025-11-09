@@ -1,6 +1,5 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import linkerPlugin from '@angular/compiler-cli/linker/babel';
 
 const __dirname = path.dirname(fileURLToPath(new URL(import.meta.url)));
 
@@ -19,7 +18,6 @@ export default {
 				exclude: /node_modules/,
 				options: {
 					plugins: [
-						linkerPlugin,
 						['@babel/plugin-proposal-decorators', { legacy: true }],
 					],
 					compact: false,
@@ -41,7 +39,7 @@ export default {
 	output: {
 		filename: 'index.js',
 		path: path.resolve(__dirname, 'dist'),
-		libraryTarget: 'commonjs',
+		libraryTarget: 'commonjs2',
 	},
 	externals: {
 		'firebase-admin': 'firebase-admin',

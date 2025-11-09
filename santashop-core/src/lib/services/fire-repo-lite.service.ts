@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FireRepoBase } from './fire-repo-base.service';
 import {
@@ -11,7 +11,8 @@ import {
 	providedIn: 'root',
 })
 export class FireRepoLite {
-	constructor(private readonly fireRepoBase: FireRepoBase) {}
+	private readonly fireRepoBase = inject(FireRepoBase);
+
 
 	/**
 	 * Generates a random id

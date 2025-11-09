@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+ 
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
@@ -64,7 +64,7 @@ export default async (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2024,
+		programYear: 2025,
 	} as Partial<Registration>;
 
 	batch.set(registrationDocRef, updateRegistrationFields, { merge: true });

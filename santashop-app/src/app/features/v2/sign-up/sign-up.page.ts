@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	ViewChild,
+	inject,
+} from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
 	AlertController,
@@ -23,6 +28,7 @@ import {
 	IonNote,
 	IonText,
 	IonCheckbox,
+	IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { tap } from 'rxjs/operators';
@@ -33,7 +39,7 @@ import { RegistrationClosedPage } from '../../registration-closed/registration-c
 import { SignUpPageService } from './sign-up.page.service';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgIf } from '@angular/common';
+
 import { CoreModule } from '@santashop/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
@@ -44,11 +50,9 @@ import { arrowBackSharp } from 'ionicons/icons';
 	styleUrls: ['./sign-up.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [SignUpPageService],
-	standalone: true,
 	imports: [
 		RouterLink,
 		ReactiveFormsModule,
-		NgIf,
 		TranslateModule,
 		CoreModule,
 		IonContent,
@@ -71,9 +75,17 @@ import { arrowBackSharp } from 'ionicons/icons';
 		IonNote,
 		IonText,
 		IonCheckbox,
+		IonSpinner,
 	],
 })
 export class SignUpPage {
+	private readonly viewService = inject(SignUpPageService);
+	private readonly alertController = inject(AlertController);
+	private readonly translateService = inject(TranslateService);
+	private readonly modalController = inject(ModalController);
+	private readonly analytics = inject(Analytics);
+	private readonly appStateService = inject(AppStateService);
+
 	public readonly form = this.viewService.form;
 
 	@ViewChild('firstName') private readonly firstName?: HTMLIonInputElement;
@@ -91,14 +103,7 @@ export class SignUpPage {
 			)
 			.subscribe();
 
-	constructor(
-		private readonly viewService: SignUpPageService,
-		private readonly alertController: AlertController,
-		private readonly translateService: TranslateService,
-		private readonly modalController: ModalController,
-		private readonly analytics: Analytics,
-		private readonly appStateService: AppStateService,
-	) {
+	constructor() {
 		addIcons({ arrowBackSharp });
 	}
 

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { FireRepoBase } from './fire-repo-base.service';
-import { Registration } from '../../../../santashop-models/src/public-api';
+import { Registration } from '../../../../santashop-models/src';
 import { of } from 'rxjs';
 import { DocumentData, DocumentReference } from './_firestore-wrapper';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
@@ -69,7 +69,7 @@ describe('FireRepoLite', () => {
 		expect(spy).toHaveBeenCalledOnceWith(
 			'registrations',
 			'12345',
-			<any>'uid',
+			('uid' as any),
 		);
 	});
 
@@ -88,7 +88,7 @@ describe('FireRepoLite', () => {
 		expect(spy).toHaveBeenCalledOnceWith(
 			'registrations',
 			undefined,
-			<any>'uid',
+			('uid' as any),
 		);
 	});
 
@@ -182,7 +182,7 @@ describe('FireRepoLite', () => {
 			expect(spy).toHaveBeenCalledOnceWith(
 				'registrations',
 				'12345',
-				<any>'uid',
+				('uid' as any),
 			);
 		});
 
@@ -199,7 +199,7 @@ describe('FireRepoLite', () => {
 			expect(spy).toHaveBeenCalledOnceWith(
 				'registrations',
 				undefined,
-				<any>'uid',
+				('uid' as any),
 			);
 		});
 

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ModalController } from '@ionic/angular/standalone';
 import { combineLatest, from, Observable, Subject } from 'rxjs';
 import {
@@ -21,6 +21,10 @@ import { RegistrationClosedPage } from '../../features/registration-closed/regis
 	providedIn: 'root',
 })
 export class AppStateService implements OnDestroy {
+	private readonly httpService = inject(FireRepoLite);
+	private readonly modalController = inject(ModalController);
+	private readonly translateService = inject(TranslateService);
+
 	private readonly destroy$ = new Subject<void>();
 
 	private readonly currentModal = new Subject<any>();
@@ -118,12 +122,6 @@ export class AppStateService implements OnDestroy {
 			switchMap((modal) => from(this.openModal(modal))),
 		)
 		.subscribe();
-
-	constructor(
-		private readonly httpService: FireRepoLite,
-		private readonly modalController: ModalController,
-		private readonly translateService: TranslateService,
-	) {}
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();

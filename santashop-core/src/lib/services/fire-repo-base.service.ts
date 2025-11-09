@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { from, map, Observable } from 'rxjs';
 import {
 	CollectionReference,
@@ -15,7 +15,8 @@ import {
 	providedIn: 'root',
 })
 export class FireRepoBase {
-	constructor(private readonly firestoreWrapper: FirestoreWrapper) {}
+	private readonly firestoreWrapper = inject(FirestoreWrapper);
+
 
 	public randomId(): string {
 		const colRef = this.firestoreWrapper.collection('_');

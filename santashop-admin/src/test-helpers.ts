@@ -136,7 +136,7 @@ export function createFirestoreMock(): jasmine.SpyObj<Firestore> {
 			.and.returnValue(collectionMock),
 		doc: jasmine.createSpy('doc').and.returnValue(docMock),
 		_databaseId: { database: 'mock-database' },
-		type: 'firestore-lite',
+		type: 'firestore',
 		app: { name: 'mock-app' },
 	} as jasmine.SpyObj<Firestore>;
 

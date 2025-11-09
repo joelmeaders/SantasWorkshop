@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AppStateService } from './shared/services/app-state.service';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { AppStateService } from '@santashop/core';
 
 @Component({
 	selector: 'admin-root',

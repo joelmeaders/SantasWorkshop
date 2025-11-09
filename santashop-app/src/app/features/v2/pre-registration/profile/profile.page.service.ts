@@ -10,7 +10,6 @@ import {
 	filterNil,
 } from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
-import { OverlayEventDetail } from '@ionic/core';
 import {
 	COLLECTION_SCHEMA,
 	User,
@@ -126,7 +125,7 @@ export class ProfilePageService implements OnDestroy {
 		this.router.navigate(['../']);
 	}
 
-	public async emailChangedAlert(): Promise<OverlayEventDetail<any>> {
+	public async emailChangedAlert(): Promise<any> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('PROFILE.DONE'),
 			message: this.translateService.instant('PROFILE.EMAIL_UPDATED'),
@@ -137,7 +136,7 @@ export class ProfilePageService implements OnDestroy {
 		return alert.onDidDismiss();
 	}
 
-	public async passwordChangedAlert(): Promise<OverlayEventDetail<any>> {
+	public async passwordChangedAlert(): Promise<any> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('PROFILE.PASSWORD_CHANGED'),
 			message: this.translateService.instant(

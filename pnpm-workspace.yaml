@@ -2,8 +2,6 @@ packages:
   - santashop-admin
   - santashop-app
   - santashop-core
+  - santashop-functions
   - santashop-e2e
   - santashop-models
-
-patchedDependencies:
-  rxfire@6.1.0: patches/rxfire@6.1.0.patch

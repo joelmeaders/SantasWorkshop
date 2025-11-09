@@ -24,7 +24,7 @@ import {
 	tap,
 } from 'rxjs';
 import { filterNullish } from '../../../../shared/helpers';
-import { AppStateService } from '../../../../shared/services/app-state.service';
+import { AppStateService, HttpsCallableResult } from '@santashop/core';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -34,7 +34,6 @@ import { ManageChildrenComponent } from '../../../../shared/components/manage-ch
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { HttpsCallableResult } from '@santashop/core';
 
 @Component({
 	selector: 'admin-review',

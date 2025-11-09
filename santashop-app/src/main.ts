@@ -7,12 +7,7 @@ import {
 	initializeAppCheck,
 	ReCaptchaEnterpriseProvider,
 } from '@angular/fire/app-check';
-import {
-	provideAuth,
-	getAuth,
-	connectAuthEmulator,
-	Auth,
-} from '@angular/fire/auth';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import {
 	provideStorage,
 	getStorage,
@@ -23,12 +18,7 @@ import {
 	getFunctions,
 	connectFunctionsEmulator,
 } from '@angular/fire/functions';
-import {
-	PROGRAM_YEAR,
-	PROFILE_VERSION,
-	MOBILE_EVENT,
-	AuthWrapper,
-} from '@santashop/core';
+import { PROGRAM_YEAR, PROFILE_VERSION, MOBILE_EVENT } from '@santashop/core';
 import {
 	provideAnalytics,
 	getAnalytics,
@@ -129,10 +119,6 @@ bootstrapApplication(AppComponent, {
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 		ScreenTrackingService,
-		{
-			provide: AuthWrapper,
-			deps: [Auth],
-		},
 		UserTrackingService,
 	],
 }).catch((err) => console.log(err));

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthService } from '@santashop/core';
-import { AppStateService } from '../../../shared/services/app-state.service';
+import { AuthService, AppStateService } from '@santashop/core';
 
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
@@ -29,23 +28,23 @@ import {
 import { map, shareReplay } from 'rxjs';
 
 @Component({
-    selector: 'admin-landing',
-    templateUrl: './landing.page.html',
-    styleUrls: ['./landing.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        RouterLink,
-        AsyncPipe,
-        IonRouterLink,
-        IonContent,
-        IonList,
-        IonListHeader,
-        IonItem,
-        IonIcon,
-        IonToggle,
-        IonRouterLink,
-        IonContent,
-    ]
+	selector: 'admin-landing',
+	templateUrl: './landing.page.html',
+	styleUrls: ['./landing.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		RouterLink,
+		AsyncPipe,
+		IonRouterLink,
+		IonContent,
+		IonList,
+		IonListHeader,
+		IonItem,
+		IonIcon,
+		IonToggle,
+		IonRouterLink,
+		IonContent,
+	],
 })
 export class LandingPage {
 	private readonly authService = inject(AuthService);

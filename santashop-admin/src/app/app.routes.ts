@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
-import { AuthGuard, AuthPipe } from '@angular/fire/auth-guard';
-import { redirectLoggedInTo, hasCustomClaim } from '@santashop/core';
+import {
+	AuthGuard,
+	AuthPipe,
+	hasCustomClaim,
+	redirectLoggedInTo,
+} from '@angular/fire/auth-guard';
 
 const adminOnly = (): AuthPipe => hasCustomClaim('admin');
 const redirectLoggedInToAdmin = (): AuthPipe => redirectLoggedInTo(['admin']);
@@ -10,10 +14,8 @@ export const routes: Routes = [
 		path: '',
 		title: 'DSCS Sign In',
 		data: { authGuardPipe: redirectLoggedInToAdmin },
-		loadChildren: () =>
-			import('./pages/sign-in/sign-in.module').then(
-				(m) => m.SignInPageModule,
-			),
+		loadComponent: () =>
+			import('./pages/sign-in/sign-in.page').then((m) => m.SignInPage),
 	},
 	{
 		path: 'admin',

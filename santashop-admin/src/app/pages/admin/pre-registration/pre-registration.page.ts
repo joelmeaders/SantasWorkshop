@@ -51,8 +51,7 @@ import {
 	timestampToDate,
 	HttpsCallableResult,
 } from '@santashop/core';
-import { httpsCallable } from 'firebase/functions';
-import { Functions } from '@angular/fire/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';

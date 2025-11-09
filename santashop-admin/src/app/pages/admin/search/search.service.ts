@@ -1,8 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { QueryConstraint } from '@angular/fire/firestore';
-import { FireRepoLite, User } from '@santashop/core';
-import { COLLECTION_SCHEMA, RegistrationSearchIndex } from '@santashop/models';
-import { limit, orderBy, where } from 'firebase/firestore';
+import {
+	limit,
+	orderBy,
+	QueryConstraint,
+	where,
+} from '@angular/fire/firestore';
+import { FireRepoLite } from '@santashop/core';
+import {
+	COLLECTION_SCHEMA,
+	RegistrationSearchIndex,
+	User,
+} from '@santashop/models';
 import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
 
 @Injectable({

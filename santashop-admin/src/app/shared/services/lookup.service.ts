@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { QueryConstraint } from '@angular/fire/firestore';
+import {
+	limit,
+	orderBy,
+	QueryConstraint,
+	where,
+} from '@angular/fire/firestore';
 import { FireRepoLite } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
@@ -7,7 +12,6 @@ import {
 	Registration,
 	RegistrationSearchIndex,
 } from '@santashop/models';
-import { limit, orderBy, where } from 'firebase/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 

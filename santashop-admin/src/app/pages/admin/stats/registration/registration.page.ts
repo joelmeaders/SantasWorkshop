@@ -22,7 +22,6 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
-import { Timestamp } from 'firebase/firestore';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -41,6 +40,7 @@ import {
 	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
+import { Timestamp } from '@angular/fire/firestore';
 
 Chart.register(ChartDataLabels);
 

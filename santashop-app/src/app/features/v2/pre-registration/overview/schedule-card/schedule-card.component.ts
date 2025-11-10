@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import type { DateTimeSlot } from '@santashop/models';
-import { CoreModule } from '@santashop/core';
+import { CoreModule, TimeSlotPipe } from '@santashop/core';
 
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -24,6 +24,7 @@ import {
 		CoreModule,
 		RouterLink,
 		DatePipe,
+		TimeSlotPipe,
 		TranslateModule,
 		IonCard,
 		IonCardHeader,

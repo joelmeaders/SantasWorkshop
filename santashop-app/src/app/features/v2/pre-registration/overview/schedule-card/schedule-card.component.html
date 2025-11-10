@@ -1,48 +1,42 @@
 <ion-card [disabled]="!canChooseDateTime" *appLet="dateTimeSlot as slot">
-  <ion-card-header>
-    <ion-item class="inset-ion-item-title">
-      <ion-card-title>
-        {{ 'OVERVIEW.SCHEDULE' | translate }}
-      </ion-card-title>
-      @if (slot !== null && slot !== undefined) {
-        <ion-badge
-          color="success"
-          slot="end"
-          >
-          Complete
-        </ion-badge>
-      }
-    </ion-item>
-  </ion-card-header>
-  <ion-card-content class="ion-text-center">
-    @if (!slot) {
-      <p>
-        <strong>
-          {{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }}
-        </strong>
-        <br />
-        {{ 'OVERVIEW.NO_TIME_MESSAGE' | translate }}
-      </p>
-      <p class="ion-text-end es-pd-top-lg">
-        <ion-button color="xmasred" [routerLink]="['../date-time']">
-          {{ 'OVERVIEW.SELECT_TIME' | translate }}
-        </ion-button>
-      </p>
-    } @else {
-      @if (slot) {
-        <ion-item lines="none">
-          <h2 class="ion-text-wrap">
-            {{ slot.dateTime | date: 'fullDate' }},
-            {{ slot.dateTime | date: 'shortTime' }}
-          </h2>
-        </ion-item>
-      }
-      <p class="ion-text-end es-pd-top-lg">
-        <ion-button color="xmasred" [routerLink]="['../date-time']">
-          {{ 'OVERVIEW.CHANGE_TIME' | translate }}
-        </ion-button>
-      </p>
-    }
-
-  </ion-card-content>
+	<ion-card-header>
+		<ion-item class="inset-ion-item-title">
+			<ion-card-title>
+				{{ 'OVERVIEW.SCHEDULE' | translate }}
+			</ion-card-title>
+			@if (slot !== null && slot !== undefined) {
+				<ion-badge color="success" slot="end"> Complete </ion-badge>
+			}
+		</ion-item>
+	</ion-card-header>
+	<ion-card-content class="ion-text-center">
+		@if (!slot) {
+			<p>
+				<strong>
+					{{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }}
+				</strong>
+				<br />
+				{{ 'OVERVIEW.NO_TIME_MESSAGE' | translate }}
+			</p>
+			<p class="ion-text-end es-pd-top-lg">
+				<ion-button color="xmasred" [routerLink]="['../date-time']">
+					{{ 'OVERVIEW.SELECT_TIME' | translate }}
+				</ion-button>
+			</p>
+		} @else {
+			@if (slot) {
+				<ion-item lines="none">
+					<h2 class="ion-text-wrap">
+						{{ slot.dateTime | date: 'fullDate' }},
+						{{ slot.dateTime | timeSlot }}
+					</h2>
+				</ion-item>
+			}
+			<p class="ion-text-end es-pd-top-lg">
+				<ion-button color="xmasred" [routerLink]="['../date-time']">
+					{{ 'OVERVIEW.CHANGE_TIME' | translate }}
+				</ion-button>
+			</p>
+		}
+	</ion-card-content>
 </ion-card>

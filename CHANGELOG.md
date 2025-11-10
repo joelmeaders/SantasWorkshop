@@ -7,6 +7,24 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [2025.0.1] - 2025-11-09
 
+### Added
+- **TimeSlot Pipe**: New custom pipe for formatting appointment time slots (e.g., "10AM - 11AM")
+  - Displays start and end times for one-hour time slots
+  - Supports timezone parameter for proper time zone handling
+  - Includes comprehensive unit tests
+
+### Changed
+- **UI Improvements**: Updated time display formatting across registration flow
+  - Date/time selection page now uses TimeSlot pipe for consistent formatting
+  - Schedule card component uses TimeSlot pipe instead of raw date formatting
+  - Submit page displays time slots in user-friendly format
+- **Translations**: Updated infant toy messaging to be more inclusive
+  - English: Changed from "gender neutral toys" to "toys for children ages 0-2"
+  - Spanish: Updated to match new English messaging
+
+### Removed
+- Outdated face mask recommendation from event information page
+
 ### Fixed
 - Test suite compatibility: Updated test mocks and helpers for better reliability
 - Removed debug console.log statements from test environment configuration

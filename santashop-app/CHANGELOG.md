@@ -2,6 +2,18 @@
 
 All notable changes to the main application will be documented in this file.
 
+## [2025.0.1] - 2025-11-09
+
+### Fixed
+- Test suite compatibility: Fixed all spec files to use proper mock factories
+- Removed debug console.log statements from environment.test.ts
+- Updated test helpers with complete Auth mock (including `authStateReady`)
+- Fixed Analytics mock to use proper factory pattern
+- Enhanced ActivatedRoute mock with all required snapshot properties
+- Fixed E2E test to remove unnecessary debug logging
+- Improved service spec files with proper dependency mocking
+- Fixed guard spec files to use factory-based mocks
+
 ## [2025.0.0] - 2025-11-09
 
 ### Added

@@ -59,8 +59,6 @@ test.describe('Create Account Flow', () => {
 					.waitFor({ state: 'visible', timeout: 30000 }),
 			]);
 		} catch (error) {
-			// Log current URL for debugging
-			console.log('Current URL:', page.url());
 			throw error;
 		}
 

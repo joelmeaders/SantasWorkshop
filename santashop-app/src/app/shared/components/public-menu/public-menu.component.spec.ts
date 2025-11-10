@@ -8,6 +8,7 @@ import {
 	provideTranslateServiceMock,
 	createAuthMock,
 	createFunctionsMock,
+	createAnalyticsMock,
 } from '../../../../test-helpers';
 import { PublicMenuComponent } from './public-menu.component';
 
@@ -29,7 +30,7 @@ describe('PublicMenuComponent', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				{
 					provide: PopoverController,

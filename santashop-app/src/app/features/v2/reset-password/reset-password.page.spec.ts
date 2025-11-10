@@ -5,6 +5,8 @@ import { Functions } from '@angular/fire/functions';
 import {
 	provideActivatedRouteMock,
 	provideTranslateServiceMock,
+	createAnalyticsMock,
+	createAuthMock,
 } from '../../../../test-helpers';
 import { ResetPasswordPage } from './reset-password.page';
 
@@ -18,9 +20,7 @@ describe('ResetPasswordPage', () => {
 			providers: [
 				{
 					provide: Auth,
-					useValue: jasmine.createSpyObj('Auth', [
-						'sendPasswordResetEmail',
-					]),
+					useFactory: createAuthMock,
 				},
 				{
 					provide: Functions,
@@ -30,7 +30,7 @@ describe('ResetPasswordPage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),

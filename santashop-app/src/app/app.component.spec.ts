@@ -4,13 +4,19 @@ import { Analytics } from '@angular/fire/analytics';
 import {
 	provideActivatedRouteMock,
 	createTranslateServiceMock,
+	createAnalyticsMock,
+	createModalControllerMock,
 } from '../test-helpers';
 
-import { AlertController, Platform } from '@ionic/angular/standalone';
+import {
+	AlertController,
+	Platform,
+	ModalController,
+} from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';
-import { AppStateService } from './core';
+import { AppStateService } from '@santashop/core';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
@@ -39,13 +45,17 @@ describe('AppComponent', () => {
 				{ provide: AppStateService, useValue: appStateSpy },
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['']),
+					useFactory: createAnalyticsMock,
 				},
 				{
 					provide: AlertController,
 					useValue: jasmine.createSpyObj('AlertController', [
 						'create',
 					]),
+				},
+				{
+					provide: ModalController,
+					useValue: createModalControllerMock(),
 				},
 				provideActivatedRouteMock(),
 			],

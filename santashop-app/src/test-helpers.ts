@@ -102,7 +102,30 @@ export function createActivatedRouteMock(): Partial<ActivatedRoute> {
 			params: {},
 			queryParams: {},
 			data: {},
-		},
+			url: [],
+			fragment: null,
+			outlet: 'primary',
+			component: null,
+			routeName: null,
+			title: undefined,
+			paramMap: jasmine.createSpyObj('ParamMap', [
+				'get',
+				'has',
+				'getAll',
+				'keys',
+			]),
+			queryParamMap: jasmine.createSpyObj('ParamMap', [
+				'get',
+				'has',
+				'getAll',
+				'keys',
+			]),
+			root: {} as any,
+			parent: null,
+			firstChild: null,
+			children: [],
+			pathFromRoot: [],
+		} as any,
 		params: of({}),
 		queryParams: of({}),
 		data: of({}),
@@ -128,6 +151,7 @@ export function createAuthMock(): any {
 		'createUserWithEmailAndPassword',
 		'signOut',
 		'sendPasswordResetEmail',
+		'authStateReady',
 	]);
 	// Add onAuthStateChanged as a property that returns a function
 	Object.defineProperty(mock, 'onAuthStateChanged', {
@@ -140,6 +164,7 @@ export function createAuthMock(): any {
 		configurable: true,
 	});
 	mock.currentUser = null;
+	mock.authStateReady.and.returnValue(Promise.resolve());
 	return mock;
 }
 
@@ -196,7 +221,16 @@ export function createStorageMock(): any {
  * Creates a mock Firebase Analytics.
  */
 export function createAnalyticsMock(): any {
-	return jasmine.createSpy('Analytics');
+	return {
+		app: {
+			name: 'mock-app',
+			options: {
+				apiKey: 'mock-api-key',
+				projectId: 'mock-project-id',
+			},
+			automaticDataCollectionEnabled: false,
+		},
+	};
 }
 
 /**

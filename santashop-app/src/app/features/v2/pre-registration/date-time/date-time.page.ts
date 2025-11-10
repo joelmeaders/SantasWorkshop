@@ -5,7 +5,11 @@ import {
 	inject,
 } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
-import { SkeletonStateService, CoreModule } from '@santashop/core';
+import {
+	SkeletonStateService,
+	CoreModule,
+	TimeSlotPipe,
+} from '@santashop/core';
 import {
 	AlertController,
 	IonContent,
@@ -57,6 +61,7 @@ import { arrowBackSharp } from 'ionicons/icons';
 		CoreModule,
 		AsyncPipe,
 		DatePipe,
+		TimeSlotPipe,
 		TranslateModule,
 		IonContent,
 		IonGrid,

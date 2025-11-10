@@ -4,7 +4,7 @@ import { SubmitPageService } from './submit.page.service';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
 import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
-import { CoreModule } from '@santashop/core';
+import { CoreModule, TimeSlotPipe } from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import {
@@ -52,6 +52,7 @@ import {
 		IonCardHeader,
 		IonCardSubtitle,
 		IonLabel,
+		TimeSlotPipe,
 	],
 })
 export class SubmitPage {

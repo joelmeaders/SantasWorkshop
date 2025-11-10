@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Analytics } from '@angular/fire/analytics';
 import { TranslateService } from '@ngx-translate/core';
-import { Spied } from '../../../../../../test-helpers';
+import {
+	Spied,
+	createFirebaseAnalyticsMock,
+} from '../../../../../../test-helpers';
 
 import { LanguageToggleComponent } from './language-toggle.component';
 import { of } from 'rxjs';
@@ -24,7 +27,7 @@ describe('LanguageToggleComponent', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createFirebaseAnalyticsMock,
 				},
 			],
 			imports: [LanguageToggleComponent],

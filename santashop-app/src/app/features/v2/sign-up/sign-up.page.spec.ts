@@ -9,6 +9,7 @@ import {
 	createAppStateServiceMock,
 	createAuthMock,
 	provideActivatedRouteMock,
+	createAnalyticsMock,
 } from '../../../../test-helpers';
 import { SignUpPage } from './sign-up.page';
 import { SignUpPageService } from './sign-up.page.service';
@@ -50,7 +51,7 @@ describe('SignUpPage', () => {
 				},
 				{
 					provide: Analytics,
-					useValue: jasmine.createSpyObj('Analytics', ['logEvent']),
+					useFactory: createAnalyticsMock,
 				},
 				{
 					provide: AlertController,

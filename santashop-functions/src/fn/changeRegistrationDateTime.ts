@@ -13,14 +13,24 @@ admin.initializeApp();
 
 interface ChangeRegistrationData {
 	newDateTimeSlot: DateTimeSlot;
+	registrationUid?: string;
 }
 
 export default async function changeRegistrationDateTime(
 	data: ChangeRegistrationData,
 	context: CallableContext,
 ): Promise<boolean | HttpsError> {
-	const uid = context.auth?.uid;
+	// If registrationUid is provided (admin editing another user), use it; otherwise use authenticated user's uid
+	const isAdmin = context.auth?.token?.['admin'];
+	const uid = data.registrationUid ?? context.auth?.uid;
 	if (!uid) throw new HttpsError('unauthenticated', 'User not authenticated');
+
+	if (!isAdmin && data.registrationUid) {
+		throw new HttpsError(
+			'permission-denied',
+			"Only admins can change other users' registrations",
+		);
+	}
 
 	if (!data.newDateTimeSlot) {
 		throw new HttpsError(
@@ -76,7 +86,6 @@ export default async function changeRegistrationDateTime(
 	};
 	registrationDoc.includedInCounts = false;
 
-	batch.set(registrationDocRef, registrationDoc);
 	batch.set(registrationDocRef, registrationDoc);
 
 	// Create email record for new confirmation email

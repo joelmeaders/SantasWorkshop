@@ -109,6 +109,10 @@
 					"function": "callableResendRegistrationEmail"
 				},
 				{
+					"source": "/changeRegistrationDateTime",
+					"function": "changeRegistrationDateTime"
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}

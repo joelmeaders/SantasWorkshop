@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
 	AlertController,
+	ModalController,
 	IonContent,
 	IonList,
 	IonListHeader,
@@ -13,7 +14,7 @@ import {
 	IonIcon,
 	IonButton,
 } from '@ionic/angular/standalone';
-import { Child, Registration } from '@santashop/models';
+import { Child, DateTimeSlot, Registration } from '@santashop/models';
 import {
 	catchError,
 	firstValueFrom,
@@ -31,6 +32,7 @@ import { LookupService } from '../../../../shared/services/lookup.service';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../../shared/components/manage-children/manage-children.component';
+import { DateTimeModalComponent } from '../../../../shared/components/date-time-modal/date-time-modal.component';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
 import { Functions, httpsCallable } from '@angular/fire/functions';
@@ -64,6 +66,7 @@ export class ReviewPage {
 	private readonly checkinService = inject(CheckInService);
 	private readonly appStateService = inject(AppStateService);
 	private readonly alertController = inject(AlertController);
+	private readonly modalController = inject(ModalController);
 	private readonly functions = inject(Functions);
 
 	private readonly router = inject(Router);
@@ -95,6 +98,18 @@ export class ReviewPage {
 			this.functions,
 			'undoRegistration',
 		)(registration);
+
+	private readonly changeRegistrationDateTimeFn = (
+		newDateTimeSlot: DateTimeSlot,
+		registrationUid?: string,
+	): Promise<HttpsCallableResult<boolean>> =>
+		httpsCallable<
+			{ newDateTimeSlot: DateTimeSlot; registrationUid?: string },
+			boolean
+		>(
+			this.functions,
+			'changeRegistrationDateTime',
+		)({ newDateTimeSlot, registrationUid });
 
 	protected readonly setRegistrationSubscription = this.lookupRegistration$
 		.pipe(
@@ -173,7 +188,6 @@ export class ReviewPage {
 		registration?.children?.push(child);
 		this.checkinContext.setRegistration(registration);
 	}
-
 	public async addChild(child: Child): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
 		if (!registration) return;
@@ -182,10 +196,57 @@ export class ReviewPage {
 		this.checkinContext.setRegistration(registration);
 	}
 
+	public async editDateTime(): Promise<void> {
+		const registration = await firstValueFrom(this.registration$);
+		if (!registration?.dateTimeSlot) return;
+
+		const currentSlot = {
+			id: registration.dateTimeSlot.id,
+			dateTime: registration.dateTimeSlot.dateTime,
+		} as DateTimeSlot;
+
+		const modal = await this.modalController.create({
+			component: DateTimeModalComponent,
+			componentProps: {
+				currentSlot,
+			},
+		});
+
+		await modal.present();
+		const result = await modal.onDidDismiss<DateTimeSlot | undefined>();
+
+		if (result.data !== undefined) {
+			if (result.data) {
+				try {
+					await this.changeRegistrationDateTimeFn(
+						result.data,
+						registration.uid,
+					);
+					registration.dateTimeSlot = {
+						dateTime: result.data.dateTime,
+						id: result.data.id,
+					};
+					this.checkinContext.setRegistration(registration);
+					this.wasEdited = true;
+				} catch (error: unknown) {
+					const err = error as { message?: string };
+					const alert = await this.alertController.create({
+						header: 'Error changing date/time',
+						message: err.message ?? String(error),
+					});
+					await alert.present();
+				}
+			} else {
+				delete registration.dateTimeSlot;
+				this.checkinContext.setRegistration(registration);
+				this.wasEdited = true;
+			}
+		}
+	}
+
 	public async checkIn(): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
 		if (!registration) return;
-
 		try {
 			const result: number = await this.checkinService.checkIn(
 				registration,

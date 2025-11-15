@@ -45,6 +45,7 @@ import {
 	getFirestore,
 	provideFirestore,
 } from '@angular/fire/firestore';
+import { PROGRAM_YEAR } from '@santashop/core';
 
 const firebaseProviders = [
 	provideFirebaseApp(() => initializeApp(firebaseConfig)),
@@ -106,5 +107,6 @@ bootstrapApplication(AppComponent, {
 		// App settings
 		ScreenTrackingService,
 		UserTrackingService,
+		{ provide: PROGRAM_YEAR, useValue: 2025 },
 	],
 }).catch((err) => console.log(err));

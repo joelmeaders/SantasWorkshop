@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+} from '@angular/core';
 import { combineLatest, Subject } from 'rxjs';
 import {
 	filter,
@@ -20,22 +25,22 @@ import { SubmitCardComponent } from './submit-card/submit-card.component';
 import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-overview',
-    templateUrl: './overview.page.html',
-    styleUrls: ['./overview.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    ReferralCardComponent,
-    PreRegistrationMenuComponent,
-    ChildrenCardComponent,
-    ScheduleCardComponent,
-    SubmitCardComponent,
-    AsyncPipe,
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonCol
-]
+	selector: 'app-overview',
+	templateUrl: './overview.page.html',
+	styleUrls: ['./overview.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		ReferralCardComponent,
+		PreRegistrationMenuComponent,
+		ChildrenCardComponent,
+		ScheduleCardComponent,
+		SubmitCardComponent,
+		AsyncPipe,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+	],
 })
 export class OverviewPage implements OnDestroy {
 	private readonly preregistrationService = inject(PreRegistrationService);

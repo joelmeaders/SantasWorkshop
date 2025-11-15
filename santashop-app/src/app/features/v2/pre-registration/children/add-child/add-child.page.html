@@ -1,187 +1,177 @@
 <ion-content color="light">
-  <ion-grid class="height-max es-mg-bottom-xxl">
-    <ion-row class="height-max">
-      <ion-col
-        class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-        size="auto"
-        >
-        <app-pre-registration-menu></app-pre-registration-menu>
-      </ion-col>
-      <ion-col
-        sizeXl="9"
-        sizeLg="12"
-        sizeMd="12"
-        sizeSm="12"
-        sizeXs="12"
-        size="12"
-        >
-        <ion-row class="ion-justify-content-center">
-          <ion-col sizeXs="12" sizeSm="7">
-            <ion-button
-              class="ion-no-padding even-ratio-button ion-margin"
-              color="white"
-              [routerLink]="['..']"
-              >
-              <ion-icon
-                slot="icon-only"
-                name="arrow-back-sharp"
-                class="even-ratio-button"
-              ></ion-icon>
-            </ion-button>
+	<ion-grid class="height-max es-mg-bottom-xxl">
+		<ion-row class="height-max">
+			<ion-col
+				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
+				size="auto"
+			>
+				<app-pre-registration-menu></app-pre-registration-menu>
+			</ion-col>
+			<ion-col
+				sizeXl="9"
+				sizeLg="12"
+				sizeMd="12"
+				sizeSm="12"
+				sizeXs="12"
+				size="12"
+			>
+				<ion-row class="ion-justify-content-center">
+					<ion-col sizeXs="12" sizeSm="7">
+						<ion-button
+							class="ion-no-padding even-ratio-button ion-margin"
+							color="white"
+							[routerLink]="['..']"
+						>
+							<ion-icon
+								slot="icon-only"
+								name="arrow-back-sharp"
+								class="even-ratio-button"
+							></ion-icon>
+						</ion-button>
 
-            <div class="ion-padding es-mg-bottom-xxl">
-              <ion-item class="inset-ion-item-title" color="none">
-                <ion-card-title lines="full">
-                  {{ ((isEdit$ | async) ?
-                  "ADDCHILD.EDIT_TITLE" :
-                  "ADDCHILD.ADD_TITLE") | translate }}
-                </ion-card-title>
-              </ion-item>
+						<div class="ion-padding es-mg-bottom-xxl">
+							<ion-item class="inset-ion-item-title" color="none">
+								<ion-card-title lines="full">
+									{{ ((isEdit$ | async) ?
+									"ADDCHILD.EDIT_TITLE" :
+									"ADDCHILD.ADD_TITLE") | translate }}
+								</ion-card-title>
+							</ion-item>
 
-              <div>
-                <form [formGroup]="form" novalidate>
-                  <ion-list lines="none">
-                    <ion-item color="light">
-                      <ion-input
-                        class="red-label"
-                        [label]="'ADDCHILD.FIRST_NAME' | translate"
-                        [errorText]="form.controls.firstName | niceFormError | translate"
-                        labelPlacement="fixed"
-                        type="text"
-                        autocomplete="false"
-                        formControlName="firstName"
-                        [debounce]="500"
-                        />
-                      </ion-item>
+							<div>
+								<form [formGroup]="form" novalidate>
+									<ion-list lines="none">
+										<ion-item color="light">
+											<ion-input
+												class="red-label"
+												[label]="'ADDCHILD.FIRST_NAME' | translate"
+												[errorText]="form.controls.firstName | niceFormError | translate"
+												labelPlacement="fixed"
+												type="text"
+												autocomplete="false"
+												formControlName="firstName"
+												[debounce]="500"
+											/>
+										</ion-item>
 
-                      <ion-item color="light">
-                        <ion-input
-                          class="red-label"
-                          [label]="'ADDCHILD.LAST_NAME' | translate"
-                          [errorText]="form.controls.lastName | niceFormError | translate"
-                          labelPlacement="fixed"
-                          type="text"
-                          autocomplete="family-name"
-                          formControlName="lastName"
-                          [debounce]="500"
-                          />
-                        </ion-item>
+										<ion-item color="light">
+											<ion-input
+												class="red-label"
+												[label]="'ADDCHILD.LAST_NAME' | translate"
+												[errorText]="form.controls.lastName | niceFormError | translate"
+												labelPlacement="fixed"
+												type="text"
+												autocomplete="family-name"
+												formControlName="lastName"
+												[debounce]="500"
+											/>
+										</ion-item>
 
-                        <ion-item color="light">
-                          <ion-input
-                            class="red-label"
-                            [label]="'ADDCHILD.BIRTH_DATE' | translate"
-                            [errorText]="form.controls.dateOfBirth | niceFormError | translate"
-                            labelPlacement="fixed"
-                            type="date"
-                            [min]="minBirthDate"
-                            [max]="maxBirthDate"
-                            autocomplete="off"
-                            formControlName="dateOfBirth"
-                            (ionChange)="birthdaySelected($event)"
-                            />
-                          </ion-item>
+										<ion-item color="light">
+											<ion-input
+												class="red-label"
+												[label]="'ADDCHILD.BIRTH_DATE' | translate"
+												[errorText]="form.controls.dateOfBirth | niceFormError | translate"
+												labelPlacement="fixed"
+												type="date"
+												[min]="minBirthDate"
+												[max]="maxBirthDate"
+												autocomplete="off"
+												formControlName="dateOfBirth"
+												(ionChange)="birthdaySelected($event)"
+											/>
+										</ion-item>
 
-                          <ion-list-header>
-                            <ion-label color="xmasred">
-                              {{ 'ADDCHILD.TOY_TYPE' |
-                              translate }}
-                            </ion-label>
-                          </ion-list-header>
+										<ion-list-header>
+											<ion-label color="xmasred">
+												{{ 'ADDCHILD.TOY_TYPE' |
+												translate }}
+											</ion-label>
+										</ion-list-header>
 
-                          <ion-radio-group
-                            formControlName="toyType"
-                            >
-                            @if ((isInfant$ | async)) {
-                              <ion-item
-                                color="light"
-                                >
-                                <ion-radio
-                                  slot="start"
-                                  value="infants"
-                                  labelPlacement="end"
-                                  >
-                                  {{ "ADDCHILD.BABIES" |
-                                  translate }}
-                                </ion-radio>
-                              </ion-item>
-                            }
+										<ion-radio-group
+											formControlName="toyType"
+										>
+											@if ((isInfant$ | async)) {
+											<ion-item color="light">
+												<ion-radio
+													slot="start"
+													value="infants"
+													labelPlacement="end"
+												>
+													{{ "ADDCHILD.BABIES" |
+													translate }}
+												</ion-radio>
+											</ion-item>
+											} @if ((isInfant$ | async) ===
+											false) {
+											<ion-item color="light">
+												<ion-radio
+													slot="start"
+													value="boys"
+													labelPlacement="end"
+												>
+													{{ "ADDCHILD.BOYS" |
+													translate }}
+												</ion-radio>
+											</ion-item>
+											} @if ((isInfant$ | async) ===
+											false) {
+											<ion-item color="light">
+												<ion-radio
+													slot="start"
+													value="girls"
+													labelPlacement="end"
+												>
+													{{ "ADDCHILD.GIRLS" |
+													translate }}
+												</ion-radio>
+											</ion-item>
+											}
+										</ion-radio-group>
 
-                            @if ((isInfant$ | async) === false) {
-                              <ion-item
-                                color="light"
-                                >
-                                <ion-radio
-                                  slot="start"
-                                  value="boys"
-                                  labelPlacement="end"
-                                  >
-                                  {{ "ADDCHILD.BOYS" |
-                                  translate }}
-                                </ion-radio>
-                              </ion-item>
-                            }
-
-                            @if ((isInfant$ | async) === false) {
-                              <ion-item
-                                color="light"
-                                >
-                                <ion-radio
-                                  slot="start"
-                                  value="girls"
-                                  labelPlacement="end"
-                                  >
-                                  {{ "ADDCHILD.GIRLS" |
-                                  translate }}
-                                </ion-radio>
-                              </ion-item>
-                            }
-                          </ion-radio-group>
-
-                          @if (
-                            mobileEvent &&
-                            (isInfant$ | async)
-                            ) {
-                            <div
-                              class="ion-padding-top ion-text-wrap"
-                              >
-                              <ion-icon
-                                name="gift"
-                                color="success"
-                                slot="start"
-                                size="large"
-                              ></ion-icon>
-                              <ion-text>
-                                {{ "ADDCHILD.INFANT_MSG" |
-                                translate }}
-                              </ion-text>
-                              <ion-item
-                                lines="none"
-                                color="light"
-                                >
-                              </ion-item>
-                            </div>
-                          }
-                        </ion-list>
-                      </form>
-                    </div>
-                    <div
-                      *appLet="isEdit$ | async as isEditing"
-                      class="ion-text-end ion-padding-top es-pd-bottom-xxl"
-                      >
-                      <ion-button
-                        color="xmasred"
-                        (click)="isEditing ? editChild() : addChild()"
-                        [disabled]="!form.valid"
-                        >
-                        {{ (isEditing ? "OVERVIEW.EDIT_CHILD" :
-                        "OVERVIEW.ADD_CHILD") | translate }}
-                      </ion-button>
-                    </div>
-                  </div>
-                </ion-col>
-              </ion-row>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-content>
+										@if ( mobileEvent && (isInfant$ | async)
+										) {
+										<div
+											class="ion-padding-top ion-text-wrap"
+										>
+											<ion-icon
+												name="gift"
+												color="success"
+												slot="start"
+												size="large"
+											></ion-icon>
+											<ion-text>
+												{{ "ADDCHILD.INFANT_MSG" |
+												translate }}
+											</ion-text>
+											<ion-item
+												lines="none"
+												color="light"
+											>
+											</ion-item>
+										</div>
+										}
+									</ion-list>
+								</form>
+							</div>
+							<div
+								*appLet="isEdit$ | async as isEditing"
+								class="ion-text-end ion-padding-top es-pd-bottom-xxl"
+							>
+								<ion-button
+									color="xmasred"
+									(click)="isEditing ? editChild() : addChild()"
+									[disabled]="!form.valid"
+								>
+									{{ (isEditing ? "OVERVIEW.EDIT_CHILD" :
+									"OVERVIEW.ADD_CHILD") | translate }}
+								</ion-button>
+							</div>
+						</div>
+					</ion-col>
+				</ion-row>
+			</ion-col>
+		</ion-row>
+	</ion-grid>
+</ion-content>

@@ -1,4 +1,3 @@
- 
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { CallableContext } from 'firebase-functions/v1/https';

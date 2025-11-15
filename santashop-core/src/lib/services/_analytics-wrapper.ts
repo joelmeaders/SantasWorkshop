@@ -7,7 +7,6 @@ import { Analytics, logEvent } from '@angular/fire/analytics';
 export class AnalyticsWrapper {
 	private readonly analytics = inject(Analytics);
 
-
 	public readonly logErrorEvent = (
 		errorCode: string,
 		message?: string,

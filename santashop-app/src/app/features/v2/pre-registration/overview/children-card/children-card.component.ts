@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Child } from '@santashop/models';
 
-
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -26,25 +25,25 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-children-card',
-    templateUrl: './children-card.component.html',
-    styleUrls: ['./children-card.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    RouterLink,
-    TranslateModule,
-    IonCard,
-    IonCardHeader,
-    IonItem,
-    IonCardTitle,
-    IonBadge,
-    IonCardContent,
-    IonButton,
-    IonList,
-    IonIcon,
-    IonLabel,
-    IonNote
-]
+	selector: 'app-children-card',
+	templateUrl: './children-card.component.html',
+	styleUrls: ['./children-card.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		RouterLink,
+		TranslateModule,
+		IonCard,
+		IonCardHeader,
+		IonItem,
+		IonCardTitle,
+		IonBadge,
+		IonCardContent,
+		IonButton,
+		IonList,
+		IonIcon,
+		IonLabel,
+		IonNote,
+	],
 })
 export class ChildrenCardComponent {
 	@Input() public children?: Child[];

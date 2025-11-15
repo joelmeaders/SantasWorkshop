@@ -39,6 +39,8 @@
 		"VERIFICATION_FAILED": "Error en la verificación",
 		"VERIFICATION_FAILED_MSG": "Es necesario actualizar la página para intentarlo de nuevo",
 		"CONFIRM": "Confirmar",
+		"CONTINUE": "Continuar",
+		"SUCCESS": "Éxito",
 		"RESET": "Restablecimiento",
 		"SAVE_CHOICE": "Guardar elección",
 		"NEWSLETTER": "¿Le gustaría recibir nuestro boletín de noticias y ser notificado de futuros eventos?",
@@ -125,7 +127,8 @@
 		"ADD_ONE_BELOW.": "Agregue uno a continuación.",
 		"ON_TIME": "Por favor, llegue durante la hora asignada. Los tiempos de espera variarán.",
 		"AVAILABLE_DATES/TIMES": "Fechas/Horas Disponibles",
-		"FULL": "Todos los cupos han sido ocupados y no hay fechas ni horarios disponibles. Consulta Facebook para obtener actualizaciones."
+		"FULL": "Todos los cupos han sido ocupados y no hay fechas ni horarios disponibles. Consulta Facebook para obtener actualizaciones.",
+		"SELECT_DATETIME": "Seleccione fecha y hora"
 	},
 	"SUBMIT": {
 		"CONFIRM_ADDED_CHILDREN": "¿Ha agregado a todos los niños? ¿Es correcta la información de los niños?",
@@ -139,9 +142,15 @@
 		"QR_CODE": "Código QR",
 		"THIS_IS_YOUR_TICKET": "Esta es tu entrada al evento",
 		"EMAIL_REMEMBER_TICKET": "También lo estamos enviando a su correo electrónico.",
-		"CHANGE_REGISTRATION": "Cambiar registro",
+		"CHANGE_REGISTRATION_DATETIME": "Cambiar fecha y hora",
 		"ARE_YOU_SURE": "¿Estás seguro?",
-		"CONFIRM_CHANGE_MSG": "Solicitar hacer un cambio en su registro perderá su fecha y hora actuales.<br/> Después de confirmar, envíe su nuevo registro lo antes posible. La disponibilidad es limitada y el registro se llena rápidamente."
+		"CONFIRM_CHANGE_MSG": "Solicitar hacer un cambio en su registro perderá su fecha y hora actuales.<br/> Después de confirmar, envíe su nuevo registro lo antes posible. La disponibilidad es limitada y el registro se llena rápidamente.",
+		"CONFIRM_DATETIME_CHANGE_MSG": "Cambiar la fecha y hora de su registro actualizará su confirmación y enviará un nuevo correo electrónico de confirmación. Su horario anterior estará disponible para otros.",
+		"CURRENT_DATETIME": "Fecha y hora actual",
+		"CURRENT_SELECTION": "Selección actual",
+		"UPDATING_REGISTRATION": "Actualizando registro...",
+		"REGISTRATION_UPDATED_MSG": "¡Su registro ha sido actualizado! Se le ha enviado un nuevo correo electrónico de confirmación.",
+		"CANNOT_CHANGE_AFTER_CHECKIN": "No puede cambiar la fecha y hora de su registro después de haber sido registrado en el evento."
 	},
 	"HELP": {
 		"TITLE": "Ayuda",
@@ -280,6 +289,7 @@
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "Este campo es obligatorio",
+		"MINLENGTH": "La longitud mínima es ",
 		"LONGITUDMINIMA": "La longitud mínima es ",
 		"MAXLENGTH": "La longitud máxima es ",
 		"EMAIL": "Debe ser una dirección de correo electrónico válida",

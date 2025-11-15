@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+} from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';

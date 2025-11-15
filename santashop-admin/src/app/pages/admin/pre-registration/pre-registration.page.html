@@ -94,22 +94,23 @@
 					>
 						Pick Agency
 						<ion-icon slot="end" name="search-outline"></ion-icon>
-				</ion-button>
-			</ion-item-divider>
-			<ion-item (click)="chooseReferral()" button detail>
-				<span>
-					<ion-label> {{ chosenReferrer$ | async }} </ion-label>
-					@if (!form.controls['referredBy'].value) {
-					<ion-note
-						color="danger"
-						slot="error"
-						class="error-note"
-					>
-						Choose a referring agency
-					</ion-note>
-					}
-				</span>
-			</ion-item>				<div class="margin-top">
+					</ion-button>
+				</ion-item-divider>
+				<ion-item (click)="chooseReferral()" button detail>
+					<span>
+						<ion-label> {{ chosenReferrer$ | async }} </ion-label>
+						@if (!form.controls['referredBy'].value) {
+						<ion-note
+							color="danger"
+							slot="error"
+							class="error-note"
+						>
+							Choose a referring agency
+						</ion-note>
+						}
+					</span>
+				</ion-item>
+				<div class="margin-top">
 					@if (children$ | async; as children) {
 					<admin-manage-children
 						[children]="children"
@@ -120,14 +121,14 @@
 					}
 				</div>
 
-			<ion-item-divider class="margin-top">
-				<ion-label> Reservation </ion-label>
-				@if (!form.controls['dateTimeSlot'].value) {
-				<ion-text color="danger" class="error-note" slot="end">
-					Pick a date and time
-				</ion-text>
-				}
-			</ion-item-divider>
+				<ion-item-divider class="margin-top">
+					<ion-label> Reservation </ion-label>
+					@if (!form.controls['dateTimeSlot'].value) {
+					<ion-text color="danger" class="error-note" slot="end">
+						Pick a date and time
+					</ion-text>
+					}
+				</ion-item-divider>
 				@if (availableSlots$ | async; as slots) {
 				<ion-item>
 					<ion-select

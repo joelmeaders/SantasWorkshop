@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+} from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';
@@ -27,23 +32,23 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-pre-registration',
-    templateUrl: './pre-registration.page.html',
-    styleUrls: ['./pre-registration.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    CoreModule,
-    InternalHeaderComponent,
-    AsyncPipe,
-    TranslateModule,
-    IonContent,
-    IonTabs,
-    IonTabBar,
-    IonTabButton,
-    IonIcon,
-    IonLabel,
-    IonBadge
-]
+	selector: 'app-pre-registration',
+	templateUrl: './pre-registration.page.html',
+	styleUrls: ['./pre-registration.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		CoreModule,
+		InternalHeaderComponent,
+		AsyncPipe,
+		TranslateModule,
+		IonContent,
+		IonTabs,
+		IonTabBar,
+		IonTabButton,
+		IonIcon,
+		IonLabel,
+		IonBadge,
+	],
 })
 export class PreRegistrationPage implements OnDestroy {
 	private readonly viewService = inject(PreRegistrationService);

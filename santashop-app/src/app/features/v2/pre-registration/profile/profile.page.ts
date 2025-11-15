@@ -24,29 +24,29 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-profile',
-    templateUrl: './profile.page.html',
-    styleUrls: ['./profile.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ProfilePageService],
-    imports: [
-    PreRegistrationMenuComponent,
-    RouterLink,
-    AsyncPipe,
-    TranslateModule,
-    IonContent,
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonButton,
-    IonIcon,
-    IonItem,
-    IonCardTitle,
-    IonCard,
-    IonCardContent,
-    IonList,
-    IonInput
-]
+	selector: 'app-profile',
+	templateUrl: './profile.page.html',
+	styleUrls: ['./profile.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [ProfilePageService],
+	imports: [
+		PreRegistrationMenuComponent,
+		RouterLink,
+		AsyncPipe,
+		TranslateModule,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonCardTitle,
+		IonCard,
+		IonCardContent,
+		IonList,
+		IonInput,
+	],
 })
 export class ProfilePage {
 	private readonly viewService = inject(ProfilePageService);

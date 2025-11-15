@@ -78,6 +78,7 @@ pnpm --filter @santashop/e2e test:report
 ## Configuration
 
 The tests are configured to:
+
 - Run against `http://localhost:4100` (santashop-app test server)
 - Use Firebase emulators for backend services
 - Run in parallel across multiple workers
@@ -95,14 +96,15 @@ Example:
 import { test, expect } from '@playwright/test';
 
 test('homepage loads', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveTitle(/Santa/);
+	await page.goto('/');
+	await expect(page).toHaveTitle(/Santa/);
 });
 ```
 
 ## CI/CD
 
 The e2e tests can be integrated into your CI pipeline. Make sure to:
+
 1. Build the functions project
 2. Start Firebase emulators
 3. Start the app in test mode

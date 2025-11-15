@@ -22,7 +22,6 @@ export type HttpsCallableResult<ResponseData> =
 export class FunctionsWrapper {
 	private readonly functions = inject(_Functions);
 
-
 	public readonly callableWrapper = <RequestData, ResponseData>(
 		name: string,
 	): HttpsCallable<RequestData, ResponseData> =>
@@ -54,4 +53,11 @@ export class FunctionsWrapper {
 	public readonly undoRegistration = (): Promise<
 		_HttpsCallableResult<unknown>
 	> => this.callableWrapper<unknown, unknown>('undoRegistration')({});
+
+	public readonly changeRegistrationDateTime = (
+		data: unknown,
+	): Promise<_HttpsCallableResult<unknown>> =>
+		this.callableWrapper<unknown, unknown>('changeRegistrationDateTime')(
+			data,
+		);
 }

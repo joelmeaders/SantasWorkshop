@@ -1,78 +1,75 @@
 <ion-card>
-  <ion-card-header>
-    <ion-item class="inset-ion-item-title">
-      <ion-card-title>
-        {{ 'MENU.CHILDREN' | translate }}
-      </ion-card-title>
-      @if (childCount) {
-        <ion-badge color="success" slot="end">
-          Complete
-        </ion-badge>
-      }
-    </ion-item>
-  </ion-card-header>
-  <ion-card-content class="ion-text-center">
-    @if (!childCount) {
-      <p>
-        <strong>
-          {{ 'OVERVIEW.NO_CHILDREN' | translate }}
-        </strong>
-        <br />
-        {{ 'OVERVIEW.NO_CHILDREN_MESSAGE' | translate }}
-      </p>
-      <p class="ion-text-end es-pd-top-sm">
-        <ion-button color="xmasred" [routerLink]="['../children']">
-          {{ 'OVERVIEW.ADD_CHILD' | translate }}
-        </ion-button>
-      </p>
-    } @else {
-      <ion-list>
-        @for (child of children; track child) {
-          <ion-item lines="none">
-            @if (child.toyType === 'boys') {
-              <ion-icon
-                name="man-outline"
-                slot="start"
-              ></ion-icon>
-            }
-            @if (child.toyType === 'girls') {
-              <ion-icon
-                name="woman-outline"
-                slot="start"
-              ></ion-icon>
-            }
-            @if (child.toyType === 'infants') {
-              <ion-icon
-                name="happy-outline"
-                slot="start"
-              ></ion-icon>
-            }
-            @if (!child.toyType) {
-              <ion-icon
-                name="alert-circle"
-                color="danger"
-                slot="start"
-              ></ion-icon>
-            }
-            <div class="width-max">
-              <ion-label class="width-max ion-text-wrap">
-                {{ child.firstName }} {{ child.lastName }}
-              </ion-label>
-              @if (!child.toyType) {
-                <ion-note color="danger">
-                  {{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
-                </ion-note>
-              }
-            </div>
-          </ion-item>
-        }
-      </ion-list>
-      <p class="ion-text-end es-pd-top-sm">
-        <ion-button color="xmasred" [routerLink]="['../children']">
-          {{ 'OVERVIEW.ADD_EDIT_CHILD' | translate }}
-        </ion-button>
-      </p>
-    }
-
-  </ion-card-content>
+	<ion-card-header>
+		<ion-item class="inset-ion-item-title">
+			<ion-card-title>
+				{{ 'MENU.CHILDREN' | translate }}
+			</ion-card-title>
+			@if (childCount) {
+				<ion-badge color="success" slot="end"> Complete </ion-badge>
+			}
+		</ion-item>
+	</ion-card-header>
+	<ion-card-content class="ion-text-center">
+		@if (!childCount) {
+			<p>
+				<strong>
+					{{ 'OVERVIEW.NO_CHILDREN' | translate }}
+				</strong>
+				<br />
+				{{ 'OVERVIEW.NO_CHILDREN_MESSAGE' | translate }}
+			</p>
+			<p class="ion-text-end es-pd-top-sm">
+				<ion-button color="xmasred" [routerLink]="['../children']">
+					{{ 'OVERVIEW.ADD_CHILD' | translate }}
+				</ion-button>
+			</p>
+		} @else {
+			<ion-list>
+				@for (child of children; track child) {
+					<ion-item lines="none">
+						@if (child.toyType === 'boys') {
+							<ion-icon
+								name="man-outline"
+								slot="start"
+							></ion-icon>
+						}
+						@if (child.toyType === 'girls') {
+							<ion-icon
+								name="woman-outline"
+								slot="start"
+							></ion-icon>
+						}
+						@if (child.toyType === 'infants') {
+							<ion-icon
+								name="happy-outline"
+								slot="start"
+							></ion-icon>
+						}
+						@if (!child.toyType) {
+							<ion-icon
+								name="alert-circle"
+								color="danger"
+								slot="start"
+							></ion-icon>
+						}
+						<div class="width-max">
+							<ion-label class="width-max ion-text-wrap">
+								{{ child.firstName }} {{ child.lastName }}
+							</ion-label>
+							@if (!child.toyType) {
+								<ion-note color="danger">
+									{{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
+								</ion-note>
+							}
+						</div>
+					</ion-item>
+				}
+			</ion-list>
+			<p class="ion-text-end es-pd-top-sm">
+				<ion-button color="xmasred" [routerLink]="['../children']">
+					{{ 'OVERVIEW.ADD_EDIT_CHILD' | translate }}
+				</ion-button>
+			</p>
+		}
+	</ion-card-content>
 </ion-card>

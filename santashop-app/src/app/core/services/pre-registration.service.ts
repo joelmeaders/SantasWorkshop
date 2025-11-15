@@ -76,6 +76,13 @@ export class PreRegistrationService implements OnDestroy {
 	);
 
 	@automock
+	public readonly hasCheckedIn$ = this.userRegistration$.pipe(
+		takeUntil(this.destroy$),
+		map((registration) => !!registration.hasCheckedIn),
+		shareReplay(1),
+	);
+
+	@automock
 	public readonly children$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		map((registration) => this.getChildren(registration)),
@@ -132,6 +139,14 @@ export class PreRegistrationService implements OnDestroy {
 
 	public undoRegistration(): Promise<HttpsCallableResult<unknown>> {
 		return this.afFunctions.undoRegistration();
+	}
+
+	public changeRegistrationDateTime(
+		newDateTimeSlot: DateTimeSlot,
+	): Promise<HttpsCallableResult<unknown>> {
+		return this.afFunctions.changeRegistrationDateTime({
+			newDateTimeSlot,
+		});
 	}
 
 	public isRegistrationComplete(registration: Registration): boolean {

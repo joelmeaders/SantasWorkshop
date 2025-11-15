@@ -14,20 +14,20 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'admin-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        RouterLink,
-        IonRouterLink,
-        IonHeader,
-        IonToolbar,
-        IonButtons,
-        IonButton,
-        IonIcon,
-        IonTitle,
-    ]
+	selector: 'admin-header',
+	templateUrl: './header.component.html',
+	styleUrls: ['./header.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		RouterLink,
+		IonRouterLink,
+		IonHeader,
+		IonToolbar,
+		IonButtons,
+		IonButton,
+		IonIcon,
+		IonTitle,
+	],
 })
 export class HeaderComponent {
 	@Input() public title?: string;

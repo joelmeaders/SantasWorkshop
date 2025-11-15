@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+} from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import {
@@ -16,23 +21,23 @@ import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
 
 @Component({
-    selector: 'app-public-menu',
-    templateUrl: './public-menu.component.html',
-    styleUrls: ['./public-menu.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    IonContent,
-    IonList,
-    IonItem,
-    IonLabel,
-    LanguageToggleComponent,
-    AsyncPipe,
-    TranslateModule,
-    IonContent,
-    IonList,
-    IonItem,
-    IonLabel
-]
+	selector: 'app-public-menu',
+	templateUrl: './public-menu.component.html',
+	styleUrls: ['./public-menu.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		IonContent,
+		IonList,
+		IonItem,
+		IonLabel,
+		LanguageToggleComponent,
+		AsyncPipe,
+		TranslateModule,
+		IonContent,
+		IonList,
+		IonItem,
+		IonLabel,
+	],
 })
 export class PublicMenuComponent implements OnDestroy {
 	private readonly authService = inject(AuthService);

@@ -30,28 +30,28 @@ import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-referral-card',
-    templateUrl: './referral-card.component.html',
-    styleUrls: ['./referral-card.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    ReactiveFormsModule,
-    AsyncPipe,
-    TranslateModule,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonList,
-    IonSearchbar,
-    IonItemGroup,
-    IonItemDivider,
-    IonLabel,
-    IonItem,
-    IonText,
-    IonInput,
-    IonButton
-]
+	selector: 'app-referral-card',
+	templateUrl: './referral-card.component.html',
+	styleUrls: ['./referral-card.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		ReactiveFormsModule,
+		AsyncPipe,
+		TranslateModule,
+		IonCard,
+		IonCardHeader,
+		IonCardTitle,
+		IonCardContent,
+		IonList,
+		IonSearchbar,
+		IonItemGroup,
+		IonItemDivider,
+		IonLabel,
+		IonItem,
+		IonText,
+		IonInput,
+		IonButton,
+	],
 })
 export class ReferralCardComponent {
 	private readonly functions = inject(FunctionsWrapper);

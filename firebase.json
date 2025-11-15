@@ -42,6 +42,10 @@
 					"function": "undoRegistration"
 				},
 				{
+					"source": "/changeRegistrationDateTime",
+					"function": "changeRegistrationDateTime"
+				},
+				{
 					"source": "/updateEmailAddress",
 					"function": "updateEmailAddress"
 				},

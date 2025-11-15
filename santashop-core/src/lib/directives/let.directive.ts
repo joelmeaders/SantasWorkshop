@@ -1,11 +1,16 @@
-import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import {
+	Directive,
+	Input,
+	TemplateRef,
+	ViewContainerRef,
+	inject,
+} from '@angular/core';
 
 export interface AppLetContext<T> {
 	appLet: T | null;
 }
 
 @Directive({
-	 
 	selector: '[appLet]',
 	standalone: true,
 })

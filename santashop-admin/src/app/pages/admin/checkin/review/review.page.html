@@ -1,9 +1,10 @@
 <admin-header title="Check-In: Review Info" backRoute="/admin/checkin/scan">
-	@if (allowCancelRegistration$ | async) {
+	@if (registration$ | async; as registration) { @if (allowCancelRegistration$
+	| async) {
 	<ion-button color="danger" (click)="cancelReservation()">
-		Cancel Reservation
+		Delete
 	</ion-button>
-	}
+	} }
 </admin-header>
 
 <ion-content fullscreen class="ion-padding-horizontal">
@@ -37,6 +38,15 @@
 							Reservation: {{ registration.dateTimeSlot?.dateTime
 							| date:'medium' }}
 						</ion-text>
+						<ion-button
+							fill="outline"
+							size="small"
+							color="primary"
+							(click)="editDateTime()"
+							color="warning"
+						>
+							Change Date/Time
+						</ion-button>
 					</p>
 					}
 				</ion-label>

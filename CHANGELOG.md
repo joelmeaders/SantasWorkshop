@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2025.2.0] - 2025-11-15
+
+### Added
+
+- **Admin Check-In DateTime Change**: Admins can now change registration date/time during the check-in review process
+    - New "Change Date/Time" button on admin check-in review page
+    - Date/Time modal component with accordion-grouped available time slots
+    - Real-time availability display showing remaining spots for each time slot
+    - Confirmation dialog when changing from existing reservation
+    - Automatic email notification sent to registrant with updated date/time
+- **Enhanced Firebase Functions**: Updated `changeRegistrationDateTime` function to support admin operations
+    - Admins can change date/time for any registration (with proper permission checks)
+    - Non-admin users can only change their own registrations
+    - Prevents changes after check-in to maintain data integrity
+- **Program Year Configuration**: Added `PROGRAM_YEAR` injection token to admin application
+    - Centralized program year management (set to 2025)
+    - Used by date/time selection to filter available slots
+- **Firebase Hosting Rewrites**: Added `changeRegistrationDateTime` function to admin hosting configuration
+
+### Changed
+
+- **Review Page UI**: Updated check-in review page layout
+    - Delete button now only shows when registration exists
+    - Improved button text from "Cancel Reservation" to "Delete" for clarity
+    - Date/time display now includes change button when reservation exists
+
+### Fixed
+
+- Removed duplicate batch.set call in `changeRegistrationDateTime` function
+
 ## [2025.1.0] - 2025-11-15
 
 ### Added

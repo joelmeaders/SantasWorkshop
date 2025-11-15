@@ -1,0 +1,89 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>Choose Date & Time</ion-title>
+		<ion-button
+			slot="end"
+			fill="outline"
+			color="danger"
+			(click)="dismiss()"
+		>
+			Cancel
+		</ion-button>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content>
+	<div class="ion-padding">
+		@if (currentSlot) {
+			<ion-card>
+				<ion-card-header>
+					<ion-card-title color="primary">
+						Current Date/Time
+					</ion-card-title>
+				</ion-card-header>
+				<ion-card-content class="ion-text-center">
+					<ion-item lines="none">
+						{{ currentSlot.dateTime | date: 'MMMM d' : 'MST' }},
+						{{ currentSlot.dateTime | timeSlot: 'MST' }}
+					</ion-item>
+				</ion-card-content>
+			</ion-card>
+		}
+
+		<ion-list-header class="ion-padding-top">
+			Available Dates/Times
+		</ion-list-header>
+
+		<ng-container *appLet="availableDays$ | async as availableDays">
+			@if (availableDays?.length) {
+				<ion-accordion-group color="light">
+					@for (day of availableDays; track day) {
+						<ion-accordion>
+							<ion-item slot="header" color="light">
+								<ion-label>
+									{{ day | date: 'EEEE, MMMM d' }}
+								</ion-label>
+							</ion-item>
+							<ion-list
+								slot="content"
+								color="light"
+								class="ion-no-padding"
+							>
+								@for (
+									slot of availableSlotsByDay$(day) | async;
+									track slot
+								) {
+									<ion-item
+										color="light"
+										(click)="selectDateTime(slot)"
+										[disabled]="!slot.enabled"
+										[detail]="true"
+										button
+									>
+										<ion-label>
+											{{
+												slot.dateTime | timeSlot: 'MST'
+											}}
+											<br />
+											<ion-text color="primary">
+												{{ spotsRemaining(slot) }}
+											</ion-text>
+										</ion-label>
+									</ion-item>
+								}
+							</ion-list>
+						</ion-accordion>
+					}
+				</ion-accordion-group>
+			} @else {
+				<ion-card color="danger">
+					<ion-card-header>
+						<ion-note>
+							No available time slots at this time.
+						</ion-note>
+					</ion-card-header>
+				</ion-card>
+			}
+		</ng-container>
+	</div>
+</ion-content>

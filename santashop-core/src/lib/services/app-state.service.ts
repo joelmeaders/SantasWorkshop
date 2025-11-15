@@ -95,6 +95,18 @@ export class AppStateService implements OnDestroy {
 			shareReplay(1),
 		);
 
+	/**
+	 * Whether users can change their registration date/time (admin).
+	 */
+	public readonly allowChangeRegistration$: Observable<boolean> =
+		this.publicDoc$.pipe(
+			takeUntil(this.destroy$),
+			map((value) => value.admin.allowChangeRegistration),
+			startWith(false),
+			catchError(() => of(false)),
+			shareReplay(1),
+		);
+
 	// Public app-specific observables
 	/**
 	 * Whether maintenance mode is enabled (public app).

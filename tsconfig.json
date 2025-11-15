@@ -34,7 +34,7 @@
 			"@santashop/core": ["dist/@santashop/core"],
 			"@santashop/app": ["dist/@santashop/app"],
 			"@santashop/admin": ["dist/@santashop/admin"]
-		},
+		}
 	},
 	"angularCompilerOptions": {
 		"enableI18nLegacyMessageIdFormat": false,

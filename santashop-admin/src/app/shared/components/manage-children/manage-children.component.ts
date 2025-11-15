@@ -27,23 +27,23 @@ import { addIcons } from 'ionicons';
 import { addCircle, createOutline, trashOutline } from 'ionicons/icons';
 
 @Component({
-    selector: 'admin-manage-children',
-    templateUrl: './manage-children.component.html',
-    styleUrls: ['./manage-children.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        DatePipe,
-        IonItemDivider,
-        IonLabel,
-        IonBadge,
-        IonButton,
-        IonIcon,
-        IonItem,
-        IonNote,
-        IonItemSliding,
-        IonItemOptions,
-        IonItemOption,
-    ]
+	selector: 'admin-manage-children',
+	templateUrl: './manage-children.component.html',
+	styleUrls: ['./manage-children.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		DatePipe,
+		IonItemDivider,
+		IonLabel,
+		IonBadge,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonNote,
+		IonItemSliding,
+		IonItemOptions,
+		IonItemOption,
+	],
 })
 export class ManageChildrenComponent {
 	private readonly modalController = inject(ModalController);

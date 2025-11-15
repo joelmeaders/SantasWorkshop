@@ -12,20 +12,20 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'admin-confirmation',
-    templateUrl: './confirmation.page.html',
-    styleUrls: ['./confirmation.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        HeaderComponent,
-        RouterLink,
-        AsyncPipe,
-        IonRouterLink,
-        IonContent,
-        IonText,
-        IonButton,
-        IonRouterLink,
-    ]
+	selector: 'admin-confirmation',
+	templateUrl: './confirmation.page.html',
+	styleUrls: ['./confirmation.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		HeaderComponent,
+		RouterLink,
+		AsyncPipe,
+		IonRouterLink,
+		IonContent,
+		IonText,
+		IonButton,
+		IonRouterLink,
+	],
 })
 export class ConfirmationPage {
 	private readonly checkinContext = inject(CheckInContextService);

@@ -16,22 +16,22 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-event-information',
-    templateUrl: './event-information.page.html',
-    styleUrls: ['./event-information.page.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        RouterLink,
-        TranslateModule,
-        IonContent,
-        IonGrid,
-        IonRow,
-        IonCol,
-        IonButton,
-        IonIcon,
-        IonItem,
-        IonCardTitle,
-    ]
+	selector: 'app-event-information',
+	templateUrl: './event-information.page.html',
+	styleUrls: ['./event-information.page.css'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		RouterLink,
+		TranslateModule,
+		IonContent,
+		IonGrid,
+		IonRow,
+		IonCol,
+		IonButton,
+		IonIcon,
+		IonItem,
+		IonCardTitle,
+	],
 })
 export class EventInformationPage {
 	constructor() {

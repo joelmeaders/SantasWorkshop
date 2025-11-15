@@ -13,25 +13,25 @@ import { addIcons } from 'ionicons';
 import { closeCircle } from 'ionicons/icons';
 
 @Component({
-    selector: 'app-privacy-policy-modal',
-    templateUrl: './privacy-policy-modal.component.html',
-    styleUrls: ['./privacy-policy-modal.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        IonContent,
-        IonFooter,
-        IonToolbar,
-        IonButton,
-        IonIcon,
-        IonLabel,
-        TranslateModule,
-        IonContent,
-        IonFooter,
-        IonToolbar,
-        IonButton,
-        IonIcon,
-        IonLabel,
-    ]
+	selector: 'app-privacy-policy-modal',
+	templateUrl: './privacy-policy-modal.component.html',
+	styleUrls: ['./privacy-policy-modal.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		IonContent,
+		IonFooter,
+		IonToolbar,
+		IonButton,
+		IonIcon,
+		IonLabel,
+		TranslateModule,
+		IonContent,
+		IonFooter,
+		IonToolbar,
+		IonButton,
+		IonIcon,
+		IonLabel,
+	],
 })
 export class PrivacyPolicyModalComponent {
 	private readonly modalController = inject(ModalController);

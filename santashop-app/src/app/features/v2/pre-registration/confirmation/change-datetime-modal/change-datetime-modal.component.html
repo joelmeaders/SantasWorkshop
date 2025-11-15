@@ -1,0 +1,89 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>{{
+			'CONFIRMATION.CHANGE_REGISTRATION_DATETIME' | translate
+		}}</ion-title>
+		<ion-buttons slot="end">
+			<ion-button (click)="cancel()">
+				{{ 'COMMON.CANCEL' | translate }}
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+	<ion-card>
+		<ion-card-header>
+			<ion-text color="xmasred">
+				{{ 'CONFIRMATION.CURRENT_DATETIME' | translate }}
+			</ion-text>
+		</ion-card-header>
+		<ion-card-content>
+			<ion-text>
+				<h2>
+					{{ currentSlot.dateTime | date: 'EEEE, MMMM d,' : 'MST' }}
+					{{ currentSlot.dateTime | timeSlot }}
+				</h2>
+			</ion-text>
+		</ion-card-content>
+	</ion-card>
+
+	<ion-list>
+		<ion-list-header>
+			<ion-label>
+				<ion-text color="xmasred">
+					<h2>{{ 'SCHEDULE.SELECT_DATETIME' | translate }}</h2>
+				</ion-text>
+			</ion-label>
+		</ion-list-header>
+
+		<ion-accordion-group [multiple]="true">
+			@for (day of availableDays$ | async; track day) {
+				<ion-accordion [value]="day">
+					<ion-item slot="header">
+						<ion-label>
+							<h2>{{ day | date: 'EEEE, MMMM d' : 'MST' }}</h2>
+						</ion-label>
+					</ion-item>
+					<ion-list slot="content">
+						@for (
+							slot of availableSlotsByDay$(day) | async;
+							track slot.id
+						) {
+							<ion-item
+								[button]="true"
+								[disabled]="
+									!slot.enabled ||
+									spotsRemaining(slot) === 'Unavailable' ||
+									isCurrentSlot(slot)
+								"
+								(click)="selectSlot(slot)"
+								[color]="
+									isCurrentSlot(slot) ? 'light' : undefined
+								"
+								[detail]="true"
+							>
+								<ion-label>
+									<h3>{{ slot.dateTime | timeSlot }}</h3>
+									@if (isCurrentSlot(slot)) {
+										<ion-text color="primary">
+											<p>
+												<strong>{{
+													'CONFIRMATION.CURRENT_SELECTION'
+														| translate
+												}}</strong>
+											</p>
+										</ion-text>
+									}
+								</ion-label>
+								<ion-note slot="end">
+									{{ spotsRemaining(slot) }}
+								</ion-note>
+							</ion-item>
+						}
+					</ion-list>
+				</ion-accordion>
+			}
+		</ion-accordion-group>
+	</ion-list>
+</ion-content>

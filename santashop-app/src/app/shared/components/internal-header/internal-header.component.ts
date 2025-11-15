@@ -14,23 +14,23 @@ import { addIcons } from 'ionicons';
 import { menuSharp } from 'ionicons/icons';
 
 @Component({
-    selector: 'app-internal-header',
-    templateUrl: './internal-header.component.html',
-    styleUrls: ['./internal-header.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    IonIcon,
-    IonHeader,
-    IonToolbar,
-    IonItem,
-    IonButton,
-    AsyncPipe,
-    IonHeader,
-    IonToolbar,
-    IonItem,
-    IonButton,
-    IonIcon
-]
+	selector: 'app-internal-header',
+	templateUrl: './internal-header.component.html',
+	styleUrls: ['./internal-header.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		IonIcon,
+		IonHeader,
+		IonToolbar,
+		IonItem,
+		IonButton,
+		AsyncPipe,
+		IonHeader,
+		IonToolbar,
+		IonItem,
+		IonButton,
+		IonIcon,
+	],
 })
 export class InternalHeaderComponent {
 	private readonly authService = inject(AuthService);

@@ -39,6 +39,8 @@
 		"VERIFICATION_FAILED": "Verification Failed",
 		"VERIFICATION_FAILED_MSG": "You need to refresh the page to try again",
 		"CONFIRM": "Confirm",
+		"CONTINUE": "Continue",
+		"SUCCESS": "Success",
 		"RESET": "Reset",
 		"SAVE_CHOICE": "Save choice",
 		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?",
@@ -125,7 +127,8 @@
 		"ADD_ONE_BELOW.": "Add one below.",
 		"ON_TIME": "Please arrive during your assigned time. Wait times will vary.",
 		"AVAILABLE_DATES/TIMES": "Available Dates/Times",
-		"FULL": "All spots have been filled and there are no available dates or times. Check Facebook for updates."
+		"FULL": "All spots have been filled and there are no available dates or times. Check Facebook for updates.",
+		"SELECT_DATETIME": "Select Date & Time"
 	},
 	"SUBMIT": {
 		"CONFIRM_ADDED_CHILDREN": "Have you added all children? Is children information correct?",
@@ -139,9 +142,15 @@
 		"QR_CODE": "QR Code",
 		"THIS_IS_YOUR_TICKET": "This is your ticket to the event",
 		"EMAIL_REMEMBER_TICKET": "We are also sending it to your email.",
-		"CHANGE_REGISTRATION": "Change Registration",
+		"CHANGE_REGISTRATION_DATETIME": "Change Date & Time",
 		"ARE_YOU_SURE": "Are you sure?",
-		"CONFIRM_CHANGE_MSG": "Requesting to make a change to your registration will forfeit your current Date & Time.<br/>After you confirm, submit your new registration as soon as possible. Availability is limited and registration fills up quickly."
+		"CONFIRM_CHANGE_MSG": "Requesting to make a change to your registration will forfeit your current Date & Time.<br/>After you confirm, submit your new registration as soon as possible. Availability is limited and registration fills up quickly.",
+		"CONFIRM_DATETIME_CHANGE_MSG": "Changing your registration date/time will update your confirmation and send a new confirmation email. Your previous time slot will be made available to others.",
+		"CURRENT_DATETIME": "Current Date & Time",
+		"CURRENT_SELECTION": "Current Selection",
+		"UPDATING_REGISTRATION": "Updating registration...",
+		"REGISTRATION_UPDATED_MSG": "Your registration has been updated! A new confirmation email has been sent to you.",
+		"CANNOT_CHANGE_AFTER_CHECKIN": "You cannot change your registration date/time after you have been checked in to the event."
 	},
 	"HELP": {
 		"TITLE": "Help",

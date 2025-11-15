@@ -13,20 +13,20 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'admin-search',
-    templateUrl: './search.page.html',
-    styleUrls: ['./search.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        HeaderComponent,
-        RouterLink,
-        IonRouterLink,
-        IonContent,
-        IonCardHeader,
-        IonCardTitle,
-        IonCardSubtitle,
-        IonList,
-        IonItem,
-    ]
+	selector: 'admin-search',
+	templateUrl: './search.page.html',
+	styleUrls: ['./search.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		HeaderComponent,
+		RouterLink,
+		IonRouterLink,
+		IonContent,
+		IonCardHeader,
+		IonCardTitle,
+		IonCardSubtitle,
+		IonList,
+		IonItem,
+	],
 })
 export class SearchPage {}

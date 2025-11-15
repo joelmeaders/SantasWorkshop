@@ -12,6 +12,7 @@ export interface PublicParameters {
 		onsiteRegistrationEnabled: boolean;
 		preRegistrationEnabled: boolean;
 		allowCancelRegistration: boolean;
+		allowChangeRegistration: boolean;
 	};
 	globalAlert: GlobalAlert;
 }

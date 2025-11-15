@@ -19,19 +19,19 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'app-pre-registration-menu',
-    templateUrl: './pre-registration-menu.component.html',
-    styleUrls: ['./pre-registration-menu.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-    CoreModule,
-    AsyncPipe,
-    TranslateModule,
-    IonTabBar,
-    IonTabButton,
-    IonIcon,
-    IonLabel
-]
+	selector: 'app-pre-registration-menu',
+	templateUrl: './pre-registration-menu.component.html',
+	styleUrls: ['./pre-registration-menu.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		CoreModule,
+		AsyncPipe,
+		TranslateModule,
+		IonTabBar,
+		IonTabButton,
+		IonIcon,
+		IonLabel,
+	],
 })
 export class PreRegistrationMenuComponent {
 	private readonly viewService = inject(PreRegistrationService);

@@ -9,9 +9,11 @@ This directory contains helper functions for E2E testing with Firebase emulators
 These functions are exposed as callable Firebase functions and should **ONLY** be used with emulators, never in production.
 
 #### `testSeedScenario(scenario: string)`
+
 Seeds the database with predefined test scenarios.
 
 Available scenarios:
+
 - `create-account-enabled` - Registration and create account enabled
 - `create-account-disabled` - Registration enabled, create account disabled
 - `registration-closed` - Registration disabled
@@ -20,7 +22,9 @@ Available scenarios:
 - `default` - Everything enabled (default state)
 
 #### `testSeedPublicParameters(params: object)`
+
 Seeds custom public parameters. Accepts any fields from the `PublicParameters` interface:
+
 - `registrationEnabled: boolean`
 - `maintenanceModeEnabled: boolean`
 - `weatherModeEnabled: boolean`
@@ -29,7 +33,9 @@ Seeds custom public parameters. Accepts any fields from the `PublicParameters` i
 - `messageEs: string`
 
 #### `testClearAllData()`
+
 Clears all data from Firestore and Auth emulators. This includes:
+
 - All Firestore collections (users, registrations, children, dateTimeSlots, parameters)
 - All Auth users
 
@@ -41,21 +47,22 @@ Use the fixtures provided in `test-fixtures.ts`:
 import { test, expect } from '../fixtures/test-fixtures';
 
 test('my test', async ({ page, seedScenario, clearData }) => {
-  // Clear data before test
-  await clearData();
-  
-  // Seed a scenario
-  await seedScenario('create-account-enabled');
-  
-  // Run your test
-  await page.goto('/sign-up');
-  // ...
+	// Clear data before test
+	await clearData();
+
+	// Seed a scenario
+	await seedScenario('create-account-enabled');
+
+	// Run your test
+	await page.goto('/sign-up');
+	// ...
 });
 ```
 
 ## Implementation Details
 
 The helper functions are implemented in:
+
 - `santashop-functions/src/fn/testHelpers.ts` - Core helper logic
 - `santashop-functions/src/index.ts` - Exported as callable functions
 - `santashop-e2e/fixtures/test-fixtures.ts` - Playwright fixtures that call the functions

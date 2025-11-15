@@ -10,7 +10,6 @@ export class ErrorHandlerService {
 	private readonly analyticsWrapper = inject(AnalyticsWrapper);
 	private readonly alertController = inject(AlertController);
 
-
 	public async handleError(
 		error: IError,
 		title = 'Error Encountered',

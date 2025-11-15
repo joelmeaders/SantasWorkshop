@@ -36,6 +36,7 @@ export async function seedPublicParameters(params: {
 			onsiteRegistrationEnabled: true,
 			preRegistrationEnabled: true,
 			allowCancelRegistration: true,
+			allowChangeRegistration: true,
 		},
 		globalAlert: {
 			displayAlert: false,

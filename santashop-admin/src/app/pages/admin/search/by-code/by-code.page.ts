@@ -26,26 +26,26 @@ import {
 } from '@ionic/angular/standalone';
 
 @Component({
-    selector: 'admin-by-code',
-    templateUrl: './by-code.page.html',
-    styleUrls: ['./by-code.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [
-        HeaderComponent,
-        ReactiveFormsModule,
-        RouterLink,
-        IonRouterLink,
-        IonContent,
-        IonCardHeader,
-        IonCardTitle,
-        IonCardSubtitle,
-        IonList,
-        IonItem,
-        IonLabel,
-        IonInput,
-        IonButton,
-        IonIcon,
-    ]
+	selector: 'admin-by-code',
+	templateUrl: './by-code.page.html',
+	styleUrls: ['./by-code.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	imports: [
+		HeaderComponent,
+		ReactiveFormsModule,
+		RouterLink,
+		IonRouterLink,
+		IonContent,
+		IonCardHeader,
+		IonCardTitle,
+		IonCardSubtitle,
+		IonList,
+		IonItem,
+		IonLabel,
+		IonInput,
+		IonButton,
+		IonIcon,
+	],
 })
 export class ByCodePage {
 	private readonly searchService = inject(SearchService);

@@ -50,6 +50,15 @@ export const undoRegistration = functions
 		);
 	});
 
+export const changeRegistrationDateTime = functions
+	.runWith({ enforceAppCheck: true })
+	.https.onCall(async (request, context) => {
+		return (await import('./fn/changeRegistrationDateTime')).default(
+			request,
+			context,
+		);
+	});
+
 export const updateEmailAddress = functions
 	.runWith({ enforceAppCheck: true })
 	.https.onCall(async (request, context) => {

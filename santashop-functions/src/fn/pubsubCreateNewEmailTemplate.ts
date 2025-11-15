@@ -29,7 +29,6 @@ const createCreateTemplateCommand =
 				TemplateName: 'dscs-registration-confirmation-v1',
 				HtmlPart: cleanedUpTemplate,
 				SubjectPart:
-					 
 					"Here's your ticket for the 2025 Denver Santa Claus Shop!",
 			},
 		});

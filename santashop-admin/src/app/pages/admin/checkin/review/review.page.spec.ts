@@ -3,6 +3,8 @@ import { ReviewPage } from './review.page';
 import {
 	provideFirestoreWrapperMock,
 	provideFunctionsMock,
+	provideModalControllerMock,
+	provideAlertControllerMock,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 
@@ -16,6 +18,8 @@ describe('ReviewPage', () => {
 			providers: [
 				provideFirestoreWrapperMock(),
 				provideFunctionsMock(),
+				provideModalControllerMock(),
+				provideAlertControllerMock(),
 				provideRouter([]),
 			],
 		}).compileComponents();

@@ -70,13 +70,54 @@
 		</ion-row>
 
 		@if ((hasScheduleData$ | async) === true) {
+		<ion-row *appLet="capacityByDay$ | async as capacities">
+			<ion-col size="12">
+				<h2>Capacity by Day</h2>
+			</ion-col>
+			@for (capacity of capacities; track capacity.label) {
+			<ion-col sizeXs="12" sizeSm="6" sizeMd="3" sizeLg="3">
+				<div class="capacity-card">
+					<div class="capacity-card__header">
+						<h3>{{ capacity.label }}</h3>
+						<div class="capacity-card__percent">
+							{{ capacity.percent | number:'1.0-1' }}%
+						</div>
+					</div>
+					<canvas
+						baseChart
+						[data]="capacity.chartData"
+						[options]="chartOptions"
+						[legend]="false"
+						type="doughnut"
+					></canvas>
+					<div class="capacity-card__meta">
+						<span>Used: {{ capacity.used | number }}</span>
+						<span>Total: {{ capacity.total | number }}</span>
+						@if (capacity.overflow === 0) {
+						<span
+							>Remaining: {{ capacity.remaining | number }}</span
+						>
+						} @if (capacity.overflow > 0) {
+						<span>
+							Overflow: {{ capacity.overflow | number }}
+						</span>
+						}
+					</div>
+				</div>
+			</ion-col>
+			}
+		</ion-row>
+
 		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
 			<ion-col size="12">
 				<h2>Schedules by Day</h2>
 			</ion-col>
 			@for (slot of slots; track slot; let i = $index) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-				<h3>{{ slot.datasets[0].label }}</h3>
+				<h3>
+					{{ slot.datasets[0].label }} - Total: {{
+					getTotalCount(slot.datasets[0].data) }}
+				</h3>
 				<canvas
 					baseChart
 					[options]="barChartOptions"

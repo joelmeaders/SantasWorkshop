@@ -5,9 +5,11 @@ import {
 	filterNil,
 	CoreModule,
 	shopSchedule,
+	timestampToDate,
 } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
+	DateTimeSlot,
 	RegistrationStats,
 	ScheduleStats,
 } from '@santashop/models';
@@ -40,7 +42,7 @@ import {
 	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
-import { Timestamp } from '@angular/fire/firestore';
+import { QueryConstraint, Timestamp, where } from '@angular/fire/firestore';
 
 Chart.register(ChartDataLabels);
 
@@ -77,6 +79,12 @@ export class RegistrationPage {
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
 		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
+	private readonly dateTimeSlotCollection =
+		(): IFireRepoCollection<DateTimeSlot> =>
+			this.httpService.collection<DateTimeSlot>(
+				COLLECTION_SCHEMA.dateTimeSlots,
+			);
+
 	private readonly registrationStats$ = this.refreshYear.pipe(
 		switchMap(() =>
 			this.statsCollection<RegistrationStats>()
@@ -91,6 +99,36 @@ export class RegistrationPage {
 				.read(`schedule-${this.year}`)
 				.pipe(shareReplay(1)),
 		),
+	);
+
+	private readonly dateTimeSlots$ = this.refreshYear.pipe(
+		switchMap(() => {
+			const queryConstraints: QueryConstraint[] = [
+				where('programYear', '==', this.year),
+			];
+
+			return this.dateTimeSlotCollection()
+				.readMany(queryConstraints, 'id')
+				.pipe(
+					map((slots) =>
+						slots.map((slot) => ({
+							...slot,
+							dateTime:
+								slot.dateTime instanceof Date
+									? slot.dateTime
+									: timestampToDate(slot.dateTime),
+						})),
+					),
+					map((slots) =>
+						slots.sort(
+							(a, b) =>
+								(a.dateTime as Date).valueOf() -
+								(b.dateTime as Date).valueOf(),
+						),
+					),
+				);
+		}),
+		shareReplay(1),
 	);
 
 	public readonly hasScheduleData$ = this.scheduleStats$.pipe(
@@ -235,6 +273,17 @@ export class RegistrationPage {
 		borderWidth: 1,
 	};
 
+	private readonly capacityColorSettings = {
+		used: 'rgba(63, 81, 181, 0.85)',
+		available: 'rgba(102, 187, 106, 0.8)',
+		overflow: 'rgba(255, 99, 132, 0.85)',
+		border: '#ffffff',
+	};
+
+	public readonly capacityByDay$ = this.dateTimeSlots$.pipe(
+		map((slots) => this.mapSlotsToCapacityCharts(slots)),
+	);
+
 	public zipCodeOptions: ChartConfiguration['options'] = {
 		responsive: true,
 		plugins: {
@@ -373,4 +422,121 @@ export class RegistrationPage {
 
 		return day + 'th';
 	}
+
+	public getTotalCount(data: number[]): number {
+		return data.reduce((a, b) => a + b, 0);
+	}
+
+	private mapSlotsToCapacityCharts(
+		slots: DateTimeSlot[],
+	): DayCapacityChart[] {
+		const schedule = this.schedule.find((s) => s.year === this.year);
+		if (!schedule) return [];
+
+		const grouped = slots.reduce<Map<number, DateTimeSlot[]>>(
+			(acc, slot) => {
+				const date =
+					slot.dateTime instanceof Date
+						? slot.dateTime
+						: (slot.dateTime as Timestamp).toDate();
+				const day = date.getDate();
+				const existing = acc.get(day) ?? [];
+				existing.push(slot);
+				acc.set(day, existing);
+				return acc;
+			},
+			new Map(),
+		);
+
+		return schedule.days.map((day) => {
+			const label = this.friendlyDay(day);
+			const daySlots = grouped.get(day) ?? [];
+			const dateValue = daySlots[0]
+				? (daySlots[0].dateTime as Date)
+				: undefined;
+			const dateLabel = dateValue
+				? (dateValue as Date).toLocaleDateString('en-US', {
+						month: 'short',
+						day: 'numeric',
+					})
+				: '';
+			const stats = daySlots.reduce(
+				(acc, slot) => {
+					const max = slot.maxSlots ?? 0;
+					const used = slot.slotsReserved ?? 0;
+					acc.total += max;
+					acc.used += used;
+					return acc;
+				},
+				{ used: 0, total: 0 },
+			);
+
+			const overflow = Math.max(stats.used - stats.total, 0);
+			const usedWithinCapacity = Math.min(stats.used, stats.total);
+			const remaining = Math.max(stats.total - usedWithinCapacity, 0);
+			const percent =
+				stats.total === 0 ? 0 : (stats.used / stats.total) * 100;
+
+			return {
+				label,
+				dateLabel,
+				percent,
+				used: stats.used,
+				total: stats.total,
+				remaining,
+				overflow,
+				chartData: this.buildCapacityChartData(
+					usedWithinCapacity,
+					remaining,
+					overflow,
+				),
+			};
+		});
+	}
+
+	private buildCapacityChartData(
+		used: number,
+		remaining: number,
+		overflow: number,
+	): ChartData<'doughnut', number[], string | string[]> {
+		const labels =
+			overflow > 0 ? ['Used', 'Overflow'] : ['Used', 'Remaining'];
+		const data = overflow > 0 ? [used, overflow] : [used, remaining];
+		const backgroundColor =
+			overflow > 0
+				? [
+						this.capacityColorSettings.used,
+						this.capacityColorSettings.overflow,
+					]
+				: [
+						this.capacityColorSettings.used,
+						this.capacityColorSettings.available,
+					];
+		const borderColor = new Array(labels.length).fill(
+			this.capacityColorSettings.border,
+		);
+
+		return {
+			labels,
+			datasets: [
+				{
+					data,
+					backgroundColor,
+					borderColor,
+					borderWidth: 1,
+				},
+			],
+		};
+	}
+}
+
+interface DayCapacityChart {
+	label: string;
+	dateLabel: string;
+	percent: number;
+	used: number;
+	total: number;
+	remaining: number;
+	overflow: number;
+	chartData: ChartData<'doughnut', number[], string | string[]>;
 }

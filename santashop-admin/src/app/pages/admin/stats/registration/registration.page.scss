@@ -25,3 +25,47 @@ h3 {
 		rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
 	border-radius: 24px;
 }
+
+.capacity-card {
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	box-shadow:
+		rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+		rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+	border-radius: 24px;
+}
+
+.capacity-card h3 {
+	text-align: left;
+	margin: 0;
+}
+
+.capacity-card__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.capacity-card__date {
+	font-size: 0.95rem;
+	color: #666;
+	margin-left: auto;
+}
+
+.capacity-card__percent {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #3f51b5;
+}
+
+.capacity-card__meta {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	font-size: 0.95rem;
+	text-align: left;
+}
+

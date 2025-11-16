@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2025.2.1] - 2025-11-15
+
+### Added
+
+- **Registration Capacity Insights**: Admin stats dashboard now surfaces "Capacity by Day" cards with donut charts so admins can see used, remaining, and overflow slots at a glance.
+- **Test Helper Enhancements**: Added reusable FireRepoLite and PROGRAM_YEAR providers to simplify Angular admin component testing.
+
+### Changed
+
+- **Schedule Charts**: Each schedule bar chart now shows the total number of families for that day directly in the heading for faster scanning.
+- **Admin Detection Logic**: Landing page admin toggle now keys off `meaders` email addresses to keep the new stats tooling limited to the intended team.
+
 ## [2025.2.0] - 2025-11-15
 
 ### Added

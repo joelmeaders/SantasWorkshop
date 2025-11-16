@@ -12,7 +12,12 @@ import {
 	LoadingController,
 } from '@ionic/angular/standalone';
 import { of } from 'rxjs';
-import { FirestoreWrapper } from '@santashop/core';
+import {
+	FirestoreWrapper,
+	FireRepoLite,
+	IFireRepoCollection,
+	PROGRAM_YEAR,
+} from '@santashop/core';
 
 /**
  * Creates a mock Firebase Auth instance.
@@ -160,6 +165,37 @@ export function provideFirestoreMock(): Provider {
 	return {
 		provide: Firestore,
 		useFactory: createFirestoreMock,
+	};
+}
+
+export function createFireRepoLiteMock(): jasmine.SpyObj<FireRepoLite> {
+	const collectionMock = jasmine.createSpyObj<IFireRepoCollection<unknown>>(
+		'FireRepoCollection',
+		['read', 'readMany', 'add', 'addById', 'update', 'delete'],
+	);
+
+	collectionMock.read.and.returnValue(of(undefined));
+	collectionMock.readMany.and.returnValue(of([]));
+	collectionMock.add.and.returnValue(of({} as any));
+	collectionMock.addById.and.returnValue(of({} as any));
+	collectionMock.update.and.returnValue(of({} as any));
+	collectionMock.delete.and.returnValue(of(void 0));
+
+	const mock = jasmine.createSpyObj<FireRepoLite>('FireRepoLite', [
+		'collection',
+		'randomId',
+	]);
+
+	(mock.collection as jasmine.Spy).and.returnValue(collectionMock);
+	mock.randomId.and.returnValue('mock-random-id');
+
+	return mock;
+}
+
+export function provideFireRepoLiteMock(): Provider {
+	return {
+		provide: FireRepoLite,
+		useFactory: createFireRepoLiteMock,
 	};
 }
 
@@ -421,3 +457,26 @@ export function createScannerServiceMock(): jasmine.SpyObj<{
 	mock.$hasPermissions = of(false);
 	return mock;
 }
+
+export function provideProgramYearMock(programYear = 2025): Provider {
+	return {
+		provide: PROGRAM_YEAR,
+		useValue: programYear,
+	};
+}
+
+export const testHelpers: Provider[] = [
+	provideAuthMock(),
+	provideFirestoreWrapperMock(),
+	provideFirestoreMock(),
+	provideFireRepoLiteMock(),
+	provideFunctionsMock(),
+	provideStorageMock(),
+	provideAnalyticsMock(),
+	provideModalControllerMock(),
+	provideAlertControllerMock(),
+	provideLoadingControllerMock(),
+	providePopoverControllerMock(),
+	provideActivatedRouteMock(),
+	provideProgramYearMock(),
+];

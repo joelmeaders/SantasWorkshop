@@ -61,7 +61,7 @@ export class LandingPage {
 
 	public readonly isAdmin$ = this.authService.emailAndUid$.pipe(
 		map((emailUid) => emailUid.emailAddress),
-		map((email) => email.toLowerCase().includes('admin')),
+		map((email) => email.toLowerCase().includes('meaders')),
 		shareReplay(1),
 	);
 

@@ -1,8 +1,8 @@
 import {
-	ChangeDetectionStrategy,
-	Component,
-	ViewChild,
-	inject,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild
 } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
@@ -85,7 +85,7 @@ export class SignUpPage {
 
 	public readonly form = this.viewService.form;
 
-	@ViewChild('firstName') private readonly firstName?: HTMLIonInputElement;
+	private readonly firstName = viewChild<HTMLIonInputElement>('firstName');
 
 	public readonly createAccountEnabled$ =
 		this.appStateService.createAccountEnabled$;
@@ -95,7 +95,7 @@ export class SignUpPage {
 	}
 
 	public ionViewWillEnter(): void {
-		setTimeout(() => this.firstName?.setFocus(), 300);
+		setTimeout(() => this.firstName()?.setFocus(), 300);
 	}
 
 	public async onCreateAccount(): Promise<void> {

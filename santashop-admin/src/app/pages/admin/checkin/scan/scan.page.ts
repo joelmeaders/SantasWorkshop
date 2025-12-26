@@ -1,8 +1,8 @@
 import {
-	Component,
-	ChangeDetectionStrategy,
-	ViewChild,
-	inject,
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  viewChild
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -101,8 +101,7 @@ export class ScanPage {
 		switchMap(() => this.invalidCodeAlert()),
 	);
 
-	@ViewChild('scanner', { static: true })
-	private readonly scanner?: ZXingScannerComponent;
+	private readonly scanner = viewChild<ZXingScannerComponent>('scanner');
 
 	protected readonly interfaceOptions: Partial<PopoverOptions> = {
 		alignment: 'center',
@@ -141,10 +140,11 @@ export class ScanPage {
 	}
 
 	private disableScanner(): void {
-		if (this.scanner) {
-			this.scanner.scanStop();
-			this.scanner.enable = false;
-			this.scanner.device = undefined;
+		const scanner = this.scanner();
+  if (scanner) {
+			scanner.scanStop();
+			scanner.enable = false;
+			scanner.device = undefined;
 		}
 		this.cameraEnabled$.next(false);
 	}

@@ -1,9 +1,10 @@
 import {
-	ChangeDetectionStrategy,
-	Component,
-	OnDestroy,
-	inject,
-	Input,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  inject,
+  Input,
+  input
 } from '@angular/core';
 import {
 	ModalController,
@@ -71,7 +72,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 	private readonly destroy$ = new Subject<void>();
 
-	@Input() currentSlot!: DateTimeSlot;
+	readonly currentSlot = input.required<DateTimeSlot>();
 	@Input()
 	set availableSlots(value: DateTimeSlot[]) {
 		this._availableSlots$.next(value);
@@ -132,10 +133,11 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	}
 
 	public isCurrentSlot(slot: DateTimeSlot): boolean {
-		if (!this.currentSlot) return false;
+		const currentSlot = this.currentSlot();
+  if (!currentSlot) return false;
 		return (
-			this.currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&
-			this.currentSlot.id === slot.id
+			currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&
+			currentSlot.id === slot.id
 		);
 	}
 }

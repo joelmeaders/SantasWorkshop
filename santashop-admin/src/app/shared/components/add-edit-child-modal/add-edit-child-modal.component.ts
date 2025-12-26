@@ -1,9 +1,9 @@
 import {
-	Component,
-	ChangeDetectionStrategy,
-	Input,
-	OnInit,
-	inject,
+  Component,
+  ChangeDetectionStrategy,
+  OnInit,
+  inject,
+  input
 } from '@angular/core';
 import {
 	UntypedFormControl,
@@ -97,8 +97,7 @@ export class AddEditChildModalComponent implements OnInit {
 	private readonly alertController = inject(AlertController);
 	protected readonly childValidationService = inject(ChildValidationService);
 
-	@Input()
-	public child?: Child;
+	public readonly child = input<Child>();
 
 	public form?: UntypedFormGroup;
 
@@ -109,10 +108,11 @@ export class AddEditChildModalComponent implements OnInit {
 	public readonly isInfant$ = this.isInfant.asObservable();
 
 	public ngOnInit(): void {
-		this.form = this.newForm(this.child);
+		this.form = this.newForm(this.child());
 
-		if (this.child?.dateOfBirth) {
-			const dob: string = this.child.dateOfBirth
+		const child = this.child();
+  if (child?.dateOfBirth) {
+			const dob: string = child.dateOfBirth
 				.toISOString()
 				.substring(0, 10);
 			this.birthdaySelected({ detail: { value: dob } });

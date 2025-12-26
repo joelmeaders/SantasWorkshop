@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -28,5 +28,5 @@ import {
 	],
 })
 export class SubmitCardComponent {
-	@Input() public canSubmit = false;
+	public readonly canSubmit = input(false);
 }

@@ -4,13 +4,13 @@
 			<ion-card-title>
 				{{ 'MENU.CHILDREN' | translate }}
 			</ion-card-title>
-			@if (childCount) {
+			@if (childCount()) {
 				<ion-badge color="success" slot="end"> Complete </ion-badge>
 			}
 		</ion-item>
 	</ion-card-header>
 	<ion-card-content class="ion-text-center">
-		@if (!childCount) {
+		@if (!childCount()) {
 			<p>
 				<strong>
 					{{ 'OVERVIEW.NO_CHILDREN' | translate }}
@@ -25,7 +25,7 @@
 			</p>
 		} @else {
 			<ion-list>
-				@for (child of children; track child) {
+				@for (child of children(); track child) {
 					<ion-item lines="none">
 						@if (child.toyType === 'boys') {
 							<ion-icon

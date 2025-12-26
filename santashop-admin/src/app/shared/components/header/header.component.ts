@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -30,9 +30,9 @@ import {
 	],
 })
 export class HeaderComponent {
-	@Input() public title?: string;
+	public readonly title = input<string>();
 
-	@Input() public backRoute = '/admin';
+	public readonly backRoute = input('/admin');
 
 	constructor() {
 		addIcons({ arrowBackSharp });

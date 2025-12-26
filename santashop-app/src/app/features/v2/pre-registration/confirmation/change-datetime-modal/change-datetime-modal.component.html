@@ -21,8 +21,8 @@
 		<ion-card-content>
 			<ion-text>
 				<h2>
-					{{ currentSlot.dateTime | date: 'EEEE, MMMM d,' : 'MST' }}
-					{{ currentSlot.dateTime | timeSlot }}
+					{{ currentSlot().dateTime | date: 'EEEE, MMMM d,' : 'MST' }}
+					{{ currentSlot().dateTime | timeSlot }}
 				</h2>
 			</ion-text>
 		</ion-card-content>

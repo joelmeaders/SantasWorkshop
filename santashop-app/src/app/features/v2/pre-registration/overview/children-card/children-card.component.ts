@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Child } from '@santashop/models';
 
 import { RouterLink } from '@angular/router';
@@ -46,9 +46,9 @@ import {
 	],
 })
 export class ChildrenCardComponent {
-	@Input() public children?: Child[];
+	public readonly children = input<Child[]>();
 
-	@Input() public childCount = 0;
+	public readonly childCount = input(0);
 
 	constructor() {
 		addIcons({ manOutline, womanOutline, happyOutline, alertCircle });

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { DateTimeSlot } from '@santashop/models';
 import { CoreModule, TimeSlotPipe } from '@santashop/core';
 
@@ -36,7 +36,7 @@ import {
 	],
 })
 export class ScheduleCardComponent {
-	@Input() public dateTimeSlot?: DateTimeSlot;
+	public readonly dateTimeSlot = input<DateTimeSlot>();
 
-	@Input() public canChooseDateTime = false;
+	public readonly canChooseDateTime = input(false);
 }

@@ -3,7 +3,7 @@ import { SubmitPageService } from './submit.page.service';
 
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
-import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { CoreModule, TimeSlotPipe } from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -36,7 +36,6 @@ import {
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
-		NgClass,
 		CoreModule,
 		AsyncPipe,
 		DatePipe,

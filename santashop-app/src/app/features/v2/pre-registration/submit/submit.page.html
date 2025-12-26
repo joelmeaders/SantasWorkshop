@@ -46,7 +46,7 @@
 							@if ( viewService.children$ | async; as children ) {
 							@for (child of children; track child) {
 							<ion-item
-								[ngClass]="{
+								[class]="{
 										'infant-style':
 											child.toyType === 'infants',
 										'boys-style': child.toyType === 'boys',

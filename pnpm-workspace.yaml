@@ -2,6 +2,6 @@ packages:
     - santashop-admin
     - santashop-app
     - santashop-core
-    - santashop-functions
+    # - santashop-functions
     - santashop-e2e
     - santashop-models

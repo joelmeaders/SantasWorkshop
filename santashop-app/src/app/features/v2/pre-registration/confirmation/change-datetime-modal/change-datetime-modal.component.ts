@@ -1,10 +1,10 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  inject,
-  Input,
-  input
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	inject,
+	Input,
+	input,
 } from '@angular/core';
 import {
 	ModalController,
@@ -135,7 +135,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 
 	public isCurrentSlot(slot: DateTimeSlot): boolean {
 		const currentSlot = this.currentSlot();
-  if (!currentSlot) return false;
+		if (!currentSlot) return false;
 		return (
 			currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&
 			currentSlot.id === slot.id

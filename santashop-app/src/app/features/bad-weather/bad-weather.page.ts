@@ -12,13 +12,7 @@ import { map } from 'rxjs/operators';
 	templateUrl: './bad-weather.page.html',
 	styleUrls: ['./bad-weather.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonButton,
-		IonIcon,
-	],
+	imports: [AsyncPipe, TranslateModule, IonContent, IonButton, IonIcon],
 })
 export class BadWeatherPage {
 	public readonly service = inject(AppStateService);

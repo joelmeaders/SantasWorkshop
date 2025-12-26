@@ -13,13 +13,7 @@ import { map } from 'rxjs/operators';
 	templateUrl: './registration-closed.page.html',
 	styleUrls: ['./registration-closed.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonButton,
-		IonIcon,
-	],
+	imports: [AsyncPipe, TranslateModule, IonContent, IonButton, IonIcon],
 })
 export class RegistrationClosedPage {
 	public readonly service = inject(AppStateService);

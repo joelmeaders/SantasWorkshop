@@ -1,8 +1,8 @@
 import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  viewChild
+	Component,
+	ChangeDetectionStrategy,
+	inject,
+	viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -140,7 +140,7 @@ export class ScanPage {
 
 	private disableScanner(): void {
 		const scanner = this.scanner();
-  if (scanner) {
+		if (scanner) {
 			scanner.scanStop();
 			scanner.enable = false;
 			scanner.device = undefined;

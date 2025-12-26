@@ -1,8 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  viewChild
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	viewChild,
 } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import {

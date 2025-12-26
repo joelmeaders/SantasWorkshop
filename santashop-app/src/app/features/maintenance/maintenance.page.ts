@@ -13,13 +13,7 @@ import { map } from 'rxjs/operators';
 	templateUrl: './maintenance.page.html',
 	styleUrls: ['./maintenance.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonButton,
-		IonIcon,
-	],
+	imports: [AsyncPipe, TranslateModule, IonContent, IonButton, IonIcon],
 })
 export class MaintenancePage {
 	public readonly service = inject(AppStateService);

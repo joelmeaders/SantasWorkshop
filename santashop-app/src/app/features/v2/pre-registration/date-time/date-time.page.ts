@@ -5,10 +5,7 @@ import {
 	inject,
 } from '@angular/core';
 import { Analytics, logEvent } from '@angular/fire/analytics';
-import {
-	SkeletonStateService,
-	TimeSlotPipe,
-} from '@santashop/core';
+import { SkeletonStateService, TimeSlotPipe } from '@santashop/core';
 import {
 	AlertController,
 	IonContent,

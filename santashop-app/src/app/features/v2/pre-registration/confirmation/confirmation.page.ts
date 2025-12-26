@@ -27,7 +27,7 @@ import {
 import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';
-import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { addIcons } from 'ionicons';
 import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
@@ -44,9 +44,9 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
-		NgClass,
 		AsyncPipe,
 		DatePipe,
+		NgClass,
 		TranslateModule,
 		IonContent,
 		IonGrid,

@@ -1,9 +1,18 @@
 import { NgModule } from '@angular/core';
-import { HelpPageRoutingModule } from './help-routing.module';
 import { HelpPage } from './help.page';
 import { CoreModule } from '@santashop/core';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
-	imports: [CoreModule, HelpPageRoutingModule, HelpPage],
+	imports: [
+		CoreModule,
+		RouterModule.forChild([
+			{
+				path: '',
+				component: HelpPage,
+			},
+		]),
+		HelpPage,
+	],
 })
 export class HelpPageModule {}

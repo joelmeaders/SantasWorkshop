@@ -17,24 +17,21 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@angular/animations": "*",
-		"@angular/common": "*",
-		"@angular/core": "*",
-		"@angular/fire": "*",
-		"@angular/forms": "*",
-		"@angular/platform-browser": "*",
-		"@angular/router": "*",
-		"@ionic/angular": "*",
-		"chart.js": "*",
-		"chartjs-plugin-datalabels": "*",
-		"firebase": "*",
-		"ng2-charts": "*",
-		"rxfire": "*",
-		"rxjs": "*",
-		"tslib": "*",
-		"zone.js": "*"
-	},
-	"volta": {
-		"node": "24.11.0"
+		"@angular/animations": "catalog:",
+		"@angular/common": "catalog:",
+		"@angular/core": "catalog:",
+		"@angular/fire": "catalog:",
+		"@angular/forms": "catalog:",
+		"@angular/platform-browser": "catalog:",
+		"@angular/router": "catalog:",
+		"@ionic/angular": "catalog:",
+		"chart.js": "catalog:",
+		"chartjs-plugin-datalabels": "catalog:",
+		"firebase": "catalog:",
+		"ng2-charts": "catalog:",
+		"rxfire": "catalog:",
+		"rxjs": "catalog:",
+		"tslib": "catalog:",
+		"zone.js": "catalog:"
 	}
 }

@@ -4,7 +4,7 @@ End-to-end testing suite for the SantaShop application using Playwright.
 
 ## Prerequisites
 
-- Node.js 24.11.0 (managed by Volta)
+- Node.js 24.11.0
 - Firebase emulators
 - santashop-functions built
 

@@ -7,7 +7,7 @@
 	},
 	"peerDependencies": {},
 	"dependencies": {
-		"tslib": "^2.4.0"
+		"tslib": "catalog:"
 	},
 	"sideEffects": false
 }

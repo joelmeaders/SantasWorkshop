@@ -9,17 +9,14 @@
 		"build:prod": "ng build santashop-core --configuration=production"
 	},
 	"dependencies": {
-		"tslib": "~2.4.0"
+		"tslib": "catalog:"
 	},
 	"peerDependencies": {
-		"@angular/common": "*",
-		"@angular/core": "*",
-		"@angular/fire": "*",
-		"firebase": "*",
-		"reflect-metadata": "*"
+		"@angular/common": "catalog:",
+		"@angular/core": "catalog:",
+		"@angular/fire": "catalog:",
+		"firebase": "catalog:",
+		"reflect-metadata": "catalog:"
 	},
-	"sideEffects": false,
-	"volta": {
-		"node": "24.11.0"
-	}
+	"sideEffects": false
 }

@@ -1,10 +1,9 @@
 import {
-	Component,
-	ChangeDetectionStrategy,
-	Input,
-	EventEmitter,
-	Output,
-	inject,
+  Component,
+  ChangeDetectionStrategy,
+  Input,
+  inject,
+  output
 } from '@angular/core';
 import {
 	AlertController,
@@ -51,9 +50,9 @@ export class ManageChildrenComponent {
 
 	@Input() public children: Child[] = [];
 
-	@Output() public readonly adddedChild = new EventEmitter<Child>();
-	@Output() public readonly editedChild = new EventEmitter<Child>();
-	@Output() public readonly removedChild = new EventEmitter<number>();
+	public readonly adddedChild = output<Child>();
+	public readonly editedChild = output<Child>();
+	public readonly removedChild = output<number>();
 
 	constructor() {
 		addIcons({ addCircle, createOutline, trashOutline });

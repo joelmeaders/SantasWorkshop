@@ -8,7 +8,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';
 import { ProfileService } from '../../../core/services/profile.service';
-import { CoreModule } from '@santashop/core';
+
 import { AsyncPipe } from '@angular/common';
 import { InternalHeaderComponent } from '../../../shared/components/internal-header/internal-header.component';
 
@@ -37,7 +37,6 @@ import {
 	styleUrls: ['./pre-registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		CoreModule,
 		InternalHeaderComponent,
 		AsyncPipe,
 		TranslateModule,

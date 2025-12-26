@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AppStateService, CoreModule } from '@santashop/core';
+import { AppStateService } from '@santashop/core';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -13,7 +13,6 @@ import { map } from 'rxjs/operators';
 	styleUrls: ['./bad-weather.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		CoreModule,
 		AsyncPipe,
 		TranslateModule,
 		IonContent,

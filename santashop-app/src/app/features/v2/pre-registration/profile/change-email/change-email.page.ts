@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { CoreModule } from '@santashop/core';
+import { NiceFormErrorPipe } from '@santashop/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
 import {
@@ -37,7 +37,7 @@ import {
 		ReactiveFormsModule,
 		AsyncPipe,
 		TranslateModule,
-		CoreModule,
+		NiceFormErrorPipe,
 		IonContent,
 		IonGrid,
 		IonRow,

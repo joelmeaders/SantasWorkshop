@@ -17,7 +17,7 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
 
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CoreModule } from '@santashop/core';
+
 import { addIcons } from 'ionicons';
 import { backspaceOutline } from 'ionicons/icons';
 import {
@@ -48,7 +48,6 @@ declare type SortFnType = (
 	imports: [
 		HeaderComponent,
 		RouterLink,
-		CoreModule,
 		AsyncPipe,
 		IonRouterLink,
 		IonContent,

@@ -29,7 +29,7 @@ import { LookupService } from '../../../../shared/services/lookup.service';
 import { ScannerService } from './scanner.service';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
-import { filterNil, CoreModule } from '@santashop/core';
+import { filterNil } from '@santashop/core';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
@@ -43,7 +43,6 @@ import { camera } from 'ionicons/icons';
 	imports: [
 		HeaderComponent,
 		ZXingScannerModule,
-		CoreModule,
 		AsyncPipe,
 		IonContent,
 		IonItem,

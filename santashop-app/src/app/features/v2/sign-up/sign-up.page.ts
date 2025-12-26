@@ -31,12 +31,13 @@ import {
 	IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { AppStateService, CoreModule } from '@santashop/core';
+import { AppStateService, NiceFormErrorPipe } from '@santashop/core';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { SignUpPageService } from './sign-up.page.service';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
 
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
@@ -51,7 +52,8 @@ import { arrowBackSharp } from 'ionicons/icons';
 		RouterLink,
 		ReactiveFormsModule,
 		TranslateModule,
-		CoreModule,
+		NiceFormErrorPipe,
+		AsyncPipe,
 		IonContent,
 		IonGrid,
 		IonRow,

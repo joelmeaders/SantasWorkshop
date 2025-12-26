@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import type { DateTimeSlot } from '@santashop/models';
-import { CoreModule, TimeSlotPipe } from '@santashop/core';
+import { TimeSlotPipe } from '@santashop/core';
 
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -21,7 +21,6 @@ import {
 	styleUrls: ['./schedule-card.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		CoreModule,
 		RouterLink,
 		DatePipe,
 		TimeSlotPipe,

@@ -7,7 +7,6 @@ import {
 import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
 	SkeletonStateService,
-	CoreModule,
 	TimeSlotPipe,
 } from '@santashop/core';
 import {
@@ -58,7 +57,6 @@ import { arrowBackSharp } from 'ionicons/icons';
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,
-		CoreModule,
 		AsyncPipe,
 		DatePipe,
 		TimeSlotPipe,

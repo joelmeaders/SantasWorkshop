@@ -3,7 +3,6 @@ import {
 	FireRepoLite,
 	IFireRepoCollection,
 	filterNil,
-	CoreModule,
 	shopSchedule,
 	timestampToDate,
 } from '@santashop/core';
@@ -62,7 +61,6 @@ Chart.register(ChartDataLabels);
 		IonSelect,
 		IonSelectOption,
 		BaseChartDirective,
-		CoreModule,
 		AsyncPipe,
 		DecimalPipe,
 		FormsModule,
@@ -423,8 +421,12 @@ export class RegistrationPage {
 		return day + 'th';
 	}
 
-	public getTotalCount(data: number[]): number {
-		return data.reduce((a, b) => a + b, 0);
+	public getTotalCount(data: (number | [number, number] | null)[]): number {
+		return data.reduce((a: number, b) => {
+			if (b === null) return a;
+			if (Array.isArray(b)) return a + b[0];
+			return a + b;
+		}, 0);
 	}
 
 	private mapSlotsToCapacityCharts(

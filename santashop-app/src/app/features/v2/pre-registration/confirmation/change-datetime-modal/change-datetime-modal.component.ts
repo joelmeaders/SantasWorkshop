@@ -36,7 +36,7 @@ import {
 	shareReplay,
 	distinctUntilChanged,
 } from 'rxjs/operators';
-import { TimeSlotPipe, CoreModule } from '@santashop/core';
+import { TimeSlotPipe } from '@santashop/core';
 
 @Component({
 	selector: 'app-change-datetime-modal',
@@ -65,7 +65,6 @@ import { TimeSlotPipe, CoreModule } from '@santashop/core';
 		DatePipe,
 		TranslateModule,
 		TimeSlotPipe,
-		CoreModule,
 	],
 })
 export class ChangeDatetimeModalComponent implements OnDestroy {

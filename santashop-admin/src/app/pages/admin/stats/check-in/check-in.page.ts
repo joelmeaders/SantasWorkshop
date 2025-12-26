@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Timestamp } from '@angular/fire/firestore';
-import { ChartConfiguration, ChartData } from 'chart.js';
+import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
 	combineLatest,
@@ -12,7 +12,6 @@ import {
 	IFireRepoCollection,
 	FireRepoLite,
 	filterNil,
-	CoreModule,
 	shopSchedule,
 } from '@santashop/core';
 import {
@@ -50,7 +49,6 @@ import {
 	imports: [
 		HeaderComponent,
 		FormsModule,
-		CoreModule,
 		BaseChartDirective,
 		AsyncPipe,
 		DatePipe,
@@ -231,7 +229,7 @@ export class CheckInPage {
 	private mapDaysHoursToChart(
 		data: CheckInDateTimeCount[],
 		view: 'customerCount' | 'childCount',
-	): ChartData<'bar'>[] {
+	): CheckInChartData[] {
 		data = data.sort((a, b) => a.date - b.date || a.hour - b.hour);
 
 		const chartStructure = (
@@ -258,13 +256,7 @@ export class CheckInPage {
 			],
 		});
 
-		const outputData: {
-			datasets: {
-				data: number[];
-				label: string;
-				dataSeriesLabels?: string[];
-			}[];
-		}[] = [];
+		const outputData: CheckInChartData[] = [];
 
 		const days: number[] = this.getDays(data);
 
@@ -291,8 +283,25 @@ export class CheckInPage {
 		}
 	}
 
-	public addValues(values?: number[]): number {
+	public addValues(values?: (number | [number, number] | null)[]): number {
 		if (!values) return 0;
-		return values.reduce((a, b) => a + b);
+		return values.reduce((a: number, b) => {
+			if (b === null) return a;
+			if (Array.isArray(b)) return a + b[0];
+			return a + b;
+		}, 0);
 	}
+}
+
+interface CheckInChartDataset {
+	data: number[];
+	label: string;
+	backgroundColor: string[];
+	borderColor: string[];
+	borderWidth: number;
+	dataSeriesLabels?: string[];
+}
+
+interface CheckInChartData {
+	datasets: CheckInChartDataset[];
 }

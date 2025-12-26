@@ -5,7 +5,7 @@ import { PreRegistrationMenuComponent } from '../../../../../shared/components/p
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { CoreModule } from '@santashop/core';
+import { NiceFormErrorPipe } from '@santashop/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
 import {
@@ -35,7 +35,7 @@ import {
 		RouterLink,
 		ReactiveFormsModule,
 		TranslateModule,
-		CoreModule,
+		NiceFormErrorPipe,
 		IonContent,
 		IonGrid,
 		IonRow,

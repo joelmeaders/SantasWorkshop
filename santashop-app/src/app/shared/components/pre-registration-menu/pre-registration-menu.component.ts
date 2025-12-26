@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PreRegistrationService } from '../../../core';
-import { CoreModule } from '@santashop/core';
+
 import { AsyncPipe } from '@angular/common';
 
 import { TranslateModule } from '@ngx-translate/core';
@@ -24,7 +24,6 @@ import {
 	styleUrls: ['./pre-registration-menu.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		CoreModule,
 		AsyncPipe,
 		TranslateModule,
 		IonTabBar,

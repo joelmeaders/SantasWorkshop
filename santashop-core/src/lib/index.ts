@@ -1,4 +1,3 @@
-export * from './core.module';
 export * from './decorators';
 export * from './errors';
 export * from './forms';

@@ -149,9 +149,9 @@ export const routes: Routes = [
 			},
 			{
 				path: 'help',
-				loadChildren: () =>
-					import('./features/v2/pre-registration/help/help.module').then(
-						(m) => m.HelpPageModule,
+				loadComponent: () =>
+					import('./features/v2/pre-registration/help/help.page').then(
+						(m) => m.HelpPage,
 					),
 			},
 		],

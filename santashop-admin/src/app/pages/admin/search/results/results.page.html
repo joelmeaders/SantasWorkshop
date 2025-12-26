@@ -25,10 +25,10 @@
 				Cancel
 			</ion-button>
 		</div>
-		} @else { @if (results?.length > 0) {
+		} @else { @if (results && results.length > 0) {
 		<span>
 			<ion-card-header>
-				<ion-card-title> {{ results.length }} Results </ion-card-title>
+				<ion-card-title> {{ results!.length }} Results </ion-card-title>
 				@let sortFn = sortBy$ | async;
 				<ion-card-subtitle>
 					Sort by

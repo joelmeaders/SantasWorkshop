@@ -4,7 +4,7 @@ import {
 	MOBILE_EVENT,
 	MAX_BIRTHDATE,
 	MIN_BIRTHDATE,
-	CoreModule,
+	NiceFormErrorPipe,
 } from '@santashop/core';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { AddChildPageService } from './add-child.page.service';
@@ -43,7 +43,7 @@ import {
 		PreRegistrationMenuComponent,
 		RouterLink,
 		ReactiveFormsModule,
-		CoreModule,
+		NiceFormErrorPipe,
 		AsyncPipe,
 		TranslateModule,
 		IonContent,

@@ -1,9 +1,9 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   inject,
-  output
+  output,
+  input
 } from '@angular/core';
 import {
 	AlertController,
@@ -48,7 +48,7 @@ export class ManageChildrenComponent {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
 
-	@Input() public children: Child[] = [];
+	public readonly children = input<Child[]>([]);
 
 	public readonly adddedChild = output<Child>();
 	public readonly editedChild = output<Child>();
@@ -80,7 +80,7 @@ export class ManageChildrenComponent {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const child = this.children.find((e) => e.id === childId);
+		const child = this.children().find((e) => e.id === childId);
 		if (!child) return;
 
 		const alert = await this.alertController.create({

@@ -1,7 +1,7 @@
 <ion-item-divider>
 	<ion-label>
 		Children
-		<ion-badge>{{ children.length }}</ion-badge>
+		<ion-badge>{{ children().length }}</ion-badge>
 	</ion-label>
 	<ion-button slot="end" fill="clear" shape="round" (click)="addEditChild()">
 		<ion-icon name="add-circle" slot="end" />
@@ -9,11 +9,11 @@
 	</ion-button>
 </ion-item-divider>
 
-@if (!children.length) {
+@if (!children().length) {
 	<ion-item button detail (click)="addEditChild()">
 		<span>
 			<ion-label> Add children </ion-label>
-			@if (!children.length) {
+			@if (!children().length) {
 				<ion-note color="danger" slot="error" class="error-note">
 					Add all children ages 0-11
 				</ion-note>
@@ -22,7 +22,7 @@
 	</ion-item>
 }
 
-@for (child of children; track child) {
+@for (child of children(); track child) {
 	<ion-item-sliding #slider>
 		<ion-item (click)="slider.open('end')" detail detailIcon="menu-outline">
 			<ion-label>

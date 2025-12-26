@@ -12,7 +12,8 @@
 			/>
 		</div>
 
-		<div class="ion-padding" *appLet="message$ | async as message">
+		@let message = message$ | async;
+		<div class="ion-padding">
 			@if (message === null) {
 			<h3>{{ "REG_CLOSED.4" | translate }}</h3>
 			} @else {
@@ -32,10 +33,11 @@
 					class="remove-shadow round-button ion-margin-end"
 					size="default"
 				>
-					<ion-icon slot="icon-only"
+					<ion-icon
+						slot="icon-only"
 						name="logo-facebook"
 						color="medium"
-					 />
+					/>
 				</ion-button>
 			</a>
 
@@ -50,10 +52,11 @@
 					class="remove-shadow round-button"
 					size="default"
 				>
-					<ion-icon slot="icon-only"
+					<ion-icon
+						slot="icon-only"
 						name="logo-instagram"
 						color="medium"
-					 />
+					/>
 				</ion-button>
 			</a>
 		</div>

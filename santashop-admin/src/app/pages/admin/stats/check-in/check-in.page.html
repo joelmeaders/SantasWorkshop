@@ -26,53 +26,44 @@
 		</ion-row>
 		<ion-row class="ion-justify-content-center">
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				<div
-					class="count-container"
-					*appLet="totalCustomers$ | async as count"
-				>
-					<h1>{{ count }}</h1>
+				@let totalCustomersCount = totalCustomers$ | async;
+				<div class="count-container">
+					<h1>{{ totalCustomersCount }}</h1>
 					<h3>Customers</h3>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				<div
-					class="count-container"
-					*appLet="totalChildren$ | async as count"
-				>
-					<h1>{{ count }}</h1>
+				@let totalChildrenCount = totalChildren$ | async;
+				<div class="count-container">
+					<h1>{{ totalChildrenCount }}</h1>
 					<h3>Children</h3>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				<div
-					class="count-container"
-					*appLet="totalPreregistered$ | async as count"
-				>
-					<h1>{{ count }}</h1>
+				@let preregisteredCount = totalPreregistered$ | async;
+				<div class="count-container">
+					<h1>{{ preregisteredCount }}</h1>
 					<h3>Pre-Registered</h3>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				<div
-					class="count-container"
-					*appLet="onSiteRegistrations$ | async as count"
-				>
-					<h1>{{ count }}</h1>
+				@let onSiteCount = onSiteRegistrations$ | async;
+				<div class="count-container">
+					<h1>{{ onSiteCount }}</h1>
 					<h3>On-Site</h3>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
-				<div
-					class="count-container"
-					*appLet="totalModifiedRegistrations$ | async as count"
-				>
-					<h1>{{ count }}</h1>
+				@let modifiedCount = totalModifiedRegistrations$ | async;
+				<div class="count-container">
+					<h1>{{ modifiedCount }}</h1>
 					<h3>Modified</h3>
 				</div>
 			</ion-col>
 		</ion-row>
 
-		<ion-row *appLet="checkInsByDayHour$ | async as slots">
+		@let slots = checkInsByDayHour$ | async;
+		<ion-row>
 			<ion-col size="12">
 				<ion-toolbar color="none">
 					<h2 slot="start" class="ion-text-left">
@@ -81,9 +72,7 @@
 					</h2>
 					<div slot="end">
 						<ion-button (click)="switchView()">
-							<ion-icon name="refresh-sharp"
-								slot="start"
-							 />
+							<ion-icon name="refresh-sharp" slot="start" />
 							{{ viewButtonText$ | async }}
 						</ion-button>
 					</div>

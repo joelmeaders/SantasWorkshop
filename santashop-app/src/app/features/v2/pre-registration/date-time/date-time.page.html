@@ -22,16 +22,15 @@
 							color="white"
 							[routerLink]="['../overview']"
 						>
-							<ion-icon slot="icon-only"
+							<ion-icon
+								slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							 />
+							/>
 						</ion-button>
 
-						<div
-							class="ion-padding es-mg-bottom-xxl"
-							*appLet="chosenSlot$ | async as chosenSlot"
-						>
+						@let chosenSlot = chosenSlot$ | async;
+						<div class="ion-padding es-mg-bottom-xxl">
 							<ion-item class="inset-ion-item-title" color="none">
 								<ion-card-title lines="full">
 									{{ "MENU.SCHEDULE" | translate }}
@@ -110,79 +109,71 @@
 									translate }}
 								</ion-title>
 							</ion-list-header>
-							<ng-container
-								*appLet="
-										availableDays$ | async as availableDays
-									"
+							@let availableDays = availableDays$ | async; @if
+							(availableDays?.length) {
+							<ion-accordion-group
+								color="light"
+								class="es-pd-left-xl es-pd-right-xl"
 							>
-								@if (availableDays?.length) {
-								<ion-accordion-group
-									color="light"
-									class="es-pd-left-xl es-pd-right-xl"
-								>
-									@for ( day of availableDays ; track day) {
-									<ion-accordion>
-										<ion-item slot="header" color="light">
-											<ion-label>
-												{{ day | date : "EEEE, MMMM d"
-												}}
-											</ion-label>
-										</ion-item>
-										<ion-list
-											slot="content"
-											color="light"
-											class="ion-no-padding inset-list"
-										>
-											@for ( slot of availableSlotsByDay$(
-											day ) | async ; track slot) {
-											<ion-item color="light">
-												<ion-label
-													class="es-mg-left-lg timeslot"
+								@for ( day of availableDays ; track day) {
+								<ion-accordion>
+									<ion-item slot="header" color="light">
+										<ion-label>
+											{{ day | date : "EEEE, MMMM d" }}
+										</ion-label>
+									</ion-item>
+									<ion-list
+										slot="content"
+										color="light"
+										class="ion-no-padding inset-list"
+									>
+										@for ( slot of availableSlotsByDay$( day
+										) | async ; track slot) {
+										<ion-item color="light">
+											<ion-label
+												class="es-mg-left-lg timeslot"
+											>
+												{{ slot.dateTime | timeSlot :
+												"MST" }}
+												<br />
+												<ion-text
+													color="xmasred"
+													class="es-mg-left-md"
 												>
-													{{ slot.dateTime | timeSlot
-													: "MST" }}
-													<br />
-													<ion-text
-														color="xmasred"
-														class="es-mg-left-md"
-													>
-														{{ spotsRemaining( slot
-														) }}
-													</ion-text>
-												</ion-label>
-												<ion-button
-													slot="end"
-													(click)="
+													{{ spotsRemaining( slot ) }}
+												</ion-text>
+											</ion-label>
+											<ion-button
+												slot="end"
+												(click)="
 																selectDateTime(
 																	slot
 																)
 															"
-													size="default"
-													class="small-padding"
-													[disabled]="
+												size="default"
+												class="small-padding"
+												[disabled]="
 																!slot.enabled
 															"
-												>
-													{{ "COMMON.SELECT" |
-													translate }}
-												</ion-button>
-											</ion-item>
-											}
-										</ion-list>
-									</ion-accordion>
-									}
-								</ion-accordion-group>
-								} @else {
-								<ion-card class="danger-card">
-									<ion-card-header>
-										<ion-note>
-											{{ "SCHEDULE.FULL" | translate }}
-										</ion-note>
-									</ion-card-header>
-								</ion-card>
+											>
+												{{ "COMMON.SELECT" | translate
+												}}
+											</ion-button>
+										</ion-item>
+										}
+									</ion-list>
+								</ion-accordion>
 								}
-							</ng-container>
-							} @if (chosenSlot$ | async) {
+							</ion-accordion-group>
+							} @else {
+							<ion-card class="danger-card">
+								<ion-card-header>
+									<ion-note>
+										{{ "SCHEDULE.FULL" | translate }}
+									</ion-note>
+								</ion-card-header>
+							</ion-card>
+							} } @if (chosenSlot$ | async) {
 							<ion-button
 								color="xmasred"
 								[routerLink]="['../overview']"

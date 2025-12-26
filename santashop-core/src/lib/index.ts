@@ -1,6 +1,5 @@
 export * from './core.module';
 export * from './decorators';
-export * from './directives';
 export * from './errors';
 export * from './forms';
 export * from './helpers';

@@ -22,10 +22,11 @@
 							color="white"
 							[routerLink]="['../overview']"
 						>
-							<ion-icon slot="icon-only"
+							<ion-icon
+								slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							 />
+							/>
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -54,20 +55,23 @@
 								lines="none"
 							>
 								@if (child.toyType === 'boys') {
-								<ion-icon name="man-outline"
+								<ion-icon
+									name="man-outline"
 									size="large"
 									slot="start"
-								 />
+								/>
 								} @if (child.toyType === 'girls') {
-								<ion-icon name="woman-outline"
+								<ion-icon
+									name="woman-outline"
 									size="large"
 									slot="start"
-								 />
+								/>
 								} @if (child.toyType === 'infants') {
-								<ion-icon name="happy-outline"
+								<ion-icon
+									name="happy-outline"
 									size="large"
 									slot="start"
-								 />
+								/>
 								}
 								<ion-card-header>
 									<ion-card-title>
@@ -110,9 +114,9 @@
 								<p>{{ "SUBMIT.PRESUBMIT" | translate }}</p>
 							</div>
 
+							@let ready = registrationReadyToSubmit$ | async;
 							<div
 								class="width-max ion-text-center es-mg-bottom-xxl"
-								*appLet="registrationReadyToSubmit$ | async as ready"
 							>
 								<ion-button
 									fill="clear"

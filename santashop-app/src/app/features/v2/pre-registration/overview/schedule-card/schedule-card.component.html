@@ -1,4 +1,5 @@
-<ion-card [disabled]="!canChooseDateTime()" *appLet="dateTimeSlot() as slot">
+@let slot = dateTimeSlot();
+<ion-card [disabled]="!canChooseDateTime()">
 	<ion-card-header>
 		<ion-item class="inset-ion-item-title">
 			<ion-card-title>

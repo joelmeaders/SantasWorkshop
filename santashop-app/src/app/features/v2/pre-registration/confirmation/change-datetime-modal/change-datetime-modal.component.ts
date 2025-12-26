@@ -73,6 +73,8 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 
 	readonly currentSlot = input.required<DateTimeSlot>();
+	// TODO: Skipped for migration because:
+	//  Accessor inputs cannot be migrated as they are too complex.
 	@Input()
 	set availableSlots(value: DateTimeSlot[]) {
 		this._availableSlots$.next(value);

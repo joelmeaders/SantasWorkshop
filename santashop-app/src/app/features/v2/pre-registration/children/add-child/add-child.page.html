@@ -22,10 +22,11 @@
 							color="white"
 							[routerLink]="['..']"
 						>
-							<ion-icon slot="icon-only"
+							<ion-icon
+								slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							 />
+							/>
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -134,25 +135,27 @@
 										<div
 											class="ion-padding-top ion-text-wrap"
 										>
-											<ion-icon name="gift"
+											<ion-icon
+												name="gift"
 												color="success"
 												slot="start"
 												size="large"
-											 />
+											/>
 											<ion-text>
 												{{ "ADDCHILD.INFANT_MSG" |
 												translate }}
 											</ion-text>
-											<ion-item lines="none"
+											<ion-item
+												lines="none"
 												color="light"
-											 />
+											/>
 										</div>
 										}
 									</ion-list>
 								</form>
 							</div>
+							@let isEditing = isEdit$ | async;
 							<div
-								*appLet="isEdit$ | async as isEditing"
 								class="ion-text-end ion-padding-top es-pd-bottom-xxl"
 							>
 								<ion-button

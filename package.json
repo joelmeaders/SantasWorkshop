@@ -12,6 +12,8 @@
     "emulators:start:sample": "firebase use santas-workshop-test && firebase emulators:start --import .firebase-sample-data --export-on-exit .firebase-sample-data",
     "fsrules:deploy": "firebase deploy --only firestore:rules",
     "prettier:format": "npx prettier --end-of-line auto --write .",
+    "app:build": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=production",
+    "admin:build": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-admin --configuration=production",
     "ci:admin:config": "ts-node -O '{\"module\": \"commonjs\"}' config.admin.ts",
     "ci:admin:build": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-admin --configuration=production",
     "ci:app:config": "ts-node -O '{\"module\": \"commonjs\"}' config.app.ts",
@@ -48,7 +50,7 @@
     "ng2-charts": "^8.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
-    "tslib": "~2.7.0",
+    "tslib": "~2.8.1",
     "zone.js": "~0.15.1"
   },
   "devDependencies": {
@@ -90,7 +92,7 @@
     "prettier": "^3.7.4",
     "ts-node": "~10.9.2",
     "typescript": "5.9.3",
-    "wait-on": "^8.0.3",
+    "wait-on": "^9.0.3",
     "webpack-bundle-analyzer": "^5.1.0"
   },
   "volta": {

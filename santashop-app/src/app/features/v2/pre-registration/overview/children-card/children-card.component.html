@@ -28,29 +28,25 @@
 				@for (child of children(); track child) {
 					<ion-item lines="none">
 						@if (child.toyType === 'boys') {
-							<ion-icon
-								name="man-outline"
+							<ion-icon name="man-outline"
 								slot="start"
-							></ion-icon>
+							 />
 						}
 						@if (child.toyType === 'girls') {
-							<ion-icon
-								name="woman-outline"
+							<ion-icon name="woman-outline"
 								slot="start"
-							></ion-icon>
+							 />
 						}
 						@if (child.toyType === 'infants') {
-							<ion-icon
-								name="happy-outline"
+							<ion-icon name="happy-outline"
 								slot="start"
-							></ion-icon>
+							 />
 						}
 						@if (!child.toyType) {
-							<ion-icon
-								name="alert-circle"
+							<ion-icon name="alert-circle"
 								color="danger"
 								slot="start"
-							></ion-icon>
+							 />
 						}
 						<div class="width-max">
 							<ion-label class="width-max ion-text-wrap">

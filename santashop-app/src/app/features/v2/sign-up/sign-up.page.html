@@ -12,7 +12,7 @@
 					color="white"
 					[routerLink]="['/']"
 				>
-					<ion-icon slot="start" name="arrow-back-sharp"></ion-icon>
+					<ion-icon slot="start" name="arrow-back-sharp" />
 					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
 				</ion-button>
 				<ion-card class="sign-up-card">
@@ -38,8 +38,7 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-input
-											id="firstName"
+										<ion-input id="firstName"
 											[label]="'SIGNUP.FIRST_NAME' | translate"
 											[errorText]="
 													form.controls.firstName | niceFormError |
@@ -50,11 +49,10 @@
 											formControlName="firstName"
 											[debounce]="500"
 											[autofocus]="true"
-										></ion-input>
+										 />
 									</ion-item>
 									<ion-item>
-										<ion-input
-											id="lastName"
+										<ion-input id="lastName"
 											[label]="'SIGNUP.LAST_NAME' | translate"
 											[errorText]="
 													form.controls.lastName |
@@ -65,11 +63,10 @@
 											autocomplete="family-name"
 											formControlName="lastName"
 											[debounce]="500"
-										></ion-input>
+										 />
 									</ion-item>
 									<ion-item>
-										<ion-input
-											id="zipCode"
+										<ion-input id="zipCode"
 											[label]="'SIGNUP.ZIP_CODE' | translate"
 											[errorText]="
 													form.controls.zipCode |
@@ -82,7 +79,7 @@
 											[debounce]="500"
 											maxlength="5"
 											minlength="5"
-										></ion-input>
+										 />
 									</ion-item>
 								</ion-item-group>
 
@@ -97,8 +94,7 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-input
-											id="emailAddress"
+										<ion-input id="emailAddress"
 											[label]="'COMMON.EMAIL_ADDRESS' | translate"
 											[errorText]="form.controls.emailAddress | niceFormError | translate"
 											labelPlacement="floating"
@@ -106,12 +102,11 @@
 											autocomplete="email"
 											formControlName="emailAddress"
 											[debounce]="500"
-										></ion-input>
+										 />
 									</ion-item>
 
 									<ion-item>
-										<ion-input
-											id="password"
+										<ion-input id="password"
 											[label]="'COMMON.PASSWORD' | translate"
 											[errorText]="form.controls.password | niceFormError | translate"
 											labelPlacement="floating"
@@ -119,12 +114,11 @@
 											autocomplete="new-password"
 											formControlName="password"
 											[debounce]="500"
-										></ion-input>
+										 />
 									</ion-item>
 
 									<ion-item>
-										<ion-input
-											id="password2"
+										<ion-input id="password2"
 											[label]="'SIGNUP.PASSWORD2' | translate"
 											[errorText]="form.controls.password2 | niceFormError | translate"
 											labelPlacement="floating"
@@ -132,7 +126,7 @@
 											autocomplete="new-password"
 											formControlName="password2"
 											[debounce]="500"
-										></ion-input>
+										 />
 									</ion-item>
 
 									@if (form.errors?.['passwordMismatch']) {
@@ -171,11 +165,10 @@
 										<div
 											class="ion-float-right check-container"
 										>
-											<ion-checkbox
-												id="legalCheckbox"
+											<ion-checkbox id="legalCheckbox"
 												formControlName="legal"
 												class="check"
-											></ion-checkbox>
+											 />
 										</div>
 										<ion-text color="medium">
 											{{ "SIGNUP.LEGAL1" | translate }} {{
@@ -195,10 +188,9 @@
 										<div
 											class="ion-float-right check-container"
 										>
-											<ion-checkbox
-												formControlName="newsletter"
+											<ion-checkbox formControlName="newsletter"
 												class="check"
-											></ion-checkbox>
+											 />
 										</div>
 										<ion-text color="medium">
 											{{ 'COMMON.NEWSLETTER' | translate
@@ -255,7 +247,7 @@
 		} @else {
 		<ion-row>
 			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
-				<ion-spinner name="crescent"></ion-spinner>
+				<ion-spinner name="crescent" />
 			</ion-col>
 		</ion-row>
 		}

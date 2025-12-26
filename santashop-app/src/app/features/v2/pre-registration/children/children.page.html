@@ -5,7 +5,7 @@
 				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
 				size="auto"
 			>
-				<app-pre-registration-menu></app-pre-registration-menu>
+				<app-pre-registration-menu />
 			</ion-col>
 			<ion-col
 				sizeXl="9"
@@ -22,11 +22,10 @@
 							color="white"
 							[routerLink]="['../overview']"
 						>
-							<ion-icon
-								slot="icon-only"
+							<ion-icon slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							></ion-icon>
+							 />
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -41,11 +40,10 @@
 								<p>{{ "CHILDREN.CHILD_LINE_2" | translate }}</p>
 							</div>
 
-							<ion-item
-								color="none"
+							<ion-item color="none"
 								lines="full"
 								class="inset-ion-item-title"
-							></ion-item>
+							 />
 
 							<ion-list color="none">
 								<ion-button
@@ -56,11 +54,10 @@
 									<ion-label>
 										{{ "CHILDREN.ADD_A_CHILD" | translate }}
 									</ion-label>
-									<ion-icon
-										name="add-circle"
+									<ion-icon name="add-circle"
 										size="large"
 										slot="end"
-									></ion-icon>
+									 />
 								</ion-button>
 
 								@if (children$ | async; as children) {
@@ -76,34 +73,30 @@
 									tappable
 								>
 									@if (child.toyType === 'boys') {
-									<ion-icon
-										class="icon-reduced-margin"
+									<ion-icon class="icon-reduced-margin"
 										name="man-outline"
 										size="large"
 										slot="start"
-									></ion-icon>
+									 />
 									} @if (child.toyType === 'girls') {
-									<ion-icon
-										class="icon-reduced-margin"
+									<ion-icon class="icon-reduced-margin"
 										name="woman-outline"
 										size="large"
 										slot="start"
-									></ion-icon>
+									 />
 									} @if (child.toyType === 'infants') {
-									<ion-icon
-										class="icon-reduced-margin"
+									<ion-icon class="icon-reduced-margin"
 										name="happy-outline"
 										size="large"
 										slot="start"
-									></ion-icon>
+									 />
 									} @if (!child.toyType) {
-									<ion-icon
-										class="icon-reduced-margin"
+									<ion-icon class="icon-reduced-margin"
 										name="alert-circle"
 										color="danger"
 										size="large"
 										slot="start"
-									></ion-icon>
+									 />
 									}
 									<ion-card-header>
 										<h2>
@@ -131,10 +124,9 @@
 											[routerLink]="['./add-child']"
 											[queryParams]="{ id: child.id }"
 										>
-											<ion-icon
-												size="large"
+											<ion-icon size="large"
 												name="create-outline"
-											></ion-icon>
+											 />
 										</ion-button>
 										<ion-button
 											color="medium"
@@ -142,11 +134,10 @@
 											slot="end"
 											(click)="removeChild(child)"
 										>
-											<ion-icon
-												size="large"
+											<ion-icon size="large"
 												name="trash-outline"
 												color="danger"
-											></ion-icon>
+											 />
 										</ion-button>
 									</div>
 								</ion-item>

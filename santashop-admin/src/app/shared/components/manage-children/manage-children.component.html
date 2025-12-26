@@ -4,7 +4,7 @@
 		<ion-badge>{{ children.length }}</ion-badge>
 	</ion-label>
 	<ion-button slot="end" fill="clear" shape="round" (click)="addEditChild()">
-		<ion-icon name="add-circle" slot="end"></ion-icon>
+		<ion-icon name="add-circle" slot="end" />
 		Add Child
 	</ion-button>
 </ion-item-divider>
@@ -37,19 +37,17 @@
 		</ion-item>
 		<ion-item-options>
 			<ion-item-option color="primary" (click)="addEditChild(child)">
-				<ion-icon
-					slot="start"
+				<ion-icon slot="start"
 					name="create-outline"
 					slot="top"
-				></ion-icon>
+				 />
 				<ion-label slot="bottom"> Edit </ion-label>
 			</ion-item-option>
 			<ion-item-option color="danger" (click)="removeChild(child.id!)">
-				<ion-icon
-					slot="start"
+				<ion-icon slot="start"
 					name="trash-outline"
 					slot="top"
-				></ion-icon>
+				 />
 				<ion-label slot="bottom"> Delete </ion-label>
 			</ion-item-option>
 		</ion-item-options>

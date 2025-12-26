@@ -1,7 +1,6 @@
-<admin-header
-	title="Search: Last Name & Zip"
+<admin-header title="Search: Last Name & Zip"
 	backRoute="/admin/search"
-></admin-header>
+ />
 
 <ion-content fullscreen class="ion-padding">
 	<main class="limited-container">
@@ -15,14 +14,13 @@
 			<ion-list>
 				<ion-item>
 					<ion-label position="fixed"> Last name </ion-label>
-					<ion-input
-						type="text"
+					<ion-input type="text"
 						formControlName="lastName"
 						maxlength="20"
 						minlength="2"
 						autocomplete="off"
 						placeholder="required"
-					></ion-input>
+					 />
 					@if (form.controls['lastName'].touched &&
 					form.controls['lastName'].invalid) {
 					<ion-note slot="error">
@@ -32,14 +30,13 @@
 				</ion-item>
 				<ion-item counter>
 					<ion-label position="fixed"> Zip code </ion-label>
-					<ion-input
-						type="number"
+					<ion-input type="number"
 						maxlength="5"
 						minlength="5"
 						formControlName="zipCode"
 						autocomplete="off"
 						placeholder="required"
-					></ion-input>
+					 />
 					@if (form.controls['zipCode'].touched &&
 					form.controls['zipCode'].invalid) {
 					<ion-note slot="error">
@@ -51,7 +48,7 @@
 		</form>
 		<div class="search-buttons">
 			<ion-button color="danger" (click)="reset()" routerLink="..">
-				<ion-icon name="backspace-outline" slot="start"></ion-icon>
+				<ion-icon name="backspace-outline" slot="start" />
 				<ion-label> Reset </ion-label>
 			</ion-button>
 			<ion-button
@@ -59,7 +56,7 @@
 				routerLink="../results"
 				[disabled]="!form.valid"
 			>
-				<ion-icon name="search-outline" slot="start"></ion-icon>
+				<ion-icon name="search-outline" slot="start" />
 				<ion-label> Search </ion-label>
 			</ion-button>
 		</div>

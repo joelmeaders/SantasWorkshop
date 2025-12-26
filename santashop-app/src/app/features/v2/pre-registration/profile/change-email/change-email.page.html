@@ -5,7 +5,7 @@
 				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
 				size="auto"
 			>
-				<app-pre-registration-menu></app-pre-registration-menu>
+				<app-pre-registration-menu />
 			</ion-col>
 			<ion-col
 				sizeXl="9"
@@ -22,11 +22,10 @@
 							color="white"
 							[routerLink]="['..']"
 						>
-							<ion-icon
-								slot="icon-only"
+							<ion-icon slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							></ion-icon>
+							 />
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -56,8 +55,7 @@
 
 										<ion-list lines="none">
 											<ion-item>
-												<ion-input
-													class="red-label"
+												<ion-input class="red-label"
 													[label]="'COMMON.NEW_EMAIL_ADDRESS' |
 													translate"
 													labelPlacement="floating"
@@ -71,12 +69,11 @@
 													type="email"
 													autocomplete="email"
 													inputmode="email"
-												></ion-input>
+												 />
 											</ion-item>
 
 											<ion-item>
-												<ion-input
-													class="red-label"
+												<ion-input class="red-label"
 													[label]="'COMMON.PASSWORD' |
 													translate"
 													labelPlacement="floating"
@@ -89,7 +86,7 @@
 													[debounce]="500"
 													type="password"
 													autocomplete="new-password"
-												></ion-input>
+												 />
 											</ion-item>
 										</ion-list>
 									</form>

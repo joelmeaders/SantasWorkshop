@@ -7,19 +7,17 @@
 			disabled
 			[disabled]="(checkinEnabled$ | async) === false"
 		>
-			<ion-icon
-				name="bag-check-outline"
+			<ion-icon name="bag-check-outline"
 				color="success"
 				slot="start"
-			></ion-icon>
+			 />
 			Check in customers
 		</ion-item>
 		<ion-item detail routerLink="../search">
-			<ion-icon
-				name="search-outline"
+			<ion-icon name="search-outline"
 				color="warning"
 				slot="start"
-			></ion-icon>
+			 />
 			Search for customers
 		</ion-item>
 		<ion-item
@@ -27,11 +25,10 @@
 			routerLink="../registration"
 			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
 		>
-			<ion-icon
-				name="storefront-outline"
+			<ion-icon name="storefront-outline"
 				color="primary"
 				slot="start"
-			></ion-icon>
+			 />
 			On-Site Registration
 		</ion-item>
 
@@ -42,66 +39,59 @@
 			routerLink="../pre-registration"
 			[disabled]="(preRegistrationEnabled$ | async) === false"
 		>
-			<ion-icon
-				name="person-add-outline"
+			<ion-icon name="person-add-outline"
 				color="primary"
 				slot="start"
-			></ion-icon>
+			 />
 			Pre-Register Customers
 		</ion-item>
 		<ion-item detail routerLink="../resend-email">
-			<ion-icon
-				name="mail-outline"
+			<ion-icon name="mail-outline"
 				color="tertiary"
 				slot="start"
-			></ion-icon>
+			 />
 			Resend Registration Emails
 		</ion-item>
 
 		<ion-list-header> DSCS Data </ion-list-header>
 		<ion-item detail routerLink="../stats/registration">
-			<ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+			<ion-icon name="stats-chart-outline" slot="start" />
 			Registration Stats
 		</ion-item>
 		<ion-item detail routerLink="../stats/check-in">
-			<ion-icon
-				name="cart-outline"
+			<ion-icon name="cart-outline"
 				color="secondary"
 				slot="start"
-			></ion-icon>
+			 />
 			Check-In Stats
 		</ion-item>
 		<ion-item detail routerLink="../stats/user">
-			<ion-icon
-				name="people-outline"
+			<ion-icon name="people-outline"
 				color="tertiary"
 				slot="start"
-			></ion-icon>
+			 />
 			User Stats
 		</ion-item>
 		}
 
 		<ion-list-header> Other </ion-list-header>
 		<ion-item (click)="signOut()" detail button tappable>
-			<ion-icon
-				name="exit-outline"
+			<ion-icon name="exit-outline"
 				color="danger"
 				slot="start"
-			></ion-icon>
+			 />
 			Sign Out
 		</ion-item>
 		<ion-item>
-			<ion-icon
-				name="moon-outline"
+			<ion-icon name="moon-outline"
 				color="tertiary"
 				slot="start"
-			></ion-icon>
+			 />
 			Theme (Light or Dark)
-			<ion-toggle
-				slot="end"
+			<ion-toggle slot="end"
 				(ionChange)="toggleTheme()"
 				[checked]="appStateService.prefersDark"
-			></ion-toggle>
+			 />
 		</ion-item>
 	</ion-list>
 </ion-content>

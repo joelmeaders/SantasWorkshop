@@ -1,4 +1,4 @@
-<admin-header title="Search Results" backRoute="/admin/search"></admin-header>
+<admin-header title="Search Results" backRoute="/admin/search" />
 
 <ion-content class="ion-text-center">
 	<main class="limited-container">
@@ -17,7 +17,7 @@
 		<ng-container *appLet="searchResults$ | async as results">
 			@if (results === null) {
 			<div class="center-100 searching">
-				<ion-spinner name="crescent"></ion-spinner>
+				<ion-spinner name="crescent" />
 				<ion-card-subtitle>
 					Searching, please wait...
 				</ion-card-subtitle>
@@ -83,10 +83,9 @@
 						(click)="reset()"
 						routerLink=".."
 					>
-						<ion-icon
-							name="backspace-outline"
+						<ion-icon name="backspace-outline"
 							slot="start"
-						></ion-icon>
+						 />
 						<ion-label> Start Over </ion-label>
 					</ion-button>
 				</div>
@@ -95,7 +94,7 @@
 			<div class="center-100 searching">
 				<h2>No results found</h2>
 				<ion-button color="danger" (click)="reset()" routerLink="..">
-					<ion-icon name="backspace-outline" slot="start"></ion-icon>
+					<ion-icon name="backspace-outline" slot="start" />
 					<ion-label> Start Over </ion-label>
 				</ion-button>
 			</div>

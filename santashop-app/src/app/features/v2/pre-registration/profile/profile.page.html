@@ -6,7 +6,7 @@
 				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin ion-float-start"
 				size="auto"
 			>
-				<app-pre-registration-menu></app-pre-registration-menu>
+				<app-pre-registration-menu />
 			</ion-col>
 			}
 			<ion-col
@@ -25,11 +25,10 @@
 							color="white"
 							[routerLink]="['../overview']"
 						>
-							<ion-icon
-								slot="icon-only"
+							<ion-icon slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							></ion-icon>
+							 />
 						</ion-button>
 						<div class="ion-padding es-mg-bottom-xxl">
 							<ion-item class="inset-ion-item-title" color="none">
@@ -44,41 +43,37 @@
 										class="ion-float-end"
 										[routerLink]="['change-info']"
 									>
-										<ion-icon
-											name="create-outline"
+										<ion-icon name="create-outline"
 											color="dark"
-										></ion-icon>
+										 />
 									</ion-button>
 									<ion-list lines="none">
 										<ion-item class="locked-item">
-											<ion-input
-												class="red-label"
+											<ion-input class="red-label"
 												[label]="'SIGNUP.FIRST_NAME' |
 												translate"
 												labelPlacement="fixed"
 												[value]="user.firstName"
 												disabled
-											></ion-input>
+											 />
 										</ion-item>
 										<ion-item class="locked-item">
-											<ion-input
-												class="red-label"
+											<ion-input class="red-label"
 												[label]="'SIGNUP.LAST_NAME' |
 												translate"
 												labelPlacement="fixed"
 												[value]="user.lastName"
 												disabled
-											></ion-input>
+											 />
 										</ion-item>
 										<ion-item class="locked-item">
-											<ion-input
-												class="red-label"
+											<ion-input class="red-label"
 												[label]="'SIGNUP.ZIP_CODE' |
 												translate"
 												labelPlacement="fixed"
 												[value]="user.zipCode"
 												disabled
-											></ion-input>
+											 />
 										</ion-item>
 									</ion-list>
 								</ion-card-content>
@@ -90,21 +85,19 @@
 										class="ion-float-end"
 										[routerLink]="['change-email']"
 									>
-										<ion-icon
-											name="create-outline"
+										<ion-icon name="create-outline"
 											color="dark"
-										></ion-icon>
+										 />
 									</ion-button>
 									<ion-list lines="none">
 										<ion-item class="locked-item">
-											<ion-input
-												class="red-label"
+											<ion-input class="red-label"
 												[label]="'COMMON.EMAIL_ADDRESS' |
 												translate"
 												labelPlacement="fixed"
 												[value]="user.emailAddress"
 												disabled
-											></ion-input>
+											 />
 										</ion-item>
 									</ion-list>
 								</ion-card-content>
@@ -116,22 +109,20 @@
 										class="ion-float-end"
 										[routerLink]="['change-password']"
 									>
-										<ion-icon
-											name="create-outline"
+										<ion-icon name="create-outline"
 											color="dark"
-										></ion-icon>
+										 />
 									</ion-button>
 									<ion-list lines="none">
 										<ion-item class="locked-item">
-											<ion-input
-												class="red-label"
+											<ion-input class="red-label"
 												[label]="'COMMON.PASSWORD' |
 												translate"
 												labelPlacement="fixed"
 												[value]="user.emailAddress"
 												type="password"
 												disabled
-											></ion-input>
+											 />
 										</ion-item>
 									</ion-list>
 								</ion-card-content>

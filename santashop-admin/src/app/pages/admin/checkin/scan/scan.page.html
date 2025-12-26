@@ -1,4 +1,4 @@
-<admin-header title="Check In"></admin-header>
+<admin-header title="Check In" />
 
 <ion-content
 	[hidden]="!(availableDevices$ | async)?.length"
@@ -6,8 +6,7 @@
 	[scrollX]="false"
 	[scrollY]="false"
 >
-	<zxing-scanner
-		#scanner
+	<zxing-scanner #scanner
 		[formats]="formatsEnabled"
 		[device]="(deviceToUse$ | async) || undefined"
 		[autostart]="true"
@@ -18,11 +17,11 @@
 		(scanSuccess)="scanResult.next($event)"
 		(scanError)="scanError.next($event)"
 		[delayBetweenScanSuccess]="5000"
-	></zxing-scanner>
+	 />
 
 	<div class="selection-container">
 		<ion-item lines="none" color="tertiary">
-			<ion-icon name="camera" slot="start"></ion-icon>
+			<ion-icon name="camera" slot="start" />
 			<ion-select
 				#deviceSelection
 				[value]="(deviceId$ | async)"

@@ -10,11 +10,10 @@
 						<ion-label position="floating">
 							Email Address</ion-label
 						>
-						<ion-input
-							formControlName="emailAddress"
+						<ion-input formControlName="emailAddress"
 							autocomplete="email"
 							type="email"
-						></ion-input>
+						 />
 						@if (form.controls['emailAddress'].dirty) {
 						<ion-note slot="error" color="danger">
 							Invalid email address
@@ -23,11 +22,10 @@
 					</ion-item>
 					<ion-item>
 						<ion-label position="floating">Password</ion-label>
-						<ion-input
-							formControlName="password"
+						<ion-input formControlName="password"
 							autocomplete="password"
 							type="password"
-						></ion-input>
+						 />
 						@if (form.controls['password'].dirty) {
 						<ion-note slot="error" color="danger">
 							Password is required

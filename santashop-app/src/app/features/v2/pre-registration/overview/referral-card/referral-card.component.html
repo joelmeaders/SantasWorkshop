@@ -7,14 +7,13 @@
 	<ion-card-content>
 		@if ((referralChoice$ | async) === undefined) {
 			<ion-list>
-				<ion-searchbar
-					id="referralSearchbar"
+				<ion-searchbar id="referralSearchbar"
 					(ionChange)="filter($event)"
 					animated="true"
 					placeholder="{{
 						'REFERRAL.SEARCH_PLACEHOLDER' | translate
 					}}"
-				></ion-searchbar>
+				 />
 				<ion-item-group>
 					<ion-item-divider color="light" disabled>
 						<ion-label> Common </ion-label>
@@ -60,8 +59,7 @@
 				<form [formGroup]="otherForm">
 					@if (choice === 'Other') {
 						<ion-item>
-							<ion-input
-								id="referralOther"
+							<ion-input id="referralOther"
 								[autofocus]="true"
 								class="red-label"
 								#otherInput
@@ -74,7 +72,7 @@
 										| translate
 								"
 								formControlName="other"
-							></ion-input>
+							 />
 						</ion-item>
 					}
 				</form>

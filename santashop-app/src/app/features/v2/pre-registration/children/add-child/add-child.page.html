@@ -5,7 +5,7 @@
 				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
 				size="auto"
 			>
-				<app-pre-registration-menu></app-pre-registration-menu>
+				<app-pre-registration-menu />
 			</ion-col>
 			<ion-col
 				sizeXl="9"
@@ -22,11 +22,10 @@
 							color="white"
 							[routerLink]="['..']"
 						>
-							<ion-icon
-								slot="icon-only"
+							<ion-icon slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							></ion-icon>
+							 />
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -135,21 +134,18 @@
 										<div
 											class="ion-padding-top ion-text-wrap"
 										>
-											<ion-icon
-												name="gift"
+											<ion-icon name="gift"
 												color="success"
 												slot="start"
 												size="large"
-											></ion-icon>
+											 />
 											<ion-text>
 												{{ "ADDCHILD.INFANT_MSG" |
 												translate }}
 											</ion-text>
-											<ion-item
-												lines="none"
+											<ion-item lines="none"
 												color="light"
-											>
-											</ion-item>
+											 />
 										</div>
 										}
 									</ion-list>

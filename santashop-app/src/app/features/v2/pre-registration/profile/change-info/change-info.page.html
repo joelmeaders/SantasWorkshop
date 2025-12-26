@@ -5,7 +5,7 @@
 				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
 				size="auto"
 			>
-				<app-pre-registration-menu></app-pre-registration-menu>
+				<app-pre-registration-menu />
 			</ion-col>
 			<ion-col
 				sizeXl="9"
@@ -22,11 +22,10 @@
 							color="white"
 							[routerLink]="['..']"
 						>
-							<ion-icon
-								slot="icon-only"
+							<ion-icon slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							></ion-icon>
+							 />
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -49,8 +48,7 @@
 									<form [formGroup]="form" novalidate>
 										<ion-list lines="none">
 											<ion-item>
-												<ion-input
-													#firstName
+												<ion-input #firstName
 													class="red-label"
 													[label]="'SIGNUP.FIRST_NAME' |
 													translate"
@@ -65,12 +63,11 @@
 													autocomplete="given-name"
 													inputmode="text"
 													autofocus="true"
-												></ion-input>
+												 />
 											</ion-item>
 
 											<ion-item>
-												<ion-input
-													class="red-label"
+												<ion-input class="red-label"
 													[label]="
 														'SIGNUP.LAST_NAME' |
 														translate"
@@ -85,12 +82,11 @@
 													[debounce]="500"
 													autocomplete="family-name"
 													inputmode="text"
-												></ion-input>
+												 />
 											</ion-item>
 
 											<ion-item>
-												<ion-input
-													class="red-label"
+												<ion-input class="red-label"
 													[label]="
 														'SIGNUP.ZIP_CODE' |
 														translate"
@@ -107,7 +103,7 @@
 													inputmode="numeric"
 													maxlength="5"
 													minlength="5"
-												></ion-input>
+												 />
 											</ion-item>
 										</ion-list>
 									</form>

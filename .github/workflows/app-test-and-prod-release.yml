@@ -1,0 +1,95 @@
+name: App Test Deploy and Manual Prod Release
+'on':
+  push:
+    branches:
+      - master
+    paths:
+      - 'santashop-app/**'
+      - 'santashop-core/**'
+      - 'santashop-models/**'
+      - 'angular.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'config.firebase.cjs'
+
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Commit SHA or ref to promote after test validation
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy_test:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+      TEST_FIREBASE_AUTH_DOMAIN: santas-workshop-test.firebaseapp.com
+      TEST_FIREBASE_DATABASE_URL: https://santas-workshop-test-default-rtdb.firebaseio.com
+      TEST_FIREBASE_PROJECT_ID: santas-workshop-test
+      TEST_FIREBASE_STORAGE_BUCKET: santas-workshop-test.appspot.com
+      TEST_FIREBASE_MESSAGING_SENDER_ID: '312672416598'
+      TEST_FIREBASE_APP_ID: '1:312672416598:web:75721875d43341bef29cf7'
+      TEST_FIREBASE_MEASUREMENT_ID: G-4FQR667VT9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ci:app:config:test
+      - run: pnpm run ci:app:build:test
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''TEST'')] }}'
+          channelId: live
+          target: santashop-app
+          projectId: santas-workshop-test
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels
+
+  deploy_prod:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      PROD_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
+      PROD_FIREBASE_AUTH_DOMAIN: santas-workshop-193b5.firebaseapp.com
+      PROD_FIREBASE_DATABASE_URL: https://santas-workshop-193b5.firebaseio.com
+      PROD_FIREBASE_PROJECT_ID: santas-workshop-193b5
+      PROD_FIREBASE_STORAGE_BUCKET: santas-workshop-193b5.appspot.com
+      PROD_FIREBASE_MESSAGING_SENDER_ID: '397997267986'
+      PROD_FIREBASE_APP_ID: '1:397997267986:web:8c85e08550793dd348cccb'
+      PROD_FIREBASE_MEASUREMENT_ID: G-0KHS1T1W85
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ci:app:config:prod
+      - run: pnpm run ci:app:build:prod
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''193B5'')] }}'
+          channelId: live
+          target: santashop-app
+          projectId: santas-workshop-193b5
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels

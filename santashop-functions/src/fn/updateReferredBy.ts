@@ -1,19 +1,13 @@
-import {
-	COLLECTION_SCHEMA,
-	UpdateReferredBy,
-} from '../../../santashop-models/src';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
+import { COLLECTION_SCHEMA, UpdateReferredBy } from '../models';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
+import { serializeError } from '../utility/errors';
 
-admin.initializeApp();
-
-export default async (
-	data: UpdateReferredBy,
-	context: CallableContext,
-): Promise<any | HttpsError> => {
-	const uid = context.auth?.uid;
+export default async function updateReferredBy(
+	request: CallableRequest<UpdateReferredBy>,
+): Promise<boolean | HttpsError> {
+	const data = request.data;
+	const uid = request.auth?.uid;
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 
 	if (!data?.referredBy)
@@ -23,20 +17,18 @@ export default async (
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
 
-	return userDocumentRef
-		.update({ referredBy: data.referredBy })
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(
-				`Error updating user document ${uid} with ${JSON.stringify(
-					data,
-				)}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				'Error updating user document',
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await userDocumentRef.update({ referredBy: data.referredBy });
+		return true;
+	} catch (error) {
+		console.error(
+			`Error updating user document ${uid} with ${JSON.stringify(data)}`,
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			'Error updating user document',
+			serializeError(error),
+		);
+	}
+}

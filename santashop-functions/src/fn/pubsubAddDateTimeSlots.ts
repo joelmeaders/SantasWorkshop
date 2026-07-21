@@ -1,13 +1,17 @@
-import * as admin from 'firebase-admin';
-import { COLLECTION_SCHEMA, DateTimeSlot } from '../../../santashop-models/src';
-
-admin.initializeApp();
+import admin from '../firebase-admin';
+import { COLLECTION_SCHEMA, DateTimeSlot } from '../models';
+import {
+	createShopDate,
+	DEFAULT_MAX_SLOTS,
+	PROGRAM_YEAR,
+	SHOP_DAYS,
+} from '../utility/runtime-config';
 
 const dateTimeSlotCollection = admin
 	.firestore()
 	.collection(`${COLLECTION_SCHEMA.dateTimeSlots}`);
 
-export default async (): Promise<void> => {
+export default async function pubsubAddDateTimeSlots(): Promise<void> {
 	const hasDateTimeSlots = !(await dateTimeSlotCollection.get()).empty;
 
 	if (hasDateTimeSlots) {
@@ -22,139 +26,22 @@ export default async (): Promise<void> => {
 	} catch (error: unknown) {
 		throw new Error(`Error adding DateTimeSlots: ${error}`);
 	}
+}
+
+const createSlot = (day: string, hour: number): DateTimeSlot => {
+	return {
+		programYear: PROGRAM_YEAR,
+		dateTime: createShopDate(day, hour),
+		maxSlots: DEFAULT_MAX_SLOTS,
+		enabled: true,
+	};
 };
 
-const addDateTimeSlots = async () => {
+const addDateTimeSlots = async (): Promise<void[]> => {
 	const collection = dateTimeSlotCollection;
-	const shopDays = ['12-12', '12-13', '12-15', '12-16'];
-	const programYear = 2025;
-	const defaultMaxSlots = 350;
-
-	const dateTimeSlots: DateTimeSlot[] = [
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[0]}-${programYear} 10:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[0]}-${programYear} 11:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[0]}-${programYear} 12:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[0]}-${programYear} 13:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[0]}-${programYear} 14:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[1]}-${programYear} 10:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[1]}-${programYear} 11:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[1]}-${programYear} 12:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[1]}-${programYear} 13:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[1]}-${programYear} 14:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[2]}-${programYear} 10:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[2]}-${programYear} 11:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[2]}-${programYear} 12:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[2]}-${programYear} 13:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[2]}-${programYear} 14:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[3]}-${programYear} 10:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[3]}-${programYear} 11:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[3]}-${programYear} 12:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[3]}-${programYear} 13:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-		{
-			programYear: programYear,
-			dateTime: new Date(`${shopDays[3]}-${programYear} 14:00 MST`),
-			maxSlots: defaultMaxSlots,
-			enabled: true,
-		},
-	];
+	const dateTimeSlots: DateTimeSlot[] = SHOP_DAYS.flatMap((shopDay) => {
+		return [10, 11, 12, 13, 14].map((hour) => createSlot(shopDay, hour));
+	});
 
 	return Promise.all(
 		dateTimeSlots.map(async (slot) => {

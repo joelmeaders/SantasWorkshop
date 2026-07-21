@@ -5,7 +5,7 @@ export const generateId = (length: number): string => {
 	const generatedId: string[] = [];
 
 	while (length > 0) {
-		generatedId.push(customLib[Math.round(Math.random() * n)]);
+		generatedId.push(customLib[Math.floor(Math.random() * n)]);
 		length -= 1;
 	}
 

@@ -5,7 +5,7 @@ import {
 	OnDestroy,
 } from '@angular/core';
 import { Subject } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { config } from '../../config';
 
 import { LanguageToggleComponent } from '../shared/components/language-toggle/language-toggle.component';
 import { RouterLink } from '@angular/router';
@@ -49,8 +49,8 @@ export class HomePage implements OnDestroy {
 	private readonly appState = inject(AppStateService);
 	private readonly destroy$ = new Subject<void>();
 
-	public readonly environmentName = `${environment.name}_${environment.label}`;
-	public readonly environmentVersion = environment.version;
+	public readonly environmentName = `${config.name}_${config.label}`;
+	public readonly environmentVersion = config.version;
 
 	public readonly createAccountEnabled$ = this.appState.createAccountEnabled$;
 

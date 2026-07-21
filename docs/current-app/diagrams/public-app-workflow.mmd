@@ -1,0 +1,78 @@
+---
+alt: "Santashop public app workflow"
+---
+flowchart TB
+    accTitle: Santashop public app workflow
+    accDescr: Major user journey through landing, sign-up or sign-in, pre-registration, submission, confirmation, and check-in lockout
+
+    Start[Home page] --> CreateGate{createAccountEnabled?}
+    CreateGate -->|Yes| SignUp[Sign-up page]
+    CreateGate -->|No or existing user| SignIn[Sign-in page]
+
+    SignUp --> NewAccount[newAccount callable]
+    NewAccount --> UserDoc[("users/{uid}")]
+    NewAccount --> RegistrationDoc[("registrations/{uid}")]
+    NewAccount --> QRStorage[("Storage: registrations/{uid}.png")]
+    NewAccount --> AutoLogin[Firebase Auth login]
+
+    SignIn --> Login[Firebase Auth login]
+    AutoLogin --> Shell[Pre-registration shell]
+    Login --> Shell
+
+    Shell --> Overview[Overview page]
+    Overview --> Referral[Optional referral save]
+    Referral --> UpdateReferral[updateReferredBy callable]
+    UpdateReferral --> UserDoc
+
+    Overview --> Children[Children page]
+    Children --> AddChild[Add/edit child page]
+    AddChild --> SaveChildren[Direct registration save]
+    SaveChildren --> RegistrationDoc
+
+    Overview --> Slot[Date-time page]
+    Slot --> SaveSlot[Direct registration save]
+    SaveSlot --> RegistrationDoc
+
+    Overview --> Submit[Submit page]
+    Submit --> CompleteRegistration[completeRegistration callable]
+    CompleteRegistration --> RegistrationDoc
+    CompleteRegistration --> SearchIndex[("registrationsearchindex/{uid}")]
+    CompleteRegistration --> EmailQueue[("tmp_registrationemails/{uid}")]
+    EmailQueue --> EmailTrigger[sendNewRegistrationEmails trigger]
+
+    CompleteRegistration --> Confirmation[Confirmation page]
+    Confirmation --> ViewQR[Read QR image]
+    ViewQR --> QRStorage
+
+    Confirmation --> ChangeSlot{allowChangeRegistration and not checked in?}
+    ChangeSlot -->|Yes| ChangeCallable[changeRegistrationDateTime callable]
+    ChangeCallable --> RegistrationDoc
+    ChangeCallable --> EmailQueue
+
+    Confirmation --> EventInfo[Event information page]
+    Shell --> Profile[Profile page]
+    Profile --> ChangeInfo[Change info]
+    ChangeInfo --> ChangeInfoFn[changeAccountInformation callable]
+    ChangeInfoFn --> UserDoc
+    ChangeInfoFn --> RegistrationDoc
+    ChangeInfoFn --> SearchIndex
+
+    Profile --> ChangeEmail[Change email]
+    ChangeEmail --> UpdateEmailFn[updateEmailAddress callable]
+    UpdateEmailFn --> UserDoc
+    UpdateEmailFn --> RegistrationDoc
+    UpdateEmailFn --> SearchIndex
+
+    Profile --> ChangePassword[Change password]
+    ChangePassword --> PasswordAuth[Firebase Auth updatePassword]
+
+    Reset[Reset password page] --> ResetAuth[Firebase Auth sendPasswordResetEmail]
+
+    AdminCheckIn[Admin check-in flow] --> CheckinDoc[("checkins/{uid}")]
+    CheckinDoc --> CheckinObserver[CheckinService observes document]
+    CheckinObserver --> Logout[Alert, logout, reload]
+
+    GlobalFlags[(parameters/public)] --> Overlay{blocking overlay?}
+    Overlay -->|maintenance| Maintenance[Maintenance page modal]
+    Overlay -->|weather| Weather[Bad weather page modal]
+    Overlay -->|registration off| Closed[Registration closed page modal]

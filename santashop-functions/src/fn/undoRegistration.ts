@@ -1,22 +1,15 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
-import {
-	COLLECTION_SCHEMA,
-	DateTimeSlot,
-	Registration,
-} from '../../../santashop-models/src';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import { COLLECTION_SCHEMA, DateTimeSlot, Registration } from '../models';
+import admin from '../firebase-admin';
+import { serializeError } from '../utility/errors';
 
-admin.initializeApp();
-
-export default async (
-	data: Registration,
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
+export default async function undoRegistration(
+	request: CallableRequest<Registration>,
+): Promise<boolean | HttpsError> {
+	const data = request.data;
 	// If admin, use registration data from input, otherwise use own account
-	const isAdmin = context.auth?.token?.admin;
-	const uid = isAdmin ? data.uid : context.auth?.uid;
+	const isAdmin = request.auth?.token?.admin;
+	const uid = isAdmin ? data.uid : request.auth?.uid;
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 
 	const batch = admin.firestore().batch();
@@ -31,16 +24,15 @@ export default async (
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 
-	const registrationDoc = await registrationDocRef.get().then((snapshot) => {
-		if (snapshot.exists) {
-			return { ...snapshot.data() } as Registration;
-		} else {
-			throw new HttpsError(
-				'not-found',
-				`registration not found for uid ${uid}`,
-			);
-		}
-	});
+	const snapshot = await registrationDocRef.get();
+	if (!snapshot.exists) {
+		throw new HttpsError(
+			'not-found',
+			`registration not found for uid ${uid}`,
+		);
+	}
+
+	const registrationDoc = { ...snapshot.data() } as Registration;
 
 	registrationDoc.previousDateTimeSlot = {
 		...registrationDoc.dateTimeSlot,
@@ -52,20 +44,18 @@ export default async (
 
 	batch.set(registrationDocRef, registrationDoc);
 
-	return batch
-		.commit()
-		.then(() => Promise.resolve(true))
-		.catch((error: any) => {
-			console.error(
-				`Error updating user document ${uid} with ${JSON.stringify(
-					data,
-				)}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				'Error updating user document',
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return true;
+	} catch (error) {
+		console.error(
+			`Error updating user document ${uid} with ${JSON.stringify(data)}`,
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			'Error updating user document',
+			serializeError(error),
+		);
+	}
+}

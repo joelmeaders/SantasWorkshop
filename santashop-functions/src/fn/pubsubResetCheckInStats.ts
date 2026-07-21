@@ -1,12 +1,10 @@
-import * as admin from 'firebase-admin';
-import { CheckIn } from '../../../santashop-models/src';
+import admin from '../firebase-admin';
+import { CheckIn } from '../models';
 
-admin.initializeApp();
-
-export default async (): Promise<string> => {
+export default async function pubsubResetCheckInStats(): Promise<string> {
 	// Load all checkins
 	const records: CheckIn[] = await loadCheckIns();
-	if (!records.length) return Promise.resolve('No checkins');
+	if (!records.length) return 'No checkins';
 
 	const batchSize = 499;
 	let processed = 0;
@@ -14,7 +12,7 @@ export default async (): Promise<string> => {
 	do {
 		const batchRegs = records.splice(0, batchSize);
 
-		await admin.firestore().runTransaction((transaction) => {
+		await admin.firestore().runTransaction(async (transaction) => {
 			batchRegs.forEach((record) => {
 				const doc = admin
 					.firestore()
@@ -23,14 +21,13 @@ export default async (): Promise<string> => {
 
 				transaction.set(doc, { inStats: false }, { merge: true });
 			});
-			return Promise.resolve();
 		});
 		processed += batchRegs.length;
 		console.info('Processed ', processed);
 	} while (records.length > 0);
 
-	return Promise.resolve('Reset Checkins');
-};
+	return 'Reset Checkins';
+}
 
 const loadCheckIns = async (): Promise<CheckIn[]> => {
 	let allRecords: CheckIn[] = [];

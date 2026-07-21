@@ -18,3 +18,5 @@ dist/
 
 #config
 .runtimeconfig.json
+.env.*
+.secret.local

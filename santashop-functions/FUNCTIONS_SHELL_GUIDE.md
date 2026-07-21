@@ -172,16 +172,13 @@ someFunction({ data: {} }).catch((error) => {
 
 1. **Use `.exit` or `Ctrl+C` to exit the shell**
 2. **Functions reload automatically** when you save changes to your code
-3. **Environment variables** can be set using `.runtimeconfig.json` in the functions directory
+3. **Environment variables** can be set using `santashop-functions/.env` (or the workspace root `.env`)
 4. **Emulator data** persists between shell sessions unless you clear it
 5. **AppCheck is disabled** for test helper functions to allow easy testing
 
 ## Related Commands
 
 ```bash
-# Get current runtime config
-firebase functions:config:get > .runtimeconfig.json
-
 # Start all emulators
 firebase emulators:start
 

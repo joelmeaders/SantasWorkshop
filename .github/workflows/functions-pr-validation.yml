@@ -1,0 +1,85 @@
+name: Functions PR Validation
+
+on:
+  pull_request:
+    paths:
+      - 'santashop-functions/**'
+      - 'firebase.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.env.example'
+      - 'config.functions.cjs'
+
+permissions:
+  contents: read
+
+env:
+  TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+  TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+  TEST_ADMIN_BOOTSTRAP_PASSWORD: ${{ secrets.TEST_ADMIN_BOOTSTRAP_PASSWORD }}
+  TEST_ADMIN_UIDS: bIMHv99EssTqMfhX2kkYm2vErwu1,xkeLDNPTVVPkt6Onh4EGYNuGi2C2,sGVW9Om1E5UGKWcq97EpygbwQfl2,2kNkKB4Xz5agjs6TfXzQStJ38gx1,RDkrgjJE0oQAXY6peLoABJvOH2j2
+  TEST_SANTASHOP_PROGRAM_YEAR: '2025'
+  TEST_SANTASHOP_TIME_ZONE: America/Denver
+  TEST_SANTASHOP_TIME_OFFSET: '-07:00'
+  TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+  TEST_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
+  TEST_FIRESTORE_BACKUP_BUCKET: gs://santashop-backups
+  TEST_SES_REGION: us-west-2
+  TEST_REGISTRATION_EMAIL_TEMPLATE: dscs-registration-confirmation-v1
+  TEST_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
+  TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2025 Denver Santa Claus Shop
+  TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+  TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
+  TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
+  TEST_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
+  TEST_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
+  TEST_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
+  TEST_SCHEDULED_USER_STATS: 55 23 * 11,12 *
+  TEST_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
+
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run functions:test:unit
+
+  integration_tests:
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Check integration test prerequisites
+        id: check_secrets
+        shell: bash
+        run: |
+          if [ -n "$TEST_AWS_ACCESS_KEY_ID" ] && [ -n "$TEST_AWS_SECRET_ACCESS_KEY" ] && [ -n "$TEST_ADMIN_BOOTSTRAP_PASSWORD" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+      - run: pnpm install --frozen-lockfile
+      - if: steps.check_secrets.outputs.ready == 'true'
+        run: pnpm run functions:test:integration
+      - if: steps.check_secrets.outputs.ready != 'true'
+        run: echo "Skipping Functions integration tests because required test secrets are not configured for this repository or PR context."

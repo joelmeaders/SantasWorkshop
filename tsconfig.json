@@ -1,7 +1,6 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"baseUrl": "./",
 		"rootDir": ".",
 		"outDir": "./dist/out-tsc",
 		"strict": true,
@@ -30,10 +29,10 @@
 		"module": "ES2022",
 		"lib": ["ES2022", "dom"],
 		"paths": {
-			"@santashop/models": ["dist/@santashop/models"],
-			"@santashop/core": ["dist/@santashop/core"],
-			"@santashop/app": ["dist/@santashop/app"],
-			"@santashop/admin": ["dist/@santashop/admin"]
+			"@santashop/models": ["./dist/@santashop/models"],
+			"@santashop/core": ["./dist/@santashop/core"],
+			"@santashop/app": ["./dist/@santashop/app"],
+			"@santashop/admin": ["./dist/@santashop/admin"]
 		}
 	},
 	"angularCompilerOptions": {

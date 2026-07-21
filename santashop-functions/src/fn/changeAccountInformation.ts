@@ -1,23 +1,17 @@
-import {
-	ChangeUserInfo,
-	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
+import { ChangeUserInfo, COLLECTION_SCHEMA } from '../models';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
+import { serializeError } from '../utility/errors';
 
-admin.initializeApp();
-
-export default async (
-	data: ChangeUserInfo,
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
-	const uid = context.auth?.uid;
+export default async function changeAccountInformation(
+	request: CallableRequest<ChangeUserInfo>,
+): Promise<boolean | HttpsError> {
+	const data = request.data;
+	const uid = request.auth?.uid;
 
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 
-	if (!data || !data.firstName || !data.lastName || !data.zipCode)
+	if (!data?.firstName || !data.lastName || !data.zipCode)
 		throw new HttpsError('data-loss', 'missing request information');
 
 	await admin.auth().updateUser(uid, {
@@ -56,20 +50,18 @@ export default async (
 
 	batch.set(registrationDocRef, registrationDoc, { merge: true });
 
-	return batch
-		.commit()
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(
-				`Error updating user document ${uid} with ${JSON.stringify(
-					data,
-				)}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				'Error updating user document',
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return true;
+	} catch (error) {
+		console.error(
+			`Error updating user document ${uid} with ${JSON.stringify(data)}`,
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			'Error updating user document',
+			serializeError(error),
+		);
+	}
+}

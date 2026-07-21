@@ -1,16 +1,26 @@
 {
 	"name": "@santashop/functions",
 	"scripts": {
+		"config:dev": "node ../config.functions.cjs dev",
+		"config:test": "node ../config.functions.cjs test",
+		"config:prod": "node ../config.functions.cjs prod",
 		"lint": "eslint --ext .ts . --fix --cache --quiet",
 		"build": "webpack",
-		"serve": "npm run build && firebase emulators:start --only functions",
-		"shell": "npm run build && firebase functions:shell",
+		"test": "pnpm run test:unit",
+		"test:unit": "vitest run --config vitest.config.ts test/unit",
+		"test:integration": "vitest run --config vitest.config.ts test/integration",
+		"test:watch": "vitest --config vitest.config.ts",
+		"test:coverage": "vitest run --config vitest.config.ts --coverage test/unit",
+		"serve": "pnpm run config:test && npm run build && firebase emulators:start --only functions",
+		"shell": "pnpm run config:test && npm run build && firebase functions:shell",
 		"start": "npm run shell",
-		"deploy": "firebase deploy --only functions",
+		"deploy": "pnpm run config:prod && firebase deploy --only functions",
+		"deploy:test": "pnpm run config:test && firebase use santas-workshop-test && firebase deploy --only functions",
+		"deploy:prod": "pnpm run config:prod && firebase use santas-workshop-193b5 && firebase deploy --only functions",
 		"logs": "firebase functions:log"
 	},
 	"engines": {
-		"node": "22"
+		"node": "24"
 	},
 	"main": "dist/index.js",
 	"dependencies": {
@@ -21,7 +31,6 @@
 		"firebase-functions": "catalog:functions",
 		"json2csv": "catalog:functions",
 		"qrcode": "catalog:functions",
-		"request": "catalog:functions",
 		"uuid": "catalog:functions"
 	},
 	"devDependencies": {
@@ -33,7 +42,6 @@
 		"@types/json2csv": "catalog:functions",
 		"@types/node": "catalog:functions",
 		"@types/qrcode": "catalog:functions",
-		"@types/request-promise": "catalog:functions",
 		"@typescript-eslint/eslint-plugin": "catalog:functions",
 		"@typescript-eslint/parser": "catalog:functions",
 		"babel-loader": "catalog:functions",
@@ -42,8 +50,10 @@
 		"eslint-config-google": "catalog:functions",
 		"eslint-plugin-import": "catalog:functions",
 		"firebase-functions-test": "catalog:functions",
+		"@vitest/coverage-v8": "catalog:functions",
 		"ts-loader": "catalog:functions",
 		"typescript": "catalog:functions",
+		"vitest": "catalog:functions",
 		"webpack": "catalog:functions",
 		"webpack-cli": "catalog:functions",
 		"webpack-sources": "catalog:functions"

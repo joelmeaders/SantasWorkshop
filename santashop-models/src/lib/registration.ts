@@ -35,7 +35,15 @@ export interface Registration {
 
 	referredBy?: string;
 
+	reminderEmailQueuedOn?: false | Date;
+
+	reminderEmailFailedOn?: false | Date;
+
 	reminderEmailSentOn?: false | Date;
+
+	qrCodeGeneratedOn?: false | Date;
+
+	qrCodeGenerationFailedOn?: false | Date;
 
 	hasCheckedIn?: boolean;
 }

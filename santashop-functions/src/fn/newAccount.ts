@@ -1,33 +1,31 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { HttpsError } from 'firebase-functions/v1/https';
-import {
-	OnboardUser,
-	User,
-	Registration,
-	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import { OnboardUser, User, Registration, COLLECTION_SCHEMA } from '../models';
 import { generateId } from '../utility/id-generation';
-import { generateQrCode } from '../utility/qrcodes';
+import { deleteQrCode, generateQrCode } from '../utility/qrcodes';
+import admin from '../firebase-admin';
+import {
+	getErrorCode,
+	getErrorMessage,
+	serializeError,
+} from '../utility/errors';
 
-admin.initializeApp();
+export default async function newAccount(
+	request: CallableRequest<OnboardUser>,
+): Promise<string> {
+	const data = request.data;
+	let newUserAccount;
 
-export default async (data: OnboardUser): Promise<string | HttpsError> => {
-	const newUserAccount = await admin
-		.auth()
-		.createUser({
+	try {
+		newUserAccount = await admin.auth().createUser({
 			email: data.emailAddress.toLowerCase(),
 			password: data.password,
 			disabled: false,
 			displayName: `${data.firstName} ${data.lastName}`,
-		})
-		.catch((error) => {
-			console.error(
-				`${data.emailAddress}`,
-				new Error(JSON.stringify(error)),
-			);
-			throw handleAuthError(error);
 		});
+	} catch (error) {
+		console.error(`${data.emailAddress}`, new Error(serializeError(error)));
+		handleAuthError(error);
+	}
 
 	const acceptedLegal = new Date();
 
@@ -50,6 +48,7 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 		emailAddress: data.emailAddress.toLowerCase(),
 		zipCode: data.zipCode,
 		qrcode: generateId(8),
+		qrCodeGeneratedOn: false,
 	};
 
 	const userDocument = admin
@@ -65,41 +64,61 @@ export default async (data: OnboardUser): Promise<string | HttpsError> => {
 	batch.create(userDocument, user);
 	batch.create(registrationDocument, registration);
 
-	// TODO: This whole file is super shitty and fragile
-	return batch
-		.commit()
-		.then(async () => {
-			await generateQrCode(newUserAccount.uid, registration.qrcode!);
-		})
-		.then(() => {
-			return Promise.resolve(newUserAccount.uid);
-		})
-		.catch((error) => {
-			console.error(
-				'Error creating account records in batch process',
-				error,
-			);
-			throw new functions.https.HttpsError(
-				'internal',
-				'Account created but something else went wrong',
-				JSON.stringify(error),
-			);
-		});
-};
-
-const handleAuthError = (error: any) => {
-	switch (error.code) {
-		case 'auth/email-already-exists':
-			throw new functions.https.HttpsError(
-				'already-exists',
-				error.code,
-				error.message,
-			);
-		default:
-			throw new functions.https.HttpsError(
-				'unknown',
-				error.code,
-				error.message,
-			);
+	try {
+		await batch.commit();
+	} catch (error) {
+		await admin.auth().deleteUser(newUserAccount.uid);
+		console.error('Error creating account records in batch process', error);
+		throw new HttpsError(
+			'internal',
+			'Unable to create account records',
+			JSON.stringify(error),
+		);
 	}
+
+	try {
+		await generateQrCode(newUserAccount.uid, registration.qrcode);
+		await registrationDocument.set(
+			{ qrCodeGeneratedOn: new Date(), qrCodeGenerationFailedOn: false },
+			{ merge: true },
+		);
+	} catch (error) {
+		console.error(
+			`Error generating QR Code for uid: ${newUserAccount.uid}`,
+			error,
+		);
+		await deleteQrCode(newUserAccount.uid).catch(() => undefined);
+		await registrationDocument.set(
+			{ qrCodeGenerationFailedOn: new Date() },
+			{ merge: true },
+		);
+		await admin.auth().deleteUser(newUserAccount.uid);
+		await Promise.all([
+			userDocument.delete(),
+			registrationDocument.delete(),
+		]);
+		throw new HttpsError(
+			'internal',
+			'Unable to finalize account setup',
+			serializeError(error),
+		);
+	}
+
+	return newUserAccount.uid;
+}
+
+const handleAuthError = (error: unknown): never => {
+	if (getErrorCode(error) === 'auth/email-already-exists') {
+		throw new HttpsError(
+			'already-exists',
+			getErrorCode(error),
+			getErrorMessage(error),
+		);
+	}
+
+	throw new HttpsError(
+		'unknown',
+		getErrorCode(error),
+		getErrorMessage(error),
+	);
 };

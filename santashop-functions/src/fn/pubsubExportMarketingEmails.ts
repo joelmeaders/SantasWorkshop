@@ -1,13 +1,11 @@
-import * as admin from 'firebase-admin';
+import admin from '../firebase-admin';
 import { parseAsync } from 'json2csv';
 import { v4 } from 'uuid';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
 
-admin.initializeApp();
-
-export default async (): Promise<string> => {
+export default async function pubsubExportMarketingEmails(): Promise<string> {
 	// gets the documents from the firestore collection
 	const applicationsSnapshot = await admin
 		.firestore()
@@ -51,7 +49,7 @@ export default async (): Promise<string> => {
 					},
 				})
 				.then(() => resolve('Upload successful'))
-				.catch((errorr) => reject(errorr));
+				.catch((error_) => reject(error_));
 		});
 	});
-};
+}

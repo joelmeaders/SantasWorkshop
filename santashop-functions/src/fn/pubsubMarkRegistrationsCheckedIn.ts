@@ -1,12 +1,10 @@
-import * as admin from 'firebase-admin';
-import { CheckIn } from '../../../santashop-models/src';
+import admin from '../firebase-admin';
+import { CheckIn } from '../models';
 
-admin.initializeApp();
-
-export default async (): Promise<string> => {
+export default async function pubsubMarkRegistrationsCheckedIn(): Promise<string> {
 	// Load all registrations
 	const checkins: CheckIn[] = await loadCheckins();
-	if (!checkins.length) return Promise.resolve('No checkins');
+	if (!checkins.length) return 'No checkins';
 
 	const batchSize = 499;
 	let processed = 0;
@@ -14,7 +12,7 @@ export default async (): Promise<string> => {
 	do {
 		const batchCheckins = checkins.splice(0, batchSize);
 
-		await admin.firestore().runTransaction((transaction) => {
+		await admin.firestore().runTransaction(async (transaction) => {
 			batchCheckins.forEach((checkin) => {
 				const uid = checkin.customerId!.toString();
 				const registrationDoc = admin
@@ -28,15 +26,14 @@ export default async (): Promise<string> => {
 					{ merge: true },
 				);
 			});
-			return Promise.resolve();
 		});
 
 		processed += batchCheckins.length;
 		console.info('Processed ', processed);
 	} while (checkins.length > 0);
 
-	return Promise.resolve('Updated registrations');
-};
+	return 'Updated registrations';
+}
 
 const checkinQuery = () =>
 	admin

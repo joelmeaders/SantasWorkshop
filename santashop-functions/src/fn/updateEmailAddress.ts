@@ -1,19 +1,16 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
-import { Auth, COLLECTION_SCHEMA } from '../../../santashop-models/src';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import { Auth, COLLECTION_SCHEMA } from '../models';
+import admin from '../firebase-admin';
+import { serializeError } from '../utility/errors';
 
-admin.initializeApp();
-
-export default async (
-	data: Auth,
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
-	const uid = context.auth?.uid;
+export default async function updateEmailAddress(
+	request: CallableRequest<Auth>,
+): Promise<boolean | HttpsError> {
+	const data = request.data;
+	const uid = request.auth?.uid;
 
 	if (!uid) {
-		return new HttpsError('not-found', 'uid null');
+		throw new HttpsError('not-found', 'uid null');
 	}
 
 	await admin.auth().updateUser(uid, {
@@ -44,18 +41,18 @@ export default async (
 
 	batch.set(registrationDocRef, docData, { merge: true });
 
-	return batch
-		.commit()
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(
-				`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return true;
+	} catch (error) {
+		console.error(
+			`Error updating email address for ${request.auth?.token.email} to ${data.emailAddress}`,
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			`Error updating email address for ${request.auth?.token.email} to ${data.emailAddress}`,
+			serializeError(error),
+		);
+	}
+}

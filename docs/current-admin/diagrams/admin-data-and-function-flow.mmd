@@ -1,0 +1,75 @@
+---
+alt: "Santashop admin app data and function flow"
+---
+sequenceDiagram
+    accTitle: Santashop admin app data and function flow
+    accDescr: Main admin UI services, callable functions, Firestore collections, and stats documents involved in the admin workflows
+
+    actor Staff
+    participant UI as Santashop Admin UI
+    participant Auth as Firebase Auth
+    participant Ctx as Context / Shared Services
+    participant Fn as Cloud Functions
+    participant FS as Firestore
+    participant Stats as Stats Docs / Schedules
+
+    Staff->>UI: Sign in
+    UI->>Auth: signInWithEmailAndPassword
+
+    Staff->>UI: Search by name/email/code
+    UI->>Ctx: SearchService stores search query
+    Ctx->>FS: query registrationsearchindex
+    UI->>Ctx: ResultsPage unwraps and sorts results
+
+    Staff->>UI: Scan QR code
+    UI->>Ctx: LookupService.getRegistrationByQrCode$(code)
+    Ctx->>FS: query registrations by qrcode
+    Ctx-->>UI: set registration in CheckInContextService
+
+    Staff->>UI: Review registration and check in
+    alt Unedited check-in
+        UI->>Fn: checkIn({ uid, qrcode, zipCode, children, hasCheckedIn })
+        Fn->>FS: create checkins/{uid}
+    else Edited check-in
+        UI->>Fn: checkInWithEdit({ uid, qrcode, zipCode, children })
+        Fn->>FS: create checkins/{uid}
+        Fn->>FS: create editedregistrations/{uid}
+    end
+
+    Staff->>UI: Change date/time from review
+    UI->>Fn: changeRegistrationDateTime({ newDateTimeSlot, registrationUid })
+    Fn->>FS: update registrations/{uid}
+    Fn->>FS: upsert tmp_registrationemails/{uid}
+
+    Staff->>UI: Cancel reservation from review
+    UI->>Fn: undoRegistration(registration)
+    Fn->>FS: update registrations/{uid}
+    Fn->>FS: delete registrationsearchindex/{uid}
+
+    Staff->>UI: Create preregistration
+    UI->>FS: query users by email for duplicate check
+    UI->>Fn: callableAdminPreRegister(registration)
+    Fn->>Auth: createUser(email, generated password)
+    Fn->>FS: create users/{uid}
+    Fn->>FS: create registrations/{uid}
+    Fn->>FS: upsert registrationsearchindex/{uid}
+    Fn->>FS: upsert tmp_registrationemails/{uid}
+
+    Staff->>UI: Create on-site registration
+    UI->>Fn: onSiteRegistration(registration)
+    Fn->>FS: create onsiteregistrations/{id}
+    Fn->>FS: create checkins/{id}
+
+    Staff->>UI: Resend registration email
+    UI->>FS: query registrationsearchindex by email
+    UI->>Fn: callableResendRegistrationEmail({ customerId })
+    Fn->>FS: upsert tmp_registrationemails/{uid}
+    Fn->>FS: update registrations/{uid}.reminderEmail*
+
+    Staff->>UI: Open stats pages
+    UI->>FS: read stats/registration-{year}
+    UI->>FS: read stats/schedule-{year}
+    UI->>FS: read stats/checkin-{year}
+    UI->>FS: read stats/user-{year}
+    UI->>FS: query dateTimeSlots by programYear
+    Stats-->>FS: scheduled jobs keep aggregate docs fresh

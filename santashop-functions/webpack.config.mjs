@@ -1,5 +1,5 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import webpack from 'webpack';
 
 const __dirname = path.dirname(fileURLToPath(new URL(import.meta.url)));
@@ -19,15 +19,15 @@ export default {
 				exclude: /node_modules/,
 				options: {
 					plugins: [
-						['@babel/plugin-proposal-decorators', { legacy: true }],
+						[
+							'@babel/plugin-proposal-decorators',
+							{ version: 'legacy' },
+						],
 					],
 					compact: false,
 					cacheDirectory: true,
 					presets: [
-						[
-							'@babel/preset-env',
-							{ useBuiltIns: 'entry', corejs: '3.25' },
-						],
+						['@babel/preset-env'],
 						['@babel/preset-typescript', { allowNamespaces: true }],
 					],
 				},
@@ -35,6 +35,12 @@ export default {
 		],
 	},
 	resolve: {
+		alias: {
+			'@santashop/models': path.resolve(
+				__dirname,
+				'../santashop-models/src/index.ts',
+			),
+		},
 		extensions: ['.tsx', '.ts', '.js', '.json', '.mjs'],
 	},
 	output: {

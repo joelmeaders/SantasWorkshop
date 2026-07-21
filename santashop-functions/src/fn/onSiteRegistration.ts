@@ -1,27 +1,23 @@
-import * as functions from 'firebase-functions/v1';
-import * as admin from 'firebase-admin';
-import { CallableContext } from 'firebase-functions/v1/https';
-import {
-	CheckIn,
-	COLLECTION_SCHEMA,
-	Registration,
-} from '../../../santashop-models/src';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import { CheckIn, COLLECTION_SCHEMA, Registration } from '../models';
 import {
 	calculateRegistrationStats,
 	isRegistrationComplete,
 } from '../utility/registrations';
+import admin from '../firebase-admin';
+import { getErrorMessage, getErrorStatus } from '../utility/errors';
+import { PROGRAM_YEAR } from '../utility/runtime-config';
 
-admin.initializeApp();
+export default async function onSiteRegistration(
+	request: CallableRequest<Registration>,
+): Promise<number> {
+	const record = request.data;
 
-export default (
-	record: Registration,
-	context: CallableContext,
-): Promise<number> => {
-	if (!context.auth?.token?.admin) {
+	if (!request.auth?.token?.admin) {
 		console.error(
-			`${context.auth?.uid} attempted to check in for uid ${record.uid}`,
+			`${request.auth?.uid} attempted to check in for uid ${record.uid}`,
 		);
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'permission-denied',
 			'-99',
 			'You can only update your own records',
@@ -32,7 +28,7 @@ export default (
 		console.error(
 			`Registration incomplete. Unable to check in for uid ${record.uid}`,
 		);
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'failed-precondition',
 
 			'Incomplete registration. Cannot continue.',
@@ -58,7 +54,7 @@ export default (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2025,
+		programYear: PROGRAM_YEAR,
 	};
 
 	batch.create(registrationDocRef, updatedRegistration);
@@ -78,14 +74,14 @@ export default (
 
 	batch.create(checkinDocRef, checkin);
 
-	return batch
-		.commit()
-		.then(() => checkin.stats!.children)
-		.catch((error: any) => {
-			throw new functions.https.HttpsError(
-				error.status,
-				error.message,
-				error,
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return checkin.stats!.children;
+	} catch (error) {
+		throw new HttpsError(
+			getErrorStatus(error) ?? 'internal',
+			getErrorMessage(error),
+			error,
+		);
+	}
+}

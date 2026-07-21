@@ -3,12 +3,7 @@
  * These functions should only be available in emulator mode
  */
 
-import * as admin from 'firebase-admin';
-
-// Initialize Firebase Admin SDK if not already initialized
-if (!admin.apps.length) {
-	admin.initializeApp();
-}
+import admin from '../firebase-admin';
 
 /**
  * Seeds the Firestore database with public parameters for testing
@@ -141,12 +136,7 @@ export async function seedTestScenario(scenario: string): Promise<void> {
 			break;
 
 		default:
-			// Default scenario - everything enabled
-			await seedPublicParameters({
-				registrationEnabled: true,
-				createAccountEnabled: true,
-				maintenanceModeEnabled: false,
-				weatherModeEnabled: false,
-			});
+			// Reuse the standard enabled scenario.
+			await seedTestScenario('create-account-enabled');
 	}
 }

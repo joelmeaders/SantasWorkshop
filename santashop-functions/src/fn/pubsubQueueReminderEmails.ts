@@ -1,12 +1,59 @@
-import * as admin from 'firebase-admin';
-import { COLLECTION_SCHEMA } from '../../../santashop-models/src';
-import * as formatDateTime from 'dateformat';
-import { Timestamp } from 'firebase-admin/firestore';
+import admin from '../firebase-admin';
+import type { Timestamp } from 'firebase-admin/firestore';
+import { COLLECTION_SCHEMA, Registration } from '../models';
+import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { REMINDER_EMAIL_TEMPLATE } from '../utility/runtime-config';
 
-admin.initializeApp();
+interface ReminderQueueResult {
+	success: number;
+	failed: number;
+}
 
-export default async (): Promise<{ success: number; failed: number }> => {
-	let result = { success: 0, failed: 0 };
+type ReminderQueueRegistration = Registration & {
+	reminderEmailQueuedOn?: false | Date;
+	reminderEmailFailedOn?: false | Date;
+	reminderEmailSentOn?: false | Date;
+};
+
+interface ReminderEmailDocument {
+	code?: string;
+	email?: string;
+	name?: string;
+	formattedDateTime: string;
+	template: string;
+	queuedOn: Date;
+	queueSource: 'scheduled-reminder';
+	deliveryRequestedOn: Date;
+	deliveryState: 'queued';
+}
+
+const shouldQueueReminderEmail = (
+	registration: ReminderQueueRegistration,
+): boolean => {
+	if (registration.reminderEmailSentOn) {
+		return false;
+	}
+
+	if (registration.reminderEmailQueuedOn) {
+		return false;
+	}
+
+	if (registration.reminderEmailFailedOn) {
+		return false;
+	}
+
+	if (
+		!registration.qrCodeGeneratedOn ||
+		registration.qrCodeGenerationFailedOn
+	) {
+		return false;
+	}
+
+	return true;
+};
+
+export default async function pubsubQueueReminderEmails(): Promise<ReminderQueueResult> {
+	let result: ReminderQueueResult = { success: 0, failed: 0 };
 
 	try {
 		const completedRegistrationsQuery = await admin
@@ -15,82 +62,133 @@ export default async (): Promise<{ success: number; failed: number }> => {
 			.orderBy('registrationSubmittedOn', 'asc')
 			.get();
 
-		const allRegistrations: any[] = completedRegistrationsQuery.docs.map(
-			(doc) => doc.data(),
+		const allRegistrations: ReminderQueueRegistration[] =
+			completedRegistrationsQuery.docs.map(
+				(doc) => doc.data() as ReminderQueueRegistration,
+			);
+
+		const registrations = allRegistrations.filter((registration) =>
+			shouldQueueReminderEmail(registration),
 		);
 
-		const registrations = allRegistrations.filter(
-			(e) => !e.reminderEmailFailed && !e.reminderEmailSent,
-		);
-
-		result = await QueueReminderEmails(registrations);
+		result = await queueReminderEmails(registrations);
 
 		return result;
 	} catch (err) {
 		console.error(err);
 		throw new Error(`Failed to queue reminder emails: ${err}`);
 	}
-};
+}
 
-async function QueueReminderEmails(
-	registrations: any,
-): Promise<{ success: number; failed: number }> {
+async function queueReminderEmails(
+	registrations: ReminderQueueRegistration[],
+): Promise<ReminderQueueResult> {
 	let success = 0;
 	let failed = 0;
 
 	for (const registration of registrations) {
 		const uid = registration.uid;
 
-		let dateTime: any;
+		if (!uid) {
+			failed++;
+			continue;
+		}
+
+		let emailDoc: ReminderEmailDocument;
 
 		try {
-			dateTime = registration.dateTimeSlot?.dateTime as any as Timestamp;
-			const tmp = dateTime.toDate();
-			const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
-			dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
-
-			if (!dateTime) {
-				console.error(
-					'missing datetimeslot for email queue',
-					registration.uid,
-				);
-				continue;
-			}
+			emailDoc = buildReminderEmailDocument(
+				registration,
+				registration.dateTimeSlot?.dateTime as Timestamp,
+			);
 		} catch (err) {
 			console.error(
 				'failed to convert date/time for email queue',
 				registration.uid,
 				err,
 			);
+			failed++;
 			continue;
 		}
-
-		const emailDoc = {
-			code: registration.qrcode,
-			email: registration.emailAddress,
-			name: registration.firstName,
-			formattedDateTime: dateTime,
-			template: 'dscs-event-reminder',
-		};
 
 		try {
 			const emailDocRef = admin
 				.firestore()
 				.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
-
-			await emailDocRef.create(emailDoc);
-
 			const registrationDocRef = admin
 				.firestore()
 				.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 
-			await registrationDocRef.set(
-				{ reminderEmailSent: new Date() },
-				{ merge: true },
-			);
+			const wasQueued = await admin
+				.firestore()
+				.runTransaction(async (transaction) => {
+					const [queueSnapshot, registrationSnapshot] =
+						await Promise.all([
+							transaction.get(emailDocRef),
+							transaction.get(registrationDocRef),
+						]);
+					const currentRegistration = registrationSnapshot.data() as
+						| ReminderQueueRegistration
+						| undefined;
+
+					if (
+						!currentRegistration ||
+						!shouldQueueReminderEmail(currentRegistration)
+					) {
+						return false;
+					}
+
+					if (queueSnapshot.exists) {
+						transaction.set(
+							registrationDocRef,
+							{
+								reminderEmailQueuedOn: emailDoc.queuedOn,
+								reminderEmailFailedOn: false,
+							},
+							{ merge: true },
+						);
+						transaction.set(
+							emailDocRef,
+							{
+								queuedOn: emailDoc.queuedOn,
+								deliveryRequestedOn:
+									emailDoc.deliveryRequestedOn,
+								deliveryState: 'queued',
+								failedOn: false,
+								lastErrorMessage: false,
+								lastErrorDetails: false,
+							},
+							{ merge: true },
+						);
+						return true;
+					}
+
+					transaction.create(emailDocRef, emailDoc);
+					transaction.set(
+						registrationDocRef,
+						{
+							reminderEmailQueuedOn: emailDoc.queuedOn,
+							reminderEmailFailedOn: false,
+						},
+						{ merge: true },
+					);
+
+					return true;
+				});
+
+			if (!wasQueued) {
+				continue;
+			}
 
 			success++;
 		} catch (err) {
+			const registrationDocRef = admin
+				.firestore()
+				.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+			await registrationDocRef.set(
+				{ reminderEmailFailedOn: new Date() },
+				{ merge: true },
+			);
 			console.error('failed to queue email', uid, err);
 			failed++;
 			continue;
@@ -98,4 +196,21 @@ async function QueueReminderEmails(
 	}
 
 	return { success, failed };
+}
+
+function buildReminderEmailDocument(
+	registration: ReminderQueueRegistration,
+	dateTimeSlot: Timestamp,
+): ReminderEmailDocument {
+	return {
+		code: registration.qrcode,
+		email: registration.emailAddress,
+		name: registration.firstName,
+		formattedDateTime: formatRegistrationDateTime(dateTimeSlot),
+		template: REMINDER_EMAIL_TEMPLATE,
+		queuedOn: new Date(),
+		queueSource: 'scheduled-reminder',
+		deliveryRequestedOn: new Date(),
+		deliveryState: 'queued',
+	};
 }

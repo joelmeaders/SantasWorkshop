@@ -1,93 +1,227 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	User,
 	Registration,
 	COLLECTION_SCHEMA,
 	RegistrationSearchIndex,
-} from '../../../santashop-models/src';
+} from '../models';
+import type { Timestamp } from 'firebase-admin/firestore';
 import { generateId } from '../utility/id-generation';
-import { generateQrCode } from '../utility/qrcodes';
-import * as formatDateTime from 'dateformat';
+import { deleteQrCode, generateQrCode } from '../utility/qrcodes';
+import admin from '../firebase-admin';
+import {
+	formatRegistrationDateTime,
+	normalizeDateTime,
+} from '../utility/date-time-format';
+import {
+	getErrorCode,
+	getErrorMessage,
+	serializeError,
+} from '../utility/errors';
+import { PROGRAM_YEAR } from '../utility/runtime-config';
 
-admin.initializeApp();
+interface RegistrationCreationResult {
+	qrCode: string;
+	formattedDateTime: string;
+}
 
-export default async (
-	record: Registration,
-	context: CallableContext,
-): Promise<string | HttpsError> => {
-	if (!context.auth?.token?.admin) {
+interface FirebaseAuthTokenLike {
+	[key: string]: unknown;
+}
+
+const isAdminContext = (request: CallableRequest<unknown>): boolean => {
+	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
+	return token?.['admin'] === true;
+};
+
+const getRequiredString = (
+	value: string | undefined,
+	label: string,
+): string => {
+	if (!value) {
+		throw new HttpsError('invalid-argument', `Missing required ${label}`);
+	}
+
+	return value;
+};
+
+export default async function callableAdminPreRegister(
+	request: CallableRequest<Registration>,
+): Promise<string> {
+	const record = request.data;
+	const emailAddress = record.emailAddress?.toLowerCase();
+	const firstName = record.firstName;
+	const lastName = record.lastName;
+	const zipCode = record.zipCode;
+
+	if (!isAdminContext(request)) {
 		console.error(
-			`${context.auth?.uid} attempted to create registration for ${record.emailAddress}`,
+			`${request.auth?.uid} attempted to create registration for ${record.emailAddress}`,
 		);
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'permission-denied',
 			'-99',
 			'You can only update your own records',
 		);
 	}
 
-	// Create Account
-	const newUserAccount = await admin
-		.auth()
-		.createUser({
-			email: record.emailAddress!.toLowerCase(),
-			password: generateId(12),
-			disabled: false,
-			displayName: `${record.firstName} ${record.lastName}`,
-		})
-		.catch((error) => {
-			console.error(
-				`${record.emailAddress}`,
-				new Error(JSON.stringify(error)),
-			);
-			throw handleAuthError(error);
-		});
-
-	let qrCode: string;
-
-	try {
-		qrCode = await createRegistration(record, newUserAccount.uid);
-	} catch (error: any) {
-		await admin.auth().deleteUser(newUserAccount.uid);
-		throw new functions.https.HttpsError(
-			error.code ?? 'cancelled',
-			error.message ??
-				'Failed to create registration after account creation',
+	if (!emailAddress || !firstName || !lastName || !zipCode) {
+		throw new HttpsError(
+			'invalid-argument',
+			'Missing required registration account fields',
 		);
 	}
 
+	// Create Account
+	let newUserAccount;
+
 	try {
-		await generateQrCode(newUserAccount.uid, qrCode);
+		newUserAccount = await admin.auth().createUser({
+			email: emailAddress,
+			password: generateId(12),
+			disabled: false,
+			displayName: `${firstName} ${lastName}`,
+		});
+	} catch (error) {
+		console.error(
+			`${record.emailAddress}`,
+			new Error(serializeError(error)),
+		);
+		handleAuthError(error);
+	}
+
+	let createdRegistration: RegistrationCreationResult;
+
+	try {
+		createdRegistration = await createRegistration(
+			record,
+			newUserAccount.uid,
+		);
+	} catch (error: unknown) {
+		await admin.auth().deleteUser(newUserAccount.uid);
+		const registrationError =
+			error instanceof HttpsError
+				? error
+				: new HttpsError(
+						'internal',
+						'Failed to create registration after account creation',
+					);
+
+		throw new HttpsError(registrationError.code, registrationError.message);
+	}
+
+	try {
+		await generateQrCode(newUserAccount.uid, createdRegistration.qrCode);
+		const finalizedOn = new Date();
+		const registrationDocRef = admin
+			.firestore()
+			.doc(`${COLLECTION_SCHEMA.registrations}/${newUserAccount.uid}`);
+		const emailDocRef = admin
+			.firestore()
+			.doc(
+				`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${newUserAccount.uid}`,
+			);
+
+		await registrationDocRef.set(
+			{
+				qrCodeGeneratedOn: finalizedOn,
+				qrCodeGenerationFailedOn: false,
+				reminderEmailQueuedOn: finalizedOn,
+				reminderEmailFailedOn: false,
+			},
+			{ merge: true },
+		);
+		await emailDocRef.set(
+			{
+				code: createdRegistration.qrCode,
+				email: emailAddress,
+				name: firstName,
+				formattedDateTime: createdRegistration.formattedDateTime,
+				queuedOn: finalizedOn,
+				queueSource: 'admin-preregistration',
+				deliveryRequestedOn: finalizedOn,
+				deliveryState: 'queued',
+				failedOn: false,
+				lastErrorMessage: false,
+				lastErrorDetails: false,
+			},
+			{ merge: true },
+		);
 	} catch (error) {
 		console.error(
 			'Error generating QR Code for uid: ' + newUserAccount.uid,
-			JSON.stringify(error),
+			serializeError(error),
+		);
+		await deleteQrCode(newUserAccount.uid).catch(() => undefined);
+		await admin.auth().deleteUser(newUserAccount.uid);
+		await Promise.all([
+			admin
+				.firestore()
+				.doc(`${COLLECTION_SCHEMA.users}/${newUserAccount.uid}`)
+				.delete(),
+			admin
+				.firestore()
+				.doc(`${COLLECTION_SCHEMA.registrations}/${newUserAccount.uid}`)
+				.delete(),
+			admin
+				.firestore()
+				.doc(
+					`${COLLECTION_SCHEMA.registrationSearchIndex}/${newUserAccount.uid}`,
+				)
+				.delete(),
+			admin
+				.firestore()
+				.doc(
+					`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${newUserAccount.uid}`,
+				)
+				.delete(),
+		]);
+		throw new HttpsError(
+			'internal',
+			'Unable to finalize pre-registration setup',
+			serializeError(error),
 		);
 	}
 
 	return newUserAccount.uid;
-};
+}
 
 const createRegistration = async (
 	record: Registration,
 	uid: string,
-): Promise<string> => {
+): Promise<RegistrationCreationResult> => {
+	const emailAddress = record.emailAddress?.toLowerCase();
+	const firstName = record.firstName;
+	const lastName = record.lastName;
+	const zipCode = record.zipCode;
+	const requiredFirstName = getRequiredString(firstName, 'first name');
+	const requiredLastName = getRequiredString(lastName, 'last name');
+	const requiredEmailAddress = getRequiredString(
+		emailAddress,
+		'email address',
+	);
+
+	if (!emailAddress || !firstName || !lastName || !zipCode) {
+		throw new HttpsError(
+			'invalid-argument',
+			'Missing required registration account fields',
+		);
+	}
+
 	const batch = admin.firestore().batch();
 
 	// Create User Record
 	const user: User = {
-		firstName: record.firstName!,
-		lastName: record.lastName!,
-		emailAddress: record.emailAddress!.toLowerCase(),
-		zipCode: record.zipCode!,
+		firstName: requiredFirstName,
+		lastName: requiredLastName,
+		emailAddress: requiredEmailAddress,
+		zipCode,
 		acceptedTermsOfService: new Date(0),
 		acceptedPrivacyPolicy: new Date(0),
 		version: 1,
 		manuallyMigrated: true,
 		newsletter: record.newsletter ?? false,
-		referredBy: record.referredBy,
+		...(record.referredBy ? { referredBy: record.referredBy } : {}),
 	};
 
 	const userDocument = admin
@@ -98,30 +232,39 @@ const createRegistration = async (
 
 	// Create Registration Record
 	const qrCode = generateId(8);
-	const dateTimeSlot = await admin
+	const dateTimeSlotSnapshot = await admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${record.dateTimeSlot?.id}`)
-		.get()
-		.then((doc) => {
-			return doc.data()!.dateTime as any;
-		});
+		.get();
+	const rawDateTimeSlotData = dateTimeSlotSnapshot.data();
+	const dateTimeSlot = rawDateTimeSlotData?.['dateTime'] as
+		| Timestamp
+		| undefined;
+
+	if (!dateTimeSlot) {
+		throw new HttpsError(
+			'not-found',
+			`Date/time slot ${record.dateTimeSlot?.id ?? 'unknown'} not found`,
+		);
+	}
 
 	const registration: Registration = {
 		uid,
-		firstName: record.firstName,
-		lastName: record.lastName,
-		emailAddress: record.emailAddress!.toLowerCase(),
-		zipCode: record.zipCode,
+		firstName: requiredFirstName,
+		lastName: requiredLastName,
+		emailAddress: requiredEmailAddress,
+		zipCode,
 		qrcode: qrCode,
 		children: record.children,
 		dateTimeSlot: {
 			id: record.dateTimeSlot?.id,
-			dateTime: dateTimeSlot,
+			dateTime: normalizeDateTime(dateTimeSlot),
 		},
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2025,
+		programYear: PROGRAM_YEAR,
+		qrCodeGeneratedOn: false,
 	};
 
 	const registrationDocument = admin
@@ -138,53 +281,37 @@ const createRegistration = async (
 	const indexDoc: RegistrationSearchIndex = {
 		code: qrCode,
 		customerId: uid,
-		firstName: record.firstName!.toLowerCase(),
-		lastName: record.lastName!.toLowerCase(),
-		emailAddress: record.emailAddress!.toLowerCase(),
-		zip: record.zipCode!,
+		firstName: requiredFirstName.toLowerCase(),
+		lastName: requiredLastName.toLowerCase(),
+		emailAddress: requiredEmailAddress,
+		zip: zipCode,
 	};
 
 	batch.set(indexDocRef, indexDoc, { merge: true });
 
 	// Create Email Record
-	const emailDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
-
-	let dateTime: string;
-
-	dateTime = record.dateTimeSlot?.dateTime as any as string;
-	const tmp = new Date(dateTime);
-	const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
-	dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
-
-	const emailDoc = {
-		code: qrCode,
-		email: record.emailAddress,
-		name: record.firstName,
-		formattedDateTime: dateTime,
-	};
-
-	batch.set(emailDocRef, emailDoc, { merge: true });
+	const formattedDateTime = formatRegistrationDateTime(dateTimeSlot);
 
 	await batch.commit();
 
-	return qrCode;
+	return {
+		qrCode,
+		formattedDateTime,
+	};
 };
 
-const handleAuthError = (error: any) => {
-	switch (error.code) {
-		case 'auth/email-already-exists':
-			throw new functions.https.HttpsError(
-				'already-exists',
-				error.code,
-				error.message,
-			);
-		default:
-			throw new functions.https.HttpsError(
-				'unknown',
-				error.code,
-				error.message,
-			);
+const handleAuthError = (error: unknown): never => {
+	if (getErrorCode(error) === 'auth/email-already-exists') {
+		throw new HttpsError(
+			'already-exists',
+			getErrorCode(error),
+			getErrorMessage(error),
+		);
 	}
+
+	throw new HttpsError(
+		'unknown',
+		getErrorCode(error),
+		getErrorMessage(error),
+	);
 };

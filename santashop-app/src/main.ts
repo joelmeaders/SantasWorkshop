@@ -1,6 +1,7 @@
 import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 
-import { environment, firebaseConfig } from './environments/environment';
+import { config } from './config';
+import { firebaseConfig } from './firebase.config';
 import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
 import {
 	provideAppCheck,
@@ -49,13 +50,13 @@ const firebaseProviders = [
 	provideFirebaseApp(() => initializeApp(firebaseConfig)),
 	provideAppCheck(() =>
 		initializeAppCheck(getApp(), {
-			provider: new ReCaptchaEnterpriseProvider(environment.appCheckKey),
+			provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
 			isTokenAutoRefreshEnabled: true,
 		}),
 	),
 	provideAuth(() => {
 		const auth = getAuth();
-		if (!environment.production) {
+		if (!config.production) {
 			connectAuthEmulator(auth, 'http://localhost:9099', {
 				disableWarnings: true,
 			});
@@ -64,14 +65,14 @@ const firebaseProviders = [
 	}),
 	provideStorage(() => {
 		const storage = getStorage();
-		if (!environment.production) {
+		if (!config.production) {
 			connectStorageEmulator(storage, 'localhost', 9199);
 		}
 		return storage;
 	}),
 	provideFunctions(() => {
 		const functions = getFunctions();
-		if (!environment.production) {
+		if (!config.production) {
 			connectFunctionsEmulator(functions, 'localhost', 5001);
 		} else {
 			functions.customDomain = location.origin;
@@ -80,7 +81,7 @@ const firebaseProviders = [
 	}),
 	provideFirestore(() => {
 		const firestore = getFirestore();
-		if (!environment.production) {
+		if (!config.production) {
 			connectFirestoreEmulator(firestore, 'localhost', 8080);
 		}
 		return firestore;
@@ -88,11 +89,11 @@ const firebaseProviders = [
 	provideAnalytics(() => getAnalytics()),
 ];
 
-if (!environment.production) {
+if (!config.production) {
 	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
-if (environment.production) {
+if (config.production) {
 	enableProdMode();
 }
 

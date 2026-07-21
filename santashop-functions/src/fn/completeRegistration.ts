@@ -1,40 +1,40 @@
-import * as functions from 'firebase-functions/v1';
-import * as admin from 'firebase-admin';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
-import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import * as formatDateTime from 'dateformat';
 import {
 	COLLECTION_SCHEMA,
 	Registration,
 	RegistrationSearchIndex,
-} from '../../../santashop-models/src';
+} from '../models';
+import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { serializeError } from '../utility/errors';
+import { PROGRAM_YEAR } from '../utility/runtime-config';
 
-admin.initializeApp();
+export default async function completeRegistration(
+	request: CallableRequest<Registration>,
+): Promise<boolean | HttpsError> {
+	const record = request.data;
 
-export default async (
-	record: Registration,
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
 	if (!isRegistrationComplete(record)) {
 		console.error(
 			new Error(
 				`Registration incomplete. Unable to submit registration for uid ${record.uid}`,
 			),
 		);
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'failed-precondition',
 			'-10',
 			'Incomplete registration. Cannot continue.',
 		);
 	}
 
-	if (record.uid !== context.auth?.uid) {
+	if (record.uid !== request.auth?.uid) {
 		console.error(
 			new Error(
-				`${context.auth?.uid} attempted to update registration for uid ${record.uid}`,
+				`${request.auth?.uid} attempted to update registration for uid ${record.uid}`,
 			),
 		);
-		throw new functions.https.HttpsError(
+		throw new HttpsError(
 			'permission-denied',
 			'-99',
 			'You can only update your own records',
@@ -45,11 +45,7 @@ export default async (
 		console.error(
 			new Error(`Registration already submitted for uid ${record.uid}`),
 		);
-		throw new functions.https.HttpsError(
-			'cancelled',
-			'-98',
-			'Already Submitted',
-		);
+		throw new HttpsError('cancelled', '-98', 'Already Submitted');
 	}
 
 	const batch = admin.firestore().batch();
@@ -63,7 +59,7 @@ export default async (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2025,
+		programYear: PROGRAM_YEAR,
 	} as Partial<Registration>;
 
 	batch.set(registrationDocRef, updateRegistrationFields, { merge: true });
@@ -73,18 +69,13 @@ export default async (
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${record.uid}`);
 
-	let dateTime: string;
-
-	dateTime = record.dateTimeSlot?.dateTime as any as string;
-	const tmp = new Date(dateTime);
-	const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
-	dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
-
 	const emailDoc = {
 		code: record.qrcode,
 		email: record.emailAddress,
 		name: record.firstName,
-		formattedDateTime: dateTime,
+		formattedDateTime: formatRegistrationDateTime(
+			record.dateTimeSlot?.dateTime as string,
+		),
 	};
 
 	batch.set(emailDocRef, emailDoc, { merge: true });
@@ -105,11 +96,15 @@ export default async (
 
 	batch.set(indexDocRef, indexDoc, { merge: true });
 
-	return batch
-		.commit()
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(error);
-			throw new Error(error);
-		});
-};
+	try {
+		await batch.commit();
+		return true;
+	} catch (error) {
+		console.error(error);
+		throw new HttpsError(
+			'internal',
+			'Failed to complete registration',
+			serializeError(error),
+		);
+	}
+}

@@ -1,9 +1,7 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
+import { HttpsError } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
 
-admin.initializeApp();
-
-export default async (): Promise<void> => {
+export default async function pubsubDeleteUsers(): Promise<void> {
 	let count = 0;
 
 	const listUsers = (nextPageToken?: string) =>
@@ -37,13 +35,13 @@ export default async (): Promise<void> => {
 		})
 		.catch((error) => {
 			console.error('Error deleting all users', error);
-			throw new functions.https.HttpsError(
+			throw new HttpsError(
 				'internal',
 				'Unable to delete all users',
 				JSON.stringify(error),
 			);
 		});
-};
+}
 
 function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));

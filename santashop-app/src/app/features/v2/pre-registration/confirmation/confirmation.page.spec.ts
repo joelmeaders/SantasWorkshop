@@ -1,16 +1,20 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Analytics } from '@angular/fire/analytics';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { Storage } from '@angular/fire/storage';
+import { provideRouter } from '@angular/router';
 import {
 	provideTranslateServiceMock,
 	provideActivatedRouteMock,
-	createAuthMock,
-	createFirestoreMock,
-	createAnalyticsMock,
+	createModalControllerMock,
+	provideAnalyticsMock,
 } from '../../../../../test-helpers';
+import {
+	AlertController,
+	LoadingController,
+	ModalController,
+} from '@ionic/angular/standalone';
+import { AppStateService, ErrorHandlerService } from '@santashop/core';
+import { of } from 'rxjs';
+import { DateTimePageService } from '../date-time/date-time.page.service';
+import { PreRegistrationService } from '../../../../core/services/pre-registration.service';
 
 import { ConfirmationPage } from './confirmation.page';
 
@@ -22,32 +26,66 @@ describe('ConfirmationPage', () => {
 		TestBed.configureTestingModule({
 			imports: [ConfirmationPage],
 			providers: [
+				provideAnalyticsMock(),
 				{
-					provide: Firestore,
-					useFactory: createFirestoreMock,
+					provide: PreRegistrationService,
+					useValue: {
+						registrationComplete$: of(false),
+						hasCheckedIn$: of(false),
+						dateTimeSlot$: of(undefined),
+						undoRegistration: jasmine
+							.createSpy('undoRegistration')
+							.and.resolveTo(undefined),
+						changeRegistrationDateTime: jasmine
+							.createSpy('changeRegistrationDateTime')
+							.and.resolveTo(undefined),
+					},
 				},
 				{
-					provide: Auth,
-					useFactory: createAuthMock,
+					provide: DateTimePageService,
+					useValue: {
+						availableSlots$: of([]),
+					},
 				},
 				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
+					provide: AppStateService,
+					useValue: {
+						allowChangeRegistration$: of(true),
+					},
+				},
+				{
+					provide: ErrorHandlerService,
+					useValue: jasmine.createSpyObj('ErrorHandlerService', [
+						'handleError',
 					]),
 				},
 				{
-					provide: Storage,
-					useValue: jasmine.createSpyObj('Storage', ['ref']),
+					provide: ModalController,
+					useValue: createModalControllerMock(),
 				},
 				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
+					provide: LoadingController,
+					useValue: jasmine.createSpyObj('LoadingController', [
+						'create',
+					]),
 				},
+				{
+					provide: AlertController,
+					useValue: jasmine.createSpyObj('AlertController', [
+						'create',
+					]),
+				},
+				provideRouter([]),
 				provideTranslateServiceMock(),
 				provideActivatedRouteMock(),
 			],
-		}).compileComponents();
+		})
+			.overrideComponent(ConfirmationPage, {
+				set: {
+					providers: [],
+				},
+			})
+			.compileComponents();
 		fixture = TestBed.createComponent(ConfirmationPage);
 		component = fixture.componentInstance;
 		fixture.detectChanges();

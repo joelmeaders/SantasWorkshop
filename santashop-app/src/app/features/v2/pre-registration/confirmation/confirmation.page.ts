@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router, RouterLink } from '@angular/router';
 import {
+	AnalyticsWrapper,
 	ErrorHandlerService,
 	AppStateService,
 	TimeSlotPipe,
@@ -71,7 +71,7 @@ export class ConfirmationPage {
 	private readonly router = inject(Router);
 	private readonly errorHandler = inject(ErrorHandlerService);
 	private readonly translateService = inject(TranslateService);
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
 	private readonly dateTimeService = inject(DateTimePageService);
 
@@ -119,7 +119,7 @@ export class ConfirmationPage {
 		await loader.present();
 
 		try {
-			logEvent(this.analytics, 'delete_registration');
+			this.analytics.logEvent('delete_registration');
 			await this.viewService.undoRegistration();
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
@@ -207,7 +207,7 @@ export class ConfirmationPage {
 		await loader.present();
 
 		try {
-			logEvent(this.analytics, 'change_registration_datetime');
+			this.analytics.logEvent('change_registration_datetime');
 			await this.viewService.changeRegistrationDateTime(result.data);
 
 			// Show success message

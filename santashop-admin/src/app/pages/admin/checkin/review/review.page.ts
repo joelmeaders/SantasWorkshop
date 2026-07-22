@@ -25,7 +25,11 @@ import {
 	tap,
 } from 'rxjs';
 import { filterNullish } from '../../../../shared/helpers';
-import { AppStateService, HttpsCallableResult } from '@santashop/core';
+import {
+	AppStateService,
+	FunctionsWrapper,
+	HttpsCallableResult,
+} from '@santashop/core';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -35,7 +39,6 @@ import { ManageChildrenComponent } from '../../../../shared/components/manage-ch
 import { DateTimeModalComponent } from '../../../../shared/components/date-time-modal/date-time-modal.component';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 
 @Component({
 	selector: 'admin-review',
@@ -67,7 +70,7 @@ export class ReviewPage {
 	private readonly appStateService = inject(AppStateService);
 	private readonly alertController = inject(AlertController);
 	private readonly modalController = inject(ModalController);
-	private readonly functions = inject(Functions);
+	private readonly functions = inject(FunctionsWrapper);
 
 	private readonly router = inject(Router);
 	private readonly route = inject(ActivatedRoute);
@@ -94,8 +97,7 @@ export class ReviewPage {
 	private readonly cancelRegistrationFn = (
 		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<Registration, number>(
-			this.functions,
+		this.functions.callableWrapper<Registration, number>(
 			'undoRegistration',
 		)(registration);
 
@@ -103,11 +105,10 @@ export class ReviewPage {
 		newDateTimeSlot: DateTimeSlot,
 		registrationUid?: string,
 	): Promise<HttpsCallableResult<boolean>> =>
-		httpsCallable<
+		this.functions.callableWrapper<
 			{ newDateTimeSlot: DateTimeSlot; registrationUid?: string },
 			boolean
 		>(
-			this.functions,
 			'changeRegistrationDateTime',
 		)({ newDateTimeSlot, registrationUid });
 

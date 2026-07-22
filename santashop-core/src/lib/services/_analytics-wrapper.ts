@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
+import { logEvent } from 'firebase/analytics';
+import { FIREBASE_ANALYTICS } from '../tokens';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class AnalyticsWrapper {
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(FIREBASE_ANALYTICS);
 
 	public readonly logErrorEvent = (
 		errorCode: string,

@@ -3,6 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { ModalController, PopoverController } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
+import {
+	FIREBASE_ANALYTICS,
+	FIREBASE_AUTH,
+	FIREBASE_FIRESTORE,
+	FIREBASE_FUNCTIONS,
+	FIREBASE_STORAGE,
+} from '@santashop/core';
 
 /**
  * Creates a mock TranslateService with common methods and observables.
@@ -251,5 +258,40 @@ export function createAppStateServiceMock(): any {
 		closeExistingModals: jasmine
 			.createSpy('closeExistingModals')
 			.and.returnValue(Promise.resolve()),
+	};
+}
+
+export function provideAuthMock(): Provider {
+	return {
+		provide: FIREBASE_AUTH,
+		useFactory: createAuthMock,
+	};
+}
+
+export function provideFirestoreMock(): Provider {
+	return {
+		provide: FIREBASE_FIRESTORE,
+		useFactory: createFirestoreMock,
+	};
+}
+
+export function provideFunctionsMock(): Provider {
+	return {
+		provide: FIREBASE_FUNCTIONS,
+		useFactory: createFunctionsMock,
+	};
+}
+
+export function provideStorageMock(): Provider {
+	return {
+		provide: FIREBASE_STORAGE,
+		useFactory: createStorageMock,
+	};
+}
+
+export function provideAnalyticsMock(): Provider {
+	return {
+		provide: FIREBASE_ANALYTICS,
+		useFactory: createAnalyticsMock,
 	};
 }

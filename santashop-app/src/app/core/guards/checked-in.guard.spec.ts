@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { createAuthMock } from '../../../test-helpers';
+import {
+	provideAuthMock,
+	provideFirestoreMock,
+	provideFunctionsMock,
+} from '../../../test-helpers';
 
 import { CheckedInGuard } from './checked-in.guard';
 
@@ -12,23 +13,9 @@ describe('CheckedInGuard', () => {
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			providers: [
-				{
-					provide: Firestore,
-					useValue: jasmine.createSpyObj('Firestore', [
-						'collection',
-						'doc',
-					]),
-				},
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
+				provideFirestoreMock(),
+				provideAuthMock(),
+				provideFunctionsMock(),
 			],
 		});
 		guard = TestBed.inject(CheckedInGuard);

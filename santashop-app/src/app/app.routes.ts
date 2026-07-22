@@ -1,20 +1,33 @@
-import {
-	AuthGuard,
-	AuthPipe,
-	redirectLoggedInTo,
-	redirectUnauthorizedTo,
-} from '@angular/fire/auth-guard';
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { AuthService } from '@santashop/core';
+import { map, take } from 'rxjs/operators';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 import { CheckedInGuard } from './core/guards/checked-in.guard';
 import { RegistrationCompleteGuard } from './core/guards/registration-complete.guard';
 import { RegistrationIncompleteGuard } from './core/guards/registration-incomplete.guard';
 import { RegistrationReadyToSubmitGuard } from './core/guards/registration-ready-to-submit.guard';
 
-const redirectUnauthorizedToLogin = (): AuthPipe =>
-	redirectUnauthorizedTo(['/sign-in']);
+const redirectUnauthorizedToLoginGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
 
-const redirectLoggedInToRegistration = (): AuthPipe =>
-	redirectLoggedInTo(['/pre-registration/overview']);
+	return authService.currentUser$.pipe(
+		take(1),
+		map((user) => (user ? true : router.createUrlTree(['/sign-in']))),
+	);
+};
+
+const redirectLoggedInToRegistrationGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+
+	return authService.currentUser$.pipe(
+		take(1),
+		map((user) =>
+			user ? router.createUrlTree(['/pre-registration/overview']) : true,
+		),
+	);
+};
 
 export const routes: Routes = [
 	{
@@ -24,30 +37,28 @@ export const routes: Routes = [
 	},
 	{
 		path: 'sign-in',
+		canActivate: [redirectLoggedInToRegistrationGuard],
 		loadComponent: () =>
 			import('./features/v2/sign-in/sign-in.page').then(
 				(m) => m.SignInPage,
 			),
-		data: { authGuardPipe: redirectLoggedInToRegistration },
 	},
 	{
 		path: 'sign-up',
+		canActivate: [redirectLoggedInToRegistrationGuard],
 		loadComponent: () =>
 			import('./features/v2/sign-up/sign-up.page').then(
 				(m) => m.SignUpPage,
 			),
-		canActivate: [AuthGuard],
-		data: { authGuardPipe: redirectLoggedInToRegistration },
 	},
 	{
 		path: 'pre-registration',
+		canActivate: [redirectUnauthorizedToLoginGuard],
 		loadComponent: () =>
 			import('./features/v2/pre-registration/pre-registration.page').then(
 				(m) => m.PreRegistrationPage,
 			),
-		canActivate: [AuthGuard],
 		canActivateChild: [CheckedInGuard],
-		data: { authGuardPipe: redirectUnauthorizedToLogin },
 		children: [
 			{
 				path: 'overview',

@@ -10,7 +10,11 @@ import { from, Observable } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
 import { Auth, UserEmailUid } from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
-import { IdTokenResult, User, UserCredential } from '@angular/fire/auth';
+import {
+	type IdTokenResult,
+	type User,
+	type UserCredential,
+} from 'firebase/auth';
 
 @Injectable({
 	providedIn: 'root',

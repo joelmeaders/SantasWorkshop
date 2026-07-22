@@ -26,7 +26,7 @@ import {
 	timestampDateFix,
 } from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference } from 'firebase/firestore';
 
 @Injectable({
 	providedIn: 'root',
@@ -125,7 +125,6 @@ export class PreRegistrationService implements OnDestroy {
 		this.destroy$.complete();
 	}
 
-	// TODO: Convert to function
 	public saveRegistration(
 		registration: Registration,
 	): Observable<DocumentReference<Registration>> {

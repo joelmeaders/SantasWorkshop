@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { Firestore } from '@angular/fire/firestore';
 import { ModalController } from '@ionic/angular/standalone';
 import { AppStateService } from '@santashop/core';
 import {
 	createModalControllerMock,
 	createAppStateServiceMock,
+	provideFirestoreMock,
 } from '../../../test-helpers';
 import { ApplicationService } from './application.service';
 
@@ -14,13 +14,7 @@ describe('ApplicationService', () => {
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			providers: [
-				{
-					provide: Firestore,
-					useValue: jasmine.createSpyObj('Firestore', [
-						'collection',
-						'doc',
-					]),
-				},
+				provideFirestoreMock(),
 				{
 					provide: ModalController,
 					useValue: createModalControllerMock(),

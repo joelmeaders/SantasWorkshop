@@ -2,30 +2,26 @@ import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 
 import { config } from './config';
 import { firebaseConfig } from './firebase.config';
-import { provideFirebaseApp, initializeApp, getApp } from '@angular/fire/app';
 import {
-	provideAppCheck,
 	initializeAppCheck,
 	ReCaptchaEnterpriseProvider,
-} from '@angular/fire/app-check';
-import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
+} from 'firebase/app-check';
+import { initializeApp } from 'firebase/app';
+import { connectAuthEmulator, getAuth } from 'firebase/auth';
+import { connectStorageEmulator, getStorage } from 'firebase/storage';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import {
-	provideStorage,
-	getStorage,
-	connectStorageEmulator,
-} from '@angular/fire/storage';
-import {
-	provideFunctions,
-	getFunctions,
-	connectFunctionsEmulator,
-} from '@angular/fire/functions';
-import { PROGRAM_YEAR, PROFILE_VERSION, MOBILE_EVENT } from '@santashop/core';
-import {
-	provideAnalytics,
-	getAnalytics,
-	ScreenTrackingService,
-	UserTrackingService,
-} from '@angular/fire/analytics';
+	FIREBASE_ANALYTICS,
+	FIREBASE_APP,
+	FIREBASE_AUTH,
+	FIREBASE_FIRESTORE,
+	FIREBASE_FUNCTIONS,
+	FIREBASE_STORAGE,
+	MOBILE_EVENT,
+	PROFILE_VERSION,
+	PROGRAM_YEAR,
+} from '@santashop/core';
+import { getAnalytics } from 'firebase/analytics';
 import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
 	provideHttpClient,
@@ -40,58 +36,53 @@ import {
 	provideIonicAngular,
 } from '@ionic/angular/standalone';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-import {
-	connectFirestoreEmulator,
-	getFirestore,
-	provideFirestore,
-} from '@angular/fire/firestore';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 
-const firebaseProviders = [
-	provideFirebaseApp(() => initializeApp(firebaseConfig)),
-	provideAppCheck(() =>
-		initializeAppCheck(getApp(), {
-			provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
-			isTokenAutoRefreshEnabled: true,
-		}),
-	),
-	provideAuth(() => {
-		const auth = getAuth();
-		if (!config.production) {
-			connectAuthEmulator(auth, 'http://localhost:9099', {
-				disableWarnings: true,
-			});
-		}
-		return auth;
-	}),
-	provideStorage(() => {
-		const storage = getStorage();
-		if (!config.production) {
-			connectStorageEmulator(storage, 'localhost', 9199);
-		}
-		return storage;
-	}),
-	provideFunctions(() => {
-		const functions = getFunctions();
-		if (!config.production) {
-			connectFunctionsEmulator(functions, 'localhost', 5001);
-		} else {
-			functions.customDomain = location.origin;
-		}
-		return functions;
-	}),
-	provideFirestore(() => {
-		const firestore = getFirestore();
-		if (!config.production) {
-			connectFirestoreEmulator(firestore, 'localhost', 8080);
-		}
-		return firestore;
-	}),
-	provideAnalytics(() => getAnalytics()),
-];
+const firebaseApp = initializeApp(firebaseConfig);
 
 if (!config.production) {
 	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
+
+initializeAppCheck(firebaseApp, {
+	provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
+	isTokenAutoRefreshEnabled: true,
+});
+
+const firebaseAuth = getAuth(firebaseApp);
+if (!config.production) {
+	connectAuthEmulator(firebaseAuth, 'http://localhost:9099', {
+		disableWarnings: true,
+	});
+}
+
+const firebaseStorage = getStorage(firebaseApp);
+if (!config.production) {
+	connectStorageEmulator(firebaseStorage, 'localhost', 9199);
+}
+
+const firebaseFunctions = config.production
+	? getFunctions(firebaseApp, location.origin)
+	: getFunctions(firebaseApp);
+if (!config.production) {
+	connectFunctionsEmulator(firebaseFunctions, 'localhost', 5001);
+}
+
+const firebaseFirestore = getFirestore(firebaseApp);
+if (!config.production) {
+	connectFirestoreEmulator(firebaseFirestore, 'localhost', 8080);
+}
+
+const firebaseAnalytics = getAnalytics(firebaseApp);
+
+const firebaseProviders = [
+	{ provide: FIREBASE_APP, useValue: firebaseApp },
+	{ provide: FIREBASE_AUTH, useValue: firebaseAuth },
+	{ provide: FIREBASE_STORAGE, useValue: firebaseStorage },
+	{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
+	{ provide: FIREBASE_FIRESTORE, useValue: firebaseFirestore },
+	{ provide: FIREBASE_ANALYTICS, useValue: firebaseAnalytics },
+];
 
 if (config.production) {
 	enableProdMode();
@@ -119,7 +110,5 @@ bootstrapApplication(AppComponent, {
 		{ provide: PROGRAM_YEAR, useValue: 2025 },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
-		ScreenTrackingService,
-		UserTrackingService,
 	],
 }).catch((err) => console.log(err));

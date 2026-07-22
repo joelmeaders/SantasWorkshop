@@ -4,7 +4,6 @@ import {
 	OnDestroy,
 	inject,
 } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router } from '@angular/router';
 import {
 	PopoverController,
@@ -16,7 +15,7 @@ import {
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { AuthService } from '@santashop/core';
+import { AnalyticsWrapper, AuthService } from '@santashop/core';
 import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
 
@@ -44,7 +43,7 @@ export class PublicMenuComponent implements OnDestroy {
 	private readonly router = inject(Router);
 	private readonly popoverController = inject(PopoverController);
 	private readonly translateService = inject(TranslateService);
-	private readonly analyticsService = inject(Analytics);
+	private readonly analyticsService = inject(AnalyticsWrapper);
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -94,7 +93,7 @@ export class PublicMenuComponent implements OnDestroy {
 
 	public async setLanguage(value: 'en' | 'es'): Promise<void> {
 		this.translateService.use(value);
-		await logEvent(this.analyticsService, `set_language_${value}`);
+		this.analyticsService.logEvent(`set_language_${value}`);
 		await this.closeMenu();
 	}
 }

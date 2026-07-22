@@ -1,10 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Analytics } from '@angular/fire/analytics';
 import { TranslateService } from '@ngx-translate/core';
-import {
-	Spied,
-	createFirebaseAnalyticsMock,
-} from '../../../../../../test-helpers';
+import { AnalyticsWrapper } from '@santashop/core';
 
 import { LanguageToggleComponent } from './language-toggle.component';
 import { of } from 'rxjs';
@@ -13,7 +9,7 @@ describe('LanguageToggleComponent', () => {
 	let component: LanguageToggleComponent;
 	let fixture: ComponentFixture<LanguageToggleComponent>;
 
-	let translateService: Spied<TranslateService>;
+	let translateService: jasmine.SpyObj<TranslateService>;
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
@@ -26,8 +22,11 @@ describe('LanguageToggleComponent', () => {
 					}),
 				},
 				{
-					provide: Analytics,
-					useFactory: createFirebaseAnalyticsMock,
+					provide: AnalyticsWrapper,
+					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
+						'AnalyticsWrapper',
+						['logEvent', 'logEventWithParams', 'logErrorEvent'],
+					),
 				},
 			],
 			imports: [LanguageToggleComponent],

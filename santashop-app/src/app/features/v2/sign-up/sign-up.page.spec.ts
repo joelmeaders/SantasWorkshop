@@ -1,15 +1,13 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Analytics } from '@angular/fire/analytics';
-import { Auth } from '@angular/fire/auth';
-import { Functions } from '@angular/fire/functions';
 import { ModalController, AlertController } from '@ionic/angular/standalone';
 import {
 	provideTranslateServiceMock,
 	createModalControllerMock,
 	createAppStateServiceMock,
-	createAuthMock,
+	provideAnalyticsMock,
+	provideAuthMock,
+	provideFunctionsMock,
 	provideActivatedRouteMock,
-	createAnalyticsMock,
 } from '../../../../test-helpers';
 import { SignUpPage } from './sign-up.page';
 import { SignUpPageService } from './sign-up.page.service';
@@ -39,20 +37,9 @@ describe('SignUpPage', () => {
 					provide: AppStateService,
 					useFactory: createAppStateServiceMock,
 				},
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
-				},
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideAnalyticsMock(),
 				{
 					provide: AlertController,
 					useValue: jasmine.createSpyObj('AlertController', [

@@ -47,18 +47,18 @@ import {
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
 import {
 	FireRepoLite,
+	FunctionsWrapper,
 	IFireRepoCollection,
 	timestampToDate,
 	HttpsCallableResult,
 } from '@santashop/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
 import { addIcons } from 'ionicons';
 import { searchOutline, checkmarkCircle } from 'ionicons/icons';
-import { QueryConstraint, where } from '@angular/fire/firestore';
+import { QueryConstraint, where } from 'firebase/firestore';
 
 @Component({
 	selector: 'admin-pre-registration',
@@ -91,7 +91,7 @@ export class PreRegistrationPage implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 	private readonly fireRepo = inject(FireRepoLite);
 	private readonly searchService = inject(SearchService);
-	private readonly functions = inject(Functions);
+	private readonly functions = inject(FunctionsWrapper);
 	private readonly loadingController = inject(LoadingController);
 	private readonly alertController = inject(AlertController);
 
@@ -105,8 +105,7 @@ export class PreRegistrationPage implements OnDestroy {
 	private readonly preRegistrationFn = (
 		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<Registration, number>(
-			this.functions,
+		this.functions.callableWrapper<Registration, number>(
 			'callableAdminPreRegister',
 		)(registration);
 

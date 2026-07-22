@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
-import { ErrorHandlerService } from '@santashop/core';
+import {
+	AnalyticsWrapper,
+	ErrorHandlerService,
+	FunctionsWrapper,
+} from '@santashop/core';
 import { LoadingController } from '@ionic/angular/standalone';
 import { IError, Registration } from '@santashop/models';
 import { PreRegistrationService } from '../../../../core';
@@ -11,9 +13,9 @@ import { delay, firstValueFrom, of } from 'rxjs';
 @Injectable()
 export class SubmitPageService {
 	private readonly preregistrationService = inject(PreRegistrationService);
-	private readonly afFunctions = inject(Functions);
+	private readonly functions = inject(FunctionsWrapper);
 	private readonly router = inject(Router);
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly loadingController = inject(LoadingController);
 	private readonly errorHandler = inject(ErrorHandlerService);
 
@@ -30,7 +32,7 @@ export class SubmitPageService {
 
 		await loader.present();
 
-		logEvent(this.analytics, 'submit_registration');
+		this.analytics.logEvent('submit_registration');
 
 		try {
 			const registration = await firstValueFrom(
@@ -38,7 +40,6 @@ export class SubmitPageService {
 			);
 
 			if (!registration) {
-				// FIXME: Add error handling
 				throw new Error('Registration object is undefined');
 			}
 
@@ -69,10 +70,10 @@ export class SubmitPageService {
 		registration: Registration,
 		attempts = 0,
 	): Promise<boolean> {
-		const completeRegistrationFunction = httpsCallable(
-			this.afFunctions,
-			'completeRegistration',
-		);
+		const completeRegistrationFunction =
+			this.functions.callableWrapper<Registration, boolean>(
+				'completeRegistration',
+			);
 
 		try {
 			if (attempts <= 1) {

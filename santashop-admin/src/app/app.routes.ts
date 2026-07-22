@@ -1,27 +1,53 @@
-import { Routes } from '@angular/router';
-import {
-	AuthGuard,
-	AuthPipe,
-	hasCustomClaim,
-	redirectLoggedInTo,
-} from '@angular/fire/auth-guard';
+import { inject } from '@angular/core';
+import { AuthService } from '@santashop/core';
+import { from, of } from 'rxjs';
+import { map, switchMap, take } from 'rxjs/operators';
+import { CanActivateFn, Router, Routes } from '@angular/router';
 
-const adminOnly = (): AuthPipe => hasCustomClaim('admin');
-const redirectLoggedInToAdmin = (): AuthPipe => redirectLoggedInTo(['admin']);
+const redirectLoggedInToAdminGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+
+	return authService.currentUser$.pipe(
+		take(1),
+		map((user) => (user ? router.createUrlTree(['/admin']) : true)),
+	);
+};
+
+const adminOnlyGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+
+	return authService.currentUser$.pipe(
+		take(1),
+		switchMap((user) => {
+			if (!user) {
+				return of(router.createUrlTree(['/']));
+			}
+
+			return from(user.getIdTokenResult(false)).pipe(
+				map((token) =>
+					token.claims?.['admin']
+						? true
+						: router.createUrlTree(['/']),
+				),
+			);
+		}),
+	);
+};
 
 export const routes: Routes = [
 	{
 		path: '',
 		title: 'DSCS Sign In',
-		data: { authGuardPipe: redirectLoggedInToAdmin },
+		canActivate: [redirectLoggedInToAdminGuard],
 		loadComponent: () =>
 			import('./pages/sign-in/sign-in.page').then((m) => m.SignInPage),
 	},
 	{
 		path: 'admin',
 		title: 'DSCS Home',
-		canActivate: [AuthGuard],
-		data: { authGuardPipe: adminOnly },
+		canActivate: [adminOnlyGuard],
 		loadComponent: () =>
 			import('./pages/admin/admin.page').then((m) => m.AdminPage),
 		children: [

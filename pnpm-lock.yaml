@@ -42,9 +42,6 @@ catalogs:
     '@angular/core':
       specifier: ^21.0.6
       version: 21.0.6
-    '@angular/fire':
-      specifier: ^21.0.0-rc.0
-      version: 21.0.0-rc.0-canary.ac3dd7c
     '@angular/forms':
       specifier: ^21.0.6
       version: 21.0.6
@@ -180,9 +177,6 @@ catalogs:
     reflect-metadata:
       specifier: ^0.2.2
       version: 0.2.2
-    rxfire:
-      specifier: ^6.1.0
-      version: 6.1.0
     rxjs:
       specifier: ^7.8.2
       version: 7.8.2
@@ -320,9 +314,6 @@ importers:
       '@angular/core':
         specifier: 'catalog:'
         version: 21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/fire':
-        specifier: 'catalog:'
-        version: 21.0.0-rc.0-canary.ac3dd7c(8dc1798953a5f1a7667fa4ab5a9e0b0a)
       '@angular/forms':
         specifier: 'catalog:'
         version: 21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
@@ -519,9 +510,6 @@ importers:
       '@angular/core':
         specifier: 'catalog:'
         version: 21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/fire':
-        specifier: 'catalog:'
-        version: 21.0.0-rc.0-canary.ac3dd7c(8dc1798953a5f1a7667fa4ab5a9e0b0a)
       '@angular/forms':
         specifier: 'catalog:'
         version: 21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
@@ -546,9 +534,6 @@ importers:
       ng2-charts:
         specifier: 'catalog:'
         version: 8.0.0(@angular/cdk@21.0.5(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(chart.js@4.5.1)(rxjs@7.8.2)
-      rxfire:
-        specifier: 'catalog:'
-        version: 6.1.0(firebase@12.7.0)(rxjs@7.8.2)
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
@@ -570,9 +555,6 @@ importers:
       '@angular/core':
         specifier: 'catalog:'
         version: 21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/fire':
-        specifier: 'catalog:'
-        version: 21.0.0-rc.0-canary.ac3dd7c(8dc1798953a5f1a7667fa4ab5a9e0b0a)
       '@angular/forms':
         specifier: 'catalog:'
         version: 21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
@@ -594,9 +576,6 @@ importers:
       firebase:
         specifier: 'catalog:'
         version: 12.7.0
-      rxfire:
-        specifier: 'catalog:'
-        version: 6.1.0(firebase@12.7.0)(rxjs@7.8.2)
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2
@@ -615,9 +594,6 @@ importers:
       '@angular/core':
         specifier: 'catalog:'
         version: 21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/fire':
-        specifier: 'catalog:'
-        version: 21.0.0-rc.0-canary.ac3dd7c(8dc1798953a5f1a7667fa4ab5a9e0b0a)
       firebase:
         specifier: 'catalog:'
         version: 12.7.0
@@ -1023,22 +999,6 @@ packages:
       '@angular/compiler':
         optional: true
       zone.js:
-        optional: true
-
-  '@angular/fire@21.0.0-rc.0-canary.ac3dd7c':
-    resolution: {integrity: sha512-Z1T9FrA8pd4JxUdQt1kDpsPGuXmqJSofsyiIZEJWboG4K1rezqN2JsB3cVGucIJ9uLljaFdvAtXYc+unBmAADQ==}
-    peerDependencies:
-      '@angular/common': ^21.0.0
-      '@angular/core': ^21.0.0
-      '@angular/platform-browser': ^21.0.0
-      '@angular/platform-browser-dynamic': ^21.0.0
-      '@angular/platform-server': ^21.0.0
-      firebase-tools: ^14.0.0
-      rxjs: ~7.8.0
-    peerDependenciesMeta:
-      '@angular/platform-server':
-        optional: true
-      firebase-tools:
         optional: true
 
   '@angular/forms@21.0.6':
@@ -9529,12 +9489,6 @@ packages:
     resolution: {integrity: sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ==}
     engines: {node: '>=0.12.0'}
 
-  rxfire@6.1.0:
-    resolution: {integrity: sha512-NezdjeY32VZcCuGO0bbb8H8seBsJSCaWdUwGsHNzUcAOHR0VGpzgPtzjuuLXr8R/iemkqSzbx/ioS7VwV43ynA==}
-    peerDependencies:
-      firebase: ^9.0.0 || ^10.0.0 || ^11.0.0
-      rxjs: ^6.0.0 || ^7.0.0
-
   rxjs@6.6.7:
     resolution: {integrity: sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==}
     engines: {npm: '>=2.0.0'}
@@ -11343,24 +11297,6 @@ snapshots:
     optionalDependencies:
       '@angular/compiler': 21.0.6
       zone.js: 0.15.1
-
-  '@angular/fire@21.0.0-rc.0-canary.ac3dd7c(8dc1798953a5f1a7667fa4ab5a9e0b0a)':
-    dependencies:
-      '@angular-devkit/schematics': 21.0.4(chokidar@4.0.3)
-      '@angular/common': 21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
-      '@angular/core': 21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)
-      '@angular/platform-browser': 21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))
-      '@angular/platform-browser-dynamic': 21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@21.0.6)(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))
-      '@schematics/angular': 21.0.4(chokidar@4.0.3)
-      firebase: 12.7.0
-      rxfire: 6.1.0(firebase@12.7.0)(rxjs@7.8.2)
-      rxjs: 7.8.2
-      tslib: 2.8.1
-    optionalDependencies:
-      firebase-tools: 15.1.0(@types/node@25.0.3)(encoding@0.1.13)(hono@4.11.3)(typescript@5.9.3)
-    transitivePeerDependencies:
-      - '@react-native-async-storage/async-storage'
-      - chokidar
 
   '@angular/forms@21.0.6(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@21.0.6(@angular/animations@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@21.0.6(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@21.0.6(@angular/compiler@21.0.6)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)':
     dependencies:
@@ -21515,11 +21451,6 @@ snapshots:
   run-applescript@7.1.0: {}
 
   run-async@2.4.1: {}
-
-  rxfire@6.1.0(firebase@12.7.0)(rxjs@7.8.2):
-    dependencies:
-      firebase: 12.7.0
-      rxjs: 7.8.2
 
   rxjs@6.6.7:
     dependencies:

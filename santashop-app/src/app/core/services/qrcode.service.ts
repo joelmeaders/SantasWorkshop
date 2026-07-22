@@ -1,14 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { ref, Storage, getDownloadURL } from '@angular/fire/storage';
+import { StorageWrapper } from '@santashop/core';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class QrCodeService {
-	private readonly storage = inject(Storage);
+	private readonly storage = inject(StorageWrapper);
 
 	public registrationQrCodeUrl(uid: string): Promise<string> {
-		const qrCodeRef = ref(this.storage, `registrations/${uid}.png`);
-		return getDownloadURL(qrCodeRef);
+		return this.storage.getDownloadUrl(`registrations/${uid}.png`);
 	}
 }

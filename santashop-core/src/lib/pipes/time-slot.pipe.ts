@@ -6,7 +6,7 @@ import { DatePipe } from '@angular/common';
 	standalone: true,
 })
 export class TimeSlotPipe implements PipeTransform {
-	private datePipe = new DatePipe('en-US');
+	private readonly datePipe = new DatePipe('en-US');
 
 	public transform(date: Date | string | number, timezone?: string): string {
 		if (!date) return '';

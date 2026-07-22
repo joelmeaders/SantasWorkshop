@@ -4,7 +4,7 @@ import {
 	orderBy,
 	QueryConstraint,
 	where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { FireRepoLite } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,

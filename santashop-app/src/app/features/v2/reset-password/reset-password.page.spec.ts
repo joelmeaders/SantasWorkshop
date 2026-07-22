@@ -1,12 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Analytics } from '@angular/fire/analytics';
-import { Auth } from '@angular/fire/auth';
-import { Functions } from '@angular/fire/functions';
 import {
+	provideAnalyticsMock,
+	provideAuthMock,
+	provideFunctionsMock,
 	provideActivatedRouteMock,
 	provideTranslateServiceMock,
-	createAnalyticsMock,
-	createAuthMock,
 } from '../../../../test-helpers';
 import { ResetPasswordPage } from './reset-password.page';
 
@@ -18,20 +16,9 @@ describe('ResetPasswordPage', () => {
 		TestBed.configureTestingModule({
 			imports: [ResetPasswordPage],
 			providers: [
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
-				},
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideAnalyticsMock(),
 				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),
 			],

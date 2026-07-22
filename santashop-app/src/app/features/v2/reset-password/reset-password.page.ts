@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
 	FormBuilder,
 	FormGroup,
 	Validators,
 	ReactiveFormsModule,
 } from '@angular/forms';
-import { AuthService } from '@santashop/core';
+import { AnalyticsWrapper, AuthService } from '@santashop/core';
 import { BehaviorSubject } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 
@@ -76,7 +75,7 @@ import { arrowBackSharp } from 'ionicons/icons';
 export class ResetPasswordPage {
 	private readonly formBuilder = inject(FormBuilder);
 	private readonly authService = inject(AuthService);
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(AnalyticsWrapper);
 
 	public readonly form: FormGroup = this.formBuilder.group({
 		emailAddress: [
@@ -103,7 +102,7 @@ export class ResetPasswordPage {
 	public async resetPassword(): Promise<void> {
 		const email = this.form.get('emailAddress')?.value;
 
-		logEvent(this.analytics, 'reset_password');
+		this.analytics.logEvent('reset_password');
 
 		await this.authService.resetPassword(email).then(() => {
 			this.resetEmailSent.next(true);

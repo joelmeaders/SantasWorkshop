@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Functions } from '@angular/fire/functions';
 import { PopoverController } from '@ionic/angular/standalone';
 import {
 	createPopoverControllerMock,
-	createAuthMock,
+	provideAuthMock,
+	provideFunctionsMock,
 } from '../../../../test-helpers';
 import { InternalHeaderComponent } from './internal-header.component';
 
@@ -16,16 +15,8 @@ describe('InternalHeaderComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [InternalHeaderComponent],
 			providers: [
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
+				provideAuthMock(),
+				provideFunctionsMock(),
 				{
 					provide: PopoverController,
 					useValue: createPopoverControllerMock(),

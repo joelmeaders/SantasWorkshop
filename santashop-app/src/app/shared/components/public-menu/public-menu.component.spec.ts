@@ -1,14 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Analytics } from '@angular/fire/analytics';
-import { Auth } from '@angular/fire/auth';
-import { Functions } from '@angular/fire/functions';
 import { PopoverController } from '@ionic/angular/standalone';
 import {
 	createPopoverControllerMock,
 	provideTranslateServiceMock,
-	createAuthMock,
-	createFunctionsMock,
-	createAnalyticsMock,
+	provideAnalyticsMock,
+	provideAuthMock,
+	provideFunctionsMock,
 } from '../../../../test-helpers';
 import { PublicMenuComponent } from './public-menu.component';
 
@@ -20,18 +17,9 @@ describe('PublicMenuComponent', () => {
 		await TestBed.configureTestingModule({
 			imports: [PublicMenuComponent],
 			providers: [
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useFactory: createFunctionsMock,
-				},
-				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
-				},
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideAnalyticsMock(),
 				{
 					provide: PopoverController,
 					useValue: createPopoverControllerMock(),

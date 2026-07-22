@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { BehaviorSubject, map, shareReplay } from 'rxjs';
 import { Registration } from '@santashop/models';
 import { filterNullish } from '../helpers';

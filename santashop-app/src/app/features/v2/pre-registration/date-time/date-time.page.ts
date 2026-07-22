@@ -4,8 +4,11 @@ import {
 	OnDestroy,
 	inject,
 } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
-import { SkeletonStateService, TimeSlotPipe } from '@santashop/core';
+import {
+	AnalyticsWrapper,
+	SkeletonStateService,
+	TimeSlotPipe,
+} from '@santashop/core';
 import {
 	AlertController,
 	IonContent,
@@ -83,7 +86,7 @@ export class DateTimePage implements OnDestroy {
 	private readonly viewService = inject(DateTimePageService);
 	private readonly alertController = inject(AlertController);
 	private readonly translateService = inject(TranslateService);
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(AnalyticsWrapper);
 	public readonly skeletonState = inject(SkeletonStateService);
 
 	private readonly destroy$ = new Subject<void>();
@@ -143,10 +146,10 @@ export class DateTimePage implements OnDestroy {
 
 		if (hasSlot) shouldChange = await this.confirmChangeDate();
 
-		if (shouldChange) logEvent(this.analytics, 'cancelled_datetime');
+		if (shouldChange) this.analytics.logEvent('cancelled_datetime');
 
 		if (!hasSlot || shouldChange) {
-			logEvent(this.analytics, 'chose_datetime');
+			this.analytics.logEvent('chose_datetime');
 			await this.viewService.updateRegistration(slot);
 		}
 	}
@@ -169,7 +172,7 @@ export class DateTimePage implements OnDestroy {
 
 	private async confirmChangeDate(): Promise<boolean> {
 		const alert = await this.alertController.create({
-			// TODO: This stuff
+			// Translation keys can be added later; keep the fallback copy explicit.
 			header: this.translateService.instant('Confirm Changes'),
 			subHeader: this.translateService.instant(
 				'Are you sure you want to do this?',

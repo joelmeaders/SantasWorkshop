@@ -9,7 +9,7 @@ import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
 import { PreRegistrationService } from '../../../../core';
-import { QueryConstraint, where } from '@angular/fire/firestore';
+import { QueryConstraint, where } from 'firebase/firestore';
 
 @Injectable()
 export class DateTimePageService implements OnDestroy {
@@ -52,7 +52,6 @@ export class DateTimePageService implements OnDestroy {
 		);
 
 		if (!registration) {
-			// FIXME: Error handling
 			throw new Error('Registration object is undefined');
 		}
 
@@ -65,16 +64,9 @@ export class DateTimePageService implements OnDestroy {
 			};
 		}
 
-		// FIXME: Error handling
-		const storeRegistration = firstValueFrom(
+		await firstValueFrom(
 			this.preRegistrationService.saveRegistration(registration),
 		);
-
-		try {
-			await storeRegistration;
-		} catch (error) {
-			console.error(error);
-		}
 	}
 
 	private dateTimeSlotCollection(): IFireRepoCollection<DateTimeSlot> {

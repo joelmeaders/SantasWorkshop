@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
+import type { User, UserCredential } from 'firebase/auth';
 import { AuthService } from './auth.service';
-import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
+import { AuthWrapper } from './_auth-wrapper';
 import { FunctionsWrapper } from './_functions-wrapper';
 
 describe('AuthService', () => {
@@ -144,6 +145,7 @@ describe('AuthService', () => {
 			await expectAsync(action).toBeRejectedWithError(
 				'User cannot be null',
 			);
+			expect(spy).toHaveBeenCalled();
 		});
 
 		it('should handle and return error', async () => {
@@ -159,6 +161,7 @@ describe('AuthService', () => {
 
 			// Assert
 			await expectAsync(action).toBeRejectedWith(testError);
+			expect(signInSpy).toHaveBeenCalledOnceWith(mockUser.email!, 'abc');
 			// Note: ErrorHandlerService is not called in current implementation
 		});
 
@@ -197,6 +200,7 @@ describe('AuthService', () => {
 			await expectAsync(action).toBeRejectedWithError(
 				'User cannot be null',
 			);
+			expect(spy).toHaveBeenCalled();
 		});
 
 		it('should handle and return error', async () => {
@@ -212,6 +216,7 @@ describe('AuthService', () => {
 
 			// Assert
 			await expectAsync(action).toBeRejectedWith(testError);
+			expect(signInSpy).toHaveBeenCalledOnceWith(mockUser.email!, 'abc');
 			// Note: ErrorHandlerService is not called in current implementation
 		});
 

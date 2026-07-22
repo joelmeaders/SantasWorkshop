@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import {
 	UntypedFormGroup,
 	UntypedFormControl,
 	Validators,
 	ReactiveFormsModule,
 } from '@angular/forms';
-import { HttpsCallableResult } from '@santashop/core';
+import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core';
 import {
 	AlertController,
 	LoadingController,
@@ -48,7 +47,7 @@ import { mailOutline } from 'ionicons/icons';
 })
 export class ResendEmailPage {
 	private readonly lookupService = inject(LookupService);
-	private readonly functions = inject(Functions);
+	private readonly functions = inject(FunctionsWrapper);
 	private readonly alerts = inject(AlertController);
 	private readonly loading = inject(LoadingController);
 
@@ -62,8 +61,7 @@ export class ResendEmailPage {
 	private readonly sendEmailFn = (
 		customerId: string,
 	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<{ customerId: string }, number>(
-			this.functions,
+		this.functions.callableWrapper<{ customerId: string }, number>(
 			'callableResendRegistrationEmail',
 		)({ customerId });
 

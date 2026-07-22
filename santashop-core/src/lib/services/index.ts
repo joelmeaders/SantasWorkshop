@@ -2,6 +2,7 @@ export * from './_analytics-wrapper';
 export * from './_auth-wrapper';
 export * from './_firestore-wrapper';
 export * from './_functions-wrapper';
+export * from './_storage-wrapper';
 export * from './app-state.service';
 export * from './auth.service';
 export * from './error-handler.service';

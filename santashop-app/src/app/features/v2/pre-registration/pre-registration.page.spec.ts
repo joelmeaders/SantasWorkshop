@@ -1,11 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { Storage } from '@angular/fire/storage';
 import {
 	provideActivatedRouteMock,
-	createAuthMock,
+	provideAuthMock,
+	provideFirestoreMock,
+	provideFunctionsMock,
+	provideStorageMock,
 } from '../../../../test-helpers';
 
 import { PreRegistrationPage } from './pre-registration.page';
@@ -18,27 +17,10 @@ describe('PreRegistrationPage', () => {
 		TestBed.configureTestingModule({
 			imports: [PreRegistrationPage],
 			providers: [
-				{
-					provide: Firestore,
-					useValue: jasmine.createSpyObj('Firestore', [
-						'collection',
-						'doc',
-					]),
-				},
-				{
-					provide: Auth,
-					useValue: createAuthMock(),
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				{
-					provide: Storage,
-					useValue: jasmine.createSpyObj('Storage', ['ref']),
-				},
+				provideFirestoreMock(),
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideStorageMock(),
 				provideActivatedRouteMock(),
 			],
 		}).compileComponents();

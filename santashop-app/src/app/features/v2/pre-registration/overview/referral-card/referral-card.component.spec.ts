@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Functions } from '@angular/fire/functions';
-import { provideTranslateServiceMock } from '../../../../../../test-helpers';
+import {
+	provideFunctionsMock,
+	provideTranslateServiceMock,
+} from '../../../../../../test-helpers';
 import { ReferralCardComponent } from './referral-card.component';
 
 describe('ReferralCardComponent', () => {
@@ -10,15 +12,7 @@ describe('ReferralCardComponent', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [ReferralCardComponent],
-			providers: [
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				provideTranslateServiceMock(),
-			],
+			providers: [provideFunctionsMock(), provideTranslateServiceMock()],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ReferralCardComponent);

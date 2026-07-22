@@ -1,44 +1,52 @@
 import { TestBed } from '@angular/core/testing';
-import { FireRepoBase } from './fire-repo-base.service';
+import { of, firstValueFrom } from 'rxjs';
+import { DocumentReference, Query } from 'firebase/firestore';
 import { Registration } from '../../../../santashop-models/src';
-import { of } from 'rxjs';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
-import {
-	DocumentData,
-	DocumentReference,
-	Firestore,
-} from '@angular/fire/firestore';
+import { FirestoreWrapper } from './_firestore-wrapper';
 
 describe('FireRepoLite', () => {
 	let service: FireRepoLite;
-	let fireRepoBase: jasmine.SpyObj<FireRepoBase>;
+	let firestoreWrapper: jasmine.SpyObj<FirestoreWrapper>;
 
 	const mockData = { uid: '12345' } as Registration;
+	const collectionReference = { path: 'registrations' } as any;
+	const documentReference = {
+		id: '12345',
+		withConverter: jasmine
+			.createSpy('withConverter')
+			.and.callFake(() => documentReference),
+	} as unknown as DocumentReference<Registration>;
+	const queryReference = {} as Query<Registration>;
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			teardown: { destroyAfterEach: false },
 			providers: [
 				{
-					provide: FireRepoBase,
-					useValue: jasmine.createSpyObj<FireRepoBase>('frb', [
-						'delete',
-						'randomId',
-						'addById',
-						'read',
-						'add',
-						'update',
-						'readMany',
+					provide: FirestoreWrapper,
+					useValue: jasmine.createSpyObj<FirestoreWrapper>('frb', [
+						'collection',
+						'collectionQuery',
+						'doc',
+						'docData',
+						'query',
+						'addDoc',
+						'setDoc',
+						'deleteDoc',
 					]),
 				},
-				{ provide: Firestore, useValue: jasmine.createSpy('fs') },
 			],
 		});
 
 		service = TestBed.inject(FireRepoLite);
-		fireRepoBase = TestBed.inject(
-			FireRepoBase,
-		) as jasmine.SpyObj<FireRepoBase>;
+		firestoreWrapper = TestBed.inject(
+			FirestoreWrapper,
+		) as jasmine.SpyObj<FirestoreWrapper>;
+
+		firestoreWrapper.collection.and.returnValue(collectionReference);
+		firestoreWrapper.doc.and.returnValue(documentReference);
+		firestoreWrapper.query.and.returnValue(queryReference);
 	});
 
 	it('should be created', () => {
@@ -46,118 +54,126 @@ describe('FireRepoLite', () => {
 	});
 
 	it('randomId(): should make expected call', () => {
-		// Arrange
-		const spy = fireRepoBase.randomId;
-
-		spy.and.returnValue('12345');
-
 		// Act
 		const value = service.randomId();
 
 		// Assert
 		expect(value).toEqual('12345');
-		expect(spy).toHaveBeenCalled();
+		expect(firestoreWrapper.collection).toHaveBeenCalledOnceWith('_');
+		expect(firestoreWrapper.doc).toHaveBeenCalledWith(collectionReference);
 	});
 
 	it('read<T>(): should make expected call', async () => {
-		// Arrange
-		const spy = fireRepoBase.read;
-
-		spy.and.returnValue(of(mockData));
+		firestoreWrapper.docData.and.returnValue(of(mockData));
 
 		// Act
-		service.collection<Registration>('registrations').read('12345', 'uid');
+		const value = await firstValueFrom(
+			service
+				.collection<Registration>('registrations')
+				.read('12345', 'uid'),
+		);
 
 		// Assert
-		expect(spy).toHaveBeenCalledOnceWith(
+		expect(value).toEqual(mockData);
+		expect(firestoreWrapper.collection).toHaveBeenCalledWith(
 			'registrations',
+		);
+		expect(firestoreWrapper.doc).toHaveBeenCalledWith(
+			collectionReference,
 			'12345',
-			'uid' as any,
+		);
+		expect(firestoreWrapper.docData).toHaveBeenCalledWith(
+			documentReference,
+			jasmine.objectContaining({ idField: 'uid' }) as any,
 		);
 	});
 
 	it('readMany<T>(): should make expected call', async () => {
-		// Arrange
-		const spy = fireRepoBase.readMany;
-
-		spy.and.returnValue(of([mockData]));
+		firestoreWrapper.collectionQuery.and.returnValue(of([mockData]));
 
 		// Act
-		service
-			.collection<Registration>('registrations')
-			.readMany(undefined, 'uid');
+		const value = await firstValueFrom(
+			service
+				.collection<Registration>('registrations')
+				.readMany(undefined, 'uid'),
+		);
 
 		// Assert
-		expect(spy).toHaveBeenCalledOnceWith(
-			'registrations',
-			undefined,
+		expect(value).toEqual([mockData]);
+		expect(firestoreWrapper.query).toHaveBeenCalledWith(
+			collectionReference,
+		);
+		expect(firestoreWrapper.collectionQuery).toHaveBeenCalledWith(
+			queryReference,
 			'uid' as any,
 		);
 	});
 
 	it('add<T>(): should make expected call', async () => {
-		// Arrange
-		const spy = fireRepoBase.add;
-
-		spy.and.returnValue(of({} as DocumentReference<Registration>));
+		firestoreWrapper.addDoc.and.resolveTo(documentReference);
 
 		// Act
-		service.collection<Registration>('registrations').add(mockData);
+		const value = await firstValueFrom(
+			service.collection<Registration>('registrations').add(mockData),
+		);
 
 		// Assert
-		expect(spy).toHaveBeenCalledOnceWith('registrations', mockData);
+		expect(value).toEqual(documentReference);
+		expect(firestoreWrapper.addDoc).toHaveBeenCalledOnceWith(
+			collectionReference,
+			mockData,
+		);
 	});
 
 	it('addById<T>(): should make expected call', async () => {
-		// Arrange
-		const spy = fireRepoBase.addById;
-
-		spy.and.returnValue(of({} as DocumentReference<Registration>));
+		firestoreWrapper.setDoc.and.resolveTo();
 
 		// Act
-		service
-			.collection<Registration>('registrations')
-			.addById('12345', mockData);
+		const value = await firstValueFrom(
+			service
+				.collection<Registration>('registrations')
+				.addById('12345', mockData),
+		);
 
 		// Assert
-		expect(spy).toHaveBeenCalledOnceWith(
-			'registrations',
-			'12345',
+		expect(value).toEqual(documentReference);
+		expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+			documentReference,
 			mockData,
 		);
 	});
 
 	it('update<T>(): should make expected call', async () => {
-		// Arrange
-		const spy = fireRepoBase.update;
-
-		spy.and.returnValue(of({} as DocumentReference<DocumentData>));
+		firestoreWrapper.setDoc.and.resolveTo();
 
 		// Act
-		service
-			.collection<Registration>('registrations')
-			.update('12345', mockData, true);
+		const value = await firstValueFrom(
+			service
+				.collection<Registration>('registrations')
+				.update('12345', mockData, true),
+		);
 
 		// Assert
-		expect(spy).toHaveBeenCalledOnceWith(
-			'registrations',
-			'12345',
+		expect(value).toEqual(documentReference);
+		expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+			documentReference,
 			mockData,
-			true,
+			{ merge: true },
 		);
 	});
 
 	it('delete(): should make expected call', async () => {
-		// Arrange
-		const spy = fireRepoBase.delete;
-
-		spy.and.returnValue(of());
+		firestoreWrapper.deleteDoc.and.resolveTo();
 
 		// Act
-		service.collection<Registration>('registrations').delete('12345');
+		await firstValueFrom(
+			service.collection<Registration>('registrations').delete('12345'),
+		);
 
 		// Assert
-		expect(spy).toHaveBeenCalledOnceWith('registrations', '12345');
+		expect(firestoreWrapper.deleteDoc).toHaveBeenCalledOnceWith(
+			documentReference,
+		);
 	});
 
 	describe('collection<T>()', () => {
@@ -173,98 +189,92 @@ describe('FireRepoLite', () => {
 		});
 
 		it('read<T>(): should make expected call', async () => {
-			// Arrange
-			const spy = fireRepoBase.read;
-
-			spy.and.returnValue(of(mockData));
+			firestoreWrapper.docData.and.returnValue(of(mockData));
 
 			// Act
-			collection.read('12345', 'uid');
+			const value = await firstValueFrom(collection.read('12345', 'uid'));
 
 			// Assert
-			expect(spy).toHaveBeenCalledOnceWith(
-				'registrations',
-				'12345',
-				'uid' as any,
+			expect(value).toEqual(mockData);
+			expect(firestoreWrapper.docData).toHaveBeenCalledWith(
+				documentReference,
+				jasmine.objectContaining({ idField: 'uid' }) as any,
 			);
 		});
 
 		it('readMany<T>(): should make expected call', async () => {
-			// Arrange
-			const spy = fireRepoBase.readMany;
-
-			spy.and.returnValue(of([mockData]));
+			firestoreWrapper.collectionQuery.and.returnValue(of([mockData]));
 
 			// Act
-			collection.readMany(undefined, 'uid');
+			const value = await firstValueFrom(
+				collection.readMany(undefined, 'uid'),
+			);
 
 			// Assert
-			expect(spy).toHaveBeenCalledOnceWith(
-				'registrations',
-				undefined,
+			expect(value).toEqual([mockData]);
+			expect(firestoreWrapper.collectionQuery).toHaveBeenCalledWith(
+				queryReference,
 				'uid' as any,
 			);
 		});
 
 		it('add<T>(): should make expected call', async () => {
-			// Arrange
-			const spy = fireRepoBase.add;
-
-			spy.and.returnValue(of({} as DocumentReference<Registration>));
+			firestoreWrapper.addDoc.and.resolveTo(documentReference);
 
 			// Act
-			collection.add(mockData);
+			const value = await firstValueFrom(collection.add(mockData));
 
 			// Assert
-			expect(spy).toHaveBeenCalledOnceWith('registrations', mockData);
+			expect(value).toEqual(documentReference);
+			expect(firestoreWrapper.addDoc).toHaveBeenCalledOnceWith(
+				collectionReference,
+				mockData,
+			);
 		});
 
 		it('addById<T>(): should make expected call', async () => {
-			// Arrange
-			const spy = fireRepoBase.addById;
-
-			spy.and.returnValue(of({} as DocumentReference<Registration>));
+			firestoreWrapper.setDoc.and.resolveTo();
 
 			// Act
-			collection.addById('12345', mockData);
+			const value = await firstValueFrom(
+				collection.addById('12345', mockData),
+			);
 
 			// Assert
-			expect(spy).toHaveBeenCalledOnceWith(
-				'registrations',
-				'12345',
+			expect(value).toEqual(documentReference);
+			expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+				documentReference,
 				mockData,
 			);
 		});
 
 		it('update<T>(): should make expected call', async () => {
-			// Arrange
-			const spy = fireRepoBase.update;
-
-			spy.and.returnValue(of({} as DocumentReference<DocumentData>));
+			firestoreWrapper.setDoc.and.resolveTo();
 
 			// Act
-			collection.update('12345', mockData, true);
+			const value = await firstValueFrom(
+				collection.update('12345', mockData, true),
+			);
 
 			// Assert
-			expect(spy).toHaveBeenCalledOnceWith(
-				'registrations',
-				'12345',
+			expect(value).toEqual(documentReference);
+			expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+				documentReference,
 				mockData,
-				true,
+				{ merge: true },
 			);
 		});
 
 		it('delete(): should make expected call', async () => {
-			// Arrange
-			const spy = fireRepoBase.delete;
-
-			spy.and.returnValue(of());
+			firestoreWrapper.deleteDoc.and.resolveTo();
 
 			// Act
-			collection.delete('12345');
+			await firstValueFrom(collection.delete('12345'));
 
 			// Assert
-			expect(spy).toHaveBeenCalledOnceWith('registrations', '12345');
+			expect(firestoreWrapper.deleteDoc).toHaveBeenCalledOnceWith(
+				documentReference,
+			);
 		});
 	});
 });

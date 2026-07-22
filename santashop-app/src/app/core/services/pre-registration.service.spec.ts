@@ -1,7 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService, FireRepoLite } from '@santashop/core';
-import { Functions } from '@angular/fire/functions';
-import { autoSpyProvider, Spied } from 'test-helpers/jasmine';
+import { AuthService, FireRepoLite, FunctionsWrapper } from '@santashop/core';
+import { autoSpyProvider } from '../../../../../test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';
 import { PreRegistrationService } from './pre-registration.service';
 import { repoCollectionStub } from '../../../../../test-helpers';
@@ -9,8 +8,8 @@ import { mockRegistrations } from '../../../../../test-helpers/mock-data';
 import { QrCodeService } from './qrcode.service';
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
-	let repository: Spied<FireRepoLite>;
-	let qrCodeService: Spied<QrCodeService>;
+	let repository: jasmine.SpyObj<FireRepoLite>;
+	let qrCodeService: jasmine.SpyObj<QrCodeService>;
 
 	let collectionSpy: jasmine.Spy;
 	const collectionStub = repoCollectionStub();
@@ -24,7 +23,7 @@ describe('PreRegistrationService', () => {
 				autoSpyProvider(FireRepoLite),
 				{ provide: AuthService, useValue: { uid$: of(userId) } },
 				autoSpyProvider(QrCodeService),
-				autoSpyProvider(Functions),
+				autoSpyProvider(FunctionsWrapper),
 			],
 		});
 
@@ -128,7 +127,7 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value.length).toBe(2);
+		expect(value).toHaveSize(2);
 	});
 
 	it('children$: should get no children', async () => {
@@ -141,7 +140,7 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value.length).toBe(0);
+		expect(value).toHaveSize(0);
 	});
 
 	it('childCount$: should return 0', async () => {

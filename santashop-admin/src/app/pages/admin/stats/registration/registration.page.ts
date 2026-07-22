@@ -41,7 +41,7 @@ import {
 	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
-import { QueryConstraint, Timestamp, where } from '@angular/fire/firestore';
+import { QueryConstraint, Timestamp, where } from 'firebase/firestore';
 
 Chart.register(ChartDataLabels);
 
@@ -117,13 +117,7 @@ export class RegistrationPage {
 									: timestampToDate(slot.dateTime),
 						})),
 					),
-					map((slots) =>
-						slots.sort(
-							(a, b) =>
-								(a.dateTime as Date).valueOf() -
-								(b.dateTime as Date).valueOf(),
-						),
-					),
+					map((slots) => this.sortDateTimeSlots(slots)),
 				);
 		}),
 		shareReplay(1),
@@ -204,8 +198,7 @@ export class RegistrationPage {
 				return { date, count: e.count };
 			}),
 		),
-
-		map((data) => data.sort((a, b) => Number(a.date) - Number(b.date))),
+		map((data) => this.sortFamiliesByDate(data)),
 	);
 
 	public readonly familiesBySlotsChartData$ = this.familiesBySlots$.pipe(
@@ -217,7 +210,7 @@ export class RegistrationPage {
 	);
 
 	public readonly topFiveZipCodesCount$ = this.zipCodeStats$.pipe(
-		map((data) => data.sort((a, b) => b.count - a.count)),
+		map((data) => this.sortZipCodeCounts(data)),
 		map((data) => data.slice(0, 4)),
 	);
 
@@ -235,7 +228,7 @@ export class RegistrationPage {
 				],
 			};
 
-			data.forEach((e) => {
+			data.forEach((e: { zip: string | number; count: number }) => {
 				if (formatted.labels) {
 					formatted.labels.push([
 						e.zip.toString(),
@@ -328,7 +321,15 @@ export class RegistrationPage {
 				},
 				formatter: (value, ctx) => {
 					const label = ctx.chart?.data?.labels?.[ctx.dataIndex];
-					return `${value} ${label ?? ''}`;
+					let labelText = '';
+
+					if (Array.isArray(label)) {
+						labelText = label.join(' ');
+					} else if (typeof label === 'string') {
+						labelText = label;
+					}
+
+					return `${value} ${labelText}`;
 				},
 			},
 		},
@@ -391,7 +392,7 @@ export class RegistrationPage {
 		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
 			const day = date.getDate();
-			return schedule.days.findIndex((d) => d === day);
+			return schedule.days.indexOf(day);
 		};
 
 		data.forEach((e) => {
@@ -400,6 +401,42 @@ export class RegistrationPage {
 		});
 
 		return arr;
+	}
+
+	private sortDateTimeSlots(slots: DateTimeSlot[]): DateTimeSlot[] {
+		const sortedSlots = [...slots];
+
+		sortedSlots.sort(
+			(a: DateTimeSlot, b: DateTimeSlot) =>
+				(a.dateTime as Date).valueOf() - (b.dateTime as Date).valueOf(),
+		);
+
+		return sortedSlots;
+	}
+
+	private sortFamiliesByDate(
+		data: { date: Date; count: number }[],
+	): { date: Date; count: number }[] {
+		const sortedFamilies = [...data];
+
+		sortedFamilies.sort(
+			(a: { date: Date; count: number }, b: { date: Date; count: number }) =>
+				Number(a.date) - Number(b.date),
+		);
+
+		return sortedFamilies;
+	}
+
+	private sortZipCodeCounts<
+		T extends {
+			count: number;
+		},
+	>(data: T[]): T[] {
+		const sortedCounts = [...data];
+
+		sortedCounts.sort((a: T, b: T) => b.count - a.count);
+
+		return sortedCounts;
 	}
 
 	private friendlyDay(day: number): string {

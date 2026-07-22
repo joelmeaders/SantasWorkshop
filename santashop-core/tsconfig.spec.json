@@ -2,7 +2,11 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"baseUrl": "..",
 		"outDir": "../out-tsc/spec",
+		"paths": {
+			"@santashop/models": ["santashop-models/src/index.ts"]
+		},
 		"types": ["jasmine"]
 	},
 	"files": ["src/test.ts"],

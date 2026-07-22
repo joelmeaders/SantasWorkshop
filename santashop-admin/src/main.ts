@@ -1,34 +1,15 @@
-import {
-	enableProdMode,
-	inject,
-	provideZoneChangeDetection,
-} from '@angular/core';
+import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
 
 import { config } from './config';
 import { firebaseConfig } from './firebase.config';
+import { initializeApp } from 'firebase/app';
 import {
-	provideFirebaseApp,
-	initializeApp,
-	getApp,
-	FirebaseApp,
-} from '@angular/fire/app';
-import {
-	provideAppCheck,
 	initializeAppCheck,
 	ReCaptchaEnterpriseProvider,
-} from '@angular/fire/app-check';
-import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
-import {
-	provideFunctions,
-	getFunctions,
-	connectFunctionsEmulator,
-} from '@angular/fire/functions';
-import {
-	provideAnalytics,
-	getAnalytics,
-	ScreenTrackingService,
-	UserTrackingService,
-} from '@angular/fire/analytics';
+} from 'firebase/app-check';
+import { connectAuthEmulator, getAuth } from 'firebase/auth';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
+import { getAnalytics } from 'firebase/analytics';
 import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
 	provideHttpClient,
@@ -41,54 +22,57 @@ import {
 	IonicRouteStrategy,
 	provideIonicAngular,
 } from '@ionic/angular/standalone';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import {
-	connectFirestoreEmulator,
-	getFirestore,
-	provideFirestore,
-} from '@angular/fire/firestore';
-import { PROGRAM_YEAR } from '@santashop/core';
+	FIREBASE_ANALYTICS,
+	FIREBASE_APP,
+	FIREBASE_AUTH,
+	FIREBASE_FIRESTORE,
+	FIREBASE_FUNCTIONS,
+	PROGRAM_YEAR,
+} from '@santashop/core';
 
-const firebaseProviders = [
-	provideFirebaseApp(() => initializeApp(firebaseConfig)),
-	provideAppCheck(() =>
-		initializeAppCheck(getApp(), {
-			provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
-			isTokenAutoRefreshEnabled: true,
-		}),
-	),
-	provideAuth(() => {
-		const auth = getAuth(inject(FirebaseApp));
-		if (!config.production) {
-			connectAuthEmulator(auth, 'http://localhost:9099', {
-				disableWarnings: true,
-			});
-		}
-		return auth;
-	}),
-	provideFunctions(() => {
-		const functions = getFunctions();
-		if (!config.production) {
-			connectFunctionsEmulator(functions, 'localhost', 5001);
-		} else {
-			functions.customDomain = location.origin;
-		}
-		return functions;
-	}),
-	provideFirestore(() => {
-		const firestore = getFirestore();
-		if (!config.production) {
-			connectFirestoreEmulator(firestore, 'localhost', 8080);
-		}
-		return firestore;
-	}),
-	provideAnalytics(() => getAnalytics()),
-];
+const firebaseApp = initializeApp(firebaseConfig);
 
 if (!config.production) {
 	(
 		self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: boolean }
 	).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
+
+initializeAppCheck(firebaseApp, {
+	provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
+	isTokenAutoRefreshEnabled: true,
+});
+
+const firebaseAuth = getAuth(firebaseApp);
+if (!config.production) {
+	connectAuthEmulator(firebaseAuth, 'http://localhost:9099', {
+		disableWarnings: true,
+	});
+}
+
+const firebaseFunctions = config.production
+	? getFunctions(firebaseApp, location.origin)
+	: getFunctions(firebaseApp);
+if (!config.production) {
+	connectFunctionsEmulator(firebaseFunctions, 'localhost', 5001);
+}
+
+const firebaseFirestore = getFirestore(firebaseApp);
+if (!config.production) {
+	connectFirestoreEmulator(firebaseFirestore, 'localhost', 8080);
+}
+
+const firebaseAnalytics = getAnalytics(firebaseApp);
+
+const firebaseProviders = [
+	{ provide: FIREBASE_APP, useValue: firebaseApp },
+	{ provide: FIREBASE_AUTH, useValue: firebaseAuth },
+	{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
+	{ provide: FIREBASE_FIRESTORE, useValue: firebaseFirestore },
+	{ provide: FIREBASE_ANALYTICS, useValue: firebaseAnalytics },
+];
 
 if (config.production) {
 	enableProdMode();
@@ -106,8 +90,6 @@ bootstrapApplication(AppComponent, {
 		...firebaseProviders,
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
-		ScreenTrackingService,
-		UserTrackingService,
 		{ provide: PROGRAM_YEAR, useValue: 2025 },
 	],
 }).catch((err) => console.log(err));

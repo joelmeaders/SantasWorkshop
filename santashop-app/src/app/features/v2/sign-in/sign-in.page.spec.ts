@@ -1,13 +1,11 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Analytics } from '@angular/fire/analytics';
-import { Functions } from '@angular/fire/functions';
 import {
 	createAppStateServiceMock,
-	createAuthMock,
+	provideAnalyticsMock,
+	provideAuthMock,
+	provideFunctionsMock,
 	provideActivatedRouteMock,
 	provideTranslateServiceMock,
-	createAnalyticsMock,
 } from '../../../../test-helpers';
 import { SignInPage } from './sign-in.page';
 import { SignInPageService } from './sign-in.page.service';
@@ -37,20 +35,9 @@ describe('SignInPage', () => {
 					provide: AppStateService,
 					useFactory: createAppStateServiceMock,
 				},
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
-				},
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideAnalyticsMock(),
 				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),
 			],

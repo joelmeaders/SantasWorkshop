@@ -1,5 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnInit,
+	inject,
+} from '@angular/core';
 import {
 	AlertController,
 	IonApp,
@@ -8,7 +12,7 @@ import {
 	Platform,
 } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
-import { AppStateService } from '@santashop/core';
+import { AnalyticsWrapper, AppStateService } from '@santashop/core';
 import { ApplicationService } from './core/services/application.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -20,16 +24,16 @@ import { firstValueFrom } from 'rxjs';
 	imports: [IonApp, IonRouterOutlet],
 	providers: [ModalController],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 	private readonly platform = inject(Platform);
 	private readonly translateService = inject(TranslateService);
-	private readonly analyticsService = inject(Analytics);
+	private readonly analyticsService = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
 	private readonly applicationService = inject(ApplicationService);
 	private readonly alertController = inject(AlertController);
 
-	constructor() {
-		this.initializeApp();
+	public ngOnInit(): void {
+		void this.initializeApp();
 	}
 
 	public async initializeApp(): Promise<void> {
@@ -42,17 +46,18 @@ export class AppComponent {
 		this.translateService.setFallbackLang('en');
 
 		const browserLang = this.translateService.getBrowserLang() ?? 'en';
+		const supportedLanguage = /en|es/.exec(browserLang) ? browserLang : 'en';
 		this.translateService.use(
-			browserLang.match(/en|es/) ? browserLang : 'en',
+			supportedLanguage,
 		);
 
-		logEvent(this.analyticsService, 'default_language', {
+		this.analyticsService.logEventWithParams('default_language', {
 			value: browserLang,
 		});
 
 		const alert = await firstValueFrom(this.appStateService.globalAlert$);
 		if (alert?.displayAlert) {
-			const isEnglish = this.translateService.currentLang === 'en';
+			const isEnglish = this.translateService.getCurrentLang() === 'en';
 			const title = isEnglish ? alert.titleEn : alert.titleEs;
 			const message = isEnglish ? alert.messageEn : alert.messageEs;
 			await this.showGlobalMessage({ title, message });

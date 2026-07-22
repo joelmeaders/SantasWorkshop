@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Analytics } from '@angular/fire/analytics';
 import {
 	PROGRAM_YEAR,
+	AnalyticsWrapper,
 	FireRepoLite,
 	SkeletonStateService,
 } from '@santashop/core';
@@ -9,7 +9,6 @@ import {
 	createAppStateServiceMock,
 	provideTranslateServiceMock,
 	provideActivatedRouteMock,
-	createAnalyticsMock,
 } from '../../../../../test-helpers';
 
 import { DateTimePage } from './date-time.page';
@@ -68,8 +67,11 @@ describe('DateTimePage', () => {
 					useFactory: createAppStateServiceMock,
 				},
 				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
+					provide: AnalyticsWrapper,
+					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
+						'AnalyticsWrapper',
+						['logEvent', 'logEventWithParams', 'logErrorEvent'],
+					),
 				},
 				{
 					provide: AlertController,

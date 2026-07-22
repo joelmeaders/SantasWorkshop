@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
@@ -108,13 +108,15 @@ export class CheckInPage {
 		map((data) =>
 			data
 				.map((e) => e.customerCount)
-				.reduce((prev, curr) => prev + curr),
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 	);
 
 	public readonly totalChildren$ = this.dateTimeStats$.pipe(
 		map((data) =>
-			data.map((e) => e.childCount).reduce((prev, curr) => prev + curr),
+			data
+				.map((e) => e.childCount)
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 	);
 
@@ -122,7 +124,7 @@ export class CheckInPage {
 		map((data) =>
 			data
 				.map((e) => e.pregisteredCount)
-				.reduce((prev, curr) => prev + curr),
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 	);
 
@@ -136,7 +138,7 @@ export class CheckInPage {
 		map((data) =>
 			data
 				.map((e) => e.modifiedCount)
-				.reduce((prev, curr) => prev + curr),
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 		switchMap((count) =>
 			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite)),
@@ -159,7 +161,7 @@ export class CheckInPage {
 		),
 	);
 
-	// TODO: These should be redone to not need udated every year...
+	// These chart groupings are schedule-driven and still require annual schedule data.
 	public readonly checkInsByDayHour$ = combineLatest([
 		this.dateTimeStats$,
 		this.graphView$,

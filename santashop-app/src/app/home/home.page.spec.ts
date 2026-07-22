@@ -4,13 +4,12 @@ import {
 	provideTranslateServiceMock,
 	createAppStateServiceMock,
 	provideActivatedRouteMock,
-	createAnalyticsMock,
+	provideAnalyticsMock,
 } from '../../test-helpers';
 
 import { HomePage } from './home.page';
 import { ModalController } from '@ionic/angular/standalone';
 import { AppStateService } from '@santashop/core';
-import { Analytics } from '@angular/fire/analytics';
 
 describe('HomePage', () => {
 	let component: HomePage;
@@ -28,10 +27,7 @@ describe('HomePage', () => {
 					provide: ModalController,
 					useValue: createModalControllerMock(),
 				},
-				{
-					provide: Analytics,
-					useFactory: createAnalyticsMock,
-				},
+				provideAnalyticsMock(),
 				provideTranslateServiceMock(),
 				provideActivatedRouteMock(),
 			],

@@ -2,7 +2,13 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"baseUrl": "..",
 		"outDir": "../out-tsc/spec",
+		"paths": {
+			"@santashop/models": ["dist/@santashop/models"],
+			"@santashop/core": ["dist/@santashop/core"],
+			"test-helpers/*": ["test-helpers/*"]
+		},
 		"types": ["jasmine"]
 	},
 	"files": ["src/test.ts", "src/polyfills.ts"],

@@ -14,7 +14,6 @@
 	"peerDependencies": {
 		"@angular/common": "catalog:",
 		"@angular/core": "catalog:",
-		"@angular/fire": "catalog:",
 		"firebase": "catalog:",
 		"reflect-metadata": "catalog:"
 	},

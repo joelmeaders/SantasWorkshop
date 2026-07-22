@@ -4,7 +4,6 @@ import {
 	inject,
 	viewChild,
 } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
 import {
 	AlertController,
 	ModalController,
@@ -31,7 +30,11 @@ import {
 	IonSpinner,
 } from '@ionic/angular/standalone';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { AppStateService, NiceFormErrorPipe } from '@santashop/core';
+import {
+	AnalyticsWrapper,
+	AppStateService,
+	NiceFormErrorPipe,
+} from '@santashop/core';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { SignUpPageService } from './sign-up.page.service';
@@ -82,7 +85,7 @@ export class SignUpPage {
 	private readonly alertController = inject(AlertController);
 	private readonly translateService = inject(TranslateService);
 	private readonly modalController = inject(ModalController);
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
 
 	public readonly form = this.viewService.form;
@@ -130,7 +133,7 @@ export class SignUpPage {
 		await alert.present();
 		const shouldContinue = await alert.onDidDismiss();
 
-		logEvent(this.analytics, 'confirmed_email', {
+		this.analytics.logEventWithParams('confirmed_email', {
 			value: shouldContinue.role,
 		});
 
@@ -138,7 +141,7 @@ export class SignUpPage {
 	}
 
 	public async showPrivacyPolicyModal(): Promise<void> {
-		logEvent(this.analytics, 'viewed_privacypolicy');
+		this.analytics.logEvent('viewed_privacypolicy');
 		const modal = await this.modalController.create({
 			component: PrivacyPolicyModalComponent,
 		});
@@ -146,7 +149,7 @@ export class SignUpPage {
 	}
 
 	public async showTermsConditionsModal(): Promise<void> {
-		logEvent(this.analytics, 'viewed_termsofservice');
+		this.analytics.logEvent('viewed_termsofservice');
 		const modal = await this.modalController.create({
 			component: TermsOfServiceModalComponent,
 		});

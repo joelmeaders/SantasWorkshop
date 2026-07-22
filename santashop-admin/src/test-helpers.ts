@@ -1,9 +1,4 @@
 import { Provider } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { Storage } from '@angular/fire/storage';
-import { Analytics } from '@angular/fire/analytics';
 import { ActivatedRoute } from '@angular/router';
 import {
 	ModalController,
@@ -13,11 +8,22 @@ import {
 } from '@ionic/angular/standalone';
 import { of } from 'rxjs';
 import {
+	FIREBASE_ANALYTICS,
+	FIREBASE_AUTH,
+	FIREBASE_FIRESTORE,
+	FIREBASE_FUNCTIONS,
+	FIREBASE_STORAGE,
 	FirestoreWrapper,
 	FireRepoLite,
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 } from '@santashop/core';
+
+import type { Analytics } from 'firebase/analytics';
+import type { Auth } from 'firebase/auth';
+import type { Firestore } from 'firebase/firestore';
+import type { Functions } from 'firebase/functions';
+import type { FirebaseStorage } from 'firebase/storage';
 
 /**
  * Creates a mock Firebase Auth instance.
@@ -45,7 +51,7 @@ export function createAuthMock(): jasmine.SpyObj<Auth> {
  */
 export function provideAuthMock(): Provider {
 	return {
-		provide: Auth,
+		provide: FIREBASE_AUTH,
 		useFactory: createAuthMock,
 	};
 }
@@ -163,7 +169,7 @@ export function createFirestoreMock(): jasmine.SpyObj<Firestore> {
  */
 export function provideFirestoreMock(): Provider {
 	return {
-		provide: Firestore,
+		provide: FIREBASE_FIRESTORE,
 		useFactory: createFirestoreMock,
 	};
 }
@@ -211,7 +217,7 @@ export function createFunctionsMock(): jasmine.SpyObj<Functions> {
  */
 export function provideFunctionsMock(): Provider {
 	return {
-		provide: Functions,
+		provide: FIREBASE_FUNCTIONS,
 		useFactory: createFunctionsMock,
 	};
 }
@@ -219,8 +225,8 @@ export function provideFunctionsMock(): Provider {
 /**
  * Creates a mock Firebase Storage instance.
  */
-export function createStorageMock(): jasmine.SpyObj<Storage> {
-	return jasmine.createSpyObj('Storage', ['ref', 'upload']);
+export function createStorageMock(): jasmine.SpyObj<FirebaseStorage> {
+	return jasmine.createSpyObj('Storage', ['app', 'maxUploadRetryTime']);
 }
 
 /**
@@ -228,7 +234,7 @@ export function createStorageMock(): jasmine.SpyObj<Storage> {
  */
 export function provideStorageMock(): Provider {
 	return {
-		provide: Storage,
+		provide: FIREBASE_STORAGE,
 		useFactory: createStorageMock,
 	};
 }
@@ -249,7 +255,7 @@ export function createAnalyticsMock(): jasmine.SpyObj<Analytics> {
  */
 export function provideAnalyticsMock(): Provider {
 	return {
-		provide: Analytics,
+		provide: FIREBASE_ANALYTICS,
 		useFactory: createAnalyticsMock,
 	};
 }

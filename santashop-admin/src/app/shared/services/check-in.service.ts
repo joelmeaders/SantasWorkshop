@@ -1,37 +1,33 @@
 import { Injectable, inject } from '@angular/core';
 import { LoadingController } from '@ionic/angular/standalone';
 import { Registration } from '@santashop/models';
-import { Functions, httpsCallable } from '@angular/fire/functions';
-import { HttpsCallableResult } from '@santashop/core';
+import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class CheckInService {
-	private readonly functions = inject(Functions);
+	private readonly functions = inject(FunctionsWrapper);
 	private readonly loadingController = inject(LoadingController);
 
 	private readonly checkInFn = (
 		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<Registration, number>(
-			this.functions,
-			'checkIn',
-		)(registration);
+		this.functions.callableWrapper<Registration, number>('checkIn')(
+			registration,
+		);
 
 	private readonly checkInWithEditFn = (
 		registration: Partial<Registration>,
 	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<Registration, number>(
-			this.functions,
+		this.functions.callableWrapper<Registration, number>(
 			'checkInWithEdit',
 		)(registration);
 
 	private readonly onSiteRegistrationFn = (
 		registration: Registration,
 	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<Registration, number>(
-			this.functions,
+		this.functions.callableWrapper<Registration, number>(
 			'onSiteRegistration',
 		)(registration);
 

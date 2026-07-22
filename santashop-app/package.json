@@ -25,7 +25,6 @@
 		"@angular/animations": "catalog:",
 		"@angular/common": "catalog:",
 		"@angular/core": "catalog:",
-		"@angular/fire": "catalog:",
 		"@angular/forms": "catalog:",
 		"@angular/platform-browser": "catalog:",
 		"@angular/router": "catalog:",
@@ -33,7 +32,6 @@
 		"@ngx-translate/core": "catalog:",
 		"@ngx-translate/http-loader": "catalog:",
 		"firebase": "catalog:",
-		"rxfire": "catalog:",
 		"rxjs": "catalog:",
 		"tslib": "catalog:",
 		"zone.js": "catalog:"

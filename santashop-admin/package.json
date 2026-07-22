@@ -24,7 +24,6 @@
 		"@angular/animations": "catalog:",
 		"@angular/common": "catalog:",
 		"@angular/core": "catalog:",
-		"@angular/fire": "catalog:",
 		"@angular/forms": "catalog:",
 		"@angular/platform-browser": "catalog:",
 		"@angular/router": "catalog:",
@@ -33,7 +32,6 @@
 		"chartjs-plugin-datalabels": "catalog:",
 		"firebase": "catalog:",
 		"ng2-charts": "catalog:",
-		"rxfire": "catalog:",
 		"rxjs": "catalog:",
 		"tslib": "catalog:",
 		"zone.js": "catalog:"

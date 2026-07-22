@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import {
-	Functions as _Functions,
 	httpsCallable,
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
-} from '@angular/fire/functions';
+} from 'firebase/functions';
 import { ChangeUserInfo, UpdateReferredBy } from '@santashop/models';
+import { FIREBASE_FUNCTIONS } from '../tokens';
 
-export type Functions = _Functions;
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
 	RequestData,
 	ResponseData
@@ -20,7 +19,7 @@ export type HttpsCallableResult<ResponseData> =
 	providedIn: 'root',
 })
 export class FunctionsWrapper {
-	private readonly functions = inject(_Functions);
+	private readonly functions = inject(FIREBASE_FUNCTIONS);
 
 	public readonly callableWrapper = <RequestData, ResponseData>(
 		name: string,

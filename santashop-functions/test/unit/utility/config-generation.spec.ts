@@ -7,8 +7,20 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 		string,
 		{ production: boolean; label: string; appCheckKey: string }
 	>;
-	parseFirebaseConfigMode: (value?: string) => 'dev' | 'test' | 'prod';
-	buildFirebaseClientConfig: (mode: 'dev' | 'test' | 'prod') => {
+	LOCAL_FIREBASE_CONFIG: {
+		apiKey: string;
+		authDomain: string;
+		databaseURL: string;
+		projectId: string;
+		storageBucket: string;
+		messagingSenderId: string;
+		appId: string;
+		measurementId: string;
+	};
+	parseFirebaseConfigMode: (
+		value?: string,
+	) => 'dev' | 'local' | 'test' | 'prod';
+	buildFirebaseClientConfig: (mode: 'dev' | 'local' | 'test' | 'prod') => {
 		apiKey: string;
 		authDomain: string;
 		databaseURL: string;
@@ -20,7 +32,7 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 	};
 	buildAppConfig: (
 		target: 'app' | 'admin',
-		mode: 'dev' | 'test' | 'prod',
+		mode: 'dev' | 'local' | 'test' | 'prod',
 	) => {
 		production: boolean;
 		label: string;
@@ -40,11 +52,13 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 	}) => string;
 };
 const configFunctions = requireFromTest('../../../../config.functions.cjs') as {
-	FUNCTION_PROJECT_IDS: Record<'test' | 'prod', string>;
-	parseMode: (value?: string) => 'test' | 'prod';
-	buildFunctionsConfig: (mode: 'test' | 'prod') => Record<string, string>;
+	FUNCTION_PROJECT_IDS: Record<'local' | 'test' | 'prod', string>;
+	parseMode: (value?: string) => 'local' | 'test' | 'prod';
+	buildFunctionsConfig: (
+		mode: 'local' | 'test' | 'prod',
+	) => Record<string, string>;
 	renderFunctionsEnvFile: (
-		mode: 'test' | 'prod',
+		mode: 'local' | 'test' | 'prod',
 		projectId: string,
 		config: Record<string, string>,
 	) => string;
@@ -190,6 +204,7 @@ describe('config.firebase.cjs', () => {
 		expect(configFirebase.parseFirebaseConfigMode('development')).toBe(
 			'dev',
 		);
+		expect(configFirebase.parseFirebaseConfigMode('local')).toBe('local');
 		expect(configFirebase.parseFirebaseConfigMode('qa')).toBe('test');
 		expect(configFirebase.parseFirebaseConfigMode(undefined)).toBe('prod');
 	});
@@ -206,6 +221,14 @@ describe('config.firebase.cjs', () => {
 		expect(prodConfig.apiKey).toBe(FIREBASE_ENV_KEYS.PROD_FIREBASE_API_KEY);
 		expect(prodConfig.projectId).toBe(
 			FIREBASE_ENV_KEYS.PROD_FIREBASE_PROJECT_ID,
+		);
+	});
+
+	it('uses a hardcoded demo project for local mode without reading environment variables', () => {
+		setManagedEnv({});
+
+		expect(configFirebase.buildFirebaseClientConfig('local')).toEqual(
+			configFirebase.LOCAL_FIREBASE_CONFIG,
 		);
 	});
 
@@ -267,14 +290,50 @@ describe('config.firebase.cjs', () => {
 describe('config.functions.cjs', () => {
 	it('maps development-style aliases to the test project and defaults to prod', () => {
 		expect(configFunctions.parseMode('development')).toBe('test');
+		expect(configFunctions.parseMode('local')).toBe('local');
 		expect(configFunctions.parseMode('qa')).toBe('test');
 		expect(configFunctions.parseMode(undefined)).toBe('prod');
+		expect(configFunctions.FUNCTION_PROJECT_IDS.local).toBe(
+			'demo-santashop',
+		);
 		expect(configFunctions.FUNCTION_PROJECT_IDS.test).toBe(
 			'santas-workshop-test',
 		);
 		expect(configFunctions.FUNCTION_PROJECT_IDS.prod).toBe(
 			'santas-workshop-193b5',
 		);
+	});
+
+	it('builds local Functions config from LOCAL values and falls back to unprefixed ones', () => {
+		setManagedEnv({
+			AWS_ACCESS_KEY_ID: 'fallback-access-key',
+			AWS_SECRET_ACCESS_KEY: 'fallback-secret-key',
+			ADMIN_BOOTSTRAP_PASSWORD: 'fallback-password',
+			SANTASHOP_PROGRAM_YEAR: '2029',
+			SANTASHOP_TIME_ZONE: 'America/Chicago',
+			SANTASHOP_TIME_OFFSET: '-06:00',
+			SANTASHOP_DEFAULT_MAX_SLOTS: '250',
+			FIRESTORE_BACKUP_BUCKET: 'gs://fallback-backups',
+			SES_REGION: 'us-central-1',
+			REGISTRATION_EMAIL_TEMPLATE: 'fallback-registration',
+			REMINDER_EMAIL_TEMPLATE: 'fallback-reminder',
+			SANTASHOP_EVENT_DISPLAY_NAME: 'Fallback Event',
+			REGISTRATION_EMAIL_SOURCE: 'fallback@example.com',
+			REGISTRATION_EMAIL_RETURN_PATH: 'fallback-admin@example.com',
+			SCHEDULED_FIRESTORE_BACKUP: '10 0 * * *',
+			SCHEDULED_DATETIME_SLOT_COUNTERS: '11 * * * *',
+			SCHEDULED_REGISTRATION_STATS: '12 1 * * *',
+			SCHEDULED_USER_STATS: '13 2 * * *',
+			SCHEDULED_CHECKIN_STATS: '14 3 * * *',
+			LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 'Local Event',
+			LOCAL_SES_REGION: 'us-west-1',
+		});
+
+		const config = configFunctions.buildFunctionsConfig('local');
+
+		expect(config['AWS_ACCESS_KEY_ID']).toBe('fallback-access-key');
+		expect(config['SES_REGION']).toBe('us-west-1');
+		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Local Event');
 	});
 
 	it('builds test Functions config from TEST values and omits empty optional values', () => {

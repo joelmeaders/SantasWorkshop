@@ -28,6 +28,11 @@ const MODE_METADATA = {
 		label: 'DEV',
 		appCheckKey: '2839440c-0a91-4c48-921a-451020157001',
 	},
+	local: {
+		production: false,
+		label: 'LOCAL',
+		appCheckKey: '2839440c-0a91-4c48-921a-451020157001',
+	},
 	test: {
 		production: true,
 		label: 'TEST/QA',
@@ -49,6 +54,17 @@ const FIREBASE_CONFIG_ENV_KEYS = {
 	messagingSenderId: 'FIREBASE_MESSAGING_SENDER_ID',
 	appId: 'FIREBASE_APP_ID',
 	measurementId: 'FIREBASE_MEASUREMENT_ID',
+};
+
+const LOCAL_FIREBASE_CONFIG = {
+	apiKey: 'demo-api-key',
+	authDomain: 'demo-santashop.firebaseapp.com',
+	databaseURL: 'http://127.0.0.1:9000?ns=demo-santashop',
+	projectId: 'demo-santashop',
+	storageBucket: 'demo-santashop.appspot.com',
+	messagingSenderId: '000000000000',
+	appId: '1:000000000000:web:0000000000000000000000',
+	measurementId: 'G-LOCAL0000',
 };
 
 const loadLocalEnvFiles = () => {
@@ -76,19 +92,28 @@ const requireEnvValue = (mode, envKey) => {
 	return value;
 };
 
-const buildFirebaseClientConfig = (mode) => ({
-	apiKey: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.apiKey),
-	authDomain: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.authDomain),
-	databaseURL: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.databaseURL),
-	projectId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.projectId),
-	storageBucket: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.storageBucket),
-	messagingSenderId: requireEnvValue(
-		mode,
-		FIREBASE_CONFIG_ENV_KEYS.messagingSenderId,
-	),
-	appId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.appId),
-	measurementId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.measurementId),
-});
+const buildFirebaseClientConfig = (mode) => {
+	if (mode === 'local') {
+		return LOCAL_FIREBASE_CONFIG;
+	}
+
+	return {
+		apiKey: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.apiKey),
+		authDomain: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.authDomain),
+		databaseURL: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.databaseURL),
+		projectId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.projectId),
+		storageBucket: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.storageBucket),
+		messagingSenderId: requireEnvValue(
+			mode,
+			FIREBASE_CONFIG_ENV_KEYS.messagingSenderId,
+		),
+		appId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.appId),
+		measurementId: requireEnvValue(
+			mode,
+			FIREBASE_CONFIG_ENV_KEYS.measurementId,
+		),
+	};
+};
 
 const readAppPackageConfig = (target) => {
 	return JSON.parse(
@@ -124,6 +149,10 @@ const parseFirebaseConfigTarget = (value) => {
 const parseFirebaseConfigMode = (value) => {
 	if (value === 'dev' || value === 'development') {
 		return 'dev';
+	}
+
+	if (value === 'local') {
+		return 'local';
 	}
 
 	if (!value || value === 'prod' || value === 'production') {
@@ -169,6 +198,7 @@ module.exports = {
 	APP_METADATA,
 	MODE_METADATA,
 	FIREBASE_CONFIG_ENV_KEYS,
+	LOCAL_FIREBASE_CONFIG,
 	loadLocalEnvFiles,
 	getModePrefix,
 	getEnvValue,

@@ -73,15 +73,15 @@ if (!config.production) {
 	connectFirestoreEmulator(firebaseFirestore, 'localhost', 8080);
 }
 
-const firebaseAnalytics = getAnalytics(firebaseApp);
-
 const firebaseProviders = [
 	{ provide: FIREBASE_APP, useValue: firebaseApp },
 	{ provide: FIREBASE_AUTH, useValue: firebaseAuth },
 	{ provide: FIREBASE_STORAGE, useValue: firebaseStorage },
 	{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
 	{ provide: FIREBASE_FIRESTORE, useValue: firebaseFirestore },
-	{ provide: FIREBASE_ANALYTICS, useValue: firebaseAnalytics },
+	...(config.production
+		? [{ provide: FIREBASE_ANALYTICS, useValue: getAnalytics(firebaseApp) }]
+		: []),
 ];
 
 if (config.production) {

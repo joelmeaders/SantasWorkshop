@@ -3,6 +3,7 @@ const path = require('node:path');
 const { loadEnvFiles } = require('./scripts/env-loader.cjs');
 
 const FUNCTION_PROJECT_IDS = {
+	local: 'demo-santashop',
 	test: 'santas-workshop-test',
 	prod: 'santas-workshop-193b5',
 };
@@ -49,6 +50,10 @@ const loadLocalEnvFiles = () => {
 };
 
 const parseMode = (value) => {
+	if (value === 'local') {
+		return 'local';
+	}
+
 	if (!value || value === 'prod' || value === 'production') {
 		return 'prod';
 	}
@@ -63,11 +68,17 @@ const parseMode = (value) => {
 	}
 
 	throw new Error(
-		'Expected Functions config mode to be one of: test, qa, dev, development, prod, production.',
+		'Expected Functions config mode to be one of: local, test, qa, dev, development, prod, production.',
 	);
 };
 
-const getModePrefix = (mode) => (mode === 'test' ? 'TEST' : 'PROD');
+const getModePrefix = (mode) => {
+	if (mode === 'local') {
+		return 'LOCAL';
+	}
+
+	return mode === 'test' ? 'TEST' : 'PROD';
+};
 
 const getEnvValue = (mode, envKey) => {
 	const prefixedEnvKey = `${getModePrefix(mode)}_${envKey}`;

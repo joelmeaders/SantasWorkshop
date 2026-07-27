@@ -141,5 +141,8 @@
       "browserslist": "4.28.6",
       "caniuse-lite": "1.0.30001805"
     }
+  },
+  "volta": {
+    "node": "24.18.0"
   }
 }

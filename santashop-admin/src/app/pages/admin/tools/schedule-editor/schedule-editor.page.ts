@@ -152,10 +152,13 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		const startDate = this.generatorForm.controls['startDate'].value as string;
+		const startDate = this.generatorForm.controls['startDate']
+			.value as string;
 		const endDate = this.generatorForm.controls['endDate'].value as string;
 		const capacity = Number(this.generatorForm.controls['capacity'].value);
-		const startHour = Number(this.generatorForm.controls['startHour'].value);
+		const startHour = Number(
+			this.generatorForm.controls['startHour'].value,
+		);
 		const endHour = Number(this.generatorForm.controls['endHour'].value);
 
 		try {
@@ -217,10 +220,7 @@ export class ScheduleEditorPage {
 			changes.enabled = false;
 		}
 
-		if (
-			changes.maxSlots === undefined &&
-			changes.enabled === undefined
-		) {
+		if (changes.maxSlots === undefined && changes.enabled === undefined) {
 			await this.showError(
 				'Nothing to update',
 				'Choose a capacity or enabled state to apply.',
@@ -252,15 +252,13 @@ export class ScheduleEditorPage {
 		return !!slotId && this.selectedSlotIds.has(slotId);
 	}
 
-	public toggleSelection(
-		slotId: string | undefined,
-		event: Event,
-	): void {
+	public toggleSelection(slotId: string | undefined, event: Event): void {
 		if (!slotId) {
 			return;
 		}
 
-		const checked = (event as CustomEvent<{ checked: boolean }>).detail.checked;
+		const checked = (event as CustomEvent<{ checked: boolean }>).detail
+			.checked;
 		const next = new Set(this.selectedSlotIds);
 
 		if (checked) {
@@ -294,7 +292,8 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		const value = (event as CustomEvent<{ value?: string | null }>).detail.value;
+		const value = (event as CustomEvent<{ value?: string | null }>).detail
+			.value;
 
 		if (!value) {
 			this.slotDateDrafts.delete(slotId);
@@ -309,9 +308,11 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		const rawValue = (event as CustomEvent<{
-			value?: string | number | null;
-		}>).detail.value;
+		const rawValue = (
+			event as CustomEvent<{
+				value?: string | number | null;
+			}>
+		).detail.value;
 
 		if (rawValue === '' || rawValue === null || rawValue === undefined) {
 			this.slotHourDrafts.delete(slotId);
@@ -332,18 +333,17 @@ export class ScheduleEditorPage {
 		slot: ScheduleEditorRow,
 		event: Event,
 	): Promise<void> {
-		const rawValue = (event as CustomEvent<{
-			value?: string | number | null;
-		}>).detail.value;
+		const rawValue = (
+			event as CustomEvent<{
+				value?: string | number | null;
+			}>
+		).detail.value;
 		let value = 0;
 
 		try {
 			value = this.parseRequiredCapacity(rawValue);
 		} catch (error: unknown) {
-			await this.showError(
-				'Invalid capacity',
-				this.errorMessage(error),
-			);
+			await this.showError('Invalid capacity', this.errorMessage(error));
 			return;
 		}
 
@@ -369,11 +369,17 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		const draftDate = this.slotDateDrafts.get(slot.id) ?? this.formatDateInput(slot.dateTime);
-		const draftHour = this.slotHourDrafts.get(slot.id) ?? slot.dateTime.getHours();
+		const draftDate =
+			this.slotDateDrafts.get(slot.id) ??
+			this.formatDateInput(slot.dateTime);
+		const draftHour =
+			this.slotHourDrafts.get(slot.id) ?? slot.dateTime.getHours();
 
 		if (!Number.isInteger(draftHour) || draftHour < 0 || draftHour > 23) {
-			await this.showError('Invalid time', 'Hour must be between 0 and 23.');
+			await this.showError(
+				'Invalid time',
+				'Hour must be between 0 and 23.',
+			);
 			return;
 		}
 
@@ -410,11 +416,14 @@ export class ScheduleEditorPage {
 		slot: ScheduleEditorRow,
 		event: Event,
 	): Promise<void> {
-		const enabled = (event as CustomEvent<{ checked: boolean }>).detail.checked;
+		const enabled = (event as CustomEvent<{ checked: boolean }>).detail
+			.checked;
 		const selectedSlots = await this.getEditableSlots(slot);
 
 		try {
-			await this.scheduleEditorService.bulkUpdate(selectedSlots, { enabled });
+			await this.scheduleEditorService.bulkUpdate(selectedSlots, {
+				enabled,
+			});
 		} catch (error: unknown) {
 			await this.showError(
 				'Unable to update schedules',
@@ -432,7 +441,8 @@ export class ScheduleEditorPage {
 		}
 
 		const reservations = slot.slotsReserved ?? 0;
-		const reservationLabel = reservations === 1 ? 'reservation' : 'reservations';
+		const reservationLabel =
+			reservations === 1 ? 'reservation' : 'reservations';
 		const deleteMessage =
 			reservations > 0
 				? `This slot already has ${reservations} ${reservationLabel}. Deleting it cannot be undone.`
@@ -451,9 +461,13 @@ export class ScheduleEditorPage {
 					role: 'destructive',
 					handler: async (): Promise<void> => {
 						try {
-							await this.scheduleEditorService.deleteSlot(slot.id as string);
+							await this.scheduleEditorService.deleteSlot(
+								slot.id as string,
+							);
 							this.selectedSlotIds.delete(slot.id as string);
-							this.selectedSlotIds = new Set(this.selectedSlotIds);
+							this.selectedSlotIds = new Set(
+								this.selectedSlotIds,
+							);
 							this.statusMessage = 'Schedule deleted.';
 						} catch (error: unknown) {
 							await this.showError(
@@ -534,9 +548,7 @@ export class ScheduleEditorPage {
 		return this.parseCapacityValue(rawValue);
 	}
 
-	private parseRequiredCapacity(
-		rawValue: CapacityInputValue,
-	): number {
+	private parseRequiredCapacity(rawValue: CapacityInputValue): number {
 		if (rawValue === '' || rawValue === null || rawValue === undefined) {
 			throw new TypeError('Capacity is required.');
 		}
@@ -587,7 +599,8 @@ export class ScheduleEditorPage {
 
 	public getSlotDraftDate(slot: ScheduleEditorRow): string {
 		return slot.id
-			? (this.slotDateDrafts.get(slot.id) ?? this.formatDateInput(slot.dateTime))
+			? (this.slotDateDrafts.get(slot.id) ??
+					this.formatDateInput(slot.dateTime))
 			: this.formatDateInput(slot.dateTime);
 	}
 

@@ -22,17 +22,29 @@ describe('ScheduleEditorPage', () => {
 		slotsSubject = new BehaviorSubject<DateTimeSlot[]>([]);
 		scheduleEditorService = jasmine.createSpyObj<ScheduleEditorService>(
 			'ScheduleEditorService',
-			['createSlots', 'bulkUpdate', 'updateSlot', 'deleteSlot', 'setYear', 'refresh'],
+			[
+				'createSlots',
+				'bulkUpdate',
+				'updateSlot',
+				'deleteSlot',
+				'setYear',
+				'refresh',
+			],
 		);
 		Object.defineProperty(scheduleEditorService, 'slots$', {
 			value: slotsSubject.asObservable(),
 		});
-		scheduleEditorService.createSlots.and.resolveTo({ created: 0, skipped: 0 });
+		scheduleEditorService.createSlots.and.resolveTo({
+			created: 0,
+			skipped: 0,
+		});
 		scheduleEditorService.bulkUpdate.and.resolveTo();
 		scheduleEditorService.updateSlot.and.resolveTo();
 		scheduleEditorService.deleteSlot.and.resolveTo();
 
-		alerts = jasmine.createSpyObj<AlertController>('AlertController', ['create']);
+		alerts = jasmine.createSpyObj<AlertController>('AlertController', [
+			'create',
+		]);
 		alerts.create.and.returnValue(
 			Promise.resolve({
 				present: jasmine.createSpy('present').and.resolveTo(),
@@ -149,8 +161,8 @@ describe('ScheduleEditorPage', () => {
 		await component.updateCapacity(firstSlot, createValueEvent('12'));
 
 		// Assert
-		const [updatedSlots, changes] = scheduleEditorService.bulkUpdate.calls
-			.mostRecent().args;
+		const [updatedSlots, changes] =
+			scheduleEditorService.bulkUpdate.calls.mostRecent().args;
 		expect(updatedSlots).toHaveSize(2);
 		expect(changes).toEqual({ maxSlots: 12 });
 	});

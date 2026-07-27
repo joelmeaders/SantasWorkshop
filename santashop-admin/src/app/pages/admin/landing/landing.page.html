@@ -7,17 +7,11 @@
 			disabled
 			[disabled]="(checkinEnabled$ | async) === false"
 		>
-			<ion-icon name="bag-check-outline"
-				color="success"
-				slot="start"
-			 />
+			<ion-icon name="bag-check-outline" color="success" slot="start" />
 			Check in customers
 		</ion-item>
 		<ion-item detail routerLink="../search">
-			<ion-icon name="search-outline"
-				color="warning"
-				slot="start"
-			 />
+			<ion-icon name="search-outline" color="warning" slot="start" />
 			Search for customers
 		</ion-item>
 		<ion-item
@@ -25,10 +19,7 @@
 			routerLink="../registration"
 			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
 		>
-			<ion-icon name="storefront-outline"
-				color="primary"
-				slot="start"
-			 />
+			<ion-icon name="storefront-outline" color="primary" slot="start" />
 			On-Site Registration
 		</ion-item>
 
@@ -39,24 +30,15 @@
 			routerLink="../pre-registration"
 			[disabled]="(preRegistrationEnabled$ | async) === false"
 		>
-			<ion-icon name="person-add-outline"
-				color="primary"
-				slot="start"
-			 />
+			<ion-icon name="person-add-outline" color="primary" slot="start" />
 			Pre-Register Customers
 		</ion-item>
 		<ion-item detail routerLink="../resend-email">
-			<ion-icon name="mail-outline"
-				color="tertiary"
-				slot="start"
-			 />
+			<ion-icon name="mail-outline" color="tertiary" slot="start" />
 			Resend Registration Emails
 		</ion-item>
 		<ion-item detail routerLink="../schedule-editor">
-			<ion-icon name="calendar-outline"
-				color="secondary"
-				slot="start"
-			 />
+			<ion-icon name="calendar-outline" color="secondary" slot="start" />
 			Schedule & Capacity Editor
 		</ion-item>
 
@@ -66,39 +48,34 @@
 			Registration Stats
 		</ion-item>
 		<ion-item detail routerLink="../stats/check-in">
-			<ion-icon name="cart-outline"
-				color="secondary"
-				slot="start"
-			 />
+			<ion-icon name="cart-outline" color="secondary" slot="start" />
 			Check-In Stats
 		</ion-item>
 		<ion-item detail routerLink="../stats/user">
-			<ion-icon name="people-outline"
-				color="tertiary"
-				slot="start"
-			 />
+			<ion-icon name="people-outline" color="tertiary" slot="start" />
 			User Stats
 		</ion-item>
 		}
 
 		<ion-list-header> Other </ion-list-header>
-		<ion-item (click)="signOut()" (keydown.enter)="signOut()" detail button tappable>
-			<ion-icon name="exit-outline"
-				color="danger"
-				slot="start"
-			 />
+		<ion-item
+			(click)="signOut()"
+			(keydown.enter)="signOut()"
+			detail
+			button
+			tappable
+		>
+			<ion-icon name="exit-outline" color="danger" slot="start" />
 			Sign Out
 		</ion-item>
 		<ion-item>
-			<ion-icon name="moon-outline"
-				color="tertiary"
-				slot="start"
-			 />
+			<ion-icon name="moon-outline" color="tertiary" slot="start" />
 			Theme (Light or Dark)
-			<ion-toggle slot="end"
+			<ion-toggle
+				slot="end"
 				(ionChange)="toggleTheme()"
 				[checked]="appStateService.prefersDark"
-			 />
+			/>
 		</ion-item>
 	</ion-list>
 </ion-content>

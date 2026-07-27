@@ -36,7 +36,9 @@ export class ScheduleEditorService {
 	private readonly duplicateSlotMessage =
 		'A schedule already exists for that date and time.';
 
-	private readonly year = new BehaviorSubject<number>(this.defaultProgramYear);
+	private readonly year = new BehaviorSubject<number>(
+		this.defaultProgramYear,
+	);
 	private readonly refreshTrigger = new BehaviorSubject<void>(undefined);
 
 	public readonly year$ = this.year.asObservable().pipe(shareReplay(1));
@@ -75,7 +77,9 @@ export class ScheduleEditorService {
 		this.refreshTrigger.next();
 	}
 
-	public async createSlots(slots: DateTimeSlot[]): Promise<CreateSlotsResult> {
+	public async createSlots(
+		slots: DateTimeSlot[],
+	): Promise<CreateSlotsResult> {
 		const existingSlots = await firstValueFrom(this.slots$);
 		const existingKeys = new Set(
 			existingSlots.map((slot) => this.getDateTimeKey(slot.dateTime)),
@@ -95,7 +99,9 @@ export class ScheduleEditorService {
 		await Promise.all(
 			uniqueSlots.map(async (slot) => {
 				await firstValueFrom(
-					this.dateTimeSlotCollection().add(this.toPersistedSlot(slot)),
+					this.dateTimeSlotCollection().add(
+						this.toPersistedSlot(slot),
+					),
 				);
 			}),
 		);

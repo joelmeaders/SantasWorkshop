@@ -25,7 +25,9 @@ describe('LandingPage', () => {
 			emailAddress: 'admin@example.com',
 			uid: '123',
 		});
-		authService = jasmine.createSpyObj<AuthService>('AuthService', ['logout']) as jasmine.SpyObj<AuthService> & {
+		authService = jasmine.createSpyObj<AuthService>('AuthService', [
+			'logout',
+		]) as jasmine.SpyObj<AuthService> & {
 			emailAndUid$: typeof emailSubject;
 		};
 		authService.emailAndUid$ = emailSubject;
@@ -66,7 +68,9 @@ describe('LandingPage', () => {
 		);
 
 		const scheduleEditorItem = Array.from<HTMLElement>(
-			fixture.nativeElement.querySelectorAll('ion-item') as NodeListOf<HTMLElement>,
+			fixture.nativeElement.querySelectorAll(
+				'ion-item',
+			) as NodeListOf<HTMLElement>,
 		).find((element) =>
 			element.textContent?.includes('Schedule & Capacity Editor'),
 		) as HTMLElement | undefined;

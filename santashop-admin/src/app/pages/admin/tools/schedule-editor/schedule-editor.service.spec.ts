@@ -30,9 +30,7 @@ describe('ScheduleEditorService', () => {
 		fireRepo = TestBed.inject(FireRepoLite) as jasmine.SpyObj<FireRepoLite>;
 		collection = fireRepo.collection(
 			COLLECTION_SCHEMA.dateTimeSlots,
-		) as jasmine.SpyObj<
-			IFireRepoCollection<DateTimeSlot>
-		>;
+		) as jasmine.SpyObj<IFireRepoCollection<DateTimeSlot>>;
 	});
 
 	it('should be created', () => {
@@ -48,7 +46,9 @@ describe('ScheduleEditorService', () => {
 				{
 					id: 'later',
 					programYear: 2025,
-					dateTime: { toDate: (): Date => laterDate } as unknown as Date,
+					dateTime: {
+						toDate: (): Date => laterDate,
+					} as unknown as Date,
 					maxSlots: 20,
 					enabled: true,
 				},

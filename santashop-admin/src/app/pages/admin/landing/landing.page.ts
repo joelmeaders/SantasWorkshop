@@ -15,6 +15,7 @@ import {
 	peopleOutline,
 	exitOutline,
 	moonOutline,
+	calendarOutline,
 } from 'ionicons/icons';
 import {
 	IonRouterLink,
@@ -90,6 +91,7 @@ export class LandingPage {
 			peopleOutline,
 			exitOutline,
 			moonOutline,
+			calendarOutline,
 		});
 		addIcons({
 			bagCheckOutline,
@@ -102,6 +104,7 @@ export class LandingPage {
 			peopleOutline,
 			exitOutline,
 			moonOutline,
+			calendarOutline,
 		});
 		addIcons({
 			bagCheckOutline,
@@ -114,6 +117,7 @@ export class LandingPage {
 			peopleOutline,
 			exitOutline,
 			moonOutline,
+			calendarOutline,
 		});
 	}
 }

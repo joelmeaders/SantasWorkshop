@@ -168,6 +168,14 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'schedule-editor',
+				title: 'DSCS: Schedule Editor',
+				loadComponent: () =>
+					import('./pages/admin/tools/schedule-editor/schedule-editor.page').then(
+						(m) => m.ScheduleEditorPage,
+					),
+			},
+			{
 				path: '',
 				redirectTo: 'landing',
 				pathMatch: 'full',

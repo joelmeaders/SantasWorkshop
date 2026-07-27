@@ -40,14 +40,16 @@ import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 
 const firebaseApp = initializeApp(firebaseConfig);
 
-if (!config.production) {
-	(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-}
+if (config.appCheckEnabled) {
+	if (!config.production) {
+		(self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+	}
 
-initializeAppCheck(firebaseApp, {
-	provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
-	isTokenAutoRefreshEnabled: true,
-});
+	initializeAppCheck(firebaseApp, {
+		provider: new ReCaptchaEnterpriseProvider(config.appCheckKey),
+		isTokenAutoRefreshEnabled: true,
+	});
+}
 
 const firebaseAuth = getAuth(firebaseApp);
 if (!config.production) {

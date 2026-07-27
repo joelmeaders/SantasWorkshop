@@ -5,7 +5,12 @@ const requireFromTest = createRequire(import.meta.url);
 const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 	MODE_METADATA: Record<
 		string,
-		{ production: boolean; label: string; appCheckKey: string }
+		{
+			production: boolean;
+			label: string;
+			appCheckKey: string;
+			appCheckEnabled: boolean;
+		}
 	>;
 	LOCAL_FIREBASE_CONFIG: {
 		apiKey: string;
@@ -39,7 +44,16 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 		name: string;
 		version: string;
 		appCheckKey: string;
+		appCheckEnabled: boolean;
 	};
+	renderAppConfigModule: (appConfig: {
+		production: boolean;
+		label: string;
+		name: string;
+		version: string;
+		appCheckKey: string;
+		appCheckEnabled: boolean;
+	}) => string;
 	renderFirebaseConfigModule: (firebaseConfig: {
 		apiKey: string;
 		authDomain: string;
@@ -260,13 +274,29 @@ describe('config.firebase.cjs', () => {
 
 	it('builds app metadata with the expected mode flags and labels', () => {
 		const config = configFirebase.buildAppConfig('app', 'test');
+		const localConfig = configFirebase.buildAppConfig('app', 'local');
 
 		expect(config.production).toBe(true);
 		expect(config.label).toBe('TEST/QA');
 		expect(config.appCheckKey).toBe(
 			configFirebase.MODE_METADATA.test.appCheckKey,
 		);
+		expect(config.appCheckEnabled).toBe(true);
 		expect(config.name).toBe('@santashop/app');
+		expect(localConfig.appCheckEnabled).toBe(false);
+	});
+
+	it('renders app config with the mode-specific App Check flag', () => {
+		const moduleText = configFirebase.renderAppConfigModule({
+			production: false,
+			label: 'LOCAL',
+			name: '@santashop/app',
+			version: '2025.2.1',
+			appCheckKey: 'local-app-check-key',
+			appCheckEnabled: false,
+		});
+
+		expect(moduleText).toContain('appCheckEnabled: false');
 	});
 
 	it('renders a Firebase config module with the supplied values', () => {

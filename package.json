@@ -25,7 +25,7 @@
     "emulators:start": "pnpm run config:functions:test && firebase emulators:start --project santas-workshop-test --import .firebase --export-on-exit",
     "emulators:start:noexport": "pnpm run config:functions:test && firebase emulators:start --project santas-workshop-test --import .firebase",
     "emulators:start:sample": "pnpm run config:functions:test && firebase emulators:start --project santas-workshop-test --import .firebase-sample-data --export-on-exit .firebase-sample-data",
-    "emulators:start:local": "pnpm run config:functions:local && pnpm --filter @santashop/functions build && firebase emulators:start --project demo-santashop --export-on-exit .firebase-local",
+    "emulators:start:local": "pnpm run config:functions:local && pnpm --filter @santashop/functions build && firebase emulators:start --project demo-santashop --only auth,firestore,functions,storage --import .firebase-local --export-on-exit .firebase-local",
     "fsrules:deploy": "firebase deploy --only firestore:rules",
     "prettier:format": "npx prettier --end-of-line auto --write .",
     "app:build": "pnpm run config:app:prod && pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=production",

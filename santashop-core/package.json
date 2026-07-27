@@ -8,6 +8,9 @@
 		"build": "ng build santashop-core",
 		"build:prod": "ng build santashop-core --configuration=production"
 	},
+	"engines": {
+		"node": ">=24.0.0"
+	},
 	"dependencies": {
 		"tslib": "catalog:"
 	},

@@ -15,6 +15,9 @@
 		"playwright",
 		"testing"
 	],
+	"engines": {
+		"node": ">=24.0.0"
+	},
 	"author": "",
 	"license": "ISC"
 }

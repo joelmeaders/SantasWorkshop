@@ -52,6 +52,13 @@
 			 />
 			Resend Registration Emails
 		</ion-item>
+		<ion-item detail routerLink="../schedule-editor">
+			<ion-icon name="calendar-outline"
+				color="secondary"
+				slot="start"
+			 />
+			Schedule & Capacity Editor
+		</ion-item>
 
 		<ion-list-header> DSCS Data </ion-list-header>
 		<ion-item detail routerLink="../stats/registration">
@@ -75,7 +82,7 @@
 		}
 
 		<ion-list-header> Other </ion-list-header>
-		<ion-item (click)="signOut()" detail button tappable>
+		<ion-item (click)="signOut()" (keydown.enter)="signOut()" detail button tappable>
 			<ion-icon name="exit-outline"
 				color="danger"
 				slot="start"

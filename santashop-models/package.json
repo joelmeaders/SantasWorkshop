@@ -5,6 +5,9 @@
 		"lint": "ng lint santashop-models --fix --cache",
 		"build": "ng build santashop-models"
 	},
+	"engines": {
+		"node": ">=24.0.0"
+	},
 	"peerDependencies": {},
 	"dependencies": {
 		"tslib": "catalog:"

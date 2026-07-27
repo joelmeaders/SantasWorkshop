@@ -2,6 +2,10 @@
 
 This package now uses the native Firebase Functions v2 APIs from `firebase-functions/v2/*`.
 
+## Runtime requirement
+
+- Node.js 24 is the minimum supported runtime for this package and the workspace.
+
 For the full cross-repo guide to secrets, client config, and environment flow, see `../docs/SECRETS_AND_CONFIGURATION.md`.
 
 ### Local configuration

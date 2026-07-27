@@ -47,7 +47,7 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 ## Firebase and functions gotchas
 
 - Emulator-oriented scripts target the `santas-workshop-test` Firebase project; start with the root [`README.md`](README.md) for setup.
-- `santashop-functions` uses webpack and declares Node `22`, while the root workspace pins Node `24` for app/tooling workflows. Check the relevant package before changing runtime-sensitive code.
+- `santashop-functions` uses webpack and declares Node `24`, matching the root workspace Node `24` floor for app/tooling workflows. Check the relevant package before changing runtime-sensitive code.
 - In the Functions shell, callable functions must be invoked with a `data` wrapper such as `myFunction({ data: { ... } })`. See [`santashop-functions/FUNCTIONS_SHELL_GUIDE.md`](santashop-functions/FUNCTIONS_SHELL_GUIDE.md).
 - If a new callable function or rewrite behaves like a hosting redirect locally, verify the relevant entries in [`firebase.json`](firebase.json).
 

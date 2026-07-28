@@ -41,4 +41,34 @@ describe('pubsubDeleteUsers handler', () => {
 			'enabled-user',
 		]);
 	});
+
+	it('skips elevated users and protected bootstrap admins', async () => {
+		const { pubsubDeleteUsers } = await loadPubsubHandlers(backgroundMock);
+		backgroundMock.listUsers.mockResolvedValue({
+			users: [
+				{ uid: 'enabled-user', disabled: false },
+				{
+					uid: 'checkin-user',
+					disabled: false,
+					customClaims: { roles: ['checkin'] },
+				},
+				{
+					uid: 'admin-user',
+					disabled: false,
+					customClaims: { admin: true, roles: ['admin', 'checkin'] },
+				},
+				{
+					uid: 'bIMHv99EssTqMfhX2kkYm2vErwu1',
+					disabled: false,
+				},
+			],
+			pageToken: undefined,
+		});
+		backgroundMock.deleteUsers.mockResolvedValue({});
+
+		await expect(pubsubDeleteUsers()).resolves.toBeUndefined();
+		expect(backgroundMock.deleteUsers).toHaveBeenCalledWith([
+			'enabled-user',
+		]);
+	});
 });

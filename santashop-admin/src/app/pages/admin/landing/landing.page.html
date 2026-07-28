@@ -22,9 +22,6 @@
 			<ion-icon name="storefront-outline" color="primary" slot="start" />
 			On-Site Registration
 		</ion-item>
-
-		@if ((isAdmin$ | async) === true) {
-		<ion-list-header> Tools </ion-list-header>
 		<ion-item
 			detail
 			routerLink="../pre-registration"
@@ -33,6 +30,9 @@
 			<ion-icon name="person-add-outline" color="primary" slot="start" />
 			Pre-Register Customers
 		</ion-item>
+
+		@if ((isAdmin$ | async) === true) {
+		<ion-list-header> Tools </ion-list-header>
 		<ion-item detail routerLink="../resend-email">
 			<ion-icon name="mail-outline" color="tertiary" slot="start" />
 			Resend Registration Emails
@@ -40,6 +40,10 @@
 		<ion-item detail routerLink="../schedule-editor">
 			<ion-icon name="calendar-outline" color="secondary" slot="start" />
 			Schedule & Capacity Editor
+		</ion-item>
+		<ion-item detail routerLink="../users">
+			<ion-icon name="people-outline" color="primary" slot="start" />
+			User Management
 		</ion-item>
 
 		<ion-list-header> DSCS Data </ion-list-header>

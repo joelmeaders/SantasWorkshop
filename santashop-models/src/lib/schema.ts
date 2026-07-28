@@ -11,6 +11,7 @@ export const COLLECTION_SCHEMA = {
 	tmpRegistrationEmails: 'tmp_registrationemails',
 	tmpResendRegistrationEmails: 'tmp_registrationemails2',
 	parameters: 'parameters',
+	staff: 'staff',
 	// campaigns: (organizationId: string): string =>
 	//   `${COLLECTION_SCHEMA.organizations}/${organizationId}/campaigns`
 };

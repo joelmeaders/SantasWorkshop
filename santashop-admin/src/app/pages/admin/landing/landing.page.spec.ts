@@ -1,16 +1,15 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AppStateService, AuthService } from '@santashop/core';
-import { UserEmailUid } from '@santashop/models';
 import { BehaviorSubject, of } from 'rxjs';
 import { LandingPage } from './landing.page';
 
 describe('LandingPage', () => {
 	let component: LandingPage;
 	let fixture: ComponentFixture<LandingPage>;
-	let emailSubject: BehaviorSubject<UserEmailUid>;
+	let adminSubject: BehaviorSubject<boolean>;
 	let authService: jasmine.SpyObj<AuthService> & {
-		emailAndUid$: BehaviorSubject<UserEmailUid>;
+		isAdmin$: BehaviorSubject<boolean>;
 	};
 	let appStateService: Pick<
 		AppStateService,
@@ -21,16 +20,13 @@ describe('LandingPage', () => {
 	>;
 
 	beforeEach(waitForAsync(() => {
-		emailSubject = new BehaviorSubject<UserEmailUid>({
-			emailAddress: 'admin@example.com',
-			uid: '123',
-		});
+		adminSubject = new BehaviorSubject<boolean>(true);
 		authService = jasmine.createSpyObj<AuthService>('AuthService', [
 			'logout',
 		]) as jasmine.SpyObj<AuthService> & {
-			emailAndUid$: typeof emailSubject;
+			isAdmin$: typeof adminSubject;
 		};
-		authService.emailAndUid$ = emailSubject;
+		authService.isAdmin$ = adminSubject;
 		appStateService = {
 			preRegistrationEnabled$: of(true),
 			onsiteRegistrationEnabled$: of(true),
@@ -84,7 +80,7 @@ describe('LandingPage', () => {
 
 	it('should hide the schedule editor link for non-admin users', async () => {
 		// Arrange
-		emailSubject.next({ emailAddress: 'helper@example.com', uid: '123' });
+		adminSubject.next(false);
 
 		// Act
 		fixture.detectChanges();

@@ -23,9 +23,10 @@ The admin app is a standalone Ionic/Angular client for authorized staff and volu
 High-level runtime dependencies:
 
 - Firebase Auth for staff sign-in
-- Firebase custom `admin` claim for route and backend authorization
+- Firebase custom claims with `roles[]` for elevated access and legacy `admin` for compatibility
 - Firestore for registration lookup, search index reads, check-in reads, stats dashboards, and runtime parameters
 - Cloud Functions for privileged mutations such as pre-registration, on-site registration, check-in, resend email, cancel registration, and date/time changes
+- Firestore `staff` collection for elevated-account management and staff listing
 - Shared `AppStateService` feature flags sourced from `parameters/public`
 - Chart.js / `ng2-charts` for stats pages
 
@@ -36,12 +37,13 @@ High-level runtime dependencies:
 | Route tree | `santashop-admin/src/app/app.routes.ts` | Defines the admin workflow, auth gate, and feature areas |
 | Admin shell | `santashop-admin/src/app/pages/admin/admin.page.ts` | Bottom-tab shell and feature-flag-aware navigation |
 | Landing/dashboard | `santashop-admin/src/app/pages/admin/landing/landing.page.ts` | Main operator navigation hub |
+| User management | `santashop-admin/src/app/pages/admin/users/**/*`, `staff.service.ts` | Create/edit/delete elevated staff accounts and reset passwords |
 | Search flow | `santashop-admin/src/app/pages/admin/search/**/*`, `search.service.ts`, `lookup.service.ts` | Provides search by name/email/code over `registrationsearchindex` and lookup into `registrations` |
 | Check-in flow | `scan.page.ts`, `review.page.ts`, `confirmation.page.ts`, `duplicate.page.ts`, `check-in-context.service.ts`, `check-in.service.ts` | Core scan/review/check-in workflow |
 | Admin registration flows | `pre-registration.page.ts`, `registration.page.ts` | Admin-created preregistration and on-site registration/check-in |
 | Resend email tool | `tools/resend-email/resend-email.page.ts` | Manual requeue of registration email delivery |
 | Stats dashboards | `stats/registration.page.ts`, `stats/check-in.page.ts`, `stats/user.page.ts` | Reads aggregated stats docs and slot data for reporting |
-| Backend mutations | `santashop-functions/src/fn/callableAdminPreRegister.ts`, `onSiteRegistration.ts`, `checkIn.ts`, `checkInWithEdit.ts`, `callableResendRegistrationEmail.ts`, `undoRegistration.ts`, `changeRegistrationDateTime.ts` | Implements privileged admin mutations |
+| Backend mutations | `santashop-functions/src/fn/callableAdminPreRegister.ts`, `callableCreateStaffUser.ts`, `callableUpdateStaffUser.ts`, `callableDeleteStaffUser.ts`, `onSiteRegistration.ts`, `checkIn.ts`, `checkInWithEdit.ts`, `callableResendRegistrationEmail.ts`, `undoRegistration.ts`, `changeRegistrationDateTime.ts` | Implements privileged admin mutations |
 
 ## Route and page catalog
 
@@ -49,29 +51,31 @@ High-level runtime dependencies:
 
 | Route | Page | Purpose | Primary reads | Primary writes / calls | Gate |
 | --- | --- | --- | --- | --- | --- |
-| `/` | `SignInPage` | Staff sign-in form | None | Firebase Auth `login()` | Redirects logged-in users to `/admin` |
+| `/` | `SignInPage` | Staff sign-in form | None | Firebase Auth `login()` | Redirects only elevated users to `/admin` |
 
 ### Admin shell and task routes
 
 | Route | Page | Purpose | Primary reads | Primary writes / calls | Gate |
 | --- | --- | --- | --- | --- | --- |
-| `/admin` | `AdminPage` | Tab shell for check-in, search, and registration-related tasks | `preRegistrationEnabled$`, `onsiteRegistrationEnabled$`, `checkinEnabled$` | None | Requires Firebase auth + `admin` custom claim |
-| `/admin/landing` | `LandingPage` | Operator landing/dashboard and feature entry hub | same feature flags plus email-derived `isAdmin$` helper | logout and theme toggle only | Requires Firebase auth + `admin` claim |
-| `/admin/checkin/scan` | `ScanPage` | QR scanning entry point for existing registrations | camera devices + registration lookup by QR code | stores registration in context | Requires Firebase auth + `admin` claim |
-| `/admin/checkin/review` | `ReviewPage` | Review/edit scanned registration before check-in | current registration context, `checkinEnabled$`, `allowCancelRegistration$` | callable `checkIn`, `checkInWithEdit`, `changeRegistrationDateTime`, `undoRegistration` | Requires Firebase auth + `admin` claim |
-| `/admin/checkin/confirmation` | `ConfirmationPage` | Success screen after check-in or on-site registration | check-in result context | None | Requires Firebase auth + `admin` claim |
-| `/admin/checkin/duplicate/:uid` | `DuplicatePage` | Shows an already-existing check-in record when duplicate check-in occurs | `checkins/{uid}` | None | Requires Firebase auth + `admin` claim |
-| `/admin/search` | `SearchPage` | Hub page for search modes | None | None | Requires Firebase auth + `admin` claim |
-| `/admin/search/by-name` | `ByNamePage` | Search form by last name + zip | None directly | populates `SearchService` query state | Requires Firebase auth + `admin` claim |
-| `/admin/search/by-email` | `ByEmailPage` | Search form by email | None directly | populates `SearchService` query state | Requires Firebase auth + `admin` claim |
-| `/admin/search/by-code` | `ByCodePage` | Search form by QR code | None directly | populates `SearchService` query state | Requires Firebase auth + `admin` claim |
-| `/admin/search/results` | `ResultsPage` | Shows and sorts search results | `SearchService.searchResults$` | None | Requires Firebase auth + `admin` claim |
-| `/admin/registration` | `RegistrationPage` | One-step on-site registration plus immediate check-in | local form state only | callable `onSiteRegistration` | Requires Firebase auth + `admin` claim |
-| `/admin/pre-registration` | `PreRegistrationPage` | Creates a preregistered customer account and queued email | users-by-email duplicate check, available slots | callable `callableAdminPreRegister` | Requires Firebase auth + `admin` claim |
+| `/admin` | `AdminPage` | Tab shell for check-in, search, and registration-related tasks | `preRegistrationEnabled$`, `onsiteRegistrationEnabled$`, `checkinEnabled$` | None | Requires Firebase auth + any elevated role |
+| `/admin/landing` | `LandingPage` | Operator landing/dashboard and feature entry hub | feature flags plus claim-derived `isAdmin$` | logout and theme toggle only | Requires Firebase auth + any elevated role |
+| `/admin/checkin/scan` | `ScanPage` | QR scanning entry point for existing registrations | camera devices + registration lookup by QR code | stores registration in context | Requires Firebase auth + any elevated role |
+| `/admin/checkin/review` | `ReviewPage` | Review/edit scanned registration before check-in | current registration context, `checkinEnabled$`, `allowCancelRegistration$` | callable `checkIn`, `checkInWithEdit`, `changeRegistrationDateTime`, `undoRegistration` | Requires Firebase auth + any elevated role |
+| `/admin/checkin/confirmation` | `ConfirmationPage` | Success screen after check-in or on-site registration | check-in result context | None | Requires Firebase auth + any elevated role |
+| `/admin/checkin/duplicate/:uid` | `DuplicatePage` | Shows an already-existing check-in record when duplicate check-in occurs | `checkins/{uid}` | None | Requires Firebase auth + any elevated role |
+| `/admin/search` | `SearchPage` | Hub page for search modes | None | None | Requires Firebase auth + any elevated role |
+| `/admin/search/by-name` | `ByNamePage` | Search form by last name + zip | None directly | populates `SearchService` query state | Requires Firebase auth + any elevated role |
+| `/admin/search/by-email` | `ByEmailPage` | Search form by email | None directly | populates `SearchService` query state | Requires Firebase auth + any elevated role |
+| `/admin/search/by-code` | `ByCodePage` | Search form by QR code | None directly | populates `SearchService` query state | Requires Firebase auth + any elevated role |
+| `/admin/search/results` | `ResultsPage` | Shows and sorts search results | `SearchService.searchResults$` | None | Requires Firebase auth + any elevated role |
+| `/admin/registration` | `RegistrationPage` | One-step on-site registration plus immediate check-in | local form state only | callable `onSiteRegistration` | Requires Firebase auth + any elevated role |
+| `/admin/pre-registration` | `PreRegistrationPage` | Creates a preregistered customer account and queued email | users-by-email duplicate check, available slots | callable `callableAdminPreRegister` | Requires Firebase auth + any elevated role |
 | `/admin/resend-email` | `ResendEmailPage` | Finds a customer by email and requeues their registration email | `registrationsearchindex` by email | callable `callableResendRegistrationEmail` | Requires Firebase auth + `admin` claim |
-| `/admin/stats/registration` | `RegistrationPage` (stats) | Registration and capacity reporting | `stats/registration-{year}`, `stats/schedule-{year}`, `dateTimeSlots` | None | Route is outside `/admin` shell but intended for admins |
-| `/admin/stats/check-in` | `CheckInPage` | Check-in volume and preregistration/on-site reporting | `stats/checkin-{year}` | None | Route is outside `/admin` shell but intended for admins |
-| `/admin/stats/user` | `UserPage` | User/referrer/zip distribution reporting | `stats/user-{year}` | None | Route is outside `/admin` shell but intended for admins |
+| `/admin/schedule-editor` | `ScheduleEditorPage` | Edits schedule and capacity configuration | date/time slot and schedule data | schedule editor services and Firestore writes | Requires Firebase auth + `admin` claim |
+| `/admin/users` | `UsersPage` | Manages elevated staff accounts and passwords | `staff` collection | callable `callableCreateStaffUser`, `callableUpdateStaffUser`, `callableDeleteStaffUser` | Requires Firebase auth + `admin` claim |
+| `/admin/stats/registration` | `RegistrationPage` (stats) | Registration and capacity reporting | `stats/registration-{year}`, `stats/schedule-{year}`, `dateTimeSlots` | None | Requires Firebase auth + `admin` claim |
+| `/admin/stats/check-in` | `CheckInPage` | Check-in volume and preregistration/on-site reporting | `stats/checkin-{year}` | None | Requires Firebase auth + `admin` claim |
+| `/admin/stats/user` | `UserPage` | User/referrer/zip distribution reporting | `stats/user-{year}` | None | Requires Firebase auth + `admin` claim |
 
 ## Major workflow
 
@@ -87,8 +91,8 @@ High-level runtime dependencies:
 Flow:
 
 1. Staff signs in via Firebase Auth.
-2. Router sends authenticated users into `/admin`.
-3. Route guard then applies `hasCustomClaim('admin')`.
+2. Router redirects only elevated users into `/admin`.
+3. Route guards admit any elevated role to the main shell and reserve admin-only tools for the legacy `admin` claim.
 
 Why it matters:
 
@@ -114,7 +118,8 @@ These pages are feature-flag aware through `AppStateService`:
 
 Important current-state note:
 
-- `LandingPage.isAdmin$` uses whether the signed-in email contains the substring `admin`, which is a convenience signal, not a trustworthy authorization mechanism.
+- `LandingPage.isAdmin$` now comes from auth custom claims, not email heuristics.
+- `admin` implies `checkin` in the role model, and the user manager persists both roles for admin accounts while keeping the legacy boolean `admin` claim in sync.
 
 ### 3. Search workflow
 
@@ -579,6 +584,9 @@ Feature-flag wiring found:
 | `changeRegistrationDateTime` | `ReviewPage.editDateTime()` | `{ newDateTimeSlot, registrationUid }` | updates submitted registration slot and requeues email |
 | `undoRegistration` | `ReviewPage.cancelReservation()` | current registration object | deletes search index and clears submitted reservation state |
 | `callableResendRegistrationEmail` | `ResendEmailPage.searchAndSend()` | `{ customerId }` | requeues email and resets reminder-email flags |
+| `callableCreateStaffUser` | `UsersPage.addUser()` | `{ emailAddress, displayName, password, roles }` | creates an elevated auth account, writes `/staff/{uid}`, and syncs claims |
+| `callableUpdateStaffUser` | `UsersPage.editUser()` / reset-password flow | `{ uid, displayName?, roles?, newPassword?, disabled? }` | updates an existing staff account, writes `/staff/{uid}`, and syncs claims |
+| `callableDeleteStaffUser` | `UsersPage.deleteUser()` | `{ uid }` | deletes an existing elevated auth account and removes `/staff/{uid}` |
 
 ### Backend follow-on processes relevant to admin workflows
 

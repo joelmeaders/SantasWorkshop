@@ -10,7 +10,23 @@ const redirectLoggedInToAdminGuard: CanActivateFn = () => {
 
 	return authService.currentUser$.pipe(
 		take(1),
-		map((user) => (user ? router.createUrlTree(['/admin']) : true)),
+		switchMap((user) => {
+			if (!user) {
+				return of(true);
+			}
+
+			return from(user.getIdTokenResult(false)).pipe(
+				map((token) => {
+					const claims = token.claims ?? {};
+					const roles =
+						(claims['roles'] as string[] | undefined) ?? [];
+
+					return claims['admin'] === true || roles.length > 0
+						? router.createUrlTree(['/admin'])
+						: true;
+				}),
+			);
+		}),
 	);
 };
 
@@ -36,6 +52,32 @@ const adminOnlyGuard: CanActivateFn = () => {
 	);
 };
 
+const elevatedUserGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+
+	return authService.currentUser$.pipe(
+		take(1),
+		switchMap((user) => {
+			if (!user) {
+				return of(router.createUrlTree(['/']));
+			}
+
+			return from(user.getIdTokenResult(false)).pipe(
+				map((token) => {
+					const claims = token.claims ?? {};
+					const roles =
+						(claims['roles'] as string[] | undefined) ?? [];
+
+					return claims['admin'] === true || roles.length > 0
+						? true
+						: router.createUrlTree(['/']);
+				}),
+			);
+		}),
+	);
+};
+
 export const routes: Routes = [
 	{
 		path: '',
@@ -47,7 +89,7 @@ export const routes: Routes = [
 	{
 		path: 'admin',
 		title: 'DSCS Home',
-		canActivate: [adminOnlyGuard],
+		canActivate: [elevatedUserGuard],
 		loadComponent: () =>
 			import('./pages/admin/admin.page').then((m) => m.AdminPage),
 		children: [
@@ -162,6 +204,7 @@ export const routes: Routes = [
 			{
 				path: 'resend-email',
 				title: 'DSCS: Resend Email',
+				canActivate: [adminOnlyGuard],
 				loadComponent: () =>
 					import('./pages/admin/tools/resend-email/resend-email.page').then(
 						(m) => m.ResendEmailPage,
@@ -170,9 +213,19 @@ export const routes: Routes = [
 			{
 				path: 'schedule-editor',
 				title: 'DSCS: Schedule Editor',
+				canActivate: [adminOnlyGuard],
 				loadComponent: () =>
 					import('./pages/admin/tools/schedule-editor/schedule-editor.page').then(
 						(m) => m.ScheduleEditorPage,
+					),
+			},
+			{
+				path: 'users',
+				title: 'DSCS: User Management',
+				canActivate: [adminOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/users/users.page').then(
+						(m) => m.UsersPage,
 					),
 			},
 			{
@@ -184,6 +237,7 @@ export const routes: Routes = [
 	},
 	{
 		path: 'admin/stats',
+		canActivate: [adminOnlyGuard],
 		children: [
 			{
 				path: 'registration',

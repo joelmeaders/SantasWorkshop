@@ -101,6 +101,27 @@ export const callableResendRegistrationEmail = onCall(
 	},
 );
 
+export const callableCreateStaffUser = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/callableCreateStaffUser')).default(request);
+	},
+);
+
+export const callableUpdateStaffUser = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/callableUpdateStaffUser')).default(request);
+	},
+);
+
+export const callableDeleteStaffUser = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/callableDeleteStaffUser')).default(request);
+	},
+);
+
 // ------------------------------------- TRIGGER FUNCTIONS
 
 export const sendNewRegistrationEmails = onDocumentCreated(

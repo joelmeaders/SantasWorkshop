@@ -1,0 +1,89 @@
+<ion-header>
+	<ion-toolbar>
+		<ion-title>{{ isEdit ? 'Edit User' : 'New User' }}</ion-title>
+		<ion-button
+			slot="end"
+			fill="outline"
+			color="danger"
+			(click)="dismiss()"
+			(keydown.enter)="dismiss()"
+		>
+			Cancel
+		</ion-button>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+	<form [formGroup]="form" (ngSubmit)="save()">
+		<ion-list>
+			<ion-item>
+				<ion-input
+					label="Email address"
+					labelPlacement="stacked"
+					type="email"
+					autocomplete="off"
+					formControlName="emailAddress"
+					[readonly]="isEdit"
+				></ion-input>
+			</ion-item>
+			@if (isEdit) {
+				<ion-note color="medium" class="ion-padding-start">
+					Email addresses cannot be changed after creation.
+				</ion-note>
+			}
+
+			<ion-item>
+				<ion-input
+					label="Display name"
+					labelPlacement="stacked"
+					type="text"
+					autocomplete="off"
+					formControlName="displayName"
+				></ion-input>
+			</ion-item>
+
+			<ion-item>
+				<ion-select
+					label="Roles"
+					labelPlacement="stacked"
+					[multiple]="true"
+					placeholder="Select roles"
+					formControlName="roles"
+				>
+					@for (option of roleOptions; track option.value) {
+						<ion-select-option [value]="option.value">
+							{{ option.label }}
+						</ion-select-option>
+					}
+				</ion-select>
+			</ion-item>
+
+			<ion-item>
+				<ion-input
+					[label]="isEdit ? 'New password (optional)' : 'Password'"
+					labelPlacement="stacked"
+					type="password"
+					autocomplete="new-password"
+					formControlName="password"
+				></ion-input>
+			</ion-item>
+			<ion-note color="medium" class="ion-padding-start">
+				Passwords must be at least 8 characters.
+			</ion-note>
+
+			@if (isEdit) {
+				<ion-item>
+					<ion-toggle formControlName="disabled">
+						Account disabled
+					</ion-toggle>
+				</ion-item>
+			}
+		</ion-list>
+
+		<div class="ion-padding-top">
+			<ion-button expand="block" type="submit" [disabled]="form.invalid">
+				{{ isEdit ? 'Save changes' : 'Create user' }}
+			</ion-button>
+		</div>
+	</form>
+</ion-content>

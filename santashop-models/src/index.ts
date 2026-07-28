@@ -14,5 +14,6 @@ export * from './lib/registration-stats';
 export * from './lib/registration';
 export * from './lib/schedule-stats';
 export * from './lib/schema';
+export * from './lib/staff';
 export * from './lib/user-stats';
 export * from './lib/user';

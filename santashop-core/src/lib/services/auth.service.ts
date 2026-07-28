@@ -8,7 +8,7 @@ import {
 } from 'rxjs/operators';
 import { from, Observable } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
-import { Auth, UserEmailUid } from '@santashop/models';
+import { Auth, StaffRole, UserEmailUid } from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
 import {
 	type IdTokenResult,
@@ -81,6 +81,71 @@ export class AuthService {
 		map((token) => token.claims?.['admin'] ?? false),
 		shareReplay(1),
 	);
+
+	/**
+	 * Stream of the elevated roles assigned to the current user via
+	 * custom claims. Emits an empty array when no roles are present.
+	 * Will not fire/complete unless user is signed in.
+	 *
+	 * @memberof AuthService
+	 */
+	public readonly roles$: Observable<StaffRole[]> = this.currentUser$.pipe(
+		filter((user) => !!user),
+		switchMap((user) => from(user.getIdTokenResult(false))),
+		map((token) => (token.claims?.['roles'] as StaffRole[]) ?? []),
+		shareReplay(1),
+	);
+
+	/**
+	 * Checks token claims to see if the user can perform check-in work.
+	 * Admins implicitly satisfy this role.
+	 *
+	 * @memberof AuthService
+	 */
+	public readonly isCheckin$ = this.hasRole('checkin').pipe(shareReplay(1));
+
+	/**
+	 * Checks token claims to see if the user holds any elevated role
+	 * (admin or a named role). Used to gate access to the admin app.
+	 * Will not fire/complete unless user is signed in.
+	 *
+	 * @memberof AuthService
+	 */
+	public readonly isElevated$: Observable<boolean> = this.currentUser$.pipe(
+		filter((user) => !!user),
+		switchMap((user) => from(user.getIdTokenResult(false))),
+		map((token) => {
+			const claims = token.claims ?? {};
+			const roles = (claims['roles'] as StaffRole[] | undefined) ?? [];
+			return claims['admin'] === true || roles.length > 0;
+		}),
+		shareReplay(1),
+	);
+
+	/**
+	 * Checks token claims to see if the current user has the given role.
+	 * Admins implicitly satisfy every role.
+	 *
+	 * @param role
+	 * @return
+	 * @memberof AuthService
+	 */
+	public hasRole(role: StaffRole): Observable<boolean> {
+		return this.currentUser$.pipe(
+			filter((user) => !!user),
+			switchMap((user) => from(user.getIdTokenResult(false))),
+			map((token) => {
+				const claims = token.claims ?? {};
+				if (claims['admin'] === true) {
+					return true;
+				}
+				const roles =
+					(claims['roles'] as StaffRole[] | undefined) ?? [];
+				return roles.includes(role);
+			}),
+			shareReplay(1),
+		);
+	}
 
 	/**
 	 * Reset user password, sends an email.

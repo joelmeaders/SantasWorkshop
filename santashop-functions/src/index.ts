@@ -1,5 +1,5 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { onCall } from 'firebase-functions/v2/https';
+import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import {
@@ -11,15 +11,24 @@ import {
 	SHOP_TIME_ZONE,
 } from './utility/runtime-config';
 
+/**
+ * App Check is enforced in deployed environments but relaxed when running
+ * under the Firebase emulator (`FUNCTIONS_EMULATOR === 'true'`). This allows
+ * end-to-end tests to exercise these callables against the emulators without a
+ * valid App Check token, while production and other deployed environments keep
+ * enforcement enabled.
+ */
+const ENFORCE_APP_CHECK = process.env.FUNCTIONS_EMULATOR !== 'true';
+
 export const changeAccountInformation = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/changeAccountInformation')).default(request);
 	},
 );
 
 export const updateReferredBy = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/updateReferredBy')).default(request);
 	},
@@ -34,25 +43,28 @@ export const updateReferredBy = onCall(
  * registration-email, RegistrationSearchIndex
  */
 export const completeRegistration = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/completeRegistration')).default(request);
 	},
 );
 
-export const newAccount = onCall({ enforceAppCheck: true }, async (request) => {
-	return (await import('./fn/newAccount')).default(request);
-});
+export const newAccount = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/newAccount')).default(request);
+	},
+);
 
 export const undoRegistration = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/undoRegistration')).default(request);
 	},
 );
 
 export const changeRegistrationDateTime = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/changeRegistrationDateTime')).default(
 			request,
@@ -61,39 +73,42 @@ export const changeRegistrationDateTime = onCall(
 );
 
 export const updateEmailAddress = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/updateEmailAddress')).default(request);
 	},
 );
 
-export const checkIn = onCall({ enforceAppCheck: true }, async (request) => {
-	return (await import('./fn/checkIn')).default(request);
-});
+export const checkIn = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/checkIn')).default(request);
+	},
+);
 
 export const checkInWithEdit = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/checkInWithEdit')).default(request);
 	},
 );
 
 export const onSiteRegistration = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/onSiteRegistration')).default(request);
 	},
 );
 
 export const callableAdminPreRegister = onCall(
-	{ enforceAppCheck: true },
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
 		return (await import('./fn/callableAdminPreRegister')).default(request);
 	},
 );
 
 export const callableResendRegistrationEmail = onCall(
-	{ enforceAppCheck: true, maxInstances: 2, memory: '128MiB' },
+	{ enforceAppCheck: ENFORCE_APP_CHECK, maxInstances: 2, memory: '128MiB' },
 	async (request) => {
 		return (await import('./fn/callableResendRegistrationEmail')).default(
 			request,
@@ -298,56 +313,148 @@ export const pubsubDeleteUsers = onMessagePublished(
 // These functions are only available when running in the Firebase emulator
 // They should NOT be deployed to production
 
-// Only export test functions in non-production environments
-const isProduction =
-	process.env['NODE_ENV'] === 'production' ||
-	process.env['FUNCTIONS_EMULATOR'] !== 'true';
+const assertEmulatorOnly = (): void => {
+	const isRunningInEmulator =
+		process.env['FUNCTIONS_EMULATOR'] === 'true' ||
+		!!process.env['FIREBASE_EMULATOR_HUB'];
 
-if (!isProduction) {
-	/**
-	 * Seeds the database with test parameters
-	 * @param scenario - The test scenario to seed
-	 */
-	exports.testSeedScenario = onCall(
-		{ enforceAppCheck: false },
-		async (request) => {
-			const { seedTestScenario } = await import('./fn/testHelpers');
-			const scenario =
-				typeof request.data === 'object' &&
-				request.data !== null &&
-				'scenario' in request.data
-					? ((request.data as { scenario?: string }).scenario ??
-						'default')
-					: 'default';
-			await seedTestScenario(scenario);
-			return { success: true };
-		},
-	);
+	if (!isRunningInEmulator) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Test helper functions are only available in the Firebase emulator.',
+		);
+	}
+};
 
-	/**
-	 * Seeds public parameters with custom values
-	 * @param params - The parameters to seed
-	 */
-	exports.testSeedPublicParameters = onCall(
-		{ enforceAppCheck: false },
-		async (request) => {
-			const { seedPublicParameters } = await import('./fn/testHelpers');
-			await seedPublicParameters(
-				typeof request.data === 'object' && request.data !== null
-					? request.data
-					: {},
-			);
-			return { success: true };
-		},
-	);
+/**
+ * Seeds the database with test parameters.
+ * Emulator only.
+ */
+export const testSeedScenario = onCall(
+	{ enforceAppCheck: false },
+	async (request) => {
+		assertEmulatorOnly();
 
-	/**
-	 * Clears all test data from Firestore and Auth
-	 * WARNING: This will delete all data in the emulator
-	 */
-	exports.testClearAllData = onCall({ enforceAppCheck: false }, async () => {
-		const { clearAllData } = await import('./fn/testHelpers');
-		await clearAllData();
+		const { seedTestScenario } = await import('./fn/testHelpers');
+		const scenario =
+			typeof request.data === 'object' &&
+			request.data !== null &&
+			'scenario' in request.data
+				? ((request.data as { scenario?: string }).scenario ??
+					'default')
+				: 'default';
+
+		await seedTestScenario(scenario);
 		return { success: true };
-	});
-}
+	},
+);
+
+/**
+ * Seeds public parameters with custom values.
+ * Emulator only.
+ */
+export const testSeedPublicParameters = onCall(
+	{ enforceAppCheck: false },
+	async (request) => {
+		assertEmulatorOnly();
+
+		const { seedPublicParameters } = await import('./fn/testHelpers');
+		await seedPublicParameters(
+			typeof request.data === 'object' && request.data !== null
+				? request.data
+				: {},
+		);
+
+		return { success: true };
+	},
+);
+
+/**
+ * Clears all test data from Firestore and Auth.
+ * Emulator only.
+ */
+export const testClearAllData = onCall({ enforceAppCheck: false }, async () => {
+	assertEmulatorOnly();
+
+	const { clearAllData } = await import('./fn/testHelpers');
+	await clearAllData();
+	return { success: true };
+});
+
+/**
+ * Seeds an admin auth user with custom admin claims.
+ * Emulator only.
+ */
+export const testSeedAdminUser = onCall(
+	{ enforceAppCheck: false },
+	async (request) => {
+		assertEmulatorOnly();
+
+		const { seedAdminUser } = await import('./fn/testHelpers');
+		const data =
+			typeof request.data === 'object' && request.data !== null
+				? request.data
+				: {};
+
+		const emailAddress =
+			'emailAddress' in data && typeof data.emailAddress === 'string'
+				? data.emailAddress
+				: 'admin-e2e@test.com';
+		const password =
+			'password' in data && typeof data.password === 'string'
+				? data.password
+				: undefined;
+		const uid =
+			'uid' in data && typeof data.uid === 'string'
+				? data.uid
+				: undefined;
+		const adminClaim =
+			'admin' in data && typeof data.admin === 'boolean'
+				? data.admin
+				: true;
+
+		if (!password) {
+			throw new HttpsError(
+				'invalid-argument',
+				'testSeedAdminUser requires a password.',
+			);
+		}
+
+		return seedAdminUser({
+			emailAddress,
+			password,
+			uid,
+			admin: adminClaim,
+		});
+	},
+);
+
+/**
+ * Seeds date/time slots for e2e schedule-editor tests.
+ * Emulator only.
+ */
+export const testSeedDateTimeSlots = onCall(
+	{ enforceAppCheck: false },
+	async (request) => {
+		assertEmulatorOnly();
+
+		const { seedDateTimeSlots } = await import('./fn/testHelpers');
+		const data =
+			typeof request.data === 'object' && request.data !== null
+				? request.data
+				: {};
+		const slots = Array.isArray((data as { slots?: unknown[] }).slots)
+			? ((data as { slots: unknown[] }).slots as {
+				id?: string;
+				programYear: number;
+				dateTime: string;
+				maxSlots: number;
+				slotsReserved?: number;
+				enabled?: boolean;
+				lastUpdated?: string;
+			}[])
+			: [];
+
+		return seedDateTimeSlots(slots);
+	},
+);

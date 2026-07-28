@@ -14,12 +14,19 @@
 				</h2>
 			}
 		</ion-item>
-		<ion-button slot="end" fill="clear" (click)="menu($event)">
-			<ion-icon slot="icon-only"
+		<ion-button
+			id="menuButton"
+			slot="end"
+			fill="clear"
+			(click)="menu($event)"
+			(keyup.enter)="menu($event)"
+		>
+			<ion-icon
+				slot="icon-only"
 				name="menu-sharp"
 				color="dark"
 				size="large"
-			 />
+			/>
 		</ion-button>
 	</ion-toolbar>
 </ion-header>

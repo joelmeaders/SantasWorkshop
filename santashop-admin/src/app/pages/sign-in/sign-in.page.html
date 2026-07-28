@@ -10,7 +10,8 @@
 						<ion-label position="floating">
 							Email Address</ion-label
 						>
-						<ion-input formControlName="emailAddress"
+						<ion-input id="adminSignInEmail"
+							formControlName="emailAddress"
 							autocomplete="email"
 							type="email"
 						 />
@@ -22,7 +23,8 @@
 					</ion-item>
 					<ion-item>
 						<ion-label position="floating">Password</ion-label>
-						<ion-input formControlName="password"
+						<ion-input id="adminSignInPassword"
+							formControlName="password"
 							autocomplete="password"
 							type="password"
 						 />
@@ -35,9 +37,11 @@
 				</form>
 				<ion-toolbar color="none">
 					<ion-button
+						id="adminSignInButton"
 						slot="end"
 						[disabled]="form.invalid"
 						(click)="login()"
+						(keydown.enter)="login()"
 					>
 						Login
 					</ion-button>

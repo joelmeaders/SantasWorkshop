@@ -1,5 +1,22 @@
 import { test as base } from '@playwright/test';
 
+export interface E2eAdminSeedUser {
+	uid?: string;
+	emailAddress: string;
+	password: string;
+	admin?: boolean;
+}
+
+export interface E2eSeedDateTimeSlot {
+	id?: string;
+	programYear: number;
+	dateTime: string;
+	maxSlots: number;
+	slotsReserved?: number;
+	enabled?: boolean;
+	lastUpdated?: string;
+}
+
 /**
  * Custom fixtures for SantaShop E2E tests
  *
@@ -16,11 +33,21 @@ type CustomFixtures = {
 	clearData: () => Promise<void>;
 	/** Helper to seed custom public parameters */
 	seedPublicParams: (params: any) => Promise<void>;
+	/** Helper to seed an admin auth user */
+	seedAdminUser: (user: E2eAdminSeedUser) => Promise<{ uid: string }>;
+	/** Helper to seed date/time slot documents */
+	seedDateTimeSlots: (
+		slots: E2eSeedDateTimeSlot[],
+	) => Promise<{ ids: string[] }>;
 };
 
-// Firebase Functions emulator URL
-const FUNCTIONS_EMULATOR_URL =
-	'http://127.0.0.1:5001/santas-workshop-test/us-central1';
+// Firebase Functions emulator URL.
+// Defaults to the local emulator project (demo-santashop) used by
+// `emulators:start:local` and the app's `local` build configuration, which
+// connects the browser app to the emulators with App Check disabled.
+const EMULATOR_PROJECT_ID =
+	process.env['E2E_EMULATOR_PROJECT'] ?? 'demo-santashop';
+const FUNCTIONS_EMULATOR_URL = `http://127.0.0.1:5001/${EMULATOR_PROJECT_ID}/us-central1`;
 
 /**
  * Calls a Firebase function in the emulator
@@ -65,6 +92,20 @@ export const test = base.extend<CustomFixtures>({
 			await callFunction('testSeedPublicParameters', params);
 		};
 		await use(seedPublicParams);
+	},
+
+	seedAdminUser: async ({}, use) => {
+		const seedAdminUser = async (user: E2eAdminSeedUser) =>
+			callFunction('testSeedAdminUser', user) as Promise<{ uid: string }>;
+		await use(seedAdminUser);
+	},
+
+	seedDateTimeSlots: async ({}, use) => {
+		const seedDateTimeSlots = async (slots: E2eSeedDateTimeSlot[]) =>
+			callFunction('testSeedDateTimeSlots', {
+				slots,
+			}) as Promise<{ ids: string[] }>;
+		await use(seedDateTimeSlots);
 	},
 });
 

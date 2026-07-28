@@ -1,5 +1,5 @@
 import * as firebaseAdmin from 'firebase-admin';
-import { getApps, initializeApp, type AppOptions } from 'firebase-admin/app';
+import type { AppOptions } from 'firebase-admin/app';
 
 interface FirebaseEnvironmentConfig {
 	projectId?: string;
@@ -33,8 +33,8 @@ const buildAppOptions = (): AppOptions => {
 	};
 };
 
-if (getApps().length === 0) {
-	initializeApp(buildAppOptions());
+if (firebaseAdmin.apps.length === 0) {
+	firebaseAdmin.initializeApp(buildAppOptions());
 }
 
 export default firebaseAdmin;

@@ -5,6 +5,7 @@
 				button
 				tappable
 				(click)="profile()"
+				(keyup.enter)="profile()"
 				class="ion-text-center"
 			>
 				<ion-label>
@@ -14,15 +15,23 @@
 			<ion-item class="ion-text-center">
 				<app-language-toggle />
 			</ion-item>
-			<ion-item button tappable (click)="help()" class="ion-text-center">
+			<ion-item
+				button
+				tappable
+				(click)="help()"
+				(keyup.enter)="help()"
+				class="ion-text-center"
+			>
 				<ion-label>
 					{{ 'COMMON.HELP' | translate }}
 				</ion-label>
 			</ion-item>
 			<ion-item
+				id="signOutButton"
 				button
 				tappable
 				(click)="logout()"
+				(keyup.enter)="logout()"
 				class="ion-text-center"
 			>
 				<ion-label>
@@ -36,6 +45,7 @@
 				target="_blank"
 				class="ion-text-center"
 				(click)="closeMenu()"
+				(keyup.enter)="closeMenu()"
 			>
 				<ion-label> {{ 'COMMON.OUR_WEBSITE' | translate }} </ion-label>
 			</ion-item>

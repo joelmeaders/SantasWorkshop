@@ -11,9 +11,7 @@
 							color="light"
 							[routerLink]="['..']"
 						>
-							<ion-icon slot="start"
-								name="arrow-back-sharp"
-							 />
+							<ion-icon slot="start" name="arrow-back-sharp" />
 							<ion-label>
 								{{ "COMMON.GO_BACK" | translate }}
 							</ion-label>
@@ -33,6 +31,7 @@
 							<ion-list lines="none">
 								<ion-item>
 									<ion-input
+										id="signInEmail"
 										[label]="'COMMON.EMAIL_ADDRESS' | translate"
 										[errorText]="'COMMON.VALID_EMAIL' | translate"
 										labelPlacement="floating"
@@ -44,6 +43,7 @@
 								</ion-item>
 								<ion-item>
 									<ion-input
+										id="signInPassword"
 										[label]="'COMMON.PASSWORD' | translate"
 										[errorText]="'COMMON.VALID_PASSWORD' | translate"
 										labelPlacement="floating"
@@ -56,12 +56,14 @@
 						</form>
 
 						<ion-button
+							id="signInButton"
 							size="large"
 							color="xmasred"
 							[disabled]="
 								!form.valid
 							"
 							(click)="onSignIn()"
+							(keyup.enter)="onSignIn()"
 						>
 							{{ "COMMON.SIGN_IN" | translate }}
 						</ion-button>

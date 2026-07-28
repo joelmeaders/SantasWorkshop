@@ -53,26 +53,26 @@ if (config.appCheckEnabled) {
 
 const firebaseAuth = getAuth(firebaseApp);
 if (!config.production) {
-	connectAuthEmulator(firebaseAuth, 'http://localhost:9099', {
+	connectAuthEmulator(firebaseAuth, 'http://127.0.0.1:9099', {
 		disableWarnings: true,
 	});
 }
 
 const firebaseStorage = getStorage(firebaseApp);
 if (!config.production) {
-	connectStorageEmulator(firebaseStorage, 'localhost', 9199);
+	connectStorageEmulator(firebaseStorage, '127.0.0.1', 9199);
 }
 
 const firebaseFunctions = config.production
 	? getFunctions(firebaseApp, location.origin)
 	: getFunctions(firebaseApp);
 if (!config.production) {
-	connectFunctionsEmulator(firebaseFunctions, 'localhost', 5001);
+	connectFunctionsEmulator(firebaseFunctions, '127.0.0.1', 5001);
 }
 
 const firebaseFirestore = getFirestore(firebaseApp);
 if (!config.production) {
-	connectFirestoreEmulator(firebaseFirestore, 'localhost', 8080);
+	connectFirestoreEmulator(firebaseFirestore, '127.0.0.1', 8080);
 }
 
 const firebaseProviders = [

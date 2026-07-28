@@ -370,19 +370,17 @@ export class RegistrationPage {
 	// Update yearly. Last updated 2024
 	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[],
-	): ChartData<'bar'>[] {
+	): ChartData<'bar', number[], string>[] {
 		const defaults = (
 			label: string,
-		): { datasets: { data: number[]; label: string }[] } => ({
+		): ChartData<'bar', number[], string> => ({
 			datasets: [{ data: [], ...this.colorSettings, label }],
 		});
 
 		const schedule = this.schedule.find((s) => s.year === this.year);
 		if (!schedule) throw new Error('Unable to find schedule');
 
-		const arr: {
-			datasets: { data: number[]; label: string }[];
-		}[] = [
+		const arr: ChartData<'bar', number[], string>[] = [
 			{ ...defaults(this.friendlyDay(schedule.days[0])) },
 			{ ...defaults(this.friendlyDay(schedule.days[1])) },
 			{ ...defaults(this.friendlyDay(schedule.days[2])) },
@@ -420,8 +418,10 @@ export class RegistrationPage {
 		const sortedFamilies = [...data];
 
 		sortedFamilies.sort(
-			(a: { date: Date; count: number }, b: { date: Date; count: number }) =>
-				Number(a.date) - Number(b.date),
+			(
+				a: { date: Date; count: number },
+				b: { date: Date; count: number },
+			) => Number(a.date) - Number(b.date),
 		);
 
 		return sortedFamilies;

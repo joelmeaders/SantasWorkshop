@@ -1,6 +1,7 @@
 <admin-header title="Schedule Editor">
 	<ion-item lines="none">
 		<ion-select
+			id="scheduleEditorYear"
 			label="Year"
 			labelPlacement="stacked"
 			[(ngModel)]="year"
@@ -19,6 +20,7 @@
 	<main class="limited-container schedule-editor">
 		@if (statusMessage) {
 		<p class="status-message ion-padding-horizontal">{{ statusMessage }}</p>
+		<p id="scheduleEditorStatus" class="status-message ion-padding-horizontal">{{ statusMessage }}</p>
 		}
 
 		<ion-card>
@@ -29,6 +31,7 @@
 				<form [formGroup]="generatorForm" class="editor-grid">
 					<ion-item>
 						<ion-input
+							id="generateStartDate"
 							label="Start date"
 							labelPlacement="stacked"
 							type="date"
@@ -37,6 +40,7 @@
 					</ion-item>
 					<ion-item>
 						<ion-input
+							id="generateEndDate"
 							label="End date"
 							labelPlacement="stacked"
 							type="date"
@@ -45,6 +49,7 @@
 					</ion-item>
 					<ion-item>
 						<ion-input
+							id="generateCapacity"
 							label="Capacity"
 							labelPlacement="stacked"
 							type="number"
@@ -55,6 +60,7 @@
 					</ion-item>
 					<ion-item>
 						<ion-select
+							id="generateStartHour"
 							label="Start hour"
 							labelPlacement="stacked"
 							formControlName="startHour"
@@ -68,6 +74,7 @@
 					</ion-item>
 					<ion-item>
 						<ion-select
+							id="generateEndHour"
 							label="End hour"
 							labelPlacement="stacked"
 							formControlName="endHour"
@@ -86,6 +93,7 @@
 						Creates one slot every hour for program year {{ year }}.
 					</ion-note>
 					<ion-button
+						id="generateSchedulesButton"
 						slot="end"
 						(click)="generateSlots()"
 						(keydown.enter)="generateSlots()"
@@ -108,6 +116,7 @@
 				<form [formGroup]="bulkEditForm" class="bulk-edit-grid">
 					<ion-item>
 						<ion-input
+							id="bulkEditCapacity"
 							label="Capacity"
 							labelPlacement="stacked"
 							type="number"
@@ -118,6 +127,7 @@
 					</ion-item>
 					<ion-item>
 						<ion-select
+							id="bulkEditEnabled"
 							label="Enabled state"
 							labelPlacement="stacked"
 							formControlName="enabled"
@@ -135,6 +145,7 @@
 					</ion-item>
 					<div class="bulk-edit-actions">
 						<ion-button
+							id="applyBulkEditButton"
 							(click)="applyBulkEdit()"
 							(keydown.enter)="applyBulkEdit()"
 							[disabled]="selectedCount === 0"
@@ -146,6 +157,7 @@
 							Apply to {{ selectedCount || 0 }} selected
 						</ion-button>
 						<ion-button
+							id="clearSelectionButton"
 							fill="outline"
 							color="medium"
 							(click)="clearSelection()"
@@ -187,6 +199,7 @@
 					>
 					<ion-buttons slot="end">
 						<ion-button
+							id="selectAllSchedulesButton"
 							fill="outline"
 							size="small"
 							(click)="toggleAll(slots)"
@@ -205,11 +218,13 @@
 				<ion-list lines="full">
 					@for (slot of slots; track trackBySlot($index, slot)) {
 					<div
+						[attr.id]="'scheduleRow-' + slot.id"
 						class="slot-row"
 						[class.slot-row--disabled]="!slot.enabled"
 					>
 						<div class="slot-row__top">
 							<ion-checkbox
+								[attr.id]="'selectSchedule-' + slot.id"
 								[checked]="isSelected(slot.id)"
 								(ionChange)="toggleSelection(slot.id, $event)"
 							></ion-checkbox>
@@ -246,6 +261,7 @@
 						<div class="slot-row__bottom">
 							<ion-item lines="none">
 								<ion-input
+									[attr.id]="'slotDate-' + slot.id"
 									label="Date"
 									labelPlacement="stacked"
 									type="date"
@@ -255,6 +271,7 @@
 							</ion-item>
 							<ion-item lines="none">
 								<ion-select
+									[attr.id]="'slotHour-' + slot.id"
 									label="Hour"
 									labelPlacement="stacked"
 									[value]="getSlotDraftHour(slot)"
@@ -268,6 +285,7 @@
 								</ion-select>
 							</ion-item>
 							<ion-button
+								[attr.id]="'saveTimeSlot-' + slot.id"
 								fill="outline"
 								color="primary"
 								(click)="saveSlotDateTime(slot)"
@@ -281,6 +299,7 @@
 							</ion-button>
 							<ion-item lines="none">
 								<ion-input
+									[attr.id]="'slotCapacity-' + slot.id"
 									label="Capacity"
 									labelPlacement="stacked"
 									type="number"
@@ -292,6 +311,7 @@
 							</ion-item>
 							<div class="slot-row__toggle">
 								<ion-toggle
+									[attr.id]="'slotEnabled-' + slot.id"
 									[checked]="slot.enabled"
 									(ionChange)="updateEnabled(slot, $event)"
 								>
@@ -299,6 +319,7 @@
 								</ion-toggle>
 							</div>
 							<ion-button
+								[attr.id]="'deleteSchedule-' + slot.id"
 								fill="outline"
 								color="danger"
 								(click)="confirmDelete(slot)"

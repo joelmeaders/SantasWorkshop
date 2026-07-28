@@ -5,6 +5,23 @@
 
 import admin from '../firebase-admin';
 
+export interface TestAdminUserSeed {
+	uid?: string;
+	emailAddress: string;
+	password: string;
+	admin?: boolean;
+}
+
+export interface TestDateTimeSlotSeed {
+	id?: string;
+	programYear: number;
+	dateTime: string;
+	maxSlots: number;
+	slotsReserved?: number;
+	enabled?: boolean;
+	lastUpdated?: string;
+}
+
 /**
  * Seeds the Firestore database with public parameters for testing
  * @param params - The parameters to seed
@@ -82,6 +99,83 @@ export async function clearAllData(): Promise<void> {
 
 	// Note: Storage clearing would require additional setup
 	// For now, we'll just clear Firestore and Auth
+}
+
+/**
+ * Seeds an admin user in the Auth emulator.
+ */
+export async function seedAdminUser(
+	user: TestAdminUserSeed,
+): Promise<{ uid: string }> {
+	const auth = admin.auth();
+	const emailAddress = user.emailAddress.toLowerCase();
+
+	try {
+		const existingUser = await auth.getUserByEmail(emailAddress);
+		await auth.deleteUser(existingUser.uid);
+	} catch (error: unknown) {
+		const code = (error as { code?: string }).code;
+
+		if (code !== 'auth/user-not-found') {
+			throw error;
+		}
+	}
+
+	if (user.uid) {
+		try {
+			await auth.deleteUser(user.uid);
+		} catch (error: unknown) {
+			const code = (error as { code?: string }).code;
+
+			if (code !== 'auth/user-not-found') {
+				throw error;
+			}
+		}
+	}
+
+	const createdUser = await auth.createUser({
+		uid: user.uid,
+		email: emailAddress,
+		password: user.password,
+		emailVerified: true,
+	});
+
+	await auth.setCustomUserClaims(createdUser.uid, {
+		admin: user.admin ?? true,
+	});
+
+	return { uid: createdUser.uid };
+}
+
+/**
+ * Seeds date/time slots in Firestore for schedule-editor testing.
+ */
+export async function seedDateTimeSlots(
+	slots: TestDateTimeSlotSeed[],
+): Promise<{ ids: string[] }> {
+	const db = admin.firestore();
+	const ids: string[] = [];
+
+	for (const slot of slots) {
+		const docRef = slot.id
+			? db.collection('dateTimeSlots').doc(slot.id)
+			: db.collection('dateTimeSlots').doc();
+
+		await docRef.set({
+			programYear: slot.programYear,
+			dateTime: new Date(slot.dateTime),
+			maxSlots: slot.maxSlots,
+			slotsReserved: slot.slotsReserved ?? 0,
+			enabled: slot.enabled ?? true,
+			lastUpdated: slot.lastUpdated
+				? new Date(slot.lastUpdated)
+				: new Date(),
+		});
+
+		ids.push(docRef.id);
+	}
+
+	return { ids };
 }
 
 /**

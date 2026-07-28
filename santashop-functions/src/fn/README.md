@@ -8,6 +8,14 @@ This directory contains helper functions for E2E testing with Firebase emulators
 
 These functions are exposed as callable Firebase functions and should **ONLY** be used with emulators, never in production.
 
+Available helper callables:
+
+- `testSeedScenario`
+- `testSeedPublicParameters`
+- `testClearAllData`
+- `testSeedAdminUser`
+- `testSeedDateTimeSlots`
+
 #### `testSeedScenario(scenario: string)`
 
 Seeds the database with predefined test scenarios.
@@ -38,6 +46,30 @@ Clears all data from Firestore and Auth emulators. This includes:
 
 - All Firestore collections (users, registrations, children, dateTimeSlots, parameters)
 - All Auth users
+
+#### `testSeedAdminUser({ emailAddress, password, uid?, admin? })`
+
+Creates an Auth emulator user and applies custom claims. This is intended for
+admin-app end-to-end sign-in flows.
+
+- `emailAddress: string`
+- `password: string`
+- `uid?: string`
+- `admin?: boolean` (defaults to `true`)
+
+#### `testSeedDateTimeSlots({ slots })`
+
+Seeds `dateTimeSlots` documents for schedule-editor tests.
+
+Each slot supports:
+
+- `id?: string`
+- `programYear: number`
+- `dateTime: string` (ISO string)
+- `maxSlots: number`
+- `slotsReserved?: number`
+- `enabled?: boolean`
+- `lastUpdated?: string` (ISO string)
 
 ## Usage in Tests
 

@@ -1,0 +1,17 @@
+.limited-container {
+	display: block;
+	max-width: 720px;
+	margin: 0 auto;
+}
+
+.empty-note {
+	display: block;
+	padding: 1rem 0;
+}
+
+.roles {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	margin-top: 0.35rem;
+}

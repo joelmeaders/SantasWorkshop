@@ -29,12 +29,25 @@ describe('pubsubSetAdminRights handler', () => {
 		const { pubsubSetAdminRights } =
 			await loadPubsubHandlers(backgroundMock);
 		backgroundMock.updateUser.mockResolvedValue(undefined);
+		backgroundMock.getUser.mockResolvedValue({
+			email: 'admin@example.com',
+			displayName: 'Admin User',
+		});
 		backgroundMock.setCustomUserClaims.mockResolvedValue(undefined);
 
 		await pubsubSetAdminRights();
 
 		expect(backgroundMock.updateUser).toHaveBeenCalledTimes(5);
 		expect(backgroundMock.setCustomUserClaims).toHaveBeenCalledTimes(5);
+		expect(backgroundMock.setCustomUserClaims).toHaveBeenCalledWith(
+			expect.any(String),
+			{
+				roles: ['admin', 'checkin'],
+				admin: true,
+			},
+		);
+		expect(backgroundMock.getDocRef('staff/bIMHv99EssTqMfhX2kkYm2vErwu1').set)
+			.toHaveBeenCalled();
 	});
 
 	it('fails fast when the bootstrap password is still the placeholder value', async () => {

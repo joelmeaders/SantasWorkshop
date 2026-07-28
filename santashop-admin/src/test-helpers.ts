@@ -308,6 +308,9 @@ export function createAlertControllerMock(): jasmine.SpyObj<AlertController> {
 			dismiss: jasmine
 				.createSpy('dismiss')
 				.and.returnValue(Promise.resolve()),
+			onDidDismiss: jasmine
+				.createSpy('onDidDismiss')
+				.and.returnValue(Promise.resolve({ role: 'cancel', data: null })),
 		} as unknown as HTMLIonAlertElement),
 	);
 	return mock;
@@ -327,7 +330,11 @@ export function provideAlertControllerMock(): Provider {
  * Creates a mock LoadingController.
  */
 export function createLoadingControllerMock(): jasmine.SpyObj<LoadingController> {
-	const mock = jasmine.createSpyObj('LoadingController', ['create']);
+	const mock = jasmine.createSpyObj('LoadingController', [
+		'create',
+		'dismiss',
+		'getTop',
+	]);
 	mock.create.and.returnValue(
 		Promise.resolve({
 			present: jasmine
@@ -337,6 +344,10 @@ export function createLoadingControllerMock(): jasmine.SpyObj<LoadingController>
 				.createSpy('dismiss')
 				.and.returnValue(Promise.resolve()),
 		} as unknown as HTMLIonLoadingElement),
+	);
+	mock.dismiss.and.returnValue(Promise.resolve(true));
+	mock.getTop.and.returnValue(
+		Promise.resolve({} as HTMLIonLoadingElement),
 	);
 	return mock;
 }

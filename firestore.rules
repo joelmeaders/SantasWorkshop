@@ -55,5 +55,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+
+    match /staff/{userId} {
+      allow get, list: if isAdmin();
+      allow write: if false;
+    }
   }
 }

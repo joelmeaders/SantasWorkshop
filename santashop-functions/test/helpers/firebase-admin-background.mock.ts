@@ -50,6 +50,7 @@ export interface BackgroundAdminMock {
 	transactionSet: ReturnType<typeof vi.fn>;
 	listUsers: ReturnType<typeof vi.fn>;
 	deleteUsers: ReturnType<typeof vi.fn>;
+	getUser: ReturnType<typeof vi.fn>;
 	updateUser: ReturnType<typeof vi.fn>;
 	setCustomUserClaims: ReturnType<typeof vi.fn>;
 	upload: ReturnType<typeof vi.fn>;
@@ -64,13 +65,13 @@ export interface BackgroundAdminMock {
 	) => void;
 	setCollectionDocs: (
 		name: string,
-		docs: Array<{ id: string; data: Record<string, unknown> }>,
+		docs: { id: string; data: Record<string, unknown> }[],
 	) => void;
 	setCollectionCount: (name: string, count: number) => void;
 }
 
-const timestampFromDate = (date: Date) => ({
-	toDate: () => date,
+const timestampFromDate = (date: Date): { toDate: () => Date } => ({
+	toDate: (): Date => date,
 });
 
 export const createBackgroundAdminMock = (): BackgroundAdminMock => {
@@ -89,7 +90,10 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		) => ref.set(value, options),
 	);
 	const transactionCreate = vi.fn(
-		(ref: MockDocRef, value: Record<string, unknown>) => ref.create(value),
+		(
+			ref: MockDocRef,
+			value: Record<string, unknown>,
+		): ReturnType<MockDocRef['create']> => ref.create(value),
 	);
 	const runTransaction = vi.fn(
 		async (
@@ -116,6 +120,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	);
 	const listUsers = vi.fn();
 	const deleteUsers = vi.fn();
+	const getUser = vi.fn();
 	const updateUser = vi.fn();
 	const setCustomUserClaims = vi.fn();
 	const upload = vi.fn();
@@ -196,14 +201,14 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 
 	const setCollectionDocs = (
 		name: string,
-		docs: Array<{ id: string; data: Record<string, unknown> }>,
+		docs: { id: string; data: Record<string, unknown> }[],
 	): void => {
 		createCollectionRef(name).get.mockResolvedValue({
 			empty: docs.length === 0,
 			size: docs.length,
 			docs: docs.map((entry) => ({
 				id: entry.id,
-				data: () => entry.data,
+				data: (): Record<string, unknown> => entry.data,
 			})),
 			forEach: (
 				callback: (doc: {
@@ -224,7 +229,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 
 	const setCollectionCount = (name: string, countValue: number): void => {
 		createCollectionRef(name).countGet.mockResolvedValue({
-			data: () => ({ count: countValue }),
+			data: (): { count: number } => ({ count: countValue }),
 		});
 	};
 
@@ -256,6 +261,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	const auth = vi.fn(() => ({
 		listUsers,
 		deleteUsers,
+		getUser,
 		updateUser,
 		setCustomUserClaims,
 	}));
@@ -282,6 +288,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		transactionSet,
 		listUsers,
 		deleteUsers,
+		getUser,
 		updateUser,
 		setCustomUserClaims,
 		upload,

@@ -270,4 +270,73 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			{ merge: true },
 		);
 	});
+
+	it('resolves a published template name from the logical template key', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		sesSendMock.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
+		backgroundMock.setDocSnapshot('tmp_registrationemails/user-3', {
+			code: 'REM12345',
+			name: 'Noelle',
+			email: 'noelle.elf@example.com',
+			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+			templateKey: 'event-reminder',
+		});
+		backgroundMock.setDocSnapshot('registrations/user-3', {}, true);
+		backgroundMock.setCollectionDocs('emailTemplates', [
+			{
+				id: 'special-reminder-2026',
+				data: {
+					key: 'special-reminder-2026',
+					deliveryProfile: 'event-reminder',
+					displayName: 'Event Reminder',
+					subjectPart: 'Reminder',
+					awsTemplateName: 'custom-event-reminder-v2',
+					fieldMappings: [
+						{
+							name: 'guestName',
+							mapping: 'firstName',
+							sampleValue: 'Noelle',
+						},
+					],
+					publishedRevisionId: 'rev-3',
+					publishedRevisionNumber: 3,
+					publishedOn: new Date('2025-11-02T00:00:00.000Z'),
+					createdOn: new Date('2025-11-01T00:00:00.000Z'),
+					updatedOn: new Date('2025-11-02T00:00:00.000Z'),
+				},
+			},
+		]);
+		backgroundMock.getDocRef('registrations/user-3').set.mockResolvedValue(undefined);
+		backgroundMock.getDocRef('tmp_registrationemails/user-3').set.mockResolvedValue(undefined);
+
+		await sendNewRegistrationEmails({
+			id: 'user-3',
+			data: () => ({
+				code: 'REM12345',
+				name: 'Noelle',
+				email: 'noelle.elf@example.com',
+				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+				templateKey: 'event-reminder',
+			}),
+		} as never);
+
+		expect(
+			(sesSendMock.mock.calls[0]?.[0] as {
+				input: { Template: string };
+			}).input.Template,
+		).toBe('custom-event-reminder-v2');
+		expect(
+			JSON.parse(
+				(sesSendMock.mock.calls[0]?.[0] as {
+					input: { TemplateData: string };
+				}).input.TemplateData,
+			),
+		).toEqual(
+			expect.objectContaining({
+				guestName: 'Noelle',
+				firstName: 'Noelle',
+			}),
+		);
+	});
 });

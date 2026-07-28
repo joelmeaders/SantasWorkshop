@@ -6,6 +6,7 @@ export const COLLECTION_SCHEMA = {
 	onSiteRegistrations: 'onsiteregistrations',
 	children: 'children',
 	dateTimeSlots: 'dateTimeSlots',
+	emailTemplates: 'emailTemplates',
 	registrationSearchIndex: 'registrationsearchindex',
 	stats: 'stats',
 	tmpRegistrationEmails: 'tmp_registrationemails',

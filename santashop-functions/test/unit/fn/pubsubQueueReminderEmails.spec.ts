@@ -62,7 +62,11 @@ describe('pubsubQueueReminderEmails handler', () => {
 		expect(result).toEqual({ success: 1, failed: 0 });
 		expect(
 			backgroundMock.getDocRef('tmp_registrationemails/reg-1').create,
-		).toHaveBeenCalledTimes(1);
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				templateKey: 'event-reminder',
+			}),
+		);
 		expect(
 			backgroundMock.getDocRef('registrations/reg-1').set,
 		).toHaveBeenCalledWith(

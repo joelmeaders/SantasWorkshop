@@ -1,0 +1,234 @@
+<admin-header [title]="pageTitle" />
+
+<ion-content class="ion-padding-horizontal">
+	<main class="editor-layout">
+		<section class="editor-main">
+			<ion-card>
+				<ion-card-header>
+					<ion-card-title>
+						@if (isCreateMode$ | async) {
+							Create Email Template
+						} @else {
+							Edit Email Template
+						}
+					</ion-card-title>
+				</ion-card-header>
+				<ion-card-content>
+					<form [formGroup]="form">
+						<ion-list>
+							<ion-item>
+								<ion-input
+									label="Template key"
+									formControlName="key"
+									placeholder="registration-confirmation"
+								></ion-input>
+							</ion-item>
+							<ion-item>
+								<ion-select
+									label="Delivery profile"
+									formControlName="deliveryProfile"
+									(ionChange)="onDeliveryProfileChanged()"
+								>
+									@for (option of deliveryProfileOptions; track option.value) {
+										<ion-select-option [value]="option.value">
+											{{ option.label }}
+										</ion-select-option>
+									}
+								</ion-select>
+							</ion-item>
+							<ion-item>
+								<ion-input
+									label="Display name"
+									formControlName="displayName"
+									placeholder="Registration Confirmation"
+								></ion-input>
+							</ion-item>
+							<ion-item>
+								<ion-input
+									label="AWS SES template name"
+									formControlName="awsTemplateName"
+									placeholder="dscs-registration-confirmation-v1"
+								></ion-input>
+							</ion-item>
+							<ion-item>
+								<ion-input
+									label="Subject"
+									formControlName="subjectPart"
+									[placeholder]="subjectPlaceholder"
+									(ionInput)="onSubjectChanged()"
+								></ion-input>
+							</ion-item>
+							<ion-item>
+								<ion-textarea
+									label="Description"
+									formControlName="description"
+									autoGrow="true"
+								></ion-textarea>
+							</ion-item>
+							<ion-item>
+								<ion-textarea
+									label="Revision notes"
+									formControlName="notes"
+									autoGrow="true"
+									placeholder="What changed in this draft?"
+								></ion-textarea>
+							</ion-item>
+						</ion-list>
+					</form>
+
+					<section class="action-row">
+						<ion-button
+							color="primary"
+							(click)="saveRevision()"
+							(keydown.enter)="saveRevision()"
+							[disabled]="!form.valid"
+						>
+							<ion-icon name="save-outline" slot="start"></ion-icon>
+							Save Revision
+						</ion-button>
+						<ion-button
+							color="success"
+							fill="outline"
+							(click)="publishTemplate()"
+							(keydown.enter)="publishTemplate()"
+							[disabled]="!selectedRevisionId"
+						>
+							<ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+							Publish to AWS
+						</ion-button>
+						<ion-button
+							fill="clear"
+							(click)="refreshPreview()"
+							(keydown.enter)="refreshPreview()"
+						>
+							<ion-icon name="refresh-outline" slot="start"></ion-icon>
+							Refresh Preview
+						</ion-button>
+					</section>
+				</ion-card-content>
+			</ion-card>
+
+			<ion-card>
+				<ion-card-header>
+					<ion-card-title>Template HTML</ion-card-title>
+				</ion-card-header>
+				<ion-card-content>
+					<admin-email-template-code-editor
+						[value]="html"
+						(valueChange)="onHtmlChange($event)"
+					></admin-email-template-code-editor>
+				</ion-card-content>
+			</ion-card>
+		</section>
+
+		<aside class="sidebar">
+			<ion-card>
+				<ion-card-header>
+					<ion-card-title>
+						<ion-icon name="document-text-outline"></ion-icon>
+						Fields & sample data
+					</ion-card-title>
+				</ion-card-header>
+				<ion-card-content>
+					@if (fieldMappings.length === 0) {
+						<ion-note color="medium">
+							Add Handlebars fields like {{ firstNameExample }} to your HTML and they will appear here.
+						</ion-note>
+						<ion-note color="medium">
+							Use the delivery profile mapping list to connect placeholders to runtime data fields.
+						</ion-note>
+					} @else {
+						<div class="runtime-field-list">
+							@for (runtimeField of availableRuntimeFields(); track runtimeField) {
+								<ion-badge color="secondary">{{ runtimeField }}</ion-badge>
+							}
+						</div>
+						<ion-list>
+							@for (group of fieldMappings.controls; track $index) {
+								<div [formGroup]="$any(group)" class="field-group">
+									<ion-item>
+										<ion-label>
+											<strong>{{ $any(group).controls['name'].value }}</strong>
+										</ion-label>
+										<ion-badge color="tertiary">Handlebars</ion-badge>
+									</ion-item>
+									<ion-item>
+										<ion-select
+											label="Data mapping"
+											formControlName="mapping"
+											(ionChange)="refreshPreview()"
+										>
+											@for (runtimeField of availableRuntimeFields(); track runtimeField) {
+												<ion-select-option [value]="runtimeField">
+													{{ runtimeField }}
+												</ion-select-option>
+											}
+										</ion-select>
+									</ion-item>
+									<ion-item>
+										<ion-input
+											label="Sample value"
+											formControlName="sampleValue"
+											(ionInput)="refreshPreview()"
+										></ion-input>
+									</ion-item>
+								</div>
+							}
+						</ion-list>
+					}
+				</ion-card-content>
+			</ion-card>
+
+			<ion-card>
+				<ion-card-header>
+					<ion-card-title>Live preview</ion-card-title>
+				</ion-card-header>
+				<ion-card-content>
+					<iframe
+						#previewFrame
+						title="Email template preview"
+						sandbox=""
+						class="preview-frame"
+					></iframe>
+				</ion-card-content>
+			</ion-card>
+
+			<ion-card>
+				<ion-card-header>
+					<ion-card-title>Revisions</ion-card-title>
+				</ion-card-header>
+				<ion-card-content>
+					@if (revisions.length === 0) {
+						<ion-note color="medium">Save your first revision to start history.</ion-note>
+					} @else {
+						<ion-list>
+							@for (revision of revisions; track revision.id) {
+								<ion-item>
+									<ion-label>
+										<h3>Revision r{{ revision.revisionNumber }}</h3>
+										<p>{{ revision.subjectPart }}</p>
+									</ion-label>
+									<ion-badge [color]="revisionBadgeColor(revision)">
+										@if (revision.id === currentTemplate?.publishedRevisionId) {
+											Published
+										} @else {
+											Draft
+										}
+									</ion-badge>
+									<ion-button
+										fill="clear"
+										slot="end"
+										(click)="loadRevision(revision)"
+										(keydown.enter)="loadRevision(revision)"
+									>
+										Load
+									</ion-button>
+								</ion-item>
+							}
+						</ion-list>
+					}
+				</ion-card-content>
+			</ion-card>
+		</aside>
+	</main>
+</ion-content>

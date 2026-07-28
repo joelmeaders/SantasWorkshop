@@ -42,8 +42,9 @@ High-level runtime dependencies:
 | Check-in flow | `scan.page.ts`, `review.page.ts`, `confirmation.page.ts`, `duplicate.page.ts`, `check-in-context.service.ts`, `check-in.service.ts` | Core scan/review/check-in workflow |
 | Admin registration flows | `pre-registration.page.ts`, `registration.page.ts` | Admin-created preregistration and on-site registration/check-in |
 | Resend email tool | `tools/resend-email/resend-email.page.ts` | Manual requeue of registration email delivery |
+| Email templates | `tools/email-templates/**/*`, `email-template.service.ts` | Manage HTML email templates, revisions, preview data mappings, and SES publishing |
 | Stats dashboards | `stats/registration.page.ts`, `stats/check-in.page.ts`, `stats/user.page.ts` | Reads aggregated stats docs and slot data for reporting |
-| Backend mutations | `santashop-functions/src/fn/callableAdminPreRegister.ts`, `callableCreateStaffUser.ts`, `callableUpdateStaffUser.ts`, `callableDeleteStaffUser.ts`, `onSiteRegistration.ts`, `checkIn.ts`, `checkInWithEdit.ts`, `callableResendRegistrationEmail.ts`, `undoRegistration.ts`, `changeRegistrationDateTime.ts` | Implements privileged admin mutations |
+| Backend mutations | `santashop-functions/src/fn/callableAdminPreRegister.ts`, `callableCreateStaffUser.ts`, `callableUpdateStaffUser.ts`, `callableDeleteStaffUser.ts`, `onSiteRegistration.ts`, `checkIn.ts`, `checkInWithEdit.ts`, `callableResendRegistrationEmail.ts`, `undoRegistration.ts`, `changeRegistrationDateTime.ts`, `callableListEmailTemplates.ts`, `callableGetEmailTemplate.ts`, `callableGetEmailTemplateRevision.ts`, `callableSaveEmailTemplateRevision.ts`, `callablePublishEmailTemplate.ts` | Implements privileged admin mutations |
 
 ## Route and page catalog
 
@@ -71,6 +72,9 @@ High-level runtime dependencies:
 | `/admin/registration` | `RegistrationPage` | One-step on-site registration plus immediate check-in | local form state only | callable `onSiteRegistration` | Requires Firebase auth + any elevated role |
 | `/admin/pre-registration` | `PreRegistrationPage` | Creates a preregistered customer account and queued email | users-by-email duplicate check, available slots | callable `callableAdminPreRegister` | Requires Firebase auth + any elevated role |
 | `/admin/resend-email` | `ResendEmailPage` | Finds a customer by email and requeues their registration email | `registrationsearchindex` by email | callable `callableResendRegistrationEmail` | Requires Firebase auth + `admin` claim |
+| `/admin/email-templates` | `EmailTemplatesPage` | Lists template records, publish state, and revision pointers | `emailTemplates` metadata via callable | navigation only | Requires Firebase auth + `admin` claim |
+| `/admin/email-templates/create` | `EmailTemplateEditorPage` | Creates a new template record and first draft revision | none initially | callable `callableSaveEmailTemplateRevision` | Requires Firebase auth + `admin` claim |
+| `/admin/email-templates/:key` | `EmailTemplateEditorPage` | Edits a template, previews mapped sample data, and publishes to SES | template metadata + revision HTML via callables | callable `callableGetEmailTemplate`, `callableGetEmailTemplateRevision`, `callableSaveEmailTemplateRevision`, `callablePublishEmailTemplate` | Requires Firebase auth + `admin` claim |
 | `/admin/schedule-editor` | `ScheduleEditorPage` | Edits schedule and capacity configuration | date/time slot and schedule data | schedule editor services and Firestore writes | Requires Firebase auth + `admin` claim |
 | `/admin/users` | `UsersPage` | Manages elevated staff accounts and passwords | `staff` collection | callable `callableCreateStaffUser`, `callableUpdateStaffUser`, `callableDeleteStaffUser` | Requires Firebase auth + `admin` claim |
 | `/admin/stats/registration` | `RegistrationPage` (stats) | Registration and capacity reporting | `stats/registration-{year}`, `stats/schedule-{year}`, `dateTimeSlots` | None | Requires Firebase auth + `admin` claim |
@@ -321,6 +325,24 @@ Shows:
 - top referrers
 - top zip codes
 
+### 9. Email template management workflow
+
+`EmailTemplatesPage` and `EmailTemplateEditorPage` implement the admin-managed SES template flow.
+
+Flow:
+
+1. Admin opens `/admin/email-templates` to inspect template records and publish state.
+2. Admin opens an existing template or creates a new record with a template key and delivery profile.
+3. Editor loads the latest revision HTML from Cloud Storage through callable functions.
+4. CodeMirror edits the raw HTML while the field-mapping panel extracts Handlebars placeholders from both the subject and HTML body.
+5. Preview renders mapped sample values inside a sandboxed iframe.
+6. Saving creates a new revision in `emailTemplates/{key}/revisions/{revisionId}` and writes the HTML blob to `emailTemplates/{key}/revisions/{revisionId}.html` in Cloud Storage.
+7. Publishing transforms the HTML for SES compatibility and calls SES `UpdateTemplate` with create fallback, then marks the selected revision as published.
+
+Important current-state note:
+
+- Automated registration/reminder email delivery resolves the active SES template by delivery profile, allowing a published custom template record to replace the legacy static template names without changing queue writers.
+
 ## Data contracts and record mutations
 
 ```mermaid src="./diagrams/admin-data-and-function-flow.mmd" alt="Santashop admin app data and function flow"```
@@ -522,6 +544,66 @@ Fields written by admin-driven workflows:
 | change date/time from review | callable `changeRegistrationDateTime` | requeues updated date/time email with `queueSource = date-time-change` |
 | resend email tool | callable `callableResendRegistrationEmail` | requeues email with `queueSource = manual-resend` |
 
+Behavioral note:
+
+- queue writers stamp a delivery-profile-style `templateKey` such as `registration-confirmation` or `event-reminder`; the send worker resolves the currently published SES template for that profile and applies stored field mappings before calling SES.
+
+### `emailTemplates/{key}`
+
+Primary purpose:
+
+- metadata record for a logical email template, including its delivery profile, current draft pointer, published revision pointer, and field mappings
+
+Fields used by the admin app:
+
+- `key`
+- `deliveryProfile`
+- `displayName`
+- `description`
+- `subjectPart`
+- `awsTemplateName`
+- `fieldMappings[]`
+- `currentRevisionId`
+- `currentRevisionNumber`
+- `publishedRevisionId`
+- `publishedRevisionNumber`
+- `publishedOn`
+- `createdOn`
+- `updatedOn`
+
+Fields added or updated by admin workflow:
+
+| When | Mutation source | Fields added or changed |
+| --- | --- | --- |
+| save draft revision | callable `callableSaveEmailTemplateRevision` | creates/updates the metadata record, advances `currentRevisionId`, stores delivery profile + field mappings |
+| publish to SES | callable `callablePublishEmailTemplate` | updates published revision pointers and `publishedOn` |
+
+### `emailTemplates/{key}/revisions/{revisionId}`
+
+Primary purpose:
+
+- immutable draft/publish history entries for template HTML revisions
+
+Fields stored:
+
+- `id`
+- `templateKey`
+- `deliveryProfile`
+- `revisionNumber`
+- `subjectPart`
+- `htmlStoragePath`
+- `htmlFileName`
+- `fieldMappings[]`
+- `notes`
+- `createdOn`
+- `createdByUid`
+- `createdByEmail`
+- `publishedOn`
+
+Related storage objects:
+
+- `gs://<default-bucket>/emailTemplates/{key}/revisions/{revisionId}.html`
+
 ### `stats/{docId}`
 
 Primary purpose:
@@ -584,6 +666,11 @@ Feature-flag wiring found:
 | `changeRegistrationDateTime` | `ReviewPage.editDateTime()` | `{ newDateTimeSlot, registrationUid }` | updates submitted registration slot and requeues email |
 | `undoRegistration` | `ReviewPage.cancelReservation()` | current registration object | deletes search index and clears submitted reservation state |
 | `callableResendRegistrationEmail` | `ResendEmailPage.searchAndSend()` | `{ customerId }` | requeues email and resets reminder-email flags |
+| `callableListEmailTemplates` | `EmailTemplatesPage.ionViewWillEnter()` | none | returns template metadata for the admin template list |
+| `callableGetEmailTemplate` | `EmailTemplateEditorPage.ionViewWillEnter()` | `{ key }` | loads template metadata, revisions, and current HTML |
+| `callableGetEmailTemplateRevision` | `EmailTemplateEditorPage.loadRevision()` | `{ key, revisionId }` | loads a specific revision HTML blob and metadata |
+| `callableSaveEmailTemplateRevision` | `EmailTemplateEditorPage.saveRevision()` | `{ key, deliveryProfile, displayName, description?, awsTemplateName, subjectPart, html, fieldMappings[], notes? }` | writes Cloud Storage HTML and upserts revision metadata |
+| `callablePublishEmailTemplate` | `EmailTemplateEditorPage.publishTemplate()` | `{ key, revisionId? }` | transforms HTML for SES, publishes the selected revision, and updates publish markers |
 | `callableCreateStaffUser` | `UsersPage.addUser()` | `{ emailAddress, displayName, password, roles }` | creates an elevated auth account, writes `/staff/{uid}`, and syncs claims |
 | `callableUpdateStaffUser` | `UsersPage.editUser()` / reset-password flow | `{ uid, displayName?, roles?, newPassword?, disabled? }` | updates an existing staff account, writes `/staff/{uid}`, and syncs claims |
 | `callableDeleteStaffUser` | `UsersPage.deleteUser()` | `{ uid }` | deletes an existing elevated auth account and removes `/staff/{uid}` |
@@ -593,6 +680,7 @@ Feature-flag wiring found:
 | Function / process | Trigger | Why the admin app cares |
 | --- | --- | --- |
 | `sendNewRegistrationEmails` | writes to `tmp_registrationemails/{uid}` | sends the queued emails created by preregistration, date changes, and manual resend |
+| SES template publish path | admin publish callable | keeps published HTML revisions synchronized into AWS SES templates |
 | scheduled stats builders | cron/scheduler | populate the dashboards the admin stats pages read |
 | slot counter job | cron/scheduler | keeps `slotsReserved` current for capacity displays and selection confidence |
 

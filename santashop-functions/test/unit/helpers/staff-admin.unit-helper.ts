@@ -11,6 +11,7 @@ interface MockDocRef {
 
 export interface StaffAdminMock {
 	module: {
+		apps: unknown[];
 		initializeApp: ReturnType<typeof vi.fn>;
 		auth: ReturnType<typeof vi.fn>;
 		firestore: ReturnType<typeof vi.fn>;
@@ -78,6 +79,7 @@ export const createStaffAdminMock = (): StaffAdminMock => {
 
 	return {
 		module: {
+			apps: [],
 			initializeApp,
 			auth,
 			firestore,

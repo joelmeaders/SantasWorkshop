@@ -4,6 +4,7 @@ export * from './lib/check-in';
 export * from './lib/child';
 export * from './lib/date-time-slot-count';
 export * from './lib/date-time-slot';
+export * from './lib/email-template';
 export * from './lib/error';
 export * from './lib/global-alert';
 export * from './lib/onboard-user';

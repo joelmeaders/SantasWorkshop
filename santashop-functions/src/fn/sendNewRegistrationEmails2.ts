@@ -9,7 +9,11 @@ import type {
 	DocumentSnapshot,
 	QueryDocumentSnapshot,
 } from 'firebase-admin/firestore';
-import { COLLECTION_SCHEMA, Registration } from '../models';
+import {
+	COLLECTION_SCHEMA,
+	EMAIL_TEMPLATE_KEYS,
+	Registration,
+} from '../models';
 import admin from '../firebase-admin';
 import {
 	EVENT_DISPLAY_NAME,
@@ -20,6 +24,10 @@ import {
 	REGISTRATION_EMAIL_TEMPLATE,
 	SES_REGION,
 } from '../utility/runtime-config';
+import {
+	buildEmailTemplateDataFromMappings,
+	resolvePublishedEmailTemplate,
+} from '../utility/email-templates';
 import { serializeError } from '../utility/errors';
 import {
 	normalizeDateTime,
@@ -38,6 +46,7 @@ interface QueuedRegistrationEmailDocument {
 	email?: string;
 	formattedDateTime?: string;
 	template?: string;
+	templateKey?: string;
 	queuedOn?: Date;
 	queueSource?: string;
 	deliveryRequestedOn?: Date;
@@ -64,7 +73,8 @@ interface ResolvedEmailPayload {
 	firstName: string;
 	dateTime: string;
 	code: string;
-	template: string;
+	template?: string;
+	templateKey?: string;
 }
 
 const queueProcessingState = {
@@ -319,7 +329,10 @@ const resolveEmailPayload = (
 		firstName: document.name,
 		dateTime: document.formattedDateTime,
 		code: document.code,
-		template: document.template ?? REGISTRATION_EMAIL_TEMPLATE,
+		...(document.template ? { template: document.template } : {}),
+		...(document.templateKey
+			? { templateKey: document.templateKey }
+			: { templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation }),
 	};
 };
 
@@ -430,7 +443,7 @@ export default async function sendNewRegistrationEmails2(
 		return;
 	}
 
-	const messageDetails = {
+	const baseMessageDetails = {
 		firstName: payload.firstName,
 		eventName: EVENT_DISPLAY_NAME,
 		qrCodeUrl: getRegistrationQrCodeUrl(payload.uid),
@@ -443,10 +456,25 @@ export default async function sendNewRegistrationEmails2(
 		region: SES_REGION,
 	} as SESClientConfig);
 
+	const resolvedTemplate = await resolvePublishedEmailTemplate(
+		{
+			...(payload.template ? { template: payload.template } : {}),
+			...(payload.templateKey ? { templateKey: payload.templateKey } : {}),
+		},
+		REGISTRATION_EMAIL_TEMPLATE,
+	);
+
+	const messageDetails = resolvedTemplate.templateSummary
+		? buildEmailTemplateDataFromMappings(
+				resolvedTemplate.templateSummary.fieldMappings,
+				baseMessageDetails,
+			)
+		: baseMessageDetails;
+
 	const sendReminderEmailCommand = createReminderEmailCommand(
 		messageDetails,
 		payload.email,
-		payload.template,
+		resolvedTemplate.templateName,
 	);
 
 	let response: SendTemplatedEmailCommandOutput | undefined;

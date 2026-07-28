@@ -3,6 +3,7 @@ import {
 	User,
 	Registration,
 	COLLECTION_SCHEMA,
+	EMAIL_TEMPLATE_KEYS,
 	RegistrationSearchIndex,
 } from '../models';
 import type { Timestamp } from 'firebase-admin/firestore';
@@ -137,6 +138,8 @@ export default async function callableAdminPreRegister(
 				email: emailAddress,
 				name: firstName,
 				formattedDateTime: createdRegistration.formattedDateTime,
+				templateKey:
+					EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 				queuedOn: finalizedOn,
 				queueSource: 'admin-preregistration',
 				deliveryRequestedOn: finalizedOn,

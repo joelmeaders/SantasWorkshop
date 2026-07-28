@@ -23,8 +23,16 @@ interface MockCollectionRef {
 	add: ReturnType<typeof vi.fn>;
 }
 
+interface MockFileRef {
+	path: string;
+	save: ReturnType<typeof vi.fn>;
+	download: ReturnType<typeof vi.fn>;
+	delete: ReturnType<typeof vi.fn>;
+}
+
 export interface BackgroundAdminMock {
 	module: {
+		apps: unknown[];
 		initializeApp: ReturnType<typeof vi.fn>;
 		auth: ReturnType<typeof vi.fn>;
 		firestore: ReturnType<typeof vi.fn> & {
@@ -54,6 +62,8 @@ export interface BackgroundAdminMock {
 	updateUser: ReturnType<typeof vi.fn>;
 	setCustomUserClaims: ReturnType<typeof vi.fn>;
 	upload: ReturnType<typeof vi.fn>;
+	getFileRef: (path: string) => MockFileRef;
+	setFileContents: (path: string, contents: string) => void;
 	databasePath: ReturnType<typeof vi.fn>;
 	exportDocuments: ReturnType<typeof vi.fn>;
 	getDocRef: (path: string) => MockDocRef;
@@ -77,6 +87,7 @@ const timestampFromDate = (date: Date): { toDate: () => Date } => ({
 export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	const docRefs = new Map<string, MockDocRef>();
 	const collectionRefs = new Map<string, MockCollectionRef>();
+	const fileRefs = new Map<string, MockFileRef>();
 	const initializeApp = vi.fn();
 	const batchSet = vi.fn();
 	const batchCreate = vi.fn();
@@ -127,6 +138,35 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	const databasePath = vi.fn();
 	const exportDocuments = vi.fn();
 	let generatedDocId = 0;
+
+	const getFileRef = (path: string): MockFileRef => {
+		const existing = fileRefs.get(path);
+		if (existing) {
+			return existing;
+		}
+
+		const created: MockFileRef = {
+			path,
+			save: vi.fn().mockImplementation(async (contents: string | Buffer) => {
+				const stringContents = Buffer.isBuffer(contents)
+					? contents.toString('utf-8')
+					: String(contents);
+				created.download.mockResolvedValue([
+					Buffer.from(stringContents, 'utf-8'),
+				]);
+			}),
+			download: vi.fn().mockResolvedValue([Buffer.from('', 'utf-8')]),
+			delete: vi.fn().mockResolvedValue(undefined),
+		};
+		fileRefs.set(path, created);
+		return created;
+	};
+
+	const setFileContents = (path: string, contents: string): void => {
+		getFileRef(path).download.mockResolvedValue([
+			Buffer.from(contents, 'utf-8'),
+		]);
+	};
 
 	const getDocRef = (path: string): MockDocRef => {
 		const existing = docRefs.get(path);
@@ -268,11 +308,13 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	const storage = vi.fn(() => ({
 		bucket: vi.fn(() => ({
 			upload,
+			file: vi.fn((path: string) => getFileRef(path)),
 		})),
 	}));
 
 	return {
 		module: {
+			apps: [],
 			initializeApp,
 			auth,
 			firestore,
@@ -292,6 +334,8 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		updateUser,
 		setCustomUserClaims,
 		upload,
+		getFileRef,
+		setFileContents,
 		databasePath,
 		exportDocuments,
 		getDocRef,

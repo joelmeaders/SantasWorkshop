@@ -1,8 +1,11 @@
 import admin from '../firebase-admin';
 import type { Timestamp } from 'firebase-admin/firestore';
-import { COLLECTION_SCHEMA, Registration } from '../models';
+import {
+	COLLECTION_SCHEMA,
+	EMAIL_TEMPLATE_KEYS,
+	Registration,
+} from '../models';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
-import { REMINDER_EMAIL_TEMPLATE } from '../utility/runtime-config';
 
 interface ReminderQueueResult {
 	success: number;
@@ -20,7 +23,7 @@ interface ReminderEmailDocument {
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
-	template: string;
+	templateKey: string;
 	queuedOn: Date;
 	queueSource: 'scheduled-reminder';
 	deliveryRequestedOn: Date;
@@ -207,7 +210,7 @@ function buildReminderEmailDocument(
 		email: registration.emailAddress,
 		name: registration.firstName,
 		formattedDateTime: formatRegistrationDateTime(dateTimeSlot),
-		template: REMINDER_EMAIL_TEMPLATE,
+		templateKey: EMAIL_TEMPLATE_KEYS.eventReminder,
 		queuedOn: new Date(),
 		queueSource: 'scheduled-reminder',
 		deliveryRequestedOn: new Date(),

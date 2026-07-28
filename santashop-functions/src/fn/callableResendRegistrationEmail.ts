@@ -1,5 +1,9 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import { COLLECTION_SCHEMA, Registration } from '../models';
+import {
+	COLLECTION_SCHEMA,
+	EMAIL_TEMPLATE_KEYS,
+	Registration,
+} from '../models';
 import admin from '../firebase-admin';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
 import { isRegistrationComplete } from '../utility/registrations';
@@ -13,6 +17,7 @@ interface ResendEmailDocument {
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
+	templateKey: string;
 	queuedOn: Date;
 	queueSource: 'manual-resend';
 	deliveryRequestedOn: Date;
@@ -68,6 +73,7 @@ export default async function callableResendRegistrationEmail(
 		email: record.emailAddress,
 		name: record.firstName,
 		formattedDateTime: dateTime,
+		templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 		queuedOn,
 		queueSource: 'manual-resend',
 		deliveryRequestedOn: queuedOn,

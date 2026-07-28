@@ -3,6 +3,7 @@ import admin from '../firebase-admin';
 import { isRegistrationComplete } from '../utility/registrations';
 import {
 	COLLECTION_SCHEMA,
+	EMAIL_TEMPLATE_KEYS,
 	Registration,
 	RegistrationSearchIndex,
 } from '../models';
@@ -76,6 +77,7 @@ export default async function completeRegistration(
 		formattedDateTime: formatRegistrationDateTime(
 			record.dateTimeSlot?.dateTime as string,
 		),
+		templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 	};
 
 	batch.set(emailDocRef, emailDoc, { merge: true });

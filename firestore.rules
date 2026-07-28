@@ -47,6 +47,14 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /emailTemplates/{templateId} {
+      allow read, write: if isAdmin();
+
+      match /revisions/{revisionId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
     match /stats/{document=**} {
       allow read: if isAdmin();
     }

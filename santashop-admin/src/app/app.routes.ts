@@ -220,6 +220,33 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'email-templates',
+				title: 'DSCS: Email Templates',
+				canActivate: [adminOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/tools/email-templates/email-templates.page').then(
+						(m) => m.EmailTemplatesPage,
+					),
+			},
+			{
+				path: 'email-templates/create',
+				title: 'DSCS: Create Email Template',
+				canActivate: [adminOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/tools/email-templates/email-template-editor.page').then(
+						(m) => m.EmailTemplateEditorPage,
+					),
+			},
+			{
+				path: 'email-templates/:key',
+				title: 'DSCS: Edit Email Template',
+				canActivate: [adminOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/tools/email-templates/email-template-editor.page').then(
+						(m) => m.EmailTemplateEditorPage,
+					),
+			},
+			{
 				path: 'users',
 				title: 'DSCS: User Management',
 				canActivate: [adminOnlyGuard],

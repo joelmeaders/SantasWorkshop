@@ -116,6 +116,56 @@ export const callableResendRegistrationEmail = onCall(
 	},
 );
 
+export const callableListEmailTemplates = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/callableListEmailTemplates')).default(
+			request,
+		);
+	},
+);
+
+export const callableGetEmailTemplate = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/callableGetEmailTemplate')).default(
+			request,
+		);
+	},
+);
+
+export const callableGetEmailTemplateRevision = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	async (request) => {
+		return (await import('./fn/callableGetEmailTemplateRevision')).default(
+			request,
+		);
+	},
+);
+
+export const callableSaveEmailTemplateRevision = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK, timeoutSeconds: 60, memory: '256MiB' },
+	async (request) => {
+		return (await import('./fn/callableSaveEmailTemplateRevision')).default(
+			request,
+		);
+	},
+);
+
+export const callablePublishEmailTemplate = onCall(
+	{
+		enforceAppCheck: ENFORCE_APP_CHECK,
+		memory: '256MiB',
+		timeoutSeconds: 60,
+		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
+	},
+	async (request) => {
+		return (await import('./fn/callablePublishEmailTemplate')).default(
+			request,
+		);
+	},
+);
+
 export const callableCreateStaffUser = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {

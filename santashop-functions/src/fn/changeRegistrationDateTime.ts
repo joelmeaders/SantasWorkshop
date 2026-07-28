@@ -1,5 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import { COLLECTION_SCHEMA, DateTimeSlot, Registration } from '../models';
+import {
+	COLLECTION_SCHEMA,
+	DateTimeSlot,
+	EMAIL_TEMPLATE_KEYS,
+	Registration,
+} from '../models';
 import admin from '../firebase-admin';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
 import {
@@ -23,6 +28,7 @@ interface RegistrationChangeEmailDocument {
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
+	templateKey: string;
 	queuedOn: Date;
 	queueSource: 'date-time-change';
 	deliveryRequestedOn: Date;
@@ -119,6 +125,7 @@ export default async function changeRegistrationDateTime(
 		email: registrationDoc.emailAddress,
 		name: registrationDoc.firstName,
 		formattedDateTime: formatRegistrationDateTime(normalizedDateTime),
+		templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 		queuedOn,
 		queueSource: 'date-time-change',
 		deliveryRequestedOn: queuedOn,

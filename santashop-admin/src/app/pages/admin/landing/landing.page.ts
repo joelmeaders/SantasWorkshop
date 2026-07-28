@@ -6,6 +6,7 @@ import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
 	bagCheckOutline,
+	documentTextOutline,
 	searchOutline,
 	storefrontOutline,
 	personAddOutline,
@@ -82,6 +83,7 @@ export class LandingPage {
 			storefrontOutline,
 			personAddOutline,
 			mailOutline,
+			documentTextOutline,
 			statsChartOutline,
 			cartOutline,
 			peopleOutline,
@@ -95,6 +97,7 @@ export class LandingPage {
 			storefrontOutline,
 			personAddOutline,
 			mailOutline,
+			documentTextOutline,
 			statsChartOutline,
 			cartOutline,
 			peopleOutline,
@@ -108,6 +111,7 @@ export class LandingPage {
 			storefrontOutline,
 			personAddOutline,
 			mailOutline,
+			documentTextOutline,
 			statsChartOutline,
 			cartOutline,
 			peopleOutline,

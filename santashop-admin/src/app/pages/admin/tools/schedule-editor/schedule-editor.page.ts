@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	ReactiveFormsModule,
@@ -13,7 +13,6 @@ import {
 	AlertController,
 	IonBadge,
 	IonButton,
-	IonButtons,
 	IonCard,
 	IonCardContent,
 	IonCardHeader,
@@ -23,12 +22,10 @@ import {
 	IonIcon,
 	IonInput,
 	IonItem,
-	IonList,
 	IonNote,
 	IonSelect,
 	IonSelectOption,
 	IonToggle,
-	IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -40,6 +37,7 @@ import {
 	trashOutline,
 } from 'ionicons/icons';
 import { firstValueFrom, map, shareReplay } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import {
 	buildDateRange,
@@ -57,6 +55,12 @@ interface ScheduleEditorRow extends DateTimeSlot {
 	slotsReserved: number;
 }
 
+interface ScheduleEditorDayGroup {
+	dateKey: string;
+	dateLabel: string;
+	slots: ScheduleEditorRow[];
+}
+
 type CapacityInputValue = string | number | null | undefined;
 
 @Component({
@@ -68,13 +72,11 @@ type CapacityInputValue = string | number | null | undefined;
 	imports: [
 		HeaderComponent,
 		AsyncPipe,
-		DatePipe,
 		FormsModule,
 		ReactiveFormsModule,
 		TimeSlotPipe,
 		IonBadge,
 		IonButton,
-		IonButtons,
 		IonCard,
 		IonCardContent,
 		IonCardHeader,
@@ -84,12 +86,10 @@ type CapacityInputValue = string | number | null | undefined;
 		IonIcon,
 		IonInput,
 		IonItem,
-		IonList,
 		IonNote,
 		IonSelect,
 		IonSelectOption,
 		IonToggle,
-		IonToolbar,
 	],
 })
 export class ScheduleEditorPage {
@@ -103,6 +103,7 @@ export class ScheduleEditorPage {
 	public year = this.defaultProgramYear;
 	public statusMessage = '';
 	public selectedSlotIds = new Set<string>();
+	private latestSlots: ScheduleEditorRow[] = [];
 	private readonly slotDateDrafts = new Map<string, string>();
 	private readonly slotHourDrafts = new Map<string, number>();
 
@@ -124,6 +125,14 @@ export class ScheduleEditorPage {
 
 	public readonly slots$ = this.scheduleEditorService.slots$.pipe(
 		map((slots) => slots.map((slot) => this.mapSlotRow(slot))),
+		tap((slots) => {
+			this.latestSlots = slots;
+		}),
+		shareReplay(1),
+	);
+
+	public readonly groupedSlots$ = this.slots$.pipe(
+		map((slots) => this.groupSlotsByDate(slots)),
 		shareReplay(1),
 	);
 
@@ -142,8 +151,27 @@ export class ScheduleEditorPage {
 		return this.selectedSlotIds.size;
 	}
 
+	public get hasSelections(): boolean {
+		return this.selectedCount > 0;
+	}
+
+	public get totalSlotCount(): number {
+		return this.latestSlots.length;
+	}
+
+	public get allLoadedSlotsSelected(): boolean {
+		return this.totalSlotCount > 0 && this.selectedCount === this.totalSlotCount;
+	}
+
 	public trackBySlot(_index: number, slot: ScheduleEditorRow): string {
 		return slot.id ?? slot.dateTime.toISOString();
+	}
+
+	public trackByDayGroup(
+		_index: number,
+		group: ScheduleEditorDayGroup,
+	): string {
+		return group.dateKey;
 	}
 
 	public async generateSlots(): Promise<void> {
@@ -285,6 +313,10 @@ export class ScheduleEditorPage {
 
 	public clearSelection(): void {
 		this.selectedSlotIds = new Set<string>();
+	}
+
+	public toggleAllLoadedSlots(): void {
+		this.toggleAll(this.latestSlots);
 	}
 
 	public setSlotDateDraft(slotId: string | undefined, event: Event): void {
@@ -590,6 +622,10 @@ export class ScheduleEditorPage {
 		return `${normalizedHour}:00 ${suffix}`;
 	}
 
+	public countSelectedSlots(slots: ScheduleEditorRow[]): number {
+		return slots.filter((slot) => this.isSelected(slot.id)).length;
+	}
+
 	public formatDateInput(date: Date): string {
 		const year = date.getFullYear();
 		const month = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -608,5 +644,31 @@ export class ScheduleEditorPage {
 		return slot.id
 			? (this.slotHourDrafts.get(slot.id) ?? slot.dateTime.getHours())
 			: slot.dateTime.getHours();
+	}
+
+	private groupSlotsByDate(
+		slots: ScheduleEditorRow[],
+	): ScheduleEditorDayGroup[] {
+		const groupedSlots = slots.reduce<Map<string, ScheduleEditorRow[]>>(
+			(acc, slot) => {
+				const dateKey = this.formatDateInput(slot.dateTime);
+				const currentSlots = acc.get(dateKey) ?? [];
+				currentSlots.push(slot);
+				acc.set(dateKey, currentSlots);
+				return acc;
+			},
+			new Map<string, ScheduleEditorRow[]>(),
+		);
+
+		return Array.from(groupedSlots.entries()).map(([dateKey, daySlots]) => ({
+			dateKey,
+			dateLabel: daySlots[0].dateTime.toLocaleDateString('en-US', {
+				weekday: 'long',
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+			}),
+			slots: daySlots,
+		}));
 	}
 }

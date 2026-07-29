@@ -59,7 +59,7 @@ test.describe('admin schedule editor - status and delete', () => {
 			'Disabled',
 		);
 		await expect(page.locator('#scheduleRow-slot-over-capacity')).toHaveClass(
-			/slot-row--disabled/,
+			/slot-card--disabled/,
 		);
 	});
 

@@ -28,7 +28,8 @@ test.describe('admin schedule editor - generate schedules', () => {
 		await page.click('#generateSchedulesButton');
 
 		// Assert
-		await expect(page.locator('text=5 total schedules')).toBeVisible();
+		await expect(page.locator('text=Friday, Dec 12, 2025')).toBeVisible();
+		await expect(page.locator('text=5 slots')).toBeVisible();
 		await expect(page.locator('[id^="scheduleRow-"]')).toHaveCount(5);
 		await expect(page.locator('[id^="scheduleRow-"]').first()).toContainText(
 			'Reserved 0 of 20',

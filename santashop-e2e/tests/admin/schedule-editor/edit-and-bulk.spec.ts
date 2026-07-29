@@ -62,8 +62,9 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Updated schedule time slot.',
 		);
+		await expect(page.locator('text=Saturday, Dec 13, 2025')).toBeVisible();
 		await expect(page.locator('#scheduleRow-slot-1')).toContainText(
-			'Dec 13, 2025',
+			'3AM - 4AM',
 		);
 	});
 });

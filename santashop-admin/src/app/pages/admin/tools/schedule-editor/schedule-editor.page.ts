@@ -160,7 +160,10 @@ export class ScheduleEditorPage {
 	}
 
 	public get allLoadedSlotsSelected(): boolean {
-		return this.totalSlotCount > 0 && this.selectedCount === this.totalSlotCount;
+		return (
+			this.totalSlotCount > 0 &&
+			this.selectedCount === this.totalSlotCount
+		);
 	}
 
 	public trackBySlot(_index: number, slot: ScheduleEditorRow): string {
@@ -660,15 +663,17 @@ export class ScheduleEditorPage {
 			new Map<string, ScheduleEditorRow[]>(),
 		);
 
-		return Array.from(groupedSlots.entries()).map(([dateKey, daySlots]) => ({
-			dateKey,
-			dateLabel: daySlots[0].dateTime.toLocaleDateString('en-US', {
-				weekday: 'long',
-				month: 'short',
-				day: 'numeric',
-				year: 'numeric',
+		return Array.from(groupedSlots.entries()).map(
+			([dateKey, daySlots]) => ({
+				dateKey,
+				dateLabel: daySlots[0].dateTime.toLocaleDateString('en-US', {
+					weekday: 'long',
+					month: 'short',
+					day: 'numeric',
+					year: 'numeric',
+				}),
+				slots: daySlots,
 			}),
-			slots: daySlots,
-		}));
+		);
 	}
 }

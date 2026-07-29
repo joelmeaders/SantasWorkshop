@@ -10,30 +10,35 @@ import {
 
 test.describe('admin schedule editor - status and delete', () => {
 	test.beforeEach(
-		async ({ clearData, seedPublicParams, seedAdminUser, seedDateTimeSlots }) => {
+		async ({
+			clearData,
+			seedPublicParams,
+			seedAdminUser,
+			seedDateTimeSlots,
+		}) => {
 			await clearData();
 			await seedPublicParams({});
 			await seedAdminUser(defaultAdminAccount());
 			await seedDateTimeSlots([
-			scheduleSlot({
-				id: 'slot-at-capacity',
+				scheduleSlot({
+					id: 'slot-at-capacity',
 					dateTime: '2025-12-12T10:00:00',
-				maxSlots: 5,
-				slotsReserved: 5,
-			}),
-			scheduleSlot({
-				id: 'slot-over-capacity',
+					maxSlots: 5,
+					slotsReserved: 5,
+				}),
+				scheduleSlot({
+					id: 'slot-over-capacity',
 					dateTime: '2025-12-12T11:00:00',
-				maxSlots: 5,
-				slotsReserved: 7,
-				enabled: false,
-			}),
-			scheduleSlot({
-				id: 'slot-delete-me',
+					maxSlots: 5,
+					slotsReserved: 7,
+					enabled: false,
+				}),
+				scheduleSlot({
+					id: 'slot-delete-me',
 					dateTime: '2025-12-12T12:00:00',
-				maxSlots: 8,
-				slotsReserved: 2,
-			}),
+					maxSlots: 8,
+					slotsReserved: 2,
+				}),
 			]);
 		},
 	);
@@ -49,18 +54,18 @@ test.describe('admin schedule editor - status and delete', () => {
 		await navigateToScheduleEditorViaLanding(page);
 
 		// Assert
-		await expect(page.locator('#scheduleRow-slot-at-capacity')).toContainText(
-			'At capacity',
-		);
-		await expect(page.locator('#scheduleRow-slot-over-capacity')).toContainText(
-			'Over capacity',
-		);
-		await expect(page.locator('#scheduleRow-slot-over-capacity')).toContainText(
-			'Disabled',
-		);
-		await expect(page.locator('#scheduleRow-slot-over-capacity')).toHaveClass(
-			/slot-card--disabled/,
-		);
+		await expect(
+			page.locator('#scheduleRow-slot-at-capacity'),
+		).toContainText('At capacity');
+		await expect(
+			page.locator('#scheduleRow-slot-over-capacity'),
+		).toContainText('Over capacity');
+		await expect(
+			page.locator('#scheduleRow-slot-over-capacity'),
+		).toContainText('Disabled');
+		await expect(
+			page.locator('#scheduleRow-slot-over-capacity'),
+		).toHaveClass(/slot-card--disabled/);
 	});
 
 	test('should enable a disabled slot and delete a schedule row', async ({
@@ -76,9 +81,9 @@ test.describe('admin schedule editor - status and delete', () => {
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Enabled 1 schedule.',
 		);
-		await expect(page.locator('#scheduleRow-slot-over-capacity')).not.toHaveClass(
-			/slot-row--disabled/,
-		);
+		await expect(
+			page.locator('#scheduleRow-slot-over-capacity'),
+		).not.toHaveClass(/slot-row--disabled/);
 
 		const deleteButton = page.locator('#deleteSchedule-slot-delete-me');
 		await deleteButton.scrollIntoViewIfNeeded();
@@ -91,6 +96,8 @@ test.describe('admin schedule editor - status and delete', () => {
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Schedule deleted.',
 		);
-		await expect(page.locator('#scheduleRow-slot-delete-me')).toHaveCount(0);
+		await expect(page.locator('#scheduleRow-slot-delete-me')).toHaveCount(
+			0,
+		);
 	});
 });

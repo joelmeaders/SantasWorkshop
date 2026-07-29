@@ -10,7 +10,12 @@ import {
 
 test.describe('admin schedule editor - edit and bulk update', () => {
 	test.beforeEach(
-		async ({ clearData, seedPublicParams, seedAdminUser, seedDateTimeSlots }) => {
+		async ({
+			clearData,
+			seedPublicParams,
+			seedAdminUser,
+			seedDateTimeSlots,
+		}) => {
 			await clearData();
 			await seedPublicParams({});
 			await seedAdminUser(defaultAdminAccount());

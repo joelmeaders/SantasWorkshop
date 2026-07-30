@@ -2,7 +2,7 @@
 
 I analyzed `santashop-functions` end-to-end against current Firebase/Google Cloud guidance. I did **not modify files**.
 
-The project is in decent shape overall: it is fully on Firebase Functions v2 APIs, avoids deprecated `functions.config()`, uses App Check for deployed callables, has emulator-gated test helpers, and has meaningful unit/integration coverage. The biggest improvement opportunities are around **runtime support verification, idempotency/retries, least-privilege service accounts, full-collection job scalability, stronger server-side validation, and consistency across Auth/Firestore/Storage/SES side effects**.
+The project is in decent shape overall: it is fully on Firebase Functions v2 APIs, avoids deprecated `functions.config()`, uses App Check for deployed callables, has emulator-gated test helpers, and has meaningful unit/integration coverage. The biggest improvement opportunities are around **idempotency/retries, least-privilege service accounts, full-collection job scalability, stronger server-side validation, and consistency across Auth/Firestore/Storage/SES side effects**.
 
 I reviewed guidance from:
 
@@ -41,9 +41,8 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 
 | Priority | Improvement | Impact |
 |---|---|---|
-| Critical | Verify Firebase runtime support for `engines.node: "24"` | Prevent failed deploys if Firebase runtime does not support Node 24 in the target project/CLI combination |
 | Critical | Make retrying external-side-effect functions fully idempotent | Reduces duplicate emails and retry-loop risk |
-| High | Add explicit `region`, `serviceAccount`, and selected runtime options | Improves latency predictability, security, cost control, and deploy reproducibility |
+| High | Add explicit `serviceAccount` and selected shared runtime options | Improves security, cost control, and deploy reproducibility |
 | High | Replace dangerous manual Pub/Sub jobs with safer gated workflows | Reduces blast radius of accidental admin password resets or mass user deletion |
 | High | Move large batch jobs from full-collection reads to paginated/streamed/task-queue flows | Prevents timeouts, memory growth, and high Firestore read costs as data grows |
 | High | Enforce authoritative server-side reads/transactions for registration, slot capacity, and check-in flows | Prevents client-tampering, overbooking, and inconsistent stats |
@@ -54,41 +53,7 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 
 ## Cross-cutting findings
 
-### 1. Node.js 24 runtime support should be verified before production deploy
-
-`package.json` sets:
-
-- `engines.node = "24"`
-
-The Firebase docs I fetched list Cloud Functions supported Node.js runtimes as **22**, **20**, and deprecated **18**. This conflicts with the repo’s Node 24 floor.
-
-**Impact:** If the active Firebase CLI/runtime does not support Node 24 for Cloud Functions in your project, deploys can fail even though local builds/tests pass.
-
-**Recommendation:**
-
-- Verify with a targeted deploy to the test Firebase project before production.
-- If deploy fails due runtime support, set Functions runtime to Node 22 until Firebase docs/CLI/runtime fully support Node 24.
-- If Node 24 is intentionally supported in your project through newer tooling, document that in `santashop-functions/README.md` with the minimum Firebase CLI version.
-
-### 2. Add explicit regions everywhere
-
-No exported function in `src/index.ts` currently sets `region`.
-
-Firebase guidance encourages explicit regions because defaults can change, and latency/cost depend on proximity to Firestore, Storage, Pub/Sub, and users.
-
-**Impact:**
-
-- Avoids accidental region drift.
-- Makes Hosting rewrites and callable client initialization predictable.
-- Reduces latency between Functions and Firestore/Storage if colocated.
-
-**Recommendation:**
-
-- Define a shared runtime option, probably `region: 'us-central1'` if that matches current deploy/client assumptions.
-- If Firestore/Storage are in a different region/multi-region, choose the nearest recommended Functions region.
-- If changing region for existing production functions, follow Firebase’s safe migration sequence: deploy renamed/new-region functions, verify, then delete old ones.
-
-### 3. Use dedicated least-privilege service accounts
+### 1. Use dedicated least-privilege service accounts
 
 All functions appear to run under the default 2nd-gen compute service account. Several functions have very different privilege profiles:
 
@@ -113,9 +78,9 @@ Firebase/Cloud Run guidance recommends overriding default broad service accounts
 - Set `serviceAccount` per function or group.
 - Especially isolate `pubsubDeleteUsers` and `pubsubSetAdminRights`.
 
-### 4. Consider `setGlobalOptions`
+### 2. Consider `setGlobalOptions` for other shared defaults
 
-Many function options are repeated or omitted. Firebase v2 allows global defaults.
+Many function options are repeated or omitted. Firebase v2 allows global defaults, and while region is now explicit, other shared defaults remain worth evaluating.
 
 **Impact:**
 
@@ -128,13 +93,12 @@ Use `setGlobalOptions` for common defaults, then override per heavy function.
 
 Likely defaults to evaluate:
 
-- `region`
 - `cpu: 'gcf_gen1'` for low-traffic low-memory functions if cost matters
 - conservative `maxInstances`
 - `concurrency` tuned by function type
 - labels for cost ownership
 
-### 5. Revisit v2 CPU/concurrency/cost settings
+### 3. Revisit v2 CPU/concurrency/cost settings
 
 Cloud Functions v2 defaults to Cloud Run behavior. Firebase docs note that low-memory functions can get a full CPU by default, which may increase per-ms cost compared to 1st gen behavior. Callable functions also default to concurrency up to 80 when eligible.
 
@@ -151,7 +115,7 @@ Cloud Functions v2 defaults to Cloud Run behavior. Firebase docs note that low-m
 - For public callables like `newAccount`, tune `maxInstances` and rate protections.
 - Load test before raising concurrency.
 
-### 6. Move env configuration toward Firebase params/secrets
+### 4. Move env configuration toward Firebase params/secrets
 
 `runtime-config.ts` eagerly loads `.env` files and calls `requireEnv()` at module load.
 
@@ -170,7 +134,7 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 - Build SES credentials inside lazy factory methods, not module-level objects.
 - Keep `.env` only as local/project parameter source, not as custom loader dependency.
 
-### 7. Add observability and structured logging
+### 5. Add observability and structured logging
 
 Most handlers use `console.log` / `console.error`.
 
@@ -1054,12 +1018,10 @@ Firebase tips recommend explicitly including/pinning Functions Framework so buil
 
 ### Phase 1: Safety and deploy correctness
 
-1. Verify/resolve Node 24 Firebase runtime support.
-2. Remove `--fix` from predeploy lint.
-3. Add explicit region.
-4. Add service accounts for high-risk functions.
-5. Lock down or remove `pubsubSetAdminRights` and `pubsubDeleteUsers`.
-6. Make `scheduledReindexRegistrations` safe or delete it if unused.
+1. Remove `--fix` from predeploy lint.
+2. Add service accounts for high-risk functions.
+3. Lock down or remove `pubsubSetAdminRights` and `pubsubDeleteUsers`.
+4. Make `scheduledReindexRegistrations` safe or delete it if unused.
 
 ### Phase 2: Correctness and idempotency
 
@@ -1090,7 +1052,7 @@ The package is already much healthier than many Firebase Functions codebases: v2
 
 If you want the highest return next, I’d start with:
 
-1. **Runtime/deploy safety:** Node 24 verification + non-mutating lint.
+1. **Runtime/deploy safety:** non-mutating lint.
 2. **Security:** per-function service accounts + lock down/delete dangerous Pub/Sub maintenance functions.
 3. **Correctness:** transactionally enforce slot capacity and authoritative registration/check-in state.
 4. **Reliability:** harden email idempotency/retry handling and add alerts.

@@ -27,31 +27,52 @@
 			"rewrites": [
 				{
 					"source": "/changeAccountInformation",
-					"function": "changeAccountInformation"
+					"function": {
+						"functionId": "changeAccountInformation",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/completeRegistration",
-					"function": "completeRegistration"
+					"function": {
+						"functionId": "completeRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/newAccount",
-					"function": "newAccount"
+					"function": {
+						"functionId": "newAccount",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/undoRegistration",
-					"function": "undoRegistration"
+					"function": {
+						"functionId": "undoRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/changeRegistrationDateTime",
-					"function": "changeRegistrationDateTime"
+					"function": {
+						"functionId": "changeRegistrationDateTime",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/updateEmailAddress",
-					"function": "updateEmailAddress"
+					"function": {
+						"functionId": "updateEmailAddress",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/updateReferredBy",
-					"function": "updateReferredBy"
+					"function": {
+						"functionId": "updateReferredBy",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "**",
@@ -86,31 +107,52 @@
 			"rewrites": [
 				{
 					"source": "/checkIn",
-					"function": "checkIn"
+					"function": {
+						"functionId": "checkIn",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/checkInWithEdit",
-					"function": "checkInWithEdit"
+					"function": {
+						"functionId": "checkInWithEdit",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/onSiteRegistration",
-					"function": "onSiteRegistration"
+					"function": {
+						"functionId": "onSiteRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/undoRegistration",
-					"function": "undoRegistration"
+					"function": {
+						"functionId": "undoRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/callableAdminPreRegister",
-					"function": "callableAdminPreRegister"
+					"function": {
+						"functionId": "callableAdminPreRegister",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/callableResendRegistrationEmail",
-					"function": "callableResendRegistrationEmail"
+					"function": {
+						"functionId": "callableResendRegistrationEmail",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/changeRegistrationDateTime",
-					"function": "changeRegistrationDateTime"
+					"function": {
+						"functionId": "changeRegistrationDateTime",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "**",
@@ -120,6 +162,7 @@
 		}
 	],
 	"functions": {
+		"runtime": "nodejs22",
 		"predeploy": [
 			"npm --prefix \"$RESOURCE_DIR\" run lint",
 			"npm --prefix \"$RESOURCE_DIR\" run build"

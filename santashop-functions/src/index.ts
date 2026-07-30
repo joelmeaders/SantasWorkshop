@@ -1,7 +1,9 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { setGlobalOptions } from 'firebase-functions/v2/options';
 import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { FUNCTION_REGION } from './utility/function-region';
 import {
 	SCHEDULED_CHECKIN_STATS,
 	SCHEDULED_DATETIME_SLOT_COUNTERS,
@@ -19,6 +21,8 @@ import {
  * enforcement enabled.
  */
 const ENFORCE_APP_CHECK = process.env.FUNCTIONS_EMULATOR !== 'true';
+
+setGlobalOptions({ region: FUNCTION_REGION });
 
 export const changeAccountInformation = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
@@ -128,9 +132,7 @@ export const callableListEmailTemplates = onCall(
 export const callableGetEmailTemplate = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {
-		return (await import('./fn/callableGetEmailTemplate')).default(
-			request,
-		);
+		return (await import('./fn/callableGetEmailTemplate')).default(request);
 	},
 );
 
@@ -144,7 +146,11 @@ export const callableGetEmailTemplateRevision = onCall(
 );
 
 export const callableSaveEmailTemplateRevision = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK, timeoutSeconds: 60, memory: '256MiB' },
+	{
+		enforceAppCheck: ENFORCE_APP_CHECK,
+		timeoutSeconds: 60,
+		memory: '256MiB',
+	},
 	async (request) => {
 		return (await import('./fn/callableSaveEmailTemplateRevision')).default(
 			request,
@@ -530,14 +536,14 @@ export const testSeedDateTimeSlots = onCall(
 				: {};
 		const slots = Array.isArray((data as { slots?: unknown[] }).slots)
 			? ((data as { slots: unknown[] }).slots as {
-				id?: string;
-				programYear: number;
-				dateTime: string;
-				maxSlots: number;
-				slotsReserved?: number;
-				enabled?: boolean;
-				lastUpdated?: string;
-			}[])
+					id?: string;
+					programYear: number;
+					dateTime: string;
+					maxSlots: number;
+					slotsReserved?: number;
+					enabled?: boolean;
+					lastUpdated?: string;
+				}[])
 			: [];
 
 		return seedDateTimeSlots(slots);

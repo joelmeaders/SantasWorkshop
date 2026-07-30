@@ -6,8 +6,7 @@ import {
 	httpsCallable,
 } from 'firebase/functions';
 import firebaseConfig from '../../../firebase.environment.test.json';
-
-const REGION = 'us-central1';
+import { FUNCTION_REGION } from '../../src/utility/function-region';
 
 let functionsClient: Functions | undefined;
 
@@ -17,7 +16,7 @@ const getFunctionsClient = () => {
 	}
 
 	const app = getApps()[0] ?? initializeApp(firebaseConfig);
-	functionsClient = getFunctions(app, REGION);
+	functionsClient = getFunctions(app, FUNCTION_REGION);
 	connectFunctionsEmulator(functionsClient, '127.0.0.1', 5001);
 	return functionsClient;
 };

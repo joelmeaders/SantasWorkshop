@@ -113,7 +113,7 @@ describe('testHelpers module', () => {
 		await clearAllData();
 
 		expect(adminMock.batchDelete).toHaveBeenCalledTimes(4);
-		expect(adminMock.batchCommit).toHaveBeenCalledTimes(5);
+		expect(adminMock.batchCommit).toHaveBeenCalledTimes(14);
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('auth-1');
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('auth-2');
 	});

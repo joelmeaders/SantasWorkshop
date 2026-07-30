@@ -39,6 +39,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 
 const firebaseApp = initializeApp(firebaseConfig);
+const FUNCTIONS_REGION = 'us-central1';
 
 if (config.appCheckEnabled) {
 	if (!config.production) {
@@ -73,7 +74,7 @@ if (!config.production) {
 
 const firebaseFunctions = config.production
 	? getFunctions(firebaseApp, location.origin)
-	: getFunctions(firebaseApp);
+	: getFunctions(firebaseApp, FUNCTIONS_REGION);
 if (!config.production) {
 	connectFunctionsEmulator(
 		firebaseFunctions,

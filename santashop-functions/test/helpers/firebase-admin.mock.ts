@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 
 export interface FirebaseAdminMock {
 	module: {
+		apps: unknown[];
 		initializeApp: ReturnType<typeof vi.fn>;
 		auth: ReturnType<typeof vi.fn>;
 		firestore: ReturnType<typeof vi.fn>;
@@ -80,6 +81,7 @@ export const createFirebaseAdminMock = (): FirebaseAdminMock => {
 
 	return {
 		module: {
+			apps: [],
 			initializeApp,
 			auth,
 			firestore,

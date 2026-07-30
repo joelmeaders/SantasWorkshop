@@ -36,7 +36,11 @@ describe.sequential('pubsubQueueReminderEmails integration', () => {
 				COLLECTION_SCHEMA.tmpRegistrationEmails,
 				'reg-1',
 			),
-		).toMatchObject({ template: 'dscs-event-reminder' });
+		).toMatchObject({
+			templateKey: 'event-reminder',
+			queueSource: 'scheduled-reminder',
+			deliveryState: 'queued',
+		});
 		expect(
 			await getDocument<Record<string, unknown>>(
 				COLLECTION_SCHEMA.registrations,

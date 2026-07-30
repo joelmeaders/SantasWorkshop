@@ -4,7 +4,8 @@ This package now uses the native Firebase Functions v2 APIs from `firebase-funct
 
 ## Runtime requirement
 
-- Node.js 24 is the minimum supported runtime for this package and the workspace.
+- Firebase deploys for this package explicitly target the Node.js 22 runtime via `../firebase.json`.
+- The package `engines.node` range still allows newer local Node versions so the workspace can keep using Node.js 24 for package-manager and general development workflows.
 
 For the full cross-repo guide to secrets, client config, and environment flow, see `../docs/SECRETS_AND_CONFIGURATION.md`.
 

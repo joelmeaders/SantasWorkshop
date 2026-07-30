@@ -238,7 +238,7 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 
 		await (
 			await import('./fn/sendNewRegistrationEmails2')
-		).default(event.data);
+		).default(event.data, { eventId: event.id });
 	}),
 );
 

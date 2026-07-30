@@ -2,7 +2,7 @@
 
 I analyzed `santashop-functions` end-to-end against current Firebase/Google Cloud guidance. I did **not modify files**.
 
-The project is in decent shape overall: it is fully on Firebase Functions v2 APIs, avoids deprecated `functions.config()`, uses App Check for deployed callables, has emulator-gated test helpers, and has meaningful unit/integration coverage. The biggest improvement opportunities are around **idempotency/retries, least-privilege service accounts, full-collection job scalability, stronger server-side validation, and consistency across Auth/Firestore/Storage/SES side effects**.
+The project is in decent shape overall: it is fully on Firebase Functions v2 APIs, avoids deprecated `functions.config()`, uses App Check for deployed callables, has emulator-gated test helpers, and has meaningful unit/integration coverage. The biggest improvement opportunities are around **least-privilege service accounts, full-collection job scalability, stronger server-side validation, and consistency across Auth/Firestore/Storage/SES side effects**.
 
 I reviewed guidance from:
 
@@ -33,7 +33,7 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 - **AWS secrets are bound only to AWS-email functions** in `index.ts`.
 - **Dynamic imports in `index.ts` reduce cold-start blast radius** by deferring handler-specific dependencies until invocation.
 - **Many state-changing admin callables check custom claims** before proceeding.
-- **Email sending has an outbox-like queue document model**, including `queued`, `sending`, `sent`, `failed`, stale sending repair, and registration repair.
+- **Email sending has an outbox-like queue document model** with retry-safe delivery claims, provider acceptance markers, and registration repair.
 - **Tests exist and are modernized** with Vitest plus emulator-backed integration tests.
 - **Generated `.env.*` files appear ignored**, and `git ls-files` only showed `.env.example` as tracked.
 
@@ -41,7 +41,6 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 
 | Priority | Improvement | Impact |
 |---|---|---|
-| Critical | Make retrying external-side-effect functions fully idempotent | Reduces duplicate emails and retry-loop risk |
 | High | Add explicit `serviceAccount` and selected shared runtime options | Improves security, cost control, and deploy reproducibility |
 | High | Replace dangerous manual Pub/Sub jobs with safer gated workflows | Reduces blast radius of accidental admin password resets or mass user deletion |
 | High | Move large batch jobs from full-collection reads to paginated/streamed/task-queue flows | Prevents timeouts, memory growth, and high Firestore read costs as data grows |
@@ -544,24 +543,18 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 **Current behavior:** Firestore `onDocumentCreated` for `tmp_registrationemails/{docId}`, with AWS secrets, `retry: true`, `maxInstances: 1`, delegates to `sendNewRegistrationEmails2`.
 
-**Findings:**
+**What is now strong:**
 
-- Good: retry enabled for transient SES/Firestore failures.
-- Good: handler tracks `queued`, `sending`, `sent`, `failed`, stale sending repair, and registration repair.
-- Firebase retry guidance says retrying event-driven functions must be idempotent. This function is close, but external SES sends cannot be made perfectly idempotent with current state.
-- If the function sends via SES and crashes before persisting `sent`, retry/stale recovery can send a duplicate email.
-- No explicit event-age cutoff or dead-letter strategy.
-- `maxInstances: 1` limits SES pressure but can create backlog.
+- Retry-safe event claims prevent the same Firestore event from re-sending a queued email.
+- SES acceptance is recorded before final `sent` bookkeeping so retries can repair Firestore state without sending a duplicate email.
+- Ambiguous same-event retries are flagged for review instead of blindly reissuing the external side effect.
+- Queue and registration repair logic still heals partial Firestore persistence failures after a successful delivery.
 
-**Improvements:**
+**Remaining considerations:**
 
-- Store event IDs / attempt IDs if available from the Firestore event wrapper.
-- Add attempt count and max retry age on queue doc.
 - Consider Cloud Tasks for email delivery with explicit retry config and rate limits.
-- Consider a “manual review” state after repeated failures instead of endless re-trigger/repair.
-- Add alerting on `failed` and long-lived `sending`.
-
-**Impact:** Reduces duplicate-email and stuck-queue risk.
+- Add alerting on `failed`, `accepted`, or long-lived review-required queue documents.
+- Add event-age cutoffs or dead-letter handling if operational volumes grow.
 
 ### `scheduledFirestoreBackup`
 
@@ -1023,11 +1016,11 @@ Firebase tips recommend explicitly including/pinning Functions Framework so buil
 
 ## Bottom line
 
-The package is already much healthier than many Firebase Functions codebases: v2 APIs, App Check, secret binding, tests, and an email outbox model are all wins. The biggest risk is not “bad code” so much as **serverless production sharp edges**: retries with external side effects, privileged maintenance functions, cross-service consistency, and batch jobs that assume seasonal data stays small.
+The package is already much healthier than many Firebase Functions codebases: v2 APIs, App Check, secret binding, tests, and an email outbox model are all wins. The biggest risk is not “bad code” so much as **serverless production sharp edges**: privileged maintenance functions, cross-service consistency, and batch jobs that assume seasonal data stays small.
 
 If you want the highest return next, I’d start with:
 
 1. **Runtime/deploy safety:** non-mutating lint.
 2. **Security:** per-function service accounts + lock down/delete dangerous Pub/Sub maintenance functions.
 3. **Correctness:** transactionally enforce slot capacity and authoritative registration/check-in state.
-4. **Reliability:** harden email idempotency/retry handling and add alerts.
+4. **Reliability:** add alerts and operational dashboards for the hardened email delivery flow.

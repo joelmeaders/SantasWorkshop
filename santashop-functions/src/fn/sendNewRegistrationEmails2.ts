@@ -43,6 +43,10 @@ const credentials = {
 };
 let sesClient: SESClient | undefined = undefined;
 
+interface EmailTriggerMetadata {
+	eventId?: string;
+}
+
 interface QueuedRegistrationEmailDocument {
 	code?: string;
 	name?: string;
@@ -54,8 +58,14 @@ interface QueuedRegistrationEmailDocument {
 	queueSource?: string;
 	deliveryRequestedOn?: Date;
 	deliveryAttemptedOn?: Date;
+	deliveryAttemptEventId?: string;
+	deliveryAttemptCount?: number;
+	deliveryProviderAcceptedOn?: Date;
+	deliveryProviderMessageId?: string;
+	deliveryRequiresReviewOn?: Date;
+	deliveryRequiresReviewReason?: string;
 	deliveryCompletedOn?: Date;
-	deliveryState?: 'queued' | 'sending' | 'sent' | 'failed';
+	deliveryState?: 'queued' | 'sending' | 'accepted' | 'sent' | 'failed';
 	failedOn?: Date;
 	lastErrorMessage?: string;
 	lastErrorDetails?: string;
@@ -82,6 +92,7 @@ interface ResolvedEmailPayload {
 
 const queueProcessingState = {
 	sending: 'sending',
+	accepted: 'accepted',
 	sent: 'sent',
 	failed: 'failed',
 } as const;
@@ -96,6 +107,8 @@ const buildSuccessfulDeliveryUpdates = (sentOn: Date) => ({
 		deliveryAttemptedOn: sentOn,
 		deliveryCompletedOn: sentOn,
 		failedOn: false,
+		deliveryRequiresReviewOn: false,
+		deliveryRequiresReviewReason: false,
 		lastErrorMessage: false,
 		lastErrorDetails: false,
 	},
@@ -120,6 +133,16 @@ const getNormalizedDate = (value: Date | undefined, fallback: Date): Date => {
 	}
 
 	return normalizeDateTime(value as DateTimeValue);
+};
+
+const getSuccessfulDeliveryDate = (
+	document: QueuedRegistrationEmailDocument,
+	fallback: Date,
+): Date => {
+	return getNormalizedDate(
+		document.deliveryCompletedOn ?? document.deliveryProviderAcceptedOn,
+		fallback,
+	);
 };
 
 const shouldSendQueuedDocument = (
@@ -154,12 +177,24 @@ const isStaleSendingDocument = (
 	return now.getTime() - attemptedDate.getTime() >= staleThresholdMs;
 };
 
+const hasAcceptedExternalDelivery = (
+	document: QueuedRegistrationEmailDocument,
+): boolean => {
+	return Boolean(
+		document.deliveryProviderMessageId ||
+		document.deliveryState === queueProcessingState.accepted,
+	);
+};
+
 const repairRegistrationStatus = async (
 	registrationDocRef: DocumentReference,
 	registration: Registration | undefined,
 	document: QueuedRegistrationEmailDocument,
 ): Promise<void> => {
-	if (document.deliveryState !== queueProcessingState.sent) {
+	if (
+		document.deliveryState !== queueProcessingState.sent &&
+		!hasAcceptedExternalDelivery(document)
+	) {
 		return;
 	}
 
@@ -167,7 +202,7 @@ const repairRegistrationStatus = async (
 		return;
 	}
 
-	const sentOn = getNormalizedDate(document.deliveryCompletedOn, new Date());
+	const sentOn = getSuccessfulDeliveryDate(document, new Date());
 	await registrationDocRef.set(
 		{
 			reminderEmailQueuedOn: getQueueRequestedOn(document, sentOn),
@@ -243,6 +278,22 @@ const loadEmailTriggerContext = async (
 	};
 };
 
+const persistDeliveryReviewRequirement = async (
+	context: LoadedEmailTriggerContext,
+	reviewedOn: Date,
+	reason: string,
+): Promise<void> => {
+	await context.emailDocRef.set(
+		{
+			deliveryRequiresReviewOn: reviewedOn,
+			deliveryRequiresReviewReason: reason,
+			lastErrorMessage: reason,
+			lastErrorDetails: false,
+		},
+		{ merge: true },
+	);
+};
+
 const syncSentQueueDocument = async (
 	context: LoadedEmailTriggerContext,
 	sentOn: Date,
@@ -254,10 +305,16 @@ const syncSentQueueDocument = async (
 	await context.emailDocRef.set(
 		{
 			deliveryState: queueProcessingState.sent,
+			deliveryProviderAcceptedOn:
+				context.document.deliveryProviderAcceptedOn ?? sentOn,
+			deliveryProviderMessageId:
+				context.document.deliveryProviderMessageId ?? false,
 			deliveryCompletedOn: sentOn,
 			queuedOn: getQueueRequestedOn(context.document, sentOn),
 			deliveryRequestedOn: getQueueRequestedOn(context.document, sentOn),
 			failedOn: false,
+			deliveryRequiresReviewOn: false,
+			deliveryRequiresReviewReason: false,
 			lastErrorMessage: false,
 			lastErrorDetails: false,
 		},
@@ -267,6 +324,7 @@ const syncSentQueueDocument = async (
 
 const canSkipDelivery = async (
 	context: LoadedEmailTriggerContext,
+	triggerMetadata: EmailTriggerMetadata,
 ): Promise<boolean> => {
 	const now = new Date();
 
@@ -278,11 +336,35 @@ const canSkipDelivery = async (
 		return true;
 	}
 
+	if (hasAcceptedExternalDelivery(context.document)) {
+		const sentOn = getSuccessfulDeliveryDate(context.document, now);
+		await syncSentQueueDocument(context, sentOn);
+		await repairRegistrationStatus(
+			context.registrationDocRef,
+			context.registration,
+			context.document,
+		);
+		return true;
+	}
+
 	if (context.document.deliveryState === queueProcessingState.sent) {
 		await repairRegistrationStatus(
 			context.registrationDocRef,
 			context.registration,
 			context.document,
+		);
+		return true;
+	}
+
+	if (
+		triggerMetadata.eventId &&
+		context.document.deliveryState === queueProcessingState.sending &&
+		context.document.deliveryAttemptEventId === triggerMetadata.eventId
+	) {
+		await persistDeliveryReviewRequirement(
+			context,
+			now,
+			'A retry attempted to reuse an in-flight SES delivery claim; automatic resend was skipped to avoid duplicate email delivery.',
 		);
 		return true;
 	}
@@ -345,11 +427,41 @@ const resolveEmailPayload = (
 const markQueueSending = async (
 	context: LoadedEmailTriggerContext,
 	attemptedOn: Date,
+	triggerMetadata: EmailTriggerMetadata,
 ): Promise<void> => {
 	await context.emailDocRef.set(
 		{
 			deliveryState: queueProcessingState.sending,
 			deliveryAttemptedOn: attemptedOn,
+			deliveryAttemptEventId: triggerMetadata.eventId ?? false,
+			deliveryAttemptCount:
+				(context.document.deliveryAttemptCount ?? 0) + 1,
+			deliveryProviderAcceptedOn: false,
+			deliveryProviderMessageId: false,
+			deliveryRequiresReviewOn: false,
+			deliveryRequiresReviewReason: false,
+		},
+		{ merge: true },
+	);
+};
+
+const persistProviderAcceptance = async (
+	context: LoadedEmailTriggerContext,
+	queuedOn: Date,
+	acceptedOn: Date,
+	response: SendTemplatedEmailCommandOutput,
+): Promise<void> => {
+	await context.emailDocRef.set(
+		{
+			deliveryState: queueProcessingState.accepted,
+			deliveryAttemptedOn: acceptedOn,
+			deliveryProviderAcceptedOn: acceptedOn,
+			deliveryProviderMessageId: response.MessageId ?? false,
+			queuedOn,
+			deliveryRequestedOn: queuedOn,
+			failedOn: false,
+			lastErrorMessage: false,
+			lastErrorDetails: false,
 		},
 		{ merge: true },
 	);
@@ -366,6 +478,10 @@ const persistSuccessfulDelivery = async (
 		await context.emailDocRef.set(
 			{
 				...successUpdates.queue,
+				deliveryProviderAcceptedOn:
+					context.document.deliveryProviderAcceptedOn ?? sentOn,
+				deliveryProviderMessageId:
+					context.document.deliveryProviderMessageId ?? false,
 				queuedOn,
 				deliveryRequestedOn: queuedOn,
 			},
@@ -420,7 +536,6 @@ const persistFailedDelivery = async (
 			...failedUpdates.queue,
 			queuedOn,
 			deliveryRequestedOn: queuedOn,
-			rejected: response,
 		},
 		{ merge: true },
 	);
@@ -434,13 +549,14 @@ const persistFailedDelivery = async (
 
 export default async function sendNewRegistrationEmails2(
 	triggeredSnapshot: QueryDocumentSnapshot,
+	triggerMetadata: EmailTriggerMetadata = {},
 ): Promise<void> {
 	const context = await loadEmailTriggerContext(triggeredSnapshot);
 	if (!context) {
 		return;
 	}
 
-	if (await canSkipDelivery(context)) {
+	if (await canSkipDelivery(context, triggerMetadata)) {
 		return;
 	}
 
@@ -489,15 +605,28 @@ export default async function sendNewRegistrationEmails2(
 	const attemptedOn = new Date();
 	const queuedOn = getQueueRequestedOn(context.document, attemptedOn);
 
-	await markQueueSending(context, attemptedOn);
+	await markQueueSending(context, attemptedOn, triggerMetadata);
 
 	try {
 		response = await sesClient.send(sendReminderEmailCommand);
+		// todo: later, check SES delivery status from AWS for this message ID and
+		// update the queue/registration state if delivery is deferred, bounced, or rejected.
+		const acceptedOn = new Date();
+		await persistProviderAcceptance(
+			context,
+			queuedOn,
+			acceptedOn,
+			response,
+		);
+		context.document.deliveryState = queueProcessingState.accepted;
+		context.document.deliveryProviderAcceptedOn = acceptedOn;
+		context.document.deliveryProviderMessageId = response.MessageId;
 		const sentOn = new Date();
 		log.info('Successfully sent queued registration email', {
 			uid: payload.uid,
 			templateName: resolvedTemplate.templateName,
 			templateKey: payload.templateKey ?? null,
+			providerMessageId: response.MessageId ?? null,
 			httpStatusCode: response.$metadata?.httpStatusCode,
 		});
 		await persistSuccessfulDelivery(context, queuedOn, sentOn);

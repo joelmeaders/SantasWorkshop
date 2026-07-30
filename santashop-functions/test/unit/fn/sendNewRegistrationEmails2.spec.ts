@@ -184,7 +184,10 @@ describe('sendNewRegistrationEmails2 handler', () => {
 	it('preserves a sent queue marker when registration persistence fails after SES succeeds', async () => {
 		const { sendNewRegistrationEmails } =
 			await loadTriggerScheduledHandlers(backgroundMock);
-		sesSendMock.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
+		sesSendMock.mockResolvedValue({
+			MessageId: 'msg-123',
+			$metadata: { httpStatusCode: 200 },
+		});
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-1', {
 			code: 'ABCD2345',
 			name: 'Buddy',
@@ -217,6 +220,15 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
+				deliveryState: 'accepted',
+				deliveryProviderMessageId: 'msg-123',
+			}),
+			{ merge: true },
+		);
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
 				deliveryState: 'sent',
 				deliveryCompletedOn: expect.any(Date),
 			}),
@@ -238,8 +250,11 @@ describe('sendNewRegistrationEmails2 handler', () => {
 				name: 'Buddy',
 				email: 'buddy.elf@example.com',
 				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
-				deliveryState: 'sent',
-				deliveryCompletedOn: new Date('2025-12-10T18:00:00.000Z'),
+				deliveryState: 'accepted',
+				deliveryProviderAcceptedOn: new Date(
+					'2025-12-10T18:00:00.000Z',
+				),
+				deliveryProviderMessageId: 'msg-123',
 			},
 			true,
 		);
@@ -263,6 +278,107 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
 			backgroundMock.getDocRef('registrations/user-1').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				reminderEmailSentOn: expect.any(Date),
+			}),
+			{ merge: true },
+		);
+	});
+
+	it('does not resend when the same Firestore event retries an already-claimed send', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		backgroundMock.setDocSnapshot('tmp_registrationemails/user-4', {
+			code: 'LOCK1234',
+			name: 'Tinsel',
+			email: 'tinsel.elf@example.com',
+			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+			deliveryState: 'sending',
+			deliveryAttemptEventId: 'evt-claimed',
+			deliveryAttemptedOn: new Date('2025-12-10T18:00:00.000Z'),
+		});
+		backgroundMock.setDocSnapshot('registrations/user-4', {}, true);
+		backgroundMock
+			.getDocRef('tmp_registrationemails/user-4')
+			.set.mockResolvedValue(undefined);
+
+		await sendNewRegistrationEmails(
+			{
+				id: 'user-4',
+				data: () => ({
+					code: 'LOCK1234',
+					name: 'Tinsel',
+					email: 'tinsel.elf@example.com',
+					formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+					deliveryState: 'sending',
+					deliveryAttemptEventId: 'evt-claimed',
+				}),
+			} as never,
+			{ eventId: 'evt-claimed' },
+		);
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-4').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				deliveryRequiresReviewOn: expect.any(Date),
+				deliveryRequiresReviewReason: expect.stringContaining(
+					'automatic resend was skipped',
+				),
+			}),
+			{ merge: true },
+		);
+	});
+
+	it('repairs accepted sends without calling SES again', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		backgroundMock.setDocSnapshot('tmp_registrationemails/user-5', {
+			code: 'DONE1234',
+			name: 'Sparkle',
+			email: 'sparkle.elf@example.com',
+			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+			deliveryState: 'accepted',
+			deliveryProviderAcceptedOn: new Date('2025-12-10T18:15:00.000Z'),
+			deliveryProviderMessageId: 'msg-accepted',
+		});
+		backgroundMock.setDocSnapshot('registrations/user-5', {}, true);
+		backgroundMock
+			.getDocRef('tmp_registrationemails/user-5')
+			.set.mockResolvedValue(undefined);
+		backgroundMock
+			.getDocRef('registrations/user-5')
+			.set.mockResolvedValue(undefined);
+
+		await sendNewRegistrationEmails({
+			id: 'user-5',
+			data: () => ({
+				code: 'DONE1234',
+				name: 'Sparkle',
+				email: 'sparkle.elf@example.com',
+				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+				deliveryState: 'accepted',
+				deliveryProviderAcceptedOn: new Date(
+					'2025-12-10T18:15:00.000Z',
+				),
+				deliveryProviderMessageId: 'msg-accepted',
+			}),
+		} as never);
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-5').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				deliveryState: 'sent',
+				deliveryProviderMessageId: 'msg-accepted',
+			}),
+			{ merge: true },
+		);
+		expect(
+			backgroundMock.getDocRef('registrations/user-5').set,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				reminderEmailSentOn: expect.any(Date),
@@ -307,8 +423,12 @@ describe('sendNewRegistrationEmails2 handler', () => {
 				},
 			},
 		]);
-		backgroundMock.getDocRef('registrations/user-3').set.mockResolvedValue(undefined);
-		backgroundMock.getDocRef('tmp_registrationemails/user-3').set.mockResolvedValue(undefined);
+		backgroundMock
+			.getDocRef('registrations/user-3')
+			.set.mockResolvedValue(undefined);
+		backgroundMock
+			.getDocRef('tmp_registrationemails/user-3')
+			.set.mockResolvedValue(undefined);
 
 		await sendNewRegistrationEmails({
 			id: 'user-3',
@@ -322,15 +442,19 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		} as never);
 
 		expect(
-			(sesSendMock.mock.calls[0]?.[0] as {
-				input: { Template: string };
-			}).input.Template,
+			(
+				sesSendMock.mock.calls[0]?.[0] as {
+					input: { Template: string };
+				}
+			).input.Template,
 		).toBe('custom-event-reminder-v2');
 		expect(
 			JSON.parse(
-				(sesSendMock.mock.calls[0]?.[0] as {
-					input: { TemplateData: string };
-				}).input.TemplateData,
+				(
+					sesSendMock.mock.calls[0]?.[0] as {
+						input: { TemplateData: string };
+					}
+				).input.TemplateData,
 			),
 		).toEqual(
 			expect.objectContaining({

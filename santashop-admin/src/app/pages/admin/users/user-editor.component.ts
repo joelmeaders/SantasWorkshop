@@ -1,9 +1,9 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	Input,
 	OnInit,
 	inject,
-	input,
 } from '@angular/core';
 import {
 	ReactiveFormsModule,
@@ -26,7 +26,7 @@ import {
 	IonToolbar,
 	ModalController,
 } from '@ionic/angular/standalone';
-import {
+import type {
 	CreateStaffUser,
 	StaffAccount,
 	StaffRole,
@@ -61,7 +61,7 @@ interface RoleOption {
 export class UserEditorComponent implements OnInit {
 	private readonly modalController = inject(ModalController);
 
-	public readonly account = input<StaffAccount>();
+	@Input() public account?: StaffAccount;
 
 	public readonly roleOptions: readonly RoleOption[] = [
 		{ value: 'admin', label: 'Administrator' },
@@ -72,7 +72,7 @@ export class UserEditorComponent implements OnInit {
 	public isEdit = false;
 
 	public ngOnInit(): void {
-		const account = this.account();
+		const account = this.account;
 		this.isEdit = !!account;
 		const initialRoles = this.normalizeRoles(account?.roles ?? []);
 
@@ -107,7 +107,7 @@ export class UserEditorComponent implements OnInit {
 		const roles = this.normalizeRoles(value.roles);
 
 		if (this.isEdit) {
-			const account = this.account();
+			const account = this.account;
 			const data: UpdateStaffUser = {
 				uid: account?.uid ?? '',
 				displayName: value.displayName,

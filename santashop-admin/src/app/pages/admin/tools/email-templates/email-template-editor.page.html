@@ -110,6 +110,42 @@
 
 			<ion-card>
 				<ion-card-header>
+					<ion-card-title>Send test email</ion-card-title>
+				</ion-card-header>
+				<ion-card-content>
+					<form [formGroup]="testEmailForm">
+						<ion-list>
+							<ion-item>
+								<ion-input
+									label="Test recipient email"
+									formControlName="recipientEmail"
+									type="email"
+									placeholder="name@example.com"
+								></ion-input>
+							</ion-item>
+						</ion-list>
+					</form>
+
+					<ion-note color="medium">
+						Uses the current draft subject, current HTML, and the test values entered for the detected Handlebars fields.
+					</ion-note>
+
+					<section class="action-row">
+						<ion-button
+							color="tertiary"
+							(click)="sendTestEmail()"
+							(keydown.enter)="sendTestEmail()"
+							[disabled]="!testEmailForm.valid"
+						>
+							<ion-icon name="mail-outline" slot="start"></ion-icon>
+							Send Test Email
+						</ion-button>
+					</section>
+				</ion-card-content>
+			</ion-card>
+
+			<ion-card>
+				<ion-card-header>
 					<ion-card-title>Template HTML</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
@@ -167,7 +203,7 @@
 									</ion-item>
 									<ion-item>
 										<ion-input
-											label="Sample value"
+												label="Test / preview value"
 											formControlName="sampleValue"
 											(ionInput)="refreshPreview()"
 										></ion-input>

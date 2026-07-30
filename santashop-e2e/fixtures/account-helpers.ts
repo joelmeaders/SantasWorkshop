@@ -61,7 +61,7 @@ const fillField = async (
 	selector: string,
 	value: string,
 ): Promise<void> => {
-	const input = page.locator(selector);
+	const input = page.locator(selector).first();
 	await input.fill(value);
 	await expect(input).toHaveValue(value, { timeout: 10000 });
 };

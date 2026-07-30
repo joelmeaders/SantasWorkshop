@@ -286,6 +286,8 @@ export class AddChildPageService implements OnDestroy {
 	}
 
 	public resetForm(): void {
-		this.form = newChildForm(this.programYear);
+		this.form.reset();
+		this.isInfant.next(false);
+		this.isEdit.next(false);
 	}
 }

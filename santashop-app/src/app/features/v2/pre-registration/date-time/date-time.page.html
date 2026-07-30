@@ -75,6 +75,7 @@
 											"MST" }}, {{ slot.dateTime |
 											timeSlot : "MST" }}
 											<ion-button
+												[attr.data-selected-slot-id]="slot.id"
 												slot="end"
 												(click)="
 															selectDateTime()
@@ -144,6 +145,7 @@
 												</ion-text>
 											</ion-label>
 											<ion-button
+												[attr.data-select-slot-id]="slot.id"
 												slot="end"
 												(click)="
 																selectDateTime(

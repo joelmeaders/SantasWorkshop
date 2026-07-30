@@ -22,6 +22,7 @@ import type {
 	EmailTemplateRevision,
 	EmailTemplateSummary,
 	SaveEmailTemplateRevisionRequest,
+	SendTestEmailTemplateRequest,
 } from '@santashop/models';
 import {
 	EMAIL_TEMPLATE_DELIVERY_PROFILES as DELIVERY_PROFILES,
@@ -51,6 +52,7 @@ import { addIcons } from 'ionicons';
 import {
 	cloudUploadOutline,
 	documentTextOutline,
+	mailOutline,
 	refreshOutline,
 	saveOutline,
 } from 'ionicons/icons';
@@ -124,6 +126,12 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	public currentTemplate?: EmailTemplateSummary;
 	public selectedRevisionId?: string;
 	public readonly isCreateMode$ = new BehaviorSubject<boolean>(true);
+	public readonly testEmailForm = new UntypedFormGroup({
+		recipientEmail: new UntypedFormControl('', {
+			nonNullable: true,
+			validators: [Validators.required, Validators.email],
+		}),
+	});
 
 	public readonly form = new UntypedFormGroup({
 		key: new UntypedFormControl('', {
@@ -164,6 +172,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		addIcons({
 			cloudUploadOutline,
 			documentTextOutline,
+			mailOutline,
 			refreshOutline,
 			saveOutline,
 		});
@@ -252,6 +261,40 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		this.syncPreviewFrame();
 	}
 
+	public async sendTestEmail(): Promise<void> {
+		const recipientEmail = this.testEmailForm.controls['recipientEmail'].value;
+		if (!recipientEmail || !this.testEmailForm.valid || !this.html.trim()) {
+			this.testEmailForm.markAllAsTouched();
+			await this.showMessage(
+				'Validation',
+				'Enter a valid recipient email and make sure the template has HTML before sending a test email.',
+			);
+			return;
+		}
+
+		await this.presentLoading('Sending test email…');
+		try {
+			const payload: SendTestEmailTemplateRequest = {
+				recipientEmail,
+				deliveryProfile: this.form.controls['deliveryProfile'].value,
+				subjectPart: this.form.controls['subjectPart'].value,
+				html: this.html,
+				fieldMappings: this.fieldDefinitions(),
+			};
+
+			const result =
+				await this.emailTemplateService.sendTestEmailTemplate(payload);
+			await this.showMessage(
+				'Test email sent',
+				`A rendered draft email was sent to ${result.recipientEmail}.`,
+			);
+		} catch (error) {
+			await this.showError(error, 'Could not send a test email.');
+		} finally {
+			await this.dismissLoading();
+		}
+	}
+
 	public async saveRevision(): Promise<void> {
 		if (!this.form.valid || !this.html.trim()) {
 			this.form.markAllAsTouched();
@@ -325,6 +368,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 				subjectPart: '',
 				notes: '',
 			});
+			this.testEmailForm.reset({ recipientEmail: '' });
 			this.html = '';
 			this.setFieldMappings([]);
 			this.refreshPreview();
@@ -357,6 +401,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		this.form.controls['awsTemplateName'].setValue(detail.template.awsTemplateName);
 		this.form.controls['subjectPart'].setValue(detail.template.subjectPart);
 		this.form.controls['notes'].setValue('');
+		this.testEmailForm.reset({ recipientEmail: '' });
 		this.html = detail.currentHtml ?? '';
 		this.setFieldMappings(detail.template.fieldMappings);
 		this.reconcileFieldMappings();

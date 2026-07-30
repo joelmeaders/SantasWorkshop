@@ -10,6 +10,12 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 			label: string;
 			appCheckKey: string;
 			appCheckEnabled: boolean;
+			emulatorPorts?: {
+				auth: number;
+				functions: number;
+				firestore: number;
+				storage: number;
+			};
 		}
 	>;
 	LOCAL_FIREBASE_CONFIG: {
@@ -24,8 +30,10 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 	};
 	parseFirebaseConfigMode: (
 		value?: string,
-	) => 'dev' | 'local' | 'test' | 'prod';
-	buildFirebaseClientConfig: (mode: 'dev' | 'local' | 'test' | 'prod') => {
+	) => 'dev' | 'local' | 'e2e' | 'test' | 'prod';
+	buildFirebaseClientConfig: (
+		mode: 'dev' | 'local' | 'e2e' | 'test' | 'prod',
+	) => {
 		apiKey: string;
 		authDomain: string;
 		databaseURL: string;
@@ -37,7 +45,7 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 	};
 	buildAppConfig: (
 		target: 'app' | 'admin',
-		mode: 'dev' | 'local' | 'test' | 'prod',
+		mode: 'dev' | 'local' | 'e2e' | 'test' | 'prod',
 	) => {
 		production: boolean;
 		label: string;
@@ -45,6 +53,12 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 		version: string;
 		appCheckKey: string;
 		appCheckEnabled: boolean;
+		emulatorPorts: {
+			auth: number;
+			functions: number;
+			firestore: number;
+			storage: number;
+		};
 	};
 	renderAppConfigModule: (appConfig: {
 		production: boolean;
@@ -53,6 +67,12 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 		version: string;
 		appCheckKey: string;
 		appCheckEnabled: boolean;
+		emulatorPorts: {
+			auth: number;
+			functions: number;
+			firestore: number;
+			storage: number;
+		};
 	}) => string;
 	renderFirebaseConfigModule: (firebaseConfig: {
 		apiKey: string;
@@ -219,6 +239,7 @@ describe('config.firebase.cjs', () => {
 			'dev',
 		);
 		expect(configFirebase.parseFirebaseConfigMode('local')).toBe('local');
+		expect(configFirebase.parseFirebaseConfigMode('e2e')).toBe('e2e');
 		expect(configFirebase.parseFirebaseConfigMode('qa')).toBe('test');
 		expect(configFirebase.parseFirebaseConfigMode(undefined)).toBe('prod');
 	});
@@ -242,6 +263,9 @@ describe('config.firebase.cjs', () => {
 		setManagedEnv({});
 
 		expect(configFirebase.buildFirebaseClientConfig('local')).toEqual(
+			configFirebase.LOCAL_FIREBASE_CONFIG,
+		);
+		expect(configFirebase.buildFirebaseClientConfig('e2e')).toEqual(
 			configFirebase.LOCAL_FIREBASE_CONFIG,
 		);
 	});
@@ -275,6 +299,7 @@ describe('config.firebase.cjs', () => {
 	it('builds app metadata with the expected mode flags and labels', () => {
 		const config = configFirebase.buildAppConfig('app', 'test');
 		const localConfig = configFirebase.buildAppConfig('app', 'local');
+		const e2eConfig = configFirebase.buildAppConfig('app', 'e2e');
 
 		expect(config.production).toBe(true);
 		expect(config.label).toBe('TEST/QA');
@@ -284,6 +309,8 @@ describe('config.firebase.cjs', () => {
 		expect(config.appCheckEnabled).toBe(true);
 		expect(config.name).toBe('@santashop/app');
 		expect(localConfig.appCheckEnabled).toBe(false);
+		expect(localConfig.emulatorPorts.firestore).toBe(8080);
+		expect(e2eConfig.emulatorPorts.firestore).toBe(8180);
 	});
 
 	it('renders app config with the mode-specific App Check flag', () => {
@@ -294,9 +321,16 @@ describe('config.firebase.cjs', () => {
 			version: '2025.2.1',
 			appCheckKey: 'local-app-check-key',
 			appCheckEnabled: false,
+			emulatorPorts: {
+				auth: 9099,
+				functions: 5001,
+				firestore: 8180,
+				storage: 9199,
+			},
 		});
 
 		expect(moduleText).toContain('appCheckEnabled: false');
+		expect(moduleText).toContain('firestore: 8180');
 	});
 
 	it('renders a Firebase config module with the supplied values', () => {

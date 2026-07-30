@@ -33,6 +33,7 @@
 							</div>
 
 							<img
+								id="registrationQrCode"
 								[src]="viewService.qrCode$ | async"
 								alt="Registration QR Code"
 								class="qr-code"
@@ -40,6 +41,7 @@
 
 							<div class="ion-text-center width-max">
 								<ion-button
+									id="eventInformationButton"
 									color="xmasred"
 									[routerLink]="['event-information']"
 								>
@@ -192,20 +194,23 @@
 									lines="none"
 								>
 									@if (child.toyType === 'boys') {
-									<ion-icon name="man-outline"
+									<ion-icon
+										name="man-outline"
 										size="large"
 										slot="start"
-									 />
+									/>
 									} @if (child.toyType === 'girls') {
-									<ion-icon name="woman-outline"
+									<ion-icon
+										name="woman-outline"
 										size="large"
 										slot="start"
-									 />
+									/>
 									} @if (child.toyType === 'infants') {
-									<ion-icon name="happy-outline"
+									<ion-icon
+										name="happy-outline"
 										size="large"
 										slot="start"
-									 />
+									/>
 									}
 									<ion-card-header>
 										<ion-card-title>

@@ -1,10 +1,14 @@
-import { defineConfig, devices } from '@playwright/test';
+import {
+	defineConfig,
+	devices,
+	type ReporterDescription,
+} from '@playwright/test';
 
-const reporters = process.env.CI
-	? [['list']]
+const reporters: ReporterDescription[] = process.env['CI']
+	? [['list', {}]]
 	: [
 			['html', { outputFolder: 'playwright-report', open: 'never' }],
-			['list'],
+			['list', {}],
 		];
 
 const baseURL = process.env['E2E_BASE_URL'] ?? 'http://localhost:4100';
@@ -19,7 +23,7 @@ export default defineConfig({
 	fullyParallel: false,
 
 	/* Fail the build on CI if you accidentally left test.only in the source code. */
-	forbidOnly: !!process.env.CI,
+	forbidOnly: !!process.env['CI'],
 
 	/* Fail fast for quicker e2e feedback loops. */
 	retries: 0,
@@ -57,31 +61,14 @@ export default defineConfig({
 		actionTimeout: 10000,
 	},
 
-	/* Configure projects for major browsers */
+	/*
+	 * Most customers use the application on a phone. Keep the integrated suite
+	 * on one Chromium-backed mobile profile for fast, representative feedback.
+	 */
 	projects: [
 		{
-			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] },
-		},
-
-		{
-			name: 'firefox',
-			use: { ...devices['Desktop Firefox'] },
-		},
-
-		{
-			name: 'webkit',
-			use: { ...devices['Desktop Safari'] },
-		},
-
-		/* Test against mobile viewports. */
-		{
-			name: 'Mobile Chrome',
+			name: 'mobile-chrome',
 			use: { ...devices['Pixel 5'] },
-		},
-		{
-			name: 'Mobile Safari',
-			use: { ...devices['iPhone 12'] },
 		},
 	],
 

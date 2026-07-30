@@ -20,18 +20,24 @@
 			<ion-col sizeXl="9" size="12">
 				<ion-row class="ion-justify-content-center">
 					<ion-col sizeXs="12" sizeSm="7">
-						<app-children-card [children]="(children$ | async)!"
+						<app-children-card
+							id="childrenProgressCard"
+							[children]="(children$ | async)!"
 							[childCount]="(childCount$ | async)!"
-						 />
+						/>
 					</ion-col>
 					<ion-col sizeXs="12" sizeSm="7">
-						<app-schedule-card [dateTimeSlot]="(dateTimeSlot$ | async)!"
+						<app-schedule-card
+							id="scheduleProgressCard"
+							[dateTimeSlot]="(dateTimeSlot$ | async)!"
 							[canChooseDateTime]="(canChooseDateTime$ | async)!"
-						 />
+						/>
 					</ion-col>
 					<ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
-						<app-submit-card [canSubmit]="(canSubmit$ | async)!"
-						 />
+						<app-submit-card
+							id="submitProgressCard"
+							[canSubmit]="(canSubmit$ | async)!"
+						/>
 					</ion-col>
 				</ion-row>
 			</ion-col>

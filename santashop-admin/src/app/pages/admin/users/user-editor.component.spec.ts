@@ -53,8 +53,8 @@ describe('UserEditorComponent', () => {
 		};
 
 		fixture = TestBed.createComponent(UserEditorComponent);
-		fixture.componentRef.setInput('account', account);
 		component = fixture.componentInstance;
+		component.account = account;
 		fixture.detectChanges();
 
 		expect(component.form.controls['roles'].value).toEqual([

@@ -43,6 +43,7 @@
 									<ion-list lines="none">
 										<ion-item color="light">
 											<ion-input
+												id="childFirstName"
 												class="red-label"
 												[label]="'ADDCHILD.FIRST_NAME' | translate"
 												[errorText]="form.controls.firstName | niceFormError | translate"
@@ -56,6 +57,7 @@
 
 										<ion-item color="light">
 											<ion-input
+												id="childLastName"
 												class="red-label"
 												[label]="'ADDCHILD.LAST_NAME' | translate"
 												[errorText]="form.controls.lastName | niceFormError | translate"
@@ -69,6 +71,7 @@
 
 										<ion-item color="light">
 											<ion-input
+												id="childDateOfBirth"
 												class="red-label"
 												[label]="'ADDCHILD.BIRTH_DATE' | translate"
 												[errorText]="form.controls.dateOfBirth | niceFormError | translate"
@@ -95,6 +98,7 @@
 											@if ((isInfant$ | async)) {
 											<ion-item color="light">
 												<ion-radio
+													id="childToyTypeInfants"
 													slot="start"
 													value="infants"
 													labelPlacement="end"
@@ -107,6 +111,7 @@
 											false) {
 											<ion-item color="light">
 												<ion-radio
+													id="childToyTypeBoys"
 													slot="start"
 													value="boys"
 													labelPlacement="end"
@@ -119,6 +124,7 @@
 											false) {
 											<ion-item color="light">
 												<ion-radio
+													id="childToyTypeGirls"
 													slot="start"
 													value="girls"
 													labelPlacement="end"
@@ -159,6 +165,7 @@
 								class="ion-text-end ion-padding-top es-pd-bottom-xxl"
 							>
 								<ion-button
+									id="saveChildButton"
 									color="xmasred"
 									(click)="isEditing ? editChild() : addChild()"
 									[disabled]="!form.valid"

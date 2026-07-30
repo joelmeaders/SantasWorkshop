@@ -53,7 +53,7 @@ import { arrowBackSharp } from 'ionicons/icons';
 	templateUrl: './date-time.page.html',
 	styleUrls: ['./date-time.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [DateTimePageService],
+	providers: [DateTimePageService, SkeletonStateService],
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,

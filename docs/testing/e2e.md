@@ -4,22 +4,26 @@
 
 Use this guide when creating or updating Playwright tests in `santashop-e2e/` for the public SantaShop app.
 
-This repo has two different Firebase config modes that matter for end-to-end testing:
+This repo has three Firebase config modes that matter for end-to-end testing:
 
 - `test` mode targets the `santas-workshop-test` project and generates `production: true`
 - `local` mode targets the `demo-santashop` emulator project and generates `production: false`
+- `e2e` mode also targets `demo-santashop`, generates `production: false`, and
+  uses the dedicated Firestore emulator port `8180`
 
-For **emulator-backed public-app e2e tests**, agents should use the **local/demo emulator flow**.
+For **emulator-backed public-app e2e tests**, use the **e2e/demo emulator
+flow**. The separate port avoids collisions with common local services on
+`8080`.
 
 ## The validated stack
 
 The current passing setup is:
 
 - Firebase emulators running under project `demo-santashop`
-- Browser app served from `santashop-app` with the **local** config
+- Browser app served from `santashop-app` with the **e2e** config
 - Playwright running in **headless**, **CI-style**, **single-worker**, **no-retry** mode
 - Playwright fixtures calling emulator-only helper functions at:
-  - `http://127.0.0.1:5001/demo-santashop/us-central1`
+    - `http://127.0.0.1:5001/demo-santashop/us-central1`
 
 Relevant files:
 
@@ -35,12 +39,14 @@ All public-app e2e tests should run against emulators.
 
 For this repo, that means:
 
-- use `config:app:local`
+- use `config:app:e2e`
 - use `config:functions:local`
-- start Firebase emulators with `--project demo-santashop`
+- start Firebase emulators with `--config firebase.e2e.json --project demo-santashop`
 - let the browser connect to `127.0.0.1` emulator endpoints
 
-Do **not** assume `start:test` or the root `e2e:test` script is the right orchestration for new emulator-backed public-app tests. Those scripts are older and were not the validated path for the current passing suite.
+Use the root `e2e:test:app` and `e2e:test:admin` scripts for the validated
+local/demo orchestration. The older `start:test` package scripts target the
+remote test configuration and are not the emulator-backed e2e path.
 
 ## Validated authoring workflow
 
@@ -54,19 +60,29 @@ volta run --node 24.11.0 pnpm --filter @santashop/e2e exec playwright install
 ### Prepare local emulator config and builds
 
 ```text
-volta run --node 24.11.0 pnpm run config:app:local
+volta run --node 24.11.0 pnpm run config:app:e2e
 volta run --node 24.11.0 pnpm run config:functions:local
 volta run --node 24.11.0 pnpm --filter @santashop/models build
 volta run --node 24.11.0 pnpm --filter @santashop/core build:prod
 volta run --node 24.11.0 pnpm e2e:prebuild
 ```
 
+### Recommended automated run
+
+```text
+volta run --node 24.11.0 pnpm e2e:test:app
+```
+
+This prepares local app and Functions configuration, builds shared packages and
+Functions, starts the emulators and public app, runs `tests/public`, and shuts
+down the processes.
+
 ### Start services in separate terminals
 
 Terminal 1:
 
 ```text
-volta run --node 24.11.0 pnpm exec firebase emulators:start --project demo-santashop --only auth,firestore,functions,storage
+volta run --node 24.11.0 pnpm exec firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage
 ```
 
 Terminal 2:
@@ -80,13 +96,15 @@ volta run --node 24.11.0 pnpm exec ng serve santashop-app --configuration=develo
 ```text
 $env:CI='1'
 volta run --node 24.11.0 pnpm exec wait-on http://localhost:4100
-volta run --node 24.11.0 pnpm --filter @santashop/e2e test --project=chromium tests/create-account.spec.ts tests/sign-in.spec.ts tests/sign-out.spec.ts tests/global-alert.spec.ts
+volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/public
 $env:CI=$null
 ```
 
 Notes:
 
 - The Playwright config is already headless by default.
+- The only Playwright project is `mobile-chrome`, using the Pixel 5 device
+  profile.
 - `CI=1` keeps reporting non-interactive.
 - Retries are disabled (`retries: 0`) for faster feedback.
 - Workers are fixed at `1` because tests mutate shared emulator state.
@@ -96,7 +114,7 @@ Notes:
 Use the custom Playwright test wrapper from `fixtures/test-fixtures.ts`:
 
 ```ts
-import { test, expect } from '../fixtures/test-fixtures';
+import { test, expect } from '../../fixtures/test-fixtures';
 ```
 
 This gives you:
@@ -192,7 +210,7 @@ await expect(page.locator('#submitButton')).not.toHaveClass(/button-disabled/);
 For the sign-up confirm-email alert, target the confirm button with:
 
 ```ts
-page.locator('ion-alert button.alert-button-role-confirm')
+page.locator('ion-alert button.alert-button-role-confirm');
 ```
 
 Do not rely on a `role="cancel"` attribute filter.
@@ -238,11 +256,11 @@ If future tests need more backend setup, add new **emulator-only** helper callab
 
 ## Admin-app e2e workflow
 
-Admin Playwright tests should also run against the **local/demo emulator flow**.
+Admin Playwright tests should also run against the **e2e/demo emulator flow**.
 
 For admin tests, use:
 
-- `config:admin:local`
+- `config:admin:e2e`
 - `config:functions:local`
 - the same `demo-santashop` Firebase emulator project
 - the admin app served on port `4100`
@@ -250,7 +268,7 @@ For admin tests, use:
 ### Prepare local emulator config and builds for admin tests
 
 ```text
-volta run --node 24.11.0 pnpm run config:admin:local
+volta run --node 24.11.0 pnpm run config:admin:e2e
 volta run --node 24.11.0 pnpm run config:functions:local
 volta run --node 24.11.0 pnpm --filter @santashop/models build
 volta run --node 24.11.0 pnpm --filter @santashop/core build:prod
@@ -262,7 +280,7 @@ volta run --node 24.11.0 pnpm e2e:prebuild
 Terminal 1:
 
 ```text
-volta run --node 24.11.0 pnpm exec firebase emulators:start --project demo-santashop --only auth,firestore,functions,storage
+volta run --node 24.11.0 pnpm exec firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage
 ```
 
 Terminal 2:
@@ -276,7 +294,7 @@ volta run --node 24.11.0 pnpm --filter @santashop/admin start:local
 ```text
 $env:CI='1'
 volta run --node 24.11.0 pnpm exec wait-on http://localhost:4100
-volta run --node 24.11.0 pnpm --filter @santashop/e2e test --project=chromium tests/admin/schedule-editor/generate-schedules.spec.ts
+volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/admin/schedule-editor/generate-schedules.spec.ts
 $env:CI=$null
 ```
 
@@ -351,7 +369,8 @@ Aligning the admin app emulator connections with the public app's validated patt
 
 - Auth emulator: `http://127.0.0.1:9099`
 - Functions emulator: `127.0.0.1:5001`
-- Firestore emulator: `127.0.0.1:8080`
+- Firestore emulator: `127.0.0.1:8180` in e2e mode (`8080` remains the
+  ordinary local-development default)
 
 If admin e2e tests can sign in but seeded Firestore documents never appear, check these host values first.
 
@@ -447,11 +466,12 @@ Keep these additions minimal and focused on test stability.
 
 ## What to validate after changes
 
-For small e2e changes, prefer a scoped run over the full browser matrix.
+For small e2e changes, prefer a feature-scoped spec run over the complete
+public/admin suite.
 
 Recommended validation order:
 
-1. run only the affected Playwright spec(s) on `chromium`
+1. run only the affected Playwright spec(s) on `mobile-chrome`
 2. fix flakes and selector issues
 3. run the full targeted public-app auth/global-alert slice
 
@@ -459,18 +479,18 @@ Validated passing command from this workflow:
 
 ```text
 $env:CI='1'
-volta run --node 24.11.0 pnpm --filter @santashop/e2e test --project=chromium tests/create-account.spec.ts tests/sign-in.spec.ts tests/sign-out.spec.ts tests/global-alert.spec.ts
+volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/public/account-access.spec.ts tests/public/entry-and-controls.spec.ts
 $env:CI=$null
 ```
 
 ## Current passing target set
 
-At the time this guide was written, the following targeted specs passed together in headless Chromium:
+The public baseline is organized by feature and runs in headless mobile
+Chromium:
 
-- `tests/create-account.spec.ts`
-- `tests/sign-in.spec.ts`
-- `tests/sign-out.spec.ts`
-- `tests/global-alert.spec.ts`
+- `tests/public/account-access.spec.ts`
+- `tests/public/entry-and-controls.spec.ts`
+- `tests/public/registration-lifecycle.spec.ts`
 
 If a future change breaks them, start by checking:
 

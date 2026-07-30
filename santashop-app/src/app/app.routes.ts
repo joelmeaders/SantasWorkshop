@@ -62,39 +62,39 @@ export const routes: Routes = [
 		children: [
 			{
 				path: 'overview',
-				canActivateChild: [RegistrationCompleteGuard],
+				canActivate: [RegistrationCompleteGuard],
 				loadComponent: () =>
 					import('./features/v2/pre-registration/overview/overview.page').then(
 						(m) => m.OverviewPage,
 					),
 			},
 			{
+				path: 'children/add-child/:id',
+				canActivate: [RegistrationCompleteGuard],
+				loadComponent: () =>
+					import('./features/v2/pre-registration/children/add-child/add-child.page').then(
+						(m) => m.AddChildPage,
+					),
+			},
+			{
+				path: 'children/add-child',
+				canActivate: [RegistrationCompleteGuard],
+				loadComponent: () =>
+					import('./features/v2/pre-registration/children/add-child/add-child.page').then(
+						(m) => m.AddChildPage,
+					),
+			},
+			{
 				path: 'children',
-				canActivateChild: [RegistrationCompleteGuard],
+				canActivate: [RegistrationCompleteGuard],
 				loadComponent: () =>
 					import('./features/v2/pre-registration/children/children.page').then(
 						(m) => m.ChildrenPage,
 					),
-				children: [
-					{
-						path: 'add-child',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/children/add-child/add-child.page').then(
-								(m) => m.AddChildPage,
-							),
-					},
-					{
-						path: 'add-child/:id',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/children/add-child/add-child.page').then(
-								(m) => m.AddChildPage,
-							),
-					},
-				],
 			},
 			{
 				path: 'date-time',
-				canActivateChild: [RegistrationCompleteGuard],
+				canActivate: [RegistrationCompleteGuard],
 				loadComponent: () =>
 					import('./features/v2/pre-registration/date-time/date-time.page').then(
 						(m) => m.DateTimePage,
@@ -102,7 +102,7 @@ export const routes: Routes = [
 			},
 			{
 				path: 'submit',
-				canActivateChild: [
+				canActivate: [
 					RegistrationReadyToSubmitGuard,
 					RegistrationCompleteGuard,
 				],
@@ -112,21 +112,20 @@ export const routes: Routes = [
 					),
 			},
 			{
+				path: 'confirmation/event-information',
+				canActivate: [RegistrationIncompleteGuard],
+				loadComponent: () =>
+					import('./features/v2/pre-registration/confirmation/event-information/event-information.page').then(
+						(m) => m.EventInformationPage,
+					),
+			},
+			{
 				path: 'confirmation',
-				canActivateChild: [RegistrationIncompleteGuard],
+				canActivate: [RegistrationIncompleteGuard],
 				loadComponent: () =>
 					import('./features/v2/pre-registration/confirmation/confirmation.page').then(
 						(m) => m.ConfirmationPage,
 					),
-				children: [
-					{
-						path: 'event-information',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/confirmation/event-information/event-information.page').then(
-								(m) => m.EventInformationPage,
-							),
-					},
-				],
 			},
 			{
 				path: 'profile',

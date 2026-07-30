@@ -20,31 +20,42 @@ pnpm --filter @santashop/e2e exec playwright install
 
 ## Running Tests
 
-### Full E2E Test Suite (Recommended)
+### Full E2E test suite
 
-From the root directory, this will build functions, start emulators, serve the app, and run tests:
+From the workspace root, this runs the public and admin suites sequentially.
+Each run builds e2e/demo configuration, starts isolated Firebase emulators, serves
+one application on port `4100`, runs its specs, and shuts its processes down:
 
 ```bash
 pnpm e2e:test
 ```
 
-### Manual Testing
-
-If you need more control over the process:
+For a faster feature-scoped run:
 
 ```bash
-# Terminal 1: Build functions and start emulators
-cd santashop-functions
-npm run build
-cd ..
-firebase use santas-workshop-test
-firebase emulators:start --import .firebase
+pnpm e2e:test:app
+pnpm e2e:test:admin
+```
 
-# Terminal 2: Start the app
-pnpm --filter @santashop/app start:test
+### Manual testing
 
-# Terminal 3: Run tests
-pnpm --filter @santashop/e2e test
+If you need more control, prepare the e2e/demo configuration and builds:
+
+```bash
+pnpm e2e:prepare:app
+```
+
+Then use separate terminals:
+
+```bash
+# Terminal 1
+pnpm e2e:emulators
+
+# Terminal 2
+pnpm e2e:serve:app
+
+# Terminal 3
+pnpm e2e:run:app
 ```
 
 ### Development Mode
@@ -80,20 +91,23 @@ pnpm --filter @santashop/e2e test:report
 The tests are configured to:
 
 - Run against `http://localhost:4100` (santashop-app test server)
-- Use Firebase emulators for backend services
-- Run in parallel across multiple workers
+- Use the `demo-santashop` Firebase emulators for backend services
+- Run one Chromium project with Playwright's Pixel 5 mobile profile
+- Run sequentially in one worker because tests share emulator state
 - Generate HTML reports
 - Take screenshots on failure
 - Record traces for debugging
 
 ## Writing Tests
 
-Tests should be placed in the `tests/` directory with the `.spec.ts` extension.
+Tests should be placed under the matching feature directory in `tests/public/`
+or `tests/admin/` with the `.spec.ts` extension. Use the custom emulator
+fixture rather than importing Playwright's base test directly.
 
 Example:
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures/test-fixtures';
 
 test('homepage loads', async ({ page }) => {
 	await page.goto('/');
@@ -111,4 +125,5 @@ The e2e tests can be integrated into your CI pipeline. Make sure to:
 4. Run the e2e tests
 5. Stop all services
 
-The `e2e:test` script handles this orchestration.
+The root `e2e:test`, `e2e:test:app`, and `e2e:test:admin` scripts handle this
+orchestration.

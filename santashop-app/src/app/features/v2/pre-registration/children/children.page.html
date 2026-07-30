@@ -22,10 +22,11 @@
 							color="white"
 							[routerLink]="['../overview']"
 						>
-							<ion-icon slot="icon-only"
+							<ion-icon
+								slot="icon-only"
 								name="arrow-back-sharp"
 								class="even-ratio-button"
-							 />
+							/>
 						</ion-button>
 
 						<div class="ion-padding es-mg-bottom-xxl">
@@ -40,13 +41,15 @@
 								<p>{{ "CHILDREN.CHILD_LINE_2" | translate }}</p>
 							</div>
 
-							<ion-item color="none"
+							<ion-item
+								color="none"
 								lines="full"
 								class="inset-ion-item-title"
-							 />
+							/>
 
 							<ion-list color="none">
 								<ion-button
+									id="addChildButton"
 									fill="clear"
 									[routerLink]="['add-child']"
 									class="ion-float-end"
@@ -54,10 +57,11 @@
 									<ion-label>
 										{{ "CHILDREN.ADD_A_CHILD" | translate }}
 									</ion-label>
-									<ion-icon name="add-circle"
+									<ion-icon
+										name="add-circle"
 										size="large"
 										slot="end"
-									 />
+									/>
 								</ion-button>
 
 								@if (children$ | async; as children) {
@@ -66,6 +70,7 @@
 								></div>
 								@for (child of children; track child) {
 								<ion-item
+									[attr.data-child-id]="child.id"
 									lines="none"
 									[routerLink]="['./add-child']"
 									[queryParams]="{ id: child.id }"
@@ -73,30 +78,34 @@
 									tappable
 								>
 									@if (child.toyType === 'boys') {
-									<ion-icon class="icon-reduced-margin"
+									<ion-icon
+										class="icon-reduced-margin"
 										name="man-outline"
 										size="large"
 										slot="start"
-									 />
+									/>
 									} @if (child.toyType === 'girls') {
-									<ion-icon class="icon-reduced-margin"
+									<ion-icon
+										class="icon-reduced-margin"
 										name="woman-outline"
 										size="large"
 										slot="start"
-									 />
+									/>
 									} @if (child.toyType === 'infants') {
-									<ion-icon class="icon-reduced-margin"
+									<ion-icon
+										class="icon-reduced-margin"
 										name="happy-outline"
 										size="large"
 										slot="start"
-									 />
+									/>
 									} @if (!child.toyType) {
-									<ion-icon class="icon-reduced-margin"
+									<ion-icon
+										class="icon-reduced-margin"
 										name="alert-circle"
 										color="danger"
 										size="large"
 										slot="start"
-									 />
+									/>
 									}
 									<ion-card-header>
 										<h2>
@@ -118,26 +127,30 @@
 									</ion-card-header>
 									<div slot="end" class="item-options">
 										<ion-button
+											[attr.data-edit-child-id]="child.id"
 											color="medium"
 											fill="clear"
 											slot="end"
 											[routerLink]="['./add-child']"
 											[queryParams]="{ id: child.id }"
 										>
-											<ion-icon size="large"
+											<ion-icon
+												size="large"
 												name="create-outline"
-											 />
+											/>
 										</ion-button>
 										<ion-button
+											[attr.data-remove-child-id]="child.id"
 											color="medium"
 											fill="clear"
 											slot="end"
 											(click)="removeChild(child)"
 										>
-											<ion-icon size="large"
+											<ion-icon
+												size="large"
 												name="trash-outline"
 												color="danger"
-											 />
+											/>
 										</ion-button>
 									</div>
 								</ion-item>

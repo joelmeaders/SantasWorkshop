@@ -40,6 +40,9 @@ const AWS_TEMPLATE_NAME_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const EMAIL_TEMPLATE_STORAGE_ROOT = 'emailTemplates';
 const HANDLEBARS_FIELD_PATTERN = /{{\s*([a-zA-Z0-9_.]+)\s*}}/g;
 
+const escapeRegExp = (value: string): string =>
+	value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const FALLBACK_TEMPLATE_NAMES: Readonly<Record<string, string>> = {
 	[EMAIL_TEMPLATE_KEYS.registrationConfirmation]:
 		REGISTRATION_EMAIL_TEMPLATE,
@@ -49,6 +52,9 @@ const FALLBACK_TEMPLATE_NAMES: Readonly<Record<string, string>> = {
 const DELIVERY_PROFILE_VALUES = new Set<string>(
 	Object.values(EMAIL_TEMPLATE_DELIVERY_PROFILES),
 );
+
+const normalizeTemplatePlaceholderName = (value: string): string =>
+	value.replace(/\bcontact\.firstName\b/g, 'firstName');
 
 export const getEmailTemplateDocPath = (key: string): string =>
 	`${COLLECTION_SCHEMA.emailTemplates}/${key}`;
@@ -149,6 +155,13 @@ export const extractHandlebarsFieldNames = (
 	return Array.from(matches.values());
 };
 
+export const hasImplicitQrCodePlaceholder = (html: string): boolean =>
+	html.includes('{{qrCodeUrl}}') ||
+	html.includes('*|QRCODE_URL|*') ||
+	/<img\b[^>]*(?:alt|title)\s*=\s*['"][^'"]*qr[^'"]*['"][^>]*>/i.test(
+		html,
+	);
+
 const getValueAtPath = (
 	target: Record<string, unknown>,
 	path: string,
@@ -208,6 +221,48 @@ export const buildEmailTemplateDataFromMappings = (
 	}
 
 	return result;
+};
+
+export const buildDirectTemplateDataFromFieldDefinitions = (
+	fieldMappings: EmailTemplateFieldDefinition[],
+): Record<string, unknown> => {
+	const result: Record<string, unknown> = {};
+
+	for (const field of fieldMappings) {
+		setValueAtPath(result, field.name, field.sampleValue);
+
+		if (field.name === 'contact.firstName') {
+			setValueAtPath(result, 'firstName', field.sampleValue);
+		}
+	}
+
+	return result;
+};
+
+export const renderTemplateWithFieldValues = (
+	template: string,
+	fieldMappings: EmailTemplateFieldDefinition[],
+): string => {
+	const templateData = buildDirectTemplateDataFromFieldDefinitions(
+		fieldMappings,
+	);
+	let renderedTemplate = template;
+
+	for (const fieldName of extractHandlebarsFieldNames(template)) {
+		const resolvedValue = getValueAtPath(templateData, fieldName);
+		const replacementValue =
+			typeof resolvedValue === 'string' ? resolvedValue : '';
+		const tokenPattern = new RegExp(
+			`{{\\s*${escapeRegExp(fieldName)}\\s*}}`,
+			'g',
+		);
+		renderedTemplate = renderedTemplate.replace(
+			tokenPattern,
+			replacementValue,
+		);
+	}
+
+	return renderedTemplate;
 };
 
 export const validateEmailTemplateFieldMappings = (

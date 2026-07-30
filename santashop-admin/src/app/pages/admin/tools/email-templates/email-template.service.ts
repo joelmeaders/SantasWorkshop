@@ -10,6 +10,8 @@ import type {
 	PublishEmailTemplateResponse,
 	SaveEmailTemplateRevisionRequest,
 	SaveEmailTemplateRevisionResponse,
+	SendTestEmailTemplateRequest,
+	SendTestEmailTemplateResponse,
 } from '@santashop/models';
 
 @Injectable({
@@ -66,6 +68,17 @@ export class EmailTemplateService {
 				PublishEmailTemplateRequest,
 				PublishEmailTemplateResponse
 			>('callablePublishEmailTemplate')(payload);
+		return result.data;
+	}
+
+	public async sendTestEmailTemplate(
+		payload: SendTestEmailTemplateRequest,
+	): Promise<SendTestEmailTemplateResponse> {
+		const result: HttpsCallableResult<SendTestEmailTemplateResponse> =
+			await this.functions.callableWrapper<
+				SendTestEmailTemplateRequest,
+				SendTestEmailTemplateResponse
+			>('callableSendTestEmailTemplate')(payload);
 		return result.data;
 	}
 }

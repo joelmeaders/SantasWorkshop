@@ -15,6 +15,7 @@ export const loadEmailTemplateHandlers = async (
 	callableGetEmailTemplateRevision: typeof import('../../../src/fn/callableGetEmailTemplateRevision').default;
 	callableSaveEmailTemplateRevision: typeof import('../../../src/fn/callableSaveEmailTemplateRevision').default;
 	callablePublishEmailTemplate: typeof import('../../../src/fn/callablePublishEmailTemplate').default;
+	callableSendTestEmailTemplate: typeof import('../../../src/fn/callableSendTestEmailTemplate').default;
 }> => {
 	vi.resetModules();
 	sesSendMock.mockReset();
@@ -22,6 +23,9 @@ export const loadEmailTemplateHandlers = async (
 	vi.doMock('@aws-sdk/client-ses', () => ({
 		SESClient: class {
 			public send = sesSendMock;
+		},
+		SendEmailCommand: class {
+			constructor(public readonly input: unknown) {}
 		},
 		CreateTemplateCommand: class {
 			constructor(public readonly input: unknown) {}
@@ -37,12 +41,14 @@ export const loadEmailTemplateHandlers = async (
 		getRevisionModule,
 		saveModule,
 		publishModule,
+		sendTestModule,
 	] = await Promise.all([
 		import('../../../src/fn/callableListEmailTemplates'),
 		import('../../../src/fn/callableGetEmailTemplate'),
 		import('../../../src/fn/callableGetEmailTemplateRevision'),
 		import('../../../src/fn/callableSaveEmailTemplateRevision'),
 		import('../../../src/fn/callablePublishEmailTemplate'),
+		import('../../../src/fn/callableSendTestEmailTemplate'),
 	]);
 
 	return {
@@ -51,5 +57,6 @@ export const loadEmailTemplateHandlers = async (
 		callableGetEmailTemplateRevision: getRevisionModule.default,
 		callableSaveEmailTemplateRevision: saveModule.default,
 		callablePublishEmailTemplate: publishModule.default,
+		callableSendTestEmailTemplate: sendTestModule.default,
 	};
 };

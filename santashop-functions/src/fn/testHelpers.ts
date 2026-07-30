@@ -22,18 +22,36 @@ export interface TestDateTimeSlotSeed {
 	lastUpdated?: string;
 }
 
-/**
- * Seeds the Firestore database with public parameters for testing
- * @param params - The parameters to seed
- */
-export async function seedPublicParameters(params: {
+export interface TestPublicParameters {
 	registrationEnabled?: boolean;
 	maintenanceModeEnabled?: boolean;
 	weatherModeEnabled?: boolean;
 	createAccountEnabled?: boolean;
 	messageEn?: string;
 	messageEs?: string;
-}): Promise<void> {
+	admin?: {
+		checkinEnabled?: boolean;
+		onsiteRegistrationEnabled?: boolean;
+		preRegistrationEnabled?: boolean;
+		allowCancelRegistration?: boolean;
+		allowChangeRegistration?: boolean;
+	};
+	globalAlert?: {
+		displayAlert?: boolean;
+		titleEn?: string;
+		titleEs?: string;
+		messageEn?: string;
+		messageEs?: string;
+	};
+}
+
+/**
+ * Seeds the Firestore database with public parameters for testing
+ * @param params - The parameters to seed
+ */
+export async function seedPublicParameters(
+	params: TestPublicParameters,
+): Promise<void> {
 	const db = admin.firestore();
 
 	const defaultParams = {
@@ -74,11 +92,20 @@ export async function clearAllData(): Promise<void> {
 
 	// Clear Firestore collections
 	const collections = [
+		'checkins',
 		'users',
 		'registrations',
+		'editedregistrations',
+		'onsiteregistrations',
 		'children',
 		'dateTimeSlots',
+		'emailTemplates',
+		'registrationsearchindex',
+		'stats',
+		'tmp_registrationemails',
+		'tmp_registrationemails2',
 		'parameters',
+		'staff',
 	];
 
 	for (const collectionName of collections) {

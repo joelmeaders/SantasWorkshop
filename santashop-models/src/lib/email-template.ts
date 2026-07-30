@@ -122,3 +122,31 @@ export interface PublishEmailTemplateResponse {
 	revision: EmailTemplateRevision;
 	renderedHtml: string;
 }
+
+export interface SendTestEmailTemplateRequest {
+	recipientEmail: string;
+	deliveryProfile: EmailTemplateDeliveryProfile;
+	subjectPart: string;
+	html: string;
+	fieldMappings: EmailTemplateFieldDefinition[];
+}
+
+export interface SendTestEmailTemplateResponse {
+	recipientEmail: string;
+	renderedSubject: string;
+	renderedHtml: string;
+}
+
+export interface SendTestEmailTemplateRequest {
+	recipientEmail: string;
+	deliveryProfile: EmailTemplateDeliveryProfile;
+	subjectPart: string;
+	html: string;
+	fieldMappings: EmailTemplateFieldDefinition[];
+}
+
+export interface SendTestEmailTemplateResponse {
+	recipientEmail: string;
+	renderedSubject: string;
+	renderedHtml: string;
+}

@@ -17,6 +17,29 @@ export interface E2eSeedDateTimeSlot {
 	lastUpdated?: string;
 }
 
+export interface E2ePublicParameters {
+	registrationEnabled?: boolean;
+	maintenanceModeEnabled?: boolean;
+	weatherModeEnabled?: boolean;
+	createAccountEnabled?: boolean;
+	messageEn?: string;
+	messageEs?: string;
+	admin?: {
+		checkinEnabled?: boolean;
+		onsiteRegistrationEnabled?: boolean;
+		preRegistrationEnabled?: boolean;
+		allowCancelRegistration?: boolean;
+		allowChangeRegistration?: boolean;
+	};
+	globalAlert?: {
+		displayAlert?: boolean;
+		titleEn?: string;
+		titleEs?: string;
+		messageEn?: string;
+		messageEs?: string;
+	};
+}
+
 /**
  * Custom fixtures for SantaShop E2E tests
  *
@@ -32,7 +55,7 @@ type CustomFixtures = {
 	/** Helper to clear all data from Firebase emulator */
 	clearData: () => Promise<void>;
 	/** Helper to seed custom public parameters */
-	seedPublicParams: (params: any) => Promise<void>;
+	seedPublicParams: (params: E2ePublicParameters) => Promise<void>;
 	/** Helper to seed an admin auth user */
 	seedAdminUser: (user: E2eAdminSeedUser) => Promise<{ uid: string }>;
 	/** Helper to seed date/time slot documents */
@@ -52,7 +75,11 @@ const FUNCTIONS_EMULATOR_URL = `http://127.0.0.1:5001/${EMULATOR_PROJECT_ID}/us-
 /**
  * Calls a Firebase function in the emulator
  */
-async function callFunction(functionName: string, data?: any): Promise<any> {
+async function callFunction(
+	functionName: string,
+	data?: any,
+	attempt = 0,
+): Promise<any> {
 	const response = await fetch(`${FUNCTIONS_EMULATOR_URL}/${functionName}`, {
 		method: 'POST',
 		headers: {
@@ -63,12 +90,22 @@ async function callFunction(functionName: string, data?: any): Promise<any> {
 
 	if (!response.ok) {
 		const errorBody = await response.text();
+		const functionDiscoveryPending =
+			response.status === 404 &&
+			errorBody.includes('does not exist') &&
+			attempt < 30;
+
+		if (functionDiscoveryPending) {
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			return callFunction(functionName, data, attempt + 1);
+		}
+
 		throw new Error(
 			`Function call failed: ${response.statusText} - ${errorBody}`,
 		);
 	}
 
-	const result = await response.json();
+	const result = (await response.json()) as { result: any };
 	return result.result;
 }
 
@@ -88,7 +125,7 @@ export const test = base.extend<CustomFixtures>({
 	},
 
 	seedPublicParams: async ({}, use) => {
-		const seedPublicParams = async (params: any) => {
+		const seedPublicParams = async (params: E2ePublicParameters) => {
 			await callFunction('testSeedPublicParameters', params);
 		};
 		await use(seedPublicParams);

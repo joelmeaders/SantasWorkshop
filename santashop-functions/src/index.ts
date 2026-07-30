@@ -166,6 +166,20 @@ export const callablePublishEmailTemplate = onCall(
 	},
 );
 
+export const callableSendTestEmailTemplate = onCall(
+	{
+		enforceAppCheck: ENFORCE_APP_CHECK,
+		memory: '256MiB',
+		timeoutSeconds: 60,
+		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
+	},
+	async (request) => {
+		return (await import('./fn/callableSendTestEmailTemplate')).default(
+			request,
+		);
+	},
+);
+
 export const callableCreateStaffUser = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	async (request) => {

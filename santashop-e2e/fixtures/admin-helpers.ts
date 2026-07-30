@@ -1,9 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
-import type {
-	E2eAdminSeedUser,
-	E2eSeedDateTimeSlot,
-} from './test-fixtures';
+import type { E2eAdminSeedUser, E2eSeedDateTimeSlot } from './test-fixtures';
 
 export const defaultAdminAccount = (
 	overrides: Partial<E2eAdminSeedUser> = {},
@@ -63,7 +60,7 @@ export const fillIonicInput = async (
 	selector: string,
 	value: string,
 ): Promise<void> => {
-	const input = page.locator(`${selector} input`);
+	const input = page.locator(`${selector} input`).first();
 	await expect(input).toBeVisible({ timeout: 15000 });
 	await input.fill(value);
 	await expect(input).toHaveValue(value, { timeout: 10000 });
@@ -108,22 +105,26 @@ export const scheduleSlot = (
 		id: string;
 		dateTime: string;
 	},
-): E2eSeedDateTimeSlot => ({
-	id: overrides.id,
-	programYear: 2025,
-	dateTime: overrides.dateTime,
-	maxSlots: 10,
-	slotsReserved: 0,
-	enabled: true,
-	...overrides,
-});
+): E2eSeedDateTimeSlot => {
+	const { id, dateTime, ...remainingOverrides } = overrides;
+
+	return {
+		id,
+		programYear: 2025,
+		dateTime,
+		maxSlots: 10,
+		slotsReserved: 0,
+		enabled: true,
+		...remainingOverrides,
+	};
+};
 
 const fillField = async (
 	page: Page,
 	selector: string,
 	value: string,
 ): Promise<void> => {
-	const input = page.locator(selector);
+	const input = page.locator(selector).first();
 	await input.fill(value);
 	await expect(input).toHaveValue(value, { timeout: 10000 });
 };

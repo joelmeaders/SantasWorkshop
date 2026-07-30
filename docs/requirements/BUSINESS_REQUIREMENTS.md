@@ -317,26 +317,3 @@ The rebuilt customer and staff experiences shall meet WCAG AA accessibility stan
 ### BR-053 Self-service with abuse protection
 
 The service shall maximize self-service wherever practical while enforcing protections against abuse, including abuse patterns such as repeated cancellation and re-registration, duplicate accounts, and false child registrations.
-
-## Success outcomes
-
-The rebuilt service should preserve the ability to achieve the following outcomes:
-
-- customers can complete registration without staff intervention in normal cases
-- staff can still assist or override when self-service is insufficient
-- event-day staff can quickly find and check in families
-- communications support the registration and event process
-- operational leaders can monitor and analyze seasonal activity
-- runtime controls can pause or alter operations safely
-
-## Out of scope
-
-Unless explicitly added later, the rebuild should treat the following as out of scope:
-
-- payment collection
-- inventory or fulfillment allocation
-- volunteer scheduling
-- donor or sponsor management
-- public self-check-in kiosks
-- broad multi-role authorization models beyond the needs of customers and authorized staff
-

@@ -2,6 +2,7 @@
 	<ion-list>
 		<ion-list-header> DSCS Event Administration </ion-list-header>
 		<ion-item
+			id="checkInNav"
 			detail
 			routerLink="../checkin"
 			disabled
@@ -10,11 +11,12 @@
 			<ion-icon name="bag-check-outline" color="success" slot="start" />
 			Check in customers
 		</ion-item>
-		<ion-item detail routerLink="../search">
+		<ion-item id="searchNav" detail routerLink="../search">
 			<ion-icon name="search-outline" color="warning" slot="start" />
 			Search for customers
 		</ion-item>
 		<ion-item
+			id="onSiteRegistrationNav"
 			detail
 			routerLink="../registration"
 			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
@@ -23,6 +25,7 @@
 			On-Site Registration
 		</ion-item>
 		<ion-item
+			id="preRegistrationNav"
 			detail
 			routerLink="../pre-registration"
 			[disabled]="(preRegistrationEnabled$ | async) === false"
@@ -42,7 +45,11 @@
 			Schedule & Capacity Editor
 		</ion-item>
 		<ion-item detail routerLink="../email-templates">
-			<ion-icon name="document-text-outline" color="secondary" slot="start" />
+			<ion-icon
+				name="document-text-outline"
+				color="secondary"
+				slot="start"
+			/>
 			Email Templates
 		</ion-item>
 		<ion-item detail routerLink="../users">
@@ -67,6 +74,7 @@
 
 		<ion-list-header> Other </ion-list-header>
 		<ion-item
+			id="adminSignOutButton"
 			(click)="signOut()"
 			(keydown.enter)="signOut()"
 			detail

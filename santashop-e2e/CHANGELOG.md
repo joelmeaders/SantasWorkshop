@@ -2,6 +2,21 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Requirements-traced public registration lifecycle and staff access/control
+  scenarios.
+- Stable mobile e2e selectors and reusable registration helpers.
+- Separate public and admin emulator orchestration from the workspace root.
+
+### Changed
+
+- Organized specs by public/admin feature.
+- Reduced Playwright execution to one Pixel 5 mobile Chromium project and one
+  worker.
+
 ## [2025.0.0] - 2025-11-09
 
 ### Added

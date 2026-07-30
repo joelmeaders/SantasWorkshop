@@ -25,6 +25,7 @@ describe('EmailTemplateEditorPage', () => {
 				'getEmailTemplateRevision',
 				'saveEmailTemplateRevision',
 				'publishEmailTemplate',
+				'sendTestEmailTemplate',
 			],
 		);
 		emailTemplateService.getEmailTemplate.and.resolveTo({
@@ -66,6 +67,11 @@ describe('EmailTemplateEditorPage', () => {
 				},
 			],
 			currentHtml: '<h1>Hello {{firstName}}</h1>',
+		});
+		emailTemplateService.sendTestEmailTemplate.and.resolveTo({
+			recipientEmail: 'preview@example.com',
+			renderedSubject: 'Ticket for Toy Drive',
+			renderedHtml: '<h1>Hello Buddy</h1>',
 		});
 
 		const routeMock = createActivatedRouteMock();
@@ -112,7 +118,7 @@ describe('EmailTemplateEditorPage', () => {
 		await component.ionViewWillEnter();
 
 		// Assert
-		expect(component.fieldMappings.length).toBe(2);
+		expect(component.fieldMappings).toHaveSize(2);
 		expect(component.fieldMappings.at(0).value).toEqual(
 			jasmine.objectContaining({
 				name: 'firstName',
@@ -123,6 +129,26 @@ describe('EmailTemplateEditorPage', () => {
 			jasmine.objectContaining({
 				name: 'eventName',
 				mapping: 'eventName',
+			}),
+		);
+	});
+
+	it('sends a test email using the current draft and detected field values', async () => {
+		// Arrange
+		await component.ionViewWillEnter();
+		component.testEmailForm.controls['recipientEmail'].setValue(
+			'preview@example.com',
+		);
+
+		// Act
+		await component.sendTestEmail();
+
+		// Assert
+		expect(emailTemplateService.sendTestEmailTemplate).toHaveBeenCalledWith(
+			jasmine.objectContaining({
+				recipientEmail: 'preview@example.com',
+				deliveryProfile: 'registration-confirmation',
+				subjectPart: 'Ticket for {{eventName}}',
 			}),
 		);
 	});

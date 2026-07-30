@@ -1,5 +1,8 @@
 import admin from '../firebase-admin';
 import { CheckIn } from '../models';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('pubsubResetCheckInStats');
 
 export default async function pubsubResetCheckInStats(): Promise<string> {
 	// Load all checkins
@@ -23,7 +26,7 @@ export default async function pubsubResetCheckInStats(): Promise<string> {
 			});
 		});
 		processed += batchRegs.length;
-		console.info('Processed ', processed);
+		log.info('Processed check-in stats reset batch', { processed });
 	} while (records.length > 0);
 
 	return 'Reset Checkins';

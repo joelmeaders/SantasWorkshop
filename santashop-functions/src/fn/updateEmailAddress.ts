@@ -1,7 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { Auth, COLLECTION_SCHEMA } from '../models';
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+
+const log = createFunctionLogger('updateEmailAddress');
 
 export default async function updateEmailAddress(
 	request: CallableRequest<Auth>,
@@ -45,8 +48,16 @@ export default async function updateEmailAddress(
 		await batch.commit();
 		return true;
 	} catch (error) {
-		console.error(
-			`Error updating email address for ${request.auth?.token.email} to ${data.emailAddress}`,
+		log.error(
+			'Failed to update email address',
+			{
+				uid,
+				previousEmailAddress:
+					typeof request.auth?.token.email === 'string'
+						? request.auth.token.email
+						: null,
+				nextEmailAddress: data.emailAddress,
+			},
 			error,
 		);
 		throw new HttpsError(

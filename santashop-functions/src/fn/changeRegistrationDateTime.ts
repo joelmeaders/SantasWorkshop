@@ -11,6 +11,9 @@ import {
 	normalizeDateTime,
 	type DateTimeValue,
 } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('changeRegistrationDateTime');
 
 const isAdminContext = (
 	request: CallableRequest<ChangeRegistrationData>,
@@ -141,7 +144,15 @@ export default async function changeRegistrationDateTime(
 		await batch.commit();
 		return true;
 	} catch (error) {
-		console.error(`Error changing registration for uid ${uid}`, error);
+		log.error(
+			'Failed to change registration date/time slot',
+			{
+				uid,
+				newDateTimeSlotId: data.newDateTimeSlot.id ?? null,
+				actorUid: request.auth?.uid ?? null,
+			},
+			error,
+		);
 		throw new HttpsError(
 			'internal',
 			'Error changing registration',

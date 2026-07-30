@@ -1,6 +1,9 @@
 import admin from '../firebase-admin';
 import { User, UserStats, UsersByZipCodeCount, ReferrerCount } from '../models';
+import { createFunctionLogger } from '../utility/observability';
 import { getStatsDocumentId } from '../utility/runtime-config';
+
+const log = createFunctionLogger('scheduledUserStats');
 
 const normalizeZipCode = (zipCode: User['zipCode']): string => {
 	return `${zipCode ?? ''}`.slice(0, 5);
@@ -34,6 +37,12 @@ export default async function scheduledUserStats(): Promise<void> {
 		.collection('stats')
 		.doc(getStatsDocumentId('user'))
 		.set(stats, { merge: false });
+
+	log.info('Updated user stats document', {
+		totalUsers: stats.totalUsers,
+		zipCodeBucketCount: stats.zipCodeCount.length,
+		referrerBucketCount: stats.referrerCount.length,
+	});
 }
 
 function getZipCodeCounts(users: User[]): UsersByZipCodeCount[] {

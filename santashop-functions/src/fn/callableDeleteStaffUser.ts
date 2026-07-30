@@ -2,6 +2,7 @@ import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { COLLECTION_SCHEMA, DeleteStaffUser } from '../models';
 import admin from '../firebase-admin';
 import { serializeError } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 import { ADMIN_UIDS } from '../utility/runtime-config';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
@@ -10,6 +11,8 @@ const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
 	return token?.['admin'] === true;
 };
+
+const log = createFunctionLogger('callableDeleteStaffUser');
 
 const PROTECTED_UIDS = new Set<string>(ADMIN_UIDS);
 
@@ -31,9 +34,10 @@ export default async function callableDeleteStaffUser(
 	request: CallableRequest<DeleteStaffUser>,
 ): Promise<void> {
 	if (!isAdminContext(request)) {
-		console.error(
-			`${request.auth?.uid} attempted to delete a staff account`,
-		);
+		log.warn('Non-admin attempted to delete a staff account', {
+			actorUid: request.auth?.uid ?? null,
+			targetStaffUid: request.data?.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'You do not have permission to manage staff accounts',
@@ -69,9 +73,10 @@ export default async function callableDeleteStaffUser(
 			.doc(`${COLLECTION_SCHEMA.staff}/${uid}`)
 			.delete();
 	} catch (error) {
-		console.error(
-			`Error deleting staff account ${uid}`,
-			new Error(serializeError(error)),
+		log.error(
+			'Failed to delete staff account',
+			{ uid },
+			error,
 		);
 		throw new HttpsError(
 			'internal',

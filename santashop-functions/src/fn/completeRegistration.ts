@@ -8,8 +8,11 @@ import {
 	RegistrationSearchIndex,
 } from '../models';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
+
+const log = createFunctionLogger('completeRegistration');
 
 export default async function completeRegistration(
 	request: CallableRequest<Registration>,
@@ -17,11 +20,9 @@ export default async function completeRegistration(
 	const record = request.data;
 
 	if (!isRegistrationComplete(record)) {
-		console.error(
-			new Error(
-				`Registration incomplete. Unable to submit registration for uid ${record.uid}`,
-			),
-		);
+		log.warn('Attempted to complete an incomplete registration', {
+			uid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'failed-precondition',
 			'-10',
@@ -30,11 +31,10 @@ export default async function completeRegistration(
 	}
 
 	if (record.uid !== request.auth?.uid) {
-		console.error(
-			new Error(
-				`${request.auth?.uid} attempted to update registration for uid ${record.uid}`,
-			),
-		);
+		log.warn('Unauthorized registration completion attempt', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'-99',
@@ -43,9 +43,9 @@ export default async function completeRegistration(
 	}
 
 	if (record.registrationSubmittedOn) {
-		console.error(
-			new Error(`Registration already submitted for uid ${record.uid}`),
-		);
+		log.warn('Attempted to complete an already-submitted registration', {
+			uid: record.uid ?? null,
+		});
 		throw new HttpsError('cancelled', '-98', 'Already Submitted');
 	}
 
@@ -102,7 +102,11 @@ export default async function completeRegistration(
 		await batch.commit();
 		return true;
 	} catch (error) {
-		console.error(error);
+		log.error(
+			'Failed to complete registration',
+			{ uid: record.uid ?? null },
+			error,
+		);
 		throw new HttpsError(
 			'internal',
 			'Failed to complete registration',

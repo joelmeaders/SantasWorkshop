@@ -134,29 +134,6 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 - Build SES credentials inside lazy factory methods, not module-level objects.
 - Keep `.env` only as local/project parameter source, not as custom loader dependency.
 
-### 5. Add observability and structured logging
-
-Most handlers use `console.log` / `console.error`.
-
-Firebase examples now commonly use `firebase-functions/logger` so logs are structured and easier to query.
-
-**Impact:**
-
-- Easier incident triage.
-- Better filtering by function, user ID, queue doc ID, registration ID, delivery state, and operation type.
-- Cleaner Error Reporting integration.
-
-**Recommendation:**
-
-- Use `logger.info`, `logger.warn`, `logger.error`.
-- Include structured fields like `{ uid, functionName, queueDocId, templateKey, deliveryState }`.
-- Add alerting for:
-  - repeated `sendNewRegistrationEmails` failures
-  - backup export failures
-  - mass delete/admin bootstrap invocation
-  - scheduled stats timeout
-  - queue docs stuck in `sending`
-
 ## Function-by-function report
 
 ### `changeAccountInformation`
@@ -411,7 +388,6 @@ Firebase examples now commonly use `firebase-functions/logger` so logs are struc
 **Improvements:**
 
 - Add pagination if template history grows.
-- Use structured logging for admin actions if needed.
 
 **Impact:** Low; mainly future-proofing.
 
@@ -1039,12 +1015,11 @@ Firebase tips recommend explicitly including/pinning Functions Framework so buil
 4. Evaluate Cloud Tasks for email queueing, user deletion, exports, and long-running batch operations.
 5. Tune CPU/concurrency/max/min instances based on observed traffic.
 
-### Phase 4: Observability and operations
+### Phase 4: Operations
 
-1. Convert logs to structured `firebase-functions/logger`.
-2. Add audit documents for staff/admin/template/destructive functions.
-3. Add dashboard/alerts for queue failures, backup freshness, scheduled job runtime, and Pub/Sub errors.
-4. Document manual runbooks for maintenance functions.
+1. Add audit documents for staff/admin/template/destructive functions.
+2. Add dashboard/alerts for queue failures, backup freshness, scheduled job runtime, and Pub/Sub errors.
+3. Document manual runbooks for maintenance functions.
 
 ## Bottom line
 

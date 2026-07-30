@@ -1,5 +1,8 @@
 import admin from '../firebase-admin';
 import { Registration, RegistrationSearchIndex } from '../models';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('scheduledReindexRegistrations');
 
 export default async function scheduledReindexRegistrations(): Promise<string> {
 	// Load all registrations
@@ -43,7 +46,7 @@ export default async function scheduledReindexRegistrations(): Promise<string> {
 			return Promise.resolve();
 		});
 		processed += batchRegs.length;
-		console.info('Processed ', processed);
+		log.info('Processed registration search index batch', { processed });
 	} while (rsi.length > 0);
 
 	return 'Updated index';

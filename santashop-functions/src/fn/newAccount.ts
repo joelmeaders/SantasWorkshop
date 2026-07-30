@@ -8,6 +8,9 @@ import {
 	getErrorMessage,
 	serializeError,
 } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('newAccount');
 
 export default async function newAccount(
 	request: CallableRequest<OnboardUser>,
@@ -23,7 +26,11 @@ export default async function newAccount(
 			displayName: `${data.firstName} ${data.lastName}`,
 		});
 	} catch (error) {
-		console.error(`${data.emailAddress}`, new Error(serializeError(error)));
+		log.error(
+			'Failed to create auth user during account onboarding',
+			{ emailAddress: data.emailAddress },
+			error,
+		);
 		handleAuthError(error);
 	}
 
@@ -68,7 +75,11 @@ export default async function newAccount(
 		await batch.commit();
 	} catch (error) {
 		await admin.auth().deleteUser(newUserAccount.uid);
-		console.error('Error creating account records in batch process', error);
+		log.error(
+			'Failed to create Firestore account records',
+			{ uid: newUserAccount.uid },
+			error,
+		);
 		throw new HttpsError(
 			'internal',
 			'Unable to create account records',
@@ -83,8 +94,9 @@ export default async function newAccount(
 			{ merge: true },
 		);
 	} catch (error) {
-		console.error(
-			`Error generating QR Code for uid: ${newUserAccount.uid}`,
+		log.error(
+			'Failed to finalize QR code generation for new account',
+			{ uid: newUserAccount.uid },
 			error,
 		);
 		await deleteQrCode(newUserAccount.uid).catch(() => undefined);

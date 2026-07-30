@@ -41,7 +41,7 @@ const EMAIL_TEMPLATE_STORAGE_ROOT = 'emailTemplates';
 const HANDLEBARS_FIELD_PATTERN = /{{\s*([a-zA-Z0-9_.]+)\s*}}/g;
 
 const escapeRegExp = (value: string): string =>
-	value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 const FALLBACK_TEMPLATE_NAMES: Readonly<Record<string, string>> = {
 	[EMAIL_TEMPLATE_KEYS.registrationConfirmation]:
@@ -52,9 +52,6 @@ const FALLBACK_TEMPLATE_NAMES: Readonly<Record<string, string>> = {
 const DELIVERY_PROFILE_VALUES = new Set<string>(
 	Object.values(EMAIL_TEMPLATE_DELIVERY_PROFILES),
 );
-
-const normalizeTemplatePlaceholderName = (value: string): string =>
-	value.replace(/\bcontact\.firstName\b/g, 'firstName');
 
 export const getEmailTemplateDocPath = (key: string): string =>
 	`${COLLECTION_SCHEMA.emailTemplates}/${key}`;
@@ -253,7 +250,7 @@ export const renderTemplateWithFieldValues = (
 		const replacementValue =
 			typeof resolvedValue === 'string' ? resolvedValue : '';
 		const tokenPattern = new RegExp(
-			`{{\\s*${escapeRegExp(fieldName)}\\s*}}`,
+			String.raw`{{\s*${escapeRegExp(fieldName)}\s*}}`,
 			'g',
 		);
 		renderedTemplate = renderedTemplate.replace(

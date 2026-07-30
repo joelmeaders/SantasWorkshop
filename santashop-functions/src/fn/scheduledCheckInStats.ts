@@ -1,8 +1,11 @@
 import type { Timestamp } from 'firebase-admin/firestore';
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { getStatsDocumentId, SHOP_TIME_ZONE } from '../utility/runtime-config';
 
 let stats: ICheckInAggregatedStats;
+
+const log = createFunctionLogger('scheduledCheckInStats');
 
 export default async function scheduledCheckInStats(): Promise<string> {
 	// Load all checkins
@@ -45,7 +48,7 @@ export default async function scheduledCheckInStats(): Promise<string> {
 			});
 		});
 		processed += batchRegs.length;
-		console.info('Processed check-ins', processed);
+		log.info('Processed check-in stats batch', { processed });
 	} while (checkins.length > 0);
 
 	await admin
@@ -53,6 +56,14 @@ export default async function scheduledCheckInStats(): Promise<string> {
 		.collection('stats')
 		.doc(getStatsDocumentId('checkin'))
 		.set(stats, { merge: false });
+
+	log.info('Updated check-in stats document', {
+		processed: stats.dateTimeCount.reduce(
+			(total, entry) => total + entry.customerCount,
+			0,
+		),
+		bucketCount: stats.dateTimeCount.length,
+	});
 
 	stats = {} as ICheckInAggregatedStats;
 

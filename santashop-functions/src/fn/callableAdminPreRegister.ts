@@ -19,6 +19,7 @@ import {
 	getErrorMessage,
 	serializeError,
 } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 
 interface RegistrationCreationResult {
@@ -34,6 +35,8 @@ const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
 	return token?.['admin'] === true;
 };
+
+const log = createFunctionLogger('callableAdminPreRegister');
 
 const getRequiredString = (
 	value: string | undefined,
@@ -56,9 +59,10 @@ export default async function callableAdminPreRegister(
 	const zipCode = record.zipCode;
 
 	if (!isAdminContext(request)) {
-		console.error(
-			`${request.auth?.uid} attempted to create registration for ${record.emailAddress}`,
-		);
+		log.warn('Non-admin attempted to create a registration', {
+			actorUid: request.auth?.uid ?? null,
+			targetEmailAddress: record.emailAddress ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'-99',
@@ -84,9 +88,10 @@ export default async function callableAdminPreRegister(
 			displayName: `${firstName} ${lastName}`,
 		});
 	} catch (error) {
-		console.error(
-			`${record.emailAddress}`,
-			new Error(serializeError(error)),
+		log.error(
+			'Failed to create auth user for pre-registration',
+			{ targetEmailAddress: record.emailAddress ?? null },
+			error,
 		);
 		handleAuthError(error);
 	}
@@ -151,9 +156,10 @@ export default async function callableAdminPreRegister(
 			{ merge: true },
 		);
 	} catch (error) {
-		console.error(
-			'Error generating QR Code for uid: ' + newUserAccount.uid,
-			serializeError(error),
+		log.error(
+			'Failed to finalize admin pre-registration resources',
+			{ uid: newUserAccount.uid },
+			error,
 		);
 		await deleteQrCode(newUserAccount.uid).catch(() => undefined);
 		await admin.auth().deleteUser(newUserAccount.uid);

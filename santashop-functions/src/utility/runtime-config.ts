@@ -1,7 +1,12 @@
 import * as path from 'node:path';
+import { createRequire } from 'node:module';
 
-const envLoader = require('../../../scripts/env-loader.cjs') as {
-	loadEnvFiles: (filePaths: string[], env?: NodeJS.ProcessEnv) => void;
+type EnvironmentMap = Record<string, string | undefined>;
+
+const requireFromRuntime = createRequire(import.meta.url);
+
+const envLoader = requireFromRuntime('../../../scripts/env-loader.cjs') as {
+	loadEnvFiles: (filePaths: string[], env?: EnvironmentMap) => void;
 };
 
 interface FirebaseEnvironmentConfig {

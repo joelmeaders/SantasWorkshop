@@ -1,7 +1,10 @@
 import { ChangeUserInfo, COLLECTION_SCHEMA } from '../models';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+
+const log = createFunctionLogger('changeAccountInformation');
 
 export default async function changeAccountInformation(
 	request: CallableRequest<ChangeUserInfo>,
@@ -54,8 +57,14 @@ export default async function changeAccountInformation(
 		await batch.commit();
 		return true;
 	} catch (error) {
-		console.error(
-			`Error updating user document ${uid} with ${JSON.stringify(data)}`,
+		log.error(
+			'Failed to update account information',
+			{
+				uid,
+				updatedFields: Object.keys(data ?? {}).sort((left, right) =>
+					left.localeCompare(right),
+				),
+			},
 			error,
 		);
 		throw new HttpsError(

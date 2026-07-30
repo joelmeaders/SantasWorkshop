@@ -6,7 +6,10 @@ import {
 } from '../utility/registrations';
 import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
+
+const log = createFunctionLogger('checkInWithEdit');
 
 export default async function checkInWithEdit(
 	request: CallableRequest<Partial<Registration>>,
@@ -14,9 +17,10 @@ export default async function checkInWithEdit(
 	const record = request.data;
 
 	if (!request.auth?.token?.admin) {
-		console.error(
-			`${request.auth?.uid} attempted to check in for uid ${record.uid}`,
-		);
+		log.warn('Non-admin attempted to check in with edits', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'-99',
@@ -25,9 +29,9 @@ export default async function checkInWithEdit(
 	}
 
 	if (!isPartialRegistrationComplete(record)) {
-		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`,
-		);
+		log.warn('Attempted to check in edited incomplete registration', {
+			uid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'failed-precondition',
 			'-11',

@@ -4,10 +4,12 @@ import * as path from 'node:path';
 import { createRequire } from 'node:module';
 import { afterEach, describe, expect, it } from 'vitest';
 
+type EnvironmentMap = Record<string, string | undefined>;
+
 const requireFromTest = createRequire(import.meta.url);
 const envLoader = requireFromTest('../../../../scripts/env-loader.cjs') as {
-	loadEnvFile: (filePath: string, env?: NodeJS.ProcessEnv) => void;
-	loadEnvFiles: (filePaths: string[], env?: NodeJS.ProcessEnv) => void;
+	loadEnvFile: (filePath: string, env?: EnvironmentMap) => void;
+	loadEnvFiles: (filePaths: string[], env?: EnvironmentMap) => void;
 	unquote: (value: string) => string;
 };
 
@@ -50,7 +52,7 @@ describe('env-loader', () => {
 			'utf8',
 		);
 
-		const env: NodeJS.ProcessEnv = { EXISTING: 'process-value' };
+		const env: EnvironmentMap = { EXISTING: 'process-value' };
 
 		envLoader.loadEnvFile(envFilePath, env);
 
@@ -75,7 +77,7 @@ describe('env-loader', () => {
 			'utf8',
 		);
 
-		const env: NodeJS.ProcessEnv = {};
+		const env: EnvironmentMap = {};
 
 		envLoader.loadEnvFiles([firstEnvPath, secondEnvPath], env);
 

@@ -1,7 +1,10 @@
 import { COLLECTION_SCHEMA, UpdateReferredBy } from '../models';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+
+const log = createFunctionLogger('updateReferredBy');
 
 export default async function updateReferredBy(
 	request: CallableRequest<UpdateReferredBy>,
@@ -21,8 +24,9 @@ export default async function updateReferredBy(
 		await userDocumentRef.update({ referredBy: data.referredBy });
 		return true;
 	} catch (error) {
-		console.error(
-			`Error updating user document ${uid} with ${JSON.stringify(data)}`,
+		log.error(
+			'Failed to update referred-by value',
+			{ uid, referredBy: data.referredBy },
 			error,
 		);
 		throw new HttpsError(

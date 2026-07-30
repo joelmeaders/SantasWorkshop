@@ -6,6 +6,7 @@ import {
 } from '../models';
 import admin from '../firebase-admin';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
 import { isRegistrationComplete } from '../utility/registrations';
 
 interface FirebaseAuthTokenLike {
@@ -31,6 +32,8 @@ const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
 	return token?.['admin'] === true;
 };
+
+const log = createFunctionLogger('callableResendRegistrationEmail');
 
 export default async function callableResendRegistrationEmail(
 	request: CallableRequest<{ customerId: string }>,
@@ -110,11 +113,9 @@ function ensureQrReady(record: Registration): void {
 
 function registrationCompleteGuard(record: Registration): void {
 	if (!isRegistrationComplete(record)) {
-		console.error(
-			new Error(
-				'Registration incomplete. Unable to send registration email.',
-			),
-		);
+		log.warn('Attempted to resend email for incomplete registration', {
+			uid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'failed-precondition',
 			'-10',
@@ -128,11 +129,10 @@ function adminOrOwnerGuard(
 	request: CallableRequest<{ customerId: string }>,
 ): void {
 	if (!isAdminContext(request) && record.uid !== request.auth?.uid) {
-		console.error(
-			new Error(
-				`${request.auth?.uid} attempted to update registration for uid ${record.uid}`,
-			),
-		);
+		log.warn('Unauthorized registration email resend attempt', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'-99',

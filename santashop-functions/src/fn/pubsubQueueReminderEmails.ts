@@ -6,6 +6,9 @@ import {
 	Registration,
 } from '../models';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('pubsubQueueReminderEmails');
 
 interface ReminderQueueResult {
 	success: number;
@@ -75,10 +78,15 @@ export default async function pubsubQueueReminderEmails(): Promise<ReminderQueue
 		);
 
 		result = await queueReminderEmails(registrations);
+		log.info('Processed reminder email queue run', {
+			candidateCount: registrations.length,
+			successCount: result.success,
+			failedCount: result.failed,
+		});
 
 		return result;
 	} catch (err) {
-		console.error(err);
+		log.error('Failed to queue reminder emails', undefined, err);
 		throw new Error(`Failed to queue reminder emails: ${err}`);
 	}
 }
@@ -105,9 +113,9 @@ async function queueReminderEmails(
 				registration.dateTimeSlot?.dateTime as Timestamp,
 			);
 		} catch (err) {
-			console.error(
-				'failed to convert date/time for email queue',
-				registration.uid,
+			log.error(
+				'Failed to format reminder email date/time',
+				{ uid: registration.uid ?? null },
 				err,
 			);
 			failed++;
@@ -192,7 +200,7 @@ async function queueReminderEmails(
 				{ reminderEmailFailedOn: new Date() },
 				{ merge: true },
 			);
-			console.error('failed to queue email', uid, err);
+			log.error('Failed to queue reminder email', { uid }, err);
 			failed++;
 			continue;
 		}

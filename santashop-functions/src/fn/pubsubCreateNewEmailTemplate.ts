@@ -4,6 +4,7 @@ import {
 	SESClientConfig,
 } from '@aws-sdk/client-ses';
 import * as fileSystem from 'node:fs/promises';
+import { createFunctionLogger } from '../utility/observability';
 
 const region = 'us-west-2';
 const credentials = {
@@ -11,6 +12,8 @@ const credentials = {
 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 };
 let sesClient: SESClient | undefined = undefined;
+
+const log = createFunctionLogger('pubsubCreateNewEmailTemplate');
 
 const loadTemplate = async (): Promise<string> => {
 	return fileSystem.readFile(
@@ -35,16 +38,23 @@ const createCreateTemplateCommand =
 	};
 
 export default async function pubsubCreateNewEmailTemplate(): Promise<void> {
-	if (!sesClient)
-		sesClient = new SESClient({ credentials, region } as SESClientConfig);
+	sesClient ??= new SESClient({ credentials, region } as SESClientConfig);
 
 	const createTemplateCommand = await createCreateTemplateCommand();
 
 	try {
 		await sesClient.send(createTemplateCommand);
+		log.info('Created SES email template', {
+			region,
+			templateName: 'dscs-registration-confirmation-v1',
+		});
 		return;
 	} catch (err) {
-		console.error('Failed to create template.', err);
+		log.error(
+			'Failed to create SES email template',
+			{ region, templateName: 'dscs-registration-confirmation-v1' },
+			err,
+		);
 		throw err;
 	}
 }

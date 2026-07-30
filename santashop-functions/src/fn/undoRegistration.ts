@@ -1,7 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { COLLECTION_SCHEMA, DateTimeSlot, Registration } from '../models';
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+
+const log = createFunctionLogger('undoRegistration');
 
 export default async function undoRegistration(
 	request: CallableRequest<Registration>,
@@ -48,8 +51,14 @@ export default async function undoRegistration(
 		await batch.commit();
 		return true;
 	} catch (error) {
-		console.error(
-			`Error updating user document ${uid} with ${JSON.stringify(data)}`,
+		log.error(
+			'Failed to undo registration',
+			{
+				uid,
+				updatedFields: Object.keys(data ?? {}).sort((left, right) =>
+					left.localeCompare(right),
+				),
+			},
 			error,
 		);
 		throw new HttpsError(

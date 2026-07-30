@@ -1,9 +1,12 @@
 import admin from '../firebase-admin';
 import { DateTimeSlot, ScheduleStats } from '../models';
+import { createFunctionLogger } from '../utility/observability';
 import {
 	getStatsDocumentId,
 	PROGRAM_YEAR,
 } from '../utility/runtime-config';
+
+const log = createFunctionLogger('scheduledDateTimeSlotCounters2');
 
 /**
  * This method loads all time slots and updates the reserved spots.
@@ -37,7 +40,11 @@ export default async function scheduledDateTimeSlotCounters(): Promise<string> {
 			dateTime: slot.dateTime,
 			count: registrationCount,
 		});
-		console.log(`Slot ${slot.id} has ${slot.slotsReserved} registrations`);
+		log.info('Evaluated date time slot reservation count', {
+			slotId,
+			registrationCount,
+			previousSlotsReserved: slot.slotsReserved,
+		});
 
 		// No need to update if the count is the same
 		if (registrationCount === slot.slotsReserved) continue;
@@ -56,6 +63,9 @@ export default async function scheduledDateTimeSlotCounters(): Promise<string> {
 
 	// Update the schedule stats
 	await scheduleStatsDoc.set({ ...scheduleStats }, { merge: true });
+	log.info('Updated schedule stats from date time slot counters', {
+		slotCount: dateTimeSlots.length,
+	});
 
 	return 'Updated date time slots';
 }

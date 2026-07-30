@@ -9,6 +9,7 @@ import {
 	ZipCodeCount,
 } from '../models';
 import { normalizeDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
 import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 
 interface RegistrationStatsDocument {
@@ -16,6 +17,8 @@ interface RegistrationStatsDocument {
 	dateTimeCount: DateTimeCount[];
 	zipCodeCount: ZipCodeCount[];
 }
+
+const log = createFunctionLogger('scheduledRegistrationStats');
 
 const toRegistration = (data: Record<string, unknown>): Registration => {
 	return data as Registration;
@@ -66,6 +69,12 @@ export default async function scheduledRegistrationStats(): Promise<void> {
 		.collection('stats')
 		.doc(getStatsDocumentId('registration'))
 		.set(stats, { merge: false });
+
+	log.info('Updated registration stats document', {
+		completedRegistrations,
+		dateTimeBucketCount: stats.dateTimeCount.length,
+		zipCodeBucketCount: stats.zipCodeCount.length,
+	});
 }
 
 function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
@@ -82,9 +91,9 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 			| undefined;
 
 		if (!timestamp) {
-			console.log(
-				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`,
-			);
+			log.warn('Skipping registration without a date time slot in stats job', {
+				uid: registration.uid ?? null,
+			});
 			return;
 		}
 

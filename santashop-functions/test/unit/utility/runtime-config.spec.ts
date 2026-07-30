@@ -4,9 +4,11 @@ import * as path from 'node:path';
 import { createRequire } from 'node:module';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+type EnvironmentMap = Record<string, string | undefined>;
+
 const requireFromTest = createRequire(import.meta.url);
 const realEnvLoader = requireFromTest('../../../../scripts/env-loader.cjs') as {
-	loadEnvFiles: (filePaths: string[], env?: NodeJS.ProcessEnv) => void;
+	loadEnvFiles: (filePaths: string[], env?: EnvironmentMap) => void;
 };
 const originalLoadEnvFiles = realEnvLoader.loadEnvFiles;
 
@@ -106,7 +108,7 @@ const loadRuntimeConfig = async () => {
 	vi.resetModules();
 	realEnvLoader.loadEnvFiles = (
 		filePaths: string[],
-		env?: NodeJS.ProcessEnv,
+		env?: EnvironmentMap,
 	) => {
 		const currentWorkingDirectory = process.cwd();
 		originalLoadEnvFiles(

@@ -6,6 +6,9 @@ import {
 } from '../utility/registrations';
 import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('checkIn');
 
 export default function checkIn(
 	request: CallableRequest<Partial<Registration>>,
@@ -13,9 +16,10 @@ export default function checkIn(
 	const record = request.data;
 
 	if (!request.auth?.token?.admin) {
-		console.error(
-			`${request.auth?.uid} attempted to check in for uid ${record.uid} but is not an admin`,
-		);
+		log.warn('Non-admin attempted to check in a registration', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'-99',
@@ -24,9 +28,9 @@ export default function checkIn(
 	}
 
 	if (!isPartialRegistrationComplete(record)) {
-		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`,
-		);
+		log.warn('Attempted to check in an incomplete registration', {
+			uid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'failed-precondition',
 			'-11',

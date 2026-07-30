@@ -1,5 +1,8 @@
 import admin from '../firebase-admin';
 import { CheckIn } from '../models';
+import { createFunctionLogger } from '../utility/observability';
+
+const log = createFunctionLogger('pubsubMarkRegistrationsCheckedIn');
 
 export default async function pubsubMarkRegistrationsCheckedIn(): Promise<string> {
 	// Load all registrations
@@ -29,7 +32,7 @@ export default async function pubsubMarkRegistrationsCheckedIn(): Promise<string
 		});
 
 		processed += batchCheckins.length;
-		console.info('Processed ', processed);
+		log.info('Processed registration check-in batch', { processed });
 	} while (checkins.length > 0);
 
 	return 'Updated registrations';

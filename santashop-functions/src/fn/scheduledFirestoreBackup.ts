@@ -1,7 +1,10 @@
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { FIRESTORE_BACKUP_BUCKET } from '../utility/runtime-config';
 
 const client = new admin.firestore.v1.FirestoreAdminClient();
+
+const log = createFunctionLogger('scheduledFirestoreBackup');
 
 export default async function scheduledFirestoreBackup(): Promise<void> {
 	const env = process.env as Record<string, string | undefined>;
@@ -19,9 +22,18 @@ export default async function scheduledFirestoreBackup(): Promise<void> {
 			collectionIds: [],
 		});
 		const response = responses[0];
-		console.log(`Operation Name: ${response.name}`);
+		log.info('Started Firestore export operation', {
+			projectId,
+			databaseName,
+			bucket,
+			operationName: response.name,
+		});
 	} catch (error) {
-		console.error(`Error: ${projectId}, ${databaseName}: ${error}`);
+		log.error(
+			'Failed to start Firestore export operation',
+			{ projectId, databaseName, bucket },
+			error,
+		);
 		throw new Error('Export operation failed');
 	}
 }

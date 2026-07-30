@@ -5,6 +5,12 @@ import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { FUNCTION_REGION } from './utility/function-region';
 import {
+	observeCallableHandler,
+	observeDocumentHandler,
+	observePubsubHandler,
+	observeScheduledHandler,
+} from './utility/observability';
+import {
 	SCHEDULED_CHECKIN_STATS,
 	SCHEDULED_DATETIME_SLOT_COUNTERS,
 	SCHEDULED_FIRESTORE_BACKUP,
@@ -26,16 +32,16 @@ setGlobalOptions({ region: FUNCTION_REGION });
 
 export const changeAccountInformation = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('changeAccountInformation', async (request) => {
 		return (await import('./fn/changeAccountInformation')).default(request);
-	},
+	}),
 );
 
 export const updateReferredBy = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('updateReferredBy', async (request) => {
 		return (await import('./fn/updateReferredBy')).default(request);
-	},
+	}),
 );
 
 /**
@@ -48,101 +54,101 @@ export const updateReferredBy = onCall(
  */
 export const completeRegistration = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('completeRegistration', async (request) => {
 		return (await import('./fn/completeRegistration')).default(request);
-	},
+	}),
 );
 
 export const newAccount = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('newAccount', async (request) => {
 		return (await import('./fn/newAccount')).default(request);
-	},
+	}),
 );
 
 export const undoRegistration = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('undoRegistration', async (request) => {
 		return (await import('./fn/undoRegistration')).default(request);
-	},
+	}),
 );
 
 export const changeRegistrationDateTime = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('changeRegistrationDateTime', async (request) => {
 		return (await import('./fn/changeRegistrationDateTime')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const updateEmailAddress = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('updateEmailAddress', async (request) => {
 		return (await import('./fn/updateEmailAddress')).default(request);
-	},
+	}),
 );
 
 export const checkIn = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('checkIn', async (request) => {
 		return (await import('./fn/checkIn')).default(request);
-	},
+	}),
 );
 
 export const checkInWithEdit = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('checkInWithEdit', async (request) => {
 		return (await import('./fn/checkInWithEdit')).default(request);
-	},
+	}),
 );
 
 export const onSiteRegistration = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('onSiteRegistration', async (request) => {
 		return (await import('./fn/onSiteRegistration')).default(request);
-	},
+	}),
 );
 
 export const callableAdminPreRegister = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableAdminPreRegister', async (request) => {
 		return (await import('./fn/callableAdminPreRegister')).default(request);
-	},
+	}),
 );
 
 export const callableResendRegistrationEmail = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK, maxInstances: 2, memory: '128MiB' },
-	async (request) => {
+	observeCallableHandler('callableResendRegistrationEmail', async (request) => {
 		return (await import('./fn/callableResendRegistrationEmail')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const callableListEmailTemplates = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableListEmailTemplates', async (request) => {
 		return (await import('./fn/callableListEmailTemplates')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const callableGetEmailTemplate = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableGetEmailTemplate', async (request) => {
 		return (await import('./fn/callableGetEmailTemplate')).default(request);
-	},
+	}),
 );
 
 export const callableGetEmailTemplateRevision = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableGetEmailTemplateRevision', async (request) => {
 		return (await import('./fn/callableGetEmailTemplateRevision')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const callableSaveEmailTemplateRevision = onCall(
@@ -151,11 +157,11 @@ export const callableSaveEmailTemplateRevision = onCall(
 		timeoutSeconds: 60,
 		memory: '256MiB',
 	},
-	async (request) => {
+	observeCallableHandler('callableSaveEmailTemplateRevision', async (request) => {
 		return (await import('./fn/callableSaveEmailTemplateRevision')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const callablePublishEmailTemplate = onCall(
@@ -165,11 +171,11 @@ export const callablePublishEmailTemplate = onCall(
 		timeoutSeconds: 60,
 		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
 	},
-	async (request) => {
+	observeCallableHandler('callablePublishEmailTemplate', async (request) => {
 		return (await import('./fn/callablePublishEmailTemplate')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const callableSendTestEmailTemplate = onCall(
@@ -179,32 +185,32 @@ export const callableSendTestEmailTemplate = onCall(
 		timeoutSeconds: 60,
 		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
 	},
-	async (request) => {
+	observeCallableHandler('callableSendTestEmailTemplate', async (request) => {
 		return (await import('./fn/callableSendTestEmailTemplate')).default(
 			request,
 		);
-	},
+	}),
 );
 
 export const callableCreateStaffUser = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableCreateStaffUser', async (request) => {
 		return (await import('./fn/callableCreateStaffUser')).default(request);
-	},
+	}),
 );
 
 export const callableUpdateStaffUser = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableUpdateStaffUser', async (request) => {
 		return (await import('./fn/callableUpdateStaffUser')).default(request);
-	},
+	}),
 );
 
 export const callableDeleteStaffUser = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	async (request) => {
+	observeCallableHandler('callableDeleteStaffUser', async (request) => {
 		return (await import('./fn/callableDeleteStaffUser')).default(request);
-	},
+	}),
 );
 
 // ------------------------------------- TRIGGER FUNCTIONS
@@ -216,7 +222,7 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 		retry: true,
 		maxInstances: 1,
 	},
-	async (event) => {
+	observeDocumentHandler('sendNewRegistrationEmails', async (event) => {
 		if (!event.data) {
 			return;
 		}
@@ -224,7 +230,7 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 		await (
 			await import('./fn/sendNewRegistrationEmails2')
 		).default(event.data);
-	},
+	}),
 );
 
 // ------------------------------------- SCHEDULED FUNCTIONS
@@ -240,9 +246,9 @@ export const scheduledFirestoreBackup = onSchedule(
 		timeoutSeconds: 240,
 		maxInstances: 1,
 	},
-	async () => {
+	observeScheduledHandler('scheduledFirestoreBackup', async () => {
 		await (await import('./fn/scheduledFirestoreBackup')).default();
-	},
+	}),
 );
 
 // At every 15th minute in November and December.
@@ -253,9 +259,9 @@ export const scheduledDateTimeSlotCounters = onSchedule(
 		timeoutSeconds: 30,
 		maxInstances: 1,
 	},
-	async () => {
+	observeScheduledHandler('scheduledDateTimeSlotCounters', async () => {
 		await (await import('./fn/scheduledDateTimeSlotCounters2')).default();
-	},
+	}),
 );
 
 // “At 23:59.” (11:59 PM) every day.
@@ -267,9 +273,9 @@ export const scheduledRegistrationStats = onSchedule(
 		timeoutSeconds: 240,
 		maxInstances: 1,
 	},
-	async () => {
+	observeScheduledHandler('scheduledRegistrationStats', async () => {
 		await (await import('./fn/scheduledRegistrationStats')).default();
-	},
+	}),
 );
 
 // “At 23:55.” (11:55 PM) every day in November and December.
@@ -281,9 +287,9 @@ export const scheduledUserStats = onSchedule(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observeScheduledHandler('scheduledUserStats', async () => {
 		await (await import('./fn/scheduledUserStats')).default();
-	},
+	}),
 );
 
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
@@ -295,9 +301,9 @@ export const scheduledCheckInStats = onSchedule(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observeScheduledHandler('scheduledCheckInStats', async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
-	},
+	}),
 );
 
 // ------------------------------------- PUBSUB FUNCTIONS
@@ -308,9 +314,9 @@ export const pubsubResetCheckInStats = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubResetCheckInStats', async () => {
 		await (await import('./fn/pubsubResetCheckInStats')).default();
-	},
+	}),
 );
 
 export const pubsubQueueReminderEmails = onMessagePublished(
@@ -320,9 +326,9 @@ export const pubsubQueueReminderEmails = onMessagePublished(
 		timeoutSeconds: 540,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubQueueReminderEmails', async () => {
 		await (await import('./fn/pubsubQueueReminderEmails')).default();
-	},
+	}),
 );
 
 export const pubsubSetAdminRights = onMessagePublished(
@@ -332,9 +338,9 @@ export const pubsubSetAdminRights = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubSetAdminRights', async () => {
 		await (await import('./fn/pubsubSetAdminRights')).default();
-	},
+	}),
 );
 
 export const pubsubMarkRegistrationsCheckedIn = onMessagePublished(
@@ -344,9 +350,9 @@ export const pubsubMarkRegistrationsCheckedIn = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubMarkRegistrationsCheckedIn', async () => {
 		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
-	},
+	}),
 );
 
 export const pubsubExportMarketingEmails = onMessagePublished(
@@ -356,9 +362,9 @@ export const pubsubExportMarketingEmails = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubExportMarketingEmails', async () => {
 		await (await import('./fn/pubsubExportMarketingEmails')).default();
-	},
+	}),
 );
 
 export const pubsubExportRegisteredEmails = onMessagePublished(
@@ -368,9 +374,9 @@ export const pubsubExportRegisteredEmails = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubExportRegisteredEmails', async () => {
 		await (await import('./fn/pubsubExportRegisteredEmails')).default();
-	},
+	}),
 );
 
 // This method checks for existing dates/times.
@@ -382,9 +388,9 @@ export const pubsubAddDateTimeSlots = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubAddDateTimeSlots', async () => {
 		await (await import('./fn/pubsubAddDateTimeSlots')).default();
-	},
+	}),
 );
 
 // Deletes all users except for disabled accounts
@@ -395,9 +401,9 @@ export const pubsubDeleteUsers = onMessagePublished(
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
-	async () => {
+	observePubsubHandler('pubsubDeleteUsers', async () => {
 		await (await import('./fn/pubsubDeleteUsers')).default();
-	},
+	}),
 );
 
 // ------------------------------------- TEST HELPER FUNCTIONS (Emulator Only)
@@ -423,7 +429,7 @@ const assertEmulatorOnly = (): void => {
  */
 export const testSeedScenario = onCall(
 	{ enforceAppCheck: false },
-	async (request) => {
+	observeCallableHandler('testSeedScenario', async (request) => {
 		assertEmulatorOnly();
 
 		const { seedTestScenario } = await import('./fn/testHelpers');
@@ -437,7 +443,7 @@ export const testSeedScenario = onCall(
 
 		await seedTestScenario(scenario);
 		return { success: true };
-	},
+	}),
 );
 
 /**
@@ -446,7 +452,7 @@ export const testSeedScenario = onCall(
  */
 export const testSeedPublicParameters = onCall(
 	{ enforceAppCheck: false },
-	async (request) => {
+	observeCallableHandler('testSeedPublicParameters', async (request) => {
 		assertEmulatorOnly();
 
 		const { seedPublicParameters } = await import('./fn/testHelpers');
@@ -457,20 +463,23 @@ export const testSeedPublicParameters = onCall(
 		);
 
 		return { success: true };
-	},
+	}),
 );
 
 /**
  * Clears all test data from Firestore and Auth.
  * Emulator only.
  */
-export const testClearAllData = onCall({ enforceAppCheck: false }, async () => {
-	assertEmulatorOnly();
+export const testClearAllData = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testClearAllData', async () => {
+		assertEmulatorOnly();
 
-	const { clearAllData } = await import('./fn/testHelpers');
-	await clearAllData();
-	return { success: true };
-});
+		const { clearAllData } = await import('./fn/testHelpers');
+		await clearAllData();
+		return { success: true };
+	}),
+);
 
 /**
  * Seeds an admin auth user with custom admin claims.
@@ -478,7 +487,7 @@ export const testClearAllData = onCall({ enforceAppCheck: false }, async () => {
  */
 export const testSeedAdminUser = onCall(
 	{ enforceAppCheck: false },
-	async (request) => {
+	observeCallableHandler('testSeedAdminUser', async (request) => {
 		assertEmulatorOnly();
 
 		const { seedAdminUser } = await import('./fn/testHelpers');
@@ -517,7 +526,7 @@ export const testSeedAdminUser = onCall(
 			uid,
 			admin: adminClaim,
 		});
-	},
+	}),
 );
 
 /**
@@ -526,7 +535,7 @@ export const testSeedAdminUser = onCall(
  */
 export const testSeedDateTimeSlots = onCall(
 	{ enforceAppCheck: false },
-	async (request) => {
+	observeCallableHandler('testSeedDateTimeSlots', async (request) => {
 		assertEmulatorOnly();
 
 		const { seedDateTimeSlots } = await import('./fn/testHelpers');
@@ -547,5 +556,5 @@ export const testSeedDateTimeSlots = onCall(
 			: [];
 
 		return seedDateTimeSlots(slots);
-	},
+	}),
 );

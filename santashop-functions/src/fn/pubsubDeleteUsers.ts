@@ -1,8 +1,11 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
 import { ADMIN_UIDS } from '../utility/runtime-config';
 
 const PROTECTED_UIDS = new Set<string>(ADMIN_UIDS);
+
+const log = createFunctionLogger('pubsubDeleteUsers');
 
 const isElevatedUser = (user: {
 	uid: string;
@@ -54,10 +57,16 @@ export default async function pubsubDeleteUsers(): Promise<void> {
 
 	return deleteAllUsers()
 		.then(() => {
-			console.log('Deleted all users');
+			log.info('Completed bulk user deletion run', {
+				pageIterations: count,
+			});
 		})
 		.catch((error) => {
-			console.error('Error deleting all users', error);
+			log.error(
+				'Failed during bulk user deletion run',
+				{ pageIterations: count },
+				error,
+			);
 			throw new HttpsError(
 				'internal',
 				'Unable to delete all users',

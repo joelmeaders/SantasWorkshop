@@ -6,7 +6,10 @@ import {
 } from '../utility/registrations';
 import admin from '../firebase-admin';
 import { getErrorMessage, getErrorStatus } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
+
+const log = createFunctionLogger('onSiteRegistration');
 
 export default async function onSiteRegistration(
 	request: CallableRequest<Registration>,
@@ -14,9 +17,10 @@ export default async function onSiteRegistration(
 	const record = request.data;
 
 	if (!request.auth?.token?.admin) {
-		console.error(
-			`${request.auth?.uid} attempted to check in for uid ${record.uid}`,
-		);
+		log.warn('Non-admin attempted an on-site registration', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'-99',
@@ -25,9 +29,9 @@ export default async function onSiteRegistration(
 	}
 
 	if (!isRegistrationComplete(record)) {
-		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`,
-		);
+		log.warn('Attempted on-site registration with incomplete data', {
+			uid: record.uid ?? null,
+		});
 		throw new HttpsError(
 			'failed-precondition',
 

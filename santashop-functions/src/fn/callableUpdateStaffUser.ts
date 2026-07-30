@@ -6,6 +6,7 @@ import {
 } from '../models';
 import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage, serializeError } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 import { ADMIN_UIDS } from '../utility/runtime-config';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
@@ -20,6 +21,8 @@ const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
 	return token?.['admin'] === true;
 };
+
+const log = createFunctionLogger('callableUpdateStaffUser');
 
 const VALID_ROLES = new Set<StaffRole>(['admin', 'checkin']);
 const PROTECTED_UIDS = new Set<string>(ADMIN_UIDS);
@@ -149,9 +152,10 @@ export default async function callableUpdateStaffUser(
 	request: CallableRequest<UpdateStaffUser>,
 ): Promise<void> {
 	if (!isAdminContext(request)) {
-		console.error(
-			`${request.auth?.uid} attempted to update a staff account`,
-		);
+		log.warn('Non-admin attempted to update a staff account', {
+			actorUid: request.auth?.uid ?? null,
+			targetStaffUid: request.data?.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'You do not have permission to manage staff accounts',
@@ -174,9 +178,10 @@ export default async function callableUpdateStaffUser(
 	try {
 		await persistStaffChanges(uid, authUpdate, roles);
 	} catch (error) {
-		console.error(
-			`Error updating staff account ${uid}`,
-			new Error(serializeError(error)),
+		log.error(
+			'Failed to update staff account',
+			{ uid },
+			error,
 		);
 
 		if (getErrorCode(error) === 'auth/email-already-exists') {

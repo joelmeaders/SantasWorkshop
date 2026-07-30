@@ -7,6 +7,7 @@ import {
 } from '../models';
 import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage, serializeError } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
 
@@ -14,6 +15,8 @@ const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
 	return token?.['admin'] === true;
 };
+
+const log = createFunctionLogger('callableCreateStaffUser');
 
 const VALID_ROLES = new Set<StaffRole>(['admin', 'checkin']);
 
@@ -73,9 +76,9 @@ export default async function callableCreateStaffUser(
 	request: CallableRequest<CreateStaffUser>,
 ): Promise<string> {
 	if (!isAdminContext(request)) {
-		console.error(
-			`${request.auth?.uid} attempted to create a staff account`,
-		);
+		log.warn('Non-admin attempted to create a staff account', {
+			actorUid: request.auth?.uid ?? null,
+		});
 		throw new HttpsError(
 			'permission-denied',
 			'You do not have permission to manage staff accounts',
@@ -126,7 +129,11 @@ export default async function callableCreateStaffUser(
 			displayName,
 		});
 	} catch (error) {
-		console.error(`${emailAddress}`, new Error(serializeError(error)));
+		log.error(
+			'Failed to create auth user for staff account',
+			{ emailAddress },
+			error,
+		);
 		handleAuthError(error);
 	}
 
@@ -153,9 +160,10 @@ export default async function callableCreateStaffUser(
 			.set(staffAccount);
 	} catch (error) {
 		await admin.auth().deleteUser(newUserAccount.uid);
-		console.error(
-			`Error finalizing staff account ${emailAddress}`,
-			new Error(serializeError(error)),
+		log.error(
+			'Failed to finalize staff account',
+			{ uid: newUserAccount.uid, emailAddress },
+			error,
 		);
 		throw new HttpsError(
 			'internal',

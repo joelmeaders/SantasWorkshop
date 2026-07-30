@@ -29,10 +29,13 @@ import {
 	resolvePublishedEmailTemplate,
 } from '../utility/email-templates';
 import { serializeError } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
 import {
 	normalizeDateTime,
 	type DateTimeValue,
 } from '../utility/date-time-format';
+
+const log = createFunctionLogger('sendNewRegistrationEmails2');
 
 const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -152,7 +155,7 @@ const isStaleSendingDocument = (
 };
 
 const repairRegistrationStatus = async (
-	registrationDocRef: FirestoreDocumentReferenceLike,
+	registrationDocRef: DocumentReference,
 	registration: Registration | undefined,
 	document: QueuedRegistrationEmailDocument,
 ): Promise<void> => {
@@ -317,9 +320,12 @@ const resolveEmailPayload = (
 		!document.email ||
 		!document.formattedDateTime
 	) {
-		console.warn(
-			`Skipping registration email for ${triggeredSnapshot.id} because the queued document is incomplete.`,
-		);
+		log.warn('Skipping incomplete queued registration email document', {
+			uid: triggeredSnapshot.id,
+			documentKeys: Object.keys(document).sort((left, right) =>
+				left.localeCompare(right),
+			),
+		});
 		return undefined;
 	}
 
@@ -486,10 +492,23 @@ export default async function sendNewRegistrationEmails2(
 	try {
 		response = await sesClient.send(sendReminderEmailCommand);
 		const sentOn = new Date();
-		console.log('Successfully sent template email', response);
+		log.info('Successfully sent queued registration email', {
+			uid: payload.uid,
+			templateName: resolvedTemplate.templateName,
+			templateKey: payload.templateKey ?? null,
+			httpStatusCode: response.$metadata?.httpStatusCode,
+		});
 		await persistSuccessfulDelivery(context, queuedOn, sentOn);
 	} catch (err) {
-		console.log('Failed to send template email', err);
+		log.error(
+			'Failed to send queued registration email',
+			{
+				uid: payload.uid,
+				templateName: resolvedTemplate.templateName,
+				templateKey: payload.templateKey ?? null,
+			},
+			err,
+		);
 		await persistFailedDelivery(context, queuedOn, response, err);
 	}
 }

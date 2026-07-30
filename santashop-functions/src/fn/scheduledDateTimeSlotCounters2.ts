@@ -1,10 +1,7 @@
 import admin from '../firebase-admin';
 import { DateTimeSlot, ScheduleStats } from '../models';
 import { createFunctionLogger } from '../utility/observability';
-import {
-	getStatsDocumentId,
-	PROGRAM_YEAR,
-} from '../utility/runtime-config';
+import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 
 const log = createFunctionLogger('scheduledDateTimeSlotCounters2');
 

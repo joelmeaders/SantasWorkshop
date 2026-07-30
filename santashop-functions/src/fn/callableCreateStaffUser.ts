@@ -6,7 +6,11 @@ import {
 	StaffRole,
 } from '../models';
 import admin from '../firebase-admin';
-import { getErrorCode, getErrorMessage, serializeError } from '../utility/errors';
+import {
+	getErrorCode,
+	getErrorMessage,
+	serializeError,
+} from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
@@ -47,7 +51,9 @@ const normalizeEmailAddress = (emailAddress: string | undefined): string => {
 	const hasWhitespace =
 		normalized === undefined
 			? true
-			: [...normalized].some((character) => character.trim().length === 0);
+			: [...normalized].some(
+					(character) => character.trim().length === 0,
+				);
 	const [localPart, domainPart, ...extraParts] = normalized?.split('@') ?? [];
 	const hasValidDomain =
 		domainPart !== undefined &&
@@ -184,5 +190,9 @@ const handleAuthError = (error: unknown): never => {
 		);
 	}
 
-	throw new HttpsError('unknown', getErrorCode(error), getErrorMessage(error));
+	throw new HttpsError(
+		'unknown',
+		getErrorCode(error),
+		getErrorMessage(error),
+	);
 };

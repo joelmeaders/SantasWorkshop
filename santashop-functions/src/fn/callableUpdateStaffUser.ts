@@ -1,11 +1,11 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import {
-	COLLECTION_SCHEMA,
-	StaffRole,
-	UpdateStaffUser,
-} from '../models';
+import { COLLECTION_SCHEMA, StaffRole, UpdateStaffUser } from '../models';
 import admin from '../firebase-admin';
-import { getErrorCode, getErrorMessage, serializeError } from '../utility/errors';
+import {
+	getErrorCode,
+	getErrorMessage,
+	serializeError,
+} from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { ADMIN_UIDS } from '../utility/runtime-config';
 
@@ -141,10 +141,7 @@ const assertStaffAccountExists = async (uid: string): Promise<void> => {
 		.get();
 
 	if (!snapshot.exists) {
-		throw new HttpsError(
-			'not-found',
-			'Staff account not found',
-		);
+		throw new HttpsError('not-found', 'Staff account not found');
 	}
 };
 
@@ -166,7 +163,10 @@ export default async function callableUpdateStaffUser(
 	const uid = data?.uid;
 
 	if (!uid) {
-		throw new HttpsError('invalid-argument', 'A staff account uid is required');
+		throw new HttpsError(
+			'invalid-argument',
+			'A staff account uid is required',
+		);
 	}
 
 	await assertStaffAccountExists(uid);
@@ -178,11 +178,7 @@ export default async function callableUpdateStaffUser(
 	try {
 		await persistStaffChanges(uid, authUpdate, roles);
 	} catch (error) {
-		log.error(
-			'Failed to update staff account',
-			{ uid },
-			error,
-		);
+		log.error('Failed to update staff account', { uid }, error);
 
 		if (getErrorCode(error) === 'auth/email-already-exists') {
 			throw new HttpsError(

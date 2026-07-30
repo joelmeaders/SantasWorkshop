@@ -91,9 +91,12 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 			| undefined;
 
 		if (!timestamp) {
-			log.warn('Skipping registration without a date time slot in stats job', {
-				uid: registration.uid ?? null,
-			});
+			log.warn(
+				'Skipping registration without a date time slot in stats job',
+				{
+					uid: registration.uid ?? null,
+				},
+			);
 			return;
 		}
 

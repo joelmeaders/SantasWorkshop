@@ -129,9 +129,7 @@ const buildPubsubMetadata = (event: unknown): StructuredLogMetadata => {
 	});
 };
 
-const buildErrorMetadata = (
-	error: unknown,
-): StructuredLogMetadata => {
+const buildErrorMetadata = (error: unknown): StructuredLogMetadata => {
 	return compactMetadata({
 		errorCode: getErrorCode(error),
 		errorMessage: getErrorMessage(error),
@@ -162,7 +160,7 @@ const writeLog = (
 			logger.error(message, metadata);
 			return;
 	}
-	};
+};
 
 export const createFunctionLogger = (functionName: string): FunctionLogger => {
 	const logWithLevel = (
@@ -244,14 +242,24 @@ export const observeDocumentHandler = <TEvent, TResult>(
 	functionName: string,
 	handler: AsyncHandler<TEvent, TResult>,
 ): AsyncHandler<TEvent, TResult> => {
-	return observeHandler(functionName, 'firestore', buildFirestoreMetadata, handler);
+	return observeHandler(
+		functionName,
+		'firestore',
+		buildFirestoreMetadata,
+		handler,
+	);
 };
 
 export const observeScheduledHandler = <TEvent, TResult>(
 	functionName: string,
 	handler: AsyncHandler<TEvent, TResult>,
 ): AsyncHandler<TEvent, TResult> => {
-	return observeHandler(functionName, 'scheduled', buildScheduledMetadata, handler);
+	return observeHandler(
+		functionName,
+		'scheduled',
+		buildScheduledMetadata,
+		handler,
+	);
 };
 
 export const observePubsubHandler = <TEvent, TResult>(

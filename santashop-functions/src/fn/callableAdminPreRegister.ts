@@ -143,8 +143,7 @@ export default async function callableAdminPreRegister(
 				email: emailAddress,
 				name: firstName,
 				formattedDateTime: createdRegistration.formattedDateTime,
-				templateKey:
-					EMAIL_TEMPLATE_KEYS.registrationConfirmation,
+				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 				queuedOn: finalizedOn,
 				queueSource: 'admin-preregistration',
 				deliveryRequestedOn: finalizedOn,

@@ -465,7 +465,9 @@ export default async function sendNewRegistrationEmails2(
 	const resolvedTemplate = await resolvePublishedEmailTemplate(
 		{
 			...(payload.template ? { template: payload.template } : {}),
-			...(payload.templateKey ? { templateKey: payload.templateKey } : {}),
+			...(payload.templateKey
+				? { templateKey: payload.templateKey }
+				: {}),
 		},
 		REGISTRATION_EMAIL_TEMPLATE,
 	);

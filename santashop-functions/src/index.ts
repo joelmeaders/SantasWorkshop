@@ -119,11 +119,14 @@ export const callableAdminPreRegister = onCall(
 
 export const callableResendRegistrationEmail = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK, maxInstances: 2, memory: '128MiB' },
-	observeCallableHandler('callableResendRegistrationEmail', async (request) => {
-		return (await import('./fn/callableResendRegistrationEmail')).default(
-			request,
-		);
-	}),
+	observeCallableHandler(
+		'callableResendRegistrationEmail',
+		async (request) => {
+			return (
+				await import('./fn/callableResendRegistrationEmail')
+			).default(request);
+		},
+	),
 );
 
 export const callableListEmailTemplates = onCall(
@@ -144,11 +147,14 @@ export const callableGetEmailTemplate = onCall(
 
 export const callableGetEmailTemplateRevision = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
-	observeCallableHandler('callableGetEmailTemplateRevision', async (request) => {
-		return (await import('./fn/callableGetEmailTemplateRevision')).default(
-			request,
-		);
-	}),
+	observeCallableHandler(
+		'callableGetEmailTemplateRevision',
+		async (request) => {
+			return (
+				await import('./fn/callableGetEmailTemplateRevision')
+			).default(request);
+		},
+	),
 );
 
 export const callableSaveEmailTemplateRevision = onCall(
@@ -157,11 +163,14 @@ export const callableSaveEmailTemplateRevision = onCall(
 		timeoutSeconds: 60,
 		memory: '256MiB',
 	},
-	observeCallableHandler('callableSaveEmailTemplateRevision', async (request) => {
-		return (await import('./fn/callableSaveEmailTemplateRevision')).default(
-			request,
-		);
-	}),
+	observeCallableHandler(
+		'callableSaveEmailTemplateRevision',
+		async (request) => {
+			return (
+				await import('./fn/callableSaveEmailTemplateRevision')
+			).default(request);
+		},
+	),
 );
 
 export const callablePublishEmailTemplate = onCall(

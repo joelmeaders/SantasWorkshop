@@ -34,7 +34,11 @@ describe('observability utility', () => {
 		const log = createFunctionLogger('winterTelemetry');
 		const error = new Error('Snowstorm');
 
-		log.error('Something drifted off the sleigh rails', { uid: 'elf-1' }, error);
+		log.error(
+			'Something drifted off the sleigh rails',
+			{ uid: 'elf-1' },
+			error,
+		);
 
 		expect(errorMock).toHaveBeenCalledWith(
 			'Something drifted off the sleigh rails',
@@ -86,13 +90,16 @@ describe('observability utility', () => {
 	});
 
 	it('logs callable failures and rethrows the original error', async () => {
-		const handler = observeCallableHandler('callableFailureTest', async () => {
-			throw new Error('No cocoa left');
-		});
-
-		await expect(handler({ auth: null, data: null } as never)).rejects.toThrow(
-			'No cocoa left',
+		const handler = observeCallableHandler(
+			'callableFailureTest',
+			async () => {
+				throw new Error('No cocoa left');
+			},
 		);
+
+		await expect(
+			handler({ auth: null, data: null } as never),
+		).rejects.toThrow('No cocoa left');
 
 		expect(errorMock).toHaveBeenCalledWith(
 			'Function invocation failed',
@@ -106,7 +113,10 @@ describe('observability utility', () => {
 	});
 
 	it('logs firestore trigger metadata from the document snapshot context', async () => {
-		const handler = observeDocumentHandler('firestoreAudit', async () => undefined);
+		const handler = observeDocumentHandler(
+			'firestoreAudit',
+			async () => undefined,
+		);
 
 		await handler({
 			id: 'evt-1',

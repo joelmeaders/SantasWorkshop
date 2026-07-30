@@ -23,10 +23,7 @@ const assertStaffAccountExists = async (uid: string): Promise<void> => {
 		.get();
 
 	if (!snapshot.exists) {
-		throw new HttpsError(
-			'not-found',
-			'Staff account not found',
-		);
+		throw new HttpsError('not-found', 'Staff account not found');
 	}
 };
 
@@ -47,7 +44,10 @@ export default async function callableDeleteStaffUser(
 	const uid = request.data?.uid;
 
 	if (!uid) {
-		throw new HttpsError('invalid-argument', 'A staff account uid is required');
+		throw new HttpsError(
+			'invalid-argument',
+			'A staff account uid is required',
+		);
 	}
 
 	await assertStaffAccountExists(uid);
@@ -73,11 +73,7 @@ export default async function callableDeleteStaffUser(
 			.doc(`${COLLECTION_SCHEMA.staff}/${uid}`)
 			.delete();
 	} catch (error) {
-		log.error(
-			'Failed to delete staff account',
-			{ uid },
-			error,
-		);
+		log.error('Failed to delete staff account', { uid }, error);
 		throw new HttpsError(
 			'internal',
 			'Unable to delete staff account',

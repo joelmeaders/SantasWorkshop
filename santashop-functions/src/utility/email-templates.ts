@@ -44,8 +44,7 @@ const escapeRegExp = (value: string): string =>
 	value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 const FALLBACK_TEMPLATE_NAMES: Readonly<Record<string, string>> = {
-	[EMAIL_TEMPLATE_KEYS.registrationConfirmation]:
-		REGISTRATION_EMAIL_TEMPLATE,
+	[EMAIL_TEMPLATE_KEYS.registrationConfirmation]: REGISTRATION_EMAIL_TEMPLATE,
 	[EMAIL_TEMPLATE_KEYS.eventReminder]: REMINDER_EMAIL_TEMPLATE,
 };
 
@@ -56,9 +55,8 @@ const DELIVERY_PROFILE_VALUES = new Set<string>(
 export const getEmailTemplateDocPath = (key: string): string =>
 	`${COLLECTION_SCHEMA.emailTemplates}/${key}`;
 
-export const getEmailTemplateRevisionCollectionPath = (
-	key: string,
-): string => `${getEmailTemplateDocPath(key)}/revisions`;
+export const getEmailTemplateRevisionCollectionPath = (key: string): string =>
+	`${getEmailTemplateDocPath(key)}/revisions`;
 
 export const getEmailTemplateRevisionDocPath = (
 	key: string,
@@ -68,7 +66,8 @@ export const getEmailTemplateRevisionDocPath = (
 export const getEmailTemplateRevisionStoragePath = (
 	key: string,
 	revisionId: string,
-): string => `${EMAIL_TEMPLATE_STORAGE_ROOT}/${key}/revisions/${revisionId}.html`;
+): string =>
+	`${EMAIL_TEMPLATE_STORAGE_ROOT}/${key}/revisions/${revisionId}.html`;
 
 export const normalizeEmailTemplateKey = (value: string): string => {
 	const normalized = value.trim().toLowerCase();
@@ -155,9 +154,7 @@ export const extractHandlebarsFieldNames = (
 export const hasImplicitQrCodePlaceholder = (html: string): boolean =>
 	html.includes('{{qrCodeUrl}}') ||
 	html.includes('*|QRCODE_URL|*') ||
-	/<img\b[^>]*(?:alt|title)\s*=\s*['"][^'"]*qr[^'"]*['"][^>]*>/i.test(
-		html,
-	);
+	/<img\b[^>]*(?:alt|title)\s*=\s*['"][^'"]*qr[^'"]*['"][^>]*>/i.test(html);
 
 const getValueAtPath = (
 	target: Record<string, unknown>,
@@ -240,9 +237,8 @@ export const renderTemplateWithFieldValues = (
 	template: string,
 	fieldMappings: EmailTemplateFieldDefinition[],
 ): string => {
-	const templateData = buildDirectTemplateDataFromFieldDefinitions(
-		fieldMappings,
-	);
+	const templateData =
+		buildDirectTemplateDataFromFieldDefinitions(fieldMappings);
 	let renderedTemplate = template;
 
 	for (const fieldName of extractHandlebarsFieldNames(template)) {
@@ -305,7 +301,11 @@ export const validateEmailTemplateFieldMappings = (
 export const readEmailTemplateHtml = async (
 	storagePath: string,
 ): Promise<string> => {
-	const [buffer] = await admin.storage().bucket().file(storagePath).download();
+	const [buffer] = await admin
+		.storage()
+		.bucket()
+		.file(storagePath)
+		.download();
 	return buffer.toString('utf-8');
 };
 

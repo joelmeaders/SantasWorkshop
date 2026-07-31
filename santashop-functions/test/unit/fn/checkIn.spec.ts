@@ -22,16 +22,19 @@ describe('checkIn handler', () => {
 	it('rejects non-admin callers', async () => {
 		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
 
-		expect(() =>
+		await expect(
 			checkIn(
 				createCallableRequest(createRegistration(), { admin: false }),
 			),
-		).toThrowError();
+		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
 
 	it('creates a check-in record and returns the child count', async () => {
 		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
 		const checkinDoc = adminMock.getDocRef('checkins/test-user-123');
+		adminMock.setDocSnapshot('registrations/test-user-123', {
+			uid: 'test-user-123',
+		});
 		checkinDoc.create.mockResolvedValue(undefined);
 
 		const result = await checkIn(
@@ -39,6 +42,14 @@ describe('checkIn handler', () => {
 		);
 
 		expect(result).toBe(1);
-		expect(checkinDoc.create).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
+			checkinDoc,
+			expect.objectContaining({ customerId: 'test-user-123' }),
+		);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			adminMock.getDocRef('registrations/test-user-123'),
+			{ hasCheckedIn: true },
+			{ merge: true },
+		);
 	});
 });

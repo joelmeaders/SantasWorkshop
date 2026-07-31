@@ -21,13 +21,21 @@ describe('checkInWithEdit handler', () => {
 
 	it('creates edited registration and check-in records', async () => {
 		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.setDocSnapshot('registrations/test-user-123', {
+			uid: 'test-user-123',
+		});
 
 		const result = await checkInWithEdit(
 			createCallableRequest(createRegistration(), { admin: true }),
 		);
 
 		expect(result).toBe(1);
-		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			adminMock.getDocRef('registrations/test-user-123'),
+			{ hasCheckedIn: true },
+			{ merge: true },
+		);
 		expect(adminMock.doc).toHaveBeenCalledWith(
 			'editedregistrations/test-user-123',
 		);

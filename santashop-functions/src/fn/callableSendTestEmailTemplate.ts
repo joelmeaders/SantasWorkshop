@@ -28,6 +28,7 @@ import {
 	requireTrimmedString,
 	withCallableValidation,
 } from '../utility/callable-validation';
+import { isAdminToken } from '../utility/capabilities';
 
 const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -37,7 +38,7 @@ const credentials = {
 let sesClient: SESClient | undefined;
 
 const assertAdmin = (request: CallableRequest<unknown>): void => {
-	if (request.auth?.token?.['admin'] !== true) {
+	if (!isAdminToken(request.auth?.token)) {
 		throw new HttpsError(
 			'permission-denied',
 			'Only admins can send test email templates.',

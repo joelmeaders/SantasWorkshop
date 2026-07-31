@@ -2,6 +2,7 @@
 
 <ion-content class="ion-padding-horizontal">
 	<main class="limited-container">
+		@let owner = (isOwner$ | async) === true;
 		@if (staffAccounts$ | async; as accounts) {
 			@if (accounts.length === 0) {
 				<ion-note class="empty-note" color="medium">
@@ -33,6 +34,7 @@
 							<ion-button
 								fill="clear"
 								title="Edit user"
+								[disabled]="!canManage(account, owner)"
 								(click)="editUser(account)"
 								(keydown.enter)="editUser(account)"
 							>
@@ -44,6 +46,7 @@
 							<ion-button
 								fill="clear"
 								title="Reset password"
+								[disabled]="!canManage(account, owner)"
 								(click)="resetPassword(account)"
 								(keydown.enter)="resetPassword(account)"
 							>
@@ -56,6 +59,7 @@
 								fill="clear"
 								color="danger"
 								title="Delete user"
+								[disabled]="!canManage(account, owner)"
 								(click)="deleteUser(account)"
 								(keydown.enter)="deleteUser(account)"
 							>

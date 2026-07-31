@@ -5,7 +5,7 @@ const setGlobalOptionsMock = vi.fn();
 const onCallMock = vi.fn();
 const onDocumentCreatedMock = vi.fn();
 const onScheduleMock = vi.fn();
-const onMessagePublishedMock = vi.fn();
+const onTaskDispatchedMock = vi.fn();
 const sendNewRegistrationEmailsMock = vi.fn();
 const originalFunctionsEmulator = process.env.FUNCTIONS_EMULATOR;
 const originalSendEmailsFromEmulator =
@@ -28,8 +28,8 @@ vi.mock('firebase-functions/v2/scheduler', () => ({
 	onSchedule: onScheduleMock,
 }));
 
-vi.mock('firebase-functions/v2/pubsub', () => ({
-	onMessagePublished: onMessagePublishedMock,
+vi.mock('firebase-functions/v2/tasks', () => ({
+	onTaskDispatched: onTaskDispatchedMock,
 }));
 
 vi.mock('../../src/fn/sendNewRegistrationEmails2', () => ({
@@ -42,7 +42,7 @@ describe('functions index exports', () => {
 		onCallMock.mockClear();
 		onDocumentCreatedMock.mockClear();
 		onScheduleMock.mockClear();
-		onMessagePublishedMock.mockClear();
+		onTaskDispatchedMock.mockClear();
 		sendNewRegistrationEmailsMock.mockClear();
 		vi.resetModules();
 
@@ -58,7 +58,7 @@ describe('functions index exports', () => {
 			options,
 			handler,
 		}));
-		onMessagePublishedMock.mockImplementation((options, handler) => ({
+		onTaskDispatchedMock.mockImplementation((options, handler) => ({
 			options,
 			handler,
 		}));

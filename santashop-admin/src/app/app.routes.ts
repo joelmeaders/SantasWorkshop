@@ -21,7 +21,9 @@ const redirectLoggedInToAdminGuard: CanActivateFn = () => {
 					const roles =
 						(claims['roles'] as string[] | undefined) ?? [];
 
-					return claims['admin'] === true || roles.length > 0
+					return claims['owner'] === true ||
+						claims['admin'] === true ||
+						roles.length > 0
 						? router.createUrlTree(['/admin'])
 						: true;
 				}),
@@ -43,7 +45,8 @@ const adminOnlyGuard: CanActivateFn = () => {
 
 			return from(user.getIdTokenResult(false)).pipe(
 				map((token) =>
-					token.claims?.['admin']
+					token.claims?.['owner'] === true ||
+					token.claims?.['admin'] === true
 						? true
 						: router.createUrlTree(['/']),
 				),
@@ -69,10 +72,34 @@ const elevatedUserGuard: CanActivateFn = () => {
 					const roles =
 						(claims['roles'] as string[] | undefined) ?? [];
 
-					return claims['admin'] === true || roles.length > 0
+					return claims['owner'] === true ||
+						claims['admin'] === true ||
+						roles.length > 0
 						? true
 						: router.createUrlTree(['/']);
 				}),
+			);
+		}),
+	);
+};
+
+const ownerOnlyGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+
+	return authService.currentUser$.pipe(
+		take(1),
+		switchMap((user) => {
+			if (!user) {
+				return of(router.createUrlTree(['/']));
+			}
+
+			return from(user.getIdTokenResult(false)).pipe(
+				map((token) =>
+					token.claims?.['owner'] === true
+						? true
+						: router.createUrlTree(['/admin/landing']),
+				),
 			);
 		}),
 	);
@@ -244,6 +271,15 @@ export const routes: Routes = [
 				loadComponent: () =>
 					import('./pages/admin/tools/email-templates/email-template-editor.page').then(
 						(m) => m.EmailTemplateEditorPage,
+					),
+			},
+			{
+				path: 'owner-operations',
+				title: 'DSCS: Owner Operations',
+				canActivate: [ownerOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/tools/owner-operations/owner-operations.page').then(
+						(m) => m.OwnerOperationsPage,
 					),
 			},
 			{

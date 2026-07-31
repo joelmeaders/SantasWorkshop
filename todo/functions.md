@@ -1,16 +1,8 @@
 # SantaShop Functions audit todo
 
-Last updated: 2026-07-11
+Last updated: 2026-07-30
 
 ## Open issues
-
-1. **Hardcoded privileged data in source**
-   - Files: `src/fn/pubsubSetAdminRights.ts`, `src/fn/manualMigrate.ts`
-   - Impact: security and operational risk from hardcoded admin UIDs, privileged UID checks, and plaintext bootstrap password.
-
-6. **Several handlers do full scans or sleep-based loops**
-   - Files: `src/fn/pubsubQueueReminderEmails.ts`, `src/fn/scheduledRegistrationStats.ts`, `src/fn/scheduledCheckInStats.ts`, `src/fn/pubsubMarkRegistrationsCheckedIn.ts`, `src/fn/pubsubDeleteUsers.ts`
-   - Impact: scalability and timeout risk as data grows.
 
 10. **Readability and type-safety debt is widespread**
    - Files: `src/fn/callableAdminPreRegister.ts`, `src/fn/callableResendRegistrationEmail.ts`, `src/fn/scheduledRegistrationStats.ts`, `src/fn/scheduledUserStats.ts`, `src/utility/registrations.ts`

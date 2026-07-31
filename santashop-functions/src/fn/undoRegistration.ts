@@ -3,6 +3,7 @@ import { COLLECTION_SCHEMA, DateTimeSlot, Registration } from '../models';
 import admin from '../firebase-admin';
 import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+import { isAdminToken } from '../utility/capabilities';
 
 const log = createFunctionLogger('undoRegistration');
 
@@ -11,7 +12,7 @@ export default async function undoRegistration(
 ): Promise<boolean | HttpsError> {
 	const data = request.data;
 	// If admin, use registration data from input, otherwise use own account
-	const isAdmin = request.auth?.token?.admin;
+	const isAdmin = isAdminToken(request.auth?.token);
 	const uid = isAdmin ? data.uid : request.auth?.uid;
 	if (!uid) throw new HttpsError('not-found', 'uid null');
 

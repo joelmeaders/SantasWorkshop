@@ -1,6 +1,6 @@
 import { test, expect } from '../../../fixtures/test-fixtures';
 import {
-	defaultAdminAccount,
+	defaultOwnerAccount,
 	fillIonicInput,
 	navigateToScheduleEditorViaLanding,
 	signInAdminViaUi,
@@ -10,25 +10,37 @@ test.describe('admin schedule editor - generate schedules', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
 		await clearData();
 		await seedPublicParams({});
-		await seedAdminUser(defaultAdminAccount());
+		await seedAdminUser(defaultOwnerAccount());
 	});
 
 	test('should generate hourly schedules for a single date range', async ({
 		page,
 	}) => {
 		// Arrange
-		const adminAccount = defaultAdminAccount();
+		const adminAccount = defaultOwnerAccount();
 
 		// Act
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
-		await fillIonicInput(page, '#generateStartDate', '2025-12-12');
-		await fillIonicInput(page, '#generateEndDate', '2025-12-12');
+		await expect(page.locator('#generateSchedulesButton')).toBeVisible();
+		await fillIonicInput(page, '#generateStartDate', '2026-12-12');
+		await fillIonicInput(page, '#generateEndDate', '2026-12-12');
 		await fillIonicInput(page, '#generateCapacity', '20');
 		await page.click('#generateSchedulesButton');
+		const alert = page.locator('ion-alert');
+		await expect(alert).toBeVisible();
+		await alert
+			.getByRole('textbox', { name: 'Account password' })
+			.fill(adminAccount.password);
+		await alert.getByRole('textbox', {
+			name: 'Exact confirmation phrase',
+		}).fill(
+			'INITIALIZE SCHEDULE demo-santashop 2026',
+		);
+		await alert.getByRole('button', { name: 'Initialize' }).click();
 
 		// Assert
-		await expect(page.locator('text=Friday, Dec 12, 2025')).toBeVisible();
+		await expect(page.locator('text=Saturday, Dec 12, 2026')).toBeVisible();
 		await expect(page.locator('text=5 slots')).toBeVisible();
 		await expect(page.locator('[id^="scheduleRow-"]')).toHaveCount(5);
 		await expect(

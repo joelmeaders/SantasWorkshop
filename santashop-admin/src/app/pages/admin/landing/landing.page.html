@@ -56,6 +56,16 @@
 			<ion-icon name="people-outline" color="primary" slot="start" />
 			User Management
 		</ion-item>
+		@if ((isOwner$ | async) === true) {
+		<ion-item id="ownerOperationsNav" detail routerLink="../owner-operations">
+			<ion-icon
+				name="shield-checkmark-outline"
+				color="danger"
+				slot="start"
+			/>
+			Owner Operations
+		</ion-item>
+		}
 
 		<ion-list-header> DSCS Data </ion-list-header>
 		<ion-item detail routerLink="../stats/registration">

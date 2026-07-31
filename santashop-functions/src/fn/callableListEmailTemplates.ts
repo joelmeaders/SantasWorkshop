@@ -1,9 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import type { EmailTemplateSummary } from '@santashop/models';
 import { listEmailTemplateSummaries } from '../utility/email-templates';
+import { isAdminToken } from '../utility/capabilities';
 
 const assertAdmin = (request: CallableRequest<unknown>): void => {
-	if (request.auth?.token?.['admin'] !== true) {
+	if (!isAdminToken(request.auth?.token)) {
 		throw new HttpsError(
 			'permission-denied',
 			'Only admins can manage email templates.',

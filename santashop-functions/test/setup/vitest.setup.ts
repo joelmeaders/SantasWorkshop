@@ -24,20 +24,6 @@ process.env['REMINDER_EMAIL_SENDING_STALE_MINUTES'] = '15';
 process.env['REGISTRATION_EMAIL_SOURCE'] = 'noreply@denversantaclausshop.org';
 process.env['REGISTRATION_EMAIL_RETURN_PATH'] =
 	'admin@denversantaclausshop.org';
-process.env['ADMIN_UIDS'] = [
-	'bIMHv99EssTqMfhX2kkYm2vErwu1',
-	'xkeLDNPTVVPkt6Onh4EGYNuGi2C2',
-	'sGVW9Om1E5UGKWcq97EpygbwQfl2',
-	'2kNkKB4Xz5agjs6TfXzQStJ38gx1',
-	'RDkrgjJE0oQAXY6peLoABJvOH2j2',
-].join(',');
-process.env['ADMIN_BOOTSTRAP_PASSWORD'] = [
-	'Unit',
-	'Test',
-	'Admin',
-	'Password',
-	'123!',
-].join('');
 process.env['SCHEDULED_FIRESTORE_BACKUP'] = '0 0 * 11,12 *';
 process.env['SCHEDULED_DATETIME_SLOT_COUNTERS'] = '*/5 * * 11,12 *';
 process.env['SCHEDULED_REGISTRATION_STATS'] = '59 23 * * *';

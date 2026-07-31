@@ -3,6 +3,7 @@ import { AlertController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { DateTimeSlot } from '@santashop/models';
+import { AuthService } from '@santashop/core';
 import { provideProgramYearMock } from '../../../../../test-helpers';
 import { ScheduleEditorPage } from './schedule-editor.page';
 import { ScheduleEditorService } from './schedule-editor.service';
@@ -23,7 +24,8 @@ describe('ScheduleEditorPage', () => {
 		scheduleEditorService = jasmine.createSpyObj<ScheduleEditorService>(
 			'ScheduleEditorService',
 			[
-				'createSlots',
+				'previewCreateSlots',
+				'startCreateSlots',
 				'bulkUpdate',
 				'updateSlot',
 				'deleteSlot',
@@ -34,9 +36,20 @@ describe('ScheduleEditorPage', () => {
 		Object.defineProperty(scheduleEditorService, 'slots$', {
 			value: slotsSubject.asObservable(),
 		});
-		scheduleEditorService.createSlots.and.resolveTo({
+		scheduleEditorService.startCreateSlots.and.resolveTo({
 			created: 0,
 			skipped: 0,
+		});
+		scheduleEditorService.previewCreateSlots.and.resolveTo({
+			previewId: 'preview-1',
+			operation: 'initialize-schedule',
+			projectId: 'test-project',
+			programYear: 2025,
+			expiresAt: new Date(Date.now() + 60_000).toISOString(),
+			confirmationPhrase:
+				'INITIALIZE SCHEDULE test-project 2025',
+			counts: { requestedSlots: 1 },
+			seasonRestricted: true,
 		});
 		scheduleEditorService.bulkUpdate.and.resolveTo();
 		scheduleEditorService.updateSlot.and.resolveTo();
@@ -58,6 +71,15 @@ describe('ScheduleEditorPage', () => {
 				provideProgramYearMock(2025),
 				provideRouter([]),
 				{ provide: AlertController, useValue: alerts },
+				{
+					provide: AuthService,
+					useValue: {
+						isOwner$: new BehaviorSubject(true),
+						reauthenticate: jasmine
+							.createSpy('reauthenticate')
+							.and.resolveTo(),
+					},
+				},
 			],
 		})
 			.overrideComponent(ScheduleEditorPage, {
@@ -109,7 +131,7 @@ describe('ScheduleEditorPage', () => {
 		expect(fixture.nativeElement.textContent).toContain('Over capacity');
 		expect(fixture.nativeElement.textContent).toContain('Disabled');
 		expect(
-			fixture.nativeElement.querySelectorAll('.slot-row--disabled'),
+			fixture.nativeElement.querySelectorAll('.slot-card--disabled'),
 		).toHaveSize(1);
 	});
 

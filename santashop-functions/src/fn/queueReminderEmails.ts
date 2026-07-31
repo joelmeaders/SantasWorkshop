@@ -8,7 +8,7 @@ import {
 import { formatRegistrationDateTime } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
 
-const log = createFunctionLogger('pubsubQueueReminderEmails');
+const log = createFunctionLogger('queueReminderEmails');
 
 interface ReminderQueueResult {
 	success: number;
@@ -36,15 +36,15 @@ interface ReminderEmailDocument {
 const shouldQueueReminderEmail = (
 	registration: ReminderQueueRegistration,
 ): boolean => {
+	if (!registration.registrationSubmittedOn) {
+		return false;
+	}
+
 	if (registration.reminderEmailSentOn) {
 		return false;
 	}
 
 	if (registration.reminderEmailQueuedOn) {
-		return false;
-	}
-
-	if (registration.reminderEmailFailedOn) {
 		return false;
 	}
 
@@ -58,14 +58,16 @@ const shouldQueueReminderEmail = (
 	return true;
 };
 
-export default async function pubsubQueueReminderEmails(): Promise<ReminderQueueResult> {
+export default async function queueReminderEmails(
+	programYear: number,
+): Promise<ReminderQueueResult> {
 	let result: ReminderQueueResult = { success: 0, failed: 0 };
 
 	try {
 		const completedRegistrationsQuery = await admin
 			.firestore()
 			.collection('registrations')
-			.orderBy('registrationSubmittedOn', 'asc')
+			.where('programYear', '==', programYear)
 			.get();
 
 		const allRegistrations: ReminderQueueRegistration[] =
@@ -77,7 +79,7 @@ export default async function pubsubQueueReminderEmails(): Promise<ReminderQueue
 			shouldQueueReminderEmail(registration),
 		);
 
-		result = await queueReminderEmails(registrations);
+		result = await queueReminderEmailRecords(registrations);
 		log.info('Processed reminder email queue run', {
 			candidateCount: registrations.length,
 			successCount: result.success,
@@ -91,7 +93,7 @@ export default async function pubsubQueueReminderEmails(): Promise<ReminderQueue
 	}
 }
 
-async function queueReminderEmails(
+async function queueReminderEmailRecords(
 	registrations: ReminderQueueRegistration[],
 ): Promise<ReminderQueueResult> {
 	let success = 0;

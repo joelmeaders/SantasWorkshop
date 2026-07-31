@@ -9,7 +9,7 @@
 	"HOME": {
 		"WELCOME_MESSAGE": "Denver Santa Claus Shop<br/>Registration!",
 		"CREATE_ACCOUNT": "Create An Account",
-		"SIGN_IN_INST": "Already created an account for 2025?"
+		"SIGN_IN_INST": "Already created an account for this year?"
 	},
 	"COMMON": {
 		"EMAIL_ADDRESS": "Email",
@@ -53,7 +53,7 @@
 	},
 	"SIGNUP": {
 		"CREATE_ACCOUNT_DISABLED": "We're full and cannot accept any more sign-ups right now. Please check our Facebook page for updates if any spots open up.",
-		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account for 2025, even if you have shopped with us in the past.",
+		"NEW_ACCOUNT_NOTICE": "All shoppers must create a new account each year, even if you have shopped with us in the past.",
 		"HAVE_ACCOUNT": "Already have an account?",
 		"TITLE1": "Set up your account",
 		"TITLE2": "This will only take a minute",

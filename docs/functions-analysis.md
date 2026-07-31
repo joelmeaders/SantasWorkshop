@@ -1,30 +1,35 @@
 ## Summary
 
-I analyzed `santashop-functions` end-to-end against current Firebase/Google Cloud guidance. I did **not modify files**.
+This analysis was reconciled after the owner-operations implementation. The
+former Pub/Sub maintenance handlers, bootstrap-password flow, persistent export
+tokens, and Auth-only purge have been removed. Their replacements are
+authenticated, App-Check-protected owner callables backed by a serialized Cloud
+Tasks worker.
 
-The project is in decent shape overall: it is fully on Firebase Functions v2 APIs, avoids deprecated `functions.config()`, uses App Check for deployed callables, has emulator-gated test helpers, and has meaningful unit/integration coverage. The biggest improvement opportunities are around **least-privilege service accounts, full-collection job scalability, stronger server-side validation, and consistency across Auth/Firestore/Storage/SES side effects**.
+The remaining improvement opportunities are primarily **least-privilege service
+accounts, scheduled-job scalability, stronger server-side validation, and
+consistency across Auth/Firestore/Storage/SES side effects**.
 
 I reviewed guidance from:
 
-- Firebase Cloud Functions overview, management, config/env, tips, retries, callable functions, Firestore triggers, scheduled functions, Pub/Sub triggers, locations, quotas, TypeScript, networking, task queues, App Check.
+- Firebase Cloud Functions overview, management, config/env, tips, retries, callable functions, Firestore triggers, scheduled functions, locations, quotas, TypeScript, networking, task queues, and App Check.
 - Google Cloud Run / Cloud Run functions guidance for concurrency, max/min instances, startup/cold starts, temporary files, service identity, and scaling behavior.
 
 ## Current functions inventory
 
-`src/index.ts` exports **40 deployable functions**:
+`src/index.ts` exports **37 deployable functions**:
 
 | Category | Count | Functions |
 |---|---:|---|
-| Production callable functions | 21 | `changeAccountInformation`, `updateReferredBy`, `completeRegistration`, `newAccount`, `undoRegistration`, `changeRegistrationDateTime`, `updateEmailAddress`, `checkIn`, `checkInWithEdit`, `onSiteRegistration`, `callableAdminPreRegister`, `callableResendRegistrationEmail`, `callableListEmailTemplates`, `callableGetEmailTemplate`, `callableGetEmailTemplateRevision`, `callableSaveEmailTemplateRevision`, `callablePublishEmailTemplate`, `callableSendTestEmailTemplate`, `callableCreateStaffUser`, `callableUpdateStaffUser`, `callableDeleteStaffUser` |
+| Production callable functions | 25 | `changeAccountInformation`, `updateReferredBy`, `completeRegistration`, `newAccount`, `undoRegistration`, `changeRegistrationDateTime`, `updateEmailAddress`, `checkIn`, `checkInWithEdit`, `onSiteRegistration`, `callableAdminPreRegister`, `callableResendRegistrationEmail`, `callableListEmailTemplates`, `callableGetEmailTemplate`, `callableGetEmailTemplateRevision`, `callableSaveEmailTemplateRevision`, `callablePublishEmailTemplate`, `callableSendTestEmailTemplate`, `callableCreateStaffUser`, `callableUpdateStaffUser`, `callableDeleteStaffUser`, `callablePreviewOwnerOperation`, `callableStartOwnerOperation`, `callableGetOwnerOperation`, `callableGetOwnerExportUrl` |
+| Private task function | 1 | `ownerOperationWorker` |
 | Firestore trigger | 1 | `sendNewRegistrationEmails` |
 | Scheduled functions | 5 | `scheduledFirestoreBackup`, `scheduledDateTimeSlotCounters`, `scheduledRegistrationStats`, `scheduledUserStats`, `scheduledCheckInStats` |
-| Pub/Sub functions | 8 | `pubsubResetCheckInStats`, `pubsubQueueReminderEmails`, `pubsubSetAdminRights`, `pubsubMarkRegistrationsCheckedIn`, `pubsubExportMarketingEmails`, `pubsubExportRegisteredEmails`, `pubsubAddDateTimeSlots`, `pubsubDeleteUsers` |
 | Emulator-only helper callables | 5 | `testSeedScenario`, `testSeedPublicParameters`, `testClearAllData`, `testSeedAdminUser`, `testSeedDateTimeSlots` |
 
-There are also **2 unexported/dormant handlers** in `src/fn/`:
+There is also **1 unexported/dormant handler** in `src/fn/`:
 
 - `scheduledReindexRegistrations`
-- `pubsubCreateNewEmailTemplate`
 
 ## What is already strong
 
@@ -32,7 +37,8 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 - **App Check is enforced for production callables** via `ENFORCE_APP_CHECK = process.env.FUNCTIONS_EMULATOR !== 'true'`.
 - **AWS secrets are bound only to AWS-email functions** in `index.ts`.
 - **Dynamic imports in `index.ts` reduce cold-start blast radius** by deferring handler-specific dependencies until invocation.
-- **Many state-changing admin callables check custom claims** before proceeding.
+- **Server-side capability checks enforce `owner > admin > checkin`**, with
+  owner-only checks on high-impact operations.
 - **Email sending has an outbox-like queue document model** with retry-safe delivery claims, provider acceptance markers, and registration repair.
 - **Tests exist and are modernized** with Vitest plus emulator-backed integration tests.
 - **Generated `.env.*` files appear ignored**, and `git ls-files` only showed `.env.example` as tracked.
@@ -42,11 +48,9 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 | Priority | Improvement | Impact |
 |---|---|---|
 | High | Add explicit `serviceAccount` and selected shared runtime options | Improves security, cost control, and deploy reproducibility |
-| High | Replace dangerous manual Pub/Sub jobs with safer gated workflows | Reduces blast radius of accidental admin password resets or mass user deletion |
-| High | Move large batch jobs from full-collection reads to paginated/streamed/task-queue flows | Prevents timeouts, memory growth, and high Firestore read costs as data grows |
-| High | Enforce authoritative server-side reads/transactions for registration, slot capacity, and check-in flows | Prevents client-tampering, overbooking, and inconsistent stats |
+| High | Move remaining scheduled batch jobs from full-collection reads to paginated/streamed flows | Prevents timeouts, memory growth, and high Firestore read costs as data grows |
+| High | Enforce authoritative server-side reads/transactions for registration and slot-capacity flows | Prevents client-tampering and overbooking |
 | Medium | Convert env configuration to Firebase parameterized config / `defineSecret` | Better deploy-time validation, safer secret access, fewer discovery-time surprises |
-| Medium | Clean up temporary files or avoid temp files for CSV exports | Prevents memory leaks/OOM cold starts |
 | Medium | Stop using `--fix` in predeploy lint | Avoids deploy-time mutation of source files |
 
 ## Cross-cutting findings
@@ -55,10 +59,9 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 
 All functions appear to run under the default 2nd-gen compute service account. Several functions have very different privilege profiles:
 
-- Account creation/deletion: `newAccount`, `callableAdminPreRegister`, staff functions, `pubsubDeleteUsers`
-- Admin bootstrap: `pubsubSetAdminRights`
+- Account creation/deletion: `newAccount`, `callableAdminPreRegister`, staff functions, owner yearly reset
 - Email sending/publishing: `sendNewRegistrationEmails`, template callables
-- Stats/export jobs: scheduled and Pub/Sub background jobs
+- Stats/export jobs: scheduled functions and `ownerOperationWorker`
 - Emulator helpers: should not need production identity at all
 
 Firebase/Cloud Run guidance recommends overriding default broad service accounts with custom service accounts scoped to exact resources.
@@ -74,7 +77,8 @@ Firebase/Cloud Run guidance recommends overriding default broad service accounts
   - `functions-staff-admin`
   - `functions-backup-runner`
 - Set `serviceAccount` per function or group.
-- Especially isolate `pubsubDeleteUsers` and `pubsubSetAdminRights`.
+- Especially isolate `ownerOperationWorker`, which performs backups, Auth
+  administration, Firestore purges, Storage deletion, and signed export URLs.
 
 ### 2. Consider `setGlobalOptions` for other shared defaults
 
@@ -278,38 +282,41 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 ### `checkIn`
 
-**Current behavior:** Admin-only callable creates a `checkins/{uid}` record from client-supplied partial registration.
+**Current behavior:** Admin-capable callable transactionally creates a
+`checkins/{uid}` record and sets the source registration's `hasCheckedIn` flag.
 
 **Findings:**
 
 - Good: admin check.
 - Good: `create()` makes duplicate check-ins fail.
+- Good: check-in creation and source registration status now commit atomically.
 - Risk: stats are computed from client-supplied registration fields, not authoritative Firestore registration.
-- Does not immediately mark the registration as checked in; later `pubsubMarkRegistrationsCheckedIn` does that.
 
 **Improvements:**
 
 - Load registration by UID from Firestore before writing check-in.
-- Use a transaction to create check-in and mark registration `hasCheckedIn`.
 - Keep client edits separate from authoritative persisted state.
 
-**Impact:** Prevents tampered check-in stats and removes lag between check-in and registration state.
+**Impact:** Authoritative source reads would prevent tampered check-in stats;
+the registration-state lag has already been removed by the atomic write.
 
 ### `checkInWithEdit`
 
-**Current behavior:** Admin creates edited registration snapshot and check-in.
+**Current behavior:** Admin-capable caller transactionally creates the edited
+registration snapshot and check-in, then marks the source registration checked
+in.
 
 **Findings:**
 
 - Good: admin-only and duplicate protection via `create`.
+- Good: edited snapshot, check-in, and source registration status are atomic.
 - Risk: trusts edited registration payload.
-- Does not immediately update original registration `hasCheckedIn`.
-- Batch create is good, but no authoritative validation against existing registration.
+- Confirms the source registration exists, but does not use it to validate the
+  edited payload.
 
 **Improvements:**
 
 - Validate edited data with a schema.
-- Load existing registration and write check-in + status in one transaction/batch.
 - Consider preserving original-vs-edited diff for auditability.
 
 **Impact:** Better data trust and audit history.
@@ -323,7 +330,9 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 - Good: admin-only.
 - Potential inconsistency: check-in doc ID is generated `id`, but `checkin.customerId` is set to `record.uid`, while registration’s `uid` is overwritten to `id`.
 - Uses client-supplied registration data.
-- Onsite check-ins are excluded from `pubsubMarkRegistrationsCheckedIn` by `customerId != onsite`, but here `customerId` may not be `'onsite'`.
+- The historical repair job no longer drives this lifecycle, so `customerId`
+  semantics should be documented for reporting and exports rather than for
+  eventual check-in propagation.
 
 **Improvements:**
 
@@ -475,12 +484,13 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 ### `callableCreateStaffUser`
 
-**Current behavior:** Admin creates Auth staff user, sets claims, writes staff doc.
+**Current behavior:** An admin creates a check-in staff account; only an owner can create another administrator. The callable creates the Auth user, sets claims, and writes the staff document.
 
 **Findings:**
 
 - Good: validates email, display name, password, roles.
 - Good: forces `admin` to also include `checkin`.
+- Good: enforces the `owner > admin > checkin` hierarchy server-side.
 - If setting claims or writing Firestore fails, deletes Auth user.
 - Staff password is passed through callable request.
 
@@ -495,11 +505,12 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 ### `callableUpdateStaffUser`
 
-**Current behavior:** Admin updates Auth profile/password/disabled, claims, and Firestore staff doc.
+**Current behavior:** An admin updates ordinary check-in staff. Only an owner can alter an administrator, and owner accounts are managed outside the app.
 
 **Findings:**
 
-- Good: prevents removing admin from protected UIDs.
+- Good: ordinary administrators cannot alter administrator or owner accounts.
+- Good: owner claims cannot be granted or revoked through this callable.
 - Good: validates display name/password/roles.
 - Auth and Firestore updates are sequential; partial failure can leave mismatches.
 - Allows password change through callable.
@@ -515,11 +526,12 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 ### `callableDeleteStaffUser`
 
-**Current behavior:** Admin deletes Auth user and staff doc.
+**Current behavior:** An admin deletes ordinary check-in staff; only an owner can delete an administrator.
 
 **Findings:**
 
-- Good: blocks protected UIDs and self-deletion.
+- Good: blocks self-deletion and refuses to delete owner accounts.
+- Good: owner transfer and revocation remain exclusive to the local privileged script.
 - Auth deletion happens before Firestore deletion; Firestore failure leaves stale staff doc.
 
 **Improvements:**
@@ -647,158 +659,55 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 **Impact:** Prevents race-prone aggregation and timezone bugs.
 
-### `pubsubResetCheckInStats`
+### Owner operations and retired Pub/Sub maintenance
 
-**Current behavior:** Sets all check-ins `inStats: false`.
+The eight deployed Pub/Sub maintenance handlers have been removed. Their
+replacement consists of four owner-only callables and the private
+`ownerOperationWorker` task function.
 
-**Findings:**
+**Current safeguards:**
 
-- Full collection read.
-- Uses transactions for write batches but no reads inside transactions; regular batches/BulkWriter would be simpler.
-- Manual operation could be destructive to stats if accidentally triggered.
+- Server authorization requires the immutable `owner` custom claim; ordinary
+  administrators cannot invoke the endpoints directly.
+- App Check protects deployed callables, and state-changing operations require
+  authentication no older than five minutes.
+- Previews are single-use, actor/project/arguments-bound, expire after ten
+  minutes, and are stored with job/audit records in server-only collections.
+- Yearly reset, stats rebuild, and schedule initialization require exact
+  project/year/operation phrases and are limited to January 1 through September
+  15 in `SHOP_TIME_ZONE`.
+- Cloud Tasks execution is serialized with concurrency and maximum instances
+  set to one, while Firestore locks reject overlapping jobs.
+- Reminder queueing is year-filtered, paginated, previewable, and idempotent.
+- Exports are written directly to private Storage objects and exposed only
+  through owner-rechecked 15-minute signed URLs; objects expire after seven
+  days.
+- Schedule initialization uses deterministic year/timestamp IDs, bounded
+  batches, and duplicate-safe retries.
+- Check-in repair remains available for historical mismatches, while normal
+  check-ins update `hasCheckedIn` atomically.
+- Check-in stats rebuild replaces the selected-year aggregate from bounded
+  source data and synchronizes `inStats` markers instead of incrementing stale
+  totals.
 
-**Improvements:**
+**Verified yearly reset behavior:**
 
-- Require message payload confirmation if kept as Pub/Sub.
-- Use BulkWriter/pagination.
-- Log actor/source metadata through Pub/Sub attributes.
+- A recent private marketing export must exist before reset preview.
+- A fresh full Firestore export must complete successfully before the first
+  deletion.
+- Resumable stages delete nonstaff Auth users, including disabled customers;
+  the approved customer/registration/check-in/queue collections;
+  `dateTimeSlots`; and registration QR images.
+- Staff and owner accounts, parameters, stats, email templates, private
+  exports, and owner operation records are retained.
+- Stage cursors and counts make task retries resume rather than restart the
+  purge.
 
-**Impact:** Safer manual maintenance.
+**Remaining operational work:**
 
-### `pubsubQueueReminderEmails`
-
-**Current behavior:** Full reads registrations ordered by `registrationSubmittedOn`, filters eligible reminder emails, writes queue docs transactionally.
-
-**Findings:**
-
-- Good: transaction rechecks queue and registration state.
-- Good: skips already sent/queued/failed and QR-not-ready records.
-- Full collection read and in-memory filter.
-- Query orders by submitted date but does not filter to completed/program year.
-- Failed queueing sets `reminderEmailFailedOn`, which then prevents future queue attempts.
-
-**Improvements:**
-
-- Query only eligible records where possible: submitted, current year, not queued/sent/failed.
-- Page/stream.
-- Use Cloud Tasks for per-email rate limits/retries.
-- Differentiate permanent failed from transient queueing failure.
-- Add dry-run/count mode.
-
-**Impact:** Avoids timeout and makes reminders reliable at larger scale.
-
-### `pubsubSetAdminRights`
-
-**Current behavior:** For each `ADMIN_UIDS`, resets password to `ADMIN_BOOTSTRAP_PASSWORD`, enables account, sets admin/checkin claims, writes staff doc.
-
-**Findings:**
-
-- Very high-impact administrative function.
-- If topic publishing permission is too broad, triggering this resets protected admin passwords.
-- Storing and reusing bootstrap password is risky, even though placeholder detection exists.
-- Runs sequentially and mutates Auth/staff docs.
-
-**Improvements:**
-
-- Replace with a local/CI-only one-time script, not deployed Pub/Sub.
-- Prefer Firebase password reset links or manual claims management.
-- If retained, require signed payload with one-time nonce and environment guard.
-- Restrict Pub/Sub publisher IAM to a break-glass service account.
-- Add alerting on every invocation.
-
-**Impact:** Major reduction in account takeover/blast-radius risk.
-
-### `pubsubMarkRegistrationsCheckedIn`
-
-**Current behavior:** Loads check-ins where `customerId != onsite`, marks matching registration docs `hasCheckedIn: true`.
-
-**Findings:**
-
-- Full query.
-- Eventual consistency: registration state lags after check-in.
-- Depends on `customerId` semantics being consistent.
-- Could be replaced by transaction at check-in time.
-
-**Improvements:**
-
-- Mark registration checked-in in `checkIn` / `checkInWithEdit` transaction.
-- Keep this as repair job only.
-- Page/stream if retained.
-
-**Impact:** Improves real-time correctness and removes a manual maintenance dependency.
-
-### `pubsubExportMarketingEmails`
-
-**Current behavior:** Queries newsletter users, converts to CSV, writes temp file, uploads to Storage with download token.
-
-**Findings:**
-
-- Uses `/tmp` and never deletes the temporary file.
-- Firebase docs warn temp files can persist between invocations and consume memory.
-- Full result set in memory.
-- Download token makes object accessible to anyone with URL.
-
-**Improvements:**
-
-- Use `bucket.file(...).save(output)` directly or delete temp file in `finally`.
-- Put exports under a clear folder and lifecycle policy.
-- Consider signed URLs with expiry instead of persistent download token.
-- Page/stream for large exports.
-
-**Impact:** Prevents OOM/cold starts and reduces data exposure risk.
-
-### `pubsubExportRegisteredEmails`
-
-Same findings as `pubsubExportMarketingEmails`, but source is completed registrations.
-
-**Additional note:**
-
-- Query `where('registrationSubmittedOn', '!=', '')` is a loose sentinel. Prefer explicit `programYear` and submitted timestamp presence/status fields.
-
-**Impact:** Better export safety and accuracy.
-
-### `pubsubAddDateTimeSlots`
-
-**Current behavior:** If any `dateTimeSlots` exist, does nothing; otherwise creates slots for configured days/hours.
-
-**Findings:**
-
-- Checks the whole collection, not current `PROGRAM_YEAR`.
-- Non-idempotent doc IDs from `.add()`.
-- Duplicate or partial setup recovery is awkward.
-
-**Improvements:**
-
-- Query by `programYear`.
-- Use deterministic doc IDs, e.g. `${PROGRAM_YEAR}-${day}-${hour}`.
-- Upsert missing slots instead of all-or-nothing “collection empty”.
-- Add dry-run/log summary.
-
-**Impact:** Safer annual setup and recovery.
-
-### `pubsubDeleteUsers`
-
-**Current behavior:** Deletes all non-disabled, non-elevated Auth users, up to an abort threshold.
-
-**Findings:**
-
-- Very dangerous production operation.
-- No dry-run.
-- No required payload confirmation.
-- No project/environment safeguard beyond protected/elevated filtering.
-- Deletes Auth users only; Firestore user/registration cleanup is not shown.
-- Uses `sleep(3000)` inside function; okay technically, but Cloud Tasks is cleaner for long/rate-limited operations.
-
-**Improvements:**
-
-- Convert to a secured admin-only callable or CLI script with confirmation.
-- Add dry-run mode and output target list/count.
-- Require payload like `{ confirmProjectId, confirmPhrase, maxUsers }`.
-- Delete/disable in batches with Cloud Tasks.
-- Add audit log and alerting.
-- Reconcile Firestore documents or explicitly document that this is Auth-only.
-
-**Impact:** Reduces catastrophic accidental deletion risk.
+- Deploy the worker under a dedicated least-privilege service account.
+- Add alerts for failed/stalled operations and backup freshness.
+- Periodically exercise Firestore restore and QR regeneration procedures.
 
 ### `testSeedScenario`
 
@@ -875,7 +784,7 @@ Same production deployment concern as `testSeedScenario`.
 
 **Impact:** Better test failure messages.
 
-## Dormant/unexported function files
+## Dormant/unexported function file
 
 ### `scheduledReindexRegistrations`
 
@@ -894,25 +803,6 @@ Same production deployment concern as `testSeedScenario`.
 - Use batches/BulkWriter instead of transactions since it performs no transaction reads.
 - Page/stream registrations.
 - Add metrics and skipped-record logging.
-
-### `pubsubCreateNewEmailTemplate`
-
-**Current behavior:** Creates a hard-coded SES template from a local HTML file.
-
-**Findings:**
-
-- Not exported.
-- Hard-coded region `us-west-2`; should use `SES_REGION`.
-- Hard-coded 2025 subject.
-- Reads `src/utility/assets/registration-confirmation-2023.html`, which may not exist in deployed bundle as expected.
-- Superseded by newer email template management callables.
-
-**Recommendation:**
-
-- Delete if obsolete, or update and export intentionally.
-- Prefer the current template management workflow.
-
-**Impact:** Removes dead code/confusion.
 
 ## Build, deploy, and repo workflow findings
 
@@ -974,43 +864,41 @@ Firebase tips recommend explicitly including/pinning Functions Framework so buil
 
 - Evaluate adding `@google-cloud/functions-framework` as a pinned dependency if applicable to Firebase’s current v2 build flow.
 
-## Suggested implementation roadmap
+## Remaining implementation roadmap
 
 ### Phase 1: Safety and deploy correctness
 
 1. Remove `--fix` from predeploy lint.
-2. Add service accounts for high-risk functions.
-3. Lock down or remove `pubsubSetAdminRights` and `pubsubDeleteUsers`.
-4. Make `scheduledReindexRegistrations` safe or delete it if unused.
+2. Assign least-privilege service identities to the owner-operation worker and other high-risk functions before production rollout.
+3. Make `scheduledReindexRegistrations` safe or delete it if unused.
 
 ### Phase 2: Correctness and idempotency
 
 1. Make registration completion/date changes transactionally authoritative.
-2. Move check-in + `hasCheckedIn` marking into one transaction.
-3. Harden email outbox idempotency and retry cutoffs.
-4. Add event/queue attempt counters and stuck-state alerts.
+2. Harden email outbox retry cutoffs.
+3. Add event/queue attempt counters and stuck-state alerts.
 
 ### Phase 3: Scalability and cost
 
 1. Replace full-collection reads with pagination/streaming.
 2. Replace `offset()` pagination.
 3. Use BulkWriter or batched writes for maintenance jobs.
-4. Evaluate Cloud Tasks for email queueing, user deletion, exports, and long-running batch operations.
+4. Evaluate Cloud Tasks for the remaining email-delivery workflows.
 5. Tune CPU/concurrency/max/min instances based on observed traffic.
 
 ### Phase 4: Operations
 
 1. Add audit documents for staff/admin/template/destructive functions.
-2. Add dashboard/alerts for queue failures, backup freshness, scheduled job runtime, and Pub/Sub errors.
-3. Document manual runbooks for maintenance functions.
+2. Add dashboard/alerts for queue failures, backup freshness, scheduled job runtime, and owner-operation failures.
+3. Exercise the documented yearly-reset and restore runbooks regularly.
 
 ## Bottom line
 
-The package is already much healthier than many Firebase Functions codebases: v2 APIs, App Check, secret binding, tests, and an email outbox model are all wins. The biggest risk is not “bad code” so much as **serverless production sharp edges**: privileged maintenance functions, cross-service consistency, and batch jobs that assume seasonal data stays small.
+The package is already much healthier than many Firebase Functions codebases: v2 APIs, App Check, secret binding, owner-only maintenance operations, tests, and an email outbox model are all wins. The biggest remaining risk is not “bad code” so much as **serverless production sharp edges**: cross-service consistency, service-account scope, and batch jobs that assume seasonal data stays small.
 
 If you want the highest return next, I’d start with:
 
 1. **Runtime/deploy safety:** non-mutating lint.
-2. **Security:** per-function service accounts + lock down/delete dangerous Pub/Sub maintenance functions.
-3. **Correctness:** transactionally enforce slot capacity and authoritative registration/check-in state.
+2. **Security:** least-privilege service identities for high-risk functions.
+3. **Correctness:** transactionally enforce slot capacity and authoritative registration state.
 4. **Reliability:** add alerts and operational dashboards for the hardened email delivery flow.

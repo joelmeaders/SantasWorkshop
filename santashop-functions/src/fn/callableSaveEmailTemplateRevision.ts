@@ -26,11 +26,12 @@ import {
 	requireTrimmedString,
 	withCallableValidation,
 } from '../utility/callable-validation';
+import { isAdminToken } from '../utility/capabilities';
 
 const assertAdmin = (
 	request: CallableRequest<unknown>,
 ): { email?: string; uid: string } => {
-	if (request.auth?.token?.['admin'] !== true || !request.auth.uid) {
+	if (!isAdminToken(request.auth?.token) || !request.auth?.uid) {
 		throw new HttpsError(
 			'permission-denied',
 			'Only admins can manage email templates.',

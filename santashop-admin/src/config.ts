@@ -3,11 +3,12 @@
 
 export const config = {
 	production: true,
-	label: "TEST/QA",
+	label: "PROD",
 	name: "@santashop/admin",
 	version: "2025.2.1",
-	appCheckKey: "6LfQqwkpAAAAAHyIhwZ4v9ZGl6lMdwzsh_maGnSU",
+	appCheckKey: "6Lc4vgkpAAAAACOIJc4lTNn4wLzvuJkoz17t_RXH",
 	appCheckEnabled: true,
+	programYear: 2026,
 	emulatorPorts: {
 		auth: 9099,
 		functions: 5001,

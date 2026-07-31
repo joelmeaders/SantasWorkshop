@@ -43,7 +43,6 @@ These values should be treated as true secrets:
 
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
-- `ADMIN_BOOTSTRAP_PASSWORD`
 - GitHub Actions service account secrets such as:
   - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST`
   - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5`
@@ -212,7 +211,6 @@ Then fill in local-only values such as:
 
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
-- `ADMIN_BOOTSTRAP_PASSWORD`
 
 Also replace placeholder Firebase API key values in your local `.env` with real ones before generating config.
 
@@ -334,7 +332,7 @@ That command now:
 
 Important caveat:
 
-- Functions currently read **unprefixed** runtime variable names such as `AWS_ACCESS_KEY_ID`, `ADMIN_BOOTSTRAP_PASSWORD`, `SANTASHOP_PROGRAM_YEAR`, etc.
+- Functions currently read **unprefixed** runtime variable names such as `AWS_ACCESS_KEY_ID`, `SANTASHOP_PROGRAM_YEAR`, etc.
 - The per-project generated env file solves that by converting the shared root config into the correct unprefixed runtime variables for the target project.
 
 In GitHub Actions, those values are supplied through `TEST_...` secrets and converted into the generated test env file before deploy.
@@ -385,10 +383,8 @@ Required GitHub secrets for Functions CI/CD are:
 
 - `TEST_AWS_ACCESS_KEY_ID`
 - `TEST_AWS_SECRET_ACCESS_KEY`
-- `TEST_ADMIN_BOOTSTRAP_PASSWORD`
 - `PROD_AWS_ACCESS_KEY_ID`
 - `PROD_AWS_SECRET_ACCESS_KEY`
-- `PROD_ADMIN_BOOTSTRAP_PASSWORD`
 - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST`
 - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5`
 
@@ -424,7 +420,6 @@ The script syncs the same key names used in `.env`, including:
 - Functions keys such as:
   - `AWS_ACCESS_KEY_ID`
   - `AWS_SECRET_ACCESS_KEY`
-  - `ADMIN_BOOTSTRAP_PASSWORD`
   - `SANTASHOP_PROGRAM_YEAR`
   - `SANTASHOP_TIME_ZONE`
   - `SANTASHOP_TIME_OFFSET`
@@ -432,7 +427,7 @@ The script syncs the same key names used in `.env`, including:
   - `REGISTRATION_EMAIL_TEMPLATE`
   - `REMINDER_EMAIL_TEMPLATE`
   - `SCHEDULED_FIRESTORE_BACKUP`
-  - plus optional keys like `ADMIN_UIDS` and `SANTASHOP_SHOP_DAYS`
+  - plus optional keys like `SANTASHOP_SHOP_DAYS`
 
 ### Usage
 
@@ -495,10 +490,8 @@ Required secrets currently include:
 - `PROD_FIREBASE_API_KEY`
 - `TEST_AWS_ACCESS_KEY_ID`
 - `TEST_AWS_SECRET_ACCESS_KEY`
-- `TEST_ADMIN_BOOTSTRAP_PASSWORD`
 - `PROD_AWS_ACCESS_KEY_ID`
 - `PROD_AWS_SECRET_ACCESS_KEY`
-- `PROD_ADMIN_BOOTSTRAP_PASSWORD`
 
 Optional secrets currently include:
 
@@ -540,7 +533,6 @@ These are currently unprefixed and shared by name across environments:
 
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
-- `ADMIN_BOOTSTRAP_PASSWORD`
 - `SANTASHOP_PROGRAM_YEAR`
 - `SANTASHOP_TIME_ZONE`
 - `SANTASHOP_TIME_OFFSET`
@@ -566,8 +558,6 @@ Optional environment-specific overrides are supported in the root `.env` by pref
 
 Examples:
 
-- `TEST_ADMIN_BOOTSTRAP_PASSWORD`
-- `PROD_ADMIN_BOOTSTRAP_PASSWORD`
 - `TEST_FIRESTORE_BACKUP_BUCKET`
 - `PROD_FIRESTORE_BACKUP_BUCKET`
 

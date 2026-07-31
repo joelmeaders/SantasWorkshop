@@ -12,13 +12,12 @@ import {
 	serializeError,
 } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
+import {
+	isAdminToken,
+	isOwnerToken,
+} from '../utility/capabilities';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
-
-const isAdminContext = (request: CallableRequest<unknown>): boolean => {
-	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
-	return token?.['admin'] === true;
-};
 
 const log = createFunctionLogger('callableCreateStaffUser');
 
@@ -81,7 +80,8 @@ const normalizeEmailAddress = (emailAddress: string | undefined): string => {
 export default async function callableCreateStaffUser(
 	request: CallableRequest<CreateStaffUser>,
 ): Promise<string> {
-	if (!isAdminContext(request)) {
+	const actorToken = request.auth?.token as FirebaseAuthTokenLike | undefined;
+	if (!isAdminToken(actorToken)) {
 		log.warn('Non-admin attempted to create a staff account', {
 			actorUid: request.auth?.uid ?? null,
 		});
@@ -96,6 +96,13 @@ export default async function callableCreateStaffUser(
 	const displayName = data?.displayName?.trim();
 	const password = data?.password;
 	const roles = sanitizeRoles(data?.roles);
+
+	if (roles.includes('admin') && !isOwnerToken(actorToken)) {
+		throw new HttpsError(
+			'permission-denied',
+			'Only a project owner may create an administrator.',
+		);
+	}
 
 	if (!displayName || !password) {
 		throw new HttpsError(

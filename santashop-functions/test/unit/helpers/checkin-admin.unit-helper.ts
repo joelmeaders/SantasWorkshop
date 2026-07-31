@@ -26,6 +26,9 @@ export interface CheckInAdminMock {
 	doc: ReturnType<typeof vi.fn>;
 	collection: ReturnType<typeof vi.fn>;
 	runTransaction: ReturnType<typeof vi.fn>;
+	transactionGet: ReturnType<typeof vi.fn>;
+	transactionCreate: ReturnType<typeof vi.fn>;
+	transactionSet: ReturnType<typeof vi.fn>;
 	batchCreate: ReturnType<typeof vi.fn>;
 	batchSet: ReturnType<typeof vi.fn>;
 	batchCommit: ReturnType<typeof vi.fn>;
@@ -56,12 +59,24 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 			options?: { merge: boolean },
 		) => ref.set(value, options),
 	);
+	const transactionGet = vi.fn(async (ref: MockDocRef) => ref.get());
+	const transactionCreate = vi.fn(
+		(ref: MockDocRef, value: Record<string, unknown>) =>
+			ref.create(value),
+	);
 	const runTransaction = vi.fn(
 		async (
 			callback: (transaction: {
+				get: typeof transactionGet;
+				create: typeof transactionCreate;
 				set: typeof transactionSet;
 			}) => Promise<void> | void,
-		) => callback({ set: transactionSet }),
+		) =>
+			callback({
+				get: transactionGet,
+				create: transactionCreate,
+				set: transactionSet,
+			}),
 	);
 	const initializeApp = vi.fn();
 
@@ -116,6 +131,9 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 		collection,
 		batch: vi.fn(() => batch),
 		runTransaction,
+		transactionGet,
+		transactionCreate,
+		transactionSet,
 	}));
 	const auth = vi.fn(() => ({
 		createUser,
@@ -143,6 +161,9 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 		doc,
 		collection,
 		runTransaction,
+		transactionGet,
+		transactionCreate,
+		transactionSet,
 		batchCreate,
 		batchSet,
 		batchCommit,

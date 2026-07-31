@@ -5,6 +5,7 @@ export interface E2eAdminSeedUser {
 	emailAddress: string;
 	password: string;
 	admin?: boolean;
+	owner?: boolean;
 }
 
 export interface E2eSeedDateTimeSlot {

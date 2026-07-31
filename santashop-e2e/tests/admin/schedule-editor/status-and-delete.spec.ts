@@ -22,20 +22,20 @@ test.describe('admin schedule editor - status and delete', () => {
 			await seedDateTimeSlots([
 				scheduleSlot({
 					id: 'slot-at-capacity',
-					dateTime: '2025-12-12T10:00:00',
+					dateTime: '2026-12-12T10:00:00',
 					maxSlots: 5,
 					slotsReserved: 5,
 				}),
 				scheduleSlot({
 					id: 'slot-over-capacity',
-					dateTime: '2025-12-12T11:00:00',
+					dateTime: '2026-12-12T11:00:00',
 					maxSlots: 5,
 					slotsReserved: 7,
 					enabled: false,
 				}),
 				scheduleSlot({
 					id: 'slot-delete-me',
-					dateTime: '2025-12-12T12:00:00',
+					dateTime: '2026-12-12T12:00:00',
 					maxSlots: 8,
 					slotsReserved: 2,
 				}),

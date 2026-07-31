@@ -20,8 +20,8 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 			await seedPublicParams({});
 			await seedAdminUser(defaultAdminAccount());
 			await seedDateTimeSlots([
-				scheduleSlot({ id: 'slot-1', dateTime: '2025-12-12T10:00:00' }),
-				scheduleSlot({ id: 'slot-2', dateTime: '2025-12-12T11:00:00' }),
+				scheduleSlot({ id: 'slot-1', dateTime: '2026-12-12T10:00:00' }),
+				scheduleSlot({ id: 'slot-2', dateTime: '2026-12-12T11:00:00' }),
 			]);
 		},
 	);
@@ -60,14 +60,14 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 		// Act
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
-		await fillIonicInput(page, '#slotDate-slot-1', '2025-12-13');
+		await fillIonicInput(page, '#slotDate-slot-1', '2026-12-13');
 		await page.click('#saveTimeSlot-slot-1');
 
 		// Assert
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Updated schedule time slot.',
 		);
-		await expect(page.locator('text=Saturday, Dec 13, 2025')).toBeVisible();
+		await expect(page.locator('text=Sunday, Dec 13, 2026')).toBeVisible();
 		await expect(page.locator('#scheduleRow-slot-1')).toContainText(
 			'3AM - 4AM',
 		);

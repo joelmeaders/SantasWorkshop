@@ -8,6 +8,7 @@ export * from './lib/email-template';
 export * from './lib/error';
 export * from './lib/global-alert';
 export * from './lib/onboard-user';
+export * from './lib/owner-operation';
 export * from './lib/parameters';
 export * from './lib/registration-email';
 export * from './lib/registration-search-index';

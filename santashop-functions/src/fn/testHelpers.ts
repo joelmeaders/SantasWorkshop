@@ -10,6 +10,7 @@ export interface TestAdminUserSeed {
 	emailAddress: string;
 	password: string;
 	admin?: boolean;
+	owner?: boolean;
 }
 
 export interface TestDateTimeSlotSeed {
@@ -169,6 +170,11 @@ export async function seedAdminUser(
 
 	await auth.setCustomUserClaims(createdUser.uid, {
 		admin: user.admin ?? true,
+		owner: user.owner ?? false,
+		roles:
+			user.owner || user.admin !== false
+				? ['admin', 'checkin']
+				: ['checkin'],
 	});
 
 	return { uid: createdUser.uid };

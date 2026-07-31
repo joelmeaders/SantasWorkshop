@@ -12,13 +12,14 @@ import {
 	type DateTimeValue,
 } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
+import { isAdminToken } from '../utility/capabilities';
 
 const log = createFunctionLogger('changeRegistrationDateTime');
 
 const isAdminContext = (
 	request: CallableRequest<ChangeRegistrationData>,
 ): boolean => {
-	return request.auth?.token?.['admin'] === true;
+	return isAdminToken(request.auth?.token);
 };
 
 interface ChangeRegistrationData {

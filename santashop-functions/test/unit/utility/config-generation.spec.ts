@@ -53,6 +53,7 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 		version: string;
 		appCheckKey: string;
 		appCheckEnabled: boolean;
+		programYear: number;
 		emulatorPorts: {
 			auth: number;
 			functions: number;
@@ -67,6 +68,7 @@ const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 		version: string;
 		appCheckKey: string;
 		appCheckEnabled: boolean;
+		programYear: number;
 		emulatorPorts: {
 			auth: number;
 			functions: number;
@@ -120,7 +122,6 @@ const FIREBASE_ENV_KEYS = {
 const FUNCTIONS_ENV_KEYS = {
 	TEST_AWS_ACCESS_KEY_ID: 'test-access-key',
 	TEST_AWS_SECRET_ACCESS_KEY: 'test-secret-key',
-	TEST_ADMIN_BOOTSTRAP_PASSWORD: 'test-bootstrap-password',
 	TEST_SANTASHOP_PROGRAM_YEAR: '2025',
 	TEST_SANTASHOP_TIME_ZONE: 'America/Denver',
 	TEST_SANTASHOP_TIME_OFFSET: '-07:00',
@@ -137,12 +138,10 @@ const FUNCTIONS_ENV_KEYS = {
 	TEST_SCHEDULED_REGISTRATION_STATS: '0 1 * * *',
 	TEST_SCHEDULED_USER_STATS: '0 2 * * *',
 	TEST_SCHEDULED_CHECKIN_STATS: '0 3 * * *',
-	TEST_ADMIN_UIDS: 'admin-1,admin-2',
 	TEST_SANTASHOP_SHOP_DAYS: '12-12,12-13',
 	TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '30',
 	PROD_AWS_ACCESS_KEY_ID: 'prod-access-key',
 	PROD_AWS_SECRET_ACCESS_KEY: 'prod-secret-key',
-	PROD_ADMIN_BOOTSTRAP_PASSWORD: 'prod-bootstrap-password',
 	PROD_SANTASHOP_PROGRAM_YEAR: '2030',
 	PROD_SANTASHOP_TIME_ZONE: 'America/New_York',
 	PROD_SANTASHOP_TIME_OFFSET: '-05:00',
@@ -174,7 +173,6 @@ const MANAGED_ENV_KEYS = [
 	'FIREBASE_MEASUREMENT_ID',
 	'AWS_ACCESS_KEY_ID',
 	'AWS_SECRET_ACCESS_KEY',
-	'ADMIN_BOOTSTRAP_PASSWORD',
 	'SANTASHOP_PROGRAM_YEAR',
 	'SANTASHOP_TIME_ZONE',
 	'SANTASHOP_TIME_OFFSET',
@@ -191,7 +189,6 @@ const MANAGED_ENV_KEYS = [
 	'SCHEDULED_REGISTRATION_STATS',
 	'SCHEDULED_USER_STATS',
 	'SCHEDULED_CHECKIN_STATS',
-	'ADMIN_UIDS',
 	'SANTASHOP_SHOP_DAYS',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
 	'AWS_REGION',
@@ -307,6 +304,7 @@ describe('config.firebase.cjs', () => {
 			configFirebase.MODE_METADATA.test.appCheckKey,
 		);
 		expect(config.appCheckEnabled).toBe(true);
+		expect(config.programYear).toBe(2025);
 		expect(config.name).toBe('@santashop/app');
 		expect(localConfig.appCheckEnabled).toBe(false);
 		expect(localConfig.emulatorPorts.firestore).toBe(8080);
@@ -321,6 +319,7 @@ describe('config.firebase.cjs', () => {
 			version: '2025.2.1',
 			appCheckKey: 'local-app-check-key',
 			appCheckEnabled: false,
+			programYear: 2026,
 			emulatorPorts: {
 				auth: 9099,
 				functions: 5001,
@@ -330,7 +329,18 @@ describe('config.firebase.cjs', () => {
 		});
 
 		expect(moduleText).toContain('appCheckEnabled: false');
+		expect(moduleText).toContain('programYear: 2026');
 		expect(moduleText).toContain('firestore: 8180');
+	});
+
+	it('rejects an invalid configured program year', () => {
+		process.env['TEST_SANTASHOP_PROGRAM_YEAR'] = 'not-a-year';
+
+		expect(() =>
+			configFirebase.buildAppConfig('admin', 'test'),
+		).toThrow(
+			'SANTASHOP_PROGRAM_YEAR must be a four-digit year between 2000 and 2100.',
+		);
 	});
 
 	it('renders a Firebase config module with the supplied values', () => {
@@ -372,7 +382,6 @@ describe('config.functions.cjs', () => {
 		setManagedEnv({
 			AWS_ACCESS_KEY_ID: 'fallback-access-key',
 			AWS_SECRET_ACCESS_KEY: 'fallback-secret-key',
-			ADMIN_BOOTSTRAP_PASSWORD: 'fallback-password',
 			SANTASHOP_PROGRAM_YEAR: '2029',
 			SANTASHOP_TIME_ZONE: 'America/Chicago',
 			SANTASHOP_TIME_OFFSET: '-06:00',
@@ -403,7 +412,6 @@ describe('config.functions.cjs', () => {
 	it('builds test Functions config from TEST values and omits empty optional values', () => {
 		setManagedEnv({
 			...FUNCTIONS_ENV_KEYS,
-			TEST_ADMIN_UIDS: '',
 			TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '',
 		});
 
@@ -413,7 +421,6 @@ describe('config.functions.cjs', () => {
 			FUNCTIONS_ENV_KEYS.TEST_AWS_ACCESS_KEY_ID,
 		);
 		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Test Event');
-		expect(config['ADMIN_UIDS']).toBeUndefined();
 		expect(config['REMINDER_EMAIL_SENDING_STALE_MINUTES']).toBeUndefined();
 	});
 
@@ -421,7 +428,6 @@ describe('config.functions.cjs', () => {
 		setManagedEnv({
 			AWS_ACCESS_KEY_ID: 'fallback-access-key',
 			AWS_SECRET_ACCESS_KEY: 'fallback-secret-key',
-			ADMIN_BOOTSTRAP_PASSWORD: 'fallback-password',
 			SANTASHOP_PROGRAM_YEAR: '2029',
 			SANTASHOP_TIME_ZONE: 'America/Chicago',
 			SANTASHOP_TIME_OFFSET: '-06:00',

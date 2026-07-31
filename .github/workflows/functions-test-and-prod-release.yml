@@ -24,8 +24,7 @@ permissions:
   contents: read
 
 env:
-  TEST_ADMIN_UIDS: bIMHv99EssTqMfhX2kkYm2vErwu1,xkeLDNPTVVPkt6Onh4EGYNuGi2C2,sGVW9Om1E5UGKWcq97EpygbwQfl2,2kNkKB4Xz5agjs6TfXzQStJ38gx1,RDkrgjJE0oQAXY6peLoABJvOH2j2
-  TEST_SANTASHOP_PROGRAM_YEAR: '2025'
+  TEST_SANTASHOP_PROGRAM_YEAR: '2026'
   TEST_SANTASHOP_TIME_ZONE: America/Denver
   TEST_SANTASHOP_TIME_OFFSET: '-07:00'
   TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
@@ -34,7 +33,7 @@ env:
   TEST_SES_REGION: us-west-2
   TEST_REGISTRATION_EMAIL_TEMPLATE: dscs-registration-confirmation-v1
   TEST_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
-  TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2025 Denver Santa Claus Shop
+  TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
   TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
@@ -43,8 +42,7 @@ env:
   TEST_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
   TEST_SCHEDULED_USER_STATS: 55 23 * 11,12 *
   TEST_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
-  PROD_ADMIN_UIDS: bIMHv99EssTqMfhX2kkYm2vErwu1,xkeLDNPTVVPkt6Onh4EGYNuGi2C2,sGVW9Om1E5UGKWcq97EpygbwQfl2,2kNkKB4Xz5agjs6TfXzQStJ38gx1,RDkrgjJE0oQAXY6peLoABJvOH2j2
-  PROD_SANTASHOP_PROGRAM_YEAR: '2025'
+  PROD_SANTASHOP_PROGRAM_YEAR: '2026'
   PROD_SANTASHOP_TIME_ZONE: America/Denver
   PROD_SANTASHOP_TIME_OFFSET: '-07:00'
   PROD_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
@@ -53,7 +51,7 @@ env:
   PROD_SES_REGION: us-west-2
   PROD_REGISTRATION_EMAIL_TEMPLATE: dscs-registration-confirmation-v1
   PROD_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
-  PROD_SANTASHOP_EVENT_DISPLAY_NAME: 2025 Denver Santa Claus Shop
+  PROD_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   PROD_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
   PROD_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   PROD_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
@@ -70,7 +68,6 @@ jobs:
     env:
       TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
-      TEST_ADMIN_BOOTSTRAP_PASSWORD: ${{ secrets.TEST_ADMIN_BOOTSTRAP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -91,7 +88,6 @@ jobs:
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', 'TEST')] }}
       TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
-      TEST_ADMIN_BOOTSTRAP_PASSWORD: ${{ secrets.TEST_ADMIN_BOOTSTRAP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -111,7 +107,6 @@ jobs:
           [ -n "$FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST" ] || { echo "Missing FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST"; exit 1; }
           [ -n "$TEST_AWS_ACCESS_KEY_ID" ] || { echo "Missing TEST_AWS_ACCESS_KEY_ID"; exit 1; }
           [ -n "$TEST_AWS_SECRET_ACCESS_KEY" ] || { echo "Missing TEST_AWS_SECRET_ACCESS_KEY"; exit 1; }
-          [ -n "$TEST_ADMIN_BOOTSTRAP_PASSWORD" ] || { echo "Missing TEST_ADMIN_BOOTSTRAP_PASSWORD"; exit 1; }
       - name: Write test Firebase service account
         shell: bash
         run: |
@@ -128,7 +123,6 @@ jobs:
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', '193B5')] }}
       PROD_AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       PROD_AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-      PROD_ADMIN_BOOTSTRAP_PASSWORD: ${{ secrets.PROD_ADMIN_BOOTSTRAP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -146,7 +140,6 @@ jobs:
           [ -n "$FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5" ] || { echo "Missing FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5"; exit 1; }
           [ -n "$PROD_AWS_ACCESS_KEY_ID" ] || { echo "Missing PROD_AWS_ACCESS_KEY_ID"; exit 1; }
           [ -n "$PROD_AWS_SECRET_ACCESS_KEY" ] || { echo "Missing PROD_AWS_SECRET_ACCESS_KEY"; exit 1; }
-          [ -n "$PROD_ADMIN_BOOTSTRAP_PASSWORD" ] || { echo "Missing PROD_ADMIN_BOOTSTRAP_PASSWORD"; exit 1; }
       - name: Write production Firebase service account
         shell: bash
         run: |

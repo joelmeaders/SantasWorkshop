@@ -7,7 +7,10 @@ import {
 	serializeError,
 } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import { ADMIN_UIDS } from '../utility/runtime-config';
+import {
+	isAdminToken,
+	isOwnerToken,
+} from '../utility/capabilities';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
 
@@ -17,15 +20,9 @@ interface StaffAuthUpdate {
 	disabled?: boolean;
 }
 
-const isAdminContext = (request: CallableRequest<unknown>): boolean => {
-	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
-	return token?.['admin'] === true;
-};
-
 const log = createFunctionLogger('callableUpdateStaffUser');
 
 const VALID_ROLES = new Set<StaffRole>(['admin', 'checkin']);
-const PROTECTED_UIDS = new Set<string>(ADMIN_UIDS);
 
 const sanitizeRoles = (roles: StaffRole[]): StaffRole[] => {
 	for (const role of roles) {
@@ -88,13 +85,6 @@ const resolveRoles = (uid: string, roles: StaffRole[]): StaffRole[] => {
 		);
 	}
 
-	if (PROTECTED_UIDS.has(uid) && !sanitized.includes('admin')) {
-		throw new HttpsError(
-			'failed-precondition',
-			'Cannot remove admin rights from a protected account',
-		);
-	}
-
 	return sanitized;
 };
 
@@ -148,7 +138,8 @@ const assertStaffAccountExists = async (uid: string): Promise<void> => {
 export default async function callableUpdateStaffUser(
 	request: CallableRequest<UpdateStaffUser>,
 ): Promise<void> {
-	if (!isAdminContext(request)) {
+	const actorToken = request.auth?.token as FirebaseAuthTokenLike | undefined;
+	if (!isAdminToken(actorToken)) {
 		log.warn('Non-admin attempted to update a staff account', {
 			actorUid: request.auth?.uid ?? null,
 			targetStaffUid: request.data?.uid ?? null,
@@ -170,6 +161,25 @@ export default async function callableUpdateStaffUser(
 	}
 
 	await assertStaffAccountExists(uid);
+
+	const targetUser = await admin.auth().getUser(uid);
+	const targetClaims = targetUser.customClaims as
+		| FirebaseAuthTokenLike
+		| undefined;
+	const requestedAdmin =
+		data.roles?.includes('admin') ??
+		isAdminToken(targetClaims);
+	if (
+		(isOwnerToken(targetClaims) ||
+			isAdminToken(targetClaims) ||
+			requestedAdmin) &&
+		!isOwnerToken(actorToken)
+	) {
+		throw new HttpsError(
+			'permission-denied',
+			'Only a project owner may alter an administrator account.',
+		);
+	}
 
 	const authUpdate = buildAuthUpdate(data);
 	const roles =

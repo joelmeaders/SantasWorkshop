@@ -8,6 +8,7 @@ import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
+import { isAdminToken } from '../utility/capabilities';
 
 const log = createFunctionLogger('checkInWithEdit');
 
@@ -16,7 +17,7 @@ export default async function checkInWithEdit(
 ): Promise<number> {
 	const record = request.data;
 
-	if (!request.auth?.token?.admin) {
+	if (!isAdminToken(request.auth?.token)) {
 		log.warn('Non-admin attempted to check in with edits', {
 			actorUid: request.auth?.uid ?? null,
 			targetUid: record.uid ?? null,
@@ -39,8 +40,6 @@ export default async function checkInWithEdit(
 		);
 	}
 
-	const batch = admin.firestore().batch();
-
 	// Registration
 	const registrationDocRef = admin
 		.firestore()
@@ -53,8 +52,6 @@ export default async function checkInWithEdit(
 		includedInRegistrationStats: false,
 		programYear: PROGRAM_YEAR,
 	} as Partial<Registration>;
-
-	batch.create(registrationDocRef, partialRegistration);
 
 	// Check In
 	const checkinDocRef = admin
@@ -69,12 +66,35 @@ export default async function checkInWithEdit(
 		stats: calculateRegistrationStats(record, true),
 	} as CheckIn;
 
-	batch.create(checkinDocRef, checkin);
+	const sourceRegistrationDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
 
 	try {
-		await batch.commit();
+		await admin.firestore().runTransaction(async (transaction) => {
+			const sourceRegistration = await transaction.get(
+				sourceRegistrationDocRef,
+			);
+			if (!sourceRegistration.exists) {
+				throw new HttpsError(
+					'not-found',
+					'Registration was not found.',
+				);
+			}
+
+			transaction.create(registrationDocRef, partialRegistration);
+			transaction.create(checkinDocRef, checkin);
+			transaction.set(
+				sourceRegistrationDocRef,
+				{ hasCheckedIn: true },
+				{ merge: true },
+			);
+		});
 		return checkin.stats!.children;
 	} catch (error) {
+		if (error instanceof HttpsError) {
+			throw error;
+		}
 		throw new HttpsError(
 			getErrorCode(error) === '6' ? 'already-exists' : 'internal',
 			getErrorMessage(error),

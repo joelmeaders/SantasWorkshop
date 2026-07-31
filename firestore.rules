@@ -68,5 +68,17 @@ service cloud.firestore {
       allow get, list: if isAdmin();
       allow write: if false;
     }
+
+    match /ownerOperationPreviews/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /ownerOperations/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /ownerOperationLocks/{document=**} {
+      allow read, write: if false;
+    }
   }
 }

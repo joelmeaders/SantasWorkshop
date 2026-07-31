@@ -126,7 +126,7 @@ bootstrapApplication(AppComponent, {
 		...firebaseProviders,
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
-		{ provide: PROGRAM_YEAR, useValue: 2025 },
+		{ provide: PROGRAM_YEAR, useValue: config.programYear },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 	],

@@ -67,7 +67,17 @@ const parseRequiredInteger = (name: string): number => {
 	return parsed;
 };
 
-export const PROGRAM_YEAR = parseRequiredInteger('SANTASHOP_PROGRAM_YEAR');
+const parseRequiredYear = (name: string): number => {
+	const year = parseRequiredInteger(name);
+	if (year < 2000 || year > 2100) {
+		throw new TypeError(
+			`Invalid year environment variable: ${name}`,
+		);
+	}
+	return year;
+};
+
+export const PROGRAM_YEAR = parseRequiredYear('SANTASHOP_PROGRAM_YEAR');
 
 export const SHOP_TIME_ZONE = requireEnv('SANTASHOP_TIME_ZONE');
 
@@ -106,10 +116,6 @@ export const REGISTRATION_EMAIL_SOURCE = requireEnv(
 export const REGISTRATION_EMAIL_RETURN_PATH = requireEnv(
 	'REGISTRATION_EMAIL_RETURN_PATH',
 );
-
-export const ADMIN_BOOTSTRAP_PASSWORD = requireEnv('ADMIN_BOOTSTRAP_PASSWORD');
-
-export const ADMIN_UIDS = parseList(process.env['ADMIN_UIDS'], []);
 
 export const SCHEDULED_FIRESTORE_BACKUP = requireEnv(
 	'SCHEDULED_FIRESTORE_BACKUP',

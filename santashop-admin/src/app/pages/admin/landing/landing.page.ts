@@ -17,6 +17,7 @@ import {
 	exitOutline,
 	moonOutline,
 	calendarOutline,
+	shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import {
 	IonRouterLink,
@@ -62,6 +63,7 @@ export class LandingPage {
 	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
 
 	public readonly isAdmin$ = this.authService.isAdmin$.pipe(shareReplay(1));
+	public readonly isOwner$ = this.authService.isOwner$.pipe(shareReplay(1));
 
 	public async signOut(): Promise<void> {
 		await this.authService.logout();
@@ -90,34 +92,7 @@ export class LandingPage {
 			exitOutline,
 			moonOutline,
 			calendarOutline,
-		});
-		addIcons({
-			bagCheckOutline,
-			searchOutline,
-			storefrontOutline,
-			personAddOutline,
-			mailOutline,
-			documentTextOutline,
-			statsChartOutline,
-			cartOutline,
-			peopleOutline,
-			exitOutline,
-			moonOutline,
-			calendarOutline,
-		});
-		addIcons({
-			bagCheckOutline,
-			searchOutline,
-			storefrontOutline,
-			personAddOutline,
-			mailOutline,
-			documentTextOutline,
-			statsChartOutline,
-			cartOutline,
-			peopleOutline,
-			exitOutline,
-			moonOutline,
-			calendarOutline,
+			shieldCheckmarkOutline,
 		});
 	}
 }

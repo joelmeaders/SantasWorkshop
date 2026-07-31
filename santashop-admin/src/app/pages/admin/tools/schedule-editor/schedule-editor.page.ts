@@ -7,7 +7,12 @@ import {
 	Validators,
 	FormsModule,
 } from '@angular/forms';
-import { PROGRAM_YEAR, TimeSlotPipe, shopSchedule } from '@santashop/core';
+import {
+	AuthService,
+	PROGRAM_YEAR,
+	TimeSlotPipe,
+	shopSchedule,
+} from '@santashop/core';
 import { DateTimeSlot } from '@santashop/models';
 import {
 	AlertController,
@@ -96,8 +101,10 @@ export class ScheduleEditorPage {
 	private readonly scheduleEditorService = inject(ScheduleEditorService);
 	private readonly alerts = inject(AlertController);
 	private readonly defaultProgramYear = inject(PROGRAM_YEAR);
+	private readonly authService = inject(AuthService);
 
 	public readonly availableYears = this.buildYearOptions();
+	public readonly isOwner$ = this.authService.isOwner$;
 	public readonly hourOptions = Array.from({ length: 24 }, (_, hour) => hour);
 
 	public year = this.defaultProgramYear;
@@ -204,7 +211,17 @@ export class ScheduleEditorPage {
 				startHour,
 				endHour,
 			});
-			const result = await this.scheduleEditorService.createSlots(slots);
+			const preview =
+				await this.scheduleEditorService.previewCreateSlots(slots);
+			const confirmation = await this.requestOwnerConfirmation(
+				preview.confirmationPhrase,
+			);
+			if (!confirmation) return;
+			await this.authService.reauthenticate(confirmation.password);
+			const result = await this.scheduleEditorService.startCreateSlots(
+				preview.previewId,
+				confirmation.phrase,
+			);
 			this.statusMessage =
 				result.skipped > 0
 					? `Created ${result.created} schedules and skipped ${result.skipped} duplicates.`
@@ -215,6 +232,49 @@ export class ScheduleEditorPage {
 				this.errorMessage(error),
 			);
 		}
+	}
+
+	private async requestOwnerConfirmation(
+		confirmationPhrase: string,
+	): Promise<{ password: string; phrase: string } | undefined> {
+		const alert = await this.alerts.create({
+			header: 'Initialize schedules?',
+			message: `This owner-only action is season restricted. Type: ${confirmationPhrase}`,
+			inputs: [
+				{
+					name: 'password',
+					type: 'password',
+					placeholder: 'Account password',
+					attributes: { autocomplete: 'current-password' },
+				},
+				{
+					name: 'phrase',
+					type: 'text',
+					placeholder: 'Exact confirmation phrase',
+				},
+			],
+			buttons: [
+				{ text: 'Cancel', role: 'cancel' },
+				{ text: 'Initialize', role: 'confirm' },
+			],
+		});
+		await alert.present();
+		const result = await alert.onDidDismiss<{
+			values?: {
+				password?: string;
+				phrase?: string;
+			};
+		}>();
+		const password = result.data?.values?.password?.trim();
+		const phrase = result.data?.values?.phrase?.trim();
+		if (
+			result.role !== 'confirm' ||
+			!password ||
+			phrase !== confirmationPhrase
+		) {
+			return undefined;
+		}
+		return { password, phrase };
 	}
 
 	public async applyBulkEdit(): Promise<void> {

@@ -17,7 +17,9 @@
 		"deploy": "pnpm run config:prod && firebase deploy --only functions",
 		"deploy:test": "pnpm run config:test && firebase use santas-workshop-test && firebase deploy --only functions",
 		"deploy:prod": "pnpm run config:prod && firebase use santas-workshop-193b5 && firebase deploy --only functions",
-		"logs": "firebase functions:log"
+		"logs": "firebase functions:log",
+		"owner:manage": "node scripts/manage-owner.mjs",
+		"owner:archive-backup": "node scripts/archive-firestore-backup.mjs"
 	},
 	"engines": {
 		"node": ">=22"

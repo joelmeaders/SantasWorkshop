@@ -7,18 +7,25 @@ import {
 	provideProgramYearMock,
 } from '../../../../../test-helpers';
 import { ScheduleEditorService } from './schedule-editor.service';
+import { OwnerOperationsService } from '../owner-operations/owner-operations.service';
 
 describe('ScheduleEditorService', () => {
 	let service: ScheduleEditorService;
 	let fireRepo: jasmine.SpyObj<FireRepoLite>;
 	let collection: jasmine.SpyObj<IFireRepoCollection<DateTimeSlot>>;
+	let ownerOperations: jasmine.SpyObj<OwnerOperationsService>;
 
 	beforeEach(() => {
+		ownerOperations = jasmine.createSpyObj<OwnerOperationsService>(
+			'OwnerOperationsService',
+			['preview', 'start', 'get'],
+		);
 		TestBed.configureTestingModule({
 			teardown: { destroyAfterEach: false },
 			providers: [
 				ScheduleEditorService,
 				provideProgramYearMock(2025),
+				{ provide: OwnerOperationsService, useValue: ownerOperations },
 				{
 					provide: FireRepoLite,
 					useFactory: createFireRepoLiteMock,
@@ -73,23 +80,23 @@ describe('ScheduleEditorService', () => {
 		expect(result[1].slotsReserved).toBe(0);
 	});
 
-	it('createSlots() should add only non-duplicate slots', async () => {
+	it('previewCreateSlots() should send normalized slots to the owner callable', async () => {
 		// Arrange
 		const existingDate = new Date(2025, 11, 12, 10);
-		collection.readMany.and.returnValue(
-			of([
-				{
-					id: 'existing',
-					programYear: 2025,
-					dateTime: existingDate,
-					maxSlots: 30,
-					enabled: true,
-				},
-			]),
-		);
+		ownerOperations.preview.and.resolveTo({
+			previewId: 'preview-1',
+			operation: 'initialize-schedule',
+			projectId: 'test-project',
+			programYear: 2025,
+			expiresAt: '2026-07-30T12:10:00.000Z',
+			confirmationPhrase:
+				'INITIALIZE SCHEDULE test-project 2025',
+			counts: { requestedSlots: 1 },
+			seasonRestricted: true,
+		});
 
 		// Act
-		const result = await service.createSlots([
+		const result = await service.previewCreateSlots([
 			{
 				programYear: 2025,
 				dateTime: existingDate,
@@ -97,26 +104,22 @@ describe('ScheduleEditorService', () => {
 				enabled: true,
 				slotsReserved: 0,
 			},
-			{
-				programYear: 2025,
-				dateTime: new Date(2025, 11, 12, 11),
-				maxSlots: 30,
-				enabled: true,
-				slotsReserved: 0,
-			},
 		]);
 
 		// Assert
-		expect(result).toEqual({ created: 1, skipped: 1 });
-		expect(collection.add).toHaveBeenCalledTimes(1);
-		expect(collection.add).toHaveBeenCalledWith(
-			jasmine.objectContaining({
+		expect(result.previewId).toBe('preview-1');
+		expect(ownerOperations.preview).toHaveBeenCalledOnceWith({
+			operation: 'initialize-schedule',
+			programYear: 2025,
+			slots: [
+				{
 				programYear: 2025,
+					dateTime: existingDate.toISOString(),
 				maxSlots: 30,
 				enabled: true,
-				lastUpdated: jasmine.any(Date),
-			}),
-		);
+				},
+			],
+		});
 	});
 
 	it('bulkUpdate() should update every selected slot', async () => {

@@ -1,13 +1,12 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2/options';
-import { onMessagePublished } from 'firebase-functions/v2/pubsub';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { FUNCTION_REGION } from './utility/function-region';
 import {
 	observeCallableHandler,
 	observeDocumentHandler,
-	observePubsubHandler,
 	observeScheduledHandler,
 } from './utility/observability';
 import {
@@ -229,6 +228,78 @@ export const callableDeleteStaffUser = onCall(
 	}),
 );
 
+export const callablePreviewOwnerOperation = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK, timeoutSeconds: 120 },
+	observeCallableHandler(
+		'callablePreviewOwnerOperation',
+		async (request) => {
+			return (
+				await import('./fn/ownerOperations')
+			).previewOwnerOperation(request);
+		},
+	),
+);
+
+export const callableStartOwnerOperation = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK, timeoutSeconds: 60 },
+	observeCallableHandler(
+		'callableStartOwnerOperation',
+		async (request) => {
+			return (
+				await import('./fn/ownerOperations')
+			).startOwnerOperation(request);
+		},
+	),
+);
+
+export const callableGetOwnerOperation = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler(
+		'callableGetOwnerOperation',
+		async (request) => {
+			return (
+				await import('./fn/ownerOperations')
+			).getOwnerOperation(request);
+		},
+	),
+);
+
+export const callableGetOwnerExportUrl = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler(
+		'callableGetOwnerExportUrl',
+		async (request) => {
+			return (
+				await import('./fn/ownerOperations')
+			).getOwnerExportUrl(request);
+		},
+	),
+);
+
+export const ownerOperationWorker = onTaskDispatched(
+	{
+		invoker: 'private',
+		maxInstances: 1,
+		concurrency: 1,
+		memory: '512MiB',
+		timeoutSeconds: 1800,
+		retryConfig: {
+			maxAttempts: 3,
+			minBackoffSeconds: 30,
+			maxBackoffSeconds: 300,
+			maxDoublings: 3,
+			maxRetrySeconds: 3600,
+		},
+		rateLimits: {
+			maxConcurrentDispatches: 1,
+			maxDispatchesPerSecond: 1,
+		},
+	},
+	async (request) => {
+		await (await import('./fn/ownerOperationWorker')).default(request);
+	},
+);
+
 // ------------------------------------- TRIGGER FUNCTIONS
 
 export const sendNewRegistrationEmails = onDocumentCreated(
@@ -326,106 +397,6 @@ export const scheduledCheckInStats = onSchedule(
 	},
 	observeScheduledHandler('scheduledCheckInStats', async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
-	}),
-);
-
-// ------------------------------------- PUBSUB FUNCTIONS
-export const pubsubResetCheckInStats = onMessagePublished(
-	{
-		topic: 'reset-checkin-stats',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubResetCheckInStats', async () => {
-		await (await import('./fn/pubsubResetCheckInStats')).default();
-	}),
-);
-
-export const pubsubQueueReminderEmails = onMessagePublished(
-	{
-		topic: 'queue-reminder-emails',
-		memory: '256MiB',
-		timeoutSeconds: 540,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubQueueReminderEmails', async () => {
-		await (await import('./fn/pubsubQueueReminderEmails')).default();
-	}),
-);
-
-export const pubsubSetAdminRights = onMessagePublished(
-	{
-		topic: 'set-admin-rights',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubSetAdminRights', async () => {
-		await (await import('./fn/pubsubSetAdminRights')).default();
-	}),
-);
-
-export const pubsubMarkRegistrationsCheckedIn = onMessagePublished(
-	{
-		topic: 'mark-registrations-checked-in',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubMarkRegistrationsCheckedIn', async () => {
-		await (await import('./fn/pubsubMarkRegistrationsCheckedIn')).default();
-	}),
-);
-
-export const pubsubExportMarketingEmails = onMessagePublished(
-	{
-		topic: 'export-marketing-emails',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubExportMarketingEmails', async () => {
-		await (await import('./fn/pubsubExportMarketingEmails')).default();
-	}),
-);
-
-export const pubsubExportRegisteredEmails = onMessagePublished(
-	{
-		topic: 'export-registered-emails',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubExportRegisteredEmails', async () => {
-		await (await import('./fn/pubsubExportRegisteredEmails')).default();
-	}),
-);
-
-// This method checks for existing dates/times.
-// If there are none it adds them
-export const pubsubAddDateTimeSlots = onMessagePublished(
-	{
-		topic: 'create-datetime-slots',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubAddDateTimeSlots', async () => {
-		await (await import('./fn/pubsubAddDateTimeSlots')).default();
-	}),
-);
-
-// Deletes all users except for disabled accounts
-export const pubsubDeleteUsers = onMessagePublished(
-	{
-		topic: 'delete-users',
-		memory: '256MiB',
-		timeoutSeconds: 60,
-		maxInstances: 1,
-	},
-	observePubsubHandler('pubsubDeleteUsers', async () => {
-		await (await import('./fn/pubsubDeleteUsers')).default();
 	}),
 );
 
@@ -535,6 +506,10 @@ export const testSeedAdminUser = onCall(
 			'admin' in data && typeof data.admin === 'boolean'
 				? data.admin
 				: true;
+		const ownerClaim =
+			'owner' in data && typeof data.owner === 'boolean'
+				? data.owner
+				: false;
 
 		if (!password) {
 			throw new HttpsError(
@@ -548,6 +523,7 @@ export const testSeedAdminUser = onCall(
 			password,
 			uid,
 			admin: adminClaim,
+			owner: ownerClaim,
 		});
 	}),
 );

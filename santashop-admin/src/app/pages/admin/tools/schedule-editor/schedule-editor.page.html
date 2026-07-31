@@ -37,6 +37,7 @@
 			</div>
 
 			<div class="editor-panels">
+				@if ((isOwner$ | async) === true) {
 				<ion-card class="editor-panel editor-panel--generator">
 					<ion-card-header>
 						<ion-card-title
@@ -127,6 +128,20 @@
 						</div>
 					</ion-card-content>
 				</ion-card>
+				} @else {
+				<ion-card class="editor-panel editor-panel--generator">
+					<ion-card-header>
+						<ion-card-title>Schedule initialization</ion-card-title>
+					</ion-card-header>
+					<ion-card-content>
+						<ion-note>
+							Only a project owner can generate the initial
+							schedule. Administrators can continue editing
+							existing schedules.
+						</ion-note>
+					</ion-card-content>
+				</ion-card>
+				}
 
 				<ion-card class="editor-panel editor-panel--bulk">
 					<ion-card-header>

@@ -2,6 +2,7 @@ import { test, expect } from '../../fixtures/test-fixtures';
 import type { Locator } from '@playwright/test';
 import {
 	defaultAdminAccount,
+	defaultOwnerAccount,
 	fillAdminSignInForm,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
@@ -15,6 +16,11 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		page,
 		seedPublicParams,
 	}) => {
+		await page.goto('/');
+		if (new URL(page.url()).pathname.startsWith('/admin')) {
+			await page.click('#adminSignOutButton');
+			await expect(page).toHaveURL(/\/$/, { timeout: 30000 });
+		}
 		await seedPublicParams({});
 		await page.goto('/admin/landing');
 		await expect(page).toHaveURL(/\/$/);
@@ -101,6 +107,58 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expectIonicDisabled(page.locator('#checkInTab'));
 		await expectIonicDisabled(page.locator('#onSiteRegistrationTab'));
 		await expect(page.locator('#searchNav')).toBeVisible();
+	});
+
+	test('STAFF-006 denies owner operations to an ordinary administrator', async ({
+		page,
+		seedPublicParams,
+		seedAdminUser,
+	}) => {
+		const account = defaultAdminAccount();
+		await seedPublicParams({});
+		await seedAdminUser(account);
+		await signInAdminViaUi(page, account);
+
+		await page.goto('/admin/owner-operations');
+
+		await expect(page).toHaveURL(/\/admin\/landing$/, {
+			timeout: 30000,
+		});
+		await expect(page.locator('#ownerOperationsNav')).toHaveCount(0);
+	});
+
+	test('RULES-001 denies direct access to owner operation records', async ({
+		request,
+		seedAdminUser,
+	}) => {
+		const account = defaultOwnerAccount();
+		await seedAdminUser(account);
+		const signInResponse = await request.post(
+			'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',
+			{
+				data: {
+					email: account.emailAddress,
+					password: account.password,
+					returnSecureToken: true,
+				},
+			},
+		);
+		expect(signInResponse.ok()).toBe(true);
+		const { idToken } = (await signInResponse.json()) as {
+			idToken: string;
+		};
+
+		for (const collection of [
+			'ownerOperationPreviews',
+			'ownerOperations',
+			'ownerOperationLocks',
+		]) {
+			const response = await request.get(
+				`http://127.0.0.1:8180/v1/projects/demo-santashop/databases/(default)/documents/${collection}/rules-test`,
+				{ headers: { Authorization: `Bearer ${idToken}` } },
+			);
+			expect(response.status()).toBe(403);
+		}
 	});
 });
 

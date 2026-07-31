@@ -4,6 +4,9 @@ interface CallableRequestOptions {
 	uid?: string;
 	email?: string;
 	admin?: boolean;
+	owner?: boolean;
+	roles?: string[];
+	authTime?: number;
 }
 
 export const createCallableRequest = <TData>(
@@ -18,6 +21,9 @@ export const createCallableRequest = <TData>(
 		token: {
 			email,
 			admin: options.admin ?? false,
+			owner: options.owner ?? false,
+			roles: options.roles ?? [],
+			auth_time: options.authTime ?? Math.floor(Date.now() / 1000),
 		},
 	};
 

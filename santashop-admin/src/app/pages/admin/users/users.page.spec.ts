@@ -7,6 +7,7 @@ import { provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import type { StaffAccount } from '@santashop/models';
 import { StaffService } from './staff.service';
+import { AuthService } from '@santashop/core';
 import {
 	provideActivatedRouteMock,
 	provideAlertControllerMock,
@@ -43,6 +44,10 @@ describe('UsersPage', () => {
 				provideLoadingControllerMock(),
 				provideModalControllerMock(),
 				{ provide: StaffService, useValue: staffService },
+				{
+					provide: AuthService,
+					useValue: { isOwner$: of(true) },
+				},
 			],
 		}).compileComponents();
 

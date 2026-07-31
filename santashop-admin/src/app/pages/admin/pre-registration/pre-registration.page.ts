@@ -51,6 +51,7 @@ import {
 	IFireRepoCollection,
 	timestampToDate,
 	HttpsCallableResult,
+	PROGRAM_YEAR,
 } from '@santashop/core';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
@@ -94,6 +95,7 @@ export class PreRegistrationPage implements OnDestroy {
 	private readonly functions = inject(FunctionsWrapper);
 	private readonly loadingController = inject(LoadingController);
 	private readonly alertController = inject(AlertController);
+	private readonly programYear = inject(PROGRAM_YEAR);
 
 	private readonly destroy$ = new Subject<void>();
 	private readonly childrenList = new BehaviorSubject<Child[]>([]);
@@ -150,7 +152,9 @@ export class PreRegistrationPage implements OnDestroy {
 		dateTimeSlot: new UntypedFormControl(undefined, Validators.required),
 	});
 
-	public readonly availableSlots$ = this.availableSlotsQuery(2025).pipe(
+	public readonly availableSlots$ = this.availableSlotsQuery(
+		this.programYear,
+	).pipe(
 		takeUntil(this.destroy$),
 		map((data) =>
 			data.map((s) => {

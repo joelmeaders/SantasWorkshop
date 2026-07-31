@@ -100,7 +100,7 @@ describe('callableCreateStaffUser handler', () => {
 		const result = await callableCreateStaffUser(
 			createCallableRequest(
 				{ ...validPayload(), roles: ['checkin', 'admin'] },
-				{ admin: true },
+				{ owner: true },
 			),
 		);
 
@@ -135,7 +135,7 @@ describe('callableCreateStaffUser handler', () => {
 		await callableCreateStaffUser(
 			createCallableRequest(
 				{ ...validPayload(), roles: ['admin'] },
-				{ admin: true },
+				{ owner: true },
 			),
 		);
 

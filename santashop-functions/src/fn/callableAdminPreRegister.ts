@@ -21,6 +21,7 @@ import {
 } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
+import { isAdminToken } from '../utility/capabilities';
 
 interface RegistrationCreationResult {
 	qrCode: string;
@@ -33,7 +34,7 @@ interface FirebaseAuthTokenLike {
 
 const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
-	return token?.['admin'] === true;
+	return isAdminToken(token);
 };
 
 const log = createFunctionLogger('callableAdminPreRegister');

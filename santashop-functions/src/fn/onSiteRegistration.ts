@@ -8,6 +8,7 @@ import admin from '../firebase-admin';
 import { getErrorMessage, getErrorStatus } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
+import { isAdminToken } from '../utility/capabilities';
 
 const log = createFunctionLogger('onSiteRegistration');
 
@@ -16,7 +17,7 @@ export default async function onSiteRegistration(
 ): Promise<number> {
 	const record = request.data;
 
-	if (!request.auth?.token?.admin) {
+	if (!isAdminToken(request.auth?.token)) {
 		log.warn('Non-admin attempted an on-site registration', {
 			actorUid: request.auth?.uid ?? null,
 			targetUid: record.uid ?? null,

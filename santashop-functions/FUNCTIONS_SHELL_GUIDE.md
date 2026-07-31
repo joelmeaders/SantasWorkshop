@@ -102,43 +102,19 @@ scheduledUserStats();
 scheduledCheckInStats();
 ```
 
-### 4. Pub/Sub Functions (pubsub.topic)
+### 4. Owner Operations
 
-Pub/Sub functions are triggered by messages published to a topic. They can be manually triggered in the shell.
+The former Pub/Sub maintenance handlers have been retired. Their supported
+replacements are authenticated, App-Check-protected callables exposed through
+the admin app's **Owner operations** area. Do not invoke these workflows from
+the Functions shell: previews, recent authentication, exact confirmation
+phrases, seasonal restrictions, single-use records, and task progress are all
+part of the security contract.
 
-#### Syntax
-
-```javascript
-functionName();
-```
-
-#### Examples
-
-```javascript
-// Reset check-in statistics
-pubsubResetCheckInStats();
-
-// Queue reminder emails for registrants
-pubsubQueueReminderEmails();
-
-// Set admin rights for users
-pubsubSetAdminRights();
-
-// Mark registrations as checked in
-pubsubMarkRegistrationsCheckedIn();
-
-// Export marketing email addresses
-pubsubExportMarketingEmails();
-
-// Export registered user emails
-pubsubExportRegisteredEmails();
-
-// Add datetime slots to database
-pubsubAddDateTimeSlots();
-
-// Delete all users (except disabled accounts)
-pubsubDeleteUsers();
-```
+Provision or transfer an owner with `pnpm --filter @santashop/functions
+owner:manage`. See [`../docs/yearly-startup.md`](../docs/yearly-startup.md) for
+the yearly export, verified backup, purge, archive, schedule initialization, and
+deployment workflow.
 
 ## Common Patterns
 

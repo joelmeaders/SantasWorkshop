@@ -13,6 +13,9 @@ export const COLLECTION_SCHEMA = {
 	tmpResendRegistrationEmails: 'tmp_registrationemails2',
 	parameters: 'parameters',
 	staff: 'staff',
+	ownerOperationPreviews: 'ownerOperationPreviews',
+	ownerOperations: 'ownerOperations',
+	ownerOperationLocks: 'ownerOperationLocks',
 	// campaigns: (organizationId: string): string =>
 	//   `${COLLECTION_SCHEMA.organizations}/${organizationId}/campaigns`
 };

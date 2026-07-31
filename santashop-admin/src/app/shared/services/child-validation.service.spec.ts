@@ -23,11 +23,19 @@ describe('ChildValidationService', () => {
 	});
 
 	it('ageValid(): should return expected results', () => {
-		// Arrange - For 2025: ages 0-12 are valid (born 2013-2025)
-		const ageZero = new Date('12/15/2025'); // Born in 2025, age 0
-		const age12 = new Date('12/15/2013'); // Born in 2013, age 12
-		const age13 = new Date('12/15/2012'); // Born in 2012, age 13 - TOO OLD
-		const futureDate = new Date('1/1/2026'); // Future date - INVALID
+		const programYear = new Date().getFullYear();
+		const ageZero = new Date(programYear, 11, 15);
+		const age12 = new Date(
+			programYear - MAX_CHILD_AGE_IN_YEARS(),
+			11,
+			15,
+		);
+		const age13 = new Date(
+			programYear - MAX_CHILD_AGE_IN_YEARS() - 1,
+			11,
+			15,
+		);
+		const futureDate = new Date(programYear + 1, 0, 1);
 
 		// Act & Assert - Valid ages
 		expect(service.ageValid(ageZero)).toBeTrue();
@@ -152,7 +160,7 @@ describe('ChildValidationService', () => {
 
 	it('MAX_BIRTHDATE: should be expected value', () => {
 		expect(MAX_BIRTHDATE().toDateString()).toEqual(
-			new Date('12/31/2025').toDateString(),
+			new Date(new Date().getFullYear(), 11, 31).toDateString(),
 		);
 	});
 
@@ -161,8 +169,10 @@ describe('ChildValidationService', () => {
 	});
 
 	it('MIN_BIRTHDATE: should be expected value', () => {
+		const expectedYear =
+			new Date().getFullYear() - MAX_CHILD_AGE_IN_YEARS();
 		expect(MIN_BIRTHDATE().toDateString()).toEqual(
-			new Date('1/1/2013').toDateString(),
+			new Date(`1/1/${expectedYear}`).toDateString(),
 		);
 	});
 });

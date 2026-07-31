@@ -17,6 +17,7 @@ export interface StaffAdminMock {
 		firestore: ReturnType<typeof vi.fn>;
 	};
 	createUser: ReturnType<typeof vi.fn>;
+	getUser: ReturnType<typeof vi.fn>;
 	updateUser: ReturnType<typeof vi.fn>;
 	deleteUser: ReturnType<typeof vi.fn>;
 	setCustomUserClaims: ReturnType<typeof vi.fn>;
@@ -27,11 +28,17 @@ export interface StaffAdminMock {
 		exists?: boolean,
 	) => void;
 	getDocRef: (path: string) => MockDocRef;
+	setUserClaims: (uid: string, claims: Record<string, unknown>) => void;
 }
 
 export const createStaffAdminMock = (): StaffAdminMock => {
 	const docRefs = new Map<string, MockDocRef>();
 	const createUser = vi.fn();
+	const userClaims = new Map<string, Record<string, unknown>>();
+	const getUser = vi.fn(async (uid: string) => ({
+		uid,
+		customClaims: userClaims.get(uid) ?? { roles: ['checkin'] },
+	}));
 	const updateUser = vi.fn().mockResolvedValue(undefined);
 	const deleteUser = vi.fn().mockResolvedValue(undefined);
 	const setCustomUserClaims = vi.fn().mockResolvedValue(undefined);
@@ -72,6 +79,7 @@ export const createStaffAdminMock = (): StaffAdminMock => {
 	const firestore = vi.fn(() => ({ doc }));
 	const auth = vi.fn(() => ({
 		createUser,
+		getUser,
 		updateUser,
 		deleteUser,
 		setCustomUserClaims,
@@ -85,12 +93,16 @@ export const createStaffAdminMock = (): StaffAdminMock => {
 			firestore,
 		},
 		createUser,
+		getUser,
 		updateUser,
 		deleteUser,
 		setCustomUserClaims,
 		doc,
 		setDocSnapshot,
 		getDocRef,
+		setUserClaims: (uid, claims): void => {
+			userClaims.set(uid, claims);
+		},
 	};
 };
 

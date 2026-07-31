@@ -1,6 +1,8 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import {
+	EmailAuthProvider,
 	onAuthStateChanged,
+	reauthenticateWithCredential,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
@@ -75,6 +77,22 @@ export class AuthWrapper {
 		user: User,
 		newPassword: string,
 	): Promise<void> => updatePassword(user, newPassword);
+
+	public readonly reauthenticateWithPassword = (
+		user: User,
+		password: string,
+	): Promise<UserCredential> => {
+		if (!user.email) {
+			return Promise.reject(
+				new Error('The current account does not have an email address.'),
+			);
+		}
+
+		return reauthenticateWithCredential(
+			user,
+			EmailAuthProvider.credential(user.email, password),
+		);
+	};
 
 	public readonly signOut = (): Promise<void> => this.auth.signOut();
 }

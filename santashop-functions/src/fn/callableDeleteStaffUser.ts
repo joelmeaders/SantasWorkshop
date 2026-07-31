@@ -3,18 +3,14 @@ import { COLLECTION_SCHEMA, DeleteStaffUser } from '../models';
 import admin from '../firebase-admin';
 import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import { ADMIN_UIDS } from '../utility/runtime-config';
+import {
+	isAdminToken,
+	isOwnerToken,
+} from '../utility/capabilities';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
 
-const isAdminContext = (request: CallableRequest<unknown>): boolean => {
-	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
-	return token?.['admin'] === true;
-};
-
 const log = createFunctionLogger('callableDeleteStaffUser');
-
-const PROTECTED_UIDS = new Set<string>(ADMIN_UIDS);
 
 const assertStaffAccountExists = async (uid: string): Promise<void> => {
 	const snapshot = await admin
@@ -30,7 +26,8 @@ const assertStaffAccountExists = async (uid: string): Promise<void> => {
 export default async function callableDeleteStaffUser(
 	request: CallableRequest<DeleteStaffUser>,
 ): Promise<void> {
-	if (!isAdminContext(request)) {
+	const actorToken = request.auth?.token as FirebaseAuthTokenLike | undefined;
+	if (!isAdminToken(actorToken)) {
 		log.warn('Non-admin attempted to delete a staff account', {
 			actorUid: request.auth?.uid ?? null,
 			targetStaffUid: request.data?.uid ?? null,
@@ -52,10 +49,22 @@ export default async function callableDeleteStaffUser(
 
 	await assertStaffAccountExists(uid);
 
-	if (PROTECTED_UIDS.has(uid)) {
+	const targetUser = await admin.auth().getUser(uid);
+	const targetClaims = targetUser.customClaims as
+		| FirebaseAuthTokenLike
+		| undefined;
+
+	if (isOwnerToken(targetClaims)) {
 		throw new HttpsError(
 			'failed-precondition',
-			'This account is protected and cannot be deleted',
+			'Owner accounts must be transferred and revoked outside the app.',
+		);
+	}
+
+	if (isAdminToken(targetClaims) && !isOwnerToken(actorToken)) {
+		throw new HttpsError(
+			'permission-denied',
+			'Only a project owner may delete an administrator.',
 		);
 	}
 

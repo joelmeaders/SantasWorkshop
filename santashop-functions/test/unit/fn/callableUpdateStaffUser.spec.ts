@@ -28,6 +28,11 @@ describe('callableUpdateStaffUser handler', () => {
 			roles: ['admin', 'checkin'],
 			disabled: false,
 		});
+		adminMock.setUserClaims(PROTECTED_UID, {
+			owner: true,
+			admin: true,
+			roles: ['admin', 'checkin'],
+		});
 	});
 
 	it('rejects non-admin callers', async () => {
@@ -109,7 +114,7 @@ describe('callableUpdateStaffUser handler', () => {
 		await callableUpdateStaffUser(
 			createCallableRequest<UpdateStaffUser>(
 				{ uid: 'staff-1', roles: ['admin', 'checkin'] },
-				{ admin: true },
+				{ owner: true },
 			),
 		);
 
@@ -126,7 +131,7 @@ describe('callableUpdateStaffUser handler', () => {
 		await callableUpdateStaffUser(
 			createCallableRequest<UpdateStaffUser>(
 				{ uid: 'staff-1', roles: ['admin'] },
-				{ admin: true },
+				{ owner: true },
 			),
 		);
 
@@ -161,7 +166,7 @@ describe('callableUpdateStaffUser handler', () => {
 					{ admin: true },
 				),
 			),
-		).rejects.toMatchObject({ code: 'failed-precondition' });
+		).rejects.toMatchObject({ code: 'permission-denied' });
 		expect(adminMock.setCustomUserClaims).not.toHaveBeenCalled();
 	});
 

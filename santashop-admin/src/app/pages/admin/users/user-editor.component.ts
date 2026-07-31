@@ -62,11 +62,16 @@ export class UserEditorComponent implements OnInit {
 	private readonly modalController = inject(ModalController);
 
 	@Input() public account?: StaffAccount;
+	@Input() public isOwner = false;
 
-	public readonly roleOptions: readonly RoleOption[] = [
-		{ value: 'admin', label: 'Administrator' },
-		{ value: 'checkin', label: 'Check-In' },
-	];
+	public get roleOptions(): readonly RoleOption[] {
+		return [
+			...(this.isOwner
+				? [{ value: 'admin', label: 'Administrator' } as RoleOption]
+				: []),
+			{ value: 'checkin', label: 'Check-In' },
+		];
+	}
 
 	public form!: UntypedFormGroup;
 	public isEdit = false;

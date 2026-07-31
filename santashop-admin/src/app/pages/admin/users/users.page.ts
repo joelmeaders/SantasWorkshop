@@ -27,6 +27,8 @@ import { StaffAccount, StaffRole, UpdateStaffUser } from '@santashop/models';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { StaffService } from './staff.service';
 import { UserEditorComponent } from './user-editor.component';
+import { AuthService } from '@santashop/core';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
 	selector: 'admin-users',
@@ -54,8 +56,10 @@ export class UsersPage {
 	private readonly modalController = inject(ModalController);
 	private readonly alerts = inject(AlertController);
 	private readonly loading = inject(LoadingController);
+	private readonly authService = inject(AuthService);
 
 	public readonly staffAccounts$ = this.staffService.staffAccounts$;
+	public readonly isOwner$ = this.authService.isOwner$;
 
 	private readonly roleLabels: Readonly<Record<StaffRole, string>> = {
 		admin: 'Administrator',
@@ -68,6 +72,10 @@ export class UsersPage {
 
 	public roleLabel(role: StaffRole): string {
 		return this.roleLabels[role] ?? role;
+	}
+
+	public canManage(account: StaffAccount, isOwner: boolean): boolean {
+		return isOwner || !account.roles.includes('admin');
 	}
 
 	public async addUser(): Promise<void> {
@@ -153,9 +161,17 @@ export class UsersPage {
 	}
 
 	private async presentEditor(account?: StaffAccount): Promise<void> {
+		const isOwner = await firstValueFrom(this.isOwner$);
+		if (account && !this.canManage(account, isOwner)) {
+			await this.showAlert(
+				'Owner access required',
+				'Only a project owner may alter an administrator.',
+			);
+			return;
+		}
 		const modal = await this.modalController.create({
 			component: UserEditorComponent,
-			componentProps: { account },
+			componentProps: { account, isOwner },
 		});
 
 		await modal.present();

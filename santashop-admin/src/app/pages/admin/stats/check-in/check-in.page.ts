@@ -12,6 +12,7 @@ import {
 	IFireRepoCollection,
 	FireRepoLite,
 	filterNil,
+	PROGRAM_YEAR,
 	shopSchedule,
 } from '@santashop/core';
 import {
@@ -68,10 +69,11 @@ import {
 })
 export class CheckInPage {
 	private readonly httpService = inject(FireRepoLite);
+	private readonly programYear = inject(PROGRAM_YEAR);
 
 	public readonly schedule = shopSchedule;
 
-	public year = 2025;
+	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>

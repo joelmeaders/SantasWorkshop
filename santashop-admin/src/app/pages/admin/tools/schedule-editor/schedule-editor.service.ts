@@ -14,6 +14,11 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs';
+import {
+	OwnerOperation,
+	PreviewOwnerOperationResponse,
+} from '@santashop/models';
+import { OwnerOperationsService } from '../owner-operations/owner-operations.service';
 
 export interface BulkSlotUpdate {
 	maxSlots?: number;
@@ -28,6 +33,7 @@ export interface CreateSlotsResult {
 @Injectable()
 export class ScheduleEditorService {
 	private readonly fireRepo = inject(FireRepoLite);
+	private readonly ownerOperations = inject(OwnerOperationsService);
 	private readonly defaultProgramYear = inject(PROGRAM_YEAR);
 	private readonly invalidCapacityMessage =
 		'Capacity must be a whole number zero or greater.';
@@ -77,40 +83,47 @@ export class ScheduleEditorService {
 		this.refreshTrigger.next();
 	}
 
-	public async createSlots(
+	public async previewCreateSlots(
 		slots: DateTimeSlot[],
-	): Promise<CreateSlotsResult> {
-		const existingSlots = await firstValueFrom(this.slots$);
-		const existingKeys = new Set(
-			existingSlots.map((slot) => this.getDateTimeKey(slot.dateTime)),
-		);
-		const requestKeys = new Set<string>();
-		const uniqueSlots = slots.filter((slot) => {
-			const key = this.getDateTimeKey(slot.dateTime);
-
-			if (existingKeys.has(key) || requestKeys.has(key)) {
-				return false;
-			}
-
-			requestKeys.add(key);
-			return true;
+	): Promise<PreviewOwnerOperationResponse> {
+		const programYear = slots[0]?.programYear;
+		return this.ownerOperations.preview({
+			operation: 'initialize-schedule',
+			programYear,
+			slots: slots.map((slot) => ({
+				programYear: slot.programYear,
+				dateTime: slot.dateTime.toISOString(),
+				maxSlots: slot.maxSlots,
+				enabled: slot.enabled ?? true,
+			})),
 		});
+	}
 
-		await Promise.all(
-			uniqueSlots.map(async (slot) => {
-				await firstValueFrom(
-					this.dateTimeSlotCollection().add(
-						this.toPersistedSlot(slot),
-					),
-				);
-			}),
+	public async startCreateSlots(
+		previewId: string,
+		confirmationPhrase: string,
+	): Promise<CreateSlotsResult> {
+		const started = await this.ownerOperations.start({
+			previewId,
+			confirmationPhrase,
+		});
+		let operation: OwnerOperation;
+		do {
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			operation = await this.ownerOperations.get(started.operationId);
+		} while (
+			operation.status !== 'succeeded' &&
+			operation.status !== 'failed'
 		);
-
+		if (operation.status === 'failed') {
+			throw new Error(
+				operation.errorMessage ?? 'Schedule initialization failed.',
+			);
+		}
 		this.refresh();
-
 		return {
-			created: uniqueSlots.length,
-			skipped: slots.length - uniqueSlots.length,
+			created: Number(operation.result?.['created'] ?? 0),
+			skipped: Number(operation.result?.['skipped'] ?? 0),
 		};
 	}
 

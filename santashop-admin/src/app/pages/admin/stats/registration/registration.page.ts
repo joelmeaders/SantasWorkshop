@@ -3,6 +3,7 @@ import {
 	FireRepoLite,
 	IFireRepoCollection,
 	filterNil,
+	PROGRAM_YEAR,
 	shopSchedule,
 	timestampToDate,
 } from '@santashop/core';
@@ -68,10 +69,11 @@ Chart.register(ChartDataLabels);
 })
 export class RegistrationPage {
 	private readonly httpService = inject(FireRepoLite);
+	private readonly programYear = inject(PROGRAM_YEAR);
 
 	public readonly schedule = shopSchedule;
 
-	public year = 2025;
+	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
 	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>

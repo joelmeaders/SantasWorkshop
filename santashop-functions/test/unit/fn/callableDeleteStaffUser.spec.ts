@@ -28,6 +28,11 @@ describe('callableDeleteStaffUser handler', () => {
 			roles: ['admin', 'checkin'],
 			disabled: false,
 		});
+		adminMock.setUserClaims(PROTECTED_UID, {
+			owner: true,
+			admin: true,
+			roles: ['admin', 'checkin'],
+		});
 		adminMock.setDocSnapshot('staff/test-user-123', {
 			uid: 'test-user-123',
 			displayName: 'Self User',

@@ -818,8 +818,8 @@ Why it matters:
 
 Current state:
 
-- several admin pages default to `2025`
-- some slot loading is hardcoded to `2025` rather than using shared program-year config
+- admin pages obtain their default year from the validated shared program-year configuration
+- schedule initialization and slot loading use the same program-year source
 
 Why it matters:
 

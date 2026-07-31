@@ -24,7 +24,6 @@ $firebaseEnvKeys = @(
 $requiredFunctionsEnvKeys = @(
 	'AWS_ACCESS_KEY_ID',
 	'AWS_SECRET_ACCESS_KEY',
-	'ADMIN_BOOTSTRAP_PASSWORD',
 	'SANTASHOP_PROGRAM_YEAR',
 	'SANTASHOP_TIME_ZONE',
 	'SANTASHOP_TIME_OFFSET',
@@ -44,7 +43,6 @@ $requiredFunctionsEnvKeys = @(
 )
 
 $optionalFunctionsEnvKeys = @(
-	'ADMIN_UIDS',
 	'SANTASHOP_SHOP_DAYS',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
 	'AWS_REGION'

@@ -31,8 +31,6 @@ const RUNTIME_ENV_KEYS = [
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
 	'REGISTRATION_EMAIL_SOURCE',
 	'REGISTRATION_EMAIL_RETURN_PATH',
-	'ADMIN_BOOTSTRAP_PASSWORD',
-	'ADMIN_UIDS',
 	'SCHEDULED_FIRESTORE_BACKUP',
 	'SCHEDULED_DATETIME_SLOT_COUNTERS',
 	'SCHEDULED_REGISTRATION_STATS',
@@ -59,8 +57,6 @@ const BASE_RUNTIME_ENV = {
 	REMINDER_EMAIL_SENDING_STALE_MINUTES: '15',
 	REGISTRATION_EMAIL_SOURCE: 'noreply@example.com',
 	REGISTRATION_EMAIL_RETURN_PATH: 'admin@example.com',
-	ADMIN_BOOTSTRAP_PASSWORD: 'password-123',
-	ADMIN_UIDS: 'admin-1,admin-2',
 	SCHEDULED_FIRESTORE_BACKUP: '0 0 * * *',
 	SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * * *',
 	SCHEDULED_REGISTRATION_STATS: '1 1 * * *',
@@ -229,6 +225,6 @@ describe('runtime-config', () => {
 		const subject = await loadRuntimeConfig();
 
 		expect(subject.EVENT_DISPLAY_NAME).toBe('Functions File Event');
-		expect(subject.ADMIN_UIDS).toEqual(['admin-1', 'admin-2']);
+		expect(subject).not.toHaveProperty('ADMIN_UIDS');
 	});
 });

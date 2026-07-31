@@ -3,6 +3,7 @@ import { UserPage } from './user.page';
 import {
 	provideFirestoreWrapperMock,
 	provideActivatedRouteMock,
+	provideProgramYearMock,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 
@@ -16,6 +17,7 @@ describe('UserPage', () => {
 			providers: [
 				provideFirestoreWrapperMock(),
 				provideActivatedRouteMock(),
+				provideProgramYearMock(2026),
 				provideRouter([]),
 			],
 		}).compileComponents();

@@ -3,11 +3,7 @@ import { OnboardUser, User, Registration, COLLECTION_SCHEMA } from '../models';
 import { generateId } from '../utility/id-generation';
 import { deleteQrCode, generateQrCode } from '../utility/qrcodes';
 import admin from '../firebase-admin';
-import {
-	getErrorCode,
-	getErrorMessage,
-	serializeError,
-} from '../utility/errors';
+import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import {
 	CallableValidationError,

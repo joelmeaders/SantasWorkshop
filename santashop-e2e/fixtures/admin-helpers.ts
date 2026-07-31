@@ -12,6 +12,16 @@ export const defaultAdminAccount = (
 	...overrides,
 });
 
+export const defaultOwnerAccount = (
+	overrides: Partial<E2eAdminSeedUser> = {},
+): E2eAdminSeedUser =>
+	defaultAdminAccount({
+		uid: 'owner-e2e-user',
+		emailAddress: 'owner-e2e@test.com',
+		owner: true,
+		...overrides,
+	});
+
 export const fillAdminSignInForm = async (
 	page: Page,
 	account: Pick<E2eAdminSeedUser, 'emailAddress' | 'password'>,
@@ -50,7 +60,7 @@ export const navigateToScheduleEditorViaLanding = async (
 		page.waitForURL('**/admin/schedule-editor', { timeout: 30000 }),
 		page.click('#scheduleEditorNav'),
 	]);
-	await expect(page.locator('#generateSchedulesButton')).toBeVisible({
+	await expect(page.locator('main.schedule-editor')).toBeVisible({
 		timeout: 15000,
 	});
 };
@@ -110,7 +120,7 @@ export const scheduleSlot = (
 
 	return {
 		id,
-		programYear: 2025,
+		programYear: 2026,
 		dateTime,
 		maxSlots: 10,
 		slotsReserved: 0,

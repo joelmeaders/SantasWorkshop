@@ -78,7 +78,18 @@ export class AuthService {
 	public readonly isAdmin$ = this.currentUser$.pipe(
 		filter((user) => !!user),
 		switchMap((user) => from(user.getIdTokenResult(false))),
-		map((token) => token.claims?.['admin'] ?? false),
+		map(
+			(token) =>
+				token.claims?.['owner'] === true ||
+				token.claims?.['admin'] === true,
+		),
+		shareReplay(1),
+	);
+
+	public readonly isOwner$ = this.currentUser$.pipe(
+		filter((user) => !!user),
+		switchMap((user) => from(user.getIdTokenResult(false))),
+		map((token) => token.claims?.['owner'] === true),
 		shareReplay(1),
 	);
 
@@ -117,7 +128,11 @@ export class AuthService {
 		map((token) => {
 			const claims = token.claims ?? {};
 			const roles = (claims['roles'] as StaffRole[] | undefined) ?? [];
-			return claims['admin'] === true || roles.length > 0;
+			return (
+				claims['owner'] === true ||
+				claims['admin'] === true ||
+				roles.length > 0
+			);
 		}),
 		shareReplay(1),
 	);
@@ -136,7 +151,10 @@ export class AuthService {
 			switchMap((user) => from(user.getIdTokenResult(false))),
 			map((token) => {
 				const claims = token.claims ?? {};
-				if (claims['admin'] === true) {
+				if (
+					claims['owner'] === true ||
+					claims['admin'] === true
+				) {
 					return true;
 				}
 				const roles =
@@ -145,6 +163,16 @@ export class AuthService {
 			}),
 			shareReplay(1),
 		);
+	}
+
+	public async reauthenticate(password: string): Promise<void> {
+		const user = this.authWrapper.currentUser();
+		if (!user) {
+			throw new Error('User must be signed in.');
+		}
+
+		await this.authWrapper.reauthenticateWithPassword(user, password);
+		await user.getIdToken(true);
 	}
 
 	/**

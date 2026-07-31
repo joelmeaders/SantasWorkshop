@@ -569,7 +569,7 @@ These are not called directly by the public app, but they are part of the effect
 | `scheduledRegistrationStats` | scheduled job | Consumes submitted registrations for reporting |
 | `scheduledUserStats` | scheduled job | Consumes user/profile data for reporting |
 | `scheduledCheckInStats` | scheduled job | Consumes check-in data for reporting |
-| `pubsubMarkRegistrationsCheckedIn` | Pub/Sub | Contributes to the `hasCheckedIn`/check-in lifecycle reflected back to the app |
+| `checkIn` / `checkInWithEdit` | callable | Atomically create the check-in record and synchronize the registration's `hasCheckedIn` flag |
 
 ## Guard and gating behavior
 

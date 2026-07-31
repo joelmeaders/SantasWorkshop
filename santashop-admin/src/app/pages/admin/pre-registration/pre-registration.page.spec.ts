@@ -7,6 +7,7 @@ import {
 	provideAlertControllerMock,
 	provideLoadingControllerMock,
 	provideActivatedRouteMock,
+	provideProgramYearMock,
 } from '../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 
@@ -24,6 +25,7 @@ describe('PreRegistrationPage', () => {
 				provideAlertControllerMock(),
 				provideLoadingControllerMock(),
 				provideActivatedRouteMock(),
+				provideProgramYearMock(2026),
 				provideRouter([]),
 			],
 		}).compileComponents();

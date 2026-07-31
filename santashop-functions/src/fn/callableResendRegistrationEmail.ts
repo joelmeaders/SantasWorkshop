@@ -8,6 +8,7 @@ import admin from '../firebase-admin';
 import { formatRegistrationDateTime } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
 import { isRegistrationComplete } from '../utility/registrations';
+import { isAdminToken } from '../utility/capabilities';
 
 interface FirebaseAuthTokenLike {
 	[key: string]: unknown;
@@ -30,7 +31,7 @@ interface ResendEmailDocument {
 
 const isAdminContext = (request: CallableRequest<unknown>): boolean => {
 	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
-	return token?.['admin'] === true;
+	return isAdminToken(token);
 };
 
 const log = createFunctionLogger('callableResendRegistrationEmail');

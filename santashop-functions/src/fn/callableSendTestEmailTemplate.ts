@@ -21,6 +21,13 @@ import {
 	REGISTRATION_EMAIL_SOURCE,
 	SES_REGION,
 } from '../utility/runtime-config';
+import {
+	requireArray,
+	requireCallableData,
+	requireEmailAddress,
+	requireTrimmedString,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -28,8 +35,6 @@ const credentials = {
 };
 
 let sesClient: SESClient | undefined;
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const assertAdmin = (request: CallableRequest<unknown>): void => {
 	if (request.auth?.token?.['admin'] !== true) {
@@ -41,32 +46,13 @@ const assertAdmin = (request: CallableRequest<unknown>): void => {
 };
 
 const getSesClient = (): SESClient => {
-	if (!sesClient) {
-		sesClient = new SESClient({
-			credentials,
-			region: SES_REGION,
-		} as SESClientConfig);
-	}
+	sesClient ??= new SESClient({
+		credentials,
+		region: SES_REGION,
+	} as SESClientConfig);
 
 	return sesClient;
 };
-
-const validateRequest = (request: SendTestEmailTemplateRequest): void => {
-	if (!EMAIL_PATTERN.test(request.recipientEmail.trim())) {
-		throw new HttpsError(
-			'invalid-argument',
-			'A valid test recipient email address is required.',
-		);
-	}
-
-	if (!request.subjectPart.trim()) {
-		throw new HttpsError('invalid-argument', 'Subject is required.');
-	}
-
-	if (!request.html.trim()) {
-		throw new HttpsError('invalid-argument', 'HTML is required.');
-	}
-}
 
 const validateDetectedFields = (
 	subjectPart: string,
@@ -87,39 +73,51 @@ const validateDetectedFields = (
 			);
 		}
 	}
-}
+};
 
 export default async function callableSendTestEmailTemplate(
 	request: CallableRequest<SendTestEmailTemplateRequest>,
 ): Promise<SendTestEmailTemplateResponse> {
 	assertAdmin(request);
-	validateRequest(request.data);
-	const deliveryProfile = normalizeEmailTemplateDeliveryProfile(
-		request.data.deliveryProfile,
-	);
-	void deliveryProfile;
+	const { recipientEmail, subjectPart, html, fieldMappings } =
+		withCallableValidation(() => {
+			const data = requireCallableData(request.data);
+			normalizeEmailTemplateDeliveryProfile(
+				requireTrimmedString(
+					data['deliveryProfile'],
+					'Delivery profile',
+				),
+			);
 
-	const fieldMappings = normalizeEmailTemplateFieldDefinitions(
-		request.data.fieldMappings,
-	);
-	validateDetectedFields(
-		request.data.subjectPart,
-		request.data.html,
-		fieldMappings,
-	);
+			return {
+				recipientEmail: requireEmailAddress(
+					data['recipientEmail'],
+					'Recipient email',
+				),
+				subjectPart: requireTrimmedString(
+					data['subjectPart'],
+					'Subject',
+				),
+				html: requireTrimmedString(data['html'], 'HTML'),
+				fieldMappings: normalizeEmailTemplateFieldDefinitions(
+					requireArray(data['fieldMappings'], 'Field mappings'),
+				),
+			};
+		});
+	validateDetectedFields(subjectPart, html, fieldMappings);
 
 	const renderedSubject = renderTemplateWithFieldValues(
-		request.data.subjectPart,
+		subjectPart,
 		fieldMappings,
 	);
 	const renderedHtml = renderTemplateWithFieldValues(
-		prepareEmailTemplateHtmlForSes(request.data.html),
+		prepareEmailTemplateHtmlForSes(html),
 		fieldMappings,
 	);
 
 	const sendCommand = new SendEmailCommand({
 		Destination: {
-			ToAddresses: [request.data.recipientEmail.trim()],
+			ToAddresses: [recipientEmail],
 		},
 		Message: {
 			Subject: {
@@ -148,7 +146,7 @@ export default async function callableSendTestEmailTemplate(
 	}
 
 	return {
-		recipientEmail: request.data.recipientEmail.trim(),
+		recipientEmail,
 		renderedSubject,
 		renderedHtml,
 	};

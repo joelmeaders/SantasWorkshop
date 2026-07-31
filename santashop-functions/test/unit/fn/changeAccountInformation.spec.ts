@@ -57,6 +57,24 @@ describe('changeAccountInformation handler', () => {
 					{},
 				),
 			),
-		).rejects.toMatchObject({ code: 'data-loss' });
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('throws unauthenticated when the user is missing from context', async () => {
+		const { changeAccountInformation } =
+			await loadAccountRegistrationHandlers(adminMock);
+
+		await expect(
+			changeAccountInformation(
+				createCallableRequest(
+					{
+						firstName: 'Jovie',
+						lastName: 'Elf',
+						zipCode: 80211,
+					},
+					{ uid: '' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'unauthenticated' });
 	});
 });

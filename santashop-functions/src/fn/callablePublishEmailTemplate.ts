@@ -22,6 +22,12 @@ import {
 	readEmailTemplateHtml,
 } from '../utility/email-templates';
 import { SES_REGION } from '../utility/runtime-config';
+import {
+	requireCallableData,
+	requireOptionalTrimmedString,
+	requireTrimmedString,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -40,12 +46,10 @@ const assertAdmin = (request: CallableRequest<unknown>): void => {
 };
 
 const getSesClient = (): SESClient => {
-	if (!sesClient) {
-		sesClient = new SESClient({
-			credentials,
-			region: SES_REGION,
-		} as SESClientConfig);
-	}
+	sesClient ??= new SESClient({
+		credentials,
+		region: SES_REGION,
+	} as SESClientConfig);
 
 	return sesClient;
 };
@@ -82,13 +86,24 @@ export default async function callablePublishEmailTemplate(
 ): Promise<PublishEmailTemplateResponse> {
 	assertAdmin(request);
 
-	const key = normalizeEmailTemplateKey(request.data.key);
+	const { key, requestedRevisionId } = withCallableValidation(() => {
+		const data = requireCallableData(request.data);
+		return {
+			key: normalizeEmailTemplateKey(
+				requireTrimmedString(data['key'], 'Template key'),
+			),
+			requestedRevisionId: requireOptionalTrimmedString(
+				data['revisionId'],
+				'Revision ID',
+			),
+		};
+	});
 	const template = await getEmailTemplateSummary(key);
 	if (!template) {
 		throw new HttpsError('not-found', `Template ${key} was not found.`);
 	}
 
-	const revisionId = request.data.revisionId ?? template.currentRevisionId;
+	const revisionId = requestedRevisionId ?? template.currentRevisionId;
 	if (!revisionId) {
 		throw new HttpsError(
 			'failed-precondition',

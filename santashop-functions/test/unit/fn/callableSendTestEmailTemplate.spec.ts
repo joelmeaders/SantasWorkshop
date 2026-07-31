@@ -59,8 +59,7 @@ describe('callableSendTestEmailTemplate handler', () => {
 						{
 							name: 'qrCodeUrl',
 							mapping: 'qrCodeUrl',
-							sampleValue:
-								'https://example.com/test-qr.png',
+							sampleValue: 'https://example.com/test-qr.png',
 						},
 					],
 				},
@@ -74,15 +73,17 @@ describe('callableSendTestEmailTemplate handler', () => {
 			'src="https://example.com/test-qr.png"',
 		);
 		expect(
-			(sesSendMock.mock.calls[0]?.[0] as {
-				input: {
-					Destination: { ToAddresses: string[] };
-					Message: {
-						Subject: { Data: string };
-						Body: { Html: { Data: string } };
+			(
+				sesSendMock.mock.calls[0]?.[0] as {
+					input: {
+						Destination: { ToAddresses: string[] };
+						Message: {
+							Subject: { Data: string };
+							Body: { Html: { Data: string } };
+						};
 					};
-				};
-			}).input,
+				}
+			).input,
 		).toEqual(
 			expect.objectContaining({
 				Destination: { ToAddresses: ['preview@example.com'] },
@@ -91,5 +92,25 @@ describe('callableSendTestEmailTemplate handler', () => {
 				}),
 			}),
 		);
+	});
+
+	it('maps malformed draft payloads to invalid-argument errors', async () => {
+		const { callableSendTestEmailTemplate } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callableSendTestEmailTemplate(
+				createCallableRequest(
+					{
+						recipientEmail: 'not-an-email',
+						deliveryProfile: 'registration-confirmation',
+						subjectPart: 'Hello {{firstName}}',
+						html: '<h1>Hello {{firstName}}</h1>',
+						fieldMappings: [],
+					},
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
 });

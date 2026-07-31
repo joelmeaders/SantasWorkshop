@@ -35,6 +35,17 @@ describe('updateReferredBy handler', () => {
 
 		await expect(
 			updateReferredBy(createCallableRequest({ referredBy: '' })),
-		).rejects.toMatchObject({ code: 'data-loss' });
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('requires an authenticated user', async () => {
+		const { updateReferredBy } =
+			await loadAccountRegistrationHandlers(adminMock);
+
+		await expect(
+			updateReferredBy(
+				createCallableRequest({ referredBy: 'Friend' }, { uid: '' }),
+			),
+		).rejects.toMatchObject({ code: 'unauthenticated' });
 	});
 });

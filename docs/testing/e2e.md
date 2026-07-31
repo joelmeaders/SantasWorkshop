@@ -20,8 +20,12 @@ flow**. The separate port avoids collisions with common local services on
 The current passing setup is:
 
 - Firebase emulators running under project `demo-santashop`
+- `firebase.e2e.json` explicitly selecting the same `nodejs22` Functions
+  runtime as the deployment configuration
 - Browser app served from `santashop-app` with the **e2e** config
 - Playwright running in **headless**, **CI-style**, **single-worker**, **no-retry** mode
+- A callable readiness probe confirming `testClearAllData` loaded before
+  Playwright starts
 - Playwright fixtures calling emulator-only helper functions at:
     - `http://127.0.0.1:5001/demo-santashop/us-central1`
 
@@ -75,7 +79,9 @@ volta run --node 24.11.0 pnpm e2e:test:app
 
 This prepares local app and Functions configuration, builds shared packages and
 Functions, starts the emulators and public app, runs `tests/public`, and shuts
-down the processes.
+down the processes. The runner waits for an actual emulator-only callable, not
+just port `5001`, so a Functions source-loading error fails during startup
+instead of once per browser scenario.
 
 ### Start services in separate terminals
 
@@ -96,6 +102,7 @@ volta run --node 24.11.0 pnpm exec ng serve santashop-app --configuration=develo
 ```text
 $env:CI='1'
 volta run --node 24.11.0 pnpm exec wait-on http://localhost:4100
+volta run --node 24.11.0 pnpm run e2e:functions:ready
 volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/public
 $env:CI=$null
 ```
@@ -103,6 +110,10 @@ $env:CI=$null
 Notes:
 
 - The Playwright config is already headless by default.
+- The Firestore email trigger retains queued email records but does not contact
+  SES from the Functions emulator by default. Set
+  `SANTASHOP_SEND_EMAILS_FROM_EMULATOR=true` only for an intentional SES
+  integration run with safe credentials.
 - The only Playwright project is `mobile-chrome`, using the Pixel 5 device
   profile.
 - `CI=1` keeps reporting non-interactive.

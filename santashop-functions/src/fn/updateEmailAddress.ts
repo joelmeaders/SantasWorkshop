@@ -3,25 +3,49 @@ import { Auth, COLLECTION_SCHEMA } from '../models';
 import admin from '../firebase-admin';
 import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+import {
+	requireAuthenticatedUid,
+	requireCallableData,
+	requireEmailAddress,
+	throwMappedAuthHttpsError,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const log = createFunctionLogger('updateEmailAddress');
 
 export default async function updateEmailAddress(
 	request: CallableRequest<Auth>,
-): Promise<boolean | HttpsError> {
-	const data = request.data;
-	const uid = request.auth?.uid;
-
-	if (!uid) {
-		throw new HttpsError('not-found', 'uid null');
-	}
-
-	await admin.auth().updateUser(uid, {
-		email: data.emailAddress.toLowerCase(),
+): Promise<boolean> {
+	const uid = requireAuthenticatedUid(request);
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		return {
+			emailAddress: requireEmailAddress(requestData['emailAddress']),
+		};
 	});
 
+	try {
+		await admin.auth().updateUser(uid, {
+			email: data.emailAddress,
+		});
+	} catch (error) {
+		log.error(
+			'Failed to update auth email address',
+			{
+				uid,
+				previousEmailAddress:
+					typeof request.auth?.token.email === 'string'
+						? request.auth.token.email
+						: null,
+				nextEmailAddress: data.emailAddress,
+			},
+			error,
+		);
+		throwMappedAuthHttpsError(error, 'Unable to update the email address.');
+	}
+
 	const docData = {
-		emailAddress: data.emailAddress.toLowerCase(),
+		emailAddress: data.emailAddress,
 	};
 
 	const batch = admin.firestore().batch();

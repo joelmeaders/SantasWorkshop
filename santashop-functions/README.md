@@ -5,6 +5,8 @@ This package now uses the native Firebase Functions v2 APIs from `firebase-funct
 ## Runtime requirement
 
 - Firebase deploys for this package explicitly target the Node.js 22 runtime via `../firebase.json`.
+- The dedicated E2E emulator config must declare the same `nodejs22` runtime;
+  Firebase CLI does not accept a package engine range as a runtime selector.
 - The package `engines.node` range still allows newer local Node versions so the workspace can keep using Node.js 24 for package-manager and general development workflows.
 
 For the full cross-repo guide to secrets, client config, and environment flow, see `../docs/SECRETS_AND_CONFIGURATION.md`.
@@ -46,3 +48,8 @@ Make sure new callable functions are added to `firebase.json`; otherwise local r
 	- `pnpm run functions:test`
 
 Integration tests currently exercise real Auth/Firestore/Storage emulator side effects by invoking handler modules directly. Production exports use native v2 callable, Firestore, scheduler, and Pub/Sub handlers.
+
+The Firestore email trigger does not contact SES while running in the Functions
+emulator unless `SANTASHOP_SEND_EMAILS_FROM_EMULATOR=true` is explicitly set.
+The direct unit/integration tests still verify queue state, SES acceptance,
+retry, deduplication, and failure behavior with controlled test doubles.

@@ -3,18 +3,28 @@ import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+import {
+	requireAuthenticatedUid,
+	requireCallableData,
+	requireTrimmedString,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const log = createFunctionLogger('updateReferredBy');
 
 export default async function updateReferredBy(
 	request: CallableRequest<UpdateReferredBy>,
-): Promise<boolean | HttpsError> {
-	const data = request.data;
-	const uid = request.auth?.uid;
-	if (!uid) throw new HttpsError('not-found', 'uid null');
-
-	if (!data?.referredBy)
-		throw new HttpsError('data-loss', 'missing request information');
+): Promise<boolean> {
+	const uid = requireAuthenticatedUid(request);
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		return {
+			referredBy: requireTrimmedString(
+				requestData['referredBy'],
+				'Referred by',
+			),
+		};
+	});
 
 	const userDocumentRef = admin
 		.firestore()

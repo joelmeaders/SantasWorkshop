@@ -54,4 +54,18 @@ describe('callableGetEmailTemplateRevision handler', () => {
 		expect(result.revision.id).toBe('rev-1');
 		expect(result.html).toContain('{{eventName}}');
 	});
+
+	it('maps invalid revision requests to invalid-argument errors', async () => {
+		const { callableGetEmailTemplateRevision } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callableGetEmailTemplateRevision(
+				createCallableRequest(
+					{ key: 'reminder-2026', revisionId: '' },
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
 });

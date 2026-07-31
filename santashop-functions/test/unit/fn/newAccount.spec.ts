@@ -114,4 +114,23 @@ describe('newAccount handler', () => {
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('new-user-qr');
 		expect(deleteQrCode).toHaveBeenCalledWith('new-user-qr');
 	});
+
+	it('rejects malformed onboarding requests with invalid-argument', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+
+		await expect(
+			newAccount(
+				createCallableRequest({
+					firstName: 'Buddy',
+					lastName: 'Elf',
+					emailAddress: 'not-an-email',
+					password: 'CandyCane123!',
+					password2: 'Mismatch123!',
+					zipCode: 80205,
+					legal: true,
+					newsletter: true,
+				} as never),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
 });

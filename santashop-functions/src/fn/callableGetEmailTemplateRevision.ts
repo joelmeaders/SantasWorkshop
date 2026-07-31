@@ -9,6 +9,11 @@ import {
 	normalizeEmailTemplateKey,
 	readEmailTemplateHtml,
 } from '../utility/email-templates';
+import {
+	requireCallableData,
+	requireTrimmedString,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const assertAdmin = (request: CallableRequest<unknown>): void => {
 	if (request.auth?.token?.['admin'] !== true) {
@@ -24,17 +29,25 @@ export default async function callableGetEmailTemplateRevision(
 ): Promise<GetEmailTemplateRevisionResponse> {
 	assertAdmin(request);
 
-	const key = normalizeEmailTemplateKey(request.data.key);
+	const { key, revisionId } = withCallableValidation(() => {
+		const data = requireCallableData(request.data);
+		return {
+			key: normalizeEmailTemplateKey(
+				requireTrimmedString(data['key'], 'Template key'),
+			),
+			revisionId: requireTrimmedString(data['revisionId'], 'Revision ID'),
+		};
+	});
 	const template = await getEmailTemplateSummary(key);
 	if (!template) {
 		throw new HttpsError('not-found', `Template ${key} was not found.`);
 	}
 
-	const revision = await getEmailTemplateRevision(key, request.data.revisionId);
+	const revision = await getEmailTemplateRevision(key, revisionId);
 	if (!revision) {
 		throw new HttpsError(
 			'not-found',
-			`Revision ${request.data.revisionId} was not found for ${key}.`,
+			`Revision ${revisionId} was not found for ${key}.`,
 		);
 	}
 

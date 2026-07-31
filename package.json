@@ -60,8 +60,9 @@
     "e2e:emulators": "firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage",
     "e2e:serve:app": "ng serve santashop-app --configuration=development --port=4100",
     "e2e:serve:admin": "ng serve santashop-admin --configuration=development --port=4100",
-    "e2e:run:app": "wait-on http://localhost:4100 tcp:127.0.0.1:5001 tcp:127.0.0.1:8180 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && pnpm --filter @santashop/e2e test tests/public",
-    "e2e:run:admin": "wait-on http://localhost:4100 tcp:127.0.0.1:5001 tcp:127.0.0.1:8180 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && pnpm --filter @santashop/e2e test tests/admin",
+    "e2e:functions:ready": "node santashop-e2e/scripts/wait-for-functions.mjs",
+    "e2e:run:app": "wait-on http://localhost:4100 tcp:127.0.0.1:5001 tcp:127.0.0.1:8180 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && pnpm run e2e:functions:ready && pnpm --filter @santashop/e2e test tests/public",
+    "e2e:run:admin": "wait-on http://localhost:4100 tcp:127.0.0.1:5001 tcp:127.0.0.1:8180 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && pnpm run e2e:functions:ready && pnpm --filter @santashop/e2e test tests/admin",
     "e2e:ui": "wait-on http://localhost:4100 && pnpm --filter @santashop/e2e test:ui",
     "e2e:debug": "wait-on http://localhost:4100 && pnpm --filter @santashop/e2e test:debug"
   },

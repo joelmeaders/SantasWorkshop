@@ -23,8 +23,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 						key: 'registration-confirmation',
 						deliveryProfile: 'registration-confirmation',
 						displayName: 'Registration Confirmation',
-						awsTemplateName:
-							'dscs-registration-confirmation-v1',
+						awsTemplateName: 'dscs-registration-confirmation-v1',
 						subjectPart: 'Hello {{firstName}}',
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: [],
@@ -77,7 +76,8 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 			resumable: false,
 		});
 		expect(
-			backgroundMock.getDocRef('emailTemplates/registration-confirmation').set,
+			backgroundMock.getDocRef('emailTemplates/registration-confirmation')
+				.set,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				key: 'registration-confirmation',
@@ -104,8 +104,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 						key: 'registration-confirmation',
 						deliveryProfile: 'registration-confirmation',
 						displayName: 'Registration Confirmation',
-						awsTemplateName:
-							'dscs-registration-confirmation-v1',
+						awsTemplateName: 'dscs-registration-confirmation-v1',
 						subjectPart: 'Hello {{firstName}}',
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: [
@@ -132,18 +131,21 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 		// Arrange
 		const { callableSaveEmailTemplateRevision } =
 			await loadEmailTemplateHandlers(backgroundMock);
-		backgroundMock.setDocSnapshot('emailTemplates/registration-confirmation', {
-			key: 'registration-confirmation',
-			deliveryProfile: 'registration-confirmation',
-			displayName: 'Registration Confirmation',
-			subjectPart: 'Hello {{firstName}}',
-			awsTemplateName: 'dscs-registration-confirmation-v1',
-			fieldMappings: [],
-			currentRevisionId: 'rev-1',
-			currentRevisionNumber: 1,
-			createdOn: new Date(),
-			updatedOn: new Date(),
-		});
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/registration-confirmation',
+			{
+				key: 'registration-confirmation',
+				deliveryProfile: 'registration-confirmation',
+				displayName: 'Registration Confirmation',
+				subjectPart: 'Hello {{firstName}}',
+				awsTemplateName: 'dscs-registration-confirmation-v1',
+				fieldMappings: [],
+				currentRevisionId: 'rev-1',
+				currentRevisionNumber: 1,
+				createdOn: new Date(),
+				updatedOn: new Date(),
+			},
+		);
 
 		// Act / Assert
 		await expect(
@@ -153,8 +155,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 						key: 'registration-confirmation',
 						deliveryProfile: 'registration-confirmation',
 						displayName: 'Registration Confirmation',
-						awsTemplateName:
-							'dscs-registration-confirmation-v2',
+						awsTemplateName: 'dscs-registration-confirmation-v2',
 						subjectPart: 'Hello {{firstName}}',
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: [
@@ -164,6 +165,28 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 								sampleValue: 'Buddy',
 							},
 						],
+					},
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('maps invalid field mapping payloads to invalid-argument errors', async () => {
+		const { callableSaveEmailTemplateRevision } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callableSaveEmailTemplateRevision(
+				createCallableRequest(
+					{
+						key: 'registration-confirmation',
+						deliveryProfile: 'registration-confirmation',
+						displayName: 'Registration Confirmation',
+						awsTemplateName: 'dscs-registration-confirmation-v1',
+						subjectPart: 'Hello {{firstName}}',
+						html: '<h1>Hello {{firstName}}</h1>',
+						fieldMappings: {} as never,
 					},
 					{ admin: true },
 				),

@@ -1,6 +1,7 @@
 {
 	"functions": {
-		"source": "santashop-functions"
+		"source": "santashop-functions",
+		"runtime": "nodejs22"
 	},
 	"emulators": {
 		"functions": {

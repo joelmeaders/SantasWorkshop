@@ -9,18 +9,68 @@ import {
 	serializeError,
 } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
+import {
+	CallableValidationError,
+	requireBoolean,
+	requireCallableData,
+	requireEmailAddress,
+	requireTrimmedString,
+	requireZipCodeValue,
+	throwMappedAuthHttpsError,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const log = createFunctionLogger('newAccount');
 
 export default async function newAccount(
 	request: CallableRequest<OnboardUser>,
 ): Promise<string> {
-	const data = request.data;
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		const password = requireTrimmedString(
+			requestData['password'],
+			'Password',
+		);
+		const passwordConfirmation = requireTrimmedString(
+			requestData['password2'],
+			'Password confirmation',
+		);
+		if (password !== passwordConfirmation) {
+			throw new CallableValidationError(
+				'Password confirmation must match the password.',
+			);
+		}
+
+		const acceptedLegalTerms = requireBoolean(
+			requestData['legal'],
+			'Accepted legal terms',
+		);
+		if (!acceptedLegalTerms) {
+			throw new CallableValidationError(
+				'Terms of service and privacy policy must be accepted.',
+			);
+		}
+
+		return {
+			firstName: requireTrimmedString(
+				requestData['firstName'],
+				'First name',
+			),
+			lastName: requireTrimmedString(
+				requestData['lastName'],
+				'Last name',
+			),
+			emailAddress: requireEmailAddress(requestData['emailAddress']),
+			password,
+			zipCode: requireZipCodeValue(requestData['zipCode']),
+			newsletter: requestData['newsletter'] === true,
+		};
+	});
 	let newUserAccount;
 
 	try {
 		newUserAccount = await admin.auth().createUser({
-			email: data.emailAddress.toLowerCase(),
+			email: data.emailAddress,
 			password: data.password,
 			disabled: false,
 			displayName: `${data.firstName} ${data.lastName}`,
@@ -39,7 +89,7 @@ export default async function newAccount(
 	const user: User = {
 		firstName: data.firstName,
 		lastName: data.lastName,
-		emailAddress: data.emailAddress.toLowerCase(),
+		emailAddress: data.emailAddress,
 		zipCode: data.zipCode,
 		acceptedTermsOfService: acceptedLegal,
 		acceptedPrivacyPolicy: acceptedLegal,
@@ -52,7 +102,7 @@ export default async function newAccount(
 		uid: newUserAccount.uid,
 		firstName: data.firstName,
 		lastName: data.lastName,
-		emailAddress: data.emailAddress.toLowerCase(),
+		emailAddress: data.emailAddress,
 		zipCode: data.zipCode,
 		qrcode: generateId(8),
 		qrCodeGeneratedOn: false,
@@ -120,17 +170,5 @@ export default async function newAccount(
 }
 
 const handleAuthError = (error: unknown): never => {
-	if (getErrorCode(error) === 'auth/email-already-exists') {
-		throw new HttpsError(
-			'already-exists',
-			getErrorCode(error),
-			getErrorMessage(error),
-		);
-	}
-
-	throw new HttpsError(
-		'unknown',
-		getErrorCode(error),
-		getErrorMessage(error),
-	);
+	throwMappedAuthHttpsError(error, 'Unable to create the account.');
 };

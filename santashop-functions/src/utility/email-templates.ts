@@ -15,6 +15,7 @@ import {
 	REGISTRATION_EMAIL_TEMPLATE,
 	REMINDER_EMAIL_TEMPLATE,
 } from './runtime-config';
+import { CallableValidationError } from './callable-validation';
 
 export interface EmailTemplateReferenceLike {
 	template?: string;
@@ -73,7 +74,7 @@ export const normalizeEmailTemplateKey = (value: string): string => {
 	const normalized = value.trim().toLowerCase();
 
 	if (!TEMPLATE_KEY_PATTERN.test(normalized)) {
-		throw new Error(
+		throw new CallableValidationError(
 			'Template key must use lowercase letters, numbers, and hyphens only.',
 		);
 	}
@@ -90,7 +91,7 @@ export const normalizeEmailTemplateDeliveryProfile = (
 ): EmailTemplateDeliveryProfile => {
 	const normalized = value.trim().toLowerCase();
 	if (!isEmailTemplateDeliveryProfile(normalized)) {
-		throw new Error(
+		throw new CallableValidationError(
 			`Unsupported email template delivery profile: ${value}`,
 		);
 	}
@@ -102,7 +103,7 @@ export const normalizeAwsTemplateName = (value: string): string => {
 	const normalized = value.trim();
 
 	if (!AWS_TEMPLATE_NAME_PATTERN.test(normalized)) {
-		throw new Error(
+		throw new CallableValidationError(
 			'AWS template name must be 1-64 characters using letters, numbers, underscores, or hyphens.',
 		);
 	}
@@ -113,20 +114,69 @@ export const normalizeAwsTemplateName = (value: string): string => {
 export const normalizeEmailTemplateFieldDefinitions = (
 	fields: EmailTemplateFieldDefinition[],
 ): EmailTemplateFieldDefinition[] => {
-	const deduped = new Map<string, EmailTemplateFieldDefinition>();
+	if (!Array.isArray(fields)) {
+		throw new CallableValidationError('Field mappings must be an array.');
+	}
 
-	for (const field of fields) {
-		const name = field.name.trim();
+	const deduped = new Map<string, EmailTemplateFieldDefinition>();
+	const normalizeFieldValue = (
+		value: unknown,
+		label: string,
+	): string | undefined => {
+		if (value === undefined || value === null) {
+			return undefined;
+		}
+
+		if (typeof value !== 'string') {
+			throw new CallableValidationError(`${label} must be a string.`);
+		}
+
+		return value.trim();
+	};
+
+	for (const [index, field] of fields.entries()) {
+		if (
+			typeof field !== 'object' ||
+			field === null ||
+			Array.isArray(field)
+		) {
+			throw new CallableValidationError(
+				`Field mapping ${index + 1} must be an object.`,
+			);
+		}
+
+		const fieldRecord = field as Record<string, unknown>;
+		const name =
+			normalizeFieldValue(
+				fieldRecord['name'],
+				`Field mapping ${index + 1} name`,
+			) ?? '';
 		if (!name) {
 			continue;
 		}
 
 		deduped.set(name, {
 			name,
-			mapping: field.mapping.trim(),
-			sampleValue: field.sampleValue.trim(),
-			...(field.description?.trim()
-				? { description: field.description.trim() }
+			mapping:
+				normalizeFieldValue(
+					fieldRecord['mapping'],
+					`Field mapping ${index + 1} mapping`,
+				) ?? '',
+			sampleValue:
+				normalizeFieldValue(
+					fieldRecord['sampleValue'],
+					`Field mapping ${index + 1} sample value`,
+				) ?? '',
+			...(normalizeFieldValue(
+				fieldRecord['description'],
+				`Field mapping ${index + 1} description`,
+			)
+				? {
+						description: normalizeFieldValue(
+							fieldRecord['description'],
+							`Field mapping ${index + 1} description`,
+						) as string,
+					}
 				: {}),
 		});
 	}
@@ -275,14 +325,14 @@ export const validateEmailTemplateFieldMappings = (
 	for (const placeholder of placeholders) {
 		const mapping = mappingsByName.get(placeholder);
 		if (!mapping) {
-			throw new Error(
+			throw new CallableValidationError(
 				`Missing field mapping for template placeholder ${placeholder}.`,
 			);
 		}
 
 		const runtimeField = mapping.mapping.trim() || mapping.name;
 		if (!allowedRuntimeFields.has(runtimeField)) {
-			throw new Error(
+			throw new CallableValidationError(
 				`Mapping ${runtimeField} is not supported for ${deliveryProfile}.`,
 			);
 		}
@@ -291,7 +341,7 @@ export const validateEmailTemplateFieldMappings = (
 	for (const field of fieldMappings) {
 		const runtimeField = field.mapping.trim() || field.name;
 		if (!allowedRuntimeFields.has(runtimeField)) {
-			throw new Error(
+			throw new CallableValidationError(
 				`Mapping ${runtimeField} is not supported for ${deliveryProfile}.`,
 			);
 		}

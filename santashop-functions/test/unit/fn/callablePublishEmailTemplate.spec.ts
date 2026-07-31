@@ -17,25 +17,28 @@ describe('callablePublishEmailTemplate handler', () => {
 		// Arrange
 		const { callablePublishEmailTemplate } =
 			await loadEmailTemplateHandlers(backgroundMock);
-		backgroundMock.setDocSnapshot('emailTemplates/registration-confirmation', {
-			key: 'registration-confirmation',
-			deliveryProfile: 'registration-confirmation',
-			displayName: 'Registration Confirmation',
-			description: 'Main registration email',
-			subjectPart: 'Hello {{firstName}}',
-			awsTemplateName: 'dscs-registration-confirmation-v1',
-			fieldMappings: [
-				{
-					name: 'firstName',
-					mapping: 'firstName',
-					sampleValue: 'Buddy',
-				},
-			],
-			currentRevisionId: 'rev-1',
-			currentRevisionNumber: 1,
-			createdOn: new Date('2025-11-01T00:00:00.000Z'),
-			updatedOn: new Date('2025-11-01T00:00:00.000Z'),
-		});
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/registration-confirmation',
+			{
+				key: 'registration-confirmation',
+				deliveryProfile: 'registration-confirmation',
+				displayName: 'Registration Confirmation',
+				description: 'Main registration email',
+				subjectPart: 'Hello {{firstName}}',
+				awsTemplateName: 'dscs-registration-confirmation-v1',
+				fieldMappings: [
+					{
+						name: 'firstName',
+						mapping: 'firstName',
+						sampleValue: 'Buddy',
+					},
+				],
+				currentRevisionId: 'rev-1',
+				currentRevisionNumber: 1,
+				createdOn: new Date('2025-11-01T00:00:00.000Z'),
+				updatedOn: new Date('2025-11-01T00:00:00.000Z'),
+			},
+		);
 		backgroundMock.setDocSnapshot(
 			'emailTemplates/registration-confirmation/revisions/rev-1',
 			{
@@ -79,13 +82,18 @@ describe('callablePublishEmailTemplate handler', () => {
 
 		// Assert
 		expect(sesSendMock).toHaveBeenCalledTimes(2);
-		expect((sesSendMock.mock.calls[1]?.[0] as { input: { Template: { HtmlPart: string } } }).input.Template.HtmlPart).toContain(
-			'<meta charset="utf-8">',
-		);
+		expect(
+			(
+				sesSendMock.mock.calls[1]?.[0] as {
+					input: { Template: { HtmlPart: string } };
+				}
+			).input.Template.HtmlPart,
+		).toContain('<meta charset="utf-8">');
 		expect(result.renderedHtml).toContain('{{firstName}}');
 		expect(result.renderedHtml).toContain('src="{{qrCodeUrl}}"');
 		expect(
-			backgroundMock.getDocRef('emailTemplates/registration-confirmation').set,
+			backgroundMock.getDocRef('emailTemplates/registration-confirmation')
+				.set,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				publishedRevisionId: 'rev-1',
@@ -93,5 +101,16 @@ describe('callablePublishEmailTemplate handler', () => {
 			}),
 			{ merge: true },
 		);
+	});
+
+	it('maps invalid publish requests to invalid-argument errors', async () => {
+		const { callablePublishEmailTemplate } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callablePublishEmailTemplate(
+				createCallableRequest({ key: 'Not Valid!' }, { admin: true }),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
 });

@@ -45,6 +45,20 @@ describe('updateEmailAddress handler', () => {
 				{ emailAddress: 'new.email@example.com' },
 				{} as never,
 			),
-		).rejects.toMatchObject({ code: 'not-found' });
+		).rejects.toMatchObject({ code: 'unauthenticated' });
+	});
+
+	it('rejects invalid email addresses', async () => {
+		const { updateEmailAddress } =
+			await loadAccountRegistrationHandlers(adminMock);
+
+		await expect(
+			updateEmailAddress(
+				createCallableRequest(
+					{ emailAddress: 'nope' },
+					{ uid: 'user-6', email: 'old.email@example.com' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
 });

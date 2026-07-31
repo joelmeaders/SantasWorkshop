@@ -60,4 +60,15 @@ describe('callableGetEmailTemplate handler', () => {
 		expect(result.revisions).toHaveLength(1);
 		expect(result.currentHtml).toContain('{{firstName}}');
 	});
+
+	it('maps invalid template keys to invalid-argument errors', async () => {
+		const { callableGetEmailTemplate } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callableGetEmailTemplate(
+				createCallableRequest({ key: 'Bad Key!' }, { admin: true }),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
 });

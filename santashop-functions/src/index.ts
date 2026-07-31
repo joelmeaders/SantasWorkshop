@@ -26,7 +26,14 @@ import {
  * valid App Check token, while production and other deployed environments keep
  * enforcement enabled.
  */
-const ENFORCE_APP_CHECK = process.env.FUNCTIONS_EMULATOR !== 'true';
+const RUNNING_IN_FUNCTIONS_EMULATOR = process.env.FUNCTIONS_EMULATOR === 'true';
+const SEND_EMAILS_FROM_FUNCTIONS_EMULATOR =
+	process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR === 'true';
+const ENFORCE_APP_CHECK = !RUNNING_IN_FUNCTIONS_EMULATOR;
+const EMAIL_DELIVERY_SECRETS =
+	RUNNING_IN_FUNCTIONS_EMULATOR && !SEND_EMAILS_FROM_FUNCTIONS_EMULATOR
+		? []
+		: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
 
 setGlobalOptions({ region: FUNCTION_REGION });
 
@@ -227,12 +234,19 @@ export const callableDeleteStaffUser = onCall(
 export const sendNewRegistrationEmails = onDocumentCreated(
 	{
 		document: 'tmp_registrationemails/{docId}',
-		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
+		secrets: EMAIL_DELIVERY_SECRETS,
 		retry: true,
 		maxInstances: 1,
 	},
 	observeDocumentHandler('sendNewRegistrationEmails', async (event) => {
 		if (!event.data) {
+			return;
+		}
+
+		if (
+			RUNNING_IN_FUNCTIONS_EMULATOR &&
+			!SEND_EMAILS_FROM_FUNCTIONS_EMULATOR
+		) {
 			return;
 		}
 

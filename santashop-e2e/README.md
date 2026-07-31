@@ -92,6 +92,9 @@ The tests are configured to:
 
 - Run against `http://localhost:4100` (santashop-app test server)
 - Use the `demo-santashop` Firebase emulators for backend services
+- Run Functions on the explicit `nodejs22` emulator/deployment runtime while
+  retaining Node 24 for workspace tooling
+- Confirm an emulator-only callable loaded before Playwright begins
 - Run one Chromium project with Playwright's Pixel 5 mobile profile
 - Run sequentially in one worker because tests share emulator state
 - Generate HTML reports

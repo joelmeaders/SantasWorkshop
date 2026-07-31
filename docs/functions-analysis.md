@@ -47,7 +47,6 @@ There are also **2 unexported/dormant handlers** in `src/fn/`:
 | High | Enforce authoritative server-side reads/transactions for registration, slot capacity, and check-in flows | Prevents client-tampering, overbooking, and inconsistent stats |
 | Medium | Convert env configuration to Firebase parameterized config / `defineSecret` | Better deploy-time validation, safer secret access, fewer discovery-time surprises |
 | Medium | Clean up temporary files or avoid temp files for CSV exports | Prevents memory leaks/OOM cold starts |
-| Medium | Improve callable validation and HttpsError mapping | Better client errors and fewer generic `internal` responses |
 | Medium | Stop using `--fix` in predeploy lint | Avoids deploy-time mutation of source files |
 
 ## Cross-cutting findings
@@ -150,7 +149,6 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 - Validate lengths/characters for names and ZIP.
 - Normalize ZIP consistently.
-- Wrap user-visible failures in `HttpsError('invalid-argument', ...)`.
 - Consider a reconciliation/compensation strategy if Firestore write fails after Auth update.
 
 **Impact:** Better data quality and fewer inconsistent Auth/Firestore records.
@@ -397,11 +395,9 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 **Findings:**
 
 - Good: admin-only.
-- Validation helpers like `normalizeEmailTemplateKey` throw plain `Error`, which may surface to clients as generic `internal` instead of `invalid-argument`.
 
 **Improvements:**
 
-- Convert validation errors to `HttpsError('invalid-argument', ...)`.
 - Consider limiting revision count or lazy-loading revision HTML.
 
 **Impact:** Better client UX and scalability.
@@ -413,11 +409,9 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 **Findings:**
 
 - Good: admin-only and clear not-found errors.
-- Same validation error mapping issue.
 
 **Improvements:**
 
-- Wrap normalization/validation errors as `HttpsError`.
 - Add audit logging for template revision reads if templates are sensitive.
 
 **Impact:** Better diagnostics.
@@ -430,12 +424,10 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 
 - Good: deletes Storage object if Firestore transaction fails.
 - Good: validates mappings before saving.
-- Validation functions can throw plain `Error` before the `try` block.
 - Writes Storage before Firestore transaction; if process crashes after Storage write but before transaction, orphaned HTML can remain.
 
 **Improvements:**
 
-- Wrap all validation in `try` and return `invalid-argument`.
 - Add a scheduled cleanup for orphaned `emailTemplates/.../revisions/*.html`.
 - Add content size limits for HTML.
 
@@ -458,7 +450,6 @@ Firebase recommends **parameterized configuration** for most settings and `defin
 - Build credentials lazily inside `getSesClient`.
 - Record a publish operation document with `pending/succeeded/failed`.
 - Add reconciliation: compare SES template state to Firestore published revision.
-- Return a clean `invalid-argument` for validation errors.
 
 **Impact:** Prevents silent template metadata drift.
 
@@ -998,7 +989,6 @@ Firebase tips recommend explicitly including/pinning Functions Framework so buil
 2. Move check-in + `hasCheckedIn` marking into one transaction.
 3. Harden email outbox idempotency and retry cutoffs.
 4. Add event/queue attempt counters and stuck-state alerts.
-5. Add validation wrappers so all bad client inputs return `invalid-argument`.
 
 ### Phase 3: Scalability and cost
 

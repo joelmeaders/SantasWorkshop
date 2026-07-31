@@ -19,6 +19,13 @@ import {
 	validateEmailTemplateFieldMappings,
 	writeEmailTemplateHtml,
 } from '../utility/email-templates';
+import {
+	requireArray,
+	requireCallableData,
+	requireOptionalTrimmedString,
+	requireTrimmedString,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const assertAdmin = (
 	request: CallableRequest<unknown>,
@@ -51,61 +58,85 @@ export default async function callableSaveEmailTemplateRevision(
 	request: CallableRequest<SaveEmailTemplateRevisionRequest>,
 ): Promise<SaveEmailTemplateRevisionResponse> {
 	const actor = assertAdmin(request);
-	const key = normalizeEmailTemplateKey(request.data.key);
-	const deliveryProfile: EmailTemplateDeliveryProfile =
-		normalizeEmailTemplateDeliveryProfile(request.data.deliveryProfile);
-	const displayName = request.data.displayName.trim();
-	const subjectPart = request.data.subjectPart.trim();
-	const html = request.data.html.trim();
-	const awsTemplateName = normalizeAwsTemplateName(
-		request.data.awsTemplateName,
-	);
-	const description = request.data.description?.trim();
-	const notes = request.data.notes?.trim();
-	const fieldMappings = normalizeEmailTemplateFieldDefinitions(
-		request.data.fieldMappings,
-	);
+	const {
+		key,
+		deliveryProfile,
+		displayName,
+		subjectPart,
+		html,
+		awsTemplateName,
+		description,
+		notes,
+		fieldMappings,
+	} = withCallableValidation(() => {
+		const data = requireCallableData(request.data);
+		const normalizedDeliveryProfile: EmailTemplateDeliveryProfile =
+			normalizeEmailTemplateDeliveryProfile(
+				requireTrimmedString(
+					data['deliveryProfile'],
+					'Delivery profile',
+				),
+			);
+		const normalizedSubject = requireTrimmedString(
+			data['subjectPart'],
+			'Subject',
+		);
+		const normalizedHtml = requireTrimmedString(data['html'], 'HTML');
+		const normalizedFieldMappings = normalizeEmailTemplateFieldDefinitions(
+			requireArray(data['fieldMappings'], 'Field mappings'),
+		);
 
-	if (!displayName) {
-		throw new HttpsError('invalid-argument', 'Display name is required.');
-	}
-
-	if (!subjectPart) {
-		throw new HttpsError('invalid-argument', 'Subject is required.');
-	}
-
-	if (!html) {
-		throw new HttpsError('invalid-argument', 'HTML is required.');
-	}
-
-	try {
 		validateEmailTemplateFieldMappings(
-			deliveryProfile,
-			subjectPart,
-			html,
-			fieldMappings,
+			normalizedDeliveryProfile,
+			normalizedSubject,
+			normalizedHtml,
+			normalizedFieldMappings,
 		);
-	} catch (error) {
-		throw new HttpsError(
-			'invalid-argument',
-			error instanceof Error ? error.message : String(error),
-		);
-	}
+
+		return {
+			key: normalizeEmailTemplateKey(
+				requireTrimmedString(data['key'], 'Template key'),
+			),
+			deliveryProfile: normalizedDeliveryProfile,
+			displayName: requireTrimmedString(
+				data['displayName'],
+				'Display name',
+			),
+			subjectPart: normalizedSubject,
+			html: normalizedHtml,
+			awsTemplateName: normalizeAwsTemplateName(
+				requireTrimmedString(
+					data['awsTemplateName'],
+					'AWS template name',
+				),
+			),
+			description: requireOptionalTrimmedString(
+				data['description'],
+				'Description',
+			),
+			notes: requireOptionalTrimmedString(data['notes'], 'Notes'),
+			fieldMappings: normalizedFieldMappings,
+		};
+	});
 
 	const templateRef = admin.firestore().doc(getEmailTemplateDocPath(key));
 	const revisionsCollection = admin
 		.firestore()
 		.collection(getEmailTemplateRevisionCollectionPath(key));
 	const revisionRef = revisionsCollection.doc();
-	const storagePath = getEmailTemplateRevisionStoragePath(key, revisionRef.id);
+	const storagePath = getEmailTemplateRevisionStoragePath(
+		key,
+		revisionRef.id,
+	);
 
 	try {
 		await writeEmailTemplateHtml(storagePath, html);
 
 		const now = new Date();
 
-		const result = await admin.firestore().runTransaction(
-			async (transaction) => {
+		const result = await admin
+			.firestore()
+			.runTransaction(async (transaction) => {
 				const templateSnapshot = await transaction.get(templateRef);
 				const existingTemplate = templateSnapshot.exists
 					? (templateSnapshot.data() as EmailTemplateSummary)
@@ -156,7 +187,7 @@ export default async function callableSaveEmailTemplateRevision(
 								publishedRevisionNumber:
 									existingTemplate.publishedRevisionNumber,
 								publishedOn: existingTemplate.publishedOn,
-						  }
+							}
 						: {}),
 					createdOn: existingTemplate?.createdOn ?? now,
 					updatedOn: now,
@@ -166,8 +197,7 @@ export default async function callableSaveEmailTemplateRevision(
 				transaction.set(templateRef, template);
 
 				return { revision, template };
-			},
-		);
+			});
 
 		return {
 			template: result.template,

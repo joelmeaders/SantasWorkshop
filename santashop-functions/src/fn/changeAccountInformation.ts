@@ -3,23 +3,51 @@ import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+import {
+	requireAuthenticatedUid,
+	requireCallableData,
+	requireTrimmedString,
+	requireZipCodeValue,
+	throwMappedAuthHttpsError,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 const log = createFunctionLogger('changeAccountInformation');
 
 export default async function changeAccountInformation(
 	request: CallableRequest<ChangeUserInfo>,
-): Promise<boolean | HttpsError> {
-	const data = request.data;
-	const uid = request.auth?.uid;
-
-	if (!uid) throw new HttpsError('not-found', 'uid null');
-
-	if (!data?.firstName || !data.lastName || !data.zipCode)
-		throw new HttpsError('data-loss', 'missing request information');
-
-	await admin.auth().updateUser(uid, {
-		displayName: `${data.firstName} ${data.lastName}`,
+): Promise<boolean> {
+	const uid = requireAuthenticatedUid(request);
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		return {
+			firstName: requireTrimmedString(
+				requestData['firstName'],
+				'First name',
+			),
+			lastName: requireTrimmedString(
+				requestData['lastName'],
+				'Last name',
+			),
+			zipCode: requireZipCodeValue(requestData['zipCode']),
+		};
 	});
+
+	try {
+		await admin.auth().updateUser(uid, {
+			displayName: `${data.firstName} ${data.lastName}`,
+		});
+	} catch (error) {
+		log.error(
+			'Failed to update auth profile during account update',
+			{ uid },
+			error,
+		);
+		throwMappedAuthHttpsError(
+			error,
+			'Unable to update account information.',
+		);
+	}
 
 	const batch = admin.firestore().batch();
 

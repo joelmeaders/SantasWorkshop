@@ -50,35 +50,38 @@ export class PreRegistrationService implements OnDestroy {
 		takeUntil(this.destroy$),
 		filterNil(),
 		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
-		filterNil(),
 		shareReplay(1),
 	);
 
 	@automock
 	public readonly registrationReadyToSubmit$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		map(this.isRegistrationReadyToSubmit),
+		map((registration) =>
+			registration ? this.isRegistrationReadyToSubmit(registration) : false,
+		),
 		shareReplay(1),
 	);
 
 	@automock
 	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		map(this.isRegistrationComplete),
+		map((registration) =>
+			registration ? this.isRegistrationComplete(registration) : false,
+		),
 		shareReplay(1),
 	);
 
 	@automock
 	public readonly registrationSubmitted$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		map((registration) => !!registration.registrationSubmittedOn),
+		map((registration) => !!registration?.registrationSubmittedOn),
 		shareReplay(1),
 	);
 
 	@automock
 	public readonly hasCheckedIn$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
-		map((registration) => !!registration.hasCheckedIn),
+		map((registration) => !!registration?.hasCheckedIn),
 		shareReplay(1),
 	);
 
@@ -115,6 +118,7 @@ export class PreRegistrationService implements OnDestroy {
 	@automock
 	public readonly qrCode$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
+		filterNil(),
 		pluckFilterNil('uid'),
 		mergeMap((uid) => this.qrCodeService.registrationQrCodeUrl(uid)),
 		shareReplay(1),
@@ -163,18 +167,18 @@ export class PreRegistrationService implements OnDestroy {
 	}
 
 	private getDateTimeSlot(
-		registration: Registration,
+		registration?: Registration,
 	): DateTimeSlot | undefined {
 		const slot = registration?.dateTimeSlot as DateTimeSlot;
 		if (slot) slot.dateTime = timestampDateFix(slot.dateTime);
 		return slot;
 	}
 
-	private getChildren(registration: Registration): Child[] {
-		registration.children?.forEach((child) => {
+	private getChildren(registration?: Registration): Child[] {
+		registration?.children?.forEach((child) => {
 			child.dateOfBirth = timestampDateFix(child.dateOfBirth);
 		});
 
-		return (registration.children as Child[]) ?? new Array<Child>();
+		return (registration?.children as Child[]) ?? new Array<Child>();
 	}
 }

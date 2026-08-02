@@ -58,7 +58,18 @@ describe('PreRegistrationService', () => {
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
 		expect(readSpy).toHaveBeenCalledWith(userId, 'uid' as any);
-		expect(registration.uid).toEqual(userId);
+		expect(registration?.uid).toEqual(userId);
+	});
+
+	it('registrationComplete$: should resolve false when no registration exists', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(of(undefined));
+
+		// Act
+		const value = await firstValueFrom(service.registrationComplete$);
+
+		// Assert
+		expect(value).toBeFalse();
 	});
 
 	it('registrationComplete$: should return true', async () => {

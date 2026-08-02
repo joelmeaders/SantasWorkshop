@@ -5,9 +5,9 @@
 	"scripts": {
 		"lint": "ng lint santashop-admin --fix --cache",
 		"test": "ng test santashop-admin",
-		"start": "pnpm run config:dev && pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --configuration=development --port=4100",
-		"start:local": "pnpm run config:local && pnpm run prebuild && ng serve santashop-admin --configuration=development --port=4100",
-		"start:test": "pnpm run config:test && pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --configuration=development --port=4100",
+		"start": "pnpm run config:dev && pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --configuration=development --port=4101",
+		"start:local": "pnpm run config:local && pnpm run prebuild && ng serve santashop-admin --configuration=development --port=4101",
+		"start:test": "pnpm run config:test && pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --configuration=development --port=4101",
 		"config": "pnpm run config:dev",
 		"config:dev": "pnpm --dir .. run config:admin:dev",
 		"config:local": "pnpm --dir .. run config:admin:local",

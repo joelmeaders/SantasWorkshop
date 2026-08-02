@@ -12,6 +12,9 @@ name: App Test Deploy and Manual Prod Release
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
+      - 'scripts/env-loader.cjs'
+      - '.github/workflows/app-test-and-prod-release.yml'
+      - '.github/workflows/app-pr-validation.yml'
 
   workflow_dispatch:
     inputs:

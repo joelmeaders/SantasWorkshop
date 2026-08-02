@@ -12,6 +12,10 @@ on:
       - 'pnpm-workspace.yaml'
       - '.env.example'
       - 'config.functions.cjs'
+      - 'scripts/env-loader.cjs'
+      - 'scripts/assert-functions-deploy-ci.cjs'
+      - '.github/workflows/functions-test-and-prod-release.yml'
+      - '.github/workflows/functions-pr-validation.yml'
 
   workflow_dispatch:
     inputs:
@@ -85,6 +89,7 @@ jobs:
     needs: unit_tests
     runs-on: ubuntu-latest
     env:
+      SANTASHOP_FUNCTIONS_DEPLOY: test
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', 'TEST')] }}
       TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
@@ -120,6 +125,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
+      SANTASHOP_FUNCTIONS_DEPLOY: prod
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', '193B5')] }}
       PROD_AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       PROD_AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

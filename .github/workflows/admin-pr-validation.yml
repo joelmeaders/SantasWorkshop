@@ -10,6 +10,9 @@ on:
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
+      - 'scripts/env-loader.cjs'
+      - '.github/workflows/admin-pr-validation.yml'
+      - '.github/workflows/admin-test-and-prod-release.yml'
 
 permissions:
   contents: read

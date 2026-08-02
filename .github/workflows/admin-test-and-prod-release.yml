@@ -12,6 +12,9 @@ name: Admin Test Deploy and Manual Prod Release
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
+      - 'scripts/env-loader.cjs'
+      - '.github/workflows/admin-test-and-prod-release.yml'
+      - '.github/workflows/admin-pr-validation.yml'
 
   workflow_dispatch:
     inputs:

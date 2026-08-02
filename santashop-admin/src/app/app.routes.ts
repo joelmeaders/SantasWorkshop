@@ -114,6 +114,42 @@ export const routes: Routes = [
 			import('./pages/sign-in/sign-in.page').then((m) => m.SignInPage),
 	},
 	{
+		path: 'admin/checkin/scan',
+		canActivate: [elevatedUserGuard],
+		title: 'DSCS: Scan Registration Codes',
+		loadComponent: () =>
+			import('./pages/admin/checkin/scan/scan.page').then(
+				(m) => m.ScanPage,
+			),
+	},
+	{
+		path: 'admin/checkin/review',
+		canActivate: [elevatedUserGuard],
+		title: 'DSCS: Review Information',
+		loadComponent: () =>
+			import('./pages/admin/checkin/review/review.page').then(
+				(m) => m.ReviewPage,
+			),
+	},
+	{
+		path: 'admin/checkin/confirmation',
+		canActivate: [elevatedUserGuard],
+		title: 'DSCS: Checked In',
+		loadComponent: () =>
+			import('./pages/admin/checkin/confirmation/confirmation.page').then(
+				(m) => m.ConfirmationPage,
+			),
+	},
+	{
+		path: 'admin/checkin/duplicate/:uid',
+		canActivate: [elevatedUserGuard],
+		title: 'DSCS: Duplicate Check-In',
+		loadComponent: () =>
+			import('./pages/admin/checkin/duplicate/duplicate.page').then(
+				(m) => m.DuplicatePage,
+			),
+	},
+	{
 		path: 'admin',
 		title: 'DSCS Home',
 		canActivate: [elevatedUserGuard],
@@ -173,11 +209,15 @@ export const routes: Routes = [
 			{
 				path: 'search',
 				title: 'DSCS: Search',
-				loadComponent: () =>
-					import('./pages/admin/search/search.page').then(
-						(m) => m.SearchPage,
-					),
 				children: [
+					{
+						path: '',
+						pathMatch: 'full',
+						loadComponent: () =>
+							import('./pages/admin/search/search.page').then(
+								(m) => m.SearchPage,
+							),
+					},
 					{
 						path: 'by-name',
 						title: 'DSCS: Search By Name',

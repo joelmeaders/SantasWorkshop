@@ -2,16 +2,19 @@ import { Component, inject } from '@angular/core';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { COLLECTION_SCHEMA, UserStats } from '@santashop/models';
+import { UserStats } from '@santashop/models';
 import {
 	FireRepoLite,
-	IFireRepoCollection,
 	filterNil,
 	PROGRAM_YEAR,
-	shopSchedule,
+	SHOP_DAYS,
 } from '@santashop/core';
 import { BehaviorSubject, map, shareReplay, switchMap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import {
+	getShopSchedule,
+	getStatsCollection,
+} from '../../../../shared/helpers';
 
 import { AsyncPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
@@ -53,18 +56,19 @@ Chart.register(ChartDataLabels);
 export class UserPage {
 	private readonly httpService = inject(FireRepoLite);
 	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = shopSchedule;
+	public readonly schedule = getShopSchedule(
+		this.programYear,
+		this.shopDays,
+	);
 
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
-	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
-		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
-
 	private readonly userRecord$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<UserStats>()
+			getStatsCollection<UserStats>(this.httpService)
 				.read(`user-${this.year}`)
 				.pipe(filterNil(), shareReplay(1)),
 		),

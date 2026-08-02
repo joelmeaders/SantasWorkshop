@@ -7,8 +7,8 @@ import {
 	Observable,
 	of,
 	race,
+	ReplaySubject,
 	shareReplay,
-	Subject,
 	switchMap,
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@santashop/models';
@@ -90,7 +90,7 @@ export class ResultsPage {
 	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
 	protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));
 
-	private readonly searchTrigger = new Subject<Date>();
+	private readonly searchTrigger = new ReplaySubject<Date>(1);
 	public readonly searchInput$ = this.searchService.searchResults$;
 
 	private readonly search$: Observable<RegistrationSearchIndex[]> =

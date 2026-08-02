@@ -11,6 +11,7 @@ export interface TestAdminUserSeed {
 	password: string;
 	admin?: boolean;
 	owner?: boolean;
+	roles?: Array<'admin' | 'checkin'>;
 }
 
 export interface TestDateTimeSlotSeed {
@@ -21,6 +22,70 @@ export interface TestDateTimeSlotSeed {
 	slotsReserved?: number;
 	enabled?: boolean;
 	lastUpdated?: string;
+}
+
+export interface TestRegistrationSearchIndexSeed {
+	id?: string;
+	firstName: string;
+	lastName: string;
+	emailAddress: string;
+	customerId: string;
+	zip: string;
+	code?: string;
+}
+
+export interface TestScheduleStatsSeed {
+	programYear: number;
+	dateTimeCounts: Array<{ dateTime: string; count: number }>;
+}
+
+export interface TestRegistrationStatsSeed {
+	programYear: number;
+	completedRegistrations: number;
+	dateTimeCount: Array<{
+		dateTime: string;
+		count: number;
+		childCount: number;
+		stats: {
+			infants: Record<string, number>;
+			girls: Record<string, number>;
+			boys: Record<string, number>;
+		};
+	}>;
+	zipCodeCount: Array<{ zip: number; count: number; childCount: number }>;
+}
+
+export interface TestCheckInStatsSeed {
+	programYear: number;
+	lastUpdated: string;
+	dateTimeCount: Array<{
+		date: number;
+		hour: number;
+		customerCount: number;
+		childCount: number;
+		pregisteredCount: number;
+		modifiedCount: number;
+	}>;
+}
+
+export interface TestUserStatsSeed {
+	programYear: number;
+	totalUsers: number;
+	zipCodeCount: Array<{ zip: string; count: number }>;
+	referrerCount: Array<{ referrer: string; count: number }>;
+}
+
+export interface TestRegistrationSeed {
+	uid: string;
+	firstName: string;
+	lastName: string;
+	emailAddress: string;
+	zipCode: string;
+	code: string;
+	dateTime: string;
+	children?: Array<{ firstName: string; lastName: string; dateOfBirth: string; ageGroup: string }>;
+	hasCheckedIn?: boolean;
+	qrReady?: boolean;
 }
 
 export interface TestPublicParameters {
@@ -94,6 +159,7 @@ export async function clearAllData(): Promise<void> {
 	// Clear Firestore collections
 	const collections = [
 		'checkins',
+		'cancellations',
 		'users',
 		'registrations',
 		'editedregistrations',
@@ -172,9 +238,8 @@ export async function seedAdminUser(
 		admin: user.admin ?? true,
 		owner: user.owner ?? false,
 		roles:
-			user.owner || user.admin !== false
-				? ['admin', 'checkin']
-				: ['checkin'],
+			user.roles ??
+			(user.owner || user.admin !== false ? ['admin', 'checkin'] : []),
 	});
 
 	return { uid: createdUser.uid };
@@ -193,22 +258,213 @@ export async function seedDateTimeSlots(
 		const docRef = slot.id
 			? db.collection('dateTimeSlots').doc(slot.id)
 			: db.collection('dateTimeSlots').doc();
+		const dateTime = new Date(slot.dateTime);
+		const lastUpdated = slot.lastUpdated
+			? new Date(slot.lastUpdated)
+			: new Date();
+
+		if (Number.isNaN(dateTime.getTime())) {
+			throw new Error(`Invalid dateTime for test slot ${docRef.id}.`);
+		}
+		if (Number.isNaN(lastUpdated.getTime())) {
+			throw new Error(`Invalid lastUpdated for test slot ${docRef.id}.`);
+		}
 
 		await docRef.set({
 			programYear: slot.programYear,
-			dateTime: new Date(slot.dateTime),
+			dateTime,
 			maxSlots: slot.maxSlots,
 			slotsReserved: slot.slotsReserved ?? 0,
 			enabled: slot.enabled ?? true,
-			lastUpdated: slot.lastUpdated
-				? new Date(slot.lastUpdated)
-				: new Date(),
+			lastUpdated,
 		});
 
 		ids.push(docRef.id);
 	}
 
 	return { ids };
+}
+
+/**
+ * Seeds submitted-registration lookup index documents for staff E2E tests.
+ */
+export async function seedRegistrationSearchIndex(
+	records: TestRegistrationSearchIndexSeed[],
+): Promise<{ ids: string[] }> {
+	const db = admin.firestore();
+	const ids: string[] = [];
+
+	for (const record of records) {
+		const docRef = record.id
+			? db.collection('registrationsearchindex').doc(record.id)
+			: db.collection('registrationsearchindex').doc();
+		await docRef.set({
+			firstName: record.firstName,
+			lastName: record.lastName.toLowerCase(),
+			displayFirstName: record.firstName,
+			displayLastName: record.lastName,
+			emailAddress: record.emailAddress.toLowerCase(),
+			customerId: record.customerId,
+			zip: record.zip,
+			code: record.code?.toUpperCase(),
+		});
+		ids.push(docRef.id);
+	}
+
+	return { ids };
+}
+
+/** Seeds a complete customer registration and its lookup index for browser flows. */
+export async function seedRegistration(
+	seed: TestRegistrationSeed,
+): Promise<void> {
+	const dateTime = new Date(seed.dateTime);
+	if (Number.isNaN(dateTime.getTime())) {
+		throw new Error(`Invalid registration dateTime: ${seed.dateTime}.`);
+	}
+	const children = (seed.children ?? [
+		{ firstName: 'Test', lastName: 'Child', dateOfBirth: '2018-01-01', ageGroup: '5-11' },
+	]).map((child, index) => ({ ...child, id: index + 1, dateOfBirth: new Date(child.dateOfBirth) }));
+	const db = admin.firestore();
+	await db.collection('users').doc(seed.uid).set({
+		firstName: seed.firstName,
+		lastName: seed.lastName,
+		emailAddress: seed.emailAddress.toLowerCase(),
+		zipCode: seed.zipCode,
+		acceptedTermsOfService: new Date(),
+		acceptedPrivacyPolicy: new Date(),
+		version: 1,
+	});
+	await db.collection('registrations').doc(seed.uid).set({
+		uid: seed.uid,
+		firstName: seed.firstName,
+		lastName: seed.lastName,
+		emailAddress: seed.emailAddress.toLowerCase(),
+		zipCode: seed.zipCode,
+		qrcode: seed.code.toUpperCase(),
+		children,
+		dateTimeSlot: { id: 'e2e-registration-slot', dateTime },
+		registrationSubmittedOn: new Date(),
+		includedInCounts: false,
+		includedInRegistrationStats: false,
+		programYear: 2026,
+		hasCheckedIn: seed.hasCheckedIn ?? false,
+		qrCodeGeneratedOn: seed.qrReady === false ? false : new Date(),
+		qrCodeGenerationFailedOn: false,
+	});
+	if (seed.hasCheckedIn) {
+		await db.collection('checkins').doc(seed.uid).set({
+			checkInDateTime: new Date(),
+			customerId: seed.uid,
+			registrationCode: seed.code.toUpperCase(),
+			inStats: false,
+			stats: { children: children.length },
+		});
+	}
+	await seedRegistrationSearchIndex([{
+		id: seed.uid,
+		firstName: seed.firstName.toLowerCase(),
+		lastName: seed.lastName,
+		emailAddress: seed.emailAddress,
+		customerId: seed.uid,
+		zip: seed.zipCode,
+		code: seed.code,
+	}]);
+}
+
+/** Seeds schedule statistics for data-backed reporting E2E cases. */
+export async function seedScheduleStats(
+	stats: TestScheduleStatsSeed,
+): Promise<void> {
+	if (!Number.isInteger(stats.programYear)) {
+		throw new Error('programYear must be a whole number.');
+	}
+
+	const dateTimeCounts = stats.dateTimeCounts.map((entry) => {
+		const dateTime = new Date(entry.dateTime);
+		if (Number.isNaN(dateTime.getTime())) {
+			throw new Error(`Invalid schedule-stat date: ${entry.dateTime}.`);
+		}
+		if (!Number.isInteger(entry.count) || entry.count < 0) {
+			throw new Error('Schedule-stat counts must be non-negative integers.');
+		}
+		return { dateTime, count: entry.count };
+	});
+
+	await admin
+		.firestore()
+		.collection('stats')
+		.doc(`schedule-${stats.programYear}`)
+		.set({ dateTimeCounts });
+}
+
+/** Seeds the nightly registration statistics document used by reporting E2E cases. */
+export async function seedRegistrationStats(
+	stats: TestRegistrationStatsSeed,
+): Promise<void> {
+	const dateTimeCount = stats.dateTimeCount.map((entry) => ({
+		...entry,
+		dateTime: new Date(entry.dateTime),
+	}));
+	await admin
+		.firestore()
+		.collection('stats')
+		.doc(`registration-${stats.programYear}`)
+		.set({
+			completedRegistrations: stats.completedRegistrations,
+			dateTimeCount,
+			zipCodeCount: stats.zipCodeCount,
+		});
+}
+
+/** Seeds the aggregated check-in statistics document used by reporting E2E cases. */
+export async function seedCheckInStats(
+	stats: TestCheckInStatsSeed,
+): Promise<void> {
+	await admin
+		.firestore()
+		.collection('stats')
+		.doc(`checkin-${stats.programYear}`)
+		.set({
+			lastUpdated: new Date(stats.lastUpdated),
+			dateTimeCount: stats.dateTimeCount,
+		});
+}
+
+/** Seeds the referral and ZIP statistics document used by reporting E2E cases. */
+export async function seedUserStats(stats: TestUserStatsSeed): Promise<void> {
+	await admin
+		.firestore()
+		.collection('stats')
+		.doc(`user-${stats.programYear}`)
+		.set({
+			totalUsers: stats.totalUsers,
+			zipCodeCount: stats.zipCodeCount,
+			referrerCount: stats.referrerCount,
+		});
+}
+
+/**
+ * Marks an emulator customer registration as checked in for customer E2E tests.
+ */
+export async function seedCheckInForEmail(
+	emailAddress: string,
+): Promise<{ uid: string }> {
+	const authUser = await admin.auth().getUserByEmail(emailAddress);
+	const db = admin.firestore();
+
+	await db.collection('checkins').doc(authUser.uid).set({
+		checkInDateTime: new Date(),
+		customerId: authUser.uid,
+		inStats: false,
+		registrationCode: 'E2E-CHECKIN',
+	});
+	await db
+		.collection('registrations')
+		.doc(authUser.uid)
+		.set({ hasCheckedIn: true }, { merge: true });
+
+	return { uid: authUser.uid };
 }
 
 /**

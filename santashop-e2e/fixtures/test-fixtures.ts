@@ -6,6 +6,7 @@ export interface E2eAdminSeedUser {
 	password: string;
 	admin?: boolean;
 	owner?: boolean;
+	roles?: Array<'admin' | 'checkin'>;
 }
 
 export interface E2eSeedDateTimeSlot {
@@ -16,6 +17,70 @@ export interface E2eSeedDateTimeSlot {
 	slotsReserved?: number;
 	enabled?: boolean;
 	lastUpdated?: string;
+}
+
+export interface E2eSeedRegistrationSearchIndex {
+	id?: string;
+	firstName: string;
+	lastName: string;
+	emailAddress: string;
+	customerId: string;
+	zip: string;
+	code?: string;
+}
+
+export interface E2eSeedScheduleStats {
+	programYear: number;
+	dateTimeCounts: Array<{ dateTime: string; count: number }>;
+}
+
+export interface E2eSeedReportingStats {
+	registration?: {
+		programYear: number;
+		completedRegistrations: number;
+		dateTimeCount: Array<{
+			dateTime: string;
+			count: number;
+			childCount: number;
+			stats: {
+				infants: Record<string, number>;
+				girls: Record<string, number>;
+				boys: Record<string, number>;
+			};
+		}>;
+		zipCodeCount: Array<{ zip: number; count: number; childCount: number }>;
+	};
+	checkIn?: {
+		programYear: number;
+		lastUpdated: string;
+		dateTimeCount: Array<{
+			date: number;
+			hour: number;
+			customerCount: number;
+			childCount: number;
+			pregisteredCount: number;
+			modifiedCount: number;
+		}>;
+	};
+	user?: {
+		programYear: number;
+		totalUsers: number;
+		zipCodeCount: Array<{ zip: string; count: number }>;
+		referrerCount: Array<{ referrer: string; count: number }>;
+	};
+}
+
+export interface E2eSeedRegistration {
+	uid: string;
+	firstName: string;
+	lastName: string;
+	emailAddress: string;
+	zipCode: string;
+	code: string;
+	dateTime: string;
+	children?: Array<{ firstName: string; lastName: string; dateOfBirth: string; ageGroup: string }>;
+	hasCheckedIn?: boolean;
+	qrReady?: boolean;
 }
 
 export interface E2ePublicParameters {
@@ -63,6 +128,18 @@ type CustomFixtures = {
 	seedDateTimeSlots: (
 		slots: E2eSeedDateTimeSlot[],
 	) => Promise<{ ids: string[] }>;
+	/** Helper to seed submitted-registration lookup index documents */
+	seedRegistrationSearchIndex: (
+		records: E2eSeedRegistrationSearchIndex[],
+	) => Promise<{ ids: string[] }>;
+	/** Helper to seed a current-season schedule-statistics document. */
+	seedScheduleStats: (stats: E2eSeedScheduleStats) => Promise<void>;
+	/** Helper to seed reporting statistics documents. */
+	seedReportingStats: (stats: E2eSeedReportingStats) => Promise<void>;
+	/** Helper to mark a seeded customer registration as checked in */
+	seedCheckIn: (emailAddress: string) => Promise<{ uid: string }>;
+	/** Seed a complete registration for staff operational flows. */
+	seedRegistration: (registration: E2eSeedRegistration) => Promise<void>;
 };
 
 // Firebase Functions emulator URL.
@@ -144,6 +221,45 @@ export const test = base.extend<CustomFixtures>({
 				slots,
 			}) as Promise<{ ids: string[] }>;
 		await use(seedDateTimeSlots);
+	},
+
+	seedRegistrationSearchIndex: async ({}, use) => {
+		const seedRegistrationSearchIndex = async (
+			records: E2eSeedRegistrationSearchIndex[],
+		) =>
+			callFunction('testSeedRegistrationSearchIndex', {
+				records,
+			}) as Promise<{ ids: string[] }>;
+		await use(seedRegistrationSearchIndex);
+	},
+
+	seedScheduleStats: async ({}, use) => {
+		const seedScheduleStats = async (stats: E2eSeedScheduleStats) => {
+			await callFunction('testSeedScheduleStats', stats);
+		};
+		await use(seedScheduleStats);
+	},
+
+	seedReportingStats: async ({}, use) => {
+		const seedReportingStats = async (stats: E2eSeedReportingStats) => {
+			await callFunction('testSeedReportingStats', stats);
+		};
+		await use(seedReportingStats);
+	},
+
+	seedCheckIn: async ({}, use) => {
+		const seedCheckIn = async (emailAddress: string) =>
+			callFunction('testSeedCheckIn', { emailAddress }) as Promise<{
+				uid: string;
+			}>;
+		await use(seedCheckIn);
+	},
+
+	seedRegistration: async ({}, use) => {
+		const seedRegistration = async (registration: E2eSeedRegistration) => {
+			await callFunction('testSeedRegistration', registration);
+		};
+		await use(seedRegistration);
 	},
 });
 

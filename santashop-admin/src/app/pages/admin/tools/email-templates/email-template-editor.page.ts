@@ -55,6 +55,7 @@ import {
 	mailOutline,
 	refreshOutline,
 	saveOutline,
+	trashOutline,
 } from 'ionicons/icons';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -175,6 +176,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			mailOutline,
 			refreshOutline,
 			saveOutline,
+			trashOutline,
 		});
 	}
 
@@ -348,6 +350,44 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			await this.showError(error, 'Publish failed.');
 		} finally {
 			await this.dismissLoading();
+		}
+	}
+
+	public async deleteTemplate(): Promise<void> {
+		const key = this.form.controls['key'].value;
+		if (!key || this.isCreateMode$.value) {
+			return;
+		}
+
+		const confirmation = await this.alerts.create({
+			header: 'Delete email template?',
+			message: `Delete ${key} and all of its saved revisions? This cannot be undone.`,
+			buttons: [
+				{ text: 'Cancel', role: 'cancel' },
+				{ text: 'Delete', role: 'destructive' },
+			],
+		});
+		await confirmation.present();
+		const result = await confirmation.onDidDismiss();
+		if (result.role !== 'destructive') {
+			return;
+		}
+
+		await this.presentLoading('Deleting template…');
+		try {
+			await this.emailTemplateService.deleteEmailTemplate(key);
+			await this.dismissLoading();
+			const alert = await this.alerts.create({
+				header: 'Deleted',
+				message: `${key} was deleted.`,
+				buttons: ['OK'],
+			});
+			await alert.present();
+			await alert.onDidDismiss();
+			await this.router.navigate(['/admin/email-templates']);
+		} catch (error) {
+			await this.dismissLoading();
+			await this.showError(error, 'Could not delete this template.');
 		}
 	}
 

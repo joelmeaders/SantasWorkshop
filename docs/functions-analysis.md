@@ -35,7 +35,7 @@ There is also **1 unexported/dormant handler** in `src/fn/`:
 
 - **Firebase v2 migration is complete.** I found no `firebase-functions/v1` or `functions.config()` usage in `santashop-functions/src/**`.
 - **App Check is enforced for production callables** via `ENFORCE_APP_CHECK = process.env.FUNCTIONS_EMULATOR !== 'true'`.
-- **AWS secrets are bound only to AWS-email functions** in `index.ts`.
+- **AWS credentials are used only by AWS-email functions** in `index.ts` and are supplied through the CI-generated runtime environment.
 - **Dynamic imports in `index.ts` reduce cold-start blast radius** by deferring handler-specific dependencies until invocation.
 - **Server-side capability checks enforce `owner > admin > checkin`**, with
   owner-only checks on high-impact operations.
@@ -50,7 +50,7 @@ There is also **1 unexported/dormant handler** in `src/fn/`:
 | High | Add explicit `serviceAccount` and selected shared runtime options | Improves security, cost control, and deploy reproducibility |
 | High | Move remaining scheduled batch jobs from full-collection reads to paginated/streamed flows | Prevents timeouts, memory growth, and high Firestore read costs as data grows |
 | High | Enforce authoritative server-side reads/transactions for registration and slot-capacity flows | Prevents client-tampering and overbooking |
-| Medium | Convert env configuration to Firebase parameterized config / `defineSecret` | Better deploy-time validation, safer secret access, fewer discovery-time surprises |
+| Medium | Add typed deploy-time validation for environment configuration | Better validation and fewer discovery-time surprises |
 | Medium | Stop using `--fix` in predeploy lint | Avoids deploy-time mutation of source files |
 
 ## Cross-cutting findings
@@ -117,24 +117,23 @@ Cloud Functions v2 defaults to Cloud Run behavior. Firebase docs note that low-m
 - For public callables like `newAccount`, tune `maxInstances` and rate protections.
 - Load test before raising concurrency.
 
-### 4. Move env configuration toward Firebase params/secrets
+### 4. Strengthen environment configuration validation
 
 `runtime-config.ts` eagerly loads `.env` files and calls `requireEnv()` at module load.
 
-Firebase recommends **parameterized configuration** for most settings and `defineSecret()` / `defineJsonSecret()` for secrets. It also warns that values read in global scope can affect deploy-time discovery if unavailable.
+The current code intentionally validates required environment values during startup. Values read in global scope can affect deploy-time discovery when a required value is unavailable, so deployment must generate the project-specific dotenv file before Firebase CLI discovery.
 
 **Impact:**
 
-- Current code intentionally fails fast when env is missing, which is good locally, but deploy discovery can fail before Firebase has a chance to prompt/validate params.
-- Secrets read from `process.env` are less strongly modeled than Firebase `defineSecret`.
+- Current code intentionally fails fast when env is missing, which is good locally, but deploy discovery can fail before the workflow has generated the required values.
 - Type and range validation is manual.
 
 **Recommendation:**
 
-- Replace schedule strings, numeric settings, timezone, program year, and bucket names with `defineString`, `defineInt`, `defineList`, etc.
-- Replace AWS secrets with `defineSecret('AWS_ACCESS_KEY_ID')` and `defineSecret('AWS_SECRET_ACCESS_KEY')`.
+- Keep schedule strings, numeric settings, timezone, program year, and bucket names in the checked-in workflow environment blocks with explicit validation.
+- Continue supplying AWS credentials through GitHub Actions repository secrets and the generated project-specific dotenv file.
 - Build SES credentials inside lazy factory methods, not module-level objects.
-- Keep `.env` only as local/project parameter source, not as custom loader dependency.
+- Keep `.env` only as a local/emulator source, not as a deployment input.
 
 ## Function-by-function report
 
@@ -449,7 +448,7 @@ in.
 **Findings:**
 
 - Good: SES client is cached.
-- Good: uses bound AWS secrets in `index.ts`.
+- Good: uses AWS credentials supplied through the generated runtime environment in `index.ts`.
 - External SES side effect cannot be transactionally tied to Firestore metadata.
 - If SES update succeeds and Firestore update fails, system is out of sync.
 - Credentials are captured in a module-level object from `process.env`.
@@ -544,7 +543,7 @@ in.
 
 ### `sendNewRegistrationEmails`
 
-**Current behavior:** Firestore `onDocumentCreated` for `tmp_registrationemails/{docId}`, with AWS secrets, `retry: true`, `maxInstances: 1`, delegates to `sendNewRegistrationEmails2`.
+**Current behavior:** Firestore `onDocumentCreated` for `tmp_registrationemails/{docId}`, with AWS credentials supplied through the runtime environment, `retry: true`, `maxInstances: 1`, delegates to `sendNewRegistrationEmails2`.
 
 **What is now strong:**
 
@@ -894,7 +893,7 @@ Firebase tips recommend explicitly including/pinning Functions Framework so buil
 
 ## Bottom line
 
-The package is already much healthier than many Firebase Functions codebases: v2 APIs, App Check, secret binding, owner-only maintenance operations, tests, and an email outbox model are all wins. The biggest remaining risk is not “bad code” so much as **serverless production sharp edges**: cross-service consistency, service-account scope, and batch jobs that assume seasonal data stays small.
+The package is already much healthier than many Firebase Functions codebases: v2 APIs, App Check, isolated credential use, owner-only maintenance operations, tests, and an email outbox model are all wins. The biggest remaining risk is not “bad code” so much as **serverless production sharp edges**: cross-service consistency, service-account scope, and batch jobs that assume seasonal data stays small.
 
 If you want the highest return next, I’d start with:
 

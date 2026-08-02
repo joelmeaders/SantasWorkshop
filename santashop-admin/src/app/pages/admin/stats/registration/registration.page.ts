@@ -4,7 +4,7 @@ import {
 	IFireRepoCollection,
 	filterNil,
 	PROGRAM_YEAR,
-	shopSchedule,
+	SHOP_DAYS,
 	timestampToDate,
 } from '@santashop/core';
 import {
@@ -28,6 +28,10 @@ import {
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import {
+	getShopSchedule,
+	getStatsCollection,
+} from '../../../../shared/helpers';
 
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
@@ -70,14 +74,12 @@ Chart.register(ChartDataLabels);
 export class RegistrationPage {
 	private readonly httpService = inject(FireRepoLite);
 	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = shopSchedule;
+	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
 
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
-
-	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
-		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly dateTimeSlotCollection =
 		(): IFireRepoCollection<DateTimeSlot> =>
@@ -87,7 +89,7 @@ export class RegistrationPage {
 
 	private readonly registrationStats$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<RegistrationStats>()
+			getStatsCollection<RegistrationStats>(this.httpService)
 				.read(`registration-${this.year}`)
 				.pipe(filterNil(), shareReplay(1)),
 		),
@@ -95,7 +97,7 @@ export class RegistrationPage {
 
 	private readonly scheduleStats$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<ScheduleStats>()
+			getStatsCollection<ScheduleStats>(this.httpService)
 				.read(`schedule-${this.year}`)
 				.pipe(shareReplay(1)),
 		),
@@ -380,7 +382,7 @@ export class RegistrationPage {
 		});
 
 		const schedule = this.schedule.find((s) => s.year === this.year);
-		if (!schedule) throw new Error('Unable to find schedule');
+		if (!schedule) return [];
 
 		const arr: ChartData<'bar', number[], string>[] = [
 			{ ...defaults(this.friendlyDay(schedule.days[0])) },
@@ -397,7 +399,7 @@ export class RegistrationPage {
 
 		data.forEach((e) => {
 			const dayIndex = getDayIndex(e.date);
-			arr[dayIndex].datasets[0].data.push(e.count);
+			if (dayIndex >= 0) arr[dayIndex].datasets[0].data.push(e.count);
 		});
 
 		return arr;

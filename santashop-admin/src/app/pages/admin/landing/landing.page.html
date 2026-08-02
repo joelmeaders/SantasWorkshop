@@ -5,7 +5,6 @@
 			id="checkInNav"
 			detail
 			routerLink="../checkin"
-			disabled
 			[disabled]="(checkinEnabled$ | async) === false"
 		>
 			<ion-icon name="bag-check-outline" color="success" slot="start" />

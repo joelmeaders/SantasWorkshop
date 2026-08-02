@@ -54,6 +54,7 @@ export class LanguageToggleComponent implements OnDestroy {
 
 	private async setLanguage(value: 'en' | 'es'): Promise<void> {
 		await firstValueFrom(this.translate.use(value));
+		window.localStorage.setItem('santashop-language', value);
 		this.currentLangauge.next(value);
 		this.analyticsService.logEventWithParams('set_language', { value });
 	}

@@ -14,7 +14,7 @@ describe('undoRegistration handler', () => {
 		adminMock.batchCommit.mockResolvedValue(undefined);
 	});
 
-	it('removes the index entry and resets registration state', async () => {
+	it('records an authorized cancellation and resets registration state', async () => {
 		const { undoRegistration } =
 			await loadAccountRegistrationHandlers(adminMock);
 		adminMock.setDocSnapshot('registrations/user-4', {
@@ -27,17 +27,19 @@ describe('undoRegistration handler', () => {
 			registrationSubmittedOn: new Date('2025-12-01T00:00:00.000Z'),
 			includedInCounts: true,
 		});
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowCancelRegistration: true },
+		});
 
 		const result = await undoRegistration(
-			createCallableRequest({ uid: 'user-4' }, { uid: 'user-4' }),
+			createCallableRequest({}, { uid: 'user-4' }),
 		);
 
 		expect(result).toBe(true);
-		expect(adminMock.batchDelete).toHaveBeenCalledTimes(1);
-		expect(adminMock.batchSet).toHaveBeenCalledWith(
-			expect.objectContaining({ path: 'registrations/user-4' }),
+		expect(adminMock.transactionDelete).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+		expect.objectContaining({ path: 'registrations/user-4' }),
 			expect.objectContaining({
-				uid: 'user-4',
 				includedInCounts: false,
 				previousDateTimeSlot: {
 					id: 'slot-1',

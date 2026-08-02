@@ -83,6 +83,12 @@ export class ConfirmationPage {
 	}).pipe(
 		map(({ allowChange, hasCheckedIn }) => allowChange && !hasCheckedIn),
 	);
+	public readonly allowCancelRegistration$ = combineLatest({
+		allowCancel: this.appStateService.allowCancelRegistration$,
+		hasCheckedIn: this.viewService.hasCheckedIn$,
+	}).pipe(
+		map(({ allowCancel, hasCheckedIn }) => allowCancel && !hasCheckedIn),
+	);
 
 	constructor() {
 		addIcons({ manOutline, womanOutline, happyOutline });
@@ -92,7 +98,7 @@ export class ConfirmationPage {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
 			message: this.translateService.instant(
-				'CONFIRMATION.CONFIRM_CHANGE_MSG',
+				'CONFIRMATION.CONFIRM_CANCELLATION_MSG',
 			),
 			buttons: [
 				{
@@ -113,19 +119,21 @@ export class ConfirmationPage {
 		if (shouldContinue.role !== 'confirm') return;
 
 		const loader = await this.loadingController.create({
-			message: 'Deleting registration...',
+			message: this.translateService.instant(
+				'CONFIRMATION.CANCELLING_REGISTRATION',
+			),
 		});
 
 		await loader.present();
 
 		try {
-			this.analytics.logEvent('delete_registration');
+			this.analytics.logEvent('cancel_registration');
 			await this.viewService.undoRegistration();
+			this.router.navigate(['/pre-registration/overview']);
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {
 			await loader.dismiss();
-			this.router.navigate(['/pre-registration/overview']);
 		}
 	}
 
@@ -169,15 +177,12 @@ export class ConfirmationPage {
 
 		if (shouldContinue.role !== 'confirm') return;
 
-		// Get current slot and available slots
+		// Get the current slot. The modal subscribes to live availability itself.
 		const currentSlot = await firstValueFrom(
 			this.viewService.dateTimeSlot$,
 		);
-		const availableSlots = await firstValueFrom(
-			this.dateTimeService.availableSlots$,
-		);
 
-		if (!currentSlot || !availableSlots) {
+		if (!currentSlot) {
 			await this.errorHandler.handleError({
 				message: 'Unable to load registration information',
 			} as IError);
@@ -189,7 +194,7 @@ export class ConfirmationPage {
 			component: ChangeDatetimeModalComponent,
 			componentProps: {
 				currentSlot: currentSlot,
-				availableSlots: availableSlots,
+				availableSlots: this.dateTimeService.availableSlots$,
 			},
 		});
 

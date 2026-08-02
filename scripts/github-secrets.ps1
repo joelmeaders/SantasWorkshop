@@ -14,10 +14,7 @@ $requiredSecretMappings = @(
 	@{ SecretName = 'TEST_AWS_ACCESS_KEY_ID'; EnvKey = 'TEST_AWS_ACCESS_KEY_ID'; FallbackKey = 'AWS_ACCESS_KEY_ID' },
 	@{ SecretName = 'TEST_AWS_SECRET_ACCESS_KEY'; EnvKey = 'TEST_AWS_SECRET_ACCESS_KEY'; FallbackKey = 'AWS_SECRET_ACCESS_KEY' },
 	@{ SecretName = 'PROD_AWS_ACCESS_KEY_ID'; EnvKey = 'PROD_AWS_ACCESS_KEY_ID'; FallbackKey = 'AWS_ACCESS_KEY_ID' },
-	@{ SecretName = 'PROD_AWS_SECRET_ACCESS_KEY'; EnvKey = 'PROD_AWS_SECRET_ACCESS_KEY'; FallbackKey = 'AWS_SECRET_ACCESS_KEY' }
-)
-
-$optionalSecretMappings = @(
+	@{ SecretName = 'PROD_AWS_SECRET_ACCESS_KEY'; EnvKey = 'PROD_AWS_SECRET_ACCESS_KEY'; FallbackKey = 'AWS_SECRET_ACCESS_KEY' },
 	@{ SecretName = 'FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST'; EnvKey = 'FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST' },
 	@{ SecretName = 'FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5'; EnvKey = 'FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5' }
 )
@@ -158,13 +155,4 @@ $envValues = Read-EnvFile -FilePath $resolvedEnvFilePath
 foreach ($mapping in $requiredSecretMappings) {
 	$value = Resolve-SecretValue -EnvValues $envValues -Mapping $mapping -Required
 	Set-GitHubSecret -SecretName $mapping.SecretName -SecretValue $value
-}
-
-foreach ($mapping in $optionalSecretMappings) {
-	$value = Resolve-SecretValue -EnvValues $envValues -Mapping $mapping
-	if (-not [string]::IsNullOrWhiteSpace($value)) {
-		Set-GitHubSecret -SecretName $mapping.SecretName -SecretValue $value
-	} else {
-		Write-Host ("Skipped optional GitHub Actions secret: {0}" -f $mapping.SecretName)
-	}
 }

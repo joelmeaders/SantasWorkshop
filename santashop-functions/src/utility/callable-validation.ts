@@ -11,7 +11,7 @@ const AUTH_INVALID_ARGUMENT_CODES = new Set([
 const AUTH_NOT_FOUND_CODES = new Set(['auth/user-not-found']);
 
 export class CallableValidationError extends Error {
-	public constructor(message: string) {
+	constructor(message: string) {
 		super(message);
 		this.name = 'CallableValidationError';
 	}

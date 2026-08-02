@@ -4,6 +4,10 @@
 
 This repository is a `pnpm` monorepo for Santa's Workshop applications and Firebase backends. Prefer workspace-root commands unless a package README says otherwise.
 
+## Language and tooling
+
+- Keep repository code, scripts, and configuration in TypeScript/JavaScript and Node.js tooling. Do not introduce a second language runtime or package manager.
+
 ## Monorepo map
 
 | Path | Role | Notes |

@@ -65,7 +65,7 @@ setup exist.
 | AUTH-005 | Sign out, then navigate directly to a private registration route; the user is redirected to sign-in.                         | BR-010; FR-SH-004; NFR-SEC-001                                            | Automated   |
 | AUTH-006 | While authenticated, open sign-in or sign-up; the user is redirected to the active registration overview.                    | FR-CUS-009                                                                | Automated   |
 | AUTH-007 | Request password recovery for an account; the UI confirms that the reset request was accepted by the Auth emulator.          | BR-029; FR-CUS-010                                                        | Automated   |
-| AUTH-008 | Use wrong credentials; the user remains signed out and receives a clear recovery message.                                    | FR-CUS-008; NFR-UX-004–005                                                | Planned     |
+| AUTH-008 | Use wrong credentials; the user remains signed out and receives a clear recovery message.                                    | FR-CUS-008; NFR-UX-004–005                                                | Automated   |
 | AUTH-009 | Customer A attempts to read or mutate customer B data through the service boundary; access is denied.                        | BR-010; NFR-SEC-003, NFR-SEC-005                                          | Other layer |
 | AUTH-010 | Externally exposed mutation endpoints reject missing anti-abuse proof outside the emulator while remaining testable locally. | BR-053; NFR-SEC-004, NFR-OPS-006                                          | Other layer |
 
@@ -78,7 +78,7 @@ setup exist.
 | REG-003 | Select “Other,” enter a value, and save; the alternate referral is accepted for reporting.                           | BR-021, BR-047; FR-CUS-019–020                              | Automated |
 | REG-004 | Direct navigation to final submission before required registration data exists returns the customer to the overview. | BR-024; FR-CUS-015, FR-CUS-033, FR-CUS-053–054; NFR-DAT-007 | Automated |
 | REG-005 | A submitted registration cannot return to draft management routes.                                                   | FR-CUS-014; NFR-MNT-004                                     | Automated |
-| REG-006 | A checked-in customer is notified, signed out, and cannot continue self-service registration for that season.        | BR-027; FR-CUS-013, FR-CUS-050–051; NFR-MNT-004             | Planned   |
+| REG-006 | A checked-in customer is notified, signed out, and cannot continue self-service registration for that season.        | BR-027; FR-CUS-013, FR-CUS-050–051; NFR-MNT-004             | Automated |
 
 ## Feature 4: Child management and eligibility
 
@@ -116,7 +116,7 @@ setup exist.
 
 | Test ID     | Scenario and expected result                                                                               | Requirements                                             | Status  |
 | ----------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------- |
-| PROFILE-001 | Open the authenticated profile and help areas from mobile navigation.                                      | FR-CUS-011, FR-CUS-044, FR-CUS-049                       | Planned |
+| PROFILE-001 | Open the authenticated profile and help areas from mobile navigation.                                      | FR-CUS-011, FR-CUS-044, FR-CUS-049                       | Automated |
 | PROFILE-002 | Change core profile information; the customer registration and staff-searchable identity stay aligned.     | BR-028; FR-CUS-045, FR-CUS-048; NFR-DAT-001, NFR-DAT-008 | Planned |
 | PROFILE-003 | Change email only after identity verification; the new email signs in and the old email does not.          | FR-CUS-046; NFR-SEC-005                                  | Planned |
 | PROFILE-004 | Change password only after identity verification; the new password signs in and the old password does not. | FR-CUS-047; NFR-SEC-005                                  | Planned |
@@ -130,8 +130,9 @@ setup exist.
 | STAFF-003 | A customer/non-privileged account cannot enter the operational workspace.                                    | BR-010, BR-030; FR-SH-003, FR-SH-005; NFR-SEC-002–003, NFR-SEC-008 | Automated   |
 | STAFF-004 | Staff signs out and protected operational routes are blocked afterward.                                      | FR-OPS-005                                                         | Automated   |
 | STAFF-005 | Runtime controls disable check-in, on-site registration, preregistration, or cancellation without a rebuild. | BR-039; FR-SH-009; FR-OPS-004; NFR-MNT-003, NFR-MNT-006            | Automated   |
-| STAFF-006 | A limited operator can register/check in but cannot access reporting/admin tools; an admin can.              | FR-OPS-041; NFR-SEC-012                                            | Planned     |
+| STAFF-006 | A limited operator can register/check in but cannot access reporting/admin tools; an admin can.              | FR-OPS-041; NFR-SEC-012                                            | Automated   |
 | STAFF-007 | Every staff mutation creates an audit record containing actor, action, target, and time.                     | BR-051; NFR-OPS-009                                                | Other layer |
+| OWNER-001 | An ordinary administrator cannot access owner-only operations.                                                | NFR-SEC-012                                                       | Automated   |
 
 ## Feature 9: Schedule and capacity administration
 
@@ -167,6 +168,8 @@ setup exist.
 | INTAKE-002 | Staff preregistration detects a duplicate account and offers a safe recovery path.                         | FR-OPS-028; NFR-SEC-011           | Planned |
 | INTAKE-003 | Completed preregistration creates confirmation and support artifacts.                                      | FR-OPS-029                        | Planned |
 | INTAKE-004 | Staff registers and immediately checks in a walk-in without requiring a customer self-service account.     | BR-036; FR-OPS-030–033            | Planned |
+| EMAIL-001  | Authorized staff can open the email-template manager and begin a new SES-ready draft.                        | FR-SH-022–023; FR-OPS-034–035    | Automated |
+| USER-001   | An owner can create a check-in staff account through user management.                                         | FR-OPS-041; NFR-SEC-012            | Automated |
 | COMMS-001  | Staff locates an eligible registration and requeues confirmation communication.                            | BR-037; FR-SH-023; FR-OPS-034–035 | Planned |
 
 ## Feature 12: Reporting, seasonal isolation, and data lifecycle
@@ -177,6 +180,7 @@ setup exist.
 | REPORT-002 | Authorized reporting users see check-in statistics by program year.                                                                                   | FR-SH-026; FR-OPS-037, FR-OPS-039–040                              | Planned     |
 | REPORT-003 | Authorized reporting users see user, referral, and geographic statistics by program year.                                                             | BR-021, BR-047; FR-SH-025; FR-OPS-038–040                          | Planned     |
 | REPORT-004 | Current-year registration, schedule, lookup, and reports do not mix records from another program year.                                                | BR-009, BR-011; FR-SH-017; NFR-DAT-003; NFR-SEAS-001, NFR-SEAS-003 | Planned     |
+| REPORT-ENTRY-001 | Authorized staff can open registration, check-in, and user reporting views with safe empty states.                                             | FR-OPS-036–040; NFR-UX-004                                      | Automated   |
 | LIFE-001   | End-of-year operation backs up database content and stored files before purging customer, registration, and check-in data while retaining statistics. | BR-049; FR-SH-040; NFR-PRV-008–009; NFR-SEAS-004–005               | Other layer |
 | LIFE-002   | Event-period backups run daily, retain 30 days, produce zip archives, and restore successfully using the documented process.                          | NFR-REL-007, NFR-REL-014–017                                       | Other layer |
 | LIFE-003   | Exports containing personal contact data are audit logged and password protected.                                                                     | NFR-OPS-010–011                                                    | Other layer |
@@ -199,6 +203,10 @@ setup exist.
 | Customer account and session access                           | `tests/public/account-access.spec.ts`         |
 | Registration, children, appointment, submission, confirmation | `tests/public/registration-lifecycle.spec.ts` |
 | Staff identity and runtime-gated navigation                   | `tests/admin/access-and-controls.spec.ts`     |
+| Staff lookup by name, email, and confirmation code             | `tests/admin/search-and-lookup.spec.ts`       |
+| Admin email-template manager entry                            | `tests/admin/email-templates.spec.ts`        |
+| Admin staff user management                                  | `tests/admin/users.spec.ts`                 |
+| Admin reporting route entry                                  | `tests/admin/reporting-entry.spec.ts`      |
 | Schedule and capacity administration                          | `tests/admin/schedule-editor/*.spec.ts`       |
 
 ## Coverage boundaries

@@ -122,26 +122,6 @@ Generated files:
 
 Each app now uses one root `src/config.ts` metadata file plus a generated `src/firebase.config.ts` file.
 
-### Sync GCP Secret Manager from `.env`
-
-If you want to create or update Google Cloud Secret Manager values from the root `.env` file, use:
-
-```bash
-pwsh ./scripts/gcloud-secrets.ps1
-```
-
-Useful variants:
-
-```bash
-pwsh ./scripts/gcloud-secrets.ps1 -Environment test
-pwsh ./scripts/gcloud-secrets.ps1 -Environment prod
-pwsh ./scripts/gcloud-secrets.ps1 -WhatIf
-```
-
-The script reads `.env`, prefers `TEST_...` or `PROD_...` overrides when available, and writes secrets into the correct GCP project using `gcloud`.
-
-If your repository host or cloud vendor invalidates exposed web API keys, treat `src/firebase.config.ts` as an ephemeral generated file containing placeholders in Git and real values only in local or CI-generated working trees.
-
 ### Sync GitHub Actions secrets from `.env`
 
 If you want to create or update the GitHub Actions secrets used by the workflows, use:
@@ -156,7 +136,7 @@ Preview the operations without writing:
 pwsh ./scripts/github-secrets.ps1 -WhatIf
 ```
 
-The script reads the root `.env`, resolves the workflow secret names, and writes them with the GitHub CLI (`gh secret set`).
+The script reads the root `.env`, requires the eight repository secrets used by the workflows, and writes them with the GitHub CLI (`gh secret set`). It does not provision any cloud credential resources.
 
 ### Build Applications
 
@@ -225,12 +205,4 @@ Required GitHub secrets for the Functions workflows:
 - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST`
 - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5`
 
-### Deploy Functions
-
-```bash
-# Test environment
-pnpm run functions:deploy:test
-
-# Production
-pnpm run functions:deploy:prod
-```
+Functions deploys are GitHub Actions-only. Direct local `firebase deploy --only functions` commands are rejected by the Functions predeploy guard. Merge to `master` to deploy test, validate that environment, and then manually promote the tested `release_ref` to production.

@@ -64,6 +64,8 @@ export default async function changeAccountInformation(
 	const indexDoc = {
 		firstName: data.firstName.toLowerCase(),
 		lastName: data.lastName.toLowerCase(),
+		displayFirstName: data.firstName,
+		displayLastName: data.lastName,
 		zip: data.zipCode,
 	};
 

@@ -92,6 +92,8 @@ export default async function completeRegistration(
 		customerId: record.uid!,
 		firstName: record.firstName!.toLowerCase(),
 		lastName: record.lastName!.toLowerCase(),
+		displayFirstName: record.firstName!,
+		displayLastName: record.lastName!,
 		emailAddress: record.emailAddress!.toLowerCase(),
 		zip: record.zipCode!,
 	};

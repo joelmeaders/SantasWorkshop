@@ -112,6 +112,10 @@ export interface SaveEmailTemplateRevisionResponse {
 	html: string;
 }
 
+export interface DeleteEmailTemplateRequest {
+	key: string;
+}
+
 export interface PublishEmailTemplateRequest {
 	key: string;
 	revisionId?: string;

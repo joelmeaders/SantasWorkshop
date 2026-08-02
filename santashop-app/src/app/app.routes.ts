@@ -129,11 +129,15 @@ export const routes: Routes = [
 			},
 			{
 				path: 'profile',
-				loadComponent: () =>
-					import('./features/v2/pre-registration/profile/profile.page').then(
-						(m) => m.ProfilePage,
-					),
 				children: [
+					{
+						path: '',
+						pathMatch: 'full',
+						loadComponent: () =>
+							import('./features/v2/pre-registration/profile/profile.page').then(
+								(m) => m.ProfilePage,
+							),
+					},
 					{
 						path: 'change-info',
 						loadComponent: () =>

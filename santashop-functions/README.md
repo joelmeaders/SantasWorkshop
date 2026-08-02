@@ -17,11 +17,10 @@ Runtime configuration is loaded from environment variables instead of `functions
 
 - Prefer putting local values in the workspace root `.env` copied from `../.env.example`.
 - `santashop-functions/.env` is still supported as a migration fallback for functions-only workflows, but the root `.env` is now the primary path.
-- Generate project-specific Functions env files when needed with:
-	- `pnpm run config:functions:test`
-	- `pnpm run config:functions:prod`
-- These commands write `santashop-functions/.env.<project-id>` files for Firebase CLI to load automatically during emulator and deploy flows.
-- `firebase functions:config:get > .runtimeconfig.json` is no longer required for the current code path.
+- Local and emulator workflows may generate project-specific Functions env files with `pnpm run config:functions:local` or `pnpm run config:functions:test`.
+- GitHub Actions generates `santashop-functions/.env.<project-id>` immediately before deployment. Firebase CLI deploys those values as ordinary runtime environment variables.
+- Functions deployments are GitHub Actions-only. The Firebase predeploy guard rejects direct local Functions deploys.
+- Legacy Firebase runtime configuration files are no longer required for the current code path.
 
 If prompted for webpack CLI install during local setup, cancel and run `npm link webpack` in the console.
 

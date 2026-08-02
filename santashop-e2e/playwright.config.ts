@@ -28,6 +28,9 @@ export default defineConfig({
 	/* Fail fast for quicker e2e feedback loops. */
 	retries: 0,
 
+	/* Stop the shared emulator suite after the first failed or timed-out test. */
+	maxFailures: 1,
+
 	/* Use a single worker because tests share the same emulator instance and seeded documents. */
 	workers: 1,
 

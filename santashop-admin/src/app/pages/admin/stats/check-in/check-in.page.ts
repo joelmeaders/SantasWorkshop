@@ -9,18 +9,20 @@ import {
 	switchMap,
 } from 'rxjs';
 import {
-	IFireRepoCollection,
 	FireRepoLite,
 	filterNil,
 	PROGRAM_YEAR,
-	shopSchedule,
+	SHOP_DAYS,
 } from '@santashop/core';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
-	COLLECTION_SCHEMA,
 } from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import {
+	getShopSchedule,
+	getStatsCollection,
+} from '../../../../shared/helpers';
 
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -70,18 +72,19 @@ import {
 export class CheckInPage {
 	private readonly httpService = inject(FireRepoLite);
 	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = shopSchedule;
+	public readonly schedule = getShopSchedule(
+		this.programYear,
+		this.shopDays,
+	);
 
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
-	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
-		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
-
 	private readonly checkInRecord$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<CheckInAggregatedStats>()
+			getStatsCollection<CheckInAggregatedStats>(this.httpService)
 				.read(`checkin-${this.year}`)
 				.pipe(shareReplay(1)),
 		),

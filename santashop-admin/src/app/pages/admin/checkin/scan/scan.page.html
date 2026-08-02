@@ -1,5 +1,20 @@
 <admin-header title="Check In" />
 
+<div class="ion-padding-horizontal ion-padding-top">
+	<ion-button
+		id="manualCheckInCodeButton"
+		expand="block"
+		fill="outline"
+		(click)="enterCodeManually()"
+	>
+		Enter registration code manually
+	</ion-button>
+	<ion-button id="startCameraButton" expand="block" (click)="enableCamera()">
+		Use camera scanner
+	</ion-button>
+</div>
+
+@if (cameraEnabled$ | async) {
 <ion-content
 	[hidden]="!(availableDevices$ | async)?.length"
 	[fullscreen]="true"
@@ -42,9 +57,8 @@
 		</ion-item>
 	</div>
 </ion-content>
-
-@let hasPermission = hasPermissions$ | async; @if (hasPermission === undefined)
-{
+} @let hasPermission = hasPermissions$ | async; @if (hasPermission ===
+undefined) {
 <h2>Waiting for permissions.</h2>
 <blockquote>
 	If your device does not have cameras, no permissions will be asked.

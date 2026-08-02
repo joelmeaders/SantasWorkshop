@@ -51,6 +51,30 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 		);
 	});
 
+	test('SCHED-002 rejects a non-integral bulk capacity', async ({ page }) => {
+		// Arrange
+		const adminAccount = defaultAdminAccount();
+
+		// Act
+		await signInAdminViaUi(page, adminAccount);
+		await navigateToScheduleEditorViaLanding(page);
+		await clickIonCheckbox(page, '#selectSchedule-slot-1');
+		await fillIonicInput(page, '#bulkEditCapacity', '1.5');
+		await page.click('#applyBulkEditButton');
+
+		// Assert
+		const alert = page.locator('ion-alert');
+		await expect(alert).toBeVisible();
+		await expect(alert).toContainText('Invalid capacity');
+		await expect(alert).toContainText(
+			'Capacity must be a whole number zero or greater.',
+		);
+		await alert.getByRole('button', { name: 'OK' }).click();
+		await expect(page.locator('#scheduleRow-slot-1')).toContainText(
+			'Reserved 0 of 10',
+		);
+	});
+
 	test('should save an edited schedule date as a time-slot update', async ({
 		page,
 	}) => {

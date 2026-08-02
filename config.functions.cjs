@@ -133,6 +133,9 @@ const renderFunctionsEnvFile = (mode, projectId, config) => {
 	return lines.join('\n');
 };
 
+const getGenerationLogMessage = (mode, projectId, targetPath) =>
+	`Generated Functions env file for ${projectId} (${mode}) at ${targetPath}`;
+
 const generateFunctionsEnvFile = async (mode) => {
 	loadLocalEnvFiles();
 
@@ -151,7 +154,7 @@ const generateFunctionsEnvFile = async (mode) => {
 
 	await writeFile(targetPath, fileContents, 'utf8');
 	console.log(
-		`Generated Functions env file for ${projectId} (${normalizedMode}) at ${targetPath}`,
+		getGenerationLogMessage(normalizedMode, projectId, targetPath),
 	);
 	return targetPath;
 };
@@ -173,6 +176,7 @@ module.exports = {
 	quoteEnvValue,
 	buildFunctionsConfig,
 	renderFunctionsEnvFile,
+	getGenerationLogMessage,
 	generateFunctionsEnvFile,
 	main,
 };

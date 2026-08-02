@@ -20,6 +20,7 @@ import {
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
+	SHOP_DAYS,
 } from '@santashop/core';
 import { getAnalytics } from 'firebase/analytics';
 import { provideRouter, RouteReuseStrategy } from '@angular/router';
@@ -127,6 +128,7 @@ bootstrapApplication(AppComponent, {
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
 		{ provide: PROGRAM_YEAR, useValue: config.programYear },
+		{ provide: SHOP_DAYS, useValue: config.shopDays },
 		{ provide: PROFILE_VERSION, useValue: 1 },
 		{ provide: MOBILE_EVENT, useValue: true },
 	],

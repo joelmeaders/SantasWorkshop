@@ -29,10 +29,6 @@ const RUNNING_IN_FUNCTIONS_EMULATOR = process.env.FUNCTIONS_EMULATOR === 'true';
 const SEND_EMAILS_FROM_FUNCTIONS_EMULATOR =
 	process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR === 'true';
 const ENFORCE_APP_CHECK = !RUNNING_IN_FUNCTIONS_EMULATOR;
-const EMAIL_DELIVERY_SECRETS =
-	RUNNING_IN_FUNCTIONS_EMULATOR && !SEND_EMAILS_FROM_FUNCTIONS_EMULATOR
-		? []
-		: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'];
 
 setGlobalOptions({ region: FUNCTION_REGION });
 
@@ -179,12 +175,18 @@ export const callableSaveEmailTemplateRevision = onCall(
 	),
 );
 
+export const callableDeleteEmailTemplate = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler('callableDeleteEmailTemplate', async (request) => {
+		return (await import('./fn/callableDeleteEmailTemplate')).default(request);
+	}),
+);
+
 export const callablePublishEmailTemplate = onCall(
 	{
 		enforceAppCheck: ENFORCE_APP_CHECK,
 		memory: '256MiB',
 		timeoutSeconds: 60,
-		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
 	},
 	observeCallableHandler('callablePublishEmailTemplate', async (request) => {
 		return (await import('./fn/callablePublishEmailTemplate')).default(
@@ -198,7 +200,6 @@ export const callableSendTestEmailTemplate = onCall(
 		enforceAppCheck: ENFORCE_APP_CHECK,
 		memory: '256MiB',
 		timeoutSeconds: 60,
-		secrets: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
 	},
 	observeCallableHandler('callableSendTestEmailTemplate', async (request) => {
 		return (await import('./fn/callableSendTestEmailTemplate')).default(
@@ -305,7 +306,6 @@ export const ownerOperationWorker = onTaskDispatched(
 export const sendNewRegistrationEmails = onDocumentCreated(
 	{
 		document: 'tmp_registrationemails/{docId}',
-		secrets: EMAIL_DELIVERY_SECRETS,
 		retry: true,
 		maxInstances: 1,
 	},
@@ -510,6 +510,12 @@ export const testSeedAdminUser = onCall(
 			'owner' in data && typeof data.owner === 'boolean'
 				? data.owner
 				: false;
+		const roles = Array.isArray((data as { roles?: unknown }).roles)
+			? ((data as { roles: unknown[] }).roles.filter(
+					(role): role is 'admin' | 'checkin' =>
+						role === 'admin' || role === 'checkin',
+				) as Array<'admin' | 'checkin'>)
+			: undefined;
 
 		if (!password) {
 			throw new HttpsError(
@@ -524,6 +530,7 @@ export const testSeedAdminUser = onCall(
 			uid,
 			admin: adminClaim,
 			owner: ownerClaim,
+			roles,
 		});
 	}),
 );
@@ -555,5 +562,156 @@ export const testSeedDateTimeSlots = onCall(
 			: [];
 
 		return seedDateTimeSlots(slots);
+	}),
+);
+
+/**
+ * Seeds submitted-registration lookup index documents for e2e search tests.
+ * Emulator only.
+ */
+export const testSeedRegistrationSearchIndex = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler(
+		'testSeedRegistrationSearchIndex',
+		async (request) => {
+			assertEmulatorOnly();
+
+			const { seedRegistrationSearchIndex } = await import(
+				'./fn/testHelpers'
+			);
+			const data =
+				typeof request.data === 'object' && request.data !== null
+					? request.data
+					: {};
+			const records = Array.isArray(
+				(data as { records?: unknown[] }).records,
+			)
+				? ((data as { records: unknown[] }).records as {
+						id?: string;
+						firstName: string;
+						lastName: string;
+						emailAddress: string;
+						customerId: string;
+						zip: string;
+						code?: string;
+					}[])
+				: [];
+
+			return seedRegistrationSearchIndex(records);
+		},
+	),
+);
+
+/** Seeds a complete registration for E2E operational flows. Emulator only. */
+export const testSeedRegistration = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testSeedRegistration', async (request) => {
+		assertEmulatorOnly();
+		if (typeof request.data !== 'object' || request.data === null) {
+			throw new HttpsError('invalid-argument', 'Registration seed is required.');
+		}
+		const { seedRegistration } = await import('./fn/testHelpers');
+		await seedRegistration(request.data as Parameters<typeof seedRegistration>[0]);
+		return { success: true };
+	}),
+);
+
+/**
+ * Seeds a schedule statistics document for reporting E2E tests.
+ * Emulator only.
+ */
+export const testSeedScheduleStats = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testSeedScheduleStats', async (request) => {
+		assertEmulatorOnly();
+
+		const { seedScheduleStats } = await import('./fn/testHelpers');
+		const data =
+			typeof request.data === 'object' && request.data !== null
+				? (request.data as {
+						programYear?: unknown;
+						dateTimeCounts?: unknown;
+					})
+				: {};
+		if (!Number.isInteger(data.programYear) || !Array.isArray(data.dateTimeCounts)) {
+			throw new HttpsError(
+				'invalid-argument',
+				'programYear and dateTimeCounts are required.',
+			);
+		}
+
+		await seedScheduleStats({
+			programYear: data.programYear,
+			dateTimeCounts: data.dateTimeCounts as Array<{
+				dateTime: string;
+				count: number;
+			}>,
+		});
+		return { success: true };
+	}),
+);
+
+/** Seeds registration, check-in, and user statistics documents for reporting E2E tests. */
+export const testSeedReportingStats = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testSeedReportingStats', async (request) => {
+		assertEmulatorOnly();
+		if (typeof request.data !== 'object' || request.data === null) {
+			throw new HttpsError('invalid-argument', 'Reporting seed is required.');
+		}
+
+		const data = request.data as {
+			registration?: unknown;
+			checkIn?: unknown;
+			user?: unknown;
+		};
+		const {
+			seedRegistrationStats,
+			seedCheckInStats,
+			seedUserStats,
+		} = await import('./fn/testHelpers');
+
+		if (data.registration) {
+			await seedRegistrationStats(
+				data.registration as Parameters<typeof seedRegistrationStats>[0],
+			);
+		}
+		if (data.checkIn) {
+			await seedCheckInStats(
+				data.checkIn as Parameters<typeof seedCheckInStats>[0],
+			);
+		}
+		if (data.user) {
+			await seedUserStats(
+				data.user as Parameters<typeof seedUserStats>[0],
+			);
+		}
+
+		return { success: true };
+	}),
+);
+
+/**
+ * Marks an emulator customer as checked in for customer E2E tests.
+ * Emulator only.
+ */
+export const testSeedCheckIn = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testSeedCheckIn', async (request) => {
+		assertEmulatorOnly();
+
+		const data =
+			typeof request.data === 'object' && request.data !== null
+				? (request.data as { emailAddress?: unknown })
+				: {};
+		if (typeof data.emailAddress !== 'string' || !data.emailAddress) {
+			throw new HttpsError(
+				'invalid-argument',
+				'emailAddress is required to seed a check-in',
+			);
+		}
+
+		const { seedCheckInForEmail } = await import('./fn/testHelpers');
+		return seedCheckInForEmail(data.emailAddress);
 	}),
 );

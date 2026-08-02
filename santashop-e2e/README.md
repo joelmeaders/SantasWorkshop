@@ -95,8 +95,10 @@ The tests are configured to:
 - Run Functions on the explicit `nodejs22` emulator/deployment runtime while
   retaining Node 24 for workspace tooling
 - Confirm an emulator-only callable loaded before Playwright begins
+- Use `firebase emulators:exec` to own emulator startup and shutdown for each suite
 - Run one Chromium project with Playwright's Pixel 5 mobile profile
 - Run sequentially in one worker because tests share emulator state
+- Stop after the first failed or timed-out test (`maxFailures: 1`)
 - Generate HTML reports
 - Take screenshots on failure
 - Record traces for debugging

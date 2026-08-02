@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const requireFromTest = createRequire(import.meta.url);
@@ -97,6 +98,11 @@ const configFunctions = requireFromTest('../../../../config.functions.cjs') as {
 		mode: 'local' | 'test' | 'prod',
 		projectId: string,
 		config: Record<string, string>,
+	) => string;
+	getGenerationLogMessage: (
+		mode: 'local' | 'test' | 'prod',
+		projectId: string,
+		targetPath: string,
 	) => string;
 };
 
@@ -424,6 +430,26 @@ describe('config.functions.cjs', () => {
 		expect(config['REMINDER_EMAIL_SENDING_STALE_MINUTES']).toBeUndefined();
 	});
 
+	it('builds production Functions credentials from PROD values', () => {
+		const config = configFunctions.buildFunctionsConfig('prod');
+
+		expect(config['AWS_ACCESS_KEY_ID']).toBe(
+			FUNCTIONS_ENV_KEYS.PROD_AWS_ACCESS_KEY_ID,
+		);
+		expect(config['AWS_SECRET_ACCESS_KEY']).toBe(
+			FUNCTIONS_ENV_KEYS.PROD_AWS_SECRET_ACCESS_KEY,
+		);
+	});
+
+	it('rejects a deployment config when an AWS credential is missing', () => {
+		setManagedEnv({ ...FUNCTIONS_ENV_KEYS });
+		delete process.env['TEST_AWS_SECRET_ACCESS_KEY'];
+
+		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
+			'Missing required environment variable: TEST_AWS_SECRET_ACCESS_KEY (or AWS_SECRET_ACCESS_KEY)',
+		);
+	});
+
 	it('falls back to unprefixed Functions values when prefixed values are missing', () => {
 		setManagedEnv({
 			AWS_ACCESS_KEY_ID: 'fallback-access-key',
@@ -465,5 +491,26 @@ describe('config.functions.cjs', () => {
 		);
 		expect(fileText).toContain('AWS_ACCESS_KEY_ID="test-access-key"');
 		expect(fileText).toContain('SANTASHOP_EVENT_DISPLAY_NAME="Test Event"');
+	});
+
+	it('keeps generated dotenv files ignored and credentials out of generation logs', () => {
+		const functionsGitignore = readFileSync(
+			new URL('../../../.gitignore', import.meta.url),
+			'utf8',
+		);
+		const logMessage = configFunctions.getGenerationLogMessage(
+			'test',
+			'santas-workshop-test',
+			'D:/workspace/santashop-functions/.env.santas-workshop-test',
+		);
+
+		expect(functionsGitignore).toMatch(/^\.env\.\*$/m);
+		expect(logMessage).toContain('santas-workshop-test (test)');
+		expect(logMessage).not.toContain(
+			FUNCTIONS_ENV_KEYS.TEST_AWS_ACCESS_KEY_ID,
+		);
+		expect(logMessage).not.toContain(
+			FUNCTIONS_ENV_KEYS.TEST_AWS_SECRET_ACCESS_KEY,
+		);
 	});
 });

@@ -104,6 +104,17 @@
 							<ion-icon name="refresh-outline" slot="start"></ion-icon>
 							Refresh Preview
 						</ion-button>
+						@if ((isCreateMode$ | async) === false) {
+							<ion-button
+								fill="outline"
+								color="danger"
+								(click)="deleteTemplate()"
+								(keydown.enter)="deleteTemplate()"
+							>
+								<ion-icon name="trash-outline" slot="start"></ion-icon>
+								Delete Template
+							</ion-button>
+						}
 					</section>
 				</ion-card-content>
 			</ion-card>

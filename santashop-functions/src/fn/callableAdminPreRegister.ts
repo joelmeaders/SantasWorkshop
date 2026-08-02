@@ -292,6 +292,8 @@ const createRegistration = async (
 		customerId: uid,
 		firstName: requiredFirstName.toLowerCase(),
 		lastName: requiredLastName.toLowerCase(),
+		displayFirstName: requiredFirstName,
+		displayLastName: requiredLastName,
 		emailAddress: requiredEmailAddress,
 		zip: zipCode,
 	};

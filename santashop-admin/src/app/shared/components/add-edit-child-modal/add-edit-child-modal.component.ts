@@ -1,7 +1,8 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  OnInit,
+	OnInit,
+	ChangeDetectorRef,
   inject,
   input
 } from '@angular/core';
@@ -95,11 +96,12 @@ import { AsyncPipe } from '@angular/common';
 export class AddEditChildModalComponent implements OnInit {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
+	private readonly changeDetector = inject(ChangeDetectorRef);
 	protected readonly childValidationService = inject(ChildValidationService);
 
 	public readonly child = input<Child>();
 
-	public form?: UntypedFormGroup;
+	public form: UntypedFormGroup = this.newForm();
 
 	public readonly minBirthDate = MIN_BIRTHDATE().toISOString();
 	public readonly maxBirthDate = MAX_BIRTHDATE().toISOString();
@@ -109,6 +111,7 @@ export class AddEditChildModalComponent implements OnInit {
 
 	public ngOnInit(): void {
 		this.form = this.newForm(this.child());
+		this.changeDetector.markForCheck();
 
 		const child = this.child();
   if (child?.dateOfBirth) {

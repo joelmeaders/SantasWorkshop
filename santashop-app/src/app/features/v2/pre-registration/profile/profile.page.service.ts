@@ -17,12 +17,14 @@ import {
 	IError,
 } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, Subject } from 'rxjs';
-import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { newChangeInfoForm } from './change-info/change-info.form';
 import { changeEmailForm, changePasswordForm } from './profile.form';
 
-@Injectable()
+@Injectable({
+	providedIn: 'root',
+})
 export class ProfilePageService implements OnDestroy {
 	private readonly httpService = inject(FireRepoLite);
 	private readonly authService = inject(AuthService);
@@ -35,6 +37,7 @@ export class ProfilePageService implements OnDestroy {
 	private readonly analytics = inject(AnalyticsWrapper);
 
 	private readonly destroy$ = new Subject<void>();
+	private readonly profileUpdates$ = new BehaviorSubject<Partial<User>>({});
 
 	@automock
 	public readonly profileForm = newChangeInfoForm();
@@ -50,12 +53,18 @@ export class ProfilePageService implements OnDestroy {
 		this.httpService
 			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
-			.pipe(filterNil(), take(1));
+			.pipe(filterNil());
 
 	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
 		takeUntil(this.destroy$),
-		switchMap((user) => this.getUser$(user!.uid)),
+		switchMap((user) =>
+			combineLatest([
+				this.getUser$(user!.uid),
+				this.profileUpdates$,
+			]).pipe(map(([profile, updates]) => ({ ...profile, ...updates }))),
+		),
+		shareReplay(1),
 	);
 
 	public readonly setUserFormSubscription = this.userProfile$
@@ -89,7 +98,12 @@ export class ProfilePageService implements OnDestroy {
 
 		try {
 			await this.functions.changeAccountInformation(newInfo);
-			this.router.navigate(['../']);
+			this.profileUpdates$.next({
+				...this.profileUpdates$.value,
+				...newInfo,
+				zipCode: String(newInfo.zipCode),
+			});
+			this.router.navigate(['/pre-registration/profile']);
 		} catch (error) {
 			this.errorHandler.handleError(error as IError);
 		} finally {
@@ -109,7 +123,7 @@ export class ProfilePageService implements OnDestroy {
 
 		this.changeEmailForm.reset();
 
-		this.router.navigate(['../']);
+		this.router.navigate(['/pre-registration/profile']);
 	}
 
 	public async changePassword(): Promise<void> {
@@ -122,7 +136,7 @@ export class ProfilePageService implements OnDestroy {
 			.then(() => this.passwordChangedAlert())
 			.catch((error) => this.errorHandler.handleError(error));
 
-		this.router.navigate(['../']);
+		this.router.navigate(['/pre-registration/profile']);
 	}
 
 	public async emailChangedAlert(): Promise<any> {

@@ -1,6 +1,7 @@
 export * from './lib/auth';
 export * from './lib/check-in-stats';
 export * from './lib/check-in';
+export * from './lib/cancellation';
 export * from './lib/child';
 export * from './lib/date-time-slot-count';
 export * from './lib/date-time-slot';

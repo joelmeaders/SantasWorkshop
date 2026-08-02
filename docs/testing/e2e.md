@@ -26,6 +26,9 @@ The current passing setup is:
 - Playwright running in **headless**, **CI-style**, **single-worker**, **no-retry** mode
 - A callable readiness probe confirming `testClearAllData` loaded before
   Playwright starts
+- Firebase `emulators:exec` owning the emulator lifecycle, so each suite starts
+  only after its emulators are ready and tears them down on success, failure,
+  or timeout
 - Playwright fixtures calling emulator-only helper functions at:
     - `http://127.0.0.1:5001/demo-santashop/us-central1`
 
@@ -78,10 +81,10 @@ volta run --node 24.11.0 pnpm e2e:test:app
 ```
 
 This prepares local app and Functions configuration, builds shared packages and
-Functions, starts the emulators and public app, runs `tests/public`, and shuts
-down the processes. The runner waits for an actual emulator-only callable, not
-just port `5001`, so a Functions source-loading error fails during startup
-instead of once per browser scenario.
+Functions, starts the public app, and uses `firebase emulators:exec` to run
+`tests/public` against a fresh emulator session. The runner waits for an actual
+emulator-only callable, not just port `5001`, so a Functions source-loading
+error fails during startup instead of once per browser scenario.
 
 ### Start services in separate terminals
 
@@ -118,6 +121,9 @@ Notes:
   profile.
 - `CI=1` keeps reporting non-interactive.
 - Retries are disabled (`retries: 0`) for faster feedback.
+- `maxFailures` is `1`: the suite stops after the first failed or timed-out
+  test, which preserves the first actionable failure and avoids corrupting
+  shared emulator state.
 - Workers are fixed at `1` because tests mutate shared emulator state.
 
 ## How to structure tests
@@ -256,6 +262,8 @@ Current helper callables:
 - `testSeedPublicParameters`
 - `testSeedAdminUser`
 - `testSeedDateTimeSlots`
+- `testSeedRegistrationSearchIndex`
+- `testSeedScheduleStats`
 
 Rules:
 

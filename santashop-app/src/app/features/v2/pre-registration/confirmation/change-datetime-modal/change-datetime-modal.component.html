@@ -19,12 +19,14 @@
 			</ion-text>
 		</ion-card-header>
 		<ion-card-content>
-			<ion-text>
-				<h2>
-					{{ currentSlot().dateTime | date: 'EEEE, MMMM d,' : 'MST' }}
-					{{ currentSlot().dateTime | timeSlot }}
-				</h2>
-			</ion-text>
+			@if (currentSlot; as slot) {
+				<ion-text>
+					<h2>
+						{{ slot.dateTime | date: 'EEEE, MMMM d,' : 'MST' }}
+						{{ slot.dateTime | timeSlot }}
+					</h2>
+				</ion-text>
+			}
 		</ion-card-content>
 	</ion-card>
 
@@ -62,6 +64,7 @@
 									isCurrentSlot(slot) ? 'light' : undefined
 								"
 								[detail]="true"
+								[attr.data-change-slot-id]="slot.id"
 							>
 								<ion-label>
 									<h3>{{ slot.dateTime | timeSlot }}</h3>

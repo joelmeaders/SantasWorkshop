@@ -1,5 +1,6 @@
 export const COLLECTION_SCHEMA = {
 	checkins: 'checkins',
+	cancellations: 'cancellations',
 	users: 'users',
 	registrations: 'registrations',
 	editedRegistrations: 'editedregistrations',

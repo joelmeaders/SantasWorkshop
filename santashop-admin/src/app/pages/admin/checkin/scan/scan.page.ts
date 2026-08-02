@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import {
 	AlertController,
 	IonContent,
+	IonButton,
 	IonItem,
 	IonIcon,
 	IonSelect,
@@ -40,11 +41,13 @@ import { camera } from 'ionicons/icons';
 	templateUrl: './scan.page.html',
 	styleUrls: ['./scan.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [ScannerService],
 	imports: [
 		HeaderComponent,
 		ZXingScannerModule,
 		AsyncPipe,
 		IonContent,
+		IonButton,
 		IonItem,
 		IonIcon,
 		IonSelect,
@@ -58,7 +61,7 @@ export class ScanPage {
 	private readonly alertController = inject(AlertController);
 	private readonly router = inject(Router);
 
-	public readonly cameraEnabled$ = new BehaviorSubject<boolean>(true);
+	public readonly cameraEnabled$ = new BehaviorSubject<boolean>(false);
 	public readonly deviceId$ = this.scannerService.$deviceId;
 	public readonly availableDevices$ = this.scannerService.$availableDevices;
 	public readonly formatsEnabled = this.scannerService.formatsEnabled;
@@ -168,6 +171,15 @@ export class ScanPage {
 	public badCodeFilter(code?: string): Observable<string | undefined> {
 		if (code?.length) code = code.toUpperCase();
 		return of(code);
+	}
+
+	public enterCodeManually(): void {
+		// Triggers the invalid code process so the user can enter the code manually
+		this.invalidCode.next();
+	}
+
+	public enableCamera(): void {
+		this.cameraEnabled$.next(true);
 	}
 
 	private async invalidCodeAlert(): Promise<void> {

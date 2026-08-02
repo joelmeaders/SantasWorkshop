@@ -3,6 +3,7 @@ import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core';
 import type {
 	EmailTemplateDetail,
 	EmailTemplateSummary,
+	DeleteEmailTemplateRequest,
 	GetEmailTemplateRequest,
 	GetEmailTemplateRevisionRequest,
 	GetEmailTemplateRevisionResponse,
@@ -69,6 +70,13 @@ export class EmailTemplateService {
 				PublishEmailTemplateResponse
 			>('callablePublishEmailTemplate')(payload);
 		return result.data;
+	}
+
+	public async deleteEmailTemplate(key: string): Promise<void> {
+		const payload: DeleteEmailTemplateRequest = { key };
+		await this.functions.callableWrapper<DeleteEmailTemplateRequest, void>(
+			'callableDeleteEmailTemplate',
+		)(payload);
 	}
 
 	public async sendTestEmailTemplate(

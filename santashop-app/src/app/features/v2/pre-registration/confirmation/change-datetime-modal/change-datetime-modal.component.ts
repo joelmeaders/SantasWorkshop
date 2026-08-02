@@ -4,7 +4,6 @@ import {
 	OnDestroy,
 	inject,
 	Input,
-	input,
 } from '@angular/core';
 import {
 	ModalController,
@@ -29,14 +28,14 @@ import {
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import {
 	map,
 	takeUntil,
 	shareReplay,
 	distinctUntilChanged,
 } from 'rxjs/operators';
-import { TimeSlotPipe } from '@santashop/core';
+import { TimeSlotPipe, timestampToDate } from '@santashop/core';
 
 @Component({
 	selector: 'app-change-datetime-modal',
@@ -71,11 +70,35 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 	private readonly destroy$ = new Subject<void>();
 
-	public readonly currentSlot = input.required<DateTimeSlot>();
-	// Kept as an accessor input because the current setter logic is stateful.
+	private _currentSlot?: DateTimeSlot;
+	private availableSlotsSubscription?: Subscription;
+
 	@Input()
-	public set availableSlots(value: DateTimeSlot[]) {
-		this._availableSlots$.next(value);
+	public set currentSlot(value: DateTimeSlot) {
+		this._currentSlot = {
+			...value,
+			dateTime: timestampToDate(value.dateTime),
+		};
+	}
+
+	public get currentSlot(): DateTimeSlot | undefined {
+		return this._currentSlot;
+	}
+
+	// The confirmation page receives live Firestore updates after the modal opens.
+	@Input()
+	public set availableSlots(value: Observable<DateTimeSlot[]>) {
+		this.availableSlotsSubscription?.unsubscribe();
+		this.availableSlotsSubscription = value
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((slots) =>
+				this._availableSlots$.next(
+					slots.map((slot) => ({
+						...slot,
+						dateTime: timestampToDate(slot.dateTime),
+					})),
+				),
+			);
 	}
 
 	private readonly _availableSlots$ = new BehaviorSubject<DateTimeSlot[]>([]);
@@ -112,6 +135,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 		);
 
 	public ngOnDestroy(): void {
+		this.availableSlotsSubscription?.unsubscribe();
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
@@ -133,7 +157,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	}
 
 	public isCurrentSlot(slot: DateTimeSlot): boolean {
-		const currentSlot = this.currentSlot();
+		const currentSlot = this.currentSlot;
 		if (!currentSlot) return false;
 		return (
 			currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&

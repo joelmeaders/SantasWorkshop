@@ -29,7 +29,6 @@ import {
 	templateUrl: './change-password.page.html',
 	styleUrls: ['./change-password.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,

@@ -21,6 +21,9 @@ export interface AccountAdminMock {
 	updateUser: ReturnType<typeof vi.fn>;
 	doc: ReturnType<typeof vi.fn>;
 	runTransaction: ReturnType<typeof vi.fn>;
+	transactionSet: ReturnType<typeof vi.fn>;
+	transactionUpdate: ReturnType<typeof vi.fn>;
+	transactionDelete: ReturnType<typeof vi.fn>;
 	batchSet: ReturnType<typeof vi.fn>;
 	batchCreate: ReturnType<typeof vi.fn>;
 	batchDelete: ReturnType<typeof vi.fn>;
@@ -41,12 +44,24 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 	const batchDelete = vi.fn();
 	const batchCommit = vi.fn();
 	const transactionSet = vi.fn();
+	const transactionUpdate = vi.fn();
+	const transactionDelete = vi.fn();
+	const transactionGet = vi.fn((reference: MockDocRef) => reference.get());
 	const runTransaction = vi.fn(
 		async (
 			callback: (transaction: {
 				set: typeof transactionSet;
+				get: typeof transactionGet;
+				update: typeof transactionUpdate;
+				delete: typeof transactionDelete;
 			}) => Promise<void> | void,
-		) => callback({ set: transactionSet }),
+		) =>
+			callback({
+				set: transactionSet,
+				get: transactionGet,
+				update: transactionUpdate,
+				delete: transactionDelete,
+			}),
 	);
 	const initializeApp = vi.fn();
 
@@ -80,6 +95,9 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 	};
 
 	const doc = vi.fn((path: string) => getDocRef(path));
+	const collection = vi.fn((path: string) => ({
+		doc: vi.fn((id?: string) => getDocRef(`${path}/${id ?? 'generated-id'}`)),
+	}));
 	const batch = {
 		set: batchSet,
 		create: batchCreate,
@@ -88,9 +106,13 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 	};
 	const firestore = vi.fn(() => ({
 		doc,
+		collection,
 		batch: vi.fn(() => batch),
 		runTransaction,
 	}));
+	Object.assign(firestore, {
+		FieldValue: { delete: vi.fn(() => '__deleted__') },
+	});
 	const auth = vi.fn(() => ({
 		updateUser,
 	}));
@@ -105,6 +127,9 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 		updateUser,
 		doc,
 		runTransaction,
+		transactionSet,
+		transactionUpdate,
+		transactionDelete,
 		batchSet,
 		batchCreate,
 		batchDelete,
@@ -121,6 +146,10 @@ export const loadAccountRegistrationHandlers = async (
 	vi.doMock('firebase-admin', () => adminMock.module);
 	vi.doMock('dateformat', () => ({
 		default: vi.fn(() => FORMATTED_DATETIME),
+	}));
+	vi.doMock('../../../src/utility/qrcodes', () => ({
+		deleteQrCode: vi.fn().mockResolvedValue(undefined),
+		generateQrCode: vi.fn().mockResolvedValue(undefined),
 	}));
 
 	const [

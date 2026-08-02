@@ -164,6 +164,7 @@
 	"functions": {
 		"runtime": "nodejs22",
 		"predeploy": [
+			"node \"$PROJECT_DIR/scripts/assert-functions-deploy-ci.cjs\"",
 			"npm --prefix \"$RESOURCE_DIR\" run lint",
 			"npm --prefix \"$RESOURCE_DIR\" run build"
 		],

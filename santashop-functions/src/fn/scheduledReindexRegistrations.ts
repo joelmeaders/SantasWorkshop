@@ -13,12 +13,16 @@ export default async function scheduledReindexRegistrations(): Promise<string> {
 
 	registrations.forEach((registration) => {
 		try {
+			if (!registration.registrationSubmittedOn) return;
+
 			const newRsi: RegistrationSearchIndex = {
 				code: registration.qrcode,
 				customerId: registration.uid!,
 				emailAddress: registration.emailAddress!.toLowerCase(),
 				firstName: registration.firstName!.toLowerCase(),
 				lastName: registration.lastName!.toLowerCase(),
+				displayFirstName: registration.firstName!,
+				displayLastName: registration.lastName!,
 				zip: registration.zipCode!,
 			};
 			rsi.push(newRsi);

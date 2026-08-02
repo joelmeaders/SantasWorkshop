@@ -80,6 +80,7 @@ export const clearEmulatorData = async (): Promise<void> => {
 		COLLECTION_SCHEMA.tmpRegistrationEmails,
 		COLLECTION_SCHEMA.tmpResendRegistrationEmails,
 		COLLECTION_SCHEMA.checkins,
+		COLLECTION_SCHEMA.cancellations,
 		COLLECTION_SCHEMA.editedRegistrations,
 		COLLECTION_SCHEMA.onSiteRegistrations,
 		COLLECTION_SCHEMA.stats,

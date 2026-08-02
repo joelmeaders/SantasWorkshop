@@ -22,6 +22,7 @@ import {
 	IonicRouteStrategy,
 	provideIonicAngular,
 } from '@ionic/angular/standalone';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import {
 	FIREBASE_ANALYTICS,
@@ -30,6 +31,7 @@ import {
 	FIREBASE_FIRESTORE,
 	FIREBASE_FUNCTIONS,
 	PROGRAM_YEAR,
+	SHOP_DAYS,
 } from '@santashop/core';
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -98,6 +100,7 @@ bootstrapApplication(AppComponent, {
 		provideZoneChangeDetection({ eventCoalescing: true }),
 		provideRouter(routes),
 		provideHttpClient(withInterceptorsFromDi()),
+		provideCharts(withDefaultRegisterables()),
 		provideIonicAngular({
 			mode: 'md',
 			animated: true,
@@ -106,5 +109,6 @@ bootstrapApplication(AppComponent, {
 		{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 		// App settings
 		{ provide: PROGRAM_YEAR, useValue: config.programYear },
+		{ provide: SHOP_DAYS, useValue: config.shopDays },
 	],
 }).catch((err) => console.log(err));

@@ -17,10 +17,11 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		seedPublicParams,
 	}) => {
 		await page.goto('/');
-		if (new URL(page.url()).pathname.startsWith('/admin')) {
-			await page.click('#adminSignOutButton');
-			await expect(page).toHaveURL(/\/$/, { timeout: 30000 });
-		}
+		const signOut = page.locator('#adminSignOutButton');
+		await signOut.click({ timeout: 3000 }).then(
+			async () => page.waitForURL('**/', { timeout: 30000 }),
+			() => undefined,
+		);
 		await seedPublicParams({});
 		await page.goto('/admin/landing');
 		await expect(page).toHaveURL(/\/$/);
@@ -66,6 +67,38 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expect(page.locator('#scheduleEditorNav')).toHaveCount(0);
 	});
 
+	test('STAFF-006 limits a check-in operator to operational work', async ({
+		page,
+		seedPublicParams,
+		seedAdminUser,
+	}) => {
+		const account = defaultAdminAccount({
+			uid: 'checkin-operator-e2e-user',
+			emailAddress: 'checkin-operator-e2e@test.com',
+			admin: false,
+			roles: ['checkin'],
+		});
+		await seedPublicParams({});
+		await seedAdminUser(account);
+		await page.goto('/');
+		await fillAdminSignInForm(page, account);
+		await page.click('#adminSignInButton');
+
+		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
+		await expect(page.locator('#checkInNav')).toBeVisible();
+		await expect(page.locator('#onSiteRegistrationNav')).toBeVisible();
+		await expect(page.locator('#preRegistrationNav')).toBeVisible();
+		await expect(page.locator('#scheduleEditorNav')).toHaveCount(0);
+		await expect(page.getByText('User Management', { exact: true })).toHaveCount(
+			0,
+		);
+
+		await page.goto('/admin/schedule-editor');
+		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
+		await page.goto('/admin/stats/registration');
+		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
+	});
+
 	test('STAFF-004 signs out and blocks protected operational routes', async ({
 		page,
 		seedPublicParams,
@@ -109,7 +142,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expect(page.locator('#searchNav')).toBeVisible();
 	});
 
-	test('STAFF-006 denies owner operations to an ordinary administrator', async ({
+	test('OWNER-001 denies owner operations to an ordinary administrator', async ({
 		page,
 		seedPublicParams,
 		seedAdminUser,

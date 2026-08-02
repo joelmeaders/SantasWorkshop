@@ -161,6 +161,6 @@ firebase emulators:start
 # Start only functions emulator
 firebase emulators:start --only functions
 
-# Deploy functions to production
-firebase deploy --only functions
+# Functions deployment is intentionally GitHub Actions-only.
+# Merge to master for test, then promote the tested ref with the release workflow.
 ```

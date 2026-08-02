@@ -30,7 +30,6 @@ import {
 	templateUrl: './change-email.page.html',
 	styleUrls: ['./change-email.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,

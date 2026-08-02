@@ -93,6 +93,7 @@ export class PublicMenuComponent implements OnDestroy {
 
 	public async setLanguage(value: 'en' | 'es'): Promise<void> {
 		this.translateService.use(value);
+		window.localStorage.setItem('santashop-language', value);
 		this.analyticsService.logEvent(`set_language_${value}`);
 		await this.closeMenu();
 	}

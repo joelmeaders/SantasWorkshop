@@ -1,6 +1,8 @@
 import {
+	SendEmailCommand,
+	type SendEmailCommandOutput,
 	SendTemplatedEmailCommand,
-	SendTemplatedEmailCommandOutput,
+	type SendTemplatedEmailCommandOutput,
 	SESClient,
 	SESClientConfig,
 } from '@aws-sdk/client-ses';
@@ -90,6 +92,11 @@ interface ResolvedEmailPayload {
 	templateKey?: string;
 }
 
+interface EmailDeliveryResponse {
+	MessageId?: string;
+	$metadata?: { httpStatusCode?: number };
+}
+
 const queueProcessingState = {
 	sending: 'sending',
 	accepted: 'accepted',
@@ -113,6 +120,10 @@ const buildSuccessfulDeliveryUpdates = (sentOn: Date) => ({
 		lastErrorDetails: false,
 	},
 });
+
+const isCancellationCommunication = (
+	document: QueuedRegistrationEmailDocument,
+): boolean => document.queueSource === 'registration-cancellation';
 
 const getQueueRequestedOn = (
 	document: QueuedRegistrationEmailDocument,
@@ -238,6 +249,25 @@ const createReminderEmailCommand = (
 		Source: REGISTRATION_EMAIL_SOURCE,
 		Template: template,
 		ReturnPath: REGISTRATION_EMAIL_RETURN_PATH,
+});
+
+const createCancellationEmailCommand = (
+	payload: ResolvedEmailPayload,
+): SendEmailCommand =>
+	new SendEmailCommand({
+		Destination: { ToAddresses: [payload.email] },
+		Source: REGISTRATION_EMAIL_SOURCE,
+		ReturnPath: REGISTRATION_EMAIL_RETURN_PATH,
+		Message: {
+			Subject: {
+				Data: `Your ${EVENT_DISPLAY_NAME} registration was cancelled`,
+			},
+			Body: {
+				Text: {
+					Data: `Hello ${payload.firstName},\n\nYour registration for ${EVENT_DISPLAY_NAME} has been cancelled. Your previous appointment (${payload.dateTime}) is no longer reserved, and the confirmation code from your cancelled registration is no longer valid.\n\nIf you would like to attend, sign in and submit a new registration.`,
+				},
+			},
+		},
 	});
 };
 
@@ -328,7 +358,10 @@ const canSkipDelivery = async (
 ): Promise<boolean> => {
 	const now = new Date();
 
-	if (context.registration?.reminderEmailSentOn) {
+	if (
+		!isCancellationCommunication(context.document) &&
+		context.registration?.reminderEmailSentOn
+	) {
 		await syncSentQueueDocument(
 			context,
 			getNormalizedDate(context.registration.reminderEmailSentOn, now),
@@ -449,7 +482,7 @@ const persistProviderAcceptance = async (
 	context: LoadedEmailTriggerContext,
 	queuedOn: Date,
 	acceptedOn: Date,
-	response: SendTemplatedEmailCommandOutput,
+	response: EmailDeliveryResponse,
 ): Promise<void> => {
 	await context.emailDocRef.set(
 		{
@@ -492,16 +525,18 @@ const persistSuccessfulDelivery = async (
 	}
 
 	let registrationWriteError: unknown;
-	try {
-		await context.registrationDocRef.set(
-			{
-				...successUpdates.registration,
-				reminderEmailQueuedOn: queuedOn,
-			},
-			{ merge: true },
-		);
-	} catch (error) {
-		registrationWriteError = error;
+	if (!isCancellationCommunication(context.document)) {
+		try {
+			await context.registrationDocRef.set(
+				{
+					...successUpdates.registration,
+					reminderEmailQueuedOn: queuedOn,
+				},
+				{ merge: true },
+			);
+		} catch (error) {
+			registrationWriteError = error;
+		}
 	}
 
 	if (!queueWriteError && !registrationWriteError) {
@@ -518,7 +553,7 @@ const persistSuccessfulDelivery = async (
 const persistFailedDelivery = async (
 	context: LoadedEmailTriggerContext,
 	queuedOn: Date,
-	response: SendTemplatedEmailCommandOutput | undefined,
+	response: EmailDeliveryResponse | undefined,
 	error: unknown,
 ): Promise<void> => {
 	if (response) {
@@ -539,9 +574,11 @@ const persistFailedDelivery = async (
 		},
 		{ merge: true },
 	);
-	await context.registrationDocRef.set(failedUpdates.registration, {
-		merge: true,
-	});
+	if (!isCancellationCommunication(context.document)) {
+		await context.registrationDocRef.set(failedUpdates.registration, {
+			merge: true,
+		});
+	}
 	throw error instanceof Error
 		? error
 		: new Error('Failed to send queued registration email');
@@ -565,50 +602,61 @@ export default async function sendNewRegistrationEmails2(
 		return;
 	}
 
-	const baseMessageDetails = {
-		firstName: payload.firstName,
-		eventName: EVENT_DISPLAY_NAME,
-		qrCodeUrl: getRegistrationQrCodeUrl(payload.uid),
-		code: payload.code,
-		dateTime: payload.dateTime,
-	};
-
 	sesClient ??= new SESClient({
 		credentials,
 		region: SES_REGION,
 	} as SESClientConfig);
 
-	const resolvedTemplate = await resolvePublishedEmailTemplate(
-		{
-			...(payload.template ? { template: payload.template } : {}),
-			...(payload.templateKey
-				? { templateKey: payload.templateKey }
-				: {}),
-		},
-		REGISTRATION_EMAIL_TEMPLATE,
-	);
+	const isCancellation = isCancellationCommunication(context.document);
+	let templateName: string | undefined;
+	let emailCommand: SendTemplatedEmailCommand | SendEmailCommand;
+	if (isCancellation) {
+		emailCommand = createCancellationEmailCommand(payload);
+	} else {
+		const baseMessageDetails = {
+			firstName: payload.firstName,
+			eventName: EVENT_DISPLAY_NAME,
+			qrCodeUrl: getRegistrationQrCodeUrl(payload.uid),
+			code: payload.code,
+			dateTime: payload.dateTime,
+		};
+		const resolvedTemplate = await resolvePublishedEmailTemplate(
+			{
+				...(payload.template ? { template: payload.template } : {}),
+				...(payload.templateKey
+					? { templateKey: payload.templateKey }
+					: {}),
+			},
+			REGISTRATION_EMAIL_TEMPLATE,
+		);
+		templateName = resolvedTemplate.templateName;
+		const messageDetails = resolvedTemplate.templateSummary
+			? buildEmailTemplateDataFromMappings(
+					resolvedTemplate.templateSummary.fieldMappings,
+					baseMessageDetails,
+				)
+			: baseMessageDetails;
+		emailCommand = createReminderEmailCommand(
+			messageDetails,
+			payload.email,
+			resolvedTemplate.templateName,
+		);
+	}
 
-	const messageDetails = resolvedTemplate.templateSummary
-		? buildEmailTemplateDataFromMappings(
-				resolvedTemplate.templateSummary.fieldMappings,
-				baseMessageDetails,
-			)
-		: baseMessageDetails;
-
-	const sendReminderEmailCommand = createReminderEmailCommand(
-		messageDetails,
-		payload.email,
-		resolvedTemplate.templateName,
-	);
-
-	let response: SendTemplatedEmailCommandOutput | undefined;
+	let response: EmailDeliveryResponse | undefined;
 	const attemptedOn = new Date();
 	const queuedOn = getQueueRequestedOn(context.document, attemptedOn);
 
 	await markQueueSending(context, attemptedOn, triggerMetadata);
 
 	try {
-		response = await sesClient.send(sendReminderEmailCommand);
+		response = isCancellation
+			? ((await sesClient.send(
+					emailCommand as SendEmailCommand,
+				)) as SendEmailCommandOutput)
+			: ((await sesClient.send(
+					emailCommand as SendTemplatedEmailCommand,
+				)) as SendTemplatedEmailCommandOutput);
 		// todo: later, check SES delivery status from AWS for this message ID and
 		// update the queue/registration state if delivery is deferred, bounced, or rejected.
 		const acceptedOn = new Date();
@@ -624,7 +672,7 @@ export default async function sendNewRegistrationEmails2(
 		const sentOn = new Date();
 		log.info('Successfully sent queued registration email', {
 			uid: payload.uid,
-			templateName: resolvedTemplate.templateName,
+			templateName: templateName ?? 'registration-cancellation',
 			templateKey: payload.templateKey ?? null,
 			providerMessageId: response.MessageId ?? null,
 			httpStatusCode: response.$metadata?.httpStatusCode,
@@ -635,7 +683,7 @@ export default async function sendNewRegistrationEmails2(
 			'Failed to send queued registration email',
 			{
 				uid: payload.uid,
-				templateName: resolvedTemplate.templateName,
+			templateName: templateName ?? 'registration-cancellation',
 				templateKey: payload.templateKey ?? null,
 			},
 			err,

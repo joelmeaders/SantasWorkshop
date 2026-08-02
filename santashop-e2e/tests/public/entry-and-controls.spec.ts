@@ -1,4 +1,15 @@
 import { test, expect } from '../../fixtures/test-fixtures';
+import {
+	completeReferralViaUi,
+	createAccountViaUi,
+	randomAccount,
+} from '../../fixtures/account-helpers';
+import {
+	addChildViaUi,
+	defaultTestChild,
+	selectAppointmentViaUi,
+	submitRegistrationViaUi,
+} from '../../fixtures/registration-helpers';
 
 test.describe('public entry and runtime operating controls', () => {
 	test.beforeEach(async ({ clearData }) => {
@@ -33,6 +44,35 @@ test.describe('public entry and runtime operating controls', () => {
 		await expect(
 			page.getByText('Crear una cuenta', { exact: true }),
 		).toBeVisible({ timeout: 10000 });
+	});
+
+	test('PUB-009 completes a registration path in Spanish', async ({
+		page,
+		seedScenario,
+		seedDateTimeSlots,
+	}) => {
+		await seedScenario('create-account-enabled');
+		await seedDateTimeSlots([
+			{
+				id: 'spanish-registration-slot',
+				programYear: 2026,
+				dateTime: '2026-12-12T16:00:00.000Z',
+				lastUpdated: '2026-01-01T00:00:00.000Z',
+				maxSlots: 10,
+				slotsReserved: 0,
+				enabled: true,
+			},
+		]);
+		await page.goto('/');
+		await page.locator('#languageToggle').click();
+		await expect(page.getByText('Crear una cuenta', { exact: true })).toBeVisible();
+
+		await createAccountViaUi(page, randomAccount());
+		await completeReferralViaUi(page);
+		await addChildViaUi(page, defaultTestChild());
+		await selectAppointmentViaUi(page, 'spanish-registration-slot');
+		await submitRegistrationViaUi(page);
+		await expect(page.getByText('Esta es tu entrada al evento', { exact: true })).toBeVisible();
 	});
 
 	test('PUB-003 blocks account creation when the runtime control is disabled', async ({
@@ -108,5 +148,33 @@ test.describe('public entry and runtime operating controls', () => {
 		);
 		await globalAlert.locator('button.alert-button').click();
 		await expect(globalAlert).toBeHidden({ timeout: 10000 });
+	});
+
+	test('PUB-008 displays a global-alert update without reloading the session', async ({
+		page,
+		seedScenario,
+		seedPublicParams,
+	}) => {
+		await seedScenario('create-account-enabled');
+		await page.goto('/');
+		await expect(page.locator('ion-alert')).toHaveCount(0);
+
+		await seedPublicParams({
+			globalAlert: {
+				displayAlert: true,
+				titleEn: 'Live operational notice',
+				titleEs: 'Aviso operativo en vivo',
+				messageEn: 'This update arrived after the application opened.',
+				messageEs: 'Esta actualización llegó después de abrir la aplicación.',
+			},
+		});
+
+		const alert = page.locator('ion-alert');
+		await expect(alert).toContainText('Live operational notice', {
+			timeout: 15000,
+		});
+		await expect(alert).toContainText(
+			'This update arrived after the application opened.',
+		);
 	});
 });

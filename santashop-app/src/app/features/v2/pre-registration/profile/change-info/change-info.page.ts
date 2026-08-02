@@ -29,7 +29,6 @@ import {
 	templateUrl: './change-info.page.html',
 	styleUrls: ['./change-info.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,

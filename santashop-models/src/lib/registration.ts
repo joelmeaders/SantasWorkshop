@@ -46,4 +46,10 @@ export interface Registration {
 	qrCodeGenerationFailedOn?: false | Date;
 
 	hasCheckedIn?: boolean;
+
+	// Set by the authoritative cancellation callable. A cancelled registration
+	// returns to draft state and receives a new confirmation code.
+	cancelledOn?: Date;
+	cancelledByUid?: string;
+	cancellationLogId?: string;
 }

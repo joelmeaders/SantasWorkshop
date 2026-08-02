@@ -62,7 +62,10 @@
 					[routerLink]="['/admin/checkin/review', { qrcode: result.code }]"
 				>
 					<div class="result-label">
-						<h3>{{ result.firstName }} {{ result.lastName }}</h3>
+						<h3>
+							{{ result.displayFirstName ?? result.firstName }}
+							{{ result.displayLastName ?? result.lastName }}
+						</h3>
 						<ion-label> {{ result.emailAddress }} </ion-label>
 						<ion-label> Zip: {{ result.zip }} </ion-label>
 					</div>

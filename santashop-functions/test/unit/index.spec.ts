@@ -93,7 +93,7 @@ describe('functions index exports', () => {
 		delete process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR;
 		const subject = await import('../../src/index');
 		const trigger = subject.sendNewRegistrationEmails as unknown as {
-			options: { secrets: string[] };
+			options: Record<string, unknown>;
 			handler: (event: unknown) => Promise<void>;
 		};
 
@@ -106,7 +106,7 @@ describe('functions index exports', () => {
 		});
 
 		expect(sendNewRegistrationEmailsMock).not.toHaveBeenCalled();
-		expect(trigger.options.secrets).toEqual([]);
+		expect(trigger.options).not.toHaveProperty('secrets');
 	});
 
 	it('allows an explicit emulator email-delivery integration run', async () => {
@@ -114,7 +114,7 @@ describe('functions index exports', () => {
 		process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR = 'true';
 		const subject = await import('../../src/index');
 		const trigger = subject.sendNewRegistrationEmails as unknown as {
-			options: { secrets: string[] };
+			options: Record<string, unknown>;
 			handler: (event: unknown) => Promise<void>;
 		};
 		const snapshot = {
@@ -130,9 +130,20 @@ describe('functions index exports', () => {
 		expect(sendNewRegistrationEmailsMock).toHaveBeenCalledWith(snapshot, {
 			eventId: 'emulator-event',
 		});
-		expect(trigger.options.secrets).toEqual([
-			'AWS_ACCESS_KEY_ID',
-			'AWS_SECRET_ACCESS_KEY',
-		]);
+		expect(trigger.options).not.toHaveProperty('secrets');
+	});
+
+	it('does not bind SES credentials as provider-managed deployment secrets', async () => {
+		delete process.env.FUNCTIONS_EMULATOR;
+		const subject = await import('../../src/index');
+		const exportedFunctions = [
+			subject.sendNewRegistrationEmails,
+			subject.callablePublishEmailTemplate,
+			subject.callableSendTestEmailTemplate,
+		] as unknown as Array<{ options: Record<string, unknown> }>;
+
+		for (const exportedFunction of exportedFunctions) {
+			expect(exportedFunction.options).not.toHaveProperty('secrets');
+		}
 	});
 });

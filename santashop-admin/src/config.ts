@@ -9,6 +9,7 @@ export const config = {
 	appCheckKey: "6Lc4vgkpAAAAACOIJc4lTNn4wLzvuJkoz17t_RXH",
 	appCheckEnabled: true,
 	programYear: 2026,
+	shopDays: [12,13,15,16],
 	emulatorPorts: {
 		auth: 9099,
 		functions: 5001,

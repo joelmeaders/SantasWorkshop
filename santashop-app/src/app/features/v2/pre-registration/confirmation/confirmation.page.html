@@ -113,15 +113,26 @@
 									</ion-text>
 									<div class="es-mg-bottom-md">
 										@if (allowChangeRegistration$ | async) {
-										<ion-button
-											fill="outline"
+									<ion-button
+										id="changeRegistrationButton"
+										fill="outline"
 											(click)="changeRegistration()"
 										>
 											{{
 											"CONFIRMATION.CHANGE_REGISTRATION_DATETIME"
 											| translate }}
-										</ion-button>
-										}
+									</ion-button>
+									}
+									@if (allowCancelRegistration$ | async) {
+									<ion-button
+										id="cancelRegistrationButton"
+										color="danger"
+										fill="outline"
+										(click)="undoRegistration()"
+									>
+										{{ 'CONFIRMATION.CANCEL_REGISTRATION' | translate }}
+									</ion-button>
+									}
 									</div>
 									}
 								</div>

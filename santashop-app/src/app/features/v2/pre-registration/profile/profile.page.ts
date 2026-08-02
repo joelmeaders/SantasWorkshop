@@ -28,7 +28,6 @@ import {
 	templateUrl: './profile.page.html',
 	styleUrls: ['./profile.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
 	imports: [
 		PreRegistrationMenuComponent,
 		RouterLink,

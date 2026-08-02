@@ -122,4 +122,19 @@ test.describe('customer account and session access', () => {
 			timeout: 15000,
 		});
 	});
+
+	test('AUTH-008 shows a recovery message for invalid credentials', async ({
+		page,
+	}) => {
+		await page.goto('/sign-in');
+		await page.fill('#signInEmail input', 'missing@example.com');
+		await page.fill('#signInPassword input', 'WrongPassword123!');
+		await page.click('#signInButton');
+
+		const alert = page.locator('ion-alert');
+		await expect(alert).toBeVisible({ timeout: 10000 });
+		await expect(alert).toContainText(
+			/credential|password|account|user-not-found/i,
+		);
+	});
 });

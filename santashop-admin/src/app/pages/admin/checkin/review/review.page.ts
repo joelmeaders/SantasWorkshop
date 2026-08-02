@@ -258,7 +258,7 @@ export class ReviewPage {
 				result,
 				registration.qrcode ?? 'nocode',
 			);
-			await this.router.navigate(['admin/checkin/confirmation']);
+			await this.router.navigate(['/admin/checkin/confirmation']);
 		} catch (error: unknown) {
 			const err = error as {
 				details?: { code?: number };
@@ -267,7 +267,7 @@ export class ReviewPage {
 			if (err.details?.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([
-					'admin/checkin/duplicate',
+					'/admin/checkin/duplicate',
 					registration.uid,
 				]);
 				return;
@@ -282,7 +282,7 @@ export class ReviewPage {
 			await alert.present();
 			this.checkinContext.reset();
 			await alert.onDidDismiss();
-			await this.router.navigate(['admin/checkin/scan']);
+			await this.router.navigate(['/admin/checkin/scan']);
 		}
 	}
 

@@ -80,9 +80,12 @@ const confirmCreateAccountEmail = async (page: Page): Promise<void> => {
 export const createAccountViaUi = async (
 	page: Page,
 	account: TestAccount,
+	referralChoice = 'Denver Human Services DHS',
+	otherAnswer = 'Neighborhood friend',
 ): Promise<void> => {
 	await page.goto('/sign-up');
 	await fillCreateAccountForm(page, account);
+	await selectReferralViaUi(page, referralChoice, otherAnswer);
 	await page.click('#legalCheckbox');
 	// ion-button reflects its disabled state via the `button-disabled` class;
 	// waiting for it to clear also allows the input debounce to flush.
@@ -95,9 +98,34 @@ export const createAccountViaUi = async (
 	// Firebase realtime listeners keep the network busy, so `networkidle` never
 	// settles. Wait for the URL change and a page element instead.
 	await page.waitForURL('**/pre-registration/overview', { timeout: 30000 });
-	await expect(page.locator('app-referral-card')).toBeVisible({
+	await expect(page.locator('#childrenProgressCard')).toBeVisible({
 		timeout: 15000,
 	});
+};
+export const selectReferralViaUi = async (
+	page: Page,
+	choice = 'Denver Human Services DHS',
+	otherAnswer = 'Neighborhood friend',
+): Promise<void> => {
+	await page.click('#referralSelector');
+	const modal = page.locator('ion-modal');
+	await expect(modal).toBeVisible({ timeout: 10000 });
+
+	const referralOption = modal.locator(`[id="referral-${choice}"]`);
+	await expect(referralOption).toBeVisible({ timeout: 10000 });
+	await referralOption.click();
+
+	if (choice === 'Other') {
+		await modal.locator('#referralOther input').fill(otherAnswer);
+	}
+
+	const saveButton = modal.locator('#saveReferralButton');
+	await expect(saveButton).toBeVisible({ timeout: 10000 });
+	await expect(saveButton).not.toHaveClass(/button-disabled/, {
+		timeout: 10000,
+	});
+	await saveButton.click();
+	await expect(modal).toHaveCount(0, { timeout: 10000 });
 };
 
 export const signInViaUi = async (
@@ -130,33 +158,4 @@ export const signOutViaUi = async (page: Page): Promise<void> => {
 		signOutButton.click(),
 	]);
 	await expect(page.locator('#signInButton')).toBeVisible({ timeout: 10000 });
-};
-
-/**
- * Completes the referral selection shown to newly created accounts. Until a
- * referral is chosen the overview renders a full-screen takeover without the
- * app header, so this step is required before the menu (and sign-out) becomes
- * available.
- */
-export const completeReferralViaUi = async (page: Page): Promise<void> => {
-	await expect(page.locator('app-referral-card')).toBeVisible({
-		timeout: 15000,
-	});
-
-	// "Denver Human Services DHS" is a stable common referral option.
-	const referralOption = page.locator(
-		'[id="referral-Denver Human Services DHS"]',
-	);
-	await expect(referralOption).toBeVisible({ timeout: 15000 });
-	await referralOption.click();
-
-	const saveButton = page.locator('#saveReferralButton');
-	await expect(saveButton).toBeVisible({ timeout: 10000 });
-	await expect(saveButton).not.toHaveClass(/button-disabled/, {
-		timeout: 10000,
-	});
-	await saveButton.click();
-
-	// Once the referral is saved the app header (and menu button) renders.
-	await expect(page.locator('#menuButton')).toBeVisible({ timeout: 15000 });
 };

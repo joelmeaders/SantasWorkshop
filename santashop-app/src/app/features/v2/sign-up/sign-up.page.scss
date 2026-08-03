@@ -13,3 +13,37 @@
 .back-button {
 	margin-inline-start: 10px;
 }
+
+.referral-selector {
+	width: 100%;
+	margin-inline: 0;
+	--inner-padding-end: 0;
+}
+
+.referral-selector-label {
+	min-width: 0;
+	white-space: normal;
+}
+
+.referral-selector-question,
+.referral-selector-value {
+	display: block;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.referral-selector-question {
+	font-weight: 600;
+}
+
+.referral-selector-placeholder {
+	color: var(--ion-color-medium);
+}
+
+.referral-selector-error {
+	display: block;
+	padding-inline: 16px;
+	padding-top: 4px;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}

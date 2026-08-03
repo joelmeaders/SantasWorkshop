@@ -14,10 +14,8 @@ import {
 	takeUntil,
 } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../../core';
-import { ProfileService } from '../../../../core/services/profile.service';
 
 import { AsyncPipe } from '@angular/common';
-import { ReferralCardComponent } from './referral-card/referral-card.component';
 import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { ChildrenCardComponent } from './children-card/children-card.component';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
@@ -30,7 +28,6 @@ import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
 	styleUrls: ['./overview.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		ReferralCardComponent,
 		PreRegistrationMenuComponent,
 		ChildrenCardComponent,
 		ScheduleCardComponent,
@@ -44,16 +41,11 @@ import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
 })
 export class OverviewPage implements OnDestroy {
 	private readonly preregistrationService = inject(PreRegistrationService);
-	private readonly profileService = inject(ProfileService);
 
 	private readonly destroy$ = new Subject<void>();
 
 	public readonly userRegistration$ =
 		this.preregistrationService.userRegistration$;
-
-	public readonly referredBy$ = this.profileService.referredBy$.pipe(
-		shareReplay(1),
-	);
 
 	public readonly children$ = this.preregistrationService.children$;
 	public readonly childCount$ = this.preregistrationService.childCount$;

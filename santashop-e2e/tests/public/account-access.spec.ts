@@ -1,9 +1,9 @@
 import { test, expect } from '../../fixtures/test-fixtures';
 import {
-	completeReferralViaUi,
 	createAccountViaUi,
 	fillCreateAccountForm,
 	randomAccount,
+	selectReferralViaUi,
 	signInViaUi,
 	signOutViaUi,
 } from '../../fixtures/account-helpers';
@@ -21,7 +21,8 @@ test.describe('customer account and session access', () => {
 		await createAccountViaUi(page, account);
 
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
-		await expect(page.locator('app-referral-card')).toBeVisible();
+		await expect(page.locator('#menuButton')).toBeVisible();
+		await expect(page.locator('#childrenProgressCard')).toBeVisible();
 	});
 
 	test('AUTH-002 requires valid fields and policy acceptance', async ({
@@ -41,6 +42,9 @@ test.describe('customer account and session access', () => {
 		await expect(submitButton).toHaveClass(/button-disabled/);
 
 		await page.click('#legalCheckbox');
+		await expect(submitButton).toHaveClass(/button-disabled/);
+
+		await selectReferralViaUi(page);
 		await expect(submitButton).not.toHaveClass(/button-disabled/, {
 			timeout: 15000,
 		});
@@ -51,7 +55,6 @@ test.describe('customer account and session access', () => {
 	}) => {
 		const existingAccount = randomAccount();
 		await createAccountViaUi(page, existingAccount);
-		await completeReferralViaUi(page);
 		await signOutViaUi(page);
 
 		await page.goto('/sign-up');
@@ -60,6 +63,7 @@ test.describe('customer account and session access', () => {
 			emailAddress: existingAccount.emailAddress,
 		});
 		await page.click('#legalCheckbox');
+		await selectReferralViaUi(page);
 		await expect(page.locator('#submitButton')).not.toHaveClass(
 			/button-disabled/,
 			{ timeout: 15000 },
@@ -77,7 +81,6 @@ test.describe('customer account and session access', () => {
 	}) => {
 		const account = randomAccount();
 		await createAccountViaUi(page, account);
-		await completeReferralViaUi(page);
 		await signOutViaUi(page);
 
 		await page.goto('/pre-registration/overview');
@@ -93,7 +96,6 @@ test.describe('customer account and session access', () => {
 	}) => {
 		const account = randomAccount();
 		await createAccountViaUi(page, account);
-		await completeReferralViaUi(page);
 
 		await page.goto('/sign-in');
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
@@ -106,7 +108,6 @@ test.describe('customer account and session access', () => {
 	}) => {
 		const account = randomAccount();
 		await createAccountViaUi(page, account);
-		await completeReferralViaUi(page);
 		await signOutViaUi(page);
 
 		await page.goto('/reset-password');

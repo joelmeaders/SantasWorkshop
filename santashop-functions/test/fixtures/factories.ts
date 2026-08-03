@@ -17,6 +17,7 @@ export const createOnboardUser = (
 	password: TEST_ONBOARD_PASSWORD,
 	password2: TEST_ONBOARD_PASSWORD,
 	zipCode: 80205,
+	referredBy: 'Denver Human Services DHS',
 	legal: true,
 	newsletter: true,
 	...overrides,

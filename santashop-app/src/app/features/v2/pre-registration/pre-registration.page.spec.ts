@@ -5,7 +5,10 @@ import {
 	provideFirestoreMock,
 	provideFunctionsMock,
 	provideStorageMock,
+	createPopoverControllerMock,
+	provideTranslateServiceMock,
 } from '../../../../test-helpers';
+import { PopoverController } from '@ionic/angular/standalone';
 
 import { PreRegistrationPage } from './pre-registration.page';
 
@@ -21,6 +24,11 @@ describe('PreRegistrationPage', () => {
 				provideAuthMock(),
 				provideFunctionsMock(),
 				provideStorageMock(),
+				provideTranslateServiceMock(),
+				{
+					provide: PopoverController,
+					useValue: createPopoverControllerMock(),
+				},
 				provideActivatedRouteMock(),
 			],
 		}).compileComponents();

@@ -7,7 +7,6 @@ import {
 import { Subject } from 'rxjs';
 import { takeUntil, shareReplay } from 'rxjs/operators';
 import { PreRegistrationService } from '../../../core';
-import { ProfileService } from '../../../core/services/profile.service';
 
 import { AsyncPipe } from '@angular/common';
 import { InternalHeaderComponent } from '../../../shared/components/internal-header/internal-header.component';
@@ -51,13 +50,8 @@ import {
 })
 export class PreRegistrationPage implements OnDestroy {
 	private readonly viewService = inject(PreRegistrationService);
-	private readonly profileService = inject(ProfileService);
 
 	private readonly destroy$ = new Subject<void>();
-
-	public readonly referredBy$ = this.profileService.referredBy$.pipe(
-		shareReplay(1),
-	);
 
 	public readonly userRegistration$ = this.viewService.userRegistration$.pipe(
 		takeUntil(this.destroy$),

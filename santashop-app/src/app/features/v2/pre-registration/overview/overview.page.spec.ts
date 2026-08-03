@@ -5,6 +5,7 @@ import {
 	provideFirestoreMock,
 	provideFunctionsMock,
 	provideStorageMock,
+	provideActivatedRouteMock,
 } from '../../../../../test-helpers';
 import { OverviewPage } from './overview.page';
 
@@ -20,6 +21,7 @@ describe('OverviewPage', () => {
 				provideAuthMock(),
 				provideFunctionsMock(),
 				provideStorageMock(),
+				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),
 			],
 		}).compileComponents();

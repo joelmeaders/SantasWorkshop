@@ -286,6 +286,13 @@
 	},
 	"REFERRAL": {
 		"REFERRED_BY": "¿Cómo se enteró de nosotros?",
+		"MODAL_TITLE": "¿Cómo se enteró de nosotros?",
+		"SELECT": "Seleccione una respuesta",
+		"COMMON_OPTIONS": "Opciones comunes",
+		"ALPHABETICAL": "Alfabético",
+		"OTHER": "Otro",
+		"OTHER_ANSWER": "Su respuesta",
+		"OTHER_ERROR": "Ingrese entre 3 y 20 caracteres",
 		"SEARCH_PLACEHOLDER": "Tipo para buscar",
 		"YOU_SELECTED": "Has seleccionado",
 		"REFERRED_BY_PLACEHOLDER": "Escriba su respuesta aquí"

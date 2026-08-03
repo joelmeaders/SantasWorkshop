@@ -11,7 +11,9 @@ const generateQrCode = vi.fn();
 const generateId = vi.fn();
 const deleteQrCode = vi.fn();
 
-const loadSubject = async (adminMock: FirebaseAdminMock) => {
+const loadSubject = async (
+	adminMock: FirebaseAdminMock,
+): Promise<typeof import('../../../src/fn/newAccount')> => {
 	vi.resetModules();
 
 	vi.doMock('firebase-admin', () => adminMock.module);
@@ -55,6 +57,12 @@ describe('newAccount handler', () => {
 		expect(adminMock.doc).toHaveBeenCalledWith('users/new-user-123');
 		expect(adminMock.doc).toHaveBeenCalledWith(
 			'registrations/new-user-123',
+		);
+		expect(adminMock.batchCreate).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'users/new-user-123' }),
+			expect.objectContaining({
+				referredBy: 'Denver Human Services DHS',
+			}),
 		);
 		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
 		expect(generateId).toHaveBeenCalledWith(8);
@@ -132,5 +140,46 @@ describe('newAccount handler', () => {
 				} as never),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('rejects a missing referral before creating the auth user', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+
+		await expect(
+			newAccount(
+				createCallableRequest(createOnboardUser({ referredBy: '  ' })),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+	});
+
+	it('normalizes and validates Other referral answers before auth creation', async () => {
+		const onboardUser = createOnboardUser({
+			referredBy: ' Other:  Neighbor  ',
+		});
+		adminMock.createUser.mockResolvedValue({ uid: 'new-user-other' });
+		adminMock.batchCommit.mockResolvedValue(undefined);
+
+		const { default: newAccount } = await loadSubject(adminMock);
+
+		await newAccount(createCallableRequest(onboardUser));
+
+		expect(adminMock.batchCreate).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'users/new-user-other' }),
+			expect.objectContaining({ referredBy: 'Other:Neighbor' }),
+		);
+	});
+
+	it('rejects an invalid Other referral answer before creating the auth user', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+
+		await expect(
+			newAccount(
+				createCallableRequest(
+					createOnboardUser({ referredBy: 'Other:ab' }),
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.createUser).not.toHaveBeenCalled();
 	});
 });

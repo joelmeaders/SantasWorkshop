@@ -1,14 +1,4 @@
 <ion-content color="light">
-	@if ((referredBy$ | async) === null || (referredBy$ | async) === undefined)
-	{
-	<ion-grid class="height-max">
-		<ion-row class="ion-justify-content-center">
-			<ion-col size="auto">
-				<app-referral-card />
-			</ion-col>
-		</ion-row>
-	</ion-grid>
-	} @else {
 	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
 		<ion-row class="height-max">
 			<ion-col
@@ -43,5 +33,4 @@
 			</ion-col>
 		</ion-row>
 	</ion-grid>
-	}
 </ion-content>

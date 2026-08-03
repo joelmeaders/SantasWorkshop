@@ -286,6 +286,13 @@
 	},
 	"REFERRAL": {
 		"REFERRED_BY": "How did you hear about us?",
+		"MODAL_TITLE": "How did you hear about us?",
+		"SELECT": "Select an answer",
+		"COMMON_OPTIONS": "Common options",
+		"ALPHABETICAL": "Alphabetical",
+		"OTHER": "Other",
+		"OTHER_ANSWER": "Your answer",
+		"OTHER_ERROR": "Enter 3–20 characters",
 		"SEARCH_PLACEHOLDER": "Type to search",
 		"YOU_SELECTED": "You selected",
 		"REFERRED_BY_PLACEHOLDER": "Type your answer here"

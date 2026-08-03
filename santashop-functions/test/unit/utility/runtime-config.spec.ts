@@ -100,12 +100,14 @@ const writeEnvFile = (
 	fs.writeFileSync(filePath, `${fileContents}\n`, 'utf8');
 };
 
-const loadRuntimeConfig = async () => {
+const loadRuntimeConfig = async (): Promise<
+	typeof import('../../../src/utility/runtime-config')
+> => {
 	vi.resetModules();
 	realEnvLoader.loadEnvFiles = (
 		filePaths: string[],
 		env?: EnvironmentMap,
-	) => {
+	): void => {
 		const currentWorkingDirectory = process.cwd();
 		originalLoadEnvFiles(
 			filePaths.filter((filePath) =>
@@ -226,5 +228,43 @@ describe('runtime-config', () => {
 
 		expect(subject.EVENT_DISPLAY_NAME).toBe('Functions File Event');
 		expect(subject).not.toHaveProperty('ADMIN_UIDS');
+	});
+
+	it('loads the project-specific Functions env file generated for the emulator', async () => {
+		const directoryPath = createTempDirectory();
+		writeEnvFile(
+			path.join(
+				directoryPath,
+				'santashop-functions/.env.santas-workshop-test',
+			),
+			{
+				...BASE_RUNTIME_ENV,
+				SANTASHOP_EVENT_DISPLAY_NAME: 'Project File Event',
+			},
+		);
+
+		setRuntimeEnv({ GCLOUD_PROJECT: 'santas-workshop-test' });
+		process.chdir(directoryPath);
+
+		const subject = await loadRuntimeConfig();
+
+		expect(subject.EVENT_DISPLAY_NAME).toBe('Project File Event');
+	});
+
+	it('loads the project-specific Functions env file from the Functions cwd', async () => {
+		const directoryPath = createTempDirectory();
+		writeEnvFile(path.join(directoryPath, '.env.santas-workshop-test'), {
+			...BASE_RUNTIME_ENV,
+			SANTASHOP_EVENT_DISPLAY_NAME: 'Functions Cwd Project File Event',
+		});
+
+		setRuntimeEnv({ GCLOUD_PROJECT: 'santas-workshop-test' });
+		process.chdir(directoryPath);
+
+		const subject = await loadRuntimeConfig();
+
+		expect(subject.EVENT_DISPLAY_NAME).toBe(
+			'Functions Cwd Project File Event',
+		);
 	});
 });

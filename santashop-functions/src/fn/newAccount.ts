@@ -59,6 +59,7 @@ export default async function newAccount(
 			emailAddress: requireEmailAddress(requestData['emailAddress']),
 			password,
 			zipCode: requireZipCodeValue(requestData['zipCode']),
+			referredBy: requireReferredBy(requestData['referredBy']),
 			newsletter: requestData['newsletter'] === true,
 		};
 	});
@@ -92,6 +93,7 @@ export default async function newAccount(
 		version: 1,
 		manuallyMigrated: false,
 		newsletter: data.newsletter,
+		referredBy: data.referredBy,
 	};
 
 	const registration: Registration = {
@@ -167,4 +169,33 @@ export default async function newAccount(
 
 const handleAuthError = (error: unknown): never => {
 	throwMappedAuthHttpsError(error, 'Unable to create the account.');
+};
+
+const requireReferredBy = (value: unknown): string => {
+	const normalized = requireTrimmedString(value, 'Referred by');
+	if (normalized.length > 200) {
+		throw new CallableValidationError(
+			'Referred by must be 200 characters or fewer.',
+		);
+	}
+
+	if (normalized === 'Other') {
+		throw new CallableValidationError(
+			'An answer is required when Other is selected.',
+		);
+	}
+
+	if (!normalized.startsWith('Other:')) return normalized;
+
+	const otherValue = requireTrimmedString(
+		normalized.slice('Other:'.length),
+		'Other referral answer',
+	);
+	if (otherValue.length < 3 || otherValue.length > 20) {
+		throw new CallableValidationError(
+			'Other referral answer must be between 3 and 20 characters.',
+		);
+	}
+
+	return `Other:${otherValue}`;
 };

@@ -15,12 +15,26 @@ interface FirebaseEnvironmentConfig {
 }
 
 const loadLocalEnvFiles = (): void => {
-	envLoader.loadEnvFiles([
+	const projectId =
+		process.env['GCLOUD_PROJECT'] ?? process.env['GCP_PROJECT'];
+	const envFiles = [
 		path.resolve(process.cwd(), '.env'),
 		path.resolve(process.cwd(), 'santashop-functions/.env'),
 		path.resolve(__dirname, '../../.env'),
 		path.resolve(__dirname, '../../../.env'),
-	]);
+	];
+
+	if (projectId) {
+		envFiles.push(
+			path.resolve(process.cwd(), `.env.${projectId}`),
+			path.resolve(
+				process.cwd(),
+				`santashop-functions/.env.${projectId}`,
+			),
+		);
+	}
+
+	envLoader.loadEnvFiles(envFiles);
 };
 
 loadLocalEnvFiles();
@@ -70,9 +84,7 @@ const parseRequiredInteger = (name: string): number => {
 const parseRequiredYear = (name: string): number => {
 	const year = parseRequiredInteger(name);
 	if (year < 2000 || year > 2100) {
-		throw new TypeError(
-			`Invalid year environment variable: ${name}`,
-		);
+		throw new TypeError(`Invalid year environment variable: ${name}`);
 	}
 	return year;
 };

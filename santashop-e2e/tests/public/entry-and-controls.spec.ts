@@ -1,6 +1,5 @@
 import { test, expect } from '../../fixtures/test-fixtures';
 import {
-	completeReferralViaUi,
 	createAccountViaUi,
 	randomAccount,
 } from '../../fixtures/account-helpers';
@@ -65,14 +64,17 @@ test.describe('public entry and runtime operating controls', () => {
 		]);
 		await page.goto('/');
 		await page.locator('#languageToggle').click();
-		await expect(page.getByText('Crear una cuenta', { exact: true })).toBeVisible();
+		await expect(
+			page.getByText('Crear una cuenta', { exact: true }),
+		).toBeVisible();
 
 		await createAccountViaUi(page, randomAccount());
-		await completeReferralViaUi(page);
 		await addChildViaUi(page, defaultTestChild());
 		await selectAppointmentViaUi(page, 'spanish-registration-slot');
 		await submitRegistrationViaUi(page);
-		await expect(page.getByText('Esta es tu entrada al evento', { exact: true })).toBeVisible();
+		await expect(
+			page.getByText('Esta es tu entrada al evento', { exact: true }),
+		).toBeVisible();
 	});
 
 	test('PUB-003 blocks account creation when the runtime control is disabled', async ({
@@ -165,7 +167,8 @@ test.describe('public entry and runtime operating controls', () => {
 				titleEn: 'Live operational notice',
 				titleEs: 'Aviso operativo en vivo',
 				messageEn: 'This update arrived after the application opened.',
-				messageEs: 'Esta actualización llegó después de abrir la aplicación.',
+				messageEs:
+					'Esta actualización llegó después de abrir la aplicación.',
 			},
 		});
 

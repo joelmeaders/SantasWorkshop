@@ -41,6 +41,7 @@ import { SignUpPageService } from './sign-up.page.service';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
+import { ReferralSelectionModalComponent } from './referral-selection-modal/referral-selection-modal.component';
 
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
@@ -106,6 +107,41 @@ export class SignUpPage {
 	public async onCreateAccount(): Promise<void> {
 		if (await this.userConfirmedEmail())
 			await this.viewService.onboardUser();
+	}
+
+	public async showReferralModal(): Promise<void> {
+		const modal = await this.modalController.create({
+			component: ReferralSelectionModalComponent,
+			componentProps: {
+				currentValue: this.form.controls.referredBy.value,
+			},
+		});
+
+		await modal.present();
+		const result = await modal.onDidDismiss<string>();
+
+		if (result.role === 'confirm' && result.data) {
+			this.form.controls.referredBy.setValue(result.data);
+			this.form.controls.referredBy.markAsTouched();
+		}
+	}
+
+	public displayReferral(value: string | undefined): string {
+		if (!value) return '';
+		if (value.startsWith('Other:')) {
+			return `${this.translateService.instant('REFERRAL.OTHER')}: ${value.slice('Other:'.length)}`;
+		}
+
+		return value;
+	}
+
+	public referralAriaLabel(value: string | undefined): string {
+		const question = this.translateService.instant('REFERRAL.REFERRED_BY');
+		const answer =
+			this.displayReferral(value) ||
+			this.translateService.instant('REFERRAL.SELECT');
+
+		return `${question} ${answer}`;
 	}
 
 	private async userConfirmedEmail(): Promise<boolean> {

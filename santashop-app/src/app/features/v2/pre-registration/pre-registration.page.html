@@ -1,12 +1,9 @@
-@let referredBy = referredBy$ | async; @if (referredBy) {
 <app-internal-header />
-}
 
 <ion-content id="main">
 	@let isRegistrationComplete = isRegistrationComplete$ | async;
 	<ion-tabs>
-		@if (referredBy && !isRegistrationComplete) { @let childCount =
-		childCount$ | async;
+		@if (!isRegistrationComplete) { @let childCount = childCount$ | async;
 		<ion-tab-bar slot="bottom" class="ion-hide-xl-up">
 			<ion-tab-button tab="overview">
 				<ion-icon name="home" />

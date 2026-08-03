@@ -25,6 +25,7 @@ describe.sequential('newAccount integration', () => {
 	it('creates auth and firestore records when creating a new account', async () => {
 		const onboardUser = createOnboardUser({
 			emailAddress: 'integration.buddy.elf@example.com',
+			referredBy: '  School Counselor  ',
 		});
 
 		const uid = await newAccount(createCallableRequest(onboardUser));
@@ -46,6 +47,7 @@ describe.sequential('newAccount integration', () => {
 			lastName: 'Elf',
 			emailAddress: 'integration.buddy.elf@example.com',
 			newsletter: true,
+			referredBy: 'School Counselor',
 		});
 		expect(registrationDocument.exists).toBe(true);
 		expect(registrationDocument.data()).toMatchObject({
@@ -55,6 +57,7 @@ describe.sequential('newAccount integration', () => {
 			emailAddress: 'integration.buddy.elf@example.com',
 			zipCode: 80205,
 		});
+		expect(registrationDocument.data()).not.toHaveProperty('referredBy');
 	});
 
 	it('surfaces an already-exists error when creating the same account twice', async () => {

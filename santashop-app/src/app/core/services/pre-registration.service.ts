@@ -1,12 +1,15 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { AlertController } from '@ionic/angular/standalone';
+import { Observable, Subject, of } from 'rxjs';
 import {
+	catchError,
 	map,
 	mergeMap,
 	shareReplay,
 	switchMap,
 	take,
 	takeUntil,
+	tap,
 } from 'rxjs/operators';
 import {
 	DateTimeSlot,
@@ -16,6 +19,7 @@ import {
 } from '@santashop/models';
 import {
 	AuthService,
+	AnalyticsWrapper,
 	automock,
 	filterNil,
 	FireRepoLite,
@@ -36,6 +40,9 @@ export class PreRegistrationService implements OnDestroy {
 	private readonly authService = inject(AuthService);
 	private readonly qrCodeService = inject(QrCodeService);
 	private readonly afFunctions = inject(FunctionsWrapper);
+	private readonly analytics = inject(AnalyticsWrapper);
+	private readonly alertController = inject(AlertController);
+	private hasReportedUnavailableRegistration = false;
 
 	private readonly registrationCollection =
 		(): IFireRepoCollection<Registration> =>
@@ -50,6 +57,13 @@ export class PreRegistrationService implements OnDestroy {
 		takeUntil(this.destroy$),
 		filterNil(),
 		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
+		catchError(() => {
+			void this.reportUnavailableRegistration('unreadable');
+			return of(undefined);
+		}),
+		tap((registration) => {
+			if (!registration) void this.reportUnavailableRegistration('missing');
+		}),
 		shareReplay(1),
 	);
 
@@ -180,5 +194,25 @@ export class PreRegistrationService implements OnDestroy {
 		});
 
 		return (registration?.children as Child[]) ?? new Array<Child>();
+	}
+
+	private async reportUnavailableRegistration(
+		reason: 'missing' | 'unreadable',
+	): Promise<void> {
+		if (this.hasReportedUnavailableRegistration) return;
+		this.hasReportedUnavailableRegistration = true;
+
+		this.analytics.logEventWithParams('registration_record_unavailable', {
+			reason,
+		});
+
+		const alert = await this.alertController.create({
+			header: 'Registration record unavailable',
+			message:
+				'We could not load your registration record. It may be missing or corrupted. Please contact the Denver Santa Claus Shop for assistance.',
+			buttons: ['Ok'],
+		});
+
+		await alert.present();
 	}
 }

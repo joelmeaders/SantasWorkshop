@@ -1,5 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService, FireRepoLite, FunctionsWrapper } from '@santashop/core';
+import { AlertController } from '@ionic/angular/standalone';
+import {
+	AnalyticsWrapper,
+	AuthService,
+	FireRepoLite,
+	FunctionsWrapper,
+} from '@santashop/core';
 import { autoSpyProvider } from '../../../../../test-helpers/jasmine';
 import { firstValueFrom, of } from 'rxjs';
 import { PreRegistrationService } from './pre-registration.service';
@@ -10,6 +16,8 @@ describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
 	let repository: jasmine.SpyObj<FireRepoLite>;
 	let qrCodeService: jasmine.SpyObj<QrCodeService>;
+	let analytics: jasmine.SpyObj<AnalyticsWrapper>;
+	let alertController: jasmine.SpyObj<AlertController>;
 
 	let collectionSpy: jasmine.Spy;
 	const collectionStub = repoCollectionStub();
@@ -24,6 +32,20 @@ describe('PreRegistrationService', () => {
 				{ provide: AuthService, useValue: { uid$: of(userId) } },
 				autoSpyProvider(QrCodeService),
 				autoSpyProvider(FunctionsWrapper),
+				{
+					provide: AnalyticsWrapper,
+					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
+						'AnalyticsWrapper',
+						['logEventWithParams'],
+					),
+				},
+				{
+					provide: AlertController,
+					useValue: jasmine.createSpyObj<AlertController>(
+						'AlertController',
+						['create'],
+					),
+				},
 			],
 		});
 
@@ -34,6 +56,15 @@ describe('PreRegistrationService', () => {
 		qrCodeService = TestBed.inject(
 			QrCodeService,
 		) as jasmine.SpyObj<QrCodeService>;
+		analytics = TestBed.inject(
+			AnalyticsWrapper,
+		) as jasmine.SpyObj<AnalyticsWrapper>;
+		alertController = TestBed.inject(
+			AlertController,
+		) as jasmine.SpyObj<AlertController>;
+		alertController.create.and.resolveTo({
+			present: () => Promise.resolve(),
+		} as HTMLIonAlertElement);
 	});
 
 	beforeEach(() => {
@@ -70,6 +101,26 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(value).toBeFalse();
+	});
+
+	it('userRegistration$: should alert and log when registration is missing', async () => {
+		// Arrange
+		spyOn(collectionStub, 'read').and.returnValue(of(undefined));
+
+		// Act
+		await firstValueFrom(service.userRegistration$);
+		await Promise.resolve();
+
+		// Assert
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith(
+			'registration_record_unavailable',
+			{ reason: 'missing' },
+		);
+		expect(alertController.create).toHaveBeenCalledWith(
+			jasmine.objectContaining({
+				header: 'Registration record unavailable',
+			}),
+		);
 	});
 
 	it('registrationComplete$: should return true', async () => {

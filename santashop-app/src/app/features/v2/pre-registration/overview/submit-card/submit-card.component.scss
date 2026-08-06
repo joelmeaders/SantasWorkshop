@@ -1,8 +1,57 @@
-.is-locked { opacity: 0.72; }
-.card-guidance { margin-top: 0; }
-.card-actions { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
-.email-verification { border-top: 1px solid var(--ion-color-step-150, #d7d8da); margin-top: 1.5rem; padding-top: 1.25rem; }
-.email-verification h2 { font-size: 1.1rem; margin: 0; }
-.email-verification p { margin: 0.5rem 0; }
-.email-update-help { color: var(--ion-color-medium-shade); font-size: 0.9rem; }
-@media (max-width: 480px) { .card-actions ion-button { flex: 1 1 auto; } }
+.workflow-card {
+	margin: 0 0 1.25rem;
+}
+
+.workflow-card ion-card-header {
+	background: linear-gradient(135deg, rgba(179, 38, 62, 0.12), rgba(179, 38, 62, 0.02));
+}
+
+.is-locked {
+	filter: saturate(0.72);
+	opacity: 0.82;
+}
+
+.card-guidance {
+	color: var(--santa-muted);
+	margin-top: 0;
+}
+
+.card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	justify-content: flex-end;
+	margin-top: 1.25rem;
+}
+
+.email-verification {
+	background: #f8fbf9;
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	margin-top: 1.5rem;
+	padding: 1.25rem;
+}
+
+.email-verification h2 {
+	font-size: 1.2rem;
+	margin: 0;
+}
+
+.email-verification p {
+	margin: 0.5rem 0;
+}
+
+.email-update-help {
+	color: var(--santa-muted);
+	font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+	.card-actions ion-button {
+		flex: 1 1 auto;
+	}
+
+	.email-verification {
+		padding: 1rem;
+	}
+}

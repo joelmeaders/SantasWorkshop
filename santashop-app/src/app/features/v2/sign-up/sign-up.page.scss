@@ -1,23 +1,79 @@
+.signup-shell {
+	margin-inline: auto;
+	max-width: var(--santa-page-width);
+	padding: clamp(1rem, 4vw, 2.5rem) var(--santa-gutter) 3rem;
+}
+
+.signup-row {
+	min-height: 100%;
+}
+
+.form-column {
+	max-width: 50rem;
+}
+
 .sign-up-card {
-	max-width: 630px;
+	margin-inline: auto;
+	max-width: 46rem;
+}
+
+.sign-up-card ion-card-header {
+	background:
+		radial-gradient(circle at 92% 10%, rgba(229, 169, 47, 0.24) 0 1.4rem, transparent 1.45rem),
+		linear-gradient(135deg, rgba(23, 100, 71, 0.1), rgba(255, 255, 255, 0));
+}
+
+.sign-up-card ion-card-subtitle {
+	color: var(--santa-evergreen);
+	margin-top: 0.5rem;
+}
+
+.form-section {
+	display: block;
+	margin-block: 0.5rem 1.5rem;
+}
+
+.form-section ion-item-divider {
+	margin-bottom: 0.75rem;
+}
+
+.legal-section {
+	background: rgba(229, 169, 47, 0.08);
+	border: 1px solid rgba(229, 169, 47, 0.3);
+	border-radius: var(--santa-radius-md);
+	padding: 0.25rem 0.75rem 1rem;
 }
 
 .check-container {
-	padding-left: 16px;
+	padding-left: 1rem;
 }
 
 .check {
-	--size: 24px;
+	--border-color-checked: var(--santa-evergreen);
+	--checkbox-background-checked: var(--santa-evergreen);
+	--size: 1.5rem;
 }
 
 .back-button {
-	margin-inline-start: 10px;
+	--background: rgba(255, 255, 255, 0.85);
+	margin: 0 0 0.75rem;
+}
+
+.submit-account {
+	min-width: min(100%, 16rem);
 }
 
 .referral-selector {
+	--background: #f8fbf9;
+	--border-color: #cfdcd4;
+	--border-radius: var(--santa-radius-sm);
+	--border-style: solid;
+	--border-width: 1px;
+	--inner-padding-end: 0.75rem;
+	--padding-start: 0.9rem;
+	border-radius: var(--santa-radius-sm);
+	margin-block: 0.6rem;
 	width: 100%;
-	margin-inline: 0;
-	--inner-padding-end: 0;
 }
 
 .referral-selector-label {
@@ -33,6 +89,7 @@
 }
 
 .referral-selector-question {
+	color: var(--santa-evergreen-deep);
 	font-weight: 600;
 }
 
@@ -46,4 +103,23 @@
 	padding-top: 4px;
 	white-space: normal;
 	overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+	.signup-shell {
+		padding-inline: 0;
+	}
+
+	.back-button {
+		margin-inline-start: 0.75rem;
+	}
+
+	.legal-section {
+		border-radius: var(--santa-radius-sm);
+		margin-inline: -0.25rem;
+	}
+
+	.submit-account {
+		width: 100%;
+	}
 }

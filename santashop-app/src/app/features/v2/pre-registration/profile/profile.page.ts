@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ProfilePageService } from './profile.page.service';
-import { PreRegistrationService } from '../../../../core';
 
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -45,7 +44,6 @@ import {
 })
 export class ProfilePage {
 	private readonly viewService = inject(ProfilePageService);
-	private readonly preregistrationService = inject(PreRegistrationService);
 
 	public readonly profileForm = this.viewService.profileForm;
 
@@ -54,9 +52,6 @@ export class ProfilePage {
 	public readonly changePasswordForm = this.viewService.changePasswordForm;
 
 	public readonly userProfile$ = this.viewService.userProfile$;
-	public readonly isRegistrationComplete$ =
-		this.preregistrationService.registrationComplete$;
-
 	public readonly updateProfile = (): Promise<void> =>
 		this.viewService.updatePublicProfile();
 

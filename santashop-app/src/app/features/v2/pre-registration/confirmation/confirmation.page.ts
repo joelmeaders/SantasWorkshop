@@ -28,11 +28,10 @@ import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { addIcons } from 'ionicons';
 import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { ChangeDatetimeModalComponent } from './change-datetime-modal/change-datetime-modal.component';
-import { DateTimePageService } from '../date-time/date-time.page.service';
+import { DateTimeSlotsService } from './date-time-slots.service';
 import { combineLatest, firstValueFrom, map } from 'rxjs';
 
 @Component({
@@ -40,9 +39,8 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	templateUrl: './confirmation.page.html',
 	styleUrls: ['./confirmation.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [DateTimePageService],
+	providers: [DateTimeSlotsService],
 	imports: [
-		PreRegistrationMenuComponent,
 		AsyncPipe,
 		DatePipe,
 		TranslateModule,
@@ -73,10 +71,8 @@ export class ConfirmationPage {
 	private readonly translateService = inject(TranslateService);
 	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
-	private readonly dateTimeService = inject(DateTimePageService);
+	private readonly dateTimeService = inject(DateTimeSlotsService);
 
-	public readonly isRegistrationComplete$ =
-		this.viewService.registrationComplete$;
 	public readonly allowChangeRegistration$ = combineLatest({
 		allowChange: this.appStateService.allowChangeRegistration$,
 		hasCheckedIn: this.viewService.hasCheckedIn$,

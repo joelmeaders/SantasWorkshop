@@ -1,16 +1,60 @@
+:host {
+	display: block;
+}
+
+ion-content {
+	--padding-bottom: 1rem;
+	--padding-end: 1rem;
+	--padding-start: 1rem;
+	--padding-top: 1rem;
+}
+
+ion-searchbar {
+	--background: #fff;
+	--border-radius: var(--santa-radius-md);
+	--box-shadow: var(--santa-shadow-sm);
+	padding-inline: 0;
+}
+
+ion-list {
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	overflow: hidden;
+}
+
+ion-item[button] {
+	--background-hover: rgba(23, 100, 71, 0.08);
+	--color: var(--santa-ink);
+}
+
 .ref-choices {
-	font-size: 1.1rem;
-	line-height: 1.8em;
+	font-size: 1rem;
+	line-height: 1.5;
 }
 
 .ref-choice {
-	font-size: 1.3rem;
-	line-height: 2em;
+	color: var(--santa-evergreen-deep);
+	font-size: 1.2rem;
+	font-weight: 800;
+	line-height: 1.6;
 }
 
 .buttons {
 	display: flex;
-	justify-content: space-between;
 	flex-wrap: wrap;
-	padding-inline: 16px;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	padding-inline: 0;
+}
+
+@media (max-width: 480px) {
+	ion-content {
+		--padding-end: 0.75rem;
+		--padding-start: 0.75rem;
+	}
+
+	.buttons ion-button {
+		flex: 1 1 auto;
+	}
 }

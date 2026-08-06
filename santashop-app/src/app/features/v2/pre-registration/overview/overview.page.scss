@@ -1,29 +1,110 @@
-app-children-card,
-app-schedule-card,
-app-submit-card {
-	display: block;
-	max-width: 760px;
-	margin: 0 auto 1rem;
+.workspace-shell {
+	margin-inline: auto;
+	max-width: var(--santa-page-width);
+	padding: clamp(1rem, 3vw, 2rem) var(--santa-gutter) 3rem;
 }
 
-.workspace-intro,
-.workspace-status,
-.workspace-error {
-	max-width: 760px;
-	margin: 1rem auto;
+app-children-card,
+app-schedule-card,
+app-submit-card,
+.workspace-intro {
+	display: block;
+	margin-inline: auto;
+	max-width: var(--santa-reading-width);
+}
+
+.workspace-intro {
+	background:
+		radial-gradient(circle at 94% 20%, rgba(229, 169, 47, 0.25) 0 1.4rem, transparent 1.45rem),
+		linear-gradient(135deg, var(--santa-evergreen-deep), var(--santa-evergreen));
+	border-radius: var(--santa-radius-lg);
+	box-shadow: var(--santa-shadow-md);
+	color: #fff;
+	margin-block: 0.5rem 1rem;
+	overflow: hidden;
+	padding: clamp(1.35rem, 4vw, 2.2rem);
+	position: relative;
 }
 
 .workspace-intro h1 {
-	margin-bottom: 0.25rem;
+	color: #fff;
+	margin-bottom: 0.4rem;
 }
 
-.workspace-status {
-	min-height: 1.5rem;
+.workspace-intro p {
+	font-size: 1.05rem;
+	margin: 0;
+	max-width: 40rem;
+	opacity: 0.9;
 }
 
-.workspace-error {
-	padding: 0.75rem;
-	border-left: 4px solid var(--ion-color-danger);
-	background: var(--ion-color-danger-tint);
-	color: var(--ion-color-danger-contrast);
+.workflow-section {
+	margin-inline: auto;
+	max-width: var(--santa-reading-width);
+	padding-left: 2.2rem;
+	position: relative;
+}
+
+.workflow-section::before {
+	align-items: center;
+	background: var(--santa-snow);
+	border: 3px solid var(--santa-evergreen);
+	border-radius: 50%;
+	box-shadow: var(--santa-shadow-sm);
+	color: var(--santa-evergreen-deep);
+	content: '';
+	display: flex;
+	font-weight: 900;
+	height: 2.4rem;
+	justify-content: center;
+	left: -0.1rem;
+	position: absolute;
+	top: 1.35rem;
+	width: 2.4rem;
+	z-index: 3;
+}
+
+.children-step::before {
+	content: '1';
+}
+
+.appointment-step::before {
+	content: '2';
+}
+
+.review-step::before {
+	content: '3';
+}
+
+.workflow-section:not(:last-of-type)::after {
+	background: repeating-linear-gradient(180deg, var(--santa-red) 0 0.4rem, #fff 0.4rem 0.75rem);
+	bottom: -1rem;
+	content: '';
+	left: 1rem;
+	position: absolute;
+	top: 3.5rem;
+	width: 0.28rem;
+}
+
+@media (max-width: 600px) {
+	.workspace-shell {
+		padding-inline: 0.2rem;
+	}
+
+	.workspace-intro {
+		margin-inline: 0.75rem;
+	}
+
+	.workspace-intro {
+		border-radius: var(--santa-radius-md);
+	}
+
+	.workflow-section {
+		padding-left: 0;
+	}
+
+	.workflow-section::before,
+	.workflow-section::after {
+		display: none;
+	}
 }

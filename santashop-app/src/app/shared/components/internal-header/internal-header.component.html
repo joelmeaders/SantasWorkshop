@@ -1,13 +1,13 @@
-<ion-header color="light">
-	<ion-toolbar color="light">
-		<ion-item lines="none" color="none">
+<ion-header class="workshop-header" color="light">
+	<ion-toolbar class="workshop-toolbar" color="light">
+		<ion-item class="user-identity" lines="none" color="none">
 			<img
 				src="assets/DSCS-Santa-Body_Red.png"
 				class="sm-logo"
 				alt="logo with santa claus"
 			/>
 			@if (user$ | async; as user) {
-				<h2>
+				<h2 class="user-greeting">
 					<strong>
 						{{ user.displayName }}
 					</strong>
@@ -16,6 +16,7 @@
 		</ion-item>
 		<ion-button
 			id="menuButton"
+			class="menu-button"
 			aria-label="Open account and help menu"
 			slot="end"
 			fill="clear"

@@ -1,9 +1,8 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	computed,
+	Input,
 	inject,
-	input,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { AppStateService } from '@santashop/core';
@@ -29,9 +28,10 @@ export class OperationalNoticeComponent {
 	private readonly appState = inject(AppStateService);
 	private readonly translate = inject(TranslateService);
 
-	public readonly mode = input.required<OperationalNoticeMode>();
-	public readonly image = computed(() => {
-		switch (this.mode()) {
+	@Input({ required: true }) public mode!: OperationalNoticeMode;
+
+	public get image(): string {
+		switch (this.mode) {
 			case 'maintenance':
 				return 'assets/images/maintenance.png';
 			case 'weather':
@@ -39,7 +39,7 @@ export class OperationalNoticeComponent {
 			default:
 				return 'assets/images/registration-closed.png';
 		}
-	});
+	}
 	public readonly message$ = this.appState.messageDoc$.pipe(
 		map((doc) => {
 			const message =

@@ -1,4 +1,4 @@
-<ion-card>
+<ion-card class="workflow-card children-card">
 	<ion-card-header>
 		<ion-item class="inset-ion-item-title" lines="none">
 			<ion-card-title id="children-heading">{{ 'MENU.CHILDREN' | translate }}</ion-card-title>
@@ -8,9 +8,9 @@
 	<ion-card-content>
 		<p class="card-guidance">{{ 'OVERVIEW.CHILD_GUIDANCE' | translate }}</p>
 		@if (childCount()) {
-			<ion-list [attr.aria-label]="'OVERVIEW.REGISTERED_CHILDREN' | translate">
-				@for (child of children(); track child.id) {
-					<ion-item [attr.data-child-id]="child.id" [attr.aria-label]="('OVERVIEW.EDIT_CHILD_LABEL' | translate) + ' ' + child.firstName" [button]="true" [detail]="true" lines="full" (click)="editChild(child)" [disabled]="busy()">
+			<ion-list class="children-list" [attr.aria-label]="'OVERVIEW.REGISTERED_CHILDREN' | translate">
+				@for (child of children(); track child.id; let isLast = $last) {
+					<ion-item [attr.data-child-id]="child.id" [attr.aria-label]="('OVERVIEW.EDIT_CHILD_LABEL' | translate) + ' ' + child.firstName" [button]="true" [detail]="true" [lines]="isLast ? 'none' : 'full'" (click)="editChild(child)" [disabled]="busy()">
 						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" /> }
 						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" /> }
 						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" /> }
@@ -26,9 +26,11 @@
 		}
 
 		@if (!editorOpen()) {
-			<ion-button data-open-add-child color="xmasred" fill="outline" (click)="openNewChild()" [disabled]="busy()">
-				<ion-icon name="add-circle" slot="start" />{{ 'CHILDREN.ADD_A_CHILD' | translate }}
-			</ion-button>
+			<div class="add-child-action">
+				<ion-button data-open-add-child color="xmasred" fill="outline" (click)="openNewChild()" [disabled]="busy()">
+					<ion-icon name="add-circle" slot="start" />{{ 'CHILDREN.ADD_A_CHILD' | translate }}
+				</ion-button>
+			</div>
 		}
 	</ion-card-content>
 </ion-card>
@@ -44,10 +46,10 @@
 		<ion-content>
 			<form [formGroup]="form" (ngSubmit)="saveChild()" novalidate [attr.aria-label]="'OVERVIEW.CHILD_DETAILS' | translate">
 				<ion-list lines="none">
-					<ion-item><ion-input #firstNameInput id="childFirstName" [label]="'ADDCHILD.FIRST_NAME' | translate" labelPlacement="stacked" autocomplete="given-name" formControlName="firstName" /></ion-item>
-					<ion-item><ion-input [label]="'ADDCHILD.LAST_NAME' | translate" labelPlacement="stacked" autocomplete="family-name" formControlName="lastName" /></ion-item>
+					<ion-item><ion-input #firstNameInput id="childFirstName" fill="outline" [label]="'ADDCHILD.FIRST_NAME' | translate" labelPlacement="stacked" autocomplete="given-name" formControlName="firstName" /></ion-item>
+					<ion-item><ion-input fill="outline" [label]="'ADDCHILD.LAST_NAME' | translate" labelPlacement="stacked" autocomplete="family-name" formControlName="lastName" /></ion-item>
 					<ion-note id="childAgeRequirement" class="ion-padding-horizontal">{{ 'ADDCHILD.UNDER_13_REQUIREMENT' | translate }}</ion-note>
-					<ion-item><ion-input [label]="'ADDCHILD.BIRTH_DATE' | translate" labelPlacement="stacked" type="date" [min]="minBirthDate" [max]="maxBirthDate" formControlName="dateOfBirth" aria-describedby="childAgeRequirement" (ionChange)="birthdaySelected($event.detail.value)" /></ion-item>
+					<ion-item><ion-input fill="outline" [label]="'ADDCHILD.BIRTH_DATE' | translate" labelPlacement="stacked" type="date" [min]="minBirthDate" [max]="maxBirthDate" formControlName="dateOfBirth" aria-describedby="childAgeRequirement" (ionChange)="birthdaySelected($event.detail.value)" /></ion-item>
 					@if (showToyTypeControls()) {
 						<ion-list-header>{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-list-header>
 						<ion-radio-group formControlName="toyType" [attr.aria-label]="'ADDCHILD.TOY_TYPE' | translate">

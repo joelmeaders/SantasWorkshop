@@ -1,21 +1,21 @@
-<ion-content color="light">
-	<ion-grid fixed class="ion-margin-top ion-padding-top">
-		<ion-row>
+<ion-content color="light" class="home-page">
+	<ion-grid fixed class="home-shell">
+		<ion-row class="brand-hero">
 			<ion-col class="ion-text-center">
 				<img
 					src="assets/DSCS-Santa-Body_Red.png"
-					class="logo"
+					class="logo hero-logo"
 					alt="logo with santa claus"
 				/>
 			</ion-col>
 		</ion-row>
 
-		<ion-row class="ion-padding-bottom ion-justify-content-center">
+		<ion-row class="welcome-section ion-justify-content-center">
 			<ion-col size="12" class="ion-text-center">
 				<app-language-toggle />
 			</ion-col>
 			<ion-col size="12" class="ion-text-center es-mg-top-xl">
-				<h1>
+				<h1 class="welcome-title">
 					<strong
 						innerHtml="{{ 'HOME.WELCOME_MESSAGE' | translate }}"
 					></strong>
@@ -55,8 +55,8 @@
 					<ion-card-content>
 						<form [formGroup]="signInForm" (ngSubmit)="onSignIn()" novalidate>
 							<ion-list lines="none">
-								<ion-item><ion-input id="signInEmail" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" formControlName="emailAddress" /></ion-item>
-								<ion-item><ion-input id="signInPassword" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password" /></ion-item>
+								<ion-item><ion-input id="signInEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" formControlName="emailAddress" /></ion-item>
+								<ion-item><ion-input id="signInPassword" fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password" /></ion-item>
 							</ion-list>
 							<ion-button id="signInButton" type="submit" expand="block" size="large" color="xmasred" [disabled]="signInForm.invalid">{{ "COMMON.SIGN_IN" | translate }}</ion-button>
 						</form>
@@ -70,7 +70,7 @@
 					<ion-card-content>
 						@if ((resetEmailSent$ | async) === false) {
 						<p>{{ "FORGOTPASS.INSTRUCTIONS" | translate }}</p>
-						<ion-item><ion-input id="resetPasswordEmail" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" /></ion-item>
+						<ion-item><ion-input id="resetPasswordEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" /></ion-item>
 						<ion-button id="resetPasswordButton" expand="block" color="xmasred" [disabled]="resetEmail.invalid" (click)="resetPassword()">{{ "FORGOTPASS.RESET_PASSWORD" | translate }}</ion-button>
 						} @else {
 						<ion-text role="status" aria-live="polite"><h2>{{ "FORGOTPASS.EMAIL_SENT" | translate }}</h2><p>{{ "FORGOTPASS.EMAIL_SENT_2" | translate }}</p></ion-text>
@@ -83,7 +83,7 @@
 			</ion-col>
 		</ion-row>
 
-		<ion-row class="es-pd-top-xxl">
+		<ion-row class="social-links es-pd-top-xxl">
 			<ion-col class="ion-text-center">
 				<a
 					href="https://www.facebook.com/denversantaclausshop"

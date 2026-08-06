@@ -6,8 +6,6 @@ import {
 	map,
 	mergeMap,
 	shareReplay,
-	switchMap,
-	take,
 	takeUntil,
 	tap,
 } from 'rxjs/operators';
@@ -30,7 +28,6 @@ import {
 	timestampDateFix,
 } from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
-import { DocumentReference } from 'firebase/firestore';
 
 @Injectable({
 	providedIn: 'root',
@@ -64,15 +61,6 @@ export class PreRegistrationService implements OnDestroy {
 		tap((registration) => {
 			if (!registration) void this.reportUnavailableRegistration('missing');
 		}),
-		shareReplay(1),
-	);
-
-	@automock
-	public readonly registrationReadyToSubmit$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
-		map((registration) =>
-			registration ? this.isRegistrationReadyToSubmit(registration) : false,
-		),
 		shareReplay(1),
 	);
 
@@ -141,17 +129,6 @@ export class PreRegistrationService implements OnDestroy {
 	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
-	}
-
-	public saveRegistration(
-		registration: Registration,
-	): Observable<DocumentReference<Registration>> {
-		return this.authService.uid$.pipe(take(1)).pipe(
-			take(1),
-			switchMap((uid) =>
-				this.registrationCollection().update(uid, registration, false),
-			),
-		);
 	}
 
 	public saveDraftChild(input: {

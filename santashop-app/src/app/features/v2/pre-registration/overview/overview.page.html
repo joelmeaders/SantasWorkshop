@@ -1,5 +1,5 @@
-<ion-content color="light">
-	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+<ion-content color="light" class="workspace-page">
+	<ion-grid class="workspace-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max">
 			<ion-col size="12">
 				<ion-row class="ion-justify-content-center">
@@ -9,12 +9,7 @@
 							<p>{{ 'OVERVIEW.WORKSPACE_INTRO' | translate }}</p>
 						</div>
 
-						<p class="workspace-status" aria-live="polite" role="status">{{ liveMessage() }}</p>
-						@if (workspaceError()) {
-							<p class="workspace-error" role="alert">{{ workspaceError() }}</p>
-						}
-
-						<section id="children" tabindex="-1" aria-labelledby="children-heading">
+						<section class="workflow-section children-step" id="children" tabindex="-1" aria-labelledby="children-heading">
 							<app-children-card
 								[children]="(children$ | async) ?? []"
 								[childCount]="(childCount$ | async) ?? 0"
@@ -25,7 +20,7 @@
 							/>
 						</section>
 
-						<section id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
+						<section class="workflow-section appointment-step" id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
 							<app-schedule-card
 								[dateTimeSlot]="dateTimeSlot$ | async"
 								[slots]="(availableSlots$ | async) ?? []"
@@ -35,7 +30,7 @@
 							/>
 						</section>
 
-						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="es-mg-bottom-xxl">
+						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="workflow-section review-step es-mg-bottom-xxl">
 							<app-submit-card
 								[children]="(children$ | async) ?? []"
 								[dateTimeSlot]="dateTimeSlot$ | async"

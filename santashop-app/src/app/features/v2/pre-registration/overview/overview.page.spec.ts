@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import { DateTimeSlot } from '@santashop/models';
 import { Observable, of } from 'rxjs';
-import { AlertController } from '@ionic/angular/standalone';
+import { AlertController, ToastController } from '@ionic/angular/standalone';
 import {
 	provideTranslateServiceMock,
 	provideAuthMock,
@@ -29,6 +29,11 @@ describe('OverviewPage', () => {
 		'AlertController',
 		['create'],
 	);
+	const toast = jasmine.createSpyObj('HTMLIonToastElement', ['present']);
+	const toastController = jasmine.createSpyObj<ToastController>(
+		'ToastController',
+		['create', 'dismiss'],
+	);
 	const preregistrationService = {
 		userRegistration$: of(undefined),
 		children$: of([]),
@@ -46,11 +51,17 @@ describe('OverviewPage', () => {
 		alert.present.calls.reset();
 		alert.onDidDismiss.calls.reset();
 		alertController.create.calls.reset();
+		toast.present.calls.reset();
+		toastController.create.calls.reset();
+		toastController.dismiss.calls.reset();
 		preregistrationService.saveDraftChild.calls.reset();
 		preregistrationService.saveDraftChild.and.resolveTo({ data: true });
 		alert.present.and.resolveTo();
 		alert.onDidDismiss.and.resolveTo({ role: 'cancel' });
 		alertController.create.and.resolveTo(alert);
+		toast.present.and.resolveTo();
+		toastController.create.and.resolveTo(toast);
+		toastController.dismiss.and.resolveTo(false);
 		TestBed.configureTestingModule({
 			imports: [OverviewPage],
 			providers: [
@@ -63,6 +74,7 @@ describe('OverviewPage', () => {
 				provideAnalyticsMock(),
 				provideRouter([]),
 				{ provide: AlertController, useValue: alertController },
+				{ provide: ToastController, useValue: toastController },
 				{
 					provide: AnalyticsWrapper,
 					useValue: jasmine.createSpyObj('AnalyticsWrapper', [
@@ -107,11 +119,46 @@ describe('OverviewPage', () => {
 		});
 
 		expect(alertController.create).toHaveBeenCalled();
+		expect(toastController.create).toHaveBeenCalledWith(
+			jasmine.objectContaining({
+				message: 'Child saved. You can now choose an appointment.',
+				color: 'success',
+			}),
+		);
+		expect(toast.present).toHaveBeenCalled();
 		expect(alert.present).toHaveBeenCalled();
 		expect(alert.onDidDismiss).toHaveBeenCalled();
 		const childrenCard = fixture.debugElement.query(
 			By.directive(ChildrenCardComponent),
 		).componentInstance as ChildrenCardComponent;
 		expect(childrenCard.editorOpen()).toBeFalse();
+	});
+
+	it('presents action failures as danger toasts', async () => {
+		preregistrationService.saveDraftChild.and.rejectWith(
+			new Error('Unable to save child.'),
+		);
+
+		await component.saveChild({
+			isNew: false,
+			child: {
+				id: 456,
+				firstName: 'Jamie',
+				lastName: 'Frost',
+				dateOfBirth: new Date('2021-02-03T00:00:00.000Z'),
+				ageGroup: '3-5' as never,
+				toyType: 'boys' as never,
+				programYearAdded: 2025,
+				enabled: true,
+			},
+		});
+
+		expect(toastController.create).toHaveBeenCalledWith(
+			jasmine.objectContaining({
+				message: 'Unable to save child.',
+				color: 'danger',
+			}),
+		);
+		expect(alertController.create).not.toHaveBeenCalled();
 	});
 });

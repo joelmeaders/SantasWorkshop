@@ -1,5 +1,5 @@
 @let slot = dateTimeSlot();
-<ion-card [class.is-locked]="!canChooseDateTime()">
+<ion-card class="workflow-card schedule-card" [class.is-locked]="!canChooseDateTime()">
 	<ion-card-header>
 		<ion-item class="inset-ion-item-title" lines="none">
 			<ion-card-title id="appointment-heading">{{ 'OVERVIEW.SCHEDULE' | translate }}</ion-card-title>

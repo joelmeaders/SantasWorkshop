@@ -1,21 +1,23 @@
 <ion-content>
 	<main class="notice" role="alert" aria-live="assertive">
 		<h1>
-			@switch (mode()) {
+			@switch (mode) {
 				@case ('maintenance') { {{ 'MAINTENANCE.1' | translate }} }
 				@case ('weather') { {{ 'REG_CLOSED.1' | translate }} }
 				@default { {{ 'REG_CLOSED.1' | translate }}<br />{{ 'REG_CLOSED.2' | translate }} }
 			}
 		</h1>
 
-		<img [src]="image()" [alt]="'OPERATIONAL_NOTICE.IMAGE_ALT' | translate" />
+		<div class="notice-image-frame">
+			<img [src]="image" [alt]="'OPERATIONAL_NOTICE.IMAGE_ALT' | translate" />
+		</div>
 
 		@let message = message$ | async;
 		@if (message) {
 			<h2>{{ message }}</h2>
 		} @else {
 			<h2>
-				@switch (mode()) {
+				@switch (mode) {
 					@case ('maintenance') { {{ 'MAINTENANCE.2' | translate }} {{ 'MAINTENANCE.3' | translate }} }
 					@case ('weather') { {{ 'BAD_WEATHER.1' | translate }} {{ 'BAD_WEATHER.2' | translate }} }
 					@default { {{ 'REG_CLOSED.4' | translate }} }

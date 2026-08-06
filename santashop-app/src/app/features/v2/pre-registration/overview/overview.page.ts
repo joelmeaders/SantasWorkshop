@@ -34,7 +34,14 @@ import {
 	EmailUpdateRequest,
 	SubmitCardComponent,
 } from './submit-card/submit-card.component';
-import { AlertController, IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
+import {
+	AlertController,
+	IonCol,
+	IonContent,
+	IonGrid,
+	IonRow,
+	ToastController,
+} from '@ionic/angular/standalone';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -61,6 +68,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	private readonly router = inject(Router);
 	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly alertController = inject(AlertController);
+	private readonly toastController = inject(ToastController);
 	private readonly translateService = inject(TranslateService);
 	private readonly platformId = inject(PLATFORM_ID);
 	private readonly destroy$ = new Subject<void>();
@@ -78,8 +86,6 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		shareReplay(1),
 	);
 	public readonly isSaving = signal(false);
-	public readonly liveMessage = signal('');
-	public readonly workspaceError = signal('');
 
 	public readonly canChooseDateTime$ = combineLatest([
 		this.childCount$,
@@ -227,20 +233,41 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		action: () => Promise<void>,
 	): Promise<boolean> {
 		this.isSaving.set(true);
-		this.workspaceError.set('');
-		this.liveMessage.set('Saving your changes.');
 		try {
 			await action();
-			this.liveMessage.set(successMessage);
+			await this.presentWorkspaceToast(successMessage, 'success');
 			return true;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'We could not save your changes. Please try again.';
-			this.workspaceError.set(message);
-			this.liveMessage.set(message);
+			await this.presentWorkspaceToast(message, 'danger');
 			return false;
 		} finally {
 			this.isSaving.set(false);
 		}
+	}
+
+	private async presentWorkspaceToast(
+		message: string,
+		color: 'success' | 'danger',
+	): Promise<void> {
+		try {
+			await this.toastController.dismiss(undefined, undefined, 'workspace-toast');
+		} catch {
+			// The previous toast may have already been dismissed by Ionic.
+		}
+		const toast = await this.toastController.create({
+			id: 'workspace-toast',
+			message,
+			color,
+			cssClass: 'workshop-toast',
+			duration: color === 'success' ? 4000 : 6500,
+			position: 'top',
+			swipeGesture: 'vertical',
+			htmlAttributes: {
+				'aria-live': color === 'success' ? 'polite' : 'assertive',
+			},
+		});
+		await toast.present();
 	}
 
 	private async askAboutAnotherChild(): Promise<void> {

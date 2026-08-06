@@ -8,27 +8,112 @@
 	padding-block-end: 4rem;
 }
 
+.profile-shell {
+	margin-inline: auto;
+	max-width: var(--santa-page-width);
+	padding: clamp(1rem, 3vw, 2rem) var(--santa-gutter) 4rem;
+}
+
+.profile-column {
+	margin-inline: auto;
+	max-width: 50rem;
+}
+
+.profile-column > h1 {
+	color: var(--santa-red);
+	margin-top: 1rem;
+}
+
+.profile-column > p {
+	color: var(--santa-muted);
+	font-size: 1.05rem;
+	margin-bottom: 1.5rem;
+}
+
 .settings-panel {
-	background: var(--ion-color-light-contrast, #fff);
-	border: 1px solid var(--ion-color-step-200, #d7d8da);
-	border-radius: 0.75rem;
+	background: rgba(255, 255, 255, 0.94);
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-lg);
+	box-shadow: var(--santa-shadow-sm);
 	margin-block: 1rem;
-	padding: 1rem;
+	overflow: hidden;
+	padding: 0;
 }
 
 .settings-panel summary {
+	align-items: center;
 	cursor: pointer;
-	display: flex;
-	flex-direction: column;
+	display: grid;
 	font-size: 1.15rem;
 	font-weight: 700;
-	gap: 0.25rem;
+	gap: 0.15rem 0.85rem;
+	grid-template-columns: 2.8rem 1fr;
+	list-style: none;
+	padding: 1.2rem 1.35rem;
+}
+
+.settings-panel summary::before {
+	align-items: center;
+	background: rgba(23, 100, 71, 0.1);
+	border-radius: 0.8rem;
+	color: var(--santa-evergreen-deep);
+	content: '✦';
+	display: flex;
+	font-size: 1.2rem;
+	grid-row: 1 / span 2;
+	height: 2.6rem;
+	justify-content: center;
+	width: 2.6rem;
+}
+
+.settings-panel:nth-of-type(2) summary::before {
+	background: rgba(229, 169, 47, 0.16);
+	color: #7a5508;
+	content: '✉';
+}
+
+.settings-panel:nth-of-type(3) summary::before {
+	background: rgba(179, 38, 62, 0.1);
+	color: var(--santa-red);
+	content: '◆';
+}
+
+.settings-panel summary::-webkit-details-marker {
+	display: none;
+}
+
+.settings-panel summary small {
+	color: var(--santa-muted);
+	font-size: 0.86rem;
+	font-weight: 500;
+	grid-column: 2;
+	overflow-wrap: anywhere;
 }
 
 .settings-panel form {
-	padding-block-start: 1rem;
+	background: linear-gradient(135deg, rgba(23, 100, 71, 0.05), rgba(255, 255, 255, 0));
+	border-top: 1px solid var(--santa-line);
+	padding: 1rem 1.35rem 1.35rem;
+}
+
+.settings-panel form ion-button[type='submit'] {
+	margin-top: 0.75rem;
 }
 
 ion-label {
 	margin-inline-end: 12px;
+}
+
+@media (max-width: 600px) {
+	.profile-shell {
+		padding-inline: 0.75rem;
+	}
+
+	.settings-panel {
+		border-radius: var(--santa-radius-md);
+	}
+
+	.settings-panel form ion-button[type='submit'] {
+		width: 100%;
+	}
 }

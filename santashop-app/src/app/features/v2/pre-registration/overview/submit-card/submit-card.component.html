@@ -1,5 +1,5 @@
 @let slot = dateTimeSlot();
-<ion-card [class.is-locked]="!canSubmit()" class="es-mg-bottom-xxl">
+<ion-card [class.is-locked]="!canSubmit()" class="workflow-card submit-card es-mg-bottom-xxl">
 	<ion-card-header>
 		<ion-item class="inset-ion-item-title" lines="none">
 			<ion-card-title id="review-heading">{{ 'MENU.SUBMIT' | translate }}</ion-card-title>
@@ -39,8 +39,8 @@
 				} @else {
 					<form [formGroup]="changeEmailForm" (ngSubmit)="updateEmail()" novalidate>
 						<ion-list lines="none">
-							<ion-item><ion-input [label]="'COMMON.NEW_EMAIL_ADDRESS' | translate" labelPlacement="floating" formControlName="emailAddress" type="email" autocomplete="email" [errorText]="changeEmailForm.controls.emailAddress | niceFormError | translate" /></ion-item>
-							<ion-item><ion-input [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" formControlName="password" type="password" autocomplete="current-password" [errorText]="changeEmailForm.controls.password | niceFormError | translate" /></ion-item>
+							<ion-item><ion-input fill="outline" [label]="'COMMON.NEW_EMAIL_ADDRESS' | translate" labelPlacement="floating" formControlName="emailAddress" type="email" autocomplete="email" [errorText]="changeEmailForm.controls.emailAddress | niceFormError | translate" /></ion-item>
+							<ion-item><ion-input fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" formControlName="password" type="password" autocomplete="current-password" [errorText]="changeEmailForm.controls.password | niceFormError | translate" /></ion-item>
 						</ion-list>
 						<p class="email-update-help">{{ 'SUBMIT.UPDATE_EMAIL_HELP' | translate }}</p>
 						<div class="card-actions"><ion-button fill="clear" type="button" (click)="cancelEmailUpdate()" [disabled]="busy()">{{ 'COMMON.CANCEL' | translate }}</ion-button><ion-button color="xmasred" type="submit" [disabled]="changeEmailForm.invalid || busy()">{{ 'SUBMIT.SAVE_EMAIL' | translate }}</ion-button></div>

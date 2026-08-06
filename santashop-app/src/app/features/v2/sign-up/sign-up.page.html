@@ -1,12 +1,12 @@
-<ion-content color="light">
-	<ion-grid class="height-max ion-no-padding ion-no-margin">
+<ion-content color="light" class="signup-page">
+	<ion-grid class="signup-shell height-max">
 		@let createAccountEnabled = createAccountEnabled$ | async; @if
 		(createAccountEnabled === true) {
 		<ion-row
-			class="height-max ion-align-items-center ion-justify-content-center"
+			class="signup-row ion-align-items-center ion-justify-content-center"
 		>
 			<!-- Information -->
-			<ion-col sizeXs="12" sizeSm="10" sizeMd="auto">
+			<ion-col class="form-column" sizeXs="12" sizeSm="10" sizeMd="9" sizeLg="7">
 				<ion-button
 					class="remove-shadow back-button"
 					color="white"
@@ -15,7 +15,7 @@
 					<ion-icon slot="start" name="arrow-back-sharp" />
 					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
 				</ion-button>
-				<ion-card class="sign-up-card">
+				<ion-card class="sign-up-card form-card">
 					<ion-card-header>
 						<ion-card-title>
 							{{ "SIGNUP.TITLE1" | translate }}
@@ -25,9 +25,9 @@
 						</ion-card-subtitle>
 					</ion-card-header>
 					<ion-card-content class="ion-text-center">
-						<form [formGroup]="form" novalidate>
+						<form class="account-form" [formGroup]="form" novalidate>
 							<ion-list lines="none">
-								<ion-item-group class="es-pd-bottom-xl">
+								<ion-item-group class="form-section es-pd-bottom-xl">
 									<ion-item-divider color="light">
 										<ion-label>
 											<strong>
@@ -38,8 +38,9 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-input
-											id="firstName"
+									<ion-input
+										id="firstName"
+										fill="outline"
 											[label]="'SIGNUP.FIRST_NAME' | translate"
 											[errorText]="
 													form.controls.firstName | niceFormError |
@@ -53,8 +54,9 @@
 										/>
 									</ion-item>
 									<ion-item>
-										<ion-input
-											id="lastName"
+									<ion-input
+										id="lastName"
+										fill="outline"
 											[label]="'SIGNUP.LAST_NAME' | translate"
 											[errorText]="
 													form.controls.lastName |
@@ -68,8 +70,9 @@
 										/>
 									</ion-item>
 									<ion-item>
-										<ion-input
-											id="zipCode"
+									<ion-input
+										id="zipCode"
+										fill="outline"
 											[label]="'SIGNUP.ZIP_CODE' | translate"
 											[errorText]="
 													form.controls.zipCode |
@@ -134,7 +137,7 @@
 									}
 								</ion-item-group>
 
-								<ion-item-group class="es-pd-bottom-xl">
+								<ion-item-group class="form-section es-pd-bottom-xl">
 									<ion-item-divider color="light">
 										<ion-label>
 											<strong>
@@ -145,8 +148,9 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-input
-											id="emailAddress"
+									<ion-input
+										id="emailAddress"
+										fill="outline"
 											[label]="'COMMON.EMAIL_ADDRESS' | translate"
 											[errorText]="form.controls.emailAddress | niceFormError | translate"
 											labelPlacement="floating"
@@ -158,8 +162,9 @@
 									</ion-item>
 
 									<ion-item>
-										<ion-input
-											id="password"
+									<ion-input
+										id="password"
+										fill="outline"
 											[label]="'COMMON.PASSWORD' | translate"
 											[errorText]="form.controls.password | niceFormError | translate"
 											labelPlacement="floating"
@@ -171,8 +176,9 @@
 									</ion-item>
 
 									<ion-item>
-										<ion-input
-											id="password2"
+									<ion-input
+										id="password2"
+										fill="outline"
 											[label]="'SIGNUP.PASSWORD2' | translate"
 											[errorText]="form.controls.password2 | niceFormError | translate"
 											labelPlacement="floating"
@@ -195,7 +201,7 @@
 									}
 								</ion-item-group>
 
-								<ion-item-group>
+								<ion-item-group class="form-section legal-section">
 									<ion-item-divider color="light" />
 									<div class="ion-padding-top">
 										<ion-text
@@ -263,7 +269,7 @@
 							id="submitButton"
 							size="large"
 							color="xmasred"
-							class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xlr"
+							class="submit-account es-pd-left-lg es-pd-right-lg es-mg-bottom-xl"
 							[disabled]="
 									!form.valid
 								"

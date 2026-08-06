@@ -1,8 +1,0 @@
-import { NgModule } from '@angular/core';
-import { ChangeInfoPageRoutingModule } from './change-info-routing.module';
-import { ChangeInfoPage } from './change-info.page';
-
-@NgModule({
-	imports: [ChangeInfoPageRoutingModule, ChangeInfoPage],
-})
-export class ChangeInfoPageModule {}

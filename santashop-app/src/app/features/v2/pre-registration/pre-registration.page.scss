@@ -1,34 +1,10 @@
-ion-menu-button {
-	position: relative;
-	top: 0px;
-	left: 0px;
-	width: fit-content;
+:host {
+	--workshop-header-height: 4.8125rem;
+	display: block;
+	height: 100%;
 }
 
-:root {
-	/* Custom tab bar */
-	--tab-background: rgb(251, 251, 251);
-	--tab-color: rgb(153, 153, 153);
-	--tab-color-selected: black;
-}
-
-ion-tabs {
-	ion-tab-bar {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		width: 100%;
-		&:after {
-			content: ' ';
-			width: 100%;
-			bottom: 0;
-			background: var(--ion-color-light);
-			height: env(safe-area-inset-bottom);
-			position: absolute;
-		}
-		ion-tab-button {
-			--color-selected: var(--ion-color-xmasred);
-		}
-	}
+ion-router-outlet#main {
+	height: calc(100% - var(--workshop-header-height));
+	top: var(--workshop-header-height);
 }

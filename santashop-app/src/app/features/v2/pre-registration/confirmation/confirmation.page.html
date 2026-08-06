@@ -1,21 +1,13 @@
-<ion-content color="light">
-	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+<ion-content color="light" class="confirmation-page">
+	<ion-grid class="confirmation-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max ion-justify-content-center">
-			@if ((isRegistrationComplete$ | async) === false) {
-			<ion-col
-				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-				size="auto"
-			>
-				<app-pre-registration-menu />
-			</ion-col>
-			}
-			<ion-col size="auto">
+			<ion-col class="ticket-column" size="12" sizeMd="10" sizeLg="8" sizeXl="7">
 				<ion-row class="ion-justify-content-center">
 					<ion-col>
 						<ion-card
-							class="ion-margin-horizontal ion-text-center es-mg-bottom-xxl"
+							class="ticket-card ion-text-center es-mg-bottom-xxl"
 						>
-							<div class="ion-padding-horizontal">
+							<div class="confirmation-lead ion-padding-horizontal">
 								<ion-text
 									color="xmasred"
 									class="ion-text-center"
@@ -32,14 +24,16 @@
 								</p>
 							</div>
 
+							<div class="qr-frame">
 							<img
 								id="registrationQrCode"
 								[src]="viewService.qrCode$ | async"
 								alt="Registration QR Code"
 								class="qr-code"
 							/>
+							</div>
 
-							<div class="ion-text-center width-max">
+							<div class="ticket-actions ion-text-center width-max">
 								<ion-button
 									id="eventInformationButton"
 									color="xmasred"
@@ -59,7 +53,7 @@
 							</div>
 
 							<div>
-								<ion-item lines="none">
+								<ion-item class="ticket-detail" lines="none">
 									<div>
 										<p>
 											<ion-text color="xmasred">
@@ -94,7 +88,7 @@
 								</ion-item>
 							</div>
 
-							<ion-item lines="none">
+							<ion-item class="ticket-detail" lines="none">
 								<div>
 									<p>
 										<ion-text color="xmasred">
@@ -139,7 +133,7 @@
 								</div>
 							</ion-item>
 
-							<ion-item lines="none">
+							<ion-item class="ticket-detail" lines="none">
 								<div>
 									<p>
 										<ion-text color="xmasred">
@@ -175,7 +169,7 @@
 								</div>
 							</ion-item>
 
-							<ion-list>
+							<ion-list class="children-ticket-list">
 								<ion-item lines="none">
 									<p>
 										<ion-text color="xmasred">

@@ -13,7 +13,7 @@ import {
 } from '@ionic/angular/standalone';
 import { AppStateService, ErrorHandlerService } from '@santashop/core';
 import { of } from 'rxjs';
-import { DateTimePageService } from '../date-time/date-time.page.service';
+import { DateTimeSlotsService } from './date-time-slots.service';
 import { PreRegistrationService } from '../../../../core/services/pre-registration.service';
 
 import { ConfirmationPage } from './confirmation.page';
@@ -30,7 +30,6 @@ describe('ConfirmationPage', () => {
 				{
 					provide: PreRegistrationService,
 					useValue: {
-						registrationComplete$: of(false),
 						hasCheckedIn$: of(false),
 						dateTimeSlot$: of(undefined),
 						undoRegistration: jasmine
@@ -42,7 +41,7 @@ describe('ConfirmationPage', () => {
 					},
 				},
 				{
-					provide: DateTimePageService,
+					provide: DateTimeSlotsService,
 					useValue: {
 						availableSlots$: of([]),
 					},

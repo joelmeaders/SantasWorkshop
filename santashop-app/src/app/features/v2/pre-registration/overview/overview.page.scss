@@ -1,5 +1,29 @@
 app-children-card,
 app-schedule-card,
 app-submit-card {
-	max-width: 700px !important;
+	display: block;
+	max-width: 760px;
+	margin: 0 auto 1rem;
+}
+
+.workspace-intro,
+.workspace-status,
+.workspace-error {
+	max-width: 760px;
+	margin: 1rem auto;
+}
+
+.workspace-intro h1 {
+	margin-bottom: 0.25rem;
+}
+
+.workspace-status {
+	min-height: 1.5rem;
+}
+
+.workspace-error {
+	padding: 0.75rem;
+	border-left: 4px solid var(--ion-color-danger);
+	background: var(--ion-color-danger-tint);
+	color: var(--ion-color-danger-contrast);
 }

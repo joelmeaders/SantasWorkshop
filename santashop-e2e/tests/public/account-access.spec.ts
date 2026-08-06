@@ -22,7 +22,7 @@ test.describe('customer account and session access', () => {
 
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 		await expect(page.locator('#menuButton')).toBeVisible();
-		await expect(page.locator('#childrenProgressCard')).toBeVisible();
+		await expect(page.locator('#children-heading')).toBeVisible();
 	});
 
 	test('AUTH-002 requires valid fields and policy acceptance', async ({
@@ -84,9 +84,9 @@ test.describe('customer account and session access', () => {
 		await signOutViaUi(page);
 
 		await page.goto('/pre-registration/overview');
-		await expect(page).toHaveURL(/\/sign-in$/);
+		await expect(page).toHaveURL(/\/\?mode=sign-in/);
 		await signInViaUi(page, account);
-		await expect(page.locator('#childrenProgressCard')).toBeVisible({
+		await expect(page.locator('#children-heading')).toBeVisible({
 			timeout: 15000,
 		});
 	});
@@ -110,7 +110,7 @@ test.describe('customer account and session access', () => {
 		await createAccountViaUi(page, account);
 		await signOutViaUi(page);
 
-		await page.goto('/reset-password');
+		await page.goto('/?mode=reset');
 		await page.fill('#resetPasswordEmail input', account.emailAddress);
 		const resetButton = page.locator('#resetPasswordButton');
 		await expect(resetButton).not.toHaveClass(/button-disabled/, {
@@ -127,7 +127,7 @@ test.describe('customer account and session access', () => {
 	test('AUTH-008 shows a recovery message for invalid credentials', async ({
 		page,
 	}) => {
-		await page.goto('/sign-in');
+		await page.goto('/?mode=sign-in');
 		await page.fill('#signInEmail input', 'missing@example.com');
 		await page.fill('#signInPassword input', 'WrongPassword123!');
 		await page.click('#signInButton');

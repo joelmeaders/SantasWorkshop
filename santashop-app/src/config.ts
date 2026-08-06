@@ -3,7 +3,7 @@
 
 export const config = {
 	production: false,
-	label: "LOCAL",
+	label: "E2E",
 	name: "@santashop/app",
 	version: "2025.2.1",
 	appCheckKey: "2839440c-0a91-4c48-921a-451020157001",
@@ -13,7 +13,7 @@ export const config = {
 	emulatorPorts: {
 		auth: 9099,
 		functions: 5001,
-		firestore: 8080,
+		firestore: 8180,
 		storage: 9199,
 	},
 };

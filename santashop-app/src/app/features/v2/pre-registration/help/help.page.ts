@@ -1,9 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { PreRegistrationService } from '../../../../core';
-
-import { AsyncPipe } from '@angular/common';
-import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
-import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
@@ -20,6 +15,7 @@ import {
 	IonCardTitle,
 	IonCardContent,
 	IonText,
+	ModalController,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -28,9 +24,6 @@ import {
 	styleUrls: ['./help.page.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		PreRegistrationMenuComponent,
-		RouterLink,
-		AsyncPipe,
 		TranslateModule,
 		IonContent,
 		IonGrid,
@@ -47,12 +40,13 @@ import {
 	],
 })
 export class HelpPage {
-	public readonly viewService = inject(PreRegistrationService);
-
-	public readonly isRegistrationComplete$ =
-		this.viewService.registrationComplete$;
+	private readonly modalController = inject(ModalController);
 
 	constructor() {
 		addIcons({ arrowBackSharp });
+	}
+
+	public async close(): Promise<void> {
+		await this.modalController.dismiss();
 	}
 }

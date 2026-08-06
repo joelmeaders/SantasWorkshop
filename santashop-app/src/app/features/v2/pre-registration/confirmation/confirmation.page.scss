@@ -6,3 +6,8 @@
 .qr-card {
 	width: 90vmin;
 }
+
+.event-information {
+	border-top: 1px solid var(--ion-color-step-200, #d7d8da);
+	scroll-margin-top: 1rem;
+}

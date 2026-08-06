@@ -154,15 +154,61 @@ export class PreRegistrationService implements OnDestroy {
 		);
 	}
 
-	public undoRegistration(): Promise<HttpsCallableResult<unknown>> {
-		return this.afFunctions.undoRegistration();
+	public saveDraftChild(input: {
+		mutationId: string;
+		child: Child;
+	}): Promise<HttpsCallableResult<true>> {
+		const { child, mutationId } = input;
+		if (child.id === undefined) {
+			return Promise.reject(new Error('Child ID is required.'));
+		}
+		return this.afFunctions.saveDraftChild({
+			mutationId,
+			child: {
+				id: child.id,
+				firstName: child.firstName,
+				lastName: child.lastName,
+				dateOfBirth: child.dateOfBirth.toISOString(),
+				toyType: child.toyType,
+			},
+		});
+	}
+
+	public deleteDraftChild(input: {
+		mutationId: string;
+		childId: number;
+	}): Promise<HttpsCallableResult<true>> {
+		return this.afFunctions.deleteDraftChild(input);
+	}
+
+	public setDraftAppointment(input: {
+		mutationId: string;
+		slotId: string;
+	}): Promise<HttpsCallableResult<true>> {
+		return this.afFunctions.setDraftAppointment(input);
+	}
+
+	public completeRegistration(input: {
+		mutationId: string;
+	}): Promise<HttpsCallableResult<true>> {
+		return this.afFunctions.completeRegistration(input);
+	}
+
+	public undoRegistration(): Promise<HttpsCallableResult<true>> {
+		return this.afFunctions.undoRegistration({
+			mutationId: this.createMutationId(),
+		});
 	}
 
 	public changeRegistrationDateTime(
 		newDateTimeSlot: DateTimeSlot,
-	): Promise<HttpsCallableResult<unknown>> {
+	): Promise<HttpsCallableResult<true>> {
+		if (!newDateTimeSlot.id) {
+			return Promise.reject(new Error('Appointment ID is required.'));
+		}
 		return this.afFunctions.changeRegistrationDateTime({
-			newDateTimeSlot,
+			mutationId: this.createMutationId(),
+			slotId: newDateTimeSlot.id,
 		});
 	}
 
@@ -194,6 +240,13 @@ export class PreRegistrationService implements OnDestroy {
 		});
 
 		return (registration?.children as Child[]) ?? new Array<Child>();
+	}
+
+	private createMutationId(): string {
+		if (typeof globalThis.crypto?.randomUUID === 'function') {
+			return globalThis.crypto.randomUUID();
+		}
+		return `mutation_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
 	}
 
 	private async reportUnavailableRegistration(

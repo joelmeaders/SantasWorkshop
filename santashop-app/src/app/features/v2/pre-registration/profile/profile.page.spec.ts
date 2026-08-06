@@ -13,6 +13,8 @@ import { PreRegistrationService } from '../../../../core';
 
 import { ProfilePage } from './profile.page';
 import { ProfilePageService } from './profile.page.service';
+import { changeEmailForm, changePasswordForm } from './profile.form';
+import { newChangeInfoForm } from './change-info/change-info.form';
 
 describe('ProfilePage', () => {
 	let component: ProfilePage;
@@ -37,6 +39,10 @@ describe('ProfilePage', () => {
 		viewService,
 		'userProfile$',
 	).and.returnValue(of(mockUsers().user1));
+
+	getPropertySpy(viewService, 'profileForm').and.returnValue(newChangeInfoForm());
+	getPropertySpy(viewService, 'changeEmailForm').and.returnValue(changeEmailForm());
+	getPropertySpy(viewService, 'changePasswordForm').and.returnValue(changePasswordForm());
 
 	const isRegistrationComplete$Spy: jasmine.Spy = getPropertySpy(
 		preregistrationService,

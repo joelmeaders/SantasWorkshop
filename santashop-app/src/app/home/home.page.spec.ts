@@ -5,11 +5,13 @@ import {
 	createAppStateServiceMock,
 	provideActivatedRouteMock,
 	provideAnalyticsMock,
+	provideAuthMock,
+	provideFunctionsMock,
 } from '../../test-helpers';
 
 import { HomePage } from './home.page';
-import { ModalController } from '@ionic/angular/standalone';
-import { AppStateService } from '@santashop/core';
+import { LoadingController, ModalController } from '@ionic/angular/standalone';
+import { AppStateService, ErrorHandlerService } from '@santashop/core';
 
 describe('HomePage', () => {
 	let component: HomePage;
@@ -28,6 +30,16 @@ describe('HomePage', () => {
 					useValue: createModalControllerMock(),
 				},
 				provideAnalyticsMock(),
+				provideAuthMock(),
+				provideFunctionsMock(),
+				{
+					provide: ErrorHandlerService,
+					useValue: jasmine.createSpyObj('ErrorHandlerService', ['handleError']),
+				},
+				{
+					provide: LoadingController,
+					useValue: jasmine.createSpyObj('LoadingController', ['create']),
+				},
 				provideTranslateServiceMock(),
 				provideActivatedRouteMock(),
 			],

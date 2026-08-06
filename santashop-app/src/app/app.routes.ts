@@ -5,15 +5,23 @@ import { CanActivateFn, Router, Routes } from '@angular/router';
 import { CheckedInGuard } from './core/guards/checked-in.guard';
 import { RegistrationCompleteGuard } from './core/guards/registration-complete.guard';
 import { RegistrationIncompleteGuard } from './core/guards/registration-incomplete.guard';
-import { RegistrationReadyToSubmitGuard } from './core/guards/registration-ready-to-submit.guard';
 
-const redirectUnauthorizedToLoginGuard: CanActivateFn = () => {
+const redirectUnauthorizedToLoginGuard: CanActivateFn = (_route, state) => {
 	const authService = inject(AuthService);
 	const router = inject(Router);
 
 	return authService.currentUser$.pipe(
 		take(1),
-		map((user) => (user ? true : router.createUrlTree(['/sign-in']))),
+		map((user) =>
+			user
+				? true
+				: router.createUrlTree(['/'], {
+						queryParams: {
+							mode: 'sign-in',
+							returnUrl: state.url,
+						},
+					}),
+		),
 	);
 };
 
@@ -32,16 +40,10 @@ const redirectLoggedInToRegistrationGuard: CanActivateFn = () => {
 export const routes: Routes = [
 	{
 		path: '',
+		canActivate: [redirectLoggedInToRegistrationGuard],
 		loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
 		pathMatch: 'full',
-	},
-	{
-		path: 'sign-in',
-		canActivate: [redirectLoggedInToRegistrationGuard],
-		loadComponent: () =>
-			import('./features/v2/sign-in/sign-in.page').then(
-				(m) => m.SignInPage,
-			),
+		title: 'Santa Shop Registration',
 	},
 	{
 		path: 'sign-up',
@@ -50,6 +52,7 @@ export const routes: Routes = [
 			import('./features/v2/sign-up/sign-up.page').then(
 				(m) => m.SignUpPage,
 			),
+		title: 'Create Account | Santa Shop Registration',
 	},
 	{
 		path: 'pre-registration',
@@ -61,63 +64,18 @@ export const routes: Routes = [
 		canActivateChild: [CheckedInGuard],
 		children: [
 			{
+				path: '',
+				pathMatch: 'full',
+				redirectTo: 'overview',
+			},
+			{
 				path: 'overview',
 				canActivate: [RegistrationCompleteGuard],
 				loadComponent: () =>
 					import('./features/v2/pre-registration/overview/overview.page').then(
 						(m) => m.OverviewPage,
 					),
-			},
-			{
-				path: 'children/add-child/:id',
-				canActivate: [RegistrationCompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/children/add-child/add-child.page').then(
-						(m) => m.AddChildPage,
-					),
-			},
-			{
-				path: 'children/add-child',
-				canActivate: [RegistrationCompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/children/add-child/add-child.page').then(
-						(m) => m.AddChildPage,
-					),
-			},
-			{
-				path: 'children',
-				canActivate: [RegistrationCompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/children/children.page').then(
-						(m) => m.ChildrenPage,
-					),
-			},
-			{
-				path: 'date-time',
-				canActivate: [RegistrationCompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/date-time/date-time.page').then(
-						(m) => m.DateTimePage,
-					),
-			},
-			{
-				path: 'submit',
-				canActivate: [
-					RegistrationReadyToSubmitGuard,
-					RegistrationCompleteGuard,
-				],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/submit/submit.page').then(
-						(m) => m.SubmitPage,
-					),
-			},
-			{
-				path: 'confirmation/event-information',
-				canActivate: [RegistrationIncompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/confirmation/event-information/event-information.page').then(
-						(m) => m.EventInformationPage,
-					),
+				title: 'Registration | Santa Shop',
 			},
 			{
 				path: 'confirmation',
@@ -126,76 +84,17 @@ export const routes: Routes = [
 					import('./features/v2/pre-registration/confirmation/confirmation.page').then(
 						(m) => m.ConfirmationPage,
 					),
+				title: 'Registration Confirmation | Santa Shop',
 			},
 			{
 				path: 'profile',
-				children: [
-					{
-						path: '',
-						pathMatch: 'full',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/profile/profile.page').then(
-								(m) => m.ProfilePage,
-							),
-					},
-					{
-						path: 'change-info',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/profile/change-info/change-info.page').then(
-								(m) => m.ChangeInfoPage,
-							),
-					},
-					{
-						path: 'change-email',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/profile/change-email/change-email.page').then(
-								(m) => m.ChangeEmailPage,
-							),
-					},
-					{
-						path: 'change-password',
-						loadComponent: () =>
-							import('./features/v2/pre-registration/profile/change-password/change-password.page').then(
-								(m) => m.ChangePasswordPage,
-							),
-					},
-				],
-			},
-			{
-				path: 'help',
 				loadComponent: () =>
-					import('./features/v2/pre-registration/help/help.page').then(
-						(m) => m.HelpPage,
+					import('./features/v2/pre-registration/profile/profile.page').then(
+						(m) => m.ProfilePage,
 					),
+				title: 'My Account | Santa Shop',
 			},
 		],
 	},
-	{
-		path: 'reset-password',
-		loadComponent: () =>
-			import('./features/v2/reset-password/reset-password.page').then(
-				(m) => m.ResetPasswordPage,
-			),
-	},
-	{
-		path: 'registration-closed',
-		loadComponent: () =>
-			import('./features/registration-closed/registration-closed.page').then(
-				(m) => m.RegistrationClosedPage,
-			),
-	},
-	{
-		path: 'maintenance',
-		loadComponent: () =>
-			import('./features/maintenance/maintenance.page').then(
-				(m) => m.MaintenancePage,
-			),
-	},
-	{
-		path: 'bad-weather',
-		loadComponent: () =>
-			import('./features/bad-weather/bad-weather.page').then(
-				(m) => m.BadWeatherPage,
-			),
-	},
+	{ path: '**', redirectTo: '' },
 ];

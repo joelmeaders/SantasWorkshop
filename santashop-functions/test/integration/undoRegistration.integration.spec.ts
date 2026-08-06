@@ -48,7 +48,10 @@ describe.sequential('undoRegistration integration', () => {
 		});
 
 		const result = await undoRegistration(
-			createCallableRequest({}, { uid: 'user-undo-1' }),
+			createCallableRequest(
+				{ mutationId: 'cancel-user-0001' },
+				{ uid: 'user-undo-1' },
+			),
 		);
 
 		expect(result).toBe(true);

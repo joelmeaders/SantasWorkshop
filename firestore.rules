@@ -24,16 +24,11 @@ service cloud.firestore {
 
     match /registrations/{documentId} {
       allow read: if isUser(resource.data.uid) || isAdmin();
-      // Customers may edit only draft-registration content. Submitted state and
-      // cancellation lifecycle fields are backend-authoritative.
-      allow update: if isUser(request.resource.data.uid)
-        && isUser(resource.data.uid)
-        && !('registrationSubmittedOn' in resource.data)
-        && !('registrationSubmittedOn' in request.resource.data)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'firstName', 'lastName', 'emailAddress', 'zipCode', 'children',
-          'newsletter', 'dateTimeSlot', 'previousDateTimeSlot', 'referredBy'
-        ]);
+      allow write: if false;
+
+	  match /mutationReceipts/{mutationId} {
+		allow read, write: if false;
+	  }
     }
 
     match /cancellations/{documentId} {

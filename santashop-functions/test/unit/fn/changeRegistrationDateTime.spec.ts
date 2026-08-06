@@ -11,7 +11,6 @@ describe('changeRegistrationDateTime handler', () => {
 
 	beforeEach(() => {
 		adminMock = createAccountAdminMock();
-		adminMock.batchCommit.mockResolvedValue(undefined);
 	});
 
 	it('updates the slot and queues a fresh email record', async () => {
@@ -32,25 +31,39 @@ describe('changeRegistrationDateTime handler', () => {
 				dateTime: '2025-12-10T18:00:00.000Z',
 			},
 		});
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowChangeRegistration: true },
+		});
+		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
+			id: 'slot-new',
+			programYear: 2025,
+			enabled: true,
+			maxSlots: 10,
+			dateTime: new Date('2025-12-11T18:00:00.000Z'),
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-5/mutationReceipts/change-slot-0001',
+			{},
+			false,
+		);
 
 		const result = await changeRegistrationDateTime(
 			createCallableRequest(
 				{
-					newDateTimeSlot: {
-						id: 'slot-new',
-						dateTime: '2025-12-11T18:00:00.000Z',
-					},
+					mutationId: 'change-slot-0001',
+					slotId: 'slot-new',
 				},
 				{ uid: 'user-5' },
 			),
 		);
 
 		expect(result).toBe(true);
-		expect(adminMock.batchSet).toHaveBeenCalledTimes(2);
-		expect(adminMock.batchSet).toHaveBeenNthCalledWith(
+		expect(adminMock.transactionSet).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionSet).toHaveBeenNthCalledWith(
 			1,
 			expect.objectContaining({ path: 'registrations/user-5' }),
-			expect.objectContaining({
+				expect.objectContaining({
 				includedInCounts: false,
 				reminderEmailSentOn: false,
 				reminderEmailFailedOn: false,
@@ -60,9 +73,10 @@ describe('changeRegistrationDateTime handler', () => {
 				},
 				dateTimeSlot: expect.objectContaining({
 					id: 'slot-new',
-					dateTime: expect.any(Date),
+					dateTime: new Date('2025-12-11T18:00:00.000Z'),
 				}),
 			}),
+			expect.anything(),
 		);
 	});
 
@@ -73,16 +87,48 @@ describe('changeRegistrationDateTime handler', () => {
 		await expect(
 			changeRegistrationDateTime(
 				createCallableRequest(
-					{
-						registrationUid: 'other-user',
-						newDateTimeSlot: {
-							id: 'slot-new',
-							dateTime: '2025-12-11T18:00:00.000Z',
-						},
+				{
+					registrationUid: 'other-user',
+					mutationId: 'change-slot-0001',
+					slotId: 'slot-new',
 					},
 					{ uid: 'user-5', admin: false },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
+	});
+
+	it('returns the stored receipt result without creating another email', async () => {
+		const { changeRegistrationDateTime } =
+			await loadAccountRegistrationHandlers(adminMock);
+		adminMock.setDocSnapshot('registrations/user-5', {
+			uid: 'user-5',
+			registrationSubmittedOn: new Date('2025-12-01T00:00:00.000Z'),
+			dateTimeSlot: { id: 'slot-new' },
+		});
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowChangeRegistration: true },
+		});
+		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
+			programYear: 2025,
+			enabled: true,
+			maxSlots: 10,
+			dateTime: new Date('2025-12-11T18:00:00.000Z'),
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-5/mutationReceipts/change-slot-0001',
+			{ operation: 'changeRegistrationDateTime', result: true },
+		);
+
+		await expect(
+			changeRegistrationDateTime(
+				createCallableRequest(
+					{ mutationId: 'change-slot-0001', slotId: 'slot-new' },
+					{ uid: 'user-5' },
+				),
+			),
+		).resolves.toBe(true);
+		expect(adminMock.transactionSet).not.toHaveBeenCalled();
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 });

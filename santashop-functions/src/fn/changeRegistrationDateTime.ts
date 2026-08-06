@@ -1,163 +1,152 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
-	DateTimeSlot,
 	EMAIL_TEMPLATE_KEYS,
-	Registration,
+	type DateTimeSlot,
+	type PublicParameters,
+	type Registration,
 } from '../models';
-import admin from '../firebase-admin';
-import { formatRegistrationDateTime } from '../utility/date-time-format';
-import {
-	normalizeDateTime,
-	type DateTimeValue,
-} from '../utility/date-time-format';
-import { createFunctionLogger } from '../utility/observability';
 import { isAdminToken } from '../utility/capabilities';
+import { requireAuthenticatedUid } from '../utility/callable-validation';
+import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
+import {
+	MUTATION_RECEIPTS_SUBCOLLECTION,
+	getStoredMutationResult,
+	requireEnabledCurrentSlot,
+	requireMutationId,
+	requireObject,
+	requireOnlyKeys,
+	type MutationReceipt,
+} from './registrationMutationSupport';
 
 const log = createFunctionLogger('changeRegistrationDateTime');
 
-const isAdminContext = (
-	request: CallableRequest<ChangeRegistrationData>,
-): boolean => {
-	return isAdminToken(request.auth?.token);
-};
-
 interface ChangeRegistrationData {
-	newDateTimeSlot: DateTimeSlot;
+	mutationId: string;
+	slotId: string;
 	registrationUid?: string;
 }
 
-interface RegistrationChangeEmailDocument {
-	code?: string;
-	email?: string;
-	name?: string;
-	formattedDateTime: string;
-	templateKey: string;
-	queuedOn: Date;
-	queueSource: 'date-time-change';
-	deliveryRequestedOn: Date;
-	deliveryState: 'queued';
-	failedOn: false;
-	lastErrorMessage: false;
-	lastErrorDetails: false;
-}
+const requireSlotId = (value: unknown): string => {
+	if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(value)) {
+		throw new HttpsError('invalid-argument', 'Slot ID is invalid.');
+	}
+	return value;
+};
+
+const requireRegistrationUid = (value: unknown): string | undefined => {
+	if (value === undefined) return undefined;
+	if (typeof value !== 'string' || !value.trim()) {
+		throw new HttpsError('invalid-argument', 'Registration UID is invalid.');
+	}
+	return value;
+};
 
 export default async function changeRegistrationDateTime(
 	request: CallableRequest<ChangeRegistrationData>,
-): Promise<boolean> {
-	const data = request.data;
-	// If registrationUid is provided (admin editing another user), use it; otherwise use authenticated user's uid
-	const isAdmin = isAdminContext(request);
-	const uid = data.registrationUid ?? request.auth?.uid;
-	if (!uid) throw new HttpsError('unauthenticated', 'User not authenticated');
-
-	if (!isAdmin && data.registrationUid) {
+): Promise<true> {
+	const actorUid = requireAuthenticatedUid(request);
+	const data = requireObject(request.data);
+	requireOnlyKeys(data, ['mutationId', 'slotId', 'registrationUid']);
+	const mutationId = requireMutationId(data['mutationId']);
+	const requestedUid = requireRegistrationUid(data['registrationUid']);
+	const isAdmin = isAdminToken(request.auth?.token);
+	if (requestedUid && !isAdmin) {
 		throw new HttpsError(
 			'permission-denied',
-			"Only admins can change other users' registrations",
+			'Only staff can change another registration.',
 		);
 	}
-
-	if (!data.newDateTimeSlot) {
-		throw new HttpsError(
-			'invalid-argument',
-			'New date/time slot is required',
-		);
-	}
-
-	const batch = admin.firestore().batch();
-
-	// Get current registration
-	const registrationDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-
-	const registrationSnapshot = await registrationDocRef.get();
-	if (!registrationSnapshot.exists) {
-		throw new HttpsError(
-			'not-found',
-			`Registration not found for uid ${uid}`,
-		);
-	}
-
-	const registrationDoc = { ...registrationSnapshot.data() } as Registration;
-
-	// Verify registration is complete
-	if (!registrationDoc.registrationSubmittedOn) {
-		throw new HttpsError(
-			'failed-precondition',
-			'Registration not yet completed',
-		);
-	}
-
-	// Prevent changes after check-in
-	if (registrationDoc.hasCheckedIn) {
-		throw new HttpsError(
-			'failed-precondition',
-			'Cannot change registration after check-in',
-		);
-	}
-
-	// Store previous slot
-	registrationDoc.previousDateTimeSlot = {
-		...registrationDoc.dateTimeSlot,
-	} as DateTimeSlot;
-
-	// Update with new slot - store Date object directly (Firestore will auto-convert to Timestamp)
-	// This matches the pattern in DateTimePageService.updateRegistration()
-	const normalizedDateTime = normalizeDateTime(
-		data.newDateTimeSlot.dateTime as DateTimeValue,
-	);
-	registrationDoc.dateTimeSlot = {
-		id: data.newDateTimeSlot.id,
-		dateTime: normalizedDateTime,
-	};
-	registrationDoc.includedInCounts = false;
-	registrationDoc.reminderEmailSentOn = false;
-	registrationDoc.reminderEmailFailedOn = false;
-
-	batch.set(registrationDocRef, registrationDoc);
-
-	// Create email record for new confirmation email
-	const emailDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
-
-	const queuedOn = new Date();
-	const emailDoc: RegistrationChangeEmailDocument = {
-		code: registrationDoc.qrcode,
-		email: registrationDoc.emailAddress,
-		name: registrationDoc.firstName,
-		formattedDateTime: formatRegistrationDateTime(normalizedDateTime),
-		templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
-		queuedOn,
-		queueSource: 'date-time-change',
-		deliveryRequestedOn: queuedOn,
-		deliveryState: 'queued',
-		failedOn: false,
-		lastErrorMessage: false,
-		lastErrorDetails: false,
-	};
-
-	batch.set(emailDocRef, emailDoc, { merge: true });
+	const uid = requestedUid ?? actorUid;
+	const slotId = requireSlotId(data['slotId']);
+	const db = admin.firestore();
+	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
+	const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
+	const receiptRef = registrationRef.collection(MUTATION_RECEIPTS_SUBCOLLECTION).doc(mutationId);
 
 	try {
-		await batch.commit();
+		await db.runTransaction(async (transaction) => {
+			const [registrationSnapshot, parametersSnapshot, slotSnapshot, receiptSnapshot] = await Promise.all([
+				transaction.get(registrationRef),
+				transaction.get(parametersRef),
+				transaction.get(slotRef),
+				transaction.get(receiptRef),
+			]);
+			const cached = getStoredMutationResult(
+				receiptSnapshot.exists ? receiptSnapshot.data() as MutationReceipt : undefined,
+				'changeRegistrationDateTime',
+			);
+			if (cached) return;
+			const registration = registrationSnapshot.data() as Registration | undefined;
+			if (!registration) {
+				throw new HttpsError('not-found', `Registration not found for ${uid}.`);
+			}
+			if (!registration.registrationSubmittedOn) {
+				throw new HttpsError('failed-precondition', 'Registration is not submitted.');
+			}
+			if (registration.hasCheckedIn) {
+				throw new HttpsError('failed-precondition', 'Cannot change registration after check-in.');
+			}
+
+			const parameters = parametersSnapshot.data() as PublicParameters | undefined;
+			if (!parameters?.admin?.allowChangeRegistration) {
+				throw new HttpsError('failed-precondition', 'Registration changes are currently unavailable.');
+			}
+
+			// The requested slot already being stored is an equivalent retry/no-op.
+			if (registration.dateTimeSlot?.id === slotId) {
+				transaction.create(receiptRef, {
+					operation: 'changeRegistrationDateTime',
+					result: true,
+					completedOn: new Date(),
+				} satisfies MutationReceipt);
+				return;
+			}
+
+			const slot = requireEnabledCurrentSlot(
+				slotSnapshot.data() as DateTimeSlot | undefined,
+				slotId,
+			);
+			const queuedOn = new Date();
+			const emailRecord = {
+				code: registration.qrcode,
+				email: registration.emailAddress,
+				name: registration.firstName,
+				formattedDateTime: formatRegistrationDateTime(slot.dateTime),
+				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
+				queuedOn,
+				queueSource: 'date-time-change',
+				deliveryRequestedOn: queuedOn,
+				deliveryState: 'queued',
+				failedOn: false,
+				lastErrorMessage: false,
+				lastErrorDetails: false,
+			};
+			const emailRef = db.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
+			const registrationUpdate = {
+				previousDateTimeSlot: registration.dateTimeSlot,
+				dateTimeSlot: { id: slot.id, dateTime: slot.dateTime },
+				includedInCounts: false,
+				reminderEmailSentOn: false,
+				reminderEmailFailedOn: false,
+			};
+
+			// Capacity remains eventually consistent: this never updates a slot counter.
+			transaction.set(registrationRef, registrationUpdate, { merge: true });
+			transaction.set(emailRef, emailRecord, { merge: true });
+			transaction.create(receiptRef, {
+				operation: 'changeRegistrationDateTime',
+				result: true,
+				completedOn: queuedOn,
+			} satisfies MutationReceipt);
+		});
 		return true;
 	} catch (error) {
-		log.error(
-			'Failed to change registration date/time slot',
-			{
-				uid,
-				newDateTimeSlotId: data.newDateTimeSlot.id ?? null,
-				actorUid: request.auth?.uid ?? null,
-			},
-			error,
-		);
-		throw new HttpsError(
-			'internal',
-			'Error changing registration',
-			JSON.stringify(error),
-		);
+		if (error instanceof HttpsError) throw error;
+		log.error('Failed to change registration date/time slot', { uid, actorUid, slotId }, error);
+		throw new HttpsError('internal', 'Unable to change registration appointment.');
 	}
 }

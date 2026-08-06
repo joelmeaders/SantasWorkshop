@@ -2,6 +2,7 @@
 	Español
 	<ion-toggle
 		id="languageToggle"
+		aria-label="Switch language between Español and English"
 		[checked]="(currentLanguage$ | async) === 'en'"
 		mode="ios"
 		(ionChange)="toggleLanguage($event)"

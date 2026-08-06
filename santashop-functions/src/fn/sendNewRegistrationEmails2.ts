@@ -249,7 +249,8 @@ const createReminderEmailCommand = (
 		Source: REGISTRATION_EMAIL_SOURCE,
 		Template: template,
 		ReturnPath: REGISTRATION_EMAIL_RETURN_PATH,
-});
+	});
+};
 
 const createCancellationEmailCommand = (
 	payload: ResolvedEmailPayload,
@@ -269,7 +270,6 @@ const createCancellationEmailCommand = (
 			},
 		},
 	});
-};
 
 const loadEmailTriggerContext = async (
 	triggeredSnapshot: QueryDocumentSnapshot,

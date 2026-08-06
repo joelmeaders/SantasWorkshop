@@ -1,71 +1,68 @@
 <ion-card>
 	<ion-card-header>
-		<ion-item class="inset-ion-item-title">
-			<ion-card-title>
-				{{ 'MENU.CHILDREN' | translate }}
-			</ion-card-title>
-			@if (childCount()) {
-				<ion-badge color="success" slot="end"> Complete </ion-badge>
-			}
+		<ion-item class="inset-ion-item-title" lines="none">
+			<ion-card-title id="children-heading">{{ 'MENU.CHILDREN' | translate }}</ion-card-title>
+			@if (childCount()) { <ion-badge color="success" slot="end">{{ 'OVERVIEW.COMPLETE' | translate }}</ion-badge> }
 		</ion-item>
 	</ion-card-header>
-	<ion-card-content class="ion-text-center">
-		@if (!childCount()) {
-			<p>
-				<strong>
-					{{ 'OVERVIEW.NO_CHILDREN' | translate }}
-				</strong>
-				<br />
-				{{ 'OVERVIEW.NO_CHILDREN_MESSAGE' | translate }}
-			</p>
-			<p class="ion-text-end es-pd-top-sm">
-				<ion-button color="xmasred" [routerLink]="['../children']">
-					{{ 'OVERVIEW.ADD_CHILD' | translate }}
-				</ion-button>
-			</p>
-		} @else {
-			<ion-list>
-				@for (child of children(); track child) {
-					<ion-item lines="none">
-						@if (child.toyType === 'boys') {
-							<ion-icon name="man-outline"
-								slot="start"
-							 />
-						}
-						@if (child.toyType === 'girls') {
-							<ion-icon name="woman-outline"
-								slot="start"
-							 />
-						}
-						@if (child.toyType === 'infants') {
-							<ion-icon name="happy-outline"
-								slot="start"
-							 />
-						}
-						@if (!child.toyType) {
-							<ion-icon name="alert-circle"
-								color="danger"
-								slot="start"
-							 />
-						}
-						<div class="width-max">
-							<ion-label class="width-max ion-text-wrap">
-								{{ child.firstName }} {{ child.lastName }}
-							</ion-label>
-							@if (!child.toyType) {
-								<ion-note color="danger">
-									{{ 'CHILDREN.INVALID_TOYTYPE' | translate }}
-								</ion-note>
-							}
-						</div>
+	<ion-card-content>
+		<p class="card-guidance">{{ 'OVERVIEW.CHILD_GUIDANCE' | translate }}</p>
+		@if (childCount()) {
+			<ion-list [attr.aria-label]="'OVERVIEW.REGISTERED_CHILDREN' | translate">
+				@for (child of children(); track child.id) {
+					<ion-item [attr.data-child-id]="child.id" [attr.aria-label]="('OVERVIEW.EDIT_CHILD_LABEL' | translate) + ' ' + child.firstName" [button]="true" [detail]="true" lines="full" (click)="editChild(child)" [disabled]="busy()">
+						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" /> }
+						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" /> }
+						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" /> }
+						@if (!child.toyType) { <ion-icon name="alert-circle" color="danger" slot="start" /> }
+						<ion-label class="ion-text-wrap">
+							<h2>{{ child.firstName }} {{ child.lastName }}</h2>
+							<p>{{ child.dateOfBirth | date: 'longDate' }}</p>
+							@if (!child.toyType) { <ion-note color="danger">{{ 'CHILDREN.INVALID_TOYTYPE' | translate }}</ion-note> }
+						</ion-label>
 					</ion-item>
 				}
 			</ion-list>
-			<p class="ion-text-end es-pd-top-sm">
-				<ion-button color="xmasred" [routerLink]="['../children']">
-					{{ 'OVERVIEW.ADD_EDIT_CHILD' | translate }}
-				</ion-button>
-			</p>
+		}
+
+		@if (!editorOpen()) {
+			<ion-button data-open-add-child color="xmasred" fill="outline" (click)="openNewChild()" [disabled]="busy()">
+				<ion-icon name="add-circle" slot="start" />{{ 'CHILDREN.ADD_A_CHILD' | translate }}
+			</ion-button>
 		}
 	</ion-card-content>
 </ion-card>
+
+<ion-modal [canDismiss]="!busy()" [isOpen]="editorOpen()" (didDismiss)="collapseEditor()" (didPresent)="modalPresented()">
+	<ng-template>
+		<ion-header>
+			<ion-toolbar>
+				<ion-title>{{ editingChild() ? ('ADDCHILD.EDIT_TITLE' | translate) : ('ADDCHILD.ADD_TITLE' | translate) }}</ion-title>
+				<ion-buttons slot="end"><ion-button (click)="collapseEditor()" [disabled]="busy()">{{ 'COMMON.CANCEL' | translate }}</ion-button></ion-buttons>
+			</ion-toolbar>
+		</ion-header>
+		<ion-content>
+			<form [formGroup]="form" (ngSubmit)="saveChild()" novalidate [attr.aria-label]="'OVERVIEW.CHILD_DETAILS' | translate">
+				<ion-list lines="none">
+					<ion-item><ion-input #firstNameInput id="childFirstName" [label]="'ADDCHILD.FIRST_NAME' | translate" labelPlacement="stacked" autocomplete="given-name" formControlName="firstName" /></ion-item>
+					<ion-item><ion-input [label]="'ADDCHILD.LAST_NAME' | translate" labelPlacement="stacked" autocomplete="family-name" formControlName="lastName" /></ion-item>
+					<ion-note id="childAgeRequirement" class="ion-padding-horizontal">{{ 'ADDCHILD.UNDER_13_REQUIREMENT' | translate }}</ion-note>
+					<ion-item><ion-input [label]="'ADDCHILD.BIRTH_DATE' | translate" labelPlacement="stacked" type="date" [min]="minBirthDate" [max]="maxBirthDate" formControlName="dateOfBirth" aria-describedby="childAgeRequirement" (ionChange)="birthdaySelected($event.detail.value)" /></ion-item>
+					@if (showToyTypeControls()) {
+						<ion-list-header>{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-list-header>
+						<ion-radio-group formControlName="toyType" [attr.aria-label]="'ADDCHILD.TOY_TYPE' | translate">
+							<ion-item><ion-radio value="boys">{{ 'ADDCHILD.BOYS' | translate }}</ion-radio></ion-item>
+							<ion-item><ion-radio value="girls">{{ 'ADDCHILD.GIRLS' | translate }}</ion-radio></ion-item>
+						</ion-radio-group>
+					} @else if (isInfant()) {
+						<ion-note class="ion-padding-horizontal">{{ 'ADDCHILD.INFANT_MSG' | translate }}</ion-note>
+					}
+				</ion-list>
+				<div class="card-actions">
+					@if (editingChild()) { <ion-button data-delete-child color="danger" fill="outline" type="button" (click)="deleteCurrentChild()" [disabled]="busy()"><ion-icon name="trash-outline" slot="start" />{{ 'OVERVIEW.REMOVE_CHILD_LABEL' | translate }}</ion-button> }
+					<ion-button color="xmasred" type="submit" [disabled]="form.invalid || busy()">{{ editingChild() ? ('OVERVIEW.EDIT_CHILD' | translate) : ('OVERVIEW.ADD_CHILD' | translate) }}</ion-button>
+				</div>
+			</form>
+		</ion-content>
+	</ng-template>
+</ion-modal>

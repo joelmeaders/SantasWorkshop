@@ -1,26 +1,24 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { PreRegistrationService } from '../../../../core';
 import { ProfilePageService } from './profile.page.service';
+import { PreRegistrationService } from '../../../../core';
 
 import { AsyncPipe } from '@angular/common';
-import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NiceFormErrorPipe } from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { arrowBackSharp, createOutline } from 'ionicons/icons';
+import { arrowBackSharp } from 'ionicons/icons';
 import {
 	IonContent,
 	IonGrid,
 	IonRow,
 	IonCol,
 	IonButton,
-	IonIcon,
 	IonItem,
-	IonCardTitle,
-	IonCard,
-	IonCardContent,
 	IonList,
 	IonInput,
+	IonIcon,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -29,8 +27,9 @@ import {
 	styleUrls: ['./profile.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		PreRegistrationMenuComponent,
 		RouterLink,
+		ReactiveFormsModule,
+		NiceFormErrorPipe,
 		AsyncPipe,
 		TranslateModule,
 		IonContent,
@@ -40,9 +39,6 @@ import {
 		IonButton,
 		IonIcon,
 		IonItem,
-		IonCardTitle,
-		IonCard,
-		IonCardContent,
 		IonList,
 		IonInput,
 	],
@@ -58,7 +54,6 @@ export class ProfilePage {
 	public readonly changePasswordForm = this.viewService.changePasswordForm;
 
 	public readonly userProfile$ = this.viewService.userProfile$;
-
 	public readonly isRegistrationComplete$ =
 		this.preregistrationService.registrationComplete$;
 
@@ -72,6 +67,6 @@ export class ProfilePage {
 		this.viewService.changePassword();
 
 	constructor() {
-		addIcons({ arrowBackSharp, createOutline });
+		addIcons({ arrowBackSharp });
 	}
 }

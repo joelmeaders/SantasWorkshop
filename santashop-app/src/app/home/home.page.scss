@@ -12,3 +12,14 @@ ion-button .custom-button {
 p {
 	margin-block-end: 0.5em;
 }
+
+.entry-card {
+	margin-inline: auto;
+	max-width: 38rem;
+	text-align: start;
+}
+
+.entry-card ion-card-title,
+.entry-card p {
+	text-align: center;
+}

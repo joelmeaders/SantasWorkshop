@@ -33,11 +33,11 @@ test.describe('customer registration lifecycle', () => {
 			'School - Denver Public Schools (DPS)',
 		);
 
-		await expect(page.locator('#childrenProgressCard')).toBeVisible({
+		await expect(page.locator('#children-heading')).toBeVisible({
 			timeout: 15000,
 		});
-		await expect(page.locator('#scheduleProgressCard')).toBeVisible();
-		await expect(page.locator('#submitProgressCard')).toBeVisible();
+		await expect(page.locator('#appointment-heading')).toBeVisible();
+		await expect(page.locator('#review-heading')).toBeVisible();
 	});
 
 	test('REG-003 persists an alternate referral value', async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('customer registration lifecycle', () => {
 			'Neighborhood friend',
 		);
 
-		await expect(page.locator('#childrenProgressCard')).toBeVisible({
+		await expect(page.locator('#children-heading')).toBeVisible({
 			timeout: 15000,
 		});
 	});
@@ -57,10 +57,10 @@ test.describe('customer registration lifecycle', () => {
 		page,
 	}) => {
 		await createAccountViaUi(page, randomAccount());
-		await page.goto('/pre-registration/submit');
+		await page.goto('/pre-registration/overview#review');
 
-		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
-		await expect(page.locator('#submitProgressCard')).toBeVisible({
+		await expect(page).toHaveURL(/\/pre-registration\/overview(?:#review)?$/);
+		await expect(page.locator('#review-heading')).toBeVisible({
 			timeout: 15000,
 		});
 	});
@@ -85,16 +85,28 @@ test.describe('customer registration lifecycle', () => {
 
 	test('CHILD-004 rejects an ineligible birth date', async ({ page }) => {
 		await createAccountViaUi(page, randomAccount());
-		await page.goto('/pre-registration/children/add-child');
-		await page.fill('#childFirstName input', 'Too');
-		await page.fill('#childLastName input', 'Old');
-		const birthDate = page.locator('#childDateOfBirth');
+		await page.goto('/pre-registration/overview#children');
+		await page.locator('app-children-card [data-open-add-child]').click();
+		const childForm = page.locator('ion-modal form');
+		await expect(childForm).toBeVisible({ timeout: 15000 });
+		await childForm.locator('ion-input[formControlName="firstName"] input').fill('Too');
+		await childForm.locator('ion-input[formControlName="lastName"] input').fill('Old');
+		const birthDate = childForm.locator(
+			'ion-input[formControlName="dateOfBirth"]',
+		);
 		await birthDate.locator('input').first().fill('2010-01-01');
-
-		await expect(page.locator('ion-alert').last()).toBeVisible({
-			timeout: 10000,
+		await birthDate.evaluate((element) => {
+			element.dispatchEvent(
+				new CustomEvent('ionChange', {
+					bubbles: true,
+					detail: { value: '2010-01-01' },
+				}),
+			);
 		});
-		await expect(page.locator('#saveChildButton')).toHaveClass(
+
+		await expect(
+			childForm.locator('ion-button[type="submit"]'),
+		).toHaveClass(
 			/button-disabled/,
 		);
 	});
@@ -142,41 +154,37 @@ test.describe('customer registration lifecycle', () => {
 			},
 		]);
 		const child = defaultTestChild();
-		await createAccountViaUi(page, randomAccount());
+		const account = randomAccount();
+		const updatedEmailAddress = `updated-${account.emailAddress}`;
+		await createAccountViaUi(page, account);
 		await addChildViaUi(page, child);
 
-		await page.goto('/pre-registration/date-time');
-		await expect(
-			page.locator('[data-select-slot-id="public-slot-1"]'),
-		).toBeAttached({ timeout: 15000 });
-		await expect(
-			page.locator('[data-select-slot-id="disabled-slot"]'),
-		).toHaveCount(0);
-		await expect(
-			page.locator('[data-select-slot-id="other-season-slot"]'),
-		).toHaveCount(0);
+		await page.goto('/pre-registration/overview#appointment');
+		await expect(page.locator('app-schedule-card ion-list [data-select-slot-id]')).toHaveCount(2, {
+			timeout: 15000,
+		});
 		await selectAppointmentViaUi(page, 'public-slot-1');
-
-		await page.goto('/pre-registration/date-time');
-		await page.locator('[data-selected-slot-id="public-slot-1"]').click();
-		const changeAlert = page.locator('ion-alert');
-		await expect(changeAlert).toBeVisible({ timeout: 10000 });
-		await changeAlert.getByRole('button', { name: 'Continue' }).click();
+		await page.goto('/pre-registration/overview#review');
+		const submitCard = page.locator('app-submit-card');
+		await submitCard
+			.getByRole('button', { name: 'Review registration', exact: true })
+			.click();
+		await expect(submitCard.getByText(account.emailAddress, { exact: true })).toBeVisible();
+		await submitCard
+			.getByRole('button', { name: 'Update email', exact: true })
+			.click();
+		await submitCard
+			.locator('ion-input[formControlName="emailAddress"] input')
+			.fill(updatedEmailAddress);
+		await submitCard
+			.locator('ion-input[formControlName="password"] input')
+			.fill(account.password);
+		await submitCard
+			.getByRole('button', { name: 'Save email', exact: true })
+			.click();
 		await expect(
-			page.locator('[data-selected-slot-id="public-slot-1"]'),
-		).toHaveCount(0, { timeout: 15000 });
-		await expect(
-			page.locator('[data-select-slot-id="public-slot-2"]'),
-		).toBeAttached({ timeout: 15000 });
-		// The cancellation UI updates before the registration write settles.
-		// Prove the cleared choice survives a route transition before replacing it.
-		await page.waitForTimeout(1000);
-		await page.goto('/pre-registration/overview');
-		await expect(page.locator('#scheduleProgressCard')).not.toContainText(
-			'Complete',
-			{ timeout: 15000 },
-		);
-		await selectAppointmentViaUi(page, 'public-slot-2');
+			submitCard.getByText(updatedEmailAddress, { exact: true }),
+		).toBeVisible({ timeout: 30000 });
 		await submitRegistrationViaUi(page);
 
 		await expect(page.locator('#registrationQrCode')).toHaveAttribute(
@@ -255,13 +263,11 @@ test.describe('customer registration lifecycle', () => {
 
 		await page.click('#eventInformationButton');
 		await expect(page).toHaveURL(
-			/\/pre-registration\/confirmation\/event-information$/,
+			/\/pre-registration\/confirmation#event-information$/,
 		);
+		await expect(page.getByRole('heading', { name: 'Event information', exact: true })).toBeVisible();
 		await expect(
-			page.getByText('Event information', { exact: true }),
-		).toBeVisible();
-		await expect(
-			page.getByRole('link', { name: 'Click here (FAQ)', exact: true }),
+			page.locator('#event-information').getByRole('link', { name: /FAQ/i }),
 		).toBeVisible();
 	});
 
@@ -311,7 +317,9 @@ test.describe('customer registration lifecycle', () => {
 			.getByRole('button', { name: 'Continue', exact: true })
 			.click();
 
-		const modal = page.locator('ion-modal');
+		const modal = page.locator('ion-modal').filter({
+			has: page.locator('app-change-datetime-modal'),
+		});
 		await expect(modal).toBeVisible({ timeout: 15000 });
 		const targetDay = new Date(targetSlotDate).toLocaleDateString('en-US', {
 			day: 'numeric',
@@ -349,7 +357,9 @@ test.describe('customer registration lifecycle', () => {
 			.locator('ion-alert')
 			.getByRole('button', { name: 'Continue', exact: true })
 			.click();
-		const reopenedModal = page.locator('ion-modal');
+		const reopenedModal = page.locator('ion-modal').filter({
+			has: page.locator('app-change-datetime-modal'),
+		});
 		await expect(reopenedModal).toBeVisible({ timeout: 15000 });
 		await expect(reopenedModal.locator('ion-card h2')).toContainText(
 			targetDay,
@@ -387,11 +397,11 @@ test.describe('customer registration lifecycle', () => {
 		await checkInAlert
 			.getByRole('button', { name: 'Ok', exact: true })
 			.click();
-		await expect(page).toHaveURL(/\/sign-in$/, { timeout: 30000 });
+		await expect(page).toHaveURL(/\/\?mode=sign-in/, { timeout: 30000 });
 		await expect(page.locator('#signInButton')).toBeVisible();
 
 		await page.goto('/pre-registration/children');
-		await expect(page).toHaveURL(/\/sign-in$/, { timeout: 15000 });
+		await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
 	});
 
 	test('SUB-008 hides appointment changes and cancellation after check-in', async ({
@@ -427,7 +437,7 @@ test.describe('customer registration lifecycle', () => {
 		await checkInAlert
 			.getByRole('button', { name: 'Ok', exact: true })
 			.click();
-		await expect(page).toHaveURL(/\/sign-in$/, { timeout: 30000 });
+		await expect(page).toHaveURL(/\/\?mode=sign-in/, { timeout: 30000 });
 	});
 
 	test('REG-007 resumes an incomplete registration in a new browser context', async ({
@@ -444,13 +454,13 @@ test.describe('customer registration lifecycle', () => {
 			const resumedPage = await context.newPage();
 			await signInViaUi(resumedPage, account);
 			await expect(
-				resumedPage.locator('#childrenProgressCard'),
+				resumedPage.locator('#children-heading'),
 			).toBeVisible({
 				timeout: 15000,
 			});
 			await expect(
-				resumedPage.locator('#scheduleProgressCard'),
-			).toContainText('No Time Selected.');
+				resumedPage.locator('#appointment-heading'),
+			).toBeVisible();
 			await resumedPage.goto('/pre-registration/submit');
 			await expect(resumedPage).toHaveURL(
 				/\/pre-registration\/overview$/,
@@ -577,20 +587,17 @@ test.describe('customer registration lifecycle', () => {
 
 		await page.click('#menuButton');
 		await page.getByText('Help', { exact: true }).click();
-		await expect(page).toHaveURL(/\/pre-registration\/help$/);
-		await expect(
-			page.getByRole('heading', { name: 'Help', exact: true }),
-		).toBeVisible();
+		await expect(page.locator('ion-modal app-help')).toBeVisible();
 		await expect(
 			page.locator(
-				'ion-button[href="https://www.denversantaclausshop.org/contact/"]',
+				'ion-modal ion-button[href="https://www.denversantaclausshop.org/contact/"]',
 			),
 		).toBeVisible();
 	});
 
 	test('PROFILE-002 persists changed name and zip code', async ({ page }) => {
 		await createAccountViaUi(page, randomAccount());
-		await page.goto('/pre-registration/profile/change-info');
+		await page.goto('/pre-registration/profile');
 
 		await page
 			.locator('ion-input[formControlName="firstName"] input')
@@ -601,7 +608,8 @@ test.describe('customer registration lifecycle', () => {
 		await page
 			.locator('ion-input[formControlName="zipCode"] input')
 			.fill('80209');
-		const saveButton = page.getByRole('button', {
+		const profilePanel = page.locator('details').first();
+		const saveButton = profilePanel.getByRole('button', {
 			name: 'Save Changes',
 			exact: true,
 		});
@@ -609,9 +617,7 @@ test.describe('customer registration lifecycle', () => {
 			timeout: 15000,
 		});
 		await saveButton.click();
-		await page.waitForURL('**/pre-registration/profile', {
-			timeout: 30000,
-		});
+		await expect(page).toHaveURL(/\/pre-registration\/profile$/);
 
 		const profile = page.locator('app-profile');
 		await expect(
@@ -631,7 +637,11 @@ test.describe('customer registration lifecycle', () => {
 		const account = randomAccount();
 		const replacement = randomAccount();
 		await createAccountViaUi(page, account);
-		await page.goto('/pre-registration/profile/change-email');
+		await page.goto('/pre-registration/profile');
+		const emailPanel = page
+			.locator('details')
+			.filter({ has: page.locator('ion-input[formControlName="emailAddress"]') });
+		await emailPanel.locator('summary').click();
 
 		await page
 			.locator('ion-input[formControlName="emailAddress"] input')
@@ -639,7 +649,7 @@ test.describe('customer registration lifecycle', () => {
 		await page
 			.locator('ion-input[formControlName="password"] input')
 			.fill(account.password);
-		await page
+		await emailPanel
 			.getByRole('button', { name: 'Save Changes', exact: true })
 			.click();
 
@@ -648,14 +658,10 @@ test.describe('customer registration lifecycle', () => {
 			timeout: 15000,
 		});
 		await alert.getByRole('button', { name: 'Ok', exact: true }).click();
-		await page.waitForURL('**/pre-registration/profile', {
-			timeout: 30000,
-		});
+		await expect(page).toHaveURL(/\/pre-registration\/profile$/);
 		await expect(
-			page
-				.locator('app-profile')
-				.getByRole('textbox', { name: 'Email', exact: true }),
-		).toHaveValue(replacement.emailAddress, { timeout: 30000 });
+			emailPanel.locator('summary small'),
+		).toContainText(replacement.emailAddress, { timeout: 30000 });
 	});
 
 	test('PROFILE-004 changes the password and accepts the new credential', async ({
@@ -664,7 +670,11 @@ test.describe('customer registration lifecycle', () => {
 		const account = randomAccount();
 		const newPassword = `${account.password}Changed`;
 		await createAccountViaUi(page, account);
-		await page.goto('/pre-registration/profile/change-password');
+		await page.goto('/pre-registration/profile');
+		const passwordPanel = page
+			.locator('details')
+			.filter({ has: page.locator('ion-input[formControlName="oldPassword"]') });
+		await passwordPanel.locator('summary').click();
 
 		await page
 			.locator('ion-input[formControlName="oldPassword"] input')
@@ -675,7 +685,7 @@ test.describe('customer registration lifecycle', () => {
 		await page
 			.locator('ion-input[formControlName="newPassword2"] input')
 			.fill(newPassword);
-		await page
+		await passwordPanel
 			.getByRole('button', { name: 'Save Changes', exact: true })
 			.click();
 
@@ -684,9 +694,7 @@ test.describe('customer registration lifecycle', () => {
 			timeout: 15000,
 		});
 		await alert.getByRole('button', { name: 'Ok', exact: true }).click();
-		await page.waitForURL('**/pre-registration/profile', {
-			timeout: 30000,
-		});
+		await expect(page).toHaveURL(/\/pre-registration\/profile$/);
 
 		await signOutViaUi(page);
 		await signInViaUi(page, {

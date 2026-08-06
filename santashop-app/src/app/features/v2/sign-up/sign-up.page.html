@@ -275,7 +275,8 @@
 							<ion-button
 								fill="clear"
 								color="tertiary"
-								[routerLink]="['/sign-in']"
+								[routerLink]="['/']"
+								[queryParams]="{ mode: 'sign-in' }"
 							>
 								{{ "SIGNUP.HAVE_ACCOUNT" | translate }}
 							</ion-button>
@@ -283,7 +284,8 @@
 							<ion-button
 								fill="clear"
 								color="tertiary"
-								[routerLink]="['/reset-password']"
+								[routerLink]="['/']"
+								[queryParams]="{ mode: 'reset' }"
 							>
 								{{ "SIGNIN.FORGOT_PASSWORD" | translate }}
 							</ion-button>

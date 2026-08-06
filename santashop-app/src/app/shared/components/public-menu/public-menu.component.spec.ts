@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PopoverController } from '@ionic/angular/standalone';
+import { ModalController, PopoverController } from '@ionic/angular/standalone';
 import {
 	createPopoverControllerMock,
+	createModalControllerMock,
 	provideTranslateServiceMock,
 	provideAnalyticsMock,
 	provideAuthMock,
@@ -23,6 +24,10 @@ describe('PublicMenuComponent', () => {
 				{
 					provide: PopoverController,
 					useValue: createPopoverControllerMock(),
+				},
+				{
+					provide: ModalController,
+					useValue: createModalControllerMock(),
 				},
 				provideTranslateServiceMock(),
 			],

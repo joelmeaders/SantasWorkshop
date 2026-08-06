@@ -9,7 +9,8 @@
 	"HOME": {
 		"WELCOME_MESSAGE": "¡Registro en<br/>Denver Santa Claus Shop!",
 		"CREATE_ACCOUNT": "Crear una cuenta",
-		"SIGN_IN_INST": "¿Ya creaste una cuenta para este año?"
+		"SIGN_IN_INST": "¿Ya creaste una cuenta para este año?",
+		"CHOOSE_PATH": "¿Cómo desea continuar?"
 	},
 	"COMMON": {
 		"EMAIL_ADDRESS": "Correo electrónico",
@@ -34,6 +35,7 @@
 		"OK": "Ok",
 		"ERROR": "Error",
 		"YES": "Sí",
+		"NO": "No",
 		"TERMS_AND_CONDITIONS": "Términos y condiciones",
 		"PRIVACY_POLICY": "Política de privacidad",
 		"VERIFICATION_FAILED": "Error en la verificación",
@@ -76,6 +78,32 @@
 		"LEGAL_NEWS": "Legal y Newsletter"
 	},
 	"OVERVIEW": {
+		"CHILDREN_SECTION": "1. Niños",
+		"APPOINTMENT_SECTION": "2. Cita",
+		"REVIEW_SECTION": "3. Revisar y enviar",
+		"ADD_CHILD_FIRST": "Agregue al menos un niño elegible para elegir una cita.",
+		"CHOOSE_APPOINTMENT_FIRST": "Elija una cita para revisar y enviar su registro.",
+		"SAVED": "Se guardó su borrador de registro.",
+		"WORKSPACE_TITLE": "Complete su registro",
+		"WORKSPACE_INTRO": "Complete cada sección en orden. Puede volver a abrir las secciones completadas antes de enviar.",
+		"COMPLETE": "Completo",
+		"READY": "Listo",
+		"CHILD_GUIDANCE": "Agregue a cada niño que va a registrar. Puede editar esta lista hasta que envíe el registro.",
+		"ANOTHER_CHILD_TITLE": "¿Agregar otro niño?",
+		"ANOTHER_CHILD_MESSAGE": "¿Tiene otros niños menores de 13 años para agregar?",
+		"REGISTERED_CHILDREN": "Niños registrados",
+		"CHILD_DETAILS": "Información del niño",
+		"EDIT_CHILD_LABEL": "Editar",
+		"REMOVE_CHILD_LABEL": "Eliminar",
+		"APPOINTMENT_LOCKED": "Agregue primero un niño válido para elegir una cita.",
+		"CURRENT_AVAILABILITY": "Disponibilidad actual de citas",
+		"CURRENT_SPOT": "1 cupo actual",
+		"CURRENT_SPOTS": "{{count}} cupos actuales",
+		"REVIEW_LOCKED": "Agregue un niño válido y elija una cita antes de revisar su registro.",
+		"REVIEW_READY": "Su registro está listo para revisar y enviar.",
+		"REVIEW_REGISTRATION": "Revisar registro",
+		"CHILDREN_TO_SUBMIT": "Niños que se registrarán",
+		"SUBMITTING": "Enviando…",
 		"NO_CHILDREN": "Sin niños.",
 		"NO_CHILDREN_MESSAGE": "Agregue todos los niños y, a continuación, seleccione una hora.",
 		"ADD_CHILD": "Agregar hijo",
@@ -86,12 +114,12 @@
 		"NO_TIME_MESSAGE": "Después de agregar hijos, seleccione una hora.",
 		"SELECT_TIME": "Seleccione la hora",
 		"CHANGE_TIME": "Cambiar hora",
-		"NOT_SUBMITTED.": "No presentado.",
+		"NOT_SUBMITTED": "No presentado.",
 		"NOT_SUBMITTED_MESSAGE": "Después de agregar niños y seleccionar una hora, envíe para obtener su código QR para el evento."
 	},
 	"CHILDREN": {
-		"CHILD_LINE_1": "Los niños deben tener entre 0 y 11 años de edad.",
-		"CHILD_LINE_2": "Agregue a cada niño de 11 años o menos a continuación",
+		"CHILD_LINE_1": "Los niños deben ser menores de 13 años.",
+		"CHILD_LINE_2": "Agregue a cada niño de 12 años o menos a continuación",
 		"ADD_A_CHILD": "Agregar un niño",
 		"NO_CHILDREN": "No hay niños.",
 		"YOUR_CHILDREN": "Sus hijos",
@@ -103,10 +131,11 @@
 		"FIRST_NAME": "Nombre",
 		"LAST_NAME": "Apellido",
 		"BIRTH_DATE": "Fecha de nacimiento",
+		"UNDER_13_REQUIREMENT": "Los niños deben ser menores de 13 años.",
 		"TOY_TYPE": "Tipo de juguetes",
 		"DELETE_CHILD_TITLE": "¿Eliminar hijo?",
 		"DELETE_CHILD_MSG": "Al presionar el botón Eliminar, este niño eliminará a este niño de su cuenta",
-		"INVALID_AGE": "La edad debe estar entre 0 y 11 años",
+		"INVALID_AGE": "La edad debe estar entre 0 y 12 años",
 		"INVALID_FIRSTNAME": "El nombre debe tener entre 2 y 20 caracteres",
 		"INVALID_LASTNAME": "El nombre debe tener entre 2 y 25 caracteres",
 		"INFANT_MSG": "¡Tenemos juguetes para peques de 0 a 2 años!",
@@ -134,7 +163,12 @@
 		"CONFIRM_ADDED_CHILDREN": "¿Ha agregado a todos los niños? ¿Es correcta la información de los niños?",
 		"CONFIRM_DATE_TIME": "¿Es correcta la fecha y la hora?",
 		"PRESUBMIT": "Antes de enviar, asegúrese de que todo en esta página sea correcto. Si no es así, realice sus cambios ahora haciendo clic en 'Hacer cambios'",
-		"MAKE_CHANGES": "Realizar cambios"
+		"MAKE_CHANGES": "Realizar cambios",
+		"TICKET_EMAIL_TITLE": "¿A dónde debemos enviar su entrada?",
+		"TICKET_EMAIL_MESSAGE": "Confirme que esta dirección de correo electrónico sea correcta antes de enviar su registro.",
+		"UPDATE_EMAIL": "Actualizar correo electrónico",
+		"UPDATE_EMAIL_HELP": "Por su seguridad, ingrese su contraseña actual para actualizar su dirección de correo electrónico.",
+		"SAVE_EMAIL": "Guardar correo electrónico"
 	},
 	"CONFIRMATION": {
 		"FREE_PARKING": "El aparcamiento será gratuito",
@@ -163,6 +197,7 @@
 		"PDF_GUIDE_BUTTON": "Descargar la guía de ayuda en PDF"
 	},
 	"PROFILE": {
+		"SETTINGS_INTRO": "Administre su información de contacto, correo electrónico y contraseña en un solo lugar.",
 		"CHANGE_EMAIL": "Cambiar correo electrónico",
 		"CHANGE_EMAIL_TEXT": "Para cambiar su correo electrónico, complete el siguiente formulario.",
 		"CURRENT_EMAIL": "Su correo electrónico actual es:",
@@ -203,6 +238,12 @@
 		"1": "¡Uh oh!",
 		"2": "El mantenimiento está en curso.",
 		"3": "Visite nuestros sitios sociales para obtener más información."
+	},
+	"OPERATIONAL_NOTICE": {
+		"IMAGE_ALT": "Aviso de servicio de Santa Shop",
+		"SOCIAL_LINKS": "Actualizaciones de Santa Shop",
+		"FACEBOOK": "Visitar Santa Shop en Facebook",
+		"INSTAGRAM": "Visitar Santa Shop en Instagram"
 	},
 	"EVENT_INFO": {
 		"DATETIME": "Diciembre 12, 13, 15, 16 de 10am a 3pm",

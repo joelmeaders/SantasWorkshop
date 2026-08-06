@@ -80,13 +80,13 @@ export class SignUpPageService implements OnDestroy {
 							text: this.translateService.instant(
 								'FORGOTPASS.RESET_PASSWORD',
 							),
-							role: '/reset-password',
+							role: 'reset',
 						},
 						{
 							text: this.translateService.instant(
 								'COMMON.SIGN_IN',
 							),
-							role: '/sign-in',
+							role: 'sign-in',
 						},
 					],
 					backdropDismiss: false,
@@ -95,7 +95,9 @@ export class SignUpPageService implements OnDestroy {
 				await alert.present();
 
 				await alert.onDidDismiss().then((response) => {
-					this.router.navigate([response.role]);
+					this.router.navigate(['/'], {
+						queryParams: { mode: response.role },
+					});
 				});
 			} else {
 				this.errorHandler.handleError(error);

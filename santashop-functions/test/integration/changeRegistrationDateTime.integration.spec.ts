@@ -15,6 +15,15 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 	});
 
 	it('changes a completed registration to a new time slot', async () => {
+		await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+			admin: { allowChangeRegistration: true },
+		});
+		await setDocument(COLLECTION_SCHEMA.dateTimeSlots, 'slot-new', {
+			programYear: 2025,
+			enabled: true,
+			maxSlots: 10,
+			dateTime: createTimestamp('2025-12-11T18:00:00.000Z'),
+		});
 		await setDocument(COLLECTION_SCHEMA.registrations, 'user-slot-1', {
 			uid: 'user-slot-1',
 			qrcode: 'ABCD2345',
@@ -37,10 +46,8 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 		const result = await changeRegistrationDateTime(
 			createCallableRequest(
 				{
-					newDateTimeSlot: {
-						id: 'slot-new',
-						dateTime: '2025-12-11T18:00:00.000Z',
-					},
+					mutationId: 'change-slot-0001',
+					slotId: 'slot-new',
 				},
 				{ uid: 'user-slot-1' },
 			),

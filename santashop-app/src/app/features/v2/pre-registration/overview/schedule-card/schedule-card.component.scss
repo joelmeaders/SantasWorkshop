@@ -1,0 +1,4 @@
+.is-locked { opacity: 0.72; }
+.card-guidance { margin-top: 0; }
+.card-actions { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+@media (max-width: 480px) { .card-actions ion-button { flex: 1 1 auto; } }

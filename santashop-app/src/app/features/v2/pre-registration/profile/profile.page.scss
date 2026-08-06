@@ -4,6 +4,31 @@
 	}
 }
 
+.account-grid {
+	padding-block-end: 4rem;
+}
+
+.settings-panel {
+	background: var(--ion-color-light-contrast, #fff);
+	border: 1px solid var(--ion-color-step-200, #d7d8da);
+	border-radius: 0.75rem;
+	margin-block: 1rem;
+	padding: 1rem;
+}
+
+.settings-panel summary {
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	font-size: 1.15rem;
+	font-weight: 700;
+	gap: 0.25rem;
+}
+
+.settings-panel form {
+	padding-block-start: 1rem;
+}
+
 ion-label {
 	margin-inline-end: 12px;
 }

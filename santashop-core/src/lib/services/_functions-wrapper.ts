@@ -4,7 +4,7 @@ import {
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from 'firebase/functions';
-import { ChangeUserInfo, UpdateReferredBy } from '@santashop/models';
+import { ChangeUserInfo, ToyType, UpdateReferredBy } from '@santashop/models';
 import { FIREBASE_FUNCTIONS } from '../tokens';
 
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
@@ -49,14 +49,47 @@ export class FunctionsWrapper {
 			...data,
 		});
 
-	public readonly undoRegistration = (): Promise<
-		_HttpsCallableResult<unknown>
-	> => this.callableWrapper<unknown, unknown>('undoRegistration')({});
+	public readonly undoRegistration = (data: {
+		mutationId: string;
+		uid?: string;
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('undoRegistration')(data);
 
 	public readonly changeRegistrationDateTime = (
-		data: unknown,
-	): Promise<_HttpsCallableResult<unknown>> =>
-		this.callableWrapper<unknown, unknown>('changeRegistrationDateTime')(
-			data,
-		);
+		data: {
+			mutationId: string;
+			slotId: string;
+			registrationUid?: string;
+		},
+	): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('changeRegistrationDateTime')(data);
+
+	public readonly saveDraftChild = (data: {
+		mutationId: string;
+		child: {
+			id: number;
+			firstName: string;
+			lastName: string;
+			dateOfBirth: string;
+			toyType?: ToyType;
+		};
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('saveDraftChild')(data);
+
+	public readonly deleteDraftChild = (data: {
+		mutationId: string;
+		childId: number;
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('deleteDraftChild')(data);
+
+	public readonly setDraftAppointment = (data: {
+		mutationId: string;
+		slotId: string;
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('setDraftAppointment')(data);
+
+	public readonly completeRegistration = (data: {
+		mutationId: string;
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('completeRegistration')(data);
 }

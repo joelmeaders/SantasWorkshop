@@ -1,33 +1,51 @@
 <ion-content color="light">
 	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
 		<ion-row class="height-max">
-			<ion-col
-				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-				size="auto"
-			>
-				<app-pre-registration-menu />
-			</ion-col>
-			<ion-col sizeXl="9" size="12">
+			<ion-col size="12">
 				<ion-row class="ion-justify-content-center">
-					<ion-col sizeXs="12" sizeSm="7">
-						<app-children-card
-							id="childrenProgressCard"
-							[children]="(children$ | async)!"
-							[childCount]="(childCount$ | async)!"
-						/>
-					</ion-col>
-					<ion-col sizeXs="12" sizeSm="7">
-						<app-schedule-card
-							id="scheduleProgressCard"
-							[dateTimeSlot]="(dateTimeSlot$ | async)!"
-							[canChooseDateTime]="(canChooseDateTime$ | async)!"
-						/>
-					</ion-col>
-					<ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
-						<app-submit-card
-							id="submitProgressCard"
-							[canSubmit]="(canSubmit$ | async)!"
-						/>
+					<ion-col sizeXs="12" sizeSm="9" sizeLg="8">
+						<div class="workspace-intro" aria-labelledby="registration-workspace-title">
+							<h1 id="registration-workspace-title">{{ 'OVERVIEW.WORKSPACE_TITLE' | translate }}</h1>
+							<p>{{ 'OVERVIEW.WORKSPACE_INTRO' | translate }}</p>
+						</div>
+
+						<p class="workspace-status" aria-live="polite" role="status">{{ liveMessage() }}</p>
+						@if (workspaceError()) {
+							<p class="workspace-error" role="alert">{{ workspaceError() }}</p>
+						}
+
+						<section id="children" tabindex="-1" aria-labelledby="children-heading">
+							<app-children-card
+								[children]="(children$ | async) ?? []"
+								[childCount]="(childCount$ | async) ?? 0"
+								[programYear]="programYear"
+								[busy]="isSaving()"
+								(saveRequested)="saveChild($event)"
+								(deleteRequested)="deleteChild($event)"
+							/>
+						</section>
+
+						<section id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
+							<app-schedule-card
+								[dateTimeSlot]="dateTimeSlot$ | async"
+								[slots]="(availableSlots$ | async) ?? []"
+								[canChooseDateTime]="(canChooseDateTime$ | async) ?? false"
+								[busy]="isSaving()"
+								(selectRequested)="chooseDateTime($event)"
+							/>
+						</section>
+
+						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="es-mg-bottom-xxl">
+							<app-submit-card
+								[children]="(children$ | async) ?? []"
+								[dateTimeSlot]="dateTimeSlot$ | async"
+								[emailAddress]="(emailAddress$ | async) ?? ''"
+								[canSubmit]="(canSubmit$ | async) ?? false"
+								[busy]="isSaving()"
+								(submitRequested)="submitRegistration()"
+								(emailUpdateRequested)="updateEmailAddress($event)"
+							/>
+						</section>
 					</ion-col>
 				</ion-row>
 			</ion-col>

@@ -4,6 +4,7 @@ const FORMATTED_DATETIME = 'Wednesday, December 10, 6:00 PM';
 
 interface MockDocRef {
 	path: string;
+	collection: (path: string) => { doc: (id: string) => MockDocRef };
 	get: ReturnType<typeof vi.fn>;
 	set: ReturnType<typeof vi.fn>;
 	update: ReturnType<typeof vi.fn>;
@@ -22,6 +23,7 @@ export interface AccountAdminMock {
 	doc: ReturnType<typeof vi.fn>;
 	runTransaction: ReturnType<typeof vi.fn>;
 	transactionSet: ReturnType<typeof vi.fn>;
+	transactionCreate: ReturnType<typeof vi.fn>;
 	transactionUpdate: ReturnType<typeof vi.fn>;
 	transactionDelete: ReturnType<typeof vi.fn>;
 	batchSet: ReturnType<typeof vi.fn>;
@@ -44,6 +46,7 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 	const batchDelete = vi.fn();
 	const batchCommit = vi.fn();
 	const transactionSet = vi.fn();
+	const transactionCreate = vi.fn();
 	const transactionUpdate = vi.fn();
 	const transactionDelete = vi.fn();
 	const transactionGet = vi.fn((reference: MockDocRef) => reference.get());
@@ -51,6 +54,7 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 		async (
 			callback: (transaction: {
 				set: typeof transactionSet;
+				create: typeof transactionCreate;
 				get: typeof transactionGet;
 				update: typeof transactionUpdate;
 				delete: typeof transactionDelete;
@@ -58,6 +62,7 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 		) =>
 			callback({
 				set: transactionSet,
+				create: transactionCreate,
 				get: transactionGet,
 				update: transactionUpdate,
 				delete: transactionDelete,
@@ -73,7 +78,10 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 
 		const created: MockDocRef = {
 			path,
-			get: vi.fn(),
+			collection: (subcollection: string) => ({
+				doc: (id: string) => getDocRef(`${path}/${subcollection}/${id}`),
+			}),
+		get: vi.fn(),
 			set: vi.fn(),
 			update: vi.fn(),
 			create: vi.fn(),
@@ -128,6 +136,7 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 		doc,
 		runTransaction,
 		transactionSet,
+		transactionCreate,
 		transactionUpdate,
 		transactionDelete,
 		batchSet,
@@ -156,6 +165,9 @@ export const loadAccountRegistrationHandlers = async (
 		changeAccountInformationModule,
 		updateReferredByModule,
 		completeRegistrationModule,
+		saveDraftChildModule,
+		deleteDraftChildModule,
+		setDraftAppointmentModule,
 		undoRegistrationModule,
 		changeRegistrationDateTimeModule,
 		updateEmailAddressModule,
@@ -163,6 +175,9 @@ export const loadAccountRegistrationHandlers = async (
 		import('../../../src/fn/changeAccountInformation'),
 		import('../../../src/fn/updateReferredBy'),
 		import('../../../src/fn/completeRegistration'),
+		import('../../../src/fn/saveDraftChild'),
+		import('../../../src/fn/deleteDraftChild'),
+		import('../../../src/fn/setDraftAppointment'),
 		import('../../../src/fn/undoRegistration'),
 		import('../../../src/fn/changeRegistrationDateTime'),
 		import('../../../src/fn/updateEmailAddress'),
@@ -172,6 +187,9 @@ export const loadAccountRegistrationHandlers = async (
 		changeAccountInformation: changeAccountInformationModule.default,
 		updateReferredBy: updateReferredByModule.default,
 		completeRegistration: completeRegistrationModule.default,
+		saveDraftChild: saveDraftChildModule.default,
+		deleteDraftChild: deleteDraftChildModule.default,
+		setDraftAppointment: setDraftAppointmentModule.default,
 		undoRegistration: undoRegistrationModule.default,
 		changeRegistrationDateTime: changeRegistrationDateTimeModule.default,
 		updateEmailAddress: updateEmailAddressModule.default,

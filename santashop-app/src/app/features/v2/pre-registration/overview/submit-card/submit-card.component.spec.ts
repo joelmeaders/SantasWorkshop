@@ -29,4 +29,20 @@ describe('SubmitCardComponent', () => {
 	it('should create', () => {
 		expect(component).toBeTruthy();
 	});
+
+	it('emits a validated email update request', () => {
+		const request = jasmine.createSpy('request');
+		component.emailUpdateRequested.subscribe(request);
+		component.changeEmailForm.setValue({
+			emailAddress: 'updated@example.com',
+			password: 'current-password',
+		});
+
+		component.updateEmail();
+
+		expect(request).toHaveBeenCalledWith({
+			emailAddress: 'updated@example.com',
+			password: 'current-password',
+		});
+	});
 });

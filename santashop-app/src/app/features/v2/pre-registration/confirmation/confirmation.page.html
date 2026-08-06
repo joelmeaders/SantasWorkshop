@@ -43,7 +43,8 @@
 								<ion-button
 									id="eventInformationButton"
 									color="xmasred"
-									[routerLink]="['event-information']"
+									[routerLink]="['/pre-registration/confirmation']"
+									fragment="event-information"
 								>
 									{{ "CONFIRMATION.EVENT_INFORMATION" |
 									translate }}
@@ -165,17 +166,12 @@
 									}
 									<br />
 									<br />
-									<ion-text
-										color="primary"
-										[routerLink]="['event-information']"
-										button
-										tappable
-									>
+									<a [routerLink]="['/pre-registration/confirmation']" fragment="event-information">
 										<em>
 											{{ "CONFIRMATION.EVENT_INFORMATION"
 											| translate }}
 										</em>
-									</ion-text>
+									</a>
 								</div>
 							</ion-item>
 
@@ -236,6 +232,18 @@
 								</ion-item>
 								} }
 							</ion-list>
+
+							<section id="event-information" class="event-information ion-text-start ion-padding" tabindex="-1">
+								<h2>{{ 'EVENT_INFO.EVENT_INFO_TITLE' | translate }}</h2>
+								<h3>{{ 'EVENT_INFO.WHAT_TO_EXPECT' | translate }}</h3>
+								<p>{{ 'EVENT_INFO.ARRIVE_ON_TIME' | translate }}</p>
+								<p>{{ 'EVENT_INFO.CHECK_WEBSITE' | translate }}</p>
+								<h3>{{ 'EVENT_INFO.ENTRY_INSTRUCTIONS' | translate }}</h3>
+								<p>{{ 'EVENT_INFO.DIRECTIONS' | translate }}</p>
+								<ion-button href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}" target="_blank" rel="noopener">
+									{{ 'EVENT_INFO.FAQ_BUTTON' | translate }} (FAQ)
+								</ion-button>
+							</section>
 						</ion-card>
 					</ion-col>
 				</ion-row>

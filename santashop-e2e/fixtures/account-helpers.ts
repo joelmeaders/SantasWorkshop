@@ -98,7 +98,7 @@ export const createAccountViaUi = async (
 	// Firebase realtime listeners keep the network busy, so `networkidle` never
 	// settles. Wait for the URL change and a page element instead.
 	await page.waitForURL('**/pre-registration/overview', { timeout: 30000 });
-	await expect(page.locator('#childrenProgressCard')).toBeVisible({
+	await expect(page.locator('#children-heading')).toBeVisible({
 		timeout: 15000,
 	});
 };
@@ -132,7 +132,7 @@ export const signInViaUi = async (
 	page: Page,
 	account: Pick<TestAccount, 'emailAddress' | 'password'>,
 ): Promise<void> => {
-	await page.goto('/sign-in');
+	await page.goto('/?mode=sign-in');
 	await expect(page.locator('#signInEmail input')).toBeVisible({
 		timeout: 15000,
 	});
@@ -154,7 +154,7 @@ export const signOutViaUi = async (page: Page): Promise<void> => {
 	const signOutButton = page.locator('#signOutButton');
 	await expect(signOutButton).toBeVisible({ timeout: 10000 });
 	await Promise.all([
-		page.waitForURL('**/sign-in', { timeout: 30000 }),
+		page.waitForURL((url) => url.pathname === '/' && url.searchParams.get('mode') === 'sign-in', { timeout: 30000 }),
 		signOutButton.click(),
 	]);
 	await expect(page.locator('#signInButton')).toBeVisible({ timeout: 10000 });

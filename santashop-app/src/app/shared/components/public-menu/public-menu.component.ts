@@ -7,6 +7,7 @@ import {
 import { Router } from '@angular/router';
 import {
 	PopoverController,
+	ModalController,
 	IonLabel,
 	IonContent,
 	IonList,
@@ -18,6 +19,7 @@ import { shareReplay, takeUntil } from 'rxjs/operators';
 import { AnalyticsWrapper, AuthService } from '@santashop/core';
 import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
+import { HelpPage } from '../../../features/v2/pre-registration/help/help.page';
 
 @Component({
 	selector: 'app-public-menu',
@@ -42,6 +44,7 @@ export class PublicMenuComponent implements OnDestroy {
 	private readonly authService = inject(AuthService);
 	private readonly router = inject(Router);
 	private readonly popoverController = inject(PopoverController);
+	private readonly modalController = inject(ModalController);
 	private readonly translateService = inject(TranslateService);
 	private readonly analyticsService = inject(AnalyticsWrapper);
 
@@ -71,18 +74,18 @@ export class PublicMenuComponent implements OnDestroy {
 	}
 
 	public async signIn(): Promise<void> {
-		await this.router.navigate(['/sign-in']);
+		await this.router.navigate(['/'], { queryParams: { mode: 'sign-in' } });
 		await this.closeMenu();
 	}
 
 	public async help(): Promise<void> {
-		await this.router.navigate(['/pre-registration/help']);
 		await this.closeMenu();
-	}
-
-	public async createAccount(): Promise<void> {
-		await this.router.navigate(['/sign-up-account']);
-		await this.closeMenu();
+		const modal = await this.modalController.create({
+			component: HelpPage,
+			initialBreakpoint: 0.85,
+			breakpoints: [0, 0.5, 0.85, 1],
+		});
+		await modal.present();
 	}
 
 	public async logout(): Promise<void> {

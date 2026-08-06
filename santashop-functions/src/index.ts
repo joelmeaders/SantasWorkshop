@@ -61,6 +61,27 @@ export const completeRegistration = onCall(
 	}),
 );
 
+export const saveDraftChild = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler('saveDraftChild', async (request) => {
+		return (await import('./fn/saveDraftChild')).default(request);
+	}),
+);
+
+export const deleteDraftChild = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler('deleteDraftChild', async (request) => {
+		return (await import('./fn/deleteDraftChild')).default(request);
+	}),
+);
+
+export const setDraftAppointment = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler('setDraftAppointment', async (request) => {
+		return (await import('./fn/setDraftAppointment')).default(request);
+	}),
+);
+
 export const newAccount = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	observeCallableHandler('newAccount', async (request) => {

@@ -1,34 +1,6 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	OnDestroy,
-	inject,
-} from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil, shareReplay } from 'rxjs/operators';
-import { PreRegistrationService } from '../../../core';
-
-import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { InternalHeaderComponent } from '../../../shared/components/internal-header/internal-header.component';
-
-import { TranslateModule } from '@ngx-translate/core';
-import { addIcons } from 'ionicons';
-import {
-	home,
-	accessibility,
-	calendarOutline,
-	checkmark,
-	sendOutline,
-} from 'ionicons/icons';
-import {
-	IonContent,
-	IonTabs,
-	IonTabBar,
-	IonTabButton,
-	IonIcon,
-	IonLabel,
-	IonBadge,
-} from '@ionic/angular/standalone';
+import { IonRouterOutlet } from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'app-pre-registration',
@@ -37,55 +9,7 @@ import {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		InternalHeaderComponent,
-		AsyncPipe,
-		TranslateModule,
-		IonContent,
-		IonTabs,
-		IonTabBar,
-		IonTabButton,
-		IonIcon,
-		IonLabel,
-		IonBadge,
+		IonRouterOutlet,
 	],
 })
-export class PreRegistrationPage implements OnDestroy {
-	private readonly viewService = inject(PreRegistrationService);
-
-	private readonly destroy$ = new Subject<void>();
-
-	public readonly userRegistration$ = this.viewService.userRegistration$.pipe(
-		takeUntil(this.destroy$),
-		shareReplay(1),
-	);
-
-	public readonly childCount$ = this.viewService.childCount$.pipe(
-		takeUntil(this.destroy$),
-		shareReplay(1),
-	);
-
-	public readonly chosenSlot$ = this.viewService.dateTimeSlot$.pipe(
-		takeUntil(this.destroy$),
-		shareReplay(1),
-	);
-
-	public readonly isRegistrationComplete$ =
-		this.viewService.registrationComplete$.pipe(
-			takeUntil(this.destroy$),
-			shareReplay(1),
-		);
-
-	constructor() {
-		addIcons({
-			home,
-			accessibility,
-			calendarOutline,
-			checkmark,
-			sendOutline,
-		});
-	}
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
-}
+export class PreRegistrationPage {}

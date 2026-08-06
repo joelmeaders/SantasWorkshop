@@ -43,7 +43,6 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	providers: [DateTimePageService],
 	imports: [
 		PreRegistrationMenuComponent,
-		RouterLink,
 		AsyncPipe,
 		DatePipe,
 		TranslateModule,
@@ -61,6 +60,7 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 		IonCardTitle,
 		IonCardSubtitle,
 		TimeSlotPipe,
+		RouterLink,
 	],
 })
 export class ConfirmationPage {

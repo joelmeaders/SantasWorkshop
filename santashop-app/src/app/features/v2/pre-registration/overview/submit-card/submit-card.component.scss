@@ -1,0 +1,8 @@
+.is-locked { opacity: 0.72; }
+.card-guidance { margin-top: 0; }
+.card-actions { display: flex; justify-content: flex-end; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+.email-verification { border-top: 1px solid var(--ion-color-step-150, #d7d8da); margin-top: 1.5rem; padding-top: 1.25rem; }
+.email-verification h2 { font-size: 1.1rem; margin: 0; }
+.email-verification p { margin: 0.5rem 0; }
+.email-update-help { color: var(--ion-color-medium-shade); font-size: 0.9rem; }
+@media (max-width: 480px) { .card-actions ion-button { flex: 1 1 auto; } }

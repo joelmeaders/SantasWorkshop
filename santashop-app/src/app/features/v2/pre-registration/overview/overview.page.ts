@@ -1,26 +1,41 @@
 import {
+	AfterViewInit,
 	ChangeDetectionStrategy,
 	Component,
 	OnDestroy,
+	PLATFORM_ID,
 	inject,
+	signal,
+	viewChild,
 } from '@angular/core';
-import { combineLatest, Subject } from 'rxjs';
+import { isPlatformBrowser, AsyncPipe } from '@angular/common';
+import { Router } from '@angular/router';
 import {
-	filter,
-	map,
-	shareReplay,
-	startWith,
-	switchMap,
-	takeUntil,
-} from 'rxjs/operators';
+	AnalyticsWrapper,
+	AuthService,
+	FireRepoLite,
+	IFireRepoCollection,
+	PROGRAM_YEAR,
+	timestampToDate,
+	validateChild,
+} from '@santashop/core';
+import {
+	COLLECTION_SCHEMA,
+	Child,
+	DateTimeSlot,
+} from '@santashop/models';
+import { combineLatest, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { where } from 'firebase/firestore';
 import { PreRegistrationService } from '../../../../core';
-
-import { AsyncPipe } from '@angular/common';
-import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
-import { ChildrenCardComponent } from './children-card/children-card.component';
+import { ChildSaveRequest, ChildrenCardComponent } from './children-card/children-card.component';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
-import { SubmitCardComponent } from './submit-card/submit-card.component';
-import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
+import {
+	EmailUpdateRequest,
+	SubmitCardComponent,
+} from './submit-card/submit-card.component';
+import { AlertController, IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
 	selector: 'app-overview',
@@ -28,7 +43,6 @@ import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
 	styleUrls: ['./overview.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		PreRegistrationMenuComponent,
 		ChildrenCardComponent,
 		ScheduleCardComponent,
 		SubmitCardComponent,
@@ -37,43 +51,220 @@ import { IonContent, IonGrid, IonRow, IonCol } from '@ionic/angular/standalone';
 		IonGrid,
 		IonRow,
 		IonCol,
+		TranslateModule,
 	],
 })
-export class OverviewPage implements OnDestroy {
+export class OverviewPage implements AfterViewInit, OnDestroy {
 	private readonly preregistrationService = inject(PreRegistrationService);
-
+	private readonly authService = inject(AuthService);
+	private readonly fireRepo = inject(FireRepoLite);
+	private readonly router = inject(Router);
+	private readonly analytics = inject(AnalyticsWrapper);
+	private readonly alertController = inject(AlertController);
+	private readonly translateService = inject(TranslateService);
+	private readonly platformId = inject(PLATFORM_ID);
 	private readonly destroy$ = new Subject<void>();
+	private readonly childrenCard = viewChild(ChildrenCardComponent);
+	private readonly submitCard = viewChild(SubmitCardComponent);
 
-	public readonly userRegistration$ =
-		this.preregistrationService.userRegistration$;
-
+	public readonly programYear = inject(PROGRAM_YEAR);
+	public readonly userRegistration$ = this.preregistrationService.userRegistration$;
 	public readonly children$ = this.preregistrationService.children$;
 	public readonly childCount$ = this.preregistrationService.childCount$;
 	public readonly dateTimeSlot$ = this.preregistrationService.dateTimeSlot$;
-	public readonly registrationSubmitted$ =
-		this.preregistrationService.registrationSubmitted$;
+	public readonly registrationSubmitted$ = this.preregistrationService.registrationSubmitted$;
+	public readonly emailAddress$ = this.userRegistration$.pipe(
+		map((registration) => registration?.emailAddress ?? ''),
+		shareReplay(1),
+	);
+	public readonly isSaving = signal(false);
+	public readonly liveMessage = signal('');
+	public readonly workspaceError = signal('');
 
-	public readonly canChooseDateTime$ = this.childCount$.pipe(
-		startWith(0),
-		takeUntil(this.destroy$),
-		map((value) => value >= 1),
-		filter((isTrue) => !!isTrue),
-		switchMap(() => this.preregistrationService.noErrorsInChildren$),
-		filter((errorFree) => !!errorFree),
+	public readonly canChooseDateTime$ = combineLatest([
+		this.childCount$,
+		this.preregistrationService.noErrorsInChildren$,
+	]).pipe(
+		map(([childCount, noErrors]) => childCount >= 1 && noErrors),
 		shareReplay(1),
 	);
 
 	public readonly canSubmit$ = combineLatest([
-		this.childCount$,
+		this.canChooseDateTime$,
 		this.dateTimeSlot$,
+		this.registrationSubmitted$,
 	]).pipe(
-		takeUntil(this.destroy$),
-		map(([childCount, dateTimeSlot]) => childCount >= 1 && !!dateTimeSlot),
+		map(([canChooseDateTime, dateTimeSlot, submitted]) =>
+			canChooseDateTime && !!dateTimeSlot && !submitted,
+		),
 		shareReplay(1),
 	);
 
+	public readonly availableSlots$ = this.dateTimeSlotCollection()
+		.readMany([where('programYear', '==', this.programYear)], 'id')
+		.pipe(
+			takeUntil(this.destroy$),
+			map((slots) =>
+				slots
+					.map((slot) => ({
+						...slot,
+						dateTime: timestampToDate(slot.dateTime),
+					}))
+					.sort((left, right) => left.dateTime.valueOf() - right.dateTime.valueOf()),
+			),
+			shareReplay(1),
+		);
+
+	public ngAfterViewInit(): void {
+		if (!isPlatformBrowser(this.platformId)) return;
+		window.addEventListener('hashchange', this.focusHashSection);
+		this.focusHashSection();
+	}
+
 	public ngOnDestroy(): void {
+		if (isPlatformBrowser(this.platformId)) {
+			window.removeEventListener('hashchange', this.focusHashSection);
+		}
 		this.destroy$.next();
 		this.destroy$.complete();
+	}
+
+	public async saveChild(request: ChildSaveRequest): Promise<void> {
+		const saved = await this.runWorkspaceAction('Child saved. You can now choose an appointment.', async () => {
+			const child = request.child;
+			const validatedChild = validateChild({ ...child });
+			delete validatedChild.error;
+			await this.preregistrationService.saveDraftChild({
+				mutationId: this.createMutationId(),
+				child: validatedChild,
+			});
+			this.analytics.logEventWithParams('workspace_child_saved', {
+				childId: validatedChild.id,
+			});
+		});
+		if (!saved) return;
+		if (request.isNew) await this.askAboutAnotherChild();
+		else this.childrenCard()?.collapseEditor();
+	}
+
+	public async deleteChild(child: Child): Promise<void> {
+		const deleted = await this.runWorkspaceAction('Child removed.', async () => {
+			if (child.id === undefined) throw new Error('This child could not be removed.');
+			await this.preregistrationService.deleteDraftChild({
+				mutationId: this.createMutationId(),
+				childId: child.id,
+			});
+			this.analytics.logEventWithParams('workspace_child_removed', {
+				childId: child.id,
+			});
+		});
+		if (deleted) this.childrenCard()?.collapseEditor();
+	}
+
+	public async chooseDateTime(slot?: DateTimeSlot): Promise<void> {
+		if (!slot) return;
+		await this.runWorkspaceAction(
+			'Appointment saved. Review your registration when ready.',
+			async () => {
+				if (!slot.enabled || !slot.id) {
+					throw new Error('That appointment is no longer available. Please choose another time.');
+				}
+				await this.preregistrationService.setDraftAppointment({
+					mutationId: this.createMutationId(),
+					slotId: slot.id,
+				});
+				this.analytics.logEventWithParams('workspace_appointment_saved', {
+					slotId: slot.id,
+				});
+			},
+		);
+	}
+
+	public async submitRegistration(): Promise<void> {
+		await this.runWorkspaceAction('Registration submitted. Opening your confirmation.', async () => {
+			const result = await this.preregistrationService.completeRegistration({
+				mutationId: this.createMutationId(),
+			});
+			if (!result.data) throw new Error('We could not submit your registration. Please try again.');
+			this.analytics.logEvent('submit_registration');
+			await this.router.navigate(['/pre-registration/confirmation']);
+		});
+	}
+
+	public async updateEmailAddress(request: EmailUpdateRequest): Promise<void> {
+		const updated = await this.runWorkspaceAction(
+			'Email address updated. Your ticket will be sent there.',
+			async () => {
+				await this.authService.changeEmailAddress(
+					request.password,
+					request.emailAddress,
+				);
+				this.analytics.logEvent('workspace_email_updated');
+			},
+		);
+		if (updated) this.submitCard()?.completeEmailUpdate();
+	}
+
+	private readonly focusHashSection = (): void => {
+		const hash = window.location.hash.replace('#', '');
+		if (!['children', 'appointment', 'review'].includes(hash)) return;
+		window.setTimeout(() => document.getElementById(hash)?.focus());
+	};
+
+	private dateTimeSlotCollection(): IFireRepoCollection<DateTimeSlot> {
+		return this.fireRepo.collection<DateTimeSlot>(COLLECTION_SCHEMA.dateTimeSlots);
+	}
+
+	private createMutationId(): string {
+		if (typeof globalThis.crypto?.randomUUID === 'function') {
+			return globalThis.crypto.randomUUID();
+		}
+		return `mutation_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+	}
+
+	private async runWorkspaceAction(
+		successMessage: string,
+		action: () => Promise<void>,
+	): Promise<boolean> {
+		this.isSaving.set(true);
+		this.workspaceError.set('');
+		this.liveMessage.set('Saving your changes.');
+		try {
+			await action();
+			this.liveMessage.set(successMessage);
+			return true;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'We could not save your changes. Please try again.';
+			this.workspaceError.set(message);
+			this.liveMessage.set(message);
+			return false;
+		} finally {
+			this.isSaving.set(false);
+		}
+	}
+
+	private async askAboutAnotherChild(): Promise<void> {
+		const alert = await this.alertController.create({
+			header: this.translateService.instant('OVERVIEW.ANOTHER_CHILD_TITLE'),
+			message: this.translateService.instant('OVERVIEW.ANOTHER_CHILD_MESSAGE'),
+			backdropDismiss: false,
+			buttons: [
+				{
+					text: this.translateService.instant('COMMON.NO'),
+					role: 'cancel',
+				},
+				{
+					text: this.translateService.instant('COMMON.YES'),
+					role: 'confirm',
+				},
+			],
+		});
+		await alert.present();
+		const result = await alert.onDidDismiss();
+		if (result.role === 'confirm') {
+			this.childrenCard()?.openNewChild();
+			return;
+		}
+		this.childrenCard()?.collapseEditor();
 	}
 }

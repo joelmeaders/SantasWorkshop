@@ -1,5 +1,5 @@
 import { Provider } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { ModalController, PopoverController } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
@@ -135,6 +135,8 @@ export function createActivatedRouteMock(): Partial<ActivatedRoute> {
 		} as any,
 		params: of({}),
 		queryParams: of({}),
+		paramMap: of(convertToParamMap({})),
+		queryParamMap: of(convertToParamMap({})),
 		data: of({}),
 	};
 }

@@ -82,8 +82,8 @@ test.describe('public entry and runtime operating controls', () => {
 		seedScenario,
 	}) => {
 		await seedScenario('create-account-disabled');
-		await page.goto('/sign-in');
-		await expect(page.locator('#createAccountButton')).toBeHidden();
+		await page.goto('/?mode=sign-in');
+		await expect(page.locator('#createAccountButton')).toHaveCount(0);
 
 		await page.goto('/sign-up');
 		await expect(page.locator('.alert p')).toBeVisible();
@@ -96,7 +96,7 @@ test.describe('public entry and runtime operating controls', () => {
 	}) => {
 		await seedScenario('registration-closed');
 		await page.goto('/');
-		await expect(page.locator('app-registration-closed')).toBeVisible({
+		await expect(page.locator('ion-modal app-operational-notice')).toBeVisible({
 			timeout: 10000,
 		});
 	});
@@ -107,7 +107,7 @@ test.describe('public entry and runtime operating controls', () => {
 	}) => {
 		await seedScenario('maintenance-mode');
 		await page.goto('/');
-		await expect(page.locator('app-maintenance')).toBeVisible({
+		await expect(page.locator('ion-modal app-operational-notice')).toBeVisible({
 			timeout: 10000,
 		});
 	});
@@ -118,7 +118,7 @@ test.describe('public entry and runtime operating controls', () => {
 	}) => {
 		await seedScenario('weather-mode');
 		await page.goto('/');
-		await expect(page.locator('app-bad-weather')).toBeVisible({
+		await expect(page.locator('ion-modal app-operational-notice')).toBeVisible({
 			timeout: 10000,
 		});
 	});

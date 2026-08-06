@@ -73,6 +73,11 @@ export default defineConfig({
 			name: 'mobile-chrome',
 			use: { ...devices['Pixel 5'] },
 		},
+		{
+			name: 'desktop-chrome',
+			testMatch: /tests[\\/]public[\\/].*\.spec\.ts$/,
+			use: { ...devices['Desktop Chrome'] },
+		},
 	],
 
 	/* Run your local dev server before starting the tests */

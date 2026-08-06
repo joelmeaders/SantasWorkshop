@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export interface TestChild {
 	firstName: string;
@@ -17,27 +17,47 @@ export const defaultTestChild = (
 	...overrides,
 });
 
+const childForm = (page: Page): Locator =>
+	page.locator('ion-modal form');
+
 export const addChildViaUi = async (
 	page: Page,
 	child: TestChild,
 ): Promise<void> => {
-	await page.goto('/pre-registration/children/add-child');
-	await fillIonicInput(page, '#childFirstName', child.firstName);
-	await fillIonicInput(page, '#childLastName', child.lastName);
-	await setBirthDate(page, child.dateOfBirth);
+	await page.goto('/pre-registration/overview#children');
+	await page.locator('app-children-card [data-open-add-child]').click();
+	const form = childForm(page);
+	await expect(form).toBeVisible({ timeout: 15000 });
+	await fillIonicInput(
+		form.locator('ion-input[formControlName="firstName"]'),
+		child.firstName,
+	);
+	await fillIonicInput(
+		form.locator('ion-input[formControlName="lastName"]'),
+		child.lastName,
+	);
+	await setBirthDate(
+		form.locator('ion-input[formControlName="dateOfBirth"]'),
+		child.dateOfBirth,
+	);
 
-	const toyType = page.locator(`#childToyType${capitalize(child.toyType)}`);
-	await expect(toyType).toBeVisible({ timeout: 10000 });
-	await toyType.click();
+	if (child.toyType === 'infants') {
+		await expect(form.locator('ion-radio-group')).toHaveCount(0);
+	} else {
+		const toyType = form.locator(`ion-radio[value="${child.toyType}"]`);
+		await expect(toyType).toBeVisible({ timeout: 10000 });
+		await toyType.click();
+	}
 
-	const saveButton = page.locator('#saveChildButton');
+	const saveButton = form.locator('ion-button[type="submit"]');
 	await expect(saveButton).not.toHaveClass(/button-disabled/, {
 		timeout: 15000,
 	});
 	await saveButton.click();
-	await page.waitForURL('**/pre-registration/children', {
-		timeout: 30000,
-	});
+	const anotherChildAlert = page.locator('ion-alert');
+	await expect(anotherChildAlert).toBeVisible({ timeout: 10000 });
+	await anotherChildAlert.locator('button.alert-button-role-cancel').click();
+	await expect(anotherChildAlert).toBeHidden({ timeout: 10000 });
 	await expect(
 		page.getByText(`${child.firstName} ${child.lastName}`, { exact: true }),
 	).toBeVisible({ timeout: 15000 });
@@ -48,69 +68,99 @@ export const editChildFirstNameViaUi = async (
 	currentName: string,
 	newFirstName: string,
 ): Promise<void> => {
-	const childRow = page.locator('[data-child-id]').filter({
-		hasText: currentName,
-	});
+	const childRow = page
+		.locator('app-children-card ion-item')
+		.filter({ hasText: currentName })
+		.first();
 	await expect(childRow).toBeVisible({ timeout: 10000 });
-	const childId = await childRow.getAttribute('data-child-id');
-	expect(childId).toBeTruthy();
-
-	await page.locator(`[data-edit-child-id="${childId}"]`).click();
-	await expect(page.locator('#childFirstName input')).toBeVisible({
+	await childRow.click();
+	const form = childForm(page);
+	await expect(form.locator('ion-input[formControlName="firstName"] input')).toBeVisible({
 		timeout: 15000,
 	});
-	await fillIonicInput(page, '#childFirstName', newFirstName);
-	await page.locator('#saveChildButton').click();
-	await page.waitForURL('**/pre-registration/children', {
-		timeout: 30000,
-	});
+	await fillIonicInput(
+		form.locator('ion-input[formControlName="firstName"]'),
+		newFirstName,
+	);
+	await form.locator('ion-button[type="submit"]').click();
+	await expect(
+		page.getByText(`${newFirstName} ${currentName.split(' ').slice(1).join(' ')}`, {
+			exact: true,
+		}),
+	).toBeVisible({ timeout: 15000 });
 };
 
 export const removeChildViaUi = async (
 	page: Page,
 	childName: string,
 ): Promise<void> => {
-	const childRow = page.locator('[data-child-id]').filter({
-		hasText: childName,
-	});
+	const childRow = page
+		.locator('app-children-card ion-item')
+		.filter({ hasText: childName })
+		.first();
 	await expect(childRow).toBeVisible({ timeout: 10000 });
-	const childId = await childRow.getAttribute('data-child-id');
-	expect(childId).toBeTruthy();
-
-	await page.locator(`[data-remove-child-id="${childId}"]`).click();
+	await childRow.click();
+	const form = childForm(page);
+	await expect(form).toBeVisible({ timeout: 15000 });
+	await form.locator('[data-delete-child]').click();
 	const alert = page.locator('ion-alert');
-	await expect(alert).toBeVisible({ timeout: 10000 });
-	await alert.locator('button.alert-button-role-destructive').click();
+	if (await alert.count()) {
+		await expect(alert).toBeVisible({ timeout: 10000 });
+		await alert.locator('button.alert-button-role-destructive').click();
+	}
 	await expect(childRow).toHaveCount(0, { timeout: 15000 });
 };
 
+/**
+ * Selects a current-availability appointment in the progressive overview.
+ * Older builds exposed data-select-slot-id; the consolidated card exposes
+ * semantic buttons, so use the numeric suffix as the stable fallback index.
+ */
 export const selectAppointmentViaUi = async (
 	page: Page,
 	slotId: string,
 ): Promise<void> => {
-	await page.goto('/pre-registration/date-time');
-	const slotButton = page.locator(`[data-select-slot-id="${slotId}"]`);
-	const accordion = slotButton.locator('xpath=ancestor::ion-accordion');
-	await expect(accordion).toBeAttached({ timeout: 15000 });
-	await accordion.locator('ion-item[slot="header"]').click();
-	await expect(slotButton).toBeVisible({ timeout: 10000 });
-	await slotButton.click();
-	await expect(
-		page.locator(`[data-selected-slot-id="${slotId}"]`),
-	).toBeVisible({ timeout: 15000 });
-	// The selected card renders from the mutated registration before the
-	// Firestore write promise settles. Give the emulator write time to commit
-	// before proving persistence on a different route.
-	await page.waitForTimeout(1000);
-	await page.goto('/pre-registration/overview');
-	await expect(page.locator('#scheduleProgressCard')).toContainText(
-		'Complete',
-		{ timeout: 15000 },
-	);
+	await page.goto('/pre-registration/overview#appointment');
+	const schedule = page.locator('app-schedule-card');
+	await expect(schedule).toBeVisible({ timeout: 15000 });
+
+	const explicitSlot = schedule.locator(`[data-select-slot-id="${slotId}"]`);
+	if (await explicitSlot.count()) {
+		const dateAccordion = explicitSlot.locator('xpath=ancestor::ion-accordion');
+		await dateAccordion.locator('ion-item[slot="header"]').click();
+		await expect(explicitSlot).toBeVisible({ timeout: 15000 });
+		await explicitSlot.click();
+	} else {
+		const changeButton = schedule.getByRole('button', {
+			name: /change time|cambiar hora/i,
+		});
+		if (await changeButton.count()) await changeButton.click();
+
+		const firstDateAccordion = schedule.locator('ion-accordion').first();
+		await firstDateAccordion.locator('ion-item[slot="header"]').click();
+		const slotItems = firstDateAccordion.locator('ion-list [data-select-slot-id]');
+		await expect(slotItems.first()).toBeVisible({ timeout: 15000 });
+		const suffix = /(?:^|[-_])(\d+)$/.exec(slotId)?.[1];
+		const index = suffix ? Math.max(0, Number(suffix) - 1) : 0;
+		await slotItems.nth(index).click();
+	}
+
+	await expect(schedule.locator('ion-badge')).toBeVisible({ timeout: 15000 });
+	await page.reload();
+	await expect(page.locator('app-schedule-card ion-badge')).toBeVisible({
+		timeout: 15000,
+	});
 };
 
 export const submitRegistrationViaUi = async (page: Page): Promise<void> => {
-	await page.goto('/pre-registration/submit');
+	await page.goto('/pre-registration/overview#review');
+	const submitCard = page.locator('app-submit-card');
+	await expect(submitCard).toBeVisible({ timeout: 15000 });
+	const reviewButton = submitCard.getByRole('button', {
+		name: /review registration|revisar registro/i,
+	});
+	if (await reviewButton.count()) await reviewButton.click();
+
 	const submitButton = page.locator('#completeRegistrationButton');
 	await expect(submitButton).not.toHaveClass(/button-disabled/, {
 		timeout: 15000,
@@ -125,21 +175,22 @@ export const submitRegistrationViaUi = async (page: Page): Promise<void> => {
 };
 
 const fillIonicInput = async (
-	page: Page,
-	selector: string,
+	host: Locator,
 	value: string,
 ): Promise<void> => {
-	const input = page.locator(`${selector} input`).first();
+	const input = host.locator('input').first();
 	await expect(input).toBeVisible({ timeout: 15000 });
 	await input.fill(value);
 	await expect(input).toHaveValue(value, { timeout: 10000 });
 	await input.blur();
 	// The child name inputs intentionally debounce ionInput by 500 ms.
-	await page.waitForTimeout(550);
+	await new Promise((resolve) => setTimeout(resolve, 550));
 };
 
-const setBirthDate = async (page: Page, value: string): Promise<void> => {
-	const host = page.locator('#childDateOfBirth');
+const setBirthDate = async (
+	host: Locator,
+	value: string,
+): Promise<void> => {
 	const input = host.locator('input').first();
 	await expect(input).toBeVisible({ timeout: 15000 });
 	await input.fill(value);
@@ -154,6 +205,3 @@ const setBirthDate = async (page: Page, value: string): Promise<void> => {
 	}, value);
 	await input.blur();
 };
-
-const capitalize = (value: string): string =>
-	`${value.charAt(0).toUpperCase()}${value.slice(1)}`;

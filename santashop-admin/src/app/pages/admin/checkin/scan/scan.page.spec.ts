@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ScanPage } from './scan.page';
 import {
 	provideFirestoreWrapperMock,
@@ -12,7 +13,7 @@ describe('ScanPage', () => {
 	let component: ScanPage;
 	let fixture: ComponentFixture<ScanPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ScanPage],
 			providers: [
@@ -28,8 +29,8 @@ describe('ScanPage', () => {
 
 		fixture = TestBed.createComponent(ScanPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

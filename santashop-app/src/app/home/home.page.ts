@@ -28,7 +28,7 @@ import {
 	IonList,
 	IonText,
 	LoadingController,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
 import {
@@ -127,7 +127,7 @@ export class HomePage implements OnDestroy {
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 

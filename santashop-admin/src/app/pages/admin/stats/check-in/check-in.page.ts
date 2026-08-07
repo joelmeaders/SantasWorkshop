@@ -42,7 +42,7 @@ import {
 	IonIcon,
 	IonText,
 	IonTitle,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 @Component({
 	selector: 'admin-check-in',

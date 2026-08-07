@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	provideActivatedRouteMock,
 	provideAuthMock,
@@ -8,7 +9,7 @@ import {
 	createPopoverControllerMock,
 	provideTranslateServiceMock,
 } from '../../../../test-helpers';
-import { PopoverController } from '@ionic/angular/standalone';
+import { PopoverController } from '@ionic/angular';
 
 import { PreRegistrationPage } from './pre-registration.page';
 
@@ -16,7 +17,7 @@ describe('PreRegistrationPage', () => {
 	let component: PreRegistrationPage;
 	let fixture: ComponentFixture<PreRegistrationPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [PreRegistrationPage],
 			providers: [
@@ -34,8 +35,8 @@ describe('PreRegistrationPage', () => {
 		}).compileComponents();
 		fixture = TestBed.createComponent(PreRegistrationPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

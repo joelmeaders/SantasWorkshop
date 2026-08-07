@@ -5,6 +5,7 @@
 			@if (childCount()) { <ion-badge color="success" slot="end">{{ 'OVERVIEW.COMPLETE' | translate }}</ion-badge> }
 		</ion-item>
 	</ion-card-header>
+	@if (!collapsed()) {
 	<ion-card-content>
 		<p class="card-guidance">{{ 'OVERVIEW.CHILD_GUIDANCE' | translate }}</p>
 		@if (childCount()) {
@@ -33,6 +34,7 @@
 			</div>
 		}
 	</ion-card-content>
+	}
 </ion-card>
 
 <ion-modal [canDismiss]="!busy()" [isOpen]="editorOpen()" (didDismiss)="collapseEditor()" (didPresent)="modalPresented()">
@@ -46,12 +48,12 @@
 		<ion-content>
 			<form [formGroup]="form" (ngSubmit)="saveChild()" novalidate [attr.aria-label]="'OVERVIEW.CHILD_DETAILS' | translate">
 				<ion-list lines="none">
-					<ion-item><ion-input #firstNameInput id="childFirstName" fill="outline" [label]="'ADDCHILD.FIRST_NAME' | translate" labelPlacement="stacked" autocomplete="given-name" formControlName="firstName" /></ion-item>
-					<ion-item><ion-input fill="outline" [label]="'ADDCHILD.LAST_NAME' | translate" labelPlacement="stacked" autocomplete="family-name" formControlName="lastName" /></ion-item>
+					<ion-item><ion-input #firstNameInput id="childFirstName" fill="outline" [label]="'ADDCHILD.FIRST_NAME' | translate" labelPlacement="floating" autocomplete="given-name" formControlName="firstName" /></ion-item>
+					<ion-item><ion-input fill="outline" [label]="'ADDCHILD.LAST_NAME' | translate" labelPlacement="floating" autocomplete="family-name" formControlName="lastName" /></ion-item>
 					<ion-note id="childAgeRequirement" class="ion-padding-horizontal">{{ 'ADDCHILD.UNDER_13_REQUIREMENT' | translate }}</ion-note>
-					<ion-item><ion-input fill="outline" [label]="'ADDCHILD.BIRTH_DATE' | translate" labelPlacement="stacked" type="date" [min]="minBirthDate" [max]="maxBirthDate" formControlName="dateOfBirth" aria-describedby="childAgeRequirement" (ionChange)="birthdaySelected($event.detail.value)" /></ion-item>
+					<ion-item><ion-input fill="outline" [label]="'ADDCHILD.BIRTH_DATE' | translate" labelPlacement="floating" type="date" [min]="minBirthDate" [max]="maxBirthDate" formControlName="dateOfBirth" aria-describedby="childAgeRequirement" (ionChange)="birthdaySelected($event.detail.value)" /></ion-item>
 					@if (showToyTypeControls()) {
-						<ion-list-header>{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-list-header>
+						<ion-list-header class="toy-type-heading">{{ 'ADDCHILD.TOY_TYPE' | translate }}</ion-list-header>
 						<ion-radio-group formControlName="toyType" [attr.aria-label]="'ADDCHILD.TOY_TYPE' | translate">
 							<ion-item><ion-radio value="boys">{{ 'ADDCHILD.BOYS' | translate }}</ion-radio></ion-item>
 							<ion-item><ion-radio value="girls">{{ 'ADDCHILD.GIRLS' | translate }}</ion-radio></ion-item>

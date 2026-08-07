@@ -13,7 +13,7 @@ import {
 	IonText,
 	IonIcon,
 	IonButton,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { Child, DateTimeSlot, Registration } from '@santashop/models';
 import {
 	catchError,

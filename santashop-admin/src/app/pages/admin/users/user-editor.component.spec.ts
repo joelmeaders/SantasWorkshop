@@ -1,5 +1,6 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular';
 import { provideModalControllerMock } from '../../../../test-helpers';
 import type { StaffAccount } from '@santashop/models';
 import { UserEditorComponent } from './user-editor.component';
@@ -16,7 +17,7 @@ describe('UserEditorComponent', () => {
 
 		fixture = TestBed.createComponent(UserEditorComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {
@@ -34,7 +35,7 @@ describe('UserEditorComponent', () => {
 		await component.save();
 
 		expect(modalController.dismiss).toHaveBeenCalledWith(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				roles: ['admin', 'checkin'],
 			}),
 			'create',
@@ -55,7 +56,7 @@ describe('UserEditorComponent', () => {
 		fixture = TestBed.createComponent(UserEditorComponent);
 		component = fixture.componentInstance;
 		component.account = account;
-		fixture.detectChanges();
+		await fixture.whenStable();
 
 		expect(component.form.controls['roles'].value).toEqual([
 			'admin',

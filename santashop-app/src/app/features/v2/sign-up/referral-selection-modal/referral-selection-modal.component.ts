@@ -31,7 +31,7 @@ import {
 	IonTitle,
 	IonToolbar,
 	ModalController,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import referringAgencies from '../../../../../assets/referring-agencies.json';
 

@@ -28,7 +28,7 @@ import {
 	IonText,
 	IonSelect,
 	IonSelectOption,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import {
 	BehaviorSubject,
 	firstValueFrom,

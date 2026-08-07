@@ -1,3 +1,11 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	ActivatedRoute,
@@ -15,20 +23,27 @@ import { EmailTemplateService } from './email-template.service';
 describe('EmailTemplateEditorPage', () => {
 	let component: EmailTemplateEditorPage;
 	let fixture: ComponentFixture<EmailTemplateEditorPage>;
-	let emailTemplateService: jasmine.SpyObj<EmailTemplateService>;
+	let emailTemplateService: Mocked<EmailTemplateService>;
 
 	beforeEach(async () => {
-		emailTemplateService = jasmine.createSpyObj<EmailTemplateService>(
-			'EmailTemplateService',
-			[
-				'getEmailTemplate',
-				'getEmailTemplateRevision',
-				'saveEmailTemplateRevision',
-				'publishEmailTemplate',
-				'sendTestEmailTemplate',
-			],
-		);
-		emailTemplateService.getEmailTemplate.and.resolveTo({
+		emailTemplateService = {
+			getEmailTemplate: vi
+				.fn()
+				.mockName('EmailTemplateService.getEmailTemplate'),
+			getEmailTemplateRevision: vi
+				.fn()
+				.mockName('EmailTemplateService.getEmailTemplateRevision'),
+			saveEmailTemplateRevision: vi
+				.fn()
+				.mockName('EmailTemplateService.saveEmailTemplateRevision'),
+			publishEmailTemplate: vi
+				.fn()
+				.mockName('EmailTemplateService.publishEmailTemplate'),
+			sendTestEmailTemplate: vi
+				.fn()
+				.mockName('EmailTemplateService.sendTestEmailTemplate'),
+		} as unknown as Mocked<EmailTemplateService>;
+		emailTemplateService.getEmailTemplate.mockResolvedValue({
 			template: {
 				key: 'registration-confirmation',
 				deliveryProfile: 'registration-confirmation',
@@ -54,7 +69,8 @@ describe('EmailTemplateEditorPage', () => {
 					deliveryProfile: 'registration-confirmation',
 					revisionNumber: 1,
 					subjectPart: 'Ticket for {{eventName}}',
-					htmlStoragePath: 'emailTemplates/registration-confirmation/revisions/rev-1.html',
+					htmlStoragePath:
+						'emailTemplates/registration-confirmation/revisions/rev-1.html',
 					htmlFileName: 'registration-confirmation-revision-1.html',
 					fieldMappings: [
 						{
@@ -68,7 +84,7 @@ describe('EmailTemplateEditorPage', () => {
 			],
 			currentHtml: '<h1>Hello {{firstName}}</h1>',
 		});
-		emailTemplateService.sendTestEmailTemplate.and.resolveTo({
+		emailTemplateService.sendTestEmailTemplate.mockResolvedValue({
 			recipientEmail: 'preview@example.com',
 			renderedSubject: 'Ticket for Toy Drive',
 			renderedHtml: '<h1>Hello Buddy</h1>',
@@ -89,13 +105,16 @@ describe('EmailTemplateEditorPage', () => {
 				{ provide: ActivatedRoute, useValue: routeMock },
 				provideAlertControllerMock(),
 				provideLoadingControllerMock(),
-				{ provide: EmailTemplateService, useValue: emailTemplateService },
+				{
+					provide: EmailTemplateService,
+					useValue: emailTemplateService,
+				},
 			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(EmailTemplateEditorPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {
@@ -118,15 +137,15 @@ describe('EmailTemplateEditorPage', () => {
 		await component.ionViewWillEnter();
 
 		// Assert
-		expect(component.fieldMappings).toHaveSize(2);
+		expect(component.fieldMappings).toHaveLength(2);
 		expect(component.fieldMappings.at(0).value).toEqual(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				name: 'firstName',
 				mapping: 'firstName',
 			}),
 		);
 		expect(component.fieldMappings.at(1).value).toEqual(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				name: 'eventName',
 				mapping: 'eventName',
 			}),
@@ -145,7 +164,7 @@ describe('EmailTemplateEditorPage', () => {
 
 		// Assert
 		expect(emailTemplateService.sendTestEmailTemplate).toHaveBeenCalledWith(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				recipientEmail: 'preview@example.com',
 				deliveryProfile: 'registration-confirmation',
 				subjectPart: 'Ticket for {{eventName}}',

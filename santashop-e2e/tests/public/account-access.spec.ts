@@ -138,4 +138,43 @@ test.describe('customer account and session access', () => {
 			/credential|password|account|user-not-found/i,
 		);
 	});
+
+	test('AUTH-009 opens and dismisses both required legal documents', async ({
+		page,
+	}) => {
+		await page.goto('/sign-up');
+
+		await page
+			.getByText('Terms and Conditions', { exact: true })
+			.first()
+			.click();
+		const termsModal = page.locator('ion-modal').filter({
+			has: page.locator('app-terms-of-service-modal'),
+		});
+		await expect(termsModal).toBeVisible();
+		await expect(
+			termsModal.getByRole('heading', {
+				name: 'Terms of Service',
+				exact: true,
+			}),
+		).toBeVisible();
+		await termsModal.getByRole('button', { name: 'Close', exact: true }).click();
+		await expect(termsModal).toBeHidden();
+
+		await page.getByText('Privacy Policy', { exact: true }).first().click();
+		const privacyModal = page.locator('ion-modal').filter({
+			has: page.locator('app-privacy-policy-modal'),
+		});
+		await expect(privacyModal).toBeVisible();
+		await expect(
+			privacyModal.getByRole('heading', {
+				name: 'Privacy & Cookies',
+				exact: true,
+			}),
+		).toBeVisible();
+		await privacyModal
+			.getByRole('button', { name: 'Close', exact: true })
+			.click();
+		await expect(privacyModal).toBeHidden();
+	});
 });

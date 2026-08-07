@@ -1,9 +1,10 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	ModalController,
 	provideIonicAngular,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import {
 	createModalControllerMock,
 	provideTranslateServiceMock,
@@ -15,7 +16,7 @@ describe('TermsOfServiceModalComponent', () => {
 	let component: TermsOfServiceModalComponent;
 	let fixture: ComponentFixture<TermsOfServiceModalComponent>;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [TermsOfServiceModalComponent],
 			schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -30,10 +31,10 @@ describe('TermsOfServiceModalComponent', () => {
 		}).compileComponents();
 	});
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		fixture = TestBed.createComponent(TermsOfServiceModalComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {

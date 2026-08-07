@@ -1,5 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { PopoverController } from '@ionic/angular/standalone';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { PopoverController } from '@ionic/angular';
 import {
 	createPopoverControllerMock,
 	provideAuthMock,
@@ -11,7 +12,7 @@ describe('InternalHeaderComponent', () => {
 	let component: InternalHeaderComponent;
 	let fixture: ComponentFixture<InternalHeaderComponent>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [InternalHeaderComponent],
 			providers: [
@@ -26,8 +27,8 @@ describe('InternalHeaderComponent', () => {
 
 		fixture = TestBed.createComponent(InternalHeaderComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

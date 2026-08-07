@@ -20,7 +20,7 @@ import {
 	IonCheckbox,
 	IonButton,
 	IonIcon,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { BehaviorSubject } from 'rxjs';
 import { Child, Registration } from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';

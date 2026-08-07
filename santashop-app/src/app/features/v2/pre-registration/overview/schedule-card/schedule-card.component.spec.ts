@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	provideTranslateServiceMock,
@@ -20,7 +21,7 @@ describe('ScheduleCardComponent', () => {
 
 		fixture = TestBed.createComponent(ScheduleCardComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {
@@ -50,7 +51,7 @@ describe('ScheduleCardComponent', () => {
 		]);
 	});
 
-	it('groups available slots by their local calendar day', () => {
+	it('groups available slots by their local calendar day', async () => {
 		fixture.componentRef.setInput('canChooseDateTime', true);
 		fixture.componentRef.setInput('slots', [
 			{
@@ -75,13 +76,16 @@ describe('ScheduleCardComponent', () => {
 				enabled: true,
 			},
 		]);
-		fixture.detectChanges();
+		await fixture.whenStable();
 
-		expect(component.availableSlotDays().map((day) => day.slots.map((slot) => slot.id))).toEqual([
-			['morning', 'afternoon'],
-			['next-day'],
-		]);
-		expect(fixture.nativeElement.querySelectorAll('ion-accordion')).toHaveSize(2);
+		expect(
+			component
+				.availableSlotDays()
+				.map((day) => day.slots.map((slot) => slot.id)),
+		).toEqual([['morning', 'afternoon'], ['next-day']]);
+		expect(
+			fixture.nativeElement.querySelectorAll('ion-accordion'),
+		).toHaveLength(2);
 	});
 
 	it('makes each available time slot a direct selection target', async () => {
@@ -97,8 +101,35 @@ describe('ScheduleCardComponent', () => {
 		]);
 		await fixture.whenStable();
 
-		const slot = fixture.nativeElement.querySelector('[data-select-slot-id="morning"]');
+		const slot = fixture.nativeElement.querySelector(
+			'[data-select-slot-id="morning"]',
+		);
 		expect(slot?.tagName).toBe('ION-ITEM');
-		expect(fixture.nativeElement.querySelector('ion-button[data-select-slot-id]')).toBeNull();
+		expect(
+			fixture.nativeElement.querySelector(
+				'ion-button[data-select-slot-id]',
+			),
+		).toBeNull();
+	});
+
+	it('cancels changing an existing appointment without selecting a new slot', async () => {
+		fixture.componentRef.setInput('canChooseDateTime', true);
+		fixture.componentRef.setInput('dateTimeSlot', {
+			id: 'current',
+			programYear: 2025,
+			dateTime: new Date('2025-12-01T10:00:00'),
+			maxSlots: 10,
+			enabled: true,
+		});
+		component.open();
+		await fixture.whenStable();
+
+		expect(component.expanded()).toBe(true);
+		(fixture.nativeElement.querySelector(
+			'[data-cancel-schedule-change]',
+		) as HTMLElement).click();
+		await fixture.whenStable();
+
+		expect(component.expanded()).toBe(false);
 	});
 });

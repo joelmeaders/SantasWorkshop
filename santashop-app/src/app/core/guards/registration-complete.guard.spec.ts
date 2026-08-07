@@ -1,3 +1,11 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
@@ -6,8 +14,8 @@ import { RegistrationCompleteGuard } from './registration-complete.guard';
 
 describe('RegistrationCompleteGuard', () => {
 	let guard: RegistrationCompleteGuard;
-	let preregistrationService: jasmine.SpyObj<PreRegistrationService>;
-	let router: jasmine.SpyObj<Router>;
+	let preregistrationService: Mocked<PreRegistrationService>;
+	let router: Mocked<Router>;
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -15,24 +23,22 @@ describe('RegistrationCompleteGuard', () => {
 			providers: [
 				{
 					provide: Router,
-					useValue: jasmine.createSpyObj<Router>('Router', [
-						'parseUrl',
-					]),
+					useValue: {
+						parseUrl: vi.fn().mockName('Router.parseUrl'),
+					},
 				},
 				{
 					provide: PreRegistrationService,
-					useValue: jasmine.createSpyObj<PreRegistrationService>(
-						'prs',
-						[],
-						{ registrationComplete$: of(false) },
-					),
+					useValue: {
+						registrationComplete$: of(false),
+					},
 				},
 			],
 		});
 		preregistrationService = TestBed.inject(
 			PreRegistrationService,
-		) as jasmine.SpyObj<PreRegistrationService>;
-		router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+		) as Mocked<PreRegistrationService>;
+		router = TestBed.inject(Router) as Mocked<Router>;
 		guard = TestBed.inject(RegistrationCompleteGuard);
 	});
 
@@ -60,7 +66,7 @@ describe('RegistrationCompleteGuard', () => {
 	it('should return urlTree when registration is complete', async () => {
 		// Arrange
 		const mockUrlTree = new UrlTree();
-		router.parseUrl.and.returnValue(mockUrlTree);
+		router.parseUrl.mockReturnValue(mockUrlTree);
 
 		// Reconfigure TestBed with new PreRegistrationService mock
 		TestBed.resetTestingModule();
@@ -73,11 +79,9 @@ describe('RegistrationCompleteGuard', () => {
 				},
 				{
 					provide: PreRegistrationService,
-					useValue: jasmine.createSpyObj<PreRegistrationService>(
-						'prs',
-						[],
-						{ registrationComplete$: of(true) },
-					),
+					useValue: {
+						registrationComplete$: of(true),
+					},
 				},
 			],
 		});

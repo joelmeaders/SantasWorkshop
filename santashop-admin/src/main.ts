@@ -1,4 +1,4 @@
-import { enableProdMode, provideZoneChangeDetection } from '@angular/core';
+import { enableProdMode } from '@angular/core';
 
 import { config } from './config';
 import { firebaseConfig } from './firebase.config';
@@ -14,6 +14,7 @@ import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
 	provideHttpClient,
 	withInterceptorsFromDi,
+	withXhr,
 } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { routes } from './app/app.routes';
@@ -21,7 +22,7 @@ import { AppComponent } from './app/app.component';
 import {
 	IonicRouteStrategy,
 	provideIonicAngular,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import {
@@ -97,9 +98,8 @@ if (config.production) {
 
 bootstrapApplication(AppComponent, {
 	providers: [
-		provideZoneChangeDetection({ eventCoalescing: true }),
 		provideRouter(routes),
-		provideHttpClient(withInterceptorsFromDi()),
+		provideHttpClient(withXhr(), withInterceptorsFromDi()),
 		provideCharts(withDefaultRegisterables()),
 		provideIonicAngular({
 			mode: 'md',

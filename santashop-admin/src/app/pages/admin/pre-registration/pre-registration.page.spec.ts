@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PreRegistrationPage } from './pre-registration.page';
 import {
 	provideFirestoreWrapperMock,
@@ -15,7 +16,7 @@ describe('PreRegistrationPage', () => {
 	let component: PreRegistrationPage;
 	let fixture: ComponentFixture<PreRegistrationPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [PreRegistrationPage],
 			providers: [
@@ -32,8 +33,8 @@ describe('PreRegistrationPage', () => {
 
 		fixture = TestBed.createComponent(PreRegistrationPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

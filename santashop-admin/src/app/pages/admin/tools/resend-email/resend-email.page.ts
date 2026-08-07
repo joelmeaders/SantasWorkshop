@@ -18,7 +18,7 @@ import {
 	IonButton,
 	IonIcon,
 	IonLabel,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { firstValueFrom } from 'rxjs';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { RegistrationSearchIndex } from '@santashop/models';

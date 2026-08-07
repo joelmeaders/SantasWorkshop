@@ -1,3 +1,11 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
@@ -11,15 +19,16 @@ import { OwnerOperationsService } from '../owner-operations/owner-operations.ser
 
 describe('ScheduleEditorService', () => {
 	let service: ScheduleEditorService;
-	let fireRepo: jasmine.SpyObj<FireRepoLite>;
-	let collection: jasmine.SpyObj<IFireRepoCollection<DateTimeSlot>>;
-	let ownerOperations: jasmine.SpyObj<OwnerOperationsService>;
+	let fireRepo: Mocked<FireRepoLite>;
+	let collection: Mocked<IFireRepoCollection<DateTimeSlot>>;
+	let ownerOperations: Mocked<OwnerOperationsService>;
 
 	beforeEach(() => {
-		ownerOperations = jasmine.createSpyObj<OwnerOperationsService>(
-			'OwnerOperationsService',
-			['preview', 'start', 'get'],
-		);
+		ownerOperations = {
+			preview: vi.fn().mockName('OwnerOperationsService.preview'),
+			start: vi.fn().mockName('OwnerOperationsService.start'),
+			get: vi.fn().mockName('OwnerOperationsService.get'),
+		} as unknown as Mocked<OwnerOperationsService>;
 		TestBed.configureTestingModule({
 			teardown: { destroyAfterEach: false },
 			providers: [
@@ -34,10 +43,10 @@ describe('ScheduleEditorService', () => {
 		});
 
 		service = TestBed.inject(ScheduleEditorService);
-		fireRepo = TestBed.inject(FireRepoLite) as jasmine.SpyObj<FireRepoLite>;
+		fireRepo = TestBed.inject(FireRepoLite) as Mocked<FireRepoLite>;
 		collection = fireRepo.collection(
 			COLLECTION_SCHEMA.dateTimeSlots,
-		) as jasmine.SpyObj<IFireRepoCollection<DateTimeSlot>>;
+		) as Mocked<IFireRepoCollection<DateTimeSlot>>;
 	});
 
 	it('should be created', () => {
@@ -48,7 +57,7 @@ describe('ScheduleEditorService', () => {
 		// Arrange
 		const laterDate = new Date(2025, 11, 12, 11);
 		const earlierDate = new Date(2025, 11, 12, 10);
-		collection.readMany.and.returnValue(
+		collection.readMany.mockReturnValue(
 			of([
 				{
 					id: 'later',
@@ -75,7 +84,7 @@ describe('ScheduleEditorService', () => {
 
 		// Assert
 		expect(result.map((slot) => slot.id)).toEqual(['earlier', 'later']);
-		expect(result[0].dateTime instanceof Date).toBeTrue();
+		expect(result[0].dateTime instanceof Date).toBe(true);
 		expect(result[1].dateTime).toEqual(laterDate);
 		expect(result[1].slotsReserved).toBe(0);
 	});
@@ -83,14 +92,13 @@ describe('ScheduleEditorService', () => {
 	it('previewCreateSlots() should send normalized slots to the owner callable', async () => {
 		// Arrange
 		const existingDate = new Date(2025, 11, 12, 10);
-		ownerOperations.preview.and.resolveTo({
+		ownerOperations.preview.mockResolvedValue({
 			previewId: 'preview-1',
 			operation: 'initialize-schedule',
 			projectId: 'test-project',
 			programYear: 2025,
 			expiresAt: '2026-07-30T12:10:00.000Z',
-			confirmationPhrase:
-				'INITIALIZE SCHEDULE test-project 2025',
+			confirmationPhrase: 'INITIALIZE SCHEDULE test-project 2025',
 			counts: { requestedSlots: 1 },
 			seasonRestricted: true,
 		});
@@ -108,15 +116,16 @@ describe('ScheduleEditorService', () => {
 
 		// Assert
 		expect(result.previewId).toBe('preview-1');
-		expect(ownerOperations.preview).toHaveBeenCalledOnceWith({
+		expect(ownerOperations.preview).toHaveBeenCalledTimes(1);
+		expect(ownerOperations.preview).toHaveBeenCalledWith({
 			operation: 'initialize-schedule',
 			programYear: 2025,
 			slots: [
 				{
-				programYear: 2025,
+					programYear: 2025,
 					dateTime: existingDate.toISOString(),
-				maxSlots: 30,
-				enabled: true,
+					maxSlots: 30,
+					enabled: true,
 				},
 			],
 		});
@@ -149,21 +158,21 @@ describe('ScheduleEditorService', () => {
 		expect(collection.update).toHaveBeenCalledTimes(2);
 		expect(collection.update).toHaveBeenCalledWith(
 			'first',
-			jasmine.objectContaining({
+			expect.objectContaining({
 				programYear: 2025,
 				maxSlots: 25,
 				enabled: false,
-				lastUpdated: jasmine.any(Date),
+				lastUpdated: expect.any(Date),
 			}),
 			true,
 		);
 		expect(collection.update).toHaveBeenCalledWith(
 			'second',
-			jasmine.objectContaining({
+			expect.objectContaining({
 				programYear: 2025,
 				maxSlots: 25,
 				enabled: false,
-				lastUpdated: jasmine.any(Date),
+				lastUpdated: expect.any(Date),
 			}),
 			true,
 		);
@@ -185,8 +194,7 @@ describe('ScheduleEditorService', () => {
 		});
 
 		// Assert
-		await expectAsync(action).toBeRejectedWithError(
-			TypeError,
+		await expect(action).rejects.toThrow(
 			'Capacity must be a whole number zero or greater.',
 		);
 		expect(collection.update).not.toHaveBeenCalled();
@@ -208,8 +216,7 @@ describe('ScheduleEditorService', () => {
 		});
 
 		// Assert
-		await expectAsync(action).toBeRejectedWithError(
-			TypeError,
+		await expect(action).rejects.toThrow(
 			'Capacity must be a whole number zero or greater.',
 		);
 		expect(collection.update).not.toHaveBeenCalled();
@@ -218,7 +225,7 @@ describe('ScheduleEditorService', () => {
 	it('updateSlot() should reject duplicate date/time values', async () => {
 		// Arrange
 		const duplicateDate = new Date(2025, 11, 12, 10);
-		collection.readMany.and.returnValue(
+		collection.readMany.mockReturnValue(
 			of([
 				{
 					id: 'first',
@@ -247,7 +254,7 @@ describe('ScheduleEditorService', () => {
 		});
 
 		// Assert
-		await expectAsync(action).toBeRejectedWithError(
+		await expect(action).rejects.toThrowError(
 			'A schedule already exists for that date and time.',
 		);
 		expect(collection.update).not.toHaveBeenCalled();
@@ -261,6 +268,9 @@ describe('ScheduleEditorService', () => {
 		await service.deleteSlot(slotId);
 
 		// Assert
-		expect(collection.delete).toHaveBeenCalledOnceWith(slotId);
+		expect(collection.delete).toHaveBeenCalledTimes(1);
+
+		// Assert
+		expect(collection.delete).toHaveBeenCalledWith(slotId);
 	});
 });

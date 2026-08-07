@@ -1,10 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import { DateTimeSlot } from '@santashop/models';
 import { Observable, of } from 'rxjs';
-import { AlertController, ToastController } from '@ionic/angular/standalone';
+import { AlertController, ToastController } from '@ionic/angular';
 import {
 	provideTranslateServiceMock,
 	provideAuthMock,
@@ -16,24 +17,26 @@ import {
 } from '../../../../../test-helpers';
 import { OverviewPage } from './overview.page';
 import { ChildrenCardComponent } from './children-card/children-card.component';
+import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
 import { PreRegistrationService } from '../../../../core';
 
 describe('OverviewPage', () => {
 	let component: OverviewPage;
 	let fixture: ComponentFixture<OverviewPage>;
-	const alert = jasmine.createSpyObj('HTMLIonAlertElement', [
-		'present',
-		'onDidDismiss',
-	]);
-	const alertController = jasmine.createSpyObj<AlertController>(
-		'AlertController',
-		['create'],
-	);
-	const toast = jasmine.createSpyObj('HTMLIonToastElement', ['present']);
-	const toastController = jasmine.createSpyObj<ToastController>(
-		'ToastController',
-		['create', 'dismiss'],
-	);
+	const alert = {
+		present: vi.fn().mockName('HTMLIonAlertElement.present'),
+		onDidDismiss: vi.fn().mockName('HTMLIonAlertElement.onDidDismiss'),
+	};
+	const alertController = {
+		create: vi.fn().mockName('AlertController.create'),
+	};
+	const toast = {
+		present: vi.fn().mockName('HTMLIonToastElement.present'),
+	};
+	const toastController = {
+		create: vi.fn().mockName('ToastController.create'),
+		dismiss: vi.fn().mockName('ToastController.dismiss'),
+	};
 	const preregistrationService = {
 		userRegistration$: of(undefined),
 		children$: of([]),
@@ -41,27 +44,27 @@ describe('OverviewPage', () => {
 		dateTimeSlot$: of(undefined),
 		registrationSubmitted$: of(false),
 		noErrorsInChildren$: of(true),
-		saveDraftChild: jasmine.createSpy('saveDraftChild'),
-		deleteDraftChild: jasmine.createSpy('deleteDraftChild'),
-		setDraftAppointment: jasmine.createSpy('setDraftAppointment'),
-		completeRegistration: jasmine.createSpy('completeRegistration'),
+		saveDraftChild: vi.fn().mockName('saveDraftChild'),
+		deleteDraftChild: vi.fn().mockName('deleteDraftChild'),
+		setDraftAppointment: vi.fn().mockName('setDraftAppointment'),
+		completeRegistration: vi.fn().mockName('completeRegistration'),
 	};
 
-	beforeEach(waitForAsync(() => {
-		alert.present.calls.reset();
-		alert.onDidDismiss.calls.reset();
-		alertController.create.calls.reset();
-		toast.present.calls.reset();
-		toastController.create.calls.reset();
-		toastController.dismiss.calls.reset();
-		preregistrationService.saveDraftChild.calls.reset();
-		preregistrationService.saveDraftChild.and.resolveTo({ data: true });
-		alert.present.and.resolveTo();
-		alert.onDidDismiss.and.resolveTo({ role: 'cancel' });
-		alertController.create.and.resolveTo(alert);
-		toast.present.and.resolveTo();
-		toastController.create.and.resolveTo(toast);
-		toastController.dismiss.and.resolveTo(false);
+	beforeEach(async () => {
+		alert.present.mockClear();
+		alert.onDidDismiss.mockClear();
+		alertController.create.mockClear();
+		toast.present.mockClear();
+		toastController.create.mockClear();
+		toastController.dismiss.mockClear();
+		preregistrationService.saveDraftChild.mockClear();
+		preregistrationService.saveDraftChild.mockResolvedValue({ data: true });
+		alert.present.mockResolvedValue(undefined);
+		alert.onDidDismiss.mockResolvedValue({ role: 'cancel' });
+		alertController.create.mockResolvedValue(alert);
+		toast.present.mockResolvedValue(undefined);
+		toastController.create.mockResolvedValue(toast);
+		toastController.dismiss.mockResolvedValue(false);
 		TestBed.configureTestingModule({
 			imports: [OverviewPage],
 			providers: [
@@ -77,16 +80,23 @@ describe('OverviewPage', () => {
 				{ provide: ToastController, useValue: toastController },
 				{
 					provide: AnalyticsWrapper,
-					useValue: jasmine.createSpyObj('AnalyticsWrapper', [
-						'logEvent',
-						'logEventWithParams',
-					]),
+					useValue: {
+						logEvent: vi.fn().mockName('AnalyticsWrapper.logEvent'),
+						logEventWithParams: vi
+							.fn()
+							.mockName('AnalyticsWrapper.logEventWithParams'),
+					},
 				},
-				{ provide: PreRegistrationService, useValue: preregistrationService },
+				{
+					provide: PreRegistrationService,
+					useValue: preregistrationService,
+				},
 				{
 					provide: FireRepoLite,
 					useValue: {
-						collection: (): { readMany: () => Observable<DateTimeSlot[]> } => ({
+						collection: (): {
+							readMany: () => Observable<DateTimeSlot[]>;
+						} => ({
 							readMany: () => of([]),
 						}),
 					},
@@ -96,8 +106,8 @@ describe('OverviewPage', () => {
 		}).compileComponents();
 		fixture = TestBed.createComponent(OverviewPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -120,7 +130,7 @@ describe('OverviewPage', () => {
 
 		expect(alertController.create).toHaveBeenCalled();
 		expect(toastController.create).toHaveBeenCalledWith(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				message: 'Child saved. You can now choose an appointment.',
 				color: 'success',
 			}),
@@ -131,11 +141,11 @@ describe('OverviewPage', () => {
 		const childrenCard = fixture.debugElement.query(
 			By.directive(ChildrenCardComponent),
 		).componentInstance as ChildrenCardComponent;
-		expect(childrenCard.editorOpen()).toBeFalse();
+		expect(childrenCard.editorOpen()).toBe(false);
 	});
 
 	it('presents action failures as danger toasts', async () => {
-		preregistrationService.saveDraftChild.and.rejectWith(
+		preregistrationService.saveDraftChild.mockRejectedValue(
 			new Error('Unable to save child.'),
 		);
 
@@ -154,11 +164,38 @@ describe('OverviewPage', () => {
 		});
 
 		expect(toastController.create).toHaveBeenCalledWith(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				message: 'Unable to save child.',
 				color: 'danger',
 			}),
 		);
 		expect(alertController.create).not.toHaveBeenCalled();
+	});
+
+	it('collapses completed steps while registration is being reviewed', async () => {
+		const childrenCard = fixture.debugElement.query(
+			By.directive(ChildrenCardComponent),
+		).componentInstance as ChildrenCardComponent;
+		const scheduleCard = fixture.debugElement.query(
+			By.directive(ScheduleCardComponent),
+		).componentInstance as ScheduleCardComponent;
+		childrenCard.editorOpen.set(true);
+		scheduleCard.expanded.set(true);
+
+		component.startReview();
+		await fixture.whenStable();
+
+		expect(component.reviewing()).toBe(true);
+		expect(childrenCard.editorOpen()).toBe(false);
+		expect(scheduleCard.expanded()).toBe(false);
+		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).toBeNull();
+		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).toBeNull();
+
+		component.makeChanges();
+		await fixture.whenStable();
+
+		expect(component.reviewing()).toBe(false);
+		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).not.toBeNull();
+		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).not.toBeNull();
 	});
 });

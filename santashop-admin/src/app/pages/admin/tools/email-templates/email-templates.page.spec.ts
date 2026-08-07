@@ -1,3 +1,11 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { EmailTemplatesPage } from './email-templates.page';
@@ -11,14 +19,15 @@ import { EmailTemplateService } from './email-template.service';
 describe('EmailTemplatesPage', () => {
 	let component: EmailTemplatesPage;
 	let fixture: ComponentFixture<EmailTemplatesPage>;
-	let emailTemplateService: jasmine.SpyObj<EmailTemplateService>;
+	let emailTemplateService: Mocked<EmailTemplateService>;
 
 	beforeEach(async () => {
-		emailTemplateService = jasmine.createSpyObj<EmailTemplateService>(
-			'EmailTemplateService',
-			['listEmailTemplates'],
-		);
-		emailTemplateService.listEmailTemplates.and.resolveTo([
+		emailTemplateService = {
+			listEmailTemplates: vi
+				.fn()
+				.mockName('EmailTemplateService.listEmailTemplates'),
+		} as unknown as Mocked<EmailTemplateService>;
+		emailTemplateService.listEmailTemplates.mockResolvedValue([
 			{
 				key: 'registration-2026',
 				deliveryProfile: 'registration-confirmation',
@@ -40,13 +49,16 @@ describe('EmailTemplatesPage', () => {
 				provideActivatedRouteMock(),
 				provideAlertControllerMock(),
 				provideLoadingControllerMock(),
-				{ provide: EmailTemplateService, useValue: emailTemplateService },
+				{
+					provide: EmailTemplateService,
+					useValue: emailTemplateService,
+				},
 			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(EmailTemplatesPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {

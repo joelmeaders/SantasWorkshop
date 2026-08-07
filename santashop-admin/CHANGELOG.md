@@ -2,6 +2,14 @@
 
 All notable changes to the admin application will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Upgraded to Angular 22.1 and the Ionic Angular Angular-22 dev build.
+- Uses the esbuild application builder and Angular's zoneless runtime.
+- Unit tests now run with native Vitest in headless Chromium.
+
 ## [2025.0.1] - 2025-11-09
 
 ### Fixed

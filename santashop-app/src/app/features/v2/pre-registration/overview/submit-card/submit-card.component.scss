@@ -16,6 +16,20 @@
 	margin-top: 0;
 }
 
+.submission-children-list {
+	--background: #fff;
+	background: #fff;
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	box-shadow: 0 0.35rem 1rem rgba(15, 61, 46, 0.06);
+	margin-block: 0.9rem 1.25rem;
+	overflow: hidden;
+}
+
+.submission-children-list ion-item {
+	--background: #fff;
+}
+
 .card-actions {
 	display: flex;
 	flex-wrap: wrap;

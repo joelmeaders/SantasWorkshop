@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { routes } from './app.routes';
 
 describe('app routes', () => {
@@ -12,10 +13,10 @@ describe('app routes', () => {
 
 		// Assert
 		expect(scheduleEditorRoute).toEqual(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				path: 'schedule-editor',
 				title: 'DSCS: Schedule Editor',
-				loadComponent: jasmine.any(Function),
+				loadComponent: expect.any(Function),
 			}),
 		);
 	});

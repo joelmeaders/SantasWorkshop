@@ -5,7 +5,7 @@ import {
 	ErrorHandlerService,
 	FunctionsWrapper,
 } from '@santashop/core';
-import { AlertController, LoadingController } from '@ionic/angular/standalone';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { Auth, IError, OnboardUser } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -66,7 +66,7 @@ export class SignUpPageService implements OnDestroy {
 			const error = incomingError as IError;
 
 			if ((error as IError).code === 'functions/already-exists') {
-				await loader.dismiss();
+				await loader.dismiss().catch(() => false);
 				const alert = await this.alertController.create({
 					header: this.translateService.instant(
 						'SIGNUP.ACCOUNT_EXISTS',
@@ -100,10 +100,10 @@ export class SignUpPageService implements OnDestroy {
 					});
 				});
 			} else {
-				this.errorHandler.handleError(error);
+				await this.errorHandler.handleError(error);
 			}
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 

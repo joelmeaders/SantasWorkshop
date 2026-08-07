@@ -18,7 +18,7 @@ import {
 	IonLabel,
 	IonItem,
 	IonInput,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 

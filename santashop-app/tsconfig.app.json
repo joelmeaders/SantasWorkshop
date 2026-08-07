@@ -12,6 +12,14 @@
 			"@santashop/core": ["dist/@santashop/core"]
 		}
 	},
-	"files": ["src/main.ts", "src/polyfills.ts"],
-	"exclude": ["src/test.ts", "**/**.spec.ts"]
+	"files": ["src/main.ts"],
+	"exclude": ["**/*.spec.ts"],
+	"angularCompilerOptions": {
+		"extendedDiagnostics": {
+			"checks": {
+				"nullishCoalescingNotNullable": "suppress",
+				"optionalChainNotNullable": "suppress"
+			}
+		}
+	}
 }

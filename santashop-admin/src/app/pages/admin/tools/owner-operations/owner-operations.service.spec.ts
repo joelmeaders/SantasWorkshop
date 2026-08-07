@@ -1,15 +1,25 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FunctionsWrapper } from '@santashop/core';
 import { OwnerOperationsService } from './owner-operations.service';
 
 describe('OwnerOperationsService', () => {
 	let service: OwnerOperationsService;
-	let functions: jasmine.SpyObj<FunctionsWrapper>;
+	let functions: Mocked<FunctionsWrapper>;
 
 	beforeEach(() => {
-		functions = jasmine.createSpyObj<FunctionsWrapper>('FunctionsWrapper', [
-			'callableWrapper',
-		]);
+		functions = {
+			callableWrapper: vi
+				.fn()
+				.mockName('FunctionsWrapper.callableWrapper'),
+		} as unknown as Mocked<FunctionsWrapper>;
 		TestBed.configureTestingModule({
 			providers: [
 				OwnerOperationsService,
@@ -30,10 +40,11 @@ describe('OwnerOperationsService', () => {
 			counts: { users: 2 },
 			seasonRestricted: true,
 		};
-		const callable = jasmine
-			.createSpy('previewCallable')
-			.and.resolveTo({ data: response });
-		functions.callableWrapper.and.returnValue(
+		const callable = vi
+			.fn()
+			.mockName('previewCallable')
+			.mockResolvedValue({ data: response });
+		functions.callableWrapper.mockReturnValue(
 			callable as unknown as ReturnType<
 				FunctionsWrapper['callableWrapper']
 			>,
@@ -59,10 +70,11 @@ describe('OwnerOperationsService', () => {
 			url: 'https://storage.example/signed',
 			expiresAt: '2026-07-30T12:15:00.000Z',
 		};
-		const callable = jasmine
-			.createSpy('exportCallable')
-			.and.resolveTo({ data: response });
-		functions.callableWrapper.and.returnValue(
+		const callable = vi
+			.fn()
+			.mockName('exportCallable')
+			.mockResolvedValue({ data: response });
+		functions.callableWrapper.mockReturnValue(
 			callable as unknown as ReturnType<
 				FunctionsWrapper['callableWrapper']
 			>,

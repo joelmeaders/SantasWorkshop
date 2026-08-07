@@ -7,7 +7,7 @@ import {
 import { AsyncPipe } from '@angular/common';
 import { AppStateService } from '@santashop/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
 import { map } from 'rxjs/operators';

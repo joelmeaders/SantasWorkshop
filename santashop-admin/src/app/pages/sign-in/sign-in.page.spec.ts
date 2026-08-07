@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignInPage } from './sign-in.page';
 import {
 	provideAuthMock,
@@ -11,7 +12,7 @@ describe('SignInPage', () => {
 	let component: SignInPage;
 	let fixture: ComponentFixture<SignInPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [SignInPage],
 			providers: [
@@ -24,8 +25,8 @@ describe('SignInPage', () => {
 
 		fixture = TestBed.createComponent(SignInPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

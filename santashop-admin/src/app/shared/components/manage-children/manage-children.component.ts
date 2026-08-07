@@ -18,7 +18,7 @@ import {
 	IonItemSliding,
 	IonItemOptions,
 	IonItemOption,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
 import { DatePipe } from '@angular/common';

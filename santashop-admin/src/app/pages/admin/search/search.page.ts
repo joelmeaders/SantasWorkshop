@@ -10,7 +10,7 @@ import {
 	IonCardSubtitle,
 	IonList,
 	IonItem,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 @Component({
 	selector: 'admin-search',

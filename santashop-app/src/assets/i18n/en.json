@@ -129,7 +129,7 @@
 		"CONFIRM_DATE_TIME": "Is date and time correct?",
 		"MAKE_CHANGES": "Make Changes",
 		"TICKET_EMAIL_TITLE": "Where should we send your ticket?",
-		"TICKET_EMAIL_MESSAGE": "Please confirm that this email address is correct before you submit your registration.",
+		"TICKET_EMAIL_MESSAGE": "Please confirm that this email address is correct before you submit your registration. If it is wrong, you will not receive your invitation.",
 		"UPDATE_EMAIL": "Update email",
 		"UPDATE_EMAIL_HELP": "For your security, enter your current password to update your email address.",
 		"SAVE_EMAIL": "Save email"

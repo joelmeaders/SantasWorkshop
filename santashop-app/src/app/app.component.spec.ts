@@ -1,3 +1,11 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -10,7 +18,7 @@ import {
 	AlertController,
 	Platform,
 	ModalController,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';
@@ -20,16 +28,19 @@ import { of } from 'rxjs';
 import { ApplicationService } from './core/services/application.service';
 
 describe('AppComponent', () => {
-	let platformSpy: jasmine.SpyObj<Platform>;
+	let platformSpy: Mocked<Pick<Platform, 'ready'>>;
 
 	beforeEach(() => {
-		platformSpy = jasmine.createSpyObj('Platform', {
-			ready: Promise.resolve(),
-		});
+		platformSpy = {
+			ready: vi
+				.fn()
+				.mockName('Platform.ready')
+				.mockReturnValue(Promise.resolve()),
+		};
 
-		const appStateSpy = jasmine.createSpyObj('AppStateService', [], {
+		const appStateSpy = {
 			globalAlert$: of({ enabled: false }),
-		});
+		};
 
 		TestBed.configureTestingModule({
 			imports: [AppComponent],
@@ -44,10 +55,15 @@ describe('AppComponent', () => {
 				{ provide: AppStateService, useValue: appStateSpy },
 				{
 					provide: AnalyticsWrapper,
-					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
-						'AnalyticsWrapper',
-						['logEvent', 'logEventWithParams', 'logErrorEvent'],
-					),
+					useValue: {
+						logEvent: vi.fn().mockName('AnalyticsWrapper.logEvent'),
+						logEventWithParams: vi
+							.fn()
+							.mockName('AnalyticsWrapper.logEventWithParams'),
+						logErrorEvent: vi
+							.fn()
+							.mockName('AnalyticsWrapper.logErrorEvent'),
+					},
 				},
 				{
 					provide: ApplicationService,
@@ -55,9 +71,9 @@ describe('AppComponent', () => {
 				},
 				{
 					provide: AlertController,
-					useValue: jasmine.createSpyObj('AlertController', [
-						'create',
-					]),
+					useValue: {
+						create: vi.fn().mockName('AlertController.create'),
+					},
 				},
 				{
 					provide: ModalController,
@@ -80,7 +96,7 @@ describe('AppComponent', () => {
 
 	it('should initialize the app', async () => {
 		const fixture = TestBed.createComponent(AppComponent);
-		fixture.detectChanges();
+		await fixture.whenStable();
 		expect(platformSpy.ready).toHaveBeenCalled();
 	});
 });

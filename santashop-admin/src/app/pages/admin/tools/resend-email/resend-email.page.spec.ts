@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ResendEmailPage } from './resend-email.page';
 import {
 	provideFirestoreWrapperMock,
@@ -13,7 +14,7 @@ describe('ResendEmailPage', () => {
 	let component: ResendEmailPage;
 	let fixture: ComponentFixture<ResendEmailPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ResendEmailPage],
 			providers: [
@@ -28,8 +29,8 @@ describe('ResendEmailPage', () => {
 
 		fixture = TestBed.createComponent(ResendEmailPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

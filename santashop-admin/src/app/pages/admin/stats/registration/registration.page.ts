@@ -44,7 +44,7 @@ import {
 	IonSelect,
 	IonSelectOption,
 	IonTitle,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { QueryConstraint, Timestamp, where } from 'firebase/firestore';
 

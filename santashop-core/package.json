@@ -9,7 +9,7 @@
 		"build:prod": "ng build santashop-core --configuration=production"
 	},
 	"engines": {
-		"node": ">=24.0.0"
+    "node": ">=24.15.0"
 	},
 	"dependencies": {
 		"tslib": "catalog:"
@@ -17,6 +17,7 @@
 	"peerDependencies": {
 		"@angular/common": "catalog:",
 		"@angular/core": "catalog:",
+		"@ionic/angular": "catalog:",
 		"firebase": "catalog:",
 		"reflect-metadata": "catalog:"
 	},

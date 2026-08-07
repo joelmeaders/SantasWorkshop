@@ -1,5 +1,13 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ModalController, AlertController } from '@ionic/angular/standalone';
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ModalController, AlertController } from '@ionic/angular';
 import {
 	provideTranslateServiceMock,
 	createModalControllerMock,
@@ -19,24 +27,23 @@ import { of } from 'rxjs';
 describe('SignUpPage', () => {
 	let component: SignUpPage;
 	let fixture: ComponentFixture<SignUpPage>;
-	let modalController: jasmine.SpyObj<ModalController>;
+	let modalController: Mocked<ModalController>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		modalController = createModalControllerMock();
 		TestBed.configureTestingModule({
 			imports: [SignUpPage],
 			providers: [
 				{
 					provide: SignUpPageService,
-					useValue: jasmine.createSpyObj(
-						'SignUpPageService',
-						['onboardUser'],
-						{
-							form: newOnboardUserForm(),
-							email$: of(''),
-							password$: of(''),
-						},
-					),
+					useValue: {
+						onboardUser: vi
+							.fn()
+							.mockName('SignUpPageService.onboardUser'),
+						form: newOnboardUserForm(),
+						email$: of(''),
+						password$: of(''),
+					},
 				},
 				{
 					provide: AppStateService,
@@ -47,9 +54,9 @@ describe('SignUpPage', () => {
 				provideFunctionsMock(),
 				{
 					provide: AlertController,
-					useValue: jasmine.createSpyObj('AlertController', [
-						'create',
-					]),
+					useValue: {
+						create: vi.fn().mockName('AlertController.create'),
+					},
 				},
 				{
 					provide: ModalController,
@@ -61,8 +68,8 @@ describe('SignUpPage', () => {
 		}).compileComponents();
 		fixture = TestBed.createComponent(SignUpPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -70,16 +77,13 @@ describe('SignUpPage', () => {
 
 	it('saves a confirmed referral returned by the selection modal', async () => {
 		const modal = {
-			present: jasmine
-				.createSpy('present')
-				.and.returnValue(Promise.resolve()),
-			onDidDismiss: jasmine
-				.createSpy('onDidDismiss')
-				.and.returnValue(
-					Promise.resolve({ role: 'confirm', data: 'Friend' }),
-				),
+			present: vi.fn().mockName('present').mockResolvedValue(undefined),
+			onDidDismiss: vi
+				.fn()
+				.mockName('onDidDismiss')
+				.mockResolvedValue({ role: 'confirm', data: 'Friend' }),
 		};
-		modalController.create.and.returnValue(Promise.resolve(modal as never));
+		modalController.create.mockResolvedValue(modal as never);
 
 		await component.showReferralModal();
 
@@ -90,16 +94,13 @@ describe('SignUpPage', () => {
 	it('preserves the prior referral when the modal is cancelled', async () => {
 		component.form.controls.referredBy.setValue('Friend');
 		const modal = {
-			present: jasmine
-				.createSpy('present')
-				.and.returnValue(Promise.resolve()),
-			onDidDismiss: jasmine
-				.createSpy('onDidDismiss')
-				.and.returnValue(
-					Promise.resolve({ role: 'cancel', data: undefined }),
-				),
+			present: vi.fn().mockName('present').mockResolvedValue(undefined),
+			onDidDismiss: vi
+				.fn()
+				.mockName('onDidDismiss')
+				.mockResolvedValue({ role: 'cancel', data: undefined }),
 		};
-		modalController.create.and.returnValue(Promise.resolve(modal as never));
+		modalController.create.mockResolvedValue(modal as never);
 
 		await component.showReferralModal();
 
@@ -109,13 +110,14 @@ describe('SignUpPage', () => {
 	it('exposes the referral question, answer, required state, and error description accessibly', async () => {
 		const translateService = TestBed.inject(
 			TranslateService,
-		) as jasmine.SpyObj<TranslateService>;
-		translateService.instant.and.callFake((key: string) => {
+		) as Mocked<TranslateService>;
+		translateService.instant.mockImplementation((key: string | string[]) => {
 			const translations: Record<string, string> = {
 				'REFERRAL.REFERRED_BY': 'How did you hear about us?',
 				'REFERRAL.SELECT': 'Select an answer',
 			};
-			return translations[key] ?? key;
+			const translationKey = Array.isArray(key) ? key[0] : key;
+			return translations[translationKey] ?? translationKey;
 		});
 
 		component.form.controls.referredBy.markAsTouched();

@@ -1,21 +1,41 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { of, firstValueFrom } from 'rxjs';
-import { DocumentReference, Query } from 'firebase/firestore';
+import type { DocumentReference, Query } from 'firebase/firestore';
 import { Registration } from '../../../../santashop-models/src';
 import { FireRepoLite, IFireRepoCollection } from './fire-repo-lite.service';
 import { FirestoreWrapper } from './_firestore-wrapper';
 
+vi.mock('firebase/firestore', () => ({
+	addDoc: vi.fn(),
+	collection: vi.fn(),
+	deleteDoc: vi.fn(),
+	doc: vi.fn(),
+	onSnapshot: vi.fn(),
+	query: vi.fn(),
+	setDoc: vi.fn(),
+	Timestamp: class {},
+}));
+
 describe('FireRepoLite', () => {
 	let service: FireRepoLite;
-	let firestoreWrapper: jasmine.SpyObj<FirestoreWrapper>;
+	let firestoreWrapper: Mocked<FirestoreWrapper>;
 
 	const mockData = { uid: '12345' } as Registration;
 	const collectionReference = { path: 'registrations' } as any;
 	const documentReference = {
 		id: '12345',
-		withConverter: jasmine
-			.createSpy('withConverter')
-			.and.callFake(() => documentReference),
+		withConverter: vi
+			.fn()
+			.mockName('withConverter')
+			.mockImplementation(() => documentReference),
 	} as unknown as DocumentReference<Registration>;
 	const queryReference = {} as Query<Registration>;
 
@@ -25,16 +45,18 @@ describe('FireRepoLite', () => {
 			providers: [
 				{
 					provide: FirestoreWrapper,
-					useValue: jasmine.createSpyObj<FirestoreWrapper>('frb', [
-						'collection',
-						'collectionQuery',
-						'doc',
-						'docData',
-						'query',
-						'addDoc',
-						'setDoc',
-						'deleteDoc',
-					]),
+					useValue: {
+						collection: vi.fn().mockName('frb.collection'),
+						collectionQuery: vi
+							.fn()
+							.mockName('frb.collectionQuery'),
+						doc: vi.fn().mockName('frb.doc'),
+						docData: vi.fn().mockName('frb.docData'),
+						query: vi.fn().mockName('frb.query'),
+						addDoc: vi.fn().mockName('frb.addDoc'),
+						setDoc: vi.fn().mockName('frb.setDoc'),
+						deleteDoc: vi.fn().mockName('frb.deleteDoc'),
+					},
 				},
 			],
 		});
@@ -42,11 +64,11 @@ describe('FireRepoLite', () => {
 		service = TestBed.inject(FireRepoLite);
 		firestoreWrapper = TestBed.inject(
 			FirestoreWrapper,
-		) as jasmine.SpyObj<FirestoreWrapper>;
+		) as Mocked<FirestoreWrapper>;
 
-		firestoreWrapper.collection.and.returnValue(collectionReference);
-		firestoreWrapper.doc.and.returnValue(documentReference);
-		firestoreWrapper.query.and.returnValue(queryReference);
+		firestoreWrapper.collection.mockReturnValue(collectionReference);
+		firestoreWrapper.doc.mockReturnValue(documentReference);
+		firestoreWrapper.query.mockReturnValue(queryReference);
 	});
 
 	it('should be created', () => {
@@ -59,12 +81,13 @@ describe('FireRepoLite', () => {
 
 		// Assert
 		expect(value).toEqual('12345');
-		expect(firestoreWrapper.collection).toHaveBeenCalledOnceWith('_');
+		expect(firestoreWrapper.collection).toHaveBeenCalledTimes(1);
+		expect(firestoreWrapper.collection).toHaveBeenCalledWith('_');
 		expect(firestoreWrapper.doc).toHaveBeenCalledWith(collectionReference);
 	});
 
 	it('read<T>(): should make expected call', async () => {
-		firestoreWrapper.docData.and.returnValue(of(mockData));
+		firestoreWrapper.docData.mockReturnValue(of(mockData));
 
 		// Act
 		const value = await firstValueFrom(
@@ -84,12 +107,12 @@ describe('FireRepoLite', () => {
 		);
 		expect(firestoreWrapper.docData).toHaveBeenCalledWith(
 			documentReference,
-			jasmine.objectContaining({ idField: 'uid' }) as any,
+			expect.objectContaining({ idField: 'uid' }) as any,
 		);
 	});
 
 	it('readMany<T>(): should make expected call', async () => {
-		firestoreWrapper.collectionQuery.and.returnValue(of([mockData]));
+		firestoreWrapper.collectionQuery.mockReturnValue(of([mockData]));
 
 		// Act
 		const value = await firstValueFrom(
@@ -110,7 +133,7 @@ describe('FireRepoLite', () => {
 	});
 
 	it('add<T>(): should make expected call', async () => {
-		firestoreWrapper.addDoc.and.resolveTo(documentReference);
+		firestoreWrapper.addDoc.mockResolvedValue(documentReference);
 
 		// Act
 		const value = await firstValueFrom(
@@ -119,14 +142,15 @@ describe('FireRepoLite', () => {
 
 		// Assert
 		expect(value).toEqual(documentReference);
-		expect(firestoreWrapper.addDoc).toHaveBeenCalledOnceWith(
+		expect(firestoreWrapper.addDoc).toHaveBeenCalledTimes(1);
+		expect(firestoreWrapper.addDoc).toHaveBeenCalledWith(
 			collectionReference,
 			mockData,
 		);
 	});
 
 	it('addById<T>(): should make expected call', async () => {
-		firestoreWrapper.setDoc.and.resolveTo();
+		firestoreWrapper.setDoc.mockResolvedValue(undefined);
 
 		// Act
 		const value = await firstValueFrom(
@@ -137,14 +161,15 @@ describe('FireRepoLite', () => {
 
 		// Assert
 		expect(value).toEqual(documentReference);
-		expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+		expect(firestoreWrapper.setDoc).toHaveBeenCalledTimes(1);
+		expect(firestoreWrapper.setDoc).toHaveBeenCalledWith(
 			documentReference,
 			mockData,
 		);
 	});
 
 	it('update<T>(): should make expected call', async () => {
-		firestoreWrapper.setDoc.and.resolveTo();
+		firestoreWrapper.setDoc.mockResolvedValue(undefined);
 
 		// Act
 		const value = await firstValueFrom(
@@ -155,7 +180,8 @@ describe('FireRepoLite', () => {
 
 		// Assert
 		expect(value).toEqual(documentReference);
-		expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+		expect(firestoreWrapper.setDoc).toHaveBeenCalledTimes(1);
+		expect(firestoreWrapper.setDoc).toHaveBeenCalledWith(
 			documentReference,
 			mockData,
 			{ merge: true },
@@ -163,7 +189,7 @@ describe('FireRepoLite', () => {
 	});
 
 	it('delete(): should make expected call', async () => {
-		firestoreWrapper.deleteDoc.and.resolveTo();
+		firestoreWrapper.deleteDoc.mockResolvedValue(undefined);
 
 		// Act
 		await firstValueFrom(
@@ -171,7 +197,10 @@ describe('FireRepoLite', () => {
 		);
 
 		// Assert
-		expect(firestoreWrapper.deleteDoc).toHaveBeenCalledOnceWith(
+		expect(firestoreWrapper.deleteDoc).toHaveBeenCalledTimes(1);
+
+		// Assert
+		expect(firestoreWrapper.deleteDoc).toHaveBeenCalledWith(
 			documentReference,
 		);
 	});
@@ -189,7 +218,7 @@ describe('FireRepoLite', () => {
 		});
 
 		it('read<T>(): should make expected call', async () => {
-			firestoreWrapper.docData.and.returnValue(of(mockData));
+			firestoreWrapper.docData.mockReturnValue(of(mockData));
 
 			// Act
 			const value = await firstValueFrom(collection.read('12345', 'uid'));
@@ -198,12 +227,12 @@ describe('FireRepoLite', () => {
 			expect(value).toEqual(mockData);
 			expect(firestoreWrapper.docData).toHaveBeenCalledWith(
 				documentReference,
-				jasmine.objectContaining({ idField: 'uid' }) as any,
+				expect.objectContaining({ idField: 'uid' }) as any,
 			);
 		});
 
 		it('readMany<T>(): should make expected call', async () => {
-			firestoreWrapper.collectionQuery.and.returnValue(of([mockData]));
+			firestoreWrapper.collectionQuery.mockReturnValue(of([mockData]));
 
 			// Act
 			const value = await firstValueFrom(
@@ -219,21 +248,22 @@ describe('FireRepoLite', () => {
 		});
 
 		it('add<T>(): should make expected call', async () => {
-			firestoreWrapper.addDoc.and.resolveTo(documentReference);
+			firestoreWrapper.addDoc.mockResolvedValue(documentReference);
 
 			// Act
 			const value = await firstValueFrom(collection.add(mockData));
 
 			// Assert
 			expect(value).toEqual(documentReference);
-			expect(firestoreWrapper.addDoc).toHaveBeenCalledOnceWith(
+			expect(firestoreWrapper.addDoc).toHaveBeenCalledTimes(1);
+			expect(firestoreWrapper.addDoc).toHaveBeenCalledWith(
 				collectionReference,
 				mockData,
 			);
 		});
 
 		it('addById<T>(): should make expected call', async () => {
-			firestoreWrapper.setDoc.and.resolveTo();
+			firestoreWrapper.setDoc.mockResolvedValue(undefined);
 
 			// Act
 			const value = await firstValueFrom(
@@ -242,14 +272,15 @@ describe('FireRepoLite', () => {
 
 			// Assert
 			expect(value).toEqual(documentReference);
-			expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+			expect(firestoreWrapper.setDoc).toHaveBeenCalledTimes(1);
+			expect(firestoreWrapper.setDoc).toHaveBeenCalledWith(
 				documentReference,
 				mockData,
 			);
 		});
 
 		it('update<T>(): should make expected call', async () => {
-			firestoreWrapper.setDoc.and.resolveTo();
+			firestoreWrapper.setDoc.mockResolvedValue(undefined);
 
 			// Act
 			const value = await firstValueFrom(
@@ -258,7 +289,8 @@ describe('FireRepoLite', () => {
 
 			// Assert
 			expect(value).toEqual(documentReference);
-			expect(firestoreWrapper.setDoc).toHaveBeenCalledOnceWith(
+			expect(firestoreWrapper.setDoc).toHaveBeenCalledTimes(1);
+			expect(firestoreWrapper.setDoc).toHaveBeenCalledWith(
 				documentReference,
 				mockData,
 				{ merge: true },
@@ -266,13 +298,16 @@ describe('FireRepoLite', () => {
 		});
 
 		it('delete(): should make expected call', async () => {
-			firestoreWrapper.deleteDoc.and.resolveTo();
+			firestoreWrapper.deleteDoc.mockResolvedValue(undefined);
 
 			// Act
 			await firstValueFrom(collection.delete('12345'));
 
 			// Assert
-			expect(firestoreWrapper.deleteDoc).toHaveBeenCalledOnceWith(
+			expect(firestoreWrapper.deleteDoc).toHaveBeenCalledTimes(1);
+
+			// Assert
+			expect(firestoreWrapper.deleteDoc).toHaveBeenCalledWith(
 				documentReference,
 			);
 		});

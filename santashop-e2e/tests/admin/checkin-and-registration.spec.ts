@@ -83,8 +83,9 @@ test.describe('check-in and staff registration operations', () => {
 		await page.locator('ion-select[formControlName="dateTimeSlot"]').click();
 		await page.locator('ion-alert').getByRole('radio').first().click();
 		await page.locator('ion-alert').getByRole('button', { name: 'OK', exact: true }).click();
-		await page.getByText('Add Child', { exact: true }).click();
+		await page.locator('admin-manage-children ion-item[button]').click();
 		const modal = page.locator('ion-modal');
+		await expect(modal).toBeVisible({ timeout: 10000 });
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="firstName"]', 'Kid');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="lastName"]', 'One');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="dateOfBirth"]', '2025-01-01');
@@ -108,8 +109,9 @@ test.describe('check-in and staff registration operations', () => {
 		await fillIonicInput(page, 'ion-input[formControlName="zipCode"]', '80203');
 		await page.getByText('Pick Agency', { exact: true }).click();
 		await page.locator('ion-modal').getByText('SNAP', { exact: true }).click();
-		await page.getByText('Add Child', { exact: true }).click();
+		await page.locator('admin-manage-children ion-item[button]').click();
 		const modal = page.locator('ion-modal');
+		await expect(modal).toBeVisible({ timeout: 10000 });
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="firstName"]', 'Kid');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="lastName"]', 'Walk');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="dateOfBirth"]', '2025-01-01');

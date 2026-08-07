@@ -18,7 +18,7 @@ After building your library with `ng build santashop-core`, go to the dist folde
 
 ## Running unit tests
 
-Run `ng test santashop-core` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `ng test santashop-core` to execute the native Angular Vitest suite in headless Chromium. Run `pnpm run test:browser:setup` once when Chromium has not been installed.
 
 ## Further help
 

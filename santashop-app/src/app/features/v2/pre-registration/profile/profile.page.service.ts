@@ -9,7 +9,7 @@ import {
 	FunctionsWrapper,
 	filterNil,
 } from '@santashop/core';
-import { AlertController, LoadingController } from '@ionic/angular/standalone';
+import { AlertController, LoadingController } from '@ionic/angular';
 import {
 	COLLECTION_SCHEMA,
 	User,
@@ -57,10 +57,11 @@ export class ProfilePageService implements OnDestroy {
 
 	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
+		filterNil(),
 		takeUntil(this.destroy$),
 		switchMap((user) =>
 			combineLatest([
-				this.getUser$(user!.uid),
+				this.getUser$(user.uid),
 				this.profileUpdates$,
 			]).pipe(map(([profile, updates]) => ({ ...profile, ...updates }))),
 		),
@@ -105,9 +106,9 @@ export class ProfilePageService implements OnDestroy {
 			});
 			this.router.navigate(['/pre-registration/profile']);
 		} catch (error) {
-			this.errorHandler.handleError(error as IError);
+			await this.errorHandler.handleError(error as IError);
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 

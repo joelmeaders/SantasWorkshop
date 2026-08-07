@@ -16,17 +16,18 @@
 		"prebuild": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod",
 		"build:test": "pnpm run config:test && pnpm prebuild && ng build santashop-admin --configuration=development",
 		"build:prod": "pnpm run config:prod && pnpm prebuild && ng build santashop-admin --configuration=production",
-		"analyze": "ng build santashop-admin --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
+    "analyze": "ng build santashop-admin --configuration=production --stats-json && node ../scripts/analyze-esbuild-metafile.mjs ../dist/santashop-admin/stats.json",
 		"deploy:test": "pnpm run config:test && firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=development && firebase deploy",
 		"deploy:test:hosting": "pnpm run config:test && firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=development && firebase deploy --only hosting"
 	},
 	"author": "",
 	"license": "ISC",
 	"engines": {
-		"node": ">=24.0.0"
+    "node": ">=24.15.0"
 	},
 	"dependencies": {
 		"@angular/animations": "catalog:",
+		"@angular/cdk": "catalog:",
 		"@angular/common": "catalog:",
 		"@angular/core": "catalog:",
 		"@angular/forms": "catalog:",
@@ -43,7 +44,6 @@
 			"handlebars": "catalog:",
 		"ng2-charts": "catalog:",
 		"rxjs": "catalog:",
-		"tslib": "catalog:",
-		"zone.js": "catalog:"
+    "tslib": "catalog:"
 	}
 }

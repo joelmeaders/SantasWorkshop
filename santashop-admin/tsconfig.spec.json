@@ -9,8 +9,15 @@
 			"@santashop/core": ["dist/@santashop/core"],
 			"test-helpers/*": ["test-helpers/*"]
 		},
-		"types": ["jasmine"]
+		"types": ["vitest/globals"]
 	},
-	"files": ["src/test.ts", "src/polyfills.ts"],
-	"include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
+	"include": ["src/**/*.spec.ts", "src/**/*.d.ts"],
+	"angularCompilerOptions": {
+		"extendedDiagnostics": {
+			"checks": {
+				"nullishCoalescingNotNullable": "suppress",
+				"optionalChainNotNullable": "suppress"
+			}
+		}
+	}
 }

@@ -41,7 +41,7 @@ import {
 	IonGrid,
 	IonRow,
 	ToastController,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -73,6 +73,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	private readonly platformId = inject(PLATFORM_ID);
 	private readonly destroy$ = new Subject<void>();
 	private readonly childrenCard = viewChild(ChildrenCardComponent);
+	private readonly scheduleCard = viewChild(ScheduleCardComponent);
 	private readonly submitCard = viewChild(SubmitCardComponent);
 
 	public readonly programYear = inject(PROGRAM_YEAR);
@@ -86,6 +87,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		shareReplay(1),
 	);
 	public readonly isSaving = signal(false);
+	public readonly reviewing = signal(false);
 
 	public readonly canChooseDateTime$ = combineLatest([
 		this.childCount$,
@@ -209,6 +211,16 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			},
 		);
 		if (updated) this.submitCard()?.completeEmailUpdate();
+	}
+
+	public startReview(): void {
+		this.childrenCard()?.collapseEditor();
+		this.scheduleCard()?.collapse();
+		this.reviewing.set(true);
+	}
+
+	public makeChanges(): void {
+		this.reviewing.set(false);
 	}
 
 	private readonly focusHashSection = (): void => {

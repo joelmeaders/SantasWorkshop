@@ -1,5 +1,13 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { AlertController } from '@ionic/angular/standalone';
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AlertController } from '@ionic/angular';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { DateTimeSlot } from '@santashop/models';
@@ -16,54 +24,52 @@ describe('ScheduleEditorPage', () => {
 	let component: ScheduleEditorPage;
 	let fixture: ComponentFixture<ScheduleEditorPage>;
 	let slotsSubject: BehaviorSubject<DateTimeSlot[]>;
-	let scheduleEditorService: jasmine.SpyObj<ScheduleEditorService>;
-	let alerts: jasmine.SpyObj<AlertController>;
+	let scheduleEditorService: Mocked<ScheduleEditorService>;
+	let alerts: Mocked<AlertController>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		slotsSubject = new BehaviorSubject<DateTimeSlot[]>([]);
-		scheduleEditorService = jasmine.createSpyObj<ScheduleEditorService>(
-			'ScheduleEditorService',
-			[
-				'previewCreateSlots',
-				'startCreateSlots',
-				'bulkUpdate',
-				'updateSlot',
-				'deleteSlot',
-				'setYear',
-				'refresh',
-			],
-		);
+		scheduleEditorService = {
+			previewCreateSlots: vi
+				.fn()
+				.mockName('ScheduleEditorService.previewCreateSlots'),
+			startCreateSlots: vi
+				.fn()
+				.mockName('ScheduleEditorService.startCreateSlots'),
+			bulkUpdate: vi.fn().mockName('ScheduleEditorService.bulkUpdate'),
+			updateSlot: vi.fn().mockName('ScheduleEditorService.updateSlot'),
+			deleteSlot: vi.fn().mockName('ScheduleEditorService.deleteSlot'),
+			setYear: vi.fn().mockName('ScheduleEditorService.setYear'),
+			refresh: vi.fn().mockName('ScheduleEditorService.refresh'),
+		} as unknown as Mocked<ScheduleEditorService>;
 		Object.defineProperty(scheduleEditorService, 'slots$', {
 			value: slotsSubject.asObservable(),
 		});
-		scheduleEditorService.startCreateSlots.and.resolveTo({
+		scheduleEditorService.startCreateSlots.mockResolvedValue({
 			created: 0,
 			skipped: 0,
 		});
-		scheduleEditorService.previewCreateSlots.and.resolveTo({
+		scheduleEditorService.previewCreateSlots.mockResolvedValue({
 			previewId: 'preview-1',
 			operation: 'initialize-schedule',
 			projectId: 'test-project',
 			programYear: 2025,
-			expiresAt: new Date(Date.now() + 60_000).toISOString(),
-			confirmationPhrase:
-				'INITIALIZE SCHEDULE test-project 2025',
+			expiresAt: new Date(Date.now() + 60000).toISOString(),
+			confirmationPhrase: 'INITIALIZE SCHEDULE test-project 2025',
 			counts: { requestedSlots: 1 },
 			seasonRestricted: true,
 		});
-		scheduleEditorService.bulkUpdate.and.resolveTo();
-		scheduleEditorService.updateSlot.and.resolveTo();
-		scheduleEditorService.deleteSlot.and.resolveTo();
+		scheduleEditorService.bulkUpdate.mockResolvedValue(undefined);
+		scheduleEditorService.updateSlot.mockResolvedValue(undefined);
+		scheduleEditorService.deleteSlot.mockResolvedValue(undefined);
 
-		alerts = jasmine.createSpyObj<AlertController>('AlertController', [
-			'create',
-		]);
-		alerts.create.and.returnValue(
-			Promise.resolve({
-				present: jasmine.createSpy('present').and.resolveTo(),
-				dismiss: jasmine.createSpy('dismiss').and.resolveTo(),
-			} as unknown as HTMLIonAlertElement),
-		);
+		alerts = {
+			create: vi.fn().mockName('AlertController.create'),
+		} as unknown as Mocked<AlertController>;
+		alerts.create.mockResolvedValue({
+			present: vi.fn().mockName('present').mockResolvedValue(undefined),
+			dismiss: vi.fn().mockName('dismiss').mockResolvedValue(undefined),
+		} as unknown as HTMLIonAlertElement);
 
 		TestBed.configureTestingModule({
 			imports: [ScheduleEditorPage],
@@ -75,9 +81,10 @@ describe('ScheduleEditorPage', () => {
 					provide: AuthService,
 					useValue: {
 						isOwner$: new BehaviorSubject(true),
-						reauthenticate: jasmine
-							.createSpy('reauthenticate')
-							.and.resolveTo(),
+						reauthenticate: vi
+							.fn()
+							.mockName('reauthenticate')
+							.mockResolvedValue(undefined),
 					},
 				},
 			],
@@ -96,8 +103,8 @@ describe('ScheduleEditorPage', () => {
 
 		fixture = TestBed.createComponent(ScheduleEditorPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -122,9 +129,9 @@ describe('ScheduleEditorPage', () => {
 		]);
 
 		// Act
-		fixture.detectChanges();
 		await fixture.whenStable();
-		fixture.detectChanges();
+		await fixture.whenStable();
+		await fixture.whenStable();
 
 		// Assert
 		expect(fixture.nativeElement.textContent).toContain('At capacity');
@@ -132,7 +139,7 @@ describe('ScheduleEditorPage', () => {
 		expect(fixture.nativeElement.textContent).toContain('Disabled');
 		expect(
 			fixture.nativeElement.querySelectorAll('.slot-card--disabled'),
-		).toHaveSize(1);
+		).toHaveLength(1);
 	});
 
 	it('should render the save time slot action', async () => {
@@ -140,9 +147,9 @@ describe('ScheduleEditorPage', () => {
 		slotsSubject.next([createSlot({ id: 'slot-1' })]);
 
 		// Act
-		fixture.detectChanges();
 		await fixture.whenStable();
-		fixture.detectChanges();
+		await fixture.whenStable();
+		await fixture.whenStable();
 
 		// Assert
 		expect(fixture.nativeElement.textContent).toContain('Save time slot');
@@ -183,9 +190,10 @@ describe('ScheduleEditorPage', () => {
 		await component.updateCapacity(firstSlot, createValueEvent('12'));
 
 		// Assert
-		const [updatedSlots, changes] =
-			scheduleEditorService.bulkUpdate.calls.mostRecent().args;
-		expect(updatedSlots).toHaveSize(2);
+		const lastCall = vi.mocked(scheduleEditorService.bulkUpdate).mock.lastCall;
+		expect(lastCall).toBeDefined();
+		const [updatedSlots, changes] = lastCall!;
+		expect(updatedSlots).toHaveLength(2);
 		expect(changes).toEqual({ maxSlots: 12 });
 	});
 
@@ -227,8 +235,8 @@ describe('ScheduleEditorPage', () => {
 		await component.saveSlotDateTime(slot);
 
 		// Assert
-		const updatedSlot = scheduleEditorService.updateSlot.calls.mostRecent()
-			.args[0] as DateTimeSlot;
+		const updatedSlot = vi.mocked(scheduleEditorService.updateSlot).mock
+			.lastCall![0] as DateTimeSlot;
 		expect(updatedSlot.dateTime.getFullYear()).toBe(2025);
 		expect(updatedSlot.dateTime.getMonth()).toBe(11);
 		expect(updatedSlot.dateTime.getDate()).toBe(13);
@@ -237,7 +245,9 @@ describe('ScheduleEditorPage', () => {
 });
 
 function createSlot(
-	overrides: Partial<DateTimeSlot> & { hour?: number } = {},
+	overrides: Partial<DateTimeSlot> & {
+		hour?: number;
+	} = {},
 ): DateTimeSlot {
 	const hour = overrides.hour ?? 10;
 	const slotOverrides = { ...overrides };
@@ -255,7 +265,9 @@ function createSlot(
 }
 
 function createRow(
-	overrides: Partial<DateTimeSlot> & { hour?: number } = {},
+	overrides: Partial<DateTimeSlot> & {
+		hour?: number;
+	} = {},
 ): ScheduleEditorRowLike {
 	const slot = createSlot(overrides);
 	const reserved = slot.slotsReserved ?? 0;
@@ -280,5 +292,7 @@ function createValueEvent(value: string | number | null): Event {
 		detail: {
 			value,
 		},
-	} as CustomEvent<{ value?: string | number | null }> as Event;
+	} as CustomEvent<{
+		value?: string | number | null;
+	}> as Event;
 }

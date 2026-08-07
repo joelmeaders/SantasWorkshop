@@ -41,4 +41,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ci:app:config:test
+      - run: pnpm run test:browser:setup
+      - run: pnpm run ci:core:test
+      - run: pnpm run ci:app:test
       - run: pnpm run ci:app:build:test

@@ -50,6 +50,9 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ci:admin:config:test
+      - run: pnpm run test:browser:setup
+      - run: pnpm run ci:core:test
+      - run: pnpm run ci:admin:test
       - run: pnpm run ci:admin:build:test
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -86,6 +89,9 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ci:admin:config:prod
+      - run: pnpm run test:browser:setup
+      - run: pnpm run ci:core:test
+      - run: pnpm run ci:admin:test
       - run: pnpm run ci:admin:build:prod
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

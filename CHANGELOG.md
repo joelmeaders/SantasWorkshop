@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## Unreleased
+
+### Changed
+
+- Upgraded the Angular workspace to 22.1, Ionic Angular to the immutable Angular-22 dev build, Node.js to 24.18.0, and TypeScript to 6.0.
+- Migrated application builds to Angular's esbuild application builder and removed Zone.js from the frontend runtime.
+- Replaced frontend Karma/Jasmine tests with Angular's native Vitest runner in headless Chromium.
+
 ## [2025.2.1] - 2025-11-15
 
 ### Added

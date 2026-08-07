@@ -15,6 +15,7 @@
 								[childCount]="(childCount$ | async) ?? 0"
 								[programYear]="programYear"
 								[busy]="isSaving()"
+								[collapsed]="reviewing()"
 								(saveRequested)="saveChild($event)"
 								(deleteRequested)="deleteChild($event)"
 							/>
@@ -26,6 +27,7 @@
 								[slots]="(availableSlots$ | async) ?? []"
 								[canChooseDateTime]="(canChooseDateTime$ | async) ?? false"
 								[busy]="isSaving()"
+								[collapsed]="reviewing()"
 								(selectRequested)="chooseDateTime($event)"
 							/>
 						</section>
@@ -39,6 +41,8 @@
 								[busy]="isSaving()"
 								(submitRequested)="submitRegistration()"
 								(emailUpdateRequested)="updateEmailAddress($event)"
+								(reviewRequested)="startReview()"
+								(changesRequested)="makeChanges()"
 							/>
 						</section>
 					</ion-col>

@@ -4,7 +4,7 @@ import type { Child, DateTimeSlot } from '@santashop/models';
 import { NiceFormErrorPipe, TimeSlotPipe } from '@santashop/core';
 import { DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonItem, IonLabel, IonList } from '@ionic/angular/standalone';
+import { IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonItem, IonLabel, IonList } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline, manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { changeEmailForm } from '../../profile/profile.form';
@@ -29,6 +29,8 @@ export class SubmitCardComponent {
 	public readonly busy = input(false);
 	public readonly submitRequested = output<void>();
 	public readonly emailUpdateRequested = output<EmailUpdateRequest>();
+	public readonly reviewRequested = output<void>();
+	public readonly changesRequested = output<void>();
 	public readonly expanded = signal(false);
 	public readonly emailUpdateOpen = signal(false);
 	public readonly changeEmailForm = changeEmailForm();
@@ -47,7 +49,14 @@ export class SubmitCardComponent {
 	}
 
 	public open(): void {
-		if (this.canSubmit()) this.expanded.set(true);
+		if (!this.canSubmit()) return;
+		this.expanded.set(true);
+		this.reviewRequested.emit();
+	}
+
+	public makeChanges(): void {
+		this.expanded.set(false);
+		this.changesRequested.emit();
 	}
 
 	public submit(): void {

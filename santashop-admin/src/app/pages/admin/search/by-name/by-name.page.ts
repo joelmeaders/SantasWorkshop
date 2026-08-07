@@ -24,7 +24,7 @@ import {
 	IonNote,
 	IonButton,
 	IonIcon,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 @Component({
 	selector: 'admin-by-name',

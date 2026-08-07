@@ -52,6 +52,15 @@ ion-modal ion-list {
 	padding: 0.5rem 1rem 1rem;
 }
 
+.toy-type-heading {
+	--color: var(--santa-text);
+	--padding-start: 0;
+	font-size: 0.95rem;
+	min-height: auto;
+	padding-block: 0.8rem 0.2rem;
+	padding-inline-start: 0;
+}
+
 @media (max-width: 480px) {
 	.card-actions ion-button {
 		flex: 1 1 auto;

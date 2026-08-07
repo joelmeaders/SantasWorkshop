@@ -25,7 +25,7 @@ import {
 	IonToggle,
 	IonToolbar,
 	ModalController,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import type {
 	CreateStaffUser,
 	StaffAccount,

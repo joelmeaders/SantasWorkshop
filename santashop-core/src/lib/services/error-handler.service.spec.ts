@@ -1,13 +1,22 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandlerService } from './error-handler.service';
-import { AlertController } from '@ionic/angular/standalone';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { IError } from '@santashop/models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 
 describe('ErrorHandlerService', () => {
 	let service: ErrorHandlerService;
-	let analyticsWrapper: jasmine.SpyObj<AnalyticsWrapper>;
-	let alertControllerService: jasmine.SpyObj<AlertController>;
+	let analyticsWrapper: Mocked<AnalyticsWrapper>;
+	let alertControllerService: Mocked<AlertController>;
+	let loadingControllerService: Mocked<LoadingController>;
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -15,17 +24,29 @@ describe('ErrorHandlerService', () => {
 			providers: [
 				{
 					provide: AnalyticsWrapper,
-					useValue: jasmine.createSpyObj<AnalyticsWrapper>(
-						'AnalyticsWrapperSpy',
-						['logEvent', 'logErrorEvent'],
-					),
+					useValue: {
+						logEvent: vi
+							.fn()
+							.mockName('AnalyticsWrapperSpy.logEvent'),
+						logErrorEvent: vi
+							.fn()
+							.mockName('AnalyticsWrapperSpy.logErrorEvent'),
+					},
 				},
 				{
 					provide: AlertController,
-					useValue: jasmine.createSpyObj<AlertController>(
-						'AlertControllerSpy',
-						['create'],
-					),
+					useValue: {
+						create: vi.fn().mockName('AlertControllerSpy.create'),
+					},
+				},
+				{
+					provide: LoadingController,
+					useValue: {
+						getTop: vi
+							.fn()
+							.mockName('LoadingControllerSpy.getTop')
+							.mockResolvedValue(undefined),
+					},
 				},
 			],
 		});
@@ -33,10 +54,13 @@ describe('ErrorHandlerService', () => {
 		service = TestBed.inject(ErrorHandlerService);
 		analyticsWrapper = TestBed.inject(
 			AnalyticsWrapper,
-		) as jasmine.SpyObj<AnalyticsWrapper>;
+		) as Mocked<AnalyticsWrapper>;
 		alertControllerService = TestBed.inject(
 			AlertController,
-		) as jasmine.SpyObj<AlertController>;
+		) as Mocked<AlertController>;
+		loadingControllerService = TestBed.inject(
+			LoadingController,
+		) as Mocked<LoadingController>;
 	});
 
 	it('should be created', () => {
@@ -60,7 +84,7 @@ describe('ErrorHandlerService', () => {
 				/* mock */
 			},
 		} as HTMLIonAlertElement;
-		createAlertSpy.and.resolveTo(alertStub);
+		createAlertSpy.mockResolvedValue(alertStub);
 
 		const logSpy = analyticsWrapper.logErrorEvent;
 
@@ -70,5 +94,48 @@ describe('ErrorHandlerService', () => {
 		// Assert
 		expect(createAlertSpy).toHaveBeenCalled();
 		expect(logSpy).toHaveBeenCalledWith(error.code, error.message);
+	});
+
+	it('handleError(): should dismiss an active loading overlay before presenting the alert', async () => {
+		const dismiss = vi.fn().mockResolvedValue(true);
+		const present = vi.fn().mockResolvedValue(undefined);
+		loadingControllerService.getTop.mockResolvedValue({
+			dismiss,
+		} as unknown as HTMLIonLoadingElement);
+		alertControllerService.create.mockResolvedValue({
+			present,
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'ok' }),
+		} as unknown as HTMLIonAlertElement);
+
+		await service.handleError({
+			code: 'auth/invalid-credential',
+			message: 'Invalid credentials',
+			details: 'Please check your email address and password.',
+		});
+
+		expect(dismiss).toHaveBeenCalledOnce();
+		expect(present).toHaveBeenCalledOnce();
+		expect(dismiss.mock.invocationCallOrder[0]).toBeLessThan(
+			present.mock.invocationCallOrder[0],
+		);
+	});
+
+	it('handleError(): should still present the alert when loading dismissal fails', async () => {
+		const present = vi.fn().mockResolvedValue(undefined);
+		loadingControllerService.getTop.mockResolvedValue({
+			dismiss: vi.fn().mockRejectedValue(new Error('already dismissed')),
+		} as unknown as HTMLIonLoadingElement);
+		alertControllerService.create.mockResolvedValue({
+			present,
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'ok' }),
+		} as unknown as HTMLIonAlertElement);
+
+		await service.handleError({
+			code: 'unknown',
+			message: 'Unknown error',
+			details: 'Please try again.',
+		});
+
+		expect(present).toHaveBeenCalledOnce();
 	});
 });

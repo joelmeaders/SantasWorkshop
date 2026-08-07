@@ -11,7 +11,7 @@ import {
 	IonButton,
 	IonIcon,
 	IonTitle,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 @Component({
 	selector: 'admin-header',

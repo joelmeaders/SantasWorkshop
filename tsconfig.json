@@ -12,6 +12,7 @@
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"moduleResolution": "bundler",
+		"ignoreDeprecations": "6.0",
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 		"isolatedModules": true,

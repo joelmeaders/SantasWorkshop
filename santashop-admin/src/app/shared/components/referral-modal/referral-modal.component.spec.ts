@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReferralModalComponent } from './referral-modal.component';
 import { provideModalControllerMock } from '../../../../test-helpers';
 
@@ -6,7 +7,7 @@ describe('ReferralModalComponent', () => {
 	let component: ReferralModalComponent;
 	let fixture: ComponentFixture<ReferralModalComponent>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ReferralModalComponent],
 			providers: [provideModalControllerMock()],
@@ -14,8 +15,8 @@ describe('ReferralModalComponent', () => {
 
 		fixture = TestBed.createComponent(ReferralModalComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

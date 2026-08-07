@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import {
 	provideTranslateServiceMock,
@@ -10,7 +11,7 @@ import {
 	AlertController,
 	LoadingController,
 	ModalController,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { AppStateService, ErrorHandlerService } from '@santashop/core';
 import { of } from 'rxjs';
 import { DateTimeSlotsService } from './date-time-slots.service';
@@ -22,7 +23,7 @@ describe('ConfirmationPage', () => {
 	let component: ConfirmationPage;
 	let fixture: ComponentFixture<ConfirmationPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ConfirmationPage],
 			providers: [
@@ -32,12 +33,14 @@ describe('ConfirmationPage', () => {
 					useValue: {
 						hasCheckedIn$: of(false),
 						dateTimeSlot$: of(undefined),
-						undoRegistration: jasmine
-							.createSpy('undoRegistration')
-							.and.resolveTo(undefined),
-						changeRegistrationDateTime: jasmine
-							.createSpy('changeRegistrationDateTime')
-							.and.resolveTo(undefined),
+						undoRegistration: vi
+							.fn()
+							.mockName('undoRegistration')
+							.mockResolvedValue(undefined),
+						changeRegistrationDateTime: vi
+							.fn()
+							.mockName('changeRegistrationDateTime')
+							.mockResolvedValue(undefined),
 					},
 				},
 				{
@@ -54,9 +57,11 @@ describe('ConfirmationPage', () => {
 				},
 				{
 					provide: ErrorHandlerService,
-					useValue: jasmine.createSpyObj('ErrorHandlerService', [
-						'handleError',
-					]),
+					useValue: {
+						handleError: vi
+							.fn()
+							.mockName('ErrorHandlerService.handleError'),
+					},
 				},
 				{
 					provide: ModalController,
@@ -64,15 +69,15 @@ describe('ConfirmationPage', () => {
 				},
 				{
 					provide: LoadingController,
-					useValue: jasmine.createSpyObj('LoadingController', [
-						'create',
-					]),
+					useValue: {
+						create: vi.fn().mockName('LoadingController.create'),
+					},
 				},
 				{
 					provide: AlertController,
-					useValue: jasmine.createSpyObj('AlertController', [
-						'create',
-					]),
+					useValue: {
+						create: vi.fn().mockName('AlertController.create'),
+					},
 				},
 				provideRouter([]),
 				provideTranslateServiceMock(),
@@ -87,8 +92,8 @@ describe('ConfirmationPage', () => {
 			.compileComponents();
 		fixture = TestBed.createComponent(ConfirmationPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

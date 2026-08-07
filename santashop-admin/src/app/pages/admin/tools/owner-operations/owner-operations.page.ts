@@ -30,7 +30,7 @@ import {
 	IonSelect,
 	IonSelectOption,
 	IonSpinner,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { OwnerOperationsService } from './owner-operations.service';
 

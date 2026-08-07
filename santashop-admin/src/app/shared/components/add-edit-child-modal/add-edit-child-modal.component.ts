@@ -4,7 +4,7 @@ import {
 	OnInit,
 	ChangeDetectorRef,
   inject,
-  input
+	Input
 } from '@angular/core';
 import {
 	UntypedFormControl,
@@ -29,7 +29,7 @@ import {
 	IonInput,
 	IonRadioGroup,
 	IonRadio,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import type { Child } from '@santashop/models';
 import { AgeGroup, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
@@ -99,7 +99,7 @@ export class AddEditChildModalComponent implements OnInit {
 	private readonly changeDetector = inject(ChangeDetectorRef);
 	protected readonly childValidationService = inject(ChildValidationService);
 
-	public readonly child = input<Child>();
+	@Input() public child?: Child;
 
 	public form: UntypedFormGroup = this.newForm();
 
@@ -110,10 +110,10 @@ export class AddEditChildModalComponent implements OnInit {
 	public readonly isInfant$ = this.isInfant.asObservable();
 
 	public ngOnInit(): void {
-		this.form = this.newForm(this.child());
+		this.form = this.newForm(this.child);
 		this.changeDetector.markForCheck();
 
-		const child = this.child();
+		const child = this.child;
   if (child?.dateOfBirth) {
 			const dob: string = child.dateOfBirth
 				.toISOString()

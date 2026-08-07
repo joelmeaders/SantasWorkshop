@@ -9,7 +9,7 @@ import {
 	IonContent,
 	IonText,
 	IonButton,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 @Component({
 	selector: 'admin-confirmation',

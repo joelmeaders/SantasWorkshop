@@ -33,12 +33,12 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 - This repo uses standalone Angular bootstrap and routing, not `NgModule`-based app setup. Follow the patterns in [`santashop-app/src/main.ts`](santashop-app/src/main.ts) and [`santashop-app/src/app/app.routes.ts`](santashop-app/src/app/app.routes.ts).
 - Prefer consistency with nearby code over introducing a new architecture. The apps are heavily RxJS/observable-first even on modern Angular versions.
 - Use lazy `loadComponent()` routes and existing guard patterns where applicable.
-- Use Ionic standalone imports from `@ionic/angular/standalone` when touching standalone UI code.
+- The pinned Ionic Angular dev build exposes its standalone APIs from `@ionic/angular`; use that package root for Ionic standalone UI imports.
 - Shared Angular exports live in [`santashop-core/src/index.ts`](santashop-core/src/index.ts) and shared models in [`santashop-models/src/index.ts`](santashop-models/src/index.ts). Check those public APIs before adding new cross-project utilities.
 
 ## Testing and validation
 
-- Unit tests use Karma + Jasmine in ChromeHeadless with watch disabled in [`angular.json`](angular.json).
+- Unit tests use Angular's native Vitest runner in headless Chromium with coverage and watch disabled in [`angular.json`](angular.json). Run `pnpm run test:browser:setup` once when Chromium is not installed.
 - Typical scoped commands:
   - `pnpm --filter @santashop/app lint`
   - `pnpm --filter @santashop/app test`

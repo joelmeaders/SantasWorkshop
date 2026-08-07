@@ -28,7 +28,7 @@ import {
 	IonHeader,
 	IonTitle,
 	IonToolbar,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 interface ChildFormValue {
 	id: FormControl<number>;
@@ -78,6 +78,7 @@ export class ChildrenCardComponent {
 	public readonly childCount = input(0);
 	public readonly programYear = input(0);
 	public readonly busy = input(false);
+	public readonly collapsed = input(false);
 	public readonly saveRequested = output<ChildSaveRequest>();
 	public readonly deleteRequested = output<Child>();
 	public readonly editorOpen = signal(false);

@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ManageChildrenComponent } from './manage-children.component';
 import {
 	provideModalControllerMock,
@@ -9,7 +10,7 @@ describe('ManageChildrenComponent', () => {
 	let component: ManageChildrenComponent;
 	let fixture: ComponentFixture<ManageChildrenComponent>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ManageChildrenComponent],
 			providers: [
@@ -20,8 +21,8 @@ describe('ManageChildrenComponent', () => {
 
 		fixture = TestBed.createComponent(ManageChildrenComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

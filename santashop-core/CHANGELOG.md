@@ -2,6 +2,12 @@
 
 All notable changes to the core library will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Upgraded peer dependencies to Angular 22.1 and migrated unit tests to native Vitest in headless Chromium.
+
 ## [2025.0.1] - 2025-11-09
 
 ### Fixed

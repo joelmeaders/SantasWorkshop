@@ -12,7 +12,7 @@ import { COLLECTION_SCHEMA } from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
 import { AsyncPipe, DatePipe, KeyValuePipe } from '@angular/common';
-import { IonContent, IonNote } from '@ionic/angular/standalone';
+import { IonContent, IonNote } from '@ionic/angular';
 
 @Component({
 	selector: 'admin-duplicate',

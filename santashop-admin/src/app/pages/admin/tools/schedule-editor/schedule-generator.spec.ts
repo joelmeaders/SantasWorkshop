@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import {
 	buildDateRange,
 	createHourlyScheduleSlots,
@@ -30,7 +31,7 @@ describe('schedule-generator', () => {
 			const result = buildDateRange(startDate, endDate);
 
 			// Assert
-			expect(result).toHaveSize(3);
+			expect(result).toHaveLength(3);
 			expect(result[0].getDate()).toBe(12);
 			expect(result[1].getDate()).toBe(13);
 			expect(result[2].getDate()).toBe(14);
@@ -66,9 +67,9 @@ describe('schedule-generator', () => {
 			});
 
 			// Assert
-			expect(result).toHaveSize(6);
+			expect(result).toHaveLength(6);
 			expect(result[0]).toEqual(
-				jasmine.objectContaining({
+				expect.objectContaining({
 					programYear: 2025,
 					maxSlots: 40,
 					slotsReserved: 0,
@@ -94,7 +95,7 @@ describe('schedule-generator', () => {
 			});
 
 			// Assert
-			expect(result).toHaveSize(2);
+			expect(result).toHaveLength(2);
 		});
 
 		it('should throw when the time range is invalid', () => {

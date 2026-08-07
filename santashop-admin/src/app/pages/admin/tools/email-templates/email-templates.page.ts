@@ -14,7 +14,7 @@ import {
 	IonLabel,
 	IonList,
 	IonNote,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { add, createOutline } from 'ionicons/icons';
 import type { EmailTemplateSummary } from '@santashop/models';

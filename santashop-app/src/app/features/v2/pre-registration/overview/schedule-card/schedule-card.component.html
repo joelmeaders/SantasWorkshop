@@ -6,6 +6,7 @@
 			@if (slot) { <ion-badge color="success" slot="end">{{ 'OVERVIEW.COMPLETE' | translate }}</ion-badge> }
 		</ion-item>
 	</ion-card-header>
+	@if (!collapsed()) {
 	<ion-card-content>
 		@if (!canChooseDateTime()) {
 			<p class="card-guidance">{{ 'OVERVIEW.APPOINTMENT_LOCKED' | translate }}</p>
@@ -40,7 +41,13 @@
 				} @else {
 					<ion-note color="danger">{{ 'SCHEDULE.FULL' | translate }}</ion-note>
 				}
+				@if (slot) {
+					<div class="card-actions">
+						<ion-button data-cancel-schedule-change fill="clear" type="button" (click)="collapse()" [disabled]="busy()">{{ 'COMMON.CANCEL' | translate }}</ion-button>
+					</div>
+				}
 			}
 		}
 	</ion-card-content>
+	}
 </ion-card>

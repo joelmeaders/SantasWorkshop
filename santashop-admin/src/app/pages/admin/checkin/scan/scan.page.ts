@@ -14,7 +14,7 @@ import {
 	IonSelect,
 	IonSelectOption,
 	PopoverOptions,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import {
 	BehaviorSubject,
 	distinctUntilChanged,

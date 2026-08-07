@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -28,7 +28,7 @@ import {
 	IonItem,
 	IonSelect,
 	IonSelectOption,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 
 Chart.register(ChartDataLabels);
@@ -37,6 +37,7 @@ Chart.register(ChartDataLabels);
 	selector: 'admin-user',
 	templateUrl: './user.page.html',
 	styleUrls: ['./user.page.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		HeaderComponent,
 		BaseChartDirective,
@@ -58,10 +59,7 @@ export class UserPage {
 	private readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = getShopSchedule(
-		this.programYear,
-		this.shopDays,
-	);
+	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
 
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);

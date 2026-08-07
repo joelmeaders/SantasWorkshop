@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ByCodePage } from './by-code.page';
 import { provideFirestoreWrapperMock } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
@@ -7,7 +8,7 @@ describe('ByCodePage', () => {
 	let component: ByCodePage;
 	let fixture: ComponentFixture<ByCodePage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ByCodePage],
 			providers: [provideFirestoreWrapperMock(), provideRouter([])],
@@ -15,8 +16,8 @@ describe('ByCodePage', () => {
 
 		fixture = TestBed.createComponent(ByCodePage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();

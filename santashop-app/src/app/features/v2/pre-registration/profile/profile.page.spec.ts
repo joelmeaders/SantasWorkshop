@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, type MockInstance } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import {
@@ -30,16 +31,22 @@ describe('ProfilePage', () => {
 		},
 	];
 
-	const userProfile$Spy: jasmine.Spy = getPropertySpy(
+	const userProfile$Spy: MockInstance = getPropertySpy(
 		viewService,
 		'userProfile$',
-	).and.returnValue(of(mockUsers().user1));
+	).mockReturnValue(of(mockUsers().user1));
 
-	getPropertySpy(viewService, 'profileForm').and.returnValue(newChangeInfoForm());
-	getPropertySpy(viewService, 'changeEmailForm').and.returnValue(changeEmailForm());
-	getPropertySpy(viewService, 'changePasswordForm').and.returnValue(changePasswordForm());
+	getPropertySpy(viewService, 'profileForm').mockReturnValue(
+		newChangeInfoForm(),
+	);
+	getPropertySpy(viewService, 'changeEmailForm').mockReturnValue(
+		changeEmailForm(),
+	);
+	getPropertySpy(viewService, 'changePasswordForm').mockReturnValue(
+		changePasswordForm(),
+	);
 
-	beforeEach(waitForAsync(async (): Promise<void> => {
+	beforeEach(async (): Promise<void> => {
 		TestBed.overrideComponent(ProfilePage, {
 			set: {
 				providers: providers,
@@ -52,8 +59,8 @@ describe('ProfilePage', () => {
 
 		fixture = TestBed.createComponent(ProfilePage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -121,7 +128,7 @@ describe('ProfilePage', () => {
 		const methodSpy = getFunctionSpy(
 			viewService,
 			'updatePublicProfile',
-		).and.resolveTo();
+		).mockResolvedValue(undefined);
 
 		// Act
 		await component.updateProfile();
@@ -135,7 +142,7 @@ describe('ProfilePage', () => {
 		const methodSpy = getFunctionSpy(
 			viewService,
 			'changeEmailAddress',
-		).and.resolveTo();
+		).mockResolvedValue(undefined);
 
 		// Act
 		await component.changeEmailAddress();
@@ -149,7 +156,7 @@ describe('ProfilePage', () => {
 		const methodSpy = getFunctionSpy(
 			viewService,
 			'changePassword',
-		).and.resolveTo();
+		).mockResolvedValue(undefined);
 
 		// Act
 		await component.changePassword();

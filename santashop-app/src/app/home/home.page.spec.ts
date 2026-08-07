@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	createModalControllerMock,
@@ -10,7 +11,7 @@ import {
 } from '../../test-helpers';
 
 import { HomePage } from './home.page';
-import { LoadingController, ModalController } from '@ionic/angular/standalone';
+import { LoadingController, ModalController } from '@ionic/angular';
 import { AppStateService, ErrorHandlerService } from '@santashop/core';
 
 describe('HomePage', () => {
@@ -34,11 +35,17 @@ describe('HomePage', () => {
 				provideFunctionsMock(),
 				{
 					provide: ErrorHandlerService,
-					useValue: jasmine.createSpyObj('ErrorHandlerService', ['handleError']),
+					useValue: {
+						handleError: vi
+							.fn()
+							.mockName('ErrorHandlerService.handleError'),
+					},
 				},
 				{
 					provide: LoadingController,
-					useValue: jasmine.createSpyObj('LoadingController', ['create']),
+					useValue: {
+						create: vi.fn().mockName('LoadingController.create'),
+					},
 				},
 				provideTranslateServiceMock(),
 				provideActivatedRouteMock(),
@@ -46,7 +53,7 @@ describe('HomePage', () => {
 		}).compileComponents();
 		fixture = TestBed.createComponent(HomePage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {

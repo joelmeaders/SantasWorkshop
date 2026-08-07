@@ -129,7 +129,7 @@
 		"CONFIRM_DATE_TIME": "¿Es correcta la fecha y la hora?",
 		"MAKE_CHANGES": "Realizar cambios",
 		"TICKET_EMAIL_TITLE": "¿A dónde debemos enviar su entrada?",
-		"TICKET_EMAIL_MESSAGE": "Confirme que esta dirección de correo electrónico sea correcta antes de enviar su registro.",
+		"TICKET_EMAIL_MESSAGE": "Confirme que esta dirección de correo electrónico sea correcta antes de enviar su registro. Si es incorrecta, no recibirá su invitación.",
 		"UPDATE_EMAIL": "Actualizar correo electrónico",
 		"UPDATE_EMAIL_HELP": "Por su seguridad, ingrese su contraseña actual para actualizar su dirección de correo electrónico.",
 		"SAVE_EMAIL": "Guardar correo electrónico"

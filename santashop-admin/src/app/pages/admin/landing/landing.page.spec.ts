@@ -1,4 +1,12 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type Mocked,
+	vi,
+} from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AppStateService, AuthService } from '@santashop/core';
 import { BehaviorSubject, of } from 'rxjs';
@@ -9,7 +17,7 @@ describe('LandingPage', () => {
 	let fixture: ComponentFixture<LandingPage>;
 	let adminSubject: BehaviorSubject<boolean>;
 	let ownerSubject: BehaviorSubject<boolean>;
-	let authService: jasmine.SpyObj<AuthService> & {
+	let authService: Mocked<AuthService> & {
 		isAdmin$: BehaviorSubject<boolean>;
 		isOwner$: BehaviorSubject<boolean>;
 	};
@@ -21,12 +29,12 @@ describe('LandingPage', () => {
 		| 'prefersDark'
 	>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		adminSubject = new BehaviorSubject<boolean>(true);
 		ownerSubject = new BehaviorSubject<boolean>(true);
-		authService = jasmine.createSpyObj<AuthService>('AuthService', [
-			'logout',
-		]) as jasmine.SpyObj<AuthService> & {
+		authService = {
+			logout: vi.fn().mockName('AuthService.logout'),
+		} as unknown as Mocked<AuthService> & {
 			isAdmin$: typeof adminSubject;
 			isOwner$: typeof ownerSubject;
 		};
@@ -50,8 +58,8 @@ describe('LandingPage', () => {
 
 		fixture = TestBed.createComponent(LandingPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -59,9 +67,9 @@ describe('LandingPage', () => {
 
 	it('should show the schedule editor link for admin users', async () => {
 		// Act
-		fixture.detectChanges();
 		await fixture.whenStable();
-		fixture.detectChanges();
+		await fixture.whenStable();
+		await fixture.whenStable();
 
 		// Assert
 		expect(fixture.nativeElement.textContent).toContain(
@@ -88,9 +96,9 @@ describe('LandingPage', () => {
 		adminSubject.next(false);
 
 		// Act
-		fixture.detectChanges();
 		await fixture.whenStable();
-		fixture.detectChanges();
+		await fixture.whenStable();
+		await fixture.whenStable();
 
 		// Assert
 		expect(fixture.nativeElement.textContent).not.toContain(
@@ -102,9 +110,9 @@ describe('LandingPage', () => {
 		expect(fixture.nativeElement.textContent).toContain('Owner Operations');
 
 		ownerSubject.next(false);
-		fixture.detectChanges();
 		await fixture.whenStable();
-		fixture.detectChanges();
+		await fixture.whenStable();
+		await fixture.whenStable();
 
 		expect(fixture.nativeElement.textContent).not.toContain(
 			'Owner Operations',

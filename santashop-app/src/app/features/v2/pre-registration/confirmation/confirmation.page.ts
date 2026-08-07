@@ -23,7 +23,7 @@ import {
 	IonCardHeader,
 	IonCardTitle,
 	IonCardSubtitle,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';
@@ -129,7 +129,7 @@ export class ConfirmationPage {
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 
@@ -223,7 +223,7 @@ export class ConfirmationPage {
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 }

@@ -33,7 +33,7 @@ import {
 	IonItem,
 	IonLabel,
 	IonIcon,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 declare type SortFnType = (
 	a: RegistrationSearchIndex,

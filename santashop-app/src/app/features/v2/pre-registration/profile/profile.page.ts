@@ -18,7 +18,7 @@ import {
 	IonList,
 	IonInput,
 	IonIcon,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 
 @Component({
 	selector: 'app-profile',

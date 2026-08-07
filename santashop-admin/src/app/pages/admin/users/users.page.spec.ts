@@ -1,8 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
-	AlertController,
-	ModalController,
-} from '@ionic/angular/standalone';
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type MockInstance,
+	type Mocked,
+	vi,
+} from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AlertController, ModalController } from '@ionic/angular';
 import { provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import type { StaffAccount } from '@santashop/models';
@@ -19,21 +25,22 @@ import { UsersPage } from './users.page';
 describe('UsersPage', () => {
 	let component: UsersPage;
 	let fixture: ComponentFixture<UsersPage>;
-	let staffService: jasmine.SpyObj<StaffService> & {
+	let staffService: Mocked<StaffService> & {
 		staffAccounts$: Observable<StaffAccount[]>;
 	};
 
 	beforeEach(async () => {
-		staffService = jasmine.createSpyObj<StaffService>(
-			'StaffService',
-			['createStaffUser', 'updateStaffUser', 'deleteStaffUser'],
-		) as jasmine.SpyObj<StaffService> & {
+		staffService = {
+			createStaffUser: vi.fn().mockName('StaffService.createStaffUser'),
+			updateStaffUser: vi.fn().mockName('StaffService.updateStaffUser'),
+			deleteStaffUser: vi.fn().mockName('StaffService.deleteStaffUser'),
+		} as unknown as Mocked<StaffService> & {
 			staffAccounts$: Observable<StaffAccount[]>;
 		};
 		staffService.staffAccounts$ = of([]);
-		staffService.createStaffUser.and.returnValue(Promise.resolve('staff-1'));
-		staffService.updateStaffUser.and.returnValue(Promise.resolve());
-		staffService.deleteStaffUser.and.returnValue(Promise.resolve());
+		staffService.createStaffUser.mockResolvedValue('staff-1');
+		staffService.updateStaffUser.mockResolvedValue(undefined);
+		staffService.deleteStaffUser.mockResolvedValue(undefined);
 
 		await TestBed.configureTestingModule({
 			imports: [UsersPage],
@@ -53,7 +60,7 @@ describe('UsersPage', () => {
 
 		fixture = TestBed.createComponent(UsersPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {
@@ -79,27 +86,23 @@ describe('UsersPage', () => {
 
 	it('creates a user when the modal returns a create result', async () => {
 		const modalController = TestBed.inject(ModalController);
-		(modalController.create as jasmine.Spy).and.returnValue(
-			Promise.resolve({
-				present: jasmine.createSpy().and.returnValue(Promise.resolve()),
-				onDidDismiss: jasmine.createSpy().and.returnValue(
-					Promise.resolve({
-						role: 'create',
-						data: {
-							emailAddress: 'staff@example.com',
-							displayName: 'Staff Member',
-							password: 'Password123!',
-							roles: ['checkin'],
-						},
-					}),
-				),
-			} as unknown as HTMLIonModalElement),
-		);
+		(modalController.create as unknown as MockInstance).mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({
+				role: 'create',
+				data: {
+					emailAddress: 'staff@example.com',
+					displayName: 'Staff Member',
+					password: 'Password123!',
+					roles: ['checkin'],
+				},
+			}),
+		} as unknown as HTMLIonModalElement);
 
 		await component.addUser();
 
 		expect(staffService.createStaffUser).toHaveBeenCalledWith(
-			jasmine.objectContaining({
+			expect.objectContaining({
 				emailAddress: 'staff@example.com',
 			}),
 		);
@@ -107,7 +110,7 @@ describe('UsersPage', () => {
 
 	it('updates a password when the reset-password alert is confirmed', async () => {
 		const alerts = TestBed.inject(AlertController);
-		(alerts.create as jasmine.Spy).and.callFake((config) => {
+		(alerts.create as unknown as MockInstance).mockImplementation((config: unknown) => {
 			const saveButton = (
 				config as {
 					buttons: {
@@ -119,10 +122,8 @@ describe('UsersPage', () => {
 			saveButton?.handler?.({ password: 'Password123!' });
 
 			return Promise.resolve({
-				present: jasmine.createSpy().and.returnValue(Promise.resolve()),
-				onDidDismiss: jasmine
-					.createSpy()
-					.and.returnValue(Promise.resolve({ role: 'confirm' })),
+				present: vi.fn().mockResolvedValue(undefined),
+				onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
 			} as unknown as HTMLIonAlertElement);
 		});
 
@@ -144,14 +145,10 @@ describe('UsersPage', () => {
 
 	it('deletes a user when the confirmation alert is accepted', async () => {
 		const alerts = TestBed.inject(AlertController);
-		(alerts.create as jasmine.Spy).and.returnValue(
-			Promise.resolve({
-				present: jasmine.createSpy().and.returnValue(Promise.resolve()),
-				onDidDismiss: jasmine
-					.createSpy()
-					.and.returnValue(Promise.resolve({ role: 'destructive' })),
-			} as unknown as HTMLIonAlertElement),
-		);
+		(alerts.create as unknown as MockInstance).mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'destructive' }),
+		} as unknown as HTMLIonAlertElement);
 
 		await component.deleteUser({
 			uid: 'staff-1',

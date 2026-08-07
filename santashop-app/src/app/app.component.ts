@@ -12,7 +12,7 @@ import {
 	IonRouterOutlet,
 	ModalController,
 	Platform,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { AnalyticsWrapper, AppStateService } from '@santashop/core';
 import { ApplicationService } from './core/services/application.service';

@@ -1,5 +1,6 @@
+import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular';
 import {
 	createModalControllerMock,
 	provideTranslateServiceMock,
@@ -9,7 +10,7 @@ import { ReferralSelectionModalComponent } from './referral-selection-modal.comp
 describe('ReferralSelectionModalComponent', () => {
 	let component: ReferralSelectionModalComponent;
 	let fixture: ComponentFixture<ReferralSelectionModalComponent>;
-	let modalController: jasmine.SpyObj<ModalController>;
+	let modalController: Mocked<ModalController>;
 
 	beforeEach(async () => {
 		modalController = createModalControllerMock();
@@ -26,7 +27,7 @@ describe('ReferralSelectionModalComponent', () => {
 
 		fixture = TestBed.createComponent(ReferralSelectionModalComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('returns a listed referral when saved', async () => {

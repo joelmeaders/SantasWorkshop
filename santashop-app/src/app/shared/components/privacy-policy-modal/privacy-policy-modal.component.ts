@@ -7,7 +7,7 @@ import {
 	IonButton,
 	IonIcon,
 	IonLabel,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { closeCircle } from 'ionicons/icons';

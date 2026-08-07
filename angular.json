@@ -10,7 +10,7 @@
 			"prefix": "core",
 			"architect": {
 				"build": {
-					"builder": "@angular-devkit/build-angular:ng-packagr",
+					"builder": "@angular/build:ng-packagr",
 					"options": {
 						"project": "santashop-core/ng-package.json"
 					},
@@ -25,14 +25,14 @@
 					"defaultConfiguration": "production"
 				},
 				"test": {
-					"builder": "@angular-devkit/build-angular:karma",
+					"builder": "@angular/build:unit-test",
 					"options": {
 						"tsConfig": "santashop-core/tsconfig.spec.json",
-						"polyfills": ["zone.js", "zone.js/testing"],
-						"browsers": "ChromeHeadless",
-						"codeCoverage": true,
-						"watch": false,
-						"reporters": ["progress", "kjhtml"]
+						"buildTarget": "santashop-app:build:development",
+						"browsers": ["chromiumHeadless"],
+						"coverage": true,
+						"runnerConfig": "vitest.config.mjs",
+						"watch": false
 					}
 				},
 				"lint": {
@@ -53,7 +53,7 @@
 			"prefix": "models",
 			"architect": {
 				"build": {
-					"builder": "@angular-devkit/build-angular:ng-packagr",
+					"builder": "@angular/build:ng-packagr",
 					"options": {
 						"project": "santashop-models/ng-package.json"
 					},
@@ -66,17 +66,6 @@
 						}
 					},
 					"defaultConfiguration": "production"
-				},
-				"test": {
-					"builder": "@angular-devkit/build-angular:karma",
-					"options": {
-						"tsConfig": "santashop-core/tsconfig.spec.json",
-						"polyfills": ["zone.js", "zone.js/testing"],
-						"browsers": "ChromeHeadless",
-						"codeCoverage": true,
-						"watch": false,
-						"reporters": ["progress", "kjhtml"]
-					}
 				},
 				"lint": {
 					"builder": "@angular-eslint/builder:lint",
@@ -101,12 +90,12 @@
 			"prefix": "admin",
 			"architect": {
 				"build": {
-					"builder": "@angular-devkit/build-angular:browser",
+					"builder": "@angular/build:application",
 					"options": {
-						"outputPath": "dist/santashop-admin",
+						"outputPath": {"base": "dist/santashop-admin", "browser": ""},
 						"index": "santashop-admin/src/index.html",
-						"main": "santashop-admin/src/main.ts",
-						"polyfills": "santashop-admin/src/polyfills.ts",
+						"browser": "santashop-admin/src/main.ts",
+						"polyfills": [],
 						"tsConfig": "santashop-admin/tsconfig.app.json",
 						"assets": [
 							{
@@ -175,7 +164,7 @@
 					"defaultConfiguration": "production"
 				},
 				"serve": {
-					"builder": "@angular-devkit/build-angular:dev-server",
+					"builder": "@angular/build:dev-server",
 					"options": {
 						"buildTarget": "santashop-admin:build"
 					},
@@ -193,19 +182,14 @@
 					"defaultConfiguration": "development"
 				},
 				"test": {
-					"builder": "@angular-devkit/build-angular:karma",
+					"builder": "@angular/build:unit-test",
 					"options": {
-						"main": "santashop-admin/src/test.ts",
 						"tsConfig": "santashop-admin/tsconfig.spec.json",
-						"polyfills": ["zone.js", "zone.js/testing"],
-						"browsers": "ChromeHeadless",
-						"codeCoverage": true,
-						"watch": false,
-						"reporters": ["progress", "kjhtml"],
-						"styles": [
-							"node_modules/@ionic/angular/css/core.css",
-							"santashop-admin/src/global.scss"
-						]
+						"buildTarget": "santashop-admin:build:development",
+						"browsers": ["chromiumHeadless"],
+						"coverage": true,
+						"runnerConfig": "vitest.config.mjs",
+						"watch": false
 					}
 				},
 				"lint": {
@@ -231,12 +215,12 @@
 			"prefix": "app",
 			"architect": {
 				"build": {
-					"builder": "@angular-devkit/build-angular:browser",
+					"builder": "@angular/build:application",
 					"options": {
-						"outputPath": "dist/santashop-app",
+						"outputPath": {"base": "dist/santashop-app", "browser": ""},
 						"index": "santashop-app/src/index.html",
-						"main": "santashop-app/src/main.ts",
-						"polyfills": "santashop-app/src/polyfills.ts",
+						"browser": "santashop-app/src/main.ts",
+						"polyfills": [],
 						"tsConfig": "santashop-app/tsconfig.app.json",
 						"assets": [
 							{
@@ -305,7 +289,7 @@
 					"defaultConfiguration": "production"
 				},
 				"serve": {
-					"builder": "@angular-devkit/build-angular:dev-server",
+					"builder": "@angular/build:dev-server",
 					"options": {
 						"buildTarget": "santashop-app:build"
 					},
@@ -323,26 +307,14 @@
 					"defaultConfiguration": "development"
 				},
 				"test": {
-					"builder": "@angular-devkit/build-angular:karma",
+					"builder": "@angular/build:unit-test",
 					"options": {
-						"main": "santashop-app/src/test.ts",
 						"tsConfig": "santashop-app/tsconfig.spec.json",
-						"polyfills": ["zone.js", "zone.js/testing"],
-						"browsers": "ChromeHeadless",
-						"codeCoverage": true,
-						"watch": false,
-						"reporters": ["progress", "kjhtml"],
-						"styles": [
-							"node_modules/@ionic/angular/css/core.css",
-							"santashop-app/src/global.scss"
-						],
-						"assets": [
-							{
-								"glob": "**/*",
-								"input": "santashop-app/src/assets",
-								"output": "./assets"
-							}
-						]
+						"buildTarget": "santashop-app:build:development",
+						"browsers": ["chromiumHeadless"],
+						"coverage": true,
+						"runnerConfig": "vitest.config.mjs",
+						"watch": false
 					}
 				},
 				"lint": {

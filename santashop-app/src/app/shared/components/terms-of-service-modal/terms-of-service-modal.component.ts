@@ -7,7 +7,7 @@ import {
 	IonToolbar,
 	IonFooter,
 	IonContent,
-} from '@ionic/angular/standalone';
+} from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { closeCircle } from 'ionicons/icons';

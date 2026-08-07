@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { NiceFormErrorPipe } from './nice-form-error.pipe';
 
 describe('NiceFormErrorPipe', () => {

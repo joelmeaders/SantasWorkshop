@@ -1,6 +1,7 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular';
 import {
 	createModalControllerMock,
 	provideTranslateServiceMock,
@@ -26,10 +27,10 @@ describe('PrivacyPolicyModalComponent', () => {
 		}).compileComponents();
 	});
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		fixture = TestBed.createComponent(PrivacyPolicyModalComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {

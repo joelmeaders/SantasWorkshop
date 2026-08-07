@@ -111,7 +111,16 @@ export const selectReferralViaUi = async (
 	const modal = page.locator('ion-modal');
 	await expect(modal).toBeVisible({ timeout: 10000 });
 
-	const referralOption = modal.locator(`[id="referral-${choice}"]`);
+	if (choice === 'Other') {
+		const searchInput = modal.locator('#referralSearchbar input');
+		await searchInput.fill(choice);
+		await searchInput.press('Tab');
+	}
+
+	const referralOption = modal.getByRole('button', {
+		name: choice,
+		exact: true,
+	});
 	await expect(referralOption).toBeVisible({ timeout: 10000 });
 	await referralOption.click();
 

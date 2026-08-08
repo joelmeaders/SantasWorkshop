@@ -12,7 +12,11 @@
 					color="white"
 					[routerLink]="['/']"
 				>
-					<ion-icon slot="start" name="arrow-back-sharp" />
+					<ion-icon
+						slot="start"
+						name="arrow-back-sharp"
+						aria-hidden="true"
+					/>
 					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
 				</ion-button>
 				<ion-card class="sign-up-card form-card">
@@ -26,8 +30,11 @@
 					</ion-card-header>
 					<ion-card-content class="ion-text-center">
 						<form class="account-form" [formGroup]="form" novalidate>
-							<ion-list lines="none">
-								<ion-item-group class="form-section es-pd-bottom-xl">
+							<ion-list lines="none" role="presentation">
+								<ion-item-group
+									class="form-section es-pd-bottom-xl"
+									role="list"
+								>
 									<ion-item-divider color="light">
 										<ion-label>
 											<strong>
@@ -96,7 +103,7 @@
 										[attr.aria-label]="
 											referralAriaLabel(form.controls.referredBy.value)
 										"
-										aria-required="true"
+										aria-haspopup="dialog"
 										[attr.aria-describedby]="
 											form.controls.referredBy.invalid &&
 											form.controls.referredBy.touched
@@ -137,7 +144,10 @@
 									}
 								</ion-item-group>
 
-								<ion-item-group class="form-section es-pd-bottom-xl">
+								<ion-item-group
+									class="form-section es-pd-bottom-xl"
+									role="list"
+								>
 									<ion-item-divider color="light">
 										<ion-label>
 											<strong>
@@ -229,6 +239,7 @@
 												id="legalCheckbox"
 												formControlName="legal"
 												class="check"
+												[attr.aria-label]="'SIGNUP.LEGAL1' | translate"
 											/>
 										</div>
 										<ion-text color="medium">
@@ -252,6 +263,7 @@
 											<ion-checkbox
 												formControlName="newsletter"
 												class="check"
+												[attr.aria-label]="'COMMON.NEWSLETTER' | translate"
 											/>
 										</div>
 										<ion-text color="medium">

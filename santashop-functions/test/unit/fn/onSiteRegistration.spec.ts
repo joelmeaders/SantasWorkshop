@@ -41,4 +41,49 @@ describe('onSiteRegistration handler', () => {
 			'onsiteregistrations/generated-onsite-id',
 		);
 	});
+
+	it('rejects callers without an elevated staff claim before creating records', async () => {
+		const { onSiteRegistration } =
+			await loadCheckInAdminHandlers(adminMock);
+
+		await expect(
+			onSiteRegistration(
+				createCallableRequest(createRegistration(), { admin: false }),
+			),
+		).rejects.toMatchObject({ code: 'permission-denied', message: '-99' });
+		expect(adminMock.batchCreate).not.toHaveBeenCalled();
+	});
+
+	it('rejects incomplete on-site registrations before writing a batch', async () => {
+		const { onSiteRegistration } =
+			await loadCheckInAdminHandlers(adminMock);
+
+		await expect(
+			onSiteRegistration(
+				createCallableRequest(
+					createRegistration({ children: [] }),
+					{ roles: ['admin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+		expect(adminMock.batchCreate).not.toHaveBeenCalled();
+	});
+
+	it('preserves a batch failure status when persistence cannot commit', async () => {
+		const { onSiteRegistration } =
+			await loadCheckInAdminHandlers(adminMock);
+		adminMock.batchCommit.mockRejectedValue({
+			status: 'already-exists',
+			message: 'On-site record already exists.',
+		});
+
+		await expect(
+			onSiteRegistration(
+				createCallableRequest(createRegistration(), { owner: true }),
+			),
+		).rejects.toMatchObject({
+			code: 'already-exists',
+			message: 'On-site record already exists.',
+		});
+	});
 });

@@ -23,6 +23,7 @@ type ReminderQueueRegistration = Registration & {
 
 interface ReminderEmailDocument {
 	code?: string;
+	qrCodeStoragePath: string;
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
@@ -49,6 +50,7 @@ const shouldQueueReminderEmail = (
 	}
 
 	if (
+		!registration.qrCodeStoragePath ||
 		!registration.qrCodeGeneratedOn ||
 		registration.qrCodeGenerationFailedOn
 	) {
@@ -217,6 +219,7 @@ function buildReminderEmailDocument(
 ): ReminderEmailDocument {
 	return {
 		code: registration.qrcode,
+		qrCodeStoragePath: registration.qrCodeStoragePath,
 		email: registration.emailAddress,
 		name: registration.firstName,
 		formattedDateTime: formatRegistrationDateTime(dateTimeSlot),

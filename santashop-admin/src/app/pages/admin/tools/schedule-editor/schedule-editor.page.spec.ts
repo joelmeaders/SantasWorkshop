@@ -66,9 +66,13 @@ describe('ScheduleEditorPage', () => {
 		alerts = {
 			create: vi.fn().mockName('AlertController.create'),
 		} as unknown as Mocked<AlertController>;
-		alerts.create.mockResolvedValue({
+	alerts.create.mockResolvedValue({
 			present: vi.fn().mockName('present').mockResolvedValue(undefined),
 			dismiss: vi.fn().mockName('dismiss').mockResolvedValue(undefined),
+			onDidDismiss: vi
+				.fn()
+				.mockName('onDidDismiss')
+				.mockResolvedValue({ role: 'cancel' }),
 		} as unknown as HTMLIonAlertElement);
 
 		TestBed.configureTestingModule({
@@ -242,6 +246,153 @@ describe('ScheduleEditorPage', () => {
 		expect(updatedSlot.dateTime.getDate()).toBe(13);
 		expect(updatedSlot.dateTime.getHours()).toBe(14);
 	});
+
+	it('generates schedules after the owner supplies the exact confirmation', async () => {
+		alerts.create.mockResolvedValueOnce({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({
+				role: 'confirm',
+				data: {
+					values: {
+						password: 'secret',
+						phrase: 'INITIALIZE SCHEDULE test-project 2025',
+					},
+				},
+			}),
+		} as unknown as HTMLIonAlertElement);
+		scheduleEditorService.startCreateSlots.mockResolvedValue({
+			created: 2,
+			skipped: 1,
+		});
+		component.generatorForm.setValue({
+			startDate: '2025-12-12',
+			endDate: '2025-12-12',
+			capacity: 5,
+			startHour: 10,
+			endHour: 11,
+		});
+
+		await component.generateSlots();
+
+		expect(scheduleEditorService.previewCreateSlots).toHaveBeenCalledWith(
+			expect.arrayContaining([
+				expect.objectContaining({ maxSlots: 5, programYear: 2025 }),
+			]),
+		);
+		expect(scheduleEditorService.startCreateSlots).toHaveBeenCalledWith(
+			'preview-1',
+			'INITIALIZE SCHEDULE test-project 2025',
+		);
+		expect(component.statusMessage).toBe(
+			'Created 2 schedules and skipped 1 duplicates.',
+		);
+	});
+
+	it('does not generate schedules with an invalid form or a cancelled confirmation', async () => {
+		await component.generateSlots();
+		expect(scheduleEditorService.previewCreateSlots).not.toHaveBeenCalled();
+
+		component.generatorForm.setValue({
+			startDate: '2025-12-12',
+			endDate: '2025-12-12',
+			capacity: 5,
+			startHour: 10,
+			endHour: 10,
+		});
+		await component.generateSlots();
+
+		expect(scheduleEditorService.startCreateSlots).not.toHaveBeenCalled();
+	});
+
+	it('applies a combined bulk capacity and enabled update then resets the form', async () => {
+		slotsSubject.next([createSlot({ id: 'slot-1' }), createSlot({ id: 'slot-2' })]);
+		component.selectedSlotIds = new Set(['slot-1', 'slot-2']);
+		component.bulkEditForm.setValue({ capacity: 8, enabled: 'disabled' });
+
+		await component.applyBulkEdit();
+
+		expect(scheduleEditorService.bulkUpdate).toHaveBeenCalledWith(
+			expect.arrayContaining([
+				expect.objectContaining({ id: 'slot-1' }),
+				expect.objectContaining({ id: 'slot-2' }),
+			]),
+			{ maxSlots: 8, enabled: false },
+		);
+		expect(component.bulkEditForm.value).toEqual({ capacity: null, enabled: '' });
+	});
+
+	it('rejects a bulk operation that has no selected slots or changes', async () => {
+		await component.applyBulkEdit();
+		expect(alerts.create).toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'No schedules selected' }),
+		);
+
+		component.selectedSlotIds = new Set(['slot-1']);
+		slotsSubject.next([createSlot({ id: 'slot-1' })]);
+		await component.applyBulkEdit();
+		expect(alerts.create).toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'Nothing to update' }),
+		);
+	});
+
+	it('updates enabled state for the selected rows and reports a service error', async () => {
+		const first = createRow({ id: 'slot-1' });
+		const second = createRow({ id: 'slot-2' });
+		slotsSubject.next([first, second]);
+		component.selectedSlotIds = new Set(['slot-1', 'slot-2']);
+
+		await component.updateEnabled(first, createCheckedEvent(false));
+		expect(scheduleEditorService.bulkUpdate).toHaveBeenLastCalledWith(
+			expect.arrayContaining([
+				expect.objectContaining({ id: 'slot-1' }),
+				expect.objectContaining({ id: 'slot-2' }),
+			]),
+			{ enabled: false },
+		);
+
+		scheduleEditorService.bulkUpdate.mockRejectedValueOnce(new Error('offline'));
+		await component.updateEnabled(first, createCheckedEvent(true));
+		expect(alerts.create).toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'Unable to update schedules', message: 'offline' }),
+		);
+	});
+
+	it('maintains selection, valid slot drafts, and date helpers', () => {
+		component.toggleSelection('slot-1', createCheckedEvent(true));
+		component.toggleSelection('slot-2', createCheckedEvent(true));
+		expect(component.selectedCount).toBe(2);
+		component.toggleAll([createRow({ id: 'slot-1' }), createRow({ id: 'slot-2' })]);
+		expect(component.hasSelections).toBe(false);
+
+		component.setSlotDateDraft('slot-1', createValueEvent('2025-12-13'));
+		component.setSlotHourDraft('slot-1', createValueEvent(25));
+		const slot = createRow({ id: 'slot-1', hour: 10 });
+		expect(component.getSlotDraftDate(slot)).toBe('2025-12-13');
+		expect(component.getSlotDraftHour(slot)).toBe(10);
+		expect(component.formatHour(0)).toBe('12:00 AM');
+		expect(component.formatHour(13)).toBe('1:00 PM');
+	});
+
+	it('deletes a confirmed schedule and removes it from the selection', async () => {
+		const alert = {
+			present: vi.fn().mockResolvedValue(undefined),
+			dismiss: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
+		};
+		alerts.create.mockResolvedValueOnce(alert as unknown as HTMLIonAlertElement);
+		component.selectedSlotIds = new Set(['slot-1']);
+
+		await component.confirmDelete(createRow({ id: 'slot-1', slotsReserved: 1 }));
+		const options = alerts.create.mock.calls[0]![0] as {
+			message: string;
+			buttons: { role?: string; handler?: () => Promise<void> }[];
+		};
+		expect(options.message).toContain('1 reservation');
+		await options.buttons.find((button) => button.role === 'destructive')!.handler!();
+
+		expect(scheduleEditorService.deleteSlot).toHaveBeenCalledWith('slot-1');
+		expect(component.isSelected('slot-1')).toBe(false);
+	});
 });
 
 function createSlot(
@@ -295,4 +446,8 @@ function createValueEvent(value: string | number | null): Event {
 	} as CustomEvent<{
 		value?: string | number | null;
 	}> as Event;
+}
+
+function createCheckedEvent(checked: boolean): Event {
+	return { detail: { checked } } as CustomEvent<{ checked: boolean }> as Event;
 }

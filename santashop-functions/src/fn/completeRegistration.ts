@@ -84,6 +84,9 @@ export default async function completeRegistration(
 			if (!registration.qrcode) {
 				throw new HttpsError('failed-precondition', 'Registration confirmation code is unavailable.');
 			}
+			if (!registration.qrCodeStoragePath) {
+				throw new HttpsError('failed-precondition', 'Registration QR image is unavailable.');
+			}
 
 			const submittedOn = new Date();
 			const canonicalContact = {
@@ -101,10 +104,18 @@ export default async function completeRegistration(
 				includedInRegistrationStats: false,
 				programYear: PROGRAM_YEAR,
 			};
+			const completedRegistration = {
+				...registration,
+				...registrationUpdate,
+			};
+			delete completedRegistration.cancelledOn;
+			delete completedRegistration.cancelledByUid;
+			delete completedRegistration.cancellationLogId;
 			const emailRef = db.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
 			const indexRef = db.doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
 			const emailRecord = {
 				code: registration.qrcode,
+				qrCodeStoragePath: registration.qrCodeStoragePath,
 				email: canonicalContact.emailAddress,
 				name: canonicalContact.firstName,
 				formattedDateTime: formatRegistrationDateTime(slot.dateTime),
@@ -123,7 +134,7 @@ export default async function completeRegistration(
 
 			// This transaction deliberately never writes the shared slot document.
 			// scheduledDateTimeSlotCounters2 reconciles capacity after submissions.
-			transaction.set(registrationRef, registrationUpdate, { merge: true });
+			transaction.set(registrationRef, completedRegistration);
 			transaction.set(emailRef, emailRecord, { merge: true });
 			transaction.set(indexRef, indexRecord, { merge: true });
 			transaction.create(receiptRef, { operation: 'completeRegistration', result: true, completedOn: submittedOn } satisfies MutationReceipt);

@@ -30,7 +30,7 @@
 		(camerasFound)="onCamerasFound($event)"
 		(deviceChange)="onDeviceChange($event)"
 		(permissionResponse)="onHasPermission($event)"
-		(scanSuccess)="scanResult.next($event)"
+		(scanSuccess)="submitCameraScan($event)"
 		(scanError)="scanError.next($event)"
 		[delayBetweenScanSuccess]="5000"
 	/>

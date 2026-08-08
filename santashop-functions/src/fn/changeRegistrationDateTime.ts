@@ -87,6 +87,9 @@ export default async function changeRegistrationDateTime(
 			if (!registration.registrationSubmittedOn) {
 				throw new HttpsError('failed-precondition', 'Registration is not submitted.');
 			}
+			if (!registration.qrCodeStoragePath) {
+				throw new HttpsError('failed-precondition', 'Registration QR image is unavailable.');
+			}
 			if (registration.hasCheckedIn) {
 				throw new HttpsError('failed-precondition', 'Cannot change registration after check-in.');
 			}
@@ -113,6 +116,7 @@ export default async function changeRegistrationDateTime(
 			const queuedOn = new Date();
 			const emailRecord = {
 				code: registration.qrcode,
+				qrCodeStoragePath: registration.qrCodeStoragePath,
 				email: registration.emailAddress,
 				name: registration.firstName,
 				formattedDateTime: formatRegistrationDateTime(slot.dateTime),

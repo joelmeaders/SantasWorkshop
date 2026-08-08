@@ -1,20 +1,55 @@
-<admin-header title="Contact DSCS Member"
-	backRoute="/admin/checkin/scan"
- />
+<admin-header title="Scan Blocked" backRoute="/admin/checkin/scan" />
 
-<ion-content class="ion-padding-horizontal ion-text-center" color="danger">
-	@if (checkin$ | async; as checkin) {
-	<h1>THIS CUSTOMER ALREADY GOT TOYS!</h1>
-	<h2>Do not give them tickets. Contact DSCS Member to resolve.</h2>
-	<br />
-	Checked in on:
-	<h2>{{ checkin['checkInDateTime'] | date:'short' }}</h2>
-	<div class="ion-padding-top">
-		<ion-note color="dark">
-			@for (field of checkin['stats'] | keyvalue; track field) {
-			<span> {{ field.key }}: {{ field.value }} <br /> </span>
-			}
-		</ion-note>
+@if (result$ | async; as result) {
+<ion-content
+	class="ion-padding blocked-scan"
+	[color]="result.disposition === 'duplicate-accidental' ? 'warning' : 'danger'"
+>
+	<div class="message" role="alert" aria-live="assertive">
+		@if (result.disposition === 'duplicate-accidental') {
+		<h1>Possible accidental double scan</h1>
+		<p>This customer checked in within the last five minutes.</p>
+		} @else if (result.disposition === 'cancelled') {
+		<h1>Canceled registration code</h1>
+		<p>This code is canceled and cannot be used for entry.</p>
+		} @else {
+		<h1>Suspicious duplicate scan</h1>
+		<p>This customer checked in more than five minutes ago.</p>
+		}
+
+		<h2>Do not issue tickets or coupons.</h2>
+		@if (result.disposition !== 'duplicate-accidental') {
+		<p><strong>Contact a DSCS member to resolve this attempt.</strong></p>
+		}
 	</div>
-	}
+
+	<ion-list aria-label="Blocked scan timeline">
+		<ion-item>
+			<ion-label>
+				<h2>Current blocked attempt</h2>
+				<p>{{ result.attempt.scannedOn | date:'medium' }}</p>
+				<p>Code ending in {{ result.attempt.codeSuffix }}</p>
+			</ion-label>
+		</ion-item>
+		<ion-item>
+			<ion-label>
+				<h2>
+					{{ result.disposition === 'cancelled' ? 'Registration canceled' : 'Original successful check-in' }}
+				</h2>
+				<p>{{ result.attempt.priorEventOn | date:'medium' }}</p>
+				<p>{{ result.attempt.elapsedSeconds }} seconds before this attempt</p>
+			</ion-label>
+		</ion-item>
+	</ion-list>
+
+	<ion-button expand="block" color="light" (click)="startOver()">
+		Start Over
+	</ion-button>
 </ion-content>
+} @else {
+<ion-content class="ion-padding ion-text-center">
+	<h1>No blocked scan is loaded</h1>
+	<p>Start a new scan to continue.</p>
+	<ion-button expand="block" (click)="startOver()">Start Over</ion-button>
+</ion-content>
+}

@@ -171,6 +171,6 @@ export const getStorageBucketName = (): string => {
 	);
 };
 
-export const getRegistrationQrCodeUrl = (uid: string): string => {
-	return `https://storage.googleapis.com/${getStorageBucketName()}/registrations/${uid}.png`;
+export const getRegistrationQrCodeUrl = (storagePath: string): string => {
+	return `https://storage.googleapis.com/${getStorageBucketName()}/${storagePath}`;
 };

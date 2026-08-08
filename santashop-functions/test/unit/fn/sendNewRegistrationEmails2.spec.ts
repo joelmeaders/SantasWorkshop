@@ -21,6 +21,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		sesSendMock.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-1', {
 			code: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 			name: 'Buddy',
 			email: 'buddy.elf@example.com',
 			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -37,6 +38,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			id: 'user-1',
 			data: () => ({
 				code: 'ABCD2345',
+				qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 				name: 'Buddy',
 				email: 'buddy.elf@example.com',
 				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -69,6 +71,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			await loadTriggerScheduledHandlers(backgroundMock);
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-1', {
 			code: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 			name: 'Buddy',
 			email: 'buddy.elf@example.com',
 			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -88,6 +91,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			id: 'user-1',
 			data: () => ({
 				code: 'ABCD2345',
+				qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 				name: 'Buddy',
 				email: 'buddy.elf@example.com',
 				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -103,6 +107,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		sesSendMock.mockRejectedValue(new Error('SES failure'));
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-1', {
 			code: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 			name: 'Buddy',
 			email: 'buddy.elf@example.com',
 			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -120,6 +125,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 				id: 'user-1',
 				data: () => ({
 					code: 'ABCD2345',
+					qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 					name: 'Buddy',
 					email: 'buddy.elf@example.com',
 					formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -143,6 +149,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		sesSendMock.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-2', {
 			code: 'WXYZ6789',
+			qrCodeStoragePath: 'registrations/user-2/test-asset.png',
 			name: 'Noelle',
 			email: 'noelle.elf@example.com',
 			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -161,6 +168,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			id: 'user-2',
 			data: () => ({
 				code: 'WXYZ6789',
+				qrCodeStoragePath: 'registrations/user-2/test-asset.png',
 				name: 'Noelle',
 				email: 'noelle.elf@example.com',
 				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -190,6 +198,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		});
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-1', {
 			code: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 			name: 'Buddy',
 			email: 'buddy.elf@example.com',
 			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -208,6 +217,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 				id: 'user-1',
 				data: () => ({
 					code: 'ABCD2345',
+					qrCodeStoragePath: 'registrations/user-1/test-asset.png',
 					name: 'Buddy',
 					email: 'buddy.elf@example.com',
 					formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -393,6 +403,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 		sesSendMock.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
 		backgroundMock.setDocSnapshot('tmp_registrationemails/user-3', {
 			code: 'REM12345',
+			qrCodeStoragePath: 'registrations/user-3/test-asset.png',
 			name: 'Noelle',
 			email: 'noelle.elf@example.com',
 			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
@@ -434,6 +445,7 @@ describe('sendNewRegistrationEmails2 handler', () => {
 			id: 'user-3',
 			data: () => ({
 				code: 'REM12345',
+				qrCodeStoragePath: 'registrations/user-3/test-asset.png',
 				name: 'Noelle',
 				email: 'noelle.elf@example.com',
 				formattedDateTime: 'Wednesday, December 10, 6:00 PM',

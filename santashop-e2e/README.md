@@ -96,7 +96,9 @@ The tests are configured to:
   retaining Node 24 for workspace tooling
 - Confirm an emulator-only callable loaded before Playwright begins
 - Use `firebase emulators:exec` to own emulator startup and shutdown for each suite
-- Run one Chromium project with Playwright's Pixel 5 mobile profile
+- Run the full suite with Playwright's Pixel 5 Chromium profile
+- Repeat public flows in Desktop Chrome and run focused Desktop Chrome staff coverage
+- Run compatibility smoke journeys in Desktop Firefox, iPhone WebKit, and iPad WebKit
 - Run sequentially in one worker because tests share emulator state
 - Stop after the first failed or timed-out test (`maxFailures: 1`)
 - Generate HTML reports

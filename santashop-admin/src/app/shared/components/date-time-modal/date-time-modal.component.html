@@ -14,7 +14,7 @@
 
 <ion-content>
 	<div class="ion-padding">
-		@if (currentSlot()) {
+		@if (currentSlot) {
 			<ion-card>
 				<ion-card-header>
 					<ion-card-title color="primary">
@@ -23,8 +23,8 @@
 				</ion-card-header>
 				<ion-card-content class="ion-text-center">
 					<ion-item lines="none">
-						{{ currentSlot()!.dateTime | date: 'MMMM d' : 'MST' }},
-						{{ currentSlot()!.dateTime | timeSlot: 'MST' }}
+						{{ currentSlot.dateTime | date: 'MMMM d' : 'MST' }},
+						{{ currentSlot.dateTime | timeSlot: 'MST' }}
 					</ion-item>
 				</ion-card-content>
 			</ion-card>

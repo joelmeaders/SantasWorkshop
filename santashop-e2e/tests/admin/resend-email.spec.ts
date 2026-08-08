@@ -25,6 +25,7 @@ test.describe('admin resend-email tool', () => {
 	test('ADMIN-RESEND-001 queues a registration email for a completed registration', async ({
 		page,
 		seedRegistration,
+		inspectQueuedRegistrationEmails,
 	}) => {
 		await seedRegistration(completeRegistration);
 		await signInAdminViaUi(page, defaultAdminAccount());
@@ -42,9 +43,17 @@ test.describe('admin resend-email tool', () => {
 		await expect(
 			page.locator('ion-input[formControlName="emailAddress"] input'),
 		).toHaveValue('');
+		const queuedEmail = (await inspectQueuedRegistrationEmails(
+			completeRegistration.emailAddress,
+		)).find((email) => email.queueSource === 'manual-resend');
+		expect(queuedEmail?.deliveryState).toBe('queued');
+		expect(queuedEmail?.hasConfirmationCode).toBe(true);
+		expect(queuedEmail?.qrCodeStoragePath).toBe(
+			`registrations/${completeRegistration.uid}/e2e-seeded.png`,
+		);
 	});
 
-	test('ADMIN-RESEND-001 explains when the registration QR code is not ready', async ({
+	test('ADMIN-RESEND-002 explains when the registration QR code is not ready', async ({
 		page,
 		seedRegistration,
 	}) => {

@@ -26,6 +26,7 @@ export const mockRegistrations = (id?: string) => ({
 	complete: {
 		mockRegistration1: {
 			uid: id,
+			qrCodeStoragePath: `registrations/${id ?? 'ABC123'}/test-asset.png`,
 			children: [{ id: '1' }, { id: '2' }] as any[],
 			dateTimeSlot: { id: '1', dateTime: Timestamp.now() as any },
 			registrationSubmittedOn: new Date(),

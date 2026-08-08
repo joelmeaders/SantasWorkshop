@@ -273,4 +273,61 @@ describe('ScheduleEditorService', () => {
 		// Assert
 		expect(collection.delete).toHaveBeenCalledWith(slotId);
 	});
+
+	it('startCreateSlots() polls the owner operation, refreshes, and returns its result counts', async () => {
+		vi.useFakeTimers();
+		ownerOperations.start.mockResolvedValue({
+			operationId: 'operation-1', status: 'queued',
+		});
+		ownerOperations.get.mockResolvedValue({
+			id: 'operation-1',
+			status: 'succeeded',
+			result: { created: 4, skipped: 2 },
+		} as never);
+		const refresh = vi.spyOn(service, 'refresh');
+
+		const action = service.startCreateSlots('preview-1', 'CONFIRM');
+		await vi.advanceTimersByTimeAsync(500);
+
+		await expect(action).resolves.toEqual({ created: 4, skipped: 2 });
+		expect(ownerOperations.start).toHaveBeenCalledWith({
+			previewId: 'preview-1', confirmationPhrase: 'CONFIRM',
+		});
+		expect(ownerOperations.get).toHaveBeenCalledWith('operation-1');
+		expect(refresh).toHaveBeenCalledOnce();
+		vi.useRealTimers();
+	});
+
+	it('startCreateSlots() rejects a failed owner operation with its diagnostic message', async () => {
+		vi.useFakeTimers();
+		ownerOperations.start.mockResolvedValue({
+			operationId: 'operation-1', status: 'queued',
+		});
+		ownerOperations.get.mockResolvedValue({
+			id: 'operation-1', status: 'failed', errorMessage: 'Season is closed',
+		} as never);
+
+		const action = service.startCreateSlots('preview-1', 'CONFIRM');
+		await vi.advanceTimersByTimeAsync(500);
+
+		await expect(action).rejects.toThrow('Season is closed');
+		vi.useRealTimers();
+	});
+
+	it('updateSlot() validates identifiers and persists a unique valid schedule', async () => {
+		const unique = {
+			id: 'slot-1', programYear: 2025, dateTime: new Date(2025, 11, 12, 10),
+			maxSlots: 10, enabled: true,
+		} satisfies DateTimeSlot;
+		collection.readMany.mockReturnValue(of([unique]));
+		const refresh = vi.spyOn(service, 'refresh');
+
+		await expect(service.updateSlot({ ...unique, id: undefined })).rejects.toThrow('Slot id is required.');
+		await service.updateSlot(unique);
+
+		expect(collection.update).toHaveBeenCalledWith(
+			'slot-1', expect.objectContaining({ lastUpdated: expect.any(Date) }), true,
+		);
+		expect(refresh).toHaveBeenCalledOnce();
+	});
 });

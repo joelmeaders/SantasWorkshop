@@ -138,4 +138,42 @@ describe('ErrorHandlerService', () => {
 
 		expect(present).toHaveBeenCalledOnce();
 	});
+
+	it('can log without displaying an alert and tolerates analytics failures', async (): Promise<void> => {
+		const present = vi.fn();
+		analyticsWrapper.logErrorEvent.mockImplementation(() => {
+			throw new Error('analytics unavailable');
+		});
+		alertControllerService.create.mockResolvedValue({
+			present,
+			onDidDismiss: vi.fn(),
+		} as unknown as HTMLIonAlertElement);
+
+		await expect(
+			service.handleError(
+				{ code: 'hidden', message: 'No dialog', details: 'details' },
+				'Background error',
+				false,
+			),
+		).resolves.toBeUndefined();
+		expect(present).not.toHaveBeenCalled();
+	});
+
+	it('shows the retry guidance for registration submission failures', async (): Promise<void> => {
+		const present = vi.fn().mockResolvedValue(undefined);
+		alertControllerService.create.mockResolvedValue(
+			{ present } as unknown as HTMLIonAlertElement,
+		);
+
+		await service.completeRegistrationException({
+			code: 'functions/internal',
+			message: 'retry',
+			details: 'details',
+		});
+
+		expect(alertControllerService.create).toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'Please try submitting again.' }),
+		);
+		expect(present).toHaveBeenCalledOnce();
+	});
 });

@@ -66,11 +66,14 @@ describe('CheckInService', () => {
 		await expect(service.checkIn(registration)).resolves.toBe(2);
 		expect(callableWrapper).toHaveBeenCalledWith('checkIn');
 		expect(checkIn).toHaveBeenCalledWith({
-			uid: 'registration-1',
-			qrcode: 'QR-123',
-			zipCode: '80202',
-			children: registration.children,
-			hasCheckedIn: true,
+			inputMethod: 'camera',
+			registration: {
+				uid: 'registration-1',
+				qrcode: 'QR-123',
+				zipCode: '80202',
+				children: registration.children,
+				hasCheckedIn: true,
+			},
 		});
 		expect(dismiss).toHaveBeenCalled();
 	});

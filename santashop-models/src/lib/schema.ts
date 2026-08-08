@@ -9,6 +9,8 @@ export const COLLECTION_SCHEMA = {
 	dateTimeSlots: 'dateTimeSlots',
 	emailTemplates: 'emailTemplates',
 	registrationSearchIndex: 'registrationsearchindex',
+	registrationScanAttempts: 'registrationScanAttempts',
+	registrationScanRiskSummaries: 'registrationScanRiskSummaries',
 	stats: 'stats',
 	tmpRegistrationEmails: 'tmp_registrationemails',
 	tmpResendRegistrationEmails: 'tmp_registrationemails2',

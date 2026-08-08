@@ -19,6 +19,7 @@ describe('changeRegistrationDateTime handler', () => {
 		adminMock.setDocSnapshot('registrations/user-5', {
 			uid: 'user-5',
 			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-5/test-asset.png',
 			reminderEmailSentOn: new Date('2025-12-02T00:00:00.000Z'),
 			emailAddress: 'buddy.elf@example.com',
 			firstName: 'Buddy',
@@ -130,5 +131,58 @@ describe('changeRegistrationDateTime handler', () => {
 		).resolves.toBe(true);
 		expect(adminMock.transactionSet).not.toHaveBeenCalled();
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
+	it('rejects a missing, unsubmitted, checked-in, or QR-less registration', async () => {
+		const { changeRegistrationDateTime } =
+			await loadAccountRegistrationHandlers(adminMock);
+		const request = () =>
+			createCallableRequest(
+				{ mutationId: 'change-slot-0001', slotId: 'slot-new' },
+				{ uid: 'user-5' },
+			);
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowChangeRegistration: true },
+		});
+		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
+			programYear: 2025, enabled: true, maxSlots: 10, dateTime: new Date(),
+		});
+		adminMock.setDocSnapshot('registrations/user-5/mutationReceipts/change-slot-0001', {}, false);
+		adminMock.getDocRef('registrations/user-5').get.mockResolvedValue({
+			exists: false,
+			data: () => undefined,
+		});
+
+		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'not-found' });
+		adminMock.setDocSnapshot('registrations/user-5', { uid: 'user-5' });
+		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'failed-precondition' });
+		adminMock.setDocSnapshot('registrations/user-5', { uid: 'user-5', registrationSubmittedOn: new Date() });
+		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'failed-precondition' });
+		adminMock.setDocSnapshot('registrations/user-5', {
+			uid: 'user-5', registrationSubmittedOn: new Date(), qrCodeStoragePath: 'registrations/user-5/qr.png', hasCheckedIn: true,
+		});
+		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'failed-precondition' });
+	});
+
+	it('rejects disabled changes and creates a no-op receipt for the current slot', async () => {
+		const { changeRegistrationDateTime } =
+			await loadAccountRegistrationHandlers(adminMock);
+		const request = createCallableRequest(
+			{ mutationId: 'change-slot-0001', slotId: 'slot-new' },
+			{ uid: 'user-5' },
+		);
+		adminMock.setDocSnapshot('registrations/user-5/mutationReceipts/change-slot-0001', {}, false);
+		adminMock.setDocSnapshot('registrations/user-5', {
+			uid: 'user-5', registrationSubmittedOn: new Date(), qrCodeStoragePath: 'registrations/user-5/qr.png', dateTimeSlot: { id: 'slot-new' },
+		});
+		adminMock.setDocSnapshot('parameters/public', { admin: { allowChangeRegistration: false } });
+		await expect(changeRegistrationDateTime(request)).rejects.toMatchObject({ code: 'failed-precondition' });
+
+		adminMock.setDocSnapshot('parameters/public', { admin: { allowChangeRegistration: true } });
+		await expect(changeRegistrationDateTime(request)).resolves.toBe(true);
+		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'registrations/user-5/mutationReceipts/change-slot-0001' }),
+			expect.objectContaining({ operation: 'changeRegistrationDateTime' }),
+		);
 	});
 });

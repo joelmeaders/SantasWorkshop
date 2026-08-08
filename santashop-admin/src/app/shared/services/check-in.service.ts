@@ -1,6 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
-import { Registration } from '@santashop/models';
+import {
+	type CheckInRequest,
+	Registration,
+	type ScanInputMethod,
+} from '@santashop/models';
 import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core';
 
 @Injectable({
@@ -11,18 +15,18 @@ export class CheckInService {
 	private readonly loadingController = inject(LoadingController);
 
 	private readonly checkInFn = (
-		registration: Registration,
+		request: CheckInRequest,
 	): Promise<HttpsCallableResult<number>> =>
-		this.functions.callableWrapper<Registration, number>('checkIn')(
-			registration,
+		this.functions.callableWrapper<CheckInRequest, number>('checkIn')(
+			request,
 		);
 
 	private readonly checkInWithEditFn = (
-		registration: Partial<Registration>,
+		request: CheckInRequest,
 	): Promise<HttpsCallableResult<number>> =>
-		this.functions.callableWrapper<Registration, number>(
+		this.functions.callableWrapper<CheckInRequest, number>(
 			'checkInWithEdit',
-		)(registration);
+		)(request);
 
 	private readonly onSiteRegistrationFn = (
 		registration: Registration,
@@ -34,6 +38,7 @@ export class CheckInService {
 	public async checkIn(
 		registration: Registration,
 		isEdit = false,
+		inputMethod: ScanInputMethod = 'camera',
 	): Promise<number> {
 		if (!registration?.uid) throw new Error('Invalid registration');
 
@@ -54,9 +59,13 @@ export class CheckInService {
 				hasCheckedIn: true,
 			} as Partial<Registration>;
 
+			const request: CheckInRequest = {
+				registration: partialRegistration,
+				inputMethod,
+			};
 			const response = isEdit
-				? await this.checkInWithEditFn(partialRegistration)
-				: await this.checkInFn(partialRegistration);
+				? await this.checkInWithEditFn(request)
+				: await this.checkInFn(request);
 
 			return response.data;
 		} finally {

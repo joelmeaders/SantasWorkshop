@@ -1,5 +1,5 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import type { Locator } from '@playwright/test';
+import type { APIRequestContext, Locator } from '@playwright/test';
 import {
 	defaultAdminAccount,
 	defaultOwnerAccount,
@@ -193,6 +193,88 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			expect(response.status()).toBe(403);
 		}
 	});
+
+	test('RULES-002 allows administrators to read scan audit records, but never lets clients write them', async ({
+		page,
+		request,
+		seedPublicParams,
+		seedAdminUser,
+		seedRegistration,
+	}) => {
+		const admin = defaultAdminAccount({
+			uid: 'scan-rules-admin-e2e',
+			emailAddress: 'scan-rules-admin-e2e@test.com',
+		});
+		const checkinOnly = defaultAdminAccount({
+			uid: 'scan-rules-checkin-e2e',
+			emailAddress: 'scan-rules-checkin-e2e@test.com',
+			admin: false,
+			roles: ['checkin'],
+		});
+		await seedPublicParams({});
+		await seedAdminUser(admin);
+		await seedAdminUser(checkinOnly);
+		await seedRegistration({
+			uid: 'scan-rules-registration-e2e',
+			firstName: 'Rule',
+			lastName: 'Evidence',
+			emailAddress: 'scan-rules-registration-e2e@test.com',
+			zipCode: '80202',
+			code: 'RULESCAN',
+			dateTime: '2026-12-15T16:00:00.000Z',
+			hasCheckedIn: true,
+			checkInDateTime: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+		});
+
+		await signInAdminViaUi(page, admin);
+		await page.goto('/admin/checkin/scan');
+		await page.locator('#manualCheckInCodeButton').click();
+		const manualAlert = page.locator('ion-alert');
+		await manualAlert.locator('input').fill('RULESCAN');
+		await manualAlert.getByRole('button', { name: 'OK', exact: true }).click();
+		await expect(page.getByText('Suspicious duplicate scan')).toBeVisible();
+
+		const [adminToken, checkinToken] = await Promise.all([
+			getFirestoreIdToken(request, admin),
+			getFirestoreIdToken(request, checkinOnly),
+		]);
+		for (const collection of [
+			'registrationScanAttempts',
+			'registrationScanRiskSummaries',
+		]) {
+			const adminRead = await request.get(firestoreCollectionUrl(collection), {
+				headers: { Authorization: `Bearer ${adminToken}` },
+			});
+			expect(adminRead.status()).toBe(200);
+			const documents = ((await adminRead.json()) as {
+				documents?: { name: string }[];
+			}).documents;
+			expect(documents?.length).toBeGreaterThan(0);
+			const documentId = documents?.[0]?.name.split('/').at(-1);
+			expect(documentId).toBeTruthy();
+
+			const checkinRead = await request.get(firestoreCollectionUrl(collection), {
+				headers: { Authorization: `Bearer ${checkinToken}` },
+			});
+			expect(checkinRead.status()).toBe(403);
+
+			const headers = { Authorization: `Bearer ${adminToken}` };
+			const create = await request.post(firestoreCollectionUrl(collection), {
+				headers,
+				data: { fields: { proof: { stringValue: 'client-write' } } },
+			});
+			expect(create.status()).toBe(403);
+
+			const documentUrl = firestoreDocumentUrl(collection, documentId as string);
+			const update = await request.patch(documentUrl, {
+				headers,
+				data: { fields: { proof: { stringValue: 'client-update' } } },
+			});
+			expect(update.status()).toBe(403);
+			const remove = await request.delete(documentUrl, { headers });
+			expect(remove.status()).toBe(403);
+		}
+	});
 });
 
 const expectIonicDisabled = async (locator: Locator): Promise<void> => {
@@ -202,4 +284,28 @@ const expectIonicDisabled = async (locator: Locator): Promise<void> => {
 			locator.evaluate((element) => Reflect.get(element, 'disabled')),
 		)
 		.toBe(true);
+};
+
+const firestoreCollectionUrl = (collection: string): string =>
+	`http://127.0.0.1:8180/v1/projects/demo-santashop/databases/(default)/documents/${collection}`;
+
+const firestoreDocumentUrl = (collection: string, documentId: string): string =>
+	`${firestoreCollectionUrl(collection)}/${documentId}`;
+
+const getFirestoreIdToken = async (
+	request: APIRequestContext,
+	account: ReturnType<typeof defaultAdminAccount>,
+): Promise<string> => {
+	const response = await request.post(
+		'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',
+		{
+			data: {
+				email: account.emailAddress,
+				password: account.password,
+				returnSecureToken: true,
+			},
+		},
+	);
+	expect(response.ok()).toBe(true);
+	return ((await response.json()) as { idToken: string }).idToken;
 };

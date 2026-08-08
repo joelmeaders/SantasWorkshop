@@ -5,7 +5,10 @@ export interface RegistrationCancellation {
 	uid: string;
 	actorUid: string;
 	cancelledOn: Date;
+	programYear: number;
 	previousDateTimeSlot?: Partial<DateTimeSlot>;
-	supersededConfirmationCode?: string;
+	supersededConfirmationCode: string;
+	supersededQrCodeStoragePath: string;
 	replacementConfirmationCode: string;
+	replacementQrCodeStoragePath: string;
 }

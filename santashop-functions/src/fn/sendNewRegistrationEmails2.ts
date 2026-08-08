@@ -51,6 +51,7 @@ interface EmailTriggerMetadata {
 
 interface QueuedRegistrationEmailDocument {
 	code?: string;
+	qrCodeStoragePath?: string;
 	name?: string;
 	email?: string;
 	formattedDateTime?: string;
@@ -88,6 +89,7 @@ interface ResolvedEmailPayload {
 	firstName: string;
 	dateTime: string;
 	code: string;
+	qrCodeStoragePath?: string;
 	template?: string;
 	templateKey?: string;
 }
@@ -443,6 +445,12 @@ const resolveEmailPayload = (
 		});
 		return undefined;
 	}
+	if (!isCancellationCommunication(document) && !document.qrCodeStoragePath) {
+		log.warn('Skipping registration email without a QR image snapshot', {
+			uid: triggeredSnapshot.id,
+		});
+		return undefined;
+	}
 
 	return {
 		uid: triggeredSnapshot.id,
@@ -450,6 +458,9 @@ const resolveEmailPayload = (
 		firstName: document.name,
 		dateTime: document.formattedDateTime,
 		code: document.code,
+		...(document.qrCodeStoragePath
+			? { qrCodeStoragePath: document.qrCodeStoragePath }
+			: {}),
 		...(document.template ? { template: document.template } : {}),
 		...(document.templateKey
 			? { templateKey: document.templateKey }
@@ -613,10 +624,13 @@ export default async function sendNewRegistrationEmails2(
 	if (isCancellation) {
 		emailCommand = createCancellationEmailCommand(payload);
 	} else {
+		if (!payload.qrCodeStoragePath) {
+			throw new Error('Queued registration QR image snapshot is unavailable.');
+		}
 		const baseMessageDetails = {
 			firstName: payload.firstName,
 			eventName: EVENT_DISPLAY_NAME,
-			qrCodeUrl: getRegistrationQrCodeUrl(payload.uid),
+			qrCodeUrl: getRegistrationQrCodeUrl(payload.qrCodeStoragePath),
 			code: payload.code,
 			dateTime: payload.dateTime,
 		};

@@ -84,6 +84,8 @@ export const clearEmulatorData = async (): Promise<void> => {
 		COLLECTION_SCHEMA.editedRegistrations,
 		COLLECTION_SCHEMA.onSiteRegistrations,
 		COLLECTION_SCHEMA.stats,
+		COLLECTION_SCHEMA.registrationScanAttempts,
+		COLLECTION_SCHEMA.registrationScanRiskSummaries,
 	];
 
 	for (const collectionName of collections) {

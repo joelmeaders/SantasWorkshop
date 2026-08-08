@@ -374,6 +374,13 @@ const buildCounts = async (
 				),
 				children: await countCollection(COLLECTION_SCHEMA.children),
 				checkins: await countCollection(COLLECTION_SCHEMA.checkins),
+				cancellations: await countCollection(COLLECTION_SCHEMA.cancellations),
+				registrationScanAttempts: await countCollection(
+					COLLECTION_SCHEMA.registrationScanAttempts,
+				),
+				registrationScanRiskSummaries: await countCollection(
+					COLLECTION_SCHEMA.registrationScanRiskSummaries,
+				),
 				editedRegistrations: await countCollection(
 					COLLECTION_SCHEMA.editedRegistrations,
 				),

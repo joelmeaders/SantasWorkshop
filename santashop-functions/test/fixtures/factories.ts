@@ -41,6 +41,7 @@ export const createRegistration = (
 ): Registration => ({
 	uid: 'test-user-123',
 	qrcode: 'ABCD2345',
+	qrCodeStoragePath: 'registrations/test-user-123/test-asset.png',
 	firstName: 'Buddy',
 	lastName: 'Elf',
 	emailAddress: 'buddy.elf@example.com',

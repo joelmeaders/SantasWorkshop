@@ -10,7 +10,7 @@
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 			>
-				<ion-icon name="storefront-outline" color="tertiary" />
+				<ion-icon name="storefront-outline" color="tertiary" aria-hidden="true" />
 				<ion-label>Home</ion-label>
 			</ion-tab-button>
 
@@ -21,7 +21,7 @@
 				routerDirection="root"
 				[disabled]="(checkinEnabled$ | async) === false"
 			>
-				<ion-icon name="bag-check-outline" color="success" />
+				<ion-icon name="bag-check-outline" color="success" aria-hidden="true" />
 				<ion-label>Check-In</ion-label>
 			</ion-tab-button>
 
@@ -30,7 +30,7 @@
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 			>
-				<ion-icon name="search-outline" color="warning" />
+				<ion-icon name="search-outline" color="warning" aria-hidden="true" />
 				<ion-label>Search</ion-label>
 			</ion-tab-button>
 
@@ -41,7 +41,7 @@
 				routerDirection="root"
 				[disabled]="(onsiteRegistrationEnabled$ | async) === false"
 			>
-				<ion-icon name="storefront-outline" color="primary" />
+				<ion-icon name="storefront-outline" color="primary" aria-hidden="true" />
 				<ion-label>Registration</ion-label>
 			</ion-tab-button>
 		</ion-tab-bar>

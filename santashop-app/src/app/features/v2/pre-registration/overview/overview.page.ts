@@ -129,6 +129,10 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		this.focusHashSection();
 	}
 
+	public ionViewWillEnter(): void {
+		this.reviewing.set(false);
+	}
+
 	public ngOnDestroy(): void {
 		if (isPlatformBrowser(this.platformId)) {
 			window.removeEventListener('hashchange', this.focusHashSection);

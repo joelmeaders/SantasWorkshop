@@ -24,7 +24,7 @@ import { FIREBASE_FIRESTORE } from '../tokens';
 // in the database, but not being converted back to dates when read.
 export const timestampDateFix = (date: Date): Date => {
 	const timestamp = date as unknown as Timestamp;
-	return timestamp?.toDate() ?? date;
+	return timestamp?.toDate?.() ?? date;
 };
 
 export type idField<T> = keyof T & keyof NonNullable<T>;

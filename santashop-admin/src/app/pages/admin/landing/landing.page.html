@@ -7,11 +7,11 @@
 			routerLink="../checkin"
 			[disabled]="(checkinEnabled$ | async) === false"
 		>
-			<ion-icon name="bag-check-outline" color="success" slot="start" />
+			<ion-icon name="bag-check-outline" color="success" slot="start" aria-hidden="true" />
 			Check in customers
 		</ion-item>
 		<ion-item id="searchNav" detail routerLink="../search">
-			<ion-icon name="search-outline" color="warning" slot="start" />
+			<ion-icon name="search-outline" color="warning" slot="start" aria-hidden="true" />
 			Search for customers
 		</ion-item>
 		<ion-item
@@ -20,7 +20,7 @@
 			routerLink="../registration"
 			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
 		>
-			<ion-icon name="storefront-outline" color="primary" slot="start" />
+			<ion-icon name="storefront-outline" color="primary" slot="start" aria-hidden="true" />
 			On-Site Registration
 		</ion-item>
 		<ion-item
@@ -29,18 +29,18 @@
 			routerLink="../pre-registration"
 			[disabled]="(preRegistrationEnabled$ | async) === false"
 		>
-			<ion-icon name="person-add-outline" color="primary" slot="start" />
+			<ion-icon name="person-add-outline" color="primary" slot="start" aria-hidden="true" />
 			Pre-Register Customers
 		</ion-item>
 
 		@if ((isAdmin$ | async) === true) {
 		<ion-list-header> Tools </ion-list-header>
 		<ion-item detail routerLink="../resend-email">
-			<ion-icon name="mail-outline" color="tertiary" slot="start" />
+			<ion-icon name="mail-outline" color="tertiary" slot="start" aria-hidden="true" />
 			Resend Registration Emails
 		</ion-item>
 		<ion-item id="scheduleEditorNav" detail routerLink="../schedule-editor">
-			<ion-icon name="calendar-outline" color="secondary" slot="start" />
+			<ion-icon name="calendar-outline" color="secondary" slot="start" aria-hidden="true" />
 			Schedule & Capacity Editor
 		</ion-item>
 		<ion-item detail routerLink="../email-templates">
@@ -48,11 +48,12 @@
 				name="document-text-outline"
 				color="secondary"
 				slot="start"
+				aria-hidden="true"
 			/>
 			Email Templates
 		</ion-item>
 		<ion-item detail routerLink="../users">
-			<ion-icon name="people-outline" color="primary" slot="start" />
+			<ion-icon name="people-outline" color="primary" slot="start" aria-hidden="true" />
 			User Management
 		</ion-item>
 		@if ((isOwner$ | async) === true) {
@@ -61,22 +62,27 @@
 				name="shield-checkmark-outline"
 				color="danger"
 				slot="start"
+				aria-hidden="true"
 			/>
 			Owner Operations
 		</ion-item>
 		}
 
 		<ion-list-header> DSCS Data </ion-list-header>
+		<ion-item id="scanRiskReviewNav" detail routerLink="../stats/scan-risk">
+			<ion-icon name="alert-circle-outline" color="danger" slot="start" aria-hidden="true" />
+			Scan Risk Review
+		</ion-item>
 		<ion-item detail routerLink="../stats/registration">
-			<ion-icon name="stats-chart-outline" slot="start" />
+			<ion-icon name="stats-chart-outline" slot="start" aria-hidden="true" />
 			Registration Stats
 		</ion-item>
 		<ion-item detail routerLink="../stats/check-in">
-			<ion-icon name="cart-outline" color="secondary" slot="start" />
+			<ion-icon name="cart-outline" color="secondary" slot="start" aria-hidden="true" />
 			Check-In Stats
 		</ion-item>
 		<ion-item detail routerLink="../stats/user">
-			<ion-icon name="people-outline" color="tertiary" slot="start" />
+			<ion-icon name="people-outline" color="tertiary" slot="start" aria-hidden="true" />
 			User Stats
 		</ion-item>
 		}
@@ -90,14 +96,15 @@
 			button
 			tappable
 		>
-			<ion-icon name="exit-outline" color="danger" slot="start" />
+			<ion-icon name="exit-outline" color="danger" slot="start" aria-hidden="true" />
 			Sign Out
 		</ion-item>
 		<ion-item>
-			<ion-icon name="moon-outline" color="tertiary" slot="start" />
+			<ion-icon name="moon-outline" color="tertiary" slot="start" aria-hidden="true" />
 			Theme (Light or Dark)
 			<ion-toggle
 				slot="end"
+				aria-label="Toggle light or dark theme"
 				(ionChange)="toggleTheme()"
 				[checked]="appStateService.prefersDark"
 			/>

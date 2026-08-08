@@ -11,7 +11,9 @@ import {
 	ActivatedRoute,
 	convertToParamMap,
 	provideRouter,
+	Router,
 } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { EmailTemplateEditorPage } from './email-template-editor.page';
 import {
 	createActivatedRouteMock,
@@ -39,6 +41,9 @@ describe('EmailTemplateEditorPage', () => {
 			publishEmailTemplate: vi
 				.fn()
 				.mockName('EmailTemplateService.publishEmailTemplate'),
+			deleteEmailTemplate: vi
+				.fn()
+				.mockName('EmailTemplateService.deleteEmailTemplate'),
 			sendTestEmailTemplate: vi
 				.fn()
 				.mockName('EmailTemplateService.sendTestEmailTemplate'),
@@ -170,5 +175,174 @@ describe('EmailTemplateEditorPage', () => {
 				subjectPart: 'Ticket for {{eventName}}',
 			}),
 		);
+	});
+
+	it('loads a selected historical revision into the editable draft', async () => {
+		await component.ionViewWillEnter();
+		const revision = component.revisions[0];
+		emailTemplateService.getEmailTemplateRevision.mockResolvedValue({
+			template: component.currentTemplate!,
+			revision: {
+				...revision,
+				id: 'rev-2',
+				revisionNumber: 2,
+				subjectPart: 'Updated {{firstName}}',
+			},
+			html: '<p>Updated {{firstName}}</p>',
+		});
+
+		await component.loadRevision(revision);
+
+		expect(emailTemplateService.getEmailTemplateRevision).toHaveBeenCalledWith({
+			key: 'registration-confirmation',
+			revisionId: 'rev-1',
+		});
+		expect(component.selectedRevisionId).toBe('rev-2');
+		expect(component.form.controls['subjectPart'].value).toBe(
+			'Updated {{firstName}}',
+		);
+		expect(component.html).toBe('<p>Updated {{firstName}}</p>');
+	});
+
+	it('normalizes field mappings to the selected delivery profile and refreshes preview HTML', async () => {
+		await component.ionViewWillEnter();
+		component.form.controls['deliveryProfile'].setValue('event-reminder');
+		component.fieldMappings
+			.at(0)
+			.get('mapping')!
+			.setValue('unsupported.field');
+
+		component.onDeliveryProfileChanged();
+
+		expect(component.fieldMappings.at(0).get('mapping')!.value).toBe(
+			'firstName',
+		);
+		expect(component.previewHtml).toContain('Buddy');
+	});
+
+	it('saves a valid draft and updates the current template revision', async () => {
+		await component.ionViewWillEnter();
+		const template = {
+			...component.currentTemplate!,
+			currentRevisionId: 'rev-2',
+			currentRevisionNumber: 2,
+		};
+		const revision = {
+			...component.revisions[0],
+			id: 'rev-2',
+			revisionNumber: 2,
+		};
+		emailTemplateService.saveEmailTemplateRevision.mockResolvedValue({
+			template,
+			revision,
+			html: '<h1>Hello {{firstName}}</h1>',
+		});
+		component.form.controls['notes'].setValue('Updated copy');
+
+		await component.saveRevision();
+
+		expect(emailTemplateService.saveEmailTemplateRevision).toHaveBeenCalledWith(
+			expect.objectContaining({
+				key: 'registration-confirmation',
+				html: '<h1>Hello {{firstName}}</h1>',
+				notes: 'Updated copy',
+			}),
+		);
+		expect(component.currentTemplate?.currentRevisionId).toBe('rev-2');
+		expect(component.revisions[0].id).toBe('rev-2');
+	});
+
+	it('publishes the selected revision and marks it as current', async () => {
+		await component.ionViewWillEnter();
+		const template = {
+			...component.currentTemplate!,
+			publishedRevisionId: 'rev-1',
+			publishedRevisionNumber: 1,
+		};
+		emailTemplateService.publishEmailTemplate.mockResolvedValue({
+			template,
+			revision: component.revisions[0],
+			renderedHtml: '<h1>Hello Buddy</h1>',
+		});
+
+		await component.publishTemplate();
+
+		expect(emailTemplateService.publishEmailTemplate).toHaveBeenCalledWith({
+			key: 'registration-confirmation',
+			revisionId: 'rev-1',
+		});
+		expect(component.currentTemplate?.publishedRevisionId).toBe('rev-1');
+	});
+
+	it('marks validation failures before attempting to send or save', async () => {
+		await component.sendTestEmail();
+		expect(emailTemplateService.sendTestEmailTemplate).not.toHaveBeenCalled();
+
+		await component.saveRevision();
+		expect(emailTemplateService.saveEmailTemplateRevision).not.toHaveBeenCalled();
+	});
+
+	it('sets up a blank editable draft when the route has no template key', async () => {
+		const route = TestBed.inject(ActivatedRoute);
+		(route.snapshot as { paramMap: ReturnType<typeof convertToParamMap> }).paramMap =
+			convertToParamMap({});
+
+		await component.ionViewWillEnter();
+
+		expect(component.isCreateMode$.value).toBe(true);
+		expect(component.form.controls['key'].enabled).toBe(true);
+		expect(component.revisions).toEqual([]);
+		expect(component.previewHtml).toBe('');
+	});
+
+	it('uses the published revision badge and shows service failures to the user', async () => {
+		await component.ionViewWillEnter();
+		component.currentTemplate = {
+			...component.currentTemplate!,
+			publishedRevisionId: 'rev-1',
+		};
+		expect(component.revisionBadgeColor(component.revisions[0]!)).toBe('success');
+		expect(
+			component.revisionBadgeColor({ ...component.revisions[0]!, id: 'rev-2' }),
+		).toBe('medium');
+
+		emailTemplateService.publishEmailTemplate.mockRejectedValueOnce(
+			new Error('SES unavailable'),
+		);
+		await component.publishTemplate();
+		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
+		expect(alerts.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				header: 'Something went wrong',
+				message: 'SES unavailable',
+			}),
+		);
+	});
+
+	it('deletes a confirmed saved template and routes back to the template list', async () => {
+		await component.ionViewWillEnter();
+		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
+		const confirmation = {
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'destructive' }),
+		};
+		const deleted = {
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue(undefined),
+		};
+		alerts.create.mockResolvedValueOnce(
+			confirmation as unknown as HTMLIonAlertElement,
+		);
+		alerts.create.mockResolvedValueOnce(deleted as unknown as HTMLIonAlertElement);
+		emailTemplateService.deleteEmailTemplate.mockResolvedValue(undefined);
+		const router = TestBed.inject(Router);
+		const navigate = vi.spyOn(router, 'navigate');
+
+		await component.deleteTemplate();
+
+		expect(emailTemplateService.deleteEmailTemplate).toHaveBeenCalledWith(
+			'registration-confirmation',
+		);
+		expect(navigate).toHaveBeenCalledWith(['/admin/email-templates']);
 	});
 });

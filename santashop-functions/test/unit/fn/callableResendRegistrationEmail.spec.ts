@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createRegistration } from '../../fixtures/factories';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
 	createCheckInAdminMock,
@@ -24,6 +25,7 @@ describe('callableResendRegistrationEmail handler', () => {
 		adminMock.setDocSnapshot('registrations/test-user-123', {
 			uid: 'test-user-123',
 			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/test-user-123/test-asset.png',
 			reminderEmailSentOn: new Date('2025-12-05T00:00:00.000Z'),
 			qrCodeGeneratedOn: new Date('2025-12-01T00:00:00.000Z'),
 			firstName: 'Buddy',
@@ -70,5 +72,60 @@ describe('callableResendRegistrationEmail handler', () => {
 			}),
 			{ merge: true },
 		);
+	});
+
+	it('rejects a missing registration and an unrelated non-staff caller', async () => {
+		const { callableResendRegistrationEmail } =
+			await loadCheckInAdminHandlers(adminMock);
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest({ customerId: 'missing' }, { uid: 'owner' }),
+			),
+		).rejects.toMatchObject({ code: 'not-found' });
+
+		adminMock.setDocSnapshot('registrations/customer', {
+			...createRegistration({ uid: 'customer' }),
+			qrCodeGeneratedOn: new Date(),
+			dateTimeSlot: { id: 'slot-1', dateTime: new Date() },
+		});
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest({ customerId: 'customer' }, { uid: 'intruder' }),
+			),
+		).rejects.toMatchObject({ code: 'permission-denied' });
+	});
+
+	it('requires a complete registration, a generated QR image, and an appointment', async () => {
+		const { callableResendRegistrationEmail } =
+			await loadCheckInAdminHandlers(adminMock);
+		adminMock.setDocSnapshot('registrations/customer', {
+			...createRegistration({ uid: 'customer', children: [] }),
+		});
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest({ customerId: 'customer' }, { uid: 'customer' }),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition', message: '-10' });
+
+		adminMock.setDocSnapshot('registrations/customer', {
+			...createRegistration({ uid: 'customer' }),
+			qrCodeStoragePath: '',
+		});
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest({ customerId: 'customer' }, { uid: 'customer' }),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+
+		adminMock.setDocSnapshot('registrations/customer', {
+			...createRegistration({ uid: 'customer' }),
+			qrCodeGeneratedOn: new Date(),
+			dateTimeSlot: { id: 'slot-1' },
+		});
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest({ customerId: 'customer' }, { uid: 'customer' }),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
 	});
 });

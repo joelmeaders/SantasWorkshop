@@ -17,6 +17,7 @@ describe('completeRegistration handler', () => {
 		adminMock.setDocSnapshot('registrations/user-3', {
 			uid: 'user-3',
 			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-3/test-asset.png',
 			children: [{
 				id: 1,
 				firstName: 'Noelle',

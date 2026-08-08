@@ -16,6 +16,7 @@ interface FirebaseAuthTokenLike {
 
 interface ResendEmailDocument {
 	code?: string;
+	qrCodeStoragePath: string;
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
@@ -74,6 +75,7 @@ export default async function callableResendRegistrationEmail(
 
 	const emailDoc: ResendEmailDocument = {
 		code: record.qrcode,
+		qrCodeStoragePath: record.qrCodeStoragePath,
 		email: record.emailAddress,
 		name: record.firstName,
 		formattedDateTime: dateTime,
@@ -104,7 +106,11 @@ export default async function callableResendRegistrationEmail(
 }
 
 function ensureQrReady(record: Registration): void {
-	if (!record.qrCodeGeneratedOn || record.qrCodeGenerationFailedOn) {
+	if (
+		!record.qrCodeStoragePath ||
+		!record.qrCodeGeneratedOn ||
+		record.qrCodeGenerationFailedOn
+	) {
 		throw new HttpsError(
 			'failed-precondition',
 			'Registration QR code is not ready for email delivery',

@@ -164,4 +164,12 @@ describe('ProfilePage', () => {
 		// Assert
 		expect(methodSpy).toHaveBeenCalled();
 	});
+
+	it('renders each account settings form for the authenticated profile', async (): Promise<void> => {
+		await fixture.whenStable();
+
+		expect(fixture.nativeElement.querySelectorAll('.settings-panel')).toHaveLength(3);
+		expect(fixture.nativeElement.querySelectorAll('form')).toHaveLength(3);
+		expect(fixture.nativeElement.textContent).toContain('Jesse Doe');
+	});
 });

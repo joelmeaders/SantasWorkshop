@@ -159,6 +159,10 @@ export const loadAccountRegistrationHandlers = async (
 	vi.doMock('../../../src/utility/qrcodes', () => ({
 		deleteQrCode: vi.fn().mockResolvedValue(undefined),
 		generateQrCode: vi.fn().mockResolvedValue(undefined),
+		createQrCodeStoragePath: vi.fn(
+			(uid: string) => `registrations/${uid}/replacement.png`,
+		),
+		replaceQrCodeWithCancelled: vi.fn().mockResolvedValue(undefined),
 	}));
 
 	const [

@@ -23,7 +23,8 @@ const redirectLoggedInToAdminGuard: CanActivateFn = () => {
 
 					return claims['owner'] === true ||
 						claims['admin'] === true ||
-						roles.length > 0
+						roles.includes('admin') ||
+						roles.includes('checkin')
 						? router.createUrlTree(['/admin'])
 						: true;
 				}),
@@ -74,7 +75,8 @@ const elevatedUserGuard: CanActivateFn = () => {
 
 					return claims['owner'] === true ||
 						claims['admin'] === true ||
-						roles.length > 0
+						roles.includes('admin') ||
+						roles.includes('checkin')
 						? true
 						: router.createUrlTree(['/']);
 				}),
@@ -342,6 +344,20 @@ export const routes: Routes = [
 		path: 'admin/stats',
 		canActivate: [adminOnlyGuard],
 		children: [
+			{
+				path: 'scan-risk',
+				loadComponent: () =>
+					import('./pages/admin/stats/scan-risk/scan-risk.page').then(
+						(m) => m.ScanRiskPage,
+					),
+			},
+			{
+				path: 'scan-risk/:uid',
+				loadComponent: () =>
+					import('./pages/admin/stats/scan-risk/scan-risk-detail.page').then(
+						(m) => m.ScanRiskDetailPage,
+					),
+			},
 			{
 				path: 'registration',
 				loadComponent: () =>

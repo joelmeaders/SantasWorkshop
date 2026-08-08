@@ -1,7 +1,11 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { OnboardUser, User, Registration, COLLECTION_SCHEMA } from '../models';
 import { generateId } from '../utility/id-generation';
-import { deleteQrCode, generateQrCode } from '../utility/qrcodes';
+import {
+	createQrCodeStoragePath,
+	deleteQrCode,
+	generateQrCode,
+} from '../utility/qrcodes';
 import admin from '../firebase-admin';
 import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
@@ -15,6 +19,7 @@ import {
 	throwMappedAuthHttpsError,
 	withCallableValidation,
 } from '../utility/callable-validation';
+import { PROGRAM_YEAR } from '../utility/runtime-config';
 
 const log = createFunctionLogger('newAccount');
 
@@ -96,13 +101,17 @@ export default async function newAccount(
 		referredBy: data.referredBy,
 	};
 
+	const confirmationCode = generateId(8);
+	const qrCodeStoragePath = createQrCodeStoragePath(newUserAccount.uid);
 	const registration: Registration = {
 		uid: newUserAccount.uid,
 		firstName: data.firstName,
 		lastName: data.lastName,
 		emailAddress: data.emailAddress,
 		zipCode: data.zipCode,
-		qrcode: generateId(8),
+		qrcode: confirmationCode,
+		qrCodeStoragePath,
+		programYear: PROGRAM_YEAR,
 		qrCodeGeneratedOn: false,
 	};
 
@@ -136,7 +145,7 @@ export default async function newAccount(
 	}
 
 	try {
-		await generateQrCode(newUserAccount.uid, registration.qrcode);
+		await generateQrCode(qrCodeStoragePath, confirmationCode);
 		await registrationDocument.set(
 			{ qrCodeGeneratedOn: new Date(), qrCodeGenerationFailedOn: false },
 			{ merge: true },
@@ -147,7 +156,7 @@ export default async function newAccount(
 			{ uid: newUserAccount.uid },
 			error,
 		);
-		await deleteQrCode(newUserAccount.uid).catch(() => undefined);
+		await deleteQrCode(qrCodeStoragePath).catch(() => undefined);
 		await registrationDocument.set(
 			{ qrCodeGenerationFailedOn: new Date() },
 			{ merge: true },

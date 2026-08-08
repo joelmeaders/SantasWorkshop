@@ -8,7 +8,11 @@ import {
 } from '../models';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { generateId } from '../utility/id-generation';
-import { deleteQrCode, generateQrCode } from '../utility/qrcodes';
+import {
+	createQrCodeStoragePath,
+	deleteQrCode,
+	generateQrCode,
+} from '../utility/qrcodes';
 import admin from '../firebase-admin';
 import {
 	formatRegistrationDateTime,
@@ -25,6 +29,7 @@ import { isAdminToken } from '../utility/capabilities';
 
 interface RegistrationCreationResult {
 	qrCode: string;
+	qrCodeStoragePath: string;
 	formattedDateTime: string;
 }
 
@@ -118,7 +123,10 @@ export default async function callableAdminPreRegister(
 	}
 
 	try {
-		await generateQrCode(newUserAccount.uid, createdRegistration.qrCode);
+		await generateQrCode(
+			createdRegistration.qrCodeStoragePath,
+			createdRegistration.qrCode,
+		);
 		const finalizedOn = new Date();
 		const registrationDocRef = admin
 			.firestore()
@@ -141,6 +149,7 @@ export default async function callableAdminPreRegister(
 		await emailDocRef.set(
 			{
 				code: createdRegistration.qrCode,
+				qrCodeStoragePath: createdRegistration.qrCodeStoragePath,
 				email: emailAddress,
 				name: firstName,
 				formattedDateTime: createdRegistration.formattedDateTime,
@@ -161,7 +170,9 @@ export default async function callableAdminPreRegister(
 			{ uid: newUserAccount.uid },
 			error,
 		);
-		await deleteQrCode(newUserAccount.uid).catch(() => undefined);
+		await deleteQrCode(createdRegistration.qrCodeStoragePath).catch(
+			() => undefined,
+		);
 		await admin.auth().deleteUser(newUserAccount.uid);
 		await Promise.all([
 			admin
@@ -241,6 +252,7 @@ const createRegistration = async (
 
 	// Create Registration Record
 	const qrCode = generateId(8);
+	const qrCodeStoragePath = createQrCodeStoragePath(uid);
 	const dateTimeSlotSnapshot = await admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${record.dateTimeSlot?.id}`)
@@ -264,6 +276,7 @@ const createRegistration = async (
 		emailAddress: requiredEmailAddress,
 		zipCode,
 		qrcode: qrCode,
+		qrCodeStoragePath,
 		children: record.children,
 		dateTimeSlot: {
 			id: record.dateTimeSlot?.id,
@@ -307,6 +320,7 @@ const createRegistration = async (
 
 	return {
 		qrCode,
+		qrCodeStoragePath,
 		formattedDateTime,
 	};
 };

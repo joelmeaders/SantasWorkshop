@@ -63,4 +63,31 @@ describe('UserEditorComponent', () => {
 			'checkin',
 		]);
 	});
+
+	it('updates an existing account, including an optional password, and can cancel', async () => {
+		const modalController = TestBed.inject(ModalController);
+		component.account = {
+			uid: 'staff-2', displayName: 'Check-In Staff', emailAddress: 'staff@example.com',
+			roles: ['checkin'], disabled: false, createdOn: new Date(), updatedOn: new Date(),
+		};
+		component.isOwner = true;
+		component.ngOnInit();
+		component.form.patchValue({ displayName: 'Updated Staff', roles: ['admin'], password: 'NewPassword!' });
+
+		await component.save();
+		await component.dismiss();
+
+		expect(component.roleOptions.map((option) => option.value)).toEqual(['admin', 'checkin']);
+		expect(modalController.dismiss).toHaveBeenNthCalledWith(1, {
+			uid: 'staff-2', displayName: 'Updated Staff', roles: ['admin', 'checkin'], disabled: false, newPassword: 'NewPassword!',
+		}, 'update');
+		expect(modalController.dismiss).toHaveBeenNthCalledWith(2, undefined, 'cancelled');
+	});
+
+	it('marks invalid create forms as touched without dismissing', async () => {
+		const modalController = TestBed.inject(ModalController);
+		await component.save();
+		expect(component.form.touched).toBe(true);
+		expect(modalController.dismiss).not.toHaveBeenCalled();
+	});
 });

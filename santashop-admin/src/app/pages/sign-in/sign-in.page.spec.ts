@@ -1,24 +1,26 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignInPage } from './sign-in.page';
 import {
-	provideAuthMock,
-	provideAlertControllerMock,
-	provideFunctionsMock,
 } from '../../../test-helpers';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
+import { AuthService } from '@santashop/core';
 
 describe('SignInPage', () => {
 	let component: SignInPage;
 	let fixture: ComponentFixture<SignInPage>;
+	const login = vi.fn();
+	const alert = { present: vi.fn().mockResolvedValue(undefined) };
+	const createAlert = vi.fn().mockResolvedValue(alert);
 
 	beforeEach(async () => {
+		login.mockReset(); alert.present.mockClear(); createAlert.mockClear();
 		TestBed.configureTestingModule({
 			imports: [SignInPage],
 			providers: [
-				provideAuthMock(),
-				provideAlertControllerMock(),
-				provideFunctionsMock(),
+				{ provide: AuthService, useValue: { login } },
+				{ provide: AlertController, useValue: { create: createAlert } },
 				provideRouter([]),
 			],
 		}).compileComponents();
@@ -30,5 +32,36 @@ describe('SignInPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('authenticates a valid staff user and opens the admin landing route', async () => {
+		login.mockResolvedValue(undefined);
+		(component as unknown as { form: { patchValue(value: object): void } }).form.patchValue({
+			emailAddress: 'staff@example.test', password: 'secret',
+		});
+		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+		await component.login();
+
+		expect(login).toHaveBeenCalledWith({ emailAddress: 'staff@example.test', password: 'secret' });
+		expect(navigate).toHaveBeenCalledWith(['/admin']);
+	});
+
+	it.each([
+		['auth/wrong-password', 'Wrong Password'],
+		['auth/user-not-found', 'Wrong Email Address'],
+		['auth/too-many-requests', 'Account locked out'],
+		['other', 'Unknown Error'],
+	])('explains %s login errors as %s', async (code, header) => {
+		login.mockRejectedValue(new Error(`Firebase: ${code}`));
+
+		await component.login();
+
+		expect(createAlert).toHaveBeenCalledWith({
+			header,
+			message: code,
+			buttons: ['Ok'],
+		});
+		expect(alert.present).toHaveBeenCalledOnce();
 	});
 });

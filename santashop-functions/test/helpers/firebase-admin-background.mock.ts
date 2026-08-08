@@ -156,7 +156,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 				]);
 			}),
 			download: vi.fn().mockResolvedValue([Buffer.from('', 'utf-8')]),
-			delete: vi.fn().mockResolvedValue(undefined),
+		delete: vi.fn().mockResolvedValue(undefined),
 		};
 		fileRefs.set(path, created);
 		return created;

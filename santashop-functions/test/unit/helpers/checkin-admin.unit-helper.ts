@@ -43,6 +43,11 @@ export interface CheckInAdminMock {
 export const generateQrCodeMock = vi.fn();
 export const generateIdMock = vi.fn();
 export const deleteQrCodeMock = vi.fn().mockResolvedValue(undefined);
+export const createQrCodeStoragePathMock = vi.fn(
+	(uid: string) => `registrations/${uid}/test-asset.png`,
+);
+export const replaceQrCodeWithCancelledMock = vi.fn().mockResolvedValue(undefined);
+export const recordCheckInRaceAttemptMock = vi.fn();
 
 export const createCheckInAdminMock = (): CheckInAdminMock => {
 	const docRefs = new Map<string, MockDocRef>();
@@ -181,9 +186,14 @@ export const loadCheckInAdminHandlers = async (adminMock: CheckInAdminMock) => {
 	vi.doMock('../../../src/utility/qrcodes', () => ({
 		generateQrCode: generateQrCodeMock,
 		deleteQrCode: deleteQrCodeMock,
+		createQrCodeStoragePath: createQrCodeStoragePathMock,
+		replaceQrCodeWithCancelled: replaceQrCodeWithCancelledMock,
 	}));
 	vi.doMock('../../../src/utility/id-generation', () => ({
 		generateId: generateIdMock,
+	}));
+	vi.doMock('../../../src/utility/registration-scan', () => ({
+		recordCheckInRaceAttempt: recordCheckInRaceAttemptMock,
 	}));
 
 	const [

@@ -31,6 +31,7 @@
 						"buildTarget": "santashop-app:build:development",
 						"browsers": ["chromiumHeadless"],
 						"coverage": true,
+						"coverageInclude": ["santashop-core/src/**/*.ts"],
 						"runnerConfig": "vitest.config.mjs",
 						"watch": false
 					}
@@ -188,6 +189,7 @@
 						"buildTarget": "santashop-admin:build:development",
 						"browsers": ["chromiumHeadless"],
 						"coverage": true,
+						"coverageInclude": ["santashop-admin/src/**/*.ts"],
 						"runnerConfig": "vitest.config.mjs",
 						"watch": false
 					}
@@ -313,6 +315,7 @@
 						"buildTarget": "santashop-app:build:development",
 						"browsers": ["chromiumHeadless"],
 						"coverage": true,
+						"coverageInclude": ["santashop-app/src/**/*.ts"],
 						"runnerConfig": "vitest.config.mjs",
 						"watch": false
 					}

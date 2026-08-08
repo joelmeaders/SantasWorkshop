@@ -1,8 +1,16 @@
 <ion-header>
 	<ion-toolbar>
 		<ion-buttons slot="start">
-			<ion-button [routerLink]="[backRoute()]" routerDirection="back">
-				<ion-icon name="arrow-back-sharp" slot="icon-only" />
+			<ion-button
+				aria-label="Go back"
+				[routerLink]="[backRoute()]"
+				routerDirection="back"
+			>
+				<ion-icon
+					name="arrow-back-sharp"
+					slot="icon-only"
+					aria-hidden="true"
+				/>
 			</ion-button>
 		</ion-buttons>
 		<ion-title> {{ title() }} </ion-title>

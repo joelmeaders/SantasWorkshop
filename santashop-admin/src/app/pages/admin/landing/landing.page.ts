@@ -18,6 +18,7 @@ import {
 	moonOutline,
 	calendarOutline,
 	shieldCheckmarkOutline,
+	alertCircleOutline,
 } from 'ionicons/icons';
 import {
 	IonRouterLink,
@@ -93,6 +94,7 @@ export class LandingPage {
 			moonOutline,
 			calendarOutline,
 			shieldCheckmarkOutline,
+			alertCircleOutline,
 		});
 	}
 }

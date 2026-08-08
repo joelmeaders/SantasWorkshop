@@ -14,6 +14,10 @@ export default {
 	module: {
 		rules: [
 			{
+				test: /\.png$/,
+				type: 'asset/inline',
+			},
+			{
 				test: /\.tsx?$/,
 				loader: 'babel-loader',
 				exclude: /node_modules/,

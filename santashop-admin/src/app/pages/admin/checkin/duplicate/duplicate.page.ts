@@ -1,18 +1,31 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
-import {
-	AnalyticsWrapper,
-	FireRepoLite,
-	filterNil,
-	timestampToDate,
-} from '@santashop/core';
-import { catchError, map, of, switchMap, tap } from 'rxjs';
-import { COLLECTION_SCHEMA } from '@santashop/models';
+import { Router } from '@angular/router';
+import { AnalyticsWrapper } from '@santashop/core';
+import type { ResolveRegistrationScanResult } from '@santashop/models';
+import { IonButton, IonContent, IonItem, IonLabel, IonList } from '@ionic/angular';
+import { filter, map, tap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 
-import { AsyncPipe, DatePipe, KeyValuePipe } from '@angular/common';
-import { IonContent, IonNote } from '@ionic/angular';
+type BlockedScanResult = Extract<
+	ResolveRegistrationScanResult,
+	{ disposition: 'duplicate-accidental' | 'duplicate-risk' | 'cancelled' }
+>;
+
+const asDate = (value: unknown): Date | undefined => {
+	if (value instanceof Date) return value;
+	if (
+		typeof value === 'object' &&
+		value !== null &&
+		'toDate' in value &&
+		typeof value.toDate === 'function'
+	) {
+		return value.toDate() as Date;
+	}
+	return undefined;
+};
 
 @Component({
 	selector: 'admin-duplicate',
@@ -23,43 +36,45 @@ import { IonContent, IonNote } from '@ionic/angular';
 		HeaderComponent,
 		AsyncPipe,
 		DatePipe,
-		KeyValuePipe,
+		IonButton,
 		IonContent,
-		IonNote,
+		IonItem,
+		IonLabel,
+		IonList,
 	],
 })
 export class DuplicatePage {
-	private readonly httpService = inject(FireRepoLite);
-	private readonly route = inject(ActivatedRoute);
+	private readonly context = inject(CheckInContextService);
+	private readonly router = inject(Router);
 	private readonly analytics = inject(AnalyticsWrapper);
 
-	private readonly uid$ = this.route.params.pipe(
-		map((params) => params['uid'] as string),
-	);
-
-	public readonly checkin$ = this.uid$.pipe(
-		switchMap((uid) =>
-			this.httpService
-				.collection(COLLECTION_SCHEMA.checkins)
-				.read(uid, 'customerId'),
+	public readonly result$ = this.context.blockedScan$.pipe(
+		filter((result): result is BlockedScanResult =>
+			Boolean(
+				result &&
+					(result.disposition === 'duplicate-accidental' ||
+						result.disposition === 'duplicate-risk' ||
+						result.disposition === 'cancelled'),
+			),
 		),
-		filterNil(),
-		map((data) => {
-			data['checkInDateTime'] = timestampToDate(data['checkInDateTime']);
-			return data;
+		map((result) => ({
+			...result,
+			attempt: {
+				...result.attempt,
+				scannedOn: asDate(result.attempt.scannedOn),
+				priorEventOn: asDate(result.attempt.priorEventOn),
+			},
+		})),
+		tap((result) => {
+			this.analytics.logEventWithParams('admin_blocked_scan_view', {
+				disposition: result.disposition,
+			});
 		}),
+		takeUntilDestroyed(),
 	);
 
-	protected readonly logSubscription = this.uid$
-		.pipe(
-			takeUntilDestroyed(),
-			tap((uid) => {
-				this.analytics.logEventWithParams('admin_checkin_duplicate', {
-					uid,
-					fatal: true,
-				});
-			}),
-			catchError(() => of()),
-		)
-		.subscribe();
+	public async startOver(): Promise<void> {
+		this.context.reset();
+		await this.router.navigate(['/admin/checkin/scan']);
+	}
 }

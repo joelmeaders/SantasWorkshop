@@ -62,4 +62,26 @@ describe('SubmitCardComponent', () => {
 		expect(component.expanded()).toBe(false);
 		expect(changesRequested).toHaveBeenCalledOnce();
 	});
+
+	it('renders the complete review and email update workflow', async (): Promise<void> => {
+		fixture.componentRef.setInput('canSubmit', true);
+		fixture.componentRef.setInput('emailAddress', 'holly@example.com');
+		fixture.componentRef.setInput('children', [
+			{ id: 'girl', firstName: 'Holly', lastName: 'Jolly', toyType: 'girls', dateOfBirth: new Date('2020-01-01') },
+			{ id: 'boy', firstName: 'Nick', lastName: 'Kringle', toyType: 'boys', dateOfBirth: new Date('2019-01-01') },
+			{ id: 'infant', firstName: 'Noel', lastName: 'Bell', toyType: 'infants', dateOfBirth: new Date('2025-01-01') },
+		] as never);
+		fixture.componentRef.setInput('dateTimeSlot', {
+			id: 'slot', dateTime: new Date('2026-12-20T10:00:00'), enabled: true,
+		} as never);
+		component.open();
+		component.openEmailUpdate();
+
+		await fixture.whenStable();
+
+		expect(fixture.nativeElement.querySelector('.submission-children-list')).toBeTruthy();
+		expect(fixture.nativeElement.querySelector('form')).toBeTruthy();
+		expect(fixture.nativeElement.querySelector('#completeRegistrationButton')).toBeTruthy();
+		component.cancelEmailUpdate();
+	});
 });

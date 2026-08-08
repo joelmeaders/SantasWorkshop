@@ -7,7 +7,7 @@ import { StorageWrapper } from '@santashop/core';
 export class QrCodeService {
 	private readonly storage = inject(StorageWrapper);
 
-	public registrationQrCodeUrl(uid: string): Promise<string> {
-		return this.storage.getDownloadUrl(`registrations/${uid}.png`);
+	public registrationQrCodeUrl(storagePath: string): Promise<string> {
+		return this.storage.getDownloadUrl(storagePath);
 	}
 }

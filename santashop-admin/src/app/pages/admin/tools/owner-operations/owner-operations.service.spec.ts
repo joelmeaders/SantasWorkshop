@@ -90,4 +90,59 @@ describe('OwnerOperationsService', () => {
 		});
 		expect(result).toEqual(response);
 	});
+
+	it('starts and retrieves operations using only the supported operation request fields', async () => {
+		const startCallable = vi
+			.fn()
+			.mockName('startCallable')
+			.mockResolvedValue({ data: { operationId: 'operation-1', status: 'queued' } });
+		const getCallable = vi
+			.fn()
+			.mockName('getCallable')
+			.mockResolvedValue({
+				data: {
+					id: 'operation-1',
+					operation: 'export-marketing-emails',
+					status: 'succeeded',
+					projectId: 'test-project',
+					actorUid: 'owner-1',
+					stage: 'completed',
+					counts: {},
+					progress: {},
+					createdAt: '2026-01-01T00:00:00.000Z',
+					updatedAt: '2026-01-01T00:00:00.000Z',
+				},
+			});
+		functions.callableWrapper
+			.mockReturnValueOnce(
+				startCallable as unknown as ReturnType<
+					FunctionsWrapper['callableWrapper']
+				>,
+			)
+			.mockReturnValueOnce(
+				getCallable as unknown as ReturnType<
+					FunctionsWrapper['callableWrapper']
+				>,
+			);
+
+		await expect(
+			service.start({
+				previewId: 'preview-1',
+				confirmationPhrase: 'EXPORT MARKETING EMAILS test-project',
+			}),
+		).resolves.toEqual({ operationId: 'operation-1', status: 'queued' });
+		await expect(service.get('operation-1')).resolves.toMatchObject({
+			id: 'operation-1',
+			status: 'succeeded',
+		});
+		expect(functions.callableWrapper.mock.calls.map(([name]) => name)).toEqual([
+			'callableStartOwnerOperation',
+			'callableGetOwnerOperation',
+		]);
+		expect(startCallable).toHaveBeenCalledWith({
+			previewId: 'preview-1',
+			confirmationPhrase: 'EXPORT MARKETING EMAILS test-project',
+		});
+		expect(getCallable).toHaveBeenCalledWith({ operationId: 'operation-1' });
+	});
 });

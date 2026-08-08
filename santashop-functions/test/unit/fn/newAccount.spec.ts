@@ -10,6 +10,7 @@ import {
 const generateQrCode = vi.fn();
 const generateId = vi.fn();
 const deleteQrCode = vi.fn();
+const createQrCodeStoragePath = vi.fn();
 
 const loadSubject = async (
 	adminMock: FirebaseAdminMock,
@@ -20,6 +21,7 @@ const loadSubject = async (
 	vi.doMock('../../../src/utility/qrcodes', () => ({
 		generateQrCode,
 		deleteQrCode,
+		createQrCodeStoragePath,
 	}));
 	vi.doMock('../../../src/utility/id-generation', () => ({
 		generateId,
@@ -36,6 +38,9 @@ describe('newAccount handler', () => {
 		generateQrCode.mockResolvedValue(undefined);
 		deleteQrCode.mockResolvedValue(undefined);
 		generateId.mockReturnValue('ABCD2345');
+		createQrCodeStoragePath.mockImplementation(
+			(uid: string) => `registrations/${uid}/test-asset.png`,
+		);
 	});
 
 	it('creates auth, user, and registration records for a valid onboard request', async () => {
@@ -66,7 +71,10 @@ describe('newAccount handler', () => {
 		);
 		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
 		expect(generateId).toHaveBeenCalledWith(8);
-		expect(generateQrCode).toHaveBeenCalledWith('new-user-123', 'ABCD2345');
+		expect(generateQrCode).toHaveBeenCalledWith(
+			'registrations/new-user-123/test-asset.png',
+			'ABCD2345',
+		);
 		expect(
 			adminMock.getDocRef('registrations/new-user-123').set,
 		).toHaveBeenCalledWith(
@@ -120,7 +128,9 @@ describe('newAccount handler', () => {
 			newAccount(createCallableRequest(onboardUser)),
 		).rejects.toMatchObject({ code: 'internal' });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('new-user-qr');
-		expect(deleteQrCode).toHaveBeenCalledWith('new-user-qr');
+		expect(deleteQrCode).toHaveBeenCalledWith(
+			'registrations/new-user-qr/test-asset.png',
+		);
 	});
 
 	it('rejects malformed onboarding requests with invalid-argument', async () => {

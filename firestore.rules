@@ -11,8 +11,12 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.admin;
-    }
+	  return isSignedIn() && (
+		request.auth.token.owner == true ||
+		request.auth.token.admin == true ||
+		(request.auth.token.roles is list && request.auth.token.roles.hasAny(['admin']))
+	  );
+	}
 
     match /users/{userId} {
       allow get: if isUser(userId) || isAdmin();
@@ -42,9 +46,20 @@ service cloud.firestore {
     }
 
     match /checkins/{documentId} {
-      allow create: if isAdmin();
+	  // Check-ins are written only by authoritative callable functions.
+	  allow create, update, delete: if false;
       allow read: if isUser(documentId) || isAdmin();
     }
+
+	match /registrationScanAttempts/{documentId} {
+	  allow read: if isAdmin();
+	  allow write: if false;
+	}
+
+	match /registrationScanRiskSummaries/{documentId} {
+	  allow read: if isAdmin();
+	  allow write: if false;
+	}
 
     match /counters/{document=**} {
       allow read: if isAdmin();

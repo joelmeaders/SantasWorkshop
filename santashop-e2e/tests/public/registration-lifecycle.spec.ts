@@ -13,10 +13,25 @@ import {
 	selectAppointmentViaUi,
 	submitRegistrationViaUi,
 } from '../../fixtures/registration-helpers';
+import type { Page } from '@playwright/test';
 
 const TEST_PROGRAM_YEAR = new Date().getFullYear();
 const testSlotDate = (year: number, day: number, hour: number): string =>
 	new Date(Date.UTC(year, 11, day, hour)).toISOString();
+
+const expectSignInToBeRejected = async (
+	page: Page,
+	credentials: { emailAddress: string; password: string },
+): Promise<void> => {
+	await page.goto('/?mode=sign-in');
+	await page.locator('#signInEmail input').fill(credentials.emailAddress);
+	await page.locator('#signInPassword input').fill(credentials.password);
+	await page.locator('#signInButton').click();
+	const errorAlert = page.locator('ion-alert');
+	await expect(errorAlert).toBeVisible({ timeout: 15000 });
+	await expect(page).toHaveURL(/\/\?mode=sign-in$/);
+	await errorAlert.getByRole('button', { name: 'Ok', exact: true }).click();
+};
 
 test.describe('customer registration lifecycle', () => {
 	test.beforeEach(async ({ clearData, seedScenario }) => {
@@ -114,6 +129,8 @@ test.describe('customer registration lifecycle', () => {
 	test('APPT-001 through SUB-002 complete a valid reservation and show confirmation', async ({
 		page,
 		seedDateTimeSlots,
+		inspectRegistrationQrLifecycle,
+		inspectQueuedRegistrationEmails,
 	}) => {
 		await seedDateTimeSlots([
 			{
@@ -199,6 +216,15 @@ test.describe('customer registration lifecycle', () => {
 				}),
 		).toBeVisible();
 		await expect(page.locator('#eventInformationButton')).toBeVisible();
+		const lifecycle = await inspectRegistrationQrLifecycle(updatedEmailAddress);
+		expect(lifecycle.registration.hasSubmittedRegistration).toBe(true);
+		expect(lifecycle.registration.cancelled).toBe(false);
+		expect(lifecycle.searchIndex.exists).toBe(true);
+		expect(lifecycle.current.path).toBeTruthy();
+		const queuedConfirmation = (await inspectQueuedRegistrationEmails(
+			updatedEmailAddress,
+		)).find((email) => email.hasConfirmationCode);
+		expect(queuedConfirmation?.qrCodeStoragePath).toBe(lifecycle.current.path);
 	});
 
 	test('REG-005 and SUB-004 keep a submitted registration out of draft routes', async ({
@@ -234,7 +260,7 @@ test.describe('customer registration lifecycle', () => {
 
 		for (const route of [
 			'/pre-registration/confirmation',
-			'/pre-registration/confirmation/event-information',
+			'/pre-registration/confirmation#event-information',
 		]) {
 			await page.goto(route);
 			await expect(page).toHaveURL(/\/pre-registration\/overview$/);
@@ -274,6 +300,8 @@ test.describe('customer registration lifecycle', () => {
 	test('SUB-005 changes a submitted appointment when the control is enabled', async ({
 		page,
 		seedDateTimeSlots,
+		inspectRegistrationQrLifecycle,
+		inspectQueuedRegistrationEmails,
 	}) => {
 		const currentSlotDate = testSlotDate(TEST_PROGRAM_YEAR, 6, 16);
 		const targetSlotDate = testSlotDate(TEST_PROGRAM_YEAR, 7, 16);
@@ -297,7 +325,8 @@ test.describe('customer registration lifecycle', () => {
 				enabled: true,
 			},
 		]);
-		await createAccountViaUi(page, randomAccount());
+		const account = randomAccount();
+		await createAccountViaUi(page, account);
 		await addChildViaUi(page, defaultTestChild());
 		await selectAppointmentViaUi(page, 'submitted-current-slot');
 		await submitRegistrationViaUi(page);
@@ -364,6 +393,21 @@ test.describe('customer registration lifecycle', () => {
 		await expect(reopenedModal.locator('ion-card h2')).toContainText(
 			targetDay,
 		);
+		const lifecycle = await inspectRegistrationQrLifecycle(account.emailAddress);
+		expect(lifecycle.registration.dateTimeSlot?.id).toBe(
+			'submitted-target-slot',
+		);
+		expect(lifecycle.registration.previousDateTimeSlot?.id).toBe(
+			'submitted-current-slot',
+		);
+		expect(lifecycle.slots.current?.slotsReserved).toBe(1);
+		expect(lifecycle.slots.previous?.slotsReserved).toBe(1);
+		const followUpEmail = (await inspectQueuedRegistrationEmails(
+			account.emailAddress,
+		)).find((email) => email.queueSource === 'date-time-change');
+		expect(followUpEmail?.deliveryState).toBe('queued');
+		expect(followUpEmail?.hasConfirmationCode).toBe(true);
+		expect(followUpEmail?.qrCodeStoragePath).toBe(lifecycle.current.path);
 	});
 
 	test('REG-006 notifies and signs out a checked-in customer', async ({
@@ -404,7 +448,7 @@ test.describe('customer registration lifecycle', () => {
 		await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
 	});
 
-	test('SUB-008 hides appointment changes and cancellation after check-in', async ({
+	test('SUB-006 hides appointment changes and cancellation after check-in', async ({
 		page,
 		seedCheckIn,
 		seedDateTimeSlots,
@@ -519,6 +563,8 @@ test.describe('customer registration lifecycle', () => {
 		page,
 		seedDateTimeSlots,
 		seedPublicParams,
+		inspectRegistrationQrLifecycle,
+		inspectQueuedRegistrationEmails,
 	}) => {
 		await seedDateTimeSlots([
 			{
@@ -531,10 +577,33 @@ test.describe('customer registration lifecycle', () => {
 				enabled: true,
 			},
 		]);
-		await createAccountViaUi(page, randomAccount());
+		const account = randomAccount();
+		await createAccountViaUi(page, account);
 		await addChildViaUi(page, defaultTestChild());
 		await selectAppointmentViaUi(page, 'cancellation-slot');
 		await submitRegistrationViaUi(page);
+		await expect(page.locator('#registrationQrCode')).toHaveAttribute(
+			'src',
+			/.+/,
+			{ timeout: 15000 },
+		);
+		const originalQrSource = await page.locator('#registrationQrCode').getAttribute('src');
+		const beforeCancellation = await inspectRegistrationQrLifecycle(
+			account.emailAddress,
+		);
+		expect(beforeCancellation.current.object.exists).toBe(true);
+		expect(beforeCancellation.current.object.cacheControl).toBe(
+			'no-store, max-age=0, must-revalidate',
+		);
+		expect(beforeCancellation.current.object.contentType).toBe('image/png');
+		expect(beforeCancellation.current.object.width).toBe(600);
+		expect(beforeCancellation.current.object.height).toBe(600);
+		const initialConfirmation = (await inspectQueuedRegistrationEmails(
+			account.emailAddress,
+		)).find((email) => email.hasConfirmationCode);
+		expect(initialConfirmation?.qrCodeStoragePath).toBe(
+			beforeCancellation.current.path,
+		);
 
 		const cancelButton = page.locator('#cancelRegistrationButton');
 		await seedPublicParams({
@@ -571,6 +640,86 @@ test.describe('customer registration lifecycle', () => {
 		await expect(
 			page.locator('app-overview #registrationQrCode'),
 		).toHaveCount(0);
+
+		const afterCancellation = await inspectRegistrationQrLifecycle(
+			account.emailAddress,
+		);
+		expect(afterCancellation.latestCancellation).toBeDefined();
+		expect(afterCancellation.latestCancellation?.supersededPath).toBe(
+			beforeCancellation.current.path,
+		);
+		expect(afterCancellation.latestCancellation?.replacementPath).toBe(
+			afterCancellation.current.path,
+		);
+		expect(afterCancellation.latestCancellation?.supersededObject.exists).toBe(true);
+		expect(afterCancellation.latestCancellation?.replacementObject.exists).toBe(true);
+		expect(afterCancellation.latestCancellation?.supersededObject.cacheControl).toBe(
+			'no-store, max-age=0, must-revalidate',
+		);
+		expect(afterCancellation.latestCancellation?.supersededObject.contentType).toBe(
+			'image/png',
+		);
+		expect(afterCancellation.latestCancellation?.supersededObject.width).toBe(600);
+		expect(afterCancellation.latestCancellation?.supersededObject.height).toBe(600);
+		expect(afterCancellation.latestCancellation?.supersededObject.matchesCancelledAsset).toBe(
+			true,
+		);
+		expect(afterCancellation.latestCancellation?.replacementObject.cacheControl).toBe(
+			'no-store, max-age=0, must-revalidate',
+		);
+		expect(afterCancellation.latestCancellation?.replacementObject.contentType).toBe(
+			'image/png',
+		);
+		expect(afterCancellation.latestCancellation?.replacementObject.width).toBe(600);
+		expect(afterCancellation.latestCancellation?.replacementObject.height).toBe(600);
+		expect(afterCancellation.latestCancellation?.replacementObject.matchesCancelledAsset).toBe(
+			false,
+		);
+		expect(afterCancellation.current.code).not.toBe(beforeCancellation.current.code);
+		expect(afterCancellation.registration.hasSubmittedRegistration).toBe(false);
+		expect(afterCancellation.registration.cancelled).toBe(true);
+		expect(afterCancellation.searchIndex.exists).toBe(false);
+		expect(afterCancellation.cancellationHistory).toHaveLength(1);
+		const cancellationEmail = (await inspectQueuedRegistrationEmails(
+			account.emailAddress,
+		)).find((email) => email.queueSource === 'registration-cancellation');
+		expect(cancellationEmail?.deliveryState).toBe('queued');
+		expect(cancellationEmail?.qrCodeStoragePath).toBeUndefined();
+
+		await selectAppointmentViaUi(page, 'cancellation-slot');
+		await submitRegistrationViaUi(page);
+		await expect(page.locator('#registrationQrCode')).toHaveAttribute(
+			'src',
+			/.+/,
+			{ timeout: 15000 },
+		);
+		const replacementQrSource = await page.locator('#registrationQrCode').getAttribute('src');
+		expect(replacementQrSource).toBeTruthy();
+		expect(replacementQrSource).not.toBe(originalQrSource);
+		const afterResubmission = await inspectRegistrationQrLifecycle(
+			account.emailAddress,
+		);
+		expect(afterResubmission.current.path).toBe(
+			afterCancellation.latestCancellation?.replacementPath,
+		);
+		expect(afterResubmission.current.code).toBe(
+			afterCancellation.latestCancellation?.replacementCode,
+		);
+		expect(afterResubmission.current.object.exists).toBe(true);
+		expect(afterResubmission.registration.hasSubmittedRegistration).toBe(true);
+		expect(afterResubmission.registration.cancelled).toBe(false);
+		expect(afterResubmission.searchIndex.exists).toBe(true);
+		expect(afterResubmission.cancellationHistory).toHaveLength(1);
+		const reregistrationConfirmation = (await inspectQueuedRegistrationEmails(
+			account.emailAddress,
+		)).find(
+			(email) =>
+				email.hasConfirmationCode &&
+				email.qrCodeStoragePath === afterResubmission.current.path,
+		);
+		expect(reregistrationConfirmation?.qrCodeStoragePath).toBe(
+			afterResubmission.current.path,
+		);
 	});
 
 	test('PROFILE-001 exposes profile and help from the authenticated menu', async ({
@@ -586,7 +735,7 @@ test.describe('customer registration lifecycle', () => {
 		).toBeVisible();
 
 		await page.click('#menuButton');
-		await page.getByText('Help', { exact: true }).click();
+		await page.getByRole('button', { name: 'Help', exact: true }).click();
 		await expect(page.locator('ion-modal app-help')).toBeVisible();
 		await expect(
 			page.locator(
@@ -595,8 +744,27 @@ test.describe('customer registration lifecycle', () => {
 		).toBeVisible();
 	});
 
-	test('PROFILE-002 persists changed name and zip code', async ({ page }) => {
-		await createAccountViaUi(page, randomAccount());
+	test('PROFILE-002 persists changed name and zip code in the staff search index', async ({
+		page,
+		seedDateTimeSlots,
+		inspectRegistrationQrLifecycle,
+	}) => {
+		await seedDateTimeSlots([
+			{
+				id: 'profile-index-slot',
+				programYear: TEST_PROGRAM_YEAR,
+				dateTime: testSlotDate(TEST_PROGRAM_YEAR, 9, 16),
+				lastUpdated: testSlotDate(TEST_PROGRAM_YEAR, 1, 0),
+				maxSlots: 10,
+				slotsReserved: 0,
+				enabled: true,
+			},
+		]);
+		const account = randomAccount();
+		await createAccountViaUi(page, account);
+		await addChildViaUi(page, defaultTestChild());
+		await selectAppointmentViaUi(page, 'profile-index-slot');
+		await submitRegistrationViaUi(page);
 		await page.goto('/pre-registration/profile');
 
 		await page
@@ -629,6 +797,16 @@ test.describe('customer registration lifecycle', () => {
 		await expect(
 			profile.getByRole('textbox', { name: 'Zip Code', exact: true }),
 		).toHaveValue('80209', { timeout: 30000 });
+		const lifecycle = await inspectRegistrationQrLifecycle(account.emailAddress);
+		expect(lifecycle.searchIndex).toMatchObject({
+			exists: true,
+			customerId: lifecycle.uid,
+			firstName: 'dasher',
+			lastName: 'reindeer',
+			displayFirstName: 'Dasher',
+			displayLastName: 'Reindeer',
+			zip: '80209',
+		});
 	});
 
 	test('PROFILE-003 changes the email address after password reauthentication', async ({
@@ -662,6 +840,14 @@ test.describe('customer registration lifecycle', () => {
 		await expect(
 			emailPanel.locator('summary small'),
 		).toContainText(replacement.emailAddress, { timeout: 30000 });
+
+		await signOutViaUi(page);
+		await expectSignInToBeRejected(page, account);
+		await signInViaUi(page, {
+			emailAddress: replacement.emailAddress,
+			password: account.password,
+		});
+		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 	});
 
 	test('PROFILE-004 changes the password and accepts the new credential', async ({
@@ -697,6 +883,7 @@ test.describe('customer registration lifecycle', () => {
 		await expect(page).toHaveURL(/\/pre-registration\/profile$/);
 
 		await signOutViaUi(page);
+		await expectSignInToBeRejected(page, account);
 		await signInViaUi(page, {
 			emailAddress: account.emailAddress,
 			password: newPassword,

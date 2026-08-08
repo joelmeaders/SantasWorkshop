@@ -18,12 +18,11 @@ describe('QrCodeService', () => {
 	});
 
 	it('loads a registration QR image from its canonical storage path', async () => {
-		await expect(service.registrationQrCodeUrl('customer-123')).resolves.toBe(
+		const storagePath = 'registrations/customer-123/test-asset.png';
+		await expect(service.registrationQrCodeUrl(storagePath)).resolves.toBe(
 			'https://example.test/qr.png',
 		);
-		expect(storage.getDownloadUrl).toHaveBeenCalledWith(
-			'registrations/customer-123.png',
-		);
+		expect(storage.getDownloadUrl).toHaveBeenCalledWith(storagePath);
 	});
 
 	it('propagates storage failures to the caller', async () => {

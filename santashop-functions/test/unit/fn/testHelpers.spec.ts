@@ -12,6 +12,8 @@ interface TestHelpersAdminMock {
 	batchCommit: ReturnType<typeof vi.fn>;
 	listUsers: ReturnType<typeof vi.fn>;
 	deleteUser: ReturnType<typeof vi.fn>;
+	getFiles: ReturnType<typeof vi.fn>;
+	storageDelete: ReturnType<typeof vi.fn>;
 	setCollectionDocIds: (name: string, ids: string[]) => void;
 }
 
@@ -23,6 +25,8 @@ const createTestHelpersAdminMock = (): TestHelpersAdminMock => {
 	const batchCommit = vi.fn();
 	const listUsers = vi.fn();
 	const deleteUser = vi.fn();
+	const getFiles = vi.fn();
+	const storageDelete = vi.fn();
 
 	const collection = vi.fn((name: string) => ({
 		doc: vi.fn((id: string) => ({
@@ -56,19 +60,26 @@ const createTestHelpersAdminMock = (): TestHelpersAdminMock => {
 				listUsers,
 				deleteUser,
 			})),
+			storage: vi.fn(() => ({
+				bucket: vi.fn(() => ({ getFiles })),
+			})),
 		},
 		docSet,
 		batchDelete,
 		batchCommit,
 		listUsers,
 		deleteUser,
-		setCollectionDocIds: (name: string, ids: string[]) => {
+		getFiles,
+		storageDelete,
+		setCollectionDocIds: (name: string, ids: string[]): void => {
 			collectionDocs.set(name, ids);
 		},
 	};
 };
 
-const loadSubject = async (adminMock: TestHelpersAdminMock) => {
+const loadSubject = async (
+	adminMock: TestHelpersAdminMock,
+): Promise<typeof import('../../../src/fn/testHelpers')> => {
 	vi.resetModules();
 	vi.doMock('firebase-admin', () => adminMock.module);
 	return import('../../../src/fn/testHelpers');
@@ -81,6 +92,7 @@ describe('testHelpers module', () => {
 		adminMock = createTestHelpersAdminMock();
 		adminMock.batchCommit.mockResolvedValue(undefined);
 		adminMock.listUsers.mockResolvedValue({ users: [] });
+		adminMock.getFiles.mockResolvedValue([[{ delete: adminMock.storageDelete }]]);
 	});
 
 	it('seeds public parameters with defaults merged with overrides', async () => {
@@ -113,7 +125,10 @@ describe('testHelpers module', () => {
 		await clearAllData();
 
 		expect(adminMock.batchDelete).toHaveBeenCalledTimes(4);
-		expect(adminMock.batchCommit).toHaveBeenCalledTimes(15);
+		expect(adminMock.batchCommit).toHaveBeenCalledTimes(17);
+		expect(adminMock.getFiles).toHaveBeenCalledWith({ prefix: 'registrations/' });
+		expect(adminMock.getFiles).toHaveBeenCalledWith({ prefix: 'emailTemplates/' });
+		expect(adminMock.storageDelete).toHaveBeenCalledWith({ ignoreNotFound: true });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('auth-1');
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('auth-2');
 	});

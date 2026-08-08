@@ -14,7 +14,12 @@ import {
 	IonIcon,
 	IonButton,
 } from '@ionic/angular';
-import { Child, DateTimeSlot, Registration } from '@santashop/models';
+import {
+	Child,
+	DateTimeSlot,
+	Registration,
+	type ResolveRegistrationScanResult,
+} from '@santashop/models';
 import {
 	catchError,
 	firstValueFrom,
@@ -95,22 +100,34 @@ export class ReviewPage {
 		);
 
 	private readonly cancelRegistrationFn = (
-		registration: Registration,
-	): Promise<HttpsCallableResult<number>> =>
-		this.functions.callableWrapper<Registration, number>(
-			'undoRegistration',
-		)(registration);
+		registrationUid: string,
+	): Promise<HttpsCallableResult<true>> =>
+		this.functions.callableWrapper<
+			{ mutationId: string; uid: string },
+			true
+		>('undoRegistration')({
+			mutationId: this.createMutationId(),
+			uid: registrationUid,
+		});
 
 	private readonly changeRegistrationDateTimeFn = (
 		newDateTimeSlot: DateTimeSlot,
 		registrationUid?: string,
-	): Promise<HttpsCallableResult<boolean>> =>
-		this.functions.callableWrapper<
-			{ newDateTimeSlot: DateTimeSlot; registrationUid?: string },
+	): Promise<HttpsCallableResult<boolean>> => {
+		if (!newDateTimeSlot.id) {
+			return Promise.reject(new Error('Appointment ID is required.'));
+		}
+		return this.functions.callableWrapper<
+			{ mutationId: string; slotId: string; registrationUid?: string },
 			boolean
 		>(
 			'changeRegistrationDateTime',
-		)({ newDateTimeSlot, registrationUid });
+		)({
+			mutationId: this.createMutationId(),
+			slotId: newDateTimeSlot.id,
+			registrationUid,
+		});
+	};
 
 	protected readonly setRegistrationSubscription = this.lookupRegistration$
 		.pipe(
@@ -161,8 +178,8 @@ export class ReviewPage {
 		const response = await alert.onDidDismiss();
 		if (response.role == 'cancel') return;
 
-		if (!registration) return;
-		await this.cancelRegistrationFn(registration);
+		if (!registration?.uid) return;
+		await this.cancelRegistrationFn(registration.uid);
 
 		await this.router.navigate(['admin/landing']);
 	}
@@ -248,10 +265,14 @@ export class ReviewPage {
 	public async checkIn(): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
 		if (!registration) return;
+		const inputMethod = await firstValueFrom(
+			this.checkinContext.inputMethod$,
+		);
 		try {
 			const result: number = await this.checkinService.checkIn(
 				registration,
 				this.wasEdited,
+				inputMethod,
 			);
 
 			this.checkinContext.setCheckIn(
@@ -261,11 +282,15 @@ export class ReviewPage {
 			await this.router.navigate(['/admin/checkin/confirmation']);
 		} catch (error: unknown) {
 			const err = error as {
-				details?: { code?: number };
+				details?: ResolveRegistrationScanResult;
 				message?: string;
 			};
-			if (err.details?.code === 6) {
-				this.checkinContext.reset();
+			if (
+				err.details?.disposition === 'duplicate-accidental' ||
+				err.details?.disposition === 'duplicate-risk' ||
+				err.details?.disposition === 'cancelled'
+			) {
+				this.checkinContext.setBlockedScan(err.details);
 				this.router.navigate([
 					'/admin/checkin/duplicate',
 					registration.uid,
@@ -284,6 +309,13 @@ export class ReviewPage {
 			await alert.onDidDismiss();
 			await this.router.navigate(['/admin/checkin/scan']);
 		}
+	}
+
+	private createMutationId(): string {
+		if (typeof globalThis.crypto?.randomUUID === 'function') {
+			return globalThis.crypto.randomUUID();
+		}
+		return `mutation_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
 	}
 
 	private async missingRegistrationError(error: unknown): Promise<undefined> {

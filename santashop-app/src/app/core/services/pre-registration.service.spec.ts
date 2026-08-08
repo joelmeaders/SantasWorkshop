@@ -292,7 +292,73 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(spy).toHaveBeenCalledWith(userId);
+		expect(spy).toHaveBeenCalledWith(
+			`registrations/${userId}/test-asset.png`,
+		);
 		expect(value).toEqual('someurl');
+	});
+
+	it('forwards draft mutations and rejects incomplete child or appointment input', async (): Promise<void> => {
+		const functions = TestBed.inject(FunctionsWrapper) as unknown as Record<
+			string,
+			ReturnType<typeof vi.fn>
+		>;
+		for (const method of [
+			'saveDraftChild',
+			'deleteDraftChild',
+			'setDraftAppointment',
+			'completeRegistration',
+			'undoRegistration',
+			'changeRegistrationDateTime',
+		]) {
+			functions[method] = vi.fn().mockResolvedValue({ data: true });
+		}
+		const child = {
+			id: 7,
+			firstName: 'Taylor',
+			lastName: 'Smith',
+			dateOfBirth: new Date('2017-03-04T00:00:00.000Z'),
+			toyType: 'toy',
+		} as never;
+
+		await service.saveDraftChild({ mutationId: 'mutation-1', child });
+		await service.deleteDraftChild({ mutationId: 'mutation-2', childId: 7 });
+		await service.setDraftAppointment({ mutationId: 'mutation-3', slotId: 'slot-1' });
+		await service.completeRegistration({ mutationId: 'mutation-4' });
+		await service.undoRegistration();
+		await service.changeRegistrationDateTime({ id: 'slot-2' } as never);
+
+		expect(functions['saveDraftChild']).toHaveBeenCalledWith(
+			expect.objectContaining({
+				mutationId: 'mutation-1',
+				child: expect.objectContaining({
+					id: 7,
+					dateOfBirth: '2017-03-04T00:00:00.000Z',
+				}),
+			}),
+		);
+		expect(functions['deleteDraftChild']).toHaveBeenCalledWith({
+			mutationId: 'mutation-2',
+			childId: 7,
+		});
+		expect(functions['setDraftAppointment']).toHaveBeenCalledWith({
+			mutationId: 'mutation-3',
+			slotId: 'slot-1',
+		});
+		expect(functions['completeRegistration']).toHaveBeenCalledWith({
+			mutationId: 'mutation-4',
+		});
+		expect(functions['undoRegistration']).toHaveBeenCalledWith(
+			expect.objectContaining({ mutationId: expect.any(String) }),
+		);
+		expect(functions['changeRegistrationDateTime']).toHaveBeenCalledWith(
+			expect.objectContaining({ slotId: 'slot-2' }),
+		);
+		await expect(
+			service.saveDraftChild({ mutationId: 'mutation-5', child: {} as never }),
+		).rejects.toThrow('Child ID is required.');
+		await expect(
+			service.changeRegistrationDateTime({} as never),
+		).rejects.toThrow('Appointment ID is required.');
 	});
 });

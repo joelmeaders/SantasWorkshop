@@ -1,9 +1,9 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	Input,
 	OnDestroy,
 	inject,
-	input,
 } from '@angular/core';
 import {
 	AlertController,
@@ -74,7 +74,7 @@ export class DateTimeModalComponent implements OnDestroy {
 	private readonly alertController = inject(AlertController);
 	private readonly dateTimeService = inject(DateTimeModalService);
 
-	public readonly currentSlot = input<DateTimeSlot>();
+	@Input() public currentSlot?: DateTimeSlot;
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -120,7 +120,7 @@ export class DateTimeModalComponent implements OnDestroy {
 	}
 
 	public async selectDateTime(slot?: DateTimeSlot): Promise<void> {
-		const hasSlot = !!this.currentSlot();
+		const hasSlot = !!this.currentSlot;
 		let shouldChange = false;
 
 		if (hasSlot && slot) {

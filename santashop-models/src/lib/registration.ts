@@ -4,6 +4,7 @@ import { DateTimeSlot } from './date-time-slot';
 export interface Registration {
 	uid?: string;
 	qrcode?: string;
+	qrCodeStoragePath: string;
 	firstName?: string;
 	lastName?: string;
 	emailAddress?: string;

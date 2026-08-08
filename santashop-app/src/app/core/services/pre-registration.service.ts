@@ -121,8 +121,10 @@ export class PreRegistrationService implements OnDestroy {
 	public readonly qrCode$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		filterNil(),
-		pluckFilterNil('uid'),
-		mergeMap((uid) => this.qrCodeService.registrationQrCodeUrl(uid)),
+		pluckFilterNil('qrCodeStoragePath'),
+		mergeMap((storagePath) =>
+			this.qrCodeService.registrationQrCodeUrl(storagePath),
+		),
 		shareReplay(1),
 	);
 

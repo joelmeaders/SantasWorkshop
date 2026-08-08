@@ -77,4 +77,40 @@ describe('changeAccountInformation handler', () => {
 			),
 		).rejects.toMatchObject({ code: 'unauthenticated' });
 	});
+
+	it('maps Auth profile failures to a callable error before writing Firestore', async () => {
+		const { changeAccountInformation } =
+			await loadAccountRegistrationHandlers(adminMock);
+		adminMock.updateUser.mockRejectedValue({
+			code: 'auth/email-already-exists',
+			message: 'Email is already in use.',
+		});
+
+		await expect(
+			changeAccountInformation(
+				createCallableRequest(
+					{ firstName: 'Jovie', lastName: 'Elf', zipCode: 80211 },
+					{ uid: 'user-1' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'already-exists' });
+		expect(adminMock.batchSet).not.toHaveBeenCalled();
+	});
+
+	it('reports a commit failure after staging the synchronized documents', async () => {
+		const { changeAccountInformation } =
+			await loadAccountRegistrationHandlers(adminMock);
+		adminMock.updateUser.mockResolvedValue(undefined);
+		adminMock.batchCommit.mockRejectedValue(new Error('Firestore unavailable'));
+
+		await expect(
+			changeAccountInformation(
+				createCallableRequest(
+					{ firstName: 'Jovie', lastName: 'Elf', zipCode: 80211 },
+					{ uid: 'user-1' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'internal', message: 'Error updating user document' });
+		expect(adminMock.batchSet).toHaveBeenCalledTimes(3);
+	});
 });

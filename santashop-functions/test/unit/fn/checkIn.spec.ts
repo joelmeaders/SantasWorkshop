@@ -7,6 +7,7 @@ import {
 	generateIdMock,
 	generateQrCodeMock,
 	loadCheckInAdminHandlers,
+	recordCheckInRaceAttemptMock,
 } from '../helpers/checkin-admin.unit-helper';
 
 describe('checkIn handler', () => {
@@ -17,6 +18,7 @@ describe('checkIn handler', () => {
 		adminMock.batchCommit.mockResolvedValue(undefined);
 		generateQrCodeMock.mockResolvedValue(undefined);
 		generateIdMock.mockReturnValue('ZXCV2345');
+		recordCheckInRaceAttemptMock.mockReset();
 	});
 
 	it('rejects non-admin callers', async () => {
@@ -29,16 +31,95 @@ describe('checkIn handler', () => {
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
 
+	it('allows a dedicated check-in role but rejects unsupported scan input', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{ registration: createRegistration(), inputMethod: 'keyboard' },
+					{ roles: ['checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('rejects incomplete, missing, or stale registrations before writing', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		const incomplete = createRegistration({ children: [] });
+		await expect(
+			checkIn(createCallableRequest({ registration: incomplete, inputMethod: 'manual' }, { admin: true })),
+		).rejects.toMatchObject({ code: 'failed-precondition', message: '-11' });
+
+		await expect(
+			checkIn(createCallableRequest({ registration: createRegistration(), inputMethod: 'manual' }, { admin: true })),
+		).rejects.toMatchObject({ code: 'not-found' });
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
+	it('rejects an altered QR code using the authoritative registration', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.setDocSnapshot('registrations/test-user-123', {
+			...createRegistration(),
+			qrcode: 'authoritative-code',
+			registrationSubmittedOn: new Date(),
+		});
+
+		await expect(
+			checkIn(createCallableRequest({ registration: createRegistration(), inputMethod: 'camera' }, { admin: true })),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
+	it('records a race attempt and returns an already-exists error without a second write', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		const registration = {
+			...createRegistration(),
+			registrationSubmittedOn: new Date(),
+		};
+		adminMock.setDocSnapshot('registrations/test-user-123', registration);
+		adminMock.setDocSnapshot('checkins/test-user-123', { customerId: 'test-user-123' });
+		recordCheckInRaceAttemptMock.mockResolvedValue({ blocked: true });
+
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{ registration, inputMethod: 'camera' },
+					{ admin: true, uid: 'staff-1' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'already-exists', details: { blocked: true } });
+		expect(recordCheckInRaceAttemptMock).toHaveBeenCalledWith(
+			expect.objectContaining({ qrcode: registration.qrcode }),
+			'staff-1',
+			'camera',
+		);
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
+	it('maps transaction conflict errors to already-exists', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.runTransaction.mockRejectedValue({ code: 6, message: 'conflict' });
+
+		await expect(
+			checkIn(createCallableRequest({ registration: createRegistration(), inputMethod: 'manual' }, { admin: true })),
+		).rejects.toMatchObject({ code: 'already-exists', message: 'conflict' });
+	});
+
 	it('creates a check-in record and returns the child count', async () => {
 		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
 		const checkinDoc = adminMock.getDocRef('checkins/test-user-123');
 		adminMock.setDocSnapshot('registrations/test-user-123', {
-			uid: 'test-user-123',
+			...createRegistration(),
+			registrationSubmittedOn: new Date(),
 		});
 		checkinDoc.create.mockResolvedValue(undefined);
 
 		const result = await checkIn(
-			createCallableRequest(createRegistration(), { admin: true }),
+			createCallableRequest(
+				{ registration: createRegistration(), inputMethod: 'camera' },
+				{ admin: true },
+			),
 		);
 
 		expect(result).toBe(1);

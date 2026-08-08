@@ -24,7 +24,10 @@ setup exist.
 - Clear emulator data before each scenario and seed only the state required by
   that scenario.
 - Run sequentially because the tests share mutable emulator state.
-- Run one Playwright project: Chromium using the Pixel 5 mobile device profile.
+- Run the complete suite in Chromium using the Pixel 5 mobile device profile,
+  repeat public flows in Desktop Chrome, and run focused Desktop Chrome staff
+  coverage. Repeat critical compatibility journeys in Desktop Firefox, iPhone
+  WebKit, and iPad WebKit.
 - Exercise customer or staff behavior through the UI. Emulator-only callables
   may arrange prerequisite state and inspect durable results, but must not
   replace the interaction under test.
@@ -52,7 +55,7 @@ setup exist.
 | PUB-005 | Enable maintenance mode; the public experience shows the maintenance state.                                                            | BR-005, BR-012; FR-SH-008; FR-SH-034; NFR-AVL-001–002                    | Automated |
 | PUB-006 | Enable weather closure; the public experience shows the weather state.                                                                 | BR-005, BR-012; FR-SH-008; FR-SH-034; NFR-AVL-001–002                    | Automated |
 | PUB-007 | Seed a bilingual global alert; the English notice appears and can be dismissed.                                                        | BR-012–013; FR-SH-010; NFR-UX-004                                        | Automated |
-| PUB-008 | Change the global alert while a session is open; the updated notice becomes visible without rebuilding or redeploying.                 | BR-012; FR-SH-010; FR-SH-034                                             | Planned   |
+| PUB-008 | Change the global alert while a session is open; the updated notice becomes visible without rebuilding or redeploying.                 | BR-012; FR-SH-010; FR-SH-034                                             | Automated |
 
 ## Feature 2: Customer account and session access
 
@@ -107,9 +110,9 @@ setup exist.
 | SUB-002 | Confirmation shows a QR artifact, reservation details, child details, and event-information navigation.                                    | BR-025; FR-SH-019; FR-CUS-037–038; NFR-DAT-001                     | Automated   |
 | SUB-003 | Submission creates the staff search index and queues confirmation communication without blocking the customer workflow.                    | BR-006, BR-014–016; FR-CUS-035–036; FR-SH-020; NFR-REL-001–002     | Other layer |
 | SUB-004 | A submitted customer attempting draft/submit routes is redirected to confirmation.                                                         | FR-CUS-014; NFR-MNT-004                                            | Automated   |
-| SUB-005 | Change a submitted appointment when the control is enabled; retain prior context and queue follow-up communication.                        | BR-026; FR-CUS-039, FR-CUS-041–042; NFR-REL-003                    | Planned     |
-| SUB-006 | After check-in, appointment change is rejected at both UI and service boundaries.                                                          | FR-CUS-040; FR-SH-031; NFR-DAT-002                                 | Planned     |
-| SUB-007 | Customer cancellation records a cancellation log, queues cancellation communication, and invalidates/replaces the confirmation identifier. | BR-043–045; FR-CUS-043, FR-CUS-052; FR-SH-038–039; NFR-DAT-009–010 | Planned     |
+| SUB-005 | Change a submitted appointment when the control is enabled; retain prior context and queue follow-up communication.                        | BR-026; FR-CUS-039, FR-CUS-041–042; NFR-REL-003                    | Automated   |
+| SUB-006 | After check-in, appointment change is rejected at both UI and service boundaries.                                                          | FR-CUS-040; FR-SH-031; NFR-DAT-002                                 | Automated   |
+| SUB-007 | Customer cancellation records a cancellation log, queues cancellation communication, and invalidates/replaces the confirmation identifier. | BR-043–045; FR-CUS-043, FR-CUS-052; FR-SH-038–039; NFR-DAT-009–010 | Automated   |
 | SUB-008 | A transient communication failure records failure/retry state and produces an in-app customer notice without corrupting registration.      | BR-050; FR-SH-022, FR-SH-035–037; NFR-REL-010–013                  | Planned     |
 
 ## Feature 7: Profile and help
@@ -117,9 +120,9 @@ setup exist.
 | Test ID     | Scenario and expected result                                                                               | Requirements                                             | Status  |
 | ----------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------- |
 | PROFILE-001 | Open the authenticated profile and help areas from mobile navigation.                                      | FR-CUS-011, FR-CUS-044, FR-CUS-049                       | Automated |
-| PROFILE-002 | Change core profile information; the customer registration and staff-searchable identity stay aligned.     | BR-028; FR-CUS-045, FR-CUS-048; NFR-DAT-001, NFR-DAT-008 | Planned |
-| PROFILE-003 | Change email only after identity verification; the new email signs in and the old email does not.          | FR-CUS-046; NFR-SEC-005                                  | Planned |
-| PROFILE-004 | Change password only after identity verification; the new password signs in and the old password does not. | FR-CUS-047; NFR-SEC-005                                  | Planned |
+| PROFILE-002 | Change core profile information; the customer registration and staff-searchable identity stay aligned.     | BR-028; FR-CUS-045, FR-CUS-048; NFR-DAT-001, NFR-DAT-008 | Automated |
+| PROFILE-003 | Change email only after identity verification; the new email signs in and the old email does not.          | FR-CUS-046; NFR-SEC-005                                  | Automated |
+| PROFILE-004 | Change password only after identity verification; the new password signs in and the old password does not. | FR-CUS-047; NFR-SEC-005                                  | Automated |
 
 ## Feature 8: Staff identity, authorization, and navigation
 
@@ -131,8 +134,10 @@ setup exist.
 | STAFF-004 | Staff signs out and protected operational routes are blocked afterward.                                      | FR-OPS-005                                                         | Automated   |
 | STAFF-005 | Runtime controls disable check-in, on-site registration, preregistration, or cancellation without a rebuild. | BR-039; FR-SH-009; FR-OPS-004; NFR-MNT-003, NFR-MNT-006            | Automated   |
 | STAFF-006 | A limited operator can register/check in but cannot access reporting/admin tools; an admin can.              | FR-OPS-041; NFR-SEC-012                                            | Automated   |
-| STAFF-007 | Every staff mutation creates an audit record containing actor, action, target, and time.                     | BR-051; NFR-OPS-009                                                | Other layer |
+| STAFF-007 | A check-in-only operator cannot see or route to scan-risk review.                                             | FR-OPS-041; NFR-SEC-012                                            | Automated   |
 | OWNER-001 | An ordinary administrator cannot access owner-only operations.                                                | NFR-SEC-012                                                       | Automated   |
+| RULES-001 | Direct client access to owner-operation records is denied.                                                    | NFR-SEC-012                                                       | Automated   |
+| RULES-002 | Admins can read scan audits; check-in-only staff cannot, and no client can create, update, or delete them.  | NFR-SEC-012                                                       | Automated   |
 
 ## Feature 9: Schedule and capacity administration
 
@@ -150,37 +155,45 @@ setup exist.
 
 | Test ID     | Scenario and expected result                                                                                      | Requirements                                           | Status      |
 | ----------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----------- |
-| CHECKIN-001 | Find a submitted registration by guardian name and ZIP.                                                           | BR-007, BR-015, BR-031; FR-OPS-006–007, FR-OPS-010–011 | Planned     |
-| CHECKIN-002 | Find the same registration by email.                                                                              | FR-OPS-008                                             | Planned     |
-| CHECKIN-003 | Find the same registration by confirmation code.                                                                  | FR-OPS-009                                             | Planned     |
-| CHECKIN-004 | A failed scan routes staff to alternate lookup.                                                                   | FR-OPS-012–014; FR-SH-033; NFR-REL-004, NFR-AVL-003    | Planned     |
-| CHECKIN-005 | Review registration, child, and appointment data, then check in without edits.                                    | BR-004, BR-032; FR-OPS-015–020; NFR-DAT-001–002        | Planned     |
-| CHECKIN-006 | Correct allowed data during review and complete a modified check-in.                                              | BR-033; FR-OPS-018, FR-OPS-021–022                     | Planned     |
-| CHECKIN-007 | Attempt duplicate check-in; preserve the first record and show enough context to resolve the duplicate.           | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Planned     |
-| CHECKIN-008 | A submitted customer change appears in staff lookup immediately when practical and within a few minutes at worst. | FR-SH-043; NFR-DAT-008                                 | Planned     |
+| CHECKIN-001 | Find a submitted registration by guardian name and ZIP.                                                           | BR-007, BR-015, BR-031; FR-OPS-006–007, FR-OPS-010–011 | Automated   |
+| CHECKIN-002 | Find the same registration by email.                                                                              | FR-OPS-008                                             | Automated   |
+| CHECKIN-003 | Find the same registration by confirmation code.                                                                  | FR-OPS-009                                             | Automated   |
+| CHECKIN-004 | An unknown manual code cannot continue to check-in and offers alternate lookup recovery.                          | FR-OPS-012–014; FR-SH-033; NFR-REL-004, NFR-AVL-003    | Automated   |
+| CHECKIN-INCOMPLETE-001 | An incomplete manual-code match cannot continue to check-in and offers alternate lookup recovery.       | FR-OPS-012–014; FR-SH-033; NFR-REL-004, NFR-AVL-003    | Automated   |
+| CHECKIN-005 | Review registration, child, and appointment data, then check in without edits.                                    | BR-004, BR-032; FR-OPS-015–020; NFR-DAT-001–002        | Automated   |
+| CHECKIN-006 | Change an appointment during review and complete a modified check-in.                                             | BR-033; FR-OPS-018, FR-OPS-021–022                     | Automated   |
+| CHECKIN-007A | A likely accidental duplicate is blocked with current/prior context, no-coupon instruction, and restart.        | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
+| CHECKIN-007B | A late duplicate is blocked and appears in scan-risk review with its timeline.                                   | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
+| CHECKIN-007C | A superseded code stays blocked; a resubmitted replacement checks in once, then a later duplicate is blocked.    | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
+| CHECKIN-010 | A valid manually entered registration code completes check-in.                                                   | FR-OPS-012–020                                                    | Automated   |
+| CHECKIN-011 | Staff cancels a submitted registration from review and its superseded code is blocked.                           | BR-040; FR-SH-014; FR-OPS-018                                 | Automated   |
 | CHECKIN-009 | Measure representative lookup/check-in completion time under peak-size seeded data.                               | FR-OPS-011; NFR-PER-001, NFR-PER-005                   | Other layer |
 
 ## Feature 11: Staff-assisted intake and communication support
 
 | Test ID    | Scenario and expected result                                                                               | Requirements                      | Status  |
 | ---------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
-| INTAKE-001 | Staff preregisters a customer with identity, household, child, referral, preference, and appointment data. | BR-003, BR-035; FR-OPS-026–027    | Planned |
+| ADMIN-PRE-001 | Staff preregisters a customer with identity, child, referral, and appointment data.                      | BR-003, BR-035; FR-OPS-026–027    | Automated |
 | INTAKE-002 | Staff preregistration detects a duplicate account and offers a safe recovery path.                         | FR-OPS-028; NFR-SEC-011           | Planned |
 | INTAKE-003 | Completed preregistration creates confirmation and support artifacts.                                      | FR-OPS-029                        | Planned |
-| INTAKE-004 | Staff registers and immediately checks in a walk-in without requiring a customer self-service account.     | BR-036; FR-OPS-030–033            | Planned |
+| ADMIN-REG-001 | Staff registers and immediately checks in a walk-in without requiring a customer self-service account.   | BR-036; FR-OPS-030–033            | Automated |
 | EMAIL-001  | Authorized staff can open the email-template manager and begin a new SES-ready draft.                        | FR-SH-022–023; FR-OPS-034–035    | Automated |
 | USER-001   | An owner can create a check-in staff account through user management.                                         | FR-OPS-041; NFR-SEC-012            | Automated |
-| COMMS-001  | Staff locates an eligible registration and requeues confirmation communication.                            | BR-037; FR-SH-023; FR-OPS-034–035 | Planned |
+| COMMS-001  | Staff locates an eligible registration and requeues confirmation communication.                            | BR-037; FR-SH-023; FR-OPS-034–035 | Automated |
 
 ## Feature 12: Reporting, seasonal isolation, and data lifecycle
 
 | Test ID    | Scenario and expected result                                                                                                                          | Requirements                                                       | Status      |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------- |
-| REPORT-001 | Authorized reporting users see registration and appointment utilization for a selected program year.                                                  | BR-008, BR-038; FR-SH-024, FR-SH-027; FR-OPS-036, FR-OPS-039–040   | Planned     |
-| REPORT-002 | Authorized reporting users see check-in statistics by program year.                                                                                   | FR-SH-026; FR-OPS-037, FR-OPS-039–040                              | Planned     |
-| REPORT-003 | Authorized reporting users see user, referral, and geographic statistics by program year.                                                             | BR-021, BR-047; FR-SH-025; FR-OPS-038–040                          | Planned     |
-| REPORT-004 | Current-year registration, schedule, lookup, and reports do not mix records from another program year.                                                | BR-009, BR-011; FR-SH-017; NFR-DAT-003; NFR-SEAS-001, NFR-SEAS-003 | Planned     |
+| REPORT-001 | Authorized reporting users see registration and appointment utilization for a selected program year.                                                  | BR-008, BR-038; FR-SH-024, FR-SH-027; FR-OPS-036, FR-OPS-039–040   | Automated   |
+| REPORT-002 | Authorized reporting users see check-in statistics by program year.                                                                                   | FR-SH-026; FR-OPS-037, FR-OPS-039–040                              | Automated   |
+| REPORT-003 | Authorized reporting users see user, referral, and geographic statistics by program year.                                                             | BR-021, BR-047; FR-SH-025; FR-OPS-038–040                          | Automated   |
+| REPORT-004 | Current-year registration, schedule, lookup, and reports do not mix records from another program year.                                                | BR-009, BR-011; FR-SH-017; NFR-DAT-003; NFR-SEAS-001, NFR-SEAS-003 | Automated   |
 | REPORT-ENTRY-001 | Authorized staff can open registration, check-in, and user reporting views with safe empty states.                                             | FR-OPS-036–040; NFR-UX-004                                      | Automated   |
+| SCAN-RISK-001 | Current-season scan-risk summaries paginate past 20 customers, keep prior-year data out, and show newest-first timelines.                       | NFR-DAT-003; NFR-SEAS-001, NFR-SEAS-003                          | Automated   |
+| OWNER-002 | Exact phrase plus owner reauthentication starts safe repair work and shows in-progress then succeeded status.                                   | NFR-SEC-012                                                       | Automated   |
+| OWNER-003 | An owner previews each listed safe operation and sees its exact confirmation phrase.                                                               | NFR-SEC-012                                                       | Automated   |
+| OWNER-004 | A mistyped owner-operation phrase is rejected before an operation starts.                                                                           | NFR-SEC-012                                                       | Automated   |
 | LIFE-001   | End-of-year operation backs up database content and stored files before purging customer, registration, and check-in data while retaining statistics. | BR-049; FR-SH-040; NFR-PRV-008–009; NFR-SEAS-004–005               | Other layer |
 | LIFE-002   | Event-period backups run daily, retain 30 days, produce zip archives, and restore successfully using the documented process.                          | NFR-REL-007, NFR-REL-014–017                                       | Other layer |
 | LIFE-003   | Exports containing personal contact data are audit logged and password protected.                                                                     | NFR-OPS-010–011                                                    | Other layer |
@@ -189,11 +202,14 @@ setup exist.
 
 | Test ID  | Scenario and expected result                                                                                                           | Requirements                                               | Status             |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------------------ |
-| QUAL-001 | Run automated accessibility analysis on each critical public and staff route at the mobile viewport with no serious/critical findings. | BR-052; NFR-UX-003                                         | Planned            |
+| QUAL-001 | Run automated accessibility analysis on critical public and staff routes at the mobile viewport with no serious/critical findings.      | BR-052; NFR-UX-003                                         | Automated          |
 | QUAL-002 | Perform keyboard, screen-reader, zoom/reflow, contrast, error-identification, and focus-order review against WCAG AA.                  | BR-052; NFR-UX-003–004                                     | Manual + automated |
 | QUAL-003 | Verify public configuration is readable but immutable and contains no protected secrets.                                               | NFR-SEC-007; NFR-PRV-004–007; NFR-OPS-001–003, NFR-OPS-008 | Other layer        |
 | QUAL-004 | Verify local/test/prod configuration resolves to separate projects and never mixes customer data or credentials.                       | NFR-PRV-006; NFR-AVL-004–005; NFR-OPS-006–007              | Other layer        |
 | QUAL-005 | Measure initial route payload and interactive readiness against an agreed budget once numeric targets are approved.                    | NFR-PER-002                                                | Planned            |
+| VIEWPORT-ADMIN-001 | Keep the core staff navigation visible and free of horizontal overflow at the desktop viewport.                         | NFR-UX-001, NFR-UX-004                                     | Automated          |
+| BROWSER-PUB-001 | Keep public account entry and responsive form input usable across Chromium, Firefox, phone WebKit, and tablet WebKit.          | NFR-UX-001, NFR-UX-004                                     | Automated          |
+| BROWSER-ADMIN-001 | Keep staff sign-in, navigation, and manual scan entry usable across Chromium, Firefox, phone WebKit, and tablet WebKit.      | NFR-UX-001, NFR-UX-004                                     | Automated          |
 
 ## Executable spec map
 
@@ -202,12 +218,17 @@ setup exist.
 | Public entry and operating controls                           | `tests/public/entry-and-controls.spec.ts`     |
 | Customer account and session access                           | `tests/public/account-access.spec.ts`         |
 | Registration, children, appointment, submission, confirmation | `tests/public/registration-lifecycle.spec.ts` |
-| Staff identity and runtime-gated navigation                   | `tests/admin/access-and-controls.spec.ts`     |
+| Staff identity, authorization, runtime-gated navigation, and scan-audit rules | `tests/admin/access-and-controls.spec.ts`     |
 | Staff lookup by name, email, and confirmation code             | `tests/admin/search-and-lookup.spec.ts`       |
+| Staff event-day check-in, scan-risk review, and assisted intake | `tests/admin/checkin-and-registration.spec.ts` |
+| Owner-operation authorization, safe completion, previews, and confirmation guard | `tests/admin/owner-operations.spec.ts`        |
 | Admin email-template manager entry                            | `tests/admin/email-templates.spec.ts`        |
 | Admin staff user management                                  | `tests/admin/users.spec.ts`                 |
 | Admin reporting route entry                                  | `tests/admin/reporting-entry.spec.ts`      |
 | Schedule and capacity administration                          | `tests/admin/schedule-editor/*.spec.ts`       |
+| Automated accessibility checks                               | `tests/{public,admin}/accessibility.spec.ts`  |
+| Desktop staff navigation smoke                               | `tests/admin/desktop-smoke.spec.ts`           |
+| Cross-browser and device compatibility smoke                 | `tests/{public,admin}/browser-device-smoke.spec.ts` |
 
 ## Coverage boundaries
 

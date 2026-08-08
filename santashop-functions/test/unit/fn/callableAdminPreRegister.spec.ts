@@ -32,6 +32,43 @@ describe('callableAdminPreRegister handler', () => {
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
 
+	it('validates required account fields before attempting to create Auth users', async () => {
+		const { callableAdminPreRegister } =
+			await loadCheckInAdminHandlers(adminMock);
+		await expect(
+			callableAdminPreRegister(
+				createCallableRequest(
+					createRegistration({ emailAddress: '' }),
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+	});
+
+	it('maps duplicate Auth emails and rolls back when the requested schedule does not exist', async () => {
+		const { callableAdminPreRegister } =
+			await loadCheckInAdminHandlers(adminMock);
+		adminMock.createUser.mockRejectedValue({
+			code: 'auth/email-already-exists',
+			message: 'Already registered',
+		});
+		await expect(
+			callableAdminPreRegister(
+				createCallableRequest(createRegistration(), { admin: true }),
+			),
+		).rejects.toMatchObject({ code: 'already-exists' });
+
+		adminMock.createUser.mockResolvedValue({ uid: 'pre-reg-no-slot' });
+		adminMock.setDocSnapshot('dateTimeSlots/slot-1', {});
+		await expect(
+			callableAdminPreRegister(
+				createCallableRequest(createRegistration(), { admin: true }),
+			),
+		).rejects.toMatchObject({ code: 'not-found' });
+		expect(adminMock.deleteUser).toHaveBeenCalledWith('pre-reg-no-slot');
+	});
+
 	it('creates auth, registration, index, and email records for admins', async () => {
 		const { callableAdminPreRegister } =
 			await loadCheckInAdminHandlers(adminMock);
@@ -57,7 +94,7 @@ describe('callableAdminPreRegister handler', () => {
 		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
 		expect(adminMock.batchSet).toHaveBeenCalledTimes(1);
 		expect(generateQrCodeMock).toHaveBeenCalledWith(
-			'pre-reg-123',
+			'registrations/pre-reg-123/test-asset.png',
 			'ZXCV2345',
 		);
 		expect(
@@ -128,6 +165,8 @@ describe('callableAdminPreRegister handler', () => {
 			),
 		).rejects.toMatchObject({ code: 'internal' });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('pre-reg-qr');
-		expect(deleteQrCodeMock).toHaveBeenCalledWith('pre-reg-qr');
+		expect(deleteQrCodeMock).toHaveBeenCalledWith(
+			'registrations/pre-reg-qr/test-asset.png',
+		);
 	});
 });

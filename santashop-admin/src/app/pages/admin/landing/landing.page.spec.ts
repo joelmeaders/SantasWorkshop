@@ -118,4 +118,16 @@ describe('LandingPage', () => {
 			'Owner Operations',
 		);
 	});
+
+	it('toggles the document theme using the persisted preference', () => {
+		expect(document.body.classList.contains('dark')).toBe(false);
+
+		component.toggleTheme();
+		expect(appStateService.prefersDark).toBe(true);
+		expect(document.body.classList.contains('dark')).toBe(true);
+
+		component.toggleTheme();
+		expect(appStateService.prefersDark).toBe(false);
+		expect(document.body.classList.contains('dark')).toBe(false);
+	});
 });

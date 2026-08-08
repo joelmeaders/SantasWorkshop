@@ -1,5 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import { CheckIn, COLLECTION_SCHEMA, Registration } from '../models';
+import {
+	CheckIn,
+	CheckInRequest,
+	COLLECTION_SCHEMA,
+	Registration,
+} from '../models';
 import {
 	calculateRegistrationStats,
 	isPartialRegistrationComplete,
@@ -8,16 +13,18 @@ import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
-import { isAdminToken } from '../utility/capabilities';
+import { canCheckInToken } from '../utility/capabilities';
+import { recordCheckInRaceAttempt } from '../utility/registration-scan';
 
 const log = createFunctionLogger('checkInWithEdit');
 
 export default async function checkInWithEdit(
-	request: CallableRequest<Partial<Registration>>,
+	request: CallableRequest<CheckInRequest>,
 ): Promise<number> {
-	const record = request.data;
+	const record = request.data?.registration ?? {};
+	const inputMethod = request.data?.inputMethod;
 
-	if (!isAdminToken(request.auth?.token)) {
+	if (!canCheckInToken(request.auth?.token)) {
 		log.warn('Non-admin attempted to check in with edits', {
 			actorUid: request.auth?.uid ?? null,
 			targetUid: record.uid ?? null,
@@ -27,6 +34,9 @@ export default async function checkInWithEdit(
 			'-99',
 			'You can only update your own records',
 		);
+	}
+	if (inputMethod !== 'camera' && inputMethod !== 'manual') {
+		throw new HttpsError('invalid-argument', 'Scan input method is invalid.');
 	}
 
 	if (!isPartialRegistrationComplete(record)) {
@@ -71,16 +81,33 @@ export default async function checkInWithEdit(
 		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
 
 	try {
-		await admin.firestore().runTransaction(async (transaction) => {
-			const sourceRegistration = await transaction.get(
-				sourceRegistrationDocRef,
-			);
+		let authoritativeRegistration: Registration | undefined;
+		const created = await admin.firestore().runTransaction(async (transaction) => {
+			const [sourceRegistration, existingCheckIn] = await Promise.all([
+				transaction.get(sourceRegistrationDocRef),
+				transaction.get(checkinDocRef),
+			]);
 			if (!sourceRegistration.exists) {
 				throw new HttpsError(
 					'not-found',
 					'Registration was not found.',
 				);
 			}
+			authoritativeRegistration = {
+				uid: sourceRegistration.id,
+				...sourceRegistration.data(),
+			} as Registration;
+			if (
+				authoritativeRegistration.qrcode !== record.qrcode ||
+				!authoritativeRegistration.registrationSubmittedOn ||
+				authoritativeRegistration.cancelledOn
+			) {
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration is no longer eligible for check-in.',
+				);
+			}
+			if (existingCheckIn.exists) return false;
 
 			transaction.create(registrationDocRef, partialRegistration);
 			transaction.create(checkinDocRef, checkin);
@@ -89,7 +116,20 @@ export default async function checkInWithEdit(
 				{ hasCheckedIn: true },
 				{ merge: true },
 			);
+			return true;
 		});
+		if (!created && authoritativeRegistration && request.auth?.uid) {
+			const blocked = await recordCheckInRaceAttempt(
+				authoritativeRegistration,
+				request.auth.uid,
+				inputMethod,
+			);
+			throw new HttpsError(
+				'already-exists',
+				'Registration was already checked in.',
+				blocked,
+			);
+		}
 		return checkin.stats!.children;
 	} catch (error) {
 		if (error instanceof HttpsError) {

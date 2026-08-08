@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import { DateTimeSlot } from '@santashop/models';
 import { Observable, of } from 'rxjs';
@@ -197,5 +197,38 @@ describe('OverviewPage', () => {
 		expect(component.reviewing()).toBe(false);
 		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).not.toBeNull();
 		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).not.toBeNull();
+	});
+
+	it('saves an enabled appointment and rejects unavailable selections', async (): Promise<void> => {
+		preregistrationService.setDraftAppointment.mockResolvedValue({ data: true });
+
+		await component.chooseDateTime({ id: 'slot-1', enabled: true } as DateTimeSlot);
+		await component.chooseDateTime({ id: 'slot-2', enabled: false } as DateTimeSlot);
+		await component.chooseDateTime();
+
+		expect(preregistrationService.setDraftAppointment).toHaveBeenCalledWith(
+			expect.objectContaining({ slotId: 'slot-1' }),
+		);
+		expect(toastController.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'That appointment is no longer available. Please choose another time.',
+				color: 'danger',
+			}),
+		);
+	});
+
+	it('navigates after a successful submission and keeps the workspace open on failure', async (): Promise<void> => {
+		const router = TestBed.inject(Router);
+		const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+		preregistrationService.completeRegistration.mockResolvedValue({ data: true });
+
+		await component.submitRegistration();
+
+		expect(navigate).toHaveBeenCalledWith(['/pre-registration/confirmation']);
+		preregistrationService.completeRegistration.mockResolvedValue({ data: false });
+		await component.submitRegistration();
+		expect(toastController.create).toHaveBeenLastCalledWith(
+			expect.objectContaining({ color: 'danger' }),
+		);
 	});
 });

@@ -119,6 +119,13 @@ export const checkIn = onCall(
 	}),
 );
 
+export const resolveRegistrationScan = onCall(
+	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	observeCallableHandler('resolveRegistrationScan', async (request) => {
+		return (await import('./fn/resolveRegistrationScan')).default(request);
+	}),
+);
+
 export const checkInWithEdit = onCall(
 	{ enforceAppCheck: ENFORCE_APP_CHECK },
 	observeCallableHandler('checkInWithEdit', async (request) => {
@@ -535,7 +542,7 @@ export const testSeedAdminUser = onCall(
 			? ((data as { roles: unknown[] }).roles.filter(
 					(role): role is 'admin' | 'checkin' =>
 						role === 'admin' || role === 'checkin',
-				) as Array<'admin' | 'checkin'>)
+				) as ('admin' | 'checkin')[])
 			: undefined;
 
 		if (!password) {
@@ -637,6 +644,68 @@ export const testSeedRegistration = onCall(
 	}),
 );
 
+/** Reads registration QR lifecycle evidence for browser E2E assertions. Emulator only. */
+export const testInspectRegistrationQrLifecycle = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testInspectRegistrationQrLifecycle', async (request) => {
+		assertEmulatorOnly();
+		const data = typeof request.data === 'object' && request.data !== null
+			? request.data as { emailAddress?: unknown }
+			: {};
+		if (typeof data.emailAddress !== 'string' || !data.emailAddress.trim()) {
+			throw new HttpsError('invalid-argument', 'Email address is required.');
+		}
+		const { inspectRegistrationQrLifecycle } = await import('./fn/testHelpers');
+		return inspectRegistrationQrLifecycle(data.emailAddress);
+	}),
+);
+
+/** Reads display-safe scan audit attempts and risk summaries. Emulator only. */
+export const testInspectRegistrationScanAudit = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testInspectRegistrationScanAudit', async (request) => {
+		assertEmulatorOnly();
+		const data = typeof request.data === 'object' && request.data !== null
+			? request.data as { emailAddress?: unknown }
+			: {};
+		if (typeof data.emailAddress !== 'string' || !data.emailAddress.trim()) {
+			throw new HttpsError('invalid-argument', 'Email address is required.');
+		}
+		const { inspectRegistrationScanAudit } = await import('./fn/testHelpers');
+		return inspectRegistrationScanAudit(data.emailAddress);
+	}),
+);
+
+/** Reads queued registration-email path snapshots. Emulator only. */
+export const testInspectQueuedRegistrationEmails = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testInspectQueuedRegistrationEmails', async (request) => {
+		assertEmulatorOnly();
+		const data = typeof request.data === 'object' && request.data !== null
+			? request.data as { emailAddress?: unknown }
+			: {};
+		if (typeof data.emailAddress !== 'string' || !data.emailAddress.trim()) {
+			throw new HttpsError('invalid-argument', 'Email address is required.');
+		}
+		const { inspectQueuedRegistrationEmails } = await import('./fn/testHelpers');
+		return inspectQueuedRegistrationEmails(data.emailAddress);
+	}),
+);
+
+/** Seeds current/prior-season paginated scan-risk fixtures. Emulator only. */
+export const testSeedScanRiskHistory = onCall(
+	{ enforceAppCheck: false },
+	observeCallableHandler('testSeedScanRiskHistory', async (request) => {
+		assertEmulatorOnly();
+		if (typeof request.data !== 'object' || request.data === null) {
+			throw new HttpsError('invalid-argument', 'Scan-risk seed is required.');
+		}
+		const { seedScanRiskHistory } = await import('./fn/testHelpers');
+		await seedScanRiskHistory(request.data as Parameters<typeof seedScanRiskHistory>[0]);
+		return { success: true };
+	}),
+);
+
 /**
  * Seeds a schedule statistics document for reporting E2E tests.
  * Emulator only.
@@ -663,10 +732,10 @@ export const testSeedScheduleStats = onCall(
 
 		await seedScheduleStats({
 			programYear: data.programYear,
-			dateTimeCounts: data.dateTimeCounts as Array<{
+			dateTimeCounts: data.dateTimeCounts as {
 				dateTime: string;
 				count: number;
-			}>,
+			}[],
 		});
 		return { success: true };
 	}),

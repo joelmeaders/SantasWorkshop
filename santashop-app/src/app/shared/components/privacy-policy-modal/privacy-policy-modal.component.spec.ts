@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalController } from '@ionic/angular';
@@ -35,5 +35,15 @@ describe('PrivacyPolicyModalComponent', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('dismisses the modal from the close control', (): void => {
+		const modalController = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
+
+		component.onDismiss();
+
+		expect(modalController.dismiss).toHaveBeenCalledOnce();
 	});
 });

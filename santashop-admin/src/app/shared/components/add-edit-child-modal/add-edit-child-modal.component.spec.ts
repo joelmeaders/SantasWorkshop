@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular';
 import { AgeGroup, ToyType, type Child } from '@santashop/models';
 import { AddEditChildModalComponent } from './add-edit-child-modal.component';
 import {
@@ -89,5 +89,58 @@ describe('AddEditChildModalComponent', () => {
 
 		expect(child.id).toBe(12345);
 		expect(modalController.dismiss).toHaveBeenCalledWith(child, 'add');
+	});
+
+	it('sets infant defaults and calculates each school-age band from a birthday', async () => {
+		const year = new Date().getFullYear();
+
+		await component.birthdaySelected({ detail: { value: `${year - 1}-06-01` } });
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age02);
+		expect(component.form.controls['toyType'].value).toBe(ToyType.infant);
+
+		await component.birthdaySelected({ detail: { value: `${year - 4}-06-01` } });
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age35);
+		await component.birthdaySelected({ detail: { value: `${year - 7}-06-01` } });
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age68);
+		await component.birthdaySelected({ detail: { value: `${year - 10}-06-01` } });
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age911);
+	});
+
+	it('alerts and clears an over-age birthday', async () => {
+		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
+		alerts.create.mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue(undefined),
+		} as unknown as HTMLIonAlertElement);
+
+		await component.birthdaySelected({ detail: { value: `${new Date().getFullYear() - 12}-01-01` } });
+
+		expect(alerts.create).toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'This child is too old' }),
+		);
+		expect(component.form.controls['dateOfBirth'].value).toBeUndefined();
+	});
+
+	it('saves a form child as an add result and cancels without a child', async () => {
+		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
+		component.form.setValue({
+			id: null,
+			firstName: 'Taylor',
+			lastName: 'Tester',
+			dateOfBirth: `${new Date().getFullYear() - 6}-05-01`,
+			ageGroup: AgeGroup.age68,
+			toyType: ToyType.boy,
+		});
+		vi.spyOn(Math, 'random').mockReturnValue(0.5);
+
+		await component.saveChild();
+		await component.dismiss();
+
+		expect(modal.dismiss).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({ id: 50000, firstName: 'Taylor', dateOfBirth: expect.any(Date) }),
+			'add',
+		);
+		expect(modal.dismiss).toHaveBeenLastCalledWith(undefined, 'cancelled');
 	});
 });

@@ -12,7 +12,12 @@ import { requireAuthenticatedUid } from '../utility/callable-validation';
 import { formatRegistrationDateTime, type DateTimeValue } from '../utility/date-time-format';
 import { generateId } from '../utility/id-generation';
 import { createFunctionLogger } from '../utility/observability';
-import { deleteQrCode, generateQrCode } from '../utility/qrcodes';
+import {
+	createQrCodeStoragePath,
+	generateQrCode,
+	replaceQrCodeWithCancelled,
+} from '../utility/qrcodes';
+import { PROGRAM_YEAR } from '../utility/runtime-config';
 import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
 	getStoredMutationResult,
@@ -35,6 +40,8 @@ interface CancellationResult {
 	previousDateTimeSlot?: Partial<DateTimeSlot>;
 	emailAddress?: string;
 	firstName?: string;
+	supersededQrCodeStoragePath: string;
+	replacementQrCodeStoragePath: string;
 }
 
 const requireRegistrationUid = (value: unknown): string | undefined => {
@@ -45,15 +52,18 @@ const requireRegistrationUid = (value: unknown): string | undefined => {
 	return value;
 };
 
-const resultFromCancelledRegistration = (
+const resultFromCancellation = (
 	uid: string,
 	registration: Registration,
+	cancellation: RegistrationCancellation,
 ): CancellationResult => ({
 	uid,
 	newConfirmationCode: registration.qrcode ?? '',
 	previousDateTimeSlot: registration.previousDateTimeSlot,
 	emailAddress: registration.emailAddress,
 	firstName: registration.firstName,
+	supersededQrCodeStoragePath: cancellation.supersededQrCodeStoragePath,
+	replacementQrCodeStoragePath: cancellation.replacementQrCodeStoragePath,
 });
 
 const queueCancellationEmail = async (result: CancellationResult): Promise<void> => {
@@ -84,8 +94,11 @@ const finalizeCancellation = async (
 	if (!result.newConfirmationCode) {
 		throw new HttpsError('failed-precondition', 'Registration confirmation code is unavailable.');
 	}
-	await deleteQrCode(result.uid);
-	await generateQrCode(result.uid, result.newConfirmationCode);
+	await replaceQrCodeWithCancelled(result.supersededQrCodeStoragePath);
+	await generateQrCode(
+		result.replacementQrCodeStoragePath,
+		result.newConfirmationCode,
+	);
 	await registrationRef.set(
 		{ qrCodeGeneratedOn: new Date(), qrCodeGenerationFailedOn: false },
 		{ merge: true },
@@ -130,6 +143,18 @@ export default async function undoRegistration(
 				throw new HttpsError('not-found', `Registration not found for ${uid}.`);
 			}
 			if (cached || registration.cancelledOn) {
+				if (!registration.cancellationLogId) {
+					throw new HttpsError('internal', 'Cancellation record is unavailable.');
+				}
+				const cancellationSnapshot = await transaction.get(
+					db.doc(`${COLLECTION_SCHEMA.cancellations}/${registration.cancellationLogId}`),
+				);
+				const cancellation = cancellationSnapshot.data() as
+					| RegistrationCancellation
+					| undefined;
+				if (!cancellation) {
+					throw new HttpsError('internal', 'Cancellation record is unavailable.');
+				}
 				if (!cached) {
 					transaction.create(receiptRef, {
 						operation: 'undoRegistration',
@@ -137,7 +162,7 @@ export default async function undoRegistration(
 						completedOn: new Date(),
 					} satisfies MutationReceipt);
 				}
-				result = resultFromCancelledRegistration(uid, registration);
+				result = resultFromCancellation(uid, registration, cancellation);
 				return;
 			}
 
@@ -151,6 +176,9 @@ export default async function undoRegistration(
 			if (registration.hasCheckedIn) {
 				throw new HttpsError('failed-precondition', 'Checked-in registrations cannot be cancelled.');
 			}
+			if (!registration.qrcode || !registration.qrCodeStoragePath) {
+				throw new HttpsError('failed-precondition', 'Registration QR details are unavailable.');
+			}
 
 			const previousDateTimeSlot = registration.dateTimeSlot ? { ...registration.dateTimeSlot } : undefined;
 			const registrationWithoutSubmission = { ...registration };
@@ -158,15 +186,19 @@ export default async function undoRegistration(
 			delete registrationWithoutSubmission.registrationSubmittedOn;
 			delete registrationWithoutSubmission.previousDateTimeSlot;
 			const newConfirmationCode = generateId(8);
+			const replacementQrCodeStoragePath = createQrCodeStoragePath(uid);
 			const cancelledOn = new Date();
 			const cancellationRef = db.collection(COLLECTION_SCHEMA.cancellations).doc();
 			const cancellation: RegistrationCancellation = {
 				uid,
 				actorUid,
 				cancelledOn,
+				programYear: PROGRAM_YEAR,
 				previousDateTimeSlot,
 				supersededConfirmationCode: registration.qrcode,
+				supersededQrCodeStoragePath: registration.qrCodeStoragePath,
 				replacementConfirmationCode: newConfirmationCode,
+				replacementQrCodeStoragePath,
 			};
 
 			transaction.set(cancellationRef, cancellation);
@@ -181,6 +213,7 @@ export default async function undoRegistration(
 				reminderEmailSentOn: false,
 				reminderEmailFailedOn: false,
 				qrcode: newConfirmationCode,
+				qrCodeStoragePath: replacementQrCodeStoragePath,
 				qrCodeGeneratedOn: false,
 				qrCodeGenerationFailedOn: false,
 				cancelledOn,
@@ -198,6 +231,8 @@ export default async function undoRegistration(
 				previousDateTimeSlot,
 				emailAddress: registration.emailAddress,
 				firstName: registration.firstName,
+				supersededQrCodeStoragePath: registration.qrCodeStoragePath,
+				replacementQrCodeStoragePath,
 			};
 		});
 

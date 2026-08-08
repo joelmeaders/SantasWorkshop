@@ -87,8 +87,13 @@ describe('SignUpPage', () => {
 		modalController.create.mockResolvedValue(modal as never);
 
 		await component.showReferralModal();
+		await fixture.whenStable();
 
 		expect(component.form.controls.referredBy.value).toBe('Friend');
+		expect(
+			(fixture.nativeElement.querySelector('#referralSelector') as HTMLElement)
+				.innerText,
+		).toContain('Friend');
 		expect(modalController.create).toHaveBeenCalled();
 	});
 

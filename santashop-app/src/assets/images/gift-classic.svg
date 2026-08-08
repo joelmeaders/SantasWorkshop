@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Classic red Christmas gift</title>
+  <desc id="desc">A bright red present wrapped with a golden ribbon and a large bow.</desc>
+  <defs>
+    <linearGradient id="box" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ef4451"/>
+      <stop offset="1" stop-color="#a90928"/>
+    </linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff6870"/>
+      <stop offset="1" stop-color="#d91d3c"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff19a"/>
+      <stop offset="0.48" stop-color="#ffc83d"/>
+      <stop offset="1" stop-color="#d88900"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="9" stdDeviation="7" flood-color="#421020" flood-opacity=".24"/>
+    </filter>
+  </defs>
+  <ellipse cx="128" cy="224" rx="86" ry="13" fill="#6e2031" opacity=".16"/>
+  <g filter="url(#shadow)">
+    <path d="M47 102h162v111a12 12 0 0 1-12 12H59a12 12 0 0 1-12-12Z" fill="url(#box)"/>
+    <path d="M37 84a10 10 0 0 1 10-10h162a10 10 0 0 1 10 10v25H37Z" fill="url(#lid)"/>
+    <path d="M110 74h36v151h-36Z" fill="url(#gold)"/>
+    <path d="M37 92h182v17H37Z" fill="#fff" opacity=".12"/>
+    <path d="M128 74C95 69 73 51 78 35c5-15 29-8 50 28 21-36 45-43 50-28 5 16-17 34-50 39Z" fill="url(#gold)" stroke="#c47a00" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M128 65c-12-27-27-33-32-25-5 9 11 20 32 25Zm0 0c12-27 27-33 32-25 5 9-11 20-32 25Z" fill="#fff3a8" opacity=".58"/>
+    <circle cx="128" cy="72" r="13" fill="#f8b817"/>
+    <path d="M110 111h36v8h-36Z" fill="#8d5400" opacity=".18"/>
+    <path d="M56 122v79" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".15"/>
+  </g>
+</svg>

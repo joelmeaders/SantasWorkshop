@@ -41,4 +41,16 @@ describe('PreRegistrationPage', () => {
 	it('should create', () => {
 		expect(component).toBeTruthy();
 	});
+
+	it('offsets routed content below the header and mobile safe area', (): void => {
+		document.documentElement.style.setProperty('--ion-safe-area-top', '62px');
+		try {
+			const outlet = fixture.nativeElement.querySelector(
+				'ion-router-outlet#main',
+			) as HTMLElement;
+			expect(getComputedStyle(outlet).top).toBe('139px');
+		} finally {
+			document.documentElement.style.removeProperty('--ion-safe-area-top');
+		}
+	});
 });

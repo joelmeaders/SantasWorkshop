@@ -37,12 +37,16 @@ import {
 import {
 	AlertController,
 	IonCol,
+	IonButton,
 	IonContent,
 	IonGrid,
+	IonIcon,
 	IonRow,
 	ToastController,
 } from '@ionic/angular';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { addIcons } from 'ionicons';
+import { arrowDownCircleOutline } from 'ionicons/icons';
 
 @Component({
 	selector: 'app-overview',
@@ -58,6 +62,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 		IonGrid,
 		IonRow,
 		IonCol,
+		IonButton,
+		IonIcon,
 		TranslateModule,
 	],
 })
@@ -88,6 +94,10 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	);
 	public readonly isSaving = signal(false);
 	public readonly reviewing = signal(false);
+
+	constructor() {
+		addIcons({ arrowDownCircleOutline });
+	}
 
 	public readonly canChooseDateTime$ = combineLatest([
 		this.childCount$,
@@ -225,6 +235,28 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 
 	public makeChanges(): void {
 		this.reviewing.set(false);
+	}
+
+	public reviewAndSubmit(): void {
+		const card = this.submitCard();
+		if (!card?.canSubmit()) return;
+
+		this.analytics.logEvent('workspace_completion_nudge_clicked');
+		card.open();
+
+		if (!isPlatformBrowser(this.platformId)) return;
+		window.setTimeout(() => {
+			const reviewSection = document.getElementById('review');
+			if (!reviewSection) return;
+			const reduceMotion =
+				typeof window.matchMedia === 'function' &&
+				window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			reviewSection.focus({ preventScroll: true });
+			reviewSection.scrollIntoView({
+				behavior: reduceMotion ? 'auto' : 'smooth',
+				block: 'start',
+			});
+		});
 	}
 
 	private readonly focusHashSection = (): void => {

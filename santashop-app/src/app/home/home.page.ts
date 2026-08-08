@@ -30,7 +30,7 @@ import {
 	LoadingController,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { logoFacebook, logoInstagram } from 'ionicons/icons';
+import { arrowBackSharp, logoFacebook, logoInstagram } from 'ionicons/icons';
 import {
 	AppStateService,
 	AuthService,
@@ -101,7 +101,7 @@ export class HomePage implements OnDestroy {
 	);
 
 	constructor() {
-		addIcons({ logoFacebook, logoInstagram });
+		addIcons({ arrowBackSharp, logoFacebook, logoInstagram });
 	}
 
 	public ngOnDestroy(): void {

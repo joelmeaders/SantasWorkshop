@@ -37,6 +37,16 @@ describe('PrivacyPolicyModalComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('renders a header close control without a footer', (): void => {
+		const header = fixture.nativeElement.querySelector(
+			'ion-header',
+		) as HTMLElement;
+
+		expect(header).toBeTruthy();
+		expect(header.querySelector('#closePrivacyPolicyButton')).toBeTruthy();
+		expect(fixture.nativeElement.querySelector('ion-footer')).toBeNull();
+	});
+
 	it('dismisses the modal from the close control', (): void => {
 		const modalController = TestBed.inject(
 			ModalController,

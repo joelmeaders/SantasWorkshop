@@ -1,4 +1,5 @@
 <ion-content color="light" class="workspace-page">
+	@let canSubmit = (canSubmit$ | async) ?? false;
 	<ion-grid class="workspace-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max">
 			<ion-col size="12">
@@ -32,12 +33,42 @@
 							/>
 						</section>
 
+						@if (canSubmit && !reviewing()) {
+						<section
+							class="completion-nudge"
+							animate.enter="completion-nudge-enter"
+							role="status"
+							aria-live="polite"
+							aria-labelledby="completion-nudge-title"
+						>
+							<ion-icon
+								class="completion-nudge-icon"
+								name="arrow-down-circle-outline"
+								aria-hidden="true"
+							/>
+							<div class="completion-nudge-copy">
+								<strong id="completion-nudge-title">
+									{{ 'OVERVIEW.FINAL_STEP_TITLE' | translate }}
+								</strong>
+								<span>{{ 'OVERVIEW.FINAL_STEP_MESSAGE' | translate }}</span>
+							</div>
+							<ion-button
+								id="reviewAndSubmitButton"
+								color="xmasred"
+								[disabled]="isSaving()"
+								(click)="reviewAndSubmit()"
+							>
+								{{ 'OVERVIEW.FINAL_STEP_ACTION' | translate }}
+							</ion-button>
+						</section>
+						}
+
 						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="workflow-section review-step es-mg-bottom-xxl">
 							<app-submit-card
 								[children]="(children$ | async) ?? []"
 								[dateTimeSlot]="dateTimeSlot$ | async"
 								[emailAddress]="(emailAddress$ | async) ?? ''"
-								[canSubmit]="(canSubmit$ | async) ?? false"
+								[canSubmit]="canSubmit"
 								[busy]="isSaving()"
 								(submitRequested)="submitRegistration()"
 								(emailUpdateRequested)="updateEmailAddress($event)"

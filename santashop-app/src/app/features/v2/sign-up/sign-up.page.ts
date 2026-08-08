@@ -1,4 +1,5 @@
 import {
+	ChangeDetectorRef,
 	ChangeDetectionStrategy,
 	Component,
 	inject,
@@ -42,6 +43,7 @@ import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AsyncPipe } from '@angular/common';
 import { ReferralSelectionModalComponent } from './referral-selection-modal/referral-selection-modal.component';
+import { LanguageToggleComponent } from '../../../shared/components/language-toggle/language-toggle.component';
 
 import { addIcons } from 'ionicons';
 import { arrowBackSharp } from 'ionicons/icons';
@@ -79,9 +81,11 @@ import { arrowBackSharp } from 'ionicons/icons';
 		IonText,
 		IonCheckbox,
 		IonSpinner,
+		LanguageToggleComponent,
 	],
 })
 export class SignUpPage {
+	private readonly changeDetectorRef = inject(ChangeDetectorRef);
 	private readonly viewService = inject(SignUpPageService);
 	private readonly alertController = inject(AlertController);
 	private readonly translateService = inject(TranslateService);
@@ -123,6 +127,7 @@ export class SignUpPage {
 		if (result.role === 'confirm' && result.data) {
 			this.form.controls.referredBy.setValue(result.data);
 			this.form.controls.referredBy.markAsTouched();
+			this.changeDetectorRef.markForCheck();
 		}
 	}
 

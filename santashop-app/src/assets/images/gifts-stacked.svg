@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Stack of Christmas gifts</title>
+  <desc id="desc">Three colorful presents stacked together with ribbons, bows, stars, and snowflakes.</desc>
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f04455"/><stop offset="1" stop-color="#aa0b2a"/></linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#24a274"/><stop offset="1" stop-color="#086048"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4cc8e6"/><stop offset="1" stop-color="#2773c5"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff09a"/><stop offset=".5" stop-color="#ffc739"/><stop offset="1" stop-color="#dc8c00"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#2f1835" flood-opacity=".25"/></filter>
+  </defs>
+  <ellipse cx="130" cy="226" rx="104" ry="14" fill="#45233f" opacity=".16"/>
+  <g filter="url(#shadow)">
+    <g transform="rotate(-4 78 179)">
+      <rect x="25" y="135" width="108" height="87" rx="9" fill="url(#green)"/>
+      <rect x="68" y="135" width="22" height="87" fill="#f7e079"/>
+      <rect x="18" y="126" width="122" height="24" rx="7" fill="#168563"/>
+      <path d="M68 126h22v24H68Z" fill="#f7e079"/>
+      <path d="M79 126c-23-3-33-14-28-24 5-9 19-2 28 18 11-19 26-24 30-14 4 10-8 18-30 20Z" fill="#f7e079" stroke="#ce9f26" stroke-width="3"/>
+    </g>
+    <g transform="rotate(4 175 182)">
+      <rect x="120" y="143" width="113" height="81" rx="9" fill="url(#blue)"/>
+      <rect x="165" y="143" width="24" height="81" fill="#ff6b70"/>
+      <rect x="113" y="134" width="127" height="25" rx="7" fill="#39b7df"/>
+      <path d="M165 134h24v25h-24Z" fill="#ff6b70"/>
+      <g fill="#fff" opacity=".7">
+        <circle cx="143" cy="177" r="3"/><circle cx="210" cy="187" r="4"/><circle cx="144" cy="209" r="4"/><circle cx="216" cy="215" r="3"/>
+      </g>
+      <path d="M177 134c-23-2-36-14-31-25 5-10 21-2 31 18 12-19 28-24 32-13 4 10-10 18-32 20Z" fill="#ff6b70" stroke="#bf2941" stroke-width="3"/>
+    </g>
+    <g>
+      <rect x="73" y="60" width="111" height="92" rx="10" fill="url(#red)"/>
+      <path d="M116 60h25v92h-25Z" fill="url(#gold)"/>
+      <rect x="65" y="49" width="127" height="28" rx="8" fill="#df2442"/>
+      <path d="M116 49h25v28h-25Z" fill="url(#gold)"/>
+      <path d="M128 49c-26-3-42-17-37-30 5-12 23-5 37 22 16-26 35-31 39-18 4 13-13 24-39 26Z" fill="url(#gold)" stroke="#c27d00" stroke-width="3.5"/>
+      <circle cx="128" cy="49" r="10" fill="#f5b91e"/>
+      <g fill="#fff" opacity=".72">
+        <path d="m91 96 2-5 2 5 5 2-5 2-2 5-2-5-5-2Z"/>
+        <path d="m166 115 2-5 2 5 5 2-5 2-2 5-2-5-5-2Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

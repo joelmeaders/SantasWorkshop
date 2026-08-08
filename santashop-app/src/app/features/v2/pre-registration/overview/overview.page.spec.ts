@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import { DateTimeSlot } from '@santashop/models';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AlertController, ToastController } from '@ionic/angular';
 import {
 	provideTranslateServiceMock,
@@ -18,6 +18,7 @@ import {
 import { OverviewPage } from './overview.page';
 import { ChildrenCardComponent } from './children-card/children-card.component';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
+import { SubmitCardComponent } from './submit-card/submit-card.component';
 import { PreRegistrationService } from '../../../../core';
 
 describe('OverviewPage', () => {
@@ -37,12 +38,15 @@ describe('OverviewPage', () => {
 		create: vi.fn().mockName('ToastController.create'),
 		dismiss: vi.fn().mockName('ToastController.dismiss'),
 	};
+	const childCount = new BehaviorSubject(0);
+	const dateTimeSlot = new BehaviorSubject<DateTimeSlot | undefined>(undefined);
+	const registrationSubmitted = new BehaviorSubject(false);
 	const preregistrationService = {
 		userRegistration$: of(undefined),
 		children$: of([]),
-		childCount$: of(0),
-		dateTimeSlot$: of(undefined),
-		registrationSubmitted$: of(false),
+		childCount$: childCount.asObservable(),
+		dateTimeSlot$: dateTimeSlot.asObservable(),
+		registrationSubmitted$: registrationSubmitted.asObservable(),
 		noErrorsInChildren$: of(true),
 		saveDraftChild: vi.fn().mockName('saveDraftChild'),
 		deleteDraftChild: vi.fn().mockName('deleteDraftChild'),
@@ -57,6 +61,9 @@ describe('OverviewPage', () => {
 		toast.present.mockClear();
 		toastController.create.mockClear();
 		toastController.dismiss.mockClear();
+		childCount.next(0);
+		dateTimeSlot.next(undefined);
+		registrationSubmitted.next(false);
 		preregistrationService.saveDraftChild.mockClear();
 		preregistrationService.saveDraftChild.mockResolvedValue({ data: true });
 		alert.present.mockResolvedValue(undefined);
@@ -197,6 +204,33 @@ describe('OverviewPage', () => {
 		expect(component.reviewing()).toBe(false);
 		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).not.toBeNull();
 		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).not.toBeNull();
+	});
+
+	it('draws attention to the final step and opens review when selected', async (): Promise<void> => {
+		childCount.next(1);
+		dateTimeSlot.next({ id: 'slot-1', enabled: true } as DateTimeSlot);
+		await fixture.whenStable();
+
+		const nudge = fixture.nativeElement.querySelector(
+			'.completion-nudge',
+		) as HTMLElement;
+		const action = fixture.nativeElement.querySelector(
+			'#reviewAndSubmitButton',
+		) as HTMLIonButtonElement;
+		expect(nudge).toBeTruthy();
+		expect(action).toBeTruthy();
+
+		action.click();
+		await fixture.whenStable();
+
+		const submitCard = fixture.debugElement.query(
+			By.directive(SubmitCardComponent),
+		).componentInstance as SubmitCardComponent;
+		expect(component.reviewing()).toBe(true);
+		expect(submitCard.expanded()).toBe(true);
+		expect(
+			fixture.nativeElement.querySelector('.completion-nudge'),
+		).toBeNull();
 	});
 
 	it('saves an enabled appointment and rejects unavailable selections', async (): Promise<void> => {

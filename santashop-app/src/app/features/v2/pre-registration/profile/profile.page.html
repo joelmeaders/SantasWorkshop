@@ -2,8 +2,9 @@
 	<ion-grid class="account-grid profile-shell">
 		<ion-row class="ion-justify-content-center">
 			<ion-col class="profile-column" size="12" sizeMd="9" sizeLg="7">
-				<ion-button class="ion-no-padding even-ratio-button ion-margin" color="white" aria-label="Back to registration" [routerLink]="['../overview']">
-					<ion-icon slot="icon-only" name="arrow-back-sharp" />
+				<ion-button class="remove-shadow customer-back-button" color="white" [routerLink]="['../overview']">
+					<ion-icon slot="start" name="arrow-back-sharp" aria-hidden="true" />
+					<ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
 				</ion-button>
 
 				<h1>{{ 'COMMON.MY_ACCOUNT' | translate }}</h1>

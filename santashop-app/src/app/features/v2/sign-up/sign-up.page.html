@@ -7,18 +7,21 @@
 		>
 			<!-- Information -->
 			<ion-col class="form-column" sizeXs="12" sizeSm="10" sizeMd="9" sizeLg="7">
-				<ion-button
-					class="remove-shadow back-button"
-					color="white"
-					[routerLink]="['/']"
-				>
-					<ion-icon
-						slot="start"
-						name="arrow-back-sharp"
-						aria-hidden="true"
-					/>
-					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
-				</ion-button>
+				<div class="signup-actions">
+					<ion-button
+						class="remove-shadow customer-back-button"
+						color="white"
+						[routerLink]="['/']"
+					>
+						<ion-icon
+							slot="start"
+							name="arrow-back-sharp"
+							aria-hidden="true"
+						/>
+						<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
+					</ion-button>
+					<app-language-toggle />
+				</div>
 				<ion-card class="sign-up-card form-card">
 					<ion-card-header>
 						<ion-card-title>
@@ -35,7 +38,7 @@
 									class="form-section es-pd-bottom-xl"
 									role="list"
 								>
-									<ion-item-divider color="light">
+									<ion-item-divider>
 										<ion-label>
 											<strong>
 												{{ 'SIGNUP.YOUR_INFO' |
@@ -103,6 +106,7 @@
 										[attr.aria-label]="
 											referralAriaLabel(form.controls.referredBy.value)
 										"
+										aria-required="true"
 										aria-haspopup="dialog"
 										[attr.aria-describedby]="
 											form.controls.referredBy.invalid &&
@@ -148,7 +152,7 @@
 									class="form-section es-pd-bottom-xl"
 									role="list"
 								>
-									<ion-item-divider color="light">
+									<ion-item-divider>
 										<ion-label>
 											<strong>
 												{{ 'SIGNUP.ACCOUNT_INFO' |
@@ -212,7 +216,6 @@
 								</ion-item-group>
 
 								<ion-item-group class="form-section legal-section">
-									<ion-item-divider color="light" />
 									<div class="ion-padding-top">
 										<ion-text
 											color="primary"

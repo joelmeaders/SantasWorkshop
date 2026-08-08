@@ -18,6 +18,7 @@ import {
 	IonList,
 	IonInput,
 	IonIcon,
+	IonLabel,
 } from '@ionic/angular';
 
 @Component({
@@ -37,6 +38,7 @@ import {
 		IonCol,
 		IonButton,
 		IonIcon,
+		IonLabel,
 		IonItem,
 		IonList,
 		IonInput,

@@ -86,6 +86,85 @@ app-submit-card,
 	width: 0.28rem;
 }
 
+.completion-nudge {
+	align-items: center;
+	background: linear-gradient(135deg, #fff8e7, #fff);
+	border: 3px solid var(--santa-red);
+	border-radius: var(--santa-radius-lg);
+	bottom: calc(1rem + env(safe-area-inset-bottom));
+	box-shadow: var(--santa-shadow-lift);
+	display: grid;
+	gap: 0.9rem;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	left: 50%;
+	max-width: min(46rem, calc(100vw - 2rem));
+	overflow: hidden;
+	padding: 1rem;
+	position: fixed;
+	transform: translateX(-50%);
+	width: calc(100% - 2rem);
+	z-index: 100;
+}
+
+.completion-nudge::before {
+	background: repeating-linear-gradient(90deg, var(--santa-red) 0 0.75rem, #fff 0.75rem 1.5rem, var(--santa-evergreen) 1.5rem 2.25rem, #fff 2.25rem 3rem);
+	content: '';
+	height: 0.35rem;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.completion-nudge-icon {
+	animation: completion-nudge-bounce 0.85s ease-in-out 4;
+	color: var(--santa-red);
+	font-size: 2.5rem;
+}
+
+.completion-nudge-copy {
+	display: grid;
+	gap: 0.2rem;
+	line-height: 1.35;
+}
+
+.completion-nudge-copy strong {
+	color: var(--santa-red-deep);
+	font-size: 1.05rem;
+}
+
+.completion-nudge-copy span {
+	color: var(--santa-ink);
+	font-size: 0.92rem;
+}
+
+.completion-nudge-enter {
+	animation: completion-nudge-arrive 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25);
+}
+
+@keyframes completion-nudge-arrive {
+	from {
+		opacity: 0;
+		transform: translate(-50%, 2rem) scale(0.96);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate(-50%, 0) scale(1);
+	}
+}
+
+@keyframes completion-nudge-bounce {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(0.35rem);
+	}
+}
+
 @media (max-width: 600px) {
 	.workspace-shell {
 		padding-inline: 0.2rem;
@@ -106,5 +185,27 @@ app-submit-card,
 	.workflow-section::before,
 	.workflow-section::after {
 		display: none;
+	}
+
+	.completion-nudge {
+		bottom: calc(0.5rem + env(safe-area-inset-bottom));
+		gap: 0.65rem;
+		grid-template-columns: auto minmax(0, 1fr);
+		padding: 0.9rem;
+		width: calc(100% - 1rem);
+	}
+
+	.completion-nudge ion-button {
+		grid-column: 1 / -1;
+		margin: 0;
+		width: 100%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.completion-nudge,
+	.completion-nudge-icon,
+	.completion-nudge-enter {
+		animation: none;
 	}
 }

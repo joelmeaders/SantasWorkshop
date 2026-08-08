@@ -15,6 +15,7 @@ import {
 	IonCardTitle,
 	IonCardContent,
 	IonText,
+	IonLabel,
 	ModalController,
 } from '@ionic/angular';
 
@@ -37,6 +38,7 @@ import {
 		IonCardTitle,
 		IonCardContent,
 		IonText,
+		IonLabel,
 	],
 })
 export class HelpPage {

@@ -13,8 +13,22 @@
 }
 
 .sign-up-card {
+	--background: #fff;
 	margin-inline: auto;
 	max-width: 46rem;
+}
+
+.sign-up-card ion-card-content,
+.account-form,
+.account-form ion-list,
+.account-form ion-item-group {
+	background: #fff;
+}
+
+.account-form ion-item,
+.account-form ion-item-divider,
+.account-form ion-input {
+	--background: #fff;
 }
 
 .sign-up-card ion-card-header {
@@ -34,11 +48,15 @@
 }
 
 .form-section ion-item-divider {
+	--background: #fff;
+	--color: #000;
+	--ion-color-base: #fff;
+	--ion-color-contrast: #000;
 	margin-bottom: 0.75rem;
 }
 
 .legal-section {
-	background: rgba(229, 169, 47, 0.08);
+	background: #fff;
 	border: 1px solid rgba(229, 169, 47, 0.3);
 	border-radius: var(--santa-radius-md);
 	padding: 0.25rem 0.75rem 1rem;
@@ -54,9 +72,21 @@
 	--size: 1.5rem;
 }
 
-.back-button {
-	--background: rgba(255, 255, 255, 0.85);
-	margin: 0 0 0.75rem;
+.signup-actions {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.75rem;
+}
+
+.signup-actions app-language-toggle {
+	display: block;
+	flex: 0 0 auto;
+}
+
+.signup-actions .customer-back-button {
+	margin: 0;
 }
 
 .submit-account {
@@ -64,7 +94,7 @@
 }
 
 .referral-selector {
-	--background: #f8fbf9;
+	--background: #fff;
 	--border-color: #cfdcd4;
 	--border-radius: var(--santa-radius-sm);
 	--border-style: solid;
@@ -110,8 +140,8 @@
 		padding-inline: 0;
 	}
 
-	.back-button {
-		margin-inline-start: 0.75rem;
+	.signup-actions {
+		padding-inline: 0.75rem;
 	}
 
 	.legal-section {

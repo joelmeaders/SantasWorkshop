@@ -12,15 +12,16 @@
 				<ion-row class="ion-justify-content-center">
 					<ion-col sizeXs="12" sizeSm="7">
 						<ion-button
-							class="ion-no-padding even-ratio-button ion-margin"
+							class="remove-shadow customer-back-button"
 							color="white"
-							aria-label="Close help"
+							[attr.aria-label]="'COMMON.GO_BACK' | translate"
 							(click)="close()"
 						>
-							<ion-icon slot="icon-only"
+							<ion-icon slot="start"
 								name="arrow-back-sharp"
-								class="even-ratio-button"
+								aria-hidden="true"
 							 />
+							<ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
 						</ion-button>
 
 						<ion-card>

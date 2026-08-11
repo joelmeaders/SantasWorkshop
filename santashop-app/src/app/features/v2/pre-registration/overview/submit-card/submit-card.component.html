@@ -17,9 +17,9 @@
 			<ion-list class="submission-children-list" [attr.aria-label]="'OVERVIEW.CHILDREN_TO_SUBMIT' | translate">
 				@for (child of children(); track child.id) {
 					<ion-item lines="none">
-						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" /> }
-						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" /> }
-						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" /> }
+						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" aria-hidden="true" /> }
+						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" aria-hidden="true" /> }
+						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" aria-hidden="true" /> }
 						<ion-label><strong>{{ child.firstName }} {{ child.lastName }}</strong><p>{{ child.dateOfBirth | date: 'longDate' }}</p></ion-label>
 					</ion-item>
 				}
@@ -49,7 +49,7 @@
 			</section>
 			<div class="card-actions">
 				<ion-button fill="clear" (click)="makeChanges()" [disabled]="busy()">{{ 'SUBMIT.MAKE_CHANGES' | translate }}</ion-button>
-				<ion-button id="completeRegistrationButton" color="xmasred" (click)="submit()" [disabled]="busy()"><ion-icon name="checkmark-circle-outline" slot="start" />{{ (busy() ? 'OVERVIEW.SUBMITTING' : 'MENU.SUBMIT') | translate }}</ion-button>
+				<ion-button id="completeRegistrationButton" color="xmasred" (click)="submit()" [disabled]="busy()"><ion-icon name="checkmark-circle-outline" slot="start" aria-hidden="true" />{{ (busy() ? 'OVERVIEW.SUBMITTING' : 'MENU.SUBMIT') | translate }}</ion-button>
 			</div>
 		}
 	</ion-card-content>

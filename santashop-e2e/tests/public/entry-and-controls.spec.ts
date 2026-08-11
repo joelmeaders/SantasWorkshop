@@ -171,6 +171,10 @@ test.describe('public entry and runtime operating controls', () => {
 					'Esta actualización llegó después de abrir la aplicación.',
 			},
 		});
+		await page.evaluate(() => {
+			window.dispatchEvent(new Event('online'));
+			window.dispatchEvent(new Event('focus'));
+		});
 
 		const alert = page.locator('ion-alert');
 		await expect(alert).toContainText('Live operational notice', {

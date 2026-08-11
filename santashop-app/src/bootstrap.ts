@@ -8,28 +8,22 @@ import {
 	FIREBASE_ANALYTICS,
 	FIREBASE_APP,
 	FIREBASE_AUTH,
-	FIREBASE_FIRESTORE,
 	FIREBASE_FUNCTIONS,
 	FIREBASE_STORAGE,
 	MOBILE_EVENT,
 	PROFILE_VERSION,
 	PROGRAM_YEAR,
+	PUBLIC_PARAMETERS_SOURCE,
 	SHOP_DAYS,
-} from '@santashop/core';
+} from '@santashop/core/customer';
+import {
+	CUSTOMER_APP_CONFIG,
+	FIREBASE_FIRESTORE_LITE,
+} from './app/core/tokens/customer-runtime.token';
+import type { CustomerAppConfig } from './app/core/tokens/customer-runtime.token';
+import { LitePublicParametersSource } from './app/core/services/lite-public-parameters-source.service';
 
-export interface CustomerAppConfig {
-	production: boolean;
-	appCheckEnabled: boolean;
-	appCheckKey: string;
-	programYear: number;
-	shopDays: number[];
-	emulatorPorts: {
-		auth: number;
-		functions: number;
-		firestore: number;
-		storage: number;
-	};
-}
+export type { CustomerAppConfig } from './app/core/tokens/customer-runtime.token';
 
 export interface FirebaseBootstrapDependencies {
 	initializeApp: (firebaseConfig: any) => any;
@@ -41,8 +35,12 @@ export interface FirebaseBootstrapDependencies {
 	connectStorageEmulator: (storage: any, host: string, port: number) => void;
 	getFunctions: (app: any, regionOrCustomDomain?: string) => any;
 	connectFunctionsEmulator: (functions: any, host: string, port: number) => void;
-	getFirestore: (app: any) => any;
-	connectFirestoreEmulator: (firestore: any, host: string, port: number) => void;
+	getFirestoreLite: (app: any) => any;
+	connectFirestoreLiteEmulator: (
+		firestore: any,
+		host: string,
+		port: number,
+	) => void;
 	getAnalytics: (app: any) => any;
 }
 
@@ -87,7 +85,7 @@ export const bootstrapCustomerApplication = (
 	const firebaseFunctions = appConfig.production
 		? firebase.getFunctions(firebaseApp, location.origin)
 		: firebase.getFunctions(firebaseApp, FUNCTIONS_REGION);
-	const firebaseFirestore = firebase.getFirestore(firebaseApp);
+	const firebaseFirestoreLite = firebase.getFirestoreLite(firebaseApp);
 
 	if (!appConfig.production) {
 		firebase.connectAuthEmulator(
@@ -105,8 +103,8 @@ export const bootstrapCustomerApplication = (
 			'127.0.0.1',
 			appConfig.emulatorPorts.functions,
 		);
-		firebase.connectFirestoreEmulator(
-			firebaseFirestore,
+		firebase.connectFirestoreLiteEmulator(
+			firebaseFirestoreLite,
 			'127.0.0.1',
 			appConfig.emulatorPorts.firestore,
 		);
@@ -132,7 +130,13 @@ export const bootstrapCustomerApplication = (
 			{ provide: FIREBASE_AUTH, useValue: firebaseAuth },
 			{ provide: FIREBASE_STORAGE, useValue: firebaseStorage },
 			{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
-			{ provide: FIREBASE_FIRESTORE, useValue: firebaseFirestore },
+			{ provide: FIREBASE_FIRESTORE_LITE, useValue: firebaseFirestoreLite },
+			{ provide: CUSTOMER_APP_CONFIG, useValue: appConfig },
+			LitePublicParametersSource,
+			{
+				provide: PUBLIC_PARAMETERS_SOURCE,
+				useExisting: LitePublicParametersSource,
+			},
 			...(appConfig.production
 				? [
 						{

@@ -11,54 +11,68 @@
 
 <ion-content color="light">
 	@if (selectedReferral === undefined) {
-		<ion-list>
+		<div class="referral-search">
 			<ion-searchbar
 				id="referralSearchbar"
 				(ionChange)="filter($event)"
 				animated="true"
 				[placeholder]="'REFERRAL.SEARCH_PLACEHOLDER' | translate"
 			/>
-			<ion-item-group>
-				<ion-item-divider color="light" disabled>
-					<ion-label>{{
-						'REFERRAL.COMMON_OPTIONS' | translate
-					}}</ion-label>
-				</ion-item-divider>
-				@for (
-					referral of referrals$ | async;
-					track referral;
-					let i = $index
-				) {
-					@if (referral === '----------') {
-						<ion-item-divider disabled color="light">
-							<ion-label>
-								{{
-									i < 10
-										? ('REFERRAL.ALPHABETICAL' | translate)
-										: ''
-								}}
-							</ion-label>
-						</ion-item-divider>
-					} @else {
-						<ion-item
-							[attr.id]="'referral-' + referral"
-							button
-							detail
-							lines="full"
-							(click)="setChoice(referral)"
-						>
-							<ion-label class="ref-choices">
-								{{
-									referral === 'Other'
-										? ('REFERRAL.OTHER' | translate)
-										: referral
-								}}
-							</ion-label>
-						</ion-item>
-					}
-				}
-			</ion-item-group>
-		</ion-list>
+		</div>
+
+		@if (referralGroups$ | async; as referralGroups) {
+			@if (referralGroups.common.length) {
+				<section class="referral-group" aria-labelledby="common-referrals-heading">
+					<h2 id="common-referrals-heading" class="referral-group-heading">
+						{{ 'REFERRAL.COMMON_OPTIONS' | translate }}
+					</h2>
+					<ul class="referral-options">
+						@for (referral of referralGroups.common; track referral) {
+							<li>
+								<button
+									[attr.id]="'referral-' + referral"
+									type="button"
+									class="referral-option"
+									(click)="setChoice(referral)"
+								>
+									<span>{{ referral }}</span>
+									<span class="referral-option-chevron" aria-hidden="true">›</span>
+								</button>
+							</li>
+						}
+					</ul>
+				</section>
+			}
+
+			@if (referralGroups.alphabetical.length) {
+				<section
+					class="referral-group"
+					aria-labelledby="alphabetical-referrals-heading"
+				>
+					<h2
+						id="alphabetical-referrals-heading"
+						class="referral-group-heading"
+					>
+						{{ 'REFERRAL.ALPHABETICAL' | translate }}
+					</h2>
+					<ul class="referral-options">
+						@for (referral of referralGroups.alphabetical; track referral) {
+							<li>
+								<button
+									[attr.id]="'referral-' + referral"
+									type="button"
+									class="referral-option"
+									(click)="setChoice(referral)"
+								>
+									<span>{{ referral === 'Other' ? ('REFERRAL.OTHER' | translate) : referral }}</span>
+									<span class="referral-option-chevron" aria-hidden="true">›</span>
+								</button>
+							</li>
+						}
+					</ul>
+				</section>
+			}
+		}
 	} @else {
 		<ion-list>
 			<ion-item>

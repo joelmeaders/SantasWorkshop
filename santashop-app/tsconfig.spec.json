@@ -7,6 +7,7 @@
 		"paths": {
 			"@santashop/models": ["dist/@santashop/models"],
 			"@santashop/core": ["dist/@santashop/core"],
+			"@santashop/core/customer": ["santashop-core/src/index.ts"],
 			"test-helpers/*": ["test-helpers/*"]
 		},
 		"types": ["vitest/globals"]

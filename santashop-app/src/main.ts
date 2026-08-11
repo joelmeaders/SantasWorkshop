@@ -4,7 +4,10 @@ import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
-import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import {
+	connectFirestoreEmulator,
+	getFirestore,
+} from 'firebase/firestore/lite';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import { connectStorageEmulator, getStorage } from 'firebase/storage';
 import { AppComponent } from './app/app.component';
@@ -27,8 +30,8 @@ const firebaseDependencies: FirebaseBootstrapDependencies = {
 	connectStorageEmulator,
 	getFunctions,
 	connectFunctionsEmulator,
-	getFirestore,
-	connectFirestoreEmulator,
+	getFirestoreLite: getFirestore,
+	connectFirestoreLiteEmulator: connectFirestoreEmulator,
 	getAnalytics,
 };
 

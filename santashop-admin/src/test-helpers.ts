@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { vi } from 'vitest';
 import {
 	FIREBASE_ANALYTICS, FIREBASE_AUTH, FIREBASE_FIRESTORE, FIREBASE_FUNCTIONS, FIREBASE_STORAGE,
-	FirestoreWrapper, FireRepoLite, PROGRAM_YEAR,
+	FirestoreWrapper, FireRepoLite, PROGRAM_YEAR, PUBLIC_PARAMETERS_SOURCE,
 } from '@santashop/core';
 
 import type { Analytics } from 'firebase/analytics';
@@ -130,10 +130,16 @@ export function createScannerServiceMock(): object {
 }
 
 export function provideProgramYearMock(programYear = 2025): Provider { return { provide: PROGRAM_YEAR, useValue: programYear }; }
+export function providePublicParametersSourceMock(): Provider {
+	return {
+		provide: PUBLIC_PARAMETERS_SOURCE,
+		useValue: { publicParameters$: of(undefined) },
+	};
+}
 
 export const testHelpers: Provider[] = [
 	provideAuthMock(), provideFirestoreWrapperMock(), provideFirestoreMock(), provideFireRepoLiteMock(),
 	provideFunctionsMock(), provideStorageMock(), provideAnalyticsMock(), provideModalControllerMock(),
 	provideAlertControllerMock(), provideLoadingControllerMock(), providePopoverControllerMock(),
-	provideActivatedRouteMock(), provideProgramYearMock(),
+	provideActivatedRouteMock(), provideProgramYearMock(), providePublicParametersSourceMock(),
 ];

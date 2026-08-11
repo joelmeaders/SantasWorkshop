@@ -4,6 +4,7 @@ import { AdminPage } from './admin.page';
 import {
 	provideFirestoreWrapperMock,
 	provideAuthMock,
+	providePublicParametersSourceMock,
 } from '../../../test-helpers';
 import { provideRouter } from '@angular/router';
 
@@ -17,6 +18,7 @@ describe('AdminPage', () => {
 			providers: [
 				provideFirestoreWrapperMock(),
 				provideAuthMock(),
+				providePublicParametersSourceMock(),
 				provideRouter([]),
 			],
 		}).compileComponents();

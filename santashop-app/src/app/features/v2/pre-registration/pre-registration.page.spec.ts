@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	provideActivatedRouteMock,
-	provideAuthMock,
+	provideCustomerAuthMock,
 	provideFirestoreMock,
-	provideFunctionsMock,
-	provideStorageMock,
+	provideCustomerFunctionsMock,
+	provideCustomerStorageMock,
 	createPopoverControllerMock,
 	provideTranslateServiceMock,
 } from '../../../../test-helpers';
@@ -22,9 +22,9 @@ describe('PreRegistrationPage', () => {
 			imports: [PreRegistrationPage],
 			providers: [
 				provideFirestoreMock(),
-				provideAuthMock(),
-				provideFunctionsMock(),
-				provideStorageMock(),
+				provideCustomerAuthMock(),
+				provideCustomerFunctionsMock(),
+				provideCustomerStorageMock(),
 				provideTranslateServiceMock(),
 				{
 					provide: PopoverController,

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/customer';
 import {
 	PopoverController,
 	IonIcon,

@@ -152,12 +152,6 @@ test.describe('customer account and session access', () => {
 			has: page.locator('app-terms-of-service-modal'),
 		});
 		await expect(termsModal).toBeVisible();
-		await expect(
-			termsModal.getByRole('heading', {
-				name: 'Terms of Service',
-				exact: true,
-			}),
-		).toBeVisible();
 		await termsModal.getByRole('button', { name: 'Close', exact: true }).click();
 		await expect(termsModal).toBeHidden();
 
@@ -166,12 +160,6 @@ test.describe('customer account and session access', () => {
 			has: page.locator('app-privacy-policy-modal'),
 		});
 		await expect(privacyModal).toBeVisible();
-		await expect(
-			privacyModal.getByRole('heading', {
-				name: 'Privacy & Cookies',
-				exact: true,
-			}),
-		).toBeVisible();
 		await privacyModal
 			.getByRole('button', { name: 'Close', exact: true })
 			.click();

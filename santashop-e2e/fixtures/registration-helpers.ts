@@ -156,10 +156,15 @@ export const submitRegistrationViaUi = async (page: Page): Promise<void> => {
 	await page.goto('/pre-registration/overview#review');
 	const submitCard = page.locator('app-submit-card');
 	await expect(submitCard).toBeVisible({ timeout: 15000 });
+	const completionAction = page.locator('#reviewAndSubmitButton');
 	const reviewButton = submitCard.getByRole('button', {
 		name: /review registration|revisar registro/i,
 	});
-	if (await reviewButton.count()) await reviewButton.click();
+	if (await completionAction.isVisible()) {
+		await completionAction.click();
+	} else if (await reviewButton.count()) {
+		await reviewButton.click();
+	}
 
 	const submitButton = page.locator('#completeRegistrationButton');
 	await expect(submitButton).not.toHaveClass(/button-disabled/, {

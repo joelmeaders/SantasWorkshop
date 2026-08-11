@@ -22,7 +22,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';
-import { AnalyticsWrapper, AppStateService } from '@santashop/core';
+import { AnalyticsWrapper, AppStateService } from '@santashop/core/customer';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { ApplicationService } from './core/services/application.service';

@@ -4,7 +4,7 @@ import {
 	OnDestroy,
 	inject,
 } from '@angular/core';
-import { AnalyticsWrapper } from '@santashop/core';
+import { AnalyticsWrapper } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';

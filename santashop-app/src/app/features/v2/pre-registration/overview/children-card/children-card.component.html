@@ -12,10 +12,10 @@
 			<ion-list class="children-list" [attr.aria-label]="'OVERVIEW.REGISTERED_CHILDREN' | translate">
 				@for (child of children(); track child.id; let isLast = $last) {
 					<ion-item [attr.data-child-id]="child.id" [attr.aria-label]="('OVERVIEW.EDIT_CHILD_LABEL' | translate) + ' ' + child.firstName" [button]="true" [detail]="true" [lines]="isLast ? 'none' : 'full'" (click)="editChild(child)" [disabled]="busy()">
-						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" /> }
-						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" /> }
-						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" /> }
-						@if (!child.toyType) { <ion-icon name="alert-circle" color="danger" slot="start" /> }
+						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" aria-hidden="true" /> }
+						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" aria-hidden="true" /> }
+						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" aria-hidden="true" /> }
+						@if (!child.toyType) { <ion-icon name="alert-circle" color="danger" slot="start" aria-hidden="true" /> }
 						<ion-label class="ion-text-wrap">
 							<h2>{{ child.firstName }} {{ child.lastName }}</h2>
 							<p>{{ child.dateOfBirth | date: 'longDate' }}</p>
@@ -29,7 +29,7 @@
 		@if (!editorOpen()) {
 			<div class="add-child-action">
 				<ion-button data-open-add-child color="xmasred" fill="outline" (click)="openNewChild()" [disabled]="busy()">
-					<ion-icon name="add-circle" slot="start" />{{ 'CHILDREN.ADD_A_CHILD' | translate }}
+					<ion-icon name="add-circle" slot="start" aria-hidden="true" />{{ 'CHILDREN.ADD_A_CHILD' | translate }}
 				</ion-button>
 			</div>
 		}
@@ -63,7 +63,7 @@
 					}
 				</ion-list>
 				<div class="card-actions">
-					@if (editingChild()) { <ion-button data-delete-child color="danger" fill="outline" type="button" (click)="deleteCurrentChild()" [disabled]="busy()"><ion-icon name="trash-outline" slot="start" />{{ 'OVERVIEW.REMOVE_CHILD_LABEL' | translate }}</ion-button> }
+					@if (editingChild()) { <ion-button data-delete-child color="danger" fill="outline" type="button" (click)="deleteCurrentChild()" [disabled]="busy()"><ion-icon name="trash-outline" slot="start" aria-hidden="true" />{{ 'OVERVIEW.REMOVE_CHILD_LABEL' | translate }}</ion-button> }
 					<ion-button color="xmasred" type="submit" [disabled]="form.invalid || busy()">{{ editingChild() ? ('OVERVIEW.EDIT_CHILD' | translate) : ('OVERVIEW.ADD_CHILD' | translate) }}</ion-button>
 				</div>
 			</form>

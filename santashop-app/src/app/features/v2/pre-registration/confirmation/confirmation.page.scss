@@ -18,7 +18,19 @@
 	background:
 		radial-gradient(circle at 92% 20%, rgba(229, 169, 47, 0.25) 0 1.5rem, transparent 1.55rem),
 		linear-gradient(135deg, rgba(179, 38, 62, 0.1), rgba(255, 255, 255, 0));
-	padding-block: clamp(2rem, 5vw, 3rem) 1.25rem;
+	min-height: 10rem;
+	padding: clamp(2rem, 5vw, 3rem) clamp(9rem, 22vw, 12rem) 1.25rem clamp(1.25rem, 4vw, 2rem);
+	position: relative;
+}
+
+.confirmation-gifts {
+	pointer-events: none;
+	position: absolute;
+	right: clamp(0.5rem, 2vw, 1.25rem);
+	top: 1rem;
+	transform: rotate(2deg);
+	user-select: none;
+	width: clamp(7rem, 18vw, 10rem);
 }
 
 .confirmation-lead h1 {
@@ -116,6 +128,17 @@
 
 	.ticket-card {
 		margin-inline: 0.5rem;
+	}
+
+	.confirmation-lead {
+		padding: 2rem 1.25rem 0.75rem;
+	}
+
+	.confirmation-gifts {
+		margin: 0 auto -0.5rem;
+		position: static;
+		transform: none;
+		width: 7.5rem;
 	}
 
 	.ticket-actions ion-button {

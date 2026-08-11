@@ -9,34 +9,40 @@
 }
 
 .brand-hero {
+	isolation: isolate;
 	position: relative;
 }
 
-.brand-hero::before,
-.brand-hero::after {
-	border-radius: 0.4rem;
-	box-shadow: var(--santa-shadow-sm);
-	content: '';
-	height: clamp(2.25rem, 5vw, 4rem);
+.brand-hero ion-col {
+	position: relative;
+	z-index: 1;
+}
+
+.hero-gift {
+	aspect-ratio: 1;
+	height: auto;
+	pointer-events: none;
 	position: absolute;
-	top: 38%;
-	transform: rotate(-12deg);
-	width: clamp(2.25rem, 5vw, 4rem);
+	top: 52%;
+	user-select: none;
+	width: clamp(5rem, 12vw, 9rem);
+	z-index: 0;
 }
 
-.brand-hero::before {
-	background: linear-gradient(135deg, var(--santa-red) 0 45%, #fff 45% 55%, var(--santa-red) 55%);
-	left: clamp(1rem, 12vw, 9rem);
+.hero-gift-left {
+	left: clamp(0rem, 6vw, 5rem);
+	transform: translateY(-50%) rotate(-7deg);
 }
 
-.brand-hero::after {
-	background: linear-gradient(90deg, var(--santa-evergreen) 0 42%, var(--santa-gold) 42% 58%, var(--santa-evergreen) 58%);
-	right: clamp(1rem, 12vw, 9rem);
-	transform: rotate(10deg);
+.hero-gift-right {
+	right: clamp(0rem, 6vw, 5rem);
+	transform: translateY(-50%) rotate(7deg);
 }
 
 .hero-logo {
+	aspect-ratio: 491 / 482;
 	filter: drop-shadow(0 1rem 1.5rem rgba(117, 24, 43, 0.18));
+	height: auto;
 	max-width: clamp(12rem, 25vw, 20rem);
 	padding: 0;
 	width: 62%;
@@ -88,9 +94,21 @@
 		padding-inline: 0.25rem;
 	}
 
-	.brand-hero::before,
-	.brand-hero::after {
-		top: 52%;
+	.hero-gift {
+		top: 58%;
+		width: clamp(4rem, 20vw, 4.75rem);
+	}
+
+	.hero-gift-left {
+		left: -0.25rem;
+	}
+
+	.hero-gift-right {
+		right: -0.25rem;
+	}
+
+	.hero-logo {
+		max-width: 11.25rem;
 	}
 
 	.welcome-section {

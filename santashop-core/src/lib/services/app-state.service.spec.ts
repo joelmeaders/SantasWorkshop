@@ -1,25 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { AppStateService } from './app-state.service';
-import { FireRepoLite } from './fire-repo-lite.service';
+import { PUBLIC_PARAMETERS_SOURCE } from '../tokens';
 import { Observable, Subject, throwError } from 'rxjs';
 import type { PublicParameters } from '@santashop/models';
-
-vi.mock('firebase/firestore', () => ({
-	addDoc: vi.fn(),
-	collection: vi.fn(),
-	deleteDoc: vi.fn(),
-	doc: vi.fn(),
-	onSnapshot: vi.fn(),
-	query: vi.fn(),
-	setDoc: vi.fn(),
-	Timestamp: class {},
-}));
 
 describe('AppStateService', () => {
 	let service: AppStateService;
 	let publicParameters$: Subject<PublicParameters | null>;
-	let read: ReturnType<typeof vi.fn>;
 
 	const parameters = (overrides: Partial<PublicParameters> = {}): PublicParameters =>
 		({
@@ -42,20 +30,13 @@ describe('AppStateService', () => {
 
 	beforeEach(() => {
 		publicParameters$ = new Subject<PublicParameters | null>();
-		read = vi.fn().mockReturnValue(publicParameters$);
-		const mockFireRepoLite = {
-			collection: vi
-				.fn()
-				.mockName('collection')
-				.mockReturnValue({
-					read,
-				}),
-		};
-
 		TestBed.configureTestingModule({
 			providers: [
 				AppStateService,
-				{ provide: FireRepoLite, useValue: mockFireRepoLite },
+				{
+					provide: PUBLIC_PARAMETERS_SOURCE,
+					useValue: { publicParameters$: publicParameters$ },
+				},
 			],
 		});
 		service = TestBed.inject(AppStateService);
@@ -108,7 +89,6 @@ describe('AppStateService', () => {
 			cancel: [false, true], change: [false, true], maintenance: [true],
 			registration: [true], weather: [true], account: [true],
 		});
-		expect(read).toHaveBeenCalledWith('public');
 	});
 
 	it('deduplicates identical documents and exposes localized messages and alerts', () => {
@@ -133,11 +113,11 @@ describe('AppStateService', () => {
 			providers: [
 				AppStateService,
 				{
-					provide: FireRepoLite,
+					provide: PUBLIC_PARAMETERS_SOURCE,
 					useValue: {
-						collection: (): { read: () => Observable<never> } => ({
-							read: (): Observable<never> => throwError(() => new Error('offline')),
-						}),
+						publicParameters$: throwError(
+							() => new Error('offline'),
+						) as Observable<never>,
 					},
 				},
 			],

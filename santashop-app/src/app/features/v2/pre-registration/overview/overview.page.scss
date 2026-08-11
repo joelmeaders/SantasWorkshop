@@ -22,8 +22,24 @@ app-submit-card,
 	color: #fff;
 	margin-block: 0.5rem 1rem;
 	overflow: hidden;
-	padding: clamp(1.35rem, 4vw, 2.2rem);
+	padding: clamp(1.35rem, 4vw, 2.2rem) clamp(8rem, 19vw, 10rem) clamp(1.35rem, 4vw, 2.2rem) clamp(1.35rem, 4vw, 2.2rem);
 	position: relative;
+}
+
+.workspace-intro h1,
+.workspace-intro p {
+	position: relative;
+	z-index: 1;
+}
+
+.workspace-gift {
+	bottom: -0.65rem;
+	pointer-events: none;
+	position: absolute;
+	right: 0.75rem;
+	transform: rotate(4deg);
+	user-select: none;
+	width: clamp(6.5rem, 16vw, 8.75rem);
 }
 
 .workspace-intro h1 {
@@ -176,6 +192,14 @@ app-submit-card,
 
 	.workspace-intro {
 		border-radius: var(--santa-radius-md);
+		padding: 1.35rem;
+	}
+
+	.workspace-gift {
+		bottom: -1rem;
+		opacity: 0.2;
+		right: -0.5rem;
+		width: 8rem;
 	}
 
 	.workflow-section {

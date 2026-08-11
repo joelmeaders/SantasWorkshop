@@ -21,8 +21,6 @@ import {
 	IonHeader,
 	IonInput,
 	IonItem,
-	IonItemDivider,
-	IonItemGroup,
 	IonLabel,
 	IonList,
 	IonNote,
@@ -34,6 +32,11 @@ import {
 } from '@ionic/angular';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import referringAgencies from '../../../../../assets/referring-agencies.json';
+
+interface ReferralGroups {
+	common: string[];
+	alphabetical: string[];
+}
 
 const trimmedLengthValidator =
 	(minimum: number, maximum: number): ValidatorFn =>
@@ -77,8 +80,6 @@ const trimmedLengthValidator =
 		IonHeader,
 		IonInput,
 		IonItem,
-		IonItemDivider,
-		IonItemGroup,
 		IonLabel,
 		IonList,
 		IonNote,
@@ -92,19 +93,24 @@ export class ReferralSelectionModalComponent {
 	private readonly modalController = inject(ModalController);
 
 	public readonly allReferrals: string[] = referringAgencies.agencies;
+	private readonly commonReferrals = this.allReferrals.slice(
+		0,
+		this.allReferrals.indexOf('----------'),
+	);
+	private readonly alphabeticalReferrals = this.allReferrals.filter(
+		(referral) =>
+			referral !== '----------' && !this.commonReferrals.includes(referral),
+	);
 
 	private readonly searchText = new BehaviorSubject<string | undefined>(
 		undefined,
 	);
 
-	public readonly referrals$: Observable<string[]> = this.searchText.pipe(
-		map((search) =>
-			search
-				? this.allReferrals.filter((referral) =>
-						referral.toUpperCase().includes(search),
-					)
-				: this.allReferrals,
-		),
+	public readonly referralGroups$: Observable<ReferralGroups> = this.searchText.pipe(
+		map((search) => ({
+			common: this.filterReferrals(this.commonReferrals, search),
+			alphabetical: this.filterReferrals(this.alphabeticalReferrals, search),
+		})),
 	);
 
 	public selectedReferral?: string;
@@ -173,5 +179,11 @@ export class ReferralSelectionModalComponent {
 
 	public isOtherChoice(): boolean {
 		return this.selectedReferral === 'Other';
+	}
+
+	private filterReferrals(referrals: string[], search: string | undefined): string[] {
+		return search
+			? referrals.filter((referral) => referral.toUpperCase().includes(search))
+			: referrals;
 	}
 }

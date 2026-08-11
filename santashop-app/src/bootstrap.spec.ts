@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ApplicationRef, Type } from '@angular/core';
 import {
+	FIREBASE_FIRESTORE,
+	PUBLIC_PARAMETERS_SOURCE,
+} from '@santashop/core';
+import { LitePublicParametersSource } from './app/core/services/lite-public-parameters-source.service';
+import { FIREBASE_FIRESTORE_LITE } from './app/core/tokens/customer-runtime.token';
+import {
 	bootstrapCustomerApplication,
 	BootstrapApplication,
 	CustomerAppConfig,
@@ -37,8 +43,8 @@ const createFirebaseDependencies = (): {
 		connectStorageEmulator: vi.fn(),
 		getFunctions: vi.fn(() => functions),
 		connectFunctionsEmulator: vi.fn(),
-		getFirestore: vi.fn(() => firestore),
-		connectFirestoreEmulator: vi.fn(),
+		getFirestoreLite: vi.fn(() => firestore),
+		connectFirestoreLiteEmulator: vi.fn(),
 		getAnalytics: vi.fn(() => analytics),
 	};
 
@@ -86,7 +92,7 @@ describe('bootstrapCustomerApplication', () => {
 			'127.0.0.1',
 			5001,
 		);
-		expect(mocks['connectFirestoreEmulator']).toHaveBeenCalledWith(
+		expect(mocks['connectFirestoreLiteEmulator']).toHaveBeenCalledWith(
 			{ name: 'firestore' },
 			'127.0.0.1',
 			8080,
@@ -96,6 +102,25 @@ describe('bootstrapCustomerApplication', () => {
 			'us-central1',
 		);
 		expect(mocks['getAnalytics']).not.toHaveBeenCalled();
+		const options = bootstrap.mock.calls[0]![1];
+		expect(options.providers).toEqual(
+			expect.arrayContaining([
+				LitePublicParametersSource,
+				expect.objectContaining({
+					provide: FIREBASE_FIRESTORE_LITE,
+					useValue: { name: 'firestore' },
+				}),
+				expect.objectContaining({
+					provide: PUBLIC_PARAMETERS_SOURCE,
+					useExisting: LitePublicParametersSource,
+				}),
+			]),
+		);
+		expect(options.providers).not.toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ provide: FIREBASE_FIRESTORE }),
+			]),
+		);
 	});
 
 	it('enables App Check debugging locally and configures the production-only services', async (): Promise<void> => {

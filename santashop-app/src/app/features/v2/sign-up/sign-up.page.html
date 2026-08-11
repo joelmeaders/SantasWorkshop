@@ -24,6 +24,12 @@
 				</div>
 				<ion-card class="sign-up-card form-card">
 					<ion-card-header>
+						<img
+							src="assets/images/gift-classic.svg"
+							class="signup-gift"
+							alt=""
+							aria-hidden="true"
+						/>
 						<ion-card-title>
 							{{ "SIGNUP.TITLE1" | translate }}
 						</ion-card-title>
@@ -98,43 +104,42 @@
 										/>
 									</ion-item>
 
-									<ion-item
-										id="referralSelector"
-										button
-										detail
-										class="referral-selector"
-										[attr.aria-label]="
-											referralAriaLabel(form.controls.referredBy.value)
-										"
-										aria-required="true"
-										aria-haspopup="dialog"
-										[attr.aria-describedby]="
-											form.controls.referredBy.invalid &&
-											form.controls.referredBy.touched
-												? 'referralSelectorError'
-												: null
-										"
-										(click)="showReferralModal()"
-									>
-										<ion-label class="referral-selector-label">
-											<span class="referral-selector-question">
-												{{ 'REFERRAL.REFERRED_BY' |
-												translate }}
+									<div class="referral-selector-item" role="listitem">
+										<button
+											id="referralSelector"
+											type="button"
+											class="referral-selector"
+											aria-haspopup="dialog"
+											[attr.aria-describedby]="
+												form.controls.referredBy.invalid &&
+												form.controls.referredBy.touched
+													? 'referralSelectorError'
+													: null
+											"
+											(click)="showReferralModal()"
+										>
+											<span class="referral-selector-label">
+												<span class="referral-selector-question">
+													{{ 'REFERRAL.REFERRED_BY' | translate }}
+													<span class="referral-selector-required">
+														{{ 'REFERRAL.REQUIRED' | translate }}
+													</span>
+												</span>
+												@if (form.controls.referredBy.value; as referredBy) {
+													<span class="referral-selector-value">
+														{{ displayReferral(referredBy) }}
+													</span>
+												} @else {
+													<span
+														class="referral-selector-value referral-selector-placeholder"
+													>
+														{{ 'REFERRAL.SELECT' | translate }}
+													</span>
+												}
 											</span>
-											@if (form.controls.referredBy.value;
-											as referredBy) {
-											<span class="referral-selector-value">
-												{{ displayReferral(referredBy) }}
-											</span>
-											} @else {
-											<span
-												class="referral-selector-value referral-selector-placeholder"
-											>
-												{{ 'REFERRAL.SELECT' | translate }}
-											</span>
-											}
-										</ion-label>
-									</ion-item>
+											<span class="referral-selector-chevron" aria-hidden="true">›</span>
+										</button>
+									</div>
 									@if (form.controls.referredBy.invalid &&
 									form.controls.referredBy.touched) {
 									<ion-note

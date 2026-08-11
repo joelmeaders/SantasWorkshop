@@ -1,14 +1,22 @@
 import { inject } from '@angular/core';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/customer';
 import { map, take } from 'rxjs/operators';
-import { CanActivateFn, Router, Routes } from '@angular/router';
-import { CheckedInGuard } from './core/guards/checked-in.guard';
-import { RegistrationCompleteGuard } from './core/guards/registration-complete.guard';
-import { RegistrationIncompleteGuard } from './core/guards/registration-incomplete.guard';
+import {
+	CanActivateFn,
+	CanMatchFn,
+	Router,
+	Routes,
+} from '@angular/router';
 
-const redirectUnauthorizedToLoginGuard: CanActivateFn = (_route, state) => {
+export const redirectUnauthorizedToLoginGuard: CanMatchFn = (
+	_route,
+	segments,
+) => {
 	const authService = inject(AuthService);
 	const router = inject(Router);
+	const returnUrl =
+		router.getCurrentNavigation()?.extractedUrl.toString() ??
+		`/${segments.map((segment) => segment.path).join('/')}`;
 
 	return authService.currentUser$.pipe(
 		take(1),
@@ -16,9 +24,9 @@ const redirectUnauthorizedToLoginGuard: CanActivateFn = (_route, state) => {
 			user
 				? true
 				: router.createUrlTree(['/'], {
-						queryParams: {
+					queryParams: {
 							mode: 'sign-in',
-							returnUrl: state.url,
+							returnUrl,
 						},
 					}),
 		),
@@ -56,45 +64,11 @@ export const routes: Routes = [
 	},
 	{
 		path: 'pre-registration',
-		canActivate: [redirectUnauthorizedToLoginGuard],
-		loadComponent: () =>
-			import('./features/v2/pre-registration/pre-registration.page').then(
-				(m) => m.PreRegistrationPage,
+		canMatch: [redirectUnauthorizedToLoginGuard],
+		loadChildren: () =>
+			import('./features/v2/pre-registration/pre-registration.routes').then(
+				(module) => module.preRegistrationRoutes,
 			),
-		canActivateChild: [CheckedInGuard],
-		children: [
-			{
-				path: '',
-				pathMatch: 'full',
-				redirectTo: 'overview',
-			},
-			{
-				path: 'overview',
-				canActivate: [RegistrationCompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/overview/overview.page').then(
-						(m) => m.OverviewPage,
-					),
-				title: 'Registration | Santa Shop',
-			},
-			{
-				path: 'confirmation',
-				canActivate: [RegistrationIncompleteGuard],
-				loadComponent: () =>
-					import('./features/v2/pre-registration/confirmation/confirmation.page').then(
-						(m) => m.ConfirmationPage,
-					),
-				title: 'Registration Confirmation | Santa Shop',
-			},
-			{
-				path: 'profile',
-				loadComponent: () =>
-					import('./features/v2/pre-registration/profile/profile.page').then(
-						(m) => m.ProfilePage,
-					),
-				title: 'My Account | Santa Shop',
-			},
-		],
 	},
 	{ path: '**', redirectTo: '' },
 ];

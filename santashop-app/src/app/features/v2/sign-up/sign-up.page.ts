@@ -35,7 +35,7 @@ import {
 	AnalyticsWrapper,
 	AppStateService,
 	NiceFormErrorPipe,
-} from '@santashop/core';
+} from '@santashop/core/customer';
 import { PrivacyPolicyModalComponent } from '../../../shared/components/privacy-policy-modal/privacy-policy-modal.component';
 import { TermsOfServiceModalComponent } from '../../../shared/components/terms-of-service-modal/terms-of-service-modal.component';
 import { SignUpPageService } from './sign-up.page.service';
@@ -138,15 +138,6 @@ export class SignUpPage {
 		}
 
 		return value;
-	}
-
-	public referralAriaLabel(value: string | undefined): string {
-		const question = this.translateService.instant('REFERRAL.REFERRED_BY');
-		const answer =
-			this.displayReferral(value) ||
-			this.translateService.instant('REFERRAL.SELECT');
-
-		return `${question} ${answer}`;
 	}
 
 	private async userConfirmedEmail(): Promise<boolean> {

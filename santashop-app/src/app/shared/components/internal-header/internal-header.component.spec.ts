@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PopoverController } from '@ionic/angular';
 import {
 	createPopoverControllerMock,
-	provideAuthMock,
-	provideFunctionsMock,
+	provideCustomerAuthMock,
+	provideCustomerFunctionsMock,
 } from '../../../../test-helpers';
 import { InternalHeaderComponent } from './internal-header.component';
 
@@ -18,8 +18,8 @@ describe('InternalHeaderComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [InternalHeaderComponent],
 			providers: [
-				provideAuthMock(),
-				provideFunctionsMock(),
+				provideCustomerAuthMock(),
+				provideCustomerFunctionsMock(),
 				{
 					provide: PopoverController,
 					useValue: popoverController,
@@ -34,6 +34,16 @@ describe('InternalHeaderComponent', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('hides the decorative menu icon from assistive technology', () => {
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement
+				.querySelector('#menuButton ion-icon')
+				?.getAttribute('aria-hidden'),
+		).toBe('true');
 	});
 
 	it('opens the public menu from the triggering event', async (): Promise<void> => {

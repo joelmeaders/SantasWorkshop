@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ModalController } from '@ionic/angular';
-import { AppStateService } from '@santashop/core';
+import { AppStateService } from '@santashop/core/customer';
 import {
 	createModalControllerMock,
 	createAppStateServiceMock,

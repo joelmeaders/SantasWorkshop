@@ -5,7 +5,7 @@ import {
 	inject,
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
-import { AppStateService } from '@santashop/core';
+import { AppStateService } from '@santashop/core/customer';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { IonButton, IonContent, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';

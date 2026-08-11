@@ -36,7 +36,7 @@ import {
 	AuthService,
 	ErrorHandlerService,
 	newAuthForm,
-} from '@santashop/core';
+} from '@santashop/core/customer';
 import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { Auth, IError } from '@santashop/models';

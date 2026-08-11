@@ -4,6 +4,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
 	resolve: {
 		alias: {
+			'@santashop/core/customer': fileURLToPath(
+				new URL('./santashop-core/src/index.ts', import.meta.url),
+			),
 			'@santashop/core': fileURLToPath(
 				new URL('./santashop-core/src/index.ts', import.meta.url),
 			),

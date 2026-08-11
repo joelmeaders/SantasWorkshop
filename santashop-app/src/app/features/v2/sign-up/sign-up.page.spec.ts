@@ -12,18 +12,18 @@ import {
 	provideTranslateServiceMock,
 	createModalControllerMock,
 	createAppStateServiceMock,
-	provideAnalyticsMock,
-	provideAuthMock,
-	provideFunctionsMock,
+	provideCustomerAnalyticsMock,
+	provideCustomerAuthMock,
+	provideCustomerFunctionsMock,
 	provideActivatedRouteMock,
 } from '../../../../test-helpers';
 import { SignUpPage } from './sign-up.page';
 import { SignUpPageService } from './sign-up.page.service';
 import { newOnboardUserForm } from './sign-up.form';
-import { AppStateService } from '@santashop/core';
+import { AppStateService } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { AnalyticsWrapper } from '@santashop/core';
+import { AnalyticsWrapper } from '@santashop/core/customer';
 
 describe('SignUpPage', () => {
 	let component: SignUpPage;
@@ -50,9 +50,9 @@ describe('SignUpPage', () => {
 					provide: AppStateService,
 					useFactory: createAppStateServiceMock,
 				},
-				provideAnalyticsMock(),
-				provideAuthMock(),
-				provideFunctionsMock(),
+				provideCustomerAnalyticsMock(),
+				provideCustomerAuthMock(),
+				provideCustomerFunctionsMock(),
 				{
 					provide: AlertController,
 					useValue: {
@@ -113,19 +113,7 @@ describe('SignUpPage', () => {
 		expect(component.form.controls.referredBy.value).toBe('Friend');
 	});
 
-	it('exposes the referral question, answer, required state, and error description accessibly', async () => {
-		const translateService = TestBed.inject(
-			TranslateService,
-		) as Mocked<TranslateService>;
-		translateService.instant.mockImplementation((key: string | string[]) => {
-			const translations: Record<string, string> = {
-				'REFERRAL.REFERRED_BY': 'How did you hear about us?',
-				'REFERRAL.SELECT': 'Select an answer',
-			};
-			const translationKey = Array.isArray(key) ? key[0] : key;
-			return translations[translationKey] ?? translationKey;
-		});
-
+	it('exposes the referral question, required state, answer, and error description accessibly', async () => {
 		component.form.controls.referredBy.markAsTouched();
 		await fixture.whenStable();
 
@@ -136,18 +124,21 @@ describe('SignUpPage', () => {
 			'#referralSelectorError',
 		) as HTMLElement;
 
-		expect(selector.getAttribute('aria-label')).toBe(
-			'How did you hear about us? Select an answer',
-		);
-		expect(selector.getAttribute('aria-required')).toBe('true');
+		expect(selector.tagName).toBe('BUTTON');
+		expect(
+			selector.querySelector('.referral-selector-question'),
+		).toBeTruthy();
+		expect(
+			selector.querySelector('.referral-selector-required'),
+		).toBeTruthy();
+		expect(selector.querySelector('.referral-selector-value')).toBeTruthy();
+		expect(selector.getAttribute('aria-required')).toBeNull();
+		expect(selector.getAttribute('aria-haspopup')).toBe('dialog');
 		expect(selector.getAttribute('aria-describedby')).toBe(
 			'referralSelectorError',
 		);
 		expect(error).toBeTruthy();
 
-		expect(component.referralAriaLabel('School')).toBe(
-			'How did you hear about us? School',
-		);
 	});
 
 	it('only onboards after the customer confirms a supplied email address', async (): Promise<void> => {
@@ -204,9 +195,6 @@ describe('SignUpPage', () => {
 
 		expect(component.displayReferral('Other: Neighbor')).toBe('Other:  Neighbor');
 		expect(component.displayReferral(undefined)).toBe('');
-		expect(component.referralAriaLabel(undefined)).toBe(
-			'How did you hear about us? Select an answer',
-		);
 	});
 
 	it('presents privacy and terms modals while recording each view', async (): Promise<void> => {

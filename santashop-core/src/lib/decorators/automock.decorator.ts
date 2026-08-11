@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 export const AUTOMOCK_COLLECTION = '__autoMockCollection';
 
 export const automock = (target: any, memberName: string): any => {

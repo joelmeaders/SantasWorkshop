@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AppStateService } from '@santashop/core';
+import { AppStateService } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -16,7 +16,7 @@ import {
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { AnalyticsWrapper, AuthService } from '@santashop/core';
+import { AnalyticsWrapper, AuthService } from '@santashop/core/customer';
 import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
 import { HelpPage } from '../../../features/v2/pre-registration/help/help.page';

@@ -7,7 +7,7 @@ import {
 	takeUntil,
 	tap,
 } from 'rxjs/operators';
-import { AppStateService } from '@santashop/core';
+import { AppStateService } from '@santashop/core/customer';
 import {
 	OperationalNoticeComponent,
 	OperationalNoticeMode,

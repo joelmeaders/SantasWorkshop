@@ -1,0 +1,154 @@
+import { TestBed } from '@angular/core/testing';
+import type { PublicParameters } from '@santashop/models';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { FIREBASE_FIRESTORE_LITE } from '../tokens/customer-runtime.token';
+import { LitePublicParametersSource } from './lite-public-parameters-source.service';
+
+const firestoreMocks = vi.hoisted(() => ({
+	doc: vi.fn().mockReturnValue('parameters/public'),
+	getDoc: vi.fn(),
+}));
+
+vi.mock('firebase/firestore/lite', () => firestoreMocks);
+
+const parameters = (
+	overrides: Partial<PublicParameters> = {},
+): PublicParameters =>
+	({
+		admin: {
+			allowCancelRegistration: true,
+			allowChangeRegistration: true,
+			checkinEnabled: true,
+			onsiteRegistrationEnabled: true,
+			preRegistrationEnabled: true,
+		},
+		createAccountEnabled: true,
+		globalAlert: { displayAlert: false },
+		maintenanceModeEnabled: false,
+		messageEn: '',
+		messageEs: '',
+		registrationEnabled: true,
+		weatherModeEnabled: false,
+		...overrides,
+	}) as PublicParameters;
+
+const snapshot = (value?: PublicParameters): object => ({
+	exists: (): boolean => value !== undefined,
+	data: (): PublicParameters | undefined => value,
+});
+
+describe('LitePublicParametersSource', () => {
+	let visibilityState: DocumentVisibilityState;
+
+	beforeEach(() => {
+		vi.useFakeTimers();
+		visibilityState = 'visible';
+		vi.spyOn(document, 'visibilityState', 'get').mockImplementation(
+			() => visibilityState,
+		);
+		firestoreMocks.doc.mockClear();
+		firestoreMocks.getDoc.mockReset();
+
+		TestBed.configureTestingModule({
+			providers: [
+				LitePublicParametersSource,
+				{ provide: FIREBASE_FIRESTORE_LITE, useValue: 'firestore-lite' },
+			],
+		});
+	});
+
+	afterEach(() => {
+		TestBed.resetTestingModule();
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+	});
+
+	it('reads the public document immediately and every 60 seconds while visible', async (): Promise<void> => {
+		const first = parameters();
+		const second = parameters({ createAccountEnabled: false });
+		firestoreMocks.getDoc
+			.mockResolvedValueOnce(snapshot(first))
+			.mockResolvedValueOnce(snapshot(second));
+		const values: PublicParameters[] = [];
+		const subscription = TestBed.inject(
+			LitePublicParametersSource,
+		).publicParameters$.subscribe((value) => {
+			if (value) values.push(value);
+		});
+
+		await vi.advanceTimersByTimeAsync(0);
+		expect(values).toEqual([first]);
+		expect(firestoreMocks.doc).toHaveBeenCalledWith(
+			'firestore-lite',
+			'parameters',
+			'public',
+		);
+
+		await vi.advanceTimersByTimeAsync(60_000);
+		expect(values).toEqual([first, second]);
+		subscription.unsubscribe();
+	});
+
+	it('suppresses hidden polling and refreshes on visibility, focus, or reconnection', async (): Promise<void> => {
+		firestoreMocks.getDoc.mockResolvedValue(snapshot(parameters()));
+		const subscription = TestBed.inject(
+			LitePublicParametersSource,
+		).publicParameters$.subscribe();
+		await vi.advanceTimersByTimeAsync(0);
+
+		visibilityState = 'hidden';
+		await vi.advanceTimersByTimeAsync(60_000);
+		expect(firestoreMocks.getDoc).toHaveBeenCalledTimes(1);
+
+		visibilityState = 'visible';
+		document.dispatchEvent(new Event('visibilitychange'));
+		globalThis.dispatchEvent(new Event('focus'));
+		globalThis.dispatchEvent(new Event('online'));
+		await vi.advanceTimersByTimeAsync(0);
+		expect(firestoreMocks.getDoc).toHaveBeenCalledTimes(2);
+		subscription.unsubscribe();
+	});
+
+	it('retains the last distinct value when a read is missing or duplicated', async (): Promise<void> => {
+		const value = parameters();
+		firestoreMocks.getDoc
+			.mockResolvedValueOnce(snapshot(value))
+			.mockResolvedValueOnce(snapshot({ ...value }))
+			.mockResolvedValueOnce(snapshot());
+		const values: PublicParameters[] = [];
+		const subscription = TestBed.inject(
+			LitePublicParametersSource,
+		).publicParameters$.subscribe((result) => {
+			if (result) values.push(result);
+		});
+
+		await vi.advanceTimersByTimeAsync(0);
+		await vi.advanceTimersByTimeAsync(60_000);
+		await vi.advanceTimersByTimeAsync(60_000);
+
+		expect(values).toEqual([value]);
+		subscription.unsubscribe();
+	});
+
+	it('recovers from a failed read on the next lifecycle trigger', async (): Promise<void> => {
+		const value = parameters();
+		firestoreMocks.getDoc
+			.mockRejectedValueOnce(new Error('offline'))
+			.mockResolvedValueOnce(snapshot(value));
+		const values: PublicParameters[] = [];
+		const subscription = TestBed.inject(
+			LitePublicParametersSource,
+		).publicParameters$.subscribe((result) => {
+			if (result) values.push(result);
+		});
+
+		await vi.advanceTimersByTimeAsync(0);
+		expect(values).toEqual([]);
+
+		await vi.advanceTimersByTimeAsync(250);
+		globalThis.dispatchEvent(new Event('online'));
+		await vi.advanceTimersByTimeAsync(0);
+		expect(values).toEqual([value]);
+		subscription.unsubscribe();
+	});
+});

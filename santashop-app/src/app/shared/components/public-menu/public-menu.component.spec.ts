@@ -6,9 +6,9 @@ import {
 	createPopoverControllerMock,
 	createModalControllerMock,
 	provideTranslateServiceMock,
-	provideAnalyticsMock,
-	provideAuthMock,
-	provideFunctionsMock,
+	provideCustomerAnalyticsMock,
+	provideCustomerAuthMock,
+	provideCustomerFunctionsMock,
 } from '../../../../test-helpers';
 import { PublicMenuComponent } from './public-menu.component';
 
@@ -21,9 +21,9 @@ describe('PublicMenuComponent', () => {
 		await TestBed.configureTestingModule({
 			imports: [PublicMenuComponent],
 			providers: [
-				provideAuthMock(),
-				provideFunctionsMock(),
-				provideAnalyticsMock(),
+				provideCustomerAuthMock(),
+				provideCustomerFunctionsMock(),
+				provideCustomerAnalyticsMock(),
 				{
 					provide: PopoverController,
 					useValue: createPopoverControllerMock(),

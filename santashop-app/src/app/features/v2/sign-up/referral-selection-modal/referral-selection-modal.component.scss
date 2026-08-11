@@ -9,6 +9,14 @@ ion-content {
 	--padding-top: 1rem;
 }
 
+.referral-search {
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	margin-bottom: 1rem;
+	padding: 0.5rem 0.75rem;
+}
+
 ion-searchbar {
 	--background: #fff;
 	--border-radius: var(--santa-radius-md);
@@ -16,16 +24,63 @@ ion-searchbar {
 	padding-inline: 0;
 }
 
+.referral-group,
 ion-list {
 	background: rgba(255, 255, 255, 0.9);
 	border: 1px solid var(--santa-line);
 	border-radius: var(--santa-radius-md);
+	margin-bottom: 1rem;
 	overflow: hidden;
 }
 
-ion-item[button] {
-	--background-hover: rgba(23, 100, 71, 0.08);
-	--color: var(--santa-ink);
+.referral-group-heading {
+	color: var(--santa-evergreen-deep);
+	font-size: 1rem;
+	font-weight: 800;
+	margin: 0;
+	padding: 0.85rem 1rem;
+}
+
+.referral-options {
+	border-top: 1px solid var(--santa-line);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.referral-options li + li {
+	border-top: 1px solid var(--santa-line);
+}
+
+.referral-option {
+	align-items: center;
+	appearance: none;
+	background: #fff;
+	border: 0;
+	color: var(--santa-ink);
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	gap: 0.75rem;
+	justify-content: space-between;
+	padding: 1rem;
+	text-align: start;
+	width: 100%;
+}
+
+.referral-option:hover {
+	background: rgba(23, 100, 71, 0.08);
+}
+
+.referral-option:focus-visible {
+	outline: 3px solid var(--ion-color-primary);
+	outline-offset: -3px;
+}
+
+.referral-option-chevron {
+	color: var(--ion-color-medium);
+	font-size: 1.5rem;
+	line-height: 1;
 }
 
 .ref-choices {

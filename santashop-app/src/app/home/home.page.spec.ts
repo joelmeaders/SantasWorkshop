@@ -5,16 +5,16 @@ import {
 	createModalControllerMock,
 	provideTranslateServiceMock,
 	createAppStateServiceMock,
-	provideAnalyticsMock,
-	provideAuthMock,
-	provideFunctionsMock,
+	provideCustomerAnalyticsMock,
+	provideCustomerAuthMock,
+	provideCustomerFunctionsMock,
 } from '../../test-helpers';
 
 import { HomePage } from './home.page';
 import { LoadingController, ModalController } from '@ionic/angular';
-import { AppStateService, ErrorHandlerService } from '@santashop/core';
+import { AppStateService, ErrorHandlerService } from '@santashop/core/customer';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/customer';
 
 describe('HomePage', () => {
 	let component: HomePage;
@@ -37,9 +37,9 @@ describe('HomePage', () => {
 					provide: ModalController,
 					useValue: createModalControllerMock(),
 				},
-				provideAnalyticsMock(),
-				provideAuthMock(),
-				provideFunctionsMock(),
+				provideCustomerAnalyticsMock(),
+				provideCustomerAuthMock(),
+				provideCustomerFunctionsMock(),
 				{
 					provide: ErrorHandlerService,
 					useValue: {
@@ -82,6 +82,25 @@ describe('HomePage', () => {
 		queryParamMap$.next(convertToParamMap({ mode: 'reset' }));
 		await fixture.whenStable();
 		expect(fixture.nativeElement.querySelector('#resetPasswordButton')).toBeTruthy();
+	});
+
+	it('reserves the hero image geometry and prioritizes the Santa logo', (): void => {
+		const logo = fixture.nativeElement.querySelector(
+			'.hero-logo',
+		) as HTMLImageElement;
+		const gifts = fixture.nativeElement.querySelectorAll(
+			'.hero-gift',
+		) as NodeListOf<HTMLImageElement>;
+
+		expect(logo.getAttribute('width')).toBe('491');
+		expect(logo.getAttribute('height')).toBe('482');
+		expect(logo.getAttribute('fetchpriority')).toBe('high');
+		expect(gifts).toHaveLength(2);
+		for (const gift of gifts) {
+			expect(gift.getAttribute('width')).toBe('256');
+			expect(gift.getAttribute('height')).toBe('256');
+			expect(gift.getAttribute('fetchpriority')).toBe('low');
+		}
 	});
 
 	it('does not create a sign-in request for an invalid form', async (): Promise<void> => {

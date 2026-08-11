@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FIREBASE_ANALYTICS, PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core';
+import {
+	FIREBASE_ANALYTICS,
+	PUBLIC_PARAMETERS_SOURCE,
+	PROGRAM_YEAR,
+	RealtimePublicParametersSource,
+	SHOP_DAYS,
+} from '@santashop/core';
 import {
 	bootstrapAdminApplication,
 	type AdminBootstrapConfig,
@@ -110,6 +116,11 @@ describe('admin bootstrap', () => {
 			.calls[0]![1] as { providers: unknown[] };
 		expect(options.providers).toEqual(
 			expect.arrayContaining([
+				RealtimePublicParametersSource,
+				expect.objectContaining({
+					provide: PUBLIC_PARAMETERS_SOURCE,
+					useExisting: RealtimePublicParametersSource,
+				}),
 				expect.objectContaining({
 				provide: PROGRAM_YEAR,
 				useValue: 2026,

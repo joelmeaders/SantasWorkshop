@@ -8,7 +8,6 @@
 		"declaration": false,
 		"declarationMap": false,
 		"inlineSources": false,
-		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"moduleResolution": "bundler",
@@ -32,6 +31,7 @@
 		"paths": {
 			"@santashop/models": ["./dist/@santashop/models"],
 			"@santashop/core": ["./dist/@santashop/core"],
+			"@santashop/core/customer": ["./santashop-core/src/customer.ts"],
 			"@santashop/app": ["./dist/@santashop/app"],
 			"@santashop/admin": ["./dist/@santashop/admin"]
 		}

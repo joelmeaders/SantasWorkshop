@@ -11,6 +11,12 @@ import {
 	FIREBASE_FUNCTIONS,
 	FIREBASE_STORAGE,
 } from '@santashop/core';
+import {
+	FIREBASE_ANALYTICS as CUSTOMER_FIREBASE_ANALYTICS,
+	FIREBASE_AUTH as CUSTOMER_FIREBASE_AUTH,
+	FIREBASE_FUNCTIONS as CUSTOMER_FIREBASE_FUNCTIONS,
+	FIREBASE_STORAGE as CUSTOMER_FIREBASE_STORAGE,
+} from '@santashop/core/customer';
 import { createMock } from '../../test-helpers/vitest';
 
 export function createTranslateServiceMock(): Mocked<TranslateService> {
@@ -113,3 +119,7 @@ export function provideFirestoreMock(): Provider { return { provide: FIREBASE_FI
 export function provideFunctionsMock(): Provider { return { provide: FIREBASE_FUNCTIONS, useFactory: createFunctionsMock }; }
 export function provideStorageMock(): Provider { return { provide: FIREBASE_STORAGE, useFactory: createStorageMock }; }
 export function provideAnalyticsMock(): Provider { return { provide: FIREBASE_ANALYTICS, useFactory: createAnalyticsMock }; }
+export function provideCustomerAuthMock(): Provider { return { provide: CUSTOMER_FIREBASE_AUTH, useFactory: createAuthMock }; }
+export function provideCustomerFunctionsMock(): Provider { return { provide: CUSTOMER_FIREBASE_FUNCTIONS, useFactory: createFunctionsMock }; }
+export function provideCustomerStorageMock(): Provider { return { provide: CUSTOMER_FIREBASE_STORAGE, useFactory: createStorageMock }; }
+export function provideCustomerAnalyticsMock(): Provider { return { provide: CUSTOMER_FIREBASE_ANALYTICS, useFactory: createAnalyticsMock }; }

@@ -6,7 +6,7 @@ import {
 	AuthService,
 	ErrorHandlerService,
 	FunctionsWrapper,
-} from '@santashop/core';
+} from '@santashop/core/customer';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SignUpPageService } from './sign-up.page.service';

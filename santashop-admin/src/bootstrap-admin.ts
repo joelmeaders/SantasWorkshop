@@ -29,7 +29,9 @@ import {
 	FIREBASE_AUTH,
 	FIREBASE_FIRESTORE,
 	FIREBASE_FUNCTIONS,
+	PUBLIC_PARAMETERS_SOURCE,
 	PROGRAM_YEAR,
+	RealtimePublicParametersSource,
 	SHOP_DAYS,
 } from '@santashop/core';
 import { AppComponent } from './app/app.component';
@@ -169,6 +171,11 @@ export function bootstrapAdminApplication(
 		{ provide: FIREBASE_AUTH, useValue: firebaseAuth },
 		{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
 		{ provide: FIREBASE_FIRESTORE, useValue: firebaseFirestore },
+		RealtimePublicParametersSource,
+		{
+			provide: PUBLIC_PARAMETERS_SOURCE,
+			useExisting: RealtimePublicParametersSource,
+		},
 		...(runtimeConfig.production
 			? [
 					{

@@ -14,7 +14,7 @@ import {
 	Platform,
 } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
-import { AnalyticsWrapper, AppStateService } from '@santashop/core';
+import { AnalyticsWrapper, AppStateService } from '@santashop/core/customer';
 import { ApplicationService } from './core/services/application.service';
 
 @Component({

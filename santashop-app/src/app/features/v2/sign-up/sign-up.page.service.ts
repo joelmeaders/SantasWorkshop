@@ -4,7 +4,7 @@ import {
 	AuthService,
 	ErrorHandlerService,
 	FunctionsWrapper,
-} from '@santashop/core';
+} from '@santashop/core/customer';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { Auth, IError, OnboardUser } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';

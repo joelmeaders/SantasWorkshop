@@ -5,10 +5,16 @@
 			<ion-col size="12">
 				<ion-row class="ion-justify-content-center">
 					<ion-col sizeXs="12" sizeSm="9" sizeLg="8">
-						<div class="workspace-intro" aria-labelledby="registration-workspace-title">
+						<section class="workspace-intro" aria-labelledby="registration-workspace-title">
+							<img
+								src="assets/images/gift-toybox.svg"
+								class="workspace-gift"
+								alt=""
+								aria-hidden="true"
+							/>
 							<h1 id="registration-workspace-title">{{ 'OVERVIEW.WORKSPACE_TITLE' | translate }}</h1>
 							<p>{{ 'OVERVIEW.WORKSPACE_INTRO' | translate }}</p>
-						</div>
+						</section>
 
 						<section class="workflow-section children-step" id="children" tabindex="-1" aria-labelledby="children-heading">
 							<app-children-card

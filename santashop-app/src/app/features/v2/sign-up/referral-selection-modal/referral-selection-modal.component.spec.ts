@@ -77,4 +77,20 @@ describe('ReferralSelectionModalComponent', () => {
 
 		expect(component.selectedReferral).toBeUndefined();
 	});
+
+	it('renders the available choices as labelled native lists of buttons', async () => {
+		await fixture.whenStable();
+
+		const optionLists = fixture.nativeElement.querySelectorAll(
+			'ul.referral-options',
+		) as NodeListOf<HTMLUListElement>;
+		const referralButton = fixture.nativeElement.ownerDocument.getElementById(
+			'referral-Denver Human Services DHS',
+		) as HTMLButtonElement;
+
+		expect(optionLists.length).toBeGreaterThan(0);
+		expect(referralButton.tagName).toBe('BUTTON');
+		expect(referralButton.closest('li')).toBeTruthy();
+		expect(fixture.nativeElement.querySelector('[role="listitem"]')).toBeNull();
+	});
 });

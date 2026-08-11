@@ -19,6 +19,10 @@ const TEST_PROGRAM_YEAR = new Date().getFullYear();
 const testSlotDate = (year: number, day: number, hour: number): string =>
 	new Date(Date.UTC(year, 11, day, hour)).toISOString();
 
+const refreshPublicParameters = async (page: Page): Promise<void> => {
+	await page.evaluate(() => window.dispatchEvent(new Event('online')));
+};
+
 const expectSignInToBeRejected = async (
 	page: Page,
 	credentials: { emailAddress: string; password: string },
@@ -183,9 +187,7 @@ test.describe('customer registration lifecycle', () => {
 		await selectAppointmentViaUi(page, 'public-slot-1');
 		await page.goto('/pre-registration/overview#review');
 		const submitCard = page.locator('app-submit-card');
-		await submitCard
-			.getByRole('button', { name: 'Review registration', exact: true })
-			.click();
+		await page.locator('#reviewAndSubmitButton').click();
 		await expect(submitCard.getByText(account.emailAddress, { exact: true })).toBeVisible();
 		await submitCard
 			.getByRole('button', { name: 'Update email', exact: true })
@@ -445,7 +447,13 @@ test.describe('customer registration lifecycle', () => {
 		await expect(page.locator('#signInButton')).toBeVisible();
 
 		await page.goto('/pre-registration/children');
-		await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
+		await expect(page).toHaveURL(
+			(url) =>
+				url.pathname === '/' &&
+				url.searchParams.get('mode') === 'sign-in' &&
+				url.searchParams.get('returnUrl') === '/pre-registration/children',
+			{ timeout: 15000 },
+		);
 	});
 
 	test('SUB-006 hides appointment changes and cancellation after check-in', async ({
@@ -556,6 +564,7 @@ test.describe('customer registration lifecycle', () => {
 				allowChangeRegistration: false,
 			},
 		});
+		await refreshPublicParameters(page);
 		await expect(changeButton).toBeHidden({ timeout: 15000 });
 	});
 
@@ -615,6 +624,7 @@ test.describe('customer registration lifecycle', () => {
 				allowChangeRegistration: true,
 			},
 		});
+		await refreshPublicParameters(page);
 		await expect(cancelButton).toBeHidden({ timeout: 15000 });
 		await seedPublicParams({
 			admin: {
@@ -625,6 +635,7 @@ test.describe('customer registration lifecycle', () => {
 				allowChangeRegistration: true,
 			},
 		});
+		await refreshPublicParameters(page);
 		await expect(cancelButton).toBeVisible({ timeout: 15000 });
 		await cancelButton.click();
 		const confirmationAlert = page.locator('ion-alert');

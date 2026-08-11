@@ -9,7 +9,8 @@
 		"inlineSources": true,
 		"paths": {
 			"@santashop/models": ["dist/@santashop/models"],
-			"@santashop/core": ["dist/@santashop/core"]
+			"@santashop/core": ["dist/@santashop/core"],
+			"@santashop/core/customer": ["santashop-core/src/customer.ts"]
 		}
 	},
 	"files": ["src/main.ts"],

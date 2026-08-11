@@ -7,4 +7,5 @@ export * from './app-state.service';
 export * from './auth.service';
 export * from './error-handler.service';
 export * from './fire-repo-lite.service';
+export * from './realtime-public-parameters-source.service';
 export * from './skeleton-state.service';

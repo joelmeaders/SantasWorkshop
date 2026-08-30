@@ -779,13 +779,13 @@ test.describe('customer registration lifecycle', () => {
 		await page.goto('/pre-registration/profile');
 
 		await page
-			.locator('ion-input[formControlName="firstName"] input')
+			.locator('ion-input[formControlName="firstName"] input:not(.cloned-input)')
 			.fill('Dasher');
 		await page
-			.locator('ion-input[formControlName="lastName"] input')
+			.locator('ion-input[formControlName="lastName"] input:not(.cloned-input)')
 			.fill('Reindeer');
 		await page
-			.locator('ion-input[formControlName="zipCode"] input')
+			.locator('ion-input[formControlName="zipCode"] input:not(.cloned-input)')
 			.fill('80209');
 		const profilePanel = page.locator('details').first();
 		const saveButton = profilePanel.getByRole('button', {
@@ -800,23 +800,42 @@ test.describe('customer registration lifecycle', () => {
 
 		const profile = page.locator('app-profile');
 		await expect(
-			profile.getByRole('textbox', { name: 'First Name', exact: true }),
+			profile.locator(
+				'ion-input[formControlName="firstName"] input:not(.cloned-input)',
+			),
 		).toHaveValue('Dasher', { timeout: 30000 });
 		await expect(
-			profile.getByRole('textbox', { name: 'Last Name', exact: true }),
+			profile.locator(
+				'ion-input[formControlName="lastName"] input:not(.cloned-input)',
+			),
 		).toHaveValue('Reindeer', { timeout: 30000 });
 		await expect(
-			profile.getByRole('textbox', { name: 'Zip Code', exact: true }),
+			profile.locator(
+				'ion-input[formControlName="zipCode"] input:not(.cloned-input)',
+			),
 		).toHaveValue('80209', { timeout: 30000 });
+		await expect
+			.poll(
+				async () =>
+					(
+						await inspectRegistrationQrLifecycle(account.emailAddress)
+					).searchIndex,
+				{
+					timeout: 30000,
+				},
+			)
+			.toMatchObject({
+				exists: true,
+				firstName: 'dasher',
+				lastName: 'reindeer',
+				displayFirstName: 'Dasher',
+				displayLastName: 'Reindeer',
+				zip: '80209',
+			});
 		const lifecycle = await inspectRegistrationQrLifecycle(account.emailAddress);
 		expect(lifecycle.searchIndex).toMatchObject({
 			exists: true,
 			customerId: lifecycle.uid,
-			firstName: 'dasher',
-			lastName: 'reindeer',
-			displayFirstName: 'Dasher',
-			displayLastName: 'Reindeer',
-			zip: '80209',
 		});
 	});
 

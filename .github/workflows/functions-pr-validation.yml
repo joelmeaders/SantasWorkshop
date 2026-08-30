@@ -86,5 +86,5 @@ jobs:
           [ -n "$TEST_AWS_SECRET_ACCESS_KEY" ] || { echo "Missing TEST_AWS_SECRET_ACCESS_KEY"; exit 1; }
       - run: pnpm install --frozen-lockfile
       - run: pnpm run functions:test:integration
-      - run: pnpm run test:browser:setup
+      - run: pnpm run e2e:browser:setup:ci
       - run: pnpm run e2e:test

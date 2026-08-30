@@ -26,15 +26,11 @@
 		}
 
 		<nav [attr.aria-label]="'OPERATIONAL_NOTICE.SOCIAL_LINKS' | translate">
-			<a rel="noopener" href="https://www.facebook.com/denversantaclausshop" target="_blank">
-				<ion-button color="white" class="round-button" [attr.aria-label]="'OPERATIONAL_NOTICE.FACEBOOK' | translate">
-					<ion-icon slot="icon-only" name="logo-facebook" color="medium" />
-				</ion-button>
+			<a class="social-link-button" rel="noopener" href="https://www.facebook.com/denversantaclausshop" target="_blank" [attr.aria-label]="'OPERATIONAL_NOTICE.FACEBOOK' | translate">
+				<ion-icon name="logo-facebook" color="medium" aria-hidden="true" />
 			</a>
-			<a rel="noopener" href="https://www.instagram.com/denversantaclausshop/" target="_blank">
-				<ion-button color="white" class="round-button" [attr.aria-label]="'OPERATIONAL_NOTICE.INSTAGRAM' | translate">
-					<ion-icon slot="icon-only" name="logo-instagram" color="medium" />
-				</ion-button>
+			<a class="social-link-button" rel="noopener" href="https://www.instagram.com/denversantaclausshop/" target="_blank" [attr.aria-label]="'OPERATIONAL_NOTICE.INSTAGRAM' | translate">
+				<ion-icon name="logo-instagram" color="medium" aria-hidden="true" />
 			</a>
 		</nav>
 	</main>

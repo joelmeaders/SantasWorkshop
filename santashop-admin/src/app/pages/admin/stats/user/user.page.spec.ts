@@ -6,6 +6,7 @@ import {
 	provideFirestoreWrapperMock,
 	provideActivatedRouteMock,
 	provideProgramYearMock,
+	requireDefined,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
@@ -75,9 +76,9 @@ describe('UserPage', () => {
 			chart: { data: { labels: ['80219'] } },
 			dataIndex: 0,
 		};
-		const referrerFormatter = component.barChartOptions!.plugins?.datalabels
+		const referrerFormatter = requireDefined(component.barChartOptions).plugins?.datalabels
 			?.formatter as (value: number, context: typeof labelContext) => string;
-		const zipFormatter = component.zipCodeChartOptions!.plugins?.datalabels
+		const zipFormatter = requireDefined(component.zipCodeChartOptions).plugins?.datalabels
 			?.formatter as (value: number, context: typeof labelContext) => string;
 
 		expect(referrerFormatter(4, labelContext)).toBe('4 - Friend');

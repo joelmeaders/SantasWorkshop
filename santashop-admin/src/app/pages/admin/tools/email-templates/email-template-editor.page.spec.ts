@@ -13,12 +13,13 @@ import {
 	provideRouter,
 	Router,
 } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { EmailTemplateEditorPage } from './email-template-editor.page';
 import {
 	createActivatedRouteMock,
 	provideAlertControllerMock,
 	provideLoadingControllerMock,
+	requireDefined,
 } from '../../../../../test-helpers';
 import { EmailTemplateService } from './email-template.service';
 
@@ -181,7 +182,7 @@ describe('EmailTemplateEditorPage', () => {
 		await component.ionViewWillEnter();
 		const revision = component.revisions[0];
 		emailTemplateService.getEmailTemplateRevision.mockResolvedValue({
-			template: component.currentTemplate!,
+			template: requireDefined(component.currentTemplate),
 			revision: {
 				...revision,
 				id: 'rev-2',
@@ -207,14 +208,12 @@ describe('EmailTemplateEditorPage', () => {
 	it('normalizes field mappings to the selected delivery profile and refreshes preview HTML', async () => {
 		await component.ionViewWillEnter();
 		component.form.controls['deliveryProfile'].setValue('event-reminder');
-		component.fieldMappings
-			.at(0)
-			.get('mapping')!
+		requireDefined(component.fieldMappings.at(0).get('mapping'))
 			.setValue('unsupported.field');
 
 		component.onDeliveryProfileChanged();
 
-		expect(component.fieldMappings.at(0).get('mapping')!.value).toBe(
+		expect(requireDefined(component.fieldMappings.at(0).get('mapping')).value).toBe(
 			'firstName',
 		);
 		expect(component.previewHtml).toContain('Buddy');
@@ -223,7 +222,7 @@ describe('EmailTemplateEditorPage', () => {
 	it('saves a valid draft and updates the current template revision', async () => {
 		await component.ionViewWillEnter();
 		const template = {
-			...component.currentTemplate!,
+			...requireDefined(component.currentTemplate),
 			currentRevisionId: 'rev-2',
 			currentRevisionNumber: 2,
 		};
@@ -255,7 +254,7 @@ describe('EmailTemplateEditorPage', () => {
 	it('publishes the selected revision and marks it as current', async () => {
 		await component.ionViewWillEnter();
 		const template = {
-			...component.currentTemplate!,
+			...requireDefined(component.currentTemplate),
 			publishedRevisionId: 'rev-1',
 			publishedRevisionNumber: 1,
 		};
@@ -298,12 +297,12 @@ describe('EmailTemplateEditorPage', () => {
 	it('uses the published revision badge and shows service failures to the user', async () => {
 		await component.ionViewWillEnter();
 		component.currentTemplate = {
-			...component.currentTemplate!,
+			...requireDefined(component.currentTemplate),
 			publishedRevisionId: 'rev-1',
 		};
-		expect(component.revisionBadgeColor(component.revisions[0]!)).toBe('success');
+		expect(component.revisionBadgeColor(requireDefined(component.revisions[0]))).toBe('success');
 		expect(
-			component.revisionBadgeColor({ ...component.revisions[0]!, id: 'rev-2' }),
+			component.revisionBadgeColor({ ...requireDefined(component.revisions[0]), id: 'rev-2' }),
 		).toBe('medium');
 
 		emailTemplateService.publishEmailTemplate.mockRejectedValueOnce(

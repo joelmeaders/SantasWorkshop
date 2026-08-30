@@ -4,7 +4,7 @@
 		<ion-badge>{{ children().length }}</ion-badge>
 	</ion-label>
 	<ion-button slot="end" fill="clear" shape="round" (click)="addEditChild()">
-		<ion-icon name="add-circle" slot="end" />
+		<ion-icon name="add-circle" slot="end" aria-hidden="true" />
 		Add Child
 	</ion-button>
 </ion-item-divider>
@@ -40,6 +40,7 @@
 				<ion-icon slot="start"
 					name="create-outline"
 					slot="top"
+					aria-hidden="true"
 				 />
 				<ion-label slot="bottom"> Edit </ion-label>
 			</ion-item-option>
@@ -47,6 +48,7 @@
 				<ion-icon slot="start"
 					name="trash-outline"
 					slot="top"
+					aria-hidden="true"
 				 />
 				<ion-label slot="bottom"> Delete </ion-label>
 			</ion-item-option>

@@ -4,7 +4,7 @@ import { SignInPage } from './sign-in.page';
 import {
 } from '../../../test-helpers';
 import { provideRouter, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { AuthService } from '@santashop/core';
 
 describe('SignInPage', () => {

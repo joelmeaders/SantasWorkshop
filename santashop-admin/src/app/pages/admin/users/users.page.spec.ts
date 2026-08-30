@@ -8,7 +8,7 @@ import {
 	vi,
 } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import type { StaffAccount } from '@santashop/models';

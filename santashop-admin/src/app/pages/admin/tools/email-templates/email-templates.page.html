@@ -48,9 +48,14 @@
 							<ion-button
 								fill="clear"
 								title="Edit template"
+								aria-label="Edit template"
 								(click)="$event.stopPropagation(); openTemplate(template.key)"
 							>
-								<ion-icon slot="icon-only" name="create-outline" />
+								<ion-icon
+									slot="icon-only"
+									name="create-outline"
+									aria-hidden="true"
+								/>
 							</ion-button>
 						</ion-buttons>
 					</ion-item>
@@ -62,10 +67,11 @@
 	<ion-fab slot="fixed" vertical="bottom" horizontal="end">
 		<ion-fab-button
 			title="Create template"
+			aria-label="Create template"
 			(click)="createTemplate()"
 			(keydown.enter)="createTemplate()"
 		>
-			<ion-icon name="add"></ion-icon>
+			<ion-icon name="add" aria-hidden="true"></ion-icon>
 		</ion-fab-button>
 	</ion-fab>
 </ion-content>

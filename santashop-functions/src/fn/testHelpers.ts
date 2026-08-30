@@ -6,7 +6,7 @@
 import { createHash } from 'node:crypto';
 import type { DocumentSnapshot } from 'firebase-admin/firestore';
 import admin from '../firebase-admin';
-import cancelledRegistrationDataUrl from '../assets/cancelled-registration.png';
+import { getCancelledRegistrationAsset } from '../utility/bundled-assets';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 
 export interface TestAdminUserSeed {
@@ -568,10 +568,7 @@ export async function seedRegistration(
 	}]);
 }
 
-const cancelledAsset = Buffer.from(
-	cancelledRegistrationDataUrl.split(',', 2)[1] ?? '',
-	'base64',
-);
+const cancelledAsset = getCancelledRegistrationAsset();
 const cancelledAssetHash = createHash('sha256').update(cancelledAsset).digest('hex');
 
 const pngDimensions = (contents: Buffer): { width: number; height: number } | undefined => {
@@ -611,10 +608,13 @@ const storageObjectInfo = async (path?: string): Promise<TestStorageObjectInfo> 
 export async function inspectRegistrationQrLifecycle(
 	emailAddress: string,
 ): Promise<TestRegistrationQrLifecycle> {
-	const authUser = await admin.auth().getUserByEmail(emailAddress.toLowerCase());
 	const db = admin.firestore();
-	const registrationSnapshot = await db.collection('registrations').doc(authUser.uid).get();
-	const registration = registrationSnapshot.data() as {
+	const registrationQuery = await db.collection('registrations')
+		.where('emailAddress', '==', emailAddress.toLowerCase())
+		.limit(1)
+		.get();
+	const registrationSnapshot = registrationQuery.docs[0];
+	const registration = registrationSnapshot?.data() as {
 		qrcode?: string;
 		qrCodeStoragePath?: string;
 		registrationSubmittedOn?: unknown;
@@ -622,11 +622,14 @@ export async function inspectRegistrationQrLifecycle(
 		dateTimeSlot?: { id?: string; dateTime?: unknown };
 		previousDateTimeSlot?: { id?: string; dateTime?: unknown };
 	} | undefined;
-	if (!registration) throw new Error(`Registration not found for ${authUser.uid}.`);
+	if (!registrationSnapshot || !registration) {
+		throw new Error('Registration not found for the requested email address.');
+	}
+	const uid = registrationSnapshot.id;
 
 	const [cancellationsSnapshot, searchIndexSnapshot, currentSlotSnapshot, previousSlotSnapshot] = await Promise.all([
-		db.collection('cancellations').where('uid', '==', authUser.uid).get(),
-		db.collection('registrationsearchindex').doc(authUser.uid).get(),
+		db.collection('cancellations').where('uid', '==', uid).get(),
+		db.collection('registrationsearchindex').doc(uid).get(),
 		registration.dateTimeSlot?.id
 			? db.collection('dateTimeSlots').doc(registration.dateTimeSlot.id).get()
 			: Promise.resolve(undefined),
@@ -693,7 +696,7 @@ export async function inspectRegistrationQrLifecycle(
 	const previousSlot = slotSnapshot(previousSlotSnapshot);
 
 	return {
-		uid: authUser.uid,
+		uid,
 		registration: {
 			hasSubmittedRegistration: Boolean(registration.registrationSubmittedOn),
 			cancelled: Boolean(registration.cancelledOn),

@@ -18,12 +18,17 @@ import {
 	IonItemSliding,
 	IonItemOptions,
 	IonItemOption,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
 import { DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { addCircle, createOutline, trashOutline } from 'ionicons/icons';
+import {
+	addCircle,
+	createOutline,
+	menuOutline,
+	trashOutline,
+} from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-manage-children',
@@ -55,9 +60,7 @@ export class ManageChildrenComponent {
 	public readonly removedChild = output<number>();
 
 	constructor() {
-		addIcons({ addCircle, createOutline, trashOutline });
-		addIcons({ addCircle, createOutline, trashOutline });
-		addIcons({ addCircle, createOutline, trashOutline });
+		addIcons({ addCircle, createOutline, menuOutline, trashOutline });
 	}
 
 	public async addEditChild(child?: Child): Promise<void> {

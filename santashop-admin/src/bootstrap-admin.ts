@@ -21,8 +21,7 @@ import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import {
 	IonicRouteStrategy,
 	provideIonicAngular,
-} from '@ionic/angular';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+} from '@ionic/angular/standalone';
 import {
 	FIREBASE_ANALYTICS,
 	FIREBASE_APP,
@@ -63,12 +62,10 @@ export interface AdminBootstrapDependencies {
 	readonly getFunctions: typeof getFunctions;
 	readonly initializeApp: typeof initializeApp;
 	readonly initializeAppCheck: typeof initializeAppCheck;
-	readonly provideCharts: typeof provideCharts;
 	readonly provideHttpClient: typeof provideHttpClient;
 	readonly provideIonicAngular: typeof provideIonicAngular;
 	readonly provideRouter: typeof provideRouter;
 	readonly reCaptchaEnterpriseProvider: typeof ReCaptchaEnterpriseProvider;
-	readonly withDefaultRegisterables: typeof withDefaultRegisterables;
 	readonly withInterceptorsFromDi: typeof withInterceptorsFromDi;
 	readonly withXhr: typeof withXhr;
 }
@@ -95,12 +92,10 @@ const defaultDependencies: AdminBootstrapDependencies = {
 	getFunctions,
 	initializeApp,
 	initializeAppCheck,
-	provideCharts,
 	provideHttpClient,
 	provideIonicAngular,
 	provideRouter,
 	reCaptchaEnterpriseProvider: ReCaptchaEnterpriseProvider,
-	withDefaultRegisterables,
 	withInterceptorsFromDi,
 	withXhr,
 };
@@ -197,9 +192,6 @@ export function bootstrapAdminApplication(
 				dependencies.provideHttpClient(
 					dependencies.withXhr(),
 					dependencies.withInterceptorsFromDi(),
-				),
-				dependencies.provideCharts(
-					dependencies.withDefaultRegisterables(),
 				),
 				dependencies.provideIonicAngular({
 					mode: 'md',

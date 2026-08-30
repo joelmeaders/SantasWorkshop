@@ -6,6 +6,41 @@
 			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
 			"headers": [
 				{
+					"source": "**",
+					"headers": [
+						{
+							"key": "Content-Security-Policy",
+							"value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.googletagmanager.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://www.google-analytics.com https://region1.google-analytics.com https://*.google.com; frame-src 'self' https://*.firebaseapp.com https://www.google.com https://*.google.com; worker-src 'self' blob:; manifest-src 'self'"
+						},
+						{
+							"key": "Permissions-Policy",
+							"value": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
+						},
+						{
+							"key": "Referrer-Policy",
+							"value": "strict-origin-when-cross-origin"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						}
+					]
+				},
+				{
+					"source": "/index.html",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						}
+					]
+				},
+
+				{
 					"source": "**/*-????????.@(css|js)",
 					"headers": [
 						{
@@ -86,6 +121,41 @@
 			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
 			"headers": [
 				{
+					"source": "**",
+					"headers": [
+						{
+							"key": "Content-Security-Policy",
+							"value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.googletagmanager.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://www.google-analytics.com https://region1.google-analytics.com https://*.google.com; frame-src 'self' https://*.firebaseapp.com https://www.google.com https://*.google.com; worker-src 'self' blob:; manifest-src 'self'"
+						},
+						{
+							"key": "Permissions-Policy",
+							"value": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
+						},
+						{
+							"key": "Referrer-Policy",
+							"value": "strict-origin-when-cross-origin"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						}
+					]
+				},
+				{
+					"source": "/index.html",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						}
+					]
+				},
+
+				{
 					"source": "**/*-????????.@(css|js)",
 					"headers": [
 						{
@@ -162,7 +232,7 @@
 		}
 	],
 	"functions": {
-		"runtime": "nodejs22",
+		"runtime": "nodejs24",
 		"predeploy": [
 			"node \"$PROJECT_DIR/scripts/assert-functions-deploy-ci.cjs\"",
 			"npm --prefix \"$RESOURCE_DIR\" run lint",

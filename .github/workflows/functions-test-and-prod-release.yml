@@ -7,6 +7,10 @@ on:
     paths:
       - 'santashop-functions/**'
       - 'firebase.json'
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'storage.rules'
+      - 'database.rules.json'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -14,6 +18,7 @@ on:
       - 'config.functions.cjs'
       - 'scripts/env-loader.cjs'
       - 'scripts/assert-functions-deploy-ci.cjs'
+      - 'scripts/verify-functions-parity.cjs'
       - '.github/workflows/functions-test-and-prod-release.yml'
       - '.github/workflows/functions-pr-validation.yml'
 
@@ -39,6 +44,8 @@ env:
   TEST_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
   TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+  TEST_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
+  TEST_SANTASHOP_EVENT_MIN_INSTANCES: '0'
   TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
   TEST_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
@@ -57,6 +64,8 @@ env:
   PROD_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
   PROD_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   PROD_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+  PROD_SANTASHOP_SIGNUP_MIN_INSTANCES: ${{ vars.PROD_SANTASHOP_SIGNUP_MIN_INSTANCES || '0' }}
+  PROD_SANTASHOP_EVENT_MIN_INSTANCES: ${{ vars.PROD_SANTASHOP_EVENT_MIN_INSTANCES || '0' }}
   PROD_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   PROD_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
   PROD_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
@@ -119,7 +128,14 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run functions:test:integration
+      - run: pnpm run test:browser:setup
+      - run: pnpm run e2e:test
       - run: pnpm run ci:functions:deploy:test
+      - name: Verify live test Functions match source
+        shell: bash
+        run: |
+          pnpm exec firebase functions:list --project santas-workshop-test --json > "$RUNNER_TEMP/functions.json"
+          node scripts/verify-functions-parity.cjs "$RUNNER_TEMP/functions.json"
 
   deploy_prod:
     if: github.event_name == 'workflow_dispatch'
@@ -154,3 +170,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run functions:test:unit
       - run: pnpm run ci:functions:deploy:prod
+      - name: Verify live production Functions match source
+        shell: bash
+        run: |
+          pnpm exec firebase functions:list --project santas-workshop-193b5 --json > "$RUNNER_TEMP/functions.json"
+          node scripts/verify-functions-parity.cjs "$RUNNER_TEMP/functions.json"

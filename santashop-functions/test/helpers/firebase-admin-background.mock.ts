@@ -18,6 +18,7 @@ interface MockCollectionRef {
 	orderBy: ReturnType<typeof vi.fn>;
 	limit: ReturnType<typeof vi.fn>;
 	offset: ReturnType<typeof vi.fn>;
+	startAfter: ReturnType<typeof vi.fn>;
 	count: ReturnType<typeof vi.fn>;
 	countGet: ReturnType<typeof vi.fn>;
 	add: ReturnType<typeof vi.fn>;
@@ -28,6 +29,7 @@ interface MockFileRef {
 	save: ReturnType<typeof vi.fn>;
 	download: ReturnType<typeof vi.fn>;
 	delete: ReturnType<typeof vi.fn>;
+	getMetadata: ReturnType<typeof vi.fn>;
 }
 
 export interface BackgroundAdminMock {
@@ -156,7 +158,14 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 				]);
 			}),
 			download: vi.fn().mockResolvedValue([Buffer.from('', 'utf-8')]),
-		delete: vi.fn().mockResolvedValue(undefined),
+			delete: vi.fn().mockResolvedValue(undefined),
+			getMetadata: vi.fn().mockResolvedValue([
+				{
+					metadata: {
+						firebaseStorageDownloadTokens: 'test-download-token',
+					},
+				},
+			]),
 		};
 		fileRefs.set(path, created);
 		return created;
@@ -203,6 +212,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		const orderBy = vi.fn(() => collectionRef);
 		const limit = vi.fn(() => collectionRef);
 		const offset = vi.fn(() => collectionRef);
+		const startAfter = vi.fn(() => collectionRef);
 		const countGet = vi.fn();
 		const count = vi.fn(() => ({ get: countGet }));
 		const add = vi.fn();
@@ -219,6 +229,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 			orderBy,
 			limit,
 			offset,
+			startAfter,
 			count,
 			countGet,
 			add,
@@ -307,6 +318,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	}));
 	const storage = vi.fn(() => ({
 		bucket: vi.fn(() => ({
+			name: 'test-bucket.appspot.com',
 			upload,
 			file: vi.fn((path: string) => getFileRef(path)),
 		})),

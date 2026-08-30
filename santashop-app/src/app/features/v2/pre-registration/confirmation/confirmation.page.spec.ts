@@ -11,7 +11,7 @@ import {
 	AlertController,
 	LoadingController,
 	ModalController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { AppStateService, ErrorHandlerService } from '@santashop/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { DateTimeSlotsService } from './date-time-slots.service';

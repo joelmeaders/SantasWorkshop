@@ -32,8 +32,10 @@ describe('callable validation', () => {
 	it('validates email and ZIP values without coercing invalid input', () => {
 		expect(requireEmailAddress(' BUDDY@EXAMPLE.COM ')).toBe('buddy@example.com');
 		expect(requireZipCodeValue(' 80205 ')).toBe('80205');
+		expect(requireZipCodeValue(1234)).toBe(1234);
+		expect(() => requireZipCodeValue('8020')).toThrow(/valid US ZIP code/);
 		expect(() => requireEmailAddress('not-an-email')).toThrow(/valid email address/);
-		expect(() => requireZipCodeValue(Number.NaN)).toThrow(/valid number/);
+		expect(() => requireZipCodeValue(Number.NaN)).toThrow(/valid five-digit/);
 	});
 
 	it('converts validation and Auth failures into callable HTTPS errors', () => {

@@ -10,7 +10,7 @@ import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 
 import { AsyncPipe } from '@angular/common';
-import { IonText, IonToggle } from '@ionic/angular';
+import { IonText, IonToggle } from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'app-language-toggle',

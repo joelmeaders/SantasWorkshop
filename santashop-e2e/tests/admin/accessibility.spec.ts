@@ -66,4 +66,30 @@ test.describe('staff critical-path accessibility', () => {
 
 		await expectNoBlockingAccessibilityViolations(page);
 	});
+
+	test('A11Y-ADMIN-004 has no violations across primary staff tools', async ({
+		page,
+		seedAdminUser,
+		seedPublicParams,
+	}) => {
+		const account = defaultAdminAccount();
+		await seedPublicParams({});
+		await seedAdminUser(account);
+		await signInAdminViaUi(page, account);
+
+		for (const route of [
+			'/admin/search',
+			'/admin/checkin/scan',
+			'/admin/schedule-editor',
+			'/admin/email-templates',
+			'/admin/users',
+			'/admin/stats/registration',
+		]) {
+			await page.goto(route);
+			await expect(page.locator('admin-header')).toBeVisible({
+				timeout: 15000,
+			});
+			await expectNoBlockingAccessibilityViolations(page);
+		}
+	});
 });

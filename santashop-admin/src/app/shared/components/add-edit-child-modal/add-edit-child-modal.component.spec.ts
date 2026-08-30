@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { AgeGroup, ToyType, type Child } from '@santashop/models';
 import { AddEditChildModalComponent } from './add-edit-child-modal.component';
 import {

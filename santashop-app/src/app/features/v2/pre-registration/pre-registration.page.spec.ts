@@ -9,7 +9,7 @@ import {
 	createPopoverControllerMock,
 	provideTranslateServiceMock,
 } from '../../../../test-helpers';
-import { PopoverController } from '@ionic/angular';
+import { PopoverController } from '@ionic/angular/standalone';
 
 import { PreRegistrationPage } from './pre-registration.page';
 

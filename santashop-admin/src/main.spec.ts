@@ -12,6 +12,7 @@ import {
 	type AdminBootstrapDependencies,
 	type AdminBootstrapOptions,
 } from './bootstrap-admin';
+import { requireDefined } from './test-helpers';
 
 const firebaseModule = vi.hoisted(() => {
 	class Timestamp {
@@ -112,8 +113,9 @@ describe('admin bootstrap', () => {
 		);
 		expect(dependencies.getAnalytics).not.toHaveBeenCalled();
 		expect(dependencies.enableProdMode).not.toHaveBeenCalled();
-		const options = vi.mocked(dependencies.bootstrapApplication).mock
-			.calls[0]![1] as { providers: unknown[] };
+		const options = requireDefined(
+			vi.mocked(dependencies.bootstrapApplication).mock.calls[0],
+		)[1] as { providers: unknown[] };
 		expect(options.providers).toEqual(
 			expect.arrayContaining([
 				RealtimePublicParametersSource,
@@ -155,8 +157,9 @@ describe('admin bootstrap', () => {
 		expect(dependencies.connectFirestoreEmulator).not.toHaveBeenCalled();
 		expect(dependencies.enableProdMode).toHaveBeenCalledOnce();
 		expect(dependencies.getAnalytics).toHaveBeenCalledWith('app');
-		const options = vi.mocked(dependencies.bootstrapApplication).mock
-			.calls[0]![1] as { providers: unknown[] };
+		const options = requireDefined(
+			vi.mocked(dependencies.bootstrapApplication).mock.calls[0],
+		)[1] as { providers: unknown[] };
 		expect(options.providers).toContainEqual(
 			expect.objectContaining({
 				provide: FIREBASE_ANALYTICS,
@@ -247,7 +250,6 @@ function createDependencies(): AdminBootstrapDependencies {
 		getFunctions: vi.fn().mockReturnValue('functions'),
 		initializeApp: vi.fn().mockReturnValue('app'),
 		initializeAppCheck: vi.fn(),
-		provideCharts: vi.fn().mockReturnValue('charts-provider'),
 		provideHttpClient: vi.fn().mockReturnValue('http-provider'),
 		provideIonicAngular: vi.fn().mockReturnValue('ionic-provider'),
 		provideRouter: vi.fn().mockReturnValue('router-provider'),
@@ -258,7 +260,6 @@ function createDependencies(): AdminBootstrapDependencies {
 				this.key = key;
 			}
 		},
-		withDefaultRegisterables: vi.fn().mockReturnValue('registerables'),
 		withInterceptorsFromDi: vi.fn().mockReturnValue('interceptors'),
 		withXhr: vi.fn().mockReturnValue('xhr'),
 	} as unknown as AdminBootstrapDependencies;

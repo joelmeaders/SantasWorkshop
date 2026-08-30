@@ -5,7 +5,7 @@ import {
 	provideActivatedRouteMock,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { FunctionsWrapper } from '@santashop/core';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { of, throwError } from 'rxjs';

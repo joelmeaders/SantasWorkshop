@@ -121,7 +121,9 @@ test.describe('admin reporting routes', () => {
 		await expect(page.locator('.count-container h1').nth(1)).toHaveText('4');
 		await expect(page.getByRole('heading', { name: 'Check-Ins' })).toBeVisible();
 		await page.getByRole('button', { name: 'View by Children' }).click();
-		await expect(page.getByRole('heading', { name: 'Children' })).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'Children', level: 2 }),
+		).toBeVisible();
 	});
 
 	test('REPORT-003 renders seeded referral and ZIP user distributions', async ({

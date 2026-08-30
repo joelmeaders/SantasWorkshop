@@ -19,7 +19,7 @@ import {
 	IonTabButton,
 	IonIcon,
 	IonLabel,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-admin',
@@ -51,8 +51,6 @@ export class AdminPage {
 	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
 
 	constructor() {
-		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
-		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
 		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
 	}
 }

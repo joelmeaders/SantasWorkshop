@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular/standalone';
 import type { Child } from '@santashop/models';
 import { ManageChildrenComponent } from './manage-children.component';
 import {
@@ -31,12 +31,12 @@ describe('ManageChildrenComponent', () => {
 	});
 
 	it('emits added and edited children from the modal result', async () => {
-		const modal = TestBed.inject(ModalController) as any;
+		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
 		const added = vi.fn(); const edited = vi.fn();
 		component.adddedChild.subscribe(added); component.editedChild.subscribe(edited);
 		modal.create
-			.mockResolvedValueOnce({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role: 'add', data: { id: 1 } }) })
-			.mockResolvedValueOnce({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role: 'edit', data: { id: 2 } }) });
+			.mockResolvedValueOnce({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role: 'add', data: { id: 1 } }) } as unknown as HTMLIonModalElement)
+			.mockResolvedValueOnce({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role: 'edit', data: { id: 2 } }) } as unknown as HTMLIonModalElement);
 		await component.addEditChild();
 		await component.addEditChild({ id: 2 } as Child);
 		expect(added).toHaveBeenCalledWith({ id: 1 });
@@ -45,9 +45,9 @@ describe('ManageChildrenComponent', () => {
 
 	it('confirms removal only for an existing child', async () => {
 		fixture.componentRef.setInput('children', [{ id: 5, firstName: 'Holly', lastName: 'Jolly' } as Child]);
-		const alert = TestBed.inject(AlertController) as any;
+		const alert = TestBed.inject(AlertController) as Mocked<AlertController>;
 		const removed = vi.fn(); component.removedChild.subscribe(removed);
-		alert.create.mockResolvedValue({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }) });
+		alert.create.mockResolvedValue({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }) } as unknown as HTMLIonAlertElement);
 		await component.removeChild(5);
 		await component.removeChild(99);
 		expect(removed).toHaveBeenCalledWith(5);

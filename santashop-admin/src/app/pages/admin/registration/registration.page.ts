@@ -20,7 +20,7 @@ import {
 	IonCheckbox,
 	IonButton,
 	IonIcon,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { BehaviorSubject } from 'rxjs';
 import { Child, Registration } from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
@@ -109,8 +109,6 @@ export class RegistrationPage {
 	});
 
 	constructor() {
-		addIcons({ searchOutline, checkmarkCircle });
-		addIcons({ searchOutline, checkmarkCircle });
 		addIcons({ searchOutline, checkmarkCircle });
 	}
 

@@ -34,7 +34,11 @@ import {
 } from '../../../../shared/helpers';
 
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import {
+	BaseChartDirective,
+	provideCharts,
+	withDefaultRegisterables,
+} from 'ng2-charts';
 import {
 	IonCol,
 	IonContent,
@@ -44,7 +48,7 @@ import {
 	IonSelect,
 	IonSelectOption,
 	IonTitle,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { QueryConstraint, Timestamp, where } from 'firebase/firestore';
 
@@ -55,6 +59,7 @@ Chart.register(ChartDataLabels);
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
 		IonTitle,
 		IonGrid,

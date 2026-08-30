@@ -22,7 +22,7 @@ describe('Firebase Functions runtime configuration', () => {
 			'../../../../firebase.e2e.json',
 		);
 
-		expect(standardConfig.functions?.runtime).toBe('nodejs22');
+		expect(standardConfig.functions?.runtime).toBe('nodejs24');
 		expect(e2eConfig.functions).toEqual({
 			source: 'santashop-functions',
 			runtime: standardConfig.functions?.runtime,

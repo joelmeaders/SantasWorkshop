@@ -25,7 +25,7 @@ import {
 	IonCardContent,
 	IonCardTitle,
 	IonNote,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import {
 	BehaviorSubject,
 	Observable,

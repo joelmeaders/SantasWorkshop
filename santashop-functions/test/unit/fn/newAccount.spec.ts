@@ -163,6 +163,19 @@ describe('newAccount handler', () => {
 		expect(adminMock.createUser).not.toHaveBeenCalled();
 	});
 
+	it('rejects oversized identity fields before creating the auth user', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+
+		await expect(
+			newAccount(
+				createCallableRequest(
+					createOnboardUser({ firstName: 'A'.repeat(101) }),
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+	});
+
 	it('normalizes and validates Other referral answers before auth creation', async () => {
 		const onboardUser = createOnboardUser({
 			referredBy: ' Other:  Neighbor  ',

@@ -17,6 +17,7 @@ import {
 	clearEmulatorData,
 	getDocument,
 	getFirestore,
+	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
 
@@ -28,6 +29,8 @@ describe.sequential('sendNewRegistrationEmails2 integration', () => {
 	});
 
 	it('sends and marks queued registration emails as sent', async () => {
+		const qrCodeStoragePath = 'registrations/queued-user-1/code.png';
+		await seedQrCode(qrCodeStoragePath);
 		await setDocument(COLLECTION_SCHEMA.registrations, 'queued-user-1', {
 			uid: 'queued-user-1',
 			emailAddress: 'buddy.elf@example.com',
@@ -37,6 +40,7 @@ describe.sequential('sendNewRegistrationEmails2 integration', () => {
 			'queued-user-1',
 			{
 				code: 'ABCD2345',
+				qrCodeStoragePath,
 				name: 'Buddy',
 				email: 'buddy.elf@example.com',
 				formattedDateTime: 'Wednesday, December 10, 6:00 PM',

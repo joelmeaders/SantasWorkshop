@@ -146,6 +146,8 @@ const FUNCTIONS_ENV_KEYS = {
 	TEST_SCHEDULED_CHECKIN_STATS: '0 3 * * *',
 	TEST_SANTASHOP_SHOP_DAYS: '12-12,12-13',
 	TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '30',
+	TEST_SANTASHOP_SIGNUP_MIN_INSTANCES: '0',
+	TEST_SANTASHOP_EVENT_MIN_INSTANCES: '0',
 	PROD_AWS_ACCESS_KEY_ID: 'prod-access-key',
 	PROD_AWS_SECRET_ACCESS_KEY: 'prod-secret-key',
 	PROD_SANTASHOP_PROGRAM_YEAR: '2030',
@@ -164,6 +166,8 @@ const FUNCTIONS_ENV_KEYS = {
 	PROD_SCHEDULED_REGISTRATION_STATS: '3 1 * * *',
 	PROD_SCHEDULED_USER_STATS: '4 2 * * *',
 	PROD_SCHEDULED_CHECKIN_STATS: '5 3 * * *',
+	PROD_SANTASHOP_SIGNUP_MIN_INSTANCES: '1',
+	PROD_SANTASHOP_EVENT_MIN_INSTANCES: '0',
 } satisfies Record<string, string>;
 
 const MANAGED_ENV_KEYS = [
@@ -198,6 +202,9 @@ const MANAGED_ENV_KEYS = [
 	'SANTASHOP_SHOP_DAYS',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
 	'AWS_REGION',
+	'SANTASHOP_SIGNUP_MIN_INSTANCES',
+	'SANTASHOP_EVENT_MIN_INSTANCES',
+	'SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT',
 ];
 
 const originalEnv = new Map<string, string | undefined>();
@@ -428,6 +435,7 @@ describe('config.functions.cjs', () => {
 		);
 		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Test Event');
 		expect(config['REMINDER_EMAIL_SENDING_STALE_MINUTES']).toBeUndefined();
+		expect(config['SANTASHOP_SIGNUP_MIN_INSTANCES']).toBe('0');
 	});
 
 	it('builds production Functions credentials from PROD values', () => {
@@ -447,6 +455,22 @@ describe('config.functions.cjs', () => {
 
 		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
 			'Missing required environment variable: TEST_AWS_SECRET_ACCESS_KEY (or AWS_SECRET_ACCESS_KEY)',
+		);
+	});
+
+	it('rejects seasonal labels and warm capacity outside the guarded range', () => {
+		setManagedEnv({
+			...FUNCTIONS_ENV_KEYS,
+			TEST_SANTASHOP_EVENT_DISPLAY_NAME: '2024 Test Event',
+		});
+		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
+			'year must match',
+		);
+
+		process.env['TEST_SANTASHOP_EVENT_DISPLAY_NAME'] = '2025 Test Event';
+		process.env['TEST_SANTASHOP_SIGNUP_MIN_INSTANCES'] = '11';
+		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
+			'whole number between 0 and 10',
 		);
 	});
 
@@ -477,6 +501,15 @@ describe('config.functions.cjs', () => {
 		expect(config['AWS_ACCESS_KEY_ID']).toBe('fallback-access-key');
 		expect(config['SES_REGION']).toBe('us-central-1');
 		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Fallback Event');
+	});
+
+	it('uses test values as the safe local and E2E fallback', () => {
+		setManagedEnv({ ...FUNCTIONS_ENV_KEYS });
+
+		const config = configFunctions.buildFunctionsConfig('local');
+
+		expect(config['AWS_ACCESS_KEY_ID']).toBe('test-access-key');
+		expect(config['SANTASHOP_PROGRAM_YEAR']).toBe('2025');
 	});
 
 	it('renders a quoted env file for the selected project', () => {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PopoverController } from '@ionic/angular';
+import { PopoverController } from '@ionic/angular/standalone';
 import {
 	createPopoverControllerMock,
 	provideCustomerAuthMock,

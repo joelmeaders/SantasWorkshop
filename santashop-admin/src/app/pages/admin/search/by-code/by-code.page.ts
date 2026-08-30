@@ -23,7 +23,7 @@ import {
 	IonInput,
 	IonButton,
 	IonIcon,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-by-code',
@@ -62,8 +62,6 @@ export class ByCodePage {
 	});
 
 	constructor() {
-		addIcons({ backspaceOutline, searchOutline });
-		addIcons({ backspaceOutline, searchOutline });
 		addIcons({ backspaceOutline, searchOutline });
 	}
 

@@ -82,7 +82,7 @@ export const requireEmailAddress = (
 	label = 'Email address',
 ): string => {
 	const emailAddress = requireTrimmedString(value, label).toLowerCase();
-	if (!EMAIL_PATTERN.test(emailAddress)) {
+	if (emailAddress.length > 254 || !EMAIL_PATTERN.test(emailAddress)) {
 		throw new CallableValidationError(
 			`${label} must be a valid email address.`,
 		);
@@ -104,9 +104,9 @@ export const requireZipCodeValue = (
 	label = 'ZIP code',
 ): number | string => {
 	if (typeof value === 'number') {
-		if (!Number.isFinite(value)) {
+		if (!Number.isInteger(value) || value < 0 || value > 99999) {
 			throw new CallableValidationError(
-				`${label} must be a valid number.`,
+				`${label} must be a valid five-digit US ZIP code.`,
 			);
 		}
 
@@ -115,8 +115,10 @@ export const requireZipCodeValue = (
 
 	if (typeof value === 'string') {
 		const normalized = value.trim();
-		if (!normalized) {
-			throw new CallableValidationError(`${label} is required.`);
+		if (!/^\d{5}(?:-\d{4})?$/.test(normalized)) {
+			throw new CallableValidationError(
+				`${label} must be a valid US ZIP code.`,
+			);
 		}
 
 		return normalized;

@@ -4,7 +4,7 @@ import type { Child, DateTimeSlot } from '@santashop/models';
 import { NiceFormErrorPipe, TimeSlotPipe } from '@santashop/core';
 import { DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonItem, IonLabel, IonList } from '@ionic/angular';
+import { IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonItem, IonLabel, IonList } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline, manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { changeEmailForm } from '../../profile/profile.form';

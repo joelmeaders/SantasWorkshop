@@ -6,6 +6,7 @@ import {
 	createTimestamp,
 	getDocument,
 	seedAuthUser,
+	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
@@ -16,6 +17,8 @@ describe.sequential('callableResendRegistrationEmail integration', () => {
 	});
 
 	it('queues a resend registration email for owners', async () => {
+		const qrCodeStoragePath = 'registrations/resend-user-1/code.png';
+		await seedQrCode(qrCodeStoragePath);
 		await seedAuthUser({
 			uid: 'resend-user-1',
 			email: 'resend.user@example.com',
@@ -23,6 +26,7 @@ describe.sequential('callableResendRegistrationEmail integration', () => {
 		await setDocument(COLLECTION_SCHEMA.registrations, 'resend-user-1', {
 			uid: 'resend-user-1',
 			qrcode: 'ABCD2345',
+			qrCodeStoragePath,
 			reminderEmailSentOn: createTimestamp('2025-12-05T00:00:00.000Z'),
 			qrCodeGeneratedOn: createTimestamp('2025-12-01T00:00:00.000Z'),
 			firstName: 'Buddy',

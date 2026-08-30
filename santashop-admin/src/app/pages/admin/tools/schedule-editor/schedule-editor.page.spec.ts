@@ -7,12 +7,12 @@ import {
 	vi,
 } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { DateTimeSlot } from '@santashop/models';
 import { AuthService } from '@santashop/core';
-import { provideProgramYearMock } from '../../../../../test-helpers';
+import { provideProgramYearMock, requireDefined } from '../../../../../test-helpers';
 import { ScheduleEditorPage } from './schedule-editor.page';
 import { ScheduleEditorService } from './schedule-editor.service';
 
@@ -196,7 +196,7 @@ describe('ScheduleEditorPage', () => {
 		// Assert
 		const lastCall = vi.mocked(scheduleEditorService.bulkUpdate).mock.lastCall;
 		expect(lastCall).toBeDefined();
-		const [updatedSlots, changes] = lastCall!;
+		const [updatedSlots, changes] = requireDefined(lastCall);
 		expect(updatedSlots).toHaveLength(2);
 		expect(changes).toEqual({ maxSlots: 12 });
 	});
@@ -239,8 +239,9 @@ describe('ScheduleEditorPage', () => {
 		await component.saveSlotDateTime(slot);
 
 		// Assert
-		const updatedSlot = vi.mocked(scheduleEditorService.updateSlot).mock
-			.lastCall![0] as DateTimeSlot;
+		const updatedSlot = requireDefined(
+			vi.mocked(scheduleEditorService.updateSlot).mock.lastCall,
+		)[0] as DateTimeSlot;
 		expect(updatedSlot.dateTime.getFullYear()).toBe(2025);
 		expect(updatedSlot.dateTime.getMonth()).toBe(11);
 		expect(updatedSlot.dateTime.getDate()).toBe(13);
@@ -383,12 +384,14 @@ describe('ScheduleEditorPage', () => {
 		component.selectedSlotIds = new Set(['slot-1']);
 
 		await component.confirmDelete(createRow({ id: 'slot-1', slotsReserved: 1 }));
-		const options = alerts.create.mock.calls[0]![0] as {
+		const options = requireDefined(alerts.create.mock.calls[0])[0] as {
 			message: string;
 			buttons: { role?: string; handler?: () => Promise<void> }[];
 		};
 		expect(options.message).toContain('1 reservation');
-		await options.buttons.find((button) => button.role === 'destructive')!.handler!();
+		await requireDefined(
+			requireDefined(options.buttons.find((button) => button.role === 'destructive')).handler,
+		)();
 
 		expect(scheduleEditorService.deleteSlot).toHaveBeenCalledWith('slot-1');
 		expect(component.isSelected('slot-1')).toBe(false);

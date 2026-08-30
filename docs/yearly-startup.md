@@ -65,7 +65,7 @@ gcloud auth login
 pnpm --filter @santashop/functions owner:archive-backup -- `
   --project santas-workshop-193b5 `
   --confirm-project santas-workshop-193b5 `
-  --backup gs://santashop-backups/yearly-reset/2025/operation-id `
+  --backup gs://santashop-backups/yearly-reset/<program-year>/operation-id `
   --destination Z:\DSCS
 ```
 

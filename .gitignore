@@ -28,6 +28,8 @@ $RECYCLE.BIN/
 **/.sourcemaps
 **/.versions
 **/.vscode
+.vitest-attachments/**
+**/__screenshots__/**
 **/coverage
 **/dist
 **/node_modules

@@ -28,7 +28,7 @@ import {
 	IonText,
 	IonSelect,
 	IonSelectOption,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import {
 	BehaviorSubject,
 	firstValueFrom,
@@ -171,8 +171,6 @@ export class PreRegistrationPage implements OnDestroy {
 	);
 
 	constructor() {
-		addIcons({ searchOutline, checkmarkCircle });
-		addIcons({ searchOutline, checkmarkCircle });
 		addIcons({ searchOutline, checkmarkCircle });
 	}
 

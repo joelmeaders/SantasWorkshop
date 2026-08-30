@@ -9,7 +9,7 @@ import {
 	IonLabel,
 	IonList,
 	IonSpinner,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
 import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';

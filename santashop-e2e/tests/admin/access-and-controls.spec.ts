@@ -275,6 +275,81 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			expect(remove.status()).toBe(403);
 		}
 	});
+
+	test('RULES-003 keeps authoritative records and QR objects server-only', async ({
+		request,
+		seedAdminUser,
+		seedDateTimeSlots,
+		seedRegistration,
+		inspectRegistrationQrLifecycle,
+	}) => {
+		const admin = defaultAdminAccount({
+			uid: 'authoritative-rules-admin-e2e',
+			emailAddress: 'authoritative-rules-admin-e2e@test.com',
+		});
+		await seedAdminUser(admin);
+		await seedDateTimeSlots([
+			{
+				id: 'rules-slot',
+				programYear: 2026,
+				dateTime: '2026-12-15T16:00:00.000Z',
+				maxSlots: 350,
+				slotsReserved: 10,
+				enabled: true,
+			},
+		]);
+		await seedRegistration({
+			uid: 'rules-qr-customer',
+			firstName: 'Private',
+			lastName: 'Code',
+			emailAddress: 'private-code-e2e@test.com',
+			zipCode: '80202',
+			code: 'PRIVATE1',
+			dateTime: '2026-12-15T16:00:00.000Z',
+			qrReady: true,
+		});
+
+		const adminToken = await getFirestoreIdToken(request, admin);
+		const headers = { Authorization: `Bearer ${adminToken}` };
+		for (const collection of [
+			'users',
+			'registrationsearchindex',
+			'emailTemplates',
+		]) {
+			const create = await request.post(firestoreCollectionUrl(collection), {
+				headers,
+				data: { fields: { proof: { stringValue: 'client-write' } } },
+			});
+			expect(create.status()).toBe(403);
+		}
+
+		const counterTamper = await request.patch(
+			firestoreDocumentUrl('dateTimeSlots', 'rules-slot'),
+			{
+				headers,
+				data: {
+					fields: {
+						programYear: { integerValue: '2026' },
+						dateTime: { timestampValue: '2026-12-15T16:00:00.000Z' },
+						maxSlots: { integerValue: '350' },
+						slotsReserved: { integerValue: '0' },
+						enabled: { booleanValue: true },
+						lastUpdated: { timestampValue: new Date().toISOString() },
+					},
+				},
+			},
+		);
+		expect(counterTamper.status()).toBe(403);
+
+		const qrLifecycle = await inspectRegistrationQrLifecycle(
+			'private-code-e2e@test.com',
+		);
+		expect(qrLifecycle.current.path).toBeTruthy();
+		const anonymousQrRead = await request.get(
+			`http://127.0.0.1:9199/v0/b/demo-santashop.appspot.com/o/${encodeURIComponent(qrLifecycle.current.path as string)}?alt=media`,
+		);
+		expect([401, 403]).toContain(anonymousQrRead.status());
+	});
 });
 
 const expectIonicDisabled = async (locator: Locator): Promise<void> => {

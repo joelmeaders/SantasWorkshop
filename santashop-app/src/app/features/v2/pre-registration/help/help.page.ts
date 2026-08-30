@@ -17,7 +17,7 @@ import {
 	IonText,
 	IonLabel,
 	ModalController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'app-help',

@@ -11,7 +11,7 @@ import {
 } from '../../test-helpers';
 
 import { HomePage } from './home.page';
-import { LoadingController, ModalController } from '@ionic/angular';
+import { LoadingController, ModalController } from '@ionic/angular/standalone';
 import { AppStateService, ErrorHandlerService } from '@santashop/core/customer';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { AuthService } from '@santashop/core/customer';

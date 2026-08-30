@@ -28,7 +28,7 @@ import {
 	IonHeader,
 	IonTitle,
 	IonToolbar,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 interface ChildFormValue {
 	id: FormControl<number>;

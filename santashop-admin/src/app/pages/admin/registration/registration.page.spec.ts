@@ -5,7 +5,7 @@ import {
 	provideActivatedRouteMock,
 } from '../../../../test-helpers';
 import { provideRouter, Router } from '@angular/router';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { CheckInContextService } from '../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../shared/services/check-in.service';
 import { firstValueFrom } from 'rxjs';

@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AnalyticsWrapper } from '@santashop/core';
 import type { ResolveRegistrationScanResult } from '@santashop/models';
-import { IonButton, IonContent, IonItem, IonLabel, IonList } from '@ionic/angular';
+import { IonButton, IonContent, IonItem, IonLabel, IonList } from '@ionic/angular/standalone';
 import { filter, map, tap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';

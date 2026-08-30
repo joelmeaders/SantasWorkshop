@@ -1,6 +1,6 @@
 import { Provider } from '@angular/core';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { ModalController, PopoverController } from '@ionic/angular';
+import { ModalController, PopoverController } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { type Mocked, vi } from 'vitest';

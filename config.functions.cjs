@@ -33,6 +33,9 @@ const OPTIONAL_FUNCTION_ENV_KEYS = [
 	'SANTASHOP_SHOP_DAYS',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
 	'AWS_REGION',
+	'SANTASHOP_SIGNUP_MIN_INSTANCES',
+	'SANTASHOP_EVENT_MIN_INSTANCES',
+	'SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT',
 ];
 
 const ALL_FUNCTION_ENV_KEYS = [
@@ -80,7 +83,11 @@ const getModePrefix = (mode) => {
 
 const getEnvValue = (mode, envKey) => {
 	const prefixedEnvKey = `${getModePrefix(mode)}_${envKey}`;
-	return process.env[prefixedEnvKey] ?? process.env[envKey];
+	return (
+		process.env[prefixedEnvKey] ??
+		(mode === 'local' ? process.env[`TEST_${envKey}`] : undefined) ??
+		process.env[envKey]
+	);
 };
 
 const requireEnvValue = (mode, envKey) => {
@@ -107,6 +114,38 @@ const buildFunctionsConfig = (mode) => {
 		const value = getEnvValue(mode, key);
 		if (value !== undefined && value !== '') {
 			config[key] = value;
+		}
+	}
+
+	const programYear = Number.parseInt(config.SANTASHOP_PROGRAM_YEAR, 10);
+	if (
+		!Number.isInteger(programYear) ||
+		programYear < 2000 ||
+		programYear > 2100
+	) {
+		throw new Error(
+			'SANTASHOP_PROGRAM_YEAR must be a four-digit year between 2000 and 2100.',
+		);
+	}
+
+	const eventYearMatch = /\b(?:20\d{2}|2100)\b/u.exec(
+		config.SANTASHOP_EVENT_DISPLAY_NAME,
+	);
+	if (eventYearMatch && Number.parseInt(eventYearMatch[0], 10) !== programYear) {
+		throw new Error(
+			'SANTASHOP_EVENT_DISPLAY_NAME year must match SANTASHOP_PROGRAM_YEAR.',
+		);
+	}
+
+	for (const key of [
+		'SANTASHOP_SIGNUP_MIN_INSTANCES',
+		'SANTASHOP_EVENT_MIN_INSTANCES',
+	]) {
+		const value = config[key];
+		if (value === undefined) continue;
+		const parsed = Number.parseInt(value, 10);
+		if (!Number.isInteger(parsed) || parsed < 0 || parsed > 10) {
+			throw new Error(`${key} must be a whole number between 0 and 10.`);
 		}
 	}
 

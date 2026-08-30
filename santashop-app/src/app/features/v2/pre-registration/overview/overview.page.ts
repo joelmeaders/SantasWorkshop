@@ -43,7 +43,7 @@ import {
 	IonIcon,
 	IonRow,
 	ToastController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { arrowDownCircleOutline } from 'ionicons/icons';

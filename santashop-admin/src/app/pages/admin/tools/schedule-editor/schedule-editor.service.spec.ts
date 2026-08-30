@@ -178,6 +178,34 @@ describe('ScheduleEditorService', () => {
 		);
 	});
 
+	it('bulkUpdate() should persist only authoritative slot fields', async () => {
+		const slot = {
+			id: 'first',
+			programYear: 2025,
+			dateTime: new Date(2025, 11, 12, 10),
+			maxSlots: 20,
+			slotsReserved: 4,
+			enabled: true,
+			remaining: 16,
+			capacityState: 'available',
+		} as DateTimeSlot & {
+			remaining: number;
+			capacityState: string;
+		};
+
+		await service.bulkUpdate([slot], { maxSlots: 25 });
+
+		const persisted = collection.update.mock.calls[0][1];
+		expect(Object.keys(persisted).sort()).toEqual([
+			'dateTime',
+			'enabled',
+			'lastUpdated',
+			'maxSlots',
+			'programYear',
+			'slotsReserved',
+		]);
+	});
+
 	it('bulkUpdate() should reject invalid capacities', async () => {
 		// Arrange
 		const slot: DateTimeSlot = {

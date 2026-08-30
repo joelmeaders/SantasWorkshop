@@ -83,7 +83,7 @@
 							(keydown.enter)="saveRevision()"
 							[disabled]="!form.valid"
 						>
-							<ion-icon name="save-outline" slot="start"></ion-icon>
+							<ion-icon name="save-outline" slot="start" aria-hidden="true"></ion-icon>
 							Save Revision
 						</ion-button>
 						<ion-button
@@ -93,7 +93,7 @@
 							(keydown.enter)="publishTemplate()"
 							[disabled]="!selectedRevisionId"
 						>
-							<ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+							<ion-icon name="cloud-upload-outline" slot="start" aria-hidden="true"></ion-icon>
 							Publish to AWS
 						</ion-button>
 						<ion-button
@@ -101,7 +101,7 @@
 							(click)="refreshPreview()"
 							(keydown.enter)="refreshPreview()"
 						>
-							<ion-icon name="refresh-outline" slot="start"></ion-icon>
+							<ion-icon name="refresh-outline" slot="start" aria-hidden="true"></ion-icon>
 							Refresh Preview
 						</ion-button>
 						@if ((isCreateMode$ | async) === false) {
@@ -111,7 +111,7 @@
 								(click)="deleteTemplate()"
 								(keydown.enter)="deleteTemplate()"
 							>
-								<ion-icon name="trash-outline" slot="start"></ion-icon>
+								<ion-icon name="trash-outline" slot="start" aria-hidden="true"></ion-icon>
 								Delete Template
 							</ion-button>
 						}
@@ -148,7 +148,7 @@
 							(keydown.enter)="sendTestEmail()"
 							[disabled]="!testEmailForm.valid"
 						>
-							<ion-icon name="mail-outline" slot="start"></ion-icon>
+							<ion-icon name="mail-outline" slot="start" aria-hidden="true"></ion-icon>
 							Send Test Email
 						</ion-button>
 					</section>
@@ -172,7 +172,7 @@
 			<ion-card>
 				<ion-card-header>
 					<ion-card-title>
-						<ion-icon name="document-text-outline"></ion-icon>
+						<ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>
 						Fields & sample data
 					</ion-card-title>
 				</ion-card-header>

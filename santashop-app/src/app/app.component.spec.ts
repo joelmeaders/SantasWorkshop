@@ -18,7 +18,7 @@ import {
 	AlertController,
 	Platform,
 	ModalController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';

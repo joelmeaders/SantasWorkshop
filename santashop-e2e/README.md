@@ -92,7 +92,7 @@ The tests are configured to:
 
 - Run against `http://localhost:4100` (santashop-app test server)
 - Use the `demo-santashop` Firebase emulators for backend services
-- Run Functions on the explicit `nodejs22` emulator/deployment runtime while
+- Run Functions on the explicit `nodejs24` emulator/deployment runtime while
   retaining Node 24 for workspace tooling
 - Confirm an emulator-only callable loaded before Playwright begins
 - Use `firebase emulators:exec` to own emulator startup and shutdown for each suite

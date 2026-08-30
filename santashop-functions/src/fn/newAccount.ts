@@ -7,7 +7,6 @@ import {
 	generateQrCode,
 } from '../utility/qrcodes';
 import admin from '../firebase-admin';
-import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import {
 	CallableValidationError,
@@ -41,6 +40,11 @@ export default async function newAccount(
 				'Password confirmation must match the password.',
 			);
 		}
+		if (password.length < 6 || password.length > 128) {
+			throw new CallableValidationError(
+				'Password must be between 6 and 128 characters.',
+			);
+		}
 
 		const acceptedLegalTerms = requireBoolean(
 			requestData['legal'],
@@ -53,11 +57,11 @@ export default async function newAccount(
 		}
 
 		return {
-			firstName: requireTrimmedString(
+			firstName: requireName(
 				requestData['firstName'],
 				'First name',
 			),
-			lastName: requireTrimmedString(
+			lastName: requireName(
 				requestData['lastName'],
 				'Last name',
 			),
@@ -80,7 +84,7 @@ export default async function newAccount(
 	} catch (error) {
 		log.error(
 			'Failed to create auth user during account onboarding',
-			{ emailAddress: data.emailAddress },
+			{},
 			error,
 		);
 		handleAuthError(error);
@@ -140,7 +144,6 @@ export default async function newAccount(
 		throw new HttpsError(
 			'internal',
 			'Unable to create account records',
-			JSON.stringify(error),
 		);
 	}
 
@@ -169,7 +172,6 @@ export default async function newAccount(
 		throw new HttpsError(
 			'internal',
 			'Unable to finalize account setup',
-			serializeError(error),
 		);
 	}
 
@@ -178,6 +180,17 @@ export default async function newAccount(
 
 const handleAuthError = (error: unknown): never => {
 	throwMappedAuthHttpsError(error, 'Unable to create the account.');
+};
+
+const requireName = (value: unknown, label: string): string => {
+	const normalized = requireTrimmedString(value, label);
+	if (normalized.length > 100) {
+		throw new CallableValidationError(
+			`${label} must be 100 characters or fewer.`,
+		);
+	}
+
+	return normalized;
 };
 
 const requireReferredBy = (value: unknown): string => {

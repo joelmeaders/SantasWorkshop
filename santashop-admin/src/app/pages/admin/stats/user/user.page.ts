@@ -17,7 +17,11 @@ import {
 } from '../../../../shared/helpers';
 
 import { AsyncPipe } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import {
+	BaseChartDirective,
+	provideCharts,
+	withDefaultRegisterables,
+} from 'ng2-charts';
 import {
 	IonContent,
 	IonGrid,
@@ -28,7 +32,7 @@ import {
 	IonItem,
 	IonSelect,
 	IonSelectOption,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 
 Chart.register(ChartDataLabels);
@@ -38,6 +42,7 @@ Chart.register(ChartDataLabels);
 	templateUrl: './user.page.html',
 	styleUrls: ['./user.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
 		HeaderComponent,
 		BaseChartDirective,

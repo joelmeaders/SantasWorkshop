@@ -6,6 +6,7 @@ import {
 	createTimestamp,
 	getCollectionCount,
 	getDocument,
+	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
@@ -16,12 +17,15 @@ describe.sequential('undoRegistration integration', () => {
 	});
 
 	it('cancels a completed registration with an immutable operational record', async () => {
+		const qrCodeStoragePath = 'registrations/user-undo-1/code.png';
+		await seedQrCode(qrCodeStoragePath);
 		await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
 			admin: { allowCancelRegistration: true },
 		});
 		await setDocument(COLLECTION_SCHEMA.registrations, 'user-undo-1', {
 			uid: 'user-undo-1',
 			qrcode: 'ABCD2345',
+			qrCodeStoragePath,
 			firstName: 'Customer',
 			emailAddress: 'customer@example.com',
 			dateTimeSlot: {

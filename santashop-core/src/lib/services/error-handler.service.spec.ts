@@ -8,7 +8,7 @@ import {
 } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandlerService } from './error-handler.service';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { IError } from '@santashop/models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 

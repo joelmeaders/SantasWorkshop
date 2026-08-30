@@ -84,6 +84,9 @@ describe('scheduledDateTimeSlotCounters2 handler', () => {
 		await scheduledDateTimeSlotCounters();
 
 		expect(dateTimeSlotsCollection.get).toHaveBeenCalledTimes(2);
+		expect(dateTimeSlotsCollection.startAfter).toHaveBeenCalledWith(
+			firstPage.at(-1),
+		);
 		expect(
 			backgroundMock.getDocRef('dateTimeSlots/slot-55').update,
 		).toHaveBeenCalledTimes(1);

@@ -1,12 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, type Page } from '@playwright/test';
 
-const BLOCKING_IMPACTS = new Set(['critical', 'serious']);
-
 /**
- * Runs automated WCAG checks against the currently rendered page. Moderate and
- * minor findings remain available in the Playwright trace, while violations
- * that can prevent customers or staff from completing a task fail the suite.
+ * Runs automated WCAG 2.2 AA checks against the currently rendered page. Every
+ * reported violation fails the suite so lower-impact regressions cannot ship.
  */
 export const expectNoBlockingAccessibilityViolations = async (
 	page: Page,
@@ -31,11 +28,7 @@ export const expectNoBlockingAccessibilityViolations = async (
 			'wcag22aa',
 		])
 		.analyze();
-	const blockingViolations = results.violations.filter(
-		(violation) =>
-			typeof violation.impact === 'string' &&
-			BLOCKING_IMPACTS.has(violation.impact),
-	);
+	const blockingViolations = results.violations;
 	const summary = blockingViolations
 		.map(
 			(violation) =>

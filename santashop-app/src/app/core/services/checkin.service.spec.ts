@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { AuthService, FireRepoLite } from '@santashop/core';
 import type { CheckIn } from '@santashop/models';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';

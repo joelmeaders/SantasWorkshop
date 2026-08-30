@@ -34,6 +34,7 @@
 							<ion-button
 								fill="clear"
 								title="Edit user"
+								aria-label="Edit user"
 								[disabled]="!canManage(account, owner)"
 								(click)="editUser(account)"
 								(keydown.enter)="editUser(account)"
@@ -41,11 +42,13 @@
 								<ion-icon
 									slot="icon-only"
 									name="create-outline"
+									aria-hidden="true"
 								></ion-icon>
 							</ion-button>
 							<ion-button
 								fill="clear"
 								title="Reset password"
+								aria-label="Reset password"
 								[disabled]="!canManage(account, owner)"
 								(click)="resetPassword(account)"
 								(keydown.enter)="resetPassword(account)"
@@ -53,12 +56,14 @@
 								<ion-icon
 									slot="icon-only"
 									name="key-outline"
+									aria-hidden="true"
 								></ion-icon>
 							</ion-button>
 							<ion-button
 								fill="clear"
 								color="danger"
 								title="Delete user"
+								aria-label="Delete user"
 								[disabled]="!canManage(account, owner)"
 								(click)="deleteUser(account)"
 								(keydown.enter)="deleteUser(account)"
@@ -66,6 +71,7 @@
 								<ion-icon
 									slot="icon-only"
 									name="trash-outline"
+									aria-hidden="true"
 								></ion-icon>
 							</ion-button>
 						</ion-buttons>
@@ -78,10 +84,11 @@
 	<ion-fab slot="fixed" vertical="bottom" horizontal="end">
 		<ion-fab-button
 			title="Add user"
+			aria-label="Add user"
 			(click)="addUser()"
 			(keydown.enter)="addUser()"
 		>
-			<ion-icon name="add"></ion-icon>
+			<ion-icon name="add" aria-hidden="true"></ion-icon>
 		</ion-fab-button>
 	</ion-fab>
 </ion-content>

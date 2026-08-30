@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { SearchService } from './search.service';
 import { FireRepoLite } from '@santashop/core';
 import { firstValueFrom, of } from 'rxjs';
+import { requireDefined } from '../../../../test-helpers';
 
 describe('SearchService', () => {
 	let service: SearchService;
@@ -34,7 +35,7 @@ describe('SearchService', () => {
 		service.searchByLastNameZip('SMITH', 80001);
 		const results = await firstValueFrom(service.searchResults$);
 		expect(results).toBeTruthy();
-		await expect(firstValueFrom(results!)).resolves.toEqual([
+		await expect(firstValueFrom(requireDefined(results))).resolves.toEqual([
 			{ emailAddress: 'family@example.test' },
 		]);
 		expect(indexReadMany).toHaveBeenCalledOnce();

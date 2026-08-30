@@ -29,7 +29,7 @@ import {
 	IonText,
 	IonCheckbox,
 	IonSpinner,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
 	AnalyticsWrapper,

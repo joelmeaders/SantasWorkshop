@@ -9,7 +9,7 @@ import {
 	FunctionsWrapper,
 	filterNil,
 } from '@santashop/core';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import {
 	COLLECTION_SCHEMA,
 	User,

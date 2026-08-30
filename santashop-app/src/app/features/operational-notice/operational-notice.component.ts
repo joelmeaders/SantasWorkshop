@@ -7,7 +7,7 @@ import {
 import { AsyncPipe } from '@angular/common';
 import { AppStateService } from '@santashop/core/customer';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { IonButton, IonContent, IonIcon } from '@ionic/angular';
+import { IonContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
 import { map } from 'rxjs/operators';
@@ -22,7 +22,7 @@ export type OperationalNoticeMode =
 	templateUrl: './operational-notice.component.html',
 	styleUrls: ['./operational-notice.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [AsyncPipe, TranslateModule, IonButton, IonContent, IonIcon],
+	imports: [AsyncPipe, TranslateModule, IonContent, IonIcon],
 })
 export class OperationalNoticeComponent {
 	private readonly appState = inject(AppStateService);

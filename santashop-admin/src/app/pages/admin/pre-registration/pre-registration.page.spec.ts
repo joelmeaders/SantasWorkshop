@@ -6,7 +6,7 @@ import {
 	provideProgramYearMock,
 } from '../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { AlertController, LoadingController, ModalController } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController } from '@ionic/angular/standalone';
 import { FireRepoLite, FunctionsWrapper } from '@santashop/core';
 import { firstValueFrom, of } from 'rxjs';
 import { SearchService } from '../search/search.service';

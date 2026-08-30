@@ -7,7 +7,7 @@ import {
 	IonToolbar,
 	IonItem,
 	IonButton,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { PublicMenuComponent } from '../public-menu/public-menu.component';
 import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';

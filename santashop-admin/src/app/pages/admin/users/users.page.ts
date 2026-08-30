@@ -15,7 +15,7 @@ import {
 	IonNote,
 	IonFab,
 	IonFabButton,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
 	add,

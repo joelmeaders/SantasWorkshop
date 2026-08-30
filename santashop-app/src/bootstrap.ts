@@ -3,7 +3,7 @@ import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/com
 import { provideRouter, RouteReuseStrategy, Routes } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
-import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular';
+import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import {
 	FIREBASE_ANALYTICS,
 	FIREBASE_APP,

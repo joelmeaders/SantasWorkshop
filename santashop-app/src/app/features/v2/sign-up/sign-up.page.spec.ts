@@ -7,7 +7,7 @@ import {
 	vi,
 } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController, AlertController } from '@ionic/angular';
+import { ModalController, AlertController } from '@ionic/angular/standalone';
 import {
 	provideTranslateServiceMock,
 	createModalControllerMock,

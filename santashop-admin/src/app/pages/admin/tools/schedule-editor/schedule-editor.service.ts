@@ -233,11 +233,12 @@ export class ScheduleEditorService {
 	}
 
 	private toPersistedSlot(slot: DateTimeSlot): DateTimeSlot {
-		const persistedSlot = { ...slot };
-		delete persistedSlot.id;
-
 		return {
-			...persistedSlot,
+			programYear: slot.programYear,
+			dateTime: slot.dateTime,
+			maxSlots: slot.maxSlots,
+			slotsReserved: slot.slotsReserved ?? 0,
+			enabled: slot.enabled ?? true,
 			lastUpdated: new Date(),
 		};
 	}

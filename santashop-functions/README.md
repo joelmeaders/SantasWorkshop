@@ -5,7 +5,7 @@ This package now uses the native Firebase Functions v2 APIs from `firebase-funct
 ## Runtime requirement
 
 - Firebase deploys for this package explicitly target the Node.js 22 runtime via `../firebase.json`.
-- The dedicated E2E emulator config must declare the same `nodejs22` runtime;
+- The dedicated E2E emulator config must declare the same `nodejs24` runtime;
   Firebase CLI does not accept a package engine range as a runtime selector.
 - The package `engines.node` range still allows newer local Node versions so the workspace can keep using Node.js 24 for package-manager and general development workflows.
 

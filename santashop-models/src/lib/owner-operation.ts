@@ -30,9 +30,7 @@ export interface PreviewOwnerOperationRequest {
 	slots?: OwnerScheduleSlotInput[];
 }
 
-export interface OwnerOperationCounts {
-	[key: string]: number;
-}
+export type OwnerOperationCounts = Record<string, number>;
 
 export interface PreviewOwnerOperationResponse {
 	previewId: string;

@@ -8,7 +8,7 @@ import {
 	vi,
 } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import {
 	AnalyticsWrapper,
 	AuthService,

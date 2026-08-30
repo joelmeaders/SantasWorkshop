@@ -28,4 +28,35 @@ test.describe('public critical-path accessibility', () => {
 
 		await expectNoBlockingAccessibilityViolations(page);
 	});
+
+	test('A11Y-PUB-003 has no violations in the Spanish entry state', async ({
+		page,
+	}) => {
+		await page.goto('/');
+		await page.locator('#languageToggle').click();
+		await expect(
+			page.getByText('Crear una cuenta', { exact: true }),
+		).toBeVisible();
+
+		await expectNoBlockingAccessibilityViolations(page);
+	});
+
+	for (const scenario of [
+		'registration-closed',
+		'maintenance-mode',
+		'weather-mode',
+	]) {
+		test(`A11Y-PUB-004 has no violations in ${scenario}`, async ({
+			page,
+			seedScenario,
+		}) => {
+			await seedScenario(scenario);
+			await page.goto('/');
+			await expect(
+				page.locator('ion-modal app-operational-notice'),
+			).toBeVisible({ timeout: 10000 });
+
+			await expectNoBlockingAccessibilityViolations(page);
+		});
+	}
 });

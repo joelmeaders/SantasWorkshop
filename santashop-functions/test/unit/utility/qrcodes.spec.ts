@@ -33,8 +33,9 @@ describe('QR code storage helpers', () => {
 		const { generateQrCode } = await loadQrcodes();
 		const stream = {};
 		const file = adminMock.getFileRef('registrations/customer-1/code.png');
+		const createWriteStream = vi.fn(() => stream);
 		(file as unknown as { createWriteStream: ReturnType<typeof vi.fn> }).createWriteStream =
-			vi.fn(() => stream);
+			createWriteStream;
 
 		await generateQrCode('registrations/customer-1/code.png', 'ABCD1234');
 
@@ -42,6 +43,18 @@ describe('QR code storage helpers', () => {
 			stream,
 			'ABCD1234',
 			{ errorCorrectionLevel: 'high', width: 600, margin: 3 },
+		);
+		expect(createWriteStream).toHaveBeenCalledWith(
+			expect.objectContaining({
+				contentType: 'image/png',
+				resumable: false,
+				metadata: {
+					cacheControl: 'no-store, max-age=0, must-revalidate',
+					metadata: {
+						firebaseStorageDownloadTokens: expect.any(String),
+					},
+				},
+			}),
 		);
 	});
 
@@ -55,13 +68,26 @@ describe('QR code storage helpers', () => {
 		expect(adminMock.getFileRef(path).save).toHaveBeenCalledWith(
 			expect.any(Buffer),
 			expect.objectContaining({
-				public: true,
 				contentType: 'image/png',
-				metadata: { cacheControl: 'no-store, max-age=0, must-revalidate' },
+				metadata: {
+					cacheControl: 'no-store, max-age=0, must-revalidate',
+					metadata: {
+						firebaseStorageDownloadTokens: expect.any(String),
+					},
+				},
 			}),
 		);
 		expect(adminMock.getFileRef(path).delete).toHaveBeenCalledWith({
 			ignoreNotFound: true,
 		});
+	});
+
+	it('builds a token-protected Firebase download URL for email delivery', async () => {
+		const { getRegistrationQrCodeUrl } = await loadQrcodes();
+		const path = 'registrations/customer-1/code.png';
+
+		await expect(getRegistrationQrCodeUrl(path)).resolves.toBe(
+			'https://firebasestorage.googleapis.com/v0/b/test-bucket.appspot.com/o/registrations%2Fcustomer-1%2Fcode.png?alt=media&token=test-download-token',
+		);
 	});
 });

@@ -28,7 +28,7 @@ import {
 	IonList,
 	IonText,
 	LoadingController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { arrowBackSharp, logoFacebook, logoInstagram } from 'ionicons/icons';
 import {

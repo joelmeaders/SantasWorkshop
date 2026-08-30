@@ -24,7 +24,7 @@ import {
 	IonCard,
 	IonCardHeader,
 	IonCardContent,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';

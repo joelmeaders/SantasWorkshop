@@ -29,6 +29,9 @@ const RUNTIME_ENV_KEYS = [
 	'REMINDER_EMAIL_TEMPLATE',
 	'SANTASHOP_EVENT_DISPLAY_NAME',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
+	'SANTASHOP_SIGNUP_MIN_INSTANCES',
+	'SANTASHOP_EVENT_MIN_INSTANCES',
+	'SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT',
 	'REGISTRATION_EMAIL_SOURCE',
 	'REGISTRATION_EMAIL_RETURN_PATH',
 	'SCHEDULED_FIRESTORE_BACKUP',
@@ -55,6 +58,10 @@ const BASE_RUNTIME_ENV = {
 	REMINDER_EMAIL_TEMPLATE: 'reminder-template',
 	SANTASHOP_EVENT_DISPLAY_NAME: 'Denver Santa Claus Shop',
 	REMINDER_EMAIL_SENDING_STALE_MINUTES: '15',
+	SANTASHOP_SIGNUP_MIN_INSTANCES: '1',
+	SANTASHOP_EVENT_MIN_INSTANCES: '0',
+	SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT:
+		'santashop-functions-runtime@santas-workshop-test.iam.gserviceaccount.com',
 	REGISTRATION_EMAIL_SOURCE: 'noreply@example.com',
 	REGISTRATION_EMAIL_RETURN_PATH: 'admin@example.com',
 	SCHEDULED_FIRESTORE_BACKUP: '0 0 * * *',
@@ -148,6 +155,16 @@ afterEach(() => {
 });
 
 describe('runtime-config', () => {
+	it('parses guarded warm-capacity and runtime-identity settings', async () => {
+		const subject = await loadRuntimeConfig();
+
+		expect(subject.SIGNUP_MIN_INSTANCES).toBe(1);
+		expect(subject.EVENT_MIN_INSTANCES).toBe(0);
+		expect(subject.FUNCTIONS_SERVICE_ACCOUNT).toContain(
+			'santashop-functions-runtime@',
+		);
+	});
+
 	it('uses AWS_REGION as a fallback when SES_REGION is not set', async () => {
 		const directoryPath = createTempDirectory();
 		setRuntimeEnv({

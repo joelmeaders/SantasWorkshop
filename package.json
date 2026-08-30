@@ -44,8 +44,10 @@
     "ci:app:build:test": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=development",
     "ci:app:build:prod": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=production",
     "ci:app:build": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=production",
-    "ci:functions:deploy:test": "pnpm run config:functions:test && firebase deploy --project santas-workshop-test --only functions",
-    "ci:functions:deploy:prod": "pnpm run config:functions:prod && firebase deploy --project santas-workshop-193b5 --only functions",
+    "ci:functions:deploy:test": "pnpm run config:functions:test && firebase deploy --project santas-workshop-test --only functions,firestore:rules,firestore:indexes,storage,database --force",
+    "ci:functions:deploy:prod": "pnpm run config:functions:prod && firebase deploy --project santas-workshop-193b5 --only functions,firestore:rules,firestore:indexes,storage,database --force",
+    "ci:functions:verify:test": "firebase functions:list --project santas-workshop-test --json > .firebase-functions-test.json && node scripts/verify-functions-parity.cjs .firebase-functions-test.json",
+    "ci:functions:verify:prod": "firebase functions:list --project santas-workshop-193b5 --json > .firebase-functions-prod.json && node scripts/verify-functions-parity.cjs .firebase-functions-prod.json",
     "dev:local": "pnpm run config:app:local && pnpm run config:admin:local && pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && concurrently -k -s first -n \"EMU,APP,ADMIN\" -c \"magenta,blue,green\" \"pnpm run emulators:start:local\" \"wait-on tcp:127.0.0.1:5001 tcp:127.0.0.1:8080 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && ng serve santashop-app --configuration=development --port=4100\" \"wait-on tcp:127.0.0.1:5001 tcp:127.0.0.1:8080 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && ng serve santashop-admin --configuration=development --port=4101\"",
     "dev:app:local": "concurrently -k -s first -n \"EMU,APP\" -c \"magenta,blue\" \"pnpm run emulators:start:local\" \"wait-on tcp:127.0.0.1:5001 tcp:127.0.0.1:8080 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && pnpm --filter @santashop/app start:local\"",
     "dev:admin:local": "concurrently -k -s first -n \"EMU,ADMIN\" -c \"magenta,green\" \"pnpm run emulators:start:local\" \"wait-on tcp:127.0.0.1:5001 tcp:127.0.0.1:8080 tcp:127.0.0.1:9099 tcp:127.0.0.1:9199 && pnpm --filter @santashop/admin start:local\"",
@@ -150,9 +152,24 @@
   },
   "pnpm": {
     "overrides": {
+      "@grpc/grpc-js": "1.14.4",
+      "@protobufjs/utf8": "1.1.1",
+      "@tootallnate/once": "2.0.1",
       "baseline-browser-mapping": "2.10.43",
+      "body-parser": "2.3.0",
+      "brace-expansion@2": "2.1.4",
+      "brace-expansion@5": "5.0.9",
       "browserslist": "4.28.6",
-      "caniuse-lite": "1.0.30001805"
+      "caniuse-lite": "1.0.30001805",
+      "fast-xml-parser": "5.10.1",
+      "form-data@2": "2.5.6",
+      "lodash-es": "4.18.1",
+      "minimatch@9": "9.0.7",
+      "path-to-regexp@8": "8.4.0",
+      "protobufjs@7": "7.6.5",
+      "qs": "6.15.2",
+      "uuid@9": "11.1.1",
+      "websocket-driver": "0.7.5"
     }
   }
 }

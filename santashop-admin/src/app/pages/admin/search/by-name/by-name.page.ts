@@ -24,7 +24,7 @@ import {
 	IonNote,
 	IonButton,
 	IonIcon,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-by-name',
@@ -68,8 +68,6 @@ export class ByNamePage {
 	});
 
 	constructor() {
-		addIcons({ backspaceOutline, searchOutline });
-		addIcons({ backspaceOutline, searchOutline });
 		addIcons({ backspaceOutline, searchOutline });
 	}
 

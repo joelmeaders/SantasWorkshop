@@ -1,6 +1,6 @@
 import { Provider } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular/standalone';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import {
@@ -13,6 +13,13 @@ import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import type { Functions } from 'firebase/functions';
 import type { FirebaseStorage } from 'firebase/storage';
+
+export function requireDefined<T>(value: T | null | undefined): T {
+	if (value === null || value === undefined) {
+		throw new Error('Expected a defined value in this test.');
+	}
+	return value;
+}
 
 export function createAuthMock(): Auth & { currentUser: null } {
 	return {

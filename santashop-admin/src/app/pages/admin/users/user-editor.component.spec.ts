@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { provideModalControllerMock } from '../../../../test-helpers';
 import type { StaffAccount } from '@santashop/models';
 import { UserEditorComponent } from './user-editor.component';

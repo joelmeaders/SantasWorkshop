@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScannerService } from './scanner.service';

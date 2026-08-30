@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import {
 	createModalControllerMock,
 	provideTranslateServiceMock,

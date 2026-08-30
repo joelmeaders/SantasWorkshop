@@ -15,6 +15,22 @@ export const getFirestore = (): Firestore =>
 
 export const getAuth = (): Auth => getAdminApp().auth();
 
+export const seedQrCode = async (
+	storagePath: string,
+	contents = 'integration-test-qr',
+): Promise<void> => {
+	await getAdminApp().storage().bucket().file(storagePath).save(contents, {
+		contentType: 'image/png',
+		resumable: false,
+		metadata: {
+			cacheControl: 'no-store, max-age=0, must-revalidate',
+			metadata: {
+				firebaseStorageDownloadTokens: 'integration-download-token',
+			},
+		},
+	});
+};
+
 export const createTimestamp = (
 	date: Date | string,
 ): Timestamp => {
@@ -107,4 +123,9 @@ export const clearEmulatorData = async (): Promise<void> => {
 			auth.deleteUser(userRecord.uid),
 		),
 	);
+
+	await getAdminApp().storage().bucket().deleteFiles({
+		prefix: 'registrations/',
+		force: true,
+	});
 };

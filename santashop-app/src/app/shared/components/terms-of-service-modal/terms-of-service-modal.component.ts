@@ -8,7 +8,7 @@ import {
 	IonToolbar,
 	IonHeader,
 	IonContent,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
 import { closeCircle } from 'ionicons/icons';

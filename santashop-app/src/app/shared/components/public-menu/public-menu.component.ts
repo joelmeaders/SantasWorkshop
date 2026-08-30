@@ -12,7 +12,7 @@ import {
 	IonContent,
 	IonList,
 	IonItem,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';

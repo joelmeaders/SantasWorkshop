@@ -13,7 +13,7 @@ import {
 	IonText,
 	IonIcon,
 	IonButton,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import {
 	Child,
 	DateTimeSlot,
@@ -144,8 +144,6 @@ export class ReviewPage {
 		.subscribe();
 
 	constructor() {
-		addIcons({ checkmarkCircle });
-		addIcons({ checkmarkCircle });
 		addIcons({ checkmarkCircle });
 	}
 

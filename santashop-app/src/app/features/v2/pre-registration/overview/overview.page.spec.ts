@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import { DateTimeSlot } from '@santashop/models';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { AlertController, ToastController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular/standalone';
 import {
 	provideTranslateServiceMock,
 	provideAuthMock,

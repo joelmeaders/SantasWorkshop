@@ -20,7 +20,7 @@ flow**. The separate port avoids collisions with common local services on
 The current passing setup is:
 
 - Firebase emulators running under project `demo-santashop`
-- `firebase.e2e.json` explicitly selecting the same `nodejs22` Functions
+- `firebase.e2e.json` explicitly selecting the same `nodejs24` Functions
   runtime as the deployment configuration
 - Browser app served from `santashop-app` with the **e2e** config
 - Playwright running in **headless**, **CI-style**, **single-worker**, **no-retry** mode

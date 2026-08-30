@@ -17,12 +17,7 @@ interface FirebaseEnvironmentConfig {
 const loadLocalEnvFiles = (): void => {
 	const projectId =
 		process.env['GCLOUD_PROJECT'] ?? process.env['GCP_PROJECT'];
-	const envFiles = [
-		path.resolve(process.cwd(), '.env'),
-		path.resolve(process.cwd(), 'santashop-functions/.env'),
-		path.resolve(__dirname, '../../.env'),
-		path.resolve(__dirname, '../../../.env'),
-	];
+	const envFiles: string[] = [];
 
 	if (projectId) {
 		envFiles.push(
@@ -33,6 +28,13 @@ const loadLocalEnvFiles = (): void => {
 			),
 		);
 	}
+
+	envFiles.push(
+		path.resolve(process.cwd(), '.env'),
+		path.resolve(process.cwd(), 'santashop-functions/.env'),
+		path.resolve(__dirname, '../../.env'),
+		path.resolve(__dirname, '../../../.env'),
+	);
 
 	envLoader.loadEnvFiles(envFiles);
 };
@@ -115,6 +117,34 @@ export const REGISTRATION_EMAIL_TEMPLATE = requireEnv(
 export const REMINDER_EMAIL_TEMPLATE = requireEnv('REMINDER_EMAIL_TEMPLATE');
 
 export const EVENT_DISPLAY_NAME = requireEnv('SANTASHOP_EVENT_DISPLAY_NAME');
+const configuredEventYear = /\b(?:20\d{2}|2100)\b/u.exec(EVENT_DISPLAY_NAME);
+if (
+	configuredEventYear &&
+	Number.parseInt(configuredEventYear[0], 10) !== PROGRAM_YEAR
+) {
+	throw new Error(
+		'SANTASHOP_EVENT_DISPLAY_NAME year must match SANTASHOP_PROGRAM_YEAR.',
+	);
+}
+
+const parseOptionalInstanceCount = (name: string): number => {
+	const value = process.env[name];
+	if (value === undefined || value === '') return 0;
+	const parsed = Number.parseInt(value, 10);
+	if (!Number.isInteger(parsed) || parsed < 0 || parsed > 10) {
+		throw new TypeError(`${name} must be a whole number between 0 and 10.`);
+	}
+	return parsed;
+};
+
+export const SIGNUP_MIN_INSTANCES = parseOptionalInstanceCount(
+	'SANTASHOP_SIGNUP_MIN_INSTANCES',
+);
+export const EVENT_MIN_INSTANCES = parseOptionalInstanceCount(
+	'SANTASHOP_EVENT_MIN_INSTANCES',
+);
+export const FUNCTIONS_SERVICE_ACCOUNT =
+	process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT'] || undefined;
 
 export const REMINDER_EMAIL_SENDING_STALE_MINUTES = Number.parseInt(
 	process.env['REMINDER_EMAIL_SENDING_STALE_MINUTES'] ?? '15',
@@ -157,7 +187,6 @@ export const createShopDate = (day: string, hour: number): Date => {
 		`${PROGRAM_YEAR}-${day}T${safeHour}:00:00${SHOP_TIME_OFFSET}`,
 	);
 };
-
 export const getStorageBucketName = (): string => {
 	return (
 		process.env['FIREBASE_STORAGE_BUCKET'] ??
@@ -169,8 +198,4 @@ export const getStorageBucketName = (): string => {
 			requireEnv('GCLOUD_PROJECT')
 		}.appspot.com`
 	);
-};
-
-export const getRegistrationQrCodeUrl = (storagePath: string): string => {
-	return `https://storage.googleapis.com/${getStorageBucketName()}/${storagePath}`;
 };

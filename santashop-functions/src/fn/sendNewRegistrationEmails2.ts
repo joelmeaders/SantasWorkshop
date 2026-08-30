@@ -19,13 +19,13 @@ import {
 import admin from '../firebase-admin';
 import {
 	EVENT_DISPLAY_NAME,
-	getRegistrationQrCodeUrl,
 	REMINDER_EMAIL_SENDING_STALE_MINUTES,
 	REGISTRATION_EMAIL_RETURN_PATH,
 	REGISTRATION_EMAIL_SOURCE,
 	REGISTRATION_EMAIL_TEMPLATE,
 	SES_REGION,
 } from '../utility/runtime-config';
+import { getRegistrationQrCodeUrl } from '../utility/qrcodes';
 import {
 	buildEmailTemplateDataFromMappings,
 	resolvePublishedEmailTemplate,
@@ -630,7 +630,9 @@ export default async function sendNewRegistrationEmails2(
 		const baseMessageDetails = {
 			firstName: payload.firstName,
 			eventName: EVENT_DISPLAY_NAME,
-			qrCodeUrl: getRegistrationQrCodeUrl(payload.qrCodeStoragePath),
+			qrCodeUrl: await getRegistrationQrCodeUrl(
+				payload.qrCodeStoragePath,
+			),
 			code: payload.code,
 			dateTime: payload.dateTime,
 		};

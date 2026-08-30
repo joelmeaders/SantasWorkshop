@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	ModalController,
 	provideIonicAngular,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import {
 	createModalControllerMock,
 	provideTranslateServiceMock,

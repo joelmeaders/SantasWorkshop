@@ -11,7 +11,7 @@ import {
 	IonButton,
 	IonIcon,
 	IonTitle,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-header',
@@ -35,8 +35,6 @@ export class HeaderComponent {
 	public readonly backRoute = input('/admin');
 
 	constructor() {
-		addIcons({ arrowBackSharp });
-		addIcons({ arrowBackSharp });
 		addIcons({ arrowBackSharp });
 	}
 }

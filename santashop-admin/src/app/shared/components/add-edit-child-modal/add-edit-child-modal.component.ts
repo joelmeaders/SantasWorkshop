@@ -29,7 +29,7 @@ import {
 	IonInput,
 	IonRadioGroup,
 	IonRadio,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import type { Child } from '@santashop/models';
 import { AgeGroup, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';

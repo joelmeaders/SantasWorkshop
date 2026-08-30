@@ -1,16 +1,17 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { DateTimeModalComponent } from './date-time-modal.component';
-import { testHelpers } from '../../../../test-helpers';
+import { requireDefined, testHelpers } from '../../../../test-helpers';
 import { DateTimeModalService } from './date-time-modal.service';
+import type { DateTimeSlot } from '@santashop/models';
 
 describe('DateTimeModalComponent', () => {
 	let component: DateTimeModalComponent;
 	let fixture: ComponentFixture<DateTimeModalComponent>;
-	const slots$ = new BehaviorSubject<any[]>([]);
+	const slots$ = new BehaviorSubject<DateTimeSlot[]>([]);
 
 	beforeEach(async () => {
 		TestBed.overrideComponent(DateTimeModalComponent, {
@@ -31,15 +32,22 @@ describe('DateTimeModalComponent', () => {
 	});
 
 	it('filters available slots, reports capacity, and dismisses a new selection', async (): Promise<void> => {
-		const modal = TestBed.inject(ModalController);
-		(modal.dismiss as any).mockResolvedValue(undefined);
-		const open = { id: 'open', dateTime: new Date('2026-12-20T10:00:00'), enabled: true, maxSlots: 2, slotsReserved: 1 };
+		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
+		modal.dismiss.mockResolvedValue(true);
+		const open: DateTimeSlot = {
+			id: 'open',
+			programYear: 2026,
+			dateTime: new Date('2026-12-20T10:00:00'),
+			enabled: true,
+			maxSlots: 2,
+			slotsReserved: 1,
+		};
 		slots$.next([open, { ...open, id: 'closed', enabled: false }]);
 
 		await expect(firstValueFrom(component.availableSlots$)).resolves.toEqual([open]);
-		expect(component.spotsRemaining(open as any)).toBe('1 spot');
-		expect(component.spotsRemaining({ ...open, enabled: false } as any)).toBe('Unavailable');
-		await component.selectDateTime(open as any);
+		expect(component.spotsRemaining(open)).toBe('1 spot');
+		expect(component.spotsRemaining({ ...open, enabled: false })).toBe('Unavailable');
+		await component.selectDateTime(open);
 		expect(modal.dismiss).toHaveBeenCalledWith(open);
 	});
 
@@ -50,12 +58,14 @@ describe('DateTimeModalComponent', () => {
 		slots$.next([first, second, nextDay, { ...nextDay, id: 'disabled', enabled: false }]);
 
 		const days = await firstValueFrom(component.availableDays$);
-		const sameDaySlots = await firstValueFrom(component.availableSlotsByDay$(days[0]!));
+		const sameDaySlots = await firstValueFrom(
+			component.availableSlotsByDay$(requireDefined(days[0])),
+		);
 
 		expect(days).toHaveLength(2);
 		expect(sameDaySlots).toEqual([first, second]);
-		expect(component.spotsRemaining({ ...second, slotsReserved: 3 } as any)).toBe('Unavailable');
-		expect(component.spotsRemaining({ ...first, slotsReserved: 1 } as any)).toBe('2 spots');
+		expect(component.spotsRemaining({ ...second, slotsReserved: 3 })).toBe('Unavailable');
+		expect(component.spotsRemaining({ ...first, slotsReserved: 1 })).toBe('2 spots');
 	});
 
 	it('requires confirmation before replacing an existing slot', async () => {
@@ -67,11 +77,11 @@ describe('DateTimeModalComponent', () => {
 		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
 
 		alerts.create.mockResolvedValueOnce(createConfirmationAlert('cancel'));
-		await component.selectDateTime(replacement as any);
+		await component.selectDateTime(replacement);
 		expect(modal.dismiss).not.toHaveBeenCalled();
 
 		alerts.create.mockResolvedValueOnce(createConfirmationAlert('confirm'));
-		await component.selectDateTime(replacement as any);
+		await component.selectDateTime(replacement);
 		expect(modal.dismiss).toHaveBeenCalledWith(replacement);
 	});
 
@@ -90,9 +100,10 @@ function createSlot(
 	dateTime: string,
 	maxSlots: number,
 	slotsReserved: number,
-): object {
+): DateTimeSlot {
 	return {
 		id,
+		programYear: 2026,
 		dateTime: new Date(dateTime),
 		enabled: true,
 		maxSlots,

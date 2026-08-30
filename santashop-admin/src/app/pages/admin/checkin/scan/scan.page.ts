@@ -14,7 +14,7 @@ import {
 	IonSelect,
 	IonSelectOption,
 	PopoverOptions,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import {
 	BehaviorSubject,
 	catchError,
@@ -151,8 +151,6 @@ export class ScanPage {
 
 	constructor() {
 		addIcons({ camera });
-		addIcons({ camera });
-		addIcons({ camera });
 	}
 
 	public ionViewWillEnter(): void {
@@ -161,7 +159,9 @@ export class ScanPage {
 			this.setRegistration$().subscribe();
 		this.invalidCodeSubscription = this.notifyInvalidCode$.subscribe();
 
-		this.cameraEnabled$.next(true);
+		// Keep camera access opt-in. Manual check-in is a complete flow and should
+		// not trigger a permission prompt or camera startup cost on page entry.
+		this.cameraEnabled$.next(false);
 	}
 
 	public ionViewWillLeave(): void {

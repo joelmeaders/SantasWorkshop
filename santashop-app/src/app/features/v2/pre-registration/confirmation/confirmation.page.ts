@@ -23,7 +23,7 @@ import {
 	IonCardHeader,
 	IonCardTitle,
 	IonCardSubtitle,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';

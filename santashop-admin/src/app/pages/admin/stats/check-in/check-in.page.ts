@@ -26,7 +26,11 @@ import {
 
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import {
+	BaseChartDirective,
+	provideCharts,
+	withDefaultRegisterables,
+} from 'ng2-charts';
 import { addIcons } from 'ionicons';
 import { refreshSharp } from 'ionicons/icons';
 import {
@@ -42,13 +46,14 @@ import {
 	IonIcon,
 	IonText,
 	IonTitle,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-check-in',
 	templateUrl: './check-in.page.html',
 	styleUrls: ['./check-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
 		HeaderComponent,
 		FormsModule,
@@ -215,8 +220,6 @@ export class CheckInPage {
 	};
 
 	constructor() {
-		addIcons({ refreshSharp });
-		addIcons({ refreshSharp });
 		addIcons({ refreshSharp });
 	}
 

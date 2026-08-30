@@ -33,7 +33,7 @@ import {
 	IonItem,
 	IonLabel,
 	IonIcon,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 declare type SortFnType = (
 	a: RegistrationSearchIndex,
@@ -112,8 +112,6 @@ export class ResultsPage {
 	);
 
 	constructor() {
-		addIcons({ backspaceOutline });
-		addIcons({ backspaceOutline });
 		addIcons({ backspaceOutline });
 	}
 

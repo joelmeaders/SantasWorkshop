@@ -206,3 +206,10 @@ Required GitHub secrets for the Functions workflows:
 - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5`
 
 Functions deploys are GitHub Actions-only. Direct local `firebase deploy --only functions` commands are rejected by the Functions predeploy guard. Merge to `master` to deploy test, validate that environment, and then manually promote the tested `release_ref` to production.
+
+The backend release also deploys Firestore rules/indexes, Storage rules, and
+Realtime Database rules, removes retired Functions, and fails if the live
+Function inventory does not exactly match source. See
+[`docs/release-readiness.md`](docs/release-readiness.md) for capacity profiles,
+warm-instance cost controls, load gates, monitoring, backup/restore checks, and
+the accepted overbooking policy.

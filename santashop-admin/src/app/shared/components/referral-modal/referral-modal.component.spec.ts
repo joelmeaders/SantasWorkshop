@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { ReferralModalComponent } from './referral-modal.component';
 import { provideModalControllerMock } from '../../../../test-helpers';

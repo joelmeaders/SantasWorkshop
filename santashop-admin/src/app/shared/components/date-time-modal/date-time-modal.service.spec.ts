@@ -4,6 +4,7 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import type { DateTimeSlot } from '@santashop/models';
 import { DateTimeModalService } from './date-time-modal.service';
+import { requireDefined } from '../../../../test-helpers';
 
 describe('DateTimeModalService', () => {
 	let service: DateTimeModalService;
@@ -43,7 +44,7 @@ describe('DateTimeModalService', () => {
 			expect.any(Array),
 			'id',
 		);
-		expect(readMany.mock.calls[0]![0]).toHaveLength(2);
+		expect(requireDefined(readMany.mock.calls[0])[0]).toHaveLength(2);
 	});
 
 	it('shares the latest slot list with multiple subscribers and completes on destroy', async () => {

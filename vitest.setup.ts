@@ -1,4 +1,16 @@
 import { vi } from 'vitest';
+import { addIcons } from 'ionicons';
+import { menuOutline } from 'ionicons/icons';
+
+addIcons({ menuOutline });
+
+Object.defineProperty(navigator, 'mediaDevices', {
+	configurable: true,
+	value: {
+		enumerateDevices: vi.fn().mockResolvedValue([]),
+		getUserMedia: vi.fn().mockResolvedValue(new MediaStream()),
+	},
+});
 
 const firebaseFunction = vi.fn();
 

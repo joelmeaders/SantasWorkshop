@@ -25,7 +25,7 @@ import {
 	IonRow,
 	IonCol,
 	AlertController,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 
 @Component({
 	selector: 'admin-sign-in',

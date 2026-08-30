@@ -37,7 +37,7 @@ catalog:
   '@angular/platform-browser': 22.1.0
   '@angular/router': 22.1.0
   '@axe-core/playwright': 4.12.1
-  '@ionic/angular': 8.8.14-dev.11785507167.1f41b13b
+  '@ionic/angular': 8.8.14
   '@ionic/angular-toolkit': ^12.3.0
   '@ionic/cli': ^7.2.1
   '@ngx-translate/core': ^17.0.0
@@ -63,7 +63,7 @@ catalog:
   eslint-plugin-jsdoc: ^61.5.0
   eslint-plugin-prefer-arrow: 1.2.3
   eslint-plugin-prettier: ^5.5.4
-  firebase: ^12.16.0
+  firebase: ^12.18.0
   firebase-tools: ^15.1.0
   ionicons: ^8.0.13
   esbuild: ^0.27.0
@@ -104,9 +104,9 @@ catalogs:
     eslint: ^9.39.5
     eslint-config-google: ^0.14.0
     eslint-plugin-import: ^2.32.0
-    firebase: ^12.16.0
+    firebase: ^12.18.0
     firebase-admin: ^13.10.0
-    firebase-functions: ^7.2.5
+    firebase-functions: ^7.3.2
     firebase-functions-test: ^3.5.0
     json2csv: ^5.0.7
     qrcode: ^1.5.4

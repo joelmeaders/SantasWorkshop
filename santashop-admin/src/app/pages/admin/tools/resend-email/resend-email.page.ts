@@ -18,7 +18,7 @@ import {
 	IonButton,
 	IonIcon,
 	IonLabel,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { RegistrationSearchIndex } from '@santashop/models';
@@ -66,8 +66,6 @@ export class ResendEmailPage {
 		)({ customerId });
 
 	constructor() {
-		addIcons({ mailOutline });
-		addIcons({ mailOutline });
 		addIcons({ mailOutline });
 	}
 

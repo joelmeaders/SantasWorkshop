@@ -5,6 +5,7 @@ import {
 	clearEmulatorData,
 	createTimestamp,
 	getDocument,
+	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
@@ -15,6 +16,8 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 	});
 
 	it('changes a completed registration to a new time slot', async () => {
+		const qrCodeStoragePath = 'registrations/user-slot-1/code.png';
+		await seedQrCode(qrCodeStoragePath);
 		await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
 			admin: { allowChangeRegistration: true },
 		});
@@ -27,6 +30,7 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 		await setDocument(COLLECTION_SCHEMA.registrations, 'user-slot-1', {
 			uid: 'user-slot-1',
 			qrcode: 'ABCD2345',
+			qrCodeStoragePath,
 			reminderEmailSentOn: createTimestamp('2025-12-03T00:00:00.000Z'),
 			emailAddress: 'buddy.elf@example.com',
 			firstName: 'Buddy',

@@ -28,7 +28,7 @@ import {
 	IonItem,
 	IonIcon,
 	IonToggle,
-} from '@ionic/angular';
+} from '@ionic/angular/standalone';
 import { shareReplay } from 'rxjs';
 
 @Component({

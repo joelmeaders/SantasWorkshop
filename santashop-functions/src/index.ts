@@ -16,6 +16,9 @@ import {
 	SCHEDULED_REGISTRATION_STATS,
 	SCHEDULED_USER_STATS,
 	SHOP_TIME_ZONE,
+	SIGNUP_MIN_INSTANCES,
+	EVENT_MIN_INSTANCES,
+	FUNCTIONS_SERVICE_ACCOUNT,
 } from './utility/runtime-config';
 
 /**
@@ -29,18 +32,78 @@ const RUNNING_IN_FUNCTIONS_EMULATOR = process.env.FUNCTIONS_EMULATOR === 'true';
 const SEND_EMAILS_FROM_FUNCTIONS_EMULATOR =
 	process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR === 'true';
 const ENFORCE_APP_CHECK = !RUNNING_IN_FUNCTIONS_EMULATOR;
+const DEPLOYED_SIGNUP_MIN_INSTANCES = RUNNING_IN_FUNCTIONS_EMULATOR
+	? 0
+	: SIGNUP_MIN_INSTANCES;
+const DEPLOYED_EVENT_MIN_INSTANCES = RUNNING_IN_FUNCTIONS_EMULATOR
+	? 0
+	: EVENT_MIN_INSTANCES;
 
-setGlobalOptions({ region: FUNCTION_REGION });
+const STANDARD_CUSTOMER_OPTIONS = {
+	enforceAppCheck: ENFORCE_APP_CHECK,
+	memory: '256MiB' as const,
+	cpu: 1 as const,
+	concurrency: 10,
+	maxInstances: 5,
+	minInstances: 0,
+	timeoutSeconds: 60,
+};
+const SIGNUP_DRAFT_OPTIONS = {
+	...STANDARD_CUSTOMER_OPTIONS,
+	concurrency: 20,
+	maxInstances: 10,
+	timeoutSeconds: 30,
+};
+const SIGNUP_COMPLETION_OPTIONS = {
+	...STANDARD_CUSTOMER_OPTIONS,
+	concurrency: 20,
+	maxInstances: 10,
+	minInstances: DEPLOYED_SIGNUP_MIN_INSTANCES,
+};
+const NEW_ACCOUNT_OPTIONS = {
+	...STANDARD_CUSTOMER_OPTIONS,
+	memory: '512MiB' as const,
+	maxInstances: 10,
+	minInstances: DEPLOYED_SIGNUP_MIN_INSTANCES,
+};
+const EVENT_HOT_PATH_OPTIONS = {
+	...STANDARD_CUSTOMER_OPTIONS,
+	concurrency: 20,
+	maxInstances: 5,
+	minInstances: DEPLOYED_EVENT_MIN_INSTANCES,
+	timeoutSeconds: 30,
+};
+const EVENT_STANDARD_OPTIONS = {
+	...STANDARD_CUSTOMER_OPTIONS,
+	maxInstances: 3,
+	timeoutSeconds: 30,
+};
+const LOW_VOLUME_OPTIONS = {
+	enforceAppCheck: ENFORCE_APP_CHECK,
+	memory: '256MiB' as const,
+	cpu: 'gcf_gen1' as const,
+	concurrency: 1,
+	maxInstances: 3,
+	minInstances: 0,
+	timeoutSeconds: 60,
+};
+
+setGlobalOptions({
+	region: FUNCTION_REGION,
+	...(FUNCTIONS_SERVICE_ACCOUNT
+		? { serviceAccount: FUNCTIONS_SERVICE_ACCOUNT }
+		: {}),
+});
 
 export const changeAccountInformation = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	STANDARD_CUSTOMER_OPTIONS,
 	observeCallableHandler('changeAccountInformation', async (request) => {
 		return (await import('./fn/changeAccountInformation')).default(request);
 	}),
 );
 
 export const updateReferredBy = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	STANDARD_CUSTOMER_OPTIONS,
 	observeCallableHandler('updateReferredBy', async (request) => {
 		return (await import('./fn/updateReferredBy')).default(request);
 	}),
@@ -55,49 +118,49 @@ export const updateReferredBy = onCall(
  * registration-email, RegistrationSearchIndex
  */
 export const completeRegistration = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	SIGNUP_COMPLETION_OPTIONS,
 	observeCallableHandler('completeRegistration', async (request) => {
 		return (await import('./fn/completeRegistration')).default(request);
 	}),
 );
 
 export const saveDraftChild = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	SIGNUP_DRAFT_OPTIONS,
 	observeCallableHandler('saveDraftChild', async (request) => {
 		return (await import('./fn/saveDraftChild')).default(request);
 	}),
 );
 
 export const deleteDraftChild = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	SIGNUP_DRAFT_OPTIONS,
 	observeCallableHandler('deleteDraftChild', async (request) => {
 		return (await import('./fn/deleteDraftChild')).default(request);
 	}),
 );
 
 export const setDraftAppointment = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	SIGNUP_DRAFT_OPTIONS,
 	observeCallableHandler('setDraftAppointment', async (request) => {
 		return (await import('./fn/setDraftAppointment')).default(request);
 	}),
 );
 
 export const newAccount = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	NEW_ACCOUNT_OPTIONS,
 	observeCallableHandler('newAccount', async (request) => {
 		return (await import('./fn/newAccount')).default(request);
 	}),
 );
 
 export const undoRegistration = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	STANDARD_CUSTOMER_OPTIONS,
 	observeCallableHandler('undoRegistration', async (request) => {
 		return (await import('./fn/undoRegistration')).default(request);
 	}),
 );
 
 export const changeRegistrationDateTime = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	STANDARD_CUSTOMER_OPTIONS,
 	observeCallableHandler('changeRegistrationDateTime', async (request) => {
 		return (await import('./fn/changeRegistrationDateTime')).default(
 			request,
@@ -106,49 +169,49 @@ export const changeRegistrationDateTime = onCall(
 );
 
 export const updateEmailAddress = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	STANDARD_CUSTOMER_OPTIONS,
 	observeCallableHandler('updateEmailAddress', async (request) => {
 		return (await import('./fn/updateEmailAddress')).default(request);
 	}),
 );
 
 export const checkIn = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	EVENT_HOT_PATH_OPTIONS,
 	observeCallableHandler('checkIn', async (request) => {
 		return (await import('./fn/checkIn')).default(request);
 	}),
 );
 
 export const resolveRegistrationScan = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	EVENT_HOT_PATH_OPTIONS,
 	observeCallableHandler('resolveRegistrationScan', async (request) => {
 		return (await import('./fn/resolveRegistrationScan')).default(request);
 	}),
 );
 
 export const checkInWithEdit = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	EVENT_STANDARD_OPTIONS,
 	observeCallableHandler('checkInWithEdit', async (request) => {
 		return (await import('./fn/checkInWithEdit')).default(request);
 	}),
 );
 
 export const onSiteRegistration = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	EVENT_STANDARD_OPTIONS,
 	observeCallableHandler('onSiteRegistration', async (request) => {
 		return (await import('./fn/onSiteRegistration')).default(request);
 	}),
 );
 
 export const callableAdminPreRegister = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	EVENT_STANDARD_OPTIONS,
 	observeCallableHandler('callableAdminPreRegister', async (request) => {
 		return (await import('./fn/callableAdminPreRegister')).default(request);
 	}),
 );
 
 export const callableResendRegistrationEmail = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK, maxInstances: 2, memory: '128MiB' },
+	{ ...LOW_VOLUME_OPTIONS, maxInstances: 2 },
 	observeCallableHandler(
 		'callableResendRegistrationEmail',
 		async (request) => {
@@ -160,7 +223,7 @@ export const callableResendRegistrationEmail = onCall(
 );
 
 export const callableListEmailTemplates = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableListEmailTemplates', async (request) => {
 		return (await import('./fn/callableListEmailTemplates')).default(
 			request,
@@ -169,14 +232,14 @@ export const callableListEmailTemplates = onCall(
 );
 
 export const callableGetEmailTemplate = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableGetEmailTemplate', async (request) => {
 		return (await import('./fn/callableGetEmailTemplate')).default(request);
 	}),
 );
 
 export const callableGetEmailTemplateRevision = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler(
 		'callableGetEmailTemplateRevision',
 		async (request) => {
@@ -188,11 +251,7 @@ export const callableGetEmailTemplateRevision = onCall(
 );
 
 export const callableSaveEmailTemplateRevision = onCall(
-	{
-		enforceAppCheck: ENFORCE_APP_CHECK,
-		timeoutSeconds: 60,
-		memory: '256MiB',
-	},
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler(
 		'callableSaveEmailTemplateRevision',
 		async (request) => {
@@ -204,18 +263,14 @@ export const callableSaveEmailTemplateRevision = onCall(
 );
 
 export const callableDeleteEmailTemplate = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableDeleteEmailTemplate', async (request) => {
 		return (await import('./fn/callableDeleteEmailTemplate')).default(request);
 	}),
 );
 
 export const callablePublishEmailTemplate = onCall(
-	{
-		enforceAppCheck: ENFORCE_APP_CHECK,
-		memory: '256MiB',
-		timeoutSeconds: 60,
-	},
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callablePublishEmailTemplate', async (request) => {
 		return (await import('./fn/callablePublishEmailTemplate')).default(
 			request,
@@ -224,11 +279,7 @@ export const callablePublishEmailTemplate = onCall(
 );
 
 export const callableSendTestEmailTemplate = onCall(
-	{
-		enforceAppCheck: ENFORCE_APP_CHECK,
-		memory: '256MiB',
-		timeoutSeconds: 60,
-	},
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableSendTestEmailTemplate', async (request) => {
 		return (await import('./fn/callableSendTestEmailTemplate')).default(
 			request,
@@ -237,28 +288,28 @@ export const callableSendTestEmailTemplate = onCall(
 );
 
 export const callableCreateStaffUser = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableCreateStaffUser', async (request) => {
 		return (await import('./fn/callableCreateStaffUser')).default(request);
 	}),
 );
 
 export const callableUpdateStaffUser = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableUpdateStaffUser', async (request) => {
 		return (await import('./fn/callableUpdateStaffUser')).default(request);
 	}),
 );
 
 export const callableDeleteStaffUser = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableDeleteStaffUser', async (request) => {
 		return (await import('./fn/callableDeleteStaffUser')).default(request);
 	}),
 );
 
 export const callablePreviewOwnerOperation = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK, timeoutSeconds: 120 },
+	{ ...LOW_VOLUME_OPTIONS, timeoutSeconds: 120 },
 	observeCallableHandler(
 		'callablePreviewOwnerOperation',
 		async (request) => {
@@ -270,7 +321,7 @@ export const callablePreviewOwnerOperation = onCall(
 );
 
 export const callableStartOwnerOperation = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK, timeoutSeconds: 60 },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler(
 		'callableStartOwnerOperation',
 		async (request) => {
@@ -282,7 +333,7 @@ export const callableStartOwnerOperation = onCall(
 );
 
 export const callableGetOwnerOperation = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler(
 		'callableGetOwnerOperation',
 		async (request) => {
@@ -294,7 +345,7 @@ export const callableGetOwnerOperation = onCall(
 );
 
 export const callableGetOwnerExportUrl = onCall(
-	{ enforceAppCheck: ENFORCE_APP_CHECK },
+	LOW_VOLUME_OPTIONS,
 	observeCallableHandler(
 		'callableGetOwnerExportUrl',
 		async (request) => {
@@ -311,6 +362,8 @@ export const ownerOperationWorker = onTaskDispatched(
 		maxInstances: 1,
 		concurrency: 1,
 		memory: '512MiB',
+		cpu: 1,
+		minInstances: 0,
 		timeoutSeconds: 1800,
 		retryConfig: {
 			maxAttempts: 3,
@@ -335,7 +388,12 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 	{
 		document: 'tmp_registrationemails/{docId}',
 		retry: true,
-		maxInstances: 1,
+		memory: '256MiB',
+		cpu: 1,
+		concurrency: 5,
+		maxInstances: 2,
+		minInstances: 0,
+		timeoutSeconds: 120,
 	},
 	observeDocumentHandler('sendNewRegistrationEmails', async (event) => {
 		if (!event.data) {
@@ -365,6 +423,8 @@ export const scheduledFirestoreBackup = onSchedule(
 	{
 		schedule: SCHEDULED_FIRESTORE_BACKUP,
 		memory: '256MiB',
+		cpu: 'gcf_gen1',
+		concurrency: 1,
 		timeoutSeconds: 240,
 		maxInstances: 1,
 	},
@@ -378,6 +438,8 @@ export const scheduledDateTimeSlotCounters = onSchedule(
 	{
 		schedule: SCHEDULED_DATETIME_SLOT_COUNTERS,
 		memory: '128MiB',
+		cpu: 'gcf_gen1',
+		concurrency: 1,
 		timeoutSeconds: 30,
 		maxInstances: 1,
 	},
@@ -392,6 +454,8 @@ export const scheduledRegistrationStats = onSchedule(
 		schedule: SCHEDULED_REGISTRATION_STATS,
 		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',
+		cpu: 'gcf_gen1',
+		concurrency: 1,
 		timeoutSeconds: 240,
 		maxInstances: 1,
 	},
@@ -406,6 +470,8 @@ export const scheduledUserStats = onSchedule(
 		schedule: SCHEDULED_USER_STATS,
 		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',
+		cpu: 'gcf_gen1',
+		concurrency: 1,
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
@@ -420,6 +486,8 @@ export const scheduledCheckInStats = onSchedule(
 		schedule: SCHEDULED_CHECKIN_STATS,
 		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',
+		cpu: 'gcf_gen1',
+		concurrency: 1,
 		timeoutSeconds: 60,
 		maxInstances: 1,
 	},
@@ -445,11 +513,16 @@ const assertEmulatorOnly = (): void => {
 	}
 };
 
+const emulatorOnly = <TFunction>(
+	createFunction: () => TFunction,
+): TFunction | undefined =>
+	RUNNING_IN_FUNCTIONS_EMULATOR ? createFunction() : undefined;
+
 /**
  * Seeds the database with test parameters.
  * Emulator only.
  */
-export const testSeedScenario = onCall(
+export const testSeedScenario = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedScenario', async (request) => {
 		assertEmulatorOnly();
@@ -466,13 +539,13 @@ export const testSeedScenario = onCall(
 		await seedTestScenario(scenario);
 		return { success: true };
 	}),
-);
+));
 
 /**
  * Seeds public parameters with custom values.
  * Emulator only.
  */
-export const testSeedPublicParameters = onCall(
+export const testSeedPublicParameters = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedPublicParameters', async (request) => {
 		assertEmulatorOnly();
@@ -486,13 +559,13 @@ export const testSeedPublicParameters = onCall(
 
 		return { success: true };
 	}),
-);
+));
 
 /**
  * Clears all test data from Firestore and Auth.
  * Emulator only.
  */
-export const testClearAllData = onCall(
+export const testClearAllData = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testClearAllData', async () => {
 		assertEmulatorOnly();
@@ -501,13 +574,13 @@ export const testClearAllData = onCall(
 		await clearAllData();
 		return { success: true };
 	}),
-);
+));
 
 /**
  * Seeds an admin auth user with custom admin claims.
  * Emulator only.
  */
-export const testSeedAdminUser = onCall(
+export const testSeedAdminUser = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedAdminUser', async (request) => {
 		assertEmulatorOnly();
@@ -561,13 +634,13 @@ export const testSeedAdminUser = onCall(
 			roles,
 		});
 	}),
-);
+));
 
 /**
  * Seeds date/time slots for e2e schedule-editor tests.
  * Emulator only.
  */
-export const testSeedDateTimeSlots = onCall(
+export const testSeedDateTimeSlots = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedDateTimeSlots', async (request) => {
 		assertEmulatorOnly();
@@ -591,13 +664,13 @@ export const testSeedDateTimeSlots = onCall(
 
 		return seedDateTimeSlots(slots);
 	}),
-);
+));
 
 /**
  * Seeds submitted-registration lookup index documents for e2e search tests.
  * Emulator only.
  */
-export const testSeedRegistrationSearchIndex = onCall(
+export const testSeedRegistrationSearchIndex = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler(
 		'testSeedRegistrationSearchIndex',
@@ -628,10 +701,10 @@ export const testSeedRegistrationSearchIndex = onCall(
 			return seedRegistrationSearchIndex(records);
 		},
 	),
-);
+));
 
 /** Seeds a complete registration for E2E operational flows. Emulator only. */
-export const testSeedRegistration = onCall(
+export const testSeedRegistration = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedRegistration', async (request) => {
 		assertEmulatorOnly();
@@ -642,10 +715,10 @@ export const testSeedRegistration = onCall(
 		await seedRegistration(request.data as Parameters<typeof seedRegistration>[0]);
 		return { success: true };
 	}),
-);
+));
 
 /** Reads registration QR lifecycle evidence for browser E2E assertions. Emulator only. */
-export const testInspectRegistrationQrLifecycle = onCall(
+export const testInspectRegistrationQrLifecycle = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testInspectRegistrationQrLifecycle', async (request) => {
 		assertEmulatorOnly();
@@ -658,10 +731,10 @@ export const testInspectRegistrationQrLifecycle = onCall(
 		const { inspectRegistrationQrLifecycle } = await import('./fn/testHelpers');
 		return inspectRegistrationQrLifecycle(data.emailAddress);
 	}),
-);
+));
 
 /** Reads display-safe scan audit attempts and risk summaries. Emulator only. */
-export const testInspectRegistrationScanAudit = onCall(
+export const testInspectRegistrationScanAudit = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testInspectRegistrationScanAudit', async (request) => {
 		assertEmulatorOnly();
@@ -674,10 +747,10 @@ export const testInspectRegistrationScanAudit = onCall(
 		const { inspectRegistrationScanAudit } = await import('./fn/testHelpers');
 		return inspectRegistrationScanAudit(data.emailAddress);
 	}),
-);
+));
 
 /** Reads queued registration-email path snapshots. Emulator only. */
-export const testInspectQueuedRegistrationEmails = onCall(
+export const testInspectQueuedRegistrationEmails = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testInspectQueuedRegistrationEmails', async (request) => {
 		assertEmulatorOnly();
@@ -690,10 +763,10 @@ export const testInspectQueuedRegistrationEmails = onCall(
 		const { inspectQueuedRegistrationEmails } = await import('./fn/testHelpers');
 		return inspectQueuedRegistrationEmails(data.emailAddress);
 	}),
-);
+));
 
 /** Seeds current/prior-season paginated scan-risk fixtures. Emulator only. */
-export const testSeedScanRiskHistory = onCall(
+export const testSeedScanRiskHistory = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedScanRiskHistory', async (request) => {
 		assertEmulatorOnly();
@@ -704,13 +777,13 @@ export const testSeedScanRiskHistory = onCall(
 		await seedScanRiskHistory(request.data as Parameters<typeof seedScanRiskHistory>[0]);
 		return { success: true };
 	}),
-);
+));
 
 /**
  * Seeds a schedule statistics document for reporting E2E tests.
  * Emulator only.
  */
-export const testSeedScheduleStats = onCall(
+export const testSeedScheduleStats = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedScheduleStats', async (request) => {
 		assertEmulatorOnly();
@@ -739,10 +812,10 @@ export const testSeedScheduleStats = onCall(
 		});
 		return { success: true };
 	}),
-);
+));
 
 /** Seeds registration, check-in, and user statistics documents for reporting E2E tests. */
-export const testSeedReportingStats = onCall(
+export const testSeedReportingStats = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedReportingStats', async (request) => {
 		assertEmulatorOnly();
@@ -779,13 +852,13 @@ export const testSeedReportingStats = onCall(
 
 		return { success: true };
 	}),
-);
+));
 
 /**
  * Marks an emulator customer as checked in for customer E2E tests.
  * Emulator only.
  */
-export const testSeedCheckIn = onCall(
+export const testSeedCheckIn = emulatorOnly(() => onCall(
 	{ enforceAppCheck: false },
 	observeCallableHandler('testSeedCheckIn', async (request) => {
 		assertEmulatorOnly();
@@ -804,4 +877,4 @@ export const testSeedCheckIn = onCall(
 		const { seedCheckInForEmail } = await import('./fn/testHelpers');
 		return seedCheckInForEmail(data.emailAddress);
 	}),
-);
+));

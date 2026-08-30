@@ -125,6 +125,7 @@
 							"santashop-admin/src/theme/variables.scss"
 						],
 						"scripts": []
+						,"allowedCommonJsDependencies": ["handlebars"]
 					},
 					"configurations": {
 						"production": {
@@ -133,12 +134,12 @@
 								{
 									"type": "initial",
 									"maximumWarning": "2mb",
-									"maximumError": "7mb"
+									"maximumError": "2500kb"
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "2kb",
-									"maximumError": "5kb"
+									"maximumWarning": "5kb",
+									"maximumError": "8kb"
 								}
 							]
 						},
@@ -147,12 +148,12 @@
 								{
 									"type": "initial",
 									"maximumWarning": "2mb",
-									"maximumError": "7mb"
+									"maximumError": "2500kb"
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "2kb",
-									"maximumError": "4kb"
+									"maximumWarning": "5kb",
+									"maximumError": "8kb"
 								}
 							]
 						},
@@ -262,13 +263,13 @@
 							"budgets": [
 								{
 									"type": "initial",
-									"maximumWarning": "2mb",
-									"maximumError": "5mb"
+									"maximumWarning": "400kb",
+									"maximumError": "600kb"
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "2kb",
-									"maximumError": "4kb"
+									"maximumWarning": "5kb",
+									"maximumError": "8kb"
 								}
 							],
 							"outputHashing": "all"
@@ -277,13 +278,13 @@
 							"budgets": [
 								{
 									"type": "initial",
-									"maximumWarning": "2mb",
-									"maximumError": "5mb"
+									"maximumWarning": "400kb",
+									"maximumError": "600kb"
 								},
 								{
 									"type": "anyComponentStyle",
-									"maximumWarning": "2kb",
-									"maximumError": "4kb"
+									"maximumWarning": "5kb",
+									"maximumError": "8kb"
 								}
 							]
 						},

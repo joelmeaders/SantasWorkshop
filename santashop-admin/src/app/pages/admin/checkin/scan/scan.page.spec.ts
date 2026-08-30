@@ -5,6 +5,7 @@ import {
 	provideFirestoreWrapperMock,
 	provideAlertControllerMock,
 	createScannerServiceMock,
+	requireDefined,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 import { ScannerService } from './scanner.service';
@@ -13,7 +14,29 @@ import { AnalyticsWrapper } from '@santashop/core';
 import { firstValueFrom, Subject } from 'rxjs';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ZXingScannerModule } from '@zxing/ngx-scanner';
+
+@Component({
+	selector: 'zxing-scanner',
+	template: '',
+	standalone: true,
+})
+class ZXingScannerStubComponent {
+	@Input() public formats: readonly unknown[] = [];
+	@Input() public device?: MediaDeviceInfo;
+	@Input() public autostart = false;
+	@Input() public enable = false;
+	@Input() public delayBetweenScanSuccess = 0;
+	@Output() public readonly camerasFound = new EventEmitter<MediaDeviceInfo[]>();
+	@Output() public readonly deviceChange = new EventEmitter<MediaDeviceInfo>();
+	@Output() public readonly permissionResponse = new EventEmitter<boolean>();
+	@Output() public readonly scanSuccess = new EventEmitter<string>();
+	@Output() public readonly scanError = new EventEmitter<Error>();
+
+	public readonly scanStop = vi.fn();
+}
 
 interface ScanPageInternals {
 	scanResult: Subject<{ code: string; inputMethod: 'camera' | 'manual' } | undefined>;
@@ -29,6 +52,10 @@ describe('ScanPage', () => {
 	beforeEach(async () => {
 		resolve.mockReset();
 		logEventWithParams.mockReset();
+		TestBed.overrideComponent(ScanPage, {
+			remove: { imports: [ZXingScannerModule] },
+			add: { imports: [ZXingScannerStubComponent] },
+		});
 		TestBed.configureTestingModule({
 			imports: [ScanPage],
 			providers: [
@@ -95,7 +122,7 @@ describe('ScanPage', () => {
 	it('starts subscriptions on entry and deterministically stops them on leave', async () => {
 		component.ionViewWillEnter();
 
-		await expect(firstValueFrom(component.cameraEnabled$)).resolves.toBe(true);
+		await expect(firstValueFrom(component.cameraEnabled$)).resolves.toBe(false);
 
 		component.ionViewWillLeave();
 
@@ -177,10 +204,12 @@ describe('ScanPage', () => {
 
 		component.enterCodeManually();
 		await fixture.whenStable();
-		const options = vi.mocked(alerts.create).mock.calls[0]![0] as {
+		const options = requireDefined(vi.mocked(alerts.create).mock.calls[0])[0] as {
 			buttons: { role?: string; handler?: (value: Record<string, string>) => void }[];
 		};
-		const submit = options.buttons.find((button) => button.role === 'ok')!.handler!;
+		const submit = requireDefined(
+			requireDefined(options.buttons.find((button) => button.role === 'ok')).handler,
+		);
 		submit({ 0: 'short' });
 		await fixture.whenStable();
 		expect(resolve).not.toHaveBeenCalled();
@@ -211,12 +240,14 @@ describe('ScanPage', () => {
 		component.ionViewWillEnter();
 		(component as unknown as ScanPageInternals).scanResult.next({ code: 'ZXCVBNM', inputMethod: 'camera' });
 		await fixture.whenStable();
-		const options = vi.mocked(alerts.create).mock.calls.at(-1)![0] as {
+		const options = requireDefined(vi.mocked(alerts.create).mock.calls.at(-1))[0] as {
 			message: string;
 			buttons: { role?: string; handler?: () => Promise<boolean> }[];
 		};
 		expect(options.message).toBe('That registration could not be found');
-		await options.buttons.find((button) => button.role === 'search')!.handler!();
+		await requireDefined(
+			requireDefined(options.buttons.find((button) => button.role === 'search')).handler,
+		)();
 		expect(navigate).toHaveBeenCalledWith(['admin/search']);
 		component.ionViewWillLeave();
 	});

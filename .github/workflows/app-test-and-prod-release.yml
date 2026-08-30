@@ -49,6 +49,7 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit:security
       - run: pnpm run ci:app:config:test
       - run: pnpm run test:browser:setup
       - run: pnpm run ci:core:test
@@ -88,6 +89,7 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit:security
       - run: pnpm run ci:app:config:prod
       - run: pnpm run test:browser:setup
       - run: pnpm run ci:core:test

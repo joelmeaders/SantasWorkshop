@@ -1,4 +1,4 @@
-import { parseAsync } from 'json2csv';
+import { AsyncParser } from '@json2csv/node';
 import { getFunctions } from 'firebase-admin/functions';
 import {
 	COLLECTION_SCHEMA,
@@ -185,9 +185,10 @@ const executeExport = async (
 			.map((doc) => doc.data())
 			.filter((record) => Boolean(record['registrationSubmittedOn']));
 	}
-	const output = await parseAsync(rows, {
+	const parser = new AsyncParser({
 		fields: ['emailAddress', 'firstName', 'lastName', 'zipCode'],
 	});
+	const output = await parser.parse(rows).promise();
 	const prefix = isMarketing ? 'marketing' : 'registered';
 	const exportPath = `owner-exports/${prefix}/${operationId}.csv`;
 	await admin

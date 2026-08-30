@@ -60,6 +60,7 @@ jobs:
           node-version: '24'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit:security
       - run: pnpm run functions:test:unit
 
   integration_tests:

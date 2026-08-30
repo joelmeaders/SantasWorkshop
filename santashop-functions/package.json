@@ -24,11 +24,11 @@
 	"main": "dist/index.js",
 	"dependencies": {
 		"@aws-sdk/client-ses": "catalog:functions",
+		"@json2csv/node": "catalog:functions",
 		"dateformat": "catalog:functions",
 		"firebase": "catalog:functions",
 		"firebase-admin": "catalog:functions",
 		"firebase-functions": "catalog:functions",
-		"json2csv": "catalog:functions",
 		"qrcode": "catalog:functions",
 		"uuid": "catalog:functions"
 	},
@@ -38,7 +38,6 @@
 		"@babel/preset-env": "catalog:functions",
 		"@babel/preset-typescript": "catalog:functions",
 		"@types/dateformat": "catalog:functions",
-		"@types/json2csv": "catalog:functions",
 		"@types/node": "catalog:functions",
 		"@types/qrcode": "catalog:functions",
 		"@typescript-eslint/eslint-plugin": "catalog:functions",

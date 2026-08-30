@@ -61,18 +61,41 @@ duplicate check-ins, or prevent staff from serving customers. Staff should use
 the schedule and registration reports to redistribute operational capacity when
 a slot exceeds its target.
 
+## Dependency security
+
+Run `pnpm run audit:security` from the workspace root. It audits the complete
+production and development dependency graph and fails when a new advisory is
+present. Production dependencies must also remain clean under
+`pnpm audit --prod`.
+
+The gate excludes advisories for which the registry publishes no resolution.
+There are currently two such `image-size` advisories: the registry marks all
+versions through 2.0.2 as affected, while this locked graph contains version
+0.5.5. That version has no ICNS, JXL, or HEIF parser—the only parsers named by
+GHSA-w3rx-r6r6-pgpr and GHSA-5p2g-fcmc-qvqq—and this repository has no Less
+source files. Recheck the exception whenever Angular replaces its Less
+toolchain or the lockfile changes the installed `image-size` version. Any new
+unfixable advisory must receive an equivalent reachability review before the
+release proceeds.
+
+The workspace build-script allowlist is intentional and limited to known
+Firebase, Angular, bundler, and native-helper dependencies. Angular runs
+zoneless and tests run with Vitest, so the unused `zone.js` and Jest peers are
+intentionally not installed.
+
 ## Required release gates
 
 For every merge to `master`, the test backend workflow must:
 
 1. install from the locked dependency graph;
-2. pass Function unit and emulator integration suites;
-3. deploy Functions, Firestore rules/indexes, Storage rules, and Realtime
+2. pass the full dependency security audit;
+3. pass Function unit and emulator integration suites;
+4. deploy Functions, Firestore rules/indexes, Storage rules, and Realtime
    Database rules as one backend release;
-4. remove retired Functions with the non-interactive `--force` deploy;
-5. compare the live Function list to production source exports and fail on any
+5. remove retired Functions with the non-interactive `--force` deploy;
+6. compare the live Function list to production source exports and fail on any
    missing or unexpected Function;
-6. complete customer and admin end-to-end suites with every Axe WCAG 2.2 AA
+7. complete customer and admin end-to-end suites with every Axe WCAG 2.2 AA
    violation treated as a failure.
 
 Before production promotion, repeat the test-environment critical journeys with

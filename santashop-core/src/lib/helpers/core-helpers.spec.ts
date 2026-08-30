@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Child } from '@santashop/models';
 import {
@@ -38,8 +37,7 @@ describe('core helpers', () => {
 
 	it('converts dates and timestamps and parses local calendar dates', () => {
 		const date = new Date('2026-12-10T12:00:00Z');
-		dateToTimestamp(date);
-		expect(Timestamp.fromDate).toHaveBeenCalledWith(date);
+		expect(dateToTimestamp(date).toDate()).toEqual(date);
 		expect(timestampToDate({ toDate: () => date } as unknown as Date)).toBe(date);
 		expect(timestampToDate(date)).toBe(date);
 		const local = yyyymmddToLocalDate('2026-12-15');

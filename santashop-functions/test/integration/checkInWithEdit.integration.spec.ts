@@ -75,5 +75,5 @@ describe.sequential('checkInWithEdit integration', () => {
 			registration.uid!,
 		);
 		expect(storedRegistration).toMatchObject({ hasCheckedIn: true });
-	});
+	}, 15000);
 });

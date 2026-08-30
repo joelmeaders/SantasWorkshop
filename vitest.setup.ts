@@ -33,9 +33,20 @@ vi.mock('firebase/storage', () => ({
 }));
 
 class Timestamp {
-	public static fromDate = vi.fn().mockReturnValue(new Timestamp());
-	public static now = vi.fn().mockReturnValue(new Timestamp());
-	public toDate = vi.fn().mockReturnValue(new Date());
+	private readonly date: Date;
+
+	public constructor(value: Date | number = new Date(), nanoseconds = 0) {
+		this.date =
+			value instanceof Date
+				? new Date(value)
+				: new Date(value * 1000 + nanoseconds / 1_000_000);
+	}
+
+	public static readonly fromDate = vi.fn(
+		(date: Date): Timestamp => new Timestamp(date),
+	);
+	public static readonly now = vi.fn((): Timestamp => new Timestamp());
+	public readonly toDate = vi.fn((): Date => new Date(this.date));
 }
 
 vi.mock('firebase/firestore', () => ({

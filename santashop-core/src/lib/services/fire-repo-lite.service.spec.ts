@@ -21,7 +21,11 @@ vi.mock('firebase/firestore', () => ({
 	onSnapshot: vi.fn(),
 	query: vi.fn(),
 	setDoc: vi.fn(),
-	Timestamp: class {},
+	Timestamp: class {
+		public static readonly fromDate = vi.fn((date: Date) => ({
+			toDate: (): Date => date,
+		}));
+	},
 }));
 
 describe('FireRepoLite', () => {

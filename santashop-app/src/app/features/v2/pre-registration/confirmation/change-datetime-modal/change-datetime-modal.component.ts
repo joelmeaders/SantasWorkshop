@@ -37,6 +37,30 @@ import {
 } from 'rxjs/operators';
 import { TimeSlotPipe, timestampToDate } from '@santashop/core';
 
+const EVENT_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
+	day: '2-digit',
+	month: '2-digit',
+	timeZone: 'America/Denver',
+	year: 'numeric',
+});
+
+const toEventDayKey = (date: Date): number => {
+	const parts = Object.fromEntries(
+		EVENT_DATE_FORMATTER.formatToParts(date).map(({ type, value }) => [
+			type,
+			value,
+		]),
+	);
+
+	// Noon UTC stays on the same calendar date when the template formats it as MST.
+	return Date.UTC(
+		Number(parts['year']),
+		Number(parts['month']) - 1,
+		Number(parts['day']),
+		12,
+	);
+};
+
 @Component({
 	selector: 'app-change-datetime-modal',
 	templateUrl: './change-datetime-modal.component.html',
@@ -114,9 +138,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 
 	public readonly availableDays$ = this.filteredSlots$.pipe(
 		takeUntil(this.destroy$),
-		map((slots) =>
-			slots.map((slot) => Date.parse(slot.dateTime.toDateString())),
-		),
+		map((slots) => slots.map((slot) => toEventDayKey(slot.dateTime))),
 		map((dates) => [...new Set(dates)]),
 		shareReplay(1),
 	);
@@ -128,7 +150,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 			takeUntil(this.destroy$),
 			map((slots) =>
 				slots.filter(
-					(slot) => Date.parse(slot.dateTime.toDateString()) === date,
+					(slot) => toEventDayKey(slot.dateTime) === date,
 				),
 			),
 			shareReplay(1),

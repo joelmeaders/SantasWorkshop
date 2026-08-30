@@ -54,6 +54,21 @@ describe('ChangeDatetimeModalComponent', () => {
 		expect(await firstValueFrom(component.availableDays$)).toHaveLength(1);
 	});
 
+	it('groups slots by the Denver event date independently of the host timezone', async (): Promise<void> => {
+		slots.next([
+			slot('afternoon', new Date('2026-12-07T16:00:00.000Z')),
+			slot('evening', new Date('2026-12-08T01:00:00.000Z')),
+		]);
+
+		const eventDay = Date.UTC(2026, 11, 7, 12);
+		expect(await firstValueFrom(component.availableDays$)).toEqual([
+			eventDay,
+		]);
+		expect(
+			await firstValueFrom(component.availableSlotsByDay$(eventDay)),
+		).toHaveLength(2);
+	});
+
 	it('reports availability and dismisses with the selected action', async (): Promise<void> => {
 		const selected = slot('selected', new Date('2026-12-20T11:00:00'));
 

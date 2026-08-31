@@ -57,7 +57,7 @@ jobs:
           version: '10.14.0'
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24.18.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run audit:security
@@ -73,7 +73,7 @@ jobs:
           version: '10.14.0'
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24.18.0'
           cache: 'pnpm'
       - uses: actions/setup-java@v4
         with:

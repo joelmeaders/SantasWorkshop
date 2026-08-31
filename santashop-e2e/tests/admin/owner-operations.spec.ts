@@ -28,9 +28,13 @@ test.describe('owner protected operations', () => {
 
 		for (const operation of operations) {
 			await page.locator('ion-select[formControlName="operation"]').click();
-			const alert = page.locator('ion-alert');
-			await alert.getByText(operation, { exact: true }).click();
+			const alert = page.locator('ion-alert').last();
+			await expect(alert).toBeVisible();
+			await alert
+				.getByRole('radio', { name: operation, exact: true })
+				.click();
 			await alert.getByRole('button', { name: 'OK', exact: true }).click();
+			await expect(alert).toBeHidden();
 			await page.locator('#ownerOperationPreview').click();
 			await expect(page.locator('#previewHeading')).toBeVisible({
 				timeout: 15000,
@@ -47,9 +51,13 @@ test.describe('owner protected operations', () => {
 		await signInAdminViaUi(page, owner);
 		await page.goto('/admin/owner-operations');
 		await page.locator('ion-select[formControlName="operation"]').click();
-		const operationPicker = page.locator('ion-alert');
-		await operationPicker.getByText('Repair check-in flags', { exact: true }).click();
+		const operationPicker = page.locator('ion-alert').last();
+		await expect(operationPicker).toBeVisible();
+		await operationPicker
+			.getByRole('radio', { name: 'Repair check-in flags', exact: true })
+			.click();
 		await operationPicker.getByRole('button', { name: 'OK', exact: true }).click();
+		await expect(operationPicker).toBeHidden();
 		await page.locator('#ownerOperationPreview').click();
 		await expect(page.locator('#previewHeading')).toBeVisible({ timeout: 15000 });
 
@@ -70,9 +78,13 @@ test.describe('owner protected operations', () => {
 		await signInAdminViaUi(page, defaultOwnerAccount());
 		await page.goto('/admin/owner-operations');
 		await page.locator('ion-select[formControlName="operation"]').click();
-		const alert = page.locator('ion-alert');
-		await alert.getByText('Repair check-in flags', { exact: true }).click();
+		const alert = page.locator('ion-alert').last();
+		await expect(alert).toBeVisible();
+		await alert
+			.getByRole('radio', { name: 'Repair check-in flags', exact: true })
+			.click();
 		await alert.getByRole('button', { name: 'OK', exact: true }).click();
+		await expect(alert).toBeHidden();
 		await page.locator('#ownerOperationPreview').click();
 		await expect(page.locator('#previewHeading')).toBeVisible({ timeout: 15000 });
 

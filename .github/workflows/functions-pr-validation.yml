@@ -63,6 +63,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run audit:security
+      - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
 
   integration_tests:

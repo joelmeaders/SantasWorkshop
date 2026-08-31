@@ -12,30 +12,28 @@ Object.defineProperty(navigator, 'mediaDevices', {
 	},
 });
 
-const firebaseFunction = vi.fn();
-
-vi.mock('firebase/analytics', () => ({ logEvent: firebaseFunction }));
+vi.mock('firebase/analytics', () => ({ logEvent: vi.fn() }));
 
 vi.mock('firebase/auth', () => ({
-	EmailAuthProvider: { credential: firebaseFunction },
-	onAuthStateChanged: firebaseFunction,
-	reauthenticateWithCredential: firebaseFunction,
-	sendPasswordResetEmail: firebaseFunction,
-	signInWithEmailAndPassword: firebaseFunction,
-	updatePassword: firebaseFunction,
+	EmailAuthProvider: { credential: vi.fn() },
+	onAuthStateChanged: vi.fn(),
+	reauthenticateWithCredential: vi.fn(),
+	sendPasswordResetEmail: vi.fn(),
+	signInWithEmailAndPassword: vi.fn(),
+	updatePassword: vi.fn(),
 }));
 
-vi.mock('firebase/functions', () => ({ httpsCallable: firebaseFunction }));
+vi.mock('firebase/functions', () => ({ httpsCallable: vi.fn() }));
 
 vi.mock('firebase/storage', () => ({
-	getDownloadURL: firebaseFunction,
-	ref: firebaseFunction,
+	getDownloadURL: vi.fn(),
+	ref: vi.fn(),
 }));
 
 class Timestamp {
 	private readonly date: Date;
 
-	public constructor(value: Date | number = new Date(), nanoseconds = 0) {
+	constructor(value: Date | number = new Date(), nanoseconds = 0) {
 		this.date =
 			value instanceof Date
 				? new Date(value)
@@ -50,17 +48,17 @@ class Timestamp {
 }
 
 vi.mock('firebase/firestore', () => ({
-	addDoc: firebaseFunction,
-	collection: firebaseFunction,
-	deleteDoc: firebaseFunction,
-	doc: firebaseFunction,
-	getDoc: firebaseFunction,
-	getDocs: firebaseFunction,
-	limit: firebaseFunction,
-	onSnapshot: firebaseFunction,
-	orderBy: firebaseFunction,
-	query: firebaseFunction,
-	setDoc: firebaseFunction,
+	addDoc: vi.fn(),
+	collection: vi.fn(),
+	deleteDoc: vi.fn(),
+	doc: vi.fn(),
+	getDoc: vi.fn(),
+	getDocs: vi.fn(),
+	limit: vi.fn(),
+	onSnapshot: vi.fn(),
+	orderBy: vi.fn(),
+	query: vi.fn(),
+	setDoc: vi.fn(),
 	Timestamp,
-	where: firebaseFunction,
+	where: vi.fn(),
 }));

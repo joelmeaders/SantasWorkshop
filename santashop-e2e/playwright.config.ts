@@ -47,6 +47,9 @@ export default defineConfig({
 		/* Base URL to use in actions like `await page.goto('/')`. */
 		baseURL,
 
+		/* Exercise dates and appointment times in the event's business timezone. */
+		timezoneId: 'America/Denver',
+
 		/* Keep browser execution headless for CI-safe, non-interactive runs. */
 		headless: true,
 

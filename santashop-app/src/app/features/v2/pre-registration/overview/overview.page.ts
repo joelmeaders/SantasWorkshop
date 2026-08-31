@@ -24,8 +24,8 @@ import {
 	Child,
 	DateTimeSlot,
 } from '@santashop/models';
-import { combineLatest, Subject } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, Subject } from 'rxjs';
+import { filter, map, shareReplay, take, takeUntil, timeout } from 'rxjs/operators';
 import { where } from 'firebase/firestore';
 import { PreRegistrationService } from '../../../../core';
 import { ChildSaveRequest, ChildrenCardComponent } from './children-card/children-card.component';
@@ -208,6 +208,13 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 				mutationId: this.createMutationId(),
 			});
 			if (!result.data) throw new Error('We could not submit your registration. Please try again.');
+			await firstValueFrom(
+				this.preregistrationService.registrationComplete$.pipe(
+					filter(Boolean),
+					take(1),
+					timeout(15000),
+				),
+			);
 			this.analytics.logEvent('submit_registration');
 			await this.router.navigate(['/pre-registration/confirmation']);
 		});

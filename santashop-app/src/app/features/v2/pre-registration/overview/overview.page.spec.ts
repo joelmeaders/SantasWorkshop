@@ -40,12 +40,14 @@ describe('OverviewPage', () => {
 	};
 	const childCount = new BehaviorSubject(0);
 	const dateTimeSlot = new BehaviorSubject<DateTimeSlot | undefined>(undefined);
+	const registrationComplete = new BehaviorSubject(false);
 	const registrationSubmitted = new BehaviorSubject(false);
 	const preregistrationService = {
 		userRegistration$: of(undefined),
 		children$: of([]),
 		childCount$: childCount.asObservable(),
 		dateTimeSlot$: dateTimeSlot.asObservable(),
+		registrationComplete$: registrationComplete.asObservable(),
 		registrationSubmitted$: registrationSubmitted.asObservable(),
 		noErrorsInChildren$: of(true),
 		saveDraftChild: vi.fn().mockName('saveDraftChild'),
@@ -63,6 +65,7 @@ describe('OverviewPage', () => {
 		toastController.dismiss.mockClear();
 		childCount.next(0);
 		dateTimeSlot.next(undefined);
+		registrationComplete.next(false);
 		registrationSubmitted.next(false);
 		preregistrationService.saveDraftChild.mockClear();
 		preregistrationService.saveDraftChild.mockResolvedValue({ data: true });
@@ -256,9 +259,14 @@ describe('OverviewPage', () => {
 		const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 		preregistrationService.completeRegistration.mockResolvedValue({ data: true });
 
-		await component.submitRegistration();
+		const submission = component.submitRegistration();
+		await Promise.resolve();
+		expect(navigate).not.toHaveBeenCalled();
+		registrationComplete.next(true);
+		await submission;
 
 		expect(navigate).toHaveBeenCalledWith(['/pre-registration/confirmation']);
+		registrationComplete.next(false);
 		preregistrationService.completeRegistration.mockResolvedValue({ data: false });
 		await component.submitRegistration();
 		expect(toastController.create).toHaveBeenLastCalledWith(

@@ -4,7 +4,7 @@
 !webpack.config.js
 
 # Except the ESLint config file
-!.eslintrc.js
+!eslint.config.js
 
 # TypeScript v1 declaration files
 typings/

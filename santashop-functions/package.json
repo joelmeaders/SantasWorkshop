@@ -5,6 +5,7 @@
 		"config:test": "node ../config.functions.cjs test",
 		"config:prod": "node ../config.functions.cjs prod",
 		"lint": "eslint --ext .ts . --fix --cache --quiet",
+		"lint:check": "eslint --ext .ts . --quiet",
 		"build": "webpack",
 		"test": "pnpm run test:unit",
 		"test:unit": "vitest run --config vitest.config.ts test/unit",

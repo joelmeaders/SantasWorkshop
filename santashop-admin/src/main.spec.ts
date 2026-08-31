@@ -60,6 +60,7 @@ vi.mock('firebase/firestore', () => ({
 	getDoc: firebaseModule.function,
 	getDocs: firebaseModule.function,
 	getFirestore: firebaseModule.function,
+	initializeFirestore: firebaseModule.function,
 	limit: firebaseModule.function,
 	onSnapshot: firebaseModule.function,
 	orderBy: firebaseModule.function,
@@ -111,6 +112,10 @@ describe('admin bootstrap', () => {
 			'127.0.0.1',
 			8080,
 		);
+		expect(dependencies.initializeFirestore).toHaveBeenCalledWith('app', {
+			experimentalForceLongPolling: true,
+		});
+		expect(dependencies.getFirestore).not.toHaveBeenCalled();
 		expect(dependencies.getAnalytics).not.toHaveBeenCalled();
 		expect(dependencies.enableProdMode).not.toHaveBeenCalled();
 		const options = requireDefined(
@@ -155,6 +160,8 @@ describe('admin bootstrap', () => {
 		expect(dependencies.connectAuthEmulator).not.toHaveBeenCalled();
 		expect(dependencies.connectFunctionsEmulator).not.toHaveBeenCalled();
 		expect(dependencies.connectFirestoreEmulator).not.toHaveBeenCalled();
+		expect(dependencies.initializeFirestore).not.toHaveBeenCalled();
+		expect(dependencies.getFirestore).toHaveBeenCalledWith('app');
 		expect(dependencies.enableProdMode).toHaveBeenCalledOnce();
 		expect(dependencies.getAnalytics).toHaveBeenCalledWith('app');
 		const options = requireDefined(
@@ -250,6 +257,7 @@ function createDependencies(): AdminBootstrapDependencies {
 		getFunctions: vi.fn().mockReturnValue('functions'),
 		initializeApp: vi.fn().mockReturnValue('app'),
 		initializeAppCheck: vi.fn(),
+		initializeFirestore: vi.fn().mockReturnValue('firestore'),
 		provideHttpClient: vi.fn().mockReturnValue('http-provider'),
 		provideIonicAngular: vi.fn().mockReturnValue('ionic-provider'),
 		provideRouter: vi.fn().mockReturnValue('router-provider'),

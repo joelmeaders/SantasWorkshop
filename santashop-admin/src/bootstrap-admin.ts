@@ -9,6 +9,7 @@ import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import {
 	connectFirestoreEmulator,
 	getFirestore,
+	initializeFirestore,
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
@@ -62,6 +63,7 @@ export interface AdminBootstrapDependencies {
 	readonly getFunctions: typeof getFunctions;
 	readonly initializeApp: typeof initializeApp;
 	readonly initializeAppCheck: typeof initializeAppCheck;
+	readonly initializeFirestore: typeof initializeFirestore;
 	readonly provideHttpClient: typeof provideHttpClient;
 	readonly provideIonicAngular: typeof provideIonicAngular;
 	readonly provideRouter: typeof provideRouter;
@@ -92,6 +94,7 @@ const defaultDependencies: AdminBootstrapDependencies = {
 	getFunctions,
 	initializeApp,
 	initializeAppCheck,
+	initializeFirestore,
 	provideHttpClient,
 	provideIonicAngular,
 	provideRouter,
@@ -152,7 +155,11 @@ export function bootstrapAdminApplication(
 		);
 	}
 
-	const firebaseFirestore = dependencies.getFirestore(firebaseApp);
+	const firebaseFirestore = runtimeConfig.production
+		? dependencies.getFirestore(firebaseApp)
+		: dependencies.initializeFirestore(firebaseApp, {
+				experimentalForceLongPolling: true,
+			});
 	if (!runtimeConfig.production) {
 		dependencies.connectFirestoreEmulator(
 			firebaseFirestore,

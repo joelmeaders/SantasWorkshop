@@ -135,6 +135,16 @@ jobs:
       - run: pnpm run functions:test:integration
       - run: pnpm run e2e:browser:setup:ci
       - run: pnpm run e2e:test
+      - name: Upload E2E failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functions-release-e2e-failure-${{ github.run_id }}
+          path: |
+            santashop-e2e/test-results
+            santashop-e2e/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
       - run: pnpm run ci:functions:deploy:test
       - name: Verify live test Functions match source
         shell: bash

@@ -207,9 +207,11 @@ Required GitHub secrets for the Functions workflows:
 
 Functions deploys are GitHub Actions-only. Direct local `firebase deploy --only functions` commands are rejected by the Functions predeploy guard. Merge to `master` to deploy test, validate that environment, and then manually promote the tested `release_ref` to production.
 
-The backend release also deploys Firestore rules/indexes, Storage rules, and
-Realtime Database rules, removes retired Functions, and fails if the live
-Function inventory does not exactly match source. See
+The test backend release deploys Firestore rules/indexes and Storage rules,
+removes retired Functions, and fails if the live Function inventory does not
+exactly match source. The test project's unused Realtime Database instance is
+disabled, so Realtime Database rules are deployed only by the manual production
+release, where the instance is active. See
 [`docs/release-readiness.md`](docs/release-readiness.md) for capacity profiles,
 warm-instance cost controls, load gates, monitoring, backup/restore checks, and
 the accepted overbooking policy.

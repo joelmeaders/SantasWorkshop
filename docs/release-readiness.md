@@ -90,13 +90,20 @@ For every merge to `master`, the test backend workflow must:
 1. install from the locked dependency graph;
 2. pass the full dependency security audit;
 3. pass Function unit and emulator integration suites;
-4. deploy Functions, Firestore rules/indexes, Storage rules, and Realtime
-   Database rules as one backend release;
+4. deploy Functions, Firestore rules/indexes, and Storage rules as one test
+   backend release;
 5. remove retired Functions with the non-interactive `--force` deploy;
 6. compare the live Function list to production source exports and fail on any
    missing or unexpected Function;
 7. complete customer and admin end-to-end suites with every Axe WCAG 2.2 AA
    violation treated as a failure.
+
+The test project's unused Realtime Database instance is disabled. Test releases
+must not target it because Firebase aborts the entire backend deployment before
+Functions are updated. The manual production release continues to deploy
+Realtime Database rules to the active production instance. Realtime Database
+rule changes therefore require explicit production-release review; do not claim
+that the test deployment validated them.
 
 Before production promotion, repeat the test-environment critical journeys with
 production-equivalent runtime settings. Do not promote when a deploy, parity

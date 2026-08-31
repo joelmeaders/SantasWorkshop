@@ -45,7 +45,7 @@
     "ci:app:build:test": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=development",
     "ci:app:build:prod": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=production",
     "ci:app:build": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && ng build santashop-app --configuration=production",
-    "ci:functions:deploy:test": "pnpm run config:functions:test && firebase deploy --project santas-workshop-test --only functions,firestore:rules,firestore:indexes,storage,database --force",
+    "ci:functions:deploy:test": "pnpm run config:functions:test && firebase deploy --project santas-workshop-test --only functions,firestore:rules,firestore:indexes,storage --force",
     "ci:functions:deploy:prod": "pnpm run config:functions:prod && firebase deploy --project santas-workshop-193b5 --only functions,firestore:rules,firestore:indexes,storage,database --force",
     "ci:functions:verify:test": "firebase functions:list --project santas-workshop-test --json > .firebase-functions-test.json && node scripts/verify-functions-parity.cjs .firebase-functions-test.json",
     "ci:functions:verify:prod": "firebase functions:list --project santas-workshop-193b5 --json > .firebase-functions-prod.json && node scripts/verify-functions-parity.cjs .firebase-functions-prod.json",

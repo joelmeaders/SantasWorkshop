@@ -6,7 +6,9 @@ on:
       - master
     paths:
       - 'santashop-functions/**'
+      - 'santashop-e2e/**'
       - 'firebase.json'
+      - 'firebase.e2e.json'
       - 'firestore.rules'
       - 'firestore.indexes.json'
       - 'storage.rules'

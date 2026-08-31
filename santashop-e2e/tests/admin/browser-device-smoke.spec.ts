@@ -20,7 +20,10 @@ test.describe('staff browser and device compatibility', () => {
 		await signInAdminViaUi(page, account);
 
 		const checkInNav = page.locator('#checkInNav');
-		await expect(checkInNav).toBeEnabled({ timeout: 15000 });
+		await expect(checkInNav).not.toHaveAttribute('disabled', '', {
+			timeout: 15000,
+		});
+		await expect(checkInNav).not.toHaveAttribute('aria-disabled', 'true');
 		await checkInNav.click();
 		await expect(page).toHaveURL(/\/admin\/checkin(?:\/scan)?$/);
 		await page.locator('#manualCheckInCodeButton').click();

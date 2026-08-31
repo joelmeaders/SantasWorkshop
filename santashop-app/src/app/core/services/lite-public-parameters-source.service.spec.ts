@@ -103,10 +103,16 @@ describe('LitePublicParametersSource', () => {
 
 		visibilityState = 'visible';
 		document.dispatchEvent(new Event('visibilitychange'));
-		globalThis.dispatchEvent(new Event('focus'));
-		globalThis.dispatchEvent(new Event('online'));
 		await vi.advanceTimersByTimeAsync(0);
 		expect(getDocument).toHaveBeenCalledTimes(2);
+
+		globalThis.dispatchEvent(new Event('focus'));
+		await vi.advanceTimersByTimeAsync(0);
+		expect(getDocument).toHaveBeenCalledTimes(3);
+
+		globalThis.dispatchEvent(new Event('online'));
+		await vi.advanceTimersByTimeAsync(0);
+		expect(getDocument).toHaveBeenCalledTimes(4);
 		subscription.unsubscribe();
 	});
 

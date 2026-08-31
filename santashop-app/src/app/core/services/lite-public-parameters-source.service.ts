@@ -6,7 +6,6 @@ import {
 	EMPTY,
 	catchError,
 	distinctUntilChanged,
-	exhaustMap,
 	filter,
 	from,
 	fromEvent,
@@ -14,6 +13,7 @@ import {
 	merge,
 	Observable,
 	shareReplay,
+	switchMap,
 	timer,
 } from 'rxjs';
 import {
@@ -48,7 +48,7 @@ export class LitePublicParametersSource implements PublicParametersSource {
 
 	public readonly publicParameters$: Observable<PublicParameters | undefined> =
 		merge(this.scheduledRefresh$, this.lifecycleRefresh$).pipe(
-			exhaustMap(() => this.readPublicParameters()),
+			switchMap(() => this.readPublicParameters()),
 			distinctUntilChanged(
 				(previous, current) =>
 					JSON.stringify(previous) === JSON.stringify(current),

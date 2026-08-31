@@ -1,28 +1,53 @@
+import { ChangeUserInfo, COLLECTION_SCHEMA } from '../models';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
+import { serializeError } from '../utility/errors';
 import {
-	ChangeUserInfo,
-	COLLECTION_SCHEMA,
-} from '../../../santashop-models/src';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
+	requireAuthenticatedUid,
+	requireCallableData,
+	requireTrimmedString,
+	requireZipCodeValue,
+	throwMappedAuthHttpsError,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
-admin.initializeApp();
+const log = createFunctionLogger('changeAccountInformation');
 
-export default async (
-	data: ChangeUserInfo,
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
-	const uid = context.auth?.uid;
-
-	if (!uid) throw new HttpsError('not-found', 'uid null');
-
-	if (!data || !data.firstName || !data.lastName || !data.zipCode)
-		throw new HttpsError('data-loss', 'missing request information');
-
-	await admin.auth().updateUser(uid, {
-		displayName: `${data.firstName} ${data.lastName}`,
+export default async function changeAccountInformation(
+	request: CallableRequest<ChangeUserInfo>,
+): Promise<boolean> {
+	const uid = requireAuthenticatedUid(request);
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		return {
+			firstName: requireTrimmedString(
+				requestData['firstName'],
+				'First name',
+			),
+			lastName: requireTrimmedString(
+				requestData['lastName'],
+				'Last name',
+			),
+			zipCode: requireZipCodeValue(requestData['zipCode']),
+		};
 	});
+
+	try {
+		await admin.auth().updateUser(uid, {
+			displayName: `${data.firstName} ${data.lastName}`,
+		});
+	} catch (error) {
+		log.error(
+			'Failed to update auth profile during account update',
+			{ uid },
+			error,
+		);
+		throwMappedAuthHttpsError(
+			error,
+			'Unable to update account information.',
+		);
+	}
 
 	const batch = admin.firestore().batch();
 
@@ -39,6 +64,8 @@ export default async (
 	const indexDoc = {
 		firstName: data.firstName.toLowerCase(),
 		lastName: data.lastName.toLowerCase(),
+		displayFirstName: data.firstName,
+		displayLastName: data.lastName,
 		zip: data.zipCode,
 	};
 
@@ -56,20 +83,24 @@ export default async (
 
 	batch.set(registrationDocRef, registrationDoc, { merge: true });
 
-	return batch
-		.commit()
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(
-				`Error updating user document ${uid} with ${JSON.stringify(
-					data,
-				)}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				'Error updating user document',
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return true;
+	} catch (error) {
+		log.error(
+			'Failed to update account information',
+			{
+				uid,
+				updatedFields: Object.keys(data ?? {}).sort((left, right) =>
+					left.localeCompare(right),
+				),
+			},
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			'Error updating user document',
+			serializeError(error),
+		);
+	}
+}

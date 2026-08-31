@@ -1,15 +1,211 @@
+.signup-shell {
+	margin-inline: auto;
+	max-width: var(--santa-page-width);
+	padding: clamp(1rem, 4vw, 2.5rem) var(--santa-gutter) 3rem;
+}
+
+.signup-row {
+	min-height: 100%;
+}
+
+.form-column {
+	max-width: 50rem;
+}
+
 .sign-up-card {
-	max-width: 630px;
+	--background: #fff;
+	margin-inline: auto;
+	max-width: 46rem;
+}
+
+.sign-up-card ion-card-content,
+.account-form,
+.account-form ion-list,
+.account-form ion-item-group {
+	background: #fff;
+}
+
+.account-form ion-item,
+.account-form ion-item-divider,
+.account-form ion-input {
+	--background: #fff;
+}
+
+.sign-up-card ion-card-header {
+	background:
+		radial-gradient(circle at 92% 10%, rgba(229, 169, 47, 0.24) 0 1.4rem, transparent 1.45rem),
+		linear-gradient(135deg, rgba(23, 100, 71, 0.1), rgba(255, 255, 255, 0));
+	min-height: 7.5rem;
+	padding-inline-end: clamp(7rem, 18vw, 9rem);
+	position: relative;
+}
+
+.signup-gift {
+	pointer-events: none;
+	position: absolute;
+	right: clamp(0.75rem, 3vw, 1.5rem);
+	top: 0.65rem;
+	transform: rotate(5deg);
+	user-select: none;
+	width: clamp(5.25rem, 13vw, 6.5rem);
+}
+
+.sign-up-card ion-card-subtitle {
+	color: var(--santa-evergreen);
+	margin-top: 0.5rem;
+}
+
+.form-section {
+	display: block;
+	margin-block: 0.5rem 1.5rem;
+}
+
+.form-section ion-item-divider {
+	--background: #fff;
+	--color: #000;
+	--ion-color-base: #fff;
+	--ion-color-contrast: #000;
+	margin-bottom: 0.75rem;
+}
+
+.legal-section {
+	background: #fff;
+	border: 1px solid rgba(229, 169, 47, 0.3);
+	border-radius: var(--santa-radius-md);
+	padding: 0.25rem 0.75rem 1rem;
 }
 
 .check-container {
-	padding-left: 16px;
+	padding-left: 1rem;
 }
 
 .check {
-	--size: 24px;
+	--border-color-checked: var(--santa-evergreen);
+	--checkbox-background-checked: var(--santa-evergreen);
+	--size: 1.5rem;
 }
 
-.back-button {
-	margin-inline-start: 10px;
+.signup-actions {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.75rem;
+}
+
+.signup-actions app-language-toggle {
+	display: block;
+	flex: 0 0 auto;
+}
+
+.signup-actions .customer-back-button {
+	margin: 0;
+}
+
+.submit-account {
+	min-width: min(100%, 16rem);
+}
+
+
+.referral-selector-item {
+	margin-block: 0.6rem;
+	width: 100%;
+}
+
+.referral-selector {
+	align-items: center;
+	appearance: none;
+	background: #fff;
+	border: 1px solid #cfdcd4;
+	border-radius: var(--santa-radius-sm);
+	color: inherit;
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	gap: 0.75rem;
+	padding: 0.75rem 0.9rem;
+	text-align: start;
+	width: 100%;
+}
+
+.referral-selector:hover {
+	background: rgba(23, 100, 71, 0.08);
+}
+
+.referral-selector:focus-visible {
+	outline: 3px solid var(--ion-color-primary);
+	outline-offset: 2px;
+}
+
+.referral-selector-label {
+	flex: 1 1 auto;
+	min-width: 0;
+	white-space: normal;
+}
+
+.referral-selector-question,
+.referral-selector-value {
+	display: block;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.referral-selector-question {
+	color: var(--santa-evergreen-deep);
+	font-weight: 600;
+}
+
+.referral-selector-required {
+	color: var(--ion-color-danger);
+	font-size: 0.875em;
+	font-weight: 500;
+	margin-inline-start: 0.25rem;
+}
+
+.referral-selector-chevron {
+	color: var(--ion-color-medium);
+	font-size: 1.5rem;
+	line-height: 1;
+}
+
+.referral-selector-placeholder {
+	color: var(--ion-color-medium);
+}
+
+.referral-selector-error {
+	display: block;
+	padding-inline: 16px;
+	padding-top: 4px;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+	.signup-shell {
+		padding-inline: 0;
+	}
+
+	.signup-actions {
+		padding-inline: 0.75rem;
+	}
+
+	.legal-section {
+		border-radius: var(--santa-radius-sm);
+		margin-inline: -0.25rem;
+	}
+
+	.submit-account {
+		width: 100%;
+	}
+
+	.sign-up-card ion-card-header {
+		min-height: 6.5rem;
+		padding-inline-end: 5.75rem;
+	}
+
+	.signup-gift {
+		right: 0.35rem;
+		top: 0.85rem;
+		width: 4.75rem;
+	}
 }

@@ -1,12 +1,15 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { Storage } from '@angular/fire/storage';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	provideActivatedRouteMock,
-	createAuthMock,
+	provideCustomerAuthMock,
+	provideFirestoreMock,
+	provideCustomerFunctionsMock,
+	provideCustomerStorageMock,
+	createPopoverControllerMock,
+	provideTranslateServiceMock,
 } from '../../../../test-helpers';
+import { PopoverController } from '@ionic/angular/standalone';
 
 import { PreRegistrationPage } from './pre-registration.page';
 
@@ -14,40 +17,40 @@ describe('PreRegistrationPage', () => {
 	let component: PreRegistrationPage;
 	let fixture: ComponentFixture<PreRegistrationPage>;
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [PreRegistrationPage],
 			providers: [
+				provideFirestoreMock(),
+				provideCustomerAuthMock(),
+				provideCustomerFunctionsMock(),
+				provideCustomerStorageMock(),
+				provideTranslateServiceMock(),
 				{
-					provide: Firestore,
-					useValue: jasmine.createSpyObj('Firestore', [
-						'collection',
-						'doc',
-					]),
-				},
-				{
-					provide: Auth,
-					useValue: createAuthMock(),
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				{
-					provide: Storage,
-					useValue: jasmine.createSpyObj('Storage', ['ref']),
+					provide: PopoverController,
+					useValue: createPopoverControllerMock(),
 				},
 				provideActivatedRouteMock(),
 			],
 		}).compileComponents();
 		fixture = TestBed.createComponent(PreRegistrationPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('offsets routed content below the header and mobile safe area', (): void => {
+		document.documentElement.style.setProperty('--ion-safe-area-top', '62px');
+		try {
+			const outlet = fixture.nativeElement.querySelector(
+				'ion-router-outlet#main',
+			) as HTMLElement;
+			expect(getComputedStyle(outlet).top).toBe('139px');
+		} finally {
+			document.documentElement.style.removeProperty('--ion-safe-area-top');
+		}
 	});
 });

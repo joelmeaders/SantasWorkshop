@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	ModalController,
-	IonLabel,
 	IonIcon,
 	IonButton,
+	IonButtons,
+	IonTitle,
 	IonToolbar,
-	IonFooter,
+	IonHeader,
 	IonContent,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
@@ -18,21 +19,15 @@ import { closeCircle } from 'ionicons/icons';
 	styleUrls: ['./terms-of-service-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		IonLabel,
-		IonIcon,
-		IonButton,
+		IonHeader,
 		IonToolbar,
-		IonFooter,
+		IonTitle,
+		IonButtons,
+		IonButton,
+		IonIcon,
+		IonContent,
 		TranslateModule,
-		IonContent,
-		IonContent,
-		IonFooter,
-		IonToolbar,
-		IonButton,
-		IonIcon,
-		IonLabel,
 	],
-	providers: [ModalController],
 })
 export class TermsOfServiceModalComponent {
 	private readonly modalController = inject(ModalController);

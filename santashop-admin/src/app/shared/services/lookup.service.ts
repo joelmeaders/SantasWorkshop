@@ -4,7 +4,7 @@ import {
 	orderBy,
 	QueryConstraint,
 	where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { FireRepoLite } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
@@ -60,7 +60,7 @@ export class LookupService {
 			.read(uid)
 			.pipe(map((results) => results ?? undefined));
 
-	// TODO: Separate by program year?
+	// This currently reads all years; callers can layer year-specific filtering if needed.
 	public readonly getCheckinByUid$ = (
 		uid: string,
 	): Observable<CheckIn | undefined> =>

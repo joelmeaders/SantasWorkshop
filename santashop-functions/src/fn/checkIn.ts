@@ -1,38 +1,48 @@
-import * as functions from 'firebase-functions/v1';
-import * as admin from 'firebase-admin';
-import { CallableContext } from 'firebase-functions/v1/https';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	CheckIn,
+	CheckInRequest,
 	COLLECTION_SCHEMA,
 	Registration,
-} from '../../../santashop-models/src';
+} from '../models';
 import {
 	calculateRegistrationStats,
 	isPartialRegistrationComplete,
 } from '../utility/registrations';
+import admin from '../firebase-admin';
+import { getErrorCode, getErrorMessage } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
+import { canCheckInToken } from '../utility/capabilities';
+import { recordCheckInRaceAttempt } from '../utility/registration-scan';
 
-admin.initializeApp();
+const log = createFunctionLogger('checkIn');
 
-export default (
-	record: Partial<Registration>,
-	context: CallableContext,
-): Promise<number> => {
-	if (!context.auth?.token?.admin) {
-		console.error(
-			`${context.auth?.uid} attempted to check in for uid ${record.uid} but is not an admin`,
-		);
-		throw new functions.https.HttpsError(
+export default async function checkIn(
+	request: CallableRequest<CheckInRequest>,
+): Promise<number> {
+	const record = request.data?.registration ?? {};
+	const inputMethod = request.data?.inputMethod;
+
+	if (!canCheckInToken(request.auth?.token)) {
+		log.warn('Non-admin attempted to check in a registration', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
+		throw new HttpsError(
 			'permission-denied',
 			'-99',
 			'You can only update your own records',
 		);
 	}
+	if (inputMethod !== 'camera' && inputMethod !== 'manual') {
+		throw new HttpsError('invalid-argument', 'Scan input method is invalid.');
+	}
 
 	if (!isPartialRegistrationComplete(record)) {
-		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`,
-		);
-		throw new functions.https.HttpsError(
+		log.warn('Attempted to check in an incomplete registration', {
+			uid: record.uid ?? null,
+		});
+		throw new HttpsError(
 			'failed-precondition',
 			'-11',
 			'Incomplete registration. Cannot continue.',
@@ -52,14 +62,68 @@ export default (
 		stats: calculateRegistrationStats(record, false),
 	} as CheckIn;
 
-	return checkinDocRef
-		.create(checkin)
-		.then(() => checkin.stats?.children ?? 0)
-		.catch((error) => {
-			throw new functions.https.HttpsError(
-				error.code === 6 ? 'already-exists' : 'internal',
-				error.message,
-				error,
+	const registrationDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
+
+	try {
+		let authoritativeRegistration: Registration | undefined;
+		const created = await admin.firestore().runTransaction(async (transaction) => {
+			const [registration, existingCheckIn] = await Promise.all([
+				transaction.get(registrationDocRef),
+				transaction.get(checkinDocRef),
+			]);
+			if (!registration.exists) {
+				throw new HttpsError(
+					'not-found',
+					'Registration was not found.',
+				);
+			}
+			authoritativeRegistration = {
+				uid: registration.id,
+				...registration.data(),
+			} as Registration;
+			if (
+				authoritativeRegistration.qrcode !== record.qrcode ||
+				!authoritativeRegistration.registrationSubmittedOn ||
+				authoritativeRegistration.cancelledOn
+			) {
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration is no longer eligible for check-in.',
+				);
+			}
+			if (existingCheckIn.exists) return false;
+
+			transaction.create(checkinDocRef, checkin);
+			transaction.set(
+				registrationDocRef,
+				{ hasCheckedIn: true },
+				{ merge: true },
 			);
+			return true;
 		});
-};
+		if (!created && authoritativeRegistration && request.auth?.uid) {
+			const blocked = await recordCheckInRaceAttempt(
+				authoritativeRegistration,
+				request.auth.uid,
+				inputMethod,
+			);
+			throw new HttpsError(
+				'already-exists',
+				'Registration was already checked in.',
+				blocked,
+			);
+		}
+		return checkin.stats?.children ?? 0;
+	} catch (error) {
+		if (error instanceof HttpsError) {
+			throw error;
+		}
+		throw new HttpsError(
+			getErrorCode(error) === '6' ? 'already-exists' : 'internal',
+			getErrorMessage(error),
+			error,
+		);
+	}
+}

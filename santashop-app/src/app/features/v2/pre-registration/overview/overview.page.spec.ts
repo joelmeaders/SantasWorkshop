@@ -1,50 +1,276 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { Storage } from '@angular/fire/storage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { provideRouter, Router } from '@angular/router';
+import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
+import { DateTimeSlot } from '@santashop/models';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AlertController, ToastController } from '@ionic/angular/standalone';
 import {
 	provideTranslateServiceMock,
-	createAuthMock,
-	createFirestoreMock,
+	provideAuthMock,
+	provideFirestoreMock,
+	provideFunctionsMock,
+	provideStorageMock,
+	provideActivatedRouteMock,
+	provideAnalyticsMock,
 } from '../../../../../test-helpers';
 import { OverviewPage } from './overview.page';
+import { ChildrenCardComponent } from './children-card/children-card.component';
+import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
+import { SubmitCardComponent } from './submit-card/submit-card.component';
+import { PreRegistrationService } from '../../../../core';
 
 describe('OverviewPage', () => {
 	let component: OverviewPage;
 	let fixture: ComponentFixture<OverviewPage>;
+	const alert = {
+		present: vi.fn().mockName('HTMLIonAlertElement.present'),
+		onDidDismiss: vi.fn().mockName('HTMLIonAlertElement.onDidDismiss'),
+	};
+	const alertController = {
+		create: vi.fn().mockName('AlertController.create'),
+	};
+	const toast = {
+		present: vi.fn().mockName('HTMLIonToastElement.present'),
+	};
+	const toastController = {
+		create: vi.fn().mockName('ToastController.create'),
+		dismiss: vi.fn().mockName('ToastController.dismiss'),
+	};
+	const childCount = new BehaviorSubject(0);
+	const dateTimeSlot = new BehaviorSubject<DateTimeSlot | undefined>(undefined);
+	const registrationComplete = new BehaviorSubject(false);
+	const registrationSubmitted = new BehaviorSubject(false);
+	const preregistrationService = {
+		userRegistration$: of(undefined),
+		children$: of([]),
+		childCount$: childCount.asObservable(),
+		dateTimeSlot$: dateTimeSlot.asObservable(),
+		registrationComplete$: registrationComplete.asObservable(),
+		registrationSubmitted$: registrationSubmitted.asObservable(),
+		noErrorsInChildren$: of(true),
+		saveDraftChild: vi.fn().mockName('saveDraftChild'),
+		deleteDraftChild: vi.fn().mockName('deleteDraftChild'),
+		setDraftAppointment: vi.fn().mockName('setDraftAppointment'),
+		completeRegistration: vi.fn().mockName('completeRegistration'),
+	};
 
-	beforeEach(waitForAsync(() => {
+	beforeEach(async () => {
+		alert.present.mockClear();
+		alert.onDidDismiss.mockClear();
+		alertController.create.mockClear();
+		toast.present.mockClear();
+		toastController.create.mockClear();
+		toastController.dismiss.mockClear();
+		childCount.next(0);
+		dateTimeSlot.next(undefined);
+		registrationComplete.next(false);
+		registrationSubmitted.next(false);
+		preregistrationService.saveDraftChild.mockClear();
+		preregistrationService.saveDraftChild.mockResolvedValue({ data: true });
+		alert.present.mockResolvedValue(undefined);
+		alert.onDidDismiss.mockResolvedValue({ role: 'cancel' });
+		alertController.create.mockResolvedValue(alert);
+		toast.present.mockResolvedValue(undefined);
+		toastController.create.mockResolvedValue(toast);
+		toastController.dismiss.mockResolvedValue(false);
 		TestBed.configureTestingModule({
 			imports: [OverviewPage],
 			providers: [
-				{
-					provide: Firestore,
-					useFactory: createFirestoreMock,
-				},
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
-				},
-				{
-					provide: Storage,
-					useValue: jasmine.createSpyObj('Storage', ['ref']),
-				},
+				provideFirestoreMock(),
+				provideAuthMock(),
+				provideFunctionsMock(),
+				provideStorageMock(),
+				provideActivatedRouteMock(),
 				provideTranslateServiceMock(),
+				provideAnalyticsMock(),
+				provideRouter([]),
+				{ provide: AlertController, useValue: alertController },
+				{ provide: ToastController, useValue: toastController },
+				{
+					provide: AnalyticsWrapper,
+					useValue: {
+						logEvent: vi.fn().mockName('AnalyticsWrapper.logEvent'),
+						logEventWithParams: vi
+							.fn()
+							.mockName('AnalyticsWrapper.logEventWithParams'),
+					},
+				},
+				{
+					provide: PreRegistrationService,
+					useValue: preregistrationService,
+				},
+				{
+					provide: FireRepoLite,
+					useValue: {
+						collection: (): {
+							readMany: () => Observable<DateTimeSlot[]>;
+						} => ({
+							readMany: () => of([]),
+						}),
+					},
+				},
+				{ provide: PROGRAM_YEAR, useValue: 2025 },
 			],
 		}).compileComponents();
 		fixture = TestBed.createComponent(OverviewPage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('asks about another child after a new child is saved and collapses on No', async () => {
+		await component.saveChild({
+			isNew: true,
+			child: {
+				id: 123,
+				firstName: 'Taylor',
+				lastName: 'Snow',
+				dateOfBirth: new Date('2020-01-02T00:00:00.000Z'),
+				ageGroup: '3-5' as never,
+				toyType: 'girls' as never,
+				programYearAdded: 2025,
+				enabled: true,
+			},
+		});
+
+		expect(alertController.create).toHaveBeenCalled();
+		expect(toastController.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'Child saved. You can now choose an appointment.',
+				color: 'success',
+			}),
+		);
+		expect(toast.present).toHaveBeenCalled();
+		expect(alert.present).toHaveBeenCalled();
+		expect(alert.onDidDismiss).toHaveBeenCalled();
+		const childrenCard = fixture.debugElement.query(
+			By.directive(ChildrenCardComponent),
+		).componentInstance as ChildrenCardComponent;
+		expect(childrenCard.editorOpen()).toBe(false);
+	});
+
+	it('presents action failures as danger toasts', async () => {
+		preregistrationService.saveDraftChild.mockRejectedValue(
+			new Error('Unable to save child.'),
+		);
+
+		await component.saveChild({
+			isNew: false,
+			child: {
+				id: 456,
+				firstName: 'Jamie',
+				lastName: 'Frost',
+				dateOfBirth: new Date('2021-02-03T00:00:00.000Z'),
+				ageGroup: '3-5' as never,
+				toyType: 'boys' as never,
+				programYearAdded: 2025,
+				enabled: true,
+			},
+		});
+
+		expect(toastController.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'Unable to save child.',
+				color: 'danger',
+			}),
+		);
+		expect(alertController.create).not.toHaveBeenCalled();
+	});
+
+	it('collapses completed steps while registration is being reviewed', async () => {
+		const childrenCard = fixture.debugElement.query(
+			By.directive(ChildrenCardComponent),
+		).componentInstance as ChildrenCardComponent;
+		const scheduleCard = fixture.debugElement.query(
+			By.directive(ScheduleCardComponent),
+		).componentInstance as ScheduleCardComponent;
+		childrenCard.editorOpen.set(true);
+		scheduleCard.expanded.set(true);
+
+		component.startReview();
+		await fixture.whenStable();
+
+		expect(component.reviewing()).toBe(true);
+		expect(childrenCard.editorOpen()).toBe(false);
+		expect(scheduleCard.expanded()).toBe(false);
+		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).toBeNull();
+		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).toBeNull();
+
+		component.makeChanges();
+		await fixture.whenStable();
+
+		expect(component.reviewing()).toBe(false);
+		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).not.toBeNull();
+		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).not.toBeNull();
+	});
+
+	it('draws attention to the final step and opens review when selected', async (): Promise<void> => {
+		childCount.next(1);
+		dateTimeSlot.next({ id: 'slot-1', enabled: true } as DateTimeSlot);
+		await fixture.whenStable();
+
+		const nudge = fixture.nativeElement.querySelector(
+			'.completion-nudge',
+		) as HTMLElement;
+		const action = fixture.nativeElement.querySelector(
+			'#reviewAndSubmitButton',
+		) as HTMLIonButtonElement;
+		expect(nudge).toBeTruthy();
+		expect(action).toBeTruthy();
+
+		action.click();
+		await fixture.whenStable();
+
+		const submitCard = fixture.debugElement.query(
+			By.directive(SubmitCardComponent),
+		).componentInstance as SubmitCardComponent;
+		expect(component.reviewing()).toBe(true);
+		expect(submitCard.expanded()).toBe(true);
+		expect(
+			fixture.nativeElement.querySelector('.completion-nudge'),
+		).toBeNull();
+	});
+
+	it('saves an enabled appointment and rejects unavailable selections', async (): Promise<void> => {
+		preregistrationService.setDraftAppointment.mockResolvedValue({ data: true });
+
+		await component.chooseDateTime({ id: 'slot-1', enabled: true } as DateTimeSlot);
+		await component.chooseDateTime({ id: 'slot-2', enabled: false } as DateTimeSlot);
+		await component.chooseDateTime();
+
+		expect(preregistrationService.setDraftAppointment).toHaveBeenCalledWith(
+			expect.objectContaining({ slotId: 'slot-1' }),
+		);
+		expect(toastController.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'That appointment is no longer available. Please choose another time.',
+				color: 'danger',
+			}),
+		);
+	});
+
+	it('navigates after a successful submission and keeps the workspace open on failure', async (): Promise<void> => {
+		const router = TestBed.inject(Router);
+		const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+		preregistrationService.completeRegistration.mockResolvedValue({ data: true });
+
+		const submission = component.submitRegistration();
+		await Promise.resolve();
+		expect(navigate).not.toHaveBeenCalled();
+		registrationComplete.next(true);
+		await submission;
+
+		expect(navigate).toHaveBeenCalledWith(['/pre-registration/confirmation']);
+		registrationComplete.next(false);
+		preregistrationService.completeRegistration.mockResolvedValue({ data: false });
+		await component.submitRegistration();
+		expect(toastController.create).toHaveBeenLastCalledWith(
+			expect.objectContaining({ color: 'danger' }),
+		);
 	});
 });

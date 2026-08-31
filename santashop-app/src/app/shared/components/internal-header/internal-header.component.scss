@@ -1,0 +1,31 @@
+.workshop-toolbar {
+	--min-height: 4.5rem;
+	--padding-end: clamp(0.75rem, 3vw, 2rem);
+	--padding-start: clamp(0.75rem, 3vw, 2rem);
+}
+
+.user-identity {
+	--background: transparent;
+	--inner-padding-end: 0;
+	--padding-start: 0;
+	max-width: min(72vw, 36rem);
+}
+
+.user-greeting {
+	font-family: var(--ion-font-family);
+	font-size: clamp(1rem, 2.5vw, 1.25rem);
+	line-height: 1.2;
+	margin: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.menu-button {
+	--background: rgba(23, 100, 71, 0.08);
+	--border-radius: 50%;
+	--box-shadow: none;
+	--color: var(--santa-evergreen-deep);
+	height: 3rem;
+	width: 3rem;
+}

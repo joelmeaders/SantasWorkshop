@@ -1,40 +1,49 @@
 {
 	"name": "@santashop/admin",
-	"version": "2025.2.1",
+	"version": "2026.08.0-alpha.1",
 	"description": "",
 	"scripts": {
 		"lint": "ng lint santashop-admin --fix --cache",
 		"test": "ng test santashop-admin",
-		"start:test": "pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --port=4100",
-		"config": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"} ./config.admin.ts",
+		"start": "pnpm run config:dev && pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --configuration=development --port=4101",
+		"start:local": "pnpm run config:local && pnpm run prebuild && ng serve santashop-admin --configuration=development --port=4101",
+		"start:test": "pnpm run config:test && pnpm run prebuild && firebase use santas-workshop-test && ng serve santashop-admin --configuration=development --port=4101",
+		"config": "pnpm run config:dev",
+		"config:dev": "pnpm --dir .. run config:admin:dev",
+		"config:local": "pnpm --dir .. run config:admin:local",
+		"config:test": "pnpm --dir .. run config:admin:test",
+		"config:prod": "pnpm --dir .. run config:admin:prod",
 		"prebuild": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod",
-		"build:test": "pnpm prebuild && ng build santashop-admin --configuration=test",
-		"build:prod": "pnpm prebuild && ng build santashop-admin --configuration=production",
-		"analyze": "ng build santashop-admin --configuration=production --named-chunks=true --stats-json && webpack-bundle-analyzer dist/santashop-admin/stats.json",
-		"deploy:test": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy",
-		"deploy:test:hosting": "firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=test && firebase deploy --only hosting"
+		"build:test": "pnpm run config:test && pnpm prebuild && ng build santashop-admin --configuration=development",
+		"build:prod": "pnpm run config:prod && pnpm prebuild && ng build santashop-admin --configuration=production",
+    "analyze": "ng build santashop-admin --configuration=production --stats-json && node ../scripts/analyze-esbuild-metafile.mjs ../dist/santashop-admin/stats.json",
+		"deploy:test": "pnpm run config:test && firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=development && firebase deploy",
+		"deploy:test:hosting": "pnpm run config:test && firebase use santas-workshop-test && firebase target santashop-admin && ng build santashop-admin --configuration=development && firebase deploy --only hosting"
 	},
 	"author": "",
 	"license": "ISC",
-	"dependencies": {
-		"@angular/animations": "*",
-		"@angular/common": "*",
-		"@angular/core": "*",
-		"@angular/fire": "*",
-		"@angular/forms": "*",
-		"@angular/platform-browser": "*",
-		"@angular/router": "*",
-		"@ionic/angular": "*",
-		"chart.js": "*",
-		"chartjs-plugin-datalabels": "*",
-		"firebase": "*",
-		"ng2-charts": "*",
-		"rxfire": "*",
-		"rxjs": "*",
-		"tslib": "*",
-		"zone.js": "*"
+	"engines": {
+    "node": ">=24.15.0"
 	},
-	"volta": {
-		"node": "24.11.0"
+	"dependencies": {
+		"@angular/animations": "catalog:",
+		"@angular/cdk": "catalog:",
+		"@angular/common": "catalog:",
+		"@angular/core": "catalog:",
+		"@angular/forms": "catalog:",
+		"@angular/platform-browser": "catalog:",
+		"@angular/router": "catalog:",
+		"@ionic/angular": "catalog:",
+		"chart.js": "catalog:",
+			"@codemirror/lang-html": "catalog:",
+			"@codemirror/state": "catalog:",
+			"@codemirror/view": "catalog:",
+		"chartjs-plugin-datalabels": "catalog:",
+			"codemirror": "catalog:",
+		"firebase": "catalog:",
+			"handlebars": "catalog:",
+		"ng2-charts": "catalog:",
+		"rxjs": "catalog:",
+    "tslib": "catalog:"
 	}
 }

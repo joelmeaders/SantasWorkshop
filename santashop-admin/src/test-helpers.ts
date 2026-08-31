@@ -1,482 +1,152 @@
 import { Provider } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { Storage } from '@angular/fire/storage';
-import { Analytics } from '@angular/fire/analytics';
 import { ActivatedRoute } from '@angular/router';
-import {
-	ModalController,
-	PopoverController,
-	AlertController,
-	LoadingController,
-} from '@ionic/angular/standalone';
+import { AlertController, LoadingController, ModalController, PopoverController } from '@ionic/angular/standalone';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import {
-	FirestoreWrapper,
-	FireRepoLite,
-	IFireRepoCollection,
-	PROGRAM_YEAR,
+	FIREBASE_ANALYTICS, FIREBASE_AUTH, FIREBASE_FIRESTORE, FIREBASE_FUNCTIONS, FIREBASE_STORAGE,
+	FirestoreWrapper, FireRepoLite, PROGRAM_YEAR, PUBLIC_PARAMETERS_SOURCE,
 } from '@santashop/core';
 
-/**
- * Creates a mock Firebase Auth instance.
- */
-export function createAuthMock(): jasmine.SpyObj<Auth> {
-	const mock = jasmine.createSpyObj('Auth', [
-		'signInWithEmailAndPassword',
-		'signOut',
-		'createUserWithEmailAndPassword',
-		'sendPasswordResetEmail',
-		'onAuthStateChanged',
-		'authStateReady',
-	]) as jasmine.SpyObj<Auth> & { currentUser: null };
-	mock.currentUser = null;
-	const authStateChangedSpy = jasmine
-		.createSpy('onAuthStateChanged')
-		.and.returnValue(() => undefined);
-	(mock as any).onAuthStateChanged = authStateChangedSpy;
-	mock.authStateReady.and.returnValue(Promise.resolve());
-	return mock;
+import type { Analytics } from 'firebase/analytics';
+import type { Auth } from 'firebase/auth';
+import type { Firestore } from 'firebase/firestore';
+import type { Functions } from 'firebase/functions';
+import type { FirebaseStorage } from 'firebase/storage';
+
+export function requireDefined<T>(value: T | null | undefined): T {
+	if (value === null || value === undefined) {
+		throw new Error('Expected a defined value in this test.');
+	}
+	return value;
 }
 
-/**
- * Provider for Firebase Auth mock.
- */
-export function provideAuthMock(): Provider {
+export function createAuthMock(): Auth & { currentUser: null } {
 	return {
-		provide: Auth,
-		useFactory: createAuthMock,
-	};
+		currentUser: null,
+		signInWithEmailAndPassword: vi.fn(), signOut: vi.fn(), createUserWithEmailAndPassword: vi.fn(),
+		sendPasswordResetEmail: vi.fn(), onAuthStateChanged: vi.fn().mockReturnValue(() => undefined),
+		authStateReady: vi.fn().mockResolvedValue(undefined),
+	} as unknown as Auth & { currentUser: null };
 }
 
-/**
- * Creates a mock FirestoreWrapper instance.
- */
-export function createFirestoreWrapperMock(): jasmine.SpyObj<FirestoreWrapper> {
+export function provideAuthMock(): Provider { return { provide: FIREBASE_AUTH, useFactory: createAuthMock }; }
+
+export function createFirestoreWrapperMock(): FirestoreWrapper {
 	const docMock = {
-		set: jasmine.createSpy('set').and.returnValue(Promise.resolve()),
-		get: jasmine
-			.createSpy('get')
-			.and.returnValue(
-				Promise.resolve({ exists: () => false, data: () => ({}) }),
-			),
-		update: jasmine.createSpy('update').and.returnValue(Promise.resolve()),
-		delete: jasmine.createSpy('delete').and.returnValue(Promise.resolve()),
-		id: 'mock-doc-id',
-		path: 'mock-collection/mock-doc-id',
+		set: vi.fn().mockResolvedValue(undefined),
+		get: vi.fn().mockResolvedValue({ exists: () => false, data: () => ({}) }),
+		update: vi.fn().mockResolvedValue(undefined), delete: vi.fn().mockResolvedValue(undefined),
+		id: 'mock-doc-id', path: 'mock-collection/mock-doc-id',
 	};
-
-	const collectionMock = {
-		id: 'mock-collection',
-		path: 'mock-collection',
-	};
-
-	const mock = jasmine.createSpyObj('FirestoreWrapper', [
-		'collection',
-		'collectionQuery',
-		'doc',
-		'docData',
-		'query',
-		'addDoc',
-		'setDoc',
-		'deleteDoc',
-	]);
-
-	mock.collection.and.returnValue(collectionMock);
-	mock.collectionQuery.and.returnValue(of([]));
-	mock.doc.and.returnValue(docMock);
-	mock.docData.and.returnValue(of(undefined));
-	mock.query.and.returnValue({});
-	mock.addDoc.and.returnValue(Promise.resolve(docMock));
-	mock.setDoc.and.returnValue(Promise.resolve());
-	mock.deleteDoc.and.returnValue(Promise.resolve());
-
-	return mock;
-}
-
-/**
- * Provider for FirestoreWrapper mock.
- */
-export function provideFirestoreWrapperMock(): Provider {
+	const collectionMock = { id: 'mock-collection', path: 'mock-collection' };
 	return {
-		provide: FirestoreWrapper,
-		useFactory: createFirestoreWrapperMock,
-	};
+		collection: vi.fn().mockReturnValue(collectionMock), collectionQuery: vi.fn().mockReturnValue(of([])),
+		doc: vi.fn().mockReturnValue(docMock), docData: vi.fn().mockReturnValue(of(undefined)),
+		query: vi.fn().mockReturnValue({}), addDoc: vi.fn().mockResolvedValue(docMock),
+		setDoc: vi.fn().mockResolvedValue(undefined), deleteDoc: vi.fn().mockResolvedValue(undefined),
+	} as unknown as FirestoreWrapper;
 }
 
-/**
- * Creates a mock Firebase Firestore instance.
- */
-export function createFirestoreMock(): jasmine.SpyObj<Firestore> {
+export function provideFirestoreWrapperMock(): Provider { return { provide: FirestoreWrapper, useFactory: createFirestoreWrapperMock }; }
+
+export function createFirestoreMock(): Firestore {
 	const docMock = {
-		set: jasmine.createSpy('set').and.returnValue(Promise.resolve()),
-		get: jasmine
-			.createSpy('get')
-			.and.returnValue(
-				Promise.resolve({ exists: () => false, data: () => ({}) }),
-			),
-		update: jasmine.createSpy('update').and.returnValue(Promise.resolve()),
-		delete: jasmine.createSpy('delete').and.returnValue(Promise.resolve()),
-		firestore: null as unknown as Firestore, // Will be set below
-		type: 'document',
-		path: 'mock-collection/mock-doc',
+		set: vi.fn().mockResolvedValue(undefined),
+		get: vi.fn().mockResolvedValue({ exists: () => false, data: () => ({}) }),
+		update: vi.fn().mockResolvedValue(undefined), delete: vi.fn().mockResolvedValue(undefined),
+		type: 'document', path: 'mock-collection/mock-doc',
 	};
-
 	const collectionMock = {
-		doc: jasmine.createSpy('doc').and.returnValue(docMock),
-		add: jasmine
-			.createSpy('add')
-			.and.returnValue(Promise.resolve({ id: 'mock-id' })),
-		get: jasmine
-			.createSpy('get')
-			.and.returnValue(Promise.resolve({ docs: [] })),
-		firestore: null as unknown as Firestore, // Will be set below
-		type: 'collection',
-		path: 'mock-collection',
+		doc: vi.fn().mockReturnValue(docMock), add: vi.fn().mockResolvedValue({ id: 'mock-id' }),
+		get: vi.fn().mockResolvedValue({ docs: [] }), type: 'collection', path: 'mock-collection',
 	};
-
 	const firestoreMock = {
-		collection: jasmine
-			.createSpy('collection')
-			.and.returnValue(collectionMock),
-		doc: jasmine.createSpy('doc').and.returnValue(docMock),
-		_databaseId: { database: 'mock-database' },
-		type: 'firestore',
-		app: {
-			name: 'mock-app',
-			options: {},
-			automaticDataCollectionEnabled: false,
-		},
-		toJSON: () => ({}),
-	} as unknown as jasmine.SpyObj<Firestore>;
-
-	// Set circular references so collection/doc references point back to firestore
-	collectionMock.firestore = firestoreMock;
-	docMock.firestore = firestoreMock;
-
+		collection: vi.fn().mockReturnValue(collectionMock), doc: vi.fn().mockReturnValue(docMock),
+		_databaseId: { database: 'mock-database' }, type: 'firestore',
+		app: { name: 'mock-app', options: {}, automaticDataCollectionEnabled: false }, toJSON: vi.fn().mockReturnValue({}),
+	} as unknown as Firestore;
+	Object.assign(docMock, { firestore: firestoreMock });
+	Object.assign(collectionMock, { firestore: firestoreMock });
 	return firestoreMock;
 }
 
-/**
- * Provider for Firebase Firestore mock.
- */
-export function provideFirestoreMock(): Provider {
-	return {
-		provide: Firestore,
-		useFactory: createFirestoreMock,
+export function provideFirestoreMock(): Provider { return { provide: FIREBASE_FIRESTORE, useFactory: createFirestoreMock }; }
+
+export function createFireRepoLiteMock(): FireRepoLite {
+	const collectionMock = {
+		read: vi.fn().mockReturnValue(of(undefined)), readMany: vi.fn().mockReturnValue(of([])),
+		add: vi.fn().mockReturnValue(of({})), addById: vi.fn().mockReturnValue(of({})),
+		update: vi.fn().mockReturnValue(of({})), delete: vi.fn().mockReturnValue(of(undefined)),
 	};
+	return { collection: vi.fn().mockReturnValue(collectionMock), randomId: vi.fn().mockReturnValue('mock-random-id') } as unknown as FireRepoLite;
 }
 
-export function createFireRepoLiteMock(): jasmine.SpyObj<FireRepoLite> {
-	const collectionMock = jasmine.createSpyObj<IFireRepoCollection<unknown>>(
-		'FireRepoCollection',
-		['read', 'readMany', 'add', 'addById', 'update', 'delete'],
-	);
+export function provideFireRepoLiteMock(): Provider { return { provide: FireRepoLite, useFactory: createFireRepoLiteMock }; }
 
-	collectionMock.read.and.returnValue(of(undefined));
-	collectionMock.readMany.and.returnValue(of([]));
-	collectionMock.add.and.returnValue(of({} as any));
-	collectionMock.addById.and.returnValue(of({} as any));
-	collectionMock.update.and.returnValue(of({} as any));
-	collectionMock.delete.and.returnValue(of(void 0));
+export function createFunctionsMock(): Functions { return { httpsCallable: vi.fn() } as unknown as Functions; }
+export function provideFunctionsMock(): Provider { return { provide: FIREBASE_FUNCTIONS, useFactory: createFunctionsMock }; }
+export function createStorageMock(): FirebaseStorage { return { app: vi.fn(), maxUploadRetryTime: 0 } as unknown as FirebaseStorage; }
+export function provideStorageMock(): Provider { return { provide: FIREBASE_STORAGE, useFactory: createStorageMock }; }
+export function createAnalyticsMock(): Analytics { return { logEvent: vi.fn(), setCurrentScreen: vi.fn(), setUserId: vi.fn() } as unknown as Analytics; }
+export function provideAnalyticsMock(): Provider { return { provide: FIREBASE_ANALYTICS, useFactory: createAnalyticsMock }; }
 
-	const mock = jasmine.createSpyObj<FireRepoLite>('FireRepoLite', [
-		'collection',
-		'randomId',
-	]);
-
-	(mock.collection as jasmine.Spy).and.returnValue(collectionMock);
-	mock.randomId.and.returnValue('mock-random-id');
-
-	return mock;
-}
-
-export function provideFireRepoLiteMock(): Provider {
+export function createModalControllerMock(): ModalController {
 	return {
-		provide: FireRepoLite,
-		useFactory: createFireRepoLiteMock,
-	};
+		create: vi.fn().mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ data: null }) }),
+		dismiss: vi.fn(), getTop: vi.fn(),
+	} as unknown as ModalController;
 }
+export function provideModalControllerMock(): Provider { return { provide: ModalController, useFactory: createModalControllerMock }; }
 
-/**
- * Creates a mock Firebase Functions instance.
- */
-export function createFunctionsMock(): jasmine.SpyObj<Functions> {
-	return jasmine.createSpyObj('Functions', ['httpsCallable']);
+export function createAlertControllerMock(): AlertController {
+	return { create: vi.fn().mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel', data: null }) }) } as unknown as AlertController;
 }
+export function provideAlertControllerMock(): Provider { return { provide: AlertController, useFactory: createAlertControllerMock }; }
 
-/**
- * Provider for Firebase Functions mock.
- */
-export function provideFunctionsMock(): Provider {
+export function createLoadingControllerMock(): LoadingController {
 	return {
-		provide: Functions,
-		useFactory: createFunctionsMock,
-	};
+		create: vi.fn().mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined) }),
+		dismiss: vi.fn().mockResolvedValue(true), getTop: vi.fn().mockResolvedValue({}),
+	} as unknown as LoadingController;
 }
+export function provideLoadingControllerMock(): Provider { return { provide: LoadingController, useFactory: createLoadingControllerMock }; }
+export function createPopoverControllerMock(): PopoverController { return { create: vi.fn(), dismiss: vi.fn(), getTop: vi.fn() } as unknown as PopoverController; }
+export function providePopoverControllerMock(): Provider { return { provide: PopoverController, useFactory: createPopoverControllerMock }; }
 
-/**
- * Creates a mock Firebase Storage instance.
- */
-export function createStorageMock(): jasmine.SpyObj<Storage> {
-	return jasmine.createSpyObj('Storage', ['ref', 'upload']);
-}
-
-/**
- * Provider for Firebase Storage mock.
- */
-export function provideStorageMock(): Provider {
-	return {
-		provide: Storage,
-		useFactory: createStorageMock,
-	};
-}
-
-/**
- * Creates a mock Firebase Analytics instance.
- */
-export function createAnalyticsMock(): jasmine.SpyObj<Analytics> {
-	return jasmine.createSpyObj('Analytics', [
-		'logEvent',
-		'setCurrentScreen',
-		'setUserId',
-	]);
-}
-
-/**
- * Provider for Firebase Analytics mock.
- */
-export function provideAnalyticsMock(): Provider {
-	return {
-		provide: Analytics,
-		useFactory: createAnalyticsMock,
-	};
-}
-
-/**
- * Creates a mock ModalController.
- */
-export function createModalControllerMock(): jasmine.SpyObj<ModalController> {
-	const mock = jasmine.createSpyObj('ModalController', [
-		'create',
-		'dismiss',
-		'getTop',
-	]);
-	mock.create.and.returnValue(
-		Promise.resolve({
-			present: jasmine
-				.createSpy('present')
-				.and.returnValue(Promise.resolve()),
-			dismiss: jasmine
-				.createSpy('dismiss')
-				.and.returnValue(Promise.resolve()),
-			onDidDismiss: jasmine
-				.createSpy('onDidDismiss')
-				.and.returnValue(Promise.resolve({ data: null })),
-		} as unknown as HTMLIonModalElement),
-	);
-	return mock;
-}
-
-/**
- * Provider for ModalController mock.
- */
-export function provideModalControllerMock(): Provider {
-	return {
-		provide: ModalController,
-		useFactory: createModalControllerMock,
-	};
-}
-
-/**
- * Creates a mock AlertController.
- */
-export function createAlertControllerMock(): jasmine.SpyObj<AlertController> {
-	const mock = jasmine.createSpyObj('AlertController', ['create']);
-	mock.create.and.returnValue(
-		Promise.resolve({
-			present: jasmine
-				.createSpy('present')
-				.and.returnValue(Promise.resolve()),
-			dismiss: jasmine
-				.createSpy('dismiss')
-				.and.returnValue(Promise.resolve()),
-		} as unknown as HTMLIonAlertElement),
-	);
-	return mock;
-}
-
-/**
- * Provider for AlertController mock.
- */
-export function provideAlertControllerMock(): Provider {
-	return {
-		provide: AlertController,
-		useFactory: createAlertControllerMock,
-	};
-}
-
-/**
- * Creates a mock LoadingController.
- */
-export function createLoadingControllerMock(): jasmine.SpyObj<LoadingController> {
-	const mock = jasmine.createSpyObj('LoadingController', ['create']);
-	mock.create.and.returnValue(
-		Promise.resolve({
-			present: jasmine
-				.createSpy('present')
-				.and.returnValue(Promise.resolve()),
-			dismiss: jasmine
-				.createSpy('dismiss')
-				.and.returnValue(Promise.resolve()),
-		} as unknown as HTMLIonLoadingElement),
-	);
-	return mock;
-}
-
-/**
- * Provider for LoadingController mock.
- */
-export function provideLoadingControllerMock(): Provider {
-	return {
-		provide: LoadingController,
-		useFactory: createLoadingControllerMock,
-	};
-}
-
-/**
- * Creates a mock PopoverController.
- */
-export function createPopoverControllerMock(): jasmine.SpyObj<PopoverController> {
-	return jasmine.createSpyObj('PopoverController', [
-		'create',
-		'dismiss',
-		'getTop',
-	]);
-}
-
-/**
- * Provider for PopoverController mock.
- */
-export function providePopoverControllerMock(): Provider {
-	return {
-		provide: PopoverController,
-		useFactory: createPopoverControllerMock,
-	};
-}
-
-/**
- * Creates a mock ActivatedRoute.
- */
 export function createActivatedRouteMock(): Partial<ActivatedRoute> {
 	return {
 		snapshot: {
-			params: {},
-			queryParams: {},
-			data: {},
-			url: [],
-			fragment: null,
-			outlet: 'primary',
-			component: null,
-			routeName: null,
-			title: undefined,
-			routeConfig: null,
-			root: {} as any,
-			parent: null,
-			firstChild: null,
-			children: [],
-			pathFromRoot: [] as any,
-			paramMap: {
-				get: () => null,
-				has: () => false,
-				getAll: () => [],
-				keys: [],
-			} as any,
-			queryParamMap: {
-				get: () => null,
-				has: () => false,
-				getAll: () => [],
-				keys: [],
-			} as any,
-		} as any,
-		params: of({}),
-		queryParams: of({}),
-		data: of({}),
+			params: {}, queryParams: {}, data: {}, url: [], fragment: null, outlet: 'primary', component: null,
+			routeName: null, title: undefined, routeConfig: null, root: {} as never, parent: null, firstChild: null,
+			children: [], pathFromRoot: [], paramMap: { get: () => null, has: () => false, getAll: () => [], keys: [] },
+			queryParamMap: { get: () => null, has: () => false, getAll: () => [], keys: [] },
+		} as never,
+		params: of({}), queryParams: of({}), data: of({}),
+	};
+}
+export function provideActivatedRouteMock(): Provider { return { provide: ActivatedRoute, useFactory: createActivatedRouteMock }; }
+
+export function createScannerServiceMock(): object {
+	return {
+		scan: vi.fn(), stopScan: vi.fn(), onCamerasFound: vi.fn(), onDeviceSelectChange: vi.fn(),
+		onDeviceChange: vi.fn().mockReturnValue({ subscribe: (): { unsubscribe: () => undefined } => ({ unsubscribe: (): undefined => undefined }) }),
+		onHasPermission: vi.fn(), onScanError: vi.fn(), formatsEnabled: [],
+		$deviceId: of(''), $availableDevices: of([]), $deviceToUse: of(undefined), $hasPermissions: of(false),
 	};
 }
 
-/**
- * Provider for ActivatedRoute mock.
- */
-export function provideActivatedRouteMock(): Provider {
+export function provideProgramYearMock(programYear = 2025): Provider { return { provide: PROGRAM_YEAR, useValue: programYear }; }
+export function providePublicParametersSourceMock(): Provider {
 	return {
-		provide: ActivatedRoute,
-		useFactory: createActivatedRouteMock,
-	};
-}
-
-/**
- * Creates a mock ScannerService.
- */
-export function createScannerServiceMock(): jasmine.SpyObj<{
-	scan: () => void;
-	stopScan: () => void;
-	onCamerasFound: () => void;
-	onDeviceSelectChange: () => void;
-	onDeviceChange: () => void;
-	onHasPermission: () => void;
-	onScanError: () => void;
-}> & {
-	formatsEnabled: number[];
-	$deviceId: typeof of;
-	$availableDevices: typeof of;
-	$deviceToUse: typeof of;
-	$hasPermissions: typeof of;
-} {
-	const mock = jasmine.createSpyObj('ScannerService', [
-		'scan',
-		'stopScan',
-		'onCamerasFound',
-		'onDeviceSelectChange',
-		'onDeviceChange',
-		'onHasPermission',
-		'onScanError',
-	]);
-	mock.onDeviceChange = jasmine.createSpy('onDeviceChange').and.returnValue({
-		subscribe: (): { unsubscribe: () => void } => ({
-			unsubscribe: (): void => {
-				/* noop */
-			},
-		}),
-	});
-	mock.formatsEnabled = []; // ZXing expects an array of formats
-	mock.$deviceId = of('');
-	mock.$availableDevices = of([]);
-	mock.$deviceToUse = of(undefined);
-	mock.$hasPermissions = of(false);
-	return mock;
-}
-
-export function provideProgramYearMock(programYear = 2025): Provider {
-	return {
-		provide: PROGRAM_YEAR,
-		useValue: programYear,
+		provide: PUBLIC_PARAMETERS_SOURCE,
+		useValue: { publicParameters$: of(undefined) },
 	};
 }
 
 export const testHelpers: Provider[] = [
-	provideAuthMock(),
-	provideFirestoreWrapperMock(),
-	provideFirestoreMock(),
-	provideFireRepoLiteMock(),
-	provideFunctionsMock(),
-	provideStorageMock(),
-	provideAnalyticsMock(),
-	provideModalControllerMock(),
-	provideAlertControllerMock(),
-	provideLoadingControllerMock(),
-	providePopoverControllerMock(),
-	provideActivatedRouteMock(),
-	provideProgramYearMock(),
+	provideAuthMock(), provideFirestoreWrapperMock(), provideFirestoreMock(), provideFireRepoLiteMock(),
+	provideFunctionsMock(), provideStorageMock(), provideAnalyticsMock(), provideModalControllerMock(),
+	provideAlertControllerMock(), provideLoadingControllerMock(), providePopoverControllerMock(),
+	provideActivatedRouteMock(), provideProgramYearMock(), providePublicParametersSourceMock(),
 ];

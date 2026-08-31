@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	ModalController,
 	IonContent,
-	IonFooter,
+	IonHeader,
 	IonToolbar,
+	IonTitle,
+	IonButtons,
 	IonButton,
 	IonIcon,
-	IonLabel,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
@@ -18,19 +19,14 @@ import { closeCircle } from 'ionicons/icons';
 	styleUrls: ['./privacy-policy-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		IonContent,
-		IonFooter,
+		IonHeader,
 		IonToolbar,
+		IonTitle,
+		IonButtons,
 		IonButton,
 		IonIcon,
-		IonLabel,
+		IonContent,
 		TranslateModule,
-		IonContent,
-		IonFooter,
-		IonToolbar,
-		IonButton,
-		IonIcon,
-		IonLabel,
 	],
 })
 export class PrivacyPolicyModalComponent {

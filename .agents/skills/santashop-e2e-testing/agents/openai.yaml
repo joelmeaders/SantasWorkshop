@@ -1,0 +1,4 @@
+interface:
+  display_name: "Santa's Workshop E2E Testing"
+  short_description: "Run and write emulator-backed E2E tests"
+  default_prompt: "Use $santashop-e2e-testing to run or add a Santa's Workshop Playwright E2E test."

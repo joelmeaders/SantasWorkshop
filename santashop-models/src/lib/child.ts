@@ -22,14 +22,3 @@ export enum ToyType {
 	boy = 'boys',
 	girl = 'girls',
 }
-
-export interface ChildAlt {
-	id: number;
-	firstName: string;
-	lastName: string;
-	dateOfBirth: Date;
-	ageGroup: string;
-	toyType: string;
-	programYearAdded: number;
-	enabled: boolean;
-}

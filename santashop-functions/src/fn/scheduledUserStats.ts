@@ -1,14 +1,29 @@
-import * as admin from 'firebase-admin';
-import {
-	User,
-	UserStats,
-	UsersByZipCodeCount,
-	ReferrerCount,
-} from '../../../santashop-models/src';
+import admin from '../firebase-admin';
+import { User, UserStats, UsersByZipCodeCount, ReferrerCount } from '../models';
+import { createFunctionLogger } from '../utility/observability';
+import { getStatsDocumentId } from '../utility/runtime-config';
 
-admin.initializeApp();
+const log = createFunctionLogger('scheduledUserStats');
 
-export default async () => {
+const normalizeZipCode = (zipCode: User['zipCode']): string => {
+	return `${zipCode ?? ''}`.slice(0, 5);
+};
+
+const toUser = (data: Record<string, unknown>): User => {
+	return data as User;
+};
+
+const mapToCountEntries = <TKey extends string>(
+	counts: Map<TKey, number>,
+	keyName: 'zip' | 'referrer',
+): Array<UsersByZipCodeCount | ReferrerCount> => {
+	return Array.from(counts.entries()).map(([key, count]) => ({
+		[keyName]: key,
+		count,
+	})) as Array<UsersByZipCodeCount | ReferrerCount>;
+};
+
+export default async function scheduledUserStats(): Promise<void> {
 	const users: User[] = await loadUsers();
 
 	const stats: UserStats = {
@@ -17,103 +32,44 @@ export default async () => {
 		referrerCount: getReferrerCounts(users),
 	};
 
-	return admin
+	await admin
 		.firestore()
 		.collection('stats')
-		.doc('user-2025')
+		.doc(getStatsDocumentId('user'))
 		.set(stats, { merge: false });
-};
+
+	log.info('Updated user stats document', {
+		totalUsers: stats.totalUsers,
+		zipCodeBucketCount: stats.zipCodeCount.length,
+		referrerBucketCount: stats.referrerCount.length,
+	});
+}
 
 function getZipCodeCounts(users: User[]): UsersByZipCodeCount[] {
-	const stats: UsersByZipCodeCount[] = [];
-	let valueUndefined = 0;
+	const counts = new Map<string, number>();
 
-	let zips: string[] = [];
+	for (const user of users) {
+		const zipCode = normalizeZipCode(user.zipCode) || 'not-defined';
+		counts.set(zipCode, (counts.get(zipCode) ?? 0) + 1);
+	}
 
-	zips = Array.from(
-		new Set(
-			users.map((e) => {
-				const zip = (e.zipCode as unknown as number).toString();
-				return zip.slice(0, 5);
-			}),
-		),
-	);
-
-	zips.forEach((e) => {
-		if (e?.length) {
-			stats.push({ zip: e, count: 0 });
-		}
-	});
-
-	// Get index of zip
-	const getIndex = (zipCode: string) =>
-		stats.findIndex((e) => zipCode === e.zip);
-
-	// Increment zip count
-	users.forEach((user) => {
-		const zipCode = (user.zipCode as unknown as number)
-			.toString()
-			.slice(0, 5);
-		const index = getIndex(zipCode);
-
-		if (index === -1) {
-			valueUndefined++;
-		} else {
-			stats[index].count++;
-		}
-	});
-
-	if (valueUndefined > 0)
-		stats.push({ zip: 'not-defined', count: valueUndefined });
-
-	return stats;
+	return mapToCountEntries(counts, 'zip') as UsersByZipCodeCount[];
 }
 
 function getReferrerCounts(users: User[]): ReferrerCount[] {
-	const stats: ReferrerCount[] = [];
-	let valueUndefined = 0;
+	const counts = new Map<string, number>();
 
-	// Get unique referrers
-	const referrers = Array.from(new Set(users.map((e) => e.referredBy)));
-	referrers.forEach((e) => {
-		if (e?.length) {
-			stats.push({ referrer: e!, count: 0 });
-		}
-	});
-
-	// Get index of referrer
-	const getIndex = (referrer: string) =>
-		stats.findIndex((e) => referrer === e.referrer);
-
-	users.forEach((user) => {
+	for (const user of users) {
 		const referrer = user.referredBy ?? 'not-defined';
-		const index = getIndex(referrer);
+		counts.set(referrer, (counts.get(referrer) ?? 0) + 1);
+	}
 
-		if (index === -1) {
-			valueUndefined++;
-		} else {
-			stats[index].count++;
-		}
-	});
-
-	if (valueUndefined > 0)
-		stats.push({ referrer: 'not-defined', count: valueUndefined });
-
-	return stats;
+	return mapToCountEntries(counts, 'referrer') as ReferrerCount[];
 }
 
 const loadUsers = async (): Promise<User[]> => {
-	let allRecords: User[] = [];
-
 	const snapshotDocs = await admin.firestore().collection('users').get();
-
-	snapshotDocs.docs.forEach((doc) => {
-		const record = {
-			...doc.data(),
-		} as User;
-
-		allRecords = allRecords.concat(record);
-	});
-
-	return allRecords.filter((e) => !!e.referredBy && !!e.zipCode);
+	return snapshotDocs.docs
+		.map((doc) => toUser(doc.data() as Record<string, unknown>))
+		.filter((record) => !!record.referredBy && !!record.zipCode);
 };

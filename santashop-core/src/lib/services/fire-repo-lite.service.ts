@@ -9,7 +9,7 @@ import {
 	QueryConstraint,
 	QueryDocumentSnapshot,
 	SnapshotOptions,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 
 @Injectable({
 	providedIn: 'root',

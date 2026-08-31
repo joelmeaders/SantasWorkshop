@@ -1,0 +1,38 @@
+.owner-operations {
+	display: grid;
+	gap: 1rem;
+	padding: 1rem;
+	max-width: 52rem;
+	margin: 0 auto;
+}
+
+.eyebrow {
+	color: var(--ion-color-primary);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.preview {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--ion-color-step-200);
+}
+
+code {
+	display: block;
+	margin: 0.5rem 0;
+	padding: 0.75rem;
+	overflow-wrap: anywhere;
+	background: var(--ion-color-step-100);
+}
+
+.status {
+	min-height: 3rem;
+	text-align: center;
+}
+
+.error {
+	color: var(--ion-color-danger);
+	font-weight: 600;
+}

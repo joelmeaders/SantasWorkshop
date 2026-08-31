@@ -1,4 +1,4 @@
 export * from './checkin.service';
+export * from './lite-public-parameters-source.service';
 export * from './pre-registration.service';
-export * from './profile.service';
 export * from './qrcode.service';

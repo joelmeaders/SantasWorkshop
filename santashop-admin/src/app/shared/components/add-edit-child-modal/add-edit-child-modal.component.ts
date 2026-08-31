@@ -1,9 +1,10 @@
 import {
-	Component,
-	ChangeDetectionStrategy,
-	Input,
+  Component,
+  ChangeDetectionStrategy,
 	OnInit,
-	inject,
+	ChangeDetectorRef,
+  inject,
+	Input
 } from '@angular/core';
 import {
 	UntypedFormControl,
@@ -95,12 +96,12 @@ import { AsyncPipe } from '@angular/common';
 export class AddEditChildModalComponent implements OnInit {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
+	private readonly changeDetector = inject(ChangeDetectorRef);
 	protected readonly childValidationService = inject(ChildValidationService);
 
-	@Input()
-	public child?: Child;
+	@Input() public child?: Child;
 
-	public form?: UntypedFormGroup;
+	public form: UntypedFormGroup = this.newForm();
 
 	public readonly minBirthDate = MIN_BIRTHDATE().toISOString();
 	public readonly maxBirthDate = MAX_BIRTHDATE().toISOString();
@@ -110,9 +111,11 @@ export class AddEditChildModalComponent implements OnInit {
 
 	public ngOnInit(): void {
 		this.form = this.newForm(this.child);
+		this.changeDetector.markForCheck();
 
-		if (this.child?.dateOfBirth) {
-			const dob: string = this.child.dateOfBirth
+		const child = this.child;
+  if (child?.dateOfBirth) {
+			const dob: string = child.dateOfBirth
 				.toISOString()
 				.substring(0, 10);
 			this.birthdaySelected({ detail: { value: dob } });

@@ -1,0 +1,316 @@
+const fs = require('node:fs');
+const { writeFile } = require('node:fs/promises');
+const path = require('node:path');
+const { loadEnvFiles } = require('./scripts/env-loader.cjs');
+
+const APP_METADATA = {
+	app: {
+		packageJsonPath: path.resolve(__dirname, 'santashop-app/package.json'),
+		configPath: path.resolve(__dirname, 'santashop-app/src/config.ts'),
+		firebaseConfigPath: path.resolve(
+			__dirname,
+			'santashop-app/src/firebase.config.ts',
+		),
+	},
+	admin: {
+		packageJsonPath: path.resolve(
+			__dirname,
+			'santashop-admin/package.json',
+		),
+		configPath: path.resolve(__dirname, 'santashop-admin/src/config.ts'),
+		firebaseConfigPath: path.resolve(
+			__dirname,
+			'santashop-admin/src/firebase.config.ts',
+		),
+	},
+};
+
+const MODE_METADATA = {
+	dev: {
+		production: false,
+		label: 'DEV',
+		appCheckKey: '2839440c-0a91-4c48-921a-451020157001',
+		appCheckEnabled: true,
+	},
+	local: {
+		production: false,
+		label: 'LOCAL',
+		appCheckKey: '2839440c-0a91-4c48-921a-451020157001',
+		appCheckEnabled: false,
+		emulatorPorts: {
+			auth: 9099,
+			functions: 5001,
+			firestore: 8080,
+			storage: 9199,
+		},
+	},
+	e2e: {
+		production: false,
+		label: 'E2E',
+		appCheckKey: '2839440c-0a91-4c48-921a-451020157001',
+		appCheckEnabled: false,
+		emulatorPorts: {
+			auth: 9099,
+			functions: 5001,
+			firestore: 8180,
+			storage: 9199,
+		},
+	},
+	test: {
+		production: true,
+		label: 'TEST/QA',
+		appCheckKey: '6LfQqwkpAAAAAHyIhwZ4v9ZGl6lMdwzsh_maGnSU',
+		appCheckEnabled: true,
+	},
+	prod: {
+		production: true,
+		label: 'PROD',
+		appCheckKey: '6Lc4vgkpAAAAACOIJc4lTNn4wLzvuJkoz17t_RXH',
+		appCheckEnabled: true,
+	},
+};
+
+const FIREBASE_CONFIG_ENV_KEYS = {
+	apiKey: 'FIREBASE_API_KEY',
+	authDomain: 'FIREBASE_AUTH_DOMAIN',
+	databaseURL: 'FIREBASE_DATABASE_URL',
+	projectId: 'FIREBASE_PROJECT_ID',
+	storageBucket: 'FIREBASE_STORAGE_BUCKET',
+	messagingSenderId: 'FIREBASE_MESSAGING_SENDER_ID',
+	appId: 'FIREBASE_APP_ID',
+	measurementId: 'FIREBASE_MEASUREMENT_ID',
+};
+
+const LOCAL_FIREBASE_CONFIG = {
+	apiKey: 'demo-api-key',
+	authDomain: 'demo-santashop.firebaseapp.com',
+	databaseURL: 'http://127.0.0.1:9000?ns=demo-santashop',
+	projectId: 'demo-santashop',
+	storageBucket: 'demo-santashop.appspot.com',
+	messagingSenderId: '000000000000',
+	appId: '1:000000000000:web:0000000000000000000000',
+	measurementId: 'G-LOCAL0000',
+};
+
+const loadLocalEnvFiles = () => {
+	loadEnvFiles([
+		path.resolve(process.cwd(), '.env'),
+		path.resolve(__dirname, '.env'),
+	]);
+};
+
+const getModePrefix = (mode) => (mode === 'prod' ? 'PROD' : 'TEST');
+
+const getEnvValue = (mode, envKey) => {
+	const prefixedEnvKey = `${getModePrefix(mode)}_${envKey}`;
+	return process.env[prefixedEnvKey] ?? process.env[envKey];
+};
+
+const requireEnvValue = (mode, envKey) => {
+	const value = getEnvValue(mode, envKey);
+	if (!value) {
+		throw new Error(
+			`Missing required environment variable: ${getModePrefix(mode)}_${envKey} (or ${envKey})`,
+		);
+	}
+
+	return value;
+};
+
+const buildFirebaseClientConfig = (mode) => {
+	if (mode === 'local' || mode === 'e2e') {
+		return LOCAL_FIREBASE_CONFIG;
+	}
+
+	return {
+		apiKey: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.apiKey),
+		authDomain: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.authDomain),
+		databaseURL: requireEnvValue(
+			mode,
+			FIREBASE_CONFIG_ENV_KEYS.databaseURL,
+		),
+		projectId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.projectId),
+		storageBucket: requireEnvValue(
+			mode,
+			FIREBASE_CONFIG_ENV_KEYS.storageBucket,
+		),
+		messagingSenderId: requireEnvValue(
+			mode,
+			FIREBASE_CONFIG_ENV_KEYS.messagingSenderId,
+		),
+		appId: requireEnvValue(mode, FIREBASE_CONFIG_ENV_KEYS.appId),
+		measurementId: requireEnvValue(
+			mode,
+			FIREBASE_CONFIG_ENV_KEYS.measurementId,
+		),
+	};
+};
+
+const readAppPackageConfig = (target) => {
+	return JSON.parse(
+		fs.readFileSync(APP_METADATA[target].packageJsonPath, 'utf8'),
+	);
+};
+
+const parseShopDays = (mode) => {
+	const values = requireEnvValue(mode, 'SANTASHOP_SHOP_DAYS')
+		.split(',')
+		.map((value) => value.trim())
+		.filter(Boolean);
+	if (values.length === 0) {
+		throw new Error('SANTASHOP_SHOP_DAYS must contain at least one MM-DD date.');
+	}
+
+	const days = values.map((value) => {
+		const match = /^(\d{2})-(\d{2})$/.exec(value);
+		if (!match) {
+			throw new Error('SANTASHOP_SHOP_DAYS entries must use MM-DD format.');
+		}
+		const month = Number.parseInt(match[1], 10);
+		const day = Number.parseInt(match[2], 10);
+		const date = new Date(Date.UTC(2024, month - 1, day));
+		if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+			throw new Error(`Invalid SANTASHOP_SHOP_DAYS date: ${value}.`);
+		}
+		return day;
+	});
+
+	if (new Set(days).size !== days.length) {
+		throw new Error('SANTASHOP_SHOP_DAYS must not contain duplicate days.');
+	}
+
+	return days;
+};
+
+const buildAppConfig = (target, mode) => {
+	const packageConfig = readAppPackageConfig(target);
+	const modeConfig = MODE_METADATA[mode];
+
+	const programYear = Number.parseInt(
+		requireEnvValue(mode, 'SANTASHOP_PROGRAM_YEAR'),
+		10,
+	);
+	if (
+		!Number.isInteger(programYear) ||
+		programYear < 2000 ||
+		programYear > 2100
+	) {
+		throw new Error(
+			'SANTASHOP_PROGRAM_YEAR must be a four-digit year between 2000 and 2100.',
+		);
+	}
+	const shopDays = parseShopDays(mode);
+
+	return {
+		production: modeConfig.production,
+		label: modeConfig.label,
+		name: packageConfig.name,
+		version: packageConfig.version,
+		appCheckKey: modeConfig.appCheckKey,
+		appCheckEnabled: modeConfig.appCheckEnabled,
+		programYear,
+		shopDays,
+		emulatorPorts: modeConfig.emulatorPorts ?? {
+			auth: 9099,
+			functions: 5001,
+			firestore: 8080,
+			storage: 9199,
+		},
+	};
+};
+
+const renderAppConfigModule = (appConfig) =>
+	`// This file is auto-generated by config.firebase.cjs.\n// Do not edit this file manually.\n\nexport const config = {\n\tproduction: ${appConfig.production},\n\tlabel: ${JSON.stringify(appConfig.label)},\n\tname: ${JSON.stringify(appConfig.name)},\n\tversion: ${JSON.stringify(appConfig.version)},\n\tappCheckKey: ${JSON.stringify(appConfig.appCheckKey)},\n\tappCheckEnabled: ${appConfig.appCheckEnabled},\n\tprogramYear: ${appConfig.programYear},\n\tshopDays: ${JSON.stringify(appConfig.shopDays)},\n\temulatorPorts: {\n\t\tauth: ${appConfig.emulatorPorts.auth},\n\t\tfunctions: ${appConfig.emulatorPorts.functions},\n\t\tfirestore: ${appConfig.emulatorPorts.firestore},\n\t\tstorage: ${appConfig.emulatorPorts.storage},\n\t},\n};\n`;
+
+const renderFirebaseConfigModule = (firebaseConfig) =>
+	`// This file is auto-generated by config.firebase.cjs.\n// Do not edit this file manually.\n\nexport const firebaseConfig = {\n\tapiKey: ${JSON.stringify(firebaseConfig.apiKey)},\n\tauthDomain: ${JSON.stringify(firebaseConfig.authDomain)},\n\tdatabaseURL: ${JSON.stringify(firebaseConfig.databaseURL)},\n\tprojectId: ${JSON.stringify(firebaseConfig.projectId)},\n\tstorageBucket: ${JSON.stringify(firebaseConfig.storageBucket)},\n\tmessagingSenderId: ${JSON.stringify(firebaseConfig.messagingSenderId)},\n\tappId: ${JSON.stringify(firebaseConfig.appId)},\n\tmeasurementId: ${JSON.stringify(firebaseConfig.measurementId)},\n};\n`;
+
+const parseFirebaseConfigTarget = (value) => {
+	if (value === 'app' || value === 'admin') {
+		return value;
+	}
+
+	throw new Error(
+		'Expected Firebase config target to be either "app" or "admin".',
+	);
+};
+
+const parseFirebaseConfigMode = (value) => {
+	if (value === 'dev' || value === 'development') {
+		return 'dev';
+	}
+
+	if (value === 'local') {
+		return 'local';
+	}
+
+	if (value === 'e2e') {
+		return 'e2e';
+	}
+
+	if (!value || value === 'prod' || value === 'production') {
+		return 'prod';
+	}
+
+	if (value === 'test' || value === 'qa') {
+		return 'test';
+	}
+
+	throw new Error(
+		'Expected Firebase config mode to be one of: dev, development, local, e2e, test, qa, prod, production.',
+	);
+};
+
+const generateFirebaseConfigModule = async (target, mode) => {
+	loadLocalEnvFiles();
+
+	const appConfigPath = APP_METADATA[target].configPath;
+	const firebaseConfigPath = APP_METADATA[target].firebaseConfigPath;
+	const appConfig = buildAppConfig(target, mode);
+	const firebaseConfig = buildFirebaseClientConfig(mode);
+	const appConfigContents = renderAppConfigModule(appConfig);
+	const firebaseConfigContents = renderFirebaseConfigModule(firebaseConfig);
+
+	await writeFile(appConfigPath, appConfigContents, 'utf8');
+	await writeFile(firebaseConfigPath, firebaseConfigContents, 'utf8');
+	console.log(
+		`Generated app config for ${target} (${mode}) at ${appConfigPath}`,
+	);
+	console.log(
+		`Generated Firebase config module for ${target} (${mode}) at ${firebaseConfigPath}`,
+	);
+};
+
+const main = async () => {
+	const target = parseFirebaseConfigTarget(process.argv[2]);
+	const mode = parseFirebaseConfigMode(process.argv[3]);
+	await generateFirebaseConfigModule(target, mode);
+};
+
+module.exports = {
+	APP_METADATA,
+	MODE_METADATA,
+	FIREBASE_CONFIG_ENV_KEYS,
+	LOCAL_FIREBASE_CONFIG,
+	loadLocalEnvFiles,
+	getModePrefix,
+	getEnvValue,
+	requireEnvValue,
+	buildFirebaseClientConfig,
+	readAppPackageConfig,
+	parseShopDays,
+	buildAppConfig,
+	renderAppConfigModule,
+	renderFirebaseConfigModule,
+	parseFirebaseConfigTarget,
+	parseFirebaseConfigMode,
+	generateFirebaseConfigModule,
+	main,
+};
+
+if (require.main === module) {
+	void main().catch((error) => {
+		console.error(error);
+		process.exitCode = 1;
+	});
+}

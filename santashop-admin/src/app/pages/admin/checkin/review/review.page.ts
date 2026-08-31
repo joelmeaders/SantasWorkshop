@@ -14,7 +14,12 @@ import {
 	IonIcon,
 	IonButton,
 } from '@ionic/angular/standalone';
-import { Child, DateTimeSlot, Registration } from '@santashop/models';
+import {
+	Child,
+	DateTimeSlot,
+	Registration,
+	type ResolveRegistrationScanResult,
+} from '@santashop/models';
 import {
 	catchError,
 	firstValueFrom,
@@ -25,7 +30,11 @@ import {
 	tap,
 } from 'rxjs';
 import { filterNullish } from '../../../../shared/helpers';
-import { AppStateService, HttpsCallableResult } from '@santashop/core';
+import {
+	AppStateService,
+	FunctionsWrapper,
+	HttpsCallableResult,
+} from '@santashop/core';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -35,7 +44,6 @@ import { ManageChildrenComponent } from '../../../../shared/components/manage-ch
 import { DateTimeModalComponent } from '../../../../shared/components/date-time-modal/date-time-modal.component';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 
 @Component({
 	selector: 'admin-review',
@@ -67,7 +75,7 @@ export class ReviewPage {
 	private readonly appStateService = inject(AppStateService);
 	private readonly alertController = inject(AlertController);
 	private readonly modalController = inject(ModalController);
-	private readonly functions = inject(Functions);
+	private readonly functions = inject(FunctionsWrapper);
 
 	private readonly router = inject(Router);
 	private readonly route = inject(ActivatedRoute);
@@ -92,24 +100,34 @@ export class ReviewPage {
 		);
 
 	private readonly cancelRegistrationFn = (
-		registration: Registration,
-	): Promise<HttpsCallableResult<number>> =>
-		httpsCallable<Registration, number>(
-			this.functions,
-			'undoRegistration',
-		)(registration);
+		registrationUid: string,
+	): Promise<HttpsCallableResult<true>> =>
+		this.functions.callableWrapper<
+			{ mutationId: string; uid: string },
+			true
+		>('undoRegistration')({
+			mutationId: this.createMutationId(),
+			uid: registrationUid,
+		});
 
 	private readonly changeRegistrationDateTimeFn = (
 		newDateTimeSlot: DateTimeSlot,
 		registrationUid?: string,
-	): Promise<HttpsCallableResult<boolean>> =>
-		httpsCallable<
-			{ newDateTimeSlot: DateTimeSlot; registrationUid?: string },
+	): Promise<HttpsCallableResult<boolean>> => {
+		if (!newDateTimeSlot.id) {
+			return Promise.reject(new Error('Appointment ID is required.'));
+		}
+		return this.functions.callableWrapper<
+			{ mutationId: string; slotId: string; registrationUid?: string },
 			boolean
 		>(
-			this.functions,
 			'changeRegistrationDateTime',
-		)({ newDateTimeSlot, registrationUid });
+		)({
+			mutationId: this.createMutationId(),
+			slotId: newDateTimeSlot.id,
+			registrationUid,
+		});
+	};
 
 	protected readonly setRegistrationSubscription = this.lookupRegistration$
 		.pipe(
@@ -126,8 +144,6 @@ export class ReviewPage {
 		.subscribe();
 
 	constructor() {
-		addIcons({ checkmarkCircle });
-		addIcons({ checkmarkCircle });
 		addIcons({ checkmarkCircle });
 	}
 
@@ -160,8 +176,8 @@ export class ReviewPage {
 		const response = await alert.onDidDismiss();
 		if (response.role == 'cancel') return;
 
-		if (!registration) return;
-		await this.cancelRegistrationFn(registration);
+		if (!registration?.uid) return;
+		await this.cancelRegistrationFn(registration.uid);
 
 		await this.router.navigate(['admin/landing']);
 	}
@@ -247,26 +263,34 @@ export class ReviewPage {
 	public async checkIn(): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
 		if (!registration) return;
+		const inputMethod = await firstValueFrom(
+			this.checkinContext.inputMethod$,
+		);
 		try {
 			const result: number = await this.checkinService.checkIn(
 				registration,
 				this.wasEdited,
+				inputMethod,
 			);
 
 			this.checkinContext.setCheckIn(
 				result,
 				registration.qrcode ?? 'nocode',
 			);
-			await this.router.navigate(['admin/checkin/confirmation']);
+			await this.router.navigate(['/admin/checkin/confirmation']);
 		} catch (error: unknown) {
 			const err = error as {
-				details?: { code?: number };
+				details?: ResolveRegistrationScanResult;
 				message?: string;
 			};
-			if (err.details?.code === 6) {
-				this.checkinContext.reset();
+			if (
+				err.details?.disposition === 'duplicate-accidental' ||
+				err.details?.disposition === 'duplicate-risk' ||
+				err.details?.disposition === 'cancelled'
+			) {
+				this.checkinContext.setBlockedScan(err.details);
 				this.router.navigate([
-					'admin/checkin/duplicate',
+					'/admin/checkin/duplicate',
 					registration.uid,
 				]);
 				return;
@@ -281,8 +305,15 @@ export class ReviewPage {
 			await alert.present();
 			this.checkinContext.reset();
 			await alert.onDidDismiss();
-			await this.router.navigate(['admin/checkin/scan']);
+			await this.router.navigate(['/admin/checkin/scan']);
 		}
+	}
+
+	private createMutationId(): string {
+		if (typeof globalThis.crypto?.randomUUID === 'function') {
+			return globalThis.crypto.randomUUID();
+		}
+		return `mutation_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
 	}
 
 	private async missingRegistrationError(error: unknown): Promise<undefined> {

@@ -1,14 +1,6 @@
 <ion-content color="light">
 	<ion-grid class="height-max es-mg-bottom-xxl">
-		<ion-row class="height-max">
-			@if ((isRegistrationComplete$ | async) === false) {
-			<ion-col
-				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-				size="auto"
-			>
-				<app-pre-registration-menu></app-pre-registration-menu>
-			</ion-col>
-			}
+		<ion-row class="height-max ion-justify-content-center">
 			<ion-col
 				sizeXl="9"
 				sizeLg="12"
@@ -20,15 +12,16 @@
 				<ion-row class="ion-justify-content-center">
 					<ion-col sizeXs="12" sizeSm="7">
 						<ion-button
-							class="ion-no-padding even-ratio-button ion-margin"
+							class="remove-shadow customer-back-button"
 							color="white"
-							[routerLink]="['../overview']"
+							[attr.aria-label]="'COMMON.GO_BACK' | translate"
+							(click)="close()"
 						>
-							<ion-icon
-								slot="icon-only"
+							<ion-icon slot="start"
 								name="arrow-back-sharp"
-								class="even-ratio-button"
-							></ion-icon>
+								aria-hidden="true"
+							 />
+							<ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
 						</ion-button>
 
 						<ion-card>
@@ -63,7 +56,7 @@
 									class="ion-text-center es-mg-top-xxl es-mg-bottom-xxl"
 								>
 									<ion-text color="xmasred">
-										<strong> OR </strong>
+									<strong>—</strong>
 									</ion-text>
 								</div>
 

@@ -1,0 +1,37 @@
+<ion-content>
+	<main class="notice" role="alert" aria-live="assertive">
+		<h1>
+			@switch (mode) {
+				@case ('maintenance') { {{ 'MAINTENANCE.1' | translate }} }
+				@case ('weather') { {{ 'REG_CLOSED.1' | translate }} }
+				@default { {{ 'REG_CLOSED.1' | translate }}<br />{{ 'REG_CLOSED.2' | translate }} }
+			}
+		</h1>
+
+		<div class="notice-image-frame">
+			<img [src]="image" [alt]="'OPERATIONAL_NOTICE.IMAGE_ALT' | translate" />
+		</div>
+
+		@let message = message$ | async;
+		@if (message) {
+			<h2>{{ message }}</h2>
+		} @else {
+			<h2>
+				@switch (mode) {
+					@case ('maintenance') { {{ 'MAINTENANCE.2' | translate }} {{ 'MAINTENANCE.3' | translate }} }
+					@case ('weather') { {{ 'BAD_WEATHER.1' | translate }} {{ 'BAD_WEATHER.2' | translate }} }
+					@default { {{ 'REG_CLOSED.4' | translate }} }
+				}
+			</h2>
+		}
+
+		<nav [attr.aria-label]="'OPERATIONAL_NOTICE.SOCIAL_LINKS' | translate">
+			<a class="social-link-button" rel="noopener" href="https://www.facebook.com/denversantaclausshop" target="_blank" [attr.aria-label]="'OPERATIONAL_NOTICE.FACEBOOK' | translate">
+				<ion-icon name="logo-facebook" color="medium" aria-hidden="true" />
+			</a>
+			<a class="social-link-button" rel="noopener" href="https://www.instagram.com/denversantaclausshop/" target="_blank" [attr.aria-label]="'OPERATIONAL_NOTICE.INSTAGRAM' | translate">
+				<ion-icon name="logo-instagram" color="medium" aria-hidden="true" />
+			</a>
+		</nav>
+	</main>
+</ion-content>

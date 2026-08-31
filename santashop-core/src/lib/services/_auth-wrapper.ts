@@ -1,27 +1,47 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import {
-	Auth,
-	User,
+	EmailAuthProvider,
+	onAuthStateChanged,
+	reauthenticateWithCredential,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
-	IdTokenResult,
-	UserCredential,
-	onAuthStateChanged,
-} from '@angular/fire/auth';
+	type Auth,
+	type IdTokenResult,
+	type User,
+	type UserCredential,
+} from 'firebase/auth';
 import { from, Observable, switchMap } from 'rxjs';
-import { ɵzoneWrap } from '@angular/fire';
+import { FIREBASE_AUTH } from '../tokens';
 
-function _authState(auth: Auth): Observable<User | null> {
+const emitInZone = <T>(
+	zone: NgZone,
+	emit: (value: T) => void,
+	value: T,
+): void => {
+	zone.run(() => emit(value));
+};
+
+function authState(auth: Auth, zone: NgZone): Observable<User | null> {
 	return from(auth.authStateReady()).pipe(
 		switchMap(
 			() =>
 				new Observable<User | null>((subscriber) => {
+						const emitUser = subscriber.next.bind(subscriber);
+						const emitError = subscriber.error.bind(subscriber);
+
+					const nextUser = (user: User | null): void => {
+							emitInZone(zone, emitUser, user);
+					};
+
+					const nextError = (error: Error): void => {
+							emitInZone(zone, emitError, error);
+					};
+
 					const unsubscribe = onAuthStateChanged(
 						auth,
-						subscriber.next.bind(subscriber),
-						subscriber.error.bind(subscriber),
-						subscriber.complete.bind(subscriber),
+						nextUser,
+						nextError,
 					);
 					return { unsubscribe };
 				}),
@@ -29,16 +49,15 @@ function _authState(auth: Auth): Observable<User | null> {
 	);
 }
 
-export const authState = ɵzoneWrap(_authState, true);
-
 @Injectable({
 	providedIn: 'root',
 })
 export class AuthWrapper {
-	private readonly auth = inject(Auth);
+	private readonly auth = inject(FIREBASE_AUTH);
+	private readonly zone = inject(NgZone);
 
 	public readonly authState = (): Observable<User | null> =>
-		authState(this.auth);
+		authState(this.auth, this.zone);
 
 	public readonly currentUser = (): User | null => this.auth.currentUser;
 
@@ -58,6 +77,22 @@ export class AuthWrapper {
 		user: User,
 		newPassword: string,
 	): Promise<void> => updatePassword(user, newPassword);
+
+	public readonly reauthenticateWithPassword = (
+		user: User,
+		password: string,
+	): Promise<UserCredential> => {
+		if (!user.email) {
+			return Promise.reject(
+				new Error('The current account does not have an email address.'),
+			);
+		}
+
+		return reauthenticateWithCredential(
+			user,
+			EmailAuthProvider.credential(user.email, password),
+		);
+	};
 
 	public readonly signOut = (): Promise<void> => this.auth.signOut();
 }

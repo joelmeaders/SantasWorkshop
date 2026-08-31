@@ -15,6 +15,13 @@
 		"playwright",
 		"testing"
 	],
+	"engines": {
+		"node": ">=24.0.0"
+	},
 	"author": "",
-	"license": "ISC"
+	"license": "ISC",
+	"devDependencies": {
+		"@axe-core/playwright": "catalog:",
+		"@playwright/test": "catalog:"
+	}
 }

@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	DestroyRef,
+	OnInit,
+	inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
 	AlertController,
 	IonApp,
@@ -8,9 +14,8 @@ import {
 	Platform,
 } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
-import { AppStateService } from '@santashop/core';
+import { AnalyticsWrapper, AppStateService } from '@santashop/core/customer';
 import { ApplicationService } from './core/services/application.service';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
 	selector: 'app-root',
@@ -20,16 +25,19 @@ import { firstValueFrom } from 'rxjs';
 	imports: [IonApp, IonRouterOutlet],
 	providers: [ModalController],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+	private static readonly languageStorageKey = 'santashop-language';
+
 	private readonly platform = inject(Platform);
 	private readonly translateService = inject(TranslateService);
-	private readonly analyticsService = inject(Analytics);
+	private readonly analyticsService = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
 	private readonly applicationService = inject(ApplicationService);
 	private readonly alertController = inject(AlertController);
+	private readonly destroyRef = inject(DestroyRef);
 
-	constructor() {
-		this.initializeApp();
+	public ngOnInit(): void {
+		void this.initializeApp();
 	}
 
 	public async initializeApp(): Promise<void> {
@@ -42,21 +50,33 @@ export class AppComponent {
 		this.translateService.setFallbackLang('en');
 
 		const browserLang = this.translateService.getBrowserLang() ?? 'en';
+		const storedLanguage = window.localStorage.getItem(
+			AppComponent.languageStorageKey,
+		);
+		const supportedLanguage: 'en' | 'es' =
+			storedLanguage === 'en' || storedLanguage === 'es'
+				? storedLanguage
+				: browserLang === 'es'
+					? 'es'
+					: 'en';
 		this.translateService.use(
-			browserLang.match(/en|es/) ? browserLang : 'en',
+			supportedLanguage,
 		);
 
-		logEvent(this.analyticsService, 'default_language', {
+		this.analyticsService.logEventWithParams('default_language', {
 			value: browserLang,
 		});
 
-		const alert = await firstValueFrom(this.appStateService.globalAlert$);
-		if (alert?.displayAlert) {
-			const isEnglish = this.translateService.currentLang === 'en';
-			const title = isEnglish ? alert.titleEn : alert.titleEs;
-			const message = isEnglish ? alert.messageEn : alert.messageEs;
-			await this.showGlobalMessage({ title, message });
-		}
+		this.appStateService.globalAlert$
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((alert) => {
+				if (!alert?.displayAlert) return;
+
+				const isEnglish = this.translateService.getCurrentLang() === 'en';
+				const title = isEnglish ? alert.titleEn : alert.titleEs;
+				const message = isEnglish ? alert.messageEn : alert.messageEs;
+				void this.showGlobalMessage({ title, message });
+			});
 	}
 
 	public async showGlobalMessage(globalAlert: {

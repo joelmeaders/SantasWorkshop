@@ -1,0 +1,115 @@
+:host {
+	display: block;
+}
+
+ion-content {
+	--padding-bottom: 1rem;
+	--padding-end: 1rem;
+	--padding-start: 1rem;
+	--padding-top: 1rem;
+}
+
+.referral-search {
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	margin-bottom: 1rem;
+	padding: 0.5rem 0.75rem;
+}
+
+ion-searchbar {
+	--background: #fff;
+	--border-radius: var(--santa-radius-md);
+	--box-shadow: var(--santa-shadow-sm);
+	padding-inline: 0;
+}
+
+.referral-group,
+ion-list {
+	background: rgba(255, 255, 255, 0.9);
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	margin-bottom: 1rem;
+	overflow: hidden;
+}
+
+.referral-group-heading {
+	color: var(--santa-evergreen-deep);
+	font-size: 1rem;
+	font-weight: 800;
+	margin: 0;
+	padding: 0.85rem 1rem;
+}
+
+.referral-options {
+	border-top: 1px solid var(--santa-line);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.referral-options li + li {
+	border-top: 1px solid var(--santa-line);
+}
+
+.referral-option {
+	align-items: center;
+	appearance: none;
+	background: #fff;
+	border: 0;
+	color: var(--santa-ink);
+	cursor: pointer;
+	display: flex;
+	font: inherit;
+	gap: 0.75rem;
+	justify-content: space-between;
+	padding: 1rem;
+	text-align: start;
+	width: 100%;
+}
+
+.referral-option:hover {
+	background: rgba(23, 100, 71, 0.08);
+}
+
+.referral-option:focus-visible {
+	outline: 3px solid var(--ion-color-primary);
+	outline-offset: -3px;
+}
+
+.referral-option-chevron {
+	color: var(--ion-color-medium);
+	font-size: 1.5rem;
+	line-height: 1;
+}
+
+.ref-choices {
+	font-size: 1rem;
+	line-height: 1.5;
+}
+
+.ref-choice {
+	color: var(--santa-evergreen-deep);
+	font-size: 1.2rem;
+	font-weight: 800;
+	line-height: 1.6;
+}
+
+.buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: flex-end;
+	padding-inline: 0;
+}
+
+@media (max-width: 480px) {
+	ion-content {
+		--padding-end: 0.75rem;
+		--padding-start: 0.75rem;
+	}
+
+	.buttons ion-button {
+		flex: 1 1 auto;
+	}
+}

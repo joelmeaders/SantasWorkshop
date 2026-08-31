@@ -1,0 +1,72 @@
+.workflow-card {
+	margin: 0 0 1.25rem;
+}
+
+.workflow-card ion-card-header {
+	background: linear-gradient(135deg, rgba(23, 100, 71, 0.12), rgba(23, 100, 71, 0.02));
+}
+
+.card-guidance {
+	color: var(--santa-muted);
+	margin-top: 0;
+}
+
+.children-list {
+	--background: #fff;
+	background: #fff;
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	box-shadow: 0 0.35rem 1rem rgba(15, 61, 46, 0.06);
+	margin-block: 0.9rem 1.25rem;
+	overflow: hidden;
+}
+
+.children-list ion-item {
+	--background: #fff;
+}
+
+.add-child-action {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	justify-content: flex-end;
+	margin-top: 1.25rem;
+	padding-inline: 1rem;
+}
+
+ion-modal form {
+	margin-inline: auto;
+	max-width: 42rem;
+	padding: 1rem;
+}
+
+ion-modal ion-list {
+	background: rgba(255, 255, 255, 0.82);
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	padding: 0.5rem 1rem 1rem;
+}
+
+.toy-type-heading {
+	--color: var(--santa-text);
+	--padding-start: 0;
+	font-size: 0.95rem;
+	min-height: auto;
+	padding-block: 0.8rem 0.2rem;
+	padding-inline-start: 0;
+}
+
+@media (max-width: 480px) {
+	.card-actions ion-button {
+		flex: 1 1 auto;
+	}
+
+	ion-modal form {
+		padding-inline: 0.5rem;
+	}
+}

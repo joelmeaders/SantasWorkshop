@@ -1,0 +1,37 @@
+.workflow-card {
+	margin: 0 0 1.25rem;
+}
+
+.workflow-card ion-card-header {
+	background: linear-gradient(135deg, rgba(229, 169, 47, 0.18), rgba(229, 169, 47, 0.02));
+}
+
+.is-locked {
+	filter: saturate(0.72);
+	opacity: 0.82;
+}
+
+.card-guidance {
+	color: var(--santa-muted);
+	margin-top: 0;
+}
+
+.card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	justify-content: flex-end;
+	margin-top: 1.25rem;
+}
+
+ion-accordion-group {
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	overflow: hidden;
+}
+
+@media (max-width: 480px) {
+	.card-actions ion-button {
+		flex: 1 1 auto;
+	}
+}

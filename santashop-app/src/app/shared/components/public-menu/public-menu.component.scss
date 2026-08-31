@@ -1,6 +1,35 @@
+.menu-list {
+	background: transparent;
+	padding: 0.75rem;
+}
+
+.menu-item,
+.language-item {
+	--background: rgba(255, 255, 255, 0.76);
+	--border-radius: var(--santa-radius-sm);
+	--color: var(--santa-ink);
+	--inner-padding-end: 0.75rem;
+	--padding-start: 0.75rem;
+	border: 1px solid transparent;
+	border-radius: var(--santa-radius-sm);
+	font-weight: 800;
+	margin-block: 0.5rem;
+}
+
+.menu-item:hover {
+	--background: rgba(23, 100, 71, 0.09);
+	border-color: rgba(23, 100, 71, 0.16);
+}
+
+.sign-out-item {
+	--color: var(--santa-red);
+}
+
+.language-item {
+	--background: rgba(229, 169, 47, 0.12);
+	padding-block: 0.35rem;
+}
+
 app-language-toggle {
-	position: relative;
-	top: -9px;
-	margin-left: auto;
-	margin-right: auto;
+	margin-inline: auto;
 }

@@ -6,7 +6,42 @@
 			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
 			"headers": [
 				{
-					"source": "*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].+(css|js)",
+					"source": "**",
+					"headers": [
+						{
+							"key": "Content-Security-Policy",
+							"value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.googletagmanager.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://www.google-analytics.com https://region1.google-analytics.com https://*.google.com; frame-src 'self' https://*.firebaseapp.com https://www.google.com https://*.google.com; worker-src 'self' blob:; manifest-src 'self'"
+						},
+						{
+							"key": "Permissions-Policy",
+							"value": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
+						},
+						{
+							"key": "Referrer-Policy",
+							"value": "strict-origin-when-cross-origin"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						}
+					]
+				},
+				{
+					"source": "/index.html",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						}
+					]
+				},
+
+				{
+					"source": "**/*-????????.@(css|js)",
 					"headers": [
 						{
 							"key": "Cache-Control",
@@ -27,31 +62,52 @@
 			"rewrites": [
 				{
 					"source": "/changeAccountInformation",
-					"function": "changeAccountInformation"
+					"function": {
+						"functionId": "changeAccountInformation",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/completeRegistration",
-					"function": "completeRegistration"
+					"function": {
+						"functionId": "completeRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/newAccount",
-					"function": "newAccount"
+					"function": {
+						"functionId": "newAccount",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/undoRegistration",
-					"function": "undoRegistration"
+					"function": {
+						"functionId": "undoRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/changeRegistrationDateTime",
-					"function": "changeRegistrationDateTime"
+					"function": {
+						"functionId": "changeRegistrationDateTime",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/updateEmailAddress",
-					"function": "updateEmailAddress"
+					"function": {
+						"functionId": "updateEmailAddress",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/updateReferredBy",
-					"function": "updateReferredBy"
+					"function": {
+						"functionId": "updateReferredBy",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "**",
@@ -65,7 +121,42 @@
 			"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
 			"headers": [
 				{
-					"source": "*.[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].+(css|js)",
+					"source": "**",
+					"headers": [
+						{
+							"key": "Content-Security-Policy",
+							"value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://storage.googleapis.com; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.googletagmanager.com https://www.google.com https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://www.google-analytics.com https://region1.google-analytics.com https://*.google.com; frame-src 'self' https://*.firebaseapp.com https://www.google.com https://*.google.com; worker-src 'self' blob:; manifest-src 'self'"
+						},
+						{
+							"key": "Permissions-Policy",
+							"value": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
+						},
+						{
+							"key": "Referrer-Policy",
+							"value": "strict-origin-when-cross-origin"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						}
+					]
+				},
+				{
+					"source": "/index.html",
+					"headers": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						}
+					]
+				},
+
+				{
+					"source": "**/*-????????.@(css|js)",
 					"headers": [
 						{
 							"key": "Cache-Control",
@@ -86,31 +177,52 @@
 			"rewrites": [
 				{
 					"source": "/checkIn",
-					"function": "checkIn"
+					"function": {
+						"functionId": "checkIn",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/checkInWithEdit",
-					"function": "checkInWithEdit"
+					"function": {
+						"functionId": "checkInWithEdit",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/onSiteRegistration",
-					"function": "onSiteRegistration"
+					"function": {
+						"functionId": "onSiteRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/undoRegistration",
-					"function": "undoRegistration"
+					"function": {
+						"functionId": "undoRegistration",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/callableAdminPreRegister",
-					"function": "callableAdminPreRegister"
+					"function": {
+						"functionId": "callableAdminPreRegister",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/callableResendRegistrationEmail",
-					"function": "callableResendRegistrationEmail"
+					"function": {
+						"functionId": "callableResendRegistrationEmail",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "/changeRegistrationDateTime",
-					"function": "changeRegistrationDateTime"
+					"function": {
+						"functionId": "changeRegistrationDateTime",
+						"region": "us-central1"
+					}
 				},
 				{
 					"source": "**",
@@ -120,7 +232,9 @@
 		}
 	],
 	"functions": {
+		"runtime": "nodejs24",
 		"predeploy": [
+			"node \"$PROJECT_DIR/scripts/assert-functions-deploy-ci.cjs\"",
 			"npm --prefix \"$RESOURCE_DIR\" run lint",
 			"npm --prefix \"$RESOURCE_DIR\" run build"
 		],
@@ -131,6 +245,7 @@
 			"port": 5001
 		},
 		"firestore": {
+			"host": "127.0.0.1",
 			"port": 8080
 		},
 		"hosting": {

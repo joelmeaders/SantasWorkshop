@@ -1,5 +1,5 @@
 <ion-content>
-	<ion-router-outlet></ion-router-outlet>
+	<ion-router-outlet />
 </ion-content>
 
 <ion-footer>
@@ -10,17 +10,18 @@
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 			>
-				<ion-icon name="storefront-outline" color="tertiary"></ion-icon>
+				<ion-icon name="storefront-outline" color="tertiary" aria-hidden="true" />
 				<ion-label>Home</ion-label>
 			</ion-tab-button>
 
 			<ion-tab-button
+				id="checkInTab"
 				[routerLink]="['/admin/checkin']"
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 				[disabled]="(checkinEnabled$ | async) === false"
 			>
-				<ion-icon name="bag-check-outline" color="success"></ion-icon>
+				<ion-icon name="bag-check-outline" color="success" aria-hidden="true" />
 				<ion-label>Check-In</ion-label>
 			</ion-tab-button>
 
@@ -29,17 +30,18 @@
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 			>
-				<ion-icon name="search-outline" color="warning"></ion-icon>
+				<ion-icon name="search-outline" color="warning" aria-hidden="true" />
 				<ion-label>Search</ion-label>
 			</ion-tab-button>
 
 			<ion-tab-button
+				id="onSiteRegistrationTab"
 				[routerLink]="['/admin/registration']"
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 				[disabled]="(onsiteRegistrationEnabled$ | async) === false"
 			>
-				<ion-icon name="storefront-outline" color="primary"></ion-icon>
+				<ion-icon name="storefront-outline" color="primary" aria-hidden="true" />
 				<ion-label>Registration</ion-label>
 			</ion-tab-button>
 		</ion-tab-bar>

@@ -1,8 +1,8 @@
 import {
-	ChangeDetectionStrategy,
-	Component,
-	ViewChild,
-	inject,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  viewChild
 } from '@angular/core';
 import {
 	ModalController,
@@ -102,8 +102,7 @@ export class ReferralModalComponent {
 
 	public readonly referrals$ = this.filteredReferrals$;
 
-	@ViewChild('otherInput')
-	private readonly otherInput?: HTMLIonInputElement;
+	private readonly otherInput = viewChild<HTMLIonInputElement>('otherInput');
 
 	public filter($event: { detail?: { value?: string | null } }): void {
 		const input = $event.detail?.value;
@@ -117,7 +116,7 @@ export class ReferralModalComponent {
 
 	public async dismiss(): Promise<void> {
 		let choice = this.referralChoice.getValue();
-		if (choice === 'Other') choice = `Other:${this.otherInput?.value}`;
+		if (choice === 'Other') choice = `Other:${this.otherInput()?.value}`;
 		await this.modalController.dismiss(choice);
 	}
 }

@@ -1,89 +1,74 @@
-import { NgModule } from '@angular/core';
+import { inject } from '@angular/core';
+import { AuthService } from '@santashop/core/customer';
+import { map, take } from 'rxjs/operators';
 import {
-	AuthGuard,
-	AuthPipe,
-	redirectLoggedInTo,
-	redirectUnauthorizedTo,
-} from '@angular/fire/auth-guard';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+	CanActivateFn,
+	CanMatchFn,
+	Router,
+	Routes,
+} from '@angular/router';
 
-const redirectUnauthorizedToLogin = (): AuthPipe =>
-	redirectUnauthorizedTo(['/sign-in']);
+export const redirectUnauthorizedToLoginGuard: CanMatchFn = (
+	_route,
+	segments,
+) => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+	const returnUrl =
+		router.getCurrentNavigation()?.extractedUrl.toString() ??
+		`/${segments.map((segment) => segment.path).join('/')}`;
 
-const redirectLoggedInToRegistration = (): AuthPipe =>
-	redirectLoggedInTo(['/pre-registration/overview']);
+	return authService.currentUser$.pipe(
+		take(1),
+		map((user) =>
+			user
+				? true
+				: router.createUrlTree(['/'], {
+					queryParams: {
+							mode: 'sign-in',
+							returnUrl,
+						},
+					}),
+		),
+	);
+};
+
+const redirectLoggedInToRegistrationGuard: CanActivateFn = () => {
+	const authService = inject(AuthService);
+	const router = inject(Router);
+
+	return authService.currentUser$.pipe(
+		take(1),
+		map((user) =>
+			user ? router.createUrlTree(['/pre-registration/overview']) : true,
+		),
+	);
+};
 
 export const routes: Routes = [
 	{
 		path: '',
-		loadChildren: () =>
-			import('./home/home.module').then((m) => m.HomePageModule),
+		canActivate: [redirectLoggedInToRegistrationGuard],
+		loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
 		pathMatch: 'full',
-	},
-	{
-		path: 'sign-in',
-		loadChildren: () =>
-			import('./features/v2/sign-in/sign-in.module').then(
-				(m) => m.SignInPageModule,
-			),
-		data: { authGuardPipe: redirectLoggedInToRegistration },
+		title: 'Santa Shop Registration',
 	},
 	{
 		path: 'sign-up',
-		loadChildren: () =>
-			import('./features/v2/sign-up/sign-up.module').then(
-				(m) => m.SignUpPageModule,
+		canActivate: [redirectLoggedInToRegistrationGuard],
+		loadComponent: () =>
+			import('./features/v2/sign-up/sign-up.page').then(
+				(m) => m.SignUpPage,
 			),
-		canActivate: [AuthGuard],
-		data: { authGuardPipe: redirectLoggedInToRegistration },
+		title: 'Create Account | Santa Shop Registration',
 	},
 	{
 		path: 'pre-registration',
+		canMatch: [redirectUnauthorizedToLoginGuard],
 		loadChildren: () =>
-			import(
-				'./features/v2/pre-registration/pre-registration.module'
-			).then((m) => m.PreRegistrationPageModule),
-		canActivate: [AuthGuard],
-		data: { authGuardPipe: redirectUnauthorizedToLogin },
-	},
-	{
-		path: 'reset-password',
-		loadChildren: () =>
-			import('./features/v2/reset-password/reset-password.module').then(
-				(m) => m.ResetPasswordPageModule,
+			import('./features/v2/pre-registration/pre-registration.routes').then(
+				(module) => module.preRegistrationRoutes,
 			),
 	},
-	{
-		path: 'registration-closed',
-		loadChildren: () =>
-			import(
-				'./features/registration-closed/registration-closed.module'
-			).then((m) => m.RegistrationClosedPageModule),
-	},
-	{
-		path: 'maintenance',
-		loadChildren: () =>
-			import('./features/maintenance/maintenance.module').then(
-				(m) => m.MaintenancePageModule,
-			),
-	},
-	{
-		path: 'bad-weather',
-		loadChildren: () =>
-			import('./features/bad-weather/bad-weather.module').then(
-				(m) => m.BadWeatherPageModule,
-			),
-	},
+	{ path: '**', redirectTo: '' },
 ];
-
-@NgModule({
-	imports: [
-		RouterModule.forRoot(routes, {
-			preloadingStrategy: PreloadAllModules,
-			anchorScrolling: 'enabled',
-			onSameUrlNavigation: 'reload',
-		}),
-	],
-	exports: [RouterModule],
-})
-export class AppRoutingModule {}

@@ -1,255 +1,125 @@
 import { Provider } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { ModalController, PopoverController } from '@ionic/angular/standalone';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
+import { type Mocked, vi } from 'vitest';
+import {
+	FIREBASE_ANALYTICS,
+	FIREBASE_AUTH,
+	FIREBASE_FIRESTORE,
+	FIREBASE_FUNCTIONS,
+	FIREBASE_STORAGE,
+} from '@santashop/core';
+import {
+	FIREBASE_ANALYTICS as CUSTOMER_FIREBASE_ANALYTICS,
+	FIREBASE_AUTH as CUSTOMER_FIREBASE_AUTH,
+	FIREBASE_FUNCTIONS as CUSTOMER_FIREBASE_FUNCTIONS,
+	FIREBASE_STORAGE as CUSTOMER_FIREBASE_STORAGE,
+} from '@santashop/core/customer';
+import { createMock } from '../../test-helpers/vitest';
 
-/**
- * Creates a mock TranslateService with common methods and observables.
- */
-export function createTranslateServiceMock(): any {
+export function createTranslateServiceMock(): Mocked<TranslateService> {
 	const onLangChange = new BehaviorSubject({ lang: 'en', translations: {} });
-	const onTranslationChange = new BehaviorSubject({
-		lang: 'en',
-		translations: {},
-	});
-	const onFallbackLangChange = new BehaviorSubject({
-		lang: 'en',
-		translations: {},
-	});
-
+	const onTranslationChange = new BehaviorSubject({ lang: 'en', translations: {} });
+	const onFallbackLangChange = new BehaviorSubject({ lang: 'en', translations: {} });
 	const mock = {
-		_currentLang: 'en',
-		_fallbackLang: 'en',
-		_langs: [] as string[],
-		translations: { en: {} },
-		onLangChange: onLangChange.asObservable(),
-		onTranslationChange: onTranslationChange.asObservable(),
+		_currentLang: 'en', _fallbackLang: 'en', _langs: [] as string[], translations: { en: {} },
+		onLangChange: onLangChange.asObservable(), onTranslationChange: onTranslationChange.asObservable(),
 		onFallbackLangChange: onFallbackLangChange.asObservable(),
-		get: jasmine.createSpy('get').and.returnValue(of('translated')),
-		use: jasmine.createSpy('use').and.callFake((lang: string) => {
-			mock._currentLang = lang;
-			return of({ lang, translations: {} });
-		}),
-		addLangs: jasmine
-			.createSpy('addLangs')
-			.and.callFake((langs: string[]) => {
-				mock._langs = langs;
-			}),
-		setFallbackLang: jasmine
-			.createSpy('setFallbackLang')
-			.and.callFake((lang: string) => {
-				mock._fallbackLang = lang;
-			}),
-		getBrowserLang: jasmine
-			.createSpy('getBrowserLang')
-			.and.returnValue('en'),
-		instant: jasmine.createSpy('instant').and.returnValue('translated'),
-		stream: jasmine.createSpy('stream').and.returnValue(of('translated')),
-		getCurrentLang: jasmine
-			.createSpy('getCurrentLang')
-			.and.callFake(() => mock._currentLang),
-		getFallbackLang: jasmine
-			.createSpy('getFallbackLang')
-			.and.callFake(() => mock._fallbackLang),
-		getLangs: jasmine.createSpy('getLangs').and.callFake(() => mock._langs),
-		getParsedResult: jasmine
-			.createSpy('getParsedResult')
-			.and.returnValue(of('translated')),
+		get: vi.fn().mockReturnValue(of('translated')),
+		use: vi.fn(), addLangs: vi.fn(), setFallbackLang: vi.fn(),
+		getBrowserLang: vi.fn().mockReturnValue('en'), instant: vi.fn().mockReturnValue('translated'),
+		stream: vi.fn().mockReturnValue(of('translated')),
+		getCurrentLang: vi.fn(), getFallbackLang: vi.fn(), getLangs: vi.fn(),
+		getParsedResult: vi.fn().mockReturnValue(of('translated')),
 	};
-
-	return mock;
+	mock.use.mockImplementation((lang: string) => { mock._currentLang = lang; return of({ lang, translations: {} }); });
+	mock.addLangs.mockImplementation((langs: string[]) => { mock._langs = langs; });
+	mock.setFallbackLang.mockImplementation((lang: string) => { mock._fallbackLang = lang; });
+	mock.getCurrentLang.mockImplementation(() => mock._currentLang);
+	mock.getFallbackLang.mockImplementation(() => mock._fallbackLang);
+	mock.getLangs.mockImplementation(() => mock._langs);
+	return mock as unknown as Mocked<TranslateService>;
 }
 
-/**
- * Provider for TranslateService with common mock implementation.
- */
 export function provideTranslateServiceMock(): Provider {
-	return {
-		provide: TranslateService,
-		useFactory: createTranslateServiceMock,
-	};
+	return { provide: TranslateService, useFactory: createTranslateServiceMock };
 }
 
-/**
- * Creates a mock ModalController.
- */
-export function createModalControllerMock(): jasmine.SpyObj<ModalController> {
-	return jasmine.createSpyObj('ModalController', [
-		'create',
-		'dismiss',
-		'getTop',
-	]);
+export function createModalControllerMock(): Mocked<ModalController> {
+	return createMock<ModalController>(['create', 'dismiss', 'getTop']);
 }
 
-/**
- * Creates a mock PopoverController.
- */
-export function createPopoverControllerMock(): jasmine.SpyObj<PopoverController> {
-	return jasmine.createSpyObj('PopoverController', [
-		'create',
-		'dismiss',
-		'getTop',
-	]);
+export function createPopoverControllerMock(): Mocked<PopoverController> {
+	return createMock<PopoverController>(['create', 'dismiss', 'getTop']);
 }
 
-/**
- * Creates a mock ActivatedRoute.
- */
 export function createActivatedRouteMock(): Partial<ActivatedRoute> {
 	return {
 		snapshot: {
-			params: {},
-			queryParams: {},
-			data: {},
-			url: [],
-			fragment: null,
-			outlet: 'primary',
-			component: null,
-			routeName: null,
-			title: undefined,
-			paramMap: jasmine.createSpyObj('ParamMap', [
-				'get',
-				'has',
-				'getAll',
-				'keys',
-			]),
-			queryParamMap: jasmine.createSpyObj('ParamMap', [
-				'get',
-				'has',
-				'getAll',
-				'keys',
-			]),
-			root: {} as any,
-			parent: null,
-			firstChild: null,
-			children: [],
-			pathFromRoot: [],
-		} as any,
-		params: of({}),
-		queryParams: of({}),
-		data: of({}),
+			params: {}, queryParams: {}, data: {}, url: [], fragment: null, outlet: 'primary',
+			component: null, routeName: null, title: undefined, paramMap: convertToParamMap({}),
+			queryParamMap: convertToParamMap({}), root: {} as never, parent: null, firstChild: null,
+			children: [], pathFromRoot: [],
+		} as never,
+		params: of({}), queryParams: of({}), paramMap: of(convertToParamMap({})),
+		queryParamMap: of(convertToParamMap({})), data: of({}),
 	};
 }
 
-/**
- * Provider for ActivatedRoute with common mock implementation.
- */
 export function provideActivatedRouteMock(): Provider {
+	return { provide: ActivatedRoute, useFactory: createActivatedRouteMock };
+}
+
+export function createAuthMock(): object {
 	return {
-		provide: ActivatedRoute,
-		useFactory: createActivatedRouteMock,
+		...createMock<{
+			signInWithEmailAndPassword: () => unknown; createUserWithEmailAndPassword: () => unknown;
+			signOut: () => unknown; sendPasswordResetEmail: () => unknown;
+			authStateReady: () => Promise<void>;
+		}>(['signInWithEmailAndPassword', 'createUserWithEmailAndPassword', 'signOut', 'sendPasswordResetEmail', 'authStateReady']),
+		currentUser: null,
+		onAuthStateChanged: vi.fn().mockReturnValue(() => undefined),
+		authStateReady: vi.fn().mockResolvedValue(undefined),
 	};
 }
 
-/**
- * Creates a mock Firebase Auth with onAuthStateChanged support.
- */
-export function createAuthMock(): any {
-	const mock = jasmine.createSpyObj('Auth', [
-		'signInWithEmailAndPassword',
-		'createUserWithEmailAndPassword',
-		'signOut',
-		'sendPasswordResetEmail',
-		'authStateReady',
-	]);
-	// Add onAuthStateChanged as a property that returns a function
-	Object.defineProperty(mock, 'onAuthStateChanged', {
-		value: jasmine
-			.createSpy('onAuthStateChanged')
-			.and.returnValue((): void => {
-				return undefined;
-			}),
-		writable: true,
-		configurable: true,
-	});
-	mock.currentUser = null;
-	mock.authStateReady.and.returnValue(Promise.resolve());
-	return mock;
-}
-
-/**
- * Creates a mock Firestore with collection/doc support.
- */
-export function createFirestoreMock(): any {
+export function createFirestoreMock(): object {
 	const docMock = {
-		set: jasmine.createSpy('set').and.returnValue(Promise.resolve()),
-		get: jasmine.createSpy('get').and.returnValue(Promise.resolve()),
-		update: jasmine.createSpy('update').and.returnValue(Promise.resolve()),
-		delete: jasmine.createSpy('delete').and.returnValue(Promise.resolve()),
+		set: vi.fn().mockResolvedValue(undefined), get: vi.fn().mockResolvedValue(undefined),
+		update: vi.fn().mockResolvedValue(undefined), delete: vi.fn().mockResolvedValue(undefined),
 	};
+	const collectionMock = { doc: vi.fn().mockReturnValue(docMock), add: vi.fn().mockResolvedValue(undefined) };
+	return { collection: vi.fn().mockReturnValue(collectionMock), doc: vi.fn().mockReturnValue(docMock) };
+}
 
-	const collectionMock = {
-		doc: jasmine.createSpy('doc').and.returnValue(docMock),
-		add: jasmine.createSpy('add').and.returnValue(Promise.resolve()),
-	};
+export function createFunctionsMock(): object {
+	return { httpsCallable: vi.fn().mockReturnValue(() => of({})) };
+}
 
+export function createStorageMock(): object {
+	return { ref: vi.fn().mockReturnValue({ put: vi.fn(), getDownloadURL: vi.fn().mockReturnValue(of('http://example.com/file')) }) };
+}
+
+export function createAnalyticsMock(): object {
+	return { app: { name: 'mock-app', options: { apiKey: 'mock-api-key', projectId: 'mock-project-id' }, automaticDataCollectionEnabled: false } };
+}
+
+export function createAppStateServiceMock(): object {
 	return {
-		collection: jasmine
-			.createSpy('collection')
-			.and.returnValue(collectionMock),
-		doc: jasmine.createSpy('doc').and.returnValue(docMock),
+		globalAlert$: of({ enabled: false }), message$: of(null), isMaintenanceModeEnabled$: of(false),
+		isRegistrationEnabled$: of(true), shopClosedWeather$: of(false), createAccountEnabled$: of(true),
+		setModal: vi.fn(), openModal: vi.fn().mockResolvedValue(undefined), closeExistingModals: vi.fn().mockResolvedValue(undefined),
 	};
 }
 
-/**
- * Creates a mock Firebase Functions.
- */
-export function createFunctionsMock(): any {
-	return {
-		httpsCallable: jasmine
-			.createSpy('httpsCallable')
-			.and.returnValue(() => of({})),
-	};
-}
-
-/**
- * Creates a mock Firebase Storage.
- */
-export function createStorageMock(): any {
-	return {
-		ref: jasmine.createSpy('ref').and.returnValue({
-			put: jasmine.createSpy('put'),
-			getDownloadURL: jasmine
-				.createSpy('getDownloadURL')
-				.and.returnValue(of('http://example.com/file')),
-		}),
-	};
-}
-
-/**
- * Creates a mock Firebase Analytics.
- */
-export function createAnalyticsMock(): any {
-	return {
-		app: {
-			name: 'mock-app',
-			options: {
-				apiKey: 'mock-api-key',
-				projectId: 'mock-project-id',
-			},
-			automaticDataCollectionEnabled: false,
-		},
-	};
-}
-
-/**
- * Creates a mock AppStateService.
- */
-export function createAppStateServiceMock(): any {
-	return {
-		globalAlert$: of({ enabled: false }),
-		message$: of(null),
-		isMaintenanceModeEnabled$: of(false),
-		isRegistrationEnabled$: of(true),
-		shopClosedWeather$: of(false),
-		createAccountEnabled$: of(true),
-		setModal: jasmine.createSpy('setModal'),
-		openModal: jasmine
-			.createSpy('openModal')
-			.and.returnValue(Promise.resolve()),
-		closeExistingModals: jasmine
-			.createSpy('closeExistingModals')
-			.and.returnValue(Promise.resolve()),
-	};
-}
+export function provideAuthMock(): Provider { return { provide: FIREBASE_AUTH, useFactory: createAuthMock }; }
+export function provideFirestoreMock(): Provider { return { provide: FIREBASE_FIRESTORE, useFactory: createFirestoreMock }; }
+export function provideFunctionsMock(): Provider { return { provide: FIREBASE_FUNCTIONS, useFactory: createFunctionsMock }; }
+export function provideStorageMock(): Provider { return { provide: FIREBASE_STORAGE, useFactory: createStorageMock }; }
+export function provideAnalyticsMock(): Provider { return { provide: FIREBASE_ANALYTICS, useFactory: createAnalyticsMock }; }
+export function provideCustomerAuthMock(): Provider { return { provide: CUSTOMER_FIREBASE_AUTH, useFactory: createAuthMock }; }
+export function provideCustomerFunctionsMock(): Provider { return { provide: CUSTOMER_FIREBASE_FUNCTIONS, useFactory: createFunctionsMock }; }
+export function provideCustomerStorageMock(): Provider { return { provide: CUSTOMER_FIREBASE_STORAGE, useFactory: createStorageMock }; }
+export function provideCustomerAnalyticsMock(): Provider { return { provide: CUSTOMER_FIREBASE_ANALYTICS, useFactory: createAnalyticsMock }; }

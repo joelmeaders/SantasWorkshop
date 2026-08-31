@@ -1,42 +1,48 @@
+import { COLLECTION_SCHEMA, UpdateReferredBy } from '../models';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
+import { serializeError } from '../utility/errors';
 import {
-	COLLECTION_SCHEMA,
-	UpdateReferredBy,
-} from '../../../santashop-models/src';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
+	requireAuthenticatedUid,
+	requireCallableData,
+	requireTrimmedString,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
-admin.initializeApp();
+const log = createFunctionLogger('updateReferredBy');
 
-export default async (
-	data: UpdateReferredBy,
-	context: CallableContext,
-): Promise<any | HttpsError> => {
-	const uid = context.auth?.uid;
-	if (!uid) throw new HttpsError('not-found', 'uid null');
-
-	if (!data?.referredBy)
-		throw new HttpsError('data-loss', 'missing request information');
+export default async function updateReferredBy(
+	request: CallableRequest<UpdateReferredBy>,
+): Promise<boolean> {
+	const uid = requireAuthenticatedUid(request);
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		return {
+			referredBy: requireTrimmedString(
+				requestData['referredBy'],
+				'Referred by',
+			),
+		};
+	});
 
 	const userDocumentRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
 
-	return userDocumentRef
-		.update({ referredBy: data.referredBy })
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(
-				`Error updating user document ${uid} with ${JSON.stringify(
-					data,
-				)}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				'Error updating user document',
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await userDocumentRef.update({ referredBy: data.referredBy });
+		return true;
+	} catch (error) {
+		log.error(
+			'Failed to update referred-by value',
+			{ uid, referredBy: data.referredBy },
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			'Error updating user document',
+			serializeError(error),
+		);
+	}
+}

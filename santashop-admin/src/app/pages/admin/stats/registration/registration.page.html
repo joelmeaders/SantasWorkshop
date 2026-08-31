@@ -69,8 +69,9 @@
 			</ion-col>
 		</ion-row>
 
-		@if ((hasScheduleData$ | async) === true) {
-		<ion-row *appLet="capacityByDay$ | async as capacities">
+		@if ((hasScheduleData$ | async) === true) { @let capacities =
+		capacityByDay$ | async;
+		<ion-row>
 			<ion-col size="12">
 				<h2>Capacity by Day</h2>
 			</ion-col>
@@ -108,7 +109,8 @@
 			}
 		</ion-row>
 
-		<ion-row *appLet="familiesBySlotsChartData$ | async as slots">
+		@let slots = familiesBySlotsChartData$ | async;
+		<ion-row>
 			<ion-col size="12">
 				<h2>Schedules by Day</h2>
 			</ion-col>

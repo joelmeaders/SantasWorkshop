@@ -1,21 +1,45 @@
-<ion-content color="light">
-	<ion-grid fixed class="ion-margin-top ion-padding-top">
-		<ion-row>
+<ion-content color="light" class="home-page">
+	<ion-grid fixed class="home-shell">
+		<ion-row class="brand-hero">
+			<img
+				src="assets/images/gift-classic.svg"
+				class="hero-gift hero-gift-left"
+				alt=""
+				aria-hidden="true"
+				width="256"
+				height="256"
+				fetchpriority="low"
+				decoding="async"
+			/>
 			<ion-col class="ion-text-center">
 				<img
 					src="assets/DSCS-Santa-Body_Red.png"
-					class="logo"
+					class="logo hero-logo"
 					alt="logo with santa claus"
+					width="491"
+					height="482"
+					fetchpriority="high"
+					decoding="async"
 				/>
 			</ion-col>
+			<img
+				src="assets/images/gift-evergreen.svg"
+				class="hero-gift hero-gift-right"
+				alt=""
+				aria-hidden="true"
+				width="256"
+				height="256"
+				fetchpriority="low"
+				decoding="async"
+			/>
 		</ion-row>
 
-		<ion-row class="ion-padding-bottom">
+		<ion-row class="welcome-section ion-justify-content-center">
 			<ion-col size="12" class="ion-text-center">
-				<app-language-toggle></app-language-toggle>
+				<app-language-toggle />
 			</ion-col>
-			<ion-col class="ion-text-center es-mg-top-xl">
-				<h1>
+			<ion-col size="12" class="ion-text-center es-mg-top-xl">
+				<h1 class="welcome-title">
 					<strong
 						innerHtml="{{ 'HOME.WELCOME_MESSAGE' | translate }}"
 					></strong>
@@ -24,77 +48,96 @@
 		</ion-row>
 
 		@let createAccountEnabled = createAccountEnabled$ | async;
-		<ion-row>
-			@if (createAccountEnabled === true) {
-			<ion-col size="12" class="ion-text-center">
-				<p>{{ "SIGNUP.NEW_ACCOUNT_NOTICE" | translate }}</p>
-				<ion-button
-					size="large"
-					color="xmasred"
-					class="custom-button remove-shadow"
-					[routerLink]="['/sign-up']"
-				>
-					<strong>{{ "HOME.CREATE_ACCOUNT" | translate }}</strong>
-				</ion-button>
-			</ion-col>
-			} @else if (createAccountEnabled === false) {
-			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
-				<div class="alert">
-					<p>{{ "SIGNUP.CREATE_ACCOUNT_DISABLED" | translate }}</p>
-				</div>
-			</ion-col>
-			} @else {
-			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
-				<ion-spinner name="crescent"></ion-spinner>
-			</ion-col>
-			}
-
-			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
-				<p>{{ "HOME.SIGN_IN_INST" | translate }}</p>
-				<ion-button
-					color="white"
-					class="custom-button remove-shadow"
-					[routerLink]="['/sign-in']"
-				>
-					{{ "COMMON.EXISTING_ACCOUNT" | translate }}
-				</ion-button>
+		@let mode = mode$ | async;
+		<ion-row class="ion-justify-content-center">
+			<ion-col size="12" sizeMd="8" sizeLg="6">
+				@if (mode === 'choose') {
+				<ion-card class="entry-card ion-text-center">
+					<ion-card-header>
+						<ion-card-title>{{ "HOME.CHOOSE_PATH" | translate }}</ion-card-title>
+					</ion-card-header>
+					<ion-card-content>
+						@if (createAccountEnabled === true) {
+						<p>{{ "SIGNUP.NEW_ACCOUNT_NOTICE" | translate }}</p>
+						<ion-button id="createAccountButton" expand="block" size="large" color="xmasred" [routerLink]="['/sign-up']">
+							<strong>{{ "HOME.CREATE_ACCOUNT" | translate }}</strong>
+						</ion-button>
+						} @else if (createAccountEnabled === false) {
+						<div class="alert"><p>{{ "SIGNUP.CREATE_ACCOUNT_DISABLED" | translate }}</p></div>
+						} @else {
+						<ion-spinner name="crescent" aria-label="Loading account options" />
+						}
+						<p>{{ "HOME.SIGN_IN_INST" | translate }}</p>
+						<ion-button id="existingAccountButton" expand="block" color="white" [routerLink]="['/']" [queryParams]="{ mode: 'sign-in' }">
+							{{ "COMMON.EXISTING_ACCOUNT" | translate }}
+						</ion-button>
+					</ion-card-content>
+				</ion-card>
+				} @else if (mode === 'sign-in') {
+				<ion-card class="entry-card">
+					<ion-card-header><ion-card-title>{{ "COMMON.SIGN_IN" | translate }}</ion-card-title></ion-card-header>
+					<ion-card-content>
+						<form [formGroup]="signInForm" (ngSubmit)="onSignIn()" novalidate>
+							<ion-list lines="none">
+								<ion-item><ion-input id="signInEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" formControlName="emailAddress" /></ion-item>
+								<ion-item><ion-input id="signInPassword" fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password" /></ion-item>
+							</ion-list>
+							<ion-button id="signInButton" type="submit" expand="block" size="large" color="xmasred" [disabled]="signInForm.invalid">{{ "COMMON.SIGN_IN" | translate }}</ion-button>
+						</form>
+						<ion-button fill="clear" expand="block" [routerLink]="['/']" [queryParams]="{ mode: 'reset' }">{{ "SIGNIN.FORGOT_PASSWORD" | translate }}</ion-button>
+						<ion-button class="remove-shadow customer-back-button" color="white" [routerLink]="['/']">
+							<ion-icon slot="start" name="arrow-back-sharp" aria-hidden="true" />
+							{{ "COMMON.GO_BACK" | translate }}
+						</ion-button>
+					</ion-card-content>
+				</ion-card>
+				} @else {
+				<ion-card class="entry-card">
+					<ion-card-header><ion-card-title>{{ "FORGOTPASS.RESET_YOUR_PASSWORD" | translate }}</ion-card-title></ion-card-header>
+					<ion-card-content>
+						@if ((resetEmailSent$ | async) === false) {
+						<p>{{ "FORGOTPASS.INSTRUCTIONS" | translate }}</p>
+						<ion-item><ion-input id="resetPasswordEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" /></ion-item>
+						<ion-button id="resetPasswordButton" expand="block" color="xmasred" [disabled]="resetEmail.invalid" (click)="resetPassword()">{{ "FORGOTPASS.RESET_PASSWORD" | translate }}</ion-button>
+						} @else {
+						<ion-text role="status" aria-live="polite"><h2>{{ "FORGOTPASS.EMAIL_SENT" | translate }}</h2><p>{{ "FORGOTPASS.EMAIL_SENT_2" | translate }}</p></ion-text>
+						<ion-button expand="block" fill="clear" (click)="resetPasswordForm()">{{ "FORGOTPASS.RESET_PASSWORD_AGAIN" | translate }}</ion-button>
+						}
+						<ion-button id="returnToSignInButton" fill="clear" expand="block" [routerLink]="['/']" [queryParams]="{ mode: 'sign-in' }">{{ "COMMON.SIGN_IN" | translate }}</ion-button>
+					</ion-card-content>
+				</ion-card>
+				}
 			</ion-col>
 		</ion-row>
 
-		<ion-row class="es-pd-top-xxl">
+		<ion-row class="social-links es-pd-top-xxl">
 			<ion-col class="ion-text-center">
 				<a
 					href="https://www.facebook.com/denversantaclausshop"
 					target="_blank"
+					rel="noopener"
+					class="social-link-button ion-margin-end"
+					aria-label="Facebook"
 				>
-					<ion-button
-						color="white"
-						class="remove-shadow round-button ion-margin-end dark-border"
-						size="default"
-					>
 						<ion-icon
-							slot="icon-only"
 							name="logo-facebook"
 							color="medium"
-						></ion-icon>
-					</ion-button>
+							aria-hidden="true"
+						 />
 				</a>
 
 				<a
 					href="https://www.instagram.com/denversantaclausshop/"
 					target="_blank"
+					rel="noopener"
+					class="social-link-button"
+					aria-label="Instagram"
 				>
-					<ion-button
-						color="white"
-						class="remove-shadow round-button dark-border"
-						size="default"
-					>
 						<ion-icon
-							slot="icon-only"
 							name="logo-instagram"
 							color="medium"
-						></ion-icon>
-					</ion-button>
+							aria-hidden="true"
+						 />
 				</a>
 			</ion-col>
 		</ion-row>

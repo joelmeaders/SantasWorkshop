@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { beforeEach, describe, expect, it, type MockInstance } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import {
@@ -9,10 +10,11 @@ import {
 } from '../../../../../../../test-helpers';
 import { mockUsers } from '../../../../../../../test-helpers/mock-data';
 import { provideTranslateServiceMock } from '../../../../../test-helpers';
-import { PreRegistrationService } from '../../../../core';
 
 import { ProfilePage } from './profile.page';
 import { ProfilePageService } from './profile.page.service';
+import { changeEmailForm, changePasswordForm } from './profile.form';
+import { newChangeInfoForm } from './change-info/change-info.form';
 
 describe('ProfilePage', () => {
 	let component: ProfilePage;
@@ -21,29 +23,30 @@ describe('ProfilePage', () => {
 	const viewService: Spied<ProfilePageService> =
 		autoSpyProvider(ProfilePageService).useValue;
 
-	const preregistrationService: Spied<PreRegistrationService> =
-		autoSpyProvider(PreRegistrationService).useValue;
-
 	const providers = [
 		{ provide: ProfilePageService, useValue: viewService },
-		{ provide: PreRegistrationService, useValue: preregistrationService },
 		{
 			provide: ActivatedRoute,
 			useValue: { snapshot: { paramMap: { get: (): null => null } } },
 		},
 	];
 
-	const userProfile$Spy: jasmine.Spy = getPropertySpy(
+	const userProfile$Spy: MockInstance = getPropertySpy(
 		viewService,
 		'userProfile$',
-	).and.returnValue(of(mockUsers().user1));
+	).mockReturnValue(of(mockUsers().user1));
 
-	const isRegistrationComplete$Spy: jasmine.Spy = getPropertySpy(
-		preregistrationService,
-		'registrationComplete$',
-	).and.returnValue(of(true));
+	getPropertySpy(viewService, 'profileForm').mockReturnValue(
+		newChangeInfoForm(),
+	);
+	getPropertySpy(viewService, 'changeEmailForm').mockReturnValue(
+		changeEmailForm(),
+	);
+	getPropertySpy(viewService, 'changePasswordForm').mockReturnValue(
+		changePasswordForm(),
+	);
 
-	beforeEach(waitForAsync(async (): Promise<void> => {
+	beforeEach(async (): Promise<void> => {
 		TestBed.overrideComponent(ProfilePage, {
 			set: {
 				providers: providers,
@@ -56,8 +59,8 @@ describe('ProfilePage', () => {
 
 		fixture = TestBed.createComponent(ProfilePage);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
-	}));
+		await fixture.whenStable();
+	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -120,36 +123,12 @@ describe('ProfilePage', () => {
 		expect(result.uid).toBe('ABC123');
 	});
 
-	it('isRegistrationComplete$: should be expected reference', () => {
-		// Arrange
-		const propertySpy = getPropertySpy(
-			preregistrationService,
-			'registrationComplete$',
-		);
-
-		// Act
-		const result = component.isRegistrationComplete$;
-
-		// Assert
-		expect(propertySpy).toHaveBeenCalled();
-		expect(result).toBe(preregistrationService.registrationComplete$);
-	});
-
-	it('isRegistrationComplete$: should return expected value', async () => {
-		// Arrange & Act
-		const result = await firstValueFrom(component.isRegistrationComplete$);
-
-		// Assert
-		expect(isRegistrationComplete$Spy).toHaveBeenCalled();
-		expect(result).toBeTrue();
-	});
-
 	it('updateProfile(): should make expected call', async () => {
 		// Arrange
 		const methodSpy = getFunctionSpy(
 			viewService,
 			'updatePublicProfile',
-		).and.resolveTo();
+		).mockResolvedValue(undefined);
 
 		// Act
 		await component.updateProfile();
@@ -163,7 +142,7 @@ describe('ProfilePage', () => {
 		const methodSpy = getFunctionSpy(
 			viewService,
 			'changeEmailAddress',
-		).and.resolveTo();
+		).mockResolvedValue(undefined);
 
 		// Act
 		await component.changeEmailAddress();
@@ -177,12 +156,20 @@ describe('ProfilePage', () => {
 		const methodSpy = getFunctionSpy(
 			viewService,
 			'changePassword',
-		).and.resolveTo();
+		).mockResolvedValue(undefined);
 
 		// Act
 		await component.changePassword();
 
 		// Assert
 		expect(methodSpy).toHaveBeenCalled();
+	});
+
+	it('renders each account settings form for the authenticated profile', async (): Promise<void> => {
+		await fixture.whenStable();
+
+		expect(fixture.nativeElement.querySelectorAll('.settings-panel')).toHaveLength(3);
+		expect(fixture.nativeElement.querySelectorAll('form')).toHaveLength(3);
+		expect(fixture.nativeElement.textContent).toContain('Jesse Doe');
 	});
 });

@@ -1,24 +1,56 @@
-<ion-card [disabled]="!canSubmit" class="es-mg-bottom-xxl">
+@let slot = dateTimeSlot();
+<ion-card [class.is-locked]="!canSubmit()" class="workflow-card submit-card es-mg-bottom-xxl">
 	<ion-card-header>
-		<ion-item class="inset-ion-item-title">
-			<ion-card-title lines="full">
-				{{ 'MENU.SUBMIT' | translate }}
-			</ion-card-title>
+		<ion-item class="inset-ion-item-title" lines="none">
+			<ion-card-title id="review-heading">{{ 'MENU.SUBMIT' | translate }}</ion-card-title>
+			@if (canSubmit()) { <ion-badge color="success" slot="end">{{ 'OVERVIEW.READY' | translate }}</ion-badge> }
 		</ion-item>
 	</ion-card-header>
-	<ion-card-content class="ion-text-center ion-padding">
-		<h2>
-			<strong>
-				{{ 'OVERVIEW.NOT_SUBMITTED' | translate }}
-			</strong>
-		</h2>
-		<p>
-			{{ 'OVERVIEW.NOT_SUBMITTED_MESSAGE' | translate }}
-		</p>
-		<p class="ion-text-end es-pd-top-lg">
-			<ion-button color="xmasred" [routerLink]="['../submit']">
-				{{ 'MENU.SUBMIT' | translate }}
-			</ion-button>
-		</p>
+	<ion-card-content>
+		@if (!canSubmit()) {
+			<p class="card-guidance">{{ 'OVERVIEW.REVIEW_LOCKED' | translate }}</p>
+		} @else if (!expanded()) {
+			<p class="card-guidance">{{ 'OVERVIEW.REVIEW_READY' | translate }}</p>
+			<div class="card-actions"><ion-button color="xmasred" (click)="open()" [disabled]="busy()">{{ 'OVERVIEW.REVIEW_REGISTRATION' | translate }}</ion-button></div>
+		} @else {
+			<p>{{ 'SUBMIT.CONFIRM_ADDED_CHILDREN' | translate }}</p>
+			<ion-list class="submission-children-list" [attr.aria-label]="'OVERVIEW.CHILDREN_TO_SUBMIT' | translate">
+				@for (child of children(); track child.id) {
+					<ion-item lines="none">
+						@if (child.toyType === 'boys') { <ion-icon name="man-outline" slot="start" aria-hidden="true" /> }
+						@if (child.toyType === 'girls') { <ion-icon name="woman-outline" slot="start" aria-hidden="true" /> }
+						@if (child.toyType === 'infants') { <ion-icon name="happy-outline" slot="start" aria-hidden="true" /> }
+						<ion-label><strong>{{ child.firstName }} {{ child.lastName }}</strong><p>{{ child.dateOfBirth | date: 'longDate' }}</p></ion-label>
+					</ion-item>
+				}
+			</ion-list>
+			@if (slot) {
+				<p>{{ 'SUBMIT.CONFIRM_DATE_TIME' | translate }}</p>
+				<ion-item lines="none"><ion-label><ion-card-subtitle>{{ 'SCHEDULE.YOUR_DATE/TIME' | translate }}</ion-card-subtitle><strong>{{ slot.dateTime | date: 'fullDate' }}, {{ slot.dateTime | timeSlot }}</strong></ion-label></ion-item>
+			}
+			<section class="email-verification" aria-labelledby="ticket-email-heading">
+				<h2 id="ticket-email-heading">{{ 'SUBMIT.TICKET_EMAIL_TITLE' | translate }}</h2>
+				<p>{{ 'SUBMIT.TICKET_EMAIL_MESSAGE' | translate }}</p>
+				<ion-item lines="none">
+					<ion-label class="ion-text-wrap"><ion-card-subtitle>{{ 'COMMON.EMAIL_ADDRESS' | translate }}</ion-card-subtitle><strong>{{ emailAddress() }}</strong></ion-label>
+				</ion-item>
+				@if (!emailUpdateOpen()) {
+					<ion-button fill="outline" (click)="openEmailUpdate()" [disabled]="busy()">{{ 'SUBMIT.UPDATE_EMAIL' | translate }}</ion-button>
+				} @else {
+					<form [formGroup]="changeEmailForm" (ngSubmit)="updateEmail()" novalidate>
+						<ion-list lines="none">
+							<ion-item><ion-input fill="outline" [label]="'COMMON.NEW_EMAIL_ADDRESS' | translate" labelPlacement="floating" formControlName="emailAddress" type="email" autocomplete="email" [errorText]="changeEmailForm.controls.emailAddress | niceFormError | translate" /></ion-item>
+							<ion-item><ion-input fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" formControlName="password" type="password" autocomplete="current-password" [errorText]="changeEmailForm.controls.password | niceFormError | translate" /></ion-item>
+						</ion-list>
+						<p class="email-update-help">{{ 'SUBMIT.UPDATE_EMAIL_HELP' | translate }}</p>
+						<div class="card-actions"><ion-button fill="clear" type="button" (click)="cancelEmailUpdate()" [disabled]="busy()">{{ 'COMMON.CANCEL' | translate }}</ion-button><ion-button color="xmasred" type="submit" [disabled]="changeEmailForm.invalid || busy()">{{ 'SUBMIT.SAVE_EMAIL' | translate }}</ion-button></div>
+					</form>
+				}
+			</section>
+			<div class="card-actions">
+				<ion-button fill="clear" (click)="makeChanges()" [disabled]="busy()">{{ 'SUBMIT.MAKE_CHANGES' | translate }}</ion-button>
+				<ion-button id="completeRegistrationButton" color="xmasred" (click)="submit()" [disabled]="busy()"><ion-icon name="checkmark-circle-outline" slot="start" aria-hidden="true" />{{ (busy() ? 'OVERVIEW.SUBMITTING' : 'MENU.SUBMIT') | translate }}</ion-button>
+			</div>
+		}
 	</ion-card-content>
 </ion-card>

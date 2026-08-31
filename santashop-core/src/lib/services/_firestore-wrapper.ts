@@ -1,29 +1,30 @@
 import {
 	addDoc,
 	collection,
-	collectionData,
 	CollectionReference,
 	deleteDoc,
 	doc,
-	docData,
-	Firestore,
-	query,
-	setDoc,
-	Query,
-	Timestamp,
 	DocumentData,
 	DocumentReference,
+	onSnapshot,
+	query as createQuery,
+	Query,
 	QueryConstraint,
+	QuerySnapshot,
 	SetOptions,
-} from '@angular/fire/firestore';
+	type DocumentSnapshot,
+	setDoc,
+	Timestamp,
+} from 'firebase/firestore';
 import { Observable } from 'rxjs';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
+import { FIREBASE_FIRESTORE } from '../tokens';
 
 // Solves an issue where dates are being converted to timestamps
 // in the database, but not being converted back to dates when read.
 export const timestampDateFix = (date: Date): Date => {
 	const timestamp = date as unknown as Timestamp;
-	return timestamp?.toDate() ?? date;
+	return timestamp?.toDate?.() ?? date;
 };
 
 export type idField<T> = keyof T & keyof NonNullable<T>;
@@ -39,7 +40,47 @@ export type idField<T> = keyof T & keyof NonNullable<T>;
 	providedIn: 'root',
 })
 export class FirestoreWrapper {
-	private readonly firestore = inject(Firestore);
+	private readonly firestore = inject(FIREBASE_FIRESTORE);
+	private readonly zone = inject(NgZone);
+
+	private readonly mapDocumentData = <T = DocumentData>(
+		snapshot: DocumentSnapshot<T>,
+		options?: {
+			idField?: keyof T;
+		},
+	): T | undefined => {
+		if (!snapshot.exists()) return undefined;
+
+		const data = snapshot.data();
+		if (!data) return undefined;
+
+		if (!options?.idField) return data;
+
+		return {
+			...data,
+			[options.idField]: snapshot.id,
+		} as T;
+	};
+
+	private readonly mapCollectionData = <
+		T = DocumentData,
+		U extends string = never,
+	>(
+		snapshot: QuerySnapshot<T>,
+		idField?: (U | keyof T) & keyof NonNullable<T>,
+	): ((T & Record<U, string>) | NonNullable<T>)[] =>
+		snapshot.docs.map((documentSnapshot) => {
+			const data = documentSnapshot.data();
+
+			if (!idField) {
+				return data as T & Record<U, string>;
+			}
+
+			return {
+				...data,
+				[idField]: documentSnapshot.id,
+			} as (T & Record<U, string>) | NonNullable<T>;
+		});
 
 	public readonly collection = <T = DocumentData>(
 		path: string,
@@ -53,7 +94,20 @@ export class FirestoreWrapper {
 		query: Query<T>,
 		idField?: (U | keyof T) & keyof NonNullable<T>,
 	): Observable<((T & Record<U, string>) | NonNullable<T>)[]> =>
-		collectionData(query, { idField });
+		new Observable<((T & Record<U, string>) | NonNullable<T>)[]>(
+			(subscriber) =>
+				onSnapshot(
+					query,
+					(snapshot) =>
+						this.zone.run(() =>
+							subscriber.next(
+								this.mapCollectionData(snapshot, idField),
+							),
+						),
+					(error) =>
+						this.zone.run(() => subscriber.error(error)),
+				),
+		);
 
 	public readonly doc = <T = DocumentData>(
 		reference: CollectionReference<T>,
@@ -65,15 +119,27 @@ export class FirestoreWrapper {
 		options?: {
 			idField?: keyof T;
 		},
-	): Observable<T | undefined> => docData(ref, options);
+	): Observable<T | undefined> =>
+		new Observable<T | undefined>((subscriber) =>
+			onSnapshot(
+				ref,
+				(snapshot) =>
+					this.zone.run(() =>
+						subscriber.next(
+							this.mapDocumentData(snapshot, options),
+						),
+					),
+				(error) => this.zone.run(() => subscriber.error(error)),
+			),
+		);
 
 	public readonly query = <T = DocumentData>(
 		collectionReference: CollectionReference<T>,
 		constraints?: QueryConstraint[],
 	): Query<T> =>
 		constraints
-			? query(collectionReference, ...constraints)
-			: query(collectionReference);
+			? createQuery(collectionReference, ...constraints)
+			: createQuery(collectionReference);
 
 	public readonly addDoc = <T>(
 		collectionReference: CollectionReference<T>,

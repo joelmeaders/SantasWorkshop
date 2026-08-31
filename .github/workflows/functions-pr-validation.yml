@@ -1,0 +1,90 @@
+name: Functions PR Validation
+
+on:
+  pull_request:
+    paths:
+      - 'santashop-functions/**'
+      - 'firebase.json'
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+      - 'storage.rules'
+      - 'database.rules.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.env.example'
+      - 'config.functions.cjs'
+      - 'scripts/env-loader.cjs'
+      - 'scripts/assert-functions-deploy-ci.cjs'
+      - 'scripts/verify-functions-parity.cjs'
+      - '.github/workflows/functions-pr-validation.yml'
+      - '.github/workflows/functions-test-and-prod-release.yml'
+
+permissions:
+  contents: read
+
+env:
+  TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+  TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+  TEST_SANTASHOP_PROGRAM_YEAR: '2026'
+  TEST_SANTASHOP_TIME_ZONE: America/Denver
+  TEST_SANTASHOP_TIME_OFFSET: '-07:00'
+  TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+  TEST_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
+  TEST_FIRESTORE_BACKUP_BUCKET: gs://santashop-backups
+  TEST_SES_REGION: us-west-2
+  TEST_REGISTRATION_EMAIL_TEMPLATE: dscs-registration-confirmation-v1
+  TEST_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
+  TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
+  TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+  TEST_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
+  TEST_SANTASHOP_EVENT_MIN_INSTANCES: '0'
+  TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
+  TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
+  TEST_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
+  TEST_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
+  TEST_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
+  TEST_SCHEDULED_USER_STATS: 55 23 * 11,12 *
+  TEST_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
+
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit:security
+      - run: pnpm run functions:test:unit
+
+  integration_tests:
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Check integration test prerequisites
+        shell: bash
+        run: |
+          [ -n "$TEST_AWS_ACCESS_KEY_ID" ] || { echo "Missing TEST_AWS_ACCESS_KEY_ID"; exit 1; }
+          [ -n "$TEST_AWS_SECRET_ACCESS_KEY" ] || { echo "Missing TEST_AWS_SECRET_ACCESS_KEY"; exit 1; }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run functions:test:integration
+      - run: pnpm run e2e:browser:setup:ci
+      - run: pnpm run e2e:test

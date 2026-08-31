@@ -5,6 +5,7 @@ export interface OnboardUser {
 	password: string;
 	password2: string;
 	zipCode: number;
+	referredBy: string;
 	legal: boolean | Date;
 	newsletter: boolean;
 }

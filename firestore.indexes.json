@@ -1,6 +1,38 @@
 {
 	"indexes": [
 		{
+			"collectionGroup": "registrationScanRiskSummaries",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "latestRiskOn",
+					"order": "DESCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrationScanAttempts",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "customerId",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "scannedOn",
+					"order": "DESCENDING"
+				}
+			]
+		},
+		{
 			"collectionGroup": "children",
 			"queryScope": "COLLECTION",
 			"fields": [

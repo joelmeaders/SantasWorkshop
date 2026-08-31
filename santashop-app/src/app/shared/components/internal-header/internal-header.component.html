@@ -1,26 +1,35 @@
-<ion-header color="light">
-	<ion-toolbar color="light">
-		<ion-item lines="none" color="none">
+<ion-header class="workshop-header" color="light">
+	<ion-toolbar class="workshop-toolbar" color="light">
+		<ion-item class="user-identity" lines="none" color="none">
 			<img
 				src="assets/DSCS-Santa-Body_Red.png"
 				class="sm-logo"
 				alt="logo with santa claus"
 			/>
 			@if (user$ | async; as user) {
-				<h2>
+				<h2 class="user-greeting">
 					<strong>
 						{{ user.displayName }}
 					</strong>
 				</h2>
 			}
 		</ion-item>
-		<ion-button slot="end" fill="clear" (click)="menu($event)">
+		<ion-button
+			id="menuButton"
+			class="menu-button"
+			aria-label="Open account and help menu"
+			slot="end"
+			fill="clear"
+			(click)="menu($event)"
+			(keyup.enter)="menu($event)"
+		>
 			<ion-icon
 				slot="icon-only"
 				name="menu-sharp"
 				color="dark"
 				size="large"
-			></ion-icon>
+				aria-hidden="true"
+			/>
 		</ion-button>
 	</ion-toolbar>
 </ion-header>

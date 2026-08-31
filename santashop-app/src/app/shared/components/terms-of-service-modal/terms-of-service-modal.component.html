@@ -1,9 +1,19 @@
-<ion-content
-	class="ion-padding-horizontal"
-	style="padding-bottom: 60px"
-	fullscreen
->
-	<h1>{{ 'TOS.TITLE' | translate }}</h1>
+<ion-header>
+	<ion-toolbar color="primary">
+		<ion-title>{{ 'SIGNUP.LEGAL2' | translate }}</ion-title>
+		<ion-buttons slot="end">
+			<ion-button
+				id="closeTermsOfServiceButton"
+				(click)="onDismiss()"
+				[attr.aria-label]="'COMMON.CLOSE' | translate"
+			>
+				<ion-icon slot="icon-only" name="close-circle" aria-hidden="true" />
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-horizontal">
 	<h3>{{ 'TOS.1' | translate }}</h3>
 	<p>
 		{{ 'TOS.1A' | translate }}
@@ -43,14 +53,3 @@
 		{{ 'TOS.8A' | translate }}
 	</p>
 </ion-content>
-
-<ion-footer>
-	<ion-toolbar color="primary" class="ion-align-items-center">
-		<ion-button (click)="onDismiss()" expand="full" fill="clear">
-			<ion-icon slot="start" name="close-circle" color="light"></ion-icon>
-			<ion-label color="light">{{
-				'COMMON.CLOSE' | translate
-			}}</ion-label>
-		</ion-button>
-	</ion-toolbar>
-</ion-footer>

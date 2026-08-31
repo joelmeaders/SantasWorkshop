@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { ChildValidationError, Child } from '@santashop/models';
 import { deepCopy } from '@santashop/core';
 
-// TODO: Injectable tokens
-export const MAX_BIRTHDATE = (): Date => new Date('12/31/2025');
+export const MAX_BIRTHDATE = (): Date =>
+	new Date(new Date().getFullYear(), 11, 31);
 
 export const MAX_CHILD_AGE_IN_YEARS = (): number => 12;
 

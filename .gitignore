@@ -1,6 +1,8 @@
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
+.env
+.env.local
 *~
 *.sw[mnpcod]
 .tmp
@@ -26,6 +28,8 @@ $RECYCLE.BIN/
 **/.sourcemaps
 **/.versions
 **/.vscode
+.vitest-attachments/**
+**/__screenshots__/**
 **/coverage
 **/dist
 **/node_modules
@@ -42,3 +46,5 @@ firebase/
 .firebase*
 *-debug.log
 .runtimeconfig.json
+santashop-app/src/firebase.config.ts
+santashop-admin/src/firebase.config.ts

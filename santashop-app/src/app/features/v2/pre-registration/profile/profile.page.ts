@@ -1,26 +1,24 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { PreRegistrationService } from '../../../../core';
 import { ProfilePageService } from './profile.page.service';
 
 import { AsyncPipe } from '@angular/common';
-import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
 import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NiceFormErrorPipe } from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { arrowBackSharp, createOutline } from 'ionicons/icons';
+import { arrowBackSharp } from 'ionicons/icons';
 import {
 	IonContent,
 	IonGrid,
 	IonRow,
 	IonCol,
 	IonButton,
-	IonIcon,
 	IonItem,
-	IonCardTitle,
-	IonCard,
-	IonCardContent,
 	IonList,
 	IonInput,
+	IonIcon,
+	IonLabel,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -28,10 +26,10 @@ import {
 	templateUrl: './profile.page.html',
 	styleUrls: ['./profile.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [ProfilePageService],
 	imports: [
-		PreRegistrationMenuComponent,
 		RouterLink,
+		ReactiveFormsModule,
+		NiceFormErrorPipe,
 		AsyncPipe,
 		TranslateModule,
 		IonContent,
@@ -40,17 +38,14 @@ import {
 		IonCol,
 		IonButton,
 		IonIcon,
+		IonLabel,
 		IonItem,
-		IonCardTitle,
-		IonCard,
-		IonCardContent,
 		IonList,
 		IonInput,
 	],
 })
 export class ProfilePage {
 	private readonly viewService = inject(ProfilePageService);
-	private readonly preregistrationService = inject(PreRegistrationService);
 
 	public readonly profileForm = this.viewService.profileForm;
 
@@ -59,10 +54,6 @@ export class ProfilePage {
 	public readonly changePasswordForm = this.viewService.changePasswordForm;
 
 	public readonly userProfile$ = this.viewService.userProfile$;
-
-	public readonly isRegistrationComplete$ =
-		this.preregistrationService.registrationComplete$;
-
 	public readonly updateProfile = (): Promise<void> =>
 		this.viewService.updatePublicProfile();
 
@@ -73,6 +64,6 @@ export class ProfilePage {
 		this.viewService.changePassword();
 
 	constructor() {
-		addIcons({ arrowBackSharp, createOutline });
+		addIcons({ arrowBackSharp });
 	}
 }

@@ -1,0 +1,76 @@
+---
+alt: "Santashop admin app workflow"
+---
+flowchart TB
+    accTitle: Santashop admin app workflow
+    accDescr: Major operator flows through staff sign-in, dashboard, search, scan and review check-in, preregistration, on-site registration, resend email, and stats
+
+    SignIn[Admin sign-in page] --> Auth[Firebase Auth login]
+    Auth --> Guard{Admin custom claim?}
+    Guard -->|Yes| AdminShell[Admin shell / landing]
+    Guard -->|No| Denied[Route blocked]
+
+    Flags[(parameters/public)] --> LandingFlags[Feature flags]
+    LandingFlags --> AdminShell
+
+    AdminShell --> SearchHub[Search hub]
+    SearchHub --> ByName[Search by name]
+    SearchHub --> ByEmail[Search by email]
+    SearchHub --> ByCode[Search by code]
+    ByName --> SearchIndex[(registrationsearchindex/{uid})]
+    ByEmail --> SearchIndex
+    ByCode --> SearchIndex
+    SearchIndex --> Results[Search results page]
+    Results --> Review
+
+    AdminShell --> Scan[Scan page]
+    Scan --> LookupQR[Lookup registration by QR code]
+    LookupQR --> SearchIndex
+    LookupQR --> Registrations[(registrations/{uid})]
+    Registrations --> Context[CheckInContextService]
+    Context --> Review[Review page]
+
+    Review -->|No edits| CheckInFn[checkIn callable]
+    Review -->|Edited children| CheckInEditFn[checkInWithEdit callable]
+    Review --> ChangeSlot[changeRegistrationDateTime callable]
+    Review --> CancelReg[undoRegistration callable]
+
+    CheckInFn --> Checkins[(checkins/{uid})]
+    CheckInEditFn --> Checkins
+    CheckInEditFn --> Edited[(editedregistrations/{uid})]
+    CancelReg --> Registrations
+    CancelReg --> SearchIndex
+    ChangeSlot --> Registrations
+    ChangeSlot --> EmailQueue[(tmp_registrationemails/{uid})]
+
+    Checkins --> Confirm[Check-in confirmation page]
+    Checkins --> Duplicate[Duplicate check-in page]
+
+    AdminShell --> PreReg[Admin pre-registration page]
+    PreReg --> Users[(users/{uid})]
+    PreReg --> PreRegFn[callableAdminPreRegister]
+    PreRegFn --> AuthUser[Create Firebase Auth user]
+    PreRegFn --> Users
+    PreRegFn --> Registrations
+    PreRegFn --> SearchIndex
+    PreRegFn --> EmailQueue
+
+    AdminShell --> Onsite[On-site registration page]
+    Onsite --> OnsiteFn[onSiteRegistration callable]
+    OnsiteFn --> OnsiteRegs[(onsiteregistrations/{id})]
+    OnsiteFn --> Checkins
+    OnsiteFn --> Confirm
+
+    AdminShell --> Resend[Resend email tool]
+    Resend --> SearchIndex
+    Resend --> ResendFn[callableResendRegistrationEmail]
+    ResendFn --> EmailQueue
+    ResendFn --> Registrations
+
+    AdminShell --> RegStats[Registration stats page]
+    AdminShell --> CheckinStats[Check-in stats page]
+    AdminShell --> UserStats[User stats page]
+    RegStats --> Stats[(stats/* docs)]
+    RegStats --> Slots[(dateTimeSlots/{id})]
+    CheckinStats --> Stats
+    UserStats --> Stats

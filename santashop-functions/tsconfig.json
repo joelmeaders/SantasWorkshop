@@ -1,7 +1,9 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"baseUrl": ".",
 		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"noEmit": false,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
@@ -13,7 +15,10 @@
 		"declarationMap": true,
 		"allowSyntheticDefaultImports": true,
 		"experimentalDecorators": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			"@santashop/models": ["../santashop-models/src/index.ts"]
+		}
 	},
 	"compileOnSave": true,
 	"references": [{ "path": "../santashop-models/tsconfig.fns.json" }],

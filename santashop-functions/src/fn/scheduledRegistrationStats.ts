@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import type { Timestamp } from 'firebase-admin/firestore';
+import admin from '../firebase-admin';
 import {
 	AgeGroup,
 	AgeGroupBreakdown,
@@ -6,36 +7,75 @@ import {
 	GenderAgeStats,
 	Registration,
 	ZipCodeCount,
-} from '../../../santashop-models/src';
+} from '../models';
+import { normalizeDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
+import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 
-admin.initializeApp();
+interface RegistrationStatsDocument {
+	completedRegistrations: number;
+	dateTimeCount: DateTimeCount[];
+	zipCodeCount: ZipCodeCount[];
+}
 
-export default async () => {
+const log = createFunctionLogger('scheduledRegistrationStats');
+
+const toRegistration = (data: Record<string, unknown>): Registration => {
+	return data as Registration;
+};
+
+const createEmptyGenderAgeStats = (): GenderAgeStats => ({
+	infants: { total: 0, age02: 0, age35: 0, age68: 0, age911: 0 },
+	girls: { total: 0, age02: 0, age35: 0, age68: 0, age911: 0 },
+	boys: { total: 0, age02: 0, age35: 0, age68: 0, age911: 0 },
+});
+
+const createDateTimeStat = (
+	dateTime: Date,
+	childCount: number,
+): DateTimeCount => ({
+	dateTime,
+	count: 1,
+	childCount,
+	stats: createEmptyGenderAgeStats(),
+});
+
+const createZipCodeStat = (zip: number, childCount: number): ZipCodeCount => ({
+	zip,
+	count: 1,
+	childCount,
+});
+
+export default async function scheduledRegistrationStats(): Promise<void> {
 	const registrationsSnapshots = await registrationQuery().get();
 	const registrations: Registration[] = [];
 
 	registrationsSnapshots.forEach((doc) => {
-		const registration = {
-			...doc.data(),
-		} as Registration;
-		registrations.push(registration);
+		registrations.push(
+			toRegistration(doc.data() as Record<string, unknown>),
+		);
 	});
 
 	const completedRegistrations = registrations.length;
 
-	// TODO: Read stats record instead of making new one
-	const stats: any = {
-		completedRegistrations: completedRegistrations,
+	const stats: RegistrationStatsDocument = {
+		completedRegistrations,
 		dateTimeCount: getDateTimeStats(registrations),
 		zipCodeCount: getZipCodeStats(registrations),
 	};
 
-	return admin
+	await admin
 		.firestore()
 		.collection('stats')
-		.doc('registration-2025')
+		.doc(getStatsDocumentId('registration'))
 		.set(stats, { merge: false });
-};
+
+	log.info('Updated registration stats document', {
+		completedRegistrations,
+		dateTimeBucketCount: stats.dateTimeCount.length,
+		zipCodeBucketCount: stats.zipCodeCount.length,
+	});
+}
 
 function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 	const stats: DateTimeCount[] = [];
@@ -44,54 +84,34 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 		stats.findIndex((e) => dateTime.getTime() == e.dateTime.getTime());
 
 	registrations.forEach((registration) => {
-		const timestamp: admin.firestore.Timestamp = registration.dateTimeSlot
-			?.dateTime as any;
+		const timestamp = registration.dateTimeSlot?.dateTime as
+			| Timestamp
+			| Date
+			| string
+			| undefined;
 
 		if (!timestamp) {
-			console.log(
-				`Registration ${registration.uid} is missing a datetimeslot. Skipping.`,
+			log.warn(
+				'Skipping registration without a date time slot in stats job',
+				{
+					uid: registration.uid ?? null,
+				},
 			);
 			return;
 		}
 
-		const dateTime = timestamp.toDate();
+		const dateTime = normalizeDateTime(timestamp);
+		const children = registration.children ?? [];
 		const index = getIndex(dateTime);
 		let stat: DateTimeCount;
 
 		if (index === -1) {
-			stat = {
-				dateTime: dateTime,
-				count: 1,
-				childCount: registration.children!.length,
-				stats: {
-					infants: {
-						total: 0,
-						age02: 0,
-						age35: 0,
-						age68: 0,
-						age911: 0,
-					},
-					girls: {
-						total: 0,
-						age02: 0,
-						age35: 0,
-						age68: 0,
-						age911: 0,
-					},
-					boys: {
-						total: 0,
-						age02: 0,
-						age35: 0,
-						age68: 0,
-						age911: 0,
-					},
-				} as GenderAgeStats,
-			} as DateTimeCount;
+			stat = createDateTimeStat(dateTime, children.length);
 			setChildGenderStats(stat.stats, registration);
 			stats.push(stat);
 		} else {
 			stats[index].count += 1;
-			stats[index].childCount += registration.children!.length;
+			stats[index].childCount += children.length;
 			setChildGenderStats(stats[index].stats, registration);
 		}
 	});
@@ -104,7 +124,11 @@ function setChildGenderStats(
 	registration: Registration,
 ): void {
 	registration.children?.forEach((child) => {
-		setChildAgeStatsByGender(stats[child.toyType!], child.ageGroup!);
+		if (!child.toyType || !child.ageGroup) {
+			return;
+		}
+
+		setChildAgeStatsByGender(stats[child.toyType], child.ageGroup);
 	});
 }
 
@@ -142,18 +166,21 @@ function getZipCodeStats(registrations: Registration[]): ZipCodeCount[] {
 		stats.findIndex((e) => zipCode === e.zip);
 
 	registrations.forEach((registration) => {
-		const zipString = registration.zipCode!.toString().substr(0, 5);
+		if (
+			registration.zipCode === undefined ||
+			registration.zipCode === null
+		) {
+			return;
+		}
+
+		const zipString = registration.zipCode.toString().slice(0, 5);
 		const zipCode = Number.parseInt(zipString);
 		const index = getIndex(zipCode);
-		let stat: ZipCodeCount;
 
 		if (index === -1) {
-			stat = {
-				zip: zipCode,
-				count: 1,
-				childCount: registration.children?.length ?? 0,
-			} as ZipCodeCount;
-			stats.push(stat);
+			stats.push(
+				createZipCodeStat(zipCode, registration.children?.length ?? 0),
+			);
 		} else {
 			stats[index].count += 1;
 			stats[index].childCount += registration.children?.length ?? 0;
@@ -167,25 +194,5 @@ const registrationQuery = () =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', 2025)
+		.where('programYear', '==', PROGRAM_YEAR)
 		.where('registrationSubmittedOn', '!=', '');
-// .where('includedInRegistrationStats', '==', false);
-
-// DATE
-
-// December 10th
-
-// Boys: 1000
-// Age group 0-2: 200
-// Age group 0-2: 200
-// Age group 0-2: 200
-// Age group 0-2: 200
-
-// Girls: 1000
-
-// Infants: 1000
-
-// December 11th
-// Boys: 1000
-// Girls: 1000
-// Infants: 1000

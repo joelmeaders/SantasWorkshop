@@ -6,6 +6,7 @@ import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
 	bagCheckOutline,
+	documentTextOutline,
 	searchOutline,
 	storefrontOutline,
 	personAddOutline,
@@ -15,6 +16,9 @@ import {
 	peopleOutline,
 	exitOutline,
 	moonOutline,
+	calendarOutline,
+	shieldCheckmarkOutline,
+	alertCircleOutline,
 } from 'ionicons/icons';
 import {
 	IonRouterLink,
@@ -25,7 +29,7 @@ import {
 	IonIcon,
 	IonToggle,
 } from '@ionic/angular/standalone';
-import { map, shareReplay } from 'rxjs';
+import { shareReplay } from 'rxjs';
 
 @Component({
 	selector: 'admin-landing',
@@ -59,11 +63,8 @@ export class LandingPage {
 
 	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
 
-	public readonly isAdmin$ = this.authService.emailAndUid$.pipe(
-		map((emailUid) => emailUid.emailAddress),
-		map((email) => email.toLowerCase().includes('admin')),
-		shareReplay(1),
-	);
+	public readonly isAdmin$ = this.authService.isAdmin$.pipe(shareReplay(1));
+	public readonly isOwner$ = this.authService.isOwner$.pipe(shareReplay(1));
 
 	public async signOut(): Promise<void> {
 		await this.authService.logout();
@@ -85,35 +86,15 @@ export class LandingPage {
 			storefrontOutline,
 			personAddOutline,
 			mailOutline,
+			documentTextOutline,
 			statsChartOutline,
 			cartOutline,
 			peopleOutline,
 			exitOutline,
 			moonOutline,
-		});
-		addIcons({
-			bagCheckOutline,
-			searchOutline,
-			storefrontOutline,
-			personAddOutline,
-			mailOutline,
-			statsChartOutline,
-			cartOutline,
-			peopleOutline,
-			exitOutline,
-			moonOutline,
-		});
-		addIcons({
-			bagCheckOutline,
-			searchOutline,
-			storefrontOutline,
-			personAddOutline,
-			mailOutline,
-			statsChartOutline,
-			cartOutline,
-			peopleOutline,
-			exitOutline,
-			moonOutline,
+			calendarOutline,
+			shieldCheckmarkOutline,
+			alertCircleOutline,
 		});
 	}
 }

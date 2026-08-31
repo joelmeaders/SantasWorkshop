@@ -1,6 +1,235 @@
-app-referral-card,
+.workspace-shell {
+	margin-inline: auto;
+	max-width: var(--santa-page-width);
+	padding: clamp(1rem, 3vw, 2rem) var(--santa-gutter) 3rem;
+}
+
 app-children-card,
 app-schedule-card,
-app-submit-card {
-	max-width: 700px !important;
+app-submit-card,
+.workspace-intro {
+	display: block;
+	margin-inline: auto;
+	max-width: var(--santa-reading-width);
+}
+
+.workspace-intro {
+	background:
+		radial-gradient(circle at 94% 20%, rgba(229, 169, 47, 0.25) 0 1.4rem, transparent 1.45rem),
+		linear-gradient(135deg, var(--santa-evergreen-deep), var(--santa-evergreen));
+	border-radius: var(--santa-radius-lg);
+	box-shadow: var(--santa-shadow-md);
+	color: #fff;
+	margin-block: 0.5rem 1rem;
+	overflow: hidden;
+	padding: clamp(1.35rem, 4vw, 2.2rem) clamp(8rem, 19vw, 10rem) clamp(1.35rem, 4vw, 2.2rem) clamp(1.35rem, 4vw, 2.2rem);
+	position: relative;
+}
+
+.workspace-intro h1,
+.workspace-intro p {
+	position: relative;
+	z-index: 1;
+}
+
+.workspace-gift {
+	bottom: -0.65rem;
+	pointer-events: none;
+	position: absolute;
+	right: 0.75rem;
+	transform: rotate(4deg);
+	user-select: none;
+	width: clamp(6.5rem, 16vw, 8.75rem);
+}
+
+.workspace-intro h1 {
+	color: #fff;
+	margin-bottom: 0.4rem;
+}
+
+.workspace-intro p {
+	font-size: 1.05rem;
+	margin: 0;
+	max-width: 40rem;
+	opacity: 0.9;
+}
+
+.workflow-section {
+	margin-inline: auto;
+	max-width: var(--santa-reading-width);
+	padding-left: 2.2rem;
+	position: relative;
+}
+
+.workflow-section::before {
+	align-items: center;
+	background: var(--santa-snow);
+	border: 3px solid var(--santa-evergreen);
+	border-radius: 50%;
+	box-shadow: var(--santa-shadow-sm);
+	color: var(--santa-evergreen-deep);
+	content: '';
+	display: flex;
+	font-weight: 900;
+	height: 2.4rem;
+	justify-content: center;
+	left: -0.1rem;
+	position: absolute;
+	top: 1.35rem;
+	width: 2.4rem;
+	z-index: 3;
+}
+
+.children-step::before {
+	content: '1';
+}
+
+.appointment-step::before {
+	content: '2';
+}
+
+.review-step::before {
+	content: '3';
+}
+
+.workflow-section:not(:last-of-type)::after {
+	background: repeating-linear-gradient(180deg, var(--santa-red) 0 0.4rem, #fff 0.4rem 0.75rem);
+	bottom: -1rem;
+	content: '';
+	left: 1rem;
+	position: absolute;
+	top: 3.5rem;
+	width: 0.28rem;
+}
+
+.completion-nudge {
+	align-items: center;
+	background: linear-gradient(135deg, #fff8e7, #fff);
+	border: 3px solid var(--santa-red);
+	border-radius: var(--santa-radius-lg);
+	bottom: calc(1rem + env(safe-area-inset-bottom));
+	box-shadow: var(--santa-shadow-lift);
+	display: grid;
+	gap: 0.9rem;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	left: 50%;
+	max-width: min(46rem, calc(100vw - 2rem));
+	overflow: hidden;
+	padding: 1rem;
+	position: fixed;
+	transform: translateX(-50%);
+	width: calc(100% - 2rem);
+	z-index: 100;
+}
+
+.completion-nudge::before {
+	background: repeating-linear-gradient(90deg, var(--santa-red) 0 0.75rem, #fff 0.75rem 1.5rem, var(--santa-evergreen) 1.5rem 2.25rem, #fff 2.25rem 3rem);
+	content: '';
+	height: 0.35rem;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.completion-nudge-icon {
+	animation: completion-nudge-bounce 0.85s ease-in-out 4;
+	color: var(--santa-red);
+	font-size: 2.5rem;
+}
+
+.completion-nudge-copy {
+	display: grid;
+	gap: 0.2rem;
+	line-height: 1.35;
+}
+
+.completion-nudge-copy strong {
+	color: var(--santa-red-deep);
+	font-size: 1.05rem;
+}
+
+.completion-nudge-copy span {
+	color: var(--santa-ink);
+	font-size: 0.92rem;
+}
+
+.completion-nudge-enter {
+	animation: completion-nudge-arrive 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25);
+}
+
+@keyframes completion-nudge-arrive {
+	from {
+		opacity: 0;
+		transform: translate(-50%, 2rem) scale(0.96);
+	}
+
+	to {
+		opacity: 1;
+		transform: translate(-50%, 0) scale(1);
+	}
+}
+
+@keyframes completion-nudge-bounce {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(0.35rem);
+	}
+}
+
+@media (max-width: 600px) {
+	.workspace-shell {
+		padding-inline: 0.2rem;
+	}
+
+	.workspace-intro {
+		margin-inline: 0.75rem;
+	}
+
+	.workspace-intro {
+		border-radius: var(--santa-radius-md);
+		padding: 1.35rem;
+	}
+
+	.workspace-gift {
+		bottom: -1rem;
+		opacity: 0.2;
+		right: -0.5rem;
+		width: 8rem;
+	}
+
+	.workflow-section {
+		padding-left: 0;
+	}
+
+	.workflow-section::before,
+	.workflow-section::after {
+		display: none;
+	}
+
+	.completion-nudge {
+		bottom: calc(0.5rem + env(safe-area-inset-bottom));
+		gap: 0.65rem;
+		grid-template-columns: auto minmax(0, 1fr);
+		padding: 0.9rem;
+		width: calc(100% - 1rem);
+	}
+
+	.completion-nudge ion-button {
+		grid-column: 1 / -1;
+		margin: 0;
+		width: 100%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.completion-nudge,
+	.completion-nudge-icon,
+	.completion-nudge-enter {
+		animation: none;
+	}
 }

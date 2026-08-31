@@ -7,6 +7,7 @@ export interface OnboardUserForm {
 	password: FormControl<string | undefined>;
 	password2: FormControl<string | undefined>;
 	zipCode: FormControl<number | undefined>;
+	referredBy: FormControl<string | undefined>;
 	legal: FormControl<boolean | Date | undefined>;
 	newsletter: FormControl<boolean | undefined>;
 }
@@ -38,6 +39,7 @@ const validators = {
 		Validators.maxLength(5),
 		Validators.pattern(/^\d{5}/),
 	]),
+	referredBy: Validators.compose([Validators.required]),
 	legal: Validators.compose([Validators.requiredTrue]),
 };
 
@@ -67,6 +69,10 @@ export const newOnboardUserForm = (): FormGroup<OnboardUserForm> =>
 			zipCode: new FormControl(undefined, {
 				nonNullable: true,
 				validators: validators.zipCode,
+			}),
+			referredBy: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.referredBy,
 			}),
 			legal: new FormControl(false, {
 				nonNullable: true,

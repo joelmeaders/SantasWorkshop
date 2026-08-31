@@ -1,21 +1,19 @@
-<ion-content color="light">
-	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+<ion-content color="light" class="confirmation-page">
+	<ion-grid class="confirmation-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max ion-justify-content-center">
-			@if ((isRegistrationComplete$ | async) === false) {
-			<ion-col
-				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-				size="auto"
-			>
-				<app-pre-registration-menu></app-pre-registration-menu>
-			</ion-col>
-			}
-			<ion-col size="auto">
+			<ion-col class="ticket-column" size="12" sizeMd="10" sizeLg="8" sizeXl="7">
 				<ion-row class="ion-justify-content-center">
 					<ion-col>
 						<ion-card
-							class="ion-margin-horizontal ion-text-center es-mg-bottom-xxl"
+							class="ticket-card ion-text-center es-mg-bottom-xxl"
 						>
-							<div class="ion-padding-horizontal">
+							<div class="confirmation-lead ion-padding-horizontal">
+								<img
+									src="assets/images/gifts-stacked.svg"
+									class="confirmation-gifts"
+									alt=""
+									aria-hidden="true"
+								/>
 								<ion-text
 									color="xmasred"
 									class="ion-text-center"
@@ -32,16 +30,21 @@
 								</p>
 							</div>
 
+							<div class="qr-frame">
 							<img
+								id="registrationQrCode"
 								[src]="viewService.qrCode$ | async"
 								alt="Registration QR Code"
 								class="qr-code"
 							/>
+							</div>
 
-							<div class="ion-text-center width-max">
+							<div class="ticket-actions ion-text-center width-max">
 								<ion-button
+									id="eventInformationButton"
 									color="xmasred"
-									[routerLink]="['event-information']"
+									[routerLink]="['/pre-registration/confirmation']"
+									fragment="event-information"
 								>
 									{{ "CONFIRMATION.EVENT_INFORMATION" |
 									translate }}
@@ -56,7 +59,7 @@
 							</div>
 
 							<div>
-								<ion-item lines="none">
+								<ion-item class="ticket-detail" lines="none">
 									<div>
 										<p>
 											<ion-text color="xmasred">
@@ -91,7 +94,7 @@
 								</ion-item>
 							</div>
 
-							<ion-item lines="none">
+							<ion-item class="ticket-detail" lines="none">
 								<div>
 									<p>
 										<ion-text color="xmasred">
@@ -111,21 +114,32 @@
 									</ion-text>
 									<div class="es-mg-bottom-md">
 										@if (allowChangeRegistration$ | async) {
-										<ion-button
-											fill="outline"
+									<ion-button
+										id="changeRegistrationButton"
+										fill="outline"
 											(click)="changeRegistration()"
 										>
 											{{
 											"CONFIRMATION.CHANGE_REGISTRATION_DATETIME"
 											| translate }}
-										</ion-button>
-										}
+									</ion-button>
+									}
+									@if (allowCancelRegistration$ | async) {
+									<ion-button
+										id="cancelRegistrationButton"
+										color="danger"
+										fill="outline"
+										(click)="undoRegistration()"
+									>
+										{{ 'CONFIRMATION.CANCEL_REGISTRATION' | translate }}
+									</ion-button>
+									}
 									</div>
 									}
 								</div>
 							</ion-item>
 
-							<ion-item lines="none">
+							<ion-item class="ticket-detail" lines="none">
 								<div>
 									<p>
 										<ion-text color="xmasred">
@@ -152,21 +166,16 @@
 									}
 									<br />
 									<br />
-									<ion-text
-										color="primary"
-										[routerLink]="['event-information']"
-										button
-										tappable
-									>
+									<a [routerLink]="['/pre-registration/confirmation']" fragment="event-information">
 										<em>
 											{{ "CONFIRMATION.EVENT_INFORMATION"
 											| translate }}
 										</em>
-									</ion-text>
+									</a>
 								</div>
 							</ion-item>
 
-							<ion-list>
+							<ion-list class="children-ticket-list">
 								<ion-item lines="none">
 									<p>
 										<ion-text color="xmasred">
@@ -181,7 +190,7 @@
 								@if ( viewService.children$ | async; as children
 								) { @for (child of children; track child) {
 								<ion-item
-									[ngClass]="{
+									[class]="{
 											'infant-style':
 												child.toyType === 'infants',
 											'boys-style':
@@ -196,19 +205,22 @@
 										name="man-outline"
 										size="large"
 										slot="start"
-									></ion-icon>
+										aria-hidden="true"
+									/>
 									} @if (child.toyType === 'girls') {
 									<ion-icon
 										name="woman-outline"
 										size="large"
 										slot="start"
-									></ion-icon>
+										aria-hidden="true"
+									/>
 									} @if (child.toyType === 'infants') {
 									<ion-icon
 										name="happy-outline"
 										size="large"
 										slot="start"
-									></ion-icon>
+										aria-hidden="true"
+									/>
 									}
 									<ion-card-header>
 										<ion-card-title>
@@ -223,6 +235,18 @@
 								</ion-item>
 								} }
 							</ion-list>
+
+							<section id="event-information" class="event-information ion-text-start ion-padding" tabindex="-1">
+								<h2>{{ 'EVENT_INFO.EVENT_INFO_TITLE' | translate }}</h2>
+								<h3>{{ 'EVENT_INFO.WHAT_TO_EXPECT' | translate }}</h3>
+								<p>{{ 'EVENT_INFO.ARRIVE_ON_TIME' | translate }}</p>
+								<p>{{ 'EVENT_INFO.CHECK_WEBSITE' | translate }}</p>
+								<h3>{{ 'EVENT_INFO.ENTRY_INSTRUCTIONS' | translate }}</h3>
+								<p>{{ 'EVENT_INFO.DIRECTIONS' | translate }}</p>
+								<ion-button href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}" target="_blank" rel="noopener">
+									{{ 'EVENT_INFO.FAQ_BUTTON' | translate }} (FAQ)
+								</ion-button>
+							</section>
 						</ion-card>
 					</ion-col>
 				</ion-row>

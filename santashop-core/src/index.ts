@@ -1,5 +1,4 @@
 export * from './lib/decorators';
-export * from './lib/directives';
 export * from './lib/errors';
 export * from './lib/forms';
 export * from './lib/helpers';

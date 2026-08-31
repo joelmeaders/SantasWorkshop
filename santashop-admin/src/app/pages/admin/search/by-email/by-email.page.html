@@ -1,4 +1,4 @@
-<admin-header title="Search: Email" backRoute="/admin/search"></admin-header>
+<admin-header title="Search: Email" backRoute="/admin/search" />
 
 <ion-content fullscreen class="ion-padding">
 	<main class="limited-container">
@@ -10,18 +10,17 @@
 			<ion-list>
 				<ion-item>
 					<ion-label position="fixed"> Email </ion-label>
-					<ion-input
-						formControlName="emailAddress"
+					<ion-input formControlName="emailAddress"
 						type="email"
 						autocomplete="off"
 						placeholder="required"
-					></ion-input>
+					 />
 				</ion-item>
 			</ion-list>
 		</form>
 		<div class="search-buttons">
 			<ion-button color="danger" (click)="reset()" routerLink="..">
-				<ion-icon name="backspace-outline" slot="start"></ion-icon>
+				<ion-icon name="backspace-outline" slot="start" aria-hidden="true" />
 				<ion-label> Reset </ion-label>
 			</ion-button>
 			<ion-button
@@ -29,7 +28,7 @@
 				routerLink="../results"
 				[disabled]="!form.valid"
 			>
-				<ion-icon name="search-outline" slot="start"></ion-icon>
+				<ion-icon name="search-outline" slot="start" aria-hidden="true" />
 				<ion-label> Search </ion-label>
 			</ion-button>
 		</div>

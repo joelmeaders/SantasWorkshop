@@ -52,7 +52,5 @@ export class AdminPage {
 
 	constructor() {
 		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
-		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
-		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });
 	}
 }

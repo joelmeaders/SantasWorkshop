@@ -1,22 +1,35 @@
-<ion-content color="light">
-	<ion-grid class="height-max ion-no-padding ion-no-margin">
+<ion-content color="light" class="signup-page">
+	<ion-grid class="signup-shell height-max">
 		@let createAccountEnabled = createAccountEnabled$ | async; @if
 		(createAccountEnabled === true) {
 		<ion-row
-			class="height-max ion-align-items-center ion-justify-content-center"
+			class="signup-row ion-align-items-center ion-justify-content-center"
 		>
 			<!-- Information -->
-			<ion-col sizeXs="12" sizeSm="10" sizeMd="auto">
-				<ion-button
-					class="remove-shadow back-button"
-					color="white"
-					[routerLink]="['/']"
-				>
-					<ion-icon slot="start" name="arrow-back-sharp"></ion-icon>
-					<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
-				</ion-button>
-				<ion-card class="sign-up-card">
+			<ion-col class="form-column" sizeXs="12" sizeSm="10" sizeMd="9" sizeLg="7">
+				<div class="signup-actions">
+					<ion-button
+						class="remove-shadow customer-back-button"
+						color="white"
+						[routerLink]="['/']"
+					>
+						<ion-icon
+							slot="start"
+							name="arrow-back-sharp"
+							aria-hidden="true"
+						/>
+						<ion-label> {{ "COMMON.GO_BACK" | translate }} </ion-label>
+					</ion-button>
+					<app-language-toggle />
+				</div>
+				<ion-card class="sign-up-card form-card">
 					<ion-card-header>
+						<img
+							src="assets/images/gift-classic.svg"
+							class="signup-gift"
+							alt=""
+							aria-hidden="true"
+						/>
 						<ion-card-title>
 							{{ "SIGNUP.TITLE1" | translate }}
 						</ion-card-title>
@@ -25,10 +38,13 @@
 						</ion-card-subtitle>
 					</ion-card-header>
 					<ion-card-content class="ion-text-center">
-						<form [formGroup]="form" novalidate>
-							<ion-list lines="none">
-								<ion-item-group class="es-pd-bottom-xl">
-									<ion-item-divider color="light">
+						<form class="account-form" [formGroup]="form" novalidate>
+							<ion-list lines="none" role="presentation">
+								<ion-item-group
+									class="form-section es-pd-bottom-xl"
+									role="list"
+								>
+									<ion-item-divider>
 										<ion-label>
 											<strong>
 												{{ 'SIGNUP.YOUR_INFO' |
@@ -38,8 +54,9 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-input
-											id="firstName"
+									<ion-input
+										id="firstName"
+										fill="outline"
 											[label]="'SIGNUP.FIRST_NAME' | translate"
 											[errorText]="
 													form.controls.firstName | niceFormError |
@@ -50,11 +67,12 @@
 											formControlName="firstName"
 											[debounce]="500"
 											[autofocus]="true"
-										></ion-input>
+										/>
 									</ion-item>
 									<ion-item>
-										<ion-input
-											id="lastName"
+									<ion-input
+										id="lastName"
+										fill="outline"
 											[label]="'SIGNUP.LAST_NAME' | translate"
 											[errorText]="
 													form.controls.lastName |
@@ -65,11 +83,12 @@
 											autocomplete="family-name"
 											formControlName="lastName"
 											[debounce]="500"
-										></ion-input>
+										/>
 									</ion-item>
 									<ion-item>
-										<ion-input
-											id="zipCode"
+									<ion-input
+										id="zipCode"
+										fill="outline"
 											[label]="'SIGNUP.ZIP_CODE' | translate"
 											[errorText]="
 													form.controls.zipCode |
@@ -82,12 +101,63 @@
 											[debounce]="500"
 											maxlength="5"
 											minlength="5"
-										></ion-input>
+										/>
 									</ion-item>
+
+									<div class="referral-selector-item" role="listitem">
+										<button
+											id="referralSelector"
+											type="button"
+											class="referral-selector"
+											aria-haspopup="dialog"
+											[attr.aria-describedby]="
+												form.controls.referredBy.invalid &&
+												form.controls.referredBy.touched
+													? 'referralSelectorError'
+													: null
+											"
+											(click)="showReferralModal()"
+										>
+											<span class="referral-selector-label">
+												<span class="referral-selector-question">
+													{{ 'REFERRAL.REFERRED_BY' | translate }}
+													<span class="referral-selector-required">
+														{{ 'REFERRAL.REQUIRED' | translate }}
+													</span>
+												</span>
+												@if (form.controls.referredBy.value; as referredBy) {
+													<span class="referral-selector-value">
+														{{ displayReferral(referredBy) }}
+													</span>
+												} @else {
+													<span
+														class="referral-selector-value referral-selector-placeholder"
+													>
+														{{ 'REFERRAL.SELECT' | translate }}
+													</span>
+												}
+											</span>
+											<span class="referral-selector-chevron" aria-hidden="true">›</span>
+										</button>
+									</div>
+									@if (form.controls.referredBy.invalid &&
+									form.controls.referredBy.touched) {
+									<ion-note
+										id="referralSelectorError"
+										class="referral-selector-error"
+										color="danger"
+									>
+										{{ form.controls.referredBy |
+										niceFormError | translate }}
+									</ion-note>
+									}
 								</ion-item-group>
 
-								<ion-item-group class="es-pd-bottom-xl">
-									<ion-item-divider color="light">
+								<ion-item-group
+									class="form-section es-pd-bottom-xl"
+									role="list"
+								>
+									<ion-item-divider>
 										<ion-label>
 											<strong>
 												{{ 'SIGNUP.ACCOUNT_INFO' |
@@ -97,8 +167,9 @@
 									</ion-item-divider>
 
 									<ion-item>
-										<ion-input
-											id="emailAddress"
+									<ion-input
+										id="emailAddress"
+										fill="outline"
 											[label]="'COMMON.EMAIL_ADDRESS' | translate"
 											[errorText]="form.controls.emailAddress | niceFormError | translate"
 											labelPlacement="floating"
@@ -106,12 +177,13 @@
 											autocomplete="email"
 											formControlName="emailAddress"
 											[debounce]="500"
-										></ion-input>
+										/>
 									</ion-item>
 
 									<ion-item>
-										<ion-input
-											id="password"
+									<ion-input
+										id="password"
+										fill="outline"
 											[label]="'COMMON.PASSWORD' | translate"
 											[errorText]="form.controls.password | niceFormError | translate"
 											labelPlacement="floating"
@@ -119,12 +191,13 @@
 											autocomplete="new-password"
 											formControlName="password"
 											[debounce]="500"
-										></ion-input>
+										/>
 									</ion-item>
 
 									<ion-item>
-										<ion-input
-											id="password2"
+									<ion-input
+										id="password2"
+										fill="outline"
 											[label]="'SIGNUP.PASSWORD2' | translate"
 											[errorText]="form.controls.password2 | niceFormError | translate"
 											labelPlacement="floating"
@@ -132,7 +205,7 @@
 											autocomplete="new-password"
 											formControlName="password2"
 											[debounce]="500"
-										></ion-input>
+										/>
 									</ion-item>
 
 									@if (form.errors?.['passwordMismatch']) {
@@ -147,8 +220,7 @@
 									}
 								</ion-item-group>
 
-								<ion-item-group>
-									<ion-item-divider color="light" />
+								<ion-item-group class="form-section legal-section">
 									<div class="ion-padding-top">
 										<ion-text
 											color="primary"
@@ -175,7 +247,8 @@
 												id="legalCheckbox"
 												formControlName="legal"
 												class="check"
-											></ion-checkbox>
+												[attr.aria-label]="'SIGNUP.LEGAL1' | translate"
+											/>
 										</div>
 										<ion-text color="medium">
 											{{ "SIGNUP.LEGAL1" | translate }} {{
@@ -198,7 +271,8 @@
 											<ion-checkbox
 												formControlName="newsletter"
 												class="check"
-											></ion-checkbox>
+												[attr.aria-label]="'COMMON.NEWSLETTER' | translate"
+											/>
 										</div>
 										<ion-text color="medium">
 											{{ 'COMMON.NEWSLETTER' | translate
@@ -215,7 +289,7 @@
 							id="submitButton"
 							size="large"
 							color="xmasred"
-							class="es-pd-left-lg es-pd-right-lg es-mg-bottom-xlr"
+							class="submit-account es-pd-left-lg es-pd-right-lg es-mg-bottom-xl"
 							[disabled]="
 									!form.valid
 								"
@@ -227,7 +301,8 @@
 							<ion-button
 								fill="clear"
 								color="tertiary"
-								[routerLink]="['/sign-in']"
+								[routerLink]="['/']"
+								[queryParams]="{ mode: 'sign-in' }"
 							>
 								{{ "SIGNUP.HAVE_ACCOUNT" | translate }}
 							</ion-button>
@@ -235,7 +310,8 @@
 							<ion-button
 								fill="clear"
 								color="tertiary"
-								[routerLink]="['/reset-password']"
+								[routerLink]="['/']"
+								[queryParams]="{ mode: 'reset' }"
 							>
 								{{ "SIGNIN.FORGOT_PASSWORD" | translate }}
 							</ion-button>
@@ -255,7 +331,7 @@
 		} @else {
 		<ion-row>
 			<ion-col size="12" class="ion-text-center es-pd-top-xxl">
-				<ion-spinner name="crescent"></ion-spinner>
+				<ion-spinner name="crescent" />
 			</ion-col>
 		</ion-row>
 		}

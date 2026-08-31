@@ -1,7 +1,6 @@
-<admin-header
-	title="Search: Registration Code"
+<admin-header title="Search: Registration Code"
 	backRoute="/admin/search"
-></admin-header>
+ />
 
 <ion-content fullscreen class="ion-padding">
 	<main class="limited-container">
@@ -13,20 +12,19 @@
 			<ion-list>
 				<ion-item counter>
 					<ion-label slot="start"> Code </ion-label>
-					<ion-input
-						type="text"
+					<ion-input type="text"
 						formControlName="code"
 						maxLength="8"
 						minlength="7"
 						placeholder="required"
 						autocomplete="off"
-					></ion-input>
+					 />
 				</ion-item>
 			</ion-list>
 		</form>
 		<div class="search-buttons">
 			<ion-button color="danger" (click)="reset()" routerLink="..">
-				<ion-icon name="backspace-outline" slot="start"></ion-icon>
+				<ion-icon name="backspace-outline" slot="start" aria-hidden="true" />
 				<ion-label> Reset </ion-label>
 			</ion-button>
 			<ion-button
@@ -34,7 +32,7 @@
 				routerLink="../results"
 				[disabled]="!form.valid"
 			>
-				<ion-icon name="search-outline" slot="start"></ion-icon>
+				<ion-icon name="search-outline" slot="start" aria-hidden="true" />
 				<ion-label> Search </ion-label>
 			</ion-button>
 		</div>

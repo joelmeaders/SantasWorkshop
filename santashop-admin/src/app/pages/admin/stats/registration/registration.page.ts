@@ -3,8 +3,8 @@ import {
 	FireRepoLite,
 	IFireRepoCollection,
 	filterNil,
-	CoreModule,
-	shopSchedule,
+	PROGRAM_YEAR,
+	SHOP_DAYS,
 	timestampToDate,
 } from '@santashop/core';
 import {
@@ -28,9 +28,17 @@ import {
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import {
+	getShopSchedule,
+	getStatsCollection,
+} from '../../../../shared/helpers';
 
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import {
+	BaseChartDirective,
+	provideCharts,
+	withDefaultRegisterables,
+} from 'ng2-charts';
 import {
 	IonCol,
 	IonContent,
@@ -42,7 +50,7 @@ import {
 	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
-import { QueryConstraint, Timestamp, where } from '@angular/fire/firestore';
+import { QueryConstraint, Timestamp, where } from 'firebase/firestore';
 
 Chart.register(ChartDataLabels);
 
@@ -51,6 +59,7 @@ Chart.register(ChartDataLabels);
 	templateUrl: './registration.page.html',
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
 		IonTitle,
 		IonGrid,
@@ -62,7 +71,6 @@ Chart.register(ChartDataLabels);
 		IonSelect,
 		IonSelectOption,
 		BaseChartDirective,
-		CoreModule,
 		AsyncPipe,
 		DecimalPipe,
 		FormsModule,
@@ -70,14 +78,13 @@ Chart.register(ChartDataLabels);
 })
 export class RegistrationPage {
 	private readonly httpService = inject(FireRepoLite);
+	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = shopSchedule;
+	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
 
-	public year = 2025;
+	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
-
-	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
-		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly dateTimeSlotCollection =
 		(): IFireRepoCollection<DateTimeSlot> =>
@@ -87,7 +94,7 @@ export class RegistrationPage {
 
 	private readonly registrationStats$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<RegistrationStats>()
+			getStatsCollection<RegistrationStats>(this.httpService)
 				.read(`registration-${this.year}`)
 				.pipe(filterNil(), shareReplay(1)),
 		),
@@ -95,7 +102,7 @@ export class RegistrationPage {
 
 	private readonly scheduleStats$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<ScheduleStats>()
+			getStatsCollection<ScheduleStats>(this.httpService)
 				.read(`schedule-${this.year}`)
 				.pipe(shareReplay(1)),
 		),
@@ -119,13 +126,7 @@ export class RegistrationPage {
 									: timestampToDate(slot.dateTime),
 						})),
 					),
-					map((slots) =>
-						slots.sort(
-							(a, b) =>
-								(a.dateTime as Date).valueOf() -
-								(b.dateTime as Date).valueOf(),
-						),
-					),
+					map((slots) => this.sortDateTimeSlots(slots)),
 				);
 		}),
 		shareReplay(1),
@@ -206,8 +207,7 @@ export class RegistrationPage {
 				return { date, count: e.count };
 			}),
 		),
-
-		map((data) => data.sort((a, b) => Number(a.date) - Number(b.date))),
+		map((data) => this.sortFamiliesByDate(data)),
 	);
 
 	public readonly familiesBySlotsChartData$ = this.familiesBySlots$.pipe(
@@ -219,7 +219,7 @@ export class RegistrationPage {
 	);
 
 	public readonly topFiveZipCodesCount$ = this.zipCodeStats$.pipe(
-		map((data) => data.sort((a, b) => b.count - a.count)),
+		map((data) => this.sortZipCodeCounts(data)),
 		map((data) => data.slice(0, 4)),
 	);
 
@@ -237,7 +237,7 @@ export class RegistrationPage {
 				],
 			};
 
-			data.forEach((e) => {
+			data.forEach((e: { zip: string | number; count: number }) => {
 				if (formatted.labels) {
 					formatted.labels.push([
 						e.zip.toString(),
@@ -330,7 +330,15 @@ export class RegistrationPage {
 				},
 				formatter: (value, ctx) => {
 					const label = ctx.chart?.data?.labels?.[ctx.dataIndex];
-					return `${value} ${label ?? ''}`;
+					let labelText = '';
+
+					if (Array.isArray(label)) {
+						labelText = label.join(' ');
+					} else if (typeof label === 'string') {
+						labelText = label;
+					}
+
+					return `${value} ${labelText}`;
 				},
 			},
 		},
@@ -371,19 +379,17 @@ export class RegistrationPage {
 	// Update yearly. Last updated 2024
 	private mapFamiliesByDateToChart2(
 		data: { date: Date; count: number }[],
-	): ChartData<'bar'>[] {
+	): ChartData<'bar', number[], string>[] {
 		const defaults = (
 			label: string,
-		): { datasets: { data: number[]; label: string }[] } => ({
+		): ChartData<'bar', number[], string> => ({
 			datasets: [{ data: [], ...this.colorSettings, label }],
 		});
 
 		const schedule = this.schedule.find((s) => s.year === this.year);
-		if (!schedule) throw new Error('Unable to find schedule');
+		if (!schedule) return [];
 
-		const arr: {
-			datasets: { data: number[]; label: string }[];
-		}[] = [
+		const arr: ChartData<'bar', number[], string>[] = [
 			{ ...defaults(this.friendlyDay(schedule.days[0])) },
 			{ ...defaults(this.friendlyDay(schedule.days[1])) },
 			{ ...defaults(this.friendlyDay(schedule.days[2])) },
@@ -393,15 +399,53 @@ export class RegistrationPage {
 		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
 			const day = date.getDate();
-			return schedule.days.findIndex((d) => d === day);
+			return schedule.days.indexOf(day);
 		};
 
 		data.forEach((e) => {
 			const dayIndex = getDayIndex(e.date);
-			arr[dayIndex].datasets[0].data.push(e.count);
+			if (dayIndex >= 0) arr[dayIndex].datasets[0].data.push(e.count);
 		});
 
 		return arr;
+	}
+
+	private sortDateTimeSlots(slots: DateTimeSlot[]): DateTimeSlot[] {
+		const sortedSlots = [...slots];
+
+		sortedSlots.sort(
+			(a: DateTimeSlot, b: DateTimeSlot) =>
+				(a.dateTime as Date).valueOf() - (b.dateTime as Date).valueOf(),
+		);
+
+		return sortedSlots;
+	}
+
+	private sortFamiliesByDate(
+		data: { date: Date; count: number }[],
+	): { date: Date; count: number }[] {
+		const sortedFamilies = [...data];
+
+		sortedFamilies.sort(
+			(
+				a: { date: Date; count: number },
+				b: { date: Date; count: number },
+			) => Number(a.date) - Number(b.date),
+		);
+
+		return sortedFamilies;
+	}
+
+	private sortZipCodeCounts<
+		T extends {
+			count: number;
+		},
+	>(data: T[]): T[] {
+		const sortedCounts = [...data];
+
+		sortedCounts.sort((a: T, b: T) => b.count - a.count);
+
+		return sortedCounts;
 	}
 
 	private friendlyDay(day: number): string {
@@ -423,8 +467,12 @@ export class RegistrationPage {
 		return day + 'th';
 	}
 
-	public getTotalCount(data: number[]): number {
-		return data.reduce((a, b) => a + b, 0);
+	public getTotalCount(data: (number | [number, number] | null)[]): number {
+		return data.reduce((a: number, b) => {
+			if (b === null) return a;
+			if (Array.isArray(b)) return a + b[0];
+			return a + b;
+		}, 0);
 	}
 
 	private mapSlotsToCapacityCharts(

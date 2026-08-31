@@ -1,4 +1,4 @@
-<admin-header title="Pre-Registration"></admin-header>
+<admin-header title="Pre-Registration" />
 
 <ion-content class="ion-padding-horizontal">
 	<div class="limited-container">
@@ -27,8 +27,7 @@
 					<ion-label> Parent / Guardian </ion-label>
 				</ion-item-divider>
 				<ion-item>
-					<ion-input
-						label="First Name"
+					<ion-input label="First Name"
 						labelPlacement="fixed"
 						errorText="Enter between 2-20 characters"
 						type="text"
@@ -37,11 +36,10 @@
 						placeholder="Parent first name"
 						minlength="2"
 						maxlength="20"
-					></ion-input>
+					 />
 				</ion-item>
 				<ion-item>
-					<ion-input
-						label="Last Name"
+					<ion-input label="Last Name"
 						labelPlacement="fixed"
 						errorText="Enter between 2-25 characters"
 						type="text"
@@ -50,22 +48,20 @@
 						placeholder="Parent last name"
 						minlength="2"
 						maxlength="25"
-					></ion-input>
+					 />
 				</ion-item>
 				<ion-item>
-					<ion-input
-						label="Email"
+					<ion-input label="Email"
 						labelPlacement="fixed"
 						errorText="Must be a valid email address"
 						type="email"
 						autocomplete="off"
 						formControlName="emailAddress"
 						placeholder="Parent email"
-					></ion-input>
+					 />
 				</ion-item>
 				<ion-item>
-					<ion-input
-						label="Zip Code"
+					<ion-input label="Zip Code"
 						labelPlacement="fixed"
 						errorText="Enter 5 digit zip code"
 						type="number"
@@ -74,7 +70,7 @@
 						placeholder="5 digit zip code"
 						minlength="5"
 						maxlength="5"
-					></ion-input>
+					 />
 				</ion-item>
 				<ion-item>
 					<ion-checkbox formControlName="newsletter">
@@ -93,7 +89,7 @@
 						(click)="chooseReferral()"
 					>
 						Pick Agency
-						<ion-icon slot="end" name="search-outline"></ion-icon>
+						<ion-icon slot="end" name="search-outline" aria-hidden="true" />
 					</ion-button>
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
@@ -112,12 +108,11 @@
 				</ion-item>
 				<div class="margin-top">
 					@if (children$ | async; as children) {
-					<admin-manage-children
-						[children]="children"
+					<admin-manage-children [children]="children"
 						(adddedChild)="addChild($event)"
 						(editedChild)="editChild($event)"
 						(removedChild)="removeChild($event)"
-					></admin-manage-children>
+					 />
 					}
 				</div>
 
@@ -162,11 +157,11 @@
 				<ion-label>
 					<h1>Yes, continue</h1>
 				</ion-label>
-				<ion-icon
-					name="checkmark-circle"
+				<ion-icon name="checkmark-circle"
 					slot="end"
 					size="large"
-				></ion-icon>
+					aria-hidden="true"
+				 />
 			</ion-item>
 		</ion-list>
 	</div>

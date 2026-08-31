@@ -1,20 +1,54 @@
-10/10/2021
+## Firebase Functions
 
-// THIS STEP NEEDED FOR RECAPTCHA & SENDGRID
-// https://firebase.google.com/docs/functions/local-emulator
-Set up functions configuration (optional)
-If you're using custom functions configuration variables, first run the command to get your custom config (run this within the functions directory) in your local environment:
-firebase functions:config:get > .runtimeconfig.json
+This package now uses the native Firebase Functions v2 APIs from `firebase-functions/v2/*`.
 
-# If using Windows PowerShell, replace the above with:
+## Runtime requirement
 
-# firebase functions:config:get | ac .runtimeconfig.json
+- Firebase deploys for this package explicitly target the Node.js 22 runtime via `../firebase.json`.
+- The dedicated E2E emulator config must declare the same `nodejs24` runtime;
+  Firebase CLI does not accept a package engine range as a runtime selector.
+- The package `engines.node` range still allows newer local Node versions so the workspace can keep using Node.js 24 for package-manager and general development workflows.
 
-if prompted for webpack cli install, cancel and then run 'npm link webpack' in the console
+For the full cross-repo guide to secrets, client config, and environment flow, see `../docs/SECRETS_AND_CONFIGURATION.md`.
 
-Running pub/sub manually during development:
-user@laptop:~$ firebase functions:shell
+### Local configuration
+
+Runtime configuration is loaded from environment variables instead of `functions.config()`.
+
+- Prefer putting local values in the workspace root `.env` copied from `../.env.example`.
+- `santashop-functions/.env` is still supported as a migration fallback for functions-only workflows, but the root `.env` is now the primary path.
+- Local and emulator workflows may generate project-specific Functions env files with `pnpm run config:functions:local` or `pnpm run config:functions:test`.
+- GitHub Actions generates `santashop-functions/.env.<project-id>` immediately before deployment. Firebase CLI deploys those values as ordinary runtime environment variables.
+- Functions deployments are GitHub Actions-only. The Firebase predeploy guard rejects direct local Functions deploys.
+- Legacy Firebase runtime configuration files are no longer required for the current code path.
+
+If prompted for webpack CLI install during local setup, cancel and run `npm link webpack` in the console.
+
+### Emulator shell
+
+Run pub/sub or callable functions manually during development with the Functions shell:
+
+```text
+firebase functions:shell
 firebase > myCronFunction()
+```
 
-// NEW CALLABLE FUNCTIONS
-Make sure to add them to firebase.json, otherwise you get a "response not valid json" error due to the redirect to the site instead of the function
+For callable functions in the shell, use the v2 request shape with a `data` wrapper.
+
+Make sure new callable functions are added to `firebase.json`; otherwise local requests may be redirected and return invalid JSON.
+
+## Tests
+
+- Unit tests for Firebase Functions live under `santashop-functions/test/unit/` and run with Vitest:
+	- `pnpm --filter @santashop/functions run test:unit`
+- Emulator-backed integration tests live under `santashop-functions/test/integration/` and are orchestrated from the workspace root so the required Firebase emulators start automatically:
+	- `pnpm run functions:test:integration`
+- Run both slices together from the workspace root:
+	- `pnpm run functions:test`
+
+Integration tests currently exercise real Auth/Firestore/Storage emulator side effects by invoking handler modules directly. Production exports use native v2 callable, Firestore, scheduler, and Pub/Sub handlers.
+
+The Firestore email trigger does not contact SES while running in the Functions
+emulator unless `SANTASHOP_SEND_EMAILS_FROM_EMULATOR=true` is explicitly set.
+The direct unit/integration tests still verify queue state, SES acceptance,
+retry, deduplication, and failure behavior with controlled test doubles.

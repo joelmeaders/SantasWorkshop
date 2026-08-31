@@ -1,0 +1,14 @@
+ion-toolbar {
+	--background: linear-gradient(110deg, var(--santa-evergreen-deep), var(--santa-evergreen));
+	--color: #fff;
+}
+
+ion-title {
+	color: #fff;
+	font-family: 'Lora', Georgia, serif;
+	font-weight: 700;
+}
+
+ion-button {
+	--color: #fff;
+}

@@ -102,43 +102,19 @@ scheduledUserStats();
 scheduledCheckInStats();
 ```
 
-### 4. Pub/Sub Functions (pubsub.topic)
+### 4. Owner Operations
 
-Pub/Sub functions are triggered by messages published to a topic. They can be manually triggered in the shell.
+The former Pub/Sub maintenance handlers have been retired. Their supported
+replacements are authenticated, App-Check-protected callables exposed through
+the admin app's **Owner operations** area. Do not invoke these workflows from
+the Functions shell: previews, recent authentication, exact confirmation
+phrases, seasonal restrictions, single-use records, and task progress are all
+part of the security contract.
 
-#### Syntax
-
-```javascript
-functionName();
-```
-
-#### Examples
-
-```javascript
-// Reset check-in statistics
-pubsubResetCheckInStats();
-
-// Queue reminder emails for registrants
-pubsubQueueReminderEmails();
-
-// Set admin rights for users
-pubsubSetAdminRights();
-
-// Mark registrations as checked in
-pubsubMarkRegistrationsCheckedIn();
-
-// Export marketing email addresses
-pubsubExportMarketingEmails();
-
-// Export registered user emails
-pubsubExportRegisteredEmails();
-
-// Add datetime slots to database
-pubsubAddDateTimeSlots();
-
-// Delete all users (except disabled accounts)
-pubsubDeleteUsers();
-```
+Provision or transfer an owner with `pnpm --filter @santashop/functions
+owner:manage`. See [`../docs/yearly-startup.md`](../docs/yearly-startup.md) for
+the yearly export, verified backup, purge, archive, schedule initialization, and
+deployment workflow.
 
 ## Common Patterns
 
@@ -172,22 +148,19 @@ someFunction({ data: {} }).catch((error) => {
 
 1. **Use `.exit` or `Ctrl+C` to exit the shell**
 2. **Functions reload automatically** when you save changes to your code
-3. **Environment variables** can be set using `.runtimeconfig.json` in the functions directory
+3. **Environment variables** can be set using `santashop-functions/.env` (or the workspace root `.env`)
 4. **Emulator data** persists between shell sessions unless you clear it
 5. **AppCheck is disabled** for test helper functions to allow easy testing
 
 ## Related Commands
 
 ```bash
-# Get current runtime config
-firebase functions:config:get > .runtimeconfig.json
-
 # Start all emulators
 firebase emulators:start
 
 # Start only functions emulator
 firebase emulators:start --only functions
 
-# Deploy functions to production
-firebase deploy --only functions
+# Functions deployment is intentionally GitHub Actions-only.
+# Merge to master for test, then promote the tested ref with the release workflow.
 ```

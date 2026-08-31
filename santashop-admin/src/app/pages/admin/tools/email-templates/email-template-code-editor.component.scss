@@ -1,0 +1,16 @@
+.editor-host {
+	min-height: 24rem;
+	border: 1px solid var(--ion-color-medium-shade);
+	border-radius: 12px;
+	overflow: hidden;
+	background: var(--ion-color-light);
+}
+
+:host ::ng-deep .cm-editor {
+	height: 24rem;
+}
+
+:host ::ng-deep .cm-scroller {
+	overflow: auto;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}

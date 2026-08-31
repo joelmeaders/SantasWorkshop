@@ -10,14 +10,12 @@ import {
 	provideCharts,
 	withDefaultRegisterables,
 } from 'ng2-charts';
-import { CoreModule } from '@santashop/core';
+
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
 	imports: [
 		CommonModule,
-
-		CoreModule,
 		CheckInPageRoutingModule,
 		FormsModule,
 		BaseChartDirective,

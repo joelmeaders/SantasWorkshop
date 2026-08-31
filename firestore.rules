@@ -7,35 +7,80 @@ service cloud.firestore {
     }
 
     function isUser(userId) {
-      return request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.admin;
-    }
+	  return isSignedIn() && (
+		request.auth.token.owner == true ||
+		request.auth.token.admin == true ||
+		(request.auth.token.roles is list && request.auth.token.roles.hasAny(['admin']))
+	  );
+	}
 
     match /users/{userId} {
       allow get: if isUser(userId) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isUser(userId);
-      allow update: if isUser(userId);
-      allow delete: if isAdmin();
+      // Account mutations go through validated callable functions. Admin SDK
+      // writes bypass these rules, so no browser receives arbitrary write access.
+      allow create, update, delete: if false;
     }
 
     match /registrations/{documentId} {
       allow read: if isUser(resource.data.uid) || isAdmin();
-      allow update: if (isUser(request.resource.data.uid) && isUser(resource.data.uid));
+      allow write: if false;
+
+	  match /mutationReceipts/{mutationId} {
+		allow read, write: if false;
+	  }
     }
 
-    match /dateTimeSlots/{document=**} {
+    match /cancellations/{documentId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /dateTimeSlots/{slotId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow create: if false;
+      allow update: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+          'programYear', 'dateTime', 'maxSlots', 'slotsReserved', 'enabled',
+          'lastUpdated'
+        ])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'dateTime', 'maxSlots', 'enabled', 'lastUpdated'
+        ])
+        && request.resource.data.programYear is int
+        && request.resource.data.programYear >= 2000
+        && request.resource.data.programYear <= 2100
+        && request.resource.data.dateTime is timestamp
+        && request.resource.data.maxSlots is int
+        && request.resource.data.maxSlots >= 0
+        && request.resource.data.maxSlots <= 10000
+        && request.resource.data.enabled is bool
+        && request.resource.data.lastUpdated is timestamp
+        && (!request.resource.data.keys().hasAny(['slotsReserved'])
+          || (request.resource.data.slotsReserved is int
+            && request.resource.data.slotsReserved >= 0));
+      allow delete: if isAdmin();
     }
 
     match /checkins/{documentId} {
-      allow create: if isAdmin();
+	  // Check-ins are written only by authoritative callable functions.
+	  allow create, update, delete: if false;
       allow read: if isUser(documentId) || isAdmin();
     }
+
+	match /registrationScanAttempts/{documentId} {
+	  allow read: if isAdmin();
+	  allow write: if false;
+	}
+
+	match /registrationScanRiskSummaries/{documentId} {
+	  allow read: if isAdmin();
+	  allow write: if false;
+	}
 
     match /counters/{document=**} {
       allow read: if isAdmin();
@@ -44,7 +89,17 @@ service cloud.firestore {
 
     match /registrationsearchindex/{documentId} {
       allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow write: if false;
+    }
+
+    match /emailTemplates/{templateId} {
+      allow read: if isAdmin();
+      allow write: if false;
+
+      match /revisions/{revisionId} {
+        allow read: if isAdmin();
+        allow write: if false;
+      }
     }
 
     match /stats/{document=**} {
@@ -54,6 +109,23 @@ service cloud.firestore {
     match /parameters/public {
       allow read: if true;
       allow write: if false;
+    }
+
+    match /staff/{userId} {
+      allow get, list: if isAdmin();
+      allow write: if false;
+    }
+
+    match /ownerOperationPreviews/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /ownerOperations/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /ownerOperationLocks/{document=**} {
+      allow read, write: if false;
     }
   }
 }

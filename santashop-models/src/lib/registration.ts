@@ -4,6 +4,7 @@ import { DateTimeSlot } from './date-time-slot';
 export interface Registration {
 	uid?: string;
 	qrcode?: string;
+	qrCodeStoragePath: string;
 	firstName?: string;
 	lastName?: string;
 	emailAddress?: string;
@@ -35,7 +36,21 @@ export interface Registration {
 
 	referredBy?: string;
 
+	reminderEmailQueuedOn?: false | Date;
+
+	reminderEmailFailedOn?: false | Date;
+
 	reminderEmailSentOn?: false | Date;
 
+	qrCodeGeneratedOn?: false | Date;
+
+	qrCodeGenerationFailedOn?: false | Date;
+
 	hasCheckedIn?: boolean;
+
+	// Set by the authoritative cancellation callable. A cancelled registration
+	// returns to draft state and receives a new confirmation code.
+	cancelledOn?: Date;
+	cancelledByUid?: string;
+	cancellationLogId?: string;
 }

@@ -1,13 +1,23 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type MockInstance,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of } from 'rxjs';
+import type { User, UserCredential } from 'firebase/auth';
 import { AuthService } from './auth.service';
-import { AuthWrapper, User, UserCredential } from './_auth-wrapper';
+import { AuthWrapper } from './_auth-wrapper';
 import { FunctionsWrapper } from './_functions-wrapper';
 
 describe('AuthService', () => {
 	let service: AuthService;
-	let authWrapperService: jasmine.SpyObj<AuthWrapper>;
-	let functionsWrapperService: jasmine.SpyObj<FunctionsWrapper>;
+	let authWrapperService: Mocked<AuthWrapper>;
+	let functionsWrapperService: Mocked<FunctionsWrapper>;
 
 	let authStateSpy: any;
 
@@ -25,37 +35,51 @@ describe('AuthService', () => {
 			providers: [
 				{
 					provide: AuthWrapper,
-					useValue: jasmine.createSpyObj<AuthWrapper>('AuthWrapper', [
-						'authState',
-						'sendPasswordResetEmail',
-						'currentUser',
-						'getCurrentUserToken',
-						'updatePassword',
-						'signInWithEmailAndPassword',
-						'signOut',
-					]),
+					useValue: {
+						authState: vi.fn().mockName('AuthWrapper.authState'),
+						sendPasswordResetEmail: vi
+							.fn()
+							.mockName('AuthWrapper.sendPasswordResetEmail'),
+						currentUser: vi
+							.fn()
+							.mockName('AuthWrapper.currentUser'),
+						getCurrentUserToken: vi
+							.fn()
+							.mockName('AuthWrapper.getCurrentUserToken'),
+						updatePassword: vi
+							.fn()
+							.mockName('AuthWrapper.updatePassword'),
+						signInWithEmailAndPassword: vi
+							.fn()
+							.mockName('AuthWrapper.signInWithEmailAndPassword'),
+						reauthenticateWithPassword: vi
+							.fn()
+							.mockName('AuthWrapper.reauthenticateWithPassword'),
+						signOut: vi.fn().mockName('AuthWrapper.signOut'),
+					},
 				},
 				{
 					provide: FunctionsWrapper,
-					useValue: jasmine.createSpyObj<FunctionsWrapper>(
-						'FunctionsWrapper',
-						['updateEmailAddress'],
-					),
+					useValue: {
+						updateEmailAddress: vi
+							.fn()
+							.mockName('FunctionsWrapper.updateEmailAddress'),
+					},
 				},
 			],
 		});
 
 		authWrapperService = TestBed.inject(
 			AuthWrapper,
-		) as jasmine.SpyObj<AuthWrapper>;
+		) as Mocked<AuthWrapper>;
 		functionsWrapperService = TestBed.inject(
 			FunctionsWrapper,
-		) as jasmine.SpyObj<FunctionsWrapper>;
+		) as Mocked<FunctionsWrapper>;
 	});
 
 	beforeEach(() => {
 		authStateSpy = authWrapperService.authState;
-		authStateSpy.and.returnValue(of(mockUser));
+		authStateSpy.mockReturnValue(of(mockUser));
 		service = TestBed.inject(AuthService);
 	});
 
@@ -95,7 +119,7 @@ describe('AuthService', () => {
 
 	it('isAdmin$: should return true', async () => {
 		// Arrange
-		spyOn(mockUser, 'getIdTokenResult').and.resolveTo({
+		vi.spyOn(mockUser, 'getIdTokenResult').mockResolvedValue({
 			claims: { admin: true },
 		} as any);
 
@@ -103,12 +127,12 @@ describe('AuthService', () => {
 		const value = await firstValueFrom(service.isAdmin$);
 
 		// Assert
-		expect(value).toBeTrue();
+		expect(value).toBe(true);
 	});
 
 	it('isAdmin$: should return false', async () => {
 		// Arrange
-		spyOn(mockUser, 'getIdTokenResult').and.resolveTo({
+		vi.spyOn(mockUser, 'getIdTokenResult').mockResolvedValue({
 			claims: {},
 		} as any);
 
@@ -116,13 +140,61 @@ describe('AuthService', () => {
 		const value = await firstValueFrom(service.isAdmin$);
 
 		// Assert
-		expect(value).toBeFalse();
+		expect(value).toBe(false);
+	});
+
+	it('treats an owner as an administrator and exposes the owner role', async () => {
+		vi.spyOn(mockUser, 'getIdTokenResult').mockResolvedValue({
+			claims: { owner: true },
+		} as any);
+
+		await expect(firstValueFrom(service.isAdmin$)).resolves.toBe(true);
+		await expect(firstValueFrom(service.isOwner$)).resolves.toBe(true);
+	});
+
+	it('maps named roles and grants check-in to a matching role', async () => {
+		vi.spyOn(mockUser, 'getIdTokenResult').mockResolvedValue({
+			claims: { roles: ['checkin', 'stats'] },
+		} as any);
+
+		await expect(firstValueFrom(service.roles$)).resolves.toEqual([
+			'checkin',
+			'stats',
+		]);
+		await expect(firstValueFrom(service.isCheckin$)).resolves.toBe(true);
+		await expect(firstValueFrom(service.hasRole('admin'))).resolves.toBe(false);
+		await expect(firstValueFrom(service.isElevated$)).resolves.toBe(true);
+	});
+
+	it('reauthenticates the current user and refreshes their token', async () => {
+		const tokenRefresh = vi.fn().mockResolvedValue('fresh-token');
+		const currentUser = { ...mockUser, getIdToken: tokenRefresh } as User;
+		authWrapperService.currentUser.mockReturnValue(currentUser);
+		authWrapperService.reauthenticateWithPassword.mockResolvedValue(
+			{} as UserCredential,
+		);
+
+		await service.reauthenticate('secret');
+
+		expect(authWrapperService.reauthenticateWithPassword).toHaveBeenCalledWith(
+			currentUser,
+			'secret',
+		);
+		expect(tokenRefresh).toHaveBeenCalledWith(true);
+	});
+
+	it('rejects reauthentication when no user is signed in', async () => {
+		authWrapperService.currentUser.mockReturnValue(null);
+
+		await expect(service.reauthenticate('secret')).rejects.toThrow(
+			'User must be signed in.',
+		);
 	});
 
 	it('resetPassword(): should make expected call', async () => {
 		// Arrange
 		const spy = authWrapperService.sendPasswordResetEmail;
-		spy.and.resolveTo();
+		spy.mockResolvedValue(undefined);
 
 		// Act
 		await service.resetPassword('test@test.com');
@@ -135,42 +207,43 @@ describe('AuthService', () => {
 		it('should make expected call', async () => {
 			// Arrange
 			const spy = authWrapperService.currentUser;
-			spy.and.returnValue(null);
+			spy.mockReturnValue(null);
 
 			// Act
 			const action = service.changePassword('abc', 'def');
 
 			// Assert
-			await expectAsync(action).toBeRejectedWithError(
-				'User cannot be null',
-			);
+			await expect(action).rejects.toThrowError('User cannot be null');
+			expect(spy).toHaveBeenCalled();
 		});
 
 		it('should handle and return error', async () => {
 			// Arrange
-			authWrapperService.currentUser.and.returnValue(mockUser);
+			authWrapperService.currentUser.mockReturnValue(mockUser);
 
 			const signInSpy = authWrapperService.signInWithEmailAndPassword;
 			const testError = new Error('Sign in failed');
-			signInSpy.and.rejectWith(testError);
+			signInSpy.mockRejectedValue(testError);
 
 			// Act
 			const action = service.changePassword('abc', 'def');
 
 			// Assert
-			await expectAsync(action).toBeRejectedWith(testError);
+			await expect(action).rejects.toEqual(testError);
+			expect(signInSpy).toHaveBeenCalledTimes(1);
+			expect(signInSpy).toHaveBeenCalledWith(mockUser.email!, 'abc');
 			// Note: ErrorHandlerService is not called in current implementation
 		});
 
 		it('should make expected calls', async () => {
 			// Arrange
-			authWrapperService.currentUser.and.returnValue(mockUser);
+			authWrapperService.currentUser.mockReturnValue(mockUser);
 
 			const signInSpy = authWrapperService.signInWithEmailAndPassword;
-			signInSpy.and.resolveTo({} as UserCredential);
+			signInSpy.mockResolvedValue({} as UserCredential);
 
 			const updateSpy = authWrapperService.updatePassword;
-			updateSpy.and.resolveTo();
+			updateSpy.mockResolvedValue(undefined);
 
 			// Act
 			await service.changePassword('currentPass', 'newPass');
@@ -188,42 +261,43 @@ describe('AuthService', () => {
 		it('should make expected call', async () => {
 			// Arrange
 			const spy = authWrapperService.currentUser;
-			spy.and.returnValue(null);
+			spy.mockReturnValue(null);
 
 			// Act
 			const action = service.changeEmailAddress('abc', 'test2@test.com');
 
 			// Assert
-			await expectAsync(action).toBeRejectedWithError(
-				'User cannot be null',
-			);
+			await expect(action).rejects.toThrowError('User cannot be null');
+			expect(spy).toHaveBeenCalled();
 		});
 
 		it('should handle and return error', async () => {
 			// Arrange
-			authWrapperService.currentUser.and.returnValue(mockUser);
+			authWrapperService.currentUser.mockReturnValue(mockUser);
 
 			const signInSpy = authWrapperService.signInWithEmailAndPassword;
 			const testError = new Error('Sign in failed');
-			signInSpy.and.rejectWith(testError);
+			signInSpy.mockRejectedValue(testError);
 
 			// Act
 			const action = service.changeEmailAddress('abc', 'test2@test.com');
 
 			// Assert
-			await expectAsync(action).toBeRejectedWith(testError);
+			await expect(action).rejects.toEqual(testError);
+			expect(signInSpy).toHaveBeenCalledTimes(1);
+			expect(signInSpy).toHaveBeenCalledWith(mockUser.email!, 'abc');
 			// Note: ErrorHandlerService is not called in current implementation
 		});
 
 		it('should make expected calls', async () => {
 			// Arrange
-			authWrapperService.currentUser.and.returnValue(mockUser);
+			authWrapperService.currentUser.mockReturnValue(mockUser);
 
 			const signInSpy = authWrapperService.signInWithEmailAndPassword;
-			signInSpy.and.resolveTo({} as UserCredential);
+			signInSpy.mockResolvedValue({} as UserCredential);
 
 			const updateSpy = functionsWrapperService.updateEmailAddress;
-			updateSpy.and.resolveTo();
+			updateSpy.mockResolvedValue({ data: undefined });
 
 			// Act
 			await service.changeEmailAddress('password', 'test2@test.com');
@@ -237,7 +311,7 @@ describe('AuthService', () => {
 	it('login(): should make expected call', async () => {
 		// Arrange
 		const signInSpy = authWrapperService.signInWithEmailAndPassword;
-		signInSpy.and.resolveTo({} as UserCredential);
+		signInSpy.mockResolvedValue({} as UserCredential);
 
 		// Act
 		await service.login({ emailAddress: 'test@test.com', password: 'abc' });
@@ -249,7 +323,7 @@ describe('AuthService', () => {
 	it('logout(): should make expected call with reload=false', async () => {
 		// Arrange
 		const signOutSpy = authWrapperService.signOut;
-		signOutSpy.and.resolveTo();
+		signOutSpy.mockResolvedValue(undefined);
 
 		// Act
 		await service.logout(false);
@@ -261,7 +335,7 @@ describe('AuthService', () => {
 	it('logout(): should call signOut with default reload parameter', async () => {
 		// Arrange
 		const signOutSpy = authWrapperService.signOut;
-		signOutSpy.and.returnValue(
+		signOutSpy.mockReturnValue(
 			Promise.resolve().then(() => {
 				// Mock document.location.reload to prevent actual reload in test
 				// This is tested via the reload=false path above
@@ -280,7 +354,7 @@ describe('AuthService', () => {
 	it('getCurrentUserToken(): should return token result', async () => {
 		// Arrange
 		const mockToken = { claims: { admin: true } } as any;
-		(authWrapperService.getCurrentUserToken as jasmine.Spy).and.resolveTo(
+		(authWrapperService.getCurrentUserToken as unknown as MockInstance).mockResolvedValue(
 			mockToken,
 		);
 		const wrappedMethod = service.getCurrentUserToken;

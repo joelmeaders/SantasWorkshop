@@ -1,7 +1,6 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"baseUrl": "./",
 		"rootDir": ".",
 		"outDir": "./dist/out-tsc",
 		"strict": true,
@@ -9,10 +8,10 @@
 		"declaration": false,
 		"declarationMap": false,
 		"inlineSources": false,
-		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
 		"moduleResolution": "bundler",
+		"ignoreDeprecations": "6.0",
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 		"isolatedModules": true,
@@ -30,10 +29,11 @@
 		"module": "ES2022",
 		"lib": ["ES2022", "dom"],
 		"paths": {
-			"@santashop/models": ["dist/@santashop/models"],
-			"@santashop/core": ["dist/@santashop/core"],
-			"@santashop/app": ["dist/@santashop/app"],
-			"@santashop/admin": ["dist/@santashop/admin"]
+			"@santashop/models": ["./dist/@santashop/models"],
+			"@santashop/core": ["./dist/@santashop/core"],
+			"@santashop/core/customer": ["./santashop-core/src/customer.ts"],
+			"@santashop/app": ["./dist/@santashop/app"],
+			"@santashop/admin": ["./dist/@santashop/admin"]
 		}
 	},
 	"angularCompilerOptions": {

@@ -2,6 +2,10 @@ zxing-scanner {
 	height: 100%;
 }
 
+ion-content[hidden] {
+	display: none !important;
+}
+
 :host zxing-scanner::ng-deep video {
 	height: 100%;
 	width: 100vw;

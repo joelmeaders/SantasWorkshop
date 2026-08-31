@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AlertController } from '@ionic/angular/standalone';
+import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { IError } from '@santashop/models';
 import { AnalyticsWrapper } from './_analytics-wrapper';
 
@@ -9,12 +9,15 @@ import { AnalyticsWrapper } from './_analytics-wrapper';
 export class ErrorHandlerService {
 	private readonly analyticsWrapper = inject(AnalyticsWrapper);
 	private readonly alertController = inject(AlertController);
+	private readonly loadingController = inject(LoadingController);
 
 	public async handleError(
 		error: IError,
 		title = 'Error Encountered',
 		showAlert = true,
 	): Promise<any> {
+		await this.dismissLoadingOverlay();
+
 		const alert = await this.alertController.create({
 			header: title,
 			subHeader: `Code: ${error.code}`,
@@ -34,6 +37,8 @@ export class ErrorHandlerService {
 	}
 
 	public async completeRegistrationException(error: IError): Promise<void> {
+		await this.dismissLoadingOverlay();
+
 		const alert = await this.alertController.create({
 			header: 'Please try submitting again.',
 			subHeader:
@@ -49,6 +54,15 @@ export class ErrorHandlerService {
 			this.analyticsWrapper.logErrorEvent(error.code, error.message);
 		} catch {
 			// Do nothing
+		}
+	}
+
+	private async dismissLoadingOverlay(): Promise<void> {
+		try {
+			const loading = await this.loadingController.getTop();
+			if (loading) await loading.dismiss();
+		} catch {
+			// The overlay may already be dismissing; error reporting must continue.
 		}
 	}
 }

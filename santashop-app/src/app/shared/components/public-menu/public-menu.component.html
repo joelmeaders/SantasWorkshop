@@ -1,29 +1,38 @@
-<ion-content>
+<ion-content class="account-menu">
 	@if (isLoggedIn$ | async) {
-		<ion-list lines="none" class="ion-text-center">
+		<ion-list lines="none" class="menu-list ion-text-center">
 			<ion-item
 				button
 				tappable
 				(click)="profile()"
-				class="ion-text-center"
+				(keyup.enter)="profile()"
+				class="menu-item ion-text-center"
 			>
 				<ion-label>
 					{{ 'COMMON.MY_ACCOUNT' | translate }}
 				</ion-label>
 			</ion-item>
-			<ion-item class="ion-text-center">
-				<app-language-toggle></app-language-toggle>
+			<ion-item class="language-item ion-text-center">
+				<app-language-toggle />
 			</ion-item>
-			<ion-item button tappable (click)="help()" class="ion-text-center">
+			<ion-item
+				button
+				tappable
+				(click)="help()"
+				(keyup.enter)="help()"
+				class="menu-item ion-text-center"
+			>
 				<ion-label>
 					{{ 'COMMON.HELP' | translate }}
 				</ion-label>
 			</ion-item>
 			<ion-item
+				id="signOutButton"
 				button
 				tappable
 				(click)="logout()"
-				class="ion-text-center"
+				(keyup.enter)="logout()"
+				class="menu-item sign-out-item ion-text-center"
 			>
 				<ion-label>
 					{{ 'COMMON.SIGN_OUT' | translate }}
@@ -34,8 +43,9 @@
 				tappable
 				href="https://www.denversantaclausshop.org/"
 				target="_blank"
-				class="ion-text-center"
+				class="menu-item ion-text-center"
 				(click)="closeMenu()"
+				(keyup.enter)="closeMenu()"
 			>
 				<ion-label> {{ 'COMMON.OUR_WEBSITE' | translate }} </ion-label>
 			</ion-item>

@@ -28,14 +28,38 @@ import {
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import {
 	map,
 	takeUntil,
 	shareReplay,
 	distinctUntilChanged,
 } from 'rxjs/operators';
-import { TimeSlotPipe, CoreModule } from '@santashop/core';
+import { TimeSlotPipe, timestampToDate } from '@santashop/core';
+
+const EVENT_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
+	day: '2-digit',
+	month: '2-digit',
+	timeZone: 'America/Denver',
+	year: 'numeric',
+});
+
+const toEventDayKey = (date: Date): number => {
+	const parts = Object.fromEntries(
+		EVENT_DATE_FORMATTER.formatToParts(date).map(({ type, value }) => [
+			type,
+			value,
+		]),
+	);
+
+	// Noon UTC stays on the same calendar date when the template formats it as MST.
+	return Date.UTC(
+		Number(parts['year']),
+		Number(parts['month']) - 1,
+		Number(parts['day']),
+		12,
+	);
+};
 
 @Component({
 	selector: 'app-change-datetime-modal',
@@ -64,17 +88,41 @@ import { TimeSlotPipe, CoreModule } from '@santashop/core';
 		DatePipe,
 		TranslateModule,
 		TimeSlotPipe,
-		CoreModule,
 	],
 })
 export class ChangeDatetimeModalComponent implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 	private readonly destroy$ = new Subject<void>();
 
-	@Input() currentSlot!: DateTimeSlot;
+	private _currentSlot?: DateTimeSlot;
+	private availableSlotsSubscription?: Subscription;
+
 	@Input()
-	set availableSlots(value: DateTimeSlot[]) {
-		this._availableSlots$.next(value);
+	public set currentSlot(value: DateTimeSlot) {
+		this._currentSlot = {
+			...value,
+			dateTime: timestampToDate(value.dateTime),
+		};
+	}
+
+	public get currentSlot(): DateTimeSlot | undefined {
+		return this._currentSlot;
+	}
+
+	// The confirmation page receives live Firestore updates after the modal opens.
+	@Input()
+	public set availableSlots(value: Observable<DateTimeSlot[]>) {
+		this.availableSlotsSubscription?.unsubscribe();
+		this.availableSlotsSubscription = value
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((slots) =>
+				this._availableSlots$.next(
+					slots.map((slot) => ({
+						...slot,
+						dateTime: timestampToDate(slot.dateTime),
+					})),
+				),
+			);
 	}
 
 	private readonly _availableSlots$ = new BehaviorSubject<DateTimeSlot[]>([]);
@@ -90,9 +138,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 
 	public readonly availableDays$ = this.filteredSlots$.pipe(
 		takeUntil(this.destroy$),
-		map((slots) =>
-			slots.map((slot) => Date.parse(slot.dateTime.toDateString())),
-		),
+		map((slots) => slots.map((slot) => toEventDayKey(slot.dateTime))),
 		map((dates) => [...new Set(dates)]),
 		shareReplay(1),
 	);
@@ -104,13 +150,14 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 			takeUntil(this.destroy$),
 			map((slots) =>
 				slots.filter(
-					(slot) => Date.parse(slot.dateTime.toDateString()) === date,
+					(slot) => toEventDayKey(slot.dateTime) === date,
 				),
 			),
 			shareReplay(1),
 		);
 
 	public ngOnDestroy(): void {
+		this.availableSlotsSubscription?.unsubscribe();
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
@@ -132,10 +179,11 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	}
 
 	public isCurrentSlot(slot: DateTimeSlot): boolean {
-		if (!this.currentSlot) return false;
+		const currentSlot = this.currentSlot;
+		if (!currentSlot) return false;
 		return (
-			this.currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&
-			this.currentSlot.id === slot.id
+			currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&
+			currentSlot.id === slot.id
 		);
 	}
 }

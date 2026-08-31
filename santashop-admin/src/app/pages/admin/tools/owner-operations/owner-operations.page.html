@@ -1,0 +1,136 @@
+<admin-header title="Owner Operations" />
+
+<ion-content>
+	<main class="limited-container owner-operations">
+		<header>
+			<p class="eyebrow">Project owner only</p>
+			<h1>Protected operations</h1>
+			<p>
+				Every operation is checked by the backend, previewed first, and
+				recorded in the audit log. Reset and initialization operations
+				are available only January 1 through September 15.
+			</p>
+		</header>
+
+		<ion-card>
+			<ion-card-header>
+				<ion-card-title>Choose an operation</ion-card-title>
+			</ion-card-header>
+			<ion-card-content>
+				<form [formGroup]="form">
+					<ion-item>
+						<ion-select
+							label="Operation"
+							labelPlacement="stacked"
+							formControlName="operation"
+							(ionChange)="onOperationChange()"
+						>
+							@for (option of options; track option.value) {
+							<ion-select-option [value]="option.value">
+								{{ option.label }}
+							</ion-select-option>
+							}
+						</ion-select>
+					</ion-item>
+
+					<p>{{ selectedOption().description }}</p>
+
+					@if (selectedOption().needsYear) {
+					<ion-item>
+						<ion-input
+							label="Program year"
+							labelPlacement="stacked"
+							type="number"
+							formControlName="programYear"
+						/>
+					</ion-item>
+					}
+
+					<ion-button
+						id="ownerOperationPreview"
+						type="button"
+						expand="block"
+						[disabled]="busy()"
+						(click)="createPreview()"
+					>
+						Preview operation
+					</ion-button>
+
+					@if (preview(); as currentPreview) {
+					<section class="preview" aria-labelledby="previewHeading">
+						<h2 id="previewHeading">Preview</h2>
+						<ul>
+							@for (count of currentPreview.counts | keyvalue;
+							track count.key) {
+							<li>{{ count.key }}: {{ count.value }}</li>
+							}
+						</ul>
+						<ion-note>
+							Type:
+							<code>{{ currentPreview.confirmationPhrase }}</code>
+						</ion-note>
+						<ion-item>
+							<ion-input
+								label="Account password"
+								labelPlacement="stacked"
+								type="password"
+								autocomplete="current-password"
+								formControlName="password"
+							/>
+						</ion-item>
+						<ion-item>
+							<ion-input
+								label="Exact confirmation phrase"
+								labelPlacement="stacked"
+								formControlName="confirmationPhrase"
+							/>
+						</ion-item>
+						<ion-button
+							id="ownerOperationStart"
+							type="button"
+							color="danger"
+							expand="block"
+							[disabled]="busy() || form.invalid"
+							(click)="start()"
+						>
+							Start protected operation
+						</ion-button>
+					</section>
+					}
+				</form>
+			</ion-card-content>
+		</ion-card>
+
+		<div class="status" aria-live="polite" aria-atomic="true">
+			@if (busy()) {
+			<ion-spinner aria-label="Operation in progress" />
+			}
+			@if (statusMessage()) {
+			<p>{{ statusMessage() }}</p>
+			}
+			@if (errorMessage()) {
+			<p class="error" role="alert">{{ errorMessage() }}</p>
+			}
+		</div>
+
+		@if (operation(); as currentOperation) {
+		<ion-card>
+			<ion-card-header>
+				<ion-card-title>Operation status</ion-card-title>
+			</ion-card-header>
+			<ion-card-content>
+				<p>Status: {{ currentOperation.status }}</p>
+				<p>Stage: {{ currentOperation.stage }}</p>
+				@if (currentOperation.result?.message) {
+				<p>{{ currentOperation.result?.message }}</p>
+				}
+				@if (currentOperation.result?.exportAvailable) {
+				<ion-button type="button" (click)="downloadExport()">
+					Download private export
+				</ion-button>
+				}
+			</ion-card-content>
+		</ion-card>
+		}
+	</main>
+</ion-content>

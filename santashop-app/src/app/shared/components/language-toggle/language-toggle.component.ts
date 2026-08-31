@@ -4,7 +4,7 @@ import {
 	OnDestroy,
 	inject,
 } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
+import { AnalyticsWrapper } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
@@ -21,7 +21,7 @@ import { IonText, IonToggle } from '@ionic/angular/standalone';
 })
 export class LanguageToggleComponent implements OnDestroy {
 	private readonly translate = inject(TranslateService);
-	private readonly analyticsService = inject(Analytics);
+	private readonly analyticsService = inject(AnalyticsWrapper);
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -54,7 +54,8 @@ export class LanguageToggleComponent implements OnDestroy {
 
 	private async setLanguage(value: 'en' | 'es'): Promise<void> {
 		await firstValueFrom(this.translate.use(value));
+		window.localStorage.setItem('santashop-language', value);
 		this.currentLangauge.next(value);
-		logEvent(this.analyticsService, 'set_language', { value });
+		this.analyticsService.logEventWithParams('set_language', { value });
 	}
 }

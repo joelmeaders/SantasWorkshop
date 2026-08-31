@@ -1,7 +1,21 @@
+import {
+	beforeEach,
+	describe,
+	expect,
+	it,
+	type MockInstance,
+	type Mocked,
+	vi,
+} from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { AuthService, FireRepoLite } from '@santashop/core';
-import { Functions } from '@angular/fire/functions';
-import { autoSpyProvider, Spied } from 'test-helpers/jasmine';
+import { AlertController } from '@ionic/angular/standalone';
+import {
+	AnalyticsWrapper,
+	AuthService,
+	FireRepoLite,
+	FunctionsWrapper,
+} from '@santashop/core';
+import { autoSpyProvider } from '../../../../../test-helpers/vitest';
 import { firstValueFrom, of } from 'rxjs';
 import { PreRegistrationService } from './pre-registration.service';
 import { repoCollectionStub } from '../../../../../test-helpers';
@@ -9,10 +23,12 @@ import { mockRegistrations } from '../../../../../test-helpers/mock-data';
 import { QrCodeService } from './qrcode.service';
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
-	let repository: Spied<FireRepoLite>;
-	let qrCodeService: Spied<QrCodeService>;
+	let repository: Mocked<FireRepoLite>;
+	let qrCodeService: Mocked<QrCodeService>;
+	let analytics: Mocked<AnalyticsWrapper>;
+	let alertController: Mocked<AlertController>;
 
-	let collectionSpy: jasmine.Spy;
+	let collectionSpy: MockInstance;
 	const collectionStub = repoCollectionStub();
 
 	const userId = '12345';
@@ -24,22 +40,43 @@ describe('PreRegistrationService', () => {
 				autoSpyProvider(FireRepoLite),
 				{ provide: AuthService, useValue: { uid$: of(userId) } },
 				autoSpyProvider(QrCodeService),
-				autoSpyProvider(Functions),
+				autoSpyProvider(FunctionsWrapper),
+				{
+					provide: AnalyticsWrapper,
+					useValue: {
+						logEventWithParams: vi
+							.fn()
+							.mockName('AnalyticsWrapper.logEventWithParams'),
+					},
+				},
+				{
+					provide: AlertController,
+					useValue: {
+						create: vi.fn().mockName('AlertController.create'),
+					},
+				},
 			],
 		});
 
 		service = TestBed.inject(PreRegistrationService);
-		repository = TestBed.inject(
-			FireRepoLite,
-		) as jasmine.SpyObj<FireRepoLite>;
+		repository = TestBed.inject(FireRepoLite) as Mocked<FireRepoLite>;
 		qrCodeService = TestBed.inject(
 			QrCodeService,
-		) as jasmine.SpyObj<QrCodeService>;
+		) as Mocked<QrCodeService>;
+		analytics = TestBed.inject(
+			AnalyticsWrapper,
+		) as Mocked<AnalyticsWrapper>;
+		alertController = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
+		alertController.create.mockResolvedValue({
+			present: () => Promise.resolve(),
+		} as HTMLIonAlertElement);
 	});
 
 	beforeEach(() => {
 		collectionSpy = repository.collection;
-		collectionSpy.and.returnValue(collectionStub);
+		collectionSpy.mockReturnValue(collectionStub);
 	});
 
 	it('should be created', () => {
@@ -48,8 +85,8 @@ describe('PreRegistrationService', () => {
 
 	it('userRegistration$: should make expected calls', async () => {
 		// Arrange
-		const readSpy = spyOn(collectionStub, 'read');
-		readSpy.and.returnValue(
+		const readSpy = vi.spyOn(collectionStub, 'read');
+		readSpy.mockReturnValue(
 			of(mockRegistrations(userId).complete.mockRegistration1),
 		);
 
@@ -59,12 +96,43 @@ describe('PreRegistrationService', () => {
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
 		expect(readSpy).toHaveBeenCalledWith(userId, 'uid' as any);
-		expect(registration.uid).toEqual(userId);
+		expect(registration?.uid).toEqual(userId);
+	});
+
+	it('registrationComplete$: should resolve false when no registration exists', async () => {
+		// Arrange
+		vi.spyOn(collectionStub, 'read').mockReturnValue(of(undefined));
+
+		// Act
+		const value = await firstValueFrom(service.registrationComplete$);
+
+		// Assert
+		expect(value).toBe(false);
+	});
+
+	it('userRegistration$: should alert and log when registration is missing', async () => {
+		// Arrange
+		vi.spyOn(collectionStub, 'read').mockReturnValue(of(undefined));
+
+		// Act
+		await firstValueFrom(service.userRegistration$);
+		await Promise.resolve();
+
+		// Assert
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith(
+			'registration_record_unavailable',
+			{ reason: 'missing' },
+		);
+		expect(alertController.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				header: 'Registration record unavailable',
+			}),
+		);
 	});
 
 	it('registrationComplete$: should return true', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().complete.mockRegistration1),
 		);
 
@@ -73,12 +141,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value).toBeTrue();
+		expect(value).toBe(true);
 	});
 
 	it('registrationComplete$: should return false', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().incomplete.noRegistrationSubmittedOn),
 		);
 
@@ -87,12 +155,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value).toBeFalse();
+		expect(value).toBe(false);
 	});
 
 	it('registrationSubmitted$: should return true', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().complete.mockRegistration1),
 		);
 
@@ -101,12 +169,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value).toBeTrue();
+		expect(value).toBe(true);
 	});
 
 	it('registrationSubmitted$: should return false with no submitted on field', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().incomplete.noRegistrationSubmittedOn),
 		);
 
@@ -115,12 +183,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value).toBeFalse();
+		expect(value).toBe(false);
 	});
 
 	it('children$: should get two children', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().complete.mockRegistration1),
 		);
 		// Act
@@ -128,12 +196,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value.length).toBe(2);
+		expect(value).toHaveLength(2);
 	});
 
 	it('children$: should get no children', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().incomplete.noChildren),
 		);
 		// Act
@@ -141,12 +209,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value.length).toBe(0);
+		expect(value).toHaveLength(0);
 	});
 
 	it('childCount$: should return 0', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().incomplete.noChildren),
 		);
 		// Act
@@ -159,7 +227,7 @@ describe('PreRegistrationService', () => {
 
 	it('childCount$: should return 2', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().complete.mockRegistration1),
 		);
 		// Act
@@ -172,7 +240,7 @@ describe('PreRegistrationService', () => {
 
 	it('noErrorsInChildren$: should return true', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().complete.mockRegistration1),
 		);
 		// Act
@@ -180,12 +248,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value).toBeTrue();
+		expect(value).toBe(true);
 	});
 
 	it('noErrorsInChildren$: should return false', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().incomplete.withChildrenError),
 		);
 		// Act
@@ -193,12 +261,12 @@ describe('PreRegistrationService', () => {
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(value).toBeFalse();
+		expect(value).toBe(false);
 	});
 
 	it('dateTimeSlot$: should return dateTimeSlot', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations().complete.mockRegistration1),
 		);
 
@@ -212,19 +280,85 @@ describe('PreRegistrationService', () => {
 
 	it('qrCode$: should make expected call', async () => {
 		// Arrange
-		spyOn(collectionStub, 'read').and.returnValue(
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
 			of(mockRegistrations(userId).complete.mockRegistration1),
 		);
 
 		const spy = qrCodeService.registrationQrCodeUrl;
-		spy.and.resolveTo('someurl');
+		spy.mockResolvedValue('someurl');
 
 		// Act
 		const value = await firstValueFrom(service.qrCode$);
 
 		// Assert
 		expect(collectionSpy).toHaveBeenCalledWith('registrations');
-		expect(spy).toHaveBeenCalledWith(userId);
+		expect(spy).toHaveBeenCalledWith(
+			`registrations/${userId}/test-asset.png`,
+		);
 		expect(value).toEqual('someurl');
+	});
+
+	it('forwards draft mutations and rejects incomplete child or appointment input', async (): Promise<void> => {
+		const functions = TestBed.inject(FunctionsWrapper) as unknown as Record<
+			string,
+			ReturnType<typeof vi.fn>
+		>;
+		for (const method of [
+			'saveDraftChild',
+			'deleteDraftChild',
+			'setDraftAppointment',
+			'completeRegistration',
+			'undoRegistration',
+			'changeRegistrationDateTime',
+		]) {
+			functions[method] = vi.fn().mockResolvedValue({ data: true });
+		}
+		const child = {
+			id: 7,
+			firstName: 'Taylor',
+			lastName: 'Smith',
+			dateOfBirth: new Date('2017-03-04T00:00:00.000Z'),
+			toyType: 'toy',
+		} as never;
+
+		await service.saveDraftChild({ mutationId: 'mutation-1', child });
+		await service.deleteDraftChild({ mutationId: 'mutation-2', childId: 7 });
+		await service.setDraftAppointment({ mutationId: 'mutation-3', slotId: 'slot-1' });
+		await service.completeRegistration({ mutationId: 'mutation-4' });
+		await service.undoRegistration();
+		await service.changeRegistrationDateTime({ id: 'slot-2' } as never);
+
+		expect(functions['saveDraftChild']).toHaveBeenCalledWith(
+			expect.objectContaining({
+				mutationId: 'mutation-1',
+				child: expect.objectContaining({
+					id: 7,
+					dateOfBirth: '2017-03-04T00:00:00.000Z',
+				}),
+			}),
+		);
+		expect(functions['deleteDraftChild']).toHaveBeenCalledWith({
+			mutationId: 'mutation-2',
+			childId: 7,
+		});
+		expect(functions['setDraftAppointment']).toHaveBeenCalledWith({
+			mutationId: 'mutation-3',
+			slotId: 'slot-1',
+		});
+		expect(functions['completeRegistration']).toHaveBeenCalledWith({
+			mutationId: 'mutation-4',
+		});
+		expect(functions['undoRegistration']).toHaveBeenCalledWith(
+			expect.objectContaining({ mutationId: expect.any(String) }),
+		);
+		expect(functions['changeRegistrationDateTime']).toHaveBeenCalledWith(
+			expect.objectContaining({ slotId: 'slot-2' }),
+		);
+		await expect(
+			service.saveDraftChild({ mutationId: 'mutation-5', child: {} as never }),
+		).rejects.toThrow('Child ID is required.');
+		await expect(
+			service.changeRegistrationDateTime({} as never),
+		).rejects.toThrow('Appointment ID is required.');
 	});
 });

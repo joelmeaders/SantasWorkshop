@@ -1,0 +1,94 @@
+<admin-header title="User Management" />
+
+<ion-content class="ion-padding-horizontal">
+	<main class="limited-container">
+		@let owner = (isOwner$ | async) === true;
+		@if (staffAccounts$ | async; as accounts) {
+			@if (accounts.length === 0) {
+				<ion-note class="empty-note" color="medium">
+					No elevated user accounts yet. Use the button below to add
+					one.
+				</ion-note>
+			}
+
+			<ion-list>
+				@for (account of accounts; track account.uid) {
+					<ion-item>
+						<ion-label>
+							<h2>{{ account.displayName }}</h2>
+							<p>{{ account.emailAddress }}</p>
+							<p class="roles">
+								@for (role of account.roles; track role) {
+									<ion-badge color="primary">
+										{{ roleLabel(role) }}
+									</ion-badge>
+								}
+								@if (account.disabled) {
+									<ion-badge color="medium">
+										Disabled
+									</ion-badge>
+								}
+							</p>
+						</ion-label>
+						<ion-buttons slot="end">
+							<ion-button
+								fill="clear"
+								title="Edit user"
+								aria-label="Edit user"
+								[disabled]="!canManage(account, owner)"
+								(click)="editUser(account)"
+								(keydown.enter)="editUser(account)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="create-outline"
+									aria-hidden="true"
+								></ion-icon>
+							</ion-button>
+							<ion-button
+								fill="clear"
+								title="Reset password"
+								aria-label="Reset password"
+								[disabled]="!canManage(account, owner)"
+								(click)="resetPassword(account)"
+								(keydown.enter)="resetPassword(account)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="key-outline"
+									aria-hidden="true"
+								></ion-icon>
+							</ion-button>
+							<ion-button
+								fill="clear"
+								color="danger"
+								title="Delete user"
+								aria-label="Delete user"
+								[disabled]="!canManage(account, owner)"
+								(click)="deleteUser(account)"
+								(keydown.enter)="deleteUser(account)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="trash-outline"
+									aria-hidden="true"
+								></ion-icon>
+							</ion-button>
+						</ion-buttons>
+					</ion-item>
+				}
+			</ion-list>
+		}
+	</main>
+
+	<ion-fab slot="fixed" vertical="bottom" horizontal="end">
+		<ion-fab-button
+			title="Add user"
+			aria-label="Add user"
+			(click)="addUser()"
+			(keydown.enter)="addUser()"
+		>
+			<ion-icon name="add" aria-hidden="true"></ion-icon>
+		</ion-fab-button>
+	</ion-fab>
+</ion-content>

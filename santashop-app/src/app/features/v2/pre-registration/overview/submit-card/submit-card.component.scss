@@ -1,0 +1,70 @@
+.workflow-card {
+	margin: 0 0 1.25rem;
+}
+
+.workflow-card ion-card-header {
+	background: linear-gradient(135deg, rgba(179, 38, 62, 0.12), rgba(179, 38, 62, 0.02));
+}
+
+.is-locked {
+	filter: saturate(0.72);
+}
+
+.card-guidance {
+	color: var(--santa-muted);
+	margin-top: 0;
+}
+
+.submission-children-list {
+	--background: #fff;
+	background: #fff;
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	box-shadow: 0 0.35rem 1rem rgba(15, 61, 46, 0.06);
+	margin-block: 0.9rem 1.25rem;
+	overflow: hidden;
+}
+
+.submission-children-list ion-item {
+	--background: #fff;
+}
+
+.card-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	justify-content: flex-end;
+	margin-top: 1.25rem;
+}
+
+.email-verification {
+	background: #f8fbf9;
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-md);
+	margin-top: 1.5rem;
+	padding: 1.25rem;
+}
+
+.email-verification h2 {
+	font-size: 1.2rem;
+	margin: 0;
+}
+
+.email-verification p {
+	margin: 0.5rem 0;
+}
+
+.email-update-help {
+	color: var(--santa-muted);
+	font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+	.card-actions ion-button {
+		flex: 1 1 auto;
+	}
+
+	.email-verification {
+		padding: 1rem;
+	}
+}

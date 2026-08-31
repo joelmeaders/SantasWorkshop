@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Analytics, logEvent } from '@angular/fire/analytics';
 import { Router, RouterLink } from '@angular/router';
 import {
+	AnalyticsWrapper,
 	ErrorHandlerService,
 	AppStateService,
 	TimeSlotPipe,
@@ -27,12 +27,11 @@ import {
 import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../../core';
-import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
-import { PreRegistrationMenuComponent } from '../../../../shared/components/pre-registration-menu/pre-registration-menu.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { ChangeDatetimeModalComponent } from './change-datetime-modal/change-datetime-modal.component';
-import { DateTimePageService } from '../date-time/date-time.page.service';
+import { DateTimeSlotsService } from './date-time-slots.service';
 import { combineLatest, firstValueFrom, map } from 'rxjs';
 
 @Component({
@@ -40,11 +39,8 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	templateUrl: './confirmation.page.html',
 	styleUrls: ['./confirmation.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [DateTimePageService],
+	providers: [DateTimeSlotsService],
 	imports: [
-		PreRegistrationMenuComponent,
-		RouterLink,
-		NgClass,
 		AsyncPipe,
 		DatePipe,
 		TranslateModule,
@@ -62,6 +58,7 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 		IonCardTitle,
 		IonCardSubtitle,
 		TimeSlotPipe,
+		RouterLink,
 	],
 })
 export class ConfirmationPage {
@@ -72,17 +69,21 @@ export class ConfirmationPage {
 	private readonly router = inject(Router);
 	private readonly errorHandler = inject(ErrorHandlerService);
 	private readonly translateService = inject(TranslateService);
-	private readonly analytics = inject(Analytics);
+	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
-	private readonly dateTimeService = inject(DateTimePageService);
+	private readonly dateTimeService = inject(DateTimeSlotsService);
 
-	public readonly isRegistrationComplete$ =
-		this.viewService.registrationComplete$;
 	public readonly allowChangeRegistration$ = combineLatest({
 		allowChange: this.appStateService.allowChangeRegistration$,
 		hasCheckedIn: this.viewService.hasCheckedIn$,
 	}).pipe(
 		map(({ allowChange, hasCheckedIn }) => allowChange && !hasCheckedIn),
+	);
+	public readonly allowCancelRegistration$ = combineLatest({
+		allowCancel: this.appStateService.allowCancelRegistration$,
+		hasCheckedIn: this.viewService.hasCheckedIn$,
+	}).pipe(
+		map(({ allowCancel, hasCheckedIn }) => allowCancel && !hasCheckedIn),
 	);
 
 	constructor() {
@@ -93,7 +94,7 @@ export class ConfirmationPage {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
 			message: this.translateService.instant(
-				'CONFIRMATION.CONFIRM_CHANGE_MSG',
+				'CONFIRMATION.CONFIRM_CANCELLATION_MSG',
 			),
 			buttons: [
 				{
@@ -114,19 +115,21 @@ export class ConfirmationPage {
 		if (shouldContinue.role !== 'confirm') return;
 
 		const loader = await this.loadingController.create({
-			message: 'Deleting registration...',
+			message: this.translateService.instant(
+				'CONFIRMATION.CANCELLING_REGISTRATION',
+			),
 		});
 
 		await loader.present();
 
 		try {
-			logEvent(this.analytics, 'delete_registration');
+			this.analytics.logEvent('cancel_registration');
 			await this.viewService.undoRegistration();
+			this.router.navigate(['/pre-registration/overview']);
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {
-			await loader.dismiss();
-			this.router.navigate(['/pre-registration/overview']);
+			await loader.dismiss().catch(() => false);
 		}
 	}
 
@@ -170,15 +173,12 @@ export class ConfirmationPage {
 
 		if (shouldContinue.role !== 'confirm') return;
 
-		// Get current slot and available slots
+		// Get the current slot. The modal subscribes to live availability itself.
 		const currentSlot = await firstValueFrom(
 			this.viewService.dateTimeSlot$,
 		);
-		const availableSlots = await firstValueFrom(
-			this.dateTimeService.availableSlots$,
-		);
 
-		if (!currentSlot || !availableSlots) {
+		if (!currentSlot) {
 			await this.errorHandler.handleError({
 				message: 'Unable to load registration information',
 			} as IError);
@@ -190,7 +190,7 @@ export class ConfirmationPage {
 			component: ChangeDatetimeModalComponent,
 			componentProps: {
 				currentSlot: currentSlot,
-				availableSlots: availableSlots,
+				availableSlots: this.dateTimeService.availableSlots$,
 			},
 		});
 
@@ -208,7 +208,7 @@ export class ConfirmationPage {
 		await loader.present();
 
 		try {
-			logEvent(this.analytics, 'change_registration_datetime');
+			this.analytics.logEvent('change_registration_datetime');
 			await this.viewService.changeRegistrationDateTime(result.data);
 
 			// Show success message
@@ -223,7 +223,7 @@ export class ConfirmationPage {
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 }

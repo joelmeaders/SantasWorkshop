@@ -63,8 +63,6 @@ export class ByCodePage {
 
 	constructor() {
 		addIcons({ backspaceOutline, searchOutline });
-		addIcons({ backspaceOutline, searchOutline });
-		addIcons({ backspaceOutline, searchOutline });
 	}
 
 	public search(): void {

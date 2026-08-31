@@ -1,42 +1,53 @@
-<ion-card [disabled]="!canChooseDateTime" *appLet="dateTimeSlot as slot">
+@let slot = dateTimeSlot();
+<ion-card class="workflow-card schedule-card" [class.is-locked]="!canChooseDateTime()">
 	<ion-card-header>
-		<ion-item class="inset-ion-item-title">
-			<ion-card-title>
-				{{ 'OVERVIEW.SCHEDULE' | translate }}
-			</ion-card-title>
-			@if (slot !== null && slot !== undefined) {
-				<ion-badge color="success" slot="end"> Complete </ion-badge>
-			}
+		<ion-item class="inset-ion-item-title" lines="none">
+			<ion-card-title id="appointment-heading">{{ 'OVERVIEW.SCHEDULE' | translate }}</ion-card-title>
+			@if (slot) { <ion-badge color="success" slot="end">{{ 'OVERVIEW.COMPLETE' | translate }}</ion-badge> }
 		</ion-item>
 	</ion-card-header>
-	<ion-card-content class="ion-text-center">
-		@if (!slot) {
-			<p>
-				<strong>
-					{{ 'OVERVIEW.NO_TIME_SELECTED.' | translate }}
-				</strong>
-				<br />
-				{{ 'OVERVIEW.NO_TIME_MESSAGE' | translate }}
-			</p>
-			<p class="ion-text-end es-pd-top-lg">
-				<ion-button color="xmasred" [routerLink]="['../date-time']">
-					{{ 'OVERVIEW.SELECT_TIME' | translate }}
-				</ion-button>
-			</p>
+	@if (!collapsed()) {
+	<ion-card-content>
+		@if (!canChooseDateTime()) {
+			<p class="card-guidance">{{ 'OVERVIEW.APPOINTMENT_LOCKED' | translate }}</p>
 		} @else {
-			@if (slot) {
+			@if (slot && !expanded()) {
 				<ion-item lines="none">
-					<h2 class="ion-text-wrap">
-						{{ slot.dateTime | date: 'fullDate' }},
-						{{ slot.dateTime | timeSlot }}
-					</h2>
+					<ion-icon name="calendar-outline" slot="start" />
+					<ion-label class="ion-text-wrap"><strong>{{ slot.dateTime | date: 'fullDate' }}</strong><p>{{ slot.dateTime | timeSlot }}</p></ion-label>
 				</ion-item>
+				<div class="card-actions">
+					<ion-button color="xmasred" fill="outline" (click)="open()" [disabled]="busy()"><ion-icon name="create-outline" slot="start" />{{ 'OVERVIEW.CHANGE_TIME' | translate }}</ion-button>
+				</div>
+			} @else {
+				<p class="card-guidance">{{ 'SCHEDULE.CHOOSE_DATE_TIME' | translate }}</p>
+				@if (availableSlotDays().length) {
+					<ion-accordion-group [attr.aria-label]="'OVERVIEW.CURRENT_AVAILABILITY' | translate">
+						@for (day of availableSlotDays(); track day.key) {
+							<ion-accordion [value]="day.key">
+								<ion-item slot="header" lines="full">
+									<ion-label><strong>{{ day.dateTime | date: 'fullDate' }}</strong></ion-label>
+								</ion-item>
+								<ion-list slot="content">
+									@for (availableSlot of day.slots; track availableSlot.id) {
+										<ion-item [attr.data-select-slot-id]="availableSlot.id" [button]="true" [detail]="true" lines="full" (click)="select(availableSlot)" [disabled]="busy()">
+											<ion-label class="ion-text-wrap">{{ availableSlot.dateTime | timeSlot }} · {{ spotsRemaining(availableSlot) }}</ion-label>
+										</ion-item>
+									}
+								</ion-list>
+							</ion-accordion>
+						}
+					</ion-accordion-group>
+				} @else {
+					<ion-note color="danger">{{ 'SCHEDULE.FULL' | translate }}</ion-note>
+				}
+				@if (slot) {
+					<div class="card-actions">
+						<ion-button data-cancel-schedule-change fill="clear" type="button" (click)="collapse()" [disabled]="busy()">{{ 'COMMON.CANCEL' | translate }}</ion-button>
+					</div>
+				}
 			}
-			<p class="ion-text-end es-pd-top-lg">
-				<ion-button color="xmasred" [routerLink]="['../date-time']">
-					{{ 'OVERVIEW.CHANGE_TIME' | translate }}
-				</ion-button>
-			</p>
 		}
 	</ion-card-content>
+	}
 </ion-card>

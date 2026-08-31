@@ -59,8 +59,6 @@ export class ByEmailPage {
 
 	constructor() {
 		addIcons({ backspaceOutline, searchOutline });
-		addIcons({ backspaceOutline, searchOutline });
-		addIcons({ backspaceOutline, searchOutline });
 	}
 
 	public search(): void {

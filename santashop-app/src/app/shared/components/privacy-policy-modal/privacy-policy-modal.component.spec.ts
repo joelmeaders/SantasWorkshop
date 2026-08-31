@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalController } from '@ionic/angular/standalone';
@@ -26,13 +27,33 @@ describe('PrivacyPolicyModalComponent', () => {
 		}).compileComponents();
 	});
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		fixture = TestBed.createComponent(PrivacyPolicyModalComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
+		await fixture.whenStable();
 	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('renders a header close control without a footer', (): void => {
+		const header = fixture.nativeElement.querySelector(
+			'ion-header',
+		) as HTMLElement;
+
+		expect(header).toBeTruthy();
+		expect(header.querySelector('#closePrivacyPolicyButton')).toBeTruthy();
+		expect(fixture.nativeElement.querySelector('ion-footer')).toBeNull();
+	});
+
+	it('dismisses the modal from the close control', (): void => {
+		const modalController = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
+
+		component.onDismiss();
+
+		expect(modalController.dismiss).toHaveBeenCalledOnce();
 	});
 });

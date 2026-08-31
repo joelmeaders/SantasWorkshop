@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Timestamp } from '@angular/fire/firestore';
-import { ChartConfiguration, ChartData } from 'chart.js';
+import { Timestamp } from 'firebase/firestore';
+import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
 	combineLatest,
@@ -9,22 +9,28 @@ import {
 	switchMap,
 } from 'rxjs';
 import {
-	IFireRepoCollection,
 	FireRepoLite,
 	filterNil,
-	CoreModule,
-	shopSchedule,
+	PROGRAM_YEAR,
+	SHOP_DAYS,
 } from '@santashop/core';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
-	COLLECTION_SCHEMA,
 } from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
+import {
+	getShopSchedule,
+	getStatsCollection,
+} from '../../../../shared/helpers';
 
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, DatePipe } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
+import {
+	BaseChartDirective,
+	provideCharts,
+	withDefaultRegisterables,
+} from 'ng2-charts';
 import { addIcons } from 'ionicons';
 import { refreshSharp } from 'ionicons/icons';
 import {
@@ -47,10 +53,10 @@ import {
 	templateUrl: './check-in.page.html',
 	styleUrls: ['./check-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
 		HeaderComponent,
 		FormsModule,
-		CoreModule,
 		BaseChartDirective,
 		AsyncPipe,
 		DatePipe,
@@ -70,18 +76,20 @@ import {
 })
 export class CheckInPage {
 	private readonly httpService = inject(FireRepoLite);
+	private readonly programYear = inject(PROGRAM_YEAR);
+	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = shopSchedule;
+	public readonly schedule = getShopSchedule(
+		this.programYear,
+		this.shopDays,
+	);
 
-	public year = 2025;
+	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
-
-	private readonly statsCollection = <T>(): IFireRepoCollection<T> =>
-		this.httpService.collection<T>(COLLECTION_SCHEMA.stats);
 
 	private readonly checkInRecord$ = this.refreshYear.pipe(
 		switchMap(() =>
-			this.statsCollection<CheckInAggregatedStats>()
+			getStatsCollection<CheckInAggregatedStats>(this.httpService)
 				.read(`checkin-${this.year}`)
 				.pipe(shareReplay(1)),
 		),
@@ -110,13 +118,15 @@ export class CheckInPage {
 		map((data) =>
 			data
 				.map((e) => e.customerCount)
-				.reduce((prev, curr) => prev + curr),
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 	);
 
 	public readonly totalChildren$ = this.dateTimeStats$.pipe(
 		map((data) =>
-			data.map((e) => e.childCount).reduce((prev, curr) => prev + curr),
+			data
+				.map((e) => e.childCount)
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 	);
 
@@ -124,7 +134,7 @@ export class CheckInPage {
 		map((data) =>
 			data
 				.map((e) => e.pregisteredCount)
-				.reduce((prev, curr) => prev + curr),
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 	);
 
@@ -138,7 +148,7 @@ export class CheckInPage {
 		map((data) =>
 			data
 				.map((e) => e.modifiedCount)
-				.reduce((prev, curr) => prev + curr),
+				.reduce((prev, curr) => prev + curr, 0),
 		),
 		switchMap((count) =>
 			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite)),
@@ -161,7 +171,7 @@ export class CheckInPage {
 		),
 	);
 
-	// TODO: These should be redone to not need udated every year...
+	// These chart groupings are schedule-driven and still require annual schedule data.
 	public readonly checkInsByDayHour$ = combineLatest([
 		this.dateTimeStats$,
 		this.graphView$,
@@ -211,8 +221,6 @@ export class CheckInPage {
 
 	constructor() {
 		addIcons({ refreshSharp });
-		addIcons({ refreshSharp });
-		addIcons({ refreshSharp });
 	}
 
 	private getDays(data: CheckInDateTimeCount[]): number[] {
@@ -231,7 +239,7 @@ export class CheckInPage {
 	private mapDaysHoursToChart(
 		data: CheckInDateTimeCount[],
 		view: 'customerCount' | 'childCount',
-	): ChartData<'bar'>[] {
+	): CheckInChartData[] {
 		data = data.sort((a, b) => a.date - b.date || a.hour - b.hour);
 
 		const chartStructure = (
@@ -258,13 +266,7 @@ export class CheckInPage {
 			],
 		});
 
-		const outputData: {
-			datasets: {
-				data: number[];
-				label: string;
-				dataSeriesLabels?: string[];
-			}[];
-		}[] = [];
+		const outputData: CheckInChartData[] = [];
 
 		const days: number[] = this.getDays(data);
 
@@ -291,8 +293,25 @@ export class CheckInPage {
 		}
 	}
 
-	public addValues(values?: number[]): number {
+	public addValues(values?: (number | [number, number] | null)[]): number {
 		if (!values) return 0;
-		return values.reduce((a, b) => a + b);
+		return values.reduce((a: number, b) => {
+			if (b === null) return a;
+			if (Array.isArray(b)) return a + b[0];
+			return a + b;
+		}, 0);
 	}
+}
+
+interface CheckInChartDataset {
+	data: number[];
+	label: string;
+	backgroundColor: string[];
+	borderColor: string[];
+	borderWidth: number;
+	dataSeriesLabels?: string[];
+}
+
+interface CheckInChartData {
+	datasets: CheckInChartDataset[];
 }

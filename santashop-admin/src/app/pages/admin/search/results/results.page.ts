@@ -7,8 +7,8 @@ import {
 	Observable,
 	of,
 	race,
+	ReplaySubject,
 	shareReplay,
-	Subject,
 	switchMap,
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@santashop/models';
@@ -17,7 +17,7 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
 
 import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CoreModule } from '@santashop/core';
+
 import { addIcons } from 'ionicons';
 import { backspaceOutline } from 'ionicons/icons';
 import {
@@ -48,7 +48,6 @@ declare type SortFnType = (
 	imports: [
 		HeaderComponent,
 		RouterLink,
-		CoreModule,
 		AsyncPipe,
 		IonRouterLink,
 		IonContent,
@@ -91,7 +90,7 @@ export class ResultsPage {
 	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
 	protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));
 
-	private readonly searchTrigger = new Subject<Date>();
+	private readonly searchTrigger = new ReplaySubject<Date>(1);
 	public readonly searchInput$ = this.searchService.searchResults$;
 
 	private readonly search$: Observable<RegistrationSearchIndex[]> =
@@ -113,8 +112,6 @@ export class ResultsPage {
 	);
 
 	constructor() {
-		addIcons({ backspaceOutline });
-		addIcons({ backspaceOutline });
 		addIcons({ backspaceOutline });
 	}
 

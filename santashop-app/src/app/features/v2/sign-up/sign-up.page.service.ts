@@ -4,7 +4,7 @@ import {
 	AuthService,
 	ErrorHandlerService,
 	FunctionsWrapper,
-} from '@santashop/core';
+} from '@santashop/core/customer';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { Auth, IError, OnboardUser } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
@@ -66,7 +66,7 @@ export class SignUpPageService implements OnDestroy {
 			const error = incomingError as IError;
 
 			if ((error as IError).code === 'functions/already-exists') {
-				await loader.dismiss();
+				await loader.dismiss().catch(() => false);
 				const alert = await this.alertController.create({
 					header: this.translateService.instant(
 						'SIGNUP.ACCOUNT_EXISTS',
@@ -80,13 +80,13 @@ export class SignUpPageService implements OnDestroy {
 							text: this.translateService.instant(
 								'FORGOTPASS.RESET_PASSWORD',
 							),
-							role: '/reset-password',
+							role: 'reset',
 						},
 						{
 							text: this.translateService.instant(
 								'COMMON.SIGN_IN',
 							),
-							role: '/sign-in',
+							role: 'sign-in',
 						},
 					],
 					backdropDismiss: false,
@@ -95,13 +95,15 @@ export class SignUpPageService implements OnDestroy {
 				await alert.present();
 
 				await alert.onDidDismiss().then((response) => {
-					this.router.navigate([response.role]);
+					this.router.navigate(['/'], {
+						queryParams: { mode: response.role },
+					});
 				});
 			} else {
-				this.errorHandler.handleError(error);
+				await this.errorHandler.handleError(error);
 			}
 		} finally {
-			await loader.dismiss();
+			await loader.dismiss().catch(() => false);
 		}
 	}
 

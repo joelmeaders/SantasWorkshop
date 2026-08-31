@@ -37,7 +37,7 @@ import {
 } from 'rxjs';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import type { DateTimeSlot } from '@santashop/models';
-import { TimeSlotPipe, CoreModule } from '@santashop/core';
+import { TimeSlotPipe } from '@santashop/core';
 import { DateTimeModalService } from './date-time-modal.service';
 
 @Component({
@@ -50,7 +50,6 @@ import { DateTimeModalService } from './date-time-modal.service';
 		AsyncPipe,
 		DatePipe,
 		TimeSlotPipe,
-		CoreModule,
 		IonHeader,
 		IonToolbar,
 		IonTitle,
@@ -75,7 +74,7 @@ export class DateTimeModalComponent implements OnDestroy {
 	private readonly alertController = inject(AlertController);
 	private readonly dateTimeService = inject(DateTimeModalService);
 
-	@Input() currentSlot?: DateTimeSlot;
+	@Input() public currentSlot?: DateTimeSlot;
 
 	private readonly destroy$ = new Subject<void>();
 

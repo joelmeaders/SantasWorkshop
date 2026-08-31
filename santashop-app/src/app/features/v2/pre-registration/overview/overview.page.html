@@ -1,44 +1,90 @@
-<ion-content color="light">
-	@if ((referredBy$ | async) === null || (referredBy$ | async) === undefined)
-	{
-	<ion-grid class="height-max">
-		<ion-row class="ion-justify-content-center">
-			<ion-col size="auto">
-				<app-referral-card></app-referral-card>
-			</ion-col>
-		</ion-row>
-	</ion-grid>
-	} @else {
-	<ion-grid class="height-max ion-no-padding es-mg-bottom-xxl">
+<ion-content color="light" class="workspace-page">
+	@let canSubmit = (canSubmit$ | async) ?? false;
+	<ion-grid class="workspace-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max">
-			<ion-col
-				class="side-menu height-max ion-hide-xl-down ion-no-padding ion-no-margin"
-				size="auto"
-			>
-				<app-pre-registration-menu></app-pre-registration-menu>
-			</ion-col>
-			<ion-col sizeXl="9" size="12">
+			<ion-col size="12">
 				<ion-row class="ion-justify-content-center">
-					<ion-col sizeXs="12" sizeSm="7">
-						<app-children-card
-							[children]="(children$ | async)!"
-							[childCount]="(childCount$ | async)!"
-						></app-children-card>
-					</ion-col>
-					<ion-col sizeXs="12" sizeSm="7">
-						<app-schedule-card
-							[dateTimeSlot]="(dateTimeSlot$ | async)!"
-							[canChooseDateTime]="(canChooseDateTime$ | async)!"
-						></app-schedule-card>
-					</ion-col>
-					<ion-col sizeXs="12" sizeSm="7" class="es-mg-bottom-xxl">
-						<app-submit-card
-							[canSubmit]="(canSubmit$ | async)!"
-						></app-submit-card>
+					<ion-col sizeXs="12" sizeSm="9" sizeLg="8">
+						<section class="workspace-intro" aria-labelledby="registration-workspace-title">
+							<img
+								src="assets/images/gift-toybox.svg"
+								class="workspace-gift"
+								alt=""
+								aria-hidden="true"
+							/>
+							<h1 id="registration-workspace-title">{{ 'OVERVIEW.WORKSPACE_TITLE' | translate }}</h1>
+							<p>{{ 'OVERVIEW.WORKSPACE_INTRO' | translate }}</p>
+						</section>
+
+						<section class="workflow-section children-step" id="children" tabindex="-1" aria-labelledby="children-heading">
+							<app-children-card
+								[children]="(children$ | async) ?? []"
+								[childCount]="(childCount$ | async) ?? 0"
+								[programYear]="programYear"
+								[busy]="isSaving()"
+								[collapsed]="reviewing()"
+								(saveRequested)="saveChild($event)"
+								(deleteRequested)="deleteChild($event)"
+							/>
+						</section>
+
+						<section class="workflow-section appointment-step" id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
+							<app-schedule-card
+								[dateTimeSlot]="dateTimeSlot$ | async"
+								[slots]="(availableSlots$ | async) ?? []"
+								[canChooseDateTime]="(canChooseDateTime$ | async) ?? false"
+								[busy]="isSaving()"
+								[collapsed]="reviewing()"
+								(selectRequested)="chooseDateTime($event)"
+							/>
+						</section>
+
+						@if (canSubmit && !reviewing()) {
+						<section
+							class="completion-nudge"
+							animate.enter="completion-nudge-enter"
+							role="status"
+							aria-live="polite"
+							aria-labelledby="completion-nudge-title"
+						>
+							<ion-icon
+								class="completion-nudge-icon"
+								name="arrow-down-circle-outline"
+								aria-hidden="true"
+							/>
+							<div class="completion-nudge-copy">
+								<strong id="completion-nudge-title">
+									{{ 'OVERVIEW.FINAL_STEP_TITLE' | translate }}
+								</strong>
+								<span>{{ 'OVERVIEW.FINAL_STEP_MESSAGE' | translate }}</span>
+							</div>
+							<ion-button
+								id="reviewAndSubmitButton"
+								color="xmasred"
+								[disabled]="isSaving()"
+								(click)="reviewAndSubmit()"
+							>
+								{{ 'OVERVIEW.FINAL_STEP_ACTION' | translate }}
+							</ion-button>
+						</section>
+						}
+
+						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="workflow-section review-step es-mg-bottom-xxl">
+							<app-submit-card
+								[children]="(children$ | async) ?? []"
+								[dateTimeSlot]="dateTimeSlot$ | async"
+								[emailAddress]="(emailAddress$ | async) ?? ''"
+								[canSubmit]="canSubmit"
+								[busy]="isSaving()"
+								(submitRequested)="submitRegistration()"
+								(emailUpdateRequested)="updateEmailAddress($event)"
+								(reviewRequested)="startReview()"
+								(changesRequested)="makeChanges()"
+							/>
+						</section>
 					</ion-col>
 				</ion-row>
 			</ion-col>
 		</ion-row>
 	</ion-grid>
-	}
 </ion-content>

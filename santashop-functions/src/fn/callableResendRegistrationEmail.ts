@@ -1,57 +1,129 @@
-import * as functions from 'firebase-functions/v1';
-import * as admin from 'firebase-admin';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import {
+	COLLECTION_SCHEMA,
+	EMAIL_TEMPLATE_KEYS,
+	Registration,
+} from '../models';
+import admin from '../firebase-admin';
+import { formatRegistrationDateTime } from '../utility/date-time-format';
+import { createFunctionLogger } from '../utility/observability';
 import { isRegistrationComplete } from '../utility/registrations';
-import { CallableContext, HttpsError } from 'firebase-functions/v1/https';
-import * as formatDateTime from 'dateformat';
-import { COLLECTION_SCHEMA, Registration } from '../../../santashop-models/src';
-import { Timestamp } from 'firebase-admin/firestore';
+import { isAdminToken } from '../utility/capabilities';
 
-admin.initializeApp();
+interface FirebaseAuthTokenLike {
+	[key: string]: unknown;
+}
 
-export default async (
-	data: { customerId: string },
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
+interface ResendEmailDocument {
+	code?: string;
+	qrCodeStoragePath: string;
+	email?: string;
+	name?: string;
+	formattedDateTime: string;
+	templateKey: string;
+	queuedOn: Date;
+	queueSource: 'manual-resend';
+	deliveryRequestedOn: Date;
+	deliveryState: 'queued';
+	failedOn: false;
+	lastErrorMessage: false;
+	lastErrorDetails: false;
+}
+
+const isAdminContext = (request: CallableRequest<unknown>): boolean => {
+	const token = request.auth?.token as FirebaseAuthTokenLike | undefined;
+	return isAdminToken(token);
+};
+
+const log = createFunctionLogger('callableResendRegistrationEmail');
+
+export default async function callableResendRegistrationEmail(
+	request: CallableRequest<{ customerId: string }>,
+): Promise<boolean> {
+	const data = request.data;
 	const recordRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.registrations}/${data.customerId}`);
 
-	const record = (await recordRef.get()).data() as Registration;
+	const record = (await recordRef.get()).data() as Registration | undefined;
+	if (!record) {
+		throw new HttpsError('not-found', 'Registration not found');
+	}
 
 	registrationCompleteGuard(record);
-	adminOrOwnerGuard(record, context);
+	adminOrOwnerGuard(record, request);
+	ensureQrReady(record);
+
+	const dateTimeValue = record.dateTimeSlot?.['dateTime'];
+	if (!dateTimeValue) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Missing registration date/time slot',
+		);
+	}
 
 	// Email Record Reference
 	const emailDocRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${record.uid}`);
+	const registrationDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
 
-	let dateTime: any;
+	const queuedOn = new Date();
+	const dateTime = formatRegistrationDateTime(dateTimeValue);
 
-	dateTime = record.dateTimeSlot?.dateTime as any as Timestamp;
-	const tmp = dateTime.toDate();
-	const dateZ = tmp.toLocaleString('en-US', { timeZone: 'MST' });
-	dateTime = formatDateTime.default(dateZ, 'dddd, mmmm d, h:MM TT');
-
-	const emailDoc = {
+	const emailDoc: ResendEmailDocument = {
 		code: record.qrcode,
+		qrCodeStoragePath: record.qrCodeStoragePath,
 		email: record.emailAddress,
 		name: record.firstName,
 		formattedDateTime: dateTime,
+		templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
+		queuedOn,
+		queueSource: 'manual-resend',
+		deliveryRequestedOn: queuedOn,
+		deliveryState: 'queued',
+		failedOn: false,
+		lastErrorMessage: false,
+		lastErrorDetails: false,
 	};
 
-	await emailDocRef.set(emailDoc, { merge: true });
+	await admin.firestore().runTransaction(async (transaction) => {
+		transaction.set(emailDocRef, emailDoc, { merge: true });
+		transaction.set(
+			registrationDocRef,
+			{
+				reminderEmailQueuedOn: queuedOn,
+				reminderEmailFailedOn: false,
+				reminderEmailSentOn: false,
+			},
+			{ merge: true },
+		);
+	});
 
 	return true;
-};
-function registrationCompleteGuard(record: Registration) {
-	if (!isRegistrationComplete(record)) {
-		console.error(
-			new Error(
-				'Registration incomplete. Unable to send registration email.',
-			),
+}
+
+function ensureQrReady(record: Registration): void {
+	if (
+		!record.qrCodeStoragePath ||
+		!record.qrCodeGeneratedOn ||
+		record.qrCodeGenerationFailedOn
+	) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Registration QR code is not ready for email delivery',
 		);
-		throw new functions.https.HttpsError(
+	}
+}
+
+function registrationCompleteGuard(record: Registration): void {
+	if (!isRegistrationComplete(record)) {
+		log.warn('Attempted to resend email for incomplete registration', {
+			uid: record.uid ?? null,
+		});
+		throw new HttpsError(
 			'failed-precondition',
 			'-10',
 			'Incomplete registration. Cannot continue.',
@@ -61,15 +133,14 @@ function registrationCompleteGuard(record: Registration) {
 
 function adminOrOwnerGuard(
 	record: Registration,
-	context: functions.https.CallableContext,
-) {
-	if (!context.auth?.token?.admin && record.uid !== context.auth?.uid) {
-		console.error(
-			new Error(
-				`${context.auth?.uid} attempted to update registration for uid ${record.uid}`,
-			),
-		);
-		throw new functions.https.HttpsError(
+	request: CallableRequest<{ customerId: string }>,
+): void {
+	if (!isAdminContext(request) && record.uid !== request.auth?.uid) {
+		log.warn('Unauthorized registration email resend attempt', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
+		throw new HttpsError(
 			'permission-denied',
 			'-99',
 			'You can only update your own records',

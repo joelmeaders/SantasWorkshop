@@ -1,40 +1,45 @@
 import { TestBed } from '@angular/core/testing';
-import { Auth } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
-import { Functions } from '@angular/fire/functions';
-import { createAuthMock } from '../../../test-helpers';
-
+import { firstValueFrom, of } from 'rxjs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { CheckinService } from '../services/checkin.service';
 import { CheckedInGuard } from './checked-in.guard';
 
 describe('CheckedInGuard', () => {
-	let guard: CheckedInGuard;
-
-	beforeEach(() => {
+	function setup(hasCheckIn: boolean): CheckedInGuard {
 		TestBed.configureTestingModule({
 			providers: [
 				{
-					provide: Firestore,
-					useValue: jasmine.createSpyObj('Firestore', [
-						'collection',
-						'doc',
-					]),
-				},
-				{
-					provide: Auth,
-					useFactory: createAuthMock,
-				},
-				{
-					provide: Functions,
-					useValue: jasmine.createSpyObj('Functions', [
-						'httpsCallable',
-					]),
+					provide: CheckinService,
+					useValue: { hasCheckIn$: of(hasCheckIn) },
 				},
 			],
 		});
-		guard = TestBed.inject(CheckedInGuard);
+		return TestBed.inject(CheckedInGuard);
+	}
+
+	beforeEach(() => TestBed.resetTestingModule());
+
+	it('allows a customer who has not checked in', async () => {
+		const guard = setup(false);
+
+		await expect(
+			firstValueFrom(guard.canActivate({} as never, {} as never)),
+		).resolves.toBe(true);
 	});
 
-	it('should be created', () => {
-		expect(guard).toBeTruthy();
+	it('blocks a customer after check-in', async () => {
+		const guard = setup(true);
+
+		await expect(
+			firstValueFrom(guard.canActivate({} as never, {} as never)),
+		).resolves.toBe(false);
+	});
+
+	it('applies the same check to child routes', async () => {
+		const guard = setup(true);
+
+		await expect(
+			firstValueFrom(guard.canActivateChild({} as never, {} as never)),
+		).resolves.toBe(false);
 	});
 });

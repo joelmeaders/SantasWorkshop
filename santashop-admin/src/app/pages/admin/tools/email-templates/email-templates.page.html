@@ -1,0 +1,77 @@
+<admin-header title="Email Templates" />
+
+<ion-content class="ion-padding-horizontal">
+	<main class="limited-container">
+		<ion-card-header class="ion-padding-vertical">
+			<p>Manage SES email templates, revisions, field mappings, and publish state.</p>
+		</ion-card-header>
+
+		@if (isLoading$ | async) {
+			<ion-note color="medium">Loading templates…</ion-note>
+		} @else if (templates$ | async; as templates) {
+			@if (templates.length === 0) {
+				<ion-note color="medium">
+					No email templates yet. Create one to start managing SES-ready drafts.
+				</ion-note>
+			}
+
+			<ion-list>
+				@for (template of templates; track template.key) {
+					<ion-item
+						detail
+						button
+						(click)="openTemplate(template.key)"
+						(keydown.enter)="openTemplate(template.key)"
+					>
+						<ion-label>
+							<h2>{{ template.displayName }}</h2>
+							<p>{{ template.key }}</p>
+							<p>{{ template.awsTemplateName }}</p>
+							<p class="metadata-line">
+								<ion-badge color="secondary">
+									{{ deliveryProfileLabel(template) }}
+								</ion-badge>
+								<ion-badge color="primary">
+									{{ publishStateLabel(template) }}
+								</ion-badge>
+								<ion-badge color="secondary">
+									Current r{{ template.currentRevisionNumber ?? 0 }}
+								</ion-badge>
+								@if (template.publishedRevisionNumber) {
+									<ion-badge color="success">
+										Published r{{ template.publishedRevisionNumber }}
+									</ion-badge>
+								}
+							</p>
+						</ion-label>
+						<ion-buttons slot="end">
+							<ion-button
+								fill="clear"
+								title="Edit template"
+								aria-label="Edit template"
+								(click)="$event.stopPropagation(); openTemplate(template.key)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="create-outline"
+									aria-hidden="true"
+								/>
+							</ion-button>
+						</ion-buttons>
+					</ion-item>
+				}
+			</ion-list>
+		}
+	</main>
+
+	<ion-fab slot="fixed" vertical="bottom" horizontal="end">
+		<ion-fab-button
+			title="Create template"
+			aria-label="Create template"
+			(click)="createTemplate()"
+			(keydown.enter)="createTemplate()"
+		>
+			<ion-icon name="add" aria-hidden="true"></ion-icon>
+		</ion-fab-button>
+	</ion-fab>
+</ion-content>

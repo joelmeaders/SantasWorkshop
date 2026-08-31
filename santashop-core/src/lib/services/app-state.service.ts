@@ -9,9 +9,9 @@ import {
 	startWith,
 	takeUntil,
 } from 'rxjs/operators';
-import { COLLECTION_SCHEMA, PublicParameters } from '@santashop/models';
-import { filterNil } from '../helpers';
-import { FireRepoLite } from './fire-repo-lite.service';
+import { PublicParameters } from '@santashop/models';
+import { filterNil } from '../helpers/rxjs-helpers';
+import { PUBLIC_PARAMETERS_SOURCE } from '../tokens';
 
 /**
  * Combined app state service that manages application-wide state and parameters.
@@ -21,7 +21,7 @@ import { FireRepoLite } from './fire-repo-lite.service';
 	providedIn: 'root',
 })
 export class AppStateService implements OnDestroy {
-	private readonly httpService = inject(FireRepoLite);
+	private readonly publicParametersSource = inject(PUBLIC_PARAMETERS_SOURCE);
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -35,10 +35,8 @@ export class AppStateService implements OnDestroy {
 	/**
 	 * Observable of public parameters from Firestore.
 	 */
-	private readonly publicDoc$: Observable<PublicParameters> = this.httpService
-		.collection<PublicParameters>(COLLECTION_SCHEMA.parameters)
-		.read('public')
-		.pipe(
+	private readonly publicDoc$: Observable<PublicParameters> =
+		this.publicParametersSource.publicParameters$.pipe(
 			takeUntil(this.destroy$),
 			filterNil(),
 			distinctUntilChanged((prev, curr) => {

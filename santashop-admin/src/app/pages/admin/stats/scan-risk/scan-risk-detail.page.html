@@ -1,0 +1,35 @@
+<admin-header title="Customer Scan Timeline" backRoute="/admin/stats/scan-risk" />
+
+<ion-content class="ion-padding">
+	@if (state$ | async; as state) {
+		@if (state.status === 'loading') {
+		<div class="state"><ion-spinner /><p>Loading timeline…</p></div>
+		} @else if (state.status === 'error') {
+		<div class="state" role="alert"><h2>Timeline could not be loaded</h2></div>
+		} @else {
+		<ion-list aria-label="Customer scan timeline">
+			@if (state.checkIn) {
+			<ion-item color="success">
+				<ion-label>
+					<h2>Successful check-in</h2>
+					<p>{{ state.checkIn.checkInDateTime | date:'medium' }}</p>
+				</ion-label>
+			</ion-item>
+			}
+			@for (attempt of state.attempts; track attempt.id) {
+			<ion-item [color]="attempt.outcome === 'duplicate-accidental' ? 'warning' : 'danger'">
+				<ion-label>
+					<h2>{{ attempt.outcome }}</h2>
+					<p>{{ attempt.scannedOn | date:'medium' }}</p>
+					<p>{{ attempt.elapsedSeconds }} seconds after the original event · {{ attempt.inputMethod }}</p>
+					<p>Code ending in {{ attempt.codeSuffix }}</p>
+				</ion-label>
+			</ion-item>
+			}
+		</ion-list>
+		@if (!state.checkIn && state.attempts.length === 0) {
+		<div class="state"><h2>No current-season scan history</h2></div>
+		}
+		}
+	}
+</ion-content>

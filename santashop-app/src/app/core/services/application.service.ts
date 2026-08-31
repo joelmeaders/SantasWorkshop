@@ -7,10 +7,11 @@ import {
 	takeUntil,
 	tap,
 } from 'rxjs/operators';
-import { AppStateService } from '@santashop/core';
-import { BadWeatherPage } from '../../features/bad-weather/bad-weather.page';
-import { MaintenancePage } from '../../features/maintenance/maintenance.page';
-import { RegistrationClosedPage } from '../../features/registration-closed/registration-closed.page';
+import { AppStateService } from '@santashop/core/customer';
+import {
+	OperationalNoticeComponent,
+	OperationalNoticeMode,
+} from '../../features/operational-notice/operational-notice.component';
 
 /**
  * Application-level service that manages modal state based on app configuration.
@@ -25,11 +26,14 @@ export class ApplicationService implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 
 	private readonly destroy$ = new Subject<void>();
-	private readonly currentModal = new Subject<any>();
+	private readonly currentModal = new Subject<
+		OperationalNoticeMode | undefined
+	>();
+	private displayedMode?: OperationalNoticeMode;
 
 	private readonly currentModal$ = this.currentModal
 		.asObservable()
-		.pipe(distinctUntilChanged((prev, curr) => prev?.name === curr?.name));
+		.pipe(distinctUntilChanged());
 
 	/**
 	 * Subscription that monitors app closure states and manages modals.
@@ -42,19 +46,19 @@ export class ApplicationService implements OnDestroy {
 	])
 		.pipe(
 			takeUntil(this.destroy$),
-			tap(([maintenance, weather, registration]) => {
+				tap(([maintenance, weather, registration]) => {
 				if (maintenance) {
-					this.setModal(MaintenancePage);
+					this.setModal('maintenance');
 					return;
 				}
 
 				if (weather) {
-					this.setModal(BadWeatherPage);
+					this.setModal('weather');
 					return;
 				}
 
 				if (!registration) {
-					this.setModal(RegistrationClosedPage);
+					this.setModal('registration-closed');
 					return;
 				}
 
@@ -82,53 +86,49 @@ export class ApplicationService implements OnDestroy {
 	 * Sets which modal should be displayed.
 	 * @param component The modal component to display, or undefined to close all.
 	 */
-	public setModal(component: any): void {
-		this.currentModal.next(component);
+	public setModal(mode?: OperationalNoticeMode): void {
+		this.currentModal.next(mode);
 	}
 
 	/**
 	 * Opens the specified modal, closing any existing notice modals first.
 	 * @param toBeDisplayed The modal component to display.
 	 */
-	public async openModal(toBeDisplayed: any): Promise<void> {
-		const currentlyDisplayed = await this.modalController.getTop();
-		const currentlyDisplayedName = (currentlyDisplayed?.component as any)
-			?.name;
-
-		// Modal is already up
-		if (currentlyDisplayedName === toBeDisplayed?.name) return;
+	public async openModal(mode?: OperationalNoticeMode): Promise<void> {
+		if (this.displayedMode === mode) return;
 
 		// Close existing
 		await this.closeExistingModals();
 
-		if (!toBeDisplayed) return;
+		if (!mode) return;
 
 		const modal = await this.modalController.create({
-			component: toBeDisplayed,
+			component: OperationalNoticeComponent,
+			componentProps: { mode },
 			backdropDismiss: false,
 			keyboardClose: false,
 			cssClass: 'disabled-backdrop',
 		});
 
 		await modal.present();
+		this.displayedMode = mode;
 	}
 
 	/**
 	 * Closes any existing notice modals (maintenance, weather, registration closed).
 	 */
 	public async closeExistingModals(): Promise<void> {
-		const noticeModalNames = [
-			'RegistrationClosedPage',
-			'BadWeatherPage',
-			'MaintenancePage',
-		];
-
 		const currentModal = await this.modalController.getTop();
+		if (!currentModal) {
+			this.displayedMode = undefined;
+			return;
+		}
 		const currentModalName = (currentModal?.component as any)?.name;
 
 		// Wrong modal displayed, don't close
-		if (!noticeModalNames.includes(currentModalName)) return;
+		if (currentModalName !== 'OperationalNoticeComponent') return;
 
 		await currentModal?.dismiss();
+		this.displayedMode = undefined;
 	}
 }

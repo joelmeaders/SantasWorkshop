@@ -1,20 +1,22 @@
-import * as admin from 'firebase-admin';
-import { Timestamp } from 'firebase/firestore';
-
-admin.initializeApp();
+import type { Timestamp } from 'firebase-admin/firestore';
+import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
+import { getStatsDocumentId, SHOP_TIME_ZONE } from '../utility/runtime-config';
 
 let stats: ICheckInAggregatedStats;
 
-export default async () => {
+const log = createFunctionLogger('scheduledCheckInStats');
+
+export default async function scheduledCheckInStats(): Promise<string> {
 	// Load all checkins
 	const checkins: ICheckIn[] = await loadCheckIns();
-	if (!checkins.length) return Promise.resolve('No checkins');
+	if (!checkins.length) return 'No checkins';
 
 	// Get existing stats
 	const statsDoc = await admin
 		.firestore()
 		.collection('stats')
-		.doc('checkin-2025')
+		.doc(getStatsDocumentId('checkin'))
 		.get();
 
 	if (statsDoc.exists) {
@@ -33,7 +35,7 @@ export default async () => {
 	do {
 		const batchRegs = checkins.splice(0, batchSize);
 
-		await admin.firestore().runTransaction((transaction) => {
+		await admin.firestore().runTransaction(async (transaction) => {
 			batchRegs.forEach((record) => {
 				const doc = admin
 					.firestore()
@@ -44,27 +46,34 @@ export default async () => {
 
 				transaction.set(doc, { inStats: true }, { merge: true });
 			});
-			return Promise.resolve();
 		});
 		processed += batchRegs.length;
-		console.info('Processed check-ins', processed);
+		log.info('Processed check-in stats batch', { processed });
 	} while (checkins.length > 0);
 
 	await admin
 		.firestore()
 		.collection('stats')
-		.doc('checkin-2025')
+		.doc(getStatsDocumentId('checkin'))
 		.set(stats, { merge: false });
+
+	log.info('Updated check-in stats document', {
+		processed: stats.dateTimeCount.reduce(
+			(total, entry) => total + entry.customerCount,
+			0,
+		),
+		bucketCount: stats.dateTimeCount.length,
+	});
 
 	stats = {} as ICheckInAggregatedStats;
 
-	return Promise.resolve('Reset Checkins');
-};
+	return 'Reset Checkins';
+}
 
 function updateStats(checkIn: ICheckIn): void {
 	const localDate = checkIn.checkInDateTime
 		.toDate()
-		.toLocaleString('en-US', { timeZone: 'America/Denver' });
+		.toLocaleString('en-US', { timeZone: SHOP_TIME_ZONE });
 	const checkInDate = new Date(localDate).getDate();
 	const checkInHour = new Date(localDate).getHours();
 

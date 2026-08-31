@@ -8,7 +8,7 @@ import {
 import { Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
-import { QueryConstraint, where } from '@angular/fire/firestore';
+import { QueryConstraint, where } from 'firebase/firestore';
 
 @Injectable()
 export class DateTimeModalService implements OnDestroy {

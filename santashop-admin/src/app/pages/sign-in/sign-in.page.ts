@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '@santashop/core';
-import { environment } from '../../../environments/environment';
+import { config } from '../../../config';
 
 import {
 	IonContent,
@@ -57,8 +57,8 @@ export class SignInPage {
 
 	private readonly alertController = inject(AlertController);
 
-	public readonly environmentName = `${environment.name}_${environment.label}`;
-	public readonly environmentVersion = environment.version;
+	public readonly environmentName = `${config.name}_${config.label}`;
+	public readonly environmentVersion = config.version;
 
 	protected readonly form = new UntypedFormGroup({
 		emailAddress: new UntypedFormControl(undefined, [

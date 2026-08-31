@@ -4,7 +4,7 @@ import {
 	orderBy,
 	QueryConstraint,
 	where,
-} from '@angular/fire/firestore';
+} from 'firebase/firestore';
 import { FireRepoLite } from '@santashop/core';
 import {
 	COLLECTION_SCHEMA,
@@ -58,10 +58,10 @@ export class SearchService {
 	private readonly queryCode = (code: string): QueryConstraint[] =>
 		[where('code', '==', code), limit(50)] as QueryConstraint[];
 
-	public searchByLastNameZip(lastName: string, zipCode: string): void {
+	public searchByLastNameZip(lastName: string, zipCode: string | number): void {
 		this.searchResults.next(
 			this.index.readMany(
-				this.queryLastNameZip(lastName.toLowerCase(), zipCode),
+				this.queryLastNameZip(lastName.toLowerCase(), String(zipCode)),
 			),
 		);
 	}

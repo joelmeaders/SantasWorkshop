@@ -1,27 +1,51 @@
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions/v1';
-import { CallableContext } from 'firebase-functions/v1/https';
-import { HttpsError } from 'firebase-functions/v1/auth';
-import { Auth, COLLECTION_SCHEMA } from '../../../santashop-models/src';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import { Auth, COLLECTION_SCHEMA } from '../models';
+import admin from '../firebase-admin';
+import { createFunctionLogger } from '../utility/observability';
+import { serializeError } from '../utility/errors';
+import {
+	requireAuthenticatedUid,
+	requireCallableData,
+	requireEmailAddress,
+	throwMappedAuthHttpsError,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
-admin.initializeApp();
+const log = createFunctionLogger('updateEmailAddress');
 
-export default async (
-	data: Auth,
-	context: CallableContext,
-): Promise<boolean | HttpsError> => {
-	const uid = context.auth?.uid;
-
-	if (!uid) {
-		return new HttpsError('not-found', 'uid null');
-	}
-
-	await admin.auth().updateUser(uid, {
-		email: data.emailAddress.toLowerCase(),
+export default async function updateEmailAddress(
+	request: CallableRequest<Auth>,
+): Promise<boolean> {
+	const uid = requireAuthenticatedUid(request);
+	const data = withCallableValidation(() => {
+		const requestData = requireCallableData(request.data);
+		return {
+			emailAddress: requireEmailAddress(requestData['emailAddress']),
+		};
 	});
 
+	try {
+		await admin.auth().updateUser(uid, {
+			email: data.emailAddress,
+		});
+	} catch (error) {
+		log.error(
+			'Failed to update auth email address',
+			{
+				uid,
+				previousEmailAddress:
+					typeof request.auth?.token.email === 'string'
+						? request.auth.token.email
+						: null,
+				nextEmailAddress: data.emailAddress,
+			},
+			error,
+		);
+		throwMappedAuthHttpsError(error, 'Unable to update the email address.');
+	}
+
 	const docData = {
-		emailAddress: data.emailAddress.toLowerCase(),
+		emailAddress: data.emailAddress,
 	};
 
 	const batch = admin.firestore().batch();
@@ -44,18 +68,26 @@ export default async (
 
 	batch.set(registrationDocRef, docData, { merge: true });
 
-	return batch
-		.commit()
-		.then(() => true)
-		.catch((error: any) => {
-			console.error(
-				`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
-				error,
-			);
-			return new functions.https.HttpsError(
-				'internal',
-				`Error updating email address for ${context.auth?.token.email} to ${data.emailAddress}`,
-				JSON.stringify(error),
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return true;
+	} catch (error) {
+		log.error(
+			'Failed to update email address',
+			{
+				uid,
+				previousEmailAddress:
+					typeof request.auth?.token.email === 'string'
+						? request.auth.token.email
+						: null,
+				nextEmailAddress: data.emailAddress,
+			},
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			`Error updating email address for ${request.auth?.token.email} to ${data.emailAddress}`,
+			serializeError(error),
+		);
+	}
+}

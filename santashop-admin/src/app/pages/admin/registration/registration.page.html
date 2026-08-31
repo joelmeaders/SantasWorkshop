@@ -1,4 +1,4 @@
-<admin-header title="Registration"></admin-header>
+<admin-header title="Registration" />
 
 <ion-content class="ion-padding-horizontal">
 	<div class="limited-container">
@@ -20,14 +20,13 @@
 				</ion-item-divider>
 				<ion-item>
 					<ion-label position="fixed"> First Name </ion-label>
-					<ion-input
-						type="text"
+					<ion-input type="text"
 						autocomplete="off"
 						formControlName="firstName"
 						placeholder="required"
 						minlength="2"
 						maxlength="20"
-					></ion-input>
+					 />
 					@if (form.controls['firstName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Enter between 2-20 characters
@@ -36,14 +35,13 @@
 				</ion-item>
 				<ion-item>
 					<ion-label position="fixed"> Last Name </ion-label>
-					<ion-input
-						type="text"
+					<ion-input type="text"
 						autocomplete="off"
 						formControlName="lastName"
 						placeholder="required"
 						minlength="2"
 						maxlength="25"
-					></ion-input>
+					 />
 					@if (form.controls['lastName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Enter between 2-25 characters
@@ -52,12 +50,11 @@
 				</ion-item>
 				<ion-item>
 					<ion-label position="fixed"> Email </ion-label>
-					<ion-input
-						type="email"
+					<ion-input type="email"
 						autocomplete="off"
 						formControlName="emailAddress"
 						placeholder="required"
-					></ion-input>
+					 />
 					@if (form.controls['lastName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Must be a valid email address
@@ -66,14 +63,13 @@
 				</ion-item>
 				<ion-item>
 					<ion-label position="fixed"> Zip Code </ion-label>
-					<ion-input
-						type="number"
+					<ion-input type="number"
 						autocomplete="off"
 						formControlName="zipCode"
 						placeholder="required"
 						minlength="5"
 						maxlength="5"
-					></ion-input>
+					 />
 					@if (form.controls['lastName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Enter 5 digit zip code
@@ -85,10 +81,9 @@
 						Would you like to get occasional emails about our events
 						& services
 					</ion-label>
-					<ion-checkbox
-						slot="end"
+					<ion-checkbox slot="end"
 						formControlName="newsletter"
-					></ion-checkbox>
+					 />
 				</ion-item>
 
 				<ion-item-divider class="margin-top">
@@ -99,7 +94,7 @@
 						(click)="chooseReferral()"
 					>
 						Pick Agency
-						<ion-icon slot="end" name="search-outline"></ion-icon>
+						<ion-icon slot="end" name="search-outline" aria-hidden="true" />
 					</ion-button>
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
@@ -114,12 +109,11 @@
 
 			<div class="margin-top">
 				@if (children$ | async; as children) {
-				<admin-manage-children
-					[children]="children"
+				<admin-manage-children [children]="children"
 					(adddedChild)="addChild($event)"
 					(editedChild)="editChild($event)"
 					(removedChild)="removeChild($event)"
-				></admin-manage-children>
+				 />
 				} @if (!form.controls['referral'].value) {
 				<ion-note color="danger" slot="error" class="error-note">
 					Add all children ages 0-11
@@ -144,11 +138,11 @@
 				<ion-label>
 					<h1>Yes, continue</h1>
 				</ion-label>
-				<ion-icon
-					name="checkmark-circle"
+				<ion-icon name="checkmark-circle"
 					slot="end"
 					size="large"
-				></ion-icon>
+					aria-hidden="true"
+				 />
 			</ion-item>
 		</ion-list>
 	</div>

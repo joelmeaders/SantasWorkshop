@@ -1,10 +1,9 @@
 import {
-	Component,
-	ChangeDetectionStrategy,
-	Input,
-	EventEmitter,
-	Output,
-	inject,
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  output,
+  input
 } from '@angular/core';
 import {
 	AlertController,
@@ -24,7 +23,12 @@ import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
 import { DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { addCircle, createOutline, trashOutline } from 'ionicons/icons';
+import {
+	addCircle,
+	createOutline,
+	menuOutline,
+	trashOutline,
+} from 'ionicons/icons';
 
 @Component({
 	selector: 'admin-manage-children',
@@ -49,16 +53,14 @@ export class ManageChildrenComponent {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
 
-	@Input() public children: Child[] = [];
+	public readonly children = input<Child[]>([]);
 
-	@Output() public readonly adddedChild = new EventEmitter<Child>();
-	@Output() public readonly editedChild = new EventEmitter<Child>();
-	@Output() public readonly removedChild = new EventEmitter<number>();
+	public readonly adddedChild = output<Child>();
+	public readonly editedChild = output<Child>();
+	public readonly removedChild = output<number>();
 
 	constructor() {
-		addIcons({ addCircle, createOutline, trashOutline });
-		addIcons({ addCircle, createOutline, trashOutline });
-		addIcons({ addCircle, createOutline, trashOutline });
+		addIcons({ addCircle, createOutline, menuOutline, trashOutline });
 	}
 
 	public async addEditChild(child?: Child): Promise<void> {
@@ -81,7 +83,7 @@ export class ManageChildrenComponent {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const child = this.children.find((e) => e.id === childId);
+		const child = this.children().find((e) => e.id === childId);
 		if (!child) return;
 
 		const alert = await this.alertController.create({

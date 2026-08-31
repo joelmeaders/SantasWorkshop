@@ -110,8 +110,6 @@ export class RegistrationPage {
 
 	constructor() {
 		addIcons({ searchOutline, checkmarkCircle });
-		addIcons({ searchOutline, checkmarkCircle });
-		addIcons({ searchOutline, checkmarkCircle });
 	}
 
 	public ionViewWillLeave(): void {
@@ -169,7 +167,7 @@ export class RegistrationPage {
 				result,
 				registration.qrcode ?? 'onsite',
 			);
-			this.router.navigate(['admin/checkin/confirmation']);
+			this.router.navigate(['/admin/checkin/confirmation']);
 		} catch (error: unknown) {
 			const err = error as {
 				details?: { code?: number };
@@ -179,7 +177,7 @@ export class RegistrationPage {
 			if (err.details?.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([
-					'admin/checkin/duplicate',
+					'/admin/checkin/duplicate',
 					registration.uid,
 				]);
 				return;

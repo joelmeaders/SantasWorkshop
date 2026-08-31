@@ -1,13 +1,24 @@
 import { Injectable } from '@angular/core';
-import { Timestamp } from '@angular/fire/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { BehaviorSubject, map, shareReplay } from 'rxjs';
-import { Registration } from '@santashop/models';
+import {
+	Registration,
+	type ResolveRegistrationScanResult,
+	type ScanInputMethod,
+} from '@santashop/models';
 import { filterNullish } from '../helpers';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class CheckInContextService {
+	private readonly inputMethod = new BehaviorSubject<ScanInputMethod>('camera');
+	public readonly inputMethod$ = this.inputMethod.asObservable();
+
+	private readonly blockedScan = new BehaviorSubject<
+		ResolveRegistrationScanResult | undefined
+	>(undefined);
+	public readonly blockedScan$ = this.blockedScan.asObservable();
 	private readonly registration = new BehaviorSubject<
 		Registration | undefined
 	>(undefined);
@@ -64,8 +75,18 @@ export class CheckInContextService {
 			shareReplay(1),
 		);
 
-	public setRegistration(registration?: Registration): void {
+	public setRegistration(
+		registration?: Registration,
+		inputMethod: ScanInputMethod = 'camera',
+	): void {
 		this.registration.next(registration);
+		this.inputMethod.next(inputMethod);
+		this.blockedScan.next(undefined);
+	}
+
+	public setBlockedScan(result: ResolveRegistrationScanResult): void {
+		this.blockedScan.next(result);
+		if ('attempt' in result) this.inputMethod.next(result.attempt.inputMethod);
 	}
 
 	public resetRegistration(): void {
@@ -79,5 +100,7 @@ export class CheckInContextService {
 	public reset(): void {
 		this.registration.next(undefined);
 		this.checkin.next(undefined);
+		this.blockedScan.next(undefined);
+		this.inputMethod.next('camera');
 	}
 }

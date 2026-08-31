@@ -1,26 +1,28 @@
-import * as admin from 'firebase-admin';
-import {
-	Registration,
-	RegistrationSearchIndex,
-} from '../../../santashop-models/src';
+import admin from '../firebase-admin';
+import { Registration, RegistrationSearchIndex } from '../models';
+import { createFunctionLogger } from '../utility/observability';
 
-admin.initializeApp();
+const log = createFunctionLogger('scheduledReindexRegistrations');
 
-export default async (): Promise<string> => {
+export default async function scheduledReindexRegistrations(): Promise<string> {
 	// Load all registrations
 	const registrations: Registration[] = await loadRegistrations();
-	if (!registrations.length) return Promise.resolve('No registrations');
+	if (!registrations.length) return 'No registrations';
 
 	const rsi: RegistrationSearchIndex[] = [];
 
 	registrations.forEach((registration) => {
 		try {
+			if (!registration.registrationSubmittedOn) return;
+
 			const newRsi: RegistrationSearchIndex = {
 				code: registration.qrcode,
 				customerId: registration.uid!,
 				emailAddress: registration.emailAddress!.toLowerCase(),
 				firstName: registration.firstName!.toLowerCase(),
 				lastName: registration.lastName!.toLowerCase(),
+				displayFirstName: registration.firstName!,
+				displayLastName: registration.lastName!,
 				zip: registration.zipCode!,
 			};
 			rsi.push(newRsi);
@@ -48,11 +50,11 @@ export default async (): Promise<string> => {
 			return Promise.resolve();
 		});
 		processed += batchRegs.length;
-		console.info('Processed ', processed);
+		log.info('Processed registration search index batch', { processed });
 	} while (rsi.length > 0);
 
-	return Promise.resolve('Updated index');
-};
+	return 'Updated index';
+}
 
 const indexQuery = () => admin.firestore().collection('registrations');
 

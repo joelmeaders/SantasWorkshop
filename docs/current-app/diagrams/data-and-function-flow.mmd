@@ -1,0 +1,74 @@
+---
+alt: "Santashop public app data and function flow"
+---
+sequenceDiagram
+    accTitle: Santashop public app data and function flow
+    accDescr: Main frontend services, callable functions, and Firestore records involved in the public registration journey
+
+    actor User
+    participant UI as Santashop App UI
+    participant Auth as Firebase Auth
+    participant Core as App/Core Services
+    participant Fn as Cloud Functions
+    participant FS as Firestore
+    participant St as Firebase Storage
+    participant Trig as Triggers / Scheduled Jobs
+
+    User->>UI: Create account
+    UI->>Fn: newAccount(onboarding fields)
+    Fn->>Auth: createUser(email, password)
+    Fn->>FS: create users/{uid}
+    Fn->>FS: create registrations/{uid}
+    Fn->>St: write registrations/{uid}.png
+    UI->>Auth: signInWithEmailAndPassword
+    Core->>FS: read users/{uid}
+    Core->>FS: read registrations/{uid}
+
+    User->>UI: Save referral
+    UI->>Fn: updateReferredBy({ referredBy })
+    Fn->>FS: update users/{uid}.referredBy
+
+    User->>UI: Add/edit/remove child
+    UI->>FS: update registrations/{uid}.children[]
+
+    User->>UI: Choose slot pre-submit
+    UI->>FS: update registrations/{uid}.dateTimeSlot
+    UI->>FS: read dateTimeSlots where enabled and programYear
+
+    User->>UI: Submit registration
+    UI->>Fn: completeRegistration(registration snapshot)
+    Fn->>FS: update registrations/{uid}
+    Fn->>FS: upsert registrationsearchindex/{uid}
+    Fn->>FS: upsert tmp_registrationemails/{uid}
+    FS-->>Trig: document write fires email trigger
+
+    User->>UI: Change slot after submit
+    UI->>Fn: changeRegistrationDateTime({ newDateTimeSlot })
+    Fn->>FS: update registrations/{uid}.previousDateTimeSlot
+    Fn->>FS: update registrations/{uid}.dateTimeSlot
+    Fn->>FS: upsert tmp_registrationemails/{uid}
+    FS-->>Trig: document write fires email trigger
+
+    User->>UI: Change profile info
+    UI->>Fn: changeAccountInformation({ firstName, lastName, zipCode })
+    Fn->>Auth: update displayName
+    Fn->>FS: update users/{uid}
+    Fn->>FS: update registrations/{uid}
+    Fn->>FS: update registrationsearchindex/{uid}
+
+    User->>UI: Change email
+    UI->>Auth: re-authenticate current user
+    UI->>Fn: updateEmailAddress({ emailAddress })
+    Fn->>Auth: update email
+    Fn->>FS: update users/{uid}
+    Fn->>FS: update registrations/{uid}
+    Fn->>FS: update registrationsearchindex/{uid}
+
+    User->>UI: Change password
+    UI->>Auth: re-authenticate current user
+    UI->>Auth: updatePassword(newPassword)
+
+    Admin->>Fn: checkIn or checkInWithEdit
+    Fn->>FS: create checkins/{uid}
+    Core->>FS: observe checkins/{uid}
+    Core-->>UI: show final alert and logout

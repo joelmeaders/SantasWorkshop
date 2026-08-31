@@ -1,14 +1,125 @@
-.logo {
-	max-width: 350px;
-	width: 60%;
+:host {
+	display: block;
+}
+
+.home-shell {
+	max-width: var(--santa-page-width);
+	min-height: 100%;
+	padding: clamp(1.5rem, 4vw, 3rem) var(--santa-gutter) 2rem;
+}
+
+.brand-hero {
+	isolation: isolate;
+	position: relative;
+}
+
+.brand-hero ion-col {
+	position: relative;
+	z-index: 1;
+}
+
+.hero-gift {
+	aspect-ratio: 1;
 	height: auto;
+	pointer-events: none;
+	position: absolute;
+	top: 52%;
+	user-select: none;
+	width: clamp(5rem, 12vw, 9rem);
+	z-index: 0;
 }
 
-ion-button .custom-button {
-	font-family: brandon-grotesque, sans-serif;
-	font-size: 1.2em;
+.hero-gift-left {
+	left: clamp(0rem, 6vw, 5rem);
+	transform: translateY(-50%) rotate(-7deg);
 }
 
-p {
-	margin-block-end: 0.5em;
+.hero-gift-right {
+	right: clamp(0rem, 6vw, 5rem);
+	transform: translateY(-50%) rotate(7deg);
+}
+
+.hero-logo {
+	aspect-ratio: 491 / 482;
+	filter: drop-shadow(0 1rem 1.5rem rgba(117, 24, 43, 0.18));
+	height: auto;
+	max-width: clamp(12rem, 25vw, 20rem);
+	padding: 0;
+	width: 62%;
+}
+
+.welcome-section {
+	padding-block: 1rem 1.5rem;
+}
+
+.welcome-title {
+	color: var(--santa-red);
+	font-size: clamp(2rem, 5vw, 3.6rem);
+	margin-inline: auto;
+	max-width: 52rem;
+	text-shadow: 0 0.12rem 0 rgba(255, 255, 255, 0.9);
+}
+
+.entry-card {
+	margin-inline: auto;
+	max-width: 38rem;
+	text-align: start;
+}
+
+.entry-card ion-card-header {
+	background: linear-gradient(135deg, rgba(23, 100, 71, 0.08), rgba(229, 169, 47, 0.08));
+}
+
+.entry-card ion-card-title,
+.entry-card p {
+	text-align: center;
+}
+
+.entry-card ion-button[expand='block'] {
+	margin-block: 0.85rem;
+}
+
+.entry-card p {
+	color: var(--santa-muted);
+	margin-block: 0.85rem 0.5rem;
+}
+
+.social-link-button {
+	align-items: center;
+	background: rgba(255, 255, 255, 0.86);
+	border: 1px solid var(--santa-evergreen);
+	border-radius: 50%;
+	color: var(--santa-evergreen);
+	display: inline-flex;
+	font-size: 1.5rem;
+	height: 3rem;
+	justify-content: center;
+	width: 3rem;
+}
+
+@media (max-width: 600px) {
+	.home-shell {
+		padding-inline: 0.25rem;
+	}
+
+	.hero-gift {
+		top: 58%;
+		width: clamp(4rem, 20vw, 4.75rem);
+	}
+
+	.hero-gift-left {
+		left: -0.25rem;
+	}
+
+	.hero-gift-right {
+		right: -0.25rem;
+	}
+
+	.hero-logo {
+		max-width: 11.25rem;
+	}
+
+	.welcome-section {
+		padding-block-start: 0.5rem;
+	}
 }

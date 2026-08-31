@@ -1,27 +1,28 @@
-import * as functions from 'firebase-functions/v1';
-import * as admin from 'firebase-admin';
-import { CallableContext } from 'firebase-functions/v1/https';
-import {
-	CheckIn,
-	COLLECTION_SCHEMA,
-	Registration,
-} from '../../../santashop-models/src';
+import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
+import { CheckIn, COLLECTION_SCHEMA, Registration } from '../models';
 import {
 	calculateRegistrationStats,
 	isRegistrationComplete,
 } from '../utility/registrations';
+import admin from '../firebase-admin';
+import { getErrorMessage, getErrorStatus } from '../utility/errors';
+import { createFunctionLogger } from '../utility/observability';
+import { PROGRAM_YEAR } from '../utility/runtime-config';
+import { isAdminToken } from '../utility/capabilities';
 
-admin.initializeApp();
+const log = createFunctionLogger('onSiteRegistration');
 
-export default (
-	record: Registration,
-	context: CallableContext,
-): Promise<number> => {
-	if (!context.auth?.token?.admin) {
-		console.error(
-			`${context.auth?.uid} attempted to check in for uid ${record.uid}`,
-		);
-		throw new functions.https.HttpsError(
+export default async function onSiteRegistration(
+	request: CallableRequest<Registration>,
+): Promise<number> {
+	const record = request.data;
+
+	if (!isAdminToken(request.auth?.token)) {
+		log.warn('Non-admin attempted an on-site registration', {
+			actorUid: request.auth?.uid ?? null,
+			targetUid: record.uid ?? null,
+		});
+		throw new HttpsError(
 			'permission-denied',
 			'-99',
 			'You can only update your own records',
@@ -29,10 +30,10 @@ export default (
 	}
 
 	if (!isRegistrationComplete(record)) {
-		console.error(
-			`Registration incomplete. Unable to check in for uid ${record.uid}`,
-		);
-		throw new functions.https.HttpsError(
+		log.warn('Attempted on-site registration with incomplete data', {
+			uid: record.uid ?? null,
+		});
+		throw new HttpsError(
 			'failed-precondition',
 
 			'Incomplete registration. Cannot continue.',
@@ -58,7 +59,7 @@ export default (
 		registrationSubmittedOn: new Date(),
 		includedInCounts: false,
 		includedInRegistrationStats: false,
-		programYear: 2025,
+		programYear: PROGRAM_YEAR,
 	};
 
 	batch.create(registrationDocRef, updatedRegistration);
@@ -78,14 +79,14 @@ export default (
 
 	batch.create(checkinDocRef, checkin);
 
-	return batch
-		.commit()
-		.then(() => checkin.stats!.children)
-		.catch((error: any) => {
-			throw new functions.https.HttpsError(
-				error.status,
-				error.message,
-				error,
-			);
-		});
-};
+	try {
+		await batch.commit();
+		return checkin.stats!.children;
+	} catch (error) {
+		throw new HttpsError(
+			getErrorStatus(error) ?? 'internal',
+			getErrorMessage(error),
+			error,
+		);
+	}
+}

@@ -1,0 +1,46 @@
+<admin-header title="Scan Risk Review" backRoute="/admin/landing" />
+
+<ion-content class="ion-padding">
+	@if (state$ | async; as state) {
+		@if (state.status === 'loading') {
+		<div class="state"><ion-spinner /><p>Loading scan risks…</p></div>
+		} @else if (state.status === 'error') {
+		<div class="state" role="alert">
+			<h2>Risk records could not be loaded</h2>
+			<p>Try this page again.</p>
+		</div>
+		} @else if (state.summaries.length === 0) {
+		<div class="state">
+			<h2>No suspicious scans this season</h2>
+			<p>Late duplicate and canceled-code attempts will appear here.</p>
+		</div>
+		} @else {
+		<ion-list aria-label="Customers with suspicious scans">
+			@for (summary of state.summaries; track summary.customerId) {
+			<ion-item button detail [routerLink]="['./', summary.customerId]">
+				<ion-label>
+					<h2>{{ summary.firstName }} {{ summary.lastName }}</h2>
+					<p>{{ summary.emailAddress }}</p>
+					<p>Latest attempt: {{ summary.latestRiskOn | date:'short' }}</p>
+					@if (summary.originalCheckInOn) {
+					<p>Original check-in: {{ summary.originalCheckInOn | date:'short' }}</p>
+					}
+					<ion-badge color="danger">
+						{{ summary.totalRiskAttemptCount }} risk attempt(s)
+					</ion-badge>
+					@if (summary.lateDuplicateAttemptCount) {
+					<ion-badge color="warning">Late duplicate {{ summary.lateDuplicateAttemptCount }}</ion-badge>
+					}
+					@if (summary.cancelledCodeAttemptCount) {
+					<ion-badge color="danger">Canceled code {{ summary.cancelledCodeAttemptCount }}</ion-badge>
+					}
+				</ion-label>
+			</ion-item>
+			}
+		</ion-list>
+		@if (state.hasMore) {
+		<ion-button expand="block" fill="outline" (click)="loadMore()">Load more</ion-button>
+		}
+		}
+	}
+</ion-content>

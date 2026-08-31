@@ -1,0 +1,304 @@
+:host {
+	display: block;
+}
+
+.schedule-editor {
+	display: grid;
+	gap: 1.25rem;
+	padding: 1rem 1rem 6rem;
+}
+
+.status-message {
+	margin: 0;
+	padding: 0.9rem 1rem;
+	border-radius: 16px;
+	font-weight: 600;
+}
+
+.editor-shell {
+	display: grid;
+	gap: 1.25rem;
+}
+
+.editor-shell__intro {
+	display: grid;
+	gap: 1rem;
+	padding: 1.25rem;
+	border-radius: 24px;
+	border: 1px solid var(--ion-color-step-150, transparent);
+}
+
+.editor-shell__intro h2 {
+	margin: 0.35rem 0 0.5rem;
+	font-size: clamp(1.5rem, 4vw, 2rem);
+	line-height: 1.1;
+}
+
+.editor-shell__intro p:not(.eyebrow) {
+	margin: 0;
+	max-width: 40rem;
+	line-height: 1.5;
+}
+
+.editor-shell__year {
+	--background: var(--ion-item-background, transparent);
+	border-radius: 18px;
+	border: 1px solid var(--ion-color-step-150, transparent);
+}
+
+.eyebrow {
+	margin: 0;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+
+.editor-panels {
+	display: grid;
+	gap: 1rem;
+}
+
+.editor-panel {
+	border-radius: 24px;
+}
+
+.panel-description {
+	margin: 0 0 1rem;
+	line-height: 1.45;
+}
+
+.editor-grid,
+.bulk-edit-grid,
+.slot-card__controls {
+	display: grid;
+	gap: 0.85rem;
+}
+
+.editor-grid,
+.bulk-edit-grid {
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	align-items: end;
+}
+
+.bulk-edit-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.panel-footer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 1rem;
+}
+
+.selection-summary {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	align-items: center;
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--ion-color-step-150, transparent);
+}
+
+.empty-state {
+	margin: 1.5rem 0;
+}
+
+.schedule-surface {
+	border-radius: 24px;
+}
+
+.schedule-surface__header {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.schedule-surface__controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.day-groups {
+	display: grid;
+	gap: 1rem;
+}
+
+.day-group {
+	display: grid;
+	gap: 0.75rem;
+	padding: 1rem;
+	border-radius: 20px;
+	border: 1px solid var(--ion-color-step-150, transparent);
+}
+
+.day-group__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+}
+
+.day-group__header h3 {
+	margin: 0;
+	font-size: 1rem;
+}
+
+.day-group__header p {
+	margin: 0.2rem 0 0;
+	font-size: 0.92rem;
+}
+
+.day-group__slots {
+	display: grid;
+	gap: 0.85rem;
+}
+
+.slot-card {
+	display: grid;
+	gap: 1rem;
+	padding: 1rem;
+	border-radius: 18px;
+	border: 1px solid var(--ion-color-step-150, transparent);
+	transition: opacity 0.2s ease;
+}
+
+.slot-card--disabled {
+	opacity: 0.5;
+}
+
+.slot-card__summary {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 0.85rem;
+	align-items: start;
+}
+
+
+.slot-card__heading {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 0.75rem;
+	align-items: flex-start;
+}
+
+.slot-card__heading h4 {
+	margin: 0 0 0.25rem;
+	font-size: 1rem;
+}
+
+
+.slot-card__heading p {
+	margin: 0 0 0.25rem;
+}
+
+.slot-card__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.slot-card__controls {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+
+.slot-card__controls ion-item {
+	--background: var(--ion-item-background, transparent);
+	border-radius: 16px;
+	border: 1px solid var(--ion-color-step-150, transparent);
+}
+
+.slot-card__toggle {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 72px;
+	padding: 0.35rem 0.9rem;
+	border-radius: 16px;
+	border: 1px solid var(--ion-color-step-150, transparent);
+}
+
+.slot-card__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.slot-card__actions ion-button,
+.bulk-edit-actions ion-button,
+.schedule-surface__controls ion-button,
+.panel-footer ion-button {
+	margin: 0;
+}
+
+@media (max-width: 767px) {
+	.schedule-editor {
+		padding-inline: 0.75rem;
+	}
+
+	.editor-shell__intro,
+	.editor-panel,
+	.schedule-surface,
+	.day-group,
+	.slot-card {
+		border-radius: 18px;
+	}
+
+	.editor-grid,
+		.bulk-edit-grid,
+		.slot-card__controls,
+		.slot-card__summary,
+		.slot-card__heading,
+		.schedule-surface__header,
+		.panel-footer,
+		.day-group__header {
+		grid-template-columns: 1fr;
+	}
+
+	.bulk-edit-actions,
+	.panel-footer,
+	.schedule-surface__controls,
+	.slot-card__actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.slot-card__badges {
+		justify-content: flex-start;
+	}
+
+	.slot-card__toggle {
+		justify-content: flex-start;
+	}
+
+	.bulk-edit-actions ion-button,
+	.panel-footer ion-button,
+	.schedule-surface__controls ion-button,
+	.slot-card__actions ion-button {
+		width: 100%;
+	}
+}
+
+@media (min-width: 768px) {
+	.editor-shell__intro {
+		grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+		align-items: end;
+	}
+
+	.editor-panels {
+		grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+	}
+}

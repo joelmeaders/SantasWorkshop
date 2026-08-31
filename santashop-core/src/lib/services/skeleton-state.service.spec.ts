@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { SkeletonStateService } from './skeleton-state.service';
 import { SkeletonStateError } from '../errors/skeleton-state-service';
@@ -26,10 +27,11 @@ describe('SkeletonStateService', () => {
 		});
 
 		it('should add a new state to the states stack', () => {
-			const spy = spyOn<any>(service['state'], 'push').and.callThrough();
+			const spy = vi.spyOn(service['state'], 'push');
 			const newState = service.addState('a', 'b');
-			expect(service['state']).toHaveSize(1);
-			expect(spy).toHaveBeenCalledOnceWith(newState);
+			expect(service['state']).toHaveLength(1);
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith(newState);
 			expect(service['state'][0]).toBe(newState);
 		});
 	});
@@ -78,27 +80,30 @@ describe('SkeletonStateService', () => {
 		});
 
 		it('should call removeStateById()', () => {
-			const spy = spyOn(service, 'removeStateById').and.callThrough();
+			const spy = vi.spyOn(service, 'removeStateById');
 			service.removeState('a');
-			expect(spy).toHaveBeenCalledOnceWith('a');
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith('a');
 		});
 
 		it('should call removeStatesByGroup()', () => {
-			const spy = spyOn(service, 'removeStatesByGroup').and.callThrough();
+			const spy = vi.spyOn(service, 'removeStatesByGroup');
 			service.removeState(undefined, 'b');
-			expect(spy).toHaveBeenCalledOnceWith('b');
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith('b');
 		});
 
 		it('should remove state from stack', () => {
-			const spy = spyOn(service['state'], 'splice').and.callThrough();
+			const spy = vi.spyOn(service['state'], 'splice');
 			service.removeState('a', 'b');
-			expect(spy).toHaveBeenCalledOnceWith(0, 1);
-			expect(service['state']).toHaveSize(2);
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith(0, 1);
+			expect(service['state']).toHaveLength(2);
 		});
 
 		it('should do nothing', () => {
 			service.removeState('f', 'h');
-			expect(service['state']).toHaveSize(3);
+			expect(service['state']).toHaveLength(3);
 		});
 	});
 
@@ -110,15 +115,16 @@ describe('SkeletonStateService', () => {
 		});
 
 		it('should remove state from stack', () => {
-			const spy = spyOn(service['state'], 'splice').and.callThrough();
+			const spy = vi.spyOn(service['state'], 'splice');
 			service.removeStateById('c');
-			expect(spy).toHaveBeenCalledOnceWith(1, 1);
-			expect(service['state']).toHaveSize(2);
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith(1, 1);
+			expect(service['state']).toHaveLength(2);
 		});
 
 		it('should do nothing', () => {
 			service.removeState('f');
-			expect(service['state']).toHaveSize(3);
+			expect(service['state']).toHaveLength(3);
 		});
 	});
 
@@ -130,7 +136,7 @@ describe('SkeletonStateService', () => {
 		});
 
 		it('should remove state from stack', () => {
-			const spy = spyOn(service['state'], 'splice').and.callThrough();
+			const spy = vi.spyOn(service['state'], 'splice');
 			service.removeStatesByGroup('b');
 			expect(spy).toHaveBeenCalledWith(0, 1);
 			expect(spy).toHaveBeenCalledWith(1, 1);
@@ -140,20 +146,19 @@ describe('SkeletonStateService', () => {
 
 		it('should do nothing', () => {
 			service.removeStatesByGroup('f');
-			expect(service['state']).toHaveSize(3);
+			expect(service['state']).toHaveLength(3);
 		});
 	});
 });
 
 describe('SkeletonState', () => {
-	it('should be initialized with correct values', (done) => {
+	it('should be initialized with correct values', async () => {
 		const state = new SkeletonState('a', 'b');
 		expect(state.id).toBe('a');
 		expect(state.groupId).toBe('b');
 		state.isLoaded$.subscribe((value) => {
-			expect(value).toBeFalse();
+			expect(value).toBe(false);
 			state.destroy();
-			done();
 		});
 	});
 
@@ -166,7 +171,7 @@ describe('SkeletonState', () => {
 		state.setState(true);
 		state.destroy();
 
-		expect(done).toBeTrue();
+		expect(done).toBe(true);
 	});
 
 	it('should kill _isLoaded$', () => {
@@ -176,6 +181,6 @@ describe('SkeletonState', () => {
 		state.isLoaded$.pipe(finalize(() => (done = true))).subscribe();
 
 		state.destroy();
-		expect(done).toBeTrue();
+		expect(done).toBe(true);
 	});
 });

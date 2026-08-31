@@ -1,47 +1,38 @@
-// import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-//
-// import { firstValueFrom, of } from 'rxjs';
-// import { PreRegistrationService } from '../../../../core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ModalController } from '@ionic/angular/standalone';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	createModalControllerMock,
+	provideTranslateServiceMock,
+} from '../../../../../test-helpers';
+import { HelpPage } from './help.page';
 
-// import { HelpPage } from './help.page';
+describe('HelpPage', () => {
+	let component: HelpPage;
+	let fixture: ComponentFixture<HelpPage>;
+	let modalController: { dismiss: ReturnType<typeof vi.fn> };
 
-// describe('HelpPage', () => {
-//   let component: HelpPage;
-//   let fixture: ComponentFixture<HelpPage>;
-//   let viewService: jasmine.SpyObj<PreRegistrationService>;
+	beforeEach(async (): Promise<void> => {
+		modalController = createModalControllerMock() as unknown as {
+			dismiss: ReturnType<typeof vi.fn>;
+		};
+		await TestBed.configureTestingModule({
+			imports: [HelpPage],
+			providers: [
+				provideTranslateServiceMock(),
+				{ provide: ModalController, useValue: modalController },
+			],
+		}).compileComponents();
+		fixture = TestBed.createComponent(HelpPage);
+		component = fixture.componentInstance;
+		await fixture.whenStable();
+	});
 
-//   beforeEach(waitForAsync(() => {
-//     TestBed.configureTestingModule({
-//       declarations: [ HelpPage ],
-//       providers: [
-//         {
-//           provide: PreRegistrationService,
-//           useValue: jasmine.createSpyObj<PreRegistrationService>('PreRegistrationService', {}, ['registrationComplete$'])
-//         }
-//       ],
-//       imports: []
-//     }).compileComponents();
+	it('renders help content and closes its modal', async (): Promise<void> => {
+		expect(fixture.nativeElement.querySelector('ion-card')).toBeTruthy();
 
-//     fixture = TestBed.createComponent(HelpPage);
-//     viewService = TestBed.inject(PreRegistrationService) as jasmine.SpyObj<PreRegistrationService>;
-//     component = fixture.componentInstance;
-//     fixture.detectChanges();
-//   }));
+		await component.close();
 
-//   it('should create', () => {
-//     expect(component).toBeTruthy();
-//   });
-
-//   it('should resolve true', async () => {
-//     // Arrange
-//     const spy: any = Object.getOwnPropertyDescriptor(viewService, 'registrationComplete$')?.get;
-//     spy.and.return(of(true));
-
-//     // Act
-//     const value = await firstValueFrom(component.isRegistrationComplete$);
-
-//     // Assert
-//     expect(value).toBeTrue();
-//     expect(spy).toHaveBeenCalled();
-//   });
-// });
+		expect(modalController.dismiss).toHaveBeenCalledOnce();
+	});
+});

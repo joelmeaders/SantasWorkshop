@@ -19,7 +19,9 @@ test.describe('staff browser and device compatibility', () => {
 		await seedAdminUser(account);
 		await signInAdminViaUi(page, account);
 
-		await page.locator('#checkInNav').click();
+		const checkInNav = page.locator('#checkInNav');
+		await expect(checkInNav).toBeEnabled({ timeout: 15000 });
+		await checkInNav.click();
 		await expect(page).toHaveURL(/\/admin\/checkin(?:\/scan)?$/);
 		await page.locator('#manualCheckInCodeButton').click();
 		const alert = page.locator('ion-alert').last();

@@ -95,7 +95,9 @@ For every merge to `master`, the test backend workflow must:
 5. remove retired Functions with the non-interactive `--force` deploy;
 6. compare the live Function list to production source exports and fail on any
    missing or unexpected Function;
-7. complete customer and admin end-to-end suites with every Axe WCAG 2.2 AA
+7. verify that every Firebase-managed Scheduler job, Cloud Tasks queue, and
+   Eventarc trigger exists, is enabled, and matches its source configuration;
+8. complete customer and admin end-to-end suites with every Axe WCAG 2.2 AA
    violation treated as a failure.
 
 The test project's unused Realtime Database instance is disabled. Test releases
@@ -116,8 +118,11 @@ identity intentionally cannot enable arbitrary project services:
 
 The Functions deployment identity needs `roles/firebase.admin`,
 `roles/cloudfunctions.admin`, `roles/datastore.indexAdmin`, and
-`roles/serviceusage.serviceUsageConsumer`. Keep it separate from the runtime
-identity. Firebase's service-agent preflight also requires:
+`roles/serviceusage.serviceUsageConsumer`. Scheduled and task-queue Functions
+also require `roles/cloudscheduler.admin` and `roles/cloudtasks.queueAdmin` so
+the deployment can create, update, and remove their managed resources. Keep the
+deployment identity separate from the runtime identity. Firebase's
+service-agent preflight also requires:
 
 - `roles/iam.serviceAccountTokenCreator` for the Pub/Sub service agent;
 - `roles/run.invoker` for the default compute service account;

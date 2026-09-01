@@ -38,6 +38,9 @@ const DEPLOYED_SIGNUP_MIN_INSTANCES = RUNNING_IN_FUNCTIONS_EMULATOR
 const DEPLOYED_EVENT_MIN_INSTANCES = RUNNING_IN_FUNCTIONS_EMULATOR
 	? 0
 	: EVENT_MIN_INSTANCES;
+const MANAGED_RESOURCE_LABELS: Record<string, string> = {
+	'santashop-resource-revision': '2026-09-01',
+};
 
 const STANDARD_CUSTOMER_OPTIONS = {
 	enforceAppCheck: ENFORCE_APP_CHECK,
@@ -358,6 +361,7 @@ export const callableGetOwnerExportUrl = onCall(
 
 export const ownerOperationWorker = onTaskDispatched(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		invoker: 'private',
 		maxInstances: 1,
 		concurrency: 1,
@@ -386,6 +390,7 @@ export const ownerOperationWorker = onTaskDispatched(
 
 export const sendNewRegistrationEmails = onDocumentCreated(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		document: 'tmp_registrationemails/{docId}',
 		retry: true,
 		memory: '256MiB',
@@ -421,7 +426,9 @@ export const sendNewRegistrationEmails = onDocumentCreated(
  */
 export const scheduledFirestoreBackup = onSchedule(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		schedule: SCHEDULED_FIRESTORE_BACKUP,
+		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',
 		cpu: 'gcf_gen1',
 		concurrency: 1,
@@ -436,7 +443,9 @@ export const scheduledFirestoreBackup = onSchedule(
 // At every 15th minute in November and December.
 export const scheduledDateTimeSlotCounters = onSchedule(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		schedule: SCHEDULED_DATETIME_SLOT_COUNTERS,
+		timeZone: SHOP_TIME_ZONE,
 		memory: '128MiB',
 		cpu: 'gcf_gen1',
 		concurrency: 1,
@@ -451,6 +460,7 @@ export const scheduledDateTimeSlotCounters = onSchedule(
 // “At 23:59.” (11:59 PM) every day.
 export const scheduledRegistrationStats = onSchedule(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		schedule: SCHEDULED_REGISTRATION_STATS,
 		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',
@@ -467,6 +477,7 @@ export const scheduledRegistrationStats = onSchedule(
 // “At 23:55.” (11:55 PM) every day in November and December.
 export const scheduledUserStats = onSchedule(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		schedule: SCHEDULED_USER_STATS,
 		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',
@@ -483,6 +494,7 @@ export const scheduledUserStats = onSchedule(
 // At every 5th minute past hour 10, 11, 12, 13, 14, 15, and 16 on day-of-month 8, 9, 11, and 12 in December.
 export const scheduledCheckInStats = onSchedule(
 	{
+		labels: MANAGED_RESOURCE_LABELS,
 		schedule: SCHEDULED_CHECKIN_STATS,
 		timeZone: SHOP_TIME_ZONE,
 		memory: '256MiB',

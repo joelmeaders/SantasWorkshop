@@ -105,6 +105,30 @@ Realtime Database rules to the active production instance. Realtime Database
 rule changes therefore require explicit production-release review; do not claim
 that the test deployment validated them.
 
+### Backend deployment prerequisites
+
+Provision these APIs in each Firebase project before release; the CI deployment
+identity intentionally cannot enable arbitrary project services:
+
+- Cloud Functions, Cloud Build, Artifact Registry, Cloud Run, and Eventarc;
+- Pub/Sub, Cloud Scheduler, and Cloud Tasks;
+- Firestore, Cloud Storage, and Firebase Storage.
+
+The Functions deployment identity needs `roles/firebase.admin`,
+`roles/cloudfunctions.admin`, `roles/datastore.indexAdmin`, and
+`roles/serviceusage.serviceUsageConsumer`. Keep it separate from the runtime
+identity. Firebase's service-agent preflight also requires:
+
+- `roles/iam.serviceAccountTokenCreator` for the Pub/Sub service agent;
+- `roles/run.invoker` for the default compute service account;
+- `roles/eventarc.eventReceiver` for the default compute service account.
+
+The release does not upload the pnpm workspace package directly. It builds a
+temporary `.firebase-functions-deploy` directory containing compiled output,
+the selected project's environment file, concrete runtime dependency versions,
+and an npm lockfile. This is required because Google Cloud Build uses npm and
+cannot install pnpm `catalog:` dependency specifiers.
+
 Before production promotion, repeat the test-environment critical journeys with
 production-equivalent runtime settings. Do not promote when a deploy, parity
 check, security-rule test, accessibility check, or critical journey is red.

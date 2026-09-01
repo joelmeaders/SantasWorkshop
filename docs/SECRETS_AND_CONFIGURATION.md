@@ -41,6 +41,10 @@ as ordinary Function revision environment variables. Privileged GCP users who
 can inspect Function revisions may also be able to inspect the AWS credentials.
 Never print generated dotenv contents or credentials in workflow logs.
 
+The disposable Functions deploy artifact includes only the generated file for
+the selected project. It never includes `santashop-functions/.env` or the root
+developer-local `.env`; neither local file is required on a GitHub runner.
+
 ## GitHub repository secrets
 
 The complete required repository-secret inventory is:

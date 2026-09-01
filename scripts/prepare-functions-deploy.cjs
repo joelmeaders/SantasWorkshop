@@ -55,7 +55,7 @@ const assertSafeDeployDirectory = () => {
 	}
 };
 
-const copyRuntimeEnvironmentFiles = () => {
+const copyRuntimeEnvironmentFile = () => {
 	const projectEnvironmentFiles = {
 		test: '.env.santas-workshop-test',
 		prod: '.env.santas-workshop-193b5',
@@ -68,15 +68,14 @@ const copyRuntimeEnvironmentFiles = () => {
 		);
 	}
 
-	for (const fileName of ['.env', environmentFile]) {
-		const sourcePath = path.join(functionsDir, fileName);
-		if (!fs.existsSync(sourcePath)) {
-			throw new Error(
-				`Required Functions environment file is missing: ${fileName}`,
-			);
-		}
-		fs.copyFileSync(sourcePath, path.join(deployDir, fileName));
+	const sourcePath = path.join(functionsDir, environmentFile);
+	if (!fs.existsSync(sourcePath)) {
+		throw new Error(
+			`Required Functions environment file is missing: ${environmentFile}`,
+		);
 	}
+
+	fs.copyFileSync(sourcePath, path.join(deployDir, environmentFile));
 };
 
 const prepareDeployArtifact = () => {
@@ -95,7 +94,7 @@ const prepareDeployArtifact = () => {
 	fs.rmSync(deployDir, { recursive: true, force: true });
 	fs.mkdirSync(deployDir, { recursive: true });
 	fs.cpSync(distDir, path.join(deployDir, 'dist'), { recursive: true });
-	copyRuntimeEnvironmentFiles();
+	copyRuntimeEnvironmentFile();
 
 	const deployPackage = {
 		name: sourcePackage.name,

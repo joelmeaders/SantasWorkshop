@@ -20,6 +20,7 @@ on:
       - 'scripts/assert-functions-deploy-ci.cjs'
       - 'scripts/prepare-functions-deploy.cjs'
       - 'scripts/verify-functions-parity.cjs'
+      - 'scripts/verify-functions-managed-resources.cjs'
       - '.github/workflows/functions-pr-validation.yml'
       - '.github/workflows/functions-test-and-prod-release.yml'
 

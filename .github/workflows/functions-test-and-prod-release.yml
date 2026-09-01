@@ -22,6 +22,7 @@ on:
       - 'scripts/assert-functions-deploy-ci.cjs'
       - 'scripts/prepare-functions-deploy.cjs'
       - 'scripts/verify-functions-parity.cjs'
+      - 'scripts/verify-functions-managed-resources.cjs'
       - '.github/workflows/functions-test-and-prod-release.yml'
       - '.github/workflows/functions-pr-validation.yml'
 
@@ -180,6 +181,7 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm run ci:functions:deploy:test
+      - uses: google-github-actions/setup-gcloud@v2
       - name: Verify live test Functions match source
         shell: bash
         run: |
@@ -194,6 +196,23 @@ jobs:
             fi
           done
           exit 1
+      - name: Verify live test managed trigger resources
+        shell: bash
+        env:
+          SANTASHOP_FIREBASE_PROJECT: santas-workshop-test
+          SANTASHOP_FUNCTION_REGION: us-central1
+          SANTASHOP_TIME_ZONE: ${{ env.TEST_SANTASHOP_TIME_ZONE }}
+          SCHEDULED_FIRESTORE_BACKUP: ${{ env.TEST_SCHEDULED_FIRESTORE_BACKUP }}
+          SCHEDULED_DATETIME_SLOT_COUNTERS: ${{ env.TEST_SCHEDULED_DATETIME_SLOT_COUNTERS }}
+          SCHEDULED_REGISTRATION_STATS: ${{ env.TEST_SCHEDULED_REGISTRATION_STATS }}
+          SCHEDULED_USER_STATS: ${{ env.TEST_SCHEDULED_USER_STATS }}
+          SCHEDULED_CHECKIN_STATS: ${{ env.TEST_SCHEDULED_CHECKIN_STATS }}
+        run: |
+          gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+          gcloud scheduler jobs list --project="$SANTASHOP_FIREBASE_PROJECT" --location="$SANTASHOP_FUNCTION_REGION" --format=json > "$RUNNER_TEMP/scheduler.json"
+          gcloud tasks queues list --project="$SANTASHOP_FIREBASE_PROJECT" --location="$SANTASHOP_FUNCTION_REGION" --format=json > "$RUNNER_TEMP/tasks.json"
+          gcloud eventarc triggers list --project="$SANTASHOP_FIREBASE_PROJECT" --location=nam5 --format=json > "$RUNNER_TEMP/eventarc.json"
+          node scripts/verify-functions-managed-resources.cjs "$RUNNER_TEMP/scheduler.json" "$RUNNER_TEMP/tasks.json" "$RUNNER_TEMP/eventarc.json"
 
   deploy_prod:
     if: github.event_name == 'workflow_dispatch'
@@ -231,8 +250,26 @@ jobs:
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
       - run: pnpm run ci:functions:deploy:prod
+      - uses: google-github-actions/setup-gcloud@v2
       - name: Verify live production Functions match source
         shell: bash
         run: |
           pnpm exec firebase functions:list --project santas-workshop-193b5 --json > "$RUNNER_TEMP/functions.json"
           node scripts/verify-functions-parity.cjs "$RUNNER_TEMP/functions.json"
+      - name: Verify live production managed trigger resources
+        shell: bash
+        env:
+          SANTASHOP_FIREBASE_PROJECT: santas-workshop-193b5
+          SANTASHOP_FUNCTION_REGION: us-central1
+          SANTASHOP_TIME_ZONE: ${{ env.PROD_SANTASHOP_TIME_ZONE }}
+          SCHEDULED_FIRESTORE_BACKUP: ${{ env.PROD_SCHEDULED_FIRESTORE_BACKUP }}
+          SCHEDULED_DATETIME_SLOT_COUNTERS: ${{ env.PROD_SCHEDULED_DATETIME_SLOT_COUNTERS }}
+          SCHEDULED_REGISTRATION_STATS: ${{ env.PROD_SCHEDULED_REGISTRATION_STATS }}
+          SCHEDULED_USER_STATS: ${{ env.PROD_SCHEDULED_USER_STATS }}
+          SCHEDULED_CHECKIN_STATS: ${{ env.PROD_SCHEDULED_CHECKIN_STATS }}
+        run: |
+          gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+          gcloud scheduler jobs list --project="$SANTASHOP_FIREBASE_PROJECT" --location="$SANTASHOP_FUNCTION_REGION" --format=json > "$RUNNER_TEMP/scheduler.json"
+          gcloud tasks queues list --project="$SANTASHOP_FIREBASE_PROJECT" --location="$SANTASHOP_FUNCTION_REGION" --format=json > "$RUNNER_TEMP/tasks.json"
+          gcloud eventarc triggers list --project="$SANTASHOP_FIREBASE_PROJECT" --location=nam5 --format=json > "$RUNNER_TEMP/eventarc.json"
+          node scripts/verify-functions-managed-resources.cjs "$RUNNER_TEMP/scheduler.json" "$RUNNER_TEMP/tasks.json" "$RUNNER_TEMP/eventarc.json"

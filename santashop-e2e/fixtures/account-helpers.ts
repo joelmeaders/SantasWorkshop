@@ -42,12 +42,12 @@ export const fillCreateAccountForm = async (
 	await expect(page.locator('#firstName input')).toBeVisible({
 		timeout: 15000,
 	});
-	await fillField(page, '#firstName input', account.firstName);
-	await fillField(page, '#lastName input', account.lastName);
-	await fillField(page, '#zipCode input', account.zipCode);
-	await fillField(page, '#emailAddress input', account.emailAddress);
-	await fillField(page, '#password input', account.password);
-	await fillField(page, '#password2 input', account.password);
+	await fillIonicInput(page, '#firstName input', account.firstName);
+	await fillIonicInput(page, '#lastName input', account.lastName);
+	await fillIonicInput(page, '#zipCode input', account.zipCode);
+	await fillIonicInput(page, '#emailAddress input', account.emailAddress);
+	await fillIonicInput(page, '#password input', account.password);
+	await fillIonicInput(page, '#password2 input', account.password);
 };
 
 /**
@@ -56,7 +56,7 @@ export const fillCreateAccountForm = async (
  * plain `fill`, so asserting the value forces the control to settle before the
  * next interaction.
  */
-const fillField = async (
+export const fillIonicInput = async (
 	page: Page,
 	selector: string,
 	value: string,
@@ -163,7 +163,12 @@ export const signOutViaUi = async (page: Page): Promise<void> => {
 	const signOutButton = page.locator('#signOutButton');
 	await expect(signOutButton).toBeVisible({ timeout: 10000 });
 	await Promise.all([
-		page.waitForURL((url) => url.pathname === '/' && url.searchParams.get('mode') === 'sign-in', { timeout: 30000 }),
+		page.waitForURL(
+			(url) =>
+				url.pathname === '/' &&
+				url.searchParams.get('mode') === 'sign-in',
+			{ timeout: 30000 },
+		),
 		signOutButton.click(),
 	]);
 	await expect(page.locator('#signInButton')).toBeVisible({ timeout: 10000 });

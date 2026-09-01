@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures/test-fixtures';
+import { fillIonicInput } from '../../fixtures/account-helpers';
 
 test.describe('public browser and device compatibility', () => {
 	test.beforeEach(async ({ clearData, seedScenario }) => {
@@ -13,16 +14,20 @@ test.describe('public browser and device compatibility', () => {
 		await page.locator('#createAccountButton').click();
 		await expect(page).toHaveURL(/\/sign-up$/);
 
-		const firstName = page.locator('#firstName input:not(.cloned-input)');
-		const lastName = page.locator('#lastName input:not(.cloned-input)');
-		await firstName.fill('Browser');
-		await lastName.fill('Matrix');
+		const firstNameSelector = '#firstName input:not(.cloned-input)';
+		const lastNameSelector = '#lastName input:not(.cloned-input)';
+		const firstName = page.locator(firstNameSelector);
+		const lastName = page.locator(lastNameSelector);
+		await fillIonicInput(page, firstNameSelector, 'Browser');
+		await fillIonicInput(page, lastNameSelector, 'Matrix');
 		await expect(firstName).toHaveValue('Browser');
 		await expect(lastName).toHaveValue('Matrix');
 		await expect
 			.poll(() =>
 				page.evaluate(
-					() => document.documentElement.scrollWidth <= window.innerWidth,
+					() =>
+						document.documentElement.scrollWidth <=
+						window.innerWidth,
 				),
 			)
 			.toBe(true);

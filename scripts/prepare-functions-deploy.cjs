@@ -124,6 +124,23 @@ const prepareDeployArtifact = () => {
 		],
 		{ cwd: deployDir, stdio: 'inherit' },
 	);
+	run(
+		'npm',
+		['ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'],
+		{ cwd: deployDir, stdio: 'inherit' },
+	);
+
+	const firebaseFunctionsSdk = path.join(
+		deployDir,
+		'node_modules',
+		'firebase-functions',
+		'package.json',
+	);
+	if (!fs.existsSync(firebaseFunctionsSdk)) {
+		throw new Error(
+			'Functions deploy artifact is missing the Firebase Functions SDK required for source analysis.',
+		);
+	}
 
 	const artifactText = fs.readFileSync(
 		path.join(deployDir, 'package.json'),
@@ -139,7 +156,7 @@ const prepareDeployArtifact = () => {
 	}
 
 	console.log(
-		`Prepared npm-compatible Functions artifact with ${Object.keys(dependencies).length} runtime dependencies.`,
+		`Prepared self-analyzable npm-compatible Functions artifact with ${Object.keys(dependencies).length} runtime dependencies.`,
 	);
 };
 

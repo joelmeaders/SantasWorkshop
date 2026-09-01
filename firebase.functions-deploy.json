@@ -1,0 +1,11 @@
+{
+	"functions": {
+		"runtime": "nodejs24",
+		"predeploy": [
+			"node \"$PROJECT_DIR/scripts/assert-functions-deploy-ci.cjs\"",
+			"npm --prefix \"$PROJECT_DIR/santashop-functions\" run build",
+			"node \"$PROJECT_DIR/scripts/prepare-functions-deploy.cjs\""
+		],
+		"source": ".firebase-functions-deploy"
+	}
+}

@@ -207,6 +207,14 @@ Required GitHub secrets for the Functions workflows:
 
 Functions deploys are GitHub Actions-only. Direct local `firebase deploy --only functions` commands are rejected by the Functions predeploy guard. Merge to `master` to deploy test, validate that environment, and then manually promote the tested `release_ref` to production.
 
+The workspace keeps Functions dependencies in the pnpm `catalog:functions`
+catalog. Before Firebase uploads source, the release builds a disposable
+`.firebase-functions-deploy` artifact with the compiled runtime, concrete
+installed dependency versions, and an npm lockfile. This keeps the workspace
+catalog authoritative while giving Google Cloud Build an npm-compatible,
+reproducible package. Never point Firebase directly at the catalog-based
+`santashop-functions/package.json`.
+
 The test backend release deploys Firestore rules/indexes and Storage rules,
 removes retired Functions, and fails if the live Function inventory does not
 exactly match source. The test project's unused Realtime Database instance is

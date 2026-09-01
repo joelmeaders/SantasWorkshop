@@ -146,4 +146,13 @@ describe('functions index exports', () => {
 			expect(exportedFunction.options).not.toHaveProperty('secrets');
 		}
 	});
+
+	it('uses the private Firebase IAM default for the task queue worker', async () => {
+		const subject = await import('../../src/index');
+		const worker = subject.ownerOperationWorker as unknown as {
+			options: Record<string, unknown>;
+		};
+
+		expect(worker.options).not.toHaveProperty('invoker');
+	});
 });

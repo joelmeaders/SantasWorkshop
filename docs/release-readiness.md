@@ -128,6 +128,12 @@ service-agent preflight also requires:
 - `roles/run.invoker` for the default compute service account;
 - `roles/eventarc.eventReceiver` for the default compute service account.
 
+The owner-operation task worker intentionally leaves `invoker` unspecified.
+Firebase then keeps the worker private and limits enqueueing to identities with
+both the Cloud Tasks enqueuer and Functions invoker roles. Do not replace this
+default with `invoker: 'private'`; Firebase CLI 15 cannot reconcile that explicit
+sentinel when it updates an existing second-generation task function.
+
 The release does not upload the pnpm workspace package directly. It builds a
 temporary `.firebase-functions-deploy` directory containing compiled output,
 the selected project's environment file, concrete runtime dependency versions,

@@ -40,14 +40,18 @@ const validInput = (): ManagedResourceInput => ({
 			state: 'ENABLED',
 			schedule: schedules[functionName],
 			timeZone: 'America/Denver',
-			pubsubTarget: {
-				topicName: `projects/${project}/topics/${jobName}`,
+			httpTarget: {
+				httpMethod: 'POST',
+				uri: `https://${functionName.toLowerCase()}-abc123-uc.a.run.app/`,
+				oidcToken: {
+					audience: `https://${functionName.toLowerCase()}-abc123-uc.a.run.app`,
+				},
 			},
 		};
 	}),
 	taskQueues: [
 		{
-			name: `projects/${project}/locations/${region}/queues/firebase-functions-ownerOperationWorker-${region}`,
+			name: `projects/${project}/locations/${region}/queues/ownerOperationWorker`,
 			state: 'RUNNING',
 			rateLimits: {
 				maxConcurrentDispatches: 1,

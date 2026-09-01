@@ -362,7 +362,6 @@ export const callableGetOwnerExportUrl = onCall(
 export const ownerOperationWorker = onTaskDispatched(
 	{
 		labels: MANAGED_RESOURCE_LABELS,
-		invoker: 'private',
 		maxInstances: 1,
 		concurrency: 1,
 		memory: '512MiB',

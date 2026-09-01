@@ -56,16 +56,32 @@ const verifyManagedResources = ({
 			`${jobName} schedule`,
 		);
 		assertEqual(job.timeZone, timeZone, `${jobName} time zone`);
+		const targetUri = job.httpTarget?.uri;
+		if (!targetUri) {
+			throw new Error(`${jobName} is missing its HTTP target.`);
+		}
+		const target = new URL(targetUri);
+		if (
+			!target.hostname.startsWith(`${functionName.toLowerCase()}-`) ||
+			!target.hostname.endsWith('.a.run.app')
+		) {
+			throw new Error(`${jobName} has an unexpected HTTP target: ${targetUri}`);
+		}
 		assertEqual(
-			job.pubsubTarget?.topicName,
-			`projects/${project}/topics/${jobName}`,
-			`${jobName} Pub/Sub target`,
+			job.httpTarget?.httpMethod,
+			'POST',
+			`${jobName} HTTP method`,
+		);
+		assertEqual(
+			new URL(job.httpTarget?.oidcToken?.audience || '').origin,
+			target.origin,
+			`${jobName} OIDC audience`,
 		);
 	}
 
-	const expectedQueue = `firebase-functions-${TASK_FUNCTION}-${region}`;
+	const expectedQueue = TASK_FUNCTION;
 	const managedQueues = taskQueues.filter((queue) =>
-		resourceId(queue.name).startsWith('firebase-functions-'),
+		resourceId(queue.name) === expectedQueue,
 	);
 	assertEqual(
 		JSON.stringify(

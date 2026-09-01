@@ -212,9 +212,11 @@ catalog. Before Firebase uploads source, the release builds a disposable
 `.firebase-functions-deploy` artifact with the compiled runtime, concrete
 installed dependency versions, an npm lockfile, and only the generated
 project-specific Functions environment file. Developer-local `.env` files are
-never packaged. This keeps the workspace catalog authoritative while giving
-Google Cloud Build an npm-compatible, reproducible package. Never point
-Firebase directly at the catalog-based `santashop-functions/package.json`.
+never packaged. The artifact installs its production dependencies so Firebase
+CLI can analyze it before upload, while Cloud Build still receives the
+reproducible npm lockfile. This keeps the workspace catalog authoritative.
+Never point Firebase directly at the catalog-based
+`santashop-functions/package.json`.
 
 The test backend release deploys Firestore rules/indexes and Storage rules,
 removes retired Functions, and fails if the live Function inventory does not

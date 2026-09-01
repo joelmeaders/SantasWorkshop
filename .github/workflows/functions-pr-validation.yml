@@ -66,6 +66,14 @@ jobs:
       - run: pnpm run audit:security
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
+      - name: Validate deploy artifact
+        env:
+          SANTASHOP_FUNCTIONS_DEPLOY: test
+        run: |
+          pnpm run config:functions:test
+          pnpm --filter @santashop/functions build
+          node scripts/prepare-functions-deploy.cjs
+          npm --prefix .firebase-functions-deploy audit --omit=dev --audit-level=moderate
 
   integration_tests:
     needs: unit_tests

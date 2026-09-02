@@ -30,6 +30,18 @@ describe('AddEditChildModalComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('provides programmatic labels for child fields', () => {
+		const inputs = fixture.nativeElement.querySelectorAll(
+			'ion-input',
+		) as NodeListOf<HTMLIonInputElement>;
+
+		expect([...inputs].map((input) => input.label)).toEqual([
+			'First Name',
+			'Last Name',
+			'Birth Date',
+		]);
+	});
+
 	it('initializes an Ionic component prop as an editable child', async () => {
 		const child = {
 			id: 17,

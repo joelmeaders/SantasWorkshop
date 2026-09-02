@@ -25,6 +25,14 @@ describe('ByEmailPage', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('provides a programmatic label for the email field', () => {
+		const input = fixture.nativeElement.querySelector(
+			'ion-input',
+		) as HTMLIonInputElement;
+
+		expect(input.label).toBe('Email');
+	});
+
 	it('searches the supplied email and clears the form', () => {
 		component.form.setValue({ emailAddress: 'family@example.test' });
 		component.search();

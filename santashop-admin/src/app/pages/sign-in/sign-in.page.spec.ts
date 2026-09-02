@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignInPage } from './sign-in.page';
-import {
-} from '../../../test-helpers';
 import { provideRouter, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular/standalone';
 import { AuthService } from '@santashop/core';
@@ -32,6 +30,17 @@ describe('SignInPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('provides programmatic labels for both sign-in fields', () => {
+		const inputs = fixture.nativeElement.querySelectorAll(
+			'ion-input',
+		) as NodeListOf<HTMLIonInputElement>;
+
+		expect([...inputs].map((input) => input.label)).toEqual([
+			'Email Address',
+			'Password',
+		]);
 	});
 
 	it('authenticates a valid staff user and opens the admin landing route', async () => {

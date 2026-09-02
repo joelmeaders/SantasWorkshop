@@ -9,8 +9,9 @@
 		<form [formGroup]="form">
 			<ion-list>
 				<ion-item>
-					<ion-label position="fixed"> Email </ion-label>
 					<ion-input formControlName="emailAddress"
+						label="Email"
+						labelPlacement="fixed"
 						type="email"
 						autocomplete="off"
 						placeholder="required"

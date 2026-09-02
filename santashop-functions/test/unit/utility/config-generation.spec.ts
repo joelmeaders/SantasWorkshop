@@ -458,6 +458,22 @@ describe('config.functions.cjs', () => {
 		);
 	});
 
+	it.each([
+		['TEST_AWS_ACCESS_KEY_ID', 'your-test-aws-access-key-id'],
+		['TEST_AWS_SECRET_ACCESS_KEY', 'your-test-aws-secret-access-key'],
+		['TEST_AWS_ACCESS_KEY_ID', 'your-aws-access-key-id'],
+		['TEST_AWS_SECRET_ACCESS_KEY', 'your-aws-secret-access-key'],
+	])('rejects placeholder AWS credential %s', (envKey, placeholder) => {
+		setManagedEnv({
+			...FUNCTIONS_ENV_KEYS,
+			[envKey]: placeholder,
+		});
+
+		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
+			`Refusing to use placeholder AWS credential: ${envKey} (or ${envKey.replace('TEST_', '')})`,
+		);
+	});
+
 	it('rejects seasonal labels and warm capacity outside the guarded range', () => {
 		setManagedEnv({
 			...FUNCTIONS_ENV_KEYS,

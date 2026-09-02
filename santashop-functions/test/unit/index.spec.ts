@@ -85,6 +85,12 @@ describe('functions index exports', () => {
 		expect(setGlobalOptionsMock).toHaveBeenCalledTimes(1);
 		expect(setGlobalOptionsMock).toHaveBeenCalledWith({
 			region: FUNCTION_REGION,
+			...(process.env.SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT
+				? {
+						serviceAccount:
+							process.env.SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT,
+					}
+				: {}),
 		});
 	});
 

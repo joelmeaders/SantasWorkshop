@@ -25,6 +25,17 @@ describe('ByNamePage', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('provides programmatic labels for both search fields', () => {
+		const inputs = fixture.nativeElement.querySelectorAll(
+			'ion-input',
+		) as NodeListOf<HTMLIonInputElement>;
+
+		expect([...inputs].map((input) => input.label)).toEqual([
+			'Last name',
+			'Zip code',
+		]);
+	});
+
 	it('searches by last name and zip, then clears the form', () => {
 		component.form.setValue({ lastName: 'Smith', zipCode: '80202' });
 		component.search();

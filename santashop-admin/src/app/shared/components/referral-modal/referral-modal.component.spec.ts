@@ -38,6 +38,21 @@ describe('ReferralModalComponent', () => {
 		);
 	});
 
+	it('filters referrals from the searchbar input event', async () => {
+		const searchbar = fixture.nativeElement.querySelector(
+			'ion-searchbar',
+		) as HTMLElement;
+
+		searchbar.dispatchEvent(
+			new CustomEvent('ionInput', { detail: { value: 'Whiz' } }),
+		);
+		await fixture.whenStable();
+
+		await expect(firstValueFrom(component.referrals$)).resolves.toEqual([
+			'Whiz Kids',
+		]);
+	});
+
 	it('dismisses a standard choice immediately', async () => {
 		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
 

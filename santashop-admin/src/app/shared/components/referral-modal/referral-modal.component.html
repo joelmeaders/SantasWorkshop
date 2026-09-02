@@ -15,7 +15,7 @@
 <ion-content>
 	@if ((referralChoice$ | async) === undefined) {
 		<ion-list>
-			<ion-searchbar (ionChange)="filter($event)"
+			<ion-searchbar (ionInput)="filter($event)"
 				animated="true"
 				placeholder="Enter agency name"
 			 />
@@ -59,9 +59,10 @@
 
 	@if ((referralChoice$ | async) === 'Other') {
 		<ion-item lines="none">
-			<ion-label position="stacked"> Type name of referral: </ion-label>
 			<ion-input #otherInput
 				class="other-input"
+				label="Type name of referral:"
+				labelPlacement="stacked"
 				maxlength="20"
 				minlength="3"
 			 />

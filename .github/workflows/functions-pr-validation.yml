@@ -21,6 +21,7 @@ on:
       - 'scripts/prepare-functions-deploy.cjs'
       - 'scripts/verify-functions-parity.cjs'
       - 'scripts/verify-functions-managed-resources.cjs'
+      - 'scripts/verify-public-parameters.cjs'
       - '.github/workflows/functions-pr-validation.yml'
       - '.github/workflows/functions-test-and-prod-release.yml'
 

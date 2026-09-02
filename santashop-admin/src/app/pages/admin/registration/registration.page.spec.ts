@@ -46,6 +46,19 @@ describe('RegistrationPage', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('provides programmatic labels for guardian fields', () => {
+		const inputs = fixture.nativeElement.querySelectorAll(
+			'form > ion-item ion-input',
+		) as NodeListOf<HTMLIonInputElement>;
+
+		expect([...inputs].map((input) => input.label)).toEqual([
+			'First Name',
+			'Last Name',
+			'Email',
+			'Zip Code',
+		]);
+	});
+
 	it('maintains children and records a referral selected through the modal', async () => {
 		await component.addChild({ id: 1, firstName: 'Ava' } as never);
 		await component.editChild({ id: 1, firstName: 'Ada' } as never);

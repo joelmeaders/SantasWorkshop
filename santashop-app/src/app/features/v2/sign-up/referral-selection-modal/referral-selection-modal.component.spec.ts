@@ -93,4 +93,19 @@ describe('ReferralSelectionModalComponent', () => {
 		expect(referralButton.closest('li')).toBeTruthy();
 		expect(fixture.nativeElement.querySelector('[role="listitem"]')).toBeNull();
 	});
+
+	it('filters the rendered choices while the user types', async () => {
+		const searchbar = fixture.nativeElement.querySelector(
+			'#referralSearchbar',
+		) as HTMLElement;
+
+		searchbar.dispatchEvent(
+			new CustomEvent('ionInput', { detail: { value: 'Whiz' } }),
+		);
+		await fixture.whenStable();
+
+		const document = fixture.nativeElement.ownerDocument as Document;
+		expect(document.getElementById('referral-Whiz Kids')).toBeTruthy();
+		expect(document.getElementById('referral-Denver Health')).toBeNull();
+	});
 });

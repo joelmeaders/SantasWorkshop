@@ -23,6 +23,7 @@ on:
       - 'scripts/prepare-functions-deploy.cjs'
       - 'scripts/verify-functions-parity.cjs'
       - 'scripts/verify-functions-managed-resources.cjs'
+      - 'scripts/verify-public-parameters.cjs'
       - '.github/workflows/functions-test-and-prod-release.yml'
       - '.github/workflows/functions-pr-validation.yml'
 
@@ -213,6 +214,9 @@ jobs:
           gcloud tasks queues list --project="$SANTASHOP_FIREBASE_PROJECT" --location="$SANTASHOP_FUNCTION_REGION" --format=json > "$RUNNER_TEMP/tasks.json"
           gcloud eventarc triggers list --project="$SANTASHOP_FIREBASE_PROJECT" --location=nam5 --format=json > "$RUNNER_TEMP/eventarc.json"
           node scripts/verify-functions-managed-resources.cjs "$RUNNER_TEMP/scheduler.json" "$RUNNER_TEMP/tasks.json" "$RUNNER_TEMP/eventarc.json"
+          ACCESS_TOKEN="$(gcloud auth print-access-token)"
+          curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firestore.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/databases/(default)/documents/parameters/public" > "$RUNNER_TEMP/public-parameters.json"
+          node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"
 
   deploy_prod:
     if: github.event_name == 'workflow_dispatch'
@@ -273,3 +277,6 @@ jobs:
           gcloud tasks queues list --project="$SANTASHOP_FIREBASE_PROJECT" --location="$SANTASHOP_FUNCTION_REGION" --format=json > "$RUNNER_TEMP/tasks.json"
           gcloud eventarc triggers list --project="$SANTASHOP_FIREBASE_PROJECT" --location=nam5 --format=json > "$RUNNER_TEMP/eventarc.json"
           node scripts/verify-functions-managed-resources.cjs "$RUNNER_TEMP/scheduler.json" "$RUNNER_TEMP/tasks.json" "$RUNNER_TEMP/eventarc.json"
+          ACCESS_TOKEN="$(gcloud auth print-access-token)"
+          curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firestore.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/databases/(default)/documents/parameters/public" > "$RUNNER_TEMP/public-parameters.json"
+          node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"

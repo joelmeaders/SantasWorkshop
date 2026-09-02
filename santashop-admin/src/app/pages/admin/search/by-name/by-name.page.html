@@ -13,8 +13,9 @@
 		<form [formGroup]="form">
 			<ion-list>
 				<ion-item>
-					<ion-label position="fixed"> Last name </ion-label>
 					<ion-input type="text"
+						label="Last name"
+						labelPlacement="fixed"
 						formControlName="lastName"
 						maxlength="20"
 						minlength="2"
@@ -29,8 +30,9 @@
 					}
 				</ion-item>
 				<ion-item counter>
-					<ion-label position="fixed"> Zip code </ion-label>
 					<ion-input type="number"
+						label="Zip code"
+						labelPlacement="fixed"
 						maxlength="5"
 						minlength="5"
 						formControlName="zipCode"

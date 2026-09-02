@@ -110,6 +110,27 @@
 					}
 				},
 				{
+					"source": "/saveDraftChild",
+					"function": {
+						"functionId": "saveDraftChild",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/deleteDraftChild",
+					"function": {
+						"functionId": "deleteDraftChild",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/setDraftAppointment",
+					"function": {
+						"functionId": "setDraftAppointment",
+						"region": "us-central1"
+					}
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}
@@ -221,6 +242,111 @@
 					"source": "/changeRegistrationDateTime",
 					"function": {
 						"functionId": "changeRegistrationDateTime",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/resolveRegistrationScan",
+					"function": {
+						"functionId": "resolveRegistrationScan",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableCreateStaffUser",
+					"function": {
+						"functionId": "callableCreateStaffUser",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableUpdateStaffUser",
+					"function": {
+						"functionId": "callableUpdateStaffUser",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableDeleteStaffUser",
+					"function": {
+						"functionId": "callableDeleteStaffUser",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableListEmailTemplates",
+					"function": {
+						"functionId": "callableListEmailTemplates",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableGetEmailTemplate",
+					"function": {
+						"functionId": "callableGetEmailTemplate",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableGetEmailTemplateRevision",
+					"function": {
+						"functionId": "callableGetEmailTemplateRevision",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableSaveEmailTemplateRevision",
+					"function": {
+						"functionId": "callableSaveEmailTemplateRevision",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableDeleteEmailTemplate",
+					"function": {
+						"functionId": "callableDeleteEmailTemplate",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callablePublishEmailTemplate",
+					"function": {
+						"functionId": "callablePublishEmailTemplate",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableSendTestEmailTemplate",
+					"function": {
+						"functionId": "callableSendTestEmailTemplate",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callablePreviewOwnerOperation",
+					"function": {
+						"functionId": "callablePreviewOwnerOperation",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableStartOwnerOperation",
+					"function": {
+						"functionId": "callableStartOwnerOperation",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableGetOwnerOperation",
+					"function": {
+						"functionId": "callableGetOwnerOperation",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/callableGetOwnerExportUrl",
+					"function": {
+						"functionId": "callableGetOwnerExportUrl",
 						"region": "us-central1"
 					}
 				},

@@ -14,7 +14,7 @@
 		<div class="referral-search">
 			<ion-searchbar
 				id="referralSearchbar"
-				(ionChange)="filter($event)"
+				(ionInput)="filter($event)"
 				animated="true"
 				[placeholder]="'REFERRAL.SEARCH_PLACEHOLDER' | translate"
 			/>

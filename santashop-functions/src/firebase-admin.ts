@@ -30,6 +30,8 @@ const buildAppOptions = (): AppOptions => {
 		storageBucket:
 			firebaseConfig.storageBucket ??
 			process.env['FIREBASE_STORAGE_BUCKET'],
+		serviceAccountId:
+			process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT'],
 	};
 };
 

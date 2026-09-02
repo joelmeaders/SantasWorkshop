@@ -40,6 +40,11 @@ declare type SortFnType = (
 	b: RegistrationSearchIndex,
 ) => number;
 
+const compareSearchValues = (
+	left: string | number | undefined,
+	right: string | number | undefined,
+): number => String(left ?? '').localeCompare(String(right ?? ''));
+
 @Component({
 	selector: 'admin-results',
 	templateUrl: './results.page.html',
@@ -70,22 +75,25 @@ export class ResultsPage {
 		a: RegistrationSearchIndex,
 		b: RegistrationSearchIndex,
 	): number =>
-		a.lastName.localeCompare(b.lastName) ||
-		a.firstName.localeCompare(b.firstName) ||
-		a.zip.localeCompare(b.zip);
+		compareSearchValues(a.lastName, b.lastName) ||
+		compareSearchValues(a.firstName, b.firstName) ||
+		compareSearchValues(a.zip, b.zip);
 
 	public readonly sortFirst = (
 		a: RegistrationSearchIndex,
 		b: RegistrationSearchIndex,
 	): number =>
-		a.lastName.localeCompare(b.firstName) ||
-		a.firstName.localeCompare(b.lastName) ||
-		a.zip.localeCompare(b.zip);
+		compareSearchValues(a.firstName, b.firstName) ||
+		compareSearchValues(a.lastName, b.lastName) ||
+		compareSearchValues(a.zip, b.zip);
 
 	public readonly sortEmail = (
 		a: RegistrationSearchIndex,
 		b: RegistrationSearchIndex,
-	): number => a.lastName.localeCompare(b.emailAddress);
+	): number =>
+		compareSearchValues(a.emailAddress, b.emailAddress) ||
+		compareSearchValues(a.lastName, b.lastName) ||
+		compareSearchValues(a.firstName, b.firstName);
 
 	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
 	protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));

@@ -50,4 +50,31 @@ describe('ResultsPage', () => {
 		component.ionViewWillLeave();
 		expect(searchService.reset).toHaveBeenCalledTimes(2);
 	});
+
+	it('sorts legacy numeric zip values without throwing', (): void => {
+		const numericZip = {
+			firstName: 'Amy',
+			lastName: 'Anderson',
+			zip: 80201,
+			emailAddress: 'amy@example.com',
+			customerId: 'numeric',
+		} as unknown as RegistrationSearchIndex;
+		const stringZip = {
+			...numericZip,
+			zip: '80202',
+			customerId: 'string',
+		};
+
+		expect(component.sortLast(numericZip, stringZip)).toBeLessThan(0);
+	});
+
+	it('sorts first-name and email selections by their displayed fields', (): void => {
+		const records = [
+			{ firstName: 'Zoe', lastName: 'Able', zip: '80202', emailAddress: 'a@example.com', customerId: 'zoe' },
+			{ firstName: 'Amy', lastName: 'Zulu', zip: '80201', emailAddress: 'z@example.com', customerId: 'amy' },
+		] as RegistrationSearchIndex[];
+
+		expect([...records].sort(component.sortFirst)[0]?.firstName).toBe('Amy');
+		expect([...records].sort(component.sortEmail)[0]?.emailAddress).toBe('a@example.com');
+	});
 });

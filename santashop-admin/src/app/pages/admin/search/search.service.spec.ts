@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { SearchService } from './search.service';
+import {
+	buildZipCodeSearchValues,
+	SearchService,
+} from './search.service';
 import { FireRepoLite } from '@santashop/core';
 import { firstValueFrom, of } from 'rxjs';
 import { requireDefined } from '../../../../test-helpers';
@@ -43,6 +46,12 @@ describe('SearchService', () => {
 		service.searchByEmail('FAMILY@EXAMPLE.TEST');
 		service.searchByCode('ab12cd');
 		expect(indexReadMany).toHaveBeenCalledTimes(3);
+	});
+
+	it('searches both normalized string and legacy numeric zip values', () => {
+		expect(buildZipCodeSearchValues('80204')).toEqual(['80204', 80204]);
+		expect(buildZipCodeSearchValues(80204)).toEqual(['80204', 80204]);
+		expect(buildZipCodeSearchValues('01234')).toEqual(['01234', 1234]);
 	});
 
 	it('queries users directly for duplicate email detection and clears results on reset', async () => {

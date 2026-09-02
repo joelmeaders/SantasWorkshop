@@ -75,6 +75,28 @@
 	padding: 0.25rem 0.75rem 1rem;
 }
 
+.legal-links {
+	display: flex;
+	justify-content: center;
+	gap: 2rem;
+}
+
+.legal-link {
+	appearance: none;
+	background: none;
+	border: 0;
+	color: var(--ion-color-primary);
+	cursor: pointer;
+	font: inherit;
+	padding: 0.25rem;
+}
+
+.legal-link:focus-visible {
+	border-radius: 0.25rem;
+	outline: 2px solid var(--ion-color-primary);
+	outline-offset: 2px;
+}
+
 .check-container {
 	padding-left: 1rem;
 }

@@ -216,4 +216,18 @@ describe('SignUpPage', () => {
 		expect(privacyModal.present).toHaveBeenCalledOnce();
 		expect(termsModal.present).toHaveBeenCalledOnce();
 	});
+
+	it('exposes legal dialogs as keyboard-focusable buttons', (): void => {
+		const legalButtons = Array.from(
+			fixture.nativeElement.querySelectorAll('.legal-link'),
+		) as HTMLButtonElement[];
+
+		expect(legalButtons).toHaveLength(2);
+		expect(legalButtons.every((button) => button.type === 'button')).toBe(true);
+		expect(
+			legalButtons.every(
+				(button) => button.getAttribute('aria-haspopup') === 'dialog',
+			),
+		).toBe(true);
+	});
 });

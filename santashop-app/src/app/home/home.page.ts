@@ -9,7 +9,7 @@ import { config } from '../../config';
 
 import { LanguageToggleComponent } from '../shared/components/language-toggle/language-toggle.component';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
 	IonContent,
 	IonGrid,
@@ -78,6 +78,7 @@ export class HomePage implements OnDestroy {
 	private readonly loadingController = inject(LoadingController);
 	private readonly route = inject(ActivatedRoute);
 	private readonly router = inject(Router);
+	private readonly translate = inject(TranslateService);
 	private readonly destroy$ = new Subject<void>();
 	private readonly resetEmailSent = new BehaviorSubject<boolean>(false);
 
@@ -124,8 +125,15 @@ export class HomePage implements OnDestroy {
 				? requestedUrl
 				: '/pre-registration/overview';
 			await this.router.navigateByUrl(returnUrl);
-		} catch (error) {
-			await this.errorHandler.handleError(error as IError);
+		} catch {
+			await this.errorHandler.handleError(
+				{
+					code: 'auth/sign-in-failed',
+					message: 'Authentication failed',
+					details: this.translate.instant('SIGNIN.INVALID_CREDENTIALS'),
+				},
+				this.translate.instant('SIGNIN.UNABLE_TO_SIGN_IN'),
+			);
 		} finally {
 			await loader.dismiss().catch(() => false);
 		}
@@ -137,7 +145,19 @@ export class HomePage implements OnDestroy {
 			await this.authService.resetPassword(this.resetEmail.value);
 			this.resetEmailSent.next(true);
 		} catch (error) {
-			await this.errorHandler.handleError(error as IError);
+			if ((error as IError)?.code?.toLowerCase() === 'auth/user-not-found') {
+				this.resetEmailSent.next(true);
+				return;
+			}
+
+			await this.errorHandler.handleError(
+				{
+					code: 'auth/password-reset-failed',
+					message: 'Password reset failed',
+					details: this.translate.instant('FORGOTPASS.TRY_AGAIN'),
+				},
+				this.translate.instant('FORGOTPASS.UNABLE_TO_RESET'),
+			);
 		}
 	}
 

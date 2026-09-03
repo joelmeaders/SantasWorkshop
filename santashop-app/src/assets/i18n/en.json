@@ -49,7 +49,9 @@
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "Forgot Password?",
-		"SIGNING_IN": "Signing in..."
+		"SIGNING_IN": "Signing in...",
+		"UNABLE_TO_SIGN_IN": "Unable to sign in",
+		"INVALID_CREDENTIALS": "The email or password is incorrect."
 	},
 	"SIGNUP": {
 		"CREATE_ACCOUNT_DISABLED": "We're full and cannot accept any more sign-ups right now. Please check our Facebook page for updates if any spots open up.",
@@ -183,7 +185,9 @@
 		"RESET_PASSWORD": "Reset password",
 		"EMAIL_SENT": "Email has been sent!",
 		"EMAIL_SENT_2": "Check your email for instructions to reset your password.",
-		"RESET_PASSWORD_AGAIN": "Reset password again"
+		"RESET_PASSWORD_AGAIN": "Reset password again",
+		"UNABLE_TO_RESET": "Unable to reset password",
+		"TRY_AGAIN": "We could not start password reset. Please try again later."
 	},
 	"REG_CLOSED": {
 		"1": "We're Sorry",

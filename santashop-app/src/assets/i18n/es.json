@@ -49,7 +49,9 @@
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "¿Olvidó su contraseña?",
-		"SIGNING_IN": "Iniciar sesión..."
+		"SIGNING_IN": "Iniciar sesión...",
+		"UNABLE_TO_SIGN_IN": "No se pudo iniciar sesión",
+		"INVALID_CREDENTIALS": "El correo electrónico o la contraseña son incorrectos."
 	},
 	"SIGNUP": {
 		"CREATE_ACCOUNT_DISABLED": "Estamos llenos y no podemos aceptar más inscripciones en este momento. Consulte nuestra página de Facebook para obtener actualizaciones si se abren lugares.",
@@ -183,7 +185,9 @@
 		"RESET_PASSWORD": "Restablecer contraseña",
 		"EMAIL_SENT": "¡Se ha enviado un correo electrónico!",
 		"EMAIL_SENT_2": "Revise su correo electrónico para obtener instrucciones para restablecer su contraseña.",
-		"RESET_PASSWORD_AGAIN": "Restablecer contraseña de nuevo"
+		"RESET_PASSWORD_AGAIN": "Restablecer contraseña de nuevo",
+		"UNABLE_TO_RESET": "No se pudo restablecer la contraseña",
+		"TRY_AGAIN": "No pudimos iniciar el restablecimiento de la contraseña. Inténtelo de nuevo más tarde."
 	},
 	"REG_CLOSED": {
 		"1": "Lo sentimos",

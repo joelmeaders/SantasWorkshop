@@ -146,7 +146,7 @@ describe('HomePage', () => {
 		expect(loader.dismiss).toHaveBeenCalledOnce();
 	});
 
-	it('reports sign-in and reset-password failures while always dismissing the loader', async (): Promise<void> => {
+	it('reports generic sign-in and reset-password failures while always dismissing the loader', async (): Promise<void> => {
 		const authService = TestBed.inject(AuthService);
 		const errorHandler = TestBed.inject(
 			ErrorHandlerService,
@@ -173,7 +173,40 @@ describe('HomePage', () => {
 		await component.resetPassword();
 
 		expect(errorHandler.handleError).toHaveBeenCalledTimes(2);
+		expect(errorHandler.handleError).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				code: 'auth/sign-in-failed',
+				message: 'Authentication failed',
+			}),
+			'translated',
+		);
+		expect(errorHandler.handleError).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({
+				code: 'auth/password-reset-failed',
+				message: 'Password reset failed',
+			}),
+			'translated',
+		);
 		expect(loader.dismiss).toHaveBeenCalledOnce();
+	});
+
+	it('shows the same reset confirmation when the account does not exist', async (): Promise<void> => {
+		const authService = TestBed.inject(AuthService);
+		const errorHandler = TestBed.inject(
+			ErrorHandlerService,
+		) as unknown as Mocked<ErrorHandlerService>;
+		vi.spyOn(authService, 'resetPassword').mockRejectedValue({
+			code: 'auth/user-not-found',
+		});
+		component.resetEmail.setValue('missing@example.com');
+
+		await component.resetPassword();
+		await fixture.whenStable();
+
+		expect(await firstValueFrom(component.resetEmailSent$)).toBe(true);
+		expect(errorHandler.handleError).not.toHaveBeenCalled();
 	});
 
 	it('marks a successful reset request as sent and can start another request', async (): Promise<void> => {

@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import checkInWithEdit from '../../src/fn/checkInWithEdit';
-import { COLLECTION_SCHEMA, type CheckInRequest } from '@santashop/models';
+import {
+	COLLECTION_SCHEMA,
+	type CheckInAggregatedStats,
+	type CheckInRequest,
+} from '@santashop/models';
 import type { CallableRequest } from 'firebase-functions/v2/https';
 import { createRegistration } from '../fixtures/factories';
 import {
@@ -10,6 +14,7 @@ import {
 	setDocument,
 } from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
+import { PROGRAM_YEAR } from '../../src/utility/runtime-config';
 
 describe.sequential('checkInWithEdit integration', () => {
 	beforeEach(async () => {
@@ -20,12 +25,18 @@ describe.sequential('checkInWithEdit integration', () => {
 		await setDocument(
 			COLLECTION_SCHEMA.registrations,
 			'edited-user-1',
-		createRegistration({ uid: 'edited-user-1', registrationSubmittedOn: new Date() }),
+			createRegistration({
+				uid: 'edited-user-1',
+				registrationSubmittedOn: new Date(),
+			}),
 		);
 		const result = await checkInWithEdit(
 			createCallableRequest(
 				{
-					registration: createRegistration({ uid: 'edited-user-1', registrationSubmittedOn: new Date() }),
+					registration: createRegistration({
+						uid: 'edited-user-1',
+						registrationSubmittedOn: new Date(),
+					}),
 					inputMethod: 'manual',
 				},
 				{
@@ -48,6 +59,14 @@ describe.sequential('checkInWithEdit integration', () => {
 				'edited-user-1',
 			),
 		).toMatchObject({ hasCheckedIn: true });
+		expect(
+			await getDocument<Record<string, unknown>>(
+				COLLECTION_SCHEMA.stats,
+				`checkin-${PROGRAM_YEAR}`,
+			),
+		).toMatchObject({
+			dateTimeCount: [expect.objectContaining({ modifiedCount: 1 })],
+		});
 	});
 
 	it('allows only one real Firestore transaction when check-in variants race', async () => {
@@ -55,25 +74,50 @@ describe.sequential('checkInWithEdit integration', () => {
 			uid: 'checkin-race-user',
 			registrationSubmittedOn: new Date(),
 		});
-		await setDocument(COLLECTION_SCHEMA.registrations, registration.uid!, registration);
-		const request = (inputMethod: 'camera' | 'manual'): CallableRequest<CheckInRequest> => createCallableRequest(
-			{ registration, inputMethod },
-			{ admin: true, uid: `scanner-${inputMethod}` },
+		await setDocument(
+			COLLECTION_SCHEMA.registrations,
+			registration.uid!,
+			registration,
 		);
+		const request = (
+			inputMethod: 'camera' | 'manual',
+		): CallableRequest<CheckInRequest> =>
+			createCallableRequest(
+				{ registration, inputMethod },
+				{ admin: true, uid: `scanner-${inputMethod}` },
+			);
 
 		const outcomes = await Promise.allSettled([
 			checkInWithEdit(request('manual')),
 			(await import('../../src/fn/checkIn')).default(request('camera')),
 		]);
 
-		expect(outcomes.filter((outcome) => outcome.status === 'fulfilled')).toHaveLength(1);
-		expect(outcomes.filter((outcome) => outcome.status === 'rejected')).toHaveLength(1);
+		expect(
+			outcomes.filter((outcome) => outcome.status === 'fulfilled'),
+		).toHaveLength(1);
+		expect(
+			outcomes.filter((outcome) => outcome.status === 'rejected'),
+		).toHaveLength(1);
 		expect(await getCollectionCount(COLLECTION_SCHEMA.checkins)).toBe(1);
-		expect(await getCollectionCount(COLLECTION_SCHEMA.registrationScanAttempts)).toBe(1);
+		expect(
+			await getCollectionCount(
+				COLLECTION_SCHEMA.registrationScanAttempts,
+			),
+		).toBe(1);
 		const storedRegistration = await getDocument<Record<string, unknown>>(
 			COLLECTION_SCHEMA.registrations,
 			registration.uid!,
 		);
 		expect(storedRegistration).toMatchObject({ hasCheckedIn: true });
+		const stats = await getDocument<CheckInAggregatedStats>(
+			COLLECTION_SCHEMA.stats,
+			`checkin-${PROGRAM_YEAR}`,
+		);
+		expect(
+			stats?.dateTimeCount.reduce(
+				(total, bucket) => total + bucket.customerCount,
+				0,
+			),
+		).toBe(1);
 	}, 15000);
 });

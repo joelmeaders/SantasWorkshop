@@ -9,6 +9,7 @@ import {
 	loadCheckInAdminHandlers,
 	recordCheckInRaceAttemptMock,
 } from '../helpers/checkin-admin.unit-helper';
+import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('checkInWithEdit handler', () => {
 	let adminMock: CheckInAdminMock;
@@ -45,6 +46,13 @@ describe('checkInWithEdit handler', () => {
 		expect(adminMock.doc).toHaveBeenCalledWith(
 			'editedregistrations/test-user-123',
 		);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			adminMock.getDocRef(`stats/checkin-${PROGRAM_YEAR}`),
+			expect.objectContaining({
+				dateTimeCount: [expect.objectContaining({ modifiedCount: 1 })],
+			}),
+			{ merge: false },
+		);
 	});
 
 	it('accepts owner and check-in role claims but validates the input method', async () => {
@@ -52,7 +60,10 @@ describe('checkInWithEdit handler', () => {
 		await expect(
 			checkInWithEdit(
 				createCallableRequest(
-					{ registration: createRegistration(), inputMethod: 'barcode' },
+					{
+						registration: createRegistration(),
+						inputMethod: 'barcode',
+					},
 					{ owner: true },
 				),
 			),
@@ -62,8 +73,19 @@ describe('checkInWithEdit handler', () => {
 	it('does not create edited records for an incomplete or cancelled source registration', async () => {
 		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
 		await expect(
-			checkInWithEdit(createCallableRequest({ registration: createRegistration({ children: [] }), inputMethod: 'manual' }, { admin: true })),
-		).rejects.toMatchObject({ code: 'failed-precondition', message: '-11' });
+			checkInWithEdit(
+				createCallableRequest(
+					{
+						registration: createRegistration({ children: [] }),
+						inputMethod: 'manual',
+					},
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'failed-precondition',
+			message: '-11',
+		});
 
 		adminMock.setDocSnapshot('registrations/test-user-123', {
 			...createRegistration(),
@@ -71,16 +93,29 @@ describe('checkInWithEdit handler', () => {
 			cancelledOn: new Date(),
 		});
 		await expect(
-			checkInWithEdit(createCallableRequest({ registration: createRegistration(), inputMethod: 'manual' }, { admin: true })),
+			checkInWithEdit(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'manual',
+					},
+					{ admin: true },
+				),
+			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
 	it('records duplicate edited check-ins as a race without creating a second edited registration', async () => {
 		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
-		const registration = { ...createRegistration(), registrationSubmittedOn: new Date() };
+		const registration = {
+			...createRegistration(),
+			registrationSubmittedOn: new Date(),
+		};
 		adminMock.setDocSnapshot('registrations/test-user-123', registration);
-		adminMock.setDocSnapshot('checkins/test-user-123', { customerId: 'test-user-123' });
+		adminMock.setDocSnapshot('checkins/test-user-123', {
+			customerId: 'test-user-123',
+		});
 		recordCheckInRaceAttemptMock.mockResolvedValue({ blocked: true });
 
 		await expect(
@@ -90,7 +125,10 @@ describe('checkInWithEdit handler', () => {
 					{ roles: ['checkin'], uid: 'staff-2' },
 				),
 			),
-		).rejects.toMatchObject({ code: 'already-exists', details: { blocked: true } });
+		).rejects.toMatchObject({
+			code: 'already-exists',
+			details: { blocked: true },
+		});
 		expect(recordCheckInRaceAttemptMock).toHaveBeenCalledWith(
 			expect.objectContaining({ qrcode: registration.qrcode }),
 			'staff-2',

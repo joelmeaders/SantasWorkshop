@@ -125,6 +125,7 @@
 	},
 	"SCHEDULE": {
 		"CHOOSE_DATE_TIME": "Elija una fecha y hora disponible para recoger sus juguetes.",
+		"LOADING": "Cargando citas disponibles…",
 		"YOUR_DATE/TIME": "Su fecha/hora",
 		"FULL": "Todos los cupos han sido ocupados y no hay fechas ni horarios disponibles. Consulta Facebook para obtener actualizaciones.",
 		"SELECT_DATETIME": "Seleccione fecha y hora"

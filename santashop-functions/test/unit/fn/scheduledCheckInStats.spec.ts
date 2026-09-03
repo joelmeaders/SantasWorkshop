@@ -32,6 +32,7 @@ describe('scheduledCheckInStats handler', () => {
 				id: 'checkin-1',
 				data: {
 					registrationCode: 'ABCD1234',
+					inStats: false,
 					checkInDateTime: {
 						toDate: () => new Date('2025-12-10T18:10:00.000Z'),
 					},
@@ -42,6 +43,7 @@ describe('scheduledCheckInStats handler', () => {
 				id: 'checkin-2',
 				data: {
 					registrationCode: 'onsite',
+					inStats: false,
 					checkInDateTime: {
 						toDate: () => new Date('2025-12-10T18:45:00.000Z'),
 					},
@@ -56,7 +58,7 @@ describe('scheduledCheckInStats handler', () => {
 
 		await expect(scheduledCheckInStats()).resolves.toBe('Reset Checkins');
 
-		expect(backgroundMock.transactionSet).toHaveBeenCalledTimes(2);
+		expect(backgroundMock.transactionSet).toHaveBeenCalledTimes(3);
 		expect(backgroundMock.getDocRef('stats/checkin-2025').set).toHaveBeenCalledWith(
 			expect.objectContaining({
 				dateTimeCount: [

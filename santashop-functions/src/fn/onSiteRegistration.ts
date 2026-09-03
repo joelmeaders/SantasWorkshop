@@ -1,5 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import { CheckIn, COLLECTION_SCHEMA, Registration } from '../models';
+import {
+	CheckIn,
+	CheckInAggregatedStats,
+	COLLECTION_SCHEMA,
+	Registration,
+} from '../models';
 import {
 	calculateRegistrationStats,
 	isRegistrationComplete,
@@ -7,8 +12,9 @@ import {
 import admin from '../firebase-admin';
 import { getErrorMessage, getErrorStatus } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import { PROGRAM_YEAR } from '../utility/runtime-config';
+import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 import { isAdminToken } from '../utility/capabilities';
+import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
 
 const log = createFunctionLogger('onSiteRegistration');
 
@@ -45,8 +51,6 @@ export default async function onSiteRegistration(
 		.collection(COLLECTION_SCHEMA.onSiteRegistrations)
 		.doc().id;
 
-	const batch = admin.firestore().batch();
-
 	// Registration
 	const registrationDocRef = admin
 		.firestore()
@@ -62,8 +66,6 @@ export default async function onSiteRegistration(
 		programYear: PROGRAM_YEAR,
 	};
 
-	batch.create(registrationDocRef, updatedRegistration);
-
 	// Check In
 	const checkinDocRef = admin
 		.firestore()
@@ -72,15 +74,31 @@ export default async function onSiteRegistration(
 	const checkin = {
 		checkInDateTime: new Date(),
 		customerId: record.uid,
-		inStats: false,
+		inStats: true,
 		registrationCode: 'onsite',
 		stats: calculateRegistrationStats(record, true),
 	} as CheckIn;
 
-	batch.create(checkinDocRef, checkin);
+	const statsDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.stats}/${getStatsDocumentId('checkin')}`);
 
 	try {
-		await batch.commit();
+		await admin.firestore().runTransaction(async (transaction) => {
+			const statsDocument = await transaction.get(statsDocRef);
+			transaction.create(registrationDocRef, updatedRegistration);
+			transaction.create(checkinDocRef, checkin);
+			transaction.set(
+				statsDocRef,
+				addCheckInToAggregatedStats(
+					statsDocument.exists
+						? (statsDocument.data() as CheckInAggregatedStats)
+						: undefined,
+					checkin,
+				),
+				{ merge: false },
+			);
+		});
 		return checkin.stats!.children;
 	} catch (error) {
 		throw new HttpsError(

@@ -9,6 +9,7 @@ import {
 	loadCheckInAdminHandlers,
 	recordCheckInRaceAttemptMock,
 } from '../helpers/checkin-admin.unit-helper';
+import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('checkIn handler', () => {
 	let adminMock: CheckInAdminMock;
@@ -37,7 +38,10 @@ describe('checkIn handler', () => {
 		await expect(
 			checkIn(
 				createCallableRequest(
-					{ registration: createRegistration(), inputMethod: 'keyboard' },
+					{
+						registration: createRegistration(),
+						inputMethod: 'keyboard',
+					},
 					{ roles: ['checkin'] },
 				),
 			),
@@ -48,11 +52,27 @@ describe('checkIn handler', () => {
 		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
 		const incomplete = createRegistration({ children: [] });
 		await expect(
-			checkIn(createCallableRequest({ registration: incomplete, inputMethod: 'manual' }, { admin: true })),
-		).rejects.toMatchObject({ code: 'failed-precondition', message: '-11' });
+			checkIn(
+				createCallableRequest(
+					{ registration: incomplete, inputMethod: 'manual' },
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'failed-precondition',
+			message: '-11',
+		});
 
 		await expect(
-			checkIn(createCallableRequest({ registration: createRegistration(), inputMethod: 'manual' }, { admin: true })),
+			checkIn(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'manual',
+					},
+					{ admin: true },
+				),
+			),
 		).rejects.toMatchObject({ code: 'not-found' });
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
@@ -66,7 +86,15 @@ describe('checkIn handler', () => {
 		});
 
 		await expect(
-			checkIn(createCallableRequest({ registration: createRegistration(), inputMethod: 'camera' }, { admin: true })),
+			checkIn(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'camera',
+					},
+					{ admin: true },
+				),
+			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
@@ -78,7 +106,9 @@ describe('checkIn handler', () => {
 			registrationSubmittedOn: new Date(),
 		};
 		adminMock.setDocSnapshot('registrations/test-user-123', registration);
-		adminMock.setDocSnapshot('checkins/test-user-123', { customerId: 'test-user-123' });
+		adminMock.setDocSnapshot('checkins/test-user-123', {
+			customerId: 'test-user-123',
+		});
 		recordCheckInRaceAttemptMock.mockResolvedValue({ blocked: true });
 
 		await expect(
@@ -88,7 +118,10 @@ describe('checkIn handler', () => {
 					{ admin: true, uid: 'staff-1' },
 				),
 			),
-		).rejects.toMatchObject({ code: 'already-exists', details: { blocked: true } });
+		).rejects.toMatchObject({
+			code: 'already-exists',
+			details: { blocked: true },
+		});
 		expect(recordCheckInRaceAttemptMock).toHaveBeenCalledWith(
 			expect.objectContaining({ qrcode: registration.qrcode }),
 			'staff-1',
@@ -99,11 +132,25 @@ describe('checkIn handler', () => {
 
 	it('maps transaction conflict errors to already-exists', async () => {
 		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
-		adminMock.runTransaction.mockRejectedValue({ code: 6, message: 'conflict' });
+		adminMock.runTransaction.mockRejectedValue({
+			code: 6,
+			message: 'conflict',
+		});
 
 		await expect(
-			checkIn(createCallableRequest({ registration: createRegistration(), inputMethod: 'manual' }, { admin: true })),
-		).rejects.toMatchObject({ code: 'already-exists', message: 'conflict' });
+			checkIn(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'manual',
+					},
+					{ admin: true },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'already-exists',
+			message: 'conflict',
+		});
 	});
 
 	it('creates a check-in record and returns the child count', async () => {
@@ -131,6 +178,18 @@ describe('checkIn handler', () => {
 			adminMock.getDocRef('registrations/test-user-123'),
 			{ hasCheckedIn: true },
 			{ merge: true },
+		);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			adminMock.getDocRef(`stats/checkin-${PROGRAM_YEAR}`),
+			expect.objectContaining({
+				dateTimeCount: [
+					expect.objectContaining({
+						customerCount: 1,
+						childCount: 1,
+					}),
+				],
+			}),
+			{ merge: false },
 		);
 	});
 });

@@ -21,12 +21,18 @@ describe.sequential('checkIn integration', () => {
 		await setDocument(
 			COLLECTION_SCHEMA.registrations,
 			'checkin-user-1',
-			createRegistration({ uid: 'checkin-user-1', registrationSubmittedOn: new Date() }),
+			createRegistration({
+				uid: 'checkin-user-1',
+				registrationSubmittedOn: new Date(),
+			}),
 		);
 		const result = await checkIn(
 			createCallableRequest(
 				{
-					registration: createRegistration({ uid: 'checkin-user-1', registrationSubmittedOn: new Date() }),
+					registration: createRegistration({
+						uid: 'checkin-user-1',
+						registrationSubmittedOn: new Date(),
+					}),
 					inputMethod: 'manual',
 				},
 				{
@@ -45,6 +51,7 @@ describe.sequential('checkIn integration', () => {
 		).toMatchObject({
 			customerId: 'checkin-user-1',
 			registrationCode: 'ABCD2345',
+			inStats: true,
 		});
 		expect(
 			await getDocument<Record<string, unknown>>(
@@ -52,6 +59,19 @@ describe.sequential('checkIn integration', () => {
 				'checkin-user-1',
 			),
 		).toMatchObject({ hasCheckedIn: true });
+		expect(
+			await getDocument<Record<string, unknown>>(
+				COLLECTION_SCHEMA.stats,
+				`checkin-${PROGRAM_YEAR}`,
+			),
+		).toMatchObject({
+			dateTimeCount: [
+				expect.objectContaining({
+					customerCount: 1,
+					childCount: 1,
+				}),
+			],
+		});
 	});
 
 	it('persists a late duplicate risk summary without persisting a raw code', async () => {
@@ -59,7 +79,11 @@ describe.sequential('checkIn integration', () => {
 			uid: 'late-duplicate-user',
 			registrationSubmittedOn: new Date(),
 		});
-		await setDocument(COLLECTION_SCHEMA.registrations, registration.uid!, registration);
+		await setDocument(
+			COLLECTION_SCHEMA.registrations,
+			registration.uid!,
+			registration,
+		);
 		await setDocument(COLLECTION_SCHEMA.checkins, registration.uid!, {
 			customerId: registration.uid,
 			registrationCode: registration.qrcode,
@@ -68,16 +92,26 @@ describe.sequential('checkIn integration', () => {
 			stats: { children: 1 },
 		});
 
-		await expect(checkIn(createCallableRequest(
-			{ registration, inputMethod: 'manual' },
-			{ admin: true, uid: 'auditor-user' },
-		))).rejects.toMatchObject({ code: 'already-exists' });
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{ registration, inputMethod: 'manual' },
+					{ admin: true, uid: 'auditor-user' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'already-exists' });
 
-		expect(await getCollectionCount(COLLECTION_SCHEMA.registrationScanAttempts)).toBe(1);
-		expect(await getDocument<Record<string, unknown>>(
-			COLLECTION_SCHEMA.registrationScanRiskSummaries,
-			`${PROGRAM_YEAR}_${registration.uid}`,
-		)).toMatchObject({
+		expect(
+			await getCollectionCount(
+				COLLECTION_SCHEMA.registrationScanAttempts,
+			),
+		).toBe(1);
+		expect(
+			await getDocument<Record<string, unknown>>(
+				COLLECTION_SCHEMA.registrationScanRiskSummaries,
+				`${PROGRAM_YEAR}_${registration.uid}`,
+			),
+		).toMatchObject({
 			customerId: registration.uid,
 			lateDuplicateAttemptCount: 1,
 			totalRiskAttemptCount: 1,

@@ -21,7 +21,12 @@
 				</div>
 			} @else {
 				<p class="card-guidance">{{ 'SCHEDULE.CHOOSE_DATE_TIME' | translate }}</p>
-				@if (availableSlotDays().length) {
+				@if (slotsLoading()) {
+					<div class="schedule-loading" data-schedule-loading role="status" aria-live="polite">
+						<ion-spinner name="crescent" aria-hidden="true" />
+						<span>{{ 'SCHEDULE.LOADING' | translate }}</span>
+					</div>
+				} @else if (availableSlotDays().length) {
 					<ion-accordion-group [attr.aria-label]="'OVERVIEW.CURRENT_AVAILABILITY' | translate">
 						@for (day of availableSlotDays(); track day.key) {
 							<ion-accordion [value]="day.key">

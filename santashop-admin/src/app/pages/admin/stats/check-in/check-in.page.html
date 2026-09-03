@@ -12,13 +12,36 @@
 
 <ion-content>
 	<ion-grid>
-		@if ((hasData$ | async) === false) {
-		<ion-row>
-			<ion-col class="ion-text-center">
-				<ion-title> No data found for this year </ion-title>
+		@let checkInState = checkInState$ | async;
+		@if (!checkInState || checkInState.status === 'loading') {
+		<ion-row data-checkin-stats-loading role="status" aria-live="polite">
+			<ion-col class="ion-text-center ion-padding">
+				<ion-spinner name="crescent" aria-hidden="true" />
+				<p>Loading check-in statistics…</p>
 			</ion-col>
 		</ion-row>
-		} @else {
+		} @else if (checkInState.status === 'empty') {
+		<ion-row>
+			<ion-col class="ion-text-center">
+				<ion-title>No check-ins have been recorded for this year.</ion-title>
+				<p>New successful check-ins appear here immediately.</p>
+				<ion-button fill="outline" (click)="refresh()">
+					<ion-icon name="refresh-sharp" slot="start" aria-hidden="true" />
+					Refresh
+				</ion-button>
+			</ion-col>
+		</ion-row>
+		} @else if (checkInState.status === 'error') {
+		<ion-row role="alert">
+			<ion-col class="ion-text-center">
+				<ion-title>Check-in statistics could not be loaded.</ion-title>
+				<ion-button fill="outline" (click)="refresh()">
+					<ion-icon name="refresh-sharp" slot="start" aria-hidden="true" />
+					Try Again
+				</ion-button>
+			</ion-col>
+		</ion-row>
+		} @else if (checkInState.status === 'ready') {
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
 				Updated {{ checkinLastUpdated$ | async | date:'short' }}
@@ -100,9 +123,4 @@
 		</ion-row>
 		}
 	</ion-grid>
-	<ng-template #noData>
-		<div class="ion-padding">
-			<ion-title> No data yet. Please check back later. </ion-title>
-		</div>
-	</ng-template>
 </ion-content>

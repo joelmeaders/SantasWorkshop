@@ -43,6 +43,9 @@ const ALL_FUNCTION_ENV_KEYS = [
 	...OPTIONAL_FUNCTION_ENV_KEYS,
 ];
 
+const PLACEHOLDER_AWS_CREDENTIAL_PATTERN =
+	/^your-(?:(?:local|test|prod)-)?aws-(?:access-key-id|secret-access-key)$/iu;
+
 const loadLocalEnvFiles = () => {
 	loadEnvFiles([
 		path.resolve(process.cwd(), '.env'),
@@ -114,6 +117,14 @@ const buildFunctionsConfig = (mode) => {
 		const value = getEnvValue(mode, key);
 		if (value !== undefined && value !== '') {
 			config[key] = value;
+		}
+	}
+
+	for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']) {
+		if (PLACEHOLDER_AWS_CREDENTIAL_PATTERN.test(config[key].trim())) {
+			throw new Error(
+				`Refusing to use placeholder AWS credential: ${getModePrefix(mode)}_${key} (or ${key})`,
+			);
 		}
 	}
 

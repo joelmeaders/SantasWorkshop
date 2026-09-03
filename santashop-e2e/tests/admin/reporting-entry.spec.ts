@@ -26,8 +26,13 @@ test.describe('admin reporting routes', () => {
 
 		await page.goto('/admin/stats/check-in');
 		await expect(page.locator('admin-header')).toContainText('Check-In Stats');
+		await expect(page.locator('[data-checkin-stats-loading]')).toHaveCount(0, {
+			timeout: 15000,
+		});
 		await expect(
-			page.getByText('No data found for this year', { exact: true }),
+			page.getByText('No check-ins have been recorded for this year.', {
+				exact: true,
+			}),
 		).toBeVisible({ timeout: 15000 });
 
 		await page.goto('/admin/stats/user');

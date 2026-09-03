@@ -30,6 +30,14 @@ ion-accordion-group {
 	overflow: hidden;
 }
 
+.schedule-loading {
+	align-items: center;
+	color: var(--santa-muted);
+	display: flex;
+	gap: 0.75rem;
+	min-height: 3rem;
+}
+
 @media (max-width: 480px) {
 	.card-actions ion-button {
 		flex: 1 1 auto;

@@ -28,6 +28,24 @@ describe('ScheduleCardComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('shows a loading status until appointment availability arrives', async () => {
+		fixture.componentRef.setInput('canChooseDateTime', true);
+		await fixture.whenStable();
+
+		expect(
+			fixture.nativeElement.querySelector('[data-schedule-loading]'),
+		).not.toBeNull();
+		expect(fixture.nativeElement.querySelector('ion-note')).toBeNull();
+
+		fixture.componentRef.setInput('slots', []);
+		await fixture.whenStable();
+
+		expect(
+			fixture.nativeElement.querySelector('[data-schedule-loading]'),
+		).toBeNull();
+		expect(fixture.nativeElement.querySelector('ion-note')).not.toBeNull();
+	});
+
 	it('does not expose disabled slots as current availability', () => {
 		fixture.componentRef.setInput('slots', [
 			{
@@ -125,9 +143,11 @@ describe('ScheduleCardComponent', () => {
 		await fixture.whenStable();
 
 		expect(component.expanded()).toBe(true);
-		(fixture.nativeElement.querySelector(
-			'[data-cancel-schedule-change]',
-		) as HTMLElement).click();
+		(
+			fixture.nativeElement.querySelector(
+				'[data-cancel-schedule-change]',
+			) as HTMLElement
+		).click();
 		await fixture.whenStable();
 
 		expect(component.expanded()).toBe(false);

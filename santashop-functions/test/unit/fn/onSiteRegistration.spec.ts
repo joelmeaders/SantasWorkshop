@@ -8,6 +8,7 @@ import {
 	generateQrCodeMock,
 	loadCheckInAdminHandlers,
 } from '../helpers/checkin-admin.unit-helper';
+import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('onSiteRegistration handler', () => {
 	let adminMock: CheckInAdminMock;
@@ -33,7 +34,19 @@ describe('onSiteRegistration handler', () => {
 		);
 
 		expect(result).toBe(1);
-		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			adminMock.getDocRef(`stats/checkin-${PROGRAM_YEAR}`),
+			expect.objectContaining({
+				dateTimeCount: [
+					expect.objectContaining({
+						customerCount: 1,
+						pregisteredCount: 0,
+					}),
+				],
+			}),
+			{ merge: false },
+		);
 		expect(adminMock.collection).toHaveBeenCalledWith(
 			'onsiteregistrations',
 		);
@@ -51,7 +64,7 @@ describe('onSiteRegistration handler', () => {
 				createCallableRequest(createRegistration(), { admin: false }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied', message: '-99' });
-		expect(adminMock.batchCreate).not.toHaveBeenCalled();
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
 	it('rejects incomplete on-site registrations before writing a batch', async () => {
@@ -60,19 +73,18 @@ describe('onSiteRegistration handler', () => {
 
 		await expect(
 			onSiteRegistration(
-				createCallableRequest(
-					createRegistration({ children: [] }),
-					{ roles: ['admin'] },
-				),
+				createCallableRequest(createRegistration({ children: [] }), {
+					roles: ['admin'],
+				}),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
-		expect(adminMock.batchCreate).not.toHaveBeenCalled();
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
 	it('preserves a batch failure status when persistence cannot commit', async () => {
 		const { onSiteRegistration } =
 			await loadCheckInAdminHandlers(adminMock);
-		adminMock.batchCommit.mockRejectedValue({
+		adminMock.runTransaction.mockRejectedValue({
 			status: 'already-exists',
 			message: 'On-site record already exists.',
 		});

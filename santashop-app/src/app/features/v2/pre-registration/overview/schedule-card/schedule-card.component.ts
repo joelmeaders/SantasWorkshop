@@ -3,7 +3,7 @@ import type { DateTimeSlot } from '@santashop/models';
 import { TimeSlotPipe } from '@santashop/core';
 import { DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonList, IonNote } from '@ionic/angular/standalone';
+import { IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonList, IonNote, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { calendarOutline, chevronDownOutline, createOutline } from 'ionicons/icons';
 
@@ -18,18 +18,19 @@ interface ScheduleDay {
 	templateUrl: './schedule-card.component.html',
 	styleUrls: ['./schedule-card.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [DatePipe, TimeSlotPipe, TranslateModule, IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonList, IonNote],
+	imports: [DatePipe, TimeSlotPipe, TranslateModule, IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonList, IonNote, IonSpinner],
 })
 export class ScheduleCardComponent {
 	private readonly translate = inject(TranslateService);
 	public readonly dateTimeSlot = input<DateTimeSlot | null | undefined>();
-	public readonly slots = input<DateTimeSlot[]>([]);
+	public readonly slots = input<DateTimeSlot[] | null | undefined>();
 	public readonly canChooseDateTime = input(false);
 	public readonly busy = input(false);
 	public readonly collapsed = input(false);
 	public readonly selectRequested = output<DateTimeSlot | undefined>();
 	public readonly expanded = signal(false);
-	public readonly availableSlots = computed(() => this.slots().filter((slot) => slot.enabled));
+	public readonly slotsLoading = computed(() => this.slots() == null);
+	public readonly availableSlots = computed(() => (this.slots() ?? []).filter((slot) => slot.enabled));
 	public readonly availableSlotDays = computed<ScheduleDay[]>(() => {
 		const days = new Map<string, ScheduleDay>();
 

@@ -31,7 +31,7 @@
 						<section class="workflow-section appointment-step" id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
 							<app-schedule-card
 								[dateTimeSlot]="dateTimeSlot$ | async"
-								[slots]="(availableSlots$ | async) ?? []"
+								[slots]="availableSlots$ | async"
 								[canChooseDateTime]="(canChooseDateTime$ | async) ?? false"
 								[busy]="isSaving()"
 								[collapsed]="reviewing()"

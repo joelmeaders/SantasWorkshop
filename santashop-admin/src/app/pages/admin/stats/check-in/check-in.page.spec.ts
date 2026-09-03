@@ -10,7 +10,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
 import { CheckInAggregatedStats } from '@santashop/models';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 
 describe('CheckInPage', () => {
 	let component: CheckInPage;
@@ -41,6 +41,45 @@ describe('CheckInPage', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('keeps the empty state hidden while statistics are loading', async () => {
+		const pending = new Subject<CheckInAggregatedStats | undefined>();
+		statsCollection.read.mockReturnValue(pending);
+
+		component.refresh();
+		await fixture.whenStable();
+
+		expect(
+			fixture.nativeElement.querySelector('[data-checkin-stats-loading]'),
+		).not.toBeNull();
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'No check-ins have been recorded',
+		);
+
+		pending.next(undefined);
+		await fixture.whenStable();
+
+		expect(
+			fixture.nativeElement.querySelector('[data-checkin-stats-loading]'),
+		).toBeNull();
+		expect(fixture.nativeElement.textContent).toContain(
+			'No check-ins have been recorded',
+		);
+	});
+
+	it('renders a recoverable error state when statistics cannot load', async () => {
+		statsCollection.read.mockReturnValue(
+			throwError(() => new Error('offline')),
+		);
+
+		component.refresh();
+		await fixture.whenStable();
+
+		expect(
+			fixture.nativeElement.querySelector('[role="alert"]'),
+		).not.toBeNull();
+		expect(fixture.nativeElement.textContent).toContain('Try Again');
+	});
+
 	it('maps check-in statistics into totals, timestamps, and daily charts', async () => {
 		statsCollection.read.mockReturnValue(
 			of({
@@ -65,17 +104,46 @@ describe('CheckInPage', () => {
 				],
 			} as CheckInAggregatedStats),
 		);
+		component.refresh();
 
 		await expect(firstValueFrom(component.hasData$)).resolves.toBe(true);
-		await expect(firstValueFrom(component.totalCustomers$)).resolves.toBe(5);
+		await expect(firstValueFrom(component.totalCustomers$)).resolves.toBe(
+			5,
+		);
 		await expect(firstValueFrom(component.totalChildren$)).resolves.toBe(6);
-		await expect(firstValueFrom(component.totalPreregistered$)).resolves.toBe(3);
-		await expect(firstValueFrom(component.onSiteRegistrations$)).resolves.toBe(2);
-		await expect(firstValueFrom(component.totalModifiedRegistrations$)).resolves.toBe(1);
-		await expect(firstValueFrom(component.checkinLastUpdated$)).resolves.toContain('2026');
-		await expect(firstValueFrom(component.checkInsByDayHour$)).resolves.toMatchObject([
-			{ datasets: [{ label: 'Dec 10, 2026', data: [2], dataSeriesLabels: ['9am'] }] },
-			{ datasets: [{ label: 'Dec 11, 2026', data: [3], dataSeriesLabels: ['1pm'] }] },
+		await expect(
+			firstValueFrom(component.totalPreregistered$),
+		).resolves.toBe(3);
+		await expect(
+			firstValueFrom(component.onSiteRegistrations$),
+		).resolves.toBe(2);
+		await expect(
+			firstValueFrom(component.totalModifiedRegistrations$),
+		).resolves.toBe(1);
+		await expect(
+			firstValueFrom(component.checkinLastUpdated$),
+		).resolves.toContain('2026');
+		await expect(
+			firstValueFrom(component.checkInsByDayHour$),
+		).resolves.toMatchObject([
+			{
+				datasets: [
+					{
+						label: 'Dec 10, 2026',
+						data: [2],
+						dataSeriesLabels: ['9am'],
+					},
+				],
+			},
+			{
+				datasets: [
+					{
+						label: 'Dec 11, 2026',
+						data: [3],
+						dataSeriesLabels: ['1pm'],
+					},
+				],
+			},
 		]);
 	});
 

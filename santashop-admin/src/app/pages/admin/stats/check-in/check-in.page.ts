@@ -3,17 +3,16 @@ import { Timestamp } from 'firebase/firestore';
 import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
+	catchError,
 	combineLatest,
+	filter,
 	map,
+	of,
 	shareReplay,
+	startWith,
 	switchMap,
 } from 'rxjs';
-import {
-	FireRepoLite,
-	filterNil,
-	PROGRAM_YEAR,
-	SHOP_DAYS,
-} from '@santashop/core';
+import { FireRepoLite, PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
@@ -46,7 +45,19 @@ import {
 	IonIcon,
 	IonText,
 	IonTitle,
+	IonSpinner,
 } from '@ionic/angular/standalone';
+
+type CheckInStatsLoadState =
+	| { status: 'loading' }
+	| { status: 'empty' }
+	| { status: 'error' }
+	| { status: 'ready'; data: CheckInAggregatedStats };
+
+type ReadyCheckInStatsState = Extract<
+	CheckInStatsLoadState,
+	{ status: 'ready' }
+>;
 
 @Component({
 	selector: 'admin-check-in',
@@ -72,6 +83,7 @@ import {
 		IonIcon,
 		IonText,
 		IonTitle,
+		IonSpinner,
 	],
 })
 export class CheckInPage {
@@ -87,23 +99,42 @@ export class CheckInPage {
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
-	private readonly checkInRecord$ = this.refreshYear.pipe(
+	public readonly checkInState$ = this.refreshYear.pipe(
 		switchMap(() =>
 			getStatsCollection<CheckInAggregatedStats>(this.httpService)
 				.read(`checkin-${this.year}`)
-				.pipe(shareReplay(1)),
+				.pipe(
+					map((data): CheckInStatsLoadState =>
+						data ? { status: 'ready', data } : { status: 'empty' },
+					),
+					startWith<CheckInStatsLoadState>({ status: 'loading' }),
+					catchError(() =>
+						of<CheckInStatsLoadState>({ status: 'error' }),
+					),
+				),
 		),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
-	public readonly hasData$ = this.checkInRecord$.pipe(map((data) => !!data));
+	private readonly checkInRecord$ = this.checkInState$.pipe(
+		filter(
+			(state): state is ReadyCheckInStatsState =>
+				state.status === 'ready',
+		),
+		map((state) => state.data),
+		shareReplay({ bufferSize: 1, refCount: true }),
+	);
+
+	public readonly hasData$ = this.checkInState$.pipe(
+		filter((state) => state.status !== 'loading'),
+		map((state) => state.status === 'ready'),
+	);
 
 	private readonly dateTimeStats$ = this.checkInRecord$.pipe(
-		filterNil(),
 		map((data) => data.dateTimeCount),
 	);
 
 	public readonly checkinLastUpdated$ = this.checkInRecord$.pipe(
-		filterNil(),
 		map((updated) => {
 			const lastUpdated = updated.lastUpdated as Timestamp | Date;
 			const date =
@@ -291,6 +322,10 @@ export class CheckInPage {
 		} else {
 			this.graphView.next('customerCount');
 		}
+	}
+
+	public refresh(): void {
+		this.refreshYear.next();
 	}
 
 	public addValues(values?: (number | [number, number] | null)[]): number {

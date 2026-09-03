@@ -1,6 +1,7 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	CheckIn,
+	CheckInAggregatedStats,
 	CheckInRequest,
 	COLLECTION_SCHEMA,
 	Registration,
@@ -12,9 +13,10 @@ import {
 import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import { PROGRAM_YEAR } from '../utility/runtime-config';
+import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 import { canCheckInToken } from '../utility/capabilities';
 import { recordCheckInRaceAttempt } from '../utility/registration-scan';
+import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
 
 const log = createFunctionLogger('checkInWithEdit');
 
@@ -36,7 +38,10 @@ export default async function checkInWithEdit(
 		);
 	}
 	if (inputMethod !== 'camera' && inputMethod !== 'manual') {
-		throw new HttpsError('invalid-argument', 'Scan input method is invalid.');
+		throw new HttpsError(
+			'invalid-argument',
+			'Scan input method is invalid.',
+		);
 	}
 
 	if (!isPartialRegistrationComplete(record)) {
@@ -71,7 +76,7 @@ export default async function checkInWithEdit(
 	const checkin = {
 		checkInDateTime: new Date(),
 		customerId: record.uid,
-		inStats: false,
+		inStats: true,
 		registrationCode: record.qrcode,
 		stats: calculateRegistrationStats(record, true),
 	} as CheckIn;
@@ -79,45 +84,62 @@ export default async function checkInWithEdit(
 	const sourceRegistrationDocRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
+	const statsDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.stats}/${getStatsDocumentId('checkin')}`);
 
 	try {
 		let authoritativeRegistration: Registration | undefined;
-		const created = await admin.firestore().runTransaction(async (transaction) => {
-			const [sourceRegistration, existingCheckIn] = await Promise.all([
-				transaction.get(sourceRegistrationDocRef),
-				transaction.get(checkinDocRef),
-			]);
-			if (!sourceRegistration.exists) {
-				throw new HttpsError(
-					'not-found',
-					'Registration was not found.',
-				);
-			}
-			authoritativeRegistration = {
-				uid: sourceRegistration.id,
-				...sourceRegistration.data(),
-			} as Registration;
-			if (
-				authoritativeRegistration.qrcode !== record.qrcode ||
-				!authoritativeRegistration.registrationSubmittedOn ||
-				authoritativeRegistration.cancelledOn
-			) {
-				throw new HttpsError(
-					'failed-precondition',
-					'Registration is no longer eligible for check-in.',
-				);
-			}
-			if (existingCheckIn.exists) return false;
+		const created = await admin
+			.firestore()
+			.runTransaction(async (transaction) => {
+				const [sourceRegistration, existingCheckIn, statsDocument] =
+					await Promise.all([
+						transaction.get(sourceRegistrationDocRef),
+						transaction.get(checkinDocRef),
+						transaction.get(statsDocRef),
+					]);
+				if (!sourceRegistration.exists) {
+					throw new HttpsError(
+						'not-found',
+						'Registration was not found.',
+					);
+				}
+				authoritativeRegistration = {
+					uid: sourceRegistration.id,
+					...sourceRegistration.data(),
+				} as Registration;
+				if (
+					authoritativeRegistration.qrcode !== record.qrcode ||
+					!authoritativeRegistration.registrationSubmittedOn ||
+					authoritativeRegistration.cancelledOn
+				) {
+					throw new HttpsError(
+						'failed-precondition',
+						'Registration is no longer eligible for check-in.',
+					);
+				}
+				if (existingCheckIn.exists) return false;
 
-			transaction.create(registrationDocRef, partialRegistration);
-			transaction.create(checkinDocRef, checkin);
-			transaction.set(
-				sourceRegistrationDocRef,
-				{ hasCheckedIn: true },
-				{ merge: true },
-			);
-			return true;
-		});
+				transaction.create(registrationDocRef, partialRegistration);
+				transaction.create(checkinDocRef, checkin);
+				transaction.set(
+					sourceRegistrationDocRef,
+					{ hasCheckedIn: true },
+					{ merge: true },
+				);
+				transaction.set(
+					statsDocRef,
+					addCheckInToAggregatedStats(
+						statsDocument.exists
+							? (statsDocument.data() as CheckInAggregatedStats)
+							: undefined,
+						checkin,
+					),
+					{ merge: false },
+				);
+				return true;
+			});
 		if (!created && authoritativeRegistration && request.auth?.uid) {
 			const blocked = await recordCheckInRaceAttempt(
 				authoritativeRegistration,

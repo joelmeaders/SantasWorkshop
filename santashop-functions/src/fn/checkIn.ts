@@ -1,6 +1,7 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	CheckIn,
+	CheckInAggregatedStats,
 	CheckInRequest,
 	COLLECTION_SCHEMA,
 	Registration,
@@ -14,6 +15,8 @@ import { getErrorCode, getErrorMessage } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { canCheckInToken } from '../utility/capabilities';
 import { recordCheckInRaceAttempt } from '../utility/registration-scan';
+import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
+import { getStatsDocumentId } from '../utility/runtime-config';
 
 const log = createFunctionLogger('checkIn');
 
@@ -35,7 +38,10 @@ export default async function checkIn(
 		);
 	}
 	if (inputMethod !== 'camera' && inputMethod !== 'manual') {
-		throw new HttpsError('invalid-argument', 'Scan input method is invalid.');
+		throw new HttpsError(
+			'invalid-argument',
+			'Scan input method is invalid.',
+		);
 	}
 
 	if (!isPartialRegistrationComplete(record)) {
@@ -57,7 +63,7 @@ export default async function checkIn(
 	const checkin = {
 		checkInDateTime: new Date(),
 		customerId: record.uid,
-		inStats: false,
+		inStats: true,
 		registrationCode: record.qrcode,
 		stats: calculateRegistrationStats(record, false),
 	} as CheckIn;
@@ -65,44 +71,61 @@ export default async function checkIn(
 	const registrationDocRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
+	const statsDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.stats}/${getStatsDocumentId('checkin')}`);
 
 	try {
 		let authoritativeRegistration: Registration | undefined;
-		const created = await admin.firestore().runTransaction(async (transaction) => {
-			const [registration, existingCheckIn] = await Promise.all([
-				transaction.get(registrationDocRef),
-				transaction.get(checkinDocRef),
-			]);
-			if (!registration.exists) {
-				throw new HttpsError(
-					'not-found',
-					'Registration was not found.',
-				);
-			}
-			authoritativeRegistration = {
-				uid: registration.id,
-				...registration.data(),
-			} as Registration;
-			if (
-				authoritativeRegistration.qrcode !== record.qrcode ||
-				!authoritativeRegistration.registrationSubmittedOn ||
-				authoritativeRegistration.cancelledOn
-			) {
-				throw new HttpsError(
-					'failed-precondition',
-					'Registration is no longer eligible for check-in.',
-				);
-			}
-			if (existingCheckIn.exists) return false;
+		const created = await admin
+			.firestore()
+			.runTransaction(async (transaction) => {
+				const [registration, existingCheckIn, statsDocument] =
+					await Promise.all([
+						transaction.get(registrationDocRef),
+						transaction.get(checkinDocRef),
+						transaction.get(statsDocRef),
+					]);
+				if (!registration.exists) {
+					throw new HttpsError(
+						'not-found',
+						'Registration was not found.',
+					);
+				}
+				authoritativeRegistration = {
+					uid: registration.id,
+					...registration.data(),
+				} as Registration;
+				if (
+					authoritativeRegistration.qrcode !== record.qrcode ||
+					!authoritativeRegistration.registrationSubmittedOn ||
+					authoritativeRegistration.cancelledOn
+				) {
+					throw new HttpsError(
+						'failed-precondition',
+						'Registration is no longer eligible for check-in.',
+					);
+				}
+				if (existingCheckIn.exists) return false;
 
-			transaction.create(checkinDocRef, checkin);
-			transaction.set(
-				registrationDocRef,
-				{ hasCheckedIn: true },
-				{ merge: true },
-			);
-			return true;
-		});
+				transaction.create(checkinDocRef, checkin);
+				transaction.set(
+					registrationDocRef,
+					{ hasCheckedIn: true },
+					{ merge: true },
+				);
+				transaction.set(
+					statsDocRef,
+					addCheckInToAggregatedStats(
+						statsDocument.exists
+							? (statsDocument.data() as CheckInAggregatedStats)
+							: undefined,
+						checkin,
+					),
+					{ merge: false },
+				);
+				return true;
+			});
 		if (!created && authoritativeRegistration && request.auth?.uid) {
 			const blocked = await recordCheckInRaceAttempt(
 				authoritativeRegistration,

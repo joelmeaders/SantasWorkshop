@@ -125,6 +125,7 @@
 	},
 	"SCHEDULE": {
 		"CHOOSE_DATE_TIME": "Choose an available date and time to pick up your toys.",
+		"LOADING": "Loading available appointments…",
 		"YOUR_DATE/TIME": "Your Date/Time",
 		"FULL": "All spots have been filled and there are no available dates or times. Check Facebook for updates.",
 		"SELECT_DATETIME": "Select Date & Time"

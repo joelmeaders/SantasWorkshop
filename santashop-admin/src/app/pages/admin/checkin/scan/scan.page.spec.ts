@@ -10,7 +10,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { ScannerService } from './scanner.service';
 import { RegistrationScanService } from '../../../../shared/services/registration-scan.service';
-import { AnalyticsWrapper } from '@santashop/core';
+import { AnalyticsWrapper } from '@santashop/core/admin/firestore';
 import { firstValueFrom, Subject } from 'rxjs';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { Router } from '@angular/router';

@@ -11,7 +11,7 @@ import { AlertController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { DateTimeSlot } from '@santashop/models';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/admin/firestore';
 import { provideProgramYearMock, requireDefined } from '../../../../../test-helpers';
 import { ScheduleEditorPage } from './schedule-editor.page';
 import { ScheduleEditorService } from './schedule-editor.service';

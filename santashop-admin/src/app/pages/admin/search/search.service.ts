@@ -5,7 +5,7 @@ import {
 	QueryConstraint,
 	where,
 } from 'firebase/firestore';
-import { FireRepoLite } from '@santashop/core';
+import { FireRepoLite } from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	RegistrationSearchIndex,

@@ -5,7 +5,7 @@ import {
 	Validators,
 	ReactiveFormsModule,
 } from '@angular/forms';
-import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core';
+import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core/admin/firestore';
 import {
 	AlertController,
 	LoadingController,

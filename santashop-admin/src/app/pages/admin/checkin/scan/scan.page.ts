@@ -32,7 +32,7 @@ import {
 import { ScannerService } from './scanner.service';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
-import { AnalyticsWrapper, filterNil } from '@santashop/core';
+import { AnalyticsWrapper, filterNil } from '@santashop/core/admin/firestore';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';

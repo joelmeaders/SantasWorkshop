@@ -27,7 +27,7 @@ import { StaffAccount, StaffRole, UpdateStaffUser } from '@santashop/models';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { StaffService } from './staff.service';
 import { UserEditorComponent } from './user-editor.component';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/admin/firestore';
 import { firstValueFrom } from 'rxjs';
 
 @Component({

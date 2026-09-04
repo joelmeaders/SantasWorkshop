@@ -8,7 +8,7 @@ import {
 } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AppStateService, AuthService } from '@santashop/core';
+import { AppStateService, AuthService } from '@santashop/core/admin/firestore';
 import { BehaviorSubject, of } from 'rxjs';
 import { LandingPage } from './landing.page';
 

@@ -33,7 +33,7 @@ import {
 import type { Child } from '@santashop/models';
 import { AgeGroup, ToyType } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
-import { yyyymmddToLocalDate, getAgeFromDate } from '@santashop/core';
+import { yyyymmddToLocalDate, getAgeFromDate } from '@santashop/core/admin/firestore';
 import {
 	ChildValidationService,
 	MAX_BIRTHDATE,

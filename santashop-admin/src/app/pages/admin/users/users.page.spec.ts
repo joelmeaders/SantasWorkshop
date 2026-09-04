@@ -13,7 +13,7 @@ import { provideRouter } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import type { StaffAccount } from '@santashop/models';
 import { StaffService } from './staff.service';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/admin/firestore';
 import {
 	provideActivatedRouteMock,
 	provideAlertControllerMock,

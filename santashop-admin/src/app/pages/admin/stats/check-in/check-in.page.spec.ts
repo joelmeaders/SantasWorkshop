@@ -8,7 +8,7 @@ import {
 	provideProgramYearMock,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
+import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
 import { CheckInAggregatedStats } from '@santashop/models';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 

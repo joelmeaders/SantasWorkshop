@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FireRepoLite, FunctionsWrapper } from '@santashop/core';
+import { FireRepoLite, FunctionsWrapper } from '@santashop/core/admin/firestore';
 import type { CreateStaffUser, StaffAccount } from '@santashop/models';
 import { firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

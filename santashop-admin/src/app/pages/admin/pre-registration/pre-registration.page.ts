@@ -52,7 +52,7 @@ import {
 	timestampToDate,
 	HttpsCallableResult,
 	PROGRAM_YEAR,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';

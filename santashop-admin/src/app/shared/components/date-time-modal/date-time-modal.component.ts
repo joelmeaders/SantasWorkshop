@@ -29,23 +29,23 @@ import {
 import {
 	BehaviorSubject,
 	Observable,
+	ReplaySubject,
 	Subject,
 	map,
 	shareReplay,
+	switchMap,
 	takeUntil,
 	distinctUntilChanged,
 } from 'rxjs';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import type { DateTimeSlot } from '@santashop/models';
-import { TimeSlotPipe } from '@santashop/core';
-import { DateTimeModalService } from './date-time-modal.service';
+import { TimeSlotPipe } from '@santashop/core/admin/firestore';
 
 @Component({
 	selector: 'admin-date-time-modal',
 	templateUrl: './date-time-modal.component.html',
 	styleUrls: ['./date-time-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [DateTimeModalService],
 	imports: [
 		AsyncPipe,
 		DatePipe,
@@ -72,9 +72,15 @@ import { DateTimeModalService } from './date-time-modal.service';
 export class DateTimeModalComponent implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
-	private readonly dateTimeService = inject(DateTimeModalService);
+	private readonly slotsInput$ = new ReplaySubject<
+		Observable<DateTimeSlot[]>
+	>(1);
 
 	@Input() public currentSlot?: DateTimeSlot;
+	@Input({ required: true })
+	public set slots$(slots: Observable<DateTimeSlot[]>) {
+		this.slotsInput$.next(slots);
+	}
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -83,7 +89,8 @@ export class DateTimeModalComponent implements OnDestroy {
 	>(undefined);
 	public readonly selectedSlot$ = this.selectedSlot.asObservable();
 
-	public readonly availableSlots$ = this.dateTimeService.availableSlots$.pipe(
+	public readonly availableSlots$ = this.slotsInput$.pipe(
+		switchMap((slots) => slots),
 		takeUntil(this.destroy$),
 		map((slots: DateTimeSlot[]) => slots.filter((slot) => slot.enabled)),
 		distinctUntilChanged(
@@ -115,6 +122,7 @@ export class DateTimeModalComponent implements OnDestroy {
 		);
 
 	public ngOnDestroy(): void {
+		this.slotsInput$.complete();
 		this.destroy$.next();
 		this.destroy$.complete();
 	}

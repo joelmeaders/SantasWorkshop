@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { firstValueFrom, of, skip, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { PROGRAM_YEAR } from '@santashop/core';
+import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 import { ScanRiskDetailPage } from './scan-risk-detail.page';
 

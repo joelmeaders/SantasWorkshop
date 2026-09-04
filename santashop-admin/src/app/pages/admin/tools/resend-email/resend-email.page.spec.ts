@@ -6,7 +6,7 @@ import {
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
-import { FunctionsWrapper } from '@santashop/core';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { of, throwError } from 'rxjs';
 

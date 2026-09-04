@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FunctionsWrapper } from '@santashop/core';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { EmailTemplateService } from './email-template.service';
 

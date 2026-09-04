@@ -9,7 +9,7 @@ import {
 	requireDefined,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
+import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
 import { UserStats } from '@santashop/models';
 import { firstValueFrom, of } from 'rxjs';
 

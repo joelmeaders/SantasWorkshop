@@ -12,7 +12,7 @@ import {
 	PROGRAM_YEAR,
 	TimeSlotPipe,
 	shopSchedule,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { DateTimeSlot } from '@santashop/models';
 import {
 	AlertController,

@@ -1,11 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	FIREBASE_ANALYTICS,
-	PUBLIC_PARAMETERS_SOURCE,
+	FIREBASE_FIRESTORE,
 	PROGRAM_YEAR,
-	RealtimePublicParametersSource,
 	SHOP_DAYS,
-} from '@santashop/core';
+} from '@santashop/core/admin';
 import {
 	bootstrapAdminApplication,
 	type AdminBootstrapConfig,
@@ -15,15 +14,8 @@ import {
 import { requireDefined } from './test-helpers';
 
 const firebaseModule = vi.hoisted(() => {
-	class Timestamp {
-		public static fromDate = vi.fn().mockReturnValue(new Timestamp());
-		public static now = vi.fn().mockReturnValue(new Timestamp());
-		public toDate = vi.fn().mockReturnValue(new Date());
-	}
-
 	return {
 		function: vi.fn(),
-		Timestamp,
 	};
 });
 
@@ -51,25 +43,6 @@ vi.mock('firebase/functions', () => ({
 	getFunctions: firebaseModule.function,
 	httpsCallable: firebaseModule.function,
 }));
-vi.mock('firebase/firestore', () => ({
-	addDoc: firebaseModule.function,
-	collection: firebaseModule.function,
-	connectFirestoreEmulator: firebaseModule.function,
-	deleteDoc: firebaseModule.function,
-	doc: firebaseModule.function,
-	getDoc: firebaseModule.function,
-	getDocs: firebaseModule.function,
-	getFirestore: firebaseModule.function,
-	initializeFirestore: firebaseModule.function,
-	limit: firebaseModule.function,
-	onSnapshot: firebaseModule.function,
-	orderBy: firebaseModule.function,
-	query: firebaseModule.function,
-	setDoc: firebaseModule.function,
-	Timestamp: firebaseModule.Timestamp,
-	where: firebaseModule.function,
-}));
-
 describe('admin bootstrap', () => {
 	let dependencies: AdminBootstrapDependencies;
 	let logger: (error: unknown) => void;
@@ -107,15 +80,6 @@ describe('admin bootstrap', () => {
 			'127.0.0.1',
 			5001,
 		);
-		expect(dependencies.connectFirestoreEmulator).toHaveBeenCalledWith(
-			'firestore',
-			'127.0.0.1',
-			8080,
-		);
-		expect(dependencies.initializeFirestore).toHaveBeenCalledWith('app', {
-			experimentalForceLongPolling: true,
-		});
-		expect(dependencies.getFirestore).not.toHaveBeenCalled();
 		expect(dependencies.getAnalytics).not.toHaveBeenCalled();
 		expect(dependencies.enableProdMode).not.toHaveBeenCalled();
 		const options = requireDefined(
@@ -123,11 +87,6 @@ describe('admin bootstrap', () => {
 		)[1] as { providers: unknown[] };
 		expect(options.providers).toEqual(
 			expect.arrayContaining([
-				RealtimePublicParametersSource,
-				expect.objectContaining({
-					provide: PUBLIC_PARAMETERS_SOURCE,
-					useExisting: RealtimePublicParametersSource,
-				}),
 				expect.objectContaining({
 				provide: PROGRAM_YEAR,
 				useValue: 2026,
@@ -136,6 +95,11 @@ describe('admin bootstrap', () => {
 				provide: SHOP_DAYS,
 				useValue: [12, 13, 15, 16],
 			}),
+			]),
+		);
+		expect(options.providers).not.toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ provide: FIREBASE_FIRESTORE }),
 			]),
 		);
 	});
@@ -159,9 +123,6 @@ describe('admin bootstrap', () => {
 		);
 		expect(dependencies.connectAuthEmulator).not.toHaveBeenCalled();
 		expect(dependencies.connectFunctionsEmulator).not.toHaveBeenCalled();
-		expect(dependencies.connectFirestoreEmulator).not.toHaveBeenCalled();
-		expect(dependencies.initializeFirestore).not.toHaveBeenCalled();
-		expect(dependencies.getFirestore).toHaveBeenCalledWith('app');
 		expect(dependencies.enableProdMode).toHaveBeenCalledOnce();
 		expect(dependencies.getAnalytics).toHaveBeenCalledWith('app');
 		const options = requireDefined(
@@ -248,16 +209,13 @@ function createDependencies(): AdminBootstrapDependencies {
 	return {
 		bootstrapApplication: vi.fn().mockResolvedValue(undefined),
 		connectAuthEmulator: vi.fn(),
-		connectFirestoreEmulator: vi.fn(),
 		connectFunctionsEmulator: vi.fn(),
 		enableProdMode: vi.fn(),
 		getAnalytics: vi.fn().mockReturnValue('analytics'),
 		getAuth: vi.fn().mockReturnValue('auth'),
-		getFirestore: vi.fn().mockReturnValue('firestore'),
 		getFunctions: vi.fn().mockReturnValue('functions'),
 		initializeApp: vi.fn().mockReturnValue('app'),
 		initializeAppCheck: vi.fn(),
-		initializeFirestore: vi.fn().mockReturnValue('firestore'),
 		provideHttpClient: vi.fn().mockReturnValue('http-provider'),
 		provideIonicAngular: vi.fn().mockReturnValue('ionic-provider'),
 		provideRouter: vi.fn().mockReturnValue('router-provider'),

@@ -1,7 +1,7 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PROGRAM_YEAR } from '@santashop/core';
+import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import { IonContent, IonItem, IonLabel, IonList, IonSpinner } from '@ionic/angular/standalone';
 import { catchError, combineLatest, map, of, startWith, switchMap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';

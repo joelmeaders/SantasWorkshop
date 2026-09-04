@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { FireRepoLite } from '@santashop/core';
+import { FireRepoLite } from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	type CheckIn,

@@ -8,7 +8,7 @@ import {
 	filterNil,
 	PROGRAM_YEAR,
 	SHOP_DAYS,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { BehaviorSubject, map, shareReplay, switchMap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import {

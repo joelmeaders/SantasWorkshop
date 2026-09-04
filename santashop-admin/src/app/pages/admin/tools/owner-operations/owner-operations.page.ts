@@ -11,7 +11,7 @@ import {
 	ReactiveFormsModule,
 	Validators,
 } from '@angular/forms';
-import { AuthService, PROGRAM_YEAR } from '@santashop/core';
+import { AuthService, PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import {
 	OwnerOperation,
 	OwnerOperationType,

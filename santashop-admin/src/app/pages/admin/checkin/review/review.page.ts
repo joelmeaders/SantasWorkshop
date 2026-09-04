@@ -34,7 +34,7 @@ import {
 	AppStateService,
 	FunctionsWrapper,
 	HttpsCallableResult,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
@@ -42,6 +42,7 @@ import { HeaderComponent } from '../../../../shared/components/header/header.com
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../../shared/components/manage-children/manage-children.component';
 import { DateTimeModalComponent } from '../../../../shared/components/date-time-modal/date-time-modal.component';
+import { DateTimeModalService } from '../../../../shared/components/date-time-modal/date-time-modal.service';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
 
@@ -75,6 +76,7 @@ export class ReviewPage {
 	private readonly appStateService = inject(AppStateService);
 	private readonly alertController = inject(AlertController);
 	private readonly modalController = inject(ModalController);
+	private readonly dateTimeModalService = inject(DateTimeModalService);
 	private readonly functions = inject(FunctionsWrapper);
 
 	private readonly router = inject(Router);
@@ -120,9 +122,7 @@ export class ReviewPage {
 		return this.functions.callableWrapper<
 			{ mutationId: string; slotId: string; registrationUid?: string },
 			boolean
-		>(
-			'changeRegistrationDateTime',
-		)({
+		>('changeRegistrationDateTime')({
 			mutationId: this.createMutationId(),
 			slotId: newDateTimeSlot.id,
 			registrationUid,
@@ -225,6 +225,7 @@ export class ReviewPage {
 			component: DateTimeModalComponent,
 			componentProps: {
 				currentSlot,
+				slots$: this.dateTimeModalService.availableSlots$,
 			},
 		});
 

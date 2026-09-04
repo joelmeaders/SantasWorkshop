@@ -8,7 +8,7 @@ import {
 	provideProgramYearMock,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { FireRepoLite, IFireRepoCollection, SHOP_DAYS } from '@santashop/core';
+import { FireRepoLite, IFireRepoCollection, SHOP_DAYS } from '@santashop/core/admin/firestore';
 import {
 	DateTimeSlot,
 	RegistrationStats,

@@ -4,7 +4,7 @@ import {
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 	timestampToDate,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
 import { QueryConstraint, where } from 'firebase/firestore';
 import {

@@ -6,7 +6,7 @@ import { vi } from 'vitest';
 import {
 	FIREBASE_ANALYTICS, FIREBASE_AUTH, FIREBASE_FIRESTORE, FIREBASE_FUNCTIONS, FIREBASE_STORAGE,
 	FirestoreWrapper, FireRepoLite, PROGRAM_YEAR, PUBLIC_PARAMETERS_SOURCE,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 
 import type { Analytics } from 'firebase/analytics';
 import type { Auth } from 'firebase/auth';

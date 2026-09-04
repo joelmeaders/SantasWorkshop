@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FireRepoLite } from '@santashop/core';
+import { FireRepoLite } from '@santashop/core/admin/firestore';
 import type {
 	CheckIn,
 	Registration,

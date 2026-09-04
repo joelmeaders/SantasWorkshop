@@ -1,4 +1,4 @@
-import { shopSchedule } from '@santashop/core';
+import { shopSchedule } from '@santashop/core/admin/firestore';
 
 export const getShopSchedule = (
 	programYear: number,

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, Subject } from 'rxjs';
-import { FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
+import { FireRepoLite, PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import type { DateTimeSlot } from '@santashop/models';
 import { DateTimeModalService } from './date-time-modal.service';
 import { requireDefined } from '../../../../test-helpers';

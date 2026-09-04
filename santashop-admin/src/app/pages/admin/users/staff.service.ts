@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { orderBy, QueryConstraint } from 'firebase/firestore';
-import { FireRepoLite, FunctionsWrapper } from '@santashop/core';
+import { FireRepoLite, FunctionsWrapper } from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	CreateStaffUser,

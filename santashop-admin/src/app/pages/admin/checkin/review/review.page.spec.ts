@@ -1,16 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReviewPage } from './review.page';
-import {
-	provideActivatedRouteMock,
-} from '../../../../../test-helpers';
+import { provideActivatedRouteMock } from '../../../../../test-helpers';
 import { provideRouter, Router } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { AlertController, ModalController } from '@ionic/angular/standalone';
-import { AppStateService, FunctionsWrapper } from '@santashop/core';
+import {
+	AppStateService,
+	FunctionsWrapper,
+} from '@santashop/core/admin/firestore';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
+import { DateTimeModalService } from '../../../../shared/components/date-time-modal/date-time-modal.service';
 
 const registration = (): Record<string, unknown> => ({
 	uid: 'customer-1',
@@ -76,11 +78,23 @@ describe('ReviewPage', () => {
 						reset,
 					},
 				},
-				{ provide: LookupService, useValue: { getRegistrationByQrCode$: vi.fn(() => of(undefined)) } },
+				{
+					provide: LookupService,
+					useValue: {
+						getRegistrationByQrCode$: vi.fn(() => of(undefined)),
+					},
+				},
 				{ provide: CheckInService, useValue: { checkIn } },
 				{
+					provide: DateTimeModalService,
+					useValue: { availableSlots$: of([]) },
+				},
+				{
 					provide: AppStateService,
-					useValue: { checkinEnabled$: of(true), allowCancelRegistration$: of(true) },
+					useValue: {
+						checkinEnabled$: of(true),
+						allowCancelRegistration$: of(true),
+					},
 				},
 				{ provide: FunctionsWrapper, useValue: { callableWrapper } },
 				{ provide: AlertController, useValue: { create: createAlert } },
@@ -104,15 +118,22 @@ describe('ReviewPage', () => {
 		await component.editChild({ id: 2, firstName: 'Nora' } as never);
 
 		expect(setRegistration).toHaveBeenCalledTimes(3);
-		expect((currentRegistration.value as { children: { id: number; firstName: string }[] }).children)
-			.toEqual([{ id: 2, firstName: 'Nora' }]);
+		expect(
+			(
+				currentRegistration.value as {
+					children: { id: number; firstName: string }[];
+				}
+			).children,
+		).toEqual([{ id: 2, firstName: 'Nora' }]);
 		expect(component.wasEdited).toBe(true);
 	});
 
 	it('cancels a confirmed reservation and returns to the landing page', async () => {
 		alert.onDidDismiss.mockResolvedValue({ role: 'confirm' });
 		callable.mockResolvedValue({ data: 1 });
-		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
 
 		await component.cancelReservation();
 
@@ -125,13 +146,18 @@ describe('ReviewPage', () => {
 	});
 
 	it('applies a selected date-time slot and marks the review as edited', async () => {
-		const newSlot = { id: 'slot-2', dateTime: new Date('2026-12-11T11:00:00Z') };
+		const newSlot = {
+			id: 'slot-2',
+			dateTime: new Date('2026-12-11T11:00:00Z'),
+		};
 		modal.onDidDismiss.mockResolvedValue({ data: newSlot });
 
 		await component.editDateTime();
 
 		expect(createModal).toHaveBeenCalledOnce();
-		expect(callableWrapper).toHaveBeenCalledWith('changeRegistrationDateTime');
+		expect(callableWrapper).toHaveBeenCalledWith(
+			'changeRegistrationDateTime',
+		);
 		expect(callable).toHaveBeenCalledWith({
 			mutationId: expect.any(String),
 			slotId: 'slot-2',
@@ -146,31 +172,49 @@ describe('ReviewPage', () => {
 		await component.editDateTime();
 
 		expect(callable).not.toHaveBeenCalled();
-		expect((currentRegistration.value as { dateTimeSlot?: unknown }).dateTimeSlot).toBeUndefined();
+		expect(
+			(currentRegistration.value as { dateTimeSlot?: unknown })
+				.dateTimeSlot,
+		).toBeUndefined();
 		expect(setRegistration).toHaveBeenCalledWith(currentRegistration.value);
 		expect(component.wasEdited).toBe(true);
 	});
 
 	it('presents a date-time error without mutating the selected slot', async () => {
-		const newSlot = { id: 'slot-2', dateTime: new Date('2026-12-11T11:00:00Z') };
+		const newSlot = {
+			id: 'slot-2',
+			dateTime: new Date('2026-12-11T11:00:00Z'),
+		};
 		modal.onDidDismiss.mockResolvedValue({ data: newSlot });
 		callable.mockRejectedValue(new Error('Slot unavailable'));
 
 		await component.editDateTime();
 
-		expect(createAlert).toHaveBeenCalledWith(expect.objectContaining({
-			header: 'Error changing date/time', message: 'Slot unavailable',
-		}));
-		expect((currentRegistration.value as { dateTimeSlot: { id: string } }).dateTimeSlot.id).toBe('slot-1');
+		expect(createAlert).toHaveBeenCalledWith(
+			expect.objectContaining({
+				header: 'Error changing date/time',
+				message: 'Slot unavailable',
+			}),
+		);
+		expect(
+			(currentRegistration.value as { dateTimeSlot: { id: string } })
+				.dateTimeSlot.id,
+		).toBe('slot-1');
 	});
 
 	it('routes a successful check-in to confirmation with the preserved input method', async () => {
 		checkIn.mockResolvedValue(4);
-		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
 
 		await component.checkIn();
 
-		expect(checkIn).toHaveBeenCalledWith(currentRegistration.value, false, 'manual');
+		expect(checkIn).toHaveBeenCalledWith(
+			currentRegistration.value,
+			false,
+			'manual',
+		);
 		expect(setCheckIn).toHaveBeenCalledWith(4, 'ABCDEFGH');
 		expect(navigate).toHaveBeenCalledWith(['/admin/checkin/confirmation']);
 	});
@@ -182,25 +226,34 @@ describe('ReviewPage', () => {
 			attempt: { inputMethod: 'manual' },
 		};
 		checkIn.mockRejectedValue({ details });
-		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
 
 		await component.checkIn();
 
 		expect(setBlockedScan).toHaveBeenCalledWith(details);
-		expect(navigate).toHaveBeenCalledWith(['/admin/checkin/duplicate', 'customer-1']);
+		expect(navigate).toHaveBeenCalledWith([
+			'/admin/checkin/duplicate',
+			'customer-1',
+		]);
 	});
 
 	it('shows ordinary check-in errors, resets context, and returns to scanning', async () => {
 		checkIn.mockRejectedValue(new Error('Network unavailable'));
 		alert.onDidDismiss.mockResolvedValue({ role: 'dismiss' });
-		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
 
 		await component.checkIn();
 
-		expect(createAlert).toHaveBeenCalledWith(expect.objectContaining({
-			header: 'Error checking in',
-			message: 'Network unavailable',
-		}));
+		expect(createAlert).toHaveBeenCalledWith(
+			expect.objectContaining({
+				header: 'Error checking in',
+				message: 'Network unavailable',
+			}),
+		);
 		expect(reset).toHaveBeenCalledOnce();
 		expect(navigate).toHaveBeenCalledWith(['/admin/checkin/scan']);
 	});

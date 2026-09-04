@@ -1,6 +1,6 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { PROGRAM_YEAR } from '@santashop/core';
+import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import {
 	IonBadge,
 	IonButton,

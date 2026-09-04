@@ -4,7 +4,7 @@ import {
 	buildZipCodeSearchValues,
 	SearchService,
 } from './search.service';
-import { FireRepoLite } from '@santashop/core';
+import { FireRepoLite } from '@santashop/core/admin/firestore';
 import { firstValueFrom, of } from 'rxjs';
 import { requireDefined } from '../../../../test-helpers';
 

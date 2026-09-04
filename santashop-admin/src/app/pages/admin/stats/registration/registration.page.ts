@@ -6,7 +6,7 @@ import {
 	PROGRAM_YEAR,
 	SHOP_DAYS,
 	timestampToDate,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	DateTimeSlot,

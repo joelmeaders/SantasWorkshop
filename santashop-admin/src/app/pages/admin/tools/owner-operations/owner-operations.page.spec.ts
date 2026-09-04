@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { AuthService, PROGRAM_YEAR } from '@santashop/core';
+import { AuthService, PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideActivatedRouteMock } from '../../../../../test-helpers';
 import { OwnerOperationsPage } from './owner-operations.page';

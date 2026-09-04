@@ -7,7 +7,7 @@ import {
 } from '../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 import { AlertController, LoadingController, ModalController } from '@ionic/angular/standalone';
-import { FireRepoLite, FunctionsWrapper } from '@santashop/core';
+import { FireRepoLite, FunctionsWrapper } from '@santashop/core/admin/firestore';
 import { firstValueFrom, of } from 'rxjs';
 import { SearchService } from '../search/search.service';
 

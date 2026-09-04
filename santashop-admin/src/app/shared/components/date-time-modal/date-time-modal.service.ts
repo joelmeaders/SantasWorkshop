@@ -4,7 +4,7 @@ import {
 	IFireRepoCollection,
 	PROGRAM_YEAR,
 	timestampToDate,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { Observable, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';

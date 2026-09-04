@@ -12,7 +12,7 @@ import {
 	startWith,
 	switchMap,
 } from 'rxjs';
-import { FireRepoLite, PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core';
+import { FireRepoLite, PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core/admin/firestore';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,

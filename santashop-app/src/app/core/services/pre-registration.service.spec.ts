@@ -21,6 +21,8 @@ import { PreRegistrationService } from './pre-registration.service';
 import { repoCollectionStub } from '../../../../../test-helpers';
 import { mockRegistrations } from '../../../../../test-helpers/mock-data';
 import { QrCodeService } from './qrcode.service';
+import { Registration } from '@santashop/models';
+
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
 	let repository: Mocked<FireRepoLite>;
@@ -296,6 +298,24 @@ describe('PreRegistrationService', () => {
 			`registrations/${userId}/test-asset.png`,
 		);
 		expect(value).toEqual('someurl');
+	});
+
+	it('qrCode$: should load the legacy UID path when the stored path is missing', async () => {
+		const legacyRegistration = {
+			...mockRegistrations(userId).complete.mockRegistration1,
+			qrCodeStoragePath: undefined,
+		};
+		vi.spyOn(collectionStub, 'read').mockReturnValue(
+			of(legacyRegistration as unknown as Registration),
+		);
+		qrCodeService.registrationQrCodeUrl.mockResolvedValue('legacy-url');
+
+		const value = await firstValueFrom(service.qrCode$);
+
+		expect(qrCodeService.registrationQrCodeUrl).toHaveBeenCalledWith(
+			`registrations/${userId}.png`,
+		);
+		expect(value).toBe('legacy-url');
 	});
 
 	it('forwards draft mutations and rejects incomplete child or appointment input', async (): Promise<void> => {

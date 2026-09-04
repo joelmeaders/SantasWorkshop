@@ -24,6 +24,8 @@ import { AppStateService } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AnalyticsWrapper } from '@santashop/core/customer';
+import enTranslations from '../../../../assets/i18n/en.json';
+import esTranslations from '../../../../assets/i18n/es.json';
 
 describe('SignUpPage', () => {
 	let component: SignUpPage;
@@ -74,6 +76,11 @@ describe('SignUpPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('defines the required referral label in every supported language', (): void => {
+		expect(enTranslations.REFERRAL.REQUIRED).toBe('Required');
+		expect(esTranslations.REFERRAL.REQUIRED).toBe('Obligatorio');
 	});
 
 	it('saves a confirmed referral returned by the selection modal', async () => {

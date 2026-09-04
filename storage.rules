@@ -17,5 +17,12 @@ service firebase.storage {
       allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
       allow write: if false;
     }
+
+    match /registrations/{legacyFileName} {
+      allow read: if isSignedIn() && (
+        legacyFileName == request.auth.uid + '.png' || isAdmin()
+      );
+      allow write: if false;
+    }
   }
 }

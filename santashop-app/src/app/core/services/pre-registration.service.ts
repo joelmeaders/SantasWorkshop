@@ -24,7 +24,6 @@ import {
 	FunctionsWrapper,
 	HttpsCallableResult,
 	IFireRepoCollection,
-	pluckFilterNil,
 	timestampDateFix,
 } from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
@@ -121,7 +120,8 @@ export class PreRegistrationService implements OnDestroy {
 	public readonly qrCode$ = this.userRegistration$.pipe(
 		takeUntil(this.destroy$),
 		filterNil(),
-		pluckFilterNil('qrCodeStoragePath'),
+		map((registration) => this.getQrCodeStoragePath(registration)),
+		filterNil(),
 		mergeMap((storagePath) =>
 			this.qrCodeService.registrationQrCodeUrl(storagePath),
 		),
@@ -131,6 +131,18 @@ export class PreRegistrationService implements OnDestroy {
 	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
+	}
+
+	private getQrCodeStoragePath(
+		registration: Registration,
+	): string | undefined {
+		if (registration.qrCodeStoragePath) {
+			return registration.qrCodeStoragePath;
+		}
+
+		return registration.uid
+			? `registrations/${registration.uid}.png`
+			: undefined;
 	}
 
 	public saveDraftChild(input: {

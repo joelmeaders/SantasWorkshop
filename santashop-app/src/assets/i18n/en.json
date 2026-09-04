@@ -292,6 +292,7 @@
 	},
 	"REFERRAL": {
 		"REFERRED_BY": "How did you hear about us?",
+		"REQUIRED": "Required",
 		"MODAL_TITLE": "How did you hear about us?",
 		"SELECT": "Select an answer",
 		"COMMON_OPTIONS": "Common options",

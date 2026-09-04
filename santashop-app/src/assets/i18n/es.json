@@ -292,6 +292,7 @@
 	},
 	"REFERRAL": {
 		"REFERRED_BY": "¿Cómo se enteró de nosotros?",
+		"REQUIRED": "Obligatorio",
 		"MODAL_TITLE": "¿Cómo se enteró de nosotros?",
 		"SELECT": "Seleccione una respuesta",
 		"COMMON_OPTIONS": "Opciones comunes",

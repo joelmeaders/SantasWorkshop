@@ -144,7 +144,7 @@ describe('newAccount handler', () => {
 					emailAddress: 'not-an-email',
 					password: 'CandyCane123!',
 					password2: 'Mismatch123!',
-					zipCode: 80205,
+					zipCode: '80205',
 					legal: true,
 					newsletter: true,
 				} as never),

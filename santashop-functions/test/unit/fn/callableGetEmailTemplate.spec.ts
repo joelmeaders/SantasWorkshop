@@ -52,7 +52,7 @@ describe('callableGetEmailTemplate handler', () => {
 		const result = await callableGetEmailTemplate(
 			createCallableRequest(
 				{ key: 'registration-2026' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -67,7 +67,7 @@ describe('callableGetEmailTemplate handler', () => {
 
 		await expect(
 			callableGetEmailTemplate(
-				createCallableRequest({ key: 'Bad Key!' }, { admin: true }),
+				createCallableRequest({ key: 'Bad Key!' }, { roles: ['admin', 'checkin'] }),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});

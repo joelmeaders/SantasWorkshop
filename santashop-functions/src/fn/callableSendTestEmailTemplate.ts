@@ -14,7 +14,6 @@ import {
 	normalizeEmailTemplateFieldDefinitions,
 	prepareEmailTemplateHtmlForSes,
 	renderTemplateWithFieldValues,
-	hasImplicitQrCodePlaceholder,
 } from '../utility/email-templates';
 import {
 	REGISTRATION_EMAIL_RETURN_PATH,
@@ -61,9 +60,6 @@ const validateDetectedFields = (
 	fieldMappings: ReturnType<typeof normalizeEmailTemplateFieldDefinitions>,
 ): void => {
 	const detected = new Set(extractHandlebarsFieldNames(subjectPart, html));
-	if (hasImplicitQrCodePlaceholder(html)) {
-		detected.add('qrCodeUrl');
-	}
 
 	const configured = new Set(fieldMappings.map((field) => field.name));
 	for (const fieldName of detected) {

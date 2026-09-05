@@ -99,8 +99,6 @@ export default async function newAccount(
 		zipCode: data.zipCode,
 		acceptedTermsOfService: acceptedLegal,
 		acceptedPrivacyPolicy: acceptedLegal,
-		version: 1,
-		manuallyMigrated: false,
 		newsletter: data.newsletter,
 		referredBy: data.referredBy,
 	};

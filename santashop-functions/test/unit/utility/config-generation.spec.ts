@@ -134,8 +134,6 @@ const FUNCTIONS_ENV_KEYS = {
 	TEST_SANTASHOP_DEFAULT_MAX_SLOTS: '350',
 	TEST_FIRESTORE_BACKUP_BUCKET: 'gs://test-backups',
 	TEST_SES_REGION: 'us-west-2',
-	TEST_REGISTRATION_EMAIL_TEMPLATE: 'registration-template',
-	TEST_REMINDER_EMAIL_TEMPLATE: 'reminder-template',
 	TEST_SANTASHOP_EVENT_DISPLAY_NAME: 'Test Event',
 	TEST_REGISTRATION_EMAIL_SOURCE: 'noreply@example.com',
 	TEST_REGISTRATION_EMAIL_RETURN_PATH: 'admin@example.com',
@@ -156,8 +154,6 @@ const FUNCTIONS_ENV_KEYS = {
 	PROD_SANTASHOP_DEFAULT_MAX_SLOTS: '500',
 	PROD_FIRESTORE_BACKUP_BUCKET: 'gs://prod-backups',
 	PROD_SES_REGION: 'us-east-1',
-	PROD_REGISTRATION_EMAIL_TEMPLATE: 'prod-registration-template',
-	PROD_REMINDER_EMAIL_TEMPLATE: 'prod-reminder-template',
 	PROD_SANTASHOP_EVENT_DISPLAY_NAME: 'Prod Event',
 	PROD_REGISTRATION_EMAIL_SOURCE: 'prod-noreply@example.com',
 	PROD_REGISTRATION_EMAIL_RETURN_PATH: 'prod-admin@example.com',
@@ -171,6 +167,7 @@ const FUNCTIONS_ENV_KEYS = {
 } satisfies Record<string, string>;
 
 const MANAGED_ENV_KEYS = [
+	...Object.keys(FUNCTIONS_ENV_KEYS).filter((key) => key.startsWith('TEST_')).map((key) => key.replace('TEST_', 'LOCAL_')),
 	...Object.keys(FIREBASE_ENV_KEYS),
 	...Object.keys(FUNCTIONS_ENV_KEYS),
 	'FIREBASE_API_KEY',
@@ -189,8 +186,6 @@ const MANAGED_ENV_KEYS = [
 	'SANTASHOP_DEFAULT_MAX_SLOTS',
 	'FIRESTORE_BACKUP_BUCKET',
 	'SES_REGION',
-	'REGISTRATION_EMAIL_TEMPLATE',
-	'REMINDER_EMAIL_TEMPLATE',
 	'SANTASHOP_EVENT_DISPLAY_NAME',
 	'REGISTRATION_EMAIL_SOURCE',
 	'REGISTRATION_EMAIL_RETURN_PATH',
@@ -280,30 +275,9 @@ describe('config.firebase.cjs', () => {
 		);
 	});
 
-	it('falls back to unprefixed Firebase values when the prefixed ones are missing', () => {
-		setManagedEnv({
-			FIREBASE_API_KEY: 'fallback-api-key',
-			FIREBASE_AUTH_DOMAIN: 'fallback.firebaseapp.com',
-			FIREBASE_DATABASE_URL: 'https://fallback.example',
-			FIREBASE_PROJECT_ID: 'fallback-project',
-			FIREBASE_STORAGE_BUCKET: 'fallback.appspot.com',
-			FIREBASE_MESSAGING_SENDER_ID: '222222',
-			FIREBASE_APP_ID: 'fallback-app-id',
-			FIREBASE_MEASUREMENT_ID: 'G-FALLBACK',
-		});
-
-		const config = configFirebase.buildFirebaseClientConfig('test');
-
-		expect(config).toEqual({
-			apiKey: 'fallback-api-key',
-			authDomain: 'fallback.firebaseapp.com',
-			databaseURL: 'https://fallback.example',
-			projectId: 'fallback-project',
-			storageBucket: 'fallback.appspot.com',
-			messagingSenderId: '222222',
-			appId: 'fallback-app-id',
-			measurementId: 'G-FALLBACK',
-		});
+	it('requires the selected Firebase environment', () => {
+		setManagedEnv({ FIREBASE_API_KEY: 'unscoped-key' });
+		expect(() => configFirebase.buildFirebaseClientConfig('test')).toThrow('TEST_FIREBASE_API_KEY');
 	});
 
 	it('builds app metadata with the expected mode flags and labels', () => {
@@ -314,7 +288,7 @@ describe('config.firebase.cjs', () => {
 		expect(config.production).toBe(true);
 		expect(config.label).toBe('TEST/QA');
 		expect(config.appCheckKey).toBe(
-			configFirebase.MODE_METADATA.test.appCheckKey,
+			configFirebase.MODE_METADATA['test'].appCheckKey,
 		);
 		expect(config.appCheckEnabled).toBe(true);
 		expect(config.programYear).toBe(2025);
@@ -391,35 +365,13 @@ describe('config.functions.cjs', () => {
 		);
 	});
 
-	it('builds local Functions config from LOCAL values and falls back to unprefixed ones', () => {
-		setManagedEnv({
-			AWS_ACCESS_KEY_ID: 'fallback-access-key',
-			AWS_SECRET_ACCESS_KEY: 'fallback-secret-key',
-			SANTASHOP_PROGRAM_YEAR: '2029',
-			SANTASHOP_TIME_ZONE: 'America/Chicago',
-			SANTASHOP_TIME_OFFSET: '-06:00',
-			SANTASHOP_DEFAULT_MAX_SLOTS: '250',
-			FIRESTORE_BACKUP_BUCKET: 'gs://fallback-backups',
-			SES_REGION: 'us-central-1',
-			REGISTRATION_EMAIL_TEMPLATE: 'fallback-registration',
-			REMINDER_EMAIL_TEMPLATE: 'fallback-reminder',
-			SANTASHOP_EVENT_DISPLAY_NAME: 'Fallback Event',
-			REGISTRATION_EMAIL_SOURCE: 'fallback@example.com',
-			REGISTRATION_EMAIL_RETURN_PATH: 'fallback-admin@example.com',
-			SCHEDULED_FIRESTORE_BACKUP: '10 0 * * *',
-			SCHEDULED_DATETIME_SLOT_COUNTERS: '11 * * * *',
-			SCHEDULED_REGISTRATION_STATS: '12 1 * * *',
-			SCHEDULED_USER_STATS: '13 2 * * *',
-			SCHEDULED_CHECKIN_STATS: '14 3 * * *',
-			LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 'Local Event',
-			LOCAL_SES_REGION: 'us-west-1',
-		});
-
+	it('builds local Functions config from LOCAL values', () => {
+		setManagedEnv(Object.fromEntries(Object.entries(FUNCTIONS_ENV_KEYS)
+			.filter(([key]) => key.startsWith('TEST_'))
+			.map(([key, value]) => [key.replace('TEST_', 'LOCAL_'), value])));
 		const config = configFunctions.buildFunctionsConfig('local');
-
-		expect(config['AWS_ACCESS_KEY_ID']).toBe('fallback-access-key');
-		expect(config['SES_REGION']).toBe('us-west-1');
-		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Local Event');
+		expect(config['AWS_ACCESS_KEY_ID']).toBe('test-access-key');
+		expect(config['SES_REGION']).toBe('us-west-2');
 	});
 
 	it('builds test Functions config from TEST values and omits empty optional values', () => {
@@ -454,7 +406,7 @@ describe('config.functions.cjs', () => {
 		delete process.env['TEST_AWS_SECRET_ACCESS_KEY'];
 
 		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
-			'Missing required environment variable: TEST_AWS_SECRET_ACCESS_KEY (or AWS_SECRET_ACCESS_KEY)',
+			'Missing required environment variable: TEST_AWS_SECRET_ACCESS_KEY',
 		);
 	});
 
@@ -470,7 +422,7 @@ describe('config.functions.cjs', () => {
 		});
 
 		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
-			`Refusing to use placeholder AWS credential: ${envKey} (or ${envKey.replace('TEST_', '')})`,
+			`Refusing to use placeholder AWS credential: ${envKey}`,
 		);
 	});
 
@@ -490,42 +442,14 @@ describe('config.functions.cjs', () => {
 		);
 	});
 
-	it('falls back to unprefixed Functions values when prefixed values are missing', () => {
-		setManagedEnv({
-			AWS_ACCESS_KEY_ID: 'fallback-access-key',
-			AWS_SECRET_ACCESS_KEY: 'fallback-secret-key',
-			SANTASHOP_PROGRAM_YEAR: '2029',
-			SANTASHOP_TIME_ZONE: 'America/Chicago',
-			SANTASHOP_TIME_OFFSET: '-06:00',
-			SANTASHOP_DEFAULT_MAX_SLOTS: '250',
-			FIRESTORE_BACKUP_BUCKET: 'gs://fallback-backups',
-			SES_REGION: 'us-central-1',
-			REGISTRATION_EMAIL_TEMPLATE: 'fallback-registration',
-			REMINDER_EMAIL_TEMPLATE: 'fallback-reminder',
-			SANTASHOP_EVENT_DISPLAY_NAME: 'Fallback Event',
-			REGISTRATION_EMAIL_SOURCE: 'fallback@example.com',
-			REGISTRATION_EMAIL_RETURN_PATH: 'fallback-admin@example.com',
-			SCHEDULED_FIRESTORE_BACKUP: '10 0 * * *',
-			SCHEDULED_DATETIME_SLOT_COUNTERS: '11 * * * *',
-			SCHEDULED_REGISTRATION_STATS: '12 1 * * *',
-			SCHEDULED_USER_STATS: '13 2 * * *',
-			SCHEDULED_CHECKIN_STATS: '14 3 * * *',
-		});
-
-		const config = configFunctions.buildFunctionsConfig('prod');
-
-		expect(config['AWS_ACCESS_KEY_ID']).toBe('fallback-access-key');
-		expect(config['SES_REGION']).toBe('us-central-1');
-		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Fallback Event');
+	it('requires scoped Functions credentials', () => {
+		setManagedEnv({ AWS_ACCESS_KEY_ID: 'unscoped-key' });
+		expect(() => configFunctions.buildFunctionsConfig('prod')).toThrow('PROD_AWS_ACCESS_KEY_ID');
 	});
 
-	it('uses test values as the safe local and E2E fallback', () => {
+	it('requires LOCAL configuration for emulator execution', () => {
 		setManagedEnv({ ...FUNCTIONS_ENV_KEYS });
-
-		const config = configFunctions.buildFunctionsConfig('local');
-
-		expect(config['AWS_ACCESS_KEY_ID']).toBe('test-access-key');
-		expect(config['SANTASHOP_PROGRAM_YEAR']).toBe('2025');
+		expect(() => configFunctions.buildFunctionsConfig('local')).toThrow('LOCAL_AWS_ACCESS_KEY_ID');
 	});
 
 	it('renders a quoted env file for the selected project', () => {

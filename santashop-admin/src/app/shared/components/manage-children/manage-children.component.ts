@@ -89,7 +89,7 @@ export class ManageChildrenComponent {
 		const alert = await this.alertController.create({
 			header: 'Are you sure?',
 			subHeader: `${child.firstName} ${child.lastName}`,
-			message: 'This child will be deleted',
+			message: 'Delete this child from the registration?',
 			buttons: [
 				{
 					text: 'Cancel',

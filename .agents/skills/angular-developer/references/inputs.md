@@ -79,20 +79,6 @@ export class CustomCounter {
 <custom-counter [(value)]="myProperty" />
 ```
 
-## Decorator-based Inputs (@Input)
-
-The legacy API remains supported but is not recommended for new code.
-
-```ts
-import { Component, Input } from '@angular/core';
-
-@Component({...})
-export class Legacy {
-  @Input({ required: true }) value = 0;
-  @Input({ transform: trimString }) label = '';
-}
-```
-
 ## Best Practices
 
 - **Prefer Signals**: Use `input()` instead of `@Input()` for better reactivity and type safety.

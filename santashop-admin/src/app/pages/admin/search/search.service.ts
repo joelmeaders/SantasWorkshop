@@ -13,18 +13,6 @@ import {
 } from '@santashop/models';
 import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
 
-export const buildZipCodeSearchValues = (
-	zipCode: string | number,
-): (string | number)[] => {
-	const stringZipCode = String(zipCode);
-	const zipCodeValues: (string | number)[] = [stringZipCode];
-	if (/^\d+$/u.test(stringZipCode)) {
-		zipCodeValues.push(Number.parseInt(stringZipCode, 10));
-	}
-
-	return zipCodeValues;
-};
-
 @Injectable({
 	providedIn: 'root',
 })
@@ -49,10 +37,10 @@ export class SearchService {
 
 	private readonly queryLastNameZip = (
 		lastName: string,
-		zipCode: string | number,
+		zipCode: string,
 	): QueryConstraint[] => {
 		return [
-			where('zip', 'in', buildZipCodeSearchValues(zipCode)),
+			where('zip', '==', zipCode),
 			where('lastName', '>=', lastName),
 			where('lastName', '<=', lastName + '\uf8ff'),
 			orderBy('lastName', 'asc'),
@@ -73,7 +61,7 @@ export class SearchService {
 
 	public searchByLastNameZip(
 		lastName: string,
-		zipCode: string | number,
+		zipCode: string,
 	): void {
 		this.searchResults.next(
 			this.index.readMany(

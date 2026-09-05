@@ -1,0 +1,9 @@
+flowchart TD
+    Entry[Home: sign in or reset password] --> Auth[Firebase Auth]
+    Signup[Sign up: account and referral] --> NewAccount[newAccount]
+    NewAccount --> Auth
+    Auth --> Overview[Overview: children and appointment]
+    Overview --> Complete[completeRegistration]
+    Complete --> Confirmation[Confirmation and QR image]
+    Confirmation --> Change[changeRegistrationDateTime]
+    Auth --> Profile[Profile controls]

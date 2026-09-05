@@ -4,7 +4,7 @@ The **host element** is the DOM element that matches a component's selector. The
 
 ## Binding to the Host Element
 
-Use the `host` property in the `@Component` decorator to bind properties, attributes, styles, and events to the host element. This is the **preferred approach** over legacy decorators.
+Use the `host` property in the `@Component` decorator to bind properties, attributes, styles, and events to the host element.
 
 ```ts
 @Component({
@@ -24,24 +24,6 @@ export class CustomSlider {
   protected readonly isActive = signal(false);
   protected readonly color = signal('blue');
 
-  onKeyDown(event: KeyboardEvent) {
-    /* ... */
-  }
-}
-```
-
-## Legacy Decorators
-
-`@HostBinding` and `@HostListener` are supported for backwards compatibility but should be avoided in new code.
-
-```ts
-export class CustomSlider {
-  @HostBinding('tabIndex')
-  get tabIndex() {
-    return this.disabled ? -1 : 0;
-  }
-
-  @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
     /* ... */
   }

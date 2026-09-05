@@ -24,7 +24,7 @@ describe('changeAccountInformation handler', () => {
 				{
 					firstName: 'Jovie',
 					lastName: 'Elf',
-					zipCode: 80211,
+					zipCode: '80211',
 				},
 				{ uid: 'user-1' },
 			),
@@ -52,7 +52,7 @@ describe('changeAccountInformation handler', () => {
 					{
 						firstName: '',
 						lastName: 'Elf',
-						zipCode: 80211,
+						zipCode: '80211',
 					},
 					{},
 				),
@@ -70,7 +70,7 @@ describe('changeAccountInformation handler', () => {
 					{
 						firstName: 'Jovie',
 						lastName: 'Elf',
-						zipCode: 80211,
+						zipCode: '80211',
 					},
 					{ uid: '' },
 				),
@@ -89,7 +89,7 @@ describe('changeAccountInformation handler', () => {
 		await expect(
 			changeAccountInformation(
 				createCallableRequest(
-					{ firstName: 'Jovie', lastName: 'Elf', zipCode: 80211 },
+					{ firstName: 'Jovie', lastName: 'Elf', zipCode: '80211' },
 					{ uid: 'user-1' },
 				),
 			),
@@ -106,7 +106,7 @@ describe('changeAccountInformation handler', () => {
 		await expect(
 			changeAccountInformation(
 				createCallableRequest(
-					{ firstName: 'Jovie', lastName: 'Elf', zipCode: 80211 },
+					{ firstName: 'Jovie', lastName: 'Elf', zipCode: '80211' },
 					{ uid: 'user-1' },
 				),
 			),

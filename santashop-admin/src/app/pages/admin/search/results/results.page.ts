@@ -43,9 +43,9 @@ declare type SortFnType = (
 ) => number;
 
 const compareSearchValues = (
-	left: string | number | undefined,
-	right: string | number | undefined,
-): number => String(left ?? '').localeCompare(String(right ?? ''));
+	left: string | undefined,
+	right: string | undefined,
+): number => (left ?? '').localeCompare(right ?? '');
 
 @Component({
 	selector: 'admin-results',

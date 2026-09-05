@@ -29,6 +29,17 @@ test.describe('staff customer lookup', () => {
 		},
 	);
 
+	test('ZIP-001 preserves a leading zero through the search form', async ({ page, seedRegistrationSearchIndex }) => {
+		await seedRegistrationSearchIndex([{ id: 'zero-zip', customerId: 'zero-zip', firstName: 'Zero', lastName: 'Claus', zip: '01234', emailAddress: 'zero@example.test', code: 'ZERO001' }]);
+		await signInAdminViaUi(page, defaultAdminAccount());
+		await page.goto('/admin/search/by-name');
+		await page.locator('ion-input[formControlName="lastName"] input').fill('Claus');
+		await page.locator('ion-input[formControlName="zipCode"] input').fill('01234');
+		await page.getByRole('link', { name: 'Search', exact: true }).click();
+		await expect(page.locator('.result-item')).toHaveCount(1);
+		await expect(page.locator('.result-item')).toContainText('Zero Claus');
+		await expect(page.locator('.result-item')).toContainText('01234');
+	});
 	test('REFRESH-005 reloads the active search without re-entering its criteria', async ({
 		page,
 		seedRegistrationSearchIndex,

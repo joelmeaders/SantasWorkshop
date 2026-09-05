@@ -24,10 +24,9 @@
 	"author": "",
 	"license": "ISC",
 	"engines": {
-    "node": ">=24.15.0"
+		"node": ">=24.15.0"
 	},
 	"dependencies": {
-		"@angular/animations": "catalog:",
 		"@angular/cdk": "catalog:",
 		"@angular/common": "catalog:",
 		"@angular/core": "catalog:",
@@ -36,15 +35,15 @@
 		"@angular/router": "catalog:",
 		"@ionic/angular": "catalog:",
 		"chart.js": "catalog:",
-			"@codemirror/lang-html": "catalog:",
-			"@codemirror/state": "catalog:",
-			"@codemirror/view": "catalog:",
+		"@codemirror/lang-html": "catalog:",
+		"@codemirror/state": "catalog:",
+		"@codemirror/view": "catalog:",
 		"chartjs-plugin-datalabels": "catalog:",
-			"codemirror": "catalog:",
+		"codemirror": "catalog:",
 		"firebase": "catalog:",
-			"handlebars": "catalog:",
+		"handlebars": "catalog:",
 		"ng2-charts": "catalog:",
 		"rxjs": "catalog:",
-    "tslib": "catalog:"
+		"tslib": "catalog:"
 	}
 }

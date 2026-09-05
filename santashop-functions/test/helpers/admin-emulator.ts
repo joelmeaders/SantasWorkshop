@@ -94,7 +94,6 @@ export const clearEmulatorData = async (): Promise<void> => {
 		COLLECTION_SCHEMA.parameters,
 		COLLECTION_SCHEMA.registrationSearchIndex,
 		COLLECTION_SCHEMA.tmpRegistrationEmails,
-		COLLECTION_SCHEMA.tmpResendRegistrationEmails,
 		COLLECTION_SCHEMA.checkins,
 		COLLECTION_SCHEMA.cancellations,
 		COLLECTION_SCHEMA.editedRegistrations,

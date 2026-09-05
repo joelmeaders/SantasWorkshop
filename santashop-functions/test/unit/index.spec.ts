@@ -32,7 +32,7 @@ vi.mock('firebase-functions/v2/tasks', () => ({
 	onTaskDispatched: onTaskDispatchedMock,
 }));
 
-vi.mock('../../src/fn/sendNewRegistrationEmails2', () => ({
+vi.mock('../../src/fn/sendRegistrationEmail', () => ({
 	default: sendNewRegistrationEmailsMock,
 }));
 

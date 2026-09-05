@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { COLLECTION_SCHEMA } from '@santashop/models';
 import { createBackgroundAdminMock } from '../../helpers/firebase-admin-background.mock';
 
 const getFunctionsMock = vi.fn();
@@ -56,6 +57,28 @@ describe('owner operation callables', () => {
 	const loadHandlers = async () => import('../../../src/fn/ownerOperations');
 	const owner = { uid: 'owner-1', token: { owner: true } };
 
+	it('previews the yearly reset using the supported queue and retains role-based staff', async () => {
+		const { previewOwnerOperation } = await loadHandlers();
+		const now = new Date('2026-01-10T00:00:00.000Z');
+		adminMock.setCollectionDocs('ownerOperations', [{ id: 'export', data: {
+			operation: 'export-marketing-emails', status: 'succeeded', exportPath: 'exports/marketing.csv', completedAt: now,
+		} }]);
+		adminMock.module.storage.mockReturnValue({ bucket: () => ({
+			file: () => ({ exists: async () => [true] }),
+			getFiles: async () => [[]],
+		}) });
+		adminMock.listUsers.mockResolvedValue({ users: [
+			{ uid: 'customer' },
+			{ uid: 'staff', customClaims: { roles: ['admin'] } },
+			{ uid: 'owner', customClaims: { owner: true } },
+		] });
+		for (const collection of Object.values(COLLECTION_SCHEMA)) adminMock.setCollectionCount(collection, 0);
+		adminMock.setCollectionCount('tmp_registrationemails', 3);
+		const result = await previewOwnerOperation({ data: { operation: 'yearly-reset', programYear: 2025 }, auth: owner } as never, now);
+		expect(result.counts).toMatchObject({ authUsers: 1, emailQueue: 3 });
+		expect(Object.keys(result.counts).filter((key) => /queue/i.test(key))).toEqual(['emailQueue']);
+		expect(adminMock.collection.mock.calls.every(([name]) => typeof name === 'string' && name.length > 0)).toBe(true);
+	});
 	it('creates a preview with an independently counted marketing audience', async () => {
 		const { previewOwnerOperation } = await loadHandlers();
 		adminMock.setCollectionCount('users', 7);

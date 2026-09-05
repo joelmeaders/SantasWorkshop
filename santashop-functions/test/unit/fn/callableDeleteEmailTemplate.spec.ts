@@ -34,7 +34,7 @@ describe('callableDeleteEmailTemplate', () => {
 		await expect(
 			handler({
 				data: { key: 'registration-2026' },
-				auth: { uid: 'admin-1', token: { admin: true } },
+				auth: { uid: 'admin-1', token: { roles: ['admin', 'checkin'] } },
 			} as never),
 		).resolves.toBeUndefined();
 
@@ -56,7 +56,7 @@ describe('callableDeleteEmailTemplate', () => {
 			{ data: { key: 'registration-2026' }, auth: { uid: 'user', token: {} } },
 			'permission-denied',
 		],
-		['key is omitted', { data: {}, auth: { uid: 'admin', token: { admin: true } } }, 'invalid-argument'],
+		['key is omitted', { data: {}, auth: { uid: 'admin', token: { roles: ['admin', 'checkin'] } } }, 'invalid-argument'],
 	])('rejects when %s', async (_description, request, code) => {
 		const handler = await loadHandler();
 		await expect(handler(request as never)).rejects.toMatchObject({ code });

@@ -95,6 +95,7 @@ export class RegistrationPage {
 				Validators.required,
 				Validators.minLength(5),
 				Validators.maxLength(5),
+				Validators.pattern(/^\d{5}$/),
 			]),
 		),
 		referral: new UntypedFormControl(

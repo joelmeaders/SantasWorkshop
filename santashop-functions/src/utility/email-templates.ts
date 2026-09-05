@@ -7,18 +7,12 @@ import type {
 import {
 	COLLECTION_SCHEMA,
 	EMAIL_TEMPLATE_DELIVERY_PROFILES,
-	EMAIL_TEMPLATE_KEYS,
 	EMAIL_TEMPLATE_RUNTIME_FIELDS,
 } from '@santashop/models';
 import admin from '../firebase-admin';
-import {
-	REGISTRATION_EMAIL_TEMPLATE,
-	REMINDER_EMAIL_TEMPLATE,
-} from './runtime-config';
 import { CallableValidationError } from './callable-validation';
 
 export interface EmailTemplateReferenceLike {
-	template?: string;
 	templateKey?: string;
 }
 
@@ -32,8 +26,7 @@ export interface EmailTemplateRuntimeData {
 
 export interface ResolvedPublishedEmailTemplate {
 	templateName: string;
-	templateSummary?: EmailTemplateSummary;
-	usedLegacyFallback: boolean;
+	templateSummary: EmailTemplateSummary;
 }
 
 const TEMPLATE_KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -43,11 +36,6 @@ const HANDLEBARS_FIELD_PATTERN = /{{\s*([a-zA-Z0-9_.]+)\s*}}/g;
 
 const escapeRegExp = (value: string): string =>
 	value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-
-const FALLBACK_TEMPLATE_NAMES: Readonly<Record<string, string>> = {
-	[EMAIL_TEMPLATE_KEYS.registrationConfirmation]: REGISTRATION_EMAIL_TEMPLATE,
-	[EMAIL_TEMPLATE_KEYS.eventReminder]: REMINDER_EMAIL_TEMPLATE,
-};
 
 const DELIVERY_PROFILE_VALUES = new Set<string>(
 	Object.values(EMAIL_TEMPLATE_DELIVERY_PROFILES),
@@ -201,11 +189,6 @@ export const extractHandlebarsFieldNames = (
 	return Array.from(matches.values());
 };
 
-export const hasImplicitQrCodePlaceholder = (html: string): boolean =>
-	html.includes('{{qrCodeUrl}}') ||
-	html.includes('*|QRCODE_URL|*') ||
-	/<img\b[^>]*(?:alt|title)\s*=\s*['"][^'"]*qr[^'"]*['"][^>]*>/i.test(html);
-
 const getValueAtPath = (
 	target: Record<string, unknown>,
 	path: string,
@@ -275,9 +258,6 @@ export const buildDirectTemplateDataFromFieldDefinitions = (
 	for (const field of fieldMappings) {
 		setValueAtPath(result, field.name, field.sampleValue);
 
-		if (field.name === 'contact.firstName') {
-			setValueAtPath(result, 'firstName', field.sampleValue);
-		}
 	}
 
 	return result;
@@ -468,109 +448,35 @@ const ensureMetaCharset = (html: string): string => {
 	return `<meta charset="utf-8">${html}`;
 };
 
-const normalizeContactFields = (html: string): string =>
-	html.replace(/\bcontact\.firstName\b/g, 'firstName');
-
-const replaceLegacyQrCodeTokens = (html: string): string =>
-	html.replace(/\*\|QRCODE_URL\|\*/gi, '{{qrCodeUrl}}');
-
-const replaceQrCodeImageSource = (html: string): string => {
-	if (html.includes('{{qrCodeUrl}}')) {
-		return html;
-	}
-
-	return html.replace(/<img\b([^>]*?)>/gi, (match, attributes: string) => {
-		if (!/\bsrc\s*=\s*/i.test(attributes)) {
-			return match;
-		}
-
-		if (!/(?:alt|title)\s*=\s*["'][^"']*qr[^"']*["']/i.test(attributes)) {
-			return match;
-		}
-
-		const updatedAttributes = attributes.replace(
-			/\bsrc\s*=\s*(['"]).*?\1/i,
-			'src="{{qrCodeUrl}}"',
-		);
-
-		return `<img ${updatedAttributes.trim()}>`;
-	});
-};
-
 const stripEditorWhitespace = (html: string): string =>
 	html
 		.replace(/\r\n|\n|\r|\t/gm, '')
 		.replace(/>\s+</g, '><')
 		.trim();
 
-export const prepareEmailTemplateHtmlForSes = (html: string): string => {
-	const withCharset = ensureMetaCharset(html);
-	const withNormalizedFields = normalizeContactFields(withCharset);
-	const withLegacyQrTokens = replaceLegacyQrCodeTokens(withNormalizedFields);
-	const withQrImageSource = replaceQrCodeImageSource(withLegacyQrTokens);
-
-	return stripEditorWhitespace(withQrImageSource);
-};
+export const prepareEmailTemplateHtmlForSes = (html: string): string =>
+	stripEditorWhitespace(ensureMetaCharset(html));
 
 export const resolvePublishedEmailTemplate = async (
 	reference: EmailTemplateReferenceLike,
-	defaultTemplateName = REGISTRATION_EMAIL_TEMPLATE,
 ): Promise<ResolvedPublishedEmailTemplate> => {
-	if (reference.template?.trim()) {
-		return {
-			templateName: reference.template.trim(),
-			usedLegacyFallback: false,
-		};
+	const key = reference.templateKey?.trim();
+	if (!key) {
+		throw new Error('A published email template reference is required.');
 	}
 
-	if (!reference.templateKey?.trim()) {
-		return {
-			templateName: defaultTemplateName,
-			usedLegacyFallback: false,
-		};
-	}
-
-	const key = reference.templateKey.trim();
-	if (isEmailTemplateDeliveryProfile(key)) {
-		const matchingTemplates =
-			await listEmailTemplateSummariesByDeliveryProfile(key);
-		const publishedTemplate = matchingTemplates.find(
-			(template) => !!template.publishedRevisionId,
-		);
-
-		if (publishedTemplate) {
-			return {
-				templateName: publishedTemplate.awsTemplateName,
-				templateSummary: publishedTemplate,
-				usedLegacyFallback: false,
-			};
-		}
-
-		if (matchingTemplates.length === 0) {
-			const fallback = FALLBACK_TEMPLATE_NAMES[key];
-			if (fallback) {
-				return {
-					templateName: fallback,
-					usedLegacyFallback: true,
-				};
-			}
-		}
-
+	const summary = isEmailTemplateDeliveryProfile(key)
+		? (await listEmailTemplateSummariesByDeliveryProfile(key)).find(
+				(template) => !!template.publishedRevisionId,
+			)
+		: await getEmailTemplateSummary(key);
+	if (!summary?.publishedRevisionId) {
 		throw new Error(
-			`Template delivery profile ${key} does not have a published SES template available.`,
+			`Template ${key} does not have a published SES template available.`,
 		);
 	}
-
-	const summary = await getEmailTemplateSummary(key);
-	if (summary?.publishedRevisionId) {
-		return {
-			templateName: summary.awsTemplateName,
-			templateSummary: summary,
-			usedLegacyFallback: false,
-		};
-	}
-
-	throw new Error(
-		`Template ${key} does not have a published SES template available.`,
-	);
+	return {
+		templateName: summary.awsTemplateName,
+		templateSummary: summary,
+	};
 };

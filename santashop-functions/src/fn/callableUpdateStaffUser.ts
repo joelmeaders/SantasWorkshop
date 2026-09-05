@@ -75,7 +75,7 @@ const buildAuthUpdate = (data: UpdateStaffUser): StaffAuthUpdate => {
 	return authUpdate;
 };
 
-const resolveRoles = (uid: string, roles: StaffRole[]): StaffRole[] => {
+const resolveRoles = (roles: StaffRole[]): StaffRole[] => {
 	const sanitized = sanitizeRoles(roles);
 
 	if (sanitized.length === 0) {
@@ -100,7 +100,6 @@ const persistStaffChanges = async (
 	if (roles !== undefined) {
 		await admin.auth().setCustomUserClaims(uid, {
 			roles,
-			admin: roles.includes('admin'),
 		});
 	}
 
@@ -183,7 +182,7 @@ export default async function callableUpdateStaffUser(
 
 	const authUpdate = buildAuthUpdate(data);
 	const roles =
-		data.roles !== undefined ? resolveRoles(uid, data.roles) : undefined;
+		data.roles !== undefined ? resolveRoles(data.roles) : undefined;
 
 	try {
 		await persistStaffChanges(uid, authUpdate, roles);

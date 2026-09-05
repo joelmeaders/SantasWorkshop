@@ -33,7 +33,7 @@ describe.sequential('callableAdminPreRegister integration', () => {
 						dateTime: new Date('2025-12-10T18:00:00.000Z'),
 					},
 				}),
-				{ admin: true, uid: 'admin-user' },
+				{ roles: ['admin', 'checkin'], uid: 'admin-user' },
 			),
 		);
 

@@ -1,7 +1,7 @@
 # Angular Animations
 
 When animating elements in Angular, **first analyze the project's Angular version** in `package.json`.
-For modern applications (**Angular v20.2 and above**), prefer using native CSS with `animate.enter` and `animate.leave`. For older applications, you may need to use the deprecated `@angular/animations` package.
+Use native CSS with `animate.enter` and `animate.leave`.
 
 ## 1. Native CSS Animations (v20.2+ Recommended)
 
@@ -122,39 +122,4 @@ Retrieve animations directly using standard Web APIs:
 ```ts
 const animations = element.getAnimations();
 animations.forEach((anim) => anim.pause());
-```
-
-## 3. Legacy Animations DSL (Deprecated)
-
-For older projects (pre v20.2 or where `@angular/animations` is already heavily used), you use the component metadata DSL.
-
-**Important:** Do not mix legacy animations and `animate.enter`/`leave` in the same component.
-
-### Setup
-
-```ts
-bootstrapApplication(App, {
-  providers: [provideAnimationsAsync()],
-});
-```
-
-### Defining Transitions
-
-```ts
-import {signal} from '@angular/core';
-import {trigger, state, style, animate, transition} from '@angular/animations';
-
-@Component({
-  animations: [
-    trigger('openClose', [
-      state('open', style({opacity: 1})),
-      state('closed', style({opacity: 0})),
-      transition('open <=> closed', [animate('0.5s')]),
-    ]),
-  ],
-  template: `<div [@openClose]="isOpen() ? 'open' : 'closed'">...</div>`,
-})
-export class OpenClose {
-  protected readonly isOpen = signal(true);
-}
 ```

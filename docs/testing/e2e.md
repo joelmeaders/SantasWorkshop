@@ -60,24 +60,24 @@ remote test configuration and are not the emulator-backed e2e path.
 ### One-time setup
 
 ```text
-volta run --node 24.11.0 pnpm install
-volta run --node 24.11.0 pnpm --filter @santashop/e2e exec playwright install
+volta run --node 24.15.0 pnpm install
+volta run --node 24.15.0 pnpm --filter @santashop/e2e exec playwright install
 ```
 
 ### Prepare local emulator config and builds
 
 ```text
-volta run --node 24.11.0 pnpm run config:app:e2e
-volta run --node 24.11.0 pnpm run config:functions:local
-volta run --node 24.11.0 pnpm --filter @santashop/models build
-volta run --node 24.11.0 pnpm --filter @santashop/core build:prod
-volta run --node 24.11.0 pnpm e2e:prebuild
+volta run --node 24.15.0 pnpm run config:app:e2e
+volta run --node 24.15.0 pnpm run config:functions:local
+volta run --node 24.15.0 pnpm --filter @santashop/models build
+volta run --node 24.15.0 pnpm --filter @santashop/core build:prod
+volta run --node 24.15.0 pnpm e2e:prebuild
 ```
 
 ### Recommended automated run
 
 ```text
-volta run --node 24.11.0 pnpm e2e:test:app
+volta run --node 24.15.0 pnpm e2e:test:app
 ```
 
 This prepares local app and Functions configuration, builds shared packages and
@@ -91,22 +91,22 @@ error fails during startup instead of once per browser scenario.
 Terminal 1:
 
 ```text
-volta run --node 24.11.0 pnpm exec firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage
+volta run --node 24.15.0 pnpm exec firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage
 ```
 
 Terminal 2:
 
 ```text
-volta run --node 24.11.0 pnpm exec ng serve santashop-app --configuration=development --port 4100
+volta run --node 24.15.0 pnpm exec ng serve santashop-app --configuration=development --port 4100
 ```
 
 ### Run tests headlessly
 
 ```text
 $env:CI='1'
-volta run --node 24.11.0 pnpm exec wait-on http://localhost:4100
-volta run --node 24.11.0 pnpm run e2e:functions:ready
-volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/public
+volta run --node 24.15.0 pnpm exec wait-on http://localhost:4100
+volta run --node 24.15.0 pnpm run e2e:functions:ready
+volta run --node 24.15.0 pnpm --filter @santashop/e2e test tests/public
 $env:CI=$null
 ```
 
@@ -271,7 +271,7 @@ Rules:
 - They should never be required for production behavior.
 - They are appropriate for test setup and global app-state seeding.
 
-If future tests need more backend setup, add new **emulator-only** helper callables following the same pattern.
+If tests need more backend setup, add new **emulator-only** helper callables following the same pattern.
 
 ## Admin-app e2e workflow
 
@@ -287,11 +287,11 @@ For admin tests, use:
 ### Prepare local emulator config and builds for admin tests
 
 ```text
-volta run --node 24.11.0 pnpm run config:admin:e2e
-volta run --node 24.11.0 pnpm run config:functions:local
-volta run --node 24.11.0 pnpm --filter @santashop/models build
-volta run --node 24.11.0 pnpm --filter @santashop/core build:prod
-volta run --node 24.11.0 pnpm e2e:prebuild
+volta run --node 24.15.0 pnpm run config:admin:e2e
+volta run --node 24.15.0 pnpm run config:functions:local
+volta run --node 24.15.0 pnpm --filter @santashop/models build
+volta run --node 24.15.0 pnpm --filter @santashop/core build:prod
+volta run --node 24.15.0 pnpm e2e:prebuild
 ```
 
 ### Start services in separate terminals for admin tests
@@ -299,21 +299,21 @@ volta run --node 24.11.0 pnpm e2e:prebuild
 Terminal 1:
 
 ```text
-volta run --node 24.11.0 pnpm exec firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage
+volta run --node 24.15.0 pnpm exec firebase emulators:start --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage
 ```
 
 Terminal 2:
 
 ```text
-volta run --node 24.11.0 pnpm --filter @santashop/admin start:local
+volta run --node 24.15.0 pnpm --filter @santashop/admin start:local
 ```
 
 ### Run admin tests headlessly
 
 ```text
 $env:CI='1'
-volta run --node 24.11.0 pnpm exec wait-on http://localhost:4100
-volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/admin/schedule-editor/generate-schedules.spec.ts
+volta run --node 24.15.0 pnpm exec wait-on http://localhost:4100
+volta run --node 24.15.0 pnpm --filter @santashop/e2e test tests/admin/schedule-editor/generate-schedules.spec.ts
 $env:CI=$null
 ```
 
@@ -406,9 +406,9 @@ Use that sparingly and only when footer overlap / clipped layout is the actual c
 
 ## App Check rule for emulator e2e
 
-The public app calls real callable functions such as `newAccount` and `updateReferredBy`.
+The public app calls real callable functions such as `newAccount` and `completeRegistration`.
 
-Those functions now use emulator-aware App Check enforcement:
+Those functions use emulator-aware App Check enforcement:
 
 - enforced outside the emulator
 - relaxed when `FUNCTIONS_EMULATOR === 'true'`
@@ -498,7 +498,7 @@ Validated passing command from this workflow:
 
 ```text
 $env:CI='1'
-volta run --node 24.11.0 pnpm --filter @santashop/e2e test tests/public/account-access.spec.ts tests/public/entry-and-controls.spec.ts
+volta run --node 24.15.0 pnpm --filter @santashop/e2e test tests/public/account-access.spec.ts tests/public/entry-and-controls.spec.ts
 $env:CI=$null
 ```
 
@@ -511,7 +511,7 @@ Chromium:
 - `tests/public/entry-and-controls.spec.ts`
 - `tests/public/registration-lifecycle.spec.ts`
 
-If a future change breaks them, start by checking:
+If a change breaks them, start by checking:
 
 - emulator project alignment (`demo-santashop`)
 - app config mode (`local`, not `test`)

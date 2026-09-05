@@ -14,6 +14,7 @@ import { getErrorMessage, getErrorStatus } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 import { isAdminToken } from '../utility/capabilities';
+import { requireZipCodeValue, withCallableValidation } from '../utility/callable-validation';
 import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
 
 const log = createFunctionLogger('onSiteRegistration');
@@ -45,6 +46,8 @@ export default async function onSiteRegistration(
 			'Incomplete registration. Cannot continue.',
 		);
 	}
+
+	record.zipCode = withCallableValidation(() => requireZipCodeValue(record.zipCode));
 
 	const id = admin
 		.firestore()

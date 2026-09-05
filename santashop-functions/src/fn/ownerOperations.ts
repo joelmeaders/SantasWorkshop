@@ -281,7 +281,6 @@ const isElevatedAuthUser = (user: admin.auth.UserRecord): boolean => {
 	const roles = claims['roles'];
 	return (
 		claims['owner'] === true ||
-		claims['admin'] === true ||
 		(Array.isArray(roles) && roles.length > 0)
 	);
 };
@@ -389,9 +388,6 @@ const buildCounts = async (
 				),
 				emailQueue: await countCollection(
 					COLLECTION_SCHEMA.tmpRegistrationEmails,
-				),
-				resendEmailQueue: await countCollection(
-					COLLECTION_SCHEMA.tmpResendRegistrationEmails,
 				),
 				dateTimeSlots: await countCollection(
 					COLLECTION_SCHEMA.dateTimeSlots,

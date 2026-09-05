@@ -18,11 +18,14 @@ test.describe('customer account and session access', () => {
 		page,
 	}) => {
 		const account = randomAccount();
+		account.zipCode = '01234';
 		await createAccountViaUi(page, account);
 
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 		await expect(page.locator('#menuButton')).toBeVisible();
 		await expect(page.locator('#children-heading')).toBeVisible();
+		await page.goto('/pre-registration/profile');
+		await expect(page.locator('ion-input[formControlName="zipCode"] input')).toHaveValue('01234');
 	});
 
 	test('AUTH-002 requires valid fields and policy acceptance', async ({

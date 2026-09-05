@@ -57,7 +57,7 @@ export const routes: Routes = [
 		path: 'sign-up',
 		canActivate: [redirectLoggedInToRegistrationGuard],
 		loadComponent: () =>
-			import('./features/v2/sign-up/sign-up.page').then(
+			import('./features/sign-up/sign-up.page').then(
 				(m) => m.SignUpPage,
 			),
 		title: 'Create Account | Santa Shop Registration',
@@ -66,7 +66,7 @@ export const routes: Routes = [
 		path: 'pre-registration',
 		canMatch: [redirectUnauthorizedToLoginGuard],
 		loadChildren: () =>
-			import('./features/v2/pre-registration/pre-registration.routes').then(
+			import('./features/pre-registration/pre-registration.routes').then(
 				(module) => module.preRegistrationRoutes,
 			),
 	},

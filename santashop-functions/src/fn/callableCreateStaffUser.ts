@@ -153,7 +153,6 @@ export default async function callableCreateStaffUser(
 	try {
 		await admin.auth().setCustomUserClaims(newUserAccount.uid, {
 			roles,
-			admin: roles.includes('admin'),
 		});
 
 		const now = new Date();

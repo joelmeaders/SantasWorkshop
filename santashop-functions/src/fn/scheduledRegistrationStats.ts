@@ -3,20 +3,15 @@ import admin from '../firebase-admin';
 import {
 	AgeGroup,
 	AgeGroupBreakdown,
-	DateTimeCount,
+	RegistrationDateTimeStats,
 	GenderAgeStats,
 	Registration,
+	RegistrationStats,
 	ZipCodeCount,
 } from '../models';
 import { normalizeDateTime } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
 import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
-
-interface RegistrationStatsDocument {
-	completedRegistrations: number;
-	dateTimeCount: DateTimeCount[];
-	zipCodeCount: ZipCodeCount[];
-}
 
 const log = createFunctionLogger('scheduledRegistrationStats');
 
@@ -33,7 +28,7 @@ const createEmptyGenderAgeStats = (): GenderAgeStats => ({
 const createDateTimeStat = (
 	dateTime: Date,
 	childCount: number,
-): DateTimeCount => ({
+): RegistrationDateTimeStats => ({
 	dateTime,
 	count: 1,
 	childCount,
@@ -58,7 +53,7 @@ export default async function scheduledRegistrationStats(): Promise<void> {
 
 	const completedRegistrations = registrations.length;
 
-	const stats: RegistrationStatsDocument = {
+	const stats: RegistrationStats = {
 		completedRegistrations,
 		dateTimeCount: getDateTimeStats(registrations),
 		zipCodeCount: getZipCodeStats(registrations),
@@ -77,8 +72,8 @@ export default async function scheduledRegistrationStats(): Promise<void> {
 	});
 }
 
-function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
-	const stats: DateTimeCount[] = [];
+function getDateTimeStats(registrations: Registration[]): RegistrationDateTimeStats[] {
+	const stats: RegistrationDateTimeStats[] = [];
 
 	const getIndex = (dateTime: Date) =>
 		stats.findIndex((e) => dateTime.getTime() == e.dateTime.getTime());
@@ -103,7 +98,7 @@ function getDateTimeStats(registrations: Registration[]): DateTimeCount[] {
 		const dateTime = normalizeDateTime(timestamp);
 		const children = registration.children ?? [];
 		const index = getIndex(dateTime);
-		let stat: DateTimeCount;
+		let stat: RegistrationDateTimeStats;
 
 		if (index === -1) {
 			stat = createDateTimeStat(dateTime, children.length);

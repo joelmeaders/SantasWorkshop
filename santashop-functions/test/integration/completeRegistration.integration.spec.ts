@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import completeRegistration from '../../src/fn/completeRegistration';
-import scheduledDateTimeSlotCounters from '../../src/fn/scheduledDateTimeSlotCounters2';
+import scheduledDateTimeSlotCounters from '../../src/fn/reconcileAppointmentCounters';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import { createRegistration } from '../fixtures/factories';
 import {

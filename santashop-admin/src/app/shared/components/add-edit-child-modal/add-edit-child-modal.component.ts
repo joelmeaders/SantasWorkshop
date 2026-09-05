@@ -228,7 +228,7 @@ export class AddEditChildModalComponent implements OnInit {
 	}
 
 	public async dismiss(child?: Child): Promise<void> {
-		let role = '';
+		let role: string;
 
 		if (!child) {
 			role = 'cancelled';

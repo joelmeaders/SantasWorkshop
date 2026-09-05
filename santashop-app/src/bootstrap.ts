@@ -11,7 +11,6 @@ import {
 	FIREBASE_FUNCTIONS,
 	FIREBASE_STORAGE,
 	MOBILE_EVENT,
-	PROFILE_VERSION,
 	PROGRAM_YEAR,
 	PUBLIC_PARAMETERS_SOURCE,
 	SHOP_DAYS,
@@ -148,7 +147,6 @@ export const bootstrapCustomerApplication = (
 			{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 			{ provide: PROGRAM_YEAR, useValue: appConfig.programYear },
 			{ provide: SHOP_DAYS, useValue: appConfig.shopDays },
-			{ provide: PROFILE_VERSION, useValue: 1 },
 			{ provide: MOBILE_EVENT, useValue: true },
 		],
 	});

@@ -26,6 +26,7 @@ import {
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 import { isAdminToken } from '../utility/capabilities';
+import { requireZipCodeValue, withCallableValidation } from '../utility/callable-validation';
 
 interface RegistrationCreationResult {
 	qrCode: string;
@@ -82,6 +83,8 @@ export default async function callableAdminPreRegister(
 			'Missing required registration account fields',
 		);
 	}
+
+	record.zipCode = withCallableValidation(() => requireZipCodeValue(record.zipCode));
 
 	// Create Account
 	let newUserAccount;
@@ -238,8 +241,6 @@ const createRegistration = async (
 		zipCode,
 		acceptedTermsOfService: new Date(0),
 		acceptedPrivacyPolicy: new Date(0),
-		version: 1,
-		manuallyMigrated: true,
 		newsletter: record.newsletter ?? false,
 		...(record.referredBy ? { referredBy: record.referredBy } : {}),
 	};

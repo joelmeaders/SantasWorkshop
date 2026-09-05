@@ -4,7 +4,7 @@ End-to-end testing suite for the SantaShop application using Playwright.
 
 ## Prerequisites
 
-- Node.js 24.11.0
+- Node.js 24.15.0
 - Firebase emulators
 - santashop-functions built
 
@@ -99,7 +99,7 @@ The tests are configured to:
 - Run the full suite with Playwright's Pixel 5 Chromium profile
 - Only the Pixel 5 Chromium project is enabled. Desktop, Firefox, and WebKit
   projects are disabled for now; existing compatibility specs remain available
-  for a future browser matrix expansion.
+  for optional browser matrix execution.
 - Run sequentially in one worker because tests share emulator state
 - Stop after the first failed or timed-out test (`maxFailures: 1`)
 - Generate HTML reports

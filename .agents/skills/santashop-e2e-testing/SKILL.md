@@ -14,7 +14,7 @@ Use TypeScript/JavaScript and Node.js tooling only for repository changes and he
 ## Choose the right test layer
 
 - Use Playwright E2E tests for a real user journey through the Ionic app, Firebase Auth, Firestore, callable Functions, and Storage emulators.
-- Use Angular unit tests when testing a component, page, service, guard, or observable in isolation. Mock `AuthService` with `useValue`, `of(...)`/`BehaviorSubject`, and Jasmine spies as nearby specs do; do not call emulator helper functions from a unit test.
+- Use Angular unit tests when testing a component, page, service, guard, or observable in isolation. Mock `AuthService` with `useValue`, `of(...)`/`BehaviorSubject`, and Vitest spies as nearby specs do; do not call emulator helper functions from a unit test.
 - Use Functions unit tests for handler logic and controlled Auth/Admin SDK doubles. Use Functions integration tests when the behavior must prove real Auth/Firestore/Storage emulator side effects.
 
 Do not mock `AuthService`, replace Firebase tokens, seed local storage, or intercept the Auth REST calls in a browser E2E test merely to skip sign-in. For E2E, seed the Auth emulator and sign in through the actual UI. Keep request-level rule checks explicit and limited to tests that are intentionally testing rules.
@@ -23,7 +23,7 @@ Do not mock `AuthService`, replace Firebase tokens, seed local storage, or inter
 
 ### Prerequisites
 
-Use Node.js 24.11+ and pnpm 10.14+. From the repository root:
+Use Node.js 24.15+ and pnpm 10.14+. From the repository root:
 
 ```text
 pnpm install
@@ -90,7 +90,7 @@ The root E2E orchestration is intentionally separate from the normal local emula
 | Storage | `127.0.0.1:9199` | `firebase.e2e.json` |
 | App | `http://localhost:4100` | root serve script |
 
-`firebase.e2e.json` must explicitly declare Functions runtime `nodejs22`. The package engine range and the emulator port being open do not prove that Functions loaded. `santashop-e2e/scripts/wait-for-functions.mjs` POSTs the callable envelope `{ data: {} }` to `testClearAllData` and retries until that real callable responds. Always run `pnpm run e2e:functions:ready` before diagnosing a Playwright failure as an app failure.
+`firebase.e2e.json` must explicitly declare Functions runtime `nodejs24`. The package engine range and the emulator port being open do not prove that Functions loaded. `santashop-e2e/scripts/wait-for-functions.mjs` POSTs the callable envelope `{ data: {} }` to `testClearAllData` and retries until that real callable responds. Always run `pnpm run e2e:functions:ready` before diagnosing a Playwright failure as an app failure.
 
 The E2E app configuration uses project `demo-santashop`, disables App Check, and connects the browser to the emulators in `santashop-app/src/main.ts` or `santashop-admin/src/main.ts`. The fixture calls Functions at:
 
@@ -191,9 +191,9 @@ Use `page.goto('/')`/relative routes with the configured `baseURL`; use `E2E_BAS
 
 ## Diagnose failures in order
 
-- **Port 5001 is open but `testClearAllData` is missing:** rebuild Functions, confirm `firebase.e2e.json` has `runtime: "nodejs22"`, restart the E2E emulator, and run `pnpm run e2e:functions:ready`. Port readiness alone is insufficient.
+- **Port 5001 is open but `testClearAllData` is missing:** rebuild Functions, confirm `firebase.e2e.json` has `runtime: "nodejs24"`, restart the E2E emulator, and run `pnpm run e2e:functions:ready`. Port readiness alone is insufficient.
 - **The app reaches the wrong Firestore port:** regenerate with `pnpm run config:app:e2e` and use `firebase.e2e.json`; E2E Firestore is `8180`, not the local flow's `8080`.
-- **Config preparation fails:** check the root `.env` for `SANTASHOP_PROGRAM_YEAR`, then rerun the target `e2e:prepare:*` command. Regenerate canonical config rather than editing generated files.
+- **Config preparation fails:** check the root `.env` for `LOCAL_SANTASHOP_PROGRAM_YEAR`, then rerun the target `e2e:prepare:*` command. Regenerate canonical config rather than editing generated files.
 - **Auth sign-in fails:** confirm `clearData()` ran before seeding, call `seedAdminUser()` before `signInAdminViaUi()`, use the exact seeded email/password, and restart the dev server after changing generated config.
 - **A staff page is visible to the wrong role:** verify both custom claims and app/rules/Functions enforcement. `admin: false` and `owner: false` should not be treated as an admin; an owner seed still includes admin capabilities through the helper's derived roles.
 - **Email tests try to reach SES:** leave `SANTASHOP_SEND_EMAILS_FROM_EMULATOR` unset for normal E2E. Assert the user-facing queued/success behavior, not external delivery, unless the test is explicitly an email integration test.

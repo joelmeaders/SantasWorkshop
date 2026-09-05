@@ -8,7 +8,6 @@ service firebase.storage {
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.owner == true ||
-        request.auth.token.admin == true ||
         (request.auth.token.roles is list && request.auth.token.roles.hasAny(['admin']))
       );
     }
@@ -18,11 +17,5 @@ service firebase.storage {
       allow write: if false;
     }
 
-    match /registrations/{legacyFileName} {
-      allow read: if isSignedIn() && (
-        legacyFileName == request.auth.uid + '.png' || isAdmin()
-      );
-      allow write: if false;
-    }
   }
 }

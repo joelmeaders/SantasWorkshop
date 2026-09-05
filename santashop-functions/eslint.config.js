@@ -24,10 +24,8 @@ module.exports = [
 		rules: {
 			...eslint.configs.recommended.rules,
 			...tsPlugin.configs.recommended.rules,
-			'no-floating-decimal': 'error',
 			'@typescript-eslint/no-unused-vars': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'warn',
-			'no-return-await': 'off',
 			'@typescript-eslint/return-await': ['error'],
 			'@typescript-eslint/prefer-readonly': ['error'],
 			'@typescript-eslint/explicit-function-return-type': 'off',

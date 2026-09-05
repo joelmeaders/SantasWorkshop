@@ -433,7 +433,7 @@ export class ScheduleEditorPage {
 				value?: string | number | null;
 			}>
 		).detail.value;
-		let value = 0;
+		let value: number;
 
 		try {
 			value = this.parseRequiredCapacity(rawValue);

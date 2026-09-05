@@ -32,7 +32,7 @@ describe('checkInWithEdit handler', () => {
 		const result = await checkInWithEdit(
 			createCallableRequest(
 				{ registration: createRegistration(), inputMethod: 'manual' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -79,7 +79,7 @@ describe('checkInWithEdit handler', () => {
 						registration: createRegistration({ children: [] }),
 						inputMethod: 'manual',
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({
@@ -99,7 +99,7 @@ describe('checkInWithEdit handler', () => {
 						registration: createRegistration(),
 						inputMethod: 'manual',
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });

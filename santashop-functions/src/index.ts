@@ -105,13 +105,6 @@ export const changeAccountInformation = onCall(
 	}),
 );
 
-export const updateReferredBy = onCall(
-	STANDARD_CUSTOMER_OPTIONS,
-	observeCallableHandler('updateReferredBy', async (request) => {
-		return (await import('./fn/updateReferredBy')).default(request);
-	}),
-);
-
 /**
  * Runs a method to validate and complete a user registration record.
  * This process locks down their selected dateTimeSlot, sends an email
@@ -412,7 +405,7 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 		}
 
 		await (
-			await import('./fn/sendNewRegistrationEmails2')
+			await import('./fn/sendRegistrationEmail')
 		).default(event.data, { eventId: event.id });
 	}),
 );
@@ -452,7 +445,7 @@ export const scheduledDateTimeSlotCounters = onSchedule(
 		maxInstances: 1,
 	},
 	observeScheduledHandler('scheduledDateTimeSlotCounters', async () => {
-		await (await import('./fn/scheduledDateTimeSlotCounters2')).default();
+		await (await import('./fn/reconcileAppointmentCounters')).default();
 	}),
 );
 
@@ -614,10 +607,6 @@ export const testSeedAdminUser = emulatorOnly(() => onCall(
 			'uid' in data && typeof data.uid === 'string'
 				? data.uid
 				: undefined;
-		const adminClaim =
-			'admin' in data && typeof data.admin === 'boolean'
-				? data.admin
-				: true;
 		const ownerClaim =
 			'owner' in data && typeof data.owner === 'boolean'
 				? data.owner
@@ -640,7 +629,6 @@ export const testSeedAdminUser = emulatorOnly(() => onCall(
 			emailAddress,
 			password,
 			uid,
-			admin: adminClaim,
 			owner: ownerClaim,
 			roles,
 		});

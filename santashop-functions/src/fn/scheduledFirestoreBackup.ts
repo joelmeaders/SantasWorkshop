@@ -34,6 +34,6 @@ export default async function scheduledFirestoreBackup(): Promise<void> {
 			{ projectId, databaseName, bucket },
 			error,
 		);
-		throw new Error('Export operation failed');
+		throw new Error('Export operation failed', { cause: error });
 	}
 }

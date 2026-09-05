@@ -22,12 +22,6 @@ export default {
 				loader: 'babel-loader',
 				exclude: /node_modules/,
 				options: {
-					plugins: [
-						[
-							'@babel/plugin-proposal-decorators',
-							{ version: 'legacy' },
-						],
-					],
 					compact: false,
 					cacheDirectory: true,
 					presets: [

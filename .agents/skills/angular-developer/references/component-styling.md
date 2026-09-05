@@ -68,11 +68,6 @@ Targets the host element based on some condition in its ancestry.
 }
 ```
 
-### `::ng-deep`
-
-Disables view encapsulation for a specific rule, allowing it to "leak" into child components.
-**Note: The Angular team strongly discourages the use of `::ng-deep`.** It is supported only for backwards compatibility.
-
 ## Styles in Templates
 
 You can use `<style>` elements directly in a component's template. View encapsulation rules still apply.

@@ -22,7 +22,6 @@ export const redirectLoggedInToAdminGuard: CanActivateFn = () => {
 						(claims['roles'] as string[] | undefined) ?? [];
 
 					return claims['owner'] === true ||
-						claims['admin'] === true ||
 						roles.includes('admin') ||
 						roles.includes('checkin')
 						? router.createUrlTree(['/admin'])
@@ -47,7 +46,8 @@ export const adminOnlyGuard: CanActivateFn = () => {
 			return from(user.getIdTokenResult(false)).pipe(
 				map((token) =>
 					token.claims?.['owner'] === true ||
-					token.claims?.['admin'] === true
+					(Array.isArray(token.claims?.['roles']) &&
+						token.claims['roles'].includes('admin'))
 						? true
 						: router.createUrlTree(['/']),
 				),
@@ -74,7 +74,6 @@ export const elevatedUserGuard: CanMatchFn = () => {
 						(claims['roles'] as string[] | undefined) ?? [];
 
 					return claims['owner'] === true ||
-						claims['admin'] === true ||
 						roles.includes('admin') ||
 						roles.includes('checkin')
 						? true

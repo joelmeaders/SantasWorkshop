@@ -62,22 +62,6 @@ const subscription = componentRef.instance.valueChanged.subscribe((val) => {
 subscription.unsubscribe();
 ```
 
-## Decorator-based Outputs (@Output)
-
-The legacy API uses the `@Output()` decorator with an `EventEmitter`. It remains supported but is not recommended for new code.
-
-```ts
-import { Component, Output, EventEmitter } from '@angular/core';
-
-@Component({...})
-export class LegacyExample {
-  @Output() readonly valueChanged = new EventEmitter<number>();
-
-  // With alias
-  @Output('customEventName') readonly changed = new EventEmitter<void>();
-}
-```
-
 ## Best Practices
 
 - **Prefer `output()`**: Use the function-based `output()` instead of `@Output()` and `EventEmitter`.

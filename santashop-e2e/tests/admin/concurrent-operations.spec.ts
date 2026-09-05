@@ -37,7 +37,7 @@ test.describe('competing staff and uncertain writes', () => {
 			defaultAdminAccount({
 				uid: registration.uid,
 				emailAddress: registration.emailAddress,
-				admin: false,
+
 				roles: [],
 			}),
 		);
@@ -187,7 +187,7 @@ test.describe('competing staff and uncertain writes', () => {
 			defaultAdminAccount({
 				uid: otherFamily.uid,
 				emailAddress: otherFamily.emailAddress,
-				admin: false,
+
 				roles: [],
 			}),
 		);

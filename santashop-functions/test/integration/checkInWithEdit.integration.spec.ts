@@ -40,7 +40,7 @@ describe.sequential('checkInWithEdit integration', () => {
 					inputMethod: 'manual',
 				},
 				{
-					admin: true,
+					roles: ['admin', 'checkin'],
 					uid: 'admin-user',
 				},
 			),
@@ -84,7 +84,7 @@ describe.sequential('checkInWithEdit integration', () => {
 		): CallableRequest<CheckInRequest> =>
 			createCallableRequest(
 				{ registration, inputMethod },
-				{ admin: true, uid: `scanner-${inputMethod}` },
+				{ roles: ['admin', 'checkin'], uid: `scanner-${inputMethod}` },
 			);
 
 		const outcomes = await Promise.allSettled([

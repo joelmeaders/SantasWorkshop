@@ -13,7 +13,6 @@ export interface TestAdminUserSeed {
 	uid?: string;
 	emailAddress: string;
 	password: string;
-	admin?: boolean;
 	owner?: boolean;
 	roles?: ('admin' | 'checkin')[];
 }
@@ -183,7 +182,7 @@ export interface TestRegistrationScanAudit {
 
 export interface TestQueuedRegistrationEmailSnapshot {
 	id: string;
-	collection: 'tmp_registrationemails' | 'tmp_registrationemails2';
+	collection: 'tmp_registrationemails';
 	queueSource?: string;
 	deliveryState?: string;
 	qrCodeStoragePath?: string;
@@ -298,7 +297,7 @@ export async function seedPublicParameters(
 
 /**
  * Clears all data from Firestore, Auth, and Storage
- * WARNING: This will delete all data in the emulator
+ * WARNING: This deletes all data in the emulator
  */
 export async function clearAllData(): Promise<void> {
 	const db = admin.firestore();
@@ -320,7 +319,6 @@ export async function clearAllData(): Promise<void> {
 		'registrationsearchindex',
 		'stats',
 		'tmp_registrationemails',
-		'tmp_registrationemails2',
 		'parameters',
 		'staff',
 	];
@@ -391,11 +389,8 @@ export async function seedAdminUser(
 	});
 
 	await auth.setCustomUserClaims(createdUser.uid, {
-		admin: user.admin ?? true,
 		owner: user.owner ?? false,
-		roles:
-			user.roles ??
-			(user.owner || user.admin !== false ? ['admin', 'checkin'] : []),
+		roles: user.roles ?? ['admin', 'checkin'],
 	});
 
 	return { uid: createdUser.uid };
@@ -492,7 +487,6 @@ export async function seedRegistration(
 		zipCode: seed.zipCode,
 		acceptedTermsOfService: new Date(),
 		acceptedPrivacyPolicy: new Date(),
-		version: 1,
 	});
 	const currentQrPath = seed.cancellation
 		? `registrations/${seed.uid}/e2e-replacement.png`
@@ -882,7 +876,7 @@ export async function inspectQueuedRegistrationEmails(
 ): Promise<TestQueuedRegistrationEmailSnapshot[]> {
 	const normalizedEmail = emailAddress.toLowerCase();
 	const db = admin.firestore();
-	const collections = ['tmp_registrationemails', 'tmp_registrationemails2'] as const;
+	const collections = ['tmp_registrationemails'] as const;
 	const snapshots = await Promise.all(collections.map(async (collection) => ({
 		collection,
 		snapshot: await db.collection(collection).where('email', '==', normalizedEmail).get(),

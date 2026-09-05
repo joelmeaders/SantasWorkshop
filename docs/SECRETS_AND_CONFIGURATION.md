@@ -29,7 +29,7 @@ separation rather than secrecy of the web configuration.
 ### Functions runtime configuration
 
 Firebase Functions read unprefixed values from `process.env`. The root
-`config.functions.cjs` generator resolves `TEST_<KEY>` or `PROD_<KEY>` values
+`config.functions.cjs` generator requires `LOCAL_<KEY>`, `TEST_<KEY>`, or `PROD_<KEY>` values for the selected target
 and writes an ignored, project-specific file:
 
 - test: `santashop-functions/.env.santas-workshop-test`
@@ -59,9 +59,7 @@ The complete required repository-secret inventory is:
 - `FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5`
 
 All other Firebase client and Functions settings are non-sensitive configuration
-kept in the workflow files. Do not recreate the obsolete repository secrets
-`FIREBASE_API_KEY`, `TEST_ADMIN_BOOTSTRAP_PASSWORD`, or
-`PROD_ADMIN_BOOTSTRAP_PASSWORD`.
+kept in the workflow files.
 
 ### Synchronize repository secrets
 

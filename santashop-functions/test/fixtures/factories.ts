@@ -16,7 +16,7 @@ export const createOnboardUser = (
 	emailAddress: 'buddy.elf@example.com',
 	password: TEST_ONBOARD_PASSWORD,
 	password2: TEST_ONBOARD_PASSWORD,
-	zipCode: 80205,
+	zipCode: '80205',
 	referredBy: 'Denver Human Services DHS',
 	legal: true,
 	newsletter: true,
@@ -30,8 +30,6 @@ export const createUser = (overrides: Partial<User> = {}): User => ({
 	zipCode: '80205',
 	acceptedTermsOfService: new Date('2025-12-01T00:00:00.000Z'),
 	acceptedPrivacyPolicy: new Date('2025-12-01T00:00:00.000Z'),
-	version: 1,
-	manuallyMigrated: false,
 	newsletter: true,
 	...overrides,
 });

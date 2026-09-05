@@ -1,8 +1,9 @@
 import { AdminReadRepository } from '../../../shared/services/admin-read-repository.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { buildZipCodeSearchValues, SearchService } from './search.service';
+import { SearchService } from './search.service';
 import { firstValueFrom, of } from 'rxjs';
+import { where } from 'firebase/firestore/lite';
 import { requireDefined } from '../../../../test-helpers';
 
 describe('SearchService', () => {
@@ -33,12 +34,17 @@ describe('SearchService', () => {
 		service = TestBed.inject(SearchService);
 	});
 
+	it('preserves leading zeros in ZIP queries', () => {
+		service.searchByLastNameZip('Smith', '01234');
+		expect(indexReadMany.mock.calls[0]?.[0]?.[0]).toEqual(where('zip', '==', '01234'));
+	});
+
 	it('should be created', () => {
 		expect(service).toBeTruthy();
 	});
 
 	it('normalizes name, zip, email, and code searches before publishing their observables', async () => {
-		service.searchByLastNameZip('SMITH', 80001);
+		service.searchByLastNameZip('SMITH', '80001');
 		const results = await firstValueFrom(service.searchResults$);
 		expect(results).toBeTruthy();
 		await expect(firstValueFrom(requireDefined(results))).resolves.toEqual([
@@ -49,12 +55,6 @@ describe('SearchService', () => {
 		service.searchByEmail('FAMILY@EXAMPLE.TEST');
 		service.searchByCode('ab12cd');
 		expect(indexReadMany).toHaveBeenCalledTimes(3);
-	});
-
-	it('searches both normalized string and legacy numeric zip values', () => {
-		expect(buildZipCodeSearchValues('80204')).toEqual(['80204', 80204]);
-		expect(buildZipCodeSearchValues(80204)).toEqual(['80204', 80204]);
-		expect(buildZipCodeSearchValues('01234')).toEqual(['01234', 1234]);
 	});
 
 	it('queries users directly for duplicate email detection and clears results on reset', async () => {

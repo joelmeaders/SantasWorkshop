@@ -1,45 +1,7 @@
-import * as path from 'node:path';
-import { createRequire } from 'node:module';
-
-type EnvironmentMap = Record<string, string | undefined>;
-
-const requireFromRuntime = createRequire(import.meta.url);
-
-const envLoader = requireFromRuntime('../../../scripts/env-loader.cjs') as {
-	loadEnvFiles: (filePaths: string[], env?: EnvironmentMap) => void;
-};
-
 interface FirebaseEnvironmentConfig {
 	projectId?: string;
 	storageBucket?: string;
 }
-
-const loadLocalEnvFiles = (): void => {
-	const projectId =
-		process.env['GCLOUD_PROJECT'] ?? process.env['GCP_PROJECT'];
-	const envFiles: string[] = [];
-
-	if (projectId) {
-		envFiles.push(
-			path.resolve(process.cwd(), `.env.${projectId}`),
-			path.resolve(
-				process.cwd(),
-				`santashop-functions/.env.${projectId}`,
-			),
-		);
-	}
-
-	envFiles.push(
-		path.resolve(process.cwd(), '.env'),
-		path.resolve(process.cwd(), 'santashop-functions/.env'),
-		path.resolve(__dirname, '../../.env'),
-		path.resolve(__dirname, '../../../.env'),
-	);
-
-	envLoader.loadEnvFiles(envFiles);
-};
-
-loadLocalEnvFiles();
 
 const parseList = (value: string | undefined, fallback: string[]): string[] => {
 	const items = value
@@ -105,16 +67,7 @@ export const DEFAULT_MAX_SLOTS = parseRequiredInteger(
 
 export const FIRESTORE_BACKUP_BUCKET = requireEnv('FIRESTORE_BACKUP_BUCKET');
 
-export const SES_REGION =
-	process.env['SES_REGION'] ??
-	process.env['AWS_REGION'] ??
-	requireEnv('SES_REGION');
-
-export const REGISTRATION_EMAIL_TEMPLATE = requireEnv(
-	'REGISTRATION_EMAIL_TEMPLATE',
-);
-
-export const REMINDER_EMAIL_TEMPLATE = requireEnv('REMINDER_EMAIL_TEMPLATE');
+export const SES_REGION = requireEnv('SES_REGION');
 
 export const EVENT_DISPLAY_NAME = requireEnv('SANTASHOP_EVENT_DISPLAY_NAME');
 const configuredEventYear = /\b(?:20\d{2}|2100)\b/u.exec(EVENT_DISPLAY_NAME);

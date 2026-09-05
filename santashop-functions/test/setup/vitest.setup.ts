@@ -16,9 +16,6 @@ process.env['SANTASHOP_SHOP_DAYS'] = '12-12,12-13,12-15,12-16';
 process.env['SANTASHOP_DEFAULT_MAX_SLOTS'] = '350';
 process.env['FIRESTORE_BACKUP_BUCKET'] = 'gs://santashop-backups';
 process.env['SES_REGION'] = 'us-west-2';
-process.env['REGISTRATION_EMAIL_TEMPLATE'] =
-	'dscs-registration-confirmation-v1';
-process.env['REMINDER_EMAIL_TEMPLATE'] = 'dscs-event-reminder';
 process.env['SANTASHOP_EVENT_DISPLAY_NAME'] = '2025 Denver Santa Claus Shop';
 process.env['REMINDER_EMAIL_SENDING_STALE_MINUTES'] = '15';
 process.env['REGISTRATION_EMAIL_SOURCE'] = 'noreply@denversantaclausshop.org';

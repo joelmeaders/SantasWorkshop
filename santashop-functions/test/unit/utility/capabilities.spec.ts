@@ -18,6 +18,10 @@ const request = (
 	}) as CallableRequest<unknown>;
 
 describe('capability hierarchy', () => {
+	 it('rejects a boolean admin flag without role claims', () => {
+		expect(isAdminToken({ admin: true })).toBe(false);
+		expect(canCheckInToken({ admin: true })).toBe(false);
+	 });
 	it('makes owner imply admin and check-in access', () => {
 		const token = { owner: true };
 
@@ -27,7 +31,7 @@ describe('capability hierarchy', () => {
 	});
 
 	it('keeps ordinary admin and check-in claims below owner', () => {
-		expect(isOwnerToken({ admin: true })).toBe(false);
+		expect(isOwnerToken({ roles: ['admin', 'checkin'] })).toBe(false);
 		expect(isAdminToken({ roles: ['admin'] })).toBe(true);
 		expect(canCheckInToken({ roles: ['checkin'] })).toBe(true);
 		expect(isAdminToken({ roles: ['checkin'] })).toBe(false);
@@ -37,7 +41,7 @@ describe('capability hierarchy', () => {
 		expect(() => requireOwner(request())).toThrow(
 			expect.objectContaining({ code: 'unauthenticated' }),
 		);
-		expect(() => requireOwner(request({ admin: true }))).toThrow(
+		expect(() => requireOwner(request({ roles: ['admin', 'checkin'] }))).toThrow(
 			expect.objectContaining({ code: 'permission-denied' }),
 		);
 		expect(requireOwner(request({ owner: true }))).toEqual({

@@ -1,5 +1,6 @@
 import * as logger from 'firebase-functions/logger';
 import type { CallableRequest } from 'firebase-functions/v2/https';
+import { isAdminToken } from './capabilities';
 import {
 	getErrorCode,
 	getErrorMessage,
@@ -86,7 +87,7 @@ const buildCallableMetadata = (
 	return compactMetadata({
 		authUid: request.auth?.uid ?? null,
 		isAuthenticated: Boolean(request.auth?.uid),
-		isAdmin: authToken['admin'] === true,
+		isAdmin: isAdminToken(authToken),
 		dataType,
 		dataKeys: getObjectKeys(request.data),
 	});

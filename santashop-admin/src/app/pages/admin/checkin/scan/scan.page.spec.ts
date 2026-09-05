@@ -15,25 +15,27 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular/standalone';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ZXingScannerModule } from '@zxing/ngx-scanner';
 
 @Component({
+	// The stub must match the scanner library element.
+	// eslint-disable-next-line @angular-eslint/component-selector
 	selector: 'zxing-scanner',
 	template: '',
 	standalone: true,
 })
 class ZXingScannerStubComponent {
-	@Input() public formats: readonly unknown[] = [];
-	@Input() public device?: MediaDeviceInfo;
-	@Input() public autostart = false;
-	@Input() public enable = false;
-	@Input() public delayBetweenScanSuccess = 0;
-	@Output() public readonly camerasFound = new EventEmitter<MediaDeviceInfo[]>();
-	@Output() public readonly deviceChange = new EventEmitter<MediaDeviceInfo>();
-	@Output() public readonly permissionResponse = new EventEmitter<boolean>();
-	@Output() public readonly scanSuccess = new EventEmitter<string>();
-	@Output() public readonly scanError = new EventEmitter<Error>();
+	public readonly formats = input<readonly unknown[]>([]);
+	public readonly device = input<MediaDeviceInfo>();
+	public readonly autostart = input(false);
+	public readonly enable = input(false);
+	public readonly delayBetweenScanSuccess = input(0);
+	public readonly camerasFound = output<MediaDeviceInfo[]>();
+	public readonly deviceChange = output<MediaDeviceInfo>();
+	public readonly permissionResponse = output<boolean>();
+	public readonly scanSuccess = output<string>();
+	public readonly scanError = output<Error>();
 
 	public readonly scanStop = vi.fn();
 }

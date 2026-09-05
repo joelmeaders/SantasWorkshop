@@ -59,7 +59,7 @@ describe.sequential('resolveRegistrationScan integration', () => {
 		]);
 		const request = (code: string): CallableRequest<ResolveRegistrationScanRequest> => createCallableRequest(
 			{ code, inputMethod: 'camera' },
-			{ admin: true, uid: 'scan-staff' },
+			{ roles: ['admin', 'checkin'], uid: 'scan-staff' },
 		);
 
 		await expect(resolveRegistrationScan(request(eligible.qrcode!))).resolves.toMatchObject({ disposition: 'eligible' });

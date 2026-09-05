@@ -62,6 +62,7 @@ export class ByNamePage {
 			validators: [
 				Validators.required,
 				Validators.maxLength(5),
+				Validators.pattern(/^\d{5}$/),
 				Validators.minLength(5),
 			],
 		}),

@@ -29,13 +29,11 @@ export const timestampToDate = (timestampAsDate: Date): Date => {
 	}
 };
 
-// TODO: Siimplify
 export const yyyymmddToLocalDate = (isoString: string): Date => {
 	const [year, month, day] = isoString.split('-').map(Number);
 	return new Date(year, month - 1, day);
 };
 
-// TODO: Siimplify
 export const getAgeFromDate = (birthday: Date, fromDate: Date): number => {
 	const today = fromDate;
 	let thisYear = 0;

@@ -40,7 +40,7 @@ export class CheckinService {
 			header: 'Merry Christmas!',
 			subHeader: 'We hope your shopping experience was wonderful',
 			message:
-				'Your registration and checkin was confirmed so this app will be disabled until next year.',
+				'Your check-in is confirmed. Registration is closed for your account this season.',
 			backdropDismiss: false,
 			buttons: ['Ok'],
 		});

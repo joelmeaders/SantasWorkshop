@@ -76,7 +76,7 @@ describe('app routes', () => {
 		await expect(runGuard(guard)).resolves.toEqual({ commands: ['/'] });
 		currentUser$.next(user({ owner: true }));
 		await expect(runGuard(guard)).resolves.toBe(true);
-		currentUser$.next(user({ admin: true }));
+		currentUser$.next(user({ roles: ['admin', 'checkin'] }));
 		await expect(runGuard(guard)).resolves.toBe(true);
 		currentUser$.next(user({ roles: ['checkin'] }));
 		await expect(runGuard(guard)).resolves.toBe(true);
@@ -99,7 +99,7 @@ describe('app routes', () => {
 
 		currentUser$.next(user({ roles: ['checkin'] }));
 		await expect(runGuard(adminGuard)).resolves.toEqual({ commands: ['/'] });
-		currentUser$.next(user({ admin: true }));
+		currentUser$.next(user({ roles: ['admin', 'checkin'] }));
 		await expect(runGuard(adminGuard)).resolves.toBe(true);
 		await expect(runGuard(ownerGuard)).resolves.toEqual({
 			commands: ['/admin/landing'],

@@ -81,7 +81,8 @@ export class AuthService {
 		map(
 			(token) =>
 				token.claims?.['owner'] === true ||
-				token.claims?.['admin'] === true,
+				(Array.isArray(token.claims?.['roles']) &&
+					token.claims['roles'].includes('admin')),
 		),
 		shareReplay(1),
 	);
@@ -130,8 +131,7 @@ export class AuthService {
 			const roles = (claims['roles'] as StaffRole[] | undefined) ?? [];
 			return (
 				claims['owner'] === true ||
-				claims['admin'] === true ||
-				roles.length > 0
+				roles.includes('admin') || roles.includes('checkin')
 			);
 		}),
 		shareReplay(1),
@@ -151,15 +151,12 @@ export class AuthService {
 			switchMap((user) => from(user.getIdTokenResult(false))),
 			map((token) => {
 				const claims = token.claims ?? {};
-				if (
-					claims['owner'] === true ||
-					claims['admin'] === true
-				) {
+				if (claims['owner'] === true) {
 					return true;
 				}
 				const roles =
 					(claims['roles'] as StaffRole[] | undefined) ?? [];
-				return roles.includes(role);
+				return roles.includes('admin') || roles.includes(role);
 			}),
 			shareReplay(1),
 		);

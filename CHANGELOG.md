@@ -30,6 +30,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Supply explicit local emulator settings to Functions PR and release browser-test steps.
 - Resume owner-operation status polling with the same job ID after a read failure.
 - Preserve leading zeros in account, registration, profile, and search ZIP codes.
 - Correct E2E guidance for signup referral selection, role claims, configuration, ports, and failure traces.

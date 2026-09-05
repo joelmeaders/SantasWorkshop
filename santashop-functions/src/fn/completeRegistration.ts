@@ -133,7 +133,7 @@ export default async function completeRegistration(
 			};
 
 			// This transaction deliberately never writes the shared slot document.
-			// scheduledDateTimeSlotCounters2 reconciles capacity after submissions.
+			// reconcileAppointmentCounters reconciles capacity after submissions.
 			transaction.set(registrationRef, completedRegistration);
 			transaction.set(emailRef, emailRecord, { merge: true });
 			transaction.set(indexRef, indexRecord, { merge: true });

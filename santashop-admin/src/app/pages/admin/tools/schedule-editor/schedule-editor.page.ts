@@ -12,7 +12,7 @@ import {
 	PROGRAM_YEAR,
 	TimeSlotPipe,
 	shopSchedule,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { DateTimeSlot } from '@santashop/models';
 import {
 	AlertController,
@@ -433,7 +433,7 @@ export class ScheduleEditorPage {
 				value?: string | number | null;
 			}>
 		).detail.value;
-		let value = 0;
+		let value: number;
 
 		try {
 			value = this.parseRequiredCapacity(rawValue);

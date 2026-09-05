@@ -55,7 +55,7 @@ describe.sequential('newAccount integration', () => {
 			firstName: 'Buddy',
 			lastName: 'Elf',
 			emailAddress: 'integration.buddy.elf@example.com',
-			zipCode: 80205,
+			zipCode: '80205',
 		});
 		expect(registrationDocument.data()).not.toHaveProperty('referredBy');
 	});

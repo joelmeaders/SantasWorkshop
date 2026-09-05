@@ -2,7 +2,7 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { AnalyticsWrapper } from '@santashop/core';
+import { AnalyticsWrapper } from '@santashop/core/admin/firestore';
 import type { ResolveRegistrationScanResult } from '@santashop/models';
 import { IonButton, IonContent, IonItem, IonLabel, IonList } from '@ionic/angular/standalone';
 import { filter, map, tap } from 'rxjs';

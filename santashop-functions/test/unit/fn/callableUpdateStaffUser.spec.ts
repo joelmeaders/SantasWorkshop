@@ -30,7 +30,7 @@ describe('callableUpdateStaffUser handler', () => {
 		});
 		adminMock.setUserClaims(PROTECTED_UID, {
 			owner: true,
-			admin: true,
+
 			roles: ['admin', 'checkin'],
 		});
 	});
@@ -43,7 +43,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: 'staff-1', displayName: 'New Name' },
-					{ admin: false },
+					{ roles: [] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
@@ -57,7 +57,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: '' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -71,7 +71,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: 'customer-123', displayName: 'Nope' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'not-found' });
@@ -89,7 +89,7 @@ describe('callableUpdateStaffUser handler', () => {
 					newPassword: 'BrandNew123!',
 					disabled: true,
 				},
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -120,7 +120,7 @@ describe('callableUpdateStaffUser handler', () => {
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['admin', 'checkin'],
-			admin: true,
+
 		});
 	});
 
@@ -137,7 +137,7 @@ describe('callableUpdateStaffUser handler', () => {
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['admin', 'checkin'],
-			admin: true,
+
 		});
 	});
 
@@ -148,7 +148,7 @@ describe('callableUpdateStaffUser handler', () => {
 		await callableUpdateStaffUser(
 			createCallableRequest<UpdateStaffUser>(
 				{ uid: 'staff-1', roles: ['checkin'] },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -163,7 +163,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: PROTECTED_UID, roles: ['checkin'] },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
@@ -178,7 +178,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: 'staff-1', roles: [] },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -192,7 +192,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: 'staff-1', newPassword: 'short' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -206,7 +206,7 @@ describe('callableUpdateStaffUser handler', () => {
 			callableUpdateStaffUser(
 				createCallableRequest<UpdateStaffUser>(
 					{ uid: 'staff-1', displayName: '  ' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });

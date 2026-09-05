@@ -62,7 +62,7 @@ describe('callablePublishEmailTemplate handler', () => {
 		);
 		backgroundMock.setFileContents(
 			'emailTemplates/registration-confirmation/revisions/rev-1.html',
-			'<html><head></head><body><img src="https://example.com/original.png" alt="qr code image"><h1>Hello {{contact.firstName}}</h1></body></html>',
+			'<html><head></head><body><img src="{{qrCodeUrl}}" alt="qr code image"><h1>Hello {{firstName}}</h1></body></html>',
 		);
 		sesSendMock
 			.mockRejectedValueOnce(
@@ -76,7 +76,7 @@ describe('callablePublishEmailTemplate handler', () => {
 		const result = await callablePublishEmailTemplate(
 			createCallableRequest(
 				{ key: 'registration-confirmation' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -109,7 +109,7 @@ describe('callablePublishEmailTemplate handler', () => {
 
 		await expect(
 			callablePublishEmailTemplate(
-				createCallableRequest({ key: 'Not Valid!' }, { admin: true }),
+				createCallableRequest({ key: 'Not Valid!' }, { roles: ['admin', 'checkin'] }),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});

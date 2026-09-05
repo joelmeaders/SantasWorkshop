@@ -16,7 +16,7 @@ describe('callableListEmailTemplates handler', () => {
 
 		await expect(
 			callableListEmailTemplates(
-				createCallableRequest({}, { admin: false }),
+				createCallableRequest({}, { roles: [] }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
@@ -54,7 +54,7 @@ describe('callableListEmailTemplates handler', () => {
 		]);
 
 		const result = await callableListEmailTemplates(
-			createCallableRequest({}, { admin: true }),
+			createCallableRequest({}, { roles: ['admin', 'checkin'] }),
 		);
 
 		expect(result.map((template) => template.displayName)).toEqual([

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { LoadingController } from '@ionic/angular/standalone';
-import { FunctionsWrapper } from '@santashop/core';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import type { Registration } from '@santashop/models';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CheckInService } from './check-in.service';

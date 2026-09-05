@@ -27,7 +27,7 @@ describe('callableAdminPreRegister handler', () => {
 
 		await expect(
 			callableAdminPreRegister(
-				createCallableRequest(createRegistration(), { admin: false }),
+				createCallableRequest(createRegistration(), { roles: [] }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
@@ -39,7 +39,7 @@ describe('callableAdminPreRegister handler', () => {
 			callableAdminPreRegister(
 				createCallableRequest(
 					createRegistration({ emailAddress: '' }),
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -55,7 +55,7 @@ describe('callableAdminPreRegister handler', () => {
 		});
 		await expect(
 			callableAdminPreRegister(
-				createCallableRequest(createRegistration(), { admin: true }),
+				createCallableRequest(createRegistration(), { roles: ['admin', 'checkin'] }),
 			),
 		).rejects.toMatchObject({ code: 'already-exists' });
 
@@ -63,7 +63,7 @@ describe('callableAdminPreRegister handler', () => {
 		adminMock.setDocSnapshot('dateTimeSlots/slot-1', {});
 		await expect(
 			callableAdminPreRegister(
-				createCallableRequest(createRegistration(), { admin: true }),
+				createCallableRequest(createRegistration(), { roles: ['admin', 'checkin'] }),
 			),
 		).rejects.toMatchObject({ code: 'not-found' });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('pre-reg-no-slot');
@@ -85,7 +85,7 @@ describe('callableAdminPreRegister handler', () => {
 					dateTime: new Date('2025-12-10T18:00:00.000Z'),
 				},
 				}),
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -135,7 +135,7 @@ describe('callableAdminPreRegister handler', () => {
 						dateTime: new Date('2025-12-10T18:00:00.000Z'),
 					},
 					}),
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'internal' });
@@ -160,7 +160,7 @@ describe('callableAdminPreRegister handler', () => {
 						dateTime: new Date('2025-12-10T18:00:00.000Z'),
 					},
 					}),
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'internal' });

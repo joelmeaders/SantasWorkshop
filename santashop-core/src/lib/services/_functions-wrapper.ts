@@ -4,7 +4,7 @@ import {
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from 'firebase/functions';
-import { ChangeUserInfo, ToyType, UpdateReferredBy } from '@santashop/models';
+import { ChangeUserInfo, ToyType } from '@santashop/models';
 import { FIREBASE_FUNCTIONS } from '../tokens';
 
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
@@ -41,13 +41,6 @@ export class FunctionsWrapper {
 		this.callableWrapper<ChangeUserInfo, unknown>(
 			'changeAccountInformation',
 		)(data);
-
-	public readonly updateReferredBy = (
-		data: UpdateReferredBy,
-	): Promise<_HttpsCallableResult<unknown>> =>
-		this.callableWrapper<UpdateReferredBy, any>('updateReferredBy')({
-			...data,
-		});
 
 	public readonly undoRegistration = (data: {
 		mutationId: string;

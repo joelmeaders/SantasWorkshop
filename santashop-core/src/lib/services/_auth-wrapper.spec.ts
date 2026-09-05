@@ -28,7 +28,7 @@ vi.mock('firebase/auth', () => ({
 
 describe('AuthWrapper', () => {
 	let service: AuthWrapper;
-	const token = { claims: { admin: true } } as unknown as IdTokenResult;
+	const token = { claims: { roles: ['admin', 'checkin'] } } as unknown as IdTokenResult;
 	const user = {
 		email: 'staff@example.test',
 		getIdTokenResult: vi.fn().mockResolvedValue(token),

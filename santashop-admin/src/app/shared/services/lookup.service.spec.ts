@@ -1,5 +1,5 @@
+import { AdminReadRepository } from './admin-read-repository.service';
 import { TestBed } from '@angular/core/testing';
-import { FireRepoLite } from '@santashop/core';
 import type {
 	CheckIn,
 	Registration,
@@ -41,7 +41,9 @@ describe('LookupService', () => {
 		checkinRead.mockReset().mockReturnValue(of(undefined));
 		collection.mockClear();
 		TestBed.configureTestingModule({
-			providers: [{ provide: FireRepoLite, useValue: { collection } }],
+			providers: [
+				{ provide: AdminReadRepository, useValue: { collection } },
+			],
 		});
 	});
 

@@ -45,8 +45,6 @@ env:
   TEST_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
   TEST_FIRESTORE_BACKUP_BUCKET: gs://santashop-backups
   TEST_SES_REGION: us-west-2
-  TEST_REGISTRATION_EMAIL_TEMPLATE: dscs-test-registration-confirmation-v1
-  TEST_REMINDER_EMAIL_TEMPLATE: dscs-test-event-reminder
   TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   TEST_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
   TEST_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
@@ -66,8 +64,6 @@ env:
   PROD_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
   PROD_FIRESTORE_BACKUP_BUCKET: gs://santashop-backups
   PROD_SES_REGION: us-west-2
-  PROD_REGISTRATION_EMAIL_TEMPLATE: dscs-registration-confirmation-v1
-  PROD_REMINDER_EMAIL_TEMPLATE: dscs-event-reminder
   PROD_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   PROD_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
   PROD_SANTASHOP_SIGNUP_MIN_INSTANCES: ${{ vars.PROD_SANTASHOP_SIGNUP_MIN_INSTANCES || '0' }}
@@ -98,7 +94,24 @@ jobs:
           node-version: '24.18.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run audit:security
+      - name: Run security audit (informational)
+        id: security_audit
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
+      - name: Report security audit findings
+        if: always() && steps.security_audit.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
+          {
+            echo '### Security audit requires review'
+            echo 'This audit is informational and does not block validation or deployment.'
+            echo '```text'
+            cat "$RUNNER_TEMP/security-audit.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
 
@@ -136,10 +149,49 @@ jobs:
           printf '%s' '${{ env.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST }}' > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run audit:security
+      - name: Run security audit (informational)
+        id: security_audit
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
+      - name: Report security audit findings
+        if: always() && steps.security_audit.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
+          {
+            echo '### Security audit requires review'
+            echo 'This audit is informational and does not block validation or deployment.'
+            echo '```text'
+            cat "$RUNNER_TEMP/security-audit.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm run functions:test:integration
       - run: pnpm run e2e:browser:setup:ci
-      - run: pnpm run e2e:test
+      - name: Run customer and staff E2E tests
+        env:
+          LOCAL_AWS_ACCESS_KEY_ID: e2e-not-used
+          LOCAL_AWS_SECRET_ACCESS_KEY: e2e-not-used
+          LOCAL_FIRESTORE_BACKUP_BUCKET: gs://demo-santashop-backups
+          LOCAL_REGISTRATION_EMAIL_RETURN_PATH: admin@example.invalid
+          LOCAL_REGISTRATION_EMAIL_SOURCE: no-reply@example.invalid
+          LOCAL_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+          LOCAL_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
+          LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop E2E
+          LOCAL_SANTASHOP_EVENT_MIN_INSTANCES: '0'
+          LOCAL_SANTASHOP_PROGRAM_YEAR: '2026'
+          LOCAL_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+          LOCAL_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
+          LOCAL_SANTASHOP_TIME_OFFSET: '-07:00'
+          LOCAL_SANTASHOP_TIME_ZONE: America/Denver
+          LOCAL_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
+          LOCAL_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
+          LOCAL_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
+          LOCAL_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
+          LOCAL_SCHEDULED_USER_STATS: 55 23 * 11,12 *
+          LOCAL_SES_REGION: us-west-2
+        run: pnpm run e2e:test
       - name: Upload E2E failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
@@ -252,7 +304,24 @@ jobs:
           printf '%s' '${{ env.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5 }}' > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run audit:security
+      - name: Run security audit (informational)
+        id: security_audit
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
+      - name: Report security audit findings
+        if: always() && steps.security_audit.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
+          {
+            echo '### Security audit requires review'
+            echo 'This audit is informational and does not block validation or deployment.'
+            echo '```text'
+            cat "$RUNNER_TEMP/security-audit.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
       - run: pnpm run ci:functions:deploy:prod

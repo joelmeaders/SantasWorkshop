@@ -1,12 +1,12 @@
+import { readState } from '../../../../shared/helpers/refreshable-read';
+import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
-	FireRepoLite,
-	IFireRepoCollection,
 	filterNil,
 	PROGRAM_YEAR,
 	SHOP_DAYS,
 	timestampToDate,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	DateTimeSlot,
@@ -15,6 +15,7 @@ import {
 } from '@santashop/models';
 import {
 	BehaviorSubject,
+	forkJoin,
 	catchError,
 	combineLatest,
 	defaultIfEmpty,
@@ -41,6 +42,7 @@ import {
 } from 'ng2-charts';
 import {
 	IonCol,
+	IonButton,
 	IonContent,
 	IonGrid,
 	IonItem,
@@ -50,7 +52,7 @@ import {
 	IonTitle,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
-import { QueryConstraint, Timestamp, where } from 'firebase/firestore';
+import { Timestamp, where } from 'firebase/firestore/lite';
 
 Chart.register(ChartDataLabels);
 
@@ -65,6 +67,7 @@ Chart.register(ChartDataLabels);
 		IonGrid,
 		IonRow,
 		IonCol,
+		IonButton,
 		IonContent,
 		HeaderComponent,
 		IonItem,
@@ -77,7 +80,7 @@ Chart.register(ChartDataLabels);
 	],
 })
 export class RegistrationPage {
-	private readonly httpService = inject(FireRepoLite);
+	private readonly httpService = inject(AdminReadRepository);
 	private readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
@@ -86,50 +89,52 @@ export class RegistrationPage {
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
-	private readonly dateTimeSlotCollection =
-		(): IFireRepoCollection<DateTimeSlot> =>
-			this.httpService.collection<DateTimeSlot>(
-				COLLECTION_SCHEMA.dateTimeSlots,
-			);
+	public refresh(): void {
+		this.refreshYear.next();
+	}
 
-	private readonly registrationStats$ = this.refreshYear.pipe(
+	public ionViewWillEnter(): void {
+		this.refresh();
+	}
+
+	public readonly state$ = this.refreshYear.pipe(
 		switchMap(() =>
-			getStatsCollection<RegistrationStats>(this.httpService)
-				.read(`registration-${this.year}`)
-				.pipe(filterNil(), shareReplay(1)),
+			forkJoin({
+				registration: getStatsCollection<RegistrationStats>(
+					this.httpService,
+				).read(`registration-${this.year}`),
+				schedule: getStatsCollection<ScheduleStats>(
+					this.httpService,
+				).read(`schedule-${this.year}`),
+				slots: this.httpService
+					.collection<DateTimeSlot>(COLLECTION_SCHEMA.dateTimeSlots)
+					.readMany([where('programYear', '==', this.year)], 'id'),
+			}).pipe(readState()),
+		),
+		shareReplay({ bufferSize: 1, refCount: true }),
+	);
+	private readonly registrationStats$ = this.state$.pipe(
+		map(
+			(state): RegistrationStats =>
+				state.data?.registration ?? {
+					completedRegistrations: 0,
+					dateTimeCount: [],
+					zipCodeCount: [],
+				},
 		),
 	);
-
-	private readonly scheduleStats$ = this.refreshYear.pipe(
-		switchMap(() =>
-			getStatsCollection<ScheduleStats>(this.httpService)
-				.read(`schedule-${this.year}`)
-				.pipe(shareReplay(1)),
-		),
+	private readonly scheduleStats$ = this.state$.pipe(
+		map((state) => state.data?.schedule),
 	);
-
-	private readonly dateTimeSlots$ = this.refreshYear.pipe(
-		switchMap(() => {
-			const queryConstraints: QueryConstraint[] = [
-				where('programYear', '==', this.year),
-			];
-
-			return this.dateTimeSlotCollection()
-				.readMany(queryConstraints, 'id')
-				.pipe(
-					map((slots) =>
-						slots.map((slot) => ({
-							...slot,
-							dateTime:
-								slot.dateTime instanceof Date
-									? slot.dateTime
-									: timestampToDate(slot.dateTime),
-						})),
-					),
-					map((slots) => this.sortDateTimeSlots(slots)),
-				);
-		}),
-		shareReplay(1),
+	private readonly dateTimeSlots$ = this.state$.pipe(
+		map((state) =>
+			this.sortDateTimeSlots(
+				(state.data?.slots ?? []).map((slot) => ({
+					...slot,
+					dateTime: timestampToDate(slot.dateTime),
+				})),
+			),
+		),
 	);
 
 	public readonly hasScheduleData$ = this.scheduleStats$.pipe(
@@ -160,7 +165,7 @@ export class RegistrationPage {
 	public readonly childrenPerCustomer$ = combineLatest([
 		this.registrationCount$,
 		this.childCount$,
-	]).pipe(map((data) => data[1] / data[0]));
+	]).pipe(map((data) => (data[0] ? data[1] / data[0] : 0)));
 
 	public readonly stats$ = this.registrationStats$.pipe(
 		map((stats) => stats?.dateTimeCount),

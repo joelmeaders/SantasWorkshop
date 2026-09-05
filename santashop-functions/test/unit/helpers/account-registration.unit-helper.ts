@@ -167,7 +167,6 @@ export const loadAccountRegistrationHandlers = async (
 
 	const [
 		changeAccountInformationModule,
-		updateReferredByModule,
 		completeRegistrationModule,
 		saveDraftChildModule,
 		deleteDraftChildModule,
@@ -177,7 +176,6 @@ export const loadAccountRegistrationHandlers = async (
 		updateEmailAddressModule,
 	] = await Promise.all([
 		import('../../../src/fn/changeAccountInformation'),
-		import('../../../src/fn/updateReferredBy'),
 		import('../../../src/fn/completeRegistration'),
 		import('../../../src/fn/saveDraftChild'),
 		import('../../../src/fn/deleteDraftChild'),
@@ -189,7 +187,6 @@ export const loadAccountRegistrationHandlers = async (
 
 	return {
 		changeAccountInformation: changeAccountInformationModule.default,
-		updateReferredBy: updateReferredByModule.default,
 		completeRegistration: completeRegistrationModule.default,
 		saveDraftChild: saveDraftChildModule.default,
 		deleteDraftChild: deleteDraftChildModule.default,

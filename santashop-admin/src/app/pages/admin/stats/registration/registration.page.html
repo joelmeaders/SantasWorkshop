@@ -11,6 +11,14 @@
 </admin-header>
 
 <ion-content class="ion-padding">
+	<ion-button fill="outline" (click)="refresh()">Refresh report</ion-button>
+	@if (state$ | async; as state) { @if (state.status === 'loading') {
+	<p role="status">Loading report…</p>
+	} @else if (state.status === 'error') {
+	<p role="alert">
+		Report could not be loaded. Select Refresh report to try again.
+	</p>
+	} @else {
 	<ion-grid>
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
@@ -183,4 +191,5 @@
 		</ion-row>
 		}
 	</ion-grid>
+	} }
 </ion-content>

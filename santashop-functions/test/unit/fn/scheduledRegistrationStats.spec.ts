@@ -60,7 +60,7 @@ describe('scheduledRegistrationStats handler', () => {
 			{
 				id: 'reg-2',
 				data: {
-					uid: 'reg-2', programYear: 2025, zipCode: 80205,
+					uid: 'reg-2', programYear: 2025, zipCode: '80205',
 					children: [{ toyType: 'boys', ageGroup: '6-8' }, { toyType: 'girls' }],
 					dateTimeSlot: { dateTime },
 				},

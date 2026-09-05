@@ -24,7 +24,7 @@ describe.sequential('changeAccountInformation integration', () => {
 		await setDocument(COLLECTION_SCHEMA.users, 'user-info-1', {
 			firstName: 'Buddy',
 			lastName: 'Elf',
-			zipCode: 80205,
+			zipCode: '80205',
 		});
 		await setDocument(
 			COLLECTION_SCHEMA.registrationSearchIndex,
@@ -38,12 +38,12 @@ describe.sequential('changeAccountInformation integration', () => {
 		await setDocument(COLLECTION_SCHEMA.registrations, 'user-info-1', {
 			firstName: 'Buddy',
 			lastName: 'Elf',
-			zipCode: 80205,
+			zipCode: '80205',
 		});
 
 		const result = await changeAccountInformation(
 			createCallableRequest(
-				{ firstName: 'Jovie', lastName: 'Hobbs', zipCode: 80212 },
+				{ firstName: 'Jovie', lastName: 'Hobbs', zipCode: '80212' },
 				{ uid: 'user-info-1' },
 			),
 		);
@@ -59,7 +59,7 @@ describe.sequential('changeAccountInformation integration', () => {
 		).toMatchObject({
 			firstName: 'Jovie',
 			lastName: 'Hobbs',
-			zipCode: 80212,
+			zipCode: '80212',
 		});
 	});
 });

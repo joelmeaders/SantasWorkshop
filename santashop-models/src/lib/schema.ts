@@ -13,7 +13,6 @@ export const COLLECTION_SCHEMA = {
 	registrationScanRiskSummaries: 'registrationScanRiskSummaries',
 	stats: 'stats',
 	tmpRegistrationEmails: 'tmp_registrationemails',
-	tmpResendRegistrationEmails: 'tmp_registrationemails2',
 	parameters: 'parameters',
 	staff: 'staff',
 	ownerOperationPreviews: 'ownerOperationPreviews',

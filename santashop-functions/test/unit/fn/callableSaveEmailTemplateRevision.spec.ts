@@ -28,7 +28,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: [],
 					},
-					{ admin: false },
+					{ roles: [] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
@@ -59,7 +59,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 					],
 					notes: 'Initial draft',
 				},
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -115,7 +115,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 							},
 						],
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'internal' });
@@ -166,7 +166,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 							},
 						],
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -188,7 +188,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: {} as never,
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });

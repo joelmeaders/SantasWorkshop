@@ -27,7 +27,6 @@ describe('FunctionsWrapper', () => {
 	it.each([
 		['updateEmailAddress', ['new@example.test'], 'updateEmailAddress', { emailAddress: 'new@example.test' }],
 		['changeAccountInformation', [{ firstName: 'Ada' }], 'changeAccountInformation', { firstName: 'Ada' }],
-		['updateReferredBy', [{ referredBy: 'friend' }], 'updateReferredBy', { referredBy: 'friend' }],
 		['undoRegistration', [{ mutationId: 'm1', uid: 'u1' }], 'undoRegistration', { mutationId: 'm1', uid: 'u1' }],
 		['changeRegistrationDateTime', [{ mutationId: 'm2', slotId: 'slot-1' }], 'changeRegistrationDateTime', { mutationId: 'm2', slotId: 'slot-1' }],
 		['saveDraftChild', [{ mutationId: 'm3', child: { id: 1, firstName: 'A', lastName: 'B', dateOfBirth: '2020-01-01' } }], 'saveDraftChild', { mutationId: 'm3', child: { id: 1, firstName: 'A', lastName: 'B', dateOfBirth: '2020-01-01' } }],

@@ -93,7 +93,7 @@ describe('changeRegistrationDateTime handler', () => {
 					mutationId: 'change-slot-0001',
 					slotId: 'slot-new',
 					},
-					{ uid: 'user-5', admin: false },
+					{ uid: 'user-5', roles: [] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });

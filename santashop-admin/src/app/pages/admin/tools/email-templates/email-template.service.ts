@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core';
+import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core/admin/firestore';
 import type {
 	EmailTemplateDetail,
 	EmailTemplateSummary,

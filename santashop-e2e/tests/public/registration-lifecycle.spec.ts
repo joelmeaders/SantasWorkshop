@@ -437,7 +437,7 @@ test.describe('customer registration lifecycle', () => {
 		await seedCheckIn(account.emailAddress);
 		const checkInAlert = page.locator('ion-alert');
 		await expect(checkInAlert).toContainText(
-			'Your registration and checkin was confirmed',
+			'Your check-in is confirmed.',
 			{ timeout: 15000 },
 		);
 		await checkInAlert

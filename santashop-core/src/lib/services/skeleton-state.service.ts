@@ -41,7 +41,7 @@ export class SkeletonStateService implements OnDestroy {
 
 	/**
 	 * Returns a state by id and group. If the state
-	 * doesn't exist it will be created and returned.
+	 * does not exist, this method creates and returns it.
 	 *
 	 * @param id
 	 * @param [groupId]

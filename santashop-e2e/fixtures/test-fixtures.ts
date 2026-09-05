@@ -5,7 +5,6 @@ export interface E2eAdminSeedUser {
 	uid?: string;
 	emailAddress: string;
 	password: string;
-	admin?: boolean;
 	owner?: boolean;
 	roles?: ('admin' | 'checkin')[];
 }
@@ -217,7 +216,7 @@ export interface E2eRegistrationScanAudit {
 
 export interface E2eQueuedRegistrationEmailSnapshot {
 	id: string;
-	collection: 'tmp_registrationemails' | 'tmp_registrationemails2';
+	collection: 'tmp_registrationemails';
 	queueSource?: string;
 	deliveryState?: string;
 	qrCodeStoragePath?: string;

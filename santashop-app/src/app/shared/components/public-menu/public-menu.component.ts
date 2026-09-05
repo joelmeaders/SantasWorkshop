@@ -19,7 +19,7 @@ import { shareReplay, takeUntil } from 'rxjs/operators';
 import { AnalyticsWrapper, AuthService } from '@santashop/core/customer';
 import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
-import { HelpPage } from '../../../features/v2/pre-registration/help/help.page';
+import { HelpPage } from '../../../features/pre-registration/help/help.page';
 
 @Component({
 	selector: 'app-public-menu',

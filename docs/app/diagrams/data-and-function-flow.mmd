@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor Customer
+    participant App
+    participant Functions
+    participant Auth
+    participant Firestore
+    participant Storage
+    participant SES
+    Customer->>App: Account and referral fields
+    App->>Functions: newAccount
+    Functions->>Auth: Create identity
+    Functions->>Firestore: Create user and registration
+    Functions->>Storage: Generate QR at stored path
+    App->>Auth: Sign in
+    App->>Firestore: Observe registration and slots
+    Customer->>App: Edit children and select appointment
+    App->>Functions: Save child or appointment draft
+    App->>Functions: completeRegistration
+    Functions->>Firestore: Submit and create email queue document
+    Firestore->>Functions: Email document creation event
+    Functions->>Firestore: Resolve published template key
+    Functions->>SES: Send mapped template
+    App->>Storage: Read qrCodeStoragePath

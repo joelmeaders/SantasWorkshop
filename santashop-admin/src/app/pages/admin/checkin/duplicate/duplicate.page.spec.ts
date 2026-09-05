@@ -6,7 +6,7 @@ import {
 	provideActivatedRouteMock,
 } from '../../../../../test-helpers';
 import { provideRouter, Router } from '@angular/router';
-import { AnalyticsWrapper } from '@santashop/core';
+import { AnalyticsWrapper } from '@santashop/core/admin/firestore';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 
 describe('DuplicatePage', () => {

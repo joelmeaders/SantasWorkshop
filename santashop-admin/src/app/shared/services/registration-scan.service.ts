@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { FunctionsWrapper } from '@santashop/core';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import {
 	type ResolveRegistrationScanRequest,
 	type ResolveRegistrationScanResult,

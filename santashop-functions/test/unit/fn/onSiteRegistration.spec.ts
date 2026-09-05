@@ -28,7 +28,7 @@ describe('onSiteRegistration handler', () => {
 			createCallableRequest(
 				createRegistration({ uid: 'ignored-input' }),
 				{
-					admin: true,
+					roles: ['admin', 'checkin'],
 				},
 			),
 		);
@@ -61,7 +61,7 @@ describe('onSiteRegistration handler', () => {
 
 		await expect(
 			onSiteRegistration(
-				createCallableRequest(createRegistration(), { admin: false }),
+				createCallableRequest(createRegistration(), { roles: [] }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied', message: '-99' });
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();

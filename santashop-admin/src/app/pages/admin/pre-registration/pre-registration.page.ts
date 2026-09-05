@@ -52,7 +52,7 @@ import {
 	timestampToDate,
 	HttpsCallableResult,
 	PROGRAM_YEAR,
-} from '@santashop/core';
+} from '@santashop/core/admin/firestore';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -138,6 +138,7 @@ export class PreRegistrationPage implements OnDestroy {
 				Validators.required,
 				Validators.minLength(5),
 				Validators.maxLength(5),
+				Validators.pattern(/^\d{5}$/),
 			]),
 		),
 		referredBy: new UntypedFormControl(
@@ -167,7 +168,7 @@ export class PreRegistrationPage implements OnDestroy {
 				.slice()
 				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf()),
 		),
-		shareReplay(1),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
 	constructor() {

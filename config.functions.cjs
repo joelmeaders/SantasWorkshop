@@ -17,8 +17,6 @@ const REQUIRED_FUNCTION_ENV_KEYS = [
 	'SANTASHOP_DEFAULT_MAX_SLOTS',
 	'FIRESTORE_BACKUP_BUCKET',
 	'SES_REGION',
-	'REGISTRATION_EMAIL_TEMPLATE',
-	'REMINDER_EMAIL_TEMPLATE',
 	'SANTASHOP_EVENT_DISPLAY_NAME',
 	'REGISTRATION_EMAIL_SOURCE',
 	'REGISTRATION_EMAIL_RETURN_PATH',
@@ -32,7 +30,6 @@ const REQUIRED_FUNCTION_ENV_KEYS = [
 const OPTIONAL_FUNCTION_ENV_KEYS = [
 	'SANTASHOP_SHOP_DAYS',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
-	'AWS_REGION',
 	'SANTASHOP_SIGNUP_MIN_INSTANCES',
 	'SANTASHOP_EVENT_MIN_INSTANCES',
 	'SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT',
@@ -48,7 +45,6 @@ const PLACEHOLDER_AWS_CREDENTIAL_PATTERN =
 
 const loadLocalEnvFiles = () => {
 	loadEnvFiles([
-		path.resolve(process.cwd(), '.env'),
 		path.resolve(__dirname, '.env'),
 	]);
 };
@@ -86,18 +82,14 @@ const getModePrefix = (mode) => {
 
 const getEnvValue = (mode, envKey) => {
 	const prefixedEnvKey = `${getModePrefix(mode)}_${envKey}`;
-	return (
-		process.env[prefixedEnvKey] ??
-		(mode === 'local' ? process.env[`TEST_${envKey}`] : undefined) ??
-		process.env[envKey]
-	);
+	return process.env[prefixedEnvKey];
 };
 
 const requireEnvValue = (mode, envKey) => {
 	const value = getEnvValue(mode, envKey);
 	if (!value) {
 		throw new Error(
-			`Missing required environment variable: ${getModePrefix(mode)}_${envKey} (or ${envKey})`,
+			`Missing required environment variable: ${getModePrefix(mode)}_${envKey}`,
 		);
 	}
 
@@ -123,7 +115,7 @@ const buildFunctionsConfig = (mode) => {
 	for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']) {
 		if (PLACEHOLDER_AWS_CREDENTIAL_PATTERN.test(config[key].trim())) {
 			throw new Error(
-				`Refusing to use placeholder AWS credential: ${getModePrefix(mode)}_${key} (or ${key})`,
+				`Refusing to use placeholder AWS credential: ${getModePrefix(mode)}_${key}`,
 			);
 		}
 	}

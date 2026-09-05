@@ -9,14 +9,14 @@ describe('email template editor helpers', () => {
 	it('extracts unique handlebars paths in encounter order', () => {
 		expect(
 			extractHandlebarsFieldNames(
-				'<p>{{ firstName }} {{contact.firstName}} {{firstName}}</p>',
+				'<p>{{ firstName }} {{recipient.firstName}} {{firstName}}</p>',
 			),
-		).toEqual(['firstName', 'contact.firstName']);
+		).toEqual(['firstName', 'recipient.firstName']);
 	});
 
-	it('merges detected fields, preserves configured values, and adds an implicit QR image field', () => {
+	it('merges detected fields, preserves configured values, and detects explicit QR placeholders', () => {
 		const result = mergeTemplateFieldDefinitions(
-			'<img alt="Guest QR code" src="{{qrCodeUrl}}"><p>{{contact.firstName}}</p>',
+			'<img alt="Guest QR code" src="{{qrCodeUrl}}"><p>{{recipient.firstName}}</p>',
 			'Welcome {{eventName}}',
 			[
 				{
@@ -35,8 +35,8 @@ describe('email template editor helpers', () => {
 				sampleValue: 'https://example.com/qr-code.png',
 			},
 			{
-				name: 'contact.firstName',
-				mapping: 'contact.firstName',
+				name: 'recipient.firstName',
+				mapping: 'recipient.firstName',
 				sampleValue: 'Sample First Name',
 			},
 			{
@@ -52,8 +52,8 @@ describe('email template editor helpers', () => {
 		expect(
 			renderEmailTemplatePreview('<p>{{firstName}} / {{contact.lastName}}</p>', [
 				{
-					name: 'contact.firstName',
-					mapping: 'contact.firstName',
+					name: 'recipient.firstName',
+					mapping: 'recipient.firstName',
 					sampleValue: 'Buddy',
 				},
 				{

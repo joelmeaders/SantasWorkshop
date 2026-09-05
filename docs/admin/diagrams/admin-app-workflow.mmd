@@ -1,0 +1,13 @@
+flowchart TD
+    Login[Staff sign in] --> Claims[Role and owner guards]
+    Claims --> Checkin[Scan and review check-in]
+    Claims --> Search[Search registration index]
+    Claims --> Registration[Staff registration]
+    Claims --> Admin[Admin controls]
+    Admin --> Reports[Reports]
+    Admin --> Staff[Staff management]
+    Admin --> Templates[Published email templates]
+    Admin --> Risk[Scan-risk records]
+    Claims --> Owner[Owner operations]
+    Owner --> Preview[Preview and reauthenticate]
+    Preview --> Job[Resumable job and status]

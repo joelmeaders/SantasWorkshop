@@ -1,6 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { AppStateService } from '@santashop/core';
 
 @Component({
 	selector: 'admin-root',
@@ -10,12 +9,10 @@ import { AppStateService } from '@santashop/core';
 	imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-	private readonly appStateService = inject(AppStateService);
-
 	constructor() {
 		document.body.classList.toggle(
 			'dark',
-			this.appStateService.prefersDark,
+			globalThis.matchMedia('(prefers-color-scheme: dark)').matches,
 		);
 	}
 }

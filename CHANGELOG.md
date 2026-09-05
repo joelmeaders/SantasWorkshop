@@ -5,13 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
-## Unreleased
+## [2026.09.0-alpha.1] - Unreleased
+
+### Added
+
+- Admin bundle-size guard and browser coverage for refresh, concurrency, disconnected reads, and owner-operation recovery.
 
 ### Changed
 
+- Set the workspace and both application versions to `2026.09.0-alpha.1`.
+- Defer admin Firestore loading until authenticated routes and add explicit server refresh for reports, staff, search, and scan-risk views.
+- Require roles and owner authorization, canonical QR paths, string ZIP codes, published email templates, and target-prefixed build inputs.
+- Update ESLint to version 10 and refresh architecture, configuration, and testing documentation.
+- Restore all six changelogs with historical release entries.
+- Make security audits informational in PR and deployment workflows. Keep findings in logs and job summaries without blocking later steps.
 - Upgraded the Angular workspace to 22.1, Ionic Angular to the immutable Angular-22 dev build, Node.js to 24.18.0, and TypeScript to 6.0.
 - Migrated application builds to Angular's esbuild application builder and removed Zone.js from the frontend runtime.
 - Replaced frontend Karma/Jasmine tests with Angular's native Vitest runner in headless Chromium.
+
+### Removed
+
+- Remove the repository Angular developer skill and all reference files.
+- Remove unused profile migration fields, the referral-update API, compatibility paths, historical email assets, and unused dependencies.
+
+### Fixed
+
+- Supply explicit local emulator settings to Functions PR and release browser-test steps.
+- Resume owner-operation status polling with the same job ID after a read failure.
+- Preserve leading zeros in account, registration, profile, and search ZIP codes.
+- Correct E2E guidance for signup referral selection, role claims, configuration, ports, and failure traces.
 
 ## [2025.2.1] - 2025-11-15
 

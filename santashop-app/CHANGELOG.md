@@ -2,13 +2,26 @@
 
 All notable changes to the main application will be documented in this file.
 
-## Unreleased
+## [2026.09.0-alpha.1] - Unreleased
 
 ### Changed
 
+- Set the application version to `2026.09.0-alpha.1`.
+- Use feature-based signup and pre-registration paths.
+- Require stored canonical QR paths and string ZIP values.
+- Update English and Spanish wording and customer architecture documentation.
+- Report security audit findings without blocking PR or deployment workflows.
 - Upgraded to Angular 22.1 and the Ionic Angular Angular-22 dev build.
 - Uses the esbuild application builder and Angular's zoneless runtime.
 - Unit tests now run with native Vitest in headless Chromium.
+
+### Fixed
+
+- Preserve leading zeros when creating accounts and updating profiles.
+
+### Removed
+
+- Remove profile-version providers and the UID-only QR-path fallback.
 
 ## [2025.0.1] - 2025-11-09
 

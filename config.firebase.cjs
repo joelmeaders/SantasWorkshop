@@ -94,7 +94,6 @@ const LOCAL_FIREBASE_CONFIG = {
 
 const loadLocalEnvFiles = () => {
 	loadEnvFiles([
-		path.resolve(process.cwd(), '.env'),
 		path.resolve(__dirname, '.env'),
 	]);
 };
@@ -103,14 +102,14 @@ const getModePrefix = (mode) => (mode === 'prod' ? 'PROD' : 'TEST');
 
 const getEnvValue = (mode, envKey) => {
 	const prefixedEnvKey = `${getModePrefix(mode)}_${envKey}`;
-	return process.env[prefixedEnvKey] ?? process.env[envKey];
+	return process.env[prefixedEnvKey];
 };
 
 const requireEnvValue = (mode, envKey) => {
 	const value = getEnvValue(mode, envKey);
 	if (!value) {
 		throw new Error(
-			`Missing required environment variable: ${getModePrefix(mode)}_${envKey} (or ${envKey})`,
+			`Missing required environment variable: ${getModePrefix(mode)}_${envKey}`,
 		);
 	}
 

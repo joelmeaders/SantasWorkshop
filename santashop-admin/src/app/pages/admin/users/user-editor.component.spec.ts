@@ -42,7 +42,7 @@ describe('UserEditorComponent', () => {
 		);
 	});
 
-	it('normalizes legacy admin-only accounts when editing', async () => {
+	it('includes check-in access for administrators', async () => {
 		const account: StaffAccount = {
 			uid: 'staff-1',
 			displayName: 'Admin User',

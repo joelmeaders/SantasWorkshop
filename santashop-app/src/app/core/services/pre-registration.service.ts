@@ -136,13 +136,7 @@ export class PreRegistrationService implements OnDestroy {
 	private getQrCodeStoragePath(
 		registration: Registration,
 	): string | undefined {
-		if (registration.qrCodeStoragePath) {
-			return registration.qrCodeStoragePath;
-		}
-
-		return registration.uid
-			? `registrations/${registration.uid}.png`
-			: undefined;
+		return registration.qrCodeStoragePath;
 	}
 
 	public saveDraftChild(input: {

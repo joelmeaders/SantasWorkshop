@@ -30,7 +30,7 @@ describe('callableDeleteStaffUser handler', () => {
 		});
 		adminMock.setUserClaims(PROTECTED_UID, {
 			owner: true,
-			admin: true,
+
 			roles: ['admin', 'checkin'],
 		});
 		adminMock.setDocSnapshot('staff/test-user-123', {
@@ -50,7 +50,7 @@ describe('callableDeleteStaffUser handler', () => {
 			callableDeleteStaffUser(
 				createCallableRequest<DeleteStaffUser>(
 					{ uid: 'staff-1' },
-					{ admin: false },
+					{ roles: [] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
@@ -64,7 +64,7 @@ describe('callableDeleteStaffUser handler', () => {
 			callableDeleteStaffUser(
 				createCallableRequest<DeleteStaffUser>(
 					{ uid: '' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -78,7 +78,7 @@ describe('callableDeleteStaffUser handler', () => {
 			callableDeleteStaffUser(
 				createCallableRequest<DeleteStaffUser>(
 					{ uid: PROTECTED_UID },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
@@ -93,7 +93,7 @@ describe('callableDeleteStaffUser handler', () => {
 			callableDeleteStaffUser(
 				createCallableRequest<DeleteStaffUser>(
 					{ uid: 'customer-123' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'not-found' });
@@ -107,7 +107,7 @@ describe('callableDeleteStaffUser handler', () => {
 			callableDeleteStaffUser(
 				createCallableRequest<DeleteStaffUser>(
 					{ uid: 'test-user-123' },
-					{ uid: 'test-user-123', admin: true },
+					{ uid: 'test-user-123', roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
@@ -121,7 +121,7 @@ describe('callableDeleteStaffUser handler', () => {
 		await callableDeleteStaffUser(
 			createCallableRequest<DeleteStaffUser>(
 				{ uid: 'staff-1' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 

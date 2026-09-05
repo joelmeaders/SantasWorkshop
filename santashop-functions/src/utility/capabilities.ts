@@ -14,7 +14,6 @@ export const isOwnerToken = (token: AuthToken | undefined): boolean =>
 
 export const isAdminToken = (token: AuthToken | undefined): boolean =>
 	isOwnerToken(token) ||
-	token?.['admin'] === true ||
 	rolesFromToken(token ?? {}).includes('admin');
 
 export const canCheckInToken = (token: AuthToken | undefined): boolean =>

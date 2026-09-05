@@ -52,7 +52,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		const account = defaultAdminAccount({
 			uid: 'non-admin-e2e-user',
 			emailAddress: 'non-admin-e2e@test.com',
-			admin: false,
+			roles: [],
 		});
 		await seedPublicParams({});
 		await seedAdminUser(account);
@@ -75,7 +75,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		const account = defaultAdminAccount({
 			uid: 'checkin-operator-e2e-user',
 			emailAddress: 'checkin-operator-e2e@test.com',
-			admin: false,
+
 			roles: ['checkin'],
 		});
 		await seedPublicParams({});
@@ -208,7 +208,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		const checkinOnly = defaultAdminAccount({
 			uid: 'scan-rules-checkin-e2e',
 			emailAddress: 'scan-rules-checkin-e2e@test.com',
-			admin: false,
+
 			roles: ['checkin'],
 		});
 		await seedPublicParams({});

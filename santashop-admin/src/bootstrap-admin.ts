@@ -6,11 +6,6 @@ import {
 } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, RouteReuseStrategy } from '@angular/router';
-import {
-	connectFirestoreEmulator,
-	getFirestore,
-	initializeFirestore,
-} from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import {
@@ -27,13 +22,10 @@ import {
 	FIREBASE_ANALYTICS,
 	FIREBASE_APP,
 	FIREBASE_AUTH,
-	FIREBASE_FIRESTORE,
 	FIREBASE_FUNCTIONS,
-	PUBLIC_PARAMETERS_SOURCE,
 	PROGRAM_YEAR,
-	RealtimePublicParametersSource,
 	SHOP_DAYS,
-} from '@santashop/core';
+} from '@santashop/core/admin';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { config } from './config';
@@ -54,16 +46,13 @@ export type AdminBootstrapConfig = Pick<
 export interface AdminBootstrapDependencies {
 	readonly bootstrapApplication: typeof bootstrapApplication;
 	readonly connectAuthEmulator: typeof connectAuthEmulator;
-	readonly connectFirestoreEmulator: typeof connectFirestoreEmulator;
 	readonly connectFunctionsEmulator: typeof connectFunctionsEmulator;
 	readonly enableProdMode: typeof enableProdMode;
 	readonly getAnalytics: typeof getAnalytics;
 	readonly getAuth: typeof getAuth;
-	readonly getFirestore: typeof getFirestore;
 	readonly getFunctions: typeof getFunctions;
 	readonly initializeApp: typeof initializeApp;
 	readonly initializeAppCheck: typeof initializeAppCheck;
-	readonly initializeFirestore: typeof initializeFirestore;
 	readonly provideHttpClient: typeof provideHttpClient;
 	readonly provideIonicAngular: typeof provideIonicAngular;
 	readonly provideRouter: typeof provideRouter;
@@ -85,16 +74,13 @@ export interface AdminBootstrapOptions {
 const defaultDependencies: AdminBootstrapDependencies = {
 	bootstrapApplication,
 	connectAuthEmulator,
-	connectFirestoreEmulator,
 	connectFunctionsEmulator,
 	enableProdMode,
 	getAnalytics,
 	getAuth,
-	getFirestore,
 	getFunctions,
 	initializeApp,
 	initializeAppCheck,
-	initializeFirestore,
 	provideHttpClient,
 	provideIonicAngular,
 	provideRouter,
@@ -155,29 +141,10 @@ export function bootstrapAdminApplication(
 		);
 	}
 
-	const firebaseFirestore = runtimeConfig.production
-		? dependencies.getFirestore(firebaseApp)
-		: dependencies.initializeFirestore(firebaseApp, {
-				experimentalForceLongPolling: true,
-			});
-	if (!runtimeConfig.production) {
-		dependencies.connectFirestoreEmulator(
-			firebaseFirestore,
-			'127.0.0.1',
-			runtimeConfig.emulatorPorts.firestore,
-		);
-	}
-
 	const firebaseProviders = [
 		{ provide: FIREBASE_APP, useValue: firebaseApp },
 		{ provide: FIREBASE_AUTH, useValue: firebaseAuth },
 		{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
-		{ provide: FIREBASE_FIRESTORE, useValue: firebaseFirestore },
-		RealtimePublicParametersSource,
-		{
-			provide: PUBLIC_PARAMETERS_SOURCE,
-			useExisting: RealtimePublicParametersSource,
-		},
 		...(runtimeConfig.production
 			? [
 					{

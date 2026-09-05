@@ -1,15 +1,14 @@
 export interface RegistrationStats {
 	completedRegistrations: number;
 
-	dateTimeCount: DateTimeCount[];
+	dateTimeCount: RegistrationDateTimeStats[];
 
 	zipCodeCount: ZipCodeCount[];
 }
 
-export interface DateTimeCount {
-	// TODO: Remove after 2023. Replaced by ScheduleStats.
+/** Nightly registration and child demographics grouped by appointment time. */
+export interface RegistrationDateTimeStats {
 	dateTime: Date;
-	// TODO: Remove after 2023. Replaced by ScheduleStats.
 	count: number;
 	childCount: number;
 	stats: GenderAgeStats;

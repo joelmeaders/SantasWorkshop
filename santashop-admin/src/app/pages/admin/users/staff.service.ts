@@ -1,6 +1,7 @@
+import { AdminReadRepository } from '../../../shared/services/admin-read-repository.service';
 import { Injectable, inject } from '@angular/core';
-import { orderBy, QueryConstraint } from 'firebase/firestore';
-import { FireRepoLite, FunctionsWrapper } from '@santashop/core';
+import { orderBy, QueryConstraint } from 'firebase/firestore/lite';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	CreateStaffUser,
@@ -8,33 +9,64 @@ import {
 	StaffAccount,
 	UpdateStaffUser,
 } from '@santashop/models';
-import { Observable, shareReplay } from 'rxjs';
+import {
+	BehaviorSubject,
+	catchError,
+	filter,
+	map,
+	of,
+	shareReplay,
+	startWith,
+	switchMap,
+} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class StaffService {
-	private readonly repoService = inject(FireRepoLite);
+	private readonly repoService = inject(AdminReadRepository);
 	private readonly functions = inject(FunctionsWrapper);
 
-	private readonly staffCollection = this.repoService.collection<StaffAccount>(
-		COLLECTION_SCHEMA.staff,
+	private readonly staffCollection =
+		this.repoService.collection<StaffAccount>(COLLECTION_SCHEMA.staff);
+
+	private readonly refreshTrigger = new BehaviorSubject<void>(undefined);
+	public readonly state$ = this.refreshTrigger.pipe(
+		switchMap(() =>
+			this.staffCollection
+				.readMany(
+					[orderBy('displayName', 'asc')] as QueryConstraint[],
+					'uid',
+				)
+				.pipe(
+					map((accounts) => ({ status: 'ready' as const, accounts })),
+					startWith({
+						status: 'loading' as const,
+						accounts: [] as StaffAccount[],
+					}),
+					catchError(() =>
+						of({
+							status: 'error' as const,
+							accounts: [] as StaffAccount[],
+						}),
+					),
+				),
+		),
+		shareReplay({ bufferSize: 1, refCount: true }),
+	);
+	public readonly staffAccounts$ = this.state$.pipe(
+		filter((state) => state.status === 'ready'),
+		map((state) => state.accounts),
 	);
 
-	/**
-	 * Live stream of the elevated staff accounts, ordered by display name.
-	 * Only readable by admins per Firestore rules.
-	 *
-	 * @memberof StaffService
-	 */
-	public readonly staffAccounts$: Observable<StaffAccount[]> =
-		this.staffCollection
-			.readMany([orderBy('displayName', 'asc')] as QueryConstraint[], 'uid')
-			.pipe(shareReplay(1));
+	public refresh(): void {
+		this.refreshTrigger.next();
+	}
 
 	public async createStaffUser(data: CreateStaffUser): Promise<string> {
 		const result = await this.functions.callableWrapper<
 			CreateStaffUser,
 			string
 		>('callableCreateStaffUser')(data);
+		this.refresh();
 		return result.data;
 	}
 
@@ -42,11 +74,13 @@ export class StaffService {
 		await this.functions.callableWrapper<UpdateStaffUser, void>(
 			'callableUpdateStaffUser',
 		)(data);
+		this.refresh();
 	}
 
 	public async deleteStaffUser(uid: string): Promise<void> {
 		await this.functions.callableWrapper<DeleteStaffUser, void>(
 			'callableDeleteStaffUser',
 		)({ uid });
+		this.refresh();
 	}
 }

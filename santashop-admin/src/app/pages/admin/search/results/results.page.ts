@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	BehaviorSubject,
+	catchError,
 	delay,
 	filter,
 	map,
@@ -9,6 +10,7 @@ import {
 	race,
 	ReplaySubject,
 	shareReplay,
+	startWith,
 	switchMap,
 } from 'rxjs';
 import { RegistrationSearchIndex } from '@santashop/models';
@@ -41,9 +43,9 @@ declare type SortFnType = (
 ) => number;
 
 const compareSearchValues = (
-	left: string | number | undefined,
-	right: string | number | undefined,
-): number => String(left ?? '').localeCompare(String(right ?? ''));
+	left: string | undefined,
+	right: string | undefined,
+): number => (left ?? '').localeCompare(right ?? '');
 
 @Component({
 	selector: 'admin-results',
@@ -101,22 +103,26 @@ export class ResultsPage {
 	private readonly searchTrigger = new ReplaySubject<Date>(1);
 	public readonly searchInput$ = this.searchService.searchResults$;
 
-	private readonly search$: Observable<RegistrationSearchIndex[]> =
-		this.searchService.searchResults$.pipe(
-			filter(
-				(query): query is Observable<RegistrationSearchIndex[]> =>
-					query !== null,
-			),
-			switchMap((query) => query),
-			switchMap((results) =>
-				this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
-			),
-		);
+	private readonly search$: Observable<
+		RegistrationSearchIndex[] | undefined
+	> = this.searchService.searchResults$.pipe(
+		filter(
+			(query): query is Observable<RegistrationSearchIndex[]> =>
+				query !== null,
+		),
+		switchMap((query) => query),
+		switchMap((results) =>
+			this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
+		),
+		catchError(() => of(undefined)),
+	);
 
 	private readonly timeout$ = of(undefined).pipe(delay(5000));
 
 	public readonly searchResults$ = this.searchTrigger.pipe(
-		switchMap(() => race([this.search$, this.timeout$])),
+		switchMap(() =>
+			race([this.search$, this.timeout$]).pipe(startWith(null)),
+		),
 	);
 
 	constructor() {
@@ -124,6 +130,10 @@ export class ResultsPage {
 	}
 
 	public async ionViewWillEnter(): Promise<void> {
+		this.refresh();
+	}
+
+	public refresh(): void {
 		this.searchTrigger.next(new Date());
 	}
 

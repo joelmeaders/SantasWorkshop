@@ -31,6 +31,8 @@
 		"paths": {
 			"@santashop/models": ["./dist/@santashop/models"],
 			"@santashop/core": ["./dist/@santashop/core"],
+			"@santashop/core/admin": ["./santashop-core/src/admin.ts"],
+			"@santashop/core/admin/firestore": ["./santashop-core/src/admin-firestore.ts"],
 			"@santashop/core/customer": ["./santashop-core/src/customer.ts"],
 			"@santashop/app": ["./dist/@santashop/app"],
 			"@santashop/admin": ["./dist/@santashop/admin"]

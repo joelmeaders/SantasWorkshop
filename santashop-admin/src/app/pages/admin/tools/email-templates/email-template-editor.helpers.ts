@@ -2,8 +2,6 @@ import type { EmailTemplateFieldDefinition } from '@santashop/models';
 import Handlebars from 'handlebars';
 
 const HANDLEBARS_FIELD_PATTERN = /{{\s*([a-zA-Z0-9_.]+)\s*}}/g;
-const IMPLICIT_QR_CODE_PATTERN =
-	/<img\b[^>]*(?:alt|title)\s*=\s*['"][^'"]*qr[^'"]*['"][^>]*>/i;
 
 const toSampleLabel = (fieldName: string): string => {
 	const tail = fieldName.split('.').at(-1) ?? fieldName;
@@ -41,9 +39,6 @@ const setNestedValue = (
 	}
 };
 
-const normalizeFieldName = (value: string): string =>
-	value.replace(/\bcontact\.firstName\b/g, 'firstName');
-
 const buildSourceDataFromMappings = (
 	fields: EmailTemplateFieldDefinition[],
 ): Record<string, unknown> => {
@@ -52,10 +47,6 @@ const buildSourceDataFromMappings = (
 	for (const field of fields) {
 		setNestedValue(sourceData, field.name, field.sampleValue);
 
-		const normalizedFieldName = normalizeFieldName(field.name);
-		if (normalizedFieldName !== field.name) {
-			setNestedValue(sourceData, normalizedFieldName, field.sampleValue);
-		}
 	}
 
 	return sourceData;
@@ -101,9 +92,6 @@ export const mergeTemplateFieldDefinitions = (
 		[html, subjectPart].join('\n'),
 	);
 
-	if (IMPLICIT_QR_CODE_PATTERN.test(html) && !detectedFieldNames.includes('qrCodeUrl')) {
-		detectedFieldNames.push('qrCodeUrl');
-	}
 
 	return detectedFieldNames.map(
 		(name) => {

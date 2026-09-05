@@ -2,13 +2,33 @@
 
 All notable changes to the admin application will be documented in this file.
 
-## Unreleased
+## [2026.09.0-alpha.1] - Unreleased
+
+### Added
+
+- Add an initial-bundle guard that excludes Firestore and Firebase Storage from the initial JavaScript graph.
+- Add explicit refresh, loading, error, and retry controls for reports, staff, search, and scan-risk data.
 
 ### Changed
 
+- Set the application version to `2026.09.0-alpha.1`.
+- Load Firestore behind authenticated routes and use deferred Firestore Lite reads for one-shot queries.
+- Retain realtime operational flags and appointment controls.
+- Use roles and the distinct owner capability for staff authorization.
+- Require explicit email-template fields and string ZIP searches.
+- Report security audit findings without blocking PR or deployment workflows.
 - Upgraded to Angular 22.1 and the Ionic Angular Angular-22 dev build.
 - Uses the esbuild application builder and Angular's zoneless runtime.
 - Unit tests now run with native Vitest in headless Chromium.
+
+### Fixed
+
+- Recover owner-operation polling without starting another operation.
+- Preserve leading-zero ZIP values in registration forms and searches.
+
+### Removed
+
+- Remove unused NgModule files and implicit email token/QR substitutions.
 
 ## [2025.0.1] - 2025-11-09
 

@@ -16,8 +16,6 @@ export const mockUsers = (id?: string) => ({
 		zipCode: '90210',
 		acceptedTermsOfService: new Date(),
 		acceptedPrivacyPolicy: new Date(),
-		version: 1,
-		manuallyMigrated: false,
 		newsletter: false,
 	} as User,
 });

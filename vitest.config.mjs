@@ -4,6 +4,12 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
 	resolve: {
 		alias: {
+			'@santashop/core/admin/firestore': fileURLToPath(
+				new URL('./santashop-core/src/admin-firestore.ts', import.meta.url),
+			),
+			'@santashop/core/admin': fileURLToPath(
+				new URL('./santashop-core/src/admin.ts', import.meta.url),
+			),
 			'@santashop/core/customer': fileURLToPath(
 				new URL('./santashop-core/src/index.ts', import.meta.url),
 			),

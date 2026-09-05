@@ -364,7 +364,6 @@ const deleteCustomerAuthUsers = async (): Promise<number> => {
 			const roles = claims['roles'];
 			const elevated =
 				claims['owner'] === true ||
-				claims['admin'] === true ||
 				(Array.isArray(roles) && roles.length > 0) ||
 				staffUids.has(user.uid);
 			if (!elevated) toDelete.push(user.uid);
@@ -452,7 +451,6 @@ export const executeYearlyReset = async (
 		COLLECTION_SCHEMA.editedRegistrations,
 		COLLECTION_SCHEMA.onSiteRegistrations,
 		COLLECTION_SCHEMA.tmpRegistrationEmails,
-		COLLECTION_SCHEMA.tmpResendRegistrationEmails,
 		COLLECTION_SCHEMA.dateTimeSlots,
 	];
 	const progress: OwnerOperationCounts = { ...(operation.progress ?? {}) };

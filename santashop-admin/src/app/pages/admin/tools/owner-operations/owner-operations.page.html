@@ -90,7 +90,7 @@
 							type="button"
 							color="danger"
 							expand="block"
-							[disabled]="busy() || form.invalid"
+							[disabled]="busy() || form.invalid || !!operationId()"
 							(click)="start()"
 						>
 							Start protected operation
@@ -102,13 +102,19 @@
 		</ion-card>
 
 		<div class="status" aria-live="polite" aria-atomic="true">
-			@if (busy()) {
+			@if (operationId()) {
+			<ion-button
+				type="button"
+				[disabled]="busy()"
+				(click)="refreshStatus()"
+			>
+				Refresh operation status
+			</ion-button>
+			} @if (busy()) {
 			<ion-spinner aria-label="Operation in progress" />
-			}
-			@if (statusMessage()) {
+			} @if (statusMessage()) {
 			<p>{{ statusMessage() }}</p>
-			}
-			@if (errorMessage()) {
+			} @if (errorMessage()) {
 			<p class="error" role="alert">{{ errorMessage() }}</p>
 			}
 		</div>
@@ -123,8 +129,7 @@
 				<p>Stage: {{ currentOperation.stage }}</p>
 				@if (currentOperation.result?.message) {
 				<p>{{ currentOperation.result?.message }}</p>
-				}
-				@if (currentOperation.result?.exportAvailable) {
+				} @if (currentOperation.result?.exportAvailable) {
 				<ion-button type="button" (click)="downloadExport()">
 					Download private export
 				</ion-button>

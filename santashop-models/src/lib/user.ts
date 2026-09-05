@@ -13,12 +13,6 @@ export interface User {
 
 	acceptedPrivacyPolicy?: Date;
 
-	// Profile version: Increment on field changes, add changes to
-	// profile migration service in @core
-	version: number;
-
-	manuallyMigrated: boolean;
-
 	newsletter: boolean;
 
 	referredBy?: string;

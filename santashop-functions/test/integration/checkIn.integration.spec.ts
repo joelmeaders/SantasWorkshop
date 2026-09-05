@@ -36,7 +36,7 @@ describe.sequential('checkIn integration', () => {
 					inputMethod: 'manual',
 				},
 				{
-					admin: true,
+					roles: ['admin', 'checkin'],
 					uid: 'admin-user',
 				},
 			),
@@ -96,7 +96,7 @@ describe.sequential('checkIn integration', () => {
 			checkIn(
 				createCallableRequest(
 					{ registration, inputMethod: 'manual' },
-					{ admin: true, uid: 'auditor-user' },
+					{ roles: ['admin', 'checkin'], uid: 'auditor-user' },
 				),
 			),
 		).rejects.toMatchObject({ code: 'already-exists' });

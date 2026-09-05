@@ -37,19 +37,15 @@ This workspace uses **pnpm Catalogs** for centralized dependency version managem
 Dependencies are defined once in `pnpm-workspace.yaml`:
 
 ```yaml
-# Default catalog
 catalog:
-  "@angular/core": ^21.0.6
-  "@ionic/angular": ^8.7.15
-  firebase: ^12.7.0
-  # ...
+  "@angular/core": 22.1.0
+  "@ionic/angular": 8.8.14
+  firebase: 12.18.0
 
-# Functions-specific catalog  
 catalogs:
   functions:
-    firebase-admin: ^13.6.0
-    firebase-functions: ^6.6.0
-    # ...
+    firebase-admin: ^13.10.0
+    firebase-functions: ^7.3.2
 ```
 
 Then referenced in `package.json` files:
@@ -120,7 +116,7 @@ Generated files:
 - `santashop-admin/src/config.ts`
 - `santashop-admin/src/firebase.config.ts`
 
-Each app now uses one root `src/config.ts` metadata file plus a generated `src/firebase.config.ts` file.
+Each app uses one root `src/config.ts` metadata file plus a generated `src/firebase.config.ts` file.
 
 ### Sync GitHub Actions secrets from `.env`
 
@@ -164,7 +160,7 @@ pnpm run e2e:test
 
 ### Hosting Builds in GitHub Actions
 
-- Pull request workflows now validate app/admin builds in **test** mode, but do not deploy.
+- Pull request workflows validate app/admin builds in **test** mode, but do not deploy.
 - Merge-to-master workflows deploy the merged commit to the **test** Firebase project first.
 - Production release is a separate manual workflow run that promotes a specific tested commit or ref to the **production** Firebase project.
 - When you are ready for prod, run the workflow manually and provide the tested commit SHA or ref as `release_ref`.
@@ -180,7 +176,7 @@ Required GitHub secrets for the current hosting workflows:
 
 ### Functions Deploys in GitHub Actions
 
-Functions now have dedicated test and production workflow files:
+Functions have dedicated test and production workflow files:
 
 - `.github/workflows/functions-pr-validation.yml`
 - `.github/workflows/functions-test-and-prod-release.yml`
@@ -190,7 +186,7 @@ The pull request workflow acts as the Functions PR validation process:
 - unit tests always run on matching PRs
 - integration tests run when the required test secrets are available
 
-The merge-to-master workflow is now the Functions promotion pipeline:
+The merge-to-master workflow is the Functions promotion pipeline:
 
 - it deploys to the **test** Firebase project first
 - production release is then triggered manually for the tested commit or ref

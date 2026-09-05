@@ -28,7 +28,7 @@ describe('callableCreateStaffUser handler', () => {
 
 		await expect(
 			callableCreateStaffUser(
-				createCallableRequest(validPayload(), { admin: false }),
+				createCallableRequest(validPayload(), { roles: [] }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
@@ -41,7 +41,7 @@ describe('callableCreateStaffUser handler', () => {
 			callableCreateStaffUser(
 				createCallableRequest(
 					{ ...validPayload(), emailAddress: '' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -55,7 +55,7 @@ describe('callableCreateStaffUser handler', () => {
 			callableCreateStaffUser(
 				createCallableRequest(
 					{ ...validPayload(), emailAddress: 'not-an-email' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -68,7 +68,7 @@ describe('callableCreateStaffUser handler', () => {
 		await callableCreateStaffUser(
 			createCallableRequest(
 				{ ...validPayload(), emailAddress: '  STAFF@EXAMPLE.COM  ' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -87,7 +87,7 @@ describe('callableCreateStaffUser handler', () => {
 			callableCreateStaffUser(
 				createCallableRequest(
 					{ ...validPayload(), roles: [] },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -115,7 +115,7 @@ describe('callableCreateStaffUser handler', () => {
 		);
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['checkin', 'admin'],
-			admin: true,
+
 		});
 		expect(adminMock.getDocRef('staff/staff-1').set).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -141,21 +141,21 @@ describe('callableCreateStaffUser handler', () => {
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['admin', 'checkin'],
-			admin: true,
+
 		});
 	});
 
-	it('sets admin false when only checkin is assigned', async () => {
+	it('assigns only the selected check-in role', async () => {
 		const { callableCreateStaffUser } =
 			await loadStaffAdminHandlers(adminMock);
 
 		await callableCreateStaffUser(
-			createCallableRequest(validPayload(), { admin: true }),
+			createCallableRequest(validPayload(), { roles: ['admin', 'checkin'] }),
 		);
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['checkin'],
-			admin: false,
+
 		});
 	});
 
@@ -167,7 +167,7 @@ describe('callableCreateStaffUser handler', () => {
 			callableCreateStaffUser(
 				createCallableRequest(
 					{ ...validPayload(), password: 'short' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -181,7 +181,7 @@ describe('callableCreateStaffUser handler', () => {
 			callableCreateStaffUser(
 				createCallableRequest(
 					{ ...validPayload(), displayName: '  ' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
@@ -196,7 +196,7 @@ describe('callableCreateStaffUser handler', () => {
 
 		await expect(
 			callableCreateStaffUser(
-				createCallableRequest(validPayload(), { admin: true }),
+				createCallableRequest(validPayload(), { roles: ['admin', 'checkin'] }),
 			),
 		).rejects.toMatchObject({ code: 'internal' });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('staff-1');

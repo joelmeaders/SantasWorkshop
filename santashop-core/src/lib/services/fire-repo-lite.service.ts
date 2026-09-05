@@ -158,7 +158,7 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 * document id.
 	 *
 	 * If you specify an idField the document
-	 * id will be populated into that field. The id field
+	 * id populates that field. The id field
 	 * does not need to exist on the document in the data
 	 * store.
 	 *
@@ -179,7 +179,7 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 * optional query constraints.
 	 *
 	 * If you specify an idField the document
-	 * id will be populated into that field. The id field
+	 * id populates that field. The id field
 	 * does not need to exist on the document in the data
 	 * store.
 	 *
@@ -221,8 +221,8 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 * Update a specified document at the specified collection
 	 * path and id.
 	 *
-	 * Setting merge to true will allow upserts if the document
-	 * doesn't doesn't exist. It will also non-destructively
+	 * Setting merge to true allows upserts if the document
+	 * does not exist. It also non-destructively
 	 * update documents by only replacing specified fields.
 	 *
 	 * @template T

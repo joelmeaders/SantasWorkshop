@@ -125,7 +125,7 @@ describe('testHelpers module', () => {
 		await clearAllData();
 
 		expect(adminMock.batchDelete).toHaveBeenCalledTimes(4);
-		expect(adminMock.batchCommit).toHaveBeenCalledTimes(17);
+		expect(adminMock.batchCommit).toHaveBeenCalledTimes(16);
 		expect(adminMock.getFiles).toHaveBeenCalledWith({ prefix: 'registrations/' });
 		expect(adminMock.getFiles).toHaveBeenCalledWith({ prefix: 'emailTemplates/' });
 		expect(adminMock.storageDelete).toHaveBeenCalledWith({ ignoreNotFound: true });

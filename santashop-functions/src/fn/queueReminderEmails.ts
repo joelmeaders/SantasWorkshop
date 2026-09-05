@@ -63,7 +63,7 @@ const shouldQueueReminderEmail = (
 export default async function queueReminderEmails(
 	programYear: number,
 ): Promise<ReminderQueueResult> {
-	let result: ReminderQueueResult = { success: 0, failed: 0 };
+
 
 	try {
 		const completedRegistrationsQuery = await admin
@@ -81,7 +81,7 @@ export default async function queueReminderEmails(
 			shouldQueueReminderEmail(registration),
 		);
 
-		result = await queueReminderEmailRecords(registrations);
+		const result = await queueReminderEmailRecords(registrations);
 		log.info('Processed reminder email queue run', {
 			candidateCount: registrations.length,
 			successCount: result.success,
@@ -91,7 +91,7 @@ export default async function queueReminderEmails(
 		return result;
 	} catch (err) {
 		log.error('Failed to queue reminder emails', undefined, err);
-		throw new Error(`Failed to queue reminder emails: ${err}`);
+		throw new Error(`Failed to queue reminder emails: ${err}`, { cause: err });
 	}
 }
 

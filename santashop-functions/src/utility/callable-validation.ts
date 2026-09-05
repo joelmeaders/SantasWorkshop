@@ -102,17 +102,7 @@ export const requireBoolean = (value: unknown, label: string): boolean => {
 export const requireZipCodeValue = (
 	value: unknown,
 	label = 'ZIP code',
-): number | string => {
-	if (typeof value === 'number') {
-		if (!Number.isInteger(value) || value < 0 || value > 99999) {
-			throw new CallableValidationError(
-				`${label} must be a valid five-digit US ZIP code.`,
-			);
-		}
-
-		return value;
-	}
-
+): string => {
 	if (typeof value === 'string') {
 		const normalized = value.trim();
 		if (!/^\d{5}(?:-\d{4})?$/.test(normalized)) {

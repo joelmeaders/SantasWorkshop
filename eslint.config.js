@@ -24,7 +24,6 @@ module.exports = tseslint.config(
 		},
 		rules: {
 			'prettier/prettier': ['off', { endOfLine: 'auto' }],
-			'no-floating-decimal': 'error',
 			'@typescript-eslint/member-ordering': 'off',
 			'@typescript-eslint/no-unused-vars': 'error',
 			'@typescript-eslint/no-non-null-assertion': 'warn',
@@ -34,7 +33,6 @@ module.exports = tseslint.config(
 					suffixes: ['Page', 'Component'],
 				},
 			],
-			'no-return-await': 'off',
 			'@typescript-eslint/return-await': ['error'],
 			'@typescript-eslint/prefer-readonly': ['error'],
 			'@typescript-eslint/explicit-function-return-type': ['error'],

@@ -2,10 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
-## [Unreleased]
+## [2026.09.0-alpha.1] - Unreleased
 
 ### Added
 
+- Add browser cases for data refresh, offline recovery, concurrent operations, lost responses, appointment changes, and owner-status recovery.
+- Add leading-zero ZIP signup and staff-search regression coverage.
 - Requirements-traced public registration lifecycle and staff access/control
   scenarios.
 - Stable mobile e2e selectors and reusable registration helpers.
@@ -13,6 +15,9 @@ All notable changes to the E2E testing suite will be documented in this file.
 
 ### Changed
 
+- Use supported role/owner claims and string ZIP fixtures.
+- Retain failure traces with retries disabled.
+- Update test guidance to use signup referral selection, existing helpers, and matching E2E configuration and ports.
 - Organized specs by public/admin feature.
 - Reduced Playwright execution to one Pixel 5 mobile Chromium project and one
   worker.

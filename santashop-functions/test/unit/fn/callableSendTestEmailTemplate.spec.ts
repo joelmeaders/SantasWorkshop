@@ -27,7 +27,7 @@ describe('callableSendTestEmailTemplate handler', () => {
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: [],
 					},
-					{ admin: false },
+					{ roles: [] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
@@ -44,10 +44,10 @@ describe('callableSendTestEmailTemplate handler', () => {
 					recipientEmail: 'preview@example.com',
 					deliveryProfile: 'registration-confirmation',
 					subjectPart: 'Ticket for {{eventName}}',
-					html: '<html><head></head><body><img src="https://example.com/original.png" alt="qr code image"><h1>Hello {{contact.firstName}}</h1></body></html>',
+					html: '<html><head></head><body><img src="{{qrCodeUrl}}" alt="qr code image"><h1>Hello {{firstName}}</h1></body></html>',
 					fieldMappings: [
 						{
-							name: 'contact.firstName',
+							name: 'firstName',
 							mapping: 'firstName',
 							sampleValue: 'Buddy',
 						},
@@ -63,7 +63,7 @@ describe('callableSendTestEmailTemplate handler', () => {
 						},
 					],
 				},
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -108,7 +108,7 @@ describe('callableSendTestEmailTemplate handler', () => {
 						html: '<h1>Hello {{firstName}}</h1>',
 						fieldMappings: [],
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });

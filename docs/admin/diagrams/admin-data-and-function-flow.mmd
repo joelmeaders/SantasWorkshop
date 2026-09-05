@@ -1,0 +1,12 @@
+flowchart LR
+    UI[Admin UI] --> Auth[Firebase Auth role claims]
+    UI --> Lite[AdminReadRepository: one-time reads]
+    Lite --> FS[Firestore]
+    UI --> Live[Flags and appointment listeners]
+    Live --> FS
+    UI --> Fn[Callable Functions: capability checks]
+    Fn --> FS
+    Fn --> SES[SES template publishing and email]
+    Fn --> Jobs[Owner tasks and audit]
+    Jobs --> FS
+    Scheduler[Scheduled aggregation] --> FS

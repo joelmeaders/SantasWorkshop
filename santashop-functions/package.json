@@ -20,7 +20,7 @@
 		"owner:archive-backup": "node scripts/archive-firestore-backup.mjs"
 	},
 	"engines": {
-		"node": ">=22"
+		"node": ">=24.15.0"
 	},
 	"main": "dist/index.js",
 	"dependencies": {
@@ -35,7 +35,6 @@
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:functions",
-		"@babel/plugin-proposal-decorators": "catalog:functions",
 		"@babel/preset-env": "catalog:functions",
 		"@babel/preset-typescript": "catalog:functions",
 		"@types/dateformat": "catalog:functions",
@@ -46,16 +45,15 @@
 		"babel-loader": "catalog:functions",
 		"core-js": "catalog:functions",
 		"eslint": "catalog:functions",
-		"eslint-config-google": "catalog:functions",
-		"eslint-plugin-import": "catalog:functions",
-		"firebase-functions-test": "catalog:functions",
 		"@vitest/coverage-v8": "catalog:functions",
 		"ts-loader": "catalog:functions",
 		"typescript": "catalog:functions",
 		"vitest": "catalog:functions",
 		"webpack": "catalog:functions",
 		"webpack-cli": "catalog:functions",
-		"webpack-sources": "catalog:functions"
+		"webpack-sources": "catalog:functions",
+		"@eslint/js": "catalog:",
+		"globals": "catalog:"
 	},
 	"private": true
 }

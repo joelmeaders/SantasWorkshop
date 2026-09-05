@@ -1,11 +1,11 @@
+import { AdminReadRepository } from './admin-read-repository.service';
 import { Injectable, inject } from '@angular/core';
 import {
 	limit,
 	orderBy,
 	QueryConstraint,
 	where,
-} from 'firebase/firestore';
-import { FireRepoLite } from '@santashop/core';
+} from 'firebase/firestore/lite';
 import {
 	COLLECTION_SCHEMA,
 	CheckIn,
@@ -19,7 +19,7 @@ import { map } from 'rxjs/operators';
 	providedIn: 'root',
 })
 export class LookupService {
-	private readonly repoService = inject(FireRepoLite);
+	private readonly repoService = inject(AdminReadRepository);
 
 	private readonly collections = {
 		searchIndex: this.repoService.collection<RegistrationSearchIndex>(

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthService, AppStateService } from '@santashop/core';
+import { AuthService, AppStateService } from '@santashop/core/admin/firestore';
 
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';

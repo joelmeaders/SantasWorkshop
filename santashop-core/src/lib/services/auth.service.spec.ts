@@ -120,7 +120,7 @@ describe('AuthService', () => {
 	it('isAdmin$: should return true', async () => {
 		// Arrange
 		vi.spyOn(mockUser, 'getIdTokenResult').mockResolvedValue({
-			claims: { admin: true },
+			claims: { roles: ['admin', 'checkin'] },
 		} as any);
 
 		// Act
@@ -353,7 +353,7 @@ describe('AuthService', () => {
 
 	it('getCurrentUserToken(): should return token result', async () => {
 		// Arrange
-		const mockToken = { claims: { admin: true } } as any;
+		const mockToken = { claims: { roles: ['admin', 'checkin'] } } as any;
 		(authWrapperService.getCurrentUserToken as unknown as MockInstance).mockResolvedValue(
 			mockToken,
 		);

@@ -60,7 +60,7 @@ describe('observability utility', () => {
 		const result = await handler({
 			auth: {
 				uid: 'admin-1',
-				token: { admin: true },
+				token: { roles: ['admin', 'checkin'] },
 			},
 			data: { firstName: 'Buddy', password: 'super-secret' },
 		} as never);

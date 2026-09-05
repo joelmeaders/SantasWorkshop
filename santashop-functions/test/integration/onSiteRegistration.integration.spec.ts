@@ -18,7 +18,7 @@ describe.sequential('onSiteRegistration integration', () => {
 	it('creates an onsite registration and check-in record', async () => {
 		const result = await onSiteRegistration(
 			createCallableRequest(createRegistration({ uid: 'onsite-input' }), {
-				admin: true,
+				roles: ['admin', 'checkin'],
 				uid: 'admin-user',
 			}),
 		);

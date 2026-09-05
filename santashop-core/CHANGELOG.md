@@ -2,11 +2,21 @@
 
 All notable changes to the core library will be documented in this file.
 
-## Unreleased
+## [2026.09.0-alpha.1] - Unreleased
+
+### Added
+
+- Add separate shared admin entry points and public-parameter sources for deferred Firebase loading.
 
 ### Changed
 
+- Use roles and the distinct owner capability in shared authorization.
+- Document supported one-shot and realtime repository contracts.
 - Upgraded peer dependencies to Angular 22.1 and migrated unit tests to native Vitest in headless Chromium.
+
+### Removed
+
+- Remove the profile-version token and unused referral-update callable wrapper.
 
 ## [2025.0.1] - 2025-11-09
 

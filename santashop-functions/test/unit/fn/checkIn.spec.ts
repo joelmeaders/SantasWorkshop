@@ -27,7 +27,7 @@ describe('checkIn handler', () => {
 
 		await expect(
 			checkIn(
-				createCallableRequest(createRegistration(), { admin: false }),
+				createCallableRequest(createRegistration(), { roles: [] }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
@@ -55,7 +55,7 @@ describe('checkIn handler', () => {
 			checkIn(
 				createCallableRequest(
 					{ registration: incomplete, inputMethod: 'manual' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({
@@ -70,7 +70,7 @@ describe('checkIn handler', () => {
 						registration: createRegistration(),
 						inputMethod: 'manual',
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'not-found' });
@@ -92,7 +92,7 @@ describe('checkIn handler', () => {
 						registration: createRegistration(),
 						inputMethod: 'camera',
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
@@ -115,7 +115,7 @@ describe('checkIn handler', () => {
 			checkIn(
 				createCallableRequest(
 					{ registration, inputMethod: 'camera' },
-					{ admin: true, uid: 'staff-1' },
+					{ roles: ['admin', 'checkin'], uid: 'staff-1' },
 				),
 			),
 		).rejects.toMatchObject({
@@ -144,7 +144,7 @@ describe('checkIn handler', () => {
 						registration: createRegistration(),
 						inputMethod: 'manual',
 					},
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({
@@ -165,7 +165,7 @@ describe('checkIn handler', () => {
 		const result = await checkIn(
 			createCallableRequest(
 				{ registration: createRegistration(), inputMethod: 'camera' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 

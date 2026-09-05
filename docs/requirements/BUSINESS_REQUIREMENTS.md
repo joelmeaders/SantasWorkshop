@@ -133,11 +133,11 @@ The business reviews aggregated information about users, registrations, appointm
 
 ### BR-011 Program-year isolation
 
-The service shall organize seasonal operations around a program year so that schedules, registrations, and reporting can be managed for the active season without mixing them with prior seasons.
+The service must organize seasonal operations around a program year so that schedules, registrations, and reporting can be managed for the active season without mixing them with prior seasons.
 
 ### BR-012 Real-time operating controls
 
-The service shall allow runtime control of:
+The service must allow runtime control of:
 
 - whether public registration is open
 - whether account creation is available
@@ -148,115 +148,115 @@ The service shall allow runtime control of:
 
 ### BR-013 Bilingual public messaging
 
-The service shall support at least English and Spanish for customer-facing messaging and public operational notices.
+The service must support at least English and Spanish for customer-facing messaging and public operational notices.
 
 ### BR-014 Record continuity across workflows
 
-The business shall maintain continuity between customer self-service, staff support flows, confirmation communications, and event-day operations so that staff can act on the same underlying registration identity.
+The business must maintain continuity between customer self-service, staff support flows, confirmation communications, and event-day operations so that staff can act on the same underlying registration identity.
 
 ### BR-015 Searchable operational lookup
 
-The service shall support operator lookup of customer records by multiple identifiers needed for support and check-in.
+The service must support operator lookup of customer records by multiple identifiers needed for support and check-in.
 
 ### BR-016 Asynchronous communications
 
-The service shall support asynchronous registration communication so that submission and update workflows are not blocked by message-delivery timing.
+The service must support asynchronous registration communication so that submission and update workflows are not blocked by message-delivery timing.
 
 ### BR-017 Seasonal statistics
 
-The service shall maintain business reporting outputs for registrations, users, appointment utilization, and check-ins at a level sufficient for operational review.
+The service must maintain business reporting outputs for registrations, users, appointment utilization, and check-ins at a level sufficient for operational review.
 
 ## Customer-facing business requirements
 
 ### BR-018 Public entry
 
-The customer experience shall provide a clear entry point to create an account, sign in, and access supporting information, while respecting operational controls.
+The customer experience must provide a clear entry point to create an account, sign in, and access supporting information, while respecting operational controls.
 
 ### BR-019 Customer-owned account model
 
-The business shall use a customer account as the unit of return access for self-service registration management.
+The business must use a customer account as the unit of return access for self-service registration management.
 
 ### BR-020 Registration draft model
 
-Before final submission, a customer shall be able to assemble and revise the main parts of a registration, including children and appointment selection.
+Before final submission, a customer must be able to assemble and revise the main parts of a registration, including children and appointment selection.
 
 ### BR-021 Referral capture
 
-The business shall capture how a customer heard about Santa's Workshop so referral and outreach effectiveness can be analyzed.
+The business must capture how a customer heard about Santa's Workshop so referral and outreach effectiveness can be analyzed.
 
 ### BR-022 Child registration management
 
-The business shall let a guardian add, edit, and remove children from the household registration before final submission.
+The business must let a guardian add, edit, and remove children from the household registration before final submission.
 
 ### BR-023 Appointment selection
 
-The business shall let the customer choose from enabled appointment slots associated with the active program year.
+The business must let the customer choose from enabled appointment slots associated with the active program year.
 
 ### BR-024 Submission readiness rule
 
-A registration shall not be treated as complete until the guardian has at least one eligible child on the registration and has selected an appointment slot.
+A registration must not be treated as complete until the guardian has at least one eligible child on the registration and has selected an appointment slot.
 
 ### BR-025 Confirmation artifact
 
-After successful submission, the customer shall receive or be shown a confirmation artifact that can be used later in support and check-in workflows.
+After successful submission, the customer must receive or be shown a confirmation artifact that can be used later in support and check-in workflows.
 
 ### BR-026 Limited post-submission change support
 
-After submission, the business shall support limited changes to the reservation, including appointment changes and cancellation, when policy and operating controls allow it.
+After submission, the business must support limited changes to the reservation, including appointment changes and cancellation, when policy and operating controls allow it.
 
 ### BR-027 Checked-in lockout
 
-Once a family has been checked in, the self-service registration flow shall no longer function as an active registration-management path for that season.
+Once a family has been checked in, the self-service registration flow must no longer function as an active registration-management path for that season.
 
 ### BR-028 Profile maintenance
 
-Customers shall be able to update key profile fields needed to keep their registration reachable and searchable.
+Customers must be able to update key profile fields needed to keep their registration reachable and searchable.
 
 ### BR-029 Password recovery and account return
 
-Customers shall be able to recover account access without staff intervention.
+Customers must be able to recover account access without staff intervention.
 
 ## Staff and admin business requirements
 
 ### BR-030 Authorized staff entry
 
-The staff experience shall only be available to authenticated, authorized staff or volunteers.
+The staff experience must only be available to authenticated, authorized staff or volunteers.
 
 ### BR-031 Fast customer lookup
 
-The staff experience shall allow operators to locate customers by multiple identifiers needed for support and check-in.
+The staff experience must allow operators to locate customers by multiple identifiers needed for support and check-in.
 
 ### BR-032 Review-before-check-in
 
-Before completing check-in, staff shall be able to review the relevant customer and child information and determine whether corrections are needed.
+Before completing check-in, staff must be able to review the relevant customer and child information and determine whether corrections are needed.
 
 ### BR-033 Event-day correction path
 
-The staff experience shall support limited edits during the check-in flow when staff identify issues that must be corrected before admission.
+The staff experience must support limited edits during the check-in flow when staff identify issues that must be corrected before admission.
 
 ### BR-034 Duplicate check-in handling
 
-The service shall detect and surface attempted duplicate check-ins so staff can resolve them without corrupting event records.
+The service must detect and surface attempted duplicate check-ins so staff can resolve them without corrupting event records.
 
 ### BR-035 Staff-created preregistration
 
-Authorized staff shall be able to create a completed preregistration on behalf of a customer, including children, appointment assignment, and downstream confirmation delivery.
+Authorized staff must be able to create a completed preregistration on behalf of a customer, including children, appointment assignment, and downstream confirmation delivery.
 
 ### BR-036 Walk-in processing
 
-Authorized staff shall be able to register and check in on-site customers through a workflow that does not depend on the customer already having a self-service account.
+Authorized staff must be able to register and check in on-site customers through a workflow that does not depend on the customer already having a self-service account.
 
 ### BR-037 Communication support tooling
 
-Authorized staff shall be able to trigger a resend of registration communication when needed to support customers.
+Authorized staff must be able to trigger a resend of registration communication when needed to support customers.
 
 ### BR-038 Operational dashboards
 
-Authorized reporting roles, including managers and selected staff, shall be able to view seasonal statistics that summarize registrations, check-ins, appointment usage, referral patterns, and geographic patterns.
+Authorized reporting roles, including managers and selected staff, must be able to view seasonal statistics that summarize registrations, check-ins, appointment usage, referral patterns, and geographic patterns.
 
 ### BR-039 Feature-gated staff operations
 
-The business shall be able to enable or disable specific staff functions such as check-in, on-site registration, preregistration, and cancellation without a rebuild.
+The business must be able to enable or disable specific staff functions such as check-in, on-site registration, preregistration, and cancellation without a rebuild.
 
 ## Business constraints
 
@@ -276,15 +276,15 @@ The customer and staff experiences are two operational views of the same registr
 
 ### BR-043 Cancellation policy
 
-Customers shall be able to cancel their own registrations through self-service, and authorized staff shall also be able to cancel registrations on behalf of customers.
+Customers must be able to cancel their own registrations through self-service, and authorized staff must also be able to cancel registrations on behalf of customers.
 
 ### BR-044 Cancellation communication and invalidation
 
-When a registration is canceled, the service shall send cancellation communication, invalidate any previously issued confirmation artifact, and ensure that a replacement confirmation identifier is generated so the prior artifact can no longer be reused.
+When a registration is canceled, the service must send cancellation communication, invalidate any previously issued confirmation artifact, and ensure that a replacement confirmation identifier is generated so the prior artifact can no longer be reused.
 
 ### BR-045 Cancellation tracking
 
-Every cancellation shall be recorded in a dedicated cancellation log for operational review and abuse monitoring.
+Every cancellation must be recorded in a dedicated cancellation log for operational review and abuse monitoring.
 
 ### BR-046 Appointment exhaustion and overbooking policy
 
@@ -292,28 +292,28 @@ The business does not require strict hard-stop overbooking prevention or waitlis
 
 ### BR-047 Referral policy
 
-Referral information shall be collected for reporting purposes only.
+Referral information must be collected for reporting purposes only.
 
 ### BR-048 Eligibility policy
 
-Child eligibility shall be determined by age only. No additional household-size or maximum-child-count business rule is required at this time.
+Child eligibility must be determined by age only. No additional household-size or maximum-child-count business rule is required at this time.
 
 ### BR-049 End-of-year data lifecycle
 
-At the end of each program year, after the event, seasonal customer, registration, and check-in data shall be backed up and then deleted, with seasonal statistics and reporting outputs retained.
+At the end of each program year, after the event, seasonal customer, registration, and check-in data must be backed up and then deleted, with seasonal statistics and reporting outputs retained.
 
 ### BR-050 Confirmation failure handling
 
-Confirmation delivery failures caused by transient conditions shall be retried. Failures and retries shall be recorded, and customers shall be informed within the service when confirmation delivery fails.
+Confirmation delivery failures caused by transient conditions must be retried. Failures and retries must be recorded, and customers must be informed within the service when confirmation delivery fails.
 
 ### BR-051 Staff accountability
 
-All staff actions that modify data shall be tracked for operational review and compliance.
+All staff actions that modify data must be tracked for operational review and compliance.
 
 ### BR-052 Accessibility standard
 
-The rebuilt customer and staff experiences shall meet WCAG AA accessibility standards.
+The rebuilt customer and staff experiences must meet WCAG AA accessibility standards.
 
 ### BR-053 Self-service with abuse protection
 
-The service shall maximize self-service wherever practical while enforcing protections against abuse, including abuse patterns such as repeated cancellation and re-registration, duplicate accounts, and false child registrations.
+The service must maximize self-service wherever practical while enforcing protections against abuse, including abuse patterns such as repeated cancellation and re-registration, duplicate accounts, and false child registrations.

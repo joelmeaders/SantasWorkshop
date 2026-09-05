@@ -6,7 +6,7 @@ import {
 	ReactiveFormsModule,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/admin';
 import { config } from '../../../config';
 
 import {

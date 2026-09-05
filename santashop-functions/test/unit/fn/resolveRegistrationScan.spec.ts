@@ -21,7 +21,7 @@ describe('resolveRegistrationScan callable', () => {
 		await expect(
 			handler({
 				data: { code: ' abcd1234 ', inputMethod: 'camera' },
-				auth: { uid: 'staff-1', token: { admin: true } },
+				auth: { uid: 'staff-1', token: { roles: ['admin', 'checkin'] } },
 			} as never),
 		).resolves.toEqual({ disposition: 'eligible' });
 		expect(resolveRegistrationCodeMock).toHaveBeenCalledWith(
@@ -49,7 +49,7 @@ describe('resolveRegistrationScan callable', () => {
 			'the code is malformed',
 			{
 				data: { code: 'too-short', inputMethod: 'camera' },
-				auth: { uid: 'staff-1', token: { admin: true } },
+				auth: { uid: 'staff-1', token: { roles: ['admin', 'checkin'] } },
 			},
 			'invalid-argument',
 		],
@@ -57,7 +57,7 @@ describe('resolveRegistrationScan callable', () => {
 			'the input method is unsupported',
 			{
 				data: { code: 'ABCD1234', inputMethod: 'barcode' },
-				auth: { uid: 'staff-1', token: { admin: true } },
+				auth: { uid: 'staff-1', token: { roles: ['admin', 'checkin'] } },
 			},
 			'invalid-argument',
 		],

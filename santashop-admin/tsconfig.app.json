@@ -9,7 +9,9 @@
 		"inlineSources": true,
 		"paths": {
 			"@santashop/models": ["dist/@santashop/models"],
-			"@santashop/core": ["dist/@santashop/core"]
+			"@santashop/core": ["dist/@santashop/core"],
+			"@santashop/core/admin": ["santashop-core/src/admin.ts"],
+			"@santashop/core/admin/firestore": ["santashop-core/src/admin-firestore.ts"]
 		}
 	},
 	"files": ["src/main.ts"],

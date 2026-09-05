@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChildValidationError, Child } from '@santashop/models';
-import { deepCopy } from '@santashop/core';
+import { deepCopy } from '@santashop/core/admin/firestore';
 
 export const MAX_BIRTHDATE = (): Date =>
 	new Date(new Date().getFullYear(), 11, 31);

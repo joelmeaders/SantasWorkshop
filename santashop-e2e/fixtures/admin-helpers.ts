@@ -8,7 +8,7 @@ export const defaultAdminAccount = (
 	uid: 'admin-e2e-user',
 	emailAddress: 'admin-e2e@test.com',
 	password: 'Test1234!',
-	admin: true,
+	roles: ['admin', 'checkin'],
 	...overrides,
 });
 

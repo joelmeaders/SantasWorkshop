@@ -103,13 +103,6 @@
 					}
 				},
 				{
-					"source": "/updateReferredBy",
-					"function": {
-						"functionId": "updateReferredBy",
-						"region": "us-central1"
-					}
-				},
-				{
 					"source": "/saveDraftChild",
 					"function": {
 						"functionId": "saveDraftChild",

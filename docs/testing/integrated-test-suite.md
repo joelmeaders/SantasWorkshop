@@ -8,7 +8,7 @@ feature so that a failure points to a business capability rather than an
 implementation layer.
 
 The executable baseline lives in `santashop-e2e/tests/`. Scenarios marked
-**Automated** must pass in the normal e2e command. Scenarios marked **Planned**
+**Automated** must pass in the normal e2e command. Scenarios marked **Not automated**
 remain part of the acceptance suite, but are not added as failing or skipped
 Playwright tests until the corresponding workflow and deterministic emulator
 setup exist.
@@ -24,10 +24,8 @@ setup exist.
 - Clear emulator data before each scenario and seed only the state required by
   that scenario.
 - Run sequentially because the tests share mutable emulator state.
-- Run the complete suite in Chromium using the Pixel 5 mobile device profile,
-  repeat public flows in Desktop Chrome, and run focused Desktop Chrome staff
-  coverage. Repeat critical compatibility journeys in Desktop Firefox, iPhone
-  WebKit, and iPad WebKit.
+- Run the suite in Chromium using the Pixel 5 mobile device profile. Other
+  browser projects are disabled in the checked-in configuration.
 - Exercise customer or staff behavior through the UI. Emulator-only callables
   may arrange prerequisite state and inspect durable results, but must not
   replace the interaction under test.
@@ -40,7 +38,7 @@ setup exist.
 | Status             | Meaning                                                                                      |
 | ------------------ | -------------------------------------------------------------------------------------------- |
 | Automated          | Implemented in Playwright and expected to pass                                               |
-| Planned            | Required scenario; blocked by missing workflow, stable test seam, or acceptance detail       |
+| Not automated            | Required scenario; blocked by missing workflow, stable test seam, or acceptance detail       |
 | Other layer        | Better verified by Functions integration, rules, security, performance, or operational tests |
 | Manual + automated | Requires automated checks plus human accessibility or operational review                     |
 
@@ -100,7 +98,7 @@ setup exist.
 | APPT-001 | With an eligible child present, list only enabled appointment slots for the active program year and show comparable capacity.          | BR-011, BR-023; FR-SH-014, FR-SH-017; FR-CUS-028–029; NFR-DAT-003 | Automated |
 | APPT-002 | Select one appointment; the selection persists on the overview and enables final review.                                               | BR-020, BR-023–024; FR-CUS-030–031; NFR-DAT-006                   | Automated |
 | APPT-003 | Change a draft appointment and confirm the warning; the registration retains the new selection.                                        | FR-SH-018; NFR-REL-003                                            | Automated |
-| APPT-004 | Two customers reserve near capacity; availability remains accurate as practical without requiring a waitlist or hard overbooking stop. | BR-046; FR-SH-027, FR-SH-042; NFR-PER-008                         | Planned   |
+| APPT-004 | Two customers reserve near capacity; availability remains accurate as practical without requiring a waitlist or hard overbooking stop. | BR-046; FR-SH-027, FR-SH-042; NFR-PER-008                         | Not automated   |
 
 ## Feature 6: Submission, confirmation, and post-submission changes
 
@@ -113,7 +111,7 @@ setup exist.
 | SUB-005 | Change a submitted appointment when the control is enabled; retain prior context and queue follow-up communication.                        | BR-026; FR-CUS-039, FR-CUS-041–042; NFR-REL-003                    | Automated   |
 | SUB-006 | After check-in, appointment change is rejected at both UI and service boundaries.                                                          | FR-CUS-040; FR-SH-031; NFR-DAT-002                                 | Automated   |
 | SUB-007 | Customer cancellation records a cancellation log, queues cancellation communication, and invalidates/replaces the confirmation identifier. | BR-043–045; FR-CUS-043, FR-CUS-052; FR-SH-038–039; NFR-DAT-009–010 | Automated   |
-| SUB-008 | A transient communication failure records failure/retry state and produces an in-app customer notice without corrupting registration.      | BR-050; FR-SH-022, FR-SH-035–037; NFR-REL-010–013                  | Planned     |
+| SUB-008 | A transient communication failure records failure/retry state and produces an in-app customer notice without corrupting registration.      | BR-050; FR-SH-022, FR-SH-035–037; NFR-REL-010–013                  | Not automated     |
 
 ## Feature 7: Profile and help
 
@@ -174,8 +172,8 @@ setup exist.
 | Test ID    | Scenario and expected result                                                                               | Requirements                      | Status  |
 | ---------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
 | ADMIN-PRE-001 | Staff preregisters a customer with identity, child, referral, and appointment data.                      | BR-003, BR-035; FR-OPS-026–027    | Automated |
-| INTAKE-002 | Staff preregistration detects a duplicate account and offers a safe recovery path.                         | FR-OPS-028; NFR-SEC-011           | Planned |
-| INTAKE-003 | Completed preregistration creates confirmation and support artifacts.                                      | FR-OPS-029                        | Planned |
+| INTAKE-002 | Staff preregistration detects a duplicate account and offers a safe recovery path.                         | FR-OPS-028; NFR-SEC-011           | Not automated |
+| INTAKE-003 | Completed preregistration creates confirmation and support artifacts.                                      | FR-OPS-029                        | Not automated |
 | ADMIN-REG-001 | Staff registers and immediately checks in a walk-in without requiring a customer self-service account.   | BR-036; FR-OPS-030–033            | Automated |
 | EMAIL-001  | Authorized staff can open the email-template manager and begin a new SES-ready draft.                        | FR-SH-022–023; FR-OPS-034–035    | Automated |
 | USER-001   | An owner can create a check-in staff account through user management.                                         | FR-OPS-041; NFR-SEC-012            | Automated |
@@ -206,7 +204,7 @@ setup exist.
 | QUAL-002 | Perform keyboard, screen-reader, zoom/reflow, contrast, error-identification, and focus-order review against WCAG AA.                  | BR-052; NFR-UX-003–004                                     | Manual + automated |
 | QUAL-003 | Verify public configuration is readable but immutable and contains no protected secrets.                                               | NFR-SEC-007; NFR-PRV-004–007; NFR-OPS-001–003, NFR-OPS-008 | Other layer        |
 | QUAL-004 | Verify local/test/prod configuration resolves to separate projects and never mixes customer data or credentials.                       | NFR-PRV-006; NFR-AVL-004–005; NFR-OPS-006–007              | Other layer        |
-| QUAL-005 | Measure initial route payload and interactive readiness against an agreed budget once numeric targets are approved.                    | NFR-PER-002                                                | Planned            |
+| QUAL-005 | Measure initial route payload and interactive readiness against an agreed budget once numeric targets are approved.                    | NFR-PER-002                                                | Not automated            |
 | VIEWPORT-ADMIN-001 | Keep the core staff navigation visible and free of horizontal overflow at the desktop viewport.                         | NFR-UX-001, NFR-UX-004                                     | Automated          |
 | BROWSER-PUB-001 | Keep public account entry and responsive form input usable across Chromium, Firefox, phone WebKit, and tablet WebKit.          | NFR-UX-001, NFR-UX-004                                     | Automated          |
 | BROWSER-ADMIN-001 | Keep staff sign-in, navigation, and manual scan entry usable across Chromium, Firefox, phone WebKit, and tablet WebKit.      | NFR-UX-001, NFR-UX-004                                     | Automated          |

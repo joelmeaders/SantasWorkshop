@@ -58,7 +58,6 @@ const grantOwner = async (uid) => {
 	await auth.setCustomUserClaims(uid, {
 		...currentClaims,
 		owner: true,
-		admin: true,
 		roles: Array.from(roles),
 	});
 	const now = new Date();

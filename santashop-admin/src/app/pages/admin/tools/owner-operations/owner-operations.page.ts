@@ -11,7 +11,7 @@ import {
 	ReactiveFormsModule,
 	Validators,
 } from '@angular/forms';
-import { AuthService, PROGRAM_YEAR } from '@santashop/core';
+import { AuthService, PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import {
 	OwnerOperation,
 	OwnerOperationType,
@@ -71,6 +71,8 @@ export class OwnerOperationsPage {
 	private readonly programYear = inject(PROGRAM_YEAR);
 	private readonly destroyRef = inject(DestroyRef);
 	private pollTimer?: ReturnType<typeof setTimeout>;
+	private pollVersion = 0;
+	public readonly operationId = signal<string | undefined>(undefined);
 
 	public readonly options: readonly OperationOption[] = [
 		{
@@ -129,9 +131,9 @@ export class OwnerOperationsPage {
 		confirmationPhrase: this.formBuilder.control('', Validators.required),
 	});
 
-	public readonly preview = signal<
-		PreviewOwnerOperationResponse | undefined
-	>(undefined);
+	public readonly preview = signal<PreviewOwnerOperationResponse | undefined>(
+		undefined,
+	);
 	public readonly operation = signal<OwnerOperation | undefined>(undefined);
 	public readonly busy = signal(false);
 	public readonly statusMessage = signal('');
@@ -139,7 +141,7 @@ export class OwnerOperationsPage {
 
 	constructor() {
 		this.destroyRef.onDestroy(() => {
-			if (this.pollTimer) clearTimeout(this.pollTimer);
+			this.stopPolling();
 		});
 	}
 
@@ -152,6 +154,9 @@ export class OwnerOperationsPage {
 	}
 
 	public onOperationChange(): void {
+		this.stopPolling();
+		this.operationId.set(undefined);
+		this.busy.set(false);
 		this.preview.set(undefined);
 		this.operation.set(undefined);
 		this.errorMessage.set('');
@@ -167,6 +172,9 @@ export class OwnerOperationsPage {
 	}
 
 	public async createPreview(): Promise<void> {
+		this.stopPolling();
+		this.operationId.set(undefined);
+		this.operation.set(undefined);
 		this.busy.set(true);
 		this.errorMessage.set('');
 		this.statusMessage.set('Calculating the operation preview…');
@@ -191,6 +199,7 @@ export class OwnerOperationsPage {
 	}
 
 	public async start(): Promise<void> {
+		if (this.busy() || this.operationId()) return;
 		const preview = this.preview();
 		if (!preview || this.form.invalid) {
 			this.form.markAllAsTouched();
@@ -205,12 +214,12 @@ export class OwnerOperationsPage {
 			);
 			const started = await this.service.start({
 				previewId: preview.previewId,
-				confirmationPhrase:
-					this.form.controls.confirmationPhrase.value,
+				confirmationPhrase: this.form.controls.confirmationPhrase.value,
 			});
 			this.form.controls.password.setValue('');
+			this.operationId.set(started.operationId);
 			this.statusMessage.set('Operation queued.');
-			await this.poll(started.operationId);
+			await this.refreshStatus();
 		} catch (error) {
 			this.showError(error);
 			this.busy.set(false);
@@ -228,8 +237,34 @@ export class OwnerOperationsPage {
 		}
 	}
 
-	private async poll(operationId: string): Promise<void> {
+	public async refreshStatus(): Promise<void> {
+		const operationId = this.operationId();
+		if (!operationId) return;
+		this.stopPolling();
+		this.busy.set(true);
+		this.errorMessage.set('');
+		const version = this.pollVersion;
+		try {
+			await this.poll(operationId, version);
+		} catch (error) {
+			if (version !== this.pollVersion) return;
+			this.showError(error);
+			this.busy.set(false);
+		}
+	}
+
+	private stopPolling(): void {
+		this.pollVersion++;
+		if (this.pollTimer) clearTimeout(this.pollTimer);
+		this.pollTimer = undefined;
+	}
+
+	private async poll(
+		operationId: string,
+		version = this.pollVersion,
+	): Promise<void> {
 		const current = await this.service.get(operationId);
+		if (version !== this.pollVersion) return;
 		this.operation.set(current);
 		this.statusMessage.set(
 			`${current.operation}: ${current.stage ?? current.status}`,
@@ -244,7 +279,8 @@ export class OwnerOperationsPage {
 			return;
 		}
 		this.pollTimer = setTimeout(() => {
-			void this.poll(operationId).catch((error) => {
+			void this.poll(operationId, version).catch((error) => {
+				if (version !== this.pollVersion) return;
 				this.showError(error);
 				this.busy.set(false);
 			});

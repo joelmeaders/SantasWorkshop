@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignInPage } from './sign-in.page';
 import { provideRouter, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular/standalone';
-import { AuthService } from '@santashop/core';
+import { AuthService } from '@santashop/core/admin';
 
 describe('SignInPage', () => {
 	let component: SignInPage;

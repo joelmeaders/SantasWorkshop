@@ -6,11 +6,11 @@ project workflow has passed.
 
 ## 1. Configure and validate the new year
 
-Set `SANTASHOP_PROGRAM_YEAR` (or the matching `TEST_` and `PROD_` values) in the
+Set `LOCAL_SANTASHOP_PROGRAM_YEAR`, `TEST_SANTASHOP_PROGRAM_YEAR`, and
+`PROD_SANTASHOP_PROGRAM_YEAR` in the
 root environment configuration. Update shop days and the time offset when the
-calendar requires it. The app/admin configuration and Functions runtime now
-read the same year source; schedule dates are generated in the owner UI instead
-of being hardcoded in a Pub/Sub handler.
+calendar requires it. The app/admin configuration and Functions runtime
+read the same year source; schedule dates are generated in the owner UI.
 
 Run the configuration generators, dependency updates, scoped tests, and
 production builds before deployment:

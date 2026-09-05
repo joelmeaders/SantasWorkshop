@@ -11,9 +11,12 @@
 </admin-header>
 
 <ion-content>
+	<ion-button class="ion-margin" fill="outline" (click)="refresh()"
+		>Refresh report</ion-button
+	>
 	<ion-grid>
-		@let checkInState = checkInState$ | async;
-		@if (!checkInState || checkInState.status === 'loading') {
+		@let checkInState = checkInState$ | async; @if (!checkInState ||
+		checkInState.status === 'loading') {
 		<ion-row data-checkin-stats-loading role="status" aria-live="polite">
 			<ion-col class="ion-text-center ion-padding">
 				<ion-spinner name="crescent" aria-hidden="true" />
@@ -23,12 +26,10 @@
 		} @else if (checkInState.status === 'empty') {
 		<ion-row>
 			<ion-col class="ion-text-center">
-				<ion-title>No check-ins have been recorded for this year.</ion-title>
-				<p>New successful check-ins appear here immediately.</p>
-				<ion-button fill="outline" (click)="refresh()">
-					<ion-icon name="refresh-sharp" slot="start" aria-hidden="true" />
-					Refresh
-				</ion-button>
+				<ion-title
+					>No check-ins have been recorded for this year.</ion-title
+				>
+				<p>Refresh to load the latest check-in statistics.</p>
 			</ion-col>
 		</ion-row>
 		} @else if (checkInState.status === 'error') {
@@ -36,7 +37,11 @@
 			<ion-col class="ion-text-center">
 				<ion-title>Check-in statistics could not be loaded.</ion-title>
 				<ion-button fill="outline" (click)="refresh()">
-					<ion-icon name="refresh-sharp" slot="start" aria-hidden="true" />
+					<ion-icon
+						name="refresh-sharp"
+						slot="start"
+						aria-hidden="true"
+					/>
 					Try Again
 				</ion-button>
 			</ion-col>
@@ -95,7 +100,11 @@
 					</h2>
 					<div slot="end">
 						<ion-button (click)="switchView()">
-							<ion-icon name="refresh-sharp" slot="start" aria-hidden="true" />
+							<ion-icon
+								name="refresh-sharp"
+								slot="start"
+								aria-hidden="true"
+							/>
 							{{ viewButtonText$ | async }}
 						</ion-button>
 					</div>

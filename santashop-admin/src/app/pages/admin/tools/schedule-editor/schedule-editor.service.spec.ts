@@ -7,7 +7,7 @@ import {
 	vi,
 } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core';
+import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
 import { of, firstValueFrom } from 'rxjs';
 import {

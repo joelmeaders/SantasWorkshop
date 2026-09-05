@@ -47,7 +47,7 @@ describe('callableGetEmailTemplateRevision handler', () => {
 		const result = await callableGetEmailTemplateRevision(
 			createCallableRequest(
 				{ key: 'reminder-2026', revisionId: 'rev-1' },
-				{ admin: true },
+				{ roles: ['admin', 'checkin'] },
 			),
 		);
 
@@ -63,7 +63,7 @@ describe('callableGetEmailTemplateRevision handler', () => {
 			callableGetEmailTemplateRevision(
 				createCallableRequest(
 					{ key: 'reminder-2026', revisionId: '' },
-					{ admin: true },
+					{ roles: ['admin', 'checkin'] },
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });

@@ -7,7 +7,7 @@ import {
 	vi,
 } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { FunctionsWrapper } from '@santashop/core';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import { OwnerOperationsService } from './owner-operations.service';
 
 describe('OwnerOperationsService', () => {

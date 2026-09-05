@@ -205,7 +205,7 @@ test.describe('check-in and staff registration operations', () => {
 		const checkInAccount = defaultAdminAccount({
 			uid: 'checkin-only-e2e',
 			emailAddress: 'checkin-only-e2e@test.com',
-			admin: false,
+
 			roles: ['checkin'],
 		});
 		await seedAdminUser(checkInAccount);

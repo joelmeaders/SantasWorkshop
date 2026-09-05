@@ -8,6 +8,12 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 
 - Keep repository code, scripts, and configuration in TypeScript/JavaScript and Node.js tooling. Do not introduce a second language runtime or package manager.
 
+## Annual reset and appointment capacity
+
+- Each year, all customer data is cleared and the customer workflow starts over. Statistics and settings are retained. This describes the annual process; it does not authorize an agent to delete data.
+- Overbooking is acceptable. Reducing customer friction takes priority over enforcing a hard appointment-capacity limit. Do not treat overbooking alone as a defect.
+- A scheduled process updates date/time slot availability. During high demand, its schedule is manually changed to run more often; this is not automatic demand-based scaling.
+
 ## Monorepo map
 
 | Path | Role | Notes |

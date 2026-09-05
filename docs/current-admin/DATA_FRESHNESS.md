@@ -21,7 +21,8 @@ errors propagate to the calling screen. Reports and staff data share each
 request across their UI consumers. Report, staff, risk, and search errors can be
 retried through their refresh controls. No periodic polling was added to these
 screens. Existing polling for an in-progress owner operation remains necessary
-to show job completion.
+to show job completion. If a status request fails, Refresh operation status
+resumes reads for the same job ID without starting another operation.
 
 The older shared `FireRepoLite` class is a full Firestore snapshot wrapper,
 despite its name. Admin usage is restricted to operational flags and the three
@@ -30,8 +31,12 @@ listener when the last consumer unsubscribes.
 
 Refreshing a report fetches the latest stored aggregates; it does not run the
 backend aggregation job. Live slot updates improve displayed freshness but do
-not provide concurrency guarantees. Capacity and duplicate check-in decisions
-must remain authoritative on the server.
+not provide concurrency guarantees. Duplicate check-ins are rejected on the
+server. Appointment capacity is a soft limit: `changeRegistrationDateTime`
+deliberately leaves slot counters for scheduled reconciliation. Two staff
+members can move different registrations into the same last available slot.
+The concurrency E2E test records this existing behavior; it does not establish
+hard-capacity enforcement. A hard limit requires a separate backend change.
 
 Audit correction: `AppStateService.allowChangeRegistration$` exists, but the
 admin UI does not consume it. The earlier assessment overstated this control's
@@ -68,3 +73,28 @@ Full Firestore remains deferred behind authenticated routes because the two
 live feature groups still require it. The initial-bundle check also rejects
 Firebase Storage and enforces the existing size limit. Using Lite for other
 reads removes their listeners; it does not eliminate the retained full SDK.
+
+## Expanded regression coverage
+
+Validated locally on 2026-09-05: all 72 admin E2E tests passed on mobile
+Chromium (4.9 minutes), including 13 new scenarios. All 255 admin unit tests
+passed (52 files, 91.83% line coverage). Admin lint, E2E TypeScript/ESLint,
+and the production bundle guard passed. Initial raw output remains 944.59 kB;
+the static JavaScript graph is 1,272,967 bytes. No deployment was performed.
+
+The 2026-09-05 additions cover:
+
+- Report and staff list reloads after in-app back navigation, without a document reload.
+- Scan-risk back navigation and refresh with an expanded results list.
+- Report year selection, refresh of that year, and clearing missing-year data.
+- Failed registration/check-in report reads, staff queries, and disconnected search requests, followed by a successful retry.
+- Two signed-in staff contexts checking in the same registration. Exactly one succeeds; the other receives a blocked result backed by persisted scan-audit evidence.
+- A successful check-in whose response is lost. Retrying cannot issue a second confirmation.
+- Concurrent appointment changes with the existing soft-capacity behavior and persisted registration/slot evidence.
+- Owner status-read failure and recovery for the same job, with only one start request.
+- Owner access removed after preview, followed by real UI reauthentication and a denied start request.
+
+The suite still uses one mobile Chromium project and one worker. Concurrency
+tests use two isolated mobile contexts within one test. Failure traces are
+retained without enabling retries. Camera decoding is excluded by request.
+Emulator checks do not prove production behavior or external email delivery.

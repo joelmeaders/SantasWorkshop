@@ -51,8 +51,8 @@ export default defineConfig({
 		/* Keep browser execution headless for CI-safe, non-interactive runs. */
 		headless: true,
 
-		/* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-		trace: 'on-first-retry',
+		/* Keep failure traces even though emulator tests do not retry. */
+		trace: 'retain-on-failure',
 
 		/* Screenshot on failure */
 		screenshot: 'only-on-failure',

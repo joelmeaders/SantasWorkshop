@@ -20,6 +20,10 @@ Out of scope for deep detail:
 
 The admin app is a standalone Ionic/Angular client for authorized staff and volunteers.
 
+Read and refresh behavior is specified in [Admin data freshness](./DATA_FRESHNESS.md).
+Only operational feature flags and schedule/appointment selection use snapshot
+listeners; reports, staff lists, risk views, and lookups use Firestore Lite.
+
 High-level runtime dependencies:
 
 - Firebase Auth for staff sign-in

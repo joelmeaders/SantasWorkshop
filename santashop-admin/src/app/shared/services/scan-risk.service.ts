@@ -1,22 +1,25 @@
+import { AdminReadRepository } from './admin-read-repository.service';
 import { Injectable, inject } from '@angular/core';
-import { FireRepoLite } from '@santashop/core/admin/firestore';
 import {
 	COLLECTION_SCHEMA,
 	type CheckIn,
 	type RegistrationScanAttempt,
 	type RegistrationScanRiskSummary,
 } from '@santashop/models';
-import { limit, orderBy, QueryConstraint, where } from 'firebase/firestore';
+import {
+	limit,
+	orderBy,
+	QueryConstraint,
+	where,
+} from 'firebase/firestore/lite';
 import { map, Observable } from 'rxjs';
 
 const dateFromValue = (value: unknown): Date =>
-	value instanceof Date
-		? value
-		: (value as { toDate: () => Date }).toDate();
+	value instanceof Date ? value : (value as { toDate: () => Date }).toDate();
 
 @Injectable({ providedIn: 'root' })
 export class ScanRiskService {
-	private readonly repo = inject(FireRepoLite);
+	private readonly repo = inject(AdminReadRepository);
 
 	public summaries(
 		programYear: number,
@@ -41,7 +44,11 @@ export class ScanRiskService {
 						firstRiskOn: dateFromValue(summary.firstRiskOn),
 						latestRiskOn: dateFromValue(summary.latestRiskOn),
 						...(summary.originalCheckInOn
-							? { originalCheckInOn: dateFromValue(summary.originalCheckInOn) }
+							? {
+									originalCheckInOn: dateFromValue(
+										summary.originalCheckInOn,
+									),
+								}
 							: {}),
 					})),
 				),
@@ -85,7 +92,9 @@ export class ScanRiskService {
 					checkIn?.checkInDateTime
 						? {
 								...checkIn,
-								checkInDateTime: dateFromValue(checkIn.checkInDateTime),
+								checkInDateTime: dateFromValue(
+									checkIn.checkInDateTime,
+								),
 							}
 						: checkIn,
 				),

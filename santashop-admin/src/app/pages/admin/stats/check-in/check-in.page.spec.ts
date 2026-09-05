@@ -1,3 +1,7 @@
+import {
+	AdminReadRepository,
+	type AdminReadCollection,
+} from '../../../../shared/services/admin-read-repository.service';
 import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CheckInPage } from './check-in.page';
@@ -8,14 +12,13 @@ import {
 	provideProgramYearMock,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
 import { CheckInAggregatedStats } from '@santashop/models';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 
 describe('CheckInPage', () => {
 	let component: CheckInPage;
 	let fixture: ComponentFixture<CheckInPage>;
-	let statsCollection: Mocked<IFireRepoCollection<CheckInAggregatedStats>>;
+	let statsCollection: Mocked<AdminReadCollection<CheckInAggregatedStats>>;
 
 	beforeEach(async () => {
 		TestBed.configureTestingModule({
@@ -24,16 +27,19 @@ describe('CheckInPage', () => {
 				provideFirestoreWrapperMock(),
 				provideActivatedRouteMock(),
 				provideProgramYearMock(2026),
-				{ provide: FireRepoLite, useFactory: createFireRepoLiteMock },
+				{
+					provide: AdminReadRepository,
+					useFactory: createFireRepoLiteMock,
+				},
 				provideRouter([]),
 			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(CheckInPage);
 		component = fixture.componentInstance;
-		statsCollection = TestBed.inject(FireRepoLite).collection(
+		statsCollection = TestBed.inject(AdminReadRepository).collection(
 			'stats',
-		) as Mocked<IFireRepoCollection<CheckInAggregatedStats>>;
+		) as Mocked<AdminReadCollection<CheckInAggregatedStats>>;
 		await fixture.whenStable();
 	});
 

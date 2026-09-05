@@ -72,7 +72,7 @@ export class ScheduleEditorService {
 				}),
 			),
 		),
-		shareReplay(1),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
 	public setYear(year: number): void {

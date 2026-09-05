@@ -20,8 +20,35 @@ import { DateTimeModalService } from './shared/components/date-time-modal/date-t
 import { LookupService } from './shared/services/lookup.service';
 import { ScanRiskService } from './shared/services/scan-risk.service';
 import { initializeAdminFirestore } from './initialize-admin-firestore';
+import {
+	ADMIN_FIRESTORE_LITE,
+	AdminReadRepository,
+} from './shared/services/admin-read-repository.service';
+import {
+	connectFirestoreEmulator as connectLiteEmulator,
+	getFirestore as getLiteFirestore,
+	type Firestore as LiteFirestore,
+} from 'firebase/firestore/lite';
+
+const connectedLiteInstances = new WeakSet<LiteFirestore>();
 
 export const ADMIN_FIRESTORE_ROUTE_PROVIDERS: Provider[] = [
+	{
+		provide: ADMIN_FIRESTORE_LITE,
+		useFactory: (): LiteFirestore => {
+			const firestore = getLiteFirestore(inject(FIREBASE_APP));
+			if (!config.production && !connectedLiteInstances.has(firestore)) {
+				connectLiteEmulator(
+					firestore,
+					'127.0.0.1',
+					config.emulatorPorts.firestore,
+				);
+				connectedLiteInstances.add(firestore);
+			}
+			return firestore;
+		},
+	},
+	AdminReadRepository,
 	{
 		provide: FIREBASE_FIRESTORE,
 		useFactory: () =>

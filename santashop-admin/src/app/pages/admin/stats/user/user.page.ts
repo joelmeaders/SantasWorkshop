@@ -1,10 +1,11 @@
+import { readState } from '../../../../shared/helpers/refreshable-read';
+import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { UserStats } from '@santashop/models';
 import {
-	FireRepoLite,
 	filterNil,
 	PROGRAM_YEAR,
 	SHOP_DAYS,
@@ -23,6 +24,7 @@ import {
 	withDefaultRegisterables,
 } from 'ng2-charts';
 import {
+	IonButton,
 	IonContent,
 	IonGrid,
 	IonRow,
@@ -48,6 +50,7 @@ Chart.register(ChartDataLabels);
 		BaseChartDirective,
 		AsyncPipe,
 		FormsModule,
+		IonButton,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -60,7 +63,7 @@ Chart.register(ChartDataLabels);
 	],
 })
 export class UserPage {
-	private readonly httpService = inject(FireRepoLite);
+	private readonly httpService = inject(AdminReadRepository);
 	private readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
@@ -69,12 +72,26 @@ export class UserPage {
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
-	private readonly userRecord$ = this.refreshYear.pipe(
+	public refresh(): void {
+		this.refreshYear.next();
+	}
+
+	public ionViewWillEnter(): void {
+		this.refresh();
+	}
+
+	public readonly state$ = this.refreshYear.pipe(
 		switchMap(() =>
 			getStatsCollection<UserStats>(this.httpService)
 				.read(`user-${this.year}`)
-				.pipe(filterNil(), shareReplay(1)),
+				.pipe(readState()),
 		),
+		shareReplay({ bufferSize: 1, refCount: true }),
+	);
+
+	private readonly userRecord$ = this.state$.pipe(
+		map((state) => state.data),
+		filterNil(),
 	);
 
 	public readonly referrers$ = this.userRecord$.pipe(

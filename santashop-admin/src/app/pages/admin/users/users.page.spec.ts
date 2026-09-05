@@ -31,6 +31,8 @@ describe('UsersPage', () => {
 
 	beforeEach(async () => {
 		staffService = {
+			refresh: vi.fn(),
+			state$: of({ status: 'ready', accounts: [] }),
 			createStaffUser: vi.fn().mockName('StaffService.createStaffUser'),
 			updateStaffUser: vi.fn().mockName('StaffService.updateStaffUser'),
 			deleteStaffUser: vi.fn().mockName('StaffService.deleteStaffUser'),
@@ -110,22 +112,26 @@ describe('UsersPage', () => {
 
 	it('updates a password when the reset-password alert is confirmed', async () => {
 		const alerts = TestBed.inject(AlertController);
-		(alerts.create as unknown as MockInstance).mockImplementation((config: unknown) => {
-			const saveButton = (
-				config as {
-					buttons: {
-						text: string;
-						handler?: (value: { password?: string }) => boolean;
-					}[];
-				}
-			).buttons.find((button) => button.text === 'Save');
-			saveButton?.handler?.({ password: 'Password123!' });
+		(alerts.create as unknown as MockInstance).mockImplementation(
+			(config: unknown) => {
+				const saveButton = (
+					config as {
+						buttons: {
+							text: string;
+							handler?: (value: { password?: string }) => boolean;
+						}[];
+					}
+				).buttons.find((button) => button.text === 'Save');
+				saveButton?.handler?.({ password: 'Password123!' });
 
-			return Promise.resolve({
-				present: vi.fn().mockResolvedValue(undefined),
-				onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
-			} as unknown as HTMLIonAlertElement);
-		});
+				return Promise.resolve({
+					present: vi.fn().mockResolvedValue(undefined),
+					onDidDismiss: vi
+						.fn()
+						.mockResolvedValue({ role: 'confirm' }),
+				} as unknown as HTMLIonAlertElement);
+			},
+		);
 
 		await component.resetPassword({
 			uid: 'staff-1',
@@ -161,5 +167,12 @@ describe('UsersPage', () => {
 		});
 
 		expect(staffService.deleteStaffUser).toHaveBeenCalledWith('staff-1');
+	});
+
+	it('refreshes on route entry and from the visible refresh button', async () => {
+		component.ionViewWillEnter();
+		fixture.nativeElement.querySelector('ion-content ion-button').click();
+		await fixture.whenStable();
+		expect(staffService.refresh).toHaveBeenCalledTimes(2);
 	});
 });

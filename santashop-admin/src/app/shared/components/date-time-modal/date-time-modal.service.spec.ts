@@ -32,18 +32,23 @@ describe('DateTimeModalService', () => {
 	it('queries enabled slots for the program year and returns them in chronological order', async () => {
 		const result = firstValueFrom(service.availableSlots$);
 		slots$.next([
-			createSlot('later', { toDate: () => new Date('2026-12-15T13:00:00') }),
+			createSlot('later', {
+				toDate: () => new Date('2026-12-15T13:00:00'),
+			}),
 			createSlot('earlier', new Date('2026-12-12T10:00:00')),
 		]);
 
 		await expect(result).resolves.toEqual([
-			expect.objectContaining({ id: 'earlier', dateTime: new Date('2026-12-12T10:00:00') }),
-			expect.objectContaining({ id: 'later', dateTime: new Date('2026-12-15T13:00:00') }),
+			expect.objectContaining({
+				id: 'earlier',
+				dateTime: new Date('2026-12-12T10:00:00'),
+			}),
+			expect.objectContaining({
+				id: 'later',
+				dateTime: new Date('2026-12-15T13:00:00'),
+			}),
 		]);
-		expect(readMany).toHaveBeenCalledWith(
-			expect.any(Array),
-			'id',
-		);
+		expect(readMany).toHaveBeenCalledWith(expect.any(Array), 'id');
 		expect(requireDefined(readMany.mock.calls[0])[0]).toHaveLength(2);
 	});
 
@@ -57,6 +62,18 @@ describe('DateTimeModalService', () => {
 		expect(readMany).toHaveBeenCalledTimes(1);
 
 		service.ngOnDestroy();
+	});
+	it('keeps delivering live changes and releases the listener after the last consumer leaves', () => {
+		const lists: DateTimeSlot[][] = [];
+		const subscription = service.availableSlots$.subscribe((slots) =>
+			lists.push(slots),
+		);
+		slots$.next([createSlot('one', new Date('2026-12-12'))]);
+		slots$.next([createSlot('two', new Date('2026-12-13'))]);
+		expect(lists.map((slots) => slots[0]?.id)).toEqual(['one', 'two']);
+		expect(slots$.observed).toBe(true);
+		subscription.unsubscribe();
+		expect(slots$.observed).toBe(false);
 	});
 });
 

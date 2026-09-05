@@ -32,7 +32,7 @@ export class DateTimeModalService implements OnDestroy {
 				.slice()
 				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf()),
 		),
-		shareReplay(1),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
 	public ngOnDestroy(): void {

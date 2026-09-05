@@ -17,12 +17,7 @@ import {
 	IonFabButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import {
-	add,
-	createOutline,
-	keyOutline,
-	trashOutline,
-} from 'ionicons/icons';
+import { add, createOutline, keyOutline, trashOutline } from 'ionicons/icons';
 import { StaffAccount, StaffRole, UpdateStaffUser } from '@santashop/models';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { StaffService } from './staff.service';
@@ -59,6 +54,15 @@ export class UsersPage {
 	private readonly authService = inject(AuthService);
 
 	public readonly staffAccounts$ = this.staffService.staffAccounts$;
+	public readonly staffState$ = this.staffService.state$;
+
+	public refresh(): void {
+		this.staffService.refresh();
+	}
+
+	public ionViewWillEnter(): void {
+		this.refresh();
+	}
 	public readonly isOwner$ = this.authService.isOwner$;
 
 	private readonly roleLabels: Readonly<Record<StaffRole, string>> = {

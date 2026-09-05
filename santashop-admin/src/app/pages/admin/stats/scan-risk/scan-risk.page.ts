@@ -11,7 +11,14 @@ import {
 	IonSpinner,
 } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
-import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs';
+import {
+	BehaviorSubject,
+	catchError,
+	map,
+	of,
+	startWith,
+	switchMap,
+} from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 
@@ -55,5 +62,13 @@ export class ScanRiskPage {
 
 	public loadMore(): void {
 		this.pageSize.next(this.pageSize.value + 20);
+	}
+
+	public refresh(): void {
+		this.pageSize.next(this.pageSize.value);
+	}
+
+	public ionViewWillEnter(): void {
+		this.refresh();
 	}
 }

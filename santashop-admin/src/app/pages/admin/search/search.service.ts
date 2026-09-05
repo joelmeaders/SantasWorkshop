@@ -1,11 +1,11 @@
+import { AdminReadRepository } from '../../../shared/services/admin-read-repository.service';
 import { Injectable, inject } from '@angular/core';
 import {
 	limit,
 	orderBy,
 	QueryConstraint,
 	where,
-} from 'firebase/firestore';
-import { FireRepoLite } from '@santashop/core/admin/firestore';
+} from 'firebase/firestore/lite';
 import {
 	COLLECTION_SCHEMA,
 	RegistrationSearchIndex,
@@ -29,7 +29,7 @@ export const buildZipCodeSearchValues = (
 	providedIn: 'root',
 })
 export class SearchService {
-	private readonly repoService = inject(FireRepoLite);
+	private readonly repoService = inject(AdminReadRepository);
 
 	private readonly searchResults = new BehaviorSubject<Observable<
 		RegistrationSearchIndex[]
@@ -71,7 +71,10 @@ export class SearchService {
 	private readonly queryCode = (code: string): QueryConstraint[] =>
 		[where('code', '==', code), limit(50)] as QueryConstraint[];
 
-	public searchByLastNameZip(lastName: string, zipCode: string | number): void {
+	public searchByLastNameZip(
+		lastName: string,
+		zipCode: string | number,
+	): void {
 		this.searchResults.next(
 			this.index.readMany(
 				this.queryLastNameZip(lastName.toLowerCase(), zipCode),

@@ -11,6 +11,16 @@
 </admin-header>
 
 <ion-content class="ion-padding-vertical">
+	<ion-button fill="outline" (click)="refresh()">Refresh report</ion-button>
+	@if (state$ | async; as state) { @if (state.status === 'loading') {
+	<p role="status">Loading report…</p>
+	} @else if (state.status === 'error') {
+	<p role="alert">
+		Report could not be loaded. Select Refresh report to try again.
+	</p>
+	} @else if (!state.data) {
+	<p>No user statistics for this year.</p>
+	} @else {
 	<ion-grid>
 		<ion-row>
 			@if (referrers$ | async; as referrers) {
@@ -48,6 +58,7 @@
 			}
 		</ion-row>
 	</ion-grid>
+	} }
 	<ng-template #noData>
 		<div class="ion-padding">
 			<ion-title> No data yet. Please check back later. </ion-title>

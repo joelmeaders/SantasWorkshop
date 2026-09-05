@@ -1,10 +1,7 @@
+import { AdminReadRepository } from '../../../shared/services/admin-read-repository.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import {
-	buildZipCodeSearchValues,
-	SearchService,
-} from './search.service';
-import { FireRepoLite } from '@santashop/core/admin/firestore';
+import { buildZipCodeSearchValues, SearchService } from './search.service';
 import { firstValueFrom, of } from 'rxjs';
 import { requireDefined } from '../../../../test-helpers';
 
@@ -14,18 +11,24 @@ describe('SearchService', () => {
 	const userReadMany = vi.fn();
 
 	beforeEach(() => {
-		indexReadMany.mockReset(); userReadMany.mockReset();
-		indexReadMany.mockReturnValue(of([{ emailAddress: 'family@example.test' }]));
+		indexReadMany.mockReset();
+		userReadMany.mockReset();
+		indexReadMany.mockReturnValue(
+			of([{ emailAddress: 'family@example.test' }]),
+		);
 		userReadMany.mockReturnValue(of([{ uid: 'customer-1' }]));
 		TestBed.configureTestingModule({
-			providers: [{
-				provide: FireRepoLite,
-				useValue: {
-					collection: vi.fn()
-						.mockReturnValueOnce({ readMany: indexReadMany })
-						.mockReturnValueOnce({ readMany: userReadMany }),
+			providers: [
+				{
+					provide: AdminReadRepository,
+					useValue: {
+						collection: vi
+							.fn()
+							.mockReturnValueOnce({ readMany: indexReadMany })
+							.mockReturnValueOnce({ readMany: userReadMany }),
+					},
 				},
-			}],
+			],
 		});
 		service = TestBed.inject(SearchService);
 	});
@@ -55,12 +58,17 @@ describe('SearchService', () => {
 	});
 
 	it('queries users directly for duplicate email detection and clears results on reset', async () => {
-		await expect(firstValueFrom(service.searchUsersByEmailAddress('FAMILY@EXAMPLE.TEST')))
-			.resolves.toEqual([{ uid: 'customer-1' }]);
+		await expect(
+			firstValueFrom(
+				service.searchUsersByEmailAddress('FAMILY@EXAMPLE.TEST'),
+			),
+		).resolves.toEqual([{ uid: 'customer-1' }]);
 		expect(userReadMany).toHaveBeenCalledOnce();
 
 		service.searchByEmail('family@example.test');
 		service.reset();
-		await expect(firstValueFrom(service.searchResults$)).resolves.toBeNull();
+		await expect(
+			firstValueFrom(service.searchResults$),
+		).resolves.toBeNull();
 	});
 });

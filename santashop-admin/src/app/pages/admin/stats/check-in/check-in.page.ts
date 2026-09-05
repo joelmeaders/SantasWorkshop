@@ -1,5 +1,6 @@
+import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore/lite';
 import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
@@ -12,7 +13,7 @@ import {
 	startWith,
 	switchMap,
 } from 'rxjs';
-import { FireRepoLite, PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core/admin/firestore';
+import { PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core/admin/firestore';
 import {
 	CheckInAggregatedStats,
 	CheckInDateTimeCount,
@@ -87,14 +88,11 @@ type ReadyCheckInStatsState = Extract<
 	],
 })
 export class CheckInPage {
-	private readonly httpService = inject(FireRepoLite);
+	private readonly httpService = inject(AdminReadRepository);
 	private readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
-	public readonly schedule = getShopSchedule(
-		this.programYear,
-		this.shopDays,
-	);
+	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
 
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
@@ -322,6 +320,10 @@ export class CheckInPage {
 		} else {
 			this.graphView.next('customerCount');
 		}
+	}
+
+	public ionViewWillEnter(): void {
+		this.refresh();
 	}
 
 	public refresh(): void {

@@ -1,7 +1,8 @@
+import { AdminReadRepository } from '../../../shared/services/admin-read-repository.service';
 import { TestBed } from '@angular/core/testing';
-import { FireRepoLite, FunctionsWrapper } from '@santashop/core/admin/firestore';
+import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import type { CreateStaffUser, StaffAccount } from '@santashop/models';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StaffService } from './staff.service';
 
@@ -30,7 +31,7 @@ describe('StaffService', () => {
 	});
 
 	beforeEach(() => {
-		readMany.mockClear();
+		readMany.mockReset().mockReturnValue(of(accounts));
 		collection.mockClear();
 		createStaff.mockClear();
 		updateStaff.mockClear();
@@ -38,13 +39,13 @@ describe('StaffService', () => {
 		callableWrapper.mockClear();
 		TestBed.configureTestingModule({
 			providers: [
-				{ provide: FireRepoLite, useValue: { collection } },
+				{ provide: AdminReadRepository, useValue: { collection } },
 				{ provide: FunctionsWrapper, useValue: { callableWrapper } },
 			],
 		});
 	});
 
-	it('streams staff accounts from the protected staff collection', async () => {
+	it('loads staff accounts from the protected staff collection', async () => {
 		const service = TestBed.inject(StaffService);
 
 		await expect(firstValueFrom(service.staffAccounts$)).resolves.toEqual(
@@ -80,5 +81,36 @@ describe('StaffService', () => {
 
 		await service.deleteStaffUser('staff-1');
 		expect(deleteStaff).toHaveBeenCalledWith({ uid: 'staff-1' });
+	});
+
+	it('reloads after successful mutations and explicit refresh, sharing requests across consumers', async () => {
+		const service = TestBed.inject(StaffService);
+		const subscription = service.staffAccounts$.subscribe();
+		const stateSubscription = service.state$.subscribe();
+		expect(readMany).toHaveBeenCalledTimes(1);
+		await service.createStaffUser({
+			displayName: 'New',
+			emailAddress: 'new@example.com',
+			password: 'Password123!',
+			roles: ['checkin'],
+		});
+		await service.updateStaffUser({ uid: 'staff-1', disabled: true });
+		await service.deleteStaffUser('staff-1');
+		service.refresh();
+		expect(readMany).toHaveBeenCalledTimes(5);
+		subscription.unsubscribe();
+		stateSubscription.unsubscribe();
+	});
+
+	it('recovers from a failed read when refreshed', () => {
+		readMany.mockReturnValueOnce(throwError(() => new Error('offline')));
+		const service = TestBed.inject(StaffService);
+		const states: string[] = [];
+		const subscription = service.state$.subscribe((state) =>
+			states.push(state.status),
+		);
+		service.refresh();
+		expect(states).toEqual(['loading', 'error', 'loading', 'ready']);
+		subscription.unsubscribe();
 	});
 });

@@ -2,7 +2,11 @@
 
 <ion-content class="ion-text-center">
 	<main class="limited-container">
-		@if ((searchInput$ | async) === null) {
+		@if ((searchInput$ | async) !== null) {
+		<ion-button fill="outline" (click)="refresh()"
+			>Refresh results</ion-button
+		>
+		} @if ((searchInput$ | async) === null) {
 		<h1>No search was entered</h1>
 		<ion-button
 			color="danger"
@@ -25,6 +29,11 @@
 				Cancel
 			</ion-button>
 		</div>
+		} @else if (results === undefined && (searchInput$ | async) !== null) {
+		<p role="alert">
+			Search results could not be loaded. Select Refresh results to try
+			again.
+		</p>
 		} @else { @if (results && results.length > 0) {
 		<span>
 			<ion-card-header>
@@ -63,8 +72,8 @@
 				>
 					<div class="result-label">
 						<h3>
-							{{ result.displayFirstName ?? result.firstName }}
-							{{ result.displayLastName ?? result.lastName }}
+							{{ result.displayFirstName ?? result.firstName }} {{
+							result.displayLastName ?? result.lastName }}
 						</h3>
 						<ion-label> {{ result.emailAddress }} </ion-label>
 						<ion-label> Zip: {{ result.zip }} </ion-label>
@@ -74,7 +83,11 @@
 			</ion-list>
 			<div class="center-100">
 				<ion-button color="danger" (click)="reset()" routerLink="..">
-					<ion-icon name="backspace-outline" slot="start" aria-hidden="true" />
+					<ion-icon
+						name="backspace-outline"
+						slot="start"
+						aria-hidden="true"
+					/>
 					<ion-label> Start Over </ion-label>
 				</ion-button>
 			</div>
@@ -83,7 +96,11 @@
 		<div class="center-100 searching">
 			<h2>No results found</h2>
 			<ion-button color="danger" (click)="reset()" routerLink="..">
-				<ion-icon name="backspace-outline" slot="start" aria-hidden="true" />
+				<ion-icon
+					name="backspace-outline"
+					slot="start"
+					aria-hidden="true"
+				/>
 				<ion-label> Start Over </ion-label>
 			</ion-button>
 		</div>

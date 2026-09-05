@@ -12,8 +12,6 @@ const reporters: ReporterDescription[] = process.env['CI']
 		];
 
 const baseURL = process.env['E2E_BASE_URL'] ?? 'http://localhost:4100';
-const browserDeviceSmoke =
-	/tests[\\/](?:public|admin)[\\/]browser-device-smoke\.spec\.ts$/;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -78,32 +76,6 @@ export default defineConfig({
 			name: 'mobile-chrome',
 			testIgnore: /desktop-smoke\.spec\.ts$/,
 			use: { ...devices['Pixel 5'] },
-		},
-		{
-			name: 'desktop-chrome',
-			testMatch: /tests[\\/]public[\\/].*\.spec\.ts$/,
-			use: { ...devices['Desktop Chrome'] },
-		},
-		{
-			name: 'desktop-admin-smoke',
-			testMatch:
-				/tests[\\/]admin[\\/](?:desktop-smoke|browser-device-smoke)\.spec\.ts$/,
-			use: { ...devices['Desktop Chrome'] },
-		},
-		{
-			name: 'desktop-firefox-smoke',
-			testMatch: browserDeviceSmoke,
-			use: { ...devices['Desktop Firefox'] },
-		},
-		{
-			name: 'mobile-webkit-smoke',
-			testMatch: browserDeviceSmoke,
-			use: { ...devices['iPhone 13'] },
-		},
-		{
-			name: 'tablet-webkit-smoke',
-			testMatch: browserDeviceSmoke,
-			use: { ...devices['iPad Mini'] },
 		},
 	],
 

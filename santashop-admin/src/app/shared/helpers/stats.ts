@@ -1,7 +1,9 @@
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
+import {
+	AdminReadRepository,
+	type AdminReadCollection,
+} from '../services/admin-read-repository.service';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 
 export const getStatsCollection = <T>(
-	httpService: FireRepoLite,
-): IFireRepoCollection<T> =>
-	httpService.collection<T>(COLLECTION_SCHEMA.stats);
+	httpService: AdminReadRepository,
+): AdminReadCollection<T> => httpService.collection<T>(COLLECTION_SCHEMA.stats);

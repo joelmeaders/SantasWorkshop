@@ -30,10 +30,16 @@ describe('ScanRiskPage', () => {
 	});
 
 	it('exposes a ready page of summaries and requests one extra record', async () => {
-		summaries.mockReturnValue(of(Array.from({ length: 21 }, (_, index) => ({
-			customerId: `customer-${index}`,
-			firstName: 'Santa', lastName: 'Family', latestRiskOn: new Date(),
-		}))));
+		summaries.mockReturnValue(
+			of(
+				Array.from({ length: 21 }, (_, index) => ({
+					customerId: `customer-${index}`,
+					firstName: 'Santa',
+					lastName: 'Family',
+					latestRiskOn: new Date(),
+				})),
+			),
+		);
 		const state = await firstValueFrom(component.state$.pipe(skip(1)));
 		expect(state).toMatchObject({ status: 'ready', hasMore: true });
 		if (state.status === 'ready') expect(state.summaries).toHaveLength(20);
@@ -48,6 +54,25 @@ describe('ScanRiskPage', () => {
 
 	it('exposes an error state when the risk query fails', async () => {
 		summaries.mockReturnValue(throwError(() => new Error('unavailable')));
-		await expect(firstValueFrom(component.state$.pipe(skip(1)))).resolves.toEqual({ status: 'error' });
+		await expect(
+			firstValueFrom(component.state$.pipe(skip(1))),
+		).resolves.toEqual({ status: 'error' });
+	});
+
+	it('refreshes the current page size and retries failures through the visible button', async () => {
+		component.loadMore();
+		summaries.mockReturnValue(throwError(() => new Error('offline')));
+		component.refresh();
+		await fixture.whenStable();
+		expect(fixture.nativeElement.textContent).toContain(
+			'Risk records could not be loaded',
+		);
+		summaries.mockClear().mockReturnValue(of([]));
+		fixture.nativeElement.querySelector('ion-content ion-button').click();
+		await fixture.whenStable();
+		expect(summaries).toHaveBeenCalledExactlyOnceWith(2026, 41);
+		expect(fixture.nativeElement.textContent).toContain(
+			'No suspicious scans this season',
+		);
 	});
 });

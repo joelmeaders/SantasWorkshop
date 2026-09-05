@@ -1,3 +1,7 @@
+import {
+	AdminReadRepository,
+	type AdminReadCollection,
+} from '../../../../shared/services/admin-read-repository.service';
 import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserPage } from './user.page';
@@ -9,14 +13,13 @@ import {
 	requireDefined,
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
 import { UserStats } from '@santashop/models';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 describe('UserPage', () => {
 	let component: UserPage;
 	let fixture: ComponentFixture<UserPage>;
-	let statsCollection: Mocked<IFireRepoCollection<UserStats>>;
+	let statsCollection: Mocked<AdminReadCollection<UserStats>>;
 
 	beforeEach(async () => {
 		TestBed.configureTestingModule({
@@ -25,16 +28,19 @@ describe('UserPage', () => {
 				provideFirestoreWrapperMock(),
 				provideActivatedRouteMock(),
 				provideProgramYearMock(2026),
-				{ provide: FireRepoLite, useFactory: createFireRepoLiteMock },
+				{
+					provide: AdminReadRepository,
+					useFactory: createFireRepoLiteMock,
+				},
 				provideRouter([]),
 			],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(UserPage);
 		component = fixture.componentInstance;
-		statsCollection = TestBed.inject(FireRepoLite).collection(
+		statsCollection = TestBed.inject(AdminReadRepository).collection(
 			'stats',
-		) as Mocked<IFireRepoCollection<UserStats>>;
+		) as Mocked<AdminReadCollection<UserStats>>;
 		await fixture.whenStable();
 	});
 
@@ -58,6 +64,8 @@ describe('UserPage', () => {
 			} as UserStats),
 		);
 
+		component.refresh();
+		await fixture.whenStable();
 		await expect(firstValueFrom(component.referrers$)).resolves.toEqual([
 			{ label: 'Friend', data: [8] },
 			{ label: 'Church', data: [5] },
@@ -76,12 +84,52 @@ describe('UserPage', () => {
 			chart: { data: { labels: ['80219'] } },
 			dataIndex: 0,
 		};
-		const referrerFormatter = requireDefined(component.barChartOptions).plugins?.datalabels
-			?.formatter as (value: number, context: typeof labelContext) => string;
-		const zipFormatter = requireDefined(component.zipCodeChartOptions).plugins?.datalabels
-			?.formatter as (value: number, context: typeof labelContext) => string;
+		const referrerFormatter = requireDefined(component.barChartOptions)
+			.plugins?.datalabels?.formatter as (
+			value: number,
+			context: typeof labelContext,
+		) => string;
+		const zipFormatter = requireDefined(component.zipCodeChartOptions)
+			.plugins?.datalabels?.formatter as (
+			value: number,
+			context: typeof labelContext,
+		) => string;
 
 		expect(referrerFormatter(4, labelContext)).toBe('4 - Friend');
 		expect(zipFormatter(4, labelContext)).toBe('4 Families - Friend');
+	});
+
+	it('refreshes a shared report once, clears missing data, and recovers after a failed request', async () => {
+		statsCollection.read.mockReturnValue(
+			throwError(() => new Error('offline')),
+		);
+		component.refresh();
+		await fixture.whenStable();
+		expect(fixture.nativeElement.textContent).toContain(
+			'Report could not be loaded',
+		);
+		statsCollection.read
+			.mockClear()
+			.mockReturnValue(
+				of({
+					referrerCount: [],
+					zipCodeCount: [],
+				} as unknown as UserStats),
+			);
+		fixture.nativeElement.querySelector('ion-content ion-button').click();
+		await fixture.whenStable();
+		expect(statsCollection.read).toHaveBeenCalledTimes(1);
+		expect(fixture.nativeElement.querySelectorAll('canvas')).toHaveLength(
+			2,
+		);
+		statsCollection.read.mockReturnValue(of(undefined));
+		component.refresh();
+		await fixture.whenStable();
+		expect(fixture.nativeElement.textContent).toContain(
+			'No user statistics for this year',
+		);
+		expect(fixture.nativeElement.querySelectorAll('canvas')).toHaveLength(
+			0,
+		);
 	});
 });

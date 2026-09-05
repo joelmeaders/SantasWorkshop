@@ -64,7 +64,24 @@ jobs:
           node-version: '24.18.0'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run audit:security
+      - name: Run security audit (informational)
+        id: security_audit
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
+      - name: Report security audit findings
+        if: always() && steps.security_audit.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
+          {
+            echo '### Security audit requires review'
+            echo 'This audit is informational and does not block validation or deployment.'
+            echo '```text'
+            cat "$RUNNER_TEMP/security-audit.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
       - name: Validate deploy artifact

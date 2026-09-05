@@ -153,8 +153,7 @@ export const signInViaUi = async (
 	);
 	await page.click('#signInButton');
 	await page.waitForURL('**/pre-registration/overview', { timeout: 30000 });
-	// The account has already chosen a referral, so the full overview (with the
-	// app header/menu) renders rather than the referral takeover.
+	// The overview header exposes the account menu after sign-in.
 	await expect(page.locator('#menuButton')).toBeVisible({ timeout: 15000 });
 };
 

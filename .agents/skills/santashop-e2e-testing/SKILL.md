@@ -30,7 +30,7 @@ pnpm install
 pnpm run e2e:setup
 ```
 
-Ensure the root `.env` supplies `SANTASHOP_PROGRAM_YEAR` (copy `.env.example` first when needed). The E2E preparation scripts generate the app/admin Firebase modules from `config.firebase.cjs`; do not hand-edit generated `src/config.ts` or `src/firebase.config.ts` files.
+Ensure the root `.env` supplies the complete `LOCAL_*` Functions inputs shown in `.env.example`, including `LOCAL_SANTASHOP_PROGRAM_YEAR`. The E2E preparation scripts generate the app/admin Firebase modules from `config.firebase.cjs`; do not hand-edit generated `src/config.ts` or `src/firebase.config.ts` files.
 
 ### Preferred commands
 
@@ -100,7 +100,7 @@ http://127.0.0.1:5001/demo-santashop/us-central1/<callable-name>
 
 The fixture can read `E2E_EMULATOR_PROJECT`, and the readiness script can read `FUNCTIONS_EMULATOR_URL`, but the root `e2e:emulators` script is hard-coded to `demo-santashop`. Only override these values when the emulator, browser config, fixture, and readiness probe are all made consistent.
 
-Do not mix `pnpm run emulators:start:local` with `pnpm run e2e:emulators` or the `firebase emulators:exec` E2E wrappers: the local flow uses a different project/configuration and Firestore port (`8080`), while the E2E app expects the E2E configuration and port `8180`. `pnpm run e2e:emulators` is the intentionally long-lived manual/debugging path; the automated suite uses `firebase emulators:exec --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage`.
+Do not mix `pnpm run emulators:start:local` with `pnpm run e2e:emulators` or the `firebase emulators:exec` E2E wrappers: the local flow uses a different configuration and Firestore port (`8080`), while the E2E app expects the E2E configuration and port `8180`. `pnpm run e2e:emulators` is the intentionally long-lived manual/debugging path; the automated suite uses `firebase emulators:exec --config firebase.e2e.json --project demo-santashop --only auth,firestore,functions,storage`.
 
 ## Seed and authenticate deterministically
 
@@ -111,14 +111,14 @@ Available fixtures map to emulator-only callable Functions:
 - `clearData()` calls `testClearAllData`. It deletes the configured Firestore collections and all Auth users. It currently does not clear Storage; tests that write Storage need an explicit cleanup strategy or unique paths.
 - `seedScenario(name)` calls `testSeedScenario`. Use `create-account-enabled`, `create-account-disabled`, `registration-closed`, `maintenance-mode`, or `weather-mode`.
 - `seedPublicParams(params)` calls `testSeedPublicParameters`. Supply a complete nested `admin` or `globalAlert` object when testing that section because the helper merge is shallow.
-- `seedAdminUser(user)` calls `testSeedAdminUser`. It creates an email-verified Auth emulator user and assigns `admin`, `owner`, and derived `roles` claims.
+- `seedAdminUser(user)` calls `testSeedAdminUser`. It creates an email-verified Auth emulator user and assigns the distinct `owner` capability and `roles` claims.
 - `seedDateTimeSlots(slots)` calls `testSeedDateTimeSlots` for schedule and appointment cases. Keep `programYear`, dates, capacities, and enabled state aligned with the current generated E2E configuration.
 
 Use the existing helpers before writing new flows:
 
-- `fixtures/account-helpers.ts`: `randomAccount`, `createAccountViaUi`, `signInViaUi`, and sign-out/referral helpers.
+- `fixtures/account-helpers.ts`: `randomAccount`, `createAccountViaUi`, `signInViaUi`, `signOutViaUi`, and `selectReferralViaUi`.
 - `fixtures/admin-helpers.ts`: `defaultAdminAccount`, `defaultOwnerAccount`, `signInAdminViaUi`, and Ionic input helpers.
-- `fixtures/registration-helpers.ts`: referral, child, appointment, and submission flows.
+- `fixtures/registration-helpers.ts`: child, appointment, and submission flows.
 
 For staff authentication, seed the account and then use the UI:
 
@@ -166,7 +166,6 @@ Use this baseline for a public test:
 ```typescript
 import { test, expect } from '../../fixtures/test-fixtures';
 import {
-	completeReferralViaUi,
 	createAccountViaUi,
 	randomAccount,
 } from '../../fixtures/account-helpers';
@@ -177,10 +176,9 @@ test.describe('customer route access', () => {
 		await seedScenario('create-account-enabled');
 	});
 
-	test('protects the registration overview after sign-out', async ({ page }) => {
+	test('opens the registration overview after account creation', async ({ page }) => {
 		const account = randomAccount();
 		await createAccountViaUi(page, account);
-		await completeReferralViaUi(page);
 		await page.goto('/pre-registration/overview');
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 	});
@@ -195,13 +193,13 @@ Use `page.goto('/')`/relative routes with the configured `baseURL`; use `E2E_BAS
 - **The app reaches the wrong Firestore port:** regenerate with `pnpm run config:app:e2e` and use `firebase.e2e.json`; E2E Firestore is `8180`, not the local flow's `8080`.
 - **Config preparation fails:** check the root `.env` for `LOCAL_SANTASHOP_PROGRAM_YEAR`, then rerun the target `e2e:prepare:*` command. Regenerate canonical config rather than editing generated files.
 - **Auth sign-in fails:** confirm `clearData()` ran before seeding, call `seedAdminUser()` before `signInAdminViaUi()`, use the exact seeded email/password, and restart the dev server after changing generated config.
-- **A staff page is visible to the wrong role:** verify both custom claims and app/rules/Functions enforcement. `admin: false` and `owner: false` should not be treated as an admin; an owner seed still includes admin capabilities through the helper's derived roles.
+- **A staff page is visible to the wrong role:** verify both custom claims and app/rules/Functions enforcement. An account with `roles: []` and `owner: false` has no staff access. Test owner access separately from the `admin` and `checkin` roles.
 - **Email tests try to reach SES:** leave `SANTASHOP_SEND_EMAILS_FROM_EMULATOR` unset for normal E2E. Assert the user-facing queued/success behavior, not external delivery, unless the test is explicitly an email integration test.
 - **Tests contaminate one another or become flaky:** keep one worker, clear Auth/Firestore in `beforeEach`, use unique customer accounts, avoid order dependence, and inspect whether the test writes Storage because the shared cleanup does not remove it.
-- **Port conflicts occur:** stop stale processes using `4100`, `5001`, `8180`, `9099`, or `9199`, and run only one app/admin E2E orchestration at a time.
+- **Port conflicts occur:** identify the processes using `4100`, `5001`, `8180`, `9099`, or `9199`. Stop only test processes you own, and run only one app/admin E2E orchestration at a time.
 - **`spawn EPERM` appears from Angular/Playwright tooling:** first rerun the same targeted command in a permitted/elevated process context before changing application code; this can be a restricted-process artifact.
 
-Inspect failures in `santashop-e2e/playwright-report/` and `santashop-e2e/test-results/`. The configured suite captures screenshots on failure, retains video on failure, and collects a trace on the first retry (retries are disabled by default, so enable a retry deliberately when trace collection is needed).
+Inspect failures in `santashop-e2e/playwright-report/` and `santashop-e2e/test-results/`. The configured suite captures screenshots on failure, retains video on failure, and retains a trace on failure. Retries remain disabled.
 
 ## Validate a new or changed test
 

@@ -4,6 +4,7 @@ import {
 	AnalyticsWrapper,
 	ErrorHandlerService,
 	AppStateService,
+	dateToCalendarString,
 	TimeSlotPipe,
 } from '@santashop/core';
 import {
@@ -63,6 +64,7 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	],
 })
 export class ConfirmationPage {
+	public readonly calendarDate = dateToCalendarString;
 	public readonly viewService = inject(PreRegistrationService);
 	private readonly loadingController = inject(LoadingController);
 	private readonly alertController = inject(AlertController);
@@ -89,6 +91,13 @@ export class ConfirmationPage {
 
 	constructor() {
 		addIcons({ manOutline, womanOutline, happyOutline });
+	}
+
+	public get encodedEventAddress(): string {
+		return encodeURIComponent([
+			this.translateService.instant('EVENT_INFO.EVENT_ADDRESS1'),
+			this.translateService.instant('EVENT_INFO.EVENT_ADDRESS2'),
+		].join(', '));
 	}
 
 	public async undoRegistration(): Promise<void> {

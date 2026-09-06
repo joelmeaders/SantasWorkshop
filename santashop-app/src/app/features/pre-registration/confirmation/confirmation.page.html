@@ -151,44 +151,7 @@
 								</div>
 							</ion-item>
 
-							<ion-item class="ticket-detail" lines="none">
-								<div>
-									<p>
-										<ion-text color="xmasred">
-											<strong
-												>{{ "EVENT_INFO.LOCATION" |
-												translate }}</strong
-											>
-										</ion-text>
-									</p>
-									@if ( viewService.dateTimeSlot$ | async; as
-									slot ) {
-									<ion-text class="es-pd-bottom-md">
-										{{ "EVENT_INFO.EVENT_ADDRESS1" |
-										translate }}
-										<br />
-										{{ "EVENT_INFO.EVENT_ADDRESS2" |
-										translate }}
-										<br />
-										<em
-											>{{ "CONFIRMATION.FREE_PARKING" |
-											translate }}</em
-										>
-									</ion-text>
-									}
-									<br />
-									<br />
-									<a
-										[routerLink]="['/pre-registration/confirmation']"
-										fragment="event-information"
-									>
-										<em>
-											{{ "CONFIRMATION.EVENT_INFORMATION"
-											| translate }}
-										</em>
-									</a>
-								</div>
-							</ion-item>
+
 
 							<ion-list class="children-ticket-list">
 								<ion-item lines="none">
@@ -243,7 +206,7 @@
 											child.lastName }}
 										</ion-card-title>
 										<ion-card-subtitle>
-											{{ child.dateOfBirth |
+											{{ (child.dateOfBirth ? calendarDate(child.dateOfBirth) : undefined) |
 											localizedDate: 'longDate' }}
 										</ion-card-subtitle>
 									</ion-card-header>
@@ -260,6 +223,30 @@
 									{{ 'EVENT_INFO.EVENT_INFO_TITLE' | translate
 									}}
 								</h2>
+								<h3>{{ 'EVENT_INFO.LOCATION' | translate }}</h3>
+								<p>
+									{{ 'EVENT_INFO.EVENT_ADDRESS1' | translate }}<br />
+									{{ 'EVENT_INFO.EVENT_ADDRESS2' | translate }}<br />
+									<em>{{ 'CONFIRMATION.FREE_PARKING' | translate }}</em>
+								</p>
+								<div class="map-actions">
+									<ion-button
+										fill="outline"
+										[href]="'https://www.google.com/maps/dir/?api=1&destination=' + encodedEventAddress"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										{{ 'EVENT_INFO.GOOGLE_MAPS' | translate }}
+									</ion-button>
+									<ion-button
+										fill="outline"
+										[href]="'https://maps.apple.com/?daddr=' + encodedEventAddress"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										{{ 'EVENT_INFO.APPLE_MAPS' | translate }}
+									</ion-button>
+								</div>
 								<h3>
 									{{ 'EVENT_INFO.WHAT_TO_EXPECT' | translate
 									}}

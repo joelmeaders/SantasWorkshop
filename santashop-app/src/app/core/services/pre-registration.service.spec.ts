@@ -345,7 +345,7 @@ describe('PreRegistrationService', () => {
 				mutationId: 'mutation-1',
 				child: expect.objectContaining({
 					id: 7,
-					dateOfBirth: '2017-03-04T00:00:00.000Z',
+					dateOfBirth: '2017-03-04',
 				}),
 			}),
 		);

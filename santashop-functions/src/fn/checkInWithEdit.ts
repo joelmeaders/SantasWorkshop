@@ -20,6 +20,7 @@ import {
 	recordCheckInRaceAttempt,
 } from '../utility/registration-scan';
 import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
+import { requireCanonicalChildren } from './registrationMutationSupport';
 
 const log = createFunctionLogger('checkInWithEdit');
 
@@ -57,6 +58,8 @@ export default async function checkInWithEdit(
 			'Incomplete registration. Cannot continue.',
 		);
 	}
+	const children = requireCanonicalChildren(record.children);
+	const canonicalRecord = { ...record, children };
 
 	// Registration
 	const registrationDocRef = admin
@@ -65,7 +68,7 @@ export default async function checkInWithEdit(
 
 	const partialRegistration = {
 		uid: record.uid,
-		children: record.children,
+		children: canonicalRecord.children,
 		registrationSubmittedOn: new Date(),
 		includedInRegistrationStats: false,
 		programYear: PROGRAM_YEAR,
@@ -81,7 +84,7 @@ export default async function checkInWithEdit(
 		customerId: record.uid,
 		inStats: true,
 		registrationCode: record.qrcode,
-		stats: calculateRegistrationStats(record, true),
+		stats: calculateRegistrationStats(canonicalRecord, true),
 	} as CheckIn;
 
 	const sourceRegistrationDocRef = admin

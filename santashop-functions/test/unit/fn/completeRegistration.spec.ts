@@ -5,6 +5,7 @@ import {
 	type AccountAdminMock,
 	loadAccountRegistrationHandlers,
 } from '../helpers/account-registration.unit-helper';
+import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('completeRegistration handler', () => {
 	let adminMock: AccountAdminMock;
@@ -13,7 +14,9 @@ describe('completeRegistration handler', () => {
 		adminMock = createAccountAdminMock();
 	});
 
-	const seedCompletableRegistration = (): void => {
+	const seedCompletableRegistration = (
+		dateOfBirth = new Date('2020-12-15T00:00:00.000Z'),
+	): void => {
 		adminMock.setDocSnapshot('registrations/user-3', {
 			uid: 'user-3',
 			qrcode: 'ABCD2345',
@@ -23,7 +26,7 @@ describe('completeRegistration handler', () => {
 					id: 1,
 					firstName: 'Noelle',
 					lastName: 'Elf',
-					dateOfBirth: new Date('2020-12-15T00:00:00.000Z'),
+					dateOfBirth,
 					toyType: 'girls',
 				},
 			],
@@ -84,6 +87,23 @@ describe('completeRegistration handler', () => {
 		expect(adminMock.doc).toHaveBeenCalledWith(
 			'registrationsearchindex/user-3',
 		);
+	});
+
+	it('rejects an age 12 child before writing completion side effects', async () => {
+		const { completeRegistration } =
+			await loadAccountRegistrationHandlers(adminMock);
+		seedCompletableRegistration(new Date(PROGRAM_YEAR - 12, 11, 31));
+
+		await expect(
+			completeRegistration(
+				createCallableRequest(
+					{ mutationId: 'submit-0001' },
+					{ uid: 'user-3' },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.transactionSet).not.toHaveBeenCalled();
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
 	it('rejects unsupported client registration fields', async () => {

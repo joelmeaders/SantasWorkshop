@@ -17,6 +17,7 @@ import { Child, AgeGroup, ToyType } from '@santashop/models';
 import {
 	MAX_BIRTHDATE,
 	MIN_BIRTHDATE,
+	dateToCalendarString,
 	getAgeFromDate,
 	yyyymmddToLocalDate,
 } from '@santashop/core';
@@ -99,6 +100,7 @@ interface ChildFormValue {
 	],
 })
 export class ChildrenCardComponent {
+	public readonly calendarDate = dateToCalendarString;
 	public readonly children = input<Child[]>([]);
 	public readonly childCount = input(0);
 	public readonly programYear = input(0);
@@ -116,8 +118,12 @@ export class ChildrenCardComponent {
 	);
 	public readonly form = this.createForm();
 	private readonly firstNameInput = viewChild<IonInput>('firstNameInput');
-	public readonly minBirthDate = MIN_BIRTHDATE().toISOString().slice(0, 10);
-	public readonly maxBirthDate = MAX_BIRTHDATE().toISOString().slice(0, 10);
+	public get minBirthDate(): string {
+		return this.dateForInput(MIN_BIRTHDATE(this.effectiveProgramYear()));
+	}
+	public get maxBirthDate(): string {
+		return this.dateForInput(MAX_BIRTHDATE(this.effectiveProgramYear()));
+	}
 
 	constructor() {
 		addIcons({
@@ -163,7 +169,7 @@ export class ChildrenCardComponent {
 			enabled: child.enabled,
 		});
 		this.isInfant.set(child.toyType === ToyType.infant);
-		this.hasSelectedAge.set(true);
+		this.birthdaySelected(this.form.controls.dateOfBirth.value);
 		this.editorOpen.set(true);
 		this.focusFirstName();
 	}
@@ -177,8 +183,11 @@ export class ChildrenCardComponent {
 			return;
 		}
 		const dateOfBirth = yyyymmddToLocalDate(value);
-		const age = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
-		this.hasSelectedAge.set(age >= 0 && age < 13);
+		const age = getAgeFromDate(
+			dateOfBirth,
+			MAX_BIRTHDATE(this.effectiveProgramYear()),
+		);
+		this.hasSelectedAge.set(age >= 0 && age < 12);
 		if (age >= 0 && age < 3) {
 			this.isInfant.set(true);
 			this.form.controls.ageGroup.setValue(AgeGroup.age02);
@@ -193,7 +202,7 @@ export class ChildrenCardComponent {
 			this.form.controls.ageGroup.setValue(AgeGroup.age35);
 		else if (age >= 6 && age < 9)
 			this.form.controls.ageGroup.setValue(AgeGroup.age68);
-		else if (age >= 9 && age < 13)
+		else if (age >= 9 && age < 12)
 			this.form.controls.ageGroup.setValue(AgeGroup.age911);
 		else {
 			this.hasSelectedAge.set(false);
@@ -274,6 +283,10 @@ export class ChildrenCardComponent {
 	private dateForInput(value: Date): string {
 		const date = new Date(value);
 		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+	}
+
+	private effectiveProgramYear(): number {
+		return this.programYear() || new Date().getFullYear();
 	}
 
 	private focusFirstName(): void {

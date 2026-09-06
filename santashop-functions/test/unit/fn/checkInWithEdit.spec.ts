@@ -139,6 +139,25 @@ describe('checkInWithEdit handler', () => {
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
+	it('rejects an age 12 edited child before writing check-in records', async () => {
+		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
+		const registration = createRegistration();
+		registration.children = [{
+			...registration.children[0],
+			dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+		}];
+
+		await expect(
+			checkInWithEdit(
+				createCallableRequest(
+					{ registration, inputMethod: 'manual' },
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
 	it('keeps invalid transaction errors internal without recording a duplicate', async () => {
 		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
 		adminMock.runTransaction.mockRejectedValue({

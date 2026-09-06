@@ -37,11 +37,7 @@ import {
 	yyyymmddToLocalDate,
 	getAgeFromDate,
 } from '@santashop/core/admin/firestore';
-import {
-	ChildValidationService,
-	MAX_BIRTHDATE,
-	MIN_BIRTHDATE,
-} from '../../services/child-validation.service';
+import { ChildValidationService } from '../../services/child-validation.service';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
@@ -106,8 +102,12 @@ export class AddEditChildModalComponent implements OnInit {
 
 	public form: UntypedFormGroup = this.newForm();
 
-	public readonly minBirthDate = this.dateForInput(MIN_BIRTHDATE());
-	public readonly maxBirthDate = this.dateForInput(MAX_BIRTHDATE());
+	public readonly minBirthDate = this.dateForInput(
+		this.childValidationService.minBirthDate(),
+	);
+	public readonly maxBirthDate = this.dateForInput(
+		this.childValidationService.maxBirthDate(),
+	);
 
 	private readonly isInfant = new BehaviorSubject<boolean>(false);
 	public readonly isInfant$ = this.isInfant.asObservable();
@@ -185,7 +185,10 @@ export class AddEditChildModalComponent implements OnInit {
 		if (yyyymmdd[0]?.toString() !== '2') return;
 
 		const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
-		const ageInYears = getAgeFromDate(dateOfBirth, MAX_BIRTHDATE());
+		const ageInYears = getAgeFromDate(
+			dateOfBirth,
+			this.childValidationService.maxBirthDate(),
+		);
 		let ageGroup: AgeGroup | undefined;
 		const wasInfant = this.isInfant.getValue();
 
@@ -196,7 +199,7 @@ export class AddEditChildModalComponent implements OnInit {
 			ageGroup = AgeGroup.age35;
 		} else if (ageInYears >= 6 && ageInYears < 9) {
 			ageGroup = AgeGroup.age68;
-		} else if (ageInYears >= 9 && ageInYears < 13) {
+		} else if (ageInYears >= 9 && ageInYears < 12) {
 			ageGroup = AgeGroup.age911;
 		} else {
 			await this.childTooOldAlert();
@@ -212,7 +215,7 @@ export class AddEditChildModalComponent implements OnInit {
 	private async childTooOldAlert(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: 'This child is too old',
-			message: 'Children must be under 13 years old.',
+			message: 'Children must be 11 years old or younger.',
 			buttons: [
 				{
 					text: 'Ok',

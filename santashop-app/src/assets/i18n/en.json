@@ -43,7 +43,7 @@
 		"SUCCESS": "Success",
 		"RESET": "Reset",
 		"SAVE_CHOICE": "Save choice",
-		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?",
+		"NEWSLETTER": "Would you like to receive our newsletter and be notified of future events?",
 		"VALID_EMAIL": "Must be a valid email address",
 		"VALID_PASSWORD": "Enter your password",
 		"OPEN_ACCOUNT_HELP_MENU": "Open account and help menu"
@@ -85,7 +85,7 @@
 		"READY": "Ready",
 		"CHILD_GUIDANCE": "Add every child you are registering. You can edit this list until you submit.",
 		"ANOTHER_CHILD_TITLE": "Add another child?",
-		"ANOTHER_CHILD_MESSAGE": "Do you have any other children under 13 to add?",
+		"ANOTHER_CHILD_MESSAGE": "Do you have any other children 11 years old or younger to add?",
 		"REGISTERED_CHILDREN": "Registered children",
 		"CHILD_DETAILS": "Child details",
 		"EDIT_CHILD_LABEL": "Edit",
@@ -127,7 +127,7 @@
 		"FIRST_NAME": "First Name",
 		"LAST_NAME": "Last Name",
 		"BIRTH_DATE": "Birth Date",
-		"UNDER_13_REQUIREMENT": "Children must be under 13 years old.",
+		"AGE_REQUIREMENT": "Children must be 11 years old or younger.",
 		"TOY_TYPE": "Type of Toys",
 		"INFANT_MSG": "We have toys for children ages 0-2!",
 		"BOYS": "For Boys",
@@ -160,7 +160,7 @@
 		"CANCEL_REGISTRATION": "Cancel Registration",
 		"ARE_YOU_SURE": "Are you sure?",
 		"CONFIRM_CHANGE_MSG": "Requesting a registration change releases your selected Date & Time.<br/>After you confirm, submit your new registration as soon as possible. Availability is limited and registration fills up quickly.",
-		"CONFIRM_CANCELLATION_MSG": "Cancelling your registration releases your appointment, invalidates this confirmation, and sends a cancellation email. You can create a new registration afterwards.",
+		"CONFIRM_CANCELLATION_MSG": "Cancelling your registration releases your appointment, invalidates this confirmation, and sends a cancellation email. You can register again only if appointments are available.",
 		"CONFIRM_DATETIME_CHANGE_MSG": "Changing your registration date/time updates your confirmation and sends a new confirmation email. Your previous time slot becomes available to others.",
 		"CURRENT_DATETIME": "Current Date & Time",
 		"CURRENT_SELECTION": "Current Selection",
@@ -223,6 +223,8 @@
 	"EVENT_INFO": {
 		"DATETIME": "December 12, 13, 15, 16 at 10am - 3pm",
 		"RESEND_EMAIL": "Resend Email",
+		"GOOGLE_MAPS": "Directions in Google Maps",
+		"APPLE_MAPS": "Directions in Apple Maps",
 		"EVENT_ADDRESS1": "7150 Leetsdale Drive, Unit 380",
 		"EVENT_ADDRESS2": "Denver, CO 80224",
 		"PRINT_PAGE": "Print or save this page or the email we sent you!",
@@ -313,6 +315,12 @@
 		"SEARCH_PLACEHOLDER": "Type to search",
 		"YOU_SELECTED": "You selected",
 		"REFERRED_BY_PLACEHOLDER": "Type your answer here"
+	},
+	"CHECKIN": {
+		"COMPLETE_TITLE": "Merry Christmas!",
+		"COMPLETE_SUBTITLE": "We hope your shopping experience was wonderful",
+		"COMPLETE_MESSAGE": "Your check-in is confirmed. Registration is closed for your account this season.",
+		"OK": "Ok"
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "This field is required",

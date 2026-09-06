@@ -8,6 +8,7 @@ import {
 } from './child.validators';
 import { CommonForms } from './common-forms';
 import {
+	dateToCalendarString,
 	dateToTimestamp,
 	getAgeFromDate,
 	MAX_BIRTHDATE,
@@ -46,6 +47,18 @@ describe('core helpers', () => {
 			11,
 			15,
 		]);
+	});
+
+	it('serializes birth dates without shifting the calendar day', () => {
+		expect(dateToCalendarString(new Date(Date.UTC(2016, 11, 31)))).toBe(
+			'2016-12-31',
+		);
+		expect(dateToCalendarString(new Date(Date.UTC(2017, 0, 1)))).toBe(
+			'2017-01-01',
+		);
+		expect(dateToCalendarString(new Date(2017, 0, 2, 12))).toBe(
+			'2017-01-02',
+		);
 	});
 
 	it('calculates age before and after the birthday', () => {
@@ -87,6 +100,15 @@ describe('core helpers', () => {
 		expect(child.enabled).toBe(false);
 		expect(ageValid(MIN_BIRTHDATE())).toBe(true);
 		expect(ageValid(MAX_BIRTHDATE())).toBe(true);
+		expect(MIN_BIRTHDATE()).toEqual(new Date(2015, 0, 1));
+		expect(ageValid(new Date(2015, 0, 1))).toBe(true);
+		expect(ageValid(new Date(2014, 11, 31))).toBe(false);
+		expect(MIN_BIRTHDATE(2030)).toEqual(new Date(2019, 0, 1));
+		expect(MAX_BIRTHDATE(2030)).toEqual(new Date(2030, 11, 31));
+		expect(ageValid(new Date(2019, 0, 1), 2030)).toBe(true);
+		expect(ageValid(new Date(Date.UTC(2019, 0, 1)), 2030)).toBe(true);
+		expect(ageValid(new Date(2018, 11, 31), 2030)).toBe(false);
+		expect(ageValid(new Date(Number.NaN), 2030)).toBe(false);
 		expect(firstNameValid('A')).toBe(false);
 		expect(firstNameValid('A'.repeat(21))).toBe(false);
 		expect(firstNameValid('Ada')).toBe(true);

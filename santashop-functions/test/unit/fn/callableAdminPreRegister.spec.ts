@@ -9,6 +9,7 @@ import {
 	generateQrCodeMock,
 	loadCheckInAdminHandlers,
 } from '../helpers/checkin-admin.unit-helper';
+import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('callableAdminPreRegister handler', () => {
 	let adminMock: CheckInAdminMock;
@@ -41,6 +42,25 @@ describe('callableAdminPreRegister handler', () => {
 					createRegistration({ emailAddress: '' }),
 					{ roles: ['admin', 'checkin'] },
 				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+	});
+
+	it('rejects an age 12 child before creating an Auth user', async () => {
+		const { callableAdminPreRegister } =
+			await loadCheckInAdminHandlers(adminMock);
+		const registration = createRegistration();
+		registration.children = [{
+			...registration.children[0],
+			dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+		}];
+
+		await expect(
+			callableAdminPreRegister(
+				createCallableRequest(registration, {
+					roles: ['admin', 'checkin'],
+				}),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 		expect(adminMock.createUser).not.toHaveBeenCalled();

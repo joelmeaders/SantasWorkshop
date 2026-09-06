@@ -61,11 +61,23 @@ const verifyManagedResources = ({
 			throw new Error(`${jobName} is missing its HTTP target.`);
 		}
 		const target = new URL(targetUri);
+		const functionAlias = `https://${region}-${project}.cloudfunctions.net/${functionName}`;
+		const isRunTarget =
+			target.hostname.startsWith(`${functionName.toLowerCase()}-`) &&
+			target.hostname.endsWith('.a.run.app') &&
+			target.pathname === '/';
 		if (
-			!target.hostname.startsWith(`${functionName.toLowerCase()}-`) ||
-			!target.hostname.endsWith('.a.run.app')
+			target.protocol !== 'https:' ||
+			target.username ||
+			target.password ||
+			target.port ||
+			target.search ||
+			target.hash ||
+			(!isRunTarget && target.href !== functionAlias)
 		) {
-			throw new Error(`${jobName} has an unexpected HTTP target: ${targetUri}`);
+			throw new Error(
+				`${jobName} has an unexpected HTTP target: ${targetUri}`,
+			);
 		}
 		assertEqual(
 			job.httpTarget?.httpMethod,
@@ -73,15 +85,15 @@ const verifyManagedResources = ({
 			`${jobName} HTTP method`,
 		);
 		assertEqual(
-			new URL(job.httpTarget?.oidcToken?.audience || '').origin,
-			target.origin,
+			new URL(job.httpTarget?.oidcToken?.audience || '').href,
+			target.href,
 			`${jobName} OIDC audience`,
 		);
 	}
 
 	const expectedQueue = TASK_FUNCTION;
-	const managedQueues = taskQueues.filter((queue) =>
-		resourceId(queue.name) === expectedQueue,
+	const managedQueues = taskQueues.filter(
+		(queue) => resourceId(queue.name) === expectedQueue,
 	);
 	assertEqual(
 		JSON.stringify(

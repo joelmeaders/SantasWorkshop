@@ -24,6 +24,7 @@ import {
 	FunctionsWrapper,
 	HttpsCallableResult,
 	IFireRepoCollection,
+	dateToCalendarString,
 	timestampDateFix,
 } from '@santashop/core';
 import { QrCodeService } from './qrcode.service';
@@ -153,7 +154,7 @@ export class PreRegistrationService implements OnDestroy {
 				id: child.id,
 				firstName: child.firstName,
 				lastName: child.lastName,
-				dateOfBirth: child.dateOfBirth.toISOString(),
+				dateOfBirth: dateToCalendarString(child.dateOfBirth),
 				toyType: child.toyType,
 			},
 		});

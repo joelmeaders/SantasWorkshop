@@ -1,11 +1,18 @@
 import { Child, ChildValidationError } from '@santashop/models';
-import { MAX_BIRTHDATE, MIN_BIRTHDATE } from './date-time';
+import {
+	dateToCalendarString,
+	MAX_BIRTHDATE,
+	MIN_BIRTHDATE,
+} from './date-time';
 import { deepCopy } from './methods';
 
-export const validateChild = (inputChild: Child): Child => {
+export const validateChild = (
+	inputChild: Child,
+	programYear = new Date().getFullYear(),
+): Child => {
 	const outputChild = deepCopy(inputChild);
 
-	if (!ageValid(outputChild.dateOfBirth))
+	if (!ageValid(outputChild.dateOfBirth, programYear))
 		throw new ChildValidationError('invalid_age');
 
 	if (!firstNameValid(outputChild.firstName))
@@ -19,8 +26,16 @@ export const validateChild = (inputChild: Child): Child => {
 	return outputChild;
 };
 
-export const ageValid = (birthdate: Date): boolean => {
-	return birthdate >= MIN_BIRTHDATE() && birthdate <= MAX_BIRTHDATE();
+export const ageValid = (
+	birthdate: Date,
+	programYear = new Date().getFullYear(),
+): boolean => {
+	if (Number.isNaN(birthdate.getTime())) return false;
+	const calendarBirthdate = dateToCalendarString(birthdate);
+	return (
+		calendarBirthdate >= dateToCalendarString(MIN_BIRTHDATE(programYear)) &&
+		calendarBirthdate <= dateToCalendarString(MAX_BIRTHDATE(programYear))
+	);
 };
 
 export const firstNameValid = (firstName: string): boolean => {

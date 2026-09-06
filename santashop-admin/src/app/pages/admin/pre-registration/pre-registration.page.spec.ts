@@ -151,7 +151,11 @@ describe('PreRegistrationPage', () => {
 			newsletter: true,
 			dateTimeSlot: { id: 'slot-1' },
 		});
-		await component.addChild({ id: 1, firstName: 'Ava' } as never);
+		await component.addChild({
+			id: 1,
+			firstName: 'Ava',
+			dateOfBirth: new Date(2017, 2, 4),
+		} as never);
 
 		await component.register();
 
@@ -161,7 +165,12 @@ describe('PreRegistrationPage', () => {
 		expect(callable).toHaveBeenCalledWith(
 			expect.objectContaining({
 				firstName: 'Ada',
-				children: [{ id: 1, firstName: 'Ava' }],
+				children: [
+					expect.objectContaining({
+						id: 1,
+						dateOfBirth: new Date('2017-03-04T00:00:00.000Z'),
+					}),
+				],
 			}),
 		);
 		expect(loading.present).toHaveBeenCalledOnce();
@@ -176,7 +185,11 @@ describe('PreRegistrationPage', () => {
 		vi.spyOn(component, 'checkIfCustomerExists').mockResolvedValue(false);
 		callable.mockRejectedValue(new Error('Callable unavailable'));
 		component.form.controls['firstName'].setValue('Ada');
-		await component.addChild({ id: 1, firstName: 'Ava' } as never);
+		await component.addChild({
+			id: 1,
+			firstName: 'Ava',
+			dateOfBirth: new Date(2017, 2, 4),
+		} as never);
 
 		await component.register();
 

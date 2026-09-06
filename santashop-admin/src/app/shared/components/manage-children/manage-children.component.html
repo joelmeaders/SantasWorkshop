@@ -15,7 +15,7 @@
 			<ion-label> Add children </ion-label>
 			@if (!children().length) {
 				<ion-note color="danger" slot="error" class="error-note">
-					Add all children under 13 years old
+					Add all children 11 years old or younger
 				</ion-note>
 			}
 		</span>
@@ -31,7 +31,11 @@
 					<ion-badge color="dark">
 						Age: {{ child.ageGroup }}
 					</ion-badge>
-					{{ child.dateOfBirth | date }}
+					{{
+						(child.dateOfBirth
+							? calendarDate(child.dateOfBirth)
+							: undefined) | date
+					}}
 				</p>
 			</ion-label>
 		</ion-item>

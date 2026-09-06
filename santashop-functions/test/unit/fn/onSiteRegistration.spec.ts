@@ -81,6 +81,23 @@ describe('onSiteRegistration handler', () => {
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
+	it('rejects an age 12 child before creating onsite records', async () => {
+		const { onSiteRegistration } =
+			await loadCheckInAdminHandlers(adminMock);
+		const registration = createRegistration();
+		registration.children = [{
+			...registration.children[0],
+			dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+		}];
+
+		await expect(
+			onSiteRegistration(
+				createCallableRequest(registration, { roles: ['admin', 'checkin'] }),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
 	it('preserves a batch failure status when persistence cannot commit', async () => {
 		const { onSiteRegistration } =
 			await loadCheckInAdminHandlers(adminMock);

@@ -1,7 +1,10 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { Child, DateTimeSlot, PublicParameters, Registration } from '../models';
 import { AgeGroup, ToyType } from '../models';
-import { PROGRAM_YEAR } from '../utility/runtime-config';
+import {
+	PROGRAM_YEAR,
+	SHOP_TIME_ZONE,
+} from '../utility/runtime-config';
 
 export const MUTATION_RECEIPTS_SUBCOLLECTION = 'mutationReceipts';
 
@@ -107,41 +110,114 @@ const requireChildId = (value: unknown): number => {
 	return value as number;
 };
 
-const requireBirthDate = (value: unknown): Date => {
-	const timestampLike =
-		typeof value === 'object' &&
-		value !== null &&
-		'toDate' in value &&
-		typeof value.toDate === 'function';
-	const date = value instanceof Date
-		? value
-		: typeof value === 'string'
-			? new Date(value)
-			: timestampLike
-				? value.toDate()
-				: undefined;
-	if (!date || Number.isNaN(date.valueOf())) {
-		throw new HttpsError('invalid-argument', 'Date of birth must be a valid date.');
-	}
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/u;
+const eventDateFormatter = new Intl.DateTimeFormat('en-US', {
+	timeZone: SHOP_TIME_ZONE,
+	year: 'numeric',
+	month: '2-digit',
+	day: '2-digit',
+});
 
-	const currentYear = new Date().getFullYear();
-	const earliest = new Date(currentYear - 13, 10, 15);
-	const latest = new Date(currentYear, 11, 31);
-	if (date < earliest || date > latest) {
-		throw new HttpsError('invalid-argument', 'Child is not within the eligible age range.');
+const toUtcCalendarDate = (
+	year: number,
+	month: number,
+	day: number,
+): Date | undefined => {
+	const date = new Date(0);
+	date.setUTCFullYear(year, month - 1, day);
+	date.setUTCHours(0, 0, 0, 0);
+	if (
+		date.getUTCFullYear() !== year ||
+		date.getUTCMonth() !== month - 1 ||
+		date.getUTCDate() !== day
+	) {
+		return undefined;
 	}
-
 	return date;
 };
 
+const toEventCalendarDate = (date: Date): Date | undefined => {
+	const parts = eventDateFormatter.formatToParts(date);
+	const year = Number(parts.find((part) => part.type === 'year')?.value);
+	const month = Number(parts.find((part) => part.type === 'month')?.value);
+	const day = Number(parts.find((part) => part.type === 'day')?.value);
+	if (![year, month, day].every(Number.isInteger)) return undefined;
+	return toUtcCalendarDate(year, month, day);
+};
+
+const isUtcMidnight = (date: Date): boolean =>
+	date.getUTCHours() === 0 &&
+	date.getUTCMinutes() === 0 &&
+	date.getUTCSeconds() === 0 &&
+	date.getUTCMilliseconds() === 0;
+
+const requireBirthDate = (value: unknown): Date => {
+	let normalizedDate: Date | undefined;
+	const dateOnlyMatch =
+		typeof value === 'string' ? DATE_ONLY_PATTERN.exec(value) : undefined;
+	if (dateOnlyMatch) {
+		normalizedDate = toUtcCalendarDate(
+			Number(dateOnlyMatch[1]),
+			Number(dateOnlyMatch[2]),
+			Number(dateOnlyMatch[3]),
+		);
+		if (!normalizedDate) {
+			throw new HttpsError(
+				'invalid-argument',
+				'Date of birth must be a valid date.',
+			);
+		}
+	}
+
+	if (!normalizedDate) {
+		const timestampLike =
+			typeof value === 'object' &&
+			value !== null &&
+			'toDate' in value &&
+			typeof value.toDate === 'function';
+		const date = value instanceof Date
+			? value
+			: typeof value === 'string'
+				? new Date(value)
+				: timestampLike
+					? value.toDate()
+					: undefined;
+		if (!(date instanceof Date) || Number.isNaN(date.valueOf())) {
+			throw new HttpsError('invalid-argument', 'Date of birth must be a valid date.');
+		}
+		normalizedDate = isUtcMidnight(date)
+			? toUtcCalendarDate(
+					date.getUTCFullYear(),
+					date.getUTCMonth() + 1,
+					date.getUTCDate(),
+				)
+			: toEventCalendarDate(date);
+	}
+	if (!normalizedDate) {
+		throw new HttpsError('invalid-argument', 'Date of birth must be a valid date.');
+	}
+
+	const earliest = toUtcCalendarDate(PROGRAM_YEAR - 11, 1, 1);
+	const latest = toUtcCalendarDate(PROGRAM_YEAR, 12, 31);
+	if (!earliest || !latest || normalizedDate < earliest || normalizedDate > latest) {
+		throw new HttpsError('invalid-argument', 'Child is not within the eligible age range.');
+	}
+
+	return normalizedDate;
+};
+
 const ageGroupFor = (birthDate: Date): AgeGroup => {
-	const asOf = new Date(new Date().getFullYear(), 11, 31);
-	let age = asOf.getFullYear() - birthDate.getFullYear();
+	const asOf = toUtcCalendarDate(PROGRAM_YEAR, 12, 31) as Date;
+	let age = asOf.getUTCFullYear() - birthDate.getUTCFullYear();
 	if (
-		asOf.getMonth() < birthDate.getMonth() ||
-		(asOf.getMonth() === birthDate.getMonth() && asOf.getDate() < birthDate.getDate())
+		asOf.getUTCMonth() < birthDate.getUTCMonth() ||
+		(asOf.getUTCMonth() === birthDate.getUTCMonth() &&
+			asOf.getUTCDate() < birthDate.getUTCDate())
 	) {
 		age -= 1;
+	}
+	if (age < 0 || age >= 12) {
+		throw new HttpsError('invalid-argument', 'Child is not within the eligible age range.');
 	}
 	if (age < 3) return AgeGroup.age02;
 	if (age < 6) return AgeGroup.age35;

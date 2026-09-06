@@ -76,7 +76,7 @@
 								</h2>
 								<p>
 									{{
-										child.dateOfBirth
+										(child.dateOfBirth ? calendarDate(child.dateOfBirth) : undefined)
 											| localizedDate: 'longDate'
 									}}
 								</p>
@@ -165,7 +165,7 @@
 						id="childAgeRequirement"
 						class="ion-padding-horizontal"
 						>{{
-							'ADDCHILD.UNDER_13_REQUIREMENT' | translate
+							'ADDCHILD.AGE_REQUIREMENT' | translate
 						}}</ion-note
 					>
 					<ion-item

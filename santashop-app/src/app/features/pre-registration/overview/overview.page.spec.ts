@@ -188,6 +188,32 @@ describe('OverviewPage', () => {
 		expect(alertController.create).not.toHaveBeenCalled();
 	});
 
+	it('validates child age against the configured program year', async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date(2040, 0, 1));
+		try {
+			await component.saveChild({
+				isNew: false,
+				child: {
+					id: 789,
+					firstName: 'Robin',
+					lastName: 'Snow',
+					dateOfBirth: new Date(2014, 0, 1),
+					ageGroup: '9-11' as never,
+					toyType: 'girls' as never,
+					programYearAdded: 2025,
+					enabled: true,
+				},
+			});
+
+			expect(
+				preregistrationService.saveDraftChild,
+			).toHaveBeenCalledOnce();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it('collapses completed steps while registration is being reviewed', async () => {
 		const childrenCard = fixture.debugElement.query(
 			By.directive(ChildrenCardComponent),

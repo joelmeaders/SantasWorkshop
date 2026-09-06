@@ -8,7 +8,11 @@ import {
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import type { Child, DateTimeSlot } from '@santashop/models';
-import { NiceFormErrorPipe, TimeSlotPipe } from '@santashop/core';
+import {
+	dateToCalendarString,
+	NiceFormErrorPipe,
+	TimeSlotPipe,
+} from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
 import {
@@ -65,6 +69,7 @@ export interface EmailUpdateRequest {
 	],
 })
 export class SubmitCardComponent {
+	public readonly calendarDate = dateToCalendarString;
 	public readonly children = input<Child[]>([]);
 	public readonly dateTimeSlot = input<DateTimeSlot | null | undefined>();
 	public readonly emailAddress = input('');

@@ -30,6 +30,15 @@ describe('ManageChildrenComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('renders a child when a legacy fixture has no birth date', () => {
+		fixture.componentRef.setInput('children', [
+			{ id: 1, firstName: 'Ava', lastName: 'Evergreen' } as Child,
+		]);
+
+		expect(() => fixture.detectChanges()).not.toThrow();
+		expect(fixture.nativeElement.textContent).toContain('Ava Evergreen');
+	});
+
 	it('emits added and edited children from the modal result', async () => {
 		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
 		const added = vi.fn(); const edited = vi.fn();

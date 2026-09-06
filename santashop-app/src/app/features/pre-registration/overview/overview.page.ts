@@ -168,7 +168,10 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			this.translateService.instant('OVERVIEW.CHILD_SAVED'),
 			async () => {
 				const child = request.child;
-				const validatedChild = validateChild({ ...child });
+				const validatedChild = validateChild(
+					{ ...child },
+					this.programYear,
+				);
 				delete validatedChild.error;
 				await this.preregistrationService.saveDraftChild({
 					mutationId: this.createMutationId(),

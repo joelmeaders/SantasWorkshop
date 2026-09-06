@@ -86,7 +86,7 @@ export interface TestRegistrationSeed {
 	zipCode: string;
 	code: string;
 	dateTime: string;
-	children?: { firstName: string; lastName: string; dateOfBirth: string; ageGroup: string }[];
+	children?: { firstName: string; lastName: string; dateOfBirth: string; ageGroup: string; toyType?: string }[];
 	hasCheckedIn?: boolean;
 	checkInDateTime?: string;
 	qrReady?: boolean;
@@ -477,7 +477,7 @@ export async function seedRegistration(
 		throw new Error(`Invalid registration dateTime: ${seed.dateTime}.`);
 	}
 	const children = (seed.children ?? [
-		{ firstName: 'Test', lastName: 'Child', dateOfBirth: '2018-01-01', ageGroup: '5-11' },
+		{ firstName: 'Test', lastName: 'Child', dateOfBirth: '2018-01-01', ageGroup: '6-8', toyType: 'girls' },
 	]).map((child, index) => ({ ...child, id: index + 1, dateOfBirth: new Date(child.dateOfBirth) }));
 	const db = admin.firestore();
 	await db.collection('users').doc(seed.uid).set({

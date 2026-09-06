@@ -203,6 +203,7 @@ export class ReviewPage {
 
 		registration?.children?.push(child);
 		this.checkinContext.setRegistration(registration);
+		this.wasEdited = true;
 	}
 	public async addChild(child: Child): Promise<void> {
 		const registration = await firstValueFrom(this.registration$);
@@ -210,6 +211,7 @@ export class ReviewPage {
 
 		registration?.children?.push(child);
 		this.checkinContext.setRegistration(registration);
+		this.wasEdited = true;
 	}
 
 	public async editDateTime(): Promise<void> {

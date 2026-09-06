@@ -5,6 +5,7 @@ import {
 	type AccountAdminMock,
 	loadAccountRegistrationHandlers,
 } from '../helpers/account-registration.unit-helper';
+import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('draft registration mutation handlers', () => {
 	let adminMock: AccountAdminMock;
@@ -58,6 +59,25 @@ describe('draft registration mutation handlers', () => {
 		expect.anything(),
 	);
 		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(1);
+	});
+
+	it('rejects a child who is age 12 before writing the draft', async () => {
+		const { saveDraftChild } = await loadAccountRegistrationHandlers(adminMock);
+
+		await expect(saveDraftChild(createCallableRequest({
+			mutationId: 'child-save-0012',
+			child: {
+				id: 42,
+				firstName: 'Older',
+				lastName: 'Elf',
+				dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+				toyType: 'girls',
+			},
+		}, { uid: 'user-draft' }))).rejects.toMatchObject({
+			code: 'invalid-argument',
+		});
+		expect(adminMock.transactionSet).not.toHaveBeenCalled();
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
 	it('requires an existing eligible child before selecting an enabled slot', async () => {

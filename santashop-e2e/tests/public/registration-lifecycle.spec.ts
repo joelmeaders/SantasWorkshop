@@ -113,12 +113,12 @@ test.describe('customer registration lifecycle', () => {
 		const birthDate = childForm.locator(
 			'ion-input[formControlName="dateOfBirth"]',
 		);
-		await birthDate.locator('input').first().fill('2010-01-01');
+		await birthDate.locator('input').first().fill('2014-12-31');
 		await birthDate.evaluate((element) => {
 			element.dispatchEvent(
 				new CustomEvent('ionChange', {
 					bubbles: true,
-					detail: { value: '2010-01-01' },
+					detail: { value: '2014-12-31' },
 				}),
 			);
 		});
@@ -174,7 +174,7 @@ test.describe('customer registration lifecycle', () => {
 				enabled: true,
 			},
 		]);
-		const child = defaultTestChild();
+		const child = defaultTestChild({ dateOfBirth: `${TEST_PROGRAM_YEAR - 11}-01-01` });
 		const account = randomAccount();
 		const updatedEmailAddress = `updated-${account.emailAddress}`;
 		await createAccountViaUi(page, account);
@@ -217,6 +217,7 @@ test.describe('customer registration lifecycle', () => {
 					exact: true,
 				}),
 		).toBeVisible();
+		await expect(page.locator('app-confirmation')).toContainText(`January 1, ${TEST_PROGRAM_YEAR - 11}`);
 		await expect(page.locator('#eventInformationButton')).toBeVisible();
 		const lifecycle = await inspectRegistrationQrLifecycle(updatedEmailAddress);
 		expect(lifecycle.registration.hasSubmittedRegistration).toBe(true);

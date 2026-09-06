@@ -85,7 +85,7 @@
 		"READY": "Listo",
 		"CHILD_GUIDANCE": "Agregue a cada niño que va a registrar. Puede editar esta lista hasta que envíe el registro.",
 		"ANOTHER_CHILD_TITLE": "¿Agregar otro niño?",
-		"ANOTHER_CHILD_MESSAGE": "¿Tiene otros niños menores de 13 años para agregar?",
+		"ANOTHER_CHILD_MESSAGE": "¿Tiene otros niños de 11 años o menos para agregar?",
 		"REGISTERED_CHILDREN": "Niños registrados",
 		"CHILD_DETAILS": "Información del niño",
 		"EDIT_CHILD_LABEL": "Editar",
@@ -127,7 +127,7 @@
 		"FIRST_NAME": "Nombre",
 		"LAST_NAME": "Apellido",
 		"BIRTH_DATE": "Fecha de nacimiento",
-		"UNDER_13_REQUIREMENT": "Los niños deben ser menores de 13 años.",
+		"AGE_REQUIREMENT": "Los niños deben tener 11 años o menos.",
 		"TOY_TYPE": "Tipo de juguetes",
 		"INFANT_MSG": "¡Tenemos juguetes para peques de 0 a 2 años!",
 		"BOYS": "Para niños",
@@ -313,6 +313,12 @@
 		"SEARCH_PLACEHOLDER": "Tipo para buscar",
 		"YOU_SELECTED": "Has seleccionado",
 		"REFERRED_BY_PLACEHOLDER": "Escriba su respuesta aquí"
+	},
+	"CHECKIN": {
+		"COMPLETE_TITLE": "¡Feliz Navidad!",
+		"COMPLETE_SUBTITLE": "Esperamos que haya disfrutado de sus compras",
+		"COMPLETE_MESSAGE": "Su llegada está confirmada. El registro para su cuenta está cerrado por esta temporada.",
+		"OK": "Aceptar"
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "Este campo es obligatorio",

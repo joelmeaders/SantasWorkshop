@@ -4,6 +4,7 @@ import {
 	AnalyticsWrapper,
 	ErrorHandlerService,
 	AppStateService,
+	dateToCalendarString,
 	TimeSlotPipe,
 } from '@santashop/core';
 import {
@@ -63,6 +64,7 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	],
 })
 export class ConfirmationPage {
+	public readonly calendarDate = dateToCalendarString;
 	public readonly viewService = inject(PreRegistrationService);
 	private readonly loadingController = inject(LoadingController);
 	private readonly alertController = inject(AlertController);

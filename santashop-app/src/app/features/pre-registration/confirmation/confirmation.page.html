@@ -243,7 +243,7 @@
 											child.lastName }}
 										</ion-card-title>
 										<ion-card-subtitle>
-											{{ child.dateOfBirth |
+											{{ (child.dateOfBirth ? calendarDate(child.dateOfBirth) : undefined) |
 											localizedDate: 'longDate' }}
 										</ion-card-subtitle>
 									</ion-card-header>

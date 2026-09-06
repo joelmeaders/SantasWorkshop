@@ -22,6 +22,7 @@ import {
 import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
 import { DatePipe } from '@angular/common';
+import { dateToCalendarString } from '@santashop/core';
 import { addIcons } from 'ionicons';
 import {
 	addCircle,
@@ -50,6 +51,7 @@ import {
 	],
 })
 export class ManageChildrenComponent {
+	public readonly calendarDate = dateToCalendarString;
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
 

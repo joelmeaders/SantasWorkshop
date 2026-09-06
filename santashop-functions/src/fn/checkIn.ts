@@ -20,6 +20,7 @@ import {
 } from '../utility/registration-scan';
 import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
 import { getStatsDocumentId } from '../utility/runtime-config';
+import { requireCanonicalChildren } from './registrationMutationSupport';
 
 const log = createFunctionLogger('checkIn');
 
@@ -58,18 +59,12 @@ export default async function checkIn(
 		);
 	}
 
+	let childCount = 0;
+
 	// Check In
 	const checkinDocRef = admin
 		.firestore()
 		.doc(`${COLLECTION_SCHEMA.checkins}/${record.uid}`);
-
-	const checkin = {
-		checkInDateTime: new Date(),
-		customerId: record.uid,
-		inStats: true,
-		registrationCode: record.qrcode,
-		stats: calculateRegistrationStats(record, false),
-	} as CheckIn;
 
 	const registrationDocRef = admin
 		.firestore()
@@ -110,6 +105,18 @@ export default async function checkIn(
 					);
 				}
 				if (existingCheckIn.exists) return false;
+				const children = requireCanonicalChildren(
+					authoritativeRegistration.children,
+				);
+				const canonicalRegistration = { ...authoritativeRegistration, children };
+				const checkin = {
+					checkInDateTime: new Date(),
+					customerId: authoritativeRegistration.uid,
+					inStats: true,
+					registrationCode: authoritativeRegistration.qrcode,
+					stats: calculateRegistrationStats(canonicalRegistration, false),
+				} as CheckIn;
+				childCount = checkin.stats?.children ?? 0;
 
 				transaction.create(checkinDocRef, checkin);
 				transaction.set(
@@ -141,7 +148,7 @@ export default async function checkIn(
 				blocked,
 			);
 		}
-		return checkin.stats?.children ?? 0;
+		return childCount;
 	} catch (error) {
 		if (error instanceof HttpsError) {
 			throw error;

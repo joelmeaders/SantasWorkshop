@@ -16,6 +16,7 @@ import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 import { isAdminToken } from '../utility/capabilities';
 import { requireZipCodeValue, withCallableValidation } from '../utility/callable-validation';
 import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
+import { requireCanonicalChildren } from './registrationMutationSupport';
 
 const log = createFunctionLogger('onSiteRegistration');
 
@@ -46,8 +47,9 @@ export default async function onSiteRegistration(
 			'Incomplete registration. Cannot continue.',
 		);
 	}
-
 	record.zipCode = withCallableValidation(() => requireZipCodeValue(record.zipCode));
+	const children = requireCanonicalChildren(record.children);
+	const canonicalRecord = { ...record, children };
 
 	const id = admin
 		.firestore()
@@ -60,7 +62,7 @@ export default async function onSiteRegistration(
 		.doc(`${COLLECTION_SCHEMA.onSiteRegistrations}/${id}`);
 
 	const updatedRegistration = {
-		...record,
+		...canonicalRecord,
 		uid: id,
 		qrcode: 'onsite',
 		registrationSubmittedOn: new Date(),
@@ -79,7 +81,7 @@ export default async function onSiteRegistration(
 		customerId: record.uid,
 		inStats: true,
 		registrationCode: 'onsite',
-		stats: calculateRegistrationStats(record, true),
+		stats: calculateRegistrationStats(canonicalRecord, true),
 	} as CheckIn;
 
 	const statsDocRef = admin

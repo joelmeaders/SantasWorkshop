@@ -30,6 +30,7 @@ import {
 	requireZipCodeValue,
 	withCallableValidation,
 } from '../utility/callable-validation';
+import { requireCanonicalChildren } from './registrationMutationSupport';
 
 interface RegistrationCreationResult {
 	qrCode: string;
@@ -90,6 +91,7 @@ export default async function callableAdminPreRegister(
 	record.zipCode = withCallableValidation(() =>
 		requireZipCodeValue(record.zipCode),
 	);
+	record.children = requireCanonicalChildren(record.children);
 
 	// Create Account
 	let newUserAccount;

@@ -104,6 +104,43 @@ describe('ChildrenCardComponent', () => {
 		expect(component.form.controls.firstName.value).toBe('Taylor');
 	});
 
+	it('accepts age eleven and rejects age twelve at the year-end cutoff', () => {
+		const programYear = new Date().getFullYear() + 3;
+		fixture.componentRef.setInput('programYear', programYear);
+		component.birthdaySelected(`${programYear - 11}-01-01`);
+		expect(component.hasSelectedAge()).toBe(true);
+		expect(component.form.controls.ageGroup.value).toBe('9-11');
+		expect(component.minBirthDate).toBe(`${programYear - 11}-01-01`);
+		expect(component.maxBirthDate).toBe(`${programYear}-12-31`);
+
+		component.birthdaySelected(`${programYear - 12}-12-31`);
+		expect(component.hasSelectedAge()).toBe(false);
+		expect(component.form.controls.ageGroup.value).toBeNull();
+		expect(component.form.controls.toyType.value).toBeNull();
+		expect(component.form.invalid).toBe(true);
+	});
+
+	it('revalidates a saved twelve-year-old before allowing a name edit', () => {
+		const programYear = new Date().getFullYear() + 3;
+		fixture.componentRef.setInput('programYear', programYear);
+		const savedChild = vi.fn();
+		component.saveRequested.subscribe(savedChild);
+		component.editChild({
+			id: 12,
+			firstName: 'Before',
+			lastName: 'Tester',
+			dateOfBirth: new Date(programYear - 12, 11, 31),
+			ageGroup: '9-11' as never,
+			toyType: 'girls' as never,
+			enabled: true,
+		});
+		component.form.controls.firstName.setValue('After');
+		component.saveChild();
+
+		expect(component.form.invalid).toBe(true);
+		expect(savedChild).not.toHaveBeenCalled();
+	});
+
 	it('emits the current child when delete is requested from the edit modal', () => {
 		const deletedChild = vi.fn().mockName('deletedChild');
 		component.deleteRequested.subscribe(deletedChild);

@@ -43,7 +43,7 @@
 		"SUCCESS": "Success",
 		"RESET": "Reset",
 		"SAVE_CHOICE": "Save choice",
-		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?",
+		"NEWSLETTER": "Would you like to receive our newsletter and be notified of future events?",
 		"VALID_EMAIL": "Must be a valid email address",
 		"VALID_PASSWORD": "Enter your password",
 		"OPEN_ACCOUNT_HELP_MENU": "Open account and help menu"
@@ -85,7 +85,7 @@
 		"READY": "Ready",
 		"CHILD_GUIDANCE": "Add every child you are registering. You can edit this list until you submit.",
 		"ANOTHER_CHILD_TITLE": "Add another child?",
-		"ANOTHER_CHILD_MESSAGE": "Do you have any other children under 13 to add?",
+		"ANOTHER_CHILD_MESSAGE": "Do you have any other children 11 years old or younger to add?",
 		"REGISTERED_CHILDREN": "Registered children",
 		"CHILD_DETAILS": "Child details",
 		"EDIT_CHILD_LABEL": "Edit",
@@ -127,7 +127,7 @@
 		"FIRST_NAME": "First Name",
 		"LAST_NAME": "Last Name",
 		"BIRTH_DATE": "Birth Date",
-		"UNDER_13_REQUIREMENT": "Children must be under 13 years old.",
+		"AGE_REQUIREMENT": "Children must be 11 years old or younger.",
 		"TOY_TYPE": "Type of Toys",
 		"INFANT_MSG": "We have toys for children ages 0-2!",
 		"BOYS": "For Boys",
@@ -313,6 +313,12 @@
 		"SEARCH_PLACEHOLDER": "Type to search",
 		"YOU_SELECTED": "You selected",
 		"REFERRED_BY_PLACEHOLDER": "Type your answer here"
+	},
+	"CHECKIN": {
+		"COMPLETE_TITLE": "Merry Christmas!",
+		"COMPLETE_SUBTITLE": "We hope your shopping experience was wonderful",
+		"COMPLETE_MESSAGE": "Your check-in is confirmed. Registration is closed for your account this season.",
+		"OK": "Ok"
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "This field is required",

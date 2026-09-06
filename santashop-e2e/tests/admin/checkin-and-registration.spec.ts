@@ -349,6 +349,47 @@ test.describe('check-in and staff registration operations', () => {
 		await expect(page.getByText('Give the shopper 1 coupon.')).toBeVisible();
 	});
 
+	for (const action of ['edit', 'add'] as const) {
+		test(`CHECKIN-CHILD-${action} persists a child-only change at check-in`, async ({ page, request, seedRegistration }) => {
+			const uid = `child-${action}-checkin-e2e`;
+			await seedRegistration({ ...registration, uid });
+			await signInAdminViaUi(page, defaultAdminAccount());
+			await scanManualCode(page, registration.code);
+			await expect(page).toHaveURL(/\/admin\/checkin\/review$/);
+			if (action === 'edit') {
+				await page.getByRole('heading', { name: 'Test Child', exact: true }).click();
+				await page.locator('ion-item-option').filter({ hasText: 'Edit' }).click();
+			} else {
+				await page.getByRole('button', { name: 'Add Child', exact: true }).click();
+			}
+			const modal = page.locator('ion-modal');
+			await expect(modal).toBeVisible();
+			await fillIonicInput(page, 'ion-modal ion-input[formControlName="firstName"]', 'Updated');
+			if (action === 'add') {
+				await fillIonicInput(page, 'ion-modal ion-input[formControlName="lastName"]', 'Child');
+				await fillIonicInput(page, 'ion-modal ion-input[formControlName="dateOfBirth"]', '2015-01-01');
+			}
+			await modal.getByRole('radio', { name: 'Girls', exact: true }).click();
+			await modal.getByRole('button', { name: 'Save Child', exact: true }).click();
+			await expect(modal).toHaveCount(0);
+			await page.getByText('Yes, check in', { exact: true }).click();
+			await expect(page).toHaveURL(/\/admin\/checkin\/confirmation$/);
+			await expect(page.getByText(`Give the shopper ${action === 'add' ? '2 coupons' : '1 coupon'}.`, { exact: true })).toBeVisible();
+			// Read the emulator directly to prove that confirmation also saved the edit.
+			await expect.poll(async () => {
+				const project = process.env['E2E_EMULATOR_PROJECT'] ?? 'demo-santashop';
+				const response = await request.get(`http://127.0.0.1:8180/v1/projects/${project}/databases/(default)/documents/editedregistrations/${uid}`, {
+					headers: { Authorization: 'Bearer owner' },
+				});
+				if (!response.ok()) return [];
+				const document = await response.json();
+				return (document.fields?.children?.arrayValue?.values ?? []).map(
+					(child: { mapValue: { fields: { firstName: { stringValue: string } } } }) => child.mapValue.fields.firstName.stringValue,
+				).sort();
+			}).toEqual(action === 'add' ? ['Test', 'Updated'] : ['Updated']);
+		});
+	}
+
 	test('CHECKIN-011 lets staff cancel a submitted registration from review and blocks its superseded code', async ({
 		page,
 		seedRegistration,
@@ -412,10 +453,10 @@ test.describe('check-in and staff registration operations', () => {
 		await expect(modal).toBeVisible({ timeout: 10000 });
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="firstName"]', 'Kid');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="lastName"]', 'Walk');
-		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="dateOfBirth"]', '2025-01-01');
+		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="dateOfBirth"]', '2026-12-31');
 		await modal.locator('ion-input[formControlName="dateOfBirth"]').evaluate((element) =>
 			element.dispatchEvent(new CustomEvent('ionChange', {
-				detail: { value: '2025-01-01' },
+				detail: { value: '2026-12-31' },
 				bubbles: true,
 			})),
 		);

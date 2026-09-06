@@ -6,6 +6,7 @@ import {
 	type ScanInputMethod,
 } from '@santashop/models';
 import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core/admin/firestore';
+import { dateToCalendarString } from '@santashop/core';
 
 @Injectable({
 	providedIn: 'root',
@@ -35,6 +36,18 @@ export class CheckInService {
 			'onSiteRegistration',
 		)(registration);
 
+	private normalizeBirthDates(registration: Registration): Registration {
+		return {
+			...registration,
+			children: registration.children?.map((child) => ({
+				...child,
+				dateOfBirth: new Date(
+					`${dateToCalendarString(child.dateOfBirth)}T00:00:00.000Z`,
+				),
+			})),
+		};
+	}
+
 	public async checkIn(
 		registration: Registration,
 		isEdit = false,
@@ -55,7 +68,7 @@ export class CheckInService {
 				uid: registration.uid,
 				qrcode: registration.qrcode,
 				zipCode: registration.zipCode,
-				children: registration.children,
+				children: this.normalizeBirthDates(registration).children,
 				hasCheckedIn: true,
 			} as Partial<Registration>;
 
@@ -86,7 +99,9 @@ export class CheckInService {
 		await loading.present();
 
 		try {
-			const response = await this.onSiteRegistrationFn(registration);
+			const response = await this.onSiteRegistrationFn(
+				this.normalizeBirthDates(registration),
+			);
 			return response.data;
 		} finally {
 			if (await this.loadingController.getTop())

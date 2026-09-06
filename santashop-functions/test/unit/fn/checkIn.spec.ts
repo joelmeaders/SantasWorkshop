@@ -101,6 +101,68 @@ describe('checkIn handler', () => {
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
+	it('rejects an age 12 child stored in the authoritative registration', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		const registration = createRegistration();
+		registration.children = [{
+			...registration.children[0],
+			dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+		}];
+		adminMock.setDocSnapshot('registrations/test-user-123', {
+			...registration,
+			registrationSubmittedOn: new Date(),
+		});
+
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{ registration: createRegistration(), inputMethod: 'manual' },
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+		expect(adminMock.transactionSet).not.toHaveBeenCalled();
+	});
+
+	it('calculates check-in stats from authoritative children', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		const requestRegistration = createRegistration({
+			children: [
+				...createRegistration().children,
+				{
+					...createRegistration().children[0],
+					id: 2,
+					firstName: 'Untrusted',
+					dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+				},
+			],
+		});
+		adminMock.setDocSnapshot('registrations/test-user-123', {
+			...createRegistration(),
+			registrationSubmittedOn: new Date(),
+		});
+
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{ registration: requestRegistration, inputMethod: 'manual' },
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).resolves.toBe(1);
+		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'checkins/test-user-123' }),
+			expect.objectContaining({
+			stats: expect.objectContaining({
+				children: 1,
+				ageGroup35: 1,
+				ageGroup911: 0,
+			}),
+		}),
+		);
+	});
+
 	it('records a race attempt and returns an already-exists error without a second write', async () => {
 		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
 		const registration = {

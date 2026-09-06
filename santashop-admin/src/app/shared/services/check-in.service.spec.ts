@@ -26,7 +26,13 @@ describe('CheckInService', () => {
 		uid: 'registration-1',
 		qrcode: 'QR-123',
 		zipCode: '80202',
-		children: [{ id: 1, firstName: 'Kid' }],
+		children: [
+			{
+				id: 1,
+				firstName: 'Kid',
+				dateOfBirth: new Date(2017, 2, 4),
+			},
+		],
 		firstName: 'Parent',
 		lastName: 'Customer',
 	} as unknown as Registration;
@@ -71,7 +77,12 @@ describe('CheckInService', () => {
 				uid: 'registration-1',
 				qrcode: 'QR-123',
 				zipCode: '80202',
-				children: registration.children,
+				children: [
+					expect.objectContaining({
+						id: 1,
+						dateOfBirth: new Date('2017-03-04T00:00:00.000Z'),
+					}),
+				],
 				hasCheckedIn: true,
 			},
 		});
@@ -102,7 +113,15 @@ describe('CheckInService', () => {
 
 		await expect(service.onSiteRegistration(registration)).resolves.toBe(4);
 		expect(callableWrapper).toHaveBeenCalledWith('onSiteRegistration');
-		expect(onSiteRegistration).toHaveBeenCalledWith(registration);
+		expect(onSiteRegistration).toHaveBeenCalledWith({
+			...registration,
+			children: [
+				expect.objectContaining({
+					id: 1,
+					dateOfBirth: new Date('2017-03-04T00:00:00.000Z'),
+				}),
+			],
+		});
 		expect(dismiss).toHaveBeenCalled();
 	});
 });

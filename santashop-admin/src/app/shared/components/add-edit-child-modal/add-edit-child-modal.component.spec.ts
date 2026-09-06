@@ -155,7 +155,7 @@ describe('AddEditChildModalComponent', () => {
 		} as unknown as HTMLIonAlertElement);
 
 		await component.birthdaySelected({
-			detail: { value: `${new Date().getFullYear() - 13}-01-01` },
+			detail: { value: `${new Date().getFullYear() - 12}-12-31` },
 		});
 
 		expect(alerts.create).toHaveBeenCalledWith(
@@ -164,9 +164,9 @@ describe('AddEditChildModalComponent', () => {
 		expect(component.form.controls['dateOfBirth'].value).toBeUndefined();
 	});
 
-	it('accepts a twelve-year-old consistently with customer registration', async () => {
+	it('accepts an eleven-year-old consistently with customer registration', async () => {
 		await component.birthdaySelected({
-			detail: { value: `${new Date().getFullYear() - 12}-06-15` },
+			detail: { value: `${new Date().getFullYear() - 11}-01-01` },
 		});
 
 		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age911);

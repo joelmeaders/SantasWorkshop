@@ -53,6 +53,7 @@ import {
 	HttpsCallableResult,
 	PROGRAM_YEAR,
 } from '@santashop/core/admin/firestore';
+import { dateToCalendarString } from '@santashop/core';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -261,7 +262,12 @@ export class PreRegistrationPage implements OnDestroy {
 		try {
 			const registration = {
 				...this.form.value,
-				children: this.childrenList.getValue(),
+				children: this.childrenList.getValue().map((child) => ({
+					...child,
+					dateOfBirth: new Date(
+						`${dateToCalendarString(child.dateOfBirth)}T00:00:00.000Z`,
+					),
+				})),
 			} as Registration;
 
 			await this.preRegistrationFn(registration);

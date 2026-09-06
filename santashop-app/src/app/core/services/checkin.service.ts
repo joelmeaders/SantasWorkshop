@@ -2,12 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { CheckIn, COLLECTION_SCHEMA } from '@santashop/models';
 import {
 	AuthService,
-	filterNil,
 	FireRepoLite,
 	IFireRepoCollection,
 } from '@santashop/core';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs';
+import { distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { AlertController } from '@ionic/angular/standalone';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
 	providedIn: 'root',
@@ -16,33 +16,34 @@ export class CheckinService {
 	private readonly fireRepo = inject(FireRepoLite);
 	private readonly authService = inject(AuthService);
 	private readonly alertController = inject(AlertController);
+	private readonly translate = inject(TranslateService);
 
 	private readonly checkinCollection = (): IFireRepoCollection<CheckIn> =>
 		this.fireRepo.collection<CheckIn>(COLLECTION_SCHEMA.checkins);
 
-	public readonly hasCheckIn$ = this.authService.uid$.pipe(
-		filterNil(),
-		switchMap((uid) => this.checkinCollection().read(uid)),
+	public readonly hasCheckIn$ = this.authService.currentUser$.pipe(
+		map((user) => user?.uid),
+		distinctUntilChanged(),
+		switchMap((uid) => uid ? this.checkinCollection().read(uid) : of(undefined)),
 		distinctUntilChanged(),
 		map((checkin) => !!checkin),
 	);
 
 	public readonly checkinAlertSubscription = this.hasCheckIn$
 		.pipe(
-			filter((hasCheckIn) => !!hasCheckIn),
 			distinctUntilChanged(),
+			filter((hasCheckIn) => !!hasCheckIn),
 			switchMap(() => this.displayAlert()),
 		)
 		.subscribe();
 
 	private async displayAlert(): Promise<void> {
 		const alert = await this.alertController.create({
-			header: 'Merry Christmas!',
-			subHeader: 'We hope your shopping experience was wonderful',
-			message:
-				'Your check-in is confirmed. Registration is closed for your account this season.',
+			header: this.translate.instant('CHECKIN.COMPLETE_TITLE'),
+			subHeader: this.translate.instant('CHECKIN.COMPLETE_SUBTITLE'),
+			message: this.translate.instant('CHECKIN.COMPLETE_MESSAGE'),
 			backdropDismiss: false,
-			buttons: ['Ok'],
+			buttons: [this.translate.instant('CHECKIN.OK')],
 		});
 
 		await alert.present();

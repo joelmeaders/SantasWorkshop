@@ -128,6 +128,27 @@ describe('ReviewPage', () => {
 		expect(component.wasEdited).toBe(true);
 	});
 
+	it.each(['add', 'edit'] as const)(
+		'uses the edited check-in path when staff only %ss a child',
+		async (action) => {
+			vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+			checkIn.mockResolvedValue(1);
+			const child = { id: action === 'add' ? 2 : 1, firstName: 'Nora' };
+			if (action === 'add') await component.addChild(child as never);
+			else await component.editChild(child as never);
+
+			await component.checkIn();
+
+			expect(checkIn).toHaveBeenCalledWith(
+				expect.objectContaining({
+					children: expect.arrayContaining([child]),
+				}),
+				true,
+				'manual',
+			);
+		},
+	);
+
 	it('cancels a confirmed reservation and returns to the landing page', async () => {
 		alert.onDidDismiss.mockResolvedValue({ role: 'confirm' });
 		callable.mockResolvedValue({ data: 1 });

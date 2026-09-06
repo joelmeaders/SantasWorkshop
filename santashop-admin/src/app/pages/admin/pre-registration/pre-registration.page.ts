@@ -48,12 +48,12 @@ import { ReferralModalComponent } from '../../../shared/components/referral-moda
 import {
 	FireRepoLite,
 	FunctionsWrapper,
+	dateToCalendarString,
 	IFireRepoCollection,
 	timestampToDate,
 	HttpsCallableResult,
 	PROGRAM_YEAR,
 } from '@santashop/core/admin/firestore';
-import { dateToCalendarString } from '@santashop/core';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';

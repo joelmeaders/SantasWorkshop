@@ -50,3 +50,9 @@ After the rebase, all 310 Functions, 154 customer, and 301 admin unit tests pass
 All six HTML and plain-text templates now include the mission, “A Toy for Every Girl & Boy,” translated as “Un juguete para cada niña y niño” in Spanish. The HTML places it directly below the logo.
 
 Confirmation and reminder QR images now use 432 × 432 pixels, twice the previous 216 × 216 dimensions. They scale down proportionally on small screens. Rendered measurements were 432 × 432 at an 800px viewport and 296 × 296 at a 360px viewport. All six desktop/mobile render and images-blocked checks passed. Cancellation templates still contain no QR ticket. Full application suites were not rerun for this content and sizing change.
+
+## PR bundle-check repair
+
+The first Admin PR Validation run failed its bundle guard after the master rebase. Three date-helper imports used the full shared-library entry point, which introduced Firebase Storage into the admin output. They now use the existing `@santashop/core/admin/firestore` export. No bundle limits or validation rules were weakened.
+
+The exact `pnpm run ci:admin:build:test` command now passes locally, including the initial-bundle guard and both builds. Fifteen targeted preregistration, child-management, and check-in service tests pass.

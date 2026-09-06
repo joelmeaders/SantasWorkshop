@@ -22,11 +22,13 @@ type ReminderQueueRegistration = Registration & {
 };
 
 interface ReminderEmailDocument {
+	registrationUid: string;
 	code?: string;
 	qrCodeStoragePath: string;
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
+	appointmentSlotId?: string;
 	templateKey: string;
 	queuedOn: Date;
 	queueSource: 'scheduled-reminder';
@@ -63,8 +65,6 @@ const shouldQueueReminderEmail = (
 export default async function queueReminderEmails(
 	programYear: number,
 ): Promise<ReminderQueueResult> {
-
-
 	try {
 		const completedRegistrationsQuery = await admin
 			.firestore()
@@ -91,7 +91,9 @@ export default async function queueReminderEmails(
 		return result;
 	} catch (err) {
 		log.error('Failed to queue reminder emails', undefined, err);
-		throw new Error(`Failed to queue reminder emails: ${err}`, { cause: err });
+		throw new Error(`Failed to queue reminder emails: ${err}`, {
+			cause: err,
+		});
 	}
 }
 
@@ -109,87 +111,50 @@ async function queueReminderEmailRecords(
 			continue;
 		}
 
-		let emailDoc: ReminderEmailDocument;
-
 		try {
-			emailDoc = buildReminderEmailDocument(
-				registration,
-				registration.dateTimeSlot?.dateTime as Timestamp,
+			const db = admin.firestore();
+			const emailDocRef = db
+				.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+				.doc();
+			const registrationDocRef = db.doc(
+				`${COLLECTION_SCHEMA.registrations}/${uid}`,
 			);
-		} catch (err) {
-			log.error(
-				'Failed to format reminder email date/time',
-				{ uid: registration.uid ?? null },
-				err,
-			);
-			failed++;
-			continue;
-		}
 
-		try {
-			const emailDocRef = admin
-				.firestore()
-				.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
-			const registrationDocRef = admin
-				.firestore()
-				.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
+			const wasQueued = await db.runTransaction(async (transaction) => {
+				const registrationSnapshot =
+					await transaction.get(registrationDocRef);
+				const currentRegistration = registrationSnapshot.data() as
+					ReminderQueueRegistration | undefined;
 
-			const wasQueued = await admin
-				.firestore()
-				.runTransaction(async (transaction) => {
-					const [queueSnapshot, registrationSnapshot] =
-						await Promise.all([
-							transaction.get(emailDocRef),
-							transaction.get(registrationDocRef),
-						]);
-					const currentRegistration = registrationSnapshot.data() as
-						| ReminderQueueRegistration
-						| undefined;
-
-					if (
-						!currentRegistration ||
-						!shouldQueueReminderEmail(currentRegistration)
-					) {
-						return false;
-					}
-
-					if (queueSnapshot.exists) {
-						transaction.set(
-							registrationDocRef,
-							{
-								reminderEmailQueuedOn: emailDoc.queuedOn,
-								reminderEmailFailedOn: false,
-							},
-							{ merge: true },
-						);
-						transaction.set(
-							emailDocRef,
-							{
-								queuedOn: emailDoc.queuedOn,
-								deliveryRequestedOn:
-									emailDoc.deliveryRequestedOn,
-								deliveryState: 'queued',
-								failedOn: false,
-								lastErrorMessage: false,
-								lastErrorDetails: false,
-							},
-							{ merge: true },
-						);
-						return true;
-					}
-
-					transaction.create(emailDocRef, emailDoc);
-					transaction.set(
-						registrationDocRef,
-						{
-							reminderEmailQueuedOn: emailDoc.queuedOn,
-							reminderEmailFailedOn: false,
-						},
-						{ merge: true },
+				if (
+					!currentRegistration ||
+					!shouldQueueReminderEmail(currentRegistration)
+				) {
+					return false;
+				}
+				const dateTimeSlot = currentRegistration.dateTimeSlot?.dateTime;
+				if (!dateTimeSlot) {
+					throw new Error(
+						'Registration appointment date/time is unavailable.',
 					);
+				}
+				const emailDoc = buildReminderEmailDocument(
+					currentRegistration,
+					dateTimeSlot as Timestamp,
+				);
 
-					return true;
-				});
+				transaction.create(emailDocRef, emailDoc);
+				transaction.set(
+					registrationDocRef,
+					{
+						reminderEmailQueuedOn: emailDoc.queuedOn,
+						reminderEmailFailedOn: false,
+					},
+					{ merge: true },
+				);
+
+				return true;
+			});
 
 			if (!wasQueued) {
 				continue;
@@ -200,9 +165,14 @@ async function queueReminderEmailRecords(
 			const registrationDocRef = admin
 				.firestore()
 				.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-			await registrationDocRef.set(
-				{ reminderEmailFailedOn: new Date() },
-				{ merge: true },
+			await recordReminderQueueFailure(registrationDocRef).catch(
+				(failureWriteError: unknown) => {
+					log.error(
+						'Failed to record reminder queue failure',
+						{ uid },
+						failureWriteError,
+					);
+				},
 			);
 			log.error('Failed to queue reminder email', { uid }, err);
 			failed++;
@@ -213,20 +183,41 @@ async function queueReminderEmailRecords(
 	return { success, failed };
 }
 
+async function recordReminderQueueFailure(
+	registrationDocRef: ReturnType<ReturnType<typeof admin.firestore>['doc']>,
+): Promise<void> {
+	await admin.firestore().runTransaction(async (transaction) => {
+		const registrationSnapshot = await transaction.get(registrationDocRef);
+		const registration = registrationSnapshot.data() as
+			ReminderQueueRegistration | undefined;
+		if (!registration || !shouldQueueReminderEmail(registration)) {
+			return;
+		}
+		transaction.set(
+			registrationDocRef,
+			{ reminderEmailFailedOn: new Date() },
+			{ merge: true },
+		);
+	});
+}
+
 function buildReminderEmailDocument(
 	registration: ReminderQueueRegistration,
 	dateTimeSlot: Timestamp,
 ): ReminderEmailDocument {
+	const queuedOn = new Date();
 	return {
+		registrationUid: registration.uid ?? '',
 		code: registration.qrcode,
 		qrCodeStoragePath: registration.qrCodeStoragePath,
 		email: registration.emailAddress,
 		name: registration.firstName,
 		formattedDateTime: formatRegistrationDateTime(dateTimeSlot),
+		appointmentSlotId: registration.dateTimeSlot?.id,
 		templateKey: EMAIL_TEMPLATE_KEYS.eventReminder,
-		queuedOn: new Date(),
+		queuedOn,
 		queueSource: 'scheduled-reminder',
-		deliveryRequestedOn: new Date(),
+		deliveryRequestedOn: queuedOn,
 		deliveryState: 'queued',
 	};
 }

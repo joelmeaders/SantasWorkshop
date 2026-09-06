@@ -7,6 +7,15 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [2026.09.0-alpha.1] - Unreleased
 
+### Fixed
+
+- Queue each registration email request separately and guard against stale registration state.
+- Refresh customer profile authentication state and localize customer dates and status messages.
+- Correct admin sign-in feedback, referral saves, birthday edits, preregistration errors, and schedule field updates.
+- Render email-template previews under the site security policy and validate supported placeholders.
+- Preserve blocked concurrent check-in audit records and report complete check-in dates.
+- Record hosted customer/admin QA results and deployment follow-up in `docs/testing/hosted-qa-2026-09-05.md`.
+
 ### Added
 
 - Admin bundle-size guard and browser coverage for refresh, concurrency, disconnected reads, and owner-operation recovery.

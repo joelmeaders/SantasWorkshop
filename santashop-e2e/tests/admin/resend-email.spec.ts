@@ -38,7 +38,8 @@ test.describe('admin resend-email tool', () => {
 		await page.getByRole('button', { name: /send email/i }).click();
 
 		const alert = page.locator('ion-alert');
-		await expect(alert).toContainText('Email sent!', { timeout: 15000 });
+		await expect(alert).toContainText('Email queued', { timeout: 15000 });
+		await expect(alert).toContainText(completeRegistration.emailAddress);
 		await alert.getByRole('button', { name: 'OK', exact: true }).click();
 		await expect(
 			page.locator('ion-input[formControlName="emailAddress"] input'),

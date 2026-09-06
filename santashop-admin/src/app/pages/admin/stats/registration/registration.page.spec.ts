@@ -212,6 +212,13 @@ describe('RegistrationPage', () => {
 
 		component.refresh();
 		await fixture.whenStable();
+		await expect(firstValueFrom(component.hasScheduleData$)).resolves.toBe(
+			true,
+		);
+		expect(fixture.nativeElement.textContent).toContain('Capacity by Day');
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'No schedule data for this year',
+		);
 		const capacityByDay = await firstValueFrom(component.capacityByDay$);
 		expect(capacityByDay).toHaveLength(4);
 		expect(capacityByDay.slice(0, 2)).toMatchObject([
@@ -260,5 +267,36 @@ describe('RegistrationPage', () => {
 		expect(fixture.nativeElement.textContent).toContain(
 			'No schedule data for this year',
 		);
+	});
+	it('uses nightly registration totals when the seasonal schedule aggregate is absent', async () => {
+		const dateTime = new Date('2026-12-10T18:00:00.000Z');
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 4,
+								dateTimeCount: [
+									{ dateTime, count: 4, childCount: 4 },
+								],
+								zipCodeCount: [],
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(
+			of([
+				{ dateTime, maxSlots: 20, slotsReserved: 0, enabled: true },
+			] as DateTimeSlot[]) as never,
+		);
+		component.refresh();
+		await fixture.whenStable();
+		await expect(
+			firstValueFrom(component.registrationCountBySchedule$),
+		).resolves.toBe(4);
+		await expect(
+			firstValueFrom(component.familiesBySlots$),
+		).resolves.toEqual([{ date: dateTime, count: 4 }]);
+		expect(fixture.nativeElement.textContent).toContain('Capacity by Day');
 	});
 });

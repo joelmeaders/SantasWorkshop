@@ -12,6 +12,7 @@ import { PublicMenuComponent } from '../public-menu/public-menu.component';
 import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { menuSharp } from 'ionicons/icons';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
 	selector: 'app-internal-header',
@@ -25,6 +26,7 @@ import { menuSharp } from 'ionicons/icons';
 		IonItem,
 		IonButton,
 		AsyncPipe,
+		TranslateModule,
 		IonHeader,
 		IonToolbar,
 		IonItem,

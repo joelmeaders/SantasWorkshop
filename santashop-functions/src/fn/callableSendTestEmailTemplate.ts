@@ -14,6 +14,7 @@ import {
 	normalizeEmailTemplateFieldDefinitions,
 	prepareEmailTemplateHtmlForSes,
 	renderTemplateWithFieldValues,
+	validateEmailTemplateFieldMappings,
 } from '../utility/email-templates';
 import {
 	REGISTRATION_EMAIL_RETURN_PATH,
@@ -76,31 +77,39 @@ export default async function callableSendTestEmailTemplate(
 	request: CallableRequest<SendTestEmailTemplateRequest>,
 ): Promise<SendTestEmailTemplateResponse> {
 	assertAdmin(request);
-	const { recipientEmail, subjectPart, html, fieldMappings } =
-		withCallableValidation(() => {
-			const data = requireCallableData(request.data);
-			normalizeEmailTemplateDeliveryProfile(
-				requireTrimmedString(
-					data['deliveryProfile'],
-					'Delivery profile',
-				),
-			);
+	const {
+		recipientEmail,
+		deliveryProfile,
+		subjectPart,
+		html,
+		fieldMappings,
+	} = withCallableValidation(() => {
+		const data = requireCallableData(request.data);
+		const deliveryProfile = normalizeEmailTemplateDeliveryProfile(
+			requireTrimmedString(data['deliveryProfile'], 'Delivery profile'),
+		);
 
-			return {
-				recipientEmail: requireEmailAddress(
-					data['recipientEmail'],
-					'Recipient email',
-				),
-				subjectPart: requireTrimmedString(
-					data['subjectPart'],
-					'Subject',
-				),
-				html: requireTrimmedString(data['html'], 'HTML'),
-				fieldMappings: normalizeEmailTemplateFieldDefinitions(
-					requireArray(data['fieldMappings'], 'Field mappings'),
-				),
-			};
-		});
+		return {
+			recipientEmail: requireEmailAddress(
+				data['recipientEmail'],
+				'Recipient email',
+			),
+			deliveryProfile,
+			subjectPart: requireTrimmedString(data['subjectPart'], 'Subject'),
+			html: requireTrimmedString(data['html'], 'HTML'),
+			fieldMappings: normalizeEmailTemplateFieldDefinitions(
+				requireArray(data['fieldMappings'], 'Field mappings'),
+			),
+		};
+	});
+	withCallableValidation(() => {
+		validateEmailTemplateFieldMappings(
+			deliveryProfile,
+			subjectPart,
+			html,
+			fieldMappings,
+		);
+	});
 	validateDetectedFields(subjectPart, html, fieldMappings);
 
 	const renderedSubject = renderTemplateWithFieldValues(

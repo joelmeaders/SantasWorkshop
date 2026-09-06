@@ -20,6 +20,9 @@ export const loadTriggerScheduledHandlers = async (
 		SendTemplatedEmailCommand: class {
 			constructor(public readonly input: unknown) {}
 		},
+		SendEmailCommand: class {
+			constructor(public readonly input: unknown) {}
+		},
 	}));
 
 	const [

@@ -15,11 +15,13 @@ interface FirebaseAuthTokenLike {
 }
 
 interface ResendEmailDocument {
+	registrationUid: string;
 	code?: string;
 	qrCodeStoragePath: string;
 	email?: string;
 	name?: string;
 	formattedDateTime: string;
+	appointmentSlotId: string;
 	templateKey: string;
 	queuedOn: Date;
 	queueSource: 'manual-resend';
@@ -41,56 +43,49 @@ export default async function callableResendRegistrationEmail(
 	request: CallableRequest<{ customerId: string }>,
 ): Promise<boolean> {
 	const data = request.data;
-	const recordRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrations}/${data.customerId}`);
+	const db = admin.firestore();
+	const emailDocRef = db
+		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+		.doc();
+	const registrationDocRef = db.doc(
+		`${COLLECTION_SCHEMA.registrations}/${data.customerId}`,
+	);
+	adminOrOwnerGuard(data.customerId, request);
 
-	const record = (await recordRef.get()).data() as Registration | undefined;
-	if (!record) {
-		throw new HttpsError('not-found', 'Registration not found');
-	}
-
-	registrationCompleteGuard(record);
-	adminOrOwnerGuard(record, request);
-	ensureQrReady(record);
-
-	const dateTimeValue = record.dateTimeSlot?.['dateTime'];
-	if (!dateTimeValue) {
-		throw new HttpsError(
-			'failed-precondition',
-			'Missing registration date/time slot',
-		);
-	}
-
-	// Email Record Reference
-	const emailDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${record.uid}`);
-	const registrationDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrations}/${record.uid}`);
-
-	const queuedOn = new Date();
-	const dateTime = formatRegistrationDateTime(dateTimeValue);
-
-	const emailDoc: ResendEmailDocument = {
-		code: record.qrcode,
-		qrCodeStoragePath: record.qrCodeStoragePath,
-		email: record.emailAddress,
-		name: record.firstName,
-		formattedDateTime: dateTime,
-		templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
-		queuedOn,
-		queueSource: 'manual-resend',
-		deliveryRequestedOn: queuedOn,
-		deliveryState: 'queued',
-		failedOn: false,
-		lastErrorMessage: false,
-		lastErrorDetails: false,
-	};
-
-	await admin.firestore().runTransaction(async (transaction) => {
-		transaction.set(emailDocRef, emailDoc, { merge: true });
+	await db.runTransaction(async (transaction) => {
+		const registrationSnapshot = await transaction.get(registrationDocRef);
+		const record = registrationSnapshot.data() as Registration | undefined;
+		if (!record) {
+			throw new HttpsError('not-found', 'Registration not found');
+		}
+		registrationCompleteGuard(record);
+		ensureQrReady(record);
+		const dateTimeValue = record.dateTimeSlot?.['dateTime'];
+		if (!dateTimeValue) {
+			throw new HttpsError(
+				'failed-precondition',
+				'Missing registration date/time slot',
+			);
+		}
+		const queuedOn = new Date();
+		const emailDoc: ResendEmailDocument = {
+			registrationUid: data.customerId,
+			code: record.qrcode,
+			qrCodeStoragePath: record.qrCodeStoragePath,
+			email: record.emailAddress,
+			name: record.firstName,
+			formattedDateTime: formatRegistrationDateTime(dateTimeValue),
+			appointmentSlotId: record.dateTimeSlot?.id ?? '',
+			templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
+			queuedOn,
+			queueSource: 'manual-resend',
+			deliveryRequestedOn: queuedOn,
+			deliveryState: 'queued',
+			failedOn: false,
+			lastErrorMessage: false,
+			lastErrorDetails: false,
+		};
+		transaction.create(emailDocRef, emailDoc);
 		transaction.set(
 			registrationDocRef,
 			{
@@ -132,13 +127,13 @@ function registrationCompleteGuard(record: Registration): void {
 }
 
 function adminOrOwnerGuard(
-	record: Registration,
+	registrationUid: string,
 	request: CallableRequest<{ customerId: string }>,
 ): void {
-	if (!isAdminContext(request) && record.uid !== request.auth?.uid) {
+	if (!isAdminContext(request) && registrationUid !== request.auth?.uid) {
 		log.warn('Unauthorized registration email resend attempt', {
 			actorUid: request.auth?.uid ?? null,
-			targetUid: record.uid ?? null,
+			targetUid: registrationUid,
 		});
 		throw new HttpsError(
 			'permission-denied',

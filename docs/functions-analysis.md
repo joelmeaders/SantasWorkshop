@@ -26,18 +26,23 @@ mappings. A missing key or unpublished template fails explicitly.
 `sendNewRegistrationEmails` invokes `sendRegistrationEmail.ts` when a document
 is created in `tmp_registrationemails`. It records delivery claims and SES
 acceptance metadata. Queue-document updates do not invoke this creation trigger.
+Each submission, appointment change, reminder, or manual resend creates a new
+queue document. The sender checks available registration identity and delivery
+version data before sending and before updating registration delivery metadata.
+An obsolete request is marked superseded. A request already accepted by SES
+cannot be recalled by a later registration change.
 Provider acceptance is distinct from recipient delivery; the application does
 not receive a complete SES delivery-event stream.
 
 ## Scheduled work
 
-| Export | Purpose |
-| --- | --- |
-| `scheduledFirestoreBackup` | Firestore backup |
+| Export                          | Purpose                                                |
+| ------------------------------- | ------------------------------------------------------ |
+| `scheduledFirestoreBackup`      | Firestore backup                                       |
 | `scheduledDateTimeSlotCounters` | Reconcile reserved appointment counts and availability |
-| `scheduledRegistrationStats` | Registration and demographic aggregates |
-| `scheduledUserStats` | User aggregates |
-| `scheduledCheckInStats` | Check-in aggregates |
+| `scheduledRegistrationStats`    | Registration and demographic aggregates                |
+| `scheduledUserStats`            | User aggregates                                        |
+| `scheduledCheckInStats`         | Check-in aggregates                                    |
 
 Schedules and program year come from generated runtime configuration. Operators
 manually increase appointment-counter frequency during high demand. Capacity is

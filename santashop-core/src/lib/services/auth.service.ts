@@ -6,7 +6,7 @@ import {
 	shareReplay,
 	switchMap,
 } from 'rxjs/operators';
-import { from, Observable } from 'rxjs';
+import { from, merge, Observable, Subject } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
 import { Auth, StaffRole, UserEmailUid } from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
@@ -22,16 +22,24 @@ import {
 export class AuthService {
 	private readonly authWrapper = inject(AuthWrapper);
 	private readonly functionsWrapper = inject(FunctionsWrapper);
+	private readonly refreshedUser$ = new Subject<User | null>();
 
 	/**
-	 * Stream of the auth state, triggered on login/logout
+	 * Stream of the current identity, triggered on auth state and refreshes
 	 *
 	 * @type {(Observable<User | null>)}
 	 * @memberof AuthService
 	 */
-	public readonly currentUser$: Observable<User | null> = this.authWrapper
-		.authState()
-		.pipe(distinctUntilChanged(), shareReplay(1));
+	public readonly currentUser$: Observable<User | null> = merge(
+		this.authWrapper.authState().pipe(distinctUntilChanged()),
+		this.refreshedUser$,
+	).pipe(shareReplay(1));
+
+	public async refreshCurrentUser(): Promise<User | null> {
+		const user = await this.authWrapper.reloadCurrentUser();
+		this.refreshedUser$.next(user);
+		return user;
+	}
 
 	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
 		this.authWrapper.getCurrentUserToken();
@@ -64,6 +72,7 @@ export class AuthService {
 	 */
 	public readonly uid$: Observable<string> = this.currentUser$.pipe(
 		map((user) => user?.uid),
+		distinctUntilChanged(),
 		filter((uid) => !!uid),
 		map((uid) => uid as string),
 		shareReplay(1),
@@ -131,7 +140,8 @@ export class AuthService {
 			const roles = (claims['roles'] as StaffRole[] | undefined) ?? [];
 			return (
 				claims['owner'] === true ||
-				roles.includes('admin') || roles.includes('checkin')
+				roles.includes('admin') ||
+				roles.includes('checkin')
 			);
 		}),
 		shareReplay(1),
@@ -184,7 +194,7 @@ export class AuthService {
 	}
 
 	/**
-	 * Change user password. Logs in, then changes password.
+	 * Change user password. Refreshes the identity, logs in, then changes password.
 	 *
 	 * @param oldPassword
 	 * @param newPassword
@@ -199,18 +209,23 @@ export class AuthService {
 
 		if (!user) throw new Error('User cannot be null');
 
+		const currentUser = (await this.refreshCurrentUser()) ?? user;
+
 		const auth: Auth = {
-			emailAddress: user.email as string,
+			emailAddress: currentUser.email as string,
 			password: oldPassword,
 		};
 
-		await this.login(auth);
-		return this.authWrapper.updatePassword(user, newPassword);
+		const credential = await this.login(auth);
+		return this.authWrapper.updatePassword(
+			credential.user ?? this.authWrapper.currentUser() ?? currentUser,
+			newPassword,
+		);
 	}
 
 	/**
-	 * Changes the user email address. Logs the user
-	 * in first, then changes their email address.
+	 * Changes the user email address. Refreshes the identity, logs the user
+	 * in, changes the email address, then refreshes the identity again.
 	 *
 	 * @param password
 	 * @param newEmailAddress
@@ -225,13 +240,17 @@ export class AuthService {
 
 		if (!user) throw new Error('User cannot be null');
 
+		const currentUser = (await this.refreshCurrentUser()) ?? user;
+
 		const auth: Auth = {
-			emailAddress: user?.email as string,
+			emailAddress: currentUser.email as string,
 			password,
 		};
 
 		await this.login(auth);
 		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
+		await this.login({ emailAddress: newEmailAddress, password });
+		await this.refreshCurrentUser();
 	}
 
 	/**

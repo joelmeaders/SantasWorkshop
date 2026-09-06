@@ -299,3 +299,23 @@ export const recordCheckInRaceAttempt = async (
 		now,
 	);
 };
+
+export const recordCheckInCreateConflictAttempt = async (
+	customerId: string,
+	scannerUid: string,
+	inputMethod: ScanInputMethod,
+	now = new Date(),
+): Promise<ResolveRegistrationScanResult | undefined> => {
+	const db = admin.firestore();
+	const [registrationSnapshot, checkInSnapshot] = await Promise.all([
+		db.doc(`${COLLECTION_SCHEMA.registrations}/${customerId}`).get(),
+		db.doc(`${COLLECTION_SCHEMA.checkins}/${customerId}`).get(),
+	]);
+	if (!registrationSnapshot.exists || !checkInSnapshot.exists) {
+		return undefined;
+	}
+
+	const registration = snapshotData<Registration>(registrationSnapshot);
+	registration.uid = customerId;
+	return recordCheckInRaceAttempt(registration, scannerUid, inputMethod, now);
+};

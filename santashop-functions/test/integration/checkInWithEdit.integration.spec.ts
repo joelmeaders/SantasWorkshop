@@ -98,6 +98,14 @@ describe.sequential('checkInWithEdit integration', () => {
 		expect(
 			outcomes.filter((outcome) => outcome.status === 'rejected'),
 		).toHaveLength(1);
+		const rejected = outcomes.find(
+			(outcome): outcome is PromiseRejectedResult =>
+				outcome.status === 'rejected',
+		);
+		expect(rejected?.reason).toMatchObject({
+			code: 'already-exists',
+			details: { disposition: 'duplicate-accidental' },
+		});
 		expect(await getCollectionCount(COLLECTION_SCHEMA.checkins)).toBe(1);
 		expect(
 			await getCollectionCount(

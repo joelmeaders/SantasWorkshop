@@ -81,6 +81,42 @@ describe('registration scan resolution', () => {
 		).toHaveBeenCalledTimes(1);
 	});
 
+	it('records a create conflict only when the check-in now exists', async () => {
+		const { recordCheckInCreateConflictAttempt } = await loadResolver();
+		const checkedInOn = new Date('2025-12-10T18:00:00.000Z');
+		adminMock.setCollectionDocs('registrations', [
+			{ id: 'customer-1', data: submittedRegistration() },
+		]);
+		adminMock.setDocSnapshot(
+			'registrations/customer-1',
+			submittedRegistration(),
+		);
+
+		await expect(
+			recordCheckInCreateConflictAttempt(
+				'customer-1',
+				'staff-1',
+				'camera',
+				new Date('2025-12-10T18:04:00.000Z'),
+			),
+		).resolves.toBeUndefined();
+
+		adminMock.setDocSnapshot('checkins/customer-1', {
+			checkInDateTime: { toDate: () => checkedInOn },
+		});
+		await expect(
+			recordCheckInCreateConflictAttempt(
+				'customer-1',
+				'staff-1',
+				'camera',
+				new Date('2025-12-10T18:04:00.000Z'),
+			),
+		).resolves.toMatchObject({
+			disposition: 'duplicate-accidental',
+			attempt: { outcome: 'duplicate-accidental' },
+		});
+	});
+
 	it('records a late duplicate in a risk summary transaction', async () => {
 		const { resolveRegistrationCode } = await loadResolver();
 		const checkedInOn = new Date('2025-12-10T18:00:00.000Z');

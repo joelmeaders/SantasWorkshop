@@ -7,6 +7,7 @@ import {
 	generateIdMock,
 	generateQrCodeMock,
 	loadCheckInAdminHandlers,
+	recordCheckInCreateConflictAttemptMock,
 	recordCheckInRaceAttemptMock,
 } from '../helpers/checkin-admin.unit-helper';
 import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
@@ -19,6 +20,7 @@ describe('checkIn handler', () => {
 		adminMock.batchCommit.mockResolvedValue(undefined);
 		generateQrCodeMock.mockResolvedValue(undefined);
 		generateIdMock.mockReturnValue('ZXCV2345');
+		recordCheckInCreateConflictAttemptMock.mockReset();
 		recordCheckInRaceAttemptMock.mockReset();
 	});
 
@@ -151,6 +153,66 @@ describe('checkIn handler', () => {
 			code: 'already-exists',
 			message: 'conflict',
 		});
+		expect(recordCheckInCreateConflictAttemptMock).toHaveBeenCalledWith(
+			'test-user-123',
+			'test-user-123',
+			'manual',
+		);
+	});
+
+	it('keeps invalid transaction errors internal without recording a duplicate', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.runTransaction.mockRejectedValue({
+			code: 3,
+			message: 'Transaction is invalid or closed.',
+		});
+
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'manual',
+					},
+					{ roles: ['admin', 'checkin'], uid: 'staff-3' },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'internal',
+			message: 'Transaction is invalid or closed.',
+		});
+		expect(recordCheckInCreateConflictAttemptMock).not.toHaveBeenCalled();
+	});
+
+	it('records an evidenced create conflict as a blocked scan attempt', async () => {
+		const { checkIn } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.runTransaction.mockRejectedValue({
+			code: 6,
+			message: 'conflict',
+		});
+		recordCheckInCreateConflictAttemptMock.mockResolvedValue({
+			disposition: 'duplicate-accidental',
+		});
+
+		await expect(
+			checkIn(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'camera',
+					},
+					{ roles: ['admin', 'checkin'], uid: 'staff-4' },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'already-exists',
+			details: { disposition: 'duplicate-accidental' },
+		});
+		expect(recordCheckInCreateConflictAttemptMock).toHaveBeenCalledWith(
+			'test-user-123',
+			'staff-4',
+			'camera',
+		);
 	});
 
 	it('creates a check-in record and returns the child count', async () => {

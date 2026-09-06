@@ -14,15 +14,20 @@ export const addCheckInToAggregatedStats = (
 		throw new Error('Cannot aggregate an incomplete check-in record.');
 	}
 
-	const { day, hour } = getLocalDayAndHour(checkIn.checkInDateTime);
+	const { dateKey, month, day, hour } = getLocalDateParts(
+		checkIn.checkInDateTime,
+	);
 	const dateTimeCount = (current?.dateTimeCount ?? []).map((entry) => ({
 		...entry,
 	}));
-	const existing = dateTimeCount.find(
-		(entry) => entry.date === day && entry.hour === hour,
-	);
+	const existing = dateTimeCount.find((entry) => {
+		if (entry.hour !== hour) return false;
+		if (entry.dateKey) return entry.dateKey === dateKey;
+		return month === 12 && entry.date === day;
+	});
 
 	if (existing) {
+		existing.dateKey = dateKey;
 		existing.customerCount += 1;
 		existing.childCount += checkIn.stats.children;
 		if (checkIn.registrationCode !== 'onsite') {
@@ -32,7 +37,7 @@ export const addCheckInToAggregatedStats = (
 			existing.modifiedCount += 1;
 		}
 	} else {
-		dateTimeCount.push(createDateTimeCount(checkIn, day, hour));
+		dateTimeCount.push(createDateTimeCount(checkIn, dateKey, day, hour));
 	}
 
 	return {
@@ -43,9 +48,11 @@ export const addCheckInToAggregatedStats = (
 
 const createDateTimeCount = (
 	checkIn: CheckIn,
+	dateKey: string,
 	day: number,
 	hour: number,
 ): CheckInDateTimeCount => ({
+	dateKey,
 	date: day,
 	hour,
 	customerCount: 1,
@@ -54,19 +61,40 @@ const createDateTimeCount = (
 	modifiedCount: checkIn.stats?.modifiedAtCheckIn ? 1 : 0,
 });
 
-const getLocalDayAndHour = (date: Date): { day: number; hour: number } => {
+const getLocalDateParts = (
+	date: Date,
+): {
+	dateKey: string;
+	month: number;
+	day: number;
+	hour: number;
+} => {
 	const parts = new Intl.DateTimeFormat('en-US', {
 		timeZone: SHOP_TIME_ZONE,
+		year: 'numeric',
+		month: 'numeric',
 		day: 'numeric',
 		hour: 'numeric',
 		hourCycle: 'h23',
 	}).formatToParts(date);
-	const day = Number(parts.find((part) => part.type === 'day')?.value);
-	const hour = Number(parts.find((part) => part.type === 'hour')?.value);
+	const read = (type: Intl.DateTimeFormatPartTypes): number =>
+		Number(parts.find((part) => part.type === type)?.value);
+	const year = read('year');
+	const month = read('month');
+	const day = read('day');
+	const hour = read('hour');
 
-	if (!Number.isInteger(day) || !Number.isInteger(hour)) {
+	if (
+		!Number.isInteger(year) ||
+		!Number.isInteger(month) ||
+		!Number.isInteger(day) ||
+		!Number.isInteger(hour)
+	) {
 		throw new Error('Could not determine the local check-in time.');
 	}
 
-	return { day, hour };
+	const dateKey = `${year.toString().padStart(4, '0')}-${month
+		.toString()
+		.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+	return { dateKey, month, day, hour };
 };

@@ -27,7 +27,8 @@ import {
 import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocalizedDatePipe } from '../../../shared/pipes/localized-date.pipe';
 import { addIcons } from 'ionicons';
 import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { ChangeDatetimeModalComponent } from './change-datetime-modal/change-datetime-modal.component';
@@ -42,7 +43,7 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	providers: [DateTimeSlotsService],
 	imports: [
 		AsyncPipe,
-		DatePipe,
+		LocalizedDatePipe,
 		TranslateModule,
 		IonContent,
 		IonGrid,

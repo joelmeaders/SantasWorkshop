@@ -55,7 +55,9 @@ describe('callableAdminPreRegister handler', () => {
 		});
 		await expect(
 			callableAdminPreRegister(
-				createCallableRequest(createRegistration(), { roles: ['admin', 'checkin'] }),
+				createCallableRequest(createRegistration(), {
+					roles: ['admin', 'checkin'],
+				}),
 			),
 		).rejects.toMatchObject({ code: 'already-exists' });
 
@@ -63,7 +65,9 @@ describe('callableAdminPreRegister handler', () => {
 		adminMock.setDocSnapshot('dateTimeSlots/slot-1', {});
 		await expect(
 			callableAdminPreRegister(
-				createCallableRequest(createRegistration(), { roles: ['admin', 'checkin'] }),
+				createCallableRequest(createRegistration(), {
+					roles: ['admin', 'checkin'],
+				}),
 			),
 		).rejects.toMatchObject({ code: 'not-found' });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('pre-reg-no-slot');
@@ -80,10 +84,10 @@ describe('callableAdminPreRegister handler', () => {
 		const result = await callableAdminPreRegister(
 			createCallableRequest(
 				createRegistration({
-				dateTimeSlot: {
-					id: 'slot-1',
-					dateTime: new Date('2025-12-10T18:00:00.000Z'),
-				},
+					dateTimeSlot: {
+						id: 'slot-1',
+						dateTime: new Date('2025-12-10T18:00:00.000Z'),
+					},
 				}),
 				{ roles: ['admin', 'checkin'] },
 			),
@@ -107,13 +111,14 @@ describe('callableAdminPreRegister handler', () => {
 			{ merge: true },
 		);
 		expect(
-			adminMock.getDocRef('tmp_registrationemails/pre-reg-123').set,
+			adminMock.getDocRef('tmp_registrationemails/generated-onsite-id')
+				.create,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
+				registrationUid: 'pre-reg-123',
 				deliveryState: 'queued',
 				email: 'buddy.elf@example.com',
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -130,10 +135,10 @@ describe('callableAdminPreRegister handler', () => {
 			callableAdminPreRegister(
 				createCallableRequest(
 					createRegistration({
-					dateTimeSlot: {
-						id: 'slot-1',
-						dateTime: new Date('2025-12-10T18:00:00.000Z'),
-					},
+						dateTimeSlot: {
+							id: 'slot-1',
+							dateTime: new Date('2025-12-10T18:00:00.000Z'),
+						},
 					}),
 					{ roles: ['admin', 'checkin'] },
 				),
@@ -155,10 +160,10 @@ describe('callableAdminPreRegister handler', () => {
 			callableAdminPreRegister(
 				createCallableRequest(
 					createRegistration({
-					dateTimeSlot: {
-						id: 'slot-1',
-						dateTime: new Date('2025-12-10T18:00:00.000Z'),
-					},
+						dateTimeSlot: {
+							id: 'slot-1',
+							dateTime: new Date('2025-12-10T18:00:00.000Z'),
+						},
 					}),
 					{ roles: ['admin', 'checkin'] },
 				),

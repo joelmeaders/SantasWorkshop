@@ -284,10 +284,11 @@
 							<div>
 								<h3>{{ group.dateLabel }}</h3>
 								<p>
-									{{ group.slots.length }} slots @if
-									(countSelectedSlots(group.slots) > 0) { · {{
-									countSelectedSlots(group.slots) }} selected
-									}
+									{{ group.slots.length }} {{
+									group.slots.length === 1 ? 'slot' : 'slots'
+									}} @if (countSelectedSlots(group.slots) > 0)
+									{ · {{ countSelectedSlots(group.slots) }}
+									selected }
 								</p>
 							</div>
 						</div>

@@ -27,15 +27,15 @@ function authState(auth: Auth, zone: NgZone): Observable<User | null> {
 		switchMap(
 			() =>
 				new Observable<User | null>((subscriber) => {
-						const emitUser = subscriber.next.bind(subscriber);
-						const emitError = subscriber.error.bind(subscriber);
+					const emitUser = subscriber.next.bind(subscriber);
+					const emitError = subscriber.error.bind(subscriber);
 
 					const nextUser = (user: User | null): void => {
-							emitInZone(zone, emitUser, user);
+						emitInZone(zone, emitUser, user);
 					};
 
 					const nextError = (error: Error): void => {
-							emitInZone(zone, emitError, error);
+						emitInZone(zone, emitError, error);
 					};
 
 					const unsubscribe = onAuthStateChanged(
@@ -61,6 +61,16 @@ export class AuthWrapper {
 
 	public readonly currentUser = (): User | null => this.auth.currentUser;
 
+	public readonly reloadCurrentUser = async (): Promise<User | null> => {
+		const user = this.currentUser();
+		if (!user) {
+			return null;
+		}
+
+		await user.reload();
+		return this.currentUser();
+	};
+
 	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
 		this.currentUser()?.getIdTokenResult() ?? Promise.resolve(null);
 
@@ -84,7 +94,9 @@ export class AuthWrapper {
 	): Promise<UserCredential> => {
 		if (!user.email) {
 			return Promise.reject(
-				new Error('The current account does not have an email address.'),
+				new Error(
+					'The current account does not have an email address.',
+				),
 			);
 		}
 

@@ -6,8 +6,15 @@ import {
 	provideProgramYearMock,
 } from '../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import { AlertController, LoadingController, ModalController } from '@ionic/angular/standalone';
-import { FireRepoLite, FunctionsWrapper } from '@santashop/core/admin/firestore';
+import {
+	AlertController,
+	LoadingController,
+	ModalController,
+} from '@ionic/angular/standalone';
+import {
+	FireRepoLite,
+	FunctionsWrapper,
+} from '@santashop/core/admin/firestore';
 import { firstValueFrom, of } from 'rxjs';
 import { SearchService } from '../search/search.service';
 
@@ -22,16 +29,24 @@ describe('PreRegistrationPage', () => {
 	const searchUsersByEmailAddress = vi.fn();
 	const callable = vi.fn();
 	const callableWrapper = vi.fn().mockReturnValue(callable);
-	const loading = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined) };
+	const loading = {
+		present: vi.fn().mockResolvedValue(undefined),
+		dismiss: vi.fn().mockResolvedValue(undefined),
+	};
 	const createLoading = vi.fn().mockResolvedValue(loading);
-	const modal = { present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ data: undefined }) };
+	const modal = {
+		present: vi.fn().mockResolvedValue(undefined),
+		onDidDismiss: vi.fn().mockResolvedValue({ data: undefined }),
+	};
 	const createModal = vi.fn().mockResolvedValue(modal);
 	const alerts: { present: ReturnType<typeof vi.fn> }[] = [];
-	const createAlert = vi.fn(async (): Promise<{ present: ReturnType<typeof vi.fn> }> => {
-		const alert = { present: vi.fn().mockResolvedValue(undefined) };
-		alerts.push(alert);
-		return alert;
-	});
+	const createAlert = vi.fn(
+		async (): Promise<{ present: ReturnType<typeof vi.fn> }> => {
+			const alert = { present: vi.fn().mockResolvedValue(undefined) };
+			alerts.push(alert);
+			return alert;
+		},
+	);
 
 	beforeEach(async () => {
 		readMany.mockReset();
@@ -41,18 +56,35 @@ describe('PreRegistrationPage', () => {
 		callable.mockReset();
 		callable.mockResolvedValue({ data: 1 });
 		callableWrapper.mockClear();
-		loading.present.mockClear(); loading.dismiss.mockClear(); createLoading.mockClear();
-		modal.present.mockClear(); modal.onDidDismiss.mockReset(); modal.onDidDismiss.mockResolvedValue({ data: undefined }); createModal.mockClear();
-		alerts.length = 0; createAlert.mockClear();
+		loading.present.mockClear();
+		loading.dismiss.mockClear();
+		createLoading.mockClear();
+		modal.present.mockClear();
+		modal.onDidDismiss.mockReset();
+		modal.onDidDismiss.mockResolvedValue({ data: undefined });
+		createModal.mockClear();
+		alerts.length = 0;
+		createAlert.mockClear();
 		TestBed.configureTestingModule({
 			imports: [PreRegistrationPage],
 			providers: [
-				{ provide: FireRepoLite, useValue: { collection: vi.fn().mockReturnValue({ readMany }) } },
+				{
+					provide: FireRepoLite,
+					useValue: {
+						collection: vi.fn().mockReturnValue({ readMany }),
+					},
+				},
 				{ provide: FunctionsWrapper, useValue: { callableWrapper } },
-				{ provide: SearchService, useValue: { searchUsersByEmailAddress } },
+				{
+					provide: SearchService,
+					useValue: { searchUsersByEmailAddress },
+				},
 				{ provide: ModalController, useValue: { create: createModal } },
 				{ provide: AlertController, useValue: { create: createAlert } },
-				{ provide: LoadingController, useValue: { create: createLoading } },
+				{
+					provide: LoadingController,
+					useValue: { create: createLoading },
+				},
 				provideActivatedRouteMock(),
 				provideProgramYearMock(2026),
 				provideRouter([]),
@@ -69,9 +101,9 @@ describe('PreRegistrationPage', () => {
 	});
 
 	it('normalizes and sorts available slots while keeping stable slot identifiers', async () => {
-		await expect(firstValueFrom(component.availableSlots$)).resolves.toMatchObject([
-			{ id: 'early' }, { id: 'late' },
-		]);
+		await expect(
+			firstValueFrom(component.availableSlots$),
+		).resolves.toMatchObject([{ id: 'early' }, { id: 'late' }]);
 		expect(component.slotIndex(0, { id: 'early' } as never)).toBe('early');
 		expect(component.slotIndex(0, {} as never)).toBe('');
 	});
@@ -85,9 +117,15 @@ describe('PreRegistrationPage', () => {
 
 		await component.chooseReferral();
 
-		await expect(firstValueFrom(component.children$)).resolves.toMatchObject([{ id: 2, firstName: 'Noah' }]);
-		expect(component.form.controls['referredBy'].value).toBe('School flyer');
-		await expect(firstValueFrom(component.chosenReferrer$)).resolves.toBe('School flyer');
+		await expect(
+			firstValueFrom(component.children$),
+		).resolves.toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(component.form.controls['referredBy'].value).toBe(
+			'School flyer',
+		);
+		await expect(firstValueFrom(component.chosenReferrer$)).resolves.toBe(
+			'School flyer',
+		);
 	});
 
 	it('blocks an existing customer and displays the duplicate-account warning', async () => {
@@ -95,40 +133,64 @@ describe('PreRegistrationPage', () => {
 		searchUsersByEmailAddress.mockReturnValue(of([{ uid: 'customer-1' }]));
 
 		await expect(component.checkIfCustomerExists()).resolves.toBe(true);
-		expect(createAlert).toHaveBeenCalledWith(expect.objectContaining({
-			subHeader: 'This customer already has an account.',
-		}));
+		expect(createAlert).toHaveBeenCalledWith(
+			expect.objectContaining({
+				subHeader: 'This customer already has an account.',
+			}),
+		);
 	});
 
 	it('submits a new registration, resets the form, and confirms completion', async () => {
 		vi.spyOn(component, 'checkIfCustomerExists').mockResolvedValue(false);
 		component.form.patchValue({
-			firstName: 'Ada', lastName: 'Lovelace', emailAddress: 'ada@example.test',
-			zipCode: '80001', referredBy: 'Friend', newsletter: true, dateTimeSlot: { id: 'slot-1' },
+			firstName: 'Ada',
+			lastName: 'Lovelace',
+			emailAddress: 'ada@example.test',
+			zipCode: '80001',
+			referredBy: 'Friend',
+			newsletter: true,
+			dateTimeSlot: { id: 'slot-1' },
 		});
 		await component.addChild({ id: 1, firstName: 'Ava' } as never);
 
 		await component.register();
 
-		expect(callableWrapper).toHaveBeenCalledWith('callableAdminPreRegister');
-		expect(callable).toHaveBeenCalledWith(expect.objectContaining({
-			firstName: 'Ada', children: [{ id: 1, firstName: 'Ava' }],
-		}));
+		expect(callableWrapper).toHaveBeenCalledWith(
+			'callableAdminPreRegister',
+		);
+		expect(callable).toHaveBeenCalledWith(
+			expect.objectContaining({
+				firstName: 'Ada',
+				children: [{ id: 1, firstName: 'Ava' }],
+			}),
+		);
 		expect(loading.present).toHaveBeenCalledOnce();
 		expect(loading.dismiss).toHaveBeenCalledOnce();
 		expect(component.form.controls['firstName'].value).toBeNull();
-		expect(createAlert).toHaveBeenLastCalledWith(expect.objectContaining({ header: 'Registration Complete' }));
+		expect(createAlert).toHaveBeenLastCalledWith(
+			expect.objectContaining({ header: 'Registration Complete' }),
+		);
 	});
 
-	it('shows the callable error, dismisses the loader, then resets after registration', async () => {
+	it('shows the callable error, dismisses the loader, and preserves the draft', async () => {
 		vi.spyOn(component, 'checkIfCustomerExists').mockResolvedValue(false);
 		callable.mockRejectedValue(new Error('Callable unavailable'));
+		component.form.controls['firstName'].setValue('Ada');
+		await component.addChild({ id: 1, firstName: 'Ava' } as never);
 
 		await component.register();
 
-		expect(createAlert).toHaveBeenCalledWith(expect.objectContaining({
-			header: 'Error registering', message: 'Callable unavailable',
-		}));
+		expect(createAlert).toHaveBeenCalledWith(
+			expect.objectContaining({
+				header: 'Error registering',
+				message: 'Callable unavailable',
+			}),
+		);
+		expect(createAlert).toHaveBeenCalledTimes(1);
 		expect(loading.dismiss).toHaveBeenCalledOnce();
+		expect(component.form.controls['firstName'].value).toBe('Ada');
+		await expect(firstValueFrom(component.children$)).resolves.toHaveLength(
+			1,
+		);
 	});
 });

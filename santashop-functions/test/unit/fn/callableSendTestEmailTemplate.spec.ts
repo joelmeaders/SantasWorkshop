@@ -113,4 +113,30 @@ describe('callableSendTestEmailTemplate handler', () => {
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
+
+	it('rejects unsupported Handlebars syntax before sending', async () => {
+		const { callableSendTestEmailTemplate } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callableSendTestEmailTemplate(
+				createCallableRequest(
+					{
+						recipientEmail: 'preview@example.com',
+						deliveryProfile: 'registration-confirmation',
+						subjectPart: '{{#if firstName}}Hello{{/if}}',
+						html: '<h1>Hello {{firstName}}</h1>',
+						fieldMappings: [
+							{
+								name: 'firstName',
+								mapping: 'firstName',
+								sampleValue: 'Buddy',
+							},
+						],
+					},
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
 });

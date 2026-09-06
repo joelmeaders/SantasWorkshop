@@ -1,18 +1,14 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AlertController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { DateTimeSlot } from '@santashop/models';
 import { AuthService } from '@santashop/core/admin/firestore';
-import { provideProgramYearMock, requireDefined } from '../../../../../test-helpers';
+import {
+	provideProgramYearMock,
+	requireDefined,
+} from '../../../../../test-helpers';
 import { ScheduleEditorPage } from './schedule-editor.page';
 import { ScheduleEditorService } from './schedule-editor.service';
 
@@ -38,6 +34,9 @@ describe('ScheduleEditorPage', () => {
 				.mockName('ScheduleEditorService.startCreateSlots'),
 			bulkUpdate: vi.fn().mockName('ScheduleEditorService.bulkUpdate'),
 			updateSlot: vi.fn().mockName('ScheduleEditorService.updateSlot'),
+			updateSlotDateTime: vi
+				.fn()
+				.mockName('ScheduleEditorService.updateSlotDateTime'),
 			deleteSlot: vi.fn().mockName('ScheduleEditorService.deleteSlot'),
 			setYear: vi.fn().mockName('ScheduleEditorService.setYear'),
 			refresh: vi.fn().mockName('ScheduleEditorService.refresh'),
@@ -61,12 +60,13 @@ describe('ScheduleEditorPage', () => {
 		});
 		scheduleEditorService.bulkUpdate.mockResolvedValue(undefined);
 		scheduleEditorService.updateSlot.mockResolvedValue(undefined);
+		scheduleEditorService.updateSlotDateTime.mockResolvedValue(undefined);
 		scheduleEditorService.deleteSlot.mockResolvedValue(undefined);
 
 		alerts = {
 			create: vi.fn().mockName('AlertController.create'),
 		} as unknown as Mocked<AlertController>;
-	alerts.create.mockResolvedValue({
+		alerts.create.mockResolvedValue({
 			present: vi.fn().mockName('present').mockResolvedValue(undefined),
 			dismiss: vi.fn().mockName('dismiss').mockResolvedValue(undefined),
 			onDidDismiss: vi
@@ -157,6 +157,8 @@ describe('ScheduleEditorPage', () => {
 
 		// Assert
 		expect(fixture.nativeElement.textContent).toContain('Save time slot');
+		expect(fixture.nativeElement.textContent).toContain('1 slot');
+		expect(fixture.nativeElement.textContent).not.toContain('1 slots');
 	});
 
 	it('updateCapacity() should reject an empty value', async () => {
@@ -194,7 +196,8 @@ describe('ScheduleEditorPage', () => {
 		await component.updateCapacity(firstSlot, createValueEvent('12'));
 
 		// Assert
-		const lastCall = vi.mocked(scheduleEditorService.bulkUpdate).mock.lastCall;
+		const lastCall = vi.mocked(scheduleEditorService.bulkUpdate).mock
+			.lastCall;
 		expect(lastCall).toBeDefined();
 		const [updatedSlots, changes] = requireDefined(lastCall);
 		expect(updatedSlots).toHaveLength(2);
@@ -239,13 +242,50 @@ describe('ScheduleEditorPage', () => {
 		await component.saveSlotDateTime(slot);
 
 		// Assert
-		const updatedSlot = requireDefined(
-			vi.mocked(scheduleEditorService.updateSlot).mock.lastCall,
-		)[0] as DateTimeSlot;
-		expect(updatedSlot.dateTime.getFullYear()).toBe(2025);
-		expect(updatedSlot.dateTime.getMonth()).toBe(11);
-		expect(updatedSlot.dateTime.getDate()).toBe(13);
-		expect(updatedSlot.dateTime.getHours()).toBe(14);
+		const [slotId, updatedDateTime] = requireDefined(
+			vi.mocked(scheduleEditorService.updateSlotDateTime).mock.lastCall,
+		);
+		expect(slotId).toBe('slot-1');
+		expect(updatedDateTime).toEqual(new Date(2025, 11, 13, 14));
+	});
+
+	it('saveSlotDateTime() does not overwrite a pending capacity update', async () => {
+		// Arrange
+		const slot = createRow({
+			id: 'slot-1',
+			maxSlots: 2,
+			enabled: true,
+		});
+		slotsSubject.next([slot]);
+		const capacityWrite = createDeferred<void>();
+		scheduleEditorService.bulkUpdate.mockReturnValueOnce(
+			capacityWrite.promise,
+		);
+		const capacityUpdate = component.updateCapacity(
+			slot,
+			createValueEvent('3'),
+		);
+		await vi.waitFor(() => {
+			expect(scheduleEditorService.bulkUpdate).toHaveBeenCalledWith(
+				[expect.objectContaining({ id: 'slot-1', maxSlots: 2 })],
+				{ maxSlots: 3 },
+			);
+		});
+		component.setSlotDateDraft('slot-1', createValueEvent('2025-12-13'));
+		component.setSlotHourDraft('slot-1', createValueEvent(14));
+
+		// Act
+		await component.saveSlotDateTime(slot);
+
+		// Assert
+		expect(scheduleEditorService.updateSlotDateTime).toHaveBeenCalledWith(
+			'slot-1',
+			new Date(2025, 11, 13, 14),
+		);
+		expect(scheduleEditorService.updateSlot).not.toHaveBeenCalled();
+
+		capacityWrite.resolve(undefined);
+		await capacityUpdate;
 	});
 
 	it('generates schedules after the owner supplies the exact confirmation', async () => {
@@ -306,7 +346,10 @@ describe('ScheduleEditorPage', () => {
 	});
 
 	it('applies a combined bulk capacity and enabled update then resets the form', async () => {
-		slotsSubject.next([createSlot({ id: 'slot-1' }), createSlot({ id: 'slot-2' })]);
+		slotsSubject.next([
+			createSlot({ id: 'slot-1' }),
+			createSlot({ id: 'slot-2' }),
+		]);
 		component.selectedSlotIds = new Set(['slot-1', 'slot-2']);
 		component.bulkEditForm.setValue({ capacity: 8, enabled: 'disabled' });
 
@@ -319,7 +362,10 @@ describe('ScheduleEditorPage', () => {
 			]),
 			{ maxSlots: 8, enabled: false },
 		);
-		expect(component.bulkEditForm.value).toEqual({ capacity: null, enabled: '' });
+		expect(component.bulkEditForm.value).toEqual({
+			capacity: null,
+			enabled: '',
+		});
 	});
 
 	it('rejects a bulk operation that has no selected slots or changes', async () => {
@@ -351,10 +397,15 @@ describe('ScheduleEditorPage', () => {
 			{ enabled: false },
 		);
 
-		scheduleEditorService.bulkUpdate.mockRejectedValueOnce(new Error('offline'));
+		scheduleEditorService.bulkUpdate.mockRejectedValueOnce(
+			new Error('offline'),
+		);
 		await component.updateEnabled(first, createCheckedEvent(true));
 		expect(alerts.create).toHaveBeenCalledWith(
-			expect.objectContaining({ header: 'Unable to update schedules', message: 'offline' }),
+			expect.objectContaining({
+				header: 'Unable to update schedules',
+				message: 'offline',
+			}),
 		);
 	});
 
@@ -362,7 +413,10 @@ describe('ScheduleEditorPage', () => {
 		component.toggleSelection('slot-1', createCheckedEvent(true));
 		component.toggleSelection('slot-2', createCheckedEvent(true));
 		expect(component.selectedCount).toBe(2);
-		component.toggleAll([createRow({ id: 'slot-1' }), createRow({ id: 'slot-2' })]);
+		component.toggleAll([
+			createRow({ id: 'slot-1' }),
+			createRow({ id: 'slot-2' }),
+		]);
 		expect(component.hasSelections).toBe(false);
 
 		component.setSlotDateDraft('slot-1', createValueEvent('2025-12-13'));
@@ -380,17 +434,23 @@ describe('ScheduleEditorPage', () => {
 			dismiss: vi.fn().mockResolvedValue(undefined),
 			onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
 		};
-		alerts.create.mockResolvedValueOnce(alert as unknown as HTMLIonAlertElement);
+		alerts.create.mockResolvedValueOnce(
+			alert as unknown as HTMLIonAlertElement,
+		);
 		component.selectedSlotIds = new Set(['slot-1']);
 
-		await component.confirmDelete(createRow({ id: 'slot-1', slotsReserved: 1 }));
+		await component.confirmDelete(
+			createRow({ id: 'slot-1', slotsReserved: 1 }),
+		);
 		const options = requireDefined(alerts.create.mock.calls[0])[0] as {
 			message: string;
 			buttons: { role?: string; handler?: () => Promise<void> }[];
 		};
 		expect(options.message).toContain('1 reservation');
 		await requireDefined(
-			requireDefined(options.buttons.find((button) => button.role === 'destructive')).handler,
+			requireDefined(
+				options.buttons.find((button) => button.role === 'destructive'),
+			).handler,
 		)();
 
 		expect(scheduleEditorService.deleteSlot).toHaveBeenCalledWith('slot-1');
@@ -452,5 +512,18 @@ function createValueEvent(value: string | number | null): Event {
 }
 
 function createCheckedEvent(checked: boolean): Event {
-	return { detail: { checked } } as CustomEvent<{ checked: boolean }> as Event;
+	return { detail: { checked } } as CustomEvent<{
+		checked: boolean;
+	}> as Event;
+}
+
+function createDeferred<T>(): {
+	promise: Promise<T>;
+	resolve: (value: T) => void;
+} {
+	let resolvePromise: (value: T) => void = () => undefined;
+	const promise = new Promise<T>((resolve) => {
+		resolvePromise = resolve;
+	});
+	return { promise, resolve: resolvePromise };
 }

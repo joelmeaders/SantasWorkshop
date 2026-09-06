@@ -10,7 +10,8 @@ describe('queueReminderEmails', () => {
 		vi.doMock('firebase-admin', () => adminMock.module);
 	});
 
-	const loadQueue = async () => (await import('../../../src/fn/queueReminderEmails')).default;
+	const loadQueue = async () =>
+		(await import('../../../src/fn/queueReminderEmails')).default;
 	const eligible = (uid = 'customer-1') => ({
 		uid,
 		qrcode: 'ABCD1234',
@@ -20,6 +21,7 @@ describe('queueReminderEmails', () => {
 		emailAddress: 'buddy@example.com',
 		firstName: 'Buddy',
 		dateTimeSlot: {
+			id: 'slot-1',
 			dateTime: { toDate: () => new Date('2025-12-10T18:00:00.000Z') },
 		},
 	});
@@ -31,7 +33,10 @@ describe('queueReminderEmails', () => {
 			{ id: 'customer-1', data: current },
 			{
 				id: 'already-sent',
-				data: { ...eligible('already-sent'), reminderEmailSentOn: new Date() },
+				data: {
+					...eligible('already-sent'),
+					reminderEmailSentOn: new Date(),
+				},
 			},
 			{
 				id: 'missing-qr',
@@ -39,18 +44,25 @@ describe('queueReminderEmails', () => {
 			},
 		]);
 		adminMock.setDocSnapshot('registrations/customer-1', current);
-		adminMock.setDocSnapshot('tmp_registrationemails/customer-1', {}, false);
 
 		await expect(queue(2025)).resolves.toEqual({ success: 1, failed: 0 });
-		expect(adminMock.getDocRef('tmp_registrationemails/customer-1').create).toHaveBeenCalledWith(
+		expect(
+			adminMock.getDocRef('tmp_registrationemails/generated-0').create,
+		).toHaveBeenCalledWith(
 			expect.objectContaining({
+				registrationUid: 'customer-1',
 				code: 'ABCD1234',
+				appointmentSlotId: 'slot-1',
 				queueSource: 'scheduled-reminder',
 				deliveryState: 'queued',
 			}),
 		);
-		expect(adminMock.getDocRef('registrations/customer-1').set).toHaveBeenCalledWith(
-			expect.objectContaining({ reminderEmailQueuedOn: expect.any(Date) }),
+		expect(
+			adminMock.getDocRef('registrations/customer-1').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				reminderEmailQueuedOn: expect.any(Date),
+			}),
 			{ merge: true },
 		);
 	});
@@ -64,10 +76,42 @@ describe('queueReminderEmails', () => {
 			...eligible(),
 			reminderEmailSentOn: new Date(),
 		});
-		adminMock.setDocSnapshot('tmp_registrationemails/customer-1', {}, false);
 
 		await expect(queue(2025)).resolves.toEqual({ success: 0, failed: 0 });
-		expect(adminMock.getDocRef('tmp_registrationemails/customer-1').create).not.toHaveBeenCalled();
+		expect(
+			adminMock.getDocRef('tmp_registrationemails/generated-0').create,
+		).not.toHaveBeenCalled();
+	});
+
+	it('builds the queued payload from the registration read inside the transaction', async () => {
+		const queue = await loadQueue();
+		adminMock.setCollectionDocs('registrations', [
+			{ id: 'customer-1', data: eligible() },
+		]);
+		adminMock.setDocSnapshot('registrations/customer-1', {
+			...eligible(),
+			qrcode: 'FRESH123',
+			emailAddress: 'fresh@example.com',
+			firstName: 'Fresh',
+			dateTimeSlot: {
+				id: 'slot-2',
+				dateTime: {
+					toDate: () => new Date('2025-12-11T19:00:00.000Z'),
+				},
+			},
+		});
+
+		await expect(queue(2025)).resolves.toEqual({ success: 1, failed: 0 });
+		expect(
+			adminMock.getDocRef('tmp_registrationemails/generated-0').create,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: 'FRESH123',
+				email: 'fresh@example.com',
+				name: 'Fresh',
+				appointmentSlotId: 'slot-2',
+			}),
+		);
 	});
 
 	it('records a per-registration failure when queue persistence fails', async () => {
@@ -77,12 +121,17 @@ describe('queueReminderEmails', () => {
 			{ id: 'customer-1', data: current },
 		]);
 		adminMock.setDocSnapshot('registrations/customer-1', current);
-		adminMock.setDocSnapshot('tmp_registrationemails/customer-1', {}, false);
-		adminMock.runTransaction.mockRejectedValue(new Error('write failed'));
-		adminMock.getDocRef('registrations/customer-1').set.mockResolvedValue(undefined);
+		adminMock.runTransaction.mockRejectedValueOnce(
+			new Error('write failed'),
+		);
+		adminMock
+			.getDocRef('registrations/customer-1')
+			.set.mockResolvedValue(undefined);
 
 		await expect(queue(2025)).resolves.toEqual({ success: 0, failed: 1 });
-		expect(adminMock.getDocRef('registrations/customer-1').set).toHaveBeenCalledWith(
+		expect(
+			adminMock.getDocRef('registrations/customer-1').set,
+		).toHaveBeenCalledWith(
 			{ reminderEmailFailedOn: expect.any(Date) },
 			{ merge: true },
 		);

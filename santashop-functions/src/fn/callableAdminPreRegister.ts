@@ -26,7 +26,10 @@ import {
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 import { isAdminToken } from '../utility/capabilities';
-import { requireZipCodeValue, withCallableValidation } from '../utility/callable-validation';
+import {
+	requireZipCodeValue,
+	withCallableValidation,
+} from '../utility/callable-validation';
 
 interface RegistrationCreationResult {
 	qrCode: string;
@@ -84,7 +87,9 @@ export default async function callableAdminPreRegister(
 		);
 	}
 
-	record.zipCode = withCallableValidation(() => requireZipCodeValue(record.zipCode));
+	record.zipCode = withCallableValidation(() =>
+		requireZipCodeValue(record.zipCode),
+	);
 
 	// Create Account
 	let newUserAccount;
@@ -106,6 +111,10 @@ export default async function callableAdminPreRegister(
 	}
 
 	let createdRegistration: RegistrationCreationResult;
+	const emailDocRef = admin
+		.firestore()
+		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+		.doc();
 
 	try {
 		createdRegistration = await createRegistration(
@@ -134,12 +143,6 @@ export default async function callableAdminPreRegister(
 		const registrationDocRef = admin
 			.firestore()
 			.doc(`${COLLECTION_SCHEMA.registrations}/${newUserAccount.uid}`);
-		const emailDocRef = admin
-			.firestore()
-			.doc(
-				`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${newUserAccount.uid}`,
-			);
-
 		await registrationDocRef.set(
 			{
 				qrCodeGeneratedOn: finalizedOn,
@@ -149,24 +152,23 @@ export default async function callableAdminPreRegister(
 			},
 			{ merge: true },
 		);
-		await emailDocRef.set(
-			{
-				code: createdRegistration.qrCode,
-				qrCodeStoragePath: createdRegistration.qrCodeStoragePath,
-				email: emailAddress,
-				name: firstName,
-				formattedDateTime: createdRegistration.formattedDateTime,
-				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
-				queuedOn: finalizedOn,
-				queueSource: 'admin-preregistration',
-				deliveryRequestedOn: finalizedOn,
-				deliveryState: 'queued',
-				failedOn: false,
-				lastErrorMessage: false,
-				lastErrorDetails: false,
-			},
-			{ merge: true },
-		);
+		await emailDocRef.create({
+			registrationUid: newUserAccount.uid,
+			code: createdRegistration.qrCode,
+			qrCodeStoragePath: createdRegistration.qrCodeStoragePath,
+			email: emailAddress,
+			name: firstName,
+			formattedDateTime: createdRegistration.formattedDateTime,
+			templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
+			queuedOn: finalizedOn,
+			queueSource: 'admin-preregistration',
+			deliveryRequestedOn: finalizedOn,
+			deliveryState: 'queued',
+			failedOn: false,
+			lastErrorMessage: false,
+			lastErrorDetails: false,
+			appointmentSlotId: record.dateTimeSlot?.id,
+		});
 	} catch (error) {
 		log.error(
 			'Failed to finalize admin pre-registration resources',
@@ -192,12 +194,7 @@ export default async function callableAdminPreRegister(
 					`${COLLECTION_SCHEMA.registrationSearchIndex}/${newUserAccount.uid}`,
 				)
 				.delete(),
-			admin
-				.firestore()
-				.doc(
-					`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${newUserAccount.uid}`,
-				)
-				.delete(),
+			emailDocRef.delete(),
 		]);
 		throw new HttpsError(
 			'internal',
@@ -260,8 +257,7 @@ const createRegistration = async (
 		.get();
 	const rawDateTimeSlotData = dateTimeSlotSnapshot.data();
 	const dateTimeSlot = rawDateTimeSlotData?.['dateTime'] as
-		| Timestamp
-		| undefined;
+		Timestamp | undefined;
 
 	if (!dateTimeSlot) {
 		throw new HttpsError(

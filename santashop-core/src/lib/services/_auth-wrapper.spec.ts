@@ -28,9 +28,12 @@ vi.mock('firebase/auth', () => ({
 
 describe('AuthWrapper', () => {
 	let service: AuthWrapper;
-	const token = { claims: { roles: ['admin', 'checkin'] } } as unknown as IdTokenResult;
+	const token = {
+		claims: { roles: ['admin', 'checkin'] },
+	} as unknown as IdTokenResult;
 	const user = {
 		email: 'staff@example.test',
+		reload: vi.fn().mockResolvedValue(undefined),
 		getIdTokenResult: vi.fn().mockResolvedValue(token),
 	} as unknown as User;
 	const auth = {
@@ -40,6 +43,7 @@ describe('AuthWrapper', () => {
 	} as unknown as Auth;
 
 	beforeEach(() => {
+		vi.mocked(user.reload).mockClear();
 		vi.mocked(onAuthStateChanged).mockReset();
 		vi.mocked(sendPasswordResetEmail).mockReset();
 		vi.mocked(signInWithEmailAndPassword).mockReset();
@@ -75,16 +79,45 @@ describe('AuthWrapper', () => {
 			return vi.fn();
 		});
 
-		await expect(firstValueFrom(service.authState())).rejects.toBe(expected);
+		await expect(firstValueFrom(service.authState())).rejects.toBe(
+			expected,
+		);
 	});
 
 	it('returns the current user and token, including the signed-out case', async () => {
 		expect(service.currentUser()).toBe(user);
 		await expect(service.getCurrentUserToken()).resolves.toBe(token);
 
-		Object.defineProperty(auth, 'currentUser', { configurable: true, value: null });
+		Object.defineProperty(auth, 'currentUser', {
+			configurable: true,
+			value: null,
+		});
 		await expect(service.getCurrentUserToken()).resolves.toBeNull();
-		Object.defineProperty(auth, 'currentUser', { configurable: true, value: user });
+		Object.defineProperty(auth, 'currentUser', {
+			configurable: true,
+			value: user,
+		});
+	});
+
+	it('reloads the current user and returns the refreshed identity', async () => {
+		await expect(service.reloadCurrentUser()).resolves.toBe(user);
+
+		expect(user.reload).toHaveBeenCalledOnce();
+	});
+
+	it('returns null when reloading without a signed-in user', async () => {
+		Object.defineProperty(auth, 'currentUser', {
+			configurable: true,
+			value: null,
+		});
+
+		await expect(service.reloadCurrentUser()).resolves.toBeNull();
+		expect(user.reload).not.toHaveBeenCalled();
+
+		Object.defineProperty(auth, 'currentUser', {
+			configurable: true,
+			value: user,
+		});
 	});
 
 	it('forwards password reset, sign-in, password update, and sign-out', async () => {
@@ -114,19 +147,24 @@ describe('AuthWrapper', () => {
 	});
 
 	it('reauthenticates with an email credential', async () => {
-		const credential = {} as ReturnType<typeof EmailAuthProvider.credential>;
+		const credential = {} as ReturnType<
+			typeof EmailAuthProvider.credential
+		>;
 		const result = {} as UserCredential;
 		vi.mocked(EmailAuthProvider.credential).mockReturnValue(credential);
 		vi.mocked(reauthenticateWithCredential).mockResolvedValue(result);
 
-		await expect(service.reauthenticateWithPassword(user, 'secret')).resolves.toBe(
-			result,
-		);
+		await expect(
+			service.reauthenticateWithPassword(user, 'secret'),
+		).resolves.toBe(result);
 		expect(EmailAuthProvider.credential).toHaveBeenCalledWith(
 			'staff@example.test',
 			'secret',
 		);
-		expect(reauthenticateWithCredential).toHaveBeenCalledWith(user, credential);
+		expect(reauthenticateWithCredential).toHaveBeenCalledWith(
+			user,
+			credential,
+		);
 	});
 
 	it('rejects reauthentication when the account has no email', async () => {

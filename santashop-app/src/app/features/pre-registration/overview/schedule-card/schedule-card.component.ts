@@ -1,11 +1,39 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	effect,
+	inject,
+	input,
+	output,
+	signal,
+} from '@angular/core';
 import type { DateTimeSlot } from '@santashop/models';
 import { TimeSlotPipe } from '@santashop/core';
-import { DatePipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonList, IonNote, IonSpinner } from '@ionic/angular/standalone';
+import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
+import {
+	IonAccordion,
+	IonAccordionGroup,
+	IonBadge,
+	IonButton,
+	IonCard,
+	IonCardContent,
+	IonCardHeader,
+	IonCardTitle,
+	IonIcon,
+	IonItem,
+	IonLabel,
+	IonList,
+	IonNote,
+	IonSpinner,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { calendarOutline, chevronDownOutline, createOutline } from 'ionicons/icons';
+import {
+	calendarOutline,
+	chevronDownOutline,
+	createOutline,
+} from 'ionicons/icons';
 
 interface ScheduleDay {
 	key: string;
@@ -18,7 +46,25 @@ interface ScheduleDay {
 	templateUrl: './schedule-card.component.html',
 	styleUrls: ['./schedule-card.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [DatePipe, TimeSlotPipe, TranslateModule, IonAccordion, IonAccordionGroup, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonIcon, IonItem, IonLabel, IonList, IonNote, IonSpinner],
+	imports: [
+		LocalizedDatePipe,
+		TimeSlotPipe,
+		TranslateModule,
+		IonAccordion,
+		IonAccordionGroup,
+		IonBadge,
+		IonButton,
+		IonCard,
+		IonCardContent,
+		IonCardHeader,
+		IonCardTitle,
+		IonIcon,
+		IonItem,
+		IonLabel,
+		IonList,
+		IonNote,
+		IonSpinner,
+	],
 })
 export class ScheduleCardComponent {
 	private readonly translate = inject(TranslateService);
@@ -30,7 +76,9 @@ export class ScheduleCardComponent {
 	public readonly selectRequested = output<DateTimeSlot | undefined>();
 	public readonly expanded = signal(false);
 	public readonly slotsLoading = computed(() => this.slots() == null);
-	public readonly availableSlots = computed(() => (this.slots() ?? []).filter((slot) => slot.enabled));
+	public readonly availableSlots = computed(() =>
+		(this.slots() ?? []).filter((slot) => slot.enabled),
+	);
 	public readonly availableSlotDays = computed<ScheduleDay[]>(() => {
 		const days = new Map<string, ScheduleDay>();
 
@@ -77,7 +125,9 @@ export class ScheduleCardComponent {
 		const spots = Math.max(0, slot.maxSlots - (slot.slotsReserved ?? 0));
 		return spots === 1
 			? this.translate.instant('OVERVIEW.CURRENT_SPOT')
-			: this.translate.instant('OVERVIEW.CURRENT_SPOTS', { count: spots });
+			: this.translate.instant('OVERVIEW.CURRENT_SPOTS', {
+					count: spots,
+				});
 	}
 
 	private dayKey(dateTime: Date): string {

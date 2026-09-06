@@ -153,6 +153,55 @@ describe('CheckInPage', () => {
 		]);
 	});
 
+	it('renders local date keys and keeps legacy December buckets separate', async () => {
+		statsCollection.read.mockReturnValue(
+			of({
+				lastUpdated: new Date('2026-09-05T23:14:00.000Z'),
+				dateTimeCount: [
+					{
+						dateKey: '2026-09-05',
+						date: 5,
+						hour: 17,
+						customerCount: 2,
+						childCount: 2,
+						pregisteredCount: 1,
+						modifiedCount: 0,
+					},
+					{
+						date: 5,
+						hour: 17,
+						customerCount: 1,
+						childCount: 1,
+						pregisteredCount: 1,
+						modifiedCount: 0,
+					},
+				],
+			} as CheckInAggregatedStats),
+		);
+		component.refresh();
+
+		await expect(
+			firstValueFrom(component.checkInsByDayHour$),
+		).resolves.toMatchObject([
+			{
+				datasets: [
+					{
+						label: 'Sep 5, 2026',
+						data: [2],
+					},
+				],
+			},
+			{
+				datasets: [
+					{
+						label: 'Dec 5, 2026',
+						data: [1],
+					},
+				],
+			},
+		]);
+	});
+
 	it('switches chart views and safely totals mixed chart values', async () => {
 		await expect(firstValueFrom(component.viewButtonText$)).resolves.toBe(
 			'View by Children',

@@ -32,10 +32,22 @@ export interface ResolvedPublishedEmailTemplate {
 const TEMPLATE_KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const AWS_TEMPLATE_NAME_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 const EMAIL_TEMPLATE_STORAGE_ROOT = 'emailTemplates';
-const HANDLEBARS_FIELD_PATTERN = /{{\s*([a-zA-Z0-9_.]+)\s*}}/g;
+const HANDLEBARS_TOKEN_PATTERN = /{{[\s\S]*?}}/g;
+const FIELD_PATH_PATTERN = /^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*$/;
+const HANDLEBARS_FIELD_PATTERN = new RegExp(
+	String.raw`^{{\s*(${FIELD_PATH_PATTERN.source.slice(1, -1)})\s*}}$`,
+);
+const UNSUPPORTED_HANDLEBARS_SYNTAX_MESSAGE =
+	'Only plain Handlebars placeholders like {{field}} are supported.';
+const UNSAFE_FIELD_SEGMENTS = new Set([
+	'__proto__',
+	'constructor',
+	'prototype',
+]);
 
-const escapeRegExp = (value: string): string =>
-	value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+const isSafeFieldPath = (value: string): boolean =>
+	FIELD_PATH_PATTERN.test(value) &&
+	value.split('.').every((segment) => !UNSAFE_FIELD_SEGMENTS.has(segment));
 
 const DELIVERY_PROFILE_VALUES = new Set<string>(
 	Object.values(EMAIL_TEMPLATE_DELIVERY_PROFILES),
@@ -75,8 +87,12 @@ export const isEmailTemplateDeliveryProfile = (
 ): value is EmailTemplateDeliveryProfile => DELIVERY_PROFILE_VALUES.has(value);
 
 export const normalizeEmailTemplateDeliveryProfile = (
-	value: string,
+	value: unknown,
 ): EmailTemplateDeliveryProfile => {
+	if (typeof value !== 'string') {
+		throw new CallableValidationError('Delivery profile must be a string.');
+	}
+
 	const normalized = value.trim().toLowerCase();
 	if (!isEmailTemplateDeliveryProfile(normalized)) {
 		throw new CallableValidationError(
@@ -142,14 +158,26 @@ export const normalizeEmailTemplateFieldDefinitions = (
 		if (!name) {
 			continue;
 		}
+		if (!isSafeFieldPath(name)) {
+			throw new CallableValidationError(
+				`Field mapping ${index + 1} name must use letters, numbers, underscores, and dots without empty path segments.`,
+			);
+		}
+
+		const mapping =
+			normalizeFieldValue(
+				fieldRecord['mapping'],
+				`Field mapping ${index + 1} mapping`,
+			) ?? '';
+		if (mapping && !isSafeFieldPath(mapping)) {
+			throw new CallableValidationError(
+				`Field mapping ${index + 1} mapping must use letters, numbers, underscores, and dots without empty path segments.`,
+			);
+		}
 
 		deduped.set(name, {
 			name,
-			mapping:
-				normalizeFieldValue(
-					fieldRecord['mapping'],
-					`Field mapping ${index + 1} mapping`,
-				) ?? '',
+			mapping,
 			sampleValue:
 				normalizeFieldValue(
 					fieldRecord['sampleValue'],
@@ -172,17 +200,71 @@ export const normalizeEmailTemplateFieldDefinitions = (
 	return Array.from(deduped.values());
 };
 
+const validateHandlebarsContent = (content: string): void => {
+	if (typeof content !== 'string') {
+		throw new CallableValidationError('Template content must be a string.');
+	}
+
+	let cursor = 0;
+	while (cursor < content.length) {
+		const openIndex = content.indexOf('{{', cursor);
+		const closeBeforeOpen = content.indexOf('}}', cursor);
+		if (
+			closeBeforeOpen >= 0 &&
+			(openIndex < 0 || closeBeforeOpen < openIndex)
+		) {
+			throw new CallableValidationError(
+				UNSUPPORTED_HANDLEBARS_SYNTAX_MESSAGE,
+			);
+		}
+		if (openIndex < 0) {
+			return;
+		}
+
+		const closeIndex = content.indexOf('}}', openIndex + 2);
+		if (closeIndex < 0) {
+			throw new CallableValidationError(
+				UNSUPPORTED_HANDLEBARS_SYNTAX_MESSAGE,
+			);
+		}
+
+		const token = content.slice(openIndex, closeIndex + 2);
+		const fieldName = token.match(HANDLEBARS_FIELD_PATTERN)?.[1];
+		if (
+			!fieldName ||
+			!isSafeFieldPath(fieldName) ||
+			content[closeIndex + 2] === '}'
+		) {
+			throw new CallableValidationError(
+				UNSUPPORTED_HANDLEBARS_SYNTAX_MESSAGE,
+			);
+		}
+
+		cursor = closeIndex + 2;
+		if (content.indexOf('}}', cursor) === cursor) {
+			throw new CallableValidationError(
+				UNSUPPORTED_HANDLEBARS_SYNTAX_MESSAGE,
+			);
+		}
+	}
+};
+
+export const validateHandlebarsSyntax = (...contents: string[]): void => {
+	for (const content of contents) {
+		validateHandlebarsContent(content);
+	}
+};
+
 export const extractHandlebarsFieldNames = (
 	...contents: string[]
 ): string[] => {
+	validateHandlebarsSyntax(...contents);
 	const matches = new Set<string>();
 
 	for (const content of contents) {
-		for (const match of content.matchAll(HANDLEBARS_FIELD_PATTERN)) {
-			const fieldName = match[1]?.trim();
-			if (fieldName) {
-				matches.add(fieldName);
-			}
+		for (const token of content.matchAll(HANDLEBARS_TOKEN_PATTERN)) {
+			const fieldName = token[0].match(HANDLEBARS_FIELD_PATTERN)?.[1];
+			if (fieldName) matches.add(fieldName);
 		}
 	}
 
@@ -193,11 +275,17 @@ const getValueAtPath = (
 	target: Record<string, unknown>,
 	path: string,
 ): unknown => {
-	const parts = path.split('.').filter((part) => part.length > 0);
+	if (!isSafeFieldPath(path)) return undefined;
+	const parts = path.split('.');
 	let current: unknown = target;
 
 	for (const part of parts) {
-		if (!current || typeof current !== 'object' || Array.isArray(current)) {
+		if (
+			!current ||
+			typeof current !== 'object' ||
+			Array.isArray(current) ||
+			!Object.prototype.hasOwnProperty.call(current, part)
+		) {
 			return undefined;
 		}
 
@@ -212,7 +300,8 @@ const setValueAtPath = (
 	path: string,
 	value: string,
 ): void => {
-	const parts = path.split('.').filter((part) => part.length > 0);
+	if (!isSafeFieldPath(path)) return;
+	const parts = path.split('.');
 	let current: Record<string, unknown> = target;
 
 	for (let index = 0; index < parts.length; index += 1) {
@@ -222,7 +311,9 @@ const setValueAtPath = (
 			return;
 		}
 
-		const next = current[part];
+		const next = Object.prototype.hasOwnProperty.call(current, part)
+			? current[part]
+			: undefined;
 		if (!next || typeof next !== 'object' || Array.isArray(next)) {
 			current[part] = {};
 		}
@@ -257,7 +348,6 @@ export const buildDirectTemplateDataFromFieldDefinitions = (
 
 	for (const field of fieldMappings) {
 		setValueAtPath(result, field.name, field.sampleValue);
-
 	}
 
 	return result;
@@ -267,25 +357,17 @@ export const renderTemplateWithFieldValues = (
 	template: string,
 	fieldMappings: EmailTemplateFieldDefinition[],
 ): string => {
+	validateHandlebarsSyntax(template);
 	const templateData =
 		buildDirectTemplateDataFromFieldDefinitions(fieldMappings);
-	let renderedTemplate = template;
 
-	for (const fieldName of extractHandlebarsFieldNames(template)) {
+	return template.replace(HANDLEBARS_TOKEN_PATTERN, (token) => {
+		const fieldName = token.match(HANDLEBARS_FIELD_PATTERN)?.[1];
+		if (!fieldName) return token;
+
 		const resolvedValue = getValueAtPath(templateData, fieldName);
-		const replacementValue =
-			typeof resolvedValue === 'string' ? resolvedValue : '';
-		const tokenPattern = new RegExp(
-			String.raw`{{\s*${escapeRegExp(fieldName)}\s*}}`,
-			'g',
-		);
-		renderedTemplate = renderedTemplate.replace(
-			tokenPattern,
-			replacementValue,
-		);
-	}
-
-	return renderedTemplate;
+		return typeof resolvedValue === 'string' ? resolvedValue : '';
+	});
 };
 
 export const validateEmailTemplateFieldMappings = (
@@ -294,12 +376,21 @@ export const validateEmailTemplateFieldMappings = (
 	html: string,
 	fieldMappings: EmailTemplateFieldDefinition[],
 ): void => {
+	if (!isEmailTemplateDeliveryProfile(deliveryProfile)) {
+		throw new CallableValidationError(
+			`Unsupported email template delivery profile: ${String(deliveryProfile)}`,
+		);
+	}
+
+	validateHandlebarsSyntax(subjectPart, html);
 	const placeholders = extractHandlebarsFieldNames(subjectPart, html);
 	const allowedRuntimeFields = new Set(
 		EMAIL_TEMPLATE_RUNTIME_FIELDS[deliveryProfile],
 	);
+	const normalizedFieldMappings =
+		normalizeEmailTemplateFieldDefinitions(fieldMappings);
 	const mappingsByName = new Map(
-		fieldMappings.map((field) => [field.name, field]),
+		normalizedFieldMappings.map((field) => [field.name, field]),
 	);
 
 	for (const placeholder of placeholders) {
@@ -318,7 +409,7 @@ export const validateEmailTemplateFieldMappings = (
 		}
 	}
 
-	for (const field of fieldMappings) {
+	for (const field of normalizedFieldMappings) {
 		const runtimeField = field.mapping.trim() || field.name;
 		if (!allowedRuntimeFields.has(runtimeField)) {
 			throw new CallableValidationError(

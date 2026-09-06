@@ -18,13 +18,15 @@ describe('completeRegistration handler', () => {
 			uid: 'user-3',
 			qrcode: 'ABCD2345',
 			qrCodeStoragePath: 'registrations/user-3/test-asset.png',
-			children: [{
-				id: 1,
-				firstName: 'Noelle',
-				lastName: 'Elf',
-				dateOfBirth: new Date('2020-12-15T00:00:00.000Z'),
-				toyType: 'girls',
-			}],
+			children: [
+				{
+					id: 1,
+					firstName: 'Noelle',
+					lastName: 'Elf',
+					dateOfBirth: new Date('2020-12-15T00:00:00.000Z'),
+					toyType: 'girls',
+				},
+			],
 			dateTimeSlot: { id: 'slot-1' },
 		});
 		adminMock.setDocSnapshot('users/user-3', {
@@ -57,17 +59,27 @@ describe('completeRegistration handler', () => {
 		seedCompletableRegistration();
 
 		const result = await completeRegistration(
-			createCallableRequest({ mutationId: 'submit-0001' }, { uid: 'user-3' }),
+			createCallableRequest(
+				{ mutationId: 'submit-0001' },
+				{ uid: 'user-3' },
+			),
 		);
 
 		expect(result).toBe(true);
-		expect(adminMock.transactionSet).toHaveBeenCalledTimes(3);
-		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionSet).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(2);
 		expect(adminMock.doc).toHaveBeenCalledWith('registrations/user-3');
 		expect(adminMock.doc).toHaveBeenCalledWith('users/user-3');
 		expect(adminMock.doc).toHaveBeenCalledWith('dateTimeSlots/slot-1');
-		expect(adminMock.doc).toHaveBeenCalledWith(
-			'tmp_registrationemails/user-3',
+		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				path: 'tmp_registrationemails/generated-id',
+			}),
+			expect.objectContaining({
+				registrationUid: 'user-3',
+				appointmentSlotId: 'slot-1',
+				queueSource: 'registration-completion',
+			}),
 		);
 		expect(adminMock.doc).toHaveBeenCalledWith(
 			'registrationsearchindex/user-3',
@@ -79,7 +91,12 @@ describe('completeRegistration handler', () => {
 			await loadAccountRegistrationHandlers(adminMock);
 
 		await expect(
-			completeRegistration(createCallableRequest({ mutationId: 'submit-0001', uid: 'other' })),
+			completeRegistration(
+				createCallableRequest({
+					mutationId: 'submit-0001',
+					uid: 'other',
+				}),
+			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
 

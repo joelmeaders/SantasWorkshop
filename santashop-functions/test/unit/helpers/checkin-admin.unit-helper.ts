@@ -27,6 +27,7 @@ export interface CheckInAdminMock {
 	collection: ReturnType<typeof vi.fn>;
 	runTransaction: ReturnType<typeof vi.fn>;
 	transactionGet: ReturnType<typeof vi.fn>;
+	transactionGetAll: ReturnType<typeof vi.fn>;
 	transactionCreate: ReturnType<typeof vi.fn>;
 	transactionSet: ReturnType<typeof vi.fn>;
 	batchCreate: ReturnType<typeof vi.fn>;
@@ -46,8 +47,11 @@ export const deleteQrCodeMock = vi.fn().mockResolvedValue(undefined);
 export const createQrCodeStoragePathMock = vi.fn(
 	(uid: string) => `registrations/${uid}/test-asset.png`,
 );
-export const replaceQrCodeWithCancelledMock = vi.fn().mockResolvedValue(undefined);
+export const replaceQrCodeWithCancelledMock = vi
+	.fn()
+	.mockResolvedValue(undefined);
 export const recordCheckInRaceAttemptMock = vi.fn();
+export const recordCheckInCreateConflictAttemptMock = vi.fn();
 
 export const createCheckInAdminMock = (): CheckInAdminMock => {
 	const docRefs = new Map<string, MockDocRef>();
@@ -65,20 +69,24 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 		) => ref.set(value, options),
 	);
 	const transactionGet = vi.fn(async (ref: MockDocRef) => ref.get());
+	const transactionGetAll = vi.fn(async (...refs: MockDocRef[]) =>
+		Promise.all(refs.map(async (ref) => ref.get())),
+	);
 	const transactionCreate = vi.fn(
-		(ref: MockDocRef, value: Record<string, unknown>) =>
-			ref.create(value),
+		(ref: MockDocRef, value: Record<string, unknown>) => ref.create(value),
 	);
 	const runTransaction = vi.fn(
 		async (
 			callback: (transaction: {
 				get: typeof transactionGet;
+				getAll: typeof transactionGetAll;
 				create: typeof transactionCreate;
 				set: typeof transactionSet;
 			}) => Promise<void> | void,
 		) =>
 			callback({
 				get: transactionGet,
+				getAll: transactionGetAll,
 				create: transactionCreate,
 				set: transactionSet,
 			}),
@@ -93,6 +101,7 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 
 		const created: MockDocRef = {
 			path,
+			id: path.split('/').at(-1),
 			get: vi
 				.fn()
 				.mockResolvedValue({ exists: false, data: () => undefined }),
@@ -123,7 +132,7 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 				return getDocRef(`${name}/${id}`);
 			}
 
-			return { id: 'generated-onsite-id' };
+			return getDocRef(`${name}/generated-onsite-id`);
 		}),
 	}));
 	const batch = {
@@ -137,6 +146,7 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 		batch: vi.fn(() => batch),
 		runTransaction,
 		transactionGet,
+		transactionGetAll,
 		transactionCreate,
 		transactionSet,
 	}));
@@ -167,6 +177,7 @@ export const createCheckInAdminMock = (): CheckInAdminMock => {
 		collection,
 		runTransaction,
 		transactionGet,
+		transactionGetAll,
 		transactionCreate,
 		transactionSet,
 		batchCreate,
@@ -193,6 +204,8 @@ export const loadCheckInAdminHandlers = async (adminMock: CheckInAdminMock) => {
 		generateId: generateIdMock,
 	}));
 	vi.doMock('../../../src/utility/registration-scan', () => ({
+		recordCheckInCreateConflictAttempt:
+			recordCheckInCreateConflictAttemptMock,
 		recordCheckInRaceAttempt: recordCheckInRaceAttemptMock,
 	}));
 

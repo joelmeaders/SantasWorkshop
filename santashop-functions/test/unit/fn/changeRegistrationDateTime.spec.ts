@@ -59,12 +59,22 @@ describe('changeRegistrationDateTime handler', () => {
 		);
 
 		expect(result).toBe(true);
-		expect(adminMock.transactionSet).toHaveBeenCalledTimes(2);
-		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionSet).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				path: 'tmp_registrationemails/generated-id',
+			}),
+			expect.objectContaining({
+				registrationUid: 'user-5',
+				appointmentSlotId: 'slot-new',
+				queueSource: 'date-time-change',
+			}),
+		);
 		expect(adminMock.transactionSet).toHaveBeenNthCalledWith(
 			1,
 			expect.objectContaining({ path: 'registrations/user-5' }),
-				expect.objectContaining({
+			expect.objectContaining({
 				includedInCounts: false,
 				reminderEmailSentOn: false,
 				reminderEmailFailedOn: false,
@@ -88,10 +98,10 @@ describe('changeRegistrationDateTime handler', () => {
 		await expect(
 			changeRegistrationDateTime(
 				createCallableRequest(
-				{
-					registrationUid: 'other-user',
-					mutationId: 'change-slot-0001',
-					slotId: 'slot-new',
+					{
+						registrationUid: 'other-user',
+						mutationId: 'change-slot-0001',
+						slotId: 'slot-new',
 					},
 					{ uid: 'user-5', roles: [] },
 				),
@@ -145,23 +155,44 @@ describe('changeRegistrationDateTime handler', () => {
 			admin: { allowChangeRegistration: true },
 		});
 		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
-			programYear: 2025, enabled: true, maxSlots: 10, dateTime: new Date(),
+			programYear: 2025,
+			enabled: true,
+			maxSlots: 10,
+			dateTime: new Date(),
 		});
-		adminMock.setDocSnapshot('registrations/user-5/mutationReceipts/change-slot-0001', {}, false);
+		adminMock.setDocSnapshot(
+			'registrations/user-5/mutationReceipts/change-slot-0001',
+			{},
+			false,
+		);
 		adminMock.getDocRef('registrations/user-5').get.mockResolvedValue({
 			exists: false,
 			data: () => undefined,
 		});
 
-		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'not-found' });
+		await expect(
+			changeRegistrationDateTime(request()),
+		).rejects.toMatchObject({ code: 'not-found' });
 		adminMock.setDocSnapshot('registrations/user-5', { uid: 'user-5' });
-		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'failed-precondition' });
-		adminMock.setDocSnapshot('registrations/user-5', { uid: 'user-5', registrationSubmittedOn: new Date() });
-		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'failed-precondition' });
+		await expect(
+			changeRegistrationDateTime(request()),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
 		adminMock.setDocSnapshot('registrations/user-5', {
-			uid: 'user-5', registrationSubmittedOn: new Date(), qrCodeStoragePath: 'registrations/user-5/qr.png', hasCheckedIn: true,
+			uid: 'user-5',
+			registrationSubmittedOn: new Date(),
 		});
-		await expect(changeRegistrationDateTime(request())).rejects.toMatchObject({ code: 'failed-precondition' });
+		await expect(
+			changeRegistrationDateTime(request()),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+		adminMock.setDocSnapshot('registrations/user-5', {
+			uid: 'user-5',
+			registrationSubmittedOn: new Date(),
+			qrCodeStoragePath: 'registrations/user-5/qr.png',
+			hasCheckedIn: true,
+		});
+		await expect(
+			changeRegistrationDateTime(request()),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
 	});
 
 	it('rejects disabled changes and creates a no-op receipt for the current slot', async () => {
@@ -171,18 +202,35 @@ describe('changeRegistrationDateTime handler', () => {
 			{ mutationId: 'change-slot-0001', slotId: 'slot-new' },
 			{ uid: 'user-5' },
 		);
-		adminMock.setDocSnapshot('registrations/user-5/mutationReceipts/change-slot-0001', {}, false);
+		adminMock.setDocSnapshot(
+			'registrations/user-5/mutationReceipts/change-slot-0001',
+			{},
+			false,
+		);
 		adminMock.setDocSnapshot('registrations/user-5', {
-			uid: 'user-5', registrationSubmittedOn: new Date(), qrCodeStoragePath: 'registrations/user-5/qr.png', dateTimeSlot: { id: 'slot-new' },
+			uid: 'user-5',
+			registrationSubmittedOn: new Date(),
+			qrCodeStoragePath: 'registrations/user-5/qr.png',
+			dateTimeSlot: { id: 'slot-new' },
 		});
-		adminMock.setDocSnapshot('parameters/public', { admin: { allowChangeRegistration: false } });
-		await expect(changeRegistrationDateTime(request)).rejects.toMatchObject({ code: 'failed-precondition' });
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowChangeRegistration: false },
+		});
+		await expect(changeRegistrationDateTime(request)).rejects.toMatchObject(
+			{ code: 'failed-precondition' },
+		);
 
-		adminMock.setDocSnapshot('parameters/public', { admin: { allowChangeRegistration: true } });
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowChangeRegistration: true },
+		});
 		await expect(changeRegistrationDateTime(request)).resolves.toBe(true);
 		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
-			expect.objectContaining({ path: 'registrations/user-5/mutationReceipts/change-slot-0001' }),
-			expect.objectContaining({ operation: 'changeRegistrationDateTime' }),
+			expect.objectContaining({
+				path: 'registrations/user-5/mutationReceipts/change-slot-0001',
+			}),
+			expect.objectContaining({
+				operation: 'changeRegistrationDateTime',
+			}),
 		);
 	});
 });

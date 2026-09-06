@@ -22,7 +22,10 @@
 			@if (currentSlot; as slot) {
 				<ion-text>
 					<h2>
-						{{ slot.dateTime | date: 'EEEE, MMMM d,' : 'MST' }}
+						{{
+							slot.dateTime
+								| localizedDate: 'EEEE, MMMM d,' : 'MST'
+						}}
 						{{ slot.dateTime | timeSlot }}
 					</h2>
 				</ion-text>
@@ -44,7 +47,11 @@
 				<ion-accordion [value]="day">
 					<ion-item slot="header">
 						<ion-label>
-							<h2>{{ day | date: 'EEEE, MMMM d' : 'MST' }}</h2>
+							<h2>
+								{{
+									day | localizedDate: 'EEEE, MMMM d' : 'MST'
+								}}
+							</h2>
 						</ion-label>
 					</ion-item>
 					<ion-list slot="content">

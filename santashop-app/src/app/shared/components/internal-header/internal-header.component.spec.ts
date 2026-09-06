@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PopoverController } from '@ionic/angular/standalone';
+import { AuthService } from '@santashop/core/customer';
+import { Subject } from 'rxjs';
 import {
 	createPopoverControllerMock,
-	provideCustomerAuthMock,
-	provideCustomerFunctionsMock,
+	provideTranslateServiceMock,
 } from '../../../../test-helpers';
 import { InternalHeaderComponent } from './internal-header.component';
 
@@ -12,14 +13,15 @@ describe('InternalHeaderComponent', () => {
 	let component: InternalHeaderComponent;
 	let fixture: ComponentFixture<InternalHeaderComponent>;
 	let popoverController: Mocked<PopoverController>;
+	const currentUser$ = new Subject<{ displayName: string } | null>();
 
 	beforeEach(async () => {
 		popoverController = createPopoverControllerMock();
 		TestBed.configureTestingModule({
 			imports: [InternalHeaderComponent],
 			providers: [
-				provideCustomerAuthMock(),
-				provideCustomerFunctionsMock(),
+				{ provide: AuthService, useValue: { currentUser$ } },
+				provideTranslateServiceMock(),
 				{
 					provide: PopoverController,
 					useValue: popoverController,
@@ -41,9 +43,36 @@ describe('InternalHeaderComponent', () => {
 
 		expect(
 			fixture.nativeElement
+				.querySelector('#menuButton')
+				?.getAttribute('aria-label'),
+		).toBe('translated');
+		expect(
+			fixture.nativeElement
 				.querySelector('#menuButton ion-icon')
 				?.getAttribute('aria-hidden'),
 		).toBe('true');
+	});
+
+	it('updates the greeting when a refreshed auth identity changes the name', () => {
+		const user = { displayName: 'HostedQA' };
+		currentUser$.next(user);
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement
+				.querySelector('.user-greeting')
+				?.textContent.trim(),
+		).toBe('HostedQA');
+
+		user.displayName = 'HostedQAUpdated';
+		currentUser$.next(user);
+		fixture.detectChanges();
+
+		expect(
+			fixture.nativeElement
+				.querySelector('.user-greeting')
+				?.textContent.trim(),
+		).toBe('HostedQAUpdated');
 	});
 
 	it('opens the public menu from the triggering event', async (): Promise<void> => {

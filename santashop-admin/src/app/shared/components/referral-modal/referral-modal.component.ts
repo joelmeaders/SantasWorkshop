@@ -1,8 +1,8 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  viewChild
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	signal,
 } from '@angular/core';
 import {
 	ModalController,
@@ -102,7 +102,11 @@ export class ReferralModalComponent {
 
 	public readonly referrals$ = this.filteredReferrals$;
 
-	private readonly otherInput = viewChild<HTMLIonInputElement>('otherInput');
+	public readonly otherName = signal('');
+
+	public readonly validOtherName = (): boolean =>
+		this.otherName().trim().length >= 3 &&
+		this.otherName().trim().length <= 20;
 
 	public filter($event: { detail?: { value?: string | null } }): void {
 		const input = $event.detail?.value;
@@ -111,12 +115,15 @@ export class ReferralModalComponent {
 
 	public async setValue(ref: string): Promise<void> {
 		this.referralChoice.next(ref);
-		if (ref !== 'Other') this.dismiss();
+		if (ref !== 'Other') await this.modalController.dismiss(ref);
 	}
 
 	public async dismiss(): Promise<void> {
-		let choice = this.referralChoice.getValue();
-		if (choice === 'Other') choice = `Other:${this.otherInput()?.value}`;
-		await this.modalController.dismiss(choice);
+		await this.modalController.dismiss();
+	}
+
+	public async saveOther(): Promise<void> {
+		if (!this.validOtherName()) return;
+		await this.modalController.dismiss(`Other:${this.otherName().trim()}`);
 	}
 }

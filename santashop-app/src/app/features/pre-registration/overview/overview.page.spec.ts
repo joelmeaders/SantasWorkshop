@@ -1,3 +1,4 @@
+import { TranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
@@ -39,7 +40,9 @@ describe('OverviewPage', () => {
 		dismiss: vi.fn().mockName('ToastController.dismiss'),
 	};
 	const childCount = new BehaviorSubject(0);
-	const dateTimeSlot = new BehaviorSubject<DateTimeSlot | undefined>(undefined);
+	const dateTimeSlot = new BehaviorSubject<DateTimeSlot | undefined>(
+		undefined,
+	);
 	const registrationComplete = new BehaviorSubject(false);
 	const registrationSubmitted = new BehaviorSubject(false);
 	const preregistrationService = {
@@ -138,10 +141,13 @@ describe('OverviewPage', () => {
 			},
 		});
 
+		expect(TestBed.inject(TranslateService).instant).toHaveBeenCalledWith(
+			'OVERVIEW.CHILD_SAVED',
+		);
 		expect(alertController.create).toHaveBeenCalled();
 		expect(toastController.create).toHaveBeenCalledWith(
 			expect.objectContaining({
-				message: 'Child saved. You can now choose an appointment.',
+				message: 'translated',
 				color: 'success',
 			}),
 		);
@@ -198,15 +204,31 @@ describe('OverviewPage', () => {
 		expect(component.reviewing()).toBe(true);
 		expect(childrenCard.editorOpen()).toBe(false);
 		expect(scheduleCard.expanded()).toBe(false);
-		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).toBeNull();
-		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).toBeNull();
+		expect(
+			fixture.nativeElement.querySelector(
+				'app-children-card ion-card-content',
+			),
+		).toBeNull();
+		expect(
+			fixture.nativeElement.querySelector(
+				'app-schedule-card ion-card-content',
+			),
+		).toBeNull();
 
 		component.makeChanges();
 		await fixture.whenStable();
 
 		expect(component.reviewing()).toBe(false);
-		expect(fixture.nativeElement.querySelector('app-children-card ion-card-content')).not.toBeNull();
-		expect(fixture.nativeElement.querySelector('app-schedule-card ion-card-content')).not.toBeNull();
+		expect(
+			fixture.nativeElement.querySelector(
+				'app-children-card ion-card-content',
+			),
+		).not.toBeNull();
+		expect(
+			fixture.nativeElement.querySelector(
+				'app-schedule-card ion-card-content',
+			),
+		).not.toBeNull();
 	});
 
 	it('draws attention to the final step and opens review when selected', async (): Promise<void> => {
@@ -237,10 +259,18 @@ describe('OverviewPage', () => {
 	});
 
 	it('saves an enabled appointment and rejects unavailable selections', async (): Promise<void> => {
-		preregistrationService.setDraftAppointment.mockResolvedValue({ data: true });
+		preregistrationService.setDraftAppointment.mockResolvedValue({
+			data: true,
+		});
 
-		await component.chooseDateTime({ id: 'slot-1', enabled: true } as DateTimeSlot);
-		await component.chooseDateTime({ id: 'slot-2', enabled: false } as DateTimeSlot);
+		await component.chooseDateTime({
+			id: 'slot-1',
+			enabled: true,
+		} as DateTimeSlot);
+		await component.chooseDateTime({
+			id: 'slot-2',
+			enabled: false,
+		} as DateTimeSlot);
 		await component.chooseDateTime();
 
 		expect(preregistrationService.setDraftAppointment).toHaveBeenCalledWith(
@@ -248,16 +278,27 @@ describe('OverviewPage', () => {
 		);
 		expect(toastController.create).toHaveBeenCalledWith(
 			expect.objectContaining({
-				message: 'That appointment is no longer available. Please choose another time.',
+				message: 'translated',
+				color: 'success',
+			}),
+		);
+		expect(toastController.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: 'translated',
 				color: 'danger',
 			}),
+		);
+		expect(TestBed.inject(TranslateService).instant).toHaveBeenCalledWith(
+			'OVERVIEW.APPOINTMENT_UNAVAILABLE',
 		);
 	});
 
 	it('navigates after a successful submission and keeps the workspace open on failure', async (): Promise<void> => {
 		const router = TestBed.inject(Router);
 		const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
-		preregistrationService.completeRegistration.mockResolvedValue({ data: true });
+		preregistrationService.completeRegistration.mockResolvedValue({
+			data: true,
+		});
 
 		const submission = component.submitRegistration();
 		await Promise.resolve();
@@ -265,9 +306,13 @@ describe('OverviewPage', () => {
 		registrationComplete.next(true);
 		await submission;
 
-		expect(navigate).toHaveBeenCalledWith(['/pre-registration/confirmation']);
+		expect(navigate).toHaveBeenCalledWith([
+			'/pre-registration/confirmation',
+		]);
 		registrationComplete.next(false);
-		preregistrationService.completeRegistration.mockResolvedValue({ data: false });
+		preregistrationService.completeRegistration.mockResolvedValue({
+			data: false,
+		});
 		await component.submitRegistration();
 		expect(toastController.create).toHaveBeenLastCalledWith(
 			expect.objectContaining({ color: 'danger' }),

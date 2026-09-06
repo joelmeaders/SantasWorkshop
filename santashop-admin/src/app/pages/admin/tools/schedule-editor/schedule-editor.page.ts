@@ -490,10 +490,10 @@ export class ScheduleEditorPage {
 				0,
 			);
 
-			await this.scheduleEditorService.updateSlot({
-				...slot,
-				dateTime: updatedDateTime,
-			});
+			await this.scheduleEditorService.updateSlotDateTime(
+				slot.id,
+				updatedDateTime,
+			);
 			this.slotDateDrafts.delete(slot.id);
 			this.slotHourDrafts.delete(slot.id);
 		} catch (error: unknown) {

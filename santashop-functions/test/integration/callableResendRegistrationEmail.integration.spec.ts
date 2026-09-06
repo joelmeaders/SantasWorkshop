@@ -5,6 +5,7 @@ import {
 	clearEmulatorData,
 	createTimestamp,
 	getDocument,
+	getFirestore,
 	seedAuthUser,
 	seedQrCode,
 	setDocument,
@@ -57,15 +58,17 @@ describe.sequential('callableResendRegistrationEmail integration', () => {
 		);
 
 		expect(result).toBe(true);
-		expect(
-			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.tmpRegistrationEmails,
-				'resend-user-1',
-			),
-		).toMatchObject({
+		const queuedEmails = await getFirestore()
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('registrationUid', '==', 'resend-user-1')
+			.get();
+		expect(queuedEmails.size).toBe(1);
+		expect(queuedEmails.docs[0]?.data()).toMatchObject({
+			registrationUid: 'resend-user-1',
 			code: 'ABCD2345',
 			email: 'resend.user@example.com',
 			deliveryState: 'queued',
+			queueSource: 'manual-resend',
 		});
 		expect(
 			await getDocument<Record<string, unknown>>(

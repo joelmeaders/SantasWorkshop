@@ -20,8 +20,8 @@
 					<h3>Instructions</h3>
 					<ion-note>
 						Add all child information below. Ensure the information
-						is accurate. Only children who are ages 11 and under can
-						recieve toys
+						is accurate. Children must be under 13 years old to
+						receive toys.
 					</ion-note>
 				</span>
 			</ion-list-header>
@@ -30,7 +30,8 @@
 			</ion-item-divider>
 			<form [formGroup]="form">
 				<ion-item>
-					<ion-input type="text"
+					<ion-input
+						type="text"
 						label="First Name"
 						labelPlacement="fixed"
 						autocomplete="off"
@@ -38,7 +39,7 @@
 						placeholder="required"
 						minlength="2"
 						maxlength="20"
-					 />
+					/>
 					@if (
 						this.form.controls['firstName'].dirty &&
 						this.form.controls['firstName'].invalid
@@ -49,7 +50,8 @@
 					}
 				</ion-item>
 				<ion-item>
-					<ion-input type="text"
+					<ion-input
+						type="text"
 						label="Last Name"
 						labelPlacement="fixed"
 						autocomplete="off"
@@ -57,7 +59,7 @@
 						placeholder="required"
 						minlength="2"
 						maxlength="25"
-					 />
+					/>
 					@if (
 						this.form.controls['lastName'].dirty &&
 						this.form.controls['lastName'].invalid
@@ -68,7 +70,8 @@
 					}
 				</ion-item>
 				<ion-item>
-					<ion-input (ionChange)="birthdaySelected($event)"
+					<ion-input
+						(ionChange)="birthdaySelected($event)"
 						label="Birth Date"
 						labelPlacement="fixed"
 						formControlName="dateOfBirth"
@@ -76,13 +79,13 @@
 						type="date"
 						[min]="minBirthDate"
 						[max]="maxBirthDate"
-					 />
+					/>
 					@if (
 						this.form.controls['dateOfBirth'].dirty &&
 						this.form.controls['dateOfBirth'].invalid
 					) {
 						<ion-note slot="error" color="danger">
-							Invalid date. Only ages 0-11 allowed.
+							Invalid date. Children must be under 13 years old.
 						</ion-note>
 					}
 				</ion-item>
@@ -93,11 +96,19 @@
 						</ion-item-divider>
 						<ion-item>
 							<ion-label>Girls</ion-label>
-							<ion-radio slot="start" value="girls" />
+							<ion-radio
+								slot="start"
+								value="girls"
+								aria-label="Girls"
+							/>
 						</ion-item>
 						<ion-item>
 							<ion-label>Boys</ion-label>
-							<ion-radio slot="start" value="boys" />
+							<ion-radio
+								slot="start"
+								value="boys"
+								aria-label="Boys"
+							/>
 						</ion-item>
 					</ion-radio-group>
 				}

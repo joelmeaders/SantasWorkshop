@@ -49,7 +49,7 @@ test.describe('check-in and staff registration operations', () => {
 		await expect(page.getByText('Casey Checkin', { exact: true })).toBeVisible();
 		await page.getByText('Yes, check in', { exact: true }).click();
 		await expect(page).toHaveURL(/\/admin\/checkin\/confirmation$/);
-		await expect(page.getByText('Give the shopper 1 coupons.')).toBeVisible();
+		await expect(page.getByText('Give the shopper 1 coupon.')).toBeVisible();
 	});
 
 	test('CHECKIN-005 presents a scanned registration for staff review before normal confirmation', async ({ page, seedRegistration }) => {
@@ -346,7 +346,7 @@ test.describe('check-in and staff registration operations', () => {
 
 		await page.getByText('Yes, check in', { exact: true }).click();
 		await expect(page).toHaveURL(/\/admin\/checkin\/confirmation$/);
-		await expect(page.getByText('Give the shopper 1 coupons.')).toBeVisible();
+		await expect(page.getByText('Give the shopper 1 coupon.')).toBeVisible();
 	});
 
 	test('CHECKIN-011 lets staff cancel a submitted registration from review and blocks its superseded code', async ({
@@ -422,6 +422,6 @@ test.describe('check-in and staff registration operations', () => {
 		await modal.getByRole('button', { name: /save/i }).click();
 		await page.getByText('Yes, continue', { exact: true }).click();
 		await expect(page).toHaveURL(/\/admin\/checkin\/confirmation$/);
-		await expect(page.getByText('Give the shopper 1 coupons.')).toBeVisible();
+		await expect(page.getByText('Give the shopper 1 coupon.')).toBeVisible();
 	});
 });

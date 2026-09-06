@@ -1,13 +1,21 @@
 <ion-content color="light" class="confirmation-page">
 	<ion-grid class="confirmation-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max ion-justify-content-center">
-			<ion-col class="ticket-column" size="12" sizeMd="10" sizeLg="8" sizeXl="7">
+			<ion-col
+				class="ticket-column"
+				size="12"
+				sizeMd="10"
+				sizeLg="8"
+				sizeXl="7"
+			>
 				<ion-row class="ion-justify-content-center">
 					<ion-col>
 						<ion-card
 							class="ticket-card ion-text-center es-mg-bottom-xxl"
 						>
-							<div class="confirmation-lead ion-padding-horizontal">
+							<div
+								class="confirmation-lead ion-padding-horizontal"
+							>
 								<img
 									src="assets/images/gifts-stacked.svg"
 									class="confirmation-gifts"
@@ -31,15 +39,17 @@
 							</div>
 
 							<div class="qr-frame">
-							<img
-								id="registrationQrCode"
-								[src]="viewService.qrCode$ | async"
-								alt="Registration QR Code"
-								class="qr-code"
-							/>
+								<img
+									id="registrationQrCode"
+									[src]="viewService.qrCode$ | async"
+									alt="Registration QR Code"
+									class="qr-code"
+								/>
 							</div>
 
-							<div class="ticket-actions ion-text-center width-max">
+							<div
+								class="ticket-actions ion-text-center width-max"
+							>
 								<ion-button
 									id="eventInformationButton"
 									color="xmasred"
@@ -108,32 +118,34 @@
 									@if ( viewService.dateTimeSlot$ | async; as
 									slot ) {
 									<ion-text class="es-pd-bottom-md">
-										{{ slot.dateTime | date : "EEEE, MMMM
-										d," : "MST" }} {{ slot.dateTime |
-										timeSlot }}
+										{{ slot.dateTime | localizedDate :
+										"EEEE, MMMM d," : "MST" }} {{
+										slot.dateTime | timeSlot }}
 									</ion-text>
 									<div class="es-mg-bottom-md">
 										@if (allowChangeRegistration$ | async) {
-									<ion-button
-										id="changeRegistrationButton"
-										fill="outline"
+										<ion-button
+											id="changeRegistrationButton"
+											fill="outline"
 											(click)="changeRegistration()"
 										>
 											{{
 											"CONFIRMATION.CHANGE_REGISTRATION_DATETIME"
 											| translate }}
-									</ion-button>
-									}
-									@if (allowCancelRegistration$ | async) {
-									<ion-button
-										id="cancelRegistrationButton"
-										color="danger"
-										fill="outline"
-										(click)="undoRegistration()"
-									>
-										{{ 'CONFIRMATION.CANCEL_REGISTRATION' | translate }}
-									</ion-button>
-									}
+										</ion-button>
+										} @if (allowCancelRegistration$ | async)
+										{
+										<ion-button
+											id="cancelRegistrationButton"
+											color="danger"
+											fill="outline"
+											(click)="undoRegistration()"
+										>
+											{{
+											'CONFIRMATION.CANCEL_REGISTRATION' |
+											translate }}
+										</ion-button>
+										}
 									</div>
 									}
 								</div>
@@ -166,7 +178,10 @@
 									}
 									<br />
 									<br />
-									<a [routerLink]="['/pre-registration/confirmation']" fragment="event-information">
+									<a
+										[routerLink]="['/pre-registration/confirmation']"
+										fragment="event-information"
+									>
 										<em>
 											{{ "CONFIRMATION.EVENT_INFORMATION"
 											| translate }}
@@ -228,23 +243,46 @@
 											child.lastName }}
 										</ion-card-title>
 										<ion-card-subtitle>
-											{{ child.dateOfBirth | date: "MMMM
-											dd, yyyy" }}
+											{{ child.dateOfBirth |
+											localizedDate: 'longDate' }}
 										</ion-card-subtitle>
 									</ion-card-header>
 								</ion-item>
 								} }
 							</ion-list>
 
-							<section id="event-information" class="event-information ion-text-start ion-padding" tabindex="-1">
-								<h2>{{ 'EVENT_INFO.EVENT_INFO_TITLE' | translate }}</h2>
-								<h3>{{ 'EVENT_INFO.WHAT_TO_EXPECT' | translate }}</h3>
-								<p>{{ 'EVENT_INFO.ARRIVE_ON_TIME' | translate }}</p>
-								<p>{{ 'EVENT_INFO.CHECK_WEBSITE' | translate }}</p>
-								<h3>{{ 'EVENT_INFO.ENTRY_INSTRUCTIONS' | translate }}</h3>
+							<section
+								id="event-information"
+								class="event-information ion-text-start ion-padding"
+								tabindex="-1"
+							>
+								<h2>
+									{{ 'EVENT_INFO.EVENT_INFO_TITLE' | translate
+									}}
+								</h2>
+								<h3>
+									{{ 'EVENT_INFO.WHAT_TO_EXPECT' | translate
+									}}
+								</h3>
+								<p>
+									{{ 'EVENT_INFO.ARRIVE_ON_TIME' | translate
+									}}
+								</p>
+								<p>
+									{{ 'EVENT_INFO.CHECK_WEBSITE' | translate }}
+								</p>
+								<h3>
+									{{ 'EVENT_INFO.ENTRY_INSTRUCTIONS' |
+									translate }}
+								</h3>
 								<p>{{ 'EVENT_INFO.DIRECTIONS' | translate }}</p>
-								<ion-button href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}" target="_blank" rel="noopener">
-									{{ 'EVENT_INFO.FAQ_BUTTON' | translate }} (FAQ)
+								<ion-button
+									href="{{ 'EVENT_INFO.FAQ_LINK' | translate }}"
+									target="_blank"
+									rel="noopener"
+								>
+									{{ 'EVENT_INFO.FAQ_BUTTON' | translate }}
+									(FAQ)
 								</ion-button>
 							</section>
 						</ion-card>

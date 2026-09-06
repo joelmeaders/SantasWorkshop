@@ -48,12 +48,12 @@ import { ReferralModalComponent } from '../../../shared/components/referral-moda
 import {
 	FireRepoLite,
 	FunctionsWrapper,
+	dateToCalendarString,
 	IFireRepoCollection,
 	timestampToDate,
 	HttpsCallableResult,
 	PROGRAM_YEAR,
 } from '@santashop/core/admin/firestore';
-import { dateToCalendarString } from '@santashop/core';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -113,6 +113,7 @@ export class PreRegistrationPage implements OnDestroy {
 		)(registration);
 
 	public readonly form = new UntypedFormGroup({
+		preferredLanguage: new UntypedFormControl('en', { nonNullable: true }),
 		firstName: new UntypedFormControl(
 			undefined,
 			Validators.compose([

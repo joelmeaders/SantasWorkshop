@@ -45,10 +45,12 @@ export default async function callableDeleteEmailTemplate(
 		.collection(getEmailTemplateRevisionCollectionPath(key))
 		.get();
 	await Promise.all(
-		 revisionsSnapshot.docs.map(async (revision) => {
+		revisionsSnapshot.docs.map(async (revision) => {
 			const data = revision.data() as { htmlStoragePath?: string };
 			if (data.htmlStoragePath) {
-				await deleteEmailTemplateHtml(data.htmlStoragePath).catch(() => undefined);
+				await deleteEmailTemplateHtml(data.htmlStoragePath).catch(
+					() => undefined,
+				);
 			}
 		}),
 	);
@@ -58,5 +60,11 @@ export default async function callableDeleteEmailTemplate(
 		batch.delete(revision.ref);
 	}
 	batch.delete(templateRef);
+	const awsTemplateName = templateSnapshot.data()?.['awsTemplateName'];
+	if (typeof awsTemplateName === 'string') {
+		const nameRef = db.doc('emailTemplateNames/' + awsTemplateName);
+		const nameSnapshot = await nameRef.get();
+		if (nameSnapshot.data()?.['templateKey'] === key) batch.delete(nameRef);
+	}
 	await batch.commit();
 }

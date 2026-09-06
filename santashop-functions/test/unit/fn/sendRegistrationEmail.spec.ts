@@ -33,6 +33,10 @@ describe('sendRegistrationEmail handler', () => {
 			publishedRevisionId: 'revision-1',
 			fieldMappings: [],
 		});
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/confirmation/revisions/revision-1',
+			{ fieldMappings: [] },
+		);
 		backgroundMock.batchCommit.mockResolvedValue(undefined);
 		backgroundMock.exportDocuments.mockResolvedValue([{ name: 'op-123' }]);
 	});
@@ -785,6 +789,19 @@ describe('sendRegistrationEmail handler', () => {
 				'Noelle',
 				'noelle.elf@example.com',
 			),
+		);
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/special-reminder-2026/revisions/rev-3',
+			{
+				deliveryProfile: 'event-reminder',
+				fieldMappings: [
+					{
+						name: 'guestName',
+						mapping: 'firstName',
+						sampleValue: 'Noelle',
+					},
+				],
+			},
 		);
 		backgroundMock.setCollectionDocs('emailTemplates', [
 			{

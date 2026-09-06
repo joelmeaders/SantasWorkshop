@@ -22,7 +22,7 @@ import {
 import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
 import { DatePipe } from '@angular/common';
-import { dateToCalendarString } from '@santashop/core';
+import { dateToCalendarString } from '@santashop/core/admin/firestore';
 import { addIcons } from 'ionicons';
 import {
 	addCircle,

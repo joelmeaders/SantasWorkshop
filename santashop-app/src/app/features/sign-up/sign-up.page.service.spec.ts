@@ -70,7 +70,10 @@ describe('SignUpPageService', () => {
 				},
 				{
 					provide: TranslateService,
-					useValue: { instant: vi.fn((key: string) => key) },
+					useValue: {
+						instant: vi.fn((key: string) => key),
+						getCurrentLang: vi.fn(() => 'es'),
+					},
 				},
 			],
 		});
@@ -108,9 +111,7 @@ describe('SignUpPageService', () => {
 			emailAddress: 'holly@example.com',
 			password: 'Password123!',
 		});
-		expect(navigate).toHaveBeenCalledWith([
-			'pre-registration/overview',
-		]);
+		expect(navigate).toHaveBeenCalledWith(['pre-registration/overview']);
 		expect(loader.present).toHaveBeenCalled();
 		expect(loader.dismiss).toHaveBeenCalled();
 	});
@@ -151,9 +152,7 @@ describe('SignUpPageService', () => {
 		const service = createService();
 
 		currentUser$.next({ uid: 'existing-user' });
-		expect(navigate).toHaveBeenCalledWith([
-			'/pre-registration/overview',
-		]);
+		expect(navigate).toHaveBeenCalledWith(['/pre-registration/overview']);
 
 		navigate.mockClear();
 		service.ngOnDestroy();

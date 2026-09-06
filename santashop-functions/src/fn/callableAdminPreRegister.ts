@@ -1,3 +1,4 @@
+import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	User,
@@ -64,6 +65,9 @@ export default async function callableAdminPreRegister(
 	request: CallableRequest<Registration>,
 ): Promise<string> {
 	const record = request.data;
+	record.preferredLanguage = withCallableValidation(() =>
+		normalizeEmailLanguage(record.preferredLanguage),
+	);
 	const emailAddress = record.emailAddress?.toLowerCase();
 	const firstName = record.firstName;
 	const lastName = record.lastName;
@@ -160,6 +164,9 @@ export default async function callableAdminPreRegister(
 			qrCodeStoragePath: createdRegistration.qrCodeStoragePath,
 			email: emailAddress,
 			name: firstName,
+			appointmentDateTime: normalizeDateTime(
+				record.dateTimeSlot!.dateTime!,
+			),
 			formattedDateTime: createdRegistration.formattedDateTime,
 			templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 			queuedOn: finalizedOn,
@@ -234,6 +241,7 @@ const createRegistration = async (
 
 	// Create User Record
 	const user: User = {
+		preferredLanguage: record.preferredLanguage,
 		firstName: requiredFirstName,
 		lastName: requiredLastName,
 		emailAddress: requiredEmailAddress,

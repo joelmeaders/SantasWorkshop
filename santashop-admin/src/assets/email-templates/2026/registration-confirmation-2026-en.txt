@@ -1,0 +1,40 @@
+Hello {{firstName}},
+
+You’re registered for {{eventName}}! We look forward to welcoming your family and helping make the season a little brighter.
+
+YOUR APPOINTMENT
+{{dateTime}}
+Denver time · Mountain Time
+
+Your holiday ticket
+CONFIRMATION CODE: {{code}}
+{{qrCodeUrl}}
+
+Three things to bring
+- This ticket and QR code
+- Your photo ID
+- Proof of each child’s age
+
+Please arrive at your scheduled time. Need a different day or time? Update your registration in advance so we know when to welcome you.
+
+View or change registration: https://register.denversantaclausshop.org/
+
+DRAFT · CONFIRM 2026 DETAILS BEFORE PUBLISHING
+
+Shop Venue — not yet confirmed for 2026:
+South Lowry Marketplace
+7150 Leetsdale Drive, Unit 380
+Denver, CO 80224
+
+2026 opening date and time: TO BE CONFIRMED. Replace this note with the confirmed information before publishing.
+
+View Shop Venue on map: https://www.google.com/maps/search/?api=1&query=7150%20Leetsdale%20Drive%20Unit%20380%20Denver%20CO%2080224
+
+Read the FAQs: https://www.denversantaclausshop.org/faq-english/
+
+Contact us on Facebook: https://www.facebook.com/denversantaclausshop/
+
+With warm wishes,
+Your Denver Santa Claus Shop volunteers
+
+A Toy for Every Girl & Boy

@@ -1,7 +1,9 @@
+import type { CustomerLanguage } from './language';
 import { Child } from './child';
 import { DateTimeSlot } from './date-time-slot';
 
 export interface Registration {
+	preferredLanguage?: CustomerLanguage;
 	uid?: string;
 	qrcode?: string;
 	qrCodeStoragePath: string;

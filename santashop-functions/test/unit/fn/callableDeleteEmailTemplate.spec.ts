@@ -16,25 +16,37 @@ describe('callableDeleteEmailTemplate', () => {
 
 	it('deletes template html, every revision, and the template document', async () => {
 		const handler = await loadHandler();
-		adminMock.setDocSnapshot('emailTemplates/registration-2026', { key: 'registration-2026' });
+		adminMock.setDocSnapshot('emailTemplates/registration-2026', {
+			key: 'registration-2026',
+			awsTemplateName: 'ses-template',
+		});
+		adminMock.setDocSnapshot('emailTemplateNames/ses-template', {
+			templateKey: 'registration-2026',
+		});
 		const revisionRef = adminMock.getDocRef(
 			'emailTemplates/registration-2026/revisions/rev-1',
 		);
-		adminMock.getCollectionRef('emailTemplates/registration-2026/revisions').get.mockResolvedValue({
-			docs: [
-				{
-					ref: revisionRef,
-					data: () => ({
-						htmlStoragePath: 'emailTemplates/registration-2026/revisions/rev-1.html',
-					}),
-				},
-			],
-		});
+		adminMock
+			.getCollectionRef('emailTemplates/registration-2026/revisions')
+			.get.mockResolvedValue({
+				docs: [
+					{
+						ref: revisionRef,
+						data: () => ({
+							htmlStoragePath:
+								'emailTemplates/registration-2026/revisions/rev-1.html',
+						}),
+					},
+				],
+			});
 
 		await expect(
 			handler({
 				data: { key: 'registration-2026' },
-				auth: { uid: 'admin-1', token: { roles: ['admin', 'checkin'] } },
+				auth: {
+					uid: 'admin-1',
+					token: { roles: ['admin', 'checkin'] },
+				},
 			} as never),
 		).resolves.toBeUndefined();
 
@@ -47,16 +59,29 @@ describe('callableDeleteEmailTemplate', () => {
 		expect(adminMock.batchDelete).toHaveBeenCalledWith(
 			adminMock.getDocRef('emailTemplates/registration-2026'),
 		);
+		expect(adminMock.batchDelete).toHaveBeenCalledWith(
+			adminMock.getDocRef('emailTemplateNames/ses-template'),
+		);
 		expect(adminMock.batchCommit).toHaveBeenCalledTimes(1);
 	});
 
 	it.each([
 		[
 			'caller is not an admin',
-			{ data: { key: 'registration-2026' }, auth: { uid: 'user', token: {} } },
+			{
+				data: { key: 'registration-2026' },
+				auth: { uid: 'user', token: {} },
+			},
 			'permission-denied',
 		],
-		['key is omitted', { data: {}, auth: { uid: 'admin', token: { roles: ['admin', 'checkin'] } } }, 'invalid-argument'],
+		[
+			'key is omitted',
+			{
+				data: {},
+				auth: { uid: 'admin', token: { roles: ['admin', 'checkin'] } },
+			},
+			'invalid-argument',
+		],
 	])('rejects when %s', async (_description, request, code) => {
 		const handler = await loadHandler();
 		await expect(handler(request as never)).rejects.toMatchObject({ code });

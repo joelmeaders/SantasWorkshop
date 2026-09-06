@@ -110,7 +110,11 @@ export class SignUpPageService implements OnDestroy {
 	private async createAccount(value: OnboardUser): Promise<void> {
 		const accountStatusFunction =
 			this.functions.callableWrapper('newAccount');
-		await accountStatusFunction({ ...value });
+		await accountStatusFunction({
+			...value,
+			preferredLanguage:
+				this.translateService.getCurrentLang() === 'es' ? 'es' : 'en',
+		});
 	}
 
 	private async signIn(value: OnboardUser): Promise<void | IError> {

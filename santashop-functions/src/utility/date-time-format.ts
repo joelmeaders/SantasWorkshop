@@ -1,5 +1,5 @@
 import type { Timestamp } from 'firebase-admin/firestore';
-import * as dateFormat from 'dateformat';
+import type { CustomerLanguage } from '@santashop/models';
 import { SHOP_TIME_ZONE } from './runtime-config';
 
 type TimestampLike = Pick<Timestamp, 'toDate'>;
@@ -26,11 +26,15 @@ export const normalizeDateTime = (value: DateTimeValue): Date => {
 	return new Date(value);
 };
 
-export const formatRegistrationDateTime = (value: DateTimeValue): string => {
-	const resolvedDate = normalizeDateTime(value);
-	const localizedDate = resolvedDate.toLocaleString('en-US', {
+export const formatRegistrationDateTime = (
+	value: DateTimeValue,
+	language: CustomerLanguage = 'en',
+): string =>
+	new Intl.DateTimeFormat(language === 'es' ? 'es-US' : 'en-US', {
 		timeZone: SHOP_TIME_ZONE,
-	});
-
-	return dateFormat.default(localizedDate, 'dddd, mmmm d, h:MM TT');
-};
+		weekday: 'long',
+		month: 'long',
+		day: 'numeric',
+		hour: 'numeric',
+		minute: '2-digit',
+	}).format(normalizeDateTime(value));

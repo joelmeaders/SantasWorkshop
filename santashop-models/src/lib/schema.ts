@@ -8,6 +8,7 @@ export const COLLECTION_SCHEMA = {
 	children: 'children',
 	dateTimeSlots: 'dateTimeSlots',
 	emailTemplates: 'emailTemplates',
+	emailTemplateNames: 'emailTemplateNames',
 	registrationSearchIndex: 'registrationsearchindex',
 	registrationScanAttempts: 'registrationScanAttempts',
 	registrationScanRiskSummaries: 'registrationScanRiskSummaries',

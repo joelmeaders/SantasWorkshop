@@ -92,7 +92,9 @@ describe('testHelpers module', () => {
 		adminMock = createTestHelpersAdminMock();
 		adminMock.batchCommit.mockResolvedValue(undefined);
 		adminMock.listUsers.mockResolvedValue({ users: [] });
-		adminMock.getFiles.mockResolvedValue([[{ delete: adminMock.storageDelete }]]);
+		adminMock.getFiles.mockResolvedValue([
+			[{ delete: adminMock.storageDelete }],
+		]);
 	});
 
 	it('seeds public parameters with defaults merged with overrides', async () => {
@@ -125,10 +127,16 @@ describe('testHelpers module', () => {
 		await clearAllData();
 
 		expect(adminMock.batchDelete).toHaveBeenCalledTimes(4);
-		expect(adminMock.batchCommit).toHaveBeenCalledTimes(16);
-		expect(adminMock.getFiles).toHaveBeenCalledWith({ prefix: 'registrations/' });
-		expect(adminMock.getFiles).toHaveBeenCalledWith({ prefix: 'emailTemplates/' });
-		expect(adminMock.storageDelete).toHaveBeenCalledWith({ ignoreNotFound: true });
+		expect(adminMock.batchCommit).toHaveBeenCalledTimes(17);
+		expect(adminMock.getFiles).toHaveBeenCalledWith({
+			prefix: 'registrations/',
+		});
+		expect(adminMock.getFiles).toHaveBeenCalledWith({
+			prefix: 'emailTemplates/',
+		});
+		expect(adminMock.storageDelete).toHaveBeenCalledWith({
+			ignoreNotFound: true,
+		});
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('auth-1');
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('auth-2');
 	});

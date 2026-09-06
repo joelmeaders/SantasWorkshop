@@ -160,6 +160,7 @@ export default async function completeRegistration(
 				qrCodeStoragePath: registration.qrCodeStoragePath,
 				email: canonicalContact.emailAddress,
 				name: canonicalContact.firstName,
+				appointmentDateTime: slot.dateTime,
 				formattedDateTime: formatRegistrationDateTime(slot.dateTime),
 				appointmentSlotId: slot.id,
 				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,

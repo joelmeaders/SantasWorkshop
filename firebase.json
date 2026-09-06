@@ -61,6 +61,13 @@
 			],
 			"rewrites": [
 				{
+					"source": "/updatePreferredLanguage",
+					"function": {
+						"functionId": "updatePreferredLanguage",
+						"region": "us-central1"
+					}
+				},
+				{
 					"source": "/changeAccountInformation",
 					"function": {
 						"functionId": "changeAccountInformation",

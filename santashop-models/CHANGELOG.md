@@ -2,6 +2,13 @@
 
 All notable changes to the shared models library will be documented in this file.
 
+## [2026.09.0-alpha.2] - Unreleased
+
+### Added
+
+- Optional customer language preferences and the authenticated preference-update request.
+- Template language, cancellation delivery fields, plain text, seasonal review state, and versioned transfer-package contracts.
+
 ## [2026.09.0-alpha.1] - Unreleased
 
 ### Changed

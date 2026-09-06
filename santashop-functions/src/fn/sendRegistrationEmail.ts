@@ -1,4 +1,8 @@
 import {
+	customerLanguageOrEnglish,
+	type CustomerLanguage,
+} from '@santashop/models';
+import {
 	SendEmailCommand,
 	type SendEmailCommandOutput,
 	SendTemplatedEmailCommand,
@@ -29,6 +33,7 @@ import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import {
 	normalizeDateTime,
+	formatRegistrationDateTime,
 	type DateTimeValue,
 } from '../utility/date-time-format';
 
@@ -53,6 +58,7 @@ interface QueuedRegistrationEmailDocument {
 	name?: string;
 	email?: string;
 	formattedDateTime?: string;
+	appointmentDateTime?: DateTimeValue;
 	templateKey?: string;
 	queuedOn?: Date;
 	queueSource?: string;
@@ -266,6 +272,7 @@ const createReminderEmailCommand = (
 
 const createCancellationEmailCommand = (
 	payload: ResolvedEmailPayload,
+	language: CustomerLanguage = 'en',
 ): SendEmailCommand =>
 	new SendEmailCommand({
 		Destination: { ToAddresses: [payload.email] },
@@ -273,11 +280,19 @@ const createCancellationEmailCommand = (
 		ReturnPath: REGISTRATION_EMAIL_RETURN_PATH,
 		Message: {
 			Subject: {
-				Data: `Your ${EVENT_DISPLAY_NAME} registration was cancelled`,
+				Charset: 'UTF-8',
+				Data:
+					language === 'es'
+						? `Tu inscripción para ${EVENT_DISPLAY_NAME} fue cancelada`
+						: `Your ${EVENT_DISPLAY_NAME} registration was cancelled`,
 			},
 			Body: {
 				Text: {
-					Data: `Hello ${payload.firstName},\n\nYour registration for ${EVENT_DISPLAY_NAME} has been cancelled. Your previous appointment (${payload.dateTime}) is no longer reserved, and the confirmation code from your cancelled registration is no longer valid.\n\nIf you would like to attend, sign in and submit a new registration.`,
+					Charset: 'UTF-8',
+					Data:
+						language === 'es'
+							? `Hola ${payload.firstName},\n\nTu inscripción para ${EVENT_DISPLAY_NAME} fue cancelada. Tu cita anterior (${payload.dateTime}) ya no está reservada y tu boleto anterior ya no es válido.\n\nSi deseas asistir, inicia sesión y completa una nueva inscripción: https://register.denversantaclausshop.org`
+							: `Hello ${payload.firstName},\n\nYour registration for ${EVENT_DISPLAY_NAME} has been cancelled. Your previous appointment (${payload.dateTime}) is no longer reserved, and the confirmation code from your cancelled registration is no longer valid.\n\nIf you would like to attend, sign in and submit a new registration.`,
 				},
 			},
 		},
@@ -763,42 +778,6 @@ export default async function sendRegistrationEmail(
 		region: SES_REGION,
 	} as SESClientConfig);
 
-	const isCancellation = isCancellationCommunication(context.document);
-	let templateName: string | undefined;
-	let emailCommand: SendTemplatedEmailCommand | SendEmailCommand;
-	if (isCancellation) {
-		emailCommand = createCancellationEmailCommand(payload);
-	} else {
-		if (!payload.qrCodeStoragePath) {
-			throw new Error(
-				'Queued registration QR image snapshot is unavailable.',
-			);
-		}
-		const baseMessageDetails = {
-			firstName: payload.firstName,
-			eventName: EVENT_DISPLAY_NAME,
-			qrCodeUrl: await getRegistrationQrCodeUrl(
-				payload.qrCodeStoragePath,
-			),
-			code: payload.code,
-			dateTime: payload.dateTime,
-		};
-		const resolvedTemplate = await resolvePublishedEmailTemplate({
-			templateKey: payload.templateKey,
-		});
-		templateName = resolvedTemplate.templateName;
-		const messageDetails = buildEmailTemplateDataFromMappings(
-			resolvedTemplate.templateSummary.fieldMappings,
-			baseMessageDetails,
-		);
-		emailCommand = createReminderEmailCommand(
-			messageDetails,
-			payload.email,
-			resolvedTemplate.templateName,
-		);
-	}
-
-	let response: EmailDeliveryResponse | undefined;
 	const attemptedOn = new Date();
 	const queuedOn = getQueueRequestedOn(context.document, attemptedOn);
 
@@ -806,8 +785,105 @@ export default async function sendRegistrationEmail(
 		return;
 	}
 
+	const isCancellation = isCancellationCommunication(context.document);
+	let templateName: string | undefined;
+	let emailCommand: SendTemplatedEmailCommand | SendEmailCommand;
+	let usePlainText = false;
+	let deliveryMetadata: Record<string, unknown>;
 	try {
-		response = isCancellation
+		const profile = await admin
+			.firestore()
+			.doc(COLLECTION_SCHEMA.users + '/' + payload.uid)
+			.get();
+		const requestedLanguage = customerLanguageOrEnglish(
+			profile.data()?.['preferredLanguage'],
+		);
+		let resolvedTemplate;
+		try {
+			resolvedTemplate = await resolvePublishedEmailTemplate({
+				templateKey: isCancellation
+					? 'registration-cancellation'
+					: payload.templateKey,
+				language: requestedLanguage,
+			});
+		} catch (error) {
+			if (
+				!isCancellation ||
+				!(error instanceof Error) ||
+				!error.message.includes(
+					'does not have a published SES template',
+				)
+			)
+				throw error;
+		}
+		const deliveredLanguage =
+			resolvedTemplate?.language ?? requestedLanguage;
+		const appointment = context.document.appointmentDateTime;
+		payload.dateTime = appointment
+			? formatRegistrationDateTime(appointment, deliveredLanguage)
+			: payload.dateTime;
+		if (
+			isCancellation &&
+			!appointment &&
+			payload.dateTime === 'your previous appointment' &&
+			deliveredLanguage === 'es'
+		)
+			payload.dateTime = 'tu cita anterior';
+		deliveryMetadata = {
+			requestedLanguage,
+			deliveredLanguage,
+			selectedTemplateKey:
+				resolvedTemplate?.templateSummary.key ??
+				'registration-cancellation',
+			selectedRevisionId:
+				resolvedTemplate?.templateSummary.publishedRevisionId ?? false,
+			languageFallbackReason: resolvedTemplate?.fallbackReason ?? false,
+		};
+		if (!resolvedTemplate) {
+			usePlainText = true;
+			emailCommand = createCancellationEmailCommand(
+				payload,
+				deliveredLanguage,
+			);
+		} else {
+			templateName = resolvedTemplate.templateName;
+			const runtimeData = {
+				firstName: payload.firstName,
+				eventName: EVENT_DISPLAY_NAME,
+				dateTime: payload.dateTime,
+				...(!isCancellation
+					? {
+							code: payload.code,
+							qrCodeUrl: await getRegistrationQrCodeUrl(
+								payload.qrCodeStoragePath!,
+							),
+						}
+					: {}),
+			};
+			emailCommand = createReminderEmailCommand(
+				buildEmailTemplateDataFromMappings(
+					resolvedTemplate.templateSummary.fieldMappings,
+					runtimeData,
+				),
+				payload.email,
+				templateName,
+			);
+		}
+	} catch (error) {
+		await persistFailedDelivery(
+			context,
+			getQueueRequestedOn(context.document, new Date()),
+			undefined,
+			error,
+		);
+		return;
+	}
+
+	let response: EmailDeliveryResponse | undefined;
+
+	try {
+		await context.emailDocRef.set(deliveryMetadata, { merge: true });
+		response = usePlainText
 			? ((await sesClient.send(
 					emailCommand as SendEmailCommand,
 				)) as SendEmailCommandOutput)

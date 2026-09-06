@@ -1,11 +1,5 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { CustomerLanguageService } from './core/services/customer-language.service';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -46,6 +40,10 @@ describe('AppComponent', () => {
 			imports: [AppComponent],
 			schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
 			providers: [
+				{
+					provide: CustomerLanguageService,
+					useValue: { initialize: vi.fn() },
+				},
 				provideRouter([]),
 				{ provide: Platform, useValue: platformSpy },
 				{

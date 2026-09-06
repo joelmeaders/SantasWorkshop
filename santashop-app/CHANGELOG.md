@@ -2,6 +2,17 @@
 
 All notable changes to the main application will be documented in this file.
 
+## [2026.09.0-alpha.2] - Unreleased
+
+### Added
+
+- Save the selected language during signup and restore the customer preference on login.
+- Persist signed-in language changes from both controls, with translated error messages and retry.
+
+### Changed
+
+- Advance the application version to `2026.09.0-alpha.2`.
+
 ## [2026.09.0-alpha.1] - Unreleased
 
 ### Changed

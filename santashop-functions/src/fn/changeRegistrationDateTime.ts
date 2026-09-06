@@ -152,6 +152,7 @@ export default async function changeRegistrationDateTime(
 				qrCodeStoragePath: registration.qrCodeStoragePath,
 				email: registration.emailAddress,
 				name: registration.firstName,
+				appointmentDateTime: slot.dateTime,
 				formattedDateTime: formatRegistrationDateTime(slot.dateTime),
 				appointmentSlotId: slot.id,
 				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,

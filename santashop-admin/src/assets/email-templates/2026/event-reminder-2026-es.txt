@@ -1,0 +1,40 @@
+Hola {{firstName}}:
+
+Nos estamos preparando para recibirte en {{eventName}}. Te recordamos tu cita y lo que necesitas traer.
+
+TU CITA
+{{dateTime}}
+Hora de Denver · Hora de la Montaña
+
+Tu boleto navideño
+CÓDIGO DE CONFIRMACIÓN: {{code}}
+{{qrCodeUrl}}
+
+Tres cosas que debes traer
+- Este boleto y código QR
+- Tu identificación con foto
+- Un comprobante de la edad de cada niño
+
+Por favor, llega a la hora de tu cita. ¿Necesitas otro día u otra hora? Cambia tu inscripción con anticipación para que sepamos cuándo recibirte.
+
+Ver o cambiar mi inscripción: https://register.denversantaclausshop.org/
+
+BORRADOR · CONFIRMAR LOS DATOS DE 2026 ANTES DE PUBLICAR
+
+Lugar de la tienda; aún no está confirmado para 2026:
+South Lowry Marketplace
+7150 Leetsdale Drive, Unit 380
+Denver, CO 80224
+
+Fecha y hora de apertura de 2026: POR CONFIRMAR. Reemplaza esta nota con la información confirmada antes de publicar.
+
+Ver el lugar de la tienda en el mapa: https://www.google.com/maps/search/?api=1&query=7150%20Leetsdale%20Drive%20Unit%20380%20Denver%20CO%2080224
+
+Leer las preguntas frecuentes: https://www.denversantaclausshop.org/faq-espanol/
+
+Contactarnos por Facebook: https://www.facebook.com/denversantaclausshop/
+
+Con nuestros mejores deseos,
+El equipo de voluntarios de Denver Santa Claus Shop
+
+Un juguete para cada niña y niño

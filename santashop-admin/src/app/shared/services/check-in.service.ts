@@ -5,8 +5,8 @@ import {
 	Registration,
 	type ScanInputMethod,
 } from '@santashop/models';
-import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core/admin/firestore';
-import { dateToCalendarString } from '@santashop/core';
+import { FunctionsWrapper,
+	dateToCalendarString, HttpsCallableResult } from '@santashop/core/admin/firestore';
 
 @Injectable({
 	providedIn: 'root',

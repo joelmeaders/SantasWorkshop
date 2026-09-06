@@ -27,6 +27,7 @@ interface ReminderEmailDocument {
 	qrCodeStoragePath: string;
 	email?: string;
 	name?: string;
+	appointmentDateTime: unknown;
 	formattedDateTime: string;
 	appointmentSlotId?: string;
 	templateKey: string;
@@ -212,6 +213,7 @@ function buildReminderEmailDocument(
 		qrCodeStoragePath: registration.qrCodeStoragePath,
 		email: registration.emailAddress,
 		name: registration.firstName,
+		appointmentDateTime: dateTimeSlot,
 		formattedDateTime: formatRegistrationDateTime(dateTimeSlot),
 		appointmentSlotId: registration.dateTimeSlot?.id,
 		templateKey: EMAIL_TEMPLATE_KEYS.eventReminder,

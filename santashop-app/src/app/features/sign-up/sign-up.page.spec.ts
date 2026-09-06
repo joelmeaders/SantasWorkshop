@@ -1,11 +1,5 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { CustomerLanguageService } from '../../core/services/customer-language.service';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalController, AlertController } from '@ionic/angular/standalone';
 import {
@@ -22,7 +16,7 @@ import { SignUpPageService } from './sign-up.page.service';
 import { newOnboardUserForm } from './sign-up.form';
 import { AppStateService } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { AnalyticsWrapper } from '@santashop/core/customer';
 import enTranslations from '../../../assets/i18n/en.json';
 import esTranslations from '../../../assets/i18n/es.json';
@@ -37,6 +31,13 @@ describe('SignUpPage', () => {
 		TestBed.configureTestingModule({
 			imports: [SignUpPage],
 			providers: [
+				{
+					provide: CustomerLanguageService,
+					useValue: {
+						language$: new BehaviorSubject('en'),
+						setLanguage: vi.fn(),
+					},
+				},
 				{
 					provide: SignUpPageService,
 					useValue: {
@@ -98,8 +99,11 @@ describe('SignUpPage', () => {
 
 		expect(component.form.controls.referredBy.value).toBe('Friend');
 		expect(
-			(fixture.nativeElement.querySelector('#referralSelector') as HTMLElement)
-				.innerText,
+			(
+				fixture.nativeElement.querySelector(
+					'#referralSelector',
+				) as HTMLElement
+			).innerText,
 		).toContain('Friend');
 		expect(modalController.create).toHaveBeenCalled();
 	});
@@ -145,7 +149,6 @@ describe('SignUpPage', () => {
 			'referralSelectorError',
 		);
 		expect(error).toBeTruthy();
-
 	});
 
 	it('only onboards after the customer confirms a supplied email address', async (): Promise<void> => {
@@ -189,18 +192,22 @@ describe('SignUpPage', () => {
 		const translateService = TestBed.inject(
 			TranslateService,
 		) as Mocked<TranslateService>;
-		translateService.instant.mockImplementation((key: string | string[]) => {
-			const translationKey = Array.isArray(key) ? key[0] : key;
-			return (
-				{
-					'REFERRAL.OTHER': 'Other',
-					'REFERRAL.REFERRED_BY': 'How did you hear about us?',
-					'REFERRAL.SELECT': 'Select an answer',
-				}[translationKey] ?? translationKey
-			);
-		});
+		translateService.instant.mockImplementation(
+			(key: string | string[]) => {
+				const translationKey = Array.isArray(key) ? key[0] : key;
+				return (
+					{
+						'REFERRAL.OTHER': 'Other',
+						'REFERRAL.REFERRED_BY': 'How did you hear about us?',
+						'REFERRAL.SELECT': 'Select an answer',
+					}[translationKey] ?? translationKey
+				);
+			},
+		);
 
-		expect(component.displayReferral('Other: Neighbor')).toBe('Other:  Neighbor');
+		expect(component.displayReferral('Other: Neighbor')).toBe(
+			'Other:  Neighbor',
+		);
 		expect(component.displayReferral(undefined)).toBe('');
 	});
 
@@ -230,7 +237,9 @@ describe('SignUpPage', () => {
 		) as HTMLButtonElement[];
 
 		expect(legalButtons).toHaveLength(2);
-		expect(legalButtons.every((button) => button.type === 'button')).toBe(true);
+		expect(legalButtons.every((button) => button.type === 'button')).toBe(
+			true,
+		);
 		expect(
 			legalButtons.every(
 				(button) => button.getAttribute('aria-haspopup') === 'dialog',

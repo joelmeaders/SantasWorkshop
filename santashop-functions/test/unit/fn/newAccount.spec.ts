@@ -43,48 +43,54 @@ describe('newAccount handler', () => {
 		);
 	});
 
-	it('creates auth, user, and registration records for a valid onboard request', async () => {
-		const onboardUser = createOnboardUser();
-		adminMock.createUser.mockResolvedValue({ uid: 'new-user-123' });
-		adminMock.batchCommit.mockResolvedValue(undefined);
+	it.each([undefined, 'en', 'es'] as const)(
+		'creates profiles with language %s and defaults older clients to English',
+		async (language) => {
+			const onboardUser = createOnboardUser({
+				preferredLanguage: language,
+			});
+			adminMock.createUser.mockResolvedValue({ uid: 'new-user-123' });
+			adminMock.batchCommit.mockResolvedValue(undefined);
 
-		const { default: newAccount } = await loadSubject(adminMock);
+			const { default: newAccount } = await loadSubject(adminMock);
 
-		const result = await newAccount(createCallableRequest(onboardUser));
+			const result = await newAccount(createCallableRequest(onboardUser));
 
-		expect(result).toBe('new-user-123');
-		expect(adminMock.createUser).toHaveBeenCalledWith({
-			email: 'buddy.elf@example.com',
-			password: onboardUser.password,
-			disabled: false,
-			displayName: 'Buddy Elf',
-		});
-		expect(adminMock.doc).toHaveBeenCalledWith('users/new-user-123');
-		expect(adminMock.doc).toHaveBeenCalledWith(
-			'registrations/new-user-123',
-		);
-		expect(adminMock.batchCreate).toHaveBeenCalledWith(
-			expect.objectContaining({ path: 'users/new-user-123' }),
-			expect.objectContaining({
-				referredBy: 'Denver Human Services DHS',
-			}),
-		);
-		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
-		expect(generateId).toHaveBeenCalledWith(8);
-		expect(generateQrCode).toHaveBeenCalledWith(
-			'registrations/new-user-123/test-asset.png',
-			'ABCD2345',
-		);
-		expect(
-			adminMock.getDocRef('registrations/new-user-123').set,
-		).toHaveBeenCalledWith(
-			expect.objectContaining({
-				qrCodeGeneratedOn: expect.any(Date),
-				qrCodeGenerationFailedOn: false,
-			}),
-			{ merge: true },
-		);
-	});
+			expect(result).toBe('new-user-123');
+			expect(adminMock.createUser).toHaveBeenCalledWith({
+				email: 'buddy.elf@example.com',
+				password: onboardUser.password,
+				disabled: false,
+				displayName: 'Buddy Elf',
+			});
+			expect(adminMock.doc).toHaveBeenCalledWith('users/new-user-123');
+			expect(adminMock.doc).toHaveBeenCalledWith(
+				'registrations/new-user-123',
+			);
+			expect(adminMock.batchCreate).toHaveBeenCalledWith(
+				expect.objectContaining({ path: 'users/new-user-123' }),
+				expect.objectContaining({
+					referredBy: 'Denver Human Services DHS',
+					preferredLanguage: language ?? 'en',
+				}),
+			);
+			expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
+			expect(generateId).toHaveBeenCalledWith(8);
+			expect(generateQrCode).toHaveBeenCalledWith(
+				'registrations/new-user-123/test-asset.png',
+				'ABCD2345',
+			);
+			expect(
+				adminMock.getDocRef('registrations/new-user-123').set,
+			).toHaveBeenCalledWith(
+				expect.objectContaining({
+					qrCodeGeneratedOn: expect.any(Date),
+					qrCodeGenerationFailedOn: false,
+				}),
+				{ merge: true },
+			);
+		},
+	);
 
 	it('maps auth creation failures to an HttpsError', async () => {
 		const onboardUser = createOnboardUser();

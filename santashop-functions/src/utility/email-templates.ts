@@ -1,3 +1,8 @@
+import {
+	customerLanguageOrEnglish,
+	isCustomerLanguage,
+	type CustomerLanguage,
+} from '@santashop/models';
 import type {
 	EmailTemplateDeliveryProfile,
 	EmailTemplateFieldDefinition,
@@ -10,23 +15,27 @@ import {
 	EMAIL_TEMPLATE_RUNTIME_FIELDS,
 } from '@santashop/models';
 import admin from '../firebase-admin';
+import { normalizeDateTime, type DateTimeValue } from './date-time-format';
 import { CallableValidationError } from './callable-validation';
 
 export interface EmailTemplateReferenceLike {
 	templateKey?: string;
+	language?: CustomerLanguage;
 }
 
 export interface EmailTemplateRuntimeData {
 	firstName: string;
 	eventName: string;
-	qrCodeUrl: string;
-	code: string;
+	qrCodeUrl?: string;
+	code?: string;
 	dateTime: string;
 }
 
 export interface ResolvedPublishedEmailTemplate {
 	templateName: string;
 	templateSummary: EmailTemplateSummary;
+	language: CustomerLanguage;
+	fallbackReason?: string;
 }
 
 const TEMPLATE_KEY_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -488,13 +497,13 @@ export const listEmailTemplateSummariesByDeliveryProfile = async (
 	return templates
 		.filter((template) => template.deliveryProfile === deliveryProfile)
 		.sort((left, right) => {
-			const leftTime = new Date(
-				left.publishedOn || left.updatedOn,
+			const leftTime = normalizeDateTime(
+				(left.publishedOn || left.updatedOn) as DateTimeValue,
 			).getTime();
-			const rightTime = new Date(
-				right.publishedOn || right.updatedOn,
+			const rightTime = normalizeDateTime(
+				(right.publishedOn || right.updatedOn) as DateTimeValue,
 			).getTime();
-			return rightTime - leftTime;
+			return rightTime - leftTime || left.key.localeCompare(right.key);
 		});
 };
 
@@ -548,26 +557,69 @@ const stripEditorWhitespace = (html: string): string =>
 export const prepareEmailTemplateHtmlForSes = (html: string): string =>
 	stripEditorWhitespace(ensureMetaCharset(html));
 
+export const normalizeEmailLanguage = (value: unknown): CustomerLanguage => {
+	if (value === undefined) return 'en';
+	if (!isCustomerLanguage(value))
+		throw new CallableValidationError('Language must be en or es.');
+	return value;
+};
+
 export const resolvePublishedEmailTemplate = async (
 	reference: EmailTemplateReferenceLike,
 ): Promise<ResolvedPublishedEmailTemplate> => {
 	const key = reference.templateKey?.trim();
-	if (!key) {
+	if (!key)
 		throw new Error('A published email template reference is required.');
-	}
-
-	const summary = isEmailTemplateDeliveryProfile(key)
-		? (await listEmailTemplateSummariesByDeliveryProfile(key)).find(
-				(template) => !!template.publishedRevisionId,
+	const requested = customerLanguageOrEnglish(reference.language);
+	const candidates = isEmailTemplateDeliveryProfile(key)
+		? await listEmailTemplateSummariesByDeliveryProfile(key)
+		: [await getEmailTemplateSummary(key)].filter(
+				(item): item is EmailTemplateSummary => !!item,
+			);
+	for (const language of requested === 'es'
+		? (['es', 'en'] as const)
+		: (['en'] as const)) {
+		for (const summary of candidates) {
+			if (
+				!summary.publishedRevisionId ||
+				customerLanguageOrEnglish(summary.language) !== language
 			)
-		: await getEmailTemplateSummary(key);
-	if (!summary?.publishedRevisionId) {
-		throw new Error(
-			`Template ${key} does not have a published SES template available.`,
-		);
+				continue;
+			const revision = await getEmailTemplateRevision(
+				summary.key,
+				summary.publishedRevisionId,
+			);
+			if (!revision)
+				throw new Error(
+					`Published revision for template ${summary.key} is unavailable.`,
+				);
+			if (
+				customerLanguageOrEnglish(revision.language) !== language ||
+				revision.deliveryProfile !== summary.deliveryProfile
+			) {
+				throw new Error(
+					'Published template language or delivery profile does not match.',
+				);
+			}
+			return {
+				templateName: summary.awsTemplateName,
+				templateSummary: {
+					...summary,
+					subjectPart: revision.subjectPart,
+					fieldMappings: revision.fieldMappings,
+					textPart: revision.textPart,
+				},
+				language,
+				...(language !== requested
+					? {
+							fallbackReason:
+								'No published Spanish template is available.',
+						}
+					: {}),
+			};
+		}
 	}
-	return {
-		templateName: summary.awsTemplateName,
-		templateSummary: summary,
-	};
+	throw new Error(
+		`Template ${key} does not have a published SES template available.`,
+	);
 };

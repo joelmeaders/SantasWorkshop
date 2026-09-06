@@ -210,4 +210,67 @@ describe('callablePublishEmailTemplate handler', () => {
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
+
+	it('requires seasonal review, rejects remaining draft notes, and publishes plain text without replacing a newer draft', async () => {
+		const { callablePublishEmailTemplate: publish } =
+			await loadEmailTemplateHandlers(backgroundMock);
+		const summary = {
+			key: 'seasonal',
+			language: 'es',
+			deliveryProfile: 'event-reminder',
+			awsTemplateName: 'seasonal-es',
+			subjectPart: 'New unsaved publication draft',
+			fieldMappings: [],
+			currentRevisionId: 'r2',
+			seasonalReviewRequired: true,
+		};
+		const revision = {
+			id: 'r1',
+			language: 'es',
+			deliveryProfile: 'event-reminder',
+			htmlStoragePath: 'template.html',
+			subjectPart: 'Tu visita',
+			textPart: 'Hola',
+			fieldMappings: [],
+			seasonalReviewRequired: true,
+			seasonalDetailsReviewed: false,
+		};
+		backgroundMock.setDocSnapshot('emailTemplates/seasonal', summary);
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/seasonal/revisions/r1',
+			revision,
+		);
+		backgroundMock.setFileContents('template.html', '<p>POR CONFIRMAR</p>');
+		const request = createCallableRequest(
+			{ key: 'seasonal', revisionId: 'r1' },
+			{ roles: ['admin'] },
+		);
+		await expect(publish(request)).rejects.toMatchObject({
+			code: 'failed-precondition',
+		});
+		expect(sesSendMock).not.toHaveBeenCalled();
+		backgroundMock.setDocSnapshot('emailTemplates/seasonal/revisions/r1', {
+			...revision,
+			seasonalDetailsReviewed: true,
+		});
+		await expect(publish(request)).rejects.toThrow(
+			'Replace the unconfirmed',
+		);
+		backgroundMock.setFileContents('template.html', '<p>Hola</p>');
+		await publish(request);
+		expect(sesSendMock.mock.calls[0][0].input.Template).toMatchObject({
+			SubjectPart: 'Tu visita',
+			TextPart: 'Hola',
+		});
+		expect(
+			backgroundMock.getDocRef('emailTemplates/seasonal').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				currentRevisionId: 'r2',
+				subjectPart: 'New unsaved publication draft',
+				publishedRevisionId: 'r1',
+			}),
+			{ merge: true },
+		);
+	});
 });

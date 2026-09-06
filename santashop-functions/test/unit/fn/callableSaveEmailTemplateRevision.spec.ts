@@ -8,6 +8,7 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 
 	beforeEach(() => {
 		backgroundMock = createBackgroundAdminMock();
+		backgroundMock.setCollectionDocs('emailTemplates', []);
 	});
 
 	it('rejects non-admin callers', async () => {
@@ -220,5 +221,70 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('saves language and review state, and protects imported keys and SES names', async () => {
+		const { callableSaveEmailTemplateRevision: save } =
+			await loadEmailTemplateHandlers(backgroundMock);
+		const draft = {
+			key: 'spanish-2026',
+			language: 'es' as const,
+			deliveryProfile: 'registration-confirmation' as const,
+			displayName: 'Spanish',
+			awsTemplateName: 'spanish-2026',
+			subjectPart: 'Hola',
+			html: '<p>Hola</p>',
+			textPart: 'Hola',
+			fieldMappings: [],
+			seasonalReviewRequired: true,
+			seasonalDetailsReviewed: false,
+		};
+		const result = await save(
+			createCallableRequest(draft, { roles: ['admin'] }),
+		);
+		expect(result.revision).toMatchObject({
+			language: 'es',
+			textPart: 'Hola',
+			seasonalReviewRequired: true,
+			seasonalDetailsReviewed: false,
+		});
+		backgroundMock.setDocSnapshot('emailTemplates/spanish-2026', {
+			...result.template,
+		});
+		await expect(
+			save(
+				createCallableRequest(
+					{ ...draft, createOnly: true },
+					{ roles: ['admin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'already-exists' });
+		await expect(
+			save(
+				createCallableRequest(
+					{ ...draft, language: 'en' },
+					{ roles: ['admin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		await expect(
+			save(
+				createCallableRequest(
+					{ ...draft, deliveryProfile: 'event-reminder' },
+					{ roles: ['admin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		backgroundMock.setDocSnapshot('emailTemplateNames/occupied', {
+			templateKey: 'another',
+		});
+		await expect(
+			save(
+				createCallableRequest(
+					{ ...draft, key: 'new', awsTemplateName: 'occupied' },
+					{ roles: ['admin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'already-exists' });
 	});
 });

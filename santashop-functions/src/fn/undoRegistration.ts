@@ -247,6 +247,10 @@ export default async function undoRegistration(
 						: 'your previous appointment',
 					queuedOn: cancelledOn,
 					queueSource: 'registration-cancellation',
+					templateKey: 'registration-cancellation',
+					...(previousDateTimeSlot?.dateTime
+						? { appointmentDateTime: previousDateTimeSlot.dateTime }
+						: {}),
 					deliveryRequestedOn: cancelledOn,
 					deliveryState: 'queued',
 					failedOn: false,

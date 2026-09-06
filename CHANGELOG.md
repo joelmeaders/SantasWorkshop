@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-alpha.2] - Unreleased
+
+### Added
+
+- Six 2026 confirmation, reminder, and cancellation email starters in English and Spanish, with the original DSCS logo, mission, plain-text alternatives, and responsive QR tickets.
+- Admin JSON/HTML template import and export, immutable language/type identities, unique SES names, and revision-level seasonal review checks.
+- Saved customer email-language preferences, login restoration, translated save-error retry, and admin preregistration language selection.
+
+### Changed
+
+- Resolve outgoing templates and appointment dates from the current customer language, with English fallback and published-revision mappings.
+- Route cancellation emails through the template system while retaining localized plain-text fallback.
+- Increase email QR images from 216 to 432 pixels with proportional phone scaling.
+- Advance the workspace and both applications to version `2026.09.0-alpha.2`.
+
+### Fixed
+
+- Prevent unpublished mappings from affecting outgoing email and prevent invalid imports from replacing editor drafts.
+- Extend unit, emulator, and browser coverage for language persistence, template transfer, and publication checks.
+
 ## [2026.09.0-alpha.1] - Unreleased
 
 ### Fixed

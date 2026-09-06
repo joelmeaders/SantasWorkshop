@@ -1,12 +1,12 @@
+import { CustomerLanguageService } from '../../../core/services/customer-language.service';
 import {
 	ChangeDetectionStrategy,
 	Component,
 	OnDestroy,
 	inject,
 } from '@angular/core';
-import { AnalyticsWrapper } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
 
 import { AsyncPipe } from '@angular/common';
@@ -21,17 +21,14 @@ import { IonText, IonToggle } from '@ionic/angular/standalone';
 })
 export class LanguageToggleComponent implements OnDestroy {
 	private readonly translate = inject(TranslateService);
-	private readonly analyticsService = inject(AnalyticsWrapper);
+	private readonly language = inject(CustomerLanguageService);
 
 	private readonly destroy$ = new Subject<void>();
 
-	private readonly currentLangauge = new BehaviorSubject<'en' | 'es'>(
-		this.translate.getCurrentLang() as any,
+	public readonly currentLanguage$ = this.language.language$.pipe(
+		takeUntil(this.destroy$),
+		shareReplay(1),
 	);
-
-	public readonly currentLanguage$ = this.currentLangauge
-		.asObservable()
-		.pipe(takeUntil(this.destroy$), shareReplay(1));
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();
@@ -53,9 +50,6 @@ export class LanguageToggleComponent implements OnDestroy {
 	}
 
 	private async setLanguage(value: 'en' | 'es'): Promise<void> {
-		await firstValueFrom(this.translate.use(value));
-		window.localStorage.setItem('santashop-language', value);
-		this.currentLangauge.next(value);
-		this.analyticsService.logEventWithParams('set_language', { value });
+		await this.language.setLanguage(value);
 	}
 }

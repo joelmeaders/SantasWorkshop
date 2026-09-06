@@ -1,4 +1,5 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { EventDatePipe } from '@santashop/core/admin';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import {
@@ -29,7 +30,7 @@ import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		AsyncPipe,
-		DatePipe,
+		EventDatePipe,
 		HeaderComponent,
 		IonBadge,
 		IonButton,

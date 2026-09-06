@@ -13,7 +13,13 @@ import {
 	TimeSlotPipe,
 	shopSchedule,
 } from '@santashop/core/admin/firestore';
-import { DateTimeSlot } from '@santashop/models';
+import {
+	DateTimeSlot,
+	EVENT_TIME_ZONE,
+	createZonedDate,
+	getZonedDateKey,
+	getZonedDateParts,
+} from '@santashop/models';
 import {
 	AlertController,
 	IonBadge,
@@ -468,7 +474,8 @@ export class ScheduleEditorPage {
 			this.slotDateDrafts.get(slot.id) ??
 			this.formatDateInput(slot.dateTime);
 		const draftHour =
-			this.slotHourDrafts.get(slot.id) ?? slot.dateTime.getHours();
+			this.slotHourDrafts.get(slot.id) ??
+			getZonedDateParts(slot.dateTime).hour;
 
 		if (!Number.isInteger(draftHour) || draftHour < 0 || draftHour > 23) {
 			await this.showError(
@@ -479,16 +486,7 @@ export class ScheduleEditorPage {
 		}
 
 		try {
-			const nextDate = parseLocalDateInput(draftDate);
-			const updatedDateTime = new Date(
-				nextDate.getFullYear(),
-				nextDate.getMonth(),
-				nextDate.getDate(),
-				draftHour,
-				0,
-				0,
-				0,
-			);
+			const updatedDateTime = createZonedDate(draftDate, draftHour);
 
 			await this.scheduleEditorService.updateSlotDateTime(
 				slot.id,
@@ -544,7 +542,7 @@ export class ScheduleEditorPage {
 				: 'Deleting this schedule cannot be undone.';
 		const alert = await this.alerts.create({
 			header: 'Delete schedule?',
-			subHeader: `${slot.dateTime.toLocaleDateString()} ${this.formatHour(slot.dateTime.getHours())}`,
+			subHeader: `${slot.dateTime.toLocaleDateString('en-US', { timeZone: EVENT_TIME_ZONE })} ${this.formatHour(getZonedDateParts(slot.dateTime).hour)}`,
 			message: deleteMessage,
 			buttons: [
 				{
@@ -690,10 +688,7 @@ export class ScheduleEditorPage {
 	}
 
 	public formatDateInput(date: Date): string {
-		const year = date.getFullYear();
-		const month = `${date.getMonth() + 1}`.padStart(2, '0');
-		const day = `${date.getDate()}`.padStart(2, '0');
-		return `${year}-${month}-${day}`;
+		return getZonedDateKey(date);
 	}
 
 	public getSlotDraftDate(slot: ScheduleEditorRow): string {
@@ -705,8 +700,9 @@ export class ScheduleEditorPage {
 
 	public getSlotDraftHour(slot: ScheduleEditorRow): number {
 		return slot.id
-			? (this.slotHourDrafts.get(slot.id) ?? slot.dateTime.getHours())
-			: slot.dateTime.getHours();
+			? (this.slotHourDrafts.get(slot.id) ??
+					getZonedDateParts(slot.dateTime).hour)
+			: getZonedDateParts(slot.dateTime).hour;
 	}
 
 	private groupSlotsByDate(
@@ -727,6 +723,7 @@ export class ScheduleEditorPage {
 			([dateKey, daySlots]) => ({
 				dateKey,
 				dateLabel: daySlots[0].dateTime.toLocaleDateString('en-US', {
+					timeZone: EVENT_TIME_ZONE,
 					weekday: 'long',
 					month: 'short',
 					day: 'numeric',

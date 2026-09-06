@@ -9,6 +9,7 @@ import {
 	signal,
 } from '@angular/core';
 import type { DateTimeSlot } from '@santashop/models';
+import { getZonedDateKey } from '@santashop/models';
 import { TimeSlotPipe } from '@santashop/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
@@ -84,7 +85,7 @@ export class ScheduleCardComponent {
 
 		for (const slot of this.availableSlots()) {
 			const dateTime = slot.dateTime;
-			const key = this.dayKey(dateTime);
+			const key = getZonedDateKey(dateTime);
 			const day = days.get(key);
 
 			if (day) day.slots.push(slot);
@@ -128,13 +129,5 @@ export class ScheduleCardComponent {
 			: this.translate.instant('OVERVIEW.CURRENT_SPOTS', {
 					count: spots,
 				});
-	}
-
-	private dayKey(dateTime: Date): string {
-		return [
-			dateTime.getFullYear(),
-			String(dateTime.getMonth() + 1).padStart(2, '0'),
-			String(dateTime.getDate()).padStart(2, '0'),
-		].join('-');
 	}
 }

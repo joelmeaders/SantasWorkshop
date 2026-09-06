@@ -49,7 +49,7 @@
 		} @else if (checkInState.status === 'ready') {
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
-				Updated {{ checkinLastUpdated$ | async | date:'short' }}
+				Updated {{ checkinLastUpdated$ | async | eventDate:'short' }}
 			</ion-col>
 		</ion-row>
 		<ion-row class="ion-justify-content-center">

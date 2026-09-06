@@ -53,7 +53,7 @@ const toEventDayKey = (date: Date): number => {
 		]),
 	);
 
-	// Noon UTC stays on the same calendar date when the template formats it as MST.
+	// Noon UTC stays on the same calendar date when formatted in Denver time.
 	return Date.UTC(
 		Number(parts['year']),
 		Number(parts['month']) - 1,

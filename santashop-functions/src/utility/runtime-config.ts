@@ -1,3 +1,5 @@
+import { createZonedDate } from '@santashop/models';
+
 interface FirebaseEnvironmentConfig {
 	projectId?: string;
 	storageBucket?: string;
@@ -56,8 +58,6 @@ const parseRequiredYear = (name: string): number => {
 export const PROGRAM_YEAR = parseRequiredYear('SANTASHOP_PROGRAM_YEAR');
 
 export const SHOP_TIME_ZONE = requireEnv('SANTASHOP_TIME_ZONE');
-
-export const SHOP_TIME_OFFSET = requireEnv('SANTASHOP_TIME_OFFSET');
 
 export const SHOP_DAYS = parseList(process.env['SANTASHOP_SHOP_DAYS'], []);
 
@@ -135,10 +135,7 @@ export const getStatsDocumentId = (
 };
 
 export const createShopDate = (day: string, hour: number): Date => {
-	const safeHour = hour.toString().padStart(2, '0');
-	return new Date(
-		`${PROGRAM_YEAR}-${day}T${safeHour}:00:00${SHOP_TIME_OFFSET}`,
-	);
+	return createZonedDate(`${PROGRAM_YEAR}-${day}`, hour, SHOP_TIME_ZONE);
 };
 export const getStorageBucketName = (): string => {
 	return (

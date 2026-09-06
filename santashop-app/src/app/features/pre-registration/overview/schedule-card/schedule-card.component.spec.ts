@@ -69,7 +69,7 @@ describe('ScheduleCardComponent', () => {
 		]);
 	});
 
-	it('groups available slots by their local calendar day', async () => {
+	it('groups available slots by their Denver calendar day', async () => {
 		fixture.componentRef.setInput('canChooseDateTime', true);
 		fixture.componentRef.setInput('slots', [
 			{
@@ -104,6 +104,32 @@ describe('ScheduleCardComponent', () => {
 		expect(
 			fixture.nativeElement.querySelectorAll('ion-accordion'),
 		).toHaveLength(2);
+	});
+	it('keeps slots on the Denver day even when UTC has reached the next day', async () => {
+		fixture.componentRef.setInput('canChooseDateTime', true);
+		fixture.componentRef.setInput('slots', [
+			{
+				id: 'early',
+				programYear: 2026,
+				dateTime: new Date('2026-12-12T23:00:00Z'),
+				maxSlots: 10,
+				enabled: true,
+			},
+			{
+				id: 'late',
+				programYear: 2026,
+				dateTime: new Date('2026-12-13T00:00:00Z'),
+				maxSlots: 10,
+				enabled: true,
+			},
+		]);
+		await fixture.whenStable();
+		expect(component.availableSlotDays().map((day) => day.key)).toEqual([
+			'2026-12-12',
+		]);
+		const text = fixture.nativeElement.textContent;
+		expect(text).toContain('Saturday, December 12, 2026');
+		expect(text).toContain('5PM - 6PM');
 	});
 
 	it('makes each available time slot a direct selection target', async () => {

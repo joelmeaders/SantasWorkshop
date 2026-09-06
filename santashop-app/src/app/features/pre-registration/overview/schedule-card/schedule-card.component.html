@@ -27,7 +27,7 @@
 						<ion-icon name="calendar-outline" slot="start" />
 						<ion-label class="ion-text-wrap"
 							><strong>{{
-								slot.dateTime | localizedDate: 'fullDate'
+								slot.dateTime | localizedDate: 'fullDate' : 'America/Denver'
 							}}</strong>
 							<p>{{ slot.dateTime | timeSlot }}</p></ion-label
 						>
@@ -69,7 +69,7 @@
 										<ion-label
 											><strong>{{
 												day.dateTime
-													| localizedDate: 'fullDate'
+													| localizedDate: 'fullDate' : 'America/Denver'
 											}}</strong></ion-label
 										>
 									</ion-item>

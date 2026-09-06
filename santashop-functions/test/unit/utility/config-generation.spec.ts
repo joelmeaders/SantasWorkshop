@@ -130,7 +130,6 @@ const FUNCTIONS_ENV_KEYS = {
 	TEST_AWS_SECRET_ACCESS_KEY: 'test-secret-key',
 	TEST_SANTASHOP_PROGRAM_YEAR: '2025',
 	TEST_SANTASHOP_TIME_ZONE: 'America/Denver',
-	TEST_SANTASHOP_TIME_OFFSET: '-07:00',
 	TEST_SANTASHOP_DEFAULT_MAX_SLOTS: '350',
 	TEST_FIRESTORE_BACKUP_BUCKET: 'gs://test-backups',
 	TEST_SES_REGION: 'us-west-2',
@@ -150,7 +149,6 @@ const FUNCTIONS_ENV_KEYS = {
 	PROD_AWS_SECRET_ACCESS_KEY: 'prod-secret-key',
 	PROD_SANTASHOP_PROGRAM_YEAR: '2030',
 	PROD_SANTASHOP_TIME_ZONE: 'America/New_York',
-	PROD_SANTASHOP_TIME_OFFSET: '-05:00',
 	PROD_SANTASHOP_DEFAULT_MAX_SLOTS: '500',
 	PROD_FIRESTORE_BACKUP_BUCKET: 'gs://prod-backups',
 	PROD_SES_REGION: 'us-east-1',
@@ -167,7 +165,9 @@ const FUNCTIONS_ENV_KEYS = {
 } satisfies Record<string, string>;
 
 const MANAGED_ENV_KEYS = [
-	...Object.keys(FUNCTIONS_ENV_KEYS).filter((key) => key.startsWith('TEST_')).map((key) => key.replace('TEST_', 'LOCAL_')),
+	...Object.keys(FUNCTIONS_ENV_KEYS)
+		.filter((key) => key.startsWith('TEST_'))
+		.map((key) => key.replace('TEST_', 'LOCAL_')),
 	...Object.keys(FIREBASE_ENV_KEYS),
 	...Object.keys(FUNCTIONS_ENV_KEYS),
 	'FIREBASE_API_KEY',
@@ -182,7 +182,6 @@ const MANAGED_ENV_KEYS = [
 	'AWS_SECRET_ACCESS_KEY',
 	'SANTASHOP_PROGRAM_YEAR',
 	'SANTASHOP_TIME_ZONE',
-	'SANTASHOP_TIME_OFFSET',
 	'SANTASHOP_DEFAULT_MAX_SLOTS',
 	'FIRESTORE_BACKUP_BUCKET',
 	'SES_REGION',
@@ -277,7 +276,9 @@ describe('config.firebase.cjs', () => {
 
 	it('requires the selected Firebase environment', () => {
 		setManagedEnv({ FIREBASE_API_KEY: 'unscoped-key' });
-		expect(() => configFirebase.buildFirebaseClientConfig('test')).toThrow('TEST_FIREBASE_API_KEY');
+		expect(() => configFirebase.buildFirebaseClientConfig('test')).toThrow(
+			'TEST_FIREBASE_API_KEY',
+		);
 	});
 
 	it('builds app metadata with the expected mode flags and labels', () => {
@@ -323,9 +324,7 @@ describe('config.firebase.cjs', () => {
 	it('rejects an invalid configured program year', () => {
 		process.env['TEST_SANTASHOP_PROGRAM_YEAR'] = 'not-a-year';
 
-		expect(() =>
-			configFirebase.buildAppConfig('admin', 'test'),
-		).toThrow(
+		expect(() => configFirebase.buildAppConfig('admin', 'test')).toThrow(
 			'SANTASHOP_PROGRAM_YEAR must be a four-digit year between 2000 and 2100.',
 		);
 	});
@@ -366,9 +365,16 @@ describe('config.functions.cjs', () => {
 	});
 
 	it('builds local Functions config from LOCAL values', () => {
-		setManagedEnv(Object.fromEntries(Object.entries(FUNCTIONS_ENV_KEYS)
-			.filter(([key]) => key.startsWith('TEST_'))
-			.map(([key, value]) => [key.replace('TEST_', 'LOCAL_'), value])));
+		setManagedEnv(
+			Object.fromEntries(
+				Object.entries(FUNCTIONS_ENV_KEYS)
+					.filter(([key]) => key.startsWith('TEST_'))
+					.map(([key, value]) => [
+						key.replace('TEST_', 'LOCAL_'),
+						value,
+					]),
+			),
+		);
 		const config = configFunctions.buildFunctionsConfig('local');
 		expect(config['AWS_ACCESS_KEY_ID']).toBe('test-access-key');
 		expect(config['SES_REGION']).toBe('us-west-2');
@@ -444,12 +450,16 @@ describe('config.functions.cjs', () => {
 
 	it('requires scoped Functions credentials', () => {
 		setManagedEnv({ AWS_ACCESS_KEY_ID: 'unscoped-key' });
-		expect(() => configFunctions.buildFunctionsConfig('prod')).toThrow('PROD_AWS_ACCESS_KEY_ID');
+		expect(() => configFunctions.buildFunctionsConfig('prod')).toThrow(
+			'PROD_AWS_ACCESS_KEY_ID',
+		);
 	});
 
 	it('requires LOCAL configuration for emulator execution', () => {
 		setManagedEnv({ ...FUNCTIONS_ENV_KEYS });
-		expect(() => configFunctions.buildFunctionsConfig('local')).toThrow('LOCAL_AWS_ACCESS_KEY_ID');
+		expect(() => configFunctions.buildFunctionsConfig('local')).toThrow(
+			'LOCAL_AWS_ACCESS_KEY_ID',
+		);
 	});
 
 	it('renders a quoted env file for the selected project', () => {

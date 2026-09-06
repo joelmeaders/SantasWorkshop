@@ -128,7 +128,7 @@ describe('CheckInPage', () => {
 		).resolves.toBe(1);
 		await expect(
 			firstValueFrom(component.checkinLastUpdated$),
-		).resolves.toContain('2026');
+		).resolves.toEqual(new Date('2026-12-10T18:00:00.000Z'));
 		await expect(
 			firstValueFrom(component.checkInsByDayHour$),
 		).resolves.toMatchObject([

@@ -37,9 +37,10 @@ import {
 	takeUntil,
 	distinctUntilChanged,
 } from 'rxjs';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import type { DateTimeSlot } from '@santashop/models';
-import { TimeSlotPipe } from '@santashop/core/admin/firestore';
+import { createZonedDate, getZonedDateKey } from '@santashop/models';
+import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
 
 @Component({
 	selector: 'admin-date-time-modal',
@@ -48,7 +49,7 @@ import { TimeSlotPipe } from '@santashop/core/admin/firestore';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		AsyncPipe,
-		DatePipe,
+		EventDatePipe,
 		TimeSlotPipe,
 		IonHeader,
 		IonToolbar,
@@ -102,7 +103,9 @@ export class DateTimeModalComponent implements OnDestroy {
 	public readonly availableDays$ = this.availableSlots$.pipe(
 		takeUntil(this.destroy$),
 		map((slots: DateTimeSlot[]) =>
-			slots.map((slot) => Date.parse(slot.dateTime.toDateString())),
+			slots.map((slot) =>
+				createZonedDate(getZonedDateKey(slot.dateTime), 0).getTime(),
+			),
 		),
 		map((dates: number[]) => [...new Set(dates)]),
 		shareReplay(1),
@@ -115,7 +118,9 @@ export class DateTimeModalComponent implements OnDestroy {
 			takeUntil(this.destroy$),
 			map((slots: DateTimeSlot[]) =>
 				slots.filter(
-					(slot) => Date.parse(slot.dateTime.toDateString()) === date,
+					(slot) =>
+						getZonedDateKey(slot.dateTime) ===
+						getZonedDateKey(new Date(date)),
 				),
 			),
 			shareReplay(1),

@@ -1,3 +1,4 @@
+import { EventDatePipe } from '@santashop/core/admin';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -56,7 +57,7 @@ import {
 } from '@santashop/core/admin/firestore';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
 import { addIcons } from 'ionicons';
 import { searchOutline, checkmarkCircle } from 'ionicons/icons';
@@ -72,7 +73,7 @@ import { QueryConstraint, where } from 'firebase/firestore';
 		ReactiveFormsModule,
 		ManageChildrenComponent,
 		AsyncPipe,
-		DatePipe,
+		EventDatePipe,
 		IonContent,
 		IonList,
 		IonListHeader,

@@ -2,6 +2,17 @@
 
 All notable changes to the admin application will be documented in this file.
 
+## [2026.09.0-beta.1] - Unreleased
+
+### Changed
+
+- Advance the application version to `2026.09.0-beta.1`.
+- Create and edit schedule slots in Denver time, independently of the staff device's time zone.
+
+### Fixed
+
+- Use Denver dates and daylight-saving offsets for appointments, staff activity, and schedule statistics.
+
 ## [2026.09.0-alpha.2] - Unreleased
 
 ### Added

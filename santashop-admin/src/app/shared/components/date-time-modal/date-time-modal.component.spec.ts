@@ -27,6 +27,21 @@ describe('DateTimeModalComponent', () => {
 	it('should create', () => {
 		expect(component).toBeTruthy();
 	});
+	it('groups and displays slots using Denver time across UTC midnight', async () => {
+		const early = createSlot('early', '2026-12-20T23:00:00Z', 3, 0);
+		const late = createSlot('late', '2026-12-21T00:00:00Z', 3, 0);
+		slots$.next([early, late]);
+		await fixture.whenStable();
+		const days = await firstValueFrom(component.availableDays$);
+		expect(days).toEqual([Date.parse('2026-12-20T07:00:00Z')]);
+		await expect(
+			firstValueFrom(component.availableSlotsByDay$(days[0])),
+		).resolves.toEqual([early, late]);
+		expect(fixture.nativeElement.textContent).toContain(
+			'Sunday, December 20',
+		);
+		expect(fixture.nativeElement.textContent).toContain('5PM - 6PM');
+	});
 
 	it('filters available slots, reports capacity, and dismisses a new selection', async (): Promise<void> => {
 		const modal = TestBed.inject(

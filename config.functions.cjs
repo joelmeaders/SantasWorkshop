@@ -13,7 +13,6 @@ const REQUIRED_FUNCTION_ENV_KEYS = [
 	'AWS_SECRET_ACCESS_KEY',
 	'SANTASHOP_PROGRAM_YEAR',
 	'SANTASHOP_TIME_ZONE',
-	'SANTASHOP_TIME_OFFSET',
 	'SANTASHOP_DEFAULT_MAX_SLOTS',
 	'FIRESTORE_BACKUP_BUCKET',
 	'SES_REGION',
@@ -44,9 +43,7 @@ const PLACEHOLDER_AWS_CREDENTIAL_PATTERN =
 	/^your-(?:(?:local|test|prod)-)?aws-(?:access-key-id|secret-access-key)$/iu;
 
 const loadLocalEnvFiles = () => {
-	loadEnvFiles([
-		path.resolve(__dirname, '.env'),
-	]);
+	loadEnvFiles([path.resolve(__dirname, '.env')]);
 };
 
 const parseMode = (value) => {
@@ -134,7 +131,10 @@ const buildFunctionsConfig = (mode) => {
 	const eventYearMatch = /\b(?:20\d{2}|2100)\b/u.exec(
 		config.SANTASHOP_EVENT_DISPLAY_NAME,
 	);
-	if (eventYearMatch && Number.parseInt(eventYearMatch[0], 10) !== programYear) {
+	if (
+		eventYearMatch &&
+		Number.parseInt(eventYearMatch[0], 10) !== programYear
+	) {
 		throw new Error(
 			'SANTASHOP_EVENT_DISPLAY_NAME year must match SANTASHOP_PROGRAM_YEAR.',
 		);
@@ -195,9 +195,7 @@ const generateFunctionsEnvFile = async (mode) => {
 	);
 
 	await writeFile(targetPath, fileContents, 'utf8');
-	console.log(
-		getGenerationLogMessage(normalizedMode, projectId, targetPath),
-	);
+	console.log(getGenerationLogMessage(normalizedMode, projectId, targetPath));
 	return targetPath;
 };
 

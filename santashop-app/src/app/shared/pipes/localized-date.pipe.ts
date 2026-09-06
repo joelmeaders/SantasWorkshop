@@ -9,6 +9,7 @@ import { DatePipe, registerLocaleData } from '@angular/common';
 import localeEsUs from '@angular/common/locales/es-US';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
+import { getDateTimezoneOffset } from '@santashop/models';
 
 registerLocaleData(localeEsUs);
 
@@ -40,6 +41,10 @@ export class LocalizedDatePipe implements PipeTransform {
 				? this.spanishDatePipe
 				: this.englishDatePipe;
 
-		return datePipe.transform(value, format, timezone);
+		const offset =
+			value != null && value !== '' && timezone?.includes('/')
+				? getDateTimezoneOffset(new Date(value), timezone)
+				: timezone;
+		return datePipe.transform(value, format, offset);
 	}
 }

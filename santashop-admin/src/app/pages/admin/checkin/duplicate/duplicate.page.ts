@@ -1,10 +1,17 @@
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { EventDatePipe } from '@santashop/core/admin';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AnalyticsWrapper } from '@santashop/core/admin/firestore';
 import type { ResolveRegistrationScanResult } from '@santashop/models';
-import { IonButton, IonContent, IonItem, IonLabel, IonList } from '@ionic/angular/standalone';
+import {
+	IonButton,
+	IonContent,
+	IonItem,
+	IonLabel,
+	IonList,
+} from '@ionic/angular/standalone';
 import { filter, map, tap } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
@@ -35,7 +42,7 @@ const asDate = (value: unknown): Date | undefined => {
 	imports: [
 		HeaderComponent,
 		AsyncPipe,
-		DatePipe,
+		EventDatePipe,
 		IonButton,
 		IonContent,
 		IonItem,
@@ -52,9 +59,9 @@ export class DuplicatePage {
 		filter((result): result is BlockedScanResult =>
 			Boolean(
 				result &&
-					(result.disposition === 'duplicate-accidental' ||
-						result.disposition === 'duplicate-risk' ||
-						result.disposition === 'cancelled'),
+				(result.disposition === 'duplicate-accidental' ||
+					result.disposition === 'duplicate-risk' ||
+					result.disposition === 'cancelled'),
 			),
 		),
 		map((result) => ({

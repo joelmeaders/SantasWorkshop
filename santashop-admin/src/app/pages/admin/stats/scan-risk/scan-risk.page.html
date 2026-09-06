@@ -26,11 +26,11 @@
 			<ion-label>
 				<h2>{{ summary.firstName }} {{ summary.lastName }}</h2>
 				<p>{{ summary.emailAddress }}</p>
-				<p>Latest attempt: {{ summary.latestRiskOn | date:'short' }}</p>
+				<p>Latest attempt: {{ summary.latestRiskOn | eventDate:'short' }}</p>
 				@if (summary.originalCheckInOn) {
 				<p>
 					Original check-in: {{ summary.originalCheckInOn |
-					date:'short' }}
+					eventDate:'short' }}
 				</p>
 				}
 				<ion-badge color="danger">

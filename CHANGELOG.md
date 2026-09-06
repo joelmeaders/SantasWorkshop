@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.1] - Unreleased
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.1`.
+- Create, edit, group, and display appointments in `America/Denver`, independently of the browser or server time zone.
+- Derive schedule offsets from the named time zone instead of configuring a separate fixed UTC offset.
+
+### Fixed
+
+- Apply daylight-saving offsets to appointment dates and hourly slots.
+- Keep a stored January 1 birthday unchanged when a customer reopens the child editor west of UTC.
+- Keep staff activity timestamps as dates until display, and group appointment statistics by the Denver day.
+
 ## [2026.09.0-alpha.2] - Unreleased
 
 ### Added

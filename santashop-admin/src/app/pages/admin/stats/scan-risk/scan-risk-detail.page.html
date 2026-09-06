@@ -18,7 +18,7 @@
 		<ion-item color="success">
 			<ion-label>
 				<h2>Successful check-in</h2>
-				<p>{{ state.checkIn.checkInDateTime | date:'medium' }}</p>
+				<p>{{ state.checkIn.checkInDateTime | eventDate:'medium' }}</p>
 			</ion-label>
 		</ion-item>
 		} @for (attempt of state.attempts; track attempt.id) {
@@ -27,7 +27,7 @@
 		>
 			<ion-label>
 				<h2>{{ attempt.outcome }}</h2>
-				<p>{{ attempt.scannedOn | date:'medium' }}</p>
+				<p>{{ attempt.scannedOn | eventDate:'medium' }}</p>
 				<p>
 					{{ attempt.elapsedSeconds }} seconds after the original
 					event · {{ attempt.inputMethod }}

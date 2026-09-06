@@ -246,7 +246,20 @@ describe('ScheduleEditorPage', () => {
 			vi.mocked(scheduleEditorService.updateSlotDateTime).mock.lastCall,
 		);
 		expect(slotId).toBe('slot-1');
-		expect(updatedDateTime).toEqual(new Date(2025, 11, 13, 14));
+		expect(updatedDateTime).toEqual(new Date('2025-12-13T21:00:00Z'));
+	});
+	it('keeps an unchanged late slot on its Denver date and hour', async () => {
+		const slot = createRow({
+			id: 'late',
+			dateTime: new Date('2026-12-13T00:00:00Z'),
+		});
+		expect(component.getSlotDraftDate(slot)).toBe('2026-12-12');
+		expect(component.getSlotDraftHour(slot)).toBe(17);
+		await component.saveSlotDateTime(slot);
+		expect(scheduleEditorService.updateSlotDateTime).toHaveBeenCalledWith(
+			'late',
+			new Date('2026-12-13T00:00:00Z'),
+		);
 	});
 
 	it('saveSlotDateTime() does not overwrite a pending capacity update', async () => {
@@ -280,7 +293,7 @@ describe('ScheduleEditorPage', () => {
 		// Assert
 		expect(scheduleEditorService.updateSlotDateTime).toHaveBeenCalledWith(
 			'slot-1',
-			new Date(2025, 11, 13, 14),
+			new Date('2025-12-13T21:00:00Z'),
 		);
 		expect(scheduleEditorService.updateSlot).not.toHaveBeenCalled();
 
@@ -470,7 +483,7 @@ function createSlot(
 	return {
 		id: 'slot-default',
 		programYear: 2025,
-		dateTime: new Date(2025, 11, 12, hour, 0, 0, 0),
+		dateTime: new Date(Date.UTC(2025, 11, 12, hour + 7)),
 		maxSlots: 10,
 		slotsReserved: 0,
 		enabled: true,

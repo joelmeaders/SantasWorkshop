@@ -7,6 +7,7 @@ export * from './lib/date-time-slot-count';
 export * from './lib/date-time-slot';
 export * from './lib/email-template';
 export * from './lib/error';
+export * from './lib/event-date-time';
 export * from './lib/global-alert';
 export * from './lib/onboard-user';
 export * from './lib/owner-operation';

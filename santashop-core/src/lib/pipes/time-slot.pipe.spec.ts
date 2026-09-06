@@ -11,21 +11,27 @@ describe('TimeSlotPipe', () => {
 	it('should create an instance', () => {
 		expect(pipe).toBeTruthy();
 	});
+	it('uses Denver daylight saving time for summer slots', () => {
+		expect(pipe.transform('2026-07-12T16:00:00Z')).toBe('10AM - 11AM');
+	});
+	it('resolves each endpoint across a daylight-saving transition', () => {
+		expect(pipe.transform('2026-03-08T08:00:00Z')).toBe('1AM - 3AM');
+	});
 
 	it('should format time slot correctly for morning hours', () => {
-		const date = new Date('2024-01-01T10:00:00');
+		const date = new Date('2024-01-01T10:00:00-07:00');
 		const result = pipe.transform(date);
 		expect(result).toBe('10AM - 11AM');
 	});
 
 	it('should format time slot correctly for afternoon hours', () => {
-		const date = new Date('2024-01-01T14:00:00');
+		const date = new Date('2024-01-01T14:00:00-07:00');
 		const result = pipe.transform(date);
 		expect(result).toBe('2PM - 3PM');
 	});
 
 	it('should handle AM to PM transition', () => {
-		const date = new Date('2024-01-01T11:00:00');
+		const date = new Date('2024-01-01T11:00:00-07:00');
 		const result = pipe.transform(date);
 		expect(result).toBe('11AM - 12PM');
 	});
@@ -43,12 +49,12 @@ describe('TimeSlotPipe', () => {
 	});
 
 	it('should handle string date input', () => {
-		const result = pipe.transform('2024-01-01T10:00:00');
+		const result = pipe.transform('2024-01-01T10:00:00-07:00');
 		expect(result).toBe('10AM - 11AM');
 	});
 
 	it('should handle timestamp input', () => {
-		const timestamp = new Date('2024-01-01T10:00:00').getTime();
+		const timestamp = new Date('2024-01-01T10:00:00-07:00').getTime();
 		const result = pipe.transform(timestamp);
 		expect(result).toBe('10AM - 11AM');
 	});

@@ -1,3 +1,4 @@
+import { EVENT_TIME_ZONE, getZonedDateParts } from '@santashop/models';
 import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
@@ -408,7 +409,7 @@ export class RegistrationPage {
 
 		// Update yearly. Last updated 2024
 		const getDayIndex = (date: Date): number => {
-			const day = date.getDate();
+			const day = getZonedDateParts(date).day;
 			return schedule.days.indexOf(day);
 		};
 
@@ -497,7 +498,7 @@ export class RegistrationPage {
 					slot.dateTime instanceof Date
 						? slot.dateTime
 						: (slot.dateTime as Timestamp).toDate();
-				const day = date.getDate();
+				const day = getZonedDateParts(date).day;
 				const existing = acc.get(day) ?? [];
 				existing.push(slot);
 				acc.set(day, existing);
@@ -514,6 +515,7 @@ export class RegistrationPage {
 				: undefined;
 			const dateLabel = dateValue
 				? (dateValue as Date).toLocaleDateString('en-US', {
+						timeZone: EVENT_TIME_ZONE,
 						month: 'short',
 						day: 'numeric',
 					})

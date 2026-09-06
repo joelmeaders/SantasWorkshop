@@ -23,8 +23,8 @@
 				</ion-card-header>
 				<ion-card-content class="ion-text-center">
 					<ion-item lines="none">
-						{{ currentSlot.dateTime | date: 'MMMM d' : 'MST' }},
-						{{ currentSlot.dateTime | timeSlot: 'MST' }}
+						{{ currentSlot.dateTime | eventDate: 'MMMM d' }},
+						{{ currentSlot.dateTime | timeSlot }}
 					</ion-item>
 				</ion-card-content>
 			</ion-card>
@@ -41,7 +41,7 @@
 					<ion-accordion>
 						<ion-item slot="header" color="light">
 							<ion-label>
-								{{ day | date: 'EEEE, MMMM d' }}
+								{{ day | eventDate: 'EEEE, MMMM d' }}
 							</ion-label>
 						</ion-item>
 						<ion-list
@@ -61,7 +61,7 @@
 									button
 								>
 									<ion-label>
-										{{ slot.dateTime | timeSlot: 'MST' }}
+										{{ slot.dateTime | timeSlot }}
 										<br />
 										<ion-text color="primary">
 											{{ spotsRemaining(slot) }}

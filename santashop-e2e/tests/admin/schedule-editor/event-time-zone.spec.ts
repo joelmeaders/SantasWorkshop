@@ -1,0 +1,48 @@
+import { test, expect } from '../../../fixtures/test-fixtures';
+import {
+	defaultAdminAccount,
+	fillIonicInput,
+	navigateToScheduleEditorViaLanding,
+	scheduleSlot,
+	signInAdminViaUi,
+} from '../../../fixtures/admin-helpers';
+
+test.describe('schedule editor outside Denver', () => {
+	test.use({ timezoneId: 'Asia/Tokyo' });
+
+	test('SCHED-TZ-001 edits the Denver calendar date without shifting the hour', async ({
+		page,
+		clearData,
+		seedPublicParams,
+		seedAdminUser,
+		seedDateTimeSlots,
+	}) => {
+		await clearData();
+		await seedPublicParams({});
+		const account = defaultAdminAccount();
+		await seedAdminUser(account);
+		await seedDateTimeSlots([
+			scheduleSlot({
+				id: 'denver-slot',
+				dateTime: '2026-12-12T17:00:00.000Z',
+			}),
+		]);
+		await signInAdminViaUi(page, account);
+		await navigateToScheduleEditorViaLanding(page);
+		const row = page.locator('#scheduleRow-denver-slot');
+		await expect(row).toContainText('10AM - 11AM');
+		await expect(page.locator('#slotDate-denver-slot input')).toHaveValue(
+			'2026-12-12',
+		);
+		await fillIonicInput(page, '#slotDate-denver-slot', '2026-12-13');
+		await page.locator('#saveTimeSlot-denver-slot').click();
+		await expect(page.locator('#scheduleEditorStatus')).toContainText(
+			'Updated schedule time slot.',
+		);
+		await page.reload();
+		await expect(page.locator('#slotDate-denver-slot input')).toHaveValue(
+			'2026-12-13',
+		);
+		await expect(row).toContainText('10AM - 11AM');
+	});
+});

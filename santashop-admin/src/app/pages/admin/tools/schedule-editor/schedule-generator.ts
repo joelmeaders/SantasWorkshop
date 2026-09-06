@@ -1,4 +1,5 @@
 import type { DateTimeSlot } from '@santashop/models';
+import { createZonedDate } from '@santashop/models';
 
 export interface ScheduleGenerationRequest {
 	programYear: number;
@@ -75,14 +76,9 @@ const createSlotsForDate = (
 	for (let hour = startHour; hour <= endHour; hour += 1) {
 		slots.push({
 			programYear,
-			dateTime: new Date(
-				date.getFullYear(),
-				date.getMonth(),
-				date.getDate(),
+			dateTime: createZonedDate(
+				`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
 				hour,
-				0,
-				0,
-				0,
 			),
 			maxSlots: capacity,
 			slotsReserved: 0,

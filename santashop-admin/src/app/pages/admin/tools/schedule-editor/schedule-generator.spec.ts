@@ -76,9 +76,27 @@ describe('schedule-generator', () => {
 					enabled: true,
 				}),
 			);
-			expect(result[0].dateTime.getHours()).toBe(10);
-			expect(result[2].dateTime.getHours()).toBe(12);
-			expect(result[5].dateTime.getDate()).toBe(13);
+			expect(result[0].dateTime.toISOString()).toBe(
+				'2025-12-12T17:00:00.000Z',
+			);
+			expect(result[2].dateTime.toISOString()).toBe(
+				'2025-12-12T19:00:00.000Z',
+			);
+			expect(result[5].dateTime.toISOString()).toBe(
+				'2025-12-13T19:00:00.000Z',
+			);
+		});
+		it('creates a summer slot at Denver wall-clock time', () => {
+			const [slot] = createHourlyScheduleSlots({
+				programYear: 2026,
+				dates: [parseLocalDateInput('2026-07-12')],
+				capacity: 10,
+				startHour: 10,
+				endHour: 10,
+			});
+			expect(slot.dateTime.toISOString()).toBe(
+				'2026-07-12T16:00:00.000Z',
+			);
 		});
 
 		it('should de-duplicate repeated dates before generating slots', () => {

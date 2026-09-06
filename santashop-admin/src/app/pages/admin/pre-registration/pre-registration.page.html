@@ -152,7 +152,7 @@
 					>
 						@for (slot of slots; track slotIndex($index, slot)) {
 						<ion-select-option [value]="slot">
-							{{ slot.dateTime | date: "short" }}
+							{{ slot.dateTime | eventDate: "short" }}
 						</ion-select-option>
 						}
 					</ion-select>

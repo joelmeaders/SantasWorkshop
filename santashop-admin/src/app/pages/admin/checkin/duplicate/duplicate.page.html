@@ -27,7 +27,7 @@
 		<ion-item>
 			<ion-label>
 				<h2>Current blocked attempt</h2>
-				<p>{{ result.attempt.scannedOn | date:'medium' }}</p>
+				<p>{{ result.attempt.scannedOn | eventDate:'medium' }}</p>
 				<p>Code ending in {{ result.attempt.codeSuffix }}</p>
 			</ion-label>
 		</ion-item>
@@ -36,7 +36,7 @@
 				<h2>
 					{{ result.disposition === 'cancelled' ? 'Registration canceled' : 'Original successful check-in' }}
 				</h2>
-				<p>{{ result.attempt.priorEventOn | date:'medium' }}</p>
+				<p>{{ result.attempt.priorEventOn | eventDate:'medium' }}</p>
 				<p>{{ result.attempt.elapsedSeconds }} seconds before this attempt</p>
 			</ion-label>
 		</ion-item>

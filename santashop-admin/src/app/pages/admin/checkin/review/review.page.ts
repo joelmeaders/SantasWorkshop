@@ -1,3 +1,4 @@
+import { EventDatePipe } from '@santashop/core/admin';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
@@ -39,7 +40,7 @@ import { CheckInContextService } from '../../../../shared/services/check-in-cont
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../../shared/components/manage-children/manage-children.component';
 import { DateTimeModalComponent } from '../../../../shared/components/date-time-modal/date-time-modal.component';
 import { DateTimeModalService } from '../../../../shared/components/date-time-modal/date-time-modal.service';
@@ -56,7 +57,7 @@ import { checkmarkCircle } from 'ionicons/icons';
 		ManageChildrenComponent,
 		RouterLink,
 		AsyncPipe,
-		DatePipe,
+		EventDatePipe,
 		IonContent,
 		IonList,
 		IonListHeader,

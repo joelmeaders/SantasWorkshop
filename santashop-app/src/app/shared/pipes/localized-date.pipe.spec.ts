@@ -6,11 +6,13 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { LocalizedDatePipe } from './localized-date.pipe';
 
 @Component({
-	template: `{{ date | localizedDate: 'fullDate' : 'UTC' }}`,
+	template: `{{ date | localizedDate: format : timezone }}`,
 	imports: [LocalizedDatePipe],
 })
 class LocalizedDateTestComponent {
-	public readonly date = new Date('2026-12-20T12:00:00.000Z');
+	public date: Date | string | null = new Date('2026-12-20T12:00:00.000Z');
+	public format = 'fullDate';
+	public timezone: string | undefined = 'UTC';
 }
 
 describe('LocalizedDatePipe', () => {
@@ -52,5 +54,33 @@ describe('LocalizedDatePipe', () => {
 		expect(fixture.nativeElement.textContent.trim()).toBe(
 			'domingo, 20 de diciembre de 2026',
 		);
+	});
+	it('uses the Denver date across UTC midnight in both languages', () => {
+		fixture.componentInstance.date = new Date('2026-07-13T00:30:00Z');
+		fixture.componentInstance.timezone = 'America/Denver';
+		fixture.detectChanges();
+		expect(fixture.nativeElement.textContent.trim()).toBe(
+			'Sunday, July 12, 2026',
+		);
+		currentLanguage = 'es';
+		languageChanges.next({ lang: 'es', translations: {} });
+		fixture.detectChanges();
+		expect(fixture.nativeElement.textContent.trim()).toBe(
+			'domingo, 12 de julio de 2026',
+		);
+	});
+	it('resolves daylight saving time instead of using fixed MST', () => {
+		fixture.componentInstance.date = new Date('2026-07-12T16:00:00Z');
+		fixture.componentInstance.format = 'h:mm a';
+		fixture.componentInstance.timezone = 'America/Denver';
+		fixture.detectChanges();
+		expect(fixture.nativeElement.textContent.trim()).toBe('10:00 AM');
+	});
+	it('keeps a date-only birthday unchanged without an appointment zone', () => {
+		fixture.componentInstance.date = '2015-01-01';
+		fixture.componentInstance.format = 'yyyy-MM-dd';
+		fixture.componentInstance.timezone = undefined;
+		fixture.detectChanges();
+		expect(fixture.nativeElement.textContent.trim()).toBe('2015-01-01');
 	});
 });

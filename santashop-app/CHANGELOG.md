@@ -2,6 +2,17 @@
 
 All notable changes to the main application will be documented in this file.
 
+## [2026.09.0-beta.1] - Unreleased
+
+### Changed
+
+- Advance the application version to `2026.09.0-beta.1`.
+- Display and group appointments in Denver time, including daylight-saving changes.
+
+### Fixed
+
+- Preserve calendar birth dates when reopening a saved child in the editor.
+
 ## [2026.09.0-alpha.2] - Unreleased
 
 ### Added

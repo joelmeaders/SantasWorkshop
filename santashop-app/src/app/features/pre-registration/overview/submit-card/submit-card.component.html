@@ -86,7 +86,7 @@
 							'SCHEDULE.YOUR_DATE/TIME' | translate
 						}}</ion-card-subtitle
 						><strong
-							>{{ slot.dateTime | localizedDate: 'fullDate' }},
+							>{{ slot.dateTime | localizedDate: 'fullDate' : 'America/Denver' }},
 							{{ slot.dateTime | timeSlot }}</strong
 						></ion-label
 					></ion-item

@@ -1,3 +1,4 @@
+import { EventDatePipe } from '@santashop/core/admin';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Timestamp } from 'firebase/firestore/lite';
@@ -25,7 +26,7 @@ import {
 } from '../../../../shared/helpers';
 
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {
 	BaseChartDirective,
 	provideCharts,
@@ -71,7 +72,7 @@ type ReadyCheckInStatsState = Extract<
 		FormsModule,
 		BaseChartDirective,
 		AsyncPipe,
-		DatePipe,
+		EventDatePipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -139,7 +140,7 @@ export class CheckInPage {
 				lastUpdated instanceof Date
 					? lastUpdated
 					: lastUpdated.toDate();
-			return date.toLocaleString();
+			return date;
 		}),
 	);
 

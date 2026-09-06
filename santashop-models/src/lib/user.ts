@@ -1,4 +1,6 @@
+import type { CustomerLanguage } from './language';
 export interface User {
+	preferredLanguage?: CustomerLanguage;
 	uid?: string;
 
 	firstName: string;

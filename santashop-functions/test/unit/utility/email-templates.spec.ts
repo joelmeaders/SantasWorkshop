@@ -37,10 +37,15 @@ describe('published email template contract', () => {
 			fieldMappings: [{ name: 'guest', mapping: 'firstName' }],
 		};
 		database.setDocSnapshot('emailTemplates/confirmation', summary);
+		database.setDocSnapshot(
+			'emailTemplates/confirmation/revisions/revision-1',
+			{ fieldMappings: summary.fieldMappings },
+		);
 		const { resolvePublishedEmailTemplate } = await loadTemplates();
 		await expect(
 			resolvePublishedEmailTemplate({ templateKey: 'confirmation' }),
 		).resolves.toEqual({
+			language: 'en',
 			templateName: 'confirmation-published',
 			templateSummary: summary,
 		});
@@ -129,5 +134,63 @@ describe('published email template contract', () => {
 				},
 			]),
 		).toThrow('must use letters');
+	});
+	it('selects the latest published revision in the requested language using Firestore timestamps', async () => {
+		const profile = 'event-reminder';
+		const entries = [
+			{
+				key: 'es-old',
+				language: 'es',
+				publishedOn: { toDate: (): Date => new Date('2026-01-01') },
+				publishedRevisionId: 'live',
+			},
+			{
+				key: 'en-new',
+				language: 'en',
+				publishedOn: { toDate: (): Date => new Date('2026-09-01') },
+				publishedRevisionId: 'live',
+			},
+			{
+				key: 'es-new',
+				language: 'es',
+				publishedOn: { toDate: (): Date => new Date('2026-08-01') },
+				publishedRevisionId: 'live',
+			},
+			{
+				key: 'es-draft',
+				language: 'es',
+				updatedOn: new Date('2026-10-01'),
+			},
+		];
+		database.setCollectionDocs(
+			'emailTemplates',
+			entries.map((entry) => ({
+				id: entry.key,
+				data: {
+					...entry,
+					displayName: entry.key,
+					awsTemplateName: entry.key,
+					deliveryProfile: profile,
+				},
+			})),
+		);
+		for (const entry of entries)
+			database.setDocSnapshot(
+				'emailTemplates/' + entry.key + '/revisions/live',
+				{
+					language: entry.language,
+					deliveryProfile: profile,
+					fieldMappings: [],
+				},
+			);
+		const { resolvePublishedEmailTemplate } = await loadTemplates();
+		expect(
+			(
+				await resolvePublishedEmailTemplate({
+					templateKey: profile,
+					language: 'es',
+				})
+			).templateName,
+		).toBe('es-new');
 	});
 });

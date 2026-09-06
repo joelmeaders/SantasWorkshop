@@ -1,4 +1,6 @@
+import type { CustomerLanguage } from './language';
 export interface OnboardUser {
+	preferredLanguage?: CustomerLanguage;
 	firstName: string;
 	lastName: string;
 	emailAddress: string;

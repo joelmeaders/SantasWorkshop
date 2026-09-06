@@ -1,6 +1,8 @@
+import type { CustomerLanguage } from './language';
 export const EMAIL_TEMPLATE_KEYS = {
 	registrationConfirmation: 'registration-confirmation',
 	eventReminder: 'event-reminder',
+	registrationCancellation: 'registration-cancellation',
 } as const;
 
 export type BuiltInEmailTemplateKey =
@@ -9,6 +11,7 @@ export type BuiltInEmailTemplateKey =
 export const EMAIL_TEMPLATE_DELIVERY_PROFILES = {
 	registrationConfirmation: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 	eventReminder: EMAIL_TEMPLATE_KEYS.eventReminder,
+	registrationCancellation: EMAIL_TEMPLATE_KEYS.registrationCancellation,
 } as const;
 
 export type EmailTemplateDeliveryProfile =
@@ -17,6 +20,11 @@ export type EmailTemplateDeliveryProfile =
 export const EMAIL_TEMPLATE_RUNTIME_FIELDS: Readonly<
 	Record<EmailTemplateDeliveryProfile, readonly string[]>
 > = {
+	[EMAIL_TEMPLATE_DELIVERY_PROFILES.registrationCancellation]: [
+		'firstName',
+		'eventName',
+		'dateTime',
+	],
 	[EMAIL_TEMPLATE_DELIVERY_PROFILES.registrationConfirmation]: [
 		'firstName',
 		'eventName',
@@ -41,6 +49,10 @@ export interface EmailTemplateFieldDefinition {
 }
 
 export interface EmailTemplateSummary {
+	language?: CustomerLanguage;
+	textPart?: string;
+	seasonalReviewRequired?: boolean;
+	seasonalDetailsReviewed?: boolean;
 	key: string;
 	deliveryProfile: EmailTemplateDeliveryProfile;
 	displayName: string;
@@ -58,6 +70,10 @@ export interface EmailTemplateSummary {
 }
 
 export interface EmailTemplateRevision {
+	language?: CustomerLanguage;
+	textPart?: string;
+	seasonalReviewRequired?: boolean;
+	seasonalDetailsReviewed?: boolean;
 	id: string;
 	templateKey: string;
 	deliveryProfile: EmailTemplateDeliveryProfile;
@@ -95,6 +111,11 @@ export interface GetEmailTemplateRevisionResponse {
 }
 
 export interface SaveEmailTemplateRevisionRequest {
+	createOnly?: boolean;
+	language?: CustomerLanguage;
+	textPart?: string;
+	seasonalReviewRequired?: boolean;
+	seasonalDetailsReviewed?: boolean;
 	key: string;
 	deliveryProfile: EmailTemplateDeliveryProfile;
 	displayName: string;
@@ -128,6 +149,10 @@ export interface PublishEmailTemplateResponse {
 }
 
 export interface SendTestEmailTemplateRequest {
+	language?: CustomerLanguage;
+	textPart?: string;
+	seasonalReviewRequired?: boolean;
+	seasonalDetailsReviewed?: boolean;
 	recipientEmail: string;
 	deliveryProfile: EmailTemplateDeliveryProfile;
 	subjectPart: string;
@@ -141,16 +166,8 @@ export interface SendTestEmailTemplateResponse {
 	renderedHtml: string;
 }
 
-export interface SendTestEmailTemplateRequest {
-	recipientEmail: string;
-	deliveryProfile: EmailTemplateDeliveryProfile;
-	subjectPart: string;
-	html: string;
-	fieldMappings: EmailTemplateFieldDefinition[];
-}
-
-export interface SendTestEmailTemplateResponse {
-	recipientEmail: string;
-	renderedSubject: string;
-	renderedHtml: string;
+export interface EmailTemplatePackage {
+	format: 'santashop-email-template';
+	version: 1;
+	template: SaveEmailTemplateRevisionRequest;
 }

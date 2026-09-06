@@ -1,3 +1,4 @@
+import { CustomerLanguageService } from '../../../core/services/customer-language.service';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -13,10 +14,10 @@ import {
 	IonList,
 	IonItem,
 } from '@ionic/angular/standalone';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { AnalyticsWrapper, AuthService } from '@santashop/core/customer';
+import { AuthService } from '@santashop/core/customer';
 import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
 import { HelpPage } from '../../../features/pre-registration/help/help.page';
@@ -45,8 +46,7 @@ export class PublicMenuComponent implements OnDestroy {
 	private readonly router = inject(Router);
 	private readonly popoverController = inject(PopoverController);
 	private readonly modalController = inject(ModalController);
-	private readonly translateService = inject(TranslateService);
-	private readonly analyticsService = inject(AnalyticsWrapper);
+	private readonly language = inject(CustomerLanguageService);
 
 	private readonly destroy$ = new Subject<void>();
 
@@ -95,9 +95,7 @@ export class PublicMenuComponent implements OnDestroy {
 	}
 
 	public async setLanguage(value: 'en' | 'es'): Promise<void> {
-		this.translateService.use(value);
-		window.localStorage.setItem('santashop-language', value);
-		this.analyticsService.logEvent(`set_language_${value}`);
+		await this.language.setLanguage(value);
 		await this.closeMenu();
 	}
 }

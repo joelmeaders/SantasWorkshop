@@ -1,3 +1,4 @@
+import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { OnboardUser, User, Registration, COLLECTION_SCHEMA } from '../models';
 import { generateId } from '../utility/id-generation';
@@ -57,14 +58,11 @@ export default async function newAccount(
 		}
 
 		return {
-			firstName: requireName(
-				requestData['firstName'],
-				'First name',
+			preferredLanguage: normalizeEmailLanguage(
+				requestData['preferredLanguage'],
 			),
-			lastName: requireName(
-				requestData['lastName'],
-				'Last name',
-			),
+			firstName: requireName(requestData['firstName'], 'First name'),
+			lastName: requireName(requestData['lastName'], 'Last name'),
 			emailAddress: requireEmailAddress(requestData['emailAddress']),
 			password,
 			zipCode: requireZipCodeValue(requestData['zipCode']),
@@ -93,6 +91,7 @@ export default async function newAccount(
 	const acceptedLegal = new Date();
 
 	const user: User = {
+		preferredLanguage: data.preferredLanguage,
 		firstName: data.firstName,
 		lastName: data.lastName,
 		emailAddress: data.emailAddress,
@@ -139,10 +138,7 @@ export default async function newAccount(
 			{ uid: newUserAccount.uid },
 			error,
 		);
-		throw new HttpsError(
-			'internal',
-			'Unable to create account records',
-		);
+		throw new HttpsError('internal', 'Unable to create account records');
 	}
 
 	try {
@@ -167,10 +163,7 @@ export default async function newAccount(
 			userDocument.delete(),
 			registrationDocument.delete(),
 		]);
-		throw new HttpsError(
-			'internal',
-			'Unable to finalize account setup',
-		);
+		throw new HttpsError('internal', 'Unable to finalize account setup');
 	}
 
 	return newUserAccount.uid;

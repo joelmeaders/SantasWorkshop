@@ -246,8 +246,6 @@
 		"FAQ_BUTTON": "Click here"
 	},
 	"PRIVACY": {
-		"PRIVACY_&_COOKIES": "Privacy & Cookies",
-		"TITLE": "Privacy Policy for Denver Santa Claus Shop",
 		"1": "Your privacy is important to us. It is denversantaclausshop.org's policy to respect your privacy regarding any information we may collect from you across our website, https://denversantaclausshop.org, and other sites we own and operate.",
 		"2": "We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we’re collecting it and how we use it.",
 		"3": "We only retain collected information for as long as necessary to provide you with your requested service. What data we store, we’ll protect within commercially acceptable means to prevent loss and theft, as well as unauthorised access, disclosure, copying, use or modification.",
@@ -270,7 +268,6 @@
 		"20": "Login related cookies",
 		"21": "We use cookies when you are logged in so that we can remember this fact. This prevents you from having to log in every single time you visit a new page. These cookies are typically removed or cleared when you log out to ensure that you can only access restricted features and areas when logged in.",
 		"22": "Site preferences cookies",
-		"22_1": "In order to provide you with a great experience on this site we provide the functionality to set your preferences for how this site runs when you use it. In order to remember your preferences we need to set cookies so that this information can be called whenever you interact with a page is affected by your preferences.",
 		"23": "Third Party Cookies",
 		"24": "In some special cases we also use cookies provided by trusted third parties. The following section details which third party cookies you might encounter through this site.",
 		"25": "This site uses Google Analytics which is one of the most widespread and trusted analytics solution on the web for helping us to understand how you use the site and ways that we can improve your experience. These cookies may track things such as how long you spend on the site and the pages that you visit so we can continue to produce engaging content.",
@@ -279,27 +276,30 @@
 		"28": "More Information",
 		"29": "However if you are still looking for more information then you can contact us through one of our preferred contact methods:",
 		"30": "By visiting this link: https://denversantaclausshop.org/",
-		"31": "This policy is effective as of November 30, 2020."
+		"31": "This policy is effective as of November 30, 2020.",
+		"PRIVACY_&_COOKIES": "Privacy & Cookies",
+		"TITLE": "Privacy Policy for Denver Santa Claus Shop",
+		"22_1": "In order to provide you with a great experience on this site we provide the functionality to set your preferences for how this site runs when you use it. In order to remember your preferences we need to set cookies so that this information can be called whenever you interact with a page is affected by your preferences."
 	},
 	"TOS": {
-		"TITLE": "Terms of Service",
 		"1": "1. Terms",
-		"1A": "By accessing the website at https://denversantaclausshop.org, you are agreeing to be bound by these terms of service, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws. If you do not agree with any of these terms, you are prohibited from using or accessing this site. The materials contained in this website are protected by applicable copyright and trademark law.",
 		"2": "2. Use License",
+		"3": "3. Disclaimer",
+		"4": "4. Limitations",
+		"5": "5. Accuracy of materials",
+		"6": "6. Links",
+		"7": "7. Modifications",
+		"8": "8. Governing Law",
+		"TITLE": "Terms of Service",
+		"1A": "By accessing the website at https://denversantaclausshop.org, you are agreeing to be bound by these terms of service, all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws. If you do not agree with any of these terms, you are prohibited from using or accessing this site. The materials contained in this website are protected by applicable copyright and trademark law.",
 		"2A": "Permission is granted to temporarily download one copy of the materials (information or software) on denversantaclausshop.org's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not: modify or copy the materials; use the materials for any commercial purpose, or for any public display (commercial or non-commercial); attempt to decompile or reverse engineer any software contained on denversantaclausshop.org's website; remove any copyright or other proprietary notations from the materials; or transfer the materials to another person or \"mirror\" the materials on any other server.",
 		"2B": "This license shall automatically terminate if you violate any of these restrictions and may be terminated by denversantaclausshop.org at any time. Upon terminating your viewing of these materials or upon the termination of this license, you must destroy any downloaded materials in your possession whether in electronic or printed format.",
-		"3": "3. Disclaimer",
 		"3A": "The materials on denversantaclausshop.org's website are provided on an 'as is' basis. denversantaclausshop.org makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.",
 		"3B": "Further, denversantaclausshop.org does not warrant or make any representations concerning the accuracy, likely results, or reliability of the use of the materials on its website or otherwise relating to such materials or on any sites linked to this site.",
-		"4": "4. Limitations",
 		"4A": "In no event shall denversantaclausshop.org or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on denversantaclausshop.org'swebsite, even if denversantaclausshop.org or a .org authorized representative has been notified orally or in writing of the possibility of such damage. Because some jurisdictions do not allow limitations on implied warranties, or limitations of liability for consequential or incidental damages, these limitations may not apply to you.",
-		"5": "5. Accuracy of materials",
 		"5A": "The materials appearing on denversantaclausshop.org's website could include technical, typographical, or photographic errors. denversantaclausshop.org does not warrant that any of the materials on its website are accurate, complete or current. denversantaclausshop.org may make changes to the materials contained on its website at any time without notice. However denversantaclausshop.org does not make any commitment to update the materials.",
-		"6": "6. Links",
 		"6A": "denversantaclausshop.org has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by denversantaclausshop.org of the site. Use of any such linked website is at the user's own risk.",
-		"7": "7. Modifications",
 		"7A": "denversantaclausshop.org may revise these terms of service for its website at any time without notice. By using this website you are agreeing to be bound by the then current version of these terms of service.",
-		"8": "8. Governing Law",
 		"8A": "These terms and conditions are governed by and construed in accordance with the laws of Colorado and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location."
 	},
 	"REFERRAL": {
@@ -330,5 +330,11 @@
 		"URL": "Must be a valid website address",
 		"ZIPCODE": "Must be a valid zip code",
 		"FIELDSMATCH": "The passwords don't match"
+	},
+	"LANGUAGE": {
+		"SAVE_ERROR_TITLE": "Email language not saved",
+		"SAVE_ERROR": "The app language changed, but we could not save your email language. Please try again.",
+		"RETRY": "Try again",
+		"DISMISS": "Close"
 	}
 }

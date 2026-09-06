@@ -113,6 +113,7 @@ export class PreRegistrationPage implements OnDestroy {
 		)(registration);
 
 	public readonly form = new UntypedFormGroup({
+		preferredLanguage: new UntypedFormControl('en', { nonNullable: true }),
 		firstName: new UntypedFormControl(
 			undefined,
 			Validators.compose([

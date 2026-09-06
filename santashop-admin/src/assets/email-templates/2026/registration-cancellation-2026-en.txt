@@ -1,0 +1,18 @@
+Hello {{firstName}},
+
+Your registration for {{eventName}} has been cancelled. Your previous appointment is no longer reserved, and your previous ticket and confirmation code are no longer valid.
+
+CANCELLED APPOINTMENT
+{{dateTime}}
+Denver time · Mountain Time
+
+If you would still like to attend, sign in and complete a new registration. You’ll receive a new ticket after registering.
+
+Register again: https://register.denversantaclausshop.org/
+
+Read the FAQs: https://www.denversantaclausshop.org/faq-english/
+
+Contact us on Facebook: https://www.facebook.com/denversantaclausshop/
+
+With warm wishes,
+Your Denver Santa Claus Shop volunteers

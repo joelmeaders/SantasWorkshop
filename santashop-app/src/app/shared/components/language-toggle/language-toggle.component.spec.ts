@@ -1,3 +1,4 @@
+import { CustomerLanguageService } from '../../../core/services/customer-language.service';
 import {
 	beforeEach,
 	describe,
@@ -12,7 +13,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AnalyticsWrapper } from '@santashop/core';
 
 import { LanguageToggleComponent } from './language-toggle.component';
-import { of } from 'rxjs';
+import { of, type Observable } from 'rxjs';
 
 describe('LanguageToggleComponent', () => {
 	let component: LanguageToggleComponent;
@@ -23,6 +24,14 @@ describe('LanguageToggleComponent', () => {
 	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			providers: [
+				{
+					provide: CustomerLanguageService,
+					useFactory: (): object => ({
+						language$: of('en'),
+						setLanguage: (language: string): Observable<unknown> =>
+							TestBed.inject(TranslateService).use(language),
+					}),
+				},
 				{
 					provide: TranslateService,
 					useValue: {
@@ -67,7 +76,7 @@ describe('LanguageToggleComponent', () => {
 
 	it('should toggle language', () => {
 		const newLang = 'es';
-	(translateService.getCurrentLang as MockInstance).mockReturnValue('en');
+		(translateService.getCurrentLang as MockInstance).mockReturnValue('en');
 
 		// checked: false should trigger toggle to 'es' when current is 'en'
 		component.toggleLanguage({ detail: { checked: false } });

@@ -22,6 +22,17 @@
 			</ion-list-header>
 
 			<form [formGroup]="form" autocomplete="off" novalidate>
+				<ion-item
+					><ion-select
+						label="Email language"
+						formControlName="preferredLanguage"
+						><ion-select-option value="en"
+							>English</ion-select-option
+						><ion-select-option value="es"
+							>Español</ion-select-option
+						></ion-select
+					></ion-item
+				>
 				<ion-item-divider>
 					<ion-label> Parent / Guardian </ion-label>
 				</ion-item-divider>

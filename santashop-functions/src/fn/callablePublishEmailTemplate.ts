@@ -18,6 +18,7 @@ import {
 	getEmailTemplateRevisionDocPath,
 	getEmailTemplateSummary,
 	normalizeEmailTemplateDeliveryProfile,
+	normalizeEmailLanguage,
 	normalizeEmailTemplateKey,
 	prepareEmailTemplateHtmlForSes,
 	readEmailTemplateHtml,
@@ -67,6 +68,7 @@ const upsertSesTemplate = async (
 			TemplateName: template.awsTemplateName,
 			SubjectPart: revision.subjectPart,
 			HtmlPart: html,
+			TextPart: revision.textPart ?? '',
 		},
 	};
 
@@ -122,15 +124,46 @@ export default async function callablePublishEmailTemplate(
 		);
 	}
 
+	withCallableValidation(() =>
+		normalizeEmailTemplateDeliveryProfile(revision.deliveryProfile),
+	);
+	if (
+		normalizeEmailLanguage(revision.language) !==
+			normalizeEmailLanguage(template.language) ||
+		revision.deliveryProfile !== template.deliveryProfile
+	) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Revision language and delivery profile must match the template.',
+		);
+	}
+	if (
+		(template.seasonalReviewRequired || revision.seasonalReviewRequired) &&
+		!revision.seasonalDetailsReviewed
+	) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Review and confirm the 2026 venue and opening details before publishing this revision.',
+		);
+	}
 	const html = await readEmailTemplateHtml(revision.htmlStoragePath);
 	withCallableValidation(() => {
 		validateEmailTemplateFieldMappings(
 			normalizeEmailTemplateDeliveryProfile(revision.deliveryProfile),
 			revision.subjectPart,
-			html,
+			html + (revision.textPart ?? ''),
 			revision.fieldMappings,
 		);
 	});
+	if (
+		/CONFIRM 2026 DETAILS BEFORE PUBLISHING|CONFIRMAR LOS DATOS DE 2026 ANTES DE PUBLICAR|TO BE CONFIRMED|POR CONFIRMAR/.test(
+			html + (revision.textPart ?? ''),
+		)
+	)
+		throw new HttpsError(
+			'failed-precondition',
+			'Replace the unconfirmed seasonal draft notes before publishing.',
+		);
 	const renderedHtml = prepareEmailTemplateHtmlForSes(html);
 
 	try {
@@ -146,8 +179,6 @@ export default async function callablePublishEmailTemplate(
 	const publishedOn = new Date();
 	const publishedTemplate: EmailTemplateSummary = {
 		...template,
-		subjectPart: revision.subjectPart,
-		fieldMappings: revision.fieldMappings,
 		publishedRevisionId: revision.id,
 		publishedRevisionNumber: revision.revisionNumber,
 		publishedOn,

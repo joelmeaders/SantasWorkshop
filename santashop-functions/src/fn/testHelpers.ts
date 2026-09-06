@@ -316,6 +316,7 @@ export async function clearAllData(): Promise<void> {
 		'children',
 		'dateTimeSlots',
 		'emailTemplates',
+		'emailTemplateNames',
 		'registrationsearchindex',
 		'stats',
 		'tmp_registrationemails',

@@ -20,6 +20,7 @@ interface ResendEmailDocument {
 	qrCodeStoragePath: string;
 	email?: string;
 	name?: string;
+	appointmentDateTime: unknown;
 	formattedDateTime: string;
 	appointmentSlotId: string;
 	templateKey: string;
@@ -74,6 +75,7 @@ export default async function callableResendRegistrationEmail(
 			qrCodeStoragePath: record.qrCodeStoragePath,
 			email: record.emailAddress,
 			name: record.firstName,
+			appointmentDateTime: dateTimeValue,
 			formattedDateTime: formatRegistrationDateTime(dateTimeValue),
 			appointmentSlotId: record.dateTimeSlot?.id ?? '',
 			templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,

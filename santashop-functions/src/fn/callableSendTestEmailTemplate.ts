@@ -10,6 +10,7 @@ import type {
 } from '@santashop/models';
 import {
 	extractHandlebarsFieldNames,
+	normalizeEmailLanguage,
 	normalizeEmailTemplateDeliveryProfile,
 	normalizeEmailTemplateFieldDefinitions,
 	prepareEmailTemplateHtmlForSes,
@@ -26,6 +27,7 @@ import {
 	requireCallableData,
 	requireEmailAddress,
 	requireTrimmedString,
+	requireOptionalTrimmedString,
 	withCallableValidation,
 } from '../utility/callable-validation';
 import { isAdminToken } from '../utility/capabilities';
@@ -79,12 +81,14 @@ export default async function callableSendTestEmailTemplate(
 	assertAdmin(request);
 	const {
 		recipientEmail,
+		textPart,
 		deliveryProfile,
 		subjectPart,
 		html,
 		fieldMappings,
 	} = withCallableValidation(() => {
 		const data = requireCallableData(request.data);
+		normalizeEmailLanguage(data['language']);
 		const deliveryProfile = normalizeEmailTemplateDeliveryProfile(
 			requireTrimmedString(data['deliveryProfile'], 'Delivery profile'),
 		);
@@ -97,6 +101,9 @@ export default async function callableSendTestEmailTemplate(
 			deliveryProfile,
 			subjectPart: requireTrimmedString(data['subjectPart'], 'Subject'),
 			html: requireTrimmedString(data['html'], 'HTML'),
+			textPart:
+				requireOptionalTrimmedString(data['textPart'], 'Plain text') ??
+				'',
 			fieldMappings: normalizeEmailTemplateFieldDefinitions(
 				requireArray(data['fieldMappings'], 'Field mappings'),
 			),
@@ -106,11 +113,11 @@ export default async function callableSendTestEmailTemplate(
 		validateEmailTemplateFieldMappings(
 			deliveryProfile,
 			subjectPart,
-			html,
+			html + textPart,
 			fieldMappings,
 		);
 	});
-	validateDetectedFields(subjectPart, html, fieldMappings);
+	validateDetectedFields(subjectPart, html + textPart, fieldMappings);
 
 	const renderedSubject = renderTemplateWithFieldValues(
 		subjectPart,
@@ -131,6 +138,17 @@ export default async function callableSendTestEmailTemplate(
 				Data: renderedSubject,
 			},
 			Body: {
+				...(textPart
+					? {
+							Text: {
+								Charset: 'UTF-8',
+								Data: renderTemplateWithFieldValues(
+									textPart,
+									fieldMappings,
+								),
+							},
+						}
+					: {}),
 				Html: {
 					Charset: 'UTF-8',
 					Data: renderedHtml,

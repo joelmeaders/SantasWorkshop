@@ -21,3 +21,5 @@ export * from './lib/schema';
 export * from './lib/staff';
 export * from './lib/user-stats';
 export * from './lib/user';
+
+export * from './lib/language';

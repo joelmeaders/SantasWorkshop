@@ -1,3 +1,5 @@
+import { CustomerLanguageService } from './core/services/customer-language.service';
+import { firstValueFrom } from 'rxjs';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -28,6 +30,7 @@ import { ApplicationService } from './core/services/application.service';
 export class AppComponent implements OnInit {
 	private static readonly languageStorageKey = 'santashop-language';
 
+	private readonly language = inject(CustomerLanguageService);
 	private readonly platform = inject(Platform);
 	private readonly translateService = inject(TranslateService);
 	private readonly analyticsService = inject(AnalyticsWrapper);
@@ -59,9 +62,8 @@ export class AppComponent implements OnInit {
 				: browserLang === 'es'
 					? 'es'
 					: 'en';
-		this.translateService.use(
-			supportedLanguage,
-		);
+		await firstValueFrom(this.translateService.use(supportedLanguage));
+		this.language.initialize();
 
 		this.analyticsService.logEventWithParams('default_language', {
 			value: browserLang,
@@ -72,7 +74,8 @@ export class AppComponent implements OnInit {
 			.subscribe((alert) => {
 				if (!alert?.displayAlert) return;
 
-				const isEnglish = this.translateService.getCurrentLang() === 'en';
+				const isEnglish =
+					this.translateService.getCurrentLang() === 'en';
 				const title = isEnglish ? alert.titleEn : alert.titleEs;
 				const message = isEnglish ? alert.messageEn : alert.messageEs;
 				void this.showGlobalMessage({ title, message });

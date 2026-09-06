@@ -60,7 +60,10 @@ describe('callableResendRegistrationEmail handler', () => {
 				registrationUid: 'test-user-123',
 				code: 'ABCD2345',
 				email: 'buddy.elf@example.com',
-				formattedDateTime: 'Thursday, December 11, 6:00 PM',
+				formattedDateTime: 'Wednesday, December 10 at 11:00 AM',
+				appointmentDateTime: expect.objectContaining({
+					toDate: expect.any(Function),
+				}),
 				appointmentSlotId: 'slot-1',
 			}),
 		);

@@ -1,11 +1,4 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	ActivatedRoute,
@@ -194,7 +187,9 @@ describe('EmailTemplateEditorPage', () => {
 
 		await component.loadRevision(revision);
 
-		expect(emailTemplateService.getEmailTemplateRevision).toHaveBeenCalledWith({
+		expect(
+			emailTemplateService.getEmailTemplateRevision,
+		).toHaveBeenCalledWith({
 			key: 'registration-confirmation',
 			revisionId: 'rev-1',
 		});
@@ -208,14 +203,15 @@ describe('EmailTemplateEditorPage', () => {
 	it('normalizes field mappings to the selected delivery profile and refreshes preview HTML', async () => {
 		await component.ionViewWillEnter();
 		component.form.controls['deliveryProfile'].setValue('event-reminder');
-		requireDefined(component.fieldMappings.at(0).get('mapping'))
-			.setValue('unsupported.field');
+		requireDefined(component.fieldMappings.at(0).get('mapping')).setValue(
+			'unsupported.field',
+		);
 
 		component.onDeliveryProfileChanged();
 
-		expect(requireDefined(component.fieldMappings.at(0).get('mapping')).value).toBe(
-			'firstName',
-		);
+		expect(
+			requireDefined(component.fieldMappings.at(0).get('mapping')).value,
+		).toBe('firstName');
 		expect(component.previewHtml).toContain('Buddy');
 	});
 
@@ -240,7 +236,9 @@ describe('EmailTemplateEditorPage', () => {
 
 		await component.saveRevision();
 
-		expect(emailTemplateService.saveEmailTemplateRevision).toHaveBeenCalledWith(
+		expect(
+			emailTemplateService.saveEmailTemplateRevision,
+		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				key: 'registration-confirmation',
 				html: '<h1>Hello {{firstName}}</h1>',
@@ -275,16 +273,21 @@ describe('EmailTemplateEditorPage', () => {
 
 	it('marks validation failures before attempting to send or save', async () => {
 		await component.sendTestEmail();
-		expect(emailTemplateService.sendTestEmailTemplate).not.toHaveBeenCalled();
+		expect(
+			emailTemplateService.sendTestEmailTemplate,
+		).not.toHaveBeenCalled();
 
 		await component.saveRevision();
-		expect(emailTemplateService.saveEmailTemplateRevision).not.toHaveBeenCalled();
+		expect(
+			emailTemplateService.saveEmailTemplateRevision,
+		).not.toHaveBeenCalled();
 	});
 
 	it('sets up a blank editable draft when the route has no template key', async () => {
 		const route = TestBed.inject(ActivatedRoute);
-		(route.snapshot as { paramMap: ReturnType<typeof convertToParamMap> }).paramMap =
-			convertToParamMap({});
+		(
+			route.snapshot as { paramMap: ReturnType<typeof convertToParamMap> }
+		).paramMap = convertToParamMap({});
 
 		await component.ionViewWillEnter();
 
@@ -300,16 +303,25 @@ describe('EmailTemplateEditorPage', () => {
 			...requireDefined(component.currentTemplate),
 			publishedRevisionId: 'rev-1',
 		};
-		expect(component.revisionBadgeColor(requireDefined(component.revisions[0]))).toBe('success');
 		expect(
-			component.revisionBadgeColor({ ...requireDefined(component.revisions[0]), id: 'rev-2' }),
+			component.revisionBadgeColor(
+				requireDefined(component.revisions[0]),
+			),
+		).toBe('success');
+		expect(
+			component.revisionBadgeColor({
+				...requireDefined(component.revisions[0]),
+				id: 'rev-2',
+			}),
 		).toBe('medium');
 
 		emailTemplateService.publishEmailTemplate.mockRejectedValueOnce(
 			new Error('SES unavailable'),
 		);
 		await component.publishTemplate();
-		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
+		const alerts = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
 		expect(alerts.create).toHaveBeenCalledWith(
 			expect.objectContaining({
 				header: 'Something went wrong',
@@ -320,7 +332,9 @@ describe('EmailTemplateEditorPage', () => {
 
 	it('deletes a confirmed saved template and routes back to the template list', async () => {
 		await component.ionViewWillEnter();
-		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
+		const alerts = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
 		const confirmation = {
 			present: vi.fn().mockResolvedValue(undefined),
 			onDidDismiss: vi.fn().mockResolvedValue({ role: 'destructive' }),
@@ -332,7 +346,9 @@ describe('EmailTemplateEditorPage', () => {
 		alerts.create.mockResolvedValueOnce(
 			confirmation as unknown as HTMLIonAlertElement,
 		);
-		alerts.create.mockResolvedValueOnce(deleted as unknown as HTMLIonAlertElement);
+		alerts.create.mockResolvedValueOnce(
+			deleted as unknown as HTMLIonAlertElement,
+		);
 		emailTemplateService.deleteEmailTemplate.mockResolvedValue(undefined);
 		const router = TestBed.inject(Router);
 		const navigate = vi.spyOn(router, 'navigate');
@@ -343,5 +359,76 @@ describe('EmailTemplateEditorPage', () => {
 			'registration-confirmation',
 		);
 		expect(navigate).toHaveBeenCalledWith(['/admin/email-templates']);
+	});
+	it('invalidates seasonal review after content changes and blocks publication of unsaved edits', async () => {
+		await component.ionViewWillEnter();
+		component.form.controls['seasonalReviewRequired'].setValue(true);
+		component.confirmSeasonalReview(true);
+		component.onHtmlChange('<p>Changed {{firstName}}</p>');
+		expect(component.form.controls['seasonalDetailsReviewed'].value).toBe(
+			false,
+		);
+		await component.publishTemplate();
+		expect(
+			emailTemplateService.publishEmailTemplate,
+		).not.toHaveBeenCalled();
+	});
+
+	it('keeps unsaved HTML when an import is invalid or replacement is cancelled', async () => {
+		await component.ionViewWillEnter();
+		const html = component.html;
+		const alerts = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
+		const input = {
+			files: [new File(['{{broken'], 'broken.html')],
+			value: 'file',
+		};
+		await component.importFile({ target: input } as unknown as Event);
+		expect(component.html).toBe(html);
+		expect(alerts.create).toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'Something went wrong' }),
+		);
+		alerts.create.mockResolvedValueOnce({
+			present: vi.fn(),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
+		} as unknown as HTMLIonAlertElement);
+		input.files = [
+			new File(['<p>Replacement {{firstName}}</p>'], 'valid.html'),
+		];
+		await component.importFile({ target: input } as unknown as Event);
+		expect(component.html).toBe(html);
+	});
+
+	it('imports confirmed HTML, retains metadata, and detects new placeholders', async () => {
+		await component.ionViewWillEnter();
+		const key = component.form.controls['key'].value;
+		const alerts = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
+		alerts.create.mockResolvedValueOnce({
+			present: vi.fn(),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+		} as unknown as HTMLIonAlertElement);
+		const input = {
+			files: [
+				new File(['<p>{{firstName}}: {{dateTime}}</p>'], 'body.html'),
+			],
+			value: 'file',
+		};
+		await component.importFile({ target: input } as unknown as Event);
+		expect(component.html).toBe('<p>{{firstName}}: {{dateTime}}</p>');
+		expect(component.form.controls['key'].value).toBe(key);
+		expect(component.fieldMappings.value).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ name: 'dateTime' }),
+			]),
+		);
+		expect(
+			emailTemplateService.saveEmailTemplateRevision,
+		).not.toHaveBeenCalled();
+		expect(
+			emailTemplateService.publishEmailTemplate,
+		).not.toHaveBeenCalled();
 	});
 });

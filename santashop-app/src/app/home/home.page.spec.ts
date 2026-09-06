@@ -1,3 +1,4 @@
+import { CustomerLanguageService } from '../core/services/customer-language.service';
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
@@ -29,6 +30,13 @@ describe('HomePage', () => {
 		await TestBed.configureTestingModule({
 			imports: [HomePage],
 			providers: [
+				{
+					provide: CustomerLanguageService,
+					useValue: {
+						language$: new BehaviorSubject('en'),
+						setLanguage: vi.fn(),
+					},
+				},
 				{
 					provide: AppStateService,
 					useFactory: createAppStateServiceMock,
@@ -73,15 +81,21 @@ describe('HomePage', () => {
 	});
 
 	it('renders each account entry mode as the query parameter changes', async (): Promise<void> => {
-		expect(fixture.nativeElement.querySelector('#createAccountButton')).toBeTruthy();
+		expect(
+			fixture.nativeElement.querySelector('#createAccountButton'),
+		).toBeTruthy();
 
 		queryParamMap$.next(convertToParamMap({ mode: 'sign-in' }));
 		await fixture.whenStable();
-		expect(fixture.nativeElement.querySelector('#signInButton')).toBeTruthy();
+		expect(
+			fixture.nativeElement.querySelector('#signInButton'),
+		).toBeTruthy();
 
 		queryParamMap$.next(convertToParamMap({ mode: 'reset' }));
 		await fixture.whenStable();
-		expect(fixture.nativeElement.querySelector('#resetPasswordButton')).toBeTruthy();
+		expect(
+			fixture.nativeElement.querySelector('#resetPasswordButton'),
+		).toBeTruthy();
 	});
 
 	it('reserves the hero image geometry and prioritizes the Santa logo', (): void => {
@@ -159,7 +173,9 @@ describe('HomePage', () => {
 			LoadingController,
 		) as unknown as Mocked<LoadingController>;
 		loadingController.create.mockResolvedValue(loader as never);
-		vi.spyOn(authService, 'login').mockRejectedValue(new Error('sign-in failed'));
+		vi.spyOn(authService, 'login').mockRejectedValue(
+			new Error('sign-in failed'),
+		);
 		vi.spyOn(authService, 'resetPassword').mockRejectedValue(
 			new Error('reset failed'),
 		);

@@ -48,7 +48,9 @@ export class EmailTemplatesPage {
 	private readonly emailTemplateService = inject(EmailTemplateService);
 	private readonly router = inject(Router);
 
-	private readonly templatesSubject = new BehaviorSubject<EmailTemplateSummary[]>([]);
+	private readonly templatesSubject = new BehaviorSubject<
+		EmailTemplateSummary[]
+	>([]);
 	public readonly templates$ = this.templatesSubject.asObservable();
 
 	private readonly loadingSubject = new BehaviorSubject<boolean>(true);
@@ -75,6 +77,8 @@ export class EmailTemplatesPage {
 	}
 
 	public deliveryProfileLabel(template: EmailTemplateSummary): string {
+		if (template.deliveryProfile === 'registration-cancellation')
+			return 'Registration cancellation';
 		return template.deliveryProfile === 'event-reminder'
 			? 'Event reminder'
 			: 'Registration confirmation';
@@ -83,7 +87,8 @@ export class EmailTemplatesPage {
 	private async loadTemplates(): Promise<void> {
 		this.loadingSubject.next(true);
 		try {
-			const templates = await this.emailTemplateService.listEmailTemplates();
+			const templates =
+				await this.emailTemplateService.listEmailTemplates();
 			this.templatesSubject.next(templates);
 		} finally {
 			this.loadingSubject.next(false);

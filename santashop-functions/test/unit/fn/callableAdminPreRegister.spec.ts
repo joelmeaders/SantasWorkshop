@@ -93,54 +93,66 @@ describe('callableAdminPreRegister handler', () => {
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('pre-reg-no-slot');
 	});
 
-	it('creates auth, registration, index, and email records for admins', async () => {
-		const { callableAdminPreRegister } =
-			await loadCheckInAdminHandlers(adminMock);
-		adminMock.createUser.mockResolvedValue({ uid: 'pre-reg-123' });
-		adminMock.setDocSnapshot('dateTimeSlots/slot-1', {
-			dateTime: '2025-12-10T18:00:00.000Z',
-		});
+	it.each([undefined, 'en', 'es'] as const)(
+		'creates preregistration with profile language %s',
+		async (language) => {
+			const { callableAdminPreRegister } =
+				await loadCheckInAdminHandlers(adminMock);
+			adminMock.createUser.mockResolvedValue({ uid: 'pre-reg-123' });
+			adminMock.setDocSnapshot('dateTimeSlots/slot-1', {
+				dateTime: '2025-12-10T18:00:00.000Z',
+			});
 
-		const result = await callableAdminPreRegister(
-			createCallableRequest(
-				createRegistration({
-					dateTimeSlot: {
-						id: 'slot-1',
-						dateTime: new Date('2025-12-10T18:00:00.000Z'),
-					},
+			const result = await callableAdminPreRegister(
+				createCallableRequest(
+					createRegistration({
+						preferredLanguage: language,
+						dateTimeSlot: {
+							id: 'slot-1',
+							dateTime: new Date('2025-12-10T18:00:00.000Z'),
+						},
+					}),
+					{ roles: ['admin', 'checkin'] },
+				),
+			);
+
+			expect(result).toBe('pre-reg-123');
+			expect(adminMock.batchCreate).toHaveBeenCalledWith(
+				expect.objectContaining({ path: 'users/pre-reg-123' }),
+				expect.objectContaining({
+					preferredLanguage: language ?? 'en',
 				}),
-				{ roles: ['admin', 'checkin'] },
-			),
-		);
-
-		expect(result).toBe('pre-reg-123');
-		expect(adminMock.createUser).toHaveBeenCalledTimes(1);
-		expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
-		expect(adminMock.batchSet).toHaveBeenCalledTimes(1);
-		expect(generateQrCodeMock).toHaveBeenCalledWith(
-			'registrations/pre-reg-123/test-asset.png',
-			'ZXCV2345',
-		);
-		expect(
-			adminMock.getDocRef('registrations/pre-reg-123').set,
-		).toHaveBeenCalledWith(
-			expect.objectContaining({
-				qrCodeGeneratedOn: expect.any(Date),
-				reminderEmailQueuedOn: expect.any(Date),
-			}),
-			{ merge: true },
-		);
-		expect(
-			adminMock.getDocRef('tmp_registrationemails/generated-onsite-id')
-				.create,
-		).toHaveBeenCalledWith(
-			expect.objectContaining({
-				registrationUid: 'pre-reg-123',
-				deliveryState: 'queued',
-				email: 'buddy.elf@example.com',
-			}),
-		);
-	});
+			);
+			expect(adminMock.createUser).toHaveBeenCalledTimes(1);
+			expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
+			expect(adminMock.batchSet).toHaveBeenCalledTimes(1);
+			expect(generateQrCodeMock).toHaveBeenCalledWith(
+				'registrations/pre-reg-123/test-asset.png',
+				'ZXCV2345',
+			);
+			expect(
+				adminMock.getDocRef('registrations/pre-reg-123').set,
+			).toHaveBeenCalledWith(
+				expect.objectContaining({
+					qrCodeGeneratedOn: expect.any(Date),
+					reminderEmailQueuedOn: expect.any(Date),
+				}),
+				{ merge: true },
+			);
+			expect(
+				adminMock.getDocRef(
+					'tmp_registrationemails/generated-onsite-id',
+				).create,
+			).toHaveBeenCalledWith(
+				expect.objectContaining({
+					registrationUid: 'pre-reg-123',
+					deliveryState: 'queued',
+					appointmentDateTime: new Date('2025-12-10T18:00:00.000Z'),
+					email: 'buddy.elf@example.com',
+				}),
+			);
+		},
+	);
 
 	it('rolls back the auth user when registration persistence fails', async () => {
 		const { callableAdminPreRegister } =

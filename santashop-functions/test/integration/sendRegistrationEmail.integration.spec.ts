@@ -27,6 +27,9 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		sesSend.mockReset();
 		sesSend.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
 		await clearEmulatorData();
+		await getFirestore()
+			.doc('emailTemplates/confirmation/revisions/revision-1')
+			.set({ fieldMappings: [] });
 		await setDocument(COLLECTION_SCHEMA.emailTemplates, 'confirmation', {
 			key: 'confirmation',
 			awsTemplateName: 'confirmation-published',
@@ -73,7 +76,14 @@ describe.sequential('sendRegistrationEmail integration', () => {
 			'queued-user-1',
 		);
 		expect(queueDocument).toBeDefined();
-		expect(queueDocument?.['deliveryState']).toMatch(/sending|sent/);
+		expect(queueDocument?.['deliveryState']).toBe('sent');
+		expect(sesSend).toHaveBeenCalledOnce();
+		expect(sesSend.mock.calls[0][0].input.Template).toBe(
+			'confirmation-published',
+		);
+		expect(
+			JSON.parse(sesSend.mock.calls[0][0].input.TemplateData),
+		).toMatchObject({ firstName: 'Buddy', code: 'ABCD2345' });
 		expect(
 			await getDocument<Record<string, unknown>>(
 				COLLECTION_SCHEMA.registrations,

@@ -1,3 +1,5 @@
+import { CustomerLanguageService } from '../../../core/services/customer-language.service';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -21,6 +23,18 @@ describe('PublicMenuComponent', () => {
 		await TestBed.configureTestingModule({
 			imports: [PublicMenuComponent],
 			providers: [
+				{
+					provide: CustomerLanguageService,
+					useValue: {
+						language$: of('en'),
+						setLanguage: vi.fn(async (language: string) =>
+							window.localStorage.setItem(
+								'santashop-language',
+								language,
+							),
+						),
+					},
+				},
 				provideCustomerAuthMock(),
 				provideCustomerFunctionsMock(),
 				provideCustomerAnalyticsMock(),
@@ -49,7 +63,9 @@ describe('PublicMenuComponent', () => {
 		const popover = TestBed.inject(PopoverController) as any;
 		const modal = TestBed.inject(ModalController) as any;
 		popover.dismiss.mockResolvedValue(undefined);
-		modal.create.mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined) });
+		modal.create.mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+		});
 
 		await component.home();
 		await component.profile();
@@ -58,8 +74,12 @@ describe('PublicMenuComponent', () => {
 		await component.setLanguage('es');
 
 		expect(router.navigate).toHaveBeenNthCalledWith(1, ['/']);
-		expect(router.navigate).toHaveBeenNthCalledWith(2, ['/pre-registration/profile']);
-		expect(router.navigate).toHaveBeenNthCalledWith(3, ['/'], { queryParams: { mode: 'sign-in' } });
+		expect(router.navigate).toHaveBeenNthCalledWith(2, [
+			'/pre-registration/profile',
+		]);
+		expect(router.navigate).toHaveBeenNthCalledWith(3, ['/'], {
+			queryParams: { mode: 'sign-in' },
+		});
 		expect(modal.create).toHaveBeenCalledOnce();
 		expect(window.localStorage.getItem('santashop-language')).toBe('es');
 		expect(popover.dismiss).toHaveBeenCalledTimes(5);

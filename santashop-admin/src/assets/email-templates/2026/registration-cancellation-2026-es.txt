@@ -1,0 +1,18 @@
+Hola {{firstName}}:
+
+Tu inscripción para {{eventName}} fue cancelada. Tu cita anterior ya no está reservada, y tu boleto y código de confirmación anteriores ya no son válidos.
+
+CITA CANCELADA
+{{dateTime}}
+Hora de Denver · Hora de la Montaña
+
+Si todavía deseas asistir, inicia sesión y completa una nueva inscripción. Recibirás un nuevo boleto después de inscribirte.
+
+Inscribirme de nuevo: https://register.denversantaclausshop.org/
+
+Leer las preguntas frecuentes: https://www.denversantaclausshop.org/faq-espanol/
+
+Contactarnos por Facebook: https://www.facebook.com/denversantaclausshop/
+
+Con nuestros mejores deseos,
+El equipo de voluntarios de Denver Santa Claus Shop

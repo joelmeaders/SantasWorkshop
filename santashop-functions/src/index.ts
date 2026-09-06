@@ -1,3 +1,4 @@
+import type { UpdatePreferredLanguageRequest } from '@santashop/models';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2/options';
@@ -498,6 +499,13 @@ export const scheduledCheckInStats = onSchedule(
 	observeScheduledHandler('scheduledCheckInStats', async () => {
 		await (await import('./fn/scheduledCheckInStats')).default();
 	}),
+);
+
+export const updatePreferredLanguage = onCall(
+	STANDARD_CUSTOMER_OPTIONS,
+	observeCallableHandler<UpdatePreferredLanguageRequest, void>('updatePreferredLanguage', async (request) =>
+		(await import('./fn/updatePreferredLanguage')).default(request),
+	),
 );
 
 // ------------------------------------- TEST HELPER FUNCTIONS (Emulator Only)

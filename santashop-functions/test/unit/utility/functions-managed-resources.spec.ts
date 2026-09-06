@@ -86,6 +86,57 @@ const validInput = (): ManagedResourceInput => ({
 });
 
 describe('Functions managed deployment resources', () => {
+	const setTarget = (
+		input: ManagedResourceInput,
+		uri: string,
+		audience = uri,
+	): void => {
+		input.schedulerJobs[0] = {
+			...(input.schedulerJobs[0] as object),
+			httpTarget: { httpMethod: 'POST', uri, oidcToken: { audience } },
+		};
+	};
+	const functionName = resources.SCHEDULED_FUNCTIONS[0];
+	const alias = `https://${region}-${project}.cloudfunctions.net/${functionName}`;
+
+	it('accepts a Gen 2 cloudfunctions.net alias with its complete OIDC audience', () => {
+		const input = validInput();
+		setTarget(input, alias);
+		expect(resources.verifyManagedResources(input).schedulerJobs).toBe(5);
+	});
+
+	it.each([
+		alias.replace(project, 'another-project'),
+		alias.replace(region, 'us-east1'),
+		alias.replace(functionName, 'scheduledUserStats'),
+		`${alias}/extra`,
+		`${alias}?extra=1`,
+		alias.replace('https:', 'http:'),
+		`https://${functionName.toLowerCase()}-abc123-uc.a.run.app/extra`,
+		`https://${functionName.toLowerCase()}-abc123-uc.a.run.app.evil.example/`,
+	])('rejects an unexpected scheduler endpoint: %s', (uri) => {
+		const input = validInput();
+		setTarget(input, uri);
+		expect(() => resources.verifyManagedResources(input)).toThrow(
+			'unexpected HTTP target',
+		);
+	});
+
+	it.each([
+		new URL(alias).origin,
+		alias.replace(functionName, 'scheduledUserStats'),
+		`${alias}/`,
+	])(
+		'rejects an OIDC audience that omits or changes the function path: %s',
+		(audience) => {
+			const input = validInput();
+			setTarget(input, alias, audience);
+			expect(() => resources.verifyManagedResources(input)).toThrow(
+				'OIDC audience',
+			);
+		},
+	);
+
 	it('accepts the complete scheduler, task queue, and Eventarc topology', () => {
 		expect(resources.verifyManagedResources(validInput())).toEqual({
 			schedulerJobs: 5,

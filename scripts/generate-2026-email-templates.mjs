@@ -71,12 +71,12 @@ const copies = {
 		manage: 'View or change registration',
 		register: 'Register again',
 		again: 'If you would still like to attend, sign in and complete a new registration. You’ll receive a new ticket after registering.',
-		venue: 'Where the joy happens',
+		venue: 'Shop Venue',
 		draft: 'DRAFT · CONFIRM 2026 DETAILS BEFORE PUBLISHING',
-		venueNote: 'Historical venue — not yet confirmed for 2026:',
+		venueNote: 'Shop Venue — not yet confirmed for 2026:',
 		opening:
 			'2026 opening date and time: TO BE CONFIRMED. Replace this note with the confirmed information before publishing.',
-		map: 'View historical venue on map',
+		map: 'View Shop Venue on map',
 		faq: 'What to expect',
 		help: 'A question before your visit?',
 		helpText:
@@ -132,12 +132,12 @@ const copies = {
 		manage: 'Ver o cambiar mi inscripción',
 		register: 'Inscribirme de nuevo',
 		again: 'Si todavía deseas asistir, inicia sesión y completa una nueva inscripción. Recibirás un nuevo boleto después de inscribirte.',
-		venue: 'Donde nos encontraremos',
+		venue: 'Lugar de la tienda',
 		draft: 'BORRADOR · CONFIRMAR LOS DATOS DE 2026 ANTES DE PUBLICAR',
-		venueNote: 'Ubicación anterior; aún no está confirmada para 2026:',
+		venueNote: 'Lugar de la tienda; aún no está confirmado para 2026:',
 		opening:
 			'Fecha y hora de apertura de 2026: POR CONFIRMAR. Reemplaza esta nota con la información confirmada antes de publicar.',
-		map: 'Ver la ubicación anterior en el mapa',
+		map: 'Ver el lugar de la tienda en el mapa',
 		faq: 'Qué puedes esperar',
 		help: '¿Tienes alguna pregunta?',
 		helpText:
@@ -234,7 +234,7 @@ ${ticket}<tr><td class="pad" style="padding:32px 36px">${body}</td></tr>${venue}
 			awsTemplateName: `dscs-${key}`,
 			description:
 				'2026 starter. Review seasonal details before publishing.',
-			notes: 'Rebuilt from the historical 2025 email. Appointment preview is fictional.',
+			notes: 'Based on the 2025 email. Appointment preview is fictional.',
 			subjectPart: copy.subject,
 			html,
 			textPart,

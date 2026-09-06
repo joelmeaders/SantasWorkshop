@@ -139,6 +139,30 @@ describe('checkInWithEdit handler', () => {
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
 
+	it('keeps invalid transaction errors internal without recording a duplicate', async () => {
+		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.runTransaction.mockRejectedValue({
+			code: 3,
+			message: 'Transaction is invalid or closed.',
+		});
+
+		await expect(
+			checkInWithEdit(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'manual',
+					},
+					{ roles: ['checkin'], uid: 'staff-4' },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'internal',
+			message: 'Transaction is invalid or closed.',
+		});
+		expect(recordCheckInCreateConflictAttemptMock).not.toHaveBeenCalled();
+	});
+
 	it('records an evidenced create conflict as a blocked scan attempt', async () => {
 		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
 		adminMock.runTransaction.mockRejectedValue({
@@ -156,7 +180,7 @@ describe('checkInWithEdit handler', () => {
 						registration: createRegistration(),
 						inputMethod: 'manual',
 					},
-					{ roles: ['checkin'], uid: 'staff-4' },
+					{ roles: ['checkin'], uid: 'staff-5' },
 				),
 			),
 		).rejects.toMatchObject({
@@ -165,7 +189,7 @@ describe('checkInWithEdit handler', () => {
 		});
 		expect(recordCheckInCreateConflictAttemptMock).toHaveBeenCalledWith(
 			'test-user-123',
-			'staff-4',
+			'staff-5',
 			'manual',
 		);
 	});

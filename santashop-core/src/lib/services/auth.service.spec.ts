@@ -8,7 +8,7 @@ import {
 	vi,
 } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import type { User, UserCredential } from 'firebase/auth';
 import { AuthService } from './auth.service';
 import { AuthWrapper } from './_auth-wrapper';
@@ -18,6 +18,7 @@ describe('AuthService', () => {
 	let service: AuthService;
 	let authWrapperService: Mocked<AuthWrapper>;
 	let functionsWrapperService: Mocked<FunctionsWrapper>;
+	let authState$: BehaviorSubject<User | null>;
 
 	let authStateSpy: any;
 
@@ -81,7 +82,8 @@ describe('AuthService', () => {
 
 	beforeEach(() => {
 		authStateSpy = authWrapperService.authState;
-		authStateSpy.mockReturnValue(of(mockUser));
+		authState$ = new BehaviorSubject<User | null>(mockUser);
+		authStateSpy.mockReturnValue(authState$);
 		authWrapperService.reloadCurrentUser.mockResolvedValue(mockUser);
 		service = TestBed.inject(AuthService);
 	});
@@ -135,6 +137,31 @@ describe('AuthService', () => {
 
 		// Assert
 		expect(value).toEqual('12345');
+	});
+
+	it('uid$ does not re-emit the same uid when the identity refreshes', async () => {
+		const values: string[] = [];
+		const subscription = service.uid$.subscribe((value) =>
+			values.push(value),
+		);
+
+		await service.refreshCurrentUser();
+
+		expect(values).toEqual(['12345']);
+		subscription.unsubscribe();
+	});
+
+	it('uid$ emits again when the user signs out and signs back in', () => {
+		const values: string[] = [];
+		const subscription = service.uid$.subscribe((value) =>
+			values.push(value),
+		);
+
+		authState$.next(null);
+		authState$.next(mockUser);
+
+		expect(values).toEqual(['12345', '12345']);
+		subscription.unsubscribe();
 	});
 
 	it('isAdmin$: should return true', async () => {
@@ -358,7 +385,16 @@ describe('AuthService', () => {
 			await service.changeEmailAddress('password', 'test2@test.com');
 
 			// Assert
-			expect(signInSpy).toHaveBeenCalledWith(mockUser.email!, 'password');
+			expect(signInSpy).toHaveBeenNthCalledWith(
+				1,
+				mockUser.email!,
+				'password',
+			);
+			expect(signInSpy).toHaveBeenNthCalledWith(
+				2,
+				'test2@test.com',
+				'password',
+			);
 			expect(updateSpy).toHaveBeenCalledWith('test2@test.com');
 		});
 	});

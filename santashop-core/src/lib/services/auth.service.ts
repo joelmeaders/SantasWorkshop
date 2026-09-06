@@ -72,6 +72,7 @@ export class AuthService {
 	 */
 	public readonly uid$: Observable<string> = this.currentUser$.pipe(
 		map((user) => user?.uid),
+		distinctUntilChanged(),
 		filter((uid) => !!uid),
 		map((uid) => uid as string),
 		shareReplay(1),
@@ -248,6 +249,7 @@ export class AuthService {
 
 		await this.login(auth);
 		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
+		await this.login({ emailAddress: newEmailAddress, password });
 		await this.refreshCurrentUser();
 	}
 

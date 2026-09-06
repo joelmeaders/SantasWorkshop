@@ -44,3 +44,9 @@ Detailed execution logs remain in the worktree as ignored `email-*.log` files. R
 The feature branch was rebased without conflicts onto freshly fetched `origin/master` at `d5a2bbd`. The original 2025 logo is now linked in all six headers from `https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png`. Spanish emails have Spanish alt text. The renderer now fails if the logo does not load.
 
 After the rebase, all 310 Functions, 154 customer, and 301 admin unit tests passed (765 total). Models/core library builds, the Functions webpack build, and customer/admin production-configuration builds passed. All six previews passed at both widths, including the logo load and images-blocked text checks. Desktop and phone logo layouts were inspected. The integration and browser suite results above are from before this rebase; those suites were not rerun for this logo update.
+
+## Mission and QR size follow-up
+
+All six HTML and plain-text templates now include the mission, “A Toy for Every Girl & Boy,” translated as “Un juguete para cada niña y niño” in Spanish. The HTML places it directly below the logo.
+
+Confirmation and reminder QR images now use 432 × 432 pixels, twice the previous 216 × 216 dimensions. They scale down proportionally on small screens. Rendered measurements were 432 × 432 at an 800px viewport and 296 × 296 at a 360px viewport. All six desktop/mobile render and images-blocked checks passed. Cancellation templates still contain no QR ticket. Full application suites were not rerun for this content and sizing change.

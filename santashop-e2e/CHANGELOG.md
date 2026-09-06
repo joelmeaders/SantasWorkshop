@@ -2,6 +2,13 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.09.0-alpha.2] - Unreleased
+
+### Added
+
+- Browser coverage for signup language, fresh-session restoration, and persisted language changes.
+- Spanish template import, save/reload, JSON/HTML export, and invalid-import preservation coverage.
+
 ## [2026.09.0-alpha.1] - Unreleased
 
 ### Added

@@ -2,6 +2,19 @@
 
 All notable changes to the admin application will be documented in this file.
 
+## [2026.09.0-alpha.2] - Unreleased
+
+### Added
+
+- Six bilingual 2026 email starters with the original DSCS logo, mission, and enlarged responsive QR tickets.
+- JSON/HTML import and export, language selection, cancellation templates, plain-text previews, and seasonal review before publication.
+- English/Spanish selection for customer preregistration.
+
+### Changed
+
+- Preserve editor drafts when an import is invalid or cancelled, and require unique keys and SES names for new templates.
+- Advance the application version to `2026.09.0-alpha.2`.
+
 ## [2026.09.0-alpha.1] - Unreleased
 
 ### Added

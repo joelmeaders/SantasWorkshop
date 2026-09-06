@@ -42,6 +42,11 @@ try {
 			await page.goto(
 				pathToFileURL(output + template.key + '.html').href,
 			);
+			const logoLoaded = await page
+				.locator('img[src$="/dscs_logo_email.png"]')
+				.evaluate((img) => img.complete && img.naturalWidth > 0);
+			if (!logoLoaded)
+				throw new Error('The original DSCS logo did not load.');
 			const overflow = await page.evaluate(
 				() => document.documentElement.scrollWidth > window.innerWidth,
 			);

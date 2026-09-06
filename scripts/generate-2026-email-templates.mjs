@@ -21,7 +21,8 @@ mkdirSync(output, { recursive: true });
 const app = 'https://register.denversantaclausshop.org/';
 const website = 'https://www.denversantaclausshop.org/';
 // Original hosted DSCS logo from the 2025 email.
-const logo = 'https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png';
+const logo =
+	'https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png';
 const facebook = 'https://www.facebook.com/denversantaclausshop/';
 const map =
 	'https://www.google.com/maps/search/?api=1&query=7150%20Leetsdale%20Drive%20Unit%20380%20Denver%20CO%2080224';

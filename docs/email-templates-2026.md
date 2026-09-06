@@ -1,6 +1,8 @@
 # 2026 bilingual email templates
 
-The implementation is in `D:\SantasWorkshop-email-templates-2026`, on `feat/2026-bilingual-email-templates`, based on remote master commit `e31ba4b`. The existing checkout was preserved. Nothing was deployed, published to live SES, or emailed to a real recipient.
+The implementation is in `D:\SantasWorkshop-email-templates-2026`, on `feat/2026-bilingual-email-templates`, rebased on freshly fetched remote master commit `d5a2bbd`. The existing checkout was preserved. Nothing was deployed, published to live SES, or emailed to a real recipient.
+
+The headers use the original hosted DSCS logo from the 2025 email, with localized alt text and a link to the shop website.
 
 ## Use the templates
 

@@ -38,3 +38,9 @@ The standard Functions build passes. A supplemental standalone `tsc` check does 
 No deployment, live SES publication, real recipient test send, Gmail/Outlook/Apple Mail rendering test, or delivered-email confirmation was performed. The historical venue and 2026 opening remain unconfirmed draft content. Publishing the starters requires review and replacement of the draft notes.
 
 Detailed execution logs remain in the worktree as ignored `email-*.log` files. Reproducible preview results and screenshots are under `.artifacts/email-templates-2026/`.
+
+## Logo refresh and rebase follow-up
+
+The feature branch was rebased without conflicts onto freshly fetched `origin/master` at `d5a2bbd`. The original 2025 logo is now linked in all six headers from `https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png`. Spanish emails have Spanish alt text. The renderer now fails if the logo does not load.
+
+After the rebase, all 310 Functions, 154 customer, and 301 admin unit tests passed (765 total). Models/core library builds, the Functions webpack build, and customer/admin production-configuration builds passed. All six previews passed at both widths, including the logo load and images-blocked text checks. Desktop and phone logo layouts were inspected. The integration and browser suite results above are from before this rebase; those suites were not rerun for this logo update.

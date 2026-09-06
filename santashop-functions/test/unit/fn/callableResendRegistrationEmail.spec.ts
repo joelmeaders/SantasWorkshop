@@ -53,14 +53,16 @@ describe('callableResendRegistrationEmail handler', () => {
 
 		expect(result).toBe(true);
 		expect(
-			adminMock.getDocRef('tmp_registrationemails/test-user-123').set,
+			adminMock.getDocRef('tmp_registrationemails/generated-onsite-id')
+				.create,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
+				registrationUid: 'test-user-123',
 				code: 'ABCD2345',
 				email: 'buddy.elf@example.com',
 				formattedDateTime: 'Thursday, December 11, 6:00 PM',
+				appointmentSlotId: 'slot-1',
 			}),
-			{ merge: true },
 		);
 		expect(
 			adminMock.getDocRef('registrations/test-user-123').set,
@@ -79,7 +81,10 @@ describe('callableResendRegistrationEmail handler', () => {
 			await loadCheckInAdminHandlers(adminMock);
 		await expect(
 			callableResendRegistrationEmail(
-				createCallableRequest({ customerId: 'missing' }, { uid: 'owner' }),
+				createCallableRequest(
+					{ customerId: 'missing' },
+					{ uid: 'missing' },
+				),
 			),
 		).rejects.toMatchObject({ code: 'not-found' });
 
@@ -90,7 +95,10 @@ describe('callableResendRegistrationEmail handler', () => {
 		});
 		await expect(
 			callableResendRegistrationEmail(
-				createCallableRequest({ customerId: 'customer' }, { uid: 'intruder' }),
+				createCallableRequest(
+					{ customerId: 'customer' },
+					{ uid: 'intruder' },
+				),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
 	});
@@ -103,9 +111,15 @@ describe('callableResendRegistrationEmail handler', () => {
 		});
 		await expect(
 			callableResendRegistrationEmail(
-				createCallableRequest({ customerId: 'customer' }, { uid: 'customer' }),
+				createCallableRequest(
+					{ customerId: 'customer' },
+					{ uid: 'customer' },
+				),
 			),
-		).rejects.toMatchObject({ code: 'failed-precondition', message: '-10' });
+		).rejects.toMatchObject({
+			code: 'failed-precondition',
+			message: '-10',
+		});
 
 		adminMock.setDocSnapshot('registrations/customer', {
 			...createRegistration({ uid: 'customer' }),
@@ -113,7 +127,10 @@ describe('callableResendRegistrationEmail handler', () => {
 		});
 		await expect(
 			callableResendRegistrationEmail(
-				createCallableRequest({ customerId: 'customer' }, { uid: 'customer' }),
+				createCallableRequest(
+					{ customerId: 'customer' },
+					{ uid: 'customer' },
+				),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 
@@ -124,7 +141,10 @@ describe('callableResendRegistrationEmail handler', () => {
 		});
 		await expect(
 			callableResendRegistrationEmail(
-				createCallableRequest({ customerId: 'customer' }, { uid: 'customer' }),
+				createCallableRequest(
+					{ customerId: 'customer' },
+					{ uid: 'customer' },
+				),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 	});

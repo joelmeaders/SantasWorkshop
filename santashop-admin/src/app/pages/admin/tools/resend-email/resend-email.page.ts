@@ -5,7 +5,10 @@ import {
 	Validators,
 	ReactiveFormsModule,
 } from '@angular/forms';
-import { FunctionsWrapper, HttpsCallableResult } from '@santashop/core/admin/firestore';
+import {
+	FunctionsWrapper,
+	HttpsCallableResult,
+} from '@santashop/core/admin/firestore';
 import {
 	AlertController,
 	LoadingController,
@@ -70,6 +73,7 @@ export class ResendEmailPage {
 	}
 
 	public async searchAndSend(): Promise<void> {
+		if (this.form.invalid) return;
 		const email = this.form.controls['emailAddress'].value.toLowerCase();
 
 		const index = await this.searchCustomer(email);
@@ -148,8 +152,8 @@ export class ResendEmailPage {
 		}
 
 		const alert = await this.alerts.create({
-			header: 'Email sent!',
-			message: `Registration email sent to ${this.form.value}`,
+			header: 'Email queued',
+			message: `Registration email queued for ${index.emailAddress}.`,
 			buttons: ['OK'],
 		});
 

@@ -25,7 +25,7 @@ import {
 	IonCardHeader,
 	IonCardContent,
 } from '@ionic/angular/standalone';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
@@ -36,6 +36,7 @@ import {
 	distinctUntilChanged,
 } from 'rxjs/operators';
 import { TimeSlotPipe, timestampToDate } from '@santashop/core';
+import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
 
 const EVENT_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
 	day: '2-digit',
@@ -85,7 +86,7 @@ const toEventDayKey = (date: Date): number => {
 		IonCardHeader,
 		IonCardContent,
 		AsyncPipe,
-		DatePipe,
+		LocalizedDatePipe,
 		TranslateModule,
 		TimeSlotPipe,
 	],
@@ -149,9 +150,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 		this.filteredSlots$.pipe(
 			takeUntil(this.destroy$),
 			map((slots) =>
-				slots.filter(
-					(slot) => toEventDayKey(slot.dateTime) === date,
-				),
+				slots.filter((slot) => toEventDayKey(slot.dateTime) === date),
 			),
 			shareReplay(1),
 		);

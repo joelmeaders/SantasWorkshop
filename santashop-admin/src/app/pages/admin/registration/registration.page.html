@@ -19,7 +19,8 @@
 					<ion-label> Parent / Guardian </ion-label>
 				</ion-item-divider>
 				<ion-item>
-					<ion-input type="text"
+					<ion-input
+						type="text"
 						label="First Name"
 						labelPlacement="fixed"
 						autocomplete="off"
@@ -27,7 +28,7 @@
 						placeholder="required"
 						minlength="2"
 						maxlength="20"
-					 />
+					/>
 					@if (form.controls['firstName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Enter between 2-20 characters
@@ -35,7 +36,8 @@
 					}
 				</ion-item>
 				<ion-item>
-					<ion-input type="text"
+					<ion-input
+						type="text"
 						label="Last Name"
 						labelPlacement="fixed"
 						autocomplete="off"
@@ -43,7 +45,7 @@
 						placeholder="required"
 						minlength="2"
 						maxlength="25"
-					 />
+					/>
 					@if (form.controls['lastName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Enter between 2-25 characters
@@ -51,13 +53,14 @@
 					}
 				</ion-item>
 				<ion-item>
-					<ion-input type="email"
+					<ion-input
+						type="email"
 						label="Email"
 						labelPlacement="fixed"
 						autocomplete="off"
 						formControlName="emailAddress"
 						placeholder="required"
-					 />
+					/>
 					@if (form.controls['lastName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Must be a valid email address
@@ -65,7 +68,9 @@
 					}
 				</ion-item>
 				<ion-item>
-					<ion-input type="text" inputmode="numeric"
+					<ion-input
+						type="text"
+						inputmode="numeric"
 						label="Zip Code"
 						labelPlacement="fixed"
 						autocomplete="off"
@@ -73,7 +78,7 @@
 						placeholder="required"
 						minlength="5"
 						maxlength="5"
-					 />
+					/>
 					@if (form.controls['lastName'].dirty) {
 					<ion-note color="danger" slot="error">
 						Enter 5 digit zip code
@@ -85,9 +90,11 @@
 						Would you like to get occasional emails about our events
 						& services
 					</ion-label>
-					<ion-checkbox slot="end"
+					<ion-checkbox
+						slot="end"
+						aria-label="Receive occasional emails about our events and services"
 						formControlName="newsletter"
-					 />
+					/>
 				</ion-item>
 
 				<ion-item-divider class="margin-top">
@@ -98,7 +105,11 @@
 						(click)="chooseReferral()"
 					>
 						Pick Agency
-						<ion-icon slot="end" name="search-outline" aria-hidden="true" />
+						<ion-icon
+							slot="end"
+							name="search-outline"
+							aria-hidden="true"
+						/>
 					</ion-button>
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
@@ -113,15 +124,12 @@
 
 			<div class="margin-top">
 				@if (children$ | async; as children) {
-				<admin-manage-children [children]="children"
+				<admin-manage-children
+					[children]="children"
 					(adddedChild)="addChild($event)"
 					(editedChild)="editChild($event)"
 					(removedChild)="removeChild($event)"
-				 />
-				} @if (!form.controls['referral'].value) {
-				<ion-note color="danger" slot="error" class="error-note">
-					Add all children ages 0-11
-				</ion-note>
+				/>
 				}
 			</div>
 
@@ -142,11 +150,12 @@
 				<ion-label>
 					<h1>Yes, continue</h1>
 				</ion-label>
-				<ion-icon name="checkmark-circle"
+				<ion-icon
+					name="checkmark-circle"
 					slot="end"
 					size="large"
 					aria-hidden="true"
-				 />
+				/>
 			</ion-item>
 		</ion-list>
 	</div>

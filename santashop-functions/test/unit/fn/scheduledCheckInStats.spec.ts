@@ -59,10 +59,13 @@ describe('scheduledCheckInStats handler', () => {
 		await expect(scheduledCheckInStats()).resolves.toBe('Reset Checkins');
 
 		expect(backgroundMock.transactionSet).toHaveBeenCalledTimes(3);
-		expect(backgroundMock.getDocRef('stats/checkin-2025').set).toHaveBeenCalledWith(
+		expect(
+			backgroundMock.getDocRef('stats/checkin-2025').set,
+		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				dateTimeCount: [
 					expect.objectContaining({
+						dateKey: '2025-12-10',
 						customerCount: 2,
 						childCount: 3,
 						pregisteredCount: 1,

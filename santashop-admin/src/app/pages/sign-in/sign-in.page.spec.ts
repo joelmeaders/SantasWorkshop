@@ -9,15 +9,23 @@ describe('SignInPage', () => {
 	let component: SignInPage;
 	let fixture: ComponentFixture<SignInPage>;
 	const login = vi.fn();
+	const getCurrentUserToken = vi.fn();
 	const alert = { present: vi.fn().mockResolvedValue(undefined) };
 	const createAlert = vi.fn().mockResolvedValue(alert);
 
 	beforeEach(async () => {
-		login.mockReset(); alert.present.mockClear(); createAlert.mockClear();
+		login.mockReset();
+		getCurrentUserToken.mockReset();
+		getCurrentUserToken.mockResolvedValue({ claims: { roles: ['admin'] } });
+		alert.present.mockClear();
+		createAlert.mockClear();
 		TestBed.configureTestingModule({
 			imports: [SignInPage],
 			providers: [
-				{ provide: AuthService, useValue: { login } },
+				{
+					provide: AuthService,
+					useValue: { login, getCurrentUserToken },
+				},
 				{ provide: AlertController, useValue: { create: createAlert } },
 				provideRouter([]),
 			],
@@ -45,14 +53,122 @@ describe('SignInPage', () => {
 
 	it('authenticates a valid staff user and opens the admin landing route', async () => {
 		login.mockResolvedValue(undefined);
-		(component as unknown as { form: { patchValue(value: object): void } }).form.patchValue({
-			emailAddress: 'staff@example.test', password: 'secret',
+		(
+			component as unknown as {
+				form: { patchValue(value: object): void };
+			}
+		).form.patchValue({
+			emailAddress: 'staff@example.test',
+			password: 'secret',
 		});
-		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
 
 		await component.login();
 
-		expect(login).toHaveBeenCalledWith({ emailAddress: 'staff@example.test', password: 'secret' });
+		expect(login).toHaveBeenCalledWith({
+			emailAddress: 'staff@example.test',
+			password: 'secret',
+		});
+		expect(getCurrentUserToken).toHaveBeenCalledOnce();
+		expect(navigate).toHaveBeenCalledWith(['/admin']);
+	});
+
+	it.each([
+		['owner', { owner: true }],
+		['admin', { roles: ['admin'] }],
+		['check-in', { roles: ['checkin'] }],
+	])(
+		'opens the admin route for a staff token with %s access',
+		async (_role, claims) => {
+			login.mockResolvedValue(undefined);
+			getCurrentUserToken.mockResolvedValue({ claims });
+			(
+				component as unknown as {
+					form: { patchValue(value: object): void };
+				}
+			).form.patchValue({
+				emailAddress: 'staff@example.test',
+				password: 'secret',
+			});
+			const navigate = vi
+				.spyOn(TestBed.inject(Router), 'navigate')
+				.mockResolvedValue(true);
+
+			await component.login();
+
+			expect(navigate).toHaveBeenCalledWith(['/admin']);
+			expect(createAlert).not.toHaveBeenCalled();
+		},
+	);
+
+	it.each([
+		['empty claims', {}],
+		['null claims', null],
+		['an array of claims', []],
+		['a non-array roles claim', { roles: 'admin' }],
+		['an array of non-staff roles', { roles: ['stats'] }],
+	])(
+		'explains that a signed-in user lacks staff access for %s',
+		async (_case, claims) => {
+			login.mockResolvedValue(undefined);
+			getCurrentUserToken.mockResolvedValue({ claims });
+			(
+				component as unknown as {
+					form: { patchValue(value: object): void };
+				}
+			).form.patchValue({
+				emailAddress: 'customer@example.test',
+				password: 'secret',
+			});
+
+			await component.login();
+
+			expect(createAlert).toHaveBeenCalledWith({
+				header: 'Access Denied',
+				message:
+					'Your account is signed in, but it does not have staff access. Contact an administrator if you need access.',
+				buttons: ['Ok'],
+			});
+			expect(alert.present).toHaveBeenCalledOnce();
+		},
+	);
+
+	it('does not submit again while a sign-in request is pending', async () => {
+		let resolveLogin: (() => void) | undefined;
+		login.mockReturnValue(
+			new Promise<void>((resolve) => {
+				resolveLogin = resolve;
+			}),
+		);
+		(
+			component as unknown as {
+				form: { patchValue(value: object): void };
+			}
+		).form.patchValue({
+			emailAddress: 'staff@example.test',
+			password: 'secret',
+		});
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
+		const button = fixture.nativeElement.querySelector(
+			'#adminSignInButton',
+		) as HTMLIonButtonElement;
+		fixture.detectChanges();
+		expect(button.disabled).toBe(false);
+
+		const firstLogin = component.login();
+		await component.login();
+
+		expect(login).toHaveBeenCalledOnce();
+		await fixture.whenStable();
+		expect(button.disabled).toBe(true);
+		resolveLogin?.();
+		await firstLogin;
+		await fixture.whenStable();
+		expect(button.disabled).toBe(false);
 		expect(navigate).toHaveBeenCalledWith(['/admin']);
 	});
 
@@ -63,6 +179,14 @@ describe('SignInPage', () => {
 		['other', 'Unknown Error'],
 	])('explains %s login errors as %s', async (code, header) => {
 		login.mockRejectedValue(new Error(`Firebase: ${code}`));
+		(
+			component as unknown as {
+				form: { patchValue(value: object): void };
+			}
+		).form.patchValue({
+			emailAddress: 'staff@example.test',
+			password: 'secret',
+		});
 
 		await component.login();
 

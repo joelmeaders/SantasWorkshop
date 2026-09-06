@@ -32,6 +32,11 @@ describe('callablePublishEmailTemplate handler', () => {
 						mapping: 'firstName',
 						sampleValue: 'Buddy',
 					},
+					{
+						name: 'qrCodeUrl',
+						mapping: 'qrCodeUrl',
+						sampleValue: 'https://example.com/test-qr.png',
+					},
 				],
 				currentRevisionId: 'rev-1',
 				currentRevisionNumber: 1,
@@ -55,6 +60,11 @@ describe('callablePublishEmailTemplate handler', () => {
 						name: 'firstName',
 						mapping: 'firstName',
 						sampleValue: 'Buddy',
+					},
+					{
+						name: 'qrCodeUrl',
+						mapping: 'qrCodeUrl',
+						sampleValue: 'https://example.com/test-qr.png',
 					},
 				],
 				createdOn: new Date('2025-11-01T00:00:00.000Z'),
@@ -109,7 +119,94 @@ describe('callablePublishEmailTemplate handler', () => {
 
 		await expect(
 			callablePublishEmailTemplate(
-				createCallableRequest({ key: 'Not Valid!' }, { roles: ['admin', 'checkin'] }),
+				createCallableRequest(
+					{ key: 'Not Valid!' },
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('rejects unsupported Handlebars syntax from a saved revision', async () => {
+		const { callablePublishEmailTemplate } =
+			await loadEmailTemplateHandlers(backgroundMock);
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/registration-confirmation',
+			{
+				key: 'registration-confirmation',
+				deliveryProfile: 'registration-confirmation',
+				displayName: 'Registration Confirmation',
+				awsTemplateName: 'dscs-registration-confirmation-v1',
+				currentRevisionId: 'rev-1',
+			},
+		);
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/registration-confirmation/revisions/rev-1',
+			{
+				id: 'rev-1',
+				templateKey: 'registration-confirmation',
+				deliveryProfile: 'registration-confirmation',
+				revisionNumber: 1,
+				subjectPart: '{{#if firstName}}Hello{{/if}}',
+				htmlStoragePath:
+					'emailTemplates/registration-confirmation/revisions/rev-1.html',
+				fieldMappings: [],
+			},
+		);
+		backgroundMock.setFileContents(
+			'emailTemplates/registration-confirmation/revisions/rev-1.html',
+			'<h1>Hello {{firstName}}</h1>',
+		);
+
+		await expect(
+			callablePublishEmailTemplate(
+				createCallableRequest(
+					{ key: 'registration-confirmation' },
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+
+	it('rejects an unsupported delivery profile from a saved revision', async () => {
+		const { callablePublishEmailTemplate } =
+			await loadEmailTemplateHandlers(backgroundMock);
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/registration-confirmation',
+			{
+				key: 'registration-confirmation',
+				awsTemplateName: 'dscs-registration-confirmation-v1',
+				currentRevisionId: 'rev-1',
+			},
+		);
+		backgroundMock.setDocSnapshot(
+			'emailTemplates/registration-confirmation/revisions/rev-1',
+			{
+				id: 'rev-1',
+				deliveryProfile: 'unsupported-profile',
+				subjectPart: 'Hello {{firstName}}',
+				htmlStoragePath:
+					'emailTemplates/registration-confirmation/revisions/rev-1.html',
+				fieldMappings: [
+					{
+						name: 'firstName',
+						mapping: 'firstName',
+						sampleValue: 'Buddy',
+					},
+				],
+			},
+		);
+		backgroundMock.setFileContents(
+			'emailTemplates/registration-confirmation/revisions/rev-1.html',
+			'<h1>Hello {{firstName}}</h1>',
+		);
+
+		await expect(
+			callablePublishEmailTemplate(
+				createCallableRequest(
+					{ key: 'registration-confirmation' },
+					{ roles: ['admin', 'checkin'] },
+				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});

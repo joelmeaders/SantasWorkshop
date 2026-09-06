@@ -1,11 +1,36 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal, viewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	input,
+	output,
+	signal,
+	viewChild,
+} from '@angular/core';
+import {
+	FormControl,
+	FormGroup,
+	ReactiveFormsModule,
+	Validators,
+} from '@angular/forms';
 import { Child, AgeGroup, ToyType } from '@santashop/models';
-import { MAX_BIRTHDATE, MIN_BIRTHDATE, getAgeFromDate, yyyymmddToLocalDate } from '@santashop/core';
-import { DatePipe } from '@angular/common';
+import {
+	MAX_BIRTHDATE,
+	MIN_BIRTHDATE,
+	getAgeFromDate,
+	yyyymmddToLocalDate,
+} from '@santashop/core';
 import { TranslateModule } from '@ngx-translate/core';
+import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
 import { addIcons } from 'ionicons';
-import { manOutline, womanOutline, happyOutline, alertCircle, trashOutline, addCircle } from 'ionicons/icons';
+import {
+	manOutline,
+	womanOutline,
+	happyOutline,
+	alertCircle,
+	trashOutline,
+	addCircle,
+} from 'ionicons/icons';
 import {
 	IonBadge,
 	IonButton,
@@ -48,7 +73,7 @@ interface ChildFormValue {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		ReactiveFormsModule,
-		DatePipe,
+		LocalizedDatePipe,
 		TranslateModule,
 		IonBadge,
 		IonButton,
@@ -95,7 +120,14 @@ export class ChildrenCardComponent {
 	public readonly maxBirthDate = MAX_BIRTHDATE().toISOString().slice(0, 10);
 
 	constructor() {
-		addIcons({ manOutline, womanOutline, happyOutline, alertCircle, trashOutline, addCircle });
+		addIcons({
+			manOutline,
+			womanOutline,
+			happyOutline,
+			alertCircle,
+			trashOutline,
+			addCircle,
+		});
 	}
 
 	public openNewChild(): void {
@@ -157,9 +189,12 @@ export class ChildrenCardComponent {
 		if (this.form.controls.toyType.value === ToyType.infant) {
 			this.form.controls.toyType.setValue(null);
 		}
-		if (age >= 3 && age < 6) this.form.controls.ageGroup.setValue(AgeGroup.age35);
-		else if (age >= 6 && age < 9) this.form.controls.ageGroup.setValue(AgeGroup.age68);
-		else if (age >= 9 && age < 13) this.form.controls.ageGroup.setValue(AgeGroup.age911);
+		if (age >= 3 && age < 6)
+			this.form.controls.ageGroup.setValue(AgeGroup.age35);
+		else if (age >= 6 && age < 9)
+			this.form.controls.ageGroup.setValue(AgeGroup.age68);
+		else if (age >= 9 && age < 13)
+			this.form.controls.ageGroup.setValue(AgeGroup.age911);
 		else {
 			this.hasSelectedAge.set(false);
 			this.form.controls.ageGroup.setValue(null);
@@ -203,11 +238,33 @@ export class ChildrenCardComponent {
 
 	private createForm(): FormGroup<ChildFormValue> {
 		return new FormGroup<ChildFormValue>({
-			id: new FormControl(Math.floor(Math.random() * 100000), { nonNullable: true }),
-			firstName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2), Validators.maxLength(25)] }),
-			lastName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2), Validators.maxLength(25)] }),
-			dateOfBirth: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-			ageGroup: new FormControl<AgeGroup | null>(null, Validators.required),
+			id: new FormControl(Math.floor(Math.random() * 100000), {
+				nonNullable: true,
+			}),
+			firstName: new FormControl('', {
+				nonNullable: true,
+				validators: [
+					Validators.required,
+					Validators.minLength(2),
+					Validators.maxLength(25),
+				],
+			}),
+			lastName: new FormControl('', {
+				nonNullable: true,
+				validators: [
+					Validators.required,
+					Validators.minLength(2),
+					Validators.maxLength(25),
+				],
+			}),
+			dateOfBirth: new FormControl('', {
+				nonNullable: true,
+				validators: [Validators.required],
+			}),
+			ageGroup: new FormControl<AgeGroup | null>(
+				null,
+				Validators.required,
+			),
 			toyType: new FormControl<ToyType | null>(null, Validators.required),
 			programYearAdded: new FormControl(0, { nonNullable: true }),
 			enabled: new FormControl(true, { nonNullable: true }),

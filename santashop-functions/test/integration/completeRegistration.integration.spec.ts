@@ -6,6 +6,7 @@ import { createRegistration } from '../fixtures/factories';
 import {
 	clearEmulatorData,
 	getDocument,
+	getFirestore,
 	setDocument,
 } from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
@@ -55,15 +56,17 @@ describe.sequential('completeRegistration integration', () => {
 			includedInCounts: false,
 			includedInRegistrationStats: false,
 		});
-		expect(
-			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.tmpRegistrationEmails,
-				'user-reg-1',
-			),
-		).toMatchObject({
+		const queuedEmails = await getFirestore()
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('registrationUid', '==', 'user-reg-1')
+			.get();
+		expect(queuedEmails.size).toBe(1);
+		expect(queuedEmails.docs[0]?.data()).toMatchObject({
+			registrationUid: 'user-reg-1',
 			code: 'ABCD2345',
 			email: 'buddy.elf@example.com',
 			name: 'Buddy',
+			queueSource: 'registration-completion',
 		});
 		expect(
 			await getDocument<Record<string, unknown>>(
@@ -98,39 +101,47 @@ describe.sequential('completeRegistration integration', () => {
 			}),
 		]);
 
-		await Promise.all(Array.from({ length: submissionCount }, async (_, index) => {
-			const uid = `spike-user-${index}`;
-			const emailAddress = `spike-${index}@example.com`;
-			await Promise.all([
-				setDocument(
-					COLLECTION_SCHEMA.registrations,
-					uid,
-					createRegistration({
+		await Promise.all(
+			Array.from({ length: submissionCount }, async (_, index) => {
+				const uid = `spike-user-${index}`;
+				const emailAddress = `spike-${index}@example.com`;
+				await Promise.all([
+					setDocument(
+						COLLECTION_SCHEMA.registrations,
 						uid,
+						createRegistration({
+							uid,
+							emailAddress,
+							qrcode: `Q${index.toString().padStart(7, '0')}`,
+							dateTimeSlot: {
+								id: 'spike-slot',
+								dateTime: '2025-12-10T18:00:00.000Z',
+							},
+						}),
+					),
+					setDocument(COLLECTION_SCHEMA.users, uid, {
+						firstName: 'Spike',
+						lastName: `Customer${index}`,
 						emailAddress,
-						qrcode: `Q${index.toString().padStart(7, '0')}`,
-						dateTimeSlot: {
-							id: 'spike-slot',
-							dateTime: '2025-12-10T18:00:00.000Z',
-						},
+						zipCode: '80205',
 					}),
-				),
-				setDocument(COLLECTION_SCHEMA.users, uid, {
-					firstName: 'Spike',
-					lastName: `Customer${index}`,
-					emailAddress,
-					zipCode: '80205',
-				}),
-			]);
-		}));
+				]);
+			}),
+		);
 
-		await Promise.all(Array.from({ length: submissionCount }, (_, index) => {
-			const uid = `spike-user-${index}`;
-			return completeRegistration(createCallableRequest(
-				{ mutationId: `spike-submit-${index.toString().padStart(4, '0')}` },
-				{ uid },
-			));
-		}));
+		await Promise.all(
+			Array.from({ length: submissionCount }, (_, index) => {
+				const uid = `spike-user-${index}`;
+				return completeRegistration(
+					createCallableRequest(
+						{
+							mutationId: `spike-submit-${index.toString().padStart(4, '0')}`,
+						},
+						{ uid },
+					),
+				);
+			}),
+		);
 
 		expect(
 			await getDocument<Record<string, unknown>>(

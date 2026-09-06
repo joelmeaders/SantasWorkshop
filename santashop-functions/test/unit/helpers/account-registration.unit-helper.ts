@@ -2,6 +2,12 @@ import { vi } from 'vitest';
 
 const FORMATTED_DATETIME = 'Wednesday, December 10, 6:00 PM';
 
+export const generateQrCodeMock = vi.fn().mockResolvedValue(undefined);
+export const generateIdMock = vi.fn(() => 'ZXCV2345');
+export const replaceQrCodeWithCancelledMock = vi
+	.fn()
+	.mockResolvedValue(undefined);
+
 interface MockDocRef {
 	path: string;
 	collection: (path: string) => { doc: (id: string) => MockDocRef };
@@ -79,9 +85,10 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 		const created: MockDocRef = {
 			path,
 			collection: (subcollection: string) => ({
-				doc: (id: string) => getDocRef(`${path}/${subcollection}/${id}`),
+				doc: (id: string) =>
+					getDocRef(`${path}/${subcollection}/${id}`),
 			}),
-		get: vi.fn(),
+			get: vi.fn(),
 			set: vi.fn(),
 			update: vi.fn(),
 			create: vi.fn(),
@@ -104,7 +111,9 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 
 	const doc = vi.fn((path: string) => getDocRef(path));
 	const collection = vi.fn((path: string) => ({
-		doc: vi.fn((id?: string) => getDocRef(`${path}/${id ?? 'generated-id'}`)),
+		doc: vi.fn((id?: string) =>
+			getDocRef(`${path}/${id ?? 'generated-id'}`),
+		),
 	}));
 	const batch = {
 		set: batchSet,
@@ -158,11 +167,14 @@ export const loadAccountRegistrationHandlers = async (
 	}));
 	vi.doMock('../../../src/utility/qrcodes', () => ({
 		deleteQrCode: vi.fn().mockResolvedValue(undefined),
-		generateQrCode: vi.fn().mockResolvedValue(undefined),
+		generateQrCode: generateQrCodeMock,
 		createQrCodeStoragePath: vi.fn(
 			(uid: string) => `registrations/${uid}/replacement.png`,
 		),
-		replaceQrCodeWithCancelled: vi.fn().mockResolvedValue(undefined),
+		replaceQrCodeWithCancelled: replaceQrCodeWithCancelledMock,
+	}));
+	vi.doMock('../../../src/utility/id-generation', () => ({
+		generateId: generateIdMock,
 	}));
 
 	const [

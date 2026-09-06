@@ -15,7 +15,7 @@
 			<ion-label> Add children </ion-label>
 			@if (!children().length) {
 				<ion-note color="danger" slot="error" class="error-note">
-					Add all children ages 0-11
+					Add all children under 13 years old
 				</ion-note>
 			}
 		</span>
@@ -37,19 +37,21 @@
 		</ion-item>
 		<ion-item-options>
 			<ion-item-option color="primary" (click)="addEditChild(child)">
-				<ion-icon slot="start"
+				<ion-icon
+					slot="start"
 					name="create-outline"
 					slot="top"
 					aria-hidden="true"
-				 />
+				/>
 				<ion-label slot="bottom"> Edit </ion-label>
 			</ion-item-option>
 			<ion-item-option color="danger" (click)="removeChild(child.id!)">
-				<ion-icon slot="start"
+				<ion-icon
+					slot="start"
 					name="trash-outline"
 					slot="top"
 					aria-hidden="true"
-				 />
+				/>
 				<ion-label slot="bottom"> Delete </ion-label>
 			</ion-item-option>
 		</ion-item-options>

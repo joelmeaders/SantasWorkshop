@@ -6,6 +6,7 @@ import {
 	createTimestamp,
 	getCollectionCount,
 	getDocument,
+	getFirestore,
 	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
@@ -44,12 +45,16 @@ describe.sequential('undoRegistration integration', () => {
 				customerId: 'user-undo-1',
 			},
 		);
-		await setDocument(COLLECTION_SCHEMA.tmpRegistrationEmails, 'user-undo-1', {
-			email: 'customer@example.com',
-			name: 'Customer',
-			code: 'ABCD2345',
-			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
-		});
+		await setDocument(
+			COLLECTION_SCHEMA.tmpRegistrationEmails,
+			'user-undo-1',
+			{
+				email: 'customer@example.com',
+				name: 'Customer',
+				code: 'ABCD2345',
+				formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+			},
+		);
 
 		const result = await undoRegistration(
 			createCallableRequest(
@@ -83,12 +88,24 @@ describe.sequential('undoRegistration integration', () => {
 		);
 		expect(registration?.['qrcode']).not.toBe('ABCD2345');
 		expect(registration?.['registrationSubmittedOn']).toBeUndefined();
-		expect(await getCollectionCount(COLLECTION_SCHEMA.cancellations)).toBe(1);
+		expect(await getCollectionCount(COLLECTION_SCHEMA.cancellations)).toBe(
+			1,
+		);
+		const queuedEmails = await getFirestore()
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.get();
+		expect(queuedEmails.size).toBe(2);
 		expect(
-			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.tmpRegistrationEmails,
-				'user-undo-1',
-			),
-		).toMatchObject({ queueSource: 'registration-cancellation' });
+			queuedEmails.docs
+				.find(
+					(document) =>
+						document.data()['queueSource'] ===
+						'registration-cancellation',
+				)
+				?.data(),
+		).toMatchObject({
+			registrationUid: 'user-undo-1',
+			queueSource: 'registration-cancellation',
+		});
 	});
 });

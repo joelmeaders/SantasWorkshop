@@ -9,7 +9,10 @@ import {
 } from '../models';
 import { isAdminToken } from '../utility/capabilities';
 import { requireAuthenticatedUid } from '../utility/callable-validation';
-import { formatRegistrationDateTime, type DateTimeValue } from '../utility/date-time-format';
+import {
+	formatRegistrationDateTime,
+	type DateTimeValue,
+} from '../utility/date-time-format';
 import { generateId } from '../utility/id-generation';
 import { createFunctionLogger } from '../utility/observability';
 import {
@@ -47,7 +50,10 @@ interface CancellationResult {
 const requireRegistrationUid = (value: unknown): string | undefined => {
 	if (value === undefined) return undefined;
 	if (typeof value !== 'string' || !value.trim()) {
-		throw new HttpsError('invalid-argument', 'Registration UID is invalid.');
+		throw new HttpsError(
+			'invalid-argument',
+			'Registration UID is invalid.',
+		);
 	}
 	return value;
 };
@@ -66,33 +72,15 @@ const resultFromCancellation = (
 	replacementQrCodeStoragePath: cancellation.replacementQrCodeStoragePath,
 });
 
-const queueCancellationEmail = async (result: CancellationResult): Promise<void> => {
-	if (!result.newConfirmationCode || !result.emailAddress || !result.firstName) return;
-
-	const queuedOn = new Date();
-	await admin.firestore().doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${result.uid}`).set({
-		code: result.newConfirmationCode,
-		email: result.emailAddress,
-		name: result.firstName,
-		formattedDateTime: result.previousDateTimeSlot?.dateTime
-			? formatRegistrationDateTime(result.previousDateTimeSlot.dateTime as DateTimeValue)
-			: 'your previous appointment',
-		queuedOn,
-		queueSource: 'registration-cancellation',
-		deliveryRequestedOn: queuedOn,
-		deliveryState: 'queued',
-		failedOn: false,
-		lastErrorMessage: false,
-		lastErrorDetails: false,
-	});
-};
-
 const finalizeCancellation = async (
 	registrationRef: ReturnType<ReturnType<typeof admin.firestore>['doc']>,
 	result: CancellationResult,
 ): Promise<void> => {
 	if (!result.newConfirmationCode) {
-		throw new HttpsError('failed-precondition', 'Registration confirmation code is unavailable.');
+		throw new HttpsError(
+			'failed-precondition',
+			'Registration confirmation code is unavailable.',
+		);
 	}
 	await replaceQrCodeWithCancelled(result.supersededQrCodeStoragePath);
 	await generateQrCode(
@@ -103,7 +91,6 @@ const finalizeCancellation = async (
 		{ qrCodeGeneratedOn: new Date(), qrCodeGenerationFailedOn: false },
 		{ merge: true },
 	);
-	await queueCancellationEmail(result);
 };
 
 export default async function undoRegistration(
@@ -116,44 +103,64 @@ export default async function undoRegistration(
 	const requestedUid = requireRegistrationUid(data['uid']);
 	const isAdmin = isAdminToken(request.auth?.token);
 	if (requestedUid && !isAdmin) {
-		throw new HttpsError('permission-denied', 'Only staff can cancel another registration.');
+		throw new HttpsError(
+			'permission-denied',
+			'Only staff can cancel another registration.',
+		);
 	}
 	const uid = requestedUid ?? actorUid;
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const indexRef = db.doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
-	const emailRef = db.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
+	const indexRef = db.doc(
+		`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`,
+	);
 	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
-	const receiptRef = registrationRef.collection(MUTATION_RECEIPTS_SUBCOLLECTION).doc(mutationId);
+	const receiptRef = registrationRef
+		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
+		.doc(mutationId);
 	let result: CancellationResult | undefined;
 
 	try {
 		await db.runTransaction(async (transaction) => {
-			const [registrationSnapshot, parametersSnapshot, receiptSnapshot] = await Promise.all([
-				transaction.get(registrationRef),
-				transaction.get(parametersRef),
-				transaction.get(receiptRef),
-			]);
+			const [registrationSnapshot, parametersSnapshot, receiptSnapshot] =
+				await Promise.all([
+					transaction.get(registrationRef),
+					transaction.get(parametersRef),
+					transaction.get(receiptRef),
+				]);
 			const cached = getStoredMutationResult(
-				receiptSnapshot.exists ? receiptSnapshot.data() as MutationReceipt : undefined,
+				receiptSnapshot.exists
+					? (receiptSnapshot.data() as MutationReceipt)
+					: undefined,
 				'undoRegistration',
 			);
-			const registration = registrationSnapshot.data() as Registration | undefined;
+			const registration = registrationSnapshot.data() as
+				Registration | undefined;
 			if (!registration) {
-				throw new HttpsError('not-found', `Registration not found for ${uid}.`);
+				throw new HttpsError(
+					'not-found',
+					`Registration not found for ${uid}.`,
+				);
 			}
 			if (cached || registration.cancelledOn) {
 				if (!registration.cancellationLogId) {
-					throw new HttpsError('internal', 'Cancellation record is unavailable.');
+					throw new HttpsError(
+						'internal',
+						'Cancellation record is unavailable.',
+					);
 				}
 				const cancellationSnapshot = await transaction.get(
-					db.doc(`${COLLECTION_SCHEMA.cancellations}/${registration.cancellationLogId}`),
+					db.doc(
+						`${COLLECTION_SCHEMA.cancellations}/${registration.cancellationLogId}`,
+					),
 				);
 				const cancellation = cancellationSnapshot.data() as
-					| RegistrationCancellation
-					| undefined;
+					RegistrationCancellation | undefined;
 				if (!cancellation) {
-					throw new HttpsError('internal', 'Cancellation record is unavailable.');
+					throw new HttpsError(
+						'internal',
+						'Cancellation record is unavailable.',
+					);
 				}
 				if (!cached) {
 					transaction.create(receiptRef, {
@@ -162,25 +169,44 @@ export default async function undoRegistration(
 						completedOn: new Date(),
 					} satisfies MutationReceipt);
 				}
-				result = resultFromCancellation(uid, registration, cancellation);
+				result = resultFromCancellation(
+					uid,
+					registration,
+					cancellation,
+				);
 				return;
 			}
 
-			const parameters = parametersSnapshot.data() as PublicParameters | undefined;
+			const parameters = parametersSnapshot.data() as
+				PublicParameters | undefined;
 			if (!parameters?.admin?.allowCancelRegistration) {
-				throw new HttpsError('failed-precondition', 'Registration cancellation is currently unavailable.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration cancellation is currently unavailable.',
+				);
 			}
 			if (!registration.registrationSubmittedOn) {
-				throw new HttpsError('failed-precondition', 'Only submitted registrations can be cancelled.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Only submitted registrations can be cancelled.',
+				);
 			}
 			if (registration.hasCheckedIn) {
-				throw new HttpsError('failed-precondition', 'Checked-in registrations cannot be cancelled.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Checked-in registrations cannot be cancelled.',
+				);
 			}
 			if (!registration.qrcode || !registration.qrCodeStoragePath) {
-				throw new HttpsError('failed-precondition', 'Registration QR details are unavailable.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration QR details are unavailable.',
+				);
 			}
 
-			const previousDateTimeSlot = registration.dateTimeSlot ? { ...registration.dateTimeSlot } : undefined;
+			const previousDateTimeSlot = registration.dateTimeSlot
+				? { ...registration.dateTimeSlot }
+				: undefined;
 			const registrationWithoutSubmission = { ...registration };
 			delete registrationWithoutSubmission.dateTimeSlot;
 			delete registrationWithoutSubmission.registrationSubmittedOn;
@@ -188,7 +214,12 @@ export default async function undoRegistration(
 			const newConfirmationCode = generateId(8);
 			const replacementQrCodeStoragePath = createQrCodeStoragePath(uid);
 			const cancelledOn = new Date();
-			const cancellationRef = db.collection(COLLECTION_SCHEMA.cancellations).doc();
+			const cancellationRef = db
+				.collection(COLLECTION_SCHEMA.cancellations)
+				.doc();
+			const cancellationEmailRef = db
+				.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+				.doc();
 			const cancellation: RegistrationCancellation = {
 				uid,
 				actorUid,
@@ -202,8 +233,28 @@ export default async function undoRegistration(
 			};
 
 			transaction.set(cancellationRef, cancellation);
+			if (registration.emailAddress && registration.firstName) {
+				transaction.create(cancellationEmailRef, {
+					registrationUid: uid,
+					cancellationLogId: cancellationRef.id,
+					code: newConfirmationCode,
+					email: registration.emailAddress,
+					name: registration.firstName,
+					formattedDateTime: previousDateTimeSlot?.dateTime
+						? formatRegistrationDateTime(
+								previousDateTimeSlot.dateTime as DateTimeValue,
+							)
+						: 'your previous appointment',
+					queuedOn: cancelledOn,
+					queueSource: 'registration-cancellation',
+					deliveryRequestedOn: cancelledOn,
+					deliveryState: 'queued',
+					failedOn: false,
+					lastErrorMessage: false,
+					lastErrorDetails: false,
+				});
+			}
 			transaction.delete(indexRef);
-			transaction.delete(emailRef);
 			transaction.set(registrationRef, {
 				...registrationWithoutSubmission,
 				...(previousDateTimeSlot ? { previousDateTimeSlot } : {}),
@@ -237,9 +288,56 @@ export default async function undoRegistration(
 		});
 
 		if (!result) {
-			throw new HttpsError('internal', 'Cancellation did not produce a result.');
+			throw new HttpsError(
+				'internal',
+				'Cancellation did not produce a result.',
+			);
 		}
-		await finalizeCancellation(registrationRef, result);
+		const cancellationResult = result;
+		try {
+			await finalizeCancellation(registrationRef, cancellationResult);
+		} catch (finalizationError) {
+			const failedOn = new Date();
+			try {
+				await db.runTransaction(async (transaction) => {
+					const registrationSnapshot =
+						await transaction.get(registrationRef);
+					const registration = registrationSnapshot.data() as
+						Registration | undefined;
+					if (
+						registration?.cancelledOn &&
+						registration.qrcode ===
+							cancellationResult.newConfirmationCode &&
+						registration.qrCodeStoragePath ===
+							cancellationResult.replacementQrCodeStoragePath
+					) {
+						transaction.set(
+							registrationRef,
+							{
+								qrCodeGeneratedOn: false,
+								qrCodeGenerationFailedOn: failedOn,
+							},
+							{ merge: true },
+						);
+					}
+				});
+			} catch (failureWriteError) {
+				log.error(
+					'Failed to record cancellation finalization failure',
+					{ uid, actorUid },
+					failureWriteError,
+				);
+			}
+			log.error(
+				'Cancellation committed but confirmation-code finalization failed',
+				{ uid, actorUid },
+				finalizationError,
+			);
+			throw new HttpsError(
+				'internal',
+				'Registration was cancelled, but confirmation-code finalization failed. Retry the cancellation to finish.',
+			);
+		}
 		return true;
 	} catch (error) {
 		if (error instanceof HttpsError) throw error;

@@ -7,6 +7,7 @@ import {
 	createTimestamp,
 	getAuth,
 	getDocument,
+	getFirestore,
 	setDocument,
 } from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
@@ -45,20 +46,18 @@ describe.sequential('callableAdminPreRegister integration', () => {
 				uid,
 			),
 		).toMatchObject({ emailAddress: 'pre.reg@example.com' });
-		expect(
-			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.tmpRegistrationEmails,
-				uid,
-			),
-		).toMatchObject({ email: 'pre.reg@example.com' });
-		expect(
-			(
-				await getDocument<Record<string, unknown>>(
-					COLLECTION_SCHEMA.tmpRegistrationEmails,
-					uid,
-				)
-			)?.['deliveryState'],
-		).toMatch(/queued|sending|sent/);
+		const queuedEmails = await getFirestore()
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('registrationUid', '==', uid)
+			.get();
+		expect(queuedEmails.size).toBe(1);
+		expect(queuedEmails.docs[0]?.data()).toMatchObject({
+			email: 'pre.reg@example.com',
+			queueSource: 'admin-preregistration',
+		});
+		expect(queuedEmails.docs[0]?.data()['deliveryState']).toMatch(
+			/queued|sending|sent/,
+		);
 		expect(
 			await getDocument<Record<string, unknown>>(
 				COLLECTION_SCHEMA.registrations,

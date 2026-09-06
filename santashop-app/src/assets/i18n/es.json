@@ -45,7 +45,8 @@
 		"SAVE_CHOICE": "Guardar elección",
 		"NEWSLETTER": "¿Le gustaría recibir nuestro boletín de noticias y ser notificado de futuros eventos?",
 		"VALID_EMAIL": "Debe ser una dirección de correo electrónico válida",
-		"VALID_PASSWORD": "Ingrese su contraseña"
+		"VALID_PASSWORD": "Ingrese su contraseña",
+		"OPEN_ACCOUNT_HELP_MENU": "Abrir el menú de cuenta y ayuda"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "¿Olvidó su contraseña?",
@@ -70,7 +71,7 @@
 		"LEGAL4": "Política de Privacidad",
 		"SUBMIT_BUTTON": "Crear cuenta",
 		"CONFIRM_EMAIL": "Confirme su dirección de correo electrónico",
-		"CONFIRM_EMAIL_MSG": "Su código de invitación se envía a esta dirección de correo electrónico. Asegúrese de que sea correcta antes de continuar; necesita el código para completar su registro.",
+		"CONFIRM_EMAIL_MSG": "Enviaremos la confirmación de su registro y su código QR a esta dirección de correo electrónico cuando termine de registrarse. Compruebe que sea correcta antes de continuar.",
 		"ACCOUNT_EXISTS": "Cuenta en uso",
 		"ACCOUNT_EXISTS_MESSAGE": "Parece que ya tienes una cuenta. Inicia sesión con tu dirección de correo electrónico o restablece la contraseña si no la recuerdas.",
 		"YOUR_INFO": "Su información",
@@ -90,6 +91,15 @@
 		"EDIT_CHILD_LABEL": "Editar",
 		"REMOVE_CHILD_LABEL": "Eliminar",
 		"APPOINTMENT_LOCKED": "Agregue primero un niño válido para elegir una cita.",
+		"APPOINTMENT_SAVED": "Cita guardada. Revise su registro cuando esté listo.",
+		"CHILD_SAVED": "Niño guardado. Ahora puede elegir una cita.",
+		"CHILD_REMOVED": "Niño eliminado.",
+		"CHILD_REMOVE_FAILED": "No se pudo eliminar a este niño.",
+		"APPOINTMENT_UNAVAILABLE": "Esa cita ya no está disponible. Elija otro horario.",
+		"REGISTRATION_SUBMITTED": "Registro enviado. Abriendo su confirmación.",
+		"SUBMIT_FAILED": "No se pudo enviar su registro. Inténtelo de nuevo.",
+		"EMAIL_UPDATED": "Correo electrónico actualizado. Enviaremos su entrada a esta dirección.",
+		"SAVE_FAILED": "No se pudieron guardar sus cambios. Inténtelo de nuevo.",
 		"CURRENT_AVAILABILITY": "Disponibilidad actual de citas",
 		"CURRENT_SPOT": "1 cupo actual",
 		"CURRENT_SPOTS": "{{count}} cupos actuales",
@@ -156,7 +166,7 @@
 		"CURRENT_SELECTION": "Selección actual",
 		"UPDATING_REGISTRATION": "Actualizando registro...",
 		"CANCELLING_REGISTRATION": "Cancelando registro...",
-		"REGISTRATION_UPDATED_MSG": "¡Su registro ha sido actualizado! Se le ha enviado un nuevo correo electrónico de confirmación.",
+		"REGISTRATION_UPDATED_MSG": "¡Su registro ha sido actualizado! Le estamos enviando un nuevo correo electrónico de confirmación.",
 		"CANNOT_CHANGE_AFTER_CHECKIN": "No puede cambiar la fecha y hora de su registro después de haber sido registrado en el evento."
 	},
 	"HELP": {
@@ -220,7 +230,7 @@
 		"EVENT_INFO_TITLE": "Información del evento",
 		"LOCATION": "Ubicación:",
 		"WHAT_TO_BRING": "Qué llevar",
-		"WHAT_TO_BRING_TEXT": "Nuestro evento de entrega de toyes es un día ajetreado. Ayúdanos a conseguir tus juguetes lo más rápido posible trayendo las siguientes cosas:",
+		"WHAT_TO_BRING_TEXT": "Nuestro evento de entrega de juguetes es un día ajetreado. Ayúdanos a conseguir tus juguetes lo más rápido posible trayendo las siguientes cosas:",
 		"ID": "Por favor, traiga su identificación",
 		"QR_CODE": "Traiga su código QR (ya sea impreso o en su teléfono)",
 		"AGES": "Traiga prueba de la edad de su hijo",

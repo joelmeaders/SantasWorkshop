@@ -275,15 +275,16 @@ export class PreRegistrationPage implements OnDestroy {
 			});
 
 			await alert.present();
+			return;
 		} finally {
-			loading.dismiss();
+			await loading.dismiss();
 		}
 
 		this.reset();
 
 		const alert = await this.alertController.create({
 			header: 'Registration Complete',
-			subHeader: 'An email has been sent to the customer.',
+			subHeader: 'A confirmation email has been queued for the customer.',
 			message: 'You can now register another customer.',
 			buttons: ['OK'],
 		});

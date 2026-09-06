@@ -17,9 +17,11 @@ import {
 	getEmailTemplateRevision,
 	getEmailTemplateRevisionDocPath,
 	getEmailTemplateSummary,
+	normalizeEmailTemplateDeliveryProfile,
 	normalizeEmailTemplateKey,
 	prepareEmailTemplateHtmlForSes,
 	readEmailTemplateHtml,
+	validateEmailTemplateFieldMappings,
 } from '../utility/email-templates';
 import { SES_REGION } from '../utility/runtime-config';
 import {
@@ -121,6 +123,14 @@ export default async function callablePublishEmailTemplate(
 	}
 
 	const html = await readEmailTemplateHtml(revision.htmlStoragePath);
+	withCallableValidation(() => {
+		validateEmailTemplateFieldMappings(
+			normalizeEmailTemplateDeliveryProfile(revision.deliveryProfile),
+			revision.subjectPart,
+			html,
+			revision.fieldMappings,
+		);
+	});
 	const renderedHtml = prepareEmailTemplateHtmlForSes(html);
 
 	try {

@@ -53,9 +53,7 @@ export class SkeletonStateService implements OnDestroy {
 		groupId?: string,
 		createIfNotFound = true,
 	): SkeletonState {
-		let states: SkeletonState[] = [];
-
-		states = groupId
+		const states: SkeletonState[] = groupId
 			? this.state.filter((s) => s.groupId === groupId)
 			: this.state;
 

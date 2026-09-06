@@ -47,7 +47,9 @@ describe('AddEditChildModalComponent', () => {
 			id: 17,
 			firstName: 'Kid',
 			lastName: 'Tester',
-			dateOfBirth: new Date(`${new Date().getFullYear() - 4}-01-15T00:00:00`),
+			dateOfBirth: new Date(
+				`${new Date().getFullYear() - 4}-01-15T00:00:00`,
+			),
 			ageGroup: AgeGroup.age35,
 			toyType: ToyType.girl,
 			enabled: true,
@@ -61,7 +63,7 @@ describe('AddEditChildModalComponent', () => {
 		expect(editComponent.form.controls['firstName'].value).toBe('Kid');
 		expect(editComponent.form.controls['lastName'].value).toBe('Tester');
 		expect(editComponent.form.controls['dateOfBirth'].value).toBe(
-			child.dateOfBirth.toISOString().substring(0, 10),
+			`${new Date().getFullYear() - 4}-01-15`,
 		);
 		expect(editComponent.form.controls['ageGroup'].value).toBe(
 			AgeGroup.age35,
@@ -106,26 +108,55 @@ describe('AddEditChildModalComponent', () => {
 	it('sets infant defaults and calculates each school-age band from a birthday', async () => {
 		const year = new Date().getFullYear();
 
-		await component.birthdaySelected({ detail: { value: `${year - 1}-06-01` } });
+		await component.birthdaySelected({
+			detail: { value: `${year - 1}-06-01` },
+		});
 		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age02);
 		expect(component.form.controls['toyType'].value).toBe(ToyType.infant);
 
-		await component.birthdaySelected({ detail: { value: `${year - 4}-06-01` } });
+		await component.birthdaySelected({
+			detail: { value: `${year - 4}-06-01` },
+		});
 		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age35);
-		await component.birthdaySelected({ detail: { value: `${year - 7}-06-01` } });
+		await component.birthdaySelected({
+			detail: { value: `${year - 7}-06-01` },
+		});
 		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age68);
-		await component.birthdaySelected({ detail: { value: `${year - 10}-06-01` } });
+		await component.birthdaySelected({
+			detail: { value: `${year - 10}-06-01` },
+		});
 		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age911);
 	});
 
+	it('clears the infant toy type when the child becomes school age', async () => {
+		const year = new Date().getFullYear();
+
+		await component.birthdaySelected({
+			detail: { value: `${year - 1}-06-01` },
+		});
+		expect(component.form.controls['toyType'].value).toBe(ToyType.infant);
+
+		await component.birthdaySelected({
+			detail: { value: `${year - 4}-06-01` },
+		});
+
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age35);
+		expect(component.form.controls['toyType'].value).toBeUndefined();
+		expect(component.form.controls['toyType'].invalid).toBe(true);
+	});
+
 	it('alerts and clears an over-age birthday', async () => {
-		const alerts = TestBed.inject(AlertController) as Mocked<AlertController>;
+		const alerts = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
 		alerts.create.mockResolvedValue({
 			present: vi.fn().mockResolvedValue(undefined),
 			onDidDismiss: vi.fn().mockResolvedValue(undefined),
 		} as unknown as HTMLIonAlertElement);
 
-		await component.birthdaySelected({ detail: { value: `${new Date().getFullYear() - 12}-01-01` } });
+		await component.birthdaySelected({
+			detail: { value: `${new Date().getFullYear() - 13}-01-01` },
+		});
 
 		expect(alerts.create).toHaveBeenCalledWith(
 			expect.objectContaining({ header: 'This child is too old' }),
@@ -133,8 +164,84 @@ describe('AddEditChildModalComponent', () => {
 		expect(component.form.controls['dateOfBirth'].value).toBeUndefined();
 	});
 
+	it('accepts a twelve-year-old consistently with customer registration', async () => {
+		await component.birthdaySelected({
+			detail: { value: `${new Date().getFullYear() - 12}-06-15` },
+		});
+
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age911);
+		expect(TestBed.inject(AlertController).create).not.toHaveBeenCalled();
+	});
+
+	it('preserves the local birthday when only the child name is edited', async () => {
+		const year = new Date().getFullYear() - 8;
+		const originalBirthday = new Date(year, 5, 15);
+		const editFixture = TestBed.createComponent(AddEditChildModalComponent);
+		editFixture.componentRef.setInput('child', {
+			id: 17,
+			firstName: 'Before',
+			lastName: 'Tester',
+			dateOfBirth: originalBirthday,
+			ageGroup: AgeGroup.age68,
+			toyType: ToyType.girl,
+			enabled: true,
+		} satisfies Child);
+		await editFixture.whenStable();
+		editFixture.componentInstance.form.controls['firstName'].setValue(
+			'After',
+		);
+
+		await editFixture.componentInstance.saveChild();
+
+		expect(TestBed.inject(ModalController).dismiss).toHaveBeenCalledWith(
+			expect.objectContaining({
+				firstName: 'After',
+				dateOfBirth: originalBirthday,
+			}),
+			'edit',
+		);
+		expect(editFixture.componentInstance.minBirthDate).toMatch(
+			/^\d{4}-\d{2}-\d{2}$/,
+		);
+		expect(editFixture.componentInstance.maxBirthDate).toMatch(
+			/^\d{4}-\d{2}-\d{2}$/,
+		);
+	});
+
+	it('preserves a legacy UTC-midnight birthday when only the child name is edited', async () => {
+		const year = new Date().getFullYear() - 8;
+		const legacyBirthday = new Date(Date.UTC(year, 5, 15));
+		const editFixture = TestBed.createComponent(AddEditChildModalComponent);
+		editFixture.componentRef.setInput('child', {
+			id: 17,
+			firstName: 'Before',
+			lastName: 'Tester',
+			dateOfBirth: legacyBirthday,
+			ageGroup: AgeGroup.age68,
+			toyType: ToyType.girl,
+			enabled: true,
+		} satisfies Child);
+		await editFixture.whenStable();
+
+		expect(
+			editFixture.componentInstance.form.controls['dateOfBirth'].value,
+		).toBe(`${year}-06-15`);
+		editFixture.componentInstance.form.controls['firstName'].setValue(
+			'After',
+		);
+
+		await editFixture.componentInstance.saveChild();
+
+		const savedChild = (
+			TestBed.inject(ModalController) as Mocked<ModalController>
+		).dismiss.mock.calls.at(-1)?.[0] as Child;
+		expect(savedChild.dateOfBirth).toEqual(new Date(year, 5, 15));
+	});
+
 	it('saves a form child as an add result and cancels without a child', async () => {
-		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
+		const modal = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
 		component.form.setValue({
 			id: null,
 			firstName: 'Taylor',
@@ -150,7 +257,11 @@ describe('AddEditChildModalComponent', () => {
 
 		expect(modal.dismiss).toHaveBeenNthCalledWith(
 			1,
-			expect.objectContaining({ id: 50000, firstName: 'Taylor', dateOfBirth: expect.any(Date) }),
+			expect.objectContaining({
+				id: 50000,
+				firstName: 'Taylor',
+				dateOfBirth: expect.any(Date),
+			}),
 			'add',
 		);
 		expect(modal.dismiss).toHaveBeenLastCalledWith(undefined, 'cancelled');

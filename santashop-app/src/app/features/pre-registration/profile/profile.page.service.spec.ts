@@ -16,7 +16,12 @@ import { ProfilePageService } from './profile.page.service';
 
 describe('ProfilePageService', () => {
 	const currentUser$ = new Subject<{ uid: string } | null>();
-	const auth = { currentUser$, changeEmailAddress: vi.fn(), changePassword: vi.fn() };
+	const auth = {
+		currentUser$,
+		refreshCurrentUser: vi.fn(),
+		changeEmailAddress: vi.fn(),
+		changePassword: vi.fn(),
+	};
 	const read = vi.fn();
 	const collection = vi.fn().mockReturnValue({ read });
 	const functions = { changeAccountInformation: vi.fn() };
@@ -37,6 +42,8 @@ describe('ProfilePageService', () => {
 		analytics.logEvent.mockReset();
 		auth.changeEmailAddress.mockReset();
 		auth.changePassword.mockReset();
+		auth.refreshCurrentUser.mockReset();
+		auth.refreshCurrentUser.mockResolvedValue(null);
 		TestBed.configureTestingModule({
 			providers: [
 				ProfilePageService,
@@ -47,7 +54,12 @@ describe('ProfilePageService', () => {
 				{ provide: AlertController, useValue: alert },
 				{ provide: LoadingController, useValue: loading },
 				{ provide: Router, useValue: router },
-				{ provide: TranslateService, useValue: { instant: vi.fn().mockReturnValue('translated') } },
+				{
+					provide: TranslateService,
+					useValue: {
+						instant: vi.fn().mockReturnValue('translated'),
+					},
+				},
 				{ provide: AnalyticsWrapper, useValue: analytics },
 			],
 		});
@@ -78,21 +90,42 @@ describe('ProfilePageService', () => {
 	});
 
 	it('updates public profile, persists the local view, and always closes its loader', async (): Promise<void> => {
-		read.mockReturnValue(of({ uid: 'customer-1', firstName: 'Holly', lastName: 'Jolly', zipCode: '80202' } as User));
-		const loader = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined) };
+		read.mockReturnValue(
+			of({
+				uid: 'customer-1',
+				firstName: 'Holly',
+				lastName: 'Jolly',
+				zipCode: '80202',
+			} as User),
+		);
+		const loader = {
+			present: vi.fn().mockResolvedValue(undefined),
+			dismiss: vi.fn().mockResolvedValue(undefined),
+		};
 		loading.create.mockResolvedValue(loader);
 		functions.changeAccountInformation.mockResolvedValue(undefined);
 		router.navigate.mockResolvedValue(true);
 		const service = TestBed.inject(ProfilePageService);
 		currentUser$.next({ uid: 'customer-1' });
-		service.profileForm.setValue({ firstName: 'Noel', lastName: 'Bell', zipCode: '80203' });
+		service.profileForm.setValue({
+			firstName: 'Noel',
+			lastName: 'Bell',
+			zipCode: '80203',
+		});
 
 		await service.updatePublicProfile();
 
-		expect(functions.changeAccountInformation).toHaveBeenCalledWith({ firstName: 'Noel', lastName: 'Bell', zipCode: '80203' });
+		expect(functions.changeAccountInformation).toHaveBeenCalledWith({
+			firstName: 'Noel',
+			lastName: 'Bell',
+			zipCode: '80203',
+		});
+		expect(auth.refreshCurrentUser).toHaveBeenCalledOnce();
 		expect(analytics.logEvent).toHaveBeenCalledWith('profile_update_info');
 		expect(loader.dismiss).toHaveBeenCalledOnce();
-		expect(router.navigate).toHaveBeenCalledWith(['/pre-registration/profile']);
+		expect(router.navigate).toHaveBeenCalledWith([
+			'/pre-registration/profile',
+		]);
 	});
 
 	it('presents the email and password completion confirmations', async (): Promise<void> => {
@@ -101,8 +134,12 @@ describe('ProfilePageService', () => {
 		alert.create.mockResolvedValue({ present, onDidDismiss });
 		const service = TestBed.inject(ProfilePageService);
 
-		await expect(service.emailChangedAlert()).resolves.toEqual({ role: 'ok' });
-		await expect(service.passwordChangedAlert()).resolves.toEqual({ role: 'ok' });
+		await expect(service.emailChangedAlert()).resolves.toEqual({
+			role: 'ok',
+		});
+		await expect(service.passwordChangedAlert()).resolves.toEqual({
+			role: 'ok',
+		});
 
 		expect(alert.create).toHaveBeenCalledTimes(2);
 		expect(present).toHaveBeenCalledTimes(2);
@@ -110,19 +147,35 @@ describe('ProfilePageService', () => {
 
 	it('changes email and password, then returns to the account page', async (): Promise<void> => {
 		const present = vi.fn().mockResolvedValue(undefined);
-		alert.create.mockResolvedValue({ present, onDidDismiss: vi.fn().mockResolvedValue({}) });
+		alert.create.mockResolvedValue({
+			present,
+			onDidDismiss: vi.fn().mockResolvedValue({}),
+		});
 		auth.changeEmailAddress.mockResolvedValue(undefined);
 		auth.changePassword.mockResolvedValue(undefined);
 		router.navigate.mockResolvedValue(true);
 		const service = TestBed.inject(ProfilePageService);
-		service.changeEmailForm.setValue({ emailAddress: 'new@example.com', password: 'secret' });
-		service.changePasswordForm.setValue({ oldPassword: 'old-secret', newPassword: 'new-secret', newPassword2: 'new-secret' });
+		service.changeEmailForm.setValue({
+			emailAddress: 'new@example.com',
+			password: 'secret',
+		});
+		service.changePasswordForm.setValue({
+			oldPassword: 'old-secret',
+			newPassword: 'new-secret',
+			newPassword2: 'new-secret',
+		});
 
 		await service.changeEmailAddress();
 		await service.changePassword();
 
-		expect(auth.changeEmailAddress).toHaveBeenCalledWith('secret', 'new@example.com');
-		expect(auth.changePassword).toHaveBeenCalledWith('old-secret', 'new-secret');
+		expect(auth.changeEmailAddress).toHaveBeenCalledWith(
+			'secret',
+			'new@example.com',
+		);
+		expect(auth.changePassword).toHaveBeenCalledWith(
+			'old-secret',
+			'new-secret',
+		);
 		expect(router.navigate).toHaveBeenCalledTimes(2);
 		service.ngOnDestroy();
 	});

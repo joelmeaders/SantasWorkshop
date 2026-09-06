@@ -39,7 +39,10 @@ const requireSlotId = (value: unknown): string => {
 const requireRegistrationUid = (value: unknown): string | undefined => {
 	if (value === undefined) return undefined;
 	if (typeof value !== 'string' || !value.trim()) {
-		throw new HttpsError('invalid-argument', 'Registration UID is invalid.');
+		throw new HttpsError(
+			'invalid-argument',
+			'Registration UID is invalid.',
+		);
 	}
 	return value;
 };
@@ -65,38 +68,67 @@ export default async function changeRegistrationDateTime(
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
 	const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
-	const receiptRef = registrationRef.collection(MUTATION_RECEIPTS_SUBCOLLECTION).doc(mutationId);
+	const emailRef = db
+		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+		.doc();
+	const receiptRef = registrationRef
+		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
+		.doc(mutationId);
 
 	try {
 		await db.runTransaction(async (transaction) => {
-			const [registrationSnapshot, parametersSnapshot, slotSnapshot, receiptSnapshot] = await Promise.all([
+			const [
+				registrationSnapshot,
+				parametersSnapshot,
+				slotSnapshot,
+				receiptSnapshot,
+			] = await Promise.all([
 				transaction.get(registrationRef),
 				transaction.get(parametersRef),
 				transaction.get(slotRef),
 				transaction.get(receiptRef),
 			]);
 			const cached = getStoredMutationResult(
-				receiptSnapshot.exists ? receiptSnapshot.data() as MutationReceipt : undefined,
+				receiptSnapshot.exists
+					? (receiptSnapshot.data() as MutationReceipt)
+					: undefined,
 				'changeRegistrationDateTime',
 			);
 			if (cached) return;
-			const registration = registrationSnapshot.data() as Registration | undefined;
+			const registration = registrationSnapshot.data() as
+				Registration | undefined;
 			if (!registration) {
-				throw new HttpsError('not-found', `Registration not found for ${uid}.`);
+				throw new HttpsError(
+					'not-found',
+					`Registration not found for ${uid}.`,
+				);
 			}
 			if (!registration.registrationSubmittedOn) {
-				throw new HttpsError('failed-precondition', 'Registration is not submitted.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration is not submitted.',
+				);
 			}
 			if (!registration.qrCodeStoragePath) {
-				throw new HttpsError('failed-precondition', 'Registration QR image is unavailable.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration QR image is unavailable.',
+				);
 			}
 			if (registration.hasCheckedIn) {
-				throw new HttpsError('failed-precondition', 'Cannot change registration after check-in.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Cannot change registration after check-in.',
+				);
 			}
 
-			const parameters = parametersSnapshot.data() as PublicParameters | undefined;
+			const parameters = parametersSnapshot.data() as
+				PublicParameters | undefined;
 			if (!parameters?.admin?.allowChangeRegistration) {
-				throw new HttpsError('failed-precondition', 'Registration changes are currently unavailable.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration changes are currently unavailable.',
+				);
 			}
 
 			// The requested slot already being stored is an equivalent retry/no-op.
@@ -115,11 +147,13 @@ export default async function changeRegistrationDateTime(
 			);
 			const queuedOn = new Date();
 			const emailRecord = {
+				registrationUid: uid,
 				code: registration.qrcode,
 				qrCodeStoragePath: registration.qrCodeStoragePath,
 				email: registration.emailAddress,
 				name: registration.firstName,
 				formattedDateTime: formatRegistrationDateTime(slot.dateTime),
+				appointmentSlotId: slot.id,
 				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 				queuedOn,
 				queueSource: 'date-time-change',
@@ -129,18 +163,20 @@ export default async function changeRegistrationDateTime(
 				lastErrorMessage: false,
 				lastErrorDetails: false,
 			};
-			const emailRef = db.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
 			const registrationUpdate = {
 				previousDateTimeSlot: registration.dateTimeSlot,
 				dateTimeSlot: { id: slot.id, dateTime: slot.dateTime },
 				includedInCounts: false,
+				reminderEmailQueuedOn: queuedOn,
 				reminderEmailSentOn: false,
 				reminderEmailFailedOn: false,
 			};
 
 			// Capacity remains eventually consistent: this never updates a slot counter.
-			transaction.set(registrationRef, registrationUpdate, { merge: true });
-			transaction.set(emailRef, emailRecord, { merge: true });
+			transaction.set(registrationRef, registrationUpdate, {
+				merge: true,
+			});
+			transaction.create(emailRef, emailRecord);
 			transaction.create(receiptRef, {
 				operation: 'changeRegistrationDateTime',
 				result: true,
@@ -150,7 +186,14 @@ export default async function changeRegistrationDateTime(
 		return true;
 	} catch (error) {
 		if (error instanceof HttpsError) throw error;
-		log.error('Failed to change registration date/time slot', { uid, actorUid, slotId }, error);
-		throw new HttpsError('internal', 'Unable to change registration appointment.');
+		log.error(
+			'Failed to change registration date/time slot',
+			{ uid, actorUid, slotId },
+			error,
+		);
+		throw new HttpsError(
+			'internal',
+			'Unable to change registration appointment.',
+		);
 	}
 }

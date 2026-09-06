@@ -58,6 +58,7 @@ interface CheckInRecord {
 }
 
 interface CheckInBucket {
+	dateKey: string;
 	date: number;
 	hour: number;
 	customerCount: number;
@@ -87,15 +88,10 @@ const enqueueContinuation = async (operationId: string): Promise<void> => {
 		.taskQueue<WorkerRequest>(
 			`locations/${FUNCTION_REGION}/functions/ownerOperationWorker`,
 		)
-		.enqueue(
-			{ operationId },
-			{ scheduleDelaySeconds: 30 },
-		);
+		.enqueue({ operationId }, { scheduleDelaySeconds: 30 });
 };
 
-const releaseLock = async (
-	operation: OwnerOperationType,
-): Promise<void> => {
+const releaseLock = async (operation: OwnerOperationType): Promise<void> => {
 	await admin
 		.firestore()
 		.collection(COLLECTION_SCHEMA.ownerOperationLocks)
@@ -113,17 +109,31 @@ const toDate = (
 
 const localDateParts = (
 	date: Date,
-): { year: number; day: number; hour: number } => {
+): {
+	year: number;
+	month: number;
+	day: number;
+	hour: number;
+	dateKey: string;
+} => {
 	const parts = new Intl.DateTimeFormat('en-US', {
 		timeZone: SHOP_TIME_ZONE,
 		year: 'numeric',
+		month: 'numeric',
 		day: 'numeric',
 		hour: 'numeric',
 		hourCycle: 'h23',
 	}).formatToParts(date);
 	const read = (type: Intl.DateTimeFormatPartTypes): number =>
 		Number(parts.find((part) => part.type === type)?.value);
-	return { year: read('year'), day: read('day'), hour: read('hour') };
+	const year = read('year');
+	const month = read('month');
+	const day = read('day');
+	const hour = read('hour');
+	const dateKey = `${year.toString().padStart(4, '0')}-${month
+		.toString()
+		.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+	return { year, month, day, hour, dateKey };
 };
 
 const executeReminderQueue = async (
@@ -216,41 +226,40 @@ const executeExport = async (
 	};
 };
 
-const executeRepairCheckInFlags =
-	async (): Promise<OwnerOperationResult> => {
-		const snapshot = await admin
+const executeRepairCheckInFlags = async (): Promise<OwnerOperationResult> => {
+	const snapshot = await admin
+		.firestore()
+		.collection(COLLECTION_SCHEMA.checkins)
+		.get();
+	const writer = admin.firestore().bulkWriter();
+	let repaired = 0;
+	for (const doc of snapshot.docs) {
+		const checkin = doc.data() as CheckInRecord;
+		const uid = checkin.customerId ?? doc.id;
+		if (!uid || uid === 'onsite') continue;
+		const registrationRef = admin
 			.firestore()
-			.collection(COLLECTION_SCHEMA.checkins)
-			.get();
-		const writer = admin.firestore().bulkWriter();
-		let repaired = 0;
-		for (const doc of snapshot.docs) {
-			const checkin = doc.data() as CheckInRecord;
-			const uid = checkin.customerId ?? doc.id;
-			if (!uid || uid === 'onsite') continue;
-			const registrationRef = admin
-				.firestore()
-				.collection(COLLECTION_SCHEMA.registrations)
-				.doc(uid);
-			const registration = await registrationRef.get();
-			if (
-				registration.exists &&
-				registration.data()?.['hasCheckedIn'] !== true
-			) {
-				writer.set(
-					registrationRef,
-					{ hasCheckedIn: true },
-					{ merge: true },
-				);
-				repaired++;
-			}
+			.collection(COLLECTION_SCHEMA.registrations)
+			.doc(uid);
+		const registration = await registrationRef.get();
+		if (
+			registration.exists &&
+			registration.data()?.['hasCheckedIn'] !== true
+		) {
+			writer.set(
+				registrationRef,
+				{ hasCheckedIn: true },
+				{ merge: true },
+			);
+			repaired++;
 		}
-		await writer.close();
-		return {
-			message: `Repaired ${repaired} registration check-in flags.`,
-			repaired,
-		};
+	}
+	await writer.close();
+	return {
+		message: `Repaired ${repaired} registration check-in flags.`,
+		repaired,
 	};
+};
 
 const executeRebuildCheckInStats = async (
 	programYear: number,
@@ -268,8 +277,9 @@ const executeRebuildCheckInStats = async (
 		const local = localDateParts(date);
 		if (local.year !== programYear) continue;
 		selected.push(doc.ref);
-		const key = `${local.day}-${local.hour}`;
+		const key = `${local.dateKey}-${local.hour}`;
 		const current = buckets.get(key) ?? {
+			dateKey: local.dateKey,
 			date: local.day,
 			hour: local.hour,
 			customerCount: 0,
@@ -300,7 +310,8 @@ const executeRebuildCheckInStats = async (
 			lastUpdated: new Date(),
 			dateTimeCount: Array.from(buckets.values()).sort(
 				(left, right) =>
-					left.date - right.date || left.hour - right.hour,
+					left.dateKey.localeCompare(right.dateKey) ||
+					left.hour - right.hour,
 			),
 		},
 		{ merge: false },
@@ -519,9 +530,9 @@ const executeOperation = async (
 	}
 };
 
-export default async function ownerOperationWorker(
-	request: { data: WorkerRequest },
-): Promise<void> {
+export default async function ownerOperationWorker(request: {
+	data: WorkerRequest;
+}): Promise<void> {
 	const operationId = request.data.operationId;
 	const snapshot = await operationRef(operationId).get();
 	if (!snapshot.exists) {

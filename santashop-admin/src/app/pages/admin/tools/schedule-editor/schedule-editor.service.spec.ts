@@ -1,13 +1,9 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { FireRepoLite, IFireRepoCollection } from '@santashop/core/admin/firestore';
+import {
+	FireRepoLite,
+	IFireRepoCollection,
+} from '@santashop/core/admin/firestore';
 import { COLLECTION_SCHEMA, DateTimeSlot } from '@santashop/models';
 import { of, firstValueFrom } from 'rxjs';
 import {
@@ -159,7 +155,6 @@ describe('ScheduleEditorService', () => {
 		expect(collection.update).toHaveBeenCalledWith(
 			'first',
 			expect.objectContaining({
-				programYear: 2025,
 				maxSlots: 25,
 				enabled: false,
 				lastUpdated: expect.any(Date),
@@ -169,7 +164,6 @@ describe('ScheduleEditorService', () => {
 		expect(collection.update).toHaveBeenCalledWith(
 			'second',
 			expect.objectContaining({
-				programYear: 2025,
 				maxSlots: 25,
 				enabled: false,
 				lastUpdated: expect.any(Date),
@@ -178,7 +172,7 @@ describe('ScheduleEditorService', () => {
 		);
 	});
 
-	it('bulkUpdate() should persist only authoritative slot fields', async () => {
+	it('bulkUpdate() should persist only fields included in the change', async () => {
 		const slot = {
 			id: 'first',
 			programYear: 2025,
@@ -197,13 +191,33 @@ describe('ScheduleEditorService', () => {
 
 		const persisted = collection.update.mock.calls[0][1];
 		expect(Object.keys(persisted).sort()).toEqual([
-			'dateTime',
-			'enabled',
 			'lastUpdated',
 			'maxSlots',
-			'programYear',
-			'slotsReserved',
 		]);
+	});
+
+	it('updateSlotDateTime() should patch only the date/time fields', async () => {
+		const current = {
+			id: 'slot-1',
+			programYear: 2025,
+			dateTime: new Date(2025, 11, 12, 10),
+			maxSlots: 2,
+			slotsReserved: 1,
+			enabled: true,
+		};
+		const nextDateTime = new Date(2025, 11, 13, 14);
+		collection.readMany.mockReturnValue(of([current]));
+
+		await service.updateSlotDateTime('slot-1', nextDateTime);
+
+		expect(collection.update).toHaveBeenCalledWith(
+			'slot-1',
+			{
+				dateTime: nextDateTime,
+				lastUpdated: expect.any(Date),
+			},
+			true,
+		);
 	});
 
 	it('bulkUpdate() should reject invalid capacities', async () => {
@@ -305,7 +319,8 @@ describe('ScheduleEditorService', () => {
 	it('startCreateSlots() polls the owner operation, refreshes, and returns its result counts', async () => {
 		vi.useFakeTimers();
 		ownerOperations.start.mockResolvedValue({
-			operationId: 'operation-1', status: 'queued',
+			operationId: 'operation-1',
+			status: 'queued',
 		});
 		ownerOperations.get.mockResolvedValue({
 			id: 'operation-1',
@@ -319,7 +334,8 @@ describe('ScheduleEditorService', () => {
 
 		await expect(action).resolves.toEqual({ created: 4, skipped: 2 });
 		expect(ownerOperations.start).toHaveBeenCalledWith({
-			previewId: 'preview-1', confirmationPhrase: 'CONFIRM',
+			previewId: 'preview-1',
+			confirmationPhrase: 'CONFIRM',
 		});
 		expect(ownerOperations.get).toHaveBeenCalledWith('operation-1');
 		expect(refresh).toHaveBeenCalledOnce();
@@ -329,10 +345,13 @@ describe('ScheduleEditorService', () => {
 	it('startCreateSlots() rejects a failed owner operation with its diagnostic message', async () => {
 		vi.useFakeTimers();
 		ownerOperations.start.mockResolvedValue({
-			operationId: 'operation-1', status: 'queued',
+			operationId: 'operation-1',
+			status: 'queued',
 		});
 		ownerOperations.get.mockResolvedValue({
-			id: 'operation-1', status: 'failed', errorMessage: 'Season is closed',
+			id: 'operation-1',
+			status: 'failed',
+			errorMessage: 'Season is closed',
 		} as never);
 
 		const action = service.startCreateSlots('preview-1', 'CONFIRM');
@@ -344,17 +363,24 @@ describe('ScheduleEditorService', () => {
 
 	it('updateSlot() validates identifiers and persists a unique valid schedule', async () => {
 		const unique = {
-			id: 'slot-1', programYear: 2025, dateTime: new Date(2025, 11, 12, 10),
-			maxSlots: 10, enabled: true,
+			id: 'slot-1',
+			programYear: 2025,
+			dateTime: new Date(2025, 11, 12, 10),
+			maxSlots: 10,
+			enabled: true,
 		} satisfies DateTimeSlot;
 		collection.readMany.mockReturnValue(of([unique]));
 		const refresh = vi.spyOn(service, 'refresh');
 
-		await expect(service.updateSlot({ ...unique, id: undefined })).rejects.toThrow('Slot id is required.');
+		await expect(
+			service.updateSlot({ ...unique, id: undefined }),
+		).rejects.toThrow('Slot id is required.');
 		await service.updateSlot(unique);
 
 		expect(collection.update).toHaveBeenCalledWith(
-			'slot-1', expect.objectContaining({ lastUpdated: expect.any(Date) }), true,
+			'slot-1',
+			expect.objectContaining({ lastUpdated: expect.any(Date) }),
+			true,
 		);
 		expect(refresh).toHaveBeenCalledOnce();
 	});

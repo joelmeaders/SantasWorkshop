@@ -4,6 +4,8 @@ export interface CheckInAggregatedStats {
 }
 
 export interface CheckInDateTimeCount {
+	/** Local calendar date for new buckets. Missing legacy values are December. */
+	dateKey?: string;
 	date: number;
 	hour: number;
 	customerCount: number;

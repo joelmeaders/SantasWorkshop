@@ -14,7 +14,10 @@ import admin from '../firebase-admin';
 import { getErrorCode, getErrorMessage } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { canCheckInToken } from '../utility/capabilities';
-import { recordCheckInRaceAttempt } from '../utility/registration-scan';
+import {
+	recordCheckInCreateConflictAttempt,
+	recordCheckInRaceAttempt,
+} from '../utility/registration-scan';
 import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
 import { getStatsDocumentId } from '../utility/runtime-config';
 
@@ -81,11 +84,11 @@ export default async function checkIn(
 			.firestore()
 			.runTransaction(async (transaction) => {
 				const [registration, existingCheckIn, statsDocument] =
-					await Promise.all([
-						transaction.get(registrationDocRef),
-						transaction.get(checkinDocRef),
-						transaction.get(statsDocRef),
-					]);
+					await transaction.getAll(
+						registrationDocRef,
+						checkinDocRef,
+						statsDocRef,
+					);
 				if (!registration.exists) {
 					throw new HttpsError(
 						'not-found',
@@ -143,8 +146,23 @@ export default async function checkIn(
 		if (error instanceof HttpsError) {
 			throw error;
 		}
+		const errorCode = getErrorCode(error);
+		if (errorCode === '6' && record.uid && request.auth?.uid) {
+			const blocked = await recordCheckInCreateConflictAttempt(
+				record.uid,
+				request.auth.uid,
+				inputMethod,
+			);
+			if (blocked) {
+				throw new HttpsError(
+					'already-exists',
+					'Registration was already checked in.',
+					blocked,
+				);
+			}
+		}
 		throw new HttpsError(
-			getErrorCode(error) === '6' ? 'already-exists' : 'internal',
+			errorCode === '6' ? 'already-exists' : 'internal',
 			getErrorMessage(error),
 			error,
 		);

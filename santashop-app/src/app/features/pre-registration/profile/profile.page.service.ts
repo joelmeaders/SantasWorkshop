@@ -60,10 +60,9 @@ export class ProfilePageService implements OnDestroy {
 		filterNil(),
 		takeUntil(this.destroy$),
 		switchMap((user) =>
-			combineLatest([
-				this.getUser$(user.uid),
-				this.profileUpdates$,
-			]).pipe(map(([profile, updates]) => ({ ...profile, ...updates }))),
+			combineLatest([this.getUser$(user.uid), this.profileUpdates$]).pipe(
+				map(([profile, updates]) => ({ ...profile, ...updates })),
+			),
 		),
 		shareReplay(1),
 	);
@@ -99,6 +98,7 @@ export class ProfilePageService implements OnDestroy {
 
 		try {
 			await this.functions.changeAccountInformation(newInfo);
+			await this.authService.refreshCurrentUser();
 			this.profileUpdates$.next({
 				...this.profileUpdates$.value,
 				...newInfo,

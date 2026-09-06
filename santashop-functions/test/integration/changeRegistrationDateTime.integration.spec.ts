@@ -5,6 +5,7 @@ import {
 	clearEmulatorData,
 	createTimestamp,
 	getDocument,
+	getFirestore,
 	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
@@ -46,6 +47,15 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 				dateTime: createTimestamp('2025-12-10T18:00:00.000Z'),
 			},
 		});
+		await setDocument(
+			COLLECTION_SCHEMA.tmpRegistrationEmails,
+			'prior-confirmation',
+			{
+				registrationUid: 'user-slot-1',
+				queueSource: 'registration-completion',
+				deliveryState: 'sent',
+			},
+		);
 
 		const result = await changeRegistrationDateTime(
 			createCallableRequest(
@@ -74,11 +84,22 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 				id: 'slot-new',
 			},
 		});
+		const queuedEmails = await getFirestore()
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('registrationUid', '==', 'user-slot-1')
+			.get();
+		expect(queuedEmails.size).toBe(2);
 		expect(
-			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.tmpRegistrationEmails,
-				'user-slot-1',
-			),
-		).toMatchObject({ code: 'ABCD2345', email: 'buddy.elf@example.com' });
+			queuedEmails.docs
+				.find(
+					(document) =>
+						document.data()['queueSource'] === 'date-time-change',
+				)
+				?.data(),
+		).toMatchObject({
+			code: 'ABCD2345',
+			email: 'buddy.elf@example.com',
+			appointmentSlotId: 'slot-new',
+		});
 	});
 });

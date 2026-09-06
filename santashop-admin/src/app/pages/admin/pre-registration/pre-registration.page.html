@@ -7,16 +7,15 @@
 				<span>
 					<h3>Instructions</h3>
 					<ion-note>
-						All fields below are required for pre-registration. Upon
-						submission, the customer receives an email with a
-						link to complete the registration process.
+						Complete the required fields below to register the
+						customer. Submission reserves the appointment and queues
+						a confirmation email with the customer's ticket.
 					</ion-note>
 					<p>
 						<ion-note>
-							The service creates an account for the
-							customer. If the customer
-							wants to log into their account they need to
-							reset the password.
+							The service creates an account for the customer. If
+							the customer wants to log into their account they
+							need to reset the password.
 						</ion-note>
 					</p>
 				</span>
@@ -27,7 +26,8 @@
 					<ion-label> Parent / Guardian </ion-label>
 				</ion-item-divider>
 				<ion-item>
-					<ion-input label="First Name"
+					<ion-input
+						label="First Name"
 						labelPlacement="fixed"
 						errorText="Enter between 2-20 characters"
 						type="text"
@@ -36,10 +36,11 @@
 						placeholder="Parent first name"
 						minlength="2"
 						maxlength="20"
-					 />
+					/>
 				</ion-item>
 				<ion-item>
-					<ion-input label="Last Name"
+					<ion-input
+						label="Last Name"
 						labelPlacement="fixed"
 						errorText="Enter between 2-25 characters"
 						type="text"
@@ -48,29 +49,32 @@
 						placeholder="Parent last name"
 						minlength="2"
 						maxlength="25"
-					 />
+					/>
 				</ion-item>
 				<ion-item>
-					<ion-input label="Email"
+					<ion-input
+						label="Email"
 						labelPlacement="fixed"
 						errorText="Must be a valid email address"
 						type="email"
 						autocomplete="off"
 						formControlName="emailAddress"
 						placeholder="Parent email"
-					 />
+					/>
 				</ion-item>
 				<ion-item>
-					<ion-input label="Zip Code"
+					<ion-input
+						label="Zip Code"
 						labelPlacement="fixed"
 						errorText="Enter 5 digit zip code"
-						type="text" inputmode="numeric"
+						type="text"
+						inputmode="numeric"
 						autocomplete="off"
 						formControlName="zipCode"
 						placeholder="5 digit zip code"
 						minlength="5"
 						maxlength="5"
-					 />
+					/>
 				</ion-item>
 				<ion-item>
 					<ion-checkbox formControlName="newsletter">
@@ -89,7 +93,11 @@
 						(click)="chooseReferral()"
 					>
 						Pick Agency
-						<ion-icon slot="end" name="search-outline" aria-hidden="true" />
+						<ion-icon
+							slot="end"
+							name="search-outline"
+							aria-hidden="true"
+						/>
 					</ion-button>
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
@@ -108,11 +116,12 @@
 				</ion-item>
 				<div class="margin-top">
 					@if (children$ | async; as children) {
-					<admin-manage-children [children]="children"
+					<admin-manage-children
+						[children]="children"
 						(adddedChild)="addChild($event)"
 						(editedChild)="editChild($event)"
 						(removedChild)="removeChild($event)"
-					 />
+					/>
 					}
 				</div>
 
@@ -157,11 +166,12 @@
 				<ion-label>
 					<h1>Yes, continue</h1>
 				</ion-label>
-				<ion-icon name="checkmark-circle"
+				<ion-icon
+					name="checkmark-circle"
 					slot="end"
 					size="large"
 					aria-hidden="true"
-				 />
+				/>
 			</ion-item>
 		</ion-list>
 	</div>

@@ -45,7 +45,8 @@
 		"SAVE_CHOICE": "Save choice",
 		"NEWSLETTER": "Would you like to recieve our newsletter and be notified of future events?",
 		"VALID_EMAIL": "Must be a valid email address",
-		"VALID_PASSWORD": "Enter your password"
+		"VALID_PASSWORD": "Enter your password",
+		"OPEN_ACCOUNT_HELP_MENU": "Open account and help menu"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "Forgot Password?",
@@ -70,7 +71,7 @@
 		"LEGAL4": "Privacy Policy",
 		"SUBMIT_BUTTON": "Create Account",
 		"CONFIRM_EMAIL": "Confirm your email address",
-		"CONFIRM_EMAIL_MSG": "We send your invitation code to this email address. Please check it before continuing—you need the code to finish your registration.",
+		"CONFIRM_EMAIL_MSG": "We will send your registration confirmation and QR code to this email address after you finish registering. Please check that it is correct before continuing.",
 		"ACCOUNT_EXISTS": "Account in use",
 		"ACCOUNT_EXISTS_MESSAGE": "It looks like you already have an account. Sign in using your email address, or reset the password if you don't remember it.",
 		"YOUR_INFO": "Your Information",
@@ -90,6 +91,15 @@
 		"EDIT_CHILD_LABEL": "Edit",
 		"REMOVE_CHILD_LABEL": "Remove",
 		"APPOINTMENT_LOCKED": "Add a valid child first to unlock appointment selection.",
+		"APPOINTMENT_SAVED": "Appointment saved. Review your registration when ready.",
+		"CHILD_SAVED": "Child saved. You can now choose an appointment.",
+		"CHILD_REMOVED": "Child removed.",
+		"CHILD_REMOVE_FAILED": "This child could not be removed.",
+		"APPOINTMENT_UNAVAILABLE": "That appointment is no longer available. Please choose another time.",
+		"REGISTRATION_SUBMITTED": "Registration submitted. Opening your confirmation.",
+		"SUBMIT_FAILED": "We could not submit your registration. Please try again.",
+		"EMAIL_UPDATED": "Email address updated. We send your ticket to this address.",
+		"SAVE_FAILED": "We could not save your changes. Please try again.",
 		"CURRENT_AVAILABILITY": "Current appointment availability",
 		"CURRENT_SPOT": "1 current spot",
 		"CURRENT_SPOTS": "{{count}} current spots",
@@ -156,7 +166,7 @@
 		"CURRENT_SELECTION": "Current Selection",
 		"UPDATING_REGISTRATION": "Updating registration...",
 		"CANCELLING_REGISTRATION": "Cancelling registration...",
-		"REGISTRATION_UPDATED_MSG": "Your registration has been updated! A new confirmation email has been sent to you.",
+		"REGISTRATION_UPDATED_MSG": "Your registration has been updated! We are sending a new confirmation email to you.",
 		"CANNOT_CHANGE_AFTER_CHECKIN": "You cannot change your registration date/time after you have been checked in to the event."
 	},
 	"HELP": {

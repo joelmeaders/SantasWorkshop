@@ -37,24 +37,42 @@
 		} @else { @if (results && results.length > 0) {
 		<span>
 			<ion-card-header>
-				<ion-card-title> {{ results!.length }} Results </ion-card-title>
+				<ion-card-title>
+					{{ results!.length }} {{ results.length === 1 ? 'Result' :
+					'Results' }}
+				</ion-card-title>
 				@let sortFn = sortBy$ | async;
 				<ion-card-subtitle>
 					Sort by
 					<ion-chip
 						(click)="setSortType(sortLast)"
+						role="button"
+						tabindex="0"
+						(keydown.enter)="setSortType(sortLast)"
+						(keydown.space)="setSortType(sortLast); $event.preventDefault()"
+						[attr.aria-pressed]="sortFn === sortLast"
 						[color]="sortFn === sortLast ? 'primary' : 'medium'"
 					>
 						Last, First, Zip
 					</ion-chip>
 					<ion-chip
 						(click)="setSortType(sortFirst)"
+						role="button"
+						tabindex="0"
+						(keydown.enter)="setSortType(sortFirst)"
+						(keydown.space)="setSortType(sortFirst); $event.preventDefault()"
+						[attr.aria-pressed]="sortFn === sortFirst"
 						[color]="sortFn === sortFirst ? 'primary' : 'medium'"
 					>
 						First, Last
 					</ion-chip>
 					<ion-chip
 						(click)="setSortType(sortEmail)"
+						role="button"
+						tabindex="0"
+						(keydown.enter)="setSortType(sortEmail)"
+						(keydown.space)="setSortType(sortEmail); $event.preventDefault()"
+						[attr.aria-pressed]="sortFn === sortEmail"
 						[color]="sortFn === sortEmail ? 'primary' : 'medium'"
 					>
 						Email

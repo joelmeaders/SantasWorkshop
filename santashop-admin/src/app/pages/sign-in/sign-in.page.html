@@ -7,13 +7,14 @@
 			<ion-card-content>
 				<form [formGroup]="form">
 					<ion-item>
-						<ion-input id="adminSignInEmail"
+						<ion-input
+							id="adminSignInEmail"
 							label="Email Address"
 							labelPlacement="floating"
 							formControlName="emailAddress"
 							autocomplete="email"
 							type="email"
-						 />
+						/>
 						@if (form.controls['emailAddress'].dirty) {
 						<ion-note slot="error" color="danger">
 							Invalid email address
@@ -21,13 +22,14 @@
 						}
 					</ion-item>
 					<ion-item>
-						<ion-input id="adminSignInPassword"
+						<ion-input
+							id="adminSignInPassword"
 							label="Password"
 							labelPlacement="floating"
 							formControlName="password"
 							autocomplete="password"
 							type="password"
-						 />
+						/>
 						@if (form.controls['password'].dirty) {
 						<ion-note slot="error" color="danger">
 							Password is required
@@ -39,7 +41,7 @@
 					<ion-button
 						id="adminSignInButton"
 						slot="end"
-						[disabled]="form.invalid"
+						[disabled]="form.invalid || isSubmitting()"
 						(click)="login()"
 						(keydown.enter)="login()"
 					>

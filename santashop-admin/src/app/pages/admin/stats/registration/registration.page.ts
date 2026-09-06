@@ -2,7 +2,6 @@ import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
-	filterNil,
 	PROGRAM_YEAR,
 	SHOP_DAYS,
 	timestampToDate,
@@ -123,9 +122,6 @@ export class RegistrationPage {
 				},
 		),
 	);
-	private readonly scheduleStats$ = this.state$.pipe(
-		map((state) => state.data?.schedule),
-	);
 	private readonly dateTimeSlots$ = this.state$.pipe(
 		map((state) =>
 			this.sortDateTimeSlots(
@@ -137,13 +133,17 @@ export class RegistrationPage {
 		),
 	);
 
-	public readonly hasScheduleData$ = this.scheduleStats$.pipe(
-		map((schedule) => !!schedule),
+	public readonly hasScheduleData$ = this.state$.pipe(
+		map((state) => !!state.data?.schedule || !!state.data?.slots.length),
 	);
 
-	private readonly dateTimeStats$ = this.scheduleStats$.pipe(
-		filterNil(),
-		map((allData) => allData.dateTimeCounts),
+	private readonly dateTimeStats$ = this.state$.pipe(
+		map(
+			(state) =>
+				state.data?.schedule?.dateTimeCounts ??
+				state.data?.registration?.dateTimeCount ??
+				[],
+		),
 	);
 
 	public readonly registrationCount$ = this.registrationStats$.pipe(
@@ -151,10 +151,15 @@ export class RegistrationPage {
 		defaultIfEmpty(0),
 	);
 
-	public readonly registrationCountBySchedule$ = this.dateTimeStats$.pipe(
-		map((stats) => stats.map((s) => s.count)),
-		map((stats) => stats.reduce((a, c) => a + c, 0)),
-		defaultIfEmpty(0),
+	public readonly registrationCountBySchedule$ = this.state$.pipe(
+		map((state) =>
+			state.data?.schedule
+				? state.data.schedule.dateTimeCounts.reduce(
+						(total, slot) => total + slot.count,
+						0,
+					)
+				: (state.data?.registration?.completedRegistrations ?? 0),
+		),
 	);
 
 	public readonly childCount$ = this.registrationStats$.pipe(

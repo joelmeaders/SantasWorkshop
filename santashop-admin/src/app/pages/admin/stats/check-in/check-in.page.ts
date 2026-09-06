@@ -252,8 +252,23 @@ export class CheckInPage {
 		addIcons({ refreshSharp });
 	}
 
-	private getDays(data: CheckInDateTimeCount[]): number[] {
-		return Array.from(new Set(data.map((e) => e.date)));
+	private getDateKey(entry: CheckInDateTimeCount): string {
+		if (
+			/^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(entry.dateKey ?? '')
+		) {
+			return entry.dateKey!;
+		}
+
+		return `${this.year}-12-${entry.date.toString().padStart(2, '0')}`;
+	}
+
+	private formatDateKey(dateKey: string): string {
+		const [year, month, day] = dateKey.split('-').map(Number);
+		const monthName = new Intl.DateTimeFormat('en-US', {
+			month: 'short',
+			timeZone: 'UTC',
+		}).format(new Date(Date.UTC(year, month - 1, 1)));
+		return `${monthName} ${day}, ${year}`;
 	}
 
 	private getHourLabels(data: CheckInDateTimeCount[]): string[] {
@@ -269,7 +284,11 @@ export class CheckInPage {
 		data: CheckInDateTimeCount[],
 		view: 'customerCount' | 'childCount',
 	): CheckInChartData[] {
-		data = data.sort((a, b) => a.date - b.date || a.hour - b.hour);
+		const sortedData = [...data].sort(
+			(a, b) =>
+				this.getDateKey(a).localeCompare(this.getDateKey(b)) ||
+				a.hour - b.hour,
+		);
 
 		const chartStructure = (
 			inputData: number[],
@@ -297,15 +316,19 @@ export class CheckInPage {
 
 		const outputData: CheckInChartData[] = [];
 
-		const days: number[] = this.getDays(data);
+		const dateKeys = Array.from(
+			new Set(sortedData.map((entry) => this.getDateKey(entry))),
+		);
 
-		days.forEach((day) => {
-			const today = data.filter((e) => e.date === day);
+		dateKeys.forEach((dateKey) => {
+			const today = sortedData.filter(
+				(entry) => this.getDateKey(entry) === dateKey,
+			);
 			const dayData = today.map((e) => e[view]);
 			const hours = this.getHourLabels(today);
 			const chartData = chartStructure(
 				dayData,
-				`Dec ${day}, ${this.year}`,
+				this.formatDateKey(dateKey),
 				hours ?? [],
 			);
 			outputData.push(chartData);

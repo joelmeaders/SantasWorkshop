@@ -193,4 +193,32 @@ describe('callableSaveEmailTemplateRevision handler', () => {
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 	});
+
+	it('rejects unsupported Handlebars syntax before saving', async () => {
+		const { callableSaveEmailTemplateRevision } =
+			await loadEmailTemplateHandlers(backgroundMock);
+
+		await expect(
+			callableSaveEmailTemplateRevision(
+				createCallableRequest(
+					{
+						key: 'registration-confirmation',
+						deliveryProfile: 'registration-confirmation',
+						displayName: 'Registration Confirmation',
+						awsTemplateName: 'dscs-registration-confirmation-v1',
+						subjectPart: 'Hello {{#if firstName}}there{{/if}}',
+						html: '<h1>Hello {{firstName}}</h1>',
+						fieldMappings: [
+							{
+								name: 'firstName',
+								mapping: 'firstName',
+								sampleValue: 'Buddy',
+							},
+						],
+					},
+					{ roles: ['admin', 'checkin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
 });

@@ -15,10 +15,11 @@
 <ion-content>
 	@if ((referralChoice$ | async) === undefined) {
 		<ion-list>
-			<ion-searchbar (ionInput)="filter($event)"
+			<ion-searchbar
+				(ionInput)="filter($event)"
 				animated="true"
 				placeholder="Enter agency name"
-			 />
+			/>
 			<ion-item-group>
 				<ion-item-divider color="light" disabled>
 					<ion-label> Common </ion-label>
@@ -59,15 +60,22 @@
 
 	@if ((referralChoice$ | async) === 'Other') {
 		<ion-item lines="none">
-			<ion-input #otherInput
+			<ion-input
+				[value]="otherName()"
+				(ionInput)="otherName.set($event.detail.value ?? '')"
 				class="other-input"
 				label="Type name of referral:"
 				labelPlacement="stacked"
 				maxlength="20"
 				minlength="3"
-			 />
+			/>
 		</ion-item>
-		<ion-button slot="end" size="default" (click)="dismiss()">
+		<ion-button
+			expand="block"
+			size="default"
+			[disabled]="!validOtherName()"
+			(click)="saveOther()"
+		>
 			Save
 		</ion-button>
 	}

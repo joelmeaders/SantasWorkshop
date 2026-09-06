@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
 	createAccountAdminMock,
+	generateIdMock,
+	generateQrCodeMock,
 	type AccountAdminMock,
 	loadAccountRegistrationHandlers,
+	replaceQrCodeWithCancelledMock,
 } from '../helpers/account-registration.unit-helper';
 
 describe('undoRegistration handler', () => {
@@ -11,6 +14,9 @@ describe('undoRegistration handler', () => {
 
 	beforeEach(() => {
 		adminMock = createAccountAdminMock();
+		generateIdMock.mockReset().mockReturnValue('ZXCV2345');
+		generateQrCodeMock.mockReset().mockResolvedValue(undefined);
+		replaceQrCodeWithCancelledMock.mockReset().mockResolvedValue(undefined);
 	});
 
 	it('records an authorized cancellation and resets registration state', async () => {
@@ -19,6 +25,8 @@ describe('undoRegistration handler', () => {
 		adminMock.setDocSnapshot('registrations/user-4', {
 			uid: 'user-4',
 			qrcode: 'ABCD2345',
+			firstName: 'Customer',
+			emailAddress: 'customer@example.com',
 			qrCodeStoragePath: 'registrations/user-4/original.png',
 			dateTimeSlot: {
 				id: 'slot-1',
@@ -44,10 +52,19 @@ describe('undoRegistration handler', () => {
 		);
 
 		expect(result).toBe(true);
-		expect(adminMock.transactionDelete).toHaveBeenCalledTimes(2);
-		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionDelete).toHaveBeenCalledTimes(1);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				path: 'tmp_registrationemails/generated-id',
+			}),
+			expect.objectContaining({
+				registrationUid: 'user-4',
+				queueSource: 'registration-cancellation',
+			}),
+		);
 		expect(adminMock.transactionSet).toHaveBeenCalledWith(
-		expect.objectContaining({ path: 'registrations/user-4' }),
+			expect.objectContaining({ path: 'registrations/user-4' }),
 			expect.objectContaining({
 				includedInCounts: false,
 				previousDateTimeSlot: {
@@ -66,7 +83,10 @@ describe('undoRegistration handler', () => {
 			qrcode: 'NEWCODE1',
 			firstName: 'Customer',
 			emailAddress: 'customer@example.com',
-			previousDateTimeSlot: { id: 'slot-1', dateTime: '2025-12-10T18:00:00.000Z' },
+			previousDateTimeSlot: {
+				id: 'slot-1',
+				dateTime: '2025-12-10T18:00:00.000Z',
+			},
 			cancelledOn: new Date('2025-12-01T00:00:00.000Z'),
 			cancellationLogId: 'cancel-log-1',
 			qrCodeStoragePath: 'registrations/user-4/replacement.png',
@@ -86,7 +106,8 @@ describe('undoRegistration handler', () => {
 			supersededConfirmationCode: 'ABCD2345',
 			supersededQrCodeStoragePath: 'registrations/user-4/original.png',
 			replacementConfirmationCode: 'NEWCODE1',
-			replacementQrCodeStoragePath: 'registrations/user-4/replacement.png',
+			replacementQrCodeStoragePath:
+				'registrations/user-4/replacement.png',
 		});
 
 		await expect(
@@ -102,7 +123,8 @@ describe('undoRegistration handler', () => {
 	});
 
 	it('requires staff to cancel another account and rejects unavailable cancellations', async () => {
-		const { undoRegistration } = await loadAccountRegistrationHandlers(adminMock);
+		const { undoRegistration } =
+			await loadAccountRegistrationHandlers(adminMock);
 		await expect(
 			undoRegistration(
 				createCallableRequest(
@@ -113,42 +135,173 @@ describe('undoRegistration handler', () => {
 		).rejects.toMatchObject({ code: 'permission-denied' });
 
 		adminMock.setDocSnapshot('registrations/user-4', {
-			uid: 'user-4', registrationSubmittedOn: new Date(), qrcode: 'ABCD2345', qrCodeStoragePath: 'registrations/user-4/qr.png',
+			uid: 'user-4',
+			registrationSubmittedOn: new Date(),
+			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-4/qr.png',
 		});
-		adminMock.setDocSnapshot('parameters/public', { admin: { allowCancelRegistration: false } });
-		adminMock.setDocSnapshot('registrations/user-4/mutationReceipts/cancel-user-0001', {}, false);
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowCancelRegistration: false },
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-4/mutationReceipts/cancel-user-0001',
+			{},
+			false,
+		);
 		await expect(
-			undoRegistration(createCallableRequest({ mutationId: 'cancel-user-0001' }, { uid: 'user-4' })),
+			undoRegistration(
+				createCallableRequest(
+					{ mutationId: 'cancel-user-0001' },
+					{ uid: 'user-4' },
+				),
+			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 	});
 
 	it('rejects registrations that are missing, unsubmitted, checked in, or lack QR details', async () => {
-		const { undoRegistration } = await loadAccountRegistrationHandlers(adminMock);
-		const request = () => createCallableRequest({ mutationId: 'cancel-user-0001' }, { uid: 'user-4' });
-		adminMock.setDocSnapshot('parameters/public', { admin: { allowCancelRegistration: true } });
-		adminMock.setDocSnapshot('registrations/user-4/mutationReceipts/cancel-user-0001', {}, false);
+		const { undoRegistration } =
+			await loadAccountRegistrationHandlers(adminMock);
+		const request = () =>
+			createCallableRequest(
+				{ mutationId: 'cancel-user-0001' },
+				{ uid: 'user-4' },
+			);
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowCancelRegistration: true },
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-4/mutationReceipts/cancel-user-0001',
+			{},
+			false,
+		);
 		adminMock.getDocRef('registrations/user-4').get.mockResolvedValue({
 			exists: false,
 			data: () => undefined,
 		});
-		await expect(undoRegistration(request())).rejects.toMatchObject({ code: 'not-found' });
+		await expect(undoRegistration(request())).rejects.toMatchObject({
+			code: 'not-found',
+		});
 		adminMock.setDocSnapshot('registrations/user-4', { uid: 'user-4' });
-		await expect(undoRegistration(request())).rejects.toMatchObject({ code: 'failed-precondition' });
-		adminMock.setDocSnapshot('registrations/user-4', { uid: 'user-4', registrationSubmittedOn: new Date(), hasCheckedIn: true });
-		await expect(undoRegistration(request())).rejects.toMatchObject({ code: 'failed-precondition' });
-		adminMock.setDocSnapshot('registrations/user-4', { uid: 'user-4', registrationSubmittedOn: new Date() });
-		await expect(undoRegistration(request())).rejects.toMatchObject({ code: 'failed-precondition' });
+		await expect(undoRegistration(request())).rejects.toMatchObject({
+			code: 'failed-precondition',
+		});
+		adminMock.setDocSnapshot('registrations/user-4', {
+			uid: 'user-4',
+			registrationSubmittedOn: new Date(),
+			hasCheckedIn: true,
+		});
+		await expect(undoRegistration(request())).rejects.toMatchObject({
+			code: 'failed-precondition',
+		});
+		adminMock.setDocSnapshot('registrations/user-4', {
+			uid: 'user-4',
+			registrationSubmittedOn: new Date(),
+		});
+		await expect(undoRegistration(request())).rejects.toMatchObject({
+			code: 'failed-precondition',
+		});
 	});
 
 	it('refuses a retry-safe cancellation when its immutable cancellation log is unavailable', async () => {
-		const { undoRegistration } = await loadAccountRegistrationHandlers(adminMock);
-		adminMock.setDocSnapshot('parameters/public', { admin: { allowCancelRegistration: true } });
-		adminMock.setDocSnapshot('registrations/user-4/mutationReceipts/cancel-user-0001', { operation: 'undoRegistration', result: true });
+		const { undoRegistration } =
+			await loadAccountRegistrationHandlers(adminMock);
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowCancelRegistration: true },
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-4/mutationReceipts/cancel-user-0001',
+			{ operation: 'undoRegistration', result: true },
+		);
 		adminMock.setDocSnapshot('registrations/user-4', {
-			uid: 'user-4', cancelledOn: new Date(), cancellationLogId: 'missing-log', qrcode: 'ABCD2345', qrCodeStoragePath: 'registrations/user-4/qr.png',
+			uid: 'user-4',
+			cancelledOn: new Date(),
+			cancellationLogId: 'missing-log',
+			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-4/qr.png',
 		});
 		await expect(
-			undoRegistration(createCallableRequest({ mutationId: 'cancel-user-0001' }, { uid: 'user-4' })),
+			undoRegistration(
+				createCallableRequest(
+					{ mutationId: 'cancel-user-0001' },
+					{ uid: 'user-4' },
+				),
+			),
 		).rejects.toMatchObject({ code: 'internal' });
+	});
+
+	it('reports that cancellation committed when QR finalization fails and records the retry state', async () => {
+		const { undoRegistration } =
+			await loadAccountRegistrationHandlers(adminMock);
+		adminMock.setDocSnapshot('registrations/user-4', {
+			uid: 'user-4',
+			qrcode: 'ABCD2345',
+			firstName: 'Customer',
+			emailAddress: 'customer@example.com',
+			qrCodeStoragePath: 'registrations/user-4/original.png',
+			dateTimeSlot: {
+				id: 'slot-1',
+				dateTime: '2025-12-10T18:00:00.000Z',
+			},
+			registrationSubmittedOn: new Date('2025-12-01T00:00:00.000Z'),
+		});
+		adminMock.setDocSnapshot('parameters/public', {
+			admin: { allowCancelRegistration: true },
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-4/mutationReceipts/cancel-user-0001',
+			{},
+			false,
+		);
+		adminMock
+			.getDocRef('registrations/user-4')
+			.get.mockResolvedValueOnce({
+				exists: true,
+				data: () => ({
+					uid: 'user-4',
+					qrcode: 'ABCD2345',
+					firstName: 'Customer',
+					emailAddress: 'customer@example.com',
+					qrCodeStoragePath: 'registrations/user-4/original.png',
+					dateTimeSlot: {
+						id: 'slot-1',
+						dateTime: '2025-12-10T18:00:00.000Z',
+					},
+					registrationSubmittedOn: new Date(
+						'2025-12-01T00:00:00.000Z',
+					),
+				}),
+			})
+			.mockResolvedValueOnce({
+				exists: true,
+				data: () => ({
+					uid: 'user-4',
+					qrcode: 'ZXCV2345',
+					qrCodeStoragePath: 'registrations/user-4/replacement.png',
+					cancelledOn: new Date(),
+				}),
+			});
+		generateQrCodeMock.mockRejectedValueOnce(
+			new Error('storage unavailable'),
+		);
+
+		await expect(
+			undoRegistration(
+				createCallableRequest(
+					{ mutationId: 'cancel-user-0001' },
+					{ uid: 'user-4' },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'internal',
+			message: expect.stringContaining('Registration was cancelled'),
+		});
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'registrations/user-4' }),
+			expect.objectContaining({
+				qrCodeGeneratedOn: false,
+				qrCodeGenerationFailedOn: expect.any(Date),
+			}),
+			{ merge: true },
+		);
 	});
 });

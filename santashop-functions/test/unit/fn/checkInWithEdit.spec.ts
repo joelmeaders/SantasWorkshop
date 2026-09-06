@@ -7,6 +7,7 @@ import {
 	generateIdMock,
 	generateQrCodeMock,
 	loadCheckInAdminHandlers,
+	recordCheckInCreateConflictAttemptMock,
 	recordCheckInRaceAttemptMock,
 } from '../helpers/checkin-admin.unit-helper';
 import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
@@ -19,6 +20,7 @@ describe('checkInWithEdit handler', () => {
 		adminMock.batchCommit.mockResolvedValue(undefined);
 		generateQrCodeMock.mockResolvedValue(undefined);
 		generateIdMock.mockReturnValue('ZXCV2345');
+		recordCheckInCreateConflictAttemptMock.mockReset();
 		recordCheckInRaceAttemptMock.mockReset();
 	});
 
@@ -135,5 +137,36 @@ describe('checkInWithEdit handler', () => {
 			'manual',
 		);
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
+	it('records an evidenced create conflict as a blocked scan attempt', async () => {
+		const { checkInWithEdit } = await loadCheckInAdminHandlers(adminMock);
+		adminMock.runTransaction.mockRejectedValue({
+			code: 6,
+			message: 'conflict',
+		});
+		recordCheckInCreateConflictAttemptMock.mockResolvedValue({
+			disposition: 'duplicate-accidental',
+		});
+
+		await expect(
+			checkInWithEdit(
+				createCallableRequest(
+					{
+						registration: createRegistration(),
+						inputMethod: 'manual',
+					},
+					{ roles: ['checkin'], uid: 'staff-4' },
+				),
+			),
+		).rejects.toMatchObject({
+			code: 'already-exists',
+			details: { disposition: 'duplicate-accidental' },
+		});
+		expect(recordCheckInCreateConflictAttemptMock).toHaveBeenCalledWith(
+			'test-user-123',
+			'staff-4',
+			'manual',
+		);
 	});
 });

@@ -10,16 +10,16 @@ Firebase custom claims contain `roles` (`admin`, `checkin`) and an optional
 `owner` flag. Owners have administrative access. Route guards control screen
 access; server handlers and database rules enforce capabilities on each request.
 
-| Area | Responsibility |
-| --- | --- |
-| Check-in | Resolve scanned codes, review registration, record check-in, and show duplicates |
-| Search | Query submitted-registration indexes by name and string ZIP, email, or code |
-| Registration | Staff pre-registration, on-site registration, appointment changes, cancellation, and email resend |
-| Reports | Display registration, schedule, check-in, and user aggregates by year |
-| Staff | Manage staff identities and role claims |
-| Email templates | Edit revisions, preview mappings, publish SES templates, and send test email |
-| Scan risk | Inspect risk summaries and recorded scan attempts |
-| Owner operations | Preview and execute authorized exports, yearly reset, and schedule initialization |
+| Area             | Responsibility                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| Check-in         | Resolve scanned codes, review registration, record check-in, and show duplicates                  |
+| Search           | Query submitted-registration indexes by name and string ZIP, email, or code                       |
+| Registration     | Staff pre-registration, on-site registration, appointment changes, cancellation, and email resend |
+| Reports          | Display registration, schedule, check-in, and user aggregates by year                             |
+| Staff            | Manage staff identities and role claims                                                           |
+| Email templates  | Edit revisions, preview mappings, publish SES templates, and send test email                      |
+| Scan risk        | Inspect risk summaries and recorded scan attempts                                                 |
+| Owner operations | Preview and execute authorized exports, yearly reset, and schedule initialization                 |
 
 Administrative routes use `adminOnlyGuard`; owner routes use `ownerOnlyGuard`.
 Server capability checks remain authoritative when claims change during a session.
@@ -35,6 +35,12 @@ Privileged writes pass through callable Functions. Registration indexes support
 search without downloading all registrations. ZIP queries use string equality,
 which preserves leading zeros. Email tools publish revision-backed template
 references; template sending requires a published key and explicit placeholder mappings.
+
+Template subjects and HTML support plain placeholders such as `{{firstName}}`
+and `{{contact.name}}`. Preview, save, publish, and test-send validation reject
+helpers, blocks, comments, raw/triple-brace expressions, malformed delimiters,
+and unsafe property paths. Sample values are substituted as written, matching
+SES rendering; the preview does not execute template code.
 
 Scheduled jobs write aggregate documents. Schedule counts measure reservations;
 registration statistics also group demographic data. Refreshing a report reads

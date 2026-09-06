@@ -28,14 +28,17 @@ describe('ReferralModalComponent', () => {
 		component.filter({ detail: { value: 'denver' } });
 		await fixture.whenStable();
 		await expect(firstValueFrom(component.referrals$)).resolves.toEqual(
-			expect.arrayContaining(['Denver Human Services DHS', 'Denver Health']),
+			expect.arrayContaining([
+				'Denver Human Services DHS',
+				'Denver Health',
+			]),
 		);
 
 		component.filter({ detail: { value: '' } });
 		await fixture.whenStable();
-		await expect(firstValueFrom(component.referrals$)).resolves.toHaveLength(
-			component.allReferrals.length,
-		);
+		await expect(
+			firstValueFrom(component.referrals$),
+		).resolves.toHaveLength(component.allReferrals.length);
 	});
 
 	it('filters referrals from the searchbar input event', async () => {
@@ -54,7 +57,9 @@ describe('ReferralModalComponent', () => {
 	});
 
 	it('dismisses a standard choice immediately', async () => {
-		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
+		const modal = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
 
 		await component.setValue('SNAP');
 		await fixture.whenStable();
@@ -63,13 +68,37 @@ describe('ReferralModalComponent', () => {
 	});
 
 	it('keeps Other selected until it is explicitly saved', async () => {
-		const modal = TestBed.inject(ModalController) as Mocked<ModalController>;
+		const modal = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
 
 		await component.setValue('Other');
 		await fixture.whenStable();
 		expect(modal.dismiss).not.toHaveBeenCalled();
 
+		component.otherName.set('  Hosted QA  ');
+		await component.saveOther();
+		expect(modal.dismiss).toHaveBeenCalledWith('Other:Hosted QA');
+	});
+	it('cancels Other without saving the entered referral', async () => {
+		const modal = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
+		await component.setValue('Other');
+		component.otherName.set('Hosted QA');
 		await component.dismiss();
-		expect(modal.dismiss).toHaveBeenCalledWith('Other:');
+		expect(modal.dismiss).toHaveBeenCalledWith();
+	});
+
+	it('does not save empty, short, or overlong custom referrals', async () => {
+		const modal = TestBed.inject(
+			ModalController,
+		) as Mocked<ModalController>;
+		await component.setValue('Other');
+		for (const name of ['', '  ', 'ab', 'a'.repeat(21)]) {
+			component.otherName.set(name);
+			await component.saveOther();
+		}
+		expect(modal.dismiss).not.toHaveBeenCalled();
 	});
 });

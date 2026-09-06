@@ -225,7 +225,7 @@ export class ScanPage {
 		};
 
 		const alert = await this.alertController.create({
-			header: 'Invalid code scanned',
+			header: 'Enter registration code',
 			message: 'Manually type the code located below the QR image',
 			buttons: [
 				{
@@ -276,7 +276,9 @@ export class ScanPage {
 		});
 	}
 
-	private async cannotFindRegistrationAlert(incomplete = false): Promise<void> {
+	private async cannotFindRegistrationAlert(
+		incomplete = false,
+	): Promise<void> {
 		const alert = await this.alertController.create({
 			header: 'Oh No!',
 			message: incomplete

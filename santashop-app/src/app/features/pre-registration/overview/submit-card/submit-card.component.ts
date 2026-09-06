@@ -1,12 +1,37 @@
-import { ChangeDetectionStrategy, Component, effect, input, output, signal } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	effect,
+	input,
+	output,
+	signal,
+} from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import type { Child, DateTimeSlot } from '@santashop/models';
 import { NiceFormErrorPipe, TimeSlotPipe } from '@santashop/core';
-import { DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonItem, IonLabel, IonList } from '@ionic/angular/standalone';
+import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
+import {
+	IonBadge,
+	IonButton,
+	IonCard,
+	IonCardContent,
+	IonCardHeader,
+	IonCardSubtitle,
+	IonCardTitle,
+	IonIcon,
+	IonInput,
+	IonItem,
+	IonLabel,
+	IonList,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { checkmarkCircleOutline, manOutline, womanOutline, happyOutline } from 'ionicons/icons';
+import {
+	checkmarkCircleOutline,
+	manOutline,
+	womanOutline,
+	happyOutline,
+} from 'ionicons/icons';
 import { changeEmailForm } from '../../profile/profile.form';
 
 export interface EmailUpdateRequest {
@@ -19,7 +44,25 @@ export interface EmailUpdateRequest {
 	templateUrl: './submit-card.component.html',
 	styleUrls: ['./submit-card.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [ReactiveFormsModule, NiceFormErrorPipe, DatePipe, TimeSlotPipe, TranslateModule, IonBadge, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonIcon, IonInput, IonItem, IonLabel, IonList],
+	imports: [
+		ReactiveFormsModule,
+		NiceFormErrorPipe,
+		LocalizedDatePipe,
+		TimeSlotPipe,
+		TranslateModule,
+		IonBadge,
+		IonButton,
+		IonCard,
+		IonCardContent,
+		IonCardHeader,
+		IonCardSubtitle,
+		IonCardTitle,
+		IonIcon,
+		IonInput,
+		IonItem,
+		IonLabel,
+		IonList,
+	],
 })
 export class SubmitCardComponent {
 	public readonly children = input<Child[]>([]);
@@ -36,7 +79,12 @@ export class SubmitCardComponent {
 	public readonly changeEmailForm = changeEmailForm();
 
 	constructor() {
-		addIcons({ checkmarkCircleOutline, manOutline, womanOutline, happyOutline });
+		addIcons({
+			checkmarkCircleOutline,
+			manOutline,
+			womanOutline,
+			happyOutline,
+		});
 		effect(() => {
 			if (
 				typeof window !== 'undefined' &&

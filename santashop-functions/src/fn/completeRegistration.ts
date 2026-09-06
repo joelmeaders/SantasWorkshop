@@ -43,22 +43,35 @@ export default async function completeRegistration(
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 	const userRef = db.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
 	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
-	const receiptRef = registrationRef.collection(MUTATION_RECEIPTS_SUBCOLLECTION).doc(mutationId);
+	const emailRef = db
+		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+		.doc();
+	const receiptRef = registrationRef
+		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
+		.doc(mutationId);
 
 	try {
 		await db.runTransaction(async (transaction) => {
-			const [registrationSnapshot, userSnapshot, parametersSnapshot, receiptSnapshot] = await Promise.all([
+			const [
+				registrationSnapshot,
+				userSnapshot,
+				parametersSnapshot,
+				receiptSnapshot,
+			] = await Promise.all([
 				transaction.get(registrationRef),
 				transaction.get(userRef),
 				transaction.get(parametersRef),
 				transaction.get(receiptRef),
 			]);
 			const cached = getStoredMutationResult(
-				receiptSnapshot.exists ? receiptSnapshot.data() as MutationReceipt : undefined,
+				receiptSnapshot.exists
+					? (receiptSnapshot.data() as MutationReceipt)
+					: undefined,
 				'completeRegistration',
 			);
 			if (cached) return;
-			const registrationData = registrationSnapshot.data() as Registration | undefined;
+			const registrationData = registrationSnapshot.data() as
+				Registration | undefined;
 			if (registrationData?.registrationSubmittedOn) {
 				transaction.create(receiptRef, {
 					operation: 'completeRegistration',
@@ -67,25 +80,49 @@ export default async function completeRegistration(
 				} satisfies MutationReceipt);
 				return;
 			}
-			requireOpenPreRegistration(parametersSnapshot.data() as PublicParameters | undefined);
+			requireOpenPreRegistration(
+				parametersSnapshot.data() as PublicParameters | undefined,
+			);
 			const registration = requireDraftRegistration(registrationData);
 			const user = userSnapshot.data() as User | undefined;
-			if (!user?.firstName || !user.lastName || !user.emailAddress || user.zipCode === undefined) {
-				throw new HttpsError('failed-precondition', 'Account information is incomplete.');
+			if (
+				!user?.firstName ||
+				!user.lastName ||
+				!user.emailAddress ||
+				user.zipCode === undefined
+			) {
+				throw new HttpsError(
+					'failed-precondition',
+					'Account information is incomplete.',
+				);
 			}
 			const children = requireCanonicalChildren(registration.children);
 			const slotId = registration.dateTimeSlot?.id;
 			if (!slotId || typeof slotId !== 'string') {
-				throw new HttpsError('failed-precondition', 'An appointment is required.');
+				throw new HttpsError(
+					'failed-precondition',
+					'An appointment is required.',
+				);
 			}
-			const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
+			const slotRef = db.doc(
+				`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`,
+			);
 			const slotSnapshot = await transaction.get(slotRef);
-			const slot = requireEnabledCurrentSlot(slotSnapshot.data() as DateTimeSlot | undefined, slotId);
+			const slot = requireEnabledCurrentSlot(
+				slotSnapshot.data() as DateTimeSlot | undefined,
+				slotId,
+			);
 			if (!registration.qrcode) {
-				throw new HttpsError('failed-precondition', 'Registration confirmation code is unavailable.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration confirmation code is unavailable.',
+				);
 			}
 			if (!registration.qrCodeStoragePath) {
-				throw new HttpsError('failed-precondition', 'Registration QR image is unavailable.');
+				throw new HttpsError(
+					'failed-precondition',
+					'Registration QR image is unavailable.',
+				);
 			}
 
 			const submittedOn = new Date();
@@ -102,6 +139,9 @@ export default async function completeRegistration(
 				registrationSubmittedOn: submittedOn,
 				includedInCounts: false,
 				includedInRegistrationStats: false,
+				reminderEmailQueuedOn: submittedOn,
+				reminderEmailSentOn: false,
+				reminderEmailFailedOn: false,
 				programYear: PROGRAM_YEAR,
 			};
 			const completedRegistration = {
@@ -111,15 +151,25 @@ export default async function completeRegistration(
 			delete completedRegistration.cancelledOn;
 			delete completedRegistration.cancelledByUid;
 			delete completedRegistration.cancellationLogId;
-			const emailRef = db.doc(`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${uid}`);
-			const indexRef = db.doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`);
+			const indexRef = db.doc(
+				`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`,
+			);
 			const emailRecord = {
+				registrationUid: uid,
 				code: registration.qrcode,
 				qrCodeStoragePath: registration.qrCodeStoragePath,
 				email: canonicalContact.emailAddress,
 				name: canonicalContact.firstName,
 				formattedDateTime: formatRegistrationDateTime(slot.dateTime),
+				appointmentSlotId: slot.id,
 				templateKey: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
+				queuedOn: submittedOn,
+				queueSource: 'registration-completion',
+				deliveryRequestedOn: submittedOn,
+				deliveryState: 'queued',
+				failedOn: false,
+				lastErrorMessage: false,
+				lastErrorDetails: false,
 			};
 			const indexRecord: RegistrationSearchIndex = {
 				code: registration.qrcode,
@@ -135,9 +185,13 @@ export default async function completeRegistration(
 			// This transaction deliberately never writes the shared slot document.
 			// reconcileAppointmentCounters reconciles capacity after submissions.
 			transaction.set(registrationRef, completedRegistration);
-			transaction.set(emailRef, emailRecord, { merge: true });
+			transaction.create(emailRef, emailRecord);
 			transaction.set(indexRef, indexRecord, { merge: true });
-			transaction.create(receiptRef, { operation: 'completeRegistration', result: true, completedOn: submittedOn } satisfies MutationReceipt);
+			transaction.create(receiptRef, {
+				operation: 'completeRegistration',
+				result: true,
+				completedOn: submittedOn,
+			} satisfies MutationReceipt);
 		});
 		return true;
 	} catch (error) {

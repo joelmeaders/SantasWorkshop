@@ -19,16 +19,22 @@ import {
 	timestampToDate,
 	validateChild,
 } from '@santashop/core';
-import {
-	COLLECTION_SCHEMA,
-	Child,
-	DateTimeSlot,
-} from '@santashop/models';
+import { COLLECTION_SCHEMA, Child, DateTimeSlot } from '@santashop/models';
 import { combineLatest, firstValueFrom, Subject } from 'rxjs';
-import { filter, map, shareReplay, take, takeUntil, timeout } from 'rxjs/operators';
+import {
+	filter,
+	map,
+	shareReplay,
+	take,
+	takeUntil,
+	timeout,
+} from 'rxjs/operators';
 import { where } from 'firebase/firestore';
 import { PreRegistrationService } from '../../../core';
-import { ChildSaveRequest, ChildrenCardComponent } from './children-card/children-card.component';
+import {
+	ChildSaveRequest,
+	ChildrenCardComponent,
+} from './children-card/children-card.component';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
 import {
 	EmailUpdateRequest,
@@ -83,11 +89,13 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	private readonly submitCard = viewChild(SubmitCardComponent);
 
 	public readonly programYear = inject(PROGRAM_YEAR);
-	public readonly userRegistration$ = this.preregistrationService.userRegistration$;
+	public readonly userRegistration$ =
+		this.preregistrationService.userRegistration$;
 	public readonly children$ = this.preregistrationService.children$;
 	public readonly childCount$ = this.preregistrationService.childCount$;
 	public readonly dateTimeSlot$ = this.preregistrationService.dateTimeSlot$;
-	public readonly registrationSubmitted$ = this.preregistrationService.registrationSubmitted$;
+	public readonly registrationSubmitted$ =
+		this.preregistrationService.registrationSubmitted$;
 	public readonly emailAddress$ = this.userRegistration$.pipe(
 		map((registration) => registration?.emailAddress ?? ''),
 		shareReplay(1),
@@ -112,8 +120,9 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		this.dateTimeSlot$,
 		this.registrationSubmitted$,
 	]).pipe(
-		map(([canChooseDateTime, dateTimeSlot, submitted]) =>
-			canChooseDateTime && !!dateTimeSlot && !submitted,
+		map(
+			([canChooseDateTime, dateTimeSlot, submitted]) =>
+				canChooseDateTime && !!dateTimeSlot && !submitted,
 		),
 		shareReplay(1),
 	);
@@ -128,7 +137,10 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 						...slot,
 						dateTime: timestampToDate(slot.dateTime),
 					}))
-					.sort((left, right) => left.dateTime.valueOf() - right.dateTime.valueOf()),
+					.sort(
+						(left, right) =>
+							left.dateTime.valueOf() - right.dateTime.valueOf(),
+					),
 			),
 			shareReplay(1),
 		);
@@ -152,77 +164,104 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	}
 
 	public async saveChild(request: ChildSaveRequest): Promise<void> {
-		const saved = await this.runWorkspaceAction('Child saved. You can now choose an appointment.', async () => {
-			const child = request.child;
-			const validatedChild = validateChild({ ...child });
-			delete validatedChild.error;
-			await this.preregistrationService.saveDraftChild({
-				mutationId: this.createMutationId(),
-				child: validatedChild,
-			});
-			this.analytics.logEventWithParams('workspace_child_saved', {
-				childId: validatedChild.id,
-			});
-		});
+		const saved = await this.runWorkspaceAction(
+			this.translateService.instant('OVERVIEW.CHILD_SAVED'),
+			async () => {
+				const child = request.child;
+				const validatedChild = validateChild({ ...child });
+				delete validatedChild.error;
+				await this.preregistrationService.saveDraftChild({
+					mutationId: this.createMutationId(),
+					child: validatedChild,
+				});
+				this.analytics.logEventWithParams('workspace_child_saved', {
+					childId: validatedChild.id,
+				});
+			},
+		);
 		if (!saved) return;
 		if (request.isNew) await this.askAboutAnotherChild();
 		else this.childrenCard()?.collapseEditor();
 	}
 
 	public async deleteChild(child: Child): Promise<void> {
-		const deleted = await this.runWorkspaceAction('Child removed.', async () => {
-			if (child.id === undefined) throw new Error('This child could not be removed.');
-			await this.preregistrationService.deleteDraftChild({
-				mutationId: this.createMutationId(),
-				childId: child.id,
-			});
-			this.analytics.logEventWithParams('workspace_child_removed', {
-				childId: child.id,
-			});
-		});
+		const deleted = await this.runWorkspaceAction(
+			this.translateService.instant('OVERVIEW.CHILD_REMOVED'),
+			async () => {
+				if (child.id === undefined)
+					throw new Error(
+						this.translateService.instant(
+							'OVERVIEW.CHILD_REMOVE_FAILED',
+						),
+					);
+				await this.preregistrationService.deleteDraftChild({
+					mutationId: this.createMutationId(),
+					childId: child.id,
+				});
+				this.analytics.logEventWithParams('workspace_child_removed', {
+					childId: child.id,
+				});
+			},
+		);
 		if (deleted) this.childrenCard()?.collapseEditor();
 	}
 
 	public async chooseDateTime(slot?: DateTimeSlot): Promise<void> {
 		if (!slot) return;
 		await this.runWorkspaceAction(
-			'Appointment saved. Review your registration when ready.',
+			this.translateService.instant('OVERVIEW.APPOINTMENT_SAVED'),
 			async () => {
 				if (!slot.enabled || !slot.id) {
-					throw new Error('That appointment is no longer available. Please choose another time.');
+					throw new Error(
+						this.translateService.instant(
+							'OVERVIEW.APPOINTMENT_UNAVAILABLE',
+						),
+					);
 				}
 				await this.preregistrationService.setDraftAppointment({
 					mutationId: this.createMutationId(),
 					slotId: slot.id,
 				});
-				this.analytics.logEventWithParams('workspace_appointment_saved', {
-					slotId: slot.id,
-				});
+				this.analytics.logEventWithParams(
+					'workspace_appointment_saved',
+					{
+						slotId: slot.id,
+					},
+				);
 			},
 		);
 	}
 
 	public async submitRegistration(): Promise<void> {
-		await this.runWorkspaceAction('Registration submitted. Opening your confirmation.', async () => {
-			const result = await this.preregistrationService.completeRegistration({
-				mutationId: this.createMutationId(),
-			});
-			if (!result.data) throw new Error('We could not submit your registration. Please try again.');
-			await firstValueFrom(
-				this.preregistrationService.registrationComplete$.pipe(
-					filter(Boolean),
-					take(1),
-					timeout(15000),
-				),
-			);
-			this.analytics.logEvent('submit_registration');
-			await this.router.navigate(['/pre-registration/confirmation']);
-		});
+		await this.runWorkspaceAction(
+			this.translateService.instant('OVERVIEW.REGISTRATION_SUBMITTED'),
+			async () => {
+				const result =
+					await this.preregistrationService.completeRegistration({
+						mutationId: this.createMutationId(),
+					});
+				if (!result.data)
+					throw new Error(
+						this.translateService.instant('OVERVIEW.SUBMIT_FAILED'),
+					);
+				await firstValueFrom(
+					this.preregistrationService.registrationComplete$.pipe(
+						filter(Boolean),
+						take(1),
+						timeout(15000),
+					),
+				);
+				this.analytics.logEvent('submit_registration');
+				await this.router.navigate(['/pre-registration/confirmation']);
+			},
+		);
 	}
 
-	public async updateEmailAddress(request: EmailUpdateRequest): Promise<void> {
+	public async updateEmailAddress(
+		request: EmailUpdateRequest,
+	): Promise<void> {
 		const updated = await this.runWorkspaceAction(
-			'Email address updated. We send your ticket to this address.',
+			this.translateService.instant('OVERVIEW.EMAIL_UPDATED'),
 			async () => {
 				await this.authService.changeEmailAddress(
 					request.password,
@@ -273,7 +312,9 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	};
 
 	private dateTimeSlotCollection(): IFireRepoCollection<DateTimeSlot> {
-		return this.fireRepo.collection<DateTimeSlot>(COLLECTION_SCHEMA.dateTimeSlots);
+		return this.fireRepo.collection<DateTimeSlot>(
+			COLLECTION_SCHEMA.dateTimeSlots,
+		);
 	}
 
 	private createMutationId(): string {
@@ -293,7 +334,10 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			await this.presentWorkspaceToast(successMessage, 'success');
 			return true;
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'We could not save your changes. Please try again.';
+			const message =
+				error instanceof Error
+					? error.message
+					: this.translateService.instant('OVERVIEW.SAVE_FAILED');
 			await this.presentWorkspaceToast(message, 'danger');
 			return false;
 		} finally {
@@ -306,7 +350,11 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		color: 'success' | 'danger',
 	): Promise<void> {
 		try {
-			await this.toastController.dismiss(undefined, undefined, 'workspace-toast');
+			await this.toastController.dismiss(
+				undefined,
+				undefined,
+				'workspace-toast',
+			);
 		} catch {
 			// The previous toast may have already been dismissed by Ionic.
 		}
@@ -327,8 +375,12 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 
 	private async askAboutAnotherChild(): Promise<void> {
 		const alert = await this.alertController.create({
-			header: this.translateService.instant('OVERVIEW.ANOTHER_CHILD_TITLE'),
-			message: this.translateService.instant('OVERVIEW.ANOTHER_CHILD_MESSAGE'),
+			header: this.translateService.instant(
+				'OVERVIEW.ANOTHER_CHILD_TITLE',
+			),
+			message: this.translateService.instant(
+				'OVERVIEW.ANOTHER_CHILD_MESSAGE',
+			),
 			backdropDismiss: false,
 			buttons: [
 				{

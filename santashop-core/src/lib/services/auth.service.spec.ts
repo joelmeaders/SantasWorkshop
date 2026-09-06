@@ -24,6 +24,7 @@ describe('AuthService', () => {
 	const mockUser = {
 		email: 'test@test.com',
 		uid: '12345',
+		reload: vi.fn().mockResolvedValue(undefined),
 		getIdTokenResult() {
 			return Promise.resolve({});
 		},
@@ -43,6 +44,9 @@ describe('AuthService', () => {
 						currentUser: vi
 							.fn()
 							.mockName('AuthWrapper.currentUser'),
+						reloadCurrentUser: vi
+							.fn()
+							.mockName('AuthWrapper.reloadCurrentUser'),
 						getCurrentUserToken: vi
 							.fn()
 							.mockName('AuthWrapper.getCurrentUserToken'),
@@ -69,9 +73,7 @@ describe('AuthService', () => {
 			],
 		});
 
-		authWrapperService = TestBed.inject(
-			AuthWrapper,
-		) as Mocked<AuthWrapper>;
+		authWrapperService = TestBed.inject(AuthWrapper) as Mocked<AuthWrapper>;
 		functionsWrapperService = TestBed.inject(
 			FunctionsWrapper,
 		) as Mocked<FunctionsWrapper>;
@@ -80,6 +82,7 @@ describe('AuthService', () => {
 	beforeEach(() => {
 		authStateSpy = authWrapperService.authState;
 		authStateSpy.mockReturnValue(of(mockUser));
+		authWrapperService.reloadCurrentUser.mockResolvedValue(mockUser);
 		service = TestBed.inject(AuthService);
 	});
 
@@ -95,6 +98,23 @@ describe('AuthService', () => {
 
 		// Assert
 		expect(authStateSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('currentUser$ emits the refreshed identity for cached consumers', async () => {
+		const refreshedUser = {
+			...mockUser,
+			displayName: 'Updated Name',
+		} as User;
+		const values: (User | null)[] = [];
+		const subscription = service.currentUser$.subscribe((value) =>
+			values.push(value),
+		);
+		authWrapperService.reloadCurrentUser.mockResolvedValue(refreshedUser);
+
+		await service.refreshCurrentUser();
+
+		expect(values).toEqual([mockUser, refreshedUser]);
+		subscription.unsubscribe();
 	});
 
 	it('emailAndUid$: should return expected value', async () => {
@@ -162,7 +182,9 @@ describe('AuthService', () => {
 			'stats',
 		]);
 		await expect(firstValueFrom(service.isCheckin$)).resolves.toBe(true);
-		await expect(firstValueFrom(service.hasRole('admin'))).resolves.toBe(false);
+		await expect(firstValueFrom(service.hasRole('admin'))).resolves.toBe(
+			false,
+		);
 		await expect(firstValueFrom(service.isElevated$)).resolves.toBe(true);
 	});
 
@@ -176,10 +198,9 @@ describe('AuthService', () => {
 
 		await service.reauthenticate('secret');
 
-		expect(authWrapperService.reauthenticateWithPassword).toHaveBeenCalledWith(
-			currentUser,
-			'secret',
-		);
+		expect(
+			authWrapperService.reauthenticateWithPassword,
+		).toHaveBeenCalledWith(currentUser, 'secret');
 		expect(tokenRefresh).toHaveBeenCalledWith(true);
 	});
 
@@ -254,6 +275,40 @@ describe('AuthService', () => {
 				'currentPass',
 			);
 			expect(updateSpy).toHaveBeenCalledWith(mockUser, 'newPass');
+		});
+
+		it('uses the refreshed email after an email change in the same session', async () => {
+			const updatedUser = {
+				...mockUser,
+				email: 'updated@test.com',
+			} as User;
+			authWrapperService.currentUser
+				.mockReturnValueOnce(mockUser)
+				.mockReturnValue(updatedUser);
+			authWrapperService.reloadCurrentUser
+				.mockResolvedValueOnce(mockUser)
+				.mockResolvedValue(updatedUser);
+			authWrapperService.signInWithEmailAndPassword.mockResolvedValue({
+				user: updatedUser,
+			} as UserCredential);
+			authWrapperService.updatePassword.mockResolvedValue(undefined);
+			functionsWrapperService.updateEmailAddress.mockResolvedValue({
+				data: undefined,
+			});
+
+			await service.changeEmailAddress(
+				'current-pass',
+				'updated@test.com',
+			);
+			await service.changePassword('current-pass', 'new-pass');
+
+			expect(
+				authWrapperService.signInWithEmailAndPassword,
+			).toHaveBeenNthCalledWith(2, 'updated@test.com', 'current-pass');
+			expect(authWrapperService.updatePassword).toHaveBeenCalledWith(
+				updatedUser,
+				'new-pass',
+			);
 		});
 	});
 
@@ -354,9 +409,9 @@ describe('AuthService', () => {
 	it('getCurrentUserToken(): should return token result', async () => {
 		// Arrange
 		const mockToken = { claims: { roles: ['admin', 'checkin'] } } as any;
-		(authWrapperService.getCurrentUserToken as unknown as MockInstance).mockResolvedValue(
-			mockToken,
-		);
+		(
+			authWrapperService.getCurrentUserToken as unknown as MockInstance
+		).mockResolvedValue(mockToken);
 		const wrappedMethod = service.getCurrentUserToken;
 
 		// Act

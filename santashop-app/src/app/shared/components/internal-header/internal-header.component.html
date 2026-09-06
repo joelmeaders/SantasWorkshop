@@ -17,7 +17,7 @@
 		<ion-button
 			id="menuButton"
 			class="menu-button"
-			aria-label="Open account and help menu"
+			[attr.aria-label]="'COMMON.OPEN_ACCOUNT_HELP_MENU' | translate"
 			slot="end"
 			fill="clear"
 			(click)="menu($event)"

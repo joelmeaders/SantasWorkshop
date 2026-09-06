@@ -133,9 +133,20 @@ export class ScheduleEditorService {
 		}
 
 		this.assertValidSlot(slot);
-		await this.assertUniqueDateTime(slot);
+		await this.updateSlotDateTime(slot.id, slot.dateTime);
+	}
 
-		await this.persistSlot(slot);
+	public async updateSlotDateTime(
+		slotId: string,
+		dateTime: Date,
+	): Promise<void> {
+		if (!slotId) {
+			throw new TypeError('Slot id is required.');
+		}
+
+		this.assertValidDateTime(dateTime);
+		await this.assertUniqueDateTime(slotId, dateTime);
+		await this.persistSlotPatch(slotId, { dateTime });
 
 		this.refresh();
 	}
@@ -157,7 +168,14 @@ export class ScheduleEditorService {
 				};
 
 				this.assertValidSlot(updatedSlot);
-				await this.persistSlot(updatedSlot);
+				const patch: Partial<DateTimeSlot> = {};
+				if (changes.maxSlots !== undefined) {
+					patch.maxSlots = changes.maxSlots;
+				}
+				if (changes.enabled !== undefined) {
+					patch.enabled = changes.enabled;
+				}
+				await this.persistSlotPatch(slot.id, patch);
 			}),
 		);
 
@@ -183,15 +201,21 @@ export class ScheduleEditorService {
 		);
 	}
 
-	private async persistSlot(slot: DateTimeSlot): Promise<void> {
-		if (!slot.id) {
+	private async persistSlotPatch(
+		slotId: string | undefined,
+		patch: Partial<DateTimeSlot>,
+	): Promise<void> {
+		if (!slotId) {
 			throw new TypeError('Slot id is required.');
 		}
 
 		await firstValueFrom(
 			this.dateTimeSlotCollection().update(
-				slot.id,
-				this.toPersistedSlot(slot),
+				slotId,
+				{
+					...patch,
+					lastUpdated: new Date(),
+				} as DateTimeSlot,
 				true,
 			),
 		);
@@ -218,29 +242,21 @@ export class ScheduleEditorService {
 		}
 	}
 
-	private async assertUniqueDateTime(slot: DateTimeSlot): Promise<void> {
+	private async assertUniqueDateTime(
+		slotId: string,
+		dateTime: Date,
+	): Promise<void> {
 		const slots = await firstValueFrom(this.slots$);
-		const slotKey = this.getDateTimeKey(slot.dateTime);
+		const slotKey = this.getDateTimeKey(dateTime);
 		const hasDuplicateSlot = slots.some(
 			(existingSlot) =>
-				existingSlot.id !== slot.id &&
+				existingSlot.id !== slotId &&
 				this.getDateTimeKey(existingSlot.dateTime) === slotKey,
 		);
 
 		if (hasDuplicateSlot) {
 			throw new Error(this.duplicateSlotMessage);
 		}
-	}
-
-	private toPersistedSlot(slot: DateTimeSlot): DateTimeSlot {
-		return {
-			programYear: slot.programYear,
-			dateTime: slot.dateTime,
-			maxSlots: slot.maxSlots,
-			slotsReserved: slot.slotsReserved ?? 0,
-			enabled: slot.enabled ?? true,
-			lastUpdated: new Date(),
-		};
 	}
 
 	private getDateTimeKey(dateTime: Date): string {

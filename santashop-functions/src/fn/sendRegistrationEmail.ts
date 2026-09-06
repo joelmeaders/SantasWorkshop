@@ -11,10 +11,7 @@ import type {
 	DocumentSnapshot,
 	QueryDocumentSnapshot,
 } from 'firebase-admin/firestore';
-import {
-	COLLECTION_SCHEMA,
-	Registration,
-} from '../models';
+import { COLLECTION_SCHEMA, Registration } from '../models';
 import admin from '../firebase-admin';
 import {
 	EVENT_DISPLAY_NAME,
@@ -48,6 +45,9 @@ interface EmailTriggerMetadata {
 }
 
 interface QueuedRegistrationEmailDocument {
+	registrationUid?: string;
+	appointmentSlotId?: string;
+	cancellationLogId?: string;
 	code?: string;
 	qrCodeStoragePath?: string;
 	name?: string;
@@ -65,7 +65,8 @@ interface QueuedRegistrationEmailDocument {
 	deliveryRequiresReviewOn?: Date;
 	deliveryRequiresReviewReason?: string;
 	deliveryCompletedOn?: Date;
-	deliveryState?: 'queued' | 'sending' | 'accepted' | 'sent' | 'failed';
+	deliveryState?:
+		'queued' | 'sending' | 'accepted' | 'sent' | 'failed' | 'superseded';
 	failedOn?: Date;
 	lastErrorMessage?: string;
 	lastErrorDetails?: string;
@@ -73,6 +74,7 @@ interface QueuedRegistrationEmailDocument {
 
 interface LoadedEmailTriggerContext {
 	triggeredSnapshot: QueryDocumentSnapshot;
+	registrationUid: string;
 	emailDocRef: DocumentReference;
 	registrationDocRef: DocumentReference;
 	currentEmailDoc: DocumentSnapshot;
@@ -100,6 +102,7 @@ const queueProcessingState = {
 	accepted: 'accepted',
 	sent: 'sent',
 	failed: 'failed',
+	superseded: 'superseded',
 } as const;
 
 const buildSuccessfulDeliveryUpdates = (sentOn: Date) => ({
@@ -142,6 +145,21 @@ const getNormalizedDate = (value: Date | undefined, fallback: Date): Date => {
 	}
 
 	return normalizeDateTime(value as DateTimeValue);
+};
+
+const datesMatch = (left: unknown, right: unknown): boolean => {
+	if (!left || !right) {
+		return false;
+	}
+
+	try {
+		return (
+			normalizeDateTime(left as DateTimeValue).getTime() ===
+			normalizeDateTime(right as DateTimeValue).getTime()
+		);
+	} catch {
+		return false;
+	}
 };
 
 const getSuccessfulDeliveryDate = (
@@ -196,10 +214,9 @@ const hasAcceptedExternalDelivery = (
 };
 
 const repairRegistrationStatus = async (
-	registrationDocRef: DocumentReference,
-	registration: Registration | undefined,
-	document: QueuedRegistrationEmailDocument,
+	context: LoadedEmailTriggerContext,
 ): Promise<void> => {
+	const { document } = context;
 	if (
 		document.deliveryState !== queueProcessingState.sent &&
 		!hasAcceptedExternalDelivery(document)
@@ -207,18 +224,15 @@ const repairRegistrationStatus = async (
 		return;
 	}
 
-	if (registration?.reminderEmailSentOn) {
-		return;
-	}
-
 	const sentOn = getSuccessfulDeliveryDate(document, new Date());
-	await registrationDocRef.set(
+	await updateRegistrationDeliveryStatusIfCurrent(
+		context,
 		{
 			reminderEmailQueuedOn: getQueueRequestedOn(document, sentOn),
 			reminderEmailSentOn: sentOn,
 			reminderEmailFailedOn: false,
 		},
-		{ merge: true },
+		true,
 	);
 };
 
@@ -273,8 +287,7 @@ const loadEmailTriggerContext = async (
 	triggeredSnapshot: QueryDocumentSnapshot,
 ): Promise<LoadedEmailTriggerContext | undefined> => {
 	const triggeredData = triggeredSnapshot.data() as
-		| QueuedRegistrationEmailDocument
-		| undefined;
+		QueuedRegistrationEmailDocument | undefined;
 	if (!triggeredData) {
 		return undefined;
 	}
@@ -284,13 +297,14 @@ const loadEmailTriggerContext = async (
 		.doc(
 			`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${triggeredSnapshot.id}`,
 		);
-	const registrationDocRef = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrations}/${triggeredSnapshot.id}`);
 	const currentEmailDoc = await emailDocRef.get();
 	const document = (
 		currentEmailDoc.exists ? currentEmailDoc.data() : triggeredData
 	) as QueuedRegistrationEmailDocument;
+	const registrationUid = document.registrationUid ?? triggeredSnapshot.id;
+	const registrationDocRef = admin
+		.firestore()
+		.doc(`${COLLECTION_SCHEMA.registrations}/${registrationUid}`);
 	const registrationSnapshot = await registrationDocRef.get();
 	const registration = registrationSnapshot.exists
 		? (registrationSnapshot.data() as Registration)
@@ -298,6 +312,7 @@ const loadEmailTriggerContext = async (
 
 	return {
 		triggeredSnapshot,
+		registrationUid,
 		emailDocRef,
 		registrationDocRef,
 		currentEmailDoc,
@@ -305,6 +320,110 @@ const loadEmailTriggerContext = async (
 		registration,
 	};
 };
+
+const getSupersededReason = (
+	context: LoadedEmailTriggerContext,
+): string | undefined => {
+	const { document, registration } = context;
+	if (!registration) {
+		return 'The registration no longer exists.';
+	}
+	if (isCancellationCommunication(document)) {
+		if (
+			!registration.cancelledOn ||
+			(document.cancellationLogId &&
+				registration.cancellationLogId !== document.cancellationLogId)
+		) {
+			return 'A newer registration state replaced this cancellation.';
+		}
+	} else {
+		if (!registration.registrationSubmittedOn || registration.cancelledOn) {
+			return 'The registration is no longer active.';
+		}
+		if (
+			document.appointmentSlotId &&
+			registration.dateTimeSlot?.id !== document.appointmentSlotId
+		) {
+			return 'A newer appointment replaced this email.';
+		}
+		if (
+			document.registrationUid &&
+			(!document.deliveryRequestedOn ||
+				!datesMatch(
+					document.deliveryRequestedOn,
+					registration.reminderEmailQueuedOn,
+				))
+		) {
+			return 'A newer email delivery request replaced this email.';
+		}
+	}
+	if (!document.code || registration.qrcode !== document.code) {
+		return 'A newer confirmation code replaced this email.';
+	}
+	if (
+		!document.email ||
+		registration.emailAddress?.toLowerCase() !==
+			document.email.toLowerCase()
+	) {
+		return 'The registration email address changed after this email was queued.';
+	}
+	if (!document.name || registration.firstName !== document.name) {
+		return 'The registration name changed after this email was queued.';
+	}
+	if (
+		!isCancellationCommunication(document) &&
+		(!document.qrCodeStoragePath ||
+			registration.qrCodeStoragePath !== document.qrCodeStoragePath)
+	) {
+		return 'A newer confirmation-code image replaced this email.';
+	}
+	return undefined;
+};
+
+const updateRegistrationDeliveryStatusIfCurrent = async (
+	context: LoadedEmailTriggerContext,
+	updates: Record<string, unknown>,
+	skipWhenAlreadySent = false,
+): Promise<void> => {
+	if (isCancellationCommunication(context.document)) {
+		return;
+	}
+
+	await admin.firestore().runTransaction(async (transaction) => {
+		const registrationSnapshot = await transaction.get(
+			context.registrationDocRef,
+		);
+		const registration = registrationSnapshot.exists
+			? (registrationSnapshot.data() as Registration)
+			: undefined;
+		if (
+			(skipWhenAlreadySent && registration?.reminderEmailSentOn) ||
+			getSupersededReason({ ...context, registration })
+		) {
+			return;
+		}
+		transaction.set(context.registrationDocRef, updates, { merge: true });
+	});
+};
+
+const markQueueSuperseded = async (
+	context: LoadedEmailTriggerContext,
+	reason: string,
+): Promise<void> => {
+	await context.emailDocRef.set(buildSupersededUpdates(reason, new Date()), {
+		merge: true,
+	});
+};
+
+const buildSupersededUpdates = (reason: string, completedOn: Date) => ({
+	deliveryState: queueProcessingState.superseded,
+	deliveryCompletedOn: completedOn,
+	failedOn: false,
+	lastErrorMessage: false,
+	lastErrorDetails: false,
+	deliveryRequiresReviewOn: false,
+	deliveryRequiresReviewReason: reason,
+});
 
 const persistDeliveryReviewRequirement = async (
 	context: LoadedEmailTriggerContext,
@@ -355,8 +474,14 @@ const canSkipDelivery = async (
 	triggerMetadata: EmailTriggerMetadata,
 ): Promise<boolean> => {
 	const now = new Date();
+	const supersededReason = getSupersededReason(context);
+	if (supersededReason) {
+		await markQueueSuperseded(context, supersededReason);
+		return true;
+	}
 
 	if (
+		!context.document.registrationUid &&
 		!isCancellationCommunication(context.document) &&
 		context.registration?.reminderEmailSentOn
 	) {
@@ -370,20 +495,12 @@ const canSkipDelivery = async (
 	if (hasAcceptedExternalDelivery(context.document)) {
 		const sentOn = getSuccessfulDeliveryDate(context.document, now);
 		await syncSentQueueDocument(context, sentOn);
-		await repairRegistrationStatus(
-			context.registrationDocRef,
-			context.registration,
-			context.document,
-		);
+		await repairRegistrationStatus(context);
 		return true;
 	}
 
 	if (context.document.deliveryState === queueProcessingState.sent) {
-		await repairRegistrationStatus(
-			context.registrationDocRef,
-			context.registration,
-			context.document,
-		);
+		await repairRegistrationStatus(context);
 		return true;
 	}
 
@@ -426,7 +543,7 @@ const canSkipDelivery = async (
 const resolveEmailPayload = (
 	context: LoadedEmailTriggerContext,
 ): ResolvedEmailPayload | undefined => {
-	const { document, triggeredSnapshot } = context;
+	const { document, registrationUid } = context;
 	if (
 		!document.code ||
 		!document.name ||
@@ -434,7 +551,7 @@ const resolveEmailPayload = (
 		!document.formattedDateTime
 	) {
 		log.warn('Skipping incomplete queued registration email document', {
-			uid: triggeredSnapshot.id,
+			uid: registrationUid,
 			documentKeys: Object.keys(document).sort((left, right) =>
 				left.localeCompare(right),
 			),
@@ -443,13 +560,13 @@ const resolveEmailPayload = (
 	}
 	if (!isCancellationCommunication(document) && !document.qrCodeStoragePath) {
 		log.warn('Skipping registration email without a QR image snapshot', {
-			uid: triggeredSnapshot.id,
+			uid: registrationUid,
 		});
 		return undefined;
 	}
 
 	return {
-		uid: triggeredSnapshot.id,
+		uid: registrationUid,
 		email: document.email,
 		firstName: document.name,
 		dateTime: document.formattedDateTime,
@@ -465,21 +582,58 @@ const markQueueSending = async (
 	context: LoadedEmailTriggerContext,
 	attemptedOn: Date,
 	triggerMetadata: EmailTriggerMetadata,
-): Promise<void> => {
-	await context.emailDocRef.set(
-		{
-			deliveryState: queueProcessingState.sending,
-			deliveryAttemptedOn: attemptedOn,
-			deliveryAttemptEventId: triggerMetadata.eventId ?? false,
-			deliveryAttemptCount:
-				(context.document.deliveryAttemptCount ?? 0) + 1,
-			deliveryProviderAcceptedOn: false,
-			deliveryProviderMessageId: false,
-			deliveryRequiresReviewOn: false,
-			deliveryRequiresReviewReason: false,
-		},
-		{ merge: true },
-	);
+): Promise<boolean> => {
+	const claimResult = await admin
+		.firestore()
+		.runTransaction(async (transaction) => {
+			const [snapshot, registrationSnapshot] = await Promise.all([
+				transaction.get(context.emailDocRef),
+				transaction.get(context.registrationDocRef),
+			]);
+			const currentDocument = snapshot.data() as
+				QueuedRegistrationEmailDocument | undefined;
+			const currentRegistration = registrationSnapshot.exists
+				? (registrationSnapshot.data() as Registration)
+				: undefined;
+			const supersededReason = currentDocument
+				? getSupersededReason({
+						...context,
+						document: currentDocument,
+						registration: currentRegistration,
+					})
+				: undefined;
+			if (supersededReason) {
+				transaction.set(
+					context.emailDocRef,
+					buildSupersededUpdates(supersededReason, attemptedOn),
+					{ merge: true },
+				);
+				return { currentRegistration };
+			}
+			if (!shouldSendQueuedDocument(currentDocument)) {
+				return { currentRegistration };
+			}
+			const claimed = {
+				...currentDocument,
+				deliveryState: queueProcessingState.sending,
+				deliveryAttemptedOn: attemptedOn,
+				deliveryAttemptEventId: triggerMetadata.eventId ?? false,
+				deliveryAttemptCount:
+					(currentDocument.deliveryAttemptCount ?? 0) + 1,
+				deliveryProviderAcceptedOn: false,
+				deliveryProviderMessageId: false,
+				deliveryRequiresReviewOn: false,
+				deliveryRequiresReviewReason: false,
+			};
+			transaction.set(context.emailDocRef, claimed, { merge: true });
+			return { claimed, currentRegistration };
+		});
+	context.registration = claimResult.currentRegistration;
+	if (!claimResult.claimed) {
+		return false;
+	}
+	context.document = claimResult.claimed;
+	return true;
 };
 
 const persistProviderAcceptance = async (
@@ -531,13 +685,10 @@ const persistSuccessfulDelivery = async (
 	let registrationWriteError: unknown;
 	if (!isCancellationCommunication(context.document)) {
 		try {
-			await context.registrationDocRef.set(
-				{
-					...successUpdates.registration,
-					reminderEmailQueuedOn: queuedOn,
-				},
-				{ merge: true },
-			);
+			await updateRegistrationDeliveryStatusIfCurrent(context, {
+				...successUpdates.registration,
+				reminderEmailQueuedOn: queuedOn,
+			});
 		} catch (error) {
 			registrationWriteError = error;
 		}
@@ -579,9 +730,10 @@ const persistFailedDelivery = async (
 		{ merge: true },
 	);
 	if (!isCancellationCommunication(context.document)) {
-		await context.registrationDocRef.set(failedUpdates.registration, {
-			merge: true,
-		});
+		await updateRegistrationDeliveryStatusIfCurrent(
+			context,
+			failedUpdates.registration,
+		);
 	}
 	throw error instanceof Error
 		? error
@@ -618,7 +770,9 @@ export default async function sendRegistrationEmail(
 		emailCommand = createCancellationEmailCommand(payload);
 	} else {
 		if (!payload.qrCodeStoragePath) {
-			throw new Error('Queued registration QR image snapshot is unavailable.');
+			throw new Error(
+				'Queued registration QR image snapshot is unavailable.',
+			);
 		}
 		const baseMessageDetails = {
 			firstName: payload.firstName,
@@ -648,7 +802,9 @@ export default async function sendRegistrationEmail(
 	const attemptedOn = new Date();
 	const queuedOn = getQueueRequestedOn(context.document, attemptedOn);
 
-	await markQueueSending(context, attemptedOn, triggerMetadata);
+	if (!(await markQueueSending(context, attemptedOn, triggerMetadata))) {
+		return;
+	}
 
 	try {
 		response = isCancellation
@@ -683,7 +839,7 @@ export default async function sendRegistrationEmail(
 			'Failed to send queued registration email',
 			{
 				uid: payload.uid,
-			templateName: templateName ?? 'registration-cancellation',
+				templateName: templateName ?? 'registration-cancellation',
 				templateKey: payload.templateKey ?? null,
 			},
 			err,

@@ -93,6 +93,13 @@ export class ConfirmationPage {
 		addIcons({ manOutline, womanOutline, happyOutline });
 	}
 
+	public get encodedEventAddress(): string {
+		return encodeURIComponent([
+			this.translateService.instant('EVENT_INFO.EVENT_ADDRESS1'),
+			this.translateService.instant('EVENT_INFO.EVENT_ADDRESS2'),
+		].join(', '));
+	}
+
 	public async undoRegistration(): Promise<void> {
 		const alert = await this.alertController.create({
 			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),

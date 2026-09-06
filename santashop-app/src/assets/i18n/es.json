@@ -160,7 +160,7 @@
 		"CANCEL_REGISTRATION": "Cancelar registro",
 		"ARE_YOU_SURE": "¿Estás seguro?",
 		"CONFIRM_CHANGE_MSG": "Solicitar hacer un cambio en su registro libera su fecha y hora seleccionadas.<br/> Después de confirmar, envíe su nuevo registro lo antes posible. La disponibilidad es limitada y el registro se llena rápidamente.",
-		"CONFIRM_CANCELLATION_MSG": "Cancelar su registro libera su cita, invalida esta confirmación y envía un correo electrónico de cancelación. Puede crear un nuevo registro después.",
+		"CONFIRM_CANCELLATION_MSG": "Cancelar su registro libera su cita, invalida esta confirmación y envía un correo electrónico de cancelación. Solo podrá registrarse de nuevo si hay citas disponibles.",
 		"CONFIRM_DATETIME_CHANGE_MSG": "Cambiar la fecha y hora de su registro actualiza su confirmación y envía un nuevo correo electrónico de confirmación. Su horario anterior queda disponible para otros.",
 		"CURRENT_DATETIME": "Fecha y hora actual",
 		"CURRENT_SELECTION": "Selección actual",
@@ -223,6 +223,8 @@
 	"EVENT_INFO": {
 		"DATETIME": "Diciembre 12, 13, 15, 16 de 10am a 3pm",
 		"RESEND_EMAIL": "Reenviar el correo electrónico",
+		"GOOGLE_MAPS": "Cómo llegar con Google Maps",
+		"APPLE_MAPS": "Cómo llegar con Apple Maps",
 		"EVENT_ADDRESS1": "7150 Leetsdale Drive, Unit 380",
 		"EVENT_ADDRESS2": "Denver, CO 80224",
 		"PRINT_PAGE": "Imprima o guarde esta página y el correo electrónico que le enviamos.",

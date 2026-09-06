@@ -121,6 +121,12 @@
 	color: var(--santa-evergreen-deep);
 }
 
+.map-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
 @media (max-width: 600px) {
 	.confirmation-shell {
 		padding-inline: 0;

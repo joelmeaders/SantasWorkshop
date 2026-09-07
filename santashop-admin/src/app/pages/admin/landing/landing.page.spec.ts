@@ -99,6 +99,22 @@ describe('LandingPage', () => {
 		);
 	});
 
+	it('should hide registration links for check-in-only users', async () => {
+		adminSubject.next(false);
+		ownerSubject.next(false);
+
+		await fixture.whenStable();
+		await fixture.whenStable();
+		await fixture.whenStable();
+
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'On-Site Registration',
+		);
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'Pre-Register Customers',
+		);
+	});
+
 	it('should show owner operations only to owners', async () => {
 		expect(fixture.nativeElement.textContent).toContain('Owner Operations');
 		expect(fixture.nativeElement.textContent).toContain('App settings');

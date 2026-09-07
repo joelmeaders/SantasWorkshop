@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AppStateService } from '@santashop/core/admin/firestore';
+import { AppStateService, AuthService } from '@santashop/core/admin/firestore';
 
 import { RouterLinkActive, RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -40,6 +40,11 @@ import {
 })
 export class AdminPage {
 	private readonly appStateService = inject(AppStateService);
+	private readonly authService = inject(AuthService);
+
+	public readonly isAdmin = toSignal(this.authService.isAdmin$, {
+		initialValue: false,
+	});
 
 	public readonly preRegistrationEnabled = toSignal(
 		this.appStateService.preRegistrationEnabled$,

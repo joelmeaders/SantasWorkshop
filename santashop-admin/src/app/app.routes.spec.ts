@@ -96,8 +96,18 @@ describe('app routes', () => {
 		const ownerOperations = shell?.children?.find(
 			(route) => route.path === 'owner-operations',
 		);
+		const registration = shell?.children?.find(
+			(route) => route.path === 'registration',
+		);
+		const preRegistration = shell?.children?.find(
+			(route) => route.path === 'pre-registration',
+		);
 		const adminGuard = resend?.canActivate?.[0] as CanActivateFn;
 		const ownerGuard = ownerOperations?.canActivate?.[0] as CanActivateFn;
+		const registrationGuard = registration
+			?.canActivate?.[0] as CanActivateFn;
+		const preRegistrationGuard = preRegistration
+			?.canActivate?.[0] as CanActivateFn;
 
 		currentUser$.next(user({ roles: ['checkin'] }));
 		await expect(runGuard(adminGuard)).resolves.toEqual({
@@ -110,6 +120,17 @@ describe('app routes', () => {
 		});
 		currentUser$.next(user({ owner: true }));
 		await expect(runGuard(ownerGuard)).resolves.toBe(true);
+
+		currentUser$.next(user({ roles: ['checkin'], owner: false }));
+		await expect(runGuard(registrationGuard)).resolves.toEqual({
+			commands: ['/'],
+		});
+		await expect(runGuard(preRegistrationGuard)).resolves.toEqual({
+			commands: ['/'],
+		});
+		currentUser$.next(user({ roles: ['admin', 'checkin'], owner: false }));
+		await expect(runGuard(registrationGuard)).resolves.toBe(true);
+		await expect(runGuard(preRegistrationGuard)).resolves.toBe(true);
 	});
 
 	it('restricts App settings to owners without a maintenance guard', async () => {

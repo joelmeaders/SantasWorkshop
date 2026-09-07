@@ -1,10 +1,10 @@
 import { devices, type Page } from '@playwright/test';
-import { config } from '../../../santashop-admin/src/config';
 import { test, expect } from '../../fixtures/test-fixtures';
 import {
 	defaultAdminAccount,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
 
 const registration = {
 	uid: 'concurrent-family',
@@ -13,7 +13,7 @@ const registration = {
 	emailAddress: 'concurrent-family@test.com',
 	zipCode: '80202',
 	code: 'RACE0001',
-	dateTime: `${config.programYear}-12-12T17:00:00.000Z`,
+	dateTime: e2eDateTime(12, 12, 17),
 };
 const secondStaff = defaultAdminAccount({
 	uid: 'second-operator',
@@ -196,15 +196,15 @@ test.describe('competing staff and uncertain writes', () => {
 		await seedDateTimeSlots([
 			{
 				id: 'e2e-registration-slot',
-				programYear: config.programYear,
+				programYear: E2E_PROGRAM_YEAR,
 				dateTime: registration.dateTime,
 				maxSlots: 5,
 				slotsReserved: 2,
 			},
 			{
 				id: 'last-slot',
-				programYear: config.programYear,
-				dateTime: `${config.programYear}-12-13T17:00:00.000Z`,
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 13, 17),
 				maxSlots: 1,
 				slotsReserved: 0,
 			},

@@ -25,7 +25,10 @@ import {
 describe.sequential('sendRegistrationEmail integration', () => {
 	beforeEach(async () => {
 		sesSend.mockReset();
-		sesSend.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
+		sesSend.mockResolvedValue({
+			MessageId: 'ses-message-1',
+			$metadata: { httpStatusCode: 200 },
+		});
 		await clearEmulatorData();
 		await getFirestore()
 			.doc('emailTemplates/confirmation/revisions/revision-1')
@@ -75,12 +78,21 @@ describe.sequential('sendRegistrationEmail integration', () => {
 			COLLECTION_SCHEMA.tmpRegistrationEmails,
 			'queued-user-1',
 		);
-		expect(queueDocument).toBeDefined();
-		expect(queueDocument?.['deliveryState']).toBe('sent');
+		expect(queueDocument).toMatchObject({
+			deliveryState: 'sent',
+			deliveryAttemptCount: 1,
+			deliveryProviderMessageId: 'ses-message-1',
+			deliveryProviderAcceptedOn: expect.anything(),
+			deliveryCompletedOn: expect.anything(),
+			failedOn: false,
+		});
 		expect(sesSend).toHaveBeenCalledOnce();
-		expect(sesSend.mock.calls[0][0].input.Template).toBe(
-			'confirmation-published',
-		);
+		expect(sesSend.mock.calls[0][0].input).toMatchObject({
+			Destination: { ToAddresses: ['buddy.elf@example.com'] },
+			Source: 'noreply@denversantaclausshop.org',
+			ReturnPath: 'admin@denversantaclausshop.org',
+			Template: 'confirmation-published',
+		});
 		expect(
 			JSON.parse(sesSend.mock.calls[0][0].input.TemplateData),
 		).toMatchObject({ firstName: 'Buddy', code: 'ABCD2345' });

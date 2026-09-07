@@ -4,6 +4,7 @@ import {
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
 import { test, expect } from '../../fixtures/test-fixtures';
+import { e2eDateTime } from '../../fixtures/season';
 
 test.describe('staff critical-path accessibility', () => {
 	test.beforeEach(async ({ clearData }) => {
@@ -50,7 +51,7 @@ test.describe('staff critical-path accessibility', () => {
 			emailAddress: 'accessible.scanner-e2e@test.com',
 			zipCode: '80202',
 			code: 'A11YDUP1',
-			dateTime: '2026-12-15T16:00:00.000Z',
+			dateTime: e2eDateTime(12, 15, 16),
 			hasCheckedIn: true,
 		});
 		await signInAdminViaUi(page, account);

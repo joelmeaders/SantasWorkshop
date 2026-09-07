@@ -6,6 +6,15 @@ import {
 	fillAdminSignInForm,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import {
+	E2E_AUTH_EMULATOR_URL,
+	E2E_FIRESTORE_EMULATOR_URL,
+	E2E_PROGRAM_YEAR,
+	E2E_PROJECT_ID,
+	E2E_STORAGE_BUCKET,
+	E2E_STORAGE_EMULATOR_URL,
+	e2eDateTime,
+} from '../../fixtures/season';
 
 test.describe('staff identity, authorization, and runtime controls', () => {
 	test.beforeEach(async ({ clearData }) => {
@@ -167,7 +176,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		const account = defaultOwnerAccount();
 		await seedAdminUser(account);
 		const signInResponse = await request.post(
-			'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',
+			`${E2E_AUTH_EMULATOR_URL}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key`,
 			{
 				data: {
 					email: account.emailAddress,
@@ -187,7 +196,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			'ownerOperationLocks',
 		]) {
 			const response = await request.get(
-				`http://127.0.0.1:8180/v1/projects/demo-santashop/databases/(default)/documents/${collection}/rules-test`,
+			`${E2E_FIRESTORE_EMULATOR_URL}/v1/projects/${E2E_PROJECT_ID}/databases/(default)/documents/${collection}/rules-test`,
 				{ headers: { Authorization: `Bearer ${idToken}` } },
 			);
 			expect(response.status()).toBe(403);
@@ -221,7 +230,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			emailAddress: 'scan-rules-registration-e2e@test.com',
 			zipCode: '80202',
 			code: 'RULESCAN',
-			dateTime: '2026-12-15T16:00:00.000Z',
+			dateTime: e2eDateTime(12, 15, 16),
 			hasCheckedIn: true,
 			checkInDateTime: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
 		});
@@ -291,8 +300,8 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await seedDateTimeSlots([
 			{
 				id: 'rules-slot',
-				programYear: 2026,
-				dateTime: '2026-12-15T16:00:00.000Z',
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 15, 16),
 				maxSlots: 350,
 				slotsReserved: 10,
 				enabled: true,
@@ -305,7 +314,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			emailAddress: 'private-code-e2e@test.com',
 			zipCode: '80202',
 			code: 'PRIVATE1',
-			dateTime: '2026-12-15T16:00:00.000Z',
+			dateTime: e2eDateTime(12, 15, 16),
 			qrReady: true,
 		});
 
@@ -329,8 +338,8 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 				headers,
 				data: {
 					fields: {
-						programYear: { integerValue: '2026' },
-						dateTime: { timestampValue: '2026-12-15T16:00:00.000Z' },
+						programYear: { integerValue: E2E_PROGRAM_YEAR.toString() },
+						dateTime: { timestampValue: e2eDateTime(12, 15, 16) },
 						maxSlots: { integerValue: '350' },
 						slotsReserved: { integerValue: '0' },
 						enabled: { booleanValue: true },
@@ -346,7 +355,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		);
 		expect(qrLifecycle.current.path).toBeTruthy();
 		const anonymousQrRead = await request.get(
-			`http://127.0.0.1:9199/v0/b/demo-santashop.appspot.com/o/${encodeURIComponent(qrLifecycle.current.path as string)}?alt=media`,
+			`${E2E_STORAGE_EMULATOR_URL}/v0/b/${E2E_STORAGE_BUCKET}/o/${encodeURIComponent(qrLifecycle.current.path as string)}?alt=media`,
 		);
 		expect([401, 403]).toContain(anonymousQrRead.status());
 	});
@@ -362,7 +371,7 @@ const expectIonicDisabled = async (locator: Locator): Promise<void> => {
 };
 
 const firestoreCollectionUrl = (collection: string): string =>
-	`http://127.0.0.1:8180/v1/projects/demo-santashop/databases/(default)/documents/${collection}`;
+	`${E2E_FIRESTORE_EMULATOR_URL}/v1/projects/${E2E_PROJECT_ID}/databases/(default)/documents/${collection}`;
 
 const firestoreDocumentUrl = (collection: string, documentId: string): string =>
 	`${firestoreCollectionUrl(collection)}/${documentId}`;
@@ -372,7 +381,7 @@ const getFirestoreIdToken = async (
 	account: ReturnType<typeof defaultAdminAccount>,
 ): Promise<string> => {
 	const response = await request.post(
-		'http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',
+		`${E2E_AUTH_EMULATOR_URL}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key`,
 		{
 			data: {
 				email: account.emailAddress,

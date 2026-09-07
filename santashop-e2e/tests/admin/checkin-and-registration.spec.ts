@@ -5,6 +5,12 @@ import {
 	fillAdminSignInForm,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import {
+	E2E_FIRESTORE_EMULATOR_URL,
+	E2E_PROJECT_ID,
+	E2E_PROGRAM_YEAR,
+	e2eDateTime,
+} from '../../fixtures/season';
 
 const scanManualCode = async (page: import('@playwright/test').Page, code: string): Promise<void> => {
 	await page.goto('/admin/checkin/scan');
@@ -22,7 +28,7 @@ const registration = {
 	emailAddress: 'casey.checkin-e2e@test.com',
 	zipCode: '80202',
 	code: 'E2ECHK01',
-	dateTime: '2026-12-15T16:00:00.000Z',
+	dateTime: e2eDateTime(12, 15, 16),
 };
 
 test.describe('check-in and staff registration operations', () => {
@@ -232,20 +238,20 @@ test.describe('check-in and staff registration operations', () => {
 					firstName: 'Mixed',
 					lastName: 'Attempts',
 					emailAddress: 'mixed.attempts-e2e@test.com',
-					firstRiskOn: '2026-12-18T16:00:00.000Z',
-					latestRiskOn: '2026-12-20T16:00:00.000Z',
+					firstRiskOn: e2eDateTime(12, 18, 16),
+					latestRiskOn: e2eDateTime(12, 20, 16),
 					lateDuplicateAttemptCount: 2,
 					cancelledCodeAttemptCount: 2,
 					totalRiskAttemptCount: 4,
-					originalCheckInOn: '2026-12-15T16:00:00.000Z',
+					originalCheckInOn: e2eDateTime(12, 15, 16),
 				},
 				...Array.from({ length: 20 }, (_, index) => ({
 					customerId: `scan-page-${index + 1}-e2e`,
 					firstName: 'Paged',
 					lastName: `Customer ${index + 1}`,
 					emailAddress: `scan-page-${index + 1}-e2e@test.com`,
-					firstRiskOn: `2026-12-19T${String(23 - index).padStart(2, '0')}:00:00.000Z`,
-					latestRiskOn: `2026-12-19T${String(23 - index).padStart(2, '0')}:30:00.000Z`,
+					firstRiskOn: e2eDateTime(12, 19, 23 - index),
+					latestRiskOn: e2eDateTime(12, 19, 23 - index, 30),
 					lateDuplicateAttemptCount: 1,
 					totalRiskAttemptCount: 1,
 				})),
@@ -254,9 +260,9 @@ test.describe('check-in and staff registration operations', () => {
 					firstName: 'Prior',
 					lastName: 'Season',
 					emailAddress: 'prior.season-e2e@test.com',
-					firstRiskOn: '2025-12-20T15:00:00.000Z',
-					latestRiskOn: '2025-12-20T16:00:00.000Z',
-					programYear: 2025,
+					firstRiskOn: e2eDateTime(12, 20, 15, 0, 0, E2E_PROGRAM_YEAR - 1),
+					latestRiskOn: e2eDateTime(12, 20, 16, 0, 0, E2E_PROGRAM_YEAR - 1),
+					programYear: E2E_PROGRAM_YEAR - 1,
 					lateDuplicateAttemptCount: 1,
 					totalRiskAttemptCount: 1,
 				},
@@ -264,32 +270,32 @@ test.describe('check-in and staff registration operations', () => {
 			attempts: [
 				{
 					customerId: 'scan-mixed-e2e',
-					scannedOn: '2026-12-20T16:00:00.000Z',
-					priorEventOn: '2026-12-15T16:00:00.000Z',
+					scannedOn: e2eDateTime(12, 20, 16),
+					priorEventOn: e2eDateTime(12, 15, 16),
 					outcome: 'duplicate-risk',
 					inputMethod: 'manual',
 					codeSuffix: 'NEW1',
 				},
 				{
 					customerId: 'scan-mixed-e2e',
-					scannedOn: '2026-12-20T15:00:00.000Z',
-					priorEventOn: '2026-12-18T16:00:00.000Z',
+					scannedOn: e2eDateTime(12, 20, 15),
+					priorEventOn: e2eDateTime(12, 18, 16),
 					outcome: 'cancelled',
 					inputMethod: 'camera',
 					codeSuffix: 'OLD1',
 				},
 				{
 					customerId: 'scan-mixed-e2e',
-					scannedOn: '2026-12-19T14:00:00.000Z',
-					priorEventOn: '2026-12-15T16:00:00.000Z',
+					scannedOn: e2eDateTime(12, 19, 14),
+					priorEventOn: e2eDateTime(12, 15, 16),
 					outcome: 'duplicate-risk',
 					inputMethod: 'manual',
 					codeSuffix: 'NEW1',
 				},
 				{
 					customerId: 'scan-mixed-e2e',
-					scannedOn: '2026-12-18T16:00:00.000Z',
-					priorEventOn: '2026-12-17T16:00:00.000Z',
+					scannedOn: e2eDateTime(12, 18, 16),
+					priorEventOn: e2eDateTime(12, 17, 16),
 					outcome: 'cancelled',
 					inputMethod: 'camera',
 					codeSuffix: 'OLD1',
@@ -325,8 +331,8 @@ test.describe('check-in and staff registration operations', () => {
 		seedRegistration,
 	}) => {
 		await seedDateTimeSlots([
-			{ id: 'checkin-original-slot', programYear: 2026, dateTime: '2026-12-15T16:00:00.000Z', maxSlots: 8 },
-			{ id: 'checkin-edited-slot', programYear: 2026, dateTime: '2026-12-16T16:00:00.000Z', maxSlots: 8 },
+			{ id: 'checkin-original-slot', programYear: E2E_PROGRAM_YEAR, dateTime: e2eDateTime(12, 15, 16), maxSlots: 8 },
+			{ id: 'checkin-edited-slot', programYear: E2E_PROGRAM_YEAR, dateTime: e2eDateTime(12, 16, 16), maxSlots: 8 },
 		]);
 		await seedRegistration({ ...registration, uid: 'edited-checkin-e2e', code: 'E2EEDIT1' });
 		await signInAdminViaUi(page, defaultAdminAccount());
@@ -377,8 +383,7 @@ test.describe('check-in and staff registration operations', () => {
 			await expect(page.getByText(`Give the shopper ${action === 'add' ? '2 coupons' : '1 coupon'}.`, { exact: true })).toBeVisible();
 			// Read the emulator directly to prove that confirmation also saved the edit.
 			await expect.poll(async () => {
-				const project = process.env['E2E_EMULATOR_PROJECT'] ?? 'demo-santashop';
-				const response = await request.get(`http://127.0.0.1:8180/v1/projects/${project}/databases/(default)/documents/editedregistrations/${uid}`, {
+				const response = await request.get(`${E2E_FIRESTORE_EMULATOR_URL}/v1/projects/${E2E_PROJECT_ID}/databases/(default)/documents/editedregistrations/${uid}`, {
 					headers: { Authorization: 'Bearer owner' },
 				});
 				if (!response.ok()) return [];
@@ -410,7 +415,7 @@ test.describe('check-in and staff registration operations', () => {
 	});
 
 	test('ADMIN-PRE-001 creates a staff pre-registration with a selected slot', async ({ page, seedDateTimeSlots }) => {
-		await seedDateTimeSlots([{ id: 'pre-register-slot', programYear: 2026, dateTime: '2026-12-16T16:00:00.000Z', maxSlots: 8 }]);
+		await seedDateTimeSlots([{ id: 'pre-register-slot', programYear: E2E_PROGRAM_YEAR, dateTime: e2eDateTime(12, 16, 16), maxSlots: 8 }]);
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/pre-registration');
 		await fillIonicInput(page, 'ion-input[formControlName="firstName"]', 'Pre');
@@ -427,12 +432,18 @@ test.describe('check-in and staff registration operations', () => {
 		await expect(modal).toBeVisible({ timeout: 10000 });
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="firstName"]', 'Kid');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="lastName"]', 'One');
-		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="dateOfBirth"]', '2025-01-01');
-		await modal.locator('ion-input[formControlName="dateOfBirth"]').evaluate((element) =>
+		const childDateOfBirth = `${E2E_PROGRAM_YEAR - 1}-01-01`;
+		await fillIonicInput(
+			modal.page(),
+			'ion-modal ion-input[formControlName="dateOfBirth"]',
+			childDateOfBirth,
+		);
+		await modal.locator('ion-input[formControlName="dateOfBirth"]').evaluate((element, dateOfBirth) =>
 			element.dispatchEvent(new CustomEvent('ionChange', {
-				detail: { value: '2025-01-01' },
+				detail: { value: dateOfBirth },
 				bubbles: true,
 			})),
+			childDateOfBirth,
 		);
 		await modal.getByRole('button', { name: /save/i }).click();
 		await page.getByText('Yes, continue', { exact: true }).click();
@@ -453,12 +464,18 @@ test.describe('check-in and staff registration operations', () => {
 		await expect(modal).toBeVisible({ timeout: 10000 });
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="firstName"]', 'Kid');
 		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="lastName"]', 'Walk');
-		await fillIonicInput(modal.page(), 'ion-modal ion-input[formControlName="dateOfBirth"]', '2026-12-31');
-		await modal.locator('ion-input[formControlName="dateOfBirth"]').evaluate((element) =>
+		const childDateOfBirth = `${E2E_PROGRAM_YEAR}-12-31`;
+		await fillIonicInput(
+			modal.page(),
+			'ion-modal ion-input[formControlName="dateOfBirth"]',
+			childDateOfBirth,
+		);
+		await modal.locator('ion-input[formControlName="dateOfBirth"]').evaluate((element, dateOfBirth) =>
 			element.dispatchEvent(new CustomEvent('ionChange', {
-				detail: { value: '2026-12-31' },
+				detail: { value: dateOfBirth },
 				bubbles: true,
 			})),
+			childDateOfBirth,
 		);
 		await modal.getByRole('button', { name: /save/i }).click();
 		await page.getByText('Yes, continue', { exact: true }).click();

@@ -128,16 +128,28 @@ describe('PreRegistrationPage', () => {
 		);
 	});
 
-	it('blocks an existing customer and displays the duplicate-account warning', async () => {
-		component.form.controls['emailAddress'].setValue('family@example.test');
+	it('blocks duplicate registration before loading or invoking the callable', async () => {
+		component.form.patchValue({
+			firstName: 'Ada',
+			emailAddress: 'family@example.test',
+		});
 		searchUsersByEmailAddress.mockReturnValue(of([{ uid: 'customer-1' }]));
 
-		await expect(component.checkIfCustomerExists()).resolves.toBe(true);
+		await component.register();
+
+		expect(searchUsersByEmailAddress).toHaveBeenCalledWith(
+			'family@example.test',
+		);
 		expect(createAlert).toHaveBeenCalledWith(
 			expect.objectContaining({
+				header: 'Error registering',
 				subHeader: 'This customer already has an account.',
 			}),
 		);
+		expect(createAlert).toHaveBeenCalledTimes(1);
+		expect(createLoading).not.toHaveBeenCalled();
+		expect(callable).not.toHaveBeenCalled();
+		expect(component.form.controls['firstName'].value).toBe('Ada');
 	});
 
 	it('submits a new registration, resets the form, and confirms completion', async () => {
@@ -193,11 +205,15 @@ describe('PreRegistrationPage', () => {
 
 		await component.register();
 
+		expect(callable).toHaveBeenCalledOnce();
 		expect(createAlert).toHaveBeenCalledWith(
 			expect.objectContaining({
 				header: 'Error registering',
 				message: 'Callable unavailable',
 			}),
+		);
+		expect(createAlert).not.toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'Registration Complete' }),
 		);
 		expect(createAlert).toHaveBeenCalledTimes(1);
 		expect(loading.dismiss).toHaveBeenCalledOnce();

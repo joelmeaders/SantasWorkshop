@@ -8,10 +8,20 @@ on:
       - '.storybook/**'
       - 'angular.json'
       - 'eslint.config.js'
+      - 'vitest.config.mjs'
+      - 'vitest.setup.ts'
+      - 'test-helpers/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
+      - 'firebase.e2e.json'
+      - 'firestore.rules'
+      - 'storage.rules'
+      - 'santashop-e2e/fixtures/**'
+      - 'santashop-e2e/scripts/**'
+      - 'santashop-e2e/tests/public/**'
+      - 'santashop-e2e/playwright.config.ts'
       - 'scripts/env-loader.cjs'
       - 'scripts/check-storybook-coverage.mjs'
       - 'tsconfig.storybook.json'
@@ -24,6 +34,25 @@ permissions:
   contents: read
 
 env:
+  LOCAL_AWS_ACCESS_KEY_ID: e2e-not-used
+  LOCAL_AWS_SECRET_ACCESS_KEY: e2e-not-used
+  LOCAL_FIRESTORE_BACKUP_BUCKET: gs://demo-santashop-backups
+  LOCAL_REGISTRATION_EMAIL_RETURN_PATH: admin@example.invalid
+  LOCAL_REGISTRATION_EMAIL_SOURCE: no-reply@example.invalid
+  LOCAL_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+  LOCAL_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
+  LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop E2E
+  LOCAL_SANTASHOP_EVENT_MIN_INSTANCES: '0'
+  LOCAL_SANTASHOP_PROGRAM_YEAR: '2026'
+  LOCAL_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+  LOCAL_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
+  LOCAL_SANTASHOP_TIME_ZONE: America/Denver
+  LOCAL_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
+  LOCAL_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
+  LOCAL_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
+  LOCAL_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
+  LOCAL_SCHEDULED_USER_STATS: 55 23 * 11,12 *
+  LOCAL_SES_REGION: us-west-2
   TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
   TEST_FIREBASE_AUTH_DOMAIN: santas-workshop-test.firebaseapp.com
   TEST_FIREBASE_DATABASE_URL: https://santas-workshop-test-default-rtdb.firebaseio.com
@@ -47,6 +76,10 @@ jobs:
         with:
           node-version: '24.18.0'
           cache: 'pnpm'
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
       - run: pnpm install --frozen-lockfile
       - name: Run security audit (informational)
         id: security_audit
@@ -66,8 +99,19 @@ jobs:
             cat "$RUNNER_TEMP/security-audit.log"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      - run: pnpm run e2e:browser:setup:ci
+      - run: pnpm run e2e:test:app
+      - name: Upload customer E2E failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-e2e-failure-${{ github.job }}-${{ github.run_id }}
+          path: |
+            santashop-e2e/test-results
+            santashop-e2e/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
       - run: pnpm run ci:app:config:test
-      - run: pnpm run test:browser:setup
       - run: pnpm run ci:core:test
       - run: pnpm run ci:app:test
       - run: pnpm run ci:app:build:test

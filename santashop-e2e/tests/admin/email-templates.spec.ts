@@ -5,6 +5,7 @@ import {
 	defaultAdminAccount,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import { E2E_PROGRAM_YEAR } from '../../fixtures/season';
 
 test.describe('admin email-template tools', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
@@ -122,13 +123,13 @@ test.describe('admin email-template tools', () => {
 			readFileSync(
 				resolve(
 					__dirname,
-					'../../../santashop-admin/src/assets/email-templates/2026/registration-confirmation-2026-es.json',
+					`../../../santashop-admin/src/assets/email-templates/${E2E_PROGRAM_YEAR}/registration-confirmation-${E2E_PROGRAM_YEAR}-es.json`,
 				),
 				'utf8',
 			),
 		);
-		bundle.template.key = 'e2e-spanish-2026';
-		bundle.template.awsTemplateName = 'e2e-spanish-2026';
+		bundle.template.key = `e2e-spanish-${E2E_PROGRAM_YEAR}`;
+		bundle.template.awsTemplateName = `e2e-spanish-${E2E_PROGRAM_YEAR}`;
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/email-templates/create');
 		await page

@@ -70,6 +70,20 @@ const MODE_METADATA = {
 	},
 };
 
+const E2E_PORT_ENV_KEYS = {
+	auth: 'E2E_AUTH_PORT',
+	functions: 'E2E_FUNCTIONS_PORT',
+	firestore: 'E2E_FIRESTORE_PORT',
+	storage: 'E2E_STORAGE_PORT',
+};
+
+const DEFAULT_EMULATOR_PORTS = {
+	auth: 9099,
+	functions: 5001,
+	firestore: 8080,
+	storage: 9199,
+};
+
 const FIREBASE_CONFIG_ENV_KEYS = {
 	apiKey: 'FIREBASE_API_KEY',
 	authDomain: 'FIREBASE_AUTH_DOMAIN',
@@ -181,6 +195,28 @@ const parseShopDays = (mode) => {
 	return days;
 };
 
+const parseE2ePort = (envKey) => {
+	const value = process.env[envKey];
+	if (value === undefined) return undefined;
+
+	const port = Number(value);
+	if (!Number.isInteger(port) || port < 1 || port > 65535) {
+		throw new Error(`${envKey} must be an integer between 1 and 65535.`);
+	}
+
+	return port;
+};
+
+const buildE2eEmulatorPorts = () => {
+	const defaults = MODE_METADATA.e2e.emulatorPorts;
+	return Object.fromEntries(
+		Object.entries(E2E_PORT_ENV_KEYS).map(([service, envKey]) => [
+			service,
+			parseE2ePort(envKey) ?? defaults[service],
+		]),
+	);
+};
+
 const buildAppConfig = (target, mode) => {
 	const packageConfig = readAppPackageConfig(target);
 	const modeConfig = MODE_METADATA[mode];
@@ -209,12 +245,10 @@ const buildAppConfig = (target, mode) => {
 		appCheckEnabled: modeConfig.appCheckEnabled,
 		programYear,
 		shopDays,
-		emulatorPorts: modeConfig.emulatorPorts ?? {
-			auth: 9099,
-			functions: 5001,
-			firestore: 8080,
-			storage: 9199,
-		},
+		emulatorPorts:
+			mode === 'e2e'
+				? buildE2eEmulatorPorts()
+				: modeConfig.emulatorPorts ?? DEFAULT_EMULATOR_PORTS,
 	};
 };
 

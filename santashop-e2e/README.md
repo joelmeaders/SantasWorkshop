@@ -15,7 +15,7 @@ End-to-end testing suite for the SantaShop application using Playwright.
 pnpm install
 
 # Install Playwright browsers
-pnpm --filter @santashop/e2e exec playwright install
+pnpm --filter @santashop/e2e exec playwright install chromium
 ```
 
 ## Running Tests
@@ -96,15 +96,20 @@ The tests are configured to:
   retaining Node 24 for workspace tooling
 - Confirm an emulator-only callable loaded before Playwright begins
 - Use `firebase emulators:exec` to own emulator startup and shutdown for each suite
-- Run the full suite with Playwright's Pixel 5 Chromium profile
-- Only the Pixel 5 Chromium project is enabled. Desktop, Firefox, and WebKit
-  projects are disabled for now; existing compatibility specs remain available
-  for optional browser matrix execution.
+- Run the main suite with Playwright's Pixel 5 Chromium profile
+- Run the bounded `desktop-chrome-smoke` project for `desktop-smoke.spec.ts`.
+  Firefox and WebKit projects remain disabled.
 - Run sequentially in one worker because tests share emulator state
 - Stop after the first failed or timed-out test (`maxFailures: 1`)
 - Generate HTML reports
 - Take screenshots on failure
 - Record traces for debugging
+
+For an isolated emulator run, set each `E2E_*_PORT` value to the matching port
+in the separately provided Firebase configuration. The existing root E2E
+commands use `firebase.e2e.json` and its default ports. Set
+`FUNCTIONS_EMULATOR_URL` to the full Functions emulator base URL when the
+readiness callable uses an alternate Functions port.
 
 ## Writing Tests
 

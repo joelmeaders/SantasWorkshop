@@ -9,6 +9,7 @@ import {
 	selectAppointmentViaUi,
 	submitRegistrationViaUi,
 } from '../../fixtures/registration-helpers';
+import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
 
 test.describe('public entry and runtime operating controls', () => {
 	test.beforeEach(async ({ clearData }) => {
@@ -54,9 +55,9 @@ test.describe('public entry and runtime operating controls', () => {
 		await seedDateTimeSlots([
 			{
 				id: 'spanish-registration-slot',
-				programYear: 2026,
-				dateTime: '2026-12-12T16:00:00.000Z',
-				lastUpdated: '2026-01-01T00:00:00.000Z',
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 12, 16),
+				lastUpdated: e2eDateTime(1, 1, 0),
 				maxSlots: 10,
 				slotsReserved: 0,
 				enabled: true,

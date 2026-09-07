@@ -14,10 +14,15 @@ import {
 	submitRegistrationViaUi,
 } from '../../fixtures/registration-helpers';
 import type { Page } from '@playwright/test';
+import {
+	E2E_PROGRAM_YEAR,
+	e2eCalendarDateLabel,
+	e2eDateTime,
+} from '../../fixtures/season';
 
-const TEST_PROGRAM_YEAR = new Date().getFullYear();
+const TEST_PROGRAM_YEAR = E2E_PROGRAM_YEAR;
 const testSlotDate = (year: number, day: number, hour: number): string =>
-	new Date(Date.UTC(year, 11, day, hour)).toISOString();
+	e2eDateTime(12, day, hour, 0, 0, year);
 
 const refreshPublicParameters = async (page: Page): Promise<void> => {
 	await page.evaluate(() => window.dispatchEvent(new Event('online')));
@@ -139,42 +144,42 @@ test.describe('customer registration lifecycle', () => {
 		await seedDateTimeSlots([
 			{
 				id: 'public-slot-1',
-				programYear: TEST_PROGRAM_YEAR,
-				dateTime: testSlotDate(TEST_PROGRAM_YEAR, 6, 16),
-				lastUpdated: testSlotDate(TEST_PROGRAM_YEAR, 1, 0),
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 6, 16),
+				lastUpdated: e2eDateTime(12, 1, 0),
 				maxSlots: 10,
 				slotsReserved: 2,
 				enabled: true,
 			},
 			{
 				id: 'public-slot-2',
-				programYear: TEST_PROGRAM_YEAR,
-				dateTime: testSlotDate(TEST_PROGRAM_YEAR, 6, 17),
-				lastUpdated: testSlotDate(TEST_PROGRAM_YEAR, 1, 0),
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 7, 16),
+				lastUpdated: e2eDateTime(12, 1, 0),
 				maxSlots: 10,
 				slotsReserved: 3,
 				enabled: true,
 			},
 			{
 				id: 'disabled-slot',
-				programYear: TEST_PROGRAM_YEAR,
-				dateTime: testSlotDate(TEST_PROGRAM_YEAR, 6, 18),
-				lastUpdated: testSlotDate(TEST_PROGRAM_YEAR, 1, 0),
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 8, 16),
+				lastUpdated: e2eDateTime(12, 1, 0),
 				maxSlots: 10,
 				slotsReserved: 0,
 				enabled: false,
 			},
 			{
 				id: 'other-season-slot',
-				programYear: TEST_PROGRAM_YEAR - 1,
-				dateTime: testSlotDate(TEST_PROGRAM_YEAR - 1, 7, 16),
-				lastUpdated: testSlotDate(TEST_PROGRAM_YEAR - 1, 1, 0),
+				programYear: E2E_PROGRAM_YEAR - 1,
+				dateTime: e2eDateTime(12, 7, 16, 0, 0, E2E_PROGRAM_YEAR - 1),
+				lastUpdated: e2eDateTime(12, 1, 0, 0, 0, E2E_PROGRAM_YEAR - 1),
 				maxSlots: 10,
 				slotsReserved: 0,
 				enabled: true,
 			},
 		]);
-		const child = defaultTestChild({ dateOfBirth: `${TEST_PROGRAM_YEAR - 11}-01-01` });
+		const child = defaultTestChild({ dateOfBirth: `${E2E_PROGRAM_YEAR - 11}-01-01` });
 		const account = randomAccount();
 		const updatedEmailAddress = `updated-${account.emailAddress}`;
 		await createAccountViaUi(page, account);
@@ -217,7 +222,9 @@ test.describe('customer registration lifecycle', () => {
 					exact: true,
 				}),
 		).toBeVisible();
-		await expect(page.locator('app-confirmation')).toContainText(`January 1, ${TEST_PROGRAM_YEAR - 11}`);
+		await expect(page.locator('app-confirmation')).toContainText(
+			e2eCalendarDateLabel(1, 1, E2E_PROGRAM_YEAR - 11),
+		);
 		await expect(page.locator('#eventInformationButton')).toBeVisible();
 		const lifecycle = await inspectRegistrationQrLifecycle(updatedEmailAddress);
 		expect(lifecycle.registration.hasSubmittedRegistration).toBe(true);

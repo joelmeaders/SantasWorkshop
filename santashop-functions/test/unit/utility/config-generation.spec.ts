@@ -199,6 +199,10 @@ const MANAGED_ENV_KEYS = [
 	'SANTASHOP_SIGNUP_MIN_INSTANCES',
 	'SANTASHOP_EVENT_MIN_INSTANCES',
 	'SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT',
+	'E2E_AUTH_PORT',
+	'E2E_FUNCTIONS_PORT',
+	'E2E_FIRESTORE_PORT',
+	'E2E_STORAGE_PORT',
 ];
 
 const originalEnv = new Map<string, string | undefined>();
@@ -297,6 +301,68 @@ describe('config.firebase.cjs', () => {
 		expect(localConfig.appCheckEnabled).toBe(false);
 		expect(localConfig.emulatorPorts.firestore).toBe(8080);
 		expect(e2eConfig.emulatorPorts.firestore).toBe(8180);
+	});
+
+	it('applies optional E2E emulator port overrides to generated app config', () => {
+		setManagedEnv({
+			...FIREBASE_ENV_KEYS,
+			...FUNCTIONS_ENV_KEYS,
+			E2E_AUTH_PORT: '19099',
+			E2E_FUNCTIONS_PORT: '15001',
+			E2E_FIRESTORE_PORT: '18180',
+			E2E_STORAGE_PORT: '19199',
+		});
+
+		const e2eConfig = configFirebase.buildAppConfig('app', 'e2e');
+		const moduleText = configFirebase.renderAppConfigModule(e2eConfig);
+
+		expect(e2eConfig.emulatorPorts).toEqual({
+			auth: 19099,
+			functions: 15001,
+			firestore: 18180,
+			storage: 19199,
+		});
+		expect(moduleText).toContain('auth: 19099');
+		expect(moduleText).toContain('functions: 15001');
+		expect(moduleText).toContain('firestore: 18180');
+		expect(moduleText).toContain('storage: 19199');
+	});
+
+	it('preserves E2E emulator defaults when overrides are omitted', () => {
+		const e2eConfig = configFirebase.buildAppConfig('admin', 'e2e');
+
+		expect(e2eConfig.emulatorPorts).toEqual({
+			auth: 9099,
+			functions: 5001,
+			firestore: 8180,
+			storage: 9199,
+		});
+	});
+
+	it('does not apply E2E port overrides to local config', () => {
+		process.env['E2E_FIRESTORE_PORT'] = '18180';
+
+		expect(
+			configFirebase.buildAppConfig('app', 'local').emulatorPorts,
+		).toEqual({
+			auth: 9099,
+			functions: 5001,
+			firestore: 8080,
+			storage: 9199,
+		});
+	});
+
+	it.each([
+		['E2E_AUTH_PORT', '0'],
+		['E2E_FUNCTIONS_PORT', '65536'],
+		['E2E_FIRESTORE_PORT', 'not-a-port'],
+		['E2E_STORAGE_PORT', '8080.5'],
+	])('rejects invalid E2E port %s', (envKey, value) => {
+		process.env[envKey] = value;
+
+		expect(() => configFirebase.buildAppConfig('app', 'e2e')).toThrow(
+			`${envKey} must be an integer between 1 and 65535.`,
+		);
 	});
 
 	it('renders app config with the mode-specific App Check flag', () => {

@@ -77,6 +77,11 @@ export default defineConfig({
 			testIgnore: /desktop-smoke\.spec\.ts$/,
 			use: { ...devices['Pixel 5'] },
 		},
+		{
+			name: 'desktop-chrome-smoke',
+			testMatch: /desktop-smoke\.spec\.ts$/,
+			use: { ...devices['Desktop Chrome'] },
+		},
 	],
 
 	/* Run your local dev server before starting the tests */

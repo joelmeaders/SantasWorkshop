@@ -2,9 +2,9 @@ import { afterEach, vi } from 'vitest';
 
 process.env['TZ'] = 'UTC';
 process.env['GCLOUD_PROJECT'] = 'santas-workshop-test';
-process.env['FIRESTORE_EMULATOR_HOST'] = '127.0.0.1:8080';
-process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
-process.env['FIREBASE_STORAGE_EMULATOR_HOST'] = '127.0.0.1:9199';
+process.env['FIRESTORE_EMULATOR_HOST'] ??= '127.0.0.1:8080';
+process.env['FIREBASE_AUTH_EMULATOR_HOST'] ??= '127.0.0.1:9099';
+process.env['FIREBASE_STORAGE_EMULATOR_HOST'] ??= '127.0.0.1:9199';
 process.env['FIREBASE_CONFIG'] = JSON.stringify({
 	projectId: 'santas-workshop-test',
 	storageBucket: 'santas-workshop-test.appspot.com',

@@ -5,6 +5,14 @@ import {
 	navigateToScheduleEditorViaLanding,
 	signInAdminViaUi,
 } from '../../../fixtures/admin-helpers';
+import {
+	E2E_PROGRAM_YEAR,
+	e2eDate,
+	e2eDateTime,
+	e2eDateLabel,
+	e2eScheduleSlotId,
+	e2eScheduleInitializationPhrase,
+} from '../../../fixtures/season';
 
 test.describe('admin schedule editor - generate schedules', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
@@ -23,8 +31,8 @@ test.describe('admin schedule editor - generate schedules', () => {
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
 		await expect(page.locator('#generateSchedulesButton')).toBeVisible();
-		await fillIonicInput(page, '#generateStartDate', '2026-12-12');
-		await fillIonicInput(page, '#generateEndDate', '2026-12-12');
+		await fillIonicInput(page, '#generateStartDate', e2eDate(12, 12));
+		await fillIonicInput(page, '#generateEndDate', e2eDate(12, 12));
 		await fillIonicInput(page, '#generateCapacity', '20');
 		await page.click('#generateSchedulesButton');
 		const alert = page.locator('ion-alert');
@@ -35,12 +43,12 @@ test.describe('admin schedule editor - generate schedules', () => {
 		await alert.getByRole('textbox', {
 			name: 'Exact confirmation phrase',
 		}).fill(
-			'INITIALIZE SCHEDULE demo-santashop 2026',
+			e2eScheduleInitializationPhrase(),
 		);
 		await alert.getByRole('button', { name: 'Initialize' }).click();
 
 		// Assert
-		await expect(page.locator('text=Saturday, Dec 12, 2026')).toBeVisible();
+		await expect(page.getByText(e2eDateLabel(e2eDateTime(12, 12, 18)), { exact: false })).toBeVisible();
 		await expect(page.locator('text=5 slots')).toBeVisible();
 		await expect(page.locator('[id^="scheduleRow-"]')).toHaveCount(5);
 		await expect(
@@ -54,9 +62,9 @@ test.describe('admin schedule editor - generate schedules', () => {
 	}) => {
 		await seedDateTimeSlots([
 			{
-				id: '2026-20261212180000000',
-				programYear: 2026,
-				dateTime: '2026-12-12T18:00:00.000Z',
+				id: e2eScheduleSlotId(e2eDateTime(12, 12, 18)),
+				programYear: E2E_PROGRAM_YEAR,
+				dateTime: e2eDateTime(12, 12, 18),
 				maxSlots: 99,
 				slotsReserved: 2,
 			},
@@ -64,8 +72,8 @@ test.describe('admin schedule editor - generate schedules', () => {
 		const adminAccount = defaultOwnerAccount();
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
-		await fillIonicInput(page, '#generateStartDate', '2026-12-12');
-		await fillIonicInput(page, '#generateEndDate', '2026-12-12');
+		await fillIonicInput(page, '#generateStartDate', e2eDate(12, 12));
+		await fillIonicInput(page, '#generateEndDate', e2eDate(12, 12));
 		await fillIonicInput(page, '#generateCapacity', '20');
 		await page.locator('#generateSchedulesButton').click();
 		const alert = page.locator('ion-alert');
@@ -74,13 +82,13 @@ test.describe('admin schedule editor - generate schedules', () => {
 			.fill(adminAccount.password);
 		await alert
 			.getByRole('textbox', { name: 'Exact confirmation phrase' })
-			.fill('INITIALIZE SCHEDULE demo-santashop 2026');
+			.fill(e2eScheduleInitializationPhrase());
 		await alert.getByRole('button', { name: 'Initialize' }).click();
 
 		await expect(page.getByText('Created 4 schedules and skipped 1 duplicates.')).toBeVisible();
 		await expect(page.locator('[id^="scheduleRow-"]')).toHaveCount(5);
 		await expect(
-			page.locator('#scheduleRow-2026-20261212180000000'),
+			page.locator(`#scheduleRow-${e2eScheduleSlotId(e2eDateTime(12, 12, 18))}`),
 		).toContainText('Reserved 2 of 99');
 	});
 });

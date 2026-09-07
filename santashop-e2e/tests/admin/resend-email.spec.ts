@@ -4,6 +4,7 @@ import {
 	fillIonicInput,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import { e2eDateTime } from '../../fixtures/season';
 
 const completeRegistration = {
 	uid: 'resend-email-registration-e2e',
@@ -12,7 +13,7 @@ const completeRegistration = {
 	emailAddress: 'resend.email-e2e@test.com',
 	zipCode: '80202',
 	code: 'E2ERES01',
-	dateTime: '2026-12-15T16:00:00.000Z',
+	dateTime: e2eDateTime(12, 15, 16),
 };
 
 test.describe('admin resend-email tool', () => {

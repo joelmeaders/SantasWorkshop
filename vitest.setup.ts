@@ -14,6 +14,18 @@ Object.defineProperty(navigator, 'mediaDevices', {
 
 vi.mock('firebase/analytics', () => ({ logEvent: vi.fn(), getAnalytics: vi.fn() }));
 
+// Core services can be loaded through shared chunks before an individual spec runs.
+// Register the Remote Config boundary here so no unit suite can use the live SDK.
+vi.mock('firebase/remote-config', () => ({
+	activate: vi.fn(),
+	ensureInitialized: vi.fn(),
+	fetchAndActivate: vi.fn(),
+	getRemoteConfig: vi.fn(),
+	getValue: vi.fn(),
+	isSupported: vi.fn().mockResolvedValue(false),
+	onConfigUpdate: vi.fn(),
+}));
+
 vi.mock('firebase/auth', () => ({
 	getAuth: vi.fn(),
 	connectAuthEmulator: vi.fn(),

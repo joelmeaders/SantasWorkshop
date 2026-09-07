@@ -1,18 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultPublicParameters, PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY } from '@santashop/models';
+import * as firebaseRemoteConfig from 'firebase/remote-config';
 import { FIREBASE_APP } from '../tokens';
 import { PUBLIC_PARAMETERS_RUNTIME, provideRemoteConfigPublicParameters, type PublicParametersRuntime } from './remote-config-public-parameters.service';
 
-const sdk = vi.hoisted(() => ({
-	activate: vi.fn(), ensureInitialized: vi.fn(), fetchAndActivate: vi.fn(),
-	getRemoteConfig: vi.fn(), getValue: vi.fn(), isSupported: vi.fn(), onConfigUpdate: vi.fn(),
-}));
-vi.mock('firebase/remote-config', () => sdk);
+const sdk = vi.mocked(firebaseRemoteConfig);
 
 describe('Remote Config SDK adapter', () => {
 	let runtime: PublicParametersRuntime;
-	const remote = { settings: {} };
+	const remote = { settings: {} } as firebaseRemoteConfig.RemoteConfig;
+	const value = (text: string, source: firebaseRemoteConfig.ValueSource = 'remote'): firebaseRemoteConfig.Value => ({
+		getSource: (): firebaseRemoteConfig.ValueSource => source,
+		asString: (): string => text,
+		asBoolean: (): boolean => false,
+		asNumber: (): number => 0,
+	});
 	beforeEach(() => {
 		vi.resetAllMocks();
 		sdk.isSupported.mockResolvedValue(true);
@@ -20,7 +23,7 @@ describe('Remote Config SDK adapter', () => {
 		sdk.ensureInitialized.mockResolvedValue(undefined);
 		sdk.fetchAndActivate.mockResolvedValue(true);
 		sdk.activate.mockResolvedValue(true);
-		sdk.getValue.mockReturnValue({ getSource: (): string => 'remote', asString: (): string => JSON.stringify(createDefaultPublicParameters()) });
+		sdk.getValue.mockReturnValue(value(JSON.stringify(createDefaultPublicParameters())));
 		TestBed.configureTestingModule({ providers: [
 			...provideRemoteConfigPublicParameters({ useEmulator: false }),
 			{ provide: FIREBASE_APP, useValue: { name: 'test-app' } },
@@ -47,7 +50,7 @@ describe('Remote Config SDK adapter', () => {
 		expect(runtime.listen(next, error)).toBe(unsubscribe);
 		const observer = sdk.onConfigUpdate.mock.calls[0]?.[1] as { next: () => void; error: (value: Error) => void; complete: () => void };
 		let finish: () => void = (): void => undefined;
-		sdk.activate.mockImplementation(() => new Promise<void>((resolve) => { finish = resolve; }));
+		sdk.activate.mockImplementation(() => new Promise<boolean>((resolve) => { finish = (): void => resolve(true); }));
 		observer.next();
 		expect(next).not.toHaveBeenCalled();
 		finish();
@@ -68,9 +71,9 @@ describe('Remote Config SDK adapter', () => {
 
 	it('rejects missing remote values and malformed fetched configuration', async () => {
 		await runtime.initialize();
-		sdk.getValue.mockReturnValue({ getSource: (): string => 'static', asString: (): string => '' });
+		sdk.getValue.mockReturnValue(value('', 'static'));
 		await expect(runtime.refresh()).rejects.toThrow('missing');
-		sdk.getValue.mockReturnValue({ getSource: (): string => 'remote', asString: (): string => '{broken' });
+		sdk.getValue.mockReturnValue(value('{broken'));
 		await expect(runtime.refresh()).rejects.toThrow();
 	});
 });

@@ -13,6 +13,9 @@ checks before test environment setup.
   registration-read permission from QR-artifact access.
 - Focused Angular tests: 16 shared source/SDK tests, 9 customer tests, and 24
   admin tests passed. Five owner-editor Storybook tests also passed.
+- Full core suite: all 171 tests across 22 files passed with coverage gates
+  after moving SDK mocks into the shared test setup. Production adapter code
+  was unchanged; this fixes preload differences between focused and full runs.
 - Customer emulator browser suite: all 50 tests passed. This covers controls,
   bilingual notices, registration, appointments, and submitted-record lifecycles.
 - Owner-editor emulator tests: all three passed, covering publication,
@@ -38,6 +41,26 @@ messages can change release sizes.
 Build input graphs confirm Firestore Lite remains in the customer startup
 graph, with no full Firestore SDK there. Both baseline and current builds retain
 the existing full SDK in deferred pre-registration chunks.
+
+## PR visual reference review
+
+[Windows CI run 34145385072](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34145385072)
+rendered all 182 story captures with their interaction and resource audits
+passing, from commit `74760a5`. The comparison gate correctly failed because
+reviewed references did not yet include the new UI.
+
+All 28 selected desktop/mobile images were visually reviewed before installation:
+ten new App settings states, six new update/reload prompts, and twelve landing
+and shell views with the new settings navigation row. The settings views retain
+the expected version, dirty state, maintenance switch, loading indicator, and
+failure controls. Navigation icons and text align, and English/Spanish update
+prompts fit their viewports. Page scrolling accounts for lower content outside
+the captured viewport.
+
+Only these Windows Server 2022 references were installed. An unrelated account
+form image had only 66 slightly different pixel values (maximum channel change
+5); its existing reference was retained. The reference update does not replace
+the next CI comparison or establish deployed browser acceptance.
 
 The admin runtime-controls test originally failed because Ionic removes the
 tab IDs when applying its disabled state. Captured DOM showed the tabs with

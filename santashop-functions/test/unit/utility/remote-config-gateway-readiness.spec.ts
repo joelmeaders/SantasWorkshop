@@ -27,6 +27,7 @@ const fixture = () => ({
 		uri: 'https://publicparametersgateway-example-uc.a.run.app',
 		invokerIamDisabled: false,
 		terminalCondition: { state: 'CONDITION_SUCCEEDED' },
+		scaling: { maxInstanceCount: 20 },
 		template: { scaling: { maxInstanceCount: 1 }, maxInstanceRequestConcurrency: 80, serviceAccount: reader },
 	},
 	policy: { bindings: [{ role: 'roles/run.invoker', members: [`serviceAccount:${reader}`], condition: undefined as unknown }] },
@@ -55,6 +56,11 @@ describe('private settings gateway release gate', () => {
 		const { fn, policy, service } = fixture();
 		service.template.scaling.maxInstanceCount = 10;
 		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('Live gateway revision'));
+	});
+	it('rejects manual service scaling because it ignores revision limits', () => {
+		const { fn, policy, service } = fixture();
+		Object.assign(service.scaling, { scalingMode: 'MANUAL', manualInstanceCount: 5 });
+		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('automatic Cloud Run service scaling'));
 	});
 	it('requires a matching live Cloud Run service inspection', () => {
 		const { fn, policy } = fixture();

@@ -32,6 +32,8 @@ const assessGateway = (projectId, fn, policy, env = process.env, service) => {
 		if (service.invokerIamDisabled === true) problems.push('Settings gateway IAM permission checks are disabled.');
 		if (service.defaultUriDisabled === true) problems.push('Settings gateway canonical URI is disabled.');
 		if (service.reconciling === true || service.terminalCondition?.state !== 'CONDITION_SUCCEEDED') problems.push('The gateway Cloud Run service has not reached a ready state.');
+		const serviceScaling = service.scaling ?? {};
+		if (serviceScaling.scalingMode === 'MANUAL' || serviceScaling.scalingMode === 'SCALING_MODE_MANUAL' || serviceScaling.manualInstanceCount !== undefined) problems.push('Settings gateway must use automatic Cloud Run service scaling.');
 		if (service.template?.scaling?.maxInstanceCount !== 1 || service.template?.maxInstanceRequestConcurrency !== 80 || service.template?.serviceAccount !== gatewayReader(projectId, env)) problems.push('Live gateway revision settings do not match the singleton reader contract.');
 		const traffic = service.traffic ?? [];
 		if (traffic.length && (traffic.length !== 1 || traffic[0].percent !== 100 || traffic[0].tag || (traffic[0].type !== 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST' && traffic[0].revision !== service.latestReadyRevision))) problems.push('Settings gateway traffic must target only the latest ready revision without extra tagged revisions.');

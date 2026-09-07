@@ -4,6 +4,19 @@ This is the operating contract for test promotion, production promotion,
 signup launch, and event-day check-in. A build or deploy alone is not release
 approval.
 
+## Manual deployment without repeating tests
+
+The app, admin, and Functions release workflows accept `deployment_target`
+(`test` or `prod`), `release_ref`, and `skip_tests`. The default remains a
+production promotion with tests enabled. Set `skip_tests` to `true` for a manual
+run that should omit automated test suites and their browser setup. The workflow
+summary records the selected target and ref and states that tests were skipped.
+
+Dependency installation, builds, artifact checks, environment readiness, and
+live deployment verification still run. Push-triggered deployments and pull
+request checks keep their normal test gates. A successful skipped-test deployment
+is deployment evidence only; cite the separate test run when reporting validation.
+
 ## Remote Config migration prerequisite
 
 For beta.3, public controls move to the unconditional client-template parameter
@@ -17,11 +30,12 @@ checks no longer share Firestore transaction atomicity; cached settings and
 in-flight work can outlive a publication.
 
 The September 7 inspection found 60 template reads per minute in each project.
-The current release gate requires 600 for the configured consumer instance
-ceiling and cold-start margin. Test setup could not request an increase through
-Cloud Quotas: the service reports increases unsupported. Resolve this through a
-supported quota process or a separately reviewed capacity/design change; do not
-treat the requested increase as granted or bypass the gate.
+The initial direct-polling design required 600. Cloud Quotas rejected that
+increase as unsupported. The repair introduces an IAM-private singleton reader
+with a 60-read budget and a deployment check for its identity, private invoker
+policy, instance limit, and canonical URI. Consumer capacity is unchanged. See
+[the gateway capacity model](remote-config.md#identities-and-capacity). Verify
+actual request rates and replacement/failure behavior before promotion.
 
 Complete deployed test measurements for client delivery time, backend
 propagation, recovery, rollback, and API request counts. Passing PR gates and

@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const requireFromTest = createRequire(import.meta.url);
@@ -13,6 +14,12 @@ const parity = requireFromTest('../../../../scripts/verify-functions-parity.cjs'
 };
 
 describe('Functions deployment parity', () => {
+	it('includes the real settings callables and private gateway in release verification', () => {
+		const source = readFileSync(new URL('../../../src/index.ts', import.meta.url), 'utf8');
+		const ids = parity.sourceFunctionIds(source);
+		expect(ids).toEqual(expect.arrayContaining(['readPublicParametersSettings', 'publishPublicParametersSettings', 'publicParametersGateway']));
+		expect(ids).not.toContain('testReadPublicParameters');
+	});
 	it('excludes emulator-only exports from the production inventory', () => {
 		const source = [
 			'export const liveA = onCall({}, handler);',

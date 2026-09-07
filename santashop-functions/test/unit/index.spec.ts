@@ -3,6 +3,7 @@ import { FUNCTION_REGION } from '../../src/utility/function-region';
 
 const setGlobalOptionsMock = vi.fn();
 const onCallMock = vi.fn();
+const onRequestMock = vi.fn();
 const onDocumentCreatedMock = vi.fn();
 const onScheduleMock = vi.fn();
 const onTaskDispatchedMock = vi.fn();
@@ -18,6 +19,7 @@ vi.mock('firebase-functions/v2/options', () => ({
 vi.mock('firebase-functions/v2/https', () => ({
 	HttpsError: class extends Error {},
 	onCall: onCallMock,
+	onRequest: onRequestMock,
 }));
 
 vi.mock('firebase-functions/v2/firestore', () => ({
@@ -40,6 +42,7 @@ describe('functions index exports', () => {
 	beforeEach(() => {
 		setGlobalOptionsMock.mockClear();
 		onCallMock.mockClear();
+		onRequestMock.mockClear();
 		onDocumentCreatedMock.mockClear();
 		onScheduleMock.mockClear();
 		onTaskDispatchedMock.mockClear();
@@ -47,6 +50,10 @@ describe('functions index exports', () => {
 		vi.resetModules();
 
 		onCallMock.mockImplementation((options, handler) => ({
+			options,
+			handler,
+		}));
+		onRequestMock.mockImplementation((options, handler) => ({
 			options,
 			handler,
 		}));
@@ -194,6 +201,23 @@ describe('functions index exports', () => {
 				}
 			).options,
 		).not.toHaveProperty('serviceAccount');
+	});
+	it('configures the public settings gateway as a singleton private reader endpoint', async () => {
+		delete process.env.FUNCTIONS_EMULATOR;
+		const subject = await import('../../src/index');
+		const gateway = subject.publicParametersGateway as unknown as {
+			options: Record<string, unknown>;
+		};
+		expect(gateway.options).toMatchObject({
+			cpu: 1,
+			concurrency: 80,
+			maxInstances: 1,
+			minInstances: 0,
+			invoker:
+				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
+				'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
+		});
+		expect(onRequestMock).toHaveBeenCalledTimes(1);
 	});
 	it('does not attach Remote Config identities in the emulator', async () => {
 		process.env.FUNCTIONS_EMULATOR = 'true';

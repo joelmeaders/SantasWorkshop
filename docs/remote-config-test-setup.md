@@ -1,5 +1,11 @@
 # Remote Config test setup evidence
 
+**Follow-up:** the merged deployment on September 7 passed all Functions tests,
+then stopped at the documented quota gate. The repair replaces direct consumer
+polling with a private singleton gateway. See [the current release design](remote-config.md)
+and [deployed QA evidence](remote-config-deployed-qa.md). The original setup and
+provider rejection below remain historical evidence; no quota increase occurred.
+
 Verified on **2026-09-07 at 16:49 UTC**, for **`santas-workshop-test` only**
 (project number `312672416598`). Setup is complete except for the template-read
 quota. This is not deployment or release approval.

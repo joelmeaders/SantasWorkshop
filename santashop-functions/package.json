@@ -30,6 +30,7 @@
 		"firebase": "catalog:functions",
 		"firebase-admin": "catalog:functions",
 		"firebase-functions": "catalog:functions",
+		"google-auth-library": "catalog:functions",
 		"qrcode": "catalog:functions",
 		"uuid": "catalog:functions"
 	},

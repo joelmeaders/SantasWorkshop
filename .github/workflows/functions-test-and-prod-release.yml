@@ -37,6 +37,19 @@ on:
         description: Commit SHA or ref to promote after test validation
         required: true
         type: string
+      deployment_target:
+        description: Deployment target
+        required: true
+        default: prod
+        type: choice
+        options:
+          - test
+          - prod
+      skip_tests:
+        description: Skip test suites for this manual deployment
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -85,13 +98,15 @@ env:
 
 jobs:
   unit_tests:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test' && !inputs.skip_tests)
     runs-on: ubuntu-latest
     env:
       TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
       - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
@@ -122,7 +137,7 @@ jobs:
       - run: pnpm run functions:test:unit
 
   integration_tests:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test' && !inputs.skip_tests)
     needs: unit_tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -132,6 +147,8 @@ jobs:
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
       - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
@@ -209,7 +226,13 @@ jobs:
           retention-days: 7
 
   deploy_test:
-    if: github.event_name == 'push'
+    if: >-
+      always() && !cancelled() && (
+        (github.event_name == 'push' && needs.integration_tests.result == 'success') ||
+        (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test' &&
+          ((inputs.skip_tests && needs.integration_tests.result == 'skipped') ||
+            (!inputs.skip_tests && needs.integration_tests.result == 'success')))
+      )
     # Deploy on a clean runner so emulator and browser processes cannot starve Firebase predeploy.
     needs: integration_tests
     runs-on: ubuntu-latest
@@ -221,6 +244,20 @@ jobs:
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+      - name: Record manual deployment selection
+        if: github.event_name == 'workflow_dispatch' && inputs.skip_tests
+        env:
+          SELECTED_RELEASE_REF: ${{ inputs.release_ref }}
+          SELECTED_DEPLOYMENT_TARGET: ${{ inputs.deployment_target }}
+        run: |
+          {
+            echo '### Manual deployment'
+            echo "- Selected ref: \`$SELECTED_RELEASE_REF\`"
+            echo "- Target: \`$SELECTED_DEPLOYMENT_TARGET\`"
+            echo '- Tests: skipped by request'
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
@@ -278,7 +315,7 @@ jobs:
           node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"
 
   deploy_prod:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -290,6 +327,18 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.release_ref }}
+      - name: Record manual deployment selection
+        if: inputs.skip_tests
+        env:
+          SELECTED_RELEASE_REF: ${{ inputs.release_ref }}
+          SELECTED_DEPLOYMENT_TARGET: ${{ inputs.deployment_target }}
+        run: |
+          {
+            echo '### Manual deployment'
+            echo "- Selected ref: \`$SELECTED_RELEASE_REF\`"
+            echo "- Target: \`$SELECTED_DEPLOYMENT_TARGET\`"
+            echo '- Tests: skipped by request'
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
@@ -329,6 +378,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
+        if: inputs.skip_tests == false
       - run: pnpm run ci:functions:deploy:prod
       - uses: google-github-actions/setup-gcloud@v3
       - name: Verify live production Functions match source

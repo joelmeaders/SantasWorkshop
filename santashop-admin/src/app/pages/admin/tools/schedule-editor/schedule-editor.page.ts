@@ -1,5 +1,10 @@
-import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	inject,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
 	ReactiveFormsModule,
 	UntypedFormControl,
@@ -82,7 +87,6 @@ type CapacityInputValue = string | number | null | undefined;
 	providers: [ScheduleEditorService],
 	imports: [
 		HeaderComponent,
-		AsyncPipe,
 		FormsModule,
 		ReactiveFormsModule,
 		TimeSlotPipe,
@@ -110,7 +114,9 @@ export class ScheduleEditorPage {
 	private readonly authService = inject(AuthService);
 
 	public readonly availableYears = this.buildYearOptions();
-	public readonly isOwner$ = this.authService.isOwner$;
+	public readonly isOwner = toSignal(this.authService.isOwner$, {
+		initialValue: false,
+	});
 	public readonly hourOptions = Array.from({ length: 24 }, (_, hour) => hour);
 
 	public year = this.defaultProgramYear;
@@ -136,7 +142,7 @@ export class ScheduleEditorPage {
 		enabled: new UntypedFormControl(''),
 	});
 
-	public readonly slots$ = this.scheduleEditorService.slots$.pipe(
+	private readonly slots$ = this.scheduleEditorService.slots$.pipe(
 		map((slots) => slots.map((slot) => this.mapSlotRow(slot))),
 		tap((slots) => {
 			this.latestSlots = slots;
@@ -144,9 +150,9 @@ export class ScheduleEditorPage {
 		shareReplay(1),
 	);
 
-	public readonly groupedSlots$ = this.slots$.pipe(
-		map((slots) => this.groupSlotsByDate(slots)),
-		shareReplay(1),
+	public readonly slots = toSignal(this.slots$, { initialValue: [] });
+	public readonly groupedSlots = computed(() =>
+		this.groupSlotsByDate(this.slots()),
 	);
 
 	constructor() {

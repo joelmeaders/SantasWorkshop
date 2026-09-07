@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalController } from '@ionic/angular/standalone';
 import type { DateTimeSlot } from '@santashop/models';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	createModalControllerMock,
@@ -51,7 +51,7 @@ describe('ChangeDatetimeModalComponent', () => {
 		await fixture.whenStable();
 
 		expect(fixture.nativeElement.querySelector('[data-change-slot-id="available"]')).toBeTruthy();
-		expect(await firstValueFrom(component.availableDays$)).toHaveLength(1);
+		expect(component.availableDays()).toHaveLength(1);
 	});
 
 	it('groups slots by the Denver event date independently of the host timezone', async (): Promise<void> => {
@@ -61,12 +61,30 @@ describe('ChangeDatetimeModalComponent', () => {
 		]);
 
 		const eventDay = Date.UTC(2026, 11, 7, 12);
-		expect(await firstValueFrom(component.availableDays$)).toEqual([
+		expect(component.availableDays()).toEqual([
 			eventDay,
 		]);
 		expect(
-			await firstValueFrom(component.availableSlotsByDay$(eventDay)),
+			component.availableSlotsByDay(eventDay),
 		).toHaveLength(2);
+	});
+
+	it('switches to replacement slot streams and ignores the old stream', async (): Promise<void> => {
+		const replacement = new BehaviorSubject<DateTimeSlot[]>([
+			slot('replacement', new Date('2026-12-22T11:00:00')),
+		]);
+		fixture.componentRef.setInput('availableSlots', replacement.asObservable());
+		await fixture.whenStable();
+
+		expect(component.availableSlotsByDay(component.availableDays()[0])).toEqual(
+			expect.arrayContaining([expect.objectContaining({ id: 'replacement' })]),
+		);
+		slots.next([slot('old-stream', new Date('2026-12-23T11:00:00'))]);
+		await fixture.whenStable();
+		expect(component.availableDays()).toHaveLength(1);
+		expect(component.availableSlotsByDay(component.availableDays()[0])[0].id).toBe(
+			'replacement',
+		);
 	});
 
 	it('reports availability and dismisses with the selected action', async (): Promise<void> => {
@@ -74,7 +92,7 @@ describe('ChangeDatetimeModalComponent', () => {
 
 		expect(component.spotsRemaining({ ...selected, slotsReserved: 2 })).toBe('1 spot');
 		expect(component.spotsRemaining({ ...selected, enabled: false })).toBe('Unavailable');
-		expect(component.isCurrentSlot(component.currentSlot!)).toBe(true);
+		expect(component.isCurrentSlot(component.currentSlotValue()!)).toBe(true);
 		expect(component.isCurrentSlot(selected)).toBe(false);
 
 		await component.cancel();

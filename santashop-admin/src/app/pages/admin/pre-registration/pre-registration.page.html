@@ -113,7 +113,7 @@
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
 					<span>
-						<ion-label> {{ chosenReferrer$ | async }} </ion-label>
+						<ion-label> {{ chosenReferrer() }} </ion-label>
 						@if (!form.controls['referredBy'].value) {
 						<ion-note
 							color="danger"
@@ -126,7 +126,7 @@
 					</span>
 				</ion-item>
 				<div class="margin-top">
-					@if (children$ | async; as children) {
+				@if (children(); as children) {
 					<admin-manage-children
 						[children]="children"
 						(adddedChild)="addChild($event)"
@@ -144,7 +144,7 @@
 					</ion-text>
 					}
 				</ion-item-divider>
-				@if (availableSlots$ | async; as slots) {
+				@if (availableSlots(); as slots) {
 				<ion-item>
 					<ion-select
 						label="Available Days/Times"
@@ -171,7 +171,7 @@
 				button
 				color="success"
 				class="confirm-button"
-				[disabled]="form.invalid || !(children$ | async)?.length"
+				[disabled]="form.invalid || !children().length"
 				(click)="register()"
 			>
 				<ion-label>

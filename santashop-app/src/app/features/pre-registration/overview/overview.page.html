@@ -1,5 +1,5 @@
 <ion-content color="light" class="workspace-page">
-	@let canSubmit = (canSubmit$ | async) ?? false;
+	@let canSubmitValue = canSubmit();
 	<ion-grid class="workspace-shell height-max es-mg-bottom-xxl">
 		<ion-row class="height-max">
 			<ion-col size="12">
@@ -18,8 +18,8 @@
 
 						<section class="workflow-section children-step" id="children" tabindex="-1" aria-labelledby="children-heading">
 							<app-children-card
-								[children]="(children$ | async) ?? []"
-								[childCount]="(childCount$ | async) ?? 0"
+								[children]="children()"
+								[childCount]="childCount()"
 								[programYear]="programYear"
 								[busy]="isSaving()"
 								[collapsed]="reviewing()"
@@ -30,16 +30,16 @@
 
 						<section class="workflow-section appointment-step" id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
 							<app-schedule-card
-								[dateTimeSlot]="dateTimeSlot$ | async"
-								[slots]="availableSlots$ | async"
-								[canChooseDateTime]="(canChooseDateTime$ | async) ?? false"
+								[dateTimeSlot]="dateTimeSlot()"
+								[slots]="availableSlots()"
+								[canChooseDateTime]="canChooseDateTime()"
 								[busy]="isSaving()"
 								[collapsed]="reviewing()"
 								(selectRequested)="chooseDateTime($event)"
 							/>
 						</section>
 
-						@if (canSubmit && !reviewing()) {
+						@if (canSubmitValue && !reviewing()) {
 						<section
 							class="completion-nudge"
 							animate.enter="completion-nudge-enter"
@@ -71,10 +71,10 @@
 
 						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="workflow-section review-step es-mg-bottom-xxl">
 							<app-submit-card
-								[children]="(children$ | async) ?? []"
-								[dateTimeSlot]="dateTimeSlot$ | async"
-								[emailAddress]="(emailAddress$ | async) ?? ''"
-								[canSubmit]="canSubmit"
+								[children]="children()"
+								[dateTimeSlot]="dateTimeSlot()"
+								[emailAddress]="emailAddress()"
+								[canSubmit]="canSubmitValue"
 								[busy]="isSaving()"
 								(submitRequested)="submitRegistration()"
 								(emailUpdateRequested)="updateEmailAddress($event)"

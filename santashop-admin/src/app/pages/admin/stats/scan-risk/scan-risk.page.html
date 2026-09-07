@@ -4,7 +4,7 @@
 	<ion-button fill="outline" (click)="refresh()"
 		>Refresh scan risks</ion-button
 	>
-	@if (state$ | async; as state) { @if (state.status === 'loading') {
+	@if (state(); as state) { @if (state.status === 'loading') {
 	<div class="state">
 		<ion-spinner />
 		<p>Loading scan risks…</p>

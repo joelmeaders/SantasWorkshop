@@ -46,8 +46,8 @@
 			<ion-card>
 				<ion-card-header>
 					<ion-card-title>
-						@if (isCreateMode$ | async) { Create Email Template }
-						@else { Edit Email Template }
+						@if (isCreateMode()) { Create Email Template } @else {
+						Edit Email Template }
 					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
@@ -168,7 +168,7 @@
 							fill="outline"
 							(click)="publishTemplate()"
 							(keydown.enter)="publishTemplate()"
-							[disabled]="!selectedRevisionId || hasUnsavedContent()"
+							[disabled]="!selectedRevisionId() || hasUnsavedContent()"
 						>
 							<ion-icon
 								name="cloud-upload-outline"
@@ -189,7 +189,7 @@
 							></ion-icon>
 							Refresh Preview
 						</ion-button>
-						@if ((isCreateMode$ | async) === false) {
+						@if (!isCreateMode()) {
 						<ion-button
 							fill="outline"
 							color="danger"
@@ -255,7 +255,7 @@
 				</ion-card-header>
 				<ion-card-content>
 					<admin-email-template-code-editor
-						[value]="html"
+						[value]="html()"
 						(valueChange)="onHtmlChange($event)"
 					></admin-email-template-code-editor>
 				</ion-card-content>
@@ -367,13 +367,13 @@
 					<ion-card-title>Revisions</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
-					@if (revisions.length === 0) {
+					@if (revisions().length === 0) {
 					<ion-note color="medium"
 						>Save your first revision to start history.</ion-note
 					>
 					} @else {
 					<ion-list>
-						@for (revision of revisions; track revision.id) {
+						@for (revision of revisions(); track revision.id) {
 						<ion-item>
 							<ion-label>
 								<h3>Revision r{{ revision.revisionNumber }}</h3>
@@ -381,7 +381,7 @@
 							</ion-label>
 							<ion-badge [color]="revisionBadgeColor(revision)">
 								@if (revision.id ===
-								currentTemplate?.publishedRevisionId) {
+								currentTemplate()?.publishedRevisionId) {
 								Published } @else { Draft }
 							</ion-badge>
 							<ion-button

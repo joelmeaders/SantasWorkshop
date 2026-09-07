@@ -47,22 +47,22 @@
 			</ion-col>
 		</ion-row>
 
-		@let createAccountEnabled = createAccountEnabled$ | async;
-		@let mode = mode$ | async;
+		@let accountEnabled = createAccountEnabled();
+		@let currentMode = mode();
 		<ion-row class="ion-justify-content-center">
 			<ion-col size="12" sizeMd="8" sizeLg="6">
-				@if (mode === 'choose') {
+				@if (currentMode === 'choose') {
 				<ion-card class="entry-card ion-text-center">
 					<ion-card-header>
 						<ion-card-title>{{ "HOME.CHOOSE_PATH" | translate }}</ion-card-title>
 					</ion-card-header>
 					<ion-card-content>
-						@if (createAccountEnabled === true) {
+						@if (accountEnabled === true) {
 						<p>{{ "SIGNUP.NEW_ACCOUNT_NOTICE" | translate }}</p>
 						<ion-button id="createAccountButton" expand="block" size="large" color="xmasred" [routerLink]="['/sign-up']">
 							<strong>{{ "HOME.CREATE_ACCOUNT" | translate }}</strong>
 						</ion-button>
-						} @else if (createAccountEnabled === false) {
+						} @else if (accountEnabled === false) {
 						<div class="alert"><p>{{ "SIGNUP.CREATE_ACCOUNT_DISABLED" | translate }}</p></div>
 						} @else {
 						<ion-spinner name="crescent" aria-label="Loading account options" />
@@ -73,7 +73,7 @@
 						</ion-button>
 					</ion-card-content>
 				</ion-card>
-				} @else if (mode === 'sign-in') {
+				} @else if (currentMode === 'sign-in') {
 				<ion-card class="entry-card">
 					<ion-card-header><ion-card-title>{{ "COMMON.SIGN_IN" | translate }}</ion-card-title></ion-card-header>
 					<ion-card-content>
@@ -95,7 +95,7 @@
 				<ion-card class="entry-card">
 					<ion-card-header><ion-card-title>{{ "FORGOTPASS.RESET_YOUR_PASSWORD" | translate }}</ion-card-title></ion-card-header>
 					<ion-card-content>
-						@if ((resetEmailSent$ | async) === false) {
+						@if (resetEmailSent() === false) {
 						<p>{{ "FORGOTPASS.INSTRUCTIONS" | translate }}</p>
 						<ion-item><ion-input id="resetPasswordEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" /></ion-item>
 						<ion-button id="resetPasswordButton" expand="block" color="xmasred" [disabled]="resetEmail.invalid" (click)="resetPassword()">{{ "FORGOTPASS.RESET_PASSWORD" | translate }}</ion-button>

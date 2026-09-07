@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
-	BehaviorSubject,
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	signal,
+} from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import {
 	catchError,
 	delay,
 	filter,
@@ -8,8 +13,6 @@ import {
 	Observable,
 	of,
 	race,
-	ReplaySubject,
-	shareReplay,
 	startWith,
 	switchMap,
 } from 'rxjs';
@@ -17,7 +20,6 @@ import { RegistrationSearchIndex } from '@santashop/models';
 import { SearchService } from '../search.service';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
-import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { addIcons } from 'ionicons';
@@ -55,7 +57,6 @@ const compareSearchValues = (
 	imports: [
 		HeaderComponent,
 		RouterLink,
-		AsyncPipe,
 		IonRouterLink,
 		IonContent,
 		IonButton,
@@ -97,11 +98,12 @@ export class ResultsPage {
 		compareSearchValues(a.lastName, b.lastName) ||
 		compareSearchValues(a.firstName, b.firstName);
 
-	private readonly sortBy = new BehaviorSubject<SortFnType>(this.sortLast);
-	protected sortBy$ = this.sortBy.asObservable().pipe(shareReplay(1));
-
-	private readonly searchTrigger = new ReplaySubject<Date>(1);
-	public readonly searchInput$ = this.searchService.searchResults$;
+	public readonly sortBy = signal<SortFnType>(this.sortLast);
+	private readonly sortBy$ = toObservable(this.sortBy);
+	public readonly searchInput = toSignal(this.searchService.searchResults$, {
+		initialValue: null,
+	});
+	private readonly refreshVersion = signal<number | undefined>(undefined);
 
 	private readonly search$: Observable<
 		RegistrationSearchIndex[] | undefined
@@ -111,19 +113,25 @@ export class ResultsPage {
 				query !== null,
 		),
 		switchMap((query) => query),
-		switchMap((results) =>
-			this.sortBy$.pipe(map((sortFn) => results?.sort(sortFn) ?? [])),
-		),
+			switchMap((results) =>
+				this.sortBy$.pipe(
+					map((sortFn) => results?.slice().sort(sortFn) ?? []),
+				),
+			),
 		catchError(() => of(undefined)),
 	);
 
 	private readonly timeout$ = of(undefined).pipe(delay(5000));
 
-	public readonly searchResults$ = this.searchTrigger.pipe(
+	public readonly searchResults$ = toObservable(this.refreshVersion).pipe(
+		filter((version): version is number => version !== undefined),
 		switchMap(() =>
 			race([this.search$, this.timeout$]).pipe(startWith(null)),
 		),
 	);
+	public readonly searchResults = toSignal(this.searchResults$, {
+		initialValue: undefined,
+	});
 
 	constructor() {
 		addIcons({ backspaceOutline });
@@ -134,7 +142,7 @@ export class ResultsPage {
 	}
 
 	public refresh(): void {
-		this.searchTrigger.next(new Date());
+		this.refreshVersion.update((version) => (version ?? -1) + 1);
 	}
 
 	public ionViewWillLeave(): void {
@@ -142,7 +150,7 @@ export class ResultsPage {
 	}
 
 	public setSortType(sort: SortFnType): void {
-		this.sortBy.next(sort);
+		this.sortBy.set(sort);
 	}
 
 	public reset(): void {

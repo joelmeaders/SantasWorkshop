@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, type Mocked } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalController } from '@ionic/angular/standalone';
-import { firstValueFrom } from 'rxjs';
 import { ReferralModalComponent } from './referral-modal.component';
 import { provideModalControllerMock } from '../../../../test-helpers';
 
@@ -27,7 +26,7 @@ describe('ReferralModalComponent', () => {
 	it('filters referrals case-insensitively and preserves the full list for blank input', async () => {
 		component.filter({ detail: { value: 'denver' } });
 		await fixture.whenStable();
-		await expect(firstValueFrom(component.referrals$)).resolves.toEqual(
+		expect(component.referrals()).toEqual(
 			expect.arrayContaining([
 				'Denver Human Services DHS',
 				'Denver Health',
@@ -36,9 +35,7 @@ describe('ReferralModalComponent', () => {
 
 		component.filter({ detail: { value: '' } });
 		await fixture.whenStable();
-		await expect(
-			firstValueFrom(component.referrals$),
-		).resolves.toHaveLength(component.allReferrals.length);
+		expect(component.referrals()).toHaveLength(component.allReferrals.length);
 	});
 
 	it('filters referrals from the searchbar input event', async () => {
@@ -51,7 +48,7 @@ describe('ReferralModalComponent', () => {
 		);
 		await fixture.whenStable();
 
-		await expect(firstValueFrom(component.referrals$)).resolves.toEqual([
+		expect(component.referrals()).toEqual([
 			'Whiz Kids',
 		]);
 	});

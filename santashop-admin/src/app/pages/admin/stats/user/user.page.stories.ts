@@ -1,6 +1,9 @@
 import { type Meta, type StoryObj } from '@storybook/angular-vite';
-import { expect, userEvent, within } from 'storybook/test';
-import { adminStoryDecorators } from '../../../../../../../.storybook/admin/admin-story.providers';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import {
+	adminStoryDecorators,
+	getAdminStoryFixtures,
+} from '../../../../../../../.storybook/admin/admin-story.providers';
 import { UserPage } from './user.page';
 
 const meta = {
@@ -20,6 +23,18 @@ const meta = {
 		await expect(await canvas.findByText('Top 10 Referrers')).toBeVisible();
 		await expect(canvas.getByText('Top 10 Zip Codes')).toBeVisible();
 		await userEvent.click(canvas.getByText('Refresh report'));
+		const fixtures = getAdminStoryFixtures(canvasElement);
+		const loadedStats = fixtures.userStats$.value;
+		fixtures.userStats$.next(undefined);
+		await userEvent.click(canvas.getByText('Refresh report'));
+		await expect(
+			canvas.getByText('No user statistics for this year.'),
+		).toBeVisible();
+		fixtures.userStats$.next(loadedStats);
+		await userEvent.click(canvas.getByText('Refresh report'));
+		await waitFor(() =>
+			expect(canvas.getByText('Top 10 Referrers')).toBeVisible(),
+		);
 	},
 } satisfies Meta<typeof UserPage>;
 

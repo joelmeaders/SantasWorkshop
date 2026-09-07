@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, type MockInstance } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import {
 	autoSpyProvider,
 	getFunctionSpy,
@@ -102,25 +102,21 @@ describe('ProfilePage', () => {
 		expect(result).toBe(viewService.changePasswordForm);
 	});
 
-	it('userProfile$: should be expected reference', () => {
+	it('userProfile: should expose the latest profile signal', () => {
 		// Arrange
 		const propertySpy = getPropertySpy(viewService, 'userProfile$');
 
 		// Act
-		const result = component.userProfile$;
+		const result = component.userProfile;
 
 		// Assert
 		expect(propertySpy).toHaveBeenCalled();
-		expect(result).toBe(viewService.userProfile$);
+		expect(result()?.uid).toBe('ABC123');
 	});
 
-	it('userProfile$: should return expected value', async () => {
-		// Arrange & Act
-		const result = await firstValueFrom(component.userProfile$);
-
-		// Assert
+	it('userProfile: should return expected value', () => {
 		expect(userProfile$Spy).toHaveBeenCalled();
-		expect(result.uid).toBe('ABC123');
+		expect(component.userProfile()?.uid).toBe('ABC123');
 	});
 
 	it('updateProfile(): should make expected call', async () => {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
 	AlertController,
 	LoadingController,
@@ -23,7 +23,6 @@ import { HeaderComponent } from '../../../shared/components/header/header.compon
 import { StaffService } from './staff.service';
 import { UserEditorComponent } from './user-editor.component';
 import { AuthService } from '@santashop/core/admin/firestore';
-import { firstValueFrom } from 'rxjs';
 
 @Component({
 	selector: 'admin-users',
@@ -31,7 +30,6 @@ import { firstValueFrom } from 'rxjs';
 	styleUrls: ['./users.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		HeaderComponent,
 		IonContent,
 		IonList,
@@ -53,8 +51,15 @@ export class UsersPage {
 	private readonly loading = inject(LoadingController);
 	private readonly authService = inject(AuthService);
 
-	public readonly staffAccounts$ = this.staffService.staffAccounts$;
-	public readonly staffState$ = this.staffService.state$;
+	public readonly staffAccounts = toSignal(this.staffService.staffAccounts$, {
+		initialValue: [],
+	});
+	public readonly staffState = toSignal(this.staffService.state$, {
+		initialValue: {
+			status: 'loading' as const,
+			accounts: [],
+		},
+	});
 
 	public refresh(): void {
 		this.staffService.refresh();
@@ -63,7 +68,9 @@ export class UsersPage {
 	public ionViewWillEnter(): void {
 		this.refresh();
 	}
-	public readonly isOwner$ = this.authService.isOwner$;
+	public readonly isOwner = toSignal(this.authService.isOwner$, {
+		initialValue: false,
+	});
 
 	private readonly roleLabels: Readonly<Record<StaffRole, string>> = {
 		admin: 'Administrator',
@@ -165,7 +172,7 @@ export class UsersPage {
 	}
 
 	private async presentEditor(account?: StaffAccount): Promise<void> {
-		const isOwner = await firstValueFrom(this.isOwner$);
+		const isOwner = this.isOwner();
 		if (account && !this.canManage(account, isOwner)) {
 			await this.showAlert(
 				'Owner access required',

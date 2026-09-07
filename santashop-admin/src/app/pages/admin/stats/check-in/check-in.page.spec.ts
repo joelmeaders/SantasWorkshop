@@ -13,7 +13,7 @@ import {
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 import { CheckInAggregatedStats } from '@santashop/models';
-import { firstValueFrom, of, Subject, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 describe('CheckInPage', () => {
 	let component: CheckInPage;
@@ -112,26 +112,17 @@ describe('CheckInPage', () => {
 		);
 		component.refresh();
 
-		await expect(firstValueFrom(component.hasData$)).resolves.toBe(true);
-		await expect(firstValueFrom(component.totalCustomers$)).resolves.toBe(
-			5,
+		await fixture.whenStable();
+		expect(component.hasData()).toBe(true);
+		expect(component.totalCustomers()).toBe(5);
+		expect(component.totalChildren()).toBe(6);
+		expect(component.totalPreregistered()).toBe(3);
+		expect(component.onSiteRegistrations()).toBe(2);
+		expect(component.totalModifiedRegistrations()).toBe(1);
+		expect(component.checkinLastUpdated()).toEqual(
+			new Date('2026-12-10T18:00:00.000Z'),
 		);
-		await expect(firstValueFrom(component.totalChildren$)).resolves.toBe(6);
-		await expect(
-			firstValueFrom(component.totalPreregistered$),
-		).resolves.toBe(3);
-		await expect(
-			firstValueFrom(component.onSiteRegistrations$),
-		).resolves.toBe(2);
-		await expect(
-			firstValueFrom(component.totalModifiedRegistrations$),
-		).resolves.toBe(1);
-		await expect(
-			firstValueFrom(component.checkinLastUpdated$),
-		).resolves.toEqual(new Date('2026-12-10T18:00:00.000Z'));
-		await expect(
-			firstValueFrom(component.checkInsByDayHour$),
-		).resolves.toMatchObject([
+		expect(component.checkInsByDayHour()).toMatchObject([
 			{
 				datasets: [
 					{
@@ -180,9 +171,8 @@ describe('CheckInPage', () => {
 		);
 		component.refresh();
 
-		await expect(
-			firstValueFrom(component.checkInsByDayHour$),
-		).resolves.toMatchObject([
+		await fixture.whenStable();
+		expect(component.checkInsByDayHour()).toMatchObject([
 			{
 				datasets: [
 					{
@@ -203,13 +193,9 @@ describe('CheckInPage', () => {
 	});
 
 	it('switches chart views and safely totals mixed chart values', async () => {
-		await expect(firstValueFrom(component.viewButtonText$)).resolves.toBe(
-			'View by Children',
-		);
+		expect(component.viewButtonText()).toBe('View by Children');
 		component.switchView();
-		await expect(firstValueFrom(component.viewButtonText$)).resolves.toBe(
-			'View by Check-Ins',
-		);
+		expect(component.viewButtonText()).toBe('View by Check-Ins');
 		expect(component.addValues()).toBe(0);
 		expect(component.addValues([2, [3, 9], null, 4])).toBe(9);
 	});

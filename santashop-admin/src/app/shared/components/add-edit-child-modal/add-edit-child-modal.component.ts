@@ -5,6 +5,7 @@ import {
 	ChangeDetectorRef,
 	inject,
 	Input,
+	signal,
 } from '@angular/core';
 import {
 	UntypedFormControl,
@@ -31,13 +32,11 @@ import {
 } from '@ionic/angular/standalone';
 import type { Child } from '@santashop/models';
 import { AgeGroup, ToyType } from '@santashop/models';
-import { BehaviorSubject } from 'rxjs';
 import {
 	yyyymmddToLocalDate,
 	getAgeFromDate,
 } from '@santashop/core/admin/firestore';
 import { ChildValidationService } from '../../services/child-validation.service';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
 	selector: 'admin-add-edit-child-modal',
@@ -46,7 +45,6 @@ import { AsyncPipe } from '@angular/common';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		ReactiveFormsModule,
-		AsyncPipe,
 		IonHeader,
 		IonToolbar,
 		IonTitle,
@@ -105,8 +103,7 @@ export class AddEditChildModalComponent implements OnInit {
 		this.childValidationService.maxBirthDate(),
 	);
 
-	private readonly isInfant = new BehaviorSubject<boolean>(false);
-	public readonly isInfant$ = this.isInfant.asObservable();
+	public readonly isInfant = signal(false);
 
 	public ngOnInit(): void {
 		this.form = this.newForm(this.child);
@@ -159,7 +156,7 @@ export class AddEditChildModalComponent implements OnInit {
 
 	public setInfant(value: boolean): void {
 		if (!this.form) return;
-		this.isInfant.next(true);
+		this.isInfant.set(value);
 
 		const toyTypeControl = this.form.controls['toyType'];
 		const ageGroupControl = this.form.controls['ageGroup'];
@@ -186,7 +183,7 @@ export class AddEditChildModalComponent implements OnInit {
 			this.childValidationService.maxBirthDate(),
 		);
 		let ageGroup: AgeGroup | undefined;
-		const wasInfant = this.isInfant.getValue();
+		const wasInfant = this.isInfant();
 
 		if (ageInYears >= 0 && ageInYears < 3) {
 			this.setInfant(true);
@@ -204,7 +201,7 @@ export class AddEditChildModalComponent implements OnInit {
 		}
 
 		this.form.controls['ageGroup'].setValue(ageGroup);
-		this.isInfant.next(false);
+		this.isInfant.set(false);
 		if (wasInfant) this.form.controls['toyType'].setValue(undefined);
 	}
 

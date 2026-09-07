@@ -2,8 +2,8 @@ import { EventDatePipe } from '@santashop/core/admin';
 import {
 	ChangeDetectionStrategy,
 	Component,
-	OnDestroy,
 	inject,
+	signal,
 } from '@angular/core';
 import {
 	UntypedFormControl,
@@ -30,14 +30,11 @@ import {
 	IonSelectOption,
 } from '@ionic/angular/standalone';
 import {
-	BehaviorSubject,
 	firstValueFrom,
 	map,
 	Observable,
-	shareReplay,
-	Subject,
-	takeUntil,
 } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
 	Child,
 	COLLECTION_SCHEMA,
@@ -56,7 +53,6 @@ import {
 } from '@santashop/core/admin/firestore';
 import { SearchService } from '../search/search.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
-import { AsyncPipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
 import { addIcons } from 'ionicons';
 import { searchOutline, checkmarkCircle } from 'ionicons/icons';
@@ -71,7 +67,6 @@ import { QueryConstraint, where } from 'firebase/firestore';
 		HeaderComponent,
 		ReactiveFormsModule,
 		ManageChildrenComponent,
-		AsyncPipe,
 		EventDatePipe,
 		IonContent,
 		IonListHeader,
@@ -88,7 +83,7 @@ import { QueryConstraint, where } from 'firebase/firestore';
 		IonSelectOption,
 	],
 })
-export class PreRegistrationPage implements OnDestroy {
+export class PreRegistrationPage {
 	private readonly modalController = inject(ModalController);
 	private readonly fireRepo = inject(FireRepoLite);
 	private readonly searchService = inject(SearchService);
@@ -97,12 +92,8 @@ export class PreRegistrationPage implements OnDestroy {
 	private readonly alertController = inject(AlertController);
 	private readonly programYear = inject(PROGRAM_YEAR);
 
-	private readonly destroy$ = new Subject<void>();
-	private readonly childrenList = new BehaviorSubject<Child[]>([]);
-	public readonly children$ = this.childrenList.asObservable();
-
-	private readonly referrer = new BehaviorSubject<string>('None Selected');
-	public readonly chosenReferrer$ = this.referrer.asObservable();
+	public readonly children = signal<Child[]>([]);
+	public readonly chosenReferrer = signal('None Selected');
 
 	private readonly preRegistrationFn = (
 		registration: Registration,
@@ -154,10 +145,8 @@ export class PreRegistrationPage implements OnDestroy {
 		dateTimeSlot: new UntypedFormControl(undefined, Validators.required),
 	});
 
-	public readonly availableSlots$ = this.availableSlotsQuery(
-		this.programYear,
-	).pipe(
-		takeUntil(this.destroy$),
+	public readonly availableSlots = toSignal(
+		this.availableSlotsQuery(this.programYear).pipe(
 		map((data) =>
 			data.map((s) => {
 				s.dateTime = timestampToDate(s.dateTime);
@@ -169,16 +158,12 @@ export class PreRegistrationPage implements OnDestroy {
 				.slice()
 				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf()),
 		),
-		shareReplay({ bufferSize: 1, refCount: true }),
+		),
+		{ initialValue: undefined },
 	);
 
 	constructor() {
 		addIcons({ searchOutline, checkmarkCircle });
-	}
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	public ionViewWillLeave(): void {
@@ -186,25 +171,21 @@ export class PreRegistrationPage implements OnDestroy {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const children = this.childrenList
-			.getValue()
+		const children = this.children()
 			.filter((e) => e.id !== childId);
-		this.childrenList.next(children);
+		this.children.set(children);
 	}
 
 	public async editChild(child: Child): Promise<void> {
-		const children = this.childrenList
-			.getValue()
+		const children = this.children()
 			.filter((e) => e.id !== child.id);
 
 		children.push(child);
-		this.childrenList.next(children);
+		this.children.set(children);
 	}
 
 	public async addChild(child: Child): Promise<void> {
-		const children = this.childrenList.getValue();
-		children.push(child);
-		this.childrenList.next(children);
+		this.children.update((children) => [...children, child]);
 	}
 
 	public async chooseReferral(): Promise<void> {
@@ -215,7 +196,7 @@ export class PreRegistrationPage implements OnDestroy {
 		const result = await modal.onDidDismiss();
 		if (result.data) {
 			this.form.controls['referredBy'].setValue(result.data);
-			this.referrer.next(result.data);
+			this.chosenReferrer.set(result.data);
 		}
 	}
 
@@ -262,7 +243,7 @@ export class PreRegistrationPage implements OnDestroy {
 		try {
 			const registration = {
 				...this.form.value,
-				children: this.childrenList.getValue().map((child) => ({
+				children: this.children().map((child) => ({
 					...child,
 					dateOfBirth: new Date(
 						`${dateToCalendarString(child.dateOfBirth)}T00:00:00.000Z`,
@@ -323,8 +304,8 @@ export class PreRegistrationPage implements OnDestroy {
 	}
 
 	public reset(): void {
-		this.childrenList.next([]);
-		this.referrer.next('None Selected');
+		this.children.set([]);
+		this.chosenReferrer.set('None Selected');
 		this.form.reset();
 	}
 }

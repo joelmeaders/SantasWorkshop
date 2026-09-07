@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AppStateService } from '@santashop/core/admin/firestore';
 
 import { RouterLinkActive, RouterLink } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
 	storefrontOutline,
@@ -28,7 +28,6 @@ import {
 	imports: [
 		RouterLinkActive,
 		RouterLink,
-		AsyncPipe,
 		IonRouterLink,
 		IonRouterOutlet,
 		IonFooter,
@@ -42,11 +41,18 @@ import {
 export class AdminPage {
 	private readonly appStateService = inject(AppStateService);
 
-	public readonly preRegistrationEnabled$ =
-		this.appStateService.preRegistrationEnabled$;
-	public readonly onsiteRegistrationEnabled$ =
-		this.appStateService.onsiteRegistrationEnabled$;
-	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+	public readonly preRegistrationEnabled = toSignal(
+		this.appStateService.preRegistrationEnabled$,
+		{ initialValue: false },
+	);
+	public readonly onsiteRegistrationEnabled = toSignal(
+		this.appStateService.onsiteRegistrationEnabled$,
+		{ initialValue: false },
+	);
+	public readonly checkinEnabled = toSignal(
+		this.appStateService.checkinEnabled$,
+		{ initialValue: false },
+	);
 
 	constructor() {
 		addIcons({ storefrontOutline, bagCheckOutline, searchOutline });

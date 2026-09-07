@@ -1,6 +1,12 @@
 import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+	Component,
+	computed,
+	inject,
+	ChangeDetectionStrategy,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -17,7 +23,6 @@ import {
 	getStatsCollection,
 } from '../../../../shared/helpers';
 
-import { AsyncPipe } from '@angular/common';
 import {
 	BaseChartDirective,
 	provideCharts,
@@ -48,7 +53,6 @@ Chart.register(ChartDataLabels);
 	imports: [
 		HeaderComponent,
 		BaseChartDirective,
-		AsyncPipe,
 		FormsModule,
 		IonButton,
 		IonContent,
@@ -80,7 +84,7 @@ export class UserPage {
 		this.refresh();
 	}
 
-	public readonly state$ = this.refreshYear.pipe(
+	private readonly state$ = this.refreshYear.pipe(
 		switchMap(() =>
 			getStatsCollection<UserStats>(this.httpService)
 				.read(`user-${this.year}`)
@@ -88,24 +92,30 @@ export class UserPage {
 		),
 		shareReplay({ bufferSize: 1, refCount: true }),
 	);
+	public readonly state = toSignal(this.state$, {
+		initialValue: { status: 'loading' as const, data: undefined },
+	});
 
 	private readonly userRecord$ = this.state$.pipe(
 		map((state) => state.data),
 		filterNil(),
 	);
+	private readonly userRecord = toSignal(this.userRecord$, {
+		initialValue: undefined,
+	});
 
-	public readonly referrers$ = this.userRecord$.pipe(
-		map((data) => data.referrerCount),
-		map((counts) => counts.sort((a, b) => b.count - a.count)),
-		map((counts) => counts.slice(0, 10)),
-		map((ref) => ref.map((r) => ({ label: r.referrer, data: [r.count] }))),
+	public readonly referrers = computed(() =>
+		[...(this.userRecord()?.referrerCount ?? [])]
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 10)
+			.map((ref) => ({ label: ref.referrer, data: [ref.count] })),
 	);
 
-	public readonly zipCodes$ = this.userRecord$.pipe(
-		map((data) => data.zipCodeCount),
-		map((counts) => counts.sort((a, b) => b.count - a.count)),
-		map((counts) => counts.slice(0, 10)),
-		map((ref) => ref.map((r) => ({ label: r.zip, data: [r.count] }))),
+	public readonly zipCodes = computed(() =>
+		[...(this.userRecord()?.zipCodeCount ?? [])]
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 10)
+			.map((ref) => ({ label: ref.zip, data: [ref.count] })),
 	);
 
 	public barChartOptions: ChartConfiguration['options'] = {

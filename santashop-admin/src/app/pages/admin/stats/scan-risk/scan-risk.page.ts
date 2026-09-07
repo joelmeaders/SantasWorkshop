@@ -1,6 +1,11 @@
 import { EventDatePipe } from '@santashop/core/admin';
-import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import {
 	IonBadge,
@@ -29,7 +34,6 @@ import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 	styleUrls: ['./scan-risk.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		EventDatePipe,
 		HeaderComponent,
 		IonBadge,
@@ -45,11 +49,13 @@ import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 export class ScanRiskPage {
 	private readonly service = inject(ScanRiskService);
 	private readonly programYear = inject(PROGRAM_YEAR);
-	private readonly pageSize = new BehaviorSubject<number>(20);
+	private readonly pageSize = signal(20);
+	private readonly refreshTrigger = new BehaviorSubject<void>(undefined);
 
-	public readonly state$ = this.pageSize.pipe(
-		switchMap((pageSize) =>
-			this.service.summaries(this.programYear, pageSize + 1).pipe(
+	private readonly state$ = this.refreshTrigger.pipe(
+		switchMap(() => {
+			const pageSize = this.pageSize();
+			return this.service.summaries(this.programYear, pageSize + 1).pipe(
 				map((summaries) => ({
 					status: 'ready' as const,
 					summaries: summaries.slice(0, pageSize),
@@ -57,16 +63,20 @@ export class ScanRiskPage {
 				})),
 				startWith({ status: 'loading' as const }),
 				catchError(() => of({ status: 'error' as const })),
-			),
-		),
+			);
+		}),
 	);
+	public readonly state = toSignal(this.state$, {
+		initialValue: { status: 'loading' as const },
+	});
 
 	public loadMore(): void {
-		this.pageSize.next(this.pageSize.value + 20);
+		this.pageSize.update((size) => size + 20);
+		this.refreshTrigger.next();
 	}
 
 	public refresh(): void {
-		this.pageSize.next(this.pageSize.value);
+		this.refreshTrigger.next();
 	}
 
 	public ionViewWillEnter(): void {

@@ -15,7 +15,7 @@ import {
 	FireRepoLite,
 	FunctionsWrapper,
 } from '@santashop/core/admin/firestore';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { SearchService } from '../search/search.service';
 
 describe('PreRegistrationPage', () => {
@@ -101,9 +101,10 @@ describe('PreRegistrationPage', () => {
 	});
 
 	it('normalizes and sorts available slots while keeping stable slot identifiers', async () => {
-		await expect(
-			firstValueFrom(component.availableSlots$),
-		).resolves.toMatchObject([{ id: 'early' }, { id: 'late' }]);
+		expect(component.availableSlots()).toMatchObject([
+			{ id: 'early' },
+			{ id: 'late' },
+		]);
 		expect(component.slotIndex(0, { id: 'early' } as never)).toBe('early');
 		expect(component.slotIndex(0, {} as never)).toBe('');
 	});
@@ -116,16 +117,14 @@ describe('PreRegistrationPage', () => {
 		modal.onDidDismiss.mockResolvedValue({ data: 'School flyer' });
 
 		await component.chooseReferral();
+		await fixture.whenStable();
 
-		await expect(
-			firstValueFrom(component.children$),
-		).resolves.toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(component.children()).toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(fixture.nativeElement.textContent).toContain('Noah');
 		expect(component.form.controls['referredBy'].value).toBe(
 			'School flyer',
 		);
-		await expect(firstValueFrom(component.chosenReferrer$)).resolves.toBe(
-			'School flyer',
-		);
+		expect(component.chosenReferrer()).toBe('School flyer');
 	});
 
 	it('blocks duplicate registration before loading or invoking the callable', async () => {
@@ -218,8 +217,6 @@ describe('PreRegistrationPage', () => {
 		expect(createAlert).toHaveBeenCalledTimes(1);
 		expect(loading.dismiss).toHaveBeenCalledOnce();
 		expect(component.form.controls['firstName'].value).toBe('Ada');
-		await expect(firstValueFrom(component.children$)).resolves.toHaveLength(
-			1,
-		);
+		expect(component.children()).toHaveLength(1);
 	});
 });

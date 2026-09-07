@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import {
 	UntypedFormControl,
 	UntypedFormGroup,
@@ -20,13 +20,11 @@ import {
 	IonButton,
 	IonIcon,
 } from '@ionic/angular/standalone';
-import { BehaviorSubject } from 'rxjs';
 import { Child, Registration } from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
 import { CheckInContextService } from '../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../shared/services/check-in.service';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
-import { AsyncPipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../shared/components/manage-children/manage-children.component';
 import { addIcons } from 'ionicons';
 import { searchOutline, checkmarkCircle } from 'ionicons/icons';
@@ -40,7 +38,6 @@ import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 		HeaderComponent,
 		ReactiveFormsModule,
 		ManageChildrenComponent,
-		AsyncPipe,
 		IonContent,
 		IonListHeader,
 		IonNote,
@@ -60,11 +57,8 @@ export class RegistrationPage {
 	private readonly router = inject(Router);
 	private readonly alertController = inject(AlertController);
 
-	private readonly childrenList = new BehaviorSubject<Child[]>([]);
-	public readonly children$ = this.childrenList.asObservable();
-
-	private readonly referrer = new BehaviorSubject<string>('None Selected');
-	public readonly chosenReferrer$ = this.referrer.asObservable();
+	public readonly children = signal<Child[]>([]);
+	public readonly chosenReferrer = signal('None Selected');
 
 	public readonly form = new UntypedFormGroup({
 		firstName: new UntypedFormControl(
@@ -116,25 +110,21 @@ export class RegistrationPage {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const children = this.childrenList
-			.getValue()
+		const children = this.children()
 			.filter((e) => e.id !== childId);
-		this.childrenList.next(children);
+		this.children.set(children);
 	}
 
 	public async editChild(child: Child): Promise<void> {
-		const children = this.childrenList
-			.getValue()
+		const children = this.children()
 			.filter((e) => e.id !== child.id);
 
 		children.push(child);
-		this.childrenList.next(children);
+		this.children.set(children);
 	}
 
 	public async addChild(child: Child): Promise<void> {
-		const children = this.childrenList.getValue();
-		children.push(child);
-		this.childrenList.next(children);
+		this.children.update((children) => [...children, child]);
 	}
 
 	public async chooseReferral(): Promise<void> {
@@ -145,14 +135,14 @@ export class RegistrationPage {
 		const result = await modal.onDidDismiss();
 		if (result.data) {
 			this.form.controls['referral'].setValue(result.data);
-			this.referrer.next(result.data);
+			this.chosenReferrer.set(result.data);
 		}
 	}
 
 	public async checkIn(): Promise<void> {
 		const registration = {
 			...this.form.value,
-			children: this.childrenList.getValue(),
+			children: this.children(),
 			uid: 'onsite',
 			qrcode: 'onsite',
 			dateTimeSlot: { id: 'onsite' },
@@ -196,8 +186,8 @@ export class RegistrationPage {
 	}
 
 	public reset(): void {
-		this.childrenList.next([]);
-		this.referrer.next('None Selected');
+		this.children.set([]);
+		this.chosenReferrer.set('None Selected');
 		this.form.reset();
 	}
 }

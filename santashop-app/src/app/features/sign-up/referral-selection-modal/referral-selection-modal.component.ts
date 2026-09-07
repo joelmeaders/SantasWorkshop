@@ -2,7 +2,9 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	Input,
+	computed,
 	inject,
+	signal,
 } from '@angular/core';
 import {
 	AbstractControl,
@@ -12,7 +14,6 @@ import {
 	ValidationErrors,
 	ValidatorFn,
 } from '@angular/forms';
-import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import {
 	IonButton,
@@ -30,7 +31,6 @@ import {
 	IonToolbar,
 	ModalController,
 } from '@ionic/angular/standalone';
-import { BehaviorSubject, map, Observable } from 'rxjs';
 import referringAgencies from '../../../../assets/referring-agencies.json';
 
 interface ReferralGroups {
@@ -72,7 +72,6 @@ const trimmedLengthValidator =
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		ReactiveFormsModule,
-		AsyncPipe,
 		TranslateModule,
 		IonButton,
 		IonButtons,
@@ -102,28 +101,27 @@ export class ReferralSelectionModalComponent {
 			referral !== '----------' && !this.commonReferrals.includes(referral),
 	);
 
-	private readonly searchText = new BehaviorSubject<string | undefined>(
-		undefined,
-	);
+	private readonly searchText = signal<string | undefined>(undefined);
 
-	public readonly referralGroups$: Observable<ReferralGroups> = this.searchText.pipe(
-		map((search) => ({
+	public readonly referralGroups = computed<ReferralGroups>(() => {
+		const search = this.searchText();
+		return {
 			common: this.filterReferrals(this.commonReferrals, search),
 			alphabetical: this.filterReferrals(this.alphabeticalReferrals, search),
-		})),
-	);
+		};
+	});
 
-	public selectedReferral?: string;
+	public readonly selectedReferral = signal<string | undefined>(undefined);
 
 	@Input()
 	public set currentValue(value: string | undefined) {
-		this.selectedReferral = value
+		this.selectedReferral.set(value
 			? value.startsWith('Other:')
 				? 'Other'
 				: value
-			: undefined;
+			: undefined);
 
-		if (this.selectedReferral === 'Other') {
+		if (this.selectedReferral() === 'Other') {
 			this.otherForm.controls.other.setValue(
 				value?.slice('Other:'.length) ?? '',
 			);
@@ -141,13 +139,13 @@ export class ReferralSelectionModalComponent {
 
 	public filter(event: CustomEvent<{ value?: string | null }>): void {
 		const input = event.detail?.value?.trim();
-		this.searchText.next(input ? input.toUpperCase() : undefined);
+		this.searchText.set(input ? input.toUpperCase() : undefined);
 	}
 
 	public setChoice(choice?: string): void {
-		const previousChoice = this.selectedReferral;
-		this.selectedReferral = choice;
-		this.searchText.next(undefined);
+		const previousChoice = this.selectedReferral();
+		this.selectedReferral.set(choice);
+		this.searchText.set(undefined);
 
 		if (choice !== 'Other' || previousChoice !== 'Other') {
 			this.otherForm.controls.other.setValue('');
@@ -159,7 +157,7 @@ export class ReferralSelectionModalComponent {
 	}
 
 	public async save(): Promise<void> {
-		const choice = this.selectedReferral;
+		const choice = this.selectedReferral();
 		if (!choice) return;
 
 		if (choice === 'Other') {
@@ -178,7 +176,7 @@ export class ReferralSelectionModalComponent {
 	}
 
 	public isOtherChoice(): boolean {
-		return this.selectedReferral === 'Other';
+		return this.selectedReferral() === 'Other';
 	}
 
 	private filterReferrals(referrals: string[], search: string | undefined): string[] {

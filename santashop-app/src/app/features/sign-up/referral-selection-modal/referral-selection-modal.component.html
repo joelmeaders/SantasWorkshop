@@ -10,7 +10,7 @@
 </ion-header>
 
 <ion-content color="light">
-	@if (selectedReferral === undefined) {
+	@if (selectedReferral() === undefined) {
 		<div class="referral-search">
 			<ion-searchbar
 				id="referralSearchbar"
@@ -20,7 +20,7 @@
 			/>
 		</div>
 
-		@if (referralGroups$ | async; as referralGroups) {
+		@if (referralGroups(); as referralGroups) {
 			@if (referralGroups.common.length) {
 				<section class="referral-group" aria-labelledby="common-referrals-heading">
 					<h2 id="common-referrals-heading" class="referral-group-heading">
@@ -81,9 +81,9 @@
 				</ion-label>
 				<ion-text class="ref-choice">
 					{{
-						selectedReferral === 'Other'
+						selectedReferral() === 'Other'
 							? ('REFERRAL.OTHER' | translate)
-							: selectedReferral
+							: selectedReferral()
 					}}
 				</ion-text>
 			</ion-item>

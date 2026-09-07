@@ -22,7 +22,7 @@ import { ConfirmationPage } from './confirmation.page';
 describe('ConfirmationPage', () => {
 	let component: ConfirmationPage;
 	let fixture: ComponentFixture<ConfirmationPage>;
-	const checkedIn$ = new BehaviorSubject(false);
+	const checkedIn$ = new BehaviorSubject<boolean | undefined>(false);
 	const slot$ = new BehaviorSubject<any>({
 		id: 'slot-1', dateTime: new Date('2026-12-20T10:00:00'), enabled: true,
 	});
@@ -118,6 +118,18 @@ describe('ConfirmationPage', () => {
 		expect(fixture.nativeElement.querySelector('#changeRegistrationButton')).toBeTruthy();
 		expect(fixture.nativeElement.querySelector('#cancelRegistrationButton')).toBeTruthy();
 		expect(fixture.nativeElement.querySelectorAll('.children-ticket-list ion-item')).toHaveLength(4);
+	});
+
+	it('keeps permission actions disabled while check-in state is unresolved', async (): Promise<void> => {
+		checkedIn$.next(undefined);
+		await fixture.whenStable();
+		expect(component.allowChangeRegistration()).toBe(false);
+		expect(component.allowCancelRegistration()).toBe(false);
+
+		checkedIn$.next(false);
+		await fixture.whenStable();
+		expect(component.allowChangeRegistration()).toBe(true);
+		expect(component.allowCancelRegistration()).toBe(true);
 	});
 
 	it('confirms cancellation and changes an appointment through the customer workflow', async (): Promise<void> => {

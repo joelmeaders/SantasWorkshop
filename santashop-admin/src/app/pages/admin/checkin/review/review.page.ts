@@ -1,5 +1,6 @@
 import { EventDatePipe } from '@santashop/core/admin';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
 	AlertController,
@@ -39,7 +40,6 @@ import { CheckInContextService } from '../../../../shared/services/check-in-cont
 import { CheckInService } from '../../../../shared/services/check-in.service';
 import { LookupService } from '../../../../shared/services/lookup.service';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
-import { AsyncPipe } from '@angular/common';
 import { ManageChildrenComponent } from '../../../../shared/components/manage-children/manage-children.component';
 import { DateTimeModalComponent } from '../../../../shared/components/date-time-modal/date-time-modal.component';
 import { DateTimeModalService } from '../../../../shared/components/date-time-modal/date-time-modal.service';
@@ -55,7 +55,6 @@ import { checkmarkCircle } from 'ionicons/icons';
 		HeaderComponent,
 		ManageChildrenComponent,
 		RouterLink,
-		AsyncPipe,
 		EventDatePipe,
 		IonContent,
 		IonListHeader,
@@ -81,14 +80,22 @@ export class ReviewPage {
 	private readonly router = inject(Router);
 	private readonly route = inject(ActivatedRoute);
 
-	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+	public readonly checkinEnabled = toSignal(
+		this.appStateService.checkinEnabled$,
+		{ initialValue: undefined },
+	);
 
-	public readonly allowCancelRegistration$ =
-		this.appStateService.allowCancelRegistration$;
+	public readonly allowCancelRegistration = toSignal(
+		this.appStateService.allowCancelRegistration$,
+		{ initialValue: undefined },
+	);
 
 	public wasEdited = false;
 
-	public readonly registration$ = this.checkinContext.currentRegistration$;
+	public readonly registration = toSignal(
+		this.checkinContext.currentRegistration$,
+		{ initialValue: undefined },
+	);
 
 	private readonly scanResult = new Subject<string | undefined>();
 	private readonly lookupRegistration$: Observable<Registration> =
@@ -139,6 +146,7 @@ export class ReviewPage {
 					filterNullish<Registration>(),
 				),
 			),
+			takeUntilDestroyed(),
 		)
 		.subscribe();
 
@@ -161,7 +169,7 @@ export class ReviewPage {
 	}
 
 	public async cancelReservation(): Promise<void> {
-		const registration = await firstValueFrom(this.registration$);
+		const registration = this.registration();
 
 		const alert = await this.alertController.create({
 			header: 'Are you sure you want to do this?',
@@ -182,39 +190,41 @@ export class ReviewPage {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const registration = await firstValueFrom(this.registration$);
+		const registration = this.registration();
 		if (!registration) return;
 
-		registration.children = registration.children?.filter(
-			(e) => e.id !== childId,
-		);
-		this.checkinContext.setRegistration(registration);
+		const updatedRegistration = {
+			...registration,
+			children: registration.children?.filter((e) => e.id !== childId),
+		};
+		this.checkinContext.setRegistration(updatedRegistration);
 		this.wasEdited = true;
 	}
 
 	public async editChild(child: Child): Promise<void> {
-		const registration = await firstValueFrom(this.registration$);
+		const registration = this.registration();
 		if (!registration) return;
 
-		registration.children = registration.children?.filter(
-			(e) => e.id !== child.id,
-		);
-
-		registration?.children?.push(child);
-		this.checkinContext.setRegistration(registration);
+		const children = registration.children?.filter((e) => e.id !== child.id) ?? [];
+		this.checkinContext.setRegistration({
+			...registration,
+			children: [...children, child],
+		});
 		this.wasEdited = true;
 	}
 	public async addChild(child: Child): Promise<void> {
-		const registration = await firstValueFrom(this.registration$);
+		const registration = this.registration();
 		if (!registration) return;
 
-		registration?.children?.push(child);
-		this.checkinContext.setRegistration(registration);
+		this.checkinContext.setRegistration({
+			...registration,
+			children: [...(registration.children ?? []), child],
+		});
 		this.wasEdited = true;
 	}
 
 	public async editDateTime(): Promise<void> {
-		const registration = await firstValueFrom(this.registration$);
+		const registration = this.registration();
 		if (!registration?.dateTimeSlot) return;
 
 		const currentSlot = {
@@ -240,11 +250,13 @@ export class ReviewPage {
 						result.data,
 						registration.uid,
 					);
-					registration.dateTimeSlot = {
-						dateTime: result.data.dateTime,
-						id: result.data.id,
-					};
-					this.checkinContext.setRegistration(registration);
+					this.checkinContext.setRegistration({
+						...registration,
+						dateTimeSlot: {
+							dateTime: result.data.dateTime,
+							id: result.data.id,
+						},
+					});
 					this.wasEdited = true;
 				} catch (error: unknown) {
 					const err = error as { message?: string };
@@ -255,15 +267,16 @@ export class ReviewPage {
 					await alert.present();
 				}
 			} else {
-				delete registration.dateTimeSlot;
-				this.checkinContext.setRegistration(registration);
+				const withoutDateTime = { ...registration };
+				delete withoutDateTime.dateTimeSlot;
+				this.checkinContext.setRegistration(withoutDateTime);
 				this.wasEdited = true;
 			}
 		}
 	}
 
 	public async checkIn(): Promise<void> {
-		const registration = await firstValueFrom(this.registration$);
+		const registration = this.registration();
 		if (!registration) return;
 		const inputMethod = await firstValueFrom(
 			this.checkinContext.inputMethod$,

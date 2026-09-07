@@ -37,7 +37,7 @@
 			</div>
 
 			<div class="editor-panels">
-				@if ((isOwner$ | async) === true) {
+				@if (isOwner()) {
 				<ion-card class="editor-panel editor-panel--generator">
 					<ion-card-header>
 						<ion-card-title
@@ -270,7 +270,7 @@
 				</div>
 			</ion-card-header>
 			<ion-card-content>
-				@let groups = groupedSlots$ | async; @if (!groups ||
+				@let groups = groupedSlots(); @if (!groups ||
 				groups.length === 0) {
 				<p class="empty-state ion-text-center">
 					No schedules found for {{ year }} yet.

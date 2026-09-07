@@ -1,7 +1,7 @@
 <admin-header title="Check-In: Review Info" backRoute="/admin/checkin/scan" />
 
 <ion-content fullscreen class="ion-padding-horizontal ion-text-center">
-	@if (checkin$ | async; as checkin) {
+	@if (checkin(); as checkin) {
 	<h1>
 		<ion-text color="success"> Success! </ion-text>
 	</h1>

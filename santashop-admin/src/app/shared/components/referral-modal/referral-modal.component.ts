@@ -1,6 +1,7 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	computed,
 	inject,
 	signal,
 } from '@angular/core';
@@ -19,8 +20,6 @@ import {
 	IonItem,
 	IonInput,
 } from '@ionic/angular/standalone';
-import { BehaviorSubject, Observable, map } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
 	selector: 'admin-referral-modal',
@@ -28,7 +27,6 @@ import { AsyncPipe } from '@angular/common';
 	styleUrls: ['./referral-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		IonHeader,
 		IonToolbar,
 		IonTitle,
@@ -80,27 +78,16 @@ export class ReferralModalComponent {
 		'Other',
 	];
 
-	private readonly searchText = new BehaviorSubject<string | undefined>(
-		undefined,
-	);
-
-	private readonly referralChoice = new BehaviorSubject<string | undefined>(
-		undefined,
-	);
-	public readonly referralChoice$ = this.referralChoice.asObservable();
-
-	private readonly filteredReferrals$: Observable<string[]> =
-		this.searchText.pipe(
-			map((search) =>
-				!!search && search.length
-					? this.allReferrals.filter((ref) =>
-							ref.toUpperCase().includes(search),
-						)
-					: this.allReferrals,
-			),
-		);
-
-	public readonly referrals$ = this.filteredReferrals$;
+	public readonly searchText = signal<string | undefined>(undefined);
+	public readonly referralChoice = signal<string | undefined>(undefined);
+	public readonly referrals = computed(() => {
+		const search = this.searchText();
+		return !!search && search.length
+			? this.allReferrals.filter((ref) =>
+					ref.toUpperCase().includes(search),
+				)
+			: this.allReferrals;
+	});
 
 	public readonly otherName = signal('');
 
@@ -110,11 +97,11 @@ export class ReferralModalComponent {
 
 	public filter($event: { detail?: { value?: string | null } }): void {
 		const input = $event.detail?.value;
-		this.searchText.next(input ? input.toUpperCase() : undefined);
+		this.searchText.set(input ? input.toUpperCase() : undefined);
 	}
 
 	public async setValue(ref: string): Promise<void> {
-		this.referralChoice.next(ref);
+		this.referralChoice.set(ref);
 		if (ref !== 'Other') await this.modalController.dismiss(ref);
 	}
 

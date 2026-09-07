@@ -34,10 +34,10 @@
 			Available Dates/Times
 		</ion-list-header>
 
-		@let availableDays = availableDays$ | async;
-		@if (availableDays?.length) {
+		@let days = availableDays();
+		@if (days.length) {
 			<ion-accordion-group color="light">
-				@for (day of availableDays; track day) {
+				@for (day of days; track day) {
 					<ion-accordion>
 						<ion-item slot="header" color="light">
 							<ion-label>
@@ -50,7 +50,7 @@
 							class="ion-no-padding"
 						>
 							@for (
-								slot of availableSlotsByDay$(day) | async;
+								slot of (availableSlotsByDay().get(day) ?? []);
 								track slot
 							) {
 								<ion-item

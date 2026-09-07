@@ -2,8 +2,10 @@ import {
 	Component,
 	ChangeDetectionStrategy,
 	inject,
+	signal,
 	viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
 	AlertController,
@@ -16,7 +18,6 @@ import {
 	PopoverOptions,
 } from '@ionic/angular/standalone';
 import {
-	BehaviorSubject,
 	catchError,
 	distinctUntilChanged,
 	EMPTY,
@@ -34,7 +35,6 @@ import { CheckInContextService } from '../../../../shared/services/check-in-cont
 import { ZXingScannerComponent, ZXingScannerModule } from '@zxing/ngx-scanner';
 import { AnalyticsWrapper, filterNil } from '@santashop/core/admin/firestore';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
-import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { camera } from 'ionicons/icons';
 import {
@@ -52,7 +52,6 @@ import { RegistrationScanService } from '../../../../shared/services/registratio
 	imports: [
 		HeaderComponent,
 		ZXingScannerModule,
-		AsyncPipe,
 		IonContent,
 		IonButton,
 		IonItem,
@@ -69,12 +68,22 @@ export class ScanPage {
 	private readonly alertController = inject(AlertController);
 	private readonly router = inject(Router);
 
-	public readonly cameraEnabled$ = new BehaviorSubject<boolean>(false);
-	public readonly deviceId$ = this.scannerService.$deviceId;
-	public readonly availableDevices$ = this.scannerService.$availableDevices;
+	public readonly cameraEnabled = signal(false);
+	public readonly deviceId = toSignal(this.scannerService.$deviceId, {
+		initialValue: '',
+	});
+	public readonly availableDevices = toSignal(
+		this.scannerService.$availableDevices,
+		{ initialValue: undefined },
+	);
 	public readonly formatsEnabled = this.scannerService.formatsEnabled;
-	public readonly deviceToUse$ = this.scannerService.$deviceToUse;
-	public readonly hasPermissions$ = this.scannerService.$hasPermissions;
+	public readonly deviceToUse = toSignal(this.scannerService.$deviceToUse, {
+		initialValue: undefined,
+	});
+	public readonly hasPermissions = toSignal(
+		this.scannerService.$hasPermissions,
+		{ initialValue: false },
+	);
 
 	protected readonly scanResult = new Subject<
 		ResolveRegistrationScanRequest | undefined
@@ -161,7 +170,7 @@ export class ScanPage {
 
 		// Keep camera access opt-in. Manual check-in is a complete flow and should
 		// not trigger a permission prompt or camera startup cost on page entry.
-		this.cameraEnabled$.next(false);
+		this.cameraEnabled.set(false);
 	}
 
 	public ionViewWillLeave(): void {
@@ -181,7 +190,7 @@ export class ScanPage {
 			scanner.enable = false;
 			scanner.device = undefined;
 		}
-		this.cameraEnabled$.next(false);
+		this.cameraEnabled.set(false);
 	}
 
 	public onCamerasFound(devices: MediaDeviceInfo[]): void {
@@ -214,7 +223,7 @@ export class ScanPage {
 	}
 
 	public enableCamera(): void {
-		this.cameraEnabled$.next(true);
+		this.cameraEnabled.set(true);
 	}
 
 	private async invalidCodeAlert(): Promise<void> {

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { firstValueFrom, of, skip, throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
@@ -40,7 +40,9 @@ describe('ScanRiskPage', () => {
 				})),
 			),
 		);
-		const state = await firstValueFrom(component.state$.pipe(skip(1)));
+		component.refresh();
+		await fixture.whenStable();
+		const state = component.state();
 		expect(state).toMatchObject({ status: 'ready', hasMore: true });
 		if (state.status === 'ready') expect(state.summaries).toHaveLength(20);
 		expect(summaries).toHaveBeenLastCalledWith(2026, 21);
@@ -48,15 +50,15 @@ describe('ScanRiskPage', () => {
 
 	it('increases the page size by twenty when more records are requested', async () => {
 		component.loadMore();
-		await firstValueFrom(component.state$.pipe(skip(1)));
+		await fixture.whenStable();
 		expect(summaries).toHaveBeenLastCalledWith(2026, 41);
 	});
 
 	it('exposes an error state when the risk query fails', async () => {
 		summaries.mockReturnValue(throwError(() => new Error('unavailable')));
-		await expect(
-			firstValueFrom(component.state$.pipe(skip(1))),
-		).resolves.toEqual({ status: 'error' });
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.state()).toEqual({ status: 'error' });
 	});
 
 	it('refreshes the current page size and retries failures through the visible button', async () => {

@@ -68,14 +68,14 @@ describe('ReferralSelectionModalComponent', () => {
 
 		component.setChoice();
 
-		expect(component.selectedReferral).toBeUndefined();
+		expect(component.selectedReferral()).toBeUndefined();
 		expect(component.otherForm.controls.other.value).toBe('');
 	});
 
 	it('treats an empty current value as no selection', () => {
 		component.currentValue = '';
 
-		expect(component.selectedReferral).toBeUndefined();
+		expect(component.selectedReferral()).toBeUndefined();
 	});
 
 	it('renders the available choices as labelled native lists of buttons', async () => {

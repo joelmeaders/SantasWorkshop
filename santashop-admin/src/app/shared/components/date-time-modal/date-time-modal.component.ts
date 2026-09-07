@@ -2,8 +2,9 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	Input,
-	OnDestroy,
+	computed,
 	inject,
+	signal,
 } from '@angular/core';
 import {
 	AlertController,
@@ -26,18 +27,8 @@ import {
 	IonCardTitle,
 	IonNote,
 } from '@ionic/angular/standalone';
-import {
-	BehaviorSubject,
-	Observable,
-	ReplaySubject,
-	Subject,
-	map,
-	shareReplay,
-	switchMap,
-	takeUntil,
-	distinctUntilChanged,
-} from 'rxjs';
-import { AsyncPipe } from '@angular/common';
+import { Observable, map, of, switchMap, distinctUntilChanged } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import type { DateTimeSlot } from '@santashop/models';
 import { createZonedDate, getZonedDateKey } from '@santashop/models';
 import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
@@ -48,7 +39,6 @@ import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
 	styleUrls: ['./date-time-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		EventDatePipe,
 		TimeSlotPipe,
 		IonHeader,
@@ -70,67 +60,51 @@ import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
 		IonNote,
 	],
 })
-export class DateTimeModalComponent implements OnDestroy {
+export class DateTimeModalComponent {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
-	private readonly slotsInput$ = new ReplaySubject<
-		Observable<DateTimeSlot[]>
-	>(1);
+	private readonly slotsInput = signal<Observable<DateTimeSlot[]>>(of([]));
 
 	@Input() public currentSlot?: DateTimeSlot;
 	@Input({ required: true })
 	public set slots$(slots: Observable<DateTimeSlot[]>) {
-		this.slotsInput$.next(slots);
+		this.slotsInput.set(slots);
 	}
 
-	private readonly destroy$ = new Subject<void>();
-
-	private readonly selectedSlot = new BehaviorSubject<
-		DateTimeSlot | undefined
-	>(undefined);
-	public readonly selectedSlot$ = this.selectedSlot.asObservable();
-
-	public readonly availableSlots$ = this.slotsInput$.pipe(
+	public readonly selectedSlot = signal<DateTimeSlot | undefined>(undefined);
+	private readonly slotsStream$ = toObservable(this.slotsInput).pipe(
 		switchMap((slots) => slots),
-		takeUntil(this.destroy$),
 		map((slots: DateTimeSlot[]) => slots.filter((slot) => slot.enabled)),
 		distinctUntilChanged(
 			(prev, curr) => JSON.stringify(prev) === JSON.stringify(curr),
 		),
-		shareReplay(1),
 	);
-
-	public readonly availableDays$ = this.availableSlots$.pipe(
-		takeUntil(this.destroy$),
-		map((slots: DateTimeSlot[]) =>
-			slots.map((slot) =>
-				createZonedDate(getZonedDateKey(slot.dateTime), 0).getTime(),
-			),
-		),
-		map((dates: number[]) => [...new Set(dates)]),
-		shareReplay(1),
+	public readonly availableSlots = toSignal(this.slotsStream$, {
+		initialValue: [],
+	});
+	public readonly availableDays = computed(() =>
+		this.availableSlots().reduce<number[]>((days, slot) => {
+			const day = createZonedDate(
+				getZonedDateKey(slot.dateTime),
+				0,
+			).getTime();
+			if (!days.includes(day)) days.push(day);
+			return days;
+		}, []),
 	);
-
-	public readonly availableSlotsByDay$ = (
-		date: number,
-	): Observable<DateTimeSlot[]> =>
-		this.availableSlots$.pipe(
-			takeUntil(this.destroy$),
-			map((slots: DateTimeSlot[]) =>
-				slots.filter(
-					(slot) =>
-						getZonedDateKey(slot.dateTime) ===
-						getZonedDateKey(new Date(date)),
-				),
-			),
-			shareReplay(1),
-		);
-
-	public ngOnDestroy(): void {
-		this.slotsInput$.complete();
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
+	public readonly availableSlotsByDay = computed(() => {
+		const slotsByDay = new Map<number, DateTimeSlot[]>();
+		for (const slot of this.availableSlots()) {
+			const day = createZonedDate(
+				getZonedDateKey(slot.dateTime),
+				0,
+			).getTime();
+			const slots = slotsByDay.get(day) ?? [];
+			slots.push(slot);
+			slotsByDay.set(day, slots);
+		}
+		return slotsByDay;
+	});
 
 	public async selectDateTime(slot?: DateTimeSlot): Promise<void> {
 		const hasSlot = !!this.currentSlot;
@@ -141,7 +115,7 @@ export class DateTimeModalComponent implements OnDestroy {
 		}
 
 		if (!hasSlot || shouldChange) {
-			this.selectedSlot.next(slot);
+			this.selectedSlot.set(slot);
 			await this.dismiss();
 		}
 	}
@@ -155,7 +129,7 @@ export class DateTimeModalComponent implements OnDestroy {
 	}
 
 	public async dismiss(): Promise<void> {
-		const slot = this.selectedSlot.getValue();
+		const slot = this.selectedSlot();
 		await this.modalController.dismiss(slot);
 	}
 

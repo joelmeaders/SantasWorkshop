@@ -47,6 +47,7 @@ describe('ReviewPage', () => {
 	beforeEach(async () => {
 		currentRegistration = new BehaviorSubject(registration());
 		setRegistration.mockReset();
+		setRegistration.mockImplementation((value) => currentRegistration.next(value));
 		setCheckIn.mockReset();
 		setBlockedScan.mockReset();
 		reset.mockReset();

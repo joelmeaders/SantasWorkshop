@@ -1,6 +1,5 @@
 <admin-header title="Check-In: Review Info" backRoute="/admin/checkin/scan">
-	@if (registration$ | async; as registration) { @if (allowCancelRegistration$
-	| async) {
+	@if (registration(); as registration) { @if (allowCancelRegistration()) {
 	<ion-button color="danger" (click)="cancelReservation()">
 		Delete
 	</ion-button>
@@ -9,7 +8,7 @@
 
 <ion-content fullscreen class="ion-padding-horizontal">
 	<div class="limited-container">
-		@if (registration$ | async; as registration) {
+		@if (registration(); as registration) {
 		<div class="form-list">
 			<ion-list-header color="none" class="review-instructions">
 				<span>
@@ -62,7 +61,7 @@
 					Is all information correct and accurate?
 				</ion-label>
 			</ion-item-divider>
-			@if ((checkinEnabled$ | async) !== true) {
+			@if (checkinEnabled() !== true) {
 			<ion-note color="danger">
 				Check-In is not available at this time.
 			</ion-note>
@@ -73,7 +72,7 @@
 				color="success"
 				class="confirm-button"
 				(click)="checkIn()"
-				[disabled]="(checkinEnabled$ | async) !== true"
+				[disabled]="checkinEnabled() !== true"
 			>
 				<ion-label>
 					<h1>Yes, check in</h1>

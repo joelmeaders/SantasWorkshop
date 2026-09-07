@@ -5,7 +5,7 @@
 			id="checkInNav"
 			detail
 			routerLink="../checkin"
-			[disabled]="(checkinEnabled$ | async) === false"
+			[disabled]="!checkinEnabled()"
 		>
 			<ion-icon name="bag-check-outline" color="success" slot="start" aria-hidden="true" />
 			Check in customers
@@ -18,7 +18,7 @@
 			id="onSiteRegistrationNav"
 			detail
 			routerLink="../registration"
-			[disabled]="(onsiteRegistrationEnabled$ | async) === false"
+			[disabled]="!onsiteRegistrationEnabled()"
 		>
 			<ion-icon name="storefront-outline" color="primary" slot="start" aria-hidden="true" />
 			On-Site Registration
@@ -27,13 +27,13 @@
 			id="preRegistrationNav"
 			detail
 			routerLink="../pre-registration"
-			[disabled]="(preRegistrationEnabled$ | async) === false"
+			[disabled]="!preRegistrationEnabled()"
 		>
 			<ion-icon name="person-add-outline" color="primary" slot="start" aria-hidden="true" />
 			Pre-Register Customers
 		</ion-item>
 
-		@if ((isAdmin$ | async) === true) {
+		@if (isAdmin()) {
 		<ion-list-header> Tools </ion-list-header>
 		<ion-item detail routerLink="../resend-email">
 			<ion-icon name="mail-outline" color="tertiary" slot="start" aria-hidden="true" />
@@ -56,7 +56,7 @@
 			<ion-icon name="people-outline" color="primary" slot="start" aria-hidden="true" />
 			User Management
 		</ion-item>
-		@if ((isOwner$ | async) === true) {
+		@if (isOwner()) {
 		<ion-item id="ownerOperationsNav" detail routerLink="../owner-operations">
 			<ion-icon
 				name="shield-checkmark-outline"

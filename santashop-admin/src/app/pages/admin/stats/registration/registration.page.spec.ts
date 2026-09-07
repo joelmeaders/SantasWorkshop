@@ -18,7 +18,7 @@ import {
 	RegistrationStats,
 	ScheduleStats,
 } from '@santashop/models';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 describe('RegistrationPage', () => {
 	let component: RegistrationPage;
@@ -155,31 +155,19 @@ describe('RegistrationPage', () => {
 
 		component.refresh();
 		await fixture.whenStable();
-		await expect(
-			firstValueFrom(component.registrationCount$),
-		).resolves.toBe(3);
-		await expect(
-			firstValueFrom(component.registrationCountBySchedule$),
-		).resolves.toBe(3);
-		await expect(firstValueFrom(component.childCount$)).resolves.toBe(6);
-		await expect(
-			firstValueFrom(component.childrenPerCustomer$),
-		).resolves.toBe(2);
-		await expect(
-			firstValueFrom(component.girlBoyInfantCounts$),
-		).resolves.toEqual([3, 2, 1]);
-		await expect(firstValueFrom(component.statsNull$)).resolves.toBe(false);
-		const familiesByDay = await firstValueFrom(
-			component.familiesBySlotsChartData$,
-		);
+		expect(component.registrationCount()).toBe(3);
+		expect(component.registrationCountBySchedule()).toBe(3);
+		expect(component.childCount()).toBe(6);
+		expect(component.childrenPerCustomer()).toBe(2);
+		expect(component.girlBoyInfantCounts()).toEqual([3, 2, 1]);
+		expect(component.statsNull()).toBe(false);
+		const familiesByDay = component.familiesBySlotsChartData();
 		expect(familiesByDay).toHaveLength(4);
 		expect(familiesByDay.slice(0, 2)).toMatchObject([
 			{ datasets: [{ label: '10th', data: [1] }] },
 			{ datasets: [{ label: '11th', data: [2] }] },
 		]);
-		await expect(
-			firstValueFrom(component.topTenZipCodesCountData$),
-		).resolves.toMatchObject({
+		expect(component.topTenZipCodesCountData()).toMatchObject({
 			labels: [
 				['80219', '8 Families'],
 				['80204', '5 Families'],
@@ -212,14 +200,12 @@ describe('RegistrationPage', () => {
 
 		component.refresh();
 		await fixture.whenStable();
-		await expect(firstValueFrom(component.hasScheduleData$)).resolves.toBe(
-			true,
-		);
+		expect(component.hasScheduleData()).toBe(true);
 		expect(fixture.nativeElement.textContent).toContain('Capacity by Day');
 		expect(fixture.nativeElement.textContent).not.toContain(
 			'No schedule data for this year',
 		);
-		const capacityByDay = await firstValueFrom(component.capacityByDay$);
+		const capacityByDay = component.capacityByDay();
 		expect(capacityByDay).toHaveLength(4);
 		expect(capacityByDay.slice(0, 2)).toMatchObject([
 			{
@@ -291,12 +277,71 @@ describe('RegistrationPage', () => {
 		);
 		component.refresh();
 		await fixture.whenStable();
-		await expect(
-			firstValueFrom(component.registrationCountBySchedule$),
-		).resolves.toBe(4);
-		await expect(
-			firstValueFrom(component.familiesBySlots$),
-		).resolves.toEqual([{ date: dateTime, count: 4 }]);
+		expect(component.registrationCountBySchedule()).toBe(4);
+		expect(component.familiesBySlots()).toEqual([
+			{ date: dateTime, count: 4 },
+		]);
 		expect(fixture.nativeElement.textContent).toContain('Capacity by Day');
+	});
+	it('applies chart colors when the first report arrives synchronously', () => {
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 1,
+								dateTimeCount: [],
+								zipCodeCount: [
+									{ zip: 80219, count: 1, childCount: 1 },
+								],
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(
+			of([
+				{
+					dateTime: new Date('2026-12-10T18:00:00.000Z'),
+					maxSlots: 20,
+					slotsReserved: 5,
+					enabled: true,
+				},
+			]) as never,
+		);
+		fixture.destroy();
+		fixture = TestBed.createComponent(RegistrationPage);
+		component = fixture.componentInstance;
+		expect(component.topTenZipCodesCountData().datasets[0]).toMatchObject(
+			component.colorSettings,
+		);
+		expect(
+			component.capacityByDay()[0].chartData.datasets[0].backgroundColor,
+		).toEqual(['rgba(63, 81, 181, 0.85)', 'rgba(102, 187, 106, 0.8)']);
+	});
+
+	it('cancels an old report on refresh and releases pending reads on destruction', () => {
+		const oldReport = new Subject<RegistrationStats | undefined>();
+		collection.read
+			.mockReturnValue(of(undefined))
+			.mockReturnValueOnce(oldReport.asObservable());
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.refresh();
+		expect(component.state().status).toBe('loading');
+		expect(oldReport.observed).toBe(true);
+		component.refresh();
+		expect(oldReport.observed).toBe(false);
+		oldReport.next({
+			completedRegistrations: 99,
+			dateTimeCount: [],
+			zipCodeCount: [],
+		});
+		oldReport.complete();
+		expect(component.registrationCount()).toBe(0);
+		const pendingReport = new Subject<RegistrationStats | undefined>();
+		collection.read.mockReturnValueOnce(pendingReport.asObservable());
+		component.refresh();
+		expect(pendingReport.observed).toBe(true);
+		fixture.destroy();
+		expect(pendingReport.observed).toBe(false);
 	});
 });

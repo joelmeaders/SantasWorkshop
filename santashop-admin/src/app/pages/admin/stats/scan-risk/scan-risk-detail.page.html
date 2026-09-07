@@ -5,7 +5,7 @@
 
 <ion-content class="ion-padding">
 	<ion-button fill="outline" (click)="refresh()">Refresh timeline</ion-button>
-	@if (state$ | async; as state) { @if (state.status === 'loading') {
+	@if (state(); as state) { @if (state.status === 'loading') {
 	<div class="state">
 		<ion-spinner />
 		<p>Loading timeline…</p>

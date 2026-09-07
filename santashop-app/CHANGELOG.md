@@ -8,6 +8,8 @@ All notable changes to the main application will be documented in this file.
 
 - Advance the application version to `2026.09.0-beta.2`.
 - Run the complete Storybook validation with the normal customer application test gate.
+- Use Angular signals for component and page UI state.
+- Strengthen unit and public browser coverage, assertions, and test isolation.
 - Preserve the same confirmation code and QR artifact across cancellation and later re-registration.
 - Block the code during cancellation and restore its use after re-registration.
 

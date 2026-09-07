@@ -12,6 +12,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 - Advance the workspace and both applications to `2026.09.0-beta.2`.
 - Run the complete Storybook validation in the normal customer and admin test gates.
 - Keep the dedicated Storybook pull-request workflow focused on visual comparisons.
+- Strengthen unit, emulator-integration, and browser test isolation, assertions, seasonal setup, and workflow coverage.
+- Use Angular signals for local UI state across the customer and admin applications.
 - Keep each registration's confirmation code and QR artifact stable across cancellation and later re-registration.
 - Block the stable code while the registration is canceled, then allow it again after re-registration.
 - Align cancellation requirements, test scenarios, and hosted-QA notes with the stable QR lifecycle.

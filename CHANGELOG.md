@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.2] - Unreleased
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.2`.
+- Run the complete Storybook validation in the normal customer and admin test gates.
+- Keep the dedicated Storybook pull-request workflow focused on visual comparisons.
+- Keep each registration's confirmation code and QR artifact stable across cancellation and later re-registration.
+- Block the stable code while the registration is canceled, then allow it again after re-registration.
+- Align cancellation requirements, test scenarios, and hosted-QA notes with the stable QR lifecycle.
+
 ## [2026.09.0-beta.1] - Unreleased
 
 ### Changed

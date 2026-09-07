@@ -110,7 +110,7 @@ setup exist.
 | SUB-004 | A submitted customer attempting draft/submit routes is redirected to confirmation.                                                         | FR-CUS-014; NFR-MNT-004                                            | Automated   |
 | SUB-005 | Change a submitted appointment when the control is enabled; retain prior context and queue follow-up communication.                        | BR-026; FR-CUS-039, FR-CUS-041–042; NFR-REL-003                    | Automated   |
 | SUB-006 | After check-in, appointment change is rejected at both UI and service boundaries.                                                          | FR-CUS-040; FR-SH-031; NFR-DAT-002                                 | Automated   |
-| SUB-007 | Customer cancellation records a cancellation log, queues cancellation communication, and invalidates/replaces the confirmation identifier. | BR-043–045; FR-CUS-043, FR-CUS-052; FR-SH-038–039; NFR-DAT-009–010 | Automated   |
+| SUB-007 | Customer cancellation records a cancellation log, queues cancellation communication, preserves the confirmation identifier and QR artifact, and blocks check-in until re-registration. | BR-043–045; FR-CUS-043, FR-CUS-052; FR-SH-038–039; NFR-DAT-009–010 | Automated   |
 | SUB-008 | A transient communication failure records failure/retry state and produces an in-app customer notice without corrupting registration.      | BR-050; FR-SH-022, FR-SH-035–037; NFR-REL-010–013                  | Not automated     |
 
 ## Feature 7: Profile and help
@@ -162,9 +162,9 @@ setup exist.
 | CHECKIN-006 | Change an appointment during review and complete a modified check-in.                                             | BR-033; FR-OPS-018, FR-OPS-021–022                     | Automated   |
 | CHECKIN-007A | A likely accidental duplicate is blocked with current/prior context, no-coupon instruction, and restart.        | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
 | CHECKIN-007B | A late duplicate is blocked and appears in scan-risk review with its timeline.                                   | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
-| CHECKIN-007C | A superseded code stays blocked; a resubmitted replacement checks in once, then a later duplicate is blocked.    | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
+| CHECKIN-007C | A canceled code stays blocked while canceled; the same code checks in once after re-registration, then a later duplicate is blocked. | BR-034; FR-OPS-024–025; FR-SH-032; NFR-REL-005         | Automated   |
 | CHECKIN-010 | A valid manually entered registration code completes check-in.                                                   | FR-OPS-012–020                                                    | Automated   |
-| CHECKIN-011 | Staff cancels a submitted registration from review and its superseded code is blocked.                           | BR-040; FR-SH-014; FR-OPS-018                                 | Automated   |
+| CHECKIN-011 | Staff cancels a submitted registration from review and its stable code is blocked while canceled.              | BR-040; FR-SH-014; FR-OPS-018                                 | Automated   |
 | CHECKIN-009 | Measure representative lookup/check-in completion time under peak-size seeded data.                               | FR-OPS-011; NFR-PER-001, NFR-PER-005                   | Other layer |
 
 ## Feature 11: Staff-assisted intake and communication support

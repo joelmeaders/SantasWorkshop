@@ -188,7 +188,7 @@ Out of scope:
 | FR-CUS-041 | The service must retain the new appointment and enough prior appointment context to support operational continuity when a reservation is rescheduled. | Customer, Staff/Admin |
 | FR-CUS-042 | The service must queue follow-up communication when a submitted reservation is rescheduled. | Customer |
 | FR-CUS-043 | The service must allow a customer to cancel their own registration through self-service. | Customer |
-| FR-CUS-052 | The service must invalidate any previously issued confirmation artifact and issue a replacement confirmation identifier when a customer cancellation occurs. | Customer |
+| FR-CUS-052 | The service must preserve the same confirmation identifier and QR artifact across customer cancellation and later re-registration, while blocking check-in during cancellation. | Customer |
 
 ### Profile maintenance and help
 

@@ -25,6 +25,12 @@ pnpm run storybook:build
 pnpm run storybook:test
 ```
 
+Use `pnpm run ci:storybook` to run the complete type, lint, inventory, build,
+interaction, and accessibility gate. The normal `ci:app:test` and
+`ci:admin:test` commands include this gate. Their pull-request and release
+workflows therefore test Storybook with the other customer and admin tests.
+The separate Storybook pull-request workflow runs the Windows visual suite.
+
 The inventory check finds Angular `@Component` declarations in both apps. It requires a colocated TypeScript story that directly imports and references each component. Every named story must define or inherit a local play function. See the [generated inventory](storybook-inventory.md) for source links and named states.
 
 The browser tests render stories and execute their play functions. Accessibility violations fail the run. Automated accessibility checks cover machine-detectable issues. Also review keyboard navigation, focus order, zoom, and screen-reader announcements when changing interactive UI.

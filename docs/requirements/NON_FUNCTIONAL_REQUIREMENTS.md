@@ -95,7 +95,7 @@ Out of scope:
 | NFR-DAT-006 | The service must preserve data-consistency guarantees around appointment changes, reservation submission, and check-in so operational counts remain trustworthy. |
 | NFR-DAT-007 | The service must automatically validate draft registration changes before final submission and prevent invalid changes from being committed as complete. |
 | NFR-DAT-008 | The service must provide staff lookup consistency that is immediate when practical and no worse than a few minutes after customer data changes. |
-| NFR-DAT-009 | The service must invalidate previously issued confirmation artifacts and issue replacement confirmation identifiers when a registration is canceled. |
+| NFR-DAT-009 | The service must preserve the confirmation identifier and QR artifact across cancellation and later re-registration, while blocking use during the canceled state. |
 | NFR-DAT-010 | The service must maintain a dedicated cancellation record for every cancellation. |
 | NFR-DAT-011 | The service is not required to provide special conflict-resolution handling for near-simultaneous customer and staff changes to the same registration. |
 

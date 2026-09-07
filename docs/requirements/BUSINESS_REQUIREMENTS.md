@@ -278,9 +278,9 @@ The customer and staff experiences are two operational views of the same registr
 
 Customers must be able to cancel their own registrations through self-service, and authorized staff must also be able to cancel registrations on behalf of customers.
 
-### BR-044 Cancellation communication and invalidation
+### BR-044 Cancellation communication and stable identity
 
-When a registration is canceled, the service must send cancellation communication, invalidate any previously issued confirmation artifact, and ensure that a replacement confirmation identifier is generated so the prior artifact can no longer be reused.
+When a registration is canceled, the service must send cancellation communication and preserve the same confirmation identifier and QR artifact. The service must block the identifier while the registration is canceled. A later re-registration must use the same identifier and QR artifact.
 
 ### BR-045 Cancellation tracking
 

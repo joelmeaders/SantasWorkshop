@@ -82,10 +82,17 @@ describe('completeRegistration handler', () => {
 				registrationUid: 'user-3',
 				appointmentSlotId: 'slot-1',
 				queueSource: 'registration-completion',
+				code: 'ABCD2345',
+				qrCodeStoragePath: 'registrations/user-3/test-asset.png',
 			}),
 		);
 		expect(adminMock.doc).toHaveBeenCalledWith(
 			'registrationsearchindex/user-3',
+		);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'registrationsearchindex/user-3' }),
+			expect.objectContaining({ code: 'ABCD2345' }),
+			{ merge: true },
 		);
 	});
 

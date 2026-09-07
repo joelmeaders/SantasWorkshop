@@ -61,11 +61,14 @@ describe('undoRegistration handler', () => {
 			expect.objectContaining({
 				registrationUid: 'user-4',
 				queueSource: 'registration-cancellation',
+				code: 'ABCD2345',
 			}),
 		);
 		expect(adminMock.transactionSet).toHaveBeenCalledWith(
 			expect.objectContaining({ path: 'registrations/user-4' }),
 			expect.objectContaining({
+				qrcode: 'ABCD2345',
+				qrCodeStoragePath: 'registrations/user-4/original.png',
 				includedInCounts: false,
 				previousDateTimeSlot: {
 					id: 'slot-1',
@@ -73,6 +76,8 @@ describe('undoRegistration handler', () => {
 				},
 			}),
 		);
+		expect(generateQrCodeMock).not.toHaveBeenCalled();
+		expect(replaceQrCodeWithCancelledMock).not.toHaveBeenCalled();
 	});
 
 	it('treats an already-cancelled registration as a retry-safe success', async () => {
@@ -229,7 +234,7 @@ describe('undoRegistration handler', () => {
 		).rejects.toMatchObject({ code: 'internal' });
 	});
 
-	it('reports that cancellation committed when QR finalization fails and records the retry state', async () => {
+	it('does not rewrite the stable QR artifact during cancellation', async () => {
 		const { undoRegistration } =
 			await loadAccountRegistrationHandlers(adminMock);
 		adminMock.setDocSnapshot('registrations/user-4', {
@@ -252,38 +257,6 @@ describe('undoRegistration handler', () => {
 			{},
 			false,
 		);
-		adminMock
-			.getDocRef('registrations/user-4')
-			.get.mockResolvedValueOnce({
-				exists: true,
-				data: () => ({
-					uid: 'user-4',
-					qrcode: 'ABCD2345',
-					firstName: 'Customer',
-					emailAddress: 'customer@example.com',
-					qrCodeStoragePath: 'registrations/user-4/original.png',
-					dateTimeSlot: {
-						id: 'slot-1',
-						dateTime: '2025-12-10T18:00:00.000Z',
-					},
-					registrationSubmittedOn: new Date(
-						'2025-12-01T00:00:00.000Z',
-					),
-				}),
-			})
-			.mockResolvedValueOnce({
-				exists: true,
-				data: () => ({
-					uid: 'user-4',
-					qrcode: 'ZXCV2345',
-					qrCodeStoragePath: 'registrations/user-4/replacement.png',
-					cancelledOn: new Date(),
-				}),
-			});
-		generateQrCodeMock.mockRejectedValueOnce(
-			new Error('storage unavailable'),
-		);
-
 		await expect(
 			undoRegistration(
 				createCallableRequest(
@@ -291,17 +264,15 @@ describe('undoRegistration handler', () => {
 					{ uid: 'user-4' },
 				),
 			),
-		).rejects.toMatchObject({
-			code: 'internal',
-			message: expect.stringContaining('Registration was cancelled'),
-		});
+		).resolves.toBe(true);
+		expect(generateQrCodeMock).not.toHaveBeenCalled();
+		expect(replaceQrCodeWithCancelledMock).not.toHaveBeenCalled();
 		expect(adminMock.transactionSet).toHaveBeenCalledWith(
 			expect.objectContaining({ path: 'registrations/user-4' }),
 			expect.objectContaining({
-				qrCodeGeneratedOn: false,
-				qrCodeGenerationFailedOn: expect.any(Date),
+				qrcode: 'ABCD2345',
+				qrCodeStoragePath: 'registrations/user-4/original.png',
 			}),
-			{ merge: true },
 		);
 	});
 });

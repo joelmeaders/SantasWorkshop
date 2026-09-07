@@ -84,6 +84,21 @@ describe('SignUpPage', () => {
 		expect(esTranslations.REFERRAL.REQUIRED).toBe('Obligatorio');
 	});
 
+	it('defines signup recovery messages in every supported language', (): void => {
+		expect(enTranslations.SIGNUP.VERIFICATION_FAILED).toBe(
+			'We could not verify your request',
+		);
+		expect(esTranslations.SIGNUP.VERIFICATION_FAILED).toBe(
+			'No pudimos verificar su solicitud',
+		);
+		expect(enTranslations.SIGNUP.ACCOUNT_CREATED_MESSAGE).toContain(
+			'could not sign you in',
+		);
+		expect(esTranslations.SIGNUP.ACCOUNT_CREATED_MESSAGE).toContain(
+			'no pudimos iniciar',
+		);
+	});
+
 	it('saves a confirmed referral returned by the selection modal', async () => {
 		const modal = {
 			present: vi.fn().mockName('present').mockResolvedValue(undefined),

@@ -96,4 +96,10 @@ describe('private settings gateway release gate', () => {
 		fn.serviceConfig.uri = uri;
 		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('canonical HTTPS'));
 	});
+	it('rejects a canonical Cloud Run URI that the consumer client cannot accept', () => {
+		const { fn, policy, service } = fixture();
+		fn.serviceConfig.uri = 'https://different-service-uc.a.run.app';
+		service.uri = fn.serviceConfig.uri;
+		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('canonical HTTPS'));
+	});
 });

@@ -74,6 +74,10 @@
 		"CONFIRM_EMAIL_MSG": "Enviaremos la confirmación de su registro y su código QR a esta dirección de correo electrónico cuando termine de registrarse. Compruebe que sea correcta antes de continuar.",
 		"ACCOUNT_EXISTS": "Cuenta en uso",
 		"ACCOUNT_EXISTS_MESSAGE": "Parece que ya tienes una cuenta. Inicia sesión con tu dirección de correo electrónico o restablece la contraseña si no la recuerdas.",
+		"ACCOUNT_CREATED": "Cuenta creada",
+		"ACCOUNT_CREATED_MESSAGE": "Su cuenta fue creada, pero no pudimos iniciar su sesión. Inicie sesión con su dirección de correo electrónico o restablezca la contraseña si es necesario.",
+		"VERIFICATION_FAILED": "No pudimos verificar su solicitud",
+		"VERIFICATION_FAILED_MESSAGE": "Sus datos siguen en el formulario. Inténtelo de nuevo más tarde.",
 		"YOUR_INFO": "Su información",
 		"ACCOUNT_INFO": "Información de la cuenta",
 		"LEGAL_NEWS": "Legal y Newsletter"

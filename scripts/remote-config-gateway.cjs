@@ -4,6 +4,8 @@ const { getModePrefix, FUNCTION_PROJECT_IDS } = require('../config.functions.cjs
 const GATEWAY_FUNCTION = 'publicParametersGateway';
 const REGION = 'us-central1';
 const GATEWAY_CONSUMERS = ['completeRegistration', 'saveDraftChild', 'deleteDraftChild', 'setDraftAppointment', 'undoRegistration', 'changeRegistrationDateTime'];
+// Keep this shape aligned with publicParametersGatewayUrl in the Functions client.
+const GATEWAY_HOST = /^publicparametersgateway-[a-z0-9-]+\.a\.run\.app$/u;
 const gatewayReader = (projectId, env = process.env) => {
 	const prefix = getModePrefix(projectId === FUNCTION_PROJECT_IDS.test ? 'test' : 'prod');
 	return env[`${prefix}_SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT`] || `remote-config-reader@${projectId}.iam.gserviceaccount.com`;
@@ -20,7 +22,7 @@ const assessGateway = (projectId, fn, policy, env = process.env, service) => {
 	let url;
 	try {
 		url = new URL(config.uri);
-		if (url.protocol !== 'https:' || !url.hostname.endsWith('.run.app') || url.username || url.password || url.port || url.pathname !== '/' || url.search || url.hash) throw new Error();
+		if (url.protocol !== 'https:' || !GATEWAY_HOST.test(url.hostname) || url.username || url.password || url.port || url.pathname !== '/' || url.search || url.hash) throw new Error();
 	} catch { problems.push('Settings gateway requires the canonical HTTPS Cloud Run URI.'); }
 	const invoker = `serviceAccount:${gatewayReader(projectId, env)}`;
 	const bindings = policy.bindings ?? [];

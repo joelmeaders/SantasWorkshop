@@ -1,5 +1,8 @@
 # Remote Config deployed release QA
 
+See [follow-up issue resolution](remaining-qa-issues.md) for later repairs,
+inbox verification, and remaining limits.
+
 Completed September 7, 2026. The customer app, admin app, Functions and rules
 were promoted to production from validated code commit
 `d19274f7909c004c69e8ab341f0f1650a080c2a4`. The release is tracked in

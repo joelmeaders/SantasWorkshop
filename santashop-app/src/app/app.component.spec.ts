@@ -103,4 +103,19 @@ describe('AppComponent', () => {
 		await fixture.whenStable();
 		expect(platformSpy.ready).toHaveBeenCalled();
 	});
+
+	it('replaces an open global alert and dismisses it when disabled', async () => {
+		const firstAlert = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(true) };
+		const secondAlert = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(true) };
+		const create = TestBed.inject(AlertController).create as ReturnType<typeof vi.fn>;
+		create.mockResolvedValueOnce(firstAlert).mockResolvedValueOnce(secondAlert);
+		const component = TestBed.createComponent(AppComponent).componentInstance;
+		await component.showGlobalMessage({ title: 'First', message: 'One' });
+		await component.showGlobalMessage({ title: 'Second', message: 'Two' });
+		expect(firstAlert.dismiss).toHaveBeenCalledTimes(1);
+		expect(secondAlert.present).toHaveBeenCalledTimes(1);
+		await component.showGlobalMessage();
+		expect(secondAlert.dismiss).toHaveBeenCalledTimes(1);
+		expect(create).toHaveBeenCalledTimes(2);
+	});
 });

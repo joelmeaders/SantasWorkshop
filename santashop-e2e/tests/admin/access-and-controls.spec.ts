@@ -184,8 +184,8 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expectIonicDisabled(page.locator('#checkInNav'));
 		await expectIonicDisabled(page.locator('#onSiteRegistrationNav'));
 		await expectIonicDisabled(page.locator('#preRegistrationNav'));
-		await expectIonicDisabled(page.locator('#checkInTab'));
-		await expectIonicDisabled(page.locator('#onSiteRegistrationTab'));
+		await expectIonicDisabled(page.locator('ion-tab-button[href="/admin/checkin"]'));
+		await expectIonicDisabled(page.locator('ion-tab-button[href="/admin/registration"]'));
 		await expect(page.locator('#searchNav')).toBeVisible();
 	});
 

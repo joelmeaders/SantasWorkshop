@@ -1,0 +1,131 @@
+<admin-header title="App settings" />
+<ion-content>
+	<div class="limited-container ion-padding">
+		<h1>App settings</h1>
+		<p>
+			Publish changes to both apps. Connected apps receive changes
+			automatically.
+		</p>
+		@if (busy()) { <ion-spinner aria-label="Loading settings" /> } @if
+		(error()) {
+		<p role="alert">{{ error() }}</p>
+		}
+		<p role="status">{{ status() }}</p>
+		@if (loaded()) {
+		<p>
+			Version {{ version() }}. {{ form.dirty ? 'You have unsaved edits.' :
+			'No unsaved edits.' }}
+		</p>
+		<form [formGroup]="form" (ngSubmit)="publish()">
+			<ion-list>
+				<ion-list-header>Customer controls</ion-list-header>
+				<ion-item
+					><ion-toggle formControlName="registrationEnabled"
+						>Registration enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="createAccountEnabled"
+						>Account creation enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="maintenanceModeEnabled"
+						>Maintenance mode enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="weatherModeEnabled"
+						>Weather mode enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-textarea
+						label="Customer message (English)"
+						labelPlacement="stacked"
+						formControlName="messageEn"
+						[autoGrow]="true"
+				/></ion-item>
+				<ion-item
+					><ion-textarea
+						label="Customer message (Spanish)"
+						labelPlacement="stacked"
+						formControlName="messageEs"
+						[autoGrow]="true"
+				/></ion-item>
+			</ion-list>
+			<ion-list formGroupName="admin">
+				<ion-list-header>Admin controls</ion-list-header>
+				<ion-item
+					><ion-toggle formControlName="checkinEnabled"
+						>Check-in enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="onsiteRegistrationEnabled"
+						>On-site registration enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="preRegistrationEnabled"
+						>Pre-registration enabled</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="allowCancelRegistration"
+						>Allow registration cancellation</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-toggle formControlName="allowChangeRegistration"
+						>Allow appointment changes</ion-toggle
+					></ion-item
+				>
+			</ion-list>
+			<ion-list formGroupName="globalAlert">
+				<ion-list-header>Global alert</ion-list-header>
+				<ion-item
+					><ion-toggle formControlName="displayAlert"
+						>Display alert</ion-toggle
+					></ion-item
+				>
+				<ion-item
+					><ion-input
+						label="Alert title (English)"
+						labelPlacement="stacked"
+						formControlName="titleEn"
+				/></ion-item>
+				<ion-item
+					><ion-input
+						label="Alert title (Spanish)"
+						labelPlacement="stacked"
+						formControlName="titleEs"
+				/></ion-item>
+				<ion-item
+					><ion-textarea
+						label="Alert message (English)"
+						labelPlacement="stacked"
+						formControlName="messageEn"
+						[autoGrow]="true"
+				/></ion-item>
+				<ion-item
+					><ion-textarea
+						label="Alert message (Spanish)"
+						labelPlacement="stacked"
+						formControlName="messageEs"
+						[autoGrow]="true"
+				/></ion-item>
+			</ion-list>
+			<ion-button
+				type="submit"
+				[disabled]="busy() || !form.dirty || form.invalid"
+				>Publish</ion-button
+			>
+		</form>
+		}
+		<ion-button fill="outline" [disabled]="busy()" (click)="reload()"
+			>{{ form.dirty ? 'Discard edits and reload' : 'Reload settings'
+			}}</ion-button
+		>
+	</div>
+</ion-content>

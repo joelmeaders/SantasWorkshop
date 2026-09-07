@@ -1,9 +1,9 @@
+import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
 	type DateTimeSlot,
-	type PublicParameters,
 	type Registration,
 	type RegistrationCancellation,
 } from '../models';
@@ -114,7 +114,7 @@ export default async function undoRegistration(
 	const indexRef = db.doc(
 		`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`,
 	);
-	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
+	const parameters = await getPublicParameters();
 	const receiptRef = registrationRef
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
@@ -122,12 +122,10 @@ export default async function undoRegistration(
 
 	try {
 		await db.runTransaction(async (transaction) => {
-			const [registrationSnapshot, parametersSnapshot, receiptSnapshot] =
-				await Promise.all([
-					transaction.get(registrationRef),
-					transaction.get(parametersRef),
-					transaction.get(receiptRef),
-				]);
+			const [registrationSnapshot, receiptSnapshot] = await Promise.all([
+				transaction.get(registrationRef),
+				transaction.get(receiptRef),
+			]);
 			const cached = getStoredMutationResult(
 				receiptSnapshot.exists
 					? (receiptSnapshot.data() as MutationReceipt)
@@ -177,8 +175,6 @@ export default async function undoRegistration(
 				return;
 			}
 
-			const parameters = parametersSnapshot.data() as
-				PublicParameters | undefined;
 			if (!parameters?.admin?.allowCancelRegistration) {
 				throw new HttpsError(
 					'failed-precondition',

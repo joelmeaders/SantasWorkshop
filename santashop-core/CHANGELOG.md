@@ -2,6 +2,17 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2026.09.0-beta.3] - Unreleased
+
+### Added
+
+- Shared Remote Config public-settings source with validated defaults, lifecycle recovery, retry backoff, and configuration status.
+- Shared application update service and user prompts.
+
+### Changed
+
+- Remove Firestore public-settings sources while preserving the source interface and AppStateService observables.
+
 ## [2026.09.0-alpha.1] - Unreleased
 
 ### Added

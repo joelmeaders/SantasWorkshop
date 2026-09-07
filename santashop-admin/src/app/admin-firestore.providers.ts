@@ -5,8 +5,6 @@ import {
 	FIREBASE_FIRESTORE,
 	FireRepoLite,
 	FirestoreWrapper,
-	PUBLIC_PARAMETERS_SOURCE,
-	RealtimePublicParametersSource,
 } from '@santashop/core/admin/firestore';
 import {
 	connectFirestoreEmulator,
@@ -60,11 +58,6 @@ export const ADMIN_FIRESTORE_ROUTE_PROVIDERS: Provider[] = [
 	},
 	FirestoreWrapper,
 	FireRepoLite,
-	RealtimePublicParametersSource,
-	{
-		provide: PUBLIC_PARAMETERS_SOURCE,
-		useExisting: RealtimePublicParametersSource,
-	},
 	AppStateService,
 	DateTimeModalService,
 	SearchService,

@@ -1,10 +1,10 @@
+import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
 	EMAIL_TEMPLATE_KEYS,
 	type DateTimeSlot,
-	type PublicParameters,
 	type Registration,
 } from '../models';
 import { isAdminToken } from '../utility/capabilities';
@@ -66,7 +66,7 @@ export default async function changeRegistrationDateTime(
 	const slotId = requireSlotId(data['slotId']);
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
+	const parameters = await getPublicParameters();
 	const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
 	const emailRef = db
 		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
@@ -77,17 +77,12 @@ export default async function changeRegistrationDateTime(
 
 	try {
 		await db.runTransaction(async (transaction) => {
-			const [
-				registrationSnapshot,
-				parametersSnapshot,
-				slotSnapshot,
-				receiptSnapshot,
-			] = await Promise.all([
-				transaction.get(registrationRef),
-				transaction.get(parametersRef),
-				transaction.get(slotRef),
-				transaction.get(receiptRef),
-			]);
+			const [registrationSnapshot, slotSnapshot, receiptSnapshot] =
+				await Promise.all([
+					transaction.get(registrationRef),
+					transaction.get(slotRef),
+					transaction.get(receiptRef),
+				]);
 			const cached = getStoredMutationResult(
 				receiptSnapshot.exists
 					? (receiptSnapshot.data() as MutationReceipt)
@@ -122,8 +117,6 @@ export default async function changeRegistrationDateTime(
 				);
 			}
 
-			const parameters = parametersSnapshot.data() as
-				PublicParameters | undefined;
 			if (!parameters?.admin?.allowChangeRegistration) {
 				throw new HttpsError(
 					'failed-precondition',

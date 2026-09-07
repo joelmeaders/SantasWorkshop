@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.3] - Unreleased
+
+### Added
+
+- Owner-only App settings with bilingual notices, validated publishing, version conflicts, and publication audit logs.
+- Remote Config migration candidates, release defaults, dedicated runtime identities, and quota/IAM release checks.
+- Friendly application update prompts, including a reload-required recovery state.
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.3`.
+- Move customer, staff, and backend public controls from Firestore to one unconditional Remote Config JSON parameter.
+- Retain valid cached settings or release defaults through transient configuration failures, with real-time activation and bounded retries.
+- Improve service-worker caching, form recovery, and browser QA coverage.
+- Keep existing operation rules and the legacy settings document; older clients must upgrade to receive new settings.
+
 ## [2026.09.0-beta.2] - Unreleased
 
 ### Changed

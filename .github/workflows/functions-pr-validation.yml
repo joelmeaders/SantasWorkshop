@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'santashop-functions/**'
+      - 'santashop-models/**'
+      - 'remote-config/**'
+      - 'scripts/remote-config*.cjs'
+      - 'scripts/public-parameters-schema.cjs'
       - 'santashop-e2e/**'
       - 'firebase.json'
       - 'firebase.e2e.json'

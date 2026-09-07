@@ -2,6 +2,17 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.09.0-beta.3] - Unreleased
+
+### Added
+
+- Owner settings publication, access-denial, and conflict tests against explicit emulator fixtures.
+- Browser coverage for account recovery and application update behavior.
+
+### Fixed
+
+- Select disabled Ionic navigation tabs by destination after hydration removes their IDs.
+
 ## [2026.09.0-beta.2] - Unreleased
 
 ### Added

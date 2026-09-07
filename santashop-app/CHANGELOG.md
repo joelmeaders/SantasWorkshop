@@ -2,6 +2,15 @@
 
 All notable changes to the main application will be documented in this file.
 
+## [2026.09.0-beta.3] - Unreleased
+
+### Changed
+
+- Advance the application to `2026.09.0-beta.3`.
+- Receive public controls and bilingual notices through real-time Remote Config while retaining valid settings during outages.
+- Add friendly update prompts and reload recovery, improve caching and account-form behavior, and expand browser QA coverage.
+- Keep Firestore Lite in the startup graph and existing full Firestore features deferred.
+
 ## [2026.09.0-beta.2] - Unreleased
 
 ### Changed

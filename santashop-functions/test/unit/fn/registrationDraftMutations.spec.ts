@@ -19,7 +19,7 @@ describe('draft registration mutation handlers', () => {
 			uid: 'user-draft',
 			children,
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			registrationEnabled: true,
 			admin: { preRegistrationEnabled: true },
 		});

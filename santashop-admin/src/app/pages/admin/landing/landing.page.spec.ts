@@ -1,11 +1,4 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AppStateService, AuthService } from '@santashop/core/admin/firestore';
@@ -108,6 +101,7 @@ describe('LandingPage', () => {
 
 	it('should show owner operations only to owners', async () => {
 		expect(fixture.nativeElement.textContent).toContain('Owner Operations');
+		expect(fixture.nativeElement.textContent).toContain('App settings');
 
 		ownerSubject.next(false);
 		await fixture.whenStable();
@@ -117,6 +111,7 @@ describe('LandingPage', () => {
 		expect(fixture.nativeElement.textContent).not.toContain(
 			'Owner Operations',
 		);
+		expect(fixture.nativeElement.textContent).not.toContain('App settings');
 	});
 
 	it('toggles the document theme using the persisted preference', () => {

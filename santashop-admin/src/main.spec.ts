@@ -1,7 +1,10 @@
+import { TestBed } from '@angular/core/testing';
+import { httpsCallable } from 'firebase/functions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	FIREBASE_ANALYTICS,
 	FIREBASE_FIRESTORE,
+	PUBLIC_PARAMETERS_RUNTIME,
 	PROGRAM_YEAR,
 	SHOP_DAYS,
 } from '@santashop/core/admin';
@@ -13,36 +16,6 @@ import {
 } from './bootstrap-admin';
 import { requireDefined } from './test-helpers';
 
-const firebaseModule = vi.hoisted(() => {
-	return {
-		function: vi.fn(),
-	};
-});
-
-vi.mock('firebase/app', () => ({ initializeApp: firebaseModule.function }));
-vi.mock('firebase/app-check', () => ({
-	initializeAppCheck: firebaseModule.function,
-	ReCaptchaEnterpriseProvider: class ReCaptchaEnterpriseProvider {},
-}));
-vi.mock('firebase/analytics', () => ({
-	getAnalytics: firebaseModule.function,
-	logEvent: firebaseModule.function,
-}));
-vi.mock('firebase/auth', () => ({
-	EmailAuthProvider: { credential: firebaseModule.function },
-	connectAuthEmulator: firebaseModule.function,
-	getAuth: firebaseModule.function,
-	onAuthStateChanged: firebaseModule.function,
-	reauthenticateWithCredential: firebaseModule.function,
-	sendPasswordResetEmail: firebaseModule.function,
-	signInWithEmailAndPassword: firebaseModule.function,
-	updatePassword: firebaseModule.function,
-}));
-vi.mock('firebase/functions', () => ({
-	connectFunctionsEmulator: firebaseModule.function,
-	getFunctions: firebaseModule.function,
-	httpsCallable: firebaseModule.function,
-}));
 describe('admin bootstrap', () => {
 	let dependencies: AdminBootstrapDependencies;
 	let logger: (error: unknown) => void;
@@ -88,14 +61,35 @@ describe('admin bootstrap', () => {
 		expect(options.providers).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-				provide: PROGRAM_YEAR,
-				useValue: 2026,
-			}),
+					provide: PROGRAM_YEAR,
+					useValue: 2026,
+				}),
 				expect.objectContaining({
-				provide: SHOP_DAYS,
-				useValue: [12, 13, 15, 16],
-			}),
+					provide: SHOP_DAYS,
+					useValue: [12, 13, 15, 16],
+				}),
 			]),
+		);
+		const callable = vi
+			.fn()
+			.mockResolvedValue({ data: { local: 'fixture' } });
+		vi.mocked(httpsCallable).mockReturnValue(
+			callable as unknown as ReturnType<typeof httpsCallable>,
+		);
+		TestBed.configureTestingModule({
+			providers: options.providers.filter(
+				(provider) =>
+					typeof provider === 'object' &&
+					provider !== null &&
+					'provide' in provider,
+			) as never[],
+		});
+		const runtime = TestBed.inject(PUBLIC_PARAMETERS_RUNTIME);
+		expect(runtime.local).toBe(true);
+		await expect(runtime.refresh()).resolves.toEqual({ local: 'fixture' });
+		expect(httpsCallable).toHaveBeenCalledWith(
+			'functions',
+			'testReadPublicParameters',
 		);
 		expect(options.providers).not.toEqual(
 			expect.arrayContaining([
@@ -158,7 +152,9 @@ describe('admin bootstrap', () => {
 
 	it('logs bootstrap failures instead of leaving a rejected startup promise', async () => {
 		const error = new Error('bootstrap failed');
-		vi.mocked(dependencies.bootstrapApplication).mockRejectedValueOnce(error);
+		vi.mocked(dependencies.bootstrapApplication).mockRejectedValueOnce(
+			error,
+		);
 
 		await bootstrapAdminApplication({
 			config: createConfig(),
@@ -170,7 +166,6 @@ describe('admin bootstrap', () => {
 
 		expect(logger).toHaveBeenCalledWith(error);
 	});
-
 });
 
 function createConfig(

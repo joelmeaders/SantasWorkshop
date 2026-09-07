@@ -2,6 +2,19 @@
 
 All notable changes to the admin application will be documented in this file.
 
+## [2026.09.0-beta.3] - Unreleased
+
+### Added
+
+- Owner-only App settings for switches and bilingual messages, with explicit publishing and retained edits on version conflicts.
+- Friendly update prompts and reload recovery.
+
+### Changed
+
+- Advance the application to `2026.09.0-beta.3`.
+- Read public controls through shared Remote Config with cached continuity and real-time activation.
+- Improve service-worker caching and use stable Ionic tab selectors in browser tests.
+
 ## [2026.09.0-beta.2] - Unreleased
 
 ### Changed

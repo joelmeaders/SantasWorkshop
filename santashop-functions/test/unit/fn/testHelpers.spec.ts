@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 interface TestHelpersAdminMock {
 	module: {
@@ -53,6 +53,7 @@ const createTestHelpersAdminMock = (): TestHelpersAdminMock => {
 			apps: [],
 			initializeApp,
 			firestore: vi.fn(() => ({
+				doc: vi.fn((path: string) => ({ path, set: docSet })),
 				collection,
 				batch: vi.fn(() => batch),
 			})),
@@ -86,9 +87,11 @@ const loadSubject = async (
 };
 
 describe('testHelpers module', () => {
+	afterEach(() => vi.unstubAllEnvs());
 	let adminMock: TestHelpersAdminMock;
 
 	beforeEach(() => {
+		vi.stubEnv('FUNCTIONS_EMULATOR', 'true');
 		adminMock = createTestHelpersAdminMock();
 		adminMock.batchCommit.mockResolvedValue(undefined);
 		adminMock.listUsers.mockResolvedValue({ users: [] });
@@ -127,7 +130,7 @@ describe('testHelpers module', () => {
 		await clearAllData();
 
 		expect(adminMock.batchDelete).toHaveBeenCalledTimes(4);
-		expect(adminMock.batchCommit).toHaveBeenCalledTimes(17);
+		expect(adminMock.batchCommit).toHaveBeenCalledTimes(18);
 		expect(adminMock.getFiles).toHaveBeenCalledWith({
 			prefix: 'registrations/',
 		});

@@ -32,7 +32,7 @@ describe('changeRegistrationDateTime handler', () => {
 				dateTime: '2025-12-10T18:00:00.000Z',
 			},
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowChangeRegistration: true },
 		});
 		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
@@ -117,7 +117,7 @@ describe('changeRegistrationDateTime handler', () => {
 			registrationSubmittedOn: new Date('2025-12-01T00:00:00.000Z'),
 			dateTimeSlot: { id: 'slot-new' },
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowChangeRegistration: true },
 		});
 		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
@@ -151,7 +151,7 @@ describe('changeRegistrationDateTime handler', () => {
 				{ mutationId: 'change-slot-0001', slotId: 'slot-new' },
 				{ uid: 'user-5' },
 			);
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowChangeRegistration: true },
 		});
 		adminMock.setDocSnapshot('dateTimeSlots/slot-new', {
@@ -213,14 +213,14 @@ describe('changeRegistrationDateTime handler', () => {
 			qrCodeStoragePath: 'registrations/user-5/qr.png',
 			dateTimeSlot: { id: 'slot-new' },
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowChangeRegistration: false },
 		});
 		await expect(changeRegistrationDateTime(request)).rejects.toMatchObject(
 			{ code: 'failed-precondition' },
 		);
 
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowChangeRegistration: true },
 		});
 		await expect(changeRegistrationDateTime(request)).resolves.toBe(true);

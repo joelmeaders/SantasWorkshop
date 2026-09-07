@@ -1,3 +1,5 @@
+import { parsePublicParameters } from '../models';
+import { isLocalPublicParameters } from '../utility/public-parameters';
 /**
  * Test helper functions for E2E testing
  * These functions should only be available in emulator mode
@@ -86,7 +88,13 @@ export interface TestRegistrationSeed {
 	zipCode: string;
 	code: string;
 	dateTime: string;
-	children?: { firstName: string; lastName: string; dateOfBirth: string; ageGroup: string; toyType?: string }[];
+	children?: {
+		firstName: string;
+		lastName: string;
+		dateOfBirth: string;
+		ageGroup: string;
+		toyType?: string;
+	}[];
 	hasCheckedIn?: boolean;
 	checkInDateTime?: string;
 	qrReady?: boolean;
@@ -210,8 +218,18 @@ export interface TestRegistrationQrLifecycle {
 		zip?: string;
 	};
 	slots: {
-		current?: { id: string; maxSlots?: number; slotsReserved?: number; enabled?: boolean };
-		previous?: { id: string; maxSlots?: number; slotsReserved?: number; enabled?: boolean };
+		current?: {
+			id: string;
+			maxSlots?: number;
+			slotsReserved?: number;
+			enabled?: boolean;
+		};
+		previous?: {
+			id: string;
+			maxSlots?: number;
+			slotsReserved?: number;
+			enabled?: boolean;
+		};
 	};
 	current: {
 		code?: string;
@@ -290,9 +308,16 @@ export async function seedPublicParameters(
 		},
 	};
 
-	const mergedParams = { ...defaultParams, ...params };
+	if (!isLocalPublicParameters())
+		throw new Error('Public settings fixtures require verified emulators.');
+	const mergedParams = parsePublicParameters({
+		...defaultParams,
+		...params,
+		admin: { ...defaultParams.admin, ...params.admin },
+		globalAlert: { ...defaultParams.globalAlert, ...params.globalAlert },
+	});
 
-	await db.collection('parameters').doc('public').set(mergedParams);
+	await db.doc('_testConfig/publicParameters').set(mergedParams);
 }
 
 /**
@@ -321,6 +346,7 @@ export async function clearAllData(): Promise<void> {
 		'stats',
 		'tmp_registrationemails',
 		'parameters',
+		'_testConfig',
 		'staff',
 	];
 
@@ -346,7 +372,9 @@ export async function clearAllData(): Promise<void> {
 	const bucket = admin.storage().bucket();
 	for (const prefix of ['registrations/', 'emailTemplates/']) {
 		const [files] = await bucket.getFiles({ prefix });
-		await Promise.all(files.map((file) => file.delete({ ignoreNotFound: true })));
+		await Promise.all(
+			files.map((file) => file.delete({ ignoreNotFound: true })),
+		);
 	}
 }
 
@@ -471,15 +499,29 @@ export async function seedRegistration(
 	seed: TestRegistrationSeed,
 ): Promise<void> {
 	if (seed.incomplete && seed.cancellation) {
-		throw new Error('A seeded registration cannot be both incomplete and cancelled.');
+		throw new Error(
+			'A seeded registration cannot be both incomplete and cancelled.',
+		);
 	}
 	const dateTime = new Date(seed.dateTime);
 	if (Number.isNaN(dateTime.getTime())) {
 		throw new Error(`Invalid registration dateTime: ${seed.dateTime}.`);
 	}
-	const children = (seed.children ?? [
-		{ firstName: 'Test', lastName: 'Child', dateOfBirth: '2018-01-01', ageGroup: '6-8', toyType: 'girls' },
-	]).map((child, index) => ({ ...child, id: index + 1, dateOfBirth: new Date(child.dateOfBirth) }));
+	const children = (
+		seed.children ?? [
+			{
+				firstName: 'Test',
+				lastName: 'Child',
+				dateOfBirth: '2018-01-01',
+				ageGroup: '6-8',
+				toyType: 'girls',
+			},
+		]
+	).map((child, index) => ({
+		...child,
+		id: index + 1,
+		dateOfBirth: new Date(child.dateOfBirth),
+	}));
 	const db = admin.firestore();
 	await db.collection('users').doc(seed.uid).set({
 		firstName: seed.firstName,
@@ -496,80 +538,107 @@ export async function seedRegistration(
 		? new Date(seed.cancellation.cancelledOn)
 		: new Date();
 	if (Number.isNaN(cancellationTime.getTime())) {
-		throw new Error(`Invalid cancellation date: ${seed.cancellation?.cancelledOn}.`);
+		throw new Error(
+			`Invalid cancellation date: ${seed.cancellation?.cancelledOn}.`,
+		);
 	}
 	const cancellationId = `${seed.uid}-e2e-cancellation`;
-	await db.collection('registrations').doc(seed.uid).set({
-		uid: seed.uid,
-		firstName: seed.firstName,
-		lastName: seed.lastName,
-		emailAddress: seed.emailAddress.toLowerCase(),
-		zipCode: seed.zipCode,
-		qrcode: seed.code.toUpperCase(),
-		qrCodeStoragePath: currentQrPath,
-		children,
-		...(seed.incomplete
-			? {}
-			: seed.cancellation && !seed.cancellation.reRegistered
-			? {
-				cancelledOn: cancellationTime,
-				cancelledByUid: seed.uid,
-				cancellationLogId: cancellationId,
-				previousDateTimeSlot: { id: 'e2e-registration-slot', dateTime },
-			}
-			: {
-				dateTimeSlot: { id: 'e2e-registration-slot', dateTime },
-				registrationSubmittedOn: new Date(),
-			}),
-		includedInCounts: false,
-		includedInRegistrationStats: false,
-		programYear: PROGRAM_YEAR,
-		hasCheckedIn: seed.hasCheckedIn ?? false,
-		qrCodeGeneratedOn: seed.qrReady === false ? false : new Date(),
-		qrCodeGenerationFailedOn: false,
-	});
-	if (seed.cancellation) {
-		await db.collection('cancellations').doc(cancellationId).set({
+	await db
+		.collection('registrations')
+		.doc(seed.uid)
+		.set({
 			uid: seed.uid,
-			actorUid: seed.uid,
-			cancelledOn: cancellationTime,
+			firstName: seed.firstName,
+			lastName: seed.lastName,
+			emailAddress: seed.emailAddress.toLowerCase(),
+			zipCode: seed.zipCode,
+			qrcode: seed.code.toUpperCase(),
+			qrCodeStoragePath: currentQrPath,
+			children,
+			...(seed.incomplete
+				? {}
+				: seed.cancellation && !seed.cancellation.reRegistered
+					? {
+							cancelledOn: cancellationTime,
+							cancelledByUid: seed.uid,
+							cancellationLogId: cancellationId,
+							previousDateTimeSlot: {
+								id: 'e2e-registration-slot',
+								dateTime,
+							},
+						}
+					: {
+							dateTimeSlot: {
+								id: 'e2e-registration-slot',
+								dateTime,
+							},
+							registrationSubmittedOn: new Date(),
+						}),
+			includedInCounts: false,
+			includedInRegistrationStats: false,
 			programYear: PROGRAM_YEAR,
-			previousDateTimeSlot: { id: 'e2e-registration-slot', dateTime },
-			supersededConfirmationCode: seed.cancellation.supersededCode.toUpperCase(),
-			supersededQrCodeStoragePath: `registrations/${seed.uid}/e2e-superseded.png`,
-			replacementConfirmationCode: seed.code.toUpperCase(),
-			replacementQrCodeStoragePath: currentQrPath,
+			hasCheckedIn: seed.hasCheckedIn ?? false,
+			qrCodeGeneratedOn: seed.qrReady === false ? false : new Date(),
+			qrCodeGenerationFailedOn: false,
 		});
+	if (seed.cancellation) {
+		await db
+			.collection('cancellations')
+			.doc(cancellationId)
+			.set({
+				uid: seed.uid,
+				actorUid: seed.uid,
+				cancelledOn: cancellationTime,
+				programYear: PROGRAM_YEAR,
+				previousDateTimeSlot: { id: 'e2e-registration-slot', dateTime },
+				supersededConfirmationCode:
+					seed.cancellation.supersededCode.toUpperCase(),
+				supersededQrCodeStoragePath: `registrations/${seed.uid}/e2e-superseded.png`,
+				replacementConfirmationCode: seed.code.toUpperCase(),
+				replacementQrCodeStoragePath: currentQrPath,
+			});
 	}
 	if (seed.hasCheckedIn) {
-		await db.collection('checkins').doc(seed.uid).set({
-			checkInDateTime: seed.checkInDateTime
-				? new Date(seed.checkInDateTime)
-				: new Date(),
-			customerId: seed.uid,
-			registrationCode: seed.code.toUpperCase(),
-			inStats: false,
-			stats: { children: children.length },
-		});
+		await db
+			.collection('checkins')
+			.doc(seed.uid)
+			.set({
+				checkInDateTime: seed.checkInDateTime
+					? new Date(seed.checkInDateTime)
+					: new Date(),
+				customerId: seed.uid,
+				registrationCode: seed.code.toUpperCase(),
+				inStats: false,
+				stats: { children: children.length },
+			});
 	}
-	if (!seed.cancellation || seed.cancellation.reRegistered) await seedRegistrationSearchIndex([{
-		id: seed.uid,
-		firstName: seed.firstName.toLowerCase(),
-		lastName: seed.lastName,
-		emailAddress: seed.emailAddress,
-		customerId: seed.uid,
-		zip: seed.zipCode,
-		code: seed.code,
-	}]);
+	if (!seed.cancellation || seed.cancellation.reRegistered)
+		await seedRegistrationSearchIndex([
+			{
+				id: seed.uid,
+				firstName: seed.firstName.toLowerCase(),
+				lastName: seed.lastName,
+				emailAddress: seed.emailAddress,
+				customerId: seed.uid,
+				zip: seed.zipCode,
+				code: seed.code,
+			},
+		]);
 }
 
 const cancelledAsset = getCancelledRegistrationAsset();
-const cancelledAssetHash = createHash('sha256').update(cancelledAsset).digest('hex');
+const cancelledAssetHash = createHash('sha256')
+	.update(cancelledAsset)
+	.digest('hex');
 
-const pngDimensions = (contents: Buffer): { width: number; height: number } | undefined => {
+const pngDimensions = (
+	contents: Buffer,
+): { width: number; height: number } | undefined => {
 	const pngSignature = '89504e470d0a1a0a';
-	if (contents.subarray(0, 8).toString('hex') !== pngSignature) return undefined;
-	if (contents.subarray(12, 16).toString('ascii') !== 'IHDR') return undefined;
+	if (contents.subarray(0, 8).toString('hex') !== pngSignature)
+		return undefined;
+	if (contents.subarray(12, 16).toString('ascii') !== 'IHDR')
+		return undefined;
 	if (contents.length < 24) return undefined;
 	return {
 		width: contents.readUInt32BE(16),
@@ -577,7 +646,9 @@ const pngDimensions = (contents: Buffer): { width: number; height: number } | un
 	};
 };
 
-const storageObjectInfo = async (path?: string): Promise<TestStorageObjectInfo> => {
+const storageObjectInfo = async (
+	path?: string,
+): Promise<TestStorageObjectInfo> => {
 	if (!path) return { exists: false };
 	const file = admin.storage().bucket().file(path);
 	const [exists] = await file.exists();
@@ -590,12 +661,15 @@ const storageObjectInfo = async (path?: string): Promise<TestStorageObjectInfo> 
 	return {
 		exists: true,
 		...(metadata.md5Hash ? { md5Hash: metadata.md5Hash } : {}),
-		...(metadata.cacheControl ? { cacheControl: metadata.cacheControl } : {}),
+		...(metadata.cacheControl
+			? { cacheControl: metadata.cacheControl }
+			: {}),
 		...(metadata.contentType ? { contentType: metadata.contentType } : {}),
 		...(metadata.size ? { size: String(metadata.size) } : {}),
 		...(dimensions ?? {}),
 		matchesCancelledAsset:
-			createHash('sha256').update(contents).digest('hex') === cancelledAssetHash,
+			createHash('sha256').update(contents).digest('hex') ===
+			cancelledAssetHash,
 	};
 };
 
@@ -604,76 +678,109 @@ export async function inspectRegistrationQrLifecycle(
 	emailAddress: string,
 ): Promise<TestRegistrationQrLifecycle> {
 	const db = admin.firestore();
-	const registrationQuery = await db.collection('registrations')
+	const registrationQuery = await db
+		.collection('registrations')
 		.where('emailAddress', '==', emailAddress.toLowerCase())
 		.limit(1)
 		.get();
 	const registrationSnapshot = registrationQuery.docs[0];
-	const registration = registrationSnapshot?.data() as {
-		qrcode?: string;
-		qrCodeStoragePath?: string;
-		registrationSubmittedOn?: unknown;
-		cancelledOn?: unknown;
-		dateTimeSlot?: { id?: string; dateTime?: unknown };
-		previousDateTimeSlot?: { id?: string; dateTime?: unknown };
-	} | undefined;
+	const registration = registrationSnapshot?.data() as
+		| {
+				qrcode?: string;
+				qrCodeStoragePath?: string;
+				registrationSubmittedOn?: unknown;
+				cancelledOn?: unknown;
+				dateTimeSlot?: { id?: string; dateTime?: unknown };
+				previousDateTimeSlot?: { id?: string; dateTime?: unknown };
+		  }
+		| undefined;
 	if (!registrationSnapshot || !registration) {
-		throw new Error('Registration not found for the requested email address.');
+		throw new Error(
+			'Registration not found for the requested email address.',
+		);
 	}
 	const uid = registrationSnapshot.id;
 
-	const [cancellationsSnapshot, searchIndexSnapshot, currentSlotSnapshot, previousSlotSnapshot] = await Promise.all([
+	const [
+		cancellationsSnapshot,
+		searchIndexSnapshot,
+		currentSlotSnapshot,
+		previousSlotSnapshot,
+	] = await Promise.all([
 		db.collection('cancellations').where('uid', '==', uid).get(),
 		db.collection('registrationsearchindex').doc(uid).get(),
 		registration.dateTimeSlot?.id
-			? db.collection('dateTimeSlots').doc(registration.dateTimeSlot.id).get()
+			? db
+					.collection('dateTimeSlots')
+					.doc(registration.dateTimeSlot.id)
+					.get()
 			: Promise.resolve(undefined),
 		registration.previousDateTimeSlot?.id
-			? db.collection('dateTimeSlots').doc(registration.previousDateTimeSlot.id).get()
+			? db
+					.collection('dateTimeSlots')
+					.doc(registration.previousDateTimeSlot.id)
+					.get()
 			: Promise.resolve(undefined),
 	]);
 	const cancellations = cancellationsSnapshot.docs
-		.map((document) => document.data() as {
-			cancelledOn: { toDate?: () => Date } | Date;
-			supersededConfirmationCode: string;
-			supersededQrCodeStoragePath: string;
-			replacementConfirmationCode: string;
-			replacementQrCodeStoragePath: string;
-		})
+		.map(
+			(document) =>
+				document.data() as {
+					cancelledOn: { toDate?: () => Date } | Date;
+					supersededConfirmationCode: string;
+					supersededQrCodeStoragePath: string;
+					replacementConfirmationCode: string;
+					replacementQrCodeStoragePath: string;
+				},
+		)
 		.sort((left, right) => {
-			const leftDate = left.cancelledOn instanceof Date
-				? left.cancelledOn
-				: left.cancelledOn.toDate?.() ?? new Date(0);
-			const rightDate = right.cancelledOn instanceof Date
-				? right.cancelledOn
-				: right.cancelledOn.toDate?.() ?? new Date(0);
+			const leftDate =
+				left.cancelledOn instanceof Date
+					? left.cancelledOn
+					: (left.cancelledOn.toDate?.() ?? new Date(0));
+			const rightDate =
+				right.cancelledOn instanceof Date
+					? right.cancelledOn
+					: (right.cancelledOn.toDate?.() ?? new Date(0));
 			return rightDate.getTime() - leftDate.getTime();
 		});
 	const latestCancellation = cancellations[0];
-	const slot = (
-		value?: { id?: string; dateTime?: unknown },
-	): { id?: string; dateTime?: string } => {
+	const slot = (value?: {
+		id?: string;
+		dateTime?: unknown;
+	}): { id?: string; dateTime?: string } => {
 		const dateTime = asDate(value?.dateTime);
 		return {
 			...(value?.id ? { id: value.id } : {}),
 			...(dateTime
 				? { dateTime: dateTime.toISOString() }
-				: typeof value?.dateTime === 'string' ? { dateTime: value.dateTime } : {}),
+				: typeof value?.dateTime === 'string'
+					? { dateTime: value.dateTime }
+					: {}),
 		};
 	};
-	const searchIndex = searchIndexSnapshot.data() as {
-		customerId?: string;
-		code?: string;
-		firstName?: string;
-		lastName?: string;
-		displayFirstName?: string;
-		displayLastName?: string;
-		emailAddress?: string;
-		zip?: string;
-	} | undefined;
+	const searchIndex = searchIndexSnapshot.data() as
+		| {
+				customerId?: string;
+				code?: string;
+				firstName?: string;
+				lastName?: string;
+				displayFirstName?: string;
+				displayLastName?: string;
+				emailAddress?: string;
+				zip?: string;
+		  }
+		| undefined;
 	const slotSnapshot = (
 		snapshot: DocumentSnapshot | undefined,
-	): { id: string; maxSlots?: number; slotsReserved?: number; enabled?: boolean } | undefined => {
+	):
+		| {
+				id: string;
+				maxSlots?: number;
+				slotsReserved?: number;
+				enabled?: boolean;
+		  }
+		| undefined => {
 		if (!snapshot?.exists) return undefined;
 		const data = snapshot.data() as {
 			maxSlots?: number;
@@ -682,9 +789,15 @@ export async function inspectRegistrationQrLifecycle(
 		};
 		return {
 			id: snapshot.id,
-			...(typeof data.maxSlots === 'number' ? { maxSlots: data.maxSlots } : {}),
-			...(typeof data.slotsReserved === 'number' ? { slotsReserved: data.slotsReserved } : {}),
-			...(typeof data.enabled === 'boolean' ? { enabled: data.enabled } : {}),
+			...(typeof data.maxSlots === 'number'
+				? { maxSlots: data.maxSlots }
+				: {}),
+			...(typeof data.slotsReserved === 'number'
+				? { slotsReserved: data.slotsReserved }
+				: {}),
+			...(typeof data.enabled === 'boolean'
+				? { enabled: data.enabled }
+				: {}),
 		};
 	};
 	const currentSlot = slotSnapshot(currentSlotSnapshot);
@@ -693,20 +806,42 @@ export async function inspectRegistrationQrLifecycle(
 	return {
 		uid,
 		registration: {
-			hasSubmittedRegistration: Boolean(registration.registrationSubmittedOn),
+			hasSubmittedRegistration: Boolean(
+				registration.registrationSubmittedOn,
+			),
 			cancelled: Boolean(registration.cancelledOn),
-			...(registration.dateTimeSlot ? { dateTimeSlot: slot(registration.dateTimeSlot) } : {}),
-			...(registration.previousDateTimeSlot ? { previousDateTimeSlot: slot(registration.previousDateTimeSlot) } : {}),
+			...(registration.dateTimeSlot
+				? { dateTimeSlot: slot(registration.dateTimeSlot) }
+				: {}),
+			...(registration.previousDateTimeSlot
+				? {
+						previousDateTimeSlot: slot(
+							registration.previousDateTimeSlot,
+						),
+					}
+				: {}),
 		},
 		searchIndex: {
 			exists: searchIndexSnapshot.exists,
-			...(searchIndex?.customerId ? { customerId: searchIndex.customerId } : {}),
+			...(searchIndex?.customerId
+				? { customerId: searchIndex.customerId }
+				: {}),
 			...(searchIndex?.code ? { code: searchIndex.code } : {}),
-			...(searchIndex?.firstName ? { firstName: searchIndex.firstName } : {}),
-			...(searchIndex?.lastName ? { lastName: searchIndex.lastName } : {}),
-			...(searchIndex?.displayFirstName ? { displayFirstName: searchIndex.displayFirstName } : {}),
-			...(searchIndex?.displayLastName ? { displayLastName: searchIndex.displayLastName } : {}),
-			...(searchIndex?.emailAddress ? { emailAddress: searchIndex.emailAddress } : {}),
+			...(searchIndex?.firstName
+				? { firstName: searchIndex.firstName }
+				: {}),
+			...(searchIndex?.lastName
+				? { lastName: searchIndex.lastName }
+				: {}),
+			...(searchIndex?.displayFirstName
+				? { displayFirstName: searchIndex.displayFirstName }
+				: {}),
+			...(searchIndex?.displayLastName
+				? { displayLastName: searchIndex.displayLastName }
+				: {}),
+			...(searchIndex?.emailAddress
+				? { emailAddress: searchIndex.emailAddress }
+				: {}),
 			...(searchIndex?.zip ? { zip: searchIndex.zip } : {}),
 		},
 		slots: {
@@ -715,29 +850,36 @@ export async function inspectRegistrationQrLifecycle(
 		},
 		current: {
 			...(registration.qrcode ? { code: registration.qrcode } : {}),
-			...(registration.qrCodeStoragePath ? { path: registration.qrCodeStoragePath } : {}),
+			...(registration.qrCodeStoragePath
+				? { path: registration.qrCodeStoragePath }
+				: {}),
 			object: await storageObjectInfo(registration.qrCodeStoragePath),
 		},
 		...(latestCancellation
 			? {
-				latestCancellation: {
-					supersededCode: latestCancellation.supersededConfirmationCode,
-					supersededPath: latestCancellation.supersededQrCodeStoragePath,
-					replacementCode: latestCancellation.replacementConfirmationCode,
-					replacementPath: latestCancellation.replacementQrCodeStoragePath,
-					supersededObject: await storageObjectInfo(
-						latestCancellation.supersededQrCodeStoragePath,
-					),
-					replacementObject: await storageObjectInfo(
-						latestCancellation.replacementQrCodeStoragePath,
-					),
-				},
-			}
+					latestCancellation: {
+						supersededCode:
+							latestCancellation.supersededConfirmationCode,
+						supersededPath:
+							latestCancellation.supersededQrCodeStoragePath,
+						replacementCode:
+							latestCancellation.replacementConfirmationCode,
+						replacementPath:
+							latestCancellation.replacementQrCodeStoragePath,
+						supersededObject: await storageObjectInfo(
+							latestCancellation.supersededQrCodeStoragePath,
+						),
+						replacementObject: await storageObjectInfo(
+							latestCancellation.replacementQrCodeStoragePath,
+						),
+					},
+				}
 			: {}),
 		cancellationHistory: cancellations.map((cancellation) => {
-			const cancelledOn = cancellation.cancelledOn instanceof Date
-				? cancellation.cancelledOn
-				: cancellation.cancelledOn.toDate?.() ?? new Date(0);
+			const cancelledOn =
+				cancellation.cancelledOn instanceof Date
+					? cancellation.cancelledOn
+					: (cancellation.cancelledOn.toDate?.() ?? new Date(0));
 			return {
 				supersededCode: cancellation.supersededConfirmationCode,
 				supersededPath: cancellation.supersededQrCodeStoragePath,
@@ -751,7 +893,8 @@ export async function inspectRegistrationQrLifecycle(
 
 const requiredDate = (value: string, label: string): Date => {
 	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) throw new Error(`Invalid ${label}: ${value}.`);
+	if (Number.isNaN(date.getTime()))
+		throw new Error(`Invalid ${label}: ${value}.`);
 	return date;
 };
 
@@ -766,46 +909,79 @@ export async function seedScanRiskHistory(
 	const writes: Promise<unknown>[] = [];
 	for (const attempt of seed.attempts ?? []) {
 		const scannedOn = requiredDate(attempt.scannedOn, 'scan attempt date');
-		const priorEventOn = requiredDate(attempt.priorEventOn, 'scan attempt prior date');
+		const priorEventOn = requiredDate(
+			attempt.priorEventOn,
+			'scan attempt prior date',
+		);
 		const ref = attempt.id
 			? db.collection('registrationScanAttempts').doc(attempt.id)
 			: db.collection('registrationScanAttempts').doc();
-		writes.push(ref.set({
-			customerId: attempt.customerId,
-			scannerUid: attempt.scannerUid ?? 'e2e-scanner',
-			scannedOn,
-			priorEventOn,
-			programYear: attempt.programYear ?? PROGRAM_YEAR,
-			outcome: attempt.outcome,
-			elapsedSeconds: Math.max(0, Math.floor((scannedOn.getTime() - priorEventOn.getTime()) / 1000)),
-			inputMethod: attempt.inputMethod ?? 'camera',
-			codeFingerprint: createHash('sha256').update(`e2e:${ref.id}`).digest('hex'),
-			codeSuffix: attempt.codeSuffix ?? 'E2E0',
-		}));
+		writes.push(
+			ref.set({
+				customerId: attempt.customerId,
+				scannerUid: attempt.scannerUid ?? 'e2e-scanner',
+				scannedOn,
+				priorEventOn,
+				programYear: attempt.programYear ?? PROGRAM_YEAR,
+				outcome: attempt.outcome,
+				elapsedSeconds: Math.max(
+					0,
+					Math.floor(
+						(scannedOn.getTime() - priorEventOn.getTime()) / 1000,
+					),
+				),
+				inputMethod: attempt.inputMethod ?? 'camera',
+				codeFingerprint: createHash('sha256')
+					.update(`e2e:${ref.id}`)
+					.digest('hex'),
+				codeSuffix: attempt.codeSuffix ?? 'E2E0',
+			}),
+		);
 	}
 	for (const summary of seed.summaries ?? []) {
 		const ref = summary.id
 			? db.collection('registrationScanRiskSummaries').doc(summary.id)
 			: db.collection('registrationScanRiskSummaries').doc();
-		const lateDuplicateAttemptCount = summary.lateDuplicateAttemptCount ?? 0;
-		const cancelledCodeAttemptCount = summary.cancelledCodeAttemptCount ?? 0;
-		writes.push(ref.set({
-			customerId: summary.customerId,
-			programYear: summary.programYear ?? PROGRAM_YEAR,
-			firstName: summary.firstName,
-			lastName: summary.lastName,
-			emailAddress: summary.emailAddress.toLowerCase(),
-			accidentalAttemptCount: summary.accidentalAttemptCount ?? 0,
-			lateDuplicateAttemptCount,
-			cancelledCodeAttemptCount,
-			totalRiskAttemptCount: summary.totalRiskAttemptCount ?? lateDuplicateAttemptCount + cancelledCodeAttemptCount,
-			firstRiskOn: requiredDate(summary.firstRiskOn, 'first risk date'),
-			latestRiskOn: requiredDate(summary.latestRiskOn, 'latest risk date'),
-			latestOutcome: summary.latestOutcome ?? (cancelledCodeAttemptCount ? 'cancelled' : 'duplicate-risk'),
-			...(summary.originalCheckInOn
-				? { originalCheckInOn: requiredDate(summary.originalCheckInOn, 'original check-in date') }
-				: {}),
-		}));
+		const lateDuplicateAttemptCount =
+			summary.lateDuplicateAttemptCount ?? 0;
+		const cancelledCodeAttemptCount =
+			summary.cancelledCodeAttemptCount ?? 0;
+		writes.push(
+			ref.set({
+				customerId: summary.customerId,
+				programYear: summary.programYear ?? PROGRAM_YEAR,
+				firstName: summary.firstName,
+				lastName: summary.lastName,
+				emailAddress: summary.emailAddress.toLowerCase(),
+				accidentalAttemptCount: summary.accidentalAttemptCount ?? 0,
+				lateDuplicateAttemptCount,
+				cancelledCodeAttemptCount,
+				totalRiskAttemptCount:
+					summary.totalRiskAttemptCount ??
+					lateDuplicateAttemptCount + cancelledCodeAttemptCount,
+				firstRiskOn: requiredDate(
+					summary.firstRiskOn,
+					'first risk date',
+				),
+				latestRiskOn: requiredDate(
+					summary.latestRiskOn,
+					'latest risk date',
+				),
+				latestOutcome:
+					summary.latestOutcome ??
+					(cancelledCodeAttemptCount
+						? 'cancelled'
+						: 'duplicate-risk'),
+				...(summary.originalCheckInOn
+					? {
+							originalCheckInOn: requiredDate(
+								summary.originalCheckInOn,
+								'original check-in date',
+							),
+						}
+					: {}),
+			}),
+		);
 	}
 	await Promise.all(writes);
 }
@@ -813,61 +989,97 @@ export async function seedScanRiskHistory(
 const asDate = (value: unknown): Date | undefined =>
 	value instanceof Date
 		? value
-		: typeof value === 'object' && value !== null && 'toDate' in value &&
-			typeof value.toDate === 'function'
-			? value.toDate() as Date
+		: typeof value === 'object' &&
+			  value !== null &&
+			  'toDate' in value &&
+			  typeof value.toDate === 'function'
+			? (value.toDate() as Date)
 			: undefined;
 
 /** Reads only display-safe audit fields so E2E can prove raw codes are absent. */
 export async function inspectRegistrationScanAudit(
 	emailAddress: string,
 ): Promise<TestRegistrationScanAudit> {
-	const authUser = await admin.auth().getUserByEmail(emailAddress.toLowerCase());
+	const authUser = await admin
+		.auth()
+		.getUserByEmail(emailAddress.toLowerCase());
 	const db = admin.firestore();
 	const [attemptSnapshots, summarySnapshots] = await Promise.all([
-		db.collection('registrationScanAttempts').where('customerId', '==', authUser.uid).get(),
-		db.collection('registrationScanRiskSummaries').where('customerId', '==', authUser.uid).get(),
+		db
+			.collection('registrationScanAttempts')
+			.where('customerId', '==', authUser.uid)
+			.get(),
+		db
+			.collection('registrationScanRiskSummaries')
+			.where('customerId', '==', authUser.uid)
+			.get(),
 	]);
 	let rawCodePersisted = false;
-	const attempts = attemptSnapshots.docs.map((snapshot) => {
-		const data = snapshot.data();
-		rawCodePersisted ||= 'code' in data || 'rawCode' in data || 'confirmationCode' in data;
-		const scannedOn = asDate(data['scannedOn']) ?? new Date(0);
-		const priorEventOn = asDate(data['priorEventOn']) ?? new Date(0);
-		return {
-			id: snapshot.id,
-			customerId: String(data['customerId'] ?? ''),
-			scannerUid: String(data['scannerUid'] ?? ''),
-			scannedOn: scannedOn.toISOString(),
-			priorEventOn: priorEventOn.toISOString(),
-			programYear: Number(data['programYear']),
-			outcome: data['outcome'] as TestRegistrationScanAudit['attempts'][number]['outcome'],
-			elapsedSeconds: Number(data['elapsedSeconds'] ?? 0),
-			inputMethod: data['inputMethod'] as 'camera' | 'manual',
-			codeFingerprint: String(data['codeFingerprint'] ?? ''),
-			codeSuffix: String(data['codeSuffix'] ?? ''),
-		};
-	}).sort((left, right) => right.scannedOn.localeCompare(left.scannedOn));
-	const summaries = summarySnapshots.docs.map((snapshot) => {
-		const data = snapshot.data();
-		const originalCheckInOn = asDate(data['originalCheckInOn']);
-		return {
-			id: snapshot.id,
-			customerId: String(data['customerId'] ?? ''),
-			programYear: Number(data['programYear']),
-			firstName: String(data['firstName'] ?? ''),
-			lastName: String(data['lastName'] ?? ''),
-			emailAddress: String(data['emailAddress'] ?? ''),
-			accidentalAttemptCount: Number(data['accidentalAttemptCount'] ?? 0),
-			lateDuplicateAttemptCount: Number(data['lateDuplicateAttemptCount'] ?? 0),
-			cancelledCodeAttemptCount: Number(data['cancelledCodeAttemptCount'] ?? 0),
-			totalRiskAttemptCount: Number(data['totalRiskAttemptCount'] ?? 0),
-			firstRiskOn: (asDate(data['firstRiskOn']) ?? new Date(0)).toISOString(),
-			latestRiskOn: (asDate(data['latestRiskOn']) ?? new Date(0)).toISOString(),
-			latestOutcome: data['latestOutcome'] as 'duplicate-risk' | 'cancelled',
-			...(originalCheckInOn ? { originalCheckInOn: originalCheckInOn.toISOString() } : {}),
-		};
-	}).sort((left, right) => right.latestRiskOn.localeCompare(left.latestRiskOn));
+	const attempts = attemptSnapshots.docs
+		.map((snapshot) => {
+			const data = snapshot.data();
+			rawCodePersisted ||=
+				'code' in data ||
+				'rawCode' in data ||
+				'confirmationCode' in data;
+			const scannedOn = asDate(data['scannedOn']) ?? new Date(0);
+			const priorEventOn = asDate(data['priorEventOn']) ?? new Date(0);
+			return {
+				id: snapshot.id,
+				customerId: String(data['customerId'] ?? ''),
+				scannerUid: String(data['scannerUid'] ?? ''),
+				scannedOn: scannedOn.toISOString(),
+				priorEventOn: priorEventOn.toISOString(),
+				programYear: Number(data['programYear']),
+				outcome: data[
+					'outcome'
+				] as TestRegistrationScanAudit['attempts'][number]['outcome'],
+				elapsedSeconds: Number(data['elapsedSeconds'] ?? 0),
+				inputMethod: data['inputMethod'] as 'camera' | 'manual',
+				codeFingerprint: String(data['codeFingerprint'] ?? ''),
+				codeSuffix: String(data['codeSuffix'] ?? ''),
+			};
+		})
+		.sort((left, right) => right.scannedOn.localeCompare(left.scannedOn));
+	const summaries = summarySnapshots.docs
+		.map((snapshot) => {
+			const data = snapshot.data();
+			const originalCheckInOn = asDate(data['originalCheckInOn']);
+			return {
+				id: snapshot.id,
+				customerId: String(data['customerId'] ?? ''),
+				programYear: Number(data['programYear']),
+				firstName: String(data['firstName'] ?? ''),
+				lastName: String(data['lastName'] ?? ''),
+				emailAddress: String(data['emailAddress'] ?? ''),
+				accidentalAttemptCount: Number(
+					data['accidentalAttemptCount'] ?? 0,
+				),
+				lateDuplicateAttemptCount: Number(
+					data['lateDuplicateAttemptCount'] ?? 0,
+				),
+				cancelledCodeAttemptCount: Number(
+					data['cancelledCodeAttemptCount'] ?? 0,
+				),
+				totalRiskAttemptCount: Number(
+					data['totalRiskAttemptCount'] ?? 0,
+				),
+				firstRiskOn: (
+					asDate(data['firstRiskOn']) ?? new Date(0)
+				).toISOString(),
+				latestRiskOn: (
+					asDate(data['latestRiskOn']) ?? new Date(0)
+				).toISOString(),
+				latestOutcome: data['latestOutcome'] as
+					'duplicate-risk' | 'cancelled',
+				...(originalCheckInOn
+					? { originalCheckInOn: originalCheckInOn.toISOString() }
+					: {}),
+			};
+		})
+		.sort((left, right) =>
+			right.latestRiskOn.localeCompare(left.latestRiskOn),
+		);
 	return { uid: authUser.uid, rawCodePersisted, attempts, summaries };
 }
 
@@ -878,23 +1090,37 @@ export async function inspectQueuedRegistrationEmails(
 	const normalizedEmail = emailAddress.toLowerCase();
 	const db = admin.firestore();
 	const collections = ['tmp_registrationemails'] as const;
-	const snapshots = await Promise.all(collections.map(async (collection) => ({
-		collection,
-		snapshot: await db.collection(collection).where('email', '==', normalizedEmail).get(),
-	})));
-	return snapshots.flatMap(({ collection, snapshot }) => snapshot.docs.map((document) => {
-		const data = document.data();
-		const queuedOn = asDate(data['queuedOn']);
-		return {
-			id: document.id,
+	const snapshots = await Promise.all(
+		collections.map(async (collection) => ({
 			collection,
-			...(typeof data['queueSource'] === 'string' ? { queueSource: data['queueSource'] } : {}),
-			...(typeof data['deliveryState'] === 'string' ? { deliveryState: data['deliveryState'] } : {}),
-			...(typeof data['qrCodeStoragePath'] === 'string' ? { qrCodeStoragePath: data['qrCodeStoragePath'] } : {}),
-			hasConfirmationCode: typeof data['code'] === 'string' && Boolean(data['code']),
-			...(queuedOn ? { queuedOn: queuedOn.toISOString() } : {}),
-		};
-	}));
+			snapshot: await db
+				.collection(collection)
+				.where('email', '==', normalizedEmail)
+				.get(),
+		})),
+	);
+	return snapshots.flatMap(({ collection, snapshot }) =>
+		snapshot.docs.map((document) => {
+			const data = document.data();
+			const queuedOn = asDate(data['queuedOn']);
+			return {
+				id: document.id,
+				collection,
+				...(typeof data['queueSource'] === 'string'
+					? { queueSource: data['queueSource'] }
+					: {}),
+				...(typeof data['deliveryState'] === 'string'
+					? { deliveryState: data['deliveryState'] }
+					: {}),
+				...(typeof data['qrCodeStoragePath'] === 'string'
+					? { qrCodeStoragePath: data['qrCodeStoragePath'] }
+					: {}),
+				hasConfirmationCode:
+					typeof data['code'] === 'string' && Boolean(data['code']),
+				...(queuedOn ? { queuedOn: queuedOn.toISOString() } : {}),
+			};
+		}),
+	);
 }
 
 /** Seeds schedule statistics for data-backed reporting E2E cases. */
@@ -911,7 +1137,9 @@ export async function seedScheduleStats(
 			throw new Error(`Invalid schedule-stat date: ${entry.dateTime}.`);
 		}
 		if (!Number.isInteger(entry.count) || entry.count < 0) {
-			throw new Error('Schedule-stat counts must be non-negative integers.');
+			throw new Error(
+				'Schedule-stat counts must be non-negative integers.',
+			);
 		}
 		return { dateTime, count: entry.count };
 	});

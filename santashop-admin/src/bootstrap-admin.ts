@@ -14,7 +14,11 @@ import {
 	ReCaptchaEnterpriseProvider,
 } from 'firebase/app-check';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
-import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
+import {
+	connectFunctionsEmulator,
+	getFunctions,
+	httpsCallable,
+} from 'firebase/functions';
 import {
 	IonicRouteStrategy,
 	provideIonicAngular,
@@ -24,6 +28,7 @@ import {
 	FIREBASE_APP,
 	FIREBASE_AUTH,
 	FIREBASE_FUNCTIONS,
+	provideRemoteConfigPublicParameters,
 	PROGRAM_YEAR,
 	SHOP_DAYS,
 } from '@santashop/core/admin';
@@ -178,6 +183,17 @@ export function bootstrapAdminApplication(
 					animated: true,
 				}),
 				...firebaseProviders,
+				...provideRemoteConfigPublicParameters({
+					useEmulator: !runtimeConfig.production,
+					readLocal: async (): Promise<unknown> => {
+						return (
+							await httpsCallable(
+								firebaseFunctions,
+								'testReadPublicParameters',
+							)()
+						).data;
+					},
+				}),
 				{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
 				{ provide: PROGRAM_YEAR, useValue: runtimeConfig.programYear },
 				{ provide: SHOP_DAYS, useValue: runtimeConfig.shopDays },

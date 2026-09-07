@@ -4,7 +4,7 @@ import {
 	FIREBASE_FIRESTORE,
 	PUBLIC_PARAMETERS_SOURCE,
 } from '@santashop/core';
-import { LitePublicParametersSource } from './app/core/services/lite-public-parameters-source.service';
+import { RemoteConfigPublicParametersSource } from '@santashop/core/customer';
 import { FIREBASE_FIRESTORE_LITE } from './app/core/tokens/customer-runtime.token';
 import {
 	bootstrapCustomerApplication,
@@ -105,14 +105,14 @@ describe('bootstrapCustomerApplication', () => {
 		const options = bootstrap.mock.calls[0]![1];
 		expect(options.providers).toEqual(
 			expect.arrayContaining([
-				LitePublicParametersSource,
+				RemoteConfigPublicParametersSource,
 				expect.objectContaining({
 					provide: FIREBASE_FIRESTORE_LITE,
 					useValue: { name: 'firestore' },
 				}),
 				expect.objectContaining({
 					provide: PUBLIC_PARAMETERS_SOURCE,
-					useExisting: LitePublicParametersSource,
+					useExisting: RemoteConfigPublicParametersSource,
 				}),
 			]),
 		);

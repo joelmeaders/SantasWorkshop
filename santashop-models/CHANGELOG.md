@@ -2,6 +2,12 @@
 
 All notable changes to the shared models library will be documented in this file.
 
+## [2026.09.0-beta.3] - Unreleased
+
+### Added
+
+- Complete public-settings schema validation, release defaults, configuration status, and owner callable contracts.
+
 ## [2026.09.0-alpha.2] - Unreleased
 
 ### Added

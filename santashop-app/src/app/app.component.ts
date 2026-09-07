@@ -42,6 +42,8 @@ export class AppComponent implements OnInit {
 	private readonly applicationService = inject(ApplicationService);
 	private readonly alertController = inject(AlertController);
 	private readonly destroyRef = inject(DestroyRef);
+	private activeGlobalAlert?: Awaited<ReturnType<AlertController['create']>>;
+	private alertUpdate: Promise<void> = Promise.resolve();
 
 	public ngOnInit(): void {
 		void this.initializeApp();
@@ -76,26 +78,31 @@ export class AppComponent implements OnInit {
 		this.appStateService.globalAlert$
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe((alert) => {
-				if (!alert?.displayAlert) return;
-
 				const isEnglish =
 					this.translateService.getCurrentLang() === 'en';
-				const title = isEnglish ? alert.titleEn : alert.titleEs;
-				const message = isEnglish ? alert.messageEn : alert.messageEs;
-				void this.showGlobalMessage({ title, message });
+				const message = alert?.displayAlert ? {
+					title: isEnglish ? alert.titleEn : alert.titleEs,
+					message: isEnglish ? alert.messageEn : alert.messageEs,
+				} : undefined;
+				this.alertUpdate = this.alertUpdate.then(() => this.showGlobalMessage(message))
+					.catch((error: unknown): void => { console.error('Global alert could not update.', error); });
 			});
 	}
 
-	public async showGlobalMessage(globalAlert: {
+	public async showGlobalMessage(globalAlert?: {
 		title: string;
 		message: string;
 	}): Promise<void> {
+		await this.activeGlobalAlert?.dismiss();
+		this.activeGlobalAlert = undefined;
+		if (!globalAlert || this.destroyRef.destroyed) return;
 		const alert = await this.alertController.create({
 			header: globalAlert.title,
 			message: globalAlert.message,
 			buttons: ['Dismiss'],
 		});
 
+		this.activeGlobalAlert = alert;
 		await alert.present();
 	}
 }

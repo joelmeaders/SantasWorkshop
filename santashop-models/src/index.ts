@@ -12,6 +12,7 @@ export * from './lib/global-alert';
 export * from './lib/onboard-user';
 export * from './lib/owner-operation';
 export * from './lib/parameters';
+export * from './lib/public-parameters-config';
 export * from './lib/registration-email';
 export * from './lib/registration-search-index';
 export * from './lib/registration-scan';

@@ -6,6 +6,7 @@
 *~
 *.sw[mnpcod]
 .tmp
+.tmp-remote-config/
 *.tmp
 *.tmp.*
 *.sublime-project

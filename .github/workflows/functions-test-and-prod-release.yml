@@ -6,6 +6,10 @@ on:
       - master
     paths:
       - 'santashop-functions/**'
+      - 'santashop-models/**'
+      - 'remote-config/**'
+      - 'scripts/remote-config*.cjs'
+      - 'scripts/public-parameters-schema.cjs'
       - 'santashop-e2e/**'
       - 'firebase.json'
       - 'firebase.e2e.json'
@@ -49,6 +53,8 @@ env:
   TEST_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
   TEST_SANTASHOP_EVENT_MIN_INSTANCES: '0'
   TEST_SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT: 312672416598-compute@developer.gserviceaccount.com
+  TEST_SANTASHOP_REMOTE_CONFIG_PUBLISHER_SERVICE_ACCOUNT: remote-config-publisher@santas-workshop-test.iam.gserviceaccount.com
+  TEST_SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT: remote-config-reader@santas-workshop-test.iam.gserviceaccount.com
   TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
   TEST_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
@@ -67,6 +73,8 @@ env:
   PROD_SANTASHOP_SIGNUP_MIN_INSTANCES: ${{ vars.PROD_SANTASHOP_SIGNUP_MIN_INSTANCES || '0' }}
   PROD_SANTASHOP_EVENT_MIN_INSTANCES: ${{ vars.PROD_SANTASHOP_EVENT_MIN_INSTANCES || '0' }}
   PROD_SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT: 397997267986-compute@developer.gserviceaccount.com
+  PROD_SANTASHOP_REMOTE_CONFIG_PUBLISHER_SERVICE_ACCOUNT: remote-config-publisher@santas-workshop-193b5.iam.gserviceaccount.com
+  PROD_SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT: remote-config-reader@santas-workshop-193b5.iam.gserviceaccount.com
   PROD_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   PROD_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
   PROD_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
@@ -266,7 +274,7 @@ jobs:
           gcloud eventarc triggers list --project="$SANTASHOP_FIREBASE_PROJECT" --location=nam5 --format=json > "$RUNNER_TEMP/eventarc.json"
           node scripts/verify-functions-managed-resources.cjs "$RUNNER_TEMP/scheduler.json" "$RUNNER_TEMP/tasks.json" "$RUNNER_TEMP/eventarc.json"
           ACCESS_TOKEN="$(gcloud auth print-access-token)"
-          curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firestore.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/databases/(default)/documents/parameters/public" > "$RUNNER_TEMP/public-parameters.json"
+          curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firebaseremoteconfig.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/remoteConfig" > "$RUNNER_TEMP/public-parameters.json"
           node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"
 
   deploy_prod:
@@ -346,5 +354,5 @@ jobs:
           gcloud eventarc triggers list --project="$SANTASHOP_FIREBASE_PROJECT" --location=nam5 --format=json > "$RUNNER_TEMP/eventarc.json"
           node scripts/verify-functions-managed-resources.cjs "$RUNNER_TEMP/scheduler.json" "$RUNNER_TEMP/tasks.json" "$RUNNER_TEMP/eventarc.json"
           ACCESS_TOKEN="$(gcloud auth print-access-token)"
-          curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firestore.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/databases/(default)/documents/parameters/public" > "$RUNNER_TEMP/public-parameters.json"
+          curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firebaseremoteconfig.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/remoteConfig" > "$RUNNER_TEMP/public-parameters.json"
           node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"

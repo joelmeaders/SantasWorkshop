@@ -5,6 +5,8 @@ import { defineConfig } from '@playwright/test';
 const configDirectory = __dirname;
 const port = Number.parseInt(process.env['STORYBOOK_PORT'] ?? '6007', 10);
 const baseURL = process.env['STORYBOOK_BASE_URL'] ?? `http://127.0.0.1:${port}`;
+const snapshotPlatform =
+	process.env['STORYBOOK_SNAPSHOT_PLATFORM'] ?? '{platform}';
 
 export default defineConfig({
 	testDir: path.resolve(configDirectory, 'tests'),
@@ -60,7 +62,7 @@ export default defineConfig({
 				reuseExistingServer: false,
 			},
 	snapshotDir: path.resolve(configDirectory, 'snapshots'),
-	snapshotPathTemplate: '{snapshotDir}/{platform}/{projectName}/{arg}{ext}',
+	snapshotPathTemplate: `{snapshotDir}/${snapshotPlatform}/{projectName}/{arg}{ext}`,
 	projects: [
 		{
 			name: 'desktop',

@@ -76,9 +76,9 @@ Update images only after inspecting and accepting an intentional visual change:
 pnpm run storybook:visual:update
 ```
 
-The comparison command must fail for a missing or changed baseline. PR validation never updates baselines automatically. Keep baseline changes in the same review as the intentional UI change, and inspect the differences rather than accepting every generated image.
+The comparison command must fail for a missing or changed baseline. PR validation never approves or commits baseline changes automatically. On failure, it uploads differences and separately renders candidate references for review; the job remains failed. Keep accepted baseline changes in the same review as the intentional UI change, and inspect the differences rather than accepting every generated image.
 
-Images are stored by operating system and viewport. The initial references are Windows images. PR visual validation uses Windows Server 2022; functional and accessibility validation runs on Linux. The hosted Windows job has not been run from this local worktree. Its first run may expose font or OS differences that require review before signals work starts. Do not copy Windows reference images into the Linux directory. Playwright explains [why rendering environments affect screenshots](https://playwright.dev/docs/test-snapshots).
+Images are stored by rendering environment and viewport. Local Windows references use `win32`; the hosted Windows Server 2022 job uses `windows-2022`, selected with `STORYBOOK_SNAPSHOT_PLATFORM`. Their font rendering differs, so they need separate reviewed references. Functional and accessibility validation runs on Linux. Do not copy reference images between environments. Playwright explains [why rendering environments affect screenshots](https://playwright.dev/docs/test-snapshots).
 
 Screenshots capture each story's final visible viewport. They do not prove every intermediate state, offscreen element, keyboard action, or browser is correct. Preserve transition assertions and the existing integration suite alongside visual checks.
 

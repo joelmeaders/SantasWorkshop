@@ -1,5 +1,5 @@
 import { type Meta, type StoryObj } from '@storybook/angular-vite';
-import { expect, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 import { adminStoryDecorators } from '../../../../../.storybook/admin/admin-story.providers';
 import { AdminPage } from './admin.page';
 
@@ -17,6 +17,22 @@ const meta = {
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
+		await waitFor(() => {
+			const outlet = canvasElement.querySelector('ion-router-outlet');
+			const footer = canvasElement.querySelector('ion-footer');
+			expect(outlet).not.toBeNull();
+			expect(footer).not.toBeNull();
+			if (!outlet || !footer) {
+				throw new Error('Admin outlet and footer must be rendered.');
+			}
+			const outletBounds = outlet.getBoundingClientRect();
+			const footerBounds = footer.getBoundingClientRect();
+			expect(outletBounds.height).toBeGreaterThan(0);
+			expect(footerBounds.height).toBeGreaterThan(0);
+			expect(outletBounds.bottom).toBeLessThanOrEqual(
+				footerBounds.top + 1,
+			);
+		});
 		await expect(canvas.getByText('Home')).toBeVisible();
 		await expect(canvas.getByText('Check-In')).toBeVisible();
 		await expect(canvas.getByText('Search')).toBeVisible();
@@ -35,9 +51,17 @@ export const RegistrationAndCheckInClosed: Story = {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Home')).toBeVisible();
 		await expect(canvas.getByText('Search')).toBeVisible();
-		const checkInTab = canvas.getByText('Check-In').closest('ion-tab-button');
-		const registrationTab = canvas.getByText('Registration').closest('ion-tab-button');
-		await expect((checkInTab as HTMLIonTabButtonElement).disabled).toBe(true);
-		await expect((registrationTab as HTMLIonTabButtonElement).disabled).toBe(true);
+		const checkInTab = canvas
+			.getByText('Check-In')
+			.closest('ion-tab-button');
+		const registrationTab = canvas
+			.getByText('Registration')
+			.closest('ion-tab-button');
+		await expect((checkInTab as HTMLIonTabButtonElement).disabled).toBe(
+			true,
+		);
+		await expect(
+			(registrationTab as HTMLIonTabButtonElement).disabled,
+		).toBe(true);
 	},
 };

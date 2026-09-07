@@ -1,0 +1,21 @@
+/* Ionic pages normally receive their height from ion-router-outlet.
+   A direct Storybook render needs the same viewport-sized containing block. */
+#storybook-root,
+.santashop-story-canvas {
+	width: 100%;
+	height: 100vh;
+}
+
+#storybook-root > *,
+.santashop-story-canvas > * {
+	display: block;
+	height: 100%;
+}
+
+#storybook-root > * > *:has(> ion-content),
+.santashop-story-canvas > * > *:has(> ion-content) {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}

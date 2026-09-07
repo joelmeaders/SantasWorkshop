@@ -3,7 +3,11 @@
 }
 
 .workflow-card ion-card-header {
-	background: linear-gradient(135deg, rgba(23, 100, 71, 0.12), rgba(23, 100, 71, 0.02));
+	background: linear-gradient(
+		135deg,
+		rgba(23, 100, 71, 0.12),
+		rgba(23, 100, 71, 0.02)
+	);
 }
 
 .card-guidance {
@@ -45,7 +49,7 @@ ion-modal form {
 	padding: 1rem;
 }
 
-ion-modal ion-list {
+.child-form-fields {
 	background: rgba(255, 255, 255, 0.82);
 	border: 1px solid var(--santa-line);
 	border-radius: var(--santa-radius-md);

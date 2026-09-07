@@ -1,7 +1,7 @@
 <admin-header [title]="pageTitle" />
 
 <ion-content class="ion-padding-horizontal">
-	<main class="editor-layout">
+	<div class="editor-layout">
 		<section class="editor-main">
 			<ion-card
 				><ion-card-header
@@ -72,7 +72,7 @@
 							></ion-textarea
 						></ion-item>
 						@if (form.controls['seasonalReviewRequired'].value) {
-						<ion-note color="warning"
+						<ion-note color="warning" class="seasonal-review-note"
 							>Review the venue, map, and opening details in this
 							revision. Replace all draft notes before publishing.
 							Editing content requires another review.</ion-note
@@ -399,5 +399,5 @@
 				</ion-card-content>
 			</ion-card>
 		</aside>
-	</main>
+	</div>
 </ion-content>

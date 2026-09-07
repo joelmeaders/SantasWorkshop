@@ -3,8 +3,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
 	IonBadge,
-	IonButton,
-	IonButtons,
 	IonCardHeader,
 	IonContent,
 	IonFab,
@@ -16,7 +14,7 @@ import {
 	IonNote,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { add, createOutline } from 'ionicons/icons';
+import { add } from 'ionicons/icons';
 import type { EmailTemplateSummary } from '@santashop/models';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -31,8 +29,6 @@ import { EmailTemplateService } from './email-template.service';
 		AsyncPipe,
 		HeaderComponent,
 		IonBadge,
-		IonButton,
-		IonButtons,
 		IonCardHeader,
 		IonContent,
 		IonFab,
@@ -57,7 +53,7 @@ export class EmailTemplatesPage {
 	public readonly isLoading$ = this.loadingSubject.asObservable();
 
 	constructor() {
-		addIcons({ add, createOutline });
+		addIcons({ add });
 	}
 
 	public async ionViewWillEnter(): Promise<void> {

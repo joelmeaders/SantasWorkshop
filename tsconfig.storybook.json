@@ -1,0 +1,31 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"outDir": "./out-tsc/storybook",
+		"paths": {
+			"@santashop/core": ["./santashop-core/src/index.ts"],
+			"@santashop/core/admin": ["./santashop-core/src/admin.ts"],
+			"@santashop/core/admin/firestore": [
+				"./santashop-core/src/admin-firestore.ts"
+			],
+			"@santashop/core/customer": ["./santashop-core/src/customer.ts"],
+			"@santashop/models": ["./dist/@santashop/models"]
+		},
+		"types": ["node", "vite/client", "vitest/globals"]
+	},
+	"include": [
+		".storybook/**/*.ts",
+		".storybook/**/*.d.ts",
+		"vitest.storybook.config.ts",
+		"storybook-visual/**/*.ts",
+		"santashop-app/src/**/*.stories.ts",
+		"santashop-admin/src/**/*.stories.ts"
+	],
+	"exclude": [
+		"santashop-app/src/main.ts",
+		"santashop-app/src/bootstrap.ts",
+		"santashop-admin/src/main.ts",
+		"santashop-admin/src/bootstrap-admin.ts"
+	]
+}

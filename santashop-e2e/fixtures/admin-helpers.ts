@@ -60,7 +60,7 @@ export const navigateToScheduleEditorViaLanding = async (
 		page.waitForURL('**/admin/schedule-editor', { timeout: 30000 }),
 		page.click('#scheduleEditorNav'),
 	]);
-	await expect(page.locator('main.schedule-editor')).toBeVisible({
+	await expect(page.locator('.schedule-editor')).toBeVisible({
 		timeout: 15000,
 	});
 };

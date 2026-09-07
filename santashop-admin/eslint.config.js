@@ -11,6 +11,7 @@ module.exports = tseslint.config(
 				project: [
 					'santashop-admin/tsconfig.app.json',
 					'santashop-admin/tsconfig.spec.json',
+					'tsconfig.storybook.json',
 				],
 			},
 		},

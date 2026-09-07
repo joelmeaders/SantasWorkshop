@@ -2,6 +2,8 @@
 
 A monorepo for Santa's Workshop registration and management applications.
 
+Develop and test both apps in isolation with [Storybook](docs/storybook.md). The [UI inventory](docs/storybook-inventory.md) links every component and page to its stories.
+
 ## Workspace Structure
 
 ```

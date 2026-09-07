@@ -76,8 +76,10 @@
 								</h2>
 								<p>
 									{{
-										(child.dateOfBirth ? calendarDate(child.dateOfBirth) : undefined)
-											| localizedDate: 'longDate'
+										(child.dateOfBirth
+											? calendarDate(child.dateOfBirth)
+											: undefined
+										) | localizedDate: 'longDate'
 									}}
 								</p>
 								@if (!child.toyType) {
@@ -113,6 +115,7 @@
 </ion-card>
 
 <ion-modal
+	[attr.aria-label]="'OVERVIEW.CHILD_DETAILS' | translate"
 	[canDismiss]="!busy()"
 	[isOpen]="editorOpen()"
 	(didDismiss)="collapseEditor()"
@@ -142,8 +145,8 @@
 				novalidate
 				[attr.aria-label]="'OVERVIEW.CHILD_DETAILS' | translate"
 			>
-				<ion-list lines="none">
-					<ion-item
+				<div class="child-form-fields">
+					<ion-item lines="none"
 						><ion-input
 							#firstNameInput
 							id="childFirstName"
@@ -153,7 +156,7 @@
 							autocomplete="given-name"
 							formControlName="firstName"
 					/></ion-item>
-					<ion-item
+					<ion-item lines="none"
 						><ion-input
 							fill="outline"
 							[label]="'ADDCHILD.LAST_NAME' | translate"
@@ -164,11 +167,9 @@
 					<ion-note
 						id="childAgeRequirement"
 						class="ion-padding-horizontal"
-						>{{
-							'ADDCHILD.AGE_REQUIREMENT' | translate
-						}}</ion-note
+						>{{ 'ADDCHILD.AGE_REQUIREMENT' | translate }}</ion-note
 					>
-					<ion-item
+					<ion-item lines="none"
 						><ion-input
 							fill="outline"
 							[label]="'ADDCHILD.BIRTH_DATE' | translate"
@@ -188,12 +189,12 @@
 							formControlName="toyType"
 							[attr.aria-label]="'ADDCHILD.TOY_TYPE' | translate"
 						>
-							<ion-item
+							<ion-item lines="none"
 								><ion-radio value="boys">{{
 									'ADDCHILD.BOYS' | translate
 								}}</ion-radio></ion-item
 							>
-							<ion-item
+							<ion-item lines="none"
 								><ion-radio value="girls">{{
 									'ADDCHILD.GIRLS' | translate
 								}}</ion-radio></ion-item
@@ -204,7 +205,7 @@
 							'ADDCHILD.INFANT_MSG' | translate
 						}}</ion-note>
 					}
-				</ion-list>
+				</div>
 				<div class="card-actions">
 					@if (editingChild()) {
 						<ion-button

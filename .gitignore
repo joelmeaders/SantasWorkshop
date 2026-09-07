@@ -21,6 +21,9 @@ $RECYCLE.BIN/
 .eslintcache
 
 /.angular/cache
+/storybook-static
+/dist/storybook
+/coverage-storybook
 
 **/.idea
 **/.ionic
@@ -48,3 +51,5 @@ firebase/
 .runtimeconfig.json
 santashop-app/src/firebase.config.ts
 santashop-admin/src/firebase.config.ts
+storybook-visual/**/report/
+storybook-visual/**/test-results/

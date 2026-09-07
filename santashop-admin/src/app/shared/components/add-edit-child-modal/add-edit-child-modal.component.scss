@@ -12,6 +12,14 @@ ion-list {
 	background: none;
 }
 
+.form-list {
+	padding-block: 8px;
+}
+
+ion-item-divider {
+	color: var(--ion-color-dark);
+}
+
 .review-instructions {
 	margin-bottom: 16px;
 }

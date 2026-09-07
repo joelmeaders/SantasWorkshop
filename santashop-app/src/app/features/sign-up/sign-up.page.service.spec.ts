@@ -146,6 +146,24 @@ describe('SignUpPageService', () => {
 		expect(handleError).not.toHaveBeenCalled();
 	});
 
+	it('uses the normal error handler when navigation fails after sign-in', async () => {
+		const service = createService();
+		const error = {
+			code: 'navigation-failed',
+			message: 'The registration route could not be opened.',
+		};
+		navigate.mockRejectedValue(error);
+
+		await service.onboardUser();
+
+		expect(login).toHaveBeenCalledWith({
+			emailAddress: 'holly@example.com',
+			password: 'Password123!',
+		});
+		expect(alertCreate).not.toHaveBeenCalled();
+		expect(handleError).toHaveBeenCalledWith(error);
+	});
+
 	it('offers recovery actions when the account already exists', async () => {
 		const service = createService();
 		accountCallable.mockRejectedValue({ code: 'functions/already-exists' });

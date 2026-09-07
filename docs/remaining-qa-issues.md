@@ -39,7 +39,9 @@ creation. A rejected verification request gets neutral retry-later guidance,
 with the entered form data retained. Both supported languages contain the new
 messages. App Check remains enabled.
 
-The focused signup suite passed 17 tests. Changed-file ESLint and the diff check
+Navigation is awaited separately from authentication. A failed route transition
+uses the normal error handler and does not suggest resetting a valid password.
+The focused signup suite passed 18 tests. Changed-file ESLint and the diff check
 passed. These are local checks; they do not establish the cause of the earlier
 in-app browser failure. The existence of the `qa0907v` account remains unverified.
 

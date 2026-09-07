@@ -59,15 +59,18 @@ export class SignUpPageService implements OnDestroy {
 		await loader.present();
 
 		let accountCreated = false;
+		let authenticated = false;
 		try {
 			await this.createAccount(onboardInfo);
 			accountCreated = true;
 			loader.message = 'Logging you in';
 			await this.signIn(onboardInfo);
+			authenticated = true;
+			await this.router.navigate(['pre-registration/overview']);
 		} catch (incomingError) {
 			const error = incomingError as IError;
 
-			if (accountCreated) {
+			if (accountCreated && !authenticated) {
 				await loader.dismiss().catch(() => false);
 				await this.showAccountRecoveryAlert(
 					onboardInfo.emailAddress,
@@ -149,6 +152,5 @@ export class SignUpPageService implements OnDestroy {
 		};
 
 		await this.authService.login(auth);
-		this.router.navigate(['pre-registration/overview']);
 	}
 }

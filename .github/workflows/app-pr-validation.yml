@@ -11,6 +11,7 @@ on:
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
       - 'scripts/env-loader.cjs'
+      - 'scripts/verify-hosting-styles.mjs'
       - '.github/workflows/app-pr-validation.yml'
       - '.github/workflows/app-test-and-prod-release.yml'
 

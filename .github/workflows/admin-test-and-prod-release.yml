@@ -15,6 +15,7 @@ name: Admin Test Deploy and Manual Prod Release
       - 'firebase.e2e.json'
       - 'firestore.rules'
       - 'scripts/env-loader.cjs'
+      - 'scripts/verify-hosting-styles.mjs'
       - 'scripts/verify-admin-initial-bundle.mjs'
       - 'santashop-e2e/fixtures/**'
       - 'santashop-e2e/scripts/**'

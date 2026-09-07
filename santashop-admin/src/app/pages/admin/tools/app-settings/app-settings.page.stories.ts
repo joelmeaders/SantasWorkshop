@@ -121,6 +121,18 @@ export const LoadFailure: Story = {
 			],
 		}),
 	],
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(await canvas.findByRole('alert')).toHaveTextContent(
+			'Settings service is unavailable. Retry shortly.',
+		);
+		await waitFor(async () => {
+			await expect(
+				canvas.getByText('Reload settings').closest('ion-button'),
+			).not.toHaveAttribute('disabled');
+		});
+		await expect(canvas.queryByText('Publish')).not.toBeInTheDocument();
+	},
 };
 export const Loading: Story = {
 	decorators: [

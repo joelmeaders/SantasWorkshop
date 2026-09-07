@@ -2,8 +2,9 @@
 
 Completed September 7, 2026. The customer app, admin app, Functions and rules
 were promoted to production from validated code commit
-`d19274f7909c004c69e8ab341f0f1650a080c2a4`. PR #161 remains open for review;
-deployment does not imply that the PR was merged.
+`d19274f7909c004c69e8ab341f0f1650a080c2a4`. The release is tracked in
+[PR #161](https://github.com/joelmeaders/SantasWorkshop/pull/161).
+Deployment and PR merge are separate events.
 
 ## Deployment evidence
 
@@ -135,7 +136,16 @@ Other limits:
 
 - Physical camera decoding, actual inbox delivery, password changes, password
   reset completion and permission-grant UI actions were not verified.
-- Public signup legal acceptance awaited user confirmation. It was not bypassed.
+- The initial public signup check awaited terms approval. After the user supplied
+  standing approval on September 7, Chrome signup completed for the labeled
+  `QA September Signup Chrome` account, using the approved mailbox alias ending
+  `qa0907w`. Terms were accepted, newsletter opt-in remained off, and the email
+  confirmation dialog was confirmed. The customer overview loaded with the
+  expected empty-child prerequisite. Sign-out and a fresh sign-in returned to
+  the same named account and overview. This closes the public signup gap.
+- The separate in-app browser signup attempt (alias ending `qa0907v`) returned
+  `functions/unauthenticated`. Its account-creation outcome was not independently
+  verified. Neither attempt was cleaned up; no production records were involved.
 - Current-year schedule initialization was deliberately cancelled at confirmation.
 - Six test gateway samples returned HTTP 200 in 165–214 ms. This is smoke evidence,
   not a burst, replacement, quota-churn or load test.

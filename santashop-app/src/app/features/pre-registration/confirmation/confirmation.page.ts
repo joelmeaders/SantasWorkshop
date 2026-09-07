@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	inject,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import {
 	AnalyticsWrapper,
@@ -28,13 +34,12 @@ import {
 import { IError, DateTimeSlot } from '@santashop/models';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { PreRegistrationService } from '../../../core';
-import { AsyncPipe } from '@angular/common';
 import { LocalizedDatePipe } from '../../../shared/pipes/localized-date.pipe';
 import { addIcons } from 'ionicons';
 import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { ChangeDatetimeModalComponent } from './change-datetime-modal/change-datetime-modal.component';
 import { DateTimeSlotsService } from './date-time-slots.service';
-import { combineLatest, firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
 	selector: 'app-confirmation',
@@ -43,7 +48,6 @@ import { combineLatest, firstValueFrom, map } from 'rxjs';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [DateTimeSlotsService],
 	imports: [
-		AsyncPipe,
 		LocalizedDatePipe,
 		TranslateModule,
 		IonContent,
@@ -76,17 +80,32 @@ export class ConfirmationPage {
 	private readonly appStateService = inject(AppStateService);
 	private readonly dateTimeService = inject(DateTimeSlotsService);
 
-	public readonly allowChangeRegistration$ = combineLatest({
-		allowChange: this.appStateService.allowChangeRegistration$,
-		hasCheckedIn: this.viewService.hasCheckedIn$,
-	}).pipe(
-		map(({ allowChange, hasCheckedIn }) => allowChange && !hasCheckedIn),
+	public readonly qrCode = toSignal(this.viewService.qrCode$, {
+		initialValue: undefined,
+	});
+	public readonly dateTimeSlot = toSignal(this.viewService.dateTimeSlot$, {
+		initialValue: undefined,
+	});
+	public readonly children = toSignal(this.viewService.children$, {
+		initialValue: [],
+	});
+	private readonly hasCheckedIn = toSignal(this.viewService.hasCheckedIn$, {
+		initialValue: undefined,
+	});
+
+	private readonly allowChange = toSignal(
+		this.appStateService.allowChangeRegistration$,
+		{ initialValue: false },
 	);
-	public readonly allowCancelRegistration$ = combineLatest({
-		allowCancel: this.appStateService.allowCancelRegistration$,
-		hasCheckedIn: this.viewService.hasCheckedIn$,
-	}).pipe(
-		map(({ allowCancel, hasCheckedIn }) => allowCancel && !hasCheckedIn),
+	private readonly allowCancel = toSignal(
+		this.appStateService.allowCancelRegistration$,
+		{ initialValue: false },
+	);
+	public readonly allowChangeRegistration = computed(
+		() => this.allowChange() && this.hasCheckedIn() === false,
+	);
+	public readonly allowCancelRegistration = computed(
+		() => this.allowCancel() && this.hasCheckedIn() === false,
 	);
 
 	constructor() {

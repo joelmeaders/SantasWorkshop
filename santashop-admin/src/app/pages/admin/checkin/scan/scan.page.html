@@ -14,9 +14,9 @@
 	</ion-button>
 </div>
 
-@if (cameraEnabled$ | async) {
+@if (cameraEnabled()) {
 <ion-content
-	[hidden]="!(availableDevices$ | async)?.length"
+	[hidden]="!availableDevices()?.length"
 	[fullscreen]="true"
 	[scrollX]="false"
 	[scrollY]="false"
@@ -24,9 +24,9 @@
 	<zxing-scanner
 		#scanner
 		[formats]="formatsEnabled"
-		[device]="(deviceToUse$ | async) || undefined"
+		[device]="deviceToUse() || undefined"
 		[autostart]="true"
-		[enable]="(cameraEnabled$ | async) ?? false"
+		[enable]="cameraEnabled()"
 		(camerasFound)="onCamerasFound($event)"
 		(deviceChange)="onDeviceChange($event)"
 		(permissionResponse)="onHasPermission($event)"
@@ -40,7 +40,7 @@
 			<ion-icon name="camera" slot="start" aria-hidden="true" />
 			<ion-select
 				#deviceSelection
-				[value]="(deviceId$ | async)"
+				[value]="deviceId()"
 				(ionChange)="onDeviceSelectChange($event)"
 				scrollable="true"
 				interface="popover"
@@ -48,7 +48,7 @@
 				<ion-select-option #selection [value]="''" disabled>
 					No Camera Selected
 				</ion-select-option>
-				@for (device of (availableDevices$ | async); track device) {
+				@for (device of (availableDevices() ?? []); track device) {
 				<ion-select-option [value]="device.deviceId">
 					{{ device.label.split(' (')[0] }}
 				</ion-select-option>
@@ -57,7 +57,7 @@
 		</ion-item>
 	</div>
 </ion-content>
-} @let hasPermission = hasPermissions$ | async; @if (hasPermission ===
+} @let hasPermission = hasPermissions(); @if (hasPermission ===
 undefined) {
 <h2>Waiting for permissions.</h2>
 <blockquote>
@@ -65,7 +65,7 @@ undefined) {
 </blockquote>
 } @if (hasPermission === false) {
 <h2>You denied the camera permission, we can't scan anything without it. 😪</h2>
-} @if ((availableDevices$ | async) === undefined) {
+} @if (availableDevices() === undefined) {
 <h2>Couldn't check for devices.</h2>
 <blockquote>This may be caused by some security error.</blockquote>
 }

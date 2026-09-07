@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfilePageService } from './profile.page.service';
 
-import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NiceFormErrorPipe } from '@santashop/core';
@@ -30,7 +30,6 @@ import {
 		RouterLink,
 		ReactiveFormsModule,
 		NiceFormErrorPipe,
-		AsyncPipe,
 		TranslateModule,
 		IonContent,
 		IonGrid,
@@ -53,7 +52,9 @@ export class ProfilePage {
 
 	public readonly changePasswordForm = this.viewService.changePasswordForm;
 
-	public readonly userProfile$ = this.viewService.userProfile$;
+	public readonly userProfile = toSignal(this.viewService.userProfile$, {
+		initialValue: undefined,
+	});
 	public readonly updateProfile = (): Promise<void> =>
 		this.viewService.updatePublicProfile();
 

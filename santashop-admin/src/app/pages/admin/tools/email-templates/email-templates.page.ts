@@ -1,5 +1,5 @@
-import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
 	IonBadge,
@@ -16,7 +16,6 @@ import {
 import { addIcons } from 'ionicons';
 import { add } from 'ionicons/icons';
 import type { EmailTemplateSummary } from '@santashop/models';
-import { BehaviorSubject } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { EmailTemplateService } from './email-template.service';
 
@@ -26,7 +25,6 @@ import { EmailTemplateService } from './email-template.service';
 	styleUrls: ['./email-templates.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		HeaderComponent,
 		IonBadge,
 		IonCardHeader,
@@ -44,13 +42,8 @@ export class EmailTemplatesPage {
 	private readonly emailTemplateService = inject(EmailTemplateService);
 	private readonly router = inject(Router);
 
-	private readonly templatesSubject = new BehaviorSubject<
-		EmailTemplateSummary[]
-	>([]);
-	public readonly templates$ = this.templatesSubject.asObservable();
-
-	private readonly loadingSubject = new BehaviorSubject<boolean>(true);
-	public readonly isLoading$ = this.loadingSubject.asObservable();
+	public readonly templates = signal<EmailTemplateSummary[]>([]);
+	public readonly isLoading = signal(true);
 
 	constructor() {
 		addIcons({ add });
@@ -81,13 +74,13 @@ export class EmailTemplatesPage {
 	}
 
 	private async loadTemplates(): Promise<void> {
-		this.loadingSubject.next(true);
+		this.isLoading.set(true);
 		try {
 			const templates =
 				await this.emailTemplateService.listEmailTemplates();
-			this.templatesSubject.next(templates);
+			this.templates.set(templates);
 		} finally {
-			this.loadingSubject.next(false);
+			this.isLoading.set(false);
 		}
 	}
 }

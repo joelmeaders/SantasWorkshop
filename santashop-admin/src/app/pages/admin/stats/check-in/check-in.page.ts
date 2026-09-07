@@ -1,16 +1,20 @@
 import { EventDatePipe } from '@santashop/core/admin';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	inject,
+	signal,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Timestamp } from 'firebase/firestore/lite';
 import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
 	catchError,
-	combineLatest,
-	filter,
 	map,
 	of,
-	shareReplay,
 	startWith,
 	switchMap,
 } from 'rxjs';
@@ -26,7 +30,6 @@ import {
 } from '../../../../shared/helpers';
 
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe } from '@angular/common';
 import {
 	BaseChartDirective,
 	provideCharts,
@@ -56,11 +59,6 @@ type CheckInStatsLoadState =
 	| { status: 'error' }
 	| { status: 'ready'; data: CheckInAggregatedStats };
 
-type ReadyCheckInStatsState = Extract<
-	CheckInStatsLoadState,
-	{ status: 'ready' }
->;
-
 @Component({
 	selector: 'admin-check-in',
 	templateUrl: './check-in.page.html',
@@ -71,7 +69,6 @@ type ReadyCheckInStatsState = Extract<
 		HeaderComponent,
 		FormsModule,
 		BaseChartDirective,
-		AsyncPipe,
 		EventDatePipe,
 		IonContent,
 		IonGrid,
@@ -98,7 +95,7 @@ export class CheckInPage {
 	public year = this.programYear;
 	public refreshYear = new BehaviorSubject<void>(undefined);
 
-	public readonly checkInState$ = this.refreshYear.pipe(
+	private readonly checkInState$ = this.refreshYear.pipe(
 		switchMap(() =>
 			getStatsCollection<CheckInAggregatedStats>(this.httpService)
 				.read(`checkin-${this.year}`)
@@ -112,100 +109,62 @@ export class CheckInPage {
 					),
 				),
 		),
-		shareReplay({ bufferSize: 1, refCount: true }),
 	);
-
-	private readonly checkInRecord$ = this.checkInState$.pipe(
-		filter(
-			(state): state is ReadyCheckInStatsState =>
-				state.status === 'ready',
-		),
-		map((state) => state.data),
-		shareReplay({ bufferSize: 1, refCount: true }),
+	public readonly checkInState = toSignal(this.checkInState$, {
+		initialValue: { status: 'loading' as const },
+	});
+	private readonly checkInRecord = computed(() => {
+		const state = this.checkInState();
+		return state.status === 'ready' ? state.data : undefined;
+	});
+	public readonly hasData = computed(
+		() => this.checkInState().status === 'ready',
 	);
-
-	public readonly hasData$ = this.checkInState$.pipe(
-		filter((state) => state.status !== 'loading'),
-		map((state) => state.status === 'ready'),
+	private readonly dateTimeStats = computed(
+		() => this.checkInRecord()?.dateTimeCount ?? [],
 	);
-
-	private readonly dateTimeStats$ = this.checkInRecord$.pipe(
-		map((data) => data.dateTimeCount),
+	public readonly checkinLastUpdated = computed(() => {
+		const lastUpdated = this.checkInRecord()?.lastUpdated as
+			| Timestamp
+			| Date
+			| undefined;
+		if (!lastUpdated) return undefined;
+		return lastUpdated instanceof Date ? lastUpdated : lastUpdated.toDate();
+	});
+	public readonly totalCustomers = computed(() =>
+		this.dateTimeStats().reduce((total, entry) => total + entry.customerCount, 0),
 	);
-
-	public readonly checkinLastUpdated$ = this.checkInRecord$.pipe(
-		map((updated) => {
-			const lastUpdated = updated.lastUpdated as Timestamp | Date;
-			const date =
-				lastUpdated instanceof Date
-					? lastUpdated
-					: lastUpdated.toDate();
-			return date;
-		}),
+	public readonly totalChildren = computed(() =>
+		this.dateTimeStats().reduce((total, entry) => total + entry.childCount, 0),
 	);
-
-	public readonly totalCustomers$ = this.dateTimeStats$.pipe(
-		map((data) =>
-			data
-				.map((e) => e.customerCount)
-				.reduce((prev, curr) => prev + curr, 0),
+	public readonly totalPreregistered = computed(() =>
+		this.dateTimeStats().reduce(
+			(total, entry) => total + entry.pregisteredCount,
+			0,
 		),
 	);
-
-	public readonly totalChildren$ = this.dateTimeStats$.pipe(
-		map((data) =>
-			data
-				.map((e) => e.childCount)
-				.reduce((prev, curr) => prev + curr, 0),
-		),
+	public readonly onSiteRegistrations = computed(
+		() => this.totalCustomers() - this.totalPreregistered(),
 	);
-
-	public readonly totalPreregistered$ = this.dateTimeStats$.pipe(
-		map((data) =>
-			data
-				.map((e) => e.pregisteredCount)
-				.reduce((prev, curr) => prev + curr, 0),
-		),
+	public readonly totalModifiedRegistrations = computed(() => {
+		const count = this.dateTimeStats().reduce(
+			(total, entry) => total + entry.modifiedCount,
+			0,
+		);
+		const difference = count - this.onSiteRegistrations();
+		return difference > 0 ? difference : difference * -1;
+	});
+	public readonly graphView = signal<'customerCount' | 'childCount'>(
+		'customerCount',
 	);
-
-	public readonly onSiteRegistrations$ = this.totalCustomers$.pipe(
-		switchMap((total) =>
-			this.totalPreregistered$.pipe(map((pre) => total - pre)),
-		),
+	public readonly viewButtonText = computed(() =>
+		this.graphView() === 'customerCount'
+			? 'View by Children'
+			: 'View by Check-Ins',
 	);
-
-	public readonly totalModifiedRegistrations$ = this.dateTimeStats$.pipe(
-		map((data) =>
-			data
-				.map((e) => e.modifiedCount)
-				.reduce((prev, curr) => prev + curr, 0),
-		),
-		switchMap((count) =>
-			this.onSiteRegistrations$.pipe(map((onsite) => count - onsite)),
-		),
-		map((count) => (count > 0 ? count : count * -1)),
+	public readonly checkInsByDayHour = computed(() =>
+		this.mapDaysHoursToChart(this.dateTimeStats(), this.graphView()),
 	);
-
-	private readonly graphView = new BehaviorSubject<
-		'customerCount' | 'childCount'
-	>('customerCount');
-	public readonly graphView$ = this.graphView
-		.asObservable()
-		.pipe(shareReplay(1));
-
-	public readonly viewButtonText$ = this.graphView$.pipe(
-		map((value) =>
-			value === 'customerCount'
-				? 'View by Children'
-				: 'View by Check-Ins',
-		),
-	);
-
-	// These chart groupings are schedule-driven and still require annual schedule data.
-	public readonly checkInsByDayHour$ = combineLatest([
-		this.dateTimeStats$,
-		this.graphView$,
-	]).pipe(map(([data, view]) => this.mapDaysHoursToChart(data, view)));
 
 	public barChartOptions: ChartConfiguration['options'] = {
 		responsive: true,
@@ -339,10 +298,10 @@ export class CheckInPage {
 	}
 
 	public switchView(): void {
-		if (this.graphView.getValue() === 'customerCount') {
-			this.graphView.next('childCount');
+		if (this.graphView() === 'customerCount') {
+			this.graphView.set('childCount');
 		} else {
-			this.graphView.next('customerCount');
+			this.graphView.set('customerCount');
 		}
 	}
 

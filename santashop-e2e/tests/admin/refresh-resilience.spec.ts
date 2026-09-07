@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test';
-import { config } from '../../../santashop-admin/src/config';
 import { test, expect } from '../../fixtures/test-fixtures';
 import {
 	defaultAdminAccount,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
 
-const year = config.programYear;
+const year = E2E_PROGRAM_YEAR;
 
 async function createStaff(page: Page): Promise<void> {
 	await page.goto('/admin/users');
@@ -48,7 +48,7 @@ const stats = (
 	dateTimeCounts: { dateTime: string; count: number }[];
 } => ({
 	programYear,
-	dateTimeCounts: [{ dateTime: `${programYear}-12-12T17:00:00.000Z`, count }],
+	dateTimeCounts: [{ dateTime: e2eDateTime(12, 12, 17, 0, 0, programYear), count }],
 });
 
 async function chooseYear(page: Page, value: number): Promise<void> {

@@ -5,13 +5,12 @@
 		<ion-button fill="outline" (click)="refresh()"
 			>Refresh users</ion-button
 		>
-		@if (staffState$ | async; as state) { @if (state.status === 'loading') {
+		@if (staffState(); as state) { @if (state.status === 'loading') {
 		<p role="status">Loading users…</p>
 		} @if (state.status === 'error') {
 		<p role="alert">Users could not be loaded. Try Refresh users again.</p>
-		} } @let owner = (isOwner$ | async) === true; @if (staffAccounts$ |
-		async; as accounts) { @if (accounts.length === 0 && (staffState$ |
-		async)?.status === 'ready') {
+		} } @let owner = isOwner(); @if (staffAccounts(); as accounts) {
+		@if (accounts.length === 0 && staffState().status === 'ready') {
 		<ion-note class="empty-note" color="medium">
 			No elevated user accounts yet. Use the button below to add one.
 		</ion-note>

@@ -14,7 +14,7 @@ import {
 import { HomePage } from './home.page';
 import { LoadingController, ModalController } from '@ionic/angular/standalone';
 import { AppStateService, ErrorHandlerService } from '@santashop/core/customer';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '@santashop/core/customer';
 
 describe('HomePage', () => {
@@ -221,7 +221,7 @@ describe('HomePage', () => {
 		await component.resetPassword();
 		await fixture.whenStable();
 
-		expect(await firstValueFrom(component.resetEmailSent$)).toBe(true);
+		expect(component.resetEmailSent()).toBe(true);
 		expect(errorHandler.handleError).not.toHaveBeenCalled();
 	});
 
@@ -233,9 +233,9 @@ describe('HomePage', () => {
 		await component.resetPassword();
 		await fixture.whenStable();
 
-		expect(await firstValueFrom(component.resetEmailSent$)).toBe(true);
+		expect(component.resetEmailSent()).toBe(true);
 		component.resetPasswordForm();
 		expect(component.resetEmail.value).toBe('');
-		expect(await firstValueFrom(component.resetEmailSent$)).toBe(false);
+		expect(component.resetEmailSent()).toBe(false);
 	});
 });

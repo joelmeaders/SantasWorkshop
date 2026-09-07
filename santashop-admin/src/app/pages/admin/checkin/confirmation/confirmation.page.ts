@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 
-import { AsyncPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import {
 	IonRouterLink,
@@ -19,7 +19,6 @@ import {
 	imports: [
 		HeaderComponent,
 		RouterLink,
-		AsyncPipe,
 		IonRouterLink,
 		IonContent,
 		IonText,
@@ -30,7 +29,9 @@ import {
 export class ConfirmationPage {
 	private readonly checkinContext = inject(CheckInContextService);
 
-	public readonly checkin$ = this.checkinContext.checkin$;
+	public readonly checkin = toSignal(this.checkinContext.checkin$, {
+		initialValue: undefined,
+	});
 
 	public ionViewWillLeave(): void {
 		this.checkinContext.reset();

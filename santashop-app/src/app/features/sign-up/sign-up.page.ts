@@ -5,6 +5,7 @@ import {
 	inject,
 	viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
 	AlertController,
 	ModalController,
@@ -41,7 +42,6 @@ import { TermsOfServiceModalComponent } from '../../shared/components/terms-of-s
 import { SignUpPageService } from './sign-up.page.service';
 import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AsyncPipe } from '@angular/common';
 import { ReferralSelectionModalComponent } from './referral-selection-modal/referral-selection-modal.component';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 
@@ -59,7 +59,6 @@ import { arrowBackSharp } from 'ionicons/icons';
 		ReactiveFormsModule,
 		TranslateModule,
 		NiceFormErrorPipe,
-		AsyncPipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -97,8 +96,10 @@ export class SignUpPage {
 
 	private readonly firstName = viewChild<HTMLIonInputElement>('firstName');
 
-	public readonly createAccountEnabled$ =
-		this.appStateService.createAccountEnabled$;
+	public readonly createAccountEnabled = toSignal(
+		this.appStateService.createAccountEnabled$,
+		{ initialValue: undefined },
+	);
 
 	constructor() {
 		addIcons({ arrowBackSharp });

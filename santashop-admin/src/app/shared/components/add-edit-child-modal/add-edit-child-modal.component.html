@@ -89,7 +89,7 @@
 						</ion-note>
 					}
 				</ion-item>
-				@if ((isInfant$ | async) !== true) {
+				@if (!isInfant()) {
 					<ion-radio-group formControlName="toyType">
 						<ion-item-divider>
 							<ion-label>Choose Toy Type</ion-label>

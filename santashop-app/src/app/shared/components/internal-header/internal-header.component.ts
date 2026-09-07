@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '@santashop/core/customer';
 import {
 	PopoverController,
@@ -9,7 +10,6 @@ import {
 	IonButton,
 } from '@ionic/angular/standalone';
 import { PublicMenuComponent } from '../public-menu/public-menu.component';
-import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { menuSharp } from 'ionicons/icons';
 import { TranslateModule } from '@ngx-translate/core';
@@ -25,7 +25,6 @@ import { TranslateModule } from '@ngx-translate/core';
 		IonToolbar,
 		IonItem,
 		IonButton,
-		AsyncPipe,
 		TranslateModule,
 		IonHeader,
 		IonToolbar,
@@ -38,7 +37,10 @@ export class InternalHeaderComponent {
 	private readonly authService = inject(AuthService);
 	private readonly popoverController = inject(PopoverController);
 
-	public readonly user$ = this.authService.currentUser$;
+	public readonly user = toSignal(this.authService.currentUser$, {
+		initialValue: null,
+		equal: () => false,
+	});
 
 	constructor() {
 		addIcons({ menuSharp });

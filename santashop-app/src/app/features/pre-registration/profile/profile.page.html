@@ -10,7 +10,7 @@
 				<h1>{{ 'COMMON.MY_ACCOUNT' | translate }}</h1>
 				<p>{{ 'PROFILE.SETTINGS_INTRO' | translate }}</p>
 
-				@if (userProfile$ | async; as user) {
+				@if (userProfile(); as user) {
 				<details class="settings-panel" open>
 					<summary>
 						<span>{{ 'PROFILE.CHANGE_INFO' | translate }}</span>

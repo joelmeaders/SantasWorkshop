@@ -1,10 +1,12 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	OnDestroy,
-	inject,
 	Input,
+	computed,
+	inject,
+	signal,
 } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
 	ModalController,
 	IonHeader,
@@ -25,16 +27,10 @@ import {
 	IonCardHeader,
 	IonCardContent,
 } from '@ionic/angular/standalone';
-import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import {
-	map,
-	takeUntil,
-	shareReplay,
-	distinctUntilChanged,
-} from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { TimeSlotPipe, timestampToDate } from '@santashop/core';
 import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
 
@@ -85,81 +81,65 @@ const toEventDayKey = (date: Date): number => {
 		IonCard,
 		IonCardHeader,
 		IonCardContent,
-		AsyncPipe,
 		LocalizedDatePipe,
 		TranslateModule,
 		TimeSlotPipe,
 	],
 })
-export class ChangeDatetimeModalComponent implements OnDestroy {
+export class ChangeDatetimeModalComponent {
 	private readonly modalController = inject(ModalController);
-	private readonly destroy$ = new Subject<void>();
-
-	private _currentSlot?: DateTimeSlot;
-	private availableSlotsSubscription?: Subscription;
-
+	private readonly currentSlotInput = signal<DateTimeSlot | undefined>(
+		undefined,
+	);
+	public readonly currentSlotValue = computed(() => {
+		const value = this.currentSlotInput();
+		return value
+			? { ...value, dateTime: timestampToDate(value.dateTime) }
+			: undefined;
+	});
 	@Input()
 	public set currentSlot(value: DateTimeSlot) {
-		this._currentSlot = {
-			...value,
-			dateTime: timestampToDate(value.dateTime),
-		};
-	}
-
-	public get currentSlot(): DateTimeSlot | undefined {
-		return this._currentSlot;
+		this.currentSlotInput.set(value);
 	}
 
 	// The confirmation page receives live Firestore updates after the modal opens.
+	private readonly availableSlotsInput = signal<
+		Observable<DateTimeSlot[]> | undefined
+	>(undefined);
 	@Input()
 	public set availableSlots(value: Observable<DateTimeSlot[]>) {
-		this.availableSlotsSubscription?.unsubscribe();
-		this.availableSlotsSubscription = value
-			.pipe(takeUntil(this.destroy$))
-			.subscribe((slots) =>
-				this._availableSlots$.next(
-					slots.map((slot) => ({
-						...slot,
-						dateTime: timestampToDate(slot.dateTime),
-					})),
-				),
-			);
+		this.availableSlotsInput.set(value);
 	}
-
-	private readonly _availableSlots$ = new BehaviorSubject<DateTimeSlot[]>([]);
-
-	public readonly filteredSlots$ = this._availableSlots$.pipe(
-		takeUntil(this.destroy$),
-		map((slots) => slots.filter((slot) => slot.enabled)),
-		distinctUntilChanged(
-			(prev, curr) => JSON.stringify(prev) === JSON.stringify(curr),
-		),
-		shareReplay(1),
-	);
-
-	public readonly availableDays$ = this.filteredSlots$.pipe(
-		takeUntil(this.destroy$),
-		map((slots) => slots.map((slot) => toEventDayKey(slot.dateTime))),
-		map((dates) => [...new Set(dates)]),
-		shareReplay(1),
-	);
-
-	public readonly availableSlotsByDay$ = (
-		date: number,
-	): Observable<DateTimeSlot[]> =>
-		this.filteredSlots$.pipe(
-			takeUntil(this.destroy$),
-			map((slots) =>
-				slots.filter((slot) => toEventDayKey(slot.dateTime) === date),
+	private readonly availableSlotsState = toSignal(
+		toObservable(this.availableSlotsInput).pipe(
+			switchMap((slots$) =>
+				slots$
+					? slots$.pipe(
+							map((slots) =>
+								slots.map((slot) => ({
+									...slot,
+									dateTime: timestampToDate(slot.dateTime),
+								})),
+							),
+						)
+					: of([]),
 			),
-			shareReplay(1),
-		);
+		),
+		{ initialValue: [] },
+	);
 
-	public ngOnDestroy(): void {
-		this.availableSlotsSubscription?.unsubscribe();
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
+	public readonly filteredSlots = computed(() =>
+		this.availableSlotsState().filter((slot) => slot.enabled),
+	);
+
+	public readonly availableDays = computed(() => [
+		...new Set(
+			this.filteredSlots().map((slot) => toEventDayKey(slot.dateTime)),
+		),
+	]);
+
+	public readonly availableSlotsByDay = (date: number): DateTimeSlot[] =>
+		this.filteredSlots().filter((slot) => toEventDayKey(slot.dateTime) === date);
 
 	public async cancel(): Promise<void> {
 		await this.modalController.dismiss(null, 'cancel');
@@ -178,7 +158,7 @@ export class ChangeDatetimeModalComponent implements OnDestroy {
 	}
 
 	public isCurrentSlot(slot: DateTimeSlot): boolean {
-		const currentSlot = this.currentSlot;
+		const currentSlot = this.currentSlotValue();
 		if (!currentSlot) return false;
 		return (
 			currentSlot.dateTime.getTime() === slot.dateTime.getTime() &&

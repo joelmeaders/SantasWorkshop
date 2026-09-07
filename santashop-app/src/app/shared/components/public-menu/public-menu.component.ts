@@ -2,9 +2,9 @@ import { CustomerLanguageService } from '../../../core/services/customer-languag
 import {
 	ChangeDetectionStrategy,
 	Component,
-	OnDestroy,
 	inject,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
 	PopoverController,
@@ -15,10 +15,7 @@ import {
 	IonItem,
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
 import { AuthService } from '@santashop/core/customer';
-import { AsyncPipe } from '@angular/common';
 import { LanguageToggleComponent } from '../language-toggle/language-toggle.component';
 import { HelpPage } from '../../../features/pre-registration/help/help.page';
 
@@ -33,7 +30,6 @@ import { HelpPage } from '../../../features/pre-registration/help/help.page';
 		IonItem,
 		IonLabel,
 		LanguageToggleComponent,
-		AsyncPipe,
 		TranslateModule,
 		IonContent,
 		IonList,
@@ -41,23 +37,16 @@ import { HelpPage } from '../../../features/pre-registration/help/help.page';
 		IonLabel,
 	],
 })
-export class PublicMenuComponent implements OnDestroy {
+export class PublicMenuComponent {
 	private readonly authService = inject(AuthService);
 	private readonly router = inject(Router);
 	private readonly popoverController = inject(PopoverController);
 	private readonly modalController = inject(ModalController);
 	private readonly language = inject(CustomerLanguageService);
 
-	private readonly destroy$ = new Subject<void>();
-
-	public readonly isLoggedIn$ = this.authService.currentUser$.pipe(
-		takeUntil(this.destroy$),
-		shareReplay(1),
-	);
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-	}
+	public readonly isLoggedIn = toSignal(this.authService.currentUser$, {
+		initialValue: null,
+	});
 
 	public async closeMenu(): Promise<void> {
 		await this.popoverController.dismiss();

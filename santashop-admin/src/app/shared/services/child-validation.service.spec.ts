@@ -49,33 +49,33 @@ describe('ChildValidationService', () => {
 	it('firstNameValid(): should return expected results', () => {
 		// Arrange
 		const tooShort = 'a';
-		const tooLong = 'iuerhvbosdnckdfn.lanvkudfnvlsnvkludfnv;lksndkludfgnb';
+		const minimumLength = 'Al';
+		const maximumLength = 'a'.repeat(20);
+		const tooLong = 'a'.repeat(21);
 		const justRight = 'Emily';
 
-		// Act
-		const shouldBefalse =
-			service.firstNameValid(tooShort) && service.firstNameValid(tooLong);
-		const shouldBeTrue = service.firstNameValid(justRight);
-
 		// Assert
-		expect(shouldBeTrue).toBe(true);
-		expect(shouldBefalse).toBe(false);
+		expect(service.firstNameValid(tooShort)).toBe(false);
+		expect(service.firstNameValid(minimumLength)).toBe(true);
+		expect(service.firstNameValid(maximumLength)).toBe(true);
+		expect(service.firstNameValid(tooLong)).toBe(false);
+		expect(service.firstNameValid(justRight)).toBe(true);
 	});
 
 	it('lastNameValid(): should return expected results', () => {
 		// Arrange
 		const tooShort = 'a';
-		const tooLong = 'iuerhvbosdnckdfn.lanvkudfnvlsnvkludfnv;lksndkludfgnb';
+		const minimumLength = 'Li';
+		const maximumLength = 'a'.repeat(25);
+		const tooLong = 'a'.repeat(26);
 		const justRight = 'Lattenshire';
 
-		// Act
-		const shouldBefalse =
-			service.firstNameValid(tooShort) && service.firstNameValid(tooLong);
-		const shouldBeTrue = service.firstNameValid(justRight);
-
 		// Assert
-		expect(shouldBeTrue).toBe(true);
-		expect(shouldBefalse).toBe(false);
+		expect(service.lastNameValid(tooShort)).toBe(false);
+		expect(service.lastNameValid(minimumLength)).toBe(true);
+		expect(service.lastNameValid(maximumLength)).toBe(true);
+		expect(service.lastNameValid(tooLong)).toBe(false);
+		expect(service.lastNameValid(justRight)).toBe(true);
 	});
 
 	it('validateChild(): should make expected calls and return valid child', () => {

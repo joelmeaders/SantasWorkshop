@@ -1,7 +1,6 @@
 import { EventDatePipe } from '@santashop/core/admin';
-import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { AnalyticsWrapper } from '@santashop/core/admin/firestore';
 import type { ResolveRegistrationScanResult } from '@santashop/models';
@@ -41,7 +40,6 @@ const asDate = (value: unknown): Date | undefined => {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		HeaderComponent,
-		AsyncPipe,
 		EventDatePipe,
 		IonButton,
 		IonContent,
@@ -55,7 +53,7 @@ export class DuplicatePage {
 	private readonly router = inject(Router);
 	private readonly analytics = inject(AnalyticsWrapper);
 
-	public readonly result$ = this.context.blockedScan$.pipe(
+	public readonly result = toSignal(this.context.blockedScan$.pipe(
 		filter((result): result is BlockedScanResult =>
 			Boolean(
 				result &&
@@ -77,8 +75,7 @@ export class DuplicatePage {
 				disposition: result.disposition,
 			});
 		}),
-		takeUntilDestroyed(),
-	);
+	), { initialValue: undefined });
 
 	public async startOver(): Promise<void> {
 		this.context.reset();

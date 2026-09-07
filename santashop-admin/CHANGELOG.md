@@ -2,6 +2,17 @@
 
 All notable changes to the admin application will be documented in this file.
 
+## [2026.09.0-beta.2] - Unreleased
+
+### Changed
+
+- Advance the application version to `2026.09.0-beta.2`.
+- Run the complete Storybook validation with the normal admin application test gate.
+- Use Angular signals for component and page UI state.
+- Strengthen unit and staff browser coverage, assertions, and test isolation.
+- Keep registration codes stable across cancellation and later re-registration.
+- Block canceled codes during cancellation and accept the same code after re-registration.
+
 ## [2026.09.0-beta.1] - Unreleased
 
 ### Changed

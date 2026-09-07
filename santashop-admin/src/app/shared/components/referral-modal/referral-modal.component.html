@@ -13,7 +13,7 @@
 </ion-header>
 
 <ion-content>
-	@if ((referralChoice$ | async) === undefined) {
+	@if (referralChoice() === undefined) {
 		<ion-list>
 			<ion-searchbar
 				(ionInput)="filter($event)"
@@ -24,7 +24,7 @@
 				<ion-item-divider color="light" disabled>
 					<ion-label> Common </ion-label>
 				</ion-item-divider>
-				@for (ref of referrals$ | async; track ref; let i = $index) {
+				@for (ref of referrals(); track ref; let i = $index) {
 					@if (ref === '----------') {
 						<ion-item-divider disabled color="light">
 							<ion-label>
@@ -58,7 +58,7 @@
 		</ion-list>
 	}
 
-	@if ((referralChoice$ | async) === 'Other') {
+	@if (referralChoice() === 'Other') {
 		<ion-item lines="none">
 			<ion-input
 				[value]="otherName()"

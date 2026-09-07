@@ -69,8 +69,8 @@ describe('UsersPage', () => {
 		expect(component).toBeTruthy();
 	});
 
-	it('exposes a staff accounts stream', () => {
-		expect(component.staffAccounts$).toBeDefined();
+	it('exposes staff accounts as a signal', () => {
+		expect(component.staffAccounts()).toEqual([]);
 	});
 
 	it('maps role keys to friendly labels', () => {

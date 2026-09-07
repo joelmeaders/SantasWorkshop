@@ -30,7 +30,7 @@ describe('ConfirmationPage', () => {
 
 		component.ionViewWillLeave();
 
-		expect(component.checkin$).toBe(context.checkin$);
+		expect(component.checkin()).toBeUndefined();
 		expect(reset).toHaveBeenCalledOnce();
 	});
 });

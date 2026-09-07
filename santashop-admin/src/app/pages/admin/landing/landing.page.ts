@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService, AppStateService } from '@santashop/core/admin/firestore';
 
 import { RouterLink } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import {
 	bagCheckOutline,
@@ -29,7 +29,6 @@ import {
 	IonIcon,
 	IonToggle,
 } from '@ionic/angular/standalone';
-import { shareReplay } from 'rxjs';
 
 @Component({
 	selector: 'admin-landing',
@@ -38,7 +37,6 @@ import { shareReplay } from 'rxjs';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		RouterLink,
-		AsyncPipe,
 		IonRouterLink,
 		IonContent,
 		IonList,
@@ -55,16 +53,27 @@ export class LandingPage {
 
 	protected readonly appStateService = inject(AppStateService);
 
-	public readonly preRegistrationEnabled$ =
-		this.appStateService.preRegistrationEnabled$;
+	public readonly preRegistrationEnabled = toSignal(
+		this.appStateService.preRegistrationEnabled$,
+		{ initialValue: false },
+	);
 
-	public readonly onsiteRegistrationEnabled$ =
-		this.appStateService.onsiteRegistrationEnabled$;
+	public readonly onsiteRegistrationEnabled = toSignal(
+		this.appStateService.onsiteRegistrationEnabled$,
+		{ initialValue: false },
+	);
 
-	public readonly checkinEnabled$ = this.appStateService.checkinEnabled$;
+	public readonly checkinEnabled = toSignal(
+		this.appStateService.checkinEnabled$,
+		{ initialValue: false },
+	);
 
-	public readonly isAdmin$ = this.authService.isAdmin$.pipe(shareReplay(1));
-	public readonly isOwner$ = this.authService.isOwner$.pipe(shareReplay(1));
+	public readonly isAdmin = toSignal(this.authService.isAdmin$, {
+		initialValue: false,
+	});
+	public readonly isOwner = toSignal(this.authService.isOwner$, {
+		initialValue: false,
+	});
 
 	public async signOut(): Promise<void> {
 		await this.authService.logout();

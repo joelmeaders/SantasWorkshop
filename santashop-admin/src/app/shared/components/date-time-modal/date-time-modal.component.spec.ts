@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AlertController, ModalController } from '@ionic/angular/standalone';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { DateTimeModalComponent } from './date-time-modal.component';
 import { requireDefined, testHelpers } from '../../../../test-helpers';
@@ -32,11 +32,12 @@ describe('DateTimeModalComponent', () => {
 		const late = createSlot('late', '2026-12-21T00:00:00Z', 3, 0);
 		slots$.next([early, late]);
 		await fixture.whenStable();
-		const days = await firstValueFrom(component.availableDays$);
+		const days = component.availableDays();
 		expect(days).toEqual([Date.parse('2026-12-20T07:00:00Z')]);
-		await expect(
-			firstValueFrom(component.availableSlotsByDay$(days[0])),
-		).resolves.toEqual([early, late]);
+		expect(component.availableSlotsByDay().get(requireDefined(days[0]))).toEqual([
+			early,
+			late,
+		]);
 		expect(fixture.nativeElement.textContent).toContain(
 			'Sunday, December 20',
 		);
@@ -58,9 +59,7 @@ describe('DateTimeModalComponent', () => {
 		};
 		slots$.next([open, { ...open, id: 'closed', enabled: false }]);
 
-		await expect(
-			firstValueFrom(component.availableSlots$),
-		).resolves.toEqual([open]);
+		expect(component.availableSlots()).toEqual([open]);
 		expect(component.spotsRemaining(open)).toBe('1 spot');
 		expect(component.spotsRemaining({ ...open, enabled: false })).toBe(
 			'Unavailable',
@@ -80,9 +79,9 @@ describe('DateTimeModalComponent', () => {
 			{ ...nextDay, id: 'disabled', enabled: false },
 		]);
 
-		const days = await firstValueFrom(component.availableDays$);
-		const sameDaySlots = await firstValueFrom(
-			component.availableSlotsByDay$(requireDefined(days[0])),
+		const days = component.availableDays();
+		const sameDaySlots = component.availableSlotsByDay().get(
+			requireDefined(days[0]),
 		);
 
 		expect(days).toHaveLength(2);
@@ -121,15 +120,13 @@ describe('DateTimeModalComponent', () => {
 		expect(modal.dismiss).toHaveBeenCalledWith(replacement);
 	});
 
-	it('dismisses an explicit empty selection and completes subscriptions on destroy', async () => {
+	it('dismisses an explicit empty selection', async () => {
 		const modal = TestBed.inject(
 			ModalController,
 		) as Mocked<ModalController>;
 		await component.selectDateTime();
 		expect(modal.dismiss).toHaveBeenCalledWith(undefined);
 
-		component.ngOnDestroy();
-		await fixture.whenStable();
 	});
 });
 

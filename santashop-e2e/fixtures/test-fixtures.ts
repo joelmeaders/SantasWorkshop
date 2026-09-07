@@ -1,5 +1,6 @@
 /* eslint-disable no-empty-pattern -- Playwright fixture callbacks require object destructuring. */
 import { test as base } from '@playwright/test';
+import { E2E_FUNCTIONS_EMULATOR_URL } from './season';
 
 export interface E2eAdminSeedUser {
 	uid?: string;
@@ -301,9 +302,7 @@ interface CustomFixtures {
 // Defaults to the local emulator project (demo-santashop) used by
 // `emulators:start:local` and the app's `local` build configuration, which
 // connects the browser app to the emulators with App Check disabled.
-const EMULATOR_PROJECT_ID =
-	process.env['E2E_EMULATOR_PROJECT'] ?? 'demo-santashop';
-const FUNCTIONS_EMULATOR_URL = `http://127.0.0.1:5001/${EMULATOR_PROJECT_ID}/us-central1`;
+const FUNCTIONS_EMULATOR_URL = E2E_FUNCTIONS_EMULATOR_URL;
 
 /**
  * Calls a Firebase function in the emulator

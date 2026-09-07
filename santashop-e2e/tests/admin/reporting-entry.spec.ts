@@ -3,6 +3,7 @@ import {
 	defaultAdminAccount,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
 
 test.describe('admin reporting routes', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
@@ -44,9 +45,9 @@ test.describe('admin reporting routes', () => {
 		seedScheduleStats,
 	}) => {
 		await seedScheduleStats({
-			programYear: 2026,
+			programYear: E2E_PROGRAM_YEAR,
 			dateTimeCounts: [12, 13, 15, 16].map((day, index) => ({
-				dateTime: `2026-12-${day.toString().padStart(2, '0')}T16:00:00.000Z`,
+				dateTime: e2eDateTime(12, day, 16),
 				count: index + 1,
 			})),
 		});
@@ -72,11 +73,11 @@ test.describe('admin reporting routes', () => {
 	}) => {
 		await seedReportingStats({
 			registration: {
-				programYear: 2026,
+			programYear: E2E_PROGRAM_YEAR,
 				completedRegistrations: 3,
 				dateTimeCount: [
 					{
-						dateTime: '2026-12-12T16:00:00.000Z',
+						dateTime: e2eDateTime(12, 12, 16),
 						count: 3,
 						childCount: 4,
 						stats: {
@@ -105,8 +106,8 @@ test.describe('admin reporting routes', () => {
 	}) => {
 		await seedReportingStats({
 			checkIn: {
-				programYear: 2026,
-				lastUpdated: '2026-12-12T18:00:00.000Z',
+				programYear: E2E_PROGRAM_YEAR,
+				lastUpdated: e2eDateTime(12, 12, 18),
 				dateTimeCount: [
 					{
 						date: 12,
@@ -145,7 +146,7 @@ test.describe('admin reporting routes', () => {
 	}) => {
 		await seedReportingStats({
 			user: {
-				programYear: 2026,
+				programYear: E2E_PROGRAM_YEAR,
 				totalUsers: 4,
 				referrerCount: [{ referrer: 'SNAP', count: 3 }],
 				zipCodeCount: [{ zip: '80202', count: 4 }],

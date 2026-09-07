@@ -5,7 +5,6 @@ import {
 	serializeTemplatePackage,
 	validateTemplateHtml,
 } from './email-template-transfer';
-import { AsyncPipe } from '@angular/common';
 import {
 	AfterViewInit,
 	ChangeDetectionStrategy,
@@ -13,6 +12,7 @@ import {
 	ElementRef,
 	ViewChild,
 	inject,
+	signal,
 } from '@angular/core';
 import {
 	ReactiveFormsModule,
@@ -65,7 +65,6 @@ import {
 	saveOutline,
 	trashOutline,
 } from 'ionicons/icons';
-import { BehaviorSubject } from 'rxjs';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { EmailTemplateService } from './email-template.service';
 import { EmailTemplateCodeEditorComponent } from './email-template-code-editor.component';
@@ -80,7 +79,6 @@ import {
 	styleUrls: ['./email-template-editor.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		HeaderComponent,
 		ReactiveFormsModule,
 		EmailTemplateCodeEditorComponent,
@@ -151,12 +149,14 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	private importedDraft?: SaveEmailTemplateRevisionRequest;
 	private reviewedContent?: string;
 	private savedContent?: string;
-	public html = '';
+	public readonly html = signal('');
 	public previewHtml = '';
-	public revisions: EmailTemplateRevision[] = [];
-	public currentTemplate?: EmailTemplateSummary;
-	public selectedRevisionId?: string;
-	public readonly isCreateMode$ = new BehaviorSubject<boolean>(true);
+	public readonly revisions = signal<EmailTemplateRevision[]>([]);
+	public readonly currentTemplate = signal<EmailTemplateSummary | undefined>(
+		undefined,
+	);
+	public readonly selectedRevisionId = signal<string | undefined>(undefined);
+	public readonly isCreateMode = signal(true);
 	public readonly testEmailForm = new UntypedFormGroup({
 		recipientEmail: new UntypedFormControl('', {
 			nonNullable: true,
@@ -251,7 +251,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	}
 
 	public revisionBadgeColor(revision: EmailTemplateRevision): string {
-		return revision.id === this.currentTemplate?.publishedRevisionId
+		return revision.id === this.currentTemplate()?.publishedRevisionId
 			? 'success'
 			: 'medium';
 	}
@@ -298,13 +298,13 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 					key,
 					revisionId: revision.id,
 				});
-			this.selectedRevisionId = result.revision.id;
+			this.selectedRevisionId.set(result.revision.id);
 			this.form.controls['subjectPart'].setValue(
 				result.revision.subjectPart,
 			);
 			this.form.controls['notes'].setValue(result.revision.notes ?? '');
 			this.setFieldMappings(result.revision.fieldMappings);
-			this.html = result.html;
+			this.html.set(result.html);
 			this.applyRevisionExtras(result.revision);
 			this.reconcileFieldMappings();
 			this.refreshPreview();
@@ -317,15 +317,15 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	}
 
 	public onHtmlChange(html: string): void {
-		if (html !== this.html) this.invalidateReview();
-		this.html = html;
+		if (html !== this.html()) this.invalidateReview();
+		this.html.set(html);
 		this.reconcileFieldMappings();
 		this.refreshPreview();
 	}
 
 	public refreshPreview(): void {
 		this.previewHtml = renderEmailTemplatePreview(
-			this.html,
+			this.html(),
 			this.fieldDefinitions(),
 		);
 		this.syncPreviewFrame();
@@ -334,7 +334,11 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	public async sendTestEmail(): Promise<void> {
 		const recipientEmail =
 			this.testEmailForm.controls['recipientEmail'].value;
-		if (!recipientEmail || !this.testEmailForm.valid || !this.html.trim()) {
+		if (
+			!recipientEmail ||
+			!this.testEmailForm.valid ||
+			!this.html().trim()
+		) {
 			this.testEmailForm.markAllAsTouched();
 			await this.showMessage(
 				'Validation',
@@ -356,7 +360,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 					this.form.controls['seasonalDetailsReviewed'].value &&
 					this.reviewedContent === this.contentSignature(),
 				subjectPart: this.form.controls['subjectPart'].value,
-				html: this.html,
+				html: this.html(),
 				fieldMappings: this.fieldDefinitions(),
 			};
 
@@ -374,7 +378,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	}
 
 	public async saveRevision(): Promise<void> {
-		if (!this.form.valid || !this.html.trim()) {
+		if (!this.form.valid || !this.html().trim()) {
 			this.form.markAllAsTouched();
 			await this.showMessage(
 				'Validation',
@@ -390,21 +394,21 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 				await this.emailTemplateService.saveEmailTemplateRevision(
 					payload,
 				);
-			this.currentTemplate = result.template;
-			this.selectedRevisionId = result.revision.id;
+			this.currentTemplate.set(result.template);
+			this.selectedRevisionId.set(result.revision.id);
 			this.form.controls['notes'].setValue('');
-			this.revisions = [
+			this.revisions.set([
 				result.revision,
-				...this.revisions.filter(
+				...this.revisions().filter(
 					(revision) => revision.id !== result.revision.id,
 				),
-			];
+			]);
 			this.applyTemplateDetail({
 				template: result.template,
-				revisions: this.revisions,
+				revisions: this.revisions(),
 				currentHtml: result.html,
 			});
-			this.isCreateMode$.next(false);
+			this.isCreateMode.set(false);
 			await this.showMessage(
 				'Saved',
 				`Revision r${result.revision.revisionNumber} saved.`,
@@ -442,12 +446,16 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			const result = await this.emailTemplateService.publishEmailTemplate(
 				{
 					key,
-					revisionId: this.selectedRevisionId,
+					revisionId: this.selectedRevisionId(),
 				},
 			);
-			this.currentTemplate = result.template;
-			this.revisions = this.revisions.map((revision) =>
-				revision.id === result.revision.id ? result.revision : revision,
+			this.currentTemplate.set(result.template);
+			this.revisions.set(
+				this.revisions().map((revision) =>
+					revision.id === result.revision.id
+						? result.revision
+						: revision,
+				),
 			);
 			await this.showMessage(
 				'Published',
@@ -462,7 +470,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 
 	public async deleteTemplate(): Promise<void> {
 		const key = this.form.controls['key'].value;
-		if (!key || this.isCreateMode$.value) {
+		if (!key || this.isCreateMode()) {
 			return;
 		}
 
@@ -501,10 +509,10 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	private async loadTemplate(): Promise<void> {
 		const key = this.route.snapshot.paramMap.get('key');
 		if (!key) {
-			this.isCreateMode$.next(true);
-			this.currentTemplate = undefined;
-			this.revisions = [];
-			this.selectedRevisionId = undefined;
+			this.isCreateMode.set(true);
+			this.currentTemplate.set(undefined);
+			this.revisions.set([]);
+			this.selectedRevisionId.set(undefined);
 			this.form.controls['key'].enable();
 			this.form.controls['language'].enable();
 			this.form.controls['deliveryProfile'].enable();
@@ -523,7 +531,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 				notes: '',
 			});
 			this.testEmailForm.reset({ recipientEmail: '' });
-			this.html = '';
+			this.html.set('');
 			this.setFieldMappings([]);
 			this.refreshPreview();
 			return;
@@ -534,7 +542,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			const detail =
 				await this.emailTemplateService.getEmailTemplate(key);
 			this.applyTemplateDetail(detail);
-			this.isCreateMode$.next(false);
+			this.isCreateMode.set(false);
 		} catch (error) {
 			await this.showError(error, 'Could not load that template.');
 		} finally {
@@ -543,9 +551,9 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	}
 
 	private applyTemplateDetail(detail: EmailTemplateDetail): void {
-		this.currentTemplate = detail.template;
-		this.revisions = detail.revisions;
-		this.selectedRevisionId = detail.template.currentRevisionId;
+		this.currentTemplate.set(detail.template);
+		this.revisions.set(detail.revisions);
+		this.selectedRevisionId.set(detail.template.currentRevisionId);
 		this.form.controls['key'].setValue(detail.template.key);
 		this.form.controls['key'].disable();
 		this.form.controls['language'].setValue(
@@ -567,7 +575,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		this.form.controls['subjectPart'].setValue(detail.template.subjectPart);
 		this.form.controls['notes'].setValue('');
 		this.testEmailForm.reset({ recipientEmail: '' });
-		this.html = detail.currentHtml ?? '';
+		this.html.set(detail.currentHtml ?? '');
 		this.setFieldMappings(detail.template.fieldMappings);
 		this.applyRevisionExtras(detail.template);
 		this.reconcileFieldMappings();
@@ -587,11 +595,11 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		return this.savedContent !== this.draftSignature();
 	}
 	private draftSignature(): string {
-		return JSON.stringify([this.html, this.form.getRawValue()]);
+		return JSON.stringify([this.html(), this.form.getRawValue()]);
 	}
 	private contentSignature(): string {
 		return JSON.stringify([
-			this.html,
+			this.html(),
 			this.form.controls['subjectPart'].value,
 			this.form.controls['textPart'].value,
 			this.fieldDefinitions(),
@@ -655,7 +663,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	}
 	private async confirmImport(): Promise<boolean> {
 		if (
-			!this.html &&
+			!this.html() &&
 			!this.form.controls['subjectPart'].value &&
 			!this.form.dirty
 		)
@@ -683,13 +691,13 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		} else this.applyImportedDraft(draft);
 	}
 	private applyImportedDraft(draft: SaveEmailTemplateRevisionRequest): void {
-		this.currentTemplate = undefined;
-		this.revisions = [];
-		this.selectedRevisionId = undefined;
-		this.isCreateMode$.next(true);
+		this.currentTemplate.set(undefined);
+		this.revisions.set([]);
+		this.selectedRevisionId.set(undefined);
+		this.isCreateMode.set(true);
 		this.form.enable();
 		this.form.patchValue({ ...draft, seasonalDetailsReviewed: false });
-		this.html = draft.html;
+		this.html.set(draft.html);
 		this.setFieldMappings(draft.fieldMappings);
 		this.invalidateReview();
 		this.refreshPreview();
@@ -700,7 +708,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			const content =
 				format === 'json'
 					? serializeTemplatePackage(this.buildSavePayload())
-					: this.html;
+					: this.html();
 			if (format === 'html') validateTemplateHtml(content);
 			const url = URL.createObjectURL(
 				new Blob([content], {
@@ -726,7 +734,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 	private buildSavePayload(): SaveEmailTemplateRevisionRequest {
 		return {
 			key: this.form.controls['key'].value,
-			createOnly: this.isCreateMode$.value,
+			createOnly: this.isCreateMode(),
 			language: this.form.controls['language'].value,
 			textPart: this.form.controls['textPart'].value,
 			seasonalReviewRequired:
@@ -739,7 +747,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			description: this.form.controls['description'].value,
 			awsTemplateName: this.form.controls['awsTemplateName'].value,
 			subjectPart: this.form.controls['subjectPart'].value,
-			html: this.html,
+			html: this.html(),
 			fieldMappings: this.fieldDefinitions(),
 			notes: this.form.controls['notes'].value,
 		};
@@ -768,7 +776,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 
 	private reconcileFieldMappings(): void {
 		const merged = mergeTemplateFieldDefinitions(
-			this.html + '\n' + this.form.controls['textPart'].value,
+			this.html() + '\n' + this.form.controls['textPart'].value,
 			this.form.controls['subjectPart'].value,
 			this.fieldDefinitions(),
 		);

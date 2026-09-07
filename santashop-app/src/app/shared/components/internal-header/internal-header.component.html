@@ -6,7 +6,7 @@
 				class="sm-logo"
 				alt="logo with santa claus"
 			/>
-			@if (user$ | async; as user) {
+			@if (user(); as user) {
 				<h2 class="user-greeting">
 					<strong>
 						{{ user.displayName }}

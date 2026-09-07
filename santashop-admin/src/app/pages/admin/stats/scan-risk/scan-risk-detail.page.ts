@@ -1,6 +1,6 @@
 import { EventDatePipe } from '@santashop/core/admin';
-import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import {
@@ -29,7 +29,6 @@ import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 	styleUrls: ['./scan-risk.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		EventDatePipe,
 		HeaderComponent,
 		IonButton,
@@ -46,7 +45,7 @@ export class ScanRiskDetailPage {
 	private readonly programYear = inject(PROGRAM_YEAR);
 
 	private readonly refreshTrigger = new BehaviorSubject<void>(undefined);
-	public readonly state$ = combineLatest([
+	private readonly state$ = combineLatest([
 		this.route.paramMap,
 		this.refreshTrigger,
 	]).pipe(
@@ -66,6 +65,11 @@ export class ScanRiskDetailPage {
 			),
 		),
 	);
+	public readonly state = toSignal(this.state$, {
+		initialValue: {
+			status: 'loading' as const,
+		},
+	});
 
 	public refresh(): void {
 		this.refreshTrigger.next();

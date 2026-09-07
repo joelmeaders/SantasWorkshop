@@ -136,6 +136,13 @@ describe('functions index exports', () => {
 		expect(sendNewRegistrationEmailsMock).toHaveBeenCalledWith(snapshot, {
 			eventId: 'emulator-event',
 		});
+		expect(trigger.options).toMatchObject({
+			document: 'tmp_registrationemails/{docId}',
+			retry: true,
+			concurrency: 5,
+			maxInstances: 2,
+			timeoutSeconds: 120,
+		});
 		expect(trigger.options).not.toHaveProperty('secrets');
 	});
 

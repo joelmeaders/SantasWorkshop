@@ -19,7 +19,7 @@
 			</ion-text>
 		</ion-card-header>
 		<ion-card-content>
-			@if (currentSlot; as slot) {
+			@if (currentSlotValue(); as slot) {
 				<ion-text>
 					<h2>
 						{{
@@ -50,7 +50,7 @@
 		</ion-list-header>
 
 		<ion-accordion-group [multiple]="true">
-			@for (day of availableDays$ | async; track day) {
+			@for (day of availableDays(); track day) {
 				<ion-accordion [value]="day">
 					<ion-item slot="header">
 						<ion-label>
@@ -66,7 +66,7 @@
 					</ion-item>
 					<ion-list slot="content">
 						@for (
-							slot of availableSlotsByDay$(day) | async;
+							slot of availableSlotsByDay(day);
 							track slot.id
 						) {
 							<ion-item

@@ -2,9 +2,9 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	inject,
-	OnDestroy,
+	signal,
 } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { config } from '../../config';
 
 import { LanguageToggleComponent } from '../shared/components/language-toggle/language-toggle.component';
@@ -37,10 +37,9 @@ import {
 	ErrorHandlerService,
 	newAuthForm,
 } from '@santashop/core/customer';
-import { AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { Auth, IError } from '@santashop/models';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-home',
@@ -48,7 +47,6 @@ import { map, shareReplay, takeUntil } from 'rxjs/operators';
 	styleUrls: ['home.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		AsyncPipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -71,7 +69,7 @@ import { map, shareReplay, takeUntil } from 'rxjs/operators';
 		TranslateModule,
 	],
 })
-export class HomePage implements OnDestroy {
+export class HomePage {
 	private readonly appState = inject(AppStateService);
 	private readonly authService = inject(AuthService);
 	private readonly errorHandler = inject(ErrorHandlerService);
@@ -79,35 +77,28 @@ export class HomePage implements OnDestroy {
 	private readonly route = inject(ActivatedRoute);
 	private readonly router = inject(Router);
 	private readonly translate = inject(TranslateService);
-	private readonly destroy$ = new Subject<void>();
-	private readonly resetEmailSent = new BehaviorSubject<boolean>(false);
-
 	public readonly environmentName = `${config.name}_${config.label}`;
 	public readonly environmentVersion = config.version;
 
-	public readonly createAccountEnabled$ = this.appState.createAccountEnabled$;
+	public readonly createAccountEnabled = toSignal(
+		this.appState.createAccountEnabled$,
+		{ initialValue: undefined },
+	);
 	public readonly signInForm = newAuthForm();
 	public readonly resetEmail = new FormControl('', {
 		nonNullable: true,
 		validators: [Validators.required, Validators.email],
 	});
-	public readonly resetEmailSent$ = this.resetEmailSent.asObservable();
-	public readonly mode$ = this.route.queryParamMap.pipe(
+	public readonly resetEmailSent = signal(false);
+	public readonly mode = toSignal(this.route.queryParamMap.pipe(
 		map((params) => {
 			const mode = params.get('mode');
 			return mode === 'sign-in' || mode === 'reset' ? mode : 'choose';
 		}),
-		takeUntil(this.destroy$),
-		shareReplay(1),
-	);
+	), { initialValue: 'choose' as const });
 
 	constructor() {
 		addIcons({ arrowBackSharp, logoFacebook, logoInstagram });
-	}
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	public async onSignIn(): Promise<void> {
@@ -143,10 +134,10 @@ export class HomePage implements OnDestroy {
 		if (this.resetEmail.invalid) return;
 		try {
 			await this.authService.resetPassword(this.resetEmail.value);
-			this.resetEmailSent.next(true);
+			this.resetEmailSent.set(true);
 		} catch (error) {
 			if ((error as IError)?.code?.toLowerCase() === 'auth/user-not-found') {
-				this.resetEmailSent.next(true);
+				this.resetEmailSent.set(true);
 				return;
 			}
 
@@ -163,6 +154,6 @@ export class HomePage implements OnDestroy {
 
 	public resetPasswordForm(): void {
 		this.resetEmail.reset();
-		this.resetEmailSent.next(false);
+		this.resetEmailSent.set(false);
 	}
 }

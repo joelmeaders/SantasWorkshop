@@ -49,7 +49,7 @@ After the rebase, all 310 Functions, 154 customer, and 301 admin unit tests pass
 
 All six HTML and plain-text templates now include the mission, “A Toy for Every Girl & Boy,” translated as “Un juguete para cada niña y niño” in Spanish. The HTML places it directly below the logo.
 
-Confirmation and reminder QR images now use 432 × 432 pixels, twice the previous 216 × 216 dimensions. They scale down proportionally on small screens. Rendered measurements were 432 × 432 at an 800px viewport and 296 × 296 at a 360px viewport. All six desktop/mobile render and images-blocked checks passed. Cancellation templates still contain no QR ticket. Full application suites were not rerun for this content and sizing change.
+Confirmation and reminder QR images now use 432 × 432 pixels, twice the previous 216 × 216 dimensions. They scale down proportionally on small screens. Rendered measurements were 432 × 432 at an 800px viewport and 296 × 296 at a 360px viewport. All six desktop/mobile render and images-blocked checks passed. Cancellation templates still contain no QR ticket, but the customer's QR artifact remains stable across cancellation. Full application suites were not rerun for this content and sizing change.
 
 ## PR bundle-check repair
 

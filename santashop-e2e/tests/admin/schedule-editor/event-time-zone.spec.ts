@@ -6,6 +6,7 @@ import {
 	scheduleSlot,
 	signInAdminViaUi,
 } from '../../../fixtures/admin-helpers';
+import { e2eDate, e2eDateTime } from '../../../fixtures/season';
 
 test.describe('schedule editor outside Denver', () => {
 	test.use({ timezoneId: 'Asia/Tokyo' });
@@ -24,7 +25,7 @@ test.describe('schedule editor outside Denver', () => {
 		await seedDateTimeSlots([
 			scheduleSlot({
 				id: 'denver-slot',
-				dateTime: '2026-12-12T17:00:00.000Z',
+				dateTime: e2eDateTime(12, 12, 17),
 			}),
 		]);
 		await signInAdminViaUi(page, account);
@@ -32,16 +33,16 @@ test.describe('schedule editor outside Denver', () => {
 		const row = page.locator('#scheduleRow-denver-slot');
 		await expect(row).toContainText('10AM - 11AM');
 		await expect(page.locator('#slotDate-denver-slot input')).toHaveValue(
-			'2026-12-12',
+			e2eDate(12, 12),
 		);
-		await fillIonicInput(page, '#slotDate-denver-slot', '2026-12-13');
+		await fillIonicInput(page, '#slotDate-denver-slot', e2eDate(12, 13));
 		await page.locator('#saveTimeSlot-denver-slot').click();
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Updated schedule time slot.',
 		);
 		await page.reload();
 		await expect(page.locator('#slotDate-denver-slot input')).toHaveValue(
-			'2026-12-13',
+			e2eDate(12, 13),
 		);
 		await expect(row).toContainText('10AM - 11AM');
 	});

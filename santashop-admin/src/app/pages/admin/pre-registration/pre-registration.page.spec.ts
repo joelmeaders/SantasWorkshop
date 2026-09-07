@@ -15,7 +15,7 @@ import {
 	FireRepoLite,
 	FunctionsWrapper,
 } from '@santashop/core/admin/firestore';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 import { SearchService } from '../search/search.service';
 
 describe('PreRegistrationPage', () => {
@@ -101,9 +101,10 @@ describe('PreRegistrationPage', () => {
 	});
 
 	it('normalizes and sorts available slots while keeping stable slot identifiers', async () => {
-		await expect(
-			firstValueFrom(component.availableSlots$),
-		).resolves.toMatchObject([{ id: 'early' }, { id: 'late' }]);
+		expect(component.availableSlots()).toMatchObject([
+			{ id: 'early' },
+			{ id: 'late' },
+		]);
 		expect(component.slotIndex(0, { id: 'early' } as never)).toBe('early');
 		expect(component.slotIndex(0, {} as never)).toBe('');
 	});
@@ -116,28 +117,38 @@ describe('PreRegistrationPage', () => {
 		modal.onDidDismiss.mockResolvedValue({ data: 'School flyer' });
 
 		await component.chooseReferral();
+		await fixture.whenStable();
 
-		await expect(
-			firstValueFrom(component.children$),
-		).resolves.toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(component.children()).toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(fixture.nativeElement.textContent).toContain('Noah');
 		expect(component.form.controls['referredBy'].value).toBe(
 			'School flyer',
 		);
-		await expect(firstValueFrom(component.chosenReferrer$)).resolves.toBe(
-			'School flyer',
-		);
+		expect(component.chosenReferrer()).toBe('School flyer');
 	});
 
-	it('blocks an existing customer and displays the duplicate-account warning', async () => {
-		component.form.controls['emailAddress'].setValue('family@example.test');
+	it('blocks duplicate registration before loading or invoking the callable', async () => {
+		component.form.patchValue({
+			firstName: 'Ada',
+			emailAddress: 'family@example.test',
+		});
 		searchUsersByEmailAddress.mockReturnValue(of([{ uid: 'customer-1' }]));
 
-		await expect(component.checkIfCustomerExists()).resolves.toBe(true);
+		await component.register();
+
+		expect(searchUsersByEmailAddress).toHaveBeenCalledWith(
+			'family@example.test',
+		);
 		expect(createAlert).toHaveBeenCalledWith(
 			expect.objectContaining({
+				header: 'Error registering',
 				subHeader: 'This customer already has an account.',
 			}),
 		);
+		expect(createAlert).toHaveBeenCalledTimes(1);
+		expect(createLoading).not.toHaveBeenCalled();
+		expect(callable).not.toHaveBeenCalled();
+		expect(component.form.controls['firstName'].value).toBe('Ada');
 	});
 
 	it('submits a new registration, resets the form, and confirms completion', async () => {
@@ -193,17 +204,19 @@ describe('PreRegistrationPage', () => {
 
 		await component.register();
 
+		expect(callable).toHaveBeenCalledOnce();
 		expect(createAlert).toHaveBeenCalledWith(
 			expect.objectContaining({
 				header: 'Error registering',
 				message: 'Callable unavailable',
 			}),
 		);
+		expect(createAlert).not.toHaveBeenCalledWith(
+			expect.objectContaining({ header: 'Registration Complete' }),
+		);
 		expect(createAlert).toHaveBeenCalledTimes(1);
 		expect(loading.dismiss).toHaveBeenCalledOnce();
 		expect(component.form.controls['firstName'].value).toBe('Ada');
-		await expect(firstValueFrom(component.children$)).resolves.toHaveLength(
-			1,
-		);
+		expect(component.children()).toHaveLength(1);
 	});
 });

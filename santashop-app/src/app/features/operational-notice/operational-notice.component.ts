@@ -4,7 +4,7 @@ import {
 	Input,
 	inject,
 } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AppStateService } from '@santashop/core/customer';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { IonContent, IonIcon } from '@ionic/angular/standalone';
@@ -22,7 +22,7 @@ export type OperationalNoticeMode =
 	templateUrl: './operational-notice.component.html',
 	styleUrls: ['./operational-notice.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [AsyncPipe, TranslateModule, IonContent, IonIcon],
+	imports: [TranslateModule, IonContent, IonIcon],
 })
 export class OperationalNoticeComponent {
 	private readonly appState = inject(AppStateService);
@@ -40,7 +40,7 @@ export class OperationalNoticeComponent {
 				return 'assets/images/registration-closed.png';
 		}
 	}
-	public readonly message$ = this.appState.messageDoc$.pipe(
+	public readonly message = toSignal(this.appState.messageDoc$.pipe(
 		map((doc) => {
 			const message =
 				this.translate.getCurrentLang() === 'en'
@@ -48,7 +48,7 @@ export class OperationalNoticeComponent {
 					: doc.messageEs;
 			return message?.length ? message : null;
 		}),
-	);
+	), { initialValue: null });
 
 	constructor() {
 		addIcons({ logoFacebook, logoInstagram });

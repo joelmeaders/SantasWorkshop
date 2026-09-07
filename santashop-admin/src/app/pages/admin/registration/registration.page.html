@@ -113,7 +113,7 @@
 					</ion-button>
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
-					<ion-label> {{ chosenReferrer$ | async }} </ion-label>
+					<ion-label> {{ chosenReferrer() }} </ion-label>
 				</ion-item>
 				@if (!form.controls['referral'].value) {
 				<ion-note color="danger" slot="error" class="error-note">
@@ -123,7 +123,7 @@
 			</form>
 
 			<div class="margin-top">
-				@if (children$ | async; as children) {
+				@if (children(); as children) {
 				<admin-manage-children
 					[children]="children"
 					(adddedChild)="addChild($event)"
@@ -144,7 +144,7 @@
 				button
 				color="success"
 				class="confirm-button"
-				[disabled]="form.invalid || !(children$ | async)?.length"
+				[disabled]="form.invalid || !children().length"
 				(click)="checkIn()"
 			>
 				<ion-label>

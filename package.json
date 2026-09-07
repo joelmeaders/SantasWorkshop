@@ -1,6 +1,6 @@
 {
   "name": "santasworkshop",
-  "version": "2026.09.0-beta.1",
+  "version": "2026.09.0-beta.2",
   "author": "Joel Meaders",
   "private": true,
   "scripts": {
@@ -67,8 +67,8 @@
     "e2e:browser:setup:ci": "pnpm --filter @santashop/e2e exec playwright install --with-deps chromium",
     "test:browser:setup": "pnpm exec playwright install chromium",
     "ci:core:test": "pnpm --filter @santashop/core test",
-    "ci:app:test": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && pnpm --filter @santashop/app test",
-    "ci:admin:test": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && pnpm --filter @santashop/admin test",
+    "ci:app:test": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && pnpm --filter @santashop/app test && pnpm run ci:storybook",
+    "ci:admin:test": "pnpm --filter @santashop/models build && pnpm --filter @santashop/core build:prod && pnpm --filter @santashop/admin test && pnpm run ci:storybook",
     "e2e:test": "pnpm run e2e:test:app && pnpm run e2e:test:admin",
     "e2e:test:app": "pnpm run e2e:prepare:app && concurrently -k -s first -n \"APP,TESTS\" -c \"blue,green\" \"pnpm run e2e:serve:app\" \"pnpm run e2e:emulators:exec:app\"",
     "e2e:test:admin": "pnpm run e2e:prepare:admin && concurrently -k -s first -n \"ADMIN,TESTS\" -c \"blue,green\" \"pnpm run e2e:serve:admin\" \"pnpm run e2e:emulators:exec:admin\"",

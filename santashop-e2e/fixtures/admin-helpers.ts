@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
 import type { E2eAdminSeedUser, E2eSeedDateTimeSlot } from './test-fixtures';
+import { E2E_PROGRAM_YEAR } from './season';
 
 export const defaultAdminAccount = (
 	overrides: Partial<E2eAdminSeedUser> = {},
@@ -120,7 +121,7 @@ export const scheduleSlot = (
 
 	return {
 		id,
-		programYear: 2026,
+		programYear: E2E_PROGRAM_YEAR,
 		dateTime,
 		maxSlots: 10,
 		slotsReserved: 0,

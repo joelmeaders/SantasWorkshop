@@ -4,6 +4,7 @@ import {
 	scheduleSlot,
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
+import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
 
 test.describe('admin data freshness', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
@@ -17,9 +18,9 @@ test.describe('admin data freshness', () => {
 		seedScheduleStats,
 	}) => {
 		await seedScheduleStats({
-			programYear: 2026,
+				programYear: E2E_PROGRAM_YEAR,
 			dateTimeCounts: [
-				{ dateTime: '2026-12-12T16:00:00.000Z', count: 2 },
+				{ dateTime: e2eDateTime(12, 12, 16), count: 2 },
 			],
 		});
 		await signInAdminViaUi(page, defaultAdminAccount());
@@ -28,9 +29,9 @@ test.describe('admin data freshness', () => {
 			'2',
 		);
 		await seedScheduleStats({
-			programYear: 2026,
+				programYear: E2E_PROGRAM_YEAR,
 			dateTimeCounts: [
-				{ dateTime: '2026-12-12T16:00:00.000Z', count: 9 },
+				{ dateTime: e2eDateTime(12, 12, 16), count: 9 },
 			],
 		});
 		await expect(page.locator('.count-container h1').first()).toHaveText(
@@ -57,8 +58,8 @@ test.describe('admin data freshness', () => {
 		).toBeVisible();
 		await seedReportingStats({
 			checkIn: {
-				programYear: 2026,
-				lastUpdated: '2026-12-12T18:00:00.000Z',
+				programYear: E2E_PROGRAM_YEAR,
+				lastUpdated: e2eDateTime(12, 12, 18),
 				dateTimeCount: [
 					{
 						date: 12,
@@ -97,7 +98,7 @@ test.describe('admin data freshness', () => {
 		).toBeVisible();
 		await seedReportingStats({
 			user: {
-				programYear: 2026,
+				programYear: E2E_PROGRAM_YEAR,
 				totalUsers: 4,
 				referrerCount: [{ referrer: 'SNAP', count: 4 }],
 				zipCodeCount: [{ zip: '80202', count: 4 }],
@@ -147,8 +148,8 @@ test.describe('admin data freshness', () => {
 					firstName: 'Refresh',
 					lastName: 'Family',
 					emailAddress: 'refresh@example.com',
-					firstRiskOn: '2026-12-12T18:00:00.000Z',
-					latestRiskOn: '2026-12-12T18:00:00.000Z',
+					firstRiskOn: e2eDateTime(12, 12, 18),
+					latestRiskOn: e2eDateTime(12, 12, 18),
 					totalRiskAttemptCount: 1,
 					lateDuplicateAttemptCount: 1,
 				},
@@ -167,8 +168,8 @@ test.describe('admin data freshness', () => {
 				{
 					id: 'refresh-attempt',
 					customerId: 'refresh-customer',
-					scannedOn: '2026-12-12T18:00:00.000Z',
-					priorEventOn: '2026-12-12T16:00:00.000Z',
+					scannedOn: e2eDateTime(12, 12, 18),
+					priorEventOn: e2eDateTime(12, 12, 16),
 					outcome: 'duplicate-risk',
 				},
 			],
@@ -232,7 +233,7 @@ test.describe('admin data freshness', () => {
 	}) => {
 		const slot = scheduleSlot({
 			id: 'picker-slot',
-			dateTime: '2026-12-12T10:00:00',
+			dateTime: e2eDateTime(12, 12, 10),
 		});
 		await seedDateTimeSlots([slot]);
 		await signInAdminViaUi(page, defaultAdminAccount());
@@ -252,7 +253,7 @@ test.describe('admin data freshness', () => {
 			emailAddress: 'picker@example.com',
 			zipCode: '80202',
 			code: 'LIVEPICK',
-			dateTime: '2026-12-12T17:00:00.000Z',
+			dateTime: e2eDateTime(12, 12, 17),
 		});
 		await page.goto('/admin/checkin/review;qrcode=LIVEPICK');
 		await page
@@ -276,7 +277,7 @@ test.describe('admin data freshness', () => {
 	}) => {
 		const slot = scheduleSlot({
 			id: 'live-slot',
-			dateTime: '2026-12-12T10:00:00',
+			dateTime: e2eDateTime(12, 12, 10),
 			maxSlots: 10,
 		});
 		await seedDateTimeSlots([slot]);

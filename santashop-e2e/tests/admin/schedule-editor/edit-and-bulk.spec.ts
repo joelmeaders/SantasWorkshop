@@ -7,6 +7,7 @@ import {
 	scheduleSlot,
 	signInAdminViaUi,
 } from '../../../fixtures/admin-helpers';
+import { e2eDate, e2eDateTime, e2eDateLabel } from '../../../fixtures/season';
 
 test.describe('admin schedule editor - edit and bulk update', () => {
 	test.beforeEach(
@@ -20,8 +21,8 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 			await seedPublicParams({});
 			await seedAdminUser(defaultAdminAccount());
 			await seedDateTimeSlots([
-				scheduleSlot({ id: 'slot-1', dateTime: '2026-12-12T10:00:00' }),
-				scheduleSlot({ id: 'slot-2', dateTime: '2026-12-12T11:00:00' }),
+				scheduleSlot({ id: 'slot-1', dateTime: e2eDateTime(12, 12, 10) }),
+				scheduleSlot({ id: 'slot-2', dateTime: e2eDateTime(12, 12, 11) }),
 			]);
 		},
 	);
@@ -84,14 +85,16 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 		// Act
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
-		await fillIonicInput(page, '#slotDate-slot-1', '2026-12-13');
+		await fillIonicInput(page, '#slotDate-slot-1', e2eDate(12, 13));
 		await page.click('#saveTimeSlot-slot-1');
 
 		// Assert
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Updated schedule time slot.',
 		);
-		await expect(page.locator('text=Sunday, Dec 13, 2026')).toBeVisible();
+		await expect(
+			page.getByText(e2eDateLabel(e2eDateTime(12, 13, 10)), { exact: false }),
+		).toBeVisible();
 		await expect(page.locator('#scheduleRow-slot-1')).toContainText(
 			'3AM - 4AM',
 		);

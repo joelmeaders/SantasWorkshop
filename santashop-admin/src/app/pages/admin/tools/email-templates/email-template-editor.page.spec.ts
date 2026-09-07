@@ -173,9 +173,9 @@ describe('EmailTemplateEditorPage', () => {
 
 	it('loads a selected historical revision into the editable draft', async () => {
 		await component.ionViewWillEnter();
-		const revision = component.revisions[0];
+		const revision = component.revisions()[0];
 		emailTemplateService.getEmailTemplateRevision.mockResolvedValue({
-			template: requireDefined(component.currentTemplate),
+			template: requireDefined(component.currentTemplate()),
 			revision: {
 				...revision,
 				id: 'rev-2',
@@ -193,11 +193,11 @@ describe('EmailTemplateEditorPage', () => {
 			key: 'registration-confirmation',
 			revisionId: 'rev-1',
 		});
-		expect(component.selectedRevisionId).toBe('rev-2');
+		expect(component.selectedRevisionId()).toBe('rev-2');
 		expect(component.form.controls['subjectPart'].value).toBe(
 			'Updated {{firstName}}',
 		);
-		expect(component.html).toBe('<p>Updated {{firstName}}</p>');
+		expect(component.html()).toBe('<p>Updated {{firstName}}</p>');
 	});
 
 	it('normalizes field mappings to the selected delivery profile and refreshes preview HTML', async () => {
@@ -215,15 +215,17 @@ describe('EmailTemplateEditorPage', () => {
 		expect(component.previewHtml).toContain('Buddy');
 	});
 
-	it('saves a valid draft and updates the current template revision', async () => {
+	it('saves a valid draft and renders a new revision while remaining in edit mode', async () => {
 		await component.ionViewWillEnter();
+		await fixture.whenStable();
+		expect(component.isCreateMode()).toBe(false);
 		const template = {
-			...requireDefined(component.currentTemplate),
+			...requireDefined(component.currentTemplate()),
 			currentRevisionId: 'rev-2',
 			currentRevisionNumber: 2,
 		};
 		const revision = {
-			...component.revisions[0],
+			...component.revisions()[0],
 			id: 'rev-2',
 			revisionNumber: 2,
 		};
@@ -245,20 +247,22 @@ describe('EmailTemplateEditorPage', () => {
 				notes: 'Updated copy',
 			}),
 		);
-		expect(component.currentTemplate?.currentRevisionId).toBe('rev-2');
-		expect(component.revisions[0].id).toBe('rev-2');
+		expect(component.currentTemplate()?.currentRevisionId).toBe('rev-2');
+		expect(component.revisions()[0].id).toBe('rev-2');
+		await fixture.whenStable();
+		expect(fixture.nativeElement.textContent).toContain('Revision r2');
 	});
 
 	it('publishes the selected revision and marks it as current', async () => {
 		await component.ionViewWillEnter();
 		const template = {
-			...requireDefined(component.currentTemplate),
+			...requireDefined(component.currentTemplate()),
 			publishedRevisionId: 'rev-1',
 			publishedRevisionNumber: 1,
 		};
 		emailTemplateService.publishEmailTemplate.mockResolvedValue({
 			template,
-			revision: component.revisions[0],
+			revision: component.revisions()[0],
 			renderedHtml: '<h1>Hello Buddy</h1>',
 		});
 
@@ -268,7 +272,7 @@ describe('EmailTemplateEditorPage', () => {
 			key: 'registration-confirmation',
 			revisionId: 'rev-1',
 		});
-		expect(component.currentTemplate?.publishedRevisionId).toBe('rev-1');
+		expect(component.currentTemplate()?.publishedRevisionId).toBe('rev-1');
 	});
 
 	it('marks validation failures before attempting to send or save', async () => {
@@ -291,26 +295,26 @@ describe('EmailTemplateEditorPage', () => {
 
 		await component.ionViewWillEnter();
 
-		expect(component.isCreateMode$.value).toBe(true);
+		expect(component.isCreateMode()).toBe(true);
 		expect(component.form.controls['key'].enabled).toBe(true);
-		expect(component.revisions).toEqual([]);
+		expect(component.revisions()).toEqual([]);
 		expect(component.previewHtml).toBe('');
 	});
 
 	it('uses the published revision badge and shows service failures to the user', async () => {
 		await component.ionViewWillEnter();
-		component.currentTemplate = {
-			...requireDefined(component.currentTemplate),
+		component.currentTemplate.set({
+			...requireDefined(component.currentTemplate()),
 			publishedRevisionId: 'rev-1',
-		};
+		});
 		expect(
 			component.revisionBadgeColor(
-				requireDefined(component.revisions[0]),
+				requireDefined(component.revisions()[0]),
 			),
 		).toBe('success');
 		expect(
 			component.revisionBadgeColor({
-				...requireDefined(component.revisions[0]),
+				...requireDefined(component.revisions()[0]),
 				id: 'rev-2',
 			}),
 		).toBe('medium');
@@ -376,7 +380,7 @@ describe('EmailTemplateEditorPage', () => {
 
 	it('keeps unsaved HTML when an import is invalid or replacement is cancelled', async () => {
 		await component.ionViewWillEnter();
-		const html = component.html;
+		const html = component.html();
 		const alerts = TestBed.inject(
 			AlertController,
 		) as Mocked<AlertController>;
@@ -385,7 +389,7 @@ describe('EmailTemplateEditorPage', () => {
 			value: 'file',
 		};
 		await component.importFile({ target: input } as unknown as Event);
-		expect(component.html).toBe(html);
+		expect(component.html()).toBe(html);
 		expect(alerts.create).toHaveBeenCalledWith(
 			expect.objectContaining({ header: 'Something went wrong' }),
 		);
@@ -397,7 +401,7 @@ describe('EmailTemplateEditorPage', () => {
 			new File(['<p>Replacement {{firstName}}</p>'], 'valid.html'),
 		];
 		await component.importFile({ target: input } as unknown as Event);
-		expect(component.html).toBe(html);
+		expect(component.html()).toBe(html);
 	});
 
 	it('imports confirmed HTML, retains metadata, and detects new placeholders', async () => {
@@ -417,7 +421,7 @@ describe('EmailTemplateEditorPage', () => {
 			value: 'file',
 		};
 		await component.importFile({ target: input } as unknown as Event);
-		expect(component.html).toBe('<p>{{firstName}}: {{dateTime}}</p>');
+		expect(component.html()).toBe('<p>{{firstName}}: {{dateTime}}</p>');
 		expect(component.form.controls['key'].value).toBe(key);
 		expect(component.fieldMappings.value).toEqual(
 			expect.arrayContaining([

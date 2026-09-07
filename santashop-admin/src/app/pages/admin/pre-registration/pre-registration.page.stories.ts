@@ -1,6 +1,10 @@
 import { type Meta, type StoryObj } from '@storybook/angular-vite';
-import { expect, userEvent, within } from 'storybook/test';
-import { adminStoryDecorators } from '../../../../../../.storybook/admin/admin-story.providers';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import {
+	adminStoryDecorators,
+	demoChildren,
+	getAdminStoryComponent,
+} from '../../../../../../.storybook/admin/admin-story.providers';
 import { PreRegistrationPage } from './pre-registration.page';
 
 const meta = {
@@ -17,8 +21,20 @@ const meta = {
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
+		const component = getAdminStoryComponent<PreRegistrationPage>(
+			canvasElement,
+			'admin-pre-registration',
+		);
 		await expect(canvas.getByText('Reservation')).toBeVisible();
-		await expect(canvas.getByText('Add all children 11 years old or younger')).toBeVisible();
+		await expect(
+			canvas.getByText('Add all children 11 years old or younger'),
+		).toBeVisible();
+		await component.addChild(demoChildren[0]);
+		await expect(await canvas.findByText('Ava Rivera')).toBeVisible();
+		await component.removeChild(demoChildren[0].id);
+		await waitFor(() =>
+			expect(canvas.queryByText('Ava Rivera')).not.toBeInTheDocument(),
+		);
 		await userEvent.click(canvas.getByText('Pick Agency'));
 		await expect(canvas.getByText('Pick a date and time')).toBeVisible();
 	},

@@ -7,6 +7,7 @@ import {
 	scheduleSlot,
 	signInAdminViaUi,
 } from '../../../fixtures/admin-helpers';
+import { e2eDateTime } from '../../../fixtures/season';
 
 test.describe('admin schedule editor - status and delete', () => {
 	test.beforeEach(
@@ -22,20 +23,20 @@ test.describe('admin schedule editor - status and delete', () => {
 			await seedDateTimeSlots([
 				scheduleSlot({
 					id: 'slot-at-capacity',
-					dateTime: '2026-12-12T10:00:00',
+					dateTime: e2eDateTime(12, 12, 10),
 					maxSlots: 5,
 					slotsReserved: 5,
 				}),
 				scheduleSlot({
 					id: 'slot-over-capacity',
-					dateTime: '2026-12-12T11:00:00',
+					dateTime: e2eDateTime(12, 12, 11),
 					maxSlots: 5,
 					slotsReserved: 7,
 					enabled: false,
 				}),
 				scheduleSlot({
 					id: 'slot-delete-me',
-					dateTime: '2026-12-12T12:00:00',
+					dateTime: e2eDateTime(12, 12, 12),
 					maxSlots: 8,
 					slotsReserved: 2,
 				}),

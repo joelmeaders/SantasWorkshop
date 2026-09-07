@@ -2,6 +2,17 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.09.0-beta.2] - Unreleased
+
+### Added
+
+- Add shared season setup for deterministic registration windows.
+- Expand public and admin browser assertions for access controls, check-in, registration, reporting, scheduling, email templates, and refresh behavior.
+
+### Changed
+
+- Improve test isolation, fixture reuse, failure artifacts, and workflow path coverage.
+
 ## [2026.09.0-alpha.2] - Unreleased
 
 ### Added

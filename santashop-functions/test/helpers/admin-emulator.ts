@@ -1,17 +1,39 @@
 import type { App } from 'firebase-admin/app';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore, Timestamp } from 'firebase-admin/firestore';
-import { COLLECTION_SCHEMA } from '@santashop/models';
 import admin from '../../src/firebase-admin';
 
 const DEFAULT_TEST_PASSWORD = ['Unit', 'Test', '123!'].join('');
 
+const EMULATOR_HOST_ENV_VARS = [
+	'FIRESTORE_EMULATOR_HOST',
+	'FIREBASE_AUTH_EMULATOR_HOST',
+	'FIREBASE_STORAGE_EMULATOR_HOST',
+] as const;
+
+const isLoopbackEndpoint = (value: string | undefined): boolean =>
+	/^(?:127\.0\.0\.1|::1|\[::1\]):\d+$/u.test(value ?? '');
+
+const assertEmulatorEnvironment = (): void => {
+	if (
+		EMULATOR_HOST_ENV_VARS.every((name) =>
+			isLoopbackEndpoint(process.env[name]),
+		)
+	) {
+		return;
+	}
+
+	throw new Error(
+		'Integration helpers require Firestore, Auth, and Storage emulators.',
+	);
+};
+
 export const getAdminApp = (): App => {
+	assertEmulatorEnvironment();
 	return admin.app();
 };
 
-export const getFirestore = (): Firestore =>
-	getAdminApp().firestore();
+export const getFirestore = (): Firestore => getAdminApp().firestore();
 
 export const getAuth = (): Auth => getAdminApp().auth();
 
@@ -19,21 +41,23 @@ export const seedQrCode = async (
 	storagePath: string,
 	contents = 'integration-test-qr',
 ): Promise<void> => {
-	await getAdminApp().storage().bucket().file(storagePath).save(contents, {
-		contentType: 'image/png',
-		resumable: false,
-		metadata: {
-			cacheControl: 'no-store, max-age=0, must-revalidate',
+	await getAdminApp()
+		.storage()
+		.bucket()
+		.file(storagePath)
+		.save(contents, {
+			contentType: 'image/png',
+			resumable: false,
 			metadata: {
-				firebaseStorageDownloadTokens: 'integration-download-token',
+				cacheControl: 'no-store, max-age=0, must-revalidate',
+				metadata: {
+					firebaseStorageDownloadTokens: 'integration-download-token',
+				},
 			},
-		},
-	});
+		});
 };
 
-export const createTimestamp = (
-	date: Date | string,
-): Timestamp => {
+export const createTimestamp = (date: Date | string): Timestamp => {
 	const resolvedDate = typeof date === 'string' ? new Date(date) : date;
 	return admin.firestore.Timestamp.fromDate(resolvedDate);
 };
@@ -84,47 +108,25 @@ export const getCollectionCount = async (
 };
 
 export const clearEmulatorData = async (): Promise<void> => {
+	assertEmulatorEnvironment();
 	const db = getFirestore();
 	const auth = getAuth();
-	const collections = [
-		COLLECTION_SCHEMA.users,
-		COLLECTION_SCHEMA.registrations,
-		COLLECTION_SCHEMA.children,
-		COLLECTION_SCHEMA.dateTimeSlots,
-		COLLECTION_SCHEMA.parameters,
-		COLLECTION_SCHEMA.registrationSearchIndex,
-		COLLECTION_SCHEMA.tmpRegistrationEmails,
-		COLLECTION_SCHEMA.checkins,
-		COLLECTION_SCHEMA.cancellations,
-		COLLECTION_SCHEMA.editedRegistrations,
-		COLLECTION_SCHEMA.onSiteRegistrations,
-		COLLECTION_SCHEMA.stats,
-		COLLECTION_SCHEMA.registrationScanAttempts,
-		COLLECTION_SCHEMA.registrationScanRiskSummaries,
-	];
+	const collections = await db.listCollections();
 
-	for (const collectionName of collections) {
-		const snapshot = await db.collection(collectionName).get();
-		if (snapshot.empty) {
-			continue;
-		}
-
-		const batch = db.batch();
-		snapshot.docs.forEach((documentSnapshot) => {
-			batch.delete(documentSnapshot.ref);
-		});
-		await batch.commit();
+	for (const collection of collections) {
+		await db.recursiveDelete(collection);
 	}
 
-	const listUsersResult = await auth.listUsers();
-	await Promise.all(
-		listUsersResult.users.map((userRecord) =>
-			auth.deleteUser(userRecord.uid),
-		),
-	);
+	const users: string[] = [];
+	let pageToken: string | undefined;
+	do {
+		const listUsersResult = await auth.listUsers(1000, pageToken);
+		users.push(
+			...listUsersResult.users.map((userRecord) => userRecord.uid),
+		);
+		pageToken = listUsersResult.pageToken;
+	} while (pageToken);
+	await Promise.all(users.map((uid) => auth.deleteUser(uid)));
 
-	await getAdminApp().storage().bucket().deleteFiles({
-		prefix: 'registrations/',
-		force: true,
-	});
+	await getAdminApp().storage().bucket().deleteFiles({ force: true });
 };

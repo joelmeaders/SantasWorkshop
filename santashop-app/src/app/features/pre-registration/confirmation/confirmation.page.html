@@ -41,7 +41,7 @@
 							<div class="qr-frame">
 								<img
 									id="registrationQrCode"
-									[src]="viewService.qrCode$ | async"
+									[src]="qrCode()"
 									alt="Registration QR Code"
 									class="qr-code"
 								/>
@@ -115,7 +115,7 @@
 										</ion-text>
 										<br />
 									</p>
-									@if ( viewService.dateTimeSlot$ | async; as
+									@if ( dateTimeSlot(); as
 									slot ) {
 									<ion-text class="es-pd-bottom-md">
 										{{ slot.dateTime | localizedDate :
@@ -123,7 +123,7 @@
 										slot.dateTime | timeSlot }}
 									</ion-text>
 									<div class="es-mg-bottom-md">
-										@if (allowChangeRegistration$ | async) {
+										@if (allowChangeRegistration()) {
 										<ion-button
 											id="changeRegistrationButton"
 											fill="outline"
@@ -133,7 +133,7 @@
 											"CONFIRMATION.CHANGE_REGISTRATION_DATETIME"
 											| translate }}
 										</ion-button>
-										} @if (allowCancelRegistration$ | async)
+										} @if (allowCancelRegistration())
 										{
 										<ion-button
 											id="cancelRegistrationButton"
@@ -165,7 +165,7 @@
 										<br />
 									</p>
 								</ion-item>
-								@if ( viewService.children$ | async; as children
+								@if ( children(); as children
 								) { @for (child of children; track child) {
 								<ion-item
 									[class]="{

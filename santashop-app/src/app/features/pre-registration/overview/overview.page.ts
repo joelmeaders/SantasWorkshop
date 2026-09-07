@@ -4,11 +4,13 @@ import {
 	Component,
 	OnDestroy,
 	PLATFORM_ID,
+	computed,
 	inject,
 	signal,
 	viewChild,
 } from '@angular/core';
-import { isPlatformBrowser, AsyncPipe } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
 	AnalyticsWrapper,
@@ -20,13 +22,11 @@ import {
 	validateChild,
 } from '@santashop/core';
 import { COLLECTION_SCHEMA, Child, DateTimeSlot } from '@santashop/models';
-import { combineLatest, firstValueFrom, Subject } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
 	filter,
 	map,
-	shareReplay,
 	take,
-	takeUntil,
 	timeout,
 } from 'rxjs/operators';
 import { where } from 'firebase/firestore';
@@ -63,7 +63,6 @@ import { arrowDownCircleOutline } from 'ionicons/icons';
 		ChildrenCardComponent,
 		ScheduleCardComponent,
 		SubmitCardComponent,
-		AsyncPipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -83,22 +82,36 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	private readonly toastController = inject(ToastController);
 	private readonly translateService = inject(TranslateService);
 	private readonly platformId = inject(PLATFORM_ID);
-	private readonly destroy$ = new Subject<void>();
 	private readonly childrenCard = viewChild(ChildrenCardComponent);
 	private readonly scheduleCard = viewChild(ScheduleCardComponent);
 	private readonly submitCard = viewChild(SubmitCardComponent);
 
 	public readonly programYear = inject(PROGRAM_YEAR);
-	public readonly userRegistration$ =
-		this.preregistrationService.userRegistration$;
-	public readonly children$ = this.preregistrationService.children$;
-	public readonly childCount$ = this.preregistrationService.childCount$;
-	public readonly dateTimeSlot$ = this.preregistrationService.dateTimeSlot$;
-	public readonly registrationSubmitted$ =
-		this.preregistrationService.registrationSubmitted$;
-	public readonly emailAddress$ = this.userRegistration$.pipe(
-		map((registration) => registration?.emailAddress ?? ''),
-		shareReplay(1),
+	public readonly userRegistration = toSignal(
+		this.preregistrationService.userRegistration$,
+		{ initialValue: undefined },
+	);
+	public readonly children = toSignal(this.preregistrationService.children$, {
+		initialValue: [],
+	});
+	public readonly childCount = toSignal(
+		this.preregistrationService.childCount$,
+		{ initialValue: 0 },
+	);
+	public readonly dateTimeSlot = toSignal(
+		this.preregistrationService.dateTimeSlot$,
+		{ initialValue: undefined },
+	);
+	public readonly registrationSubmitted = toSignal(
+		this.preregistrationService.registrationSubmitted$,
+		{ initialValue: false },
+	);
+	private readonly noErrorsInChildren = toSignal(
+		this.preregistrationService.noErrorsInChildren$,
+		{ initialValue: false },
+	);
+	public readonly emailAddress = computed(
+		() => this.userRegistration()?.emailAddress ?? '',
 	);
 	public readonly isSaving = signal(false);
 	public readonly reviewing = signal(false);
@@ -107,30 +120,20 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		addIcons({ arrowDownCircleOutline });
 	}
 
-	public readonly canChooseDateTime$ = combineLatest([
-		this.childCount$,
-		this.preregistrationService.noErrorsInChildren$,
-	]).pipe(
-		map(([childCount, noErrors]) => childCount >= 1 && noErrors),
-		shareReplay(1),
+	public readonly canChooseDateTime = computed(
+		() => this.childCount() >= 1 && this.noErrorsInChildren(),
 	);
 
-	public readonly canSubmit$ = combineLatest([
-		this.canChooseDateTime$,
-		this.dateTimeSlot$,
-		this.registrationSubmitted$,
-	]).pipe(
-		map(
-			([canChooseDateTime, dateTimeSlot, submitted]) =>
-				canChooseDateTime && !!dateTimeSlot && !submitted,
-		),
-		shareReplay(1),
+	public readonly canSubmit = computed(
+		() =>
+			this.canChooseDateTime() &&
+			!!this.dateTimeSlot() &&
+			!this.registrationSubmitted(),
 	);
 
-	public readonly availableSlots$ = this.dateTimeSlotCollection()
+	public readonly availableSlots = toSignal(this.dateTimeSlotCollection()
 		.readMany([where('programYear', '==', this.programYear)], 'id')
 		.pipe(
-			takeUntil(this.destroy$),
 			map((slots) =>
 				slots
 					.map((slot) => ({
@@ -142,8 +145,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 							left.dateTime.valueOf() - right.dateTime.valueOf(),
 					),
 			),
-			shareReplay(1),
-		);
+		), { initialValue: undefined });
 
 	public ngAfterViewInit(): void {
 		if (!isPlatformBrowser(this.platformId)) return;
@@ -159,8 +161,6 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		if (isPlatformBrowser(this.platformId)) {
 			window.removeEventListener('hashchange', this.focusHashSection);
 		}
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	public async saveChild(request: ChildSaveRequest): Promise<void> {

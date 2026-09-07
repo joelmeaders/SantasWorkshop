@@ -8,7 +8,6 @@ import { provideRouter, Router } from '@angular/router';
 import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { CheckInContextService } from '../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../shared/services/check-in.service';
-import { firstValueFrom } from 'rxjs';
 
 describe('RegistrationPage', () => {
 	let component: RegistrationPage;
@@ -67,10 +66,12 @@ describe('RegistrationPage', () => {
 		modal.onDidDismiss.mockResolvedValue({ data: 'School flyer' });
 
 		await component.chooseReferral();
+		await fixture.whenStable();
 
-		await expect(firstValueFrom(component.children$)).resolves.toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(component.children()).toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(fixture.nativeElement.textContent).toContain('Noah');
 		expect(component.form.controls['referral'].value).toBe('School flyer');
-		await expect(firstValueFrom(component.chosenReferrer$)).resolves.toBe('School flyer');
+		expect(component.chosenReferrer()).toBe('School flyer');
 	});
 
 	it('registers an on-site family and routes a successful check-in to confirmation', async () => {
@@ -117,7 +118,7 @@ describe('RegistrationPage', () => {
 		component.ionViewWillLeave();
 
 		expect(component.form.controls['firstName'].value).toBeNull();
-		await expect(firstValueFrom(component.children$)).resolves.toEqual([]);
-		await expect(firstValueFrom(component.chosenReferrer$)).resolves.toBe('None Selected');
+		expect(component.children()).toEqual([]);
+		expect(component.chosenReferrer()).toBe('None Selected');
 	});
 });

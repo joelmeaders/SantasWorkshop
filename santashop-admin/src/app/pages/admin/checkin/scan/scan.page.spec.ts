@@ -124,11 +124,11 @@ describe('ScanPage', () => {
 	it('starts subscriptions on entry and deterministically stops them on leave', async () => {
 		component.ionViewWillEnter();
 
-		await expect(firstValueFrom(component.cameraEnabled$)).resolves.toBe(false);
+		expect(component.cameraEnabled()).toBe(false);
 
 		component.ionViewWillLeave();
 
-		await expect(firstValueFrom(component.cameraEnabled$)).resolves.toBe(false);
+		expect(component.cameraEnabled()).toBe(false);
 	});
 
 	it('resolves an eligible code, preserves the input method, and opens review', async () => {
@@ -262,9 +262,9 @@ describe('ScanPage', () => {
 		component.scanError.next(new Error('Camera unavailable'));
 		await fixture.whenStable();
 		expect(onScanError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Camera unavailable' }));
-		await expect(firstValueFrom(component.cameraEnabled$)).resolves.toBe(true);
+		expect(component.cameraEnabled()).toBe(true);
 
 		component.ionViewWillLeave();
-		await expect(firstValueFrom(component.cameraEnabled$)).resolves.toBe(false);
+		expect(component.cameraEnabled()).toBe(false);
 	});
 });

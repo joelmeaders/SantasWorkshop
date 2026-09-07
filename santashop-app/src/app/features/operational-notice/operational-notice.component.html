@@ -23,9 +23,9 @@
 			/>
 		</div>
 
-		@let message = message$ | async;
-		@if (message) {
-			<h2>{{ message }}</h2>
+		@let noticeMessage = message();
+		@if (noticeMessage) {
+			<h2>{{ noticeMessage }}</h2>
 		} @else {
 			<h2>
 				@switch (mode) {

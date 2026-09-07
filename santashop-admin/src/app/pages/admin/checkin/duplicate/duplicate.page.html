@@ -1,6 +1,6 @@
 <admin-header title="Scan Blocked" backRoute="/admin/checkin/scan" />
 
-@if (result$ | async; as result) {
+@if (result(); as result) {
 <ion-content
 	class="ion-padding blocked-scan"
 	[color]="result.disposition === 'duplicate-accidental' ? 'warning' : 'danger'"

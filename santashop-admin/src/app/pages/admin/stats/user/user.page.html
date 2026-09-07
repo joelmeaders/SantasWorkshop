@@ -12,7 +12,7 @@
 
 <ion-content class="ion-padding-vertical">
 	<ion-button fill="outline" (click)="refresh()">Refresh report</ion-button>
-	@if (state$ | async; as state) { @if (state.status === 'loading') {
+	@if (state(); as state) { @if (state.status === 'loading') {
 	<p role="status">Loading report…</p>
 	} @else if (state.status === 'error') {
 	<p role="alert">
@@ -23,7 +23,7 @@
 	} @else {
 	<ion-grid>
 		<ion-row>
-			@if (referrers$ | async; as referrers) {
+			@if (referrers(); as referrers) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
 				<ion-toolbar color="none" class="ion-padding-horizontal">
 					<h3 slot="start">Top 10 Referrers</h3>
@@ -39,7 +39,7 @@
 					></canvas>
 				</div>
 			</ion-col>
-			} @if (zipCodes$ | async; as zipCodes) {
+			} @if (zipCodes(); as zipCodes) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
 				<ion-toolbar color="none" class="ion-padding-horizontal">
 					<h3 slot="start">Top 10 Zip Codes</h3>

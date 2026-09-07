@@ -2,14 +2,11 @@ import { CustomerLanguageService } from '../../../core/services/customer-languag
 import {
 	ChangeDetectionStrategy,
 	Component,
-	OnDestroy,
 	inject,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
 
-import { AsyncPipe } from '@angular/common';
 import { IonText, IonToggle } from '@ionic/angular/standalone';
 
 @Component({
@@ -17,23 +14,15 @@ import { IonText, IonToggle } from '@ionic/angular/standalone';
 	templateUrl: './language-toggle.component.html',
 	styleUrls: ['./language-toggle.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [IonToggle, IonText, AsyncPipe, IonText, IonToggle],
+	imports: [IonToggle, IonText],
 })
-export class LanguageToggleComponent implements OnDestroy {
+export class LanguageToggleComponent {
 	private readonly translate = inject(TranslateService);
 	private readonly language = inject(CustomerLanguageService);
 
-	private readonly destroy$ = new Subject<void>();
-
-	public readonly currentLanguage$ = this.language.language$.pipe(
-		takeUntil(this.destroy$),
-		shareReplay(1),
-	);
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
+	public readonly currentLanguage = toSignal(this.language.language$, {
+		initialValue: 'en' as const,
+	});
 
 	public toggleLanguage(event: any): void {
 		const current = this.translate.getCurrentLang();

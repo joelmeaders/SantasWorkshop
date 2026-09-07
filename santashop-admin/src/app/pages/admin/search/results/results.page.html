@@ -2,11 +2,11 @@
 
 <ion-content class="ion-text-center">
 	<div class="limited-container">
-		@if ((searchInput$ | async) !== null) {
+		@if (searchInput() !== null) {
 		<ion-button fill="outline" (click)="refresh()"
 			>Refresh results</ion-button
 		>
-		} @if ((searchInput$ | async) === null) {
+		} @if (searchInput() === null) {
 		<h1>No search was entered</h1>
 		<ion-button
 			color="danger"
@@ -16,7 +16,7 @@
 		>
 			Go Back
 		</ion-button>
-		} @let results = searchResults$ | async; @if (results === null && (searchInput$ | async) !== null) {
+		} @let results = searchResults(); @if (results === null && searchInput() !== null) {
 		<div class="center-100 searching">
 			<ion-spinner name="crescent" aria-label="Searching for registrations" />
 			<p>Searching, please wait...</p>
@@ -29,7 +29,7 @@
 				Cancel
 			</ion-button>
 		</div>
-		} @else if (results === undefined && (searchInput$ | async) !== null) {
+		} @else if (results === undefined && searchInput() !== null) {
 		<p role="alert">
 			Search results could not be loaded. Select Refresh results to try
 			again.
@@ -41,7 +41,7 @@
 					{{ results!.length }} {{ results.length === 1 ? 'Result' :
 					'Results' }}
 				</ion-card-title>
-				@let sortFn = sortBy$ | async;
+				@let sortFn = sortBy();
 				<ion-card-subtitle>
 					Sort by
 					<ion-chip

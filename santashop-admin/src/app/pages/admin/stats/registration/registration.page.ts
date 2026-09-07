@@ -1,7 +1,13 @@
 import { EVENT_TIME_ZONE, getZonedDateParts } from '@santashop/models';
 import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+	Component,
+	ChangeDetectionStrategy,
+	computed,
+	inject,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
 	PROGRAM_YEAR,
 	SHOP_DAYS,
@@ -13,18 +19,7 @@ import {
 	RegistrationStats,
 	ScheduleStats,
 } from '@santashop/models';
-import {
-	BehaviorSubject,
-	forkJoin,
-	catchError,
-	combineLatest,
-	defaultIfEmpty,
-	map,
-	Observable,
-	of,
-	shareReplay,
-	switchMap,
-} from 'rxjs';
+import { BehaviorSubject, forkJoin, switchMap } from 'rxjs';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -34,7 +29,7 @@ import {
 	getStatsCollection,
 } from '../../../../shared/helpers';
 
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import {
 	BaseChartDirective,
 	provideCharts,
@@ -74,7 +69,6 @@ Chart.register(ChartDataLabels);
 		IonSelect,
 		IonSelectOption,
 		BaseChartDirective,
-		AsyncPipe,
 		DecimalPipe,
 		FormsModule,
 	],
@@ -97,7 +91,7 @@ export class RegistrationPage {
 		this.refresh();
 	}
 
-	public readonly state$ = this.refreshYear.pipe(
+	private readonly state$ = this.refreshYear.pipe(
 		switchMap(() =>
 			forkJoin({
 				registration: getStatsCollection<RegistrationStats>(
@@ -111,156 +105,108 @@ export class RegistrationPage {
 					.readMany([where('programYear', '==', this.year)], 'id'),
 			}).pipe(readState()),
 		),
-		shareReplay({ bufferSize: 1, refCount: true }),
 	);
-	private readonly registrationStats$ = this.state$.pipe(
-		map(
-			(state): RegistrationStats =>
-				state.data?.registration ?? {
-					completedRegistrations: 0,
-					dateTimeCount: [],
-					zipCodeCount: [],
-				},
+	public readonly state = toSignal(this.state$, {
+		initialValue: { status: 'loading' as const, data: undefined },
+	});
+	private readonly registrationStats = computed<RegistrationStats>(
+		() =>
+			this.state().data?.registration ?? {
+				completedRegistrations: 0,
+				dateTimeCount: [],
+				zipCodeCount: [],
+			},
+	);
+	private readonly dateTimeSlots = computed(() =>
+		this.sortDateTimeSlots(
+			(this.state().data?.slots ?? []).map((slot) => ({
+				...slot,
+				dateTime: timestampToDate(slot.dateTime),
+			})),
 		),
 	);
-	private readonly dateTimeSlots$ = this.state$.pipe(
-		map((state) =>
-			this.sortDateTimeSlots(
-				(state.data?.slots ?? []).map((slot) => ({
-					...slot,
-					dateTime: timestampToDate(slot.dateTime),
-				})),
-			),
+	public readonly hasScheduleData = computed(() => {
+		const data = this.state().data;
+		return !!data?.schedule || !!data?.slots.length;
+	});
+	private readonly dateTimeStats = computed(() => {
+		const data = this.state().data;
+		return (
+			data?.schedule?.dateTimeCounts ??
+			data?.registration?.dateTimeCount ??
+			[]
+		);
+	});
+	public readonly registrationCount = computed(
+		() => this.registrationStats().completedRegistrations,
+	);
+	public readonly registrationCountBySchedule = computed(() => {
+		const data = this.state().data;
+		return data?.schedule
+			? data.schedule.dateTimeCounts.reduce(
+					(total, slot) => total + slot.count,
+					0,
+				)
+			: (data?.registration?.completedRegistrations ?? 0);
+	});
+	public readonly childCount = computed(() =>
+		this.registrationStats().dateTimeCount.reduce(
+			(total, slot) => total + slot.childCount,
+			0,
 		),
 	);
-
-	public readonly hasScheduleData$ = this.state$.pipe(
-		map((state) => !!state.data?.schedule || !!state.data?.slots.length),
+	public readonly childrenPerCustomer = computed(() =>
+		this.registrationCount()
+			? this.childCount() / this.registrationCount()
+			: 0,
 	);
-
-	private readonly dateTimeStats$ = this.state$.pipe(
-		map(
-			(state) =>
-				state.data?.schedule?.dateTimeCounts ??
-				state.data?.registration?.dateTimeCount ??
-				[],
-		),
+	private readonly stats = computed(() =>
+		this.registrationStats().dateTimeCount.map((slot) => slot.stats),
 	);
-
-	public readonly registrationCount$ = this.registrationStats$.pipe(
-		map((stats) => stats.completedRegistrations),
-		defaultIfEmpty(0),
+	public readonly statsNull = computed(() =>
+		this.stats().every((stats) => !stats),
 	);
-
-	public readonly registrationCountBySchedule$ = this.state$.pipe(
-		map((state) =>
-			state.data?.schedule
-				? state.data.schedule.dateTimeCounts.reduce(
-						(total, slot) => total + slot.count,
-						0,
-					)
-				: (state.data?.registration?.completedRegistrations ?? 0),
-		),
-	);
-
-	public readonly childCount$ = this.registrationStats$.pipe(
-		map((stats) => stats.dateTimeCount.map((e) => e.childCount)),
-		map((counts) => counts.reduce((a, b) => a + b, 0)),
-	);
-
-	public readonly childrenPerCustomer$ = combineLatest([
-		this.registrationCount$,
-		this.childCount$,
-	]).pipe(map((data) => (data[0] ? data[1] / data[0] : 0)));
-
-	public readonly stats$ = this.registrationStats$.pipe(
-		map((stats) => stats?.dateTimeCount),
-		map((dateTimes) => dateTimes.map((e) => e.stats)),
-	);
-
-	public readonly statsNull$ = this.stats$.pipe(
-		map((stats) => stats.every((s) => !s)),
-	);
-
-	public readonly boyCount$ = this.stats$.pipe(
-		map((stats) => stats.map((e) => e.boys)),
-		map((boys) => boys.reduce((a, b) => a + b.total, 0)),
-		catchError(() => of(0)),
-		defaultIfEmpty(0),
-	);
-
-	public readonly girlCount$ = this.stats$.pipe(
-		map((stats) => stats.map((e) => e.girls)),
-		map((girls) => girls.reduce((a, b) => a + b.total, 0)),
-		catchError(() => of(0)),
-		defaultIfEmpty(0),
-	);
-
-	public readonly infantCount$ = this.stats$.pipe(
-		map((stats) => stats.map((e) => e.infants)),
-		map((infants) => infants.reduce((a, b) => a + b.total, 0)),
-		catchError(() => of(0)),
-		defaultIfEmpty(0),
-	);
-
-	public readonly girlBoyInfantCounts$ = combineLatest([
-		this.girlCount$,
-		this.boyCount$,
-		this.infantCount$,
+	public readonly girlBoyInfantCounts = computed(() => [
+		this.demographicCount('girls'),
+		this.demographicCount('boys'),
+		this.demographicCount('infants'),
 	]);
-
-	public readonly familiesBySlots$ = this.dateTimeStats$.pipe(
-		map((dateTimes) =>
-			dateTimes.map((e) => {
-				const dateTime = e.dateTime as Timestamp | Date;
-				const date =
-					dateTime instanceof Date ? dateTime : dateTime.toDate();
-				return { date, count: e.count };
-			}),
+	public readonly familiesBySlots = computed(() =>
+		this.sortFamiliesByDate(
+			this.dateTimeStats().map((slot) => ({
+				date: timestampToDate(slot.dateTime),
+				count: slot.count,
+			})),
 		),
-		map((data) => this.sortFamiliesByDate(data)),
 	);
-
-	public readonly familiesBySlotsChartData$ = this.familiesBySlots$.pipe(
-		map((data) => this.mapFamiliesByDateToChart2(data)),
+	public readonly familiesBySlotsChartData = computed(() =>
+		this.mapFamiliesByDateToChart2(this.familiesBySlots()),
 	);
-
-	private readonly zipCodeStats$ = this.registrationStats$.pipe(
-		map((allData) => allData.zipCodeCount),
-	);
-
-	public readonly topFiveZipCodesCount$ = this.zipCodeStats$.pipe(
-		map((data) => this.sortZipCodeCounts(data)),
-		map((data) => data.slice(0, 4)),
-	);
-
-	public readonly topTenZipCodesCountData$: Observable<
+	public readonly topTenZipCodesCountData = computed<
 		ChartData<'pie', number[], string | string[]>
-	> = this.topFiveZipCodesCount$.pipe(
-		map((data) => {
-			const formatted: ChartData<'pie', number[], string | string[]> = {
-				labels: [],
-				datasets: [
-					{
-						data: [],
-						...this.colorSettings,
-					},
-				],
-			};
+	>(() => {
+		const data = this.sortZipCodeCounts(
+			this.registrationStats().zipCodeCount,
+		).slice(0, 4);
+		return {
+			labels: data.map((entry) => [
+				entry.zip.toString(),
+				entry.count.toString() + ' Families',
+			]),
+			datasets: [
+				{
+					data: data.map((entry) => entry.count),
+					...this.colorSettings,
+				},
+			],
+		};
+	});
 
-			data.forEach((e: { zip: string | number; count: number }) => {
-				if (formatted.labels) {
-					formatted.labels.push([
-						e.zip.toString(),
-						`${e.count.toString()} Families`,
-					]);
-				}
-				formatted.datasets[0].data.push(e.count);
-			});
-
-			return formatted;
-		}),
-	);
+	private demographicCount(group: 'girls' | 'boys' | 'infants'): number {
+		const stats = this.stats();
+		if (stats.some((entry) => !entry?.[group])) return 0;
+		return stats.reduce((total, entry) => total + entry[group].total, 0);
+	}
 
 	public readonly colorSettings = {
 		backgroundColor: [
@@ -291,8 +237,8 @@ export class RegistrationPage {
 		border: '#ffffff',
 	};
 
-	public readonly capacityByDay$ = this.dateTimeSlots$.pipe(
-		map((slots) => this.mapSlotsToCapacityCharts(slots)),
+	public readonly capacityByDay = computed(() =>
+		this.mapSlotsToCapacityCharts(this.dateTimeSlots()),
 	);
 
 	public zipCodeOptions: ChartConfiguration['options'] = {

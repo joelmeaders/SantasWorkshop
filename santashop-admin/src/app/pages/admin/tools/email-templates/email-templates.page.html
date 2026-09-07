@@ -9,9 +9,9 @@
 			</p>
 		</ion-card-header>
 
-		@if (isLoading$ | async) {
+		@if (isLoading()) {
 		<ion-note color="medium">Loading templates…</ion-note>
-		} @else if (templates$ | async; as templates) { @if (templates.length
+		} @else if (templates(); as templates) { @if (templates.length
 		=== 0) {
 		<ion-note color="medium">
 			No email templates yet. Create one to start managing SES-ready

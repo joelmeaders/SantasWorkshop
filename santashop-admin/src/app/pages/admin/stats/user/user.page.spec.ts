@@ -14,7 +14,7 @@ import {
 } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
 import { UserStats } from '@santashop/models';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 describe('UserPage', () => {
 	let component: UserPage;
@@ -66,12 +66,13 @@ describe('UserPage', () => {
 
 		component.refresh();
 		await fixture.whenStable();
-		await expect(firstValueFrom(component.referrers$)).resolves.toEqual([
+		await fixture.whenStable();
+		expect(component.referrers().map(({ label, data }) => ({ label, data }))).toEqual([
 			{ label: 'Friend', data: [8] },
 			{ label: 'Church', data: [5] },
 			{ label: 'School', data: [3] },
 		]);
-		await expect(firstValueFrom(component.zipCodes$)).resolves.toEqual([
+		expect(component.zipCodes().map(({ label, data }) => ({ label, data }))).toEqual([
 			{ label: '80219', data: [7] },
 			{ label: '80204', data: [4] },
 			{ label: '80205', data: [2] },

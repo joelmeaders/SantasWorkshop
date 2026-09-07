@@ -3,14 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ResultsPage } from './results.page';
 import { provideFirestoreWrapperMock } from '../../../../../test-helpers';
 import { provideRouter } from '@angular/router';
-import {
-	BehaviorSubject,
-	defer,
-	filter,
-	firstValueFrom,
-	of,
-	throwError,
-} from 'rxjs';
+import { BehaviorSubject, Subject, defer, of, throwError } from 'rxjs';
 import { SearchService } from '../search.service';
 import type { RegistrationSearchIndex } from '@santashop/models';
 import type { Observable } from 'rxjs';
@@ -42,6 +35,36 @@ describe('ResultsPage', () => {
 		expect(component).toBeTruthy();
 	});
 
+	it('keeps an entry refresh before the first render and cancels a replaced query', async () => {
+		fixture.destroy();
+		const pending = new Subject<RegistrationSearchIndex[]>();
+		searchResults$.next(pending);
+		fixture = TestBed.createComponent(ResultsPage);
+		component = fixture.componentInstance;
+		void component.ionViewWillEnter();
+		await fixture.whenStable();
+		expect(pending.observed).toBe(true);
+
+		searchResults$.next(
+			of([
+				{
+					firstName: 'Latest',
+					lastName: 'Family',
+					zip: '80201',
+					emailAddress: 'latest@example.test',
+					customerId: 'latest',
+				},
+			]),
+		);
+		await fixture.whenStable();
+		expect(pending.observed).toBe(false);
+		pending.next([]);
+		expect(component.searchResults()).toEqual([
+			expect.objectContaining({ customerId: 'latest' }),
+		]);
+		expect(fixture.nativeElement.textContent).toContain('Latest');
+	});
+
 	it('sorts the active results and resets search state on leave', async (): Promise<void> => {
 		searchResults$.next(
 			of([
@@ -62,13 +85,8 @@ describe('ResultsPage', () => {
 			]),
 		);
 		await component.ionViewWillEnter();
-		await expect(
-			firstValueFrom(
-				component.searchResults$.pipe(
-					filter((value) => value !== null),
-				),
-			),
-		).resolves.toEqual([
+		await fixture.whenStable();
+		expect(component.searchResults()).toEqual([
 			expect.objectContaining({ firstName: 'Amy' }),
 			expect.objectContaining({ firstName: 'Zoe' }),
 		]);

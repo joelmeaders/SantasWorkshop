@@ -28,23 +28,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  storybook_validation:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: '10.14.0'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - name: Install the Storybook browser
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Build and test every story
-        run: pnpm run ci:storybook
-
   storybook_visual:
     runs-on: windows-2022
     timeout-minutes: 30

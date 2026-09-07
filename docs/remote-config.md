@@ -16,6 +16,10 @@ templates, and runtime environment settings remain in their existing stores.
   its release. It fetches on startup and registers one real-time listener.
 - Published changes are activated immediately. Reconnection, visibility, and
   focus events request a refresh with a 60-second minimum fetch interval.
+- While a tab is visible, a 60-second watchdog also requests a refresh. This
+  covers a real-time stream that stays open but stops delivering updates. The
+  watchdog uses the same single-flight and retry backoff rules as other reads.
+  Hidden tabs pause the watchdog.
 - Failed or malformed updates retain the last valid object. Retry delays are
   10, 30, 60, and then 300 seconds. Hidden tabs pause application retry timers.
 - A failed real-time stream keeps a visible-tab fetch fallback until a real-time
@@ -37,6 +41,9 @@ waits for a single refresh when its settings are at least ten seconds old.
 Concurrent requests share that refresh. This avoids stacking two stale cache
 windows. Caller ID tokens use the verified canonical Cloud Run URI as audience.
 Only the configured reader service account receives Run Invoker on the gateway.
+Client startup and watchdog fetches use the Remote Config client fetch endpoint.
+The 60 template reads per minute release gate measures the gateway's server-side
+management API reads. It is separate from those client fetches.
 
 The controls are no longer part of a Firestore transaction. Existing operation
 predicates and idempotency receipt handling are unchanged. In-flight actions can

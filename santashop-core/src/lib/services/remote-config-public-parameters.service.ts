@@ -26,6 +26,7 @@ export interface PublicParametersRuntime {
 }
 
 const OPTIONS = new InjectionToken<RemoteConfigPublicParametersOptions>('remote-config-public-parameters-options');
+const REMOTE_WATCHDOG_INTERVAL_MS = 60_000;
 
 export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRuntime>('public-parameters-runtime', {
 	factory: (): PublicParametersRuntime => {
@@ -89,6 +90,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 	private readonly status = new BehaviorSubject<PublicParametersStatus>({ source: 'defaults', refreshing: true });
 	private pending?: Promise<void>;
 	private retryTimer?: ReturnType<typeof setTimeout>;
+	private watchdogTimer?: ReturnType<typeof setTimeout>;
 	private localTimer?: ReturnType<typeof setInterval>;
 	private unsubscribe?: () => void;
 	private failures = 0;
@@ -105,10 +107,12 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 	private readonly lifecycle = (): void => {
 		if (this.document.visibilityState === 'hidden') {
 			this.clearRetry();
+			this.clearWatchdog();
 			return;
 		}
 		void this.refresh();
 		if (this.failures > 0 || this.streamError) this.scheduleRetry();
+		this.scheduleWatchdog();
 	};
 
 	constructor() {
@@ -132,6 +136,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 					(error): void => { if (!this.destroyed) this.fail(error, true); },
 				);
 			} catch (error) { this.fail(error, true); }
+			this.scheduleWatchdog();
 			if (this.runtime.local) {
 				this.localTimer = setInterval(() => this.lifecycle(), 1_000);
 			} else {
@@ -199,10 +204,29 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		this.retryTimer = undefined;
 	}
 
+	private scheduleWatchdog(): void {
+		this.clearWatchdog();
+		if (this.destroyed || this.runtime.local || this.document.visibilityState === 'hidden') return;
+		this.watchdogTimer = setTimeout(() => {
+			this.watchdogTimer = undefined;
+			if (this.destroyed || this.document.visibilityState === 'hidden') return;
+			// Retry timers own degraded-stream backoff. The watchdog only checks a healthy,
+			// possibly stalled stream and must not shorten the 10/30/60/300 second delays.
+			if (this.failures === 0 && !this.streamError) void this.refresh();
+			this.scheduleWatchdog();
+		}, REMOTE_WATCHDOG_INTERVAL_MS);
+	}
+
+	private clearWatchdog(): void {
+		if (this.watchdogTimer !== undefined) clearTimeout(this.watchdogTimer);
+		this.watchdogTimer = undefined;
+	}
+
 	public ngOnDestroy(): void {
 		if (this.destroyed) return;
 		this.destroyed = true;
 		this.clearRetry();
+		this.clearWatchdog();
 		if (this.localTimer !== undefined) clearInterval(this.localTimer);
 		this.unsubscribe?.();
 		this.document.removeEventListener('visibilitychange', this.lifecycle);

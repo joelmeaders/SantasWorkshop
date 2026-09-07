@@ -89,9 +89,9 @@ describe('RemoteConfigPublicParametersSource', () => {
 		await start();
 		window.dispatchEvent(new Event('online'));
 		expect(runtime.refresh).toHaveBeenCalledTimes(1);
-		await vi.advanceTimersByTimeAsync(60_000);
 		let resolve: (value: unknown) => void = (): void => undefined;
 		runtime.refresh = vi.fn(() => new Promise((done) => { resolve = done; }));
+		await vi.advanceTimersByTimeAsync(60_000);
 		const first = source.refresh();
 		expect(source.refresh()).toBe(first);
 		window.dispatchEvent(new Event('online'));
@@ -126,8 +126,44 @@ describe('RemoteConfigPublicParametersSource', () => {
 		update(changed());
 		expect(status?.error).toBeUndefined();
 		await vi.advanceTimersByTimeAsync(120_000);
-		expect(runtime.refresh).toHaveBeenCalledTimes(4);
+		expect(runtime.refresh).toHaveBeenCalledTimes(5);
 		expect(runtime.listen).toHaveBeenCalledTimes(1);
+	});
+
+	it('uses a visible watchdog when the real-time stream stays open without updates', async () => {
+		await start();
+		runtime.refresh = vi.fn().mockResolvedValue(changed());
+		await vi.advanceTimersByTimeAsync(59_999);
+		expect(runtime.refresh).not.toHaveBeenCalled();
+		await vi.advanceTimersByTimeAsync(1);
+		await settle();
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		expect(current).toEqual(changed());
+	});
+
+	it('does not let the watchdog bypass degraded-stream retry backoff', async () => {
+		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));
+		await start();
+		await vi.advanceTimersByTimeAsync(10_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		await vi.advanceTimersByTimeAsync(29_999);
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(runtime.refresh).toHaveBeenCalledTimes(3);
+		await vi.advanceTimersByTimeAsync(20_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(3);
+	});
+
+	it('pauses the visible watchdog while hidden and resumes it when visible', async () => {
+		await start();
+		vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+		document.dispatchEvent(new Event('visibilitychange'));
+		await vi.advanceTimersByTimeAsync(120_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+		document.dispatchEvent(new Event('visibilitychange'));
+		await settle();
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
 	});
 
 	it('suspends degraded-stream fallback while hidden and resumes it when visible', async () => {

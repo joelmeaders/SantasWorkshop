@@ -127,7 +127,15 @@ test.describe('admin reporting routes', () => {
 		await expect(page.getByRole('heading', { name: 'Check-Ins' })).toBeVisible();
 		await page.getByRole('button', { name: 'View by Children' }).click();
 		await expect(
-			page.getByRole('heading', { name: 'Children', level: 2 }),
+			page
+				.locator('ion-toolbar')
+				.filter({
+					has: page.getByRole('heading', {
+						name: 'Children',
+						level: 2,
+					}),
+				})
+				.getByRole('heading', { name: 'Children', level: 2 }),
 		).toBeVisible();
 	});
 

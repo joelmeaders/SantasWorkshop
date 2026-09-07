@@ -212,6 +212,7 @@
 						"browsers": ["chromiumHeadless"],
 						"coverage": true,
 						"coverageInclude": ["santashop-admin/src/**/*.ts"],
+						"coverageExclude": ["**/*.stories.ts"],
 						"runnerConfig": "vitest.config.mjs",
 						"watch": false
 					}
@@ -346,6 +347,7 @@
 						"browsers": ["chromiumHeadless"],
 						"coverage": true,
 						"coverageInclude": ["santashop-app/src/**/*.ts"],
+						"coverageExclude": ["**/*.stories.ts"],
 						"runnerConfig": "vitest.config.mjs",
 						"watch": false
 					}

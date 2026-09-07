@@ -23,6 +23,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: storybook-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   storybook_validation:
     runs-on: ubuntu-latest
@@ -57,7 +61,7 @@ jobs:
       - run: pnpm exec playwright install chromium
       - run: pnpm run storybook:build
       - name: Compare all story images with reviewed Windows baselines
-        run: pnpm run storybook:visual
+        run: pnpm run storybook:visual --max-failures=1
       - name: Keep visual differences and traces
         if: failure()
         uses: actions/upload-artifact@v4

@@ -116,6 +116,54 @@ describe('SignUpPageService', () => {
 		expect(loader.dismiss).toHaveBeenCalled();
 	});
 
+	it('offers sign-in and password reset when account creation succeeds but sign-in fails', async () => {
+		const service = createService();
+		const error = {
+			code: 'auth/network-request-failed',
+			message: 'The sign-in request failed.',
+		};
+		login.mockRejectedValue(error);
+		alert.onDidDismiss.mockResolvedValue({ role: 'sign-in' });
+
+		await service.onboardUser();
+
+		expect(alertCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				header: 'SIGNUP.ACCOUNT_CREATED',
+				message: 'SIGNUP.ACCOUNT_CREATED_MESSAGE',
+				subHeader: 'holly@example.com',
+				buttons: expect.arrayContaining([
+					expect.objectContaining({ role: 'reset' }),
+					expect.objectContaining({ role: 'sign-in' }),
+				]),
+				backdropDismiss: false,
+			}),
+		);
+		expect(alert.present).toHaveBeenCalled();
+		expect(navigate).toHaveBeenCalledWith(['/'], {
+			queryParams: { mode: 'sign-in' },
+		});
+		expect(handleError).not.toHaveBeenCalled();
+	});
+
+	it('uses the normal error handler when navigation fails after sign-in', async () => {
+		const service = createService();
+		const error = {
+			code: 'navigation-failed',
+			message: 'The registration route could not be opened.',
+		};
+		navigate.mockRejectedValue(error);
+
+		await service.onboardUser();
+
+		expect(login).toHaveBeenCalledWith({
+			emailAddress: 'holly@example.com',
+			password: 'Password123!',
+		});
+		expect(alertCreate).not.toHaveBeenCalled();
+		expect(handleError).toHaveBeenCalledWith(error);
+	});
+
 	it('offers recovery actions when the account already exists', async () => {
 		const service = createService();
 		accountCallable.mockRejectedValue({ code: 'functions/already-exists' });
@@ -146,6 +194,29 @@ describe('SignUpPageService', () => {
 		expect(handleError).toHaveBeenCalledWith(error);
 		expect(alertCreate).not.toHaveBeenCalled();
 		expect(loader.dismiss).toHaveBeenCalled();
+	});
+
+	it('presents neutral recovery guidance for an App Check rejection', async () => {
+		const service = createService();
+		const error = {
+			code: 'functions/unauthenticated',
+			message: 'The request was missing a valid App Check token.',
+		};
+		accountCallable.mockRejectedValue(error);
+
+		await service.onboardUser();
+
+		expect(handleError).toHaveBeenCalledWith(
+			{
+				...error,
+				details: 'SIGNUP.VERIFICATION_FAILED_MESSAGE',
+			},
+			'SIGNUP.VERIFICATION_FAILED',
+		);
+		expect(alertCreate).not.toHaveBeenCalled();
+		expect(service.form.controls.emailAddress.value).toBe(
+			'holly@example.com',
+		);
 	});
 
 	it('redirects an already authenticated user and unsubscribes on destroy', () => {

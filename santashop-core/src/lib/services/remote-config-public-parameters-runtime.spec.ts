@@ -41,6 +41,20 @@ describe('Remote Config SDK adapter', () => {
 		expect(sdk.getValue).toHaveBeenCalledWith(remote, PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY);
 	});
 
+	it('temporarily bypasses the SDK cache interval for forced scheduled fetches', async () => {
+		await runtime.initialize();
+		sdk.fetchAndActivate.mockImplementationOnce(async () => {
+			expect(remote.settings.minimumFetchIntervalMillis).toBe(0);
+			return true;
+		});
+		await expect(runtime.refresh(true)).resolves.toEqual(createDefaultPublicParameters());
+		expect(remote.settings.minimumFetchIntervalMillis).toBe(60_000);
+
+		sdk.fetchAndActivate.mockRejectedValueOnce(new Error('offline'));
+		await expect(runtime.refresh(true)).rejects.toThrow('offline');
+		expect(remote.settings.minimumFetchIntervalMillis).toBe(60_000);
+	});
+
 	it('activates real-time updates before delivering settings and preserves SDK unsubscribe', async () => {
 		await runtime.initialize();
 		const unsubscribe = vi.fn();

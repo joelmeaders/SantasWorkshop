@@ -21,7 +21,7 @@ export interface RemoteConfigPublicParametersOptions {
 export interface PublicParametersRuntime {
 	readonly local: boolean;
 	initialize(): Promise<unknown>;
-	refresh(): Promise<unknown>;
+	refresh(force?: boolean): Promise<unknown>;
 	listen(next: (settings: unknown) => void, error: (error: unknown) => void): () => void;
 }
 
@@ -55,9 +55,14 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 				// A first visit has no activated value. The source already holds release defaults.
 				try { return read(); } catch { return undefined; }
 			},
-			refresh: async (): Promise<unknown> => {
+			refresh: async (force = false): Promise<unknown> => {
 				if (!remote) throw new Error('Remote Config is unavailable.');
-				await fetchAndActivate(remote);
+				const minimumFetchIntervalMillis = remote.settings.minimumFetchIntervalMillis;
+				if (force) remote.settings.minimumFetchIntervalMillis = 0;
+				try { await fetchAndActivate(remote); }
+				finally {
+					if (force) remote.settings.minimumFetchIntervalMillis = minimumFetchIntervalMillis;
+				}
 				return read();
 			},
 			listen: (next, error): (() => void) => {
@@ -152,17 +157,22 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		return this.runRefresh();
 	}
 
-	private runRefresh(): Promise<void> {
-		this.pending = (this.initialized ? this.performRefresh() : this.start())
+	private refreshScheduled(): void {
+		if (this.destroyed || this.pending) return;
+		void this.runRefresh(true);
+	}
+
+	private runRefresh(force = false): Promise<void> {
+		this.pending = (this.initialized ? this.performRefresh(force) : this.start())
 			.finally(() => { this.pending = undefined; });
 		return this.pending;
 	}
 
-	private async performRefresh(): Promise<void> {
+	private async performRefresh(force = false): Promise<void> {
 		this.lastAttempt = Date.now();
 		this.status.next({ ...this.status.value, refreshing: true });
 		try {
-			const value = await this.runtime.refresh();
+			const value = await this.runtime.refresh(force);
 			if (!this.destroyed) this.accept(value);
 		} catch (error) { if (!this.destroyed) this.fail(error); }
 	}
@@ -196,7 +206,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		const delay = this.failures > 0
 			? PUBLIC_PARAMETERS_RETRY_DELAYS_MS[Math.min(this.failures - 1, PUBLIC_PARAMETERS_RETRY_DELAYS_MS.length - 1)] ?? 300_000
 			: Math.max(0, 60_000 - (Date.now() - this.lastAttempt));
-		this.retryTimer = setTimeout(() => { if (!this.pending) void this.runRefresh(); }, delay);
+		this.retryTimer = setTimeout(() => { if (!this.pending) void this.runRefresh(this.streamError !== undefined); }, delay);
 	}
 
 	private clearRetry(): void {
@@ -212,7 +222,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 			if (this.destroyed || this.document.visibilityState === 'hidden') return;
 			// Retry timers own degraded-stream backoff. The watchdog only checks a healthy,
 			// possibly stalled stream and must not shorten the 10/30/60/300 second delays.
-			if (this.failures === 0 && !this.streamError) void this.refresh();
+			if (this.failures === 0 && !this.streamError) this.refreshScheduled();
 			this.scheduleWatchdog();
 		}, REMOTE_WATCHDOG_INTERVAL_MS);
 	}

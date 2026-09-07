@@ -111,22 +111,26 @@ describe('RemoteConfigPublicParametersSource', () => {
 		expect(unsubscribe).toHaveBeenCalledTimes(1);
 	});
 
-	it('keeps one-minute fallback fetches after a stream error until a real-time update succeeds', async () => {
+	it('forces fallback fetches after a stream error until a real-time update succeeds', async () => {
 		await start();
 		listenerError(new Error('Stream stopped'));
 		await vi.advanceTimersByTimeAsync(10_000);
 		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		expect(runtime.refresh).toHaveBeenNthCalledWith(2, true);
 		expect(status?.error).toBe('Stream stopped');
 		await vi.advanceTimersByTimeAsync(59_999);
 		expect(runtime.refresh).toHaveBeenCalledTimes(2);
 		await vi.advanceTimersByTimeAsync(1);
 		expect(runtime.refresh).toHaveBeenCalledTimes(3);
+		expect(runtime.refresh).toHaveBeenNthCalledWith(3, true);
 		await vi.advanceTimersByTimeAsync(60_000);
 		expect(runtime.refresh).toHaveBeenCalledTimes(4);
 		update(changed());
 		expect(status?.error).toBeUndefined();
 		await vi.advanceTimersByTimeAsync(120_000);
-		expect(runtime.refresh).toHaveBeenCalledTimes(5);
+		expect(runtime.refresh).toHaveBeenCalledTimes(6);
+		expect(runtime.refresh).toHaveBeenNthCalledWith(5, true);
+		expect(runtime.refresh).toHaveBeenNthCalledWith(6, true);
 		expect(runtime.listen).toHaveBeenCalledTimes(1);
 	});
 
@@ -138,6 +142,7 @@ describe('RemoteConfigPublicParametersSource', () => {
 		await vi.advanceTimersByTimeAsync(1);
 		await settle();
 		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		expect(runtime.refresh).toHaveBeenNthCalledWith(1, true);
 		expect(current).toEqual(changed());
 	});
 

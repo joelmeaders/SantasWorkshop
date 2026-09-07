@@ -58,53 +58,81 @@ export class SignUpPageService implements OnDestroy {
 
 		await loader.present();
 
+		let accountCreated = false;
+		let authenticated = false;
 		try {
 			await this.createAccount(onboardInfo);
+			accountCreated = true;
 			loader.message = 'Logging you in';
 			await this.signIn(onboardInfo);
+			authenticated = true;
+			await this.router.navigate(['pre-registration/overview']);
 		} catch (incomingError) {
 			const error = incomingError as IError;
 
-			if ((error as IError).code === 'functions/already-exists') {
+			if (accountCreated && !authenticated) {
 				await loader.dismiss().catch(() => false);
-				const alert = await this.alertController.create({
-					header: this.translateService.instant(
-						'SIGNUP.ACCOUNT_EXISTS',
-					),
-					subHeader: onboardInfo.emailAddress,
-					message: this.translateService.instant(
-						'SIGNUP.ACCOUNT_EXISTS_MESSAGE',
-					),
-					buttons: [
-						{
-							text: this.translateService.instant(
-								'FORGOTPASS.RESET_PASSWORD',
-							),
-							role: 'reset',
-						},
-						{
-							text: this.translateService.instant(
-								'COMMON.SIGN_IN',
-							),
-							role: 'sign-in',
-						},
-					],
-					backdropDismiss: false,
-				});
-
-				await alert.present();
-
-				await alert.onDidDismiss().then((response) => {
-					this.router.navigate(['/'], {
-						queryParams: { mode: response.role },
-					});
-				});
+				await this.showAccountRecoveryAlert(
+					onboardInfo.emailAddress,
+					'SIGNUP.ACCOUNT_CREATED',
+					'SIGNUP.ACCOUNT_CREATED_MESSAGE',
+				);
+			} else if (error.code === 'functions/already-exists') {
+				await loader.dismiss().catch(() => false);
+				await this.showAccountRecoveryAlert(
+					onboardInfo.emailAddress,
+					'SIGNUP.ACCOUNT_EXISTS',
+					'SIGNUP.ACCOUNT_EXISTS_MESSAGE',
+				);
+			} else if (error.code === 'functions/unauthenticated') {
+				await this.errorHandler.handleError(
+					{
+						...error,
+						details: this.translateService.instant(
+							'SIGNUP.VERIFICATION_FAILED_MESSAGE',
+						),
+					},
+					this.translateService.instant('SIGNUP.VERIFICATION_FAILED'),
+				);
 			} else {
 				await this.errorHandler.handleError(error);
 			}
 		} finally {
 			await loader.dismiss().catch(() => false);
 		}
+	}
+
+	private async showAccountRecoveryAlert(
+		emailAddress: string | undefined,
+		headerKey: string,
+		messageKey: string,
+	): Promise<void> {
+		const alert = await this.alertController.create({
+			header: this.translateService.instant(headerKey),
+			subHeader: emailAddress,
+			message: this.translateService.instant(messageKey),
+			buttons: [
+				{
+					text: this.translateService.instant(
+						'FORGOTPASS.RESET_PASSWORD',
+					),
+					role: 'reset',
+				},
+				{
+					text: this.translateService.instant('COMMON.SIGN_IN'),
+					role: 'sign-in',
+				},
+			],
+			backdropDismiss: false,
+		});
+
+		await alert.present();
+
+		await alert.onDidDismiss().then((response) => {
+			this.router.navigate(['/'], {
+				queryParams: { mode: response.role },
+			});
+		});
 	}
 
 	private async createAccount(value: OnboardUser): Promise<void> {
@@ -124,6 +152,5 @@ export class SignUpPageService implements OnDestroy {
 		};
 
 		await this.authService.login(auth);
-		this.router.navigate(['pre-registration/overview']);
 	}
 }

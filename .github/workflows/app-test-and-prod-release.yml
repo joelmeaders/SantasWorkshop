@@ -13,6 +13,7 @@ name: App Test Deploy and Manual Prod Release
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
       - 'scripts/env-loader.cjs'
+      - 'scripts/verify-hosting-styles.mjs'
       - '.github/workflows/app-test-and-prod-release.yml'
       - '.github/workflows/app-pr-validation.yml'
 

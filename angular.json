@@ -95,6 +95,9 @@
 					"options": {
 						"outputPath": {"base": "dist/santashop-admin", "browser": ""},
 						"index": "santashop-admin/src/index.html",
+						"optimization": {
+							"styles": { "inlineCritical": false }
+						},
 						"browser": "santashop-admin/src/main.ts",
 						"polyfills": [],
 						"tsConfig": "santashop-admin/tsconfig.app.json",
@@ -222,6 +225,9 @@
 					"options": {
 						"outputPath": {"base": "dist/santashop-app", "browser": ""},
 						"index": "santashop-app/src/index.html",
+						"optimization": {
+							"styles": { "inlineCritical": false }
+						},
 						"browser": "santashop-app/src/main.ts",
 						"polyfills": [],
 						"tsConfig": "santashop-app/tsconfig.app.json",

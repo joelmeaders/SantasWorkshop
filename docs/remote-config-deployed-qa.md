@@ -32,32 +32,33 @@ must wait for the intended versions and backend deployment.
 
 | Area | Roles and checks | Result |
 | --- | --- | --- |
-| Entry controls | English/Spanish, registration, account creation, maintenance, weather and global alert | Not run |
-| Authentication | Invalid login, protected routes, sign-in/out, reload, password reset request | Not run |
+| Entry controls | English/Spanish, registration, account creation, maintenance, weather and global alert | Bilingual maintenance/global alert displayed; weather delivered without reload in the 16–42 second observation interval; account-creation-off changed the underlying home; stale closure overlay defect found |
+| Authentication | Invalid login, protected routes, sign-in/out, reload, password reset request | Invalid login, sign-in/out and reload passed; password reset pending |
 | Onboarding | Field validation, referral, consent controls, persisted customer | Not run |
-| Account | Name/ZIP edit, validation, persistence | Not run |
-| Children | Add/edit/remove disposable children, ages, preferences, cancel modal | Not run |
-| Registration | Date selection, review, submit, ticket, reschedule, cancel/re-register, QR identity | Not run |
+| Account | Name/ZIP edit, validation, persistence | Name/ZIP update and reload passed; short ZIP rejected with translated message |
+| Children | Add/edit/remove disposable children, ages, preferences, cancel modal | Add, edit and remove passed; age 0–2 omitted toy choice; one valid child enabled scheduling |
+| Registration | Date selection, review, submit, ticket, reschedule, cancel/re-register, QR identity | Appointment flows passed; reschedule retained QR; cancel/re-register rotated code, contrary to documented stable-code requirement; investigation pending |
 | Staff authorization | Customer, check-in, ordinary admin, owner routes and controls | Not run |
-| Staff search | Email, name/ZIP, code, no matches, detail | Not run |
-| Check-in | Invalid/cancelled code, review, coupons, success, duplicate protection | Not run |
-| Staff registration | Pre-registration and on-site registration with disposable data | Not run |
+| Staff search | Email, name/ZIP, code, no matches, detail | Email and name/ZIP found the isolated household; current code opened its detail |
+| Check-in | Invalid/cancelled code, review, coupons, success, duplicate protection | Invalid/cancelled code rejection, success with one coupon and immediate duplicate protection passed; physical camera decoding unavailable |
+| Staff registration | Pre-registration and on-site registration with disposable data | Owner pre-registration and on-site registration passed; check-in-only UI exposed forbidden registration links, repair pending deployment |
 | Email | Single QA recipient resend and queue state | Not run |
-| Schedules | Read, year/filter, isolated fixture create/edit/delete | Not run |
-| Templates | Isolated draft create/edit/preview/revision and safeguards | Not run |
-| Staff management | Disposable identity lifecycle and claims refresh | Not run |
-| Owner settings | Read, publish, conflict, real-time delivery, backend convergence, restore | Not run |
-| Owner operations | Preview and safeguards; do not reset shared test data | Not run |
-| Statistics | Reports, year/filter, refresh and scan-risk details | Not run |
-| Presentation | Desktop/mobile, keyboard/modal behavior, Spanish | Not run |
-| Update recovery | Visible version, reload, cache boundaries and download failure behavior | Not run |
+| Schedules | Read, year/filter, isolated fixture create/edit/delete | Read/year filtering passed; past-year generation rejected; current-year initialization confirmation cancelled without mutation |
+| Templates | Isolated draft create/edit/preview/revision and safeguards | QA template created, revision 1 published and loaded over revision 2 draft; preview and cancel-delete passed; test-send acknowledged, delivery unverified |
+| Staff management | Disposable identity lifecycle and claims refresh | List/refresh and isolated staff display-name edit passed; permission changes and password changes not exercised |
+| Owner settings | Read, publish, conflict, real-time delivery, backend convergence, restore | Read/publish/conflict passed after repairs; live delivery stalled after initial success; watchdog repair awaiting deployment; version 48 restored original version 41 values |
+| Owner operations | Preview and safeguards; do not reset shared test data | Preview passed; no reset executed |
+| Statistics | Reports, year/filter, refresh and scan-risk details | Registration/check-in/user reports read successfully; cancelled-code timeline showed the correct isolated customer |
+| Presentation | Desktop/mobile, keyboard/modal behavior, Spanish | Spanish ticket, event details, account menu and help modal inspected; mobile and full keyboard checks pending |
+| Update recovery | Visible version, reload, cache boundaries and download failure behavior | Update prompt reload completed and dismissed the prompt; custom-origin sign-in later stalled with reCAPTCHA asset HTTP 504; same credentials worked immediately on fresh Hosting origin |
 
 ## Release status
 
 Production is not deployed by this run. The quota repair uses a private singleton
 gateway with no persistent settings copy and unchanged consumer capacity. It is
-under implementation and requires PR checks plus deployed validation. No skipped
-or blocked journey counts as passed.
+deployed to test. Six sampled gateway requests returned HTTP 200 in 165–214 ms;
+this is smoke evidence, not a load test. Remaining repairs and live validation
+are in progress. No skipped or blocked journey counts as passed.
 
 Admin deployment completed at 18:05 UTC. The user cleared the browser cache; the next DOM inspection showed beta.3. This verifies the version after cache clearing, not normal update recovery.
 
@@ -87,3 +88,55 @@ Live QA findings and partial evidence:
   added. Custom Other referral selection saved successfully for a valid answer.
 - Public sign-up submission is pending action-time consent confirmation. API
   fixture setup, if used for subsequent journeys, is not sign-up UI evidence.
+
+At 19:30 UTC, the latest deployed Functions repair is `6c0b8b2` (run
+34153534488). The owner callables now use the initialized Admin SDK instance;
+the previous mixed-module import failed with `app/no-app`. Its cold-start
+regression test passed locally. Owner publish/read, stale ETag conflict rejection,
+and retention of unsaved edits passed in the browser. The legacy Firestore
+settings document remains untouched.
+
+Both Chrome and the in-app browser later held an open real-time stream without
+receiving new settings. A normal reload fetched current values. Commit
+`cd1f51f` adds a visible 60-second client-fetch watchdog while retaining stream
+updates, hidden-page pauses and failure backoff. Its 174 core tests passed
+locally. This fallback does not establish the healthy-stream 10-second target.
+Test deployment 34155576662 is in progress.
+
+Temporary settings were restored as Remote Config version 48 and compared with
+the saved version 41 settings: all fields match. Test registration, account
+creation, check-in, pre-registration, cancellation and rescheduling are enabled;
+maintenance, weather closure and the global alert are off. Spanish maintenance
+and global-alert text displayed correctly; weather and account-creation switch
+delivery still require a retest after the watchdog deployment.
+
+Fixture scope: this run owns `qa-rc-20260907-owner`, `qa-rc-20260907-admin`,
+`qa-rc-20260907-checkin` and `qa-rc-20260907-customer`, plus the labeled browser
+pre-registration and on-site households. The CLI customer fixture did not store
+legal acceptance and does not count as successful public onboarding. Camera
+decoding, inbox delivery, credential changes and permission-grant UI steps remain
+unverified. Current-year schedule generation was cancelled at its explicit
+initialization confirmation; no schedule was created or deleted.
+
+Further live findings at 19:40 UTC:
+
+- The weather notice arrived without reload between the 16- and 42-second
+  observations after version 49 publication. Clearing weather and disabling
+  account creation updated the underlying home, but the old blocking notice
+  stayed open. This is a separate UI dismissal defect, not evidence that every
+  later settings update failed to arrive. The production bundle minifies the
+  component name used by the dismissal check. A repair passed eight focused
+  local app tests, including initial maintenance and rapid state changes.
+- The same customer credentials signed in successfully on the fresh
+  `santashop-app-test.web.app` origin. The custom-origin browser recorded
+  repeated HTTP 504 failures for the external reCAPTCHA JavaScript asset before
+  its long sign-in failures. The generic incorrect-credentials message does not
+  establish that the credentials were wrong.
+- Settings are restored as version 52. A fresh API snapshot compared equal to
+  the original version 41 settings across all fields.
+- QR stability repair: 10 focused Functions unit tests and one cancellation
+  emulator integration test passed. Cancellation preserves the code and image;
+  live re-registration validation awaits test deployment.
+- Staff route repair: 15 focused admin tests passed. The attempted focused
+  STAFF-006 emulator run was blocked by local function-discovery environment
+  propagation before assertions; it is not counted as a test pass.

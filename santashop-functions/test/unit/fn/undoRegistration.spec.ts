@@ -76,6 +76,15 @@ describe('undoRegistration handler', () => {
 				},
 			}),
 		);
+		expect(adminMock.transactionSet).toHaveBeenCalledWith(
+			expect.objectContaining({ path: 'cancellations/generated-id' }),
+			expect.objectContaining({
+				supersededConfirmationCode: 'ABCD2345',
+				replacementConfirmationCode: 'ABCD2345',
+				supersededQrCodeStoragePath: 'registrations/user-4/original.png',
+				replacementQrCodeStoragePath: 'registrations/user-4/original.png',
+			}),
+		);
 		expect(generateQrCodeMock).not.toHaveBeenCalled();
 		expect(replaceQrCodeWithCancelledMock).not.toHaveBeenCalled();
 	});

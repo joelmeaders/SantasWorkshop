@@ -413,6 +413,20 @@
 					}
 				},
 				{
+					"source": "/readPublicParametersSettings",
+					"function": {
+						"functionId": "readPublicParametersSettings",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/publishPublicParametersSettings",
+					"function": {
+						"functionId": "publishPublicParametersSettings",
+						"region": "us-central1"
+					}
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}

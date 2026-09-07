@@ -65,3 +65,25 @@ Test fixture bootstrap: UID qa-rc-20260907-owner, owner=true and roles admin/che
 
 
 Repair validation before PR: 420 Functions unit tests across 65 files and 34 emulator integration tests across 20 files passed. Functions webpack build, lint, frozen-lockfile validation, and the revised test quota/identity preflight passed. Emulator environment files were restored byte-for-byte and owned servers stopped. These results do not count as deployed acceptance.
+
+At 18:44 UTC, manual test deployment 34152350919 completed at db40124 with
+`skip_tests=true`. It verified all 40 production Functions, five Scheduler jobs,
+one task queue, one Eventarc trigger, and Remote Config version 41. Customer
+34152352962 and admin 34152355365 also passed. The retry required a scoped
+service-account-user binding for the CI identity on the test App Engine default
+service account.
+
+Live QA findings and partial evidence:
+
+- The isolated owner signed in and saw the expected owner navigation. The 2026
+  schedule contains enabled December 12, 13, 15, and 16 slots.
+- Both sites showed the update-ready prompt. Dismissing it left the pages usable;
+  this does not yet prove the full update lifecycle.
+- Owner settings failed: `/readPublicParametersSettings` returned HTTP 200 with
+  `text/html`, because both settings callables lacked admin Hosting rewrites.
+  The repair adds both routes and a local regression test (passed).
+- Onboarding rejected malformed email, short ZIP, and mismatched passwords.
+  The ZIP error exposed `FORM_ERRORS.PATTERN`; English and Spanish messages were
+  added. Custom Other referral selection saved successfully for a valid answer.
+- Public sign-up submission is pending action-time consent confirmation. API
+  fixture setup, if used for subsequent journeys, is not sign-up UI evidence.

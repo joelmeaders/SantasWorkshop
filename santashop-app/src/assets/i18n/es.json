@@ -330,6 +330,7 @@
 		"EMAIL": "Debe ser una dirección de correo electrónico válida",
 		"URL": "Debe ser una dirección web válida",
 		"ZIPCODE": "Debe ser un código postal válido",
+		"PATTERN": "Ingrese un código postal de cinco dígitos",
 		"FIELDSMATCH": "Las contraseñas no coinciden"
 	},
 	"LANGUAGE": {

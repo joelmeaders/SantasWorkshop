@@ -8,6 +8,9 @@ checks before test environment setup.
 - Functions: 383 unit tests passed across 61 files. This includes operation
   predicates, idempotency, stale-cache continuity, owner authorization, ETag
   conflicts, schema validation, candidate preparation, and release-readiness checks.
+- Functions emulator integration: all 34 tests passed after adapting direct
+  helper imports to the verified emulator fixture and separating check-in
+  registration-read permission from QR-artifact access.
 - Focused Angular tests: 16 shared source/SDK tests, 9 customer tests, and 24
   admin tests passed. Five owner-editor Storybook tests also passed.
 - Customer emulator browser suite: all 50 tests passed. This covers controls,

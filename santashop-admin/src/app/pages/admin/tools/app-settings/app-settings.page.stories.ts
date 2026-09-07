@@ -3,7 +3,7 @@ import {
 	type Meta,
 	type StoryObj,
 } from '@storybook/angular-vite';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withHashLocation } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
 import { createDefaultPublicParameters } from '@santashop/models';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
@@ -21,7 +21,7 @@ const meta = {
 	decorators: [
 		applicationConfig({
 			providers: [
-				provideRouter([]),
+				provideRouter([], withHashLocation()),
 				provideIonicAngular(),
 				{
 					provide: AppSettingsService,

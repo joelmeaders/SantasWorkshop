@@ -19,14 +19,26 @@ describe.sequential('staff claims and QR Storage rules', () => {
 	});
 
 	it.each([
-		{ claims: { roles: ['admin'] }, allowed: true },
-		{ claims: { owner: true }, allowed: true },
-		{ claims: { roles: ['checkin'] }, allowed: false },
-		{ claims: { admin: true }, allowed: false },
-		{ claims: {}, allowed: false },
+		{
+			claims: { roles: ['admin'] },
+			registrationAllowed: true,
+			qrAllowed: true,
+		},
+		{ claims: { owner: true }, registrationAllowed: true, qrAllowed: true },
+		{
+			claims: { roles: ['checkin'] },
+			registrationAllowed: true,
+			qrAllowed: false,
+		},
+		{
+			claims: { admin: true },
+			registrationAllowed: false,
+			qrAllowed: false,
+		},
+		{ claims: {}, registrationAllowed: false, qrAllowed: false },
 	])(
 		'enforces supported staff claims: $claims',
-		async ({ claims, allowed }) => {
+		async ({ claims, registrationAllowed, qrAllowed }) => {
 			await seedAuthUser({
 				uid: 'staff-rules',
 				email: 'staff-rules@example.test',
@@ -56,13 +68,13 @@ describe.sequential('staff claims and QR Storage rules', () => {
 				`http://${firestoreEmulatorHost}/v1/projects/santas-workshop-test/databases/(default)/documents/registrations/customer-rules`,
 				{ headers },
 			);
-			expect(registration.status).toBe(allowed ? 200 : 403);
+			expect(registration.status).toBe(registrationAllowed ? 200 : 403);
 			const bucket = `http://${storageEmulatorHost}/v0/b/santas-workshop-test.appspot.com/o/`;
 			const canonical = await fetch(
 				`${bucket}${encodeURIComponent('registrations/customer-rules/canonical.png')}?alt=media`,
 				{ headers },
 			);
-			expect(canonical.status).toBe(allowed ? 200 : 403);
+			expect(canonical.status).toBe(qrAllowed ? 200 : 403);
 			const unsupported = await fetch(
 				`${bucket}${encodeURIComponent('registrations/customer-rules.png')}?alt=media`,
 				{ headers },

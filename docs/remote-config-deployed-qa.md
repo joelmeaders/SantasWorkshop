@@ -1,167 +1,148 @@
 # Remote Config deployed release QA
 
-Run started September 7, 2026. The user authorized test environment repair,
-blocking code fixes through a pull request, and production deployment after test
-validation. The starting merged commit is
-`e3f20e059fead009b3d60af9ceccfa7c3796507c` (PR #160).
+Completed September 7, 2026. The customer app, admin app, Functions and rules
+were promoted to production from validated code commit
+`d19274f7909c004c69e8ab341f0f1650a080c2a4`. PR #161 remains open for review;
+deployment does not imply that the PR was merged.
 
-## Environment and evidence boundaries
+## Deployment evidence
 
-- Test project: `santas-workshop-test`.
-- Customer: `https://test.denversantaclausshop.org/`.
-- Admin: `https://santas-workshop-test.web.app/`.
-- Browsers: Chrome and the Codex in-app browser.
-- Use new, labeled QA accounts. The existing Chrome customer session is not
-  verified as disposable and must not be changed by this run.
-- Production customer records and existing identities are outside this QA run.
-- Mail queue acknowledgment is not proof of delivery. Camera permission or
-  manual-code success is not proof of camera decoding.
+| Component           | Production workflow                                                                   | Result |
+| ------------------- | ------------------------------------------------------------------------------------- | ------ |
+| Functions and rules | [34159707238](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34159707238) | Passed |
+| Customer app        | [34160079129](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34160079129) | Passed |
+| Admin app           | [34160081431](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34160081431) | Passed |
 
-## Deployment baseline
+All manual deployments used `skip_tests=true`, as requested. The five PR gates
+passed before promotion. Build, configuration, Hosting and deployment checks
+still ran. Later commits update evidence only; the deployed code SHA above is
+unchanged.
 
-| Component | Workflow run | Result |
-| --- | --- | --- |
-| Customer | 34149572084 | Passed |
-| Admin | 34149572079 | Passed |
-| Functions and rules | 34149572134 | Tests passed; deploy blocked by quota before live changes |
+Production verification:
 
-The first admin page inspection showed `2026.09.0-beta.2`. Deployed acceptance
-must wait for the intended versions and backend deployment.
+- Live inventory matches all 40 source Functions. Five Scheduler jobs, one task
+  queue and one Eventarc trigger passed the managed-resource checks.
+- The deployed gateway and all six consumers pass the Remote Config readiness
+  check. Quota is 60 template reads per minute; the required budget is 60. An
+  anonymous request to the private gateway returned HTTP 403.
+- Remote Config remains version 52 with registration disabled and maintenance
+  enabled. The legacy Firestore settings document still has update time
+  `2026-01-01T23:34:17.538668Z`.
+- The production customer page renders its maintenance notice. Its Remote Config
+  fetch returned HTTP 200 for `santas-workshop-193b5`.
+- The production admin page renders the sign-in form and
+  `@santashop/admin_PROD 2026.09.0-beta.3`. Both pages were visually inspected;
+  their initial browser warning/error logs were empty.
+- Production checks were read-only. No production QA accounts were created and
+  no preexisting customer records were changed or deleted.
 
-## Journey evidence
+See [production setup](remote-config-production-setup.md) for IAM and ETag-protected
+publication evidence. These results establish deployment and a read-only smoke
+check, not authenticated production journeys or load acceptance.
 
-| Area | Roles and checks | Result |
-| --- | --- | --- |
-| Entry controls | English/Spanish, registration, account creation, maintenance, weather and global alert | Bilingual maintenance/global alert displayed; weather delivered without reload in the 16–42 second observation interval; account-creation-off changed the underlying home; stale closure overlay defect found |
-| Authentication | Invalid login, protected routes, sign-in/out, reload, password reset request | Invalid login, sign-in/out and reload passed; password reset pending |
-| Onboarding | Field validation, referral, consent controls, persisted customer | Not run |
-| Account | Name/ZIP edit, validation, persistence | Name/ZIP update and reload passed; short ZIP rejected with translated message |
-| Children | Add/edit/remove disposable children, ages, preferences, cancel modal | Add, edit and remove passed; age 0–2 omitted toy choice; one valid child enabled scheduling |
-| Registration | Date selection, review, submit, ticket, reschedule, cancel/re-register, QR identity | Appointment flows passed; reschedule retained QR; cancel/re-register rotated code, contrary to documented stable-code requirement; investigation pending |
-| Staff authorization | Customer, check-in, ordinary admin, owner routes and controls | Not run |
-| Staff search | Email, name/ZIP, code, no matches, detail | Email and name/ZIP found the isolated household; current code opened its detail |
-| Check-in | Invalid/cancelled code, review, coupons, success, duplicate protection | Invalid/cancelled code rejection, success with one coupon and immediate duplicate protection passed; physical camera decoding unavailable |
-| Staff registration | Pre-registration and on-site registration with disposable data | Owner pre-registration and on-site registration passed; check-in-only UI exposed forbidden registration links, repair pending deployment |
-| Email | Single QA recipient resend and queue state | Not run |
-| Schedules | Read, year/filter, isolated fixture create/edit/delete | Read/year filtering passed; past-year generation rejected; current-year initialization confirmation cancelled without mutation |
-| Templates | Isolated draft create/edit/preview/revision and safeguards | QA template created, revision 1 published and loaded over revision 2 draft; preview and cancel-delete passed; test-send acknowledged, delivery unverified |
-| Staff management | Disposable identity lifecycle and claims refresh | List/refresh and isolated staff display-name edit passed; permission changes and password changes not exercised |
-| Owner settings | Read, publish, conflict, real-time delivery, backend convergence, restore | Read/publish/conflict passed after repairs; live delivery stalled after initial success; watchdog repair awaiting deployment; version 48 restored original version 41 values |
-| Owner operations | Preview and safeguards; do not reset shared test data | Preview passed; no reset executed |
-| Statistics | Reports, year/filter, refresh and scan-risk details | Registration/check-in/user reports read successfully; cancelled-code timeline showed the correct isolated customer |
-| Presentation | Desktop/mobile, keyboard/modal behavior, Spanish | Spanish ticket, event details, account menu and help modal inspected; mobile and full keyboard checks pending |
-| Update recovery | Visible version, reload, cache boundaries and download failure behavior | Update prompt reload completed and dismissed the prompt; custom-origin sign-in later stalled with reCAPTCHA asset HTTP 504; same credentials worked immediately on fresh Hosting origin |
+## Test environment and automated validation
 
-## Release status
+Test project: `santas-workshop-test`. Customer routes were exercised on
+`test.denversantaclausshop.org` and `santashop-app-test.web.app`; admin routes on
+`santas-workshop-test.web.app` and its `firebaseapp.com` alias. Browsers were
+Chrome and the Codex in-app browser. The existing Chrome customer record was
+not treated as disposable and was not changed.
 
-Production is not deployed by this run. The quota repair uses a private singleton
-gateway with no persistent settings copy and unchanged consumer capacity. It is
-deployed to test. Six sampled gateway requests returned HTTP 200 in 165–214 ms;
-this is smoke evidence, not a load test. Remaining repairs and live validation
-are in progress. No skipped or blocked journey counts as passed.
+The five PR gates passed on the deployed code SHA:
 
-Admin deployment completed at 18:05 UTC. The user cleared the browser cache; the next DOM inspection showed beta.3. This verifies the version after cache clearing, not normal update recovery.
+| Validation                           | Result                               |
+| ------------------------------------ | ------------------------------------ |
+| Customer emulator browser suite      | 50 passed                            |
+| Admin emulator browser suite         | 83 passed                            |
+| Functions unit tests                 | 425 passed                           |
+| Functions emulator integration tests | 34 passed                            |
+| Shared core tests                    | 174 passed                           |
+| Customer unit tests                  | 164 passed                           |
+| Admin unit tests                     | 320 passed                           |
+| Storybook interaction tests          | 91 passed in each app validation job |
+| Storybook visual gate                | Passed                               |
 
-Test fixture bootstrap: UID qa-rc-20260907-owner, owner=true and roles admin/checkin. Exact project number 312672416598 was checked before writes. Auth and staff creation were verified. No existing identity was edited. Customer Hosting workflow 34149572084 and admin Hosting workflow 34149572079 completed successfully.
+The Functions integration gate also ran both browser suites. These are emulator
+and CI results, separate from the live checks below. Relevant focused local tests
+ran before code was submitted. An earlier local STAFF-006 attempt failed during
+emulator setup before assertions; it is not counted as passed. The later complete
+admin CI suite passed.
 
+## Live journey evidence
 
-Repair validation before PR: 420 Functions unit tests across 65 files and 34 emulator integration tests across 20 files passed. Functions webpack build, lint, frozen-lockfile validation, and the revised test quota/identity preflight passed. Emulator environment files were restored byte-for-byte and owned servers stopped. These results do not count as deployed acceptance.
+| Area                             | Observed result                                                                                                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Authentication                   | Invalid credentials rejected; correct sign-in, sign-out and session retention after reload passed. Protected routes redirected as expected.                                                                                           |
+| Public onboarding                | Invalid ZIP/email and password mismatch rejected; referral controls exercised. Final submission was not completed because legal acceptance awaited the user's confirmation.                                                           |
+| Customer account                 | Name and ZIP edits persisted after reload. Invalid ZIP showed the translated error and disabled Save.                                                                                                                                 |
+| Children                         | Added, edited and removed only labeled QA children. Ages 0–2 omitted toy choice. One valid child enabled appointment selection.                                                                                                       |
+| Registration                     | Selected an appointment, reviewed child/email/date details, submitted and loaded the ticket. Rescheduling retained the QR URL.                                                                                                        |
+| Cancellation and re-registration | Cancellation returned to the overview without reload and retained the child. Re-registration loaded the exact same QR URL, including download token, as a 600-pixel image.                                                            |
+| Staff authorization              | Check-in-only staff saw Home, Check-In and Search. Direct on-site and pre-registration URLs returned to the staff home. Ordinary admin had no owner settings links and could not open the owner editor.                               |
+| Staff search                     | Email and name/ZIP found the isolated household; the current code opened the correct review details.                                                                                                                                  |
+| Check-in                         | A labeled pre-registered household checked in with one coupon. An immediate repeat was blocked. Invalid codes were rejected. After cancellation, the same stable customer code showed “Canceled registration code” and blocked entry. |
+| Staff registration               | Owner pre-registration and on-site registration completed for labeled QA households. The forbidden check-in-only registration form was fixed and its route guards passed live retesting.                                              |
+| Schedules                        | Read and year filters passed. Past-year generation was rejected. Current-year initialization was cancelled at its explicit confirmation; no schedule was created or deleted.                                                          |
+| Templates                        | Created an isolated QA template, published revision 1 and confirmed it loaded over revision 2 draft. Preview and cancel-delete passed. Test-send was acknowledged; inbox delivery was not verified.                                   |
+| Staff management                 | List/refresh and a QA staff display-name edit passed. Roles were established as authorized test fixtures, not counted as successful permission-grant UI actions.                                                                      |
+| Owner settings                   | Read, publish, reload and stale-version conflict rejection passed. A rejected draft retained its edits. Maintenance, weather and registration-closure notices changed and dismissed without reloading the customer page.              |
+| Other controls                   | Turning check-in off disabled both its link and tab. Turning account creation off retained Sign In and removed the new-account action.                                                                                                |
+| Owner operations                 | Preview passed. No annual reset was executed.                                                                                                                                                                                         |
+| Reports                          | Registration, check-in and user reports loaded. The scan-risk timeline showed the correct isolated cancelled registration.                                                                                                            |
+| Language and layout              | Spanish ticket, event details, account menu and help modal were inspected. A 390-by-844 mobile overview had no horizontal overflow.                                                                                                   |
+| Update recovery                  | Normal update prompts reloaded both apps and retained sessions. An initial staff retry during worker transition failed; a later ordinary reload/retry recovered with the same credentials.                                            |
 
-At 18:44 UTC, manual test deployment 34152350919 completed at db40124 with
-`skip_tests=true`. It verified all 40 production Functions, five Scheduler jobs,
-one task queue, one Eventarc trigger, and Remote Config version 41. Customer
-34152352962 and admin 34152355365 also passed. The retry required a scoped
-service-account-user binding for the CI identity on the test App Engine default
-service account.
+The run owns the `qa-rc-20260907-*` fixtures and the explicitly labeled browser
+pre-registration/on-site households. The CLI customer fixture did not store legal
+acceptance and is not evidence of public onboarding. The final customer fixture
+is cancelled after the blocked-code retest. No shared test cleanup was run.
 
-Live QA findings and partial evidence:
+## Repairs verified
 
-- The isolated owner signed in and saw the expected owner navigation. The 2026
-  schedule contains enabled December 12, 13, 15, and 16 slots.
-- Both sites showed the update-ready prompt. Dismissing it left the pages usable;
-  this does not yet prove the full update lifecycle.
-- Owner settings failed: `/readPublicParametersSettings` returned HTTP 200 with
-  `text/html`, because both settings callables lacked admin Hosting rewrites.
-  The repair adds both routes and a local regression test (passed).
-- Onboarding rejected malformed email, short ZIP, and mismatched passwords.
-  The ZIP error exposed `FORM_ERRORS.PATTERN`; English and Spanish messages were
-  added. Custom Other referral selection saved successfully for a valid answer.
-- Public sign-up submission is pending action-time consent confirmation. API
-  fixture setup, if used for subsequent journeys, is not sign-up UI evidence.
+- Replaced unsupported direct template polling with a private singleton gateway,
+  while retaining consumer capacity and validated settings/default continuity.
+- Added owner callable Hosting routes and fixed the initialized Admin SDK client.
+- Serialized notice transitions and preserved initial cached closure state in
+  minified builds.
+- Preserved QR code/image identity across cancellation and fixed navigation that
+  had raced the refreshed registration state.
+- Restricted staff registration routes and links to the intended admin role.
+- Added missing ZIP validation translations.
+- Allowed the two external script origins in worker fetch CSP and versioned the
+  worker URL so installed workers can obtain the updated policy.
+- Added the exact alternate test admin hostname to the reCAPTCHA allowlist,
+  retaining `allowAllDomains: false` and all prior domains. Chrome then loaded
+  the protected owner settings page at version 61 on that hostname. The IAB
+  session received an attestation failure and the SDK's 24-hour throttle; no
+  security protection was disabled to bypass it.
 
-At 19:30 UTC, the latest deployed Functions repair is `6c0b8b2` (run
-34153534488). The owner callables now use the initialized Admin SDK instance;
-the previous mixed-module import failed with `app/no-app`. Its cold-start
-regression test passed locally. Owner publish/read, stale ETag conflict rejection,
-and retention of unsaved edits passed in the browser. The legacy Firestore
-settings document remains untouched.
+## Remaining limits
 
-Both Chrome and the in-app browser later held an open real-time stream without
-receiving new settings. A normal reload fetched current values. Commit
-`cd1f51f` adds a visible 60-second client-fetch watchdog while retaining stream
-updates, hidden-page pauses and failure backoff. Its 174 core tests passed
-locally. This fallback does not establish the healthy-stream 10-second target.
-Test deployment 34155576662 is in progress.
+**The ten-second live settings delivery target is not met.** In Chrome, a stream
+started at 20:28:39.737 UTC, version 59 was published at 20:28:56.171, and the first
+43-byte stream chunk arrived at 20:29:36.236. The follow-up settings fetch completed
+about 3.2 seconds later. HTTP 200 at stream establishment alone is not an
+invalidation event.
 
-Temporary settings were restored as Remote Config version 48 and compared with
-the saved version 41 settings: all fields match. Test registration, account
-creation, check-in, pre-registration, cancellation and rescheduling are enabled;
-maintenance, weather closure and the global alert are off. Spanish maintenance
-and global-alert text displayed correctly; weather and account-creation switch
-delivery still require a retest after the watchdog deployment.
+A separate diagnostic bypassing worker handling also missed ten seconds; normal
+worker handling was restored afterward. SDK source confirms real-time fetches
+bypass the minimum interval. Ordinary fallback fetches can take roughly 120
+seconds because the first 60-second attempt may still use the SDK cache. Firebase
+provides no numeric ten-second SLA in its [real-time documentation](https://firebase.google.com/docs/remote-config/web/real-time).
+The live checks prove eventual delivery and notice recovery, not that target.
 
-Fixture scope: this run owns `qa-rc-20260907-owner`, `qa-rc-20260907-admin`,
-`qa-rc-20260907-checkin` and `qa-rc-20260907-customer`, plus the labeled browser
-pre-registration and on-site households. The CLI customer fixture did not store
-legal acceptance and does not count as successful public onboarding. Camera
-decoding, inbox delivery, credential changes and permission-grant UI steps remain
-unverified. Current-year schedule generation was cancelled at its explicit
-initialization confirmation; no schedule was created or deleted.
+Other limits:
 
-Further live findings at 19:40 UTC:
+- Physical camera decoding, actual inbox delivery, password changes, password
+  reset completion and permission-grant UI actions were not verified.
+- Public signup legal acceptance awaited user confirmation. It was not bypassed.
+- Current-year schedule initialization was deliberately cancelled at confirmation.
+- Six test gateway samples returned HTTP 200 in 165–214 ms. This is smoke evidence,
+  not a burst, replacement, quota-churn or load test.
+- Production verification did not sign in or change customer data.
+- Local `.env` contains a stale production Firebase key. The deployed production
+  bundle uses the correctly restricted Browser key; CI consumes its GitHub
+  secret. Local environment drift was not treated as proof of a CI defect.
 
-- The weather notice arrived without reload between the 16- and 42-second
-  observations after version 49 publication. Clearing weather and disabling
-  account creation updated the underlying home, but the old blocking notice
-  stayed open. This is a separate UI dismissal defect, not evidence that every
-  later settings update failed to arrive. The production bundle minifies the
-  component name used by the dismissal check. A repair passed eight focused
-  local app tests, including initial maintenance and rapid state changes.
-- The same customer credentials signed in successfully on the fresh
-  `santashop-app-test.web.app` origin. The custom-origin browser recorded
-  repeated HTTP 504 failures for the external reCAPTCHA JavaScript asset before
-  its long sign-in failures. The generic incorrect-credentials message does not
-  establish that the credentials were wrong.
-- Settings are restored as version 52. A fresh API snapshot compared equal to
-  the original version 41 settings across all fields.
-- QR stability repair: 10 focused Functions unit tests and one cancellation
-  emulator integration test passed. Cancellation preserves the code and image;
-  live re-registration validation awaits test deployment.
-- Staff route repair: 15 focused admin tests passed. The attempted focused
-  STAFF-006 emulator run was blocked by local function-discovery environment
-  propagation before assertions; it is not counted as a test pass.
-
-Follow-up findings and repairs:
-
-- The external script 504 responses had `fromServiceWorker: true`. Hosting CSP
-  allowed their script loads but omitted their origins from `connect-src`, which
-  applies to worker fetches. Both policies now allow the two exact script
-  origins; three Hosting regression tests passed. Existing installed workers
-  retain the old policy, so the release also needs a versioned worker URL.
-- Ordinary admin sign-in succeeded on the fresh admin Hosting origin. Owner
-  settings and operations links were hidden, and direct owner settings navigation
-  returned to the admin home. The second sign-in after a reload hit the worker
-  policy defect; check-in-only navigation awaits that repair's retest.
-- Backend test deployment 34156585873 passed at `f74d7cf`. Live cancellation now
-  preserved code `C9UHHVLP` and its existing Storage path. A separate UI race kept
-  the old ticket open: navigation checked stale completion state before the
-  refresh arrived. The fix waits for the replayed incomplete state after backend
-  success, with a ten-second timeout. Five focused confirmation tests passed,
-  including backend failure and stale-to-current state transitions.
-- The customer update prompt successfully reloaded the signed-in Spanish ticket
-  and retained the session. The Spanish overview was inspected at 390 by 844 CSS
-  pixels with no horizontal overflow. Account and help navigation also worked.
-- CI exercised 45 customer E2E tests before an old cancellation-image assertion
-  failed. The revised test requires stable code, path, image bytes and download
-  token while preserving cancelled-state and search-index checks. Local QR unit
-  tests and Playwright discovery passed; the full CI rerun remains required.
+All temporary test settings were restored as Remote Config version **61**. A fresh
+API snapshot compared equal to the original version 41 settings across all fields.

@@ -125,8 +125,8 @@ The gateway, six migrated mutation functions, and owner read callable use
 
 - Project `roles/cloudconfig.viewer`, `roles/datastore.user`, and
   `roles/logging.logWriter`.
-- Bucket `roles/storage.objectUser` on the project's QR bucket. Cancellation
-  replaces existing QR images, so object-creator permission alone is insufficient.
+- Bucket `roles/storage.objectUser` on the project's QR bucket. The release
+  readiness check requires read/write access to registration objects.
   The readiness gate requires an unconditional binding because it does not
   evaluate IAM conditions. A narrower grant restricted to `registrations/`
   requires separate permission evidence and a reviewed gate update.

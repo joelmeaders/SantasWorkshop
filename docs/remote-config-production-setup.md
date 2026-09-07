@@ -2,8 +2,9 @@
 
 Completed on **2026-09-07** for project **`santas-workshop-193b5`**
 (project number **`397997267986`**). This setup used the existing production
-IAM policy and preserved unrelated bindings. No Functions, app, Hosting, or
-Rules deployment was run.
+IAM policy and preserved unrelated bindings. This prerequisite step did not
+deploy code. The later successful production deployments are recorded in the
+[deployed QA report](remote-config-deployed-qa.md).
 
 ## Remote Config publication
 
@@ -33,14 +34,14 @@ The legacy Firestore document was read only and was not changed.
 
 These dedicated service accounts were created and verified enabled:
 
-| Account | Direct project roles |
-| --- | --- |
-| `remote-config-reader@santas-workshop-193b5.iam.gserviceaccount.com` | `roles/cloudconfig.viewer`, `roles/datastore.user`, `roles/logging.logWriter` |
-| `remote-config-publisher@santas-workshop-193b5.iam.gserviceaccount.com` | `roles/cloudconfig.admin`, `roles/logging.logWriter` |
+| Account                                                                 | Direct project roles                                                          |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `remote-config-reader@santas-workshop-193b5.iam.gserviceaccount.com`    | `roles/cloudconfig.viewer`, `roles/datastore.user`, `roles/logging.logWriter` |
+| `remote-config-publisher@santas-workshop-193b5.iam.gserviceaccount.com` | `roles/cloudconfig.admin`, `roles/logging.logWriter`                          |
 
 The reader has an unconditional `roles/storage.objectUser` binding on
-`gs://santas-workshop-193b5.appspot.com` so cancellation can replace QR
-objects.
+`gs://santas-workshop-193b5.appspot.com`, as required by the release readiness
+check for registration object access.
 
 The existing CI deployment identity
 `github-action-298411435@santas-workshop-193b5.iam.gserviceaccount.com` has

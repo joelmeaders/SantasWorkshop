@@ -32,6 +32,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 - Limit staff registration navigation and direct routes to administrators.
 - Preserve confirmation codes and QR images when cancelling and registering again.
 - Translate ZIP pattern-validation messages in English and Spanish.
+- Permit service-worker fetches of authentication scripts and replace workers that retain the old policy.
+- Wait for refreshed cancellation state before returning customers to registration.
 
 ## [2026.09.0-beta.2] - Unreleased
 

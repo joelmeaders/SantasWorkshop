@@ -22,6 +22,7 @@ import {
 } from './app/core/tokens/customer-runtime.token';
 import type { CustomerAppConfig } from './app/core/tokens/customer-runtime.token';
 import { httpsCallable } from 'firebase/functions';
+import { config } from './config';
 
 export type { CustomerAppConfig } from './app/core/tokens/customer-runtime.token';
 
@@ -55,6 +56,9 @@ export interface CustomerApplication {
 }
 
 const FUNCTIONS_REGION = 'us-central1';
+
+export const getServiceWorkerScriptUrl = (version: string): string =>
+	`ngsw-worker.js?v=${encodeURIComponent(version)}`;
 
 export const bootstrapCustomerApplication = (
 	appConfig: CustomerAppConfig,
@@ -116,11 +120,14 @@ export const bootstrapCustomerApplication = (
 
 	return bootstrap(application.rootComponent, {
 		providers: [
-			provideServiceWorker('ngsw-worker.js', {
-				enabled: appConfig.production,
-				registrationStrategy: 'registerWhenStable:30000',
-				updateViaCache: 'none',
-			}),
+			provideServiceWorker(
+				getServiceWorkerScriptUrl(config.version),
+				{
+					enabled: appConfig.production,
+					registrationStrategy: 'registerWhenStable:30000',
+					updateViaCache: 'none',
+				},
+			),
 			provideRouter(application.routes),
 			provideHttpClient(withXhr(), withInterceptorsFromDi()),
 			provideIonicAngular({ mode: 'md', animated: true }),

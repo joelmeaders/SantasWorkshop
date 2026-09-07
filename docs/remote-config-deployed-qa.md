@@ -140,3 +140,28 @@ Further live findings at 19:40 UTC:
 - Staff route repair: 15 focused admin tests passed. The attempted focused
   STAFF-006 emulator run was blocked by local function-discovery environment
   propagation before assertions; it is not counted as a test pass.
+
+Follow-up findings and repairs:
+
+- The external script 504 responses had `fromServiceWorker: true`. Hosting CSP
+  allowed their script loads but omitted their origins from `connect-src`, which
+  applies to worker fetches. Both policies now allow the two exact script
+  origins; three Hosting regression tests passed. Existing installed workers
+  retain the old policy, so the release also needs a versioned worker URL.
+- Ordinary admin sign-in succeeded on the fresh admin Hosting origin. Owner
+  settings and operations links were hidden, and direct owner settings navigation
+  returned to the admin home. The second sign-in after a reload hit the worker
+  policy defect; check-in-only navigation awaits that repair's retest.
+- Backend test deployment 34156585873 passed at `f74d7cf`. Live cancellation now
+  preserved code `C9UHHVLP` and its existing Storage path. A separate UI race kept
+  the old ticket open: navigation checked stale completion state before the
+  refresh arrived. The fix waits for the replayed incomplete state after backend
+  success, with a ten-second timeout. Five focused confirmation tests passed,
+  including backend failure and stale-to-current state transitions.
+- The customer update prompt successfully reloaded the signed-in Spanish ticket
+  and retained the session. The Spanish overview was inspected at 390 by 844 CSS
+  pixels with no horizontal overflow. Account and help navigation also worked.
+- CI exercised 45 customer E2E tests before an old cancellation-image assertion
+  failed. The revised test requires stable code, path, image bytes and download
+  token while preserving cancelled-state and search-index checks. Local QR unit
+  tests and Playwright discovery passed; the full CI rerun remains required.

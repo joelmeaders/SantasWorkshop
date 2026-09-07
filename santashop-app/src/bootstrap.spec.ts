@@ -11,8 +11,10 @@ import {
 	BootstrapApplication,
 	CustomerAppConfig,
 	FirebaseBootstrapDependencies,
+	getServiceWorkerScriptUrl,
 	startCustomerApplication,
 } from './bootstrap';
+import { config } from './config';
 
 const appConfig: CustomerAppConfig = {
 	production: false,
@@ -163,6 +165,15 @@ describe('bootstrapCustomerApplication', () => {
 		expect(mocks['getAnalytics']).toHaveBeenCalledWith({ name: 'firebase-app' });
 		expect(enableProductionMode).toHaveBeenCalledOnce();
 		expect(mocks['connectAuthEmulator']).toHaveBeenCalledTimes(1);
+	});
+
+	it('keys the service-worker script URL to the configured release version', () => {
+		expect(getServiceWorkerScriptUrl(config.version)).toBe(
+			'ngsw-worker.js?v=2026.09.0-beta.3',
+		);
+		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
+			getServiceWorkerScriptUrl(config.version),
+		);
 	});
 
 	it('reports bootstrap rejection without leaving an unhandled promise', async (): Promise<void> => {

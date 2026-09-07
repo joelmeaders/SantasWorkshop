@@ -28,6 +28,13 @@ const refreshPublicParameters = async (page: Page): Promise<void> => {
 	await page.evaluate(() => window.dispatchEvent(new Event('online')));
 };
 
+const requireQrDownloadToken = (source: string | null): string => {
+	if (!source) throw new Error('Registration QR source is unavailable.');
+	const token = new URL(source).searchParams.get('token');
+	if (!token) throw new Error('Registration QR download token is unavailable.');
+	return token;
+};
+
 const expectSignInToBeRejected = async (
 	page: Page,
 	credentials: { emailAddress: string; password: string },
@@ -605,10 +612,14 @@ test.describe('customer registration lifecycle', () => {
 			{ timeout: 15000 },
 		);
 		const originalQrSource = await page.locator('#registrationQrCode').getAttribute('src');
+		const originalQrDownloadToken = requireQrDownloadToken(originalQrSource);
 		const beforeCancellation = await inspectRegistrationQrLifecycle(
 			account.emailAddress,
 		);
+		expect(beforeCancellation.current.code).toBeTruthy();
+		expect(beforeCancellation.current.path).toBeTruthy();
 		expect(beforeCancellation.current.object.exists).toBe(true);
+		expect(beforeCancellation.current.object.md5Hash).toBeTruthy();
 		expect(beforeCancellation.current.object.cacheControl).toBe(
 			'no-store, max-age=0, must-revalidate',
 		);
@@ -667,11 +678,23 @@ test.describe('customer registration lifecycle', () => {
 		expect(afterCancellation.latestCancellation?.supersededPath).toBe(
 			beforeCancellation.current.path,
 		);
+		expect(afterCancellation.latestCancellation?.supersededCode).toBe(
+			beforeCancellation.current.code,
+		);
+		expect(afterCancellation.latestCancellation?.replacementCode).toBe(
+			beforeCancellation.current.code,
+		);
 		expect(afterCancellation.latestCancellation?.replacementPath).toBe(
-			afterCancellation.current.path,
+			beforeCancellation.current.path,
 		);
 		expect(afterCancellation.latestCancellation?.supersededObject.exists).toBe(true);
 		expect(afterCancellation.latestCancellation?.replacementObject.exists).toBe(true);
+		expect(afterCancellation.latestCancellation?.supersededObject.md5Hash).toBe(
+			beforeCancellation.current.object.md5Hash,
+		);
+		expect(afterCancellation.latestCancellation?.replacementObject.md5Hash).toBe(
+			beforeCancellation.current.object.md5Hash,
+		);
 		expect(afterCancellation.latestCancellation?.supersededObject.cacheControl).toBe(
 			'no-store, max-age=0, must-revalidate',
 		);
@@ -680,9 +703,7 @@ test.describe('customer registration lifecycle', () => {
 		);
 		expect(afterCancellation.latestCancellation?.supersededObject.width).toBe(600);
 		expect(afterCancellation.latestCancellation?.supersededObject.height).toBe(600);
-		expect(afterCancellation.latestCancellation?.supersededObject.matchesCancelledAsset).toBe(
-			true,
-		);
+		expect(afterCancellation.latestCancellation?.supersededObject.matchesCancelledAsset).toBe(false);
 		expect(afterCancellation.latestCancellation?.replacementObject.cacheControl).toBe(
 			'no-store, max-age=0, must-revalidate',
 		);
@@ -691,10 +712,13 @@ test.describe('customer registration lifecycle', () => {
 		);
 		expect(afterCancellation.latestCancellation?.replacementObject.width).toBe(600);
 		expect(afterCancellation.latestCancellation?.replacementObject.height).toBe(600);
-		expect(afterCancellation.latestCancellation?.replacementObject.matchesCancelledAsset).toBe(
-			false,
+		expect(afterCancellation.latestCancellation?.replacementObject.matchesCancelledAsset).toBe(false);
+		expect(afterCancellation.current.code).toBe(beforeCancellation.current.code);
+		expect(afterCancellation.current.path).toBe(beforeCancellation.current.path);
+		expect(afterCancellation.current.object.md5Hash).toBe(
+			beforeCancellation.current.object.md5Hash,
 		);
-		expect(afterCancellation.current.code).not.toBe(beforeCancellation.current.code);
+		expect(afterCancellation.current.object.matchesCancelledAsset).toBe(false);
 		expect(afterCancellation.registration.hasSubmittedRegistration).toBe(false);
 		expect(afterCancellation.registration.cancelled).toBe(true);
 		expect(afterCancellation.searchIndex.exists).toBe(false);
@@ -714,17 +738,18 @@ test.describe('customer registration lifecycle', () => {
 		);
 		const replacementQrSource = await page.locator('#registrationQrCode').getAttribute('src');
 		expect(replacementQrSource).toBeTruthy();
-		expect(replacementQrSource).not.toBe(originalQrSource);
+		expect(replacementQrSource).toBe(originalQrSource);
+		expect(requireQrDownloadToken(replacementQrSource)).toBe(originalQrDownloadToken);
 		const afterResubmission = await inspectRegistrationQrLifecycle(
 			account.emailAddress,
 		);
-		expect(afterResubmission.current.path).toBe(
-			afterCancellation.latestCancellation?.replacementPath,
-		);
-		expect(afterResubmission.current.code).toBe(
-			afterCancellation.latestCancellation?.replacementCode,
-		);
+		expect(afterResubmission.current.path).toBe(beforeCancellation.current.path);
+		expect(afterResubmission.current.code).toBe(beforeCancellation.current.code);
 		expect(afterResubmission.current.object.exists).toBe(true);
+		expect(afterResubmission.current.object.md5Hash).toBe(
+			beforeCancellation.current.object.md5Hash,
+		);
+		expect(afterResubmission.current.object.matchesCancelledAsset).toBe(false);
 		expect(afterResubmission.registration.hasSubmittedRegistration).toBe(true);
 		expect(afterResubmission.registration.cancelled).toBe(false);
 		expect(afterResubmission.searchIndex.exists).toBe(true);

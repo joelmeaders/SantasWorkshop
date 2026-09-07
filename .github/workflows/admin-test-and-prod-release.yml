@@ -7,6 +7,10 @@ name: Admin Test Deploy and Manual Prod Release
       - 'santashop-admin/**'
       - 'santashop-core/**'
       - 'santashop-models/**'
+      - 'remote-config/**'
+      - 'scripts/remote-config*.cjs'
+      - 'scripts/public-parameters-schema.cjs'
+      - 'scripts/verify-public-parameters.cjs'
       - 'angular.json'
       - 'vitest.config.mjs'
       - 'vitest.setup.ts'
@@ -122,6 +126,10 @@ jobs:
       - run: pnpm run ci:admin:config:test
       - run: pnpm run ci:core:test
       - run: pnpm run ci:admin:test
+      - name: Load validated test Remote Config release defaults
+        env:
+          REMOTE_CONFIG_SERVICE_ACCOUNT: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''TEST'')] }}'
+        run: node scripts/remote-config.cjs release-defaults --project santas-workshop-test
       - run: pnpm run ci:admin:build:test
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -196,6 +204,10 @@ jobs:
       - run: pnpm run ci:admin:config:prod
       - run: pnpm run ci:core:test
       - run: pnpm run ci:admin:test
+      - name: Load validated production Remote Config release defaults
+        env:
+          REMOTE_CONFIG_SERVICE_ACCOUNT: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''193B5'')] }}'
+        run: node scripts/remote-config.cjs release-defaults --project santas-workshop-193b5
       - run: pnpm run ci:admin:build:prod
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:

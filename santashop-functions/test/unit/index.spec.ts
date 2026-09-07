@@ -160,6 +160,51 @@ describe('functions index exports', () => {
 		}
 	});
 
+	it('isolates configuration readers and publisher without changing other callable identities', async () => {
+		delete process.env.FUNCTIONS_EMULATOR;
+		const subject = await import('../../src/index');
+		const readers = [
+			subject.completeRegistration,
+			subject.saveDraftChild,
+			subject.deleteDraftChild,
+			subject.setDraftAppointment,
+			subject.undoRegistration,
+			subject.changeRegistrationDateTime,
+			subject.readPublicParametersSettings,
+		] as unknown as Array<{ options: Record<string, unknown> }>;
+		for (const reader of readers)
+			expect(reader.options.serviceAccount).toBe(
+				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
+					'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
+			);
+		expect(
+			(
+				subject.publishPublicParametersSettings as unknown as {
+					options: Record<string, unknown>;
+				}
+			).options.serviceAccount,
+		).toBe(
+			process.env['SANTASHOP_REMOTE_CONFIG_PUBLISHER_SERVICE_ACCOUNT'] ??
+				'remote-config-publisher@santas-workshop-test.iam.gserviceaccount.com',
+		);
+		expect(
+			(
+				subject.newAccount as unknown as {
+					options: Record<string, unknown>;
+				}
+			).options,
+		).not.toHaveProperty('serviceAccount');
+	});
+	it('does not attach Remote Config identities in the emulator', async () => {
+		process.env.FUNCTIONS_EMULATOR = 'true';
+		const subject = await import('../../src/index');
+		for (const callable of [
+			subject.completeRegistration,
+			subject.readPublicParametersSettings,
+			subject.publishPublicParametersSettings,
+		] as unknown as Array<{ options: Record<string, unknown> }>)
+			expect(callable.options).not.toHaveProperty('serviceAccount');
+	});
 	it('uses the private Firebase IAM default for the task queue worker', async () => {
 		const subject = await import('../../src/index');
 		const worker = subject.ownerOperationWorker as unknown as {

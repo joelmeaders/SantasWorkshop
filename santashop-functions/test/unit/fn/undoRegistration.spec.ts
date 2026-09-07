@@ -35,7 +35,7 @@ describe('undoRegistration handler', () => {
 			registrationSubmittedOn: new Date('2025-12-01T00:00:00.000Z'),
 			includedInCounts: true,
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowCancelRegistration: true },
 		});
 		adminMock.setDocSnapshot(
@@ -91,7 +91,7 @@ describe('undoRegistration handler', () => {
 			cancellationLogId: 'cancel-log-1',
 			qrCodeStoragePath: 'registrations/user-4/replacement.png',
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowCancelRegistration: true },
 		});
 		adminMock.setDocSnapshot(
@@ -140,7 +140,7 @@ describe('undoRegistration handler', () => {
 			qrcode: 'ABCD2345',
 			qrCodeStoragePath: 'registrations/user-4/qr.png',
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowCancelRegistration: false },
 		});
 		adminMock.setDocSnapshot(
@@ -166,7 +166,7 @@ describe('undoRegistration handler', () => {
 				{ mutationId: 'cancel-user-0001' },
 				{ uid: 'user-4' },
 			);
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowCancelRegistration: true },
 		});
 		adminMock.setDocSnapshot(
@@ -205,7 +205,7 @@ describe('undoRegistration handler', () => {
 	it('refuses a retry-safe cancellation when its immutable cancellation log is unavailable', async () => {
 		const { undoRegistration } =
 			await loadAccountRegistrationHandlers(adminMock);
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowCancelRegistration: true },
 		});
 		adminMock.setDocSnapshot(
@@ -244,7 +244,7 @@ describe('undoRegistration handler', () => {
 			},
 			registrationSubmittedOn: new Date('2025-12-01T00:00:00.000Z'),
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			admin: { allowCancelRegistration: true },
 		});
 		adminMock.setDocSnapshot(

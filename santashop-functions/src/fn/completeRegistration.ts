@@ -1,10 +1,10 @@
+import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
 	EMAIL_TEMPLATE_KEYS,
 	type DateTimeSlot,
-	type PublicParameters,
 	type Registration,
 	type RegistrationSearchIndex,
 	type User,
@@ -42,7 +42,7 @@ export default async function completeRegistration(
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 	const userRef = db.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
-	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
+	const parameters = await getPublicParameters();
 	const emailRef = db
 		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
 		.doc();
@@ -52,17 +52,12 @@ export default async function completeRegistration(
 
 	try {
 		await db.runTransaction(async (transaction) => {
-			const [
-				registrationSnapshot,
-				userSnapshot,
-				parametersSnapshot,
-				receiptSnapshot,
-			] = await Promise.all([
-				transaction.get(registrationRef),
-				transaction.get(userRef),
-				transaction.get(parametersRef),
-				transaction.get(receiptRef),
-			]);
+			const [registrationSnapshot, userSnapshot, receiptSnapshot] =
+				await Promise.all([
+					transaction.get(registrationRef),
+					transaction.get(userRef),
+					transaction.get(receiptRef),
+				]);
 			const cached = getStoredMutationResult(
 				receiptSnapshot.exists
 					? (receiptSnapshot.data() as MutationReceipt)
@@ -80,9 +75,7 @@ export default async function completeRegistration(
 				} satisfies MutationReceipt);
 				return;
 			}
-			requireOpenPreRegistration(
-				parametersSnapshot.data() as PublicParameters | undefined,
-			);
+			requireOpenPreRegistration(parameters);
 			const registration = requireDraftRegistration(registrationData);
 			const user = userSnapshot.data() as User | undefined;
 			if (

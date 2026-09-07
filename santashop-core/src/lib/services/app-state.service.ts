@@ -3,7 +3,6 @@ import { Observable, Subject, of } from 'rxjs';
 import {
 	catchError,
 	distinctUntilChanged,
-	filter,
 	map,
 	shareReplay,
 	startWith,
@@ -33,7 +32,7 @@ export class AppStateService implements OnDestroy {
 		.matches;
 
 	/**
-	 * Observable of public parameters from Firestore.
+	 * Observable of validated public configuration.
 	 */
 	private readonly publicDoc$: Observable<PublicParameters> =
 		this.publicParametersSource.publicParameters$.pipe(
@@ -144,7 +143,7 @@ export class AppStateService implements OnDestroy {
 	 */
 	public readonly globalAlert$ = this.publicDoc$.pipe(
 		map((doc) => doc?.globalAlert ?? undefined),
-		filter((value) => !!value),
+		distinctUntilChanged((previous, current) => JSON.stringify(previous) === JSON.stringify(current)),
 		shareReplay(1),
 	);
 

@@ -64,7 +64,9 @@ describe('app routes', () => {
 
 		await expect(runGuard(guard)).resolves.toBe(true);
 		currentUser$.next(user({ roles: ['checkin'] }));
-		await expect(runGuard(guard)).resolves.toEqual({ commands: ['/admin'] });
+		await expect(runGuard(guard)).resolves.toEqual({
+			commands: ['/admin'],
+		});
 		currentUser$.next(user({}));
 		await expect(runGuard(guard)).resolves.toBe(true);
 	});
@@ -98,7 +100,9 @@ describe('app routes', () => {
 		const ownerGuard = ownerOperations?.canActivate?.[0] as CanActivateFn;
 
 		currentUser$.next(user({ roles: ['checkin'] }));
-		await expect(runGuard(adminGuard)).resolves.toEqual({ commands: ['/'] });
+		await expect(runGuard(adminGuard)).resolves.toEqual({
+			commands: ['/'],
+		});
 		currentUser$.next(user({ roles: ['admin', 'checkin'] }));
 		await expect(runGuard(adminGuard)).resolves.toBe(true);
 		await expect(runGuard(ownerGuard)).resolves.toEqual({
@@ -108,6 +112,22 @@ describe('app routes', () => {
 		await expect(runGuard(ownerGuard)).resolves.toBe(true);
 	});
 
+	it('restricts App settings to owners without a maintenance guard', async () => {
+		const shell = adminRoutes.find(
+			(route) => route.path === '' && route.loadComponent,
+		);
+		const settings = shell?.children?.find(
+			(route) => route.path === 'app-settings',
+		);
+		expect(settings?.canActivate).toHaveLength(1);
+		const guard = settings?.canActivate?.[0] as CanActivateFn;
+		currentUser$.next(user({ roles: ['admin'] }));
+		await expect(runGuard(guard)).resolves.toEqual({
+			commands: ['/admin/landing'],
+		});
+		currentUser$.next(user({ owner: true }));
+		await expect(runGuard(guard)).resolves.toBe(true);
+	});
 	it('declares every operational destination inside the lazy admin tree', async () => {
 		const shell = adminRoutes.find(
 			(route) => route.path === '' && route.loadComponent,

@@ -3,6 +3,7 @@ import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/com
 import { provideRouter, RouteReuseStrategy, Routes } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { provideServiceWorker } from '@angular/service-worker';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import {
 	FIREBASE_ANALYTICS,
@@ -12,7 +13,7 @@ import {
 	FIREBASE_STORAGE,
 	MOBILE_EVENT,
 	PROGRAM_YEAR,
-	PUBLIC_PARAMETERS_SOURCE,
+	provideRemoteConfigPublicParameters,
 	SHOP_DAYS,
 } from '@santashop/core/customer';
 import {
@@ -20,7 +21,7 @@ import {
 	FIREBASE_FIRESTORE_LITE,
 } from './app/core/tokens/customer-runtime.token';
 import type { CustomerAppConfig } from './app/core/tokens/customer-runtime.token';
-import { LitePublicParametersSource } from './app/core/services/lite-public-parameters-source.service';
+import { httpsCallable } from 'firebase/functions';
 
 export type { CustomerAppConfig } from './app/core/tokens/customer-runtime.token';
 
@@ -115,6 +116,11 @@ export const bootstrapCustomerApplication = (
 
 	return bootstrap(application.rootComponent, {
 		providers: [
+			provideServiceWorker('ngsw-worker.js', {
+				enabled: appConfig.production,
+				registrationStrategy: 'registerWhenStable:30000',
+				updateViaCache: 'none',
+			}),
 			provideRouter(application.routes),
 			provideHttpClient(withXhr(), withInterceptorsFromDi()),
 			provideIonicAngular({ mode: 'md', animated: true }),
@@ -131,11 +137,11 @@ export const bootstrapCustomerApplication = (
 			{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
 			{ provide: FIREBASE_FIRESTORE_LITE, useValue: firebaseFirestoreLite },
 			{ provide: CUSTOMER_APP_CONFIG, useValue: appConfig },
-			LitePublicParametersSource,
-			{
-				provide: PUBLIC_PARAMETERS_SOURCE,
-				useExisting: LitePublicParametersSource,
-			},
+			...provideRemoteConfigPublicParameters({
+				useEmulator: !appConfig.production,
+				readLocal: async (): Promise<unknown> =>
+					(await httpsCallable(firebaseFunctions, 'testReadPublicParameters')()).data,
+			}),
 			...(appConfig.production
 				? [
 						{

@@ -752,9 +752,13 @@ test.describe('customer registration lifecycle', () => {
 		await expect(
 			page.getByRole('heading', { name: 'My Account', exact: true }),
 		).toBeVisible();
+		// Navigation resolves before the prior menu's dismissal animation finishes.
+		await expect(page.locator('ion-popover')).toHaveCount(0);
 
 		await page.click('#menuButton');
-		await page.getByRole('button', { name: 'Help', exact: true }).click();
+		const menu = page.locator('ion-popover');
+		await expect(menu).toHaveCount(1);
+		await menu.getByRole('button', { name: 'Help', exact: true }).click();
 		await expect(page.locator('ion-modal app-help')).toBeVisible();
 		await expect(
 			page.locator(

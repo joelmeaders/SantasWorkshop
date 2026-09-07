@@ -198,6 +198,15 @@ export const adminRoutes: Routes = [
 					),
 			},
 			{
+				path: 'app-settings',
+				title: 'DSCS: App settings',
+				canActivate: [ownerOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/tools/app-settings/app-settings.page').then(
+						(m) => m.AppSettingsPage,
+					),
+			},
+			{
 				path: 'owner-operations',
 				title: 'DSCS: Owner Operations',
 				canActivate: [ownerOnlyGuard],

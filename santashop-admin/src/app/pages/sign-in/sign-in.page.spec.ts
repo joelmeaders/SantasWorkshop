@@ -4,6 +4,7 @@ import { SignInPage } from './sign-in.page';
 import { provideRouter, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular/standalone';
 import { AuthService } from '@santashop/core/admin';
+import { config } from '../../../config';
 
 describe('SignInPage', () => {
 	let component: SignInPage;
@@ -38,6 +39,18 @@ describe('SignInPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('renders the configured release version and environment', () => {
+		expect(component.environmentVersion).toBe(config.version);
+		expect(component.environmentName).toBe(
+			`${config.name}_${config.label}`,
+		);
+		const releaseNote = fixture.nativeElement.querySelector('ion-note');
+		expect(releaseNote.textContent).toContain(config.version);
+		expect(releaseNote.textContent).toContain(
+			`${config.name}_${config.label}`,
+		);
 	});
 
 	it('provides programmatic labels for both sign-in fields', () => {

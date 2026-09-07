@@ -1,6 +1,7 @@
+import { getPublicParameters } from '../utility/public-parameters';
 import { type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
-import { COLLECTION_SCHEMA, type PublicParameters, type Registration } from '../models';
+import { COLLECTION_SCHEMA, type Registration } from '../models';
 import { requireAuthenticatedUid } from '../utility/callable-validation';
 import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
@@ -29,29 +30,40 @@ export default async function saveDraftChild(
 	const child = canonicalizeChild(data['child']);
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
-	const receiptRef = registrationRef.collection(MUTATION_RECEIPTS_SUBCOLLECTION).doc(mutationId);
+	const parameters = await getPublicParameters();
+	const receiptRef = registrationRef
+		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
+		.doc(mutationId);
 
 	await db.runTransaction(async (transaction) => {
-		const [registrationSnapshot, parametersSnapshot, receiptSnapshot] = await Promise.all([
+		const [registrationSnapshot, receiptSnapshot] = await Promise.all([
 			transaction.get(registrationRef),
-			transaction.get(parametersRef),
 			transaction.get(receiptRef),
 		]);
 		const cached = getStoredMutationResult(
-			receiptSnapshot.exists ? receiptSnapshot.data() as MutationReceipt : undefined,
+			receiptSnapshot.exists
+				? (receiptSnapshot.data() as MutationReceipt)
+				: undefined,
 			'saveDraftChild',
 		);
 		if (cached) return;
-		requireOpenPreRegistration(parametersSnapshot.data() as PublicParameters | undefined);
-		const registration = requireDraftRegistration(registrationSnapshot.data() as Registration | undefined);
+		requireOpenPreRegistration(parameters);
+		const registration = requireDraftRegistration(
+			registrationSnapshot.data() as Registration | undefined,
+		);
 		const children = [...(registration.children ?? [])];
-		const existingIndex = children.findIndex((candidate) => candidate.id === child.id);
+		const existingIndex = children.findIndex(
+			(candidate) => candidate.id === child.id,
+		);
 		if (existingIndex >= 0) children[existingIndex] = child;
 		else children.push(child);
 
 		transaction.set(registrationRef, { children }, { merge: true });
-		transaction.create(receiptRef, { operation: 'saveDraftChild', result: true, completedOn: new Date() } satisfies MutationReceipt);
+		transaction.create(receiptRef, {
+			operation: 'saveDraftChild',
+			result: true,
+			completedOn: new Date(),
+		} satisfies MutationReceipt);
 	});
 
 	return true;

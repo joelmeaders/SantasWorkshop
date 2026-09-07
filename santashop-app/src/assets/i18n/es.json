@@ -337,5 +337,15 @@
 		"SAVE_ERROR": "El idioma de la aplicación cambió, pero no pudimos guardar el idioma de tus correos. Inténtalo de nuevo.",
 		"RETRY": "Intentar de nuevo",
 		"DISMISS": "Cerrar"
+	},
+	"APP_UPDATE": {
+		"READY_TITLE": "Hay una nueva actualización lista",
+		"READY_MESSAGE": "Puede continuar y actualizar más tarde. Si actualiza la página ahora, podría perder la información que no haya guardado.",
+		"FAILED_TITLE": "La actualización tendrá que esperar",
+		"FAILED_MESSAGE": "No pudimos completar la actualización. Puede seguir usando el sitio e intentar actualizar la página más tarde.",
+		"UNRECOVERABLE_TITLE": "Actualice la página para continuar",
+		"UNRECOVERABLE_MESSAGE": "Lo sentimos, esta página necesita reiniciarse. Actualice la página para continuar. Quizás deba volver a ingresar la información que no haya guardado.",
+		"RELOAD": "Actualizar página",
+		"LATER": "Ahora no"
 	}
 }

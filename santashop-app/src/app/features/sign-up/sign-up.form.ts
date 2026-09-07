@@ -26,7 +26,7 @@ const validators = {
 	emailAddress: Validators.compose([
 		Validators.required,
 		Validators.minLength(5),
-		Validators.maxLength(40),
+		Validators.maxLength(254),
 		Validators.email,
 	]),
 	password: Validators.compose([

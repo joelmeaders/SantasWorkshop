@@ -57,6 +57,10 @@
 			User Management
 		</ion-item>
 		@if (isOwner()) {
+		<ion-item id="appSettingsNav" detail routerLink="../app-settings">
+			<ion-icon name="settings-outline" color="secondary" slot="start" aria-hidden="true" />
+			App settings
+		</ion-item>
 		<ion-item id="ownerOperationsNav" detail routerLink="../owner-operations">
 			<ion-icon
 				name="shield-checkmark-outline"

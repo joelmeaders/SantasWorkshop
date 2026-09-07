@@ -4,8 +4,10 @@ export * from './_firestore-wrapper';
 export * from './_functions-wrapper';
 export * from './_storage-wrapper';
 export * from './app-state.service';
+export * from './app-update.service';
 export * from './auth.service';
 export * from './error-handler.service';
 export * from './fire-repo-lite.service';
-export * from './realtime-public-parameters-source.service';
 export * from './skeleton-state.service';
+
+export * from './remote-config-public-parameters.service';

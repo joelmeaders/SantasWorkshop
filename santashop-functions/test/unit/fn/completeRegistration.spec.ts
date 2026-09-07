@@ -38,7 +38,7 @@ describe('completeRegistration handler', () => {
 			emailAddress: 'buddy.elf@example.com',
 			zipCode: '80205',
 		});
-		adminMock.setDocSnapshot('parameters/public', {
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
 			registrationEnabled: true,
 			admin: { preRegistrationEnabled: true },
 		});

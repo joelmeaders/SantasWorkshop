@@ -17,6 +17,12 @@ service cloud.firestore {
 	  );
 	}
 
+	function isCheckinStaff() {
+	  return isAdmin() ||
+		(isSignedIn() && request.auth.token.roles is list &&
+			request.auth.token.roles.hasAny(['checkin']));
+	}
+
     match /users/{userId} {
       allow get: if isUser(userId) || isAdmin();
       allow list: if isAdmin();
@@ -26,7 +32,7 @@ service cloud.firestore {
     }
 
     match /registrations/{documentId} {
-      allow read: if isUser(resource.data.uid) || isAdmin();
+      allow read: if isUser(resource.data.uid) || isCheckinStaff();
       allow write: if false;
 
 	  match /mutationReceipts/{mutationId} {
@@ -87,7 +93,7 @@ service cloud.firestore {
     }
 
     match /registrationsearchindex/{documentId} {
-      allow read: if isAdmin();
+      allow read: if isCheckinStaff();
       allow write: if false;
     }
 

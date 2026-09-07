@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	clearAllData,
 	seedPublicParameters,
@@ -17,7 +17,15 @@ import {
 
 describe.sequential('testHelpers integration', () => {
 	beforeEach(async () => {
+		// Direct handler imports do not inherit the Functions emulator process flag.
+		// Verify all three endpoints are loopback before enabling the local adapter.
+		getAdminApp();
+		vi.stubEnv('FUNCTIONS_EMULATOR', 'true');
 		await clearEmulatorData();
+	});
+
+	afterEach(() => {
+		vi.unstubAllEnvs();
 	});
 
 	it('seeds public parameters in the emulator', async () => {
@@ -28,14 +36,27 @@ describe.sequential('testHelpers integration', () => {
 
 		expect(
 			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.parameters,
-				'public',
+				'_testConfig',
+				'publicParameters',
 			),
 		).toMatchObject({
 			registrationEnabled: false,
 			messageEn: 'Testing',
 			admin: expect.objectContaining({ checkinEnabled: true }),
 		});
+		expect(
+			await getDocument(COLLECTION_SCHEMA.parameters, 'public'),
+		).toBeUndefined();
+	});
+
+	it('refuses public settings fixtures outside the local Functions adapter', async () => {
+		vi.stubEnv('FUNCTIONS_EMULATOR', 'false');
+		await expect(seedPublicParameters({})).rejects.toThrow(
+			'Public settings fixtures require verified emulators.',
+		);
+		expect(
+			await getDocument('_testConfig', 'publicParameters'),
+		).toBeUndefined();
 	});
 
 	it('clears seeded firestore data and auth users', async () => {
@@ -138,8 +159,8 @@ describe.sequential('testHelpers integration', () => {
 
 		expect(
 			await getDocument<Record<string, unknown>>(
-				COLLECTION_SCHEMA.parameters,
-				'public',
+				'_testConfig',
+				'publicParameters',
 			),
 		).toMatchObject({
 			registrationEnabled: true,

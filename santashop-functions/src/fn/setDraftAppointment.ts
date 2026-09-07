@@ -1,6 +1,11 @@
+import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
-import { COLLECTION_SCHEMA, type DateTimeSlot, type PublicParameters, type Registration } from '../models';
+import {
+	COLLECTION_SCHEMA,
+	type DateTimeSlot,
+	type Registration,
+} from '../models';
 import { requireAuthenticatedUid } from '../utility/callable-validation';
 import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
@@ -37,29 +42,46 @@ export default async function setDraftAppointment(
 	const slotId = requireSlotId(data['slotId']);
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parametersRef = db.doc(`${COLLECTION_SCHEMA.parameters}/public`);
+	const parameters = await getPublicParameters();
 	const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
-	const receiptRef = registrationRef.collection(MUTATION_RECEIPTS_SUBCOLLECTION).doc(mutationId);
+	const receiptRef = registrationRef
+		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
+		.doc(mutationId);
 
 	await db.runTransaction(async (transaction) => {
-		const [registrationSnapshot, parametersSnapshot, slotSnapshot, receiptSnapshot] = await Promise.all([
-			transaction.get(registrationRef),
-			transaction.get(parametersRef),
-			transaction.get(slotRef),
-			transaction.get(receiptRef),
-		]);
+		const [registrationSnapshot, slotSnapshot, receiptSnapshot] =
+			await Promise.all([
+				transaction.get(registrationRef),
+				transaction.get(slotRef),
+				transaction.get(receiptRef),
+			]);
 		const cached = getStoredMutationResult(
-			receiptSnapshot.exists ? receiptSnapshot.data() as MutationReceipt : undefined,
+			receiptSnapshot.exists
+				? (receiptSnapshot.data() as MutationReceipt)
+				: undefined,
 			'setDraftAppointment',
 		);
 		if (cached) return;
-		requireOpenPreRegistration(parametersSnapshot.data() as PublicParameters | undefined);
-		const registration = requireDraftRegistration(registrationSnapshot.data() as Registration | undefined);
+		requireOpenPreRegistration(parameters);
+		const registration = requireDraftRegistration(
+			registrationSnapshot.data() as Registration | undefined,
+		);
 		requireCanonicalChildren(registration.children);
-		const slot = requireEnabledCurrentSlot(slotSnapshot.data() as DateTimeSlot | undefined, slotId);
+		const slot = requireEnabledCurrentSlot(
+			slotSnapshot.data() as DateTimeSlot | undefined,
+			slotId,
+		);
 
-		transaction.set(registrationRef, { dateTimeSlot: { id: slot.id, dateTime: slot.dateTime } }, { merge: true });
-		transaction.create(receiptRef, { operation: 'setDraftAppointment', result: true, completedOn: new Date() } satisfies MutationReceipt);
+		transaction.set(
+			registrationRef,
+			{ dateTimeSlot: { id: slot.id, dateTime: slot.dateTime } },
+			{ merge: true },
+		);
+		transaction.create(receiptRef, {
+			operation: 'setDraftAppointment',
+			result: true,
+			completedOn: new Date(),
+		} satisfies MutationReceipt);
 	});
 
 	return true;

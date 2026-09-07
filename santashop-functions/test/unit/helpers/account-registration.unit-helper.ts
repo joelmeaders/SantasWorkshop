@@ -162,6 +162,12 @@ export const loadAccountRegistrationHandlers = async (
 ) => {
 	vi.resetModules();
 	vi.doMock('firebase-admin', () => adminMock.module);
+	vi.doMock('../../../src/utility/public-parameters', () => ({
+		getPublicParameters: async () =>
+			(
+				await adminMock.getDocRef('_testConfig/publicParameters').get()
+			).data(),
+	}));
 	vi.doMock('dateformat', () => ({
 		default: vi.fn(() => FORMATTED_DATETIME),
 	}));

@@ -3,7 +3,6 @@ import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
-	type DateTimeSlot,
 	type Registration,
 	type RegistrationCancellation,
 } from '../models';
@@ -13,13 +12,7 @@ import {
 	formatRegistrationDateTime,
 	type DateTimeValue,
 } from '../utility/date-time-format';
-import { generateId } from '../utility/id-generation';
 import { createFunctionLogger } from '../utility/observability';
-import {
-	createQrCodeStoragePath,
-	generateQrCode,
-	replaceQrCodeWithCancelled,
-} from '../utility/qrcodes';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
@@ -37,16 +30,6 @@ interface UndoRegistrationRequest {
 	uid?: string;
 }
 
-interface CancellationResult {
-	uid: string;
-	newConfirmationCode: string;
-	previousDateTimeSlot?: Partial<DateTimeSlot>;
-	emailAddress?: string;
-	firstName?: string;
-	supersededQrCodeStoragePath: string;
-	replacementQrCodeStoragePath: string;
-}
-
 const requireRegistrationUid = (value: unknown): string | undefined => {
 	if (value === undefined) return undefined;
 	if (typeof value !== 'string' || !value.trim()) {
@@ -56,41 +39,6 @@ const requireRegistrationUid = (value: unknown): string | undefined => {
 		);
 	}
 	return value;
-};
-
-const resultFromCancellation = (
-	uid: string,
-	registration: Registration,
-	cancellation: RegistrationCancellation,
-): CancellationResult => ({
-	uid,
-	newConfirmationCode: registration.qrcode ?? '',
-	previousDateTimeSlot: registration.previousDateTimeSlot,
-	emailAddress: registration.emailAddress,
-	firstName: registration.firstName,
-	supersededQrCodeStoragePath: cancellation.supersededQrCodeStoragePath,
-	replacementQrCodeStoragePath: cancellation.replacementQrCodeStoragePath,
-});
-
-const finalizeCancellation = async (
-	registrationRef: ReturnType<ReturnType<typeof admin.firestore>['doc']>,
-	result: CancellationResult,
-): Promise<void> => {
-	if (!result.newConfirmationCode) {
-		throw new HttpsError(
-			'failed-precondition',
-			'Registration confirmation code is unavailable.',
-		);
-	}
-	await replaceQrCodeWithCancelled(result.supersededQrCodeStoragePath);
-	await generateQrCode(
-		result.replacementQrCodeStoragePath,
-		result.newConfirmationCode,
-	);
-	await registrationRef.set(
-		{ qrCodeGeneratedOn: new Date(), qrCodeGenerationFailedOn: false },
-		{ merge: true },
-	);
 };
 
 export default async function undoRegistration(
@@ -118,8 +66,6 @@ export default async function undoRegistration(
 	const receiptRef = registrationRef
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
-	let result: CancellationResult | undefined;
-
 	try {
 		await db.runTransaction(async (transaction) => {
 			const [registrationSnapshot, receiptSnapshot] = await Promise.all([
@@ -167,11 +113,6 @@ export default async function undoRegistration(
 						completedOn: new Date(),
 					} satisfies MutationReceipt);
 				}
-				result = resultFromCancellation(
-					uid,
-					registration,
-					cancellation,
-				);
 				return;
 			}
 
@@ -207,8 +148,6 @@ export default async function undoRegistration(
 			delete registrationWithoutSubmission.dateTimeSlot;
 			delete registrationWithoutSubmission.registrationSubmittedOn;
 			delete registrationWithoutSubmission.previousDateTimeSlot;
-			const newConfirmationCode = generateId(8);
-			const replacementQrCodeStoragePath = createQrCodeStoragePath(uid);
 			const cancelledOn = new Date();
 			const cancellationRef = db
 				.collection(COLLECTION_SCHEMA.cancellations)
@@ -224,8 +163,8 @@ export default async function undoRegistration(
 				previousDateTimeSlot,
 				supersededConfirmationCode: registration.qrcode,
 				supersededQrCodeStoragePath: registration.qrCodeStoragePath,
-				replacementConfirmationCode: newConfirmationCode,
-				replacementQrCodeStoragePath,
+				replacementConfirmationCode: registration.qrcode,
+				replacementQrCodeStoragePath: registration.qrCodeStoragePath,
 			};
 
 			transaction.set(cancellationRef, cancellation);
@@ -233,7 +172,7 @@ export default async function undoRegistration(
 				transaction.create(cancellationEmailRef, {
 					registrationUid: uid,
 					cancellationLogId: cancellationRef.id,
-					code: newConfirmationCode,
+					code: registration.qrcode,
 					email: registration.emailAddress,
 					name: registration.firstName,
 					formattedDateTime: previousDateTimeSlot?.dateTime
@@ -263,10 +202,6 @@ export default async function undoRegistration(
 				reminderEmailQueuedOn: false,
 				reminderEmailSentOn: false,
 				reminderEmailFailedOn: false,
-				qrcode: newConfirmationCode,
-				qrCodeStoragePath: replacementQrCodeStoragePath,
-				qrCodeGeneratedOn: false,
-				qrCodeGenerationFailedOn: false,
 				cancelledOn,
 				cancelledByUid: actorUid,
 				cancellationLogId: cancellationRef.id,
@@ -276,68 +211,7 @@ export default async function undoRegistration(
 				result: true,
 				completedOn: cancelledOn,
 			} satisfies MutationReceipt);
-			result = {
-				uid,
-				newConfirmationCode,
-				previousDateTimeSlot,
-				emailAddress: registration.emailAddress,
-				firstName: registration.firstName,
-				supersededQrCodeStoragePath: registration.qrCodeStoragePath,
-				replacementQrCodeStoragePath,
-			};
 		});
-
-		if (!result) {
-			throw new HttpsError(
-				'internal',
-				'Cancellation did not produce a result.',
-			);
-		}
-		const cancellationResult = result;
-		try {
-			await finalizeCancellation(registrationRef, cancellationResult);
-		} catch (finalizationError) {
-			const failedOn = new Date();
-			try {
-				await db.runTransaction(async (transaction) => {
-					const registrationSnapshot =
-						await transaction.get(registrationRef);
-					const registration = registrationSnapshot.data() as
-						Registration | undefined;
-					if (
-						registration?.cancelledOn &&
-						registration.qrcode ===
-							cancellationResult.newConfirmationCode &&
-						registration.qrCodeStoragePath ===
-							cancellationResult.replacementQrCodeStoragePath
-					) {
-						transaction.set(
-							registrationRef,
-							{
-								qrCodeGeneratedOn: false,
-								qrCodeGenerationFailedOn: failedOn,
-							},
-							{ merge: true },
-						);
-					}
-				});
-			} catch (failureWriteError) {
-				log.error(
-					'Failed to record cancellation finalization failure',
-					{ uid, actorUid },
-					failureWriteError,
-				);
-			}
-			log.error(
-				'Cancellation committed but confirmation-code finalization failed',
-				{ uid, actorUid },
-				finalizationError,
-			);
-			throw new HttpsError(
-				'internal',
-				'Registration was cancelled, but confirmation-code finalization failed. Retry the cancellation to finish.',
-			);
-		}
 		return true;
 	} catch (error) {
 		if (error instanceof HttpsError) throw error;

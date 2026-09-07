@@ -95,13 +95,20 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 
 		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
 		await expect(page.locator('#checkInNav')).toBeVisible();
-		await expect(page.locator('#onSiteRegistrationNav')).toBeVisible();
-		await expect(page.locator('#preRegistrationNav')).toBeVisible();
+		await expect(page.locator('#onSiteRegistrationNav')).toHaveCount(0);
+		await expect(page.locator('#preRegistrationNav')).toHaveCount(0);
+		await expect(
+			page.locator('ion-tab-button[href="/admin/registration"]'),
+		).toHaveCount(0);
 		await expect(page.locator('#scheduleEditorNav')).toHaveCount(0);
 		await expect(page.getByText('User Management', { exact: true })).toHaveCount(
 			0,
 		);
 
+		await page.goto('/admin/registration');
+		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
+		await page.goto('/admin/pre-registration');
+		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
 		await page.goto('/admin/schedule-editor');
 		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
 		await page.goto('/admin/stats/registration');

@@ -23,6 +23,7 @@ describe('ConfirmationPage', () => {
 	let component: ConfirmationPage;
 	let fixture: ComponentFixture<ConfirmationPage>;
 	const checkedIn$ = new BehaviorSubject<boolean | undefined>(false);
+	const registrationComplete$ = new BehaviorSubject<boolean>(true);
 	const slot$ = new BehaviorSubject<any>({
 		id: 'slot-1', dateTime: new Date('2026-12-20T10:00:00'), enabled: true,
 	});
@@ -33,6 +34,7 @@ describe('ConfirmationPage', () => {
 	]);
 
 	beforeEach(async () => {
+		registrationComplete$.next(true);
 		TestBed.configureTestingModule({
 			imports: [ConfirmationPage],
 			providers: [
@@ -43,6 +45,7 @@ describe('ConfirmationPage', () => {
 						hasCheckedIn$: checkedIn$,
 						dateTimeSlot$: slot$,
 						children$,
+						registrationComplete$: registrationComplete$,
 						qrCode$: of('data:image/png;base64,test'),
 						undoRegistration: vi
 							.fn()
@@ -147,12 +150,44 @@ describe('ConfirmationPage', () => {
 		modalController.create.mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm', data: { id: 'next-slot' } }) });
 		router.navigate = vi.fn().mockResolvedValue(true);
 
-		await component.undoRegistration();
+		const cancellation = component.undoRegistration();
+		await vi.waitFor(() =>
+			expect(preRegistration.undoRegistration).toHaveBeenCalledOnce(),
+		);
+		expect(router.navigate).not.toHaveBeenCalled();
+		registrationComplete$.next(false);
+		await cancellation;
 		await component.changeRegistration();
 
 		expect(preRegistration.undoRegistration).toHaveBeenCalledOnce();
 		expect(preRegistration.changeRegistrationDateTime).toHaveBeenCalledWith({ id: 'next-slot' });
 		expect(router.navigate).toHaveBeenCalledWith(['/pre-registration/overview']);
 		expect(loader.dismiss).toHaveBeenCalledTimes(2);
+	});
+
+	it('handles a cancellation failure without navigating', async (): Promise<void> => {
+		const alertController = TestBed.inject(AlertController) as any;
+		const loadingController = TestBed.inject(LoadingController) as any;
+		const errorHandler = TestBed.inject(ErrorHandlerService) as any;
+		const router = TestBed.inject(Router) as any;
+		const preRegistration = TestBed.inject(PreRegistrationService) as any;
+		const loader = {
+			present: vi.fn().mockResolvedValue(undefined),
+			dismiss: vi.fn().mockResolvedValue(undefined),
+		};
+		const cancellationError = new Error('cancellation failed');
+		alertController.create.mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+		});
+		loadingController.create.mockResolvedValue(loader);
+		preRegistration.undoRegistration.mockRejectedValueOnce(cancellationError);
+		router.navigate = vi.fn().mockResolvedValue(true);
+
+		await component.undoRegistration();
+
+		expect(errorHandler.handleError).toHaveBeenCalledWith(cancellationError);
+		expect(router.navigate).not.toHaveBeenCalled();
+		expect(loader.dismiss).toHaveBeenCalledOnce();
 	});
 });

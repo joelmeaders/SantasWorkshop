@@ -1,9 +1,9 @@
 import { Injectable, inject, OnDestroy } from '@angular/core';
 import { ModalController } from '@ionic/angular/standalone';
-import { combineLatest, from, Subject } from 'rxjs';
+import { combineLatest, from, ReplaySubject, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
-	switchMap,
+	concatMap,
 	takeUntil,
 	tap,
 } from 'rxjs/operators';
@@ -26,9 +26,9 @@ export class ApplicationService implements OnDestroy {
 	private readonly modalController = inject(ModalController);
 
 	private readonly destroy$ = new Subject<void>();
-	private readonly currentModal = new Subject<
+	private readonly currentModal = new ReplaySubject<
 		OperationalNoticeMode | undefined
-	>();
+	>(1);
 	private displayedMode?: OperationalNoticeMode;
 
 	private readonly currentModal$ = this.currentModal
@@ -46,7 +46,7 @@ export class ApplicationService implements OnDestroy {
 	])
 		.pipe(
 			takeUntil(this.destroy$),
-				tap(([maintenance, weather, registration]) => {
+			tap(([maintenance, weather, registration]) => {
 				if (maintenance) {
 					this.setModal('maintenance');
 					return;
@@ -73,7 +73,7 @@ export class ApplicationService implements OnDestroy {
 	public readonly modalSubscription = this.currentModal$
 		.pipe(
 			takeUntil(this.destroy$),
-			switchMap((modal) => from(this.openModal(modal))),
+			concatMap((modal) => from(this.openModal(modal))),
 		)
 		.subscribe();
 
@@ -84,7 +84,7 @@ export class ApplicationService implements OnDestroy {
 
 	/**
 	 * Sets which modal should be displayed.
-	 * @param component The modal component to display, or undefined to close all.
+	 * @param mode The operational notice mode to display, or undefined to close all.
 	 */
 	public setModal(mode?: OperationalNoticeMode): void {
 		this.currentModal.next(mode);
@@ -92,7 +92,7 @@ export class ApplicationService implements OnDestroy {
 
 	/**
 	 * Opens the specified modal, closing any existing notice modals first.
-	 * @param toBeDisplayed The modal component to display.
+	 * @param mode The operational notice mode to display.
 	 */
 	public async openModal(mode?: OperationalNoticeMode): Promise<void> {
 		if (this.displayedMode === mode) return;
@@ -123,10 +123,9 @@ export class ApplicationService implements OnDestroy {
 			this.displayedMode = undefined;
 			return;
 		}
-		const currentModalName = (currentModal?.component as any)?.name;
-
-		// Wrong modal displayed, don't close
-		if (currentModalName !== 'OperationalNoticeComponent') return;
+		// Keep unrelated application modals open. Compare the component reference
+		// because production builds can rename the component constructor.
+		if (currentModal.component !== OperationalNoticeComponent) return;
 
 		await currentModal?.dismiss();
 		this.displayedMode = undefined;

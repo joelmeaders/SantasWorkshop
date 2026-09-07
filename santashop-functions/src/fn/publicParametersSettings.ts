@@ -1,4 +1,3 @@
-import { getRemoteConfig } from 'firebase-admin/remote-config';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
@@ -52,7 +51,7 @@ export const readPublicParametersSettings = async (
 		};
 	}
 	const template = await withPublicParametersDeadline(
-		getRemoteConfig().getTemplate(),
+		admin.remoteConfig().getTemplate(),
 	);
 	return {
 		settings: settingsFromTemplate(template),
@@ -101,7 +100,7 @@ export const publishPublicParametersSettings = async (
 		});
 		return readPublicParametersSettings({ ...request, data: {} });
 	}
-	const remote = getRemoteConfig();
+	const remote = admin.remoteConfig();
 	const template = await withPublicParametersDeadline(remote.getTemplate());
 	if (template.etag !== data['expectedEtag'])
 		throw new HttpsError(

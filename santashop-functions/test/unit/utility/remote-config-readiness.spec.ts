@@ -39,11 +39,11 @@ const metrics = (effectiveLimit: number | string) => ({
 });
 
 describe('Remote Config release readiness', () => {
-	it.each([599, 600, 601])('enforces the 600 reads/minute boundary for quota %i', (quota) => {
+	it.each([59, 60, 61])('enforces the gateway budget of 60 reads/minute for quota %i', (quota) => {
 		const { policy, bucketPolicy } = fixture();
 		const result = assessReadiness(testProject, metrics(String(quota)), policy, bucketPolicy, {});
 		expect(result.templateReadsPerMinute).toBe(quota);
-		expect(result.problems).toHaveLength(quota < 600 ? 1 : 0);
+		expect(result.problems).toHaveLength(quota < 60 ? 1 : 0);
 	});
 	it('rejects missing quota evidence instead of treating it as available capacity', () => {
 		const { policy, bucketPolicy } = fixture();

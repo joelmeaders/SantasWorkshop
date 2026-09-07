@@ -2,9 +2,11 @@ const { getToken, requireProject, fetchSnapshot } = require('./remote-config.cjs
 const { verifyPublicParameters } = require('./verify-public-parameters.cjs');
 const { FUNCTION_PROJECT_IDS, getModePrefix, loadLocalEnvFiles } = require('../config.functions.cjs');
 
-// Six deployments permit 50 instances in total. A busy instance refreshes six
-// times/minute. Reserve another 300 reads for cold starts and operator traffic.
-const REQUIRED_TEMPLATE_READS_PER_MINUTE = 600;
+// Only the private singleton gateway polls the management API: six reads/minute.
+// Budget twelve during replacement and leave 48 for cold starts and owner tools.
+// Consumer instances retain their capacity and call the gateway, not this API.
+// This budget is valid only with the deployed gateway checks in the release flow.
+const REQUIRED_TEMPLATE_READS_PER_MINUTE = 60;
 const runtimeRoles = ['roles/cloudconfig.viewer', 'roles/datastore.user', 'roles/logging.logWriter'];
 
 const assessReadiness = (projectId, metrics, policy, bucketPolicy, env = process.env) => {
@@ -20,11 +22,13 @@ const assessReadiness = (projectId, metrics, policy, bucketPolicy, env = process
 	const rolesFor = (member) => (policy.bindings ?? []).filter((binding) => !binding.condition && binding.members?.includes(member)).map((binding) => binding.role);
 	const readerRoles = rolesFor(reader);
 	const publisherRoles = rolesFor(publisher);
+	if ((policy.bindings ?? []).some(binding => binding.role === 'roles/run.invoker' && binding.members?.some(member => member === 'allUsers' || member === 'allAuthenticatedUsers'))) problems.push('Project-level public Run Invoker would expose the private settings gateway.');
 	for (const role of runtimeRoles) if (!readerRoles.includes(role)) problems.push(`Reader account requires ${role}.`);
 	// Conditional grants cannot prove required access, but still grant permissions
 	// in some circumstances and must count when checking excess privileges.
 	if ((policy.bindings ?? []).some((binding) => binding.members?.includes(reader) && !runtimeRoles.includes(binding.role))) problems.push('Reader account has unexpected project roles; review its permissions before release.');
 	for (const role of ['roles/cloudconfig.admin', 'roles/logging.logWriter']) if (!publisherRoles.includes(role)) problems.push(`Publisher account requires ${role}.`);
+	if ((policy.bindings ?? []).some(binding => binding.members?.includes(publisher) && !['roles/cloudconfig.admin', 'roles/logging.logWriter'].includes(binding.role))) problems.push('Publisher account has unexpected project roles; review its permissions before release.');
 	// This gate does not evaluate CEL conditions. Require an unconditional grant
 	// rather than accepting a condition that might exclude registrations objects.
 	const storageBinding = bucketPolicy.bindings?.find((binding) => !binding.condition && binding.role === 'roles/storage.objectUser' && binding.members?.includes(reader));
@@ -33,7 +37,9 @@ const assessReadiness = (projectId, metrics, policy, bucketPolicy, env = process
 };
 
 const main = async () => {
-	if (process.argv.length !== 4 || process.argv[2] !== '--project') throw new Error('Usage: node scripts/remote-config-readiness.cjs --project <projectId>');
+	const preflight = process.argv[4] === '--preflight';
+	const consumers = process.argv[4] === '--consumers';
+	if (process.argv[2] !== '--project' || (process.argv.length !== 4 && !(process.argv.length === 5 && (preflight || consumers)))) throw new Error('Usage: node scripts/remote-config-readiness.cjs --project <projectId> [--preflight|--consumers]');
 	const projectId = requireProject(process.argv[3]);
 	loadLocalEnvFiles();
 	const headers = { Authorization: `Bearer ${await getToken()}`, 'x-goog-user-project': projectId, 'Content-Type': 'application/json' };
@@ -49,7 +55,22 @@ const main = async () => {
 		fetchSnapshot(projectId),
 	]);
 	const result = assessReadiness(projectId, metrics, policy, bucketPolicy);
+	const prefix = getModePrefix(projectId === FUNCTION_PROJECT_IDS.test ? 'test' : 'prod');
+	const accounts = ['READER', 'PUBLISHER'].map(kind => process.env[`${prefix}_SANTASHOP_REMOTE_CONFIG_${kind}_SERVICE_ACCOUNT`] || `remote-config-${kind.toLowerCase()}@${projectId}.iam.gserviceaccount.com`);
+	for (const email of accounts) {
+		const account = await request(`https://iam.googleapis.com/v1/projects/-/serviceAccounts/${encodeURIComponent(email)}`);
+		if (account.email !== email || account.disabled === true) result.problems.push(`Required service account ${email} is missing or disabled.`);
+	}
 	try { verifyPublicParameters(snapshot); } catch (error) { result.problems.push(error.message); }
+	result.phase = preflight ? 'quota-and-identity-preflight-only' : 'deployed-gateway-readiness';
+	if (!preflight) {
+		try {
+			const { inspectGateway } = require('./remote-config-gateway.cjs');
+			const gateway = await inspectGateway(projectId, process.env, consumers);
+			result.gatewayUri = gateway.gatewayUri;
+			result.problems.push(...gateway.problems);
+		} catch (error) { result.problems.push(error.message); }
+	}
 	console.log(JSON.stringify(result, null, 2));
 	if (result.problems.length) process.exitCode = 1;
 };

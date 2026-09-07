@@ -39,6 +39,9 @@ import { firebaseConfig } from './firebase.config';
 
 const FUNCTIONS_REGION = 'us-central1';
 
+export const getServiceWorkerScriptUrl = (version: string): string =>
+	`ngsw-worker.js?v=${encodeURIComponent(version)}`;
+
 export type AdminBootstrapConfig = Pick<
 	typeof config,
 	| 'appCheckEnabled'
@@ -168,11 +171,14 @@ export function bootstrapAdminApplication(
 	return dependencies
 		.bootstrapApplication(options.appComponent, {
 			providers: [
-				provideServiceWorker('ngsw-worker.js', {
-					enabled: runtimeConfig.production,
-					registrationStrategy: 'registerWhenStable:30000',
-					updateViaCache: 'none',
-				}),
+				provideServiceWorker(
+					getServiceWorkerScriptUrl(config.version),
+					{
+						enabled: runtimeConfig.production,
+						registrationStrategy: 'registerWhenStable:30000',
+						updateViaCache: 'none',
+					},
+				),
 				dependencies.provideRouter(options.routes),
 				dependencies.provideHttpClient(
 					dependencies.withXhr(),

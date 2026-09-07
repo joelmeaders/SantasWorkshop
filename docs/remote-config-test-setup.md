@@ -1,8 +1,14 @@
 # Remote Config test setup evidence
 
-Verified on **2026-09-07 at 16:49 UTC**, for **`santas-workshop-test` only**
-(project number `312672416598`). Setup is complete except for the template-read
-quota. This is not deployment or release approval.
+**Current status:** the private singleton gateway resolved the quota blocker,
+and test and production deployments completed. See
+[the current release design](remote-config.md) and
+[deployed QA evidence](remote-config-deployed-qa.md). The original setup and
+provider rejection below are historical evidence; no quota increase occurred.
+
+The initial setup checkpoint was **2026-09-07 at 16:49 UTC**, for
+**`santas-workshop-test` only** (project number `312672416598`). At that point,
+setup was complete except for the template-read quota.
 
 ## Published configuration
 
@@ -29,10 +35,10 @@ disabled empty global alert for the field absent from the legacy test document.
 
 Created these dedicated service accounts and verified both remain enabled:
 
-| Account in `santas-workshop-test.iam.gserviceaccount.com` | Direct project roles |
-| --- | --- |
-| `remote-config-reader` | `roles/cloudconfig.viewer`, `roles/datastore.user`, `roles/logging.logWriter` |
-| `remote-config-publisher` | `roles/cloudconfig.admin`, `roles/logging.logWriter` |
+| Account in `santas-workshop-test.iam.gserviceaccount.com` | Direct project roles                                                          |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `remote-config-reader`                                    | `roles/cloudconfig.viewer`, `roles/datastore.user`, `roles/logging.logWriter` |
+| `remote-config-publisher`                                 | `roles/cloudconfig.admin`, `roles/logging.logWriter`                          |
 
 The reader also has an unconditional `roles/storage.objectUser` binding on
 `santas-workshop-test.appspot.com`. Project and bucket policy changes preserved
@@ -74,11 +80,40 @@ separately approved design change is needed before this gate can pass. See the
 [Cloud Quotas create API](https://docs.cloud.google.com/docs/quotas/reference/rest/v1/projects.locations.quotaPreferences/create)
 and [test project quota console](https://console.cloud.google.com/iam-admin/quotas?project=santas-workshop-test).
 
-Functions and application deployment, deployed real-time latency, failure
-recovery, load behavior, and rollback testing remain unverified. Functions must
-use the existing GitHub Actions workflow after the gate is resolved. No direct
-Functions deployment, production mutation, or customer-data cleanup occurred.
+At the initial checkpoint, deployment, real-time latency, failure recovery,
+load behavior and rollback were unverified. Subsequent deployments used GitHub
+Actions; current evidence and remaining limits are in the deployed QA report.
 
 Local raw setup responses are retained under the ignored
 `.tmp-remote-config/test-setup-*` files for this workstation's audit trail. This
 document contains the portable evidence summary for review.
+
+## App Check alternate-origin QA repair
+
+On **2026-09-07 at 20:28 UTC**, the existing test reCAPTCHA Enterprise key
+(`dscs-test`) was read before the change. Its domain enforcement was enabled
+(`allowAllDomains: false`) and it allowed the three existing hosts:
+`santas-workshop-test.web.app`, `santashop-app-test.web.app`, and
+`test.denversantaclausshop.org`.
+
+The test allowlist was updated with the verified `gcloud recaptcha keys update`
+web flags (`--web --domains=...`) to preserve those three hosts and add only
+`santas-workshop-test.firebaseapp.com`. A fresh readback now shows exactly
+those four hosts. `allowAllDomains` remains false; the integration remains
+score-based; no other key setting changed. The public site key value is omitted
+from this evidence. Chrome subsequently loaded the protected owner settings
+page on the corrected hostname.
+
+Verified command shape (key identifier redacted):
+
+```text
+gcloud recaptcha keys update <test-key-id> --project=santas-workshop-test --web --domains="santas-workshop-test.web.app,santashop-app-test.web.app,test.denversantaclausshop.org,santas-workshop-test.firebaseapp.com"
+```
+
+The production project was inspected read-only. Its `dscs-prod` key currently
+allows `register.denversantaclausshop.org`, `admin.denversantaclausshop.org`,
+`santas-workshop-admin.web.app`, and `test.denversantaclausshop.org`, with
+`allowAllDomains: false`. Production deployment should keep its customer and
+admin origins within that set; any future Firebase default host used by either
+app requires a separate production allowlist review. The production key was
+not changed.

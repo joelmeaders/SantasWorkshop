@@ -55,6 +55,12 @@ export const CheckInStaffNavigation: Story = {
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		await expect(canvas.getByText('Check in customers')).toBeVisible();
+		await expect(
+			canvas.queryByText('On-Site Registration'),
+		).not.toBeInTheDocument();
+		await expect(
+			canvas.queryByText('Pre-Register Customers'),
+		).not.toBeInTheDocument();
 		await expect(canvas.queryByText('Tools')).not.toBeInTheDocument();
 		await expect(
 			canvas.queryByText('Owner Operations'),
@@ -66,6 +72,8 @@ export const CheckInStaffNavigation: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText('Owner Operations')).toBeVisible(),
 		);
+		await expect(canvas.getByText('On-Site Registration')).toBeVisible();
+		await expect(canvas.getByText('Pre-Register Customers')).toBeVisible();
 	},
 };
 

@@ -1,6 +1,6 @@
 import type { UpdatePreferredLanguageRequest } from '@santashop/models';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2/options';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
@@ -21,6 +21,7 @@ import {
 	EVENT_MIN_INSTANCES,
 	FUNCTIONS_SERVICE_ACCOUNT,
 } from './utility/runtime-config';
+import { publicParametersGatewayHandler } from './fn/publicParametersGateway';
 
 /**
  * App Check is enforced in deployed environments but relaxed when running
@@ -30,7 +31,7 @@ import {
  * enforcement enabled.
  */
 const RUNNING_IN_FUNCTIONS_EMULATOR = process.env.FUNCTIONS_EMULATOR === 'true';
-const REMOTE_CONFIG_READER_IDENTITY = RUNNING_IN_FUNCTIONS_EMULATOR
+const REMOTE_CONFIG_READER_IDENTITY: { serviceAccount?: string } = RUNNING_IN_FUNCTIONS_EMULATOR
 	? {}
 	: {
 			serviceAccount:
@@ -120,6 +121,20 @@ setGlobalOptions({
 		? { serviceAccount: FUNCTIONS_SERVICE_ACCOUNT }
 		: {}),
 });
+
+export const publicParametersGateway = onRequest(
+	{
+		...REMOTE_CONFIG_READER_IDENTITY,
+		memory: '256MiB',
+		cpu: 1,
+		concurrency: 80,
+		maxInstances: 1,
+		minInstances: 0,
+		timeoutSeconds: 15,
+		invoker: REMOTE_CONFIG_READER_IDENTITY.serviceAccount ?? 'private',
+	},
+	publicParametersGatewayHandler,
+);
 
 export const changeAccountInformation = onCall(
 	STANDARD_CUSTOMER_OPTIONS,
@@ -519,6 +534,26 @@ export const updatePreferredLanguage = onCall(
 		'updatePreferredLanguage',
 		async (request) =>
 			(await import('./fn/updatePreferredLanguage')).default(request),
+	),
+);
+
+export const readPublicParametersSettings = onCall(
+	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('readPublicParametersSettings', async (request) =>
+		(
+			await import('./fn/publicParametersSettings')
+		).readPublicParametersSettings(request),
+	),
+);
+export const publishPublicParametersSettings = onCall(
+	{
+		...LOW_VOLUME_OPTIONS,
+		...REMOTE_CONFIG_PUBLISHER_IDENTITY,
+	},
+	observeCallableHandler('publishPublicParametersSettings', async (request) =>
+		(
+			await import('./fn/publicParametersSettings')
+		).publishPublicParametersSettings(request),
 	),
 );
 
@@ -972,26 +1007,6 @@ export const testSeedCheckIn = emulatorOnly(() =>
 			const { seedCheckInForEmail } = await import('./fn/testHelpers');
 			return seedCheckInForEmail(data.emailAddress);
 		}),
-	),
-);
-
-export const readPublicParametersSettings = onCall(
-	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
-	observeCallableHandler('readPublicParametersSettings', async (request) =>
-		(
-			await import('./fn/publicParametersSettings')
-		).readPublicParametersSettings(request),
-	),
-);
-export const publishPublicParametersSettings = onCall(
-	{
-		...LOW_VOLUME_OPTIONS,
-		...REMOTE_CONFIG_PUBLISHER_IDENTITY,
-	},
-	observeCallableHandler('publishPublicParametersSettings', async (request) =>
-		(
-			await import('./fn/publicParametersSettings')
-		).publishPublicParametersSettings(request),
 	),
 );
 

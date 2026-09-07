@@ -139,6 +139,7 @@ export const adminRoutes: Routes = [
 			{
 				path: 'registration',
 				title: 'DSCS: Register',
+				canActivate: [adminOnlyGuard],
 				loadComponent: () =>
 					import('./pages/admin/registration/registration.page').then(
 						(m) => m.RegistrationPage,
@@ -147,6 +148,7 @@ export const adminRoutes: Routes = [
 			{
 				path: 'pre-registration',
 				title: 'DSCS: Pre-Registration',
+				canActivate: [adminOnlyGuard],
 				loadComponent: () =>
 					import('./pages/admin/pre-registration/pre-registration.page').then(
 						(m) => m.PreRegistrationPage,

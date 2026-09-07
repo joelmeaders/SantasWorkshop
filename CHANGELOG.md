@@ -16,10 +16,24 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 ### Changed
 
 - Advance the workspace and both applications to `2026.09.0-beta.3`.
+- Share backend Remote Config refreshes through a private reader to fit the supported quota without reducing customer-function capacity.
+- Deploy and verify the private reader before configuring its callers, and include owner settings callables in release inventory checks.
+- Add an opt-in manual deployment mode that skips automated tests for test or production while retaining build and environment checks.
 - Move customer, staff, and backend public controls from Firestore to one unconditional Remote Config JSON parameter.
 - Retain valid cached settings or release defaults through transient configuration failures, with real-time activation and bounded retries.
 - Improve service-worker caching, form recovery, and browser QA coverage.
 - Keep existing operation rules and the legacy settings document; older clients must upgrade to receive new settings.
+
+### Fixed
+
+- Route owner settings requests to their callable functions and use the initialized Admin SDK instance.
+- Recover silently stalled configuration streams with a visible-page fallback fetch.
+- Dismiss cleared operational notices in production builds and show cached closure settings at startup.
+- Limit staff registration navigation and direct routes to administrators.
+- Preserve confirmation codes and QR images when cancelling and registering again.
+- Translate ZIP pattern-validation messages in English and Spanish.
+- Permit service-worker fetches of authentication scripts and replace workers that retain the old policy.
+- Wait for refreshed cancellation state before returning customers to registration.
 
 ## [2026.09.0-beta.2] - Unreleased
 

@@ -329,6 +329,7 @@
 		"EMAIL": "Must be a valid email address",
 		"URL": "Must be a valid website address",
 		"ZIPCODE": "Must be a valid zip code",
+		"PATTERN": "Enter a five-digit ZIP code",
 		"FIELDSMATCH": "The passwords don't match"
 	},
 	"LANGUAGE": {

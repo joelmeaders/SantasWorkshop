@@ -14,6 +14,7 @@
 			<ion-icon name="search-outline" color="warning" slot="start" aria-hidden="true" />
 			Search for customers
 		</ion-item>
+		@if (isAdmin()) {
 		<ion-item
 			id="onSiteRegistrationNav"
 			detail
@@ -32,6 +33,7 @@
 			<ion-icon name="person-add-outline" color="primary" slot="start" aria-hidden="true" />
 			Pre-Register Customers
 		</ion-item>
+		}
 
 		@if (isAdmin()) {
 		<ion-list-header> Tools </ion-list-header>

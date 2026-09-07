@@ -1,5 +1,4 @@
 import {
-	getRemoteConfig,
 	type RemoteConfigParameter,
 	type RemoteConfigTemplate,
 } from 'firebase-admin/remote-config';
@@ -13,6 +12,11 @@ import {
 	type PublicParameters,
 } from '../models';
 import { createFunctionLogger } from './observability';
+import { GoogleAuth } from 'google-auth-library';
+import type { PublicParametersGatewayResponse } from './public-parameters-gateway';
+
+export const PUBLIC_PARAMETERS_GATEWAY_URL_ENV =
+	'SANTASHOP_REMOTE_CONFIG_GATEWAY_URL';
 
 const log = createFunctionLogger('publicParameters');
 export const isLocalPublicParameters = (): boolean => {
@@ -75,6 +79,61 @@ export const withPublicParametersDeadline = async <T>(
 	}
 };
 
+/** Check the gateway URL shape; CI verifies project ownership before setting it. */
+export const publicParametersGatewayUrl = (): string => {
+	const configured = process.env[PUBLIC_PARAMETERS_GATEWAY_URL_ENV]?.trim();
+	if (!configured)
+		throw new Error(`${PUBLIC_PARAMETERS_GATEWAY_URL_ENV} is required.`);
+	let url: URL;
+	try {
+		url = new URL(configured);
+	} catch {
+		throw new Error(`${PUBLIC_PARAMETERS_GATEWAY_URL_ENV} must be an HTTPS URL.`);
+	}
+	if (
+		url.protocol !== 'https:' ||
+		url.username ||
+		url.password ||
+		url.port ||
+		url.search ||
+		url.hash
+	)
+		throw new Error(`${PUBLIC_PARAMETERS_GATEWAY_URL_ENV} must be a private HTTPS gateway URL.`);
+	const isCloudRunUrl =
+	/^publicparametersgateway-[a-z0-9-]+\.a\.run\.app$/u.test(url.hostname) &&
+		url.pathname === '/';
+	if (!isCloudRunUrl)
+		throw new Error(`${PUBLIC_PARAMETERS_GATEWAY_URL_ENV} does not identify the public settings gateway.`);
+	return url.origin;
+};
+
+export const fetchPublicParametersFromGateway = async (
+	fetcher: typeof fetch = fetch,
+	): Promise<PublicParameters> => {
+	const gatewayUrl = publicParametersGatewayUrl();
+	const signal = AbortSignal.timeout(10_000);
+	const auth = new GoogleAuth();
+	const client = await auth.getIdTokenClient(gatewayUrl);
+	const token = await client.idTokenProvider.fetchIdToken(gatewayUrl);
+	const response = await fetcher(gatewayUrl, {
+		headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+		redirect: 'error',
+		signal,
+	});
+	if (!response.ok)
+		throw new Error(`Public settings gateway failed with status ${response.status}.`);
+	const body = (await response.json()) as Partial<PublicParametersGatewayResponse>;
+	if (
+		!body ||
+		typeof body !== 'object' ||
+		(body.source !== 'fresh' && body.source !== 'stale') ||
+		typeof body.lastFreshAt !== 'number' ||
+		!Number.isFinite(body.lastFreshAt)
+	)
+		throw new Error('Public settings gateway returned an invalid response.');
+	return parsePublicParameters(body.settings);
+};
+
 /** Configuration is independent of Firestore transactions; in-flight work retains its settings. */
 export class PublicParametersCache {
 	private current = createDefaultPublicParameters();
@@ -116,7 +175,7 @@ export class PublicParametersCache {
 	}
 }
 const cache = new PublicParametersCache(async () =>
-	settingsFromTemplate(await getRemoteConfig().getTemplate()),
+	fetchPublicParametersFromGateway(),
 );
 export const getPublicParameters = async (): Promise<PublicParameters> => {
 	if (isLocalPublicParameters()) {

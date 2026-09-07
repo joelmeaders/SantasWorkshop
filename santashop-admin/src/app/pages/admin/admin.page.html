@@ -34,6 +34,7 @@
 				<ion-label>Search</ion-label>
 			</ion-tab-button>
 
+			@if (isAdmin()) {
 			<ion-tab-button
 				id="onSiteRegistrationTab"
 				[routerLink]="['/admin/registration']"
@@ -44,6 +45,7 @@
 				<ion-icon name="storefront-outline" color="primary" aria-hidden="true" />
 				<ion-label>Registration</ion-label>
 			</ion-tab-button>
+			}
 		</ion-tab-bar>
 	</ion-toolbar>
 </ion-footer>

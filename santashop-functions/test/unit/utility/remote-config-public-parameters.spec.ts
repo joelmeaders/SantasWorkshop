@@ -21,6 +21,7 @@ import {
 	readPublicParametersSettings,
 	publishPublicParametersSettings,
 } from '../../../src/fn/publicParametersSettings';
+import admin from '../../../src/firebase-admin';
 import type { RemoteConfigTemplate } from 'firebase-admin/remote-config';
 const template = (): RemoteConfigTemplate => ({
 	etag: 'etag-1',
@@ -54,6 +55,7 @@ describe('Remote Config backend', () => {
 	});
 	beforeEach(() => {
 		vi.stubEnv('FUNCTIONS_EMULATOR', 'false');
+		vi.spyOn(admin, 'remoteConfig').mockReturnValue(mocks as never);
 		mocks.getTemplate.mockResolvedValue(template());
 		mocks.validateTemplate.mockImplementation(async (value) => value);
 		mocks.publishTemplate.mockImplementation(async (value) => ({

@@ -17,7 +17,7 @@ describe.sequential('undoRegistration integration', () => {
 		await clearEmulatorData();
 	});
 
-	it('cancels a completed registration with an immutable operational record', async () => {
+	it('cancels a completed registration while preserving its seasonal QR', async () => {
 		const qrCodeStoragePath = 'registrations/user-undo-1/code.png';
 		await seedQrCode(qrCodeStoragePath);
 		await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
@@ -86,11 +86,21 @@ describe.sequential('undoRegistration integration', () => {
 			COLLECTION_SCHEMA.registrations,
 			'user-undo-1',
 		);
-		expect(registration?.['qrcode']).not.toBe('ABCD2345');
+		expect(registration?.['qrcode']).toBe('ABCD2345');
+		expect(registration?.['qrCodeStoragePath']).toBe(qrCodeStoragePath);
 		expect(registration?.['registrationSubmittedOn']).toBeUndefined();
 		expect(await getCollectionCount(COLLECTION_SCHEMA.cancellations)).toBe(
 			1,
 		);
+		const cancellationSnapshot = await getFirestore()
+			.collection(COLLECTION_SCHEMA.cancellations)
+			.get();
+		expect(cancellationSnapshot.docs[0].data()).toMatchObject({
+			supersededConfirmationCode: 'ABCD2345',
+			replacementConfirmationCode: 'ABCD2345',
+			supersededQrCodeStoragePath: qrCodeStoragePath,
+			replacementQrCodeStoragePath: qrCodeStoragePath,
+		});
 		const queuedEmails = await getFirestore()
 			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
 			.get();
@@ -106,6 +116,7 @@ describe.sequential('undoRegistration integration', () => {
 		).toMatchObject({
 			registrationUid: 'user-undo-1',
 			queueSource: 'registration-cancellation',
+			code: 'ABCD2345',
 		});
 	});
 });

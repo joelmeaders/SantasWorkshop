@@ -13,7 +13,9 @@ import {
 	type AdminBootstrapConfig,
 	type AdminBootstrapDependencies,
 	type AdminBootstrapOptions,
+	getServiceWorkerScriptUrl,
 } from './bootstrap-admin';
+import { config } from './config';
 import { requireDefined } from './test-helpers';
 
 describe('admin bootstrap', () => {
@@ -132,6 +134,15 @@ describe('admin bootstrap', () => {
 			(self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean })
 				.FIREBASE_APPCHECK_DEBUG_TOKEN,
 		).toBeUndefined();
+	});
+
+	it('keys the service-worker script URL to the configured release version', () => {
+		expect(getServiceWorkerScriptUrl(config.version)).toBe(
+			'ngsw-worker.js?v=2026.09.0-beta.3',
+		);
+		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
+			getServiceWorkerScriptUrl(config.version),
+		);
 	});
 
 	it('enables App Check debug mode for a configured local build', async () => {

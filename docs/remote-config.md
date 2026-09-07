@@ -16,6 +16,10 @@ templates, and runtime environment settings remain in their existing stores.
   its release. It fetches on startup and registers one real-time listener.
 - Published changes are activated immediately. Reconnection, visibility, and
   focus events request a refresh with a 60-second minimum fetch interval.
+- While a tab is visible, a 60-second watchdog also requests a refresh. This
+  covers a real-time stream that stays open but stops delivering updates. The
+  watchdog uses the same single-flight and retry backoff rules as other reads.
+  Hidden tabs pause the watchdog.
 - Failed or malformed updates retain the last valid object. Retry delays are
   10, 30, 60, and then 300 seconds. Hidden tabs pause application retry timers.
 - A failed real-time stream keeps a visible-tab fetch fallback until a real-time
@@ -25,12 +29,21 @@ templates, and runtime environment settings remain in their existing stores.
   source, refresh state, last accepted update time, and the last error.
 - Configuration fetches are not included in service-worker data caches.
 
-Backend mutation checks use Admin SDK `getTemplate()` on the **same client
-template**. They do not use the separate server-template feature. An instance
-returns its cached settings and starts an on-demand background refresh after ten
-seconds. Cold instances return release defaults while fetching. Failures retain
-the previous object and use the retry backoff above. Reads have a ten-second
-logical deadline; late results cannot replace a newer cache value.
+Backend mutation checks use the **same client template** through an IAM-private
+`publicParametersGateway` function. They do not use the separate server-template
+feature or a persistent configuration copy. Each consumer instance returns its
+cached settings and starts a background gateway request after ten seconds.
+Cold consumers return release defaults while fetching. Failures retain the
+previous object and use the retry backoff above.
+
+The gateway has one instance, concurrency 80, and a shared in-memory cache. It
+waits for a single refresh when its settings are at least ten seconds old.
+Concurrent requests share that refresh. This avoids stacking two stale cache
+windows. Caller ID tokens use the verified canonical Cloud Run URI as audience.
+Only the configured reader service account receives Run Invoker on the gateway.
+Client startup and watchdog fetches use the Remote Config client fetch endpoint.
+The 60 template reads per minute release gate measures the gateway's server-side
+management API reads. It is separate from those client fetches.
 
 The controls are no longer part of a Firestore transaction. Existing operation
 predicates and idempotency receipt handling are unchanged. In-flight actions can
@@ -72,8 +85,12 @@ registration and maintenance state.
    template content. Do not use a wildcard ETag or force an overwrite.
 4. Generate release defaults from the **published** template. The script rejects
    a snapshot for the wrong project and a candidate without a published version.
-5. Deploy Functions through the existing GitHub Actions release workflow, then
-   deploy both apps. Production remains a separate, explicit release.
+5. Deploy Functions through the existing GitHub Actions release workflow. It
+   checks quota and identities, deploys only the private gateway, reads its
+   canonical URI from the Cloud Functions API, and verifies its runtime identity,
+   instance limit, concurrency, and private IAM policy. It then writes that URI
+   into the consumer environment and deploys all Functions and rules. Deploy
+   both apps after backend success. Production remains an explicit release.
 6. Test the owner editor and real-time delivery in the deployed test project.
    Record the published version, actual client delivery time, backend behavior,
    retry recovery, and rollback result. A ten-second healthy-client target is
@@ -103,13 +120,13 @@ template before compiling matching fallback defaults; they do not publish it.
 
 ## Identities and capacity
 
-The six migrated mutation functions and the owner read callable use
+The gateway, six migrated mutation functions, and owner read callable use
 `remote-config-reader@PROJECT_ID.iam.gserviceaccount.com`. Grant that account:
 
 - Project `roles/cloudconfig.viewer`, `roles/datastore.user`, and
   `roles/logging.logWriter`.
-- Bucket `roles/storage.objectUser` on the project's QR bucket. Cancellation
-  replaces existing QR images, so object-creator permission alone is insufficient.
+- Bucket `roles/storage.objectUser` on the project's QR bucket. The release
+  readiness check requires read/write access to registration objects.
   The readiness gate requires an unconditional binding because it does not
   evaluate IAM conditions. A narrower grant restricted to `registrations/`
   requires separate permission evidence and a reviewed gate update.
@@ -127,17 +144,39 @@ identities. Configure matching `TEST_`/`PROD_` inputs in the environment generat
 and readiness inspection when using alternatives. Emulator exports omit these
 identity overrides.
 
+CI discovers `SANTASHOP_REMOTE_CONFIG_GATEWAY_URL` from the deployed function.
+Do not guess the Cloud Run host or substitute another project's endpoint.
+After consumer deployment, `remote-config-readiness.cjs --project PROJECT_ID
+--consumers` verifies all six consumers are active with that exact URI and the
+reader identity. The gate also checks the actual Cloud Run revision and rejects
+disabled IAM checks, so a private policy alone is insufficient evidence.
+
+If phase one succeeds but phase two fails, the private gateway can remain
+deployed. Rerun the same CI release for the same reviewed commit after resolving
+the reported problem. The release script revalidates the gateway and overwrites
+only generated environment inputs. Do not remove it or bypass checks to retry.
+
 On September 7, 2026, both projects reported **60 template reads/minute** through
-`firebaseremoteconfig.googleapis.com/read_requests`. The six consumers permit 50
-instances in total: at six refreshes/minute each, their steady ceiling is 300
-reads/minute before cold starts or operator traffic. Release readiness requires
-at least **600 reads/minute** and load evidence. Request an increase in Google
-Cloud Quotas and verify the effective allocation before release. Cold-start
-churn can exceed the steady estimate. The browser fetch quota is separate.
+`firebaseremoteconfig.googleapis.com/read_requests`. The original direct polling
+design needed 600, but the provider rejected the increase as unsupported.
+The private gateway replaces direct consumer polling. Existing consumer capacity
+remains 50 instances. Normal gateway polling uses at most six reads/minute per
+instance. The release budget reserves twelve for two overlapping gateway
+instances during replacement and 48 for cold starts, owner tools, and operations.
+The gate requires at least 60 and verifies the deployed gateway architecture.
+
+An instance limit is not an absolute quota guarantee during replacement or
+failure. Cold-start churn and operator activity can exceed this estimate. Check
+actual request rates, errors, and settings convergence under load and replacement
+before release. The browser fetch quota is separate. The gateway is a new
+configuration dependency; consumers keep validated settings or release defaults
+when it is unavailable.
 
 The new service accounts were absent at the initial inspection. The readiness
 script checks their direct project bindings, QR bucket permission, published
-settings, and template-read quota. It reports each missing prerequisite and
+settings, template-read quota, and the deployed private gateway. Its `--preflight`
+option checks only quota and identities so CI can bootstrap the gateway. A
+preflight pass is not release readiness. It reports each missing prerequisite and
 blocks a Functions release. This is a deployment check, not a runtime customer
 gate. IAM inheritance and load behavior still require release review.
 

@@ -1,7 +1,7 @@
 <admin-header title="Schedule Editor" />
 
 <ion-content class="schedule-editor-content">
-	<main class="limited-container schedule-editor">
+	<div class="limited-container schedule-editor">
 		@if (statusMessage) {
 		<p id="scheduleEditorStatus" class="status-message">
 			{{ statusMessage }}
@@ -304,6 +304,7 @@
 								<div class="slot-card__summary">
 									<ion-checkbox
 										[attr.id]="'selectSchedule-' + slot.id"
+										[attr.aria-label]="'Select schedule ' + slot.id"
 										[checked]="isSelected(slot.id)"
 										(ionChange)="toggleSelection(slot.id, $event)"
 									></ion-checkbox>
@@ -431,5 +432,5 @@
 				}
 			</ion-card-content>
 		</ion-card>
-	</main>
+	</div>
 </ion-content>

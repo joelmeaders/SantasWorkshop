@@ -39,12 +39,12 @@
 				@if ((hasScheduleData$ | async) === true) {
 				<div class="count-container">
 					<h1>{{ registrationCountBySchedule$ | async }}</h1>
-					<h3>Registrations</h3>
+				<h2>Registrations</h2>
 				</div>
 				} @else {
 				<div class="count-container">
 					<h1>{{ registrationCount$ | async }}</h1>
-					<h3>Registrations</h3>
+				<h2>Registrations</h2>
 				</div>
 				}
 			</ion-col>
@@ -58,7 +58,7 @@
 				@if (childCount$ | async; as count) {
 				<div class="count-container">
 					<h1>{{ count }}</h1>
-					<h3>Children*</h3>
+				<h2>Children*</h2>
 				</div>
 				}
 			</ion-col>
@@ -72,7 +72,7 @@
 				@if (childrenPerCustomer$ | async; as count) {
 				<div class="count-container">
 					<h1>{{ count | number:'1.0-2' }}</h1>
-					<h3>Children per Customer*</h3>
+				<h2>Children per Customer*</h2>
 				</div>
 				}
 			</ion-col>

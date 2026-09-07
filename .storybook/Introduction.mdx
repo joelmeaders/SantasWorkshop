@@ -1,0 +1,41 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guide/Isolated UI" />
+
+# Santa's Workshop UI catalog
+
+Explore the registration and admin apps with local mock data. Each story uses the actual Angular component or page.
+
+Choose **Registration** or **Admin** in the sidebar. Select a named state, then use the **Docs** tab for component details. Controls change supported inputs. The accessibility panel checks the rendered UI.
+
+## What is isolated?
+
+Stories replace authentication, database access, server calls, email delivery, and device resources with local mocks. You do not need Firebase credentials or emulators. Synthetic fixtures represent accounts, children, appointments, reports, and administrative state.
+
+A story action can update local state or record a mock call. It must never change a real account, registration, schedule, or email template.
+
+## What do the tests check?
+
+Play functions assert visible UI state and exercise interactions. Browser tests also run automated accessibility checks. Accessibility violations fail validation.
+
+Automated checks do not replace keyboard, screen-reader, or zoom review. Storybook also does not replace service unit tests or Firebase integration tests.
+
+## Before converting a component to signals
+
+Keep its visible behavior tests while changing its implementation. Test what happens after fixture data changes, not only the first render. Use visual comparisons to review appearance, and focused unit tests for cancellation, cleanup, and request ordering.
+
+The inventory measures component representation. It does not prove that every state or transition has a test. The migration section in `docs/storybook.md` explains which evidence to add before each conversion.
+
+## Add or change a story
+
+Keep stories beside their component in a `*.stories.ts` file. Reference the production component in metadata. Use fresh mock state for each render. Add meaningful populated, empty, loading, validation, error, or permission examples where the component supports them.
+
+Run these commands from the workspace root:
+
+```sh
+pnpm run storybook:coverage
+pnpm run storybook:build
+pnpm run storybook:test
+```
+
+The coverage check requires every Angular component in both apps to appear in the catalog. The repository's `docs/storybook.md` explains the workflow. `docs/storybook-inventory.md` lists the components and their named stories.

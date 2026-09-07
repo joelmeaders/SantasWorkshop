@@ -44,6 +44,20 @@ module.exports = tseslint.config(
 		},
 	},
 	{
+		files: [
+			'.storybook/**/*.ts',
+			'**/*.stories.ts',
+			'vitest.storybook.config.ts',
+			'storybook-visual/**/*.ts',
+		],
+		languageOptions: {
+			parserOptions: {
+				project: './tsconfig.storybook.json',
+				tsconfigRootDir: __dirname,
+			},
+		},
+	},
+	{
 		files: ['**/*.html'],
 		extends: [
 			...angular.configs.templateRecommended,

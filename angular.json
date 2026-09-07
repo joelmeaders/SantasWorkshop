@@ -186,6 +186,24 @@
 					},
 					"defaultConfiguration": "development"
 				},
+				"storybook": {
+					"builder": "@storybook/angular-vite:start-storybook",
+					"options": {
+						"configDir": ".storybook",
+						"tsConfig": "tsconfig.storybook.json",
+						"port": 6006,
+						"zoneless": true
+					}
+				},
+				"build-storybook": {
+					"builder": "@storybook/angular-vite:build-storybook",
+					"options": {
+						"configDir": ".storybook",
+						"tsConfig": "tsconfig.storybook.json",
+						"outputDir": "dist/storybook",
+						"zoneless": true
+					}
+				},
 				"test": {
 					"builder": "@angular/build:unit-test",
 					"options": {

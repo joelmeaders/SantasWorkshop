@@ -1,7 +1,7 @@
 <admin-header title="Email Templates" />
 
 <ion-content class="ion-padding-horizontal">
-	<main class="limited-container">
+	<div class="limited-container">
 		<ion-card-header class="ion-padding-vertical">
 			<p>
 				Manage SES email templates, revisions, field mappings, and
@@ -24,6 +24,7 @@
 			<ion-item
 				detail
 				button
+				[attr.aria-label]="'Edit template ' + template.displayName"
 				(click)="openTemplate(template.key)"
 				(keydown.enter)="openTemplate(template.key)"
 			>
@@ -51,25 +52,11 @@
 						}
 					</p>
 				</ion-label>
-				<ion-buttons slot="end">
-					<ion-button
-						fill="clear"
-						title="Edit template"
-						aria-label="Edit template"
-						(click)="$event.stopPropagation(); openTemplate(template.key)"
-					>
-						<ion-icon
-							slot="icon-only"
-							name="create-outline"
-							aria-hidden="true"
-						/>
-					</ion-button>
-				</ion-buttons>
 			</ion-item>
 			}
 		</ion-list>
 		}
-	</main>
+	</div>
 
 	<ion-fab slot="fixed" vertical="bottom" horizontal="end">
 		<ion-fab-button

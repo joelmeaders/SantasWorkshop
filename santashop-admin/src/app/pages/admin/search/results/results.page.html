@@ -1,7 +1,7 @@
 <admin-header title="Search Results" backRoute="/admin/search" />
 
 <ion-content class="ion-text-center">
-	<main class="limited-container">
+	<div class="limited-container">
 		@if ((searchInput$ | async) !== null) {
 		<ion-button fill="outline" (click)="refresh()"
 			>Refresh results</ion-button
@@ -16,10 +16,10 @@
 		>
 			Go Back
 		</ion-button>
-		} @let results = searchResults$ | async; @if (results === null) {
+		} @let results = searchResults$ | async; @if (results === null && (searchInput$ | async) !== null) {
 		<div class="center-100 searching">
-			<ion-spinner name="crescent" />
-			<ion-card-subtitle> Searching, please wait... </ion-card-subtitle>
+			<ion-spinner name="crescent" aria-label="Searching for registrations" />
+			<p>Searching, please wait...</p>
 			<ion-button
 				color="medium"
 				class="ion-padding ion-margin"
@@ -123,5 +123,5 @@
 			</ion-button>
 		</div>
 		} }
-	</main>
+	</div>
 </ion-content>

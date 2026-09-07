@@ -1,0 +1,67 @@
+name: Storybook PR Validation
+
+on:
+  pull_request:
+    paths:
+      - '.storybook/**'
+      - 'storybook-visual/**'
+      - '.github/workflows/storybook-pr-validation.yml'
+      - 'santashop-admin/**'
+      - 'santashop-app/**'
+      - 'santashop-core/**'
+      - 'santashop-models/**'
+      - 'scripts/check-storybook-coverage.mjs'
+      - 'angular.json'
+      - 'eslint.config.js'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.json'
+      - 'tsconfig.storybook.json'
+      - 'vitest.storybook.config.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  storybook_validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Install the Storybook browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build and test every story
+        run: pnpm run ci:storybook
+
+  storybook_visual:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium
+      - run: pnpm run storybook:build
+      - name: Compare all story images with reviewed Windows baselines
+        run: pnpm run storybook:visual
+      - name: Keep visual differences and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-visual-differences
+          path: storybook-visual/test-results
+          retention-days: 14

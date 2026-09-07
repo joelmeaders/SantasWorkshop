@@ -10,7 +10,7 @@
 <ion-content fullscreen class="ion-padding-horizontal">
 	<div class="limited-container">
 		@if (registration$ | async; as registration) {
-		<ion-list>
+		<div class="form-list">
 			<ion-list-header color="none" class="review-instructions">
 				<span>
 					<h3>Instructions</h3>
@@ -42,9 +42,8 @@
 						<ion-button
 							fill="outline"
 							size="small"
-							color="primary"
 							(click)="editDateTime()"
-							color="warning"
+							color="dark"
 						>
 							Change Date/Time
 						</ion-button>
@@ -81,7 +80,7 @@
 				</ion-label>
 				<ion-icon name="checkmark-circle" slot="end" size="large" aria-hidden="true" />
 			</ion-item>
-		</ion-list>
+		</div>
 		} @else {
 		<div class="no-info ion-text-center ion-padding-top">
 			<h1>No information loaded...</h1>

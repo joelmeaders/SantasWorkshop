@@ -1,7 +1,7 @@
 <admin-header title="Resend Email" />
 
 <ion-content class="ion-padding-horizontal">
-	<main class="limited-container">
+	<div class="limited-container">
 		<ion-card-header class="ion-padding-vertical">
 			<p>
 				Enter the customer's email address and then press "Send Email"
@@ -22,7 +22,8 @@
 						placeholder="required"
 					 />
 				</ion-item>
-				<ion-button
+			</ion-list>
+			<ion-button
 					(click)="searchAndSend()"
 					expand="block"
 					[disabled]="!form.valid"
@@ -30,8 +31,7 @@
 				>
 					<ion-icon name="mail-outline" slot="start" aria-hidden="true" />
 					<ion-label> Send Email </ion-label>
-				</ion-button>
-			</ion-list>
+			</ion-button>
 		</form>
-	</main>
+	</div>
 </ion-content>

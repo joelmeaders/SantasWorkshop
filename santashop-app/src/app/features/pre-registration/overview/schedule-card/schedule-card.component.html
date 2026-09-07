@@ -24,10 +24,17 @@
 			} @else {
 				@if (slot && !expanded()) {
 					<ion-item lines="none">
-						<ion-icon name="calendar-outline" slot="start" />
+						<ion-icon
+							name="calendar-outline"
+							slot="start"
+							aria-hidden="true"
+						/>
 						<ion-label class="ion-text-wrap"
 							><strong>{{
-								slot.dateTime | localizedDate: 'fullDate' : 'America/Denver'
+								slot.dateTime
+									| localizedDate
+										: 'fullDate'
+										: 'America/Denver'
 							}}</strong>
 							<p>{{ slot.dateTime | timeSlot }}</p></ion-label
 						>
@@ -38,7 +45,11 @@
 							fill="outline"
 							(click)="open()"
 							[disabled]="busy()"
-							><ion-icon name="create-outline" slot="start" />{{
+							><ion-icon
+								name="create-outline"
+								slot="start"
+								aria-hidden="true"
+							/>{{
 								'OVERVIEW.CHANGE_TIME' | translate
 							}}</ion-button
 						>
@@ -69,7 +80,9 @@
 										<ion-label
 											><strong>{{
 												day.dateTime
-													| localizedDate: 'fullDate' : 'America/Denver'
+													| localizedDate
+														: 'fullDate'
+														: 'America/Denver'
 											}}</strong></ion-label
 										>
 									</ion-item>

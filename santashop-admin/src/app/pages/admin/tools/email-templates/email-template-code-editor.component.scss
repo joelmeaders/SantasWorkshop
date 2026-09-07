@@ -8,6 +8,11 @@
 
 :host ::ng-deep .cm-editor {
 	height: 24rem;
+	background: #fff;
+}
+
+:host ::ng-deep .cm-activeLine {
+	background: #fff;
 }
 
 :host ::ng-deep .cm-scroller {

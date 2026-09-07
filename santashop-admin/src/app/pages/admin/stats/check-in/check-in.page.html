@@ -57,35 +57,35 @@
 				@let totalCustomersCount = totalCustomers$ | async;
 				<div class="count-container">
 					<h1>{{ totalCustomersCount }}</h1>
-					<h3>Customers</h3>
+					<h2>Customers</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				@let totalChildrenCount = totalChildren$ | async;
 				<div class="count-container">
 					<h1>{{ totalChildrenCount }}</h1>
-					<h3>Children</h3>
+					<h2>Children</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				@let preregisteredCount = totalPreregistered$ | async;
 				<div class="count-container">
 					<h1>{{ preregisteredCount }}</h1>
-					<h3>Pre-Registered</h3>
+					<h2>Pre-Registered</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				@let onSiteCount = onSiteRegistrations$ | async;
 				<div class="count-container">
 					<h1>{{ onSiteCount }}</h1>
-					<h3>On-Site</h3>
+					<h2>On-Site</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
 				@let modifiedCount = totalModifiedRegistrations$ | async;
 				<div class="count-container">
 					<h1>{{ modifiedCount }}</h1>
-					<h3>Modified</h3>
+					<h2>Modified</h2>
 				</div>
 			</ion-col>
 		</ion-row>

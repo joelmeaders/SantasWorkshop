@@ -11,7 +11,6 @@ import {
 } from 'ionicons/icons';
 import {
 	IonRouterLink,
-	IonContent,
 	IonRouterOutlet,
 	IonFooter,
 	IonToolbar,
@@ -31,7 +30,6 @@ import {
 		RouterLink,
 		AsyncPipe,
 		IonRouterLink,
-		IonContent,
 		IonRouterOutlet,
 		IonFooter,
 		IonToolbar,

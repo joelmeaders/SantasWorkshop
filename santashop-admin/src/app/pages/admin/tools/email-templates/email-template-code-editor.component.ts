@@ -63,6 +63,9 @@ export class EmailTemplateCodeEditorComponent
 					basicSetup,
 					html(),
 					EditorView.lineWrapping,
+					EditorView.contentAttributes.of({
+						'aria-label': 'HTML template source',
+					}),
 					EditorView.updateListener.of((update) => {
 						if (update.docChanged) {
 							this.valueChange.emit(

@@ -14,11 +14,21 @@ describe('newAuthForm', () => {
 		expect(form.controls.password.hasError('minlength')).toBe(true);
 
 		form.setValue({
-			emailAddress: `${'a'.repeat(30)}@example.test`,
+			emailAddress: `${'a'.repeat(243)}@example.test`,
 			password: 'a'.repeat(41),
 		});
 		expect(form.controls.emailAddress.hasError('maxlength')).toBe(true);
 		expect(form.controls.password.hasError('maxlength')).toBe(true);
+	});
+
+	it('accepts a valid email address up to the backend limit', () => {
+		const form = newAuthForm();
+		const emailAddress = `${'a'.repeat(64)}@${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(61)}`;
+
+		form.controls.emailAddress.setValue(emailAddress);
+
+		expect(emailAddress).toHaveLength(254);
+		expect(form.controls.emailAddress.valid).toBe(true);
 	});
 
 	it('accepts a valid email and password', () => {

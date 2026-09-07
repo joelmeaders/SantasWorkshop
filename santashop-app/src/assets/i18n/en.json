@@ -336,5 +336,15 @@
 		"SAVE_ERROR": "The app language changed, but we could not save your email language. Please try again.",
 		"RETRY": "Try again",
 		"DISMISS": "Close"
+	},
+	"APP_UPDATE": {
+		"READY_TITLE": "A fresh update is ready",
+		"READY_MESSAGE": "You can keep going and update later. Refreshing now may erase information you have not saved.",
+		"FAILED_TITLE": "The update will have to wait",
+		"FAILED_MESSAGE": "We could not finish the update. You can keep using the site and try refreshing later.",
+		"UNRECOVERABLE_TITLE": "Please refresh to continue",
+		"UNRECOVERABLE_MESSAGE": "Sorry, this page needs a fresh start. Refresh to continue. You may need to enter information you have not saved again.",
+		"RELOAD": "Refresh page",
+		"LATER": "Not now"
 	}
 }

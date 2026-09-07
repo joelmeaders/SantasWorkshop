@@ -16,7 +16,10 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 
 import { AppComponent } from './app.component';
-import { AnalyticsWrapper, AppStateService } from '@santashop/core/customer';
+import {
+	AnalyticsWrapper,
+	AppStateService,
+} from '@santashop/core/customer';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { ApplicationService } from './core/services/application.service';
@@ -81,7 +84,10 @@ describe('AppComponent', () => {
 			],
 		})
 			.overrideComponent(AppComponent, {
-				set: { imports: [] },
+				set: {
+					imports: [],
+					template: '<ion-app><ion-router-outlet /></ion-app>',
+				},
 			})
 			.compileComponents();
 	});

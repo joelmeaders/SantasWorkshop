@@ -32,6 +32,7 @@
 		"@angular/core": "catalog:",
 		"@angular/forms": "catalog:",
 		"@angular/platform-browser": "catalog:",
+		"@angular/service-worker": "catalog:",
 		"@angular/router": "catalog:",
 		"@ionic/angular": "catalog:",
 		"chart.js": "catalog:",

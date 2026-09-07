@@ -25,7 +25,9 @@ test.describe('customer account and session access', () => {
 		await expect(page.locator('#menuButton')).toBeVisible();
 		await expect(page.locator('#children-heading')).toBeVisible();
 		await page.goto('/pre-registration/profile');
-		await expect(page.locator('ion-input[formControlName="zipCode"] input')).toHaveValue('01234');
+		await expect(
+			page.locator('ion-input[formControlName="zipCode"] input'),
+		).toHaveValue('01234');
 	});
 
 	test('AUTH-002 requires valid fields and policy acceptance', async ({
@@ -51,6 +53,54 @@ test.describe('customer account and session access', () => {
 		await expect(submitButton).not.toHaveClass(/button-disabled/, {
 			timeout: 15000,
 		});
+	});
+
+	test('AUTH-010 accepts a long email through signup and later sign-in', async ({
+		page,
+	}) => {
+		const account = randomAccount();
+		account.emailAddress = account.emailAddress.replace(
+			'@',
+			'+long-email-validation-journey@',
+		);
+		expect(account.emailAddress.length).toBeGreaterThan(40);
+		await createAccountViaUi(page, account);
+		await signOutViaUi(page);
+		await signInViaUi(page, account);
+		await expect(page.locator('#children-heading')).toBeVisible();
+	});
+
+	test('AUTH-011 updates visible email errors as the value changes', async ({
+		page,
+	}) => {
+		await page.goto('/sign-up');
+		const emailField = page.locator('#emailAddress');
+		const input = emailField.locator('input:not([disabled])');
+		await input.focus();
+		await input.blur();
+		await expect(
+			emailField.getByText('This field is required'),
+		).toBeVisible();
+
+		await input.fill(`${'a'.repeat(242)}@example.test`);
+		await input.blur();
+		await expect(emailField.getByText(/Maximum length is/)).toBeVisible();
+
+		await input.fill('not-an-email');
+		await input.blur();
+		await expect(
+			emailField.getByText('Must be a valid email address'),
+		).toBeVisible();
+		await expect(
+			emailField.getByText('This field is required'),
+		).toBeHidden();
+
+		await input.fill('valid-email@example.test');
+		await input.blur();
+		await expect(emailField).toHaveJSProperty('errorText', '');
+		await expect(
+			emailField.getByText('Must be a valid email address'),
+		).toBeHidden();
 	});
 
 	test('AUTH-003 shows a recovery message for a duplicate account', async ({
@@ -155,7 +205,9 @@ test.describe('customer account and session access', () => {
 			has: page.locator('app-terms-of-service-modal'),
 		});
 		await expect(termsModal).toBeVisible();
-		await termsModal.getByRole('button', { name: 'Close', exact: true }).click();
+		await termsModal
+			.getByRole('button', { name: 'Close', exact: true })
+			.click();
 		await expect(termsModal).toBeHidden();
 
 		await page.getByText('Privacy Policy', { exact: true }).first().click();

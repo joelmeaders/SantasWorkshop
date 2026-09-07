@@ -3,6 +3,7 @@ import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/com
 import { provideRouter, RouteReuseStrategy, Routes } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { provideServiceWorker } from '@angular/service-worker';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import {
 	FIREBASE_ANALYTICS,
@@ -115,6 +116,11 @@ export const bootstrapCustomerApplication = (
 
 	return bootstrap(application.rootComponent, {
 		providers: [
+			provideServiceWorker('ngsw-worker.js', {
+				enabled: appConfig.production,
+				registrationStrategy: 'registerWhenStable:30000',
+				updateViaCache: 'none',
+			}),
 			provideRouter(application.routes),
 			provideHttpClient(withXhr(), withInterceptorsFromDi()),
 			provideIonicAngular({ mode: 'md', animated: true }),

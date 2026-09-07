@@ -15,8 +15,12 @@ import {
 	ModalController,
 	Platform,
 } from '@ionic/angular/standalone';
-import { TranslateService } from '@ngx-translate/core';
-import { AnalyticsWrapper, AppStateService } from '@santashop/core/customer';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+	AnalyticsWrapper,
+	AppStateService,
+	AppUpdatePromptComponent,
+} from '@santashop/core/customer';
 import { ApplicationService } from './core/services/application.service';
 
 @Component({
@@ -24,7 +28,7 @@ import { ApplicationService } from './core/services/application.service';
 	templateUrl: 'app.component.html',
 	styleUrls: ['app.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [IonApp, IonRouterOutlet],
+	imports: [IonApp, IonRouterOutlet, TranslateModule, AppUpdatePromptComponent],
 	providers: [ModalController],
 })
 export class AppComponent implements OnInit {

@@ -9,7 +9,7 @@ export interface TestAccount {
 	password: string;
 }
 
-// The sign-up form enforces emailAddress maxLength(40) and lastName
+// The sign-up form enforces emailAddress maxLength(254) and lastName
 // maxLength(25), so generated values must stay short while remaining unique.
 const buildUniqueToken = (): string => {
 	const timeToken = Date.now().toString(36);
@@ -29,7 +29,7 @@ export const randomAccount = (): TestAccount => {
 		firstName: 'Test',
 		lastName: 'User',
 		zipCode: `8020${zipSuffix}`,
-		// e.g. "e2e-lz4k9x1a2b3c@test.com" — comfortably under 40 characters.
+		// e.g. "e2e-lz4k9x1a2b3c@test.com" — comfortably under the email limit.
 		emailAddress: `e2e-${token}@test.com`,
 		password: buildPassword(),
 	};

@@ -7,6 +7,15 @@ const meta = {
 	title: 'Admin/Authentication/Sign In',
 	component: SignInPage,
 	decorators: adminStoryDecorators(),
+	// Release metadata is fixture data here. The page unit test checks real config.
+	render: (): {
+		props: { environmentName: string; environmentVersion: string };
+	} => ({
+		props: {
+			environmentName: '@santashop/admin_LOCAL',
+			environmentVersion: '2026.09.0-beta.2',
+		},
+	}),
 	parameters: {
 		docs: {
 			description: {
@@ -19,6 +28,7 @@ const meta = {
 		const canvas = within(canvasElement);
 		const login = canvas.getByText('Login').closest('ion-button');
 		await expect(canvas.getByText('Sign in')).toBeVisible();
+		await expect(canvas.getByText(/2026\.09\.0-beta\.2/)).toBeVisible();
 		await expect(login).toHaveAttribute('disabled');
 		await userEvent.click(canvas.getByText('Sign in'));
 	},

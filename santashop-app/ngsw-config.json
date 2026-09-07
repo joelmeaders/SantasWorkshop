@@ -1,0 +1,35 @@
+{
+	"index": "/index.html",
+	"appData": {
+		"application": "santashop-app",
+		"updateMessage": "A newer customer app is ready. Refresh to use it."
+	},
+	"assetGroups": [
+		{
+			"name": "app-shell",
+			"installMode": "prefetch",
+			"updateMode": "prefetch",
+			"resources": {
+				"files": [
+					"/index.html",
+					"/main*.js",
+					"/styles*.css"
+				]
+			}
+		},
+		{
+			"name": "static-assets",
+			"installMode": "lazy",
+			"updateMode": "lazy",
+			"resources": {
+				"files": [
+					"/*.js",
+					"/*.css",
+					"/assets/**",
+					"/svg/**",
+					"/robots.txt"
+				]
+			}
+		}
+	]
+}

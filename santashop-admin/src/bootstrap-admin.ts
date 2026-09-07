@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, RouteReuseStrategy } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import {
@@ -162,6 +163,11 @@ export function bootstrapAdminApplication(
 	return dependencies
 		.bootstrapApplication(options.appComponent, {
 			providers: [
+				provideServiceWorker('ngsw-worker.js', {
+					enabled: runtimeConfig.production,
+					registrationStrategy: 'registerWhenStable:30000',
+					updateViaCache: 'none',
+				}),
 				dependencies.provideRouter(options.routes),
 				dependencies.provideHttpClient(
 					dependencies.withXhr(),

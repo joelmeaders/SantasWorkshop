@@ -76,6 +76,8 @@ pnpm run storybook:visual
 
 The visual suite reads every named story from the static Storybook index. It compares desktop and mobile screenshots after the story's play function and render audit pass. Use `pnpm run storybook:visual:report` to inspect local failures.
 
+Release metadata is fixture data in visual stories. The admin sign-in story fixes its displayed environment and version independently of generated application configuration. Do not update those fixture values for a normal release bump. Its page unit test verifies that the real application renders `config.version` and the configured environment. This preserves visual coverage of the version label without requiring new images for every release.
+
 Update images only after inspecting and accepting an intentional visual change:
 
 ```sh

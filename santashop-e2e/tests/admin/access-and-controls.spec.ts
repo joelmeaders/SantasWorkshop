@@ -108,6 +108,44 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
 	});
 
+	test('STAFF-008 allows check-in staff to search by name and open registration review', async ({
+		page,
+		seedPublicParams,
+		seedAdminUser,
+		seedRegistration,
+	}) => {
+		const account = defaultAdminAccount({
+			uid: 'checkin-lookup-e2e-user',
+			emailAddress: 'checkin-lookup-e2e@test.com',
+			roles: ['checkin'],
+		});
+		await seedPublicParams({});
+		await seedAdminUser(account);
+		await seedRegistration({
+			uid: 'checkin-lookup-registration-e2e',
+			firstName: 'Lookup',
+			lastName: 'Operator',
+			emailAddress: 'checkin-lookup-registration-e2e@test.com',
+			zipCode: '80202',
+			code: 'LOOKUP01',
+			dateTime: e2eDateTime(12, 15, 16),
+		});
+
+		await page.goto('/');
+		await fillAdminSignInForm(page, account);
+		await page.click('#adminSignInButton');
+		await page.waitForURL('**/admin/landing', { timeout: 30000 });
+		await page.goto('/admin/search/by-name');
+		await page.locator('ion-input[formControlName="lastName"] input').fill('Operator');
+		await page.locator('ion-input[formControlName="zipCode"] input').fill('80202');
+		await page.getByRole('link', { name: 'Search', exact: true }).click();
+		await expect(page.locator('.result-item')).toHaveCount(1);
+		await expect(page.locator('.result-item')).toContainText(/lookup Operator/i);
+		await page.locator('.result-item').click();
+		await expect(page).toHaveURL(/\/admin\/checkin\/review/);
+		await expect(page.getByText('Lookup Operator', { exact: true })).toBeVisible();
+	});
+
 	test('STAFF-004 signs out and blocks protected operational routes', async ({
 		page,
 		seedPublicParams,
@@ -358,6 +396,103 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			`${E2E_STORAGE_EMULATOR_URL}/v0/b/${E2E_STORAGE_BUCKET}/o/${encodeURIComponent(qrLifecycle.current.path as string)}?alt=media`,
 		);
 		expect([401, 403]).toContain(anonymousQrRead.status());
+	});
+
+	test('RULES-004 permits check-in lookup reads without granting customer or audit access', async ({
+		request,
+		seedAdminUser,
+		seedRegistration,
+	}) => {
+		const checkinOnly = defaultAdminAccount({
+			uid: 'lookup-rules-checkin-e2e',
+			emailAddress: 'lookup-rules-checkin-e2e@test.com',
+			roles: ['checkin'],
+		});
+		const unrelatedCustomer = defaultAdminAccount({
+			uid: 'lookup-rules-customer-e2e',
+			emailAddress: 'lookup-rules-customer-e2e@test.com',
+			roles: [],
+		});
+		await seedAdminUser(checkinOnly);
+		await seedAdminUser(unrelatedCustomer);
+		await seedRegistration({
+			uid: 'lookup-rules-registration-e2e',
+			firstName: 'Lookup',
+			lastName: 'Allowed',
+			emailAddress: 'lookup-rules-registration-e2e@test.com',
+			zipCode: '80202',
+			code: 'RULELOOKUP',
+			dateTime: e2eDateTime(12, 15, 16),
+		});
+
+		const checkinToken = await getFirestoreIdToken(request, checkinOnly);
+		const customerToken = await getFirestoreIdToken(request, unrelatedCustomer);
+		const checkinHeaders = { Authorization: `Bearer ${checkinToken}` };
+		const customerHeaders = { Authorization: `Bearer ${customerToken}` };
+
+		for (const collection of ['registrationsearchindex', 'registrations']) {
+			const checkinRead = await request.get(firestoreCollectionUrl(collection), {
+				headers: checkinHeaders,
+			});
+			expect(checkinRead.status()).toBe(200);
+			expect(
+				((await checkinRead.json()) as { documents?: unknown[] }).documents,
+			).toBeTruthy();
+
+			const customerRead = await request.get(
+				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				{ headers: customerHeaders },
+			);
+			expect(customerRead.status()).toBe(403);
+
+			const anonymousRead = await request.get(
+				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+			);
+			expect([401, 403]).toContain(anonymousRead.status());
+
+			const create = await request.post(firestoreCollectionUrl(collection), {
+				headers: checkinHeaders,
+				data: { fields: { proof: { stringValue: 'checkin-write' } } },
+			});
+			expect(create.status()).toBe(403);
+
+			const update = await request.patch(
+				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				{
+					headers: checkinHeaders,
+					data: { fields: { proof: { stringValue: 'checkin-update' } } },
+				},
+			);
+			expect(update.status()).toBe(403);
+
+			const remove = await request.delete(
+				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				{ headers: checkinHeaders },
+			);
+			expect(remove.status()).toBe(403);
+		}
+
+		const mutationReceiptRead = await request.get(
+			firestoreDocumentUrl(
+				'registrations/lookup-rules-registration-e2e/mutationReceipts',
+				'rules-test',
+			),
+			{ headers: checkinHeaders },
+		);
+		expect(mutationReceiptRead.status()).toBe(403);
+
+		for (const collection of [
+			'users',
+			'checkins',
+			'registrationScanAttempts',
+			'registrationScanRiskSummaries',
+		]) {
+			const checkinRead = await request.get(
+				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				{ headers: checkinHeaders },
+			);
+			expect(checkinRead.status()).toBe(403);
+		}
 	});
 });
 

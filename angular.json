@@ -132,6 +132,7 @@
 					},
 					"configurations": {
 						"production": {
+							"serviceWorker": "santashop-admin/ngsw-config.json",
 							"outputHashing": "all",
 							"budgets": [
 								{
@@ -161,6 +162,7 @@
 							]
 						},
 						"development": {
+							"serviceWorker": "santashop-admin/ngsw-config.json",
 							"optimization": false,
 							"extractLicenses": false,
 							"sourceMap": true
@@ -285,7 +287,8 @@
 					},
 					"configurations": {
 						"production": {
-							"budgets": [
+							"serviceWorker": "santashop-app/ngsw-config.json",
+						"budgets": [
 								{
 									"type": "initial",
 									"maximumWarning": "400kb",
@@ -314,6 +317,7 @@
 							]
 						},
 						"development": {
+							"serviceWorker": "santashop-app/ngsw-config.json",
 							"optimization": false,
 							"extractLicenses": false,
 							"sourceMap": true

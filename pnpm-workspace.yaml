@@ -43,6 +43,7 @@ catalog:
   '@angular/forms': 22.1.0
   '@angular/platform-browser': 22.1.0
   '@angular/router': 22.1.0
+  '@angular/service-worker': 22.1.0
   '@analogjs/vite-plugin-angular': 2.7.1
   '@axe-core/playwright': 4.12.1
   '@ionic/angular': 8.8.14

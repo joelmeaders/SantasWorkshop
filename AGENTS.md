@@ -44,6 +44,10 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 
 ## Testing and validation
 
+- Read [`docs/browser-flow-testing.md`](docs/browser-flow-testing.md) before browser testing against emulators, deployed test, or production. It defines account setup, role checks, journey coverage, and evidence requirements.
+- Test data may be deleted in verified emulators or the deployed test project. Never run test cleanup against production.
+- Never alter or delete preexisting production data without an explicit instruction identifying the intended change. During November and December (America/Denver), never alter or delete preexisting production data, even for an otherwise authorized test.
+- Production browser testing is read-only by default. New production QA records and permissions require explicit approval. Do not delete production data as test cleanup, including newly created QA records.
 - Unit tests use Angular's native Vitest runner in headless Chromium with coverage and watch disabled in [`angular.json`](angular.json). Run `pnpm run test:browser:setup` once when Chromium is not installed.
 - Typical scoped commands:
   - `pnpm --filter @santashop/app lint`

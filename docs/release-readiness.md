@@ -4,6 +4,30 @@ This is the operating contract for test promotion, production promotion,
 signup launch, and event-day check-in. A build or deploy alone is not release
 approval.
 
+## Remote Config migration prerequisite
+
+For beta.3, public controls move to the unconditional client-template parameter
+`santashop_public_parameters`. Follow [the migration release order](remote-config.md)
+before promoting dependent code. Keep the legacy Firestore settings document
+intact and require older applications to upgrade.
+
+Provision the dedicated reader and publisher identities, publish reviewed target
+settings, and generate matching release defaults before deployment. Configuration
+checks no longer share Firestore transaction atomicity; cached settings and
+in-flight work can outlive a publication.
+
+The September 7 inspection found 60 template reads per minute in each project.
+The current release gate requires 600 for the configured consumer instance
+ceiling and cold-start margin. Test setup could not request an increase through
+Cloud Quotas: the service reports increases unsupported. Resolve this through a
+supported quota process or a separately reviewed capacity/design change; do not
+treat the requested increase as granted or bypass the gate.
+
+Complete deployed test measurements for client delivery time, backend
+propagation, recovery, rollback, and API request counts. Passing PR gates and
+[local migration checks](remote-config-validation.md) does not satisfy these
+deployed acceptance requirements.
+
 ## Traffic and capacity assumptions
 
 - Signup launch: 2,000 customers in 30 minutes is 1.1 completed customers per

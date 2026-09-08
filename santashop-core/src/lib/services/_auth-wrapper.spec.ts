@@ -4,7 +4,6 @@ import {
 	EmailAuthProvider,
 	onAuthStateChanged,
 	reauthenticateWithCredential,
-	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
 	type Auth,
@@ -21,7 +20,6 @@ vi.mock('firebase/auth', () => ({
 	EmailAuthProvider: { credential: vi.fn() },
 	onAuthStateChanged: vi.fn(),
 	reauthenticateWithCredential: vi.fn(),
-	sendPasswordResetEmail: vi.fn(),
 	signInWithEmailAndPassword: vi.fn(),
 	updatePassword: vi.fn(),
 }));
@@ -45,7 +43,6 @@ describe('AuthWrapper', () => {
 	beforeEach(() => {
 		vi.mocked(user.reload).mockClear();
 		vi.mocked(onAuthStateChanged).mockReset();
-		vi.mocked(sendPasswordResetEmail).mockReset();
 		vi.mocked(signInWithEmailAndPassword).mockReset();
 		vi.mocked(updatePassword).mockReset();
 		vi.mocked(reauthenticateWithCredential).mockReset();
@@ -120,23 +117,17 @@ describe('AuthWrapper', () => {
 		});
 	});
 
-	it('forwards password reset, sign-in, password update, and sign-out', async () => {
+	it('forwards sign-in, password update, and sign-out', async () => {
 		const credential = {} as UserCredential;
-		vi.mocked(sendPasswordResetEmail).mockResolvedValue(undefined);
 		vi.mocked(signInWithEmailAndPassword).mockResolvedValue(credential);
 		vi.mocked(updatePassword).mockResolvedValue(undefined);
 
-		await service.sendPasswordResetEmail('staff@example.test');
 		await expect(
 			service.signInWithEmailAndPassword('staff@example.test', 'secret'),
 		).resolves.toBe(credential);
 		await service.updatePassword(user, 'new-secret');
 		await service.signOut();
 
-		expect(sendPasswordResetEmail).toHaveBeenCalledWith(
-			auth,
-			'staff@example.test',
-		);
 		expect(signInWithEmailAndPassword).toHaveBeenCalledWith(
 			auth,
 			'staff@example.test',

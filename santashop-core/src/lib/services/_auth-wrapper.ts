@@ -3,7 +3,6 @@ import {
 	EmailAuthProvider,
 	onAuthStateChanged,
 	reauthenticateWithCredential,
-	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	updatePassword,
 	type Auth,
@@ -73,9 +72,6 @@ export class AuthWrapper {
 
 	public readonly getCurrentUserToken = (): Promise<IdTokenResult | null> =>
 		this.currentUser()?.getIdTokenResult() ?? Promise.resolve(null);
-
-	public readonly sendPasswordResetEmail = (email: string): Promise<void> =>
-		sendPasswordResetEmail(this.auth, email);
 
 	public readonly signInWithEmailAndPassword = (
 		email: string,

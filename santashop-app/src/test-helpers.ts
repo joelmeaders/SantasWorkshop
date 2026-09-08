@@ -76,9 +76,9 @@ export function createAuthMock(): object {
 	return {
 		...createMock<{
 			signInWithEmailAndPassword: () => unknown; createUserWithEmailAndPassword: () => unknown;
-			signOut: () => unknown; sendPasswordResetEmail: () => unknown;
+			signOut: () => unknown;
 			authStateReady: () => Promise<void>;
-		}>(['signInWithEmailAndPassword', 'createUserWithEmailAndPassword', 'signOut', 'sendPasswordResetEmail', 'authStateReady']),
+		}>(['signInWithEmailAndPassword', 'createUserWithEmailAndPassword', 'signOut', 'authStateReady']),
 		currentUser: null,
 		onAuthStateChanged: vi.fn().mockReturnValue(() => undefined),
 		authStateReady: vi.fn().mockResolvedValue(undefined),

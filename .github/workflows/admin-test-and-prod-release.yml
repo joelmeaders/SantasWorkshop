@@ -63,6 +63,7 @@ env:
   LOCAL_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
   LOCAL_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
   LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop E2E
+  LOCAL_SANTASHOP_PASSWORD_RESET_CONTINUE_URL: http://localhost:4100/?mode=sign-in
   LOCAL_SANTASHOP_EVENT_MIN_INSTANCES: '0'
   LOCAL_SANTASHOP_PROGRAM_YEAR: '2026'
   LOCAL_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
@@ -93,7 +94,7 @@ jobs:
       TEST_SANTASHOP_PROGRAM_YEAR: '2026'
       TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
       - name: Record manual deployment selection
@@ -108,10 +109,10 @@ jobs:
             echo "- Target: \`$SELECTED_DEPLOYMENT_TARGET\`"
             echo '- Tests: skipped by request'
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '24.18.0'
           cache: 'pnpm'
@@ -145,7 +146,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
       - name: Upload admin E2E failure artifacts
         if: failure() && (github.event_name != 'workflow_dispatch' || !inputs.skip_tests)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: admin-test-deploy-e2e-failure-${{ github.run_id }}
           path: |
@@ -163,7 +164,7 @@ jobs:
           REMOTE_CONFIG_SERVICE_ACCOUNT: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''TEST'')] }}'
         run: node scripts/remote-config.cjs release-defaults --project santas-workshop-test
       - run: pnpm run ci:admin:build:test
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@v0.11.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''TEST'')] }}'
@@ -188,7 +189,7 @@ jobs:
       PROD_SANTASHOP_PROGRAM_YEAR: '2026'
       PROD_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.release_ref }}
       - name: Record manual deployment selection
@@ -203,10 +204,10 @@ jobs:
             echo "- Target: \`$SELECTED_DEPLOYMENT_TARGET\`"
             echo '- Tests: skipped by request'
           } >> "$GITHUB_STEP_SUMMARY"
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '24.18.0'
           cache: 'pnpm'
@@ -240,7 +241,7 @@ jobs:
         if: inputs.skip_tests == false
       - name: Upload admin E2E failure artifacts
         if: failure() && inputs.skip_tests == false
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: admin-prod-release-e2e-failure-${{ github.run_id }}
           path: |
@@ -258,7 +259,7 @@ jobs:
           REMOTE_CONFIG_SERVICE_ACCOUNT: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''193B5'')] }}'
         run: node scripts/remote-config.cjs release-defaults --project santas-workshop-193b5
       - run: pnpm run ci:admin:build:prod
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@v0.11.0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''193B5'')] }}'

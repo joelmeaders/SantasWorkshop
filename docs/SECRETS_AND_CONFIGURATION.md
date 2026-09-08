@@ -101,6 +101,16 @@ AWS credentials. Set `SANTASHOP_SEND_EMAILS_FROM_EMULATOR=true` only for an
 intentional SES integration run, and supply local `AWS_ACCESS_KEY_ID` and
 `AWS_SECRET_ACCESS_KEY` values for that run.
 
+Password-reset delivery also requires
+`SANTASHOP_PASSWORD_RESET_CONTINUE_URL`. Use these values:
+
+- Local: `http://localhost:4100/?mode=sign-in`
+- Test: `https://test.denversantaclausshop.org/?mode=sign-in`
+- Production: `https://register.denversantaclausshop.org/?mode=sign-in`
+
+Deploy `firestore.indexes.json` with Functions so Firestore TTL can remove old
+`passwordResetRateLimits` claims by their `expiresAt` field.
+
 Do not use local production configuration to deploy. Production generation is
 reserved for the release workflow.
 

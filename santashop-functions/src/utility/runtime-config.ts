@@ -69,6 +69,10 @@ export const FIRESTORE_BACKUP_BUCKET = requireEnv('FIRESTORE_BACKUP_BUCKET');
 
 export const SES_REGION = requireEnv('SES_REGION');
 
+export const PASSWORD_RESET_CONTINUE_URL = requireEnv(
+	'SANTASHOP_PASSWORD_RESET_CONTINUE_URL',
+);
+
 export const EVENT_DISPLAY_NAME = requireEnv('SANTASHOP_EVENT_DISPLAY_NAME');
 const configuredEventYear = /\b(?:20\d{2}|2100)\b/u.exec(EVENT_DISPLAY_NAME);
 if (

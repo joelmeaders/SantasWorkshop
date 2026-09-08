@@ -13,6 +13,8 @@ const BASE_RUNTIME_ENV = {
 	FIRESTORE_BACKUP_BUCKET: 'gs://santashop-backups',
 	SES_REGION: 'us-west-2',
 	SANTASHOP_EVENT_DISPLAY_NAME: 'Denver Santa Claus Shop',
+	SANTASHOP_PASSWORD_RESET_CONTINUE_URL:
+		'https://test.denversantaclausshop.org/?mode=sign-in',
 	REMINDER_EMAIL_SENDING_STALE_MINUTES: '15',
 	SANTASHOP_SIGNUP_MIN_INSTANCES: '1',
 	SANTASHOP_EVENT_MIN_INSTANCES: '0',
@@ -79,6 +81,11 @@ describe('runtime configuration', () => {
 				AWS_REGION: 'us-east-2',
 			}),
 		).rejects.toThrow('SES_REGION');
+	});
+	it('requires an explicit password reset continue URL', async () => {
+		await expect(
+			loadRuntimeConfig({ SANTASHOP_PASSWORD_RESET_CONTINUE_URL: undefined }),
+		).rejects.toThrow('SANTASHOP_PASSWORD_RESET_CONTINUE_URL');
 	});
 	it('uses the configured Storage bucket', async () => {
 		const config = await loadRuntimeConfig({

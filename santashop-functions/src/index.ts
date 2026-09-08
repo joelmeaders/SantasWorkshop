@@ -537,6 +537,13 @@ export const updatePreferredLanguage = onCall(
 	),
 );
 
+export const requestPasswordReset = onCall(
+	STANDARD_CUSTOMER_OPTIONS,
+	observeCallableHandler('requestPasswordReset', async (request) => {
+		return (await import('./fn/requestPasswordReset')).default(request);
+	}),
+);
+
 export const readPublicParametersSettings = onCall(
 	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
 	observeCallableHandler('readPublicParametersSettings', async (request) =>

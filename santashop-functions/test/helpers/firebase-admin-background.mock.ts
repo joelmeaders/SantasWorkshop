@@ -61,6 +61,8 @@ export interface BackgroundAdminMock {
 	listUsers: ReturnType<typeof vi.fn>;
 	deleteUsers: ReturnType<typeof vi.fn>;
 	getUser: ReturnType<typeof vi.fn>;
+	getUserByEmail: ReturnType<typeof vi.fn>;
+	generatePasswordResetLink: ReturnType<typeof vi.fn>;
 	updateUser: ReturnType<typeof vi.fn>;
 	setCustomUserClaims: ReturnType<typeof vi.fn>;
 	upload: ReturnType<typeof vi.fn>;
@@ -134,6 +136,8 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	const listUsers = vi.fn();
 	const deleteUsers = vi.fn();
 	const getUser = vi.fn();
+	const getUserByEmail = vi.fn();
+	const generatePasswordResetLink = vi.fn();
 	const updateUser = vi.fn();
 	const setCustomUserClaims = vi.fn();
 	const upload = vi.fn();
@@ -313,6 +317,8 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		listUsers,
 		deleteUsers,
 		getUser,
+		getUserByEmail,
+		generatePasswordResetLink,
 		updateUser,
 		setCustomUserClaims,
 	}));
@@ -343,6 +349,8 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		listUsers,
 		deleteUsers,
 		getUser,
+		getUserByEmail,
+		generatePasswordResetLink,
 		updateUser,
 		setCustomUserClaims,
 		upload,

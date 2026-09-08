@@ -206,7 +206,7 @@ test.describe('customer account and session access', () => {
 		});
 		await resetButton.click();
 		await expect(
-			page.getByText('Email has been sent!', { exact: true }),
+			page.getByText('Password reset request received', { exact: true }),
 		).toBeVisible({
 			timeout: 15000,
 		});
@@ -225,7 +225,7 @@ test.describe('customer account and session access', () => {
 		await page.fill('#resetPasswordEmail input', account.emailAddress);
 		await page.locator('#resetPasswordButton').click();
 		await expect(
-			page.getByText('Email has been sent!', { exact: true }),
+			page.getByText('Password reset request received', { exact: true }),
 		).toBeVisible({ timeout: 15000 });
 
 		let resetLink = '';

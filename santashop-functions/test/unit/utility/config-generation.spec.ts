@@ -134,6 +134,8 @@ const FUNCTIONS_ENV_KEYS = {
 	TEST_FIRESTORE_BACKUP_BUCKET: 'gs://test-backups',
 	TEST_SES_REGION: 'us-west-2',
 	TEST_SANTASHOP_EVENT_DISPLAY_NAME: 'Test Event',
+	TEST_SANTASHOP_PASSWORD_RESET_CONTINUE_URL:
+		'https://test.denversantaclausshop.org/?mode=sign-in',
 	TEST_REGISTRATION_EMAIL_SOURCE: 'noreply@example.com',
 	TEST_REGISTRATION_EMAIL_RETURN_PATH: 'admin@example.com',
 	TEST_SCHEDULED_FIRESTORE_BACKUP: '0 0 * * *',
@@ -153,6 +155,8 @@ const FUNCTIONS_ENV_KEYS = {
 	PROD_FIRESTORE_BACKUP_BUCKET: 'gs://prod-backups',
 	PROD_SES_REGION: 'us-east-1',
 	PROD_SANTASHOP_EVENT_DISPLAY_NAME: 'Prod Event',
+	PROD_SANTASHOP_PASSWORD_RESET_CONTINUE_URL:
+		'https://register.denversantaclausshop.org/?mode=sign-in',
 	PROD_REGISTRATION_EMAIL_SOURCE: 'prod-noreply@example.com',
 	PROD_REGISTRATION_EMAIL_RETURN_PATH: 'prod-admin@example.com',
 	PROD_SCHEDULED_FIRESTORE_BACKUP: '1 0 * * *',
@@ -186,6 +190,7 @@ const MANAGED_ENV_KEYS = [
 	'FIRESTORE_BACKUP_BUCKET',
 	'SES_REGION',
 	'SANTASHOP_EVENT_DISPLAY_NAME',
+	'SANTASHOP_PASSWORD_RESET_CONTINUE_URL',
 	'REGISTRATION_EMAIL_SOURCE',
 	'REGISTRATION_EMAIL_RETURN_PATH',
 	'SCHEDULED_FIRESTORE_BACKUP',
@@ -458,6 +463,9 @@ describe('config.functions.cjs', () => {
 			FUNCTIONS_ENV_KEYS.TEST_AWS_ACCESS_KEY_ID,
 		);
 		expect(config['SANTASHOP_EVENT_DISPLAY_NAME']).toBe('Test Event');
+		expect(config['SANTASHOP_PASSWORD_RESET_CONTINUE_URL']).toBe(
+			'https://test.denversantaclausshop.org/?mode=sign-in',
+		);
 		expect(config['REMINDER_EMAIL_SENDING_STALE_MINUTES']).toBeUndefined();
 		expect(config['SANTASHOP_SIGNUP_MIN_INSTANCES']).toBe('0');
 	});
@@ -540,6 +548,9 @@ describe('config.functions.cjs', () => {
 		);
 		expect(fileText).toContain('AWS_ACCESS_KEY_ID="test-access-key"');
 		expect(fileText).toContain('SANTASHOP_EVENT_DISPLAY_NAME="Test Event"');
+		expect(fileText).toContain(
+			'SANTASHOP_PASSWORD_RESET_CONTINUE_URL="https://test.denversantaclausshop.org/?mode=sign-in"',
+		);
 	});
 
 	it('keeps generated dotenv files ignored and credentials out of generation logs', () => {

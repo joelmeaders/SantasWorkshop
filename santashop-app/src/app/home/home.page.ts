@@ -38,7 +38,7 @@ import {
 	newAuthForm,
 } from '@santashop/core/customer';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
-import { Auth, IError } from '@santashop/models';
+import { Auth } from '@santashop/models';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -135,12 +135,7 @@ export class HomePage {
 		try {
 			await this.authService.resetPassword(this.resetEmail.value);
 			this.resetEmailSent.set(true);
-		} catch (error) {
-			if ((error as IError)?.code?.toLowerCase() === 'auth/user-not-found') {
-				this.resetEmailSent.set(true);
-				return;
-			}
-
+		} catch {
 			await this.errorHandler.handleError(
 				{
 					code: 'auth/password-reset-failed',

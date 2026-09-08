@@ -65,10 +65,11 @@ setup exist.
 | AUTH-004 | Sign out and sign back in with the created credentials; registration continuity is preserved.                                | BR-019, BR-029; FR-CUS-008; NFR-DAT-001                                   | Automated   |
 | AUTH-005 | Sign out, then navigate directly to a private registration route; the user is redirected to sign-in.                         | BR-010; FR-SH-004; NFR-SEC-001                                            | Automated   |
 | AUTH-006 | While authenticated, open sign-in or sign-up; the user is redirected to the active registration overview.                    | FR-CUS-009                                                                | Automated   |
-| AUTH-007 | Request password recovery for an account; the UI confirms that the reset request was accepted by the Auth emulator.          | BR-029; FR-CUS-010                                                        | Automated   |
+| AUTH-007 | Request password recovery; existing, missing, and rate-limited accounts receive the same neutral acknowledgment.             | BR-029; FR-CUS-010; NFR-SEC-013; NFR-PRV-010                             | Automated across unit, integration, and browser layers |
 | AUTH-008 | Use wrong credentials; the user remains signed out and receives a clear recovery message.                                    | FR-CUS-008; NFR-UX-004–005                                                | Automated   |
 | AUTH-009 | Customer A attempts to read or mutate customer B data through the service boundary; access is denied.                        | BR-010; NFR-SEC-003, NFR-SEC-005                                          | Other layer |
 | AUTH-010 | Externally exposed mutation endpoints reject missing anti-abuse proof outside the emulator while remaining testable locally. | BR-053; NFR-SEC-004, NFR-OPS-006                                          | Other layer |
+| AUTH-012 | Request and complete password recovery with the Auth emulator OOB code; the old password fails and the new password signs in. | BR-029; FR-CUS-010                                                        | Automated   |
 
 ## Feature 3: Registration overview, referral, and readiness
 

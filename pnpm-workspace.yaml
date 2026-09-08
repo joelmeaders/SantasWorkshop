@@ -75,7 +75,7 @@ catalog:
   eslint-config-prettier: ^10.1.8
   eslint-plugin-prettier: ^5.5.6
   firebase: ^12.18.0
-  firebase-tools: ^15.28.2
+  firebase-tools: ^15.29.0
   ionicons: ^8.1.0
   esbuild: ^0.28.2
   ng-packagr: 22.1.1

@@ -131,8 +131,8 @@ not reproduce the earlier Chrome service-worker update transition. Source review
 still shows that `/` and `/admin` wait for Auth initialization and an ID-token
 result before the route renders. It also confirms that Remote Config starts only
 after the authenticated admin tree loads. No blocking request was demonstrated,
-so no speculative Auth, route, or cache change was made. The intermittent blank
-Chrome startup remains open until its first failing load is captured.
+so no speculative Auth, route, or cache change was made. By owner direction, the
+intermittent blank-admin observation is crossed off and needs no further work.
 
 The settings-delivery design was also assessed against Firebase guidance.
 [Real-time Remote Config](https://firebase.google.com/docs/remote-config/web/real-time)
@@ -148,16 +148,47 @@ which is six times as many. About 12 continuously visible tabs would exceed the
 first 100,000 daily fetches before startup, retry, or invalidation traffic. That
 extra traffic would increase cost and throttling risk without controlling server
 propagation or network delay. Remote Config remains the only settings source.
-The 60-second watchdog, current backoff, hidden-tab pause, and ten-second request
-timeout remain unchanged. The ten-second publication-to-display target remains
-an unmet best-effort target, not a Firebase guarantee.
+At application startup, release defaults stay available while one fetch gets a
+three-second timeout. If that fetch fails, the source waits two seconds and
+makes one more three-second fetch. After startup, the existing ten-second fetch
+timeout, 60-second watchdog, failure backoff, and hidden-tab pause remain in
+effect. The ten-second publication-to-display target remains an unmet
+best-effort target, not a Firebase guarantee.
 
-`AUTH-012` now covers password-reset completion with the Firebase Auth emulator.
+Password-reset requests now use the `requestPasswordReset` callable in source.
+The callable reserves a SHA-256-keyed Firestore rate-limit claim before it asks
+Auth for a reset link. It returns the same accepted response for missing and
+rate-limited accounts. In emulator mode, Auth still creates the out-of-band
+code while SES delivery stays off unless explicitly enabled. The browser copy
+now acknowledges the request without claiming that an email was delivered.
+
+`AUTH-012` covers password-reset completion with the Firebase Auth emulator.
 It requests a reset, reads the matching emulator out-of-band action, applies a
-new password, proves that the old password is rejected, and signs in with the new
-password. The focused test passed in 15.6 seconds. The full customer emulator
-browser suite passed all 51 tests in 6.4 minutes. Changed-file ESLint also passed.
+new password, proves that the old password is rejected, and signs in with the
+new password. Its earlier direct-Firebase version passed in 15.6 seconds. The
+earlier full customer emulator browser suite passed all 51 tests in 6.4 minutes.
 
-This is emulator evidence. It does not prove deployed reset-email delivery, the
-hosted reset-action page, physical camera decoding, deployed permission UI, or
-production load capacity. Those limits remain open and are not confirmed defects.
+For the current change, all 442 Functions unit tests, 36 Functions emulator
+integration tests, 184 core tests, 167 customer-app tests, and 51 customer
+emulator browser tests passed. The browser suite includes `AUTH-007` and
+`AUTH-012`. Functions, core, and app lint passed. Functions, core, and customer
+production builds also passed. The emulator startup problem from the first
+focused attempt was an invocation mismatch; matching the configured emulator
+project to the generated Functions environment loaded all required settings and
+passed.
+
+CI tooling is also current as of this work. `firebase-tools` is 15.29.0. The
+workflows use the latest supported major tags for Checkout 7, Setup Node 7,
+pnpm Action Setup 6, and Upload Artifact 7, plus Hosting Deploy 0.11.0. The
+remaining `stream-json` advisory comes through `firebase-tools`; its fixed
+release requires an incompatible major override. A narrow audit exception is
+limited to that dev-only dependency path and its unused vulnerable CLI paths.
+
+This is emulator evidence. The new custom SES password-reset message has not
+been deployed or received in a real inbox. The hosted reset-action page and
+configured continue URL also need deployed test verification. This evidence
+does not prove physical camera decoding, deployed permission UI, or production
+load capacity. Physical camera work and production load testing remain
+scheduled for later this week. Deployed role and permission UI remains
+scheduled for the next manual test or production walkthrough. These limits are
+not confirmed defects.

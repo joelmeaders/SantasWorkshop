@@ -122,7 +122,7 @@ Out of scope:
 | FR-CUS-007 | The service must reject or gracefully handle duplicate account creation attempts. | Customer |
 | FR-CUS-008 | The service must allow an existing customer to sign in using their account credentials. | Customer |
 | FR-CUS-009 | The service must redirect an already authenticated customer away from redundant entry points into the active registration area. | Customer |
-| FR-CUS-010 | The service must allow a customer to recover account access without staff intervention. | Customer |
+| FR-CUS-010 | The service must allow a customer to recover account access without staff intervention. The request response must not reveal whether the account exists. | Customer |
 
 ### Authenticated registration area
 

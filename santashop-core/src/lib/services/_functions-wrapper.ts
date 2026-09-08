@@ -35,6 +35,14 @@ export class FunctionsWrapper {
 			emailAddress: newEmailAddress,
 		});
 
+	public readonly requestPasswordReset = (
+		emailAddress: string,
+	): Promise<_HttpsCallableResult<{ accepted: true }>> =>
+		this.callableWrapper<
+			{ emailAddress: string },
+			{ accepted: true }
+		>('requestPasswordReset')({ emailAddress });
+
 	public readonly changeAccountInformation = (
 		data: ChangeUserInfo,
 	): Promise<_HttpsCallableResult<unknown>> =>

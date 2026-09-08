@@ -182,15 +182,9 @@ export class AuthService {
 		await user.getIdToken(true);
 	}
 
-	/**
-	 * Reset user password, sends an email.
-	 *
-	 * @param emailAddress
-	 * @return
-	 * @memberof AuthService
-	 */
-	public resetPassword(emailAddress: string): Promise<void> {
-		return this.authWrapper.sendPasswordResetEmail(emailAddress);
+	/** Requests password recovery without disclosing whether the account exists. */
+	public async resetPassword(emailAddress: string): Promise<void> {
+		await this.functionsWrapper.requestPasswordReset(emailAddress);
 	}
 
 	/**

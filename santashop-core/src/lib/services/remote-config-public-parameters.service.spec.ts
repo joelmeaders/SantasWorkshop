@@ -48,6 +48,74 @@ describe('RemoteConfigPublicParametersSource', () => {
 		expect(status?.source).toBe('remote');
 	});
 
+	it('keeps release defaults available while the startup fetch is pending', async () => {
+		runtime.refresh = vi.fn(() => new Promise(() => undefined));
+		await start();
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		expect(current).toEqual(createDefaultPublicParameters());
+		expect(status?.refreshing).toBe(true);
+	});
+
+	it('retries the startup fetch once after exactly two seconds and accepts success', async () => {
+		runtime.refresh = vi.fn()
+			.mockRejectedValueOnce(new Error('offline'))
+			.mockResolvedValueOnce(changed());
+		await start();
+		expect(runtime.refresh).toHaveBeenNthCalledWith(1, false, 3_000);
+		await vi.advanceTimersByTimeAsync(1_999);
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		await vi.advanceTimersByTimeAsync(1);
+		await settle();
+		expect(runtime.refresh).toHaveBeenNthCalledWith(2, false, 3_000);
+		expect(current).toEqual(changed());
+		expect(status?.error).toBeUndefined();
+	});
+
+	it('does not repeat the startup fetch when the stream recovers during the wait', async () => {
+		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));
+		await start();
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		update(changed());
+		expect(current).toEqual(changed());
+		expect(status?.error).toBeUndefined();
+		await vi.advanceTimersByTimeAsync(2_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+	});
+
+	it('keeps backoff when the second startup fetch fails after a stream update', async () => {
+		let rejectSecond: (error: Error) => void = (): void => undefined;
+		runtime.refresh = vi.fn()
+			.mockRejectedValueOnce(new Error('offline'))
+			.mockImplementationOnce(() => new Promise((_, reject) => { rejectSecond = reject; }))
+			.mockRejectedValue(new Error('later offline'));
+		await start();
+		await vi.advanceTimersByTimeAsync(2_000);
+		await settle();
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		update(changed());
+		rejectSecond(new Error('second offline'));
+		await settle();
+		expect(status?.error).toBe('second offline');
+		await vi.advanceTimersByTimeAsync(9_999);
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(runtime.refresh).toHaveBeenCalledTimes(3);
+	});
+
+	it('enters normal backoff after both startup attempts fail', async () => {
+		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));
+		await start();
+		await vi.advanceTimersByTimeAsync(2_000);
+		await settle();
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		expect(current).toEqual(createDefaultPublicParameters());
+		expect(status?.error).toBe('offline');
+		await vi.advanceTimersByTimeAsync(29_999);
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(runtime.refresh).toHaveBeenCalledTimes(3);
+	});
+
 	it('accepts immediate updates and rejects malformed updates without replacing valid settings', async () => {
 		await start();
 		update(changed());
@@ -58,15 +126,17 @@ describe('RemoteConfigPublicParametersSource', () => {
 		expect(runtime.listen).toHaveBeenCalledTimes(1);
 	});
 
-	it('retries failed reads at 10, 30, 60, then 300 seconds and retains settings', async () => {
+	it('retries failed reads after startup at 30, 60, then 300 seconds and retains settings', async () => {
 		runtime.initialize = vi.fn().mockResolvedValue(changed());
 		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));
 		await start();
-		for (const [index, delay] of [10_000, 30_000, 60_000, 300_000].entries()) {
+		await vi.advanceTimersByTimeAsync(2_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
+		for (const [index, delay] of [30_000, 60_000, 300_000].entries()) {
 			await vi.advanceTimersByTimeAsync(delay - 1);
-			expect(runtime.refresh).toHaveBeenCalledTimes(index + 1);
-			await vi.advanceTimersByTimeAsync(1);
 			expect(runtime.refresh).toHaveBeenCalledTimes(index + 2);
+			await vi.advanceTimersByTimeAsync(1);
+			expect(runtime.refresh).toHaveBeenCalledTimes(index + 3);
 		}
 		expect(current).toEqual(changed());
 	});
@@ -83,6 +153,28 @@ describe('RemoteConfigPublicParametersSource', () => {
 		await settle();
 		expect(current).toEqual(changed());
 		expect(status?.error).toBeUndefined();
+	});
+
+	it('does not start the startup retry when the first fetch fails while hidden', async () => {
+		let rejectFirst: (error: Error) => void = (): void => undefined;
+		runtime.refresh = vi.fn()
+			.mockImplementationOnce(() => new Promise((_, reject) => { rejectFirst = reject; }))
+			.mockResolvedValue(changed());
+		await start();
+		vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+		document.dispatchEvent(new Event('visibilitychange'));
+		rejectFirst(new Error('offline'));
+		await settle();
+		await vi.advanceTimersByTimeAsync(10_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+		document.dispatchEvent(new Event('visibilitychange'));
+		await settle();
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		await vi.advanceTimersByTimeAsync(9_999);
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
+		await vi.advanceTimersByTimeAsync(1);
+		expect(runtime.refresh).toHaveBeenCalledTimes(2);
 	});
 
 	it('coalesces lifecycle requests and limits healthy refreshes to once per minute', async () => {
@@ -109,6 +201,14 @@ describe('RemoteConfigPublicParametersSource', () => {
 		window.dispatchEvent(new Event('online'));
 		expect(runtime.refresh).toHaveBeenCalledTimes(1);
 		expect(unsubscribe).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not run the startup retry after destroy', async () => {
+		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));
+		await start();
+		source.ngOnDestroy();
+		await vi.advanceTimersByTimeAsync(2_000);
+		expect(runtime.refresh).toHaveBeenCalledTimes(1);
 	});
 
 	it('forces fallback fetches after a stream error until a real-time update succeeds', async () => {
@@ -149,7 +249,7 @@ describe('RemoteConfigPublicParametersSource', () => {
 	it('does not let the watchdog bypass degraded-stream retry backoff', async () => {
 		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));
 		await start();
-		await vi.advanceTimersByTimeAsync(10_000);
+		await vi.advanceTimersByTimeAsync(2_000);
 		expect(runtime.refresh).toHaveBeenCalledTimes(2);
 		await vi.advanceTimersByTimeAsync(29_999);
 		expect(runtime.refresh).toHaveBeenCalledTimes(2);

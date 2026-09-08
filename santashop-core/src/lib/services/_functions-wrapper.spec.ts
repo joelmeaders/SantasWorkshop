@@ -25,6 +25,7 @@ describe('FunctionsWrapper', () => {
 	});
 
 	it.each([
+		['requestPasswordReset', ['parent@example.test'], 'requestPasswordReset', { emailAddress: 'parent@example.test' }],
 		['updateEmailAddress', ['new@example.test'], 'updateEmailAddress', { emailAddress: 'new@example.test' }],
 		['changeAccountInformation', [{ firstName: 'Ada' }], 'changeAccountInformation', { firstName: 'Ada' }],
 		['undoRegistration', [{ mutationId: 'm1', uid: 'u1' }], 'undoRegistration', { mutationId: 'm1', uid: 'u1' }],

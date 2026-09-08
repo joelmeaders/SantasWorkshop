@@ -5,8 +5,10 @@ const path = require('node:path');
 const reviewedAdvisories = new Set([
 	'https://github.com/advisories/GHSA-w3rx-r6r6-pgpr',
 	'https://github.com/advisories/GHSA-5p2g-fcmc-qvqq',
+	'https://github.com/advisories/GHSA-528h-pc64-c93x',
 ]);
-const expectedPath = '.>@angular/build>less>image-size';
+const expectedImageSizePath = '.>@angular/build>less>image-size';
+const expectedStreamJsonPath = '.>firebase-tools>stream-json';
 const pnpmCli = process.env.npm_execpath;
 
 if (!pnpmCli) {
@@ -42,11 +44,23 @@ try {
 const advisories = Object.values(report.advisories ?? {});
 const unexpected = advisories.filter((advisory) => {
 	if (!reviewedAdvisories.has(advisory.url)) return true;
-	if (advisory.module_name !== 'image-size') return true;
-	if (advisory.patched_versions !== '<0.0.0') return true;
-	return advisory.findings.some((finding) =>
-		finding.paths.some((findingPath) => findingPath !== expectedPath),
-	);
+	if (advisory.module_name === 'image-size') {
+		if (advisory.patched_versions !== '<0.0.0') return true;
+		return advisory.findings.some((finding) =>
+			finding.paths.some(
+				(findingPath) => findingPath !== expectedImageSizePath,
+			),
+		);
+	}
+	if (advisory.module_name === 'stream-json') {
+		if (advisory.patched_versions !== '>=3.5.0') return true;
+		return advisory.findings.some((finding) =>
+			finding.paths.some(
+				(findingPath) => findingPath !== expectedStreamJsonPath,
+			),
+		);
+	}
+	return true;
 });
 
 if (unexpected.length > 0) {
@@ -58,7 +72,7 @@ if (unexpected.length > 0) {
 	process.exit(1);
 }
 
-if (advisories.length > 0) {
+if (advisories.some((advisory) => advisory.module_name === 'image-size')) {
 	const imageTypesPath = path.resolve(
 		__dirname,
 		'..',

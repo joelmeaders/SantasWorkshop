@@ -202,6 +202,22 @@ describe('functions index exports', () => {
 			).options,
 		).not.toHaveProperty('serviceAccount');
 	});
+
+	it('exports password reset with bounded customer callable options', async () => {
+		delete process.env.FUNCTIONS_EMULATOR;
+		const subject = await import('../../src/index');
+		const callable = subject.requestPasswordReset as unknown as {
+			options: Record<string, unknown>;
+		};
+
+		expect(callable.options).toMatchObject({
+			enforceAppCheck: true,
+			concurrency: 10,
+			maxInstances: 5,
+			minInstances: 0,
+			timeoutSeconds: 60,
+		});
+	});
 	it('configures the public settings gateway as a singleton private reader endpoint', async () => {
 		delete process.env.FUNCTIONS_EMULATOR;
 		const subject = await import('../../src/index');

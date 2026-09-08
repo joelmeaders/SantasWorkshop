@@ -121,6 +121,15 @@ Firebase, Angular, bundler, and native-helper dependencies. Angular runs
 zoneless and tests run with Vitest, so the unused `zone.js` and Jest peers are
 intentionally not installed.
 
+`firebase-tools` 15.29.0 also installs `stream-json` 1.9.1. Advisory
+GHSA-528h-pc64-c93x affects the package's Pick, Ignore, Filter, and Replace
+filters. Firebase CLI uses those filters in Realtime Database import, Auth
+import, and Next.js framework handling. This repository's CI and release
+commands use none of those paths, and `firebase-tools` does not yet accept the
+fixed `stream-json` major version. The audit gate permits only this exact
+dependency path and fixed-version range. Remove the exception when Firebase CLI
+adopts `stream-json` 3.5.0 or later.
+
 ## Required release gates
 
 For every merge to `master`, the test backend workflow must:

@@ -208,23 +208,6 @@ describe('HomePage', () => {
 		expect(loader.dismiss).toHaveBeenCalledOnce();
 	});
 
-	it('shows the same reset confirmation when the account does not exist', async (): Promise<void> => {
-		const authService = TestBed.inject(AuthService);
-		const errorHandler = TestBed.inject(
-			ErrorHandlerService,
-		) as unknown as Mocked<ErrorHandlerService>;
-		vi.spyOn(authService, 'resetPassword').mockRejectedValue({
-			code: 'auth/user-not-found',
-		});
-		component.resetEmail.setValue('missing@example.com');
-
-		await component.resetPassword();
-		await fixture.whenStable();
-
-		expect(component.resetEmailSent()).toBe(true);
-		expect(errorHandler.handleError).not.toHaveBeenCalled();
-	});
-
 	it('marks a successful reset request as sent and can start another request', async (): Promise<void> => {
 		const authService = TestBed.inject(AuthService);
 		vi.spyOn(authService, 'resetPassword').mockResolvedValue(undefined);

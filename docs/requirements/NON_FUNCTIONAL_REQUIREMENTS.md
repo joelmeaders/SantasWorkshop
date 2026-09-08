@@ -46,6 +46,7 @@ Out of scope:
 | NFR-SEC-010 | The rebuild must preserve strong server-side validation of privileged mutation paths. |
 | NFR-SEC-011 | The service must include abuse protections that reduce misuse such as repeated cancellation and re-registration, duplicate accounts, and false child registrations. |
 | NFR-SEC-012 | The service must support role-based authorization within staff workflows so that reporting access can be granted to some staff while other staff remain limited to registration and check-in duties. |
+| NFR-SEC-013 | Password-reset requests must use App Check outside emulators and a persistent, concurrency-safe rate limit that does not store the raw email address. |
 
 ## Privacy, consent, and data-handling requirements
 
@@ -60,6 +61,7 @@ Out of scope:
 | NFR-PRV-007 | The service must expose only the minimum public configuration necessary for end-user experiences. |
 | NFR-PRV-008 | The service must back up seasonal customer, registration, and check-in information before year-end purge operations are executed. |
 | NFR-PRV-009 | The service must delete customer, registration, and check-in information at the end of each program year and must retain only seasonal statistics and reporting outputs across years. |
+| NFR-PRV-010 | Password-reset delivery must not persist or log the reset link or the raw requested email address. |
 
 ## Reliability, resilience, and recoverability requirements
 

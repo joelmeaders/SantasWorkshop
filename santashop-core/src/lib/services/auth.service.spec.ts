@@ -39,9 +39,6 @@ describe('AuthService', () => {
 					provide: AuthWrapper,
 					useValue: {
 						authState: vi.fn().mockName('AuthWrapper.authState'),
-						sendPasswordResetEmail: vi
-							.fn()
-							.mockName('AuthWrapper.sendPasswordResetEmail'),
 						currentUser: vi
 							.fn()
 							.mockName('AuthWrapper.currentUser'),
@@ -66,6 +63,9 @@ describe('AuthService', () => {
 				{
 					provide: FunctionsWrapper,
 					useValue: {
+						requestPasswordReset: vi
+							.fn()
+							.mockName('FunctionsWrapper.requestPasswordReset'),
 						updateEmailAddress: vi
 							.fn()
 							.mockName('FunctionsWrapper.updateEmailAddress'),
@@ -240,9 +240,8 @@ describe('AuthService', () => {
 	});
 
 	it('resetPassword(): should make expected call', async () => {
-		// Arrange
-		const spy = authWrapperService.sendPasswordResetEmail;
-		spy.mockResolvedValue(undefined);
+		const spy = functionsWrapperService.requestPasswordReset;
+		spy.mockResolvedValue({ data: { accepted: true } });
 
 		// Act
 		await service.resetPassword('test@test.com');

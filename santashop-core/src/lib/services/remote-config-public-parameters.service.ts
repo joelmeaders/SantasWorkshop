@@ -21,12 +21,14 @@ export interface RemoteConfigPublicParametersOptions {
 export interface PublicParametersRuntime {
 	readonly local: boolean;
 	initialize(): Promise<unknown>;
-	refresh(force?: boolean): Promise<unknown>;
+	refresh(force?: boolean, fetchTimeoutMillis?: number): Promise<unknown>;
 	listen(next: (settings: unknown) => void, error: (error: unknown) => void): () => void;
 }
 
 const OPTIONS = new InjectionToken<RemoteConfigPublicParametersOptions>('remote-config-public-parameters-options');
 const REMOTE_WATCHDOG_INTERVAL_MS = 60_000;
+const STARTUP_FETCH_TIMEOUT_MS = 3_000;
+const STARTUP_RETRY_DELAY_MS = 2_000;
 
 export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRuntime>('public-parameters-runtime', {
 	factory: (): PublicParametersRuntime => {
@@ -55,13 +57,16 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 				// A first visit has no activated value. The source already holds release defaults.
 				try { return read(); } catch { return undefined; }
 			},
-			refresh: async (force = false): Promise<unknown> => {
+			refresh: async (force = false, fetchTimeoutMillis?: number): Promise<unknown> => {
 				if (!remote) throw new Error('Remote Config is unavailable.');
 				const minimumFetchIntervalMillis = remote.settings.minimumFetchIntervalMillis;
+				const configuredFetchTimeoutMillis = remote.settings.fetchTimeoutMillis;
 				if (force) remote.settings.minimumFetchIntervalMillis = 0;
+				if (fetchTimeoutMillis !== undefined) remote.settings.fetchTimeoutMillis = fetchTimeoutMillis;
 				try { await fetchAndActivate(remote); }
 				finally {
 					if (force) remote.settings.minimumFetchIntervalMillis = minimumFetchIntervalMillis;
+					if (fetchTimeoutMillis !== undefined) remote.settings.fetchTimeoutMillis = configuredFetchTimeoutMillis;
 				}
 				return read();
 			},
@@ -95,6 +100,8 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 	private readonly status = new BehaviorSubject<PublicParametersStatus>({ source: 'defaults', refreshing: true });
 	private pending?: Promise<void>;
 	private retryTimer?: ReturnType<typeof setTimeout>;
+	private startupRetryTimer?: ReturnType<typeof setTimeout>;
+	private startupRetryResolve?: (retry: boolean) => void;
 	private watchdogTimer?: ReturnType<typeof setTimeout>;
 	private localTimer?: ReturnType<typeof setInterval>;
 	private unsubscribe?: () => void;
@@ -113,6 +120,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		if (this.document.visibilityState === 'hidden') {
 			this.clearRetry();
 			this.clearWatchdog();
+			this.cancelStartupRetry();
 			return;
 		}
 		void this.refresh();
@@ -145,9 +153,47 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 			if (this.runtime.local) {
 				this.localTimer = setInterval(() => this.lifecycle(), 1_000);
 			} else {
-				await this.performRefresh();
+				await this.performStartupRefresh();
 			}
 		} catch (error) { if (!this.destroyed) this.fail(error); }
+	}
+
+	private async performStartupRefresh(): Promise<void> {
+		await this.performRefreshWithTimeout(STARTUP_FETCH_TIMEOUT_MS, false);
+		if (this.destroyed || this.failures === 0 || this.document.visibilityState === 'hidden') return;
+		if (!(await this.waitForStartupRetry())) return;
+		if (this.destroyed || this.failures === 0) return;
+		await this.performRefreshWithTimeout(STARTUP_FETCH_TIMEOUT_MS, true);
+	}
+
+	private async performRefreshWithTimeout(fetchTimeoutMillis: number, startup: boolean): Promise<void> {
+		this.lastAttempt = Date.now();
+		this.status.next({ ...this.status.value, refreshing: true });
+		try {
+			const value = await this.runtime.refresh(false, fetchTimeoutMillis);
+			if (!this.destroyed) this.accept(value);
+		} catch (error) {
+			if (!this.destroyed) this.fail(error, false, startup || this.failures > 0);
+		}
+	}
+
+	private waitForStartupRetry(): Promise<boolean> {
+		this.clearRetry();
+		return new Promise((resolve) => {
+			this.startupRetryResolve = resolve;
+			this.startupRetryTimer = setTimeout(() => {
+				this.startupRetryTimer = undefined;
+				this.startupRetryResolve = undefined;
+				resolve(true);
+			}, STARTUP_RETRY_DELAY_MS);
+		});
+	}
+
+	private cancelStartupRetry(): void {
+		if (this.startupRetryTimer !== undefined) clearTimeout(this.startupRetryTimer);
+		this.startupRetryTimer = undefined;
+		this.startupRetryResolve?.(false);
+		this.startupRetryResolve = undefined;
 	}
 
 	public refresh(): Promise<void> {
@@ -192,17 +238,17 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		if (this.streamError) this.scheduleRetry();
 	}
 
-	private fail(error: unknown, fromStream = false): void {
+	private fail(error: unknown, fromStream = false, schedule = true): void {
 		this.failures++;
 		const message = error instanceof Error ? error.message : 'Settings refresh failed.';
 		if (fromStream) this.streamError = message;
 		this.status.next({ ...this.status.value, refreshing: false, error: message });
-		this.scheduleRetry();
+		if (schedule) this.scheduleRetry();
 	}
 
 	private scheduleRetry(): void {
 		this.clearRetry();
-		if (this.destroyed || this.document.visibilityState === 'hidden') return;
+		if (this.destroyed || this.document.visibilityState === 'hidden' || this.startupRetryTimer !== undefined) return;
 		const delay = this.failures > 0
 			? PUBLIC_PARAMETERS_RETRY_DELAYS_MS[Math.min(this.failures - 1, PUBLIC_PARAMETERS_RETRY_DELAYS_MS.length - 1)] ?? 300_000
 			: Math.max(0, 60_000 - (Date.now() - this.lastAttempt));
@@ -236,6 +282,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		if (this.destroyed) return;
 		this.destroyed = true;
 		this.clearRetry();
+		this.cancelStartupRetry();
 		this.clearWatchdog();
 		if (this.localTimer !== undefined) clearInterval(this.localTimer);
 		this.unsubscribe?.();

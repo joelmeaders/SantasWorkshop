@@ -79,3 +79,40 @@ remains unmet by the earlier live evidence and is not established by these tests
 
 Physical camera decoding and authenticated production journeys remain outside
 the evidence collected here. Production customer data remains unchanged.
+
+## Release and deployed checks
+
+[PR #162](https://github.com/joelmeaders/SantasWorkshop/pull/162) merged as
+`788687be63d1b40c7238f87f5e283c4f8fb0ab5a` after all five PR checks passed.
+CI included 50 customer and 83 admin emulator browser tests. The admin merge
+bypassed the review requirement, as authorized; it did not bypass failed tests.
+
+| Target     | Customer                                                                         | Admin                                                                            | Functions                                                                        |
+| ---------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Test       | [Passed](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34171791185) | [Passed](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34171793516) | [Passed](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34171795371) |
+| Production | [Passed](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34172316134) | [Passed](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34172318161) | Runtime source unchanged; not redeployed                                         |
+
+These manual deployments used the approved `skip_tests=true` option after PR
+validation. Build and deployment checks still ran. Superseded automatic test
+deployment runs were cancelled to avoid duplicate deployments.
+
+The test customer session survived the normal update prompt. Its visible tab
+made a Remote Config HTTP 200 request 60.965 seconds after reload. The next two
+HTTP 200 responses were 60.021 and 60.032 seconds apart. This verifies the
+deployed watchdog cadence, not publication-to-display latency.
+
+The existing Chrome admin session briefly showed an empty route after its
+update. A second ordinary reload recovered the owner menu. App Check, token,
+account lookup, Remote Config and bundle responses then returned HTTP 200.
+The separate in-app browser staff session updated and retained its expected
+check-in-only menu. No application console errors were observed. The first
+blank startup's network trace was not captured, so its cause remains unproved.
+Source review places the root-route wait in authentication before Remote Config
+initialization. Treat this as an intermittent startup observation, not a fixed
+or conclusively diagnosed defect.
+
+Production customer and admin pages were inspected after deployment. Their
+normal update prompts reloaded successfully. The customer maintenance notice
+and closed-signup state remained visible. Admin sign-in rendered with version
+`2026.09.0-beta.3`. Startup warning/error logs were empty. These production checks
+were read-only and did not exercise authenticated customer journeys.

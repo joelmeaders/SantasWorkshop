@@ -116,3 +116,48 @@ normal update prompts reloaded successfully. The customer maintenance notice
 and closed-signup state remained visible. Admin sign-in rendered with version
 `2026.09.0-beta.3`. Startup warning/error logs were empty. These production checks
 were read-only and did not exercise authenticated customer journeys.
+
+## September 8 continuation
+
+An authenticated deployed-test admin session was captured before its first
+reload. The account lookup and all main and lazy chunks returned HTTP 200, and
+the routed check-in-only landing page rendered. The session did not need a token
+refresh. The first reload and eight more ordinary reloads all rendered without
+console or runtime errors. The only cancelled request was an analytics beacon
+cancelled by the next navigation.
+
+The in-app browser reported no service-worker registration, so this run could
+not reproduce the earlier Chrome service-worker update transition. Source review
+still shows that `/` and `/admin` wait for Auth initialization and an ID-token
+result before the route renders. It also confirms that Remote Config starts only
+after the authenticated admin tree loads. No blocking request was demonstrated,
+so no speculative Auth, route, or cache change was made. The intermittent blank
+Chrome startup remains open until its first failing load is captured.
+
+The settings-delivery design was also assessed against Firebase guidance.
+[Real-time Remote Config](https://firebase.google.com/docs/remote-config/web/real-time)
+automatically fetches after an invalidation and bypasses the SDK minimum fetch
+interval, but Firebase does not state a numeric delivery-time guarantee. Firebase
+[warns against low production fetch intervals](https://firebase.google.com/docs/remote-config/loading)
+and documents both [connection limits](https://firebase.google.com/docs/remote-config/quotas-limits)
+and [fetch pricing](https://firebase.google.com/docs/remote-config/pricing).
+
+A continuously visible tab can make up to about 1,440 watchdog fetches per day
+at the current 60-second interval. A ten-second interval would make about 8,640,
+which is six times as many. About 12 continuously visible tabs would exceed the
+first 100,000 daily fetches before startup, retry, or invalidation traffic. That
+extra traffic would increase cost and throttling risk without controlling server
+propagation or network delay. Remote Config remains the only settings source.
+The 60-second watchdog, current backoff, hidden-tab pause, and ten-second request
+timeout remain unchanged. The ten-second publication-to-display target remains
+an unmet best-effort target, not a Firebase guarantee.
+
+`AUTH-012` now covers password-reset completion with the Firebase Auth emulator.
+It requests a reset, reads the matching emulator out-of-band action, applies a
+new password, proves that the old password is rejected, and signs in with the new
+password. The focused test passed in 15.6 seconds. The full customer emulator
+browser suite passed all 51 tests in 6.4 minutes. Changed-file ESLint also passed.
+
+This is emulator evidence. It does not prove deployed reset-email delivery, the
+hosted reset-action page, physical camera decoding, deployed permission UI, or
+production load capacity. Those limits remain open and are not confirmed defects.

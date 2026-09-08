@@ -7,6 +7,41 @@ import {
 	signInViaUi,
 	signOutViaUi,
 } from '../../fixtures/account-helpers';
+import {
+	E2E_AUTH_EMULATOR_URL,
+	E2E_PROJECT_ID,
+} from '../../fixtures/season';
+
+const readPasswordResetLink = async (
+	request: import('@playwright/test').APIRequestContext,
+	emailAddress: string,
+): Promise<string> => {
+	const response = await request.get(
+		`${E2E_AUTH_EMULATOR_URL}/emulator/v1/projects/${encodeURIComponent(E2E_PROJECT_ID)}/oobCodes`,
+	);
+	if (!response.ok()) return '';
+
+	const payload = (await response.json()) as {
+		oobCodes?: {
+			email?: string;
+			requestType?: string;
+			oobLink?: string;
+		}[];
+	};
+	const matchingCodes = payload.oobCodes ?? [];
+	for (let index = matchingCodes.length - 1; index >= 0; index -= 1) {
+		const code = matchingCodes[index];
+		if (
+			code?.email === emailAddress &&
+			code.requestType === 'PASSWORD_RESET' &&
+			code.oobLink
+		) {
+			return code.oobLink;
+		}
+	}
+
+	return '';
+};
 
 test.describe('customer account and session access', () => {
 	test.beforeEach(async ({ clearData, seedScenario }) => {
@@ -175,6 +210,64 @@ test.describe('customer account and session access', () => {
 		).toBeVisible({
 			timeout: 15000,
 		});
+	});
+
+	test('AUTH-012 completes password recovery with the Auth emulator OOB link', async ({
+		page,
+		request,
+	}) => {
+		const account = randomAccount();
+		const replacementPassword = `${account.password}Reset`;
+		await createAccountViaUi(page, account);
+		await signOutViaUi(page);
+
+		await page.goto('/?mode=reset');
+		await page.fill('#resetPasswordEmail input', account.emailAddress);
+		await page.locator('#resetPasswordButton').click();
+		await expect(
+			page.getByText('Email has been sent!', { exact: true }),
+		).toBeVisible({ timeout: 15000 });
+
+		let resetLink = '';
+		await expect
+			.poll(
+				async () => {
+					resetLink = await readPasswordResetLink(
+						request,
+						account.emailAddress,
+					);
+					return resetLink;
+				},
+				{ timeout: 15000 },
+			)
+			.toBeTruthy();
+		if (!resetLink) throw new Error('Auth emulator reset link was not created.');
+
+		const resetResponse = await request.get(
+			`${resetLink}&newPassword=${encodeURIComponent(replacementPassword)}`,
+		);
+		if (!resetResponse.ok()) {
+			throw new Error(
+				`Auth emulator password reset failed (${resetResponse.status()}): ${await resetResponse.text()}`,
+			);
+		}
+
+		await page.goto('/?mode=sign-in');
+		await page.fill('#signInEmail input', account.emailAddress);
+		await page.fill('#signInPassword input', account.password);
+		await page.locator('#signInButton').click();
+		const rejectedAlert = page.locator('ion-alert');
+		await expect(rejectedAlert).toBeVisible({ timeout: 10000 });
+		await expect(rejectedAlert).toContainText(
+			/credential|password|account|authentication/i,
+		);
+		await rejectedAlert.getByRole('button').first().click();
+
+		await signInViaUi(page, {
+			emailAddress: account.emailAddress,
+			password: replacementPassword,
+		});
+		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 	});
 
 	test('AUTH-008 shows a recovery message for invalid credentials', async ({

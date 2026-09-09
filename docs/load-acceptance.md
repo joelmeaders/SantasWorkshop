@@ -79,6 +79,7 @@ node scripts/load/provision-network.mjs --project santas-workshop-test --apply
 pnpm run load:preflight --project santas-workshop-test
 node scripts/load/run.mjs smoke --project santas-workshop-test
 pnpm run load:run --project santas-workshop-test
+node scripts/load/run.mjs run --project santas-workshop-test --skip-smoke
 pnpm run load:verify --project santas-workshop-test --run-id <printed-run-id>
 ```
 
@@ -93,6 +94,10 @@ Browser smoke uses ordinary hosted sign-up, terms acceptance for labeled QA
 accounts, child forms, appointment selection, completion, and QR rendering.
 The `smoke` command stops after five successful browser journeys and business,
 email-sink, and counter verification. It does not start calibration or load.
+For an explicitly requested full run after prior browser validation, use
+`run --skip-smoke` to start with calibration. The run manifest records the
+omitted smoke phase. Isolation, App Check, budget, monitoring, business, and
+resource gates still apply; all load phases use fresh run-owned fixtures.
 Automated browsers and synthetic phases use normal password authentication and
 real App Check tokens exchanged through a run-owned test debug-provider registration.
 They do not substitute privileged tokens for customer requests. The debug

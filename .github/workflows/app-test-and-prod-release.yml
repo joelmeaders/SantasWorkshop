@@ -21,6 +21,7 @@ name: App Test Deploy and Manual Prod Release
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'config.firebase.cjs'
+      - 'firebase.json'
       - 'firebase.e2e.json'
       - 'firestore.rules'
       - 'storage.rules'

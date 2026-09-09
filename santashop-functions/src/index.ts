@@ -86,6 +86,7 @@ const SIGNUP_DRAFT_OPTIONS = {
 };
 const SIGNUP_COMPLETION_OPTIONS = {
 	...STANDARD_CUSTOMER_OPTIONS,
+	memory: '512MiB' as const,
 	concurrency: 20,
 	maxInstances: 10,
 	minInstances: DEPLOYED_SIGNUP_MIN_INSTANCES,
@@ -162,7 +163,7 @@ export const publicParametersGateway = onRequest(
 		memory: '256MiB',
 		cpu: 1,
 		concurrency: 80,
-		maxInstances: 1,
+		maxInstances: 2,
 		minInstances: 0,
 		timeoutSeconds: 15,
 		invoker: REMOTE_CONFIG_READER_IDENTITY.serviceAccount ?? 'private',

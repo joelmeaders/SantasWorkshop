@@ -81,6 +81,25 @@ That run found `completeRegistration` at an 81% memory bound and `saveDraftChild
 at 80%; it did not establish full capacity. Normal reCAPTCHA attestation and real
 SES delivery remain separate from debug-provider and sink evidence.
 
+## Follow-up configuration in the PR
+
+The partial load evidence supports increasing `completeRegistration` from
+256 to 512 MiB. It keeps one CPU, concurrency 20, and a maximum of ten instances.
+`publicParametersGateway` increases its maximum from one to two instances while
+keeping 256 MiB, one CPU, concurrency 80, and zero minimum instances. Its live
+deployment checks require the matching two-instance limit. The Remote Config
+budget remains 60 reads/minute: 24 for four overlapping gateway instances during
+replacement, leaving 36 for cold starts and operations.
+
+These follow-up settings are source changes for review. They have not been
+deployed or load-tested. No additional hosted load run was performed after the
+user requested documentation and the PR. `saveDraftChild` remains at 256 MiB
+because its measured 80% bound met the current headroom gate; it has no spare
+margin beyond that gate. No CPU change is supported by the measured usage.
+
+The commands and operating instructions now live in
+[`scripts/load/README.md`](../scripts/load/README.md).
+
 ## Reusable read-only command
 
 ```text

@@ -1,6 +1,6 @@
 # Remote Config test setup evidence
 
-**Current status:** the private singleton gateway resolved the quota blocker,
+**Current status:** the private gateway resolved the quota blocker,
 and test and production deployments completed. See
 [the current release design](remote-config.md) and
 [deployed QA evidence](remote-config-deployed-qa.md). The original setup and

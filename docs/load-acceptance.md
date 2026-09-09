@@ -1,5 +1,8 @@
 # Historical load acceptance
 
+For setup, commands, monitoring, stopping, and result verification, start with
+[`scripts/load/README.md`](../scripts/load/README.md).
+
 This harness targets only `santas-workshop-test`. Run it from the workspace root
 with Node 24 and the existing pnpm dependencies. It never deletes fixtures and
 does not call emulator helpers. Keep `artifacts/load/` local: it contains labeled

@@ -36,9 +36,9 @@ cached settings and starts a background gateway request after ten seconds.
 Cold consumers return release defaults while fetching. Failures retain the
 previous object and use the retry backoff above.
 
-The gateway has one instance, concurrency 80, and a shared in-memory cache. It
-waits for a single refresh when its settings are at least ten seconds old.
-Concurrent requests share that refresh. This avoids stacking two stale cache
+The gateway permits up to two instances with concurrency 80 each. Each instance
+has an in-memory cache and waits for one refresh when its settings are at least
+ten seconds old. Concurrent requests on that instance share the refresh. This avoids stacking two stale cache
 windows. Caller ID tokens use the verified canonical Cloud Run URI as audience.
 Only the configured reader service account receives Run Invoker on the gateway.
 Client startup and watchdog fetches use the Remote Config client fetch endpoint.
@@ -161,8 +161,9 @@ On September 7, 2026, both projects reported **60 template reads/minute** throug
 design needed 600, but the provider rejected the increase as unsupported.
 The private gateway replaces direct consumer polling. Existing consumer capacity
 remains 50 instances. Normal gateway polling uses at most six reads/minute per
-instance. The release budget reserves twelve for two overlapping gateway
-instances during replacement and 48 for cold starts, owner tools, and operations.
+instance, or twelve across two healthy instances. The release budget reserves
+24 for four overlapping gateway instances during replacement and 36 for cold
+starts, owner tools, and operations.
 The gate requires at least 60 and verifies the deployed gateway architecture.
 
 An instance limit is not an absolute quota guarantee during replacement or

@@ -17,7 +17,7 @@ const fixture = () => ({
 		serviceConfig: {
 			uri: 'https://publicparametersgateway-example-uc.a.run.app',
 			service: `projects/${project}/locations/us-central1/services/publicparametersgateway`,
-			maxInstanceCount: 1,
+			maxInstanceCount: 2,
 			maxInstanceRequestConcurrency: 80,
 			serviceAccountEmail: reader,
 		},
@@ -28,7 +28,7 @@ const fixture = () => ({
 		invokerIamDisabled: false,
 		terminalCondition: { state: 'CONDITION_SUCCEEDED' },
 		scaling: { maxInstanceCount: 20 },
-		template: { scaling: { maxInstanceCount: 1 }, maxInstanceRequestConcurrency: 80, serviceAccount: reader },
+		template: { scaling: { maxInstanceCount: 2 }, maxInstanceRequestConcurrency: 80, serviceAccount: reader },
 	},
 	policy: { bindings: [{ role: 'roles/run.invoker', members: [`serviceAccount:${reader}`], condition: undefined as unknown }] },
 });
@@ -52,7 +52,7 @@ describe('private settings gateway release gate', () => {
 		service.invokerIamDisabled = true;
 		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('permission checks are disabled'));
 	});
-	it('rejects live revision drift even if the Functions configuration still says one instance', () => {
+	it('rejects live revision drift even if the Functions configuration still says two instances', () => {
 		const { fn, policy, service } = fixture();
 		service.template.scaling.maxInstanceCount = 10;
 		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('Live gateway revision'));
@@ -66,7 +66,7 @@ describe('private settings gateway release gate', () => {
 		const { fn, policy } = fixture();
 		expect(assessGateway(project, fn, policy, {}).problems).toContainEqual(expect.stringContaining('live Cloud Run service'));
 	});
-	it('accepts the exact active singleton and its private reader binding', () => {
+	it('accepts the exact active two-instance limit and its private reader binding', () => {
 		const { fn, policy, service } = fixture();
 		expect(assessGateway(project, fn, policy, {}, service)).toEqual({ projectId: project, gatewayUri: fn.serviceConfig.uri, problems: [] });
 	});
@@ -80,10 +80,10 @@ describe('private settings gateway release gate', () => {
 		policy.bindings[0].condition = { expression: 'false', title: 'deny' };
 		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('unconditional'));
 	});
-	it.each([0, 2, 50])('rejects an unbounded or expanded gateway instance count of %i', max => {
+	it.each([0, 1, 3, 50])('rejects a gateway instance limit outside the contract: %i', max => {
 		const { fn, policy, service } = fixture();
 		fn.serviceConfig.maxInstanceCount = max;
-		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('maxInstanceCount=1'));
+		expect(assessGateway(project, fn, policy, {}, service).problems).toContainEqual(expect.stringContaining('maxInstanceCount=2'));
 	});
 	it('rejects cross-project discovery and a different runtime identity', () => {
 		const { fn, policy, service } = fixture();

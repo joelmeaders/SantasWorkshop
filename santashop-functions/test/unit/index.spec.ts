@@ -218,7 +218,7 @@ describe('functions index exports', () => {
 			timeoutSeconds: 60,
 		});
 	});
-	it('configures the public settings gateway as a singleton private reader endpoint', async () => {
+	it('configures the public settings gateway as a private reader with bounded scale', async () => {
 		delete process.env.FUNCTIONS_EMULATOR;
 		const subject = await import('../../src/index');
 		const gateway = subject.publicParametersGateway as unknown as {
@@ -227,7 +227,7 @@ describe('functions index exports', () => {
 		expect(gateway.options).toMatchObject({
 			cpu: 1,
 			concurrency: 80,
-			maxInstances: 1,
+			maxInstances: 2,
 			minInstances: 0,
 			invoker:
 				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??

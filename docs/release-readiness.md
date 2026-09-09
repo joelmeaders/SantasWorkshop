@@ -31,7 +31,7 @@ in-flight work can outlive a publication.
 
 The September 7 inspection found 60 template reads per minute in each project.
 The initial direct-polling design required 600. Cloud Quotas rejected that
-increase as unsupported. The repair introduces an IAM-private singleton reader
+increase as unsupported. The repair introduces an IAM-private gateway
 with a 60-read budget and a deployment check for its identity, private invoker
 policy, instance limit, and canonical URI. Consumer capacity is unchanged. See
 [the gateway capacity model](remote-config.md#identities-and-capacity). Verify

@@ -102,6 +102,12 @@ $5 reserved for drain. The retained network connector has continuing cost.
 
 ## Follow-up before another full attempt
 
+The follow-up PR now sets `completeRegistration` to 512 MiB and the gateway's
+maximum to two instances, with their existing one-CPU settings retained. It
+also updates the deployment contract and adds
+[`scripts/load/README.md`](../scripts/load/README.md). These source changes have
+not been deployed or load-tested; the user requested no further load runs.
+
 - Test a larger `completeRegistration` memory allocation, such as 512 MiB,
   while retaining one CPU. Recheck `saveDraftChild`, which reached the boundary.
 - Resolve the gateway's one-instance limit against the agreed instance guard.

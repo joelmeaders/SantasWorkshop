@@ -16,6 +16,11 @@ import { CustomerApi } from './customer.mjs';
 import { RunJournal, arrivals, delay } from './metrics.mjs';
 import { costCeiling, enforceBudget, instanceEvidence } from './monitor.mjs';
 import { document, verifyRun } from './verify.mjs';
+import {
+	collectResourceEvidence,
+	METRIC_SETTLE_MS,
+	resourceObservationEnd,
+} from './resources.mjs';
 
 const option = (name) => {
 	const index = process.argv.indexOf(name);
@@ -92,6 +97,61 @@ async function monitor() {
 	} catch (error) {
 		journal.stop(error.message);
 	}
+}
+
+async function verifyResources(verification) {
+	const endTime = resourceObservationEnd(verification.checkedAt);
+	journal.record({
+		type: 'resource-metrics-wait',
+		endTime,
+		settleMs: METRIC_SETTLE_MS,
+	});
+	while (Date.now() < Date.parse(endTime) + METRIC_SETTLE_MS) {
+		journal.assertRunning();
+		await delay(15_000);
+	}
+	const names = new Set(
+		proof.snapshot.functions.map((fn) => fn.name.split('/').at(-1)),
+	);
+	const required = new Set(
+		journal.events
+			.filter(
+				(event) =>
+					event.type === 'request' &&
+					event.ok &&
+					names.has(event.operation),
+			)
+			.map((event) => event.operation),
+	);
+	if (verification.completedRegistrations) {
+		required.add('sendNewRegistrationEmails');
+		required.add('publicParametersGateway');
+	}
+	if (verification.expectedSlots)
+		required.add('scheduledDateTimeSlotCounters');
+	const report = await collectResourceEvidence(
+		client,
+		proof.snapshot.functions,
+		{
+			startTime: new Date(started).toISOString(),
+			endTime,
+			requiredFunctions: [...required].sort(),
+		},
+	);
+	writeFileSync(
+		resolve(directory, 'resources.json'),
+		JSON.stringify(report, null, 2),
+	);
+	journal.record({
+		type: 'resource-verification',
+		passed: report.passed,
+		requiredFunctions: report.requiredFunctions,
+		problems: report.problems,
+	});
+	if (!report.passed || !report.metricsSettled)
+		throw new Error(
+			'Function resource verification failed. See resources.json.',
+		);
 }
 
 try {
@@ -622,6 +682,7 @@ try {
 				const verification = await verifyRun(client, journal, slotId);
 				if (!verification.passed)
 					throw new Error('Business verification failed.');
+				await verifyResources(verification);
 				const latencyFailures = journal
 					.summary()
 					.filter(
@@ -646,6 +707,7 @@ try {
 				const verification = await verifyRun(client, journal, slotId);
 				if (!verification.passed)
 					throw new Error('Smoke business verification failed.');
+				await verifyResources(verification);
 				journal.record({
 					type: 'smoke-acceptance',
 					passed: true,
@@ -692,6 +754,10 @@ try {
 				latestVerificationPassed:
 					journal.events.findLast(
 						(event) => event.type === 'verification',
+					)?.passed ?? null,
+				latestResourceVerificationPassed:
+					journal.events.findLast(
+						(event) => event.type === 'resource-verification',
 					)?.passed ?? null,
 				operations: journal.summary(),
 				sesDeliveryVerified: false,

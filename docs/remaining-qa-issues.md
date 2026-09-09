@@ -184,11 +184,49 @@ remaining `stream-json` advisory comes through `firebase-tools`; its fixed
 release requires an incompatible major override. A narrow audit exception is
 limited to that dev-only dependency path and its unused vulnerable CLI paths.
 
-This is emulator evidence. The new custom SES password-reset message has not
-been deployed or received in a real inbox. The hosted reset-action page and
-configured continue URL also need deployed test verification. This evidence
-does not prove physical camera decoding, deployed permission UI, or production
-load capacity. Physical camera work and production load testing remain
-scheduled for later this week. Deployed role and permission UI remains
+## Password-reset deployed verification
+
+[PR #166](https://github.com/joelmeaders/SantasWorkshop/pull/166) added the
+customer Hosting rewrite for `requestPasswordReset` before the SPA fallback.
+It also made `firebase.json` changes trigger customer and admin Hosting
+validation and test deployment. All four PR checks passed. An independent
+post-gate review found no actionable defect. The administrator merge bypassed
+only the review requirement and produced merge commit
+`b1c976caad695ef82ff59334cc920966a04e0c68`.
+
+The exact merge commit passed and deployed through the
+[customer Hosting](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34298922999),
+[admin Hosting](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34298922962),
+and [Functions](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34298922941)
+test-release workflows. Production jobs were skipped.
+
+A fresh deployed-test browser request reached
+`https://test.denversantaclausshop.org/requestPasswordReset`. It returned HTTP
+200 with `application/json` and `{"result":{"accepted":true}}`, instead of
+the SPA's HTML. App Check was valid, and the Function logged the invocation.
+
+That first routed request exposed a separate test-project configuration gap.
+Firebase Auth rejected the configured continue URL with
+`auth/unauthorized-continue-uri` because `test.denversantaclausshop.org` was
+missing from the test project's authorized domains. The existing source URL
+was correct. The custom test domain was added while preserving all existing
+domains. A read-only production check confirmed that
+`register.denversantaclausshop.org` was already authorized; production was not
+changed.
+
+The second request logged successful password-reset processing with email
+delivery enabled. The custom English message arrived in the approved Gmail
+Inbox from `noreply@denversantaclausshop.org` with subject
+`Reset your Denver Santa Claus Shop password`. Its tracked link reached the
+Firebase hosted reset form for the correct account in a clean browser and
+carried the test-site sign-in continue URL. An Edge content blocker stopped
+the SES tracking hop, but opening the same tracked link in the in-app browser
+completed the redirect. No new password was submitted, so the QA account was
+not changed. `AUTH-012` continues to cover password replacement and old/new
+password sign-in behavior in the Auth emulator.
+
+This evidence does not prove physical camera decoding, deployed permission UI,
+or production load capacity. Physical camera work and production load testing
+remain scheduled for later this week. Deployed role and permission UI remains
 scheduled for the next manual test or production walkthrough. These limits are
 not confirmed defects.

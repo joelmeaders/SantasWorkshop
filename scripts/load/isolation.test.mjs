@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assessIsolation } from './isolation.mjs';
+import { assessIsolation, collectRunServices } from './isolation.mjs';
 import { FIREWALL_RULES, networkUrl } from './provision-network.mjs';
 import {
 	PROJECT,
@@ -11,6 +11,48 @@ import {
 	assertRunId,
 	TARGETS,
 } from './config.mjs';
+
+test('global service inventory reads full configuration in every listed region', async () => {
+	const calls = [];
+	const client = {
+		project: PROJECT,
+		request: async (url) => {
+			calls.push(url);
+			if (url.includes('/namespaces/'))
+				return {
+					kind: 'ServiceList',
+					items: ['us-central1', 'europe-west1'].map((region) => ({
+						metadata: {
+							name: 'example',
+							labels: { 'cloud.googleapis.com/location': region },
+						},
+					})),
+				};
+			return { name: url };
+		},
+	};
+	const services = await collectRunServices(client);
+	assert.equal(services.length, 2);
+	assert.ok(calls[1].endsWith('/locations/us-central1/services/example'));
+	assert.ok(calls[2].endsWith('/locations/europe-west1/services/example'));
+});
+
+test('global service inventory rejects incomplete lists and unknown identities', async () => {
+	for (const inventory of [
+		{ kind: 'ServiceList', items: [], metadata: { continue: 'more' } },
+		{ kind: 'ServiceList', items: [], unreachable: ['region'] },
+		{ kind: 'ServiceList' },
+		{ kind: 'ServiceList', items: [{ metadata: { name: 'example' } }] },
+	]) {
+		await assert.rejects(
+			collectRunServices({
+				project: PROJECT,
+				request: async () => inventory,
+			}),
+			/incomplete/,
+		);
+	}
+});
 
 function safeSnapshot() {
 	const name = `projects/${PROJECT}/locations/us-central1/services/emailisolationprobe`;

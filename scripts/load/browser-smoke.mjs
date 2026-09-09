@@ -13,11 +13,17 @@ export async function browserSmoke(
 	year,
 	journal,
 	outputDirectory,
+	appCheckDebugToken,
 ) {
 	const browser = await chromium.launch();
 	const context = await browser.newContext({
 		baseURL: config.customerOrigin,
 	});
+	if (appCheckDebugToken) {
+		await context.addInitScript((token) => {
+			self.FIREBASE_APPCHECK_DEBUG_TOKEN = token;
+		}, appCheckDebugToken);
+	}
 	await context.route(
 		(url) => isCustomerCallable(config, url.href, 'POST'),
 		async (route) => {

@@ -114,9 +114,9 @@ try {
 		);
 		if (!result.passed) process.exitCode = 1;
 	} else {
-		if (!['preflight', 'run'].includes(command))
+		if (!['preflight', 'smoke', 'run'].includes(command))
 			throw new Error(
-				'Use preflight, run, or verify with --project santas-workshop-test.',
+				'Use preflight, smoke, run, or verify with --project santas-workshop-test.',
 			);
 		proof = await checkIsolation();
 		configuration = await discoverConfiguration(client, proof.snapshot);
@@ -125,7 +125,7 @@ try {
 			year: configuration.year,
 			remoteConfigVersion: configuration.remoteConfigVersion,
 		});
-		if (command === 'run') {
+		if (command === 'run' || command === 'smoke') {
 			if (option('--run-id'))
 				throw new Error(
 					'New runs generate a fresh ID; use verify for existing runs.',
@@ -149,6 +149,8 @@ try {
 				slotId,
 				targets: TARGETS,
 				startedAt: new Date(started).toISOString(),
+				mode: command,
+				browserAppCheckProvider: 'registered-test-debug',
 				revisionFingerprint: proof.fingerprint,
 			});
 			appCheck = await createAppCheckSession(
@@ -229,6 +231,7 @@ try {
 					configuration.year,
 					journal,
 					directory,
+					appCheck.browserDebugToken,
 				);
 				journal.record({
 					type: 'journey-complete',
@@ -242,378 +245,416 @@ try {
 					),
 				);
 			}
-			const signup = async (phase) => {
-				const account = fixture();
-				const session = await api.prepare(
-					phase,
-					account,
-					slotId,
-					configuration.year,
-				);
-				const registration = await api.complete(
-					phase,
-					account,
-					session,
-				);
-				completed.push(registration);
-				return { account, session, registration };
-			};
-			await arrivals(
-				journal,
-				'calibration',
-				TARGETS.calibration.count,
-				TARGETS.calibration.durationMs,
-				() => signup('calibration'),
-			);
-			await monitor();
-			journal.assertRunning();
-			// Delayed metrics are allowed during smoke only, never at the main-load gate.
-			journal.record({
-				type: 'instances',
-				...(await instanceEvidence(client, proof.snapshot)),
-			});
-			const projection = costCeiling(
-				proof.snapshot,
-				(Date.now() - started) / 1000,
-				3600,
-			);
-			journal.record({ type: 'calibration-budget', ...projection });
-			enforceBudget(projection, true);
-			await arrivals(
-				journal,
-				'signup-sustained',
-				TARGETS.signup.count,
-				TARGETS.signup.durationMs,
-				() => signup('signup-sustained'),
-			);
-			for (
-				let index = 0;
-				index < TARGETS.signupBurst.repetitions;
-				index++
-			) {
-				const phase = `signup-burst-${index + 1}`;
-				await arrivals(
-					journal,
-					phase,
-					TARGETS.signupBurst.count,
-					TARGETS.signupBurst.durationMs,
-					() => signup(phase),
-				);
-				await delay(TARGETS.drainMs);
-			}
-			const prepared = [];
-			for (let index = 0; index < TARGETS.signupCluster.count; index++) {
-				const account = fixture();
-				prepared.push({
-					account,
-					session: await api.prepare(
-						'cluster-preparation',
+			if (command === 'run') {
+				const signup = async (phase) => {
+					const account = fixture();
+					const session = await api.prepare(
+						phase,
 						account,
 						slotId,
 						configuration.year,
-					),
+					);
+					const registration = await api.complete(
+						phase,
+						account,
+						session,
+					);
+					completed.push(registration);
+					return { account, session, registration };
+				};
+				await arrivals(
+					journal,
+					'calibration',
+					TARGETS.calibration.count,
+					TARGETS.calibration.durationMs,
+					() => signup('calibration'),
+				);
+				await monitor();
+				journal.assertRunning();
+				// Delayed metrics are allowed during smoke only, never at the main-load gate.
+				journal.record({
+					type: 'instances',
+					...(await instanceEvidence(client, proof.snapshot)),
 				});
-			}
-			await arrivals(journal, 'signup-cluster', 9, 1000, async (index) =>
-				completed.push(
-					await api.complete(
-						'signup-cluster',
-						prepared[index].account,
-						prepared[index].session,
+				const projection = costCeiling(
+					proof.snapshot,
+					(Date.now() - started) / 1000,
+					3600,
+				);
+				journal.record({ type: 'calibration-budget', ...projection });
+				enforceBudget(projection, true);
+				await arrivals(
+					journal,
+					'signup-sustained',
+					TARGETS.signup.count,
+					TARGETS.signup.durationMs,
+					() => signup('signup-sustained'),
+				);
+				for (
+					let index = 0;
+					index < TARGETS.signupBurst.repetitions;
+					index++
+				) {
+					const phase = `signup-burst-${index + 1}`;
+					await arrivals(
+						journal,
+						phase,
+						TARGETS.signupBurst.count,
+						TARGETS.signupBurst.durationMs,
+						() => signup(phase),
+					);
+					await delay(TARGETS.drainMs);
+				}
+				const prepared = [];
+				for (
+					let index = 0;
+					index < TARGETS.signupCluster.count;
+					index++
+				) {
+					const account = fixture();
+					prepared.push({
+						account,
+						session: await api.prepare(
+							'cluster-preparation',
+							account,
+							slotId,
+							configuration.year,
+						),
+					});
+				}
+				await arrivals(
+					journal,
+					'signup-cluster',
+					9,
+					1000,
+					async (index) =>
+						completed.push(
+							await api.complete(
+								'signup-cluster',
+								prepared[index].account,
+								prepared[index].session,
+							),
+						),
+				);
+				const staff = [];
+				for (let index = 0; index < TARGETS.staff.sessions; index++) {
+					const account = fixture();
+					await api.prepare(
+						'staff-preparation',
+						account,
+						slotId,
+						configuration.year,
+					);
+					await client.request(
+						`https://identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:update`,
+						{
+							method: 'POST',
+							body: {
+								localId: account.uid,
+								customAttributes: JSON.stringify({
+									roles: ['admin', 'checkin'],
+								}),
+							},
+						},
+					);
+					journal.record({
+						type: 'staff-claims',
+						uid: account.uid,
+						roles: ['admin', 'checkin'],
+					});
+					staff.push(await api.signIn('staff-preparation', account));
+				}
+				let nextRegistration = 0;
+				const checkedIn = async (
+					phase,
+					index,
+					mix,
+					preparedRegistration,
+				) => {
+					const session = staff[index % staff.length];
+					journal.assertRunning();
+					const onsite = mix && index % 11 === 0;
+					const edit = mix && index % 11 === 1;
+					let registration;
+					let account;
+					if (onsite) {
+						account = fixture();
+						registration = {
+							uid: `${runId}-${account.id}`,
+							firstName: account.firstName,
+							lastName: account.lastName,
+							emailAddress: account.emailAddress,
+							zipCode: '80202',
+							qrcode: 'onsite',
+							dateTimeSlot: { id: slotId },
+							children: [0, 1, 2].map((id) =>
+								childFixture(configuration.year, id),
+							),
+						};
+					} else {
+						registration =
+							preparedRegistration ??
+							completed[nextRegistration++];
+						if (!preparedRegistration) {
+							const scan = await api.call(
+								phase,
+								'resolveRegistrationScan',
+								{
+									code: registration.qrcode,
+									inputMethod: 'manual',
+								},
+								session,
+							);
+							if (
+								scan.disposition !== 'eligible' ||
+								scan.registration.uid !== registration.uid
+							)
+								throw new Error('Unexpected scan disposition.');
+						}
+						// Use canonical date-only child inputs, not serialized Firestore Timestamp objects.
+						registration = {
+							...registration,
+							children: [0, 1, 2].map((id) =>
+								childFixture(configuration.year, id),
+							),
+						};
+						if (edit) registration.children[0].firstName = 'Edited';
+					}
+					journal.record({
+						type: 'checkin-intent',
+						phase,
+						uid: registration.uid,
+						...(onsite
+							? { emailAddress: account.emailAddress }
+							: {}),
+						onsite,
+						edit,
+					});
+					const coupons = await api.call(
+						phase,
+						onsite
+							? 'onSiteRegistration'
+							: edit
+								? 'checkInWithEdit'
+								: 'checkIn',
+						onsite
+							? registration
+							: { registration, inputMethod: 'manual' },
+						session,
+					);
+					if (coupons !== 3)
+						throw new Error('Expected three coupons.');
+					if (onsite) {
+						const matches = await query(
+							client,
+							'onsiteregistrations',
+							[['emailAddress', 'EQUAL', account.emailAddress]],
+						);
+						if (matches.length !== 1)
+							throw new Error(
+								'On-site registration is missing or duplicated.',
+							);
+						registration.uid = matches[0].id;
+					}
+					const original = await document(
+						client,
+						`checkins/${registration.uid}`,
+					);
+					journal.record({
+						type: 'checkin-completed',
+						phase,
+						uid: registration.uid,
+						coupons,
+						onsite,
+						edit,
+						...(onsite
+							? { emailAddress: account.emailAddress }
+							: {}),
+						originalCheckInAt: original?.checkInDateTime,
+					});
+				};
+				await arrivals(
+					journal,
+					'staff-sustained',
+					TARGETS.staff.count,
+					TARGETS.staff.durationMs,
+					(index) => checkedIn('staff-sustained', index, true),
+				);
+				await arrivals(journal, 'staff-minute', 23, 60_000, (index) =>
+					checkedIn('staff-minute', index, false),
+				);
+				const clusterRegistrations = [];
+				for (let index = 0; index < 5; index++) {
+					const registration = completed[nextRegistration++];
+					const scan = await api.call(
+						'staff-cluster-preparation',
+						'resolveRegistrationScan',
+						{ code: registration.qrcode, inputMethod: 'manual' },
+						staff[index],
+					);
+					if (
+						scan.disposition !== 'eligible' ||
+						scan.registration.uid !== registration.uid
+					)
+						throw new Error(
+							'Cluster registration is not eligible.',
+						);
+					clusterRegistrations.push(registration);
+				}
+				await arrivals(journal, 'staff-cluster', 5, 1000, (index) =>
+					checkedIn(
+						'staff-cluster',
+						index,
+						false,
+						clusterRegistrations[index],
 					),
-				),
-			);
-			const staff = [];
-			for (let index = 0; index < TARGETS.staff.sessions; index++) {
-				const account = fixture();
-				await api.prepare(
-					'staff-preparation',
-					account,
+				);
+				const duplicate = completed[nextRegistration++];
+				let accepted = 0;
+				await Promise.all(
+					staff.map(async (session) => {
+						const scan = await api.call(
+							'duplicate-scans',
+							'resolveRegistrationScan',
+							{ code: duplicate.qrcode, inputMethod: 'manual' },
+							session,
+						);
+						if (scan.disposition.startsWith('duplicate-')) return;
+						if (scan.disposition !== 'eligible')
+							throw new Error(
+								'Unexpected duplicate scan disposition.',
+							);
+						try {
+							const coupons = await api.call(
+								'duplicate-scans',
+								'checkIn',
+								{
+									registration: {
+										...duplicate,
+										children: [0, 1, 2].map((id) =>
+											childFixture(
+												configuration.year,
+												id,
+											),
+										),
+									},
+									inputMethod: 'manual',
+								},
+								session,
+								{ expectedCodes: ['ALREADY_EXISTS'] },
+							);
+							if (coupons !== 3)
+								throw new Error(
+									'Duplicate coupon count is invalid.',
+								);
+							accepted++;
+						} catch (error) {
+							if (error.code !== 'ALREADY_EXISTS') throw error;
+						}
+					}),
+				);
+				if (accepted !== 1)
+					throw new Error(
+						'Concurrent scans did not produce exactly one check-in.',
+					);
+				journal.record({
+					type: 'checkin-completed',
+					phase: 'duplicate-scans',
+					uid: duplicate.uid,
+					coupons: 3,
+					originalCheckInAt: (
+						await document(client, `checkins/${duplicate.uid}`)
+					).checkInDateTime,
+				});
+				const recovery = fixture();
+				const recoverySession = await api.prepare(
+					'interruption-preparation',
+					recovery,
 					slotId,
 					configuration.year,
 				);
-				await client.request(
-					`https://identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:update`,
-					{
-						method: 'POST',
-						body: {
-							localId: account.uid,
-							customAttributes: JSON.stringify({
-								roles: ['admin', 'checkin'],
-							}),
+				const mutationId = randomUUID();
+				journal.record({
+					type: 'completion-intent',
+					phase: 'interruption',
+					uid: recovery.uid,
+					fixture: recovery.id,
+					mutationId,
+				});
+				const controller = new AbortController();
+				const timer = setTimeout(() => controller.abort(), 50);
+				let interrupted = false;
+				try {
+					await api.call(
+						'interruption',
+						'completeRegistration',
+						{ mutationId },
+						recoverySession,
+						{
+							signal: controller.signal,
+							expectedCodes: ['AbortError'],
 						},
-					},
-				);
-				journal.record({
-					type: 'staff-claims',
-					uid: account.uid,
-					roles: ['admin', 'checkin'],
-				});
-				staff.push(await api.signIn('staff-preparation', account));
-			}
-			let nextRegistration = 0;
-			const checkedIn = async (
-				phase,
-				index,
-				mix,
-				preparedRegistration,
-			) => {
-				const session = staff[index % staff.length];
-				journal.assertRunning();
-				const onsite = mix && index % 11 === 0;
-				const edit = mix && index % 11 === 1;
-				let registration;
-				let account;
-				if (onsite) {
-					account = fixture();
-					registration = {
-						uid: `${runId}-${account.id}`,
-						firstName: account.firstName,
-						lastName: account.lastName,
-						emailAddress: account.emailAddress,
-						zipCode: '80202',
-						qrcode: 'onsite',
-						dateTimeSlot: { id: slotId },
-						children: [0, 1, 2].map((id) =>
-							childFixture(configuration.year, id),
-						),
-					};
-				} else {
-					registration =
-						preparedRegistration ?? completed[nextRegistration++];
-					if (!preparedRegistration) {
-						const scan = await api.call(
-							phase,
-							'resolveRegistrationScan',
-							{
-								code: registration.qrcode,
-								inputMethod: 'manual',
-							},
-							session,
-						);
-						if (
-							scan.disposition !== 'eligible' ||
-							scan.registration.uid !== registration.uid
-						)
-							throw new Error('Unexpected scan disposition.');
-					}
-					// Use canonical date-only child inputs, not serialized Firestore Timestamp objects.
-					registration = {
-						...registration,
-						children: [0, 1, 2].map((id) =>
-							childFixture(configuration.year, id),
-						),
-					};
-					if (edit) registration.children[0].firstName = 'Edited';
-				}
-				journal.record({
-					type: 'checkin-intent',
-					phase,
-					uid: registration.uid,
-					...(onsite ? { emailAddress: account.emailAddress } : {}),
-					onsite,
-					edit,
-				});
-				const coupons = await api.call(
-					phase,
-					onsite
-						? 'onSiteRegistration'
-						: edit
-							? 'checkInWithEdit'
-							: 'checkIn',
-					onsite
-						? registration
-						: { registration, inputMethod: 'manual' },
-					session,
-				);
-				if (coupons !== 3) throw new Error('Expected three coupons.');
-				if (onsite) {
-					const matches = await query(client, 'onsiteregistrations', [
-						['emailAddress', 'EQUAL', account.emailAddress],
-					]);
-					if (matches.length !== 1)
-						throw new Error(
-							'On-site registration is missing or duplicated.',
-						);
-					registration.uid = matches[0].id;
-				}
-				const original = await document(
-					client,
-					`checkins/${registration.uid}`,
-				);
-				journal.record({
-					type: 'checkin-completed',
-					phase,
-					uid: registration.uid,
-					coupons,
-					onsite,
-					edit,
-					...(onsite ? { emailAddress: account.emailAddress } : {}),
-					originalCheckInAt: original?.checkInDateTime,
-				});
-			};
-			await arrivals(
-				journal,
-				'staff-sustained',
-				TARGETS.staff.count,
-				TARGETS.staff.durationMs,
-				(index) => checkedIn('staff-sustained', index, true),
-			);
-			await arrivals(journal, 'staff-minute', 23, 60_000, (index) =>
-				checkedIn('staff-minute', index, false),
-			);
-			const clusterRegistrations = [];
-			for (let index = 0; index < 5; index++) {
-				const registration = completed[nextRegistration++];
-				const scan = await api.call(
-					'staff-cluster-preparation',
-					'resolveRegistrationScan',
-					{ code: registration.qrcode, inputMethod: 'manual' },
-					staff[index],
-				);
-				if (
-					scan.disposition !== 'eligible' ||
-					scan.registration.uid !== registration.uid
-				)
-					throw new Error('Cluster registration is not eligible.');
-				clusterRegistrations.push(registration);
-			}
-			await arrivals(journal, 'staff-cluster', 5, 1000, (index) =>
-				checkedIn(
-					'staff-cluster',
-					index,
-					false,
-					clusterRegistrations[index],
-				),
-			);
-			const duplicate = completed[nextRegistration++];
-			let accepted = 0;
-			await Promise.all(
-				staff.map(async (session) => {
-					const scan = await api.call(
-						'duplicate-scans',
-						'resolveRegistrationScan',
-						{ code: duplicate.qrcode, inputMethod: 'manual' },
-						session,
 					);
-					if (scan.disposition.startsWith('duplicate-')) return;
-					if (scan.disposition !== 'eligible')
-						throw new Error(
-							'Unexpected duplicate scan disposition.',
-						);
-					try {
-						const coupons = await api.call(
-							'duplicate-scans',
-							'checkIn',
-							{
-								registration: {
-									...duplicate,
-									children: [0, 1, 2].map((id) =>
-										childFixture(configuration.year, id),
-									),
-								},
-								inputMethod: 'manual',
-							},
-							session,
-							{ expectedCodes: ['ALREADY_EXISTS'] },
-						);
-						if (coupons !== 3)
-							throw new Error(
-								'Duplicate coupon count is invalid.',
-							);
-						accepted++;
-					} catch (error) {
-						if (error.code !== 'ALREADY_EXISTS') throw error;
-					}
-				}),
-			);
-			if (accepted !== 1)
-				throw new Error(
-					'Concurrent scans did not produce exactly one check-in.',
-				);
-			journal.record({
-				type: 'checkin-completed',
-				phase: 'duplicate-scans',
-				uid: duplicate.uid,
-				coupons: 3,
-				originalCheckInAt: (
-					await document(client, `checkins/${duplicate.uid}`)
-				).checkInDateTime,
-			});
-			const recovery = fixture();
-			const recoverySession = await api.prepare(
-				'interruption-preparation',
-				recovery,
-				slotId,
-				configuration.year,
-			);
-			const mutationId = randomUUID();
-			journal.record({
-				type: 'completion-intent',
-				phase: 'interruption',
-				uid: recovery.uid,
-				fixture: recovery.id,
-				mutationId,
-			});
-			const controller = new AbortController();
-			const timer = setTimeout(() => controller.abort(), 50);
-			let interrupted = false;
-			try {
-				await api.call(
-					'interruption',
-					'completeRegistration',
-					{ mutationId },
+				} catch (error) {
+					if (error.name !== 'AbortError') throw error;
+					interrupted = true;
+				} finally {
+					clearTimeout(timer);
+				}
+				if (!interrupted)
+					throw new Error(
+						'The planned client interruption did not occur; recovery coverage is incomplete.',
+					);
+				journal.record({
+					type: 'fault-injected',
+					phase: 'interruption',
+					uid: recovery.uid,
+					mutationId,
+				});
+				await api.complete(
+					'interruption-recovery',
+					recovery,
 					recoverySession,
-					{
-						signal: controller.signal,
-						expectedCodes: ['AbortError'],
-					},
+					mutationId,
 				);
-			} catch (error) {
-				if (error.name !== 'AbortError') throw error;
-				interrupted = true;
-			} finally {
-				clearTimeout(timer);
+				await monitor();
+				journal.assertRunning();
+				const verification = await verifyRun(client, journal, slotId);
+				if (!verification.passed)
+					throw new Error('Business verification failed.');
+				const latencyFailures = journal
+					.summary()
+					.filter(
+						(item) =>
+							!item.operation.startsWith('interruption/') &&
+							(item.unexpectedErrors ||
+								item.underTwoSecondsFraction < 0.99),
+					);
+				if (latencyFailures.length)
+					throw new Error(
+						'One or more operations failed the 99% under two seconds gate.',
+					);
+				journal.record({
+					type: 'acceptance',
+					passed: true,
+					sesDeliveryVerified: false,
+					productionAcceptanceVerified: false,
+				});
+			} else {
+				await monitor();
+				journal.assertRunning();
+				const verification = await verifyRun(client, journal, slotId);
+				if (!verification.passed)
+					throw new Error('Smoke business verification failed.');
+				journal.record({
+					type: 'smoke-acceptance',
+					passed: true,
+					completedJourneys: completed.length,
+					calibrationAndLoadRun: false,
+					browserAppCheckProvider: 'registered-test-debug',
+					recaptchaAttestationVerified: false,
+				});
 			}
-			if (!interrupted)
-				throw new Error(
-					'The planned client interruption did not occur; recovery coverage is incomplete.',
-				);
-			journal.record({
-				type: 'fault-injected',
-				phase: 'interruption',
-				uid: recovery.uid,
-				mutationId,
-			});
-			await api.complete(
-				'interruption-recovery',
-				recovery,
-				recoverySession,
-				mutationId,
-			);
-			await monitor();
-			journal.assertRunning();
-			const verification = await verifyRun(client, journal, slotId);
-			if (!verification.passed)
-				throw new Error('Business verification failed.');
-			const latencyFailures = journal
-				.summary()
-				.filter(
-					(item) =>
-						!item.operation.startsWith('interruption/') &&
-						(item.unexpectedErrors ||
-							item.underTwoSecondsFraction < 0.99),
-				);
-			if (latencyFailures.length)
-				throw new Error(
-					'One or more operations failed the 99% under two seconds gate.',
-				);
-			journal.record({
-				type: 'acceptance',
-				passed: true,
-				sesDeliveryVerified: false,
-				productionAcceptanceVerified: false,
-			});
 		}
 	}
 } catch (error) {
@@ -622,7 +663,7 @@ try {
 	console.error(error.message);
 	process.exitCode = 1;
 	if (
-		command === 'run' &&
+		['run', 'smoke'].includes(command) &&
 		journal.events.some((event) => event.type === 'account-intent')
 	) {
 		try {

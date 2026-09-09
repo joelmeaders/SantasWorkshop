@@ -77,6 +77,7 @@ retained; include that cost in operational follow-up.
 ```text
 node scripts/load/provision-network.mjs --project santas-workshop-test --apply
 pnpm run load:preflight --project santas-workshop-test
+node scripts/load/run.mjs smoke --project santas-workshop-test
 pnpm run load:run --project santas-workshop-test
 pnpm run load:verify --project santas-workshop-test --run-id <printed-run-id>
 ```
@@ -89,11 +90,15 @@ public settings. It discovers the customer Web App configuration from Firebase
 and checks project, bucket, and hosted origins before any fixture write.
 
 Browser smoke uses ordinary hosted sign-up, terms acceptance for labeled QA
-accounts, normal App Check, child forms, appointment selection, completion,
-and QR rendering. The synthetic phases use normal password authentication and
-real App Check tokens exchanged through a run-owned debug-provider registration.
+accounts, child forms, appointment selection, completion, and QR rendering.
+The `smoke` command stops after five successful browser journeys and business,
+email-sink, and counter verification. It does not start calibration or load.
+Automated browsers and synthetic phases use normal password authentication and
+real App Check tokens exchanged through a run-owned test debug-provider registration.
 They do not substitute privileged tokens for customer requests. The debug
 registration is recorded by resource name; its secret is not recorded.
+Backend App Check enforcement remains active. This tests attested application
+requests but does not validate normal reCAPTCHA Enterprise browser attestation.
 
 Arrival timing is open loop. Slow responses do not silently reduce offered
 traffic. A generator delay above 250 ms or 100 outstanding journeys stops the

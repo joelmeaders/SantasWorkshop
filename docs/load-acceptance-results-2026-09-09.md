@@ -59,6 +59,10 @@ All sustained signup, burst, staff, duplicate-protection, interruption/recovery,
 
 The preliminary conservative one-hour ceiling was **$17.73**, using all configured instance maxima, rounded-up compute rates, connector cost, and a $5 noncompute allowance. This is an estimate, not a billing export. Actual billed cost is unavailable. The retained connector continues to incur infrastructure cost.
 
-Before another run, establish successful normal App Check attestation in the intended hosted browser environment. Then start a fresh run through the full isolation gate and all five smoke journeys; do not skip directly to load.
+The user subsequently narrowed execution to successful smoke tests only. The
+follow-up smoke command uses the run-owned test App Check debug provider for the
+automated browser while preserving backend enforcement. It must pass the full
+isolation gate and all five journeys, then stop before calibration or load.
+Normal reCAPTCHA Enterprise attestation remains a separate unverified result.
 
 SES delivery and production acceptance remain unverified. Historical targets represent retained successful transactions plus headroom, not abandoned attempts, historical retries, or exact browser concurrency. Local evidence is retained under `artifacts/load/` and is excluded from Git.

@@ -3,6 +3,7 @@ import {
 	SESClient,
 	SESClientConfig,
 } from '@aws-sdk/client-ses';
+import { isEmailSink, recordSimulatedEmail } from '../utility/email-isolation';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import type {
 	SendTestEmailTemplateRequest,
@@ -160,7 +161,11 @@ export default async function callableSendTestEmailTemplate(
 	});
 
 	try {
-		await getSesClient().send(sendCommand);
+		if (isEmailSink()) {
+			await recordSimulatedEmail('template-test', sendCommand.input);
+		} else {
+			await getSesClient().send(sendCommand);
+		}
 	} catch (error) {
 		throw new HttpsError(
 			'internal',

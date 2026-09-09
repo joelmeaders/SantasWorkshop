@@ -28,6 +28,8 @@ const REQUIRED_FUNCTION_ENV_KEYS = [
 ];
 
 const OPTIONAL_FUNCTION_ENV_KEYS = [
+	'SANTASHOP_EMAIL_TRANSPORT',
+	'SANTASHOP_EMAIL_VPC_CONNECTOR',
 	'SANTASHOP_SHOP_DAYS',
 	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
 	'SANTASHOP_SIGNUP_MIN_INSTANCES',
@@ -103,6 +105,7 @@ const buildFunctionsConfig = (mode) => {
 	const config = {};
 
 	for (const key of REQUIRED_FUNCTION_ENV_KEYS) {
+		if (mode === 'test' && key.startsWith('AWS_')) continue;
 		config[key] = requireEnvValue(mode, key);
 	}
 
@@ -114,11 +117,27 @@ const buildFunctionsConfig = (mode) => {
 	}
 
 	for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']) {
-		if (PLACEHOLDER_AWS_CREDENTIAL_PATTERN.test(config[key].trim())) {
+		if (
+			config[key] &&
+			PLACEHOLDER_AWS_CREDENTIAL_PATTERN.test(config[key].trim())
+		) {
 			throw new Error(
 				`Refusing to use placeholder AWS credential: ${getModePrefix(mode)}_${key}`,
 			);
 		}
+	}
+	if (mode === 'test') {
+		// Test deployments cannot restore SES credentials or remove network isolation.
+		config.SANTASHOP_EMAIL_TRANSPORT = 'sink';
+		config.SANTASHOP_EMAIL_VPC_CONNECTOR =
+			'projects/santas-workshop-test/locations/us-central1/connectors/load-email';
+	} else if (
+		config.SANTASHOP_EMAIL_TRANSPORT ||
+		config.SANTASHOP_EMAIL_VPC_CONNECTOR
+	) {
+		throw new Error(
+			'Email isolation settings are managed only for the test project.',
+		);
 	}
 
 	const programYear = Number.parseInt(config.SANTASHOP_PROGRAM_YEAR, 10);

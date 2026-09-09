@@ -233,7 +233,20 @@ describe('functions index exports', () => {
 				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
 				'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
 		});
-		expect(onRequestMock).toHaveBeenCalledTimes(1);
+		expect(onRequestMock).toHaveBeenCalledTimes(2);
+		expect(
+			(
+				subject.emailIsolationProbe as unknown as {
+					options: Record<string, unknown>;
+				}
+			).options,
+		).toMatchObject({
+			invoker: 'private',
+			maxInstances: 1,
+			minInstances: 0,
+			concurrency: 1,
+			timeoutSeconds: 30,
+		});
 	});
 	it('does not attach Remote Config identities in the emulator', async () => {
 		process.env.FUNCTIONS_EMULATOR = 'true';

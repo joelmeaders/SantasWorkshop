@@ -31,16 +31,19 @@ import { publicParametersGatewayHandler } from './fn/publicParametersGateway';
  * enforcement enabled.
  */
 const RUNNING_IN_FUNCTIONS_EMULATOR = process.env.FUNCTIONS_EMULATOR === 'true';
-const REMOTE_CONFIG_READER_IDENTITY: { serviceAccount?: string } = RUNNING_IN_FUNCTIONS_EMULATOR
-	? {}
-	: {
-			serviceAccount:
-				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
-				'remote-config-reader@' +
-					(process.env['GCLOUD_PROJECT'] ??
-						process.env['GCP_PROJECT']) +
-					'.iam.gserviceaccount.com',
-		};
+const REMOTE_CONFIG_READER_IDENTITY: { serviceAccount?: string } =
+	RUNNING_IN_FUNCTIONS_EMULATOR
+		? {}
+		: {
+				serviceAccount:
+					process.env[
+						'SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'
+					] ??
+					'remote-config-reader@' +
+						(process.env['GCLOUD_PROJECT'] ??
+							process.env['GCP_PROJECT']) +
+						'.iam.gserviceaccount.com',
+			};
 const REMOTE_CONFIG_PUBLISHER_IDENTITY = RUNNING_IN_FUNCTIONS_EMULATOR
 	? {}
 	: {
@@ -117,10 +120,43 @@ const LOW_VOLUME_OPTIONS = {
 
 setGlobalOptions({
 	region: FUNCTION_REGION,
+	...(process.env['SANTASHOP_EMAIL_TRANSPORT'] === 'sink'
+		? {
+				vpcConnector:
+					'projects/santas-workshop-test/locations/us-central1/connectors/load-email',
+				vpcConnectorEgressSettings: 'ALL_TRAFFIC' as const,
+			}
+		: {}),
 	...(FUNCTIONS_SERVICE_ACCOUNT
 		? { serviceAccount: FUNCTIONS_SERVICE_ACCOUNT }
 		: {}),
 });
+
+export const emailIsolationProbe = onRequest(
+	{
+		invoker: 'private',
+		maxInstances: 1,
+		minInstances: 0,
+		concurrency: 1,
+		timeoutSeconds: 30,
+	},
+	async (_request, response) => {
+		try {
+			response.json(
+				await (
+					await import('./fn/emailIsolationProbe')
+				).probeEmailIsolation(),
+			);
+		} catch {
+			response
+				.status(503)
+				.json({
+					isolated: false,
+					reason: 'Email isolation probe failed.',
+				});
+		}
+	},
+);
 
 export const publicParametersGateway = onRequest(
 	{

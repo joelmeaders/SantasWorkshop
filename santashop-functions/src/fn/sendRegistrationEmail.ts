@@ -27,8 +27,12 @@ import {
 import { getRegistrationQrCodeUrl } from '../utility/qrcodes';
 import {
 	buildEmailTemplateDataFromMappings,
+	getEmailTemplateRevision,
+	readEmailTemplateHtml,
+	renderTemplateWithFieldValues,
 	resolvePublishedEmailTemplate,
 } from '../utility/email-templates';
+import { isEmailSink, recordSimulatedEmail } from '../utility/email-isolation';
 import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import {
@@ -72,7 +76,13 @@ interface QueuedRegistrationEmailDocument {
 	deliveryRequiresReviewReason?: string;
 	deliveryCompletedOn?: Date;
 	deliveryState?:
-		'queued' | 'sending' | 'accepted' | 'sent' | 'failed' | 'superseded';
+		| 'queued'
+		| 'sending'
+		| 'accepted'
+		| 'sent'
+		| 'failed'
+		| 'superseded'
+		| 'simulated';
 	failedOn?: Date;
 	lastErrorMessage?: string;
 	lastErrorDetails?: string;
@@ -488,6 +498,8 @@ const canSkipDelivery = async (
 	context: LoadedEmailTriggerContext,
 	triggerMetadata: EmailTriggerMetadata,
 ): Promise<boolean> => {
+	// Simulated deliveries remain terminal even if real delivery is later restored.
+	if (context.document.deliveryState === 'simulated') return true;
 	const now = new Date();
 	const supersededReason = getSupersededReason(context);
 	if (supersededReason) {
@@ -773,10 +785,7 @@ export default async function sendRegistrationEmail(
 		return;
 	}
 
-	sesClient ??= new SESClient({
-		credentials,
-		region: SES_REGION,
-	} as SESClientConfig);
+	const simulated = isEmailSink();
 
 	const attemptedOn = new Date();
 	const queuedOn = getQueueRequestedOn(context.document, attemptedOn);
@@ -790,6 +799,7 @@ export default async function sendRegistrationEmail(
 	let emailCommand: SendTemplatedEmailCommand | SendEmailCommand;
 	let usePlainText = false;
 	let deliveryMetadata: Record<string, unknown>;
+	let renderedSinkContent: unknown;
 	try {
 		const profile = await admin
 			.firestore()
@@ -868,6 +878,44 @@ export default async function sendRegistrationEmail(
 				payload.email,
 				templateName,
 			);
+			if (simulated) {
+				const summary = resolvedTemplate.templateSummary;
+				if (!summary.publishedRevisionId)
+					throw new Error(
+						'Published sink template revision is missing.',
+					);
+				const revision = await getEmailTemplateRevision(
+					summary.key,
+					summary.publishedRevisionId,
+				);
+				if (!revision)
+					throw new Error(
+						'Published sink template revision is missing.',
+					);
+				const html = await readEmailTemplateHtml(
+					revision.htmlStoragePath,
+				);
+				const fields = revision.fieldMappings.map((field) => ({
+					...field,
+					sampleValue: String(
+						runtimeData[
+							(field.mapping.trim() ||
+								field.name) as keyof typeof runtimeData
+						] ?? '',
+					),
+				}));
+				renderedSinkContent = {
+					subject: renderTemplateWithFieldValues(
+						revision.subjectPart,
+						fields,
+					),
+					html: renderTemplateWithFieldValues(html, fields),
+					text: renderTemplateWithFieldValues(
+						revision.textPart ?? '',
+						fields,
+					),
+				};
+			}
 		}
 	} catch (error) {
 		await persistFailedDelivery(
@@ -883,6 +931,30 @@ export default async function sendRegistrationEmail(
 
 	try {
 		await context.emailDocRef.set(deliveryMetadata, { merge: true });
+		if (simulated) {
+			const receiptId = await recordSimulatedEmail(
+				'registration',
+				renderedSinkContent ?? emailCommand.input,
+				triggeredSnapshot.id,
+			);
+			await context.emailDocRef.set(
+				{
+					deliveryState: 'simulated',
+					deliveryTransport: 'test-sink',
+					deliveryCompletedOn: new Date(),
+					deliverySinkReceiptId: receiptId,
+					failedOn: false,
+					lastErrorMessage: false,
+					lastErrorDetails: false,
+				},
+				{ merge: true },
+			);
+			return;
+		}
+		sesClient ??= new SESClient({
+			credentials,
+			region: SES_REGION,
+		} as SESClientConfig);
 		response = usePlainText
 			? ((await sesClient.send(
 					emailCommand as SendEmailCommand,

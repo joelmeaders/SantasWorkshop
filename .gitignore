@@ -54,3 +54,4 @@ santashop-app/src/firebase.config.ts
 santashop-admin/src/firebase.config.ts
 storybook-visual/**/report/
 storybook-visual/**/test-results/
+artifacts/load/

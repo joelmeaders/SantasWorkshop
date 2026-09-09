@@ -17,6 +17,7 @@ import {
 } from '../utility/callable-validation';
 import { getErrorCode } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
+import { isEmailSink, recordSimulatedEmail } from '../utility/email-isolation';
 import {
 	PASSWORD_RESET_CONTINUE_URL,
 	REGISTRATION_EMAIL_RETURN_PATH,
@@ -104,8 +105,7 @@ const reserveRequest = async (
 	return firestore.runTransaction(async (transaction) => {
 		const snapshot = await transaction.get(document);
 		const existing = snapshot.data() as
-			| PasswordResetRateLimitRecord
-			| undefined;
+			PasswordResetRateLimitRecord | undefined;
 		const lastRequestedAt = toDate(existing?.lastRequestedAt);
 		if (
 			lastRequestedAt &&
@@ -116,9 +116,7 @@ const reserveRequest = async (
 
 		transaction.set(document, {
 			lastRequestedAt: now,
-			expiresAt: new Date(
-				now.getTime() + RATE_LIMIT_RECORD_LIFETIME_MS,
-			),
+			expiresAt: new Date(now.getTime() + RATE_LIMIT_RECORD_LIFETIME_MS),
 		});
 		return true;
 	});
@@ -130,7 +128,9 @@ const loadPreferredLanguage = async (
 ): Promise<CustomerLanguage> => {
 	try {
 		const snapshot = await admin.firestore().doc(`users/${uid}`).get();
-		return customerLanguageOrEnglish(snapshot.data()?.['preferredLanguage']);
+		return customerLanguageOrEnglish(
+			snapshot.data()?.['preferredLanguage'],
+		);
 	} catch (error) {
 		log.warn('Password reset profile lookup failed; using English', {
 			requestKey,
@@ -146,6 +146,10 @@ const sendPasswordResetEmail = async (
 	language: CustomerLanguage,
 ): Promise<void> => {
 	const content = buildPasswordResetEmail(resetLink, language);
+	if (isEmailSink()) {
+		await recordSimulatedEmail('password-reset', content);
+		return;
+	}
 	await getSesClient().send(
 		new SendEmailCommand({
 			Destination: { ToAddresses: [emailAddress] },
@@ -188,10 +192,11 @@ export default async function requestPasswordReset(
 	try {
 		const authUser = await admin.auth().getUserByEmail(emailAddress);
 		const language = await loadPreferredLanguage(authUser.uid, requestKey);
-		const resetLink = await admin.auth().generatePasswordResetLink(
-			emailAddress,
-			{ url: PASSWORD_RESET_CONTINUE_URL },
-		);
+		const resetLink = await admin
+			.auth()
+			.generatePasswordResetLink(emailAddress, {
+				url: PASSWORD_RESET_CONTINUE_URL,
+			});
 
 		if (
 			process.env.FUNCTIONS_EMULATOR !== 'true' ||
@@ -203,8 +208,9 @@ export default async function requestPasswordReset(
 			requestKey,
 			language,
 			emailDeliverySuppressed:
-				process.env.FUNCTIONS_EMULATOR === 'true' &&
-				process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR !== 'true',
+				isEmailSink() ||
+				(process.env.FUNCTIONS_EMULATOR === 'true' &&
+					process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR !== 'true'),
 		});
 	} catch (error) {
 		const errorCode = getErrorCode(error);

@@ -25,6 +25,7 @@ import {
 	validateEmailTemplateFieldMappings,
 } from '../utility/email-templates';
 import { SES_REGION } from '../utility/runtime-config';
+import { isEmailSink } from '../utility/email-isolation';
 import {
 	requireCallableData,
 	requireOptionalTrimmedString,
@@ -63,6 +64,8 @@ const upsertSesTemplate = async (
 	revision: EmailTemplateRevision,
 	html: string,
 ): Promise<void> => {
+	// Publishing remains a local Firestore/Storage operation in the isolated test project.
+	if (isEmailSink()) return;
 	const templateInput = {
 		Template: {
 			TemplateName: template.awsTemplateName,

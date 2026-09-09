@@ -4,6 +4,10 @@
   "author": "Joel Meaders",
   "private": true,
   "scripts": {
+    "load:test": "node --test scripts/load/*.test.mjs",
+    "load:preflight": "node scripts/load/run.mjs preflight",
+    "load:run": "node scripts/load/run.mjs run",
+    "load:verify": "node scripts/load/run.mjs verify",
     "ng": "ng",
     "config:app:dev": "node config.firebase.cjs app dev",
     "config:app:local": "node config.firebase.cjs app local",

@@ -44,13 +44,15 @@ deployed acceptance requirements.
 
 ## Traffic and capacity assumptions
 
-- Signup launch: 2,000 customers in 30 minutes is 1.1 completed customers per
-  second on average. The release target is four times that average (at least
-  4.5 completed signup journeys per second) plus short bursts of 10 journeys
-  per second.
-- Event check-in: 20-30 customers in five minutes is 0.07-0.1 check-ins per
-  second on average. The release target is at least 10 simultaneous scanners
-  and a burst of 30 check-in requests without duplicate records.
+- Retained 2025 registration timestamps show peaks of 713 completions per
+  rolling 15 minutes, 90 per minute, and six per second. With 50% headroom,
+  test 1.2 signup journeys/second for 15 minutes, three one-minute bursts of
+  2.25/second, and nine prepared completions within one second.
+- Retained 2025 check-in timestamps show peaks of 54 per rolling five minutes,
+  15 per minute, and three per second. Test ten authenticated staff sessions
+  sharing 81 check-ins per five minutes for 15 minutes, then separate bursts
+  of 23 per minute and five within one second. Include about 9% on-site
+  registrations and 9% staff edits. Device concurrency is a coverage choice.
 - A signup journey makes several callable and Firestore requests. Load tests
   must exercise the complete account, draft, child, appointment, and completion
   journey rather than treating one HTTP response as one customer.
@@ -61,15 +63,15 @@ All customer and staff callables use bounded second-generation concurrency and
 maximum instances. These limits protect cost while leaving substantial margin
 above the expected traffic.
 
-| Profile | Functions | CPU | Memory | Concurrency | Maximum instances | Warm instances |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Standard customer | account/profile/email changes | 1 | 256 MiB | 10 | 5 | 0 |
-| Signup draft | save/delete child, set appointment | 1 | 256 MiB | 20 | 10 | 0 |
-| Signup completion | complete registration | 1 | 256 MiB | 20 | 10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
-| New account | account creation and QR generation | 1 | 512 MiB | 20 | 10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
-| Event hot path | check-in and scan resolution | 1 | 256 MiB | 20 | 5 | `SANTASHOP_EVENT_MIN_INSTANCES` |
-| Event standard | edit/on-site/pre-registration | 1 | 256 MiB | 10 | 3 | 0 |
-| Low volume/admin | templates, staff, owner operations | 1 | 256 MiB | 10 | 3 | 0 |
+| Profile           | Functions                          | CPU |  Memory | Concurrency | Maximum instances |                   Warm instances |
+| ----------------- | ---------------------------------- | --: | ------: | ----------: | ----------------: | -------------------------------: |
+| Standard customer | account/profile/email changes      |   1 | 256 MiB |          10 |                 5 |                                0 |
+| Signup draft      | save/delete child, set appointment |   1 | 256 MiB |          20 |                10 |                                0 |
+| Signup completion | complete registration              |   1 | 256 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| New account       | account creation and QR generation |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| Event hot path    | check-in and scan resolution       |   1 | 256 MiB |          20 |                 5 |  `SANTASHOP_EVENT_MIN_INSTANCES` |
+| Event standard    | edit/on-site/pre-registration      |   1 | 256 MiB |          10 |                 3 |                                0 |
+| Low volume/admin  | templates, staff, owner operations |   1 | 256 MiB |          10 |                 3 |                                0 |
 
 The configured ceilings provide 200 concurrent requests for each signup hot
 path and 100 for each check-in hot path. This is capacity headroom, not a claim
@@ -197,18 +199,26 @@ evidence that Firebase Hosting applied those headers.
 
 ## Load and resilience gate
 
-Run against the test project, never production. Seed isolated test customers and
-slots, then measure the complete journeys described above. The pass criteria
-are:
+Run against the test project, never production. Follow
+[historical load acceptance](load-acceptance.md). No hosted smoke, account
+creation, or fixture seeding may start until the deployed email isolation gate
+proves credential removal, independent network denial, sink routing, and old
+worker retirement. The pass criteria are:
 
 - no unexpected 4xx/5xx responses;
 - at least 99% of callable responses under 2 seconds, excluding email delivery;
-- account/signup success under the 10 journeys-per-second launch burst;
+- every valid attempted signup completes under the historical targets above;
 - exactly one check-in record for repeated or concurrent scans of one code;
 - no lost registration or slot-counter writes;
-- queue work drains after the traffic burst;
+- simulated email work drains within five minutes; counters reconcile within
+  two scheduler intervals plus two minutes;
 - no Function reaches its maximum-instance ceiling for five continuous minutes;
 - recovery after an injected callable failure succeeds without duplicate data.
+
+Stop new arrivals on isolation drift, target mismatch, data corruption,
+unexpected errors above 1% in a rolling minute, or the $20 estimated operating
+limit. The total budget is $25, including a $5 verification reserve. Fixtures
+remain in test. SES delivery and production acceptance remain unverified.
 
 Store the test parameters, commit SHA, UTC start/end, result counts, p50/p95/p99,
 and relevant Monitoring links with the release record. A small emulator test is

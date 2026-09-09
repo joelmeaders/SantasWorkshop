@@ -52,9 +52,9 @@ test('open-loop arrivals launch before preceding journeys finish', async () => {
 	const log = journal();
 	let active = 0;
 	let peak = 0;
-	await arrivals(log, 'phase', 4, 40, async () => {
+	await arrivals(log, 'phase', 4, 400, async () => {
 		peak = Math.max(peak, ++active);
-		await new Promise((resolve) => setTimeout(resolve, 60));
+		await new Promise((resolve) => setTimeout(resolve, 450));
 		active--;
 	});
 	assert.ok(peak > 1);

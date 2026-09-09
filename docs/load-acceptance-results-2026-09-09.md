@@ -1,68 +1,77 @@
-# Historical load acceptance: September 9, 2026
+# Hosted smoke results: September 9, 2026
 
-## Result
+## Result and scope
 
-**Blocked at the first hosted smoke signup. No load acceptance claim is made.**
+**Five of five hosted browser smoke journeys passed. Testing stopped before calibration or load, as requested.**
 
-The deployed email isolation gate passed. The normal reCAPTCHA Enterprise App Check exchange in the automated browser then returned HTTP 403, `PERMISSION_DENIED`, with `App attestation failed.` Signup reached the server without App Check and received HTTP 401. The runner stopped before calibration or sustained traffic.
+The subsequent read-only checks confirmed the five completed registrations, 15 children, QR ownership/search state, and five terminal simulated email receipts. The scheduled slot counter did not reconcile: its Function failed with an out-of-memory error. Overall load acceptance is therefore **not established**.
 
-This evidence establishes failure in the automated browser used for this run. It does not establish that every browser or real customer fails attestation. App Check enforcement was preserved. No authentication or cache workaround was applied.
+No more browser journeys, calibration, signup bursts, staff traffic, or full load will run under this completed smoke-only execution.
 
-## Revisions and validation
+## Verified smoke evidence
 
-- Implementation: [PR #168](https://github.com/joelmeaders/SantasWorkshop/pull/168), merged as `89a5e730c5e5cb563ef7a35c33a0d89081fefc12`.
-- Global Cloud Run inventory correction: [PR #169](https://github.com/joelmeaders/SantasWorkshop/pull/169), merged as `b2267b3b413b18d7c3ec86e24c4c927015af23a9`.
-- Hosted run checkout: `b2267b3b413b18d7c3ec86e24c4c927015af23a9`, clean before execution.
-- Functions source deployed from `89a5e73`; the later inventory correction changed only the local harness.
-- PR #168 passed Functions unit validation, 36 Functions integration tests, 51 customer E2E tests, 83 staff E2E tests, customer/admin validation, and Storybook validation.
-- PR #169 passed unit and combined integration/E2E checks. Both merges used the standing administrator review bypass after checks passed.
-- [Test Functions deployment](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34308301006) passed. Its manual test-only selection reused the passed PR validation after identical Git trees were verified. The redundant automatic run was cancelled. Production deployment was skipped.
-- [Test customer deployment](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34308235860) and [test admin deployment](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34308235832) passed.
-- The harness-only merge's automatic deployment was cancelled before deployment; no cloud source changed.
+Run: `load-20260909T043941Z-3043942b` in `santas-workshop-test`.
 
-## Email isolation evidence
+- Clean runner commit: `744e0919fd8b4af6759acac4ef2738c558c08120`.
+- Started: `2026-09-09T04:39:41.867Z`.
+- Fifth browser journey completed: `2026-09-09T04:41:39.533Z`.
+- Five normal customer Auth accounts and five completed registrations were verified by read-only lookup.
+- Each journey used the hosted signup form, QA terms acceptance, three child forms, appointment selection, review, submission, and visible QR confirmation.
+- All 30 browser callable requests succeeded and carried App Check. All were under two seconds; the slowest was 1,958.924 ms.
+- All five simulated email receipts drained within 3,439 ms. No SES delivery acceptance was recorded.
+- Three live isolation checks passed during the run.
+- No calibration or load phase events occurred.
 
-All checks targeted `santas-workshop-test`.
+| Browser callable      | Responses |        p50 |    p95 / p99 |
+| --------------------- | --------: | ---------: | -----------: |
+| Account creation      |         5 | 737.587 ms |   967.900 ms |
+| Save child            |        15 | 248.816 ms |   372.383 ms |
+| Select appointment    |         5 | 309.980 ms |   460.203 ms |
+| Complete registration |         5 | 359.389 ms | 1,958.924 ms |
 
-- All 42 deployed Functions were active, configured for the sink, stripped of AWS configuration, and routed through the isolated VPC for all outbound traffic.
-- Cloud Run service configuration, active revisions, global job inventory, triggers, queues, schedulers, private DNS, and effective firewall rules passed the gate.
-- The v2 global Cloud Run listing reported unreachable regions. The corrected gate uses the complete v1 global ServiceList and reads each listed service's v2 configuration in its reported region. Partial lists or missing service identities still block.
-- Latest function update: `2026-09-09T03:51:24.569917407Z`. The full 32-minute old-worker retirement window elapsed before testing.
-- The private probe verified Google API connectivity and failed TCP connections to SES in `us-west-2` and `us-east-1` on port 443, and SMTP in `us-west-2` on ports 587 and 465. No email protocol payload or credentials were transmitted by the probe.
-- Fresh full preflight passed in run `load-20260909T042337Z-8f69e918`. The traffic run repeated that gate before any fixture setup.
-- Email isolation remains enabled. Simulated receipts are terminal and cannot replay as real delivery.
+These are small-sample smoke measurements, not a throughput or sustained-load acceptance result.
 
-## Hosted attempt and recovery
+## App Check and harness corrections
 
-Traffic run: `load-20260909T042402Z-cf17d028`, started at approximately `2026-09-09T04:24:02Z`.
+The normal reCAPTCHA Enterprise App Check exchange in the automated browser returned HTTP 403, `PERMISSION_DENIED`, with `App attestation failed.` The backend correctly rejected signup without App Check. That first attempt created no Auth account or registration.
 
-| Measure                                      | Observed |
-| -------------------------------------------- | -------: |
-| Hosted smoke journeys attempted              |        1 |
-| Hosted smoke journeys completed              |        0 |
-| Auth accounts created                        |        0 |
-| Registration records found                   |        0 |
-| Completed registrations                      |        0 |
-| Check-ins                                    |        0 |
-| Pending email work for the attempted fixture |        0 |
-| Run-owned slot reservations                  |        0 |
+The successful automated smoke used a run-owned, registered test App Check debug provider. Backend enforcement remained active, and a deliberate missing-App-Check request was rejected. This validates attested application requests; **normal reCAPTCHA Enterprise browser attestation remains unverified**.
 
-The deliberate missing-App-Check negative request was rejected in about 1.54 seconds. The first browser signup was also rejected without App Check. Read-only Auth lookup at `2026-09-09T04:29:49.310Z` confirmed no account for the attempted fixture. Read-only business-state recovery found no registration, check-in, or pending email work for it.
+Live evidence also exposed three harness issues that were corrected:
 
-The initial browser recorder watched only direct Functions URLs. The hosted app uses same-origin Hosting rewrites, so that recorder missed the browser's HTTP 401. Server logs established the rejection. A separate read-only browser check captured the App Check exchange failure at `content-firebaseappcheck.googleapis.com`. The subsequent recorder correction includes Hosting rewrites, status, App Check presence, and failure screenshots.
+- Hosted Functions calls use same-origin Hosting rewrites. The recorder now captures those routes as well as direct Functions URLs, HTTP status, and App Check presence, and saves failure screenshots.
+- The reused submission helper checked for the review action before hosted data finished loading. Smoke now waits for the visible review action. That earlier attempt left one retained QA draft account with three children.
+- Recovery searched for mixed-case fixture emails, while the app stores lowercase emails. The corrected read-only lookup found all five completed registrations. The original verifier stop remains in the journal; it did not represent a failed browser journey.
 
-The run-owned empty appointment slot and App Check debug-token registration are retained. No preexisting customer data was changed or deleted.
+## Unresolved counter finding
 
-## Remaining acceptance and cost limits
+The run-owned slot still had zero reservations when five were expected. Cloud logs show `scheduledDateTimeSlotCounters` exceeded its 128 MiB limit:
 
-All sustained signup, burst, staff, duplicate-protection, interruption/recovery, email-drain, and counter-reconciliation targets in [the load plan](load-acceptance.md) remain **unmeasured at the requested load**. No latency percentile or throughput acceptance result can be inferred from this stopped smoke attempt.
+- `2026-09-09T04:40:03.246346Z`: 147 MiB used; HTTP 500.
+- `2026-09-09T04:45:03.252235Z`: 134 MiB used; HTTP 500.
 
-The preliminary conservative one-hour ceiling was **$17.73**, using all configured instance maxima, rounded-up compute rates, connector cost, and a $5 noncompute allowance. This is an estimate, not a billing export. Actual billed cost is unavailable. The retained connector continues to incur infrastructure cost.
+The scheduler remained enabled on its five-minute cadence. No manual counter write or memory/configuration change was made to hide or remediate this finding after the requested browser smoke stop. Counter reconciliation and full acceptance remain unresolved.
 
-The user subsequently narrowed execution to successful smoke tests only. The
-follow-up smoke command uses the run-owned test App Check debug provider for the
-automated browser while preserving backend enforcement. It must pass the full
-isolation gate and all five journeys, then stop before calibration or load.
-Normal reCAPTCHA Enterprise attestation remains a separate unverified result.
+## Deployment and isolation
 
-SES delivery and production acceptance remain unverified. Historical targets represent retained successful transactions plus headroom, not abandoned attempts, historical retries, or exact browser concurrency. Local evidence is retained under `artifacts/load/` and is excluded from Git.
+- [PR #168](https://github.com/joelmeaders/SantasWorkshop/pull/168) deployed the isolation and load harness implementation from `89a5e730c5e5cb563ef7a35c33a0d89081fefc12`.
+- [PR #169](https://github.com/joelmeaders/SantasWorkshop/pull/169) corrected global Cloud Run discovery without changing cloud source.
+- [PR #170](https://github.com/joelmeaders/SantasWorkshop/pull/170) contains smoke-only execution, the evidence-driven harness corrections, and this report.
+- PR #168 passed unit checks, 36 Functions integration tests, 51 customer E2E tests, 83 staff E2E tests, customer/admin validation, and Storybook validation. PR #169 passed its unit and integration/E2E checks.
+- [Test Functions deployment](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34308301006), [test customer deployment](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34308235860), and [test admin deployment](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34308235832) passed.
+- The manual test Functions deployment reused passed PR checks after identical Git trees were verified. Redundant automatic deployments were cancelled. Production deployment was skipped.
+- Administrator merges used the standing review bypass after checks passed. No branch protection was changed.
+
+All 42 deployed Functions passed checks for sink mode, removed AWS configuration, and all-traffic VPC routing. Service revisions, global jobs, triggers, queues, schedulers, private DNS, and effective firewalls passed inventory checks. Partial global Cloud Run lists are rejected; the harness uses the complete v1 ServiceList plus per-service v2 configuration reads.
+
+The latest Function update was `2026-09-09T03:51:24.569917407Z`. The full 32-minute old-worker retirement window elapsed before any smoke account was created. Fresh preflight `load-20260909T042337Z-8f69e918` passed.
+
+The private safe probe confirmed Google API connectivity and blocked SES TCP connections in us-west-2/us-east-1 on port 443 and SMTP in us-west-2 on ports 587/465. It transmitted no email payload or credentials. Isolation remains enabled, and simulated email receipts are terminal so they cannot replay as real delivery.
+
+## Retained state and limits
+
+The successful run's five completed QA accounts are retained, along with the earlier incomplete QA draft, run-owned appointment slots, and App Check debug registrations. No preexisting customer data was changed or deleted. Local screenshots, journals, monitoring, and read-only verification evidence remain under `artifacts/load/`, excluded from Git.
+
+The successful smoke's final conservative cost ceiling was **$5.46**, including a $5 noncompute allowance. This is not a billing export and does not state actual cost across earlier attempts. Actual billing is unavailable. The retained connector continues to incur infrastructure cost.
+
+The sustained signup, burst, staff, duplicate-protection, request-interruption, and full-load reconciliation targets in [the load plan](load-acceptance.md) were not run. SES delivery and production acceptance remain unverified. Historical targets describe retained successful transactions plus headroom, not abandoned attempts, historical retries, or exact browser concurrency.

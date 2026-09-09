@@ -121,6 +121,17 @@ saturation check. Cloud Monitoring
 evidence must be available and fresh. Isolation is rechecked every minute; an
 expired proof stops new client calls.
 
+Smoke and full-run verification also check deployed memory and CPU. After
+business verification, the harness waits three minutes for the 60-second
+monitoring samples and up to 120 seconds of ingestion delay. It writes
+`resources.json` for the exact deployed revisions. Required functions must
+have request, memory, and CPU evidence, no memory-limit termination or HTTP
+5xx response, at least 20% observed memory headroom, and CPU p95 at or below
+80%. These are observed-workload checks, not proof of capacity at configured
+maximum concurrency. Unexercised functions remain explicitly unmeasured.
+See [function resource sizing](function-resource-sizing.md) for methods,
+limits, and the counter memory correction.
+
 After calibration, the conservative cost projection must be below $20 before
 main load starts. Compute estimates charge every configured maximum instance
 for the full elapsed/projected time, with no free tier and rounded-up CPU and

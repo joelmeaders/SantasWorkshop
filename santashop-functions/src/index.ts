@@ -148,12 +148,10 @@ export const emailIsolationProbe = onRequest(
 				).probeEmailIsolation(),
 			);
 		} catch {
-			response
-				.status(503)
-				.json({
-					isolated: false,
-					reason: 'Email isolation probe failed.',
-				});
+			response.status(503).json({
+				isolated: false,
+				reason: 'Email isolation probe failed.',
+			});
 		}
 	},
 );
@@ -496,13 +494,14 @@ export const scheduledFirestoreBackup = onSchedule(
 	}),
 );
 
-// At every 15th minute in November and December.
+// The configured schedule controls test and seasonal reconciliation cadence.
 export const scheduledDateTimeSlotCounters = onSchedule(
 	{
 		labels: MANAGED_RESOURCE_LABELS,
 		schedule: SCHEDULED_DATETIME_SLOT_COUNTERS,
 		timeZone: SHOP_TIME_ZONE,
-		memory: '128MiB',
+		// Node 24 and the Firestore client exceeded 128 MiB during cold starts.
+		memory: '256MiB',
 		cpu: 'gcf_gen1',
 		concurrency: 1,
 		timeoutSeconds: 30,

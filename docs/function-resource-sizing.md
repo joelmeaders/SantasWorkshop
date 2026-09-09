@@ -4,7 +4,9 @@
 
 Resource sizing is part of hosted test acceptance. A successful request alone
 does not prove adequate memory, CPU, or concurrency capacity. The current
-scope remains smoke validation; the historical sustained load is paused.
+initial scope was smoke validation. A later full-load attempt stopped at its
+instance guard and exposed another memory-headroom failure; see the
+[full-load result](load-acceptance-full-results-2026-09-09.md).
 
 The read-only collector in `scripts/load/resources.mjs` records each deployed
 Function's memory, CPU, concurrency, maximum instances, and timeout. It joins
@@ -58,7 +60,7 @@ the number of memory-limit log events.
 
 ## Counter correction
 
-Raise `scheduledDateTimeSlotCounters` from 128 MiB to 256 MiB. Keep
+Raised `scheduledDateTimeSlotCounters` from 128 MiB to 256 MiB. Retained
 `cpu: 'gcf_gen1'`, concurrency one, maximum one instance, and the existing
 timeout. With Firebase's fractional CPU mapping, this also increases CPU
 from approximately 1/12 to 1/6. The change addresses the measured memory
@@ -70,12 +72,14 @@ for concurrent requests. Those Functions retain their one-CPU configuration
 until representative concurrency evidence supports another setting.
 See [Firebase runtime and CPU configuration](https://firebase.google.com/docs/functions/manage-functions#override_cpu_defaults).
 
-Only the test project will be deployed for this validation. The source change
+Only the test project was deployed for this validation. The source change
 can reach production only through a later authorized production release.
-After deployment, verify repeated scheduled successes, corrected slot counts,
-new-revision CPU/memory samples, and a fresh smoke run with the full email
-isolation gate. Keep normal reCAPTCHA attestation and real SES delivery
-explicitly separate from test debug-provider and sink evidence.
+The new revision passed repeated scheduled requests. During the later partial
+load run it reconciled 236 completed registrations, with memory bounded at 62%
+and CPU p95 at 4%. The user chose to skip another smoke run and start full load.
+That run found `completeRegistration` at an 81% memory bound and `saveDraftChild`
+at 80%; it did not establish full capacity. Normal reCAPTCHA attestation and real
+SES delivery remain separate from debug-provider and sink evidence.
 
 ## Reusable read-only command
 

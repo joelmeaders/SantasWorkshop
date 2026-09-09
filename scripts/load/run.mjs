@@ -126,16 +126,11 @@ async function verifyResources(verification) {
 			)
 			.map((event) => event.operation),
 	);
-	if (verification.completedRegistrations)
+	if (verification.completedRegistrations) {
 		required.add('sendNewRegistrationEmails');
-	if (
-		journal.events.some(
-			(event) =>
-				event.type === 'journey-complete' &&
-				event.phase === 'browser-smoke',
-		)
-	)
+		// Customer Functions also fetch settings through this shared dependency.
 		required.add('publicParametersGateway');
+	}
 	if (verification.expectedSlots)
 		required.add('scheduledDateTimeSlotCounters');
 	const report = await collectResourceEvidence(

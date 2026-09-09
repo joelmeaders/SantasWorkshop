@@ -72,10 +72,23 @@ async function monitor() {
 		const cost = costCeiling(proof.snapshot, (Date.now() - started) / 1000);
 		journal.record({ type: 'cost-estimate', ...cost });
 		enforceBudget(cost);
-		journal.record({
-			type: 'instances',
-			...(await instanceEvidence(client, proof.snapshot)),
-		});
+		try {
+			journal.record({
+				type: 'instances',
+				...(await instanceEvidence(client, proof.snapshot)),
+			});
+		} catch (error) {
+			if (
+				Date.now() - started < 300_000 &&
+				error.message ===
+					'Cloud Run instance monitoring returned no evidence.'
+			)
+				journal.record({
+					type: 'monitoring-warmup',
+					reason: 'Waiting for the first application samples; five-minute limit.',
+				});
+			else throw error;
+		}
 	} catch (error) {
 		journal.stop(error.message);
 	}
@@ -254,6 +267,11 @@ try {
 			);
 			await monitor();
 			journal.assertRunning();
+			// Delayed metrics are allowed during smoke only, never at the main-load gate.
+			journal.record({
+				type: 'instances',
+				...(await instanceEvidence(client, proof.snapshot)),
+			});
 			const projection = costCeiling(
 				proof.snapshot,
 				(Date.now() - started) / 1000,

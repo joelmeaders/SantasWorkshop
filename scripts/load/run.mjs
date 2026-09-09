@@ -684,7 +684,15 @@ try {
 			{
 				runId,
 				project: PROJECT,
-				stopped: journal.stopReason ?? null,
+				stopped:
+					journal.stopReason ??
+					journal.events.findLast((event) => event.type === 'stop')
+						?.reason ??
+					null,
+				latestVerificationPassed:
+					journal.events.findLast(
+						(event) => event.type === 'verification',
+					)?.passed ?? null,
 				operations: journal.summary(),
 				sesDeliveryVerified: false,
 				productionAcceptanceVerified: false,

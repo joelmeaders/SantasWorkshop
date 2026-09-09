@@ -4,7 +4,7 @@ import {
 	addChildViaUi,
 	submitRegistrationViaUi,
 } from '../../santashop-e2e/fixtures/registration-helpers.ts';
-import { childFixture } from './config.mjs';
+import { childFixture, isCustomerCallable } from './config.mjs';
 
 export async function browserSmoke(
 	config,
@@ -19,8 +19,12 @@ export async function browserSmoke(
 		baseURL: config.customerOrigin,
 	});
 	await context.route(
-		'https://us-central1-santas-workshop-test.cloudfunctions.net/**',
+		(url) => isCustomerCallable(config, url.href, 'POST'),
 		async (route) => {
+			if (route.request().method() !== 'POST') {
+				await route.continue();
+				return;
+			}
 			try {
 				journal.assertRunning();
 			} catch {
@@ -35,13 +39,7 @@ export async function browserSmoke(
 	const pending = [];
 	let hasAppCheck = false;
 	page.on('request', (request) => {
-		if (
-			request
-				.url()
-				.startsWith(
-					'https://us-central1-santas-workshop-test.cloudfunctions.net/',
-				)
-		) {
+		if (isCustomerCallable(config, request.url(), request.method())) {
 			requests.set(request, performance.now());
 			hasAppCheck ||= Boolean(request.headers()['x-firebase-appcheck']);
 		}
@@ -59,6 +57,11 @@ export async function browserSmoke(
 					operation,
 					durationMs: performance.now() - requests.get(request),
 					ok: response.ok() && !body.error,
+					status: response.status(),
+					errorCode: body.error?.status,
+					appCheckPresent: Boolean(
+						request.headers()['x-firebase-appcheck'],
+					),
 				});
 				if (
 					operation === 'newAccount' &&
@@ -110,6 +113,15 @@ export async function browserSmoke(
 			uid: fixture.uid,
 			phase: 'browser-smoke',
 		});
+	} catch (error) {
+		await page
+			.screenshot({
+				path: `${outputDirectory}/${fixture.id}-failure.png`,
+				fullPage: true,
+			})
+			.catch(() => {});
+		await Promise.allSettled(pending);
+		throw error;
 	} finally {
 		await context.close();
 		await browser.close();

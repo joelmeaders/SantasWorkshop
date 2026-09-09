@@ -10,7 +10,48 @@ import {
 	assertProject,
 	assertRunId,
 	TARGETS,
+	isCustomerCallable,
 } from './config.mjs';
+
+test('hosted callable capture includes Hosting rewrites and excludes other traffic', () => {
+	const config = { customerOrigin: 'https://test.denversantaclausshop.org' };
+	assert.equal(
+		isCustomerCallable(
+			config,
+			`${config.customerOrigin}/newAccount`,
+			'POST',
+		),
+		true,
+	);
+	assert.equal(
+		isCustomerCallable(
+			config,
+			`https://us-central1-${PROJECT}.cloudfunctions.net/newAccount`,
+			'POST',
+		),
+		true,
+	);
+	assert.equal(
+		isCustomerCallable(config, `${config.customerOrigin}/sign-up`, 'GET'),
+		false,
+	);
+	assert.equal(
+		isCustomerCallable(
+			config,
+			'https://register.denversantaclausshop.org/newAccount',
+			'POST',
+		),
+		false,
+	);
+	assert.equal(
+		isCustomerCallable(
+			config,
+			`${config.customerOrigin}/assets/config.json`,
+			'POST',
+		),
+		false,
+	);
+});
 
 test('global service inventory reads full configuration in every listed region', async () => {
 	const calls = [];

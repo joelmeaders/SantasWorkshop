@@ -101,7 +101,10 @@ export class CustomerApi {
 			const response = await fetch(
 				`https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(this.config.storageBucket)}/o/${encodeURIComponent(path)}?alt=media`,
 				{
-					headers: this.headers(session),
+					headers: {
+						...this.headers(session),
+						Authorization: `Firebase ${session.idToken}`,
+					},
 					redirect: 'error',
 					signal: AbortSignal.timeout(30_000),
 				},

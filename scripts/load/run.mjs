@@ -557,6 +557,7 @@ try {
 			});
 			const controller = new AbortController();
 			const timer = setTimeout(() => controller.abort(), 50);
+			let interrupted = false;
 			try {
 				await api.call(
 					'interruption',
@@ -570,9 +571,20 @@ try {
 				);
 			} catch (error) {
 				if (error.name !== 'AbortError') throw error;
+				interrupted = true;
 			} finally {
 				clearTimeout(timer);
 			}
+			if (!interrupted)
+				throw new Error(
+					'The planned client interruption did not occur; recovery coverage is incomplete.',
+				);
+			journal.record({
+				type: 'fault-injected',
+				phase: 'interruption',
+				uid: recovery.uid,
+				mutationId,
+			});
 			await api.complete(
 				'interruption-recovery',
 				recovery,

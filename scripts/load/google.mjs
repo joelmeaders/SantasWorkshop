@@ -121,6 +121,10 @@ export class GoogleClient {
 			const pageUrl = new URL(url);
 			if (next) pageUrl.searchParams.set('pageToken', next);
 			const page = await this.request(pageUrl.href);
+			if (page.unreachable?.length)
+				throw new Error(
+					`Inventory has unreachable locations: ${pageUrl.hostname}${pageUrl.pathname}.`,
+				);
 			items.push(...(page[key] ?? []));
 			next = page.nextPageToken;
 		} while (next);

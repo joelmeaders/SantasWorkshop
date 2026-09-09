@@ -139,3 +139,33 @@ test('budget has no free-tier credits and blocks missing limits or exhausted res
 		/\$20/,
 	);
 });
+
+test('QR retrieval uses Firebase Storage user authentication and App Check', async (t) => {
+	let observed;
+	t.mock.method(globalThis, 'fetch', async (_url, options) => {
+		observed = options.headers;
+		return new Response(new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]));
+	});
+	const api = new CustomerApi(
+		{
+			projectId: 'santas-workshop-test',
+			apiKey: 'key',
+			appId: '1:123:web:abc',
+			storageBucket: 'santas-workshop-test.appspot.com',
+			customerOrigin: 'https://test.denversantaclausshop.org',
+			adminOrigin: 'https://santas-workshop-test.web.app',
+		},
+		() => 'app-check-token',
+		journal(),
+	);
+	await api.readQr(
+		'qr',
+		{ uid: 'parent', idToken: 'id-token' },
+		{
+			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/parent/qr.png',
+		},
+	);
+	assert.equal(observed.Authorization, 'Firebase id-token');
+	assert.equal(observed['X-Firebase-AppCheck'], 'app-check-token');
+});

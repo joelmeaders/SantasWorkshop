@@ -239,6 +239,35 @@ export function assessIsolation(snapshot, now = Date.now()) {
 	return problems;
 }
 
+export async function collectRunServices(client) {
+	assertProject(client.project);
+	const inventory = await client.request(
+		`https://run.googleapis.com/apis/serving.knative.dev/v1/namespaces/${PROJECT}/services`,
+	);
+	if (
+		inventory.kind !== 'ServiceList' ||
+		inventory.metadata?.continue ||
+		inventory.unreachable?.length ||
+		!Array.isArray(inventory.items)
+	)
+		throw new Error('Cloud Run service inventory is incomplete.');
+	return Promise.all(
+		inventory.items.map((service) => {
+			const region =
+				service.metadata?.labels?.['cloud.googleapis.com/location'];
+			const name = service.metadata?.name;
+			if (
+				!/^[a-z][a-z0-9-]+$/.test(region ?? '') ||
+				!/^[a-z][a-z0-9-]+$/.test(name ?? '')
+			)
+				throw new Error('Cloud Run service identity is incomplete.');
+			return client.request(
+				`https://run.googleapis.com/v2/projects/${PROJECT}/locations/${region}/services/${name}`,
+			);
+		}),
+	);
+}
+
 export async function collectIsolation(client) {
 	assertProject(client.project);
 	const base = `https://compute.googleapis.com/compute/v1/projects/${PROJECT}`;
@@ -250,10 +279,7 @@ export async function collectIsolation(client) {
 		`https://cloudfunctions.googleapis.com/v1/projects/${PROJECT}/locations/-/functions`,
 		'functions',
 	);
-	const services = await client.list(
-		`https://run.googleapis.com/v2/projects/${PROJECT}/locations/-/services`,
-		'services',
-	);
+	const services = await collectRunServices(client);
 	// The v1 global endpoint provides the project-wide JobList. Any job blocks.
 	const jobInventory = await client.request(
 		`https://run.googleapis.com/apis/run.googleapis.com/v1/namespaces/${PROJECT}/jobs`,

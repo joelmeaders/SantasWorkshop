@@ -194,10 +194,9 @@ export async function verifyRun(
 			`Slot counter expected ${expectedSlots}, observed ${slot?.slotsReserved ?? 'missing'}.`,
 		);
 	if (
-		waitMs > 0 &&
 		expectedSlots &&
 		(!slot?.lastUpdated ||
-			Date.parse(slot.lastUpdated) > lastSubmissionAt + waitMs)
+			Date.parse(slot.lastUpdated) > lastSubmissionAt + 720_000)
 	)
 		problems.push(
 			'Counter reconciliation exceeded two scheduler intervals plus two minutes.',

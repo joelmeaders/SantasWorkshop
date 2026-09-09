@@ -97,6 +97,7 @@ export class GoogleClient {
 			signal: AbortSignal.timeout(60_000),
 			headers: {
 				Authorization: `Bearer ${this.token()}`,
+				'X-Goog-User-Project': PROJECT,
 				'Content-Type': 'application/json',
 			},
 			...(body === undefined ? {} : { body: JSON.stringify(body) }),

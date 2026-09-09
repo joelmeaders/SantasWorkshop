@@ -6,11 +6,17 @@ export async function discoverConfiguration(client, snapshot) {
 		`https://firebase.googleapis.com/v1beta1/projects/${PROJECT}/webApps`,
 		'apps',
 	);
-	const app = apps.find(
+	const matchingApps = apps.filter(
 		(item) =>
 			/app|customer/i.test(item.displayName) &&
 			!/admin/i.test(item.displayName),
 	);
+	const app =
+		apps.length === 1
+			? apps[0]
+			: matchingApps.length === 1
+				? matchingApps[0]
+				: undefined;
 	if (!app)
 		throw new Error(
 			'The customer Firebase Web App was not uniquely identified.',

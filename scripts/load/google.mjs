@@ -1,4 +1,6 @@
-import { execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+const executeFile = promisify(execFile);
 import { PROJECT, assertProject } from './config.mjs';
 
 const ALLOWED_APIS = new Set([
@@ -25,54 +27,55 @@ const ALLOWED_APIS = new Set([
 ]);
 
 export class GoogleClient {
-	#token;
-	#expires = 0;
+	#credentials = new Map();
 	constructor(project) {
 		assertProject(project);
 		this.project = project;
 	}
+	async #credential(kind) {
+		let cached = this.#credentials.get(kind);
+		if (!cached || Date.now() >= cached.expires) {
+			const command =
+				kind === 'identity'
+					? 'print-identity-token'
+					: 'print-access-token';
+			const pending = (async () => {
+				try {
+					const { stdout } = await executeFile(
+						process.platform === 'win32'
+							? 'powershell.exe'
+							: 'gcloud',
+						process.platform === 'win32'
+							? [
+									'-NoProfile',
+									'-Command',
+									`gcloud auth ${command}`,
+								]
+							: ['auth', command],
+						{
+							encoding: 'utf8',
+							windowsHide: true,
+							timeout: 30_000,
+						},
+					);
+					return stdout.trim();
+				} catch {
+					throw new Error(
+						'Google credential retrieval failed. Check the current gcloud sign-in.',
+					);
+				}
+			})();
+			cached = { pending, expires: Date.now() + 45 * 60_000 };
+			this.#credentials.set(kind, cached);
+			void pending.catch(() => this.#credentials.delete(kind));
+		}
+		return cached.pending;
+	}
 	identityToken() {
-		return (
-			process.platform === 'win32'
-				? execFileSync(
-						'powershell.exe',
-						[
-							'-NoProfile',
-							'-Command',
-							'gcloud auth print-identity-token',
-						],
-						{ encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
-					)
-				: execFileSync('gcloud', ['auth', 'print-identity-token'], {
-						encoding: 'utf8',
-						stdio: ['ignore', 'pipe', 'pipe'],
-					})
-		).trim();
+		return this.#credential('identity');
 	}
 	token() {
-		if (Date.now() >= this.#expires) {
-			this.#token = (
-				process.platform === 'win32'
-					? execFileSync(
-							'powershell.exe',
-							[
-								'-NoProfile',
-								'-Command',
-								'gcloud auth print-access-token',
-							],
-							{
-								encoding: 'utf8',
-								stdio: ['ignore', 'pipe', 'pipe'],
-							},
-						)
-					: execFileSync('gcloud', ['auth', 'print-access-token'], {
-							encoding: 'utf8',
-							stdio: ['ignore', 'pipe', 'pipe'],
-						})
-			).trim();
-			this.#expires = Date.now() + 45 * 60_000;
-		}
-		return this.#token;
+		return this.#credential('access');
 	}
 	async request(url, { method = 'GET', body, allow404 = false } = {}) {
 		assertProject(this.project);
@@ -96,7 +99,7 @@ export class GoogleClient {
 			redirect: 'error',
 			signal: AbortSignal.timeout(60_000),
 			headers: {
-				Authorization: `Bearer ${this.token()}`,
+				Authorization: `Bearer ${await this.token()}`,
 				'X-Goog-User-Project': PROJECT,
 				'Content-Type': 'application/json',
 			},

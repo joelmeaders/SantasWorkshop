@@ -57,7 +57,7 @@ function fixture() {
 }
 
 async function checkIsolation() {
-	const next = await requireIsolation(client, client.identityToken());
+	const next = await requireIsolation(client, await client.identityToken());
 	if (proof && next.fingerprint !== proof.fingerprint)
 		throw new Error('Deployed revisions changed during the run.');
 	journal.record({ type: 'isolation', ...next.report });

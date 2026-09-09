@@ -1,9 +1,6 @@
 import { chromium, expect } from '@playwright/test';
 import { createAccountViaUi } from '../../santashop-e2e/fixtures/account-helpers.ts';
-import {
-	addChildViaUi,
-	submitRegistrationViaUi,
-} from '../../santashop-e2e/fixtures/registration-helpers.ts';
+import { addChildViaUi } from '../../santashop-e2e/fixtures/registration-helpers.ts';
 import { childFixture, isCustomerCallable } from './config.mjs';
 
 export async function browserSmoke(
@@ -57,11 +54,15 @@ export async function browserSmoke(
 			(async () => {
 				const operation = new URL(request.url()).pathname.slice(1);
 				const body = await response.json().catch(() => ({}));
+				const timing = request.timing();
 				journal.record({
 					type: 'request',
 					phase: 'browser-smoke',
 					operation,
-					durationMs: performance.now() - requests.get(request),
+					durationMs:
+						timing.responseEnd >= 0
+							? timing.responseEnd
+							: performance.now() - requests.get(request),
 					ok: response.ok() && !body.error,
 					status: response.status(),
 					errorCode: body.error?.status,
@@ -102,7 +103,18 @@ export async function browserSmoke(
 			.locator('ion-item[slot="header"]')
 			.click();
 		await slot.click();
-		await submitRegistrationViaUi(page);
+		const review = page.locator('#reviewAndSubmitButton');
+		await expect(review).toBeVisible({ timeout: 30_000 });
+		await review.click();
+		const submit = page.locator('#completeRegistrationButton');
+		await expect(submit).toBeVisible({ timeout: 30_000 });
+		await expect(submit).not.toHaveClass(/button-disabled/, {
+			timeout: 15_000,
+		});
+		await submit.click();
+		await page.waitForURL('**/pre-registration/confirmation', {
+			timeout: 45_000,
+		});
 		await expect(page.locator('#registrationQrCode')).toBeVisible();
 		if (!hasAppCheck)
 			throw new Error('Hosted browser did not send App Check.');

@@ -77,3 +77,15 @@ export function childFixture(programYear, id) {
 		toyType: ['infants', 'girls', 'boys'][id],
 	};
 }
+
+export function isCustomerCallable(config, url, method) {
+	const target = new URL(url);
+	return (
+		method === 'POST' &&
+		[
+			target.origin === config.customerOrigin,
+			target.origin === `https://${REGION}-${PROJECT}.cloudfunctions.net`,
+		].some(Boolean) &&
+		/^\/[A-Za-z][A-Za-z0-9]*$/.test(target.pathname)
+	);
+}

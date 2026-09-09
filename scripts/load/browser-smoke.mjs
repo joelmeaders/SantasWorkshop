@@ -1,10 +1,7 @@
 import { chromium, expect } from '@playwright/test';
 import { createAccountViaUi } from '../../santashop-e2e/fixtures/account-helpers.ts';
-import {
-	addChildViaUi,
-	submitRegistrationViaUi,
-} from '../../santashop-e2e/fixtures/registration-helpers.ts';
-import { childFixture } from './config.mjs';
+import { addChildViaUi } from '../../santashop-e2e/fixtures/registration-helpers.ts';
+import { childFixture, isCustomerCallable } from './config.mjs';
 
 export async function browserSmoke(
 	config,
@@ -13,14 +10,24 @@ export async function browserSmoke(
 	year,
 	journal,
 	outputDirectory,
+	appCheckDebugToken,
 ) {
 	const browser = await chromium.launch();
 	const context = await browser.newContext({
 		baseURL: config.customerOrigin,
 	});
+	if (appCheckDebugToken) {
+		await context.addInitScript((token) => {
+			self.FIREBASE_APPCHECK_DEBUG_TOKEN = token;
+		}, appCheckDebugToken);
+	}
 	await context.route(
-		'https://us-central1-santas-workshop-test.cloudfunctions.net/**',
+		(url) => isCustomerCallable(config, url.href, 'POST'),
 		async (route) => {
+			if (route.request().method() !== 'POST') {
+				await route.continue();
+				return;
+			}
 			try {
 				journal.assertRunning();
 			} catch {
@@ -35,13 +42,7 @@ export async function browserSmoke(
 	const pending = [];
 	let hasAppCheck = false;
 	page.on('request', (request) => {
-		if (
-			request
-				.url()
-				.startsWith(
-					'https://us-central1-santas-workshop-test.cloudfunctions.net/',
-				)
-		) {
+		if (isCustomerCallable(config, request.url(), request.method())) {
 			requests.set(request, performance.now());
 			hasAppCheck ||= Boolean(request.headers()['x-firebase-appcheck']);
 		}
@@ -53,12 +54,21 @@ export async function browserSmoke(
 			(async () => {
 				const operation = new URL(request.url()).pathname.slice(1);
 				const body = await response.json().catch(() => ({}));
+				const timing = request.timing();
 				journal.record({
 					type: 'request',
 					phase: 'browser-smoke',
 					operation,
-					durationMs: performance.now() - requests.get(request),
+					durationMs:
+						timing.responseEnd >= 0
+							? timing.responseEnd
+							: performance.now() - requests.get(request),
 					ok: response.ok() && !body.error,
+					status: response.status(),
+					errorCode: body.error?.status,
+					appCheckPresent: Boolean(
+						request.headers()['x-firebase-appcheck'],
+					),
 				});
 				if (
 					operation === 'newAccount' &&
@@ -93,7 +103,18 @@ export async function browserSmoke(
 			.locator('ion-item[slot="header"]')
 			.click();
 		await slot.click();
-		await submitRegistrationViaUi(page);
+		const review = page.locator('#reviewAndSubmitButton');
+		await expect(review).toBeVisible({ timeout: 30_000 });
+		await review.click();
+		const submit = page.locator('#completeRegistrationButton');
+		await expect(submit).toBeVisible({ timeout: 30_000 });
+		await expect(submit).not.toHaveClass(/button-disabled/, {
+			timeout: 15_000,
+		});
+		await submit.click();
+		await page.waitForURL('**/pre-registration/confirmation', {
+			timeout: 45_000,
+		});
 		await expect(page.locator('#registrationQrCode')).toBeVisible();
 		if (!hasAppCheck)
 			throw new Error('Hosted browser did not send App Check.');
@@ -110,6 +131,15 @@ export async function browserSmoke(
 			uid: fixture.uid,
 			phase: 'browser-smoke',
 		});
+	} catch (error) {
+		await page
+			.screenshot({
+				path: `${outputDirectory}/${fixture.id}-failure.png`,
+				fullPage: true,
+			})
+			.catch(() => {});
+		await Promise.allSettled(pending);
+		throw error;
 	} finally {
 		await context.close();
 		await browser.close();

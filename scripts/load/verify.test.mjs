@@ -48,7 +48,7 @@ function fixture() {
 			{
 				type: 'account-intent',
 				fixture: 'one',
-				emailAddress: 'load@example.invalid',
+				emailAddress: 'Load@Example.Invalid',
 			},
 			{ type: 'registration-completed', uid: 'parent' },
 			{

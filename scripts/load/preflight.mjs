@@ -87,7 +87,7 @@ export async function discoverConfiguration(client, snapshot) {
 	};
 }
 
-/** This debug provider still exchanges and sends genuine App Check tokens. Browser smoke uses its normal provider. */
+/** Automated browsers and API clients exchange genuine App Check tokens through a run-owned test debug registration. */
 export async function createAppCheckSession(client, config, runId, journal) {
 	const root = `https://firebaseappcheck.googleapis.com/v1/projects/${PROJECT}/apps/${encodeURIComponent(config.appId)}`;
 	const debugSecret = randomUUID();
@@ -99,6 +99,7 @@ export async function createAppCheckSession(client, config, runId, journal) {
 	let token;
 	let expires = 0;
 	return {
+		browserDebugToken: debugSecret,
 		async refresh() {
 			const response = await fetch(
 				`${root}:exchangeDebugToken?key=${encodeURIComponent(config.apiKey)}`,

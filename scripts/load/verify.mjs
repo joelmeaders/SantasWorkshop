@@ -30,7 +30,7 @@ export async function verifyRun(
 	const owned = new Map();
 	for (const intent of intents) {
 		const matches = await query(client, 'registrations', [
-			['emailAddress', 'EQUAL', intent.emailAddress],
+			['emailAddress', 'EQUAL', intent.emailAddress.trim().toLowerCase()],
 		]);
 		if (matches.length !== 1) {
 			problems.push(
@@ -52,7 +52,11 @@ export async function verifyRun(
 	)) {
 		if (intent.onsite) {
 			const matches = await query(client, 'onsiteregistrations', [
-				['emailAddress', 'EQUAL', intent.emailAddress],
+				[
+					'emailAddress',
+					'EQUAL',
+					intent.emailAddress.trim().toLowerCase(),
+				],
 			]);
 			if (matches.length !== 1)
 				problems.push(
@@ -199,7 +203,9 @@ export async function verifyRun(
 			Date.parse(slot.lastUpdated) > lastSubmissionAt + 720_000)
 	)
 		problems.push(
-			'Counter reconciliation exceeded two scheduler intervals plus two minutes.',
+			!slot?.lastUpdated && Date.now() <= lastSubmissionAt + 720_000
+				? 'Counter reconciliation is pending within the allowed window.'
+				: 'Counter reconciliation exceeded two scheduler intervals plus two minutes.',
 		);
 	if (
 		emailPending.length &&

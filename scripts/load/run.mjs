@@ -334,7 +334,12 @@ try {
 				staff.push(await api.signIn('staff-preparation', account));
 			}
 			let nextRegistration = 0;
-			const checkedIn = async (phase, index, mix) => {
+			const checkedIn = async (
+				phase,
+				index,
+				mix,
+				preparedRegistration,
+			) => {
 				const session = staff[index % staff.length];
 				journal.assertRunning();
 				const onsite = mix && index % 11 === 0;
@@ -356,18 +361,24 @@ try {
 						),
 					};
 				} else {
-					registration = completed[nextRegistration++];
-					const scan = await api.call(
-						phase,
-						'resolveRegistrationScan',
-						{ code: registration.qrcode, inputMethod: 'manual' },
-						session,
-					);
-					if (
-						scan.disposition !== 'eligible' ||
-						scan.registration.uid !== registration.uid
-					)
-						throw new Error('Unexpected scan disposition.');
+					registration =
+						preparedRegistration ?? completed[nextRegistration++];
+					if (!preparedRegistration) {
+						const scan = await api.call(
+							phase,
+							'resolveRegistrationScan',
+							{
+								code: registration.qrcode,
+								inputMethod: 'manual',
+							},
+							session,
+						);
+						if (
+							scan.disposition !== 'eligible' ||
+							scan.registration.uid !== registration.uid
+						)
+							throw new Error('Unexpected scan disposition.');
+					}
 					// Use canonical date-only child inputs, not serialized Firestore Timestamp objects.
 					registration = {
 						...registration,
@@ -433,8 +444,29 @@ try {
 			await arrivals(journal, 'staff-minute', 23, 60_000, (index) =>
 				checkedIn('staff-minute', index, false),
 			);
+			const clusterRegistrations = [];
+			for (let index = 0; index < 5; index++) {
+				const registration = completed[nextRegistration++];
+				const scan = await api.call(
+					'staff-cluster-preparation',
+					'resolveRegistrationScan',
+					{ code: registration.qrcode, inputMethod: 'manual' },
+					staff[index],
+				);
+				if (
+					scan.disposition !== 'eligible' ||
+					scan.registration.uid !== registration.uid
+				)
+					throw new Error('Cluster registration is not eligible.');
+				clusterRegistrations.push(registration);
+			}
 			await arrivals(journal, 'staff-cluster', 5, 1000, (index) =>
-				checkedIn('staff-cluster', index, false),
+				checkedIn(
+					'staff-cluster',
+					index,
+					false,
+					clusterRegistrations[index],
+				),
 			);
 			const duplicate = completed[nextRegistration++];
 			let accepted = 0;

@@ -47,7 +47,7 @@ export async function instanceEvidence(client, snapshot, now = Date.now()) {
 	);
 	url.searchParams.set(
 		'filter',
-		'metric.type="run.googleapis.com/container/instance_count" AND resource.type="cloud_run_revision"',
+		'metric.type="run.googleapis.com/container/instance_count" AND resource.type="cloud_run_revision" AND metric.labels.state="active"',
 	);
 	url.searchParams.set(
 		'interval.startTime',
@@ -57,10 +57,12 @@ export async function instanceEvidence(client, snapshot, now = Date.now()) {
 	url.searchParams.set('view', 'FULL');
 	const series = await client.list(url.href, 'timeSeries');
 	const ceilings = new Map(
-		snapshot.functions.map((fn) => [
-			fn.serviceConfig.service.split('/').at(-1),
-			fn.serviceConfig.maxInstanceCount,
-		]),
+		snapshot.functions
+			.filter((fn) => !fn.name.endsWith('/emailIsolationProbe'))
+			.map((fn) => [
+				fn.serviceConfig.service.split('/').at(-1),
+				fn.serviceConfig.maxInstanceCount,
+			]),
 	);
 	const buckets = new Map();
 	for (const item of series) {

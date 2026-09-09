@@ -117,6 +117,7 @@ export async function arrivals(
 ) {
 	const start = performance.now();
 	const pending = new Set();
+	const dispatchedAt = [];
 	let failure;
 	journal.record({ type: 'phase-start', phase, count, durationMs });
 	for (let index = 0; index < count && !journal.stopReason; index++) {
@@ -129,6 +130,7 @@ export async function arrivals(
 			break;
 		}
 		journal.record({ type: 'journey-attempt', phase, index, lagMs });
+		dispatchedAt.push(performance.now());
 		const task = Promise.resolve()
 			.then(() => work(index))
 			.then(() => {
@@ -146,7 +148,19 @@ export async function arrivals(
 	await Promise.allSettled(pending);
 	while (!journal.stopReason && performance.now() < start + durationMs)
 		await delay(Math.min(1000, start + durationMs - performance.now()));
-	journal.record({ type: 'phase-end', phase });
+	const dispatchSpanMs = dispatchedAt.length
+		? dispatchedAt.at(-1) - dispatchedAt[0]
+		: 0;
+	journal.record({
+		type: 'phase-end',
+		phase,
+		offered: dispatchedAt.length,
+		dispatchSpanMs,
+	});
+	if (dispatchedAt.length !== count || dispatchSpanMs >= durationMs)
+		journal.stop(
+			'Offered traffic did not fit the required arrival window.',
+		);
 	if (failure) throw failure;
 	journal.assertRunning();
 }

@@ -110,7 +110,9 @@ p50/p95/p99 and fraction below two seconds by phase. Unexpected errors fail
 acceptance; expected duplicate rejections and the intentional client abort are
 recorded separately. Stop on a rolling-minute unexpected error rate above 1%,
 isolation failure/expiry, revision drift, generator mismatch, invalid business
-state, or five minutes at a configured instance ceiling. Cloud Monitoring
+state, or five minutes of active application instances at a configured ceiling.
+Idle warm instances and the harness's private TCP probe are excluded from that
+saturation check. Cloud Monitoring
 evidence must be available and fresh. Isolation is rechecked every minute; an
 expired proof stops new client calls.
 

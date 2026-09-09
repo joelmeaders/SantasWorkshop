@@ -140,10 +140,16 @@ test('budget has no free-tier credits and blocks missing limits or exhausted res
 	);
 });
 
-test('QR retrieval uses Firebase Storage user authentication and App Check', async (t) => {
-	let observed;
-	t.mock.method(globalThis, 'fetch', async (_url, options) => {
-		observed = options.headers;
+test('QR retrieval authorizes metadata before using the application download URL', async (t) => {
+	const observed = [];
+	t.mock.method(globalThis, 'fetch', async (url, options) => {
+		observed.push({ url, headers: options.headers });
+		if (observed.length === 1)
+			return Response.json({
+				name: 'registrations/parent/qr.png',
+				bucket: 'santas-workshop-test.appspot.com',
+				downloadTokens: 'download-token',
+			});
 		return new Response(new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]));
 	});
 	const api = new CustomerApi(
@@ -166,6 +172,34 @@ test('QR retrieval uses Firebase Storage user authentication and App Check', asy
 			qrCodeStoragePath: 'registrations/parent/qr.png',
 		},
 	);
-	assert.equal(observed.Authorization, 'Firebase id-token');
-	assert.equal(observed['X-Firebase-AppCheck'], 'app-check-token');
+	assert.equal(observed.length, 2);
+	assert.equal(observed[0].headers.Authorization, 'Firebase id-token');
+	assert.equal(observed[0].headers['X-Firebase-AppCheck'], 'app-check-token');
+	assert.equal(new URL(observed[0].url).search, '');
+	assert.equal(new URL(observed[1].url).searchParams.get('alt'), 'media');
+	assert.equal(
+		new URL(observed[1].url).searchParams.get('token'),
+		'download-token',
+	);
+	assert.equal(observed[1].headers, undefined);
+	observed.length = 0;
+	t.mock.method(globalThis, 'fetch', async () => {
+		observed.push({});
+		return Response.json(
+			{ error: { message: 'Permission denied' } },
+			{ status: 403 },
+		);
+	});
+	await assert.rejects(
+		api.readQr(
+			'qr-denied',
+			{ uid: 'parent', idToken: 'id-token' },
+			{
+				qrcode: 'ABCD2345',
+				qrCodeStoragePath: 'registrations/parent/qr.png',
+			},
+		),
+		(error) => error.code === 'Permission denied',
+	);
+	assert.equal(observed.length, 1);
 });

@@ -22,6 +22,39 @@ const config = JSON.parse(
 	readFileSync(new URL('../../../../firebase.json', import.meta.url), 'utf8'),
 ) as FirebaseConfig;
 
+const hostingWorkflowPaths = [
+	'app-pr-validation.yml',
+	'app-test-and-prod-release.yml',
+	'admin-pr-validation.yml',
+	'admin-test-and-prod-release.yml',
+];
+
+describe('Customer hosting rewrites', () => {
+	it('routes requestPasswordReset before the SPA fallback', () => {
+		const customer = config.hosting?.find(
+			(site) => site.target === 'santashop-app',
+		);
+		const rewrites = customer?.rewrites ?? [];
+		const resetRewriteIndex = rewrites.findIndex(
+			(rewrite) => rewrite.source === '/requestPasswordReset',
+		);
+
+		expect(rewrites[resetRewriteIndex]).toEqual({
+			source: '/requestPasswordReset',
+			function: {
+				functionId: 'requestPasswordReset',
+				region: 'us-central1',
+			},
+		});
+		expect(resetRewriteIndex).toBeGreaterThanOrEqual(0);
+		expect(resetRewriteIndex).toBeLessThan(rewrites.length - 1);
+		expect(rewrites.at(-1)).toEqual({
+			source: '**',
+			destination: '/index.html',
+		});
+	});
+});
+
 describe('Admin hosting rewrites', () => {
 	it('routes both public settings callables before the SPA fallback', () => {
 		const admin = config.hosting?.find(
@@ -56,6 +89,23 @@ describe('Admin hosting rewrites', () => {
 			destination: '/index.html',
 		});
 	});
+});
+
+describe('Hosting workflow triggers', () => {
+	it.each(hostingWorkflowPaths)(
+		'runs %s when firebase.json changes',
+		(workflowName) => {
+			const workflow = readFileSync(
+				new URL(
+					`../../../../.github/workflows/${workflowName}`,
+					import.meta.url,
+				),
+				'utf8',
+			);
+
+			expect(workflow).toContain("      - 'firebase.json'");
+		},
+	);
 });
 
 describe('Hosting service-worker script requests', () => {

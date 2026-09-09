@@ -114,8 +114,15 @@ export class CustomerApi {
 				!response.ok ||
 				bytes.length < 8 ||
 				bytes.slice(0, 8).join(',') !== '137,80,78,71,13,10,26,10'
-			)
-				throw new Error('QR PNG retrieval failed.');
+			) {
+				const error = new Error(
+					`QR PNG retrieval failed: HTTP ${response.status}, ${response.headers.get('content-type') ?? 'unknown content type'}, ${bytes.length} bytes.`,
+				);
+				error.code = response.ok
+					? 'INVALID_PNG'
+					: `HTTP_${response.status}`;
+				throw error;
+			}
 		});
 	}
 	async prepare(phase, fixture, slotId, year) {

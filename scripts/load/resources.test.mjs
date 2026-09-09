@@ -1,6 +1,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assessResourceEvidence, summarizeDistribution } from './resources.mjs';
+import {
+	assessResourceEvidence,
+	summarizeDistribution,
+	resourceObservationEnd,
+} from './resources.mjs';
+
+test('resource window includes the final partial metric minute', () => {
+	assert.equal(
+		resourceObservationEnd('2026-09-09T04:45:07Z'),
+		'2026-09-09T04:46:00.000Z',
+	);
+	assert.equal(
+		resourceObservationEnd('2026-09-09T04:45:00Z'),
+		'2026-09-09T04:45:00.000Z',
+	);
+	assert.throws(() => resourceObservationEnd('invalid'), /Invalid/);
+});
 
 function series(value, revision = 'counter-new', code) {
 	return {

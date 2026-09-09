@@ -14,6 +14,14 @@ const METRICS = {
 };
 export const METRIC_SETTLE_MS = 180_000;
 
+// Include the complete metric minute containing the final request or counter run.
+export function resourceObservationEnd(timestamp) {
+	const milliseconds = Date.parse(timestamp);
+	if (!Number.isFinite(milliseconds))
+		throw new Error('Invalid resource observation timestamp.');
+	return new Date(Math.ceil(milliseconds / 60_000) * 60_000).toISOString();
+}
+
 function bucketUpper(options, index) {
 	if (options.linearBuckets) {
 		const { numFiniteBuckets, width, offset = 0 } = options.linearBuckets;

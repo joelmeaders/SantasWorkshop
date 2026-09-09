@@ -16,7 +16,11 @@ import { CustomerApi } from './customer.mjs';
 import { RunJournal, arrivals, delay } from './metrics.mjs';
 import { costCeiling, enforceBudget, instanceEvidence } from './monitor.mjs';
 import { document, verifyRun } from './verify.mjs';
-import { collectResourceEvidence, METRIC_SETTLE_MS } from './resources.mjs';
+import {
+	collectResourceEvidence,
+	METRIC_SETTLE_MS,
+	resourceObservationEnd,
+} from './resources.mjs';
 
 const option = (name) => {
 	const index = process.argv.indexOf(name);
@@ -96,7 +100,7 @@ async function monitor() {
 }
 
 async function verifyResources(verification) {
-	const endTime = verification.checkedAt;
+	const endTime = resourceObservationEnd(verification.checkedAt);
 	journal.record({
 		type: 'resource-metrics-wait',
 		endTime,

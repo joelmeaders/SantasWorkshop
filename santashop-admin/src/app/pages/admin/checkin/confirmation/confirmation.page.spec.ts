@@ -15,13 +15,7 @@ describe('ConfirmationPage', () => {
 		TestBed.configureTestingModule({
 			imports: [ConfirmationPage],
 			providers: [
-				{
-					provide: AuthService,
-					useValue: { currentUser$: of({ uid: 'staff-1' }) },
-				},
-				provideActivatedRouteMock(),
-				provideRouter([]),
-			],
+                { provide: AuthService, useValue: { currentUser$: of({ uid: 'staff-1' }) } },provideActivatedRouteMock(), provideRouter([])],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ConfirmationPage);

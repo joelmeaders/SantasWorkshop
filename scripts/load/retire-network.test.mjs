@@ -69,4 +69,3 @@ test('retirement protects isolated latest ready revisions', async () => {
 		/serving or latest role/,
 	);
 });
-

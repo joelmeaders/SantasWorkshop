@@ -209,7 +209,9 @@ export const storyProfile: User = {
 export function createCustomerStoryControls(
 	options: CustomerStoryControlOptions = {},
 ): CustomerStoryControls {
-	const registration = options.registration ?? storyRegistration;
+	const registration = structuredClone(
+		options.registration ?? storyRegistration,
+	);
 	const children = registration.children ?? [];
 	const dateTimeSlot = registration.dateTimeSlot as DateTimeSlot | undefined;
 	const registrationSubmitted = !!registration.registrationSubmittedOn;
@@ -223,7 +225,7 @@ export function createCustomerStoryControls(
 						email: 'jordan.garcia@example.com',
 						uid: 'storybook-parent',
 					}
-				: options.currentUser,
+				: structuredClone(options.currentUser),
 		),
 		registration$: new BehaviorSubject(registration),
 		registrationComplete$: new BehaviorSubject(registrationComplete),
@@ -236,8 +238,12 @@ export function createCustomerStoryControls(
 		),
 		dateTimeSlot$: new BehaviorSubject(dateTimeSlot),
 		qrCode$: new BehaviorSubject(storyQrCodeDataUrl),
-		slots$: new BehaviorSubject(options.slots ?? storySlots),
-		userProfile$: new BehaviorSubject(options.userProfile ?? storyProfile),
+		slots$: new BehaviorSubject(
+			structuredClone(options.slots ?? storySlots),
+		),
+		userProfile$: new BehaviorSubject(
+			structuredClone(options.userProfile ?? storyProfile),
+		),
 		allowCancelRegistration$: new BehaviorSubject(
 			options.allowCancelRegistration ?? true,
 		),
@@ -258,10 +264,11 @@ export function createCustomerStoryControls(
 		}),
 		shopClosedWeather$: new BehaviorSubject(false),
 		updateRegistration: (nextRegistration): void => {
-			const nextChildren = nextRegistration.children ?? [];
-			const nextDateTimeSlot = nextRegistration.dateTimeSlot as
+			const registration = structuredClone(nextRegistration);
+			const nextChildren = registration.children ?? [];
+			const nextDateTimeSlot = registration.dateTimeSlot as
 				DateTimeSlot | undefined;
-			controls.registration$.next(nextRegistration);
+			controls.registration$.next(registration);
 			controls.children$.next(nextChildren);
 			controls.childCount$.next(nextChildren.length);
 			controls.noErrorsInChildren$.next(
@@ -269,14 +276,14 @@ export function createCustomerStoryControls(
 			);
 			controls.dateTimeSlot$.next(nextDateTimeSlot);
 			controls.registrationSubmitted$.next(
-				!!nextRegistration.registrationSubmittedOn,
+				!!registration.registrationSubmittedOn,
 			);
 			controls.registrationComplete$.next(
 				nextChildren.length > 0 &&
 					!!nextDateTimeSlot &&
-					!!nextRegistration.registrationSubmittedOn,
+					!!registration.registrationSubmittedOn,
 			);
-			controls.hasCheckedIn$.next(!!nextRegistration.hasCheckedIn);
+			controls.hasCheckedIn$.next(!!registration.hasCheckedIn);
 		},
 	};
 	return controls;

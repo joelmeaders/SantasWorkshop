@@ -6,6 +6,7 @@ export type EmailTemplateAdminMock = ReturnType<
 >;
 
 export const sesSendMock = vi.fn();
+export const emailSendingEnabledMock = vi.fn();
 
 export const loadEmailTemplateHandlers = async (
 	backgroundMock: EmailTemplateAdminMock,
@@ -19,6 +20,10 @@ export const loadEmailTemplateHandlers = async (
 }> => {
 	vi.resetModules();
 	sesSendMock.mockReset();
+	emailSendingEnabledMock.mockReset().mockResolvedValue(true);
+	vi.doMock('../../../src/utility/email-sending', () => ({
+		isEmailSendingEnabled: emailSendingEnabledMock,
+	}));
 	vi.doMock('firebase-admin', () => backgroundMock.module);
 	vi.doMock('@aws-sdk/client-ses', () => ({
 		SESClient: class {

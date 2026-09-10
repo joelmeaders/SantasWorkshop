@@ -40,10 +40,10 @@ Keep the measured workload, failure evidence, old and new settings, and
 post-deployment results in the project vault's release record.
 
 Create each dated measurement report directly in the vault's
-`Archive/Load and Resources` folder using the [recording policy](README.md#recording-future-work).
-Keep source profiles in the [release procedure](release-readiness.md#function-resource-profiles)
+`Archive/Load and Resources` folder using the [recording policy](../../docs/README.md#recording-future-work).
+Keep source profiles in the [release procedure](../../docs/release-readiness.md#function-resource-profiles)
 and the gateway's cache, instance limits, and read budget in the
-[Remote Config guide](remote-config.md). Those settings describe configuration,
+[Remote Config guide](../../docs/remote-config.md). Those settings describe configuration,
 not measured capacity or deployment status.
 
 Do not reduce customer Functions to fractional CPUs because sequential smoke

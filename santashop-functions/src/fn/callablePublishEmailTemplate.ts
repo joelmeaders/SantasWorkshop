@@ -25,7 +25,7 @@ import {
 	validateEmailTemplateFieldMappings,
 } from '../utility/email-templates';
 import { SES_REGION } from '../utility/runtime-config';
-import { isEmailSink } from '../utility/email-isolation';
+import { isEmailSink } from '../../../scripts/load/functions/email-isolation';
 import {
 	requireCallableData,
 	requireOptionalTrimmedString,

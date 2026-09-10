@@ -6,22 +6,22 @@ implementation or policy changes.
 
 ## Start here
 
-| Topic | Maintained reference |
-| --- | --- |
-| Workspace setup and commands | [Root README](../README.md) |
-| Contributor rules | [AGENTS.md](../AGENTS.md) |
-| Customer architecture | [Customer app](app/ARCHITECTURE_OVERVIEW.md) |
-| Admin architecture and reads | [Admin app](admin/ARCHITECTURE_OVERVIEW.md), [data freshness](admin/DATA_FRESHNESS.md) |
-| Backend handlers and runtime paths | [Functions reference](functions-reference.md), [function call map](function-call-map.md) |
-| Business and acceptance contracts | [Business](requirements/BUSINESS_REQUIREMENTS.md), [functional](requirements/FUNCTIONAL_REQUIREMENTS.md), [non-functional](requirements/NON_FUNCTIONAL_REQUIREMENTS.md) requirements |
-| Configuration and credentials | [Configuration](SECRETS_AND_CONFIGURATION.md), [Remote Config](remote-config.md) |
-| Email authoring and review | [Bilingual templates](email-templates.md) |
-| Test coverage and acceptance | [Test coverage](test-coverage.md), [integrated suite](testing/integrated-test-suite.md) |
-| Browser test procedure | [Browser flows](browser-flow-testing.md), [emulator E2E](testing/e2e.md) |
-| UI development and visual tests | [Storybook](storybook.md), [generated inventory](storybook-inventory.md) |
-| Deployment and operations | [Release procedure](release-readiness.md), [yearly startup](yearly-startup.md) |
-| Load and resource validation | [Load harness](load-acceptance.md), [resource sizing](function-resource-sizing.md) |
-| Browser updates and caching | [Service worker](service-worker-caching.md) |
+| Topic                              | Maintained reference                                                                                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Workspace setup and commands       | [Root README](../README.md)                                                                                                                                                          |
+| Contributor rules                  | [AGENTS.md](../AGENTS.md)                                                                                                                                                            |
+| Customer architecture              | [Customer app](app/ARCHITECTURE_OVERVIEW.md)                                                                                                                                         |
+| Admin architecture and reads       | [Admin app](admin/ARCHITECTURE_OVERVIEW.md), [data freshness](admin/DATA_FRESHNESS.md)                                                                                               |
+| Backend handlers and runtime paths | [Functions reference](functions-reference.md), [function call map](function-call-map.md)                                                                                             |
+| Business and acceptance contracts  | [Business](requirements/BUSINESS_REQUIREMENTS.md), [functional](requirements/FUNCTIONAL_REQUIREMENTS.md), [non-functional](requirements/NON_FUNCTIONAL_REQUIREMENTS.md) requirements |
+| Configuration and credentials      | [Configuration](SECRETS_AND_CONFIGURATION.md), [Remote Config](remote-config.md)                                                                                                     |
+| Email authoring and review         | [Bilingual templates](email-templates.md)                                                                                                                                            |
+| Test coverage and acceptance       | [Test coverage](test-coverage.md), [integrated suite](testing/integrated-test-suite.md)                                                                                              |
+| Browser test procedure             | [Browser flows](browser-flow-testing.md), [emulator E2E](testing/e2e.md)                                                                                                             |
+| UI development and visual tests    | [Storybook](storybook.md), [generated inventory](storybook-inventory.md)                                                                                                             |
+| Deployment and operations          | [Release procedure](release-readiness.md), [yearly startup](yearly-startup.md)                                                                                                       |
+| Load and resource validation       | [Load harness](../scripts/load/acceptance.md), [resource sizing](../scripts/load/resource-sizing.md)                                                                                 |
+| Browser updates and caching        | [Service worker](service-worker-caching.md)                                                                                                                                          |
 
 ## Where records belong
 

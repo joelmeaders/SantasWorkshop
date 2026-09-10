@@ -1,6 +1,10 @@
 const { writeFile } = require('node:fs/promises');
 const path = require('node:path');
 const { loadEnvFiles } = require('./scripts/env-loader.cjs');
+const {
+	loadTestMode,
+	applyLoadTestConfiguration,
+} = require('./scripts/load/configuration.cjs');
 
 const FUNCTION_PROJECT_IDS = {
 	local: 'demo-santashop',
@@ -103,9 +107,10 @@ const quoteEnvValue = (value) => JSON.stringify(value);
 
 const buildFunctionsConfig = (mode) => {
 	const config = {};
+	const isolated = loadTestMode(mode);
 
 	for (const key of REQUIRED_FUNCTION_ENV_KEYS) {
-		if (mode === 'test' && key.startsWith('AWS_')) continue;
+		if (isolated && key.startsWith('AWS_')) continue;
 		config[key] = requireEnvValue(mode, key);
 	}
 
@@ -126,17 +131,14 @@ const buildFunctionsConfig = (mode) => {
 			);
 		}
 	}
-	if (mode === 'test') {
-		// Test deployments cannot restore SES credentials or remove network isolation.
-		config.SANTASHOP_EMAIL_TRANSPORT = 'sink';
-		config.SANTASHOP_EMAIL_VPC_CONNECTOR =
-			'projects/santas-workshop-test/locations/us-central1/connectors/load-email';
+	if (isolated) {
+		applyLoadTestConfiguration(config);
 	} else if (
 		config.SANTASHOP_EMAIL_TRANSPORT ||
 		config.SANTASHOP_EMAIL_VPC_CONNECTOR
 	) {
 		throw new Error(
-			'Email isolation settings are managed only for the test project.',
+			'Email isolation settings require explicit SANTASHOP_LOAD_TEST_MODE=true in test.',
 		);
 	}
 

@@ -1,25 +1,36 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const TEST_HELPERS_MARKER = '// ------------------------------------- TEST HELPER FUNCTIONS';
+const TEST_HELPERS_MARKER =
+	'// ------------------------------------- TEST HELPER FUNCTIONS';
 
-const sourceFunctionIds = (source) => {
+const sourceFunctionIds = (
+	source,
+	loadTest = process.env.SANTASHOP_LOAD_TEST_MODE === 'true',
+) => {
 	const productionSource = source.split(TEST_HELPERS_MARKER, 1)[0];
 	return [...productionSource.matchAll(/^export const ([A-Za-z0-9_]+)\s*=/gm)]
 		.map((match) => match[1])
+		.filter((id) => loadTest || id !== 'emailIsolationProbe')
 		.sort();
 };
 
 const deployedFunctionIds = (firebaseOutput) => {
-	const parsed = typeof firebaseOutput === 'string'
-		? JSON.parse(firebaseOutput)
-		: firebaseOutput;
+	const parsed =
+		typeof firebaseOutput === 'string'
+			? JSON.parse(firebaseOutput)
+			: firebaseOutput;
 	const functions = Array.isArray(parsed) ? parsed : parsed.result;
 	if (!Array.isArray(functions)) {
-		throw new Error('Firebase Functions list output did not contain a result array.');
+		throw new Error(
+			'Firebase Functions list output did not contain a result array.',
+		);
 	}
 
-	return functions.map((entry) => entry.id).filter(Boolean).sort();
+	return functions
+		.map((entry) => entry.id)
+		.filter(Boolean)
+		.sort();
 };
 
 const compareFunctionIds = (expected, actual) => ({
@@ -32,11 +43,13 @@ const verifyFunctionsParity = (source, firebaseOutput) => {
 	const actual = deployedFunctionIds(firebaseOutput);
 	const differences = compareFunctionIds(expected, actual);
 	if (differences.missing.length || differences.unexpected.length) {
-		throw new Error([
-			'Live Firebase Functions do not match the production source exports.',
-			`Missing: ${differences.missing.join(', ') || 'none'}`,
-			`Unexpected: ${differences.unexpected.join(', ') || 'none'}`,
-		].join('\n'));
+		throw new Error(
+			[
+				'Live Firebase Functions do not match the production source exports.',
+				`Missing: ${differences.missing.join(', ') || 'none'}`,
+				`Unexpected: ${differences.unexpected.join(', ') || 'none'}`,
+			].join('\n'),
+		);
 	}
 
 	return expected;
@@ -45,7 +58,9 @@ const verifyFunctionsParity = (source, firebaseOutput) => {
 const main = () => {
 	const outputPath = process.argv[2];
 	if (!outputPath) {
-		throw new Error('Usage: node scripts/verify-functions-parity.cjs <firebase-functions-list.json>');
+		throw new Error(
+			'Usage: node scripts/verify-functions-parity.cjs <firebase-functions-list.json>',
+		);
 	}
 
 	const root = path.resolve(__dirname, '..');
@@ -55,7 +70,9 @@ const main = () => {
 	);
 	const output = fs.readFileSync(path.resolve(outputPath), 'utf8');
 	const ids = verifyFunctionsParity(source, output);
-	console.log(`Verified ${ids.length} production Functions; live inventory matches source.`);
+	console.log(
+		`Verified ${ids.length} production Functions; live inventory matches source.`,
+	);
 };
 
 module.exports = {

@@ -105,6 +105,22 @@ test('inventory includes emulator wrappers, schedules and document triggers', ()
 	);
 });
 
+test('resolves load-only handlers outside the Functions source directory', () => {
+	const entries = entryPoints(
+		source(
+			'santashop-functions/src/index.ts',
+			`
+		export const emailIsolationProbe = loadMode ? onRequest({}, async () => {
+			return import('../../scripts/load/functions/emailIsolationProbe');
+		}) : undefined;
+	`,
+		),
+	);
+	assert.deepEqual(entries[0].handlers, [
+		'scripts/load/functions/emailIsolationProbe.ts',
+	]);
+});
+
 test('resolves callable SDK aliases and injected wrapper methods without matching unrelated methods', () => {
 	const wrapper = source(
 		'santashop-core/src/_functions-wrapper.ts',

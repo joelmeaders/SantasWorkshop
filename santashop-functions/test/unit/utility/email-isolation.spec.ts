@@ -7,6 +7,9 @@ describe('isolated test email delivery', () => {
 	const constructSes = vi.fn();
 	beforeEach(() => {
 		vi.resetModules();
+		vi.doMock('../../../src/utility/email-sending', () => ({
+			isEmailSendingEnabled: vi.fn().mockResolvedValue(true),
+		}));
 		background = createBackgroundAdminMock();
 		vi.doMock('firebase-admin', () => background.module);
 		vi.doMock('@aws-sdk/client-ses', () => ({
@@ -46,7 +49,7 @@ describe('isolated test email delivery', () => {
 
 	it('rejects production, conflicting project identity, credentials, and unknown modes', async () => {
 		const { isEmailSink } =
-			await import('../../../src/utility/email-isolation');
+			await import('../../../../scripts/load/functions/email-isolation');
 		expect(isEmailSink()).toBe(true);
 		vi.stubEnv('GCP_PROJECT', 'santas-workshop-193b5');
 		expect(isEmailSink).toThrow('restricted');
@@ -60,7 +63,7 @@ describe('isolated test email delivery', () => {
 
 	it('stores hash-only simulated receipts without recipients, links, or provider acceptance', async () => {
 		const { recordSimulatedEmail } =
-			await import('../../../src/utility/email-isolation');
+			await import('../../../../scripts/load/functions/email-isolation');
 		await recordSimulatedEmail(
 			'password-reset',
 			{ secret: 'reset-link', email: 'person@example.com' },

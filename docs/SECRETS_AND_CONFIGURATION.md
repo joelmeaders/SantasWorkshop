@@ -104,6 +104,55 @@ default, so normal unit, integration, and E2E runs do not require or use live
 AWS credentials. Set `SANTASHOP_SEND_EMAILS_FROM_EMULATOR=true` only for an
 intentional SES integration run, and supply local `AWS_ACCESS_KEY_ID` and
 `AWS_SECRET_ACCESS_KEY` values for that run.
+Also set `_testConfig/emailSending.enabled=true` in the verified Firestore
+emulator for an intentional email integration run. Ordinary emulator runs
+remain unable to send email through the application sender paths.
+
+## Remote email sending control
+
+The independent Firebase Remote Config parameter
+**`santashop_email_sending_enabled`** must have type **BOOLEAN**, an explicit
+default value, and no conditions. Set it to `false` to disable all application
+email sending: registration confirmations, reminders, cancellations,
+password-reset messages, and admin test emails. Set it to `true` to allow
+ordinary delivery. Template authoring and publishing remain available.
+
+Each sender caches the value for at most three minutes, measured from the
+start of its read. The next send after expiry waits for a recheck. Missing,
+malformed, conditional, timed-out, or unreadable settings block sending;
+expired permission is never reused. A failed read also waits three minutes
+before retrying to limit Remote Config traffic. A message already submitted
+to AWS cannot be recalled.
+
+You can edit the boolean in Firebase Console → Remote Config, or use these
+authenticated commands with the explicit target project:
+
+```text
+node scripts/email-sending.cjs read --project santas-workshop-test
+node scripts/email-sending.cjs disable --project santas-workshop-test
+node scripts/email-sending.cjs enable --project santas-workshop-test
+```
+
+The commands use the same Application Default Credentials or
+`REMOTE_CONFIG_ACCESS_TOKEN` authentication as the other Remote Config tools.
+Updates preserve unrelated parameters and use an exact ETag; a conflict must
+be reviewed before retrying. Deployment checks require the parameter to exist
+but do not force it on. Initialize it explicitly in each project before the
+first deployment of this control; routine deployments preserve the operator's
+choice. Runtime sender identities need `cloudconfig.configs.get` (for example,
+`roles/cloudconfig.viewer`), in addition to their existing application access.
+
+Queued messages blocked by the setting become terminal `suppressed` records,
+with no SES acceptance or successful-send claim. Re-enabling does not replay
+them. Password-reset responses retain the generic acknowledgement to protect
+account privacy; admin test sends return a clear disabled error. This control
+does not hold mail for later delivery. Use a new request or an explicit admin
+resend after re-enabling if a message is still needed.
+
+Normal test and production deployments use SES. The optional load-test sink
+and network are documented in [the load directory](../scripts/load/README.md).
+The three-minute setting is an application control, not the independent AWS
+network denial required for load testing.
 
 Password-reset delivery also requires
 `SANTASHOP_PASSWORD_RESET_CONTINUE_URL`. Use these values:
@@ -126,7 +175,7 @@ reserved for the release workflow.
 - Functions unit tests always run.
 - Functions integration and browser tests use Firebase emulators and do not
   require test AWS secrets. Integration uses the generated test configuration
-  with AWS credentials omitted; browser suites use the demo project and local
+  with dummy AWS credentials; browser suites use the demo project and local
   dummy credentials.
 
 ### Test deployment
@@ -134,7 +183,7 @@ reserved for the release workflow.
 A matching merge to `master` runs the Functions release workflow. The deploy
 job:
 
-1. receives the test Firebase service account from repository secrets
+1. receives the test Firebase service account and scoped test AWS credentials from repository secrets
 2. validates that every required value is present
 3. writes the service-account JSON into the ephemeral runner directory
 4. runs integration tests
@@ -209,4 +258,4 @@ The synchronization helper treats both as required.
 
 Unset `SANTASHOP_SEND_EMAILS_FROM_EMULATOR`. Normal emulator runs preserve the
 queued-email records but intentionally skip external SES delivery. Hosted load
-requires the independent network-denial checks in [load acceptance](load-acceptance.md).
+requires the independent network-denial checks in [load acceptance](../scripts/load/acceptance.md).

@@ -17,7 +17,11 @@ import {
 } from '../utility/callable-validation';
 import { getErrorCode } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import { isEmailSink, recordSimulatedEmail } from '../utility/email-isolation';
+import {
+	isEmailSink,
+	recordSimulatedEmail,
+} from '../../../scripts/load/functions/email-isolation';
+import { isEmailSendingEnabled } from '../utility/email-sending';
 import {
 	PASSWORD_RESET_CONTINUE_URL,
 	REGISTRATION_EMAIL_RETURN_PATH,
@@ -144,11 +148,12 @@ const sendPasswordResetEmail = async (
 	emailAddress: string,
 	resetLink: string,
 	language: CustomerLanguage,
-): Promise<void> => {
+): Promise<boolean> => {
+	if (!(await isEmailSendingEnabled())) return false;
 	const content = buildPasswordResetEmail(resetLink, language);
 	if (isEmailSink()) {
 		await recordSimulatedEmail('password-reset', content);
-		return;
+		return false;
 	}
 	await getSesClient().send(
 		new SendEmailCommand({
@@ -164,6 +169,7 @@ const sendPasswordResetEmail = async (
 			},
 		}),
 	);
+	return true;
 };
 
 export default async function requestPasswordReset(
@@ -198,19 +204,21 @@ export default async function requestPasswordReset(
 				url: PASSWORD_RESET_CONTINUE_URL,
 			});
 
+		let delivered = false;
 		if (
 			process.env.FUNCTIONS_EMULATOR !== 'true' ||
 			process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR === 'true'
 		) {
-			await sendPasswordResetEmail(emailAddress, resetLink, language);
+			delivered = await sendPasswordResetEmail(
+				emailAddress,
+				resetLink,
+				language,
+			);
 		}
 		log.info('Password reset request processed', {
 			requestKey,
 			language,
-			emailDeliverySuppressed:
-				isEmailSink() ||
-				(process.env.FUNCTIONS_EMULATOR === 'true' &&
-					process.env.SANTASHOP_SEND_EMAILS_FROM_EMULATOR !== 'true'),
+			emailDeliverySuppressed: !delivered,
 		});
 	} catch (error) {
 		const errorCode = getErrorCode(error);

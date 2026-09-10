@@ -106,6 +106,7 @@ export class GoogleClient {
 			...(body === undefined ? {} : { body: JSON.stringify(body) }),
 		});
 		if (allow404 && response.status === 404) return undefined;
+		if (response.status === 204 && method === 'DELETE') return {};
 		const data = await response.json().catch(() => {
 			throw new Error(
 				`${method} ${parsed.hostname}${parsed.pathname}: HTTP ${response.status}, non-JSON response.`,

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
@@ -166,9 +166,11 @@ export function entryPoints(file) {
 					ts.isStringLiteral(node.arguments[0])
 				)
 					handlers.push(
-						node.arguments[0].text.replace(
-							'./',
-							'santashop-functions/src/',
+						posix.normalize(
+							posix.join(
+								posix.dirname(file.fileName),
+								node.arguments[0].text,
+							),
 						) + '.ts',
 					);
 			});
@@ -432,13 +434,17 @@ export function main(args = process.argv.slice(2)) {
 		throw new Error(
 			'Usage: node scripts/function-call-graph.mjs [--update | --strict]',
 		);
-	const files = sourceRoots.flatMap((folder) => sourceFiles(`${folder}/src`));
+	const files = [
+		...sourceRoots.flatMap((folder) => sourceFiles(`${folder}/src`)),
+		...sourceFiles('scripts/load/functions'),
+	];
 	const coverage = [
 		...files,
 		'firebase.json',
 		'firestore.rules',
 		'.env.example',
 		'config.functions.cjs',
+		'scripts/load/configuration.cjs',
 		'.github/workflows/functions-pr-validation.yml',
 		'.github/workflows/functions-test-and-prod-release.yml',
 	].sort();

@@ -172,7 +172,7 @@ Follow the [recording policy](README.md#recording-future-work) for the exact pat
 evidence fields, and generated artifacts. Do not add hosted QA reports or run
 logs to repository documentation.
 
-Run scoped unit/build/rules checks for fixes. The shared UI PR check runs Storybook once, separately from the app/admin unit commands; it does not replace Firebase browser journeys. Use `ci:storybook` and relevant visual checks when shared UI behavior changes.
+Run scoped unit/build/rules checks for fixes. The Storybook workflow runs the behavioral suite once, separately from the app/admin unit commands; it does not replace Firebase browser journeys. Use `ci:storybook` and relevant visual checks when shared UI behavior changes.
 
 Separate results into emulator, deployed test, and production evidence. Record limitations such as unavailable camera, missing mailbox access, protected production data, or pending approval. Do not describe page rendering as a successful mutation, queued mail as delivered mail, or API seeding as UI onboarding.
 

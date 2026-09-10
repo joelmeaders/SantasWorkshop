@@ -94,7 +94,7 @@
     "storybook:visual": "playwright test --config storybook-visual/playwright.config.ts",
     "storybook:visual:update": "playwright test --config storybook-visual/playwright.config.ts --update-snapshots=all",
     "storybook:visual:report": "playwright show-report storybook-visual/report",
-    "ci:ui:shared": "pnpm run storybook:prepare && pnpm run ci:core:test && pnpm run ci:storybook:run",
+    "ci:ui:shared": "pnpm run storybook:prepare && pnpm run ci:core:test",
     "ci:storybook:run": "pnpm run storybook:typecheck && pnpm run storybook:lint && ng run santashop-admin:build-storybook && vitest run --config vitest.storybook.config.ts --project=storybook",
     "ci:ui:test": "pnpm run storybook:prepare && pnpm --filter @santashop/app test && pnpm --filter @santashop/admin test && pnpm run ci:core:test && pnpm run ci:storybook:run"
   },

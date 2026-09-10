@@ -67,12 +67,12 @@ the current version before retrying.
 
 ## Migration and release order
 
-The files under `remote-config/migration/` are prepared candidates, not evidence
-of publication. Each has a provenance file with project ID, source update time,
-source template version, expected ETag, and candidate hash. The initial test
-document lacked `globalAlert`; its candidate represents the old behavior with a
-disabled empty alert. The production candidate preserves the existing closed
-registration and maintenance state.
+Prepare migration candidates outside the repository. Record project ID, source
+update time, source template version, expected ETag, and candidate hash. Archive
+reviewed candidates and publication evidence in the project vault. They are
+historical records, not release defaults. If a legacy document lacks
+`globalAlert`, represent its old behavior with a disabled empty alert. Preserve
+the target's operating settings and obtain approval for any change.
 
 1. Re-read each project's current Firestore document and Remote Config template
    before its release. Check that the candidate still matches the intended
@@ -156,10 +156,9 @@ deployed. Rerun the same CI release for the same reviewed commit after resolving
 the reported problem. The release script revalidates the gateway and overwrites
 only generated environment inputs. Do not remove it or bypass checks to retry.
 
-On September 7, 2026, both projects reported **60 template reads/minute** through
-`firebaseremoteconfig.googleapis.com/read_requests`. The original direct polling
-design needed 600, but the provider rejected the increase as unsupported.
-The private gateway replaces direct consumer polling. Existing consumer capacity
+The readiness gate requires at least **60 template reads/minute** through
+`firebaseremoteconfig.googleapis.com/read_requests`. Inspect the current project
+allocation before release. The private gateway supplies consumer reads. Existing consumer capacity
 remains 50 instances. Normal gateway polling uses at most six reads/minute per
 instance, or twelve across two healthy instances. The release budget reserves
 24 for four overlapping gateway instances during replacement and 36 for cold
@@ -173,8 +172,7 @@ before release. The browser fetch quota is separate. The gateway is a new
 configuration dependency; consumers keep validated settings or release defaults
 when it is unavailable.
 
-The new service accounts were absent at the initial inspection. The readiness
-script checks their direct project bindings, QR bucket permission, published
+The readiness script checks their direct project bindings, QR bucket permission, published
 settings, template-read quota, and the deployed private gateway. Its `--preflight`
 option checks only quota and identities so CI can bootstrap the gateway. A
 preflight pass is not release readiness. It reports each missing prerequisite and

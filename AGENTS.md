@@ -28,6 +28,9 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 
 ## Working rules
 
+- Create dated reports, release evidence, agent logs/handoffs, audit results, PR drafts, meeting notes, and one-time migration records directly in `C:\Users\joelm\OneDrive\Documents\Notes\Joel's Obsidian Vault\Denver Santas Claus Shop\Archive`, under the relevant topic. Do not create these records in the repository, including ignored folders, or append run results to maintained procedures. Follow [the documentation policy](docs/README.md#recording-future-work) for naming, evidence, generated artifacts, and unavailable-vault handling.
+- Keep maintained code/project guidance and changelogs in Git. Preserve historical source records in the vault before extracting reusable guidance. A report remains transient even if its filename has no date.
+
 - Standing user authorization (September 7, 2026): continue authorized work through validation and PR completion without asking for the same approval again. Approve and merge PRs as needed; use an administrator merge to bypass a review requirement when necessary and available. Do not impersonate a reviewer or change branch protection. Report actual checks and any bypassed gate.
 - The user has approved acceptance of the application's terms for labeled QA signup accounts in the deployed test project. This does not authorize unrelated agreements or override a browser tool's required user handoff.
 - This standing authorization does not waive the production data and seasonal restrictions below or authorize unrelated destructive actions.

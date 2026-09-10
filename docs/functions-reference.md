@@ -56,4 +56,4 @@ mock external services; integration tests use Firebase emulators. Neither test
 type establishes SES recipient delivery or deployed capacity.
 
 See [configuration](SECRETS_AND_CONFIGURATION.md),
-[yearly startup](yearly-startup.md), and [test coverage](TEST_COVERAGE_AUDIT.md).
+[yearly startup](yearly-startup.md), and [test coverage](test-coverage.md).

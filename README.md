@@ -1,5 +1,10 @@
 # Santa's Workshop
 
+See the [documentation index](docs/README.md) for maintained architecture,
+requirements, testing, and operating procedures. Dated release and QA records
+must be created directly in the project Obsidian vault. Follow the
+[recording policy](docs/README.md#recording-future-work) for its path and topic folders.
+
 A monorepo for Santa's Workshop registration and management applications.
 
 Develop and test both apps in isolation with [Storybook](docs/storybook.md). The [UI inventory](docs/storybook-inventory.md) links every component and page to its stories.

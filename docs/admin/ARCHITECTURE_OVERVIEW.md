@@ -28,7 +28,8 @@ Duplicate check-in protection is enforced in server transactions.
 ## Data flow
 
 Lookups, reports, staff, and risk views use `AdminReadRepository` with Firestore
-Lite. Operational flags and appointment controls use snapshot listeners.
+Lite. Appointment controls use Firestore snapshot listeners. Operational flags
+use [Remote Config](../remote-config.md) through the shared public-parameters source.
 [Data freshness](DATA_FRESHNESS.md) specifies refresh and recovery behavior.
 
 Privileged writes pass through callable Functions. Registration indexes support

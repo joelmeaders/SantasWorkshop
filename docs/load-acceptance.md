@@ -1,4 +1,4 @@
-# Historical load acceptance
+# Hosted load acceptance
 
 For setup, commands, monitoring, stopping, and result verification, start with
 [`scripts/load/README.md`](../scripts/load/README.md).
@@ -9,11 +9,13 @@ does not call emulator helpers. Keep `artifacts/load/` local: it contains labele
 QA account addresses, UIDs, and browser screenshots. Passwords and tokens stay
 in process memory and are not written to the journal.
 
-## Evidence and targets
+## Configured workload
 
-Read-only research on September 8, 2026 covered 8,322 retained registration
-timestamps and 5,776 check-in timestamps from 2025. Both counts matched annual
-statistics. Targets use the selected 50% headroom.
+The workload below is defined in [`scripts/load/config.mjs`](../scripts/load/config.mjs).
+Review the targets against retained traffic and an agreed headroom allowance
+before each acceptance campaign. Store the dated research and rationale with
+the campaign record in the project vault. The configured targets are inputs,
+not proof of accepted capacity.
 
 | Phase                | Offered traffic                                              |
 | -------------------- | ------------------------------------------------------------ |
@@ -27,17 +29,13 @@ statistics. Targets use the selected 50% headroom.
 | Duplicate scans      | Ten concurrent scans of one unused fixture                   |
 | Recovery             | Interrupt one completion request; retry the same mutation ID |
 
-Each customer has three children, compared with the historical mean of 2.71.
+Each synthetic customer has three children.
 The staff mix uses every eleventh journey for on-site registration and the next
 for a child edit, approximately 9% each. Registration records created through
 the preceding signup phases supply the ordinary check-in fixtures.
 
-The first retained completion on November 15, 2025 was at 08:13:20 Denver time;
-1,108 followed within 30 minutes. This does not establish the opening time.
-The busiest shop day had 1,534 check-ins; the largest hourly bucket across
-2020–2025 was 431 in 2025. Rounded Google Analytics daily totals corroborate the
-surge but are not completion throughput. Retained successful transactions do
-not reconstruct abandoned attempts, cancellations, retries, or device counts.
+Retained successful transactions do not reconstruct abandoned attempts,
+cancellations, retries, or device counts. Keep those limits with any sizing analysis.
 
 ## Email isolation comes first
 
@@ -138,7 +136,7 @@ have request, memory, and CPU evidence, no memory-limit termination or HTTP
 80%. These are observed-workload checks, not proof of capacity at configured
 maximum concurrency. Unexercised functions remain explicitly unmeasured.
 See [function resource sizing](function-resource-sizing.md) for methods,
-limits, and the counter memory correction.
+limits, and resource-change validation.
 
 After calibration, the conservative cost projection must be below $20 before
 main load starts. Compute estimates charge every configured maximum instance
@@ -152,7 +150,10 @@ See [Cloud Run pricing](https://cloud.google.com/run/pricing) and
 Verification checks registration uniqueness, children, QR ownership and index,
 check-ins, returned coupon counts, retained edits and original check-in times,
 simulated queue receipts, and the run-owned appointment counter. Soft
-overbooking is allowed. Keep generated fixtures and evidence for review.
+overbooking is allowed. Keep generated fixtures for review. Create narrative run
+reports directly in the Obsidian project's `Archive/Load and Resources` folder.
+Follow the [recording policy](README.md#recording-future-work) for the exact path
+and for archiving selected evidence from generated local output directories.
 The journal includes UTC timestamps, deployed revisions, instance evidence,
 cost estimates, operation results, and any stop reason. A code test, build,
 deployment, or preflight pass alone is not a load acceptance pass. SES delivery

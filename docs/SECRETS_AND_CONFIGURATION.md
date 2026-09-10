@@ -37,8 +37,10 @@ and writes an ignored, project-specific file:
 - local emulator: `santashop-functions/.env.demo-santashop`
 
 Firebase CLI loads the selected file during deployment and persists the values
-as ordinary Function revision environment variables. Privileged GCP users who
-can inspect Function revisions may also be able to inspect the AWS credentials.
+as ordinary Function revision environment variables. Test generation omits AWS
+credentials, forces the `sink` email transport, and pins the `load-email` VPC
+connector. Privileged GCP users who can inspect production Function revisions
+may also be able to inspect their AWS credentials.
 Never print generated dotenv contents or credentials in workflow logs.
 
 The disposable Functions deploy artifact includes only the generated file for
@@ -47,7 +49,9 @@ developer-local `.env`; neither local file is required on a GitHub runner.
 
 ## GitHub repository secrets
 
-The complete required repository-secret inventory is:
+The `scripts/github-secrets.ps1` synchronization helper requires these eight
+secret names. Its inventory still includes legacy test AWS values; the test
+deployment workflow does not consume them and the test generator omits them:
 
 - `TEST_FIREBASE_API_KEY`
 - `PROD_FIREBASE_API_KEY`
@@ -120,26 +124,28 @@ reserved for the release workflow.
 
 - App/admin workflows validate test-mode builds without deploying.
 - Functions unit tests always run.
-- Functions integration tests run only when the test AWS secrets are available;
-  forked PRs without repository-secret access report an explicit skip.
+- Functions integration and browser tests use Firebase emulators and do not
+  require test AWS secrets. Integration uses the generated test configuration
+  with AWS credentials omitted; browser suites use the demo project and local
+  dummy credentials.
 
 ### Test deployment
 
 A matching merge to `master` runs the Functions release workflow. The deploy
 job:
 
-1. receives test AWS credentials and the test Firebase service account from
-   repository secrets
+1. receives the test Firebase service account from repository secrets
 2. validates that every required value is present
 3. writes the service-account JSON into the ephemeral runner directory
 4. runs integration tests
-5. generates `.env.santas-workshop-test`
+5. generates `.env.santas-workshop-test` with sink transport, network isolation,
+   and no AWS credentials
 6. deploys Functions to `santas-workshop-test`
 
 ### Production deployment
 
-After validating test, manually dispatch the same workflow with the tested
-commit SHA or ref as `release_ref`. The production job checks out that ref,
+After validating test, manually dispatch the same workflow with
+`deployment_target=prod` and the tested commit SHA or ref as `release_ref`. The production job checks out that ref,
 generates `.env.santas-workshop-193b5`, and deploys it to
 `santas-workshop-193b5`.
 
@@ -161,9 +167,10 @@ Rotate one environment at a time:
 
 1. create the replacement AWS key or Firebase service-account credential
 2. update the matching GitHub repository secret without logging its value
-3. run the test deployment and exercise registration email delivery, test-email
-   sending, and SES template publishing
-4. promote the tested ref to production when applicable
+3. run the test deployment and verify simulated email receipts and local template
+   publication; test sink mode cannot validate a live AWS credential
+4. promote the tested ref to production when applicable and perform the
+   separately authorized live credential/delivery check
 5. revoke the old credential only after the deployed Function revision passes
    its smoke checks
 
@@ -201,4 +208,5 @@ The synchronization helper treats both as required.
 ### An emulator attempts to access AWS
 
 Unset `SANTASHOP_SEND_EMAILS_FROM_EMULATOR`. Normal emulator runs preserve the
-queued-email records but intentionally skip external SES delivery.
+queued-email records but intentionally skip external SES delivery. Hosted load
+requires the independent network-denial checks in [load acceptance](load-acceptance.md).

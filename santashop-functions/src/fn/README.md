@@ -8,7 +8,7 @@ This directory contains helper functions for E2E testing with Firebase emulators
 
 These functions are exposed as callable Firebase functions and should **ONLY** be used with emulators, never in production.
 
-Available helper callables:
+Common helper callables (see `src/index.ts` for the complete export list):
 
 - `testSeedScenario`
 - `testSeedPublicParameters`
@@ -31,7 +31,8 @@ Available scenarios:
 
 #### `testSeedPublicParameters(params: object)`
 
-Seeds custom public parameters. Accepts any fields from the `PublicParameters` interface:
+Seeds `_testConfig/publicParameters` in verified emulators. It merges complete
+nested defaults and validates the `PublicParameters` schema. Fields include:
 
 - `registrationEnabled: boolean`
 - `maintenanceModeEnabled: boolean`
@@ -39,15 +40,22 @@ Seeds custom public parameters. Accepts any fields from the `PublicParameters` i
 - `createAccountEnabled: boolean`
 - `messageEn: string`
 - `messageEs: string`
+- `admin`: staff operating controls
+- `globalAlert`: bilingual alert content and display control
 
 #### `testClearAllData()`
 
-Clears all data from Firestore and Auth emulators. This includes:
+Clears configured test data in verified emulators. This includes:
 
-- All Firestore collections (users, registrations, children, dateTimeSlots, parameters)
-- All Auth users
+- Documents in the explicitly listed Firestore collections, including `_testConfig`
+- Auth users returned by the cleanup helper
+- Storage objects under `registrations/` and `emailTemplates/`
 
-#### `testSeedAdminUser({ emailAddress, password, uid?, admin? })`
+This is not a general recursive or bucket-wide cleanup tool. The exact collection
+list is in `clearAllData` in `testHelpers.ts`. Use isolated fixtures and verify
+cleanup results when a test creates nested data.
+
+#### `testSeedAdminUser({ emailAddress, password, uid?, roles?, owner? })`
 
 Creates an Auth emulator user and applies custom claims. This is intended for
 admin-app end-to-end sign-in flows.
@@ -55,7 +63,8 @@ admin-app end-to-end sign-in flows.
 - `emailAddress: string`
 - `password: string`
 - `uid?: string`
-- `admin?: boolean` (defaults to `true`)
+- `roles?: ('admin' | 'checkin')[]` (defaults to both roles)
+- `owner?: boolean` (separate owner capability)
 
 #### `testSeedDateTimeSlots({ slots })`
 

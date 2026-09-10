@@ -73,7 +73,8 @@ The E2E serve scripts retain the prepared configuration and use port 4100.
 
 Import `test` and `expect` from [test-fixtures.ts](../../santashop-e2e/fixtures/test-fixtures.ts).
 Use `clearData()` and reseed each test's state. The helper deletes emulator Auth users and
-configured Firestore collections. Use unique paths for Storage writes because it does not clear Storage.
+configured Firestore collections and the `registrations/` and `emailTemplates/`
+Storage prefixes. Use unique paths and explicit cleanup for other Storage fixtures.
 
 Customer helpers live in [account-helpers.ts](../../santashop-e2e/fixtures/account-helpers.ts):
 
@@ -129,7 +130,7 @@ accounts, children, and slots needed by the test. Do not depend on another test'
 - Keep one worker, no retries, and isolated seeds because tests share the emulator instance.
 - Keep event dates aligned with the configured program year and `America/Denver` business timezone.
 
-[playwright.config.ts](../../santashop-e2e/playwright.config.ts) runs headless mobile Chromium,
+[playwright.config.ts](../../santashop-e2e/playwright.config.ts) runs headless mobile Chromium plus bounded desktop Chromium smoke,
 stops after one failure, and retains failure screenshots, video, and traces.
 Inspect `santashop-e2e/playwright-report/` and `santashop-e2e/test-results/` after a failure.
 

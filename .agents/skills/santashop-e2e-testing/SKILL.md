@@ -7,6 +7,8 @@ description: Run and author Santa's Workshop Playwright E2E tests against the Fi
 
 Use this skill for integrated browser tests. Treat `santashop-e2e/` as the source of truth for Playwright configuration, fixtures, helpers, and specs; treat the root `package.json` as the source of truth for orchestration.
 
+Create authored test reports and agent handoffs directly in the project Obsidian vault's `Archive/QA` folder. Follow the [recording policy](../../../docs/README.md#recording-future-work) for the exact path, naming, evidence, and unavailable-vault handling. Generated Playwright output may use its ignored output folders; do not create narrative run reports in the repository.
+
 ## Language boundary
 
 Use TypeScript/JavaScript and Node.js tooling only for repository changes and helper scripts. Do not introduce a second language runtime or package manager.

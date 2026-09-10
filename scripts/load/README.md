@@ -6,10 +6,13 @@ records through deployed customer and staff APIs. It does not use emulator
 cleanup helpers or delete its fixtures.
 
 The workload uses the historical peaks plus the selected 50% headroom. See the
-[test plan](../../docs/load-acceptance.md) for the source data and acceptance
-criteria, and the [September 9 result](../../docs/load-acceptance-full-results-2026-09-09.md)
-for the latest executed attempt. That attempt stopped and did not pass full
-acceptance. Runtime changes made afterward have not been load-tested.
+[test plan](../../docs/load-acceptance.md) for the workload and acceptance
+criteria. Create dated run reports directly in the Obsidian project's
+`Archive/Load and Resources` folder, following the
+[recording policy](../../docs/README.md#recording-future-work). The vault's
+Archive Index links prior attempts and their source evidence. A report applies
+only to its recorded revision and workload; source changes require fresh
+deployment and load evidence before acceptance.
 
 ## Prepare the environment
 

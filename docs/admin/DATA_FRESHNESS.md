@@ -2,7 +2,7 @@
 
 | Feature | Data | Refresh behavior |
 | --- | --- | --- |
-| Operational flags | `parameters/public` | Snapshot listener |
+| Operational flags | Remote Config `santashop_public_parameters` | Activated settings, real-time listener, and visible-tab fetch fallback |
 | Schedule editor and appointment controls | `dateTimeSlots` | Snapshot listeners |
 | Reports | Aggregates and report slots | Reload together on entry, year change, or Refresh report |
 | Staff | `staff` | Reload on entry, refresh, and successful mutation |
@@ -18,7 +18,8 @@ A failed owner status request resumes with the same job ID and does not start
 another operation.
 
 `FireRepoLite` is a full Firestore snapshot wrapper despite its name. Admin
-consumers use it for operational flags and appointment controls. Slot listeners
+consumers use it for appointment controls. Operational flags use
+`PUBLIC_PARAMETERS_SOURCE`; see [Remote Config](../remote-config.md). Slot listeners
 release when their last consumer unsubscribes. Full Firestore loads behind the
 authenticated route; the initial bundle check also excludes Firebase Storage.
 
@@ -33,6 +34,6 @@ admin UI. Server authorization remains the enforcement boundary.
 Unit tests cover deferred reads, completion, errors, retries, shared requests,
 year selection, and listener teardown. Emulator browser tests cover navigation,
 refresh, disconnected reads, concurrent check-in, lost responses, appointment
-changes, and owner-status recovery. Playwright uses one mobile Chromium project
+changes, and owner-status recovery. Playwright uses mobile Chromium plus a bounded desktop Chromium smoke project
 and one worker; concurrency cases create isolated contexts within a test.
 These checks do not prove external email delivery or production behavior.

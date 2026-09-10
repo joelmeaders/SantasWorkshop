@@ -4,6 +4,10 @@ This is the operating contract for test promotion, production promotion,
 signup launch, and event-day check-in. A build or deploy alone is not release
 approval.
 
+Create release reports and deployment evidence directly in the Obsidian vault
+under `Archive/Releases`, following the [recording policy](README.md#recording-future-work).
+Keep this page as the maintained release procedure; do not append execution results.
+
 ## Manual deployment without repeating tests
 
 The app, admin, and Functions release workflows accept `deployment_target`
@@ -17,9 +21,9 @@ live deployment verification still run. Push-triggered deployments and pull
 request checks keep their normal test gates. A successful skipped-test deployment
 is deployment evidence only; cite the separate test run when reporting validation.
 
-## Remote Config migration prerequisite
+## Remote Config prerequisites
 
-For beta.3, public controls move to the unconditional client-template parameter
+Public controls use the unconditional client-template parameter
 `santashop_public_parameters`. Follow [the migration release order](remote-config.md)
 before promoting dependent code. Keep the legacy Firestore settings document
 intact and require older applications to upgrade.
@@ -29,53 +33,47 @@ settings, and generate matching release defaults before deployment. Configuratio
 checks no longer share Firestore transaction atomicity; cached settings and
 in-flight work can outlive a publication.
 
-The September 7 inspection found 60 template reads per minute in each project.
-The initial direct-polling design required 600. Cloud Quotas rejected that
-increase as unsupported. The repair introduces an IAM-private gateway
-with a 60-read budget and a deployment check for its identity, private invoker
-policy, instance limit, and canonical URI. Consumer capacity is unchanged. See
+The IAM-private gateway has a 60-read release budget. Deployment checks verify
+its identity, private invoker policy, instance limit, and canonical URI. See
 [the gateway capacity model](remote-config.md#identities-and-capacity). Verify
 actual request rates and replacement/failure behavior before promotion.
 
 Complete deployed test measurements for client delivery time, backend
 propagation, recovery, rollback, and API request counts. Passing PR gates and
-[local migration checks](remote-config-validation.md) does not satisfy these
-deployed acceptance requirements.
+local migration checks does not satisfy these deployed acceptance requirements.
 
 ## Traffic and capacity assumptions
 
-- Retained 2025 registration timestamps show peaks of 713 completions per
-  rolling 15 minutes, 90 per minute, and six per second. With 50% headroom,
-  test 1.2 signup journeys/second for 15 minutes, three one-minute bursts of
-  2.25/second, and nine prepared completions within one second.
-- Retained 2025 check-in timestamps show peaks of 54 per rolling five minutes,
-  15 per minute, and three per second. Test ten authenticated staff sessions
-  sharing 81 check-ins per five minutes for 15 minutes, then separate bursts
-  of 23 per minute and five within one second. Include about 9% on-site
-  registrations and 9% staff edits. Device concurrency is a coverage choice.
-- A signup journey makes several callable and Firestore requests. Load tests
-  must exercise the complete account, draft, child, appointment, and completion
-  journey rather than treating one HTTP response as one customer.
+Use the [configured load workload](load-acceptance.md#configured-workload) and
+its source constants. Review sustained arrivals, short bursts, simultaneous
+completions, staff sessions, and the mix of staff edits/on-site registrations
+before each campaign. Store dated traffic measurements in the project vault.
+
+A signup journey makes several callable and Firestore requests. Exercise the
+complete account, draft, child, appointment, and completion journey. One HTTP
+response is not one completed customer journey. Keep historical successful
+transactions separate from assumptions about abandoned attempts and devices.
 
 ## Function resource profiles
 
 All customer and staff callables use bounded second-generation concurrency and
-maximum instances. These limits protect cost while leaving substantial margin
-above the expected traffic.
+maximum instances. These limits bound configured concurrency and cost. Verify
+workload headroom with measurements for the deployed revision.
 
 | Profile           | Functions                          | CPU |  Memory | Concurrency | Maximum instances |                   Warm instances |
 | ----------------- | ---------------------------------- | --: | ------: | ----------: | ----------------: | -------------------------------: |
 | Standard customer | account/profile/email changes      |   1 | 256 MiB |          10 |                 5 |                                0 |
 | Signup draft      | save/delete child, set appointment |   1 | 256 MiB |          20 |                10 |                                0 |
-| Signup completion | complete registration              |   1 | 256 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| Signup completion | complete registration              |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
 | New account       | account creation and QR generation |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
 | Event hot path    | check-in and scan resolution       |   1 | 256 MiB |          20 |                 5 |  `SANTASHOP_EVENT_MIN_INSTANCES` |
 | Event standard    | edit/on-site/pre-registration      |   1 | 256 MiB |          10 |                 3 |                                0 |
 | Low volume/admin  | templates, staff, owner operations |   1 | 256 MiB |          10 |                 3 |                                0 |
 
 The configured ceilings provide 200 concurrent requests for each signup hot
-path and 100 for each check-in hot path. This is capacity headroom, not a claim
-that downstream Auth, Firestore, Storage, or SES limits are unlimited.
+path and 100 for each check-in hot path. These are configured ceilings, not
+measured throughput or evidence of downstream Auth, Firestore, Storage, or SES
+capacity.
 
 Warm instances are deliberately temporary:
 
@@ -104,11 +102,13 @@ a slot exceeds its target.
 ## Dependency security
 
 Run `pnpm run audit:security` from the workspace root. It audits the complete
-production and development dependency graph and fails when a new advisory is
-present. Production dependencies must also remain clean under
-`pnpm audit --prod`.
+production and development dependency graph and returns a failure when an
+advisory outside the reviewed exceptions is present. Current CI workflows report it as
+informational with `continue-on-error`; a green workflow does not prove a clean
+audit. Review findings before promotion. Check production dependencies with
+`pnpm audit --prod` as well.
 
-The gate excludes advisories for which the registry publishes no resolution.
+The audit script excludes advisories for which the registry publishes no resolution.
 There are currently two such `image-size` advisories: the registry marks all
 versions through 2.0.2 as affected, while this locked graph contains version
 0.5.5. That version has no ICNS, JXL, or HEIF parser—the only parsers named by
@@ -137,7 +137,7 @@ adopts `stream-json` 3.5.0 or later.
 For every merge to `master`, the test backend workflow must:
 
 1. install from the locked dependency graph;
-2. pass the full dependency security audit;
+2. run the full dependency security audit and report findings for release review;
 3. pass Function unit and emulator integration suites;
 4. deploy Functions, Firestore rules/indexes, and Storage rules as one test
    backend release;
@@ -200,14 +200,14 @@ evidence that Firebase Hosting applied those headers.
 ## Load and resilience gate
 
 Run against the test project, never production. Follow
-[historical load acceptance](load-acceptance.md). No hosted smoke, account
+[hosted load acceptance](load-acceptance.md). No hosted smoke, account
 creation, or fixture seeding may start until the deployed email isolation gate
 proves credential removal, independent network denial, sink routing, and old
 worker retirement. The pass criteria are:
 
 - no unexpected 4xx/5xx responses;
 - at least 99% of callable responses under 2 seconds, excluding email delivery;
-- every valid attempted signup completes under the historical targets above;
+- every valid attempted signup completes under the configured workload;
 - exactly one check-in record for repeated or concurrent scans of one code;
 - no lost registration or slot-counter writes;
 - simulated email work drains within five minutes; counters reconcile within
@@ -218,10 +218,10 @@ worker retirement. The pass criteria are:
 Stop new arrivals on isolation drift, target mismatch, data corruption,
 unexpected errors above 1% in a rolling minute, or the $20 estimated operating
 limit. The total budget is $25, including a $5 verification reserve. Fixtures
-remain in test. SES delivery and production acceptance remain unverified.
+remain in test. A sink run does not establish SES delivery or production acceptance.
 
 Store the test parameters, commit SHA, UTC start/end, result counts, p50/p95/p99,
-and relevant Monitoring links with the release record. A small emulator test is
+and relevant Monitoring links with the release record in the project vault. A small emulator test is
 useful for correctness but is not evidence of cloud latency or quota headroom.
 
 ## Monitoring and incident triggers

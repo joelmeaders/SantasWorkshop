@@ -10,7 +10,6 @@ on:
       - 'santashop-app/**'
       - 'santashop-core/**'
       - 'santashop-models/**'
-      - 'scripts/check-storybook-coverage.mjs'
       - 'angular.json'
       - 'eslint.config.js'
       - 'package.json'

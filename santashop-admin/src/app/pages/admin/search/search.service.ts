@@ -3,96 +3,100 @@ import { Injectable, inject } from '@angular/core';
 import {
 	limit,
 	orderBy,
-	QueryConstraint,
+	type QueryConstraint,
 	where,
 } from 'firebase/firestore/lite';
 import {
 	COLLECTION_SCHEMA,
-	RegistrationSearchIndex,
-	User,
+	type RegistrationSearchIndex,
+	type User,
 } from '@santashop/models';
-import { BehaviorSubject, Observable, shareReplay } from 'rxjs';
+import {
+	BehaviorSubject,
+	catchError,
+	defer,
+	map,
+	type Observable,
+	of,
+	shareReplay,
+	startWith,
+	switchMap,
+	timeout,
+} from 'rxjs';
 
-@Injectable({
-	providedIn: 'root',
-})
+export type SearchState =
+	| { status: 'idle' | 'loading' | 'error' }
+	| { status: 'ready'; results: RegistrationSearchIndex[] };
+
+@Injectable({ providedIn: 'root' })
 export class SearchService {
-	private readonly repoService = inject(AdminReadRepository);
-
-	private readonly searchResults = new BehaviorSubject<Observable<
-		RegistrationSearchIndex[]
-	> | null>(null);
-	public readonly searchResults$: Observable<Observable<
-		RegistrationSearchIndex[]
-	> | null> = this.searchResults.asObservable().pipe(shareReplay(1));
-
-	private readonly index =
-		this.repoService.collection<RegistrationSearchIndex>(
-			COLLECTION_SCHEMA.registrationSearchIndex,
-		);
-
-	private readonly users = this.repoService.collection<User>(
+	private readonly repo = inject(AdminReadRepository);
+	private readonly criteria = new BehaviorSubject<QueryConstraint[] | null>(
+		null,
+	);
+	private readonly index = this.repo.collection<RegistrationSearchIndex>(
+		COLLECTION_SCHEMA.registrationSearchIndex,
+	);
+	private readonly users = this.repo.collection<User>(
 		COLLECTION_SCHEMA.users,
 	);
 
-	private readonly queryLastNameZip = (
-		lastName: string,
-		zipCode: string,
-	): QueryConstraint[] => {
-		return [
+	/** One server read per query or refresh, shared by all current consumers. */
+	public readonly state$: Observable<SearchState> = this.criteria.pipe(
+		switchMap((criteria) =>
+			criteria === null
+				? of<SearchState>({ status: 'idle' })
+				: defer(() => this.index.readMany(criteria)).pipe(
+						timeout({ first: 5000 }),
+						map((results): SearchState => ({
+							status: 'ready',
+							results,
+						})),
+						catchError(() => of<SearchState>({ status: 'error' })),
+						startWith<SearchState>({ status: 'loading' }),
+					),
+		),
+		shareReplay({ bufferSize: 1, refCount: true }),
+	);
+
+	public searchByLastNameZip(lastName: string, zipCode: string): void {
+		const name = lastName.toLowerCase();
+		this.criteria.next([
 			where('zip', '==', zipCode),
-			where('lastName', '>=', lastName),
-			where('lastName', '<=', lastName + '\uf8ff'),
+			where('lastName', '>=', name),
+			where('lastName', '<=', name + '\uf8ff'),
 			orderBy('lastName', 'asc'),
 			limit(50),
-		] as QueryConstraint[];
-	};
-
-	private readonly queryEmail = (emailAddress: string): QueryConstraint[] =>
-		[
-			where('emailAddress', '>=', emailAddress),
-			where('emailAddress', '<=', emailAddress + '\uf8ff'),
-			orderBy('emailAddress', 'asc'),
-			limit(50),
-		] as QueryConstraint[];
-
-	private readonly queryCode = (code: string): QueryConstraint[] =>
-		[where('code', '==', code), limit(50)] as QueryConstraint[];
-
-	public searchByLastNameZip(
-		lastName: string,
-		zipCode: string,
-	): void {
-		this.searchResults.next(
-			this.index.readMany(
-				this.queryLastNameZip(lastName.toLowerCase(), zipCode),
-			),
-		);
+		]);
 	}
 
 	public searchByEmail(emailAddress: string): void {
-		this.searchResults.next(
-			this.index.readMany(this.queryEmail(emailAddress.toLowerCase())),
-		);
+		const email = emailAddress.toLowerCase();
+		this.criteria.next([
+			where('emailAddress', '>=', email),
+			where('emailAddress', '<=', email + '\uf8ff'),
+			orderBy('emailAddress', 'asc'),
+			limit(50),
+		]);
 	}
 
 	public searchByCode(code: string): void {
-		this.searchResults.next(
-			this.index.readMany(this.queryCode(code.toUpperCase())),
-		);
+		this.criteria.next([
+			where('code', '==', code.toUpperCase()),
+			limit(50),
+		]);
 	}
 
-	// This method operates differently than the others. It returns a list of users directly
 	public searchUsersByEmailAddress(emailAddress: string): Observable<User[]> {
-		const queryConstraint = where(
-			'emailAddress',
-			'==',
-			emailAddress.toLowerCase(),
-		);
-		return this.users.readMany([queryConstraint]);
+		return this.users.readMany([
+			where('emailAddress', '==', emailAddress.toLowerCase()),
+		]);
 	}
 
+	public refresh(): void {
+		this.criteria.next(this.criteria.value);
+	}
 	public reset(): void {
-		this.searchResults.next(null);
+		this.criteria.next(null);
 	}
 }

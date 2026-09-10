@@ -3,104 +3,60 @@ import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const requireFromTest = createRequire(import.meta.url);
+type ClientMode = 'dev' | 'local' | 'e2e' | 'test' | 'prod';
+type FunctionsMode = 'local' | 'test' | 'prod';
+interface EmulatorPorts {
+	auth: number;
+	functions: number;
+	firestore: number;
+	storage: number;
+}
+interface FirebaseClientConfig {
+	apiKey: string;
+	authDomain: string;
+	databaseURL: string;
+	projectId: string;
+	storageBucket: string;
+	messagingSenderId: string;
+	appId: string;
+	measurementId: string;
+}
+interface AppConfig {
+	production: boolean;
+	label: string;
+	name: string;
+	version: string;
+	appCheckKey: string;
+	appCheckEnabled: boolean;
+	programYear: number;
+	emulatorPorts: EmulatorPorts;
+}
 const configFirebase = requireFromTest('../../../../config.firebase.cjs') as {
 	MODE_METADATA: Record<
-		string,
-		{
-			production: boolean;
-			label: string;
-			appCheckKey: string;
-			appCheckEnabled: boolean;
-			emulatorPorts?: {
-				auth: number;
-				functions: number;
-				firestore: number;
-				storage: number;
-			};
-		}
+		ClientMode,
+		Pick<
+			AppConfig,
+			'production' | 'label' | 'appCheckKey' | 'appCheckEnabled'
+		> & { emulatorPorts?: EmulatorPorts }
 	>;
-	LOCAL_FIREBASE_CONFIG: {
-		apiKey: string;
-		authDomain: string;
-		databaseURL: string;
-		projectId: string;
-		storageBucket: string;
-		messagingSenderId: string;
-		appId: string;
-		measurementId: string;
-	};
-	parseFirebaseConfigMode: (
-		value?: string,
-	) => 'dev' | 'local' | 'e2e' | 'test' | 'prod';
-	buildFirebaseClientConfig: (
-		mode: 'dev' | 'local' | 'e2e' | 'test' | 'prod',
-	) => {
-		apiKey: string;
-		authDomain: string;
-		databaseURL: string;
-		projectId: string;
-		storageBucket: string;
-		messagingSenderId: string;
-		appId: string;
-		measurementId: string;
-	};
-	buildAppConfig: (
-		target: 'app' | 'admin',
-		mode: 'dev' | 'local' | 'e2e' | 'test' | 'prod',
-	) => {
-		production: boolean;
-		label: string;
-		name: string;
-		version: string;
-		appCheckKey: string;
-		appCheckEnabled: boolean;
-		programYear: number;
-		emulatorPorts: {
-			auth: number;
-			functions: number;
-			firestore: number;
-			storage: number;
-		};
-	};
-	renderAppConfigModule: (appConfig: {
-		production: boolean;
-		label: string;
-		name: string;
-		version: string;
-		appCheckKey: string;
-		appCheckEnabled: boolean;
-		programYear: number;
-		emulatorPorts: {
-			auth: number;
-			functions: number;
-			firestore: number;
-			storage: number;
-		};
-	}) => string;
-	renderFirebaseConfigModule: (firebaseConfig: {
-		apiKey: string;
-		authDomain: string;
-		databaseURL: string;
-		projectId: string;
-		storageBucket: string;
-		messagingSenderId: string;
-		appId: string;
-		measurementId: string;
-	}) => string;
+	LOCAL_FIREBASE_CONFIG: FirebaseClientConfig;
+	parseFirebaseConfigMode: (value?: string) => ClientMode;
+	buildFirebaseClientConfig: (mode: ClientMode) => FirebaseClientConfig;
+	buildAppConfig: (target: 'app' | 'admin', mode: ClientMode) => AppConfig;
+	renderAppConfigModule: (config: AppConfig) => string;
+	renderFirebaseConfigModule: (config: FirebaseClientConfig) => string;
 };
 const configFunctions = requireFromTest('../../../../config.functions.cjs') as {
-	FUNCTION_PROJECT_IDS: Record<'local' | 'test' | 'prod', string>;
-	parseMode: (value?: string) => 'local' | 'test' | 'prod';
-	buildFunctionsConfig: (
-		mode: 'local' | 'test' | 'prod',
-	) => Record<string, string>;
+	FUNCTION_PROJECT_IDS: Record<FunctionsMode, string>;
+	parseMode: (value?: string) => FunctionsMode;
+	buildFunctionsConfig: (mode: FunctionsMode) => Record<string, string>;
 	renderFunctionsEnvFile: (
-		mode: 'local' | 'test' | 'prod',
+		mode: FunctionsMode,
 		projectId: string,
 		config: Record<string, string>,
 	) => string;
 	getGenerationLogMessage: (
-		mode: 'local' | 'test' | 'prod',
+		mode: FunctionsMode,
 		projectId: string,
 		targetPath: string,
 	) => string;
@@ -177,32 +133,9 @@ const MANAGED_ENV_KEYS = [
 		.map((key) => key.replace('TEST_', 'LOCAL_')),
 	...Object.keys(FIREBASE_ENV_KEYS),
 	...Object.keys(FUNCTIONS_ENV_KEYS),
-	'FIREBASE_API_KEY',
-	'FIREBASE_AUTH_DOMAIN',
-	'FIREBASE_DATABASE_URL',
-	'FIREBASE_PROJECT_ID',
-	'FIREBASE_STORAGE_BUCKET',
-	'FIREBASE_MESSAGING_SENDER_ID',
-	'FIREBASE_APP_ID',
-	'FIREBASE_MEASUREMENT_ID',
-	'AWS_ACCESS_KEY_ID',
-	'AWS_SECRET_ACCESS_KEY',
-	'SANTASHOP_PROGRAM_YEAR',
-	'SANTASHOP_TIME_ZONE',
-	'SANTASHOP_DEFAULT_MAX_SLOTS',
-	'FIRESTORE_BACKUP_BUCKET',
-	'SES_REGION',
-	'SANTASHOP_EVENT_DISPLAY_NAME',
-	'SANTASHOP_PASSWORD_RESET_CONTINUE_URL',
-	'REGISTRATION_EMAIL_SOURCE',
-	'REGISTRATION_EMAIL_RETURN_PATH',
-	'SCHEDULED_FIRESTORE_BACKUP',
-	'SCHEDULED_DATETIME_SLOT_COUNTERS',
-	'SCHEDULED_REGISTRATION_STATS',
-	'SCHEDULED_USER_STATS',
-	'SCHEDULED_CHECKIN_STATS',
-	'SANTASHOP_SHOP_DAYS',
-	'REMINDER_EMAIL_SENDING_STALE_MINUTES',
+	...Object.keys({ ...FIREBASE_ENV_KEYS, ...FUNCTIONS_ENV_KEYS }).map((key) =>
+		key.replace(/^(TEST|PROD)_/, ''),
+	),
 	'AWS_REGION',
 	'SANTASHOP_SIGNUP_MIN_INSTANCES',
 	'SANTASHOP_EVENT_MIN_INSTANCES',

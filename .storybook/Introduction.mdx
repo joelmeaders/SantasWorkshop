@@ -24,7 +24,7 @@ Automated checks do not replace keyboard, screen-reader, or zoom review. Storybo
 
 Keep its visible behavior tests while changing its implementation. Test what happens after fixture data changes, not only the first render. Use visual comparisons to review appearance, and focused unit tests for cancellation, cleanup, and request ordering.
 
-The inventory measures component representation. It does not prove that every state or transition has a test. The migration section in `docs/storybook.md` explains which evidence to add before each conversion.
+The catalog is a set of useful examples, not a component-count requirement or proof that every state or transition has a test. The migration section in `docs/storybook.md` explains which evidence to add before each conversion.
 
 ## Add or change a story
 
@@ -33,9 +33,9 @@ Keep stories beside their component in a `*.stories.ts` file. Reference the prod
 Run these commands from the workspace root:
 
 ```sh
-pnpm run storybook:coverage
+pnpm run storybook:typecheck
 pnpm run storybook:build
 pnpm run storybook:test
 ```
 
-The coverage check requires every Angular component in both apps to appear in the catalog. The repository's `docs/storybook.md` explains the workflow. `docs/storybook-inventory.md` lists the components and their named stories.
+Choose stories and play functions for meaningful UI risks rather than blanket presence rules. Keep accessibility and visual checks for retained stories. The repository's `docs/storybook.md` explains validation and coverage decisions; use the catalog sidebar for the current inventory.

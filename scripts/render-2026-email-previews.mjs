@@ -30,6 +30,12 @@ try {
 			template.language === 'es'
 				? 'María José Rodríguez'
 				: 'Alexandra-Michelle';
+		// Optional editable exports come from the canonical JSON, not app assets.
+		writeFileSync(
+			output + template.key + '.source.html',
+			template.html + '\n',
+		);
+		writeFileSync(output + template.key + '.txt', template.textPart + '\n');
 		const html = Handlebars.compile(template.html)(data);
 		writeFileSync(output + template.key + '.html', html);
 		for (const [label, width] of [

@@ -35,8 +35,11 @@ import { AgeGroup, ToyType } from '@santashop/models';
 import {
 	yyyymmddToLocalDate,
 	getAgeFromDate,
+	MAX_BIRTHDATE,
+	MIN_BIRTHDATE,
+	PROGRAM_YEAR,
+	dateToCalendarString,
 } from '@santashop/core/admin/firestore';
-import { ChildValidationService } from '../../services/child-validation.service';
 
 @Component({
 	selector: 'admin-add-edit-child-modal',
@@ -58,49 +61,24 @@ import { ChildValidationService } from '../../services/child-validation.service'
 		IonInput,
 		IonRadioGroup,
 		IonRadio,
-		IonHeader,
-		IonToolbar,
-		IonTitle,
-		IonButton,
-		IonContent,
-		IonListHeader,
-		IonNote,
-		IonItemDivider,
-		IonLabel,
-		IonItem,
-		IonInput,
-		IonRadioGroup,
-		IonRadio,
-		IonHeader,
-		IonToolbar,
-		IonTitle,
-		IonButton,
-		IonContent,
-		IonListHeader,
-		IonNote,
-		IonItemDivider,
-		IonLabel,
-		IonItem,
-		IonInput,
-		IonRadioGroup,
-		IonRadio,
 	],
 })
 export class AddEditChildModalComponent implements OnInit {
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
 	private readonly changeDetector = inject(ChangeDetectorRef);
-	protected readonly childValidationService = inject(ChildValidationService);
+	private readonly programYear =
+		inject(PROGRAM_YEAR, { optional: true }) ?? new Date().getFullYear();
 
 	@Input() public child?: Child;
 
 	public form: UntypedFormGroup = this.newForm();
 
-	public readonly minBirthDate = this.dateForInput(
-		this.childValidationService.minBirthDate(),
+	public readonly minBirthDate = dateToCalendarString(
+		MIN_BIRTHDATE(this.programYear),
 	);
-	public readonly maxBirthDate = this.dateForInput(
-		this.childValidationService.maxBirthDate(),
+	public readonly maxBirthDate = dateToCalendarString(
+		MAX_BIRTHDATE(this.programYear),
 	);
 
 	public readonly isInfant = signal(false);
@@ -111,7 +89,7 @@ export class AddEditChildModalComponent implements OnInit {
 
 		const child = this.child;
 		if (child?.dateOfBirth) {
-			const dob = this.dateForInput(child.dateOfBirth);
+			const dob = dateToCalendarString(child.dateOfBirth);
 			this.birthdaySelected({ detail: { value: dob } });
 		}
 	}
@@ -132,12 +110,12 @@ export class AddEditChildModalComponent implements OnInit {
 				Validators.compose([
 					Validators.required,
 					Validators.minLength(2),
-					Validators.maxLength(20),
+					Validators.maxLength(25),
 				]),
 			),
 			dateOfBirth: new UntypedFormControl(
 				child?.dateOfBirth
-					? this.dateForInput(child.dateOfBirth)
+					? dateToCalendarString(child.dateOfBirth)
 					: undefined,
 				Validators.compose([
 					Validators.required,
@@ -180,7 +158,7 @@ export class AddEditChildModalComponent implements OnInit {
 		const dateOfBirth = yyyymmddToLocalDate(yyyymmdd);
 		const ageInYears = getAgeFromDate(
 			dateOfBirth,
-			this.childValidationService.maxBirthDate(),
+			MAX_BIRTHDATE(this.programYear),
 		);
 		let ageGroup: AgeGroup | undefined;
 		const wasInfant = this.isInfant();
@@ -227,19 +205,6 @@ export class AddEditChildModalComponent implements OnInit {
 			this.form.controls['dateOfBirth'].value,
 		);
 		await this.dismiss(child);
-	}
-
-	private dateForInput(date: Date): string {
-		const isUtcMidnight =
-			date.getUTCHours() === 0 &&
-			date.getUTCMinutes() === 0 &&
-			date.getUTCSeconds() === 0 &&
-			date.getUTCMilliseconds() === 0;
-		const year = isUtcMidnight ? date.getUTCFullYear() : date.getFullYear();
-		const month = isUtcMidnight ? date.getUTCMonth() : date.getMonth();
-		const day = isUtcMidnight ? date.getUTCDate() : date.getDate();
-
-		return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 	}
 
 	public async dismiss(child?: Child): Promise<void> {

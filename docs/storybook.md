@@ -20,18 +20,24 @@ Install the test browser once with `pnpm exec playwright install chromium`. Linu
 ```sh
 pnpm run storybook:typecheck
 pnpm run storybook:lint
-pnpm run storybook:coverage
 pnpm run storybook:build
 pnpm run storybook:test
 ```
 
-Use `pnpm run ci:storybook` to run the complete type, lint, inventory, build,
-interaction, and accessibility gate. The normal `ci:app:test` and
-`ci:admin:test` commands include this gate. Their pull-request and release
-workflows therefore test Storybook with the other customer and admin tests.
-The separate Storybook pull-request workflow runs the Windows visual suite.
+Use `pnpm run ci:storybook` for type, lint, build, interaction, and accessibility
+validation. `ci:app:test` and `ci:admin:test` are target-only unit commands;
+`ci:ui:test` is the local all-UI aggregate. In PRs, the shared job runs core and
+Storybook once and `build_validation` requires it along with the selected UI
+jobs. Standalone UI releases run their own shared validation unless tests were
+explicitly skipped. Windows visual comparisons remain a separate PR job.
 
-The inventory check finds Angular `@Component` declarations in both apps. It requires a colocated TypeScript story that directly imports and references each component. Every named story must define or inherit a local play function. See the [generated inventory](storybook-inventory.md) for source links and named states.
+Choose stories for a specific regression risk: complex forms and overlays,
+responsive layouts, input/output transitions, loading/errors, and permission
+presentation. A trivial component does not need a story solely because it
+exists, and a static example does not need a no-op play function. Existing
+meaningful stories, accessibility checks, and visual baselines remain. Before
+removing a story or test, identify its unique failure and where that behavior
+will still be covered. The live catalog replaces the committed second inventory.
 
 The browser tests render stories and execute their play functions. Accessibility violations fail the run. Automated accessibility checks cover machine-detectable issues. Also review keyboard navigation, focus order, zoom, and screen-reader announcements when changing interactive UI.
 
@@ -39,15 +45,15 @@ These are isolated UI tests. Existing unit tests still cover service logic. Emul
 
 ## Preparing for a signals migration
 
-The catalog is a regression baseline, not proof that a signals conversion preserves every behavior. Component coverage counts show which components have stories. They do not measure branch coverage or reactive behavior coverage.
+The catalog is a regression baseline, not proof that a signals conversion preserves every behavior. The catalog does not measure branch coverage or prove that all reactive transitions are covered.
 
 Keep three kinds of evidence during each conversion:
 
-| Check                                          | Regression it can detect                                                                                     |
+| Check | Regression it can detect |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Interaction and transition stories             | Stale rendered state after new data, incorrect derived state, broken controls, or wrong submitted values     |
-| Visual comparisons at mobile and desktop sizes | Missing content, spacing, wrapping, clipping, and changed layout                                             |
-| Focused unit and integration tests             | Subscription cleanup, cancellation, error propagation, request ordering, route guards, and backend contracts |
+| Interaction and transition stories | Stale rendered state after new data, incorrect derived state, broken controls, or wrong submitted values |
+| Visual comparisons at mobile and desktop sizes | Missing content, spacing, wrapping, clipping, and changed layout |
+| Focused unit and integration tests | Subscription cleanup, cancellation, error propagation, request ordering, route guards, and backend contracts |
 
 Large serialized DOM snapshots are not the default. They produce noisy changes when Angular or Ionic changes internal markup. Prefer visible behavior assertions and image comparisons. See [Storybook's snapshot guidance](https://storybook.js.org/docs/writing-tests/snapshot-testing).
 
@@ -96,15 +102,14 @@ baseline records that revision; rerun the checks for later changes.
 
 ## Add a component or page
 
-1. Add a colocated `*.stories.ts` file beside the production component.
+1. Identify the component's meaningful UI risks and retained coverage. Add a colocated `*.stories.ts` file when isolated examples or tests add value.
 2. Import the actual component and set `component` in its default story metadata.
 3. Add `autodocs` and a description of the UI and mocked dependencies.
 4. Supply all required inputs with synthetic, stable fixtures.
 5. Replace external services with explicit Angular providers.
 6. Add named stories for relevant populated, empty, loading, validation, error, and permission states.
-7. Add play assertions for visible output and meaningful interactions.
-8. Run the inventory, build, and browser checks.
-9. Refresh the inventory with `node scripts/check-storybook-coverage.mjs --write`.
+7. Add play assertions for meaningful transitions or interactions; do not add no-op functions to satisfy a presence rule.
+8. Run type checking, build, browser tests, and relevant visual comparisons.
 
 Use the existing stories and app-specific helpers in `.storybook/registration` and `.storybook/admin` as examples. Keep each mock limited to the interface the UI uses. An unsupported external operation should fail clearly, rather than silently return generic data.
 

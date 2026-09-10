@@ -50,7 +50,7 @@ import {
 } from '@santashop/models';
 import { applicationConfig, type Decorator } from '@storybook/angular-vite';
 import { fn } from 'storybook/test';
-import { BehaviorSubject, of, type Observable } from 'rxjs';
+import { BehaviorSubject, map, of } from 'rxjs';
 import { EmailTemplateService } from '../../santashop-admin/src/app/pages/admin/tools/email-templates/email-template.service';
 import { LandingPage } from '../../santashop-admin/src/app/pages/admin/landing/landing.page';
 import { OwnerOperationsService } from '../../santashop-admin/src/app/pages/admin/tools/owner-operations/owner-operations.service';
@@ -521,34 +521,35 @@ const createAdminStoryFixtures = (
 	};
 };
 
-const createSearchService = (fixtures: AdminStoryFixtures): object => {
-	const searchResults = fixtures.searchResults$.value;
-	const searchResultValues$ = new BehaviorSubject<RegistrationSearchIndex[]>(
-		cloneStoryData([...(searchResults ?? [])]),
-	);
-	const searchResultStream$ = new BehaviorSubject<Observable<
-		RegistrationSearchIndex[]
-	> | null>(
-		searchResults === null ? null : searchResultValues$.asObservable(),
-	);
-	fixtures.searchResults$.subscribe((value) => {
-		if (value === null) {
-			searchResultStream$.next(null);
-			return;
-		}
-		searchResultValues$.next(cloneStoryData(value));
-		searchResultStream$.next(searchResultValues$.asObservable());
-	});
-
-	return {
-		searchResults$: searchResultStream$.asObservable(),
-		searchByLastNameZip: fn(),
-		searchByEmail: fn(),
-		searchByCode: fn(),
-		searchUsersByEmailAddress$: fn(() => of([])),
-		reset: fn(),
-	};
-};
+const createSearchService = (
+	fixtures: AdminStoryFixtures,
+): Pick<
+	SearchService,
+	| 'state$'
+	| 'searchByLastNameZip'
+	| 'searchByEmail'
+	| 'searchByCode'
+	| 'searchUsersByEmailAddress'
+	| 'refresh'
+	| 'reset'
+> => ({
+	state$: fixtures.searchResults$.pipe(
+		map((results) =>
+			results === null
+				? { status: 'idle' as const }
+				: {
+						status: 'ready' as const,
+						results: cloneStoryData(results),
+					},
+		),
+	),
+	searchByLastNameZip: fn(),
+	searchByEmail: fn(),
+	searchByCode: fn(),
+	searchUsersByEmailAddress: fn(() => of([])),
+	refresh: fn(),
+	reset: fn(() => fixtures.searchResults$.next(null)),
+});
 
 const createProviders = (
 	options: AdminStoryOptions,
@@ -620,7 +621,15 @@ const createProviders = (
 		},
 		{
 			provide: AppStateService,
-			useFactory: (): object => {
+			useFactory: (): Pick<
+				AppStateService,
+				| 'prefersDark'
+				| 'preRegistrationEnabled$'
+				| 'onsiteRegistrationEnabled$'
+				| 'checkinEnabled$'
+				| 'allowCancelRegistration$'
+				| 'allowChangeRegistration$'
+			> => {
 				const fixtures = inject(ADMIN_STORY_FIXTURES);
 				return {
 					prefersDark: false,
@@ -705,7 +714,18 @@ const createProviders = (
 		},
 		{
 			provide: CheckInContextService,
-			useFactory: (): object => {
+			useFactory: (): Pick<
+				CheckInContextService,
+				| 'currentRegistration$'
+				| 'checkin$'
+				| 'blockedScan$'
+				| 'inputMethod$'
+				| 'setRegistration'
+				| 'setCheckIn'
+				| 'setBlockedScan'
+				| 'resetRegistration'
+				| 'reset'
+			> => {
 				const fixtures = inject(ADMIN_STORY_FIXTURES);
 				return {
 					currentRegistration$: fixtures.registration$.asObservable(),
@@ -728,37 +748,43 @@ const createProviders = (
 		},
 		{
 			provide: CheckInService,
-			useFactory: () => ({
+			useFactory: (): Pick<
+				CheckInService,
+				'checkIn' | 'onSiteRegistration'
+			> => ({
 				checkIn: fn(async (): Promise<number> => 2),
 				onSiteRegistration: fn(async (): Promise<number> => 2),
 			}),
 		},
 		{
 			provide: RegistrationScanService,
-			useFactory: () => ({
+			useFactory: (): Pick<RegistrationScanService, 'resolve'> => ({
 				resolve: fn(async () => ({
-					disposition: 'eligible',
-					registration: demoRegistration,
+					disposition: 'eligible' as const,
+					registration: cloneStoryData(demoRegistration),
 				})),
 			}),
 		},
 		{
 			provide: LookupService,
-			useFactory: (): object => {
+			useFactory: (): Pick<
+				LookupService,
+				'getRegistrationByQrCode$' | 'getSearchIndexByEmailAddress$'
+			> => {
 				const fixtures = inject(ADMIN_STORY_FIXTURES);
 				return {
 					getRegistrationByQrCode$: fn(() =>
 						fixtures.registration$.asObservable(),
 					),
 					getSearchIndexByEmailAddress$: fn(() =>
-						of(demoSearchResults[0]),
+						of(cloneStoryData(demoSearchResults[0])),
 					),
 				};
 			},
 		},
 		{
 			provide: DateTimeModalService,
-			useFactory: (): object => {
+			useFactory: (): Pick<DateTimeModalService, 'availableSlots$'> => {
 				const fixtures = inject(ADMIN_STORY_FIXTURES);
 				return {
 					availableSlots$: fixtures.slots$.asObservable(),
@@ -767,22 +793,38 @@ const createProviders = (
 		},
 		{
 			provide: ScanRiskService,
-			useFactory: (): object => {
+			useFactory: (): Pick<
+				ScanRiskService,
+				'summaries' | 'attempts' | 'checkIn'
+			> => {
 				const fixtures = inject(ADMIN_STORY_FIXTURES);
 				return {
 					summaries: fn(() => fixtures.riskSummaries$.asObservable()),
 					attempts: fn(() => fixtures.riskAttempts$.asObservable()),
-					checkIn: fn(() => of(demoCheckIn)),
+					checkIn: fn(() => of(cloneStoryData(demoCheckIn))),
 				};
 			},
 		},
 		{
 			provide: StaffService,
-			useFactory: (): object => {
+			useFactory: (): Pick<
+				StaffService,
+				| 'staffAccounts$'
+				| 'state$'
+				| 'refresh'
+				| 'createStaffUser'
+				| 'updateStaffUser'
+				| 'deleteStaffUser'
+			> => {
 				const fixtures = inject(ADMIN_STORY_FIXTURES);
 				return {
 					staffAccounts$: fixtures.staffAccounts$.asObservable(),
-					state$: of({ status: 'ready' }),
+					state$: fixtures.staffAccounts$.pipe(
+						map((accounts) => ({
+							status: 'ready' as const,
+							accounts,
+						})),
+					),
 					refresh: fn(),
 					createStaffUser: fn(async () => 'staff-created'),
 					updateStaffUser: fn(async (): Promise<void> => undefined),
@@ -792,24 +834,35 @@ const createProviders = (
 		},
 		{
 			provide: EmailTemplateService,
-			useFactory: () => ({
+			useFactory: (): Pick<
+				EmailTemplateService,
+				| 'listEmailTemplates'
+				| 'getEmailTemplate'
+				| 'getEmailTemplateRevision'
+				| 'saveEmailTemplateRevision'
+				| 'publishEmailTemplate'
+				| 'sendTestEmailTemplate'
+				| 'deleteEmailTemplate'
+			> => ({
 				listEmailTemplates: fn(async () => [
 					...(options.emailTemplates ?? [demoEmailTemplate]),
 				]),
-				getEmailTemplate: fn(async () => demoEmailDetail),
+				getEmailTemplate: fn(async () =>
+					cloneStoryData(demoEmailDetail),
+				),
 				getEmailTemplateRevision: fn(async () => ({
-					template: demoEmailTemplate,
-					revision: emailRevision,
+					template: cloneStoryData(demoEmailTemplate),
+					revision: cloneStoryData(emailRevision),
 					html: demoEmailDetail.currentHtml ?? '',
 				})),
 				saveEmailTemplateRevision: fn(async () => ({
-					template: demoEmailTemplate,
-					revision: emailRevision,
+					template: cloneStoryData(demoEmailTemplate),
+					revision: cloneStoryData(emailRevision),
 					html: demoEmailDetail.currentHtml ?? '',
 				})),
 				publishEmailTemplate: fn(async () => ({
-					template: demoEmailTemplate,
-					revision: emailRevision,
+					template: cloneStoryData(demoEmailTemplate),
+					revision: cloneStoryData(emailRevision),
 					renderedHtml: demoEmailDetail.currentHtml ?? '',
 				})),
 				sendTestEmailTemplate: fn(async () => ({
@@ -822,13 +875,16 @@ const createProviders = (
 		},
 		{
 			provide: OwnerOperationsService,
-			useFactory: () => ({
-				preview: fn(async () => previewOperation),
+			useFactory: (): Pick<
+				OwnerOperationsService,
+				'preview' | 'start' | 'get' | 'getExportUrl'
+			> => ({
+				preview: fn(async () => cloneStoryData(previewOperation)),
 				start: fn(async () => ({
 					operationId: completedOperation.id,
-					status: 'queued',
+					status: 'queued' as const,
 				})),
-				get: fn(async () => completedOperation),
+				get: fn(async () => cloneStoryData(completedOperation)),
 				getExportUrl: fn(async () => ({
 					url: 'https://example.test/private-export.csv',
 					expiresAt: '2026-09-06T20:00:00.000Z',

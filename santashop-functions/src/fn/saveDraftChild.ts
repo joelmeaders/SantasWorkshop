@@ -1,19 +1,12 @@
-import { getPublicParameters } from '../utility/public-parameters';
 import { type CallableRequest } from 'firebase-functions/v2/https';
-import admin from '../firebase-admin';
-import { COLLECTION_SCHEMA, type Registration } from '../models';
 import { requireAuthenticatedUid } from '../utility/callable-validation';
 import {
-	MUTATION_RECEIPTS_SUBCOLLECTION,
 	canonicalizeChild,
-	getStoredMutationResult,
-	requireDraftRegistration,
 	requireMutationId,
 	requireObject,
 	requireOnlyKeys,
-	requireOpenPreRegistration,
-	type MutationReceipt,
 } from './registrationMutationSupport';
+import { mutateDraftChildren } from './mutateDraftChildren';
 
 interface SaveDraftChildData {
 	mutationId: string;
@@ -28,43 +21,17 @@ export default async function saveDraftChild(
 	requireOnlyKeys(data, ['mutationId', 'child']);
 	const mutationId = requireMutationId(data['mutationId']);
 	const child = canonicalizeChild(data['child']);
-	const db = admin.firestore();
-	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parameters = await getPublicParameters();
-	const receiptRef = registrationRef
-		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
-		.doc(mutationId);
-
-	await db.runTransaction(async (transaction) => {
-		const [registrationSnapshot, receiptSnapshot] = await Promise.all([
-			transaction.get(registrationRef),
-			transaction.get(receiptRef),
-		]);
-		const cached = getStoredMutationResult(
-			receiptSnapshot.exists
-				? (receiptSnapshot.data() as MutationReceipt)
-				: undefined,
-			'saveDraftChild',
-		);
-		if (cached) return;
-		requireOpenPreRegistration(parameters);
-		const registration = requireDraftRegistration(
-			registrationSnapshot.data() as Registration | undefined,
-		);
-		const children = [...(registration.children ?? [])];
-		const existingIndex = children.findIndex(
-			(candidate) => candidate.id === child.id,
-		);
-		if (existingIndex >= 0) children[existingIndex] = child;
-		else children.push(child);
-
-		transaction.set(registrationRef, { children }, { merge: true });
-		transaction.create(receiptRef, {
-			operation: 'saveDraftChild',
-			result: true,
-			completedOn: new Date(),
-		} satisfies MutationReceipt);
-	});
-
-	return true;
+	return mutateDraftChildren(
+		uid,
+		mutationId,
+		'saveDraftChild',
+		(children) => {
+			const existingIndex = children.findIndex(
+				(candidate) => candidate.id === child.id,
+			);
+			if (existingIndex >= 0) children[existingIndex] = child;
+			else children.push(child);
+			return children;
+		},
+	);
 }

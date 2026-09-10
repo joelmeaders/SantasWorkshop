@@ -1,171 +1,87 @@
-import { beforeEach, describe, expect, it, type MockInstance } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
-import {
-	autoSpyProvider,
-	getFunctionSpy,
-	getPropertySpy,
-	Spied,
-} from '../../../../../../test-helpers';
+import { BehaviorSubject } from 'rxjs';
 import { mockUsers } from '../../../../../../test-helpers/mock-data';
 import { provideTranslateServiceMock } from '../../../../test-helpers';
-
 import { ProfilePage } from './profile.page';
 import { ProfilePageService } from './profile.page.service';
 import { changeEmailForm, changePasswordForm } from './profile.form';
 import { newChangeInfoForm } from './change-info/change-info.form';
 
+const createProfileFixture = (): Pick<
+	ProfilePageService,
+	| 'profileForm'
+	| 'changeEmailForm'
+	| 'changePasswordForm'
+	| 'updatePublicProfile'
+	| 'changeEmailAddress'
+	| 'changePassword'
+> & {
+	userProfile$: BehaviorSubject<ReturnType<typeof mockUsers>['user1']>;
+} => ({
+	profileForm: newChangeInfoForm(),
+	changeEmailForm: changeEmailForm(),
+	changePasswordForm: changePasswordForm(),
+	userProfile$: new BehaviorSubject(mockUsers().user1),
+	updatePublicProfile: vi
+		.fn<ProfilePageService['updatePublicProfile']>()
+		.mockResolvedValue(undefined),
+	changeEmailAddress: vi
+		.fn<ProfilePageService['changeEmailAddress']>()
+		.mockResolvedValue(undefined),
+	changePassword: vi
+		.fn<ProfilePageService['changePassword']>()
+		.mockResolvedValue(undefined),
+});
+
 describe('ProfilePage', () => {
-	let component: ProfilePage;
 	let fixture: ComponentFixture<ProfilePage>;
-
-	const viewService: Spied<ProfilePageService> =
-		autoSpyProvider(ProfilePageService).useValue;
-
-	const providers = [
-		{ provide: ProfilePageService, useValue: viewService },
-		{
-			provide: ActivatedRoute,
-			useValue: { snapshot: { paramMap: { get: (): null => null } } },
-		},
-	];
-
-	const userProfile$Spy: MockInstance = getPropertySpy(
-		viewService,
-		'userProfile$',
-	).mockReturnValue(of(mockUsers().user1));
-
-	getPropertySpy(viewService, 'profileForm').mockReturnValue(
-		newChangeInfoForm(),
-	);
-	getPropertySpy(viewService, 'changeEmailForm').mockReturnValue(
-		changeEmailForm(),
-	);
-	getPropertySpy(viewService, 'changePasswordForm').mockReturnValue(
-		changePasswordForm(),
-	);
-
-	beforeEach(async (): Promise<void> => {
-		TestBed.overrideComponent(ProfilePage, {
-			set: {
-				providers: providers,
-			},
-		});
+	let service: ReturnType<typeof createProfileFixture>;
+	beforeEach(async () => {
+		service = createProfileFixture();
 		await TestBed.configureTestingModule({
 			imports: [ProfilePage],
-			providers: [provideTranslateServiceMock()],
+			providers: [
+				{ provide: ProfilePageService, useValue: service },
+				{
+					provide: ActivatedRoute,
+					useValue: {
+						snapshot: { paramMap: { get: (): null => null } },
+					},
+				},
+				provideTranslateServiceMock(),
+			],
 		}).compileComponents();
-
 		fixture = TestBed.createComponent(ProfilePage);
-		component = fixture.componentInstance;
 		await fixture.whenStable();
 	});
 
-	it('should create', () => {
-		expect(component).toBeTruthy();
-	});
-
-	it('profileForm: should be expected reference', () => {
-		// Arrange
-		const propertySpy = getPropertySpy(viewService, 'profileForm');
-
-		// Act
-		const result = component.profileForm;
-
-		// Assert
-		expect(propertySpy).toHaveBeenCalled();
-		expect(result).toBe(viewService.profileForm);
-	});
-
-	it('changeEmailForm: should be expected reference', () => {
-		// Arrange
-		const propertySpy = getPropertySpy(viewService, 'changeEmailForm');
-
-		// Act
-		const result = component.changeEmailForm;
-
-		// Assert
-		expect(propertySpy).toHaveBeenCalled();
-		expect(result).toBe(viewService.changeEmailForm);
-	});
-
-	it('changePasswordForm: should be expected reference', () => {
-		// Arrange
-		const propertySpy = getPropertySpy(viewService, 'changePasswordForm');
-
-		// Act
-		const result = component.changePasswordForm;
-
-		// Assert
-		expect(propertySpy).toHaveBeenCalled();
-		expect(result).toBe(viewService.changePasswordForm);
-	});
-
-	it('userProfile: should expose the latest profile signal', () => {
-		// Arrange
-		const propertySpy = getPropertySpy(viewService, 'userProfile$');
-
-		// Act
-		const result = component.userProfile;
-
-		// Assert
-		expect(propertySpy).toHaveBeenCalled();
-		expect(result()?.uid).toBe('ABC123');
-	});
-
-	it('userProfile: should return expected value', () => {
-		expect(userProfile$Spy).toHaveBeenCalled();
-		expect(component.userProfile()?.uid).toBe('ABC123');
-	});
-
-	it('updateProfile(): should make expected call', async () => {
-		// Arrange
-		const methodSpy = getFunctionSpy(
-			viewService,
-			'updatePublicProfile',
-		).mockResolvedValue(undefined);
-
-		// Act
-		await component.updateProfile();
-
-		// Assert
-		expect(methodSpy).toHaveBeenCalled();
-	});
-
-	it('changeEmailAddress(): should make expected call', async () => {
-		// Arrange
-		const methodSpy = getFunctionSpy(
-			viewService,
-			'changeEmailAddress',
-		).mockResolvedValue(undefined);
-
-		// Act
-		await component.changeEmailAddress();
-
-		// Assert
-		expect(methodSpy).toHaveBeenCalled();
-	});
-
-	it('changePassword(): should make expected call', async () => {
-		// Arrange
-		const methodSpy = getFunctionSpy(
-			viewService,
-			'changePassword',
-		).mockResolvedValue(undefined);
-
-		// Act
-		await component.changePassword();
-
-		// Assert
-		expect(methodSpy).toHaveBeenCalled();
-	});
-
-	it('renders each account settings form for the authenticated profile', async (): Promise<void> => {
-		await fixture.whenStable();
-
-		expect(fixture.nativeElement.querySelectorAll('.settings-panel')).toHaveLength(3);
+	it('renders the three account forms and updates the visible profile', async () => {
+		expect(
+			fixture.nativeElement.querySelectorAll('.settings-panel'),
+		).toHaveLength(3);
 		expect(fixture.nativeElement.querySelectorAll('form')).toHaveLength(3);
 		expect(fixture.nativeElement.textContent).toContain('Jesse Doe');
+		service.userProfile$.next({
+			...mockUsers().user1,
+			firstName: 'Another',
+			lastName: 'Family',
+		});
+		await fixture.whenStable();
+		expect(fixture.nativeElement.textContent).toContain('Another Family');
+		expect(fixture.nativeElement.textContent).not.toContain('Jesse Doe');
 	});
+
+	it.each([
+		['updateProfile', 'updatePublicProfile'],
+		['changeEmailAddress', 'changeEmailAddress'],
+		['changePassword', 'changePassword'],
+	] as const)(
+		'routes %s to its account action',
+		async (pageAction, serviceAction) => {
+			await fixture.componentInstance[pageAction]();
+			expect(service[serviceAction]).toHaveBeenCalledOnce();
+		},
+	);
 });

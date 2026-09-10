@@ -1,4 +1,4 @@
-name: App PR Validation
+name: UI PR Validation
 on:
   pull_request:
     paths:
@@ -28,51 +28,49 @@ on:
       - 'santashop-e2e/tests/public/**'
       - 'santashop-e2e/playwright.config.ts'
       - 'scripts/env-loader.cjs'
-      - 'scripts/check-storybook-coverage.mjs'
       - 'tsconfig.storybook.json'
       - 'vitest.storybook.config.ts'
       - 'scripts/verify-hosting-styles.mjs'
       - '.github/workflows/app-pr-validation.yml'
       - '.github/workflows/app-test-and-prod-release.yml'
+      - 'santashop-admin/**'
+      - 'scripts/verify-admin-initial-bundle.mjs'
+      - 'santashop-e2e/tests/admin/**'
+      - '.github/workflows/admin-test-and-prod-release.yml'
+      - '.github/workflows/ui-target.yml'
+      - 'scripts/ui-targets*.mjs'
+      - 'scripts/github-secrets*.ps1'
+      - 'tsconfig.json'
+      - 'storybook-visual/**'
+      - 'scripts/verify-hosting-cache.mjs'
 
 permissions:
   contents: read
-
-env:
-  LOCAL_AWS_ACCESS_KEY_ID: e2e-not-used
-  LOCAL_AWS_SECRET_ACCESS_KEY: e2e-not-used
-  LOCAL_FIRESTORE_BACKUP_BUCKET: gs://demo-santashop-backups
-  LOCAL_REGISTRATION_EMAIL_RETURN_PATH: admin@example.invalid
-  LOCAL_REGISTRATION_EMAIL_SOURCE: no-reply@example.invalid
-  LOCAL_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
-  LOCAL_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
-  LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop E2E
-  LOCAL_SANTASHOP_PASSWORD_RESET_CONTINUE_URL: http://localhost:4100/?mode=sign-in
-  LOCAL_SANTASHOP_EVENT_MIN_INSTANCES: '0'
-  LOCAL_SANTASHOP_PROGRAM_YEAR: '2026'
-  LOCAL_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
-  LOCAL_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
-  LOCAL_SANTASHOP_TIME_ZONE: America/Denver
-  LOCAL_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
-  LOCAL_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
-  LOCAL_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
-  LOCAL_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
-  LOCAL_SCHEDULED_USER_STATS: 55 23 * 11,12 *
-  LOCAL_SES_REGION: us-west-2
-  TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
-  TEST_FIREBASE_AUTH_DOMAIN: santas-workshop-test.firebaseapp.com
-  TEST_FIREBASE_DATABASE_URL: https://santas-workshop-test-default-rtdb.firebaseio.com
-  TEST_FIREBASE_PROJECT_ID: santas-workshop-test
-  TEST_FIREBASE_STORAGE_BUCKET: santas-workshop-test.appspot.com
-  TEST_FIREBASE_MESSAGING_SENDER_ID: '312672416598'
-  TEST_FIREBASE_APP_ID: '1:312672416598:web:75721875d43341bef29cf7'
-  TEST_FIREBASE_MEASUREMENT_ID: G-4FQR667VT9
-  TEST_SANTASHOP_PROGRAM_YEAR: '2026'
-  TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
-
+concurrency:
+  group: ui-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
-  build_validation:
+  targets:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: select
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -o pipefail
+          matrix=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | node scripts/ui-targets.mjs)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+  shared:
+    runs-on: ubuntu-latest
+    env:
+      TEST_SANTASHOP_PROGRAM_YEAR: '2026'
+      TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -81,43 +79,35 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24.18.0'
-          cache: 'pnpm'
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: '21'
+          cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Run security audit (informational)
-        id: security_audit
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
-      - name: Report security audit findings
-        if: always() && steps.security_audit.outcome == 'failure'
-        continue-on-error: true
-        run: |
-          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
-          {
-            echo '### Security audit requires review'
-            echo 'This audit is informational and does not block validation or deployment.'
-            echo '```text'
-            cat "$RUNNER_TEMP/security-audit.log"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+      - run: node --test scripts/ui-targets.test.mjs
+      - name: Test secret synchronization without credentials or network writes
+        shell: pwsh
+        run: ./scripts/github-secrets.test.ps1
       - run: pnpm run e2e:browser:setup:ci
-      - run: pnpm run e2e:test:app
-      - name: Upload customer E2E failure artifacts
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-e2e-failure-${{ github.job }}-${{ github.run_id }}
-          path: |
-            santashop-e2e/test-results
-            santashop-e2e/playwright-report
-          if-no-files-found: ignore
-          retention-days: 7
-      - run: pnpm run ci:app:config:test
-      - run: pnpm run ci:core:test
-      - run: pnpm run ci:app:test
-      - run: pnpm run ci:app:build:test
+      - run: pnpm run config:app:e2e && pnpm run config:admin:e2e
+      - run: pnpm run ci:ui:shared
+  ui:
+    needs: targets
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
+    uses: ./.github/workflows/ui-target.yml
+    with:
+      target: ${{ matrix.target }}
+      mode: test
+      release_ref: ${{ github.sha }}
+      shared_tests: false
+    secrets:
+      TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+  build_validation:
+    if: always()
+    needs: [targets, shared, ui]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every selected UI and shared check
+        run: |
+          test '${{ needs.targets.result }}' = success
+          test '${{ needs.shared.result }}' = success
+          test '${{ needs.ui.result }}' = success

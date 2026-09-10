@@ -2,41 +2,40 @@ name: App Test Deploy and Manual Prod Release
 'on':
   push:
     branches:
-      - master
+    - master
     paths:
-      - 'santashop-app/**'
-      - 'santashop-core/**'
-      - 'santashop-models/**'
-      - 'remote-config/**'
-      - 'scripts/remote-config*.cjs'
-      - 'scripts/public-parameters-schema.cjs'
-      - 'scripts/verify-public-parameters.cjs'
-      - '.storybook/**'
-      - 'angular.json'
-      - 'eslint.config.js'
-      - 'vitest.config.mjs'
-      - 'vitest.setup.ts'
-      - 'test-helpers/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'config.firebase.cjs'
-      - 'firebase.json'
-      - 'firebase.e2e.json'
-      - 'firestore.rules'
-      - 'storage.rules'
-      - 'santashop-e2e/fixtures/**'
-      - 'santashop-e2e/scripts/**'
-      - 'santashop-e2e/tests/public/**'
-      - 'santashop-e2e/playwright.config.ts'
-      - 'scripts/env-loader.cjs'
-      - 'scripts/check-storybook-coverage.mjs'
-      - 'tsconfig.storybook.json'
-      - 'vitest.storybook.config.ts'
-      - 'scripts/verify-hosting-styles.mjs'
-      - '.github/workflows/app-test-and-prod-release.yml'
-      - '.github/workflows/app-pr-validation.yml'
-
+    - santashop-app/**
+    - santashop-core/**
+    - santashop-models/**
+    - remote-config/**
+    - scripts/remote-config*.cjs
+    - scripts/public-parameters-schema.cjs
+    - scripts/verify-public-parameters.cjs
+    - .storybook/**
+    - angular.json
+    - eslint.config.js
+    - vitest.config.mjs
+    - vitest.setup.ts
+    - test-helpers/**
+    - package.json
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - config.firebase.cjs
+    - firebase.json
+    - firebase.e2e.json
+    - firestore.rules
+    - storage.rules
+    - santashop-e2e/fixtures/**
+    - santashop-e2e/scripts/**
+    - santashop-e2e/tests/public/**
+    - santashop-e2e/playwright.config.ts
+    - scripts/env-loader.cjs
+    - tsconfig.storybook.json
+    - vitest.storybook.config.ts
+    - scripts/verify-hosting-styles.mjs
+    - .github/workflows/app-test-and-prod-release.yml
+    - .github/workflows/app-pr-validation.yml
+    - .github/workflows/ui-target.yml
   workflow_dispatch:
     inputs:
       release_ref:
@@ -49,232 +48,27 @@ name: App Test Deploy and Manual Prod Release
         default: prod
         type: choice
         options:
-          - test
-          - prod
+        - test
+        - prod
       skip_tests:
         description: Skip test suites for this manual deployment
         required: true
         default: false
         type: boolean
-
 permissions:
   contents: read
 
-env:
-  TEST_SANTASHOP_PROGRAM_YEAR: '2026'
-  TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
-  LOCAL_AWS_ACCESS_KEY_ID: e2e-not-used
-  LOCAL_AWS_SECRET_ACCESS_KEY: e2e-not-used
-  LOCAL_FIRESTORE_BACKUP_BUCKET: gs://demo-santashop-backups
-  LOCAL_REGISTRATION_EMAIL_RETURN_PATH: admin@example.invalid
-  LOCAL_REGISTRATION_EMAIL_SOURCE: no-reply@example.invalid
-  LOCAL_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
-  LOCAL_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
-  LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop E2E
-  LOCAL_SANTASHOP_PASSWORD_RESET_CONTINUE_URL: http://localhost:4100/?mode=sign-in
-  LOCAL_SANTASHOP_EVENT_MIN_INSTANCES: '0'
-  LOCAL_SANTASHOP_PROGRAM_YEAR: '2026'
-  LOCAL_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
-  LOCAL_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
-  LOCAL_SANTASHOP_TIME_ZONE: America/Denver
-  LOCAL_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
-  LOCAL_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
-  LOCAL_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
-  LOCAL_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
-  LOCAL_SCHEDULED_USER_STATS: 55 23 * 11,12 *
-  LOCAL_SES_REGION: us-west-2
-
 jobs:
-  deploy_test:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
-    runs-on: ubuntu-latest
-    env:
+  release:
+    uses: ./.github/workflows/ui-target.yml
+    with:
+      target: app
+      mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
+      release_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+      deploy: true
+      skip_tests: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || false }}
+    secrets:
       TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
-      TEST_FIREBASE_AUTH_DOMAIN: santas-workshop-test.firebaseapp.com
-      TEST_FIREBASE_DATABASE_URL: https://santas-workshop-test-default-rtdb.firebaseio.com
-      TEST_FIREBASE_PROJECT_ID: santas-workshop-test
-      TEST_FIREBASE_STORAGE_BUCKET: santas-workshop-test.appspot.com
-      TEST_FIREBASE_MESSAGING_SENDER_ID: '312672416598'
-      TEST_FIREBASE_APP_ID: '1:312672416598:web:75721875d43341bef29cf7'
-      TEST_FIREBASE_MEASUREMENT_ID: G-4FQR667VT9
-      TEST_SANTASHOP_PROGRAM_YEAR: '2026'
-      TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
-      - name: Record manual deployment selection
-        if: github.event_name == 'workflow_dispatch' && inputs.skip_tests
-        env:
-          SELECTED_RELEASE_REF: ${{ inputs.release_ref }}
-          SELECTED_DEPLOYMENT_TARGET: ${{ inputs.deployment_target }}
-        run: |
-          {
-            echo '### Manual deployment'
-            echo "- Selected ref: \`$SELECTED_RELEASE_REF\`"
-            echo "- Target: \`$SELECTED_DEPLOYMENT_TARGET\`"
-            echo '- Tests: skipped by request'
-          } >> "$GITHUB_STEP_SUMMARY"
-      - uses: pnpm/action-setup@v6
-        with:
-          version: '10.14.0'
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
-      - uses: actions/setup-java@v6
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
-        with:
-          distribution: temurin
-          java-version: '21'
-      - run: pnpm install --frozen-lockfile
-      - name: Check function call graph before validation or deployment
-        run: pnpm run functions:graph:check
-      - name: Run security audit (informational)
-        id: security_audit
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
-      - name: Report security audit findings
-        if: always() && steps.security_audit.outcome == 'failure'
-        continue-on-error: true
-        run: |
-          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
-          {
-            echo '### Security audit requires review'
-            echo 'This audit is informational and does not block validation or deployment.'
-            echo '```text'
-            cat "$RUNNER_TEMP/security-audit.log"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-      - run: pnpm run e2e:browser:setup:ci
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
-      - run: pnpm run e2e:test:app
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
-      - name: Upload customer E2E failure artifacts
-        if: failure() && (github.event_name != 'workflow_dispatch' || !inputs.skip_tests)
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-e2e-failure-${{ github.job }}-${{ github.run_id }}
-          path: |
-            santashop-e2e/test-results
-            santashop-e2e/playwright-report
-          if-no-files-found: ignore
-          retention-days: 7
-      - run: pnpm run ci:app:config:test
-      - run: pnpm run ci:core:test
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
-      - run: pnpm run ci:app:test
-        if: github.event_name != 'workflow_dispatch' || !inputs.skip_tests
-      - name: Load validated test Remote Config release defaults
-        env:
-          REMOTE_CONFIG_SERVICE_ACCOUNT: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''TEST'')] }}'
-        run: node scripts/remote-config.cjs release-defaults --project santas-workshop-test
-      - run: pnpm run ci:app:build:test
-      - uses: FirebaseExtended/action-hosting-deploy@v0.11.0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''TEST'')] }}'
-          channelId: live
-          target: santashop-app
-          projectId: santas-workshop-test
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels
-
-  deploy_prod:
-    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'
-    runs-on: ubuntu-latest
-    env:
       PROD_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
-      PROD_FIREBASE_AUTH_DOMAIN: santas-workshop-193b5.firebaseapp.com
-      PROD_FIREBASE_DATABASE_URL: https://santas-workshop-193b5.firebaseio.com
-      PROD_FIREBASE_PROJECT_ID: santas-workshop-193b5
-      PROD_FIREBASE_STORAGE_BUCKET: santas-workshop-193b5.appspot.com
-      PROD_FIREBASE_MESSAGING_SENDER_ID: '397997267986'
-      PROD_FIREBASE_APP_ID: '1:397997267986:web:8c85e08550793dd348cccb'
-      PROD_FIREBASE_MEASUREMENT_ID: G-0KHS1T1W85
-      PROD_SANTASHOP_PROGRAM_YEAR: '2026'
-      PROD_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.release_ref }}
-      - name: Record manual deployment selection
-        if: inputs.skip_tests
-        env:
-          SELECTED_RELEASE_REF: ${{ inputs.release_ref }}
-          SELECTED_DEPLOYMENT_TARGET: ${{ inputs.deployment_target }}
-        run: |
-          {
-            echo '### Manual deployment'
-            echo "- Selected ref: \`$SELECTED_RELEASE_REF\`"
-            echo "- Target: \`$SELECTED_DEPLOYMENT_TARGET\`"
-            echo '- Tests: skipped by request'
-          } >> "$GITHUB_STEP_SUMMARY"
-      - uses: pnpm/action-setup@v6
-        with:
-          version: '10.14.0'
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
-      - uses: actions/setup-java@v6
-        if: inputs.skip_tests == false
-        with:
-          distribution: temurin
-          java-version: '21'
-      - run: pnpm install --frozen-lockfile
-      - name: Check function call graph before validation or deployment
-        run: pnpm run functions:graph:check
-      - name: Run security audit (informational)
-        id: security_audit
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          pnpm run audit:security 2>&1 | tee "$RUNNER_TEMP/security-audit.log"
-      - name: Report security audit findings
-        if: always() && steps.security_audit.outcome == 'failure'
-        continue-on-error: true
-        run: |
-          echo "::warning::Security audit reported findings or could not complete. Review the job summary and audit log."
-          {
-            echo '### Security audit requires review'
-            echo 'This audit is informational and does not block validation or deployment.'
-            echo '```text'
-            cat "$RUNNER_TEMP/security-audit.log"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-      - run: pnpm run e2e:browser:setup:ci
-        if: inputs.skip_tests == false
-      - run: pnpm run e2e:test:app
-        if: inputs.skip_tests == false
-      - name: Upload customer E2E failure artifacts
-        if: failure() && inputs.skip_tests == false
-        uses: actions/upload-artifact@v7
-        with:
-          name: app-e2e-failure-${{ github.job }}-${{ github.run_id }}
-          path: |
-            santashop-e2e/test-results
-            santashop-e2e/playwright-report
-          if-no-files-found: ignore
-          retention-days: 7
-      - run: pnpm run ci:app:config:prod
-      - run: pnpm run ci:core:test
-        if: inputs.skip_tests == false
-      - run: pnpm run ci:app:test
-        if: inputs.skip_tests == false
-      - name: Load validated production Remote Config release defaults
-        env:
-          REMOTE_CONFIG_SERVICE_ACCOUNT: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''193B5'')] }}'
-        run: node scripts/remote-config.cjs release-defaults --project santas-workshop-193b5
-      - run: pnpm run ci:app:build:prod
-      - uses: FirebaseExtended/action-hosting-deploy@v0.11.0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets[format(''FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}'', ''193B5'')] }}'
-          channelId: live
-          target: santashop-app
-          projectId: santas-workshop-193b5
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels
+      FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST }}
+      FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5 }}

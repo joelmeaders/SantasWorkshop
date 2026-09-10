@@ -9,7 +9,7 @@ The headers use the hosted DSCS logo, localized alt text, and a link to the shop
 
 ## Use the templates
 
-Open **Admin → Email Templates → Create**. Choose one of the six 2026 starters or import a JSON package. The starters cover registration confirmation, event reminder, and cancellation in English and Spanish. Source JSON, HTML, and plain-text files are in `santashop-admin/src/assets/email-templates/2026/`.
+Open **Admin → Email Templates → Create**. Choose one of the six 2026 starters or import a JSON package. The starters cover registration confirmation, event reminder, and cancellation in English and Spanish. The six canonical JSON packages are in `santashop-admin/src/assets/email-templates/2026/`; each includes HTML and plain text. Standalone copies are generated for review/export, not tracked as additional application assets.
 
 JSON import creates an unsaved draft. Choose a unique key and SES name. A saved template keeps its language, delivery type, and SES name. HTML import replaces only the body after confirmation. Invalid files leave the editor unchanged. Export JSON to transfer metadata, mappings, samples, plain text, language, and review state; export HTML to transfer source with placeholders intact. Imports do not publish.
 
@@ -43,7 +43,7 @@ node scripts/generate-2026-email-templates.mjs
 node scripts/render-2026-email-previews.mjs
 ```
 
-Open `.artifacts/email-templates-2026/index.html`. The gallery includes six rendered emails and desktop/phone screenshots. QR codes, confirmation codes, names, and appointments in these previews are fictional. The preview checker covers 360px and 800px widths, horizontal overflow, long names, Spanish dates, and essential text with images blocked. Browser rendering does not establish Outlook, Gmail, Apple Mail, or real recipient delivery behavior.
+Open `.artifacts/email-templates-2026/index.html`. The renderer also writes each starter’s unrendered `*.source.html` and `*.txt` beside the previews. These are optional exports from the JSON packages; edit the generator/source package, not a second tracked HTML/TXT copy. The gallery includes six rendered emails and desktop/phone screenshots. QR codes, confirmation codes, names, and appointments in these previews are fictional. The preview checker covers 360px and 800px widths, horizontal overflow, long names, Spanish dates, and essential text with images blocked. Browser rendering does not establish Outlook, Gmail, Apple Mail, or real recipient delivery behavior.
 
 ## Content references
 

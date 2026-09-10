@@ -60,15 +60,15 @@ All customer and staff callables use bounded second-generation concurrency and
 maximum instances. These limits bound configured concurrency and cost. Verify
 workload headroom with measurements for the deployed revision.
 
-| Profile           | Functions                          | CPU |  Memory | Concurrency | Maximum instances |                   Warm instances |
+| Profile | Functions | CPU | Memory | Concurrency | Maximum instances | Warm instances |
 | ----------------- | ---------------------------------- | --: | ------: | ----------: | ----------------: | -------------------------------: |
-| Standard customer | account/profile/email changes      |   1 | 256 MiB |          10 |                 5 |                                0 |
-| Signup draft      | save/delete child, set appointment |   1 | 256 MiB |          20 |                10 |                                0 |
-| Signup completion | complete registration              |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
-| New account       | account creation and QR generation |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
-| Event hot path    | check-in and scan resolution       |   1 | 256 MiB |          20 |                 5 |  `SANTASHOP_EVENT_MIN_INSTANCES` |
-| Event standard    | edit/on-site/pre-registration      |   1 | 256 MiB |          10 |                 3 |                                0 |
-| Low volume/admin  | templates, staff, owner operations |   1 | 256 MiB |          10 |                 3 |                                0 |
+| Standard customer | account/profile/email changes | 1 | 256 MiB | 10 | 5 | 0 |
+| Signup draft | save/delete child, set appointment | 1 | 256 MiB | 20 | 10 | 0 |
+| Signup completion | complete registration | 1 | 512 MiB | 20 | 10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| New account | account creation and QR generation | 1 | 512 MiB | 20 | 10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| Event hot path | check-in and scan resolution | 1 | 256 MiB | 20 | 5 | `SANTASHOP_EVENT_MIN_INSTANCES` |
+| Event standard | edit/on-site/pre-registration | 1 | 256 MiB | 10 | 3 | 0 |
+| Low volume/admin | templates, staff, owner operations | 1 | 256 MiB | 10 | 3 | 0 |
 
 The configured ceilings provide 200 concurrent requests for each signup hot
 path and 100 for each check-in hot path. These are configured ceilings, not
@@ -101,43 +101,31 @@ a slot exceeds its target.
 
 ## Dependency security
 
-Run `pnpm run audit:security` from the workspace root. It audits the complete
-production and development dependency graph and returns a failure when an
-advisory outside the reviewed exceptions is present. Current CI workflows report it as
-informational with `continue-on-error`; a green workflow does not prove a clean
-audit. Review findings before promotion. Check production dependencies with
-`pnpm audit --prod` as well.
+`Dependency Review` runs ordinary `pnpm audit` once for dependency-changing PRs
+and can be run manually. The workflow uploads its audit output and flags a
+non-zero exit; it is informational, not a clean-security certificate. Joel, as
+maintainer, reviews new findings on those PRs and records an upgrade or explicit
+risk decision there before promotion. A network/audit failure is not a clean
+result. Run `pnpm run audit:security` for the same ordinary workspace audit and
+`pnpm audit --prod` to inspect production dependency exposure.
 
-The audit script excludes advisories for which the registry publishes no resolution.
-There are currently two such `image-size` advisories: the registry marks all
-versions through 2.0.2 as affected, while this locked graph contains version
-0.5.5. That version has no ICNS, JXL, or HEIF parser—the only parsers named by
-GHSA-w3rx-r6r6-pgpr and GHSA-5p2g-fcmc-qvqq—and this repository has no Less
-source files. Recheck the exception whenever Angular replaces its Less
-toolchain or the lockfile changes the installed `image-size` version. Any new
-unfixable advisory must receive an equivalent reachability review before the
-release proceeds.
+There is no custom advisory allowlist or installed-parser exception analyzer.
+Removing the repeated UI/Functions audit-wrapper runs changes when this signal
+is collected; it does not establish that an advisory is unreachable or that an
+old acceptance remains valid. Reassess accepted risks when dependencies or
+usage change. The Functions deployment's separate **blocking** production-only
+artifact audit remains in place.
 
-The workspace build-script allowlist is intentional and limited to known
-Firebase, Angular, bundler, and native-helper dependencies. Angular runs
-zoneless and tests run with Vitest, so the unused `zone.js` and Jest peers are
-intentionally not installed.
-
-`firebase-tools` 15.29.0 also installs `stream-json` 1.9.1. Advisory
-GHSA-528h-pc64-c93x affects the package's Pick, Ignore, Filter, and Replace
-filters. Firebase CLI uses those filters in Realtime Database import, Auth
-import, and Next.js framework handling. This repository's CI and release
-commands use none of those paths, and `firebase-tools` does not yet accept the
-fixed `stream-json` major version. The audit gate permits only this exact
-dependency path and fixed-version range. Remove the exception when Firebase CLI
-adopts `stream-json` 3.5.0 or later.
+The workspace build-script allowlist remains limited to known Firebase,
+Angular, bundler, and native-helper dependencies. Do not broaden it to silence
+installation warnings without reviewing the package's build script.
 
 ## Required release gates
 
 For every merge to `master`, the test backend workflow must:
 
 1. install from the locked dependency graph;
-2. run the full dependency security audit and report findings for release review;
+2. pass the production-dependency audit of the prepared Functions artifact and review applicable dependency-PR findings;
 3. pass Function unit and emulator integration suites;
 4. deploy Functions, Firestore rules/indexes, and Storage rules as one test
    backend release;

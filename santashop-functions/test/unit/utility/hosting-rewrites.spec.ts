@@ -25,7 +25,6 @@ const config = JSON.parse(
 const hostingWorkflowPaths = [
 	'app-pr-validation.yml',
 	'app-test-and-prod-release.yml',
-	'admin-pr-validation.yml',
 	'admin-test-and-prod-release.yml',
 ];
 
@@ -103,7 +102,7 @@ describe('Hosting workflow triggers', () => {
 				'utf8',
 			);
 
-			expect(workflow).toContain("      - 'firebase.json'");
+			expect(workflow).toMatch(/^\s*-\s*['"]?firebase\.json['"]?\s*$/m);
 		},
 	);
 });

@@ -113,9 +113,8 @@ export interface CustomerStoryControls {
 
 export type CustomerStoryControlsFactory = () => CustomerStoryControls;
 
-export const CUSTOMER_STORY_CONTROLS = new InjectionToken<CustomerStoryControls>(
-	'CUSTOMER_STORY_CONTROLS',
-);
+export const CUSTOMER_STORY_CONTROLS =
+	new InjectionToken<CustomerStoryControls>('CUSTOMER_STORY_CONTROLS');
 
 export interface CustomerStoryControlOptions {
 	currentUser?: StoryUser | null;
@@ -212,9 +211,7 @@ export function createCustomerStoryControls(
 ): CustomerStoryControls {
 	const registration = options.registration ?? storyRegistration;
 	const children = registration.children ?? [];
-	const dateTimeSlot = registration.dateTimeSlot as
-		| DateTimeSlot
-		| undefined;
+	const dateTimeSlot = registration.dateTimeSlot as DateTimeSlot | undefined;
 	const registrationSubmitted = !!registration.registrationSubmittedOn;
 	const registrationComplete =
 		children.length > 0 && !!dateTimeSlot && registrationSubmitted;
@@ -225,7 +222,7 @@ export function createCustomerStoryControls(
 						displayName: 'Jordan Garcia',
 						email: 'jordan.garcia@example.com',
 						uid: 'storybook-parent',
-				  }
+					}
 				: options.currentUser,
 		),
 		registration$: new BehaviorSubject(registration),
@@ -263,8 +260,7 @@ export function createCustomerStoryControls(
 		updateRegistration: (nextRegistration): void => {
 			const nextChildren = nextRegistration.children ?? [];
 			const nextDateTimeSlot = nextRegistration.dateTimeSlot as
-				| DateTimeSlot
-				| undefined;
+				DateTimeSlot | undefined;
 			controls.registration$.next(nextRegistration);
 			controls.children$.next(nextChildren);
 			controls.childCount$.next(nextChildren.length);
@@ -277,8 +273,8 @@ export function createCustomerStoryControls(
 			);
 			controls.registrationComplete$.next(
 				nextChildren.length > 0 &&
-				!!nextDateTimeSlot &&
-				!!nextRegistration.registrationSubmittedOn,
+					!!nextDateTimeSlot &&
+					!!nextRegistration.registrationSubmittedOn,
 			);
 			controls.hasCheckedIn$.next(!!nextRegistration.hasCheckedIn);
 		},
@@ -469,14 +465,18 @@ function createCustomerStoryProviders(
 					),
 					readMany: fn(() => controls.slots$.asObservable()),
 				}),
-				}),
+			}),
 			deps: [CUSTOMER_STORY_CONTROLS],
 		},
 		{
 			provide: FunctionsWrapper,
 			useFactory: (): object => ({
-				callableWrapper: fn(() => fn(async () => ({ data: true }))),
-				changeAccountInformation: fn(async () => ({ data: true })),
+				callableWrapper: fn(() =>
+					fn(async () => ({ data: true as const })),
+				),
+				changeAccountInformation: fn(async () => ({
+					data: true as const,
+				})),
 			}),
 		},
 		{
@@ -534,7 +534,24 @@ function createCustomerStoryProviders(
 
 function createPreRegistrationService(
 	controls: CustomerStoryControls,
-): object {
+): Pick<
+	PreRegistrationService,
+	| 'userRegistration$'
+	| 'registrationComplete$'
+	| 'registrationSubmitted$'
+	| 'hasCheckedIn$'
+	| 'children$'
+	| 'childCount$'
+	| 'noErrorsInChildren$'
+	| 'dateTimeSlot$'
+	| 'qrCode$'
+	| 'saveDraftChild'
+	| 'deleteDraftChild'
+	| 'setDraftAppointment'
+	| 'completeRegistration'
+	| 'undoRegistration'
+	| 'changeRegistrationDateTime'
+> {
 	return {
 		userRegistration$: controls.registration$.asObservable(),
 		registrationComplete$: controls.registrationComplete$.asObservable(),
@@ -545,16 +562,27 @@ function createPreRegistrationService(
 		noErrorsInChildren$: controls.noErrorsInChildren$.asObservable(),
 		dateTimeSlot$: controls.dateTimeSlot$.asObservable(),
 		qrCode$: controls.qrCode$.asObservable(),
-		saveDraftChild: fn(async () => ({ data: true })),
-		deleteDraftChild: fn(async () => ({ data: true })),
-		setDraftAppointment: fn(async () => ({ data: true })),
-		completeRegistration: fn(async () => ({ data: true })),
-		undoRegistration: fn(async () => ({ data: true })),
-		changeRegistrationDateTime: fn(async () => ({ data: true })),
+		saveDraftChild: fn(async () => ({ data: true as const })),
+		deleteDraftChild: fn(async () => ({ data: true as const })),
+		setDraftAppointment: fn(async () => ({ data: true as const })),
+		completeRegistration: fn(async () => ({ data: true as const })),
+		undoRegistration: fn(async () => ({ data: true as const })),
+		changeRegistrationDateTime: fn(async () => ({ data: true as const })),
 	};
 }
 
-function createProfilePageService(controls: CustomerStoryControls): object {
+function createProfilePageService(
+	controls: CustomerStoryControls,
+): Pick<
+	ProfilePageService,
+	| 'profileForm'
+	| 'changeEmailForm'
+	| 'changePasswordForm'
+	| 'userProfile$'
+	| 'updatePublicProfile'
+	| 'changeEmailAddress'
+	| 'changePassword'
+> {
 	const profileForm = newChangeInfoForm();
 	profileForm.patchValue(controls.userProfile$.value);
 	return {

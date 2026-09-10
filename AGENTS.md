@@ -17,10 +17,10 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 ## Monorepo map
 
 | Path | Role | Notes |
-| --- | --- | --- |
+| ---------------------- | --------------------------------- | ---------------------------------------------- |
 | `santashop-app/` | Customer-facing Ionic/Angular app | Standalone Angular app with Firebase + Ionic |
 | `santashop-admin/` | Admin Ionic/Angular app | Similar stack, separate routes and deploy flow |
-| `santashop-core/` | Shared Angular library | Shared services, helpers, tokens, pipes, decorators |
+| `santashop-core/` | Shared Angular library | Shared services, helpers, tokens, pipes |
 | `santashop-models/` | Shared model library | Cross-project TypeScript data models |
 | `santashop-functions/` | Firebase Cloud Functions | Webpack-built Node functions |
 | `santashop-e2e/` | Playwright tests | End-to-end coverage for the app flow |
@@ -57,11 +57,11 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 - Production browser testing is read-only by default. New production QA records and permissions require explicit approval. Do not delete production data as test cleanup, including newly created QA records.
 - Unit tests use Angular's native Vitest runner in headless Chromium with coverage and watch disabled in [`angular.json`](angular.json). Run `pnpm run test:browser:setup` once when Chromium is not installed.
 - Typical scoped commands:
-  - `pnpm --filter @santashop/app lint`
-  - `pnpm --filter @santashop/app test`
-  - `pnpm --filter @santashop/admin lint`
-  - `pnpm --filter @santashop/admin test`
-  - `ng test santashop-core`
+    - `pnpm --filter @santashop/app lint`
+    - `pnpm --filter @santashop/app test`
+    - `pnpm --filter @santashop/admin lint`
+    - `pnpm --filter @santashop/admin test`
+    - `ng test santashop-core`
 - Reuse helpers from [`test-helpers/`](test-helpers/) before introducing new mocks or test utilities.
 - End-to-end orchestration lives in the root [`package.json`](package.json) and package docs at [`santashop-e2e/README.md`](santashop-e2e/README.md). Note that both app and admin `start:test` scripts use port `4100`, so only run one test server at a time.
 
@@ -69,8 +69,7 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 
 - Before changing app callable clients, Functions, shared helpers/models, Firestore writes/triggers, task dispatch, routing, or schedules, read [the function call map](docs/function-call-map.md).
 - Trace runtime cycles through local helper calls, HTTP/callable calls, Cloud Tasks, and Firestore writes. Match create/update/delete/write events to the actual trigger. A `set` with merge can create a missing document. A retry limit on one task does not bound a chain of newly queued tasks. Imports and Firestore reads alone are not runtime call edges.
-- Run `pnpm run functions:graph:check` and `pnpm run functions:graph:test` for affected changes. Source changes invalidate the reviewed map, including changes inside helper modules. Review the changed paths and update `docs/function-call-graph.review.json` before running `pnpm run functions:graph:update`; do not refresh hashes merely to clear CI.
-- Run `pnpm run functions:cycles` before claiming the workflow is cycle-free. It intentionally fails on the documented, bounded worker continuation. The email handler must only update existing queue records. Keep the worker backup deadline separate from purge resumption, and release locks only when the operation ID matches. The CI regression gate keeps retained cycles visible; a pass does not establish acyclicity. Do not add a new cycle baseline without documenting its path, stop condition, limits, and unresolved risk. Do not change application behavior merely to hide a graph finding.
+- Preserve focused runtime regression tests when changing these paths. The email handler must only update existing queue records. Keep the worker backup deadline separate from purge resumption, and release locks only when the operation ID matches. Review continuations and their stop conditions explicitly; no source-hash or generated call-graph gate certifies that a workflow is cycle-free.
 
 - Emulator-oriented scripts target the `santas-workshop-test` Firebase project; start with the root [`README.md`](README.md) for setup.
 - `santashop-functions` uses webpack and declares Node `24`, matching the root workspace Node `24` floor for app/tooling workflows. Check the relevant package before changing runtime-sensitive code.

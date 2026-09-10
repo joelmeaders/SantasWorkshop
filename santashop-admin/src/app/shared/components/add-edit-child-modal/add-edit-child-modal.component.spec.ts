@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { AgeGroup, ToyType, type Child } from '@santashop/models';
+import { PROGRAM_YEAR } from '@santashop/core/admin/firestore';
 import { AddEditChildModalComponent } from './add-edit-child-modal.component';
 import {
 	provideAlertControllerMock,
@@ -9,6 +10,7 @@ import {
 } from '../../../../test-helpers';
 
 describe('AddEditChildModalComponent', () => {
+	const programYear = 2030;
 	let component: AddEditChildModalComponent;
 	let fixture: ComponentFixture<AddEditChildModalComponent>;
 
@@ -16,6 +18,7 @@ describe('AddEditChildModalComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [AddEditChildModalComponent],
 			providers: [
+				{ provide: PROGRAM_YEAR, useValue: programYear },
 				provideModalControllerMock(),
 				provideAlertControllerMock(),
 			],
@@ -26,8 +29,24 @@ describe('AddEditChildModalComponent', () => {
 		await fixture.whenStable();
 	});
 
-	it('should create', () => {
-		expect(component).toBeTruthy();
+	it('uses configured-year bounds, not the machine year', () => {
+		expect(component.minBirthDate).toBe('2019-01-01');
+		expect(component.maxBirthDate).toBe('2030-12-31');
+	});
+
+	it('accepts 25 last-name characters and rejects 26', () => {
+		const lastName = component.form.controls['lastName'];
+		lastName.setValue('A'.repeat(25));
+		expect(lastName.valid).toBe(true);
+		lastName.setValue('A'.repeat(26));
+		expect(lastName.hasError('maxlength')).toBe(true);
+	});
+
+	it('accepts the youngest eligible birthday with infant defaults', async () => {
+		await component.birthdaySelected({ detail: { value: '2030-12-31' } });
+		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age02);
+		expect(component.form.controls['toyType'].value).toBe(ToyType.infant);
+		expect(TestBed.inject(AlertController).create).not.toHaveBeenCalled();
 	});
 
 	it('provides programmatic labels for child fields', () => {
@@ -47,9 +66,7 @@ describe('AddEditChildModalComponent', () => {
 			id: 17,
 			firstName: 'Kid',
 			lastName: 'Tester',
-			dateOfBirth: new Date(
-				`${new Date().getFullYear() - 4}-01-15T00:00:00`,
-			),
+			dateOfBirth: new Date(`${programYear - 4}-01-15T00:00:00`),
 			ageGroup: AgeGroup.age35,
 			toyType: ToyType.girl,
 			enabled: true,
@@ -63,7 +80,7 @@ describe('AddEditChildModalComponent', () => {
 		expect(editComponent.form.controls['firstName'].value).toBe('Kid');
 		expect(editComponent.form.controls['lastName'].value).toBe('Tester');
 		expect(editComponent.form.controls['dateOfBirth'].value).toBe(
-			`${new Date().getFullYear() - 4}-01-15`,
+			`${programYear - 4}-01-15`,
 		);
 		expect(editComponent.form.controls['ageGroup'].value).toBe(
 			AgeGroup.age35,
@@ -106,7 +123,7 @@ describe('AddEditChildModalComponent', () => {
 	});
 
 	it('sets infant defaults and calculates each school-age band from a birthday', async () => {
-		const year = new Date().getFullYear();
+		const year = programYear;
 
 		await component.birthdaySelected({
 			detail: { value: `${year - 1}-06-01` },
@@ -129,7 +146,7 @@ describe('AddEditChildModalComponent', () => {
 	});
 
 	it('clears the infant toy type when the child becomes school age', async () => {
-		const year = new Date().getFullYear();
+		const year = programYear;
 
 		await component.birthdaySelected({
 			detail: { value: `${year - 1}-06-01` },
@@ -155,7 +172,7 @@ describe('AddEditChildModalComponent', () => {
 		} as unknown as HTMLIonAlertElement);
 
 		await component.birthdaySelected({
-			detail: { value: `${new Date().getFullYear() - 12}-12-31` },
+			detail: { value: `${programYear - 12}-12-31` },
 		});
 
 		expect(alerts.create).toHaveBeenCalledWith(
@@ -166,7 +183,7 @@ describe('AddEditChildModalComponent', () => {
 
 	it('accepts an eleven-year-old consistently with customer registration', async () => {
 		await component.birthdaySelected({
-			detail: { value: `${new Date().getFullYear() - 11}-01-01` },
+			detail: { value: `${programYear - 11}-01-01` },
 		});
 
 		expect(component.form.controls['ageGroup'].value).toBe(AgeGroup.age911);
@@ -174,7 +191,7 @@ describe('AddEditChildModalComponent', () => {
 	});
 
 	it('preserves the local birthday when only the child name is edited', async () => {
-		const year = new Date().getFullYear() - 8;
+		const year = programYear - 8;
 		const originalBirthday = new Date(year, 5, 15);
 		const editFixture = TestBed.createComponent(AddEditChildModalComponent);
 		editFixture.componentRef.setInput('child', {
@@ -209,7 +226,7 @@ describe('AddEditChildModalComponent', () => {
 	});
 
 	it('preserves a legacy UTC-midnight birthday when only the child name is edited', async () => {
-		const year = new Date().getFullYear() - 8;
+		const year = programYear - 8;
 		const legacyBirthday = new Date(Date.UTC(year, 5, 15));
 		const editFixture = TestBed.createComponent(AddEditChildModalComponent);
 		editFixture.componentRef.setInput('child', {
@@ -246,7 +263,7 @@ describe('AddEditChildModalComponent', () => {
 			id: null,
 			firstName: 'Taylor',
 			lastName: 'Tester',
-			dateOfBirth: `${new Date().getFullYear() - 6}-05-01`,
+			dateOfBirth: `${programYear - 6}-05-01`,
 			ageGroup: AgeGroup.age68,
 			toyType: ToyType.boy,
 		});

@@ -4,11 +4,11 @@ Read this guide before browser QA. Use the current repository, deployed UI, and 
 
 ## 1. Data safety comes first
 
-| Environment                           | Allowed test mutations                                                                                                                   | Cleanup                                                                                                             |
+| Environment | Allowed test mutations | Cleanup |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Isolated Firebase emulators           | Create accounts, assign test roles, seed fixtures, submit and cancel registrations, and exercise destructive flows on fixture data.      | Deletion is allowed after checking the emulator host and project.                                                   |
-| Deployed test: `santas-workshop-test` | Create labeled QA records and roles. Exercise the requested flows. Coordinate shared settings with other testers.                        | Deletion is allowed after checking the exact test project and targets. Prefer cleanup limited to the run's records. |
-| Production: `santas-workshop-193b5`   | Read-only by default. Obtain explicit approval before creating QA data, sending messages, assigning permissions, or making other writes. | Never delete production data as test cleanup, including new QA records.                                             |
+| Isolated Firebase emulators | Create accounts, assign test roles, seed fixtures, submit and cancel registrations, and exercise destructive flows on fixture data. | Deletion is allowed after checking the emulator host and project. |
+| Deployed test: `santas-workshop-test` | Create labeled QA records and roles. Exercise the requested flows. Coordinate shared settings with other testers. | Deletion is allowed after checking the exact test project and targets. Prefer cleanup limited to the run's records. |
+| Production: `santas-workshop-193b5` | Read-only by default. Obtain explicit approval before creating QA data, sending messages, assigning permissions, or making other writes. | Never delete production data as test cleanup, including new QA records. |
 
 **Preexisting production data must never be altered or deleted unless the user explicitly instructs that specific change. During November and December, preexisting production data must never be altered or deleted, even when a general testing or maintenance request exists. Use America/Denver to determine the date.**
 
@@ -33,12 +33,12 @@ On September 7, 2026, the user gave standing approval to accept the application'
 
 Current target mapping from `.firebaserc`:
 
-| Target                      | Project                 | Customer                                                                          | Admin                                    |
+| Target | Project | Customer | Admin |
 | --------------------------- | ----------------------- | --------------------------------------------------------------------------------- | ---------------------------------------- |
-| E2E emulators               | `demo-santashop`        | `http://localhost:4100`                                                           | `http://localhost:4100`, sequentially    |
-| Local development emulators | `demo-santashop`        | `http://localhost:4100`                                                           | `http://localhost:4101` with `dev:local` |
-| Deployed test               | `santas-workshop-test`  | `https://test.denversantaclausshop.org/` or `https://santashop-app-test.web.app/` | `https://santas-workshop-test.web.app/`  |
-| Production hosting targets  | `santas-workshop-193b5` | Site `santas-workshop-193b5`                                                      | Site `santas-workshop-admin`             |
+| E2E emulators | `demo-santashop` | `http://localhost:4100` | `http://localhost:4100`, sequentially |
+| Local development emulators | `demo-santashop` | `http://localhost:4100` | `http://localhost:4101` with `dev:local` |
+| Deployed test | `santas-workshop-test` | `https://test.denversantaclausshop.org/` or `https://santashop-app-test.web.app/` | `https://santas-workshop-test.web.app/` |
+| Production hosting targets | `santas-workshop-193b5` | Site `santas-workshop-193b5` | Site `santas-workshop-admin` |
 
 Confirm current production domains from Hosting configuration and the user's requested destination. Do not guess a production URL or rely only on a CI-generated link. Firebase hosting target names are not necessarily site names.
 
@@ -46,46 +46,15 @@ For deployed CLI operations, always pass an explicit project. `pnpm exec firebas
 
 ## 3. Start an emulator browser session
 
-Read the `santashop-e2e-testing` skill before integrated emulator tests. Use Node.js and pnpm. Do not introduce another runtime.
+Use the [E2E guide](testing/e2e.md) for supported commands, exact ports, generated
+configuration, targeted specs, fixture APIs, and browser assertions. Read the
+`santashop-e2e-testing` skill before integrated emulator testing. Customer and
+admin suites share port/state and must run sequentially.
 
-For the automated customer and admin suites:
-
-```text
-pnpm install
-pnpm run e2e:setup
-pnpm run e2e:test
-```
-
-The root suite runs customer and admin sequentially. Both automated servers use port 4100. Never run those suites concurrently against shared emulator state.
-
-For interactive customer QA, first run:
-
-```text
-pnpm run e2e:prepare:app
-```
-
-Then use separate terminals:
-
-```text
-# Terminal 1: long-lived emulators
-pnpm run e2e:emulators
-
-# Terminal 2: customer UI
-pnpm run e2e:serve:app
-
-# Terminal 3: callable readiness, BEFORE seeding test records
-pnpm run e2e:functions:ready
-```
-
-For admin QA, stop only the customer server you own. Run `e2e:prepare:admin` and `e2e:serve:admin`. Keep the environment consistent. Rebuilding Functions requires restarting the emulator if the loaded code did not refresh.
-
-The E2E ports are Functions 5001, Firestore 8180, Auth 9099, and Storage 9199. The normal local workflow uses Firestore 8080. Do not mix these configurations. `pnpm run dev:local` is the separate two-application workflow, not the E2E suite.
-
-**The readiness command invokes `testClearAllData`. It is destructive to emulator fixtures. Run it before seeding, never in the middle of a journey, and never point it at a deployed site.** A listening Functions port alone does not prove callable readiness.
-
-Supply the `LOCAL_*` Functions inputs documented in `.env.example`. App configuration also requires `TEST_SANTASHOP_PROGRAM_YEAR` and `TEST_SANTASHOP_SHOP_DAYS` for non-production modes, including E2E. Do not print secrets. Generated app Firebase configuration comes from `config.firebase.cjs`. Review and restore only configuration changes made by this run; do not blindly overwrite a preexisting configuration diff.
-
-Do not point the existing emulator suite at test or production by changing `E2E_BASE_URL`. Its fixtures reset data and call emulator-only helpers. Use a separate, non-destructive deployed-browser workflow.
+**The callable readiness command clears emulator fixtures. Run it before
+seeding, never during a journey or against a deployed site.** Do not point the
+emulator suite at a deployed environment by changing `E2E_BASE_URL`; its helpers
+are destructive and emulator-only. Use the deployed procedure below instead.
 
 ## 4. Create accounts and assign permissions
 
@@ -93,30 +62,21 @@ Use unique labels such as `QA <date> <run> <purpose>`. For deployed test, use al
 
 Create at least these identities:
 
-| Identity       | Claims                                        | Purpose                                                   |
+| Identity | Claims | Purpose |
 | -------------- | --------------------------------------------- | --------------------------------------------------------- |
-| Customer       | No staff role, no owner claim                 | Public journeys and denied staff access                   |
-| Check-in staff | `roles: ['checkin']`, `owner: false`          | Front-desk workflows without admin privileges             |
-| Admin          | `roles: ['admin', 'checkin']`, `owner: false` | Admin tools without owner capability                      |
-| Owner          | `roles: ['admin', 'checkin']`, `owner: true`  | Owner-only preview and isolated protected-operation tests |
+| Customer | No staff role, no owner claim | Public journeys and denied staff access |
+| Check-in staff | `roles: ['checkin']`, `owner: false` | Front-desk workflows without admin privileges |
+| Admin | `roles: ['admin', 'checkin']`, `owner: false` | Admin tools without owner capability |
+| Owner | `roles: ['admin', 'checkin']`, `owner: true` | Owner-only preview and isolated protected-operation tests |
 
 Do not test only with an owner account. It can hide missing staff permissions. Never assign `admin` merely to bypass a failed check-in test.
 
 ### Emulator accounts
 
-Prefer the fixtures in `santashop-e2e/fixtures/`:
-
-- `account-helpers.ts`: create a customer through the actual UI, then sign in and out through the UI.
-- `admin-helpers.ts`: `defaultAdminAccount`, `defaultOwnerAccount`, and `signInAdminViaUi`.
-- `test-fixtures.ts`: `seedAdminUser`, `seedScenario`, `seedPublicParams`, and `seedDateTimeSlots`.
-
-For a manual emulator seed, inspect the current `testSeedAdminUser` input/export in `santashop-functions/src/fn/testHelpers.ts` and `src/index.ts`. Use the callable envelope `{ "data": { ... } }` at the verified local Functions endpoint. Seed the complete role combination deliberately. Use a generated password that is not committed or included in reports.
-
-The input fields are `emailAddress`, `password`, optional `uid`, `roles`, and `owner`. Pass `roles: ['checkin']` explicitly for a check-in-only account. Omitted roles default to admin and check-in. The helper deletes and recreates an existing matching emulator identity. Use only disposable fixture identities.
-
-`signInAdminViaUi` expects an admin-only navigation control. For check-in-only coverage, use the shared form-fill helper, submit, and assert the permitted landing controls instead.
-
-The seed helpers are emulator-only. Never deploy them or call them against test/prod. Their API setup does not count as a passed sign-up flow: exercise actual sign-up separately.
+Use the [E2E fixture APIs](testing/e2e.md#fixtures-and-supported-user-flows), with
+disposable data and explicit roles. Omitted staff roles can default to admin
+and check-in; do not use those defaults for permission-denial tests. UI signup
+must still be exercised when testing signup—API seeds do not prove that flow.
 
 ### Deployed test accounts
 
@@ -162,29 +122,29 @@ Use the browser tool and skill available in the session. If the user names Chrom
 
 Run destructive, error-injection, and shared-setting cases in emulators first. In test, use the labeled QA records. In production, perform only the authorized subset under section 1.
 
-| Area                             | Checks and required evidence                                                                                                                                                                                                                        |
+| Area | Checks and required evidence |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Entry and status flags           | Account creation enabled/disabled, registration closed, maintenance/weather alerts, loading/error/retry states, English/Spanish. Seed flags in emulators; do not toggle shared production settings.                                                 |
-| Sign-up                          | Required fields, malformed and long email, password mismatch, ZIP/referral validation, listed and Other referral, terms, newsletter opt-in/out, duplicate email, email confirmation, successful persisted account.                                  |
-| Authentication                   | Signed-out protected URLs, correct/incorrect credentials, sign-out, safe return URL, session reload, password-reset request. Distinguish request acknowledgment from inbox receipt and final password replacement. Follow credential handoff rules. |
-| Account                          | Name/ZIP changes, email-change reauthentication, password-change validation, persistence after reload. Verify old/new sign-in behavior only when credential changes are permitted.                                                                  |
-| Children                         | Add/edit/remove, multiple children, age boundary, missing/invalid dates, toy preference, cancelled modal, persisted values, prerequisite gating.                                                                                                    |
-| Scheduling                       | Available/disabled/full slots, selection, changed availability, reschedule, backend failure and retry, state after reload. Preserve the project's soft-capacity policy.                                                                             |
-| Submission                       | Review all children, appointment, email confirmation, one successful submit, repeated/double submit, error recovery, ticket/QR, event/help/map links.                                                                                               |
-| Cancellation and re-registration | Cancel only the QA record, confirm appointment release and UI state, try its code while cancelled, resubmit if slots exist, verify stable QR identity and current-state scan behavior. Never infer this result from rescheduling alone.             |
-| Staff access                     | Customer denial; check-in-only, ordinary admin, owner roles; hidden controls and direct-route denial; permitted data reads and server-side writes. Refresh claims before judging results.                                                           |
-| Staff searches                   | Email, name+ZIP, exact code, empty results, sorting, retry/error state, correct detail route. Verify each with check-in-only as well as admin.                                                                                                      |
-| Check-in                         | Camera permission/denial/no-device states, real camera decode where available, manual code, invalid/cancelled code, child review/edit, correct coupon count, success. API lookup is not camera-scan evidence.                                       |
-| Duplicate scans                  | Immediate accidental duplicate, later risk duplicate, original event preservation, no extra coupons/check-in, admin-only risk list and timeline. Do not sleep through a threshold when emulator fixtures can model it.                              |
-| Staff pre-registration           | Referral, language, children, appointment, duplicate/invalid email, submitted registration, account creation, queued confirmation, retry behavior.                                                                                                  |
-| On-site registration             | Required fields, children, referral, newsletter state, successful check-in/coupons, repeated submit handling.                                                                                                                                       |
-| Email operations                 | Single-recipient resend for complete/incomplete/missing QA accounts, queued state, actual delivery only with mailbox evidence. No broad sends during QA.                                                                                            |
-| Schedules                        | Load/filter year, generation, inline/bulk edits, enabled state, delete confirmation and persistence. Perform writes/deletes only on isolated emulator/test fixtures.                                                                                |
-| Templates                        | List, create/import, edit fields, preview/sample mapping, plain text, revision save/load, test recipient, publish/delete safeguards. Use isolated test templates; never overwrite a shared published template for convenience.                      |
-| Staff management                 | Create/update/disable/delete a disposable QA identity, claims refresh, self/last-owner protections, unauthorized operations. Production identities remain protected.                                                                                |
-| Owner operations                 | Preview, reauthentication, exact phrase, allowed date window, execution/audit/error paths. Execute destructive cases only in emulators/test. Preview is not execution evidence.                                                                     |
-| Statistics                       | Registration/check-in/user reports, year changes, refresh/empty/error states, chart labels, scan-risk pagination/timeline. Compare timestamps and documented reconciliation schedules, not immediate totals alone.                                  |
-| Presentation                     | Requested desktop/mobile widths, scrolling, keyboard focus, modal focus/return, validation announcements, contrast/overflow, complete Spanish journey where in scope. Restore viewport/theme changes.                                               |
+| Entry and status flags | Account creation enabled/disabled, registration closed, maintenance/weather alerts, loading/error/retry states, English/Spanish. Seed flags in emulators; do not toggle shared production settings. |
+| Sign-up | Required fields, malformed and long email, password mismatch, ZIP/referral validation, listed and Other referral, terms, newsletter opt-in/out, duplicate email, email confirmation, successful persisted account. |
+| Authentication | Signed-out protected URLs, correct/incorrect credentials, sign-out, safe return URL, session reload, password-reset request. Distinguish request acknowledgment from inbox receipt and final password replacement. Follow credential handoff rules. |
+| Account | Name/ZIP changes, email-change reauthentication, password-change validation, persistence after reload. Verify old/new sign-in behavior only when credential changes are permitted. |
+| Children | Add/edit/remove, multiple children, age boundary, missing/invalid dates, toy preference, cancelled modal, persisted values, prerequisite gating. |
+| Scheduling | Available/disabled/full slots, selection, changed availability, reschedule, backend failure and retry, state after reload. Preserve the project's soft-capacity policy. |
+| Submission | Review all children, appointment, email confirmation, one successful submit, repeated/double submit, error recovery, ticket/QR, event/help/map links. |
+| Cancellation and re-registration | Cancel only the QA record, confirm appointment release and UI state, try its code while cancelled, resubmit if slots exist, verify stable QR identity and current-state scan behavior. Never infer this result from rescheduling alone. |
+| Staff access | Customer denial; check-in-only, ordinary admin, owner roles; hidden controls and direct-route denial; permitted data reads and server-side writes. Refresh claims before judging results. |
+| Staff searches | Email, name+ZIP, exact code, empty results, sorting, retry/error state, correct detail route. Verify each with check-in-only as well as admin. |
+| Check-in | Camera permission/denial/no-device states, real camera decode where available, manual code, invalid/cancelled code, child review/edit, correct coupon count, success. API lookup is not camera-scan evidence. |
+| Duplicate scans | Immediate accidental duplicate, later risk duplicate, original event preservation, no extra coupons/check-in, admin-only risk list and timeline. Do not sleep through a threshold when emulator fixtures can model it. |
+| Staff pre-registration | Referral, language, children, appointment, duplicate/invalid email, submitted registration, account creation, queued confirmation, retry behavior. |
+| On-site registration | Required fields, children, referral, newsletter state, successful check-in/coupons, repeated submit handling. |
+| Email operations | Single-recipient resend for complete/incomplete/missing QA accounts, queued state, actual delivery only with mailbox evidence. No broad sends during QA. |
+| Schedules | Load/filter year, generation, inline/bulk edits, enabled state, delete confirmation and persistence. Perform writes/deletes only on isolated emulator/test fixtures. |
+| Templates | List, create/import, edit fields, preview/sample mapping, plain text, revision save/load, test recipient, publish/delete safeguards. Use isolated test templates; never overwrite a shared published template for convenience. |
+| Staff management | Create/update/disable/delete a disposable QA identity, claims refresh, self/last-owner protections, unauthorized operations. Production identities remain protected. |
+| Owner operations | Preview, reauthentication, exact phrase, allowed date window, execution/audit/error paths. Execute destructive cases only in emulators/test. Preview is not execution evidence. |
+| Statistics | Registration/check-in/user reports, year changes, refresh/empty/error states, chart labels, scan-risk pagination/timeline. Compare timestamps and documented reconciliation schedules, not immediate totals alone. |
+| Presentation | Requested desktop/mobile widths, scrolling, keyboard focus, modal focus/return, validation announcements, contrast/overflow, complete Spanish journey where in scope. Restore viewport/theme changes. |
 
 ## 7. Finish and report honestly
 
@@ -212,7 +172,7 @@ Follow the [recording policy](README.md#recording-future-work) for the exact pat
 evidence fields, and generated artifacts. Do not add hosted QA reports or run
 logs to repository documentation.
 
-Run scoped unit/build/rules checks for fixes. Storybook is part of the app/admin test gates (`ci:app:test`, `ci:admin:test`); it does not replace Firebase browser journeys. Use `ci:storybook` and relevant visual checks when shared UI behavior changes.
+Run scoped unit/build/rules checks for fixes. The shared UI PR check runs Storybook once, separately from the app/admin unit commands; it does not replace Firebase browser journeys. Use `ci:storybook` and relevant visual checks when shared UI behavior changes.
 
 Separate results into emulator, deployed test, and production evidence. Record limitations such as unavailable camera, missing mailbox access, protected production data, or pending approval. Do not describe page rendering as a successful mutation, queued mail as delivered mail, or API seeding as UI onboarding.
 

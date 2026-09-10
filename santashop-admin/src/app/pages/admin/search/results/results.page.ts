@@ -1,21 +1,11 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	computed,
 	inject,
 	signal,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import {
-	catchError,
-	delay,
-	filter,
-	map,
-	Observable,
-	of,
-	race,
-	startWith,
-	switchMap,
-} from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RegistrationSearchIndex } from '@santashop/models';
 import { SearchService } from '../search.service';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
@@ -99,50 +89,22 @@ export class ResultsPage {
 		compareSearchValues(a.firstName, b.firstName);
 
 	public readonly sortBy = signal<SortFnType>(this.sortLast);
-	private readonly sortBy$ = toObservable(this.sortBy);
-	public readonly searchInput = toSignal(this.searchService.searchResults$, {
-		initialValue: null,
+	public readonly state = toSignal(this.searchService.state$, {
+		initialValue: { status: 'idle' } as const,
 	});
-	private readonly refreshVersion = signal<number | undefined>(undefined);
-
-	private readonly search$: Observable<
-		RegistrationSearchIndex[] | undefined
-	> = this.searchService.searchResults$.pipe(
-		filter(
-			(query): query is Observable<RegistrationSearchIndex[]> =>
-				query !== null,
-		),
-		switchMap((query) => query),
-			switchMap((results) =>
-				this.sortBy$.pipe(
-					map((sortFn) => results?.slice().sort(sortFn) ?? []),
-				),
-			),
-		catchError(() => of(undefined)),
-	);
-
-	private readonly timeout$ = of(undefined).pipe(delay(5000));
-
-	public readonly searchResults$ = toObservable(this.refreshVersion).pipe(
-		filter((version): version is number => version !== undefined),
-		switchMap(() =>
-			race([this.search$, this.timeout$]).pipe(startWith(null)),
-		),
-	);
-	public readonly searchResults = toSignal(this.searchResults$, {
-		initialValue: undefined,
+	public readonly searchResults = computed(() => {
+		const state = this.state();
+		return state.status === 'ready'
+			? [...state.results].sort(this.sortBy())
+			: undefined;
 	});
 
 	constructor() {
 		addIcons({ backspaceOutline });
 	}
 
-	public async ionViewWillEnter(): Promise<void> {
-		this.refresh();
-	}
-
 	public refresh(): void {
-		this.refreshVersion.update((version) => (version ?? -1) + 1);
+		this.searchService.refresh();
 	}
 
 	public ionViewWillLeave(): void {

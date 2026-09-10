@@ -9,6 +9,5 @@ export * from './lib/services/_functions-wrapper';
 export * from './lib/services/app-update.service';
 export * from './lib/services/auth.service';
 export * from './lib/services/error-handler.service';
-export * from './lib/services/skeleton-state.service';
 
 export * from './lib/services/remote-config-public-parameters.service';

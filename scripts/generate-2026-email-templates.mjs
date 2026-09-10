@@ -254,7 +254,5 @@ ${ticket}<tr><td class="pad" style="padding:32px 36px">${body}</td></tr>${venue}
 				2,
 			) + '\n',
 		);
-		writeFileSync(`${output}${key}.html`, html + '\n');
-		writeFileSync(`${output}${key}.txt`, textPart + '\n');
 	}
 }

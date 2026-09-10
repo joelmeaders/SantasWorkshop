@@ -4,7 +4,6 @@ import {
 	ErrorHandlerService,
 	AuthService,
 	FireRepoLite,
-	automock,
 	AnalyticsWrapper,
 	FunctionsWrapper,
 	filterNil,
@@ -39,23 +38,18 @@ export class ProfilePageService implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 	private readonly profileUpdates$ = new BehaviorSubject<Partial<User>>({});
 
-	@automock
 	public readonly profileForm = newChangeInfoForm();
 
-	@automock
 	public readonly changeEmailForm = changeEmailForm();
 
-	@automock
 	public readonly changePasswordForm = changePasswordForm();
 
-	@automock
 	private readonly getUser$ = (uuid: string): Observable<User> =>
 		this.httpService
 			.collection<User>(COLLECTION_SCHEMA.users)
 			.read(uuid)
 			.pipe(filterNil());
 
-	@automock
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
 		filterNil(),
 		takeUntil(this.destroy$),

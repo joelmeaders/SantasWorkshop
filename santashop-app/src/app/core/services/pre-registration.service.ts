@@ -1,14 +1,19 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlertController } from '@ionic/angular/standalone';
-import { Observable, Subject, of } from 'rxjs';
 import {
 	catchError,
+	defer,
+	distinctUntilChanged,
+	filter,
+	from,
 	map,
-	mergeMap,
+	of,
 	shareReplay,
-	takeUntil,
+	startWith,
+	switchMap,
 	tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import {
 	DateTimeSlot,
 	Registration,
@@ -18,12 +23,9 @@ import {
 import {
 	AuthService,
 	AnalyticsWrapper,
-	automock,
-	filterNil,
 	FireRepoLite,
 	FunctionsWrapper,
 	HttpsCallableResult,
-	IFireRepoCollection,
 	dateToCalendarString,
 	timestampDateFix,
 } from '@santashop/core';
@@ -32,7 +34,7 @@ import { QrCodeService } from './qrcode.service';
 @Injectable({
 	providedIn: 'root',
 })
-export class PreRegistrationService implements OnDestroy {
+export class PreRegistrationService {
 	private readonly fireRepo = inject(FireRepoLite);
 	private readonly authService = inject(AuthService);
 	private readonly qrCodeService = inject(QrCodeService);
@@ -41,103 +43,105 @@ export class PreRegistrationService implements OnDestroy {
 	private readonly alertController = inject(AlertController);
 	private hasReportedUnavailableRegistration = false;
 
-	private readonly registrationCollection =
-		(): IFireRepoCollection<Registration> =>
-			this.fireRepo.collection<Registration>(
-				COLLECTION_SCHEMA.registrations,
+	private readonly destroyRef = inject(DestroyRef);
+	private registrationUid: string | undefined;
+
+	private readonly registrationState$ = this.authService.currentUser$.pipe(
+		map((user) => user?.uid),
+		distinctUntilChanged(),
+		switchMap((uid) => {
+			if (uid !== this.registrationUid) {
+				this.registrationUid = uid;
+				this.hasReportedUnavailableRegistration = false;
+			}
+			if (!uid) return of({ loading: false, registration: undefined });
+			return defer(() =>
+				this.fireRepo
+					.collection<Registration>(COLLECTION_SCHEMA.registrations)
+					.read(uid, 'uid'),
+			).pipe(
+				tap((registration) => {
+					if (!registration)
+						void this.reportUnavailableRegistration('missing');
+				}),
+				map((registration) => ({
+					loading: false,
+					registration: registration
+						? this.normalizeRegistration(registration)
+						: undefined,
+				})),
+				catchError(() => {
+					void this.reportUnavailableRegistration('unreadable');
+					return of({ loading: false, registration: undefined });
+				}),
+				startWith({ loading: true, registration: undefined }),
 			);
-
-	private readonly destroy$ = new Subject<void>();
-
-	@automock
-	public readonly userRegistration$ = this.authService.uid$.pipe(
-		takeUntil(this.destroy$),
-		filterNil(),
-		mergeMap((uid) => this.registrationCollection().read(uid, 'uid')),
-		catchError(() => {
-			void this.reportUnavailableRegistration('unreadable');
-			return of(undefined);
 		}),
-		tap((registration) => {
-			if (!registration) void this.reportUnavailableRegistration('missing');
-		}),
-		shareReplay(1),
+		takeUntilDestroyed(this.destroyRef),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
-	@automock
-	public readonly registrationComplete$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
-		map((registration) =>
-			registration ? this.isRegistrationComplete(registration) : false,
+	/** Clears visible data while a different identity is loading. */
+	public readonly userRegistration$ = this.registrationState$.pipe(
+		map((state) => state.registration),
+	);
+	/** Route guards must wait for the read; loading is not an incomplete registration. */
+	public readonly registrationComplete$ = this.registrationState$.pipe(
+		filter((state) => !state.loading),
+		map(
+			({ registration }) =>
+				!!registration && this.isRegistrationComplete(registration),
 		),
-		shareReplay(1),
 	);
-
-	@automock
 	public readonly registrationSubmitted$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
 		map((registration) => !!registration?.registrationSubmittedOn),
-		shareReplay(1),
 	);
-
-	@automock
 	public readonly hasCheckedIn$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
 		map((registration) => !!registration?.hasCheckedIn),
-		shareReplay(1),
 	);
-
-	@automock
 	public readonly children$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
-		map((registration) => this.getChildren(registration)),
-		shareReplay(1),
+		map((registration) => registration?.children ?? []),
 	);
-
-	@automock
-	public readonly childCount$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
-		map((registration) => registration?.children?.length ?? 0),
-		shareReplay(1),
+	public readonly childCount$ = this.children$.pipe(
+		map((children) => children.length),
 	);
-
-	@automock
 	public readonly noErrorsInChildren$ = this.children$.pipe(
-		takeUntil(this.destroy$),
-		map((children) => children.filter((c) => !!c.error)),
-		map((errors) => errors.length === 0),
-		shareReplay(1),
+		map((children) => children.every((child) => !child.error)),
 	);
-
-	@automock
-	public readonly dateTimeSlot$: Observable<DateTimeSlot | undefined> =
-		this.userRegistration$.pipe(
-			takeUntil(this.destroy$),
-			map((registration) => this.getDateTimeSlot(registration)),
-			shareReplay(1),
-		);
-
-	@automock
-	public readonly qrCode$ = this.userRegistration$.pipe(
-		takeUntil(this.destroy$),
-		filterNil(),
-		map((registration) => this.getQrCodeStoragePath(registration)),
-		filterNil(),
-		mergeMap((storagePath) =>
-			this.qrCodeService.registrationQrCodeUrl(storagePath),
+	public readonly dateTimeSlot$ = this.userRegistration$.pipe(
+		map(
+			(registration) =>
+				registration?.dateTimeSlot as DateTimeSlot | undefined,
 		),
-		shareReplay(1),
+	);
+	public readonly qrCode$ = this.userRegistration$.pipe(
+		map((registration) => registration?.qrCodeStoragePath),
+		distinctUntilChanged(),
+		switchMap((path) =>
+			path
+				? from(this.qrCodeService.registrationQrCodeUrl(path)).pipe(
+						startWith(undefined),
+					)
+				: of(undefined),
+		),
+		takeUntilDestroyed(this.destroyRef),
+		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
-
-	private getQrCodeStoragePath(
-		registration: Registration,
-	): string | undefined {
-		return registration.qrCodeStoragePath;
+	private normalizeRegistration(registration: Registration): Registration {
+		return {
+			...registration,
+			children: registration.children?.map((child) => ({
+				...child,
+				dateOfBirth: timestampDateFix(child.dateOfBirth),
+			})),
+			dateTimeSlot: registration.dateTimeSlot && {
+				...registration.dateTimeSlot,
+				dateTime:
+					registration.dateTimeSlot.dateTime &&
+					timestampDateFix(registration.dateTimeSlot.dateTime),
+			},
+		};
 	}
 
 	public saveDraftChild(input: {
@@ -210,22 +214,6 @@ export class PreRegistrationService implements OnDestroy {
 		const hasDateTime = registration.dateTimeSlot?.dateTime;
 		const isSubmitted = registration.registrationSubmittedOn;
 		return !!hasChildren && !!hasDateTime && !isSubmitted;
-	}
-
-	private getDateTimeSlot(
-		registration?: Registration,
-	): DateTimeSlot | undefined {
-		const slot = registration?.dateTimeSlot as DateTimeSlot;
-		if (slot) slot.dateTime = timestampDateFix(slot.dateTime);
-		return slot;
-	}
-
-	private getChildren(registration?: Registration): Child[] {
-		registration?.children?.forEach((child) => {
-			child.dateOfBirth = timestampDateFix(child.dateOfBirth);
-		});
-
-		return (registration?.children as Child[]) ?? new Array<Child>();
 	}
 
 	private createMutationId(): string {

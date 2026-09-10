@@ -1,23 +1,33 @@
-import { AdminReadRepository } from '../../../shared/services/admin-read-repository.service';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { SearchService } from './search.service';
-import { firstValueFrom, of } from 'rxjs';
-import { where } from 'firebase/firestore/lite';
-import { requireDefined } from '../../../../test-helpers';
+import { firstValueFrom, of, Subject, Subscription, throwError } from 'rxjs';
+import { limit, orderBy, where } from 'firebase/firestore/lite';
+import type { RegistrationSearchIndex, User } from '@santashop/models';
+import {
+	AdminReadRepository,
+	type AdminReadCollection,
+} from '../../../shared/services/admin-read-repository.service';
+import { SearchService, type SearchState } from './search.service';
 
 describe('SearchService', () => {
 	let service: SearchService;
-	const indexReadMany = vi.fn();
-	const userReadMany = vi.fn();
-
+	let reads: ReturnType<
+		typeof vi.fn<AdminReadCollection<RegistrationSearchIndex>['readMany']>
+	>;
+	let userReads: ReturnType<
+		typeof vi.fn<AdminReadCollection<User>['readMany']>
+	>;
+	let subscriptions: Subscription;
+	let states: SearchState[];
 	beforeEach(() => {
-		indexReadMany.mockReset();
-		userReadMany.mockReset();
-		indexReadMany.mockReturnValue(
-			of([{ emailAddress: 'family@example.test' }]),
-		);
-		userReadMany.mockReturnValue(of([{ uid: 'customer-1' }]));
+		reads = vi
+			.fn<AdminReadCollection<RegistrationSearchIndex>['readMany']>()
+			.mockReturnValue(of([]));
+		userReads = vi
+			.fn<AdminReadCollection<User>['readMany']>()
+			.mockReturnValue(of([]));
+		subscriptions = new Subscription();
+		states = [];
 		TestBed.configureTestingModule({
 			providers: [
 				{
@@ -25,50 +35,106 @@ describe('SearchService', () => {
 					useValue: {
 						collection: vi
 							.fn()
-							.mockReturnValueOnce({ readMany: indexReadMany })
-							.mockReturnValueOnce({ readMany: userReadMany }),
+							.mockReturnValueOnce({ readMany: reads })
+							.mockReturnValueOnce({ readMany: userReads }),
 					},
 				},
 			],
 		});
 		service = TestBed.inject(SearchService);
+		subscriptions.add(
+			service.state$.subscribe((state) => states.push(state)),
+		);
+	});
+	afterEach(() => {
+		subscriptions.unsubscribe();
+		vi.useRealTimers();
 	});
 
-	it('preserves leading zeros in ZIP queries', () => {
-		service.searchByLastNameZip('Smith', '01234');
-		expect(indexReadMany.mock.calls[0]?.[0]?.[0]).toEqual(where('zip', '==', '01234'));
+	it('starts idle without fetching, including an idle refresh', () => {
+		service.refresh();
+		expect(states.at(-1)).toEqual({ status: 'idle' });
+		expect(reads).not.toHaveBeenCalled();
 	});
 
-	it('should be created', () => {
-		expect(service).toBeTruthy();
-	});
-
-	it('normalizes name, zip, email, and code searches before publishing their observables', async () => {
-		service.searchByLastNameZip('SMITH', '80001');
-		const results = await firstValueFrom(service.searchResults$);
-		expect(results).toBeTruthy();
-		await expect(firstValueFrom(requireDefined(results))).resolves.toEqual([
-			{ emailAddress: 'family@example.test' },
+	it('normalizes queries, preserves ZIP zeros, and bounds search results', async () => {
+		service.searchByLastNameZip('SMITH', '01234');
+		expect(reads).toHaveBeenLastCalledWith([
+			where('zip', '==', '01234'),
+			where('lastName', '>=', 'smith'),
+			where('lastName', '<=', 'smith\uf8ff'),
+			orderBy('lastName', 'asc'),
+			limit(50),
 		]);
-		expect(indexReadMany).toHaveBeenCalledOnce();
-
 		service.searchByEmail('FAMILY@EXAMPLE.TEST');
+		expect(reads).toHaveBeenLastCalledWith([
+			where('emailAddress', '>=', 'family@example.test'),
+			where('emailAddress', '<=', 'family@example.test\uf8ff'),
+			orderBy('emailAddress', 'asc'),
+			limit(50),
+		]);
 		service.searchByCode('ab12cd');
-		expect(indexReadMany).toHaveBeenCalledTimes(3);
+		expect(reads).toHaveBeenLastCalledWith([
+			where('code', '==', 'AB12CD'),
+			limit(50),
+		]);
+		await firstValueFrom(
+			service.searchUsersByEmailAddress('FAMILY@EXAMPLE.TEST'),
+		);
+		expect(userReads).toHaveBeenLastCalledWith([
+			where('emailAddress', '==', 'family@example.test'),
+		]);
 	});
 
-	it('queries users directly for duplicate email detection and clears results on reset', async () => {
-		await expect(
-			firstValueFrom(
-				service.searchUsersByEmailAddress('FAMILY@EXAMPLE.TEST'),
-			),
-		).resolves.toEqual([{ uid: 'customer-1' }]);
-		expect(userReadMany).toHaveBeenCalledOnce();
-
-		service.searchByEmail('family@example.test');
+	it('shares one read, replaces a pending query, and clears on reset', () => {
+		const first = new Subject<RegistrationSearchIndex[]>();
+		const second = new Subject<RegistrationSearchIndex[]>();
+		reads.mockReturnValueOnce(first).mockReturnValueOnce(second);
+		service.searchByCode('first');
+		subscriptions.add(service.state$.subscribe());
+		expect(reads).toHaveBeenCalledTimes(1);
+		expect(states.at(-1)).toEqual({ status: 'loading' });
+		service.searchByCode('second');
+		expect(first.observed).toBe(false);
+		first.next([{ customerId: 'stale' } as RegistrationSearchIndex]);
+		expect(states.at(-1)).toEqual({ status: 'loading' });
+		second.next([]);
+		expect(states.at(-1)).toEqual({ status: 'ready', results: [] });
 		service.reset();
-		await expect(
-			firstValueFrom(service.searchResults$),
-		).resolves.toBeNull();
+		expect(second.observed).toBe(false);
+		expect(states.at(-1)).toEqual({ status: 'idle' });
+	});
+
+	it('reports an error and retries the same criteria without completing state', () => {
+		reads
+			.mockReturnValueOnce(throwError(() => new Error('offline')))
+			.mockReturnValueOnce(of([]));
+		service.searchByEmail('a@example.test');
+		expect(states.at(-1)).toEqual({ status: 'error' });
+		service.refresh();
+		expect(reads.mock.calls[1]).toEqual(reads.mock.calls[0]);
+		expect(states.at(-1)).toEqual({ status: 'ready', results: [] });
+	});
+
+	it('times out a stalled read and can recover on refresh', async () => {
+		vi.useFakeTimers();
+		const pending = new Subject<RegistrationSearchIndex[]>();
+		reads.mockReturnValueOnce(pending).mockReturnValueOnce(of([]));
+		service.searchByCode('slow');
+		await vi.advanceTimersByTimeAsync(5000);
+		expect(states.at(-1)).toEqual({ status: 'error' });
+		expect(pending.observed).toBe(false);
+		service.refresh();
+		expect(states.at(-1)).toEqual({ status: 'ready', results: [] });
+	});
+
+	it('releases the last subscription and fetches fresh data on resubscription', () => {
+		const pending = new Subject<RegistrationSearchIndex[]>();
+		reads.mockReturnValue(pending);
+		service.searchByCode('again');
+		subscriptions.unsubscribe();
+		expect(pending.observed).toBe(false);
+		subscriptions = service.state$.subscribe();
+		expect(reads).toHaveBeenCalledTimes(2);
 	});
 });

@@ -37,10 +37,11 @@ and writes an ignored, project-specific file:
 - local emulator: `santashop-functions/.env.demo-santashop`
 
 Firebase CLI loads the selected file during deployment and persists the values
-as ordinary Function revision environment variables. Test generation omits AWS
-credentials, forces the `sink` email transport, and pins the `load-email` VPC
-connector. Privileged GCP users who can inspect production Function revisions
-may also be able to inspect their AWS credentials.
+as ordinary Function revision environment variables. Both deployed environments
+ordinarily use SES and their own scoped AWS credentials; the test load-isolation
+configuration is an explicit, separate operation, not the default. Privileged
+GCP users who can inspect Function revisions may also be able to inspect their
+AWS credentials.
 Never print generated dotenv contents or credentials in workflow logs.
 
 The disposable Functions deploy artifact includes only the generated file for
@@ -50,8 +51,7 @@ developer-local `.env`; neither local file is required on a GitHub runner.
 ## GitHub repository secrets
 
 The `scripts/github-secrets.ps1` synchronization helper requires these eight
-secret names. Its inventory still includes legacy test AWS values; the test
-deployment workflow does not consume them and the test generator omits them:
+secret names, including separate AWS credentials for both deployed environments:
 
 - `TEST_FIREBASE_API_KEY`
 - `PROD_FIREBASE_API_KEY`
@@ -82,7 +82,15 @@ pwsh ./scripts/github-secrets.ps1 -WhatIf
 
 The helper requires an authenticated GitHub CLI and repository permission to
 manage Actions secrets. Service-account JSON must be represented on one line in
-the dotenv file.
+the dotenv file. Every key must be explicitly scoped: an unprefixed AWS value
+never substitutes for a missing test or production key. The helper validates all
+eight inputs before any write, selects the repository explicitly, passes values
+on standard input, and reports names rather than secret-bearing command lines.
+It does not create cloud credentials or delete existing secrets.
+
+The fixture test `pwsh ./scripts/github-secrets.test.ps1` shadows `gh` and checks
+success, missing scoped values, `-WhatIf`, and failure redaction without network
+writes. It is part of shared UI PR validation.
 
 ## Local development
 

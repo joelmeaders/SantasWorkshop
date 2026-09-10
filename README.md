@@ -7,9 +7,9 @@ must be created directly in the project Obsidian vault. Follow the
 
 A monorepo for Santa's Workshop registration and management applications.
 
-Develop and test both apps in isolation with [Storybook](docs/storybook.md). The [UI inventory](docs/storybook-inventory.md) links every component and page to its stories.
+Develop and test selected states of both apps in isolation with [Storybook](docs/storybook.md). The catalog itself is the UI inventory; stories protect meaningful rendering, interaction, and accessibility behavior rather than satisfying a component-count target.
 
-The [function call map](docs/function-call-map.md) covers app callables, Firestore triggers, function calls, task queues, and schedules. Run `pnpm run functions:graph:check` to check source freshness and cycle regressions, and `pnpm run functions:cycles` for a strict cycle check. The strict check reports the bounded owner-worker continuation. The email handler cannot recreate its queue record. A passing regression check does not mean there are no cycles.
+Read the [runtime call boundaries](docs/function-call-map.md) before changing callables, Firestore triggers, queue writes, task continuations, or schedules. Focused runtime tests protect email update-only writes and owner-worker deadlines/lock ownership; there is no broad source-hash approval gate.
 
 ## Workspace Structure
 
@@ -37,7 +37,7 @@ This workspace uses **pnpm Catalogs** for centralized dependency version managem
 ### Catalogs
 
 | Catalog | Purpose | Used By |
-|---------|---------|---------|
+| -------------------- | ---------------------------- | ------------------------------ |
 | `catalog:` (default) | Angular/Ionic dependencies | app, admin, core, models, root |
 | `catalog:functions` | Cloud Functions dependencies | santashop-functions |
 
@@ -47,33 +47,34 @@ Dependencies are defined once in `pnpm-workspace.yaml`:
 
 ```yaml
 catalog:
-  "@angular/core": 22.1.0
-  "@ionic/angular": 8.8.14
-  firebase: 12.18.0
+    '@angular/core': 22.1.0
+    '@ionic/angular': 8.8.14
+    firebase: 12.18.0
 
 catalogs:
-  functions:
-    firebase-admin: ^13.10.0
-    firebase-functions: ^7.3.2
+    functions:
+        firebase-admin: ^13.10.0
+        firebase-functions: ^7.3.2
 ```
 
 Then referenced in `package.json` files:
 
 ```json
 {
-  "dependencies": {
-    "@angular/core": "catalog:",
-    "firebase": "catalog:"
-  }
+	"dependencies": {
+		"@angular/core": "catalog:",
+		"firebase": "catalog:"
+	}
 }
 ```
 
 For functions:
+
 ```json
 {
-  "dependencies": {
-    "firebase-admin": "catalog:functions"
-  }
+	"dependencies": {
+		"firebase-admin": "catalog:functions"
+	}
 }
 ```
 
@@ -129,19 +130,7 @@ Each app uses one root `src/config.ts` metadata file plus a generated `src/fireb
 
 ### Sync GitHub Actions secrets from `.env`
 
-If you want to create or update the GitHub Actions secrets used by the workflows, use:
-
-```bash
-pwsh ./scripts/github-secrets.ps1
-```
-
-Preview the operations without writing:
-
-```bash
-pwsh ./scripts/github-secrets.ps1 -WhatIf
-```
-
-The script reads the root `.env`, requires the eight repository secrets used by the workflows, and writes them with the GitHub CLI (`gh secret set`). It does not provision any cloud credential resources.
+The [configuration guide](docs/SECRETS_AND_CONFIGURATION.md#synchronize-repository-secrets) owns the required secret names and safe synchronization procedure. Both deployed projects use scoped SES credentials. The helper supports `-WhatIf`, validates all required input before writing, and does not pass secret values in command arguments or diagnostics.
 
 ### Build Applications
 
@@ -169,7 +158,7 @@ pnpm run e2e:test
 
 ### Hosting Builds in GitHub Actions
 
-- Pull request workflows validate app/admin builds in **test** mode, but do not deploy.
+- The UI PR workflow runs core and Storybook once, selects the affected app/admin targets, and requires every selected/shared job through `build_validation`. Target jobs validate **test**-mode builds and emulator journeys without deployment. The separate Windows visual job remains independent.
 - Merge-to-master workflows deploy the merged commit to the **test** Firebase project first.
 - Production release is a separate manual workflow run that promotes a specific tested commit or ref to the **production** Firebase project.
 - When you are ready for prod, run the workflow manually and provide the tested commit SHA or ref as `release_ref`.

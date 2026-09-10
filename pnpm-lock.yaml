@@ -198,9 +198,6 @@ catalogs:
     react-dom:
       specifier: 19.2.8
       version: 19.2.8
-    reflect-metadata:
-      specifier: ^0.2.2
-      version: 0.2.2
     rxjs:
       specifier: ^7.8.2
       version: 7.8.2
@@ -429,9 +426,6 @@ importers:
       ng2-charts:
         specifier: 'catalog:'
         version: 8.0.0(@angular/cdk@22.1.0(@angular/common@22.1.0(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2))(@angular/platform-browser@22.1.0(@angular/animations@22.1.0(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2)))(@angular/common@22.1.0(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2)))(rxjs@7.8.2))(@angular/common@22.1.0(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2))(@angular/platform-browser@22.1.0(@angular/animations@22.1.0(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2)))(@angular/common@22.1.0(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.0(@angular/compiler@22.1.0)(rxjs@7.8.2)))(chart.js@4.5.1)(rxjs@7.8.2)
-      reflect-metadata:
-        specifier: 'catalog:'
-        version: 0.2.2
       rxjs:
         specifier: 'catalog:'
         version: 7.8.2

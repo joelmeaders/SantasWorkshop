@@ -2,11 +2,11 @@
 
 <ion-content class="ion-text-center">
 	<div class="limited-container">
-		@if (searchInput() !== null) {
+		@if (state().status !== 'idle') {
 		<ion-button fill="outline" (click)="refresh()"
 			>Refresh results</ion-button
 		>
-		} @if (searchInput() === null) {
+		} @if (state().status === 'idle') {
 		<h1>No search was entered</h1>
 		<ion-button
 			color="danger"
@@ -16,9 +16,12 @@
 		>
 			Go Back
 		</ion-button>
-		} @let results = searchResults(); @if (results === null && searchInput() !== null) {
+		} @let results = searchResults(); @if (state().status === 'loading') {
 		<div class="center-100 searching">
-			<ion-spinner name="crescent" aria-label="Searching for registrations" />
+			<ion-spinner
+				name="crescent"
+				aria-label="Searching for registrations"
+			/>
 			<p>Searching, please wait...</p>
 			<ion-button
 				color="medium"
@@ -29,16 +32,17 @@
 				Cancel
 			</ion-button>
 		</div>
-		} @else if (results === undefined && searchInput() !== null) {
+		} @else if (state().status === 'error') {
 		<p role="alert">
 			Search results could not be loaded. Select Refresh results to try
 			again.
 		</p>
-		} @else { @if (results && results.length > 0) {
+		} @else if (state().status === 'ready') { @if (results && results.length
+		> 0) {
 		<span>
 			<ion-card-header>
 				<ion-card-title>
-					{{ results!.length }} {{ results.length === 1 ? 'Result' :
+					{{ results.length }} {{ results.length === 1 ? 'Result' :
 					'Results' }}
 				</ion-card-title>
 				@let sortFn = sortBy();

@@ -32,9 +32,6 @@ export type idField<T> = keyof T & keyof NonNullable<T>;
 /**
  * The entire reason for this class is to make
  * the modular firebase methods unit testable.
- *
- * @export
- * @class FirestoreMethods
  */
 @Injectable({
 	providedIn: 'root',

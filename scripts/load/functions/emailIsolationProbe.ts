@@ -1,6 +1,6 @@
 import { lookup } from 'node:dns/promises';
 import { connect } from 'node:net';
-import { isEmailSink } from '../utility/email-isolation';
+import { isEmailSink } from './email-isolation';
 
 const probePort = (address: string, port: number): Promise<boolean> =>
 	new Promise((resolve, reject) => {

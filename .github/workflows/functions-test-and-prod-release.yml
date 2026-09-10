@@ -9,6 +9,7 @@ on:
       - 'santashop-models/**'
       - 'remote-config/**'
       - 'scripts/remote-config*.cjs'
+      - 'scripts/email-sending.cjs'
       - 'scripts/public-parameters-schema.cjs'
       - 'scripts/load/**'
       - 'santashop-e2e/**'
@@ -46,6 +47,11 @@ on:
         options:
           - test
           - prod
+      load_test_mode:
+        description: Enable isolated load testing in test (requires provisioned network)
+        required: true
+        default: false
+        type: boolean
       skip_tests:
         description: Skip test suites for this manual deployment
         required: true
@@ -56,6 +62,9 @@ permissions:
   contents: read
 
 env:
+  # Validation artifacts and emulators never receive usable AWS credentials.
+  TEST_AWS_ACCESS_KEY_ID: ci-not-used
+  TEST_AWS_SECRET_ACCESS_KEY: ci-not-used
   TEST_SANTASHOP_PROGRAM_YEAR: '2026'
   TEST_SANTASHOP_TIME_ZONE: America/Denver
   TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
@@ -73,7 +82,7 @@ env:
   TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
   TEST_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
-  TEST_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * * *'
+  TEST_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
   TEST_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
   TEST_SCHEDULED_USER_STATS: 55 23 * 11,12 *
   TEST_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
@@ -137,7 +146,6 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
-      - run: pnpm run load:test
 
   integration_tests:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test' && !inputs.skip_tests)
@@ -241,6 +249,9 @@ jobs:
     timeout-minutes: 45
     env:
       SANTASHOP_FUNCTIONS_DEPLOY: test
+      SANTASHOP_LOAD_TEST_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.load_test_mode && 'true' || 'false' }}
+      TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+      TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', 'TEST')] }}
     steps:
       - uses: actions/checkout@v7
@@ -269,6 +280,10 @@ jobs:
         shell: bash
         run: |
           [ -n "$FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST" ] || { echo "Missing FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST"; exit 1; }
+          if [ "$SANTASHOP_LOAD_TEST_MODE" != "true" ]; then
+            [ -n "$TEST_AWS_ACCESS_KEY_ID" ] || { echo "Missing TEST_AWS_ACCESS_KEY_ID"; exit 1; }
+            [ -n "$TEST_AWS_SECRET_ACCESS_KEY" ] || { echo "Missing TEST_AWS_SECRET_ACCESS_KEY"; exit 1; }
+          fi
       - name: Write test Firebase service account
         shell: bash
         run: |
@@ -300,7 +315,7 @@ jobs:
           SANTASHOP_FUNCTION_REGION: us-central1
           SANTASHOP_TIME_ZONE: ${{ env.TEST_SANTASHOP_TIME_ZONE }}
           SCHEDULED_FIRESTORE_BACKUP: ${{ env.TEST_SCHEDULED_FIRESTORE_BACKUP }}
-          SCHEDULED_DATETIME_SLOT_COUNTERS: ${{ env.TEST_SCHEDULED_DATETIME_SLOT_COUNTERS }}
+          SCHEDULED_DATETIME_SLOT_COUNTERS: ${{ inputs.load_test_mode && '*/5 * * * *' || env.TEST_SCHEDULED_DATETIME_SLOT_COUNTERS }}
           SCHEDULED_REGISTRATION_STATS: ${{ env.TEST_SCHEDULED_REGISTRATION_STATS }}
           SCHEDULED_USER_STATS: ${{ env.TEST_SCHEDULED_USER_STATS }}
           SCHEDULED_CHECKIN_STATS: ${{ env.TEST_SCHEDULED_CHECKIN_STATS }}
@@ -320,6 +335,7 @@ jobs:
     timeout-minutes: 120
     env:
       SANTASHOP_FUNCTIONS_DEPLOY: prod
+      SANTASHOP_LOAD_TEST_MODE: ${{ inputs.load_test_mode && 'true' || 'false' }}
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', '193B5')] }}
       PROD_AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       PROD_AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

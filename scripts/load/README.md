@@ -1,12 +1,18 @@
 # Hosted load tests
 
+Load infrastructure is optional and is not required for normal PR validation.
+Normal test deployments use AWS SES, omit the isolation probe, clear VPC
+connector settings, and use the ordinary seasonal counter schedule. Keep the
+load connector deleted between campaigns; it has an ongoing minimum-instance
+charge. Provisioning and retirement scripts require the explicit test project.
+
 Run these commands from the repository root with Node 24 and pnpm. This harness
 targets **`santas-workshop-test` only**. It creates labeled QA accounts and test
 records through deployed customer and staff APIs. It does not use emulator
 cleanup helpers or delete its fixtures.
 
 The workload uses the historical peaks plus the selected 50% headroom. See the
-[test plan](../../docs/load-acceptance.md) for the workload and acceptance
+[test plan](acceptance.md) for the workload and acceptance
 criteria. Create dated run reports directly in the Obsidian project's
 `Archive/Load and Resources` folder, following the
 [recording policy](../../docs/README.md#recording-future-work). The vault's
@@ -22,23 +28,89 @@ deployment and load evidence before acceptance.
 2. Sign in to the intended Google account with the gcloud CLI. The harness uses
    that account for test-project inventory and run-owned fixture setup. Customer
    calls use ordinary Firebase password authentication and App Check.
-3. Deploy the reviewed Functions configuration through the repository's CI
-   release workflow. The harness does not deploy Functions or change public
-   feature flags. The test settings must permit signup, registration, check-in,
-   and on-site registration. The counter schedule must be `*/5 * * * *`.
-4. Ensure test email isolation has been provisioned: sink transport, no AWS
-   credentials, restricted VPC egress, private Google API DNS, and no unreviewed
-   workers. The one-time infrastructure command below changes the test network;
-   use it only as part of authorized environment setup. Reuse an existing setup.
+3. Disable email with `node scripts/email-sending.cjs disable --project
+santas-workshop-test`. This is an application stop control, not proof of AWS
+   network isolation. Never send load while ordinary SES transport is active.
+4. Provision the network before deploying isolated Functions. This creates the
+   `load-email-isolation` custom IPv4 subnet (`10.253.0.0/28`), Google-only
+   egress rules, three private DNS zones, and the `load-email` connector in
+   `us-central1` (two to three `e2-micro` instances, no NAT or peering):
 
 ```text
 node scripts/load/provision-network.mjs --project santas-workshop-test --apply
 ```
 
+5. Dispatch the reviewed Functions workflow with **test** as the deployment
+   target, the exact committed ref, and `load_test_mode=true`. For example:
+
+```text
+gh workflow run functions-test-and-prod-release.yml --ref <reviewed-branch> -f release_ref=<commit-sha> -f deployment_target=test -f load_test_mode=true -f skip_tests=false
+```
+
+The workflow passes `SANTASHOP_LOAD_TEST_MODE=true` to the generator. This
+test-only opt-in removes AWS credentials, routes all Function egress through
+the connector, deploys the private probe, and sets counters to run every five
+minutes. A normal push or dispatch defaults to `false`; coordinate other test
+deployments so they cannot restore ordinary SES while a campaign is active.
+Do not pass load mode to production. Do not replace CI deployment with a local
+Functions deploy.
+
+6. Wait for deployment success and the retirement window below. Review the
+   current worker inventory and queued work. Enable the email control for
+   **sink processing** only after all deployed senders have no AWS credentials
+   and use the verified deny network. Allow three minutes for caches:
+
+```text
+node scripts/email-sending.cjs enable --project santas-workshop-test
+```
+
+7. The test public settings must permit signup, registration, check-in, and
+   on-site registration. Review them through owner App settings. Run preflight
+   before traffic. It checks the email control and independent network/runtime
+   isolation; the control alone never authorizes load.
+
 After any Functions deployment, wait at least 32 minutes for previous work to
 retire. Preflight checks the live configuration, network restrictions, worker
 inventory, and a TCP-only negative SES/SMTP probe before any account is created.
 It fails closed if evidence is missing or a previous revision has not retired.
+
+## Retire the environment after a campaign
+
+1. Stop the load generator and wait for its in-flight work to finish. Disable
+   the email control and allow three minutes for sender caches. Review Cloud
+   Tasks, the Eventarc subscription backlog, and registration email records.
+   Resolve queued, failed, or in-flight synthetic work before restoring SES.
+   Simulated and suppressed queue records are terminal; retain that state so
+   old work cannot be replayed. Archive selected evidence under the recording
+   policy before any separately authorized fixture cleanup.
+2. Dispatch the same reviewed Functions workflow with
+   `deployment_target=test` and **`load_test_mode=false`**. Keep email disabled.
+   The deploy uses the scoped `TEST_AWS_ACCESS_KEY_ID` and
+   `TEST_AWS_SECRET_ACCESS_KEY` repository secrets, explicitly clears connector
+   routing, removes the probe, and restores the normal counter schedule.
+3. Verify all Functions are ACTIVE, Cloud Run has completed the deployment,
+   and current services no longer reference the connector. Retire the network:
+
+```text
+node scripts/load/retire-network.mjs --project santas-workshop-test --apply
+```
+
+The script removes non-serving isolated revisions, then the connector, private
+DNS records/zones, firewall rules, subnet, and VPC. It refuses attached active
+services, unexpected jobs, VMs, and peering. It never deletes application data,
+current serving revisions, other networks, or production resources. Recheck
+the reported operation after a timeout before retrying. No automatic expiry
+is configured; the operator must complete this step to stop connector charges.
+
+4. Verify no connector, isolation network, DNS zones, or isolation probe
+   remains. Compare published application email templates with AWS SES:
+   publishing in sink mode writes only the local revision. Review and publish
+   any intended missing revisions before resuming ordinary email.
+5. Re-enable the email control only when normal credentials, runtime access
+   to Remote Config, template mappings, and queue disposition are verified.
+   Re-enabling does not replay suppressed or simulated records. Use a new,
+   explicitly authorized QA message for inbox validation; this procedure does
+   not send one automatically.
 
 ## Choose a command
 
@@ -109,7 +181,8 @@ continue to incur costs after the test.
 
 Use Ctrl+C to stop arrivals. Allow in-flight work and read-only verification to
 finish. Do not restore real email delivery while generated work may still run.
-The harness has no cleanup or restore command.
+The traffic runner does not clean up fixtures or restore SES automatically.
+Follow the retirement procedure above.
 
 ## Read and verify results
 
@@ -155,15 +228,17 @@ pnpm run load:test
 
 This runs local unit tests for the harness; it does not send hosted load.
 
-| File                                     | Responsibility                                               |
-| ---------------------------------------- | ------------------------------------------------------------ |
-| `run.mjs`                                | Phase orchestration and run manifest                         |
-| `config.mjs`                             | Project guards, fixture shapes, and traffic targets          |
-| `isolation.mjs`, `provision-network.mjs` | Live isolation checks and authorized network setup           |
-| `browser-smoke.mjs`, `customer.mjs`      | Browser journeys and authenticated API journeys              |
-| `metrics.mjs`, `monitor.mjs`             | Journal, arrivals, stop conditions, cost and instance checks |
-| `verify.mjs`                             | Read-only business reconciliation                            |
-| `resources.mjs`                          | Read-only memory and CPU acceptance                          |
+| File                                                           | Responsibility                                                       |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `run.mjs`                                                      | Phase orchestration and run manifest                                 |
+| `config.mjs`                                                   | Project guards, fixture shapes, and traffic targets                  |
+| `isolation.mjs`, `provision-network.mjs`, `retire-network.mjs` | Isolation checks, network setup, and retirement                      |
+| `configuration.cjs`, `functions/`                              | Optional deployment configuration, hash-only sink, and private probe |
+| `acceptance.md`, `resource-sizing.md`                          | Workload, acceptance criteria, and resource measurement              |
+| `browser-smoke.mjs`, `customer.mjs`                            | Browser journeys and authenticated API journeys                      |
+| `metrics.mjs`, `monitor.mjs`                                   | Journal, arrivals, stop conditions, cost and instance checks         |
+| `verify.mjs`                                                   | Read-only business reconciliation                                    |
+| `resources.mjs`                                                | Read-only memory and CPU acceptance                                  |
 
 Update the targets or stop conditions only as an explicit test-plan change.
 Commit changes before a hosted run and retain earlier failed evidence.

@@ -3,7 +3,10 @@ import {
 	SESClient,
 	SESClientConfig,
 } from '@aws-sdk/client-ses';
-import { isEmailSink, recordSimulatedEmail } from '../utility/email-isolation';
+import {
+	isEmailSink,
+	recordSimulatedEmail,
+} from '../../../scripts/load/functions/email-isolation';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import type {
 	SendTestEmailTemplateRequest,
@@ -32,6 +35,7 @@ import {
 	withCallableValidation,
 } from '../utility/callable-validation';
 import { isAdminToken } from '../utility/capabilities';
+import { isEmailSendingEnabled } from '../utility/email-sending';
 
 const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -160,6 +164,12 @@ export default async function callableSendTestEmailTemplate(
 		ReturnPath: REGISTRATION_EMAIL_RETURN_PATH,
 	});
 
+	if (!(await isEmailSendingEnabled())) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Email sending is disabled. No email was sent.',
+		);
+	}
 	try {
 		if (isEmailSink()) {
 			await recordSimulatedEmail('template-test', sendCommand.input);

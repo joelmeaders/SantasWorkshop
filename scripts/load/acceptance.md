@@ -1,7 +1,7 @@
 # Hosted load acceptance
 
 For setup, commands, monitoring, stopping, and result verification, start with
-[`scripts/load/README.md`](../scripts/load/README.md).
+[`scripts/load/README.md`](README.md).
 
 This harness targets only `santas-workshop-test`. Run it from the workspace root
 with Node 24 and the existing pnpm dependencies. It never deletes fixtures and
@@ -11,7 +11,7 @@ in process memory and are not written to the journal.
 
 ## Configured workload
 
-The workload below is defined in [`scripts/load/config.mjs`](../scripts/load/config.mjs).
+The workload below is defined in [`scripts/load/config.mjs`](config.mjs).
 Review the targets against retained traffic and an agreed headroom allowance
 before each acceptance campaign. Store the dated research and rationale with
 the campaign record in the project vault. The configured targets are inputs,
@@ -39,8 +39,9 @@ cancellations, retries, or device counts. Keep those limits with any sizing anal
 
 ## Email isolation comes first
 
-The test configuration generator omits all AWS credentials and forces the
-`sink` transport. Production configuration is unchanged. All test Functions
+When `SANTASHOP_LOAD_TEST_MODE=true`, the test configuration generator omits all
+AWS credentials and forces the `sink` transport. Normal test deployments use
+SES. Production cannot use load mode. All isolated test Functions
 route all egress through the dedicated `load-email` VPC connector. Network
 rules allow only the Private Google Access VIP over TCP 443 and the connector's
 required infrastructure protocols; higher-priority IPv4 and IPv6 denies block
@@ -70,8 +71,9 @@ Email paths covered by the source changes:
 Receipts never claim SES acceptance or recipient delivery. Keep network denial
 and credential removal active while any generated email work remains. Do not
 restore SES merely because arrivals stopped. This harness has no restore or
-cleanup command. The connector has continuing infrastructure cost while it is
-retained; include that cost in operational follow-up.
+fixture-cleanup command. Follow the [retirement procedure](README.md#retire-the-environment-after-a-campaign)
+to restore normal deployment and remove the connector, which has continuing
+infrastructure cost while retained.
 
 ## Commands
 
@@ -135,7 +137,7 @@ have request, memory, and CPU evidence, no memory-limit termination or HTTP
 5xx response, at least 20% observed memory headroom, and CPU p95 at or below
 80%. These are observed-workload checks, not proof of capacity at configured
 maximum concurrency. Unexercised functions remain explicitly unmeasured.
-See [function resource sizing](function-resource-sizing.md) for methods,
+See [function resource sizing](resource-sizing.md) for methods,
 limits, and resource-change validation.
 
 After calibration, the conservative cost projection must be below $20 before
@@ -152,7 +154,7 @@ check-ins, returned coupon counts, retained edits and original check-in times,
 simulated queue receipts, and the run-owned appointment counter. Soft
 overbooking is allowed. Keep generated fixtures for review. Create narrative run
 reports directly in the Obsidian project's `Archive/Load and Resources` folder.
-Follow the [recording policy](README.md#recording-future-work) for the exact path
+Follow the [recording policy](../../docs/README.md#recording-future-work) for the exact path
 and for archiving selected evidence from generated local output directories.
 The journal includes UTC timestamps, deployed revisions, instance evidence,
 cost estimates, operation results, and any stop reason. A code test, build,

@@ -32,7 +32,11 @@ import {
 	renderTemplateWithFieldValues,
 	resolvePublishedEmailTemplate,
 } from '../utility/email-templates';
-import { isEmailSink, recordSimulatedEmail } from '../utility/email-isolation';
+import {
+	isEmailSink,
+	recordSimulatedEmail,
+} from '../../../scripts/load/functions/email-isolation';
+import { isEmailSendingEnabled } from '../utility/email-sending';
 import { serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import {
@@ -82,7 +86,8 @@ interface QueuedRegistrationEmailDocument {
 		| 'sent'
 		| 'failed'
 		| 'superseded'
-		| 'simulated';
+		| 'simulated'
+		| 'suppressed';
 	failedOn?: Date;
 	lastErrorMessage?: string;
 	lastErrorDetails?: string;
@@ -520,8 +525,13 @@ const canSkipDelivery = async (
 	context: LoadedEmailTriggerContext,
 	triggerMetadata: EmailTriggerMetadata,
 ): Promise<boolean> => {
-	// Simulated deliveries remain terminal even if real delivery is later restored.
-	if (context.document.deliveryState === 'simulated') return true;
+	// Suppressed and simulated deliveries never replay when sending is restored.
+	if (
+		['simulated', 'suppressed'].includes(
+			context.document.deliveryState ?? '',
+		)
+	)
+		return true;
 	const now = new Date();
 	const supersededReason = getSupersededReason(context);
 	if (supersededReason) {
@@ -785,6 +795,22 @@ const persistFailedDelivery = async (
 		: new Error('Failed to send queued registration email');
 };
 
+const suppressDeliveryIfDisabled = async (
+	context: LoadedEmailTriggerContext,
+): Promise<boolean> => {
+	if (await isEmailSendingEnabled()) return false;
+	await updateQueueDocument(context, {
+		deliveryState: 'suppressed',
+		deliverySuppressionReason: 'email-sending-disabled',
+		deliveryCompletedOn: new Date(),
+		failedOn: false,
+		lastErrorMessage: false,
+		lastErrorDetails: false,
+	});
+	log.info('Queued email suppressed by the email sending control.');
+	return true;
+};
+
 async function processRegistrationEmail(
 	triggeredSnapshot: QueryDocumentSnapshot,
 	triggerMetadata: EmailTriggerMetadata = {},
@@ -797,6 +823,7 @@ async function processRegistrationEmail(
 	if (await canSkipDelivery(context, triggerMetadata)) {
 		return;
 	}
+	if (await suppressDeliveryIfDisabled(context)) return;
 
 	const payload = resolveEmailPayload(context);
 	if (!payload) {
@@ -949,6 +976,8 @@ async function processRegistrationEmail(
 
 	try {
 		await updateQueueDocument(context, deliveryMetadata);
+		// Rendering can outlive the cached permission. Check again at the send boundary.
+		if (await suppressDeliveryIfDisabled(context)) return;
 		if (simulated) {
 			const receiptId = await recordSimulatedEmail(
 				'registration',

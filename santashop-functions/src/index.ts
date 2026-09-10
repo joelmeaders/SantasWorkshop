@@ -1,7 +1,7 @@
 import type { UpdatePreferredLanguageRequest } from '@santashop/models';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
-import { setGlobalOptions } from 'firebase-functions/v2/options';
+import { RESET_VALUE, setGlobalOptions } from 'firebase-functions/v2/options';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { FUNCTION_REGION } from './utility/function-region';
@@ -127,35 +127,41 @@ setGlobalOptions({
 					'projects/santas-workshop-test/locations/us-central1/connectors/load-email',
 				vpcConnectorEgressSettings: 'ALL_TRAFFIC' as const,
 			}
-		: {}),
+		: {
+				vpcConnector: RESET_VALUE,
+				vpcConnectorEgressSettings: RESET_VALUE,
+			}),
 	...(FUNCTIONS_SERVICE_ACCOUNT
 		? { serviceAccount: FUNCTIONS_SERVICE_ACCOUNT }
 		: {}),
 });
 
-export const emailIsolationProbe = onRequest(
-	{
-		invoker: 'private',
-		maxInstances: 1,
-		minInstances: 0,
-		concurrency: 1,
-		timeoutSeconds: 30,
-	},
-	async (_request, response) => {
-		try {
-			response.json(
-				await (
-					await import('./fn/emailIsolationProbe')
-				).probeEmailIsolation(),
-			);
-		} catch {
-			response.status(503).json({
-				isolated: false,
-				reason: 'Email isolation probe failed.',
-			});
-		}
-	},
-);
+export const emailIsolationProbe =
+	process.env['SANTASHOP_EMAIL_TRANSPORT'] === 'sink'
+		? onRequest(
+				{
+					invoker: 'private',
+					maxInstances: 1,
+					minInstances: 0,
+					concurrency: 1,
+					timeoutSeconds: 30,
+				},
+				async (_request, response) => {
+					try {
+						response.json(
+							await (
+								await import('../../scripts/load/functions/emailIsolationProbe')
+							).probeEmailIsolation(),
+						);
+					} catch {
+						response.status(503).json({
+							isolated: false,
+							reason: 'Email isolation probe failed.',
+						});
+					}
+				},
+			)
+		: undefined;
 
 export const publicParametersGateway = onRequest(
 	{

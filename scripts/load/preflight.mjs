@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { PROJECT, assertClientConfig } from './config.mjs';
+import emailSettings from '../email-sending.cjs';
 
 export async function discoverConfiguration(client, snapshot) {
 	const apps = await client.list(
@@ -32,6 +33,11 @@ export async function discoverConfiguration(client, snapshot) {
 	const template = await client.request(
 		`https://firebaseremoteconfig.googleapis.com/v1/projects/${PROJECT}/remoteConfig`,
 	);
+	if (!emailSettings.readEmailSending(template)) {
+		throw new Error(
+			'The email control must allow isolated sink processing before a load run.',
+		);
+	}
 	const candidates = [
 		template.parameters,
 		...Object.values(template.parameterGroups ?? {}).map(

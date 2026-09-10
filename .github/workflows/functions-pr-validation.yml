@@ -7,6 +7,7 @@ on:
       - 'santashop-models/**'
       - 'remote-config/**'
       - 'scripts/remote-config*.cjs'
+      - 'scripts/email-sending.cjs'
       - 'scripts/public-parameters-schema.cjs'
       - 'scripts/load/**'
       - 'santashop-e2e/**'
@@ -34,6 +35,9 @@ permissions:
   contents: read
 
 env:
+  # Validation artifacts and emulators never receive usable AWS credentials.
+  TEST_AWS_ACCESS_KEY_ID: ci-not-used
+  TEST_AWS_SECRET_ACCESS_KEY: ci-not-used
   TEST_SANTASHOP_PROGRAM_YEAR: '2026'
   TEST_SANTASHOP_TIME_ZONE: America/Denver
   TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
@@ -49,7 +53,7 @@ env:
   TEST_REGISTRATION_EMAIL_SOURCE: noreply@denversantaclausshop.org
   TEST_REGISTRATION_EMAIL_RETURN_PATH: admin@denversantaclausshop.org
   TEST_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
-  TEST_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * * *'
+  TEST_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
   TEST_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
   TEST_SCHEDULED_USER_STATS: 55 23 * 11,12 *
   TEST_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
@@ -87,7 +91,6 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run functions:test:unit
-      - run: pnpm run load:test
       - name: Validate deploy artifact
         env:
           SANTASHOP_FUNCTIONS_DEPLOY: test

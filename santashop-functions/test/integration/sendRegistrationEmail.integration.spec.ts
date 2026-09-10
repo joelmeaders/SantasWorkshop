@@ -1,3 +1,6 @@
+vi.mock('../../src/utility/email-sending', () => ({
+	isEmailSendingEnabled: vi.fn().mockResolvedValue(true),
+}));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DocumentSnapshot, Timestamp } from 'firebase-admin/firestore';
 

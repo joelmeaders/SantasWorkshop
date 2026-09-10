@@ -14,6 +14,7 @@ const originalSendEmailsFromEmulator =
 
 vi.mock('firebase-functions/v2/options', () => ({
 	setGlobalOptions: setGlobalOptionsMock,
+	RESET_VALUE: null,
 }));
 
 vi.mock('firebase-functions/v2/https', () => ({
@@ -92,6 +93,8 @@ describe('functions index exports', () => {
 		expect(setGlobalOptionsMock).toHaveBeenCalledTimes(1);
 		expect(setGlobalOptionsMock).toHaveBeenCalledWith({
 			region: FUNCTION_REGION,
+			vpcConnector: null,
+			vpcConnectorEgressSettings: null,
 			...(process.env.SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT
 				? {
 						serviceAccount:
@@ -233,20 +236,8 @@ describe('functions index exports', () => {
 				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
 				'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
 		});
-		expect(onRequestMock).toHaveBeenCalledTimes(2);
-		expect(
-			(
-				subject.emailIsolationProbe as unknown as {
-					options: Record<string, unknown>;
-				}
-			).options,
-		).toMatchObject({
-			invoker: 'private',
-			maxInstances: 1,
-			minInstances: 0,
-			concurrency: 1,
-			timeoutSeconds: 30,
-		});
+		expect(onRequestMock).toHaveBeenCalledTimes(1);
+		expect(subject.emailIsolationProbe).toBeUndefined();
 	});
 	it('does not attach Remote Config identities in the emulator', async () => {
 		process.env.FUNCTIONS_EMULATOR = 'true';

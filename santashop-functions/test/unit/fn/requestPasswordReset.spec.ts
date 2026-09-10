@@ -4,6 +4,7 @@ import { createCallableRequest } from '../../helpers/callable-context';
 import { createBackgroundAdminMock } from '../../helpers/firebase-admin-background.mock';
 
 const sesSend = vi.fn();
+const emailSendingEnabled = vi.fn();
 const logDebug = vi.fn();
 const logInfo = vi.fn();
 const logWarn = vi.fn();
@@ -13,6 +14,10 @@ const loadSubject = async (
 	adminMock: ReturnType<typeof createBackgroundAdminMock>,
 ): Promise<typeof import('../../../src/fn/requestPasswordReset')> => {
 	vi.resetModules();
+	emailSendingEnabled.mockReset().mockResolvedValue(true);
+	vi.doMock('../../../src/utility/email-sending', () => ({
+		isEmailSendingEnabled: emailSendingEnabled,
+	}));
 	vi.doMock('firebase-admin', () => adminMock.module);
 	vi.doMock('@aws-sdk/client-ses', () => ({
 		SESClient: class {
@@ -150,7 +155,9 @@ describe('requestPasswordReset handler', () => {
 		const { default: requestPasswordReset } = await loadSubject(adminMock);
 
 		await expect(
-			requestPasswordReset(createCallableRequest({ emailAddress: email })),
+			requestPasswordReset(
+				createCallableRequest({ emailAddress: email }),
+			),
 		).resolves.toEqual({ accepted: true });
 		expect(adminMock.transactionSet).not.toHaveBeenCalled();
 		expect(adminMock.getUserByEmail).not.toHaveBeenCalled();
@@ -161,7 +168,9 @@ describe('requestPasswordReset handler', () => {
 		adminMock.generatePasswordResetLink.mockResolvedValue(
 			'https://auth.example/reset?oobCode=one-time-code',
 		);
-		adminMock.setDocSnapshot('users/user-2', { preferredLanguage: 'unknown' });
+		adminMock.setDocSnapshot('users/user-2', {
+			preferredLanguage: 'unknown',
+		});
 		sesSend.mockRejectedValue({ code: 'MessageRejected' });
 		const { default: requestPasswordReset } = await loadSubject(adminMock);
 

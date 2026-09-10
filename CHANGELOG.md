@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.4] - Unreleased
+
+### Added
+
+- Add the independent `santashop_email_sending_enabled` Remote Config control for all application email senders, with a three-minute cache and sending blocked when the setting is unavailable.
+- Record suppressed queued emails as terminal so re-enabling delivery does not send an accumulated backlog.
+- Add an explicit test-only load deployment mode and guarded network retirement instructions.
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.4`.
+- Restore SES credentials and ordinary networking for normal test deployments, and restore the seasonal appointment-counter schedule.
+- Deploy the isolation probe only in load-test mode and consolidate load procedures and runtime support under `scripts/load`.
+- Keep validation credentials separate from deployment credentials; ordinary PR checks do not require running load infrastructure.
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Added

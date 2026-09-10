@@ -44,7 +44,7 @@ local migration checks does not satisfy these deployed acceptance requirements.
 
 ## Traffic and capacity assumptions
 
-Use the [configured load workload](load-acceptance.md#configured-workload) and
+Use the [configured load workload](../scripts/load/acceptance.md#configured-workload) and
 its source constants. Review sustained arrivals, short bursts, simultaneous
 completions, staff sessions, and the mix of staff edits/on-site registrations
 before each campaign. Store dated traffic measurements in the project vault.
@@ -200,7 +200,7 @@ evidence that Firebase Hosting applied those headers.
 ## Load and resilience gate
 
 Run against the test project, never production. Follow
-[hosted load acceptance](load-acceptance.md). No hosted smoke, account
+[hosted load acceptance](../scripts/load/acceptance.md). No hosted smoke, account
 creation, or fixture seeding may start until the deployed email isolation gate
 proves credential removal, independent network denial, sink routing, and old
 worker retirement. The pass criteria are:

@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import admin from '../firebase-admin';
+import admin from '../../../santashop-functions/src/firebase-admin';
 
 export const EMAIL_SINK_COLLECTION = 'emailSinkReceipts';
 export const EMAIL_ISOLATION_PROJECT = 'santas-workshop-test';

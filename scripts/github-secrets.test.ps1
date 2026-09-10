@@ -1,6 +1,8 @@
 # Self-contained fixture test: gh is shadowed; this never contacts GitHub or writes a real secret.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$previousExitCode = 0
+if (Test-Path variable:LASTEXITCODE) { $previousExitCode = $LASTEXITCODE }
 $fixture = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
 $names = @('TEST_FIREBASE_API_KEY', 'PROD_FIREBASE_API_KEY', 'TEST_AWS_ACCESS_KEY_ID',
     'TEST_AWS_SECRET_ACCESS_KEY', 'PROD_AWS_ACCESS_KEY_ID', 'PROD_AWS_SECRET_ACCESS_KEY',
@@ -50,4 +52,6 @@ try {
     Remove-Item -LiteralPath $fixture -ErrorAction SilentlyContinue
     Remove-Item Function:\gh
     Remove-Variable secretWrites, failSecretWrite -Scope Global
+    # Expected native failures must not leak into the caller's PowerShell exit status.
+    $global:LASTEXITCODE = $previousExitCode
 }

@@ -16,6 +16,7 @@ vi.mock('@aws-sdk/client-ses', () => ({
 }));
 
 import sendNewRegistrationEmails from '../../src/fn/sendRegistrationEmail';
+import { isEmailSendingEnabled } from '../../src/utility/email-sending';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import {
 	clearEmulatorData,
@@ -28,6 +29,7 @@ import {
 
 describe.sequential('sendRegistrationEmail integration', () => {
 	beforeEach(async () => {
+		vi.mocked(isEmailSendingEnabled).mockResolvedValue(true);
 		sesSend.mockReset();
 		sesSend.mockResolvedValue({
 			MessageId: 'ses-message-1',

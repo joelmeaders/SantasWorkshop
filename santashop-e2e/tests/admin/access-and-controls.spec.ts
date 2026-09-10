@@ -162,8 +162,12 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await seedPublicParams({});
 		await seedAdminUser(account);
 		await signInAdminViaUi(page, account);
-		await page.click('#adminSignOutButton');
+		await Promise.all([
+			page.waitForEvent('domcontentloaded'),
+			page.click('#adminSignOutButton'),
+		]);
 		await expect(page).toHaveURL(/\/$/, { timeout: 30000 });
+		await expect(page.locator('#adminSignInButton')).toBeVisible();
 
 		await page.goto('/admin/landing');
 		await expect(page).toHaveURL(/\/$/);
@@ -501,30 +505,39 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			expect(checkinRead.status()).toBe(403);
 		}
 	});
-	test('STAFF-015 clears an open staff session after cross-tab sign-out without reloading', async ({
-		page,
-		context,
-		seedPublicParams,
-		seedAdminUser,
-	}) => {
-		const account = defaultAdminAccount();
-		await seedPublicParams({});
-		await seedAdminUser(account);
-		await signInAdminViaUi(page, account);
-		await expect(page.locator('#searchNav')).toBeVisible();
-		const timeOrigin = await page.evaluate(() => performance.timeOrigin);
-		const otherTab = await context.newPage();
-		await otherTab.goto('/admin/landing');
-		await expect(otherTab.locator('#searchNav')).toBeVisible();
-		await otherTab.locator('#adminSignOutButton').click();
-		await expect(page).toHaveURL(/\/$/);
-		await expect(page.locator('#adminSignInButton')).toBeVisible();
-		await expect(page.locator('#searchNav')).not.toBeVisible();
-		expect(await page.evaluate(() => performance.timeOrigin)).toBe(
-			timeOrigin,
-		);
-		await otherTab.close();
-	});
+	for (const route of ['landing', 'checkin/scan']) {
+		test(`STAFF-015 clears ${route} after cross-tab sign-out without reloading`, async ({
+			page,
+			context,
+			seedPublicParams,
+			seedAdminUser,
+		}) => {
+			const account = defaultAdminAccount();
+			await seedPublicParams({});
+			await seedAdminUser(account);
+			await signInAdminViaUi(page, account);
+			await expect(page.locator('#searchNav')).toBeVisible();
+			if (route === 'checkin/scan') {
+				await page.goto('/admin/checkin/scan');
+				await expect(page.locator('#manualCheckInCodeButton')).toBeVisible();
+			}
+			const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+			const otherTab = await context.newPage();
+			await otherTab.goto('/admin/landing');
+			await expect(otherTab.locator('#searchNav')).toBeVisible();
+			await otherTab.locator('#adminSignOutButton').click();
+			await expect(page).toHaveURL(/\/$/);
+			await expect(page.locator('#adminSignInButton')).toBeVisible();
+			await expect(page.locator('#searchNav')).not.toBeVisible();
+			await expect(page.locator('#manualCheckInCodeButton')).not.toBeVisible();
+			expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+				timeOrigin,
+			);
+			await otherTab.close();
+			await signInAdminViaUi(page, account);
+			await expect(page.locator('#searchNav')).toBeVisible();
+		});
+	}
 });
 
 const expectIonicDisabled = async (locator: Locator): Promise<void> => {

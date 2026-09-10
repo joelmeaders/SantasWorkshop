@@ -2,7 +2,8 @@ flowchart LR
     UI[Admin UI] --> Auth[Firebase Auth role claims]
     UI --> Lite[AdminReadRepository: one-time reads]
     Lite --> FS[Firestore]
-    UI --> Live[Flags and appointment listeners]
+    UI --> RC[Remote Config: operational flags]
+    UI --> Live[Appointment listeners]
     Live --> FS
     UI --> Fn[Callable Functions: capability checks]
     Fn --> FS

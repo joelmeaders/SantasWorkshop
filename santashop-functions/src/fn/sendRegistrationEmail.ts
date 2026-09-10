@@ -113,6 +113,30 @@ interface EmailDeliveryResponse {
 	$metadata?: { httpStatusCode?: number };
 }
 
+class QueueDocumentMissingError extends Error {}
+
+const updateQueueDocument = async (
+	context: LoadedEmailTriggerContext,
+	updates: Record<string, unknown>,
+): Promise<void> => {
+	try {
+		await context.emailDocRef.update(updates);
+	} catch (error) {
+		// Only a missing queue write cancels work. Other NOT_FOUND errors remain errors.
+		if (
+			typeof error === 'object' &&
+			error !== null &&
+			'code' in error &&
+			error.code === 5
+		) {
+			throw new QueueDocumentMissingError(
+				'The queued email was deleted.',
+			);
+		}
+		throw error;
+	}
+};
+
 const queueProcessingState = {
 	sending: 'sending',
 	accepted: 'accepted',
@@ -323,9 +347,8 @@ const loadEmailTriggerContext = async (
 			`${COLLECTION_SCHEMA.tmpRegistrationEmails}/${triggeredSnapshot.id}`,
 		);
 	const currentEmailDoc = await emailDocRef.get();
-	const document = (
-		currentEmailDoc.exists ? currentEmailDoc.data() : triggeredData
-	) as QueuedRegistrationEmailDocument;
+	if (!currentEmailDoc.exists) return undefined;
+	const document = currentEmailDoc.data() as QueuedRegistrationEmailDocument;
 	const registrationUid = document.registrationUid ?? triggeredSnapshot.id;
 	const registrationDocRef = admin
 		.firestore()
@@ -435,9 +458,10 @@ const markQueueSuperseded = async (
 	context: LoadedEmailTriggerContext,
 	reason: string,
 ): Promise<void> => {
-	await context.emailDocRef.set(buildSupersededUpdates(reason, new Date()), {
-		merge: true,
-	});
+	await updateQueueDocument(
+		context,
+		buildSupersededUpdates(reason, new Date()),
+	);
 };
 
 const buildSupersededUpdates = (reason: string, completedOn: Date) => ({
@@ -455,15 +479,12 @@ const persistDeliveryReviewRequirement = async (
 	reviewedOn: Date,
 	reason: string,
 ): Promise<void> => {
-	await context.emailDocRef.set(
-		{
-			deliveryRequiresReviewOn: reviewedOn,
-			deliveryRequiresReviewReason: reason,
-			lastErrorMessage: reason,
-			lastErrorDetails: false,
-		},
-		{ merge: true },
-	);
+	await updateQueueDocument(context, {
+		deliveryRequiresReviewOn: reviewedOn,
+		deliveryRequiresReviewReason: reason,
+		lastErrorMessage: reason,
+		lastErrorDetails: false,
+	});
 };
 
 const syncSentQueueDocument = async (
@@ -474,8 +495,8 @@ const syncSentQueueDocument = async (
 		return;
 	}
 
-	await context.emailDocRef.set(
-		{
+	try {
+		await updateQueueDocument(context, {
 			deliveryState: queueProcessingState.sent,
 			deliveryProviderAcceptedOn:
 				context.document.deliveryProviderAcceptedOn ?? sentOn,
@@ -489,9 +510,10 @@ const syncSentQueueDocument = async (
 			deliveryRequiresReviewReason: false,
 			lastErrorMessage: false,
 			lastErrorDetails: false,
-		},
-		{ merge: true },
-	);
+		});
+	} catch (error) {
+		if (!(error instanceof QueueDocumentMissingError)) throw error;
+	}
 };
 
 const canSkipDelivery = async (
@@ -552,15 +574,12 @@ const canSkipDelivery = async (
 	}
 
 	if (isStaleSendingDocument(context.document, now)) {
-		await context.emailDocRef.set(
-			{
-				deliveryState: 'queued',
-				failedOn: false,
-				lastErrorMessage: false,
-				lastErrorDetails: false,
-			},
-			{ merge: true },
-		);
+		await updateQueueDocument(context, {
+			deliveryState: 'queued',
+			failedOn: false,
+			lastErrorMessage: false,
+			lastErrorDetails: false,
+		});
 		context.document.deliveryState = 'queued';
 	}
 
@@ -630,10 +649,9 @@ const markQueueSending = async (
 					})
 				: undefined;
 			if (supersededReason) {
-				transaction.set(
+				transaction.update(
 					context.emailDocRef,
 					buildSupersededUpdates(supersededReason, attemptedOn),
-					{ merge: true },
 				);
 				return { currentRegistration };
 			}
@@ -652,7 +670,7 @@ const markQueueSending = async (
 				deliveryRequiresReviewOn: false,
 				deliveryRequiresReviewReason: false,
 			};
-			transaction.set(context.emailDocRef, claimed, { merge: true });
+			transaction.update(context.emailDocRef, claimed);
 			return { claimed, currentRegistration };
 		});
 	context.registration = claimResult.currentRegistration;
@@ -669,20 +687,17 @@ const persistProviderAcceptance = async (
 	acceptedOn: Date,
 	response: EmailDeliveryResponse,
 ): Promise<void> => {
-	await context.emailDocRef.set(
-		{
-			deliveryState: queueProcessingState.accepted,
-			deliveryAttemptedOn: acceptedOn,
-			deliveryProviderAcceptedOn: acceptedOn,
-			deliveryProviderMessageId: response.MessageId ?? false,
-			queuedOn,
-			deliveryRequestedOn: queuedOn,
-			failedOn: false,
-			lastErrorMessage: false,
-			lastErrorDetails: false,
-		},
-		{ merge: true },
-	);
+	await updateQueueDocument(context, {
+		deliveryState: queueProcessingState.accepted,
+		deliveryAttemptedOn: acceptedOn,
+		deliveryProviderAcceptedOn: acceptedOn,
+		deliveryProviderMessageId: response.MessageId ?? false,
+		queuedOn,
+		deliveryRequestedOn: queuedOn,
+		failedOn: false,
+		lastErrorMessage: false,
+		lastErrorDetails: false,
+	});
 };
 
 const persistSuccessfulDelivery = async (
@@ -693,20 +708,18 @@ const persistSuccessfulDelivery = async (
 	const successUpdates = buildSuccessfulDeliveryUpdates(sentOn);
 	let queueWriteError: unknown;
 	try {
-		await context.emailDocRef.set(
-			{
-				...successUpdates.queue,
-				deliveryProviderAcceptedOn:
-					context.document.deliveryProviderAcceptedOn ?? sentOn,
-				deliveryProviderMessageId:
-					context.document.deliveryProviderMessageId ?? false,
-				queuedOn,
-				deliveryRequestedOn: queuedOn,
-			},
-			{ merge: true },
-		);
+		await updateQueueDocument(context, {
+			...successUpdates.queue,
+			deliveryProviderAcceptedOn:
+				context.document.deliveryProviderAcceptedOn ?? sentOn,
+			deliveryProviderMessageId:
+				context.document.deliveryProviderMessageId ?? false,
+			queuedOn,
+			deliveryRequestedOn: queuedOn,
+		});
 	} catch (error) {
-		queueWriteError = error;
+		if (!(error instanceof QueueDocumentMissingError))
+			queueWriteError = error;
 	}
 
 	let registrationWriteError: unknown;
@@ -738,6 +751,7 @@ const persistFailedDelivery = async (
 	response: EmailDeliveryResponse | undefined,
 	error: unknown,
 ): Promise<void> => {
+	if (error instanceof QueueDocumentMissingError) throw error;
 	if (response) {
 		throw error instanceof Error
 			? error
@@ -748,14 +762,18 @@ const persistFailedDelivery = async (
 
 	const failedOn = new Date();
 	const failedUpdates = buildFailedDeliveryUpdates(failedOn, error);
-	await context.emailDocRef.set(
-		{
+	try {
+		await updateQueueDocument(context, {
 			...failedUpdates.queue,
 			queuedOn,
 			deliveryRequestedOn: queuedOn,
-		},
-		{ merge: true },
-	);
+		});
+	} catch (queueError) {
+		// Deleting the queue must not hide the original provider/template failure.
+		throw queueError instanceof QueueDocumentMissingError
+			? error
+			: queueError;
+	}
 	if (!isCancellationCommunication(context.document)) {
 		await updateRegistrationDeliveryStatusIfCurrent(
 			context,
@@ -767,7 +785,7 @@ const persistFailedDelivery = async (
 		: new Error('Failed to send queued registration email');
 };
 
-export default async function sendRegistrationEmail(
+async function processRegistrationEmail(
 	triggeredSnapshot: QueryDocumentSnapshot,
 	triggerMetadata: EmailTriggerMetadata = {},
 ): Promise<void> {
@@ -930,25 +948,22 @@ export default async function sendRegistrationEmail(
 	let response: EmailDeliveryResponse | undefined;
 
 	try {
-		await context.emailDocRef.set(deliveryMetadata, { merge: true });
+		await updateQueueDocument(context, deliveryMetadata);
 		if (simulated) {
 			const receiptId = await recordSimulatedEmail(
 				'registration',
 				renderedSinkContent ?? emailCommand.input,
 				triggeredSnapshot.id,
 			);
-			await context.emailDocRef.set(
-				{
-					deliveryState: 'simulated',
-					deliveryTransport: 'test-sink',
-					deliveryCompletedOn: new Date(),
-					deliverySinkReceiptId: receiptId,
-					failedOn: false,
-					lastErrorMessage: false,
-					lastErrorDetails: false,
-				},
-				{ merge: true },
-			);
+			await updateQueueDocument(context, {
+				deliveryState: 'simulated',
+				deliveryTransport: 'test-sink',
+				deliveryCompletedOn: new Date(),
+				deliverySinkReceiptId: receiptId,
+				failedOn: false,
+				lastErrorMessage: false,
+				lastErrorDetails: false,
+			});
 			return;
 		}
 		sesClient ??= new SESClient({
@@ -964,25 +979,30 @@ export default async function sendRegistrationEmail(
 				)) as SendTemplatedEmailCommandOutput);
 		// SES acceptance records the send request, not recipient delivery.
 		const acceptedOn = new Date();
-		await persistProviderAcceptance(
-			context,
-			queuedOn,
-			acceptedOn,
-			response,
-		);
 		context.document.deliveryState = queueProcessingState.accepted;
 		context.document.deliveryProviderAcceptedOn = acceptedOn;
 		context.document.deliveryProviderMessageId = response.MessageId;
 		const sentOn = new Date();
-		log.info('Successfully sent queued registration email', {
+		log.info('SES accepted queued registration email', {
 			uid: payload.uid,
 			templateName: templateName ?? 'registration-cancellation',
 			templateKey: payload.templateKey ?? null,
 			providerMessageId: response.MessageId ?? null,
 			httpStatusCode: response.$metadata?.httpStatusCode,
 		});
+		try {
+			await persistProviderAcceptance(
+				context,
+				queuedOn,
+				acceptedOn,
+				response,
+			);
+		} catch (error) {
+			if (!(error instanceof QueueDocumentMissingError)) throw error;
+		}
 		await persistSuccessfulDelivery(context, queuedOn, sentOn);
 	} catch (err) {
+		if (err instanceof QueueDocumentMissingError) throw err;
 		log.error(
 			'Failed to send queued registration email',
 			{
@@ -993,5 +1013,19 @@ export default async function sendRegistrationEmail(
 			err,
 		);
 		await persistFailedDelivery(context, queuedOn, response, err);
+	}
+}
+
+export default async function sendRegistrationEmail(
+	triggeredSnapshot: QueryDocumentSnapshot,
+	triggerMetadata: EmailTriggerMetadata = {},
+): Promise<void> {
+	try {
+		await processRegistrationEmail(triggeredSnapshot, triggerMetadata);
+	} catch (error) {
+		if (!(error instanceof QueueDocumentMissingError)) throw error;
+		log.info('Stopped processing a deleted queued email', {
+			queueDocumentId: triggeredSnapshot.id,
+		});
 	}
 }

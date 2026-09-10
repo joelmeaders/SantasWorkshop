@@ -2,8 +2,9 @@ const { getToken, requireProject, fetchSnapshot } = require('./remote-config.cjs
 const { verifyPublicParameters } = require('./verify-public-parameters.cjs');
 const { FUNCTION_PROJECT_IDS, getModePrefix, loadLocalEnvFiles } = require('../config.functions.cjs');
 
-// Only the private singleton gateway polls the management API: six reads/minute.
-// Budget twelve during replacement and leave 48 for cold starts and owner tools.
+// Each of the two private gateway instances polls at most six times/minute.
+// Budget 24 for four overlapping instances during replacement and leave 36
+// for cold starts and owner tools. The quota gate remains 60 reads/minute.
 // Consumer instances retain their capacity and call the gateway, not this API.
 // This budget is valid only with the deployed gateway checks in the release flow.
 const REQUIRED_TEMPLATE_READS_PER_MINUTE = 60;

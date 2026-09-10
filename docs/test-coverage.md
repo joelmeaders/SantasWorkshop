@@ -23,8 +23,8 @@ and still fail a global coverage threshold; report both outcomes accurately.
 Browser tests use the Firebase emulators and disposable seeded data. They cover
 account access, registration, QR state, staff workflows, reports, refresh and
 error recovery, owner operations, and concurrent requests. Customer and admin
-servers share port 4100 and run sequentially. The enabled Playwright project is
-mobile Chromium; other browser engines require separate execution evidence.
+servers share port 4100 and run sequentially. Playwright runs mobile Chromium and a bounded desktop Chromium smoke project.
+Other browser engines require separate execution evidence.
 
 External SES delivery, deployed rules, production load, backup restoration,
 manual accessibility review, and operational monitoring require their own

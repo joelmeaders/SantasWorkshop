@@ -21,6 +21,9 @@ import {
 
 const log = createFunctionLogger('ownerOperationWorker');
 const EXPORT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+const BACKUP_WAIT_LIMIT_MS = 60 * 60 * 1000;
+
+class BackupWaitExpiredError extends Error {}
 
 interface WorkerRequest {
 	operationId: string;
@@ -36,6 +39,8 @@ interface StoredOperation {
 	counts: OwnerOperationCounts;
 	progress: OwnerOperationCounts;
 	stage: string;
+	createdAt: admin.firestore.Timestamp | Date;
+	purgeStartedAt?: admin.firestore.Timestamp | Date;
 	backupOperationName?: string;
 	backupLocation?: string;
 	exportPath?: string;
@@ -91,13 +96,40 @@ const enqueueContinuation = async (operationId: string): Promise<void> => {
 		.enqueue({ operationId }, { scheduleDelaySeconds: 30 });
 };
 
-const releaseLock = async (operation: OwnerOperationType): Promise<void> => {
-	await admin
-		.firestore()
+const releaseLock = async (
+	operation: OwnerOperationType,
+	operationId: string,
+): Promise<void> => {
+	const db = admin.firestore();
+	const lockRef = db
 		.collection(COLLECTION_SCHEMA.ownerOperationLocks)
-		.doc(operation)
-		.delete()
-		.catch(() => undefined);
+		.doc(operation);
+	await db.runTransaction(async (transaction) => {
+		const lock = await transaction.get(lockRef);
+		if (lock.exists && lock.data()?.['operationId'] === operationId) {
+			await transaction.delete(lockRef);
+		}
+	});
+};
+
+const requireOperationDate = (
+	value: admin.firestore.Timestamp | Date | undefined,
+	field: string,
+): Date => {
+	const date = value instanceof Date ? value : value?.toDate?.();
+	if (!(date instanceof Date) || !Number.isFinite(date.getTime())) {
+		throw new Error(`Owner operation has an invalid ${field}.`);
+	}
+	return date;
+};
+
+const assertBackupWaitWithinLimit = (operation: StoredOperation): void => {
+	const createdAt = requireOperationDate(operation.createdAt, 'createdAt');
+	if (Date.now() - createdAt.getTime() >= BACKUP_WAIT_LIMIT_MS) {
+		throw new BackupWaitExpiredError(
+			'Backup wait exceeded one hour. The reset stopped before deletion; the Firestore export may still finish.',
+		);
+	}
 };
 
 const toDate = (
@@ -391,65 +423,82 @@ export const executeYearlyReset = async (
 	operationId: string,
 	operation: StoredOperation,
 ): Promise<WorkerResult> => {
-	const client = new admin.firestore.v1.FirestoreAdminClient();
-	const databaseName = client.databasePath(operation.projectId, '(default)');
 	const backupLocation =
 		operation.backupLocation ??
 		`${FIRESTORE_BACKUP_BUCKET.replace(
 			/\/$/,
 			'',
 		)}/yearly-reset/${operation.programYear}/${operationId}`;
-	if (!operation.backupOperationName) {
-		await updateOperation(operationId, {
-			status: 'backing-up',
-			stage: 'starting-backup',
-			backupLocation,
-		});
-		const [backupOperation] = await client.exportDocuments({
-			name: databaseName,
-			outputUriPrefix: backupLocation,
-			collectionIds: [],
-		});
-		if (!backupOperation.name) {
+	if (operation.purgeStartedAt !== undefined) {
+		// A retry must finish an existing purge, even after the backup deadline.
+		requireOperationDate(operation.purgeStartedAt, 'purgeStartedAt');
+		if (!operation.backupOperationName) {
 			throw new Error(
-				'Firestore did not return a backup operation name.',
+				'A started purge is missing its backup operation name.',
 			);
 		}
-		await updateOperation(operationId, {
-			backupOperationName: backupOperation.name,
-			stage: 'waiting-for-backup',
-		});
-		await enqueueContinuation(operationId);
-		return {
-			message: 'Firestore backup started.',
-			deferred: true,
-		};
-	}
-
-	const [backupOperation] = await client.operationsClient.getOperation({
-		name: operation.backupOperationName,
-	});
-	if (backupOperation.error) {
-		throw new Error(
-			`Firestore backup failed: ${backupOperation.error.message ?? 'unknown error'}`,
+	} else {
+		assertBackupWaitWithinLimit(operation);
+		const client = new admin.firestore.v1.FirestoreAdminClient();
+		const databaseName = client.databasePath(
+			operation.projectId,
+			'(default)',
 		);
-	}
-	if (!backupOperation.done) {
-		await updateOperation(operationId, {
-			status: 'backing-up',
-			stage: 'waiting-for-backup',
-		});
-		await enqueueContinuation(operationId);
-		return {
-			message: 'Firestore backup is still running.',
-			deferred: true,
-		};
-	}
+		if (!operation.backupOperationName) {
+			await updateOperation(operationId, {
+				status: 'backing-up',
+				stage: 'starting-backup',
+				backupLocation,
+			});
+			const [backupOperation] = await client.exportDocuments({
+				name: databaseName,
+				outputUriPrefix: backupLocation,
+				collectionIds: [],
+			});
+			if (!backupOperation.name) {
+				throw new Error(
+					'Firestore did not return a backup operation name.',
+				);
+			}
+			// Save the external handle even when the export request crosses the deadline.
+			await updateOperation(operationId, {
+				backupOperationName: backupOperation.name,
+				stage: 'waiting-for-backup',
+			});
+			assertBackupWaitWithinLimit(operation);
+			await enqueueContinuation(operationId);
+			return { message: 'Firestore backup started.', deferred: true };
+		}
 
-	await updateOperation(operationId, {
-		status: 'running',
-		stage: 'purging-firestore',
-	});
+		const [backupOperation] = await client.operationsClient.getOperation({
+			name: operation.backupOperationName,
+		});
+		if (backupOperation.error) {
+			throw new Error(
+				`Firestore backup failed: ${backupOperation.error.message ?? 'unknown error'}`,
+			);
+		}
+		assertBackupWaitWithinLimit(operation);
+		if (!backupOperation.done) {
+			await updateOperation(operationId, {
+				status: 'backing-up',
+				stage: 'waiting-for-backup',
+			});
+			assertBackupWaitWithinLimit(operation);
+			await enqueueContinuation(operationId);
+			return {
+				message: 'Firestore backup is still running.',
+				deferred: true,
+			};
+		}
+
+		// Persist before any deletion; stage/progress alone cannot identify a partial purge.
+		await updateOperation(operationId, {
+			status: 'running',
+			stage: 'purging-firestore',
+			purgeStartedAt: new Date(),
+		});
+	}
 	const collections = [
 		COLLECTION_SCHEMA.users,
 		COLLECTION_SCHEMA.registrations,
@@ -539,8 +588,11 @@ export default async function ownerOperationWorker(request: {
 		throw new Error(`Owner operation ${operationId} does not exist.`);
 	}
 	const operation = snapshot.data() as StoredOperation;
-	if (operation.status === 'succeeded') {
-		await releaseLock(operation.operation);
+	if (
+		operation.status === 'succeeded' ||
+		(operation.status === 'failed' && operation.stage === 'backup-timeout')
+	) {
+		await releaseLock(operation.operation, operationId);
 		return;
 	}
 	let shouldReleaseLock = true;
@@ -582,6 +634,7 @@ export default async function ownerOperationWorker(request: {
 			operation: operation.operation,
 		});
 	} catch (error) {
+		const backupTimedOut = error instanceof BackupWaitExpiredError;
 		log.error(
 			'Owner operation failed',
 			{ operationId, operation: operation.operation },
@@ -589,17 +642,17 @@ export default async function ownerOperationWorker(request: {
 		);
 		await updateOperation(operationId, {
 			status: 'failed',
-			stage: 'failed',
+			stage: backupTimedOut ? 'backup-timeout' : 'failed',
 			errorMessage:
 				error instanceof Error
 					? error.message
 					: 'Owner operation failed.',
 			completedAt: new Date(),
 		});
-		throw error;
+		if (!backupTimedOut) throw error;
 	} finally {
 		if (shouldReleaseLock) {
-			await releaseLock(operation.operation);
+			await releaseLock(operation.operation, operationId);
 		}
 	}
 }

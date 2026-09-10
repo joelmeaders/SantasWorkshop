@@ -43,7 +43,8 @@ records use the shared model directly without a profile-version field.
 
 Templated email references a published template by `templateKey`. Published
 revisions define SES template names and placeholder mappings. Missing keys or
-unpublished templates fail explicitly. QR placeholders use `qrCodeUrl`. Cancellation notices use a separate inline message.
+unpublished templates fail explicitly. QR placeholders use `qrCodeUrl`. Cancellation selects a published localized template when available, with a
+localized plain-text fallback. Test sink mode records simulated receipts without SES delivery.
 The email trigger runs on queue-document creation; rewriting an existing queue
 document does not create another trigger event. SES acceptance does not prove
 recipient delivery.

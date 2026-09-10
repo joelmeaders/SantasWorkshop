@@ -207,6 +207,11 @@ Service-worker removal needs a tested rollback plan. Reverting registration code
 
 ### Test results and handoff
 
+Create dated QA reports directly in the Obsidian project's `Archive/QA` folder.
+Follow the [recording policy](README.md#recording-future-work) for the exact path,
+evidence fields, and generated artifacts. Do not add hosted QA reports or run
+logs to repository documentation.
+
 Run scoped unit/build/rules checks for fixes. Storybook is part of the app/admin test gates (`ci:app:test`, `ci:admin:test`); it does not replace Firebase browser journeys. Use `ci:storybook` and relevant visual checks when shared UI behavior changes.
 
 Separate results into emulator, deployed test, and production evidence. Record limitations such as unavailable camera, missing mailbox access, protected production data, or pending approval. Do not describe page rendering as a successful mutation, queued mail as delivered mail, or API seeding as UI onboarding.

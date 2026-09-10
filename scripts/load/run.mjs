@@ -27,6 +27,9 @@ const option = (name) => {
 	return index < 0 ? undefined : process.argv[index + 1];
 };
 const command = process.argv[2];
+const skipSmoke = process.argv.includes('--skip-smoke');
+if (skipSmoke && command !== 'run')
+	throw new Error('--skip-smoke is supported only by the full run command.');
 assertProject(option('--project'));
 const client = new GoogleClient(PROJECT);
 const runId =
@@ -125,6 +128,7 @@ async function verifyResources(verification) {
 	);
 	if (verification.completedRegistrations) {
 		required.add('sendNewRegistrationEmails');
+		// Customer Functions also fetch settings through this shared dependency.
 		required.add('publicParametersGateway');
 	}
 	if (verification.expectedSlots)
@@ -210,6 +214,7 @@ try {
 				targets: TARGETS,
 				startedAt: new Date(started).toISOString(),
 				mode: command,
+				smokeSkipped: skipSmoke,
 				browserAppCheckProvider: 'registered-test-debug',
 				revisionFingerprint: proof.fingerprint,
 			});
@@ -277,7 +282,16 @@ try {
 			}, 60_000);
 			const { browserSmoke } = await import('./browser-smoke.mjs');
 			const completed = [];
-			for (let index = 0; index < TARGETS.smoke; index++) {
+			if (skipSmoke)
+				journal.record({
+					type: 'smoke-skipped',
+					reason: 'Operator selected --skip-smoke after prior browser validation.',
+				});
+			for (
+				let index = 0;
+				index < (skipSmoke ? 0 : TARGETS.smoke);
+				index++
+			) {
 				const account = fixture();
 				journal.record({
 					type: 'journey-attempt',

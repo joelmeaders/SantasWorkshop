@@ -90,9 +90,9 @@ Images are stored by rendering environment and viewport. Local Windows reference
 
 Screenshots capture each story's final visible viewport. They do not prove every intermediate state, offscreen element, keyboard action, or browser is correct. Preserve transition assertions and the existing integration suite alongside visual checks.
 
-The initial `windows-2022` references were captured by [CI run 34073445330](https://github.com/joelmeaders/SantasWorkshop/actions/runs/34073445330) from commit `5b953a7`. All 166 captures passed their story and resource audits. The complete contact sheets and representative full-size images were reviewed before the references were committed.
-
-Initial local validation passed on Windows: 52 component/page suites, 83 story tests, and 166 desktop/mobile image comparisons. The build, typecheck, lint, and inventory checks also passed. Deliberately withheld fixture updates and a deliberate image mutation caused the expected failures. Customer and admin stories also passed a revisit check in the same browser context. These results establish a regression baseline; they do not certify all future conversions or remove existing UI defects.
+Keep the source revision, rendering environment, capture counts, image review,
+and validation results with each accepted baseline in the project vault. A
+baseline records that revision; rerun the checks for later changes.
 
 ## Add a component or page
 

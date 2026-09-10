@@ -130,6 +130,11 @@ test('homepage loads', async ({ page }) => {
 
 ## CI/CD
 
+Create dated test reports directly in the Obsidian project, following the
+[recording policy](../docs/README.md#recording-future-work). Generated Playwright
+reports stay in their configured ignored output folders until selected evidence
+is archived; do not add narrative execution logs to this README or repository docs.
+
 The e2e tests can be integrated into your CI pipeline. Make sure to:
 
 1. Build the functions project

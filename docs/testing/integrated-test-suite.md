@@ -24,8 +24,8 @@ setup exist.
 - Clear emulator data before each scenario and seed only the state required by
   that scenario.
 - Run sequentially because the tests share mutable emulator state.
-- Run the suite in Chromium using the Pixel 5 mobile device profile. Other
-  browser projects are disabled in the checked-in configuration.
+- Run the suite in Chromium using the Pixel 5 mobile device profile. A bounded
+  desktop Chromium smoke project also runs. Firefox and WebKit are not configured.
 - Exercise customer or staff behavior through the UI. Emulator-only callables
   may arrange prerequisite state and inspect durable results, but must not
   replace the interaction under test.

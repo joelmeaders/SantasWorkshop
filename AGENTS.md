@@ -28,6 +28,9 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 
 ## Working rules
 
+- Create dated reports, release evidence, agent logs/handoffs, audit results, PR drafts, meeting notes, and one-time migration records directly in `C:\Users\joelm\OneDrive\Documents\Notes\Joel's Obsidian Vault\Denver Santas Claus Shop\Archive`, under the relevant topic. Do not create these records in the repository, including ignored folders, or append run results to maintained procedures. Follow [the documentation policy](docs/README.md#recording-future-work) for naming, evidence, generated artifacts, and unavailable-vault handling.
+- Keep maintained code/project guidance and changelogs in Git. Preserve historical source records in the vault before extracting reusable guidance. A report remains transient even if its filename has no date.
+
 - Standing user authorization (September 7, 2026): continue authorized work through validation and PR completion without asking for the same approval again. Approve and merge PRs as needed; use an administrator merge to bypass a review requirement when necessary and available. Do not impersonate a reviewer or change branch protection. Report actual checks and any bypassed gate.
 - The user has approved acceptance of the application's terms for labeled QA signup accounts in the deployed test project. This does not authorize unrelated agreements or override a browser tool's required user handoff.
 - This standing authorization does not waive the production data and seasonal restrictions below or authorize unrelated destructive actions.
@@ -63,6 +66,11 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 - End-to-end orchestration lives in the root [`package.json`](package.json) and package docs at [`santashop-e2e/README.md`](santashop-e2e/README.md). Note that both app and admin `start:test` scripts use port `4100`, so only run one test server at a time.
 
 ## Firebase and functions gotchas
+
+- Before changing app callable clients, Functions, shared helpers/models, Firestore writes/triggers, task dispatch, routing, or schedules, read [the function call map](docs/function-call-map.md).
+- Trace runtime cycles through local helper calls, HTTP/callable calls, Cloud Tasks, and Firestore writes. Match create/update/delete/write events to the actual trigger. A `set` with merge can create a missing document. A retry limit on one task does not bound a chain of newly queued tasks. Imports and Firestore reads alone are not runtime call edges.
+- Run `pnpm run functions:graph:check` and `pnpm run functions:graph:test` for affected changes. Source changes invalidate the reviewed map, including changes inside helper modules. Review the changed paths and update `docs/function-call-graph.review.json` before running `pnpm run functions:graph:update`; do not refresh hashes merely to clear CI.
+- Run `pnpm run functions:cycles` before claiming the workflow is cycle-free. It intentionally fails on the documented, bounded worker continuation. The email handler must only update existing queue records. Keep the worker backup deadline separate from purge resumption, and release locks only when the operation ID matches. The CI regression gate keeps retained cycles visible; a pass does not establish acyclicity. Do not add a new cycle baseline without documenting its path, stop condition, limits, and unresolved risk. Do not change application behavior merely to hide a graph finding.
 
 - Emulator-oriented scripts target the `santas-workshop-test` Firebase project; start with the root [`README.md`](README.md) for setup.
 - `santashop-functions` uses webpack and declares Node `24`, matching the root workspace Node `24` floor for app/tooling workflows. Check the relevant package before changing runtime-sensitive code.

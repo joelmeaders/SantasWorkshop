@@ -1,4 +1,7 @@
-# Historical load acceptance
+# Hosted load acceptance
+
+For setup, commands, monitoring, stopping, and result verification, start with
+[`scripts/load/README.md`](../scripts/load/README.md).
 
 This harness targets only `santas-workshop-test`. Run it from the workspace root
 with Node 24 and the existing pnpm dependencies. It never deletes fixtures and
@@ -6,11 +9,13 @@ does not call emulator helpers. Keep `artifacts/load/` local: it contains labele
 QA account addresses, UIDs, and browser screenshots. Passwords and tokens stay
 in process memory and are not written to the journal.
 
-## Evidence and targets
+## Configured workload
 
-Read-only research on September 8, 2026 covered 8,322 retained registration
-timestamps and 5,776 check-in timestamps from 2025. Both counts matched annual
-statistics. Targets use the selected 50% headroom.
+The workload below is defined in [`scripts/load/config.mjs`](../scripts/load/config.mjs).
+Review the targets against retained traffic and an agreed headroom allowance
+before each acceptance campaign. Store the dated research and rationale with
+the campaign record in the project vault. The configured targets are inputs,
+not proof of accepted capacity.
 
 | Phase                | Offered traffic                                              |
 | -------------------- | ------------------------------------------------------------ |
@@ -24,17 +29,13 @@ statistics. Targets use the selected 50% headroom.
 | Duplicate scans      | Ten concurrent scans of one unused fixture                   |
 | Recovery             | Interrupt one completion request; retry the same mutation ID |
 
-Each customer has three children, compared with the historical mean of 2.71.
+Each synthetic customer has three children.
 The staff mix uses every eleventh journey for on-site registration and the next
 for a child edit, approximately 9% each. Registration records created through
 the preceding signup phases supply the ordinary check-in fixtures.
 
-The first retained completion on November 15, 2025 was at 08:13:20 Denver time;
-1,108 followed within 30 minutes. This does not establish the opening time.
-The busiest shop day had 1,534 check-ins; the largest hourly bucket across
-2020–2025 was 431 in 2025. Rounded Google Analytics daily totals corroborate the
-surge but are not completion throughput. Retained successful transactions do
-not reconstruct abandoned attempts, cancellations, retries, or device counts.
+Retained successful transactions do not reconstruct abandoned attempts,
+cancellations, retries, or device counts. Keep those limits with any sizing analysis.
 
 ## Email isolation comes first
 
@@ -79,6 +80,7 @@ node scripts/load/provision-network.mjs --project santas-workshop-test --apply
 pnpm run load:preflight --project santas-workshop-test
 node scripts/load/run.mjs smoke --project santas-workshop-test
 pnpm run load:run --project santas-workshop-test
+node scripts/load/run.mjs run --project santas-workshop-test --skip-smoke
 pnpm run load:verify --project santas-workshop-test --run-id <printed-run-id>
 ```
 
@@ -93,6 +95,10 @@ Browser smoke uses ordinary hosted sign-up, terms acceptance for labeled QA
 accounts, child forms, appointment selection, completion, and QR rendering.
 The `smoke` command stops after five successful browser journeys and business,
 email-sink, and counter verification. It does not start calibration or load.
+For an explicitly requested full run after prior browser validation, use
+`run --skip-smoke` to start with calibration. The run manifest records the
+omitted smoke phase. Isolation, App Check, budget, monitoring, business, and
+resource gates still apply; all load phases use fresh run-owned fixtures.
 Automated browsers and synthetic phases use normal password authentication and
 real App Check tokens exchanged through a run-owned test debug-provider registration.
 They do not substitute privileged tokens for customer requests. The debug
@@ -130,7 +136,7 @@ have request, memory, and CPU evidence, no memory-limit termination or HTTP
 80%. These are observed-workload checks, not proof of capacity at configured
 maximum concurrency. Unexercised functions remain explicitly unmeasured.
 See [function resource sizing](function-resource-sizing.md) for methods,
-limits, and the counter memory correction.
+limits, and resource-change validation.
 
 After calibration, the conservative cost projection must be below $20 before
 main load starts. Compute estimates charge every configured maximum instance
@@ -144,7 +150,10 @@ See [Cloud Run pricing](https://cloud.google.com/run/pricing) and
 Verification checks registration uniqueness, children, QR ownership and index,
 check-ins, returned coupon counts, retained edits and original check-in times,
 simulated queue receipts, and the run-owned appointment counter. Soft
-overbooking is allowed. Keep generated fixtures and evidence for review.
+overbooking is allowed. Keep generated fixtures for review. Create narrative run
+reports directly in the Obsidian project's `Archive/Load and Resources` folder.
+Follow the [recording policy](README.md#recording-future-work) for the exact path
+and for archiving selected evidence from generated local output directories.
 The journal includes UTC timestamps, deployed revisions, instance evidence,
 cost estimates, operation results, and any stop reason. A code test, build,
 deployment, or preflight pass alone is not a load acceptance pass. SES delivery

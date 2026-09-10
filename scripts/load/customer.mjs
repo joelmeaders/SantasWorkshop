@@ -98,13 +98,26 @@ export class CustomerApi {
 		)
 			throw new Error('QR ownership or code is invalid.');
 		await this.journal.measure(phase, 'retrieveQr', async () => {
+			const objectUrl = `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(this.config.storageBucket)}/o/${encodeURIComponent(path)}`;
+			const metadata = await this.json(objectUrl, {
+				headers: {
+					...this.headers(session),
+					Authorization: `Firebase ${session.idToken}`,
+				},
+			});
+			const downloadToken = metadata.downloadTokens?.split(',')[0];
+			if (
+				metadata.name !== path ||
+				metadata.bucket !== this.config.storageBucket ||
+				!downloadToken
+			)
+				throw new Error(
+					'QR download metadata is missing or mismatched.',
+				);
+			// Match the application's getDownloadURL + image request flow.
 			const response = await fetch(
-				`https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(this.config.storageBucket)}/o/${encodeURIComponent(path)}?alt=media`,
+				`${objectUrl}?alt=media&token=${encodeURIComponent(downloadToken)}`,
 				{
-					headers: {
-						...this.headers(session),
-						Authorization: `Firebase ${session.idToken}`,
-					},
 					redirect: 'error',
 					signal: AbortSignal.timeout(30_000),
 				},
@@ -114,8 +127,15 @@ export class CustomerApi {
 				!response.ok ||
 				bytes.length < 8 ||
 				bytes.slice(0, 8).join(',') !== '137,80,78,71,13,10,26,10'
-			)
-				throw new Error('QR PNG retrieval failed.');
+			) {
+				const error = new Error(
+					`QR PNG retrieval failed: HTTP ${response.status}, ${response.headers.get('content-type') ?? 'unknown content type'}, ${bytes.length} bytes.`,
+				);
+				error.code = response.ok
+					? 'INVALID_PNG'
+					: `HTTP_${response.status}`;
+				throw error;
+			}
 		});
 	}
 	async prepare(phase, fixture, slotId, year) {

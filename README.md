@@ -1,8 +1,15 @@
 # Santa's Workshop
 
+See the [documentation index](docs/README.md) for maintained architecture,
+requirements, testing, and operating procedures. Dated release and QA records
+must be created directly in the project Obsidian vault. Follow the
+[recording policy](docs/README.md#recording-future-work) for its path and topic folders.
+
 A monorepo for Santa's Workshop registration and management applications.
 
 Develop and test both apps in isolation with [Storybook](docs/storybook.md). The [UI inventory](docs/storybook-inventory.md) links every component and page to its stories.
+
+The [function call map](docs/function-call-map.md) covers app callables, Firestore triggers, function calls, task queues, and schedules. Run `pnpm run functions:graph:check` to check source freshness and cycle regressions, and `pnpm run functions:cycles` for a strict cycle check. The strict check reports the bounded owner-worker continuation. The email handler cannot recreate its queue record. A passing regression check does not mean there are no cycles.
 
 ## Workspace Structure
 

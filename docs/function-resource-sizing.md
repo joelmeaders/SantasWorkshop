@@ -3,8 +3,8 @@
 ## Scope and method
 
 Resource sizing is part of hosted test acceptance. A successful request alone
-does not prove adequate memory, CPU, or concurrency capacity. The current
-scope remains smoke validation; the historical sustained load is paused.
+does not prove adequate memory, CPU, or concurrency capacity. Choose the workload
+explicitly for each run. Smoke measurements do not establish sustained-load capacity.
 
 The read-only collector in `scripts/load/resources.mjs` records each deployed
 Function's memory, CPU, concurrency, maximum instances, and timeout. It joins
@@ -31,51 +31,29 @@ provider guarantees or automatic scaling rules. The report marks unexercised
 functions as unmeasured. Low-concurrency smoke data cannot validate a
 function at its configured peak concurrency or prove production capacity.
 
-## Baseline: September 9, 2026
+## Choosing and validating a resource change
 
-Read-only evidence covered the current test revisions from 03:48 through
-13:25 UTC. Nine of 42 Functions had observed requests. The other 33 did not
-have workload coverage in this window.
+Use the source runtime profiles in `santashop-functions/src/index.ts` and the
+deployed revision inventory as the starting point. Change memory, CPU,
+concurrency, or instance limits only when measurements support the change.
+Keep the measured workload, failure evidence, old and new settings, and
+post-deployment results in the project vault's release record.
 
-| Function                      |  Memory |    CPU | Memory peak upper bound | CPU p95 upper bound | Finding                                   |
-| ----------------------------- | ------: | -----: | ----------------------: | ------------------: | ----------------------------------------- |
-| scheduledDateTimeSlotCounters | 128 MiB | 0.0833 |             99% sampled |                 31% | 152 memory-limit events; sizing fails     |
-| newAccount                    | 512 MiB |      1 |                     36% |                  3% | Headroom at observed traffic              |
-| saveDraftChild                | 256 MiB |      1 |                     74% |                  4% | Headroom at observed traffic              |
-| setDraftAppointment           | 256 MiB |      1 |                     73% |                  2% | Headroom at observed traffic              |
-| completeRegistration          | 256 MiB |      1 |                     74% |                  4% | Headroom at observed traffic              |
-| sendNewRegistrationEmails     | 256 MiB |      1 |                     69% |                  4% | Headroom with simulated delivery          |
-| publicParametersGateway       | 256 MiB |      1 |                     66% |                  3% | Headroom at observed traffic              |
-| scheduledRegistrationStats    | 256 MiB | 0.1666 |                     65% |                  5% | One observed invocation; limited coverage |
-| emailIsolationProbe           | 256 MiB |      1 |                     59% |                  1% | Probe coverage only                       |
+Create each dated measurement report directly in the vault's
+`Archive/Load and Resources` folder using the [recording policy](README.md#recording-future-work).
+Keep source profiles in the [release procedure](release-readiness.md#function-resource-profiles)
+and the gateway's cache, instance limits, and read budget in the
+[Remote Config guide](remote-config.md). Those settings describe configuration,
+not measured capacity or deployment status.
 
-The counter's memory sampling did not capture every failing peak. Logs proved
-that it crossed the limit, including 134 and 147 MiB used against 128 MiB.
-The resource gate fails from those logs even when sampled utilization is lower.
-The same revision returned 3 HTTP 200, 96 HTTP 500, and 15 HTTP 503 responses
-in the baseline window. Startup/health retries mean these counts do not equal
-the number of memory-limit log events.
+Do not reduce customer Functions to fractional CPUs because sequential smoke
+CPU usage is low. Concurrent customer workloads need their own measurements.
+Verify the runtime's CPU/concurrency constraints before changing a profile.
 
-## Counter correction
-
-Raise `scheduledDateTimeSlotCounters` from 128 MiB to 256 MiB. Keep
-`cpu: 'gcf_gen1'`, concurrency one, maximum one instance, and the existing
-timeout. With Firebase's fractional CPU mapping, this also increases CPU
-from approximately 1/12 to 1/6. The change addresses the measured memory
-failure without adding concurrency or warm instances.
-
-Do not reduce the customer Functions to fractional CPUs because their
-sequential smoke CPU usage is low. Firebase requires at least one full CPU
-for concurrent requests. Those Functions retain their one-CPU configuration
-until representative concurrency evidence supports another setting.
-See [Firebase runtime and CPU configuration](https://firebase.google.com/docs/functions/manage-functions#override_cpu_defaults).
-
-Only the test project will be deployed for this validation. The source change
-can reach production only through a later authorized production release.
-After deployment, verify repeated scheduled successes, corrected slot counts,
-new-revision CPU/memory samples, and a fresh smoke run with the full email
-isolation gate. Keep normal reCAPTCHA attestation and real SES delivery
-explicitly separate from test debug-provider and sink evidence.
+After a resource change, verify repeated successes, correct business state,
+and CPU/memory samples for the new revision. Use the complete email isolation
+gate before any hosted traffic. A source edit does not establish deployment
+or a corrected production workload.
 
 ## Reusable read-only command
 

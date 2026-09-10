@@ -17,7 +17,7 @@ const assessGateway = (projectId, fn, policy, env = process.env, service) => {
 	const expectedName = `projects/${projectId}/locations/${REGION}/functions/${GATEWAY_FUNCTION}`;
 	if (fn.name !== expectedName || fn.state !== 'ACTIVE') problems.push('The settings gateway must be ACTIVE in the exact target project.');
 	const config = fn.serviceConfig ?? {};
-	if (config.maxInstanceCount !== 1 || config.maxInstanceRequestConcurrency !== 80) problems.push('Settings gateway requires maxInstanceCount=1 and concurrency=80.');
+	if (config.maxInstanceCount !== 2 || config.maxInstanceRequestConcurrency !== 80) problems.push('Settings gateway requires maxInstanceCount=2 and concurrency=80.');
 	if (config.serviceAccountEmail !== gatewayReader(projectId, env)) problems.push('Settings gateway runtime identity does not match the configured reader.');
 	let url;
 	try {
@@ -36,7 +36,7 @@ const assessGateway = (projectId, fn, policy, env = process.env, service) => {
 		if (service.reconciling === true || service.terminalCondition?.state !== 'CONDITION_SUCCEEDED') problems.push('The gateway Cloud Run service has not reached a ready state.');
 		const serviceScaling = service.scaling ?? {};
 		if (serviceScaling.scalingMode === 'MANUAL' || serviceScaling.scalingMode === 'SCALING_MODE_MANUAL' || serviceScaling.manualInstanceCount !== undefined) problems.push('Settings gateway must use automatic Cloud Run service scaling.');
-		if (service.template?.scaling?.maxInstanceCount !== 1 || service.template?.maxInstanceRequestConcurrency !== 80 || service.template?.serviceAccount !== gatewayReader(projectId, env)) problems.push('Live gateway revision settings do not match the singleton reader contract.');
+		if (service.template?.scaling?.maxInstanceCount !== 2 || service.template?.maxInstanceRequestConcurrency !== 80 || service.template?.serviceAccount !== gatewayReader(projectId, env)) problems.push('Live gateway revision settings do not match the two-instance reader contract.');
 		const traffic = service.traffic ?? [];
 		if (traffic.length && (traffic.length !== 1 || traffic[0].percent !== 100 || traffic[0].tag || (traffic[0].type !== 'TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST' && traffic[0].revision !== service.latestReadyRevision))) problems.push('Settings gateway traffic must target only the latest ready revision without extra tagged revisions.');
 	}

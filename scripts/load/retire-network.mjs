@@ -131,6 +131,8 @@ export async function retireNetwork(client) {
 			);
 			await waitOperation(client, operation, 'run.googleapis.com');
 			removedRevisions++;
+			// Leave room in the regional write quota for application operations.
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 		}
 	}
 	console.log(`Removed ${removedRevisions} non-serving isolated revisions.`);

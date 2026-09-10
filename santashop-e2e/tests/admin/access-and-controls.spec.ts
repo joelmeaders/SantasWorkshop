@@ -501,6 +501,30 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			expect(checkinRead.status()).toBe(403);
 		}
 	});
+	test('STAFF-015 clears an open staff session after cross-tab sign-out without reloading', async ({
+		page,
+		context,
+		seedPublicParams,
+		seedAdminUser,
+	}) => {
+		const account = defaultAdminAccount();
+		await seedPublicParams({});
+		await seedAdminUser(account);
+		await signInAdminViaUi(page, account);
+		await expect(page.locator('#searchNav')).toBeVisible();
+		const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+		const otherTab = await context.newPage();
+		await otherTab.goto('/admin/landing');
+		await expect(otherTab.locator('#searchNav')).toBeVisible();
+		await otherTab.locator('#adminSignOutButton').click();
+		await expect(page).toHaveURL(/\/$/);
+		await expect(page.locator('#adminSignInButton')).toBeVisible();
+		await expect(page.locator('#searchNav')).not.toBeVisible();
+		expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+			timeOrigin,
+		);
+		await otherTab.close();
+	});
 });
 
 const expectIonicDisabled = async (locator: Locator): Promise<void> => {

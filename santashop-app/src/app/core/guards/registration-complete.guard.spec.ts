@@ -1,11 +1,4 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
@@ -30,7 +23,7 @@ describe('RegistrationCompleteGuard', () => {
 				{
 					provide: PreRegistrationService,
 					useValue: {
-						registrationComplete$: of(false),
+						registrationCompleteResolved$: of(false),
 					},
 				},
 			],
@@ -48,10 +41,14 @@ describe('RegistrationCompleteGuard', () => {
 
 	it('should return true when registration is not complete', async () => {
 		// Arrange
-		Object.defineProperty(preregistrationService, 'registrationComplete$', {
-			get: () => of(false),
-			configurable: true,
-		});
+		Object.defineProperty(
+			preregistrationService,
+			'registrationCompleteResolved$',
+			{
+				get: () => of(false),
+				configurable: true,
+			},
+		);
 
 		// Recreate guard with updated observable
 		guard = TestBed.inject(RegistrationCompleteGuard);
@@ -80,7 +77,7 @@ describe('RegistrationCompleteGuard', () => {
 				{
 					provide: PreRegistrationService,
 					useValue: {
-						registrationComplete$: of(true),
+						registrationCompleteResolved$: of(true),
 					},
 				},
 			],

@@ -60,15 +60,15 @@ All customer and staff callables use bounded second-generation concurrency and
 maximum instances. These limits bound configured concurrency and cost. Verify
 workload headroom with measurements for the deployed revision.
 
-| Profile | Functions | CPU | Memory | Concurrency | Maximum instances | Warm instances |
+| Profile           | Functions                          | CPU |  Memory | Concurrency | Maximum instances |                   Warm instances |
 | ----------------- | ---------------------------------- | --: | ------: | ----------: | ----------------: | -------------------------------: |
-| Standard customer | account/profile/email changes | 1 | 256 MiB | 10 | 5 | 0 |
-| Signup draft | save/delete child, set appointment | 1 | 256 MiB | 20 | 10 | 0 |
-| Signup completion | complete registration | 1 | 512 MiB | 20 | 10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
-| New account | account creation and QR generation | 1 | 512 MiB | 20 | 10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
-| Event hot path | check-in and scan resolution | 1 | 256 MiB | 20 | 5 | `SANTASHOP_EVENT_MIN_INSTANCES` |
-| Event standard | edit/on-site/pre-registration | 1 | 256 MiB | 10 | 3 | 0 |
-| Low volume/admin | templates, staff, owner operations | 1 | 256 MiB | 10 | 3 | 0 |
+| Standard customer | account/profile/email changes      |   1 | 256 MiB |          10 |                 5 |                                0 |
+| Signup draft      | save/delete child, set appointment |   1 | 256 MiB |          20 |                10 |                                0 |
+| Signup completion | complete registration              |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| New account       | account creation and QR generation |   1 | 512 MiB |          20 |                10 | `SANTASHOP_SIGNUP_MIN_INSTANCES` |
+| Event hot path    | check-in and scan resolution       |   1 | 256 MiB |          20 |                 5 |  `SANTASHOP_EVENT_MIN_INSTANCES` |
+| Event standard    | edit/on-site/pre-registration      |   1 | 256 MiB |          10 |                 3 |                                0 |
+| Low volume/admin  | templates, staff, owner operations |   1 | 256 MiB |          10 |                 3 |                                0 |
 
 The configured ceilings provide 200 concurrent requests for each signup hot
 path and 100 for each check-in hot path. These are configured ceilings, not
@@ -101,20 +101,8 @@ a slot exceeds its target.
 
 ## Dependency security
 
-`Dependency Review` runs ordinary `pnpm audit` once for dependency-changing PRs
-and can be run manually. The workflow uploads its audit output and flags a
-non-zero exit; it is informational, not a clean-security certificate. Joel, as
-maintainer, reviews new findings on those PRs and records an upgrade or explicit
-risk decision there before promotion. A network/audit failure is not a clean
-result. Run `pnpm run audit:security` for the same ordinary workspace audit and
-`pnpm audit --prod` to inspect production dependency exposure.
-
-There is no custom advisory allowlist or installed-parser exception analyzer.
-Removing the repeated UI/Functions audit-wrapper runs changes when this signal
-is collected; it does not establish that an advisory is unreachable or that an
-old acceptance remains valid. Reassess accepted risks when dependencies or
-usage change. The Functions deployment's separate **blocking** production-only
-artifact audit remains in place.
+The Functions deployment retains its separate blocking production-dependency
+audit of the disposable deployment artifact. Review its findings before promotion.
 
 The workspace build-script allowlist remains limited to known Firebase,
 Angular, bundler, and native-helper dependencies. Do not broaden it to silence
@@ -125,7 +113,7 @@ installation warnings without reviewing the package's build script.
 For every merge to `master`, the test backend workflow must:
 
 1. install from the locked dependency graph;
-2. pass the production-dependency audit of the prepared Functions artifact and review applicable dependency-PR findings;
+2. pass the production-dependency audit of the prepared Functions artifact;
 3. pass Function unit and emulator integration suites;
 4. deploy Functions, Firestore rules/indexes, and Storage rules as one test
    backend release;

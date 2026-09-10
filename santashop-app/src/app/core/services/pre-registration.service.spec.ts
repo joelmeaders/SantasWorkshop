@@ -5,6 +5,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
 import {
 	BehaviorSubject,
+	from,
 	type Observable,
 	Subject,
 	Subscription,
@@ -13,12 +14,16 @@ import {
 import {
 	AnalyticsWrapper,
 	AuthService,
+	AuthWrapper,
 	FireRepoLite,
 	FunctionsWrapper,
 	type IFireRepoCollection,
 } from '@santashop/core';
 import { ToyType, type Child, type Registration } from '@santashop/models';
 import { PreRegistrationService } from './pre-registration.service';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
+import en from '../../../assets/i18n/en.json';
+import es from '../../../assets/i18n/es.json';
 import { QrCodeService } from './qrcode.service';
 
 const child = (): Child => ({
@@ -40,7 +45,11 @@ const registration = (uid = 'first'): Registration => ({
 	registrationSubmittedOn: new Date('2026-11-01T12:00:00.000Z'),
 });
 // Only identity is read by this service; other Firebase User SDK members are outside this fixture.
-const identity = (uid: string): FirebaseUser => ({ uid }) as FirebaseUser;
+const identity = (uid: string): FirebaseUser =>
+	({
+		uid,
+		getIdTokenResult: () => Promise.resolve({ claims: {} }),
+	}) as FirebaseUser;
 const callableFixtures = (): Pick<
 	FunctionsWrapper,
 	| 'saveDraftChild'
@@ -101,17 +110,23 @@ describe('PreRegistrationService', () => {
 			.mockResolvedValue('ticket-url');
 		log = vi.fn<AnalyticsWrapper['logEventWithParams']>();
 		present = vi.fn().mockResolvedValue(undefined);
-		createAlert = vi.fn().mockResolvedValue({ present });
+		createAlert = vi.fn().mockResolvedValue({
+			present,
+			dismiss: vi.fn().mockResolvedValue(true),
+		});
 		functions = callableFixtures();
 		TestBed.configureTestingModule({
 			providers: [
 				{
-					provide: AuthService,
-					useValue: { currentUser$: auth } satisfies Pick<
-						AuthService,
-						'currentUser$'
-					>,
+					provide: AuthWrapper,
+					useValue: {
+						authState: (): Observable<FirebaseUser | null> => auth,
+						signOut: async (): Promise<void> => {
+							auth.next(null);
+						},
+					},
 				},
+				provideTranslateService(),
 				{
 					provide: FireRepoLite,
 					useValue: {
@@ -139,13 +154,17 @@ describe('PreRegistrationService', () => {
 				{ provide: FunctionsWrapper, useValue: functions },
 			],
 		});
+		const translate = TestBed.inject(TranslateService);
+		translate.setTranslation('en', en);
+		translate.setTranslation('es', es);
+		translate.use('en');
 		service = TestBed.inject(PreRegistrationService);
 	});
 	afterEach(() => subscriptions.unsubscribe());
 
 	it('waits for an authenticated read before deciding completion', () => {
 		auth.next(identity('first'));
-		const completed = observe(service.registrationComplete$);
+		const completed = observe(service.registrationCompleteResolved$);
 		const visible = observe(service.userRegistration$);
 		expect(completed).toEqual([]);
 		expect(visible.at(-1)).toBeUndefined();
@@ -158,7 +177,7 @@ describe('PreRegistrationService', () => {
 
 	it('clears old identity data, cancels its listener, and waits for the next registration', () => {
 		const visible = observe(service.userRegistration$);
-		const completed = observe(service.registrationComplete$);
+		const completed = observe(service.registrationCompleteResolved$);
 		auth.next(identity('first'));
 		snapshot.next(registration());
 		const nextSnapshot = new Subject<Registration | undefined>();
@@ -254,7 +273,7 @@ describe('PreRegistrationService', () => {
 		expect(createAlert).not.toHaveBeenCalled();
 		snapshot.next(undefined);
 		snapshot.next(undefined);
-		await Promise.resolve();
+		await vi.waitFor(() => expect(present).toHaveBeenCalledOnce());
 		expect(log).toHaveBeenCalledExactlyOnceWith(
 			'registration_record_unavailable',
 			{ reason: 'missing' },
@@ -263,7 +282,7 @@ describe('PreRegistrationService', () => {
 		auth.next(null);
 		auth.next(identity('second'));
 		snapshot.next(undefined);
-		expect(createAlert).toHaveBeenCalledTimes(2);
+		await vi.waitFor(() => expect(createAlert).toHaveBeenCalledTimes(2));
 	});
 
 	it('recovers a failed read for a subsequent identity', () => {
@@ -392,5 +411,143 @@ describe('PreRegistrationService', () => {
 				maxSlots: 10,
 			}),
 		).rejects.toThrow('Appointment ID is required.');
+	});
+
+	it.each([
+		['en', en],
+		['es', es],
+	] as const)(
+		'translates missing and unreadable record alerts in %s',
+		async (language, catalog) => {
+			TestBed.inject(TranslateService).use(language);
+			observe(service.userRegistration$);
+			auth.next(identity('missing'));
+			snapshot.next(undefined);
+			await vi.waitFor(() => expect(present).toHaveBeenCalledOnce());
+			expect(createAlert).toHaveBeenLastCalledWith({
+				header: catalog.REGISTRATION_UNAVAILABLE.TITLE,
+				message: catalog.REGISTRATION_UNAVAILABLE.MESSAGE,
+				buttons: [catalog.COMMON.OK],
+			});
+			read.mockReturnValueOnce(throwError(() => new Error('unreadable')));
+			auth.next(identity('unreadable'));
+			await vi.waitFor(() => expect(present).toHaveBeenCalledTimes(2));
+			expect(createAlert).toHaveBeenLastCalledWith({
+				header: catalog.REGISTRATION_UNAVAILABLE.TITLE,
+				message: catalog.REGISTRATION_UNAVAILABLE.MESSAGE,
+				buttons: [catalog.COMMON.OK],
+			});
+			auth.next(null);
+			expect(createAlert).toHaveBeenCalledTimes(2);
+		},
+	);
+	it('resets cooperating auth and registration services on logout(false), external sign-out, and direct switches', async () => {
+		const realAuth = TestBed.inject(AuthService);
+		const streams: Observable<unknown>[] = [
+			realAuth.uid$,
+			realAuth.roles$,
+			realAuth.isAdmin$,
+			realAuth.isOwner$,
+			realAuth.isElevated$,
+			realAuth.isCheckin$,
+			service.userRegistration$,
+			service.children$,
+			service.dateTimeSlot$,
+			service.qrCode$,
+			service.registrationComplete$,
+			service.registrationSubmitted$,
+			service.hasCheckedIn$,
+		];
+		const values = streams.map((stream) => observe(stream));
+		const latest = (): unknown[] => values.map((items) => items.at(-1));
+		const neutral = [
+			null,
+			[],
+			false,
+			false,
+			false,
+			false,
+			undefined,
+			[],
+			undefined,
+			undefined,
+			false,
+			false,
+			false,
+		];
+		const admin = {
+			...identity('first'),
+			getIdTokenResult: async () => ({
+				claims: { owner: true, roles: ['admin', 'checkin'] },
+			}),
+		} as unknown as FirebaseUser;
+		auth.next(admin);
+		snapshot.next({ ...registration(), hasCheckedIn: true });
+		await vi.waitFor(() => expect(latest()[9]).toBe('ticket-url'));
+		expect(latest()[2]).toBe(true);
+		await realAuth.logout(false);
+		expect(latest()).toEqual(neutral);
+		expect(streams.map((stream) => observe(stream).at(-1))).toEqual(
+			neutral,
+		);
+		auth.next(admin);
+		snapshot.next(registration());
+		await vi.waitFor(() => expect(latest()[2]).toBe(true));
+		auth.next(identity('second'));
+		expect(latest()).toEqual(['second', ...neutral.slice(1)]);
+		snapshot.next(registration('second'));
+		await vi.waitFor(() => expect(latest()[9]).toBe('ticket-url'));
+		expect(latest()[2]).toBe(false);
+		auth.next(null);
+		expect(latest()).toEqual(neutral);
+		expect(createAlert).not.toHaveBeenCalled();
+	});
+	it('keeps QR state usable after a failed download', async () => {
+		getQr.mockRejectedValueOnce(new Error('offline'));
+		const urls = observe(service.qrCode$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		await Promise.resolve();
+		await Promise.resolve();
+		expect(urls.at(-1)).toBeUndefined();
+		auth.next(identity('second'));
+		snapshot.next(registration('second'));
+		await vi.waitFor(() => expect(urls.at(-1)).toBe('ticket-url'));
+	});
+
+	it('ignores a late registration promise from a previous identity', async () => {
+		let resolve!: (record: Registration) => void;
+		read.mockReturnValueOnce(
+			from(
+				new Promise<Registration>((done) => {
+					resolve = done;
+				}),
+			),
+		).mockReturnValue(snapshot);
+		const values = observe(service.userRegistration$);
+		auth.next(identity('a'));
+		auth.next(identity('b'));
+		resolve(registration('a'));
+		await Promise.resolve();
+		expect(values.at(-1)).toBeUndefined();
+		snapshot.next(registration('b'));
+		expect(values.at(-1)?.uid).toBe('b');
+		expect(values.some((value) => value?.uid === 'a')).toBe(false);
+	});
+	it('does not present a pending missing-record alert after sign-out', async () => {
+		let resolve!: (alert: unknown) => void;
+		createAlert.mockReturnValueOnce(
+			new Promise((done) => {
+				resolve = done;
+			}),
+		);
+		observe(service.userRegistration$);
+		auth.next(identity('a'));
+		snapshot.next(undefined);
+		await vi.waitFor(() => expect(createAlert).toHaveBeenCalledOnce());
+		auth.next(null);
+		resolve({ present, dismiss: vi.fn().mockResolvedValue(true) });
+		await Promise.resolve();
+		expect(present).not.toHaveBeenCalled();
 	});
 });

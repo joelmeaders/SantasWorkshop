@@ -75,10 +75,6 @@ describe('SignUpPage', () => {
 		await fixture.whenStable();
 	});
 
-	it('should create', () => {
-		expect(component).toBeTruthy();
-	});
-
 	it('defines the required referral label in every supported language', (): void => {
 		expect(enTranslations.REFERRAL.REQUIRED).toBe('Required');
 		expect(esTranslations.REFERRAL.REQUIRED).toBe('Obligatorio');

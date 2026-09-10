@@ -15,7 +15,11 @@ describe('CheckinService', () => {
 	const logout = vi.fn().mockResolvedValue(undefined);
 	const present = vi.fn().mockResolvedValue(undefined);
 	const onDidDismiss = vi.fn().mockResolvedValue({ role: 'confirm' });
-	const createAlert = vi.fn().mockResolvedValue({ present, onDidDismiss });
+	const createAlert = vi.fn().mockResolvedValue({
+		present,
+		onDidDismiss,
+		dismiss: vi.fn().mockResolvedValue(true),
+	});
 	const instant = vi.fn((key: string): string => key);
 
 	beforeEach(() => {
@@ -97,5 +101,25 @@ describe('CheckinService', () => {
 		expect(stopped).toHaveBeenCalledOnce();
 		checkin$.next({ inStats: false });
 		expect(createAlert).not.toHaveBeenCalled();
+	});
+
+	it('does not log out a new identity when an old check-in alert finishes', async () => {
+		let dismiss!: (value: unknown) => void;
+		onDidDismiss.mockReturnValueOnce(
+			new Promise((resolve) => {
+				dismiss = resolve;
+			}),
+		);
+		const service = TestBed.inject(CheckinService);
+		currentUser$.next({ uid: 'a' });
+		checkin$.next({ inStats: false });
+		await vi.waitFor(() => expect(onDidDismiss).toHaveBeenCalledOnce());
+		checkin$.next(undefined);
+		currentUser$.next({ uid: 'b' });
+		dismiss({ role: 'confirm' });
+		await Promise.resolve();
+		await Promise.resolve();
+		expect(logout).not.toHaveBeenCalled();
+		expect(await firstValueFrom(service.hasCheckIn$)).toBe(false);
 	});
 });

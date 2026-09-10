@@ -1,107 +1,37 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
+import { CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
 import { AuthService } from '@santashop/core/admin';
-import { from, of } from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
+import { Observable, map, take } from 'rxjs';
 
-export const redirectLoggedInToAdminGuard: CanActivateFn = () => {
-	const authService = inject(AuthService);
+function accessGuard(
+	role: 'admin' | 'owner' | 'elevated',
+	redirectSignedIn = false,
+): Observable<boolean | UrlTree> {
+	const auth = inject(AuthService);
 	const router = inject(Router);
-
-	return authService.currentUser$.pipe(
-		take(1),
-		switchMap((user) => {
-			if (!user) {
-				return of(true);
-			}
-
-			return from(user.getIdTokenResult(false)).pipe(
-				map((token) => {
-					const claims = token.claims ?? {};
-					const roles =
-						(claims['roles'] as string[] | undefined) ?? [];
-
-					return claims['owner'] === true ||
-						roles.includes('admin') ||
-						roles.includes('checkin')
-						? router.createUrlTree(['/admin'])
-						: true;
-				}),
-			);
+	return auth.claimsResolved$.pipe(
+		map((claims) => {
+			const roles: string[] = Array.isArray(claims?.['roles'])
+				? claims['roles']
+				: [];
+			const allowed =
+				claims?.['owner'] === true ||
+				(role !== 'owner' &&
+					(roles.includes('admin') ||
+						(role === 'elevated' && roles.includes('checkin'))));
+			if (redirectSignedIn)
+				return allowed ? router.createUrlTree(['/admin']) : true;
+			return allowed
+				? true
+				: router.createUrlTree([
+						role === 'owner' && claims ? '/admin/landing' : '/',
+					]);
 		}),
-	);
-};
-
-export const adminOnlyGuard: CanActivateFn = () => {
-	const authService = inject(AuthService);
-	const router = inject(Router);
-
-	return authService.currentUser$.pipe(
 		take(1),
-		switchMap((user) => {
-			if (!user) {
-				return of(router.createUrlTree(['/']));
-			}
-
-			return from(user.getIdTokenResult(false)).pipe(
-				map((token) =>
-					token.claims?.['owner'] === true ||
-					(Array.isArray(token.claims?.['roles']) &&
-						token.claims['roles'].includes('admin'))
-						? true
-						: router.createUrlTree(['/']),
-				),
-			);
-		}),
 	);
-};
-
-export const elevatedUserGuard: CanMatchFn = () => {
-	const authService = inject(AuthService);
-	const router = inject(Router);
-
-	return authService.currentUser$.pipe(
-		take(1),
-		switchMap((user) => {
-			if (!user) {
-				return of(router.createUrlTree(['/']));
-			}
-
-			return from(user.getIdTokenResult(false)).pipe(
-				map((token) => {
-					const claims = token.claims ?? {};
-					const roles =
-						(claims['roles'] as string[] | undefined) ?? [];
-
-					return claims['owner'] === true ||
-						roles.includes('admin') ||
-						roles.includes('checkin')
-						? true
-						: router.createUrlTree(['/']);
-				}),
-			);
-		}),
-	);
-};
-
-export const ownerOnlyGuard: CanActivateFn = () => {
-	const authService = inject(AuthService);
-	const router = inject(Router);
-
-	return authService.currentUser$.pipe(
-		take(1),
-		switchMap((user) => {
-			if (!user) {
-				return of(router.createUrlTree(['/']));
-			}
-
-			return from(user.getIdTokenResult(false)).pipe(
-				map((token) =>
-					token.claims?.['owner'] === true
-						? true
-						: router.createUrlTree(['/admin/landing']),
-				),
-			);
-		}),
-	);
-};
+}
+export const redirectLoggedInToAdminGuard: CanActivateFn = () =>
+	accessGuard('elevated', true);
+export const adminOnlyGuard: CanActivateFn = () => accessGuard('admin');
+export const elevatedUserGuard: CanMatchFn = () => accessGuard('elevated');
+export const ownerOnlyGuard: CanActivateFn = () => accessGuard('owner');

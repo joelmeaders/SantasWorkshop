@@ -1,3 +1,5 @@
+import { AuthService } from '@santashop/core/admin';
+import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, skip, take } from 'rxjs';
@@ -8,7 +10,16 @@ describe('CheckInContextService', () => {
 	let service: CheckInContextService;
 
 	beforeEach(() => {
-		TestBed.configureTestingModule({});
+		TestBed.configureTestingModule({
+			providers: [
+				{
+					provide: AuthService,
+					useValue: {
+						currentUser$: new BehaviorSubject({ uid: 'staff-1' }),
+					},
+				},
+			],
+		});
 		service = TestBed.inject(CheckInContextService);
 	});
 
@@ -26,7 +37,9 @@ describe('CheckInContextService', () => {
 			},
 		};
 
-		const received = firstValueFrom(service.currentRegistration$);
+		const received = firstValueFrom(
+			service.currentRegistration$.pipe(skip(1)),
+		);
 		service.setRegistration(registration as never, 'manual');
 
 		const normalized = await received;
@@ -36,11 +49,15 @@ describe('CheckInContextService', () => {
 		});
 		expect(normalized?.dateTimeSlot?.dateTime).toBeInstanceOf(Date);
 		expect(registration.children[0].dateOfBirth).toBeInstanceOf(Date);
-		await expect(firstValueFrom(service.inputMethod$)).resolves.toBe('manual');
+		await expect(firstValueFrom(service.inputMethod$)).resolves.toBe(
+			'manual',
+		);
 	});
 
 	it('tracks blocked scans and fully resets transient check-in state', async () => {
-		const nextBlocked = firstValueFrom(service.blockedScan$.pipe(skip(1), take(1)));
+		const nextBlocked = firstValueFrom(
+			service.blockedScan$.pipe(skip(1), take(1)),
+		);
 		service.setBlockedScan({
 			disposition: 'duplicate-risk',
 			registration: { uid: 'customer-1' } as never,
@@ -50,13 +67,40 @@ describe('CheckInContextService', () => {
 		await expect(nextBlocked).resolves.toMatchObject({
 			disposition: 'duplicate-risk',
 		});
-		await expect(firstValueFrom(service.inputMethod$)).resolves.toBe('manual');
+		await expect(firstValueFrom(service.inputMethod$)).resolves.toBe(
+			'manual',
+		);
 
 		service.setCheckIn(3, 'QR123');
 		service.reset();
 
 		await expect(firstValueFrom(service.checkin$)).resolves.toBeUndefined();
-		await expect(firstValueFrom(service.blockedScan$)).resolves.toBeUndefined();
-		await expect(firstValueFrom(service.inputMethod$)).resolves.toBe('camera');
+		await expect(
+			firstValueFrom(service.blockedScan$),
+		).resolves.toBeUndefined();
+		await expect(firstValueFrom(service.inputMethod$)).resolves.toBe(
+			'camera',
+		);
+	});
+
+	it('clears cached registration and check-in values for existing and late subscribers on identity change', async () => {
+		const auth = TestBed.inject(AuthService)
+			.currentUser$ as BehaviorSubject<{ uid: string } | null>;
+		const values: unknown[] = [];
+		const subscription = service.currentRegistration$.subscribe((value) =>
+			values.push(value),
+		);
+		service.setRegistration({ uid: 'customer-a' } as never);
+		service.setCheckIn(2, 'code-a');
+		auth.next({ uid: 'staff-b' });
+		expect(values.at(-1)).toBeUndefined();
+		expect(
+			await firstValueFrom(service.currentRegistration$),
+		).toBeUndefined();
+		expect(await firstValueFrom(service.checkin$)).toBeUndefined();
+		service.setRegistration({ uid: 'customer-b' } as never);
+		auth.next(null);
+		expect(values.at(-1)).toBeUndefined();
+		subscription.unsubscribe();
 	});
 });

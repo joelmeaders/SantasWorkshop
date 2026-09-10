@@ -18,14 +18,15 @@ export class RegistrationIncompleteGuard
 	private readonly service = inject(PreRegistrationService);
 	private readonly router = inject(Router);
 
-	public readonly isComplete$ = this.service.registrationComplete$.pipe(
-		take(1),
-		map((isComplete) =>
-			isComplete
-				? true
-				: this.router.parseUrl('pre-registration/overview'),
-		),
-	);
+	public readonly isComplete$ =
+		this.service.registrationCompleteResolved$.pipe(
+			take(1),
+			map((isComplete) =>
+				isComplete
+					? true
+					: this.router.parseUrl('pre-registration/overview'),
+			),
+		);
 
 	public canActivate(): Observable<boolean | UrlTree> {
 		return this.isComplete$;

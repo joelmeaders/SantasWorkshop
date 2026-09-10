@@ -8,7 +8,7 @@ import {
 } from '../../../test-helpers';
 import { AuthService } from '@santashop/core/admin/firestore';
 import { provideRouter } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 describe('AdminPage', () => {
 	let component: AdminPage;
@@ -25,7 +25,10 @@ describe('AdminPage', () => {
 				providePublicParametersSourceMock(),
 				{
 					provide: AuthService,
-					useValue: { isAdmin$: isAdmin$.asObservable() },
+					useValue: {
+						isAdmin$: isAdmin$.asObservable(),
+						currentUser$: of(null),
+					},
 				},
 				provideRouter([]),
 			],

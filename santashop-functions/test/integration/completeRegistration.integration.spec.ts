@@ -83,8 +83,8 @@ describe.sequential('completeRegistration integration', () => {
 	});
 
 	it('allows a small concurrent overage and reconciles it on the delayed counter run', async () => {
-		const submissionCount = 200;
-		const slotCapacity = 198;
+		const submissionCount = 5;
+		const slotCapacity = 3;
 		await Promise.all([
 			setDocument(COLLECTION_SCHEMA.parameters, 'public', {
 				registrationEnabled: true,

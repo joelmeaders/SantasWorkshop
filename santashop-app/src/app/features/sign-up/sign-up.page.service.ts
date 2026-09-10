@@ -8,7 +8,7 @@ import {
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { Auth, IError, OnboardUser } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { newOnboardUserForm } from './sign-up.form';
 
@@ -53,7 +53,9 @@ export class SignUpPageService implements OnDestroy {
 		const onboardInfo = this.form.value as OnboardUser;
 
 		const loader = await this.loadingController.create({
-			message: 'Creating account...',
+			message: await firstValueFrom(
+				this.translateService.get('SIGNUP.CREATING_ACCOUNT'),
+			),
 		});
 
 		await loader.present();
@@ -63,7 +65,9 @@ export class SignUpPageService implements OnDestroy {
 		try {
 			await this.createAccount(onboardInfo);
 			accountCreated = true;
-			loader.message = 'Logging you in';
+			loader.message = await firstValueFrom(
+				this.translateService.get('SIGNUP.SIGNING_IN'),
+			);
 			await this.signIn(onboardInfo);
 			authenticated = true;
 			await this.router.navigate(['pre-registration/overview']);

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import {
 	AuthService,
 	ErrorHandlerService,
@@ -9,6 +9,8 @@ import {
 } from '@santashop/core/customer';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import en from '../../../assets/i18n/en.json';
+import es from '../../../assets/i18n/es.json';
 import { SignUpPageService } from './sign-up.page.service';
 
 describe('SignUpPageService', () => {
@@ -34,7 +36,7 @@ describe('SignUpPageService', () => {
 		accountCallable.mockReset().mockResolvedValue({ data: undefined });
 		callableWrapper.mockClear();
 		login.mockReset().mockResolvedValue(undefined);
-		navigate.mockClear();
+		navigate.mockReset().mockResolvedValue(true);
 		handleError.mockClear();
 		loader.message = '';
 		loader.present.mockClear();
@@ -68,18 +70,16 @@ describe('SignUpPageService', () => {
 					provide: AlertController,
 					useValue: { create: alertCreate },
 				},
-				{
-					provide: TranslateService,
-					useValue: {
-						instant: vi.fn((key: string) => key),
-						getCurrentLang: vi.fn(() => 'es'),
-					},
-				},
+				provideTranslateService(),
 			],
 		});
 	});
 
 	function createService(): SignUpPageService {
+		const translate = TestBed.inject(TranslateService);
+		translate.setTranslation('en', en);
+		translate.setTranslation('es', es);
+		translate.use('es');
 		const service = TestBed.inject(SignUpPageService);
 		service.form.setValue({
 			firstName: 'Holly',
@@ -129,8 +129,8 @@ describe('SignUpPageService', () => {
 
 		expect(alertCreate).toHaveBeenCalledWith(
 			expect.objectContaining({
-				header: 'SIGNUP.ACCOUNT_CREATED',
-				message: 'SIGNUP.ACCOUNT_CREATED_MESSAGE',
+				header: es.SIGNUP.ACCOUNT_CREATED,
+				message: es.SIGNUP.ACCOUNT_CREATED_MESSAGE,
 				subHeader: 'holly@example.com',
 				buttons: expect.arrayContaining([
 					expect.objectContaining({ role: 'reset' }),
@@ -209,9 +209,9 @@ describe('SignUpPageService', () => {
 		expect(handleError).toHaveBeenCalledWith(
 			{
 				...error,
-				details: 'SIGNUP.VERIFICATION_FAILED_MESSAGE',
+				details: es.SIGNUP.VERIFICATION_FAILED_MESSAGE,
 			},
-			'SIGNUP.VERIFICATION_FAILED',
+			es.SIGNUP.VERIFICATION_FAILED,
 		);
 		expect(alertCreate).not.toHaveBeenCalled();
 		expect(service.form.controls.emailAddress.value).toBe(
@@ -229,5 +229,76 @@ describe('SignUpPageService', () => {
 		service.ngOnDestroy();
 		currentUser$.next({ uid: 'another-user' });
 		expect(navigate).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		['en', en],
+		['es', es],
+	] as const)(
+		'shows both translated progress phases in %s while each operation is pending',
+		async (language, catalog) => {
+			const service = createService();
+			TestBed.inject(TranslateService).use(language);
+			let createDone!: () => void;
+			let loginDone!: () => void;
+			accountCallable.mockReturnValue(
+				new Promise<void>((resolve) => {
+					createDone = resolve;
+				}),
+			);
+			login.mockReturnValue(
+				new Promise<void>((resolve) => {
+					loginDone = resolve;
+				}),
+			);
+			const pending = service.onboardUser();
+			await vi.waitFor(() => expect(accountCallable).toHaveBeenCalled());
+			expect(loadingCreate).toHaveBeenCalledWith({
+				message: catalog.SIGNUP.CREATING_ACCOUNT,
+			});
+			expect(login).not.toHaveBeenCalled();
+			createDone();
+			await vi.waitFor(() => expect(login).toHaveBeenCalled());
+			expect(loader.message).toBe(catalog.SIGNUP.SIGNING_IN);
+			expect(loader.dismiss).not.toHaveBeenCalled();
+			loginDone();
+			await pending;
+			expect(loader.dismiss).toHaveBeenCalled();
+		},
+	);
+	it.each([
+		' winter-pass-2026',
+		'winter-pass-2026 ',
+		' winter-pass-2026 ',
+		'winter pass 2026',
+	])(
+		'uses the same raw password for signup and immediate sign-in',
+		async (password) => {
+			const service = createService();
+			service.form.patchValue({ password, password2: password });
+			expect(service.form.valid).toBe(true);
+			await service.onboardUser();
+			expect(accountCallable).toHaveBeenCalledWith(
+				expect.objectContaining({ password, password2: password }),
+			);
+			expect(login).toHaveBeenCalledWith(
+				expect.objectContaining({ password }),
+			);
+		},
+	);
+	it('uses the signup length boundaries and exact confirmation', () => {
+		const service = createService();
+		for (const length of [7, 8, 40, 41]) {
+			service.form.patchValue({
+				password: 'a'.repeat(length),
+				password2: 'a'.repeat(length),
+			});
+			expect(service.form.valid).toBe(length === 8 || length === 40);
+		}
+		service.form.patchValue({
+			password: ' winter-pass-2026 ',
+			password2: 'winter-pass-2026',
+		});
+		expect(service.form.hasError('passwordMismatch')).toBe(true);
 	});
 });

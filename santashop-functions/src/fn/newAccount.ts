@@ -1,6 +1,13 @@
 import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import { OnboardUser, User, Registration, COLLECTION_SCHEMA } from '../models';
+import {
+	OnboardUser,
+	User,
+	Registration,
+	COLLECTION_SCHEMA,
+	SIGNUP_PASSWORD_MIN_LENGTH,
+	SIGNUP_PASSWORD_MAX_LENGTH,
+} from '../models';
 import { generateId } from '../utility/id-generation';
 import {
 	createQrCodeStoragePath,
@@ -28,22 +35,14 @@ export default async function newAccount(
 ): Promise<string> {
 	const data = withCallableValidation(() => {
 		const requestData = requireCallableData(request.data);
-		const password = requireTrimmedString(
-			requestData['password'],
-			'Password',
-		);
-		const passwordConfirmation = requireTrimmedString(
+		const password = requirePassword(requestData['password'], 'Password');
+		const passwordConfirmation = requirePassword(
 			requestData['password2'],
 			'Password confirmation',
 		);
 		if (password !== passwordConfirmation) {
 			throw new CallableValidationError(
 				'Password confirmation must match the password.',
-			);
-		}
-		if (password.length < 6 || password.length > 128) {
-			throw new CallableValidationError(
-				'Password must be between 6 and 128 characters.',
 			);
 		}
 
@@ -211,4 +210,23 @@ const requireReferredBy = (value: unknown): string => {
 	}
 
 	return `Other:${otherValue}`;
+};
+
+const requirePassword = (value: unknown, label: string): string => {
+	if (typeof value !== 'string')
+		throw new CallableValidationError(label + ' must be a string.');
+	if (
+		value.length < SIGNUP_PASSWORD_MIN_LENGTH ||
+		value.length > SIGNUP_PASSWORD_MAX_LENGTH
+	) {
+		throw new CallableValidationError(
+			label +
+				' must be between ' +
+				SIGNUP_PASSWORD_MIN_LENGTH +
+				' and ' +
+				SIGNUP_PASSWORD_MAX_LENGTH +
+				' characters.',
+		);
+	}
+	return value;
 };

@@ -211,4 +211,67 @@ describe('newAccount handler', () => {
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 		expect(adminMock.createUser).not.toHaveBeenCalled();
 	});
+
+	it.each([
+		' winter-pass-2026',
+		'winter-pass-2026 ',
+		' winter-pass-2026 ',
+		'winter pass 2026',
+		'a'.repeat(8),
+		'a'.repeat(40),
+	])('passes an exact raw password to Auth', async (password) => {
+		adminMock.createUser.mockResolvedValue({ uid: 'raw-password-user' });
+		adminMock.batchCommit.mockResolvedValue(undefined);
+		const { default: newAccount } = await loadSubject(adminMock);
+		await newAccount(
+			createCallableRequest(
+				createOnboardUser({ password, password2: password }),
+			),
+		);
+		expect(adminMock.createUser).toHaveBeenCalledWith(
+			expect.objectContaining({ password }),
+		);
+	});
+	it.each([undefined, null, 123, {}, '', 'a'.repeat(7), 'a'.repeat(41)])(
+		'rejects invalid raw passwords without side effects',
+		async (password) => {
+			const { default: newAccount } = await loadSubject(adminMock);
+			await expect(
+				newAccount(
+					createCallableRequest(
+						createOnboardUser({
+							password,
+							password2: password,
+						} as never),
+					),
+				),
+			).rejects.toMatchObject({ code: 'invalid-argument' });
+			expect(adminMock.createUser).not.toHaveBeenCalled();
+			expect(adminMock.batchCreate).not.toHaveBeenCalled();
+		},
+	);
+	it.each([
+		'winter-pass-2026',
+		' winter-pass-2026',
+		'winter-pass-2026 ',
+		undefined,
+		123,
+	])(
+		'rejects an inexact or invalid confirmation without side effects',
+		async (password2) => {
+			const { default: newAccount } = await loadSubject(adminMock);
+			await expect(
+				newAccount(
+					createCallableRequest(
+						createOnboardUser({
+							password: ' winter-pass-2026 ',
+							password2,
+						} as never),
+					),
+				),
+			).rejects.toMatchObject({ code: 'invalid-argument' });
+			expect(adminMock.createUser).not.toHaveBeenCalled();
+			expect(adminMock.batchCreate).not.toHaveBeenCalled();
+		},
+	);
 });

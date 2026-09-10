@@ -1,3 +1,5 @@
+import { AuthService } from '@santashop/core/admin';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DuplicatePage } from './duplicate.page';
@@ -18,6 +20,10 @@ describe('DuplicatePage', () => {
 		TestBed.configureTestingModule({
 			imports: [DuplicatePage],
 			providers: [
+				{
+					provide: AuthService,
+					useValue: { currentUser$: of({ uid: 'staff-1' }) },
+				},
 				provideFirestoreWrapperMock(),
 				provideActivatedRouteMock(),
 				{ provide: AnalyticsWrapper, useValue: { logEventWithParams } },
@@ -39,20 +45,30 @@ describe('DuplicatePage', () => {
 		const context = TestBed.inject(CheckInContextService);
 		context.setBlockedScan({
 			disposition: 'duplicate-risk',
-			registration: { uid: 'customer-1', emailAddress: 'family@example.test' } as never,
+			registration: {
+				uid: 'customer-1',
+				emailAddress: 'family@example.test',
+			} as never,
 			attempt: {
 				inputMethod: 'manual',
-				scannedOn: { toDate: (): Date => new Date('2026-12-10T10:00:00Z') },
+				scannedOn: {
+					toDate: (): Date => new Date('2026-12-10T10:00:00Z'),
+				},
 				priorEventOn: new Date('2026-12-10T09:45:00Z'),
 			} as never,
 		});
 
 		await fixture.whenStable();
 
-		expect(fixture.nativeElement.textContent).toContain('Suspicious duplicate scan');
-		expect(logEventWithParams).toHaveBeenCalledWith('admin_blocked_scan_view', {
-			disposition: 'duplicate-risk',
-		});
+		expect(fixture.nativeElement.textContent).toContain(
+			'Suspicious duplicate scan',
+		);
+		expect(logEventWithParams).toHaveBeenCalledWith(
+			'admin_blocked_scan_view',
+			{
+				disposition: 'duplicate-risk',
+			},
+		);
 	});
 
 	it('clears the current blocked scan before returning to the scanner', async () => {

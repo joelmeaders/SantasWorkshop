@@ -80,7 +80,9 @@
 		"VERIFICATION_FAILED_MESSAGE": "Your information is still in the form. Please try again later.",
 		"YOUR_INFO": "Your Information",
 		"ACCOUNT_INFO": "Account Information",
-		"LEGAL_NEWS": "Legal & Newsletter"
+		"LEGAL_NEWS": "Legal & Newsletter",
+		"CREATING_ACCOUNT": "Creating account...",
+		"SIGNING_IN": "Logging you in"
 	},
 	"OVERVIEW": {
 		"WORKSPACE_TITLE": "Complete your registration",
@@ -351,5 +353,9 @@
 		"UNRECOVERABLE_MESSAGE": "Sorry, this page needs a fresh start. Refresh to continue. You may need to enter information you have not saved again.",
 		"RELOAD": "Refresh page",
 		"LATER": "Not now"
+	},
+	"REGISTRATION_UNAVAILABLE": {
+		"TITLE": "Registration record unavailable",
+		"MESSAGE": "We could not load your registration record. It may be missing or corrupted. Please contact the Denver Santa Claus Shop for assistance."
 	}
 }

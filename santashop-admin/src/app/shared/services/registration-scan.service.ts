@@ -1,4 +1,7 @@
 import { Injectable, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { firstValueFrom, map } from 'rxjs';
+import { AuthService } from '@santashop/core/admin';
 import { FunctionsWrapper } from '@santashop/core/admin/firestore';
 import {
 	type ResolveRegistrationScanRequest,
@@ -41,14 +44,30 @@ const deserializeCallableTimestamps = (value: unknown): unknown => {
 @Injectable({ providedIn: 'root' })
 export class RegistrationScanService {
 	private readonly functions = inject(FunctionsWrapper);
+	private readonly auth = inject(AuthService);
+	private identityVersion = 0;
+	constructor() {
+		this.auth.uid$
+			.pipe(takeUntilDestroyed())
+			.subscribe(() => this.identityVersion++);
+	}
 
 	public async resolve(
 		request: ResolveRegistrationScanRequest,
 	): Promise<ResolveRegistrationScanResult> {
+		const { uid, version } = await firstValueFrom(
+			this.auth.uid$.pipe(
+				map((uid) => ({ uid, version: this.identityVersion })),
+			),
+		);
+		if (!uid || version !== this.identityVersion)
+			throw new Error('Sign in before scanning a registration.');
 		const response = await this.functions.callableWrapper<
 			ResolveRegistrationScanRequest,
 			ResolveRegistrationScanResult
 		>('resolveRegistrationScan')(request);
+		if (version !== this.identityVersion)
+			throw new Error('The signed-in account changed during the scan.');
 		return deserializeCallableTimestamps(
 			response.data,
 		) as ResolveRegistrationScanResult;

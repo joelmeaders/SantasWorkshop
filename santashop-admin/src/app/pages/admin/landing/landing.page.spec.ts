@@ -54,10 +54,6 @@ describe('LandingPage', () => {
 		await fixture.whenStable();
 	});
 
-	it('should create', () => {
-		expect(component).toBeTruthy();
-	});
-
 	it('should show the schedule editor link for admin users', async () => {
 		// Act
 		await fixture.whenStable();

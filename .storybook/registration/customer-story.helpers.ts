@@ -216,7 +216,7 @@ export function createCustomerStoryControls(
 	const dateTimeSlot = registration.dateTimeSlot as DateTimeSlot | undefined;
 	const registrationSubmitted = !!registration.registrationSubmittedOn;
 	const registrationComplete =
-		children.length > 0 && !!dateTimeSlot && registrationSubmitted;
+		children.length > 0 && !!dateTimeSlot?.dateTime && registrationSubmitted;
 	const controls: CustomerStoryControls = {
 		currentUser$: new BehaviorSubject<StoryUser | null>(
 			options.currentUser === undefined
@@ -280,7 +280,7 @@ export function createCustomerStoryControls(
 			);
 			controls.registrationComplete$.next(
 				nextChildren.length > 0 &&
-					!!nextDateTimeSlot &&
+					!!nextDateTimeSlot?.dateTime &&
 					!!registration.registrationSubmittedOn,
 			);
 			controls.hasCheckedIn$.next(!!registration.hasCheckedIn);

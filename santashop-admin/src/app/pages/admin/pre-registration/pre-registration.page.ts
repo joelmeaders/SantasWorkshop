@@ -209,11 +209,6 @@ export class PreRegistrationPage {
 	/**
 	 * Returns all time slots for the specified program year
 	 * where the field 'enabled' is true.
-	 *
-	 * @private
-	 * @param programYear
-	 * @return
-	 * @memberof DateTimePageService
 	 */
 	private availableSlotsQuery(
 		programYear: number,

@@ -175,8 +175,15 @@ but must not replace the user interaction under test.
 | QUAL-004 | Verify local/test/prod configuration resolves to separate projects and never mixes customer data or credentials. | NFR-PRV-006; NFR-AVL-004–005; NFR-OPS-006–007 | Other layer |
 | QUAL-005 | Measure initial route payload and interactive readiness against an agreed budget once numeric targets are approved. | NFR-PER-002 | Not automated |
 | VIEWPORT-ADMIN-001 | Keep the core staff navigation visible and free of horizontal overflow at the desktop viewport. | NFR-UX-001, NFR-UX-004 | Automated |
-| BROWSER-PUB-001 | Keep public account entry and responsive form input usable across Chromium, Firefox, phone WebKit, and tablet WebKit. | NFR-UX-001, NFR-UX-004 | Automated |
-| BROWSER-ADMIN-001 | Keep staff sign-in, navigation, and manual scan entry usable across Chromium, Firefox, phone WebKit, and tablet WebKit. | NFR-UX-001, NFR-UX-004 | Automated |
+| BROWSER-PUB-001 | Keep public account entry and responsive form input usable across Chromium, Firefox, phone WebKit, and tablet WebKit. | NFR-UX-001, NFR-UX-004 | Automated on mobile Chromium; Firefox and phone/tablet WebKit not automated |
+| BROWSER-ADMIN-001 | Keep staff sign-in, navigation, and manual scan entry usable across Chromium, Firefox, phone WebKit, and tablet WebKit. | NFR-UX-001, NFR-UX-004 | Automated on mobile Chromium; Firefox and phone/tablet WebKit not automated |
+
+The [Playwright configuration](../../santashop-e2e/playwright.config.ts) runs these
+browser-device scenarios on the `mobile-chrome` project. The separate
+`desktop-chrome-smoke` project runs only `desktop-smoke.spec.ts`; it does not
+extend these scenarios to other browsers. Firefox and phone/tablet WebKit remain
+acceptance obligations under the same IDs. See the [E2E guide](e2e.md#reliable-browser-assertions)
+for the configured browser scope.
 
 ## Executable spec map
 

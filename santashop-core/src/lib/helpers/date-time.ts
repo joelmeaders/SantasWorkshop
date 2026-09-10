@@ -40,10 +40,6 @@ export const dateToCalendarString = (date: Date): string => {
  * AngularFire or Firestore casts dates as timestamps
  * once stored. The property type may say Date (because
  * of the interface) but it's a Timestamp.
- *
- * @export
- * @param timestampAsDate
- * @return
  */
 export const timestampToDate = (timestampAsDate: Date): Date => {
 	try {

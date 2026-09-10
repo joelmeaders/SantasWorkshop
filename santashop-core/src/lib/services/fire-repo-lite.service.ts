@@ -19,9 +19,6 @@ export class FireRepoLite {
 
 	/**
 	 * Generates a random id
-	 *
-	 * @return
-	 * @memberof FireRepoLite
 	 */
 	public randomId(): string {
 		const colRef = this.firestoreWrapper.collection('_');
@@ -139,17 +136,10 @@ export class FireRepoLite {
 
 /**
  * A collection of all repository actions
- *
- * @export
- * @interface IFireRepoCollection
- * @template T
  */
 export interface IFireRepoCollection<T = DocumentData> {
 	/**
 	 * Collection path this collection was initialized with
-	 *
-	 * @type {string}
-	 * @memberof IFireRepoCollection
 	 */
 	collectionPathName: string;
 
@@ -161,13 +151,6 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 * id populates that field. The id field
 	 * does not need to exist on the document in the data
 	 * store.
-	 *
-	 * @template T
-	 * @param {string} collectionPath Path to document
-	 * @param {string} documentId Id of document
-	 * @param {Extract<keyof T, string>} [idField] Optional
-	 * @return {*}  {Observable<T>}
-	 * @memberof FireRepoLite
 	 */
 	read(
 		documentId: string,
@@ -182,12 +165,6 @@ export interface IFireRepoCollection<T = DocumentData> {
 	 * id populates that field. The id field
 	 * does not need to exist on the document in the data
 	 * store.
-	 *
-	 * @template T
-	 * @param {QueryConstraint[]} [queryConstraints] Optional
-	 * @param {Extract<keyof T, string>} [idField] Optional
-	 * @return {*}  {Observable<T[]>}
-	 * @memberof FireRepoLite
 	 */
 	readMany(
 		queryConstraints?: QueryConstraint[],
@@ -196,41 +173,18 @@ export interface IFireRepoCollection<T = DocumentData> {
 
 	/**
 	 * Add a new document to the specified collection path
-	 *
-	 * @template T
-	 * @param {string} collectionPath Path to document
-	 * @param {T} document Document to store
-	 * @return {*}  {Observable<DocumentReference<T>>}
-	 * @memberof FireRepoLite
 	 */
 	add(document: T): Observable<DocumentReference<T>>;
 
 	/**
 	 * Add a new document to the specified collection path
 	 * with the specified id.
-	 *
-	 * @template T
-	 * @param {string} documentId Id to use
-	 * @param {T} document
-	 * @return {*}  {Observable<DocumentReference<T>>}
-	 * @memberof FireRepoLite
 	 */
 	addById(documentId: string, document: T): Observable<DocumentReference<T>>;
 
 	/**
-	 * Update a specified document at the specified collection
-	 * path and id.
-	 *
-	 * Setting merge to true allows upserts if the document
-	 * does not exist. It also non-destructively
-	 * update documents by only replacing specified fields.
-	 *
-	 * @template T
-	 * @param {string} documentId Document id
-	 * @param {T} document
-	 * @param {boolean} [merge=false] True = Upsert / Merge data
-	 * @return {*}  {Observable<DocumentReference<DocumentData>>}
-	 * @memberof FireRepoLite
+	 * Writes with setDoc, which creates the document if it does not exist.
+	 * With merge false, replaces existing data. With merge true, merges the supplied fields.
 	 */
 	update(
 		documentId: string,
@@ -240,10 +194,6 @@ export interface IFireRepoCollection<T = DocumentData> {
 
 	/**
 	 * Deletes the specified document
-	 *
-	 * @param {string} documentId Document id
-	 * @return {*}  {Observable<void>}
-	 * @memberof FireRepoLite
 	 */
 	delete(documentId: string): Observable<void>;
 }

@@ -28,6 +28,8 @@ deployment and load evidence before acceptance.
 2. Sign in to the intended Google account with the gcloud CLI. The harness uses
    that account for test-project inventory and run-owned fixture setup. Customer
    calls use ordinary Firebase password authentication and App Check.
+   The email-control commands also require Application Default Credentials or
+   `REMOTE_CONFIG_ACCESS_TOKEN`; see [email control authentication](../../docs/SECRETS_AND_CONFIGURATION.md#remote-email-sending-control).
 3. Disable email with `node scripts/email-sending.cjs disable --project
 santas-workshop-test`. This is an application stop control, not proof of AWS
    network isolation. Never send load while ordinary SES transport is active.
@@ -242,3 +244,4 @@ This runs local unit tests for the harness; it does not send hosted load.
 
 Update the targets or stop conditions only as an explicit test-plan change.
 Commit changes before a hosted run and retain earlier failed evidence.
+

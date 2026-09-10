@@ -1,147 +1,27 @@
 # SantaShop E2E Tests
 
-End-to-end testing suite for the SantaShop application using Playwright.
+Playwright tests for the customer and staff applications.
 
-## Prerequisites
+The [E2E guide](../docs/testing/e2e.md) owns setup, commands, configuration, and fixture APIs:
 
-- Node.js 24.15.0
-- Firebase emulators
-- santashop-functions built
+- [Runtime, setup, and alternate emulator ports](../docs/testing/e2e.md#runtime-and-configuration)
+- [Automated suites and CI orchestration](../docs/testing/e2e.md#automated-suites)
+- [Manual sessions and individual specs](../docs/testing/e2e.md#manual-debugging-and-individual-specs)
+- [Interactive debugging and code generation](../docs/testing/e2e.md#interactive-debugging)
+- [Reports and evidence](../docs/testing/e2e.md#reports-and-evidence)
+- [Writing tests and using fixtures](../docs/testing/e2e.md#fixtures-and-supported-user-flows)
+- [Browser scope and reliable assertions](../docs/testing/e2e.md#reliable-browser-assertions)
 
-## Setup
+Read the [browser QA guide](../docs/browser-flow-testing.md) for deployed/manual
+QA and data safety. The [integrated suite](../docs/testing/integrated-test-suite.md)
+retains acceptance requirements and obligations that are not automated.
 
-```bash
-# Install dependencies (from root)
-pnpm install
+E2E helpers delete emulator fixtures. Verify the emulator target before using
+them; never point this suite at a deployed site. Customer and admin suites share
+emulator state and must run sequentially.
 
-# Install Playwright browsers
-pnpm --filter @santashop/e2e exec playwright install chromium
-```
+## Package structure
 
-## Running Tests
-
-### Full E2E test suite
-
-From the workspace root, this runs the public and admin suites sequentially.
-Each run builds e2e/demo configuration, starts isolated Firebase emulators, serves
-one application on port `4100`, runs its specs, and shuts its processes down:
-
-```bash
-pnpm e2e:test
-```
-
-For a faster feature-scoped run:
-
-```bash
-pnpm e2e:test:app
-pnpm e2e:test:admin
-```
-
-### Manual testing
-
-If you need more control, prepare the e2e/demo configuration and builds:
-
-```bash
-pnpm e2e:prepare:app
-```
-
-Then use separate terminals:
-
-```bash
-# Terminal 1
-pnpm e2e:emulators
-
-# Terminal 2
-pnpm e2e:serve:app
-
-# Terminal 3
-pnpm e2e:run:app
-```
-
-### Development Mode
-
-```bash
-# Run tests with UI mode for debugging
-pnpm --filter @santashop/e2e test:ui
-
-# Run tests in headed mode (see browser)
-pnpm --filter @santashop/e2e test:headed
-
-# Debug tests step-by-step
-pnpm --filter @santashop/e2e test:debug
-
-# Generate test code
-pnpm --filter @santashop/e2e test:codegen
-```
-
-### View Test Reports
-
-```bash
-pnpm --filter @santashop/e2e test:report
-```
-
-## Test Structure
-
-- `tests/` - Test files
-- `fixtures/` - Custom fixtures and test utilities
-- `playwright.config.ts` - Playwright configuration
-
-## Configuration
-
-The tests are configured to:
-
-- Run against `http://localhost:4100` (santashop-app test server)
-- Use the `demo-santashop` Firebase emulators for backend services
-- Run Functions on the explicit `nodejs24` emulator/deployment runtime while
-  retaining Node 24 for workspace tooling
-- Confirm an emulator-only callable loaded before Playwright begins
-- Use `firebase emulators:exec` to own emulator startup and shutdown for each suite
-- Run the main suite with Playwright's Pixel 5 Chromium profile
-- Run the bounded `desktop-chrome-smoke` project for `desktop-smoke.spec.ts`.
-  Firefox and WebKit projects remain disabled.
-- Run sequentially in one worker because tests share emulator state
-- Stop after the first failed or timed-out test (`maxFailures: 1`)
-- Generate HTML reports
-- Take screenshots on failure
-- Record traces for debugging
-
-For an isolated emulator run, set each `E2E_*_PORT` value to the matching port
-in the separately provided Firebase configuration. The existing root E2E
-commands use `firebase.e2e.json` and its default ports. Set
-`FUNCTIONS_EMULATOR_URL` to the full Functions emulator base URL when the
-readiness callable uses an alternate Functions port.
-
-## Writing Tests
-
-Tests should be placed under the matching feature directory in `tests/public/`
-or `tests/admin/` with the `.spec.ts` extension. Use the custom emulator
-fixture rather than importing Playwright's base test directly.
-
-Example:
-
-```typescript
-import { test, expect } from '../../fixtures/test-fixtures';
-
-test('homepage loads', async ({ page }) => {
-	await page.goto('/');
-	await expect(page).toHaveTitle(/Santa/);
-});
-```
-
-## CI/CD
-
-Create dated test reports directly in the Obsidian project, following the
-[recording policy](../docs/README.md#recording-future-work). Generated Playwright
-reports stay in their configured ignored output folders until selected evidence
-is archived; do not add narrative execution logs to this README or repository docs.
-
-The e2e tests can be integrated into your CI pipeline. Make sure to:
-
-1. Build the functions project
-2. Start Firebase emulators
-3. Start the app in test mode
-4. Run the e2e tests
-5. Stop all services
-
-The root `e2e:test`, `e2e:test:app`, and `e2e:test:admin` scripts handle this
-orchestration.
+- [tests/](tests/) — customer and staff feature specs
+- [fixtures/](fixtures/) — custom fixtures and test utilities
+- [playwright.config.ts](playwright.config.ts) — browser and reporting configuration

@@ -138,7 +138,7 @@ describe('admin bootstrap', () => {
 
 	it('keys the service-worker script URL to the configured release version', () => {
 		expect(getServiceWorkerScriptUrl(config.version)).toBe(
-			'ngsw-worker.js?v=2026.09.0-beta.3',
+			'ngsw-worker.js?v=2026.09.0-beta.4',
 		);
 		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
 			getServiceWorkerScriptUrl(config.version),

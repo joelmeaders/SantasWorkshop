@@ -844,9 +844,11 @@ const createProviders = (
 				| 'sendTestEmailTemplate'
 				| 'deleteEmailTemplate'
 			> => ({
-				listEmailTemplates: fn(async () => [
-					...(options.emailTemplates ?? [demoEmailTemplate]),
-				]),
+				listEmailTemplates: fn(async () =>
+					cloneStoryData([
+						...(options.emailTemplates ?? [demoEmailTemplate]),
+					]),
+				),
 				getEmailTemplate: fn(async () =>
 					cloneStoryData(demoEmailDetail),
 				),

@@ -22,6 +22,18 @@ E2E uses project `demo-santashop` and [firebase.e2e.json](../../firebase.e2e.jso
 The ordinary local workflow uses Firestore port 8080. Keep its configuration separate from E2E.
 The remote test configuration targets `santas-workshop-test` and is not the demo emulator configuration.
 
+Functions use the explicit `nodejs24` emulator/deployment runtime; workspace tooling also uses Node 24.
+
+### Alternate emulator ports
+
+For an isolated emulator run, set each `E2E_*_PORT` value to the matching port
+in the separately provided Firebase configuration. The existing root E2E
+commands use `firebase.e2e.json` and its default ports. Set
+`FUNCTIONS_EMULATOR_URL` to the full Functions emulator base URL when the
+readiness callable uses an alternate Functions port.
+The fixture inputs are defined in [season.ts](../../santashop-e2e/fixtures/season.ts);
+the readiness probe reads its URL in [wait-for-functions.mjs](../../santashop-e2e/scripts/wait-for-functions.mjs).
+
 ## Automated suites
 
 Run both suites sequentially:
@@ -41,6 +53,8 @@ Each command prepares its target, builds dependencies and Functions, starts the 
 and runs Playwright through `firebase emulators:exec`. A callable readiness probe verifies
 that the Functions emulator loaded the test helpers. An open port alone is insufficient.
 Both browser servers use port 4100. Run one target at a time.
+Use these root commands for CI orchestration as well; they own emulator startup
+and shutdown for each suite.
 
 ## Manual debugging and individual specs
 
@@ -69,9 +83,56 @@ For admin tests, use `e2e:prepare:admin` in terminal 1 and `e2e:serve:admin` in 
 Use an admin spec such as `tests/admin/access-and-controls.spec.ts` in terminal 3.
 The E2E serve scripts retain the prepared configuration and use port 4100.
 
+To run the whole prepared target in terminal 3, use `pnpm run e2e:run:app`
+or `pnpm run e2e:run:admin`. These commands wait for services and run the
+callable readiness probe before Playwright.
+
+### Interactive debugging
+
+After preparing the target, starting its server and emulators, and completing
+the readiness steps above, choose a debugging mode:
+
+```text
+# Run tests with UI mode for debugging
+pnpm --filter @santashop/e2e test:ui tests/public
+
+# Run tests in headed mode (see browser)
+pnpm --filter @santashop/e2e test:headed tests/public
+
+# Debug tests step-by-step
+pnpm --filter @santashop/e2e test:debug tests/public
+
+# Generate test code against the local browser app
+pnpm --filter @santashop/e2e test:codegen
+```
+
+The `tests/public` filter runs only customer specs against the prepared customer
+app. Use `tests/admin` in all three test commands when the admin app is prepared.
+Without a target filter, Playwright can run both suites against the same server.
+These package commands do not start emulators or prepare the application.
+The readiness probe clears emulator fixtures; run it before seeding, never
+during a journey or against a deployed site.
+
+### Reports and evidence
+
+Open an existing local HTML report with:
+
+```text
+pnpm --filter @santashop/e2e test:report
+```
+
+Local runs generate HTML reports; CI uses the list reporter. Inspect
+`santashop-e2e/playwright-report/` and `santashop-e2e/test-results/` after a failure.
+Create dated test reports in the Obsidian project under the
+[recording policy](../README.md#recording-future-work). Generated Playwright
+artifacts remain in their configured ignored folders until selected evidence
+is archived. Do not add narrative execution logs to repository guides.
+
 ## Fixtures and supported user flows
 
 Import `test` and `expect` from [test-fixtures.ts](../../santashop-e2e/fixtures/test-fixtures.ts).
+Place `.spec.ts` files under the matching feature directory in `santashop-e2e/tests/public/`
+or `santashop-e2e/tests/admin/`. Use the custom emulator fixture instead of Playwright's base test.
 Use `clearData()` and reseed each test's state. The helper deletes emulator Auth users and
 configured Firestore collections and the `registrations/` and `emailTemplates/`
 Storage prefixes. Use unique paths and explicit cleanup for other Storage fixtures.
@@ -130,9 +191,11 @@ accounts, children, and slots needed by the test. Do not depend on another test'
 - Keep one worker, no retries, and isolated seeds because tests share the emulator instance.
 - Keep event dates aligned with the configured program year and `America/Denver` business timezone.
 
-[playwright.config.ts](../../santashop-e2e/playwright.config.ts) runs headless mobile Chromium plus bounded desktop Chromium smoke,
+[playwright.config.ts](../../santashop-e2e/playwright.config.ts) runs headless mobile Chromium with the Pixel 5 profile
+plus the `desktop-chrome-smoke` project for `desktop-smoke.spec.ts`,
 stops after one failure, and retains failure screenshots, video, and traces.
-Inspect `santashop-e2e/playwright-report/` and `santashop-e2e/test-results/` after a failure.
+Firefox and WebKit projects remain disabled. See [reports and evidence](#reports-and-evidence)
+for report commands and artifact locations.
 
 ## Emulator boundaries and validation
 

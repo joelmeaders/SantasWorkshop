@@ -28,9 +28,6 @@ export class AuthService {
 
 	/**
 	 * Stream of the current identity, triggered on auth state and refreshes
-	 *
-	 * @type {(Observable<User | null>)}
-	 * @memberof AuthService
 	 */
 	public readonly currentUser$: Observable<User | null> = merge(
 		this.authWrapper.authState().pipe(distinctUntilChanged()),
@@ -48,9 +45,6 @@ export class AuthService {
 
 	/**
 	 * Stream of user email and uid
-	 *
-	 * @type {Observable<UserEmailUid>}
-	 * @memberof AuthService
 	 */
 	public readonly emailAndUid$: Observable<UserEmailUid | null> =
 		this.currentUser$.pipe(
@@ -141,11 +135,6 @@ export class AuthService {
 
 	/**
 	 * Change user password. Refreshes the identity, logs in, then changes password.
-	 *
-	 * @param oldPassword
-	 * @param newPassword
-	 * @return
-	 * @memberof AuthService
 	 */
 	public async changePassword(
 		oldPassword: string,
@@ -172,11 +161,6 @@ export class AuthService {
 	/**
 	 * Changes the user email address. Refreshes the identity, logs the user
 	 * in, changes the email address, then refreshes the identity again.
-	 *
-	 * @param password
-	 * @param newEmailAddress
-	 * @return
-	 * @memberof AuthService
 	 */
 	public async changeEmailAddress(
 		password: string,
@@ -201,10 +185,6 @@ export class AuthService {
 
 	/**
 	 * Logs the user in via email/password
-	 *
-	 * @param auth
-	 * @return
-	 * @memberof AuthService
 	 */
 	public login(auth: Auth): Promise<UserCredential> {
 		return this.authWrapper.signInWithEmailAndPassword(
@@ -215,10 +195,6 @@ export class AuthService {
 
 	/**
 	 * Logs the user out, then triggers browser reload.
-	 *
-	 * @param [reload=true]
-	 * @return
-	 * @memberof AuthService
 	 */
 	public async logout(reload = true): Promise<void> {
 		await this.authWrapper.signOut().then(() => {

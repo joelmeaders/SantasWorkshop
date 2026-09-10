@@ -27,9 +27,6 @@ export class SignUpPageService implements OnDestroy {
 
 	/**
 	 * Redirects a user if they're already signed in.
-	 *
-	 * @private
-	 * @memberof SignInPageService
 	 */
 	public readonly redirectIfLoggedInSubscription =
 		this.authService.currentUser$.pipe(

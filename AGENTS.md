@@ -64,6 +64,11 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 
 ## Firebase and functions gotchas
 
+- Before changing app callable clients, Functions, shared helpers/models, Firestore writes/triggers, task dispatch, routing, or schedules, read [the function call map](docs/function-call-map.md).
+- Trace runtime cycles through local helper calls, HTTP/callable calls, Cloud Tasks, and Firestore writes. Match create/update/delete/write events to the actual trigger. A `set` with merge can create a missing document. A retry limit on one task does not bound a chain of newly queued tasks. Imports and Firestore reads alone are not runtime call edges.
+- Run `pnpm run functions:graph:check` and `pnpm run functions:graph:test` for affected changes. Source changes invalidate the reviewed map, including changes inside helper modules. Review the changed paths and update `docs/function-call-graph.review.json` before running `pnpm run functions:graph:update`; do not refresh hashes merely to clear CI.
+- Run `pnpm run functions:cycles` before claiming the workflow is cycle-free. It intentionally fails on the documented, bounded worker continuation. The email handler must only update existing queue records. Keep the worker backup deadline separate from purge resumption, and release locks only when the operation ID matches. The CI regression gate keeps retained cycles visible; a pass does not establish acyclicity. Do not add a new cycle baseline without documenting its path, stop condition, limits, and unresolved risk. Do not change application behavior merely to hide a graph finding.
+
 - Emulator-oriented scripts target the `santas-workshop-test` Firebase project; start with the root [`README.md`](README.md) for setup.
 - `santashop-functions` uses webpack and declares Node `24`, matching the root workspace Node `24` floor for app/tooling workflows. Check the relevant package before changing runtime-sensitive code.
 - In the Functions shell, callable functions must be invoked with a `data` wrapper such as `myFunction({ data: { ... } })`. See [`santashop-functions/FUNCTIONS_SHELL_GUIDE.md`](santashop-functions/FUNCTIONS_SHELL_GUIDE.md).

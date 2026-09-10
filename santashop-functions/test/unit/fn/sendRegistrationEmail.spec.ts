@@ -41,6 +41,208 @@ describe('sendRegistrationEmail handler', () => {
 		backgroundMock.exportDocuments.mockResolvedValue([{ name: 'op-123' }]);
 	});
 
+	const prepareQueuedEmail = (): {
+		id: string;
+		data: () => Record<string, unknown>;
+	} => {
+		const document = {
+			code: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/user-1/test-asset.png',
+			name: 'Buddy',
+			email: 'buddy.elf@example.com',
+			formattedDateTime: 'Wednesday, December 10, 6:00 PM',
+			templateKey: 'confirmation',
+			deliveryState: 'queued',
+		};
+		backgroundMock.setDocSnapshot(
+			'tmp_registrationemails/user-1',
+			document,
+		);
+		backgroundMock.setDocSnapshot(
+			'registrations/user-1',
+			activeRegistration(
+				'user-1',
+				'ABCD2345',
+				'Buddy',
+				'buddy.elf@example.com',
+			),
+		);
+		return { id: 'user-1', data: () => document };
+	};
+
+	it('ignores an old create event when its queue document was deleted', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		backgroundMock.setDocSnapshot(
+			'tmp_registrationemails/user-1',
+			{},
+			false,
+		);
+
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
+		).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').update,
+		).not.toHaveBeenCalled();
+	});
+
+	it('stops when the queue is deleted before the delivery claim', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		const queue = backgroundMock.getDocRef('tmp_registrationemails/user-1');
+		queue.get
+			.mockResolvedValueOnce({ exists: true, data: snapshot.data })
+			.mockResolvedValueOnce({ exists: false, data: () => undefined });
+
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(queue.set).not.toHaveBeenCalled();
+		expect(queue.update).not.toHaveBeenCalled();
+	});
+
+	it('stops before SES when the claimed queue is deleted during template preparation', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		const queue = backgroundMock.getDocRef('tmp_registrationemails/user-1');
+		queue.update
+			.mockResolvedValueOnce(undefined)
+			.mockRejectedValueOnce(
+				Object.assign(new Error('Queue no longer exists'), { code: 5 }),
+			);
+
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(queue.set).not.toHaveBeenCalled();
+		expect(queue.update).toHaveBeenCalledTimes(2);
+		expect(
+			backgroundMock.getDocRef('registrations/user-1').set,
+		).not.toHaveBeenCalled();
+	});
+
+	it('records an accepted send on its current registration without recreating a deleted queue', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		const queue = backgroundMock.getDocRef('tmp_registrationemails/user-1');
+		sesSendMock.mockImplementationOnce(async () => {
+			backgroundMock.setDocSnapshot(
+				'tmp_registrationemails/user-1',
+				{},
+				false,
+			);
+			queue.update.mockRejectedValue(
+				Object.assign(new Error('Queue no longer exists'), { code: 5 }),
+			);
+			return { MessageId: 'accepted-before-deletion' };
+		});
+
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
+
+		expect(sesSendMock).toHaveBeenCalledTimes(1);
+		expect(queue.set).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('registrations/user-1').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({
+				reminderEmailSentOn: expect.any(Date),
+				reminderEmailFailedOn: false,
+			}),
+			{ merge: true },
+		);
+	});
+
+	it('repairs an accepted send when the queue disappears during receipt synchronization', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		backgroundMock.setDocSnapshot('tmp_registrationemails/user-1', {
+			...snapshot.data(),
+			deliveryState: 'accepted',
+			deliveryProviderAcceptedOn: new Date(),
+			deliveryProviderMessageId: 'already-accepted',
+		});
+		const queue = backgroundMock.getDocRef('tmp_registrationemails/user-1');
+		queue.update.mockRejectedValue(
+			Object.assign(new Error('Queue no longer exists'), { code: 5 }),
+		);
+
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(queue.set).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('registrations/user-1').set,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({ reminderEmailSentOn: expect.any(Date) }),
+			{ merge: true },
+		);
+	});
+
+	it('does not suppress a NOT_FOUND error from a profile read', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		const missingProfile = Object.assign(new Error('Profile read failed'), {
+			code: 5,
+		});
+		backgroundMock
+			.getDocRef('users/user-1')
+			.get.mockRejectedValueOnce(missingProfile);
+
+		await expect(sendNewRegistrationEmails(snapshot as never)).rejects.toBe(
+			missingProfile,
+		);
+
+		expect(sesSendMock).not.toHaveBeenCalled();
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').update,
+		).toHaveBeenCalledWith(
+			expect.objectContaining({ deliveryState: 'failed' }),
+		);
+	});
+
+	it('preserves provider errors when failure recording finds a deleted queue', async () => {
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		const providerError = new Error('SES unavailable');
+		const queue = backgroundMock.getDocRef('tmp_registrationemails/user-1');
+		sesSendMock.mockImplementationOnce(async () => {
+			queue.update.mockRejectedValue(
+				Object.assign(new Error('Queue no longer exists'), { code: 5 }),
+			);
+			throw providerError;
+		});
+
+		await expect(sendNewRegistrationEmails(snapshot as never)).rejects.toBe(
+			providerError,
+		);
+
+		expect(queue.set).not.toHaveBeenCalled();
+	});
+
 	it('marks queued registration email docs as sent after a successful send', async () => {
 		const { sendNewRegistrationEmails } =
 			await loadTriggerScheduledHandlers(backgroundMock);
@@ -67,7 +269,7 @@ describe('sendRegistrationEmail handler', () => {
 			.set.mockResolvedValue(undefined);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-1')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await sendNewRegistrationEmails({
 			id: 'user-1',
@@ -83,13 +285,12 @@ describe('sendRegistrationEmail handler', () => {
 
 		expect(sesSendMock).toHaveBeenCalledTimes(1);
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'sent',
 				deliveryCompletedOn: expect.any(Date),
 			}),
-			{ merge: true },
 		);
 		expect(
 			backgroundMock.getDocRef('registrations/user-1').set,
@@ -141,10 +342,9 @@ describe('sendRegistrationEmail handler', () => {
 		expect(sesSendMock).toHaveBeenCalledTimes(1);
 		expect(
 			backgroundMock.getDocRef('tmp_registrationemails/email-request-1')
-				.set,
+				.update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({ deliveryState: 'sent' }),
-			{ merge: true },
 		);
 		expect(
 			backgroundMock.getDocRef('registrations/user-1').set,
@@ -190,14 +390,13 @@ describe('sendRegistrationEmail handler', () => {
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
 			backgroundMock.getDocRef('tmp_registrationemails/email-request-old')
-				.set,
+				.update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'superseded',
 				deliveryRequiresReviewReason:
 					expect.stringContaining('newer appointment'),
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -229,14 +428,13 @@ describe('sendRegistrationEmail handler', () => {
 
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'superseded',
 				deliveryRequiresReviewReason:
 					expect.stringContaining('confirmation code'),
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -278,14 +476,13 @@ describe('sendRegistrationEmail handler', () => {
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
 			backgroundMock.getDocRef('tmp_registrationemails/email-request-2')
-				.set,
+				.update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'superseded',
 				deliveryRequiresReviewReason:
 					expect.stringContaining('email address'),
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -395,7 +592,7 @@ describe('sendRegistrationEmail handler', () => {
 		);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-1')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await sendNewRegistrationEmails({
 			id: 'user-1',
@@ -438,7 +635,7 @@ describe('sendRegistrationEmail handler', () => {
 			.set.mockResolvedValue(undefined);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-1')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await expect(
 			sendNewRegistrationEmails({
@@ -492,7 +689,7 @@ describe('sendRegistrationEmail handler', () => {
 			.set.mockResolvedValue(undefined);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-2')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await sendNewRegistrationEmails({
 			id: 'user-2',
@@ -510,13 +707,12 @@ describe('sendRegistrationEmail handler', () => {
 
 		expect(sesSendMock).toHaveBeenCalledTimes(1);
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-2').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-2').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'queued',
 				lastErrorMessage: false,
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -555,7 +751,7 @@ describe('sendRegistrationEmail handler', () => {
 			.mockRejectedValueOnce(new Error('registration write failed'));
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-1')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await expect(
 			sendNewRegistrationEmails({
@@ -573,22 +769,20 @@ describe('sendRegistrationEmail handler', () => {
 		).rejects.toThrow('registration write failed');
 
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'accepted',
 				deliveryProviderMessageId: 'msg-123',
 			}),
-			{ merge: true },
 		);
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-1').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'sent',
 				deliveryCompletedOn: expect.any(Date),
 			}),
-			{ merge: true },
 		);
 		expect(backgroundMock.runTransaction).toHaveBeenCalledTimes(2);
 
@@ -671,7 +865,7 @@ describe('sendRegistrationEmail handler', () => {
 		);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-4')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await sendNewRegistrationEmails(
 			{
@@ -691,7 +885,7 @@ describe('sendRegistrationEmail handler', () => {
 
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-4').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-4').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryRequiresReviewOn: expect.any(Date),
@@ -699,7 +893,6 @@ describe('sendRegistrationEmail handler', () => {
 					'automatic resend was skipped',
 				),
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -728,7 +921,7 @@ describe('sendRegistrationEmail handler', () => {
 		);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-5')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 		backgroundMock
 			.getDocRef('registrations/user-5')
 			.set.mockResolvedValue(undefined);
@@ -751,13 +944,12 @@ describe('sendRegistrationEmail handler', () => {
 
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
-			backgroundMock.getDocRef('tmp_registrationemails/user-5').set,
+			backgroundMock.getDocRef('tmp_registrationemails/user-5').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'sent',
 				deliveryProviderMessageId: 'msg-accepted',
 			}),
-			{ merge: true },
 		);
 		expect(
 			backgroundMock.getDocRef('registrations/user-5').set,
@@ -832,7 +1024,7 @@ describe('sendRegistrationEmail handler', () => {
 			.set.mockResolvedValue(undefined);
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-3')
-			.set.mockResolvedValue(undefined);
+			.update.mockResolvedValue(undefined);
 
 		await sendNewRegistrationEmails({
 			id: 'user-3',

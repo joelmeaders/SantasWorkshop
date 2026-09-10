@@ -106,13 +106,12 @@ describe('isolated test email delivery', () => {
 			await import('../../../src/fn/sendRegistrationEmail');
 		await send({ id: 'message', data: () => queued } as never);
 		expect(
-			background.getDocRef('tmp_registrationemails/message').set,
+			background.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				deliveryState: 'simulated',
 				deliverySinkReceiptId: 'registration-message',
 			}),
-			{ merge: true },
 		);
 		expect(constructSes).not.toHaveBeenCalled();
 		expect(
@@ -137,7 +136,7 @@ describe('isolated test email delivery', () => {
 		} as never);
 		expect(constructSes).not.toHaveBeenCalled();
 		expect(
-			background.getDocRef('tmp_registrationemails/message').set,
+			background.getDocRef('tmp_registrationemails/message').update,
 		).not.toHaveBeenCalled();
 	});
 
@@ -287,10 +286,9 @@ describe('isolated test email delivery', () => {
 			background.getFileRef('templates/rev-1.html').download,
 		).toHaveBeenCalled();
 		expect(
-			background.getDocRef('tmp_registrationemails/message').set,
+			background.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({ deliveryState: 'simulated' }),
-			{ merge: true },
 		);
 		const { createHash } = await import('node:crypto');
 		const content = JSON.stringify({

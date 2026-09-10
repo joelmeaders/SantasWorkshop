@@ -102,7 +102,7 @@ describe('bilingual email delivery', () => {
 			expect(data).not.toHaveProperty('qrCodeUrl');
 		}
 		expect(
-			db.getDocRef('tmp_registrationemails/message').set,
+			db.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				requestedLanguage: language,
@@ -110,7 +110,6 @@ describe('bilingual email delivery', () => {
 				selectedRevisionId: 'published',
 				languageFallbackReason: false,
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -160,14 +159,13 @@ describe('bilingual email delivery', () => {
 				.dateTime,
 		).toContain('December');
 		expect(
-			db.getDocRef('tmp_registrationemails/message').set,
+			db.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
 				requestedLanguage: 'es',
 				deliveredLanguage: 'en',
 				languageFallbackReason: expect.any(String),
 			}),
-			{ merge: true },
 		);
 	});
 
@@ -198,10 +196,9 @@ describe('bilingual email delivery', () => {
 		).rejects.toThrow('published SES template');
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
-			db.getDocRef('tmp_registrationemails/message').set,
+			db.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({ deliveryState: 'failed' }),
-			{ merge: true },
 		);
 	});
 });

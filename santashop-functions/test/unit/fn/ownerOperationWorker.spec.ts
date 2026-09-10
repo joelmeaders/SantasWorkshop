@@ -14,6 +14,7 @@ describe('ownerOperationWorker yearly reset', () => {
 		counts: {},
 		progress: {},
 		stage: 'queued',
+		createdAt: new Date(),
 		...overrides,
 	});
 
@@ -66,6 +67,7 @@ describe('ownerOperationWorker yearly reset', () => {
 
 		await expect(
 			executeYearlyReset('operation-1', {
+				createdAt: new Date(),
 				operation: 'yearly-reset',
 				status: 'backing-up',
 				projectId: 'santas-workshop-test',
@@ -88,6 +90,9 @@ describe('ownerOperationWorker yearly reset', () => {
 
 	it('completes a reminder queue operation and releases its lock', async () => {
 		const adminMock = createBackgroundAdminMock();
+		adminMock.setDocSnapshot('ownerOperationLocks/queue-reminder-emails', {
+			operationId: 'operation-2',
+		});
 		const queueReminderEmailsMock = vi.fn().mockResolvedValue({
 			success: 3,
 			failed: 1,
@@ -143,6 +148,9 @@ describe('ownerOperationWorker yearly reset', () => {
 
 	it('marks a failed worker operation and still releases its lock', async () => {
 		const adminMock = createBackgroundAdminMock();
+		adminMock.setDocSnapshot('ownerOperationLocks/queue-reminder-emails', {
+			operationId: 'operation-3',
+		});
 		const queueReminderEmailsMock = vi
 			.fn()
 			.mockRejectedValue(new Error('queue unavailable'));
@@ -213,6 +221,7 @@ describe('ownerOperationWorker yearly reset', () => {
 			await import('../../../src/fn/ownerOperationWorker');
 		await expect(
 			executeYearlyReset('operation-4', {
+				createdAt: new Date(),
 				operation: 'yearly-reset',
 				status: 'queued',
 				projectId: 'santas-workshop-test',
@@ -238,6 +247,9 @@ describe('ownerOperationWorker yearly reset', () => {
 
 	it('releases an already-completed operation lock without rerunning work', async () => {
 		const adminMock = createBackgroundAdminMock();
+		adminMock.setDocSnapshot('ownerOperationLocks/queue-reminder-emails', {
+			operationId: 'done',
+		});
 		adminMock.setDocSnapshot(
 			'ownerOperations/done',
 			queuedOperation('queue-reminder-emails', { status: 'succeeded' }),
@@ -308,6 +320,7 @@ describe('ownerOperationWorker yearly reset', () => {
 			() =>
 				({
 					collection: adminMock.collection,
+					runTransaction: adminMock.runTransaction,
 					bulkWriter: () => ({ set: writerSet, close: writerClose }),
 				}) as never,
 		);
@@ -369,6 +382,7 @@ describe('ownerOperationWorker yearly reset', () => {
 			() =>
 				({
 					collection: adminMock.collection,
+					runTransaction: adminMock.runTransaction,
 					getAll: vi
 						.fn()
 						.mockResolvedValue([
@@ -437,6 +451,7 @@ describe('ownerOperationWorker yearly reset', () => {
 			() =>
 				({
 					collection: adminMock.collection,
+					runTransaction: adminMock.runTransaction,
 					bulkWriter: () => ({ set: writerSet, close: writerClose }),
 				}) as never,
 		);

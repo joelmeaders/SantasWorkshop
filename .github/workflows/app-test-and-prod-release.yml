@@ -128,6 +128,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - run: pnpm install --frozen-lockfile
+      - name: Check function call graph before validation or deployment
+        run: pnpm run functions:graph:check
       - name: Run security audit (informational)
         id: security_audit
         continue-on-error: true
@@ -223,6 +225,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - run: pnpm install --frozen-lockfile
+      - name: Check function call graph before validation or deployment
+        run: pnpm run functions:graph:check
       - name: Run security audit (informational)
         id: security_audit
         continue-on-error: true

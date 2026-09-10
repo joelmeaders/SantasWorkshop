@@ -5,9 +5,9 @@ interface MockDocRef {
 	id: string;
 	get: ReturnType<typeof vi.fn>;
 	set: ReturnType<typeof vi.fn>;
-	update: ReturnType<typeof vi.fn>;
+	update: ReturnType<typeof vi.fn<(...args: unknown[]) => unknown>>;
 	create: ReturnType<typeof vi.fn>;
-	delete: ReturnType<typeof vi.fn>;
+	delete: ReturnType<typeof vi.fn<(...args: unknown[]) => unknown>>;
 }
 
 interface MockCollectionRef {
@@ -110,6 +110,10 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 			value: Record<string, unknown>,
 		): ReturnType<MockDocRef['create']> => ref.create(value),
 	);
+	const transactionUpdate = vi.fn(
+		(ref: MockDocRef, value: Record<string, unknown>) => ref.update(value),
+	);
+	const transactionDelete = vi.fn((ref: MockDocRef) => ref.delete());
 	const runTransaction = vi.fn(
 		async (
 			callback: (transaction: {
@@ -119,6 +123,8 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 				}>;
 				create: typeof transactionCreate;
 				set: typeof transactionSet;
+				update: typeof transactionUpdate;
+				delete: typeof transactionDelete;
 			}) => Promise<void> | void,
 		) =>
 			callback({
@@ -131,6 +137,8 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 				},
 				create: transactionCreate,
 				set: transactionSet,
+				update: transactionUpdate,
+				delete: transactionDelete,
 			}),
 	);
 	const listUsers = vi.fn();
@@ -153,14 +161,16 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 
 		const created: MockFileRef = {
 			path,
-			save: vi.fn().mockImplementation(async (contents: string | Buffer) => {
-				const stringContents = Buffer.isBuffer(contents)
-					? contents.toString('utf-8')
-					: String(contents);
-				created.download.mockResolvedValue([
-					Buffer.from(stringContents, 'utf-8'),
-				]);
-			}),
+			save: vi
+				.fn()
+				.mockImplementation(async (contents: string | Buffer) => {
+					const stringContents = Buffer.isBuffer(contents)
+						? contents.toString('utf-8')
+						: String(contents);
+					created.download.mockResolvedValue([
+						Buffer.from(stringContents, 'utf-8'),
+					]);
+				}),
 			download: vi.fn().mockResolvedValue([Buffer.from('', 'utf-8')]),
 			delete: vi.fn().mockResolvedValue(undefined),
 			getMetadata: vi.fn().mockResolvedValue([

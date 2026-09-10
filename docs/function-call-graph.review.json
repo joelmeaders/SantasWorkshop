@@ -1,0 +1,195 @@
+{
+	"scope": "Map of app-to-Cloud-Function calls, Firestore-triggered calls, calls between Cloud Functions (including local reuse of an exported handler), task dispatch, and scheduled entry points in this checkout. Helper chains that lead to another function or trigger are included. This is a source review, not a live cloud audit.",
+	"clientPaths": [
+		{
+			"from": "santashop-app",
+			"to": "requestPasswordReset",
+			"via": "AuthService.resetPassword -> FunctionsWrapper.requestPasswordReset",
+			"sources": [
+				"santashop-app/src/app/home/home.page.ts:136",
+				"santashop-core/src/lib/services/auth.service.ts:187"
+			]
+		},
+		{
+			"from": "santashop-app",
+			"to": "updateEmailAddress",
+			"via": "AuthService.changeEmailAddress -> FunctionsWrapper.updateEmailAddress",
+			"sources": [
+				"santashop-app/src/app/features/pre-registration/profile/profile.page.service.ts:121",
+				"santashop-app/src/app/features/pre-registration/overview/overview.page.ts:269",
+				"santashop-core/src/lib/services/auth.service.ts:245"
+			]
+		}
+	],
+	"findings": [
+		{
+			"title": "Bounded owner backup polling",
+			"detail": "ownerOperationWorker still queues itself every 30 seconds while a yearly-reset backup is pending. The wait has a one-hour budget from the original createdAt, including queue delay. Checks run before the backup request, after its response, and before enqueueing or starting deletion. Expiry records failed / backup-timeout and acknowledges the task after lock cleanup; terminal redeliveries retry cleanup without restarting work. An external export can finish after this deadline. The purgeStartedAt marker is persisted before deletion, so partial purges resume under existing per-task retries without further backup polling. Locks are released in a transaction only when operationId matches. This is a bounded continuation cycle, not an acyclic graph. One hour is an operational policy, not a measured backup SLA; duplicate task deliveries mean it is not a strict dispatch-count limit.",
+			"sources": [
+				"santashop-functions/src/fn/ownerOperationWorker.ts:24",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:126",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:432",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:499",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:590",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:99"
+			]
+		}
+	],
+	"edges": [
+		{
+			"from": "completeRegistration",
+			"to": "publicParametersGateway",
+			"kind": "HTTPS",
+			"condition": "getPublicParameters -> cached refresh -> authenticated private gateway; deployed environments only",
+			"sources": [
+				"santashop-functions/src/fn/completeRegistration.ts:45",
+				"santashop-functions/src/utility/public-parameters.ts:110"
+			]
+		},
+		{
+			"from": "undoRegistration",
+			"to": "publicParametersGateway",
+			"kind": "HTTPS",
+			"condition": "getPublicParameters -> cached refresh -> authenticated private gateway; deployed environments only",
+			"sources": [
+				"santashop-functions/src/fn/undoRegistration.ts:65",
+				"santashop-functions/src/utility/public-parameters.ts:110"
+			]
+		},
+		{
+			"from": "setDraftAppointment",
+			"to": "publicParametersGateway",
+			"kind": "HTTPS",
+			"condition": "getPublicParameters -> cached refresh -> authenticated private gateway; deployed environments only",
+			"sources": [
+				"santashop-functions/src/fn/setDraftAppointment.ts:45",
+				"santashop-functions/src/utility/public-parameters.ts:110"
+			]
+		},
+		{
+			"from": "deleteDraftChild",
+			"to": "publicParametersGateway",
+			"kind": "HTTPS",
+			"condition": "getPublicParameters -> cached refresh -> authenticated private gateway; deployed environments only",
+			"sources": [
+				"santashop-functions/src/fn/deleteDraftChild.ts:42",
+				"santashop-functions/src/utility/public-parameters.ts:110"
+			]
+		},
+		{
+			"from": "saveDraftChild",
+			"to": "publicParametersGateway",
+			"kind": "HTTPS",
+			"condition": "getPublicParameters -> cached refresh -> authenticated private gateway; deployed environments only",
+			"sources": [
+				"santashop-functions/src/fn/saveDraftChild.ts:33",
+				"santashop-functions/src/utility/public-parameters.ts:110"
+			]
+		},
+		{
+			"from": "changeRegistrationDateTime",
+			"to": "publicParametersGateway",
+			"kind": "HTTPS",
+			"condition": "getPublicParameters -> cached refresh -> authenticated private gateway; deployed environments only",
+			"sources": [
+				"santashop-functions/src/fn/changeRegistrationDateTime.ts:69",
+				"santashop-functions/src/utility/public-parameters.ts:110"
+			]
+		},
+		{
+			"from": "completeRegistration",
+			"to": "firestore:tmp_registrationemails/{docId}",
+			"kind": "create",
+			"condition": "New queue document for confirmation or resend",
+			"sources": [
+				"santashop-functions/src/fn/completeRegistration.ts:182"
+			]
+		},
+		{
+			"from": "changeRegistrationDateTime",
+			"to": "firestore:tmp_registrationemails/{docId}",
+			"kind": "create",
+			"condition": "New queue document for confirmation or resend",
+			"sources": [
+				"santashop-functions/src/fn/changeRegistrationDateTime.ts:173"
+			]
+		},
+		{
+			"from": "undoRegistration",
+			"to": "firestore:tmp_registrationemails/{docId}",
+			"kind": "create",
+			"condition": "Cancellation email, when contact information is present",
+			"sources": ["santashop-functions/src/fn/undoRegistration.ts:172"]
+		},
+		{
+			"from": "callableAdminPreRegister",
+			"to": "firestore:tmp_registrationemails/{docId}",
+			"kind": "create",
+			"condition": "New queue document for confirmation or resend",
+			"sources": [
+				"santashop-functions/src/fn/callableAdminPreRegister.ts:122",
+				"santashop-functions/src/fn/callableAdminPreRegister.ts:161"
+			]
+		},
+		{
+			"from": "callableResendRegistrationEmail",
+			"to": "firestore:tmp_registrationemails/{docId}",
+			"kind": "create",
+			"condition": "New queue document for confirmation or resend",
+			"sources": [
+				"santashop-functions/src/fn/callableResendRegistrationEmail.ts:90"
+			]
+		},
+		{
+			"from": "callableStartOwnerOperation",
+			"to": "ownerOperationWorker",
+			"kind": "task",
+			"condition": "Start an authorized owner operation; enqueue a Cloud Task",
+			"sources": ["santashop-functions/src/fn/ownerOperations.ts:626"]
+		},
+		{
+			"from": "ownerOperationWorker",
+			"to": "ownerOperationWorker",
+			"kind": "task-continuation",
+			"condition": "Yearly-reset backup polling only, within one hour of createdAt and before purgeStartedAt; next task delayed 30 seconds",
+			"sources": [
+				"santashop-functions/src/fn/ownerOperationWorker.ts:91",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:469",
+				"santashop-functions/src/fn/ownerOperationWorker.ts:488"
+			]
+		},
+		{
+			"from": "ownerOperationWorker",
+			"to": "firestore:tmp_registrationemails/{docId}",
+			"kind": "create",
+			"condition": "queue-reminder-emails -> local executeReminderQueue -> queueReminderEmails -> queueReminderEmailRecords",
+			"sources": [
+				"santashop-functions/src/fn/ownerOperationWorker.ts:175",
+				"santashop-functions/src/fn/queueReminderEmails.ts:147"
+			]
+		},
+		{
+			"from": "publishPublicParametersSettings",
+			"to": "readPublicParametersSettings",
+			"kind": "local-handler",
+			"condition": "Emulator branch calls the read handler implementation directly after writing _testConfig/publicParameters; no network invocation",
+			"sources": [
+				"santashop-functions/src/fn/publicParametersSettings.ts:101"
+			]
+		}
+	],
+	"knownCycles": [
+		"ownerOperationWorker --task-continuation--> ownerOperationWorker"
+	],
+	"notes": [
+		"The source has one Firestore trigger: onDocumentCreated on tmp_registrationemails/{docId}. There are no registration, user, check-in, dateTimeSlots, or stats Firestore triggers in index.ts. Writes to those collections do not, by themselves, invoke a function in this source graph. Changing this to an update/write trigger would make the email feedback path much broader.",
+		"scheduledDateTimeSlotCounters calls the local reconcileAppointmentCounters handler: it reads registrations/dateTimeSlots, updates slot counters, and writes stats/schedule-{year}. scheduledRegistrationStats reads submitted registrations and writes stats/registration-{year}. scheduledUserStats reads users and writes stats/user-{year}. scheduledCheckInStats reads pending checkins, marks processed records, and updates stats/checkin-{year}. scheduledFirestoreBackup starts a Firestore export to Cloud Storage. None calls another deployed function in the reviewed source.",
+		"Reminder email queueing is an owner task operation, not a sixth scheduler. The worker also calls local ownerOperations helpers (season guard and marketing-export check); these helpers do not enqueue work. Importing that module does not mean the worker calls startOwnerOperation.",
+		"The six registration/draft callables use the private publicParametersGateway through a cache refresh. The gateway reads Remote Config and calls parsing/deadline helpers; it does not call getPublicParameters or fetchPublicParametersFromGateway. The shared module imports do not establish a gateway self-call. Customer and admin Remote Config polling goes to the Firebase service, not this private Cloud Function.",
+		"The publicParametersSettings publish handler calls the read implementation only in the emulator branch. This is local function reuse, not a callable request. The complete inventory below also lists each exported function-to-handler-module path.",
+		"emailIsolationProbe is a private operator HTTP endpoint. It has no app caller and probes external AWS email connectivity. requestPasswordReset and callableSendTestEmailTemplate send mail directly through local helpers; they do not queue registration emails or call the registration trigger. Auth, Storage, SES, Remote Config, and Firestore export APIs are external sinks in this function graph.",
+		"The email handler only updates existing queue records. Missing records stop processing; transaction.update cannot create a new record. After SES acceptance, provider logging and guarded registration status updates survive queue deletion without recreating it. Updating a queue record does not fire its creation trigger, so the former email recreation edge is absent.",
+		"Before deploying this marker-based timeout over an older revision, inspect active yearly resets. An older partially completed purge has no purgeStartedAt marker and cannot safely be classified using stage or completed progress alone. Do not deploy across an active legacy reset without resolving its state. Missing or malformed createdAt values fail without starting an export or extending the budget. Seasonal and backup prerequisites remain in force.",
+		"Emulator-only test handlers are QA entry points except testReadPublicParameters, which both app bootstraps use locally. Map generation and cycle checks never invoke handlers or modify cloud data."
+	]
+}

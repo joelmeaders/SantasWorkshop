@@ -14,6 +14,10 @@ Functions deployment runs through GitHub Actions and its predeploy guard.
 
 ## Validation
 
+Read the [function call map](../docs/function-call-map.md) when changing call paths, helper code, queue writes, triggers, or schedules. Run `pnpm run functions:graph:test` and `pnpm run functions:graph:check` from the workspace root. Review changed paths and update the semantic edges before recording the review with `pnpm run functions:graph:update`. Source hashes make unreviewed changes fail CI.
+
+`pnpm run functions:cycles` is the strict check. It reports the retained owner-worker continuation, which has a one-hour backup wait budget from the operation creation time. A persisted purge marker keeps retries of partial resets separate from this deadline. The email handler updates existing queue records and does not recreate deleted records. CI checks for regressions; it does not certify that the graph is acyclic. Before deploying over an older revision, inspect active yearly resets that may lack the new purge marker; see the [call map](../docs/function-call-map.md).
+
 ```text
 pnpm --filter @santashop/functions lint
 pnpm --filter @santashop/functions test:unit

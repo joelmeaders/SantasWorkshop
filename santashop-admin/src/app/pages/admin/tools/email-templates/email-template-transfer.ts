@@ -42,7 +42,15 @@ export const parseTemplatePackage = (
 ): SaveEmailTemplateRevisionRequest => {
 	if (new TextEncoder().encode(content).length > MAX_TEMPLATE_FILE_BYTES)
 		throw new Error('Template files must not exceed 1 MB.');
-	const envelope = record(JSON.parse(content));
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(content);
+	} catch {
+		throw new Error(
+			'The template could not be read. Expected a JSON template file. Reload the page and try again, or check the imported file.',
+		);
+	}
+	const envelope = record(parsed);
 	if (
 		envelope['format'] !== 'santashop-email-template' ||
 		envelope['version'] !== 1

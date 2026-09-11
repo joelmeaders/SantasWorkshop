@@ -30,6 +30,15 @@ const draft: SaveEmailTemplateRevisionRequest = {
 };
 
 describe('email template file transfer', () => {
+	it.each(['<!doctype html><html><body>Admin app</body></html>', '{'])(
+		'reports unreadable JSON without exposing a parser error',
+		(content) => {
+			expect(() => parseTemplatePackage(content)).toThrow(
+				'Expected a JSON template file.',
+			);
+		},
+	);
+
 	it.each([starter0, starter1, starter2, starter3, starter4, starter5])(
 		'accepts and round trips the bundled starter $template.key',
 		(starter) => {

@@ -255,6 +255,13 @@ describe('EmailTemplateEditorPage', () => {
 
 	it('publishes the selected revision and marks it as current', async () => {
 		await component.ionViewWillEnter();
+		const alerts = TestBed.inject(
+			AlertController,
+		) as Mocked<AlertController>;
+		alerts.create.mockResolvedValueOnce({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+		} as unknown as HTMLIonAlertElement);
 		const template = {
 			...requireDefined(component.currentTemplate()),
 			publishedRevisionId: 'rev-1',
@@ -272,8 +279,69 @@ describe('EmailTemplateEditorPage', () => {
 			key: 'registration-confirmation',
 			revisionId: 'rev-1',
 		});
+		expect(
+			emailTemplateService.publishEmailTemplate,
+		).toHaveBeenCalledOnce();
 		expect(component.currentTemplate()?.publishedRevisionId).toBe('rev-1');
 	});
+
+	it.each([
+		['en', 'English'],
+		['es', 'Spanish'],
+	] as const)(
+		'explains customer delivery in %s and waits for approval before publishing',
+		async (language, languageLabel) => {
+			const detail = await emailTemplateService.getEmailTemplate(
+				'registration-confirmation',
+			);
+			emailTemplateService.getEmailTemplate.mockResolvedValue({
+				...detail,
+				template: { ...detail.template, language },
+			});
+			await component.ionViewWillEnter();
+			const alerts = TestBed.inject(
+				AlertController,
+			) as Mocked<AlertController>;
+			let dismiss!: (result: { role: string }) => void;
+			const confirmation = {
+				present: vi.fn().mockResolvedValue(undefined),
+				onDidDismiss: vi.fn().mockReturnValue(
+					new Promise<{ role: string }>((resolve) => {
+						dismiss = resolve;
+					}),
+				),
+			};
+			alerts.create.mockResolvedValueOnce(
+				confirmation as unknown as HTMLIonAlertElement,
+			);
+			const publish = component.publishTemplate();
+			await vi.waitFor(() =>
+				expect(confirmation.present).toHaveBeenCalled(),
+			);
+			expect(
+				emailTemplateService.publishEmailTemplate,
+			).not.toHaveBeenCalled();
+			expect(alerts.create).toHaveBeenCalledWith(
+				expect.objectContaining({
+					header: 'Publish and activate template?',
+					subHeader: `Registration confirmation · ${languageLabel}`,
+					message: expect.stringContaining(
+						`active for all registration confirmation messages in ${languageLabel}`,
+					),
+					buttons: [
+						{ text: 'Cancel', role: 'cancel' },
+						{ text: 'Publish and activate', role: 'confirm' },
+					],
+				}),
+			);
+			expect(confirmation.onDidDismiss).toHaveBeenCalledOnce();
+			dismiss({ role: 'cancel' });
+			await publish;
+			expect(
+				emailTemplateService.publishEmailTemplate,
+			).not.toHaveBeenCalled();
+		},
+	);
 
 	it('marks validation failures before attempting to send or save', async () => {
 		await component.sendTestEmail();
@@ -322,10 +390,14 @@ describe('EmailTemplateEditorPage', () => {
 		emailTemplateService.publishEmailTemplate.mockRejectedValueOnce(
 			new Error('SES unavailable'),
 		);
-		await component.publishTemplate();
 		const alerts = TestBed.inject(
 			AlertController,
 		) as Mocked<AlertController>;
+		alerts.create.mockResolvedValueOnce({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+		} as unknown as HTMLIonAlertElement);
+		await component.publishTemplate();
 		expect(alerts.create).toHaveBeenCalledWith(
 			expect.objectContaining({
 				header: 'Something went wrong',

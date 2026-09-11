@@ -437,7 +437,35 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			return;
 		}
 		const key = this.form.controls['key'].value;
-		if (!key) {
+		const revisionId = this.selectedRevisionId();
+		const profileLabel = this.deliveryProfileOptions.find(
+			(option) =>
+				option.value === this.form.controls['deliveryProfile'].value,
+		)?.label;
+		if (!key || !revisionId || !profileLabel) {
+			return;
+		}
+
+		const language =
+			this.form.controls['language'].value === 'es'
+				? 'Spanish'
+				: 'English';
+		const fallbackNotice =
+			language === 'English'
+				? ' Spanish messages also use this template when no Spanish template is published.'
+				: '';
+		const confirmation = await this.alerts.create({
+			header: 'Publish and activate template?',
+			subHeader: `${profileLabel} · ${language}`,
+			message: `Publishing makes this template active for all ${profileLabel.toLowerCase()} messages in ${language}. It replaces the template currently used for those messages.${fallbackNotice}`,
+			buttons: [
+				{ text: 'Cancel', role: 'cancel' },
+				{ text: 'Publish and activate', role: 'confirm' },
+			],
+		});
+		await confirmation.present();
+		const confirmationResult = await confirmation.onDidDismiss();
+		if (confirmationResult.role !== 'confirm') {
 			return;
 		}
 
@@ -446,7 +474,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			const result = await this.emailTemplateService.publishEmailTemplate(
 				{
 					key,
-					revisionId: this.selectedRevisionId(),
+					revisionId,
 				},
 			);
 			this.currentTemplate.set(result.template);

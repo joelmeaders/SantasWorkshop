@@ -11,18 +11,11 @@ on:
       release_ref:
         required: true
         type: string
-      skip_tests:
-        type: boolean
-        default: false
-      evidence_run_ids:
-        type: string
-        default: ''
-      production_approval:
-        type: string
-        default: ''
     outputs:
       sha:
         value: ${{ jobs.verify.outputs.sha }}
+      reuse_tests:
+        value: ${{ jobs.verify.outputs.reuse_tests }}
 permissions:
   contents: read
   actions: read
@@ -31,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.verify.outputs.sha }}
+      reuse_tests: ${{ steps.verify.outputs.reuse_tests }}
     steps:
       # This is workflow source, never the unchecked release_ref.
       - uses: actions/checkout@v7
@@ -44,12 +38,9 @@ jobs:
         id: verify
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          RELEASE_SHA: ${{ inputs.release_ref }}
+          RELEASE_REF: ${{ inputs.release_ref }}
           RELEASE_UNIT: ${{ inputs.target }}
           RELEASE_MODE: ${{ inputs.mode }}
-          SKIP_TESTS: ${{ inputs.skip_tests }}
-          EVIDENCE_RUN_IDS: ${{ inputs.evidence_run_ids }}
-          PRODUCTION_APPROVAL: ${{ inputs.production_approval }}
           RELEASE_WORKFLOW_REF: ${{ github.workflow_ref }}
           RELEASE_ACTOR: ${{ github.triggering_actor }}
         run: node scripts/release-evidence.mjs

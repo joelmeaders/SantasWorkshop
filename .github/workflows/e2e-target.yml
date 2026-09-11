@@ -1,0 +1,82 @@
+name: Isolated browser suite
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+      release_ref:
+        required: true
+        type: string
+permissions:
+  contents: read
+# No deployment secrets are accepted or inherited by this workflow.
+env:
+  LOCAL_AWS_ACCESS_KEY_ID: e2e-not-used
+  LOCAL_AWS_SECRET_ACCESS_KEY: e2e-not-used
+  LOCAL_FIRESTORE_BACKUP_BUCKET: gs://demo-santashop-backups
+  LOCAL_REGISTRATION_EMAIL_RETURN_PATH: admin@example.invalid
+  LOCAL_REGISTRATION_EMAIL_SOURCE: no-reply@example.invalid
+  LOCAL_REMINDER_EMAIL_SENDING_STALE_MINUTES: '15'
+  LOCAL_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
+  LOCAL_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop E2E
+  LOCAL_SANTASHOP_PASSWORD_RESET_CONTINUE_URL: http://localhost:4100/?mode=sign-in
+  LOCAL_SANTASHOP_EVENT_MIN_INSTANCES: '0'
+  LOCAL_SANTASHOP_PROGRAM_YEAR: '2026'
+  LOCAL_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+  LOCAL_SANTASHOP_SIGNUP_MIN_INSTANCES: '0'
+  LOCAL_SANTASHOP_TIME_ZONE: America/Denver
+  LOCAL_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
+  LOCAL_SCHEDULED_DATETIME_SLOT_COUNTERS: '*/5 * * 11,12 *'
+  LOCAL_SCHEDULED_FIRESTORE_BACKUP: 0 0 * 11,12 *
+  LOCAL_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
+  LOCAL_SCHEDULED_USER_STATS: 55 23 * 11,12 *
+  LOCAL_SES_REGION: us-west-2
+  E2E_TARGET: ${{ inputs.target }}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.release_ref }}
+          persist-credentials: false
+      - name: Capture checkout revision before candidate code
+        id: revision
+        env:
+          EXPECTED_SHA: ${{ inputs.release_ref }}
+        run: |
+          actual=$(git rev-parse HEAD)
+          test "$actual" = "$EXPECTED_SHA"
+          echo "sha=$actual" >> "$GITHUB_OUTPUT"
+      - name: Release revision ${{ steps.revision.outputs.sha }}
+        run: echo 'Checkout revision recorded before candidate execution'
+      - name: Validate browser target
+        run: |
+          case "$E2E_TARGET" in app|admin) ;; *) exit 1 ;; esac
+      - uses: pnpm/action-setup@v6
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.18.0'
+          cache: pnpm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run e2e:browser:setup:ci
+      - name: Customer or staff E2E tests
+        run: pnpm run "e2e:test:$E2E_TARGET"
+      - name: Upload E2E failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-${{ inputs.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            santashop-e2e/test-results
+            santashop-e2e/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7

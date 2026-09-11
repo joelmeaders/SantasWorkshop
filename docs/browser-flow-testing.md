@@ -49,7 +49,8 @@ For deployed CLI operations, always pass an explicit project. `pnpm exec firebas
 Use the [E2E guide](testing/e2e.md) for supported commands, exact ports, generated
 configuration, targeted specs, fixture APIs, and browser assertions. Read the
 `santashop-e2e-testing` skill before integrated emulator testing. Customer and
-admin suites share port/state and must run sequentially.
+admin suites share port/state on one machine and must run sequentially there.
+Parallel CI targets use separate runners and emulator instances.
 
 **The callable readiness command clears emulator fixtures. Run it before
 seeding, never during a journey or against a deployed site.** Do not point the

@@ -1,4 +1,4 @@
-name: UI PR Validation
+name: PR Validation
 on:
   pull_request:
     paths:
@@ -45,17 +45,34 @@ on:
       - 'tsconfig.json'
       - 'storybook-visual/**'
       - 'scripts/verify-hosting-cache.mjs'
+      - 'santashop-functions/**'
+      - 'scripts/email-sending.cjs'
+      - 'scripts/load/**'
+      - 'santashop-e2e/**'
+      - 'firestore.indexes.json'
+      - 'database.rules.json'
+      - '.env.example'
+      - 'config.functions.cjs'
+      - 'scripts/assert-functions-deploy-ci.cjs'
+      - 'scripts/prepare-functions-deploy.cjs'
+      - 'scripts/verify-functions-parity.cjs'
+      - 'scripts/verify-functions-managed-resources.cjs'
+      - '.github/workflows/functions-pr-validation.yml'
+      - '.github/workflows/functions-test-and-prod-release.yml'
+      - '.github/workflows/e2e-target.yml'
+      - 'scripts/ci-workflows.test.mjs'
 
 permissions:
   contents: read
 concurrency:
-  group: ui-pr-${{ github.event.pull_request.number }}
+  group: pr-validation-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 jobs:
   targets:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
+      functions: ${{ steps.select.outputs.functions }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -66,8 +83,11 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -o pipefail
-          matrix=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | node scripts/ui-targets.mjs)
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/pr-paths"
+          matrix=$(node scripts/ui-targets.mjs < "$RUNNER_TEMP/pr-paths")
+          functions=$(node scripts/ui-targets.mjs --functions < "$RUNNER_TEMP/pr-paths")
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "functions=$functions" >> "$GITHUB_OUTPUT"
   shared:
     runs-on: ubuntu-latest
     env:
@@ -83,7 +103,7 @@ jobs:
           node-version: '24.18.0'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node --test scripts/ui-targets.test.mjs scripts/release-*.test.mjs
+      - run: node --test scripts/ui-targets.test.mjs scripts/ci-workflows.test.mjs scripts/release-*.test.mjs
       - name: Test secret synchronization without credentials or network writes
         shell: pwsh
         run: ./scripts/github-secrets.test.ps1
@@ -103,13 +123,37 @@ jobs:
       shared_tests: false
     secrets:
       TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+  functions:
+    needs: targets
+    if: needs.targets.outputs.functions == 'true'
+    uses: ./.github/workflows/functions-pr-validation.yml
+  e2e:
+    needs: [targets, shared, ui, functions]
+    if: >-
+      always() && !cancelled() && needs.targets.result == 'success' &&
+      needs.shared.result == 'success' && needs.ui.result == 'success' &&
+      ((needs.targets.outputs.functions == 'true' && needs.functions.result == 'success') ||
+       (needs.targets.outputs.functions == 'false' && needs.functions.result == 'skipped'))
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
+    uses: ./.github/workflows/e2e-target.yml
+    with:
+      target: ${{ matrix.target }}
+      release_ref: ${{ github.sha }}
   build_validation:
     if: always()
-    needs: [targets, shared, ui]
+    needs: [targets, shared, ui, functions, e2e]
     runs-on: ubuntu-latest
     steps:
-      - name: Require every selected UI and shared check
+      - name: Require every selected PR check
         run: |
           test '${{ needs.targets.result }}' = success
           test '${{ needs.shared.result }}' = success
           test '${{ needs.ui.result }}' = success
+          test '${{ needs.e2e.result }}' = success
+          case '${{ needs.targets.outputs.functions }}' in
+            true) test '${{ needs.functions.result }}' = success ;;
+            false) test '${{ needs.functions.result }}' = skipped ;;
+            *) exit 1 ;;
+          esac

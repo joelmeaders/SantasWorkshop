@@ -15,6 +15,10 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Changed
 
+- Resolve selected releases to immutable commits and automatically verify production evidence, removing manual run IDs, repeated commit approval, and test-skip inputs.
+- Run each selected PR browser suite once, on separate customer and staff runners, after unit and build checks. Cancel obsolete validation runs including Functions checks.
+- Require both isolated browser suites before Functions test deployment and verify each suite's exact-commit evidence during release reuse.
+- Keep app-only validation scoped when a change also updates known documentation or the root changelog.
 - Advance the workspace and both applications to `2026.09.0-beta.4`.
 - Restore SES credentials and ordinary networking for normal test deployments, and restore the seasonal appointment-counter schedule.
 - Deploy the isolation probe only in load-test mode and consolidate load procedures and runtime support under `scripts/load`.

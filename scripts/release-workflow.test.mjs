@@ -20,7 +20,13 @@ const readWorkflow = (path) => load(readFileSync(path, 'utf8'));
 // status conditions, reusable workflows, and step environments. Run the real
 // verifier. Replace external actions/build/deploy commands with trace entries
 // and a harmless child-process sentinel. Never pass process.env or credentials.
-async function dryRun(unit, inputs, api, mutate = () => {}) {
+async function dryRun(
+	unit,
+	inputs,
+	api,
+	mutate = () => {},
+	failCommand = () => false,
+) {
 	const trace = {
 		commands: [],
 		deployments: [],
@@ -140,11 +146,30 @@ async function dryRun(unit, inputs, api, mutate = () => {}) {
 			}
 			if (job.uses) {
 				mapValues(job.secrets, context);
-				results[id] = await run(
-					job.uses,
-					mapValues(job.with, context),
-					`${prefix}${id} / `,
-				);
+				const branches = [];
+				for (const target of job.strategy?.matrix?.target ?? [
+					undefined,
+				]) {
+					context.matrix = { target };
+					branches.push(
+						await run(
+							job.uses,
+							mapValues(job.with, context),
+							`${prefix}${id}${target ? ` (${target})` : ''} / `,
+						),
+					);
+				}
+				results[id] =
+					branches.length === 1
+						? branches[0]
+						: {
+								result: branches.every(
+									({ result }) => result === 'success',
+								)
+									? 'success'
+									: 'failure',
+								outputs: {},
+							};
 				continue;
 			}
 			successful = true;
@@ -161,6 +186,10 @@ async function dryRun(unit, inputs, api, mutate = () => {}) {
 				if (!permitted(step.if, context, successful)) continue;
 				const env = { ...context.env, ...mapValues(step.env, context) };
 				try {
+					if (step.run && failCommand(step, env, `${prefix}${id}`))
+						throw new Error(
+							`Command failed: ${step.name ?? step.run}`,
+						);
 					if (step.uses?.startsWith('actions/checkout@'))
 						trace.checkouts.push({
 							job: `${prefix}${id}`,
@@ -176,20 +205,21 @@ async function dryRun(unit, inputs, api, mutate = () => {}) {
 					if (step.run === 'node scripts/release-evidence.mjs') {
 						const result = await verifyRelease(
 							{
-								sha: env.RELEASE_SHA,
+								releaseRef: env.RELEASE_REF,
 								unit: env.RELEASE_UNIT,
 								mode: env.RELEASE_MODE,
-								skipTests: env.SKIP_TESTS,
+
 								repository,
 								workflowRef: env.RELEASE_WORKFLOW_REF,
 								actor: env.RELEASE_ACTOR,
-								approval: env.PRODUCTION_APPROVAL,
-								runIds: env.EVIDENCE_RUN_IDS,
 							},
 							api,
 						);
 						context.steps[step.id] = {
-							outputs: { sha: result.sha },
+							outputs: {
+								sha: result.sha,
+								reuse_tests: String(result.reuse),
+							},
 						};
 					} else if (
 						step.uses?.startsWith(
@@ -252,9 +282,7 @@ for (const unit of ['app', 'admin', 'functions']) {
 	const selected = (f, overrides = {}) => ({
 		deployment_target: 'prod',
 		release_ref: releaseSha,
-		skip_tests: true,
-		production_approval: releaseSha,
-		evidence_run_ids: f.options.runIds,
+
 		load_test_mode: false,
 		...overrides,
 	});
@@ -262,7 +290,7 @@ for (const unit of ['app', 'admin', 'functions']) {
 		[
 			'missing evidence',
 			(f) => {
-				f.options.runIds = '';
+				f.runs.length = 0;
 			},
 		],
 		[
@@ -287,7 +315,7 @@ for (const unit of ['app', 'admin', 'functions']) {
 			},
 		],
 	])
-		test(`${unit} workflow: ${name} blocks all production execution with skip_tests=true`, async () => {
+		test(`${unit} workflow: ${name} blocks all production execution without manually supplied evidence`, async () => {
 			const f = fixture(unit);
 			invalidate(f);
 			const trace = await dryRun(unit, selected(f), f.api);
@@ -299,7 +327,7 @@ for (const unit of ['app', 'admin', 'functions']) {
 				[workflowSha],
 			);
 		});
-	test(`${unit} workflow: verified reuse reaches sentinel with immutable SHA and no suite rerun`, async () => {
+	test(`${unit} workflow: automatic verified reuse reaches sentinel with immutable SHA and no suite rerun`, async () => {
 		const f = fixture(unit);
 		const trace = await dryRun(unit, selected(f), f.api);
 		assert.deepEqual(trace.errors, []);
@@ -325,8 +353,6 @@ for (const unit of ['app', 'admin', 'functions']) {
 			unit,
 			selected(f, {
 				deployment_target: 'test',
-				skip_tests: false,
-				evidence_run_ids: '',
 			}),
 			f.api,
 		);
@@ -350,14 +376,13 @@ for (const unit of ['app', 'admin', 'functions']) {
 
 test('workflow mutation witness: removing production dependency reaches sentinel after rejected evidence', async () => {
 	const f = fixture();
+	f.runs.length = 0;
 	const trace = await dryRun(
 		'functions',
 		{
 			deployment_target: 'prod',
 			release_ref: releaseSha,
-			skip_tests: true,
-			production_approval: releaseSha,
-			evidence_run_ids: '',
+
 			load_test_mode: false,
 		},
 		f.api,
@@ -383,3 +408,102 @@ test('workflow mutation witness: removing production dependency reaches sentinel
 		{ target: 'santas-workshop-193b5', output: 'deployment-sentinel' },
 	]);
 });
+
+for (const unit of ['app', 'admin', 'functions']) {
+	test(`${unit} dispatch needs no manual evidence or repeated approval fields`, () => {
+		const workflow = readWorkflow(
+			`.github/workflows/${unit}-test-and-prod-release.yml`,
+		);
+		assert.deepEqual(
+			Object.keys(workflow.on.workflow_dispatch.inputs).sort(),
+			(unit === 'functions'
+				? ['deployment_target', 'load_test_mode', 'release_ref']
+				: ['deployment_target', 'release_ref']
+			).sort(),
+		);
+	});
+	test(`${unit} selected tag is resolved before any candidate checkout`, async () => {
+		const f = fixture(unit);
+		const trace = await dryRun(
+			unit,
+			{ deployment_target: 'prod', release_ref: 'release/2026.09' },
+			async (path) =>
+				path === 'commits/release%2F2026.09'
+					? { sha: releaseSha }
+					: f.api(path),
+		);
+		assert.deepEqual(trace.errors, []);
+		assert.ok(
+			trace.checkouts
+				.filter(({ job }) => !job.includes('verify'))
+				.every(({ ref }) => ref === releaseSha),
+		);
+		assert.equal(trace.deployments.length, 1);
+	});
+}
+
+for (const target of ['app', 'admin'])
+	test(`Functions test deployment is blocked when ${target} E2E fails`, async () => {
+		const f = fixture();
+		const trace = await dryRun(
+			'functions',
+			{
+				deployment_target: 'test',
+				release_ref: releaseSha,
+			},
+			f.api,
+			() => {},
+			(step, env) =>
+				step.name === 'Customer or staff E2E tests' &&
+				env.E2E_TARGET === target,
+		);
+		assert.ok(
+			trace.errors.some((error) =>
+				error.includes('Customer or staff E2E tests'),
+			),
+		);
+		assert.deepEqual(trace.deployments, []);
+	});
+
+test('Functions test deployment is blocked when the browser matrix is skipped', async () => {
+	const f = fixture();
+	const trace = await dryRun(
+		'functions',
+		{
+			deployment_target: 'test',
+			release_ref: releaseSha,
+		},
+		f.api,
+		(path, workflow) => {
+			if (path.endsWith('functions-test-and-prod-release.yml'))
+				workflow.jobs.e2e.if = 'false';
+		},
+	);
+	assert.deepEqual(trace.errors, []);
+	assert.deepEqual(trace.deployments, []);
+});
+
+for (const target of ['app', 'admin'])
+	test(`${target} release runs unit and build checks before E2E`, async () => {
+		const f = fixture(target);
+		const trace = await dryRun(
+			target,
+			{
+				deployment_target: 'test',
+				release_ref: releaseSha,
+			},
+			f.api,
+		);
+		assert.deepEqual(trace.errors, []);
+		const e2e = trace.commands.findIndex(
+			({ name }) => name === 'Customer or staff E2E tests',
+		);
+		const unit = trace.commands.findIndex(
+			({ name }) =>
+				name === 'Run target unit tests with prepared shared libraries',
+		);
+		const build = trace.commands.findIndex(
+			({ run }) => run === 'pnpm run "ci:$UI_TARGET:build:$UI_MODE"',
+		);
+		assert.ok(unit >= 0 && unit < build && build < e2e);
+	});

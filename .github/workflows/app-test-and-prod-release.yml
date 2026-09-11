@@ -41,7 +41,7 @@ name: App Test Deploy and Manual Prod Release
   workflow_dispatch:
     inputs:
       release_ref:
-        description: Full 40-character commit SHA on master
+        description: Release tag, branch, or commit to deploy (must be on master)
         required: true
         type: string
       deployment_target:
@@ -52,19 +52,6 @@ name: App Test Deploy and Manual Prod Release
         options:
         - test
         - prod
-      skip_tests:
-        description: Reuse verified exact-SHA tests without rerunning suites
-        required: true
-        default: false
-        type: boolean
-      evidence_run_ids:
-        description: Comma-separated successful validation and test-deployment run IDs
-        type: string
-        default: ''
-      production_approval:
-        description: Owner approval - repeat the full SHA to approve these evidence runs for production
-        type: string
-        default: ''
 
 permissions:
   contents: read
@@ -77,9 +64,6 @@ jobs:
       target: app
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
       release_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
-      skip_tests: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || false }}
-      evidence_run_ids: ${{ inputs.evidence_run_ids || '' }}
-      production_approval: ${{ inputs.production_approval || '' }}
 
   release:
     needs: prepare_release
@@ -89,7 +73,7 @@ jobs:
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
       release_ref: ${{ needs.prepare_release.outputs.sha }}
       deploy: true
-      skip_tests: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || false }}
+      reuse_tests: ${{ needs.prepare_release.outputs.reuse_tests == 'true' }}
     secrets:
       TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
       PROD_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}

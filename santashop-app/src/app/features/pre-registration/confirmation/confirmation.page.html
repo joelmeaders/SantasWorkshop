@@ -53,8 +53,7 @@
 								<ion-button
 									id="eventInformationButton"
 									color="xmasred"
-									[routerLink]="['/pre-registration/confirmation']"
-									fragment="event-information"
+									(click)="showEventInformation()"
 								>
 									{{ "CONFIRMATION.EVENT_INFORMATION" |
 									translate }}
@@ -215,6 +214,7 @@
 							</ion-list>
 
 							<section
+								#eventInformation
 								id="event-information"
 								class="event-information ion-text-start ion-padding"
 								tabindex="-1"

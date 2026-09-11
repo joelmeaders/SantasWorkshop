@@ -17,63 +17,96 @@
 							[attr.aria-label]="'COMMON.GO_BACK' | translate"
 							(click)="close()"
 						>
-							<ion-icon slot="start"
+							<ion-icon
+								slot="start"
 								name="arrow-back-sharp"
 								aria-hidden="true"
-							 />
-							<ion-label>{{ 'COMMON.GO_BACK' | translate }}</ion-label>
+							/>
+							<ion-label
+								>{{ 'COMMON.GO_BACK' | translate }}</ion-label
+							>
 						</ion-button>
 
 						<ion-card>
 							<ion-card-header>
-								<ion-item
-									class="inset-ion-item-title"
-									color="white"
-								>
-									<ion-card-title lines="full">
-										{{ "HELP.TITLE" | translate }}
-									</ion-card-title>
-								</ion-item>
+								<h1>{{ 'HELP.TITLE' | translate }}</h1>
 							</ion-card-header>
-							<ion-card-content>
-								<div class="ion-padding">
-									{{ "HELP.VISIT_TEXT" | translate }}
-								</div>
-
-								<div
-									class="ion-padding ion-text-center es-mg-bottom-xxl"
+							<ion-card-content class="help-content">
+								<section aria-labelledby="help-guide-heading">
+									<h2 id="help-guide-heading">
+										{{ 'HELP.GUIDE_TITLE' | translate }}
+									</h2>
+									<p>{{ 'HELP.GUIDE_INTRO' | translate }}</p>
+									<ol class="help-steps">
+										<li>
+											<h3>
+												{{ 'HELP.ACCOUNT_TITLE' |
+												translate }}
+											</h3>
+											<p>
+												{{ 'HELP.ACCOUNT_TEXT' |
+												translate }}
+											</p>
+										</li>
+										<li>
+											<h3>
+												{{ 'HELP.CHILDREN_TITLE' |
+												translate }}
+											</h3>
+											<p>
+												{{ 'HELP.CHILDREN_TEXT' |
+												translate }}
+											</p>
+										</li>
+										<li>
+											<h3>
+												{{ 'HELP.APPOINTMENT_TITLE' |
+												translate }}
+											</h3>
+											<p>
+												{{ 'HELP.APPOINTMENT_TEXT' |
+												translate }}
+											</p>
+										</li>
+										<li>
+											<h3>
+												{{ 'HELP.REVIEW_TITLE' |
+												translate }}
+											</h3>
+											<p>
+												{{ 'HELP.REVIEW_TEXT' |
+												translate }}
+											</p>
+										</li>
+										<li>
+											<h3>
+												{{ 'HELP.TICKET_TITLE' |
+												translate }}
+											</h3>
+											<p>
+												{{ 'HELP.TICKET_TEXT' |
+												translate }}
+											</p>
+										</li>
+									</ol>
+								</section>
+								<section
+									class="help-contact"
+									aria-labelledby="help-contact-heading"
 								>
+									<h2 id="help-contact-heading">
+										{{ 'HELP.CONTACT_TITLE' | translate }}
+									</h2>
+									<p>{{ 'HELP.VISIT_TEXT' | translate }}</p>
 									<ion-button
 										color="xmasred"
 										href="https://www.denversantaclausshop.org/contact/"
 										target="_blank"
+										rel="noopener noreferrer"
 									>
 										{{ "HELP.VISIT_BUTTON" | translate }}
 									</ion-button>
-								</div>
-
-								<div
-									class="ion-text-center es-mg-top-xxl es-mg-bottom-xxl"
-								>
-									<ion-text color="xmasred">
-									<strong>—</strong>
-									</ion-text>
-								</div>
-
-								<div class="ion-padding">
-									{{ "HELP.PDF_GUIDE_TEXT" | translate }}
-								</div>
-
-								<div class="ion-text-center es-pd-bottom-xxl">
-									<ion-button
-										color="xmasred"
-										href="https://www.denversantaclausshop.org/wp-content/uploads/2021/11/DSCS-App-Help-Guide-1.pdf"
-										target="_blank"
-									>
-										{{ "HELP.PDF_GUIDE_BUTTON" | translate
-										}}
-									</ion-button>
-								</div>
+								</section>
 							</ion-card-content>
 						</ion-card>
 

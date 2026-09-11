@@ -1,6 +1,6 @@
 import { AuthService } from '@santashop/core/admin';
 import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ScanPage } from './scan.page';
 import {
@@ -52,6 +52,7 @@ describe('ScanPage', () => {
 	let fixture: ComponentFixture<ScanPage>;
 	const resolve = vi.fn();
 	const logEventWithParams = vi.fn();
+	let realAlert: HTMLIonAlertElement | undefined;
 
 	beforeEach(async () => {
 		resolve.mockReset();
@@ -86,6 +87,29 @@ describe('ScanPage', () => {
 		component = fixture.componentInstance;
 		await fixture.whenStable();
 	});
+
+	afterEach(async () => {
+		component.ionViewWillLeave();
+		await realAlert?.dismiss();
+		realAlert?.remove();
+		realAlert = undefined;
+	});
+
+	async function openRealManualCodeAlert(): Promise<HTMLIonAlertElement> {
+		const realAlerts = new AlertController();
+		const alerts = TestBed.inject(AlertController);
+		const didPresent = vi.fn();
+		vi.mocked(alerts.create).mockImplementation(async (options) => {
+			realAlert = await realAlerts.create({ ...options, animated: false });
+			realAlert.addEventListener('ionAlertDidPresent', didPresent);
+			return realAlert;
+		});
+		alerts.getTop = () => realAlerts.getTop();
+		component.ionViewWillEnter();
+		component.enterCodeManually();
+		await vi.waitFor(() => expect(didPresent).toHaveBeenCalledOnce());
+		return requireDefined(realAlert);
+	}
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
@@ -199,7 +223,24 @@ describe('ScanPage', () => {
 		component.ionViewWillLeave();
 	});
 
-	it('accepts a valid manual code, ignores a short one, and routes its eligible result', async () => {
+	it.each(['', 'XYZ', 'zzzzzzz', '123456789', 'ABCD!234', 'ABC 1234', 'ÁBCD1234'])('keeps invalid manual code %j open with correction guidance', async (code) => {
+		const alerts = TestBed.inject(AlertController);
+		component.ionViewWillEnter();
+		component.enterCodeManually();
+		await fixture.whenStable();
+		const alert = await vi.mocked(alerts.create).mock.results[0].value;
+		const options = requireDefined(vi.mocked(alerts.create).mock.calls[0])[0] as {
+			buttons: { role?: string; handler?: (value: Record<string, string>) => boolean }[];
+		};
+		const submit = requireDefined(
+			requireDefined(options.buttons.find((button) => button.role === 'ok')).handler,
+		);
+		expect(submit({ 0: code })).toBe(false);
+		expect(alert.message).toBe('Enter 8 letters or numbers, as shown below the QR image.');
+		expect(resolve).not.toHaveBeenCalled();
+	});
+
+	it.each(['abc12345', 'ABCDEFGH', '12345678', ' abcd1234 '])('accepts valid manual code %s once and routes its eligible result', async (code) => {
 		resolve.mockResolvedValue({
 			disposition: 'eligible', registration: { uid: 'manual-customer' },
 		});
@@ -210,20 +251,56 @@ describe('ScanPage', () => {
 		component.enterCodeManually();
 		await fixture.whenStable();
 		const options = requireDefined(vi.mocked(alerts.create).mock.calls[0])[0] as {
-			buttons: { role?: string; handler?: (value: Record<string, string>) => void }[];
+			buttons: { role?: string; handler?: (value: Record<string, string>) => boolean }[];
 		};
 		const submit = requireDefined(
 			requireDefined(options.buttons.find((button) => button.role === 'ok')).handler,
 		);
-		submit({ 0: 'short' });
+		expect(submit({ 0: code })).toBe(true);
 		await fixture.whenStable();
-		expect(resolve).not.toHaveBeenCalled();
-
-		submit({ 0: 'abc1234' });
-		await fixture.whenStable();
-		expect(resolve).toHaveBeenCalledWith({ code: 'ABC1234', inputMethod: 'manual' });
+		expect(resolve).toHaveBeenCalledExactlyOnceWith({ code: code.trim().toUpperCase(), inputMethod: 'manual' });
 		expect(navigate).toHaveBeenCalledWith(['/admin/checkin/review']);
 		component.ionViewWillLeave();
+	});
+
+	it.each(['abc12345', '12345678'])('keeps the real Ionic alert open for invalid input then submits %s once', async (code) => {
+		resolve.mockResolvedValue({ disposition: 'eligible', registration: { uid: 'manual-customer' } });
+		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const alert = await openRealManualCodeAlert();
+		const input = requireDefined(alert.querySelector('input'));
+		expect(input.placeholder).toBe('Code (8 letters or numbers)');
+		expect(input.minLength).toBe(8);
+		expect(input.maxLength).toBe(8);
+		const ok = requireDefined(alert.querySelector<HTMLButtonElement>('.alert-button-role-ok'));
+		const didDismiss = vi.fn();
+		alert.addEventListener('ionAlertDidDismiss', didDismiss);
+
+		for (const invalidCode of ['', 'XYZ', 'zzzzzzz', 'ABCD!234']) {
+			input.value = invalidCode;
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			ok.click();
+			await vi.waitFor(() => expect(alert.querySelector('.alert-message')?.textContent).toBe('Enter 8 letters or numbers, as shown below the QR image.'));
+			expect(alert.isConnected).toBe(true);
+			expect(didDismiss).not.toHaveBeenCalled();
+			expect(input.value).toBe(invalidCode);
+			expect(resolve).not.toHaveBeenCalled();
+		}
+
+		input.value = code;
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+		ok.click();
+		await vi.waitFor(() => expect(didDismiss).toHaveBeenCalledOnce());
+		expect(resolve).toHaveBeenCalledExactlyOnceWith({ code: code.toUpperCase(), inputMethod: 'manual' });
+		expect(navigate).toHaveBeenCalledExactlyOnceWith(['/admin/checkin/review']);
+	});
+
+	it('dismisses the real manual-code alert with Cancel without resolving a registration', async () => {
+		const alert = await openRealManualCodeAlert();
+		const didDismiss = alert.onDidDismiss();
+		requireDefined(alert.querySelector<HTMLButtonElement>('.alert-button-role-cancel')).click();
+		await didDismiss;
+		expect(alert.isConnected).toBe(false);
+		expect(resolve).not.toHaveBeenCalled();
 	});
 
 	it('surfaces validation errors from the registration resolver', async () => {

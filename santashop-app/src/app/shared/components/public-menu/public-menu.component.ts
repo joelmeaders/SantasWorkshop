@@ -1,9 +1,5 @@
 import { CustomerLanguageService } from '../../../core/services/customer-language.service';
-import {
-	ChangeDetectionStrategy,
-	Component,
-	inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
@@ -71,8 +67,8 @@ export class PublicMenuComponent {
 		await this.closeMenu();
 		const modal = await this.modalController.create({
 			component: HelpPage,
-			initialBreakpoint: 0.85,
-			breakpoints: [0, 0.5, 0.85, 1],
+			initialBreakpoint: 1,
+			breakpoints: [0, 1],
 		});
 		await modal.present();
 	}

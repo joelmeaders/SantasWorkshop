@@ -88,6 +88,20 @@ statistics under the existing reset contract. No migration or historical
 customer-data rewrite is needed for this schema. Older years remain readable
 without recalculation. Do not backfill unavailable history from guessed values.
 
+Past-year report pages read the saved annual stats documents only. Registration
+progress, cancellation and attendance counts, daily registration observations,
+and profile-creation counts are stored in those documents before customer records
+are removed. They do not query deleted registrations, check-ins, cancellations,
+or shopper profiles when staff open an old report. A calculation that was never
+saved for an older year remains unavailable.
+
+Capacity percentages, planned spots, open spots, and amounts above planned
+capacity require appointment-slot records. Those records are deleted at the
+annual reset, and their limits are not retained in the stats documents. The
+capacity section is therefore available only for the current program year when
+slot records exist. Saved appointment totals, charts, and tables remain available
+for older years without those limits.
+
 ## Tables and CSV
 
 Tables provide the complete distributions behind the summary charts. The

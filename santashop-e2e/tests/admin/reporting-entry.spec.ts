@@ -70,7 +70,7 @@ test.describe('admin reporting routes', () => {
 		);
 	});
 
-	test('REPORT-004 renders populated current-season schedule data', async ({
+	test('REPORT-004 shows saved appointment totals without capacity when slots are absent', async ({
 		page,
 		seedScheduleStats,
 	}) => {
@@ -91,9 +91,12 @@ test.describe('admin reporting routes', () => {
 				exact: true,
 			}),
 		).toHaveCount(0, { timeout: 15000 });
-		await expect(page.locator('.capacity-card')).toHaveCount(4, {
+		await expect(page.locator('.capacity-card')).toHaveCount(0, {
 			timeout: 15000,
 		});
+		await expect(
+			page.getByRole('heading', { name: 'Capacity by Day', exact: true }),
+		).toHaveCount(0);
 		await expect(
 			page.getByRole('heading', { name: '12th - Total: 1' }),
 		).toBeVisible();

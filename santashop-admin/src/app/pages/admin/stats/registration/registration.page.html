@@ -91,7 +91,7 @@
 			</ion-col>
 		</ion-row>
 
-		@if (hasScheduleData()) { @let capacities = capacityByDay();
+		@if (capacityByDay().length) { @let capacities = capacityByDay();
 		<ion-row>
 			<ion-col size="12">
 				<h2>Capacity by Day</h2>
@@ -137,7 +137,7 @@
 			}
 		</ion-row>
 
-		@let slots = familiesBySlotsChartData();
+		} @if (hasScheduleData()) { @let slots = familiesBySlotsChartData();
 		<ion-row>
 			<ion-col size="12">
 				<h2>Appointments by Day</h2>

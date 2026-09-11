@@ -27,6 +27,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 - Distinguish attempted, successful, and failed operations, and record email dialog confirmation only when confirmed.
 - Count all stored user profiles and group missing ZIP and referral data independently.
 - Include remaining ZIP codes in the registration chart's Other slice.
+- Remove capacity calculations from past-year reports and reports without appointment-slot records; retained stats remain readable after the annual reset.
 
 ## [2026.09.0-beta.4] - Unreleased
 

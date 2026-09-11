@@ -87,6 +87,153 @@ test.describe('report compatibility and exports', () => {
 		expect(pageErrors).toEqual([]);
 	});
 
+	test('REPORT-ARCHIVE-008 reads all report tables from retained stats after customer records are gone', async ({
+		page,
+		seedReportingStats,
+		seedScheduleStats,
+	}) => {
+		const archivedYear = E2E_PROGRAM_YEAR - 1;
+		const dateKey = `${archivedYear}-12-13`;
+		const calculatedAt = `${dateKey}T18:00:00.000Z`;
+		const operational = {
+			coverage: 'current-records' as const,
+			registrationRecords: 4,
+			submittedRegistrations: 3,
+			draftRegistrations: 1,
+			cancelledRegistrations: 0,
+			recordedCancellationEvents: 2,
+			checkedInRegistrations: 2,
+			pastAppointmentRegistrations: 3,
+			attendedPastAppointments: 2,
+			unconfirmedPastAppointments: 1,
+			attendanceStatusUnavailable: 0,
+			missingAppointmentRegistrations: 0,
+			invalidSubmissionDates: 0,
+			completionRate: 0.75,
+			attendanceRate: 2 / 3,
+		};
+		// Only retained stats are seeded; there are no customer or appointment-slot records.
+		await seedScheduleStats({
+			programYear: archivedYear,
+			dateTimeCounts: [{ dateTime: calculatedAt, count: 3 }],
+		});
+		await seedReportingStats({
+			registration: {
+				programYear: archivedYear,
+				calculatedAt,
+				completedRegistrations: 3,
+				dateTimeCount: [],
+				zipCodeCount: [{ zip: 80202, count: 3, childCount: 4 }],
+				operational,
+				dailySnapshots: [{ ...operational, dateKey, calculatedAt }],
+			},
+			checkIn: {
+				programYear: archivedYear,
+				lastUpdated: calculatedAt,
+				dateTimeCount: [
+					{
+						date: 13,
+						hour: 11,
+						customerCount: 2,
+						childCount: 4,
+						pregisteredCount: 2,
+						modifiedCount: 0,
+					},
+				],
+			},
+			user: {
+				programYear: archivedYear,
+				calculatedAt,
+				totalUsers: 3,
+				population: 'all-users',
+				zipCodeCount: [{ zip: '80202', count: 3 }],
+				referrerCount: [{ referrer: 'School', count: 3 }],
+				dailySignups: [{ dateKey, count: 3 }],
+			},
+		});
+		await signInAdminViaUi(page, defaultAdminAccount());
+		await page.goto('/admin/stats/registration');
+		await expect(
+			page.getByRole('heading', { name: 'Registrations', exact: true }),
+		).toBeVisible();
+		const unexpectedQueries: string[] = [];
+		await page.route('**/documents:runQuery**', (route) => {
+			unexpectedQueries.push(route.request().url());
+			return route.fulfill({
+				status: 403,
+				contentType: 'application/json',
+				body: '{"error":{"status":"PERMISSION_DENIED"}}',
+			});
+		});
+		for (const report of ['registration', 'check-in', 'user']) {
+			if (report !== 'registration')
+				await page.goto(`/admin/stats/${report}`);
+			await page.locator('admin-header ion-select').click();
+			const picker = page.locator('ion-alert');
+			await picker
+				.getByRole('radio', { name: String(archivedYear), exact: true })
+				.click();
+			await picker
+				.getByRole('button', { name: 'OK', exact: true })
+				.click();
+			await expect(picker).toBeHidden();
+			if (report === 'registration') {
+				await expect(
+					page.getByRole('table', {
+						name: 'Registration progress',
+						exact: true,
+					}),
+				).toContainText('75.0%');
+				await expect(
+					page.getByRole('table', {
+						name: 'Registration progress',
+						exact: true,
+					}),
+				).toContainText('66.7%');
+				await expect(
+					page.getByRole('table', {
+						name: 'Daily registration totals',
+						exact: true,
+					}),
+				).toContainText(dateKey);
+				await expect(
+					page.getByRole('heading', {
+						name: 'Capacity by Day',
+						exact: true,
+					}),
+				).toHaveCount(0);
+				await expect(
+					page.getByRole('table', {
+						name: 'Appointments',
+						exact: true,
+					}),
+				).toContainText('3');
+			} else if (report === 'check-in') {
+				await expect(
+					page.getByRole('table', {
+						name: 'Attendance by hour',
+						exact: true,
+					}),
+				).toContainText(dateKey);
+			} else {
+				await expect(
+					page.getByRole('table', {
+						name: 'Shopper profiles by day',
+						exact: true,
+					}),
+				).toContainText(dateKey);
+				await expect(
+					page.getByRole('table', {
+						name: 'Shopper referrals',
+						exact: true,
+					}),
+				).toContainText('School');
+			}
+			await expect(page.getByRole('alert')).toHaveCount(0);
+		}
+		expect(unexpectedQueries).toEqual([]);
+	});
+
 	test('REPORT-EXPORT-006 exports all referrals and escapes spreadsheet formulas', async ({
 		page,
 		seedReportingStats,
@@ -187,12 +334,10 @@ test.describe('report compatibility and exports', () => {
 		await expect(outcomes).toBeVisible();
 		await expect(outcomes).toContainText('75');
 		await expect(
-			outcomes
-				.locator('th small')
-				.filter({
-					hasText:
-						'Completed registrations as a share of all saved registrations.',
-				}),
+			outcomes.locator('th small').filter({
+				hasText:
+					'Completed registrations as a share of all saved registrations.',
+			}),
 		).toBeVisible();
 		const history = page.getByRole('table', {
 			name: 'Daily registration totals',

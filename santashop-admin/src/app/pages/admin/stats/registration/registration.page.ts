@@ -19,7 +19,7 @@ import {
 	RegistrationStats,
 	ScheduleStats,
 } from '@santashop/models';
-import { BehaviorSubject, forkJoin, switchMap } from 'rxjs';
+import { BehaviorSubject, forkJoin, of, switchMap } from 'rxjs';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -109,9 +109,17 @@ export class RegistrationPage {
 				schedule: getStatsCollection<ScheduleStats>(
 					this.httpService,
 				).read(`schedule-${this.year}`),
-				slots: this.httpService
-					.collection<DateTimeSlot>(COLLECTION_SCHEMA.dateTimeSlots)
-					.readMany([where('programYear', '==', this.year)], 'id'),
+				slots:
+					this.year === this.programYear
+						? this.httpService
+								.collection<DateTimeSlot>(
+									COLLECTION_SCHEMA.dateTimeSlots,
+								)
+								.readMany(
+									[where('programYear', '==', this.year)],
+									'id',
+								)
+						: of<DateTimeSlot[]>([]),
 			}).pipe(readState()),
 		),
 	);
@@ -672,6 +680,8 @@ export class RegistrationPage {
 	private mapSlotsToCapacityCharts(
 		slots: DateTimeSlot[],
 	): DayCapacityChart[] {
+		// Annual reset removes slots; saved stats do not contain appointment limits.
+		if (this.year !== this.programYear || slots.length === 0) return [];
 		const schedule = this.schedule.find((s) => s.year === this.year);
 		if (!schedule) return [];
 

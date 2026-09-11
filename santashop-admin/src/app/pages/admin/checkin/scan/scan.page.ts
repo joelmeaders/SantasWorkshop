@@ -227,10 +227,15 @@ export class ScanPage {
 	}
 
 	private async invalidCodeAlert(): Promise<void> {
-		const alertOkHandler = (value: Record<string, string>): void => {
-			if ((value[0]?.length ?? 0) >= 7) {
-				this.scanResult.next({ code: value[0], inputMethod: 'manual' });
+		const alertOkHandler = (value: Record<string, string>): boolean => {
+			const code = value[0] ?? '';
+			if (code.length < 7 || code.length > 8) {
+				alert.message =
+					'Enter a code with 7 or 8 characters, as shown below the QR image.';
+				return false;
 			}
+			this.scanResult.next({ code, inputMethod: 'manual' });
+			return true;
 		};
 
 		const alert = await this.alertController.create({

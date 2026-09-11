@@ -1,3 +1,5 @@
+import { AuthService } from '@santashop/core/admin';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ConfirmationPage } from './confirmation.page';
@@ -12,7 +14,8 @@ describe('ConfirmationPage', () => {
 	beforeEach(async () => {
 		TestBed.configureTestingModule({
 			imports: [ConfirmationPage],
-			providers: [provideActivatedRouteMock(), provideRouter([])],
+			providers: [
+                { provide: AuthService, useValue: { currentUser$: of({ uid: 'staff-1' }) } },provideActivatedRouteMock(), provideRouter([])],
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(ConfirmationPage);

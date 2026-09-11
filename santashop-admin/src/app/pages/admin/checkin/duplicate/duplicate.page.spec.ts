@@ -1,3 +1,5 @@
+import { AuthService } from '@santashop/core/admin';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DuplicatePage } from './duplicate.page';
@@ -18,6 +20,7 @@ describe('DuplicatePage', () => {
 		TestBed.configureTestingModule({
 			imports: [DuplicatePage],
 			providers: [
+                { provide: AuthService, useValue: { currentUser$: of({ uid: 'staff-1' }) } },
 				provideFirestoreWrapperMock(),
 				provideActivatedRouteMock(),
 				{ provide: AnalyticsWrapper, useValue: { logEventWithParams } },

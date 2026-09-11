@@ -1,3 +1,5 @@
+import { AuthService } from '@santashop/core';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
@@ -21,6 +23,7 @@ describe('PreRegistrationPage', () => {
 		TestBed.configureTestingModule({
 			imports: [PreRegistrationPage],
 			providers: [
+				{ provide: AuthService, useValue: { currentUser$: of(null) } },
 				provideFirestoreMock(),
 				provideCustomerAuthMock(),
 				provideCustomerFunctionsMock(),
@@ -43,14 +46,19 @@ describe('PreRegistrationPage', () => {
 	});
 
 	it('offsets routed content below the header and mobile safe area', (): void => {
-		document.documentElement.style.setProperty('--ion-safe-area-top', '62px');
+		document.documentElement.style.setProperty(
+			'--ion-safe-area-top',
+			'62px',
+		);
 		try {
 			const outlet = fixture.nativeElement.querySelector(
 				'ion-router-outlet#main',
 			) as HTMLElement;
 			expect(getComputedStyle(outlet).top).toBe('139px');
 		} finally {
-			document.documentElement.style.removeProperty('--ion-safe-area-top');
+			document.documentElement.style.removeProperty(
+				'--ion-safe-area-top',
+			);
 		}
 	});
 });

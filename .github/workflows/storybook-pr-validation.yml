@@ -1,4 +1,4 @@
-name: Storybook PR Validation
+name: Storybook Validation
 
 on:
   pull_request:
@@ -18,16 +18,63 @@ on:
       - 'tsconfig.json'
       - 'tsconfig.storybook.json'
       - 'vitest.storybook.config.ts'
+      - 'test-helpers/**'
+      - 'config.firebase.cjs'
+      - 'vitest.config.mjs'
+      - 'vitest.setup.ts'
+  push:
+    branches: [master]
+    paths:
+      - '.storybook/**'
+      - 'storybook-visual/**'
+      - '.github/workflows/storybook-pr-validation.yml'
+      - 'santashop-admin/**'
+      - 'santashop-app/**'
+      - 'santashop-core/**'
+      - 'santashop-models/**'
+      - 'angular.json'
+      - 'eslint.config.js'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.json'
+      - 'tsconfig.storybook.json'
+      - 'vitest.storybook.config.ts'
+      - 'test-helpers/**'
+      - 'config.firebase.cjs'
+      - 'vitest.config.mjs'
+      - 'vitest.setup.ts'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: storybook-pr-${{ github.event.pull_request.number }}
+  group: storybook-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  storybook_behavior:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TEST_SANTASHOP_PROGRAM_YEAR: '2026'
+      TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: '10.14.0'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.18.0'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run e2e:browser:setup:ci
+      - run: pnpm run config:app:e2e && pnpm run config:admin:e2e
+      - run: pnpm run ci:storybook
   storybook_visual:
+    if: github.event_name == 'pull_request'
     runs-on: windows-2022
     timeout-minutes: 30
     env:

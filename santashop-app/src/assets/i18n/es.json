@@ -30,7 +30,7 @@
 		"CANCEL": "Cancelar",
 		"REQUIRED_CHOICE": "Selección requerida",
 		"CLOSE": "Cerca",
-		"OK": "Ok",
+		"OK": "Aceptar",
 		"ERROR": "Error",
 		"YES": "Sí",
 		"NO": "No",
@@ -80,7 +80,9 @@
 		"VERIFICATION_FAILED_MESSAGE": "Sus datos siguen en el formulario. Inténtelo de nuevo más tarde.",
 		"YOUR_INFO": "Su información",
 		"ACCOUNT_INFO": "Información de la cuenta",
-		"LEGAL_NEWS": "Legal y Newsletter"
+		"LEGAL_NEWS": "Legal y Newsletter",
+		"CREATING_ACCOUNT": "Creando tu cuenta...",
+		"SIGNING_IN": "Iniciando sesión"
 	},
 	"OVERVIEW": {
 		"WORKSPACE_TITLE": "Complete su registro",
@@ -352,5 +354,9 @@
 		"UNRECOVERABLE_MESSAGE": "Lo sentimos, esta página necesita reiniciarse. Actualice la página para continuar. Quizás deba volver a ingresar la información que no haya guardado.",
 		"RELOAD": "Actualizar página",
 		"LATER": "Ahora no"
+	},
+	"REGISTRATION_UNAVAILABLE": {
+		"TITLE": "No se puede acceder al registro",
+		"MESSAGE": "No pudimos cargar tu registro. Es posible que falte o esté dañado. Comunícate con Denver Santa Claus Shop para obtener ayuda."
 	}
 }

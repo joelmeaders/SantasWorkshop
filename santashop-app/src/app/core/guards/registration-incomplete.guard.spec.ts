@@ -20,7 +20,7 @@ describe('RegistrationIncompleteGuard', () => {
 			providers: [
 				{
 					provide: PreRegistrationService,
-					useValue: { registrationComplete$: of(isComplete) },
+					useValue: { registrationCompleteResolved$: of(isComplete) },
 				},
 				{ provide: Router, useValue: { parseUrl } },
 			],
@@ -43,7 +43,9 @@ describe('RegistrationIncompleteGuard', () => {
 	it('redirects an incomplete registration to the overview', async () => {
 		const { guard, parseUrl, urlTree } = setup(false);
 
-		await expect(firstValueFrom(guard.canActivate())).resolves.toBe(urlTree);
+		await expect(firstValueFrom(guard.canActivate())).resolves.toBe(
+			urlTree,
+		);
 		expect(parseUrl).toHaveBeenCalledWith('pre-registration/overview');
 	});
 

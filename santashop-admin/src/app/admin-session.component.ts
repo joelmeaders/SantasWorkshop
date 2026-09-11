@@ -1,30 +1,30 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	signal,
 	inject,
+	signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { AuthService } from '@santashop/core';
-import { distinctUntilChanged, map, pairwise } from 'rxjs';
-import { InternalHeaderComponent } from '../../shared/components/internal-header/internal-header.component';
 import { IonRouterOutlet } from '@ionic/angular/standalone';
+import { AuthService } from '@santashop/core/admin';
+import { distinctUntilChanged, map, pairwise } from 'rxjs';
+import { CheckInContextService } from './shared/services/check-in-context.service';
 
 @Component({
-	selector: 'app-pre-registration',
-	templateUrl: './pre-registration.page.html',
-	styleUrls: ['./pre-registration.page.scss'],
+	selector: 'admin-session',
+	imports: [IonRouterOutlet],
+	providers: [CheckInContextService],
+	template: '@if (sessionActive()) { <ion-router-outlet /> }',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [InternalHeaderComponent, IonRouterOutlet],
 })
-export class PreRegistrationPage {
-	private readonly auth = inject(AuthService);
-	private readonly router = inject(Router);
+export class AdminSessionComponent {
 	public readonly sessionActive = signal(true);
+	private readonly router = inject(Router);
+
 	constructor() {
-		this.auth.currentUser$
-			.pipe(
+		inject(AuthService)
+			.currentUser$.pipe(
 				map((user) => user?.uid),
 				distinctUntilChanged(),
 				pairwise(),

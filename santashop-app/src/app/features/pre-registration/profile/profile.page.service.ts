@@ -6,7 +6,6 @@ import {
 	FireRepoLite,
 	AnalyticsWrapper,
 	FunctionsWrapper,
-	filterNil,
 } from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import {
@@ -16,7 +15,16 @@ import {
 	IError,
 } from '@santashop/models';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import {
+	BehaviorSubject,
+	combineLatest,
+	Observable,
+	Subject,
+	of,
+	defer,
+	catchError,
+	startWith,
+} from 'rxjs';
 import { map, shareReplay, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { newChangeInfoForm } from './change-info/change-info.form';
 import { changeEmailForm, changePasswordForm } from './profile.form';
@@ -36,6 +44,8 @@ export class ProfilePageService implements OnDestroy {
 	private readonly analytics = inject(AnalyticsWrapper);
 
 	private readonly destroy$ = new Subject<void>();
+	private profileUid: string | undefined;
+	private profileVersion = 0;
 	private readonly profileUpdates$ = new BehaviorSubject<Partial<User>>({});
 
 	public readonly profileForm = newChangeInfoForm();
@@ -44,20 +54,33 @@ export class ProfilePageService implements OnDestroy {
 
 	public readonly changePasswordForm = changePasswordForm();
 
-	private readonly getUser$ = (uuid: string): Observable<User> =>
-		this.httpService
-			.collection<User>(COLLECTION_SCHEMA.users)
-			.read(uuid)
-			.pipe(filterNil());
+	private readonly getUser$ = (uuid: string): Observable<User | undefined> =>
+		this.httpService.collection<User>(COLLECTION_SCHEMA.users).read(uuid);
 
 	public readonly userProfile$ = this.authService.currentUser$.pipe(
-		filterNil(),
+		switchMap((user) => {
+			if (this.profileUid !== user?.uid) {
+				this.profileUid = user?.uid;
+				this.profileVersion++;
+				this.profileUpdates$.next({});
+				this.profileForm.reset();
+				this.changeEmailForm.reset();
+				this.changePasswordForm.reset();
+			}
+			return user
+				? combineLatest([
+						defer(() => this.getUser$(user.uid)),
+						this.profileUpdates$,
+					]).pipe(
+						map(([profile, updates]) =>
+							profile ? { ...profile, ...updates } : undefined,
+						),
+						catchError(() => of(undefined)),
+						startWith(undefined),
+					)
+				: of(undefined);
+		}),
 		takeUntil(this.destroy$),
-		switchMap((user) =>
-			combineLatest([this.getUser$(user.uid), this.profileUpdates$]).pipe(
-				map(([profile, updates]) => ({ ...profile, ...updates })),
-			),
-		),
 		shareReplay(1),
 	);
 
@@ -65,6 +88,10 @@ export class ProfilePageService implements OnDestroy {
 		.pipe(
 			takeUntil(this.destroy$),
 			tap((user) => {
+				if (!user) {
+					this.profileForm.reset();
+					return;
+				}
 				this.profileForm.patchValue({
 					firstName: user.firstName,
 					lastName: user.lastName,
@@ -83,6 +110,7 @@ export class ProfilePageService implements OnDestroy {
 		this.analytics.logEvent('profile_update_info');
 
 		const newInfo = this.profileForm.value as ChangeUserInfo;
+		const version = this.profileVersion;
 
 		const loader = await this.loadingController.create({
 			message: 'Updating account...',
@@ -93,6 +121,7 @@ export class ProfilePageService implements OnDestroy {
 		try {
 			await this.functions.changeAccountInformation(newInfo);
 			await this.authService.refreshCurrentUser();
+			if (version !== this.profileVersion) return;
 			this.profileUpdates$.next({
 				...this.profileUpdates$.value,
 				...newInfo,

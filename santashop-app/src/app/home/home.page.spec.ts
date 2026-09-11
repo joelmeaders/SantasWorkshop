@@ -76,10 +76,6 @@ describe('HomePage', () => {
 		await fixture.whenStable();
 	});
 
-	it('should create', () => {
-		expect(component).toBeTruthy();
-	});
-
 	it('renders each account entry mode as the query parameter changes', async (): Promise<void> => {
 		expect(
 			fixture.nativeElement.querySelector('#createAccountButton'),

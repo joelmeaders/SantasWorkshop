@@ -179,4 +179,36 @@ describe('ProfilePageService', () => {
 		expect(router.navigate).toHaveBeenCalledTimes(2);
 		service.ngOnDestroy();
 	});
+
+	it('clears profile and password forms and ignores a late prior-account read', () => {
+		const first = new Subject<User | undefined>();
+		const second = new Subject<User | undefined>();
+		read.mockReturnValueOnce(first).mockReturnValue(second);
+		const service = TestBed.inject(ProfilePageService);
+		const values: (User | undefined)[] = [];
+		const subscription = service.userProfile$.subscribe((value) =>
+			values.push(value),
+		);
+		currentUser$.next({ uid: 'a' });
+		first.next({
+			firstName: 'Account A',
+			lastName: 'Private',
+			zipCode: '80202',
+		} as User);
+		service.changePasswordForm.patchValue({
+			oldPassword: 'private-password',
+		});
+		currentUser$.next({ uid: 'b' });
+		expect(values.at(-1)).toBeUndefined();
+		expect(service.profileForm.value.firstName).toBeNull();
+		expect(service.changePasswordForm.value.oldPassword).toBeNull();
+		expect(first.observed).toBe(false);
+		first.next({ firstName: 'Late A' } as User);
+		second.next({ firstName: 'Account B' } as User);
+		expect(values.at(-1)?.firstName).toBe('Account B');
+		currentUser$.next(null);
+		expect(values.at(-1)).toBeUndefined();
+		expect(second.observed).toBe(false);
+		subscription.unsubscribe();
+	});
 });

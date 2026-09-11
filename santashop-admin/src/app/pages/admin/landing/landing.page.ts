@@ -78,7 +78,6 @@ export class LandingPage {
 
 	public async signOut(): Promise<void> {
 		await this.authService.logout();
-		window.location.reload();
 	}
 
 	public toggleTheme(): void {

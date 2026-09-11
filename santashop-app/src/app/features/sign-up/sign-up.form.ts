@@ -1,3 +1,7 @@
+import {
+	SIGNUP_PASSWORD_MIN_LENGTH,
+	SIGNUP_PASSWORD_MAX_LENGTH,
+} from '@santashop/models';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 export interface OnboardUserForm {
@@ -31,8 +35,8 @@ const validators = {
 	]),
 	password: Validators.compose([
 		Validators.required,
-		Validators.minLength(8),
-		Validators.maxLength(40),
+		Validators.minLength(SIGNUP_PASSWORD_MIN_LENGTH),
+		Validators.maxLength(SIGNUP_PASSWORD_MAX_LENGTH),
 	]),
 	zipCode: Validators.compose([
 		Validators.required,

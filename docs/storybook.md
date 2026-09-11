@@ -26,10 +26,7 @@ pnpm run storybook:test
 
 Use `pnpm run ci:storybook` for type, lint, build, interaction, and accessibility
 validation. `ci:app:test` and `ci:admin:test` are target-only unit commands;
-`ci:ui:test` is the local all-UI aggregate. In PRs, the shared job runs core and
-Storybook once and `build_validation` requires it along with the selected UI
-jobs. Standalone UI releases run their own shared validation unless tests were
-explicitly skipped. Windows visual comparisons remain a separate PR job.
+`ci:ui:test` is the local all-UI aggregate. The Storybook workflow owns the full behavioral suite for PRs and master pushes, including app-only and admin-only changes. It can also validate a selected ref through workflow_dispatch. UI PR and release jobs run core and target tests without repeating Storybook. Windows visual comparisons remain a separate PR job. Require the Storybook behavioral check before promoting a revision.
 
 Choose stories for a specific regression risk: complex forms and overlays,
 responsive layouts, input/output transitions, loading/errors, and permission

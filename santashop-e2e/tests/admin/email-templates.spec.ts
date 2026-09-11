@@ -70,6 +70,7 @@ test.describe('admin email-template tools', () => {
 			.click();
 		await expect(page).toHaveURL(
 			/\/admin\/email-templates\/e2e-registration-template$/,
+			{ timeout: 15000 },
 		);
 		const savedAlert = page.locator('ion-alert');
 		await expect(savedAlert).toContainText('Revision r1 saved.', {

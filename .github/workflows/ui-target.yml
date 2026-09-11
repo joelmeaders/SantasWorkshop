@@ -125,9 +125,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - run: pnpm run "config:$UI_TARGET:$UI_MODE"
-      - name: Run shared suites once for this standalone release
+      - name: Run shared core tests for this standalone release
         if: ${{ !inputs.skip_tests && inputs.shared_tests }}
-        run: pnpm run ci:core:test && pnpm run ci:storybook
+        run: pnpm run ci:core:test
       - name: Run target unit tests with prepared shared libraries
         if: ${{ !inputs.skip_tests }}
         run: pnpm --filter "@santashop/$UI_TARGET" test

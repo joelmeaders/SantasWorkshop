@@ -1,18 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Timestamp } from 'firebase/firestore';
-import { BehaviorSubject, map, shareReplay } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import {
 	Registration,
 	type ResolveRegistrationScanResult,
 	type ScanInputMethod,
 } from '@santashop/models';
-import { filterNullish } from '../helpers';
+import { AuthService } from '@santashop/core/admin';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class CheckInContextService {
-	private readonly inputMethod = new BehaviorSubject<ScanInputMethod>('camera');
+	private readonly inputMethod = new BehaviorSubject<ScanInputMethod>(
+		'camera',
+	);
 	public readonly inputMethod$ = this.inputMethod.asObservable();
 
 	private readonly blockedScan = new BehaviorSubject<
@@ -31,7 +34,6 @@ export class CheckInContextService {
 	public readonly currentRegistration$ = this.registration
 		.asObservable()
 		.pipe(
-			filterNullish<Registration>(),
 			map((registration) => {
 				if (!registration) return;
 				// Convert timestamp to date
@@ -75,6 +77,16 @@ export class CheckInContextService {
 			shareReplay(1),
 		);
 
+	constructor() {
+		inject(AuthService)
+			.currentUser$.pipe(
+				map((user) => user?.uid),
+				distinctUntilChanged(),
+				takeUntilDestroyed(),
+			)
+			.subscribe(() => this.reset());
+	}
+
 	public setRegistration(
 		registration?: Registration,
 		inputMethod: ScanInputMethod = 'camera',
@@ -86,7 +98,8 @@ export class CheckInContextService {
 
 	public setBlockedScan(result: ResolveRegistrationScanResult): void {
 		this.blockedScan.next(result);
-		if ('attempt' in result) this.inputMethod.next(result.attempt.inputMethod);
+		if ('attempt' in result)
+			this.inputMethod.next(result.attempt.inputMethod);
 	}
 
 	public resetRegistration(): void {

@@ -6,7 +6,6 @@ import {
 	defer,
 	distinctUntilChanged,
 	filter,
-	from,
 	map,
 	of,
 	shareReplay,
@@ -29,6 +28,8 @@ import {
 	dateToCalendarString,
 	timestampDateFix,
 } from '@santashop/core';
+import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 import { QrCodeService } from './qrcode.service';
 
 @Injectable({
@@ -41,10 +42,15 @@ export class PreRegistrationService {
 	private readonly afFunctions = inject(FunctionsWrapper);
 	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly alertController = inject(AlertController);
+	private readonly translate = inject(TranslateService);
 	private hasReportedUnavailableRegistration = false;
 
 	private readonly destroyRef = inject(DestroyRef);
 	private registrationUid: string | undefined;
+	private registrationVersion = 0;
+	private activeUnavailableAlert?: Awaited<
+		ReturnType<AlertController['create']>
+	>;
 
 	private readonly registrationState$ = this.authService.currentUser$.pipe(
 		map((user) => user?.uid),
@@ -52,6 +58,9 @@ export class PreRegistrationService {
 		switchMap((uid) => {
 			if (uid !== this.registrationUid) {
 				this.registrationUid = uid;
+				this.registrationVersion++;
+				void this.activeUnavailableAlert?.dismiss();
+				this.activeUnavailableAlert = undefined;
 				this.hasReportedUnavailableRegistration = false;
 			}
 			if (!uid) return of({ loading: false, registration: undefined });
@@ -86,10 +95,17 @@ export class PreRegistrationService {
 		map((state) => state.registration),
 	);
 	/** Route guards must wait for the read; loading is not an incomplete registration. */
-	public readonly registrationComplete$ = this.registrationState$.pipe(
-		filter((state) => !state.loading),
+	public readonly registrationCompleteResolved$ =
+		this.registrationState$.pipe(
+			filter((state) => !state.loading),
+			map(
+				({ registration }) =>
+					!!registration && this.isRegistrationComplete(registration),
+			),
+		);
+	public readonly registrationComplete$ = this.userRegistration$.pipe(
 		map(
-			({ registration }) =>
+			(registration) =>
 				!!registration && this.isRegistrationComplete(registration),
 		),
 	);
@@ -119,7 +135,10 @@ export class PreRegistrationService {
 		distinctUntilChanged(),
 		switchMap((path) =>
 			path
-				? from(this.qrCodeService.registrationQrCodeUrl(path)).pipe(
+				? defer(() =>
+						this.qrCodeService.registrationQrCodeUrl(path),
+					).pipe(
+						catchError(() => of(undefined)),
 						startWith(undefined),
 					)
 				: of(undefined),
@@ -233,13 +252,24 @@ export class PreRegistrationService {
 			reason,
 		});
 
+		const version = this.registrationVersion;
+		const text = await firstValueFrom(
+			this.translate.get([
+				'REGISTRATION_UNAVAILABLE.TITLE',
+				'REGISTRATION_UNAVAILABLE.MESSAGE',
+				'COMMON.OK',
+			]),
+		);
+		if (version !== this.registrationVersion || this.destroyRef.destroyed)
+			return;
 		const alert = await this.alertController.create({
-			header: 'Registration record unavailable',
-			message:
-				'We could not load your registration record. It may be missing or corrupted. Please contact the Denver Santa Claus Shop for assistance.',
-			buttons: ['Ok'],
+			header: text['REGISTRATION_UNAVAILABLE.TITLE'],
+			message: text['REGISTRATION_UNAVAILABLE.MESSAGE'],
+			buttons: [text['COMMON.OK']],
 		});
-
+		if (version !== this.registrationVersion || this.destroyRef.destroyed)
+			return;
+		this.activeUnavailableAlert = alert;
 		await alert.present();
 	}
 }

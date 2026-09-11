@@ -1,3 +1,4 @@
+import { elevatedUserGuard } from './auth.guards';
 import { TestBed } from '@angular/core/testing';
 import {
 	CanActivateFn,
@@ -6,8 +7,9 @@ import {
 	Router,
 	Routes,
 } from '@angular/router';
-import { AuthService } from '@santashop/core/admin';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { User, IdTokenResult } from 'firebase/auth';
+import { AuthWrapper, FunctionsWrapper } from '@santashop/core/admin';
+import { BehaviorSubject, Subject, firstValueFrom, Observable } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { adminRoutes } from './admin.routes';
 import { routes } from './app.routes';
@@ -21,7 +23,14 @@ describe('app routes', () => {
 		createUrlTree.mockClear();
 		TestBed.configureTestingModule({
 			providers: [
-				{ provide: AuthService, useValue: { currentUser$ } },
+				{
+					provide: AuthWrapper,
+					useValue: {
+						authState: (): Observable<User | null> =>
+							currentUser$ as Observable<User | null>,
+					},
+				},
+				{ provide: FunctionsWrapper, useValue: {} },
 				{ provide: Router, useValue: { createUrlTree } },
 			],
 		});
@@ -189,6 +198,41 @@ describe('app routes', () => {
 		expect(
 			components.every((component) => typeof component === 'function'),
 		).toBe(true);
+	});
+	it('waits for SDK initialization and cancels a prior identity token while guarding navigation', async () => {
+		const sdk = new Subject<User | null>();
+		TestBed.overrideProvider(AuthWrapper, {
+			useValue: { authState: (): Observable<User | null> => sdk },
+		});
+		const outcomes: unknown[] = [];
+		const pending = runGuard(elevatedUserGuard).then((result) => {
+			outcomes.push(result);
+			return result;
+		});
+		await Promise.resolve();
+		expect(outcomes).toEqual([]);
+		let resolve!: (token: IdTokenResult) => void;
+		const token = new Promise<IdTokenResult>((done) => {
+			resolve = done;
+		});
+		sdk.next({
+			uid: 'a',
+			getIdTokenResult: vi.fn().mockReturnValue(token),
+		} as unknown as User);
+		await Promise.resolve();
+		expect(outcomes).toEqual([]);
+		sdk.next(null);
+		expect(await pending).toEqual({ commands: ['/'] });
+		resolve({ claims: { owner: true } } as unknown as IdTokenResult);
+		await Promise.resolve();
+		expect(outcomes).toEqual([{ commands: ['/'] }]);
+		sdk.next({
+			uid: 'b',
+			getIdTokenResult: vi
+				.fn()
+				.mockResolvedValue({ claims: { roles: ['checkin'] } }),
+		} as unknown as User);
+		expect(await runGuard(elevatedUserGuard)).toBe(true);
 	});
 });
 

@@ -2,11 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import {
 	distinctUntilChanged,
 	filter,
+	catchError,
+	startWith,
 	map,
 	shareReplay,
 	switchMap,
 } from 'rxjs/operators';
-import { from, merge, Observable, Subject } from 'rxjs';
+import { defer, of, merge, Observable, Subject } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
 import { Auth, StaffRole, UserEmailUid } from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
@@ -44,110 +46,75 @@ export class AuthService {
 	/**
 	 * Stream of user email and uid
 	 */
-	public readonly emailAndUid$: Observable<UserEmailUid> =
+	public readonly emailAndUid$: Observable<UserEmailUid | null> =
 		this.currentUser$.pipe(
-			map(
-				(res: any) =>
-					({
-						emailAddress: res?.email,
-						uid: res?.uid,
-					}) as UserEmailUid,
+			map((user) =>
+				user ? { emailAddress: user.email, uid: user.uid } : null,
 			),
 			distinctUntilChanged(),
 			shareReplay(1),
 		);
 
-	/**
-	 * Stream of uid. Will not fire/complete if user is
-	 * not logged in.
-	 */
-	public readonly uid$: Observable<string> = this.currentUser$.pipe(
-		map((user) => user?.uid),
+	/** No identity is emitted until the SDK has finished initializing. */
+	public readonly uid$: Observable<string | null> = this.currentUser$.pipe(
+		map((user) => user?.uid ?? null),
 		distinctUntilChanged(),
-		filter((uid) => !!uid),
-		map((uid) => uid as string),
 		shareReplay(1),
 	);
 
-	/**
-	 * Checks token claims to see if the user has an admin
-	 * claim. Will not fire/complete unless user is signed in.
-	 */
-	public readonly isAdmin$ = this.currentUser$.pipe(
-		filter((user) => !!user),
-		switchMap((user) => from(user.getIdTokenResult(false))),
-		map(
-			(token) =>
-				token.claims?.['owner'] === true ||
-				(Array.isArray(token.claims?.['roles']) &&
-					token.claims['roles'].includes('admin')),
+	/** Pending claims clear visible privileges. Guards use claimsResolved$. */
+	private readonly claimsState$ = this.currentUser$.pipe(
+		switchMap((user) =>
+			user
+				? defer(() => user.getIdTokenResult(false)).pipe(
+						map((token) => ({
+							loading: false,
+							claims: token.claims,
+						})),
+						catchError(() => of({ loading: false, claims: null })),
+						startWith({ loading: true, claims: null }),
+					)
+				: of({ loading: false, claims: null }),
 		),
 		shareReplay(1),
 	);
-
-	public readonly isOwner$ = this.currentUser$.pipe(
-		filter((user) => !!user),
-		switchMap((user) => from(user.getIdTokenResult(false))),
-		map((token) => token.claims?.['owner'] === true),
-		shareReplay(1),
+	public readonly claimsResolved$ = this.claimsState$.pipe(
+		filter((state) => !state.loading),
+		map((state) => state.claims),
 	);
-
-	/**
-	 * Stream of the elevated roles assigned to the current user via
-	 * custom claims. Emits an empty array when no roles are present.
-	 * Will not fire/complete unless user is signed in.
-	 */
-	public readonly roles$: Observable<StaffRole[]> = this.currentUser$.pipe(
-		filter((user) => !!user),
-		switchMap((user) => from(user.getIdTokenResult(false))),
-		map((token) => (token.claims?.['roles'] as StaffRole[]) ?? []),
-		shareReplay(1),
+	private readonly claims$ = this.claimsState$.pipe(
+		map((state) => state.claims),
 	);
-
-	/**
-	 * Checks token claims to see if the user can perform check-in work.
-	 * Admins implicitly satisfy this role.
-	 */
-	public readonly isCheckin$ = this.hasRole('checkin').pipe(shareReplay(1));
-
-	/**
-	 * Checks token claims to see if the user holds any elevated role
-	 * (admin or a named role). Used to gate access to the admin app.
-	 * Will not fire/complete unless user is signed in.
-	 */
-	public readonly isElevated$: Observable<boolean> = this.currentUser$.pipe(
-		filter((user) => !!user),
-		switchMap((user) => from(user.getIdTokenResult(false))),
-		map((token) => {
-			const claims = token.claims ?? {};
-			const roles = (claims['roles'] as StaffRole[] | undefined) ?? [];
-			return (
-				claims['owner'] === true ||
-				roles.includes('admin') ||
-				roles.includes('checkin')
-			);
-		}),
-		shareReplay(1),
+	public readonly isAdmin$ = this.hasRole('admin');
+	public readonly isOwner$ = this.claims$.pipe(
+		map((claims) => claims?.['owner'] === true),
 	);
-
-	/**
-	 * Checks token claims to see if the current user has the given role.
-	 * Admins implicitly satisfy every role.
-	 */
+	public readonly roles$: Observable<StaffRole[]> = this.claims$.pipe(
+		map((claims) =>
+			Array.isArray(claims?.['roles'])
+				? (claims['roles'] as StaffRole[])
+				: [],
+		),
+	);
+	public readonly isCheckin$ = this.hasRole('checkin');
+	public readonly isElevated$ = this.claims$.pipe(
+		map(
+			(claims) =>
+				claims?.['owner'] === true ||
+				(Array.isArray(claims?.['roles']) &&
+					(claims['roles'].includes('admin') ||
+						claims['roles'].includes('checkin'))),
+		),
+	);
 	public hasRole(role: StaffRole): Observable<boolean> {
-		return this.currentUser$.pipe(
-			filter((user) => !!user),
-			switchMap((user) => from(user.getIdTokenResult(false))),
-			map((token) => {
-				const claims = token.claims ?? {};
-				if (claims['owner'] === true) {
-					return true;
-				}
-				const roles =
-					(claims['roles'] as StaffRole[] | undefined) ?? [];
-				return roles.includes('admin') || roles.includes(role);
-			}),
-			shareReplay(1),
+		return this.claims$.pipe(
+			map(
+				(claims) =>
+					claims?.['owner'] === true ||
+					(Array.isArray(claims?.['roles']) &&
+						(claims['roles'].includes('admin') ||
+							claims['roles'].includes(role))),
+			),
 		);
 	}
 

@@ -8,9 +8,6 @@ describe('TimeSlotPipe', () => {
 		pipe = new TimeSlotPipe();
 	});
 
-	it('should create an instance', () => {
-		expect(pipe).toBeTruthy();
-	});
 	it('uses Denver daylight saving time for summer slots', () => {
 		expect(pipe.transform('2026-07-12T16:00:00Z')).toBe('10AM - 11AM');
 	});

@@ -4,6 +4,6 @@ export interface Auth {
 }
 
 export interface UserEmailUid {
-	emailAddress: string;
+	emailAddress: string | null;
 	uid: string;
 }

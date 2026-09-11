@@ -9,6 +9,7 @@ import {
 } from '../../fixtures/account-helpers';
 import {
 	E2E_AUTH_EMULATOR_URL,
+	E2E_FIRESTORE_EMULATOR_URL,
 	E2E_PROJECT_ID,
 } from '../../fixtures/season';
 
@@ -241,7 +242,8 @@ test.describe('customer account and session access', () => {
 				{ timeout: 15000 },
 			)
 			.toBeTruthy();
-		if (!resetLink) throw new Error('Auth emulator reset link was not created.');
+		if (!resetLink)
+			throw new Error('Auth emulator reset link was not created.');
 
 		const resetResponse = await request.get(
 			`${resetLink}&newPassword=${encodeURIComponent(replacementPassword)}`,
@@ -312,5 +314,103 @@ test.describe('customer account and session access', () => {
 			.getByRole('button', { name: 'Close', exact: true })
 			.click();
 		await expect(privacyModal).toBeHidden();
+	});
+
+	test('AUTH-014 signs in with a whitespace password and observes cross-tab sign-out without reloading', async ({
+		page,
+		context,
+	}) => {
+		const account = { ...randomAccount(), password: ' winter-pass-2026 ' };
+		await createAccountViaUi(page, account);
+		await expect(page.locator('#children-heading')).toBeVisible();
+		const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+		const otherTab = await context.newPage();
+		await otherTab.goto('/pre-registration/overview');
+		await expect(otherTab.locator('#children-heading')).toBeVisible();
+		await signOutViaUi(otherTab);
+		await expect(page).toHaveURL(/\/$/);
+		await expect(page.locator('#children-heading')).not.toBeVisible();
+		expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+			timeOrigin,
+		);
+		await expect(page.locator('ion-alert')).toHaveCount(0);
+		await otherTab.close();
+		await signInViaUi(page, account);
+		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
+	});
+	test('AUTH-015 shows Spanish signup phases and a readable recovery alert on mobile', async ({
+		page,
+		request,
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.addInitScript(() =>
+			localStorage.setItem('santashop-language', 'es'),
+		);
+		let createDone!: () => void;
+		let signInDone!: () => void;
+		const createGate = new Promise<void>((resolve) => {
+			createDone = resolve;
+		});
+		const signInGate = new Promise<void>((resolve) => {
+			signInDone = resolve;
+		});
+		await page.route('**/newAccount', async (route) => {
+			await createGate;
+			await route.continue();
+		});
+		await page.route('**/accounts:signInWithPassword*', async (route) => {
+			await signInGate;
+			await route.continue();
+		});
+		const account = { ...randomAccount(), password: ' winter-pass-2026 ' };
+		const creating = createAccountViaUi(page, account);
+		await expect(page.locator('ion-loading')).toContainText(
+			'Creando tu cuenta...',
+		);
+		createDone();
+		await expect(page.locator('ion-loading')).toContainText(
+			'Iniciando sesión',
+		);
+		signInDone();
+		await creating;
+		await expect(page.locator('ion-loading')).toHaveCount(0);
+		const login = await request.post(
+			E2E_AUTH_EMULATOR_URL +
+				'/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=emulator-test-key',
+			{
+				data: {
+					email: account.emailAddress,
+					password: account.password,
+					returnSecureToken: true,
+				},
+			},
+		);
+		expect(login.ok()).toBeTruthy();
+		const { localId } = (await login.json()) as { localId: string };
+		const deletion = await request.delete(
+			E2E_FIRESTORE_EMULATOR_URL +
+				'/v1/projects/' +
+				E2E_PROJECT_ID +
+				'/databases/(default)/documents/registrations/' +
+				encodeURIComponent(localId),
+			{ headers: { Authorization: 'Bearer owner' } },
+		);
+		expect(deletion.ok()).toBeTruthy();
+		await page.reload();
+		const alert = page.locator('ion-alert');
+		await expect(alert).toContainText('No se puede acceder al registro');
+		await expect(alert).toContainText(
+			'Comunícate con Denver Santa Claus Shop para obtener ayuda.',
+		);
+		const acknowledge = alert.getByRole('button', {
+			name: 'Aceptar',
+			exact: true,
+		});
+		await expect(acknowledge).toBeVisible();
+		const bounds = await acknowledge.boundingBox();
+		expect(bounds).not.toBeNull();
+		expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(844);
+		await acknowledge.click();
+		await expect(alert).toHaveCount(0);
 	});
 });

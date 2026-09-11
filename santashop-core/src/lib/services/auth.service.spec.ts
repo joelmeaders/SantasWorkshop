@@ -8,7 +8,7 @@ import {
 	vi,
 } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject, Observable } from 'rxjs';
 import type { User, UserCredential } from 'firebase/auth';
 import { AuthService } from './auth.service';
 import { AuthWrapper } from './_auth-wrapper';
@@ -126,7 +126,7 @@ describe('AuthService', () => {
 		const value = await firstValueFrom(service.emailAndUid$);
 
 		// Assert
-		expect(value.emailAddress).toEqual('test@test.com');
+		expect(value?.emailAddress).toEqual('test@test.com');
 	});
 
 	it('uid$: should return expected value', async () => {
@@ -140,7 +140,7 @@ describe('AuthService', () => {
 	});
 
 	it('uid$ does not re-emit the same uid when the identity refreshes', async () => {
-		const values: string[] = [];
+		const values: (string | null)[] = [];
 		const subscription = service.uid$.subscribe((value) =>
 			values.push(value),
 		);
@@ -152,7 +152,7 @@ describe('AuthService', () => {
 	});
 
 	it('uid$ emits again when the user signs out and signs back in', () => {
-		const values: string[] = [];
+		const values: (string | null)[] = [];
 		const subscription = service.uid$.subscribe((value) =>
 			values.push(value),
 		);
@@ -160,7 +160,7 @@ describe('AuthService', () => {
 		authState$.next(null);
 		authState$.next(mockUser);
 
-		expect(values).toEqual(['12345', '12345']);
+		expect(values).toEqual(['12345', null, '12345']);
 		subscription.unsubscribe();
 	});
 
@@ -171,6 +171,7 @@ describe('AuthService', () => {
 		} as any);
 
 		// Act
+		await firstValueFrom(service.claimsResolved$);
 		const value = await firstValueFrom(service.isAdmin$);
 
 		// Assert
@@ -184,6 +185,7 @@ describe('AuthService', () => {
 		} as any);
 
 		// Act
+		await firstValueFrom(service.claimsResolved$);
 		const value = await firstValueFrom(service.isAdmin$);
 
 		// Assert
@@ -195,6 +197,7 @@ describe('AuthService', () => {
 			claims: { owner: true },
 		} as any);
 
+		await firstValueFrom(service.claimsResolved$);
 		await expect(firstValueFrom(service.isAdmin$)).resolves.toBe(true);
 		await expect(firstValueFrom(service.isOwner$)).resolves.toBe(true);
 	});
@@ -204,6 +207,7 @@ describe('AuthService', () => {
 			claims: { roles: ['checkin', 'stats'] },
 		} as any);
 
+		await firstValueFrom(service.claimsResolved$);
 		await expect(firstValueFrom(service.roles$)).resolves.toEqual([
 			'checkin',
 			'stats',
@@ -455,5 +459,115 @@ describe('AuthService', () => {
 		// Assert
 		expect(result).toEqual(mockToken);
 		expect(authWrapperService.getCurrentUserToken).toHaveBeenCalled();
+	});
+
+	it('clears every capability on sign-out and ignores late token results', async () => {
+		const admin = {
+			...mockUser,
+			uid: 'admin-a',
+			getIdTokenResult: vi.fn().mockResolvedValue({
+				claims: { owner: true, roles: ['admin', 'checkin'] },
+			}),
+		} as unknown as User;
+		authState$.next(admin);
+		const values: unknown[][] = [];
+		const streams: Observable<unknown>[] = [
+			service.uid$,
+			service.roles$,
+			service.isAdmin$,
+			service.isOwner$,
+			service.isCheckin$,
+			service.isElevated$,
+			service.hasRole('checkin'),
+		];
+		const subscriptions = streams.map((stream, index) => {
+			values[index] = [];
+			return stream.subscribe((value) => values[index].push(value));
+		});
+		await firstValueFrom(service.claimsResolved$);
+		expect(values.map((v) => v.at(-1))).toEqual([
+			'admin-a',
+			['admin', 'checkin'],
+			true,
+			true,
+			true,
+			true,
+			true,
+		]);
+		let resolve!: (value: unknown) => void;
+		authState$.next({
+			...mockUser,
+			uid: 'pending-b',
+			getIdTokenResult: () =>
+				new Promise((done) => {
+					resolve = done;
+				}),
+		} as unknown as User);
+		expect(values.map((v) => v.at(-1))).toEqual([
+			'pending-b',
+			[],
+			false,
+			false,
+			false,
+			false,
+			false,
+		]);
+		authState$.next(null);
+		resolve({ claims: { owner: true, roles: ['admin'] } });
+		await Promise.resolve();
+		expect(values.map((v) => v.at(-1))).toEqual([
+			null,
+			[],
+			false,
+			false,
+			false,
+			false,
+			false,
+		]);
+		expect(
+			await Promise.all(streams.map((stream) => firstValueFrom(stream))),
+		).toEqual([null, [], false, false, false, false, false]);
+		subscriptions.forEach((s) => s.unsubscribe());
+	});
+	it('recovers a failed token fetch for a later identity', async () => {
+		authState$.next({
+			...mockUser,
+			getIdTokenResult: vi.fn().mockRejectedValue(new Error('offline')),
+		} as unknown as User);
+		expect(await firstValueFrom(service.claimsResolved$)).toBeNull();
+		authState$.next({
+			...mockUser,
+			uid: 'b',
+			getIdTokenResult: vi
+				.fn()
+				.mockResolvedValue({ claims: { roles: ['checkin'] } }),
+		} as unknown as User);
+		await firstValueFrom(service.claimsResolved$);
+		expect(await firstValueFrom(service.isCheckin$)).toBe(true);
+		expect(await firstValueFrom(service.isAdmin$)).toBe(false);
+	});
+	it('does not emit signed-out state while the SDK is still initializing', () => {
+		TestBed.resetTestingModule();
+		const initializing = new Subject<User | null>();
+		TestBed.configureTestingModule({
+			providers: [
+				{
+					provide: AuthWrapper,
+					useValue: {
+						authState: (): Observable<User | null> => initializing,
+					},
+				},
+				{ provide: FunctionsWrapper, useValue: {} },
+			],
+		});
+		const auth = TestBed.inject(AuthService);
+		const values: unknown[] = [];
+		const subscription = auth.claimsResolved$.subscribe((value) =>
+			values.push(value),
+		);
+		expect(values).toEqual([]);
+		initializing.next(null);
+		expect(values).toEqual([null]);
+		subscription.unsubscribe();
 	});
 });

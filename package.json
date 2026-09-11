@@ -28,7 +28,7 @@
     "remote-config:defaults:prod": "node scripts/remote-config.cjs release-defaults --project santas-workshop-193b5",
     "remote-config:readiness:test": "node scripts/remote-config-readiness.cjs --project santas-workshop-test",
     "remote-config:readiness:prod": "node scripts/remote-config-readiness.cjs --project santas-workshop-193b5",
-    "functions:test:integration": "pnpm run config:functions:test && pnpm --filter @santashop/functions build && firebase emulators:exec --project santas-workshop-test --only auth,firestore,functions,storage \"pnpm --filter @santashop/functions run test:integration\"",
+    "functions:test:integration": "pnpm run config:functions:test && pnpm --filter @santashop/functions build && firebase emulators:exec --project santas-workshop-test --only auth,firestore,storage \"pnpm --filter @santashop/functions run test:integration\"",
     "functions:test": "pnpm run functions:test:unit && pnpm run functions:test:integration",
     "emulators:start": "pnpm run config:functions:test && firebase emulators:start --project santas-workshop-test --import .firebase --export-on-exit",
     "emulators:start:noexport": "pnpm run config:functions:test && firebase emulators:start --project santas-workshop-test --import .firebase",

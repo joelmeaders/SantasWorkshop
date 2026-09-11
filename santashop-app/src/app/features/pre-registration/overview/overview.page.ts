@@ -5,6 +5,7 @@ import {
 	OnDestroy,
 	PLATFORM_ID,
 	computed,
+	effect,
 	inject,
 	signal,
 	viewChild,
@@ -22,13 +23,8 @@ import {
 	validateChild,
 } from '@santashop/core';
 import { COLLECTION_SCHEMA, Child, DateTimeSlot } from '@santashop/models';
-import { firstValueFrom } from 'rxjs';
-import {
-	filter,
-	map,
-	take,
-	timeout,
-} from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom, switchMap } from 'rxjs';
+import { filter, map, take, timeout } from 'rxjs/operators';
 import { where } from 'firebase/firestore';
 import { PreRegistrationService } from '../../../core';
 import {
@@ -115,9 +111,23 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	);
 	public readonly isSaving = signal(false);
 	public readonly reviewing = signal(false);
+	private readonly slotRefresh = new BehaviorSubject<void>(undefined);
+	private pendingCompletionId?: string;
+	private completionUid?: string;
 
 	constructor() {
 		addIcons({ arrowDownCircleOutline });
+		effect(() => {
+			const uid = this.userRegistration()?.uid;
+			if (uid !== this.completionUid) {
+				this.completionUid = uid;
+				this.pendingCompletionId = undefined;
+			}
+			if (this.registrationSubmitted() && this.pendingCompletionId) {
+				this.pendingCompletionId = undefined;
+				void this.router.navigate(['/pre-registration/confirmation']);
+			}
+		});
 	}
 
 	public readonly canChooseDateTime = computed(
@@ -131,25 +141,38 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			!this.registrationSubmitted(),
 	);
 
-	public readonly availableSlots = toSignal(this.dateTimeSlotCollection()
-		.readMany([where('programYear', '==', this.programYear)], 'id')
-		.pipe(
-			map((slots) =>
-				slots
-					.map((slot) => ({
-						...slot,
-						dateTime: timestampToDate(slot.dateTime),
-					}))
-					.sort(
-						(left, right) =>
-							left.dateTime.valueOf() - right.dateTime.valueOf(),
+	public readonly availableSlots = toSignal(
+		this.slotRefresh
+			.pipe(
+				switchMap(() =>
+					this.dateTimeSlotCollection().readMany(
+						[where('programYear', '==', this.programYear)],
+						'id',
 					),
+				),
+			)
+			.pipe(
+				map((slots) =>
+					slots
+						.map((slot) => ({
+							...slot,
+							dateTime: timestampToDate(slot.dateTime),
+						}))
+						.sort(
+							(left, right) =>
+								left.dateTime.valueOf() -
+								right.dateTime.valueOf(),
+						),
+				),
 			),
-		), { initialValue: undefined });
+		{ initialValue: undefined },
+	);
 
 	public ngAfterViewInit(): void {
 		if (!isPlatformBrowser(this.platformId)) return;
 		window.addEventListener('hashchange', this.focusHashSection);
+		document.addEventListener('visibilitychange', this.resumeReview);
+		window.addEventListener('online', this.resumeReview);
 		this.focusHashSection();
 	}
 
@@ -160,6 +183,8 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	public ngOnDestroy(): void {
 		if (isPlatformBrowser(this.platformId)) {
 			window.removeEventListener('hashchange', this.focusHashSection);
+			document.removeEventListener('visibilitychange', this.resumeReview);
+			window.removeEventListener('online', this.resumeReview);
 		}
 	}
 
@@ -224,7 +249,9 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 				await this.preregistrationService.setDraftAppointment({
 					mutationId: this.createMutationId(),
 					slotId: slot.id,
+					reviewedDateTime: slot.dateTime.toISOString(),
 				});
+				this.reviewing.set(false);
 				this.analytics.logEventWithParams(
 					'workspace_appointment_saved',
 					{
@@ -239,9 +266,11 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		await this.runWorkspaceAction(
 			this.translateService.instant('OVERVIEW.REGISTRATION_SUBMITTED'),
 			async () => {
+				this.slotRefresh.next();
 				const result =
 					await this.preregistrationService.completeRegistration({
-						mutationId: this.createMutationId(),
+						mutationId: (this.pendingCompletionId ??=
+							this.createMutationId()),
 					});
 				if (!result.data)
 					throw new Error(
@@ -255,6 +284,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 					),
 				);
 				this.analytics.logEvent('submit_registration');
+				this.pendingCompletionId = undefined;
 				await this.router.navigate(['/pre-registration/confirmation']);
 			},
 		);
@@ -276,10 +306,60 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		if (updated) this.submitCard()?.completeEmailUpdate();
 	}
 
-	public startReview(): void {
-		this.childrenCard()?.collapseEditor();
-		this.scheduleCard()?.collapse();
-		this.reviewing.set(true);
+	public async startReview(): Promise<void> {
+		this.slotRefresh.next();
+		this.isSaving.set(true);
+		try {
+			const slot = this.dateTimeSlot();
+			if (!slot?.id) return;
+			await this.preregistrationService.setDraftAppointment({
+				mutationId: this.createMutationId(),
+				slotId: slot.id,
+				reviewedDateTime: slot.dateTime.toISOString(),
+			});
+			this.childrenCard()?.collapseEditor();
+			this.scheduleCard()?.collapse();
+			this.reviewing.set(true);
+		} catch (error) {
+			if (!(await this.recoverAppointment(error))) {
+				this.reviewing.set(false);
+				this.submitCard()?.makeChanges();
+				await this.presentWorkspaceToast(
+					this.translateService.instant('OVERVIEW.SAVE_FAILED'),
+					'danger',
+				);
+			}
+		} finally {
+			this.isSaving.set(false);
+		}
+	}
+
+	private readonly resumeReview = (): void => {
+		if (
+			document.visibilityState === 'hidden' ||
+			this.registrationSubmitted()
+		)
+			return;
+		this.reviewing.set(false);
+		this.submitCard()?.makeChanges();
+		this.slotRefresh.next();
+	};
+
+	private async recoverAppointment(error: unknown): Promise<boolean> {
+		const details = (error as { details?: { reason?: string } })?.details;
+		if (details?.reason !== 'appointment-review-required') return false;
+		this.pendingCompletionId = undefined;
+		this.reviewing.set(false);
+		this.submitCard()?.makeChanges();
+		this.scheduleCard()?.open();
+		this.slotRefresh.next();
+		await this.presentWorkspaceToast(
+			this.translateService.instant(
+				'OVERVIEW.APPOINTMENT_REVIEW_REQUIRED',
+			),
+			'danger',
+		);
+		return true;
 	}
 
 	public makeChanges(): void {
@@ -337,6 +417,12 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			await this.presentWorkspaceToast(successMessage, 'success');
 			return true;
 		} catch (error) {
+			if (await this.recoverAppointment(error)) return false;
+			if (this.registrationSubmitted()) {
+				this.pendingCompletionId = undefined;
+				await this.router.navigate(['/pre-registration/confirmation']);
+				return true;
+			}
 			const message =
 				error instanceof Error
 					? error.message

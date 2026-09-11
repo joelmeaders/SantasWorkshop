@@ -49,8 +49,16 @@ test.describe('competing staff and uncertain writes', () => {
 		baseURL,
 		seedRegistration,
 		inspectRegistrationScanAudit,
+		inspectRegistrationBoundary,
 	}) => {
 		await seedRegistration(registration);
+		const before = await inspectRegistrationBoundary(
+			registration.emailAddress,
+		);
+		expect(before.annualCheckin).toEqual({
+			customerCount: 0,
+			childCount: 0,
+		});
 		const peer = await browser.newContext({
 			...devices['Pixel 5'],
 			baseURL,
@@ -115,6 +123,16 @@ test.describe('competing staff and uncertain writes', () => {
 			expect(audit.attempts).toHaveLength(1);
 			expect(audit.attempts[0].outcome).toBe('duplicate-accidental');
 			expect(audit.rawCodePersisted).toBe(false);
+			const stored = await inspectRegistrationBoundary(
+				registration.emailAddress,
+			);
+			expect(stored).toMatchObject({
+				checkinCount: 1,
+				checkinIds: [registration.uid],
+				checkinChildCount: 1,
+				registration: { hasCheckedIn: true },
+				annualCheckin: { customerCount: 1, childCount: 1 },
+			});
 			// A fresh lookup must also see the stored check-in, not just the two page states.
 			await blocked.goto('/admin/checkin/scan');
 			await blocked.locator('#manualCheckInCodeButton').click();
@@ -124,6 +142,9 @@ test.describe('competing staff and uncertain writes', () => {
 				.getByRole('button', { name: 'OK', exact: true })
 				.click();
 			await expect(blocked).toHaveURL(/\/duplicate\/concurrent-family$/);
+			expect(
+				await inspectRegistrationBoundary(registration.emailAddress),
+			).toEqual(stored);
 		} finally {
 			await peer.close();
 		}
@@ -133,6 +154,7 @@ test.describe('competing staff and uncertain writes', () => {
 		page,
 		seedRegistration,
 		inspectRegistrationScanAudit,
+		inspectRegistrationBoundary,
 	}) => {
 		await seedRegistration(registration);
 		await signInAdminViaUi(page, defaultAdminAccount());
@@ -143,6 +165,16 @@ test.describe('competing staff and uncertain writes', () => {
 			async (route) => {
 				const response = await route.fetch();
 				expect(response.ok()).toBe(true);
+				expect(
+					await inspectRegistrationBoundary(
+						registration.emailAddress,
+					),
+				).toMatchObject({
+					checkinCount: 1,
+					checkinChildCount: 1,
+					registration: { hasCheckedIn: true },
+					annualCheckin: { customerCount: 1, childCount: 1 },
+				});
 				committed = true;
 				await route.abort('connectionreset');
 			},
@@ -166,7 +198,113 @@ test.describe('competing staff and uncertain writes', () => {
 		);
 		expect(audit.attempts).toHaveLength(1);
 		expect(audit.attempts[0].outcome).toBe('duplicate-accidental');
+		expect(
+			await inspectRegistrationBoundary(registration.emailAddress),
+		).toMatchObject({
+			checkinCount: 1,
+			checkinChildCount: 1,
+			registration: { hasCheckedIn: true },
+			annualCheckin: { customerCount: 1, childCount: 1 },
+		});
 	});
+
+	for (const change of ['cancelled', 'unsubmitted', 'children'] as const) {
+		test(`STALE-REVIEW uses authoritative ${change} state at check-in`, async ({
+			page,
+			seedRegistration,
+			inspectRegistrationBoundary,
+		}) => {
+			await seedRegistration(registration);
+			await signInAdminViaUi(page, defaultAdminAccount());
+			await review(page, registration.code);
+			let arrived = false;
+			let release!: () => void;
+			const gate = new Promise<void>((resolve) => {
+				release = resolve;
+			});
+			await page.route(
+				'**/us-central1/checkIn',
+				async (route) => {
+					expect(
+						route.request().postDataJSON().data.registration
+							.children,
+					).toHaveLength(1);
+					arrived = true;
+					await gate;
+					await route.continue();
+				},
+				{ times: 1 },
+			);
+			await page.getByText('Yes, check in', { exact: true }).click();
+			await expect.poll(() => arrived).toBe(true);
+			try {
+				await seedRegistration({
+					...registration,
+					...(change === 'unsubmitted' ? { incomplete: true } : {}),
+					...(change === 'cancelled'
+						? {
+								cancellation: {
+									supersededCode: registration.code,
+								},
+							}
+						: {}),
+					...(change === 'children'
+						? {
+								children: [
+									{
+										firstName: 'Changed',
+										lastName: 'Child',
+										dateOfBirth: '2018-01-01',
+										ageGroup: '6-8',
+										toyType: 'girls',
+									},
+									{
+										firstName: 'New',
+										lastName: 'Child',
+										dateOfBirth: '2019-01-01',
+										ageGroup: '6-8',
+										toyType: 'boys',
+									},
+								],
+							}
+						: {}),
+				});
+			} finally {
+				release();
+			}
+			if (change === 'children') {
+				await expect(page).toHaveURL(/\/confirmation$/);
+				await expect(
+					page.getByText('Give the shopper 2 coupons.'),
+				).toBeVisible();
+				expect(
+					await inspectRegistrationBoundary(
+						registration.emailAddress,
+					),
+				).toMatchObject({
+					checkinCount: 1,
+					checkinChildCount: 2,
+					registration: { hasCheckedIn: true },
+					annualCheckin: { customerCount: 1, childCount: 2 },
+				});
+			} else {
+				await expect(page.locator('ion-alert')).toContainText(
+					'Error checking in',
+				);
+				await expect(page).not.toHaveURL(/\/confirmation$/);
+				expect(
+					await inspectRegistrationBoundary(
+						registration.emailAddress,
+					),
+				).toMatchObject({
+					checkinCount: 0,
+					checkinChildCount: 0,
+					registration: { hasCheckedIn: false },
+					annualCheckin: { customerCount: 0, childCount: 0 },
+				});
+			}
+		});
+	}
 
 	test('CONCURRENT-002 concurrent appointment changes persist with eventually consistent capacity', async ({
 		page,

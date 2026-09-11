@@ -279,19 +279,73 @@ export const requireCanonicalChildren = (children: Child[] | undefined): Child[]
 export const requireEnabledCurrentSlot = (
 	slot: DateTimeSlot | undefined,
 	slotId: string,
+	now: Date,
+	customer = true,
 ): DateTimeSlot => {
 	if (!slot) {
-		throw new HttpsError('not-found', 'The selected appointment no longer exists.');
+		throw new HttpsError(
+			'not-found',
+			'The selected appointment no longer exists.',
+			{ reason: 'appointment-review-required' },
+		);
 	}
-	if (slot.programYear !== PROGRAM_YEAR || !slot.enabled) {
+	if (
+		slot.programYear !== PROGRAM_YEAR ||
+		!slot.enabled ||
+		!Number.isFinite(slot.maxSlots) ||
+		(slot.slotsReserved ?? 0) >= slot.maxSlots
+	) {
 		throw new HttpsError(
 			'failed-precondition',
 			'The selected appointment is no longer available.',
+			{ reason: 'appointment-review-required' },
 		);
 	}
-	if (!slot.dateTime) {
-		throw new HttpsError('failed-precondition', 'The selected appointment is invalid.');
+	const dateTime = appointmentInstant(slot.dateTime);
+	if (!Number.isFinite(dateTime) || (customer && dateTime <= now.valueOf())) {
+		throw new HttpsError(
+			'failed-precondition',
+			'The selected appointment is no longer available.',
+			{ reason: 'appointment-review-required' },
+		);
 	}
 
-	return { id: slot.id ?? slotId, dateTime: slot.dateTime, programYear: slot.programYear, maxSlots: slot.maxSlots, enabled: slot.enabled };
+	return {
+		id: slot.id ?? slotId,
+		dateTime: slot.dateTime,
+		programYear: slot.programYear,
+		maxSlots: slot.maxSlots,
+		enabled: slot.enabled,
+	};
+};
+
+export const appointmentInstant = (value: unknown): number => {
+	if (value instanceof Date) return value.valueOf();
+	if (typeof value === 'string') return new Date(value).valueOf();
+	if (
+		typeof value === 'object' &&
+		value !== null &&
+		'toDate' in value &&
+		typeof value.toDate === 'function'
+	) {
+		const date: unknown = value.toDate();
+		return date instanceof Date ? date.valueOf() : NaN;
+	}
+	return NaN;
+};
+
+export const requireReviewedAppointment = (
+	reviewed: unknown,
+	current: unknown,
+): void => {
+	if (
+		!Number.isFinite(appointmentInstant(reviewed)) ||
+		appointmentInstant(reviewed) !== appointmentInstant(current)
+	) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Please review the current appointment details.',
+			{ reason: 'appointment-review-required' },
+		);
+	}
 };

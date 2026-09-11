@@ -1,6 +1,7 @@
 import type { App } from 'firebase-admin/app';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore, Timestamp } from 'firebase-admin/firestore';
+import { afterEach, beforeEach, vi } from 'vitest';
 import admin from '../../src/firebase-admin';
 
 const DEFAULT_TEST_PASSWORD = ['Unit', 'Test', '123!'].join('');
@@ -27,6 +28,16 @@ const assertEmulatorEnvironment = (): void => {
 		'Integration helpers require Firestore, Auth, and Storage emulators.',
 	);
 };
+
+// Raw integration handlers run in Vitest, outside the Functions emulator
+// process. Select their local adapters explicitly for each test, but only
+// after validating every SDK endpoint. Unit suites do not import this helper.
+beforeEach(() => {
+	assertEmulatorEnvironment();
+	vi.stubEnv('FUNCTIONS_EMULATOR', 'true');
+});
+
+afterEach(() => vi.unstubAllEnvs());
 
 export const getAdminApp = (): App => {
 	assertEmulatorEnvironment();

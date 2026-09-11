@@ -114,10 +114,12 @@ export class ConfirmationPage {
 	}
 
 	public get encodedEventAddress(): string {
-		return encodeURIComponent([
-			this.translateService.instant('EVENT_INFO.EVENT_ADDRESS1'),
-			this.translateService.instant('EVENT_INFO.EVENT_ADDRESS2'),
-		].join(', '));
+		return encodeURIComponent(
+			[
+				this.translateService.instant('EVENT_INFO.EVENT_ADDRESS1'),
+				this.translateService.instant('EVENT_INFO.EVENT_ADDRESS2'),
+			].join(', '),
+		);
 	}
 
 	public async undoRegistration(): Promise<void> {
@@ -257,7 +259,17 @@ export class ConfirmationPage {
 			});
 			await successAlert.present();
 		} catch (error) {
-			await this.errorHandler.handleError(error as IError);
+			const details = (error as { details?: { reason?: string } })
+				?.details;
+			if (details?.reason === 'appointment-review-required') {
+				await this.errorHandler.handleError({
+					message: this.translateService.instant(
+						'OVERVIEW.APPOINTMENT_REVIEW_REQUIRED',
+					),
+				} as IError);
+			} else {
+				await this.errorHandler.handleError(error as IError);
+			}
 		} finally {
 			await loader.dismiss().catch(() => false);
 		}

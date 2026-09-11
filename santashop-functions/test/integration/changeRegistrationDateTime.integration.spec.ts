@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { seedPublicParameters } from '../../src/fn/testHelpers';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import changeRegistrationDateTime from '../../src/fn/changeRegistrationDateTime';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import {
@@ -13,13 +14,16 @@ import { createCallableRequest } from '../helpers/callable-context';
 
 describe.sequential('changeRegistrationDateTime integration', () => {
 	beforeEach(async () => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			Date.parse('2025-12-01T00:00:00.000Z'),
+		);
 		await clearEmulatorData();
 	});
 
 	it('changes a completed registration to a new time slot', async () => {
 		const qrCodeStoragePath = 'registrations/user-slot-1/code.png';
 		await seedQrCode(qrCodeStoragePath);
-		await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+		await seedPublicParameters({
 			admin: { allowChangeRegistration: true },
 		});
 		await setDocument(COLLECTION_SCHEMA.dateTimeSlots, 'slot-new', {

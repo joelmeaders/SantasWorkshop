@@ -29,11 +29,7 @@ import {
 	IonSelect,
 	IonSelectOption,
 } from '@ionic/angular/standalone';
-import {
-	firstValueFrom,
-	map,
-	Observable,
-} from 'rxjs';
+import { firstValueFrom, map, Observable } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
 	Child,
@@ -147,17 +143,19 @@ export class PreRegistrationPage {
 
 	public readonly availableSlots = toSignal(
 		this.availableSlotsQuery(this.programYear).pipe(
-		map((data) =>
-			data.map((s) => {
-				s.dateTime = timestampToDate(s.dateTime);
-				return s;
-			}),
-		),
-		map((data) =>
-			data
-				.slice()
-				.sort((a, b) => a.dateTime.valueOf() - b.dateTime.valueOf()),
-		),
+			map((data) =>
+				data.map((s) => {
+					s.dateTime = timestampToDate(s.dateTime);
+					return s;
+				}),
+			),
+			map((data) =>
+				data
+					.slice()
+					.sort(
+						(a, b) => a.dateTime.valueOf() - b.dateTime.valueOf(),
+					),
+			),
 		),
 		{ initialValue: undefined },
 	);
@@ -171,14 +169,12 @@ export class PreRegistrationPage {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const children = this.children()
-			.filter((e) => e.id !== childId);
+		const children = this.children().filter((e) => e.id !== childId);
 		this.children.set(children);
 	}
 
 	public async editChild(child: Child): Promise<void> {
-		const children = this.children()
-			.filter((e) => e.id !== child.id);
+		const children = this.children().filter((e) => e.id !== child.id);
 
 		children.push(child);
 		this.children.set(children);
@@ -218,7 +214,15 @@ export class PreRegistrationPage {
 			where('enabled', '==', true),
 		];
 
-		return this.dateTimeSlotCollection().readMany(queryConstraints, 'id');
+		return this.dateTimeSlotCollection()
+			.readMany(queryConstraints, 'id')
+			.pipe(
+				map((slots) =>
+					slots.filter(
+						(slot) => (slot.slotsReserved ?? 0) < slot.maxSlots,
+					),
+				),
+			);
 	}
 
 	public slotIndex(_: number, slot: DateTimeSlot): string {

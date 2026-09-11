@@ -74,7 +74,12 @@ export class DateTimeModalComponent {
 	public readonly selectedSlot = signal<DateTimeSlot | undefined>(undefined);
 	private readonly slotsStream$ = toObservable(this.slotsInput).pipe(
 		switchMap((slots) => slots),
-		map((slots: DateTimeSlot[]) => slots.filter((slot) => slot.enabled)),
+		map((slots: DateTimeSlot[]) =>
+			slots.filter(
+				(slot) =>
+					slot.enabled && (slot.slotsReserved ?? 0) < slot.maxSlots,
+			),
+		),
 		distinctUntilChanged(
 			(prev, curr) => JSON.stringify(prev) === JSON.stringify(curr),
 		),

@@ -83,7 +83,18 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.release_ref }}
-      - name: Validate target and record requested test bypass
+          persist-credentials: false
+      - name: Capture checkout revision before candidate code
+        id: revision
+        env:
+          EXPECTED_SHA: ${{ inputs.release_ref }}
+        run: |
+          actual=$(git rev-parse HEAD)
+          test "$actual" = "$EXPECTED_SHA"
+          echo "sha=$actual" >> "$GITHUB_OUTPUT"
+      - name: Release revision ${{ steps.revision.outputs.sha }}
+        run: echo 'Checkout revision recorded before candidate execution'
+      - name: Validate target and record verified test reuse
         env:
           RELEASE_REF: ${{ inputs.release_ref }}
           DEPLOY: ${{ inputs.deploy }}
@@ -94,7 +105,7 @@ jobs:
             test "$DEPLOY" = true
             {
               echo '### Manual deployment'
-              printf 'Selected ref: `%s`\nTarget: `%s/%s`\nTests: skipped by request\n' "$RELEASE_REF" "$UI_TARGET" "$UI_MODE"
+              printf 'Selected ref: `%s`\nTarget: `%s/%s`\nTests: successful exact-SHA evidence reused\n' "$RELEASE_REF" "$UI_TARGET" "$UI_MODE"
             } >> "$GITHUB_STEP_SUMMARY"
           fi
       - uses: pnpm/action-setup@v6
@@ -112,7 +123,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run e2e:browser:setup:ci
         if: ${{ !inputs.skip_tests }}
-      - run: pnpm run "e2e:test:$UI_TARGET"
+      - name: Customer or staff E2E tests
+        run: pnpm run "e2e:test:$UI_TARGET"
         if: ${{ !inputs.skip_tests }}
       - name: Upload E2E failure artifacts
         if: ${{ failure() && !inputs.skip_tests }}
@@ -150,3 +162,14 @@ jobs:
           projectId: ${{ inputs.mode == 'prod' && 'santas-workshop-193b5' || 'santas-workshop-test' }}
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+
+      - name: Test deployment ${{ inputs.target }} santas-workshop-test
+        if: ${{ inputs.deploy && inputs.mode == 'test' }}
+        run: echo 'Test Hosting deployment succeeded'
+      - name: Record production deployment result
+        if: ${{ always() && inputs.deploy && inputs.mode == 'prod' }}
+        env:
+          RELEASE_SHA: ${{ inputs.release_ref }}
+          DEPLOYMENT_STATUS: ${{ job.status }}
+        run: |
+          printf 'Production Hosting deployment for `%s` (%s): %s\n' "$RELEASE_SHA" "$UI_TARGET" "$DEPLOYMENT_STATUS" >> "$GITHUB_STEP_SUMMARY"

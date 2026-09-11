@@ -1,4 +1,8 @@
-import { test, expect } from '../../fixtures/test-fixtures';
+import {
+	test,
+	expect,
+	type E2eRegistrationBoundary,
+} from '../../fixtures/test-fixtures';
 import {
 	createAccountViaUi,
 	fillCreateAccountForm,
@@ -80,9 +84,13 @@ test.describe('customer account and session access', () => {
 		await page.fill('#emailAddress input', account.emailAddress);
 		await page.fill('#password input', account.password);
 		await page.fill('#password2 input', account.password);
+		await expect(page.locator('#password2')).toHaveClass(/ng-valid/);
+		await page.locator('#password2 input').blur();
 		await expect(submitButton).toHaveClass(/button-disabled/);
 
-		await page.click('#legalCheckbox');
+		const policyCheckbox = page.locator('#legalCheckbox');
+		await policyCheckbox.click();
+		await expect(policyCheckbox).toBeChecked();
 		await expect(submitButton).toHaveClass(/button-disabled/);
 
 		await selectReferralViaUi(page);
@@ -338,6 +346,120 @@ test.describe('customer account and session access', () => {
 		await signInViaUi(page, account);
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 	});
+	for (const fault of [
+		'lost-creation-response',
+		'transient-sign-in-failure',
+	] as const) {
+		test(`AUTH-016 recovers ${fault} without duplicating the committed account`, async ({
+			page,
+			inspectRegistrationBoundary,
+		}) => {
+			const account = {
+				...randomAccount(),
+				password: ' winter-pass-2026 ',
+			};
+			let committed: E2eRegistrationBoundary | undefined;
+			await page.route(
+				'**/newAccount',
+				async (route) => {
+					const response = await route.fetch();
+					expect(response.ok()).toBe(true);
+					committed = await inspectRegistrationBoundary(
+						account.emailAddress,
+					);
+					expect((await response.json()).result).toBe(committed.uid);
+					expect(committed).toMatchObject({
+						authUserCount: 1,
+						userDocumentCount: 1,
+						registrationCount: 1,
+						ownedQrObjectCount: 1,
+					});
+					if (fault === 'lost-creation-response')
+						await route.abort('connectionreset');
+					else await route.fulfill({ response });
+				},
+				{ times: 1 },
+			);
+			if (fault === 'transient-sign-in-failure') {
+				await page.route(
+					'**/accounts:signInWithPassword*',
+					async (route) => {
+						expect(committed).toBeDefined();
+						await route.abort('connectionreset');
+					},
+					{ times: 1 },
+				);
+			}
+			await page.goto('/sign-up');
+			await fillCreateAccountForm(page, account);
+			await page.click('#legalCheckbox');
+			await selectReferralViaUi(page);
+			await page.locator('#submitButton').click();
+			await page
+				.locator('ion-alert button.alert-button-role-confirm')
+				.click();
+			const alert = page.locator('ion-alert');
+			await expect(alert).toContainText(
+				fault === 'lost-creation-response'
+					? 'Error Encountered'
+					: 'Account created',
+				{ timeout: 15000 },
+			);
+			expect(committed).toBeDefined();
+			if (!committed)
+				throw new Error(
+					'Account creation did not commit before recovery.',
+				);
+			await expect(page.locator('#emailAddress input')).toHaveValue(
+				account.emailAddress,
+			);
+			await expect(page.locator('#password input')).toHaveValue(
+				account.password,
+			);
+			if (fault === 'lost-creation-response') {
+				await alert
+					.getByRole('button', { name: 'Ok', exact: true })
+					.click();
+				await page.locator('#submitButton').click();
+				await page
+					.locator('ion-alert button.alert-button-role-confirm')
+					.click();
+				await expect(alert).toContainText('Account in use', {
+					timeout: 15000,
+				});
+			}
+			await expect(
+				alert.getByRole('button', {
+					name: 'Reset password',
+					exact: true,
+				}),
+			).toBeVisible();
+			await alert
+				.getByRole('button', { name: 'Sign In', exact: true })
+				.click();
+			await expect(page).toHaveURL(/\/?\?mode=sign-in$/);
+			await page.locator('#signInEmail input').fill(account.emailAddress);
+			await page.locator('#signInPassword input').fill(account.password);
+			await page.locator('#signInButton').click();
+			await expect(page).toHaveURL(/\/pre-registration\/overview$/, {
+				timeout: 15000,
+			});
+			await expect(page.locator('#children-heading')).toBeVisible();
+			const recovered = await inspectRegistrationBoundary(
+				account.emailAddress,
+			);
+			expect(recovered).toMatchObject({
+				authUserCount: 1,
+				userDocumentCount: 1,
+				registrationCount: 1,
+				ownedQrObjectCount: 1,
+			});
+			expect(recovered.uid).toBe(committed.uid);
+			expect(recovered.qrPaths).toEqual(committed.qrPaths);
+			expect(recovered.registration).toEqual(committed.registration);
+		});
+	}
+
 	test('AUTH-015 shows Spanish signup phases and a readable recovery alert on mobile', async ({
 		page,
 		request,
@@ -409,7 +531,9 @@ test.describe('customer account and session access', () => {
 		await expect(acknowledge).toBeVisible();
 		const bounds = await acknowledge.boundingBox();
 		expect(bounds).not.toBeNull();
-		expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(844);
+		if (!bounds)
+			throw new Error('Recovery acknowledgement has no visible bounds.');
+		expect(bounds.y + bounds.height).toBeLessThanOrEqual(844);
 		await acknowledge.click();
 		await expect(alert).toHaveCount(0);
 	});

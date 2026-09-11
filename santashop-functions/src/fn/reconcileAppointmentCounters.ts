@@ -9,7 +9,7 @@ const COUNTER_CONCURRENCY = 10;
 
 /**
  * This method loads all time slots and updates the reserved spots.
- * If the reserved spots is greater than the max slots, it disables the slot.
+ * The enabled field is operator permission. Consumers derive capacity availability.
  */
 export default async function scheduledDateTimeSlotCounters(): Promise<string> {
 	// Load all date/time slots
@@ -113,7 +113,6 @@ const reconcileDateTimeSlot = async (
 			.doc(slotId)
 			.update({
 				slotsReserved: registrationCount,
-				enabled: registrationCount < slot.maxSlots,
 				lastUpdated: new Date(),
 			});
 	}

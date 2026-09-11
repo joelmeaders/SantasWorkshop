@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
-import { DateTimeSlot } from '@santashop/models';
+import { DateTimeSlot, Registration } from '@santashop/models';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AlertController, ToastController } from '@ionic/angular/standalone';
 import {
@@ -21,6 +21,8 @@ import { ChildrenCardComponent } from './children-card/children-card.component';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
 import { SubmitCardComponent } from './submit-card/submit-card.component';
 import { PreRegistrationService } from '../../../core';
+import en from '../../../../assets/i18n/en.json';
+import es from '../../../../assets/i18n/es.json';
 
 describe('OverviewPage', () => {
 	let component: OverviewPage;
@@ -45,8 +47,11 @@ describe('OverviewPage', () => {
 	);
 	const registrationComplete = new BehaviorSubject(false);
 	const registrationSubmitted = new BehaviorSubject(false);
+	const userRegistration = new BehaviorSubject<Registration | undefined>(
+		undefined,
+	);
 	const preregistrationService = {
-		userRegistration$: of(undefined),
+		userRegistration$: userRegistration.asObservable(),
 		children$: of([]),
 		childCount$: childCount.asObservable(),
 		dateTimeSlot$: dateTimeSlot.asObservable(),
@@ -70,6 +75,11 @@ describe('OverviewPage', () => {
 		dateTimeSlot.next(undefined);
 		registrationComplete.next(false);
 		registrationSubmitted.next(false);
+		preregistrationService.setDraftAppointment.mockReset();
+		preregistrationService.setDraftAppointment.mockResolvedValue({
+			data: true,
+		});
+		preregistrationService.completeRegistration.mockReset();
 		preregistrationService.saveDraftChild.mockClear();
 		preregistrationService.saveDraftChild.mockResolvedValue({ data: true });
 		alert.present.mockResolvedValue(undefined);
@@ -124,6 +134,122 @@ describe('OverviewPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it.each([
+		['en', en],
+		['es', es],
+	] as const)(
+		'preserves the draft and opens selection with the real %s recovery text',
+		async (_language, catalog) => {
+			childCount.next(1);
+			dateTimeSlot.next({
+				id: 'slot-1',
+				dateTime: new Date('2025-12-10T18:00:00.000Z'),
+			} as DateTimeSlot);
+			await fixture.whenStable();
+			const translate = TestBed.inject(TranslateService);
+			vi.mocked(translate.instant).mockImplementation((key) =>
+				key === 'OVERVIEW.APPOINTMENT_REVIEW_REQUIRED'
+					? catalog.OVERVIEW.APPOINTMENT_REVIEW_REQUIRED
+					: 'translated',
+			);
+			preregistrationService.completeRegistration.mockRejectedValue({
+				details: { reason: 'appointment-review-required' },
+			});
+			await component.submitRegistration();
+			expect(toastController.create).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					message: catalog.OVERVIEW.APPOINTMENT_REVIEW_REQUIRED,
+					color: 'danger',
+				}),
+			);
+			expect(childCount.value).toBe(1);
+			expect(dateTimeSlot.value?.id).toBe('slot-1');
+			expect(component.reviewing()).toBe(false);
+			const schedule = fixture.debugElement.query(
+				By.directive(ScheduleCardComponent),
+			).componentInstance as ScheduleCardComponent;
+			expect(schedule.expanded()).toBe(true);
+		},
+	);
+
+	it('retains the completion ID after an uncertain response and converges on a later committed snapshot', async () => {
+		const router = TestBed.inject(Router);
+		const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+		preregistrationService.completeRegistration.mockRejectedValue(
+			new Error('Response lost'),
+		);
+		await component.submitRegistration();
+		await component.submitRegistration();
+		expect(
+			preregistrationService.completeRegistration.mock.calls[1][0]
+				.mutationId,
+		).toBe(
+			preregistrationService.completeRegistration.mock.calls[0][0]
+				.mutationId,
+		);
+		registrationSubmitted.next(true);
+		await fixture.whenStable();
+		expect(navigate).toHaveBeenCalledWith([
+			'/pre-registration/confirmation',
+		]);
+		registrationSubmitted.next(false);
+		userRegistration.next(undefined);
+		await fixture.whenStable();
+		await component.submitRegistration();
+		expect(
+			preregistrationService.completeRegistration.mock.calls[2][0]
+				.mutationId,
+		).not.toBe(
+			preregistrationService.completeRegistration.mock.calls[0][0]
+				.mutationId,
+		);
+	});
+
+	it('exits review when the tab resumes and requires fresh server validation to review again', async () => {
+		childCount.next(1);
+		dateTimeSlot.next({
+			id: 'slot-1',
+			dateTime: new Date('2025-12-10T18:00:00.000Z'),
+		} as DateTimeSlot);
+		await component.startReview();
+		expect(component.reviewing()).toBe(true);
+		window.dispatchEvent(new Event('online'));
+		expect(component.reviewing()).toBe(false);
+		await component.startReview();
+		expect(
+			preregistrationService.setDraftAppointment,
+		).toHaveBeenCalledTimes(2);
+		expect(
+			preregistrationService.setDraftAppointment,
+		).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				slotId: 'slot-1',
+				reviewedDateTime: '2025-12-10T18:00:00.000Z',
+			}),
+		);
+	});
+
+	it('clears a pending completion identity when the authenticated registration changes', async () => {
+		userRegistration.next({ uid: 'first-user' } as Registration);
+		await fixture.whenStable();
+		preregistrationService.completeRegistration.mockRejectedValue(
+			new Error('Response lost'),
+		);
+		await component.submitRegistration();
+		userRegistration.next(undefined);
+		await fixture.whenStable();
+		userRegistration.next({ uid: 'second-user' } as Registration);
+		await fixture.whenStable();
+		await component.submitRegistration();
+		expect(
+			preregistrationService.completeRegistration.mock.calls[1][0]
+				.mutationId,
+		).not.toBe(
+			preregistrationService.completeRegistration.mock.calls[0][0]
+				.mutationId,
+		);
 	});
 
 	it('asks about another child after a new child is saved and collapses on No', async () => {
@@ -224,7 +350,11 @@ describe('OverviewPage', () => {
 		childrenCard.editorOpen.set(true);
 		scheduleCard.expanded.set(true);
 
-		component.startReview();
+		dateTimeSlot.next({
+			id: 'slot-1',
+			dateTime: new Date('2025-12-10T18:00:00.000Z'),
+		} as DateTimeSlot);
+		await component.startReview();
 		await fixture.whenStable();
 
 		expect(component.reviewing()).toBe(true);
@@ -259,7 +389,11 @@ describe('OverviewPage', () => {
 
 	it('draws attention to the final step and opens review when selected', async (): Promise<void> => {
 		childCount.next(1);
-		dateTimeSlot.next({ id: 'slot-1', enabled: true } as DateTimeSlot);
+		dateTimeSlot.next({
+			id: 'slot-1',
+			enabled: true,
+			dateTime: new Date('2025-12-10T18:00:00.000Z'),
+		} as DateTimeSlot);
 		await fixture.whenStable();
 
 		const nudge = fixture.nativeElement.querySelector(
@@ -291,6 +425,7 @@ describe('OverviewPage', () => {
 
 		await component.chooseDateTime({
 			id: 'slot-1',
+			dateTime: new Date('2026-12-20T18:00:00.000Z'),
 			enabled: true,
 		} as DateTimeSlot);
 		await component.chooseDateTime({

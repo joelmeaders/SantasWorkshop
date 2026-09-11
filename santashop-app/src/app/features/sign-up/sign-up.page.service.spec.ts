@@ -133,8 +133,14 @@ describe('SignUpPageService', () => {
 				message: es.SIGNUP.ACCOUNT_CREATED_MESSAGE,
 				subHeader: 'holly@example.com',
 				buttons: expect.arrayContaining([
-					expect.objectContaining({ role: 'reset' }),
-					expect.objectContaining({ role: 'sign-in' }),
+					expect.objectContaining({
+						role: 'reset',
+						text: es.FORGOTPASS.RESET_PASSWORD,
+					}),
+					expect.objectContaining({
+						role: 'sign-in',
+						text: es.COMMON.SIGN_IN,
+					}),
 				]),
 				backdropDismiss: false,
 			}),
@@ -175,6 +181,18 @@ describe('SignUpPageService', () => {
 			expect.objectContaining({
 				subHeader: 'holly@example.com',
 				backdropDismiss: false,
+				header: es.SIGNUP.ACCOUNT_EXISTS,
+				message: es.SIGNUP.ACCOUNT_EXISTS_MESSAGE,
+				buttons: expect.arrayContaining([
+					expect.objectContaining({
+						role: 'reset',
+						text: es.FORGOTPASS.RESET_PASSWORD,
+					}),
+					expect.objectContaining({
+						role: 'sign-in',
+						text: es.COMMON.SIGN_IN,
+					}),
+				]),
 			}),
 		);
 		expect(alert.present).toHaveBeenCalled();

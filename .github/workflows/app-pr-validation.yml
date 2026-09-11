@@ -39,6 +39,8 @@ on:
       - '.github/workflows/admin-test-and-prod-release.yml'
       - '.github/workflows/ui-target.yml'
       - 'scripts/ui-targets*.mjs'
+      - 'scripts/release-*.mjs'
+      - '.github/workflows/release-gate.yml'
       - 'scripts/github-secrets*.ps1'
       - 'tsconfig.json'
       - 'storybook-visual/**'
@@ -81,7 +83,7 @@ jobs:
           node-version: '24.18.0'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node --test scripts/ui-targets.test.mjs
+      - run: node --test scripts/ui-targets.test.mjs scripts/release-*.test.mjs
       - name: Test secret synchronization without credentials or network writes
         shell: pwsh
         run: ./scripts/github-secrets.test.ps1

@@ -8,18 +8,77 @@ Create release reports and deployment evidence directly in the Obsidian vault
 under `Archive/Releases`, following the [recording policy](README.md#recording-future-work).
 Keep this page as the maintained release procedure; do not append execution results.
 
-## Manual deployment without repeating tests
+## Exact-SHA release evidence and owner approval
 
-The app, admin, and Functions release workflows accept `deployment_target`
-(`test` or `prod`), `release_ref`, and `skip_tests`. The default remains a
-production promotion with tests enabled. Set `skip_tests` to `true` for a manual
-run that should omit automated test suites and their browser setup. The workflow
-summary records the selected target and ref and states that tests were skipped.
+Run app, admin, and Functions release workflows from `master`. `release_ref`
+must be a full lowercase 40-character commit SHA that exists on `master`.
+Branches, tags, abbreviated SHAs, and unmerged PR commits are rejected.
+Every candidate checkout uses the immutable SHA returned by the shared gate.
 
-Dependency installation, builds, artifact checks, environment readiness, and
-live deployment verification still run. Push-triggered deployments and pull
-request checks keep their normal test gates. A successful skipped-test deployment
-is deployment evidence only; cite the separate test run when reporting validation.
+The gate runs from the dispatch workflow's source commit before candidate
+installation, builds, or production credentials. It requires `contents: read`
+and `actions: read` only. It compares evidence-producing workflow and verifier
+files with that trusted source. Evidence from a different producer version must
+be regenerated from current `master`.
+
+Each producing job records `git rev-parse HEAD` immediately after checkout,
+before running candidate code. Verification reads this marker and individual
+job/step results from the GitHub API. A dispatch run's `head_sha` identifies its
+workflow source and can differ from its actual tested or deployed SHA.
+PR heads and synthetic merge commits do not substitute for release evidence.
+
+| Promotion | Required successful validation for the exact SHA                                                                                   | Required successful test deployment                                                |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Functions | `unit_tests`: Functions unit tests; `integration_tests`: Functions integration tests and customer/staff E2E                        | Functions `deploy_test`, including live resource checks, in `santas-workshop-test` |
+| App       | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | App Hosting in `santas-workshop-test`                                              |
+| Admin     | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | Admin Hosting in `santas-workshop-test`                                            |
+
+Both hosting validations are required for every hosting promotion because core,
+models, configuration, and browser behavior cross app boundaries. This policy
+does not infer equivalence from path-filtered or previous-commit checks.
+If a push path filter omits a required run, dispatch the missing test release
+with the same SHA and `skip_tests=false`. For Storybook, dispatch its existing
+workflow with `release_ref` set to that SHA. Do not create another behavior suite.
+
+To promote a release:
+
+1. Complete the required test releases and Storybook run, where applicable.
+2. Inspect those runs and complete the applicable hosted acceptance checks below.
+3. As repository owner Joel, dispatch the release workflow from `master`.
+4. Set `deployment_target=prod` and `release_ref` to the tested full SHA.
+5. Set `evidence_run_ids` to the comma-separated validation and test-deployment run IDs.
+6. Repeat the SHA in `production_approval` to approve that SHA and those runs.
+7. Inspect the gate summary and the separate production deployment result.
+
+This explicit owner dispatch is the production approval checkpoint. It does
+not require another reviewer. Keep workflow editing and production credentials
+under owner control. A protected GitHub environment may provide an additional
+owner checkpoint where available, but the workflow does not assume one exists.
+
+Missing, failed, cancelled, incomplete, duplicate, skipped, untrusted, or
+wrong-SHA evidence blocks promotion. Wrong repositories, workflow identities,
+and deployment targets also block promotion. API failures stop the gate with
+an error. The summary lists the verified run IDs/URLs, selected SHA, test reuse,
+owner approval, and separate deployment result. There is no emergency bypass.
+
+### Reuse tests and roll back
+
+`skip_tests=true` means reuse successful exact-SHA evidence without rerunning
+suites. Production always requires validation and test-deployment evidence,
+regardless of this input. A test deployment with `skip_tests=true` requires
+separate validation evidence, but does not require an earlier test deployment.
+It can provide new deployment evidence, not new test evidence.
+
+Dependency installation, builds, artifact checks, and deployment checks still
+run. To roll back, select an earlier SHA on `master` and supply its verified
+runs through the same gate. If runs have expired or their producer version no
+longer matches, regenerate the required evidence before promotion. A rollback
+does not authorize customer data changes.
+
+Run `node --test scripts/release-*.test.mjs` for verifier fixtures and the actual
+YAML decision/dependency dry run. The harness uses a harmless deployment sentinel
+without production credentials. It does not execute GitHub's runner or validate
+hosted IAM, deployment services, browser timing, or real email delivery.
 
 ## Remote Config prerequisites
 
@@ -98,6 +157,29 @@ the scheduled counter job. Overbooking must not corrupt registrations, create
 duplicate check-ins, or prevent staff from serving customers. Staff should use
 the schedule and registration reports to redistribute operational capacity when
 a slot exceeds its target.
+
+New customer selections, submissions, and reschedules require the current
+program year, operator permission (`enabled=true`), and a valid future start.
+The latest stored `slotsReserved` must be below `maxSlots`. The server rejects
+these actions when its current time reaches the appointment start. Display
+appointment times in `America/Denver`. Previously submitted appointments and
+staff check-in/on-site workflows retain their existing behavior after the start.
+
+A selection has no separate age limit. Entering review confirms the current
+appointment state. Resuming a tab exits review and refreshes that state. If the
+appointment start changed, the customer must select and review it again. A
+successful mutation receipt can still replay after a later closure or cutoff.
+
+`enabled` records the operator's permission. The counter job updates exact
+`slotsReserved` counts and never changes `enabled`. Existing disabled slots
+remain closed until an operator enables them. Historical closure causes cannot
+be inferred safely. A new `maxSlots` value applies even if counts did not change.
+
+The configured counter schedule runs every five minutes in November and
+December. Operators can manually increase its frequency during high demand,
+inspect stored counts, close a slot, or increase its capacity. Concurrent
+selections can exceed capacity before counts refresh. This remains a soft
+capacity policy and does not reserve capacity atomically for each selection.
 
 ## Dependency security
 

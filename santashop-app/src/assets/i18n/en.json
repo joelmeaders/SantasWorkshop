@@ -120,7 +120,8 @@
 		"ADD_CHILD": "Add Child",
 		"EDIT_CHILD": "Save Changes",
 		"SCHEDULE": "Schedule",
-		"CHANGE_TIME": "Change Time"
+		"CHANGE_TIME": "Change Time",
+		"APPOINTMENT_REVIEW_REQUIRED": "This appointment changed or is no longer available. Your family details are saved. Please choose and review an available appointment."
 	},
 	"CHILDREN": {
 		"ADD_A_CHILD": "Add a Child",

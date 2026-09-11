@@ -2,6 +2,46 @@
 import { test as base } from '@playwright/test';
 import { E2E_FUNCTIONS_EMULATOR_URL } from './season';
 
+export interface E2eRegistrationBoundary {
+	uid: string;
+	authUserCount: number;
+	userDocumentCount: number;
+	registrationCount: number;
+	ownedQrObjectCount: number;
+	qrPaths: string[];
+	emailCount: number;
+	searchIndexCount: number;
+	registration: {
+		firstName: string;
+		lastName: string;
+		emailAddress: string;
+		zipCode: string;
+		children: unknown[];
+		registrationSubmittedOn: string | null;
+		cancelledOn: string | null;
+		hasCheckedIn: boolean;
+		dateTimeSlot: { id: string; dateTime: string | null } | null;
+	};
+	receipts: {
+		id: string;
+		operation: string;
+		result: boolean;
+		completedOn: string | null;
+	}[];
+	checkinCount: number;
+	checkinIds: string[];
+	checkinChildCount: number;
+	annualCheckin: { customerCount: number; childCount: number };
+}
+
+export interface E2eDateTimeSlotUpdate {
+	enabled?: boolean;
+	dateTime?: string;
+	programYear?: number;
+	maxSlots?: number;
+	deleted?: boolean;
+}
+
 export interface E2eAdminSeedUser {
 	uid?: string;
 	emailAddress: string;
@@ -79,7 +119,13 @@ export interface E2eSeedRegistration {
 	zipCode: string;
 	code: string;
 	dateTime: string;
-	children?: { firstName: string; lastName: string; dateOfBirth: string; ageGroup: string }[];
+	children?: {
+		firstName: string;
+		lastName: string;
+		dateOfBirth: string;
+		ageGroup: string;
+		toyType?: string;
+	}[];
 	hasCheckedIn?: boolean;
 	checkInDateTime?: string;
 	qrReady?: boolean;
@@ -111,8 +157,18 @@ export interface E2eRegistrationQrLifecycle {
 		zip?: string;
 	};
 	slots: {
-		current?: { id: string; maxSlots?: number; slotsReserved?: number; enabled?: boolean };
-		previous?: { id: string; maxSlots?: number; slotsReserved?: number; enabled?: boolean };
+		current?: {
+			id: string;
+			maxSlots?: number;
+			slotsReserved?: number;
+			enabled?: boolean;
+		};
+		previous?: {
+			id: string;
+			maxSlots?: number;
+			slotsReserved?: number;
+			enabled?: boolean;
+		};
 	};
 	current: {
 		code?: string;
@@ -258,6 +314,14 @@ export interface E2ePublicParameters {
  */
 
 interface CustomFixtures {
+	inspectRegistrationBoundary: (
+		emailAddress: string,
+	) => Promise<E2eRegistrationBoundary>;
+	updateDateTimeSlot: (
+		id: string,
+		changes: E2eDateTimeSlotUpdate,
+	) => Promise<void>;
+	setBookingClock: (now: string | null) => Promise<void>;
 	/** Helper to seed test scenarios in the Firebase emulator */
 	seedScenario: (scenario: string) => Promise<void>;
 	/** Helper to clear all data from Firebase emulator */
@@ -440,11 +504,32 @@ export const test = base.extend<CustomFixtures>({
 		await use(inspectRegistrationQrLifecycle);
 	},
 
+	inspectRegistrationBoundary: async ({}, use): Promise<void> => {
+		await use(
+			(emailAddress) =>
+				callFunction('testInspectRegistrationBoundary', {
+					emailAddress,
+				}) as Promise<E2eRegistrationBoundary>,
+		);
+	},
+	updateDateTimeSlot: async ({}, use): Promise<void> => {
+		await use(async (id, changes) => {
+			await callFunction('testUpdateDateTimeSlot', { id, changes });
+		});
+	},
+	setBookingClock: async ({}, use): Promise<void> => {
+		await use(async (now) => {
+			await callFunction('testSetBookingClock', { now });
+		});
+	},
+
 	inspectRegistrationScanAudit: async ({}, use): Promise<void> => {
 		const inspectRegistrationScanAudit = async (
 			emailAddress: string,
 		): Promise<E2eRegistrationScanAudit> =>
-			callFunction('testInspectRegistrationScanAudit', { emailAddress }) as Promise<E2eRegistrationScanAudit>;
+			callFunction('testInspectRegistrationScanAudit', {
+				emailAddress,
+			}) as Promise<E2eRegistrationScanAudit>;
 		await use(inspectRegistrationScanAudit);
 	},
 
@@ -452,7 +537,9 @@ export const test = base.extend<CustomFixtures>({
 		const inspectQueuedRegistrationEmails = async (
 			emailAddress: string,
 		): Promise<E2eQueuedRegistrationEmailSnapshot[]> =>
-			callFunction('testInspectQueuedRegistrationEmails', { emailAddress }) as Promise<E2eQueuedRegistrationEmailSnapshot[]>;
+			callFunction('testInspectQueuedRegistrationEmails', {
+				emailAddress,
+			}) as Promise<E2eQueuedRegistrationEmailSnapshot[]>;
 		await use(inspectQueuedRegistrationEmails);
 	},
 

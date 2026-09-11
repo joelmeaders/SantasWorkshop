@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
 	createAccountAdminMock,
@@ -10,6 +10,9 @@ describe('changeRegistrationDateTime handler', () => {
 	let adminMock: AccountAdminMock;
 
 	beforeEach(() => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			Date.parse('2025-12-01T00:00:00.000Z'),
+		);
 		adminMock = createAccountAdminMock();
 	});
 

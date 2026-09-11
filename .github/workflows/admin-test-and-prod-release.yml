@@ -32,10 +32,12 @@ name: Admin Test Deploy and Manual Prod Release
     - .github/workflows/admin-test-and-prod-release.yml
     - .github/workflows/app-pr-validation.yml
     - .github/workflows/ui-target.yml
+    - .github/workflows/release-gate.yml
+    - scripts/release-*.mjs
   workflow_dispatch:
     inputs:
       release_ref:
-        description: Commit SHA or ref to promote after test validation
+        description: Full 40-character commit SHA on master
         required: true
         type: string
       deployment_target:
@@ -47,20 +49,41 @@ name: Admin Test Deploy and Manual Prod Release
         - test
         - prod
       skip_tests:
-        description: Skip test suites for this manual deployment
+        description: Reuse verified exact-SHA tests without rerunning suites
         required: true
         default: false
         type: boolean
+      evidence_run_ids:
+        description: Comma-separated successful validation and test-deployment run IDs
+        type: string
+        default: ''
+      production_approval:
+        description: Owner approval - repeat the full SHA to approve these evidence runs for production
+        type: string
+        default: ''
+
 permissions:
   contents: read
+  actions: read
 
 jobs:
-  release:
-    uses: ./.github/workflows/ui-target.yml
+  prepare_release:
+    uses: ./.github/workflows/release-gate.yml
     with:
       target: admin
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
       release_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
+      skip_tests: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || false }}
+      evidence_run_ids: ${{ inputs.evidence_run_ids || '' }}
+      production_approval: ${{ inputs.production_approval || '' }}
+
+  release:
+    needs: prepare_release
+    uses: ./.github/workflows/ui-target.yml
+    with:
+      target: admin
+      mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
+      release_ref: ${{ needs.prepare_release.outputs.sha }}
       deploy: true
       skip_tests: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || false }}
     secrets:

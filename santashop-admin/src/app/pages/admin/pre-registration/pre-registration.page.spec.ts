@@ -23,8 +23,27 @@ describe('PreRegistrationPage', () => {
 	let fixture: ComponentFixture<PreRegistrationPage>;
 	const readMany = vi.fn();
 	const availableSlots = [
-		{ id: 'late', dateTime: new Date('2026-12-13T10:00:00Z') },
-		{ id: 'early', dateTime: new Date('2026-12-12T10:00:00Z') },
+		{
+			id: 'late',
+			dateTime: new Date('2026-12-13T10:00:00Z'),
+			enabled: true,
+			maxSlots: 3,
+			slotsReserved: 0,
+		},
+		{
+			id: 'early',
+			dateTime: new Date('2026-12-12T10:00:00Z'),
+			enabled: true,
+			maxSlots: 3,
+			slotsReserved: 2,
+		},
+		{
+			id: 'full',
+			dateTime: new Date('2026-12-12T12:00:00Z'),
+			enabled: true,
+			maxSlots: 3,
+			slotsReserved: 3,
+		},
 	];
 	const searchUsersByEmailAddress = vi.fn();
 	const callable = vi.fn();
@@ -100,7 +119,7 @@ describe('PreRegistrationPage', () => {
 		expect(component).toBeTruthy();
 	});
 
-	it('normalizes and sorts available slots while keeping stable slot identifiers', async () => {
+	it('sorts available slots, excludes full slots, and keeps stable identifiers', async () => {
 		expect(component.availableSlots()).toMatchObject([
 			{ id: 'early' },
 			{ id: 'late' },
@@ -119,7 +138,9 @@ describe('PreRegistrationPage', () => {
 		await component.chooseReferral();
 		await fixture.whenStable();
 
-		expect(component.children()).toMatchObject([{ id: 2, firstName: 'Noah' }]);
+		expect(component.children()).toMatchObject([
+			{ id: 2, firstName: 'Noah' },
+		]);
 		expect(fixture.nativeElement.textContent).toContain('Noah');
 		expect(component.form.controls['referredBy'].value).toBe(
 			'School flyer',

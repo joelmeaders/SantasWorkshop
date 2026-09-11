@@ -342,6 +342,78 @@ describe('ScheduleEditorPage', () => {
 		);
 	});
 
+	it.each([
+		[
+			'',
+			'INITIALIZE SCHEDULE test-project 2025',
+			'Enter your account password.',
+		],
+		['secret', '', 'The confirmation phrase does not match.'],
+		['secret', 'WRONG PHRASE', 'The confirmation phrase does not match.'],
+	])(
+		'keeps invalid owner confirmation open and allows correction: %s / %s',
+		async (password, phrase, message) => {
+			const dismissal = createDeferred<{
+				role: string;
+				data: { values: { password: string; phrase: string } };
+			}>();
+			const alert = {
+				message: '',
+				present: vi.fn().mockResolvedValue(undefined),
+				onDidDismiss: vi.fn().mockReturnValue(dismissal.promise),
+			} as unknown as HTMLIonAlertElement;
+			alerts.create.mockResolvedValueOnce(alert);
+			scheduleEditorService.startCreateSlots.mockResolvedValue({
+				created: 1,
+				skipped: 0,
+			});
+			component.generatorForm.setValue({
+				startDate: '2025-12-12',
+				endDate: '2025-12-12',
+				capacity: 5,
+				startHour: 10,
+				endHour: 10,
+			});
+			const generate = component.generateSlots();
+			await vi.waitFor(() =>
+				expect(alert.onDidDismiss).toHaveBeenCalled(),
+			);
+			const options = alerts.create.mock.calls[0]?.[0];
+			const confirm = options?.buttons?.find(
+				(button) =>
+					typeof button !== 'string' && button.role === 'confirm',
+			);
+			if (!confirm || typeof confirm === 'string')
+				throw new Error('Missing confirm button');
+			expect(confirm.handler).toBeTypeOf('function');
+			expect(await confirm.handler?.({ password, phrase })).toBe(false);
+			expect(alert.message).toContain(message);
+			expect(alert.message).toContain(
+				'INITIALIZE SCHEDULE test-project 2025',
+			);
+			expect(
+				TestBed.inject(AuthService).reauthenticate,
+			).not.toHaveBeenCalled();
+			expect(
+				scheduleEditorService.startCreateSlots,
+			).not.toHaveBeenCalled();
+
+			const corrected = {
+				password: 'secret',
+				phrase: 'INITIALIZE SCHEDULE test-project 2025',
+			};
+			expect(await confirm.handler?.(corrected)).toBe(true);
+			dismissal.resolve({ role: 'confirm', data: { values: corrected } });
+			await generate;
+			expect(
+				TestBed.inject(AuthService).reauthenticate,
+			).toHaveBeenCalledExactlyOnceWith('secret');
+			expect(
+				scheduleEditorService.startCreateSlots,
+			).toHaveBeenCalledExactlyOnceWith('preview-1', corrected.phrase);
+		},
+	);
+
 	it('does not generate schedules with an invalid form or a cancelled confirmation', async () => {
 		await component.generateSlots();
 		expect(scheduleEditorService.previewCreateSlots).not.toHaveBeenCalled();
@@ -356,6 +428,10 @@ describe('ScheduleEditorPage', () => {
 		await component.generateSlots();
 
 		expect(scheduleEditorService.startCreateSlots).not.toHaveBeenCalled();
+		expect(
+			TestBed.inject(AuthService).reauthenticate,
+		).not.toHaveBeenCalled();
+		expect(alerts.create).toHaveBeenCalledTimes(1);
 	});
 
 	it('applies a combined bulk capacity and enabled update then resets the form', async () => {

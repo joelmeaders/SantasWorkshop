@@ -104,7 +104,7 @@
 						"assets": [
 							{
 								"glob": "**/*",
-								"input": "src/assets",
+								"input": "santashop-admin/src/assets",
 								"output": "assets"
 							},
 							{

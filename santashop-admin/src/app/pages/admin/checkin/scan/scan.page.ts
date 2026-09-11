@@ -228,10 +228,10 @@ export class ScanPage {
 
 	private async invalidCodeAlert(): Promise<void> {
 		const alertOkHandler = (value: Record<string, string>): boolean => {
-			const code = value[0] ?? '';
-			if (code.length < 7 || code.length > 8) {
+			const code = (value[0] ?? '').trim();
+			if (!/^[A-Za-z0-9]{8}$/.test(code)) {
 				alert.message =
-					'Enter a code with 7 or 8 characters, as shown below the QR image.';
+					'Enter 8 letters or numbers, as shown below the QR image.';
 				return false;
 			}
 			this.scanResult.next({ code, inputMethod: 'manual' });
@@ -258,9 +258,9 @@ export class ScanPage {
 			inputs: [
 				{
 					type: 'text',
-					placeholder: 'Code (7-8 characters)',
+					placeholder: 'Code (8 letters or numbers)',
 					attributes: {
-						minlength: 7,
+						minlength: 8,
 						maxlength: 8,
 					},
 				},

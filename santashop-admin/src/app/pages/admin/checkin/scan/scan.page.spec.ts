@@ -223,7 +223,7 @@ describe('ScanPage', () => {
 		component.ionViewWillLeave();
 	});
 
-	it.each(['', 'XYZ', '123456789'])('keeps invalid manual code %j open with correction guidance', async (code) => {
+	it.each(['', 'XYZ', 'zzzzzzz', '123456789', 'ABCD!234', 'ABC 1234', 'ÁBCD1234'])('keeps invalid manual code %j open with correction guidance', async (code) => {
 		const alerts = TestBed.inject(AlertController);
 		component.ionViewWillEnter();
 		component.enterCodeManually();
@@ -236,11 +236,11 @@ describe('ScanPage', () => {
 			requireDefined(options.buttons.find((button) => button.role === 'ok')).handler,
 		);
 		expect(submit({ 0: code })).toBe(false);
-		expect(alert.message).toBe('Enter a code with 7 or 8 characters, as shown below the QR image.');
+		expect(alert.message).toBe('Enter 8 letters or numbers, as shown below the QR image.');
 		expect(resolve).not.toHaveBeenCalled();
 	});
 
-	it.each(['abc1234', 'abc12345'])('accepts valid manual code %s once and routes its eligible result', async (code) => {
+	it.each(['abc12345', 'ABCDEFGH', '12345678', ' abcd1234 '])('accepts valid manual code %s once and routes its eligible result', async (code) => {
 		resolve.mockResolvedValue({
 			disposition: 'eligible', registration: { uid: 'manual-customer' },
 		});
@@ -258,25 +258,28 @@ describe('ScanPage', () => {
 		);
 		expect(submit({ 0: code })).toBe(true);
 		await fixture.whenStable();
-		expect(resolve).toHaveBeenCalledExactlyOnceWith({ code: code.toUpperCase(), inputMethod: 'manual' });
+		expect(resolve).toHaveBeenCalledExactlyOnceWith({ code: code.trim().toUpperCase(), inputMethod: 'manual' });
 		expect(navigate).toHaveBeenCalledWith(['/admin/checkin/review']);
 		component.ionViewWillLeave();
 	});
 
-	it.each(['abc1234', 'abc12345'])('keeps the real Ionic alert open for invalid input then submits %s once', async (code) => {
+	it.each(['abc12345', '12345678'])('keeps the real Ionic alert open for invalid input then submits %s once', async (code) => {
 		resolve.mockResolvedValue({ disposition: 'eligible', registration: { uid: 'manual-customer' } });
 		const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 		const alert = await openRealManualCodeAlert();
 		const input = requireDefined(alert.querySelector('input'));
+		expect(input.placeholder).toBe('Code (8 letters or numbers)');
+		expect(input.minLength).toBe(8);
+		expect(input.maxLength).toBe(8);
 		const ok = requireDefined(alert.querySelector<HTMLButtonElement>('.alert-button-role-ok'));
 		const didDismiss = vi.fn();
 		alert.addEventListener('ionAlertDidDismiss', didDismiss);
 
-		for (const invalidCode of ['', 'XYZ']) {
+		for (const invalidCode of ['', 'XYZ', 'zzzzzzz', 'ABCD!234']) {
 			input.value = invalidCode;
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 			ok.click();
-			await vi.waitFor(() => expect(alert.querySelector('.alert-message')?.textContent).toBe('Enter a code with 7 or 8 characters, as shown below the QR image.'));
+			await vi.waitFor(() => expect(alert.querySelector('.alert-message')?.textContent).toBe('Enter 8 letters or numbers, as shown below the QR image.'));
 			expect(alert.isConnected).toBe(true);
 			expect(didDismiss).not.toHaveBeenCalled();
 			expect(input.value).toBe(invalidCode);

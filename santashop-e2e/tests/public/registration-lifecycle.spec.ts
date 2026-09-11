@@ -484,11 +484,16 @@ test.describe('customer registration lifecycle', () => {
 		await selectAppointmentViaUi(page, 'event-information-slot');
 		await submitRegistrationViaUi(page);
 
+		const eventInformation = page.locator('#event-information');
+		const heading = eventInformation.getByRole('heading', {
+			name: 'Event information',
+			exact: true,
+		});
+		await expect(heading).not.toBeInViewport();
 		await page.click('#eventInformationButton');
-		await expect(page).toHaveURL(
-			/\/pre-registration\/confirmation#event-information$/,
-		);
-		await expect(page.getByRole('heading', { name: 'Event information', exact: true })).toBeVisible();
+		await expect(heading).toBeInViewport({ ratio: 1 });
+		await expect(eventInformation).toBeFocused();
+		await expect(page).toHaveURL(/\/pre-registration\/confirmation$/);
 		await expect(
 			page.locator('#event-information').getByRole('link', { name: /FAQ/i }),
 		).toBeVisible();

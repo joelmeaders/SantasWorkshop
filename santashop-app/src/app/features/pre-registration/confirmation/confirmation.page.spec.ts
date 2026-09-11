@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { page } from 'vitest/browser';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
+import en from '../../../../assets/i18n/en.json';
+import es from '../../../../assets/i18n/es.json';
 import {
-	provideTranslateServiceMock,
 	provideActivatedRouteMock,
 	createModalControllerMock,
 	provideAnalyticsMock,
@@ -46,7 +49,12 @@ describe('ConfirmationPage', () => {
 						dateTimeSlot$: slot$,
 						children$,
 						registrationComplete$: registrationComplete$,
-						qrCode$: of('data:image/png;base64,test'),
+						qrCode$: of(
+							'data:image/svg+xml,' +
+								encodeURIComponent(
+									'<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"></svg>',
+								),
+						),
 						undoRegistration: vi
 							.fn()
 							.mockName('undoRegistration')
@@ -94,8 +102,10 @@ describe('ConfirmationPage', () => {
 						create: vi.fn().mockName('AlertController.create'),
 					},
 				},
-				provideRouter([]),
-				provideTranslateServiceMock(),
+				provideRouter([
+					{ path: 'pre-registration/confirmation', component: ConfirmationPage },
+				]),
+				provideTranslateService(),
 				provideActivatedRouteMock(),
 			],
 		})
@@ -105,6 +115,10 @@ describe('ConfirmationPage', () => {
 				},
 			})
 			.compileComponents();
+		const translate = TestBed.inject(TranslateService);
+		translate.setTranslation('en', en);
+		translate.setTranslation('es', es);
+		translate.use('en');
 		fixture = TestBed.createComponent(ConfirmationPage);
 		component = fixture.componentInstance;
 		await fixture.whenStable();
@@ -113,6 +127,54 @@ describe('ConfirmationPage', () => {
 	it('should create', () => {
 		expect(component).toBeTruthy();
 	});
+
+	it.each(['en', 'es'])(
+		'scrolls the Ionic ticket to event details on repeated mobile clicks in %s',
+		async (language): Promise<void> => {
+			const viewport = {
+				width: window.innerWidth,
+				height: window.innerHeight,
+			};
+			try {
+				await page.viewport(390, 844);
+				TestBed.inject(TranslateService).use(language);
+				await TestBed.inject(Router).navigateByUrl(
+					'/pre-registration/confirmation',
+				);
+				const host = fixture.nativeElement as HTMLElement;
+				// Match the viewport bounds supplied by the routed page container.
+				host.style.cssText =
+					'position: fixed; inset: 0; display: flex; flex-direction: column;';
+				await fixture.whenStable();
+				const content = host.querySelector('ion-content') as HTMLIonContentElement;
+				const scrollElement = await content.getScrollElement();
+				const details = host.querySelector('#event-information') as HTMLElement;
+				const heading = details.querySelector('h2') as HTMLElement;
+				const button = host.querySelector('#eventInformationButton') as HTMLIonButtonElement;
+				expect(button.textContent).toContain(
+					(language === 'es' ? es : en).CONFIRMATION.EVENT_INFORMATION,
+				);
+				for (let attempt = 0; attempt < 2; attempt++) {
+					await content.scrollToTop(0);
+					expect(scrollElement.scrollTop).toBe(0);
+					expect(details.getBoundingClientRect().top).toBeGreaterThan(
+						scrollElement.getBoundingClientRect().bottom,
+					);
+					await page.elementLocator(button).click();
+					await vi.waitFor(() => {
+						expect(scrollElement.scrollTop).toBeGreaterThan(0);
+						const bounds = heading.getBoundingClientRect();
+						const visible = scrollElement.getBoundingClientRect();
+						expect(bounds.top).toBeGreaterThanOrEqual(visible.top);
+						expect(bounds.bottom).toBeLessThanOrEqual(visible.bottom);
+						expect(document.activeElement).toBe(details);
+					}, { timeout: 3000 });
+				}
+			} finally {
+				await page.viewport(viewport.width, viewport.height);
+			}
+		},
+	);
 
 	it('renders the registered slot, children, and available ticket actions', async (): Promise<void> => {
 		await fixture.whenStable();

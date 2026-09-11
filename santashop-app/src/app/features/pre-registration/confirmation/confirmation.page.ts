@@ -1,11 +1,13 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	ElementRef,
 	computed,
 	inject,
+	viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
 	AnalyticsWrapper,
 	ErrorHandlerService,
@@ -65,7 +67,6 @@ import { filter, timeout } from 'rxjs/operators';
 		IonCardTitle,
 		IonCardSubtitle,
 		TimeSlotPipe,
-		RouterLink,
 	],
 })
 export class ConfirmationPage {
@@ -80,6 +81,9 @@ export class ConfirmationPage {
 	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly appStateService = inject(AppStateService);
 	private readonly dateTimeService = inject(DateTimeSlotsService);
+	private readonly content = viewChild.required(IonContent);
+	private readonly eventInformation =
+		viewChild.required<ElementRef<HTMLElement>>('eventInformation');
 
 	public readonly qrCode = toSignal(this.viewService.qrCode$, {
 		initialValue: undefined,
@@ -120,6 +124,21 @@ export class ConfirmationPage {
 				this.translateService.instant('EVENT_INFO.EVENT_ADDRESS2'),
 			].join(', '),
 		);
+	}
+
+	public async showEventInformation(): Promise<void> {
+		const target = this.eventInformation().nativeElement;
+		const content = this.content();
+		const scrollElement = await content.getScrollElement();
+		const top =
+			scrollElement.scrollTop +
+			target.getBoundingClientRect().top -
+			scrollElement.getBoundingClientRect().top;
+		const reduceMotion = window.matchMedia(
+			'(prefers-reduced-motion: reduce)',
+		).matches;
+		await content.scrollToPoint(undefined, top, reduceMotion ? 0 : 300);
+		target.focus({ preventScroll: true });
 	}
 
 	public async undoRegistration(): Promise<void> {

@@ -167,7 +167,7 @@ test.describe('admin refresh navigation and recovery', () => {
 		);
 		await chooseYear(page, year - 2);
 		await expect(
-			page.getByText('No schedule data for this year', { exact: true }),
+			page.getByText('No appointment data for this year', { exact: true }),
 		).toBeVisible();
 		await expect(page.locator('.count-container h1').first()).toHaveText(
 			'0',
@@ -264,7 +264,7 @@ test.describe('admin refresh navigation and recovery', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.locator('#scanRiskReviewNav').click();
 		const rows = page.locator(
-			'ion-list[aria-label="Customers with suspicious scans"] ion-item',
+			'ion-list[aria-label="Shoppers with suspicious scans"] ion-item',
 		);
 		await expect(rows).toHaveCount(20);
 		await page

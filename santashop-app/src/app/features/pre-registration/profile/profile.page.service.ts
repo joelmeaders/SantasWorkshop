@@ -5,6 +5,7 @@ import {
 	AuthService,
 	FireRepoLite,
 	AnalyticsWrapper,
+	trackAnalyticsOperation,
 	FunctionsWrapper,
 } from '@santashop/core';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
@@ -107,8 +108,6 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async updatePublicProfile(): Promise<void> {
-		this.analytics.logEvent('profile_update_info');
-
 		const newInfo = this.profileForm.value as ChangeUserInfo;
 		const version = this.profileVersion;
 
@@ -119,7 +118,12 @@ export class ProfilePageService implements OnDestroy {
 		await loader.present();
 
 		try {
-			await this.functions.changeAccountInformation(newInfo);
+			await trackAnalyticsOperation(
+				this.analytics,
+				'profile_update',
+				() => this.functions.changeAccountInformation(newInfo),
+			);
+			this.analytics.logEvent('profile_update_info');
 			await this.authService.refreshCurrentUser();
 			if (version !== this.profileVersion) return;
 			this.profileUpdates$.next({
@@ -136,13 +140,18 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changeEmailAddress(): Promise<void> {
-		this.analytics.logEvent('profile_update_email');
-
 		const value = this.changeEmailForm.value;
 
-		await this.authService
-			.changeEmailAddress(value.password!, value.emailAddress!)
-			.then(() => this.emailChangedAlert())
+		await trackAnalyticsOperation(this.analytics, 'email_update', () =>
+			this.authService.changeEmailAddress(
+				value.password!,
+				value.emailAddress!,
+			),
+		)
+			.then(() => {
+				this.analytics.logEvent('profile_update_email');
+				return this.emailChangedAlert();
+			})
 			.catch((error) => this.errorHandler.handleError(error));
 
 		this.changeEmailForm.reset();
@@ -151,13 +160,18 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changePassword(): Promise<void> {
-		this.analytics.logEvent('profile_update_password');
-
 		const value = this.changePasswordForm.value;
 
-		await this.authService
-			.changePassword(value.oldPassword!, value.newPassword!)
-			.then(() => this.passwordChangedAlert())
+		await trackAnalyticsOperation(this.analytics, 'password_update', () =>
+			this.authService.changePassword(
+				value.oldPassword!,
+				value.newPassword!,
+			),
+		)
+			.then(() => {
+				this.analytics.logEvent('profile_update_password');
+				return this.passwordChangedAlert();
+			})
 			.catch((error) => this.errorHandler.handleError(error));
 
 		this.router.navigate(['/pre-registration/profile']);

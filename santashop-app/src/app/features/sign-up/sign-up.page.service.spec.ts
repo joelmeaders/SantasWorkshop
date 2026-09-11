@@ -4,6 +4,7 @@ import { AlertController, LoadingController } from '@ionic/angular/standalone';
 import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import {
 	AuthService,
+	AnalyticsWrapper,
 	ErrorHandlerService,
 	FunctionsWrapper,
 } from '@santashop/core/customer';
@@ -18,6 +19,7 @@ describe('SignUpPageService', () => {
 	const accountCallable = vi.fn();
 	const callableWrapper = vi.fn().mockReturnValue(accountCallable);
 	const login = vi.fn();
+	const analytics = { logEvent: vi.fn(), logEventWithParams: vi.fn() };
 	const navigate = vi.fn().mockResolvedValue(true);
 	const handleError = vi.fn();
 	const loader = {
@@ -33,6 +35,8 @@ describe('SignUpPageService', () => {
 	const alertCreate = vi.fn().mockResolvedValue(alert);
 
 	beforeEach(() => {
+		analytics.logEvent.mockClear();
+		analytics.logEventWithParams.mockClear();
 		accountCallable.mockReset().mockResolvedValue({ data: undefined });
 		callableWrapper.mockClear();
 		login.mockReset().mockResolvedValue(undefined);
@@ -49,6 +53,7 @@ describe('SignUpPageService', () => {
 		TestBed.configureTestingModule({
 			providers: [
 				SignUpPageService,
+				{ provide: AnalyticsWrapper, useValue: analytics },
 				{
 					provide: AuthService,
 					useValue: { currentUser$, login },
@@ -150,6 +155,9 @@ describe('SignUpPageService', () => {
 			queryParams: { mode: 'sign-in' },
 		});
 		expect(handleError).not.toHaveBeenCalled();
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith('workflow_action', { operation: 'signup_sign_in', outcome: 'failed', error_code: 'auth/network-request-failed' });
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith('signup_recovery_shown', { reason: 'sign_in_failed' });
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith('signup_recovery_selected', { action: 'sign_in' });
 	});
 
 	it('uses the normal error handler when navigation fails after sign-in', async () => {
@@ -275,9 +283,13 @@ describe('SignUpPageService', () => {
 				message: catalog.SIGNUP.CREATING_ACCOUNT,
 			});
 			expect(login).not.toHaveBeenCalled();
+			expect(analytics.logEvent).not.toHaveBeenCalledWith('account_created');
+			expect(analytics.logEventWithParams).toHaveBeenCalledWith('workflow_action', { operation: 'create_account', outcome: 'attempted' });
 			createDone();
 			await vi.waitFor(() => expect(login).toHaveBeenCalled());
 			expect(loader.message).toBe(catalog.SIGNUP.SIGNING_IN);
+			expect(analytics.logEvent).toHaveBeenCalledWith('account_created');
+			expect(analytics.logEventWithParams).not.toHaveBeenCalledWith('workflow_action', { operation: 'signup_sign_in', outcome: 'succeeded' });
 			expect(loader.dismiss).not.toHaveBeenCalled();
 			loginDone();
 			await pending;

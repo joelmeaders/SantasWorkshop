@@ -26,10 +26,15 @@ test.describe('admin reporting routes', () => {
 		).toBeVisible({ timeout: 15000 });
 
 		await page.goto('/admin/stats/check-in');
-		await expect(page.locator('admin-header')).toContainText('Check-In Stats');
-		await expect(page.locator('[data-checkin-stats-loading]')).toHaveCount(0, {
-			timeout: 15000,
-		});
+		await expect(page.locator('admin-header')).toContainText(
+			'Check-In Stats',
+		);
+		await expect(page.locator('[data-checkin-stats-loading]')).toHaveCount(
+			0,
+			{
+				timeout: 15000,
+			},
+		);
 		await expect(
 			page.getByText('No check-ins have been recorded for this year.', {
 				exact: true,
@@ -62,8 +67,12 @@ test.describe('admin reporting routes', () => {
 		await expect(page.locator('.capacity-card')).toHaveCount(4, {
 			timeout: 15000,
 		});
-		await expect(page.getByRole('heading', { name: '12th - Total: 1' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: '16th - Total: 4' })).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: '12th - Total: 1' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: '16th - Total: 4' }),
+		).toBeVisible();
 		expect(pageErrors).toEqual([]);
 	});
 
@@ -73,7 +82,7 @@ test.describe('admin reporting routes', () => {
 	}) => {
 		await seedReportingStats({
 			registration: {
-			programYear: E2E_PROGRAM_YEAR,
+				programYear: E2E_PROGRAM_YEAR,
 				completedRegistrations: 3,
 				dateTimeCount: [
 					{
@@ -81,9 +90,27 @@ test.describe('admin reporting routes', () => {
 						count: 3,
 						childCount: 4,
 						stats: {
-							infants: { total: 1, age02: 1, age35: 0, age68: 0, age911: 0 },
-							girls: { total: 2, age02: 0, age35: 1, age68: 1, age911: 0 },
-							boys: { total: 1, age02: 0, age35: 0, age68: 1, age911: 0 },
+							infants: {
+								total: 1,
+								age02: 1,
+								age35: 0,
+								age68: 0,
+								age911: 0,
+							},
+							girls: {
+								total: 2,
+								age02: 0,
+								age35: 1,
+								age68: 1,
+								age911: 0,
+							},
+							boys: {
+								total: 1,
+								age02: 0,
+								age35: 0,
+								age68: 1,
+								age911: 0,
+							},
 						},
 					},
 				],
@@ -93,10 +120,20 @@ test.describe('admin reporting routes', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/registration');
 
-		await expect(page.locator('.count-container h1').first()).toHaveText('3');
-		await expect(page.locator('.count-container h1').nth(1)).toHaveText('4');
-		await expect(page.getByRole('heading', { name: 'Gender' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Top Zip Codes' })).toBeVisible();
+		await expect(page.locator('.count-container h1').first()).toHaveText(
+			'3',
+		);
+		await expect(page.locator('.count-container h1').nth(1)).toHaveText(
+			'4',
+		);
+		await expect(
+			page.getByRole('heading', { name: 'Gender' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('heading', {
+				name: 'ZIP codes (top four and Other)',
+			}),
+		).toBeVisible();
 		await expect(page.locator('canvas')).toHaveCount(2);
 	});
 
@@ -123,9 +160,15 @@ test.describe('admin reporting routes', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/check-in');
 
-		await expect(page.locator('.count-container h1').first()).toHaveText('3');
-		await expect(page.locator('.count-container h1').nth(1)).toHaveText('4');
-		await expect(page.getByRole('heading', { name: 'Check-Ins' })).toBeVisible();
+		await expect(page.locator('.count-container h1').first()).toHaveText(
+			'3',
+		);
+		await expect(page.locator('.count-container h1').nth(1)).toHaveText(
+			'4',
+		);
+		await expect(
+			page.getByRole('heading', { name: 'Check-Ins' }),
+		).toBeVisible();
 		await page.getByRole('button', { name: 'View by Children' }).click();
 		await expect(
 			page
@@ -155,8 +198,12 @@ test.describe('admin reporting routes', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/user');
 
-		await expect(page.getByRole('heading', { name: 'Top 10 Referrers' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Top 10 Zip Codes' })).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'Top 10 Referrers' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'Top 10 Zip Codes' }),
+		).toBeVisible();
 		await expect(page.locator('canvas')).toHaveCount(2);
 	});
 });

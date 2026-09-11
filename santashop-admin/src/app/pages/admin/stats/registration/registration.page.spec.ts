@@ -16,6 +16,7 @@ import { SHOP_DAYS } from '@santashop/core/admin/firestore';
 import {
 	DateTimeSlot,
 	RegistrationStats,
+	RegistrationOperationalStats,
 	ScheduleStats,
 } from '@santashop/models';
 import { of, Subject, throwError } from 'rxjs';
@@ -51,6 +52,148 @@ describe('RegistrationPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('keeps legacy totals while marking new calculations and timestamps unavailable', async () => {
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 7,
+								dateTimeCount: [],
+								zipCodeCount: [],
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.year = 2024;
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.registrationCount()).toBe(7);
+		expect(component.outcomeRows()).toEqual([]);
+		expect(component.snapshotRows()).toEqual([]);
+		expect(fixture.nativeElement.textContent).toContain(
+			'Calculation time unavailable for this saved report.',
+		);
+		expect(fixture.nativeElement.textContent).toContain(
+			'New outcome calculations are unavailable for this saved report.',
+		);
+		expect(fixture.nativeElement.textContent).not.toContain('0.0%');
+	});
+
+	it('shows explicit zero outcomes, unavailable rates, and dated snapshots without changing the registration count', async () => {
+		const operational: RegistrationOperationalStats = {
+			coverage: 'current-records',
+			registrationRecords: 5,
+			submittedRegistrations: 0,
+			draftRegistrations: 5,
+			cancelledRegistrations: 0,
+			recordedCancellationEvents: 0,
+			checkedInRegistrations: 0,
+			pastAppointmentRegistrations: 0,
+			attendedPastAppointments: 0,
+			unconfirmedPastAppointments: 0,
+			attendanceStatusUnavailable: 0,
+			missingAppointmentRegistrations: 0,
+			invalidSubmissionDates: 0,
+			completionRate: 0,
+		};
+		const calculatedAt = new Date('2026-09-10T06:00:00Z');
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 3,
+								dateTimeCount: [],
+								zipCodeCount: [],
+								calculatedAt,
+								operational,
+								dailySnapshots: [
+									{
+										...operational,
+										dateKey: '2026-09-10',
+										calculatedAt,
+									},
+								],
+							}
+						: { dateTimeCounts: [] },
+				) as never,
+		);
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.registrationCount()).toBe(3);
+		expect(component.outcomeRows()).toContainEqual([
+			'Current cancelled registrations',
+			0,
+		]);
+		expect(component.outcomeRows()).toContainEqual([
+			'Completion rate',
+			'0.0%',
+		]);
+		expect(component.outcomeRows()).toContainEqual([
+			'Attendance rate for past appointments',
+			undefined,
+		]);
+		expect(component.snapshotRows()[0]).toEqual([
+			'2026-09-10',
+			'2026-09-10T06:00:00.000Z',
+			5,
+			0,
+			5,
+			0,
+			0,
+			'0.0%',
+		]);
+		expect(component.appointmentExportContext()).toContainEqual([
+			'Calculated at',
+			undefined,
+		]);
+		expect(fixture.nativeElement.textContent).toContain('Unavailable');
+	});
+
+	it('includes every ZIP code in the pie, table and export totals', async () => {
+		const zipCodeCount = [6, 5, 4, 3, 2, 1].map((count, index) => ({
+			zip: 80200 + index,
+			count,
+			childCount: count * 2,
+		}));
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 21,
+								dateTimeCount: [],
+								zipCodeCount,
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.topTenZipCodesCountData().labels).toContainEqual([
+			'Other',
+			'3 Families',
+		]);
+		expect(component.topTenZipCodesCountData().datasets[0].data).toEqual([
+			6, 5, 4, 3, 3,
+		]);
+		expect(component.zipRows()).toHaveLength(6);
+		expect(component.zipTotals()).toEqual(['Total', 21, 42]);
+		const tables = Array.from(
+			fixture.nativeElement.querySelectorAll('table'),
+		) as HTMLTableElement[];
+		const zipTable = tables.find(
+			(table) =>
+				table.caption?.textContent?.trim() === 'Registration ZIP codes',
+		);
+		expect(zipTable?.querySelectorAll('tbody tr')).toHaveLength(6);
+		expect(zipTable?.querySelector('tfoot')?.textContent).toContain('21');
 	});
 
 	it('derives registration totals, demographic charts, and zip-code charts', async () => {

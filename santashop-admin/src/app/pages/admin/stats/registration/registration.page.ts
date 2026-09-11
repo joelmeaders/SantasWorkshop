@@ -48,6 +48,12 @@ import {
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { Timestamp, where } from 'firebase/firestore/lite';
+import { ReportTableComponent } from '../../../../shared/components/report-table/report-table.component';
+import { ReportFreshnessComponent } from '../../../../shared/components/report-freshness/report-freshness.component';
+import {
+	reportDate,
+	ReportCell,
+} from '../../../../shared/helpers/report-export';
 
 Chart.register(ChartDataLabels);
 
@@ -58,6 +64,8 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		ReportTableComponent,
+		ReportFreshnessComponent,
 		IonTitle,
 		IonGrid,
 		IonRow,
@@ -75,7 +83,7 @@ Chart.register(ChartDataLabels);
 })
 export class RegistrationPage {
 	private readonly httpService = inject(AdminReadRepository);
-	private readonly programYear = inject(PROGRAM_YEAR);
+	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
 	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
@@ -109,6 +117,128 @@ export class RegistrationPage {
 	public readonly state = toSignal(this.state$, {
 		initialValue: { status: 'loading' as const, data: undefined },
 	});
+	public readonly operational = computed(
+		() => this.state().data?.registration?.operational,
+	);
+	public readonly outcomeRows = computed<ReportCell[][]>(() => {
+		const data = this.operational();
+		return data
+			? [
+					['Registration records', data.registrationRecords],
+					['Submitted registrations', data.submittedRegistrations],
+					['Draft registrations', data.draftRegistrations],
+					[
+						'Current cancelled registrations',
+						data.cancelledRegistrations,
+					],
+					[
+						'Recorded cancellation events',
+						data.recordedCancellationEvents,
+					],
+					['Checked-in registrations', data.checkedInRegistrations],
+					['Completion rate', this.formatRate(data.completionRate)],
+					['Past appointments', data.pastAppointmentRegistrations],
+					[
+						'Attended past appointments',
+						data.attendedPastAppointments,
+					],
+					[
+						'Unconfirmed past appointments',
+						data.unconfirmedPastAppointments,
+					],
+					[
+						'Past appointments with unavailable attendance status',
+						data.attendanceStatusUnavailable,
+					],
+					[
+						'Attendance rate for past appointments',
+						this.formatRate(data.attendanceRate),
+					],
+					[
+						'Submitted registrations without an appointment',
+						data.missingAppointmentRegistrations,
+					],
+					['Invalid submission dates', data.invalidSubmissionDates],
+				]
+			: [];
+	});
+	public readonly snapshotRows = computed<ReportCell[][]>(() =>
+		[...(this.state().data?.registration?.dailySnapshots ?? [])]
+			.sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+			.map((entry) => [
+				entry.dateKey,
+				reportDate(entry.calculatedAt)?.toISOString(),
+				entry.registrationRecords,
+				entry.submittedRegistrations,
+				entry.draftRegistrations,
+				entry.cancelledRegistrations,
+				entry.checkedInRegistrations,
+				this.formatRate(entry.completionRate),
+			]),
+	);
+	public readonly zipRows = computed(() =>
+		this.sortZipCodeCounts(this.registrationStats().zipCodeCount).map(
+			(entry) => [String(entry.zip), entry.count, entry.childCount],
+		),
+	);
+	public readonly zipTotals = computed(() => [
+		'Total',
+		this.registrationStats().zipCodeCount.reduce(
+			(sum, row) => sum + row.count,
+			0,
+		),
+		this.registrationStats().zipCodeCount.reduce(
+			(sum, row) => sum + row.childCount,
+			0,
+		),
+	]);
+	public readonly appointmentRows = computed<ReportCell[][]>(() =>
+		this.familiesBySlots().map((entry) => [
+			entry.date.toLocaleString('en-US', {
+				timeZone: EVENT_TIME_ZONE,
+				dateStyle: 'medium',
+				timeStyle: 'short',
+			}),
+			entry.count,
+		]),
+	);
+	public readonly appointmentTotals = computed(() => [
+		'Total',
+		this.familiesBySlots().reduce((sum, row) => sum + row.count, 0),
+	]);
+	public readonly registrationExportContext = computed<ReportCell[][]>(() => [
+		['Program year', this.year],
+		['Source', 'Nightly registration calculation'],
+		[
+			'Calculated at',
+			reportDate(
+				this.state().data?.registration?.calculatedAt,
+			)?.toISOString(),
+		],
+	]);
+	public readonly appointmentExportContext = computed<ReportCell[][]>(() => [
+		['Program year', this.year],
+		[
+			'Source',
+			this.state().data?.schedule
+				? 'Seasonal reservation calculation'
+				: 'Nightly registration calculation',
+		],
+		[
+			'Calculated at',
+			reportDate(
+				this.state().data?.schedule
+					? this.state().data?.schedule?.calculatedAt
+					: this.state().data?.registration?.calculatedAt,
+			)?.toISOString(),
+		],
+	]);
+
+	private formatRate(value: number | undefined): string | undefined {
+		return value === undefined || !Number.isFinite(value)
+			? undefined
+			: `${(value * 100).toFixed(1)}%`;
+	}
 	private readonly registrationStats = computed<RegistrationStats>(
 		() =>
 			this.state().data?.registration ?? {
@@ -163,8 +293,12 @@ export class RegistrationPage {
 	private readonly stats = computed(() =>
 		this.registrationStats().dateTimeCount.map((slot) => slot.stats),
 	);
-	public readonly statsNull = computed(() =>
-		this.stats().every((stats) => !stats),
+	public readonly statsNull = computed(
+		() =>
+			!this.stats().length ||
+			this.stats().some(
+				(stats) => !stats?.girls || !stats?.boys || !stats?.infants,
+			),
 	);
 	public readonly girlBoyInfantCounts = computed(() => [
 		this.demographicCount('girls'),
@@ -185,9 +319,20 @@ export class RegistrationPage {
 	public readonly topTenZipCodesCountData = computed<
 		ChartData<'pie', number[], string | string[]>
 	>(() => {
-		const data = this.sortZipCodeCounts(
+		const sorted = this.sortZipCodeCounts(
 			this.registrationStats().zipCodeCount,
-		).slice(0, 4);
+		);
+		const data = sorted
+			.slice(0, 4)
+			.map((entry) => ({ zip: String(entry.zip), count: entry.count }));
+		if (sorted.length > 4) {
+			data.push({
+				zip: 'Other',
+				count: sorted
+					.slice(4)
+					.reduce((sum, entry) => sum + entry.count, 0),
+			});
+		}
 		return {
 			labels: data.map((entry) => [
 				entry.zip.toString(),

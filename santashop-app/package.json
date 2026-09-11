@@ -1,6 +1,6 @@
 {
 	"name": "@santashop/app",
-	"version": "2026.09.0-beta.4",
+	"version": "2026.09.0-beta.5",
 	"description": "Coming soon.",
 	"main": "index.js",
 	"scripts": {

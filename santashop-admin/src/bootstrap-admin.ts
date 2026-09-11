@@ -25,6 +25,8 @@ import {
 } from '@ionic/angular/standalone';
 import {
 	FIREBASE_ANALYTICS,
+	ANALYTICS_APP_AREA,
+	optionalAnalytics,
 	FIREBASE_APP,
 	FIREBASE_AUTH,
 	FIREBASE_FUNCTIONS,
@@ -158,7 +160,7 @@ export function bootstrapAdminApplication(
 			? [
 					{
 						provide: FIREBASE_ANALYTICS,
-						useValue: dependencies.getAnalytics(firebaseApp),
+						useValue: optionalAnalytics(() => dependencies.getAnalytics(firebaseApp)),
 					},
 				]
 			: []),
@@ -189,6 +191,7 @@ export function bootstrapAdminApplication(
 					animated: true,
 				}),
 				...firebaseProviders,
+				{ provide: ANALYTICS_APP_AREA, useValue: 'admin' },
 				...provideRemoteConfigPublicParameters({
 					useEmulator: !runtimeConfig.production,
 					readLocal: async (): Promise<unknown> => {

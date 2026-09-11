@@ -122,6 +122,23 @@ describe('CheckInPage', () => {
 		expect(component.checkinLastUpdated()).toEqual(
 			new Date('2026-12-10T18:00:00.000Z'),
 		);
+		expect(component.attendanceRows()).toEqual([
+			['2026-12-10', '09:00', 2, 1, 1, 1, 0],
+			['2026-12-11', '13:00', 3, 5, 2, 1, 1],
+		]);
+		expect(component.attendanceTotals()).toEqual([
+			'Total',
+			'',
+			5,
+			6,
+			3,
+			2,
+			1,
+		]);
+		expect(component.exportContext()).toContainEqual([
+			'Date coverage',
+			'Buckets without a saved date key use the legacy December convention',
+		]);
 		expect(component.checkInsByDayHour()).toMatchObject([
 			{
 				datasets: [

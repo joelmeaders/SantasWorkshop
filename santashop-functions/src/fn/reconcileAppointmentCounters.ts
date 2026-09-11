@@ -20,11 +20,19 @@ export default async function scheduledDateTimeSlotCounters(): Promise<string> {
 		.firestore()
 		.collection('stats')
 		.doc(getStatsDocumentId('schedule'));
-	const scheduleStats: ScheduleStats = { dateTimeCounts: [] };
+	const scheduleStats: ScheduleStats = {
+		dateTimeCounts: [],
+		schemaVersion: 2,
+		programYear: PROGRAM_YEAR,
+	};
 
 	// Count in bounded parallel batches. This keeps the scheduled job quick
 	// without creating an unbounded burst of Firestore aggregation queries.
-	for (let index = 0; index < dateTimeSlots.length; index += COUNTER_CONCURRENCY) {
+	for (
+		let index = 0;
+		index < dateTimeSlots.length;
+		index += COUNTER_CONCURRENCY
+	) {
 		const results = await Promise.all(
 			dateTimeSlots
 				.slice(index, index + COUNTER_CONCURRENCY)
@@ -34,7 +42,10 @@ export default async function scheduledDateTimeSlotCounters(): Promise<string> {
 	}
 
 	// Update the schedule stats
-	await scheduleStatsDoc.set({ ...scheduleStats }, { merge: true });
+	await scheduleStatsDoc.set(
+		{ ...scheduleStats, calculatedAt: new Date() },
+		{ merge: true },
+	);
 	log.info('Updated schedule stats from date time slot counters', {
 		slotCount: dateTimeSlots.length,
 	});
@@ -71,7 +82,10 @@ const loadDateTimeSlots = async (): Promise<DateTimeSlot[]> => {
 	let allDateTimeSlots: DateTimeSlot[] = [];
 
 	do {
-		const snapshotDocs = await dateTimeSlotQuery(pageSize, lastDocument).get();
+		const snapshotDocs = await dateTimeSlotQuery(
+			pageSize,
+			lastDocument,
+		).get();
 
 		snapshotDocs.docs.forEach((doc) => {
 			const slot = {
@@ -107,14 +121,10 @@ const reconcileDateTimeSlot = async (
 	});
 
 	if (registrationCount !== slot.slotsReserved) {
-		await admin
-			.firestore()
-			.collection('dateTimeSlots')
-			.doc(slotId)
-			.update({
-				slotsReserved: registrationCount,
-				lastUpdated: new Date(),
-			});
+		await admin.firestore().collection('dateTimeSlots').doc(slotId).update({
+			slotsReserved: registrationCount,
+			lastUpdated: new Date(),
+		});
 	}
 
 	return { dateTime: slot.dateTime, count: registrationCount };

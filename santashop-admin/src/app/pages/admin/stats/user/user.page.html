@@ -21,6 +21,25 @@
 	} @else if (!state.data) {
 	<p>No user statistics for this year.</p>
 	} @else {
+	<div class="ion-padding-horizontal">
+		<admin-report-freshness
+			label="User demographics"
+			[calculatedAt]="state.data.calculatedAt"
+			[currentSeason]="year === programYear"
+		/>
+		<p>Total users: {{ state.data.totalUsers ?? 'Unavailable' }}</p>
+		@if (state.data.population !== 'all-users') {
+		<p>
+			This older report may exclude profiles without a ZIP code or
+			referral. Its totals use the original population.
+		</p>
+		} @else {
+		<p>
+			Counts include all current user profiles. Missing ZIP codes and
+			referrals appear as Unknown in each breakdown.
+		</p>
+		}
+	</div>
 	<ion-grid>
 		<ion-row>
 			@if (referrers(); as referrers) {
@@ -38,6 +57,14 @@
 						type="bar"
 					></canvas>
 				</div>
+				<admin-report-table
+					caption="User referrals"
+					[columns]="['Referral', 'Users']"
+					[rows]="referralRows()"
+					[totals]="referralTotal()"
+					[filename]="'user-referrals-' + year"
+					[exportContext]="exportContext()"
+				/>
 			</ion-col>
 			} @if (zipCodes(); as zipCodes) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
@@ -54,10 +81,43 @@
 						type="bar"
 					></canvas>
 				</div>
+				<admin-report-table
+					caption="User ZIP codes"
+					[columns]="['ZIP code', 'Users']"
+					[rows]="zipRows()"
+					[totals]="zipTotal()"
+					[filename]="'user-zip-codes-' + year"
+					[exportContext]="exportContext()"
+				/>
 			</ion-col>
 			}
 		</ion-row>
 	</ion-grid>
+	<div class="ion-padding">
+		@if (state.data.dailySignups !== undefined) {
+		<p>
+			Daily counts retain the highest number of profiles observed for each
+			creation day. Profiles removed before a calculation are unavailable.
+			Retained counts can exceed current user totals after records are
+			removed.
+		</p>
+		<p>
+			Current profiles with unavailable creation dates: {{
+			state.data.signupDatesUnavailable ?? 'Unavailable' }}. Created
+			outside this program year: {{
+			state.data.signupDatesOutsideProgramYear ?? 'Unavailable' }}.
+		</p>
+		<admin-report-table
+			caption="Profile records observed by creation day"
+			[columns]="['Creation day (America/Denver)', 'Observed profiles']"
+			[rows]="signupRows()"
+			[filename]="'profile-creation-days-' + year"
+			[exportContext]="signupExportContext()"
+		/>
+		} @else {
+		<p>Daily profile calculations are unavailable for this saved report.</p>
+		}
+	</div>
 	} }
 	<ng-template #noData>
 		<div class="ion-padding">

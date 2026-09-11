@@ -20,9 +20,21 @@ const meta = {
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
-		await expect(await canvas.findByText('Customers')).toBeVisible();
-		await expect(canvas.getByText('Children')).toBeVisible();
-		await expect(canvas.getByText('Pre-Registered')).toBeVisible();
+		await expect(
+			await canvas.findByRole('heading', {
+				name: 'Customers',
+				exact: true,
+			}),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'Children', exact: true }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', {
+				name: 'Pre-Registered',
+				exact: true,
+			}),
+		).toBeVisible();
 		await userEvent.click(
 			canvas.getByText(/View by Children|View by Check-Ins/),
 		);
@@ -35,7 +47,12 @@ const meta = {
 			),
 		).toBeVisible();
 		fixtures.checkInStats$.next(loadedStats);
-		await expect(await canvas.findByText('Customers')).toBeVisible();
+		await expect(
+			await canvas.findByRole('heading', {
+				name: 'Customers',
+				exact: true,
+			}),
+		).toBeVisible();
 		await waitFor(() =>
 			expect(
 				canvas.queryByText(

@@ -19,6 +19,23 @@
 		Report could not be loaded. Select Refresh report to try again.
 	</p>
 	} @else {
+	<admin-report-freshness
+		label="Registration and demographics"
+		[calculatedAt]="state.data?.registration?.calculatedAt"
+		[currentSeason]="year === programYear"
+	/>
+	@if (state.data?.schedule) {
+	<admin-report-freshness
+		label="Reservation counts"
+		[calculatedAt]="state.data?.schedule?.calculatedAt"
+		[currentSeason]="year === programYear"
+		[maxAgeHours]="24"
+	/>
+	} @else {
+	<p>
+		Reservation counts use the nightly registration calculation shown above.
+	</p>
+	}
 	<ion-grid>
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
@@ -39,12 +56,12 @@
 				@if (hasScheduleData()) {
 				<div class="count-container">
 					<h1>{{ registrationCountBySchedule() }}</h1>
-				<h2>Registrations</h2>
+					<h2>Registrations</h2>
 				</div>
 				} @else {
 				<div class="count-container">
 					<h1>{{ registrationCount() }}</h1>
-				<h2>Registrations</h2>
+					<h2>Registrations</h2>
 				</div>
 				}
 			</ion-col>
@@ -58,7 +75,7 @@
 				@if (childCount(); as count) {
 				<div class="count-container">
 					<h1>{{ count }}</h1>
-				<h2>Children*</h2>
+					<h2>Children*</h2>
 				</div>
 				}
 			</ion-col>
@@ -72,7 +89,7 @@
 				@if (childrenPerCustomer(); as count) {
 				<div class="count-container">
 					<h1>{{ count | number:'1.0-2' }}</h1>
-				<h2>Children per Customer*</h2>
+					<h2>Children per Customer*</h2>
 				</div>
 				}
 			</ion-col>
@@ -82,6 +99,10 @@
 		<ion-row>
 			<ion-col size="12">
 				<h2>Capacity by Day</h2>
+				<p>
+					Capacity uses saved appointment slots. Calculation times for
+					individual slots are unavailable.
+				</p>
 			</ion-col>
 			@for (capacity of capacities; track capacity.label) {
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="3" sizeLg="3">
@@ -146,6 +167,17 @@
 			</ion-col>
 		</ion-row>
 		}
+		<ion-row
+			><ion-col size="12">
+				<admin-report-table
+					caption="Appointments"
+					[columns]="['Appointment (America/Denver)', 'Registrations']"
+					[rows]="appointmentRows()"
+					[totals]="appointmentTotals()"
+					[filename]="'appointments-' + year"
+					[exportContext]="appointmentExportContext()"
+				/> </ion-col
+		></ion-row>
 
 		<ion-row class="ion-margin ion-padding">
 			<ion-col class="ion-text-center">
@@ -178,7 +210,7 @@
 			</ion-col>
 			@if (topTenZipCodesCountData(); as pieData) {
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
-				<h2>Top Zip Codes</h2>
+				<h2>ZIP codes (top four and Other)</h2>
 				<canvas
 					baseChart
 					[data]="pieData"
@@ -190,6 +222,72 @@
 			}
 		</ion-row>
 		}
+		<ion-row
+			><ion-col size="12">
+				<admin-report-table
+					caption="Registration ZIP codes"
+					[columns]="['ZIP code', 'Families', 'Children']"
+					[rows]="zipRows()"
+					[totals]="zipTotals()"
+					[filename]="'registration-zip-codes-' + year"
+					[exportContext]="registrationExportContext()"
+				/> </ion-col
+		></ion-row>
+		<ion-row
+			><ion-col size="12">
+				<h2>Registration outcomes</h2>
+				@if (operational()) {
+				<p>
+					Outcomes describe current registration records. Completion
+					is submitted registrations divided by all registration
+					records.
+				</p>
+				<p>
+					Past appointments are submitted, active appointments before
+					the saved calculation date shown above in America/Denver.
+					Attendance uses this same population. Unconfirmed
+					appointments are not proven no-shows. Rates with missing
+					source data are unavailable.
+				</p>
+				<p>
+					Cancelled registrations describe current records. Recorded
+					cancellation events count saved cancellation logs, including
+					repeated cancellations.
+				</p>
+				<admin-report-table
+					caption="Registration outcomes"
+					[columns]="['Measure', 'Value']"
+					[rows]="outcomeRows()"
+					[filename]="'registration-outcomes-' + year"
+					[exportContext]="registrationExportContext()"
+				/>
+				} @else {
+				<p>
+					New outcome calculations are unavailable for this saved
+					report.
+				</p>
+				} @if (state.data?.registration?.dailySnapshots !== undefined) {
+				<p>
+					Snapshots retain the first nightly observation for each
+					recorded day. Missing days are unavailable. Retained
+					snapshots can differ from current totals after records are
+					removed.
+				</p>
+				<admin-report-table
+					caption="Daily registration snapshots"
+					[columns]="['Observation day (America/Denver)', 'Calculated at (UTC)', 'Records', 'Submitted', 'Drafts', 'Cancelled', 'Checked in', 'Completion rate']"
+					[rows]="snapshotRows()"
+					[filename]="'registration-snapshots-' + year"
+					[exportContext]="registrationExportContext()"
+				/>
+				} @else {
+				<p>
+					Daily registration snapshots are unavailable for this saved
+					report.
+				</p>
+				}
+			</ion-col></ion-row
+		>
 	</ion-grid>
 	} }
 </ion-content>

@@ -78,6 +78,13 @@ export interface E2eSeedScheduleStats {
 export interface E2eSeedReportingStats {
 	registration?: {
 		programYear: number;
+		schemaVersion?: number;
+		calculatedAt?: string;
+		operational?: import('@santashop/models').RegistrationOperationalStats;
+		dailySnapshots?: (Omit<
+			import('@santashop/models').RegistrationDailySnapshot,
+			'calculatedAt'
+		> & { calculatedAt: string })[];
 		completedRegistrations: number;
 		dateTimeCount: {
 			dateTime: string;
@@ -105,6 +112,13 @@ export interface E2eSeedReportingStats {
 	};
 	user?: {
 		programYear: number;
+		schemaVersion?: number;
+		calculatedAt?: string;
+		population?: 'all-users';
+		signupCoverage?: 'observed-profile-records';
+		dailySignups?: { dateKey: string; count: number }[];
+		signupDatesUnavailable?: number;
+		signupDatesOutsideProgramYear?: number;
 		totalUsers: number;
 		zipCodeCount: { zip: string; count: number }[];
 		referrerCount: { referrer: string; count: number }[];

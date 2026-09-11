@@ -12,6 +12,7 @@ implementation or policy changes.
 | Contributor rules | [AGENTS.md](../AGENTS.md) |
 | Customer architecture | [Customer app](app/ARCHITECTURE_OVERVIEW.md) |
 | Admin architecture and reads | [Admin app](admin/ARCHITECTURE_OVERVIEW.md), [data freshness](admin/DATA_FRESHNESS.md) |
+| Analytics and report definitions | [Event contract, legacy reports, and GA4 validation](analytics-and-reporting.md) |
 | Backend handlers and runtime paths | [Functions reference](functions-reference.md), [runtime call boundaries](function-call-map.md) |
 | Business and acceptance contracts | [Business](requirements/BUSINESS_REQUIREMENTS.md), [functional](requirements/FUNCTIONAL_REQUIREMENTS.md), [non-functional](requirements/NON_FUNCTIONAL_REQUIREMENTS.md) requirements |
 | Configuration and credentials | [Configuration](SECRETS_AND_CONFIGURATION.md), [Remote Config](remote-config.md) |

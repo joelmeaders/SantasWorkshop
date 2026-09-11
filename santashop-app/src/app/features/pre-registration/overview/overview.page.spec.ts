@@ -215,7 +215,9 @@ describe('OverviewPage', () => {
 		} as DateTimeSlot);
 		await component.startReview();
 		expect(component.reviewing()).toBe(true);
+		expect(TestBed.inject(AnalyticsWrapper).logEvent).toHaveBeenCalledWith('workspace_review_started');
 		window.dispatchEvent(new Event('online'));
+		expect(TestBed.inject(AnalyticsWrapper).logEvent).toHaveBeenCalledWith('workspace_review_resumed');
 		expect(component.reviewing()).toBe(false);
 		await component.startReview();
 		expect(
@@ -280,6 +282,7 @@ describe('OverviewPage', () => {
 		expect(toast.present).toHaveBeenCalled();
 		expect(alert.present).toHaveBeenCalled();
 		expect(alert.onDidDismiss).toHaveBeenCalled();
+		expect(TestBed.inject(AnalyticsWrapper).logEventWithParams).toHaveBeenCalledWith('workspace_child_saved', { action: 'added' });
 		const childrenCard = fixture.debugElement.query(
 			By.directive(ChildrenCardComponent),
 		).componentInstance as ChildrenCardComponent;

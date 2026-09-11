@@ -1,4 +1,8 @@
 import { parsePublicParameters } from '../models';
+import type {
+	RegistrationDailySnapshot,
+	RegistrationOperationalStats,
+} from '../models';
 import { isLocalPublicParameters } from '../utility/public-parameters';
 /**
  * Test helper functions for E2E testing
@@ -46,6 +50,14 @@ export interface TestScheduleStatsSeed {
 
 export interface TestRegistrationStatsSeed {
 	programYear: number;
+	schemaVersion?: number;
+	calculatedAt?: string;
+	operational?: RegistrationOperationalStats;
+	dailySnapshots?: Array<
+		Omit<RegistrationDailySnapshot, 'calculatedAt'> & {
+			calculatedAt: string;
+		}
+	>;
 	completedRegistrations: number;
 	dateTimeCount: {
 		dateTime: string;
@@ -75,6 +87,13 @@ export interface TestCheckInStatsSeed {
 
 export interface TestUserStatsSeed {
 	programYear: number;
+	schemaVersion?: number;
+	calculatedAt?: string;
+	population?: 'all-users';
+	signupCoverage?: 'observed-profile-records';
+	dailySignups?: { dateKey: string; count: number }[];
+	signupDatesUnavailable?: number;
+	signupDatesOutsideProgramYear?: number;
 	totalUsers: number;
 	zipCodeCount: { zip: string; count: number }[];
 	referrerCount: { referrer: string; count: number }[];
@@ -1164,6 +1183,28 @@ export async function seedRegistrationStats(
 		.collection('stats')
 		.doc(`registration-${stats.programYear}`)
 		.set({
+			...(stats.schemaVersion === undefined
+				? {}
+				: {
+						schemaVersion: stats.schemaVersion,
+						programYear: stats.programYear,
+					}),
+			...(stats.calculatedAt === undefined
+				? {}
+				: { calculatedAt: new Date(stats.calculatedAt) }),
+			...(stats.operational === undefined
+				? {}
+				: { operational: stats.operational }),
+			...(stats.dailySnapshots === undefined
+				? {}
+				: {
+						dailySnapshots: stats.dailySnapshots.map(
+							(snapshot) => ({
+								...snapshot,
+								calculatedAt: new Date(snapshot.calculatedAt),
+							}),
+						),
+					}),
 			completedRegistrations: stats.completedRegistrations,
 			dateTimeCount,
 			zipCodeCount: stats.zipCodeCount,
@@ -1191,6 +1232,33 @@ export async function seedUserStats(stats: TestUserStatsSeed): Promise<void> {
 		.collection('stats')
 		.doc(`user-${stats.programYear}`)
 		.set({
+			...(stats.schemaVersion === undefined
+				? {}
+				: {
+						schemaVersion: stats.schemaVersion,
+						programYear: stats.programYear,
+					}),
+			...(stats.calculatedAt === undefined
+				? {}
+				: { calculatedAt: new Date(stats.calculatedAt) }),
+			...(stats.population === undefined
+				? {}
+				: { population: stats.population }),
+			...(stats.signupCoverage === undefined
+				? {}
+				: { signupCoverage: stats.signupCoverage }),
+			...(stats.dailySignups === undefined
+				? {}
+				: { dailySignups: stats.dailySignups }),
+			...(stats.signupDatesUnavailable === undefined
+				? {}
+				: { signupDatesUnavailable: stats.signupDatesUnavailable }),
+			...(stats.signupDatesOutsideProgramYear === undefined
+				? {}
+				: {
+						signupDatesOutsideProgramYear:
+							stats.signupDatesOutsideProgramYear,
+					}),
 			totalUsers: stats.totalUsers,
 			zipCodeCount: stats.zipCodeCount,
 			referrerCount: stats.referrerCount,

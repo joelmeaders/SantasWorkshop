@@ -28,6 +28,12 @@ updates do not enforce hard capacity: overbooking is acceptable, and scheduled
 reconciliation updates counters. Operators manually adjust the schedule during
 high demand. Duplicate check-ins are rejected by the server.
 
+New registration and user aggregates include their calculation times. Reports
+label each data source separately and show unavailable times or calculations
+for older documents. Check-in totals retain their existing `lastUpdated` time.
+See [analytics and reporting](../analytics-and-reporting.md) for population,
+snapshot, export, and legacy-data definitions.
+
 `AppStateService.allowChangeRegistration$` exists but is not consumed by the
 admin UI. Server authorization remains the enforcement boundary.
 

@@ -20,6 +20,10 @@ describe.sequential('scheduledUserStats integration', () => {
 		await setDocument(COLLECTION_SCHEMA.users, 'user-2', {
 			zipCode: '80205',
 		});
+		await setDocument(COLLECTION_SCHEMA.users, 'user-3', {
+			referredBy: 'School Counselor',
+		});
+		await setDocument(COLLECTION_SCHEMA.users, 'user-4', {});
 
 		await scheduledUserStats();
 
@@ -28,6 +32,40 @@ describe.sequential('scheduledUserStats integration', () => {
 				COLLECTION_SCHEMA.stats,
 				'user-2025',
 			),
-		).toMatchObject({ totalUsers: 1 });
+		).toMatchObject({
+			totalUsers: 4,
+			population: 'all-users',
+			schemaVersion: 2,
+			programYear: 2025,
+			zipCodeCount: [
+				{ zip: '80205', count: 2 },
+				{ zip: 'Unknown', count: 2 },
+			],
+			referrerCount: [
+				{ referrer: 'School Counselor', count: 2 },
+				{ referrer: 'Unknown', count: 2 },
+			],
+		});
+	});
+
+	it('keeps observed profile history when current profiles are no longer present', async () => {
+		await setDocument(COLLECTION_SCHEMA.stats, 'user-2025', {
+			totalUsers: 3,
+			zipCodeCount: [],
+			referrerCount: [],
+			dailySignups: [{ dateKey: '2025-11-01', count: 3 }],
+		});
+		await scheduledUserStats();
+		await scheduledUserStats();
+		expect(
+			await getDocument<Record<string, unknown>>(
+				COLLECTION_SCHEMA.stats,
+				'user-2025',
+			),
+		).toMatchObject({
+			totalUsers: 0,
+			signupCoverage: 'observed-profile-records',
+			dailySignups: [{ dateKey: '2025-11-01', count: 3 }],
+		});
 	});
 });

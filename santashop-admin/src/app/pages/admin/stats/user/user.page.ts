@@ -11,12 +11,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { UserStats } from '@santashop/models';
+import { PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core/admin/firestore';
+import { BehaviorSubject, switchMap } from 'rxjs';
+import { ReportTableComponent } from '../../../../shared/components/report-table/report-table.component';
+import { ReportFreshnessComponent } from '../../../../shared/components/report-freshness/report-freshness.component';
 import {
-	filterNil,
-	PROGRAM_YEAR,
-	SHOP_DAYS,
-} from '@santashop/core/admin/firestore';
-import { BehaviorSubject, map, shareReplay, switchMap } from 'rxjs';
+	reportDate,
+	ReportCell,
+} from '../../../../shared/helpers/report-export';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import {
 	getShopSchedule,
@@ -51,6 +53,8 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		ReportTableComponent,
+		ReportFreshnessComponent,
 		HeaderComponent,
 		BaseChartDirective,
 		FormsModule,
@@ -68,7 +72,7 @@ Chart.register(ChartDataLabels);
 })
 export class UserPage {
 	private readonly httpService = inject(AdminReadRepository);
-	private readonly programYear = inject(PROGRAM_YEAR);
+	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
 	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
@@ -90,19 +94,77 @@ export class UserPage {
 				.read(`user-${this.year}`)
 				.pipe(readState()),
 		),
-		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 	public readonly state = toSignal(this.state$, {
 		initialValue: { status: 'loading' as const, data: undefined },
 	});
 
-	private readonly userRecord$ = this.state$.pipe(
-		map((state) => state.data),
-		filterNil(),
+	public readonly userRecord = computed(() => this.state().data);
+	public readonly referralRows = computed(() =>
+		[...(this.userRecord()?.referrerCount ?? [])]
+			.sort((a, b) => b.count - a.count)
+			.map((entry) => [entry.referrer || 'Unknown', entry.count]),
 	);
-	private readonly userRecord = toSignal(this.userRecord$, {
-		initialValue: undefined,
-	});
+	public readonly zipRows = computed(() =>
+		[...(this.userRecord()?.zipCodeCount ?? [])]
+			.sort((a, b) => b.count - a.count)
+			.map((entry) => [entry.zip || 'Unknown', entry.count]),
+	);
+	public readonly referralTotal = computed(() => [
+		'Total',
+		(this.userRecord()?.referrerCount ?? []).reduce(
+			(sum, row) => sum + row.count,
+			0,
+		),
+	]);
+	public readonly zipTotal = computed(() => [
+		'Total',
+		(this.userRecord()?.zipCodeCount ?? []).reduce(
+			(sum, row) => sum + row.count,
+			0,
+		),
+	]);
+	public readonly signupRows = computed(() =>
+		[...(this.userRecord()?.dailySignups ?? [])]
+			.sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+			.map((entry) => [entry.dateKey, entry.count]),
+	);
+	public readonly exportContext = computed<ReportCell[][]>(() => [
+		['Program year', this.year],
+		[
+			'Calculated at',
+			reportDate(this.userRecord()?.calculatedAt)?.toISOString(),
+		],
+		[
+			'Population',
+			this.userRecord()?.population === 'all-users'
+				? 'All current user profiles'
+				: 'Legacy filtered population; missing ZIP or referral profiles may be excluded',
+		],
+	]);
+	public readonly signupExportContext = computed<ReportCell[][]>(() => [
+		['Program year', this.year],
+		[
+			'Calculated at',
+			reportDate(this.userRecord()?.calculatedAt)?.toISOString(),
+		],
+		[
+			'Population',
+			'Retained maximum observed profile counts per creation day, including profiles later removed',
+		],
+		[
+			'Coverage',
+			'Lower bound: profiles removed before a calculation are unavailable. Retained counts can exceed current profile totals.',
+		],
+		[
+			'Current profiles with unavailable creation dates',
+			this.userRecord()?.signupDatesUnavailable,
+		],
+		[
+			'Current profiles created outside the program year',
+			this.userRecord()?.signupDatesOutsideProgramYear,
+		],
+	]);
 
 	public readonly referrers = computed(() =>
 		[...(this.userRecord()?.referrerCount ?? [])]

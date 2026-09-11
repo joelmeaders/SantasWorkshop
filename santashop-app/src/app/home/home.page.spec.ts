@@ -13,7 +13,7 @@ import {
 
 import { HomePage } from './home.page';
 import { LoadingController, ModalController } from '@ionic/angular/standalone';
-import { AppStateService, ErrorHandlerService } from '@santashop/core/customer';
+import { AnalyticsWrapper, AppStateService, ErrorHandlerService } from '@santashop/core/customer';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '@santashop/core/customer';
 
@@ -181,8 +181,11 @@ describe('HomePage', () => {
 		});
 		component.resetEmail.setValue('parent@example.com');
 
+		const outcomes = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEventWithParams');
 		await component.onSignIn();
 		await component.resetPassword();
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'sign_in', outcome: 'failed', error_code: 'unknown' });
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'password_reset_request', outcome: 'failed', error_code: 'unknown' });
 
 		expect(errorHandler.handleError).toHaveBeenCalledTimes(2);
 		expect(errorHandler.handleError).toHaveBeenNthCalledWith(
@@ -208,8 +211,10 @@ describe('HomePage', () => {
 		const authService = TestBed.inject(AuthService);
 		vi.spyOn(authService, 'resetPassword').mockResolvedValue(undefined);
 		component.resetEmail.setValue('parent@example.com');
+		const outcomes = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEventWithParams');
 
 		await component.resetPassword();
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'password_reset_request', outcome: 'succeeded' });
 		await fixture.whenStable();
 
 		expect(component.resetEmailSent()).toBe(true);

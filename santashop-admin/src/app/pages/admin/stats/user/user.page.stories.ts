@@ -43,10 +43,63 @@ type Story = StoryObj<typeof meta>;
 
 export const CurrentSeason: Story = {};
 
+export const SavedProfileHistory: Story = {
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		const fixtures = getAdminStoryFixtures(canvasElement);
+		fixtures.userStats$.next({
+			totalUsers: 116,
+			schemaVersion: 2,
+			population: 'all-users',
+			programYear: 2026,
+			calculatedAt: new Date('2026-09-03T06:00:00Z'),
+			signupCoverage: 'observed-profile-records',
+			referrerCount: [
+				{ referrer: 'School', count: 60 },
+				{ referrer: 'Friend or family', count: 40 },
+				{ referrer: 'Unknown', count: 16 },
+			],
+			zipCodeCount: [
+				{ zip: '80219', count: 60 },
+				{ zip: '80204', count: 40 },
+				{ zip: 'Unknown', count: 16 },
+			],
+			dailySignups: [
+				{ dateKey: '2026-09-01', count: 60 },
+				{ dateKey: '2026-09-02', count: 36 },
+				{ dateKey: '2026-09-03', count: 20 },
+			],
+			signupDatesUnavailable: 0,
+			signupDatesOutsideProgramYear: 0,
+		});
+		await userEvent.click(canvas.getByText('Refresh report'));
+		await expect(
+			await canvas.findByRole('table', {
+				name: 'Profile records observed by creation day',
+			}),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('table', { name: 'User referrals' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByText('Counts include all current user profiles.', {
+				exact: false,
+			}),
+		).toBeVisible();
+		canvas
+			.getByRole('table', {
+				name: 'Profile records observed by creation day',
+			})
+			.scrollIntoView({ block: 'start', behavior: 'instant' });
+	},
+};
+
 export const NoUserStatistics: Story = {
 	decorators: adminStoryDecorators({ emptyStats: true }),
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
-		await expect(await canvas.findByText('No user statistics for this year.')).toBeVisible();
+		await expect(
+			await canvas.findByText('No user statistics for this year.'),
+		).toBeVisible();
 	},
 };

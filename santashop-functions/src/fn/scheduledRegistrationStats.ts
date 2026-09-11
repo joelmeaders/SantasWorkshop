@@ -8,10 +8,20 @@ import {
 	Registration,
 	RegistrationStats,
 	ZipCodeCount,
+	getZonedDateKey,
 } from '../models';
 import { normalizeDateTime } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
-import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
+import {
+	getStatsDocumentId,
+	PROGRAM_YEAR,
+	SHOP_TIME_ZONE,
+} from '../utility/runtime-config';
+import {
+	appendDailyRegistrationSnapshot,
+	calculateOperationalStats,
+	readStatsDate,
+} from '../utility/reporting-stats';
 
 const log = createFunctionLogger('scheduledRegistrationStats');
 
@@ -42,28 +52,100 @@ const createZipCodeStat = (zip: number, childCount: number): ZipCodeCount => ({
 });
 
 export default async function scheduledRegistrationStats(): Promise<void> {
-	const registrationsSnapshots = await registrationQuery().get();
-	const registrations: Registration[] = [];
-
-	registrationsSnapshots.forEach((doc) => {
-		registrations.push(
-			toRegistration(doc.data() as Record<string, unknown>),
+	const [registrationsSnapshots, checkinsSnapshot, cancellationsSnapshot] =
+		await Promise.all([
+			registrationQuery().get(),
+			admin.firestore().collection('checkins').get(),
+			admin
+				.firestore()
+				.collection('cancellations')
+				.where('programYear', '==', PROGRAM_YEAR)
+				.get(),
+		]);
+	const now = new Date();
+	const records = registrationsSnapshots.docs.map((doc) => ({
+		id: doc.id,
+		data: toRegistration(doc.data()),
+	}));
+	// Preserve the original submitted-registration population of the demographics report.
+	const registrations = records
+		.map(({ data }) => data)
+		.filter(
+			(record) =>
+				record.programYear === PROGRAM_YEAR &&
+				record.registrationSubmittedOn != null &&
+				(record.registrationSubmittedOn as unknown) !== '',
 		);
-	});
+	const checkedInIds = new Set(
+		checkinsSnapshot.docs
+			.filter((doc) => {
+				const data = doc.data();
+				const checkedInOn = readStatsDate(data['checkInDateTime']);
+				return (
+					data['registrationCode'] !== 'onsite' &&
+					checkedInOn &&
+					checkedInOn <= now &&
+					getZonedDateKey(checkedInOn, SHOP_TIME_ZONE).startsWith(
+						`${PROGRAM_YEAR}-`,
+					)
+				);
+			})
+			.map((doc) => doc.id),
+	);
+	const recordedCancellationEvents = cancellationsSnapshot.docs.filter(
+		(doc) => {
+			const data = doc.data();
+			const cancelledOn = readStatsDate(data['cancelledOn']);
+			return (
+				data['programYear'] === PROGRAM_YEAR &&
+				cancelledOn &&
+				cancelledOn <= now
+			);
+		},
+	).length;
+	const operational = calculateOperationalStats(
+		records,
+		checkedInIds,
+		recordedCancellationEvents,
+		PROGRAM_YEAR,
+		SHOP_TIME_ZONE,
+		now,
+	);
 
 	const completedRegistrations = registrations.length;
 
 	const stats: RegistrationStats = {
+		schemaVersion: 2,
+		calculatedAt: now,
+		programYear: PROGRAM_YEAR,
+		operational,
 		completedRegistrations,
 		dateTimeCount: getDateTimeStats(registrations),
 		zipCodeCount: getZipCodeStats(registrations),
 	};
 
-	await admin
+	const statsRef = admin
 		.firestore()
 		.collection('stats')
-		.doc(getStatsDocumentId('registration'))
-		.set(stats, { merge: false });
+		.doc(getStatsDocumentId('registration'));
+	await admin.firestore().runTransaction(async (transaction) => {
+		const previous = (await transaction.get(statsRef)).data() as
+			RegistrationStats | undefined;
+		transaction.set(
+			statsRef,
+			{
+				...stats,
+				dailySnapshots: appendDailyRegistrationSnapshot(
+					previous?.dailySnapshots,
+					operational,
+					PROGRAM_YEAR,
+					SHOP_TIME_ZONE,
+					now,
+				),
+			},
+			{ merge: false },
+		);
+	});
 
 	log.info('Updated registration stats document', {
 		completedRegistrations,
@@ -72,7 +154,9 @@ export default async function scheduledRegistrationStats(): Promise<void> {
 	});
 }
 
-function getDateTimeStats(registrations: Registration[]): RegistrationDateTimeStats[] {
+function getDateTimeStats(
+	registrations: Registration[],
+): RegistrationDateTimeStats[] {
 	const stats: RegistrationDateTimeStats[] = [];
 
 	const getIndex = (dateTime: Date) =>
@@ -80,10 +164,7 @@ function getDateTimeStats(registrations: Registration[]): RegistrationDateTimeSt
 
 	registrations.forEach((registration) => {
 		const timestamp = registration.dateTimeSlot?.dateTime as
-			| Timestamp
-			| Date
-			| string
-			| undefined;
+			Timestamp | Date | string | undefined;
 
 		if (!timestamp) {
 			log.warn(
@@ -189,5 +270,4 @@ const registrationQuery = () =>
 	admin
 		.firestore()
 		.collection('registrations')
-		.where('programYear', '==', PROGRAM_YEAR)
-		.where('registrationSubmittedOn', '!=', '');
+		.where('programYear', '==', PROGRAM_YEAR);

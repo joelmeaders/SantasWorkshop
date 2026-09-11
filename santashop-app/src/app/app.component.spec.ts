@@ -104,6 +104,18 @@ describe('AppComponent', () => {
 		expect(platformSpy.ready).toHaveBeenCalled();
 	});
 
+	it('reports the selected language when it differs from the browser language', async () => {
+		const storage = vi.spyOn(Storage.prototype, 'getItem').mockReturnValue('es');
+		try {
+			const translate = TestBed.inject(TranslateService);
+			vi.mocked(translate.getBrowserLang).mockReturnValue('en');
+			const fixture = TestBed.createComponent(AppComponent);
+			await fixture.whenStable();
+			expect(translate.use).toHaveBeenCalledWith('es');
+			expect(TestBed.inject(AnalyticsWrapper).logEventWithParams).toHaveBeenCalledWith('default_language', { value: 'es' });
+		} finally { storage.mockRestore(); }
+	});
+
 	it('replaces an open global alert and dismisses it when disabled', async () => {
 		const firstAlert = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(true) };
 		const secondAlert = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(true) };

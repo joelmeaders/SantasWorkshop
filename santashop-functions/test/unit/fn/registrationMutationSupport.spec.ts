@@ -12,8 +12,12 @@ import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
 describe('registration mutation support', () => {
 	it('rejects malformed request envelopes and mutation IDs', () => {
-		expect(() => requireObject([])).toThrow(/Request data must be an object/);
-		expect(() => requireMutationId('short')).toThrow(/Mutation ID must contain/);
+		expect(() => requireObject([])).toThrow(
+			/Request data must be an object/,
+		);
+		expect(() => requireMutationId('short')).toThrow(
+			/Mutation ID must contain/,
+		);
 		expect(() => requireOpenPreRegistration(undefined)).toThrow(
 			/Pre-registration is currently unavailable/,
 		);
@@ -22,7 +26,11 @@ describe('registration mutation support', () => {
 	it('rejects a reused mutation ID for a different operation', () => {
 		expect(() =>
 			getStoredMutationResult(
-				{ operation: 'saveDraftChild', result: true, completedOn: new Date() },
+				{
+					operation: 'saveDraftChild',
+					result: true,
+					completedOn: new Date(),
+				},
 				'undoRegistration',
 			),
 		).toThrow(/already used for a different operation/);
@@ -33,17 +41,24 @@ describe('registration mutation support', () => {
 			id: 2,
 			firstName: ' Noelle ',
 			lastName: ' Elf ',
-			dateOfBirth: new Date(new Date().getFullYear() - 5, 5, 10),
+			dateOfBirth: new Date(PROGRAM_YEAR - 5, 5, 10),
 			toyType: ToyType.girl,
 		});
-		expect(child).toMatchObject({ id: 2, firstName: 'Noelle', lastName: 'Elf', toyType: ToyType.girl });
-		expect(() => canonicalizeChild({
-			id: 3,
-			firstName: 'Baby',
+		expect(child).toMatchObject({
+			id: 2,
+			firstName: 'Noelle',
 			lastName: 'Elf',
-			dateOfBirth: new Date(new Date().getFullYear() - 1, 5, 10),
 			toyType: ToyType.girl,
-		})).toThrow(/Infant children must use the infant toy type/);
+		});
+		expect(() =>
+			canonicalizeChild({
+				id: 3,
+				firstName: 'Baby',
+				lastName: 'Elf',
+				dateOfBirth: new Date(PROGRAM_YEAR - 1, 5, 10),
+				toyType: ToyType.girl,
+			}),
+		).toThrow(/Infant children must use the infant toy type/);
 	});
 
 	it('accepts age 11 and rejects age 12 at the program-year cutoff', () => {
@@ -56,13 +71,15 @@ describe('registration mutation support', () => {
 		});
 
 		expect(eligibleChild.ageGroup).toBe('9-11');
-		expect(() => canonicalizeChild({
-			id: 5,
-			firstName: 'Too Old',
-			lastName: 'Elf',
-			dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
-			toyType: ToyType.girl,
-		})).toThrow(/eligible age range/);
+		expect(() =>
+			canonicalizeChild({
+				id: 5,
+				firstName: 'Too Old',
+				lastName: 'Elf',
+				dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+				toyType: ToyType.girl,
+			}),
+		).toThrow(/eligible age range/);
 	});
 
 	it('normalizes date-only and event-time birth dates to UTC calendar dates', () => {
@@ -97,18 +114,37 @@ describe('registration mutation support', () => {
 	});
 
 	it('rejects an overflowing date-only birth date', () => {
-		expect(() => canonicalizeChild({
-			id: 9,
-			firstName: 'Invalid',
-			lastName: 'Date',
-			dateOfBirth: `${PROGRAM_YEAR}-02-30`,
-			toyType: ToyType.girl,
-		})).toThrow(/valid date/);
+		expect(() =>
+			canonicalizeChild({
+				id: 9,
+				firstName: 'Invalid',
+				lastName: 'Date',
+				dateOfBirth: `${PROGRAM_YEAR}-02-30`,
+				toyType: ToyType.girl,
+			}),
+		).toThrow(/valid date/);
 	});
 
 	it('requires a current enabled appointment slot', () => {
-		expect(() => requireEnabledCurrentSlot(undefined, 'slot')).toThrow(/no longer exists/);
-		expect(() => requireEnabledCurrentSlot({ id: 'slot', programYear: 2020, enabled: false } as never, 'slot')).toThrow(/no longer available/);
-		expect(() => requireEnabledCurrentSlot({ id: 'slot', programYear: 2025, enabled: true } as never, 'slot')).toThrow(/invalid/);
+		expect(() =>
+			requireEnabledCurrentSlot(
+				undefined,
+				'slot',
+				new Date('2025-12-01'),
+			),
+		).toThrow(/no longer exists/);
+		expect(() =>
+			requireEnabledCurrentSlot(
+				{ id: 'slot', programYear: 2020, enabled: false } as never,
+				'slot',
+				new Date('2025-12-01'),
+			),
+		).toThrow(/no longer available/);
+		expect(() =>
+			requireEnabledCurrentSlot(
+				{ id: 'slot', programYear: 2025, enabled: true } as never,
+				'slot',
+			),
+		).toThrow(/no longer available/);
 	});
 });

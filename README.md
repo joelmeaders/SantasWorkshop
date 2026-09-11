@@ -36,10 +36,10 @@ This workspace uses **pnpm Catalogs** for centralized dependency version managem
 
 ### Catalogs
 
-| Catalog | Purpose | Used By |
+| Catalog              | Purpose                      | Used By                        |
 | -------------------- | ---------------------------- | ------------------------------ |
-| `catalog:` (default) | Angular/Ionic dependencies | app, admin, core, models, root |
-| `catalog:functions` | Cloud Functions dependencies | santashop-functions |
+| `catalog:` (default) | Angular/Ionic dependencies   | app, admin, core, models, root |
+| `catalog:functions`  | Cloud Functions dependencies | santashop-functions            |
 
 ### How It Works
 
@@ -158,10 +158,11 @@ pnpm run e2e:test
 
 ### Hosting Builds in GitHub Actions
 
-- The UI PR workflow runs core and Storybook once, selects the affected app/admin targets, and requires every selected/shared job through `build_validation`. Target jobs validate **test**-mode builds and emulator journeys without deployment. The separate Windows visual job remains independent.
+- The UI PR workflow runs core tests, selects the affected app/admin targets, and requires every selected/shared job through `build_validation`. Target jobs validate **test**-mode builds and emulator journeys without deployment. The canonical Storybook workflow owns behavior tests and the separate Windows visual job.
 - Merge-to-master workflows deploy the merged commit to the **test** Firebase project first.
-- Production release is a separate manual workflow run that promotes a specific tested commit or ref to the **production** Firebase project.
-- When you are ready for prod, run the workflow manually and provide the tested commit SHA or ref as `release_ref`.
+- Production release is a separate owner-dispatched workflow from `master`. Set `release_ref` to a full 40-character commit SHA on `master`.
+- Supply `evidence_run_ids` for successful validation and test deployment of that exact SHA. Repeat the SHA in `production_approval` to approve the selected runs. The shared gate verifies evidence before candidate execution or production credentials.
+- `skip_tests=true` reuses verified tests. It cannot bypass the gate. See [the release procedure](docs/release-readiness.md#exact-sha-release-evidence-and-owner-approval) for required runs, path-filter gaps, and rollback reuse.
 
 Current app/admin PR and test-deploy workflows generate **test-mode** Angular config (`config.production === true`) and then build with Angular CLI's `development` configuration. Production workflows use Angular CLI's `production` configuration.
 
@@ -187,8 +188,8 @@ The pull request workflow acts as the Functions PR validation process:
 The merge-to-master workflow is the Functions promotion pipeline:
 
 - it deploys to the **test** Firebase project first
-- production release is then triggered manually for the tested commit or ref
-- the manual run deploys that ref to the **production** Firebase project
+- the owner then dispatches production from `master` with the full tested SHA, evidence run IDs, and matching approval
+- the shared gate verifies unit, integration, customer/staff E2E, and test-deployment evidence before deploying that SHA to **production**
 
 Required GitHub secrets for the Functions workflows:
 

@@ -78,7 +78,9 @@ export class ScheduleCardComponent {
 	public readonly expanded = signal(false);
 	public readonly slotsLoading = computed(() => this.slots() == null);
 	public readonly availableSlots = computed(() =>
-		(this.slots() ?? []).filter((slot) => slot.enabled),
+		(this.slots() ?? []).filter(
+			(slot) => slot.enabled && (slot.slotsReserved ?? 0) < slot.maxSlots,
+		),
 	);
 	public readonly availableSlotDays = computed<ScheduleDay[]>(() => {
 		const days = new Map<string, ScheduleDay>();

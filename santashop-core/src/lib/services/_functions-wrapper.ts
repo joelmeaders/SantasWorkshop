@@ -60,6 +60,7 @@ export class FunctionsWrapper {
 		data: {
 			mutationId: string;
 			slotId: string;
+		reviewedDateTime?: string;
 			registrationUid?: string;
 		},
 	): Promise<_HttpsCallableResult<true>> =>
@@ -86,6 +87,7 @@ export class FunctionsWrapper {
 	public readonly setDraftAppointment = (data: {
 		mutationId: string;
 		slotId: string;
+		reviewedDateTime?: string;
 	}): Promise<_HttpsCallableResult<true>> =>
 		this.callableWrapper<typeof data, true>('setDraftAppointment')(data);
 

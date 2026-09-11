@@ -1,3 +1,4 @@
+import { getBookingNow } from '../utility/booking-clock';
 import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
@@ -13,6 +14,7 @@ import {
 	requireCanonicalChildren,
 	requireDraftRegistration,
 	requireEnabledCurrentSlot,
+	requireReviewedAppointment,
 	requireMutationId,
 	requireObject,
 	requireOnlyKeys,
@@ -23,6 +25,7 @@ import {
 interface SetDraftAppointmentData {
 	mutationId: string;
 	slotId: string;
+	reviewedDateTime?: string;
 }
 
 const requireSlotId = (value: unknown): string => {
@@ -37,12 +40,11 @@ export default async function setDraftAppointment(
 ): Promise<true> {
 	const uid = requireAuthenticatedUid(request);
 	const data = requireObject(request.data);
-	requireOnlyKeys(data, ['mutationId', 'slotId']);
+	requireOnlyKeys(data, ['mutationId', 'slotId', 'reviewedDateTime']);
 	const mutationId = requireMutationId(data['mutationId']);
 	const slotId = requireSlotId(data['slotId']);
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parameters = await getPublicParameters();
 	const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
 	const receiptRef = registrationRef
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
@@ -62,6 +64,8 @@ export default async function setDraftAppointment(
 			'setDraftAppointment',
 		);
 		if (cached) return;
+		const parameters = await getPublicParameters();
+		const now = await getBookingNow(db);
 		requireOpenPreRegistration(parameters);
 		const registration = requireDraftRegistration(
 			registrationSnapshot.data() as Registration | undefined,
@@ -70,8 +74,11 @@ export default async function setDraftAppointment(
 		const slot = requireEnabledCurrentSlot(
 			slotSnapshot.data() as DateTimeSlot | undefined,
 			slotId,
+			now,
 		);
 
+		if (data['reviewedDateTime'] !== undefined)
+			requireReviewedAppointment(data['reviewedDateTime'], slot.dateTime);
 		transaction.set(
 			registrationRef,
 			{ dateTimeSlot: { id: slot.id, dateTime: slot.dateTime } },

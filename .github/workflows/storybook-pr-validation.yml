@@ -45,6 +45,11 @@ on:
       - 'vitest.config.mjs'
       - 'vitest.setup.ts'
   workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Exact release SHA for behavior evidence (defaults to workflow SHA)
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -62,6 +67,14 @@ jobs:
       TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.release_ref || github.sha }}
+          persist-credentials: false
+      - name: Capture checkout revision before candidate code
+        id: revision
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Release revision ${{ steps.revision.outputs.sha }}
+        run: echo 'Checkout revision recorded before candidate execution'
       - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
@@ -72,7 +85,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run e2e:browser:setup:ci
       - run: pnpm run config:app:e2e && pnpm run config:admin:e2e
-      - run: pnpm run ci:storybook
+      - name: Storybook behavior tests
+        run: pnpm run ci:storybook
   storybook_visual:
     if: github.event_name == 'pull_request'
     runs-on: windows-2022

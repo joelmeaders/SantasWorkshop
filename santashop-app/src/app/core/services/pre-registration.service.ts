@@ -193,6 +193,7 @@ export class PreRegistrationService {
 	public setDraftAppointment(input: {
 		mutationId: string;
 		slotId: string;
+		reviewedDateTime?: string;
 	}): Promise<HttpsCallableResult<true>> {
 		return this.afFunctions.setDraftAppointment(input);
 	}
@@ -218,6 +219,7 @@ export class PreRegistrationService {
 		return this.afFunctions.changeRegistrationDateTime({
 			mutationId: this.createMutationId(),
 			slotId: newDateTimeSlot.id,
+			reviewedDateTime: newDateTimeSlot.dateTime.toISOString(),
 		});
 	}
 

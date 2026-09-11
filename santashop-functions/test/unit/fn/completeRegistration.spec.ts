@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
 	createAccountAdminMock,
@@ -11,6 +11,9 @@ describe('completeRegistration handler', () => {
 	let adminMock: AccountAdminMock;
 
 	beforeEach(() => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			Date.parse('2025-12-01T00:00:00.000Z'),
+		);
 		adminMock = createAccountAdminMock();
 	});
 
@@ -30,7 +33,10 @@ describe('completeRegistration handler', () => {
 					toyType: 'girls',
 				},
 			],
-			dateTimeSlot: { id: 'slot-1' },
+			dateTimeSlot: {
+				id: 'slot-1',
+				dateTime: new Date('2025-12-10T18:00:00.000Z'),
+			},
 		});
 		adminMock.setDocSnapshot('users/user-3', {
 			firstName: 'Buddy',

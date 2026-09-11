@@ -1,3 +1,4 @@
+import { getBookingNow } from '../utility/booking-clock';
 import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
@@ -19,6 +20,7 @@ import {
 	requireCanonicalChildren,
 	requireDraftRegistration,
 	requireEnabledCurrentSlot,
+	requireReviewedAppointment,
 	requireMutationId,
 	requireObject,
 	requireOnlyKeys,
@@ -42,7 +44,6 @@ export default async function completeRegistration(
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 	const userRef = db.doc(`${COLLECTION_SCHEMA.users}/${uid}`);
-	const parameters = await getPublicParameters();
 	const emailRef = db
 		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
 		.doc();
@@ -65,6 +66,8 @@ export default async function completeRegistration(
 				'completeRegistration',
 			);
 			if (cached) return;
+			const parameters = await getPublicParameters();
+			const now = await getBookingNow(db);
 			const registrationData = registrationSnapshot.data() as
 				Registration | undefined;
 			if (registrationData?.registrationSubmittedOn) {
@@ -104,6 +107,11 @@ export default async function completeRegistration(
 			const slot = requireEnabledCurrentSlot(
 				slotSnapshot.data() as DateTimeSlot | undefined,
 				slotId,
+				now,
+			);
+			requireReviewedAppointment(
+				registration.dateTimeSlot?.dateTime,
+				slot.dateTime,
 			);
 			if (!registration.qrcode) {
 				throw new HttpsError(
@@ -118,7 +126,7 @@ export default async function completeRegistration(
 				);
 			}
 
-			const submittedOn = new Date();
+			const submittedOn = now;
 			const canonicalContact = {
 				firstName: user.firstName,
 				lastName: user.lastName,

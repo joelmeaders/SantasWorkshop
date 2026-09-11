@@ -120,7 +120,8 @@
 		"ADD_CHILD": "Agregar hijo",
 		"EDIT_CHILD": "Guardar Cambios",
 		"SCHEDULE": "Horario",
-		"CHANGE_TIME": "Cambiar hora"
+		"CHANGE_TIME": "Cambiar hora",
+		"APPOINTMENT_REVIEW_REQUIRED": "Esta cita cambió o ya no está disponible. Los datos de su familia están guardados. Elija y revise una cita disponible."
 	},
 	"CHILDREN": {
 		"ADD_A_CHILD": "Agregar un niño",

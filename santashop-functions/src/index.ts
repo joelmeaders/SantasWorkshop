@@ -628,6 +628,49 @@ const emulatorOnly = <TFunction>(
 ): TFunction | undefined =>
 	RUNNING_IN_FUNCTIONS_EMULATOR ? createFunction() : undefined;
 
+export const testInspectRegistrationBoundary = emulatorOnly(() =>
+	onCall(
+		{ enforceAppCheck: false },
+		observeCallableHandler(
+			'testInspectRegistrationBoundary',
+			async (request) => {
+				assertEmulatorOnly();
+				const { inspectRegistrationBoundary } =
+					await import('./fn/testBoundaryHelpers');
+				return inspectRegistrationBoundary(request.data?.emailAddress);
+			},
+		),
+	),
+);
+
+export const testUpdateDateTimeSlot = emulatorOnly(() =>
+	onCall(
+		{ enforceAppCheck: false },
+		observeCallableHandler('testUpdateDateTimeSlot', async (request) => {
+			assertEmulatorOnly();
+			const { updateDateTimeSlot } =
+				await import('./fn/testBoundaryHelpers');
+			await updateDateTimeSlot(
+				request.data?.id,
+				request.data?.changes ?? {},
+			);
+			return { success: true };
+		}),
+	),
+);
+
+export const testSetBookingClock = emulatorOnly(() =>
+	onCall(
+		{ enforceAppCheck: false },
+		observeCallableHandler('testSetBookingClock', async (request) => {
+			assertEmulatorOnly();
+			return (await import('./fn/testBookingClock')).testSetBookingClock(
+				request,
+			);
+		}),
+	),
+);
+
 /**
  * Seeds the database with test parameters.
  * Emulator only.

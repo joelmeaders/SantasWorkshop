@@ -25,9 +25,11 @@ test.describe('appointment time zone', () => {
 		clearData,
 		seedScenario,
 		seedDateTimeSlots,
+		setBookingClock,
 	}) => {
 		await clearData();
 		await seedScenario('create-account-enabled');
+		await setBookingClock(e2eDateTime(12, 1, 0));
 		await seedDateTimeSlots([
 			{
 				id: 'denver-late-slot',

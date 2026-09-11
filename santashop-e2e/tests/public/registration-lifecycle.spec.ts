@@ -31,7 +31,8 @@ const refreshPublicParameters = async (page: Page): Promise<void> => {
 const requireQrDownloadToken = (source: string | null): string => {
 	if (!source) throw new Error('Registration QR source is unavailable.');
 	const token = new URL(source).searchParams.get('token');
-	if (!token) throw new Error('Registration QR download token is unavailable.');
+	if (!token)
+		throw new Error('Registration QR download token is unavailable.');
 	return token;
 };
 
@@ -50,9 +51,188 @@ const expectSignInToBeRejected = async (
 };
 
 test.describe('customer registration lifecycle', () => {
-	test.beforeEach(async ({ clearData, seedScenario }) => {
+	test.beforeEach(async ({ clearData, seedScenario, setBookingClock }) => {
 		await clearData();
 		await seedScenario('create-account-enabled');
+		await setBookingClock(testSlotDate(TEST_PROGRAM_YEAR, 1, 0));
+	});
+
+	test('BOOKING-CUTOFF rejects elapsed server time with a wrong browser clock and preserves the family for recovery', async ({
+		page,
+		seedDateTimeSlots,
+		setBookingClock,
+		inspectRegistrationBoundary,
+	}) => {
+		const appointment = testSlotDate(TEST_PROGRAM_YEAR, 10, 16);
+		await setBookingClock(testSlotDate(TEST_PROGRAM_YEAR, 1, 0));
+		await seedDateTimeSlots([
+			{
+				id: 'cutoff-slot',
+				programYear: TEST_PROGRAM_YEAR,
+				dateTime: appointment,
+				maxSlots: 5,
+				enabled: true,
+			},
+			{
+				id: 'recovery-slot',
+				programYear: TEST_PROGRAM_YEAR,
+				dateTime: testSlotDate(TEST_PROGRAM_YEAR, 11, 16),
+				maxSlots: 5,
+				enabled: true,
+			},
+		]);
+		const account = randomAccount();
+		await createAccountViaUi(page, account);
+		await addChildViaUi(page, defaultTestChild());
+		await selectAppointmentViaUi(page, 'cutoff-slot');
+		// Selection age alone does not expire an otherwise eligible appointment.
+		await setBookingClock(testSlotDate(TEST_PROGRAM_YEAR, 9, 0));
+		await page.evaluate(() => window.dispatchEvent(new Event('online')));
+		const freshReview = page.waitForResponse(
+			(response) =>
+				response.request().method() === 'POST' &&
+				response.url().endsWith('/setDraftAppointment'),
+		);
+		await page.locator('#reviewAndSubmitButton').click();
+		const reviewed = await freshReview;
+		expect(reviewed.status()).toBe(200);
+		const authorization = (await reviewed.request().allHeaders())[
+			'authorization'
+		];
+		await expect(
+			page.locator('#completeRegistrationButton'),
+		).not.toHaveClass(/button-disabled/);
+		const before = await inspectRegistrationBoundary(account.emailAddress);
+		await page.clock.setFixedTime(
+			new Date(testSlotDate(TEST_PROGRAM_YEAR, 1, 0)),
+		);
+		await setBookingClock(appointment);
+		await page.evaluate(() => window.dispatchEvent(new Event('online')));
+		const rejected = page.waitForResponse(
+			(response) =>
+				response.request().method() === 'POST' &&
+				response.url().endsWith('/setDraftAppointment'),
+		);
+		await page.locator('#reviewAndSubmitButton').click();
+		expect((await rejected).status()).toBe(400);
+		await expect(page.locator('ion-toast')).toContainText(
+			'Your family details are saved',
+		);
+		// Review blocks the UI first. The final callable independently enforces the same cutoff.
+		const rejectedCompletion = await page.request.post(
+			reviewed
+				.url()
+				.replace(/\/setDraftAppointment$/, '/completeRegistration'),
+			{
+				headers: { authorization },
+				data: { data: { mutationId: 'cutoff-after-resume' } },
+			},
+		);
+		expect(rejectedCompletion.status()).toBe(400);
+		const after = await inspectRegistrationBoundary(account.emailAddress);
+		expect(after.registration).toEqual(before.registration);
+		expect(after.emailCount).toBe(0);
+		expect(after.searchIndexCount).toBe(0);
+		expect(
+			after.receipts.filter(
+				(receipt) => receipt.operation === 'completeRegistration',
+			),
+		).toHaveLength(0);
+		await page.evaluate(() => window.dispatchEvent(new Event('online')));
+		await selectAppointmentViaUi(page, 'recovery-slot');
+		await submitRegistrationViaUi(page);
+		expect(
+			(await inspectRegistrationBoundary(account.emailAddress))
+				.registration.children,
+		).toEqual(before.registration.children);
+	});
+
+	test('BOOKING-LOST-ACK converges after a committed response is discarded and replays the exact receipt after closure', async ({
+		page,
+		seedDateTimeSlots,
+		setBookingClock,
+		seedPublicParams,
+		inspectRegistrationBoundary,
+	}) => {
+		const appointment = testSlotDate(TEST_PROGRAM_YEAR, 10, 16);
+		await setBookingClock(testSlotDate(TEST_PROGRAM_YEAR, 1, 0));
+		await seedDateTimeSlots([
+			{
+				id: 'lost-ack-slot',
+				programYear: TEST_PROGRAM_YEAR,
+				dateTime: appointment,
+				maxSlots: 5,
+				enabled: true,
+			},
+		]);
+		const account = randomAccount();
+		await createAccountViaUi(page, account);
+		await addChildViaUi(page, defaultTestChild());
+		await selectAppointmentViaUi(page, 'lost-ack-slot');
+		let replay:
+			| {
+					url: string;
+					authorization: string;
+					data: { data: { mutationId: string } };
+			  }
+			| undefined;
+		let committed:
+			Awaited<ReturnType<typeof inspectRegistrationBoundary>> | undefined;
+		let responseDiscarded = false;
+		await page.route(
+			'**/completeRegistration',
+			async (route) => {
+				const request = route.request();
+				const response = await route.fetch();
+				expect(response.ok()).toBe(true);
+				expect(await response.json()).toMatchObject({ result: true });
+				replay = {
+					url: request.url(),
+					authorization: (await request.allHeaders())[
+						'authorization'
+					],
+					data: request.postDataJSON() as {
+						data: { mutationId: string };
+					},
+				};
+				committed = await inspectRegistrationBoundary(
+					account.emailAddress,
+				);
+				expect(
+					committed.registration.registrationSubmittedOn,
+				).toBeTruthy();
+				expect(committed.receipts).toContainEqual(
+					expect.objectContaining({
+						id: replay.data.data.mutationId,
+						operation: 'completeRegistration',
+						result: true,
+					}),
+				);
+				await route.abort('failed');
+				responseDiscarded = true;
+			},
+			{ times: 1 },
+		);
+		await submitRegistrationViaUi(page);
+		await expect.poll(() => responseDiscarded).toBe(true);
+		if (!replay || !committed)
+			throw new Error('The committed response was not captured.');
+		await setBookingClock(appointment);
+		await seedPublicParams({ registrationEnabled: false });
+		const response = await page.request.post(replay.url, {
+			headers: { authorization: replay.authorization },
+			data: replay.data,
+		});
+		expect(response.ok()).toBe(true);
+		expect(await response.json()).toMatchObject({ result: true });
+		const after = await inspectRegistrationBoundary(account.emailAddress);
+		expect(after.registrationCount).toBe(1);
+		expect(after.emailCount).toBe(1);
+		expect(after.searchIndexCount).toBe(1);
+		expect(after.registration.registrationSubmittedOn).toBe(
+			committed.registration.registrationSubmittedOn,
+		);
+		expect(after.receipts).toEqual(committed.receipts);
 	});
 
 	test('REG-001 and REG-002 persist a listed referral and reveal registration progress', async ({

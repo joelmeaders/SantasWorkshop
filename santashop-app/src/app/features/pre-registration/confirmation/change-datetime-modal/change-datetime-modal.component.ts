@@ -129,7 +129,9 @@ export class ChangeDatetimeModalComponent {
 	);
 
 	public readonly filteredSlots = computed(() =>
-		this.availableSlotsState().filter((slot) => slot.enabled),
+		this.availableSlotsState().filter(
+			(slot) => slot.enabled && (slot.slotsReserved ?? 0) < slot.maxSlots,
+		),
 	);
 
 	public readonly availableDays = computed(() => [
@@ -139,7 +141,9 @@ export class ChangeDatetimeModalComponent {
 	]);
 
 	public readonly availableSlotsByDay = (date: number): DateTimeSlot[] =>
-		this.filteredSlots().filter((slot) => toEventDayKey(slot.dateTime) === date);
+		this.filteredSlots().filter(
+			(slot) => toEventDayKey(slot.dateTime) === date,
+		);
 
 	public async cancel(): Promise<void> {
 		await this.modalController.dismiss(null, 'cancel');

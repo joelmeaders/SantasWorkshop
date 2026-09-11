@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import changeRegistrationDateTime from '../../src/fn/changeRegistrationDateTime';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import {
@@ -13,6 +13,9 @@ import { createCallableRequest } from '../helpers/callable-context';
 
 describe.sequential('changeRegistrationDateTime integration', () => {
 	beforeEach(async () => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			Date.parse('2025-12-01T00:00:00.000Z'),
+		);
 		await clearEmulatorData();
 	});
 

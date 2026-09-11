@@ -396,6 +396,7 @@ describe('PreRegistrationService', () => {
 		expect(functions.changeRegistrationDateTime).toHaveBeenCalledWith({
 			mutationId: expect.any(String),
 			slotId: 'slot-2',
+			reviewedDateTime: expect.any(String),
 		});
 		await expect(
 			service.saveDraftChild({

@@ -1,3 +1,4 @@
+import { getBookingNow } from '../utility/booking-clock';
 import { getPublicParameters } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
@@ -15,6 +16,7 @@ import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
 	getStoredMutationResult,
 	requireEnabledCurrentSlot,
+	requireReviewedAppointment,
 	requireMutationId,
 	requireObject,
 	requireOnlyKeys,
@@ -26,6 +28,7 @@ const log = createFunctionLogger('changeRegistrationDateTime');
 interface ChangeRegistrationData {
 	mutationId: string;
 	slotId: string;
+	reviewedDateTime?: string;
 	registrationUid?: string;
 }
 
@@ -52,7 +55,12 @@ export default async function changeRegistrationDateTime(
 ): Promise<true> {
 	const actorUid = requireAuthenticatedUid(request);
 	const data = requireObject(request.data);
-	requireOnlyKeys(data, ['mutationId', 'slotId', 'registrationUid']);
+	requireOnlyKeys(data, [
+		'mutationId',
+		'slotId',
+		'registrationUid',
+		'reviewedDateTime',
+	]);
 	const mutationId = requireMutationId(data['mutationId']);
 	const requestedUid = requireRegistrationUid(data['registrationUid']);
 	const isAdmin = isAdminToken(request.auth?.token);
@@ -66,7 +74,6 @@ export default async function changeRegistrationDateTime(
 	const slotId = requireSlotId(data['slotId']);
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parameters = await getPublicParameters();
 	const slotRef = db.doc(`${COLLECTION_SCHEMA.dateTimeSlots}/${slotId}`);
 	const emailRef = db
 		.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
@@ -90,6 +97,8 @@ export default async function changeRegistrationDateTime(
 				'changeRegistrationDateTime',
 			);
 			if (cached) return;
+			const parameters = await getPublicParameters();
+			const now = await getBookingNow(db);
 			const registration = registrationSnapshot.data() as
 				Registration | undefined;
 			if (!registration) {
@@ -137,7 +146,14 @@ export default async function changeRegistrationDateTime(
 			const slot = requireEnabledCurrentSlot(
 				slotSnapshot.data() as DateTimeSlot | undefined,
 				slotId,
+				now,
+				!isAdmin,
 			);
+			if (data['reviewedDateTime'] !== undefined)
+				requireReviewedAppointment(
+					data['reviewedDateTime'],
+					slot.dateTime,
+				);
 			const queuedOn = new Date();
 			const emailRecord = {
 				registrationUid: uid,

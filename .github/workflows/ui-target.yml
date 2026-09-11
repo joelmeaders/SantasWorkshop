@@ -144,6 +144,7 @@ jobs:
       - name: Record verified Hosting output before emulator tests
         if: ${{ inputs.deploy && !inputs.reuse_tests }}
         run: |
+          set -o pipefail
           rg --files --hidden --no-ignore --null "dist/santashop-$UI_TARGET" | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/hosting-before-e2e.sha256"
       # PR browser tests run once in the caller, after all fast checks.
       # Release browser preparation changes source config but does not write
@@ -167,6 +168,7 @@ jobs:
       - name: Require unchanged verified Hosting output
         if: ${{ inputs.deploy && !inputs.reuse_tests }}
         run: |
+          set -o pipefail
           rg --files --hidden --no-ignore --null "dist/santashop-$UI_TARGET" | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/hosting-after-e2e.sha256"
           cmp "$RUNNER_TEMP/hosting-before-e2e.sha256" "$RUNNER_TEMP/hosting-after-e2e.sha256"
       - uses: FirebaseExtended/action-hosting-deploy@v0.11.0

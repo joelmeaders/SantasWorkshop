@@ -1,3 +1,4 @@
+import { seedPublicParameters } from '../../src/fn/testHelpers';
 import { beforeEach, describe, expect, it } from 'vitest';
 import undoRegistration from '../../src/fn/undoRegistration';
 import { COLLECTION_SCHEMA } from '@santashop/models';
@@ -20,7 +21,7 @@ describe.sequential('undoRegistration integration', () => {
 	it('cancels a completed registration while preserving its seasonal QR', async () => {
 		const qrCodeStoragePath = 'registrations/user-undo-1/code.png';
 		await seedQrCode(qrCodeStoragePath);
-		await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+		await seedPublicParameters({
 			admin: { allowCancelRegistration: true },
 		});
 		await setDocument(COLLECTION_SCHEMA.registrations, 'user-undo-1', {

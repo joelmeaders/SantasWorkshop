@@ -84,9 +84,13 @@ test.describe('customer account and session access', () => {
 		await page.fill('#emailAddress input', account.emailAddress);
 		await page.fill('#password input', account.password);
 		await page.fill('#password2 input', account.password);
+		await expect(page.locator('#password2')).toHaveClass(/ng-valid/);
+		await page.locator('#password2 input').blur();
 		await expect(submitButton).toHaveClass(/button-disabled/);
 
-		await page.click('#legalCheckbox');
+		const policyCheckbox = page.locator('#legalCheckbox');
+		await policyCheckbox.click();
+		await expect(policyCheckbox).toBeChecked();
 		await expect(submitButton).toHaveClass(/button-disabled/);
 
 		await selectReferralViaUi(page);

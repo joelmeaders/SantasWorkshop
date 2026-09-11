@@ -1,8 +1,10 @@
+import { seedPublicParameters } from '../../src/fn/testHelpers';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import completeRegistration from '../../src/fn/completeRegistration';
 import setDraftAppointment from '../../src/fn/setDraftAppointment';
 import changeRegistrationDateTime from '../../src/fn/changeRegistrationDateTime';
 import scheduledDateTimeSlotCounters from '../../src/fn/reconcileAppointmentCounters';
+import { getPublicParameters } from '../../src/utility/public-parameters';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import { createRegistration } from '../fixtures/factories';
 import {
@@ -34,7 +36,7 @@ describe.sequential('completeRegistration integration', () => {
 				emailAddress: 'buddy.elf@example.com',
 				zipCode: '80205',
 			}),
-			setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+			seedPublicParameters({
 				registrationEnabled: true,
 				admin: {
 					preRegistrationEnabled: true,
@@ -175,7 +177,10 @@ describe.sequential('completeRegistration integration', () => {
 			await getFirestore()
 				.doc('dateTimeSlots/slot-1')
 				.update({ enabled: false });
-			await setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+			await seedPublicParameters({
+				registrationEnabled: false,
+			});
+			expect(await getPublicParameters()).toMatchObject({
 				registrationEnabled: false,
 			});
 			await expect(completeRegistration(request)).resolves.toBe(true);
@@ -221,7 +226,10 @@ describe.sequential('completeRegistration integration', () => {
 						{ uid: 'new-draft' },
 					),
 				),
-			).rejects.toMatchObject({ code: 'failed-precondition' });
+			).rejects.toMatchObject({
+				code: 'failed-precondition',
+				message: 'Pre-registration is currently unavailable.',
+			});
 		},
 	);
 
@@ -321,7 +329,7 @@ describe.sequential('completeRegistration integration', () => {
 				emailAddress: 'buddy.elf@example.com',
 				zipCode: '80205',
 			}),
-			setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+			seedPublicParameters({
 				registrationEnabled: true,
 				admin: { preRegistrationEnabled: true },
 			}),
@@ -381,7 +389,7 @@ describe.sequential('completeRegistration integration', () => {
 		const submissionCount = 5;
 		const slotCapacity = 3;
 		await Promise.all([
-			setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+			seedPublicParameters({
 				registrationEnabled: true,
 				maintenanceModeEnabled: false,
 				weatherModeEnabled: false,

@@ -1,3 +1,4 @@
+import { seedPublicParameters } from '../../src/fn/testHelpers';
 import {
 	afterEach,
 	beforeAll,
@@ -119,7 +120,7 @@ describe.sequential('sendRegistrationEmail integration', () => {
 				uid,
 				createUser({ emailAddress: 'BUDDY.ELF@example.com' }),
 			),
-			setDocument(COLLECTION_SCHEMA.parameters, 'public', {
+			seedPublicParameters({
 				registrationEnabled: true,
 				admin: {
 					preRegistrationEnabled: true,

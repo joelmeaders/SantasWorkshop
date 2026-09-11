@@ -249,9 +249,10 @@ export class ScheduleEditorPage {
 	private async requestOwnerConfirmation(
 		confirmationPhrase: string,
 	): Promise<{ password: string; phrase: string } | undefined> {
+		const instructions = `This owner-only action is season restricted. Type: ${confirmationPhrase}`;
 		const alert = await this.alerts.create({
 			header: 'Initialize schedules?',
-			message: `This owner-only action is season restricted. Type: ${confirmationPhrase}`,
+			message: instructions,
 			inputs: [
 				{
 					name: 'password',
@@ -267,7 +268,24 @@ export class ScheduleEditorPage {
 			],
 			buttons: [
 				{ text: 'Cancel', role: 'cancel' },
-				{ text: 'Initialize', role: 'confirm' },
+				{
+					text: 'Initialize',
+					role: 'confirm',
+					handler: (values: {
+						password?: string;
+						phrase?: string;
+					}): boolean => {
+						if (!values.password?.trim()) {
+							alert.message = `Enter your account password. ${instructions}`;
+							return false;
+						}
+						if (values.phrase?.trim() !== confirmationPhrase) {
+							alert.message = `The confirmation phrase does not match. ${instructions}`;
+							return false;
+						}
+						return true;
+					},
+				},
 			],
 		});
 		await alert.present();

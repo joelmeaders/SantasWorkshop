@@ -28,6 +28,7 @@ on:
       - 'scripts/assert-functions-deploy-ci.cjs'
       - 'scripts/prepare-functions-deploy.cjs'
       - 'scripts/verify-functions-parity.cjs'
+      - 'scripts/owner-export-readiness.cjs'
       - 'scripts/verify-functions-managed-resources.cjs'
       - 'scripts/verify-public-parameters.cjs'
       - '.github/workflows/functions-test-and-prod-release.yml'
@@ -272,6 +273,8 @@ jobs:
             fi
           done
           exit 1
+      - name: Verify live test owner export signing configuration
+        run: node scripts/owner-export-readiness.cjs --project santas-workshop-test
       - name: Verify live test managed trigger resources
         shell: bash
         env:
@@ -349,6 +352,8 @@ jobs:
         run: |
           pnpm exec firebase functions:list --project santas-workshop-193b5 --json > "$RUNNER_TEMP/functions.json"
           node scripts/verify-functions-parity.cjs "$RUNNER_TEMP/functions.json"
+      - name: Verify live production owner export signing configuration
+        run: node scripts/owner-export-readiness.cjs --project santas-workshop-193b5
       - name: Verify live production managed trigger resources
         shell: bash
         env:

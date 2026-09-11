@@ -336,3 +336,50 @@ Storage, Cloud Tasks, logging, and export permissions required by these
 Functions. Set the environment value only after the identity and permissions
 exist; an invalid value intentionally blocks deployment. The GitHub deployment
 service account remains separate and must not be used as the runtime identity.
+
+### Private owner export signing
+
+Owner export downloads require [`iam.serviceAccounts.signBlob`](https://docs.cloud.google.com/storage/docs/authentication/creating-signatures)
+on the runtime service account. The supported configuration is an unconditional
+`roles/iam.serviceAccountTokenCreator` binding from that account to itself,
+on that service-account resource. Do not grant this role project-wide.
+Custom roles, inherited grants, and conditional grants can also provide signing
+access, but the release check does not evaluate those alternatives.
+
+Before enabling the release gate, give the CI deployment identity
+`roles/iam.serviceAccountViewer` on the same runtime service-account resource.
+Its existing Functions, Firebase, and Service Usage roles must also allow
+`cloudfunctions.functions.get`, `resourcemanager.projects.get`, and
+`serviceusage.services.get`. This permits inspection without giving the deployer
+signing or IAM mutation rights. Configure test and production independently;
+the checker never changes IAM or enables APIs.
+
+An authorized operator can use these PowerShell commands after selecting the
+intended project and its deployment identity. For production, follow the
+production approval procedure before applying grants.
+
+```powershell
+$exportProject = 'santas-workshop-test'
+$exportDeployer = 'github-action-298411435@santas-workshop-test.iam.gserviceaccount.com'
+$exportRuntime = gcloud functions describe callableGetOwnerExportUrl --gen2 --region=us-central1 --project=$exportProject --format='value(serviceConfig.serviceAccountEmail)'
+if ($LASTEXITCODE -ne 0 -or -not $exportRuntime) { throw 'Cannot identify the export runtime.' }
+gcloud iam service-accounts describe $exportRuntime --project=$exportProject --format='table(email,projectId,disabled)'
+# Verify the displayed identity and project before applying either grant.
+gcloud iam service-accounts add-iam-policy-binding $exportRuntime --project=$exportProject --member="serviceAccount:$exportRuntime" --role=roles/iam.serviceAccountTokenCreator --condition=None
+gcloud iam service-accounts add-iam-policy-binding $exportRuntime --project=$exportProject --member="serviceAccount:$exportDeployer" --role=roles/iam.serviceAccountViewer --condition=None
+$priorExportToken = $env:REMOTE_CONFIG_ACCESS_TOKEN
+try {
+  $env:REMOTE_CONFIG_ACCESS_TOKEN = gcloud auth print-access-token --project=$exportProject
+  if ($LASTEXITCODE -ne 0) { throw 'Authentication failed.' }
+  node scripts/owner-export-readiness.cjs --project $exportProject
+  if ($LASTEXITCODE -ne 0) { throw 'Owner export readiness failed.' }
+} finally { $env:REMOTE_CONFIG_ACCESS_TOKEN = $priorExportToken }
+```
+
+The read-only check verifies the active function, runtime identity, enabled IAM
+Credentials API, and supported self-scoped binding. A missing binding reports an
+unsupported configuration; it does not prove that all effective signing access
+is absent. An unreadable policy fails the check. Passing does not prove object
+read access, absence of an IAM deny policy, or a working download. Complete an
+authorized owner export download in the test browser and verify the file opens
+without recording its contents or temporary signed URL.

@@ -53,20 +53,27 @@ export function fixture(unit = 'functions') {
 		);
 	}
 	const options = {
-		sha: releaseSha,
+		releaseRef: releaseSha,
 		unit,
 		mode: 'prod',
-		skipTests: true,
 		repository,
 		workflowRef: `${repository}/.github/workflows/${unit}-test-and-prod-release.yml@refs/heads/master`,
 		actor: 'joelmeaders',
-		approval: releaseSha,
-		runIds: runs.map(({ id }) => id).join(','),
 	};
 	const api = async (path) => {
 		if (path === `commits/${releaseSha}`) return { sha: releaseSha };
 		if (path === `compare/${releaseSha}...master`)
 			return { status: 'ahead' };
+		const listing = path.match(
+			/^actions\/workflows\/([^/]+)\/runs\?.*page=(\d+)$/,
+		);
+		if (listing)
+			return {
+				workflow_runs:
+					Number(listing[2]) === 1
+						? runs.filter((run) => run.path.endsWith(listing[1]))
+						: [],
+			};
 		const run = runs.find(({ id }) => path === `actions/runs/${id}`);
 		if (run) return run;
 		const workflow = runs.find(

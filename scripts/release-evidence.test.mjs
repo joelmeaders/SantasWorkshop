@@ -9,14 +9,40 @@ import {
 import { githubApi, verifyRelease } from './release-evidence.mjs';
 
 for (const unit of ['app', 'admin', 'functions']) {
-	test(`${unit}: accepts exact checkout SHA despite different dispatch metadata SHA`, async () => {
+	test(`${unit}: automatically discovers exact checkout evidence despite different dispatch metadata SHA`, async () => {
 		const { options, api } = fixture(unit);
 		const result = await verifyRelease(options, api);
 		assert.equal(result.sha, releaseSha);
 		assert.ok(result.verified.length >= 3);
 		assert.equal(result.reuse, true);
+		assert.equal(result.approval, 'joelmeaders');
 	});
 }
+
+for (const releaseRef of [
+	'v2026.09.0-beta.4',
+	'master',
+	'refs/tags/release-2026',
+	releaseSha.slice(0, 12),
+])
+	test(`resolves ${releaseRef} once and verifies the immutable result`, async () => {
+		const f = fixture();
+		let resolutions = 0;
+		const result = await verifyRelease(
+			{ ...f.options, releaseRef },
+			async (path) => {
+				if (path === `commits/${encodeURIComponent(releaseRef)}`) {
+					resolutions++;
+					return {
+						sha: resolutions === 1 ? releaseSha : workflowSha,
+					};
+				}
+				return f.api(path);
+			},
+		);
+		assert.equal(resolutions, 1);
+		assert.equal(result.sha, releaseSha);
+	});
 
 for (const [name, change, pattern] of [
 	[
@@ -32,26 +58,28 @@ for (const [name, change, pattern] of [
 		(f) => {
 			f.runs[0].repository.full_name = 'other/repo';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'fork head repository',
 		(f) => {
 			f.runs[0].head_repository.full_name = 'other/repo';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'wrong workflow',
 		(f) => {
 			f.runs[0].path = '.github/workflows/functions-pr-validation.yml';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'wrong deployment target',
 		(f) => {
-			f.jobs.get(101)[2].steps[1].name =
+			f.jobs
+				.get(101)
+				.find(({ name }) => name === 'deploy_test').steps[1].name =
 				'Test deployment functions santas-workshop-193b5';
 		},
 		/exact-SHA/,
@@ -61,14 +89,14 @@ for (const [name, change, pattern] of [
 		(f) => {
 			f.runs[0].event = 'pull_request';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'non-master workflow',
 		(f) => {
 			f.runs[0].head_branch = 'feature';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'green run with skipped required test',
@@ -85,18 +113,25 @@ for (const [name, change, pattern] of [
 		/exact-SHA/,
 	],
 	[
+		'failed run',
+		(f) => {
+			f.runs[0].conclusion = 'failure';
+		},
+		/exact-SHA/,
+	],
+	[
 		'cancelled run',
 		(f) => {
 			f.runs[0].conclusion = 'cancelled';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'in-progress run',
 		(f) => {
 			f.runs[0].status = 'in_progress';
 		},
-		/trusted release run/,
+		/exact-SHA/,
 	],
 	[
 		'missing required job',
@@ -127,20 +162,6 @@ for (const [name, change, pattern] of [
 		/exact-SHA/,
 	],
 	[
-		'mutable branch ref',
-		(f) => {
-			f.options.sha = 'master';
-		},
-		/full lowercase/,
-	],
-	[
-		'abbreviated SHA',
-		(f) => {
-			f.options.sha = releaseSha.slice(0, 12);
-		},
-		/full lowercase/,
-	],
-	[
 		'candidate verifier source',
 		(f) => {
 			f.options.workflowRef = f.options.workflowRef.replace(
@@ -151,23 +172,16 @@ for (const [name, change, pattern] of [
 		/from master/,
 	],
 	[
-		'missing evidence with skip_tests',
+		'missing evidence',
 		(f) => {
-			f.options.runIds = '';
+			f.runs.length = 0;
 		},
-		/Missing evidence/,
+		/Run the missing test or Storybook workflow/,
 	],
 	[
-		'non-owner approval',
+		'non-owner production invocation',
 		(f) => {
 			f.options.actor = 'another-developer';
-		},
-		/owner/,
-	],
-	[
-		'approval for different SHA',
-		(f) => {
-			f.options.approval = workflowSha;
 		},
 		/owner/,
 	],
@@ -176,6 +190,27 @@ for (const [name, change, pattern] of [
 		const f = fixture();
 		change(f);
 		await assert.rejects(verifyRelease(f.options, f.api), pattern);
+	});
+
+for (const releaseRef of ['', ' master', 'master\n', undefined, 123])
+	test(`rejects invalid release selection ${JSON.stringify(releaseRef)}`, async () => {
+		await assert.rejects(
+			verifyRelease({ ...fixture().options, releaseRef }, async () => {
+				throw new Error('Invalid selections must not reach the API');
+			}),
+			/Select a release/,
+		);
+	});
+
+for (const sha of ['', 'not-a-commit', workflowSha])
+	test(`rejects invalid commit resolution ${sha}`, async () => {
+		const f = fixture();
+		await assert.rejects(
+			verifyRelease(f.options, async (path) =>
+				path.startsWith('commits/') ? { sha } : f.api(path),
+			),
+			/immutable commit/,
+		);
 	});
 
 test('rejects altered producer source even with matching workflow identity', async () => {
@@ -196,11 +231,28 @@ test('rejects altered producer source even with matching workflow identity', asy
 	);
 });
 
+test('rejects an altered reusable browser evidence producer', async () => {
+	const f = fixture();
+	await assert.rejects(
+		verifyRelease(f.options, async (path) =>
+			path.startsWith('contents/.github/workflows/e2e-target.yml?')
+				? {
+						encoding: 'base64',
+						content: Buffer.from('unchecked E2E workflow').toString(
+							'base64',
+						),
+					}
+				: f.api(path),
+		),
+		/different evidence producer/,
+	);
+});
+
 test('rejects workflow ID lookup mismatch', async () => {
 	const f = fixture();
 	await assert.rejects(
 		verifyRelease(f.options, async (path) =>
-			path.startsWith('actions/workflows/')
+			/^actions\/workflows\/\d+$/.test(path)
 				? { id: 999, path: f.runs[0].path }
 				: f.api(path),
 		),
@@ -218,23 +270,120 @@ test('rejects commit outside master ancestry', async () => {
 	);
 });
 
-test('test deployment reuse requires tests but does not require an earlier deployment', async () => {
+for (const target of ['app', 'admin']) {
+	for (const outcome of ['skipped', 'failure', 'cancelled'])
+		test(`rejects ${target} E2E ${outcome} in an otherwise green release`, async () => {
+			const f = fixture();
+			f.jobs
+				.get(101)
+				.find(
+					({ name }) => name === `e2e (${target}) / test`,
+				).steps[1].conclusion = outcome;
+			await assert.rejects(verifyRelease(f.options, f.api), /exact-SHA/);
+		});
+	test(`rejects missing ${target} E2E evidence`, async () => {
+		const f = fixture();
+		f.jobs.set(
+			101,
+			f.jobs
+				.get(101)
+				.filter(({ name }) => name !== `e2e (${target}) / test`),
+		);
+		await assert.rejects(verifyRelease(f.options, f.api), /exact-SHA/);
+	});
+	test(`rejects ${target} E2E evidence from another checkout`, async () => {
+		const f = fixture();
+		f.jobs
+			.get(101)
+			.find(
+				({ name }) => name === `e2e (${target}) / test`,
+			).steps[0].name = `Release revision ${workflowSha}`;
+		await assert.rejects(verifyRelease(f.options, f.api), /exact-SHA/);
+	});
+}
+
+test('fresh test release requires new suites without evidence discovery', async () => {
 	const f = fixture();
-	f.options.mode = 'test';
-	f.jobs.get(101).pop();
-	assert.equal((await verifyRelease(f.options, f.api)).verified.length, 2);
+	const result = await verifyRelease(
+		{ ...f.options, mode: 'test' },
+		async (path) => {
+			assert.ok(!path.startsWith('actions/'));
+			return f.api(path);
+		},
+	);
+	assert.equal(result.verified.length, 0);
+	assert.equal(result.reuse, false);
 });
 
-test('fresh test release schedules validation without prior evidence', async () => {
-	const f = fixture();
-	f.options = { ...f.options, mode: 'test', skipTests: false, runIds: '' };
-	assert.equal((await verifyRelease(f.options, f.api)).verified.length, 0);
-});
-
-test('shared hosting policy cannot omit the other UI or canonical Storybook checks', async () => {
+test('hosting promotion cannot omit the other UI or canonical Storybook checks', async () => {
 	const f = fixture('app');
-	f.options.runIds = '101';
+	f.runs.splice(1);
 	await assert.rejects(verifyRelease(f.options, f.api), /exact-SHA/);
+});
+
+test('discovers evidence on later pages without filtering by dispatch head SHA', async () => {
+	const f = fixture();
+	const pages = [];
+	const result = await verifyRelease(f.options, async (path) => {
+		if (path.includes('/runs?')) {
+			assert.ok(!path.includes('head_sha'));
+			pages.push(path);
+			return {
+				workflow_runs: path.endsWith('page=1')
+					? Array.from({ length: 100 }, (_, index) => ({
+							...f.runs[0],
+							id: 1000 + index,
+							event: 'push',
+							head_sha: workflowSha,
+						}))
+					: f.runs,
+			};
+		}
+		return f.api(path);
+	});
+	assert.equal(pages.length, 2);
+	assert.equal(result.reuse, true);
+});
+
+test('ignores unrelated successful dispatches and finds the matching release', async () => {
+	const f = fixture();
+	f.runs.unshift({ ...structuredClone(f.runs[0]), id: 102 });
+	f.jobs.set(
+		102,
+		structuredClone(f.jobs.get(101)).map((job) => ({
+			...job,
+			steps: job.steps.map((step) =>
+				step.name.startsWith('Release revision ')
+					? { ...step, name: `Release revision ${workflowSha}` }
+					: step,
+			),
+		})),
+	);
+	const result = await verifyRelease(f.options, f.api);
+	assert.ok(result.verified.every(({ runId }) => runId === 101));
+});
+
+test('a rerun that starts during verification blocks promotion', async () => {
+	const f = fixture();
+	let reads = 0;
+	await assert.rejects(
+		verifyRelease(f.options, async (path) => {
+			if (path === 'actions/runs/101' && ++reads > 1)
+				return { ...f.runs[0], status: 'in_progress', run_attempt: 2 };
+			return f.api(path);
+		}),
+		/changed during verification/,
+	);
+});
+
+test('malformed discovery results fail closed', async () => {
+	const f = fixture();
+	await assert.rejects(
+		verifyRelease(f.options, async (path) =>
+			path.includes('/runs?') ? {} : f.api(path),
+		),
+		/invalid workflow run list/,
+	);
 });
 
 for (const status of [403, 404, 429, 500])

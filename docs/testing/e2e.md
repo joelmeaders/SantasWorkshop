@@ -52,9 +52,20 @@ pnpm run e2e:test:admin
 Each command prepares its target, builds dependencies and Functions, starts the browser server,
 and runs Playwright through `firebase emulators:exec`. A callable readiness probe verifies
 that the Functions emulator loaded the test helpers. An open port alone is insufficient.
-Both browser servers use port 4100. Run one target at a time.
+Both browser servers use port 4100. Run one target at a time on each machine.
 Use these root commands for CI orchestration as well; they own emulator startup
 and shutdown for each suite.
+
+The PR workflow owns one E2E matrix after the selected unit, build, shared, and
+backend checks pass. Each matrix target runs on a separate GitHub runner with
+its own emulators. Backend and shared changes select both customer and staff
+suites. A change limited to one app selects that app's suite. The Functions
+test-release workflow also uses separate runners for the two suites and waits
+for both before deployment. Keep one Playwright worker per emulator instance.
+
+The final PR check fails on failed, cancelled, or unexpectedly skipped jobs.
+The only optional backend result is an intentional skip for known UI-only
+inputs. Storybook behavior and visual checks remain in their existing workflow.
 
 ## Manual debugging and individual specs
 

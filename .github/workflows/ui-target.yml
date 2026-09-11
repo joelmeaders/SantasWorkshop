@@ -14,7 +14,7 @@ on:
       deploy:
         type: boolean
         default: false
-      skip_tests:
+      reuse_tests:
         type: boolean
         default: false
       shared_tests:
@@ -98,14 +98,14 @@ jobs:
         env:
           RELEASE_REF: ${{ inputs.release_ref }}
           DEPLOY: ${{ inputs.deploy }}
-          SKIP_TESTS: ${{ inputs.skip_tests }}
+          REUSE_TESTS: ${{ inputs.reuse_tests }}
         run: |
           case "$UI_TARGET:$UI_MODE" in app:test|app:prod|admin:test|admin:prod) ;; *) exit 1 ;; esac
-          if [ "$SKIP_TESTS" = true ]; then
+          if [ "$REUSE_TESTS" = true ]; then
             test "$DEPLOY" = true
             {
               echo '### Manual deployment'
-              printf 'Selected ref: `%s`\nTarget: `%s/%s`\nTests: successful exact-SHA evidence reused\n' "$RELEASE_REF" "$UI_TARGET" "$UI_MODE"
+              printf 'Selected ref: `%s`\nTarget: `%s/%s`\nTests: automatically discovered exact-SHA evidence reused\n' "$RELEASE_REF" "$UI_TARGET" "$UI_MODE"
             } >> "$GITHUB_STEP_SUMMARY"
           fi
       - uses: pnpm/action-setup@v6
@@ -116,32 +116,21 @@ jobs:
           node-version: '24.18.0'
           cache: pnpm
       - uses: actions/setup-java@v6
-        if: ${{ !inputs.skip_tests }}
+        if: ${{ inputs.deploy && !inputs.reuse_tests }}
         with:
           distribution: temurin
           java-version: '21'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run e2e:browser:setup:ci
-        if: ${{ !inputs.skip_tests }}
-      - name: Customer or staff E2E tests
-        run: pnpm run "e2e:test:$UI_TARGET"
-        if: ${{ !inputs.skip_tests }}
-      - name: Upload E2E failure artifacts
-        if: ${{ failure() && !inputs.skip_tests }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: ui-${{ inputs.target }}-${{ inputs.mode }}-e2e-${{ github.run_id }}
-          path: |
-            santashop-e2e/test-results
-            santashop-e2e/playwright-report
-          if-no-files-found: ignore
-          retention-days: 7
+        if: ${{ !inputs.reuse_tests }}
       - run: pnpm run "config:$UI_TARGET:$UI_MODE"
+      - name: Prepare shared libraries before unit tests
+        run: pnpm run storybook:prepare
       - name: Run shared core tests for this standalone release
-        if: ${{ !inputs.skip_tests && inputs.shared_tests }}
+        if: ${{ !inputs.reuse_tests && inputs.shared_tests }}
         run: pnpm run ci:core:test
       - name: Run target unit tests with prepared shared libraries
-        if: ${{ !inputs.skip_tests }}
+        if: ${{ !inputs.reuse_tests }}
         run: pnpm --filter "@santashop/$UI_TARGET" test
       - name: Load validated Remote Config release defaults
         if: ${{ inputs.deploy }}
@@ -152,6 +141,36 @@ jobs:
           if [ "$UI_MODE" = prod ]; then project=santas-workshop-193b5; fi
           node scripts/remote-config.cjs release-defaults --project "$project"
       - run: pnpm run "ci:$UI_TARGET:build:$UI_MODE"
+      - name: Record verified Hosting output before emulator tests
+        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        run: |
+          set -o pipefail
+          rg --files --hidden --no-ignore --null "dist/santashop-$UI_TARGET" | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/hosting-before-e2e.sha256"
+      # PR browser tests run once in the caller, after all fast checks.
+      # Release browser preparation changes source config but does not write
+      # dist/santashop-app or dist/santashop-admin, the verified Hosting output.
+      - name: Customer or staff E2E tests
+        run: pnpm run "e2e:test:$UI_TARGET"
+        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+      - name: Upload E2E failure artifacts
+        if: ${{ failure() && inputs.deploy && !inputs.reuse_tests }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-${{ inputs.target }}-${{ inputs.mode }}-e2e-${{ github.run_id }}
+          path: |
+            santashop-e2e/test-results
+            santashop-e2e/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Restore release source configuration after emulator tests
+        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        run: pnpm run "config:$UI_TARGET:$UI_MODE"
+      - name: Require unchanged verified Hosting output
+        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        run: |
+          set -o pipefail
+          rg --files --hidden --no-ignore --null "dist/santashop-$UI_TARGET" | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/hosting-after-e2e.sha256"
+          cmp "$RUNNER_TEMP/hosting-before-e2e.sha256" "$RUNNER_TEMP/hosting-after-e2e.sha256"
       - uses: FirebaseExtended/action-hosting-deploy@v0.11.0
         if: ${{ inputs.deploy }}
         with:

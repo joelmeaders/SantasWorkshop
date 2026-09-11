@@ -12,6 +12,8 @@ permissions:
   contents: read
 # No deployment secrets are accepted or inherited by this workflow.
 env:
+  TEST_SANTASHOP_PROGRAM_YEAR: '2026'
+  TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
   LOCAL_AWS_ACCESS_KEY_ID: e2e-not-used
   LOCAL_AWS_SECRET_ACCESS_KEY: e2e-not-used
   LOCAL_FIRESTORE_BACKUP_BUCKET: gs://demo-santashop-backups

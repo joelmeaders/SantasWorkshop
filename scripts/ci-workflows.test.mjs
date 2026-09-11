@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import test from 'node:test';
@@ -13,6 +14,28 @@ const ui = readWorkflow('ui-target');
 const functions = readWorkflow('functions-pr-validation');
 const browser = readWorkflow('e2e-target');
 const release = readWorkflow('functions-test-and-prod-release');
+
+test('isolated browser job can build real app and Functions configuration without caller environment', () => {
+	execFileSync(
+		process.execPath,
+		[
+			'-e',
+			`
+		const assert = require('node:assert/strict');
+		const client = require('./config.firebase.cjs');
+		const backend = require('./config.functions.cjs');
+		for (const target of ['app', 'admin']) {
+			const config = client.buildAppConfig(target, 'e2e');
+			assert.equal(config.programYear, Number(process.env.LOCAL_SANTASHOP_PROGRAM_YEAR));
+			assert.ok(config.shopDays.length > 0);
+		}
+		assert.equal(client.buildFirebaseClientConfig('e2e').projectId, 'demo-santashop');
+		assert.equal(backend.buildFunctionsConfig('local').SANTASHOP_PROGRAM_YEAR, process.env.TEST_SANTASHOP_PROGRAM_YEAR);
+	`,
+		],
+		{ env: browser.env, stdio: 'pipe' },
+	);
+});
 
 // Evaluate the actual job condition with synthetic GitHub results. This checks
 // that deliberately omitted backend checks do not suppress the browser matrix,

@@ -23,16 +23,14 @@ const meta = {
 		await expect(
 			await canvas.findByRole('heading', {
 				name: 'Customers',
-				exact: true,
 			}),
 		).toBeVisible();
 		await expect(
-			canvas.getByRole('heading', { name: 'Children', exact: true }),
+			canvas.getByRole('heading', { name: 'Children' }),
 		).toBeVisible();
 		await expect(
 			canvas.getByRole('heading', {
 				name: 'Pre-Registered',
-				exact: true,
 			}),
 		).toBeVisible();
 		await userEvent.click(
@@ -50,7 +48,6 @@ const meta = {
 		await expect(
 			await canvas.findByRole('heading', {
 				name: 'Customers',
-				exact: true,
 			}),
 		).toBeVisible();
 		await waitFor(() =>

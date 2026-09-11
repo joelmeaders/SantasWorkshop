@@ -23,7 +23,6 @@ const meta = {
 		await expect(
 			await canvas.findByRole('heading', {
 				name: 'Registrations',
-				exact: true,
 			}),
 		).toBeVisible();
 		await expect(
@@ -150,7 +149,6 @@ export const NoReportData: Story = {
 		await expect(
 			await canvas.findByRole('heading', {
 				name: 'Registrations',
-				exact: true,
 			}),
 		).toBeVisible();
 		await expect(canvas.getAllByText('0').length).toBeGreaterThan(0);

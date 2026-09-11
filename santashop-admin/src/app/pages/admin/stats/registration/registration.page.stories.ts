@@ -4,6 +4,7 @@ import {
 	adminStoryDecorators,
 	getAdminStoryFixtures,
 } from '../../../../../../../.storybook/admin/admin-story.providers';
+import { scrollToReportTable } from '../../../../../../../.storybook/admin/report-story.helpers';
 import { RegistrationPage } from './registration.page';
 import { type RegistrationOperationalStats } from '@santashop/models';
 
@@ -136,9 +137,9 @@ export const SavedOutcomeCalculations: Story = {
 				canvas.getByRole('table', { name: 'Registration outcomes' }),
 			).getByText('80.0%'),
 		).toBeVisible();
-		canvas
-			.getByRole('table', { name: 'Registration outcomes' })
-			.scrollIntoView({ block: 'start', behavior: 'instant' });
+		await scrollToReportTable(
+			canvas.getByRole('table', { name: 'Registration outcomes' }),
+		);
 	},
 };
 

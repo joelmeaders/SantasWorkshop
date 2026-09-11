@@ -4,6 +4,7 @@ import {
 	adminStoryDecorators,
 	getAdminStoryFixtures,
 } from '../../../../../../../.storybook/admin/admin-story.providers';
+import { scrollToReportTable } from '../../../../../../../.storybook/admin/report-story.helpers';
 import { UserPage } from './user.page';
 
 const meta = {
@@ -86,11 +87,11 @@ export const SavedProfileHistory: Story = {
 				exact: false,
 			}),
 		).toBeVisible();
-		canvas
-			.getByRole('table', {
+		await scrollToReportTable(
+			canvas.getByRole('table', {
 				name: 'Profile records observed by creation day',
-			})
-			.scrollIntoView({ block: 'start', behavior: 'instant' });
+			}),
+		);
 	},
 };
 

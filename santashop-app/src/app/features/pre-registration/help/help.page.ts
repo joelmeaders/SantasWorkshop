@@ -11,10 +11,8 @@ import {
 	IonIcon,
 	IonCard,
 	IonCardHeader,
-	IonItem,
 	IonCardTitle,
 	IonCardContent,
-	IonText,
 	IonLabel,
 	ModalController,
 } from '@ionic/angular/standalone';
@@ -34,10 +32,8 @@ import {
 		IonIcon,
 		IonCard,
 		IonCardHeader,
-		IonItem,
 		IonCardTitle,
 		IonCardContent,
-		IonText,
 		IonLabel,
 	],
 })

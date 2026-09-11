@@ -178,10 +178,21 @@
 	},
 	"HELP": {
 		"TITLE": "Ayuda",
+		"GUIDE_TITLE": "Cómo registrarse",
+		"GUIDE_INTRO": "Siga estos pasos para registrarse y obtener su entrada.",
+		"ACCOUNT_TITLE": "Cree su cuenta o inicie sesión",
+		"ACCOUNT_TEXT": "Elija Crear cuenta, ingrese sus datos de contacto y de acceso, y acepte los términos. Si ya tiene una cuenta, inicie sesión.",
+		"CHILDREN_TITLE": "Agregue a sus niños",
+		"CHILDREN_TEXT": "En la pantalla de registro, agregue el nombre y la fecha de nacimiento de cada niño, elija un tipo de juguetes cuando se le pida y guarde sus datos. Agregue a todos los niños que va a registrar.",
+		"APPOINTMENT_TITLE": "Elija una cita",
+		"APPOINTMENT_TEXT": "Después de guardar los datos de un niño, abra una fecha disponible y seleccione una hora. Cuando su cita aparezca en la pantalla de registro, continúe para revisar.",
+		"REVIEW_TITLE": "Revise y envíe",
+		"REVIEW_TEXT": "Elija Revisar y enviar. Revise los datos de sus niños, su cita y el correo electrónico para su entrada. Haga los cambios necesarios y elija Enviar para completar su registro.",
+		"TICKET_TITLE": "Guarde su entrada",
+		"TICKET_TEXT": "Después de enviar el registro, la pantalla de su entrada muestra su código QR. Guarde una captura de pantalla o imprima su entrada para presentarla al llegar. Puede volver a iniciar sesión para verla.",
+		"CONTACT_TITLE": "¿Necesita más ayuda?",
 		"VISIT_TEXT": "Visite la página Contáctenos de nuestro sitio web para obtener ayuda con el registro.",
-		"VISIT_BUTTON": "Visite el sitio web",
-		"PDF_GUIDE_TEXT": "Descargue una guía de ayuda en PDF paso a paso aquí.",
-		"PDF_GUIDE_BUTTON": "Descargar la guía de ayuda en PDF"
+		"VISIT_BUTTON": "Visite el sitio web"
 	},
 	"PROFILE": {
 		"SETTINGS_INTRO": "Administre su información de contacto, correo electrónico y contraseña en un solo lugar.",

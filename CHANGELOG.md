@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.5] - Unreleased
+
+### Added
+
+- Add a typed analytics event contract, bounded error categories, active-language context, and registration journey and recovery events.
+- Add calculation timestamps, current registration outcomes, retained daily snapshots, and observed profile-creation trends to yearly reports.
+- Add accessible report tables and aggregate CSV downloads with spreadsheet-formula escaping.
+- Cover older reports, unavailable calculations, analytics failures, and report downloads with regression tests.
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.5`.
+- Keep legacy report totals readable and label missing new calculations and timestamps as unavailable.
+- Keep charts above report tables, use Shoppers for customers, and explain table labels in smaller text.
+- Isolate analytics initialization and delivery failures from application startup and business operations.
+
+### Fixed
+
+- Use a valid error event name and exclude raw error messages and customer record identifiers from analytics.
+- Distinguish attempted, successful, and failed operations, and record email dialog confirmation only when confirmed.
+- Count all stored user profiles and group missing ZIP and referral data independently.
+- Include remaining ZIP codes in the registration chart's Other slice.
+- Remove capacity calculations from past-year reports and reports without appointment-slot records; retained stats remain readable after the annual reset.
+
 ## [2026.09.0-beta.4] - Unreleased
 
 ### Added

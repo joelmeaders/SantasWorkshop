@@ -122,6 +122,23 @@ describe('CheckInPage', () => {
 		expect(component.checkinLastUpdated()).toEqual(
 			new Date('2026-12-10T18:00:00.000Z'),
 		);
+		expect(component.attendanceRows()).toEqual([
+			['2026-12-10', '09:00', 2, 1, 1, 1, 0],
+			['2026-12-11', '13:00', 3, 5, 2, 1, 1],
+		]);
+		expect(component.attendanceTotals()).toEqual([
+			'Total',
+			'',
+			5,
+			6,
+			3,
+			2,
+			1,
+		]);
+		expect(component.exportContext()).toContainEqual([
+			'Date notes',
+			'Older reports use December when no month was saved',
+		]);
 		expect(component.checkInsByDayHour()).toMatchObject([
 			{
 				datasets: [
@@ -193,9 +210,9 @@ describe('CheckInPage', () => {
 	});
 
 	it('switches chart views and safely totals mixed chart values', async () => {
-		expect(component.viewButtonText()).toBe('View by Children');
+		expect(component.viewButtonText()).toBe('Show children');
 		component.switchView();
-		expect(component.viewButtonText()).toBe('View by Check-Ins');
+		expect(component.viewButtonText()).toBe('Show shoppers');
 		expect(component.addValues()).toBe(0);
 		expect(component.addValues([2, [3, 9], null, 4])).toBe(9);
 	});

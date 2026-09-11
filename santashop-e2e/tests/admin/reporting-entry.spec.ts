@@ -4,6 +4,27 @@ import {
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
 import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
+import { type Page } from '@playwright/test';
+
+async function expectChartsBeforeTables(page: Page): Promise<void> {
+	const chartsFirst = await page
+		.locator('ion-content')
+		.evaluate((content) => {
+			const charts = Array.from(content.querySelectorAll('canvas'));
+			const lastChart = charts.at(-1);
+			const firstTable = content.querySelector('table');
+			return Boolean(
+				lastChart &&
+				firstTable &&
+				lastChart.compareDocumentPosition(firstTable) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			);
+		});
+	expect(
+		chartsFirst,
+		'Every chart should come before the report tables',
+	).toBe(true);
+}
 
 test.describe('admin reporting routes', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
@@ -22,14 +43,21 @@ test.describe('admin reporting routes', () => {
 			'Registration Stats',
 		);
 		await expect(
-			page.getByText('No schedule data for this year', { exact: true }),
+			page.getByText('No appointment data for this year', {
+				exact: true,
+			}),
 		).toBeVisible({ timeout: 15000 });
 
 		await page.goto('/admin/stats/check-in');
-		await expect(page.locator('admin-header')).toContainText('Check-In Stats');
-		await expect(page.locator('[data-checkin-stats-loading]')).toHaveCount(0, {
-			timeout: 15000,
-		});
+		await expect(page.locator('admin-header')).toContainText(
+			'Check-In Stats',
+		);
+		await expect(page.locator('[data-checkin-stats-loading]')).toHaveCount(
+			0,
+			{
+				timeout: 15000,
+			},
+		);
 		await expect(
 			page.getByText('No check-ins have been recorded for this year.', {
 				exact: true,
@@ -37,10 +65,12 @@ test.describe('admin reporting routes', () => {
 		).toBeVisible({ timeout: 15000 });
 
 		await page.goto('/admin/stats/user');
-		await expect(page.locator('admin-header')).toContainText('User Stats');
+		await expect(page.locator('admin-header')).toContainText(
+			'Shopper Stats',
+		);
 	});
 
-	test('REPORT-004 renders populated current-season schedule data', async ({
+	test('REPORT-004 shows saved appointment totals without capacity when slots are absent', async ({
 		page,
 		seedScheduleStats,
 	}) => {
@@ -57,13 +87,22 @@ test.describe('admin reporting routes', () => {
 		await page.goto('/admin/stats/registration');
 
 		await expect(
-			page.getByText('No schedule data for this year', { exact: true }),
+			page.getByText('No appointment data for this year', {
+				exact: true,
+			}),
 		).toHaveCount(0, { timeout: 15000 });
-		await expect(page.locator('.capacity-card')).toHaveCount(4, {
+		await expect(page.locator('.capacity-card')).toHaveCount(0, {
 			timeout: 15000,
 		});
-		await expect(page.getByRole('heading', { name: '12th - Total: 1' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: '16th - Total: 4' })).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'Capacity by Day', exact: true }),
+		).toHaveCount(0);
+		await expect(
+			page.getByRole('heading', { name: '12th - Total: 1' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: '16th - Total: 4' }),
+		).toBeVisible();
 		expect(pageErrors).toEqual([]);
 	});
 
@@ -73,7 +112,7 @@ test.describe('admin reporting routes', () => {
 	}) => {
 		await seedReportingStats({
 			registration: {
-			programYear: E2E_PROGRAM_YEAR,
+				programYear: E2E_PROGRAM_YEAR,
 				completedRegistrations: 3,
 				dateTimeCount: [
 					{
@@ -81,9 +120,27 @@ test.describe('admin reporting routes', () => {
 						count: 3,
 						childCount: 4,
 						stats: {
-							infants: { total: 1, age02: 1, age35: 0, age68: 0, age911: 0 },
-							girls: { total: 2, age02: 0, age35: 1, age68: 1, age911: 0 },
-							boys: { total: 1, age02: 0, age35: 0, age68: 1, age911: 0 },
+							infants: {
+								total: 1,
+								age02: 1,
+								age35: 0,
+								age68: 0,
+								age911: 0,
+							},
+							girls: {
+								total: 2,
+								age02: 0,
+								age35: 1,
+								age68: 1,
+								age911: 0,
+							},
+							boys: {
+								total: 1,
+								age02: 0,
+								age35: 0,
+								age68: 1,
+								age911: 0,
+							},
 						},
 					},
 				],
@@ -93,11 +150,22 @@ test.describe('admin reporting routes', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/registration');
 
-		await expect(page.locator('.count-container h1').first()).toHaveText('3');
-		await expect(page.locator('.count-container h1').nth(1)).toHaveText('4');
-		await expect(page.getByRole('heading', { name: 'Gender' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Top Zip Codes' })).toBeVisible();
+		await expect(page.locator('.count-container h1').first()).toHaveText(
+			'3',
+		);
+		await expect(page.locator('.count-container h1').nth(1)).toHaveText(
+			'4',
+		);
+		await expect(
+			page.getByRole('heading', { name: 'Children by Group' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('heading', {
+				name: 'Shoppers by ZIP Code',
+			}),
+		).toBeVisible();
 		await expect(page.locator('canvas')).toHaveCount(2);
+		await expectChartsBeforeTables(page);
 	});
 
 	test('REPORT-002 renders seeded check-in counts by day and supports the children view', async ({
@@ -123,10 +191,17 @@ test.describe('admin reporting routes', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/check-in');
 
-		await expect(page.locator('.count-container h1').first()).toHaveText('3');
-		await expect(page.locator('.count-container h1').nth(1)).toHaveText('4');
-		await expect(page.getByRole('heading', { name: 'Check-Ins' })).toBeVisible();
-		await page.getByRole('button', { name: 'View by Children' }).click();
+		await expect(page.locator('.count-container h1').first()).toHaveText(
+			'3',
+		);
+		await expect(page.locator('.count-container h1').nth(1)).toHaveText(
+			'4',
+		);
+		await expect(
+			page.getByRole('heading', { name: 'Shopper Check-Ins' }),
+		).toBeVisible();
+		await expectChartsBeforeTables(page);
+		await page.getByRole('button', { name: 'Show children' }).click();
 		await expect(
 			page
 				.locator('ion-toolbar')
@@ -155,8 +230,13 @@ test.describe('admin reporting routes', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/user');
 
-		await expect(page.getByRole('heading', { name: 'Top 10 Referrers' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Top 10 Zip Codes' })).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'How Shoppers Heard About Us' }),
+		).toBeVisible();
+		await expect(
+			page.getByRole('heading', { name: 'Top 10 ZIP Codes' }),
+		).toBeVisible();
 		await expect(page.locator('canvas')).toHaveCount(2);
+		await expectChartsBeforeTables(page);
 	});
 });

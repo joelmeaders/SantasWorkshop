@@ -15,7 +15,7 @@ import {
 	LoadingController,
 	ModalController,
 } from '@ionic/angular/standalone';
-import { AppStateService, ErrorHandlerService } from '@santashop/core';
+import { AnalyticsWrapper, AppStateService, ErrorHandlerService } from '@santashop/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { DateTimeSlotsService } from './date-time-slots.service';
 import { PreRegistrationService } from '../../../core/services/pre-registration.service';
@@ -212,6 +212,9 @@ describe('ConfirmationPage', () => {
 		modalController.create.mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm', data: { id: 'next-slot' } }) });
 		router.navigate = vi.fn().mockResolvedValue(true);
 
+		const analytics = TestBed.inject(AnalyticsWrapper);
+		const events = vi.spyOn(analytics, 'logEvent');
+		const outcomes = vi.spyOn(analytics, 'logEventWithParams');
 		const cancellation = component.undoRegistration();
 		await vi.waitFor(() =>
 			expect(preRegistration.undoRegistration).toHaveBeenCalledOnce(),
@@ -225,6 +228,10 @@ describe('ConfirmationPage', () => {
 		expect(preRegistration.changeRegistrationDateTime).toHaveBeenCalledWith({ id: 'next-slot' });
 		expect(router.navigate).toHaveBeenCalledWith(['/pre-registration/overview']);
 		expect(loader.dismiss).toHaveBeenCalledTimes(2);
+		expect(events).toHaveBeenCalledWith('cancel_registration');
+		expect(events).toHaveBeenCalledWith('change_registration_datetime');
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'registration_cancel', outcome: 'succeeded' });
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'appointment_change', outcome: 'succeeded' });
 	});
 
 	it('handles a cancellation failure without navigating', async (): Promise<void> => {
@@ -246,7 +253,11 @@ describe('ConfirmationPage', () => {
 		preRegistration.undoRegistration.mockRejectedValueOnce(cancellationError);
 		router.navigate = vi.fn().mockResolvedValue(true);
 
+		const events = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEvent');
+		const outcomes = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEventWithParams');
 		await component.undoRegistration();
+		expect(events).not.toHaveBeenCalledWith('cancel_registration');
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'registration_cancel', outcome: 'failed', error_code: 'unknown' });
 
 		expect(errorHandler.handleError).toHaveBeenCalledWith(cancellationError);
 		expect(router.navigate).not.toHaveBeenCalled();

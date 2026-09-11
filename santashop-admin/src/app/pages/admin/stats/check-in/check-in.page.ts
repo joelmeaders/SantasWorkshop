@@ -1,4 +1,3 @@
-import { EventDatePipe } from '@santashop/core/admin';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import {
 	ChangeDetectionStrategy,
@@ -8,7 +7,6 @@ import {
 	signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Timestamp } from 'firebase/firestore/lite';
 import { ChartConfiguration } from 'chart.js';
 import {
 	BehaviorSubject,
@@ -37,6 +35,13 @@ import {
 } from 'ng2-charts';
 import { addIcons } from 'ionicons';
 import { refreshSharp } from 'ionicons/icons';
+import { ReportTableComponent } from '../../../../shared/components/report-table/report-table.component';
+import { ReportFreshnessComponent } from '../../../../shared/components/report-freshness/report-freshness.component';
+import {
+	reportDate,
+	ReportCell,
+	ReportLabel,
+} from '../../../../shared/helpers/report-export';
 import {
 	IonContent,
 	IonGrid,
@@ -66,10 +71,11 @@ type CheckInStatsLoadState =
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		ReportTableComponent,
+		ReportFreshnessComponent,
 		HeaderComponent,
 		FormsModule,
 		BaseChartDirective,
-		EventDatePipe,
 		IonContent,
 		IonGrid,
 		IonRow,
@@ -87,7 +93,7 @@ type CheckInStatsLoadState =
 })
 export class CheckInPage {
 	private readonly httpService = inject(AdminReadRepository);
-	private readonly programYear = inject(PROGRAM_YEAR);
+	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
 	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
@@ -123,19 +129,87 @@ export class CheckInPage {
 	private readonly dateTimeStats = computed(
 		() => this.checkInRecord()?.dateTimeCount ?? [],
 	);
-	public readonly checkinLastUpdated = computed(() => {
-		const lastUpdated = this.checkInRecord()?.lastUpdated as
-			| Timestamp
-			| Date
-			| undefined;
-		if (!lastUpdated) return undefined;
-		return lastUpdated instanceof Date ? lastUpdated : lastUpdated.toDate();
-	});
+	public readonly checkinLastUpdated = computed(() =>
+		reportDate(this.checkInRecord()?.lastUpdated),
+	);
+	public readonly hasLegacyDateBuckets = computed(() =>
+		this.dateTimeStats().some((entry) => !entry.dateKey),
+	);
+	public readonly attendanceColumns: ReportLabel[] = [
+		{ label: 'Day', description: 'Check-in date in Denver time.' },
+		{
+			label: 'Hour',
+			description: 'Start of the check-in hour, in Denver time.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Shoppers checked in during this hour.',
+		},
+		{
+			label: 'Children',
+			description: 'Children included with these shoppers.',
+		},
+		{
+			label: 'Registered ahead',
+			description: 'Checked-in shoppers who registered before arriving.',
+		},
+		{
+			label: 'Registered on site',
+			description: 'Checked-in shoppers who registered at the shop.',
+		},
+		{
+			label: 'Changed at check-in',
+			description:
+				'Registrations marked as edited during check-in, before the on-site adjustment.',
+		},
+	];
+	public readonly attendanceRows = computed<ReportCell[][]>(() =>
+		[...this.dateTimeStats()]
+			.sort(
+				(a, b) =>
+					this.getDateKey(a).localeCompare(this.getDateKey(b)) ||
+					a.hour - b.hour,
+			)
+			.map((entry) => [
+				this.getDateKey(entry),
+				`${String(entry.hour).padStart(2, '0')}:00`,
+				entry.customerCount,
+				entry.childCount,
+				entry.pregisteredCount,
+				entry.customerCount - entry.pregisteredCount,
+				entry.modifiedCount,
+			]),
+	);
+	public readonly attendanceTotals = computed(() => [
+		'Total',
+		'',
+		this.totalCustomers(),
+		this.totalChildren(),
+		this.totalPreregistered(),
+		this.onSiteRegistrations(),
+		this.dateTimeStats().reduce((sum, row) => sum + row.modifiedCount, 0),
+	]);
+	public readonly exportContext = computed<ReportCell[][]>(() => [
+		['Year', this.year],
+		['Updated at (UTC)', this.checkinLastUpdated()?.toISOString()],
+		[
+			'Date notes',
+			this.hasLegacyDateBuckets()
+				? 'Older reports use December when no month was saved'
+				: 'Dates use Denver time',
+		],
+	]);
 	public readonly totalCustomers = computed(() =>
-		this.dateTimeStats().reduce((total, entry) => total + entry.customerCount, 0),
+		this.dateTimeStats().reduce(
+			(total, entry) => total + entry.customerCount,
+			0,
+		),
 	);
 	public readonly totalChildren = computed(() =>
-		this.dateTimeStats().reduce((total, entry) => total + entry.childCount, 0),
+		this.dateTimeStats().reduce(
+			(total, entry) => total + entry.childCount,
+			0,
+		),
 	);
 	public readonly totalPreregistered = computed(() =>
 		this.dateTimeStats().reduce(
@@ -159,8 +233,8 @@ export class CheckInPage {
 	);
 	public readonly viewButtonText = computed(() =>
 		this.graphView() === 'customerCount'
-			? 'View by Children'
-			: 'View by Check-Ins',
+			? 'Show children'
+			: 'Show shoppers',
 	);
 	public readonly checkInsByDayHour = computed(() =>
 		this.mapDaysHoursToChart(this.dateTimeStats(), this.graphView()),
@@ -213,10 +287,12 @@ export class CheckInPage {
 	}
 
 	private getDateKey(entry: CheckInDateTimeCount): string {
+		const dateKey = entry.dateKey;
 		if (
-			/^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(entry.dateKey ?? '')
+			dateKey &&
+			/^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(dateKey)
 		) {
-			return entry.dateKey!;
+			return dateKey;
 		}
 
 		return `${this.year}-12-${entry.date.toString().padStart(2, '0')}`;

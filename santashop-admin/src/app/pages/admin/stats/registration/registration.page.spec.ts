@@ -16,6 +16,7 @@ import { SHOP_DAYS } from '@santashop/core/admin/firestore';
 import {
 	DateTimeSlot,
 	RegistrationStats,
+	RegistrationOperationalStats,
 	ScheduleStats,
 } from '@santashop/models';
 import { of, Subject, throwError } from 'rxjs';
@@ -51,6 +52,158 @@ describe('RegistrationPage', () => {
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('keeps legacy totals while marking new calculations and timestamps unavailable', async () => {
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 7,
+								dateTimeCount: [],
+								zipCodeCount: [],
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.year = 2024;
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.registrationCount()).toBe(7);
+		expect(component.outcomeRows()).toEqual([]);
+		expect(component.snapshotRows()).toEqual([]);
+		expect(fixture.nativeElement.textContent).toContain(
+			'Update time not saved in this report.',
+		);
+		expect(fixture.nativeElement.textContent).toContain(
+			'Registration progress was not saved in this report.',
+		);
+		expect(fixture.nativeElement.textContent).not.toContain('0.0%');
+	});
+
+	it('reads archived outcomes and daily totals from saved stats without customer or appointment-slot records', async () => {
+		const operational: RegistrationOperationalStats = {
+			coverage: 'current-records',
+			registrationRecords: 5,
+			submittedRegistrations: 0,
+			draftRegistrations: 5,
+			cancelledRegistrations: 0,
+			recordedCancellationEvents: 0,
+			checkedInRegistrations: 0,
+			pastAppointmentRegistrations: 0,
+			attendedPastAppointments: 0,
+			unconfirmedPastAppointments: 0,
+			attendanceStatusUnavailable: 0,
+			missingAppointmentRegistrations: 0,
+			invalidSubmissionDates: 0,
+			completionRate: 0,
+		};
+		const calculatedAt = new Date('2025-09-10T06:00:00Z');
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 3,
+								dateTimeCount: [],
+								zipCodeCount: [],
+								calculatedAt,
+								operational,
+								dailySnapshots: [
+									{
+										...operational,
+										dateKey: '2025-09-10',
+										calculatedAt,
+									},
+								],
+							}
+						: { dateTimeCounts: [] },
+				) as never,
+		);
+		collection.readMany.mockClear().mockImplementation(() => {
+			throw new Error(
+				'Historical customer and slot records have been deleted',
+			);
+		});
+		component.year = 2025;
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.registrationCount()).toBe(3);
+		expect(component.outcomeRows()).toContainEqual([
+			{ label: 'Canceled', description: expect.any(String) },
+			0,
+		]);
+		expect(component.outcomeRows()).toContainEqual([
+			{ label: 'Completion rate', description: expect.any(String) },
+			'0.0%',
+		]);
+		expect(component.outcomeRows()).toContainEqual([
+			{ label: 'Attendance rate', description: expect.any(String) },
+			undefined,
+		]);
+		expect(component.snapshotRows()[0]).toEqual([
+			'2025-09-10',
+			'2025-09-10T06:00:00.000Z',
+			5,
+			0,
+			5,
+			0,
+			0,
+			'0.0%',
+		]);
+		expect(component.appointmentExportContext()).toContainEqual([
+			'Updated at (UTC)',
+			undefined,
+		]);
+		expect(fixture.nativeElement.textContent).toContain('Unavailable');
+		expect(collection.readMany).not.toHaveBeenCalled();
+		expect(component.capacityByDay()).toEqual([]);
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'Capacity by Day',
+		);
+	});
+
+	it('includes every ZIP code in the pie, table and export totals', async () => {
+		const zipCodeCount = [6, 5, 4, 3, 2, 1].map((count, index) => ({
+			zip: 80200 + index,
+			count,
+			childCount: count * 2,
+		}));
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('registration-')
+						? {
+								completedRegistrations: 21,
+								dateTimeCount: [],
+								zipCodeCount,
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.topTenZipCodesCountData().labels).toContainEqual([
+			'Other',
+			'3 Shoppers',
+		]);
+		expect(component.topTenZipCodesCountData().datasets[0].data).toEqual([
+			6, 5, 4, 3, 3,
+		]);
+		expect(component.zipRows()).toHaveLength(6);
+		expect(component.zipTotals()).toEqual(['Total', 21, 42]);
+		const tables = Array.from(
+			fixture.nativeElement.querySelectorAll('table'),
+		) as HTMLTableElement[];
+		const zipTable = tables.find(
+			(table) =>
+				table.caption?.textContent?.trim() === 'Registration ZIP codes',
+		);
+		expect(zipTable?.querySelectorAll('tbody tr')).toHaveLength(6);
+		expect(zipTable?.querySelector('tfoot')?.textContent).toContain('21');
 	});
 
 	it('derives registration totals, demographic charts, and zip-code charts', async () => {
@@ -169,9 +322,9 @@ describe('RegistrationPage', () => {
 		]);
 		expect(component.topTenZipCodesCountData()).toMatchObject({
 			labels: [
-				['80219', '8 Families'],
-				['80204', '5 Families'],
-				['80205', '3 Families'],
+				['80219', '8 Shoppers'],
+				['80204', '5 Shoppers'],
+				['80205', '3 Shoppers'],
 			],
 			datasets: [{ data: [8, 5, 3] }],
 		});
@@ -203,7 +356,7 @@ describe('RegistrationPage', () => {
 		expect(component.hasScheduleData()).toBe(true);
 		expect(fixture.nativeElement.textContent).toContain('Capacity by Day');
 		expect(fixture.nativeElement.textContent).not.toContain(
-			'No schedule data for this year',
+			'No appointment data for this year',
 		);
 		const capacityByDay = component.capacityByDay();
 		expect(capacityByDay).toHaveLength(4);
@@ -234,7 +387,38 @@ describe('RegistrationPage', () => {
 		expect(component.getTotalCount([2, [3, 7], null, 4])).toBe(9);
 	});
 
-	it('refreshes all report inputs once per refresh, retries errors, and loads the selected year', async () => {
+	it('keeps saved appointment totals without showing capacity when slot records are absent', async () => {
+		collection.read.mockImplementation(
+			(id: string) =>
+				of(
+					id.startsWith('schedule-')
+						? {
+								dateTimeCounts: [
+									{
+										dateTime: new Date(
+											'2026-12-10T18:00:00Z',
+										),
+										count: 7,
+									},
+								],
+							}
+						: undefined,
+				) as never,
+		);
+		collection.readMany.mockReturnValue(of([]) as never);
+		component.refresh();
+		await fixture.whenStable();
+		expect(component.registrationCountBySchedule()).toBe(7);
+		expect(component.capacityByDay()).toEqual([]);
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'Capacity by Day',
+		);
+		expect(fixture.nativeElement.textContent).toContain(
+			'Appointments by Day',
+		);
+	});
+
+	it('refreshes saved report inputs, retries errors, and skips live records for past years', async () => {
 		collection.read.mockReturnValue(throwError(() => new Error('offline')));
 		component.refresh();
 		await fixture.whenStable();
@@ -249,9 +433,9 @@ describe('RegistrationPage', () => {
 		expect(collection.read).toHaveBeenCalledTimes(2);
 		expect(collection.read).toHaveBeenCalledWith('registration-2025');
 		expect(collection.read).toHaveBeenCalledWith('schedule-2025');
-		expect(collection.readMany).toHaveBeenCalledTimes(1);
+		expect(collection.readMany).not.toHaveBeenCalled();
 		expect(fixture.nativeElement.textContent).toContain(
-			'No schedule data for this year',
+			'No appointment data for this year',
 		);
 	});
 	it('uses nightly registration totals when the seasonal schedule aggregate is absent', async () => {

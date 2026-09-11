@@ -20,12 +20,20 @@ const meta = {
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
-		await expect(await canvas.findByText('Customers')).toBeVisible();
-		await expect(canvas.getByText('Children')).toBeVisible();
-		await expect(canvas.getByText('Pre-Registered')).toBeVisible();
-		await userEvent.click(
-			canvas.getByText(/View by Children|View by Check-Ins/),
-		);
+		await expect(
+			await canvas.findByRole('heading', {
+				name: 'Shoppers',
+			}),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'Children' }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', {
+				name: 'Registered Ahead',
+			}),
+		).toBeVisible();
+		await userEvent.click(canvas.getByText(/Show children|Show shoppers/));
 		const fixtures = getAdminStoryFixtures(canvasElement);
 		const loadedStats = fixtures.checkInStats$.value;
 		fixtures.checkInStats$.next(undefined);
@@ -35,7 +43,11 @@ const meta = {
 			),
 		).toBeVisible();
 		fixtures.checkInStats$.next(loadedStats);
-		await expect(await canvas.findByText('Customers')).toBeVisible();
+		await expect(
+			await canvas.findByRole('heading', {
+				name: 'Shoppers',
+			}),
+		).toBeVisible();
 		await waitFor(() =>
 			expect(
 				canvas.queryByText(

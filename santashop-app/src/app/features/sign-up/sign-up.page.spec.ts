@@ -175,12 +175,29 @@ describe('SignUpPage', () => {
 		};
 		alertController.create.mockResolvedValue(alert as never);
 		component.form.controls.emailAddress.setValue('parent@example.com');
+		vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEvent');
 		vi.spyOn(pageService, 'onboardUser').mockResolvedValue(undefined);
 
 		await component.onCreateAccount();
 
 		expect(alert.present).toHaveBeenCalledOnce();
 		expect(pageService.onboardUser).toHaveBeenCalledOnce();
+		expect(TestBed.inject(AnalyticsWrapper).logEvent).toHaveBeenCalledWith('confirmed_email');
+	});
+
+	it.each(['cancel', 'backdrop', undefined])('records email dialog dismissal without claiming confirmation (%s)', async (role) => {
+		const alertController = TestBed.inject(AlertController) as unknown as Mocked<AlertController>;
+		const pageService = fixture.debugElement.injector.get(SignUpPageService) as Mocked<SignUpPageService>;
+		vi.spyOn(pageService, 'onboardUser').mockResolvedValue(undefined);
+		alertController.create.mockResolvedValue({ present: vi.fn(), onDidDismiss: vi.fn().mockResolvedValue({ role }) } as never);
+		component.form.controls.emailAddress.setValue('private@example.com');
+		const analytics = TestBed.inject(AnalyticsWrapper);
+		const event = vi.spyOn(analytics, 'logEvent');
+		const params = vi.spyOn(analytics, 'logEventWithParams');
+		await component.onCreateAccount();
+		expect(event).not.toHaveBeenCalledWith('confirmed_email');
+		expect(params).toHaveBeenCalledWith('email_confirmation_dialog', { outcome: 'dismissed' });
+		expect(pageService.onboardUser).not.toHaveBeenCalled();
 	});
 
 	it('does not show confirmation or onboard without an email address', async (): Promise<void> => {

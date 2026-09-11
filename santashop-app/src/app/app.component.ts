@@ -72,7 +72,7 @@ export class AppComponent implements OnInit {
 		this.language.initialize();
 
 		this.analyticsService.logEventWithParams('default_language', {
-			value: browserLang,
+			value: supportedLanguage,
 		});
 
 		this.appStateService.globalAlert$

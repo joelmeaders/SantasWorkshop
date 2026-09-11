@@ -49,7 +49,12 @@
 		} @else if (currentState.status === 'ready') {
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
-				Updated {{ checkinLastUpdated() | eventDate:'short' }}
+				<admin-report-freshness
+					label="Check-in counts"
+					[calculatedAt]="checkinLastUpdated()"
+					[currentSeason]="year === programYear"
+					[maxAgeHours]="24"
+				/>
 			</ion-col>
 		</ion-row>
 		<ion-row class="ion-justify-content-center">
@@ -57,7 +62,7 @@
 				@let totalCustomersCount = totalCustomers();
 				<div class="count-container">
 					<h1>{{ totalCustomersCount }}</h1>
-					<h2>Customers</h2>
+					<h2>Shoppers</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
@@ -71,21 +76,22 @@
 				@let preregisteredCount = totalPreregistered();
 				<div class="count-container">
 					<h1>{{ preregisteredCount }}</h1>
-					<h2>Pre-Registered</h2>
+					<h2>Registered Ahead</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 				@let onSiteCount = onSiteRegistrations();
 				<div class="count-container">
 					<h1>{{ onSiteCount }}</h1>
-					<h2>On-Site</h2>
+					<h2>Registered On Site</h2>
 				</div>
 			</ion-col>
 			<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
 				@let modifiedCount = totalModifiedRegistrations();
 				<div class="count-container">
 					<h1>{{ modifiedCount }}</h1>
-					<h2>Modified</h2>
+					<h2>Changes (Adjusted)</h2>
+					<p>Difference from on-site registrations.</p>
 				</div>
 			</ion-col>
 		</ion-row>
@@ -95,8 +101,8 @@
 			<ion-col size="12">
 				<ion-toolbar color="none">
 					<h2 slot="start" class="ion-text-left">
-						{{ graphView() === 'customerCount' ?
-						'Check-Ins' : 'Children' }}
+						{{ graphView() === 'customerCount' ? 'Shopper Check-Ins'
+						: 'Children' }}
 					</h2>
 					<div slot="end">
 						<ion-button (click)="switchView()">
@@ -129,6 +135,26 @@
 				></canvas>
 			</ion-col>
 			} }
+		</ion-row>
+		<ion-row>
+			<ion-col size="12">
+				<h2>Report details</h2>
+				@if (hasLegacyDateBuckets()) {
+				<p>Older reports use December when no month was saved.</p>
+				}
+				<admin-report-table
+					caption="Attendance by hour"
+					[columns]="attendanceColumns"
+					[rows]="attendanceRows()"
+					[totals]="attendanceTotals()"
+					[filename]="'attendance-by-hour-' + year"
+					[exportContext]="exportContext()"
+				/>
+				<p>
+					The adjusted changes summary shows the positive difference
+					between recorded changes and on-site registrations.
+				</p>
+			</ion-col>
 		</ion-row>
 		}
 	</ion-grid>

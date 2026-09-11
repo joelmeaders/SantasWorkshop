@@ -19,7 +19,7 @@ import {
 	RegistrationStats,
 	ScheduleStats,
 } from '@santashop/models';
-import { BehaviorSubject, forkJoin, switchMap } from 'rxjs';
+import { BehaviorSubject, forkJoin, of, switchMap } from 'rxjs';
 
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -48,6 +48,13 @@ import {
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { Timestamp, where } from 'firebase/firestore/lite';
+import { ReportTableComponent } from '../../../../shared/components/report-table/report-table.component';
+import { ReportFreshnessComponent } from '../../../../shared/components/report-freshness/report-freshness.component';
+import {
+	reportDate,
+	ReportCell,
+	ReportLabel,
+} from '../../../../shared/helpers/report-export';
 
 Chart.register(ChartDataLabels);
 
@@ -58,6 +65,8 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		ReportTableComponent,
+		ReportFreshnessComponent,
 		IonTitle,
 		IonGrid,
 		IonRow,
@@ -75,7 +84,7 @@ Chart.register(ChartDataLabels);
 })
 export class RegistrationPage {
 	private readonly httpService = inject(AdminReadRepository);
-	private readonly programYear = inject(PROGRAM_YEAR);
+	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
 	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
@@ -100,15 +109,236 @@ export class RegistrationPage {
 				schedule: getStatsCollection<ScheduleStats>(
 					this.httpService,
 				).read(`schedule-${this.year}`),
-				slots: this.httpService
-					.collection<DateTimeSlot>(COLLECTION_SCHEMA.dateTimeSlots)
-					.readMany([where('programYear', '==', this.year)], 'id'),
+				slots:
+					this.year === this.programYear
+						? this.httpService
+								.collection<DateTimeSlot>(
+									COLLECTION_SCHEMA.dateTimeSlots,
+								)
+								.readMany(
+									[where('programYear', '==', this.year)],
+									'id',
+								)
+						: of<DateTimeSlot[]>([]),
 			}).pipe(readState()),
 		),
 	);
 	public readonly state = toSignal(this.state$, {
 		initialValue: { status: 'loading' as const, data: undefined },
 	});
+	public readonly operational = computed(
+		() => this.state().data?.registration?.operational,
+	);
+	public readonly outcomeRows = computed<ReportCell[][]>(() => {
+		const data = this.operational();
+		if (!data) return [];
+		const rows: [string, string, ReportCell][] = [
+			[
+				'All registrations',
+				'All saved registrations for this year, including unfinished and canceled registrations.',
+				data.registrationRecords,
+			],
+			[
+				'Completed',
+				'Submitted registrations that have not been canceled.',
+				data.submittedRegistrations,
+			],
+			[
+				'Not finished',
+				'Registrations that have not been submitted or canceled.',
+				data.draftRegistrations,
+			],
+			[
+				'Canceled',
+				'Registrations currently marked as canceled.',
+				data.cancelledRegistrations,
+			],
+			[
+				'Times canceled',
+				'Every saved cancellation, including repeat cancellations of the same registration.',
+				data.recordedCancellationEvents,
+			],
+			[
+				'Checked in',
+				'Completed registrations with a recorded check-in.',
+				data.checkedInRegistrations,
+			],
+			[
+				'Completion rate',
+				'Completed registrations as a share of all saved registrations.',
+				this.formatRate(data.completionRate),
+			],
+			[
+				'Past appointments',
+				'Completed, uncanceled appointments before the report update day (Denver time).',
+				data.pastAppointmentRegistrations,
+			],
+			[
+				'Attended',
+				'Past appointments with a recorded check-in.',
+				data.attendedPastAppointments,
+			],
+			[
+				'No check-in recorded',
+				'Past appointments without a recorded check-in. This does not confirm a no-show.',
+				data.unconfirmedPastAppointments,
+			],
+			[
+				'Check-in status missing',
+				'Past appointments whose older records do not include a check-in status.',
+				data.attendanceStatusUnavailable,
+			],
+			[
+				'Attendance rate',
+				'Past appointments with a check-in, divided by all past appointments.',
+				this.formatRate(data.attendanceRate),
+			],
+			[
+				'Appointment missing',
+				'Completed registrations without a valid appointment in this year.',
+				data.missingAppointmentRegistrations,
+			],
+			[
+				'Submission date needs review',
+				'Registrations with an unreadable submission date or a date after this report update.',
+				data.invalidSubmissionDates,
+			],
+		];
+		return rows.map(([label, description, value]) => [
+			{ label, description },
+			value,
+		]);
+	});
+	public readonly appointmentColumns: ReportLabel[] = [
+		{
+			label: 'Appointment',
+			description: 'Scheduled date and time in Denver.',
+		},
+		{
+			label: 'Registrations',
+			description: 'Registrations booked for this appointment.',
+		},
+	];
+	public readonly zipColumns: ReportLabel[] = [
+		{
+			label: 'ZIP code',
+			description: 'Home ZIP code from the registration.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Completed registrations with this ZIP code.',
+		},
+		{
+			label: 'Children',
+			description: 'Children included in those registrations.',
+		},
+	];
+	public readonly snapshotColumns: ReportLabel[] = [
+		{
+			label: 'Day',
+			description: 'Day this report was saved, in Denver time.',
+		},
+		{
+			label: 'Report updated',
+			description: 'Time the totals were calculated (UTC).',
+		},
+		{
+			label: 'All registrations',
+			description: 'All registrations saved that day.',
+		},
+		{ label: 'Completed', description: 'Submitted and not canceled.' },
+		{
+			label: 'Not finished',
+			description: 'Not yet submitted or canceled.',
+		},
+		{ label: 'Canceled', description: 'Marked as canceled that day.' },
+		{
+			label: 'Checked in',
+			description: 'Completed registrations with a check-in.',
+		},
+		{
+			label: 'Completion rate',
+			description:
+				'Completed registrations divided by all registrations.',
+		},
+	];
+	public readonly snapshotRows = computed<ReportCell[][]>(() =>
+		[...(this.state().data?.registration?.dailySnapshots ?? [])]
+			.sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+			.map((entry) => [
+				entry.dateKey,
+				reportDate(entry.calculatedAt)?.toISOString(),
+				entry.registrationRecords,
+				entry.submittedRegistrations,
+				entry.draftRegistrations,
+				entry.cancelledRegistrations,
+				entry.checkedInRegistrations,
+				this.formatRate(entry.completionRate),
+			]),
+	);
+	public readonly zipRows = computed(() =>
+		this.sortZipCodeCounts(this.registrationStats().zipCodeCount).map(
+			(entry) => [String(entry.zip), entry.count, entry.childCount],
+		),
+	);
+	public readonly zipTotals = computed(() => [
+		'Total',
+		this.registrationStats().zipCodeCount.reduce(
+			(sum, row) => sum + row.count,
+			0,
+		),
+		this.registrationStats().zipCodeCount.reduce(
+			(sum, row) => sum + row.childCount,
+			0,
+		),
+	]);
+	public readonly appointmentRows = computed<ReportCell[][]>(() =>
+		this.familiesBySlots().map((entry) => [
+			entry.date.toLocaleString('en-US', {
+				timeZone: EVENT_TIME_ZONE,
+				dateStyle: 'medium',
+				timeStyle: 'short',
+			}),
+			entry.count,
+		]),
+	);
+	public readonly appointmentTotals = computed(() => [
+		'Total',
+		this.familiesBySlots().reduce((sum, row) => sum + row.count, 0),
+	]);
+	public readonly registrationExportContext = computed<ReportCell[][]>(() => [
+		['Year', this.year],
+		['Source', 'Nightly registration report'],
+		[
+			'Updated at (UTC)',
+			reportDate(
+				this.state().data?.registration?.calculatedAt,
+			)?.toISOString(),
+		],
+	]);
+	public readonly appointmentExportContext = computed<ReportCell[][]>(() => [
+		['Year', this.year],
+		[
+			'Source',
+			this.state().data?.schedule
+				? 'Saved appointment totals'
+				: 'Nightly registration report',
+		],
+		[
+			'Updated at (UTC)',
+			reportDate(
+				this.state().data?.schedule
+					? this.state().data?.schedule?.calculatedAt
+					: this.state().data?.registration?.calculatedAt,
+			)?.toISOString(),
+		],
+	]);
+
+	private formatRate(value: number | undefined): string | undefined {
+		return value === undefined || !Number.isFinite(value)
+			? undefined
+			: `${(value * 100).toFixed(1)}%`;
+	}
 	private readonly registrationStats = computed<RegistrationStats>(
 		() =>
 			this.state().data?.registration ?? {
@@ -163,8 +393,12 @@ export class RegistrationPage {
 	private readonly stats = computed(() =>
 		this.registrationStats().dateTimeCount.map((slot) => slot.stats),
 	);
-	public readonly statsNull = computed(() =>
-		this.stats().every((stats) => !stats),
+	public readonly statsNull = computed(
+		() =>
+			!this.stats().length ||
+			this.stats().some(
+				(stats) => !stats?.girls || !stats?.boys || !stats?.infants,
+			),
 	);
 	public readonly girlBoyInfantCounts = computed(() => [
 		this.demographicCount('girls'),
@@ -185,13 +419,24 @@ export class RegistrationPage {
 	public readonly topTenZipCodesCountData = computed<
 		ChartData<'pie', number[], string | string[]>
 	>(() => {
-		const data = this.sortZipCodeCounts(
+		const sorted = this.sortZipCodeCounts(
 			this.registrationStats().zipCodeCount,
-		).slice(0, 4);
+		);
+		const data = sorted
+			.slice(0, 4)
+			.map((entry) => ({ zip: String(entry.zip), count: entry.count }));
+		if (sorted.length > 4) {
+			data.push({
+				zip: 'Other',
+				count: sorted
+					.slice(4)
+					.reduce((sum, entry) => sum + entry.count, 0),
+			});
+		}
 		return {
 			labels: data.map((entry) => [
 				entry.zip.toString(),
-				entry.count.toString() + ' Families',
+				entry.count.toString() + ' Shoppers',
 			]),
 			datasets: [
 				{
@@ -435,6 +680,8 @@ export class RegistrationPage {
 	private mapSlotsToCapacityCharts(
 		slots: DateTimeSlot[],
 	): DayCapacityChart[] {
+		// Annual reset removes slots; saved stats do not contain appointment limits.
+		if (this.year !== this.programYear || slots.length === 0) return [];
 		const schedule = this.schedule.find((s) => s.year === this.year);
 		if (!schedule) return [];
 

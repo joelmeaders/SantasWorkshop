@@ -106,6 +106,7 @@ export class SignUpPage {
 	}
 
 	public ionViewWillEnter(): void {
+		this.analytics.logEvent('sign_up_started');
 		setTimeout(() => this.firstName()?.setFocus(), 300);
 	}
 
@@ -166,9 +167,12 @@ export class SignUpPage {
 		await alert.present();
 		const shouldContinue = await alert.onDidDismiss();
 
-		this.analytics.logEventWithParams('confirmed_email', {
-			value: shouldContinue.role,
+		this.analytics.logEventWithParams('email_confirmation_dialog', {
+			outcome:
+				shouldContinue.role === 'confirm' ? 'confirmed' : 'dismissed',
 		});
+		if (shouldContinue.role === 'confirm')
+			this.analytics.logEvent('confirmed_email');
 
 		return shouldContinue.role === 'confirm';
 	}

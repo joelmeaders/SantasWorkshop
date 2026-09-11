@@ -2,6 +2,8 @@ import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
 	AuthService,
+	AnalyticsWrapper,
+	trackAnalyticsOperation,
 	ErrorHandlerService,
 	FunctionsWrapper,
 } from '@santashop/core/customer';
@@ -15,6 +17,7 @@ import { newOnboardUserForm } from './sign-up.form';
 @Injectable()
 export class SignUpPageService implements OnDestroy {
 	private readonly authService = inject(AuthService);
+	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly functions = inject(FunctionsWrapper);
 	private readonly router = inject(Router);
 	private readonly loadingController = inject(LoadingController);
@@ -60,32 +63,47 @@ export class SignUpPageService implements OnDestroy {
 		let accountCreated = false;
 		let authenticated = false;
 		try {
-			await this.createAccount(onboardInfo);
+			await trackAnalyticsOperation(
+				this.analytics,
+				'create_account',
+				() => this.createAccount(onboardInfo),
+			);
+			this.analytics.logEvent('account_created');
 			accountCreated = true;
 			loader.message = await firstValueFrom(
 				this.translateService.get('SIGNUP.SIGNING_IN'),
 			);
-			await this.signIn(onboardInfo);
+			await trackAnalyticsOperation(
+				this.analytics,
+				'signup_sign_in',
+				() => this.signIn(onboardInfo),
+			);
 			authenticated = true;
 			await this.router.navigate(['pre-registration/overview']);
 		} catch (incomingError) {
 			const error = incomingError as IError;
 
 			if (accountCreated && !authenticated) {
+				this.analytics.logEventWithParams('signup_recovery_shown', {
+					reason: 'sign_in_failed',
+				});
 				await loader.dismiss().catch(() => false);
 				await this.showAccountRecoveryAlert(
 					onboardInfo.emailAddress,
 					'SIGNUP.ACCOUNT_CREATED',
 					'SIGNUP.ACCOUNT_CREATED_MESSAGE',
 				);
-			} else if (error.code === 'functions/already-exists') {
+			} else if (error?.code === 'functions/already-exists') {
+				this.analytics.logEventWithParams('signup_recovery_shown', {
+					reason: 'account_exists',
+				});
 				await loader.dismiss().catch(() => false);
 				await this.showAccountRecoveryAlert(
 					onboardInfo.emailAddress,
 					'SIGNUP.ACCOUNT_EXISTS',
 					'SIGNUP.ACCOUNT_EXISTS_MESSAGE',
 				);
-			} else if (error.code === 'functions/unauthenticated') {
+			} else if (error?.code === 'functions/unauthenticated') {
 				await this.errorHandler.handleError(
 					{
 						...error,
@@ -130,6 +148,14 @@ export class SignUpPageService implements OnDestroy {
 		await alert.present();
 
 		await alert.onDidDismiss().then((response) => {
+			this.analytics.logEventWithParams('signup_recovery_selected', {
+				action:
+					response.role === 'reset'
+						? 'reset'
+						: response.role === 'sign-in'
+							? 'sign_in'
+							: 'dismissed',
+			});
 			this.router.navigate(['/'], {
 				queryParams: { mode: response.role },
 			});

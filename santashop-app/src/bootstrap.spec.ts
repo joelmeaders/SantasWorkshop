@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ApplicationRef, Type } from '@angular/core';
 import {
+	FIREBASE_ANALYTICS,
+	ANALYTICS_APP_AREA,
 	FIREBASE_FIRESTORE,
 	PUBLIC_PARAMETERS_SOURCE,
 } from '@santashop/core';
@@ -59,6 +61,20 @@ const application = {
 };
 
 describe('bootstrapCustomerApplication', () => {
+	it('bootstraps with customer context when analytics initialization is unavailable', async (): Promise<void> => {
+		const { dependencies, mocks } = createFirebaseDependencies();
+		mocks['getAnalytics'].mockImplementation(() => { throw new Error('Analytics unavailable'); });
+		const appRef = {} as ApplicationRef;
+		const bootstrap = vi.fn<BootstrapApplication>().mockResolvedValue(appRef);
+		await expect(bootstrapCustomerApplication(
+			{ ...appConfig, production: true }, {}, dependencies, application, bootstrap, vi.fn(),
+		)).resolves.toBe(appRef);
+		expect(bootstrap.mock.calls[0]?.[1].providers).toEqual(expect.arrayContaining([
+			{ provide: FIREBASE_ANALYTICS, useValue: null },
+			{ provide: ANALYTICS_APP_AREA, useValue: 'customer' },
+		]));
+	});
+
 	afterEach(() => {
 		delete (self as { FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean })
 			.FIREBASE_APPCHECK_DEBUG_TOKEN;
@@ -169,7 +185,7 @@ describe('bootstrapCustomerApplication', () => {
 
 	it('keys the service-worker script URL to the configured release version', () => {
 		expect(getServiceWorkerScriptUrl(config.version)).toBe(
-			'ngsw-worker.js?v=2026.09.0-beta.4',
+			'ngsw-worker.js?v=2026.09.0-beta.5',
 		);
 		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
 			getServiceWorkerScriptUrl(config.version),

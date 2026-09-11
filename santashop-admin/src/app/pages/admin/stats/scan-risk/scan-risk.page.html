@@ -20,7 +20,7 @@
 		<p>Refresh to check for late duplicate and canceled-code attempts.</p>
 	</div>
 	} @else {
-	<ion-list aria-label="Customers with suspicious scans">
+	<ion-list aria-label="Shoppers with suspicious scans">
 		@for (summary of state.summaries; track summary.customerId) {
 		<ion-item button detail [routerLink]="['./', summary.customerId]">
 			<ion-label>

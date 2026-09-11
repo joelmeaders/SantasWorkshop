@@ -15,6 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
 	AnalyticsWrapper,
+	trackAnalyticsOperation,
 	AuthService,
 	FireRepoLite,
 	IFireRepoCollection,
@@ -198,12 +199,17 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 					this.programYear,
 				);
 				delete validatedChild.error;
-				await this.preregistrationService.saveDraftChild({
-					mutationId: this.createMutationId(),
-					child: validatedChild,
-				});
+				await trackAnalyticsOperation(
+					this.analytics,
+					'child_save',
+					() =>
+						this.preregistrationService.saveDraftChild({
+							mutationId: this.createMutationId(),
+							child: validatedChild,
+						}),
+				);
 				this.analytics.logEventWithParams('workspace_child_saved', {
-					childId: validatedChild.id,
+					action: request.isNew ? 'added' : 'edited',
 				});
 			},
 		);
@@ -222,13 +228,17 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 							'OVERVIEW.CHILD_REMOVE_FAILED',
 						),
 					);
-				await this.preregistrationService.deleteDraftChild({
-					mutationId: this.createMutationId(),
-					childId: child.id,
-				});
-				this.analytics.logEventWithParams('workspace_child_removed', {
-					childId: child.id,
-				});
+				const childId = child.id;
+				await trackAnalyticsOperation(
+					this.analytics,
+					'child_remove',
+					() =>
+						this.preregistrationService.deleteDraftChild({
+							mutationId: this.createMutationId(),
+							childId,
+						}),
+				);
+				this.analytics.logEvent('workspace_child_removed');
 			},
 		);
 		if (deleted) this.childrenCard()?.collapseEditor();
@@ -246,18 +256,19 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 						),
 					);
 				}
-				await this.preregistrationService.setDraftAppointment({
-					mutationId: this.createMutationId(),
-					slotId: slot.id,
-					reviewedDateTime: slot.dateTime.toISOString(),
-				});
-				this.reviewing.set(false);
-				this.analytics.logEventWithParams(
-					'workspace_appointment_saved',
-					{
-						slotId: slot.id,
-					},
+				const slotId = slot.id;
+				await trackAnalyticsOperation(
+					this.analytics,
+					'appointment_select',
+					() =>
+						this.preregistrationService.setDraftAppointment({
+							mutationId: this.createMutationId(),
+							slotId,
+							reviewedDateTime: slot.dateTime.toISOString(),
+						}),
 				);
+				this.reviewing.set(false);
+				this.analytics.logEvent('workspace_appointment_saved');
 			},
 		);
 	}
@@ -267,15 +278,26 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			this.translateService.instant('OVERVIEW.REGISTRATION_SUBMITTED'),
 			async () => {
 				this.slotRefresh.next();
-				const result =
-					await this.preregistrationService.completeRegistration({
-						mutationId: (this.pendingCompletionId ??=
-							this.createMutationId()),
-					});
-				if (!result.data)
-					throw new Error(
-						this.translateService.instant('OVERVIEW.SUBMIT_FAILED'),
-					);
+				await trackAnalyticsOperation(
+					this.analytics,
+					'registration_submit',
+					async () => {
+						const result =
+							await this.preregistrationService.completeRegistration(
+								{
+									mutationId: (this.pendingCompletionId ??=
+										this.createMutationId()),
+								},
+							);
+						if (!result.data)
+							throw new Error(
+								this.translateService.instant(
+									'OVERVIEW.SUBMIT_FAILED',
+								),
+							);
+					},
+				);
+				this.analytics.logEvent('submit_registration');
 				await firstValueFrom(
 					this.preregistrationService.registrationComplete$.pipe(
 						filter(Boolean),
@@ -283,7 +305,6 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 						timeout(15000),
 					),
 				);
-				this.analytics.logEvent('submit_registration');
 				this.pendingCompletionId = undefined;
 				await this.router.navigate(['/pre-registration/confirmation']);
 			},
@@ -296,9 +317,14 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		const updated = await this.runWorkspaceAction(
 			this.translateService.instant('OVERVIEW.EMAIL_UPDATED'),
 			async () => {
-				await this.authService.changeEmailAddress(
-					request.password,
-					request.emailAddress,
+				await trackAnalyticsOperation(
+					this.analytics,
+					'email_update',
+					() =>
+						this.authService.changeEmailAddress(
+							request.password,
+							request.emailAddress,
+						),
 				);
 				this.analytics.logEvent('workspace_email_updated');
 			},
@@ -312,14 +338,21 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 		try {
 			const slot = this.dateTimeSlot();
 			if (!slot?.id) return;
-			await this.preregistrationService.setDraftAppointment({
-				mutationId: this.createMutationId(),
-				slotId: slot.id,
-				reviewedDateTime: slot.dateTime.toISOString(),
-			});
+			const slotId = slot.id;
+			await trackAnalyticsOperation(
+				this.analytics,
+				'registration_review',
+				() =>
+					this.preregistrationService.setDraftAppointment({
+						mutationId: this.createMutationId(),
+						slotId,
+						reviewedDateTime: slot.dateTime.toISOString(),
+					}),
+			);
 			this.childrenCard()?.collapseEditor();
 			this.scheduleCard()?.collapse();
 			this.reviewing.set(true);
+			this.analytics.logEvent('workspace_review_started');
 		} catch (error) {
 			if (!(await this.recoverAppointment(error))) {
 				this.reviewing.set(false);
@@ -340,6 +373,8 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			this.registrationSubmitted()
 		)
 			return;
+		if (this.reviewing())
+			this.analytics.logEvent('workspace_review_resumed');
 		this.reviewing.set(false);
 		this.submitCard()?.makeChanges();
 		this.slotRefresh.next();
@@ -348,6 +383,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	private async recoverAppointment(error: unknown): Promise<boolean> {
 		const details = (error as { details?: { reason?: string } })?.details;
 		if (details?.reason !== 'appointment-review-required') return false;
+		this.analytics.logEvent('workspace_appointment_review_required');
 		this.pendingCompletionId = undefined;
 		this.reviewing.set(false);
 		this.submitCard()?.makeChanges();
@@ -363,6 +399,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	}
 
 	public makeChanges(): void {
+		this.analytics.logEvent('workspace_review_changes');
 		this.reviewing.set(false);
 	}
 

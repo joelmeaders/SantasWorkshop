@@ -3,6 +3,7 @@ import { httpsCallable } from 'firebase/functions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	FIREBASE_ANALYTICS,
+	ANALYTICS_APP_AREA,
 	FIREBASE_FIRESTORE,
 	PUBLIC_PARAMETERS_RUNTIME,
 	PROGRAM_YEAR,
@@ -138,11 +139,26 @@ describe('admin bootstrap', () => {
 
 	it('keys the service-worker script URL to the configured release version', () => {
 		expect(getServiceWorkerScriptUrl(config.version)).toBe(
-			'ngsw-worker.js?v=2026.09.0-beta.4',
+			'ngsw-worker.js?v=2026.09.0-beta.5',
 		);
 		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
 			getServiceWorkerScriptUrl(config.version),
 		);
+	});
+
+	it('bootstraps with admin context when analytics initialization is unavailable', async () => {
+		vi.mocked(dependencies.getAnalytics).mockImplementation(() => { throw new Error('Analytics unavailable'); });
+		await bootstrapAdminApplication({
+			config: createConfig({ production: true }), dependencies,
+			firebaseConfig: createFirebaseConfig(), logger,
+		});
+		expect(dependencies.bootstrapApplication).toHaveBeenCalledOnce();
+		const options = requireDefined(vi.mocked(dependencies.bootstrapApplication).mock.calls[0])[1] as { providers: unknown[] };
+		expect(options.providers).toEqual(expect.arrayContaining([
+			{ provide: FIREBASE_ANALYTICS, useValue: null },
+			{ provide: ANALYTICS_APP_AREA, useValue: 'admin' },
+		]));
+		expect(logger).not.toHaveBeenCalled();
 	});
 
 	it('enables App Check debug mode for a configured local build', async () => {

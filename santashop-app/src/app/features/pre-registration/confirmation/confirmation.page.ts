@@ -10,6 +10,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
 	AnalyticsWrapper,
+	trackAnalyticsOperation,
 	ErrorHandlerService,
 	AppStateService,
 	dateToCalendarString,
@@ -174,8 +175,12 @@ export class ConfirmationPage {
 		await loader.present();
 
 		try {
+			await trackAnalyticsOperation(
+				this.analytics,
+				'registration_cancel',
+				() => this.viewService.undoRegistration(),
+			);
 			this.analytics.logEvent('cancel_registration');
-			await this.viewService.undoRegistration();
 			await firstValueFrom(
 				this.viewService.registrationComplete$.pipe(
 					filter((isComplete) => !isComplete),
@@ -265,8 +270,13 @@ export class ConfirmationPage {
 		await loader.present();
 
 		try {
+			const selectedSlot = result.data;
+			await trackAnalyticsOperation(
+				this.analytics,
+				'appointment_change',
+				() => this.viewService.changeRegistrationDateTime(selectedSlot),
+			);
 			this.analytics.logEvent('change_registration_datetime');
-			await this.viewService.changeRegistrationDateTime(result.data);
 
 			// Show success message
 			const successAlert = await this.alertController.create({

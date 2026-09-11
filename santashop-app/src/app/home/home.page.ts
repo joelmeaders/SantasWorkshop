@@ -33,6 +33,8 @@ import { addIcons } from 'ionicons';
 import { arrowBackSharp, logoFacebook, logoInstagram } from 'ionicons/icons';
 import {
 	AppStateService,
+	AnalyticsWrapper,
+	trackAnalyticsOperation,
 	AuthService,
 	ErrorHandlerService,
 	newAuthForm,
@@ -71,6 +73,7 @@ import { map } from 'rxjs/operators';
 })
 export class HomePage {
 	private readonly appState = inject(AppStateService);
+	private readonly analytics = inject(AnalyticsWrapper);
 	private readonly authService = inject(AuthService);
 	private readonly errorHandler = inject(ErrorHandlerService);
 	private readonly loadingController = inject(LoadingController);
@@ -110,7 +113,7 @@ export class HomePage {
 		await loader.present();
 
 		try {
-			await this.authService.login(this.signInForm.getRawValue() as Auth);
+			await trackAnalyticsOperation(this.analytics, 'sign_in', () => this.authService.login(this.signInForm.getRawValue() as Auth));
 			const requestedUrl = this.route.snapshot.queryParamMap.get('returnUrl');
 			const returnUrl = requestedUrl?.startsWith('/pre-registration/')
 				? requestedUrl
@@ -133,7 +136,7 @@ export class HomePage {
 	public async resetPassword(): Promise<void> {
 		if (this.resetEmail.invalid) return;
 		try {
-			await this.authService.resetPassword(this.resetEmail.value);
+			await trackAnalyticsOperation(this.analytics, 'password_reset_request', () => this.authService.resetPassword(this.resetEmail.value));
 			this.resetEmailSent.set(true);
 		} catch {
 			await this.errorHandler.handleError(

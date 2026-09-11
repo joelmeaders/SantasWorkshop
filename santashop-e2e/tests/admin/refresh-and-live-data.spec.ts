@@ -85,14 +85,14 @@ test.describe('admin data freshness', () => {
 		);
 	});
 
-	test('REFRESH-003 user report recovers from failed reads and loads new data on refresh', async ({
+	test('REFRESH-003 shopper report recovers from failed reads and loads new data on refresh', async ({
 		page,
 		seedReportingStats,
 	}) => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/user');
 		await expect(
-			page.getByText('No user statistics for this year.', {
+			page.getByText('No shopper data for this year.', {
 				exact: true,
 			}),
 		).toBeVisible();

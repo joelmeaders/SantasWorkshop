@@ -11,12 +11,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Chart, ChartConfiguration } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { UserStats } from '@santashop/models';
+import { PROGRAM_YEAR, SHOP_DAYS } from '@santashop/core/admin/firestore';
+import { BehaviorSubject, switchMap } from 'rxjs';
+import { ReportTableComponent } from '../../../../shared/components/report-table/report-table.component';
+import { ReportFreshnessComponent } from '../../../../shared/components/report-freshness/report-freshness.component';
 import {
-	filterNil,
-	PROGRAM_YEAR,
-	SHOP_DAYS,
-} from '@santashop/core/admin/firestore';
-import { BehaviorSubject, map, shareReplay, switchMap } from 'rxjs';
+	reportDate,
+	ReportCell,
+	ReportLabel,
+} from '../../../../shared/helpers/report-export';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import {
 	getShopSchedule,
@@ -51,6 +54,8 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		ReportTableComponent,
+		ReportFreshnessComponent,
 		HeaderComponent,
 		BaseChartDirective,
 		FormsModule,
@@ -68,7 +73,7 @@ Chart.register(ChartDataLabels);
 })
 export class UserPage {
 	private readonly httpService = inject(AdminReadRepository);
-	private readonly programYear = inject(PROGRAM_YEAR);
+	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
 
 	public readonly schedule = getShopSchedule(this.programYear, this.shopDays);
@@ -90,19 +95,107 @@ export class UserPage {
 				.read(`user-${this.year}`)
 				.pipe(readState()),
 		),
-		shareReplay({ bufferSize: 1, refCount: true }),
 	);
 	public readonly state = toSignal(this.state$, {
 		initialValue: { status: 'loading' as const, data: undefined },
 	});
 
-	private readonly userRecord$ = this.state$.pipe(
-		map((state) => state.data),
-		filterNil(),
+	public readonly userRecord = computed(() => this.state().data);
+	public readonly referralColumns: ReportLabel[] = [
+		{
+			label: 'How they heard about us',
+			description: 'The source each shopper chose when signing up.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Shopper profiles with this answer.',
+		},
+	];
+	public readonly zipColumns: ReportLabel[] = [
+		{
+			label: 'ZIP code',
+			description: 'Home ZIP code from the shopper profile.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Shopper profiles with this ZIP code.',
+		},
+	];
+	public readonly signupColumns: ReportLabel[] = [
+		{
+			label: 'Profile created',
+			description: 'Day the shopper profile was created, in Denver time.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Highest saved count for this profile creation day.',
+		},
+	];
+	public readonly referralRows = computed(() =>
+		[...(this.userRecord()?.referrerCount ?? [])]
+			.sort((a, b) => b.count - a.count)
+			.map((entry) => [entry.referrer || 'Unknown', entry.count]),
 	);
-	private readonly userRecord = toSignal(this.userRecord$, {
-		initialValue: undefined,
-	});
+	public readonly zipRows = computed(() =>
+		[...(this.userRecord()?.zipCodeCount ?? [])]
+			.sort((a, b) => b.count - a.count)
+			.map((entry) => [entry.zip || 'Unknown', entry.count]),
+	);
+	public readonly referralTotal = computed(() => [
+		'Total',
+		(this.userRecord()?.referrerCount ?? []).reduce(
+			(sum, row) => sum + row.count,
+			0,
+		),
+	]);
+	public readonly zipTotal = computed(() => [
+		'Total',
+		(this.userRecord()?.zipCodeCount ?? []).reduce(
+			(sum, row) => sum + row.count,
+			0,
+		),
+	]);
+	public readonly signupRows = computed(() =>
+		[...(this.userRecord()?.dailySignups ?? [])]
+			.sort((a, b) => a.dateKey.localeCompare(b.dateKey))
+			.map((entry) => [entry.dateKey, entry.count]),
+	);
+	public readonly exportContext = computed<ReportCell[][]>(() => [
+		['Year', this.year],
+		[
+			'Updated at (UTC)',
+			reportDate(this.userRecord()?.calculatedAt)?.toISOString(),
+		],
+		[
+			'Includes',
+			this.userRecord()?.population === 'all-users'
+				? 'All saved shopper profiles'
+				: 'Older totals may leave out shoppers without a ZIP code or referral',
+		],
+	]);
+	public readonly signupExportContext = computed<ReportCell[][]>(() => [
+		['Year', this.year],
+		[
+			'Updated at (UTC)',
+			reportDate(this.userRecord()?.calculatedAt)?.toISOString(),
+		],
+		[
+			'Includes',
+			'Highest saved shopper count for each profile creation day, including profiles later removed',
+		],
+		[
+			'Counting notes',
+			'Profiles removed before a report ran are not counted. Saved daily counts may exceed the current shopper total.',
+		],
+		[
+			'Shopper profiles with missing creation dates',
+			this.userRecord()?.signupDatesUnavailable,
+		],
+		[
+			'Shopper profiles created in other years',
+			this.userRecord()?.signupDatesOutsideProgramYear,
+		],
+	]);
 
 	public readonly referrers = computed(() =>
 		[...(this.userRecord()?.referrerCount ?? [])]
@@ -192,7 +285,7 @@ export class UserPage {
 					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
-					return `${ctx.dataset?.data[0]} Families - ${ctx.dataset.label}`;
+					return `${ctx.dataset?.data[0]} Shoppers - ${ctx.dataset.label}`;
 				},
 			},
 		},

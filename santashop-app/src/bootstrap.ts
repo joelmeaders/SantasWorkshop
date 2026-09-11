@@ -7,6 +7,8 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 import {
 	FIREBASE_ANALYTICS,
+	ANALYTICS_APP_AREA,
+	optionalAnalytics,
 	FIREBASE_APP,
 	FIREBASE_AUTH,
 	FIREBASE_FUNCTIONS,
@@ -144,6 +146,7 @@ export const bootstrapCustomerApplication = (
 			{ provide: FIREBASE_FUNCTIONS, useValue: firebaseFunctions },
 			{ provide: FIREBASE_FIRESTORE_LITE, useValue: firebaseFirestoreLite },
 			{ provide: CUSTOMER_APP_CONFIG, useValue: appConfig },
+			{ provide: ANALYTICS_APP_AREA, useValue: 'customer' },
 			...provideRemoteConfigPublicParameters({
 				useEmulator: !appConfig.production,
 				readLocal: async (): Promise<unknown> =>
@@ -153,7 +156,7 @@ export const bootstrapCustomerApplication = (
 				? [
 						{
 							provide: FIREBASE_ANALYTICS,
-							useValue: firebase.getAnalytics(firebaseApp),
+							useValue: optionalAnalytics(() => firebase.getAnalytics(firebaseApp)),
 						},
 					]
 				: []),

@@ -12,6 +12,7 @@ import {
 	throwError,
 } from 'rxjs';
 import {
+	type AnalyticsEventName,
 	AnalyticsWrapper,
 	AuthService,
 	AuthWrapper,
@@ -79,6 +80,11 @@ const callableFixtures = (): Pick<
 		.mockResolvedValue({ data: true }),
 });
 
+type AnalyticsLog = (
+	eventName: AnalyticsEventName,
+	eventParams?: object,
+) => void;
+
 describe('PreRegistrationService', () => {
 	let service: PreRegistrationService;
 	let auth: BehaviorSubject<FirebaseUser | null>;
@@ -87,7 +93,7 @@ describe('PreRegistrationService', () => {
 		typeof vi.fn<IFireRepoCollection<Registration>['read']>
 	>;
 	let getQr: ReturnType<typeof vi.fn<QrCodeService['registrationQrCodeUrl']>>;
-	let log: ReturnType<typeof vi.fn<AnalyticsWrapper['logEventWithParams']>>;
+	let log: ReturnType<typeof vi.fn<AnalyticsLog>>;
 	let present: ReturnType<typeof vi.fn>;
 	let createAlert: ReturnType<typeof vi.fn>;
 	let functions: ReturnType<typeof callableFixtures>;
@@ -108,7 +114,7 @@ describe('PreRegistrationService', () => {
 		getQr = vi
 			.fn<QrCodeService['registrationQrCodeUrl']>()
 			.mockResolvedValue('ticket-url');
-		log = vi.fn<AnalyticsWrapper['logEventWithParams']>();
+		log = vi.fn<AnalyticsLog>();
 		present = vi.fn().mockResolvedValue(undefined);
 		createAlert = vi.fn().mockResolvedValue({
 			present,

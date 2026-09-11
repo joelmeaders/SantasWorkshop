@@ -331,9 +331,9 @@
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "Este campo es obligatorio",
-		"MINLENGTH": "La longitud mínima es ",
+		"MINLENGTH": "La longitud mínima es {{requiredLength}}",
 		"LONGITUDMINIMA": "La longitud mínima es ",
-		"MAXLENGTH": "La longitud máxima es ",
+		"MAXLENGTH": "La longitud máxima es {{requiredLength}}",
 		"EMAIL": "Debe ser una dirección de correo electrónico válida",
 		"URL": "Debe ser una dirección web válida",
 		"ZIPCODE": "Debe ser un código postal válido",

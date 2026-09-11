@@ -135,7 +135,7 @@
 									[errorText]="
 										changeEmailForm.controls.emailAddress
 											| niceFormError
-											| translate
+											| translate: (changeEmailForm.controls.emailAddress.errors?.['minlength'] ?? changeEmailForm.controls.emailAddress.errors?.['maxlength'])
 									"
 							/></ion-item>
 							<ion-item
@@ -149,7 +149,7 @@
 									[errorText]="
 										changeEmailForm.controls.password
 											| niceFormError
-											| translate
+											| translate: (changeEmailForm.controls.password.errors?.['minlength'] ?? changeEmailForm.controls.password.errors?.['maxlength'])
 									"
 							/></ion-item>
 						</ion-list>

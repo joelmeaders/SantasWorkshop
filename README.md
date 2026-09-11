@@ -158,11 +158,11 @@ pnpm run e2e:test
 
 ### Hosting Builds in GitHub Actions
 
-- The UI PR workflow runs core tests, selects the affected app/admin targets, and requires every selected/shared job through `build_validation`. Target jobs validate **test**-mode builds and emulator journeys without deployment. The canonical Storybook workflow owns behavior tests and the separate Windows visual job.
+- The PR workflow selects affected app/admin targets and backend checks, then requires every selected job through `build_validation`. Target jobs run unit tests and **test**-mode build checks before a single customer/staff E2E matrix. Each browser target has its own runner and emulators. Root `README.md`, root `CHANGELOG.md`, and Markdown under `docs/` do not expand an otherwise scoped target selection. Unknown code and configuration inputs keep full validation. The canonical Storybook workflow owns behavior tests and the separate Windows visual job.
 - Merge-to-master workflows deploy the merged commit to the **test** Firebase project first.
-- Production release is a separate owner-dispatched workflow from `master`. Set `release_ref` to a full 40-character commit SHA on `master`.
-- Supply `evidence_run_ids` for successful validation and test deployment of that exact SHA. Repeat the SHA in `production_approval` to approve the selected runs. The shared gate verifies evidence before candidate execution or production credentials.
-- `skip_tests=true` reuses verified tests. It cannot bypass the gate. See [the release procedure](docs/release-readiness.md#exact-sha-release-evidence-and-owner-approval) for required runs, path-filter gaps, and rollback reuse.
+- To deploy to production, the owner selects a release tag, branch, or commit in `release_ref` and invokes the release workflow from `master`. The gate resolves the selection once to an immutable commit on `master`.
+- The workflow automatically finds and verifies the required successful tests and test deployment for that commit. There are no manual run-ID, repeated-commit approval, or test-skip inputs. Missing or invalid evidence blocks production and identifies the test workflow to run.
+- Production reuses verified evidence automatically. Test deployments run fresh suites. See [the release procedure](docs/release-readiness.md#exact-sha-release-evidence-and-owner-approval) for required checks, path-filter gaps, and rollback reuse.
 
 Current app/admin PR and test-deploy workflows generate **test-mode** Angular config (`config.production === true`) and then build with Angular CLI's `development` configuration. Production workflows use Angular CLI's `production` configuration.
 
@@ -175,20 +175,22 @@ Required GitHub secrets for the current hosting workflows:
 
 ### Functions Deploys in GitHub Actions
 
-Functions have dedicated test and production workflow files:
+Functions use a reusable PR check workflow and a separate release workflow:
 
 - `.github/workflows/functions-pr-validation.yml`
 - `.github/workflows/functions-test-and-prod-release.yml`
 
-The pull request workflow acts as the Functions PR validation process:
+The main PR workflow calls the Functions checks for backend and shared inputs:
 
-- unit tests always run on matching PRs
-- integration tests run when the required test secrets are available
+- unit tests, lint, deploy-artifact checks, and emulator integration tests run without deployment credentials
+- the caller owns the customer/staff E2E matrix, so UI and Functions changes do not duplicate browser suites
+- a newer PR revision cancels the obsolete validation run, including Functions jobs
 
 The merge-to-master workflow is the Functions promotion pipeline:
 
 - it deploys to the **test** Firebase project first
-- the owner then dispatches production from `master` with the full tested SHA, evidence run IDs, and matching approval
+- customer and staff E2E run on separate runners, and both must pass before test deployment
+- the owner then selects the release and invokes production deployment from `master`; the gate automatically discovers its evidence
 - the shared gate verifies unit, integration, customer/staff E2E, and test-deployment evidence before deploying that SHA to **production**
 
 Required GitHub secrets for the Functions workflows:

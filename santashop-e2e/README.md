@@ -18,7 +18,8 @@ retains acceptance requirements and obligations that are not automated.
 
 E2E helpers delete emulator fixtures. Verify the emulator target before using
 them; never point this suite at a deployed site. Customer and admin suites share
-emulator state and must run sequentially.
+emulator state on one machine and must run sequentially there. CI runs the
+customer and admin targets on separate runners with separate emulator instances.
 
 ## Package structure
 

@@ -46,7 +46,7 @@ node scripts/load/provision-network.mjs --project santas-workshop-test --apply
    target, the exact committed ref, and `load_test_mode=true`. For example:
 
 ```text
-gh workflow run functions-test-and-prod-release.yml --ref <reviewed-branch> -f release_ref=<commit-sha> -f deployment_target=test -f load_test_mode=true -f skip_tests=false
+gh workflow run functions-test-and-prod-release.yml --ref master -f release_ref=<reviewed-commit-on-master> -f deployment_target=test -f load_test_mode=true
 ```
 
 The workflow passes `SANTASHOP_LOAD_TEST_MODE=true` to the generator. This

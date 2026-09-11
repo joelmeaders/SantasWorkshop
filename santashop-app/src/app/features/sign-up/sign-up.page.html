@@ -60,7 +60,7 @@
 											[label]="'SIGNUP.FIRST_NAME' | translate"
 											[errorText]="
 													form.controls.firstName | niceFormError |
-													translate"
+													translate: (form.controls.firstName.errors?.['minlength'] ?? form.controls.firstName.errors?.['maxlength'])"
 											labelPlacement="floating"
 											type="text"
 											autocomplete="given-name"
@@ -77,7 +77,7 @@
 											[errorText]="
 													form.controls.lastName |
 													niceFormError |
-													translate"
+													translate: (form.controls.lastName.errors?.['minlength'] ?? form.controls.lastName.errors?.['maxlength'])"
 											labelPlacement="floating"
 											type="text"
 											autocomplete="family-name"
@@ -93,7 +93,7 @@
 											[errorText]="
 													form.controls.zipCode |
 													niceFormError |
-													translate"
+													translate: (form.controls.zipCode.errors?.['minlength'] ?? form.controls.zipCode.errors?.['maxlength'])"
 											labelPlacement="floating"
 											type="text" inputmode="numeric"
 											autocomplete="postal-code"
@@ -171,7 +171,7 @@
 										id="emailAddress"
 										fill="outline"
 											[label]="'COMMON.EMAIL_ADDRESS' | translate"
-											[errorText]="form.controls.emailAddress | niceFormError | translate"
+											[errorText]="form.controls.emailAddress | niceFormError | translate: (form.controls.emailAddress.errors?.['minlength'] ?? form.controls.emailAddress.errors?.['maxlength'])"
 											labelPlacement="floating"
 											type="email"
 											autocomplete="email"
@@ -185,7 +185,7 @@
 										id="password"
 										fill="outline"
 											[label]="'COMMON.PASSWORD' | translate"
-											[errorText]="form.controls.password | niceFormError | translate"
+											[errorText]="form.controls.password | niceFormError | translate: (form.controls.password.errors?.['minlength'] ?? form.controls.password.errors?.['maxlength'])"
 											labelPlacement="floating"
 											type="password"
 											autocomplete="new-password"
@@ -199,7 +199,7 @@
 										id="password2"
 										fill="outline"
 											[label]="'SIGNUP.PASSWORD2' | translate"
-											[errorText]="form.controls.password2 | niceFormError | translate"
+											[errorText]="form.controls.password2 | niceFormError | translate: (form.controls.password2.errors?.['minlength'] ?? form.controls.password2.errors?.['maxlength'])"
 											labelPlacement="floating"
 											type="password"
 											autocomplete="new-password"

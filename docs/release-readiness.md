@@ -10,70 +10,76 @@ Keep this page as the maintained release procedure; do not append execution resu
 
 ## Exact-SHA release evidence and owner approval
 
-Run app, admin, and Functions release workflows from `master`. `release_ref`
-must be a full lowercase 40-character commit SHA that exists on `master`.
-Branches, tags, abbreviated SHAs, and unmerged PR commits are rejected.
-Every candidate checkout uses the immutable SHA returned by the shared gate.
+Run app, admin, and Functions release workflows from `master`. The owner selects
+`release_ref` and invokes production deployment. The selection can be a release
+tag, branch, or commit. The gate resolves it once to a full immutable commit
+that must exist on `master`. Every later checkout uses that resolved SHA.
 
-The gate runs from the dispatch workflow's source commit before candidate
-installation, builds, or production credentials. It requires `contents: read`
-and `actions: read` only. It compares evidence-producing workflow and verifier
-files with that trusted source. Evidence from a different producer version must
-be regenerated from current `master`.
+The gate runs from the workflow's trusted source before candidate installation,
+builds, or production credentials. It requires only `contents: read` and
+`actions: read`. It automatically discovers successful runs from the required
+workflows, then verifies their actual checkout markers, jobs, and test steps.
+No manual run IDs, repeated-commit approval, or test-skip input is required.
 
 Each producing job records `git rev-parse HEAD` immediately after checkout,
-before running candidate code. Verification reads this marker and individual
-job/step results from the GitHub API. A dispatch run's `head_sha` identifies its
-workflow source and can differ from its actual tested or deployed SHA.
-PR heads and synthetic merge commits do not substitute for release evidence.
+before running candidate code. A dispatch run's `head_sha` identifies its
+workflow source and can differ from its tested SHA. Discovery therefore checks
+checkout markers rather than filtering dispatches by `head_sha`. PR heads and
+synthetic merge commits do not substitute for release evidence.
 
-| Promotion | Required successful validation for the exact SHA                                                                                   | Required successful test deployment                                                |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Functions | `unit_tests`: Functions unit tests; `integration_tests`: Functions integration tests and customer/staff E2E                        | Functions `deploy_test`, including live resource checks, in `santas-workshop-test` |
-| App       | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | App Hosting in `santas-workshop-test`                                              |
-| Admin     | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | Admin Hosting in `santas-workshop-test`                                            |
+| Promotion | Required successful validation for the exact SHA | Required successful test deployment |
+| --- | --- | --- |
+| Functions | `unit_tests`: Functions unit tests; `integration_tests`: Functions integration tests; both `e2e (app) / test` and `e2e (admin) / test`: respective browser suites | Functions `deploy_test`, including live resource checks, in `santas-workshop-test` |
+| App | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | App Hosting in `santas-workshop-test` |
+| Admin | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | Admin Hosting in `santas-workshop-test` |
 
-Both hosting validations are required for every hosting promotion because core,
-models, configuration, and browser behavior cross app boundaries. This policy
-does not infer equivalence from path-filtered or previous-commit checks.
-If a push path filter omits a required run, dispatch the missing test release
-with the same SHA and `skip_tests=false`. For Storybook, dispatch its existing
-workflow with `release_ref` set to that SHA. Do not create another behavior suite.
-
-To promote a release:
-
-1. Complete the required test releases and Storybook run, where applicable.
-2. Inspect those runs and complete the applicable hosted acceptance checks below.
-3. As repository owner Joel, dispatch the release workflow from `master`.
-4. Set `deployment_target=prod` and `release_ref` to the tested full SHA.
-5. Set `evidence_run_ids` to the comma-separated validation and test-deployment run IDs.
-6. Repeat the SHA in `production_approval` to approve that SHA and those runs.
-7. Inspect the gate summary and the separate production deployment result.
-
-This explicit owner dispatch is the production approval checkpoint. It does
-not require another reviewer. Keep workflow editing and production credentials
-under owner control. A protected GitHub environment may provide an additional
-owner checkpoint where available, but the workflow does not assume one exists.
+Both hosting validations remain required for every hosting promotion because
+core, models, configuration, and browser behavior cross app boundaries.
+Functions browser jobs use `e2e-target.yml` on separate runners. The gate checks
+all evidence-producing workflow files, including reusable workflows and the
+verifier, against the trusted current source. Changed producers require new evidence.
 
 Missing, failed, cancelled, incomplete, duplicate, skipped, untrusted, or
 wrong-SHA evidence blocks promotion. Wrong repositories, workflow identities,
-and deployment targets also block promotion. API failures stop the gate with
-an error. The summary lists the verified run IDs/URLs, selected SHA, test reuse,
-owner approval, and separate deployment result. There is no emergency bypass.
+and deployment targets also block promotion. API failures stop the gate.
+Discovery examines up to 1,000 recent successful runs per required workflow.
+The gate rechecks selected run attempts before accepting them. Its summary lists
+the resolved commit and the evidence links it found.
 
-### Reuse tests and roll back
+To deploy to production:
 
-`skip_tests=true` means reuse successful exact-SHA evidence without rerunning
-suites. Production always requires validation and test-deployment evidence,
-regardless of this input. A test deployment with `skip_tests=true` requires
-separate validation evidence, but does not require an earlier test deployment.
-It can provide new deployment evidence, not new test evidence.
+1. Open the target's release workflow from `master`.
+2. Select the release in `release_ref`, leave `deployment_target=prod`, and run it.
+3. Inspect the gate summary and the separate deployment result.
 
-Dependency installation, builds, artifact checks, and deployment checks still
-run. To roll back, select an earlier SHA on `master` and supply its verified
-runs through the same gate. If runs have expired or their producer version no
-longer matches, regenerate the required evidence before promotion. A rollback
-does not authorize customer data changes.
+The owner's dispatch is the production approval. There is no additional typed
+approval or reviewer step. The operational acceptance requirements below still
+apply. These workflow checks do not prove hosted journeys, inbox delivery, or
+production capacity.
+
+If evidence is missing, run the indicated test workflow from `master` with the
+same resolved SHA and `deployment_target=test`. For missing Storybook evidence,
+dispatch its existing workflow with `release_ref` set to that SHA. Then retry
+production. A path filter can omit one of these runs, so the gate never assumes
+that a merged commit has complete release evidence.
+
+### Test execution and rollback
+
+Production automatically reuses verified tests. Test deployments always run
+fresh suites and produce new evidence. Dependency installation, builds,
+artifact audits, parity checks, and deployment checks remain in place.
+
+UI jobs prepare shared libraries, run unit tests, and verify builds before
+browser tests. Release E2E changes generated source configuration but does not
+write the verified Hosting output. The job restores the selected source
+configuration and compares Hosting file hashes after E2E. Changed output blocks
+deployment. A Functions test deployment waits for unit tests,
+integration tests, and both isolated browser suites.
+
+To roll back, select an earlier release on `master` through the same production
+workflow. If evidence expired, falls outside discovery's search window, or uses
+an older producer, run fresh test validation for that SHA first. There is no
+silent fallback or bypass, and a rollback does not authorize customer data changes.
 
 Run `node --test scripts/release-*.test.mjs` for verifier fixtures and the actual
 YAML decision/dependency dry run. The harness uses a harmless deployment sentinel

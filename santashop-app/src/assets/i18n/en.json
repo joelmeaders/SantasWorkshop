@@ -331,8 +331,8 @@
 	},
 	"FORM_ERRORS": {
 		"REQUIRED": "This field is required",
-		"MINLENGTH": "Minimum length is ",
-		"MAXLENGTH": "Maximum length is ",
+		"MINLENGTH": "Minimum length is {{requiredLength}}",
+		"MAXLENGTH": "Maximum length is {{requiredLength}}",
 		"EMAIL": "Must be a valid email address",
 		"URL": "Must be a valid website address",
 		"ZIPCODE": "Must be a valid zip code",

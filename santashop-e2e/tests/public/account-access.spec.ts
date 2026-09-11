@@ -485,7 +485,17 @@ test.describe('customer account and session access', () => {
 			await route.continue();
 		});
 		const account = { ...randomAccount(), password: ' winter-pass-2026 ' };
-		const creating = createAccountViaUi(page, account);
+		await page.goto('/sign-up');
+		await fillCreateAccountForm(page, account);
+		await selectReferralViaUi(page);
+		await page.locator('#legalCheckbox').click();
+		await expect(page.locator('#submitButton')).not.toHaveClass(
+			/button-disabled/,
+			{ timeout: 15000 },
+		);
+		await page.locator('#submitButton').click();
+		await page.locator('ion-alert button.alert-button-role-confirm').click();
+		// The request gates keep each phase visible after form submission.
 		await expect(page.locator('ion-loading')).toContainText(
 			'Creando tu cuenta...',
 		);
@@ -494,7 +504,10 @@ test.describe('customer account and session access', () => {
 			'Iniciando sesión',
 		);
 		signInDone();
-		await creating;
+		await expect(page).toHaveURL(/\/pre-registration\/overview$/, {
+			timeout: 30000,
+		});
+		await expect(page.locator('#children-heading')).toBeVisible();
 		await expect(page.locator('ion-loading')).toHaveCount(0);
 		const login = await request.post(
 			E2E_AUTH_EMULATOR_URL +

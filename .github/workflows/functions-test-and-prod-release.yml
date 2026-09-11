@@ -263,12 +263,12 @@ jobs:
         shell: bash
         run: |
           for attempt in {1..12}; do
-            pnpm exec firebase functions:list --project santas-workshop-test --json > "$RUNNER_TEMP/functions.json"
-            if node scripts/verify-functions-parity.cjs "$RUNNER_TEMP/functions.json"; then
+            if pnpm exec firebase functions:list --project santas-workshop-test --json > "$RUNNER_TEMP/functions.json" &&
+              node scripts/verify-functions-parity.cjs "$RUNNER_TEMP/functions.json"; then
               exit 0
             fi
             if [ "$attempt" -lt 12 ]; then
-              echo "Functions inventory has not converged yet (attempt $attempt/12); retrying in 10 seconds."
+              echo "Functions inventory lookup or source parity check failed (attempt $attempt/12); retrying in 10 seconds."
               sleep 10
             fi
           done

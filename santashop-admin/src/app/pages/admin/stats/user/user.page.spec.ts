@@ -59,10 +59,10 @@ describe('UserPage', () => {
 		component.refresh();
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).toContain(
-			'This older report may exclude profiles',
+			'Older totals may leave out shoppers',
 		);
 		expect(fixture.nativeElement.textContent).toContain(
-			'Calculation time unavailable',
+			'Update time not saved',
 		);
 		expect(component.referralRows()).toEqual([['School', 2]]);
 		statsCollection.read.mockReturnValue(of(undefined));
@@ -101,22 +101,22 @@ describe('UserPage', () => {
 		expect(component.zipTotal()).toEqual(['Total', 11]);
 		expect(component.signupRows()).toEqual([['2026-09-09', 20]]);
 		expect(component.signupExportContext()).toContainEqual([
-			'Population',
-			'Retained maximum observed profile counts per creation day, including profiles later removed',
+			'Includes',
+			'Highest saved shopper count for each profile creation day, including profiles later removed',
 		]);
 		expect(component.signupExportContext()).toContainEqual([
-			'Current profiles with unavailable creation dates',
+			'Shopper profiles with missing creation dates',
 			0,
 		]);
 		expect(component.signupExportContext()).toContainEqual([
-			'Current profiles created outside the program year',
+			'Shopper profiles created in other years',
 			0,
 		]);
 		expect(component.signupExportContext().flat()).not.toContain(
-			'All current user profiles',
+			'All saved shopper profiles',
 		);
 		expect(fixture.nativeElement.textContent).toContain(
-			'Retained counts can exceed current user totals',
+			'they may be higher than the total above',
 		);
 	});
 
@@ -173,7 +173,7 @@ describe('UserPage', () => {
 		) => string;
 
 		expect(referrerFormatter(4, labelContext)).toBe('4 - Friend');
-		expect(zipFormatter(4, labelContext)).toBe('4 Families - Friend');
+		expect(zipFormatter(4, labelContext)).toBe('4 Shoppers - Friend');
 	});
 
 	it('refreshes a shared report once, clears missing data, and recovers after a failed request', async () => {
@@ -201,7 +201,7 @@ describe('UserPage', () => {
 		component.refresh();
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).toContain(
-			'No user statistics for this year',
+			'No shopper data for this year',
 		);
 		expect(fixture.nativeElement.querySelectorAll('canvas')).toHaveLength(
 			0,

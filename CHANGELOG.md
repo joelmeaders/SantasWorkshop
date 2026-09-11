@@ -18,6 +18,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 - Advance the workspace and both applications to `2026.09.0-beta.5`.
 - Keep legacy report totals readable and label missing new calculations and timestamps as unavailable.
+- Keep charts above report tables, use Shoppers for customers, and explain table labels in smaller text.
 - Isolate analytics initialization and delivery failures from application startup and business operations.
 
 ### Fixed

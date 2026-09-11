@@ -53,6 +53,7 @@ import { ReportFreshnessComponent } from '../../../../shared/components/report-f
 import {
 	reportDate,
 	ReportCell,
+	ReportLabel,
 } from '../../../../shared/helpers/report-export';
 
 Chart.register(ChartDataLabels);
@@ -122,46 +123,137 @@ export class RegistrationPage {
 	);
 	public readonly outcomeRows = computed<ReportCell[][]>(() => {
 		const data = this.operational();
-		return data
-			? [
-					['Registration records', data.registrationRecords],
-					['Submitted registrations', data.submittedRegistrations],
-					['Draft registrations', data.draftRegistrations],
-					[
-						'Current cancelled registrations',
-						data.cancelledRegistrations,
-					],
-					[
-						'Recorded cancellation events',
-						data.recordedCancellationEvents,
-					],
-					['Checked-in registrations', data.checkedInRegistrations],
-					['Completion rate', this.formatRate(data.completionRate)],
-					['Past appointments', data.pastAppointmentRegistrations],
-					[
-						'Attended past appointments',
-						data.attendedPastAppointments,
-					],
-					[
-						'Unconfirmed past appointments',
-						data.unconfirmedPastAppointments,
-					],
-					[
-						'Past appointments with unavailable attendance status',
-						data.attendanceStatusUnavailable,
-					],
-					[
-						'Attendance rate for past appointments',
-						this.formatRate(data.attendanceRate),
-					],
-					[
-						'Submitted registrations without an appointment',
-						data.missingAppointmentRegistrations,
-					],
-					['Invalid submission dates', data.invalidSubmissionDates],
-				]
-			: [];
+		if (!data) return [];
+		const rows: [string, string, ReportCell][] = [
+			[
+				'All registrations',
+				'All saved registrations for this year, including unfinished and canceled registrations.',
+				data.registrationRecords,
+			],
+			[
+				'Completed',
+				'Submitted registrations that have not been canceled.',
+				data.submittedRegistrations,
+			],
+			[
+				'Not finished',
+				'Registrations that have not been submitted or canceled.',
+				data.draftRegistrations,
+			],
+			[
+				'Canceled',
+				'Registrations currently marked as canceled.',
+				data.cancelledRegistrations,
+			],
+			[
+				'Times canceled',
+				'Every saved cancellation, including repeat cancellations of the same registration.',
+				data.recordedCancellationEvents,
+			],
+			[
+				'Checked in',
+				'Completed registrations with a recorded check-in.',
+				data.checkedInRegistrations,
+			],
+			[
+				'Completion rate',
+				'Completed registrations as a share of all saved registrations.',
+				this.formatRate(data.completionRate),
+			],
+			[
+				'Past appointments',
+				'Completed, uncanceled appointments before the report update day (Denver time).',
+				data.pastAppointmentRegistrations,
+			],
+			[
+				'Attended',
+				'Past appointments with a recorded check-in.',
+				data.attendedPastAppointments,
+			],
+			[
+				'No check-in recorded',
+				'Past appointments without a recorded check-in. This does not confirm a no-show.',
+				data.unconfirmedPastAppointments,
+			],
+			[
+				'Check-in status missing',
+				'Past appointments whose older records do not include a check-in status.',
+				data.attendanceStatusUnavailable,
+			],
+			[
+				'Attendance rate',
+				'Past appointments with a check-in, divided by all past appointments.',
+				this.formatRate(data.attendanceRate),
+			],
+			[
+				'Appointment missing',
+				'Completed registrations without a valid appointment in this year.',
+				data.missingAppointmentRegistrations,
+			],
+			[
+				'Submission date needs review',
+				'Registrations with an unreadable submission date or a date after this report update.',
+				data.invalidSubmissionDates,
+			],
+		];
+		return rows.map(([label, description, value]) => [
+			{ label, description },
+			value,
+		]);
 	});
+	public readonly appointmentColumns: ReportLabel[] = [
+		{
+			label: 'Appointment',
+			description: 'Scheduled date and time in Denver.',
+		},
+		{
+			label: 'Registrations',
+			description: 'Registrations booked for this appointment.',
+		},
+	];
+	public readonly zipColumns: ReportLabel[] = [
+		{
+			label: 'ZIP code',
+			description: 'Home ZIP code from the registration.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Completed registrations with this ZIP code.',
+		},
+		{
+			label: 'Children',
+			description: 'Children included in those registrations.',
+		},
+	];
+	public readonly snapshotColumns: ReportLabel[] = [
+		{
+			label: 'Day',
+			description: 'Day this report was saved, in Denver time.',
+		},
+		{
+			label: 'Report updated',
+			description: 'Time the totals were calculated (UTC).',
+		},
+		{
+			label: 'All registrations',
+			description: 'All registrations saved that day.',
+		},
+		{ label: 'Completed', description: 'Submitted and not canceled.' },
+		{
+			label: 'Not finished',
+			description: 'Not yet submitted or canceled.',
+		},
+		{ label: 'Canceled', description: 'Marked as canceled that day.' },
+		{
+			label: 'Checked in',
+			description: 'Completed registrations with a check-in.',
+		},
+		{
+			label: 'Completion rate',
+			description:
+				'Completed registrations divided by all registrations.',
+		},
+	];
 	public readonly snapshotRows = computed<ReportCell[][]>(() =>
 		[...(this.state().data?.registration?.dailySnapshots ?? [])]
 			.sort((a, b) => a.dateKey.localeCompare(b.dateKey))
@@ -207,25 +299,25 @@ export class RegistrationPage {
 		this.familiesBySlots().reduce((sum, row) => sum + row.count, 0),
 	]);
 	public readonly registrationExportContext = computed<ReportCell[][]>(() => [
-		['Program year', this.year],
-		['Source', 'Nightly registration calculation'],
+		['Year', this.year],
+		['Source', 'Nightly registration report'],
 		[
-			'Calculated at',
+			'Updated at (UTC)',
 			reportDate(
 				this.state().data?.registration?.calculatedAt,
 			)?.toISOString(),
 		],
 	]);
 	public readonly appointmentExportContext = computed<ReportCell[][]>(() => [
-		['Program year', this.year],
+		['Year', this.year],
 		[
 			'Source',
 			this.state().data?.schedule
-				? 'Seasonal reservation calculation'
-				: 'Nightly registration calculation',
+				? 'Saved appointment totals'
+				: 'Nightly registration report',
 		],
 		[
-			'Calculated at',
+			'Updated at (UTC)',
 			reportDate(
 				this.state().data?.schedule
 					? this.state().data?.schedule?.calculatedAt
@@ -336,7 +428,7 @@ export class RegistrationPage {
 		return {
 			labels: data.map((entry) => [
 				entry.zip.toString(),
-				entry.count.toString() + ' Families',
+				entry.count.toString() + ' Shoppers',
 			]),
 			datasets: [
 				{

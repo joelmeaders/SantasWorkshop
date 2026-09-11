@@ -1,4 +1,4 @@
-<admin-header title="User Stats">
+<admin-header title="Shopper Stats">
 	<ion-item>
 		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
 			@for (years of schedule; track years.year) {
@@ -19,34 +19,26 @@
 		Report could not be loaded. Select Refresh report to try again.
 	</p>
 	} @else if (!state.data) {
-	<p>No user statistics for this year.</p>
+	<p>No shopper data for this year.</p>
 	} @else {
 	<div class="ion-padding-horizontal">
 		<admin-report-freshness
-			label="User demographics"
+			label="Shopper details"
 			[calculatedAt]="state.data.calculatedAt"
 			[currentSeason]="year === programYear"
 		/>
-		<p>Total users: {{ state.data.totalUsers ?? 'Unavailable' }}</p>
-		@if (state.data.population !== 'all-users') {
-		<p>
-			This older report may exclude profiles without a ZIP code or
-			referral. Its totals use the original population.
-		</p>
-		} @else {
-		<p>
-			Counts include all current user profiles. Missing ZIP codes and
-			referrals appear as Unknown in each breakdown.
-		</p>
-		}
+		<h2>Total shoppers: {{ state.data.totalUsers ?? 'Unavailable' }}</h2>
 	</div>
 	<ion-grid>
 		<ion-row>
 			@if (referrers(); as referrers) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
 				<ion-toolbar color="none" class="ion-padding-horizontal">
-					<h3 slot="start">Top 10 Referrers</h3>
+					<h3 slot="start">How Shoppers Heard About Us</h3>
 				</ion-toolbar>
+				<p class="ion-padding-horizontal">
+					The ten most common answers.
+				</p>
 				<div class="referrer-container">
 					<canvas
 						baseChart
@@ -57,19 +49,11 @@
 						type="bar"
 					></canvas>
 				</div>
-				<admin-report-table
-					caption="User referrals"
-					[columns]="['Referral', 'Users']"
-					[rows]="referralRows()"
-					[totals]="referralTotal()"
-					[filename]="'user-referrals-' + year"
-					[exportContext]="exportContext()"
-				/>
 			</ion-col>
 			} @if (zipCodes(); as zipCodes) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
 				<ion-toolbar color="none" class="ion-padding-horizontal">
-					<h3 slot="start">Top 10 Zip Codes</h3>
+					<h3 slot="start">Top 10 ZIP Codes</h3>
 				</ion-toolbar>
 				<div class="referrer-container">
 					<canvas
@@ -81,41 +65,59 @@
 						type="bar"
 					></canvas>
 				</div>
-				<admin-report-table
-					caption="User ZIP codes"
-					[columns]="['ZIP code', 'Users']"
-					[rows]="zipRows()"
-					[totals]="zipTotal()"
-					[filename]="'user-zip-codes-' + year"
-					[exportContext]="exportContext()"
-				/>
 			</ion-col>
 			}
 		</ion-row>
 	</ion-grid>
 	<div class="ion-padding">
+		<h2>Report details</h2>
+		@if (state.data.population !== 'all-users') {
+		<p>
+			Older totals may leave out shoppers without a ZIP code or referral.
+		</p>
+		} @else {
+		<p>
+			Includes all saved shopper profiles. Missing answers appear as
+			Unknown.
+		</p>
+		}
+		<admin-report-table
+			caption="Shopper referrals"
+			[columns]="referralColumns"
+			[rows]="referralRows()"
+			[totals]="referralTotal()"
+			[filename]="'shopper-referrals-' + year"
+			[exportContext]="exportContext()"
+		/>
+		<admin-report-table
+			caption="Shopper ZIP codes"
+			[columns]="zipColumns"
+			[rows]="zipRows()"
+			[totals]="zipTotal()"
+			[filename]="'shopper-zip-codes-' + year"
+			[exportContext]="exportContext()"
+		/>
 		@if (state.data.dailySignups !== undefined) {
 		<p>
-			Daily counts retain the highest number of profiles observed for each
-			creation day. Profiles removed before a calculation are unavailable.
-			Retained counts can exceed current user totals after records are
-			removed.
+			Saved daily counts include shopper profiles later removed, so they
+			may be higher than the total above. Profiles removed before a report
+			ran are not counted.
 		</p>
 		<p>
-			Current profiles with unavailable creation dates: {{
-			state.data.signupDatesUnavailable ?? 'Unavailable' }}. Created
-			outside this program year: {{
-			state.data.signupDatesOutsideProgramYear ?? 'Unavailable' }}.
+			Profiles with missing creation dates: {{
+			state.data.signupDatesUnavailable ?? 'Unavailable' }}. Profiles
+			created in other years: {{ state.data.signupDatesOutsideProgramYear
+			?? 'Unavailable' }}.
 		</p>
 		<admin-report-table
-			caption="Profile records observed by creation day"
-			[columns]="['Creation day (America/Denver)', 'Observed profiles']"
+			caption="Shopper profiles by day"
+			[columns]="signupColumns"
 			[rows]="signupRows()"
 			[filename]="'profile-creation-days-' + year"
 			[exportContext]="signupExportContext()"
 		/>
 		} @else {
-		<p>Daily profile calculations are unavailable for this saved report.</p>
+		<p>Daily shopper totals were not saved in this report.</p>
 		}
 	</div>
 	} }

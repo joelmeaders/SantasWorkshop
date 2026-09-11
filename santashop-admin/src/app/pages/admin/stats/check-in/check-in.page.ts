@@ -40,6 +40,7 @@ import { ReportFreshnessComponent } from '../../../../shared/components/report-f
 import {
 	reportDate,
 	ReportCell,
+	ReportLabel,
 } from '../../../../shared/helpers/report-export';
 import {
 	IonContent,
@@ -134,6 +135,34 @@ export class CheckInPage {
 	public readonly hasLegacyDateBuckets = computed(() =>
 		this.dateTimeStats().some((entry) => !entry.dateKey),
 	);
+	public readonly attendanceColumns: ReportLabel[] = [
+		{ label: 'Day', description: 'Check-in date in Denver time.' },
+		{
+			label: 'Hour',
+			description: 'Start of the check-in hour, in Denver time.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Shoppers checked in during this hour.',
+		},
+		{
+			label: 'Children',
+			description: 'Children included with these shoppers.',
+		},
+		{
+			label: 'Registered ahead',
+			description: 'Checked-in shoppers who registered before arriving.',
+		},
+		{
+			label: 'Registered on site',
+			description: 'Checked-in shoppers who registered at the shop.',
+		},
+		{
+			label: 'Changed at check-in',
+			description:
+				'Registrations marked as edited during check-in, before the on-site adjustment.',
+		},
+	];
 	public readonly attendanceRows = computed<ReportCell[][]>(() =>
 		[...this.dateTimeStats()]
 			.sort(
@@ -161,13 +190,13 @@ export class CheckInPage {
 		this.dateTimeStats().reduce((sum, row) => sum + row.modifiedCount, 0),
 	]);
 	public readonly exportContext = computed<ReportCell[][]>(() => [
-		['Program year', this.year],
-		['Calculated at', this.checkinLastUpdated()?.toISOString()],
+		['Year', this.year],
+		['Updated at (UTC)', this.checkinLastUpdated()?.toISOString()],
 		[
-			'Date coverage',
+			'Date notes',
 			this.hasLegacyDateBuckets()
-				? 'Buckets without a saved date key use the legacy December convention'
-				: 'Saved local date keys',
+				? 'Older reports use December when no month was saved'
+				: 'Dates use Denver time',
 		],
 	]);
 	public readonly totalCustomers = computed(() =>
@@ -204,8 +233,8 @@ export class CheckInPage {
 	);
 	public readonly viewButtonText = computed(() =>
 		this.graphView() === 'customerCount'
-			? 'View by Children'
-			: 'View by Check-Ins',
+			? 'Show children'
+			: 'Show shoppers',
 	);
 	public readonly checkInsByDayHour = computed(() =>
 		this.mapDaysHoursToChart(this.dateTimeStats(), this.graphView()),

@@ -5,7 +5,6 @@ import {
 	input,
 } from '@angular/core';
 import { EventDatePipe } from '@santashop/core/admin';
-import { EVENT_TIME_ZONE } from '@santashop/models';
 import { reportDate } from '../../helpers/report-export';
 
 @Component({
@@ -16,17 +15,15 @@ import { reportDate } from '../../helpers/report-export';
 		<p>
 			<strong>{{ label() }}:</strong>
 			@if (date(); as calculated) {
-				Calculated {{ calculated | eventDate: 'short' }} ({{
-					timeZone
-				}}).
+				Updated {{ calculated | eventDate: 'short' }} (Denver time).
 				@if (isOld()) {
 					<span class="old"
-						>This calculation is over {{ maxAgeHours() }} hours old.
-						Check the report update schedule.</span
+						>Over {{ maxAgeHours() }} hours old. A newer update may
+						be due.</span
 					>
 				}
 			} @else {
-				Calculation time unavailable for this saved report.
+				Update time not saved in this report.
 			}
 		</p>
 	`,
@@ -38,7 +35,6 @@ import { reportDate } from '../../helpers/report-export';
 	`,
 })
 export class ReportFreshnessComponent {
-	public readonly timeZone = EVENT_TIME_ZONE;
 	public readonly label = input.required<string>();
 	public readonly calculatedAt = input<unknown>();
 	public readonly currentSeason = input(false);

@@ -66,15 +66,11 @@ test.describe('report compatibility and exports', () => {
 		);
 		await expect(
 			page.getByText(
-				'New outcome calculations are unavailable for this saved report.',
+				'Registration progress was not saved in this report.',
 			),
 		).toBeVisible();
 		await expect(
-			page
-				.getByText(
-					'Calculation time unavailable for this saved report.',
-				)
-				.first(),
+			page.getByText('Update time not saved in this report.').first(),
 		).toBeVisible();
 		await expect(
 			page.getByRole('table', {
@@ -109,7 +105,7 @@ test.describe('report compatibility and exports', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/user');
 		const table = page.getByRole('table', {
-			name: 'User referrals',
+			name: 'Shopper referrals',
 			exact: true,
 		});
 		await expect(table).toContainText('=1+1');
@@ -117,7 +113,7 @@ test.describe('report compatibility and exports', () => {
 		const pendingDownload = page.waitForEvent('download');
 		await page
 			.getByRole('button', {
-				name: 'Download User referrals CSV',
+				name: 'Download Shopper referrals CSV',
 				exact: true,
 			})
 			.click();
@@ -181,17 +177,25 @@ test.describe('report compatibility and exports', () => {
 		await page.goto('/admin/stats/registration');
 		await expect(
 			page.getByText(
-				'New outcome calculations are unavailable for this saved report.',
+				'Registration progress was not saved in this report.',
 			),
 		).toHaveCount(0);
 		const outcomes = page.getByRole('table', {
-			name: 'Registration outcomes',
+			name: 'Registration progress',
 			exact: true,
 		});
 		await expect(outcomes).toBeVisible();
 		await expect(outcomes).toContainText('75');
+		await expect(
+			outcomes
+				.locator('th small')
+				.filter({
+					hasText:
+						'Completed registrations as a share of all saved registrations.',
+				}),
+		).toBeVisible();
 		const history = page.getByRole('table', {
-			name: 'Daily registration snapshots',
+			name: 'Daily registration totals',
 			exact: true,
 		});
 		await expect(history).toContainText(`${E2E_PROGRAM_YEAR}-09-10`);

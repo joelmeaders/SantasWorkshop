@@ -26,6 +26,16 @@ describe('report exports', () => {
 			expect(createReportCsv([[value]])).toBe(
 				`"'${value.replace(/"/g, '""')}"`,
 			);
+			expect(
+				createReportCsv([
+					[
+						{
+							label: value,
+							description: 'Help shown below the label.',
+						},
+					],
+				]),
+			).toBe(`"'${value.replace(/"/g, '""')}"`);
 		}
 		expect(createReportCsv([[-2, '80219']])).toBe('"-2","80219"');
 	});

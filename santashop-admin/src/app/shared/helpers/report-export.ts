@@ -1,4 +1,15 @@
-export type ReportCell = string | number | null | undefined;
+export interface ReportLabel {
+	label: string;
+	description: string;
+}
+
+export type ReportCell = string | number | null | undefined | ReportLabel;
+
+export function reportCellValue(
+	cell: ReportCell,
+): string | number | null | undefined {
+	return cell && typeof cell === 'object' ? cell.label : cell;
+}
 
 /** Quote every cell and prevent spreadsheet applications from evaluating text. */
 export function createReportCsv(
@@ -7,7 +18,8 @@ export function createReportCsv(
 	return rows
 		.map((row) =>
 			row
-				.map((value) => {
+				.map((cell) => {
+					const value = reportCellValue(cell);
 					let text = value == null ? 'Unavailable' : String(value);
 
 					if (

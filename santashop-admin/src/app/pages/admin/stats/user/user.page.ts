@@ -18,6 +18,7 @@ import { ReportFreshnessComponent } from '../../../../shared/components/report-f
 import {
 	reportDate,
 	ReportCell,
+	ReportLabel,
 } from '../../../../shared/helpers/report-export';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import {
@@ -100,6 +101,36 @@ export class UserPage {
 	});
 
 	public readonly userRecord = computed(() => this.state().data);
+	public readonly referralColumns: ReportLabel[] = [
+		{
+			label: 'How they heard about us',
+			description: 'The source each shopper chose when signing up.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Shopper profiles with this answer.',
+		},
+	];
+	public readonly zipColumns: ReportLabel[] = [
+		{
+			label: 'ZIP code',
+			description: 'Home ZIP code from the shopper profile.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Shopper profiles with this ZIP code.',
+		},
+	];
+	public readonly signupColumns: ReportLabel[] = [
+		{
+			label: 'Profile created',
+			description: 'Day the shopper profile was created, in Denver time.',
+		},
+		{
+			label: 'Shoppers',
+			description: 'Highest saved count for this profile creation day.',
+		},
+	];
 	public readonly referralRows = computed(() =>
 		[...(this.userRecord()?.referrerCount ?? [])]
 			.sort((a, b) => b.count - a.count)
@@ -130,38 +161,38 @@ export class UserPage {
 			.map((entry) => [entry.dateKey, entry.count]),
 	);
 	public readonly exportContext = computed<ReportCell[][]>(() => [
-		['Program year', this.year],
+		['Year', this.year],
 		[
-			'Calculated at',
+			'Updated at (UTC)',
 			reportDate(this.userRecord()?.calculatedAt)?.toISOString(),
 		],
 		[
-			'Population',
+			'Includes',
 			this.userRecord()?.population === 'all-users'
-				? 'All current user profiles'
-				: 'Legacy filtered population; missing ZIP or referral profiles may be excluded',
+				? 'All saved shopper profiles'
+				: 'Older totals may leave out shoppers without a ZIP code or referral',
 		],
 	]);
 	public readonly signupExportContext = computed<ReportCell[][]>(() => [
-		['Program year', this.year],
+		['Year', this.year],
 		[
-			'Calculated at',
+			'Updated at (UTC)',
 			reportDate(this.userRecord()?.calculatedAt)?.toISOString(),
 		],
 		[
-			'Population',
-			'Retained maximum observed profile counts per creation day, including profiles later removed',
+			'Includes',
+			'Highest saved shopper count for each profile creation day, including profiles later removed',
 		],
 		[
-			'Coverage',
-			'Lower bound: profiles removed before a calculation are unavailable. Retained counts can exceed current profile totals.',
+			'Counting notes',
+			'Profiles removed before a report ran are not counted. Saved daily counts may exceed the current shopper total.',
 		],
 		[
-			'Current profiles with unavailable creation dates',
+			'Shopper profiles with missing creation dates',
 			this.userRecord()?.signupDatesUnavailable,
 		],
 		[
-			'Current profiles created outside the program year',
+			'Shopper profiles created in other years',
 			this.userRecord()?.signupDatesOutsideProgramYear,
 		],
 	]);
@@ -254,7 +285,7 @@ export class UserPage {
 					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
-					return `${ctx.dataset?.data[0]} Families - ${ctx.dataset.label}`;
+					return `${ctx.dataset?.data[0]} Shoppers - ${ctx.dataset.label}`;
 				},
 			},
 		},

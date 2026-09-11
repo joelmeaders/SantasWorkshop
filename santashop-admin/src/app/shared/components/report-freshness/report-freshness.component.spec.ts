@@ -8,7 +8,7 @@ describe('ReportFreshnessComponent', () => {
 		fixture.componentRef.setInput('label', 'Registration and demographics');
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).toContain(
-			'Calculation time unavailable for this saved report.',
+			'Update time not saved in this report.',
 		);
 		expect(fixture.componentInstance.date()).toBeUndefined();
 	});
@@ -23,11 +23,11 @@ describe('ReportFreshnessComponent', () => {
 		fixture.componentRef.setInput('currentSeason', true);
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).toContain(
-			'over 36 hours old',
+			'Over 36 hours old',
 		);
 		fixture.componentRef.setInput('currentSeason', false);
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).not.toContain('hours old');
-		expect(fixture.nativeElement.textContent).toContain('Calculated');
+		expect(fixture.nativeElement.textContent).toContain('Updated');
 	});
 });

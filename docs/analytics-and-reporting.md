@@ -91,6 +91,10 @@ without recalculation. Do not backfill unavailable history from guessed values.
 ## Tables and CSV
 
 Tables provide the complete distributions behind the summary charts. The
+charts appear before all tables so staff can scan the report first. Customer
+labels use Shoppers. Brief explanations appear below table labels in smaller
+text. CSV exports use the label itself and preserve the numeric values.
+The
 registration ZIP chart includes the remaining ZIP codes in an Other slice.
 Exports include report context and all table rows, not only the top chart rows.
 CSV quoting preserves commas, quotes, and line breaks. Text that could be

@@ -136,8 +136,8 @@ describe('CheckInPage', () => {
 			1,
 		]);
 		expect(component.exportContext()).toContainEqual([
-			'Date coverage',
-			'Buckets without a saved date key use the legacy December convention',
+			'Date notes',
+			'Older reports use December when no month was saved',
 		]);
 		expect(component.checkInsByDayHour()).toMatchObject([
 			{
@@ -210,9 +210,9 @@ describe('CheckInPage', () => {
 	});
 
 	it('switches chart views and safely totals mixed chart values', async () => {
-		expect(component.viewButtonText()).toBe('View by Children');
+		expect(component.viewButtonText()).toBe('Show children');
 		component.switchView();
-		expect(component.viewButtonText()).toBe('View by Check-Ins');
+		expect(component.viewButtonText()).toBe('Show shoppers');
 		expect(component.addValues()).toBe(0);
 		expect(component.addValues([2, [3, 9], null, 4])).toBe(9);
 	});

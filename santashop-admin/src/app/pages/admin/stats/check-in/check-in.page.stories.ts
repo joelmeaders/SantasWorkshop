@@ -22,7 +22,7 @@ const meta = {
 		const canvas = within(canvasElement);
 		await expect(
 			await canvas.findByRole('heading', {
-				name: 'Customers',
+				name: 'Shoppers',
 			}),
 		).toBeVisible();
 		await expect(
@@ -30,12 +30,10 @@ const meta = {
 		).toBeVisible();
 		await expect(
 			canvas.getByRole('heading', {
-				name: 'Pre-Registered',
+				name: 'Registered Ahead',
 			}),
 		).toBeVisible();
-		await userEvent.click(
-			canvas.getByText(/View by Children|View by Check-Ins/),
-		);
+		await userEvent.click(canvas.getByText(/Show children|Show shoppers/));
 		const fixtures = getAdminStoryFixtures(canvasElement);
 		const loadedStats = fixtures.checkInStats$.value;
 		fixtures.checkInStats$.next(undefined);
@@ -47,7 +45,7 @@ const meta = {
 		fixtures.checkInStats$.next(loadedStats);
 		await expect(
 			await canvas.findByRole('heading', {
-				name: 'Customers',
+				name: 'Shoppers',
 			}),
 		).toBeVisible();
 		await waitFor(() =>

@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
-import { downloadReportCsv, ReportCell } from '../../helpers/report-export';
+import {
+	downloadReportCsv,
+	reportCellValue,
+	ReportCell,
+	ReportLabel,
+} from '../../helpers/report-export';
 
 @Component({
 	selector: 'admin-report-table',
@@ -29,7 +34,14 @@ import { downloadReportCsv, ReportCell } from '../../helpers/report-export';
 				<thead>
 					<tr>
 						@for (column of columns(); track $index) {
-							<th scope="col">{{ column }}</th>
+							<th scope="col">
+								{{ cellValue(column) }}
+								@if (description(column); as explanation) {
+									<small class="label-description">{{
+										explanation
+									}}</small>
+								}
+							</th>
 						}
 					</tr>
 				</thead>
@@ -39,10 +51,20 @@ import { downloadReportCsv, ReportCell } from '../../helpers/report-export';
 							@for (cell of row; track $index) {
 								@if ($first) {
 									<th scope="row">
-										{{ cell ?? 'Unavailable' }}
+										{{ cellValue(cell) ?? 'Unavailable' }}
+										@if (
+											description(cell);
+											as explanation
+										) {
+											<small class="label-description">{{
+												explanation
+											}}</small>
+										}
 									</th>
 								} @else {
-									<td>{{ cell ?? 'Unavailable' }}</td>
+									<td>
+										{{ cellValue(cell) ?? 'Unavailable' }}
+									</td>
 								}
 							}
 						</tr>
@@ -60,10 +82,12 @@ import { downloadReportCsv, ReportCell } from '../../helpers/report-export';
 							@for (cell of total; track $index) {
 								@if ($first) {
 									<th scope="row">
-										{{ cell ?? 'Unavailable' }}
+										{{ cellValue(cell) ?? 'Unavailable' }}
 									</th>
 								} @else {
-									<td>{{ cell ?? 'Unavailable' }}</td>
+									<td>
+										{{ cellValue(cell) ?? 'Unavailable' }}
+									</td>
 								}
 							}
 						</tr>
@@ -95,6 +119,16 @@ import { downloadReportCsv, ReportCell } from '../../helpers/report-export';
 			padding: 0.65rem 0.75rem;
 			text-align: start;
 			border-bottom: 1px solid var(--ion-color-step-200, #ccc);
+			vertical-align: top;
+		}
+		.label-description {
+			display: block;
+			margin-top: 0.25rem;
+			font-size: 0.8125rem;
+			font-weight: 400;
+			line-height: 1.4;
+			color: var(--ion-text-color, #222);
+			max-width: 32rem;
 		}
 		thead,
 		tfoot {
@@ -104,14 +138,21 @@ import { downloadReportCsv, ReportCell } from '../../helpers/report-export';
 })
 export class ReportTableComponent {
 	public readonly caption = input.required<string>();
-	public readonly columns = input.required<readonly string[]>();
+	public readonly columns =
+		input.required<readonly (string | ReportLabel)[]>();
 	public readonly rows = input.required<readonly (readonly ReportCell[])[]>();
 	public readonly totals = input<readonly ReportCell[]>();
 	public readonly filename = input.required<string>();
-	public readonly emptyText = input('No rows recorded in this report.');
+	public readonly emptyText = input('No data in this report.');
 	public readonly exportContext = input<readonly (readonly ReportCell[])[]>(
 		[],
 	);
+
+	public readonly cellValue = reportCellValue;
+
+	public description(cell: ReportCell): string | undefined {
+		return cell && typeof cell === 'object' ? cell.description : undefined;
+	}
 
 	public download(): void {
 		if (!this.rows().length) return;

@@ -75,10 +75,10 @@ describe('RegistrationPage', () => {
 		expect(component.outcomeRows()).toEqual([]);
 		expect(component.snapshotRows()).toEqual([]);
 		expect(fixture.nativeElement.textContent).toContain(
-			'Calculation time unavailable for this saved report.',
+			'Update time not saved in this report.',
 		);
 		expect(fixture.nativeElement.textContent).toContain(
-			'New outcome calculations are unavailable for this saved report.',
+			'Registration progress was not saved in this report.',
 		);
 		expect(fixture.nativeElement.textContent).not.toContain('0.0%');
 	});
@@ -127,15 +127,15 @@ describe('RegistrationPage', () => {
 		await fixture.whenStable();
 		expect(component.registrationCount()).toBe(3);
 		expect(component.outcomeRows()).toContainEqual([
-			'Current cancelled registrations',
+			{ label: 'Canceled', description: expect.any(String) },
 			0,
 		]);
 		expect(component.outcomeRows()).toContainEqual([
-			'Completion rate',
+			{ label: 'Completion rate', description: expect.any(String) },
 			'0.0%',
 		]);
 		expect(component.outcomeRows()).toContainEqual([
-			'Attendance rate for past appointments',
+			{ label: 'Attendance rate', description: expect.any(String) },
 			undefined,
 		]);
 		expect(component.snapshotRows()[0]).toEqual([
@@ -149,7 +149,7 @@ describe('RegistrationPage', () => {
 			'0.0%',
 		]);
 		expect(component.appointmentExportContext()).toContainEqual([
-			'Calculated at',
+			'Updated at (UTC)',
 			undefined,
 		]);
 		expect(fixture.nativeElement.textContent).toContain('Unavailable');
@@ -178,7 +178,7 @@ describe('RegistrationPage', () => {
 		await fixture.whenStable();
 		expect(component.topTenZipCodesCountData().labels).toContainEqual([
 			'Other',
-			'3 Families',
+			'3 Shoppers',
 		]);
 		expect(component.topTenZipCodesCountData().datasets[0].data).toEqual([
 			6, 5, 4, 3, 3,
@@ -312,9 +312,9 @@ describe('RegistrationPage', () => {
 		]);
 		expect(component.topTenZipCodesCountData()).toMatchObject({
 			labels: [
-				['80219', '8 Families'],
-				['80204', '5 Families'],
-				['80205', '3 Families'],
+				['80219', '8 Shoppers'],
+				['80204', '5 Shoppers'],
+				['80205', '3 Shoppers'],
 			],
 			datasets: [{ data: [8, 5, 3] }],
 		});
@@ -346,7 +346,7 @@ describe('RegistrationPage', () => {
 		expect(component.hasScheduleData()).toBe(true);
 		expect(fixture.nativeElement.textContent).toContain('Capacity by Day');
 		expect(fixture.nativeElement.textContent).not.toContain(
-			'No schedule data for this year',
+			'No appointment data for this year',
 		);
 		const capacityByDay = component.capacityByDay();
 		expect(capacityByDay).toHaveLength(4);
@@ -394,7 +394,7 @@ describe('RegistrationPage', () => {
 		expect(collection.read).toHaveBeenCalledWith('schedule-2025');
 		expect(collection.readMany).toHaveBeenCalledTimes(1);
 		expect(fixture.nativeElement.textContent).toContain(
-			'No schedule data for this year',
+			'No appointment data for this year',
 		);
 	});
 	it('uses nightly registration totals when the seasonal schedule aggregate is absent', async () => {

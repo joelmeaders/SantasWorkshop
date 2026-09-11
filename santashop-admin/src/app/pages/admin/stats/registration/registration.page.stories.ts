@@ -30,7 +30,7 @@ const meta = {
 			canvas.getByRole('heading', { name: 'Capacity by Day' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByRole('heading', { name: 'Schedules by Day' }),
+			canvas.getByRole('heading', { name: 'Appointments by Day' }),
 		).toBeVisible();
 		await userEvent.click(canvas.getByText('Refresh report'));
 		const fixtures = getAdminStoryFixtures(canvasElement);
@@ -42,7 +42,7 @@ const meta = {
 		fixtures.slots$.next([]);
 		await userEvent.click(canvas.getByText('Refresh report'));
 		await expect(
-			canvas.getByText('No schedule data for this year'),
+			canvas.getByText('No appointment data for this year'),
 		).toBeVisible();
 		fixtures.registrationStats$.next(loadedStats);
 		fixtures.scheduleStats$.next(loadedSchedule);
@@ -127,18 +127,18 @@ export const SavedOutcomeCalculations: Story = {
 		});
 		await userEvent.click(canvas.getByText('Refresh report'));
 		await expect(
-			await canvas.findByRole('table', { name: 'Registration outcomes' }),
+			await canvas.findByRole('table', { name: 'Registration progress' }),
 		).toBeVisible();
 		await expect(
-			canvas.getByRole('table', { name: 'Daily registration snapshots' }),
+			canvas.getByRole('table', { name: 'Daily registration totals' }),
 		).toBeVisible();
 		await expect(
 			within(
-				canvas.getByRole('table', { name: 'Registration outcomes' }),
+				canvas.getByRole('table', { name: 'Registration progress' }),
 			).getByText('80.0%'),
 		).toBeVisible();
 		await scrollToReportTable(
-			canvas.getByRole('table', { name: 'Registration outcomes' }),
+			canvas.getByRole('table', { name: 'Registration progress' }),
 		);
 	},
 };

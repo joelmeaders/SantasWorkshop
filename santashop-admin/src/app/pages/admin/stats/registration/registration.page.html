@@ -20,29 +20,25 @@
 	</p>
 	} @else {
 	<admin-report-freshness
-		label="Registration and demographics"
+		label="Registration details"
 		[calculatedAt]="state.data?.registration?.calculatedAt"
 		[currentSeason]="year === programYear"
 	/>
 	@if (state.data?.schedule) {
 	<admin-report-freshness
-		label="Reservation counts"
+		label="Appointment totals"
 		[calculatedAt]="state.data?.schedule?.calculatedAt"
 		[currentSeason]="year === programYear"
 		[maxAgeHours]="24"
 	/>
 	} @else {
-	<p>
-		Reservation counts use the nightly registration calculation shown above.
-	</p>
+	<p>Appointment totals use the nightly report shown above.</p>
 	}
 	<ion-grid>
 		<ion-row>
 			<ion-col size="12" class="ion-text-center">
-				* Children, gender and zip codes update nightly around midnight.
-				Reservation counts update on the configured seasonal schedule.
-				Until that update is available, this report uses the latest
-				nightly registration totals.
+				Children and ZIP codes update each night. Appointment totals
+				update separately.
 			</ion-col>
 		</ion-row>
 		<ion-row class="ion-justify-content-center">
@@ -75,7 +71,7 @@
 				@if (childCount(); as count) {
 				<div class="count-container">
 					<h1>{{ count }}</h1>
-					<h2>Children*</h2>
+					<h2>Children</h2>
 				</div>
 				}
 			</ion-col>
@@ -89,7 +85,7 @@
 				@if (childrenPerCustomer(); as count) {
 				<div class="count-container">
 					<h1>{{ count | number:'1.0-2' }}</h1>
-					<h2>Children per Customer*</h2>
+					<h2>Children per Shopper</h2>
 				</div>
 				}
 			</ion-col>
@@ -100,8 +96,8 @@
 			<ion-col size="12">
 				<h2>Capacity by Day</h2>
 				<p>
-					Capacity uses saved appointment slots. Calculation times for
-					individual slots are unavailable.
+					Based on saved appointment limits. Update times for
+					individual appointments are not available.
 				</p>
 			</ion-col>
 			@for (capacity of capacities; track capacity.label) {
@@ -121,15 +117,18 @@
 						type="doughnut"
 					></canvas>
 					<div class="capacity-card__meta">
-						<span>Used: {{ capacity.used | number }}</span>
-						<span>Total: {{ capacity.total | number }}</span>
+						<span>Booked: {{ capacity.used | number }}</span>
+						<span
+							>Planned spots: {{ capacity.total | number }}</span
+						>
 						@if (capacity.overflow === 0) {
 						<span
-							>Remaining: {{ capacity.remaining | number }}</span
+							>Open spots: {{ capacity.remaining | number }}</span
 						>
 						} @if (capacity.overflow > 0) {
 						<span>
-							Overflow: {{ capacity.overflow | number }}
+							Above planned capacity: {{ capacity.overflow |
+							number }}
 						</span>
 						}
 					</div>
@@ -141,7 +140,7 @@
 		@let slots = familiesBySlotsChartData();
 		<ion-row>
 			<ion-col size="12">
-				<h2>Schedules by Day</h2>
+				<h2>Appointments by Day</h2>
 			</ion-col>
 			@for (slot of slots; track slot; let i = $index) {
 			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
@@ -163,29 +162,10 @@
 		} @else {
 		<ion-row>
 			<ion-col class="ion-text-center">
-				<ion-title> No schedule data for this year </ion-title>
+				<ion-title> No appointment data for this year </ion-title>
 			</ion-col>
 		</ion-row>
-		}
-		<ion-row
-			><ion-col size="12">
-				<admin-report-table
-					caption="Appointments"
-					[columns]="['Appointment (America/Denver)', 'Registrations']"
-					[rows]="appointmentRows()"
-					[totals]="appointmentTotals()"
-					[filename]="'appointments-' + year"
-					[exportContext]="appointmentExportContext()"
-				/> </ion-col
-		></ion-row>
-
-		<ion-row class="ion-margin ion-padding">
-			<ion-col class="ion-text-center">
-				Demographic information is updated once daily
-			</ion-col>
-		</ion-row>
-
-		@if (girlBoyInfantCounts(); as gender) {
+		} @if (girlBoyInfantCounts(); as gender) {
 		<ion-row class="ion-justify-content-evenly">
 			<ion-col
 				sizeXs="12"
@@ -194,7 +174,7 @@
 				sizeLg="6"
 				class="ion-text-center"
 			>
-				<h2>Gender</h2>
+				<h2>Children by Group</h2>
 				@if (!statsNull()) {
 				<canvas
 					baseChart
@@ -205,12 +185,16 @@
 					type="doughnut"
 				></canvas>
 				} @else {
-				<ion-title> No gender information for this year </ion-title>
+				<ion-title> No child group data for this year </ion-title>
 				}
 			</ion-col>
 			@if (topTenZipCodesCountData(); as pieData) {
 			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
-				<h2>ZIP codes (top four and Other)</h2>
+				<h2>Shoppers by ZIP Code</h2>
+				<p>
+					The four largest groups are shown separately. Other includes
+					all remaining ZIP codes.
+				</p>
 				<canvas
 					baseChart
 					[data]="pieData"
@@ -222,11 +206,24 @@
 			}
 		</ion-row>
 		}
+		<ion-row>
+			<ion-col size="12">
+				<h2>Report details</h2>
+				<admin-report-table
+					caption="Appointments"
+					[columns]="appointmentColumns"
+					[rows]="appointmentRows()"
+					[totals]="appointmentTotals()"
+					[filename]="'appointments-' + year"
+					[exportContext]="appointmentExportContext()"
+				/>
+			</ion-col>
+		</ion-row>
 		<ion-row
 			><ion-col size="12">
 				<admin-report-table
 					caption="Registration ZIP codes"
-					[columns]="['ZIP code', 'Families', 'Children']"
+					[columns]="zipColumns"
 					[rows]="zipRows()"
 					[totals]="zipTotals()"
 					[filename]="'registration-zip-codes-' + year"
@@ -235,56 +232,35 @@
 		></ion-row>
 		<ion-row
 			><ion-col size="12">
-				<h2>Registration outcomes</h2>
 				@if (operational()) {
 				<p>
-					Outcomes describe current registration records. Completion
-					is submitted registrations divided by all registration
-					records.
-				</p>
-				<p>
-					Past appointments are submitted, active appointments before
-					the saved calculation date shown above in America/Denver.
-					Attendance uses this same population. Unconfirmed
-					appointments are not proven no-shows. Rates with missing
-					source data are unavailable.
-				</p>
-				<p>
-					Cancelled registrations describe current records. Recorded
-					cancellation events count saved cancellation logs, including
-					repeated cancellations.
+					Progress for this year's saved registrations. Unavailable
+					means the report does not have enough information.
 				</p>
 				<admin-report-table
-					caption="Registration outcomes"
-					[columns]="['Measure', 'Value']"
+					caption="Registration progress"
+					[columns]="['Status', 'Total or rate']"
 					[rows]="outcomeRows()"
 					[filename]="'registration-outcomes-' + year"
 					[exportContext]="registrationExportContext()"
 				/>
 				} @else {
-				<p>
-					New outcome calculations are unavailable for this saved
-					report.
-				</p>
+				<p>Registration progress was not saved in this report.</p>
 				} @if (state.data?.registration?.dailySnapshots !== undefined) {
 				<p>
-					Snapshots retain the first nightly observation for each
-					recorded day. Missing days are unavailable. Retained
-					snapshots can differ from current totals after records are
-					removed.
+					Each row keeps the first report saved that day. Missing days
+					were not recorded. Past totals stay saved when registrations
+					are removed.
 				</p>
 				<admin-report-table
-					caption="Daily registration snapshots"
-					[columns]="['Observation day (America/Denver)', 'Calculated at (UTC)', 'Records', 'Submitted', 'Drafts', 'Cancelled', 'Checked in', 'Completion rate']"
+					caption="Daily registration totals"
+					[columns]="snapshotColumns"
 					[rows]="snapshotRows()"
 					[filename]="'registration-snapshots-' + year"
 					[exportContext]="registrationExportContext()"
 				/>
 				} @else {
-				<p>
-					Daily registration snapshots are unavailable for this saved
-					report.
-				</p>
+				<p>Daily registration totals were not saved in this report.</p>
 				}
 			</ion-col></ion-row
 		>

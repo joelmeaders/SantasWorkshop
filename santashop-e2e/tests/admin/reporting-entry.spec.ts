@@ -4,6 +4,27 @@ import {
 	signInAdminViaUi,
 } from '../../fixtures/admin-helpers';
 import { E2E_PROGRAM_YEAR, e2eDateTime } from '../../fixtures/season';
+import { type Page } from '@playwright/test';
+
+async function expectChartsBeforeTables(page: Page): Promise<void> {
+	const chartsFirst = await page
+		.locator('ion-content')
+		.evaluate((content) => {
+			const charts = Array.from(content.querySelectorAll('canvas'));
+			const lastChart = charts.at(-1);
+			const firstTable = content.querySelector('table');
+			return Boolean(
+				lastChart &&
+				firstTable &&
+				lastChart.compareDocumentPosition(firstTable) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			);
+		});
+	expect(
+		chartsFirst,
+		'Every chart should come before the report tables',
+	).toBe(true);
+}
 
 test.describe('admin reporting routes', () => {
 	test.beforeEach(async ({ clearData, seedPublicParams, seedAdminUser }) => {
@@ -22,7 +43,9 @@ test.describe('admin reporting routes', () => {
 			'Registration Stats',
 		);
 		await expect(
-			page.getByText('No schedule data for this year', { exact: true }),
+			page.getByText('No appointment data for this year', {
+				exact: true,
+			}),
 		).toBeVisible({ timeout: 15000 });
 
 		await page.goto('/admin/stats/check-in');
@@ -42,7 +65,9 @@ test.describe('admin reporting routes', () => {
 		).toBeVisible({ timeout: 15000 });
 
 		await page.goto('/admin/stats/user');
-		await expect(page.locator('admin-header')).toContainText('User Stats');
+		await expect(page.locator('admin-header')).toContainText(
+			'Shopper Stats',
+		);
 	});
 
 	test('REPORT-004 renders populated current-season schedule data', async ({
@@ -62,7 +87,9 @@ test.describe('admin reporting routes', () => {
 		await page.goto('/admin/stats/registration');
 
 		await expect(
-			page.getByText('No schedule data for this year', { exact: true }),
+			page.getByText('No appointment data for this year', {
+				exact: true,
+			}),
 		).toHaveCount(0, { timeout: 15000 });
 		await expect(page.locator('.capacity-card')).toHaveCount(4, {
 			timeout: 15000,
@@ -127,14 +154,15 @@ test.describe('admin reporting routes', () => {
 			'4',
 		);
 		await expect(
-			page.getByRole('heading', { name: 'Gender' }),
+			page.getByRole('heading', { name: 'Children by Group' }),
 		).toBeVisible();
 		await expect(
 			page.getByRole('heading', {
-				name: 'ZIP codes (top four and Other)',
+				name: 'Shoppers by ZIP Code',
 			}),
 		).toBeVisible();
 		await expect(page.locator('canvas')).toHaveCount(2);
+		await expectChartsBeforeTables(page);
 	});
 
 	test('REPORT-002 renders seeded check-in counts by day and supports the children view', async ({
@@ -167,9 +195,10 @@ test.describe('admin reporting routes', () => {
 			'4',
 		);
 		await expect(
-			page.getByRole('heading', { name: 'Check-Ins' }),
+			page.getByRole('heading', { name: 'Shopper Check-Ins' }),
 		).toBeVisible();
-		await page.getByRole('button', { name: 'View by Children' }).click();
+		await expectChartsBeforeTables(page);
+		await page.getByRole('button', { name: 'Show children' }).click();
 		await expect(
 			page
 				.locator('ion-toolbar')
@@ -199,11 +228,12 @@ test.describe('admin reporting routes', () => {
 		await page.goto('/admin/stats/user');
 
 		await expect(
-			page.getByRole('heading', { name: 'Top 10 Referrers' }),
+			page.getByRole('heading', { name: 'How Shoppers Heard About Us' }),
 		).toBeVisible();
 		await expect(
-			page.getByRole('heading', { name: 'Top 10 Zip Codes' }),
+			page.getByRole('heading', { name: 'Top 10 ZIP Codes' }),
 		).toBeVisible();
 		await expect(page.locator('canvas')).toHaveCount(2);
+		await expectChartsBeforeTables(page);
 	});
 });

@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import {
+	mkdtempSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs';
 import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 import { functionsRequired, uiTargets } from './ui-targets.mjs';
 
@@ -14,6 +22,76 @@ const ui = readWorkflow('ui-target');
 const functions = readWorkflow('functions-pr-validation');
 const browser = readWorkflow('e2e-target');
 const release = readWorkflow('functions-test-and-prod-release');
+
+for (const target of ['app', 'admin'])
+	test(`${target} Hosting checksum steps run without ripgrep and reject changed output`, () => {
+		const directory = mkdtempSync(join(tmpdir(), 'santashop-checksum-'));
+		const output = join(directory, 'dist', `santashop-${target}`);
+		const runner = join(directory, 'runner');
+		const bash =
+			process.platform === 'win32'
+				? join(
+						process.env['ProgramFiles'] ?? 'C:/Program Files',
+						'Git',
+						'bin',
+						'bash.exe',
+					)
+				: '/bin/bash';
+		const steps = ui.jobs.validate_release.steps;
+		const before = steps.find(
+			({ name }) =>
+				name === 'Record verified Hosting output before emulator tests',
+		);
+		const after = steps.find(
+			({ name }) => name === 'Require unchanged verified Hosting output',
+		);
+		const execute = (step) =>
+			execFileSync(
+				bash,
+				[
+					'--noprofile',
+					'--norc',
+					'-e',
+					'-c',
+					// Model a runner without ripgrep even when the developer installed it.
+					`rg() { printf 'rg: command not found\\n' >&2; return 127; }\n${step.run}`,
+				],
+				{
+					cwd: directory,
+					env: {
+						PATH: process.env['PATH'],
+						SystemRoot: process.env['SystemRoot'],
+						UI_TARGET: target,
+						RUNNER_TEMP: runner.replaceAll('\\', '/'),
+					},
+					stdio: 'pipe',
+				},
+			);
+		try {
+			mkdirSync(join(output, '.well-known'), { recursive: true });
+			mkdirSync(runner);
+			writeFileSync(join(output, 'index.html'), '<html>release</html>');
+			const nested = join(output, '.well-known', 'file with spaces.json');
+			writeFileSync(nested, '{"release":1}');
+			execute(before);
+			const manifest = readFileSync(
+				join(runner, 'hosting-before-e2e.sha256'),
+				'utf8',
+			);
+			assert.match(manifest, /\.well-known\/file with spaces\.json/);
+			execute(after);
+			writeFileSync(nested, '{"release":2}');
+			assert.throws(() => execute(after), /Command failed/);
+			writeFileSync(nested, '{"release":1}');
+			writeFileSync(join(output, 'unexpected.js'), 'extra bundle');
+			assert.throws(() => execute(after), /Command failed/);
+			rmSync(join(output, 'unexpected.js'));
+			rmSync(nested);
+			assert.throws(() => execute(after), /Command failed/);
+		} finally {
+			rmSync(directory, { recursive: true, force: true });
+		}
+	});
 
 test('isolated browser job can build real app and Functions configuration without caller environment', () => {
 	execFileSync(

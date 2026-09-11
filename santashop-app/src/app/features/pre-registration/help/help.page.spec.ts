@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ModalController } from '@ionic/angular/standalone';
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { page } from 'vitest/browser';
 import { createModalControllerMock } from '../../../../test-helpers';
 import en from '../../../../assets/i18n/en.json';
 import es from '../../../../assets/i18n/es.json';
@@ -32,6 +33,36 @@ describe('HelpPage', () => {
 		component = fixture.componentInstance;
 		await fixture.whenStable();
 	});
+
+	it.each([
+		['en', 'Help'],
+		['es', 'Ayuda'],
+	] as const)(
+		'exposes one level-one page heading with real Ionic components in %s',
+		async (language, title): Promise<void> => {
+			translate.use(language);
+			fixture.detectChanges();
+			await fixture.whenStable();
+			const host = fixture.nativeElement as HTMLElement;
+			const header = host.querySelector('ion-card-header');
+			await vi.waitFor(() => {
+				expect(header?.shadowRoot).toBeInstanceOf(ShadowRoot);
+			});
+			const headings = page
+				.elementLocator(host)
+				.getByRole('heading', { name: title, exact: true });
+			expect(headings.all()).toHaveLength(1);
+			await expect
+				.element(
+					page.elementLocator(host).getByRole('heading', {
+						name: title,
+						exact: true,
+						level: 1,
+					}),
+				)
+				.toBeInTheDocument();
+		},
+	);
 
 	it.each([
 		[

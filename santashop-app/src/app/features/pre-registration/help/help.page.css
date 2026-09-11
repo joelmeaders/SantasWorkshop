@@ -1,1 +1,38 @@
+h1 {
+	margin: 0;
+	font-size: 1.5rem;
+}
 
+.help-content h2 {
+	font-size: 1.2rem;
+	font-weight: 600;
+}
+
+.help-content p {
+	margin: 0.4rem 0 0;
+	line-height: 1.5;
+}
+
+.help-steps {
+	padding-inline-start: 1.5rem;
+	margin-block: 1.25rem;
+}
+
+.help-steps li + li {
+	margin-top: 1rem;
+}
+
+.help-steps h3 {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.help-contact {
+	border-top: 1px solid var(--ion-color-light-shade);
+	padding-top: 1rem;
+}
+
+.help-contact ion-button {
+	margin-top: 1rem;
+}

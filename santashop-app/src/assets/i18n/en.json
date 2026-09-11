@@ -178,10 +178,21 @@
 	},
 	"HELP": {
 		"TITLE": "Help",
+		"GUIDE_TITLE": "How to register",
+		"GUIDE_INTRO": "Follow these steps to register and get your ticket.",
+		"ACCOUNT_TITLE": "Create or sign in to your account",
+		"ACCOUNT_TEXT": "Choose Create Account, enter your contact and sign-in details, and accept the terms. If you already have an account, sign in.",
+		"CHILDREN_TITLE": "Add your children",
+		"CHILDREN_TEXT": "On the registration screen, add each child's name and birth date, choose a toy type when asked, and save the child. Add every child you are registering.",
+		"APPOINTMENT_TITLE": "Choose an appointment",
+		"APPOINTMENT_TEXT": "After saving a child, open an available date and select a time. When your appointment appears on the registration screen, continue to review.",
+		"REVIEW_TITLE": "Review and submit",
+		"REVIEW_TEXT": "Choose Review & submit. Check your children, appointment, and ticket email address. Make any changes, then choose Submit to finish your registration.",
+		"TICKET_TITLE": "Keep your ticket",
+		"TICKET_TEXT": "After you submit, the ticket screen shows your QR code. Save a screenshot or print your ticket for check-in. You can sign in again to view it.",
+		"CONTACT_TITLE": "Need more help?",
 		"VISIT_TEXT": "Visit the Contact Us page of our website for help with registration.",
-		"VISIT_BUTTON": "Visit Website",
-		"PDF_GUIDE_TEXT": "Download a Step-By-Step PDF Help Guide here.",
-		"PDF_GUIDE_BUTTON": "Download PDF Help Guide"
+		"VISIT_BUTTON": "Visit Website"
 	},
 	"PROFILE": {
 		"SETTINGS_INTRO": "Manage your contact information, email address, and password in one place.",

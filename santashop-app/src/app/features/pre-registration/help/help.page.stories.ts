@@ -28,15 +28,18 @@ export const CustomerHelp: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const close = getIonButton(canvasElement, /go back/i);
-		expect(canvas.getByText(/^help$/i)).toBeVisible();
+		expect(
+			canvas.getByRole('heading', { name: /^help$/i, level: 1 }),
+		).toBeVisible();
+		expect(canvas.getAllByRole('listitem')).toHaveLength(5);
+		expect(
+			canvas.getByRole('heading', { name: /review and submit/i }),
+		).toBeInTheDocument();
 		expect(getIonButton(canvasElement, /visit.*website/i)).toHaveAttribute(
 			'target',
 			'_blank',
 		);
-		expect(getIonButton(canvasElement, /pdf.*guide/i)).toHaveAttribute(
-			'target',
-			'_blank',
-		);
+		expect(canvasElement.querySelector('[href$=".pdf"]')).toBeNull();
 		await userEvent.click(close);
 		expect(close).toBeEnabled();
 	},

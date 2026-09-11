@@ -23,6 +23,96 @@ const functions = readWorkflow('functions-pr-validation');
 const browser = readWorkflow('e2e-target');
 const release = readWorkflow('functions-test-and-prod-release');
 
+test('test Functions inventory retries listing failures and still requires source parity', () => {
+	const directory = mkdtempSync(
+		join(tmpdir(), 'santashop-functions-inventory-'),
+	);
+	const bash =
+		process.platform === 'win32'
+			? join(
+					process.env['ProgramFiles'] ?? 'C:/Program Files',
+					'Git',
+					'bin',
+					'bash.exe',
+				)
+			: '/bin/bash';
+	const step = release.jobs.deploy_test.steps.find(
+		({ name }) => name === 'Verify live test Functions match source',
+	);
+	const cases = [
+		{ listFailures: 0, parityFailures: 0, status: 0, counts: '1 1 0' },
+		{ listFailures: 1, parityFailures: 0, status: 0, counts: '2 1 1' },
+		{ listFailures: 0, parityFailures: 1, status: 0, counts: '2 2 1' },
+		{ listFailures: 12, parityFailures: 0, status: 1, counts: '12 0 11' },
+		{ listFailures: 0, parityFailures: 12, status: 1, counts: '12 12 11' },
+	];
+	try {
+		for (const scenario of cases) {
+			let status = 0;
+			try {
+				execFileSync(
+					bash,
+					[
+						'--noprofile',
+						'--norc',
+						'-e',
+						'-o',
+						'pipefail',
+						'-c',
+						`
+list_attempts=0
+parity_attempts=0
+sleep_count=0
+trap 'printf "%s %s %s" "$list_attempts" "$parity_attempts" "$sleep_count" > "$RUNNER_TEMP/counts"' EXIT
+pnpm() {
+  [[ "$*" == 'exec firebase functions:list --project santas-workshop-test --json' ]] || return 2
+  ((list_attempts += 1))
+  if ((list_attempts <= LIST_FAILURES)); then return 1; fi
+  printf '{}'
+}
+node() {
+  [[ "$1" == 'scripts/verify-functions-parity.cjs' && "$2" == "$RUNNER_TEMP/functions.json" ]] || return 2
+  ((parity_attempts += 1))
+  if ((parity_attempts <= PARITY_FAILURES)); then return 1; fi
+}
+sleep() {
+  [[ "$1" == 10 ]] || return 2
+  ((sleep_count += 1))
+}
+${step.run}`,
+					],
+					{
+						cwd: directory,
+						env: {
+							PATH: process.env['PATH'],
+							SystemRoot: process.env['SystemRoot'],
+							RUNNER_TEMP: directory.replaceAll('\\', '/'),
+							LIST_FAILURES: String(scenario.listFailures),
+							PARITY_FAILURES: String(scenario.parityFailures),
+						},
+						stdio: 'pipe',
+					},
+				);
+			} catch (error) {
+				status = error.status;
+			}
+			assert.equal(status, scenario.status, JSON.stringify(scenario));
+			assert.equal(
+				readFileSync(join(directory, 'counts'), 'utf8'),
+				scenario.counts,
+				JSON.stringify(scenario),
+			);
+		}
+	} finally {
+		assert.ok(
+			directory.startsWith(
+				join(tmpdir(), 'santashop-functions-inventory-'),
+			),
+		);
+		rmSync(directory, { recursive: true, force: true });
+	}
+});
+
 for (const target of ['app', 'admin'])
 	test(`${target} Hosting checksum steps run without ripgrep and reject changed output`, () => {
 		const directory = mkdtempSync(join(tmpdir(), 'santashop-checksum-'));

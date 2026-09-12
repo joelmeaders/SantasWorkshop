@@ -1,42 +1,8 @@
 name: Functions Test Deploy and Manual Prod Release
-
-on:
+'on':
   push:
     branches:
       - master
-    paths:
-      - 'santashop-functions/**'
-      - 'santashop-models/**'
-      - 'remote-config/**'
-      - 'scripts/remote-config*.cjs'
-      - 'scripts/email-sending.cjs'
-      - 'scripts/public-parameters-schema.cjs'
-      - 'scripts/load/**'
-      - 'santashop-e2e/**'
-      - 'firebase.json'
-      - 'firebase.e2e.json'
-      - 'firestore.rules'
-      - 'firestore.indexes.json'
-      - 'storage.rules'
-      - 'database.rules.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.env.example'
-      - 'config.functions.cjs'
-      - 'scripts/env-loader.cjs'
-      - 'scripts/assert-functions-deploy-ci.cjs'
-      - 'scripts/prepare-functions-deploy.cjs'
-      - 'scripts/verify-functions-parity.cjs'
-      - 'scripts/owner-export-readiness.cjs'
-      - 'scripts/verify-functions-managed-resources.cjs'
-      - 'scripts/verify-public-parameters.cjs'
-      - '.github/workflows/functions-test-and-prod-release.yml'
-      - '.github/workflows/e2e-target.yml'
-      - '.github/workflows/functions-pr-validation.yml'
-      - '.github/workflows/release-gate.yml'
-      - 'scripts/release-*.mjs'
-
   workflow_dispatch:
     inputs:
       release_ref:
@@ -56,13 +22,10 @@ on:
         required: true
         default: false
         type: boolean
-
 permissions:
   contents: read
   actions: read
-
 env:
-  # Validation artifacts and emulators never receive usable AWS credentials.
   TEST_AWS_ACCESS_KEY_ID: ci-not-used
   TEST_AWS_SECRET_ACCESS_KEY: ci-not-used
   TEST_SANTASHOP_PROGRAM_YEAR: '2026'
@@ -107,15 +70,18 @@ env:
   PROD_SCHEDULED_REGISTRATION_STATS: 59 23 * * *
   PROD_SCHEDULED_USER_STATS: 55 23 * 11,12 *
   PROD_SCHEDULED_CHECKIN_STATS: '*/5 10,11,12,13,14,15,16 12,13,15,16 12 *'
-
 jobs:
+  changes:
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/ci-changes.yml
   prepare_release:
     uses: ./.github/workflows/release-gate.yml
     with:
       target: functions
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
       release_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
-
+    needs: changes
+    if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.changes.result == 'success' && (needs.changes.outputs.deploy_functions == 'true' || needs.changes.outputs.deploy_rules == 'true')))
   unit_tests:
     needs: prepare_release
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
@@ -137,19 +103,20 @@ jobs:
         run: echo 'Checkout revision recorded before candidate execution'
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: 24.18.0
+          cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @santashop/functions run lint:check
       - name: Functions unit tests
         run: pnpm run functions:test:unit
-
   integration_tests:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
-    needs: [prepare_release, unit_tests]
+    needs:
+      - prepare_release
+      - unit_tests
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -171,11 +138,11 @@ jobs:
         run: echo 'Checkout revision recorded before candidate execution'
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: 24.18.0
+          cache: pnpm
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -192,27 +159,27 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Functions integration tests
         run: pnpm run functions:test:integration
-
   e2e:
     needs: prepare_release
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
     strategy:
       fail-fast: false
       matrix:
-        target: [app, admin]
+        target:
+          - app
+          - admin
     uses: ./.github/workflows/e2e-target.yml
     with:
       target: ${{ matrix.target }}
       release_ref: ${{ needs.prepare_release.outputs.sha }}
-
   deploy_test:
-    if: >-
-      always() && !cancelled() && needs.prepare_release.result == 'success' &&
-      needs.unit_tests.result == 'success' && needs.integration_tests.result == 'success' &&
-      needs.e2e.result == 'success' &&
-      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
-    # Deploy on a clean runner so emulator and browser processes cannot starve Firebase predeploy.
-    needs: [prepare_release, unit_tests, integration_tests, e2e]
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.unit_tests.result == 'success' && needs.integration_tests.result == 'success' && needs.e2e.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
+    needs:
+      - changes
+      - prepare_release
+      - unit_tests
+      - integration_tests
+      - e2e
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -221,6 +188,8 @@ jobs:
       TEST_AWS_ACCESS_KEY_ID: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
       TEST_AWS_SECRET_ACCESS_KEY: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', 'TEST')] }}
+      SANTASHOP_DEPLOY_FUNCTIONS: ${{ github.event_name == 'workflow_dispatch' && 'true' || needs.changes.outputs.deploy_functions }}
+      SANTASHOP_DEPLOY_RULES: ${{ github.event_name == 'workflow_dispatch' && 'true' || needs.changes.outputs.deploy_rules }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -238,11 +207,11 @@ jobs:
         run: echo 'Checkout revision recorded before candidate execution'
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: 24.18.0
+          cache: pnpm
       - name: Check test deploy prerequisites
         shell: bash
         run: |
@@ -295,10 +264,9 @@ jobs:
           ACCESS_TOKEN="$(gcloud auth print-access-token)"
           curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firebaseremoteconfig.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/remoteConfig" > "$RUNNER_TEMP/public-parameters.json"
           node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"
-
       - name: Test deployment functions santas-workshop-test
         run: echo 'Test deployment and live resource checks succeeded'
-
+        if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.deploy_functions == 'true'
   deploy_prod:
     needs: prepare_release
     if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'
@@ -327,11 +295,11 @@ jobs:
         run: echo 'Checkout revision recorded before candidate execution'
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: 24.18.0
+          cache: pnpm
       - name: Check production deploy prerequisites
         shell: bash
         run: |
@@ -374,7 +342,6 @@ jobs:
           ACCESS_TOKEN="$(gcloud auth print-access-token)"
           curl --fail --silent --show-error --header "Authorization: Bearer $ACCESS_TOKEN" "https://firebaseremoteconfig.googleapis.com/v1/projects/$SANTASHOP_FIREBASE_PROJECT/remoteConfig" > "$RUNNER_TEMP/public-parameters.json"
           node scripts/verify-public-parameters.cjs "$RUNNER_TEMP/public-parameters.json"
-
       - name: Record production deployment result
         if: always()
         env:

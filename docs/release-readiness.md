@@ -27,14 +27,15 @@ workflow source and can differ from its tested SHA. Discovery therefore checks
 checkout markers rather than filtering dispatches by `head_sha`. PR heads and
 synthetic merge commits do not substitute for release evidence.
 
-| Promotion | Required successful validation for the exact SHA | Required successful test deployment |
-| --- | --- | --- |
+| Promotion | Required successful validation for the exact SHA                                                                                                                  | Required successful test deployment                                                |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Functions | `unit_tests`: Functions unit tests; `integration_tests`: Functions integration tests; both `e2e (app) / test` and `e2e (admin) / test`: respective browser suites | Functions `deploy_test`, including live resource checks, in `santas-workshop-test` |
-| App | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | App Hosting in `santas-workshop-test` |
-| Admin | Both app and admin `release / validate_release`: respective E2E, core tests, and target unit tests; canonical `storybook_behavior` | Admin Hosting in `santas-workshop-test` |
+| App       | App `release / validate_release`: app E2E and unit tests; `storybook_behavior (app)`                                                                              | App Hosting in `santas-workshop-test`                                              |
+| Admin     | Admin `release / validate_release`: admin E2E and unit tests; `storybook_behavior (admin)`                                                                        | Admin Hosting in `santas-workshop-test`                                            |
 
-Both hosting validations remain required for every hosting promotion because
-core, models, configuration, and browser behavior cross app boundaries.
+Each Hosting promotion requires evidence for its selected application. Shared
+changes select all affected consumers during CI. Core tests run when shared inputs
+change, and during a manual TEST release. See [CI target selection](ci-selection.md).
 Functions browser jobs use `e2e-target.yml` on separate runners. The gate checks
 all evidence-producing workflow files, including reusable workflows and the
 verifier, against the trusted current source. Changed producers require new evidence.
@@ -60,7 +61,7 @@ production capacity.
 If evidence is missing, run the indicated test workflow from `master` with the
 same resolved SHA and `deployment_target=test`. For missing Storybook evidence,
 dispatch its existing workflow with `release_ref` set to that SHA. Then retry
-production. A path filter can omit one of these runs, so the gate never assumes
+production. Change selection can omit one of these runs, so the gate never assumes
 that a merged commit has complete release evidence.
 
 ### Test execution and rollback

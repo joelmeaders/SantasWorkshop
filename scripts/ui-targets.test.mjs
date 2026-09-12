@@ -1,89 +1,175 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { functionsRequired, uiTargets } from './ui-targets.mjs';
+import { selectChanges } from './ui-targets.mjs';
 
+const empty = {
+	ui: [],
+	e2e: [],
+	storybook: [],
+	shared: false,
+	functions: false,
+	tooling: false,
+	deploy: [],
+};
+const app = {
+	...empty,
+	ui: ['app'],
+	e2e: ['app'],
+	storybook: ['app'],
+	deploy: ['app'],
+};
+const admin = {
+	...empty,
+	ui: ['admin'],
+	e2e: ['admin'],
+	storybook: ['admin'],
+	deploy: ['admin'],
+};
 for (const [name, paths, expected] of [
-	['customer only', ['santashop-app/src/app/home/home.page.ts'], ['app']],
+	['app only', ['santashop-app/src/main.ts'], app],
+	['admin only', ['santashop-admin/src/main.ts'], admin],
 	[
-		'admin only',
-		['santashop-admin/src/app/pages/admin/search/search.service.ts'],
-		['admin'],
+		'app plus README',
+		[
+			'santashop-app/src/main.ts',
+			'santashop-app/README.md',
+			'CHANGELOG.md',
+		],
+		app,
 	],
 	[
-		'customer browser tests',
-		['santashop-e2e/tests/public/account-access.spec.ts'],
-		['app'],
+		'admin and its E2E',
+		[
+			'santashop-admin/src/main.ts',
+			'santashop-e2e/tests/admin/checkin.spec.ts',
+		],
+		admin,
 	],
 	[
-		'staff browser tests',
-		['santashop-e2e/tests/admin/search.spec.ts'],
-		['admin'],
+		'app E2E only',
+		['santashop-e2e/tests/public/signup.spec.ts'],
+		{ ...empty, e2e: ['app'] },
 	],
 	[
-		'both applications',
-		['santashop-app/a.ts', 'santashop-admin/b.ts'],
-		['app', 'admin'],
-	],
-	['shared core', ['santashop-core/src/index.ts'], ['app', 'admin']],
-	['Storybook support', ['.storybook/preview.ts'], ['app', 'admin']],
-	['workflow-only', ['.github/workflows/ui-target.yml'], ['app', 'admin']],
-	['unknown shared input', ['firebase.json'], ['app', 'admin']],
-	[
-		'customer with root changelog',
-		['santashop-app/a.ts', 'CHANGELOG.md'],
-		['app'],
+		'admin E2E only',
+		['santashop-e2e/tests/admin/checkin.spec.ts'],
+		{ ...empty, e2e: ['admin'] },
 	],
 	[
-		'docs before staff change',
-		['docs/release-readiness.md', 'santashop-admin/a.ts'],
-		['admin'],
-	],
-	['customer with root README', ['README.md', 'santashop-app/a.ts'], ['app']],
-	[
-		'executable docs are not prose',
-		['santashop-app/a.ts', 'docs/example.mjs'],
-		['app', 'admin'],
+		'shared E2E fixtures',
+		['santashop-e2e/fixtures/account.ts'],
+		{ ...empty, e2e: ['app', 'admin'] },
 	],
 	[
-		'unknown root prose remains conservative',
-		['santashop-app/a.ts', 'unknown.md'],
-		['app', 'admin'],
+		'app unit only',
+		['santashop-app/src/main.spec.ts'],
+		{ ...empty, ui: ['app'] },
 	],
 	[
-		'backend change with docs',
-		['santashop-functions/src/index.ts', 'docs/testing/e2e.md'],
-		['app', 'admin'],
+		'app story only',
+		['santashop-app/src/main.stories.ts'],
+		{ ...empty, storybook: ['app'] },
 	],
 	[
-		'docs alone fail safe if explicitly invoked',
-		['docs/release-readiness.md'],
-		['app', 'admin'],
+		'admin snapshot only',
+		['storybook-visual/snapshots/windows-2022/mobile/admin-checkin.png'],
+		{ ...empty, storybook: ['admin'] },
 	],
-	['empty input fails safe', [], ['app', 'admin']],
+	[
+		'app snapshot only',
+		[
+			'storybook-visual/snapshots/windows-2022/mobile/registration-home.png',
+		],
+		{ ...empty, storybook: ['app'] },
+	],
+	[
+		'shared core',
+		['santashop-core/src/index.ts'],
+		{
+			...empty,
+			ui: ['app', 'admin'],
+			e2e: ['app', 'admin'],
+			storybook: ['app', 'admin'],
+			shared: true,
+			deploy: ['app', 'admin'],
+		},
+	],
+	[
+		'backend runtime',
+		['santashop-functions/src/index.ts'],
+		{
+			...empty,
+			e2e: ['app', 'admin'],
+			functions: true,
+			deploy: ['functions'],
+		},
+	],
+	[
+		'backend tests',
+		['santashop-functions/test/unit/signup.test.ts'],
+		{ ...empty, functions: true },
+	],
+	[
+		'backend test config',
+		['santashop-functions/__config__.spec.ts'],
+		{ ...empty, functions: true },
+	],
+	[
+		'rules',
+		['firestore.rules'],
+		{ ...empty, e2e: ['app', 'admin'], functions: true, deploy: ['rules'] },
+	],
+	[
+		'CI workflow',
+		['.github/workflows/release-gate.yml'],
+		{ ...empty, tooling: true },
+	],
+	['CI selector', ['scripts/ci-changes.mjs'], { ...empty, tooling: true }],
+	[
+		'prose only',
+		[
+			'README.md',
+			'docs/release-readiness.md',
+			'santashop-functions/README.md',
+		],
+		empty,
+	],
+	['empty diff', [], empty],
 ])
-	test(name, () => assert.deepEqual(uiTargets(paths), expected));
+	test(name, () => assert.deepEqual(selectChanges(paths), expected));
 
-for (const [name, paths, expected] of [
-	['customer only', ['santashop-app/a.ts'], false],
-	['staff with changelog', ['CHANGELOG.md', 'santashop-admin/a.ts'], false],
-	['shared Angular library', ['santashop-core/a.ts'], false],
-	['backend source', ['santashop-functions/src/index.ts'], true],
-	['shared models', ['santashop-models/src/index.ts'], true],
+test('shared models validate and publish all consumers', () => {
+	const actual = selectChanges(['santashop-models/src/index.ts']);
+	assert.deepEqual(actual.deploy, ['app', 'admin', 'functions']);
+	assert.equal(actual.functions, true);
+	assert.equal(actual.shared, true);
+});
+test('unknown executable inputs remain conservative', () =>
+	assert.deepEqual(selectChanges(['unknown.mjs']).deploy, [
+		'app',
+		'admin',
+		'functions',
+	]));
+
+for (const [path, expected] of [
 	[
-		'rules with customer change',
-		['firestore.rules', 'santashop-app/a.ts'],
-		true,
+		'.github/workflows/storybook-pr-validation.yml',
+		{ storybook: ['app', 'admin'] },
 	],
-	['browser fixtures', ['santashop-e2e/fixtures/test-fixtures.ts'], true],
+	['.github/workflows/e2e-target.yml', { e2e: ['app', 'admin'] }],
 	[
-		'browser spec',
-		['santashop-e2e/tests/public/account-access.spec.ts'],
-		true,
+		'.github/workflows/functions-pr-validation.yml',
+		{ functions: true, e2e: ['app', 'admin'] },
 	],
-	['lockfile', ['pnpm-lock.yaml'], true],
-	['workflow', ['.github/workflows/e2e-target.yml'], true],
-	['unknown input', ['unknown.mjs'], true],
-	['empty input', [], true],
+	[
+		'.github/workflows/admin-test-and-prod-release.yml',
+		{ ui: ['admin'], e2e: ['admin'], storybook: ['admin'] },
+	],
 ])
-	test(`backend selection: ${name}`, () =>
-		assert.equal(functionsRequired(paths), expected));
+	test('workflow validates its consumer without deployment: ' + path, () =>
+		assert.deepEqual(selectChanges([path]), {
+			...empty,
+			tooling: true,
+			...expected,
+		}),
+	);

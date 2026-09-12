@@ -9,6 +9,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Changed
 
+- Select CI tests and TEST deployments by affected application, shared dependency, or backend input. Keep test-only changes from deploying code, and scope Storybook and production evidence to the selected application.
+
 - Direct registration Help to Facebook messaging in English and Spanish. Use Ionic round social buttons with evergreen backgrounds and contrasting Facebook/Instagram logos on all home states.
 
 - Advance the workspace and both applications to `2026.09.0-beta.6`.

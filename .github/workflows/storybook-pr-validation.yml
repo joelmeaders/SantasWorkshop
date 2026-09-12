@@ -1,72 +1,31 @@
 name: Storybook Validation
-
-on:
-  pull_request:
-    paths:
-      - '.storybook/**'
-      - 'storybook-visual/**'
-      - '.github/workflows/storybook-pr-validation.yml'
-      - 'santashop-admin/**'
-      - 'santashop-app/**'
-      - 'santashop-core/**'
-      - 'santashop-models/**'
-      - 'angular.json'
-      - 'eslint.config.js'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'tsconfig.json'
-      - 'tsconfig.storybook.json'
-      - 'vitest.storybook.config.ts'
-      - 'test-helpers/**'
-      - 'config.firebase.cjs'
-      - 'vitest.config.mjs'
-      - 'vitest.admin.config.mjs'
-      - 'vitest.setup.ts'
+'on':
+  pull_request: null
   push:
-    branches: [master]
-    paths:
-      - '.storybook/**'
-      - 'storybook-visual/**'
-      - '.github/workflows/storybook-pr-validation.yml'
-      - 'santashop-admin/**'
-      - 'santashop-app/**'
-      - 'santashop-core/**'
-      - 'santashop-models/**'
-      - 'angular.json'
-      - 'eslint.config.js'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'tsconfig.json'
-      - 'tsconfig.storybook.json'
-      - 'vitest.storybook.config.ts'
-      - 'test-helpers/**'
-      - 'config.firebase.cjs'
-      - 'vitest.config.mjs'
-      - 'vitest.admin.config.mjs'
-      - 'vitest.setup.ts'
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       release_ref:
         description: Exact release SHA for behavior evidence (defaults to workflow SHA)
         type: string
         default: ''
-
 permissions:
   contents: read
-
 concurrency:
   group: storybook-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 jobs:
+  changes:
+    if: github.event_name != 'workflow_dispatch'
+    uses: ./.github/workflows/ci-changes.yml
   storybook_behavior:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       TEST_SANTASHOP_PROGRAM_YEAR: '2026'
       TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+      STORYBOOK_TARGETS: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -79,31 +38,37 @@ jobs:
         run: echo 'Checkout revision recorded before candidate execution'
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
+          node-version: 24.18.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run e2e:browser:setup:ci
       - run: pnpm run config:app:e2e && pnpm run config:admin:e2e
       - name: Storybook behavior tests
         run: pnpm run ci:storybook
+    needs: changes
+    if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.changes.result == 'success' && needs.changes.outputs.storybook == 'true'))
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '{"target":["app","admin"]}' || needs.changes.outputs.storybook_matrix || '{"target":[]}') }}
   storybook_visual:
-    if: github.event_name == 'pull_request'
+    if: always() && !cancelled() && github.event_name == 'pull_request' && (github.event_name == 'workflow_dispatch' || (needs.changes.result == 'success' && needs.changes.outputs.storybook == 'true'))
     runs-on: windows-2022
     timeout-minutes: 30
     env:
       STORYBOOK_SNAPSHOT_PLATFORM: windows-2022
+      STORYBOOK_TARGETS: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
-          cache: 'pnpm'
+          node-version: 24.18.0
+          cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install chromium
       - run: pnpm run storybook:build
@@ -115,7 +80,7 @@ jobs:
         if: steps.compare.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: storybook-visual-differences
+          name: storybook-visual-differences-${{ matrix.target }}
           path: storybook-visual/test-results
           retention-days: 14
       - name: Capture candidate references for review
@@ -125,9 +90,13 @@ jobs:
         if: always() && steps.compare.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
-          name: storybook-windows-2022-candidates
+          name: storybook-windows-2022-candidates-${{ matrix.target }}
           path: storybook-visual/snapshots/windows-2022
           retention-days: 14
       - name: Require matching reviewed references
         if: always() && steps.compare.outcome == 'failure'
         run: throw 'Visual comparisons failed. Review the difference and candidate artifacts; reference images are never committed automatically.'
+    needs: changes
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(github.event_name == 'workflow_dispatch' && '{"target":["app","admin"]}' || needs.changes.outputs.storybook_matrix || '{"target":[]}') }}

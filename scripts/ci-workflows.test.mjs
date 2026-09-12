@@ -11,7 +11,9 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { functionsRequired, uiTargets } from './ui-targets.mjs';
+import { selectChanges } from './ui-targets.mjs';
+import { changeOutputs } from './ci-changes.mjs';
+import { requireSelectedChecks } from './ci-results.mjs';
 
 const require = createRequire(import.meta.url);
 const { load } = createRequire(require.resolve('eslint'))('js-yaml');
@@ -205,166 +207,121 @@ test('isolated browser job can build real app and Functions configuration withou
 	);
 });
 
-// Evaluate the actual job condition with synthetic GitHub results. This checks
-// that deliberately omitted backend checks do not suppress the browser matrix,
-// while failures and unexpected omissions still prevent it from starting.
-const canStartBrowsers = (paths, overrides = {}, cancelled = false) => {
-	const needs = Object.fromEntries(
-		['targets', 'shared', 'ui', 'functions'].map((name) => [
-			name,
-			{ result: 'success' },
-		]),
-	);
-	needs.targets.outputs = { functions: String(functionsRequired(paths)) };
-	if (!functionsRequired(paths)) needs.functions.result = 'skipped';
-	for (const [name, result] of Object.entries(overrides))
-		needs[name].result = result;
+// Exercise the real workflow predicates with selected, omitted, and failed jobs.
+function syntheticNeeds(paths) {
+	const selection = selectChanges(paths);
+	const outputs = changeOutputs(selection);
+	return {
+		targets: { result: 'success', outputs },
+		...Object.fromEntries(
+			['tooling', 'shared', 'ui', 'functions', 'e2e'].map((key) => [
+				key,
+				{ result: outputs[key] === 'true' ? 'success' : 'skipped' },
+			]),
+		),
+	};
+}
+function browsersAllowed(needs, cancelled = false) {
 	return Function(
 		'needs',
 		'always',
 		'cancelled',
-		`return (${pr.jobs.e2e.if});`,
+		`return (${pr.jobs.e2e.if})`,
 	)(
 		needs,
 		() => true,
 		() => cancelled,
 	);
-};
-
-for (const [name, paths, targets] of [
-	[
-		'customer plus prose',
-		['santashop-app/src/main.ts', 'CHANGELOG.md'],
-		['app'],
-	],
-	[
-		'staff plus prose',
-		['docs/testing/e2e.md', 'santashop-admin/src/main.ts'],
-		['admin'],
-	],
-	['backend only', ['santashop-functions/src/index.ts'], ['app', 'admin']],
-	['shared models', ['santashop-models/src/index.ts'], ['app', 'admin']],
-	['security rules', ['firestore.rules'], ['app', 'admin']],
-	['root configuration', ['pnpm-lock.yaml'], ['app', 'admin']],
-	[
-		'shared browser fixtures',
-		['santashop-e2e/fixtures/test-fixtures.ts'],
-		['app', 'admin'],
-	],
+}
+for (const [name, paths] of [
+	['app', ['santashop-app/src/main.ts']],
+	['admin', ['santashop-admin/src/main.ts']],
+	['backend', ['santashop-functions/src/index.ts']],
+	['app browser only', ['santashop-e2e/tests/public/signup.spec.ts']],
+	['rules', ['firestore.rules']],
 ])
-	test(`${name} reaches each selected browser suite once`, () => {
-		assert.equal(canStartBrowsers(paths), true);
-		assert.deepEqual(uiTargets(paths), targets);
-		assert.equal(pr.jobs.e2e.uses, './.github/workflows/e2e-target.yml');
-		assert.equal(
-			pr.jobs.e2e.strategy.matrix,
-			'${{ fromJSON(needs.targets.outputs.matrix) }}',
-		);
-		assert.equal(
-			Object.values(pr.jobs).filter(({ uses }) =>
-				uses?.endsWith('/e2e-target.yml'),
-			).length,
-			1,
-		);
-		const browserStep = ui.jobs.validate_release.steps.find(
-			({ name }) => name === 'Customer or staff E2E tests',
-		);
-		assert.equal(
-			browserStep.if,
-			'${{ inputs.deploy && !inputs.reuse_tests }}',
-		);
-		assert.equal(pr.jobs.ui.with.deploy, undefined);
-		assert.deepEqual(Object.keys(functions.on), ['workflow_call']);
-		assert.equal(
-			Object.values(functions.jobs)
-				.flatMap(({ steps }) => steps)
-				.some(({ run }) => run?.includes('e2e:test')),
-			false,
-		);
+	test(`${name} starts only its selected browsers and accepts intentional skips`, () => {
+		const needs = syntheticNeeds(paths);
+		assert.equal(browsersAllowed(needs), true);
+		assert.doesNotThrow(() => requireSelectedChecks(needs));
+		assert.equal(browsersAllowed(needs, true), false);
+		for (const job of ['targets', 'ui', 'shared', 'functions', 'tooling']) {
+			const failed = structuredClone(needs);
+			failed[job].result = 'failure';
+			assert.equal(browsersAllowed(failed), false, job);
+			assert.throws(() => requireSelectedChecks(failed), undefined, job);
+		}
 	});
-
-for (const job of ['targets', 'shared', 'ui', 'functions'])
-	for (const outcome of ['failure', 'cancelled', 'skipped'])
-		test(`${job} ${outcome} prevents backend PR browser execution`, () => {
-			assert.equal(
-				canStartBrowsers(['santashop-functions/src/index.ts'], {
-					[job]: outcome,
-				}),
-				false,
-			);
-		});
-
-test('cancelled PR never starts new browser jobs', () => {
-	assert.equal(
-		canStartBrowsers(['santashop-app/src/main.ts'], {}, true),
-		false,
-	);
-	assert.equal(pr.concurrency['cancel-in-progress'], true);
-	assert.ok(
-		pr.concurrency.group.includes('github.event.pull_request.number'),
-	);
+for (const paths of [
+	[],
+	['README.md'],
+	['santashop-app/src/main.spec.ts'],
+	['santashop-app/src/main.stories.ts'],
+	['scripts/ci-changes.mjs'],
+])
+	test(`no unselected browsers: ${paths}`, () => {
+		const needs = syntheticNeeds(paths);
+		assert.equal(browsersAllowed(needs), false);
+		assert.doesNotThrow(() => requireSelectedChecks(needs));
+	});
+test('selected checks cannot be silently skipped or cancelled', () => {
+	for (const job of ['tooling', 'shared', 'ui', 'functions', 'e2e'])
+		for (const result of ['skipped', 'failure', 'cancelled']) {
+			const needs = syntheticNeeds([
+				'unknown.mjs',
+				'scripts/ci-changes.mjs',
+			]);
+			needs[job].result = result;
+			assert.throws(() => requireSelectedChecks(needs));
+		}
 });
-
-test('single PR owner covers backend and shared browser inputs', () => {
-	for (const path of [
-		'santashop-app/**',
-		'santashop-admin/**',
-		'santashop-core/**',
-		'santashop-models/**',
-		'santashop-functions/**',
-		'santashop-e2e/**',
-		'firestore.rules',
-		'firestore.indexes.json',
-		'storage.rules',
-		'database.rules.json',
-		'firebase.json',
-		'firebase.e2e.json',
-		'config.functions.cjs',
-		'config.firebase.cjs',
-		'pnpm-lock.yaml',
-		'pnpm-workspace.yaml',
-		'.github/workflows/functions-pr-validation.yml',
-		'.github/workflows/e2e-target.yml',
-	])
-		assert.ok(pr.on.pull_request.paths.includes(path), path);
+test('selection failures and missing outputs fail the final check', () => {
+	assert.throws(() => requireSelectedChecks({}));
+	const needs = syntheticNeeds([]);
+	delete needs.targets.outputs.ui;
+	assert.throws(() => requireSelectedChecks(needs));
 });
-
-test('release browser targets use separate runners and accept no deployment secrets', () => {
-	assert.deepEqual(release.jobs.e2e.strategy.matrix.target, ['app', 'admin']);
-	assert.equal(release.jobs.e2e.strategy['fail-fast'], false);
-	assert.equal(browser.jobs.test['runs-on'], 'ubuntu-latest');
-	assert.equal(browser.on.workflow_call.secrets, undefined);
-	assert.equal(pr.jobs.e2e.secrets, undefined);
-	assert.equal(release.jobs.e2e.secrets, undefined);
-	assert.equal(browser.env.LOCAL_AWS_ACCESS_KEY_ID, 'e2e-not-used');
-	assert.equal(browser.env.LOCAL_AWS_SECRET_ACCESS_KEY, 'e2e-not-used');
-	const checkout = browser.jobs.test.steps.find(({ uses }) =>
-		uses?.startsWith('actions/checkout@'),
-	);
-	assert.equal(checkout.with.ref, '${{ inputs.release_ref }}');
-	const config = readFileSync('santashop-e2e/playwright.config.ts', 'utf8');
-	assert.match(config, /fullyParallel: false/);
-	assert.match(config, /workers: 1/);
-});
-
-test('final PR check depends on every validation job, including E2E', () => {
+test('PR workflow always reports its required aggregate, even for documentation', () => {
+	assert.equal(pr.on.pull_request, null);
 	assert.equal(pr.jobs.build_validation.if, 'always()');
 	assert.deepEqual(pr.jobs.build_validation.needs, [
 		'targets',
+		'tooling',
 		'shared',
 		'ui',
 		'functions',
 		'e2e',
 	]);
-	const check = pr.jobs.build_validation.steps[0].run;
-	for (const job of ['targets', 'shared', 'ui', 'e2e'])
-		assert.ok(
-			check.includes(`test '\${{ needs.${job}.result }}' = success`),
+	assert.equal(
+		pr.jobs.build_validation.steps.at(-1).run,
+		'node scripts/ci-results.mjs',
+	);
+	for (const key of ['ui', 'e2e'])
+		assert.equal(
+			pr.jobs[key].strategy.matrix,
+			'${{ fromJSON(needs.targets.outputs.' + key + '_matrix) }}',
 		);
-	assert.ok(
-		check.includes("true) test '${{ needs.functions.result }}' = success"),
+	assert.equal(
+		Object.values(pr.jobs).filter((job) =>
+			job.uses?.endsWith('/e2e-target.yml'),
+		).length,
+		1,
 	);
-	assert.ok(
-		check.includes("false) test '${{ needs.functions.result }}' = skipped"),
-	);
+	assert.deepEqual(Object.keys(functions.on), ['workflow_call']);
+});
+test('browser tests use isolated runners without deployment credentials', () => {
+	assert.deepEqual(release.jobs.e2e.strategy.matrix.target, ['app', 'admin']);
+	assert.equal(browser.jobs.test['runs-on'], 'ubuntu-latest');
+	assert.equal(browser.on.workflow_call.secrets, undefined);
+	assert.equal(pr.jobs.e2e.secrets, undefined);
+	assert.equal(release.jobs.e2e.secrets, undefined);
+});
+test('storybook behavior and visual jobs consume the same selected target matrix', () => {
+	const workflow = readWorkflow('storybook-pr-validation');
+	for (const name of ['storybook_behavior', 'storybook_visual']) {
+		const job = workflow.jobs[name];
+		assert.equal(job.env.STORYBOOK_TARGETS, '${{ matrix.target }}');
+		assert.match(job.strategy.matrix, /storybook_matrix/);
+		assert.match(job.if, /needs.changes.outputs.storybook == 'true'/);
+	}
 });

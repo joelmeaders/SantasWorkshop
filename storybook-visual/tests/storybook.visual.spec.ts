@@ -3,11 +3,17 @@ import path from 'node:path';
 
 import { expect, test, type Page } from '@playwright/test';
 
+import {
+	selectStorybookEntries,
+	storybookTargets,
+} from '../../.storybook/targets';
+
 interface StorybookEntry {
 	id: string;
 	name: string;
 	title: string;
 	type: string;
+	importPath: string;
 }
 
 interface StorybookIndex {
@@ -23,9 +29,10 @@ const storybookIndexPath = path.resolve(
 const storybookIndex = JSON.parse(
 	readFileSync(storybookIndexPath, 'utf8'),
 ) as StorybookIndex;
-const stories = Object.values(storybookIndex.entries)
-	.filter((entry) => entry.type === 'story')
-	.sort((left, right) => left.id.localeCompare(right.id));
+const stories = selectStorybookEntries(
+	Object.values(storybookIndex.entries),
+	storybookTargets(),
+).sort((left, right) => left.id.localeCompare(right.id));
 const baseOrigin = new URL(
 	process.env['STORYBOOK_BASE_URL'] ??
 		`http://127.0.0.1:${process.env['STORYBOOK_PORT'] ?? '6007'}`,

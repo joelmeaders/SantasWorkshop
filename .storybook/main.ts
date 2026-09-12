@@ -3,14 +3,18 @@ import { fileURLToPath } from 'node:url';
 
 import type { StorybookConfig } from '@storybook/angular-vite';
 
+import { storybookTargets, storybookTsconfig } from './targets';
+
 const configDirectory = path.dirname(fileURLToPath(import.meta.url));
 const workspaceDirectory = path.resolve(configDirectory, '..');
+const targets = storybookTargets();
 
 const config: StorybookConfig = {
 	stories: [
 		'./Introduction.mdx',
-		'../santashop-app/src/**/*.stories.ts',
-		'../santashop-admin/src/**/*.stories.ts',
+		...targets.map(
+			(target) => `../santashop-${target}/src/**/*.stories.ts`,
+		),
 	],
 	addons: [
 		'@storybook/addon-docs',
@@ -23,7 +27,7 @@ const config: StorybookConfig = {
 		options: {
 			tsconfig: path.resolve(
 				workspaceDirectory,
-				'tsconfig.storybook.json',
+				storybookTsconfig(targets),
 			),
 		},
 	},

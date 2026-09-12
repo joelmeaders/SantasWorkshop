@@ -562,7 +562,8 @@ export class RegistrationPage {
 						labelText = label;
 					}
 
-					return `${value} ${labelText}`;
+					const count = typeof value === 'number' ? new Intl.NumberFormat(this.language.locale()).format(value) : '';
+					return `${count} ${labelText}`;
 				},
 			},
 		},

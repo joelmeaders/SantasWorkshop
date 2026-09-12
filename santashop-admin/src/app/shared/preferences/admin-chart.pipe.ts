@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { type ChartData, type ChartOptions, type ChartType } from 'chart.js';
+import { type Context } from 'chartjs-plugin-datalabels';
 import { AdminLanguageService } from './admin-language.service';
 import { AdminThemeService } from './admin-theme.service';
 
@@ -72,6 +73,7 @@ export class AdminChartOptionsPipe implements PipeTransform {
 		const grid = this.theme.dark() ? '#3c3a38' : '#d8d6d2';
 		this.result = {
 			...options,
+			animation: false,
 			color,
 			locale: this.language.locale(),
 			responsive: true,
@@ -83,6 +85,8 @@ export class AdminChartOptionsPipe implements PipeTransform {
 				},
 				datalabels: {
 					...options?.plugins?.datalabels,
+					display: options?.plugins?.datalabels?.display ??
+						((context: Context): boolean => context.dataset.data[context.dataIndex] !== 0),
 					color: '#fff',
 					font: { size: 12, weight: 'bold' },
 					textShadowBlur: 0,

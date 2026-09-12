@@ -83,35 +83,35 @@
 				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 					@let totalCustomersCount = totalCustomers();
 					<div class="count-container">
-						<h1>{{ totalCustomersCount }}</h1>
+						<h1>{{ totalCustomersCount | adminText }}</h1>
 						<h2>{{ 'Shoppers' | adminText }}</h2>
 					</div>
 				</ion-col>
 				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 					@let totalChildrenCount = totalChildren();
 					<div class="count-container">
-						<h1>{{ totalChildrenCount }}</h1>
+						<h1>{{ totalChildrenCount | adminText }}</h1>
 						<h2>{{ 'Children' | adminText }}</h2>
 					</div>
 				</ion-col>
 				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 					@let preregisteredCount = totalPreregistered();
 					<div class="count-container">
-						<h1>{{ preregisteredCount }}</h1>
+						<h1>{{ preregisteredCount | adminText }}</h1>
 						<h2>{{ 'Registered Ahead' | adminText }}</h2>
 					</div>
 				</ion-col>
 				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
 					@let onSiteCount = onSiteRegistrations();
 					<div class="count-container">
-						<h1>{{ onSiteCount }}</h1>
+						<h1>{{ onSiteCount | adminText }}</h1>
 						<h2>{{ 'Registered On Site' | adminText }}</h2>
 					</div>
 				</ion-col>
 				<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
 					@let modifiedCount = totalModifiedRegistrations();
 					<div class="count-container">
-						<h1>{{ modifiedCount }}</h1>
+						<h1>{{ modifiedCount | adminText }}</h1>
 						<h2>{{ 'Changes (Adjusted)' | adminText }}</h2>
 						<p>
 							{{

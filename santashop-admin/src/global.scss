@@ -226,3 +226,9 @@ html[data-admin-theme]
 ion-header::after {
 	display: none;
 }
+
+ion-checkbox::part(label),
+ion-toggle::part(label) {
+	white-space: normal;
+	overflow-wrap: anywhere;
+}

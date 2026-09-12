@@ -69,12 +69,12 @@
 					>
 						@if (hasScheduleData()) {
 							<div class="count-container">
-								<h1>{{ registrationCountBySchedule() }}</h1>
+								<h1>{{ registrationCountBySchedule() | adminText }}</h1>
 								<h2>{{ 'Registrations' | adminText }}</h2>
 							</div>
 						} @else {
 							<div class="count-container">
-								<h1>{{ registrationCount() }}</h1>
+								<h1>{{ registrationCount() | adminText }}</h1>
 								<h2>{{ 'Registrations' | adminText }}</h2>
 							</div>
 						}
@@ -88,7 +88,7 @@
 					>
 						@if (childCount(); as count) {
 							<div class="count-container">
-								<h1>{{ count }}</h1>
+								<h1>{{ count | adminText }}</h1>
 								<h2>{{ 'Children' | adminText }}</h2>
 							</div>
 						}

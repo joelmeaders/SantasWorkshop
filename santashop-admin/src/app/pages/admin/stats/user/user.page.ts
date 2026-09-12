@@ -3,6 +3,7 @@ import {
 	AdminChartOptionsPipe,
 } from '../../../../shared/preferences/admin-chart.pipe';
 import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
 import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import {
@@ -80,6 +81,7 @@ Chart.register(ChartDataLabels);
 	],
 })
 export class UserPage {
+	private readonly language = inject(AdminLanguageService);
 	private readonly httpService = inject(AdminReadRepository);
 	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
@@ -253,7 +255,9 @@ export class UserPage {
 					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
-					return `${ctx.dataset?.data[0]} - ${ctx.dataset.label}`;
+					const value = ctx.dataset.data[0];
+					const count = typeof value === 'number' ? new Intl.NumberFormat(this.language.locale()).format(value) : '';
+					return `${count} - ${ctx.dataset.label}`;
 				},
 			},
 		},
@@ -293,7 +297,9 @@ export class UserPage {
 					weight: 'bold',
 				},
 				formatter: (_, ctx) => {
-					return `${ctx.dataset?.data[0]} Shoppers - ${ctx.dataset.label}`;
+					const value = ctx.dataset.data[0];
+					const count = typeof value === 'number' ? new Intl.NumberFormat(this.language.locale()).format(value) : '';
+					return `${count} ${this.language.text('Shoppers')} - ${ctx.dataset.label}`;
 				},
 			},
 		},

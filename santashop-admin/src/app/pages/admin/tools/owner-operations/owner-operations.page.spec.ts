@@ -48,7 +48,6 @@ describe('OwnerOperationsPage', () => {
 		component.preview.set({ previewId: 'old' } as never);
 		component.operation.set({ id: 'old' } as never);
 		component.errorMessage.set('old error');
-		component.statusMessage.set('old status');
 		component.form.controls.operation.setValue('yearly-reset');
 
 		component.onOperationChange();

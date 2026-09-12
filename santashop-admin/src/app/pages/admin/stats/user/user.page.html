@@ -1,129 +1,183 @@
-<admin-header title="Shopper Stats">
+<admin-header title="{{ 'Shopper Stats' | adminText }}">
 	<ion-item>
-		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
+		<ion-select
+			okText="{{ 'OK' | adminText }}"
+			cancelText="{{ 'Cancel' | adminText }}"
+			[(ngModel)]="year"
+			(ionChange)="refreshYear.next()"
+		>
 			@for (years of schedule; track years.year) {
-			<ion-select-option [value]="years.year">
-				{{ years.year }}
-			</ion-select-option>
+				<ion-select-option [value]="years.year">
+					{{ years.year }}
+				</ion-select-option>
 			}
 		</ion-select>
 	</ion-item>
 </admin-header>
 
 <ion-content class="ion-padding-vertical">
-	<ion-button fill="outline" (click)="refresh()">Refresh report</ion-button>
-	@if (state(); as state) { @if (state.status === 'loading') {
-	<p role="status">Loading report…</p>
-	} @else if (state.status === 'error') {
-	<p role="alert">
-		Report could not be loaded. Select Refresh report to try again.
-	</p>
-	} @else if (!state.data) {
-	<p>No shopper data for this year.</p>
-	} @else {
-	<div class="ion-padding-horizontal">
-		<admin-report-freshness
-			label="Shopper details"
-			[calculatedAt]="state.data.calculatedAt"
-			[currentSeason]="year === programYear"
-		/>
-		<h2>Total shoppers: {{ state.data.totalUsers ?? 'Unavailable' }}</h2>
-	</div>
-	<ion-grid>
-		<ion-row>
-			@if (referrers(); as referrers) {
-			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-				<ion-toolbar color="none" class="ion-padding-horizontal">
-					<h3 slot="start">How Shoppers Heard About Us</h3>
-				</ion-toolbar>
-				<p class="ion-padding-horizontal">
-					The ten most common answers.
-				</p>
-				<div class="referrer-container">
-					<canvas
-						baseChart
-						[options]="barChartOptions"
-						[datasets]="referrers"
-						[legend]="false"
-						[labels]="['']"
-						type="bar"
-					></canvas>
-				</div>
-			</ion-col>
-			} @if (zipCodes(); as zipCodes) {
-			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-				<ion-toolbar color="none" class="ion-padding-horizontal">
-					<h3 slot="start">Top 10 ZIP Codes</h3>
-				</ion-toolbar>
-				<div class="referrer-container">
-					<canvas
-						baseChart
-						[options]="zipCodeChartOptions"
-						[datasets]="zipCodes"
-						[legend]="false"
-						[labels]="['']"
-						type="bar"
-					></canvas>
-				</div>
-			</ion-col>
-			}
-		</ion-row>
-	</ion-grid>
-	<div class="ion-padding">
-		<h2>Report details</h2>
-		@if (state.data.population !== 'all-users') {
-		<p>
-			Older totals may leave out shoppers without a ZIP code or referral.
-		</p>
+	<ion-button fill="outline" (click)="refresh()">
+		{{ 'Refresh report' | adminText }}
+	</ion-button>
+	@if (state(); as state) {
+		@if (state.status === 'loading') {
+			<p role="status">{{ 'Loading report…' | adminText }}</p>
+		} @else if (state.status === 'error') {
+			<p role="alert">
+				{{
+					'Report could not be loaded. Select Refresh report to try again.'
+						| adminText
+				}}
+			</p>
+		} @else if (!state.data) {
+			<p>{{ 'No shopper data for this year.' | adminText }}</p>
 		} @else {
-		<p>
-			Includes all saved shopper profiles. Missing answers appear as
-			Unknown.
-		</p>
+			<div class="ion-padding-horizontal">
+				<admin-report-freshness
+					label="{{ 'Shopper details' | adminText }}"
+					[calculatedAt]="state.data.calculatedAt"
+					[currentSeason]="year === programYear"
+				/>
+				<h2>
+					{{ 'Total shoppers: {{v0}}' | adminText: {v0:
+					(state.data.totalUsers ?? 'Unavailable') | adminText} }}
+				</h2>
+			</div>
+			<ion-grid>
+				<ion-row>
+					@if (referrers(); as referrers) {
+						<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
+							<ion-toolbar
+								color="none"
+								class="ion-padding-horizontal"
+							>
+								<h3 slot="start">
+									{{
+										'How Shoppers Heard About Us'
+											| adminText
+									}}
+								</h3>
+							</ion-toolbar>
+							<p class="ion-padding-horizontal">
+								{{ 'The ten most common answers.' | adminText }}
+							</p>
+							<div class="referrer-container">
+								<canvas
+									baseChart
+									[options]="
+										barChartOptions | adminChartOptions
+									"
+									[data]="
+										{ datasets: referrers, labels: [''] }
+											| adminChart
+									"
+									[legend]="false"
+									type="bar"
+								></canvas>
+							</div>
+						</ion-col>
+					}
+					@if (zipCodes(); as zipCodes) {
+						<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
+							<ion-toolbar
+								color="none"
+								class="ion-padding-horizontal"
+							>
+								<h3 slot="start">
+									{{ 'Top 10 ZIP Codes' | adminText }}
+								</h3>
+							</ion-toolbar>
+							<div class="referrer-container">
+								<canvas
+									baseChart
+									[options]="
+										zipCodeChartOptions | adminChartOptions
+									"
+									[data]="
+										{ datasets: zipCodes, labels: [''] }
+											| adminChart
+									"
+									[legend]="false"
+									type="bar"
+								></canvas>
+							</div>
+						</ion-col>
+					}
+				</ion-row>
+			</ion-grid>
+			<div class="ion-padding">
+				<h2>{{ 'Report details' | adminText }}</h2>
+				@if (state.data.population !== 'all-users') {
+					<p>
+						{{
+							'Older totals may leave out shoppers without a ZIP code or referral.'
+								| adminText
+						}}
+					</p>
+				} @else {
+					<p>
+						{{
+							'Includes all saved shopper profiles. Missing answers appear as
+      Unknown.' | adminText
+						}}
+					</p>
+				}
+				<admin-report-table
+					caption="{{ 'Shopper referrals' | adminText }}"
+					[columns]="referralColumns"
+					[rows]="referralRows()"
+					[totals]="referralTotal()"
+					[filename]="'shopper-referrals-' + year"
+					[exportContext]="exportContext()"
+				/>
+				<admin-report-table
+					caption="{{ 'Shopper ZIP codes' | adminText }}"
+					[columns]="zipColumns"
+					[rows]="zipRows()"
+					[totals]="zipTotal()"
+					[filename]="'shopper-zip-codes-' + year"
+					[exportContext]="exportContext()"
+				/>
+				@if (state.data.dailySignups !== undefined) {
+					<p>
+						{{
+							'Saved daily counts include shopper profiles later removed, so they may
+      be higher than the total above. Profiles removed before a report ran are
+      not counted.' | adminText
+						}}
+					</p>
+					<p>
+						{{ 'Profiles with missing creation dates: {{v0}}.
+						Profiles created in other years: {{ v1 }}.' | adminText:
+						{v0: (state.data.signupDatesUnavailable ??
+						'Unavailable') | adminText, v1:
+						(state.data.signupDatesOutsideProgramYear ??
+						'Unavailable') | adminText} }}
+					</p>
+					<admin-report-table
+						caption="{{ 'Shopper profiles by day' | adminText }}"
+						[columns]="signupColumns"
+						[rows]="signupRows()"
+						[columnFormats]="{ '0': 'calendar-date' }"
+						[filename]="'profile-creation-days-' + year"
+						[exportContext]="signupExportContext()"
+					/>
+				} @else {
+					<p>
+						{{
+							'Daily shopper totals were not saved in this report.'
+								| adminText
+						}}
+					</p>
+				}
+			</div>
 		}
-		<admin-report-table
-			caption="Shopper referrals"
-			[columns]="referralColumns"
-			[rows]="referralRows()"
-			[totals]="referralTotal()"
-			[filename]="'shopper-referrals-' + year"
-			[exportContext]="exportContext()"
-		/>
-		<admin-report-table
-			caption="Shopper ZIP codes"
-			[columns]="zipColumns"
-			[rows]="zipRows()"
-			[totals]="zipTotal()"
-			[filename]="'shopper-zip-codes-' + year"
-			[exportContext]="exportContext()"
-		/>
-		@if (state.data.dailySignups !== undefined) {
-		<p>
-			Saved daily counts include shopper profiles later removed, so they
-			may be higher than the total above. Profiles removed before a report
-			ran are not counted.
-		</p>
-		<p>
-			Profiles with missing creation dates: {{
-			state.data.signupDatesUnavailable ?? 'Unavailable' }}. Profiles
-			created in other years: {{ state.data.signupDatesOutsideProgramYear
-			?? 'Unavailable' }}.
-		</p>
-		<admin-report-table
-			caption="Shopper profiles by day"
-			[columns]="signupColumns"
-			[rows]="signupRows()"
-			[filename]="'profile-creation-days-' + year"
-			[exportContext]="signupExportContext()"
-		/>
-		} @else {
-		<p>Daily shopper totals were not saved in this report.</p>
-		}
-	</div>
-	} }
+	}
 	<ng-template #noData>
 		<div class="ion-padding">
-			<ion-title> No data yet. Please check back later. </ion-title>
+			<ion-title>
+				{{ 'No data yet. Please check back later.' | adminText }}
+			</ion-title>
 		</div>
 	</ng-template>
 </ion-content>

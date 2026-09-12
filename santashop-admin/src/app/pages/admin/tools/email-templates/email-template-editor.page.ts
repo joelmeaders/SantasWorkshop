@@ -1,3 +1,6 @@
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectorRef } from '@angular/core';
 import {
 	MAX_TEMPLATE_FILE_BYTES,
@@ -79,6 +82,7 @@ import {
 	styleUrls: ['./email-template-editor.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		ReactiveFormsModule,
 		EmailTemplateCodeEditorComponent,
@@ -102,6 +106,7 @@ import {
 	],
 })
 export class EmailTemplateEditorPage implements AfterViewInit {
+	public readonly language = inject(AdminLanguageService);
 	private readonly changeDetector = inject(ChangeDetectorRef);
 	private readonly route = inject(ActivatedRoute);
 	private readonly router = inject(Router);
@@ -366,9 +371,13 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 
 			const result =
 				await this.emailTemplateService.sendTestEmailTemplate(payload);
-			await this.showMessage(
-				'Test email sent',
-				`A rendered draft email was sent to ${result.recipientEmail}.`,
+			await this.showMessage('Test email sent', () =>
+				this.language.text(
+					'A rendered draft email was sent to {{v0}}.',
+					{
+						v0: result.recipientEmail,
+					},
+				),
 			);
 		} catch (error) {
 			await this.showError(error, 'Could not send a test email.');
@@ -409,9 +418,10 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 				currentHtml: result.html,
 			});
 			this.isCreateMode.set(false);
-			await this.showMessage(
-				'Saved',
-				`Revision r${result.revision.revisionNumber} saved.`,
+			await this.showMessage('Saved', () =>
+				this.language.text('Revision r{{v0}} saved.', {
+					v0: result.revision.revisionNumber,
+				}),
 			);
 			if (!this.route.snapshot.paramMap.get('key')) {
 				await this.router.navigate(
@@ -454,15 +464,25 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			language === 'English'
 				? ' Spanish messages also use this template when no Spanish template is published.'
 				: '';
-		const confirmation = await this.alerts.create({
+		const confirmation = await createAdminAlert(this.alerts, () => ({
 			header: 'Publish and activate template?',
-			subHeader: `${profileLabel} · ${language}`,
-			message: `Publishing makes this template active for all ${profileLabel.toLowerCase()} messages in ${language}. It replaces the template currently used for those messages.${fallbackNotice}`,
+			subHeader: this.language.text('{{v0}} · {{v1}}', {
+				v0: this.language.text(profileLabel),
+				v1: this.language.text(language),
+			}),
+			message: this.language.text(
+				'Publishing makes this template active for all {{v0}} messages in {{v1}}. It replaces the template currently used for those messages.{{v2}}',
+				{
+					v0: this.language.text(profileLabel.toLowerCase()),
+					v1: this.language.text(language),
+					v2: this.language.text(fallbackNotice),
+				},
+			),
 			buttons: [
 				{ text: 'Cancel', role: 'cancel' },
 				{ text: 'Publish and activate', role: 'confirm' },
 			],
-		});
+		}));
 		await confirmation.present();
 		const confirmationResult = await confirmation.onDidDismiss();
 		if (confirmationResult.role !== 'confirm') {
@@ -485,9 +505,14 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 						: revision,
 				),
 			);
-			await this.showMessage(
-				'Published',
-				`${result.template.displayName} is now published to AWS SES as ${result.template.awsTemplateName}.`,
+			await this.showMessage('Published', () =>
+				this.language.text(
+					'{{v0}} is now published to AWS SES as {{v1}}.',
+					{
+						v0: result.template.displayName,
+						v1: result.template.awsTemplateName,
+					},
+				),
 			);
 		} catch (error) {
 			await this.showError(error, 'Publish failed.');
@@ -502,14 +527,17 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			return;
 		}
 
-		const confirmation = await this.alerts.create({
+		const confirmation = await createAdminAlert(this.alerts, () => ({
 			header: 'Delete email template?',
-			message: `Delete ${key} and all of its saved revisions? This cannot be undone.`,
+			message: this.language.text(
+				'Delete {{v0}} and all of its saved revisions? This cannot be undone.',
+				{ v0: key },
+			),
 			buttons: [
 				{ text: 'Cancel', role: 'cancel' },
 				{ text: 'Delete', role: 'destructive' },
 			],
-		});
+		}));
 		await confirmation.present();
 		const result = await confirmation.onDidDismiss();
 		if (result.role !== 'destructive') {
@@ -520,11 +548,11 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		try {
 			await this.emailTemplateService.deleteEmailTemplate(key);
 			await this.dismissLoading();
-			const alert = await this.alerts.create({
+			const alert = await createAdminAlert(this.alerts, () => ({
 				header: 'Deleted',
-				message: `${key} was deleted.`,
+				message: this.language.text('{{v0}} was deleted.', { v0: key }),
 				buttons: ['OK'],
-			});
+			}));
 			await alert.present();
 			await alert.onDidDismiss();
 			await this.router.navigate(['/admin/email-templates']);
@@ -696,7 +724,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 			!this.form.dirty
 		)
 			return true;
-		const alert = await this.alerts.create({
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header: 'Replace editor draft?',
 			message:
 				'This replaces the current editor content. Saved revisions stay available.',
@@ -704,7 +732,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 				{ text: 'Keep editing', role: 'cancel' },
 				{ text: 'Replace draft', role: 'confirm' },
 			],
-		});
+		}));
 		await alert.present();
 		return (await alert.onDidDismiss()).role === 'confirm';
 	}
@@ -865,12 +893,15 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		}
 	}
 
-	private async showMessage(header: string, message: string): Promise<void> {
-		const alert = await this.alerts.create({
+	private async showMessage(
+		header: string,
+		message: string | (() => string),
+	): Promise<void> {
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header,
-			message,
+			message: typeof message === 'function' ? message() : message,
 			buttons: ['OK'],
-		});
+		}));
 		await alert.present();
 	}
 

@@ -1,110 +1,119 @@
-<admin-header title="Registration" />
+<admin-header title="{{ 'Registration' | adminText }}" />
 
 <ion-content class="ion-padding-horizontal">
 	<div class="limited-container">
 		<div class="form-list">
 			<ion-list-header color="none" class="review-instructions">
 				<span>
-					<h3>Instructions</h3>
+					<h2>{{ 'Instructions' | adminText }}</h2>
 					<ion-note>
-						Fill out all information below. Ensure children are
-						validated with documentation and information is entered
-						correctly.
+						{{
+							'Fill out all information below. Ensure children are validated
+            with documentation and information is entered correctly.'
+								| adminText
+						}}
 					</ion-note>
 				</span>
 			</ion-list-header>
 
 			<form [formGroup]="form" autocomplete="off">
 				<ion-item-divider>
-					<ion-label> Parent / Guardian </ion-label>
+					<ion-label>
+						{{ 'Parent / Guardian' | adminText }}
+					</ion-label>
 				</ion-item-divider>
 				<ion-item>
 					<ion-input
 						type="text"
-						label="First Name"
-						labelPlacement="fixed"
+						label="{{ 'First Name' | adminText }}"
+						labelPlacement="stacked"
 						autocomplete="off"
 						formControlName="firstName"
-						placeholder="required"
+						placeholder="{{ 'required' | adminText }}"
 						minlength="2"
 						maxlength="20"
 					/>
 					@if (form.controls['firstName'].dirty) {
-					<ion-note color="danger" slot="error">
-						Enter between 2-20 characters
-					</ion-note>
+						<ion-note color="danger" slot="error">
+							{{ 'Enter between 2-20 characters' | adminText }}
+						</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-input
 						type="text"
-						label="Last Name"
-						labelPlacement="fixed"
+						label="{{ 'Last Name' | adminText }}"
+						labelPlacement="stacked"
 						autocomplete="off"
 						formControlName="lastName"
-						placeholder="required"
+						placeholder="{{ 'required' | adminText }}"
 						minlength="2"
 						maxlength="25"
 					/>
 					@if (form.controls['lastName'].dirty) {
-					<ion-note color="danger" slot="error">
-						Enter between 2-25 characters
-					</ion-note>
+						<ion-note color="danger" slot="error">
+							{{ 'Enter between 2-25 characters' | adminText }}
+						</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-input
 						type="email"
-						label="Email"
-						labelPlacement="fixed"
+						label="{{ 'Email' | adminText }}"
+						labelPlacement="stacked"
 						autocomplete="off"
 						formControlName="emailAddress"
-						placeholder="required"
+						placeholder="{{ 'required' | adminText }}"
 					/>
 					@if (form.controls['lastName'].dirty) {
-					<ion-note color="danger" slot="error">
-						Must be a valid email address
-					</ion-note>
+						<ion-note color="danger" slot="error">
+							{{ 'Must be a valid email address' | adminText }}
+						</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-input
 						type="text"
 						inputmode="numeric"
-						label="Zip Code"
-						labelPlacement="fixed"
+						label="{{ 'Zip Code' | adminText }}"
+						labelPlacement="stacked"
 						autocomplete="off"
 						formControlName="zipCode"
-						placeholder="required"
+						placeholder="{{ 'required' | adminText }}"
 						minlength="5"
 						maxlength="5"
 					/>
 					@if (form.controls['lastName'].dirty) {
-					<ion-note color="danger" slot="error">
-						Enter 5 digit zip code
-					</ion-note>
+						<ion-note color="danger" slot="error">
+							{{ 'Enter 5 digit zip code' | adminText }}
+						</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-label class="ion-text-wrap">
-						Would you like to get occasional emails about our events
-						& services
+						{{
+							'Would you like to get occasional emails about our events &
+            services' | adminText
+						}}
 					</ion-label>
 					<ion-checkbox
 						slot="end"
-						aria-label="Receive occasional emails about our events and services"
+						aria-label="{{
+							'Receive occasional emails about our events and services'
+								| adminText
+						}}"
 						formControlName="newsletter"
 					/>
 				</ion-item>
 
 				<ion-item-divider class="margin-top">
-					<ion-label> Referred By </ion-label>
+					<ion-label> {{ 'Referred By' | adminText }} </ion-label>
 					<ion-button
 						slot="end"
 						fill="clear"
 						(click)="chooseReferral()"
 					>
-						Pick Agency
+						{{ 'Pick Agency' | adminText }}
 						<ion-icon
 							slot="end"
 							name="search-outline"
@@ -116,26 +125,26 @@
 					<ion-label> {{ chosenReferrer() }} </ion-label>
 				</ion-item>
 				@if (!form.controls['referral'].value) {
-				<ion-note color="danger" slot="error" class="error-note">
-					Choose a referring agency
-				</ion-note>
+					<ion-note color="danger" slot="error" class="error-note">
+						{{ 'Choose a referring agency' | adminText }}
+					</ion-note>
 				}
 			</form>
 
 			<div class="margin-top">
 				@if (children(); as children) {
-				<admin-manage-children
-					[children]="children"
-					(adddedChild)="addChild($event)"
-					(editedChild)="editChild($event)"
-					(removedChild)="removeChild($event)"
-				/>
+					<admin-manage-children
+						[children]="children"
+						(adddedChild)="addChild($event)"
+						(editedChild)="editChild($event)"
+						(removedChild)="removeChild($event)"
+					/>
 				}
 			</div>
 
 			<ion-item-divider class="success-divider">
 				<ion-label>
-					Is all information correct and accurate?
+					{{ 'Is all information correct and accurate?' | adminText }}
 				</ion-label>
 			</ion-item-divider>
 
@@ -148,7 +157,7 @@
 				(click)="checkIn()"
 			>
 				<ion-label>
-					<h1>Yes, continue</h1>
+					<h1>{{ 'Yes, continue' | adminText }}</h1>
 				</ion-label>
 				<ion-icon
 					name="checkmark-circle"

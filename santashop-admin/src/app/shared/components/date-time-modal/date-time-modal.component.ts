@@ -1,3 +1,8 @@
+import { AdminLanguageService } from '../../preferences/admin-language.service';
+import { AdminTimeSlotPipe } from '../../preferences/admin-time-slot.pipe';
+import { createAdminAlert } from '../../preferences/admin-overlays';
+import { AdminDatePipe } from '../../preferences/admin-date.pipe';
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -31,7 +36,6 @@ import { Observable, map, of, switchMap, distinctUntilChanged } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import type { DateTimeSlot } from '@santashop/models';
 import { createZonedDate, getZonedDateKey } from '@santashop/models';
-import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
 
 @Component({
 	selector: 'admin-date-time-modal',
@@ -39,8 +43,9 @@ import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
 	styleUrls: ['./date-time-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		EventDatePipe,
-		TimeSlotPipe,
+		AdminTimeSlotPipe,
+		AdminTextPipe,
+		AdminDatePipe,
 		IonHeader,
 		IonToolbar,
 		IonTitle,
@@ -61,6 +66,7 @@ import { EventDatePipe, TimeSlotPipe } from '@santashop/core/admin/firestore';
 	],
 })
 export class DateTimeModalComponent {
+	private readonly language = inject(AdminLanguageService);
 	private readonly modalController = inject(ModalController);
 	private readonly alertController = inject(AlertController);
 	private readonly slotsInput = signal<Observable<DateTimeSlot[]>>(of([]));
@@ -128,9 +134,13 @@ export class DateTimeModalComponent {
 	public spotsRemaining(slot: DateTimeSlot): string {
 		const spots = slot.maxSlots - (slot.slotsReserved ?? 0);
 
-		if (!slot.enabled || spots <= 0) return 'Unavailable';
+		if (!slot.enabled || spots <= 0)
+			return this.language.text('Unavailable');
 
-		return spots === 1 ? `${spots} spot` : `${spots} spots`;
+		return this.language.text(
+			spots === 1 ? '{{count}} spot' : '{{count}} spots',
+			{ count: spots },
+		);
 	}
 
 	public async dismiss(): Promise<void> {
@@ -139,7 +149,7 @@ export class DateTimeModalComponent {
 	}
 
 	private async confirmChangeDate(): Promise<boolean> {
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Confirm Changes',
 			subHeader: 'Are you sure you want to change the date/time?',
 			message:
@@ -153,7 +163,7 @@ export class DateTimeModalComponent {
 					text: 'Continue',
 				},
 			],
-		});
+		}));
 
 		await alert.present();
 

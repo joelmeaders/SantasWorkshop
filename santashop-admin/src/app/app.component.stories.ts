@@ -18,7 +18,7 @@ const meta = {
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		await expect(canvasElement.querySelector('ion-app')).toBeTruthy();
-		const heading = await canvas.findByText('DSCS Event Administration');
+		const heading = await canvas.findByText('Ready to welcome families');
 		await waitFor(() => expect(heading).toBeVisible());
 		document.body.classList.remove('dark');
 	},

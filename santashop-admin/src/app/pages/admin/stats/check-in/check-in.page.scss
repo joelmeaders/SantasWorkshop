@@ -1,7 +1,7 @@
 h1 {
 	font-size: 3em;
 	font-weight: 700;
-	color: '#999';
+	color: var(--admin-muted);
 	text-align: center;
 	margin-bottom: 0;
 }
@@ -20,8 +20,21 @@ h3 {
 .count-container {
 	padding: 6px;
 	text-align: center;
-	box-shadow:
-		rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
-		rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+	box-shadow: none;
 	border-radius: 24px;
+}
+
+.count-container {
+	padding: 12px 4px;
+}
+.count-container h1 {
+	margin: 0 0 6px;
+	font-size: 2rem;
+	color: var(--ion-text-color);
+}
+.count-container h2 {
+	margin: 0;
+	font-size: 1rem;
+	line-height: 1.4;
+	font-weight: 600;
 }

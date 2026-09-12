@@ -1,3 +1,6 @@
+import { NgTemplateOutlet } from '@angular/common';
+import { input } from '@angular/core';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	UntypedFormGroup,
@@ -14,9 +17,6 @@ import { backspaceOutline, searchOutline } from 'ionicons/icons';
 import {
 	IonRouterLink,
 	IonContent,
-	IonCardHeader,
-	IonCardTitle,
-	IonCardSubtitle,
 	IonList,
 	IonItem,
 	IonLabel,
@@ -31,14 +31,13 @@ import {
 	styleUrls: ['./by-email.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		NgTemplateOutlet,
+		AdminTextPipe,
 		HeaderComponent,
 		ReactiveFormsModule,
 		RouterLink,
 		IonRouterLink,
 		IonContent,
-		IonCardHeader,
-		IonCardTitle,
-		IonCardSubtitle,
 		IonList,
 		IonItem,
 		IonLabel,
@@ -48,6 +47,7 @@ import {
 	],
 })
 export class ByEmailPage {
+	public readonly embedded = input(false);
 	private readonly searchService = inject(SearchService);
 
 	public readonly form = new UntypedFormGroup({

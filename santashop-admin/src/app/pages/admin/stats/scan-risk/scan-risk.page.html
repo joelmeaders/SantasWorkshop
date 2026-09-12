@@ -1,59 +1,86 @@
-<admin-header title="Scan Risk Review" backRoute="/admin/landing" />
+<admin-header
+	title="{{ 'Scan Risk Review' | adminText }}"
+	backRoute="/admin/landing"
+/>
 
 <ion-content class="ion-padding">
-	<ion-button fill="outline" (click)="refresh()"
-		>Refresh scan risks</ion-button
-	>
-	@if (state(); as state) { @if (state.status === 'loading') {
-	<div class="state">
-		<ion-spinner />
-		<p>Loading scan risks…</p>
-	</div>
-	} @else if (state.status === 'error') {
-	<div class="state" role="alert">
-		<h2>Risk records could not be loaded</h2>
-		<p>Select Refresh scan risks to try again.</p>
-	</div>
-	} @else if (state.summaries.length === 0) {
-	<div class="state">
-		<h2>No suspicious scans this season</h2>
-		<p>Refresh to check for late duplicate and canceled-code attempts.</p>
-	</div>
-	} @else {
-	<ion-list aria-label="Shoppers with suspicious scans">
-		@for (summary of state.summaries; track summary.customerId) {
-		<ion-item button detail [routerLink]="['./', summary.customerId]">
-			<ion-label>
-				<h2>{{ summary.firstName }} {{ summary.lastName }}</h2>
-				<p>{{ summary.emailAddress }}</p>
-				<p>Latest attempt: {{ summary.latestRiskOn | eventDate:'short' }}</p>
-				@if (summary.originalCheckInOn) {
+	<ion-button fill="outline" (click)="refresh()">
+		{{ 'Refresh scan risks' | adminText }}
+	</ion-button>
+	@if (state(); as state) {
+		@if (state.status === 'loading') {
+			<div class="state">
+				<ion-spinner />
+				<p>{{ 'Loading scan risks…' | adminText }}</p>
+			</div>
+		} @else if (state.status === 'error') {
+			<div class="state" role="alert">
+				<h2>{{ 'Risk records could not be loaded' | adminText }}</h2>
 				<p>
-					Original check-in: {{ summary.originalCheckInOn |
-					eventDate:'short' }}
+					{{ 'Select Refresh scan risks to try again.' | adminText }}
 				</p>
+			</div>
+		} @else if (state.summaries.length === 0) {
+			<div class="state">
+				<h2>{{ 'No suspicious scans this season' | adminText }}</h2>
+				<p>
+					{{
+						'Refresh to check for late duplicate and canceled-code attempts.'
+							| adminText
+					}}
+				</p>
+			</div>
+		} @else {
+			<ion-list
+				aria-label="{{ 'Shoppers with suspicious scans' | adminText }}"
+			>
+				@for (summary of state.summaries; track summary.customerId) {
+					<ion-item
+						button
+						detail
+						[routerLink]="['./', summary.customerId]"
+					>
+						<ion-label>
+							<h2>
+								{{ summary.firstName }} {{ summary.lastName }}
+							</h2>
+							<p>{{ summary.emailAddress }}</p>
+							<p>
+								{{ 'Latest attempt: {{v0}}' | adminText: {v0:
+								(summary.latestRiskOn | adminDate:'short')} }}
+							</p>
+							@if (summary.originalCheckInOn) {
+								<p>
+									{{ 'Original check-in: {{v0}}' | adminText:
+									{v0: (summary.originalCheckInOn |
+									adminDate:'short')} }}
+								</p>
+							}
+							<ion-badge color="danger">
+								{{ '{{v0}} risk attempt(s)' | adminText: {v0:
+								(summary.totalRiskAttemptCount)} }}
+							</ion-badge>
+							@if (summary.lateDuplicateAttemptCount) {
+								<ion-badge color="warning">
+									{{ 'Late duplicate {{v0}}' | adminText: {v0:
+									(summary.lateDuplicateAttemptCount)} }}
+								</ion-badge>
+							}
+							@if (summary.cancelledCodeAttemptCount) {
+								<ion-badge color="danger">
+									{{ 'Canceled code {{v0}}' | adminText: {v0:
+									(summary.cancelledCodeAttemptCount)} }}
+								</ion-badge>
+							}
+						</ion-label>
+					</ion-item>
 				}
-				<ion-badge color="danger">
-					{{ summary.totalRiskAttemptCount }} risk attempt(s)
-				</ion-badge>
-				@if (summary.lateDuplicateAttemptCount) {
-				<ion-badge color="warning"
-					>Late duplicate {{ summary.lateDuplicateAttemptCount
-					}}</ion-badge
-				>
-				} @if (summary.cancelledCodeAttemptCount) {
-				<ion-badge color="danger"
-					>Canceled code {{ summary.cancelledCodeAttemptCount
-					}}</ion-badge
-				>
-				}
-			</ion-label>
-		</ion-item>
+			</ion-list>
+			@if (state.hasMore) {
+				<ion-button expand="block" fill="outline" (click)="loadMore()">
+					{{ 'Load more' | adminText }}
+				</ion-button>
+			}
 		}
-	</ion-list>
-	@if (state.hasMore) {
-	<ion-button expand="block" fill="outline" (click)="loadMore()"
-		>Load more</ion-button
-	>
-	} } }
+	}
 </ion-content>

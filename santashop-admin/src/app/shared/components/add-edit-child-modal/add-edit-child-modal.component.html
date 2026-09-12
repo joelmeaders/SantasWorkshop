@@ -1,13 +1,13 @@
 <ion-header>
 	<ion-toolbar>
-		<ion-title> Add/Edit Child </ion-title>
+		<ion-title> {{ 'Add/Edit Child' | adminText }} </ion-title>
 		<ion-button
 			slot="end"
 			fill="outline"
 			color="danger"
 			(click)="dismiss()"
 		>
-			Cancel
+			{{ 'Cancel' | adminText }}
 		</ion-button>
 	</ion-toolbar>
 </ion-header>
@@ -17,26 +17,27 @@
 		<div class="form-list">
 			<ion-list-header color="none" class="review-instructions">
 				<span>
-					<h3>Instructions</h3>
+					<h3>{{ 'Instructions' | adminText }}</h3>
 					<ion-note>
-						Add all child information below. Ensure the information
-						is accurate. Children must be 11 years old or younger to
-						receive toys.
+						{{
+							'Add all child information below. Ensure the information is accurate. Children must be 11 years old or younger to receive toys.'
+								| adminText
+						}}
 					</ion-note>
 				</span>
 			</ion-list-header>
 			<ion-item-divider>
-				<ion-label>Child Information</ion-label>
+				<ion-label> {{ 'Child Information' | adminText }} </ion-label>
 			</ion-item-divider>
 			<form [formGroup]="form">
 				<ion-item>
 					<ion-input
 						type="text"
-						label="First Name"
-						labelPlacement="fixed"
+						label="{{ 'First Name' | adminText }}"
+						labelPlacement="stacked"
 						autocomplete="off"
 						formControlName="firstName"
-						placeholder="required"
+						placeholder="{{ 'required' | adminText }}"
 						minlength="2"
 						maxlength="20"
 					/>
@@ -45,18 +46,18 @@
 						this.form.controls['firstName'].invalid
 					) {
 						<ion-note slot="error" color="danger">
-							Invalid name
+							{{ 'Invalid name' | adminText }}
 						</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-input
 						type="text"
-						label="Last Name"
-						labelPlacement="fixed"
+						label="{{ 'Last Name' | adminText }}"
+						labelPlacement="stacked"
 						autocomplete="off"
 						formControlName="lastName"
-						placeholder="required"
+						placeholder="{{ 'required' | adminText }}"
 						minlength="2"
 						maxlength="25"
 					/>
@@ -65,15 +66,15 @@
 						this.form.controls['lastName'].invalid
 					) {
 						<ion-note slot="error" color="danger">
-							Invalid name
+							{{ 'Invalid name' | adminText }}
 						</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-input
 						(ionChange)="birthdaySelected($event)"
-						label="Birth Date"
-						labelPlacement="fixed"
+						label="{{ 'Birth Date' | adminText }}"
+						labelPlacement="stacked"
 						formControlName="dateOfBirth"
 						autocomplete="off"
 						type="date"
@@ -85,29 +86,34 @@
 						this.form.controls['dateOfBirth'].invalid
 					) {
 						<ion-note slot="error" color="danger">
-							Invalid date. Children must be 11 years old or younger.
+							{{
+								'Invalid date. Children must be 11 years old or younger.'
+									| adminText
+							}}
 						</ion-note>
 					}
 				</ion-item>
 				@if (!isInfant()) {
 					<ion-radio-group formControlName="toyType">
 						<ion-item-divider>
-							<ion-label>Choose Toy Type</ion-label>
+							<ion-label>
+								{{ 'Choose Toy Type' | adminText }}
+							</ion-label>
 						</ion-item-divider>
 						<ion-item>
-							<ion-label>Girls</ion-label>
+							<ion-label> {{ 'Girls' | adminText }} </ion-label>
 							<ion-radio
 								slot="start"
 								value="girls"
-								aria-label="Girls"
+								aria-label="{{ 'Girls' | adminText }}"
 							/>
 						</ion-item>
 						<ion-item>
-							<ion-label>Boys</ion-label>
+							<ion-label> {{ 'Boys' | adminText }} </ion-label>
 							<ion-radio
 								slot="start"
 								value="boys"
-								aria-label="Boys"
+								aria-label="{{ 'Boys' | adminText }}"
 							/>
 						</ion-item>
 					</ion-radio-group>
@@ -115,7 +121,7 @@
 			</form>
 			<ion-item-divider class="success-divider">
 				<ion-label>
-					Is all information correct and accurate?
+					{{ 'Is all information correct and accurate?' | adminText }}
 				</ion-label>
 			</ion-item-divider>
 			<ion-button
@@ -125,7 +131,7 @@
 				[disabled]="!form.valid"
 				(click)="saveChild()"
 			>
-				Save Child
+				{{ 'Save Child' | adminText }}
 			</ion-button>
 		</div>
 	}

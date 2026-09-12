@@ -78,7 +78,7 @@ test.describe('owner authorization and polling recovery', () => {
 			})
 			.click();
 		await expect(
-			page.getByText('Status: succeeded', { exact: true }),
+			page.getByText('Status: Completed', { exact: true }),
 		).toBeVisible({ timeout: 15000 });
 		await expect(page.getByRole('alert')).toHaveCount(0);
 		expect(starts).toBe(1);
@@ -102,7 +102,7 @@ test.describe('owner authorization and polling recovery', () => {
 		expect((await rejected).status()).toBe(403);
 		await expect(page.getByRole('alert')).toBeVisible();
 		await expect(
-			page.getByText('Status: succeeded', { exact: true }),
+			page.getByText('Status: Completed', { exact: true }),
 		).toHaveCount(0);
 		await expect(
 			page.getByRole('button', {

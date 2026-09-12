@@ -32,19 +32,22 @@
 		"@angular/core": "catalog:",
 		"@angular/forms": "catalog:",
 		"@angular/platform-browser": "catalog:",
-		"@angular/service-worker": "catalog:",
 		"@angular/router": "catalog:",
-		"@ionic/angular": "catalog:",
-		"chart.js": "catalog:",
+		"@angular/service-worker": "catalog:",
 		"@codemirror/lang-html": "catalog:",
 		"@codemirror/state": "catalog:",
 		"@codemirror/view": "catalog:",
+		"@ionic/angular": "catalog:",
+		"@ngx-translate/core": "catalog:",
+		"chart.js": "catalog:",
 		"chartjs-plugin-datalabels": "catalog:",
 		"codemirror": "catalog:",
 		"firebase": "catalog:",
 		"handlebars": "catalog:",
 		"ng2-charts": "catalog:",
 		"rxjs": "catalog:",
-		"tslib": "catalog:"
+		"tslib": "catalog:",
+		"@codemirror/language": "catalog:",
+		"@lezer/highlight": "catalog:"
 	}
 }

@@ -1,3 +1,6 @@
+import { computed } from '@angular/core';
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -30,6 +33,7 @@ import { AppSettingsService } from '../../../../shared/services/app-settings.ser
 	templateUrl: './app-settings.page.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		ReactiveFormsModule,
 		HeaderComponent,
 		IonButton,
@@ -44,6 +48,7 @@ import { AppSettingsService } from '../../../../shared/services/app-settings.ser
 	],
 })
 export class AppSettingsPage implements OnInit {
+	public readonly language = inject(AdminLanguageService);
 	private readonly service = inject(AppSettingsService);
 	private readonly builder = inject(NonNullableFormBuilder);
 	private readonly defaults = createDefaultPublicParameters();
@@ -51,7 +56,13 @@ export class AppSettingsPage implements OnInit {
 	public readonly busy = signal(false);
 	public readonly loaded = signal(false);
 	public readonly error = signal('');
-	public readonly status = signal('');
+	private readonly statusSource = signal<string | (() => string)>('');
+	public readonly status = computed(() => {
+		const value = this.statusSource();
+		return typeof value === 'function'
+			? value()
+			: this.language.text(value);
+	});
 	public readonly version = signal('');
 	public readonly form = this.builder.group({
 		registrationEnabled: this.defaults.registrationEnabled,
@@ -93,7 +104,11 @@ export class AppSettingsPage implements OnInit {
 				expectedEtag: this.etag,
 			});
 			this.accept(result);
-			this.status.set(`Published version ${result.version}.`);
+			this.statusSource.set(() =>
+				this.language.text('Published version {{v0}}.', {
+					v0: result.version,
+				}),
+			);
 		} catch (error: unknown) {
 			this.showError(error);
 		} finally {
@@ -103,7 +118,7 @@ export class AppSettingsPage implements OnInit {
 	private begin(): void {
 		this.busy.set(true);
 		this.error.set('');
-		this.status.set('');
+		this.statusSource.set('');
 		this.form.disable();
 	}
 	private end(): void {

@@ -1,16 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { IonContent } from '@ionic/angular/standalone';
 import { HeaderComponent } from '../../../shared/components/header/header.component';
-
-import { RouterLink } from '@angular/router';
-import {
-	IonRouterLink,
-	IonContent,
-	IonCardHeader,
-	IonCardTitle,
-	IonCardSubtitle,
-	IonList,
-	IonItem,
-} from '@ionic/angular/standalone';
+import { AdminTextPipe } from '../../../shared/preferences/admin-text.pipe';
+import { ByNamePage } from './by-name/by-name.page';
+import { ByEmailPage } from './by-email/by-email.page';
+import { ByCodePage } from './by-code/by-code.page';
 
 @Component({
 	selector: 'admin-search',
@@ -19,14 +13,13 @@ import {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		HeaderComponent,
-		RouterLink,
-		IonRouterLink,
+		AdminTextPipe,
 		IonContent,
-		IonCardHeader,
-		IonCardTitle,
-		IonCardSubtitle,
-		IonList,
-		IonItem,
+		ByNamePage,
+		ByEmailPage,
+		ByCodePage,
 	],
 })
-export class SearchPage {}
+export class SearchPage {
+	public readonly method = signal<'name' | 'email' | 'code'>('name');
+}

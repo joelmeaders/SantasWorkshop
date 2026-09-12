@@ -1,3 +1,6 @@
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
 	UntypedFormGroup,
@@ -14,7 +17,6 @@ import {
 	LoadingController,
 	IonContent,
 	IonCardHeader,
-	IonCardSubtitle,
 	IonList,
 	IonItem,
 	IonInput,
@@ -35,11 +37,11 @@ import { mailOutline } from 'ionicons/icons';
 	styleUrls: ['./resend-email.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		ReactiveFormsModule,
 		IonContent,
 		IonCardHeader,
-		IonCardSubtitle,
 		IonList,
 		IonItem,
 		IonInput,
@@ -49,6 +51,7 @@ import { mailOutline } from 'ionicons/icons';
 	],
 })
 export class ResendEmailPage {
+	public readonly language = inject(AdminLanguageService);
 	private readonly lookupService = inject(LookupService);
 	private readonly functions = inject(FunctionsWrapper);
 	private readonly alerts = inject(AlertController);
@@ -103,21 +106,26 @@ export class ResendEmailPage {
 			);
 
 			if (!index) {
-				const alert = await this.alerts.create({
+				const alert = await createAdminAlert(this.alerts, () => ({
 					header: 'Not Found',
-					message: `No registration found with email address ${emailAddress}`,
+					message: this.language.text(
+						'No registration found with email address {{v0}}',
+						{ v0: emailAddress },
+					),
 					buttons: ['OK'],
-				});
+				}));
 
 				await alert.present();
 			}
 		} catch (error: unknown) {
 			const err = error as { details?: string; message?: string };
-			const alert = await this.alerts.create({
+			const alert = await createAdminAlert(this.alerts, () => ({
 				header: 'Error - could not find customer',
-				message: `An error occurred: ${err.details ?? err.message}`,
+				message: this.language.text('An error occurred: {{v0}}', {
+					v0: err.details ?? err.message,
+				}),
 				buttons: ['OK'],
-			});
+			}));
 			await alert.present();
 		} finally {
 			if (await this.loading.getTop()) await this.loading.dismiss();
@@ -140,22 +148,29 @@ export class ResendEmailPage {
 			console.log(result);
 		} catch (error: unknown) {
 			const err = error as { details?: string; message?: string };
-			const alert = await this.alerts.create({
+			const alert = await createAdminAlert(this.alerts, () => ({
 				header: 'Error - could not send email',
-				message: `An error occurred: ${err.details ?? err.message}`,
+				message: this.language.text('An error occurred: {{v0}}', {
+					v0: err.details ?? err.message,
+				}),
 				buttons: ['OK'],
-			});
+			}));
 			await alert.present();
 			return;
 		} finally {
 			if (await this.loading.getTop()) await this.loading.dismiss();
 		}
 
-		const alert = await this.alerts.create({
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header: 'Email queued',
-			message: `Registration email queued for ${index.emailAddress}.`,
+			message: this.language.text(
+				'Registration email queued for {{v0}}.',
+				{
+					v0: index.emailAddress,
+				},
+			),
 			buttons: ['OK'],
-		});
+		}));
 
 		await alert.present();
 		await alert.onDidDismiss();

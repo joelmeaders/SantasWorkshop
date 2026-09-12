@@ -11,7 +11,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					'The production admin shell with Home, Check-In, Search, and Registration tabs.',
+					'The production admin shell with Home, Check-In, and Search phone navigation. The desktop sidebar belongs to the session shell.',
 			},
 		},
 	},
@@ -28,15 +28,21 @@ const meta = {
 			const outletBounds = outlet.getBoundingClientRect();
 			const footerBounds = footer.getBoundingClientRect();
 			expect(outletBounds.height).toBeGreaterThan(0);
+			if (window.innerWidth >= 1024) {
+				expect(footerBounds.height).toBe(0);
+				return;
+			}
 			expect(footerBounds.height).toBeGreaterThan(0);
 			expect(outletBounds.bottom).toBeLessThanOrEqual(
 				footerBounds.top + 1,
 			);
 		});
-		await expect(canvas.getByText('Home')).toBeVisible();
-		await expect(canvas.getByText('Check-In')).toBeVisible();
-		await expect(canvas.getByText('Search')).toBeVisible();
-		await expect(canvas.getByText('Registration')).toBeVisible();
+		await expect(canvas.getByText('Home')).toBeInTheDocument();
+		await expect(canvas.getByText('Check-In')).toBeInTheDocument();
+		await expect(canvas.getByText('Search')).toBeInTheDocument();
+		await expect(
+			canvas.queryByText('Registration'),
+		).not.toBeInTheDocument();
 	},
 } satisfies Meta<typeof AdminPage>;
 
@@ -49,19 +55,14 @@ export const RegistrationAndCheckInClosed: Story = {
 	decorators: adminStoryDecorators({ featureEnabled: false }),
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Home')).toBeVisible();
-		await expect(canvas.getByText('Search')).toBeVisible();
+		await expect(canvas.getByText('Home')).toBeInTheDocument();
+		await expect(canvas.getByText('Search')).toBeInTheDocument();
 		const checkInTab = canvas
 			.getByText('Check-In')
 			.closest('ion-tab-button');
-		const registrationTab = canvas
-			.getByText('Registration')
-			.closest('ion-tab-button');
+
 		await expect((checkInTab as HTMLIonTabButtonElement).disabled).toBe(
 			true,
 		);
-		await expect(
-			(registrationTab as HTMLIonTabButtonElement).disabled,
-		).toBe(true);
 	},
 };

@@ -1,14 +1,14 @@
 h1 {
-	font-size: 3em;
+	font-size: 2.4rem;
 	font-weight: 700;
-	color: '#999';
+	color: var(--admin-muted);
 	text-align: center;
 	margin-bottom: 0;
 }
 
 h2 {
 	text-align: center;
-	font-size: 2em;
+	font-size: 1.35rem;
 	font-weight: 700;
 }
 
@@ -20,10 +20,8 @@ h3 {
 .count-container {
 	padding: 12px;
 	text-align: center;
-	box-shadow:
-		rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
-		rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
-	border-radius: 24px;
+	box-shadow: none;
+	border-radius: 12px;
 }
 
 .capacity-card {
@@ -31,9 +29,7 @@ h3 {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	box-shadow:
-		rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
-		rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+	box-shadow: none;
 	border-radius: 24px;
 }
 
@@ -51,14 +47,14 @@ h3 {
 
 .capacity-card__date {
 	font-size: 0.95rem;
-	color: #666;
+	color: var(--admin-muted);
 	margin-left: auto;
 }
 
 .capacity-card__percent {
 	font-size: 2rem;
 	font-weight: 700;
-	color: #3f51b5;
+	color: var(--admin-accent);
 }
 
 .capacity-card__meta {
@@ -69,3 +65,17 @@ h3 {
 	text-align: left;
 }
 
+.count-container {
+	padding: 12px 4px;
+}
+.count-container h1 {
+	margin: 0 0 6px;
+	font-size: 2rem;
+	color: var(--ion-text-color);
+}
+.count-container h2 {
+	margin: 0;
+	font-size: 1rem;
+	line-height: 1.4;
+	font-weight: 600;
+}

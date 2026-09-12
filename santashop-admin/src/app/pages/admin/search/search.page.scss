@@ -1,9 +1,32 @@
-ion-list {
-	width: 100%;
+p {
+	color: var(--admin-muted);
 }
-
-ion-item.search-item {
-	--inner-padding-top: 24px;
-	--inner-padding-bottom: 24px;
-	font-size: 1.1rem;
+.search-methods {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-block: 24px 12px;
+}
+button {
+	min-height: 48px;
+	flex: 1 1 140px;
+	padding: 12px;
+	border: 1px solid var(--admin-border);
+	border-radius: 10px;
+	background: var(--admin-surface);
+	color: var(--ion-text-color);
+	font: inherit;
+	font-size: 0.875rem;
+	cursor: pointer;
+}
+button[aria-pressed='true'] {
+	color: var(--admin-accent);
+	background: var(--admin-accent-soft);
+	border-color: var(--admin-accent);
+	font-weight: 650;
+}
+section {
+	border: 1px solid var(--admin-border);
+	border-radius: 16px;
+	background: var(--admin-surface);
 }

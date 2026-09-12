@@ -48,7 +48,9 @@ const stats = (
 	dateTimeCounts: { dateTime: string; count: number }[];
 } => ({
 	programYear,
-	dateTimeCounts: [{ dateTime: e2eDateTime(12, 12, 17, 0, 0, programYear), count }],
+	dateTimeCounts: [
+		{ dateTime: e2eDateTime(12, 12, 17, 0, 0, programYear), count },
+	],
 });
 
 async function chooseYear(page: Page, value: number): Promise<void> {
@@ -167,7 +169,9 @@ test.describe('admin refresh navigation and recovery', () => {
 		);
 		await chooseYear(page, year - 2);
 		await expect(
-			page.getByText('No appointment data for this year', { exact: true }),
+			page.getByText('No appointment data for this year', {
+				exact: true,
+			}),
 		).toBeVisible();
 		await expect(page.locator('.count-container h1').first()).toHaveText(
 			'0',
@@ -285,7 +289,13 @@ test.describe('admin refresh navigation and recovery', () => {
 			],
 		});
 		await page
-			.getByTitle('Customer Scan Timeline')
+			.getByRole('banner')
+			.filter({
+				has: page.getByRole('heading', {
+					name: 'Customer Scan Timeline',
+					exact: true,
+				}),
+			})
 			.getByRole('link', { name: 'Go back', exact: true })
 			.click();
 		await expect(page).toHaveURL(/\/admin\/stats\/scan-risk$/);

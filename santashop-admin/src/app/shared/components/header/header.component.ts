@@ -1,4 +1,6 @@
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { AdminPreferencesComponent } from '../../preferences/admin-preferences.component';
 
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
@@ -10,7 +12,6 @@ import {
 	IonButtons,
 	IonButton,
 	IonIcon,
-	IonTitle,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -19,6 +20,8 @@ import {
 	styleUrls: ['./header.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
+		AdminPreferencesComponent,
 		RouterLink,
 		IonRouterLink,
 		IonHeader,
@@ -26,10 +29,10 @@ import {
 		IonButtons,
 		IonButton,
 		IonIcon,
-		IonTitle,
 	],
 })
 export class HeaderComponent {
+	public readonly showBack = input(true);
 	public readonly title = input<string>();
 
 	public readonly backRoute = input('/admin');

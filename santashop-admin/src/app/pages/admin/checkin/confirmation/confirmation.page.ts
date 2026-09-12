@@ -1,3 +1,4 @@
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
@@ -17,6 +18,7 @@ import {
 	styleUrls: ['./confirmation.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		RouterLink,
 		IonRouterLink,

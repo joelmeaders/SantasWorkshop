@@ -21,14 +21,14 @@ const meta = {
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		await expect(
-			canvas.getByText('DSCS Event Administration'),
+			canvas.getByText('Ready to welcome families'),
 		).toBeVisible();
 		await expect(canvas.getByText('Owner Operations')).toBeVisible();
-		const themeToggle = canvas.getByLabelText('Toggle light or dark theme');
-		await userEvent.click(themeToggle);
+		const appearance = canvas.getByLabelText('Appearance');
+		await userEvent.selectOptions(appearance, 'dark');
 		await expect(document.body).toHaveClass('dark');
-		await userEvent.click(themeToggle);
-		document.body.classList.remove('dark');
+		await userEvent.selectOptions(appearance, 'light');
+		await expect(document.body).not.toHaveClass('dark');
 		const fixtures = getAdminStoryFixtures(canvasElement);
 		fixtures.featureEnabled$.next(false);
 		await waitFor(() =>
@@ -91,5 +91,69 @@ export const SeasonalWorkflowsClosed: Story = {
 		await expect(
 			canvas.getByText('Pre-Register Customers'),
 		).toHaveAttribute('disabled');
+	},
+};
+
+export const EnglishLight: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'en', adminTheme: 'light' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText('Ready to welcome families'),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'en');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'light',
+		);
+	},
+};
+
+export const EnglishDark: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'en', adminTheme: 'dark' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText('Ready to welcome families'),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'en');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'dark',
+		);
+	},
+};
+
+export const SpanishLight: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'es', adminTheme: 'light' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText('Listos para recibir a las familias'),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'es');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'light',
+		);
+	},
+};
+
+export const SpanishDark: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'es', adminTheme: 'dark' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByText('Listos para recibir a las familias'),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'es');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'dark',
+		);
 	},
 };

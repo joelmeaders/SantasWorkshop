@@ -1,43 +1,67 @@
 <admin-header
-	title="Customer Scan Timeline"
+	title="{{ 'Customer Scan Timeline' | adminText }}"
 	backRoute="/admin/stats/scan-risk"
 />
 
 <ion-content class="ion-padding">
-	<ion-button fill="outline" (click)="refresh()">Refresh timeline</ion-button>
-	@if (state(); as state) { @if (state.status === 'loading') {
-	<div class="state">
-		<ion-spinner />
-		<p>Loading timeline…</p>
-	</div>
-	} @else if (state.status === 'error') {
-	<div class="state" role="alert"><h2>Timeline could not be loaded</h2></div>
-	} @else {
-	<ion-list aria-label="Customer scan timeline">
-		@if (state.checkIn) {
-		<ion-item color="success">
-			<ion-label>
-				<h2>Successful check-in</h2>
-				<p>{{ state.checkIn.checkInDateTime | eventDate:'medium' }}</p>
-			</ion-label>
-		</ion-item>
-		} @for (attempt of state.attempts; track attempt.id) {
-		<ion-item
-			[color]="attempt.outcome === 'duplicate-accidental' ? 'warning' : 'danger'"
-		>
-			<ion-label>
-				<h2>{{ attempt.outcome }}</h2>
-				<p>{{ attempt.scannedOn | eventDate:'medium' }}</p>
-				<p>
-					{{ attempt.elapsedSeconds }} seconds after the original
-					event · {{ attempt.inputMethod }}
-				</p>
-				<p>Code ending in {{ attempt.codeSuffix }}</p>
-			</ion-label>
-		</ion-item>
+	<ion-button fill="outline" (click)="refresh()">
+		{{ 'Refresh timeline' | adminText }}
+	</ion-button>
+	@if (state(); as state) {
+		@if (state.status === 'loading') {
+			<div class="state">
+				<ion-spinner />
+				<p>{{ 'Loading timeline…' | adminText }}</p>
+			</div>
+		} @else if (state.status === 'error') {
+			<div class="state" role="alert">
+				<h2>{{ 'Timeline could not be loaded' | adminText }}</h2>
+			</div>
+		} @else {
+			<ion-list aria-label="{{ 'Customer scan timeline' | adminText }}">
+				@if (state.checkIn) {
+					<ion-item color="success">
+						<ion-label>
+							<h2>{{ 'Successful check-in' | adminText }}</h2>
+							<p>
+								{{
+									state.checkIn.checkInDateTime
+										| adminDate: 'medium'
+								}}
+							</p>
+						</ion-label>
+					</ion-item>
+				}
+				@for (attempt of state.attempts; track attempt.id) {
+					<ion-item
+						[color]="
+							attempt.outcome === 'duplicate-accidental'
+								? 'warning'
+								: 'danger'
+						"
+					>
+						<ion-label>
+							<h2>{{ attempt.outcome | adminText }}</h2>
+							<p>{{ attempt.scannedOn | adminDate: 'medium' }}</p>
+							<p>
+								{{ '{{v0}} seconds after the original event ·
+								{{ v1 }}' | adminText: {v0:
+								(attempt.elapsedSeconds), v1:
+								(attempt.inputMethod | adminText)} }}
+							</p>
+							<p>
+								{{ 'Code ending in {{v0}}' | adminText: {v0:
+								(attempt.codeSuffix)} }}
+							</p>
+						</ion-label>
+					</ion-item>
+				}
+			</ion-list>
+			@if (!state.checkIn && state.attempts.length === 0) {
+				<div class="state">
+					<h2>{{ 'No current-season scan history' | adminText }}</h2>
+				</div>
+			}
 		}
-	</ion-list>
-	@if (!state.checkIn && state.attempts.length === 0) {
-	<div class="state"><h2>No current-season scan history</h2></div>
-	} } }
+	}
 </ion-content>

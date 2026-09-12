@@ -18,7 +18,7 @@ const meta = {
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		const search = canvas.getByText('Search').closest('ion-button');
-		await expect(canvas.getByText('Enter last name and zip code')).toBeVisible();
+		await expect(canvas.getByText('Search: Last Name & Zip')).toBeVisible();
 		await expect(search).toHaveAttribute('disabled');
 		await userEvent.click(canvas.getByText('Reset'));
 	},

@@ -1,39 +1,48 @@
-<admin-header title="Search" />
-
-<ion-content fullscreen class="ion-padding">
+<admin-header title="{{ 'Search' | adminText }}" />
+<ion-content>
 	<div class="limited-container">
-		<ion-card-header>
-			<ion-card-title> Step 1 </ion-card-title>
-			<ion-card-subtitle> How do you want to search? </ion-card-subtitle>
-		</ion-card-header>
-		<ion-list>
-			<ion-item
-				detail
-				button
-				class="search-item"
-				routerLink="by-name"
-				routerDirection="forward"
+		<h1>{{ 'Find a registration' | adminText }}</h1>
+		<p>
+			{{
+				'Choose how to search, then enter the customer’s details.'
+					| adminText
+			}}
+		</p>
+		<div
+			class="search-methods"
+			role="group"
+			[attr.aria-label]="'Search method' | adminText"
+		>
+			<button
+				type="button"
+				[attr.aria-pressed]="method() === 'name'"
+				(click)="method.set('name')"
 			>
-				Name & Zip Code
-			</ion-item>
-			<ion-item
-				detail
-				button
-				class="search-item"
-				routerLink="by-email"
-				routerDirection="forward"
+				{{ 'Name & Zip Code' | adminText }}
+			</button>
+			<button
+				type="button"
+				[attr.aria-pressed]="method() === 'email'"
+				(click)="method.set('email')"
 			>
-				Email Address
-			</ion-item>
-			<ion-item
-				detail
-				button
-				class="search-item"
-				routerLink="by-code"
-				routerDirection="forward"
+				{{ 'Email Address' | adminText }}
+			</button>
+			<button
+				type="button"
+				[attr.aria-pressed]="method() === 'code'"
+				(click)="method.set('code')"
 			>
-				Registration Code
-			</ion-item>
-		</ion-list>
+				{{ 'Registration Code' | adminText }}
+			</button>
+		</div>
+		<section [hidden]="method() !== 'name'">
+			<admin-by-name [embedded]="true" />
+		</section>
+		<section [hidden]="method() !== 'email'">
+			<admin-by-email [embedded]="true" />
+		</section>
+		<section [hidden]="method() !== 'code'">
+			<admin-by-code [embedded]="true" />
+		</section>
 	</div>
 </ion-content>

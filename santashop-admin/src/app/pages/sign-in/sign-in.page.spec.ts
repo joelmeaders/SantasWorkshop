@@ -205,7 +205,10 @@ describe('SignInPage', () => {
 
 		expect(createAlert).toHaveBeenCalledWith({
 			header,
-			message: code,
+			message:
+				code === 'auth/too-many-requests'
+					? 'Too many sign-in attempts. Wait a few minutes and try again.'
+					: 'Unable to sign in. Please check your email and password and try again.',
 			buttons: ['Ok'],
 		});
 		expect(alert.present).toHaveBeenCalledOnce();

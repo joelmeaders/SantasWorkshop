@@ -154,7 +154,9 @@ async function preparePage(
 				'#storybook-root { filter: hue-rotate(180deg) !important; }',
 		});
 	}
-	await page.waitForTimeout(250);
+	// Ionic layout and Chart.js resize observers settle after the story audit.
+	// Capture their final canvas paint, including charts at the viewport edge.
+	await page.waitForTimeout(1000);
 
 	const storyErrors = await page
 		.locator(

@@ -1,4 +1,8 @@
-import { EventDatePipe } from '@santashop/core/admin';
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
+import { AdminDatePipe } from '../../../../shared/preferences/admin-date.pipe';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
+
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -52,10 +56,11 @@ import { checkmarkCircle } from 'ionicons/icons';
 	styleUrls: ['./review.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		ManageChildrenComponent,
 		RouterLink,
-		EventDatePipe,
+		AdminDatePipe,
 		IonContent,
 		IonListHeader,
 		IonNote,
@@ -68,6 +73,7 @@ import { checkmarkCircle } from 'ionicons/icons';
 	],
 })
 export class ReviewPage {
+	public readonly language = inject(AdminLanguageService);
 	private readonly checkinContext = inject(CheckInContextService);
 	private readonly lookupService = inject(LookupService);
 	private readonly checkinService = inject(CheckInService);
@@ -171,13 +177,13 @@ export class ReviewPage {
 	public async cancelReservation(): Promise<void> {
 		const registration = this.registration();
 
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Are you sure you want to do this?',
 			subHeader: registration?.emailAddress,
 			message:
 				'Check that the email address is accurate. Deleting this reservation cannot be undone!',
 			buttons: ['Ok', 'Cancel'],
-		});
+		}));
 
 		await alert.present();
 		const response = await alert.onDidDismiss();
@@ -205,7 +211,8 @@ export class ReviewPage {
 		const registration = this.registration();
 		if (!registration) return;
 
-		const children = registration.children?.filter((e) => e.id !== child.id) ?? [];
+		const children =
+			registration.children?.filter((e) => e.id !== child.id) ?? [];
 		this.checkinContext.setRegistration({
 			...registration,
 			children: [...children, child],
@@ -260,10 +267,13 @@ export class ReviewPage {
 					this.wasEdited = true;
 				} catch (error: unknown) {
 					const err = error as { message?: string };
-					const alert = await this.alertController.create({
-						header: 'Error changing date/time',
-						message: err.message ?? String(error),
-					});
+					const alert = await createAdminAlert(
+						this.alertController,
+						() => ({
+							header: 'Error changing date/time',
+							message: err.message ?? String(error),
+						}),
+					);
 					await alert.present();
 				}
 			} else {
@@ -311,11 +321,13 @@ export class ReviewPage {
 				return;
 			}
 
-			const alert = await this.alertController.create({
+			const alert = await createAdminAlert(this.alertController, () => ({
 				header: 'Error checking in',
-				subHeader: `code: ${registration.qrcode}`,
+				subHeader: this.language.text('code: {{v0}}', {
+					v0: registration.qrcode,
+				}),
 				message: err?.message ?? String(error),
-			});
+			}));
 
 			await alert.present();
 			this.checkinContext.reset();
@@ -333,11 +345,11 @@ export class ReviewPage {
 
 	private async missingRegistrationError(error: unknown): Promise<undefined> {
 		const err = error as { message?: string };
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Error',
 			message: err.message ?? String(error),
 			buttons: [{ text: 'OK' }, { text: 'Try Search', role: 'search' }],
-		});
+		}));
 
 		await alert.present();
 		const { role } = await alert.onDidDismiss();

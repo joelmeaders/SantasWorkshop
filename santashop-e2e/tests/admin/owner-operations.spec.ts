@@ -27,20 +27,28 @@ test.describe('owner protected operations', () => {
 		];
 
 		for (const operation of operations) {
-			await page.locator('ion-select[formControlName="operation"]').click();
+			await page
+				.locator('ion-select[formControlName="operation"]')
+				.click();
 			const alert = page.locator('ion-alert').last();
 			await expect(alert).toBeVisible();
 			await alert
 				.getByRole('radio', { name: operation, exact: true })
 				.click();
-			await alert.getByRole('button', { name: 'OK', exact: true }).click();
+			await alert
+				.getByRole('button', { name: 'OK', exact: true })
+				.click();
 			await expect(alert).toBeHidden();
 			await page.locator('#ownerOperationPreview').click();
 			await expect(page.locator('#previewHeading')).toBeVisible({
 				timeout: 15000,
 			});
-			await expect(page.getByText('Preview ready.', { exact: false })).toBeVisible();
-			await expect(page.locator('code')).toContainText(operation.toUpperCase().split(' ').slice(0, 1)[0]);
+			await expect(
+				page.getByText('Preview ready.', { exact: false }),
+			).toBeVisible();
+			await expect(page.locator('code')).toContainText(
+				operation.toUpperCase().split(' ').slice(0, 1)[0],
+			);
 		}
 	});
 
@@ -56,20 +64,36 @@ test.describe('owner protected operations', () => {
 		await operationPicker
 			.getByRole('radio', { name: 'Repair check-in flags', exact: true })
 			.click();
-		await operationPicker.getByRole('button', { name: 'OK', exact: true }).click();
+		await operationPicker
+			.getByRole('button', { name: 'OK', exact: true })
+			.click();
 		await expect(operationPicker).toBeHidden();
 		await page.locator('#ownerOperationPreview').click();
-		await expect(page.locator('#previewHeading')).toBeVisible({ timeout: 15000 });
-
-		const phrase = await page.locator('code').innerText();
-		await fillIonicInput(page, 'ion-input[formControlName="password"]', owner.password);
-		await fillIonicInput(page, 'ion-input[formControlName="confirmationPhrase"]', phrase);
-		await page.locator('#ownerOperationStart').click();
-		await expect(page.locator('ion-spinner[aria-label="Operation in progress"]')).toBeVisible();
-		await expect(page.getByText('Status: succeeded', { exact: true })).toBeVisible({
+		await expect(page.locator('#previewHeading')).toBeVisible({
 			timeout: 15000,
 		});
-		await expect(page.getByText(/^Stage: /)).toBeVisible();
+
+		const phrase = await page.locator('code').innerText();
+		await fillIonicInput(
+			page,
+			'ion-input[formControlName="password"]',
+			owner.password,
+		);
+		await fillIonicInput(
+			page,
+			'ion-input[formControlName="confirmationPhrase"]',
+			phrase,
+		);
+		await page.locator('#ownerOperationStart').click();
+		await expect(
+			page.locator('ion-spinner[aria-label="Operation in progress"]'),
+		).toBeVisible();
+		await expect(
+			page.getByText('Status: Completed', { exact: true }),
+		).toBeVisible({
+			timeout: 15000,
+		});
+		await expect(page.getByText('Stage: Completed', { exact: true })).toBeVisible();
 	});
 
 	test('OWNER-004 rejects a mistyped confirmation phrase before any protected operation starts', async ({
@@ -86,15 +110,28 @@ test.describe('owner protected operations', () => {
 		await alert.getByRole('button', { name: 'OK', exact: true }).click();
 		await expect(alert).toBeHidden();
 		await page.locator('#ownerOperationPreview').click();
-		await expect(page.locator('#previewHeading')).toBeVisible({ timeout: 15000 });
-
-		const phrase = await page.locator('code').innerText();
-		await fillIonicInput(page, 'ion-input[formControlName="password"]', defaultOwnerAccount().password);
-		await fillIonicInput(page, 'ion-input[formControlName="confirmationPhrase"]', `${phrase}-wrong`);
-		await expect(page.locator('#ownerOperationStart')).toBeEnabled();
-		await page.locator('#ownerOperationStart').click();
-		await expect(page.getByRole('alert')).toContainText('Confirmation phrase does not match', {
+		await expect(page.locator('#previewHeading')).toBeVisible({
 			timeout: 15000,
 		});
+
+		const phrase = await page.locator('code').innerText();
+		await fillIonicInput(
+			page,
+			'ion-input[formControlName="password"]',
+			defaultOwnerAccount().password,
+		);
+		await fillIonicInput(
+			page,
+			'ion-input[formControlName="confirmationPhrase"]',
+			`${phrase}-wrong`,
+		);
+		await expect(page.locator('#ownerOperationStart')).toBeEnabled();
+		await page.locator('#ownerOperationStart').click();
+		await expect(page.getByRole('alert')).toContainText(
+			'Confirmation phrase does not match',
+			{
+				timeout: 15000,
+			},
+		);
 	});
 });

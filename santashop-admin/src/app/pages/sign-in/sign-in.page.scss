@@ -1,10 +1,32 @@
 .card-container {
-	max-width: 600px;
-	margin: auto;
+	max-width: 460px;
+	margin: 0 auto;
+	padding: 24px 16px;
 }
-
+.sign-in-intro {
+	margin-bottom: 24px;
+}
+.sign-in-intro p {
+	color: var(--admin-muted);
+}
 ion-card {
-	top: 40px;
-	margin: 12px;
-	min-width: 300px;
+	width: 100%;
+}
+ion-card-header {
+	padding: 24px;
+}
+ion-card-content {
+	padding: 0 12px 24px;
+}
+ion-button {
+	width: 100%;
+	margin-top: 24px;
+}
+ion-note {
+	overflow-wrap: anywhere;
+}
+@media (min-width: 768px) {
+	.card-container {
+		padding-top: 64px;
+	}
 }

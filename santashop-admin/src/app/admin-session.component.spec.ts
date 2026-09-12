@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { AuthService } from '@santashop/core/admin';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { AuthService, AppStateService } from '@santashop/core/admin/firestore';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 import { AdminSessionComponent } from './admin-session.component';
 import { CheckInContextService } from './shared/services/check-in-context.service';
@@ -17,7 +17,22 @@ describe('AdminSessionComponent', () => {
 				imports: [AdminSessionComponent],
 				providers: [
 					provideRouter([]),
-					{ provide: AuthService, useValue: { currentUser$ } },
+					{
+						provide: AuthService,
+						useValue: {
+							currentUser$,
+							isAdmin$: of(false),
+							isOwner$: of(false),
+						},
+					},
+					{
+						provide: AppStateService,
+						useValue: {
+							checkinEnabled$: of(true),
+							onsiteRegistrationEnabled$: of(false),
+							preRegistrationEnabled$: of(false),
+						},
+					},
 				],
 			});
 			const navigate = vi

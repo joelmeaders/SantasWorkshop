@@ -1,91 +1,116 @@
-<admin-header title="Check-In: Review Info" backRoute="/admin/checkin/scan">
-	@if (registration(); as registration) { @if (allowCancelRegistration()) {
-	<ion-button color="danger" (click)="cancelReservation()">
-		Delete
-	</ion-button>
-	} }
+<admin-header
+	title="{{ 'Check-In: Review Info' | adminText }}"
+	backRoute="/admin/checkin/scan"
+>
+	@if (registration(); as registration) {
+		@if (allowCancelRegistration()) {
+			<ion-button color="danger" (click)="cancelReservation()">
+				{{ 'Delete' | adminText }}
+			</ion-button>
+		}
+	}
 </admin-header>
 
 <ion-content fullscreen class="ion-padding-horizontal">
 	<div class="limited-container">
 		@if (registration(); as registration) {
-		<div class="form-list">
-			<ion-list-header color="none" class="review-instructions">
-				<span>
-					<h3>Instructions</h3>
-					<ion-note>
-						Review all registration information. Validate children
-						names and birth dates with documentation. Add, edit and
-						remove children if needed before continuing.
-					</ion-note>
-				</span>
-			</ion-list-header>
-			<ion-item-divider>
-				<ion-label> Parent / Guardian </ion-label>
-			</ion-item-divider>
-			<ion-item lines="none">
-				<ion-label>
-					<h1>
-						{{ registration?.firstName }} {{ registration?.lastName
+			<div class="form-list">
+				<ion-list-header color="none" class="review-instructions">
+					<span>
+						<h2>{{ 'Instructions' | adminText }}</h2>
+						<ion-note>
+							{{
+								'Review all registration information. Validate children names and
+            birth dates with documentation. Add, edit and remove children if
+            needed before continuing.' | adminText
+							}}
+						</ion-note>
+					</span>
+				</ion-list-header>
+				<ion-item-divider>
+					<ion-label>
+						{{ 'Parent / Guardian' | adminText }}
+					</ion-label>
+				</ion-item-divider>
+				<ion-item lines="none">
+					<ion-label>
+						<h1>
+							{{ registration?.firstName }}
+							{{ registration?.lastName }}
+						</h1>
+						<p>{{ registration?.emailAddress }}</p>
+						<p>
+							{{ 'Zip: {{v0}}' | adminText: {v0:
+							(registration?.zipCode)} }}
+						</p>
+						@if (registration?.dateTimeSlot?.dateTime) {
+							<p>
+								<ion-text color="primary">
+									{{ 'Reservation: {{v0}}' | adminText: {v0:
+									($safeNavigationMigration(registration.dateTimeSlot?.dateTime)
+									| adminDate:'medium')} }}
+								</ion-text>
+								<ion-button
+									fill="outline"
+									size="small"
+									(click)="editDateTime()"
+									color="dark"
+								>
+									{{ 'Change Date/Time' | adminText }}
+								</ion-button>
+							</p>
+						}
+					</ion-label>
+				</ion-item>
+				<admin-manage-children
+					[children]="registration?.children ?? []"
+					(adddedChild)="addChild($event)"
+					(editedChild)="editChild($event)"
+					(removedChild)="removeChild($event)"
+				/>
+				<ion-item-divider class="success-divider">
+					<ion-label>
+						{{
+							'Is all information correct and accurate?'
+								| adminText
 						}}
-					</h1>
-					<p>{{ registration?.emailAddress }}</p>
-					<p>Zip: {{ registration?.zipCode }}</p>
-					@if (registration?.dateTimeSlot?.dateTime) {
-					<p>
-						<ion-text color="primary">
-							Reservation: {{
-							$safeNavigationMigration(registration.dateTimeSlot?.dateTime)
-							| eventDate:'medium' }}
-						</ion-text>
-						<ion-button
-							fill="outline"
-							size="small"
-							(click)="editDateTime()"
-							color="dark"
-						>
-							Change Date/Time
-						</ion-button>
-					</p>
-					}
-				</ion-label>
-			</ion-item>
-			<admin-manage-children
-				[children]="registration?.children ?? []"
-				(adddedChild)="addChild($event)"
-				(editedChild)="editChild($event)"
-				(removedChild)="removeChild($event)"
-			/>
-			<ion-item-divider class="success-divider">
-				<ion-label>
-					Is all information correct and accurate?
-				</ion-label>
-			</ion-item-divider>
-			@if (checkinEnabled() !== true) {
-			<ion-note color="danger">
-				Check-In is not available at this time.
-			</ion-note>
-			}
-			<ion-item
-				lines="none"
-				button
-				color="success"
-				class="confirm-button"
-				(click)="checkIn()"
-				[disabled]="checkinEnabled() !== true"
-			>
-				<ion-label>
-					<h1>Yes, check in</h1>
-				</ion-label>
-				<ion-icon name="checkmark-circle" slot="end" size="large" aria-hidden="true" />
-			</ion-item>
-		</div>
+					</ion-label>
+				</ion-item-divider>
+				@if (checkinEnabled() !== true) {
+					<ion-note color="danger">
+						{{
+							'Check-In is not available at this time.'
+								| adminText
+						}}
+					</ion-note>
+				}
+				<ion-item
+					lines="none"
+					button
+					color="success"
+					class="confirm-button"
+					(click)="checkIn()"
+					[disabled]="checkinEnabled() !== true"
+				>
+					<ion-label>
+						<h1>{{ 'Yes, check in' | adminText }}</h1>
+					</ion-label>
+					<ion-icon
+						name="checkmark-circle"
+						slot="end"
+						size="large"
+						aria-hidden="true"
+					/>
+				</ion-item>
+			</div>
 		} @else {
-		<div class="no-info ion-text-center ion-padding-top">
-			<h1>No information loaded...</h1>
-			<p>Did you get here by mistake?</p>
-			<ion-button [routerLink]="['..']"> Go Back </ion-button>
-		</div>
+			<div class="no-info ion-text-center ion-padding-top">
+				<h1>{{ 'No information loaded...' | adminText }}</h1>
+				<p>{{ 'Did you get here by mistake?' | adminText }}</p>
+				<ion-button [routerLink]="['..']">
+					{{ 'Go Back' | adminText }}
+				</ion-button>
+			</div>
 		}
 	</div>
 </ion-content>

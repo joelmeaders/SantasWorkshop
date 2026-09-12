@@ -1,4 +1,6 @@
-import { EventDatePipe } from '@santashop/core/admin';
+import { AdminDatePipe } from '../../../../shared/preferences/admin-date.pipe';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
+
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -39,8 +41,9 @@ const asDate = (value: unknown): Date | undefined => {
 	styleUrls: ['./duplicate.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
-		EventDatePipe,
+		AdminDatePipe,
 		IonButton,
 		IonContent,
 		IonItem,
@@ -53,29 +56,32 @@ export class DuplicatePage {
 	private readonly router = inject(Router);
 	private readonly analytics = inject(AnalyticsWrapper);
 
-	public readonly result = toSignal(this.context.blockedScan$.pipe(
-		filter((result): result is BlockedScanResult =>
-			Boolean(
-				result &&
-				(result.disposition === 'duplicate-accidental' ||
-					result.disposition === 'duplicate-risk' ||
-					result.disposition === 'cancelled'),
+	public readonly result = toSignal(
+		this.context.blockedScan$.pipe(
+			filter((result): result is BlockedScanResult =>
+				Boolean(
+					result &&
+					(result.disposition === 'duplicate-accidental' ||
+						result.disposition === 'duplicate-risk' ||
+						result.disposition === 'cancelled'),
+				),
 			),
+			map((result) => ({
+				...result,
+				attempt: {
+					...result.attempt,
+					scannedOn: asDate(result.attempt.scannedOn),
+					priorEventOn: asDate(result.attempt.priorEventOn),
+				},
+			})),
+			tap((result) => {
+				this.analytics.logEventWithParams('admin_blocked_scan_view', {
+					disposition: result.disposition,
+				});
+			}),
 		),
-		map((result) => ({
-			...result,
-			attempt: {
-				...result.attempt,
-				scannedOn: asDate(result.attempt.scannedOn),
-				priorEventOn: asDate(result.attempt.priorEventOn),
-			},
-		})),
-		tap((result) => {
-			this.analytics.logEventWithParams('admin_blocked_scan_view', {
-				disposition: result.disposition,
-			});
-		}),
-	), { initialValue: undefined });
+		{ initialValue: undefined },
+	);
 
 	public async startOver(): Promise<void> {
 		this.context.reset();

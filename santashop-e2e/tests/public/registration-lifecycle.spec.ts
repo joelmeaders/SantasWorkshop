@@ -972,7 +972,7 @@ test.describe('customer registration lifecycle', () => {
 		await expect(page.locator('ion-modal app-help')).toBeVisible();
 		await expect(
 			page.locator(
-				'ion-modal ion-button[href="https://www.denversantaclausshop.org/contact/"]',
+				'ion-modal ion-button[href="https://www.facebook.com/denversantaclausshop/"]',
 			),
 		).toBeVisible();
 	});

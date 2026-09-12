@@ -21,6 +21,30 @@ const meta = {
 export default meta;
 type Story = StoryObj<HomePage>;
 
+export const SocialLinks: Story = {
+	play: async ({ canvasElement }) => {
+		const content = canvasElement.querySelector(
+			'ion-content',
+		) as HTMLIonContentElement;
+		await content.scrollToBottom(0);
+		for (const [name, href] of [
+			['Facebook', 'https://www.facebook.com/denversantaclausshop/'],
+			['Instagram', 'https://www.instagram.com/denversantaclausshop/'],
+		]) {
+			const button = canvasElement.querySelector(
+				`.social-links ion-button[href="${href}"]`,
+			) as HTMLIonButtonElement;
+			await waitFor(() =>
+				expect(
+					button.shadowRoot?.querySelector('a'),
+				).toHaveAccessibleName(name),
+			);
+			expect(button.href).toBe(href);
+			expect(button.target).toBe('_blank');
+		}
+	},
+};
+
 export const SignIn: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);

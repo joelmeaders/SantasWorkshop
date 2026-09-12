@@ -193,8 +193,8 @@
 		"TICKET_TITLE": "Keep your ticket",
 		"TICKET_TEXT": "After you submit, the ticket screen shows your QR code. Save a screenshot or print your ticket for check-in. You can sign in again to view it.",
 		"CONTACT_TITLE": "Need more help?",
-		"VISIT_TEXT": "Visit the Contact Us page of our website for help with registration.",
-		"VISIT_BUTTON": "Visit Website"
+		"VISIT_TEXT": "For help with registration, send a message to Denver Santa Claus Shop on Facebook.",
+		"VISIT_BUTTON": "Message us on Facebook"
 	},
 	"PROFILE": {
 		"SETTINGS_INTRO": "Manage your contact information, email address, and password in one place.",

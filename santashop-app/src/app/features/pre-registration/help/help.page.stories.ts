@@ -82,9 +82,14 @@ export const CustomerHelp: Story = {
 		expect(
 			canvas.getByRole('heading', { name: /review and submit/i }),
 		).toBeInTheDocument();
-		expect(getIonButton(canvasElement, /visit.*website/i)).toHaveAttribute(
-			'target',
-			'_blank',
+		expect(
+			getIonButton(canvasElement, /message.*facebook/i),
+		).toHaveAttribute('target', '_blank');
+		expect(
+			getIonButton(canvasElement, /message.*facebook/i),
+		).toHaveAttribute(
+			'href',
+			'https://www.facebook.com/denversantaclausshop/',
 		);
 		expect(canvasElement.querySelector('[href$=".pdf"]')).toBeNull();
 		await userEvent.click(close);

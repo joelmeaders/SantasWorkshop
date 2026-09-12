@@ -193,8 +193,8 @@
 		"TICKET_TITLE": "Guarde su entrada",
 		"TICKET_TEXT": "Después de enviar el registro, la pantalla de su entrada muestra su código QR. Guarde una captura de pantalla o imprima su entrada para presentarla al llegar. Puede volver a iniciar sesión para verla.",
 		"CONTACT_TITLE": "¿Necesita más ayuda?",
-		"VISIT_TEXT": "Visite la página Contáctenos de nuestro sitio web para obtener ayuda con el registro.",
-		"VISIT_BUTTON": "Visite el sitio web"
+		"VISIT_TEXT": "Para obtener ayuda con el registro, envíe un mensaje a Denver Santa Claus Shop en Facebook.",
+		"VISIT_BUTTON": "Envíenos un mensaje en Facebook"
 	},
 	"PROFILE": {
 		"SETTINGS_INTRO": "Administre su información de contacto, correo electrónico y contraseña en un solo lugar.",

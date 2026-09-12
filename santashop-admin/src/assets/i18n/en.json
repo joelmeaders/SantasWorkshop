@@ -827,5 +827,7 @@
 	"11am": "11am",
 	"12pm": "12pm",
 	"1pm": "1pm",
-	"2pm": "2pm"
+	"2pm": "2pm",
+	"Status": "Status",
+	"Total or rate": "Total or rate"
 }

@@ -24,11 +24,19 @@ const meta = {
 			canvas.getByText('Ready to welcome families'),
 		).toBeVisible();
 		await expect(canvas.getByText('Owner Operations')).toBeVisible();
-		const appearance = canvas.getByLabelText('Appearance');
+		await userEvent.click(
+			canvas.getByText('EN / ES'),
+		);
+		const appearance = await within(document.body).findByLabelText(
+			'Appearance',
+		);
 		await userEvent.selectOptions(appearance, 'dark');
 		await expect(document.body).toHaveClass('dark');
 		await userEvent.selectOptions(appearance, 'light');
 		await expect(document.body).not.toHaveClass('dark');
+		await (
+			document.querySelector('ion-popover') as HTMLIonPopoverElement
+		).dismiss();
 		const fixtures = getAdminStoryFixtures(canvasElement);
 		fixtures.featureEnabled$.next(false);
 		await waitFor(() =>

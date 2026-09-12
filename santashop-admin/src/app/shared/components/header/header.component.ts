@@ -1,5 +1,10 @@
 import { AdminTextPipe } from '../../preferences/admin-text.pipe';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	input,
+	signal,
+} from '@angular/core';
 import { AdminPreferencesComponent } from '../../preferences/admin-preferences.component';
 
 import { RouterLink } from '@angular/router';
@@ -12,6 +17,7 @@ import {
 	IonButtons,
 	IonButton,
 	IonIcon,
+	IonPopover,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -29,9 +35,11 @@ import {
 		IonButtons,
 		IonButton,
 		IonIcon,
+		IonPopover,
 	],
 })
 export class HeaderComponent {
+	public readonly preferencesOpen = signal(false);
 	public readonly showBack = input(true);
 	public readonly title = input<string>();
 

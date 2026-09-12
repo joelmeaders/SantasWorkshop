@@ -1,4 +1,7 @@
-<admin-header title="{{ 'Shopper Stats' | adminText }}">
+<admin-header title="{{ 'Shopper Stats' | adminText }}" />
+
+<ion-content class="ion-padding-vertical">
+	<div class="page-actions">
 	<ion-item>
 		<ion-select
 			okText="{{ 'OK' | adminText }}"
@@ -13,9 +16,7 @@
 			}
 		</ion-select>
 	</ion-item>
-</admin-header>
-
-<ion-content class="ion-padding-vertical">
+	</div>
 	<ion-button fill="outline" (click)="refresh()">
 		{{ 'Refresh report' | adminText }}
 	</ion-button>

@@ -37,6 +37,7 @@ import {
 import { filterNullish } from '../../../../shared/helpers';
 import {
 	AppStateService,
+	AuthService,
 	FunctionsWrapper,
 	HttpsCallableResult,
 } from '@santashop/core/admin/firestore';
@@ -73,6 +74,9 @@ import { checkmarkCircle } from 'ionicons/icons';
 	],
 })
 export class ReviewPage {
+	public readonly isAdmin = toSignal(inject(AuthService).isAdmin$, {
+		initialValue: false,
+	});
 	public readonly language = inject(AdminLanguageService);
 	private readonly checkinContext = inject(CheckInContextService);
 	private readonly lookupService = inject(LookupService);
@@ -175,6 +179,7 @@ export class ReviewPage {
 	}
 
 	public async cancelReservation(): Promise<void> {
+		if (!this.isAdmin() || !this.allowCancelRegistration()) return;
 		const registration = this.registration();
 
 		const alert = await createAdminAlert(this.alertController, () => ({
@@ -231,6 +236,7 @@ export class ReviewPage {
 	}
 
 	public async editDateTime(): Promise<void> {
+		if (!this.isAdmin()) return;
 		const registration = this.registration();
 		if (!registration?.dateTimeSlot) return;
 

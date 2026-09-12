@@ -47,9 +47,10 @@ export const AdministratorView: Story = {
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		const editButtons = canvas.getAllByTitle('Edit user');
-		await expect((editButtons[0] as HTMLIonButtonElement).disabled).toBe(
-			true,
-		);
-		await expect(editButtons).toHaveLength(2);
+		await expect(editButtons).toHaveLength(1);
+		const adminRow = canvas.getByText('Morgan Admin').closest('ion-item');
+		await expect(adminRow?.querySelector('ion-buttons')).toBeNull();
+		await expect(canvas.getAllByTitle('Reset password')).toHaveLength(1);
+		await expect(canvas.getAllByTitle('Delete user')).toHaveLength(1);
 	},
 };

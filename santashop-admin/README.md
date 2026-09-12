@@ -5,12 +5,15 @@ operational flags, and Firebase contracts independent of display preferences.
 
 ## Navigation and layout
 
-On phones, the shell provides Home, Check-In, and Search. Home provides access to
+The shell keeps Home, Check-In, and Search available on every signed-in screen,
+including scanner and reports, at all viewport sizes. Home provides access to
 the other workflows, based on staff permissions. The session shell displays the
 sidebar at 1024px and above. Existing search URLs still work; the main search
 screen embeds the same forms and retains their values when switching methods.
 
-Use `HeaderComponent` for page headings, back navigation, and device preferences.
+Use `HeaderComponent` for compact page headings, back navigation, and the EN / ES
+menu containing language and appearance preferences. Keep page-specific actions
+in the page body so the header stays one row.
 Use the admin theme variables in `src/theme/variables.scss` for surfaces, text,
 borders, and actions. Global controls have a minimum 44px action height and
 visible keyboard focus. Keep wide tables inside their own scroll region.

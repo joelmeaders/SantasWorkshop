@@ -178,7 +178,7 @@ describe('app routes', () => {
 				'users',
 			]),
 		);
-		const stats = adminRoutes.find((route) => route.path === 'stats');
+		const stats = shell?.children?.find((route) => route.path === 'stats');
 		expect(
 			stats?.children?.every(
 				(route) => typeof route.loadComponent === 'function',
@@ -186,6 +186,25 @@ describe('app routes', () => {
 		).toBe(true);
 	});
 
+	it('keeps scanner, review, and reports under the persistent quick-action shell', () => {
+		const shell = adminRoutes.find(
+			(route) => route.path === '' && route.loadComponent,
+		);
+		expect(adminRoutes).toHaveLength(1);
+		const checkin = shell?.children?.find(
+			(route) => route.path === 'checkin',
+		);
+		expect(checkin?.children?.map((route) => route.path)).toEqual(
+			expect.arrayContaining([
+				'scan',
+				'review',
+				'confirmation',
+				'duplicate/:uid',
+			]),
+		);
+		const stats = shell?.children?.find((route) => route.path === 'stats');
+		expect(stats?.canActivate).toHaveLength(1);
+	});
 	it('resolves every configured lazy page component', async () => {
 		const candidates = collectComponentRoutes(adminRoutes);
 		const components = await Promise.all(

@@ -27,7 +27,7 @@
 
 			<form [formGroup]="form" autocomplete="off" novalidate>
 				<ion-item
-					><ion-select
+					><ion-select labelPlacement="stacked"
 						okText="{{ 'OK' | adminText }}"
 						cancelText="{{ 'Cancel' | adminText }}"
 						label="{{ 'Email language' | adminText }}"
@@ -162,7 +162,7 @@
 				</ion-item-divider>
 				@if (availableSlots(); as slots) {
 					<ion-item>
-						<ion-select
+						<ion-select labelPlacement="stacked"
 							okText="{{ 'OK' | adminText }}"
 							cancelText="{{ 'Cancel' | adminText }}"
 							label="{{ 'Available Days/Times' | adminText }}"

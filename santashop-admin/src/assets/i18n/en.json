@@ -821,5 +821,11 @@
 	"initialize-schedule": "Create schedules",
 	"Too many sign-in attempts. Wait a few minutes and try again.": "Too many sign-in attempts. Wait a few minutes and try again.",
 	"Check your internet connection and try again.": "Check your internet connection and try again.",
-	"Enter the customer's email address, then select Send Email.": "Enter the customer's email address, then select Send Email."
+	"Enter the customer's email address, then select Send Email.": "Enter the customer's email address, then select Send Email.",
+	"skippedRegistrations": "Skipped registrations",
+	"10am": "10am",
+	"11am": "11am",
+	"12pm": "12pm",
+	"1pm": "1pm",
+	"2pm": "2pm"
 }

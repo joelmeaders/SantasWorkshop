@@ -821,5 +821,11 @@
 	"initialize-schedule": "Crear horarios",
 	"Too many sign-in attempts. Wait a few minutes and try again.": "Hubo demasiados intentos de inicio de sesión. Espere unos minutos e inténtelo de nuevo.",
 	"Check your internet connection and try again.": "Verifique su conexión a internet e inténtelo de nuevo.",
-	"Enter the customer's email address, then select Send Email.": "Ingrese el correo electrónico del cliente y seleccione Enviar correo."
+	"Enter the customer's email address, then select Send Email.": "Ingrese el correo electrónico del cliente y seleccione Enviar correo.",
+	"skippedRegistrations": "Inscripciones omitidas",
+	"10am": "10 a.m.",
+	"11am": "11 a.m.",
+	"12pm": "12 p.m.",
+	"1pm": "1 p.m.",
+	"2pm": "2 p.m."
 }

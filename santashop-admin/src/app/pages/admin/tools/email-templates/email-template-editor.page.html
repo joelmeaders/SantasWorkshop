@@ -15,7 +15,7 @@
             Imports open as drafts.' | adminText
 						}}
 					</p>
-					<ion-select
+					<ion-select labelPlacement="stacked"
 						okText="{{ 'OK' | adminText }}"
 						cancelText="{{ 'Cancel' | adminText }}"
 						label="{{ '2026 starter template' | adminText }}"
@@ -60,7 +60,7 @@
 				<ion-card-content>
 					<form [formGroup]="form">
 						<ion-item
-							><ion-select
+							><ion-select labelPlacement="stacked"
 								okText="{{ 'OK' | adminText }}"
 								cancelText="{{ 'Cancel' | adminText }}"
 								label="{{ 'Email language' | adminText }}"
@@ -75,7 +75,7 @@
 							></ion-item
 						>
 						<ion-item
-							><ion-textarea
+							><ion-textarea labelPlacement="stacked"
 								label="{{
 									'Plain-text alternative' | adminText
 								}}"
@@ -114,7 +114,7 @@
 
 						<ion-list>
 							<ion-item>
-								<ion-input
+								<ion-input labelPlacement="stacked"
 									label="{{ 'Template key' | adminText }}"
 									formControlName="key"
 									placeholder="{{
@@ -123,7 +123,7 @@
 								></ion-input>
 							</ion-item>
 							<ion-item>
-								<ion-select
+								<ion-select labelPlacement="stacked"
 									okText="{{ 'OK' | adminText }}"
 									cancelText="{{ 'Cancel' | adminText }}"
 									label="{{ 'Delivery profile' | adminText }}"
@@ -143,7 +143,7 @@
 								</ion-select>
 							</ion-item>
 							<ion-item>
-								<ion-input
+								<ion-input labelPlacement="stacked"
 									label="{{ 'Display name' | adminText }}"
 									formControlName="displayName"
 									placeholder="{{
@@ -152,7 +152,7 @@
 								></ion-input>
 							</ion-item>
 							<ion-item>
-								<ion-input
+								<ion-input labelPlacement="stacked"
 									label="{{
 										'AWS SES template name' | adminText
 									}}"
@@ -164,7 +164,7 @@
 								></ion-input>
 							</ion-item>
 							<ion-item>
-								<ion-input
+								<ion-input labelPlacement="stacked"
 									label="{{ 'Subject' | adminText }}"
 									formControlName="subjectPart"
 									[placeholder]="
@@ -174,14 +174,14 @@
 								></ion-input>
 							</ion-item>
 							<ion-item>
-								<ion-textarea
+								<ion-textarea labelPlacement="stacked"
 									label="{{ 'Description' | adminText }}"
 									formControlName="description"
 									autoGrow="true"
 								></ion-textarea>
 							</ion-item>
 							<ion-item>
-								<ion-textarea
+								<ion-textarea labelPlacement="stacked"
 									label="{{ 'Revision notes' | adminText }}"
 									formControlName="notes"
 									autoGrow="true"
@@ -265,7 +265,7 @@
 					<form [formGroup]="testEmailForm">
 						<ion-list>
 							<ion-item>
-								<ion-input
+								<ion-input labelPlacement="stacked"
 									label="{{
 										'Test recipient email' | adminText
 									}}"
@@ -375,7 +375,7 @@
 										</ion-badge>
 									</ion-item>
 									<ion-item>
-										<ion-select
+										<ion-select labelPlacement="stacked"
 											okText="{{ 'OK' | adminText }}"
 											cancelText="{{
 												'Cancel' | adminText
@@ -402,7 +402,7 @@
 										</ion-select>
 									</ion-item>
 									<ion-item>
-										<ion-input
+										<ion-input labelPlacement="stacked"
 											label="{{
 												'Test / preview value'
 													| adminText

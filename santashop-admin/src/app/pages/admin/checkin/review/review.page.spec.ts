@@ -7,6 +7,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { AlertController, ModalController } from '@ionic/angular/standalone';
 import {
 	AppStateService,
+	AuthService,
 	FunctionsWrapper,
 } from '@santashop/core/admin/firestore';
 import { CheckInContextService } from '../../../../shared/services/check-in-context.service';
@@ -24,6 +25,7 @@ const registration = (): Record<string, unknown> => ({
 
 describe('ReviewPage', () => {
 	let component: ReviewPage;
+	const isAdmin$ = new BehaviorSubject(true);
 	let fixture: ComponentFixture<ReviewPage>;
 	let currentRegistration: BehaviorSubject<Record<string, unknown>>;
 	const setRegistration = vi.fn();
@@ -45,9 +47,12 @@ describe('ReviewPage', () => {
 	const createModal = vi.fn().mockResolvedValue(modal);
 
 	beforeEach(async () => {
+		isAdmin$.next(true);
 		currentRegistration = new BehaviorSubject(registration());
 		setRegistration.mockReset();
-		setRegistration.mockImplementation((value) => currentRegistration.next(value));
+		setRegistration.mockImplementation((value) =>
+			currentRegistration.next(value),
+		);
 		setCheckIn.mockReset();
 		setBlockedScan.mockReset();
 		reset.mockReset();
@@ -67,6 +72,7 @@ describe('ReviewPage', () => {
 			imports: [ReviewPage],
 			providers: [
 				provideActivatedRouteMock(),
+				{ provide: AuthService, useValue: { isAdmin$ } },
 				{
 					provide: CheckInContextService,
 					useValue: {
@@ -109,6 +115,26 @@ describe('ReviewPage', () => {
 		await fixture.whenStable();
 	});
 
+	it('hides forbidden reservation actions for check-in staff and clears them when roles change', async () => {
+		expect(fixture.nativeElement.textContent).toContain('Change Date/Time');
+		expect(
+			fixture.nativeElement.querySelector('.page-actions').textContent,
+		).toContain('Delete');
+		isAdmin$.next(false);
+		await fixture.whenStable();
+		expect(fixture.nativeElement.textContent).not.toContain(
+			'Change Date/Time',
+		);
+		expect(
+			fixture.nativeElement.querySelector('.page-actions').textContent,
+		).not.toContain('Delete');
+		expect(fixture.nativeElement.textContent).toContain('Yes, check in');
+		await component.cancelReservation();
+		await component.editDateTime();
+		expect(createAlert).not.toHaveBeenCalled();
+		expect(createModal).not.toHaveBeenCalled();
+		expect(callable).not.toHaveBeenCalled();
+	});
 	it('should create', () => {
 		expect(component).toBeTruthy();
 	});
@@ -132,7 +158,9 @@ describe('ReviewPage', () => {
 	it.each(['add', 'edit'] as const)(
 		'uses the edited check-in path when staff only %ss a child',
 		async (action) => {
-			vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+			vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(
+				true,
+			);
 			checkIn.mockResolvedValue(1);
 			const child = { id: action === 'add' ? 2 : 1, firstName: 'Nora' };
 			if (action === 'add') await component.addChild(child as never);

@@ -232,3 +232,20 @@ ion-toggle::part(label) {
 	white-space: normal;
 	overflow-wrap: anywhere;
 }
+
+/* Modern Ionic fields draw their own underline; do not draw a second item rule. */
+ion-item:has(> ion-input),
+ion-item:has(> ion-textarea) {
+	--inner-border-width: 0;
+	--border-width: 0;
+}
+
+.page-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+}
+.page-actions:empty {
+	display: none;
+}

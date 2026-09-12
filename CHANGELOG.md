@@ -18,6 +18,9 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Changed
 
+- Keep the admin quick-action bar visible on scanner, report, and desktop screens; reduce the header to one row and remove duplicate form underlines.
+- Hide reservation and staff-account actions when the signed-in role cannot perform them.
+
 - Redesign the admin app for phones with Home, Check-in, and Search navigation, a desktop sidebar, neutral surfaces, and accessible controls.
 - Localize displayed report dates, numbers, and status labels while preserving stored data, CSV contracts, and unavailable historical calculations.
 - Advance the workspace and both applications to `2026.09.0-beta.5`.

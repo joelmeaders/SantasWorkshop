@@ -48,12 +48,12 @@
 								}
 							</p>
 						</ion-label>
+						@if (canManage(account, owner)) {
 						<ion-buttons slot="end">
 							<ion-button
 								fill="clear"
 								title="{{ 'Edit user' | adminText }}"
 								aria-label="{{ 'Edit user' | adminText }}"
-								[disabled]="!canManage(account, owner)"
 								(click)="editUser(account)"
 								(keydown.enter)="editUser(account)"
 							>
@@ -67,7 +67,6 @@
 								fill="clear"
 								title="{{ 'Reset password' | adminText }}"
 								aria-label="{{ 'Reset password' | adminText }}"
-								[disabled]="!canManage(account, owner)"
 								(click)="resetPassword(account)"
 								(keydown.enter)="resetPassword(account)"
 							>
@@ -82,7 +81,6 @@
 								color="danger"
 								title="{{ 'Delete user' | adminText }}"
 								aria-label="{{ 'Delete user' | adminText }}"
-								[disabled]="!canManage(account, owner)"
 								(click)="deleteUser(account)"
 								(keydown.enter)="deleteUser(account)"
 							>
@@ -93,6 +91,7 @@
 								></ion-icon>
 							</ion-button>
 						</ion-buttons>
+						}
 					</ion-item>
 				}
 			</ion-list>

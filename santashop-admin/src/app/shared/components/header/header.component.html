@@ -18,7 +18,28 @@
 		<h1 class="page-title">{{ title() | adminText }}</h1>
 		<ion-buttons slot="end">
 			<ng-content />
+			<ion-button
+				class="preferences-trigger"
+				(click)="preferencesOpen.set(true)"
+				[attr.aria-label]="'Language' | adminText"
+				>EN / ES</ion-button
+			>
 		</ion-buttons>
 	</ion-toolbar>
-	<div class="preferences-row"><admin-preferences /></div>
+	<ion-popover
+		[isOpen]="preferencesOpen()"
+		(didDismiss)="preferencesOpen.set(false)"
+	>
+		<ng-template
+			><div class="preferences-panel">
+				<admin-preferences />
+				<ion-button
+					expand="block"
+					fill="clear"
+					(click)="preferencesOpen.set(false)"
+					>{{ 'OK' | adminText }}</ion-button
+				>
+			</div></ng-template
+		>
+	</ion-popover>
 </ion-header>

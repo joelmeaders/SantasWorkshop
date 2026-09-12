@@ -159,6 +159,13 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expect(
 			page.getByText('Lookup Operator', { exact: true }),
 		).toBeVisible();
+		await expect(
+			page.locator('admin-review .page-actions ion-button'),
+		).toHaveCount(0);
+		await expect(
+			page.getByRole('button', { name: 'Change Date/Time', exact: true }),
+		).toHaveCount(0);
+		await expect(page.locator('ion-footer')).toBeVisible();
 	});
 
 	test('STAFF-004 signs out and blocks protected operational routes', async ({

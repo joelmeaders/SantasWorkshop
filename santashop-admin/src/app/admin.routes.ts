@@ -3,38 +3,6 @@ import { adminOnlyGuard, ownerOnlyGuard } from './auth.guards';
 
 export const adminRoutes: Routes = [
 	{
-		path: 'checkin/scan',
-		title: 'DSCS: Scan Registration Codes',
-		loadComponent: () =>
-			import('./pages/admin/checkin/scan/scan.page').then(
-				(m) => m.ScanPage,
-			),
-	},
-	{
-		path: 'checkin/review',
-		title: 'DSCS: Review Information',
-		loadComponent: () =>
-			import('./pages/admin/checkin/review/review.page').then(
-				(m) => m.ReviewPage,
-			),
-	},
-	{
-		path: 'checkin/confirmation',
-		title: 'DSCS: Checked In',
-		loadComponent: () =>
-			import('./pages/admin/checkin/confirmation/confirmation.page').then(
-				(m) => m.ConfirmationPage,
-			),
-	},
-	{
-		path: 'checkin/duplicate/:uid',
-		title: 'DSCS: Duplicate Check-In',
-		loadComponent: () =>
-			import('./pages/admin/checkin/duplicate/duplicate.page').then(
-				(m) => m.DuplicatePage,
-			),
-	},
-	{
 		path: '',
 		title: 'DSCS Home',
 		loadComponent: () =>
@@ -231,46 +199,46 @@ export const adminRoutes: Routes = [
 				redirectTo: 'landing',
 				pathMatch: 'full',
 			},
-		],
-	},
-	{
-		path: 'stats',
-		canActivate: [adminOnlyGuard],
-		children: [
 			{
-				path: 'scan-risk',
-				loadComponent: () =>
-					import('./pages/admin/stats/scan-risk/scan-risk.page').then(
-						(m) => m.ScanRiskPage,
-					),
-			},
-			{
-				path: 'scan-risk/:uid',
-				loadComponent: () =>
-					import('./pages/admin/stats/scan-risk/scan-risk-detail.page').then(
-						(m) => m.ScanRiskDetailPage,
-					),
-			},
-			{
-				path: 'registration',
-				loadComponent: () =>
-					import('./pages/admin/stats/registration/registration.page').then(
-						(m) => m.RegistrationPage,
-					),
-			},
-			{
-				path: 'check-in',
-				loadComponent: () =>
-					import('./pages/admin/stats/check-in/check-in.page').then(
-						(m) => m.CheckInPage,
-					),
-			},
-			{
-				path: 'user',
-				loadComponent: () =>
-					import('./pages/admin/stats/user/user.page').then(
-						(m) => m.UserPage,
-					),
+				path: 'stats',
+				canActivate: [adminOnlyGuard],
+				children: [
+					{
+						path: 'scan-risk',
+						loadComponent: () =>
+							import('./pages/admin/stats/scan-risk/scan-risk.page').then(
+								(m) => m.ScanRiskPage,
+							),
+					},
+					{
+						path: 'scan-risk/:uid',
+						loadComponent: () =>
+							import('./pages/admin/stats/scan-risk/scan-risk-detail.page').then(
+								(m) => m.ScanRiskDetailPage,
+							),
+					},
+					{
+						path: 'registration',
+						loadComponent: () =>
+							import('./pages/admin/stats/registration/registration.page').then(
+								(m) => m.RegistrationPage,
+							),
+					},
+					{
+						path: 'check-in',
+						loadComponent: () =>
+							import('./pages/admin/stats/check-in/check-in.page').then(
+								(m) => m.CheckInPage,
+							),
+					},
+					{
+						path: 'user',
+						loadComponent: () =>
+							import('./pages/admin/stats/user/user.page').then(
+								(m) => m.UserPage,
+							),
+					},
+				],
 			},
 		],
 	},

@@ -1,17 +1,18 @@
 <admin-header
 	title="{{ 'Check-In: Review Info' | adminText }}"
 	backRoute="/admin/checkin/scan"
->
+ />
+
+<ion-content fullscreen class="ion-padding-horizontal">
+	<div class="page-actions">
 	@if (registration(); as registration) {
-		@if (allowCancelRegistration()) {
+		@if (isAdmin() && allowCancelRegistration()) {
 			<ion-button color="danger" (click)="cancelReservation()">
 				{{ 'Delete' | adminText }}
 			</ion-button>
 		}
 	}
-</admin-header>
-
-<ion-content fullscreen class="ion-padding-horizontal">
+	</div>
 	<div class="limited-container">
 		@if (registration(); as registration) {
 			<div class="form-list">
@@ -50,6 +51,7 @@
 									($safeNavigationMigration(registration.dateTimeSlot?.dateTime)
 									| adminDate:'medium')} }}
 								</ion-text>
+								@if (isAdmin()) {
 								<ion-button
 									fill="outline"
 									size="small"
@@ -58,6 +60,7 @@
 								>
 									{{ 'Change Date/Time' | adminText }}
 								</ion-button>
+								}
 							</p>
 						}
 					</ion-label>

@@ -11,7 +11,7 @@ const meta = {
 		docs: {
 			description: {
 				component:
-					'The production admin shell with Home, Check-In, and Search phone navigation. The desktop sidebar belongs to the session shell.',
+					'The production admin shell with Home, Check-In, and Search navigation at every viewport size. Scanner, report, and other routes share this shell.',
 			},
 		},
 	},
@@ -28,10 +28,6 @@ const meta = {
 			const outletBounds = outlet.getBoundingClientRect();
 			const footerBounds = footer.getBoundingClientRect();
 			expect(outletBounds.height).toBeGreaterThan(0);
-			if (window.innerWidth >= 1024) {
-				expect(footerBounds.height).toBe(0);
-				return;
-			}
 			expect(footerBounds.height).toBeGreaterThan(0);
 			expect(outletBounds.bottom).toBeLessThanOrEqual(
 				footerBounds.top + 1,

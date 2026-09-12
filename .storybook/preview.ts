@@ -26,6 +26,11 @@ Chart.defaults.animation = false;
 const themeStyleId = 'santashop-storybook-theme';
 
 const viewports = {
+	smallPhone: {
+		name: 'Small phone (320 x 720)',
+		styles: { width: '320px', height: '720px' },
+		type: 'mobile' as const,
+	},
 	mobile: {
 		name: 'Mobile (390 x 844)',
 		styles: { width: '390px', height: '844px' },
@@ -43,11 +48,30 @@ const viewports = {
 	},
 };
 
-function applyTheme(title: string, fileName: unknown): void {
+function applyTheme(
+	title: string,
+	fileName: unknown,
+	parameters: Record<string, unknown>,
+): void {
 	const sourceFile =
 		typeof fileName === 'string' ? fileName.replaceAll('\\', '/') : '';
 	const isAdminStory =
 		title.startsWith('Admin/') || sourceFile.includes('/santashop-admin/');
+	if (isAdminStory) {
+		localStorage.setItem(
+			'santashop-admin-language',
+			parameters['adminLanguage'] === 'es' ? 'es' : 'en',
+		);
+		localStorage.setItem(
+			'santashop-admin-theme',
+			parameters['adminTheme'] === 'dark' ? 'dark' : 'light',
+		);
+	} else {
+		delete document.documentElement.dataset['adminTheme'];
+		document.documentElement.style.colorScheme = '';
+		document.documentElement.style.backgroundColor = '';
+		document.body.classList.remove('dark');
+	}
 	const style =
 		document.getElementById(themeStyleId) ??
 		document.createElement('style');
@@ -107,7 +131,11 @@ const preview: Preview = {
 	},
 	decorators: [
 		(story, context): ReturnType<typeof story> => {
-			applyTheme(context.title, context.parameters['fileName']);
+			applyTheme(
+				context.title,
+				context.parameters['fileName'],
+				context.parameters,
+			);
 			return story();
 		},
 	],

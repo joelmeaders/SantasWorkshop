@@ -1,3 +1,6 @@
+import { AdminLanguageService } from '../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -30,6 +33,7 @@ import { AuthService } from '@santashop/core/admin/firestore';
 	styleUrls: ['./users.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		IonContent,
 		IonList,
@@ -45,6 +49,7 @@ import { AuthService } from '@santashop/core/admin/firestore';
 	],
 })
 export class UsersPage {
+	public readonly language = inject(AdminLanguageService);
 	private readonly staffService = inject(StaffService);
 	private readonly modalController = inject(ModalController);
 	private readonly alerts = inject(AlertController);
@@ -100,9 +105,11 @@ export class UsersPage {
 	public async resetPassword(account: StaffAccount): Promise<void> {
 		let password = '';
 
-		const alert = await this.alerts.create({
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header: 'Reset Password',
-			message: `Set a new password for ${account.displayName}.`,
+			message: this.language.text('Set a new password for {{v0}}.', {
+				v0: account.displayName,
+			}),
 			inputs: [
 				{
 					name: 'password',
@@ -126,7 +133,7 @@ export class UsersPage {
 					},
 				},
 			],
-		});
+		}));
 
 		await alert.present();
 		const result = await alert.onDidDismiss();
@@ -148,14 +155,19 @@ export class UsersPage {
 	}
 
 	public async deleteUser(account: StaffAccount): Promise<void> {
-		const alert = await this.alerts.create({
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header: 'Delete User',
-			message: `Delete ${account.displayName}? This cannot be undone.`,
+			message: this.language.text(
+				'Delete {{v0}}? This cannot be undone.',
+				{
+					v0: account.displayName,
+				},
+			),
 			buttons: [
 				{ text: 'Cancel', role: 'cancel' },
 				{ text: 'Delete', role: 'destructive' },
 			],
-		});
+		}));
 
 		await alert.present();
 		const result = await alert.onDidDismiss();
@@ -236,11 +248,11 @@ export class UsersPage {
 	}
 
 	private async showAlert(header: string, message: string): Promise<void> {
-		const alert = await this.alerts.create({
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header,
 			message,
 			buttons: ['OK'],
-		});
+		}));
 		await alert.present();
 	}
 }

@@ -1,13 +1,13 @@
 <ion-header>
 	<ion-toolbar>
-		<ion-title>Choose Date & Time</ion-title>
+		<ion-title> {{ 'Choose Date & Time' | adminText }} </ion-title>
 		<ion-button
 			slot="end"
 			fill="outline"
 			color="danger"
 			(click)="dismiss()"
 		>
-			Cancel
+			{{ 'Cancel' | adminText }}
 		</ion-button>
 	</ion-toolbar>
 </ion-header>
@@ -18,20 +18,20 @@
 			<ion-card>
 				<ion-card-header>
 					<ion-card-title color="primary">
-						Current Date/Time
+						{{ 'Current Date/Time' | adminText }}
 					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content class="ion-text-center">
 					<ion-item lines="none">
-						{{ currentSlot.dateTime | eventDate: 'MMMM d' }},
-						{{ currentSlot.dateTime | timeSlot }}
+						{{ currentSlot.dateTime | adminDate: 'MMMM d' }},
+						{{ currentSlot.dateTime | adminTimeSlot }}
 					</ion-item>
 				</ion-card-content>
 			</ion-card>
 		}
 
 		<ion-list-header class="ion-padding-top">
-			Available Dates/Times
+			{{ 'Available Dates/Times' | adminText }}
 		</ion-list-header>
 
 		@let days = availableDays();
@@ -41,7 +41,7 @@
 					<ion-accordion>
 						<ion-item slot="header" color="light">
 							<ion-label>
-								{{ day | eventDate: 'EEEE, MMMM d' }}
+								{{ day | adminDate: 'EEEE, MMMM d' }}
 							</ion-label>
 						</ion-item>
 						<ion-list
@@ -50,7 +50,7 @@
 							class="ion-no-padding"
 						>
 							@for (
-								slot of (availableSlotsByDay().get(day) ?? []);
+								slot of availableSlotsByDay().get(day) ?? [];
 								track slot
 							) {
 								<ion-item
@@ -61,7 +61,7 @@
 									button
 								>
 									<ion-label>
-										{{ slot.dateTime | timeSlot }}
+										{{ slot.dateTime | adminTimeSlot }}
 										<br />
 										<ion-text color="primary">
 											{{ spotsRemaining(slot) }}
@@ -76,7 +76,11 @@
 		} @else {
 			<ion-card color="danger">
 				<ion-card-header>
-					<ion-note> No available time slots at this time. </ion-note>
+					<ion-note>
+						{{
+							'No available time slots at this time.' | adminText
+						}}
+					</ion-note>
 				</ion-card-header>
 			</ion-card>
 		}

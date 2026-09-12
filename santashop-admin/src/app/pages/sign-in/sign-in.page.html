@@ -1,39 +1,49 @@
+<admin-header title="{{ 'Santa Shop' | adminText }}" [showBack]="false" />
 <ion-content>
 	<div class="card-container">
+		<div class="sign-in-intro">
+			<h1>{{ 'Welcome back' | adminText }}</h1>
+			<p>
+				{{
+					'Tools for the people who make the season happen.'
+						| adminText
+				}}
+			</p>
+		</div>
 		<ion-card>
 			<ion-card-header>
-				<ion-card-title> Sign in </ion-card-title>
+				<ion-card-title> {{ 'Sign in' | adminText }} </ion-card-title>
 			</ion-card-header>
 			<ion-card-content>
 				<form [formGroup]="form">
 					<ion-item>
 						<ion-input
 							id="adminSignInEmail"
-							label="Email Address"
-							labelPlacement="floating"
+							label="{{ 'Email Address' | adminText }}"
+							labelPlacement="stacked"
 							formControlName="emailAddress"
 							autocomplete="email"
 							type="email"
 						/>
 						@if (form.controls['emailAddress'].dirty) {
-						<ion-note slot="error" color="danger">
-							Invalid email address
-						</ion-note>
+							<ion-note slot="error" color="danger">
+								{{ 'Invalid email address' | adminText }}
+							</ion-note>
 						}
 					</ion-item>
 					<ion-item>
 						<ion-input
 							id="adminSignInPassword"
-							label="Password"
-							labelPlacement="floating"
+							label="{{ 'Password' | adminText }}"
+							labelPlacement="stacked"
 							formControlName="password"
 							autocomplete="password"
 							type="password"
 						/>
 						@if (form.controls['password'].dirty) {
-						<ion-note slot="error" color="danger">
-							Password is required
-						</ion-note>
+							<ion-note slot="error" color="danger">
+								{{ 'Password is required' | adminText }}
+							</ion-note>
 						}
 					</ion-item>
 				</form>
@@ -45,7 +55,7 @@
 						(click)="login()"
 						(keydown.enter)="login()"
 					>
-						Login
+						{{ 'Login' | adminText }}
 					</ion-button>
 				</ion-toolbar>
 			</ion-card-content>

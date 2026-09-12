@@ -21,6 +21,7 @@ on:
       - 'test-helpers/**'
       - 'config.firebase.cjs'
       - 'vitest.config.mjs'
+      - 'vitest.admin.config.mjs'
       - 'vitest.setup.ts'
   push:
     branches: [master]
@@ -43,6 +44,7 @@ on:
       - 'test-helpers/**'
       - 'config.firebase.cjs'
       - 'vitest.config.mjs'
+      - 'vitest.admin.config.mjs'
       - 'vitest.setup.ts'
   workflow_dispatch:
     inputs:

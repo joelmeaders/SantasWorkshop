@@ -1,21 +1,21 @@
 <ion-item-divider>
 	<ion-label>
-		Children
+		{{ 'Children' | adminText }}
 		<ion-badge>{{ children().length }}</ion-badge>
 	</ion-label>
 	<ion-button slot="end" fill="clear" shape="round" (click)="addEditChild()">
 		<ion-icon name="add-circle" slot="end" aria-hidden="true" />
-		Add Child
+		{{ 'Add Child' | adminText }}
 	</ion-button>
 </ion-item-divider>
 
 @if (!children().length) {
 	<ion-item button detail (click)="addEditChild()">
 		<span>
-			<ion-label> Add children </ion-label>
+			<ion-label> {{ 'Add children' | adminText }} </ion-label>
 			@if (!children().length) {
 				<ion-note color="danger" slot="error" class="error-note">
-					Add all children 11 years old or younger
+					{{ 'Add all children 11 years old or younger' | adminText }}
 				</ion-note>
 			}
 		</span>
@@ -29,12 +29,13 @@
 				<h2>{{ child.firstName }} {{ child.lastName }}</h2>
 				<p>
 					<ion-badge color="dark">
-						Age: {{ child.ageGroup }}
+						{{ 'Age: {{v0}}' | adminText: {v0: (child.ageGroup)} }}
 					</ion-badge>
 					{{
 						(child.dateOfBirth
 							? calendarDate(child.dateOfBirth)
-							: undefined) | date
+							: undefined
+						) | adminCalendarDate
 					}}
 				</p>
 			</ion-label>
@@ -47,7 +48,7 @@
 					slot="top"
 					aria-hidden="true"
 				/>
-				<ion-label slot="bottom"> Edit </ion-label>
+				<ion-label slot="bottom"> {{ 'Edit' | adminText }} </ion-label>
 			</ion-item-option>
 			<ion-item-option color="danger" (click)="removeChild(child.id!)">
 				<ion-icon
@@ -56,7 +57,9 @@
 					slot="top"
 					aria-hidden="true"
 				/>
-				<ion-label slot="bottom"> Delete </ion-label>
+				<ion-label slot="bottom">
+					{{ 'Delete' | adminText }}
+				</ion-label>
 			</ion-item-option>
 		</ion-item-options>
 	</ion-item-sliding>

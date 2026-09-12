@@ -1,131 +1,182 @@
-<admin-header title="Search Results" backRoute="/admin/search" />
+<admin-header
+	title="{{ 'Search Results' | adminText }}"
+	backRoute="/admin/search"
+/>
 
 <ion-content class="ion-text-center">
 	<div class="limited-container">
 		@if (state().status !== 'idle') {
-		<ion-button fill="outline" (click)="refresh()"
-			>Refresh results</ion-button
-		>
-		} @if (state().status === 'idle') {
-		<h1>No search was entered</h1>
-		<ion-button
-			color="danger"
-			class="ion-padding ion-margin"
-			routerLink="/admin/search"
-			(click)="reset()"
-		>
-			Go Back
-		</ion-button>
-		} @let results = searchResults(); @if (state().status === 'loading') {
-		<div class="center-100 searching">
-			<ion-spinner
-				name="crescent"
-				aria-label="Searching for registrations"
-			/>
-			<p>Searching, please wait...</p>
+			<ion-button fill="outline" (click)="refresh()">
+				{{ 'Refresh results' | adminText }}
+			</ion-button>
+		}
+		@if (state().status === 'idle') {
+			<h1>{{ 'No search was entered' | adminText }}</h1>
 			<ion-button
-				color="medium"
+				color="danger"
 				class="ion-padding ion-margin"
-				routerLink=".."
+				routerLink="/admin/search"
 				(click)="reset()"
 			>
-				Cancel
+				{{ 'Go Back' | adminText }}
 			</ion-button>
-		</div>
-		} @else if (state().status === 'error') {
-		<p role="alert">
-			Search results could not be loaded. Select Refresh results to try
-			again.
-		</p>
-		} @else if (state().status === 'ready') { @if (results && results.length
-		> 0) {
-		<span>
-			<ion-card-header>
-				<ion-card-title>
-					{{ results.length }} {{ results.length === 1 ? 'Result' :
-					'Results' }}
-				</ion-card-title>
-				@let sortFn = sortBy();
-				<ion-card-subtitle>
-					Sort by
-					<ion-chip
-						(click)="setSortType(sortLast)"
-						role="button"
-						tabindex="0"
-						(keydown.enter)="setSortType(sortLast)"
-						(keydown.space)="setSortType(sortLast); $event.preventDefault()"
-						[attr.aria-pressed]="sortFn === sortLast"
-						[color]="sortFn === sortLast ? 'primary' : 'medium'"
-					>
-						Last, First, Zip
-					</ion-chip>
-					<ion-chip
-						(click)="setSortType(sortFirst)"
-						role="button"
-						tabindex="0"
-						(keydown.enter)="setSortType(sortFirst)"
-						(keydown.space)="setSortType(sortFirst); $event.preventDefault()"
-						[attr.aria-pressed]="sortFn === sortFirst"
-						[color]="sortFn === sortFirst ? 'primary' : 'medium'"
-					>
-						First, Last
-					</ion-chip>
-					<ion-chip
-						(click)="setSortType(sortEmail)"
-						role="button"
-						tabindex="0"
-						(keydown.enter)="setSortType(sortEmail)"
-						(keydown.space)="setSortType(sortEmail); $event.preventDefault()"
-						[attr.aria-pressed]="sortFn === sortEmail"
-						[color]="sortFn === sortEmail ? 'primary' : 'medium'"
-					>
-						Email
-					</ion-chip>
-				</ion-card-subtitle>
-			</ion-card-header>
-			<ion-list>
-				@for (result of results; track result) {
-				<ion-item
-					detail
-					button
-					class="result-item"
-					lines="full"
-					[routerLink]="['/admin/checkin/review', { qrcode: result.code }]"
+		}
+		@let results = searchResults();
+		@if (state().status === 'loading') {
+			<div class="center-100 searching">
+				<ion-spinner
+					name="crescent"
+					aria-label="{{ 'Searching for registrations' | adminText }}"
+				/>
+				<p>{{ 'Searching, please wait...' | adminText }}</p>
+				<ion-button
+					color="medium"
+					class="ion-padding ion-margin"
+					routerLink=".."
+					(click)="reset()"
 				>
-					<div class="result-label">
-						<h3>
-							{{ result.displayFirstName ?? result.firstName }} {{
-							result.displayLastName ?? result.lastName }}
-						</h3>
-						<ion-label> {{ result.emailAddress }} </ion-label>
-						<ion-label> Zip: {{ result.zip }} </ion-label>
-					</div>
-				</ion-item>
-				}
-			</ion-list>
-			<div class="center-100">
-				<ion-button color="danger" (click)="reset()" routerLink="..">
-					<ion-icon
-						name="backspace-outline"
-						slot="start"
-						aria-hidden="true"
-					/>
-					<ion-label> Start Over </ion-label>
+					{{ 'Cancel' | adminText }}
 				</ion-button>
 			</div>
-		</span>
-		} @else {
-		<div class="center-100 searching">
-			<h2>No results found</h2>
-			<ion-button color="danger" (click)="reset()" routerLink="..">
-				<ion-icon
-					name="backspace-outline"
-					slot="start"
-					aria-hidden="true"
-				/>
-				<ion-label> Start Over </ion-label>
-			</ion-button>
-		</div>
-		} }
+		} @else if (state().status === 'error') {
+			<p role="alert">
+				{{
+					'Search results could not be loaded. Select Refresh results to try
+      again.' | adminText
+				}}
+			</p>
+		} @else if (state().status === 'ready') {
+			@if (results && results.length > 0) {
+				<span>
+					<ion-card-header>
+						<ion-card-title>
+							{{ results.length | adminText }}
+							{{
+								(results.length === 1 ? 'Result' : 'Results')
+									| adminText
+							}}
+						</ion-card-title>
+						@let sortFn = sortBy();
+						<ion-card-subtitle>
+							{{ 'Sort by' | adminText }}
+							<ion-chip
+								(click)="setSortType(sortLast)"
+								role="button"
+								tabindex="0"
+								(keydown.enter)="setSortType(sortLast)"
+								(keydown.space)="
+									setSortType(sortLast);
+									$event.preventDefault()
+								"
+								[attr.aria-pressed]="sortFn === sortLast"
+								[color]="
+									sortFn === sortLast ? 'primary' : 'medium'
+								"
+							>
+								{{ 'Last, First, Zip' | adminText }}
+							</ion-chip>
+							<ion-chip
+								(click)="setSortType(sortFirst)"
+								role="button"
+								tabindex="0"
+								(keydown.enter)="setSortType(sortFirst)"
+								(keydown.space)="
+									setSortType(sortFirst);
+									$event.preventDefault()
+								"
+								[attr.aria-pressed]="sortFn === sortFirst"
+								[color]="
+									sortFn === sortFirst ? 'primary' : 'medium'
+								"
+							>
+								{{ 'First, Last' | adminText }}
+							</ion-chip>
+							<ion-chip
+								(click)="setSortType(sortEmail)"
+								role="button"
+								tabindex="0"
+								(keydown.enter)="setSortType(sortEmail)"
+								(keydown.space)="
+									setSortType(sortEmail);
+									$event.preventDefault()
+								"
+								[attr.aria-pressed]="sortFn === sortEmail"
+								[color]="
+									sortFn === sortEmail ? 'primary' : 'medium'
+								"
+							>
+								{{ 'Email' | adminText }}
+							</ion-chip>
+						</ion-card-subtitle>
+					</ion-card-header>
+					<ion-list>
+						@for (result of results; track result) {
+							<ion-item
+								detail
+								button
+								class="result-item"
+								lines="full"
+								[routerLink]="[
+									'/admin/checkin/review',
+									{ qrcode: result.code },
+								]"
+							>
+								<div class="result-label">
+									<h3>
+										{{
+											result.displayFirstName ??
+												result.firstName
+										}}
+										{{
+											result.displayLastName ??
+												result.lastName
+										}}
+									</h3>
+									<ion-label>
+										{{ result.emailAddress }}
+									</ion-label>
+									<ion-label>
+										{{ 'Zip: {{v0}}' | adminText: {v0:
+										(result.zip)} }}
+									</ion-label>
+								</div>
+							</ion-item>
+						}
+					</ion-list>
+					<div class="center-100">
+						<ion-button
+							color="danger"
+							(click)="reset()"
+							routerLink=".."
+						>
+							<ion-icon
+								name="backspace-outline"
+								slot="start"
+								aria-hidden="true"
+							/>
+							<ion-label>
+								{{ 'Start Over' | adminText }}
+							</ion-label>
+						</ion-button>
+					</div>
+				</span>
+			} @else {
+				<div class="center-100 searching">
+					<h2>{{ 'No results found' | adminText }}</h2>
+					<ion-button
+						color="danger"
+						(click)="reset()"
+						routerLink=".."
+					>
+						<ion-icon
+							name="backspace-outline"
+							slot="start"
+							aria-hidden="true"
+						/>
+						<ion-label> {{ 'Start Over' | adminText }} </ion-label>
+					</ion-button>
+				</div>
+			}
+		}
 	</div>
 </ion-content>

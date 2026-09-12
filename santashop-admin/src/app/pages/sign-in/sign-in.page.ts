@@ -1,3 +1,5 @@
+import { createAdminAlert } from '../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../shared/preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -13,6 +15,7 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '@santashop/core/admin';
 import { config } from '../../../config';
+import { HeaderComponent } from '../../shared/components/header/header.component';
 
 import {
 	IonContent,
@@ -37,6 +40,8 @@ import {
 	styleUrls: ['./sign-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
+		HeaderComponent,
 		ReactiveFormsModule,
 		IonContent,
 		IonCard,
@@ -105,11 +110,15 @@ export class SignInPage {
 			if (errorString.includes('auth/too-many-requests'))
 				header = 'Account locked out';
 
-			const alert = await this.alertController.create({
+			const alert = await createAdminAlert(this.alertController, () => ({
 				header,
-				message: errorString.replace('Firebase: ', ''),
+				message: errorString.includes('auth/too-many-requests')
+					? 'Too many sign-in attempts. Wait a few minutes and try again.'
+					: errorString.includes('auth/network-request-failed')
+						? 'Check your internet connection and try again.'
+						: 'Unable to sign in. Please check your email and password and try again.',
 				buttons: ['Ok'],
-			});
+			}));
 
 			await alert.present();
 		} finally {
@@ -140,12 +149,12 @@ export class SignInPage {
 	}
 
 	private async presentAccessDeniedAlert(): Promise<void> {
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Access Denied',
 			message:
 				'Your account is signed in, but it does not have staff access. Contact an administrator if you need access.',
 			buttons: ['Ok'],
-		});
+		}));
 
 		await alert.present();
 	}

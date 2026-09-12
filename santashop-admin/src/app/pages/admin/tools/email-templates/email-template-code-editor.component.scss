@@ -8,14 +8,15 @@
 
 :host ::ng-deep .cm-editor {
 	height: 24rem;
-	background: #fff;
+	background: var(--admin-surface);
 }
 
 :host ::ng-deep .cm-activeLine {
-	background: #fff;
+	background: var(--admin-surface-muted);
 }
 
 :host ::ng-deep .cm-scroller {
 	overflow: auto;
-	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-family:
+		'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 }

@@ -1,21 +1,24 @@
 <ion-header>
 	<ion-toolbar>
 		<ion-buttons slot="start">
-			<ion-button
-				aria-label="Go back"
-				[routerLink]="[backRoute()]"
-				routerDirection="back"
-			>
-				<ion-icon
-					name="arrow-back-sharp"
-					slot="icon-only"
-					aria-hidden="true"
-				/>
-			</ion-button>
+			@if (showBack()) {
+				<ion-button
+					aria-label="{{ 'Go back' | adminText }}"
+					[routerLink]="[backRoute()]"
+					routerDirection="back"
+				>
+					<ion-icon
+						name="arrow-back-sharp"
+						slot="icon-only"
+						aria-hidden="true"
+					/>
+				</ion-button>
+			}
 		</ion-buttons>
-		<ion-title> {{ title() }} </ion-title>
+		<h1 class="page-title">{{ title() | adminText }}</h1>
 		<ion-buttons slot="end">
 			<ng-content />
 		</ion-buttons>
 	</ion-toolbar>
+	<div class="preferences-row"><admin-preferences /></div>
 </ion-header>

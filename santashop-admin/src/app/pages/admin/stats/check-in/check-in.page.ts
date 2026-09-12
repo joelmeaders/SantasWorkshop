@@ -1,3 +1,9 @@
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import {
+	AdminChartPipe,
+	AdminChartOptionsPipe,
+} from '../../../../shared/preferences/admin-chart.pipe';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import {
 	ChangeDetectionStrategy,
@@ -71,6 +77,9 @@ type CheckInStatsLoadState =
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		AdminChartPipe,
+		AdminChartOptionsPipe,
+		AdminTextPipe,
 		ReportTableComponent,
 		ReportFreshnessComponent,
 		HeaderComponent,
@@ -92,6 +101,7 @@ type CheckInStatsLoadState =
 	],
 })
 export class CheckInPage {
+	private readonly language = inject(AdminLanguageService);
 	private readonly httpService = inject(AdminReadRepository);
 	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
@@ -300,11 +310,12 @@ export class CheckInPage {
 
 	private formatDateKey(dateKey: string): string {
 		const [year, month, day] = dateKey.split('-').map(Number);
-		const monthName = new Intl.DateTimeFormat('en-US', {
+		return new Intl.DateTimeFormat(this.language.locale(), {
 			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
 			timeZone: 'UTC',
-		}).format(new Date(Date.UTC(year, month - 1, 1)));
-		return `${monthName} ${day}, ${year}`;
+		}).format(new Date(Date.UTC(year, month - 1, day)));
 	}
 
 	private getHourLabels(data: CheckInDateTimeCount[]): string[] {

@@ -195,7 +195,7 @@ test.describe('report compatibility and exports', () => {
 						name: 'Daily registration totals',
 						exact: true,
 					}),
-				).toContainText(dateKey);
+				).toContainText(`Dec 13, ${archivedYear}`);
 				await expect(
 					page.getByRole('heading', {
 						name: 'Capacity by Day',
@@ -214,14 +214,14 @@ test.describe('report compatibility and exports', () => {
 						name: 'Attendance by hour',
 						exact: true,
 					}),
-				).toContainText(dateKey);
+				).toContainText(`Dec 13, ${archivedYear}`);
 			} else {
 				await expect(
 					page.getByRole('table', {
 						name: 'Shopper profiles by day',
 						exact: true,
 					}),
-				).toContainText(dateKey);
+				).toContainText(`Dec 13, ${archivedYear}`);
 				await expect(
 					page.getByRole('table', {
 						name: 'Shopper referrals',
@@ -343,7 +343,7 @@ test.describe('report compatibility and exports', () => {
 			name: 'Daily registration totals',
 			exact: true,
 		});
-		await expect(history).toContainText(`${E2E_PROGRAM_YEAR}-09-10`);
+		await expect(history).toContainText(`Sep 10, ${E2E_PROGRAM_YEAR}`);
 		await page.reload();
 		await expect(outcomes).toBeVisible();
 		await expect(page.locator('.count-container h1').first()).toHaveText(

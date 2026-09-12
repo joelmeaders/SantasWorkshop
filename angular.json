@@ -215,7 +215,7 @@
 						"coverage": true,
 						"coverageInclude": ["santashop-admin/src/**/*.ts"],
 						"coverageExclude": ["**/*.stories.ts"],
-						"runnerConfig": "vitest.config.mjs",
+						"runnerConfig": "vitest.admin.config.mjs",
 						"watch": false
 					}
 				},

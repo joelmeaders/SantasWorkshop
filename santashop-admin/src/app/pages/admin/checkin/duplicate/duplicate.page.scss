@@ -3,6 +3,12 @@
 }
 
 .message {
+	color: var(--ion-text-color);
+	background: var(--admin-surface);
+	border: 1px solid var(--admin-border);
+	border-top: 4px solid var(--ion-color-danger);
+	border-radius: 12px;
+	padding: 20px;
 	max-width: 44rem;
 	margin: 0 auto 1rem;
 	text-align: center;

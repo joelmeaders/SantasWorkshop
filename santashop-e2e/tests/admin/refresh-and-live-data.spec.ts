@@ -18,10 +18,8 @@ test.describe('admin data freshness', () => {
 		seedScheduleStats,
 	}) => {
 		await seedScheduleStats({
-				programYear: E2E_PROGRAM_YEAR,
-			dateTimeCounts: [
-				{ dateTime: e2eDateTime(12, 12, 16), count: 2 },
-			],
+			programYear: E2E_PROGRAM_YEAR,
+			dateTimeCounts: [{ dateTime: e2eDateTime(12, 12, 16), count: 2 }],
 		});
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/stats/registration');
@@ -29,10 +27,8 @@ test.describe('admin data freshness', () => {
 			'2',
 		);
 		await seedScheduleStats({
-				programYear: E2E_PROGRAM_YEAR,
-			dateTimeCounts: [
-				{ dateTime: e2eDateTime(12, 12, 16), count: 9 },
-			],
+			programYear: E2E_PROGRAM_YEAR,
+			dateTimeCounts: [{ dateTime: e2eDateTime(12, 12, 16), count: 9 }],
 		});
 		await expect(page.locator('.count-container h1').first()).toHaveText(
 			'2',
@@ -175,11 +171,17 @@ test.describe('admin data freshness', () => {
 			],
 		});
 		await expect(
-			page.getByRole('heading', { name: 'duplicate-risk', exact: true }),
+			page.getByRole('heading', {
+				name: 'Suspicious duplicate scan',
+				exact: true,
+			}),
 		).toHaveCount(0);
 		await page.getByRole('button', { name: 'Refresh timeline' }).click();
 		await expect(
-			page.getByRole('heading', { name: 'duplicate-risk', exact: true }),
+			page.getByRole('heading', {
+				name: 'Suspicious duplicate scan',
+				exact: true,
+			}),
 		).toBeVisible();
 	});
 

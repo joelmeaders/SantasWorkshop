@@ -10,14 +10,15 @@ const meta = {
 	parameters: {
 		docs: {
 			description: {
-				component: 'Customer search form with email-address validation.',
+				component:
+					'Customer search form with email-address validation.',
 			},
 		},
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		const search = canvas.getByText('Search').closest('ion-button');
-		await expect(canvas.getByText('Enter email address')).toBeVisible();
+		await expect(canvas.getByText('Search: Email')).toBeVisible();
 		await expect(search).toHaveAttribute('disabled');
 		await userEvent.click(canvas.getByText('Reset'));
 	},

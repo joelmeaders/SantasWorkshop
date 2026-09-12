@@ -17,7 +17,7 @@ const meta = {
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Step 1')).toBeVisible();
+		await expect(canvas.getByText('Find a registration')).toBeVisible();
 		await expect(canvas.getByText('Name & Zip Code')).toBeVisible();
 		await expect(canvas.getByText('Email Address')).toBeVisible();
 		await expect(canvas.getByText('Registration Code')).toBeVisible();

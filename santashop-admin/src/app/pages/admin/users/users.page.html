@@ -1,92 +1,108 @@
-<admin-header title="User Management" />
+<admin-header title="{{ 'User Management' | adminText }}" />
 
 <ion-content class="ion-padding-horizontal">
 	<div class="limited-container">
-		<ion-button fill="outline" (click)="refresh()"
-			>Refresh users</ion-button
-		>
-		@if (staffState(); as state) { @if (state.status === 'loading') {
-		<p role="status">Loading users…</p>
-		} @if (state.status === 'error') {
-		<p role="alert">Users could not be loaded. Try Refresh users again.</p>
-		} } @let owner = isOwner(); @if (staffAccounts(); as accounts) {
-		@if (accounts.length === 0 && staffState().status === 'ready') {
-		<ion-note class="empty-note" color="medium">
-			No elevated user accounts yet. Use the button below to add one.
-		</ion-note>
-		}
-
-		<ion-list>
-			@for (account of accounts; track account.uid) {
-			<ion-item>
-				<ion-label>
-					<h2>{{ account.displayName }}</h2>
-					<p>{{ account.emailAddress }}</p>
-					<p class="roles">
-						@for (role of account.roles; track role) {
-						<ion-badge color="primary">
-							{{ roleLabel(role) }}
-						</ion-badge>
-						} @if (account.disabled) {
-						<ion-badge color="medium"> Disabled </ion-badge>
-						}
-					</p>
-				</ion-label>
-				<ion-buttons slot="end">
-					<ion-button
-						fill="clear"
-						title="Edit user"
-						aria-label="Edit user"
-						[disabled]="!canManage(account, owner)"
-						(click)="editUser(account)"
-						(keydown.enter)="editUser(account)"
-					>
-						<ion-icon
-							slot="icon-only"
-							name="create-outline"
-							aria-hidden="true"
-						></ion-icon>
-					</ion-button>
-					<ion-button
-						fill="clear"
-						title="Reset password"
-						aria-label="Reset password"
-						[disabled]="!canManage(account, owner)"
-						(click)="resetPassword(account)"
-						(keydown.enter)="resetPassword(account)"
-					>
-						<ion-icon
-							slot="icon-only"
-							name="key-outline"
-							aria-hidden="true"
-						></ion-icon>
-					</ion-button>
-					<ion-button
-						fill="clear"
-						color="danger"
-						title="Delete user"
-						aria-label="Delete user"
-						[disabled]="!canManage(account, owner)"
-						(click)="deleteUser(account)"
-						(keydown.enter)="deleteUser(account)"
-					>
-						<ion-icon
-							slot="icon-only"
-							name="trash-outline"
-							aria-hidden="true"
-						></ion-icon>
-					</ion-button>
-				</ion-buttons>
-			</ion-item>
+		<ion-button fill="outline" (click)="refresh()">
+			{{ 'Refresh users' | adminText }}
+		</ion-button>
+		@if (staffState(); as state) {
+			@if (state.status === 'loading') {
+				<p role="status">{{ 'Loading users…' | adminText }}</p>
 			}
-		</ion-list>
+			@if (state.status === 'error') {
+				<p role="alert">
+					{{
+						'Users could not be loaded. Try Refresh users again.'
+							| adminText
+					}}
+				</p>
+			}
+		}
+		@let owner = isOwner();
+		@if (staffAccounts(); as accounts) {
+			@if (accounts.length === 0 && staffState().status === 'ready') {
+				<ion-note class="empty-note" color="medium">
+					{{
+						'No elevated user accounts yet. Use the button below to add one.'
+							| adminText
+					}}
+				</ion-note>
+			}
+
+			<ion-list>
+				@for (account of accounts; track account.uid) {
+					<ion-item>
+						<ion-label>
+							<h2>{{ account.displayName }}</h2>
+							<p>{{ account.emailAddress }}</p>
+							<p class="roles">
+								@for (role of account.roles; track role) {
+									<ion-badge color="primary">
+										{{ roleLabel(role) | adminText }}
+									</ion-badge>
+								}
+								@if (account.disabled) {
+									<ion-badge color="medium">
+										{{ 'Disabled' | adminText }}
+									</ion-badge>
+								}
+							</p>
+						</ion-label>
+						<ion-buttons slot="end">
+							<ion-button
+								fill="clear"
+								title="{{ 'Edit user' | adminText }}"
+								aria-label="{{ 'Edit user' | adminText }}"
+								[disabled]="!canManage(account, owner)"
+								(click)="editUser(account)"
+								(keydown.enter)="editUser(account)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="create-outline"
+									aria-hidden="true"
+								></ion-icon>
+							</ion-button>
+							<ion-button
+								fill="clear"
+								title="{{ 'Reset password' | adminText }}"
+								aria-label="{{ 'Reset password' | adminText }}"
+								[disabled]="!canManage(account, owner)"
+								(click)="resetPassword(account)"
+								(keydown.enter)="resetPassword(account)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="key-outline"
+									aria-hidden="true"
+								></ion-icon>
+							</ion-button>
+							<ion-button
+								fill="clear"
+								color="danger"
+								title="{{ 'Delete user' | adminText }}"
+								aria-label="{{ 'Delete user' | adminText }}"
+								[disabled]="!canManage(account, owner)"
+								(click)="deleteUser(account)"
+								(keydown.enter)="deleteUser(account)"
+							>
+								<ion-icon
+									slot="icon-only"
+									name="trash-outline"
+									aria-hidden="true"
+								></ion-icon>
+							</ion-button>
+						</ion-buttons>
+					</ion-item>
+				}
+			</ion-list>
 		}
 	</div>
 
 	<ion-fab slot="fixed" vertical="bottom" horizontal="end">
 		<ion-fab-button
-			title="Add user"
-			aria-label="Add user"
+			title="{{ 'Add user' | adminText }}"
+			aria-label="{{ 'Add user' | adminText }}"
 			(click)="addUser()"
 			(keydown.enter)="addUser()"
 		>

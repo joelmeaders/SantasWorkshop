@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { AdminLanguageService } from '../../preferences/admin-language.service';
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	input,
+	inject,
+} from '@angular/core';
 import { IonButton } from '@ionic/angular/standalone';
 import {
 	downloadReportCsv,
@@ -10,35 +17,36 @@ import {
 @Component({
 	selector: 'admin-report-table',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [IonButton],
+	imports: [AdminTextPipe, IonButton],
 	template: `
 		<ion-button
 			fill="outline"
 			(click)="download()"
 			[disabled]="!rows().length"
 		>
-			Download {{ caption() }} CSV
+			{{ 'Download {{v0}} CSV' | adminText: {v0: (caption() | adminText)}
+			}}
 		</ion-button>
 		<div
 			class="table-scroll"
 			role="region"
-			[attr.aria-label]="caption()"
+			[attr.aria-label]="caption() | adminText"
 			tabindex="0"
 		>
 			<table>
 				<caption>
 					{{
-						caption()
+						caption() | adminText
 					}}
 				</caption>
 				<thead>
 					<tr>
 						@for (column of columns(); track $index) {
 							<th scope="col">
-								{{ cellValue(column) }}
+								{{ cellValue(column) | adminText }}
 								@if (description(column); as explanation) {
 									<small class="label-description">{{
-										explanation
+										explanation | adminText
 									}}</small>
 								}
 							</th>
@@ -46,24 +54,24 @@ import {
 					</tr>
 				</thead>
 				<tbody>
-					@for (row of rows(); track $index) {
+					@for (row of displayRows() ?? rows(); track $index) {
 						<tr>
 							@for (cell of row; track $index) {
 								@if ($first) {
 									<th scope="row">
-										{{ cellValue(cell) ?? 'Unavailable' }}
+										{{ displayCell(cell, $index) }}
 										@if (
 											description(cell);
 											as explanation
 										) {
 											<small class="label-description">{{
-												explanation
+												explanation | adminText
 											}}</small>
 										}
 									</th>
 								} @else {
 									<td>
-										{{ cellValue(cell) ?? 'Unavailable' }}
+										{{ displayCell(cell, $index) }}
 									</td>
 								}
 							}
@@ -71,7 +79,7 @@ import {
 					} @empty {
 						<tr>
 							<td [attr.colspan]="columns().length">
-								{{ emptyText() }}
+								{{ emptyText() | adminText }}
 							</td>
 						</tr>
 					}
@@ -82,11 +90,11 @@ import {
 							@for (cell of total; track $index) {
 								@if ($first) {
 									<th scope="row">
-										{{ cellValue(cell) ?? 'Unavailable' }}
+										{{ displayCell(cell, $index) }}
 									</th>
 								} @else {
 									<td>
-										{{ cellValue(cell) ?? 'Unavailable' }}
+										{{ displayCell(cell, $index) }}
 									</td>
 								}
 							}
@@ -137,6 +145,40 @@ import {
 	`,
 })
 export class ReportTableComponent {
+	private readonly language = inject(AdminLanguageService);
+	public readonly displayRows = input<readonly (readonly ReportCell[])[]>();
+	public readonly columnFormats = input<
+		Record<number, 'calendar-date' | 'utc-date-time' | 'percent'>
+	>({});
+	public displayCell(cell: ReportCell, column: number): string {
+		const value = this.cellValue(cell);
+		if (value == null) return this.language.text('Unavailable');
+		const format = this.columnFormats()[column];
+		if (typeof value === 'string') {
+			if (format === 'calendar-date' && /^\d{4}-\d{2}-\d{2}$/.test(value))
+				return new Intl.DateTimeFormat(this.language.locale(), {
+					dateStyle: 'medium',
+					timeZone: 'UTC',
+				}).format(new Date(value));
+			if (format === 'utc-date-time' && /^\d{4}-.*Z$/.test(value))
+				return (
+					new Intl.DateTimeFormat(this.language.locale(), {
+						dateStyle: 'medium',
+						timeStyle: 'short',
+						timeZone: 'UTC',
+					}).format(new Date(value)) + ' UTC'
+				);
+			if (format === 'percent' && /^\d+(\.\d+)?%$/.test(value))
+				return new Intl.NumberFormat(this.language.locale(), {
+					style: 'percent',
+					minimumFractionDigits: 1,
+					maximumFractionDigits: 1,
+				}).format(Number.parseFloat(value) / 100);
+			return this.language.text(value);
+		}
+		return new Intl.NumberFormat(this.language.locale()).format(value);
+	}
+
 	public readonly caption = input.required<string>();
 	public readonly columns =
 		input.required<readonly (string | ReportLabel)[]>();

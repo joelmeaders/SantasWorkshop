@@ -42,12 +42,12 @@ export const E2E_FUNCTIONS_EMULATOR_URL =
 	`http://127.0.0.1:${process.env['E2E_FUNCTIONS_PORT'] ?? 5001}/${E2E_PROJECT_ID}/us-central1`;
 const emulatorUrl = (portKey: string, defaultPort: number): string =>
 	`http://127.0.0.1:${process.env[portKey] ?? defaultPort}`;
-export const E2E_AUTH_EMULATOR_URL =
-	emulatorUrl('E2E_AUTH_PORT', 9099);
-export const E2E_FIRESTORE_EMULATOR_URL =
-	emulatorUrl('E2E_FIRESTORE_PORT', 8180);
-export const E2E_STORAGE_EMULATOR_URL =
-	emulatorUrl('E2E_STORAGE_PORT', 9199);
+export const E2E_AUTH_EMULATOR_URL = emulatorUrl('E2E_AUTH_PORT', 9099);
+export const E2E_FIRESTORE_EMULATOR_URL = emulatorUrl(
+	'E2E_FIRESTORE_PORT',
+	8180,
+);
+export const E2E_STORAGE_EMULATOR_URL = emulatorUrl('E2E_STORAGE_PORT', 9199);
 export const E2E_STORAGE_BUCKET = `${E2E_PROJECT_ID}.appspot.com`;
 
 const pad = (value: number): string => value.toString().padStart(2, '0');
@@ -68,7 +68,9 @@ export const e2eDateTime = (
 	second = 0,
 	year = E2E_PROGRAM_YEAR,
 ): string =>
-	new Date(Date.UTC(year, month - 1, day, hour, minute, second)).toISOString();
+	new Date(
+		Date.UTC(year, month - 1, day, hour, minute, second),
+	).toISOString();
 
 /** Return the stable ID used by schedule initialization for a date-time slot. */
 export const e2eScheduleSlotId = (
@@ -77,10 +79,13 @@ export const e2eScheduleSlotId = (
 ): string => `${programYear}-${dateTime.replaceAll(/[^0-9]/g, '')}`;
 
 /** Return the event date label shown by the app in its business timezone. */
-export const e2eDateLabel = (dateTime: string): string =>
+export const e2eDateLabel = (
+	dateTime: string,
+	month: 'short' | 'long' = 'short',
+): string =>
 	new Intl.DateTimeFormat('en-US', {
 		weekday: 'long',
-		month: 'short',
+		month,
 		day: 'numeric',
 		year: 'numeric',
 		timeZone: 'America/Denver',

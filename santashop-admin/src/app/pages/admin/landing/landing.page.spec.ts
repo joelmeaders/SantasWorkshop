@@ -1,3 +1,4 @@
+import { AdminThemeService } from '../../../shared/preferences/admin-theme.service';
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -6,7 +7,6 @@ import { BehaviorSubject, of } from 'rxjs';
 import { LandingPage } from './landing.page';
 
 describe('LandingPage', () => {
-	let component: LandingPage;
 	let fixture: ComponentFixture<LandingPage>;
 	let adminSubject: BehaviorSubject<boolean>;
 	let ownerSubject: BehaviorSubject<boolean>;
@@ -50,7 +50,7 @@ describe('LandingPage', () => {
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(LandingPage);
-		component = fixture.componentInstance;
+
 		await fixture.whenStable();
 	});
 
@@ -129,12 +129,16 @@ describe('LandingPage', () => {
 	it('toggles the document theme using the persisted preference', () => {
 		expect(document.body.classList.contains('dark')).toBe(false);
 
-		component.toggleTheme();
-		expect(appStateService.prefersDark).toBe(true);
+		TestBed.inject(AdminThemeService).setTheme(
+			document.body.classList.contains('dark') ? 'light' : 'dark',
+		);
+		expect(TestBed.inject(AdminThemeService).dark()).toBe(true);
 		expect(document.body.classList.contains('dark')).toBe(true);
 
-		component.toggleTheme();
-		expect(appStateService.prefersDark).toBe(false);
+		TestBed.inject(AdminThemeService).setTheme(
+			document.body.classList.contains('dark') ? 'light' : 'dark',
+		);
+		expect(TestBed.inject(AdminThemeService).dark()).toBe(false);
 		expect(document.body.classList.contains('dark')).toBe(false);
 	});
 });

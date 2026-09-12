@@ -13,6 +13,7 @@ name: Admin Test Deploy and Manual Prod Release
     - scripts/verify-public-parameters.cjs
     - angular.json
     - vitest.config.mjs
+    - vitest.admin.config.mjs
     - vitest.setup.ts
     - test-helpers/**
     - package.json

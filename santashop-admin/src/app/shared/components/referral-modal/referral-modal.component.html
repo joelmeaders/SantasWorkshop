@@ -1,13 +1,13 @@
 <ion-header>
 	<ion-toolbar>
-		<ion-title> Choose Referring Agency</ion-title>
+		<ion-title> {{ 'Choose Referring Agency' | adminText }} </ion-title>
 		<ion-button
 			slot="end"
 			fill="outline"
 			color="danger"
 			(click)="dismiss()"
 		>
-			Cancel
+			{{ 'Cancel' | adminText }}
 		</ion-button>
 	</ion-toolbar>
 </ion-header>
@@ -18,17 +18,17 @@
 			<ion-searchbar
 				(ionInput)="filter($event)"
 				animated="true"
-				placeholder="Enter agency name"
+				placeholder="{{ 'Enter agency name' | adminText }}"
 			/>
 			<ion-item-group>
 				<ion-item-divider color="light" disabled>
-					<ion-label> Common </ion-label>
+					<ion-label> {{ 'Common' | adminText }} </ion-label>
 				</ion-item-divider>
-				@for (ref of referrals(); track ref; let i = $index) {
+				@for (ref of referrals(); track $index; let i = $index) {
 					@if (ref === '----------') {
 						<ion-item-divider disabled color="light">
 							<ion-label>
-								{{ i < 10 ? 'Alphabetical' : '' }}
+								{{ (i < 10 ? 'Alphabetical' : '') | adminText }}
 							</ion-label>
 						</ion-item-divider>
 					} @else {
@@ -39,7 +39,9 @@
 							(click)="setValue(ref)"
 							[disabled]="ref === '----------'"
 						>
-							<ion-label class="ref-choices">{{ ref }}</ion-label>
+							<ion-label class="ref-choices">{{
+								ref | adminText
+							}}</ion-label>
 						</ion-item>
 					}
 					<ng-template #agency>
@@ -50,7 +52,9 @@
 							(click)="setValue(ref)"
 							[disabled]="ref === '----------'"
 						>
-							<ion-label class="ref-choices">{{ ref }}</ion-label>
+							<ion-label class="ref-choices">{{
+								ref | adminText
+							}}</ion-label>
 						</ion-item>
 					</ng-template>
 				}
@@ -64,7 +68,7 @@
 				[value]="otherName()"
 				(ionInput)="otherName.set($event.detail.value ?? '')"
 				class="other-input"
-				label="Type name of referral:"
+				label="{{ 'Type name of referral:' | adminText }}"
 				labelPlacement="stacked"
 				maxlength="20"
 				minlength="3"
@@ -76,7 +80,7 @@
 			[disabled]="!validOtherName()"
 			(click)="saveOther()"
 		>
-			Save
+			{{ 'Save' | adminText }}
 		</ion-button>
 	}
 </ion-content>

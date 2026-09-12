@@ -7,6 +7,29 @@
 		<base href="/" />
 
 		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#f6f5f3" />
+		<script>
+			(() => {
+				let theme = 'system';
+				try {
+					theme =
+						localStorage.getItem('santashop-admin-theme') || theme;
+				} catch {}
+				const dark =
+					theme === 'dark' ||
+					(theme !== 'light' &&
+						matchMedia('(prefers-color-scheme: dark)').matches);
+				document.documentElement.dataset.adminTheme = dark
+					? 'dark'
+					: 'light';
+				document.documentElement.style.colorScheme = dark
+					? 'dark'
+					: 'light';
+				document.documentElement.style.backgroundColor = dark
+					? '#000000'
+					: '#f6f5f3';
+			})();
+		</script>
 		<meta
 			name="viewport"
 			content="viewport-fit=cover, width=device-width, initial-scale=1.0"

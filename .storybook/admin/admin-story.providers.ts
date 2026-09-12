@@ -1,3 +1,4 @@
+import { provideAdminLanguage } from '../../santashop-admin/src/app/shared/preferences/admin-language.providers';
 import {
 	type DebugElement,
 	type EnvironmentProviders,
@@ -898,7 +899,11 @@ const createProviders = (
 
 export const adminStoryDecorators = (
 	options: AdminStoryOptions = {},
-): Decorator[] => [applicationConfig({ providers: createProviders(options) })];
+): Decorator[] => [
+	applicationConfig({
+		providers: [provideAdminLanguage(), ...createProviders(options)],
+	}),
+];
 
 export const enterIonicStoryPage = async <
 	T extends { ionViewWillEnter: () => unknown },

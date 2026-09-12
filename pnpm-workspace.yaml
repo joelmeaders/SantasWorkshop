@@ -93,6 +93,8 @@ catalog:
     vitest: 4.1.10
     vite: 8.2.2
     wait-on: ^9.1.0
+    '@codemirror/language': 6.12.4
+    '@lezer/highlight': 1.2.3
     '@codemirror/lang-html': ^6.4.11
     '@codemirror/state': ^6.5.2
     '@codemirror/view': ^6.38.6

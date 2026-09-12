@@ -158,3 +158,67 @@ export const NoReportData: Story = {
 		).not.toBeInTheDocument();
 	},
 };
+
+export const EnglishLight: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'en', adminTheme: 'light' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByRole('heading', { name: 'Registrations' }),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'en');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'light',
+		);
+	},
+};
+
+export const EnglishDark: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'en', adminTheme: 'dark' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByRole('heading', { name: 'Registrations' }),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'en');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'dark',
+		);
+	},
+};
+
+export const SpanishLight: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'es', adminTheme: 'light' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByRole('heading', { name: 'Inscripciones' }),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'es');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'light',
+		);
+	},
+};
+
+export const SpanishDark: Story = {
+	decorators: adminStoryDecorators(),
+	parameters: { adminLanguage: 'es', adminTheme: 'dark' },
+	play: async ({ canvasElement }): Promise<void> => {
+		const canvas = within(canvasElement);
+		await expect(
+			await canvas.findByRole('heading', { name: 'Inscripciones' }),
+		).toBeVisible();
+		await expect(document.documentElement).toHaveAttribute('lang', 'es');
+		await expect(document.documentElement).toHaveAttribute(
+			'data-admin-theme',
+			'dark',
+		);
+	},
+};

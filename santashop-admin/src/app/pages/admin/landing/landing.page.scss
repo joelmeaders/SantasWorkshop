@@ -1,4 +1,58 @@
+:host {
+	min-width: 0;
+}
+.home-intro,
+.home-sections {
+	max-width: 1100px;
+	margin-inline: auto;
+}
+.home-intro {
+	padding: 12px 8px 24px;
+}
+.home-intro h1 {
+	margin-block: 8px 12px;
+}
+.home-intro p {
+	color: var(--admin-muted);
+	max-width: 44rem;
+	margin-block: 0;
+}
+.eyebrow {
+	font-size: 0.8125rem;
+	font-weight: 700;
+}
 ion-list {
-	max-width: 500px;
-	margin: auto;
+	margin: 0;
+}
+ion-list-header {
+	margin-top: 16px;
+}
+ion-item {
+	margin-bottom: 6px;
+	--border-radius: 12px;
+	--border-width: 0;
+}
+ion-item ion-icon {
+	color: var(--admin-muted);
+	font-size: 21px;
+}
+#checkInNav,
+#searchNav {
+	--min-height: 76px;
+	font-weight: 650;
+}
+#checkInNav {
+	--background: var(--admin-accent-soft);
+	--color: var(--admin-accent);
+}
+#checkInNav ion-icon {
+	color: var(--admin-accent);
+}
+@media (min-width: 768px) {
+	.home-intro {
+		padding-top: 32px;
+	}
+	ion-list {
+		max-width: 760px;
+	}
 }

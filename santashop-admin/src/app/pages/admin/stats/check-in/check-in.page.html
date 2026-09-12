@@ -1,161 +1,212 @@
-<admin-header title="Check-In Stats">
+<admin-header title="{{ 'Check-In Stats' | adminText }}">
 	<ion-item>
-		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
+		<ion-select
+			okText="{{ 'OK' | adminText }}"
+			cancelText="{{ 'Cancel' | adminText }}"
+			[(ngModel)]="year"
+			(ionChange)="refreshYear.next()"
+		>
 			@for (years of schedule; track years.year) {
-			<ion-select-option [value]="years.year">
-				{{ years.year }}
-			</ion-select-option>
+				<ion-select-option [value]="years.year">
+					{{ years.year }}
+				</ion-select-option>
 			}
 		</ion-select>
 	</ion-item>
 </admin-header>
 
 <ion-content>
-	<ion-button class="ion-margin" fill="outline" (click)="refresh()"
-		>Refresh report</ion-button
-	>
+	<ion-button class="ion-margin" fill="outline" (click)="refresh()">
+		{{ 'Refresh report' | adminText }}
+	</ion-button>
 	<ion-grid>
-		@let currentState = checkInState(); @if (!currentState ||
-		currentState.status === 'loading') {
-		<ion-row data-checkin-stats-loading role="status" aria-live="polite">
-			<ion-col class="ion-text-center ion-padding">
-				<ion-spinner name="crescent" aria-hidden="true" />
-				<p>Loading check-in statistics…</p>
-			</ion-col>
-		</ion-row>
+		@let currentState = checkInState();
+		@if (!currentState || currentState.status === 'loading') {
+			<ion-row
+				data-checkin-stats-loading
+				role="status"
+				aria-live="polite"
+			>
+				<ion-col class="ion-text-center ion-padding">
+					<ion-spinner name="crescent" aria-hidden="true" />
+					<p>{{ 'Loading check-in statistics…' | adminText }}</p>
+				</ion-col>
+			</ion-row>
 		} @else if (currentState.status === 'empty') {
-		<ion-row>
-			<ion-col class="ion-text-center">
-				<ion-title
-					>No check-ins have been recorded for this year.</ion-title
-				>
-				<p>Refresh to load the latest check-in statistics.</p>
-			</ion-col>
-		</ion-row>
+			<ion-row>
+				<ion-col class="ion-text-center">
+					<ion-title>
+						{{
+							'No check-ins have been recorded for this year.'
+								| adminText
+						}}
+					</ion-title>
+					<p>
+						{{
+							'Refresh to load the latest check-in statistics.'
+								| adminText
+						}}
+					</p>
+				</ion-col>
+			</ion-row>
 		} @else if (currentState.status === 'error') {
-		<ion-row role="alert">
-			<ion-col class="ion-text-center">
-				<ion-title>Check-in statistics could not be loaded.</ion-title>
-				<ion-button fill="outline" (click)="refresh()">
-					<ion-icon
-						name="refresh-sharp"
-						slot="start"
-						aria-hidden="true"
-					/>
-					Try Again
-				</ion-button>
-			</ion-col>
-		</ion-row>
+			<ion-row role="alert">
+				<ion-col class="ion-text-center">
+					<ion-title>
+						{{
+							'Check-in statistics could not be loaded.'
+								| adminText
+						}}
+					</ion-title>
+					<ion-button fill="outline" (click)="refresh()">
+						<ion-icon
+							name="refresh-sharp"
+							slot="start"
+							aria-hidden="true"
+						/>
+						{{ 'Try Again' | adminText }}
+					</ion-button>
+				</ion-col>
+			</ion-row>
 		} @else if (currentState.status === 'ready') {
-		<ion-row>
-			<ion-col size="12" class="ion-text-center">
-				<admin-report-freshness
-					label="Check-in counts"
-					[calculatedAt]="checkinLastUpdated()"
-					[currentSeason]="year === programYear"
-					[maxAgeHours]="24"
-				/>
-			</ion-col>
-		</ion-row>
-		<ion-row class="ion-justify-content-center">
-			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				@let totalCustomersCount = totalCustomers();
-				<div class="count-container">
-					<h1>{{ totalCustomersCount }}</h1>
-					<h2>Shoppers</h2>
-				</div>
-			</ion-col>
-			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				@let totalChildrenCount = totalChildren();
-				<div class="count-container">
-					<h1>{{ totalChildrenCount }}</h1>
-					<h2>Children</h2>
-				</div>
-			</ion-col>
-			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				@let preregisteredCount = totalPreregistered();
-				<div class="count-container">
-					<h1>{{ preregisteredCount }}</h1>
-					<h2>Registered Ahead</h2>
-				</div>
-			</ion-col>
-			<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
-				@let onSiteCount = onSiteRegistrations();
-				<div class="count-container">
-					<h1>{{ onSiteCount }}</h1>
-					<h2>Registered On Site</h2>
-				</div>
-			</ion-col>
-			<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
-				@let modifiedCount = totalModifiedRegistrations();
-				<div class="count-container">
-					<h1>{{ modifiedCount }}</h1>
-					<h2>Changes (Adjusted)</h2>
-					<p>Difference from on-site registrations.</p>
-				</div>
-			</ion-col>
-		</ion-row>
-
-		@let slots = checkInsByDayHour();
-		<ion-row>
-			<ion-col size="12">
-				<ion-toolbar color="none">
-					<h2 slot="start" class="ion-text-left">
-						{{ graphView() === 'customerCount' ? 'Shopper Check-Ins'
-						: 'Children' }}
-					</h2>
-					<div slot="end">
-						<ion-button (click)="switchView()">
-							<ion-icon
-								name="refresh-sharp"
-								slot="start"
-								aria-hidden="true"
-							/>
-							{{ viewButtonText() }}
-						</ion-button>
+			<ion-row>
+				<ion-col size="12" class="ion-text-center">
+					<admin-report-freshness
+						label="{{ 'Check-in counts' | adminText }}"
+						[calculatedAt]="checkinLastUpdated()"
+						[currentSeason]="year === programYear"
+						[maxAgeHours]="24"
+					/>
+				</ion-col>
+			</ion-row>
+			<ion-row class="ion-justify-content-center">
+				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
+					@let totalCustomersCount = totalCustomers();
+					<div class="count-container">
+						<h1>{{ totalCustomersCount | adminText }}</h1>
+						<h2>{{ 'Shoppers' | adminText }}</h2>
 					</div>
-				</ion-toolbar>
-			</ion-col>
-			@for (slot of slots; track slot; let i = $index) { @if
-			(slot.datasets[0].data) {
-			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-				<ion-toolbar color="none" class="ion-padding-horizontal">
-					<h3 slot="start">{{ slot.datasets[0].label }}</h3>
-					<ion-text slot="end">
-						Total: {{ addValues(slot.datasets[0].data) }}
-					</ion-text>
-				</ion-toolbar>
-				<canvas
-					baseChart
-					[options]="barChartOptions"
-					[datasets]="slot.datasets"
-					[labels]="slot.datasets[0].dataSeriesLabels"
-					[legend]="false"
-					type="bar"
-				></canvas>
-			</ion-col>
-			} }
-		</ion-row>
-		<ion-row>
-			<ion-col size="12">
-				<h2>Report details</h2>
-				@if (hasLegacyDateBuckets()) {
-				<p>Older reports use December when no month was saved.</p>
+				</ion-col>
+				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
+					@let totalChildrenCount = totalChildren();
+					<div class="count-container">
+						<h1>{{ totalChildrenCount | adminText }}</h1>
+						<h2>{{ 'Children' | adminText }}</h2>
+					</div>
+				</ion-col>
+				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
+					@let preregisteredCount = totalPreregistered();
+					<div class="count-container">
+						<h1>{{ preregisteredCount | adminText }}</h1>
+						<h2>{{ 'Registered Ahead' | adminText }}</h2>
+					</div>
+				</ion-col>
+				<ion-col sizeXs="6" sizeSm="4" sizeMd="3" sizeLg="2" sizeXl="2">
+					@let onSiteCount = onSiteRegistrations();
+					<div class="count-container">
+						<h1>{{ onSiteCount | adminText }}</h1>
+						<h2>{{ 'Registered On Site' | adminText }}</h2>
+					</div>
+				</ion-col>
+				<ion-col sizeXs="6" sizeSm="4" sizeMd="2" sizeLg="2" sizeXl="2">
+					@let modifiedCount = totalModifiedRegistrations();
+					<div class="count-container">
+						<h1>{{ modifiedCount | adminText }}</h1>
+						<h2>{{ 'Changes (Adjusted)' | adminText }}</h2>
+						<p>
+							{{
+								'Difference from on-site registrations.'
+									| adminText
+							}}
+						</p>
+					</div>
+				</ion-col>
+			</ion-row>
+
+			@let slots = checkInsByDayHour();
+			<ion-row>
+				<ion-col size="12">
+					<ion-toolbar color="none">
+						<h2 slot="start" class="ion-text-left">
+							{{
+								(graphView() === 'customerCount'
+									? 'Shopper Check-Ins'
+									: 'Children'
+								) | adminText
+							}}
+						</h2>
+						<div slot="end">
+							<ion-button (click)="switchView()">
+								<ion-icon
+									name="refresh-sharp"
+									slot="start"
+									aria-hidden="true"
+								/>
+								{{ viewButtonText() | adminText }}
+							</ion-button>
+						</div>
+					</ion-toolbar>
+				</ion-col>
+				@for (slot of slots; track slot; let i = $index) {
+					@if (slot.datasets[0].data) {
+						<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
+							<ion-toolbar
+								color="none"
+								class="ion-padding-horizontal"
+							>
+								<h3 slot="start">
+									{{ slot.datasets[0].label }}
+								</h3>
+								<ion-text slot="end">
+									{{ 'Total: {{v0}}' | adminText: {v0:
+									(addValues(slot.datasets[0].data))} }}
+								</ion-text>
+							</ion-toolbar>
+							<canvas
+								baseChart
+								[options]="barChartOptions | adminChartOptions"
+								[data]="
+									{
+										datasets: slot.datasets,
+										labels: slot.datasets[0]
+											.dataSeriesLabels,
+									} | adminChart
+								"
+								[legend]="false"
+								type="bar"
+							></canvas>
+						</ion-col>
+					}
 				}
-				<admin-report-table
-					caption="Attendance by hour"
-					[columns]="attendanceColumns"
-					[rows]="attendanceRows()"
-					[totals]="attendanceTotals()"
-					[filename]="'attendance-by-hour-' + year"
-					[exportContext]="exportContext()"
-				/>
-				<p>
-					The adjusted changes summary shows the positive difference
-					between recorded changes and on-site registrations.
-				</p>
-			</ion-col>
-		</ion-row>
+			</ion-row>
+			<ion-row>
+				<ion-col size="12">
+					<h2>{{ 'Report details' | adminText }}</h2>
+					@if (hasLegacyDateBuckets()) {
+						<p>
+							{{
+								'Older reports use December when no month was saved.'
+									| adminText
+							}}
+						</p>
+					}
+					<admin-report-table
+						caption="{{ 'Attendance by hour' | adminText }}"
+						[columns]="attendanceColumns"
+						[rows]="attendanceRows()"
+						[columnFormats]="{ '0': 'calendar-date' }"
+						[totals]="attendanceTotals()"
+						[filename]="'attendance-by-hour-' + year"
+						[exportContext]="exportContext()"
+					/>
+					<p>
+						{{
+							'The adjusted changes summary shows the positive difference between
+          recorded changes and on-site registrations.' | adminText
+						}}
+					</p>
+				</ion-col>
+			</ion-row>
 		}
 	</ion-grid>
 </ion-content>

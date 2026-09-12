@@ -10,14 +10,17 @@ const meta = {
 	parameters: {
 		docs: {
 			description: {
-				component: 'Manual lookup for a seven- or eight-character registration code.',
+				component:
+					'Manual lookup for a seven- or eight-character registration code.',
 			},
 		},
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		const search = canvas.getByText('Search').closest('ion-button');
-		await expect(canvas.getByText('Enter registration code')).toBeVisible();
+		await expect(
+			canvas.getByText('Search: Registration Code'),
+		).toBeVisible();
 		await expect(search).toHaveAttribute('disabled');
 		await userEvent.click(canvas.getByText('Reset'));
 	},

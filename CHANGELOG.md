@@ -23,6 +23,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Added
 
+- Add English and Spanish throughout the admin interface, with separate device preferences and live translation of open dialogs.
+- Add System, Light, and Dark admin appearance settings, applied before the first screen appears.
 - Add a typed analytics event contract, bounded error categories, active-language context, and registration journey and recovery events.
 - Add calculation timestamps, current registration outcomes, retained daily snapshots, and observed profile-creation trends to yearly reports.
 - Add accessible report tables and aggregate CSV downloads with spreadsheet-formula escaping.
@@ -30,6 +32,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Changed
 
+- Redesign the admin app for phones with Home, Check-in, and Search navigation, a desktop sidebar, neutral surfaces, and accessible controls.
+- Localize displayed report dates, numbers, and status labels while preserving stored data, CSV contracts, and unavailable historical calculations.
 - Advance the workspace and both applications to `2026.09.0-beta.5`.
 - Keep legacy report totals readable and label missing new calculations and timestamps as unavailable.
 - Keep charts above report tables, use Shoppers for customers, and explain table labels in smaller text.

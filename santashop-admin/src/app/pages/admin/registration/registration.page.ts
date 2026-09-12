@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { AdminLanguageService } from '../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../../shared/preferences/admin-text.pipe';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	signal,
+} from '@angular/core';
 import {
 	UntypedFormControl,
 	UntypedFormGroup,
@@ -35,6 +43,7 @@ import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 	styleUrls: ['./registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		ReactiveFormsModule,
 		ManageChildrenComponent,
@@ -51,6 +60,7 @@ import { searchOutline, checkmarkCircle } from 'ionicons/icons';
 	],
 })
 export class RegistrationPage {
+	public readonly language = inject(AdminLanguageService);
 	private readonly modalController = inject(ModalController);
 	private readonly checkinService = inject(CheckInService);
 	private readonly checkinContext = inject(CheckInContextService);
@@ -110,14 +120,12 @@ export class RegistrationPage {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
-		const children = this.children()
-			.filter((e) => e.id !== childId);
+		const children = this.children().filter((e) => e.id !== childId);
 		this.children.set(children);
 	}
 
 	public async editChild(child: Child): Promise<void> {
-		const children = this.children()
-			.filter((e) => e.id !== child.id);
+		const children = this.children().filter((e) => e.id !== child.id);
 
 		children.push(child);
 		this.children.set(children);
@@ -172,11 +180,13 @@ export class RegistrationPage {
 				return;
 			}
 
-			const alert = await this.alertController.create({
+			const alert = await createAdminAlert(this.alertController, () => ({
 				header: 'Error registering',
-				subHeader: `code: ${err.code ?? 'unknown'}`,
+				subHeader: this.language.text('code: {{v0}}', {
+					v0: err.code ?? 'unknown',
+				}),
 				message: err?.message ?? String(error),
-			});
+			}));
 
 			await alert.present();
 			this.checkinContext.reset();

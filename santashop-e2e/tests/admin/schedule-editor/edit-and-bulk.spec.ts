@@ -21,8 +21,14 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 			await seedPublicParams({});
 			await seedAdminUser(defaultAdminAccount());
 			await seedDateTimeSlots([
-				scheduleSlot({ id: 'slot-1', dateTime: e2eDateTime(12, 12, 10) }),
-				scheduleSlot({ id: 'slot-2', dateTime: e2eDateTime(12, 12, 11) }),
+				scheduleSlot({
+					id: 'slot-1',
+					dateTime: e2eDateTime(12, 12, 10),
+				}),
+				scheduleSlot({
+					id: 'slot-2',
+					dateTime: e2eDateTime(12, 12, 11),
+				}),
 			]);
 		},
 	);
@@ -93,10 +99,12 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 			'Updated schedule time slot.',
 		);
 		await expect(
-			page.getByText(e2eDateLabel(e2eDateTime(12, 13, 10)), { exact: false }),
+			page.getByText(e2eDateLabel(e2eDateTime(12, 13, 10), 'long'), {
+				exact: false,
+			}),
 		).toBeVisible();
 		await expect(page.locator('#scheduleRow-slot-1')).toContainText(
-			'3AM - 4AM',
+			'3:00 AM – 4:00 AM',
 		);
 	});
 });

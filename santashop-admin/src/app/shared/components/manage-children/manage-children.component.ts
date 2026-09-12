@@ -1,9 +1,11 @@
+import { createAdminAlert } from '../../preferences/admin-overlays';
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  output,
-  input
+	Component,
+	ChangeDetectionStrategy,
+	inject,
+	output,
+	input,
 } from '@angular/core';
 import {
 	AlertController,
@@ -21,7 +23,7 @@ import {
 } from '@ionic/angular/standalone';
 import { Child } from '@santashop/models';
 import { AddEditChildModalComponent } from '../add-edit-child-modal/add-edit-child-modal.component';
-import { DatePipe } from '@angular/common';
+import { AdminCalendarDatePipe } from '../../preferences/admin-calendar-date.pipe';
 import { dateToCalendarString } from '@santashop/core/admin/firestore';
 import { addIcons } from 'ionicons';
 import {
@@ -37,7 +39,8 @@ import {
 	styleUrls: ['./manage-children.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		DatePipe,
+		AdminTextPipe,
+		AdminCalendarDatePipe,
 		IonItemDivider,
 		IonLabel,
 		IonBadge,
@@ -88,7 +91,7 @@ export class ManageChildrenComponent {
 		const child = this.children().find((e) => e.id === childId);
 		if (!child) return;
 
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Are you sure?',
 			subHeader: `${child.firstName} ${child.lastName}`,
 			message: 'Delete this child from the registration?',
@@ -104,7 +107,7 @@ export class ManageChildrenComponent {
 					cssClass: '',
 				},
 			],
-		});
+		}));
 
 		await alert.present();
 		const result = await alert.onDidDismiss();

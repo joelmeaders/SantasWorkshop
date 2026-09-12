@@ -5,7 +5,12 @@ import {
 	withXhr,
 } from '@angular/common/http';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter, RouteReuseStrategy } from '@angular/router';
+import {
+	provideRouter,
+	RouteReuseStrategy,
+	TitleStrategy,
+} from '@angular/router';
+import { AdminTitleStrategy } from './app/shared/preferences/admin-title.strategy';
 import { provideServiceWorker } from '@angular/service-worker';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
@@ -35,6 +40,7 @@ import {
 	SHOP_DAYS,
 } from '@santashop/core/admin';
 import { AppComponent } from './app/app.component';
+import { provideAdminLanguage } from './app/shared/preferences/admin-language.providers';
 import { routes } from './app/app.routes';
 import { config } from './config';
 import { firebaseConfig } from './firebase.config';
@@ -160,7 +166,9 @@ export function bootstrapAdminApplication(
 			? [
 					{
 						provide: FIREBASE_ANALYTICS,
-						useValue: optionalAnalytics(() => dependencies.getAnalytics(firebaseApp)),
+						useValue: optionalAnalytics(() =>
+							dependencies.getAnalytics(firebaseApp),
+						),
 					},
 				]
 			: []),
@@ -173,6 +181,7 @@ export function bootstrapAdminApplication(
 	return dependencies
 		.bootstrapApplication(options.appComponent, {
 			providers: [
+				{ provide: TitleStrategy, useClass: AdminTitleStrategy },
 				provideServiceWorker(
 					getServiceWorkerScriptUrl(config.version),
 					{
@@ -190,6 +199,7 @@ export function bootstrapAdminApplication(
 					mode: 'md',
 					animated: true,
 				}),
+				provideAdminLanguage(),
 				...firebaseProviders,
 				{ provide: ANALYTICS_APP_AREA, useValue: 'admin' },
 				...provideRemoteConfigPublicParameters({

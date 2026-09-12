@@ -1,3 +1,4 @@
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -25,6 +26,7 @@ import { EmailTemplateService } from './email-template.service';
 	styleUrls: ['./email-templates.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		IonBadge,
 		IonCardHeader,

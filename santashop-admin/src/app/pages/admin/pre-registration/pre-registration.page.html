@@ -1,21 +1,25 @@
-<admin-header title="Pre-Registration" />
+<admin-header title="{{ 'Pre-Registration' | adminText }}" />
 
 <ion-content class="ion-padding-horizontal">
 	<div class="limited-container">
 		<div class="form-list">
 			<ion-list-header color="none" class="review-instructions">
 				<span>
-					<h3>Instructions</h3>
+					<h2>{{ 'Instructions' | adminText }}</h2>
 					<ion-note>
-						Complete the required fields below to register the
-						customer. Submission reserves the appointment and queues
-						a confirmation email with the customer's ticket.
+						{{
+							"Complete the required fields below to register the customer.
+            Submission reserves the appointment and queues a confirmation email
+            with the customer's ticket." | adminText
+						}}
 					</ion-note>
 					<p>
 						<ion-note>
-							The service creates an account for the customer. If
-							the customer wants to log into their account they
-							need to reset the password.
+							{{
+								'The service creates an account for the customer. If the
+              customer wants to log into their account they need to reset the
+              password.' | adminText
+							}}
 						</ion-note>
 					</p>
 				</span>
@@ -23,66 +27,76 @@
 
 			<form [formGroup]="form" autocomplete="off" novalidate>
 				<ion-item
-					><ion-select
-						label="Email language"
+					><ion-select labelPlacement="stacked"
+						okText="{{ 'OK' | adminText }}"
+						cancelText="{{ 'Cancel' | adminText }}"
+						label="{{ 'Email language' | adminText }}"
 						formControlName="preferredLanguage"
-						><ion-select-option value="en"
-							>English</ion-select-option
-						><ion-select-option value="es"
-							>Español</ion-select-option
-						></ion-select
+						><ion-select-option value="en">
+							{{ 'English' | adminText }} </ion-select-option
+						><ion-select-option value="es">
+							{{ 'Español' | adminText }}
+						</ion-select-option></ion-select
 					></ion-item
 				>
 				<ion-item-divider>
-					<ion-label> Parent / Guardian </ion-label>
+					<ion-label>
+						{{ 'Parent / Guardian' | adminText }}
+					</ion-label>
 				</ion-item-divider>
 				<ion-item>
 					<ion-input
-						label="First Name"
-						labelPlacement="fixed"
-						errorText="Enter between 2-20 characters"
+						label="{{ 'First Name' | adminText }}"
+						labelPlacement="stacked"
+						errorText="{{
+							'Enter between 2-20 characters' | adminText
+						}}"
 						type="text"
 						autocomplete="off"
 						formControlName="firstName"
-						placeholder="Parent first name"
+						placeholder="{{ 'Parent first name' | adminText }}"
 						minlength="2"
 						maxlength="20"
 					/>
 				</ion-item>
 				<ion-item>
 					<ion-input
-						label="Last Name"
-						labelPlacement="fixed"
-						errorText="Enter between 2-25 characters"
+						label="{{ 'Last Name' | adminText }}"
+						labelPlacement="stacked"
+						errorText="{{
+							'Enter between 2-25 characters' | adminText
+						}}"
 						type="text"
 						autocomplete="off"
 						formControlName="lastName"
-						placeholder="Parent last name"
+						placeholder="{{ 'Parent last name' | adminText }}"
 						minlength="2"
 						maxlength="25"
 					/>
 				</ion-item>
 				<ion-item>
 					<ion-input
-						label="Email"
-						labelPlacement="fixed"
-						errorText="Must be a valid email address"
+						label="{{ 'Email' | adminText }}"
+						labelPlacement="stacked"
+						errorText="{{
+							'Must be a valid email address' | adminText
+						}}"
 						type="email"
 						autocomplete="off"
 						formControlName="emailAddress"
-						placeholder="Parent email"
+						placeholder="{{ 'Parent email' | adminText }}"
 					/>
 				</ion-item>
 				<ion-item>
 					<ion-input
-						label="Zip Code"
-						labelPlacement="fixed"
-						errorText="Enter 5 digit zip code"
+						label="{{ 'Zip Code' | adminText }}"
+						labelPlacement="stacked"
+						errorText="{{ 'Enter 5 digit zip code' | adminText }}"
 						type="text"
 						inputmode="numeric"
 						autocomplete="off"
 						formControlName="zipCode"
-						placeholder="5 digit zip code"
+						placeholder="{{ '5 digit zip code' | adminText }}"
 						minlength="5"
 						maxlength="5"
 					/>
@@ -90,20 +104,22 @@
 				<ion-item>
 					<ion-checkbox formControlName="newsletter">
 						<span class="ion-text-wrap">
-							Would you like to get occasional emails about our
-							events & services?
+							{{
+								'Would you like to get occasional emails about our events &
+              services?' | adminText
+							}}
 						</span>
 					</ion-checkbox>
 				</ion-item>
 
 				<ion-item-divider class="margin-top">
-					<ion-label> Referred By </ion-label>
+					<ion-label> {{ 'Referred By' | adminText }} </ion-label>
 					<ion-button
 						slot="end"
 						fill="clear"
 						(click)="chooseReferral()"
 					>
-						Pick Agency
+						{{ 'Pick Agency' | adminText }}
 						<ion-icon
 							slot="end"
 							name="search-outline"
@@ -115,54 +131,59 @@
 					<span>
 						<ion-label> {{ chosenReferrer() }} </ion-label>
 						@if (!form.controls['referredBy'].value) {
-						<ion-note
-							color="danger"
-							slot="error"
-							class="error-note"
-						>
-							Choose a referring agency
-						</ion-note>
+							<ion-note
+								color="danger"
+								slot="error"
+								class="error-note"
+							>
+								{{ 'Choose a referring agency' | adminText }}
+							</ion-note>
 						}
 					</span>
 				</ion-item>
 				<div class="margin-top">
-				@if (children(); as children) {
-					<admin-manage-children
-						[children]="children"
-						(adddedChild)="addChild($event)"
-						(editedChild)="editChild($event)"
-						(removedChild)="removeChild($event)"
-					/>
+					@if (children(); as children) {
+						<admin-manage-children
+							[children]="children"
+							(adddedChild)="addChild($event)"
+							(editedChild)="editChild($event)"
+							(removedChild)="removeChild($event)"
+						/>
 					}
 				</div>
 
 				<ion-item-divider class="margin-top">
-					<ion-label> Reservation </ion-label>
+					<ion-label> {{ 'Reservation' | adminText }} </ion-label>
 					@if (!form.controls['dateTimeSlot'].value) {
-					<ion-text color="danger" class="error-note" slot="end">
-						Pick a date and time
-					</ion-text>
+						<ion-text color="danger" class="error-note" slot="end">
+							{{ 'Pick a date and time' | adminText }}
+						</ion-text>
 					}
 				</ion-item-divider>
 				@if (availableSlots(); as slots) {
-				<ion-item>
-					<ion-select
-						label="Available Days/Times"
-						formControlName="dateTimeSlot"
-					>
-						@for (slot of slots; track slotIndex($index, slot)) {
-						<ion-select-option [value]="slot">
-							{{ slot.dateTime | eventDate: "short" }}
-						</ion-select-option>
-						}
-					</ion-select>
-				</ion-item>
+					<ion-item>
+						<ion-select labelPlacement="stacked"
+							okText="{{ 'OK' | adminText }}"
+							cancelText="{{ 'Cancel' | adminText }}"
+							label="{{ 'Available Days/Times' | adminText }}"
+							formControlName="dateTimeSlot"
+						>
+							@for (
+								slot of slots;
+								track slotIndex($index, slot)
+							) {
+								<ion-select-option [value]="slot">
+									{{ slot.dateTime | adminDate: 'short' }}
+								</ion-select-option>
+							}
+						</ion-select>
+					</ion-item>
 				}
 			</form>
 
 			<ion-item-divider class="success-divider">
 				<ion-label>
-					Is all information correct and accurate?
+					{{ 'Is all information correct and accurate?' | adminText }}
 				</ion-label>
 			</ion-item-divider>
 
@@ -175,7 +196,7 @@
 				(click)="register()"
 			>
 				<ion-label>
-					<h1>Yes, continue</h1>
+					<h1>{{ 'Yes, continue' | adminText }}</h1>
 				</ion-label>
 				<ion-icon
 					name="checkmark-circle"

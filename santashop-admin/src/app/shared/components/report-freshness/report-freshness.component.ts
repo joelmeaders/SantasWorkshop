@@ -1,29 +1,32 @@
+import { AdminDatePipe } from '../../preferences/admin-date.pipe';
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
 	computed,
 	input,
 } from '@angular/core';
-import { EventDatePipe } from '@santashop/core/admin';
+
 import { reportDate } from '../../helpers/report-export';
 
 @Component({
 	selector: 'admin-report-freshness',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [EventDatePipe],
+	imports: [AdminTextPipe, AdminDatePipe],
 	template: `
 		<p>
-			<strong>{{ label() }}:</strong>
+			<strong>{{ label() | adminText }}:</strong>
 			@if (date(); as calculated) {
-				Updated {{ calculated | eventDate: 'short' }} (Denver time).
+				{{ 'Updated {{v0}} (Denver time).' | adminText: {v0: (calculated
+				| adminDate: 'short')} }}
 				@if (isOld()) {
-					<span class="old"
-						>Over {{ maxAgeHours() }} hours old. A newer update may
-						be due.</span
-					>
+					<span class="old">
+						{{ 'Over {{v0}} hours old. A newer update may be due.' |
+						adminText: {v0: (maxAgeHours())} }}
+					</span>
 				}
 			} @else {
-				Update time not saved in this report.
+				{{ 'Update time not saved in this report.' | adminText }}
 			}
 		</p>
 	`,

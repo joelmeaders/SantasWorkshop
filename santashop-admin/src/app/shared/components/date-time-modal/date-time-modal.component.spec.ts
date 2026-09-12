@@ -34,14 +34,15 @@ describe('DateTimeModalComponent', () => {
 		await fixture.whenStable();
 		const days = component.availableDays();
 		expect(days).toEqual([Date.parse('2026-12-20T07:00:00Z')]);
-		expect(component.availableSlotsByDay().get(requireDefined(days[0]))).toEqual([
-			early,
-			late,
-		]);
+		expect(
+			component.availableSlotsByDay().get(requireDefined(days[0])),
+		).toEqual([early, late]);
 		expect(fixture.nativeElement.textContent).toContain(
 			'Sunday, December 20',
 		);
-		expect(fixture.nativeElement.textContent).toContain('5PM - 6PM');
+		expect(fixture.nativeElement.textContent).toContain(
+			'5:00 PM – 6:00 PM',
+		);
 	});
 
 	it('filters available slots, reports capacity, and dismisses a new selection', async (): Promise<void> => {
@@ -80,9 +81,9 @@ describe('DateTimeModalComponent', () => {
 		]);
 
 		const days = component.availableDays();
-		const sameDaySlots = component.availableSlotsByDay().get(
-			requireDefined(days[0]),
-		);
+		const sameDaySlots = component
+			.availableSlotsByDay()
+			.get(requireDefined(days[0]));
 
 		expect(days).toHaveLength(2);
 		expect(sameDaySlots).toEqual([first, second]);
@@ -126,7 +127,6 @@ describe('DateTimeModalComponent', () => {
 		) as Mocked<ModalController>;
 		await component.selectDateTime();
 		expect(modal.dismiss).toHaveBeenCalledWith(undefined);
-
 	});
 });
 

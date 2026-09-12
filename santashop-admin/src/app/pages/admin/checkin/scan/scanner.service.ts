@@ -1,3 +1,4 @@
+import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular/standalone';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -116,12 +117,12 @@ export class ScannerService implements OnDestroy {
 		name?: string;
 		message?: string;
 	}): Promise<void> {
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Error',
 			subHeader: error.name,
 			message: error.message,
 			buttons: ['Ok'],
-		});
+		}));
 
 		await alert.present();
 	}

@@ -19,8 +19,12 @@ const meta = {
 	},
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
-		await expect(await canvas.findByText('Successful check-in')).toBeVisible();
-		await expect(canvas.getByText('duplicate-risk')).toBeVisible();
+		await expect(
+			await canvas.findByText('Successful check-in'),
+		).toBeVisible();
+		await expect(
+			canvas.getByText('Suspicious duplicate scan'),
+		).toBeVisible();
 		await expect(canvas.getByText('Code ending in A101')).toBeVisible();
 		await userEvent.click(canvas.getByText('Refresh timeline'));
 	},

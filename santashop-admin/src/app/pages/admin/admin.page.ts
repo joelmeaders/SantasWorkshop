@@ -1,3 +1,4 @@
+import { AdminTextPipe } from '../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AppStateService, AuthService } from '@santashop/core/admin/firestore';
@@ -26,6 +27,7 @@ import {
 	styleUrls: ['./admin.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		RouterLinkActive,
 		RouterLink,
 		IonRouterLink,

@@ -1,3 +1,4 @@
+import { AdminLanguageService } from '../../preferences/admin-language.service';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ReportTableComponent } from './report-table.component';
@@ -61,6 +62,14 @@ describe('ReportTableComponent', () => {
 				cell.textContent?.trim(),
 			),
 		).toEqual(['0', 'Unavailable']);
+		await TestBed.inject(AdminLanguageService).setLanguage('es');
+		await fixture.whenStable();
+		expect(element.textContent).toContain('No disponible');
+		expect(
+			Array.from(element.querySelectorAll('tbody td'), (cell) =>
+				cell.textContent?.trim(),
+			),
+		).toEqual(['0', 'No disponible']);
 		element.querySelector('ion-button')?.click();
 		expect(await exported?.text()).toBe(
 			'"Year","2026"\r\n"Status","Value"\r\n"Canceled","0"\r\n"Attendance rate","Unavailable"\r\n"Total","0"',

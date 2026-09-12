@@ -1,269 +1,402 @@
-<admin-header title="Registration Stats">
+<admin-header title="{{ 'Registration Stats' | adminText }}">
 	<ion-item>
-		<ion-select [(ngModel)]="year" (ionChange)="refreshYear.next()">
+		<ion-select
+			okText="{{ 'OK' | adminText }}"
+			cancelText="{{ 'Cancel' | adminText }}"
+			[(ngModel)]="year"
+			(ionChange)="refreshYear.next()"
+		>
 			@for (years of schedule; track years.year) {
-			<ion-select-option [value]="years.year">
-				{{ years.year }}
-			</ion-select-option>
+				<ion-select-option [value]="years.year">
+					{{ years.year }}
+				</ion-select-option>
 			}
 		</ion-select>
 	</ion-item>
 </admin-header>
 
 <ion-content class="ion-padding">
-	<ion-button fill="outline" (click)="refresh()">Refresh report</ion-button>
-	@if (state(); as state) { @if (state.status === 'loading') {
-	<p role="status">Loading report…</p>
-	} @else if (state.status === 'error') {
-	<p role="alert">
-		Report could not be loaded. Select Refresh report to try again.
-	</p>
-	} @else {
-	<admin-report-freshness
-		label="Registration details"
-		[calculatedAt]="state.data?.registration?.calculatedAt"
-		[currentSeason]="year === programYear"
-	/>
-	@if (state.data?.schedule) {
-	<admin-report-freshness
-		label="Appointment totals"
-		[calculatedAt]="state.data?.schedule?.calculatedAt"
-		[currentSeason]="year === programYear"
-		[maxAgeHours]="24"
-	/>
-	} @else {
-	<p>Appointment totals use the nightly report shown above.</p>
-	}
-	<ion-grid>
-		<ion-row>
-			<ion-col size="12" class="ion-text-center">
-				Children and ZIP codes update each night. Appointment totals
-				update separately.
-			</ion-col>
-		</ion-row>
-		<ion-row class="ion-justify-content-center">
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="4"
-				sizeLg="3"
-				class="ion-margin-horizontal"
-			>
-				@if (hasScheduleData()) {
-				<div class="count-container">
-					<h1>{{ registrationCountBySchedule() }}</h1>
-					<h2>Registrations</h2>
-				</div>
-				} @else {
-				<div class="count-container">
-					<h1>{{ registrationCount() }}</h1>
-					<h2>Registrations</h2>
-				</div>
-				}
-			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="4"
-				sizeLg="3"
-				class="ion-margin-horizontal"
-			>
-				@if (childCount(); as count) {
-				<div class="count-container">
-					<h1>{{ count }}</h1>
-					<h2>Children</h2>
-				</div>
-				}
-			</ion-col>
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="4"
-				sizeLg="3"
-				class="ion-margin-horizontal"
-			>
-				@if (childrenPerCustomer(); as count) {
-				<div class="count-container">
-					<h1>{{ count | number:'1.0-2' }}</h1>
-					<h2>Children per Shopper</h2>
-				</div>
-				}
-			</ion-col>
-		</ion-row>
-
-		@if (capacityByDay().length) { @let capacities = capacityByDay();
-		<ion-row>
-			<ion-col size="12">
-				<h2>Capacity by Day</h2>
-				<p>
-					Based on saved appointment limits. Update times for
-					individual appointments are not available.
-				</p>
-			</ion-col>
-			@for (capacity of capacities; track capacity.label) {
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="3" sizeLg="3">
-				<div class="capacity-card">
-					<div class="capacity-card__header">
-						<h3>{{ capacity.label }}</h3>
-						<div class="capacity-card__percent">
-							{{ capacity.percent | number:'1.0-1' }}%
-						</div>
-					</div>
-					<canvas
-						baseChart
-						[data]="capacity.chartData"
-						[options]="chartOptions"
-						[legend]="false"
-						type="doughnut"
-					></canvas>
-					<div class="capacity-card__meta">
-						<span>Booked: {{ capacity.used | number }}</span>
-						<span
-							>Planned spots: {{ capacity.total | number }}</span
-						>
-						@if (capacity.overflow === 0) {
-						<span
-							>Open spots: {{ capacity.remaining | number }}</span
-						>
-						} @if (capacity.overflow > 0) {
-						<span>
-							Above planned capacity: {{ capacity.overflow |
-							number }}
-						</span>
-						}
-					</div>
-				</div>
-			</ion-col>
-			}
-		</ion-row>
-
-		} @if (hasScheduleData()) { @let slots = familiesBySlotsChartData();
-		<ion-row>
-			<ion-col size="12">
-				<h2>Appointments by Day</h2>
-			</ion-col>
-			@for (slot of slots; track slot; let i = $index) {
-			<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-				<h3>
-					{{ slot.datasets[0].label }} - Total: {{
-					getTotalCount(slot.datasets[0].data) }}
-				</h3>
-				<canvas
-					baseChart
-					[options]="barChartOptions"
-					[datasets]="slot.datasets"
-					[labels]="['10am', '11am', '12pm', '1pm', '2pm']"
-					[legend]="false"
-					type="bar"
-				></canvas>
-			</ion-col>
-			}
-		</ion-row>
+	<ion-button fill="outline" (click)="refresh()">
+		{{ 'Refresh report' | adminText }}
+	</ion-button>
+	@if (state(); as state) {
+		@if (state.status === 'loading') {
+			<p role="status">{{ 'Loading report…' | adminText }}</p>
+		} @else if (state.status === 'error') {
+			<p role="alert">
+				{{
+					'Report could not be loaded. Select Refresh report to try again.'
+						| adminText
+				}}
+			</p>
 		} @else {
-		<ion-row>
-			<ion-col class="ion-text-center">
-				<ion-title> No appointment data for this year </ion-title>
-			</ion-col>
-		</ion-row>
-		} @if (girlBoyInfantCounts(); as gender) {
-		<ion-row class="ion-justify-content-evenly">
-			<ion-col
-				sizeXs="12"
-				sizeSm="6"
-				sizeMd="6"
-				sizeLg="6"
-				class="ion-text-center"
-			>
-				<h2>Children by Group</h2>
-				@if (!statsNull()) {
-				<canvas
-					baseChart
-					[options]="chartOptions"
-					[datasets]="[ { data: gender, backgroundColor: colorSettings.backgroundColor, borderColor: colorSettings.borderColor, borderWidth: 1} ]"
-					[labels]="[ 'Girls', 'Boys', 'Infants' ]"
-					[legend]="false"
-					type="doughnut"
-				></canvas>
-				} @else {
-				<ion-title> No child group data for this year </ion-title>
-				}
-			</ion-col>
-			@if (topTenZipCodesCountData(); as pieData) {
-			<ion-col sizeXs="12" sizeSm="6" sizeMd="6" sizeLg="6">
-				<h2>Shoppers by ZIP Code</h2>
+			<admin-report-freshness
+				label="{{ 'Registration details' | adminText }}"
+				[calculatedAt]="state.data?.registration?.calculatedAt"
+				[currentSeason]="year === programYear"
+			/>
+			@if (state.data?.schedule) {
+				<admin-report-freshness
+					label="{{ 'Appointment totals' | adminText }}"
+					[calculatedAt]="state.data?.schedule?.calculatedAt"
+					[currentSeason]="year === programYear"
+					[maxAgeHours]="24"
+				/>
+			} @else {
 				<p>
-					The four largest groups are shown separately. Other includes
-					all remaining ZIP codes.
+					{{
+						'Appointment totals use the nightly report shown above.'
+							| adminText
+					}}
 				</p>
-				<canvas
-					baseChart
-					[data]="pieData"
-					[options]="zipCodeOptions"
-					[legend]="false"
-					type="doughnut"
-				></canvas>
-			</ion-col>
 			}
-		</ion-row>
-		}
-		<ion-row>
-			<ion-col size="12">
-				<h2>Report details</h2>
-				<admin-report-table
-					caption="Appointments"
-					[columns]="appointmentColumns"
-					[rows]="appointmentRows()"
-					[totals]="appointmentTotals()"
-					[filename]="'appointments-' + year"
-					[exportContext]="appointmentExportContext()"
-				/>
-			</ion-col>
-		</ion-row>
-		<ion-row
-			><ion-col size="12">
-				<admin-report-table
-					caption="Registration ZIP codes"
-					[columns]="zipColumns"
-					[rows]="zipRows()"
-					[totals]="zipTotals()"
-					[filename]="'registration-zip-codes-' + year"
-					[exportContext]="registrationExportContext()"
-				/> </ion-col
-		></ion-row>
-		<ion-row
-			><ion-col size="12">
-				@if (operational()) {
-				<p>
-					Progress for this year's saved registrations. Unavailable
-					means the report does not have enough information.
-				</p>
-				<admin-report-table
-					caption="Registration progress"
-					[columns]="['Status', 'Total or rate']"
-					[rows]="outcomeRows()"
-					[filename]="'registration-outcomes-' + year"
-					[exportContext]="registrationExportContext()"
-				/>
-				} @else {
-				<p>Registration progress was not saved in this report.</p>
-				} @if (state.data?.registration?.dailySnapshots !== undefined) {
-				<p>
-					Each row keeps the first report saved that day. Missing days
-					were not recorded. Past totals stay saved when registrations
-					are removed.
-				</p>
-				<admin-report-table
-					caption="Daily registration totals"
-					[columns]="snapshotColumns"
-					[rows]="snapshotRows()"
-					[filename]="'registration-snapshots-' + year"
-					[exportContext]="registrationExportContext()"
-				/>
-				} @else {
-				<p>Daily registration totals were not saved in this report.</p>
+			<ion-grid>
+				<ion-row>
+					<ion-col size="12" class="ion-text-center">
+						{{
+							'Children and ZIP codes update each night. Appointment totals update
+        separately.' | adminText
+						}}
+					</ion-col>
+				</ion-row>
+				<ion-row class="ion-justify-content-center">
+					<ion-col
+						sizeXs="12"
+						sizeSm="6"
+						sizeMd="4"
+						sizeLg="3"
+						class="ion-margin-horizontal"
+					>
+						@if (hasScheduleData()) {
+							<div class="count-container">
+								<h1>{{ registrationCountBySchedule() | adminText }}</h1>
+								<h2>{{ 'Registrations' | adminText }}</h2>
+							</div>
+						} @else {
+							<div class="count-container">
+								<h1>{{ registrationCount() | adminText }}</h1>
+								<h2>{{ 'Registrations' | adminText }}</h2>
+							</div>
+						}
+					</ion-col>
+					<ion-col
+						sizeXs="12"
+						sizeSm="6"
+						sizeMd="4"
+						sizeLg="3"
+						class="ion-margin-horizontal"
+					>
+						@if (childCount(); as count) {
+							<div class="count-container">
+								<h1>{{ count | adminText }}</h1>
+								<h2>{{ 'Children' | adminText }}</h2>
+							</div>
+						}
+					</ion-col>
+					<ion-col
+						sizeXs="12"
+						sizeSm="6"
+						sizeMd="4"
+						sizeLg="3"
+						class="ion-margin-horizontal"
+					>
+						@if (childrenPerCustomer(); as count) {
+							<div class="count-container">
+								<h1>{{ count | adminNumber: '1.0-2' }}</h1>
+								<h2>
+									{{ 'Children per Shopper' | adminText }}
+								</h2>
+							</div>
+						}
+					</ion-col>
+				</ion-row>
+
+				@if (capacityByDay().length) {
+					@let capacities = capacityByDay();
+					<ion-row>
+						<ion-col size="12">
+							<h2>{{ 'Capacity by Day' | adminText }}</h2>
+							<p>
+								{{
+									'Based on saved appointment limits. Update times for individual
+          appointments are not available.' | adminText
+								}}
+							</p>
+						</ion-col>
+						@for (capacity of capacities; track capacity.label) {
+							<ion-col
+								sizeXs="12"
+								sizeSm="6"
+								sizeMd="3"
+								sizeLg="3"
+							>
+								<div class="capacity-card">
+									<div class="capacity-card__header">
+										<h3>{{ capacity.label }}</h3>
+										<div class="capacity-card__percent">
+											{{
+												capacity.percent
+													| adminNumber: '1.0-1'
+											}}%
+										</div>
+									</div>
+									<canvas
+										baseChart
+										[data]="capacity.chartData | adminChart"
+										[options]="
+											chartOptions | adminChartOptions
+										"
+										[legend]="false"
+										type="doughnut"
+									></canvas>
+									<div class="capacity-card__meta">
+										<span>
+											{{ 'Booked: {{v0}}' | adminText:
+											{v0: (capacity.used | adminNumber)}
+											}}
+										</span>
+										<span>
+											{{ 'Planned spots: {{v0}}' |
+											adminText: {v0: (capacity.total |
+											adminNumber)} }}
+										</span>
+										@if (capacity.overflow === 0) {
+											<span>
+												{{ 'Open spots: {{v0}}' |
+												adminText: {v0:
+												(capacity.remaining |
+												adminNumber)} }}
+											</span>
+										}
+										@if (capacity.overflow > 0) {
+											<span>
+												{{ 'Above planned capacity: {{v0
+												}}' | adminText: {v0:
+												(capacity.overflow |
+												adminNumber)} }}
+											</span>
+										}
+									</div>
+								</div>
+							</ion-col>
+						}
+					</ion-row>
 				}
-			</ion-col></ion-row
-		>
-	</ion-grid>
-	} }
+				@if (hasScheduleData()) {
+					@let slots = familiesBySlotsChartData();
+					<ion-row>
+						<ion-col size="12">
+							<h2>{{ 'Appointments by Day' | adminText }}</h2>
+						</ion-col>
+						@for (slot of slots; track slot; let i = $index) {
+							<ion-col
+								sizeXs="12"
+								sizeSm="12"
+								sizeMd="6"
+								sizeLg="6"
+							>
+								<h3>
+									{{ '{{v0}} - Total: {{ v1 }}' | adminText:
+									{v0: (slot.datasets[0].label), v1:
+									(getTotalCount(slot.datasets[0].data))} }}
+								</h3>
+								<canvas
+									baseChart
+									[options]="
+										barChartOptions | adminChartOptions
+									"
+									[data]="
+										{
+											datasets: slot.datasets,
+											labels: [
+												'10am',
+												'11am',
+												'12pm',
+												'1pm',
+												'2pm',
+											],
+										} | adminChart
+									"
+									[legend]="false"
+									type="bar"
+								></canvas>
+							</ion-col>
+						}
+					</ion-row>
+				} @else {
+					<ion-row>
+						<ion-col class="ion-text-center">
+							<ion-title>
+								{{
+									'No appointment data for this year'
+										| adminText
+								}}
+							</ion-title>
+						</ion-col>
+					</ion-row>
+				}
+				@if (girlBoyInfantCounts(); as gender) {
+					<ion-row class="ion-justify-content-evenly">
+						<ion-col
+							sizeXs="12"
+							sizeSm="6"
+							sizeMd="6"
+							sizeLg="6"
+							class="ion-text-center"
+						>
+							<h2>{{ 'Children by Group' | adminText }}</h2>
+							@if (!statsNull()) {
+								<canvas
+									baseChart
+									[options]="chartOptions | adminChartOptions"
+									[data]="
+										{
+											datasets: [
+												{
+													data: gender,
+													backgroundColor:
+														colorSettings.backgroundColor,
+													borderColor:
+														colorSettings.borderColor,
+													borderWidth: 1,
+												},
+											],
+											labels: [
+												'Girls',
+												'Boys',
+												'Infants',
+											],
+										} | adminChart
+									"
+									[legend]="false"
+									type="doughnut"
+								></canvas>
+							} @else {
+								<ion-title>
+									{{
+										'No child group data for this year'
+											| adminText
+									}}
+								</ion-title>
+							}
+						</ion-col>
+						@if (topTenZipCodesCountData(); as pieData) {
+							<ion-col
+								sizeXs="12"
+								sizeSm="6"
+								sizeMd="6"
+								sizeLg="6"
+							>
+								<h2>
+									{{ 'Shoppers by ZIP Code' | adminText }}
+								</h2>
+								<p>
+									{{
+										'The four largest groups are shown separately. Other includes all
+          remaining ZIP codes.' | adminText
+									}}
+								</p>
+								<canvas
+									baseChart
+									[data]="pieData | adminChart"
+									[options]="
+										zipCodeOptions | adminChartOptions
+									"
+									[legend]="false"
+									type="doughnut"
+								></canvas>
+							</ion-col>
+						}
+					</ion-row>
+				}
+				<ion-row>
+					<ion-col size="12">
+						<h2>{{ 'Report details' | adminText }}</h2>
+						<admin-report-table
+							caption="{{ 'Appointments' | adminText }}"
+							[columns]="appointmentColumns"
+							[rows]="appointmentRows()"
+							[displayRows]="appointmentDisplayRows()"
+							[totals]="appointmentTotals()"
+							[filename]="'appointments-' + year"
+							[exportContext]="appointmentExportContext()"
+						/>
+					</ion-col>
+				</ion-row>
+				<ion-row
+					><ion-col size="12">
+						<admin-report-table
+							caption="{{ 'Registration ZIP codes' | adminText }}"
+							[columns]="zipColumns"
+							[rows]="zipRows()"
+							[totals]="zipTotals()"
+							[filename]="'registration-zip-codes-' + year"
+							[exportContext]="registrationExportContext()"
+						/> </ion-col
+				></ion-row>
+				<ion-row
+					><ion-col size="12">
+						@if (operational()) {
+							<p>
+								{{
+									"Progress for this year's saved registrations. Unavailable means
+          the report does not have enough information." | adminText
+								}}
+							</p>
+							<admin-report-table
+								caption="{{
+									'Registration progress' | adminText
+								}}"
+								[columns]="['Status', 'Total or rate']"
+								[rows]="outcomeRows()"
+								[columnFormats]="{ '1': 'percent' }"
+								[filename]="'registration-outcomes-' + year"
+								[exportContext]="registrationExportContext()"
+							/>
+						} @else {
+							<p>
+								{{
+									'Registration progress was not saved in this report.'
+										| adminText
+								}}
+							</p>
+						}
+						@if (
+							state.data?.registration?.dailySnapshots !==
+							undefined
+						) {
+							<p>
+								{{
+									'Each row keeps the first report saved that day. Missing days were
+          not recorded. Past totals stay saved when registrations are removed.'
+										| adminText
+								}}
+							</p>
+							<admin-report-table
+								caption="{{
+									'Daily registration totals' | adminText
+								}}"
+								[columns]="snapshotColumns"
+								[rows]="snapshotRows()"
+								[columnFormats]="{
+									'0': 'calendar-date',
+									'1': 'utc-date-time',
+									'7': 'percent',
+								}"
+								[filename]="'registration-snapshots-' + year"
+								[exportContext]="registrationExportContext()"
+							/>
+						} @else {
+							<p>
+								{{
+									'Daily registration totals were not saved in this report.'
+										| adminText
+								}}
+							</p>
+						}
+					</ion-col></ion-row
+				>
+			</ion-grid>
+		}
+	}
 </ion-content>

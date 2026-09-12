@@ -1,3 +1,4 @@
+import { provideAdminLanguage } from '../../../../shared/preferences/admin-language.providers';
 import {
 	applicationConfig,
 	type Meta,
@@ -23,6 +24,7 @@ const meta = {
 			providers: [
 				provideRouter([], withHashLocation()),
 				provideIonicAngular(),
+				provideAdminLanguage(),
 				{
 					provide: AppSettingsService,
 					useValue: {

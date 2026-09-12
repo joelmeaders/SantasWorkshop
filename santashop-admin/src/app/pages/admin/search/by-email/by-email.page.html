@@ -1,37 +1,56 @@
-<admin-header title="Search: Email" backRoute="/admin/search" />
+@if (!embedded()) {
+	<admin-header
+		title="{{ 'Search: Email' | adminText }}"
+		backRoute="/admin/search"
+	/>
 
-<ion-content fullscreen class="ion-padding">
+	<ion-content fullscreen class="ion-padding"
+		><ng-container [ngTemplateOutlet]="searchForm"
+	/></ion-content>
+} @else {
+	<ng-container [ngTemplateOutlet]="searchForm" />
+}
+<ng-template #searchForm>
 	<div class="limited-container">
-		<ion-card-header>
-			<ion-card-title> Step 2 </ion-card-title>
-			<ion-card-subtitle> Enter email address </ion-card-subtitle>
-		</ion-card-header>
 		<form [formGroup]="form">
 			<ion-list>
 				<ion-item>
-					<ion-input formControlName="emailAddress"
-						label="Email"
-						labelPlacement="fixed"
+					<ion-input
+						formControlName="emailAddress"
+						label="{{ 'Email' | adminText }}"
+						labelPlacement="stacked"
 						type="email"
 						autocomplete="off"
-						placeholder="required"
-					 />
+						placeholder="{{ 'required' | adminText }}"
+					/>
 				</ion-item>
 			</ion-list>
 		</form>
 		<div class="search-buttons">
-			<ion-button color="danger" (click)="reset()" routerLink="..">
-				<ion-icon name="backspace-outline" slot="start" aria-hidden="true" />
-				<ion-label> Reset </ion-label>
+			<ion-button
+				color="danger"
+				(click)="reset()"
+				routerLink="/admin/search"
+			>
+				<ion-icon
+					name="backspace-outline"
+					slot="start"
+					aria-hidden="true"
+				/>
+				<ion-label> {{ 'Reset' | adminText }} </ion-label>
 			</ion-button>
 			<ion-button
 				(click)="search()"
-				routerLink="../results"
+				routerLink="/admin/search/results"
 				[disabled]="!form.valid"
 			>
-				<ion-icon name="search-outline" slot="start" aria-hidden="true" />
-				<ion-label> Search </ion-label>
+				<ion-icon
+					name="search-outline"
+					slot="start"
+					aria-hidden="true"
+				/>
+				<ion-label> {{ 'Search' | adminText }} </ion-label>
 			</ion-button>
 		</div>
 	</div>
-</ion-content>
+</ng-template>

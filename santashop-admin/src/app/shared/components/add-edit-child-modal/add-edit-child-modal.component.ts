@@ -1,3 +1,5 @@
+import { createAdminAlert } from '../../preferences/admin-overlays';
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 import {
 	Component,
 	ChangeDetectionStrategy,
@@ -47,6 +49,7 @@ import {
 	styleUrls: ['./add-edit-child-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		ReactiveFormsModule,
 		IonHeader,
 		IonToolbar,
@@ -184,7 +187,7 @@ export class AddEditChildModalComponent implements OnInit {
 	}
 
 	private async childTooOldAlert(): Promise<void> {
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'This child is too old',
 			message: 'Children must be 11 years old or younger.',
 			buttons: [
@@ -192,7 +195,7 @@ export class AddEditChildModalComponent implements OnInit {
 					text: 'Ok',
 				},
 			],
-		});
+		}));
 
 		await alert.present();
 		await alert.onDidDismiss();

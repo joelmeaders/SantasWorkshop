@@ -325,3 +325,40 @@ test('storybook behavior and visual jobs consume the same selected target matrix
 		assert.match(job.if, /needs.changes.outputs.storybook == 'true'/);
 	}
 });
+for (const target of ['app', 'admin'])
+	test(`${target} Hosting config selects only its publication workflow`, async () => {
+		const { configImpact } = await import('./ci-config-impact.mjs');
+		const before = JSON.parse(readFileSync('firebase.json', 'utf8'));
+		const after = structuredClone(before);
+		after.hosting
+			.find((site) => site.target === `santashop-${target}`)
+			.headers.push({
+				source: '/scope-test',
+				headers: [{ key: 'Cache-Control', value: 'no-store' }],
+			});
+		const selection = selectChanges(
+			configImpact(
+				'firebase.json',
+				JSON.stringify(before),
+				JSON.stringify(after),
+			),
+		);
+		assert.deepEqual(selection.deploy, [target]);
+		assert.deepEqual(selection.ui, [target]);
+		for (const name of [
+			'app-test-and-prod-release',
+			'admin-test-and-prod-release',
+		]) {
+			const workflow = readWorkflow(name);
+			assert.equal(workflow.on.push.paths, undefined);
+			assert.deepEqual(workflow.on.push.branches, ['master']);
+			assert.equal(
+				workflow.jobs.changes.uses,
+				'./.github/workflows/ci-changes.yml',
+			);
+			assert.match(
+				workflow.jobs.prepare_release.if,
+				/needs.changes.outputs.deploy_/,
+			);
+		}
+	});

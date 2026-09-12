@@ -35,7 +35,7 @@
 						<ion-list lines="none">
 							<ion-item><ion-input fill="outline" [label]="'COMMON.NEW_EMAIL_ADDRESS' | translate" labelPlacement="floating" formControlName="emailAddress" (ionInput)="changeEmailForm.controls.password.reset()" type="email" autocomplete="email" [errorText]="changeEmailForm.controls.emailAddress | niceFormError | translate: (changeEmailForm.controls.emailAddress.errors?.['minlength'] ?? changeEmailForm.controls.emailAddress.errors?.['maxlength'])" /></ion-item>
 							<ion-item><ion-input #emailPassword fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" formControlName="password" type="password" autocomplete="off" [errorText]="changeEmailForm.controls.password | niceFormError | translate: (changeEmailForm.controls.password.errors?.['minlength'] ?? changeEmailForm.controls.password.errors?.['maxlength'])" autocapitalize="off" [spellcheck]="false">
-								<button slot="end" type="button" class="password-toggle" (click)="emailPassword.type = emailPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(emailPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
+								<button slot="end" type="button" class="password-toggle" (pointerdown)="$event.preventDefault()" (click)="emailPassword.type = emailPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(emailPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
 									{{ (emailPassword.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
 								</button>
 							</ion-input></ion-item>
@@ -49,12 +49,12 @@
 					<form [formGroup]="changePasswordForm" (ngSubmit)="changePassword()" novalidate>
 						<ion-list lines="none">
 							<ion-item><ion-input #currentPassword fill="outline" [label]="'PROFILE.CURRENT_PASSWORD' | translate" labelPlacement="floating" formControlName="oldPassword" type="password" autocomplete="current-password" [errorText]="changePasswordForm.controls.oldPassword | niceFormError | translate: (changePasswordForm.controls.oldPassword.errors?.['minlength'] ?? changePasswordForm.controls.oldPassword.errors?.['maxlength'])" autocapitalize="off" [spellcheck]="false">
-								<button slot="end" type="button" class="password-toggle" (click)="currentPassword.type = currentPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(currentPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
+								<button slot="end" type="button" class="password-toggle" (pointerdown)="$event.preventDefault()" (click)="currentPassword.type = currentPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(currentPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
 									{{ (currentPassword.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
 								</button>
 							</ion-input></ion-item>
 							<ion-item><ion-input #newPassword fill="outline" [label]="'PROFILE.NEW_PASSWORD' | translate" labelPlacement="floating" formControlName="newPassword" type="password" autocomplete="new-password" [errorText]="changePasswordForm.controls.newPassword | niceFormError | translate: (changePasswordForm.controls.newPassword.errors?.['minlength'] ?? changePasswordForm.controls.newPassword.errors?.['maxlength'])" autocapitalize="off" [spellcheck]="false">
-								<button slot="end" type="button" class="password-toggle" (click)="newPassword.type = newPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(newPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
+								<button slot="end" type="button" class="password-toggle" (pointerdown)="$event.preventDefault()" (click)="newPassword.type = newPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(newPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
 									{{ (newPassword.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
 								</button>
 							</ion-input></ion-item>

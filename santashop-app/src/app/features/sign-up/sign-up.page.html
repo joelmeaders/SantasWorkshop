@@ -181,9 +181,9 @@
 									</ion-item>
 
 									<ion-item>
-									<ion-input #signupPassword
-										id="password"
-										fill="outline"
+										<ion-input #signupPassword
+											id="password"
+											fill="outline"
 											[label]="'COMMON.PASSWORD' | translate"
 											[errorText]="form.controls.password | niceFormError | translate: (form.controls.password.errors?.['minlength'] ?? form.controls.password.errors?.['maxlength'])"
 											labelPlacement="floating"
@@ -191,11 +191,11 @@
 											autocomplete="new-password"
 											formControlName="password"
 											[debounce]="500"
-										 autocapitalize="off" [spellcheck]="false">
- <button slot="end" type="button" class="password-toggle" (click)="signupPassword.type = signupPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(signupPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
- {{ (signupPassword.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
- </button>
- </ion-input>
+											autocapitalize="off" [spellcheck]="false">
+											<button slot="end" type="button" class="password-toggle" (pointerdown)="$event.preventDefault()" (click)="signupPassword.type = signupPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(signupPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
+												{{ (signupPassword.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
+											</button>
+										</ion-input>
 									</ion-item>
 								</ion-item-group>
 

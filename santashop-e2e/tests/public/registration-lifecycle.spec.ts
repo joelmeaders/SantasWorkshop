@@ -1122,10 +1122,10 @@ test.describe('customer registration lifecycle', () => {
 			.fill(newPassword);
 		const newPasswordField = passwordPanel.locator('ion-input[formControlName="newPassword"]');
 		await newPasswordField.getByRole('button', { name: 'Show password', exact: true }).click();
-		await expect(newPasswordField.locator('input')).toHaveAttribute('type', 'text');
-		await expect(newPasswordField.locator('input')).toHaveValue(newPassword);
+		await expect(newPasswordField.locator('input:not(.cloned-input)')).toHaveAttribute('type', 'text');
+		await expect(newPasswordField.locator('input:not(.cloned-input)')).toHaveValue(newPassword);
 		await newPasswordField.getByRole('button', { name: 'Hide password', exact: true }).click();
-		await expect(newPasswordField.locator('input')).toHaveAttribute('type', 'password');
+		await expect(newPasswordField.locator('input:not(.cloned-input)')).toHaveAttribute('type', 'password');
 		await expect(passwordPanel.locator('ion-input')).toHaveCount(2);
 		await passwordPanel
 			.getByRole('button', { name: 'Save Changes', exact: true })

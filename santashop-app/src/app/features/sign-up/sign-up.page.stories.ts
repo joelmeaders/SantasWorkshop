@@ -52,5 +52,9 @@ export const RegistrationOpen: Story = {
 		await waitFor(() => expect(input).toHaveAttribute('type', 'password'));
 		expect(canvasElement.querySelector('#password2')).toBeNull();
 		await userEvent.clear(input);
+		input.blur();
+		await waitFor(() =>
+			expect(canvas.getByText(/this field is required/i)).toBeVisible(),
+		);
 	},
 };

@@ -126,9 +126,9 @@ Run destructive, error-injection, and shared-setting cases in emulators first. I
 | Area | Checks and required evidence |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Entry and status flags | Account creation enabled/disabled, registration closed, maintenance/weather alerts, loading/error/retry states, English/Spanish. Seed flags in emulators; do not toggle shared production settings. |
-| Sign-up | Required fields, malformed and long email, password mismatch, ZIP/referral validation, listed and Other referral, terms, newsletter opt-in/out, duplicate email, email confirmation, successful persisted account. |
+| Sign-up | Required fields, malformed and long email, password length limits and Show/Hide controls, ZIP/referral validation, listed and Other referral, terms, newsletter opt-in/out, duplicate email, email confirmation, successful persisted account. |
 | Authentication | Signed-out protected URLs, correct/incorrect credentials, sign-out, safe return URL, session reload, password-reset request. Distinguish request acknowledgment from inbox receipt and final password replacement. Follow credential handoff rules. |
-| Account | Name/ZIP changes, email-change reauthentication, password-change validation, persistence after reload. Verify old/new sign-in behavior only when credential changes are permitted. |
+| Account | Name/ZIP changes, email-change reauthentication, single-entry password-change validation and Show/Hide controls, persistence after reload. Verify old/new sign-in behavior only when credential changes are permitted. |
 | Children | Add/edit/remove, multiple children, age boundary, missing/invalid dates, toy preference, cancelled modal, persisted values, prerequisite gating. |
 | Scheduling | Available/disabled/full slots, selection, changed availability, reschedule, backend failure and retry, state after reload. Preserve the project's soft-capacity policy. |
 | Submission | Review all children, appointment, email confirmation, one successful submit, repeated/double submit, error recovery, ticket/QR, event/help/map links. |

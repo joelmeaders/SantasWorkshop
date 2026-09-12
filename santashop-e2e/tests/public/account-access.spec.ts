@@ -83,7 +83,7 @@ test.describe('customer account and session access', () => {
 		await page.fill('#zipCode input', account.zipCode);
 		await page.fill('#emailAddress input', account.emailAddress);
 		await page.fill('#password input', account.password);
-		const passwordInput = page.locator('#password input');
+		const passwordInput = page.locator('#password input:not(.cloned-input)');
 		await expect(passwordInput).toHaveAttribute('type', 'password');
 		await page.getByRole('button', { name: 'Show password', exact: true }).click();
 		await expect(passwordInput).toHaveAttribute('type', 'text');

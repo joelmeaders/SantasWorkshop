@@ -81,7 +81,7 @@
 							<ion-list lines="none">
 								<ion-item><ion-input id="signInEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" formControlName="emailAddress" /></ion-item>
 								<ion-item><ion-input #signInPasswordInput id="signInPassword" fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password" autocapitalize="off" [spellcheck]="false">
-									<button slot="end" type="button" class="password-toggle" (click)="signInPasswordInput.type = signInPasswordInput.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(signInPasswordInput.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
+									<button slot="end" type="button" class="password-toggle" (pointerdown)="$event.preventDefault()" (click)="signInPasswordInput.type = signInPasswordInput.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(signInPasswordInput.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
 										{{ (signInPasswordInput.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
 									</button>
 								</ion-input></ion-item>

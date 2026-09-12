@@ -129,7 +129,7 @@
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
 					<span>
-						<ion-label> {{ chosenReferrer() }} </ion-label>
+						<ion-label> {{ form.controls['referredBy'].value ? chosenReferrer() : ('None Selected' | adminText) }} </ion-label>
 						@if (!form.controls['referredBy'].value) {
 							<ion-note
 								color="danger"

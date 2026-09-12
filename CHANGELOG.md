@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.6] - Unreleased
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.6`.
+- Collect passwords once during signup and password changes. Add translated Show/Hide controls to customer password fields while preserving the deployed signup API contract.
+
+### Fixed
+
+- Keep the last referral choices reachable and use the available help-sheet width.
+- Clear email-change reauthentication passwords when the new address is edited and request no autofill.
+- Block invalid account submissions and clear password fields after a successful change.
+- Preserve open Ionic sheets during visual screenshot capture.
+
 ## [2026.09.0-beta.5] - Unreleased
 
 ### Added

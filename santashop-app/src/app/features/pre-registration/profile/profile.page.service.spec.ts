@@ -162,7 +162,6 @@ describe('ProfilePageService', () => {
 		service.changePasswordForm.setValue({
 			oldPassword: 'old-secret',
 			newPassword: 'new-secret',
-			newPassword2: 'new-secret',
 		});
 
 		await service.changeEmailAddress();
@@ -180,27 +179,23 @@ describe('ProfilePageService', () => {
 		expect(
 			service.changePasswordForm.controls.newPassword.value,
 		).toBeFalsy();
-		expect(
-			service.changePasswordForm.controls.newPassword2.value,
-		).toBeFalsy();
 		service.ngOnDestroy();
 	});
 
-	it.each(['different-password', '', 'short'])(
-		'blocks password submission with invalid confirmation %s',
-		async (confirmation) => {
+	it.each(['', 'short', 'x'.repeat(41)])(
+		'blocks password submission with invalid new password %s',
+		async (password) => {
 			const service = TestBed.inject(ProfilePageService);
 			service.changePasswordForm.setValue({
 				oldPassword: 'old-password',
-				newPassword: 'new-password',
-				newPassword2: confirmation,
+				newPassword: password,
 			});
 			await service.changePassword();
 			expect(auth.changePassword).not.toHaveBeenCalled();
 			expect(alert.create).not.toHaveBeenCalled();
 			expect(router.navigate).not.toHaveBeenCalled();
 			expect(
-				service.changePasswordForm.controls.newPassword2.touched,
+				service.changePasswordForm.controls.newPassword.touched,
 			).toBe(true);
 		},
 	);

@@ -181,7 +181,7 @@
 									</ion-item>
 
 									<ion-item>
-									<ion-input
+									<ion-input #signupPassword
 										id="password"
 										fill="outline"
 											[label]="'COMMON.PASSWORD' | translate"
@@ -191,33 +191,12 @@
 											autocomplete="new-password"
 											formControlName="password"
 											[debounce]="500"
-										/>
+										 autocapitalize="off" [spellcheck]="false">
+ <button slot="end" type="button" class="password-toggle" (click)="signupPassword.type = signupPassword.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(signupPassword.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
+ {{ (signupPassword.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
+ </button>
+ </ion-input>
 									</ion-item>
-
-									<ion-item>
-									<ion-input
-										id="password2"
-										fill="outline"
-											[label]="'SIGNUP.PASSWORD2' | translate"
-											[errorText]="form.controls.password2 | niceFormError | translate: (form.controls.password2.errors?.['minlength'] ?? form.controls.password2.errors?.['maxlength'])"
-											labelPlacement="floating"
-											type="password"
-											autocomplete="new-password"
-											formControlName="password2"
-											[debounce]="500"
-										/>
-									</ion-item>
-
-									@if (form.errors?.['passwordMismatch']) {
-									<ul>
-										<li>
-											<ion-note color="danger">
-												{{ "SIGNUP.PASSWORD_MATCH" |
-												translate }}
-											</ion-note>
-										</li>
-									</ul>
-									}
 								</ion-item-group>
 
 								<ion-item-group class="form-section legal-section">

@@ -91,11 +91,10 @@ describe('ProfilePage', () => {
 		expect((await password.getInputElement()).autocomplete).toBe('off');
 	});
 
-	it('shows a mismatch and prevents submission until both new passwords match', async () => {
+	it('prevents submission until the new password meets its length limits', async () => {
 		service.changePasswordForm.setValue({
 			oldPassword: 'old-password',
-			newPassword: 'new-password',
-			newPassword2: 'different-password',
+			newPassword: 'short',
 		});
 		fixture.detectChanges();
 		await fixture.whenStable();
@@ -104,9 +103,6 @@ describe('ProfilePage', () => {
 				'form',
 			) as NodeListOf<HTMLFormElement>
 		)[2];
-		expect(form.querySelector('p[role="alert"]')?.textContent).toContain(
-			'translated',
-		);
 		expect(
 			(
 				form.querySelector(
@@ -114,12 +110,12 @@ describe('ProfilePage', () => {
 				) as HTMLIonButtonElement
 			).disabled,
 		).toBe(true);
-		service.changePasswordForm.controls.newPassword2.setValue(
+		service.changePasswordForm.controls.newPassword.setValue(
 			'new-password',
 		);
 		fixture.detectChanges();
 		await fixture.whenStable();
-		expect(form.querySelector('p[role="alert"]')).toBeNull();
+		expect(form.querySelectorAll('ion-input')).toHaveLength(2);
 		expect(
 			(
 				form.querySelector(

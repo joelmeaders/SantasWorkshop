@@ -71,8 +71,8 @@ describe('signup validation messages with the published catalogs', () => {
 	it.each([
 		['en', 'password', 'short', 'Minimum length is 8'],
 		['es', 'password', 'short', 'La longitud mínima es 8'],
-		['en', 'password2', 'x'.repeat(41), 'Maximum length is 40'],
-		['es', 'password2', 'x'.repeat(41), 'La longitud máxima es 40'],
+		['en', 'password', 'x'.repeat(41), 'Maximum length is 40'],
+		['es', 'password', 'x'.repeat(41), 'La longitud máxima es 40'],
 		['en', 'firstName', 'Q', 'Minimum length is 2'],
 		['es', 'lastName', 'Q'.repeat(26), 'La longitud máxima es 25'],
 	] as const)(
@@ -89,6 +89,45 @@ describe('signup validation messages with the published catalogs', () => {
 				`#${field}`,
 			) as HTMLIonInputElement;
 			expect(input.errorText).toBe(expected);
+		},
+	);
+
+	it.each(['en', 'es'] as const)(
+		'shows and hides the single password without changing its value in %s',
+		async (language) => {
+			translate.use(language);
+			fixture.componentInstance.form.controls.password.setValue(
+				' winter-pass-2026 ',
+			);
+			fixture.detectChanges();
+			await fixture.whenStable();
+			const input = fixture.nativeElement.querySelector(
+				'#password',
+			) as HTMLIonInputElement;
+			const native = await input.getInputElement();
+			const toggle = input.querySelector(
+				'button.password-toggle',
+			) as HTMLButtonElement;
+			await vi.waitFor(() => expect(native.type).toBe('password'));
+			expect(toggle.getAttribute('aria-label')).toBe(
+				language === 'en' ? 'Show password' : 'Mostrar contraseña',
+			);
+			toggle.click();
+			await fixture.whenStable();
+			await vi.waitFor(() => expect(native.type).toBe('text'));
+			expect(toggle.getAttribute('aria-label')).toBe(
+				language === 'en' ? 'Hide password' : 'Ocultar contraseña',
+			);
+			expect(native.spellcheck).toBe(false);
+			toggle.click();
+			await fixture.whenStable();
+			await vi.waitFor(() => expect(native.type).toBe('password'));
+			expect(fixture.componentInstance.form.controls.password.value).toBe(
+				' winter-pass-2026 ',
+			);
+			expect(
+				fixture.nativeElement.querySelector('#password2'),
+			).toBeNull();
 		},
 	);
 

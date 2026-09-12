@@ -46,7 +46,11 @@
 		"NEWSLETTER": "¿Le gustaría recibir nuestro boletín de noticias y ser notificado de futuros eventos?",
 		"VALID_EMAIL": "Debe ser una dirección de correo electrónico válida",
 		"VALID_PASSWORD": "Ingrese su contraseña",
-		"OPEN_ACCOUNT_HELP_MENU": "Abrir el menú de cuenta y ayuda"
+		"OPEN_ACCOUNT_HELP_MENU": "Abrir el menú de cuenta y ayuda",
+		"SHOW": "Mostrar",
+		"HIDE": "Ocultar",
+		"SHOW_PASSWORD": "Mostrar contraseña",
+		"HIDE_PASSWORD": "Ocultar contraseña"
 	},
 	"SIGNIN": {
 		"FORGOT_PASSWORD": "¿Olvidó su contraseña?",
@@ -63,8 +67,6 @@
 		"FIRST_NAME": "Nombre",
 		"LAST_NAME": "Apellido",
 		"ZIP_CODE": "Código postal",
-		"PASSWORD2": "Volver a introducir la contraseña",
-		"PASSWORD_MATCH": "Las contraseñas no coinciden",
 		"LEGAL1": "Al registrarse, usted acepta nuestro",
 		"LEGAL2": "Términos y Condiciones",
 		"LEGAL3": "y han leído nuestro",
@@ -202,7 +204,6 @@
 		"CHANGE_PASSWORD": "Cambiar contraseña",
 		"CURRENT_PASSWORD": "Contraseña actual",
 		"NEW_PASSWORD": "Nueva contraseña",
-		"RE-ENTER_NEW_PASSWORD": "Vuelva a introducir una nueva contraseña",
 		"DONE": "¡Cambios guardados!",
 		"EMAIL_UPDATED": "Su dirección de correo electrónico se actualizó",
 		"PASSWORD_CHANGED": "Contraseña cambiada",

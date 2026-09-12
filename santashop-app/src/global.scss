@@ -498,3 +498,19 @@ $es-direction-definitions: (top, bottom, right, left) !default;
 		align-items: flex-end;
 	}
 }
+.password-toggle {
+	background: transparent;
+	border: 0;
+	border-radius: 0.25rem;
+	color: var(--santa-evergreen-deep);
+	cursor: pointer;
+	font: inherit;
+	font-weight: 600;
+	min-height: 44px;
+	padding: 0.5rem;
+}
+
+.password-toggle:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}

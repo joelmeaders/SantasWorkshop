@@ -47,7 +47,6 @@ export const fillCreateAccountForm = async (
 	await fillIonicInput(page, '#zipCode input', account.zipCode);
 	await fillIonicInput(page, '#emailAddress input', account.emailAddress);
 	await fillIonicInput(page, '#password input', account.password);
-	await fillIonicInput(page, '#password2 input', account.password);
 };
 
 /**

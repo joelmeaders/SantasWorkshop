@@ -50,7 +50,15 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	public async onboardUser(): Promise<void> {
-		const onboardInfo = this.form.value as OnboardUser;
+		if (this.form.invalid) {
+			this.form.markAllAsTouched();
+			return;
+		}
+		// Keep the deployed callable contract while collecting the password only once.
+		const onboardInfo = {
+			...this.form.value,
+			password2: this.form.controls.password.value,
+		} as OnboardUser;
 
 		const loader = await this.loadingController.create({
 			message: await firstValueFrom(

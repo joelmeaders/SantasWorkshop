@@ -37,5 +37,20 @@ export const RegistrationOpen: Story = {
 		await userEvent.click(legal);
 		await waitFor(() => expect(legal).toBeChecked());
 		expect(canvasElement.querySelector('#submitButton')).toBeDisabled();
+		const input = canvasElement.querySelector(
+			'#password input',
+		) as HTMLInputElement;
+		await userEvent.type(input, ' winter-pass-2026 ');
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Show password' }),
+		);
+		await waitFor(() => expect(input).toHaveAttribute('type', 'text'));
+		expect(input).toHaveValue(' winter-pass-2026 ');
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Hide password' }),
+		);
+		await waitFor(() => expect(input).toHaveAttribute('type', 'password'));
+		expect(canvasElement.querySelector('#password2')).toBeNull();
+		await userEvent.clear(input);
 	},
 };

@@ -9,7 +9,6 @@ export interface OnboardUserForm {
 	lastName: FormControl<string | undefined>;
 	emailAddress: FormControl<string | undefined>;
 	password: FormControl<string | undefined>;
-	password2: FormControl<string | undefined>;
 	zipCode: FormControl<string | undefined>;
 	referredBy: FormControl<string | undefined>;
 	legal: FormControl<boolean | Date | undefined>;
@@ -48,61 +47,36 @@ const validators = {
 };
 
 export const newOnboardUserForm = (): FormGroup<OnboardUserForm> =>
-	new FormGroup<OnboardUserForm>(
-		{
-			firstName: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.firstName,
-			}),
-			lastName: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.lastName,
-			}),
-			emailAddress: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.emailAddress,
-			}),
-			password: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.password,
-			}),
-			password2: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.password,
-			}),
-			zipCode: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.zipCode,
-			}),
-			referredBy: new FormControl(undefined, {
-				nonNullable: true,
-				validators: validators.referredBy,
-			}),
-			legal: new FormControl(false, {
-				nonNullable: true,
-				validators: validators.legal,
-			}),
-			newsletter: new FormControl(false, {
-				nonNullable: true,
-			}),
-		},
-		{
-			validators: passwordMatchValidator,
-		},
-	);
-
-function passwordMatchValidator(
-	formGroup: any,
-): { passwordMismatch: boolean } | null {
-	if (
-		!formGroup.controls.password.value ||
-		!formGroup.controls.password2.value
-	) {
-		return null;
-	}
-
-	return formGroup.controls.password.value ===
-		formGroup.controls.password2.value
-		? null
-		: { passwordMismatch: true };
-}
+	new FormGroup<OnboardUserForm>({
+		firstName: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.firstName,
+		}),
+		lastName: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.lastName,
+		}),
+		emailAddress: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.emailAddress,
+		}),
+		password: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.password,
+		}),
+		zipCode: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.zipCode,
+		}),
+		referredBy: new FormControl(undefined, {
+			nonNullable: true,
+			validators: validators.referredBy,
+		}),
+		legal: new FormControl(false, {
+			nonNullable: true,
+			validators: validators.legal,
+		}),
+		newsletter: new FormControl(false, {
+			nonNullable: true,
+		}),
+	});

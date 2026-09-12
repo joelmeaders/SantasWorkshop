@@ -73,6 +73,62 @@ describe('ProfilePage', () => {
 		expect(fixture.nativeElement.textContent).not.toContain('Jesse Doe');
 	});
 
+	it('clears the email reauthentication password when the new email is edited', async () => {
+		service.changeEmailForm.controls.password.setValue('stored-password');
+		const email = fixture.nativeElement.querySelector(
+			'ion-input[formControlName="emailAddress"]',
+		) as HTMLElement;
+		email.dispatchEvent(
+			new CustomEvent('ionInput', {
+				detail: { value: 'changed@example.com' },
+			}),
+		);
+		await fixture.whenStable();
+		expect(service.changeEmailForm.controls.password.value).toBeFalsy();
+		const password = fixture.nativeElement.querySelector(
+			'ion-input[formControlName="password"]',
+		) as HTMLIonInputElement;
+		expect((await password.getInputElement()).autocomplete).toBe('off');
+	});
+
+	it('shows a mismatch and prevents submission until both new passwords match', async () => {
+		service.changePasswordForm.setValue({
+			oldPassword: 'old-password',
+			newPassword: 'new-password',
+			newPassword2: 'different-password',
+		});
+		fixture.detectChanges();
+		await fixture.whenStable();
+		const form = (
+			fixture.nativeElement.querySelectorAll(
+				'form',
+			) as NodeListOf<HTMLFormElement>
+		)[2];
+		expect(form.querySelector('p[role="alert"]')?.textContent).toContain(
+			'translated',
+		);
+		expect(
+			(
+				form.querySelector(
+					'ion-button[type="submit"]',
+				) as HTMLIonButtonElement
+			).disabled,
+		).toBe(true);
+		service.changePasswordForm.controls.newPassword2.setValue(
+			'new-password',
+		);
+		fixture.detectChanges();
+		await fixture.whenStable();
+		expect(form.querySelector('p[role="alert"]')).toBeNull();
+		expect(
+			(
+				form.querySelector(
+					'ion-button[type="submit"]',
+				) as HTMLIonButtonElement
+			).disabled,
+		).toBe(false);
+	});
+
 	it.each([
 		['updateProfile', 'updatePublicProfile'],
 		['changeEmailAddress', 'changeEmailAddress'],

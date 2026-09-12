@@ -2,6 +2,15 @@
 
 All notable changes to the main application will be documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- Keep all referral choices reachable within the registration modal.
+- Use the available help-sheet width on desktop and mobile.
+- Clear the email-change password when the new address is edited and request no automatic password filling.
+- Require matching new passwords before a password change and clear password fields after success.
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Changed

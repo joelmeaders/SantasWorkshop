@@ -31,10 +31,10 @@
 						<span>{{ 'PROFILE.CHANGE_EMAIL' | translate }}</span>
 						<small>{{ user.emailAddress }}</small>
 					</summary>
-					<form [formGroup]="changeEmailForm" (ngSubmit)="changeEmailAddress()" novalidate>
+					<form [formGroup]="changeEmailForm" (ngSubmit)="changeEmailAddress()" autocomplete="off" novalidate>
 						<ion-list lines="none">
-							<ion-item><ion-input fill="outline" [label]="'COMMON.NEW_EMAIL_ADDRESS' | translate" labelPlacement="floating" formControlName="emailAddress" type="email" autocomplete="email" [errorText]="changeEmailForm.controls.emailAddress | niceFormError | translate: (changeEmailForm.controls.emailAddress.errors?.['minlength'] ?? changeEmailForm.controls.emailAddress.errors?.['maxlength'])" /></ion-item>
-							<ion-item><ion-input fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" formControlName="password" type="password" autocomplete="current-password" [errorText]="changeEmailForm.controls.password | niceFormError | translate: (changeEmailForm.controls.password.errors?.['minlength'] ?? changeEmailForm.controls.password.errors?.['maxlength'])" /></ion-item>
+							<ion-item><ion-input fill="outline" [label]="'COMMON.NEW_EMAIL_ADDRESS' | translate" labelPlacement="floating" formControlName="emailAddress" (ionInput)="changeEmailForm.controls.password.reset()" type="email" autocomplete="email" [errorText]="changeEmailForm.controls.emailAddress | niceFormError | translate: (changeEmailForm.controls.emailAddress.errors?.['minlength'] ?? changeEmailForm.controls.emailAddress.errors?.['maxlength'])" /></ion-item>
+							<ion-item><ion-input fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" formControlName="password" type="password" autocomplete="off" [errorText]="changeEmailForm.controls.password | niceFormError | translate: (changeEmailForm.controls.password.errors?.['minlength'] ?? changeEmailForm.controls.password.errors?.['maxlength'])" /></ion-item>
 						</ion-list>
 						<ion-button type="submit" color="xmasred" [disabled]="changeEmailForm.invalid">{{ 'PROFILE.SAVE_CHANGES' | translate }}</ion-button>
 					</form>
@@ -48,6 +48,9 @@
 							<ion-item><ion-input fill="outline" [label]="'PROFILE.NEW_PASSWORD' | translate" labelPlacement="floating" formControlName="newPassword" type="password" autocomplete="new-password" [errorText]="changePasswordForm.controls.newPassword | niceFormError | translate: (changePasswordForm.controls.newPassword.errors?.['minlength'] ?? changePasswordForm.controls.newPassword.errors?.['maxlength'])" /></ion-item>
 							<ion-item><ion-input fill="outline" [label]="'PROFILE.RE-ENTER_NEW_PASSWORD' | translate" labelPlacement="floating" formControlName="newPassword2" type="password" autocomplete="new-password" [errorText]="changePasswordForm.controls.newPassword2 | niceFormError | translate: (changePasswordForm.controls.newPassword2.errors?.['minlength'] ?? changePasswordForm.controls.newPassword2.errors?.['maxlength'])" /></ion-item>
 						</ion-list>
+						@if (changePasswordForm.hasError('passwordMismatch')) {
+							<p role="alert">{{ 'SIGNUP.PASSWORD_MATCH' | translate }}</p>
+						}
 						<ion-button type="submit" color="xmasred" [disabled]="changePasswordForm.invalid">{{ 'PROFILE.SAVE_CHANGES' | translate }}</ion-button>
 					</form>
 				</details>

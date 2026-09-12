@@ -1,4 +1,10 @@
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+	AbstractControl,
+	FormControl,
+	FormGroup,
+	ValidationErrors,
+	Validators,
+} from '@angular/forms';
 
 export interface ChangeEmailForm {
 	password: FormControl<string | undefined>;
@@ -53,17 +59,30 @@ export const changeEmailForm = (): FormGroup<ChangeEmailForm> =>
 	});
 
 export const changePasswordForm = (): FormGroup<ChangePasswordForm> =>
-	new FormGroup<ChangePasswordForm>({
-		oldPassword: new FormControl(undefined, {
-			nonNullable: true,
-			validators: validators.password,
-		}),
-		newPassword: new FormControl(undefined, {
-			nonNullable: true,
-			validators: validators.password,
-		}),
-		newPassword2: new FormControl(undefined, {
-			nonNullable: true,
-			validators: validators.password,
-		}),
-	});
+	new FormGroup<ChangePasswordForm>(
+		{
+			oldPassword: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.password,
+			}),
+			newPassword: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.password,
+			}),
+			newPassword2: new FormControl(undefined, {
+				nonNullable: true,
+				validators: validators.password,
+			}),
+		},
+		{ validators: passwordMatchValidator },
+	);
+
+function passwordMatchValidator(
+	control: AbstractControl,
+): ValidationErrors | null {
+	const password = control.get('newPassword')?.value;
+	const confirmation = control.get('newPassword2')?.value;
+	return password && confirmation && password !== confirmation
+		? { passwordMismatch: true }
+		: null;
+}

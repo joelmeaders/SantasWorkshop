@@ -56,5 +56,6 @@ export const RegistrationOpen: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText(/this field is required/i)).toBeVisible(),
 		);
+		input.focus();
 	},
 };

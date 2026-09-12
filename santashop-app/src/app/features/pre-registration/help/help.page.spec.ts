@@ -113,7 +113,7 @@ describe('HelpPage', () => {
 			expect(host.textContent).not.toMatch(/HELP\.|PDF|robot|CAPTCHA/);
 			expect(host.querySelector('[href$=".pdf"]')).toBeNull();
 			const contact = host.querySelector(
-				'ion-button[href="https://www.denversantaclausshop.org/contact/"]',
+				'ion-button[href="https://www.facebook.com/denversantaclausshop/"]',
 			);
 			expect(contact?.textContent?.trim()).toBe(
 				language === 'es' ? es.HELP.VISIT_BUTTON : en.HELP.VISIT_BUTTON,

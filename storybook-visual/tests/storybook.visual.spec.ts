@@ -183,7 +183,14 @@ test.describe('Storybook visual states', () => {
 				errors,
 				`${story.title} / ${story.name} rendered with errors`,
 			).toEqual([]);
-			await expect(page).toHaveScreenshot(`${story.id}.png`);
+			// Finishing Ionic's paused sheet gesture animation moves the sheet offscreen.
+			const hasOpenSheet =
+				(await page
+					.locator('ion-modal.modal-sheet.show-modal')
+					.count()) > 0;
+			await expect(page).toHaveScreenshot(`${story.id}.png`, {
+				animations: hasOpenSheet ? 'allow' : 'disabled',
+			});
 			expect(
 				[...new Set(pageFailures.get(page) ?? [])],
 				`${story.title} / ${story.name} failed during capture`,

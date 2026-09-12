@@ -182,16 +182,22 @@ form ion-searchbar {
 }
 
 ion-button {
-	--border-radius: 0.9rem;
 	--box-shadow: 0 0.35rem 0.8rem rgba(31, 49, 44, 0.12);
-	min-height: 2.85rem;
 	text-transform: none;
+}
+
+ion-button:not([shape='round']) {
+	--border-radius: 0.9rem;
+	min-height: 2.85rem;
 }
 
 ion-button::part(native) {
 	font-size: 0.98rem;
 	font-weight: 800;
 	letter-spacing: 0.01em;
+}
+
+ion-button:not([shape='round'])::part(native) {
 	padding-inline: 1.1rem;
 }
 
@@ -497,4 +503,20 @@ $es-direction-definitions: (top, bottom, right, left) !default;
 		--width: 100%;
 		align-items: flex-end;
 	}
+}
+.password-toggle {
+	background: transparent;
+	border: 0;
+	border-radius: 0.25rem;
+	color: var(--santa-evergreen-deep);
+	cursor: pointer;
+	font: inherit;
+	font-weight: 600;
+	min-height: 44px;
+	padding: 0.5rem;
+}
+
+.password-toggle:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
 }

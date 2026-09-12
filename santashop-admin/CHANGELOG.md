@@ -1,5 +1,11 @@
 # Changelog - @santashop/admin
 
+## [2026.09.0-beta.6] - Unreleased
+
+### Changed
+
+- Align the admin release version with the workspace's registration fixes. Admin behavior is unchanged.
+
 All notable changes to the admin application will be documented in this file.
 
 ## [2026.09.0-beta.3] - Unreleased

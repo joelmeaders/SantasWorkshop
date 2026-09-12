@@ -185,7 +185,7 @@ describe('bootstrapCustomerApplication', () => {
 
 	it('keys the service-worker script URL to the configured release version', () => {
 		expect(getServiceWorkerScriptUrl(config.version)).toBe(
-			'ngsw-worker.js?v=2026.09.0-beta.5',
+			'ngsw-worker.js?v=2026.09.0-beta.6',
 		);
 		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
 			getServiceWorkerScriptUrl(config.version),

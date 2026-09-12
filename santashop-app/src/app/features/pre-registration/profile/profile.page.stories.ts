@@ -47,6 +47,29 @@ export const AccountSettings: Story = {
 		await userEvent.click(emailSummary);
 		expect(canvasElement.querySelectorAll('details[open]')).toHaveLength(2);
 		expect(canvas.getByDisplayValue('80205')).toBeVisible();
+		const passwordPanel = canvasElement.querySelectorAll('details')[2];
+		await userEvent.click(
+			within(passwordPanel).getByText(/change password/i),
+		);
+		const newPassword = passwordPanel.querySelector(
+			'ion-input[formControlName="newPassword"]',
+		) as HTMLIonInputElement;
+		const native = await newPassword.getInputElement();
+		await userEvent.type(native, 'winter-pass-2026');
+		await userEvent.click(
+			newPassword.querySelector('button.password-toggle') as HTMLElement,
+		);
+		await waitFor(() => expect(native).toHaveAttribute('type', 'text'));
+		expect(native).toHaveValue('winter-pass-2026');
+		await userEvent.click(
+			newPassword.querySelector('button.password-toggle') as HTMLElement,
+		);
+		await waitFor(() => expect(native).toHaveAttribute('type', 'password'));
+		expect(passwordPanel.querySelectorAll('ion-input')).toHaveLength(2);
+		await userEvent.clear(native);
+		await userEvent.click(
+			within(passwordPanel).getByText(/change password/i),
+		);
 	},
 };
 

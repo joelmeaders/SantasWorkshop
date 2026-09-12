@@ -2,6 +2,23 @@
 
 All notable changes to the main application will be documented in this file.
 
+## [2026.09.0-beta.6] - Unreleased
+
+### Changed
+
+- Direct registration Help to Facebook messaging in English and Spanish. Use Ionic round social buttons with evergreen backgrounds and contrasting Facebook/Instagram logos on all home states.
+
+- Advance the customer application to `2026.09.0-beta.6`.
+- Remove password confirmation fields from signup and password changes. Add English and Spanish Show/Hide controls to signup, sign-in, and account password fields.
+- Keep signup compatible with the existing backend and preserve exact password values, paste, and password-manager support.
+
+### Fixed
+
+- Keep all referral choices reachable within the registration modal.
+- Use the available help-sheet width on desktop and mobile.
+- Clear the email-change password when the new address is edited and request no automatic password filling.
+- Reject invalid account submissions and clear password fields after a successful change.
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Changed

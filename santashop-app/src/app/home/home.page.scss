@@ -84,19 +84,6 @@
 	margin-block: 0.85rem 0.5rem;
 }
 
-.social-link-button {
-	align-items: center;
-	background: rgba(255, 255, 255, 0.86);
-	border: 1px solid var(--santa-evergreen);
-	border-radius: 50%;
-	color: var(--santa-evergreen);
-	display: inline-flex;
-	font-size: 1.5rem;
-	height: 3rem;
-	justify-content: center;
-	width: 3rem;
-}
-
 @media (max-width: 600px) {
 	.home-shell {
 		padding-inline: 0.25rem;

@@ -91,7 +91,6 @@ describe('SignUpPageService', () => {
 			lastName: 'Jolly',
 			emailAddress: 'holly@example.com',
 			password: 'Password123!',
-			password2: 'Password123!',
 			zipCode: '80202',
 			referredBy: 'Friend',
 			legal: true,
@@ -155,9 +154,22 @@ describe('SignUpPageService', () => {
 			queryParams: { mode: 'sign-in' },
 		});
 		expect(handleError).not.toHaveBeenCalled();
-		expect(analytics.logEventWithParams).toHaveBeenCalledWith('workflow_action', { operation: 'signup_sign_in', outcome: 'failed', error_code: 'auth/network-request-failed' });
-		expect(analytics.logEventWithParams).toHaveBeenCalledWith('signup_recovery_shown', { reason: 'sign_in_failed' });
-		expect(analytics.logEventWithParams).toHaveBeenCalledWith('signup_recovery_selected', { action: 'sign_in' });
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith(
+			'workflow_action',
+			{
+				operation: 'signup_sign_in',
+				outcome: 'failed',
+				error_code: 'auth/network-request-failed',
+			},
+		);
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith(
+			'signup_recovery_shown',
+			{ reason: 'sign_in_failed' },
+		);
+		expect(analytics.logEventWithParams).toHaveBeenCalledWith(
+			'signup_recovery_selected',
+			{ action: 'sign_in' },
+		);
 	});
 
 	it('uses the normal error handler when navigation fails after sign-in', async () => {
@@ -283,13 +295,21 @@ describe('SignUpPageService', () => {
 				message: catalog.SIGNUP.CREATING_ACCOUNT,
 			});
 			expect(login).not.toHaveBeenCalled();
-			expect(analytics.logEvent).not.toHaveBeenCalledWith('account_created');
-			expect(analytics.logEventWithParams).toHaveBeenCalledWith('workflow_action', { operation: 'create_account', outcome: 'attempted' });
+			expect(analytics.logEvent).not.toHaveBeenCalledWith(
+				'account_created',
+			);
+			expect(analytics.logEventWithParams).toHaveBeenCalledWith(
+				'workflow_action',
+				{ operation: 'create_account', outcome: 'attempted' },
+			);
 			createDone();
 			await vi.waitFor(() => expect(login).toHaveBeenCalled());
 			expect(loader.message).toBe(catalog.SIGNUP.SIGNING_IN);
 			expect(analytics.logEvent).toHaveBeenCalledWith('account_created');
-			expect(analytics.logEventWithParams).not.toHaveBeenCalledWith('workflow_action', { operation: 'signup_sign_in', outcome: 'succeeded' });
+			expect(analytics.logEventWithParams).not.toHaveBeenCalledWith(
+				'workflow_action',
+				{ operation: 'signup_sign_in', outcome: 'succeeded' },
+			);
 			expect(loader.dismiss).not.toHaveBeenCalled();
 			loginDone();
 			await pending;
@@ -305,7 +325,7 @@ describe('SignUpPageService', () => {
 		'uses the same raw password for signup and immediate sign-in',
 		async (password) => {
 			const service = createService();
-			service.form.patchValue({ password, password2: password });
+			service.form.patchValue({ password });
 			expect(service.form.valid).toBe(true);
 			await service.onboardUser();
 			expect(accountCallable).toHaveBeenCalledWith(
@@ -316,19 +336,17 @@ describe('SignUpPageService', () => {
 			);
 		},
 	);
-	it('uses the signup length boundaries and exact confirmation', () => {
+	it('uses the signup length boundaries without a confirmation field', () => {
 		const service = createService();
 		for (const length of [7, 8, 40, 41]) {
 			service.form.patchValue({
 				password: 'a'.repeat(length),
-				password2: 'a'.repeat(length),
 			});
 			expect(service.form.valid).toBe(length === 8 || length === 40);
 		}
 		service.form.patchValue({
 			password: ' winter-pass-2026 ',
-			password2: 'winter-pass-2026',
 		});
-		expect(service.form.hasError('passwordMismatch')).toBe(true);
+		expect(service.form.valid).toBe(true);
 	});
 });

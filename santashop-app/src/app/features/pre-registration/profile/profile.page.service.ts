@@ -140,6 +140,10 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changeEmailAddress(): Promise<void> {
+		if (this.changeEmailForm.invalid) {
+			this.changeEmailForm.markAllAsTouched();
+			return;
+		}
 		const value = this.changeEmailForm.value;
 
 		await trackAnalyticsOperation(this.analytics, 'email_update', () =>
@@ -160,6 +164,10 @@ export class ProfilePageService implements OnDestroy {
 	}
 
 	public async changePassword(): Promise<void> {
+		if (this.changePasswordForm.invalid) {
+			this.changePasswordForm.markAllAsTouched();
+			return;
+		}
 		const value = this.changePasswordForm.value;
 
 		await trackAnalyticsOperation(this.analytics, 'password_update', () =>
@@ -170,6 +178,7 @@ export class ProfilePageService implements OnDestroy {
 		)
 			.then(() => {
 				this.analytics.logEvent('profile_update_password');
+				this.changePasswordForm.reset();
 				return this.passwordChangedAlert();
 			})
 			.catch((error) => this.errorHandler.handleError(error));

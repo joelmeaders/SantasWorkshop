@@ -83,9 +83,14 @@ test.describe('customer account and session access', () => {
 		await page.fill('#zipCode input', account.zipCode);
 		await page.fill('#emailAddress input', account.emailAddress);
 		await page.fill('#password input', account.password);
-		await page.fill('#password2 input', account.password);
-		await expect(page.locator('#password2')).toHaveClass(/ng-valid/);
-		await page.locator('#password2 input').blur();
+		const passwordInput = page.locator('#password input:not(.cloned-input)');
+		await expect(passwordInput).toHaveAttribute('type', 'password');
+		await page.getByRole('button', { name: 'Show password', exact: true }).click();
+		await expect(passwordInput).toHaveAttribute('type', 'text');
+		await expect(passwordInput).toHaveValue(account.password);
+		await page.getByRole('button', { name: 'Hide password', exact: true }).click();
+		await expect(passwordInput).toHaveAttribute('type', 'password');
+		await expect(page.locator('#password2')).toHaveCount(0);
 		await expect(submitButton).toHaveClass(/button-disabled/);
 
 		const policyCheckbox = page.locator('#legalCheckbox');

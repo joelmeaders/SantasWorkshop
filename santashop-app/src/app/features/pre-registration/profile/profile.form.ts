@@ -8,7 +8,6 @@ export interface ChangeEmailForm {
 export interface ChangePasswordForm {
 	oldPassword: FormControl<string | undefined>;
 	newPassword: FormControl<string | undefined>;
-	newPassword2: FormControl<string | undefined>;
 }
 
 const validators = {
@@ -59,10 +58,6 @@ export const changePasswordForm = (): FormGroup<ChangePasswordForm> =>
 			validators: validators.password,
 		}),
 		newPassword: new FormControl(undefined, {
-			nonNullable: true,
-			validators: validators.password,
-		}),
-		newPassword2: new FormControl(undefined, {
 			nonNullable: true,
 			validators: validators.password,
 		}),

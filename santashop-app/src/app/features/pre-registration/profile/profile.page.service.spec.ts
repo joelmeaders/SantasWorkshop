@@ -157,19 +157,18 @@ describe('ProfilePageService', () => {
 		const service = TestBed.inject(ProfilePageService);
 		service.changeEmailForm.setValue({
 			emailAddress: 'new@example.com',
-			password: 'secret',
+			password: 'current-secret',
 		});
 		service.changePasswordForm.setValue({
 			oldPassword: 'old-secret',
 			newPassword: 'new-secret',
-			newPassword2: 'new-secret',
 		});
 
 		await service.changeEmailAddress();
 		await service.changePassword();
 
 		expect(auth.changeEmailAddress).toHaveBeenCalledWith(
-			'secret',
+			'current-secret',
 			'new@example.com',
 		);
 		expect(auth.changePassword).toHaveBeenCalledWith(
@@ -177,7 +176,37 @@ describe('ProfilePageService', () => {
 			'new-secret',
 		);
 		expect(router.navigate).toHaveBeenCalledTimes(2);
+		expect(
+			service.changePasswordForm.controls.newPassword.value,
+		).toBeFalsy();
 		service.ngOnDestroy();
+	});
+
+	it.each(['', 'short', 'x'.repeat(41)])(
+		'blocks password submission with invalid new password %s',
+		async (password) => {
+			const service = TestBed.inject(ProfilePageService);
+			service.changePasswordForm.setValue({
+				oldPassword: 'old-password',
+				newPassword: password,
+			});
+			await service.changePassword();
+			expect(auth.changePassword).not.toHaveBeenCalled();
+			expect(alert.create).not.toHaveBeenCalled();
+			expect(router.navigate).not.toHaveBeenCalled();
+			expect(
+				service.changePasswordForm.controls.newPassword.touched,
+			).toBe(true);
+		},
+	);
+
+	it('blocks an email change without a valid reauthentication password', async () => {
+		const service = TestBed.inject(ProfilePageService);
+		service.changeEmailForm.patchValue({ emailAddress: 'new@example.com' });
+		await service.changeEmailAddress();
+		expect(auth.changeEmailAddress).not.toHaveBeenCalled();
+		expect(router.navigate).not.toHaveBeenCalled();
+		expect(service.changeEmailForm.controls.password.touched).toBe(true);
 	});
 
 	it('clears profile and password forms and ignores a late prior-account read', () => {

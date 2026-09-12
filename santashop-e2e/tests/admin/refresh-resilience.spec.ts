@@ -54,7 +54,7 @@ const stats = (
 });
 
 async function chooseYear(page: Page, value: number): Promise<void> {
-	await page.locator('admin-header ion-select').click();
+	await page.locator('.page-actions ion-select').click();
 	const picker = page.locator('ion-alert');
 	await picker
 		.getByRole('radio', { name: String(value), exact: true })
@@ -163,7 +163,7 @@ test.describe('admin refresh navigation and recovery', () => {
 		await expect(page.locator('.count-container h1').first()).toHaveText(
 			'11',
 		);
-		await expect(page.locator('admin-header ion-select')).toHaveJSProperty(
+		await expect(page.locator('.page-actions ion-select')).toHaveJSProperty(
 			'value',
 			year - 1,
 		);

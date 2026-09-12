@@ -168,7 +168,7 @@ test.describe('report compatibility and exports', () => {
 		for (const report of ['registration', 'check-in', 'user']) {
 			if (report !== 'registration')
 				await page.goto(`/admin/stats/${report}`);
-			await page.locator('admin-header ion-select').click();
+			await page.locator('.page-actions ion-select').click();
 			const picker = page.locator('ion-alert');
 			await picker
 				.getByRole('radio', { name: String(archivedYear), exact: true })

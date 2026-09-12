@@ -1,3 +1,4 @@
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -45,6 +46,7 @@ const compareSearchValues = (
 	styleUrls: ['./results.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		RouterLink,
 		IonRouterLink,

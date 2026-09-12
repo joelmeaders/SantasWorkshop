@@ -5,23 +5,27 @@
 		<section class="editor-main">
 			<ion-card
 				><ion-card-header
-					><ion-card-title
-						>2026 collection &amp; file tools</ion-card-title
-					></ion-card-header
+					><ion-card-title>
+						{{ '2026 collection & file tools' | adminText }}
+					</ion-card-title></ion-card-header
 				><ion-card-content>
 					<p>
-						Start with a seasonal design, or bring your own
-						template. Imports open as drafts.
+						{{
+							'Start with a seasonal design, or bring your own template.
+            Imports open as drafts.' | adminText
+						}}
 					</p>
 					<ion-select
-						label="2026 starter template"
-						placeholder="Choose a design"
+						okText="{{ 'OK' | adminText }}"
+						cancelText="{{ 'Cancel' | adminText }}"
+						label="{{ '2026 starter template' | adminText }}"
+						placeholder="{{ 'Choose a design' | adminText }}"
 						(ionChange)="loadStarter($event.detail.value)"
 					>
 						@for (starter of starterOptions; track starter.key) {
-						<ion-select-option [value]="starter.key"
-							>{{ starter.label }}</ion-select-option
-						>
+							<ion-select-option [value]="starter.key">{{
+								starter.label | adminText
+							}}</ion-select-option>
 						}
 					</ion-select>
 					<input
@@ -32,118 +36,159 @@
 						hidden
 						(change)="importFile($event)"
 					/>
-					<ion-button fill="outline" (click)="templateFile.click()"
-						>Import JSON or HTML</ion-button
-					>
-					<ion-button fill="outline" (click)="exportTemplate('json')"
-						>Export JSON</ion-button
-					>
-					<ion-button fill="outline" (click)="exportTemplate('html')"
-						>Export HTML</ion-button
-					>
+					<ion-button fill="outline" (click)="templateFile.click()">
+						{{ 'Import JSON or HTML' | adminText }}
+					</ion-button>
+					<ion-button fill="outline" (click)="exportTemplate('json')">
+						{{ 'Export JSON' | adminText }}
+					</ion-button>
+					<ion-button fill="outline" (click)="exportTemplate('html')">
+						{{ 'Export HTML' | adminText }}
+					</ion-button>
 				</ion-card-content></ion-card
 			>
 			<ion-card>
 				<ion-card-header>
 					<ion-card-title>
-						@if (isCreateMode()) { Create Email Template } @else {
-						Edit Email Template }
+						@if (isCreateMode()) {
+							{{ 'Create Email Template' | adminText }}
+						} @else {
+							{{ 'Edit Email Template' | adminText }}
+						}
 					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
 					<form [formGroup]="form">
 						<ion-item
 							><ion-select
-								label="Email language"
+								okText="{{ 'OK' | adminText }}"
+								cancelText="{{ 'Cancel' | adminText }}"
+								label="{{ 'Email language' | adminText }}"
 								formControlName="language"
-								><ion-select-option value="en"
-									>English</ion-select-option
-								><ion-select-option value="es"
-									>Español</ion-select-option
-								></ion-select
+								><ion-select-option value="en">
+									{{
+										'English' | adminText
+									}} </ion-select-option
+								><ion-select-option value="es">
+									{{ 'Español' | adminText }}
+								</ion-select-option></ion-select
 							></ion-item
 						>
 						<ion-item
 							><ion-textarea
-								label="Plain-text alternative"
+								label="{{
+									'Plain-text alternative' | adminText
+								}}"
 								formControlName="textPart"
 								autoGrow="true"
 								(ionInput)="onTextChanged()"
 							></ion-textarea
 						></ion-item>
 						@if (form.controls['seasonalReviewRequired'].value) {
-						<ion-note color="warning" class="seasonal-review-note"
-							>Review the venue, map, and opening details in this
-							revision. Replace all draft notes before publishing.
-							Editing content requires another review.</ion-note
-						>
-						<ion-item
-							><ion-checkbox
-								formControlName="seasonalDetailsReviewed"
-								(ionChange)="confirmSeasonalReview($event.detail.checked)"
-								>I reviewed the 2026 seasonal details in this
-								revision</ion-checkbox
-							></ion-item
-						>
+							<ion-note
+								color="warning"
+								class="seasonal-review-note"
+							>
+								{{
+									'Review the venue, map, and opening details in this revision.
+              Replace all draft notes before publishing. Editing content
+              requires another review.' | adminText
+								}}
+							</ion-note>
+							<ion-item
+								><ion-checkbox
+									formControlName="seasonalDetailsReviewed"
+									(ionChange)="
+										confirmSeasonalReview(
+											$event.detail.checked
+										)
+									"
+								>
+									{{
+										'I reviewed the 2026 seasonal details in this revision'
+											| adminText
+									}}
+								</ion-checkbox></ion-item
+							>
 						}
 
 						<ion-list>
 							<ion-item>
 								<ion-input
-									label="Template key"
+									label="{{ 'Template key' | adminText }}"
 									formControlName="key"
-									placeholder="registration-confirmation"
+									placeholder="{{
+										'registration-confirmation' | adminText
+									}}"
 								></ion-input>
 							</ion-item>
 							<ion-item>
 								<ion-select
-									label="Delivery profile"
+									okText="{{ 'OK' | adminText }}"
+									cancelText="{{ 'Cancel' | adminText }}"
+									label="{{ 'Delivery profile' | adminText }}"
 									formControlName="deliveryProfile"
 									(ionChange)="onDeliveryProfileChanged()"
 								>
-									@for (option of deliveryProfileOptions;
-									track option.value) {
-									<ion-select-option [value]="option.value">
-										{{ option.label }}
-									</ion-select-option>
+									@for (
+										option of deliveryProfileOptions;
+										track option.value
+									) {
+										<ion-select-option
+											[value]="option.value"
+										>
+											{{ option.label | adminText }}
+										</ion-select-option>
 									}
 								</ion-select>
 							</ion-item>
 							<ion-item>
 								<ion-input
-									label="Display name"
+									label="{{ 'Display name' | adminText }}"
 									formControlName="displayName"
-									placeholder="Registration Confirmation"
+									placeholder="{{
+										'Registration Confirmation' | adminText
+									}}"
 								></ion-input>
 							</ion-item>
 							<ion-item>
 								<ion-input
-									label="AWS SES template name"
+									label="{{
+										'AWS SES template name' | adminText
+									}}"
 									formControlName="awsTemplateName"
-									placeholder="dscs-registration-confirmation-v1"
+									placeholder="{{
+										'dscs-registration-confirmation-v1'
+											| adminText
+									}}"
 								></ion-input>
 							</ion-item>
 							<ion-item>
 								<ion-input
-									label="Subject"
+									label="{{ 'Subject' | adminText }}"
 									formControlName="subjectPart"
-									[placeholder]="subjectPlaceholder"
+									[placeholder]="
+										subjectPlaceholder | adminText
+									"
 									(ionInput)="onSubjectChanged()"
 								></ion-input>
 							</ion-item>
 							<ion-item>
 								<ion-textarea
-									label="Description"
+									label="{{ 'Description' | adminText }}"
 									formControlName="description"
 									autoGrow="true"
 								></ion-textarea>
 							</ion-item>
 							<ion-item>
 								<ion-textarea
-									label="Revision notes"
+									label="{{ 'Revision notes' | adminText }}"
 									formControlName="notes"
 									autoGrow="true"
-									placeholder="What changed in this draft?"
+									placeholder="{{
+										'What changed in this draft?'
+											| adminText
+									}}"
 								></ion-textarea>
 							</ion-item>
 						</ion-list>
@@ -161,21 +206,23 @@
 								slot="start"
 								aria-hidden="true"
 							></ion-icon>
-							Save Revision
+							{{ 'Save Revision' | adminText }}
 						</ion-button>
 						<ion-button
 							color="success"
 							fill="outline"
 							(click)="publishTemplate()"
 							(keydown.enter)="publishTemplate()"
-							[disabled]="!selectedRevisionId() || hasUnsavedContent()"
+							[disabled]="
+								!selectedRevisionId() || hasUnsavedContent()
+							"
 						>
 							<ion-icon
 								name="cloud-upload-outline"
 								slot="start"
 								aria-hidden="true"
 							></ion-icon>
-							Publish and activate
+							{{ 'Publish and activate' | adminText }}
 						</ion-button>
 						<ion-button
 							fill="clear"
@@ -187,22 +234,22 @@
 								slot="start"
 								aria-hidden="true"
 							></ion-icon>
-							Refresh Preview
+							{{ 'Refresh Preview' | adminText }}
 						</ion-button>
 						@if (!isCreateMode()) {
-						<ion-button
-							fill="outline"
-							color="danger"
-							(click)="deleteTemplate()"
-							(keydown.enter)="deleteTemplate()"
-						>
-							<ion-icon
-								name="trash-outline"
-								slot="start"
-								aria-hidden="true"
-							></ion-icon>
-							Delete Template
-						</ion-button>
+							<ion-button
+								fill="outline"
+								color="danger"
+								(click)="deleteTemplate()"
+								(keydown.enter)="deleteTemplate()"
+							>
+								<ion-icon
+									name="trash-outline"
+									slot="start"
+									aria-hidden="true"
+								></ion-icon>
+								{{ 'Delete Template' | adminText }}
+							</ion-button>
 						}
 					</section>
 				</ion-card-content>
@@ -210,25 +257,33 @@
 
 			<ion-card>
 				<ion-card-header>
-					<ion-card-title>Send test email</ion-card-title>
+					<ion-card-title>
+						{{ 'Send test email' | adminText }}
+					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
 					<form [formGroup]="testEmailForm">
 						<ion-list>
 							<ion-item>
 								<ion-input
-									label="Test recipient email"
+									label="{{
+										'Test recipient email' | adminText
+									}}"
 									formControlName="recipientEmail"
 									type="email"
-									placeholder="name@example.com"
+									placeholder="{{
+										'name@example.com' | adminText
+									}}"
 								></ion-input>
 							</ion-item>
 						</ion-list>
 					</form>
 
 					<ion-note color="medium">
-						Uses the current draft subject, current HTML, and the
-						test values entered for the detected Handlebars fields.
+						{{
+							'Uses the current draft subject, current HTML, and the test
+            values entered for the detected Handlebars fields.' | adminText
+						}}
 					</ion-note>
 
 					<section class="action-row">
@@ -243,7 +298,7 @@
 								slot="start"
 								aria-hidden="true"
 							></ion-icon>
-							Send Test Email
+							{{ 'Send Test Email' | adminText }}
 						</ion-button>
 					</section>
 				</ion-card-content>
@@ -251,7 +306,9 @@
 
 			<ion-card>
 				<ion-card-header>
-					<ion-card-title>Template HTML</ion-card-title>
+					<ion-card-title>
+						{{ 'Template HTML' | adminText }}
+					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
 					<admin-email-template-code-editor
@@ -270,92 +327,125 @@
 							name="document-text-outline"
 							aria-hidden="true"
 						></ion-icon>
-						Fields & sample data
+						{{ 'Fields & sample data' | adminText }}
 					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
 					@if (fieldMappings.length === 0) {
-					<ion-note color="medium">
-						Add Handlebars fields like {{ firstNameExample }} to
-						your HTML and they appear here.
-					</ion-note>
-					<ion-note color="medium">
-						Use the delivery profile mapping list to connect
-						placeholders to runtime data fields.
-					</ion-note>
+						<ion-note color="medium">
+							{{ 'Add Handlebars fields like {{v0}} to your HTML
+							and they appear here.' | adminText: {v0:
+							(firstNameExample)} }}
+						</ion-note>
+						<ion-note color="medium">
+							{{
+								'Use the delivery profile mapping list to connect placeholders to
+            runtime data fields.' | adminText
+							}}
+						</ion-note>
 					} @else {
-					<div class="runtime-field-list">
-						@for (runtimeField of availableRuntimeFields(); track
-						runtimeField) {
-						<ion-badge color="secondary"
-							>{{ runtimeField }}</ion-badge
-						>
-						}
-					</div>
-					<ion-list>
-						@for (group of fieldMappings.controls; track $index) {
-						<div [formGroup]="$any(group)" class="field-group">
-							<ion-item>
-								<ion-label>
-									<strong
-										>{{ $any(group).controls['name'].value
-										}}</strong
-									>
-								</ion-label>
-								<ion-badge color="tertiary"
-									>Handlebars</ion-badge
-								>
-							</ion-item>
-							<ion-item>
-								<ion-select
-									label="Data mapping"
-									formControlName="mapping"
-									(ionChange)="invalidateReview(); refreshPreview()"
-								>
-									@for (runtimeField of
-									availableRuntimeFields(); track
-									runtimeField) {
-									<ion-select-option [value]="runtimeField">
-										{{ runtimeField }}
-									</ion-select-option>
-									}
-								</ion-select>
-							</ion-item>
-							<ion-item>
-								<ion-input
-									label="Test / preview value"
-									formControlName="sampleValue"
-									(ionInput)="invalidateReview(); refreshPreview()"
-								></ion-input>
-							</ion-item>
+						<div class="runtime-field-list">
+							@for (
+								runtimeField of availableRuntimeFields();
+								track runtimeField
+							) {
+								<ion-badge color="secondary">{{
+									runtimeField
+								}}</ion-badge>
+							}
 						</div>
-						}
-					</ion-list>
+						<ion-list>
+							@for (
+								group of fieldMappings.controls;
+								track $index
+							) {
+								<div
+									[formGroup]="$any(group)"
+									class="field-group"
+								>
+									<ion-item>
+										<ion-label>
+											<strong>{{
+												$any(group).controls['name']
+													.value
+											}}</strong>
+										</ion-label>
+										<ion-badge color="tertiary">
+											{{ 'Handlebars' | adminText }}
+										</ion-badge>
+									</ion-item>
+									<ion-item>
+										<ion-select
+											okText="{{ 'OK' | adminText }}"
+											cancelText="{{
+												'Cancel' | adminText
+											}}"
+											label="{{
+												'Data mapping' | adminText
+											}}"
+											formControlName="mapping"
+											(ionChange)="
+												invalidateReview();
+												refreshPreview()
+											"
+										>
+											@for (
+												runtimeField of availableRuntimeFields();
+												track runtimeField
+											) {
+												<ion-select-option
+													[value]="runtimeField"
+												>
+													{{ runtimeField }}
+												</ion-select-option>
+											}
+										</ion-select>
+									</ion-item>
+									<ion-item>
+										<ion-input
+											label="{{
+												'Test / preview value'
+													| adminText
+											}}"
+											formControlName="sampleValue"
+											(ionInput)="
+												invalidateReview();
+												refreshPreview()
+											"
+										></ion-input>
+									</ion-item>
+								</div>
+							}
+						</ion-list>
 					}
 				</ion-card-content>
 			</ion-card>
 
 			<ion-card>
 				<ion-card-header>
-					<ion-card-title
-						>Live preview · {{ form.controls['language'].value ===
-						'es' ? 'Español' : 'English' }}</ion-card-title
-					>
+					<ion-card-title>
+						{{ 'Live preview · {{v0}}' | adminText: {v0:
+						(form.controls['language'].value === 'es' ? 'Español' :
+						'English')} }}
+					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
 					<p>
-						<strong
-							>{{ form.controls['subjectPart'].value }}</strong
-						>
+						<strong>{{
+							form.controls['subjectPart'].value
+						}}</strong>
 					</p>
 					<details>
-						<summary>Plain-text alternative</summary>
-						<pre style="white-space: pre-wrap">
-{{ form.controls['textPart'].value }}</pre>
+						<summary>
+							{{ 'Plain-text alternative' | adminText }}
+						</summary>
+						<pre style="white-space: pre-wrap">{{
+							form.controls['textPart'].value
+						}}</pre>
 					</details>
 					<iframe
 						#previewFrame
-						title="Email template preview"
+						title="{{ 'Email template preview' | adminText }}"
 						sandbox=""
 						class="preview-frame"
 					></iframe>
@@ -364,37 +454,53 @@
 
 			<ion-card>
 				<ion-card-header>
-					<ion-card-title>Revisions</ion-card-title>
+					<ion-card-title>
+						{{ 'Revisions' | adminText }}
+					</ion-card-title>
 				</ion-card-header>
 				<ion-card-content>
 					@if (revisions().length === 0) {
-					<ion-note color="medium"
-						>Save your first revision to start history.</ion-note
-					>
+						<ion-note color="medium">
+							{{
+								'Save your first revision to start history.'
+									| adminText
+							}}
+						</ion-note>
 					} @else {
-					<ion-list>
-						@for (revision of revisions(); track revision.id) {
-						<ion-item>
-							<ion-label>
-								<h3>Revision r{{ revision.revisionNumber }}</h3>
-								<p>{{ revision.subjectPart }}</p>
-							</ion-label>
-							<ion-badge [color]="revisionBadgeColor(revision)">
-								@if (revision.id ===
-								currentTemplate()?.publishedRevisionId) {
-								Published } @else { Draft }
-							</ion-badge>
-							<ion-button
-								fill="clear"
-								slot="end"
-								(click)="loadRevision(revision)"
-								(keydown.enter)="loadRevision(revision)"
-							>
-								Load
-							</ion-button>
-						</ion-item>
-						}
-					</ion-list>
+						<ion-list>
+							@for (revision of revisions(); track revision.id) {
+								<ion-item>
+									<ion-label>
+										<h3>
+											{{ 'Revision r{{v0}}' | adminText:
+											{v0: (revision.revisionNumber)} }}
+										</h3>
+										<p>{{ revision.subjectPart }}</p>
+									</ion-label>
+									<ion-badge
+										[color]="revisionBadgeColor(revision)"
+									>
+										@if (
+											revision.id ===
+											currentTemplate()
+												?.publishedRevisionId
+										) {
+											{{ 'Published' | adminText }}
+										} @else {
+											{{ 'Draft' | adminText }}
+										}
+									</ion-badge>
+									<ion-button
+										fill="clear"
+										slot="end"
+										(click)="loadRevision(revision)"
+										(keydown.enter)="loadRevision(revision)"
+									>
+										{{ 'Load' | adminText }}
+									</ion-button>
+								</ion-item>
+							}
+						</ion-list>
 					}
 				</ion-card-content>
 			</ion-card>

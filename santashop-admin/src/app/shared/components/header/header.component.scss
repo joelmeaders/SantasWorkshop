@@ -1,0 +1,26 @@
+:host {
+	display: block;
+}
+.preferences-row {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 4px 16px 10px;
+	background: var(--admin-surface);
+	border-bottom: 1px solid var(--admin-border);
+}
+@media (max-width: 359px) {
+	.preferences-row {
+		padding-inline: 8px;
+	}
+}
+
+.page-title {
+	margin: 0;
+	padding: 14px 12px;
+	font-size: 1.125rem;
+	line-height: 1.35;
+	font-weight: 650;
+	letter-spacing: 0;
+	overflow-wrap: anywhere;
+}

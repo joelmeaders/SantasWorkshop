@@ -1,4 +1,7 @@
-import { EventDatePipe } from '@santashop/core/admin';
+import { createAdminAlert } from '../../../shared/preferences/admin-overlays';
+import { AdminDatePipe } from '../../../shared/preferences/admin-date.pipe';
+import { AdminTextPipe } from '../../../shared/preferences/admin-text.pipe';
+
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -60,10 +63,11 @@ import { QueryConstraint, where } from 'firebase/firestore';
 	styleUrls: ['./pre-registration.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		ReactiveFormsModule,
 		ManageChildrenComponent,
-		EventDatePipe,
+		AdminDatePipe,
 		IonContent,
 		IonListHeader,
 		IonNote,
@@ -253,12 +257,12 @@ export class PreRegistrationPage {
 			await this.preRegistrationFn(registration);
 		} catch (error: unknown) {
 			const err = error as { message?: string };
-			const alert = await this.alertController.create({
+			const alert = await createAdminAlert(this.alertController, () => ({
 				header: 'Error registering',
 				subHeader:
 					'Something went wrong and this customer was not registered.',
 				message: err?.message ?? String(error),
-			});
+			}));
 
 			await alert.present();
 			return;
@@ -268,12 +272,12 @@ export class PreRegistrationPage {
 
 		this.reset();
 
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Registration Complete',
 			subHeader: 'A confirmation email has been queued for the customer.',
 			message: 'You can now register another customer.',
 			buttons: ['OK'],
-		});
+		}));
 
 		await alert.present();
 	}
@@ -289,13 +293,13 @@ export class PreRegistrationPage {
 		if (results.length === 0) return false;
 
 		// If results, alert user and return true
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Error registering',
 			subHeader: 'This customer already has an account.',
 			message:
 				'You cannot create another account with this email address',
 			buttons: ['OK'],
-		});
+		}));
 
 		await alert.present();
 

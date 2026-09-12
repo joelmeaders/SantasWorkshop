@@ -1,3 +1,8 @@
+import { AdminDatePipe } from '../../../../shared/preferences/admin-date.pipe';
+import { AdminTimeSlotPipe } from '../../../../shared/preferences/admin-time-slot.pipe';
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -15,7 +20,6 @@ import {
 import {
 	AuthService,
 	PROGRAM_YEAR,
-	TimeSlotPipe,
 	shopSchedule,
 } from '@santashop/core/admin/firestore';
 import {
@@ -86,10 +90,12 @@ type CapacityInputValue = string | number | null | undefined;
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [ScheduleEditorService],
 	imports: [
+		AdminDatePipe,
+		AdminTextPipe,
 		HeaderComponent,
 		FormsModule,
 		ReactiveFormsModule,
-		TimeSlotPipe,
+		AdminTimeSlotPipe,
 		IonBadge,
 		IonButton,
 		IonCard,
@@ -108,6 +114,7 @@ type CapacityInputValue = string | number | null | undefined;
 	],
 })
 export class ScheduleEditorPage {
+	public readonly language = inject(AdminLanguageService);
 	private readonly scheduleEditorService = inject(ScheduleEditorService);
 	private readonly alerts = inject(AlertController);
 	private readonly defaultProgramYear = inject(PROGRAM_YEAR);
@@ -120,7 +127,17 @@ export class ScheduleEditorPage {
 	public readonly hourOptions = Array.from({ length: 24 }, (_, hour) => hour);
 
 	public year = this.defaultProgramYear;
-	public statusMessage = '';
+	private statusSource: string | (() => string) = '';
+	public get statusMessage(): string {
+		return this.language.text(
+			typeof this.statusSource === 'function'
+				? this.statusSource()
+				: this.statusSource,
+		);
+	}
+	public set statusMessage(value: string | (() => string)) {
+		this.statusSource = value;
+	}
 	public selectedSlotIds = new Set<string>();
 	private latestSlots: ScheduleEditorRow[] = [];
 	private readonly slotDateDrafts = new Map<string, string>();
@@ -234,10 +251,18 @@ export class ScheduleEditorPage {
 				preview.previewId,
 				confirmation.phrase,
 			);
-			this.statusMessage =
-				result.skipped > 0
-					? `Created ${result.created} schedules and skipped ${result.skipped} duplicates.`
-					: `Created ${result.created} schedules.`;
+			this.statusMessage = (): string =>
+				result.skipped
+					? this.language.text(
+							'Created {{created}} schedules and skipped {{skipped}} duplicates.',
+							{
+								created: result.created,
+								skipped: result.skipped,
+							},
+						)
+					: this.language.text('Created {{created}} schedules.', {
+							created: result.created,
+						});
 		} catch (error: unknown) {
 			await this.showError(
 				'Unable to generate schedules',
@@ -249,10 +274,18 @@ export class ScheduleEditorPage {
 	private async requestOwnerConfirmation(
 		confirmationPhrase: string,
 	): Promise<{ password: string; phrase: string } | undefined> {
-		const instructions = `This owner-only action is season restricted. Type: ${confirmationPhrase}`;
-		const alert = await this.alerts.create({
+		let validation: string | undefined;
+		const instructions = (): string =>
+			this.language.text(
+				'This owner-only action is season restricted. Type: {{phrase}}',
+				{ phrase: confirmationPhrase },
+			);
+		const dialogMessage = (): string => validation
+			? this.language.text(validation, { v0: instructions() })
+			: instructions();
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header: 'Initialize schedules?',
-			message: instructions,
+			message: dialogMessage(),
 			inputs: [
 				{
 					name: 'password',
@@ -276,18 +309,21 @@ export class ScheduleEditorPage {
 						phrase?: string;
 					}): boolean => {
 						if (!values.password?.trim()) {
-							alert.message = `Enter your account password. ${instructions}`;
+							validation = 'Enter your account password. {{v0}}';
+							alert.message = dialogMessage();
 							return false;
 						}
 						if (values.phrase?.trim() !== confirmationPhrase) {
-							alert.message = `The confirmation phrase does not match. ${instructions}`;
+							validation =
+								'The confirmation phrase does not match. {{v0}}';
+							alert.message = dialogMessage();
 							return false;
 						}
 						return true;
 					},
 				},
 			],
-		});
+		}));
 		await alert.present();
 		const result = await alert.onDidDismiss<{
 			values?: {
@@ -359,7 +395,10 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		this.statusMessage = `Updated ${selectedSlots.length} selected schedules.`;
+		this.statusMessage = (): string =>
+			this.language.text('Updated {{v0}} selected schedules.', {
+				v0: selectedSlots.length,
+			});
 		this.bulkEditForm.patchValue({ capacity: null, enabled: '' });
 	}
 
@@ -486,7 +525,11 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		this.statusMessage = `Updated capacity on ${selectedSlots.length} schedule${selectedSlots.length === 1 ? '' : 's'}.`;
+		this.statusMessage = (): string =>
+			this.language.text('Updated capacity on {{v0}} schedule{{v1}}.', {
+				v0: selectedSlots.length,
+				v1: selectedSlots.length === 1 ? '' : 's',
+			});
 	}
 
 	public async saveSlotDateTime(slot: ScheduleEditorRow): Promise<void> {
@@ -549,7 +592,12 @@ export class ScheduleEditorPage {
 			return;
 		}
 
-		this.statusMessage = `${enabled ? 'Enabled' : 'Disabled'} ${selectedSlots.length} schedule${selectedSlots.length === 1 ? '' : 's'}.`;
+		this.statusMessage = (): string =>
+			this.language.text('{{v0}} {{v1}} schedule{{v2}}.', {
+				v0: this.language.text(enabled ? 'Enabled' : 'Disabled'),
+				v1: selectedSlots.length,
+				v2: selectedSlots.length === 1 ? '' : 's',
+			});
 	}
 
 	public async confirmDelete(slot: ScheduleEditorRow): Promise<void> {
@@ -558,16 +606,24 @@ export class ScheduleEditorPage {
 		}
 
 		const reservations = slot.slotsReserved ?? 0;
-		const reservationLabel =
-			reservations === 1 ? 'reservation' : 'reservations';
-		const deleteMessage =
+		const deleteMessage = (): string =>
 			reservations > 0
-				? `This slot already has ${reservations} ${reservationLabel}. Deleting it cannot be undone.`
-				: 'Deleting this schedule cannot be undone.';
-		const alert = await this.alerts.create({
+				? this.language.text(
+						'This slot already has {{count}} reservations. Deleting it cannot be undone.',
+						{ count: reservations },
+					)
+				: this.language.text(
+						'Deleting this schedule cannot be undone.',
+					);
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header: 'Delete schedule?',
-			subHeader: `${slot.dateTime.toLocaleDateString('en-US', { timeZone: EVENT_TIME_ZONE })} ${this.formatHour(getZonedDateParts(slot.dateTime).hour)}`,
-			message: deleteMessage,
+			subHeader: this.language.text('{{v0}} {{v1}}', {
+				v0: slot.dateTime.toLocaleDateString(this.language.locale(), {
+					timeZone: EVENT_TIME_ZONE,
+				}),
+				v1: this.formatHour(getZonedDateParts(slot.dateTime).hour),
+			}),
+			message: deleteMessage(),
 			buttons: [
 				{
 					text: 'Cancel',
@@ -595,7 +651,7 @@ export class ScheduleEditorPage {
 					},
 				},
 			],
-		});
+		}));
 
 		await alert.present();
 	}
@@ -646,11 +702,11 @@ export class ScheduleEditorPage {
 	}
 
 	private async showError(header: string, message: string): Promise<void> {
-		const alert = await this.alerts.create({
+		const alert = await createAdminAlert(this.alerts, () => ({
 			header,
 			message,
 			buttons: ['OK'],
-		});
+		}));
 
 		await alert.present();
 	}
@@ -702,9 +758,11 @@ export class ScheduleEditorPage {
 	}
 
 	public formatHour(hour: number): string {
-		const suffix = hour >= 12 ? 'PM' : 'AM';
-		const normalizedHour = hour % 12 === 0 ? 12 : hour % 12;
-		return `${normalizedHour}:00 ${suffix}`;
+		return new Intl.DateTimeFormat(this.language.locale(), {
+			hour: 'numeric',
+			minute: '2-digit',
+			timeZone: 'UTC',
+		}).format(new Date(Date.UTC(2000, 0, 1, hour)));
 	}
 
 	public countSelectedSlots(slots: ScheduleEditorRow[]): number {
@@ -746,13 +804,16 @@ export class ScheduleEditorPage {
 		return Array.from(groupedSlots.entries()).map(
 			([dateKey, daySlots]) => ({
 				dateKey,
-				dateLabel: daySlots[0].dateTime.toLocaleDateString('en-US', {
-					timeZone: EVENT_TIME_ZONE,
-					weekday: 'long',
-					month: 'short',
-					day: 'numeric',
-					year: 'numeric',
-				}),
+				dateLabel: daySlots[0].dateTime.toLocaleDateString(
+					this.language.locale(),
+					{
+						timeZone: EVENT_TIME_ZONE,
+						weekday: 'long',
+						month: 'short',
+						day: 'numeric',
+						year: 'numeric',
+					},
+				),
 				slots: daySlots,
 			}),
 		);

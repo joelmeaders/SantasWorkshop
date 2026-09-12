@@ -1,71 +1,100 @@
-<admin-header title="Check In" />
-
-<div class="ion-padding-horizontal ion-padding-top">
-	<ion-button
-		id="manualCheckInCodeButton"
-		expand="block"
-		fill="outline"
-		(click)="enterCodeManually()"
-	>
-		Enter registration code manually
-	</ion-button>
-	<ion-button id="startCameraButton" expand="block" (click)="enableCamera()">
-		Use camera scanner
-	</ion-button>
-</div>
-
-@if (cameraEnabled()) {
-<ion-content
-	[hidden]="!availableDevices()?.length"
-	[fullscreen]="true"
-	[scrollX]="false"
-	[scrollY]="false"
->
-	<zxing-scanner
-		#scanner
-		[formats]="formatsEnabled"
-		[device]="deviceToUse() || undefined"
-		[autostart]="true"
-		[enable]="cameraEnabled()"
-		(camerasFound)="onCamerasFound($event)"
-		(deviceChange)="onDeviceChange($event)"
-		(permissionResponse)="onHasPermission($event)"
-		(scanSuccess)="submitCameraScan($event)"
-		(scanError)="scanError.next($event)"
-		[delayBetweenScanSuccess]="5000"
-	/>
-
-	<div class="selection-container">
-		<ion-item lines="none" color="tertiary">
-			<ion-icon name="camera" slot="start" aria-hidden="true" />
-			<ion-select
-				#deviceSelection
-				[value]="deviceId()"
-				(ionChange)="onDeviceSelectChange($event)"
-				scrollable="true"
-				interface="popover"
+<admin-header title="{{ 'Check In' | adminText }}" />
+<ion-content>
+	<div class="scan-workspace">
+		@if (!cameraEnabled()) {
+			<div class="scan-intro">
+				<div class="scan-symbol" aria-hidden="true">
+					<ion-icon name="camera" />
+				</div>
+				<h1>{{ 'Welcome the next family' | adminText }}</h1>
+				<p>
+					{{
+						'Scan their ticket or enter the registration code. Review their
+        details before checking them in.' | adminText
+					}}
+				</p>
+			</div>
+		}
+		<div class="scan-actions">
+			@if (!cameraEnabled()) {
+				<ion-button
+					id="startCameraButton"
+					expand="block"
+					(click)="enableCamera()"
+					>{{ 'Use camera scanner' | adminText }}</ion-button
+				>
+			} @else {
+				<ion-button
+					fill="outline"
+					expand="block"
+					(click)="disableScanner()"
+					>{{ 'Stop camera' | adminText }}</ion-button
+				>
+			}
+			<ion-button
+				id="manualCheckInCodeButton"
+				expand="block"
+				fill="outline"
+				(click)="enterCodeManually()"
+				>{{
+					'Enter registration code manually' | adminText
+				}}</ion-button
 			>
-				<ion-select-option #selection [value]="''" disabled>
-					No Camera Selected
-				</ion-select-option>
-				@for (device of (availableDevices() ?? []); track device) {
-				<ion-select-option [value]="device.deviceId">
-					{{ device.label.split(' (')[0] }}
-				</ion-select-option>
-				}
-			</ion-select>
-		</ion-item>
+		</div>
+		@if (cameraEnabled()) {
+			<div class="camera-view">
+				<zxing-scanner
+					#scanner
+					[formats]="formatsEnabled"
+					[device]="deviceToUse() || undefined"
+					[autostart]="true"
+					[enable]="cameraEnabled()"
+					(camerasFound)="onCamerasFound($event)"
+					(deviceChange)="onDeviceChange($event)"
+					(permissionResponse)="onHasPermission($event)"
+					(scanSuccess)="submitCameraScan($event)"
+					(scanError)="scanError.next($event)"
+					[delayBetweenScanSuccess]="5000"
+				/>
+			</div>
+			@if (availableDevices()?.length) {
+				<ion-item lines="none">
+					<ion-select
+						label="{{ 'Camera' | adminText }}"
+						okText="{{ 'OK' | adminText }}"
+						cancelText="{{ 'Cancel' | adminText }}"
+						#deviceSelection
+						[value]="deviceId()"
+						(ionChange)="onDeviceSelectChange($event)"
+						interface="popover"
+					>
+						@for (
+							device of availableDevices() ?? [];
+							track device.deviceId
+						) {
+							<ion-select-option [value]="device.deviceId">{{
+								device.label.split(' (')[0]
+							}}</ion-select-option>
+						}
+					</ion-select>
+				</ion-item>
+			}
+			@if (hasPermissions() === false) {
+				<p role="status">
+					{{
+						'Allow camera access to scan, or enter the code manually.'
+							| adminText
+					}}
+				</p>
+			}
+			@if (availableDevices()?.length === 0) {
+				<p role="status">
+					{{
+						'No camera found. You can enter the registration code manually.'
+							| adminText
+					}}
+				</p>
+			}
+		}
 	</div>
 </ion-content>
-} @let hasPermission = hasPermissions(); @if (hasPermission ===
-undefined) {
-<h2>Waiting for permissions.</h2>
-<blockquote>
-	If your device does not have cameras, no camera permission is requested.
-</blockquote>
-} @if (hasPermission === false) {
-<h2>You denied the camera permission, we can't scan anything without it. 😪</h2>
-} @if (availableDevices() === undefined) {
-<h2>Couldn't check for devices.</h2>
-<blockquote>This may be caused by some security error.</blockquote>
-}

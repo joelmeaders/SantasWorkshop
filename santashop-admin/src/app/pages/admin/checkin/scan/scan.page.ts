@@ -1,3 +1,6 @@
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import {
 	Component,
 	ChangeDetectionStrategy,
@@ -50,6 +53,7 @@ import { RegistrationScanService } from '../../../../shared/services/registratio
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [ScannerService],
 	imports: [
+		AdminTextPipe,
 		HeaderComponent,
 		ZXingScannerModule,
 		IonContent,
@@ -61,6 +65,7 @@ import { RegistrationScanService } from '../../../../shared/services/registratio
 	],
 })
 export class ScanPage {
+	private readonly language = inject(AdminLanguageService);
 	private readonly scannerService = inject(ScannerService);
 	private readonly registrationScan = inject(RegistrationScanService);
 	private readonly checkinContext = inject(CheckInContextService);
@@ -183,7 +188,7 @@ export class ScanPage {
 		this.disableScanner();
 	}
 
-	private disableScanner(): void {
+	public disableScanner(): void {
 		const scanner = this.scanner();
 		if (scanner) {
 			scanner.scanStop();
@@ -227,20 +232,22 @@ export class ScanPage {
 	}
 
 	private async invalidCodeAlert(): Promise<void> {
+		let message = 'Manually type the code located below the QR image';
 		const alertOkHandler = (value: Record<string, string>): boolean => {
 			const code = (value[0] ?? '').trim();
 			if (!/^[A-Za-z0-9]{8}$/.test(code)) {
-				alert.message =
+				message =
 					'Enter 8 letters or numbers, as shown below the QR image.';
+				alert.message = this.language.text(message);
 				return false;
 			}
 			this.scanResult.next({ code, inputMethod: 'manual' });
 			return true;
 		};
 
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Enter registration code',
-			message: 'Manually type the code located below the QR image',
+			message,
 			buttons: [
 				{
 					text: 'Cancel',
@@ -266,7 +273,7 @@ export class ScanPage {
 				},
 			],
 			backdropDismiss: true,
-		});
+		}));
 		await alert.present();
 		await alert.onDidDismiss();
 	}
@@ -293,7 +300,7 @@ export class ScanPage {
 	private async cannotFindRegistrationAlert(
 		incomplete = false,
 	): Promise<void> {
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Oh No!',
 			message: incomplete
 				? 'That registration is incomplete and cannot be checked in.'
@@ -307,20 +314,20 @@ export class ScanPage {
 						this.router.navigate(['admin/search']),
 				},
 			],
-		});
+		}));
 
 		await alert.present();
 	}
 
 	private async scanResolutionError(error: unknown): Promise<void> {
-		const alert = await this.alertController.create({
+		const alert = await createAdminAlert(this.alertController, () => ({
 			header: 'Unable to validate code',
 			message:
 				error instanceof Error
 					? error.message
 					: 'Try the scan again or contact a DSCS member.',
 			buttons: ['OK'],
-		});
+		}));
 		await alert.present();
 	}
 }

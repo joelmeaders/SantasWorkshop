@@ -1,3 +1,4 @@
+import { AdminTextPipe } from '../../../shared/preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -43,6 +44,7 @@ interface RoleOption {
 	templateUrl: './user-editor.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		ReactiveFormsModule,
 		IonHeader,
 		IonToolbar,
@@ -96,7 +98,9 @@ export class UserEditorComponent implements OnInit {
 			]),
 			password: new UntypedFormControl(
 				'',
-				this.isEdit ? [] : [Validators.required, Validators.minLength(8)],
+				this.isEdit
+					? []
+					: [Validators.required, Validators.minLength(8)],
 			),
 			disabled: new UntypedFormControl(account?.disabled ?? false),
 		});

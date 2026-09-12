@@ -1,6 +1,8 @@
 <ion-header>
 	<ion-toolbar>
-		<ion-title>{{ isEdit ? 'Edit User' : 'New User' }}</ion-title>
+		<ion-title>
+			{{ (isEdit ? 'Edit User' : 'New User') | adminText }}
+		</ion-title>
 		<ion-button
 			slot="end"
 			fill="outline"
@@ -8,7 +10,7 @@
 			(click)="dismiss()"
 			(keydown.enter)="dismiss()"
 		>
-			Cancel
+			{{ 'Cancel' | adminText }}
 		</ion-button>
 	</ion-toolbar>
 </ion-header>
@@ -18,7 +20,7 @@
 		<ion-list>
 			<ion-item>
 				<ion-input
-					label="Email address"
+					label="{{ 'Email address' | adminText }}"
 					labelPlacement="stacked"
 					type="email"
 					autocomplete="off"
@@ -28,13 +30,16 @@
 			</ion-item>
 			@if (isEdit) {
 				<ion-note color="medium" class="ion-padding-start">
-					Email addresses cannot be changed after creation.
+					{{
+						'Email addresses cannot be changed after creation.'
+							| adminText
+					}}
 				</ion-note>
 			}
 
 			<ion-item>
 				<ion-input
-					label="Display name"
+					label="{{ 'Display name' | adminText }}"
 					labelPlacement="stacked"
 					type="text"
 					autocomplete="off"
@@ -44,15 +49,17 @@
 
 			<ion-item>
 				<ion-select
-					label="Roles"
+					okText="{{ 'OK' | adminText }}"
+					cancelText="{{ 'Cancel' | adminText }}"
+					label="{{ 'Roles' | adminText }}"
 					labelPlacement="stacked"
 					[multiple]="true"
-					placeholder="Select roles"
+					placeholder="{{ 'Select roles' | adminText }}"
 					formControlName="roles"
 				>
 					@for (option of roleOptions; track option.value) {
 						<ion-select-option [value]="option.value">
-							{{ option.label }}
+							{{ option.label | adminText }}
 						</ion-select-option>
 					}
 				</ion-select>
@@ -60,7 +67,10 @@
 
 			<ion-item>
 				<ion-input
-					[label]="isEdit ? 'New password (optional)' : 'Password'"
+					[label]="
+						(isEdit ? 'New password (optional)' : 'Password')
+							| adminText
+					"
 					labelPlacement="stacked"
 					type="password"
 					autocomplete="new-password"
@@ -68,13 +78,13 @@
 				></ion-input>
 			</ion-item>
 			<ion-note color="medium" class="ion-padding-start">
-				Passwords must be at least 8 characters.
+				{{ 'Passwords must be at least 8 characters.' | adminText }}
 			</ion-note>
 
 			@if (isEdit) {
 				<ion-item>
 					<ion-toggle formControlName="disabled">
-						Account disabled
+						{{ 'Account disabled' | adminText }}
 					</ion-toggle>
 				</ion-item>
 			}
@@ -82,7 +92,7 @@
 
 		<div class="ion-padding-top">
 			<ion-button expand="block" type="submit" [disabled]="form.invalid">
-				{{ isEdit ? 'Save changes' : 'Create user' }}
+				{{ (isEdit ? 'Save changes' : 'Create user') | adminText }}
 			</ion-button>
 		</div>
 	</form>

@@ -1,3 +1,8 @@
+import {
+	AdminChartPipe,
+	AdminChartOptionsPipe,
+} from '../../../../shared/preferences/admin-chart.pipe';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
 import {
@@ -54,6 +59,9 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		AdminChartPipe,
+		AdminChartOptionsPipe,
+		AdminTextPipe,
 		ReportTableComponent,
 		ReportFreshnessComponent,
 		HeaderComponent,

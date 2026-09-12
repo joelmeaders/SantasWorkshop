@@ -1,4 +1,6 @@
-import { EventDatePipe } from '@santashop/core/admin';
+import { AdminDatePipe } from '../../../../shared/preferences/admin-date.pipe';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
+
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -34,7 +36,8 @@ import { ScanRiskService } from '../../../../shared/services/scan-risk.service';
 	styleUrls: ['./scan-risk.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
-		EventDatePipe,
+		AdminTextPipe,
+		AdminDatePipe,
 		HeaderComponent,
 		IonBadge,
 		IonButton,

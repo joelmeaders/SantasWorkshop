@@ -1,3 +1,5 @@
+import { AdminTextPipe } from '../../../shared/preferences/admin-text.pipe';
+import { HeaderComponent } from '../../../shared/components/header/header.component';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService, AppStateService } from '@santashop/core/admin/firestore';
@@ -15,7 +17,6 @@ import {
 	cartOutline,
 	peopleOutline,
 	exitOutline,
-	moonOutline,
 	calendarOutline,
 	shieldCheckmarkOutline,
 	alertCircleOutline,
@@ -28,7 +29,6 @@ import {
 	IonListHeader,
 	IonItem,
 	IonIcon,
-	IonToggle,
 } from '@ionic/angular/standalone';
 
 @Component({
@@ -37,6 +37,8 @@ import {
 	styleUrls: ['./landing.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
+		HeaderComponent,
 		RouterLink,
 		IonRouterLink,
 		IonContent,
@@ -44,7 +46,6 @@ import {
 		IonListHeader,
 		IonItem,
 		IonIcon,
-		IonToggle,
 		IonRouterLink,
 		IonContent,
 	],
@@ -80,14 +81,6 @@ export class LandingPage {
 		await this.authService.logout();
 	}
 
-	public toggleTheme(): void {
-		this.appStateService.prefersDark = !this.appStateService.prefersDark;
-		document.body.classList.toggle(
-			'dark',
-			this.appStateService.prefersDark,
-		);
-	}
-
 	constructor() {
 		addIcons({
 			bagCheckOutline,
@@ -100,7 +93,6 @@ export class LandingPage {
 			cartOutline,
 			peopleOutline,
 			exitOutline,
-			moonOutline,
 			calendarOutline,
 			shieldCheckmarkOutline,
 			alertCircleOutline,

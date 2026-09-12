@@ -26,7 +26,9 @@ test.describe('admin email-template tools', () => {
 			),
 		).toBeVisible({ timeout: 15000 });
 
-		await page.getByTitle('Create template').click();
+		await page
+			.getByRole('button', { name: 'Create template', exact: true })
+			.click();
 		await expect(page).toHaveURL(/\/admin\/email-templates\/create$/);
 		await expect(
 			page.getByText('Create Email Template', { exact: true }),
@@ -133,13 +135,11 @@ test.describe('admin email-template tools', () => {
 		bundle.template.awsTemplateName = `e2e-spanish-${E2E_PROGRAM_YEAR}`;
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.goto('/admin/email-templates/create');
-		await page
-			.locator('#templateImport')
-			.setInputFiles({
-				name: 'spanish.json',
-				mimeType: 'application/json',
-				buffer: Buffer.from(JSON.stringify(bundle)),
-			});
+		await page.locator('#templateImport').setInputFiles({
+			name: 'spanish.json',
+			mimeType: 'application/json',
+			buffer: Buffer.from(JSON.stringify(bundle)),
+		});
 		await expect(
 			page.locator('ion-select[formControlName="language"]'),
 		).toHaveJSProperty('value', 'es');
@@ -187,13 +187,11 @@ test.describe('admin email-template tools', () => {
 		expect(
 			readFileSync((await (await htmlDownload).path())!, 'utf8'),
 		).toContain('{{qrCodeUrl}}');
-		await page
-			.locator('#templateImport')
-			.setInputFiles({
-				name: 'invalid.json',
-				mimeType: 'application/json',
-				buffer: Buffer.from('{"version":99}'),
-			});
+		await page.locator('#templateImport').setInputFiles({
+			name: 'invalid.json',
+			mimeType: 'application/json',
+			buffer: Buffer.from('{"version":99}'),
+		});
 		await expect(page.locator('ion-alert')).toContainText(
 			'Unsupported template',
 		);

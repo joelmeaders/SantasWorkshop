@@ -101,9 +101,9 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			page.locator('ion-tab-button[href="/admin/registration"]'),
 		).toHaveCount(0);
 		await expect(page.locator('#scheduleEditorNav')).toHaveCount(0);
-		await expect(page.getByText('User Management', { exact: true })).toHaveCount(
-			0,
-		);
+		await expect(
+			page.getByText('User Management', { exact: true }),
+		).toHaveCount(0);
 
 		await page.goto('/admin/registration');
 		await expect(page).toHaveURL(/\/admin\/landing$/, { timeout: 30000 });
@@ -143,14 +143,22 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await page.click('#adminSignInButton');
 		await page.waitForURL('**/admin/landing', { timeout: 30000 });
 		await page.goto('/admin/search/by-name');
-		await page.locator('ion-input[formControlName="lastName"] input').fill('Operator');
-		await page.locator('ion-input[formControlName="zipCode"] input').fill('80202');
+		await page
+			.locator('ion-input[formControlName="lastName"] input')
+			.fill('Operator');
+		await page
+			.locator('ion-input[formControlName="zipCode"] input')
+			.fill('80202');
 		await page.getByRole('link', { name: 'Search', exact: true }).click();
 		await expect(page.locator('.result-item')).toHaveCount(1);
-		await expect(page.locator('.result-item')).toContainText(/lookup Operator/i);
+		await expect(page.locator('.result-item')).toContainText(
+			/lookup Operator/i,
+		);
 		await page.locator('.result-item').click();
 		await expect(page).toHaveURL(/\/admin\/checkin\/review/);
-		await expect(page.getByText('Lookup Operator', { exact: true })).toBeVisible();
+		await expect(
+			page.getByText('Lookup Operator', { exact: true }),
+		).toBeVisible();
 	});
 
 	test('STAFF-004 signs out and blocks protected operational routes', async ({
@@ -195,8 +203,12 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await expectIonicDisabled(page.locator('#checkInNav'));
 		await expectIonicDisabled(page.locator('#onSiteRegistrationNav'));
 		await expectIonicDisabled(page.locator('#preRegistrationNav'));
-		await expectIonicDisabled(page.locator('ion-tab-button[href="/admin/checkin"]'));
-		await expectIonicDisabled(page.locator('ion-tab-button[href="/admin/registration"]'));
+		await expectIonicDisabled(
+			page.locator('ion-tab-button[href="/admin/checkin"]'),
+		);
+		await expect(
+			page.locator('ion-tab-button[href="/admin/registration"]'),
+		).toHaveCount(0);
 		await expect(page.locator('#searchNav')).toBeVisible();
 	});
 
@@ -245,7 +257,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			'ownerOperationLocks',
 		]) {
 			const response = await request.get(
-			`${E2E_FIRESTORE_EMULATOR_URL}/v1/projects/${E2E_PROJECT_ID}/databases/(default)/documents/${collection}/rules-test`,
+				`${E2E_FIRESTORE_EMULATOR_URL}/v1/projects/${E2E_PROJECT_ID}/databases/(default)/documents/${collection}/rules-test`,
 				{ headers: { Authorization: `Bearer ${idToken}` } },
 			);
 			expect(response.status()).toBe(403);
@@ -281,7 +293,9 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			code: 'RULESCAN',
 			dateTime: e2eDateTime(12, 15, 16),
 			hasCheckedIn: true,
-			checkInDateTime: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+			checkInDateTime: new Date(
+				Date.now() - 10 * 60 * 1000,
+			).toISOString(),
 		});
 
 		await signInAdminViaUi(page, admin);
@@ -289,7 +303,9 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await page.locator('#manualCheckInCodeButton').click();
 		const manualAlert = page.locator('ion-alert');
 		await manualAlert.locator('input').fill('RULESCAN');
-		await manualAlert.getByRole('button', { name: 'OK', exact: true }).click();
+		await manualAlert
+			.getByRole('button', { name: 'OK', exact: true })
+			.click();
 		await expect(page.getByText('Suspicious duplicate scan')).toBeVisible();
 
 		const [adminToken, checkinToken] = await Promise.all([
@@ -300,30 +316,46 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			'registrationScanAttempts',
 			'registrationScanRiskSummaries',
 		]) {
-			const adminRead = await request.get(firestoreCollectionUrl(collection), {
-				headers: { Authorization: `Bearer ${adminToken}` },
-			});
+			const adminRead = await request.get(
+				firestoreCollectionUrl(collection),
+				{
+					headers: { Authorization: `Bearer ${adminToken}` },
+				},
+			);
 			expect(adminRead.status()).toBe(200);
-			const documents = ((await adminRead.json()) as {
-				documents?: { name: string }[];
-			}).documents;
+			const documents = (
+				(await adminRead.json()) as {
+					documents?: { name: string }[];
+				}
+			).documents;
 			expect(documents?.length).toBeGreaterThan(0);
 			const documentId = documents?.[0]?.name.split('/').at(-1);
 			expect(documentId).toBeTruthy();
 
-			const checkinRead = await request.get(firestoreCollectionUrl(collection), {
-				headers: { Authorization: `Bearer ${checkinToken}` },
-			});
+			const checkinRead = await request.get(
+				firestoreCollectionUrl(collection),
+				{
+					headers: { Authorization: `Bearer ${checkinToken}` },
+				},
+			);
 			expect(checkinRead.status()).toBe(403);
 
 			const headers = { Authorization: `Bearer ${adminToken}` };
-			const create = await request.post(firestoreCollectionUrl(collection), {
-				headers,
-				data: { fields: { proof: { stringValue: 'client-write' } } },
-			});
+			const create = await request.post(
+				firestoreCollectionUrl(collection),
+				{
+					headers,
+					data: {
+						fields: { proof: { stringValue: 'client-write' } },
+					},
+				},
+			);
 			expect(create.status()).toBe(403);
 
-			const documentUrl = firestoreDocumentUrl(collection, documentId as string);
+			const documentUrl = firestoreDocumentUrl(
+				collection,
+				documentId as string,
+			);
 			const update = await request.patch(documentUrl, {
 				headers,
 				data: { fields: { proof: { stringValue: 'client-update' } } },
@@ -374,10 +406,15 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			'registrationsearchindex',
 			'emailTemplates',
 		]) {
-			const create = await request.post(firestoreCollectionUrl(collection), {
-				headers,
-				data: { fields: { proof: { stringValue: 'client-write' } } },
-			});
+			const create = await request.post(
+				firestoreCollectionUrl(collection),
+				{
+					headers,
+					data: {
+						fields: { proof: { stringValue: 'client-write' } },
+					},
+				},
+			);
 			expect(create.status()).toBe(403);
 		}
 
@@ -387,12 +424,16 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 				headers,
 				data: {
 					fields: {
-						programYear: { integerValue: E2E_PROGRAM_YEAR.toString() },
+						programYear: {
+							integerValue: E2E_PROGRAM_YEAR.toString(),
+						},
 						dateTime: { timestampValue: e2eDateTime(12, 15, 16) },
 						maxSlots: { integerValue: '350' },
 						slotsReserved: { integerValue: '0' },
 						enabled: { booleanValue: true },
-						lastUpdated: { timestampValue: new Date().toISOString() },
+						lastUpdated: {
+							timestampValue: new Date().toISOString(),
+						},
 					},
 				},
 			},
@@ -437,47 +478,73 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		});
 
 		const checkinToken = await getFirestoreIdToken(request, checkinOnly);
-		const customerToken = await getFirestoreIdToken(request, unrelatedCustomer);
+		const customerToken = await getFirestoreIdToken(
+			request,
+			unrelatedCustomer,
+		);
 		const checkinHeaders = { Authorization: `Bearer ${checkinToken}` };
 		const customerHeaders = { Authorization: `Bearer ${customerToken}` };
 
 		for (const collection of ['registrationsearchindex', 'registrations']) {
-			const checkinRead = await request.get(firestoreCollectionUrl(collection), {
-				headers: checkinHeaders,
-			});
+			const checkinRead = await request.get(
+				firestoreCollectionUrl(collection),
+				{
+					headers: checkinHeaders,
+				},
+			);
 			expect(checkinRead.status()).toBe(200);
 			expect(
-				((await checkinRead.json()) as { documents?: unknown[] }).documents,
+				((await checkinRead.json()) as { documents?: unknown[] })
+					.documents,
 			).toBeTruthy();
 
 			const customerRead = await request.get(
-				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				firestoreDocumentUrl(
+					collection,
+					'lookup-rules-registration-e2e',
+				),
 				{ headers: customerHeaders },
 			);
 			expect(customerRead.status()).toBe(403);
 
 			const anonymousRead = await request.get(
-				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				firestoreDocumentUrl(
+					collection,
+					'lookup-rules-registration-e2e',
+				),
 			);
 			expect([401, 403]).toContain(anonymousRead.status());
 
-			const create = await request.post(firestoreCollectionUrl(collection), {
-				headers: checkinHeaders,
-				data: { fields: { proof: { stringValue: 'checkin-write' } } },
-			});
+			const create = await request.post(
+				firestoreCollectionUrl(collection),
+				{
+					headers: checkinHeaders,
+					data: {
+						fields: { proof: { stringValue: 'checkin-write' } },
+					},
+				},
+			);
 			expect(create.status()).toBe(403);
 
 			const update = await request.patch(
-				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				firestoreDocumentUrl(
+					collection,
+					'lookup-rules-registration-e2e',
+				),
 				{
 					headers: checkinHeaders,
-					data: { fields: { proof: { stringValue: 'checkin-update' } } },
+					data: {
+						fields: { proof: { stringValue: 'checkin-update' } },
+					},
 				},
 			);
 			expect(update.status()).toBe(403);
 
 			const remove = await request.delete(
-				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				firestoreDocumentUrl(
+					collection,
+					'lookup-rules-registration-e2e',
+				),
 				{ headers: checkinHeaders },
 			);
 			expect(remove.status()).toBe(403);
@@ -499,7 +566,10 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			'registrationScanRiskSummaries',
 		]) {
 			const checkinRead = await request.get(
-				firestoreDocumentUrl(collection, 'lookup-rules-registration-e2e'),
+				firestoreDocumentUrl(
+					collection,
+					'lookup-rules-registration-e2e',
+				),
 				{ headers: checkinHeaders },
 			);
 			expect(checkinRead.status()).toBe(403);
@@ -519,9 +589,13 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			await expect(page.locator('#searchNav')).toBeVisible();
 			if (route === 'checkin/scan') {
 				await page.goto('/admin/checkin/scan');
-				await expect(page.locator('#manualCheckInCodeButton')).toBeVisible();
+				await expect(
+					page.locator('#manualCheckInCodeButton'),
+				).toBeVisible();
 			}
-			const timeOrigin = await page.evaluate(() => performance.timeOrigin);
+			const timeOrigin = await page.evaluate(
+				() => performance.timeOrigin,
+			);
 			const otherTab = await context.newPage();
 			await otherTab.goto('/admin/landing');
 			await expect(otherTab.locator('#searchNav')).toBeVisible();
@@ -529,7 +603,9 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 			await expect(page).toHaveURL(/\/$/);
 			await expect(page.locator('#adminSignInButton')).toBeVisible();
 			await expect(page.locator('#searchNav')).not.toBeVisible();
-			await expect(page.locator('#manualCheckInCodeButton')).not.toBeVisible();
+			await expect(
+				page.locator('#manualCheckInCodeButton'),
+			).not.toBeVisible();
 			expect(await page.evaluate(() => performance.timeOrigin)).toBe(
 				timeOrigin,
 			);

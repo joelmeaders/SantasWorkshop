@@ -1,3 +1,6 @@
+import { computed } from '@angular/core';
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { KeyValuePipe } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
@@ -47,6 +50,7 @@ interface OperationOption {
 	styleUrls: ['./owner-operations.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		KeyValuePipe,
 		ReactiveFormsModule,
 		HeaderComponent,
@@ -65,6 +69,7 @@ interface OperationOption {
 	],
 })
 export class OwnerOperationsPage {
+	public readonly language = inject(AdminLanguageService);
 	private readonly service = inject(OwnerOperationsService);
 	private readonly authService = inject(AuthService);
 	private readonly formBuilder = inject(NonNullableFormBuilder);
@@ -136,7 +141,13 @@ export class OwnerOperationsPage {
 	);
 	public readonly operation = signal<OwnerOperation | undefined>(undefined);
 	public readonly busy = signal(false);
-	public readonly statusMessage = signal('');
+	private readonly statusMessageSource = signal<string | (() => string)>('');
+	public readonly statusMessage = computed(() => {
+		const value = this.statusMessageSource();
+		return typeof value === 'function'
+			? value()
+			: this.language.text(value);
+	});
 	public readonly errorMessage = signal('');
 
 	constructor() {
@@ -160,7 +171,7 @@ export class OwnerOperationsPage {
 		this.preview.set(undefined);
 		this.operation.set(undefined);
 		this.errorMessage.set('');
-		this.statusMessage.set('');
+		this.statusMessageSource.set('');
 		const selected = this.selectedOption();
 		if (selected.value === 'yearly-reset') {
 			this.form.controls.programYear.setValue(
@@ -171,13 +182,49 @@ export class OwnerOperationsPage {
 		}
 	}
 
+	public stageLabel(stage: string | undefined): string {
+		if (!stage) return '';
+		return stage.startsWith('purged-')
+			? this.language.text('Removed {{collection}}', {
+					collection: this.language.text(stage.slice(7)),
+				})
+			: this.language.text(stage);
+	}
+	public resultMessage(operation: OwnerOperation): string {
+		const result = operation.result;
+		if (!result) return '';
+		if (typeof result['rows'] === 'number')
+			return this.language.text(
+				'Created an export with {{count}} rows.',
+				{
+					count: result['rows'],
+				},
+			);
+		if (typeof result['repaired'] === 'number')
+			return this.language.text(
+				'Repaired {{count}} registration check-in flags.',
+				{ count: result['repaired'] },
+			);
+		if (typeof result['records'] === 'number')
+			return this.language.text(
+				'Rebuilt check-in statistics from {{count}} records.',
+				{ count: result['records'] },
+			);
+		if (typeof result['created'] === 'number')
+			return this.language.text(
+				'Created {{created}} schedules and skipped {{skipped}} existing schedules.',
+				{ created: result['created'], skipped: result['skipped'] },
+			);
+		return this.language.text(result.message ?? '');
+	}
+
 	public async createPreview(): Promise<void> {
 		this.stopPolling();
 		this.operationId.set(undefined);
 		this.operation.set(undefined);
 		this.busy.set(true);
 		this.errorMessage.set('');
-		this.statusMessage.set('Calculating the operation preview…');
+		this.statusMessageSource.set('Calculating the operation preview…');
 		try {
 			const selected = this.selectedOption();
 			const preview = await this.service.preview({
@@ -188,7 +235,7 @@ export class OwnerOperationsPage {
 			});
 			this.preview.set(preview);
 			this.form.controls.confirmationPhrase.setValue('');
-			this.statusMessage.set(
+			this.statusMessageSource.set(
 				'Preview ready. Reauthenticate and type the exact confirmation phrase.',
 			);
 		} catch (error) {
@@ -207,7 +254,9 @@ export class OwnerOperationsPage {
 		}
 		this.busy.set(true);
 		this.errorMessage.set('');
-		this.statusMessage.set('Reauthenticating and starting the operation…');
+		this.statusMessageSource.set(
+			'Reauthenticating and starting the operation…',
+		);
 		try {
 			await this.authService.reauthenticate(
 				this.form.controls.password.value,
@@ -218,7 +267,7 @@ export class OwnerOperationsPage {
 			});
 			this.form.controls.password.setValue('');
 			this.operationId.set(started.operationId);
-			this.statusMessage.set('Operation queued.');
+			this.statusMessageSource.set('Operation queued.');
 			await this.refreshStatus();
 		} catch (error) {
 			this.showError(error);
@@ -266,8 +315,11 @@ export class OwnerOperationsPage {
 		const current = await this.service.get(operationId);
 		if (version !== this.pollVersion) return;
 		this.operation.set(current);
-		this.statusMessage.set(
-			`${current.operation}: ${current.stage ?? current.status}`,
+		this.statusMessageSource.set(() =>
+			this.language.text('{{v0}}: {{v1}}', {
+				v0: this.language.text(current.operation),
+				v1: this.stageLabel(current.stage ?? current.status),
+			}),
 		);
 		if (current.status === 'succeeded' || current.status === 'failed') {
 			this.busy.set(false);
@@ -292,6 +344,6 @@ export class OwnerOperationsPage {
 		this.errorMessage.set(
 			value.details ?? value.message ?? 'An unexpected error occurred.',
 		);
-		this.statusMessage.set('');
+		this.statusMessageSource.set('');
 	}
 }

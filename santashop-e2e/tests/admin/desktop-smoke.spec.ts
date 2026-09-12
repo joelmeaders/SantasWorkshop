@@ -20,7 +20,7 @@ test.describe('desktop staff workspace', () => {
 		await signInAdminViaUi(page, account);
 
 		await expect(
-			page.getByText('DSCS Event Administration', { exact: true }),
+			page.getByText('Ready to welcome families', { exact: true }),
 		).toBeVisible();
 		await expect(page.locator('#checkInNav')).toBeVisible();
 		await expect(page.locator('#searchNav')).toBeVisible();
@@ -28,7 +28,9 @@ test.describe('desktop staff workspace', () => {
 		await expect
 			.poll(() =>
 				page.evaluate(
-					() => document.documentElement.scrollWidth <= window.innerWidth,
+					() =>
+						document.documentElement.scrollWidth <=
+						window.innerWidth,
 				),
 			)
 			.toBe(true);

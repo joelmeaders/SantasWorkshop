@@ -40,15 +40,19 @@ test.describe('admin schedule editor - generate schedules', () => {
 		await alert
 			.getByRole('textbox', { name: 'Account password' })
 			.fill(adminAccount.password);
-		await alert.getByRole('textbox', {
-			name: 'Exact confirmation phrase',
-		}).fill(
-			e2eScheduleInitializationPhrase(),
-		);
+		await alert
+			.getByRole('textbox', {
+				name: 'Exact confirmation phrase',
+			})
+			.fill(e2eScheduleInitializationPhrase());
 		await alert.getByRole('button', { name: 'Initialize' }).click();
 
 		// Assert
-		await expect(page.getByText(e2eDateLabel(e2eDateTime(12, 12, 18)), { exact: false })).toBeVisible();
+		await expect(
+			page.getByText(e2eDateLabel(e2eDateTime(12, 12, 18), 'long'), {
+				exact: false,
+			}),
+		).toBeVisible();
 		await expect(page.locator('text=5 slots')).toBeVisible();
 		await expect(page.locator('[id^="scheduleRow-"]')).toHaveCount(5);
 		await expect(
@@ -85,10 +89,14 @@ test.describe('admin schedule editor - generate schedules', () => {
 			.fill(e2eScheduleInitializationPhrase());
 		await alert.getByRole('button', { name: 'Initialize' }).click();
 
-		await expect(page.getByText('Created 4 schedules and skipped 1 duplicates.')).toBeVisible();
+		await expect(
+			page.getByText('Created 4 schedules and skipped 1 duplicates.'),
+		).toBeVisible();
 		await expect(page.locator('[id^="scheduleRow-"]')).toHaveCount(5);
 		await expect(
-			page.locator(`#scheduleRow-${e2eScheduleSlotId(e2eDateTime(12, 12, 18))}`),
+			page.locator(
+				`#scheduleRow-${e2eScheduleSlotId(e2eDateTime(12, 12, 18))}`,
+			),
 		).toContainText('Reserved 2 of 99');
 	});
 });

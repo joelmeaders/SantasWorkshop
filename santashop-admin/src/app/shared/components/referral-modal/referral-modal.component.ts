@@ -1,3 +1,4 @@
+import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -27,6 +28,7 @@ import {
 	styleUrls: ['./referral-modal.component.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		AdminTextPipe,
 		IonHeader,
 		IonToolbar,
 		IonTitle,

@@ -10,8 +10,12 @@
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 			>
-				<ion-icon name="storefront-outline" color="tertiary" aria-hidden="true" />
-				<ion-label>Home</ion-label>
+				<ion-icon
+					name="storefront-outline"
+					color="tertiary"
+					aria-hidden="true"
+				/>
+				<ion-label> {{ 'Home' | adminText }} </ion-label>
 			</ion-tab-button>
 
 			<ion-tab-button
@@ -21,8 +25,12 @@
 				routerDirection="root"
 				[disabled]="!checkinEnabled()"
 			>
-				<ion-icon name="bag-check-outline" color="success" aria-hidden="true" />
-				<ion-label>Check-In</ion-label>
+				<ion-icon
+					name="bag-check-outline"
+					color="success"
+					aria-hidden="true"
+				/>
+				<ion-label> {{ 'Check-In' | adminText }} </ion-label>
 			</ion-tab-button>
 
 			<ion-tab-button
@@ -30,22 +38,13 @@
 				routerLinkActive="tab-selected"
 				routerDirection="root"
 			>
-				<ion-icon name="search-outline" color="warning" aria-hidden="true" />
-				<ion-label>Search</ion-label>
+				<ion-icon
+					name="search-outline"
+					color="warning"
+					aria-hidden="true"
+				/>
+				<ion-label> {{ 'Search' | adminText }} </ion-label>
 			</ion-tab-button>
-
-			@if (isAdmin()) {
-			<ion-tab-button
-				id="onSiteRegistrationTab"
-				[routerLink]="['/admin/registration']"
-				routerLinkActive="tab-selected"
-				routerDirection="root"
-				[disabled]="!onsiteRegistrationEnabled()"
-			>
-				<ion-icon name="storefront-outline" color="primary" aria-hidden="true" />
-				<ion-label>Registration</ion-label>
-			</ion-tab-button>
-			}
 		</ion-tab-bar>
 	</ion-toolbar>
 </ion-footer>

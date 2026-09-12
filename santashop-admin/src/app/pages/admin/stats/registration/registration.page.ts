@@ -1,3 +1,10 @@
+import { AdminLanguageService } from '../../../../shared/preferences/admin-language.service';
+import {
+	AdminChartPipe,
+	AdminChartOptionsPipe,
+} from '../../../../shared/preferences/admin-chart.pipe';
+import { AdminNumberPipe } from '../../../../shared/preferences/admin-number.pipe';
+import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { EVENT_TIME_ZONE, getZonedDateParts } from '@santashop/models';
 import { readState } from '../../../../shared/helpers/refreshable-read';
 import { AdminReadRepository } from '../../../../shared/services/admin-read-repository.service';
@@ -29,7 +36,6 @@ import {
 	getStatsCollection,
 } from '../../../../shared/helpers';
 
-import { DecimalPipe } from '@angular/common';
 import {
 	BaseChartDirective,
 	provideCharts,
@@ -65,6 +71,9 @@ Chart.register(ChartDataLabels);
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [provideCharts(withDefaultRegisterables())],
 	imports: [
+		AdminChartPipe,
+		AdminChartOptionsPipe,
+		AdminTextPipe,
 		ReportTableComponent,
 		ReportFreshnessComponent,
 		IonTitle,
@@ -78,11 +87,12 @@ Chart.register(ChartDataLabels);
 		IonSelect,
 		IonSelectOption,
 		BaseChartDirective,
-		DecimalPipe,
+		AdminNumberPipe,
 		FormsModule,
 	],
 })
 export class RegistrationPage {
+	private readonly language = inject(AdminLanguageService);
 	private readonly httpService = inject(AdminReadRepository);
 	public readonly programYear = inject(PROGRAM_YEAR);
 	private readonly shopDays = inject(SHOP_DAYS, { optional: true }) ?? [];
@@ -302,6 +312,16 @@ export class RegistrationPage {
 			entry.count,
 		]),
 	);
+	public readonly appointmentDisplayRows = computed<ReportCell[][]>(() =>
+		this.familiesBySlots().map((entry) => [
+			new Intl.DateTimeFormat(this.language.locale(), {
+				timeZone: EVENT_TIME_ZONE,
+				dateStyle: 'medium',
+				timeStyle: 'short',
+			}).format(entry.date),
+			entry.count,
+		]),
+	);
 	public readonly appointmentTotals = computed(() => [
 		'Total',
 		this.familiesBySlots().reduce((sum, row) => sum + row.count, 0),
@@ -436,7 +456,9 @@ export class RegistrationPage {
 		return {
 			labels: data.map((entry) => [
 				entry.zip.toString(),
-				entry.count.toString() + ' Shoppers',
+				this.language.text('{{count}} Shoppers', {
+					count: entry.count,
+				}),
 			]),
 			datasets: [
 				{
@@ -651,6 +673,8 @@ export class RegistrationPage {
 	}
 
 	private friendlyDay(day: number): string {
+		if (this.language.language() === 'es')
+			return this.language.text('Day {{day}}', { day });
 		const j = day % 10;
 		const k = day % 100;
 

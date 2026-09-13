@@ -84,7 +84,7 @@ jobs:
     if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.changes.result == 'success' && (needs.changes.outputs.deploy_functions == 'true' || needs.changes.outputs.deploy_rules == 'true')))
   unit_tests:
     needs: prepare_release
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -113,7 +113,7 @@ jobs:
       - name: Functions unit tests
         run: pnpm run functions:test:unit
   integration_tests:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.unit_tests.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
     needs:
       - prepare_release
       - unit_tests
@@ -161,7 +161,7 @@ jobs:
         run: pnpm run functions:test:integration
   e2e:
     needs: prepare_release
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test')
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
     strategy:
       fail-fast: false
       matrix:
@@ -269,7 +269,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.deploy_functions == 'true'
   deploy_prod:
     needs: prepare_release
-    if: github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:

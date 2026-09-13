@@ -3,56 +3,57 @@ import { createRequire } from 'node:module';
 import test from 'node:test';
 const require = createRequire(import.meta.url);
 const { deploy } = require('./remote-config-deploy.cjs');
-for (const [functions, rules, expected] of [
-	['true', 'false', ['functions:publicParametersGateway', 'functions']],
-	['false', 'true', ['firestore:rules,firestore:indexes,storage']],
-	[
-		'true',
-		'true',
+for (const mode of ['test', 'prod'])
+	for (const [functions, rules, expected] of [
+		['true', 'false', ['functions:publicParametersGateway', 'functions']],
+		['false', 'true', ['firestore:rules,firestore:indexes,storage']],
 		[
-			'functions:publicParametersGateway',
-			'functions',
-			'firestore:rules,firestore:indexes,storage',
+			'true',
+			'true',
+			[
+				'functions:publicParametersGateway',
+				'functions',
+				'firestore:rules,firestore:indexes,storage',
+			],
 		],
-	],
-])
-	test(`deployment selection functions=${functions} rules=${rules}`, async () => {
-		const previous = process.argv[2];
-		process.argv[2] = 'test';
-		const calls = [];
-		try {
-			await deploy(
-				{
-					GITHUB_ACTIONS: 'true',
-					SANTASHOP_FUNCTIONS_DEPLOY: 'test',
-					SANTASHOP_DEPLOY_FUNCTIONS: functions,
-					SANTASHOP_DEPLOY_RULES: rules,
-				},
-				(command, args) => calls.push({ command, args }),
-				async () => ({
-					problems: [],
-					gatewayUri: 'https://example.invalid',
-				}),
-			);
-			const deployments = calls.filter((call) =>
-				call.args.includes('deploy'),
-			);
-			assert.deepEqual(
-				deployments.map(
-					(call) => call.args[call.args.indexOf('--only') + 1],
-				),
-				expected,
-			);
-			if (functions === 'false')
-				assert.equal(
-					calls.length,
-					1,
-					'rules-only deployment must not configure or redeploy Functions',
+	])
+		test(`${mode} deployment selection functions=${functions} rules=${rules}`, async () => {
+			const previous = process.argv[2];
+			process.argv[2] = mode;
+			const calls = [];
+			try {
+				await deploy(
+					{
+						GITHUB_ACTIONS: 'true',
+						SANTASHOP_FUNCTIONS_DEPLOY: mode,
+						SANTASHOP_DEPLOY_FUNCTIONS: functions,
+						SANTASHOP_DEPLOY_RULES: rules,
+					},
+					(command, args) => calls.push({ command, args }),
+					async () => ({
+						problems: [],
+						gatewayUri: 'https://example.invalid',
+					}),
 				);
-		} finally {
-			process.argv[2] = previous;
-		}
-	});
+				const deployments = calls.filter((call) =>
+					call.args.includes('deploy'),
+				);
+				assert.deepEqual(
+					deployments.map(
+						(call) => call.args[call.args.indexOf('--only') + 1],
+					),
+					expected,
+				);
+				if (functions === 'false')
+					assert.equal(
+						calls.length,
+						1,
+						'rules-only deployment must not configure or redeploy Functions',
+					);
+			} finally {
+				process.argv[2] = previous;
+			}
+		});
 test('empty or invalid deployment selection stops before all external commands', async () => {
 	const previous = process.argv[2];
 	process.argv[2] = 'test';

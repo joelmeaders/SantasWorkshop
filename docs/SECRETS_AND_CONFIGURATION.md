@@ -5,6 +5,15 @@ Firebase Functions. GitHub Actions is the deployment source of truth.
 
 ## Configuration model
 
+Firestore is the application's database. Releases deploy Firestore and Storage
+rules; they do not provision or deploy Realtime Database. Public application
+settings are stored in Remote Config, not the legacy `parameters/public` document.
+
+The test backup destination is `gs://santas-workshop-test-backups`, owned by
+`santas-workshop-test`. Production uses `gs://santashop-backups`. Give each
+project's Firestore service agent access only to its own backup destination.
+Do not grant test identities access to production backups.
+
 ### Browser configuration
 
 The Angular app and admin site receive Firebase web configuration at build

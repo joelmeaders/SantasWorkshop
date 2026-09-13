@@ -14,7 +14,7 @@ env:
   TEST_SANTASHOP_TIME_ZONE: America/Denver
   TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
   TEST_SANTASHOP_DEFAULT_MAX_SLOTS: '350'
-  TEST_FIRESTORE_BACKUP_BUCKET: gs://santashop-backups
+  TEST_FIRESTORE_BACKUP_BUCKET: gs://santas-workshop-test-backups
   TEST_SES_REGION: us-west-2
   TEST_SANTASHOP_EVENT_DISPLAY_NAME: 2026 Denver Santa Claus Shop
   TEST_SANTASHOP_PASSWORD_RESET_CONTINUE_URL: https://test.denversantaclausshop.org/?mode=sign-in

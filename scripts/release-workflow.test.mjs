@@ -120,6 +120,12 @@ async function dryRun(
 			...passedInputs,
 		};
 		const results = {};
+		// GitHub's implicit success() includes skipped transitive dependencies.
+		// A successful release gate does not erase its skipped changes ancestor.
+		const ancestors = (job) =>
+			[job.needs ?? []]
+				.flat()
+				.flatMap((name) => [name, ...ancestors(workflow.jobs[name])]);
 		for (const [id, job] of Object.entries(workflow.jobs)) {
 			const needs = Object.fromEntries(
 				[job.needs ?? []].flat().map((name) => {
@@ -130,8 +136,8 @@ async function dryRun(
 					return [name, results[name]];
 				}),
 			);
-			let successful = Object.values(needs).every(
-				({ result }) => result === 'success',
+			let successful = ancestors(job).every(
+				(name) => results[name].result === 'success',
 			);
 			let context = contextFor(
 				{
@@ -480,6 +486,8 @@ test('workflow mutation witness: removing production dependency reaches sentinel
 					),
 				);
 				delete workflow.jobs.deploy_prod.needs;
+				workflow.jobs.deploy_prod.if =
+					"github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'";
 			}
 		},
 	);

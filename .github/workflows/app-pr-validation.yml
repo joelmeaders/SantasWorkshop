@@ -1,69 +1,6 @@
 name: PR Validation
-on:
-  pull_request:
-    paths:
-      - 'santashop-app/**'
-      - 'santashop-core/**'
-      - 'santashop-models/**'
-      - 'remote-config/**'
-      - 'scripts/remote-config*.cjs'
-      - 'scripts/public-parameters-schema.cjs'
-      - 'scripts/verify-public-parameters.cjs'
-      - '.storybook/**'
-      - 'angular.json'
-      - 'eslint.config.js'
-      - 'vitest.config.mjs'
-      - 'vitest.admin.config.mjs'
-      - 'vitest.setup.ts'
-      - 'test-helpers/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'config.firebase.cjs'
-      - 'firebase.json'
-      - 'firebase.e2e.json'
-      - 'firestore.rules'
-      - 'storage.rules'
-      - 'santashop-e2e/fixtures/**'
-      - 'santashop-e2e/scripts/**'
-      - 'santashop-e2e/tests/public/**'
-      - 'santashop-e2e/playwright.config.ts'
-      - 'scripts/env-loader.cjs'
-      - 'tsconfig.storybook.json'
-      - 'vitest.storybook.config.ts'
-      - 'scripts/verify-hosting-styles.mjs'
-      - '.github/workflows/app-pr-validation.yml'
-      - '.github/workflows/app-test-and-prod-release.yml'
-      - 'santashop-admin/**'
-      - 'scripts/verify-admin-initial-bundle.mjs'
-      - 'santashop-e2e/tests/admin/**'
-      - '.github/workflows/admin-test-and-prod-release.yml'
-      - '.github/workflows/ui-target.yml'
-      - 'scripts/ui-targets*.mjs'
-      - 'scripts/release-*.mjs'
-      - '.github/workflows/release-gate.yml'
-      - 'scripts/github-secrets*.ps1'
-      - 'tsconfig.json'
-      - 'storybook-visual/**'
-      - 'scripts/verify-hosting-cache.mjs'
-      - 'santashop-functions/**'
-      - 'scripts/email-sending.cjs'
-      - 'scripts/load/**'
-      - 'santashop-e2e/**'
-      - 'firestore.indexes.json'
-      - 'database.rules.json'
-      - '.env.example'
-      - 'config.functions.cjs'
-      - 'scripts/assert-functions-deploy-ci.cjs'
-      - 'scripts/prepare-functions-deploy.cjs'
-      - 'scripts/verify-functions-parity.cjs'
-      - 'scripts/owner-export-readiness.cjs'
-      - 'scripts/verify-functions-managed-resources.cjs'
-      - '.github/workflows/functions-pr-validation.yml'
-      - '.github/workflows/functions-test-and-prod-release.yml'
-      - '.github/workflows/e2e-target.yml'
-      - 'scripts/ci-workflows.test.mjs'
-
+'on':
+  pull_request: null
 permissions:
   contents: read
 concurrency:
@@ -71,25 +8,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   targets:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.select.outputs.matrix }}
-      functions: ${{ steps.select.outputs.functions }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - id: select
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -o pipefail
-          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/pr-paths"
-          matrix=$(node scripts/ui-targets.mjs < "$RUNNER_TEMP/pr-paths")
-          functions=$(node scripts/ui-targets.mjs --functions < "$RUNNER_TEMP/pr-paths")
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          echo "functions=$functions" >> "$GITHUB_OUTPUT"
+    uses: ./.github/workflows/ci-changes.yml
   shared:
     runs-on: ubuntu-latest
     env:
@@ -99,24 +18,22 @@ jobs:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
-          version: '10.14.0'
+          version: 10.14.0
       - uses: actions/setup-node@v7
         with:
-          node-version: '24.18.0'
+          node-version: 24.18.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node --test scripts/ui-targets.test.mjs scripts/ci-workflows.test.mjs scripts/release-*.test.mjs
-      - name: Test secret synchronization without credentials or network writes
-        shell: pwsh
-        run: ./scripts/github-secrets.test.ps1
       - run: pnpm run e2e:browser:setup:ci
       - run: pnpm run config:app:e2e && pnpm run config:admin:e2e
       - run: pnpm run ci:ui:shared
+    needs: targets
+    if: needs.targets.outputs.shared == 'true'
   ui:
     needs: targets
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.targets.outputs.ui_matrix) }}
     uses: ./.github/workflows/ui-target.yml
     with:
       target: ${{ matrix.target }}
@@ -125,37 +42,57 @@ jobs:
       shared_tests: false
     secrets:
       TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
+    if: needs.targets.outputs.ui == 'true'
   functions:
     needs: targets
     if: needs.targets.outputs.functions == 'true'
     uses: ./.github/workflows/functions-pr-validation.yml
   e2e:
-    needs: [targets, shared, ui, functions]
-    if: >-
-      always() && !cancelled() && needs.targets.result == 'success' &&
-      needs.shared.result == 'success' && needs.ui.result == 'success' &&
-      ((needs.targets.outputs.functions == 'true' && needs.functions.result == 'success') ||
-       (needs.targets.outputs.functions == 'false' && needs.functions.result == 'skipped'))
+    needs:
+      - targets
+      - shared
+      - ui
+      - functions
+      - tooling
+    if: always() && !cancelled() && needs.targets.result == 'success' && needs.targets.outputs.e2e == 'true' && ((needs.targets.outputs.shared == 'true' && needs.shared.result == 'success') || (needs.targets.outputs.shared == 'false' && needs.shared.result == 'skipped')) && ((needs.targets.outputs.ui == 'true' && needs.ui.result == 'success') || (needs.targets.outputs.ui == 'false' && needs.ui.result == 'skipped')) && ((needs.targets.outputs.functions == 'true' && needs.functions.result == 'success') || (needs.targets.outputs.functions == 'false' && needs.functions.result == 'skipped')) && ((needs.targets.outputs.tooling == 'true' && needs.tooling.result == 'success') || (needs.targets.outputs.tooling == 'false' && needs.tooling.result == 'skipped'))
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.targets.outputs.e2e_matrix) }}
     uses: ./.github/workflows/e2e-target.yml
     with:
       target: ${{ matrix.target }}
       release_ref: ${{ github.sha }}
   build_validation:
     if: always()
-    needs: [targets, shared, ui, functions, e2e]
+    needs:
+      - targets
+      - tooling
+      - shared
+      - ui
+      - functions
+      - e2e
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v7
       - name: Require every selected PR check
-        run: |
-          test '${{ needs.targets.result }}' = success
-          test '${{ needs.shared.result }}' = success
-          test '${{ needs.ui.result }}' = success
-          test '${{ needs.e2e.result }}' = success
-          case '${{ needs.targets.outputs.functions }}' in
-            true) test '${{ needs.functions.result }}' = success ;;
-            false) test '${{ needs.functions.result }}' = skipped ;;
-            *) exit 1 ;;
-          esac
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: node scripts/ci-results.mjs
+  tooling:
+    needs: targets
+    if: needs.targets.outputs.tooling == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node --test scripts/ci-*.test.mjs scripts/ui-targets.test.mjs scripts/release-*.test.mjs scripts/storybook-targets.test.mjs scripts/load/*.test.mjs
+      - name: Test secret synchronization without credentials or network writes
+        shell: pwsh
+        run: ./scripts/github-secrets.test.ps1

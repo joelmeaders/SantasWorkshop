@@ -22,12 +22,6 @@ const config = JSON.parse(
 	readFileSync(new URL('../../../../firebase.json', import.meta.url), 'utf8'),
 ) as FirebaseConfig;
 
-const hostingWorkflowPaths = [
-	'app-pr-validation.yml',
-	'app-test-and-prod-release.yml',
-	'admin-test-and-prod-release.yml',
-];
-
 describe('Customer hosting rewrites', () => {
 	it('routes requestPasswordReset before the SPA fallback', () => {
 		const customer = config.hosting?.find(
@@ -88,23 +82,6 @@ describe('Admin hosting rewrites', () => {
 			destination: '/index.html',
 		});
 	});
-});
-
-describe('Hosting workflow triggers', () => {
-	it.each(hostingWorkflowPaths)(
-		'runs %s when firebase.json changes',
-		(workflowName) => {
-			const workflow = readFileSync(
-				new URL(
-					`../../../../.github/workflows/${workflowName}`,
-					import.meta.url,
-				),
-				'utf8',
-			);
-
-			expect(workflow).toMatch(/^\s*-\s*['"]?firebase\.json['"]?\s*$/m);
-		},
-	);
 });
 
 describe('Hosting service-worker script requests', () => {

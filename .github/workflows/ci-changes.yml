@@ -1,0 +1,68 @@
+name: Select affected targets
+'on':
+  workflow_call:
+    outputs:
+      ui:
+        value: ${{ jobs.select.outputs.ui }}
+      e2e:
+        value: ${{ jobs.select.outputs.e2e }}
+      storybook:
+        value: ${{ jobs.select.outputs.storybook }}
+      ui_matrix:
+        value: ${{ jobs.select.outputs.ui_matrix }}
+      e2e_matrix:
+        value: ${{ jobs.select.outputs.e2e_matrix }}
+      storybook_matrix:
+        value: ${{ jobs.select.outputs.storybook_matrix }}
+      shared:
+        value: ${{ jobs.select.outputs.shared }}
+      functions:
+        value: ${{ jobs.select.outputs.functions }}
+      tooling:
+        value: ${{ jobs.select.outputs.tooling }}
+      deploy_app:
+        value: ${{ jobs.select.outputs.deploy_app }}
+      deploy_admin:
+        value: ${{ jobs.select.outputs.deploy_admin }}
+      deploy_functions:
+        value: ${{ jobs.select.outputs.deploy_functions }}
+      deploy_rules:
+        value: ${{ jobs.select.outputs.deploy_rules }}
+permissions:
+  contents: read
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      ui: ${{ steps.select.outputs.ui }}
+      e2e: ${{ steps.select.outputs.e2e }}
+      storybook: ${{ steps.select.outputs.storybook }}
+      ui_matrix: ${{ steps.select.outputs.ui_matrix }}
+      e2e_matrix: ${{ steps.select.outputs.e2e_matrix }}
+      storybook_matrix: ${{ steps.select.outputs.storybook_matrix }}
+      shared: ${{ steps.select.outputs.shared }}
+      functions: ${{ steps.select.outputs.functions }}
+      tooling: ${{ steps.select.outputs.tooling }}
+      deploy_app: ${{ steps.select.outputs.deploy_app }}
+      deploy_admin: ${{ steps.select.outputs.deploy_admin }}
+      deploy_functions: ${{ steps.select.outputs.deploy_functions }}
+      deploy_rules: ${{ steps.select.outputs.deploy_rules }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - id: select
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          CHANGE_EVENT: ${{ github.event_name }}
+        run: node scripts/ci-changes.mjs

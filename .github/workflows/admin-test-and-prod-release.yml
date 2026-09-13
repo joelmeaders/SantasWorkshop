@@ -2,39 +2,7 @@ name: Admin Test Deploy and Manual Prod Release
 'on':
   push:
     branches:
-    - master
-    paths:
-    - santashop-admin/**
-    - santashop-core/**
-    - santashop-models/**
-    - remote-config/**
-    - scripts/remote-config*.cjs
-    - scripts/public-parameters-schema.cjs
-    - scripts/verify-public-parameters.cjs
-    - angular.json
-    - vitest.config.mjs
-    - vitest.admin.config.mjs
-    - vitest.setup.ts
-    - test-helpers/**
-    - package.json
-    - pnpm-lock.yaml
-    - pnpm-workspace.yaml
-    - config.firebase.cjs
-    - firebase.json
-    - firebase.e2e.json
-    - firestore.rules
-    - scripts/env-loader.cjs
-    - scripts/verify-hosting-styles.mjs
-    - scripts/verify-admin-initial-bundle.mjs
-    - santashop-e2e/fixtures/**
-    - santashop-e2e/scripts/**
-    - santashop-e2e/tests/admin/**
-    - santashop-e2e/playwright.config.ts
-    - .github/workflows/admin-test-and-prod-release.yml
-    - .github/workflows/app-pr-validation.yml
-    - .github/workflows/ui-target.yml
-    - .github/workflows/release-gate.yml
-    - scripts/release-*.mjs
+      - master
   workflow_dispatch:
     inputs:
       release_ref:
@@ -47,23 +15,27 @@ name: Admin Test Deploy and Manual Prod Release
         default: prod
         type: choice
         options:
-        - test
-        - prod
-
+          - test
+          - prod
 permissions:
   contents: read
   actions: read
-
 jobs:
+  changes:
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/ci-changes.yml
   prepare_release:
     uses: ./.github/workflows/release-gate.yml
     with:
       target: admin
       mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
       release_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
-
+    needs: changes
+    if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.changes.result == 'success' && needs.changes.outputs.deploy_admin == 'true'))
   release:
-    needs: prepare_release
+    needs:
+      - changes
+      - prepare_release
     uses: ./.github/workflows/ui-target.yml
     with:
       target: admin
@@ -71,8 +43,10 @@ jobs:
       release_ref: ${{ needs.prepare_release.outputs.sha }}
       deploy: true
       reuse_tests: ${{ needs.prepare_release.outputs.reuse_tests == 'true' }}
+      shared_tests: ${{ github.event_name == 'workflow_dispatch' || needs.changes.outputs.shared == 'true' }}
     secrets:
       TEST_FIREBASE_API_KEY: ${{ secrets.TEST_FIREBASE_API_KEY }}
       PROD_FIREBASE_API_KEY: ${{ secrets.PROD_FIREBASE_API_KEY }}
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST }}
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5 }}
+    if: always() && !cancelled() && needs.prepare_release.result == 'success'

@@ -6,7 +6,7 @@ import {
 	workflowSha,
 	repository,
 } from './release-fixtures.mjs';
-import { githubApi, verifyRelease } from './release-evidence.mjs';
+import { githubApi, requirements, verifyRelease } from './release-evidence.mjs';
 
 for (const unit of ['app', 'admin', 'functions']) {
 	test(`${unit}: automatically discovers exact checkout evidence despite different dispatch metadata SHA`, async () => {
@@ -248,6 +248,30 @@ test('rejects an altered reusable browser evidence producer', async () => {
 	);
 });
 
+for (const unit of ['app', 'admin', 'functions'])
+	for (const source of [
+		'.github/workflows/ci-changes.yml',
+		'scripts/ci-changes.mjs',
+		'scripts/ci-config-impact.mjs',
+		'scripts/ui-targets.mjs',
+	])
+		test(`${unit} rejects an altered change selection producer ${source}`, async () => {
+			const f = fixture(unit);
+			await assert.rejects(
+				verifyRelease(f.options, async (path) =>
+					path.startsWith(`contents/${source}?`)
+						? {
+								encoding: 'base64',
+								content: Buffer.from(
+									'unchecked change selector',
+								).toString('base64'),
+							}
+						: f.api(path),
+				),
+				/different evidence producer/,
+			);
+		});
+
 test('rejects workflow ID lookup mismatch', async () => {
 	const f = fixture();
 	await assert.rejects(
@@ -315,11 +339,62 @@ test('fresh test release requires new suites without evidence discovery', async 
 	assert.equal(result.reuse, false);
 });
 
-test('hosting promotion cannot omit the other UI or canonical Storybook checks', async () => {
-	const f = fixture('app');
-	f.runs.splice(1);
-	await assert.rejects(verifyRelease(f.options, f.api), /exact-SHA/);
-});
+for (const target of ['app', 'admin']) {
+	const otherTarget = target === 'app' ? 'admin' : 'app';
+	test(`${target} hosting promotion needs only its own UI and Storybook evidence`, async () => {
+		const f = fixture(target);
+		assert.deepEqual(
+			f.runs.map(({ path }) => path),
+			[
+				`.github/workflows/${target}-test-and-prod-release.yml`,
+				'.github/workflows/storybook-pr-validation.yml',
+			],
+		);
+		const result = await verifyRelease(f.options, f.api);
+		assert.equal(result.verified.length, 3);
+		assert.deepEqual(requirements(target, true), [
+			{
+				path: `.github/workflows/${target}-test-and-prod-release.yml`,
+				job: 'release / validate_release',
+				steps: [
+					'Customer or staff E2E tests',
+					'Run target unit tests with prepared shared libraries',
+				],
+			},
+			{
+				path: '.github/workflows/storybook-pr-validation.yml',
+				job: `storybook_behavior (${target})`,
+				steps: ['Storybook behavior tests'],
+			},
+			{
+				path: `.github/workflows/${target}-test-and-prod-release.yml`,
+				job: 'release / validate_release',
+				steps: [`Test deployment ${target} santas-workshop-test`],
+			},
+		]);
+	});
+	for (const outcome of [
+		'missing',
+		'skipped',
+		'failure',
+		'wrong target',
+		'wrong checkout',
+	])
+		test(`${target} hosting rejects Storybook evidence: ${outcome}`, async () => {
+			const f = fixture(target);
+			const storybookRun = f.runs.find(({ path }) =>
+				path.endsWith('storybook-pr-validation.yml'),
+			);
+			const [job] = f.jobs.get(storybookRun.id);
+			if (outcome === 'missing') f.jobs.set(storybookRun.id, []);
+			else if (outcome === 'wrong target')
+				job.name = `storybook_behavior (${otherTarget})`;
+			else if (outcome === 'wrong checkout')
+				job.steps[0].name = `Release revision ${workflowSha}`;
+			else job.steps[1].conclusion = outcome;
+			await assert.rejects(verifyRelease(f.options, f.api), /exact-SHA/);
+		});
+}
 
 test('discovers evidence on later pages without filtering by dispatch head SHA', async () => {
 	const f = fixture();

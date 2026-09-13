@@ -8,7 +8,7 @@ const storybook = '.github/workflows/storybook-pr-validation.yml';
 const shaPattern = /^[0-9a-f]{40}$/;
 
 export function requirements(unit, deploymentRequired) {
-	const units = unit === 'functions' ? ['functions'] : ['app', 'admin'];
+	const units = [unit];
 	const result = units.flatMap((target) =>
 		target === 'functions'
 			? [
@@ -34,7 +34,6 @@ export function requirements(unit, deploymentRequired) {
 						job: 'release / validate_release',
 						steps: [
 							'Customer or staff E2E tests',
-							'Run shared core tests for this standalone release',
 							'Run target unit tests with prepared shared libraries',
 						],
 					},
@@ -43,7 +42,7 @@ export function requirements(unit, deploymentRequired) {
 	if (unit !== 'functions')
 		result.push({
 			path: storybook,
-			job: 'storybook_behavior',
+			job: `storybook_behavior (${unit})`,
 			steps: ['Storybook behavior tests'],
 		});
 	if (deploymentRequired)
@@ -199,7 +198,13 @@ async function findEvidence(required, sha, repository, api, readTrusted) {
 						matchesRequirement(jobs, item, sha),
 				);
 				if (!matches.length) continue;
-				const sources = [path];
+				const sources = [
+					path,
+					'.github/workflows/ci-changes.yml',
+					'scripts/ci-changes.mjs',
+					'scripts/ci-config-impact.mjs',
+					'scripts/ui-targets.mjs',
+				];
 				if (path !== storybook)
 					sources.push(
 						'.github/workflows/release-gate.yml',

@@ -10,6 +10,8 @@ import {
 	workflowSha,
 } from './release-fixtures.mjs';
 import { verifyRelease } from './release-evidence.mjs';
+import { changeOutputs } from './ci-changes.mjs';
+import { selectChanges } from './ui-targets.mjs';
 
 // Use the repository's existing ESLint YAML parser; no new runtime or package.
 const require = createRequire(import.meta.url);
@@ -26,6 +28,7 @@ async function dryRun(
 	api,
 	mutate = () => {},
 	failCommand = () => false,
+	event = { name: 'workflow_dispatch', paths: [] },
 ) {
 	const trace = {
 		commands: [],
@@ -35,8 +38,8 @@ async function dryRun(
 		errors: [],
 	};
 	const github = {
-		event_name: 'workflow_dispatch',
-		sha: workflowSha,
+		event_name: event.name,
+		sha: event.name === 'push' ? releaseSha : workflowSha,
 		workflow_sha: workflowSha,
 		workflow_ref: `${repository}/.github/workflows/${unit}-test-and-prod-release.yml@refs/heads/master`,
 		triggering_actor: 'joelmeaders',
@@ -202,7 +205,13 @@ async function dryRun(
 						context.steps.revision = {
 							outputs: { sha: releaseSha },
 						};
-					if (step.run === 'node scripts/release-evidence.mjs') {
+					if (step.run === 'node scripts/ci-changes.mjs') {
+						context.steps[step.id] = {
+							outputs: changeOutputs(selectChanges(event.paths)),
+						};
+					} else if (
+						step.run === 'node scripts/release-evidence.mjs'
+					) {
 						const result = await verifyRelease(
 							{
 								releaseRef: env.RELEASE_REF,
@@ -373,6 +382,81 @@ for (const unit of ['app', 'admin', 'functions']) {
 		assert.ok(commands.some((run) => run.includes('e2e:test')));
 	});
 }
+
+for (const [name, paths, deployments] of [
+	['customer source', ['santashop-app/src/app/app.component.ts'], ['app']],
+	['admin source', ['santashop-admin/src/app/app.component.ts'], ['admin']],
+	['backend source', ['santashop-functions/src/index.ts'], ['functions']],
+	['customer unit test', ['santashop-app/src/app/app.component.spec.ts'], []],
+	[
+		'customer browser test',
+		['santashop-e2e/tests/public/signup.spec.ts'],
+		[],
+	],
+	['documentation', ['docs/release-readiness.md'], []],
+])
+	for (const unit of ['app', 'admin', 'functions'])
+		test(`${unit} push deploys only when selected by ${name}`, async () => {
+			const f = fixture(unit);
+			const trace = await dryRun(
+				unit,
+				{},
+				f.api,
+				() => {},
+				() => false,
+				{ name: 'push', paths },
+			);
+			assert.deepEqual(trace.errors, []);
+			if (!deployments.includes(unit))
+				assert.deepEqual(trace.productionSecrets, []);
+			assert.equal(
+				trace.deployments.length,
+				deployments.includes(unit) ? 1 : 0,
+			);
+			if (trace.deployments.length)
+				assert.equal(
+					trace.deployments[0].target,
+					'santas-workshop-test',
+				);
+		});
+
+for (const unit of ['app', 'admin', 'functions'])
+	test(`${unit} push blocks deployment when change detection fails`, async () => {
+		const f = fixture(unit);
+		const trace = await dryRun(
+			unit,
+			{},
+			f.api,
+			() => {},
+			(step) => step.run === 'node scripts/ci-changes.mjs',
+			{ name: 'push', paths: [`santashop-${unit}/src/index.ts`] },
+		);
+		assert.ok(
+			trace.errors.some((error) => error.includes('ci-changes.mjs')),
+		);
+		assert.deepEqual(trace.deployments, []);
+		assert.deepEqual(trace.productionSecrets, []);
+	});
+
+test('rules-only deployment cannot certify that Functions were deployed', async () => {
+	const f = fixture();
+	const trace = await dryRun(
+		'functions',
+		{},
+		f.api,
+		() => {},
+		() => false,
+		{ name: 'push', paths: ['firestore.rules'] },
+	);
+	assert.deepEqual(trace.errors, []);
+	assert.equal(trace.deployments.length, 1);
+	assert.ok(
+		!trace.commands.some(
+			({ name }) =>
+				name === 'Test deployment functions santas-workshop-test',
+		),
+	);
+});
 
 test('workflow mutation witness: removing production dependency reaches sentinel after rejected evidence', async () => {
 	const f = fixture();

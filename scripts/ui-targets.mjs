@@ -102,7 +102,6 @@ export function selectChanges(paths) {
 				'firestore.rules',
 				'firestore.indexes.json',
 				'storage.rules',
-				'database.rules.json',
 			].includes(path)
 		) {
 			backend();

@@ -471,9 +471,6 @@
 		"pubsub": {
 			"port": 8085
 		},
-		"database": {
-			"port": 9000
-		},
 		"singleProjectMode": true
 	},
 	"storage": {
@@ -482,8 +479,5 @@
 	"firestore": {
 		"rules": "firestore.rules",
 		"indexes": "firestore.indexes.json"
-	},
-	"database": {
-		"rules": "database.rules.json"
 	}
 }

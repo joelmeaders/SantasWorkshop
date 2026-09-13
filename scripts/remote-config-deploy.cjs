@@ -102,9 +102,7 @@ const deploy = async (
 			'--project',
 			projectId,
 			'--only',
-			mode === 'prod'
-				? 'firestore:rules,firestore:indexes,storage,database'
-				: 'firestore:rules,firestore:indexes,storage',
+			'firestore:rules,firestore:indexes,storage',
 			'--force',
 		]);
 };

@@ -1,4 +1,4 @@
-name: Verify immutable release evidence
+name: Resolve immutable release
 on:
   workflow_call:
     inputs:
@@ -11,20 +11,25 @@ on:
       release_ref:
         required: true
         type: string
+      skip_tests:
+        type: boolean
+        default: false
+      commit_message:
+        type: string
+        default: ''
     outputs:
       sha:
         value: ${{ jobs.verify.outputs.sha }}
-      reuse_tests:
-        value: ${{ jobs.verify.outputs.reuse_tests }}
+      skip_tests:
+        value: ${{ jobs.verify.outputs.skip_tests }}
 permissions:
   contents: read
-  actions: read
 jobs:
   verify:
     runs-on: ubuntu-latest
     outputs:
       sha: ${{ steps.verify.outputs.sha }}
-      reuse_tests: ${{ steps.verify.outputs.reuse_tests }}
+      skip_tests: ${{ steps.verify.outputs.skip_tests }}
     steps:
       # This is workflow source, never the unchecked release_ref.
       - uses: actions/checkout@v7
@@ -34,12 +39,14 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24.18.0'
-      - name: Verify exact release evidence before candidate execution
+      - name: Resolve release before candidate execution
         id: verify
         env:
           GITHUB_TOKEN: ${{ github.token }}
           RELEASE_REF: ${{ inputs.release_ref }}
           RELEASE_UNIT: ${{ inputs.target }}
+          RELEASE_COMMIT_MESSAGE: ${{ inputs.commit_message }}
+          RELEASE_SKIP_TESTS: ${{ inputs.skip_tests }}
           RELEASE_MODE: ${{ inputs.mode }}
           RELEASE_WORKFLOW_REF: ${{ github.workflow_ref }}
           RELEASE_ACTOR: ${{ github.triggering_actor }}

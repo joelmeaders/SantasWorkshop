@@ -1,4 +1,4 @@
-name: Functions Test Deploy and Manual Prod Release
+name: Functions Test Deploy and Production Approval
 'on':
   push:
     branches:
@@ -9,8 +9,9 @@ name: Functions Test Deploy and Manual Prod Release
         description: Release tag, branch, or commit to deploy (must be on master)
         required: true
         type: string
+        default: master
       deployment_target:
-        description: Deployment target
+        description: Stop after TEST, or continue to production approval
         required: true
         default: prod
         type: choice
@@ -22,9 +23,12 @@ name: Functions Test Deploy and Manual Prod Release
         required: true
         default: false
         type: boolean
+      skip_tests:
+        description: Emergency fix - skip test suites, then deploy TEST and request production approval
+        type: boolean
+        default: false
 permissions:
   contents: read
-  actions: read
 env:
   TEST_AWS_ACCESS_KEY_ID: ci-not-used
   TEST_AWS_SECRET_ACCESS_KEY: ci-not-used
@@ -78,13 +82,15 @@ jobs:
     uses: ./.github/workflows/release-gate.yml
     with:
       target: functions
-      mode: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_target || 'test' }}
+      mode: test
+      skip_tests: ${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || false }}
+      commit_message: ${{ github.event_name == 'push' && github.event.head_commit.message || '' }}
       release_ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.sha }}
     needs: changes
     if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.changes.result == 'success' && (needs.changes.outputs.deploy_functions == 'true' || needs.changes.outputs.deploy_rules == 'true')))
   unit_tests:
     needs: prepare_release
-    if: always() && !cancelled() && needs.prepare_release.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.prepare_release.outputs.skip_tests != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -113,7 +119,7 @@ jobs:
       - name: Functions unit tests
         run: pnpm run functions:test:unit
   integration_tests:
-    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.unit_tests.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && (needs.unit_tests.result == 'success' || needs.unit_tests.result == 'skipped') && needs.prepare_release.outputs.skip_tests != 'true'
     needs:
       - prepare_release
       - unit_tests
@@ -161,7 +167,7 @@ jobs:
         run: pnpm run functions:test:integration
   e2e:
     needs: prepare_release
-    if: always() && !cancelled() && needs.prepare_release.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.prepare_release.outputs.skip_tests != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -173,7 +179,7 @@ jobs:
       target: ${{ matrix.target }}
       release_ref: ${{ needs.prepare_release.outputs.sha }}
   deploy_test:
-    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.unit_tests.result == 'success' && needs.integration_tests.result == 'success' && needs.e2e.result == 'success' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'test'))
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && (needs.unit_tests.result == 'success' || needs.unit_tests.result == 'skipped') && (needs.integration_tests.result == 'success' || needs.integration_tests.result == 'skipped') && (needs.e2e.result == 'success' || needs.e2e.result == 'skipped')
     needs:
       - changes
       - prepare_release
@@ -226,6 +232,7 @@ jobs:
           printf '%s' '${{ env.FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_TEST }}' > "$RUNNER_TEMP/firebase-service-account.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run ci:functions:deploy:test
       - uses: google-github-actions/setup-gcloud@v3
       - name: Verify live test Functions match source
@@ -267,14 +274,31 @@ jobs:
       - name: Test deployment functions santas-workshop-test
         run: echo 'Test deployment and live resource checks succeeded'
         if: github.event_name == 'workflow_dispatch' || needs.changes.outputs.deploy_functions == 'true'
+      - name: Record TEST results before production approval
+        env:
+          RELEASE_SHA: ${{ needs.prepare_release.outputs.sha }}
+          UNIT_RESULT: ${{ needs.unit_tests.result }}
+          INTEGRATION_RESULT: ${{ needs.integration_tests.result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
+        run: |
+          printf 'TEST deployed: `%s`\nUnit tests: %s\nIntegration tests: %s\nBrowser tests: %s\nProduction requires your approval.\n' "$RELEASE_SHA" "$UNIT_RESULT" "$INTEGRATION_RESULT" "$E2E_RESULT" >> "$GITHUB_STEP_SUMMARY"
   deploy_prod:
-    needs: prepare_release
-    if: always() && !cancelled() && needs.prepare_release.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'
+    needs:
+      - changes
+      - prepare_release
+      - deploy_test
+    if: always() && !cancelled() && needs.prepare_release.result == 'success' && needs.deploy_test.result == 'success' && !inputs.load_test_mode && (github.event_name == 'push' || inputs.deployment_target == 'prod')
+    environment: production
+    concurrency:
+      group: production-functions
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
       SANTASHOP_FUNCTIONS_DEPLOY: prod
-      SANTASHOP_LOAD_TEST_MODE: ${{ inputs.load_test_mode && 'true' || 'false' }}
+      SANTASHOP_LOAD_TEST_MODE: 'false'
+      SANTASHOP_DEPLOY_FUNCTIONS: ${{ github.event_name == 'workflow_dispatch' && 'true' || needs.changes.outputs.deploy_functions }}
+      SANTASHOP_DEPLOY_RULES: ${{ github.event_name == 'workflow_dispatch' && 'true' || needs.changes.outputs.deploy_rules }}
       FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_193B5: ${{ secrets[format('FIREBASE_SERVICE_ACCOUNT_SANTAS_WORKSHOP_{0}', '193B5')] }}
       PROD_AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       PROD_AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

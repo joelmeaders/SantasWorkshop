@@ -10,82 +10,79 @@ Keep this page as the maintained release procedure; do not append execution resu
 
 ## Exact-SHA release evidence and owner approval
 
-Run app, admin, and Functions release workflows from `master`. The owner selects
-`release_ref` and invokes production deployment. The selection can be a release
-tag, branch, or commit. The gate resolves it once to a full immutable commit
-that must exist on `master`. Every later checkout uses that resolved SHA.
+Each affected app, admin, or Functions release follows this sequence in one
+GitHub Actions run:
 
-The gate runs from the workflow's trusted source before candidate installation,
-builds, or production credentials. It requires only `contents: read` and
-`actions: read`. It automatically discovers successful runs from the required
-workflows, then verifies their actual checkout markers, jobs, and test steps.
-No manual run IDs, repeated-commit approval, or test-skip input is required.
+1. Resolve the selected commit on `master`.
+2. Run its test suites, unless the owner requests an emergency skip.
+3. Build and deploy to `santas-workshop-test`. Run the deployment checks.
+4. Wait for the owner's approval of the `production` environment.
+5. Build and deploy that same commit to `santas-workshop-193b5`.
 
-Each producing job records `git rev-parse HEAD` immediately after checkout,
-before running candidate code. A dispatch run's `head_sha` identifies its
-workflow source and can differ from its tested SHA. Discovery therefore checks
-checkout markers rather than filtering dispatches by `head_sha`. PR heads and
-synthetic merge commits do not substitute for release evidence.
+A push to `master` starts this sequence for each affected consumer. After TEST
+succeeds, open that run, select **Review deployments**, select **production**,
+and select **Approve and deploy**. No second workflow dispatch or test-evidence
+lookup is needed. Reject the deployment to leave the release in TEST.
 
-| Promotion | Required successful validation for the exact SHA                                                                                                                  | Required successful test deployment                                                |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Functions | `unit_tests`: Functions unit tests; `integration_tests`: Functions integration tests; both `e2e (app) / test` and `e2e (admin) / test`: respective browser suites | Functions `deploy_test`, including live resource checks, in `santas-workshop-test` |
-| App       | App `release / validate_release`: app E2E and unit tests; `storybook_behavior (app)`                                                                              | App Hosting in `santas-workshop-test`                                              |
-| Admin     | Admin `release / validate_release`: admin E2E and unit tests; `storybook_behavior (admin)`                                                                        | Admin Hosting in `santas-workshop-test`                                            |
+The repository's `production` environment must have `joelmeaders` as its required
+reviewer, with **Prevent self-review** disabled so the sole developer can approve
+his own releases. Restrict deployment branches to `master` and disable the
+administrator bypass of this environment's approval. These are repository
+settings, outside YAML. Create the protected environment before merging a
+workflow that references it: GitHub creates an unprotected environment when a
+referenced name does not exist.
 
-Each Hosting promotion requires evidence for its selected application. Shared
-changes select all affected consumers during CI. Core tests run when shared inputs
-change, and during a manual TEST release. See [CI target selection](ci-selection.md).
-Functions browser jobs use `e2e-target.yml` on separate runners. The gate checks
-all evidence-producing workflow files, including reusable workflows and the
-verifier, against the trusted current source. Changed producers require new evidence.
+The release gate runs from trusted workflow source before candidate code. It
+resolves a tag, branch, or commit once, requires that commit to be on `master`,
+and supplies the full SHA to both deployments. Each job checks
+`git rev-parse HEAD` before candidate execution. Production depends directly on the successful
+TEST deployment in the same run, so it can wait for approval while the overall
+run remains incomplete. Old workflow runs and PR merge commits are not searched
+for approval evidence.
 
-Missing, failed, cancelled, incomplete, duplicate, skipped, untrusted, or
-wrong-SHA evidence blocks promotion. Wrong repositories, workflow identities,
-and deployment targets also block promotion. API failures stop the gate.
-Discovery examines up to 1,000 recent successful runs per required workflow.
-The gate rechecks selected run attempts before accepting them. Its summary lists
-the resolved commit and the evidence links it found.
+### Emergency fixes and skipped tests
 
-To deploy to production:
+For an urgent fix, include `[skip tests]` in the commit subject (first line) that reaches
+`master` (for a squash merge, use the squash commit title). The owner can also
+select `skip_tests=true` when manually starting a release. This skips the release
+unit, integration, and browser suites. The summary records the skip explicitly.
+It does not change PR checks or the independent Storybook workflow.
 
-1. Open the target's release workflow from `master`.
-2. Select the release in `release_ref`, leave `deployment_target=prod`, and run it.
-3. Inspect the gate summary and the separate deployment result.
+Skipped test jobs do not block TEST or the production approval. Tests that run
+and fail still block release. A failed, cancelled, or skipped TEST deployment
+never offers production. Dependency installation, lint/build steps, artifact
+audits, configuration checks, and deployment checks still run. Functions load
+test mode always stops in TEST.
 
-The owner's dispatch is the production approval. There is no additional typed
-approval or reviewer step. The operational acceptance requirements below still
-apply. These workflow checks do not prove hosted journeys, inbox delivery, or
-production capacity.
+Use `[skip tests]` for this fast path. GitHub's `[skip ci]` and `[ci skip]` markers
+skip the entire push workflow, including deployment and the approval step.
 
-If evidence is missing, run the indicated test workflow from `master` with the
-same resolved SHA and `deployment_target=test`. For missing Storybook evidence,
-dispatch its existing workflow with `release_ref` set to that SHA. Then retry
-production. Change selection can omit one of these runs, so the gate never assumes
-that a merged commit has complete release evidence.
+### Manual releases and rollback
 
-### Test execution and rollback
+Manual dispatch remains available for an older release or rollback. Run the
+chosen consumer's workflow from `master` and set `release_ref` to the desired tag,
+branch, or commit. The default is `master`. With `deployment_target=prod`, it first
+deploys TEST, then waits for production approval. With
+`deployment_target=test`, it stops after TEST. Use `skip_tests` for an urgent
+rollback when appropriate. A rollback does not authorize customer data changes.
 
-Production automatically reuses verified tests. Test deployments always run
-fresh suites and produce new evidence. Dependency installation, builds,
-artifact audits, parity checks, and deployment checks remain in place.
+Production builds use production configuration and do not rerun test suites.
+UI release jobs retain the build-output checks around emulator tests. Functions
+release jobs retain artifact audits, source parity, export signing, managed
+resource checks, and public-parameter validation. Deployment selection remains
+scoped through production: app and admin changes deploy their own Hosting
+sites; Functions and rules selections remain separate.
 
-UI jobs prepare shared libraries, run unit tests, and verify builds before
-browser tests. Release E2E changes generated source configuration but does not
-write the verified Hosting output. The job restores the selected source
-configuration and compares Hosting file hashes after E2E. Changed output blocks
-deployment. A Functions test deployment waits for unit tests,
-integration tests, and both isolated browser suites.
+Storybook continues to run as independent CI. The approval step does not wait
+for workflows outside this release run. The owner reviews that evidence and
+operational acceptance when approving. Deployment success alone does not prove
+hosted journeys, inbox delivery, or production capacity.
 
-To roll back, select an earlier release on `master` through the same production
-workflow. If evidence expired, falls outside discovery's search window, or uses
-an older producer, run fresh test validation for that SHA first. There is no
-silent fallback or bypass, and a rollback does not authorize customer data changes.
-
-Run `node --test scripts/release-*.test.mjs` for verifier fixtures and the actual
-YAML decision/dependency dry run. The harness uses a harmless deployment sentinel
-without production credentials. It does not execute GitHub's runner or validate
-hosted IAM, deployment services, browser timing, or real email delivery.
+Run `node --test scripts/release-*.test.mjs` for commit-selection tests and a dry
+run of the actual YAML decisions, dependencies, and approval boundary. The
+harness uses harmless deployment sentinels without credentials. It does not
+execute GitHub's runner or prove hosted environment protection, IAM, browser
+timing, or email delivery.
 
 ## Remote Config prerequisites
 
@@ -199,25 +196,24 @@ installation warnings without reviewing the package's build script.
 
 ## Required release gates
 
-For every merge to `master`, the test backend workflow must:
+For each selected backend release, the test workflow must:
 
 1. install from the locked dependency graph;
 2. pass the production-dependency audit of the prepared Functions artifact;
-3. pass Function unit and emulator integration suites;
-4. deploy Functions, Firestore rules/indexes, and Storage rules as one test
-   backend release;
+3. pass Function unit and emulator integration suites, unless skipped;
+4. deploy the selected Functions and/or Firestore rules/indexes and Storage rules;
 5. remove retired Functions with the non-interactive `--force` deploy;
 6. compare the live Function list to production source exports and fail on any
    missing or unexpected Function;
 7. verify that every Firebase-managed Scheduler job, Cloud Tasks queue, and
    Eventarc trigger exists, is enabled, and matches its source configuration;
-8. complete customer and admin end-to-end suites with every Axe WCAG 2.2 AA
-   violation treated as a failure.
+8. complete customer and admin end-to-end suites, unless skipped, with every
+   Axe WCAG 2.2 AA violation treated as a failure when those suites run.
 
 The test project's unused Realtime Database instance is disabled. Test releases
 must not target it because Firebase aborts the entire backend deployment before
-Functions are updated. The manual production release continues to deploy
-Realtime Database rules to the active production instance. Realtime Database
+Functions are updated. The release pipeline deploys Firestore rules, indexes,
+and Storage rules. Realtime Database rules need a separate explicit deployment. Realtime Database
 rule changes therefore require explicit production-release review; do not claim
 that the test deployment validated them.
 

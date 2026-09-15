@@ -60,25 +60,96 @@ describe('owner operation callables', () => {
 	it('previews the yearly reset using the supported queue and retains role-based staff', async () => {
 		const { previewOwnerOperation } = await loadHandlers();
 		const now = new Date('2026-01-10T00:00:00.000Z');
-		adminMock.setCollectionDocs('ownerOperations', [{ id: 'export', data: {
-			operation: 'export-marketing-emails', status: 'succeeded', exportPath: 'exports/marketing.csv', completedAt: now,
-		} }]);
-		adminMock.module.storage.mockReturnValue({ bucket: () => ({
-			file: () => ({ exists: async () => [true] }),
-			getFiles: async () => [[]],
-		}) });
-		adminMock.listUsers.mockResolvedValue({ users: [
-			{ uid: 'customer' },
-			{ uid: 'staff', customClaims: { roles: ['admin'] } },
-			{ uid: 'owner', customClaims: { owner: true } },
-		] });
-		for (const collection of Object.values(COLLECTION_SCHEMA)) adminMock.setCollectionCount(collection, 0);
+		const getFiles = vi.fn(() => {
+			throw new Error('The preview must not list QR objects.');
+		});
+		adminMock.setCollectionDocs('ownerOperations', [
+			{
+				id: 'export',
+				data: {
+					operation: 'export-marketing-emails',
+					status: 'succeeded',
+					exportPath: 'exports/marketing.csv',
+					completedAt: now,
+				},
+			},
+		]);
+		adminMock.module.storage.mockReturnValue({
+			bucket: () => ({
+				file: () => ({ exists: async () => [true] }),
+				getFiles,
+			}),
+		});
+		adminMock.listUsers.mockResolvedValue({
+			users: [
+				{ uid: 'customer' },
+				{ uid: 'staff', customClaims: { roles: ['admin'] } },
+				{ uid: 'owner', customClaims: { owner: true } },
+				{ uid: 'staff-record' },
+			],
+		});
+		adminMock.setDocSnapshot('staff/staff-record', {});
+		for (const collection of Object.values(COLLECTION_SCHEMA))
+			adminMock.setCollectionCount(collection, 0);
 		adminMock.setCollectionCount('tmp_registrationemails', 3);
-		const result = await previewOwnerOperation({ data: { operation: 'yearly-reset', programYear: 2025 }, auth: owner } as never, now);
+		const result = await previewOwnerOperation(
+			{
+				data: { operation: 'yearly-reset', programYear: 2025 },
+				auth: owner,
+			} as never,
+			now,
+		);
 		expect(result.counts).toMatchObject({ authUsers: 1, emailQueue: 3 });
-		expect(Object.keys(result.counts).filter((key) => /queue/i.test(key))).toEqual(['emailQueue']);
-		expect(adminMock.collection.mock.calls.every(([name]) => typeof name === 'string' && name.length > 0)).toBe(true);
+		expect(result.counts).not.toHaveProperty('qrImages');
+		expect(getFiles).not.toHaveBeenCalled();
+		expect(
+			Object.keys(result.counts).filter((key) => /queue/i.test(key)),
+		).toEqual(['emailQueue']);
+		expect(
+			adminMock.collection.mock.calls.every(
+				([name]) => typeof name === 'string' && name.length > 0,
+			),
+		).toBe(true);
 	});
+	it('checks export history in bounded pages and accepts an existing export on a later page', async () => {
+		const { assertRecentMarketingExport } = await loadHandlers();
+		const now = new Date('2026-01-10T00:00:00.000Z');
+		const firstPage = Array.from({ length: 100 }, (_, i) => ({
+			id: `old-${i}`,
+			data: () => ({ status: 'failed' }),
+		}));
+		const query = adminMock.getCollectionRef('ownerOperations');
+		query.get
+			.mockResolvedValueOnce({ docs: firstPage })
+			.mockResolvedValueOnce({
+				docs: [
+					{
+						id: 'recent',
+						data: () => ({
+							status: 'succeeded',
+							exportPath: 'exports/recent.csv',
+							completedAt: now,
+						}),
+					},
+				],
+			});
+		adminMock.module.storage.mockReturnValue({
+			bucket: () => ({
+				file: () => ({ exists: async () => [true] }),
+			}),
+		});
+		await expect(assertRecentMarketingExport(now)).resolves.toBeUndefined();
+		expect(query.select).toHaveBeenCalledWith(
+			'status',
+			'exportPath',
+			'completedAt',
+			'updatedAt',
+		);
+		expect(query.limit).toHaveBeenCalledWith(100);
+		expect(query.startAfter).toHaveBeenCalledWith(firstPage[99]);
+		expect(query.get).toHaveBeenCalledTimes(2);
+	});
+
 	it('creates a preview with an independently counted marketing audience', async () => {
 		const { previewOwnerOperation } = await loadHandlers();
 		adminMock.setCollectionCount('users', 7);

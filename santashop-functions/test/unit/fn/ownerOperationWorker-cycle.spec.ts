@@ -16,6 +16,8 @@ const setup = async (
 	enqueue: ReturnType<typeof vi.fn>;
 	getOperation: ReturnType<typeof vi.fn>;
 	recursiveDelete: ReturnType<typeof vi.fn>;
+	getFiles: ReturnType<typeof vi.fn>;
+	deleteFile: ReturnType<typeof vi.fn>;
 }> => {
 	vi.useFakeTimers();
 	vi.setSystemTime(START);
@@ -59,14 +61,17 @@ const setup = async (
 		() =>
 			({
 				collection: adminMock.collection,
+				getAll: adminMock.getAll,
 				runTransaction: adminMock.runTransaction,
 				recursiveDelete,
 			}) as never,
 	);
 	adminMock.setCollectionDocs('staff', []);
 	adminMock.listUsers.mockResolvedValue({ users: [] });
+	const getFiles = vi.fn().mockResolvedValue([[]]);
+	const deleteFile = vi.fn().mockResolvedValue(undefined);
 	adminMock.module.storage.mockReturnValue({
-		bucket: () => ({ getFiles: vi.fn().mockResolvedValue([[]]) }),
+		bucket: () => ({ getFiles, file: () => ({ delete: deleteFile }) }),
 	});
 	const enqueue = vi.fn().mockResolvedValue(undefined);
 	vi.resetModules();
@@ -91,6 +96,8 @@ const setup = async (
 		enqueue,
 		getOperation,
 		recursiveDelete,
+		getFiles,
+		deleteFile,
 	};
 };
 
@@ -100,6 +107,221 @@ afterEach(() => {
 });
 
 describe('owner operation continuation limits', () => {
+	it('deletes a large QR inventory with at most one page and ten deletes in flight', async () => {
+		const { worker, getOperation, getFiles, deleteFile, operation } =
+			await setup({ backupOperationName: 'operations/backup-1' });
+		getOperation.mockResolvedValue([{ done: true }]);
+		let deleted = 0;
+		let active = 0;
+		let peak = 0;
+		getFiles.mockImplementation(
+			async (query: {
+				pageToken?: string;
+				maxResults: number;
+				autoPaginate: boolean;
+			}) => {
+				const page = Number(query.pageToken ?? 0);
+				expect(deleted).toBe(page * 250);
+				expect(active).toBe(0);
+				expect(query).toMatchObject({
+					maxResults: 250,
+					autoPaginate: false,
+				});
+				return [
+					Array.from({ length: 250 }, (_, i) => ({
+						name: `registrations/${page * 250 + i}`,
+					})),
+					page < 49 ? { pageToken: String(page + 1) } : undefined,
+				];
+			},
+		);
+		deleteFile.mockImplementation(async () => {
+			active++;
+			peak = Math.max(peak, active);
+			await Promise.resolve();
+			active--;
+			deleted++;
+		});
+		await worker({ data: { operationId: 'reset-1' } });
+		expect(deleted).toBe(12_500);
+		expect(peak).toBe(10);
+		expect(deleteFile).toHaveBeenCalledWith({ ignoreNotFound: true });
+		expect(operation['progress']).toMatchObject({ qrComplete: 1 });
+	});
+
+	it('waits for in-flight QR deletes before reporting a failure or releasing the lock', async () => {
+		const {
+			worker,
+			adminMock,
+			getOperation,
+			getFiles,
+			deleteFile,
+			operation,
+		} = await setup({ backupOperationName: 'operations/backup-1' });
+		getOperation.mockResolvedValue([{ done: true }]);
+		getFiles.mockResolvedValue([
+			Array.from({ length: 10 }, (_, i) => ({
+				name: `registrations/${i}`,
+			})),
+			{ pageToken: 'next-page' },
+		]);
+		let finish: (() => void) | undefined;
+		const pending = new Promise<void>((resolve) => {
+			finish = resolve;
+		});
+		deleteFile
+			.mockRejectedValueOnce(new Error('delete failed'))
+			.mockImplementationOnce(() => pending);
+		const result = expect(
+			worker({ data: { operationId: 'reset-1' } }),
+		).rejects.toThrow('delete failed');
+		await vi.waitFor(() => expect(deleteFile).toHaveBeenCalledTimes(10));
+		expect(operation['status']).toBe('running');
+		expect(operation['progress']).not.toHaveProperty('qrComplete');
+		expect(
+			adminMock.getDocRef('ownerOperationLocks/yearly-reset').delete,
+		).not.toHaveBeenCalled();
+		finish?.();
+		await result;
+		expect(getFiles).toHaveBeenCalledOnce();
+		expect(operation['status']).toBe('failed');
+		expect(operation['progress']).not.toHaveProperty('qrComplete');
+	});
+
+	it('deletes each Auth page before fetching the next and retains every staff protection', async () => {
+		const { worker, adminMock, operation, getOperation, getFiles } =
+			await setup({ backupOperationName: 'operations/backup-1' });
+		getOperation.mockResolvedValue([{ done: true }]);
+		adminMock.setDocSnapshot('staff/staff-record', { roles: [] });
+		let deleted = 0;
+		adminMock.listUsers.mockImplementation(
+			async (limit: number, token?: string) => {
+				expect(limit).toBe(250);
+				const page = Number(token ?? 0);
+				expect(deleted).toBe(page * 250);
+				if (page === 50)
+					return {
+						users: [
+							{ uid: 'staff-record' },
+							{ uid: 'owner', customClaims: { owner: true } },
+							{
+								uid: 'staff-claim',
+								customClaims: { roles: ['admin'] },
+							},
+						],
+					};
+				return {
+					users: Array.from({ length: limit }, (_, i) => ({
+						uid: `customer-${page * limit + i}`,
+						disabled: i % 2 === 0,
+					})),
+					pageToken: String(page + 1),
+				};
+			},
+		);
+		adminMock.deleteUsers.mockImplementation(async (uids: string[]) => {
+			expect(uids).toHaveLength(250);
+			expect(uids.every((uid) => uid.startsWith('customer-'))).toBe(true);
+			deleted += uids.length;
+			return { successCount: uids.length, failureCount: 0, errors: [] };
+		});
+		await worker({ data: { operationId: 'reset-1' } });
+		expect(deleted).toBe(12_500);
+		expect(
+			adminMock.getAll.mock.calls.every((args) => args.length <= 251),
+		).toBe(true);
+		expect(adminMock.getAll.mock.calls[0].at(-1)).toEqual({
+			fieldMask: [],
+		});
+		expect(operation).toMatchObject({
+			status: 'succeeded',
+			progress: {
+				deletedAuthUsers: 12_500,
+				authComplete: 1,
+				qrComplete: 1,
+			},
+		});
+		expect(getFiles).toHaveBeenCalledExactlyOnceWith({
+			prefix: 'registrations/',
+			fields: 'items(name),nextPageToken',
+			autoPaginate: false,
+			maxResults: 250,
+		});
+		expect(operation['result']).not.toHaveProperty('deletedQrImages');
+	});
+
+	it('resumes partial Auth failures without reporting success or repeating completed collection deletes', async () => {
+		const {
+			worker,
+			adminMock,
+			operation,
+			getOperation,
+			recursiveDelete,
+			getFiles,
+		} = await setup({ backupOperationName: 'operations/backup-1' });
+		getOperation.mockResolvedValue([{ done: true }]);
+		adminMock.listUsers
+			.mockResolvedValueOnce({ users: [{ uid: 'one' }, { uid: 'two' }] })
+			.mockResolvedValue({ users: [{ uid: 'two' }] });
+		adminMock.deleteUsers
+			.mockResolvedValueOnce({
+				successCount: 1,
+				failureCount: 1,
+				errors: [],
+			})
+			.mockResolvedValue({
+				successCount: 1,
+				failureCount: 0,
+				errors: [],
+			});
+		await expect(
+			worker({ data: { operationId: 'reset-1' } }),
+		).rejects.toThrow('Failed to delete 1');
+		expect(operation).toMatchObject({
+			status: 'failed',
+			progress: { deletedAuthUsers: 1 },
+		});
+		expect(operation['progress']).not.toHaveProperty('authComplete');
+		expect(getFiles).not.toHaveBeenCalled();
+		recursiveDelete.mockClear();
+		await worker({ data: { operationId: 'reset-1' } });
+		expect(operation).toMatchObject({
+			status: 'succeeded',
+			result: { deletedAuthUsers: 2 },
+		});
+		expect(recursiveDelete).not.toHaveBeenCalled();
+		expect(getOperation).toHaveBeenCalledOnce();
+	});
+
+	it('retries failed QR deletion and skips it after recorded completion', async () => {
+		const {
+			worker,
+			adminMock,
+			operation,
+			getOperation,
+			recursiveDelete,
+			getFiles,
+		} = await setup({ backupOperationName: 'operations/backup-1' });
+		getOperation.mockResolvedValue([{ done: true }]);
+		getFiles.mockRejectedValueOnce(new Error('storage unavailable'));
+		await expect(
+			worker({ data: { operationId: 'reset-1' } }),
+		).rejects.toThrow('storage unavailable');
+		expect(operation['progress']).not.toHaveProperty('qrComplete');
+		recursiveDelete.mockClear();
+		adminMock.listUsers.mockClear();
+		await worker({ data: { operationId: 'reset-1' } });
+		expect(operation).toMatchObject({
+			status: 'succeeded',
+			progress: { qrComplete: 1 },
+		});
+		expect(getFiles).toHaveBeenCalledTimes(2);
+		expect(recursiveDelete).not.toHaveBeenCalled();
+		expect(adminMock.listUsers).not.toHaveBeenCalled();
+		await worker({ data: { operationId: 'reset-1' } });
+		expect(getFiles).toHaveBeenCalledTimes(2);
+	});
+
 	it('expires a queued reset before starting a backup or deleting data', async () => {
 		const { worker, adminMock, operation, enqueue, recursiveDelete } =
 			await setup({ createdAt: new Date(START.getTime() - HOUR) });

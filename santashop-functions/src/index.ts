@@ -386,7 +386,7 @@ export const callableDeleteStaffUser = onCall(
 );
 
 export const callablePreviewOwnerOperation = onCall(
-	{ ...LOW_VOLUME_OPTIONS, timeoutSeconds: 120 },
+	{ ...LOW_VOLUME_OPTIONS, memory: '512MiB', timeoutSeconds: 120 },
 	observeCallableHandler('callablePreviewOwnerOperation', async (request) => {
 		return (await import('./fn/ownerOperations')).previewOwnerOperation(
 			request,

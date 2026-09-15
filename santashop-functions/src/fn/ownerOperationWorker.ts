@@ -18,10 +18,13 @@ import {
 	assertRecentMarketingExport,
 	isOwnerOperationSeasonOpen,
 } from './ownerOperations';
+import { customerAuthUserBatches } from './ownerOperationAuthUsers';
 
 const log = createFunctionLogger('ownerOperationWorker');
 const EXPORT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const BACKUP_WAIT_LIMIT_MS = 60 * 60 * 1000;
+const QR_PAGE_SIZE = 250;
+const QR_DELETE_CONCURRENCY = 10;
 
 class BackupWaitExpiredError extends Error {}
 
@@ -392,31 +395,54 @@ const executeScheduleInitialization = async (
 	};
 };
 
-const deleteCustomerAuthUsers = async (): Promise<number> => {
-	const staffSnapshot = await admin
-		.firestore()
-		.collection(COLLECTION_SCHEMA.staff)
-		.get();
-	const staffUids = new Set(staffSnapshot.docs.map((doc) => doc.id));
-	const toDelete: string[] = [];
+const deleteCustomerAuthUsers = async (
+	operationId: string,
+	progress: OwnerOperationCounts,
+): Promise<void> => {
+	for await (const users of customerAuthUserBatches()) {
+		const result = await admin.auth().deleteUsers(users);
+		progress['deletedAuthUsers'] =
+			(progress['deletedAuthUsers'] ?? 0) + result.successCount;
+		await updateOperation(operationId, { stage: 'purging-auth', progress });
+		if (result.failureCount > 0) {
+			throw new Error(
+				`Failed to delete ${result.failureCount} customer Auth users.`,
+			);
+		}
+	}
+};
+
+const deleteRegistrationQrs = async (): Promise<void> => {
+	const bucket = admin.storage().bucket();
 	let pageToken: string | undefined;
 	do {
-		const page = await admin.auth().listUsers(1000, pageToken);
-		for (const user of page.users) {
-			const claims = user.customClaims ?? {};
-			const roles = claims['roles'];
-			const elevated =
-				claims['owner'] === true ||
-				(Array.isArray(roles) && roles.length > 0) ||
-				staffUids.has(user.uid);
-			if (!elevated) toDelete.push(user.uid);
+		const [files, nextQuery] = await bucket.getFiles({
+			prefix: 'registrations/',
+			fields: 'items(name),nextPageToken',
+			autoPaginate: false,
+			maxResults: QR_PAGE_SIZE,
+			...(pageToken ? { pageToken } : {}),
+		});
+		for (
+			let offset = 0;
+			offset < files.length;
+			offset += QR_DELETE_CONCURRENCY
+		) {
+			// Await the whole group before surfacing an error or releasing the lock.
+			const results = await Promise.allSettled(
+				files
+					.slice(offset, offset + QR_DELETE_CONCURRENCY)
+					.map((file) =>
+						bucket.file(file.name).delete({ ignoreNotFound: true }),
+					),
+			);
+			const failure = results.find(
+				(result) => result.status === 'rejected',
+			);
+			if (failure?.status === 'rejected') throw failure.reason;
 		}
-		pageToken = page.pageToken;
+		pageToken = nextQuery?.pageToken;
 	} while (pageToken);
-	for (let index = 0; index < toDelete.length; index += 1000) {
-		await admin.auth().deleteUsers(toDelete.slice(index, index + 1000));
-	}
-	return toDelete.length;
 };
 
 export const executeYearlyReset = async (
@@ -526,34 +552,22 @@ export const executeYearlyReset = async (
 			progress,
 		});
 	}
-	let deletedAuthUsers = progress['deletedAuthUsers'] ?? 0;
 	if (progress['authComplete'] !== 1) {
-		deletedAuthUsers = await deleteCustomerAuthUsers();
-		progress['deletedAuthUsers'] = deletedAuthUsers;
+		await deleteCustomerAuthUsers(operationId, progress);
 		progress['authComplete'] = 1;
 	}
 	await updateOperation(operationId, {
 		stage: 'purging-registration-qrs',
 		progress,
 	});
-	let deletedQrImages = progress['deletedQrImages'] ?? 0;
 	if (progress['qrComplete'] !== 1) {
-		const [qrFiles] = await admin
-			.storage()
-			.bucket()
-			.getFiles({ prefix: 'registrations/' });
-		await Promise.all(
-			qrFiles.map((file) => file.delete({ ignoreNotFound: true })),
-		);
-		deletedQrImages = qrFiles.length;
-		progress['deletedQrImages'] = deletedQrImages;
+		await deleteRegistrationQrs();
 		progress['qrComplete'] = 1;
 		await updateOperation(operationId, { progress });
 	}
 	return {
 		message: 'Yearly reset completed after a verified Firestore backup.',
-		deletedAuthUsers,
-		deletedQrImages,
+		deletedAuthUsers: progress['deletedAuthUsers'] ?? 0,
 		backupLocation,
 	};
 };

@@ -14,7 +14,7 @@ on:
       deploy:
         type: boolean
         default: false
-      reuse_tests:
+      skip_tests:
         type: boolean
         default: false
       shared_tests:
@@ -76,6 +76,12 @@ env:
 jobs:
   validate_release:
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.mode == 'prod' && 'production' || 'test' }}
+      deployment: ${{ inputs.deploy }}
+    concurrency:
+      group: ui-${{ inputs.target }}-${{ inputs.mode }}-${{ inputs.deploy && 'deploy' || github.run_id }}
+      cancel-in-progress: false
     env:
       TEST_FIREBASE_API_KEY: ${{ inputs.mode == 'test' && secrets.TEST_FIREBASE_API_KEY || '' }}
       PROD_FIREBASE_API_KEY: ${{ inputs.mode == 'prod' && secrets.PROD_FIREBASE_API_KEY || '' }}
@@ -94,20 +100,22 @@ jobs:
           echo "sha=$actual" >> "$GITHUB_OUTPUT"
       - name: Release revision ${{ steps.revision.outputs.sha }}
         run: echo 'Checkout revision recorded before candidate execution'
-      - name: Validate target and record verified test reuse
+      - name: Record release test policy
         env:
           RELEASE_REF: ${{ inputs.release_ref }}
-          DEPLOY: ${{ inputs.deploy }}
-          REUSE_TESTS: ${{ inputs.reuse_tests }}
+          SKIP_TESTS: ${{ inputs.skip_tests }}
         run: |
           case "$UI_TARGET:$UI_MODE" in app:test|app:prod|admin:test|admin:prod) ;; *) exit 1 ;; esac
-          if [ "$REUSE_TESTS" = true ]; then
-            test "$DEPLOY" = true
-            {
-              echo '### Manual deployment'
-              printf 'Selected ref: `%s`\nTarget: `%s/%s`\nTests: automatically discovered exact-SHA evidence reused\n' "$RELEASE_REF" "$UI_TARGET" "$UI_MODE"
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
+          {
+            printf 'Selected commit: `%s`\nTarget: %s/%s\n' "$RELEASE_REF" "$UI_TARGET" "$UI_MODE"
+            if [ "$SKIP_TESTS" = true ]; then
+              echo 'Test suites skipped by owner request. Build and deployment checks still run.'
+            elif [ "$UI_MODE" = prod ]; then
+              echo 'TEST deployment succeeded in this run. Production does not rerun test suites.'
+            else
+              echo 'Run test suites before TEST deployment.'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: pnpm/action-setup@v6
         with:
           version: '10.14.0'
@@ -116,21 +124,21 @@ jobs:
           node-version: '24.18.0'
           cache: pnpm
       - uses: actions/setup-java@v6
-        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         with:
           distribution: temurin
           java-version: '21'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run e2e:browser:setup:ci
-        if: ${{ !inputs.reuse_tests }}
+        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' }}
       - run: pnpm run "config:$UI_TARGET:$UI_MODE"
       - name: Prepare shared libraries before unit tests
         run: pnpm run storybook:prepare
       - name: Run shared core tests for this standalone release
-        if: ${{ !inputs.reuse_tests && inputs.shared_tests }}
+        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' && inputs.shared_tests }}
         run: pnpm run ci:core:test
       - name: Run target unit tests with prepared shared libraries
-        if: ${{ !inputs.reuse_tests }}
+        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' }}
         run: pnpm --filter "@santashop/$UI_TARGET" test
       - name: Load validated Remote Config release defaults
         if: ${{ inputs.deploy }}
@@ -142,7 +150,7 @@ jobs:
           node scripts/remote-config.cjs release-defaults --project "$project"
       - run: pnpm run "ci:$UI_TARGET:build:$UI_MODE"
       - name: Record verified Hosting output before emulator tests
-        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: |
           set -o pipefail
           find "dist/santashop-$UI_TARGET" -type f -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/hosting-before-e2e.sha256"
@@ -151,9 +159,9 @@ jobs:
       # dist/santashop-app or dist/santashop-admin, the verified Hosting output.
       - name: Customer or staff E2E tests
         run: pnpm run "e2e:test:$UI_TARGET"
-        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
       - name: Upload E2E failure artifacts
-        if: ${{ failure() && inputs.deploy && !inputs.reuse_tests }}
+        if: ${{ failure() && inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         uses: actions/upload-artifact@v7
         with:
           name: ui-${{ inputs.target }}-${{ inputs.mode }}-e2e-${{ github.run_id }}
@@ -163,10 +171,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Restore release source configuration after emulator tests
-        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: pnpm run "config:$UI_TARGET:$UI_MODE"
       - name: Require unchanged verified Hosting output
-        if: ${{ inputs.deploy && !inputs.reuse_tests }}
+        if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: |
           set -o pipefail
           find "dist/santashop-$UI_TARGET" -type f -print0 | sort -z | xargs -0 sha256sum > "$RUNNER_TEMP/hosting-after-e2e.sha256"

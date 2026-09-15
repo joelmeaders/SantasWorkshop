@@ -36,17 +36,19 @@ async function dryRun(
 		productionSecrets: [],
 		checkouts: [],
 		errors: [],
+		pendingApprovals: [],
+		jobs: {},
 	};
 	const github = {
 		event_name: event.name,
 		sha: event.name === 'push' ? releaseSha : workflowSha,
 		workflow_sha: workflowSha,
 		workflow_ref: `${repository}/.github/workflows/${unit}-test-and-prod-release.yml@refs/heads/master`,
-		triggering_actor: 'joelmeaders',
+		triggering_actor: event.actor ?? 'joelmeaders',
 		repository,
 		run_id: 900,
 		token: 'read-only-fixture',
-		event: {},
+		event: { head_commit: { message: event.message ?? '' } },
 	};
 	const secrets = new Proxy(
 		{},
@@ -85,7 +87,11 @@ async function dryRun(
 			vars: {},
 			...values,
 			always: () => true,
-			cancelled: () => false,
+			cancelled: () => event.cancelled === true,
+			contains: (value, part) =>
+				String(value ?? '')
+					.toLowerCase()
+					.includes(part.toLowerCase()),
 			failure: () => !successful,
 			success: () => successful,
 			format: (format, ...args) =>
@@ -113,9 +119,11 @@ async function dryRun(
 		mutate(path, workflow);
 		const inputs = {
 			...Object.fromEntries(
-				Object.entries(workflow.on?.workflow_call?.inputs ?? {}).map(
-					([key, value]) => [key, value.default],
-				),
+				Object.entries(
+					workflow.on?.workflow_call?.inputs ??
+						workflow.on?.workflow_dispatch?.inputs ??
+						{},
+				).map(([key, value]) => [key, value.default]),
 			),
 			...passedInputs,
 		};
@@ -154,7 +162,6 @@ async function dryRun(
 				continue;
 			}
 			if (job.uses) {
-				mapValues(job.secrets, context);
 				const branches = [];
 				for (const target of job.strategy?.matrix?.target ?? [
 					undefined,
@@ -181,6 +188,17 @@ async function dryRun(
 							};
 				continue;
 			}
+			const environment = evaluate(
+				typeof job.environment === 'string'
+					? job.environment
+					: job.environment?.name,
+				context,
+			);
+			if (environment === 'production' && event.approval !== 'approved') {
+				trace.pendingApprovals.push(`${prefix}${id}`);
+				results[id] = { result: 'waiting', outputs: {} };
+				continue;
+			}
 			successful = true;
 			context.env = {
 				...mapValues(workflow.env, context),
@@ -195,7 +213,7 @@ async function dryRun(
 				if (!permitted(step.if, context, successful)) continue;
 				const env = { ...context.env, ...mapValues(step.env, context) };
 				try {
-					if (step.run && failCommand(step, env, `${prefix}${id}`))
+					if (failCommand(step, env, `${prefix}${id}`))
 						throw new Error(
 							`Command failed: ${step.name ?? step.run}`,
 						);
@@ -223,6 +241,8 @@ async function dryRun(
 								releaseRef: env.RELEASE_REF,
 								unit: env.RELEASE_UNIT,
 								mode: env.RELEASE_MODE,
+								skipTests: env.RELEASE_SKIP_TESTS,
+								commitMessage: env.RELEASE_COMMIT_MESSAGE,
 
 								repository,
 								workflowRef: env.RELEASE_WORKFLOW_REF,
@@ -233,7 +253,7 @@ async function dryRun(
 						context.steps[step.id] = {
 							outputs: {
 								sha: result.sha,
-								reuse_tests: String(result.reuse),
+								skip_tests: String(result.skipTests),
 							},
 						};
 					} else if (
@@ -255,7 +275,12 @@ async function dryRun(
 							],
 							{ env: {}, encoding: 'utf8' },
 						);
-						trace.deployments.push({ target, output });
+						trace.deployments.push({
+							target,
+							output,
+							functions: env.SANTASHOP_DEPLOY_FUNCTIONS,
+							rules: env.SANTASHOP_DEPLOY_RULES,
+						});
 					} else if (step.run)
 						trace.commands.push({
 							job: `${prefix}${id}`,
@@ -272,6 +297,15 @@ async function dryRun(
 				outputs: successful ? mapValues(job.outputs, context) : {},
 			};
 		}
+		Object.assign(
+			trace.jobs,
+			Object.fromEntries(
+				Object.entries(results).map(([id, result]) => [
+					prefix + id,
+					result.result,
+				]),
+			),
+		);
 		const finalContext = contextFor({ jobs: results }, true);
 		return {
 			result: Object.values(results).some(
@@ -293,302 +327,310 @@ async function dryRun(
 	return trace;
 }
 
+const deploymentTargets = (trace) =>
+	trace.deployments.map(({ target }) => target);
+const suiteCommands = (trace) =>
+	trace.commands.filter(({ run }) =>
+		/functions:test:|e2e:test:|ci:core:test|" test$/.test(run),
+	);
+
 for (const unit of ['app', 'admin', 'functions']) {
-	const selected = (f, overrides = {}) => ({
-		deployment_target: 'prod',
+	const inputs = {
 		release_ref: releaseSha,
-
-		load_test_mode: false,
-		...overrides,
-	});
-	for (const [name, invalidate] of [
-		[
-			'missing evidence',
-			(f) => {
-				f.runs.length = 0;
-			},
-		],
-		[
-			'skipped tests',
-			(f) => {
-				f.jobs.get(101)[0].steps[1].conclusion = 'skipped';
-			},
-		],
-		[
-			'wrong checkout SHA',
-			(f) => {
-				f.jobs.get(101)[0].steps[0].name =
-					`Release revision ${workflowSha}`;
-			},
-		],
-		[
-			'API failure',
-			(f) => {
-				f.api = async () => {
-					throw new Error('GitHub API unavailable');
-				};
-			},
-		],
-	])
-		test(`${unit} workflow: ${name} blocks all production execution without manually supplied evidence`, async () => {
+		deployment_target: 'prod',
+		skip_tests: false,
+	};
+	const push = { name: 'push', paths: [`santashop-${unit}/src/index.ts`] };
+	for (const skip_tests of [false, true]) {
+		test(`${unit}: TEST completes before production approval, skip_tests=${skip_tests}`, async () => {
 			const f = fixture(unit);
-			invalidate(f);
-			const trace = await dryRun(unit, selected(f), f.api);
-			assert.ok(trace.errors.length);
-			assert.deepEqual(trace.deployments, []);
+			const trace = await dryRun(unit, { ...inputs, skip_tests }, f.api);
+			assert.deepEqual(trace.errors, []);
+			assert.deepEqual(deploymentTargets(trace), [
+				'santas-workshop-test',
+			]);
+			assert.equal(trace.pendingApprovals.length, 1);
 			assert.deepEqual(trace.productionSecrets, []);
-			assert.deepEqual(
-				trace.checkouts.map(({ ref }) => ref),
-				[workflowSha],
-			);
+			assert.equal(suiteCommands(trace).length > 0, !skip_tests);
 		});
-	test(`${unit} workflow: automatic verified reuse reaches sentinel with immutable SHA and no suite rerun`, async () => {
-		const f = fixture(unit);
-		const trace = await dryRun(unit, selected(f), f.api);
-		assert.deepEqual(trace.errors, []);
-		assert.deepEqual(trace.deployments, [
-			{ target: 'santas-workshop-193b5', output: 'deployment-sentinel' },
-		]);
-		assert.ok(trace.productionSecrets.length);
-		assert.ok(
-			trace.checkouts
-				.filter(({ job }) => !job.includes('verify'))
-				.every(({ ref }) => ref === releaseSha),
-		);
-		assert.equal(
-			trace.commands.filter(({ run }) =>
-				/functions:test:|e2e:test:|ci:core:test|\" test$/.test(run),
-			).length,
-			0,
-		);
-	});
-	test(`${unit} workflow: fresh test release runs required suites before test sentinel`, async () => {
-		const f = fixture(unit);
-		const trace = await dryRun(
-			unit,
-			selected(f, {
-				deployment_target: 'test',
-			}),
-			f.api,
-		);
-		assert.deepEqual(trace.errors, []);
-		assert.deepEqual(trace.deployments, [
-			{ target: 'santas-workshop-test', output: 'deployment-sentinel' },
-		]);
-		const commands = trace.commands.map(({ run }) => run);
-		assert.ok(
-			commands.some((run) =>
-				run.includes(
-					unit === 'functions'
-						? 'functions:test:integration'
-						: 'ci:core:test',
-				),
-			),
-		);
-		assert.ok(commands.some((run) => run.includes('e2e:test')));
-	});
-}
-
-for (const [name, paths, deployments] of [
-	['customer source', ['santashop-app/src/app/app.component.ts'], ['app']],
-	['admin source', ['santashop-admin/src/app/app.component.ts'], ['admin']],
-	['backend source', ['santashop-functions/src/index.ts'], ['functions']],
-	['customer unit test', ['santashop-app/src/app/app.component.spec.ts'], []],
-	[
-		'customer browser test',
-		['santashop-e2e/tests/public/signup.spec.ts'],
-		[],
-	],
-	['documentation', ['docs/release-readiness.md'], []],
-])
-	for (const unit of ['app', 'admin', 'functions'])
-		test(`${unit} push deploys only when selected by ${name}`, async () => {
+		test(`${unit}: approval deploys the same SHA after TEST, skip_tests=${skip_tests}`, async () => {
 			const f = fixture(unit);
 			const trace = await dryRun(
 				unit,
-				{},
+				{ ...inputs, skip_tests },
 				f.api,
-				() => {},
-				() => false,
-				{ name: 'push', paths },
+				undefined,
+				undefined,
+				{ name: 'workflow_dispatch', paths: [], approval: 'approved' },
 			);
 			assert.deepEqual(trace.errors, []);
-			if (!deployments.includes(unit))
-				assert.deepEqual(trace.productionSecrets, []);
-			assert.equal(
-				trace.deployments.length,
-				deployments.includes(unit) ? 1 : 0,
+			assert.deepEqual(deploymentTargets(trace), [
+				'santas-workshop-test',
+				'santas-workshop-193b5',
+			]);
+			assert.ok(trace.productionSecrets.length);
+			assert.ok(
+				trace.checkouts
+					.filter(({ job }) => !job.includes('verify'))
+					.every(({ ref }) => ref === releaseSha),
 			);
-			if (trace.deployments.length)
-				assert.equal(
-					trace.deployments[0].target,
-					'santas-workshop-test',
-				);
+			assert.ok(
+				suiteCommands(trace).every(
+					({ job }) => !job.startsWith('deploy_prod'),
+				),
+			);
 		});
-
-for (const unit of ['app', 'admin', 'functions'])
-	test(`${unit} push blocks deployment when change detection fails`, async () => {
-		const f = fixture(unit);
+	}
+	for (const message of ['Ordinary fix', 'Urgent repair [skip tests]']) {
+		test(`${unit}: push automatically offers production for ${message}`, async () => {
+			const trace = await dryRun(
+				unit,
+				{},
+				fixture(unit).api,
+				undefined,
+				undefined,
+				{ ...push, message },
+			);
+			assert.deepEqual(trace.errors, []);
+			assert.deepEqual(deploymentTargets(trace), [
+				'santas-workshop-test',
+			]);
+			assert.equal(trace.pendingApprovals.length, 1);
+			assert.equal(
+				suiteCommands(trace).length > 0,
+				!message.includes('[skip tests]'),
+			);
+		});
+	}
+	test(`${unit}: non-owner cannot skip suites`, async () => {
 		const trace = await dryRun(
 			unit,
 			{},
-			f.api,
-			() => {},
-			(step) => step.run === 'node scripts/ci-changes.mjs',
-			{ name: 'push', paths: [`santashop-${unit}/src/index.ts`] },
+			fixture(unit).api,
+			undefined,
+			undefined,
+			{ ...push, message: 'Fix [skip tests]', actor: 'contributor' },
 		);
-		assert.ok(
-			trace.errors.some((error) => error.includes('ci-changes.mjs')),
+		assert.ok(trace.errors.some((error) => error.includes('owner')));
+		assert.deepEqual(trace.deployments, []);
+		assert.deepEqual(trace.pendingApprovals, []);
+	});
+	for (const failure of ['test', 'build', 'deploy']) {
+		test(`${unit}: ${failure} failure blocks the production approval`, async () => {
+			const trace = await dryRun(
+				unit,
+				inputs,
+				fixture(unit).api,
+				undefined,
+				(step) => {
+					if (failure === 'test')
+						return [
+							'Functions unit tests',
+							'Run target unit tests with prepared shared libraries',
+						].includes(step.name);
+					if (failure === 'build')
+						return step.run === 'pnpm install --frozen-lockfile';
+					return (
+						step.run?.includes('ci:functions:deploy:test') ||
+						step.uses?.startsWith(
+							'FirebaseExtended/action-hosting-deploy@',
+						)
+					);
+				},
+			);
+			assert.ok(trace.errors.length);
+			assert.deepEqual(trace.pendingApprovals, []);
+			assert.deepEqual(trace.productionSecrets, []);
+		});
+	}
+	test(`${unit}: skipping TEST deployment never offers production`, async () => {
+		const trace = await dryRun(
+			unit,
+			inputs,
+			fixture(unit).api,
+			(path, workflow) => {
+				if (path.endsWith(`${unit}-test-and-prod-release.yml`))
+					workflow.jobs[
+						unit === 'functions' ? 'deploy_test' : 'release'
+					].if = 'false';
+			},
+		);
+		assert.deepEqual(trace.deployments, []);
+		assert.deepEqual(trace.pendingApprovals, []);
+	});
+	test(`${unit}: cancellation cannot reach production`, async () => {
+		const trace = await dryRun(
+			unit,
+			inputs,
+			fixture(unit).api,
+			undefined,
+			undefined,
+			{ ...push, cancelled: true, approval: 'approved' },
+		);
+		assert.deepEqual(trace.deployments, []);
+		assert.deepEqual(trace.pendingApprovals, []);
+	});
+	test(`${unit}: API errors stop before candidate code`, async () => {
+		const trace = await dryRun(unit, inputs, async () => {
+			throw new Error('GitHub unavailable');
+		});
+		assert.ok(trace.errors.length);
+		assert.deepEqual(
+			trace.checkouts.map(({ ref }) => ref),
+			[workflowSha],
 		);
 		assert.deepEqual(trace.deployments, []);
 		assert.deepEqual(trace.productionSecrets, []);
 	});
-
-test('rules-only deployment cannot certify that Functions were deployed', async () => {
-	const f = fixture();
-	const trace = await dryRun(
-		'functions',
-		{},
-		f.api,
-		() => {},
-		() => false,
-		{ name: 'push', paths: ['firestore.rules'] },
-	);
-	assert.deepEqual(trace.errors, []);
-	assert.equal(trace.deployments.length, 1);
-	assert.ok(
-		!trace.commands.some(
-			({ name }) =>
-				name === 'Test deployment functions santas-workshop-test',
-		),
-	);
-});
-
-test('workflow mutation witness: removing production dependency reaches sentinel after rejected evidence', async () => {
-	const f = fixture();
-	f.runs.length = 0;
-	const trace = await dryRun(
-		'functions',
-		{
-			deployment_target: 'prod',
-			release_ref: releaseSha,
-
-			load_test_mode: false,
-		},
-		f.api,
-		(path, workflow) => {
-			if (path.endsWith('functions-test-and-prod-release.yml')) {
-				// Reintroduce the former independent production job and input checkout.
-				workflow.jobs.deploy_prod = JSON.parse(
-					JSON.stringify(workflow.jobs.deploy_prod).replaceAll(
-						'needs.prepare_release.outputs.sha',
-						'inputs.release_ref',
-					),
-				);
-				delete workflow.jobs.deploy_prod.needs;
-				workflow.jobs.deploy_prod.if =
-					"github.event_name == 'workflow_dispatch' && inputs.deployment_target == 'prod'";
-			}
-		},
-	);
-	assert.ok(trace.errors.length);
-	assert.ok(
-		trace.productionSecrets.length,
-		'The harness detects production access if the real dependency is removed',
-	);
-	assert.deepEqual(trace.deployments, [
-		{ target: 'santas-workshop-193b5', output: 'deployment-sentinel' },
-	]);
-});
-
-for (const unit of ['app', 'admin', 'functions']) {
-	test(`${unit} dispatch needs no manual evidence or repeated approval fields`, () => {
-		const workflow = readWorkflow(
-			`.github/workflows/${unit}-test-and-prod-release.yml`,
-		);
-		assert.deepEqual(
-			Object.keys(workflow.on.workflow_dispatch.inputs).sort(),
-			(unit === 'functions'
-				? ['deployment_target', 'load_test_mode', 'release_ref']
-				: ['deployment_target', 'release_ref']
-			).sort(),
-		);
-	});
-	test(`${unit} selected tag is resolved before any candidate checkout`, async () => {
-		const f = fixture(unit);
+	test(`${unit}: explicit test-only dispatch stops after TEST`, async () => {
 		const trace = await dryRun(
 			unit,
-			{ deployment_target: 'prod', release_ref: 'release/2026.09' },
-			async (path) =>
-				path === 'commits/release%2F2026.09'
-					? { sha: releaseSha }
-					: f.api(path),
+			{ ...inputs, deployment_target: 'test' },
+			fixture(unit).api,
 		);
 		assert.deepEqual(trace.errors, []);
+		assert.deepEqual(deploymentTargets(trace), ['santas-workshop-test']);
+		assert.deepEqual(trace.pendingApprovals, []);
+	});
+	test(`${unit}: rollback tag is resolved once before both deployments`, async () => {
+		const f = fixture(unit);
+		let resolutions = 0;
+		const trace = await dryRun(
+			unit,
+			{ ...inputs, release_ref: 'release/old', skip_tests: true },
+			async (path) => {
+				if (path === 'commits/release%2Fold') {
+					resolutions++;
+					return { sha: releaseSha };
+				}
+				return f.api(path);
+			},
+			undefined,
+			undefined,
+			{ name: 'workflow_dispatch', paths: [], approval: 'approved' },
+		);
+		assert.deepEqual(trace.errors, []);
+		assert.equal(resolutions, 1);
+		assert.deepEqual(deploymentTargets(trace), [
+			'santas-workshop-test',
+			'santas-workshop-193b5',
+		]);
 		assert.ok(
 			trace.checkouts
 				.filter(({ job }) => !job.includes('verify'))
 				.every(({ ref }) => ref === releaseSha),
 		);
-		assert.equal(trace.deployments.length, 1);
 	});
 }
 
-for (const target of ['app', 'admin'])
-	test(`Functions test deployment is blocked when ${target} E2E fails`, async () => {
-		const f = fixture();
+for (const skipped of ['unit_tests', 'integration_tests', 'e2e'])
+	test(`Functions: a skipped ${skipped} job still permits TEST and production approval`, async () => {
 		const trace = await dryRun(
 			'functions',
-			{
-				deployment_target: 'test',
-				release_ref: releaseSha,
+			{ release_ref: releaseSha, deployment_target: 'prod' },
+			fixture().api,
+			(path, workflow) => {
+				if (path.endsWith('functions-test-and-prod-release.yml'))
+					workflow.jobs[skipped].if = 'false';
 			},
-			f.api,
-			() => {},
+		);
+		assert.deepEqual(trace.errors, []);
+		assert.deepEqual(deploymentTargets(trace), ['santas-workshop-test']);
+		assert.equal(trace.pendingApprovals.length, 1);
+	});
+
+for (const target of ['app', 'admin'])
+	test(`Functions: failed ${target} browser tests stop TEST and production`, async () => {
+		const trace = await dryRun(
+			'functions',
+			{ release_ref: releaseSha },
+			fixture().api,
+			undefined,
 			(step, env) =>
 				step.name === 'Customer or staff E2E tests' &&
 				env.E2E_TARGET === target,
 		);
-		assert.ok(
-			trace.errors.some((error) =>
-				error.includes('Customer or staff E2E tests'),
-			),
-		);
+		assert.ok(trace.errors.length);
 		assert.deepEqual(trace.deployments, []);
+		assert.deepEqual(trace.pendingApprovals, []);
 	});
 
-test('Functions test deployment is blocked when the browser matrix is skipped', async () => {
-	const f = fixture();
+test('isolated Functions load testing cannot reach production', async () => {
 	const trace = await dryRun(
 		'functions',
 		{
-			deployment_target: 'test',
 			release_ref: releaseSha,
+			deployment_target: 'prod',
+			load_test_mode: true,
+			skip_tests: true,
 		},
-		f.api,
-		(path, workflow) => {
-			if (path.endsWith('functions-test-and-prod-release.yml'))
-				workflow.jobs.e2e.if = 'false';
-		},
+		fixture().api,
 	);
 	assert.deepEqual(trace.errors, []);
-	assert.deepEqual(trace.deployments, []);
+	assert.deepEqual(deploymentTargets(trace), ['santas-workshop-test']);
+	assert.deepEqual(trace.pendingApprovals, []);
+});
+
+for (const [paths, selected] of [
+	[['santashop-app/src/app/app.component.ts'], ['app']],
+	[['santashop-admin/src/app/app.component.ts'], ['admin']],
+	[['santashop-functions/src/index.ts'], ['functions']],
+	[['firestore.rules'], ['functions']],
+	[['santashop-app/src/app/app.component.spec.ts'], []],
+	[['docs/release-readiness.md'], []],
+])
+	for (const unit of ['app', 'admin', 'functions']) {
+		test(`${unit}: ${paths[0]} preserves deployment selection through production`, async () => {
+			const trace = await dryRun(
+				unit,
+				{},
+				fixture(unit).api,
+				undefined,
+				undefined,
+				{ name: 'push', paths, approval: 'approved' },
+			);
+			assert.deepEqual(trace.errors, []);
+			assert.deepEqual(
+				deploymentTargets(trace),
+				selected.includes(unit)
+					? ['santas-workshop-test', 'santas-workshop-193b5']
+					: [],
+			);
+			if (unit === 'functions' && selected.includes(unit)) {
+				assert.ok(
+					trace.deployments.every(({ functions, rules }) =>
+						paths[0] === 'firestore.rules'
+							? functions === 'false' && rules === 'true'
+							: functions === 'true' && rules === 'false',
+					),
+				);
+			}
+		});
+	}
+
+test('mutation witness: removing the environment permits production without approval', async () => {
+	const trace = await dryRun(
+		'functions',
+		{ release_ref: releaseSha, deployment_target: 'prod' },
+		fixture().api,
+		(path, workflow) => {
+			if (path.endsWith('functions-test-and-prod-release.yml'))
+				delete workflow.jobs.deploy_prod.environment;
+		},
+	);
+	assert.deepEqual(deploymentTargets(trace), [
+		'santas-workshop-test',
+		'santas-workshop-193b5',
+	]);
+	assert.ok(trace.productionSecrets.length);
 });
 
 for (const target of ['app', 'admin'])
-	test(`${target} release runs unit and build checks before E2E`, async () => {
-		const f = fixture(target);
+	test(`${target}: unit tests and build run before E2E`, async () => {
 		const trace = await dryRun(
 			target,
-			{
-				deployment_target: 'test',
-				release_ref: releaseSha,
-			},
-			f.api,
-		);
-		assert.deepEqual(trace.errors, []);
-		const e2e = trace.commands.findIndex(
-			({ name }) => name === 'Customer or staff E2E tests',
+			{ release_ref: releaseSha },
+			fixture(target).api,
 		);
 		const unit = trace.commands.findIndex(
 			({ name }) =>
@@ -596,6 +638,9 @@ for (const target of ['app', 'admin'])
 		);
 		const build = trace.commands.findIndex(
 			({ run }) => run === 'pnpm run "ci:$UI_TARGET:build:$UI_MODE"',
+		);
+		const e2e = trace.commands.findIndex(
+			({ name }) => name === 'Customer or staff E2E tests',
 		);
 		assert.ok(unit >= 0 && unit < build && build < e2e);
 	});

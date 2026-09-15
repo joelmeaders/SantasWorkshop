@@ -159,10 +159,9 @@ pnpm run e2e:test
 ### Hosting Builds in GitHub Actions
 
 - The PR workflow selects affected app/admin targets and backend checks, then requires every selected job through `build_validation`. Target jobs run unit tests and **test**-mode build checks before a single customer/staff E2E matrix. Each browser target has its own runner and emulators. Root `README.md`, root `CHANGELOG.md`, and Markdown under `docs/` do not expand an otherwise scoped target selection. Unknown code and configuration inputs keep full validation. The canonical Storybook workflow owns behavior tests and the separate Windows visual job.
-- Merge-to-master workflows deploy the merged commit to the **test** Firebase project first.
-- To deploy to production, the owner selects a release tag, branch, or commit in `release_ref` and invokes the release workflow from `master`. The gate resolves the selection once to an immutable commit on `master`.
-- The workflow automatically finds and verifies the required successful tests and test deployment for that commit. There are no manual run-ID, repeated-commit approval, or test-skip inputs. Missing or invalid evidence blocks production and identifies the test workflow to run.
-- Production reuses verified evidence automatically. Test deployments run fresh suites. See [the release procedure](docs/release-readiness.md#exact-sha-release-evidence-and-owner-approval) for required checks, path-filter gaps, and rollback reuse.
+- Merge-to-master workflows deploy each affected consumer to **TEST**, then wait for your approval to deploy the same commit to **production**. Open the run and select **Review deployments → production → Approve and deploy**.
+- For urgent fixes, add `[skip tests]` to the commit subject (first line) that reaches `master`, or select `skip_tests` on a manual release. Skipped suites do not block promotion. Build and TEST deployment checks still run, and production still needs approval.
+- Manual release and rollback remain available through `release_ref`. They also deploy TEST before requesting production approval. See [the release procedure](docs/release-readiness.md#exact-sha-release-evidence-and-owner-approval) for environment setup, test skips, and rollback.
 
 Current app/admin PR and test-deploy workflows generate **test-mode** Angular config (`config.production === true`) and then build with Angular CLI's `development` configuration. Production workflows use Angular CLI's `production` configuration.
 
@@ -189,9 +188,9 @@ The main PR workflow calls the Functions checks for backend and shared inputs:
 The merge-to-master workflow is the Functions promotion pipeline:
 
 - it deploys to the **test** Firebase project first
-- customer and staff E2E run on separate runners, and both must pass before test deployment
-- the owner then selects the release and invokes production deployment from `master`; the gate automatically discovers its evidence
-- the shared gate verifies unit, integration, customer/staff E2E, and test-deployment evidence before deploying that SHA to **production**
+- customer and staff E2E run on separate runners; failures block TEST deployment, while skipped suites permit it
+- the same run then waits for the owner's production approval; skipped test suites do not prevent promotion after TEST deployment succeeds
+- production deploys the same resolved SHA after TEST succeeds and you approve
 
 Required GitHub secrets for the Functions workflows:
 

@@ -194,6 +194,7 @@ describe('owner operation continuation limits', () => {
 		getOperation.mockResolvedValue([{ done: true }]);
 		adminMock.setDocSnapshot('staff/staff-record', { roles: [] });
 		let deleted = 0;
+		const requestTimes: number[] = [];
 		adminMock.listUsers.mockImplementation(
 			async (limit: number, token?: string) => {
 				expect(limit).toBe(250);
@@ -220,13 +221,22 @@ describe('owner operation continuation limits', () => {
 			},
 		);
 		adminMock.deleteUsers.mockImplementation(async (uids: string[]) => {
+			requestTimes.push(Date.now());
 			expect(uids).toHaveLength(250);
 			expect(uids.every((uid) => uid.startsWith('customer-'))).toBe(true);
 			deleted += uids.length;
 			return { successCount: uids.length, failureCount: 0, errors: [] };
 		});
-		await worker({ data: { operationId: 'reset-1' } });
+		const run = worker({ data: { operationId: 'reset-1' } });
+		await vi.runAllTimersAsync();
+		await run;
 		expect(deleted).toBe(12_500);
+		expect(requestTimes).toHaveLength(50);
+		for (let index = 1; index < requestTimes.length; index++) {
+			expect(
+				requestTimes[index] - requestTimes[index - 1],
+			).toBeGreaterThanOrEqual(1000);
+		}
 		expect(
 			adminMock.getAll.mock.calls.every((args) => args.length <= 251),
 		).toBe(true);
@@ -274,9 +284,11 @@ describe('owner operation continuation limits', () => {
 				failureCount: 0,
 				errors: [],
 			});
-		await expect(
+		const failedRun = expect(
 			worker({ data: { operationId: 'reset-1' } }),
 		).rejects.toThrow('Failed to delete 1');
+		await vi.runAllTimersAsync();
+		await failedRun;
 		expect(operation).toMatchObject({
 			status: 'failed',
 			progress: { deletedAuthUsers: 1 },
@@ -284,7 +296,9 @@ describe('owner operation continuation limits', () => {
 		expect(operation['progress']).not.toHaveProperty('authComplete');
 		expect(getFiles).not.toHaveBeenCalled();
 		recursiveDelete.mockClear();
-		await worker({ data: { operationId: 'reset-1' } });
+		const retry = worker({ data: { operationId: 'reset-1' } });
+		await vi.runAllTimersAsync();
+		await retry;
 		expect(operation).toMatchObject({
 			status: 'succeeded',
 			result: { deletedAuthUsers: 2 },
@@ -292,6 +306,95 @@ describe('owner operation continuation limits', () => {
 		expect(recursiveDelete).not.toHaveBeenCalled();
 		expect(getOperation).toHaveBeenCalledOnce();
 	});
+
+	it.each(['auth/quota-exceeded', 'auth/too-many-requests'])(
+		'retries %s on the same Auth batch without releasing the lock or double counting',
+		async (code) => {
+			const { worker, adminMock, operation, getOperation, enqueue } =
+				await setup({ backupOperationName: 'operations/backup-1' });
+			getOperation.mockResolvedValue([{ done: true }]);
+			adminMock.listUsers
+				.mockResolvedValueOnce({
+					users: [{ uid: 'one' }],
+					pageToken: 'next',
+				})
+				.mockResolvedValue({ users: [{ uid: 'two' }] });
+			const requestTimes: number[] = [];
+			adminMock.deleteUsers.mockImplementation(async () => {
+				requestTimes.push(Date.now() - START.getTime());
+				if (requestTimes.length === 2 || requestTimes.length === 3) {
+					expect(operation['progress']).toMatchObject({
+						deletedAuthUsers: 1,
+					});
+					expect(operation['status']).toBe('running');
+					expect(
+						adminMock.getDocRef('ownerOperationLocks/yearly-reset')
+							.delete,
+					).not.toHaveBeenCalled();
+					throw Object.assign(
+						new Error('Exceeded quota for batch deleting accounts'),
+						{ code },
+					);
+				}
+				return { successCount: 1, failureCount: 0, errors: [] };
+			});
+			const run = worker({ data: { operationId: 'reset-1' } });
+			await vi.advanceTimersByTimeAsync(1099);
+			expect(adminMock.deleteUsers).not.toHaveBeenCalled();
+			await vi.runAllTimersAsync();
+			await run;
+			expect(requestTimes).toEqual([1100, 2200, 4400, 8800]);
+			expect(adminMock.deleteUsers.mock.calls).toEqual([
+				[['one']],
+				[['two']],
+				[['two']],
+				[['two']],
+			]);
+			expect(operation).toMatchObject({
+				status: 'succeeded',
+				progress: { deletedAuthUsers: 2, authComplete: 1 },
+			});
+			expect(enqueue).not.toHaveBeenCalled();
+		},
+	);
+
+	it.each([
+		{ code: 'auth/quota-exceeded', attempts: 5 },
+		{ code: 'auth/insufficient-permission', attempts: 1 },
+		{ code: 'auth/internal-error', attempts: 1 },
+	])(
+		'stops after $attempts attempts for $code and preserves incomplete Auth state',
+		async ({ code, attempts }) => {
+			const {
+				worker,
+				adminMock,
+				operation,
+				getOperation,
+				getFiles,
+				enqueue,
+			} = await setup({ backupOperationName: 'operations/backup-1' });
+			getOperation.mockResolvedValue([{ done: true }]);
+			adminMock.listUsers.mockResolvedValue({ users: [{ uid: 'one' }] });
+			const error = Object.assign(new Error('Auth deletion failed'), {
+				code,
+			});
+			adminMock.deleteUsers.mockRejectedValue(error);
+			const run = expect(
+				worker({ data: { operationId: 'reset-1' } }),
+			).rejects.toBe(error);
+			await vi.runAllTimersAsync();
+			await run;
+			expect(adminMock.deleteUsers).toHaveBeenCalledTimes(attempts);
+			expect(operation['status']).toBe('failed');
+			expect(operation['progress']).not.toHaveProperty('authComplete');
+			expect(operation['progress']).not.toHaveProperty(
+				'deletedAuthUsers',
+			);
+			expect(getFiles).not.toHaveBeenCalled();
+			expect(enqueue).not.toHaveBeenCalled();
+			expect(vi.getTimerCount()).toBe(0);
+		},
+	);
 
 	it('retries failed QR deletion and skips it after recorded completion', async () => {
 		const {

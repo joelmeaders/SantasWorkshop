@@ -1,4 +1,5 @@
 import { AsyncParser } from '@json2csv/node';
+import type { DeleteUsersResult } from 'firebase-admin/auth';
 import { getFunctions } from 'firebase-admin/functions';
 import {
 	COLLECTION_SCHEMA,
@@ -23,6 +24,10 @@ import { customerAuthUserBatches } from './ownerOperationAuthUsers';
 const log = createFunctionLogger('ownerOperationWorker');
 const EXPORT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const BACKUP_WAIT_LIMIT_MS = 60 * 60 * 1000;
+// Firebase Auth permits one batch deletion request per second.
+// https://firebase.google.com/docs/auth/limits#account_creation_and_deletion_limits
+const AUTH_DELETE_INTERVAL_MS = 1100;
+const AUTH_DELETE_MAX_ATTEMPTS = 5;
 const QR_PAGE_SIZE = 250;
 const QR_DELETE_CONCURRENCY = 10;
 
@@ -395,12 +400,33 @@ const executeScheduleInitialization = async (
 	};
 };
 
+const deleteAuthBatch = async (users: string[]): Promise<DeleteUsersResult> => {
+	for (let attempt = 0; ; attempt++) {
+		// Wait before the first request too, including after a worker redelivery.
+		await new Promise<void>((resolve) =>
+			setTimeout(resolve, AUTH_DELETE_INTERVAL_MS * 2 ** attempt),
+		);
+		try {
+			return await admin.auth().deleteUsers(users);
+		} catch (error) {
+			const code = (error as { code?: string } | null)?.code;
+			if (
+				(code !== 'auth/quota-exceeded' &&
+					code !== 'auth/too-many-requests') ||
+				attempt + 1 >= AUTH_DELETE_MAX_ATTEMPTS
+			) {
+				throw error;
+			}
+		}
+	}
+};
+
 const deleteCustomerAuthUsers = async (
 	operationId: string,
 	progress: OwnerOperationCounts,
 ): Promise<void> => {
 	for await (const users of customerAuthUserBatches()) {
-		const result = await admin.auth().deleteUsers(users);
+		const result = await deleteAuthBatch(users);
 		progress['deletedAuthUsers'] =
 			(progress['deletedAuthUsers'] ?? 0) + result.successCount;
 		await updateOperation(operationId, { stage: 'purging-auth', progress });

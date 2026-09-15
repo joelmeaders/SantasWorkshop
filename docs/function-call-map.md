@@ -53,6 +53,13 @@ wait budget to the purge. Terminal redelivery may retry lock cleanup but must
 not restart destructive work. Release a lock transactionally only when its
 `operationId` matches the operation being completed.
 
+Auth deletion waits 1.1 seconds before each batch request, including the first.
+Quota errors retry the same batch up to five total attempts, with exponential
+delays. These retries stay inside the current task and retain its lock. Other
+errors and exhausted retries use the existing task failure path. Record success
+counts only after a batch returns, and never mark Auth complete after a partial
+failure. This follows the [Firebase batch deletion limit](https://firebase.google.com/docs/auth/limits#account_creation_and_deletion_limits).
+
 The task retry limit does not bound a chain of newly enqueued tasks. The backup
 budget is an operational policy, not a measured backup SLA or a strict dispatch
 count limit. Before deploying over an older worker revision, inspect active

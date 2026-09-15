@@ -35,8 +35,8 @@ In **Admin > Owner Operations**:
 
 1. Create and download a marketing email export. The reset refuses to preview
    unless a successful private export from the last seven days still exists.
-2. Preview the yearly reset. Verify the Auth, Firestore, schedule, queue, and QR
-   counts.
+2. Preview the yearly reset. Verify the Auth, Firestore, schedule, and queue
+   counts. Registration QR images are deleted during reset without a count.
 3. Reauthenticate and enter the exact project/year confirmation phrase.
 4. Start the reset. It starts a new full Firestore export and polls it through
    resumable private tasks. No deletion starts if that export fails.
@@ -47,6 +47,18 @@ The reset deletes all nonstaff Auth users, including disabled customers;
 customer/registration/check-in/queue collections; registration QR images; and
 old `dateTimeSlots`. It retains staff and owner accounts, parameters, stats,
 email templates, private exports, and owner audit/job records.
+
+Reset memory use does not grow with the complete customer or QR inventory.
+Auth enumeration and deletion use pages of 250 users. Staff checks fetch only
+document existence for that page. The marketing-export prerequisite reads at
+most 100 projected records per page. Firestore recursive deletion reads document
+names in bounded SDK queries, with one collection processed at a time. Storage
+deletion reads pages of 250 object names under `registrations/` and awaits groups
+of 10 deletes before proceeding. It does not load QR contents or metadata.
+The preview and worker each have 512 MiB of memory and concurrency 1.
+
+Auth batch failures and Storage errors fail the operation. A retry resumes
+unfinished stages. QR completion is recorded only after deletion succeeds.
 
 After reset completion, use **Schedule & Capacity Editor** as an owner to
 generate and validate the new year's schedules. Ordinary administrators may

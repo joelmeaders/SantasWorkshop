@@ -25,11 +25,13 @@ import {
 import { createFunctionLogger } from '../utility/observability';
 import { FUNCTION_REGION } from '../utility/function-region';
 import { SHOP_TIME_ZONE } from '../utility/runtime-config';
+import { customerAuthUserBatches } from './ownerOperationAuthUsers';
 
 const PREVIEW_TTL_MS = 10 * 60 * 1000;
 const EXPORT_URL_TTL_MS = 15 * 60 * 1000;
 const EXPORT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_SCHEDULE_SLOTS = 250;
+const EXPORT_CHECK_PAGE_SIZE = 100;
 const log = createFunctionLogger('ownerOperations');
 
 interface StoredPreview {
@@ -276,32 +278,12 @@ const countCollection = async (name: string): Promise<number> => {
 	return snapshot.data().count;
 };
 
-const isElevatedAuthUser = (user: admin.auth.UserRecord): boolean => {
-	const claims = user.customClaims ?? {};
-	const roles = claims['roles'];
-	return (
-		claims['owner'] === true ||
-		(Array.isArray(roles) && roles.length > 0)
-	);
-};
-
 const countCustomerAuthUsers = async (): Promise<number> => {
 	let count = 0;
-	let pageToken: string | undefined;
-	do {
-		const page = await admin.auth().listUsers(1000, pageToken);
-		count += page.users.filter((user) => !isElevatedAuthUser(user)).length;
-		pageToken = page.pageToken;
-	} while (pageToken);
+	for await (const users of customerAuthUserBatches()) {
+		count += users.length;
+	}
 	return count;
-};
-
-const countRegistrationQrs = async (): Promise<number> => {
-	const [files] = await admin
-		.storage()
-		.bucket()
-		.getFiles({ prefix: 'registrations/' });
-	return files.length;
 };
 
 const loadRegistrationsForYear = async (
@@ -373,7 +355,9 @@ const buildCounts = async (
 				),
 				children: await countCollection(COLLECTION_SCHEMA.children),
 				checkins: await countCollection(COLLECTION_SCHEMA.checkins),
-				cancellations: await countCollection(COLLECTION_SCHEMA.cancellations),
+				cancellations: await countCollection(
+					COLLECTION_SCHEMA.cancellations,
+				),
 				registrationScanAttempts: await countCollection(
 					COLLECTION_SCHEMA.registrationScanAttempts,
 				),
@@ -392,7 +376,6 @@ const buildCounts = async (
 				dateTimeSlots: await countCollection(
 					COLLECTION_SCHEMA.dateTimeSlots,
 				),
-				qrImages: await countRegistrationQrs(),
 			};
 	}
 };
@@ -400,29 +383,36 @@ const buildCounts = async (
 export const assertRecentMarketingExport = async (
 	now = new Date(),
 ): Promise<void> => {
-	const snapshot = await admin
+	let query = admin
 		.firestore()
 		.collection(COLLECTION_SCHEMA.ownerOperations)
 		.where('operation', '==', 'export-marketing-emails')
-		.get();
+		.select('status', 'exportPath', 'completedAt', 'updatedAt')
+		.limit(EXPORT_CHECK_PAGE_SIZE);
 	const cutoff = now.getTime() - EXPORT_RETENTION_MS;
-	const candidates = snapshot.docs
-		.map((doc) => doc.data() as StoredOperation)
-		.filter(
-			(operation) =>
-				operation.status === 'succeeded' &&
-				!!operation.exportPath &&
-				toDate(
-					operation.completedAt ?? operation.updatedAt,
-				).getTime() >= cutoff,
-		);
-	for (const candidate of candidates) {
-		const [exists] = await admin
-			.storage()
-			.bucket()
-			.file(candidate.exportPath as string)
-			.exists();
-		if (exists) return;
+	while (true) {
+		const snapshot = await query.get();
+		for (const doc of snapshot.docs) {
+			const candidate = doc.data() as StoredOperation;
+			if (
+				candidate.status !== 'succeeded' ||
+				!candidate.exportPath ||
+				!(
+					toDate(
+						candidate.completedAt ?? candidate.updatedAt,
+					).getTime() >= cutoff
+				)
+			)
+				continue;
+			const [exists] = await admin
+				.storage()
+				.bucket()
+				.file(candidate.exportPath)
+				.exists();
+			if (exists) return;
+		}
+		if (snapshot.docs.length < EXPORT_CHECK_PAGE_SIZE) break;
+		query = query.startAfter(snapshot.docs[snapshot.docs.length - 1]);
 	}
 	throw new HttpsError(
 		'failed-precondition',

@@ -15,6 +15,7 @@ interface MockCollectionRef {
 	doc: ReturnType<typeof vi.fn>;
 	get: ReturnType<typeof vi.fn>;
 	where: ReturnType<typeof vi.fn>;
+	select: ReturnType<typeof vi.fn>;
 	orderBy: ReturnType<typeof vi.fn>;
 	limit: ReturnType<typeof vi.fn>;
 	offset: ReturnType<typeof vi.fn>;
@@ -52,6 +53,7 @@ export interface BackgroundAdminMock {
 	};
 	doc: ReturnType<typeof vi.fn>;
 	collection: ReturnType<typeof vi.fn>;
+	getAll: ReturnType<typeof vi.fn>;
 	batchSet: ReturnType<typeof vi.fn>;
 	batchCreate: ReturnType<typeof vi.fn>;
 	batchDelete: ReturnType<typeof vi.fn>;
@@ -223,6 +225,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		const collectionRef = {} as MockCollectionRef;
 		const get = vi.fn();
 		const where = vi.fn(() => collectionRef);
+		const select = vi.fn(() => collectionRef);
 		const orderBy = vi.fn(() => collectionRef);
 		const limit = vi.fn(() => collectionRef);
 		const offset = vi.fn(() => collectionRef);
@@ -240,6 +243,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 			doc,
 			get,
 			where,
+			select,
 			orderBy,
 			limit,
 			offset,
@@ -300,6 +304,14 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 
 	const doc = vi.fn((path: string) => getDocRef(path));
 	const collection = vi.fn((name: string) => createCollectionRef(name));
+	const getAll = vi.fn(
+		async (...refs: Array<MockDocRef | { fieldMask: string[] }>) =>
+			Promise.all(
+				refs
+					.filter((ref): ref is MockDocRef => 'get' in ref)
+					.map((ref) => ref.get()),
+			),
+	);
 	const batch = {
 		set: batchSet,
 		create: batchCreate,
@@ -309,6 +321,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 	const firestoreBase = vi.fn(() => ({
 		doc,
 		collection,
+		getAll,
 		batch: vi.fn(() => batch),
 		runTransaction,
 	}));
@@ -350,6 +363,7 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		},
 		doc,
 		collection,
+		getAll,
 		batchSet,
 		batchCreate,
 		batchDelete,

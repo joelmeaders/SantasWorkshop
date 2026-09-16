@@ -31,6 +31,10 @@ server-authoritative endpoint.
 
 ## 2. Run the owner workflow
 
+Yearly resets and check-in statistics rebuilds are available January 1 through
+October 15, inclusive, in America/Denver. Schedule creation and editing remain
+available throughout the year, with the existing owner and administrator permissions.
+
 In **Admin > Owner Operations**:
 
 1. Create and download a marketing email export. The reset refuses to preview

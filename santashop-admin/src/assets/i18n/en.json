@@ -263,7 +263,7 @@
 	"Error registering": "Error registering",
 	"Español": "Español",
 	"Event reminder": "Event reminder",
-	"Every operation is checked by the backend, previewed first, and recorded in the audit log. Reset and initialization operations are available only January 1 through September 15.": "Every operation is checked by the backend, previewed first, and recorded in the audit log. Reset and initialization operations are available only January 1 through September 15.",
+	"Every operation is checked by the backend, previewed first, and recorded in the audit log. Yearly resets and check-in statistics rebuilds are available only January 1 through October 15. Schedules can be created and edited throughout the year.": "Every operation is checked by the backend, previewed first, and recorded in the audit log. Yearly resets and check-in statistics rebuilds are available only January 1 through October 15. Schedules can be created and edited throughout the year.",
 	"Every placeholder needs a field mapping.": "Every placeholder needs a field mapping.",
 	"Every saved cancellation, including repeat cancellations of the same registration.": "Every saved cancellation, including repeat cancellations of the same registration.",
 	"Exact confirmation phrase": "Exact confirmation phrase",

@@ -56,7 +56,7 @@ describe('ScheduleEditorPage', () => {
 			expiresAt: new Date(Date.now() + 60000).toISOString(),
 			confirmationPhrase: 'INITIALIZE SCHEDULE test-project 2025',
 			counts: { requestedSlots: 1 },
-			seasonRestricted: true,
+			seasonRestricted: false,
 		});
 		scheduleEditorService.bulkUpdate.mockResolvedValue(undefined);
 		scheduleEditorService.updateSlot.mockResolvedValue(undefined);

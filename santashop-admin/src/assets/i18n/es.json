@@ -263,7 +263,7 @@
 	"Error registering": "Error al inscribir",
 	"Español": "Español",
 	"Event reminder": "Recordatorio del evento",
-	"Every operation is checked by the backend, previewed first, and recorded in the audit log. Reset and initialization operations are available only January 1 through September 15.": "Cada operación se verifica en el servidor, requiere una vista previa y queda registrada. Las operaciones de restablecimiento e inicialización solo están disponibles del 1 de enero al 15 de septiembre.",
+	"Every operation is checked by the backend, previewed first, and recorded in the audit log. Yearly resets and check-in statistics rebuilds are available only January 1 through October 15. Schedules can be created and edited throughout the year.": "Cada operación se verifica en el servidor, requiere una vista previa y queda registrada. Los restablecimientos anuales y la reconstrucción de las estadísticas de registro de entrada solo están disponibles del 1 de enero al 15 de octubre. Los horarios se pueden crear y editar durante todo el año.",
 	"Every placeholder needs a field mapping.": "Cada campo de la plantilla necesita una asignación de datos.",
 	"Every saved cancellation, including repeat cancellations of the same registration.": "Cada cancelación guardada, incluidas las cancelaciones repetidas de una inscripción.",
 	"Exact confirmation phrase": "Frase exacta de confirmación",

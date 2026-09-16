@@ -9,6 +9,7 @@ type AdminMock = ReturnType<typeof createBackgroundAdminMock>;
 
 const setup = async (
 	overrides: Record<string, unknown> = {},
+	seasonOpen = true,
 ): Promise<{
 	worker: Worker;
 	adminMock: AdminMock;
@@ -83,7 +84,7 @@ const setup = async (
 		getFunctions: () => ({ taskQueue: () => ({ enqueue }) }),
 	}));
 	vi.doMock('../../../src/fn/ownerOperations', () => ({
-		isOwnerOperationSeasonOpen: () => true,
+		isOwnerOperationSeasonOpen: () => seasonOpen,
 		assertRecentMarketingExport: vi.fn().mockResolvedValue(undefined),
 	}));
 	const { default: worker } = await vi.importActual<{ default: Worker }>(
@@ -623,6 +624,60 @@ describe('owner operation continuation limits', () => {
 			expect(adminMock.exportDocuments).not.toHaveBeenCalled();
 			expect(enqueue).not.toHaveBeenCalled();
 			expect(recursiveDelete).not.toHaveBeenCalled();
+		},
+	);
+});
+
+describe('owner worker seasonal restrictions', () => {
+	it('creates schedule slots after the seasonal window closes', async () => {
+		const slot = {
+			programYear: 2026,
+			dateTime: '2026-12-12T18:00:00.000Z',
+			maxSlots: 20,
+			enabled: true,
+		};
+		const { worker, operation, adminMock } = await setup(
+			{
+				operation: 'initialize-schedule',
+				programYear: 2026,
+				slots: [slot],
+			},
+			false,
+		);
+		vi.setSystemTime(new Date('2026-11-15T12:00:00.000Z'));
+		const create = vi.fn();
+		const close = vi.fn().mockResolvedValue(undefined);
+		const db = adminMock.module.firestore();
+		adminMock.module.firestore.mockReturnValue({
+			...db,
+			bulkWriter: () => ({ create, close }),
+		} as never);
+		await worker({ data: { operationId: 'reset-1' } });
+		expect(operation).toMatchObject({
+			status: 'succeeded',
+			result: { created: 1, skipped: 0 },
+		});
+		expect(create).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				programYear: 2026,
+				maxSlots: 20,
+				enabled: true,
+			}),
+		);
+		expect(close).toHaveBeenCalledTimes(1);
+	});
+	it.each(['yearly-reset', 'rebuild-checkin-stats'])(
+		'rejects %s after the seasonal window closes',
+		async (type) => {
+			const { worker, operation, recursiveDelete, adminMock } =
+				await setup({ operation: type }, false);
+			await expect(
+				worker({ data: { operationId: 'reset-1' } }),
+			).rejects.toThrow('execution window closed');
+			expect(operation.status).toBe('failed');
+			expect(recursiveDelete).not.toHaveBeenCalled();
+			expect(adminMock.exportDocuments).not.toHaveBeenCalled();
 		},
 	);
 });

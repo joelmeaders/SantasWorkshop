@@ -96,7 +96,7 @@ describe('ScheduleEditorService', () => {
 			expiresAt: '2026-07-30T12:10:00.000Z',
 			confirmationPhrase: 'INITIALIZE SCHEDULE test-project 2025',
 			counts: { requestedSlots: 1 },
-			seasonRestricted: true,
+			seasonRestricted: false,
 		});
 
 		// Act

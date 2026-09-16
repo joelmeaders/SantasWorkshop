@@ -16,24 +16,24 @@ describe('owner operation seasonal window', () => {
 		).toBe(true);
 	});
 
-	it('accepts the final instant of September 15 in the shop timezone', async () => {
+	it('accepts the final instant of October 15 in the shop timezone', async () => {
 		const { isOwnerOperationSeasonOpen } = await import(
 			'../../../src/fn/ownerOperations'
 		);
 		expect(
 			isOwnerOperationSeasonOpen(
-				new Date('2026-09-16T05:59:59.999Z'),
+				new Date('2026-10-16T05:59:59.999Z'),
 			),
 		).toBe(true);
 	});
 
-	it('rejects the first instant of September 16 in the shop timezone', async () => {
+	it('rejects the first instant of October 16 in the shop timezone', async () => {
 		const { isOwnerOperationSeasonOpen } = await import(
 			'../../../src/fn/ownerOperations'
 		);
 		expect(
 			isOwnerOperationSeasonOpen(
-				new Date('2026-09-16T06:00:00.000Z'),
+				new Date('2026-10-16T06:00:00.000Z'),
 			),
 		).toBe(false);
 	});
@@ -171,41 +171,51 @@ describe('owner operation callables', () => {
 		).toHaveBeenCalledTimes(1);
 	});
 
-	it('validates and persists an initialize-schedule preview', async () => {
-		const { previewOwnerOperation } = await loadHandlers();
-		const now = new Date('2026-01-10T00:00:00.000Z');
+	it.each(['2026-01-10', '2026-10-16', '2026-11-15', '2026-12-31'])(
+		'validates and persists a schedule preview on %s',
+		async (date) => {
+			const { previewOwnerOperation } = await loadHandlers();
+			const now = new Date(`${date}T12:00:00.000Z`);
 
-		await expect(
-			previewOwnerOperation(
-				{
-					data: {
-						operation: 'initialize-schedule',
-						programYear: 2026,
-						slots: [
-							{
-								programYear: 2026,
-								dateTime: '2026-12-10T18:00:00.000Z',
-								maxSlots: 20,
-								enabled: true,
-							},
-						],
-					},
-					auth: owner,
-				} as never,
-				now,
-			),
-		).resolves.toMatchObject({
-			counts: { requestedSlots: 1 },
-			seasonRestricted: true,
-		});
+			await expect(
+				previewOwnerOperation(
+					{
+						data: {
+							operation: 'initialize-schedule',
+							programYear: 2026,
+							slots: [
+								{
+									programYear: 2026,
+									dateTime: '2026-12-10T18:00:00.000Z',
+									maxSlots: 20,
+									enabled: true,
+								},
+							],
+						},
+						auth: owner,
+					} as never,
+					now,
+				),
+			).resolves.toMatchObject({
+				counts: { requestedSlots: 1 },
+				seasonRestricted: false,
+			});
 
-		await expect(
-			previewOwnerOperation(
-				{ data: { operation: 'initialize-schedule', programYear: 2026, slots: [] }, auth: owner } as never,
-				now,
-			),
-		).rejects.toMatchObject({ code: 'invalid-argument' });
-	});
+			await expect(
+				previewOwnerOperation(
+					{
+						data: {
+							operation: 'initialize-schedule',
+							programYear: 2026,
+							slots: [],
+						},
+						auth: owner,
+					} as never,
+					now,
+				),
+			).rejects.toMatchObject({ code: 'invalid-argument' });
+		},
+	);
 
 	it('rejects unauthenticated, out-of-season, and malformed previews', async () => {
 		const { previewOwnerOperation } = await loadHandlers();
@@ -220,7 +230,7 @@ describe('owner operation callables', () => {
 		await expect(
 			previewOwnerOperation(
 				{ data: { operation: 'rebuild-checkin-stats', programYear: 2026 }, auth: owner } as never,
-				new Date('2026-10-01T00:00:00.000Z'),
+				new Date('2026-10-16T06:00:00.000Z'),
 			),
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 	});
@@ -334,6 +344,79 @@ describe('owner operation callables', () => {
 			{ consumedAt: now },
 		);
 		expect(enqueue).toHaveBeenCalledTimes(1);
+	});
+
+	it.each([
+		['initialize-schedule', '2026-10-16T06:00:00.000Z', true],
+		['initialize-schedule', '2026-11-15T12:00:00.000Z', true],
+		['initialize-schedule', '2026-12-31T12:00:00.000Z', true],
+		['yearly-reset', '2026-10-16T05:59:59.999Z', true],
+		['rebuild-checkin-stats', '2026-10-16T05:59:59.999Z', true],
+		['yearly-reset', '2026-10-16T06:00:00.000Z', false],
+		['rebuild-checkin-stats', '2026-10-16T06:00:00.000Z', false],
+	] as const)(
+		'checks the start window for %s at %s',
+		async (operation, date, allowed) => {
+			const now = new Date(date);
+			const enqueue = vi.fn().mockResolvedValue(undefined);
+			getFunctionsMock.mockReturnValue({ taskQueue: () => ({ enqueue }) });
+			adminMock.setDocSnapshot('ownerOperationPreviews/season', {
+				actorUid: owner.uid,
+				operation,
+				projectId: 'santas-workshop-test',
+				programYear: operation === 'yearly-reset' ? 2025 : 2026,
+				counts: {},
+				confirmationPhrase: 'CONFIRM',
+				expiresAt: new Date(now.getTime() + 60_000),
+			});
+			adminMock.setDocSnapshot(
+				'ownerOperationLocks/' + operation,
+				{},
+				false,
+			);
+			const { startOwnerOperation } = await loadHandlers();
+			const result = startOwnerOperation(
+				{
+					data: { previewId: 'season', confirmationPhrase: 'CONFIRM' },
+					auth: {
+						...owner,
+						token: { owner: true, auth_time: now.getTime() / 1000 },
+					},
+				} as never,
+				now,
+			);
+			if (allowed) {
+				await expect(result).resolves.toMatchObject({ status: 'queued' });
+				expect(enqueue).toHaveBeenCalledTimes(1);
+			} else {
+				await expect(result).rejects.toMatchObject({
+					code: 'failed-precondition',
+					message:
+						'This operation is available only from January 1 through October 15.',
+				});
+				expect(enqueue).not.toHaveBeenCalled();
+				expect(
+					adminMock.getDocRef('ownerOperationPreviews/season').update,
+				).not.toHaveBeenCalled();
+			}
+		},
+	);
+
+	it('allows a statistics rebuild preview in the extended October window', async () => {
+		const { previewOwnerOperation } = await loadHandlers();
+		adminMock.setCollectionCount('checkins', 2);
+		await expect(
+			previewOwnerOperation(
+				{
+					data: { operation: 'rebuild-checkin-stats', programYear: 2026 },
+					auth: owner,
+				} as never,
+				new Date('2026-10-16T05:59:59.999Z'),
+			),
+		).resolves.toMatchObject({
+			seasonRestricted: true,
+			counts: { checkins: 2 },
+		});
 	});
 
 	it('rejects an expired preview before queueing an operation', async () => {

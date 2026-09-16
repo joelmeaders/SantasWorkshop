@@ -638,11 +638,9 @@ export default async function ownerOperationWorker(request: {
 	let shouldReleaseLock = true;
 	try {
 		if (
-			[
-				'yearly-reset',
-				'rebuild-checkin-stats',
-				'initialize-schedule',
-			].includes(operation.operation) &&
+			['yearly-reset', 'rebuild-checkin-stats'].includes(
+				operation.operation,
+			) &&
 			!isOwnerOperationSeasonOpen()
 		) {
 			throw new Error(

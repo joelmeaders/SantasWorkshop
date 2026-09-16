@@ -101,19 +101,18 @@ const localDateParts = (
 
 export const isOwnerOperationSeasonOpen = (now = new Date()): boolean => {
 	const { month, day } = localDateParts(now);
-	return month < 9 || (month === 9 && day <= 15);
+	return month < 10 || (month === 10 && day <= 15);
 };
 
 const isSeasonRestricted = (operation: OwnerOperationType): boolean =>
 	operation === 'yearly-reset' ||
-	operation === 'rebuild-checkin-stats' ||
-	operation === 'initialize-schedule';
+	operation === 'rebuild-checkin-stats';
 
 const assertSeasonOpen = (operation: OwnerOperationType, now: Date): void => {
 	if (isSeasonRestricted(operation) && !isOwnerOperationSeasonOpen(now)) {
 		throw new HttpsError(
 			'failed-precondition',
-			'This operation is available only from January 1 through September 15.',
+			'This operation is available only from January 1 through October 15.',
 		);
 	}
 };

@@ -6,6 +6,9 @@ All notable changes to the main application will be documented in this file.
 
 ### Changed
 
+- List accepted examples of children's age-proof documents on the ticket in English and Spanish, matching the website FAQ.
+- Shorten the appointment dialog's social link label to "Facebook".
+
 - Combine appointment-change guidance and date/time selection in one dialog, with reassuring English and Spanish text.
 - Explain when all other appointments are full and link to Denver Santa Claus Shop on Facebook in a new window.
 

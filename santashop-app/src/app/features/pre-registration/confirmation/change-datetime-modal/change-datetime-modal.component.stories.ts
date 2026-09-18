@@ -111,7 +111,7 @@ export const AllOtherAppointmentsFull: Story = {
 		expect(canvas.getByText(/all other spots are full/i)).toBeVisible();
 		const facebook = getIonButton(
 			canvasElement,
-			/visit our facebook page/i,
+			/^\s*Facebook\s*$/,
 		);
 		expect(facebook).toHaveAttribute(
 			'href',
@@ -142,7 +142,7 @@ export const AllOtherAppointmentsFullSpanish: Story = {
 			).toBeVisible(),
 		);
 		expect(
-			getIonButton(canvasElement, /visita nuestra página de facebook/i),
+			getIonButton(canvasElement, /^\s*Facebook\s*$/),
 		).toHaveAttribute('target', '_blank');
 	},
 };

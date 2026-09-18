@@ -559,7 +559,7 @@ test.describe('customer registration lifecycle', () => {
 			if (slotsReserved === 10) {
 				await expect(modal).toContainText('All other spots are full');
 				await expect(modal.locator('ion-accordion-group')).toHaveCount(0);
-				const facebook = modal.getByRole('link', { name: /Visit our Facebook page/ });
+				const facebook = modal.getByRole('link', { name: 'Facebook', exact: true });
 				await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/denversantaclausshop');
 				await expect(facebook).toHaveAttribute('target', '_blank');
 				const unchanged = await inspectRegistrationQrLifecycle(account.emailAddress);

@@ -2,23 +2,26 @@ import { DOCUMENT } from '@angular/common';
 import { inject, Injectable, InjectionToken, OnDestroy, Provider } from '@angular/core';
 import {
 	createDefaultPublicParameters, parsePublicParameters, parsePublicParametersJson,
+	defaultWaitingListSettings,
+	parseWaitingListSettings,
+	WAITING_LIST_REMOTE_CONFIG_KEY,
+	type WaitingListSettings,
 	PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY, PUBLIC_PARAMETERS_RETRY_DELAYS_MS,
 	type PublicParameters, type PublicParametersStatus,
 } from '@santashop/models';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
-import {
-	activate, ensureInitialized, fetchAndActivate, getRemoteConfig, getValue,
-	isSupported, onConfigUpdate,
-} from 'firebase/remote-config';
+import type { RemoteConfig } from 'firebase/remote-config';
 import { FIREBASE_APP, PUBLIC_PARAMETERS_SOURCE, type PublicParametersSource } from '../tokens';
 
 export interface RemoteConfigPublicParametersOptions {
 	useEmulator: boolean;
 	/** Reads the explicit emulator fixture. Must not read a deployed database. */
 	readLocal?: () => Promise<unknown>;
+	readLocalWaitingList?: () => Promise<unknown>;
 }
 
 export interface PublicParametersRuntime {
+	readWaitingList?(): WaitingListSettings;
 	readonly local: boolean;
 	initialize(): Promise<unknown>;
 	refresh(force?: boolean, fetchTimeoutMillis?: number): Promise<unknown>;
@@ -36,34 +39,65 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 		if (options.useEmulator) {
 			const read = options.readLocal;
 			if (!read) throw new Error('An emulator settings reader is required.');
-			return { local: true, initialize: read, refresh: read, listen: (): (() => void) => (): void => undefined };
+				let waitingList = defaultWaitingListSettings();
+				const readBoth = async (): Promise<unknown> => {
+					const settings = await read();
+					try {
+						waitingList = parseWaitingListSettings(
+							await options.readLocalWaitingList?.(),
+						);
+					} catch {
+						waitingList = defaultWaitingListSettings();
+					}
+					return settings;
+				};
+				return { local: true, initialize: readBoth, refresh: readBoth,
+					readWaitingList: (): WaitingListSettings => waitingList,
+					listen: (): (() => void) => (): void => undefined,
+				};
 		}
 		const app = inject(FIREBASE_APP);
-		let remote: ReturnType<typeof getRemoteConfig> | undefined;
+		let sdk: typeof import('firebase/remote-config') | undefined;
+		let remote: RemoteConfig | undefined;
 		const read = (): PublicParameters => {
-			if (!remote) throw new Error('Remote Config is unavailable.');
-			const value = getValue(remote, PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY);
+			if (!remote || !sdk) throw new Error('Remote Config is unavailable.');
+			const value = sdk.getValue(remote, PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY);
 			if (value.getSource() !== 'remote') throw new Error('Remote settings are missing.');
 			return parsePublicParametersJson(value.asString());
 		};
 		return {
 			local: false,
-			initialize: async (): Promise<unknown> => {
-				if (!(await isSupported())) throw new Error('Remote Config is unsupported in this browser.');
-				remote = getRemoteConfig(app);
+				readWaitingList: (): WaitingListSettings => {
+					try {
+						if (!remote || !sdk) return defaultWaitingListSettings();
+						const value = sdk.getValue(remote, WAITING_LIST_REMOTE_CONFIG_KEY);
+						return value.getSource() === 'remote'
+							? parseWaitingListSettings(
+									JSON.parse(value.asString()) as unknown,
+								)
+							: defaultWaitingListSettings();
+					} catch {
+						return defaultWaitingListSettings();
+					}
+				},
+				initialize: async (): Promise<unknown> => {
+				// Keep settings SDK code out of the startup bundle and emulator sessions.
+				sdk = await import('firebase/remote-config');
+				if (!(await sdk.isSupported())) throw new Error('Remote Config is unsupported in this browser.');
+				remote = sdk.getRemoteConfig(app);
 				remote.settings.minimumFetchIntervalMillis = 60_000;
 				remote.settings.fetchTimeoutMillis = 10_000;
-				await ensureInitialized(remote);
+				await sdk.ensureInitialized(remote);
 				// A first visit has no activated value. The source already holds release defaults.
 				try { return read(); } catch { return undefined; }
 			},
 			refresh: async (force = false, fetchTimeoutMillis?: number): Promise<unknown> => {
-				if (!remote) throw new Error('Remote Config is unavailable.');
+				if (!remote || !sdk) throw new Error('Remote Config is unavailable.');
 				const minimumFetchIntervalMillis = remote.settings.minimumFetchIntervalMillis;
 				const configuredFetchTimeoutMillis = remote.settings.fetchTimeoutMillis;
 				if (force) remote.settings.minimumFetchIntervalMillis = 0;
 				if (fetchTimeoutMillis !== undefined) remote.settings.fetchTimeoutMillis = fetchTimeoutMillis;
-				try { await fetchAndActivate(remote); }
+				try { await sdk.fetchAndActivate(remote); }
 				finally {
 					if (force) remote.settings.minimumFetchIntervalMillis = minimumFetchIntervalMillis;
 					if (fetchTimeoutMillis !== undefined) remote.settings.fetchTimeoutMillis = configuredFetchTimeoutMillis;
@@ -71,11 +105,12 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 				return read();
 			},
 			listen: (next, error): (() => void) => {
-				if (!remote) return (): void => undefined;
+				if (!remote || !sdk) return (): void => undefined;
 				const activeRemote = remote;
-				return onConfigUpdate(activeRemote, {
+				const activeSdk = sdk;
+				return activeSdk.onConfigUpdate(activeRemote, {
 					next: (): void => {
-						void activate(activeRemote).then(() => next(read())).catch(error);
+						void activeSdk.activate(activeRemote).then(() => next(read())).catch(error);
 					},
 					error,
 					complete: (): void => error(new Error('Real-time settings updates stopped.')),
@@ -96,8 +131,22 @@ export const provideRemoteConfigPublicParameters = (options: RemoteConfigPublicP
 export class RemoteConfigPublicParametersSource implements PublicParametersSource, OnDestroy {
 	private readonly runtime = inject(PUBLIC_PARAMETERS_RUNTIME);
 	private readonly document = inject(DOCUMENT);
-	private readonly settings = new BehaviorSubject<PublicParameters>(createDefaultPublicParameters());
-	private readonly status = new BehaviorSubject<PublicParametersStatus>({ source: 'defaults', refreshing: true });
+	private readonly settings = new BehaviorSubject<PublicParameters>(
+		createDefaultPublicParameters(),
+	);
+	private readonly waitingListSettings =
+		new BehaviorSubject<WaitingListSettings>(defaultWaitingListSettings());
+	public readonly waitingListSettings$ = this.waitingListSettings
+		.asObservable()
+		.pipe(
+			distinctUntilChanged(
+				(a, b) =>
+					a.joiningEnabled === b.joiningEnabled &&
+					a.emailSendingEnabled === b.emailSendingEnabled,
+			),
+		);
+	private readonly status = new BehaviorSubject<PublicParametersStatus>({ source: 'defaults', refreshing: true,
+	});
 	private pending?: Promise<void>;
 	private retryTimer?: ReturnType<typeof setTimeout>;
 	private startupRetryTimer?: ReturnType<typeof setTimeout>;
@@ -228,6 +277,13 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 	}
 
 	private accept(value: unknown, fromStream = false): void {
+		try {
+			this.waitingListSettings.next(
+				parseWaitingListSettings(this.runtime.readWaitingList?.()),
+			);
+		} catch {
+			this.waitingListSettings.next(defaultWaitingListSettings());
+		}
 		const settings = parsePublicParameters(value);
 		if (fromStream) this.streamError = undefined;
 		this.settings.next(settings);
@@ -250,8 +306,12 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		this.clearRetry();
 		if (this.destroyed || this.document.visibilityState === 'hidden' || this.startupRetryTimer !== undefined) return;
 		const delay = this.failures > 0
-			? PUBLIC_PARAMETERS_RETRY_DELAYS_MS[Math.min(this.failures - 1, PUBLIC_PARAMETERS_RETRY_DELAYS_MS.length - 1)] ?? 300_000
-			: Math.max(0, 60_000 - (Date.now() - this.lastAttempt));
+			? (PUBLIC_PARAMETERS_RETRY_DELAYS_MS[
+						Math.min(
+							this.failures - 1, PUBLIC_PARAMETERS_RETRY_DELAYS_MS.length - 1,
+						)
+					] ?? 300_000)
+				: Math.max(0, 60_000 - (Date.now() - this.lastAttempt));
 		this.retryTimer = setTimeout(() => { if (!this.pending) void this.runRefresh(this.streamError !== undefined); }, delay);
 	}
 
@@ -290,6 +350,7 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		this.document.defaultView?.removeEventListener('online', this.lifecycle);
 		this.document.defaultView?.removeEventListener('focus', this.lifecycle);
 		this.settings.complete();
+		this.waitingListSettings.complete();
 		this.status.complete();
 	}
 }

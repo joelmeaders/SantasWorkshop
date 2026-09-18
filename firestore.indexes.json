@@ -301,6 +301,56 @@
 					"order": "ASCENDING"
 				}
 			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "waitingList.active",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "waitingList.joinedOn",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "waitingListCampaigns",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "createdAt",
+					"order": "DESCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "dateTimeSlots",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "enabled",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "dateTime",
+					"order": "ASCENDING"
+				}
+			]
 		}
 	],
 	"fieldOverrides": [

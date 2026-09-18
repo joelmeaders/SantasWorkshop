@@ -1,0 +1,136 @@
+<admin-header [title]="'Waiting list' | adminText" />
+<ion-content>
+	<div class="waiting-admin" tabindex="0" role="region" aria-labelledby="waiting-list-page-heading">
+		<h1 id="waiting-list-page-heading">{{ 'Waiting list capacity emails' | adminText }}</h1>
+		<p>
+			{{
+				'Send an email after more appointment times open. Each person receives
+      one email per campaign.' | adminText
+			}}
+		</p>
+		@if (loading()) {
+			<p role="status">
+				<ion-spinner aria-hidden="true" /> {{ 'Loading' | adminText }}
+			</p>
+		}
+		@if (error()) {
+			<p role="alert">{{ error() | adminText }}</p>
+		}
+		<ion-button
+			fill="outline"
+			[disabled]="loading() || busy()"
+			(click)="reload()"
+			>{{ 'Refresh preview and campaigns' | adminText }}</ion-button
+		>
+		@if (selected(); as campaign) {
+			<section aria-labelledby="campaign-heading" aria-live="polite">
+				<h2 id="campaign-heading">{{ 'Campaign results' | adminText }}</h2>
+				<p>{{ campaign.status | adminText }}</p>
+				@if (campaign.message) {
+					<p>{{ campaign.message | adminText }}</p>
+				}
+				<dl class="results">
+					<div>
+						<dt>
+							{{
+								(campaign.simulated
+									? 'Simulated emails (test only)'
+									: 'Accepted by email provider'
+								) | adminText
+							}}
+						</dt>
+						<dd>{{ campaign.accepted }}</dd>
+					</div>
+					<div>
+						<dt>{{ 'Skipped' | adminText }}</dt>
+						<dd>{{ campaign.skipped }}</dd>
+					</div>
+					<div>
+						<dt>{{ 'Failed' | adminText }}</dt>
+						<dd>{{ campaign.failed }}</dd>
+					</div>
+					<div>
+						<dt>{{ 'Needs delivery review' | adminText }}</dt>
+						<dd>{{ campaign.uncertain }}</dd>
+					</div>
+				</dl>
+				<p>
+					{{
+						'Provider acceptance does not confirm inbox delivery. Uncertain
+        messages are not sent again automatically.' | adminText
+					}}
+				</p>
+				@if (canResume(campaign)) {
+					<ion-button [disabled]="busy()" (click)="resume()">{{
+						'Resume campaign' | adminText
+					}}</ion-button>
+				}
+			</section>
+		}
+		@if (preview(); as preview) {
+			<section aria-labelledby="audience-heading">
+				<h2 id="audience-heading">{{ 'Campaign preview' | adminText }}</h2>
+				<p>
+					<strong>{{ preview.memberCount }}</strong>
+					{{
+						'active waiting-list
+        members' | adminText
+					}}
+				</p>
+				<p>
+					{{
+						'Eligibility is checked again before each email. People who book or
+        leave the list will be skipped.' | adminText
+					}}
+				</p>
+				@for (reason of preview.blockedReasons; track reason) {
+					<p class="notice">{{ reason | adminText }}</p>
+				}
+				<div class="email-grid">
+					@for (email of preview.emails; track email.language) {
+						<article>
+							<h3>{{ email.language === 'es' ? 'Español' : 'English' }}</h3>
+							<p>{{ email.subject }}</p>
+							<admin-waiting-list-email-preview
+								[title]="
+									email.language === 'es'
+										? 'Vista previa del correo'
+										: 'Email preview'
+								"
+								[html]="email.html"
+							/>
+						</article>
+					}
+				</div>
+				@if (preview.canSend) {
+					<label class="confirm"
+						><input
+							type="checkbox"
+							[checked]="confirmed()"
+							[disabled]="busy()"
+							(change)="confirmed.set($any($event.target).checked)"
+						/>
+						{{
+							'I reviewed both emails and want to notify the waiting list.'
+								| adminText
+						}}</label
+					>
+					<ion-button [disabled]="busy() || !confirmed()" (click)="send()">{{
+						(busy() ? 'Starting campaign…' : 'Send capacity emails') | adminText
+					}}</ion-button>
+				}
+			</section>
+		}
+		@if (campaigns().length) {
+			<section>
+				<h2>{{ 'Recent campaigns' | adminText }}</h2>
+				@for (campaign of campaigns(); track campaign.id) {
+					<ion-button fill="clear" (click)="select(campaign)"
+						>{{ campaign.createdAt }} ·
+						{{ campaign.status | adminText }}</ion-button
+					>
+				}
+			</section>
+		}
+	</div>
+</ion-content>

@@ -44,6 +44,73 @@
 			</h2>
 		}
 
+		@if (user()) {
+			<app-waiting-list [source]="mode" />
+		} @else if (waitingListSettings().joiningEnabled || manageMembership) {
+			<section class="notice-sign-in" aria-labelledby="notice-sign-in-title">
+				<h2 id="notice-sign-in-title">
+					{{ 'WAITING_LIST.ACCOUNT_TITLE' | translate }}
+				</h2>
+				<p>
+					{{
+						(manageMembership
+							? 'WAITING_LIST.MANAGE_HELP'
+							: 'WAITING_LIST.ACCOUNT_HELP'
+						) | translate
+					}}
+				</p>
+				@if (!showSignIn()) {
+					<ion-button (click)="showSignIn.set(true)">{{
+						'COMMON.SIGN_IN' | translate
+					}}</ion-button>
+				} @else {
+					<form [formGroup]="signInForm" (ngSubmit)="signIn()">
+						<ion-item
+							><ion-input
+								type="email"
+								autocomplete="email"
+								formControlName="emailAddress"
+								[label]="'COMMON.EMAIL_ADDRESS' | translate"
+								labelPlacement="stacked"
+						/></ion-item>
+						<ion-item
+							><ion-input
+								type="password"
+								autocomplete="current-password"
+								formControlName="password"
+								[label]="'COMMON.PASSWORD' | translate"
+								labelPlacement="stacked"
+						/></ion-item>
+						@if (signInError()) {
+							<p role="alert">{{ 'SIGNIN.INVALID_CREDENTIALS' | translate }}</p>
+						}
+						@if (resetError()) {
+							<p role="alert">{{ 'WAITING_LIST.RESET_ERROR' | translate }}</p>
+						}
+						@if (resetSent()) {
+							<p role="status">{{ 'FORGOTPASS.EMAIL_SENT' | translate }}</p>
+						}
+						<ion-button
+							type="submit"
+							[disabled]="signInForm.invalid || signingIn()"
+							>{{
+								(signingIn() ? 'WAITING_LIST.SIGNING_IN' : 'COMMON.SIGN_IN')
+									| translate
+							}}</ion-button
+						>
+						<ion-button
+							fill="clear"
+							type="button"
+							[disabled]="
+								signInForm.controls.emailAddress.invalid || signingIn()
+							"
+							(click)="resetPassword()"
+							>{{ 'SIGNIN.FORGOT_PASSWORD' | translate }}</ion-button
+						>
+					</form>
+				}
+			</section>
+		}
 		<nav [attr.aria-label]="'OPERATIONAL_NOTICE.SOCIAL_LINKS' | translate">
 			<ion-button
 				shape="round" fill="solid" size="large" color="primary"

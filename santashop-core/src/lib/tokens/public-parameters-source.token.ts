@@ -1,8 +1,9 @@
 import { InjectionToken } from '@angular/core';
-import type { PublicParameters } from '@santashop/models';
+import type { PublicParameters, WaitingListSettings } from '@santashop/models';
 import type { Observable } from 'rxjs';
 
 export interface PublicParametersSource {
+	readonly waitingListSettings$?: Observable<WaitingListSettings>;
 	readonly publicParameters$: Observable<PublicParameters | undefined>;
 }
 

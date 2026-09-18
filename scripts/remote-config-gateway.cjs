@@ -3,7 +3,7 @@ const { getModePrefix, FUNCTION_PROJECT_IDS } = require('../config.functions.cjs
 
 const GATEWAY_FUNCTION = 'publicParametersGateway';
 const REGION = 'us-central1';
-const GATEWAY_CONSUMERS = ['completeRegistration', 'saveDraftChild', 'deleteDraftChild', 'setDraftAppointment', 'undoRegistration', 'changeRegistrationDateTime'];
+const GATEWAY_CONSUMERS = ['completeRegistration', 'saveDraftChild', 'deleteDraftChild', 'setDraftAppointment', 'undoRegistration', 'changeRegistrationDateTime', 'getWaitingListState', 'setWaitingListMembership', 'previewWaitingListCampaign', 'startWaitingListCampaign', 'resumeWaitingListCampaign', 'waitingListEmailWorker'];
 // Keep this shape aligned with publicParametersGatewayUrl in the Functions client.
 const GATEWAY_HOST = /^publicparametersgateway-[a-z0-9-]+\.a\.run\.app$/u;
 const gatewayReader = (projectId, env = process.env) => {

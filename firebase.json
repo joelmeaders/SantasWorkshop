@@ -70,7 +70,6 @@
 						}
 					]
 				},
-
 				{
 					"source": "**/*-????????*.@(css|js)",
 					"headers": [
@@ -91,6 +90,20 @@
 				}
 			],
 			"rewrites": [
+				{
+					"source": "/setWaitingListMembership",
+					"function": {
+						"functionId": "setWaitingListMembership",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/getWaitingListState",
+					"function": {
+						"functionId": "getWaitingListState",
+						"region": "us-central1"
+					}
+				},
 				{
 					"source": "/updatePreferredLanguage",
 					"function": {
@@ -244,7 +257,6 @@
 						}
 					]
 				},
-
 				{
 					"source": "**/*-????????*.@(css|js)",
 					"headers": [
@@ -265,6 +277,55 @@
 				}
 			],
 			"rewrites": [
+				{
+					"source": "/resumeWaitingListCampaign",
+					"function": {
+						"functionId": "resumeWaitingListCampaign",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/listWaitingListCampaigns",
+					"function": {
+						"functionId": "listWaitingListCampaigns",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/getWaitingListCampaign",
+					"function": {
+						"functionId": "getWaitingListCampaign",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/startWaitingListCampaign",
+					"function": {
+						"functionId": "startWaitingListCampaign",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/previewWaitingListCampaign",
+					"function": {
+						"functionId": "previewWaitingListCampaign",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/publishWaitingListSettings",
+					"function": {
+						"functionId": "publishWaitingListSettings",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/readWaitingListSettings",
+					"function": {
+						"functionId": "readWaitingListSettings",
+						"region": "us-central1"
+					}
+				},
 				{
 					"source": "/checkIn",
 					"function": {

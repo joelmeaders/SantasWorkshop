@@ -1,5 +1,6 @@
 import type { CustomerLanguage } from './language';
 export const EMAIL_TEMPLATE_KEYS = {
+	waitingListCapacity: 'waiting-list-capacity',
 	registrationConfirmation: 'registration-confirmation',
 	eventReminder: 'event-reminder',
 	registrationCancellation: 'registration-cancellation',
@@ -9,6 +10,7 @@ export type BuiltInEmailTemplateKey =
 	(typeof EMAIL_TEMPLATE_KEYS)[keyof typeof EMAIL_TEMPLATE_KEYS];
 
 export const EMAIL_TEMPLATE_DELIVERY_PROFILES = {
+	waitingListCapacity: EMAIL_TEMPLATE_KEYS.waitingListCapacity,
 	registrationConfirmation: EMAIL_TEMPLATE_KEYS.registrationConfirmation,
 	eventReminder: EMAIL_TEMPLATE_KEYS.eventReminder,
 	registrationCancellation: EMAIL_TEMPLATE_KEYS.registrationCancellation,
@@ -20,6 +22,12 @@ export type EmailTemplateDeliveryProfile =
 export const EMAIL_TEMPLATE_RUNTIME_FIELDS: Readonly<
 	Record<EmailTemplateDeliveryProfile, readonly string[]>
 > = {
+	[EMAIL_TEMPLATE_DELIVERY_PROFILES.waitingListCapacity]: [
+		'firstName',
+		'eventName',
+		'registrationUrl',
+		'waitingListUrl',
+	],
 	[EMAIL_TEMPLATE_DELIVERY_PROFILES.registrationCancellation]: [
 		'firstName',
 		'eventName',

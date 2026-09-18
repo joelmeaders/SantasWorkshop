@@ -447,6 +447,98 @@ export const ownerOperationWorker = onTaskDispatched(
 	},
 );
 
+// ------------------------------------- WAITING LIST
+
+export const getWaitingListState = onCall(
+	{ ...STANDARD_CUSTOMER_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('getWaitingListState', async (request) =>
+		(await import('./fn/waitingList')).getWaitingListState(request),
+	),
+);
+export const setWaitingListMembership = onCall(
+	{ ...STANDARD_CUSTOMER_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('setWaitingListMembership', async (request) =>
+		(await import('./fn/waitingList')).setWaitingListMembership(request),
+	),
+);
+export const readWaitingListSettings = onCall(
+	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('readWaitingListSettings', async (request) =>
+		(await import('./fn/waitingListSettings')).readWaitingListSettings(request),
+	),
+);
+export const publishWaitingListSettings = onCall(
+	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_PUBLISHER_IDENTITY },
+	observeCallableHandler('publishWaitingListSettings', async (request) =>
+		(await import('./fn/waitingListSettings')).publishWaitingListSettings(
+			request,
+		),
+	),
+);
+export const previewWaitingListCampaign = onCall(
+	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('previewWaitingListCampaign', async (request) =>
+		(await import('./fn/waitingListCampaigns')).previewWaitingListCampaign(
+			request,
+		),
+	),
+);
+export const startWaitingListCampaign = onCall(
+	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('startWaitingListCampaign', async (request) =>
+		(await import('./fn/waitingListCampaigns')).startWaitingListCampaign(
+			request,
+		),
+	),
+);
+export const getWaitingListCampaign = onCall(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('getWaitingListCampaign', async (request) =>
+		(await import('./fn/waitingListCampaigns')).getWaitingListCampaign(request),
+	),
+);
+export const listWaitingListCampaigns = onCall(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('listWaitingListCampaigns', async (request) =>
+		(await import('./fn/waitingListCampaigns')).listWaitingListCampaigns(
+			request,
+		),
+	),
+);
+export const resumeWaitingListCampaign = onCall(
+	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
+	observeCallableHandler('resumeWaitingListCampaign', async (request) =>
+		(await import('./fn/waitingListCampaigns')).resumeWaitingListCampaign(
+			request,
+		),
+	),
+);
+export const waitingListEmailWorker = onTaskDispatched(
+	{
+		...REMOTE_CONFIG_READER_IDENTITY,
+		// Match the Admin SDK task OIDC identity without making the worker public.
+		invoker:
+			process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT'] ??
+			REMOTE_CONFIG_READER_IDENTITY.serviceAccount ??
+			'private',
+		labels: MANAGED_RESOURCE_LABELS,
+		memory: '256MiB',
+		cpu: 1,
+		maxInstances: 1,
+		minInstances: 0,
+		concurrency: 1,
+		timeoutSeconds: 540,
+		rateLimits: { maxConcurrentDispatches: 1, maxDispatchesPerSecond: 1 },
+		retryConfig: {
+			maxAttempts: 5,
+			minBackoffSeconds: 60,
+			maxBackoffSeconds: 600,
+		},
+	},
+	async (request) =>
+		(await import('./fn/waitingListEmailWorker')).default(request),
+);
+
 // ------------------------------------- TRIGGER FUNCTIONS
 
 export const sendNewRegistrationEmails = onDocumentCreated(
@@ -1116,4 +1208,26 @@ export const testReadPublicParameters = emulatorOnly(() =>
 			return getPublicParameters();
 		}),
 	),
+);
+
+export const testReadWaitingListSettings = emulatorOnly(() =>
+	onCall({ ...LOW_VOLUME_OPTIONS, enforceAppCheck: false }, async () => {
+		assertEmulatorOnly();
+		return (
+			await import('./utility/waiting-list-settings')
+		).getWaitingListSettings();
+	}),
+);
+
+export const testSeedWaitingListSettings = emulatorOnly(() =>
+	onCall({ ...LOW_VOLUME_OPTIONS, enforceAppCheck: false }, async (request) => {
+		assertEmulatorOnly();
+		const { parseWaitingListSettings } = await import('./models');
+		const { default: admin } = await import('./firebase-admin');
+		await admin
+			.firestore()
+			.doc('_testConfig/waitingList')
+			.set(parseWaitingListSettings(request.data));
+		return true;
+	}),
 );

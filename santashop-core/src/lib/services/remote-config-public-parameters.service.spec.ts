@@ -126,6 +126,43 @@ describe('RemoteConfigPublicParametersSource', () => {
 		expect(runtime.listen).toHaveBeenCalledTimes(1);
 	});
 
+	it('reads waiting-list flags through the same listener without changing the public settings schema', async () => {
+		let flags: unknown;
+		runtime.readWaitingList = vi
+			.fn()
+			.mockReturnValue({ joiningEnabled: true, emailSendingEnabled: false });
+		await start();
+		source.waitingListSettings$.subscribe((value) => {
+			flags = value;
+		});
+		expect(flags).toEqual({ joiningEnabled: true, emailSendingEnabled: false });
+		expect(current).toEqual(createDefaultPublicParameters());
+		runtime.readWaitingList = vi
+			.fn()
+			.mockReturnValue({ joiningEnabled: 'invalid' });
+		update(changed());
+		expect(flags).toEqual({
+			joiningEnabled: false,
+			emailSendingEnabled: false,
+		});
+		expect(current).toEqual(changed());
+		expect(status?.error).toBeUndefined();
+		expect(runtime.listen).toHaveBeenCalledTimes(1);
+	});
+
+	it('defaults waiting-list flags to disabled for older configuration providers', async () => {
+		await start();
+		let flags: unknown;
+		source.waitingListSettings$.subscribe((value) => {
+			flags = value;
+		});
+		expect(flags).toEqual({
+			joiningEnabled: false,
+			emailSendingEnabled: false,
+		});
+		expect(current).toEqual(createDefaultPublicParameters());
+	});
+
 	it('retries failed reads after startup at 30, 60, then 300 seconds and retains settings', async () => {
 		runtime.initialize = vi.fn().mockResolvedValue(changed());
 		runtime.refresh = vi.fn().mockRejectedValue(new Error('offline'));

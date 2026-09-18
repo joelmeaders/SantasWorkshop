@@ -186,6 +186,15 @@ export const adminRoutes: Routes = [
 					),
 			},
 			{
+				path: 'waiting-list',
+				title: 'DSCS: Waiting list',
+				canActivate: [ownerOnlyGuard],
+				loadComponent: () =>
+					import('./pages/admin/tools/waiting-list/waiting-list.page').then(
+						(m) => m.WaitingListPage,
+					),
+			},
+			{
 				path: 'users',
 				title: 'DSCS: User Management',
 				canActivate: [adminOnlyGuard],

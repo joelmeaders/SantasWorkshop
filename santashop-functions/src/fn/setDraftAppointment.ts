@@ -81,7 +81,11 @@ export default async function setDraftAppointment(
 			requireReviewedAppointment(data['reviewedDateTime'], slot.dateTime);
 		transaction.set(
 			registrationRef,
-			{ dateTimeSlot: { id: slot.id, dateTime: slot.dateTime } },
+			{ dateTimeSlot: { id: slot.id, dateTime: slot.dateTime },
+				...(registration.waitingList?.active
+					? { waitingList: { ...registration.waitingList, active: false } }
+					: {}),
+			},
 			{ merge: true },
 		);
 		transaction.create(receiptRef, {

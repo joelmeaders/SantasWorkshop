@@ -24,7 +24,14 @@ import {
 	validateChild,
 } from '@santashop/core';
 import { COLLECTION_SCHEMA, Child, DateTimeSlot } from '@santashop/models';
-import { BehaviorSubject, firstValueFrom, switchMap } from 'rxjs';
+import {
+	BehaviorSubject,
+	firstValueFrom,
+	switchMap,
+	catchError,
+	of,
+	tap,
+} from 'rxjs';
 import { filter, map, take, timeout } from 'rxjs/operators';
 import { where } from 'firebase/firestore';
 import { PreRegistrationService } from '../../../core';
@@ -33,6 +40,7 @@ import {
 	ChildrenCardComponent,
 } from './children-card/children-card.component';
 import { ScheduleCardComponent } from './schedule-card/schedule-card.component';
+import { WaitingListComponent } from '../../waiting-list/waiting-list.component';
 import {
 	EmailUpdateRequest,
 	SubmitCardComponent,
@@ -57,6 +65,7 @@ import { arrowDownCircleOutline } from 'ionicons/icons';
 	styleUrls: ['./overview.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		WaitingListComponent,
 		ChildrenCardComponent,
 		ScheduleCardComponent,
 		SubmitCardComponent,
@@ -142,20 +151,34 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			!this.registrationSubmitted(),
 	);
 
+	public readonly scheduleError = signal(false);
+	public retrySchedule(): void {
+		this.scheduleError.set(false);
+		this.slotRefresh.next();
+	}
+
 	public readonly availableSlots = toSignal(
 		this.slotRefresh
 			.pipe(
 				switchMap(() =>
-					this.dateTimeSlotCollection().readMany(
-						[where('programYear', '==', this.programYear)],
-						'id',
-					),
+					this.dateTimeSlotCollection()
+						.readMany(
+							[where('programYear', '==', this.programYear)],
+							'id',
+						)
+						.pipe(
+							tap(() => this.scheduleError.set(false)),
+							catchError(() => {
+								this.scheduleError.set(true);
+								return of(undefined);
+							}),
+						),
 				),
 			)
 			.pipe(
 				map((slots) =>
 					slots
-						.map((slot) => ({
+						?.map((slot) => ({
 							...slot,
 							dateTime: timestampToDate(slot.dateTime),
 						}))

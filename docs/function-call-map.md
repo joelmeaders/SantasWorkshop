@@ -38,6 +38,26 @@ control must permit delivery, and emulator delivery remains disabled by default.
 Do not remove these controls when simplifying the queue implementation. See
 [configuration and email control](SECRETS_AND_CONFIGURATION.md#remote-email-sending-control).
 
+## Waiting-list campaign boundaries
+
+The authenticated membership callable updates only the customer's registration
+and its mutation receipt. Booking and completion clear membership in their own
+transactions. These flag writes do not create email queue records.
+
+Owner launch/resume callables enqueue `waitingListEmailWorker`. The worker reads
+up to 50 active memberships before its frozen cutoff, writes separate campaign
+delivery receipts, and calls SES directly. It never creates
+`tmp_registrationemails` documents. A continuation advances a saved cursor or
+checkpoints the remaining batch within a 420-second work budget. An empty page
+completes the campaign; disabled/unavailable permission or an error pauses it.
+Terminal delivery receipts, including uncertain outcomes, are not resent.
+Retries retain the cutoff and templates. Queue retry limits alone do not bound
+new continuations; the fixed cutoff and advancing cursor do.
+
+Annual reset recursively removes campaign customer records. See
+[waiting-list operations](waiting-list.md) for controls, private task IAM,
+leases, receipt semantics, and emulator-only simulated delivery.
+
 ## Owner worker: bounded backup continuation, resumable purge
 
 [`ownerOperationWorker`](../santashop-functions/src/fn/ownerOperationWorker.ts)

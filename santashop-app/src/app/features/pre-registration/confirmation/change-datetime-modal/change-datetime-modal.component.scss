@@ -10,3 +10,13 @@ ion-list-header {
 	padding-block: 8px;
 	background: var(--ion-item-background, var(--ion-background-color, #fff));
 }
+
+.appointment-message {
+	margin: 1rem;
+	line-height: 1.5;
+
+	ion-button {
+		max-width: 100%;
+		white-space: normal;
+	}
+}

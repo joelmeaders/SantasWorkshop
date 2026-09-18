@@ -35,75 +35,111 @@
 		</ion-card-content>
 	</ion-card>
 
-	<section
-		class="appointment-options"
-		aria-labelledby="appointment-options-title"
-	>
-		<ion-list-header>
-			<ion-label>
-				<ion-text color="xmasred">
-					<h2 id="appointment-options-title">
-						{{ 'SCHEDULE.SELECT_DATETIME' | translate }}
-					</h2>
-				</ion-text>
-			</ion-label>
-		</ion-list-header>
+	@if (loading()) {
+		<p class="appointment-message" role="status">
+			{{ 'CONFIRMATION.LOADING_APPOINTMENTS' | translate }}
+		</p>
+	} @else if (loadFailed()) {
+		<p class="appointment-message" role="alert">
+			{{ 'CONFIRMATION.APPOINTMENTS_LOAD_ERROR' | translate }}
+		</p>
+	} @else if (!hasAlternatives()) {
+		<section
+			class="appointment-message"
+			aria-labelledby="appointments-full-title"
+		>
+			<div role="status">
+				<h2 id="appointments-full-title">
+					{{ 'CONFIRMATION.NO_OTHER_APPOINTMENTS_TITLE' | translate }}
+				</h2>
+				<p>
+					{{ 'CONFIRMATION.NO_OTHER_APPOINTMENTS_MSG' | translate }}
+				</p>
+			</div>
+			<ion-button
+				href="https://www.facebook.com/denversantaclausshop"
+				target="_blank"
+				rel="noopener noreferrer"
+				>{{ 'CONFIRMATION.FACEBOOK_UPDATES' | translate }}</ion-button
+			>
+		</section>
+	} @else {
+		<section
+			class="appointment-options"
+			aria-labelledby="appointment-options-title"
+		>
+			<p class="appointment-message">
+				{{ 'CONFIRMATION.CONFIRM_DATETIME_CHANGE_MSG' | translate }}
+			</p>
+			<ion-list-header>
+				<ion-label>
+					<ion-text color="xmasred">
+						<h2 id="appointment-options-title">
+							{{ 'SCHEDULE.SELECT_DATETIME' | translate }}
+						</h2>
+					</ion-text>
+				</ion-label>
+			</ion-list-header>
 
-		<ion-accordion-group [multiple]="true">
-			@for (day of availableDays(); track day) {
-				<ion-accordion [value]="day">
-					<ion-item slot="header">
-						<ion-label>
-							<h2>
-								{{
-									day
-										| localizedDate
-											: 'EEEE, MMMM d'
-											: 'America/Denver'
-								}}
-							</h2>
-						</ion-label>
-					</ion-item>
-					<ion-list slot="content">
-						@for (
-							slot of availableSlotsByDay(day);
-							track slot.id
-						) {
-							<ion-item
-								[button]="true"
-								[disabled]="
-									!slot.enabled ||
-									spotsRemaining(slot) === 'Unavailable' ||
-									isCurrentSlot(slot)
-								"
-								(click)="selectSlot(slot)"
-								[color]="
-									isCurrentSlot(slot) ? 'light' : undefined
-								"
-								[detail]="true"
-								[attr.data-change-slot-id]="slot.id"
-							>
-								<ion-label>
-									<h3>{{ slot.dateTime | timeSlot }}</h3>
-									@if (isCurrentSlot(slot)) {
-										<ion-text color="primary">
-											<p>
-												<strong>{{
-													'CONFIRMATION.CURRENT_SELECTION'
-														| translate
-												}}</strong>
-											</p>
-										</ion-text>
-									}
-								</ion-label>
-								<ion-note slot="end">
-									{{ spotsRemaining(slot) }}
-								</ion-note>
-							</ion-item>
-						}
-					</ion-list>
-				</ion-accordion>
-			}
-		</ion-accordion-group>
-	</section>
+			<ion-accordion-group [multiple]="true">
+				@for (day of availableDays(); track day) {
+					<ion-accordion [value]="day">
+						<ion-item slot="header">
+							<ion-label>
+								<h2>
+									{{
+										day
+											| localizedDate
+												: 'EEEE, MMMM d'
+												: 'America/Denver'
+									}}
+								</h2>
+							</ion-label>
+						</ion-item>
+						<ion-list slot="content">
+							@for (
+								slot of availableSlotsByDay(day);
+								track slot.id
+							) {
+								<ion-item
+									[button]="true"
+									[disabled]="
+										!slot.enabled ||
+										spotsRemaining(slot) ===
+											'Unavailable' ||
+										isCurrentSlot(slot)
+									"
+									(click)="selectSlot(slot)"
+									[color]="
+										isCurrentSlot(slot)
+											? 'light'
+											: undefined
+									"
+									[detail]="true"
+									[attr.data-change-slot-id]="slot.id"
+								>
+									<ion-label>
+										<h3>{{ slot.dateTime | timeSlot }}</h3>
+										@if (isCurrentSlot(slot)) {
+											<ion-text color="primary">
+												<p>
+													<strong>{{
+														'CONFIRMATION.CURRENT_SELECTION'
+															| translate
+													}}</strong>
+												</p>
+											</ion-text>
+										}
+									</ion-label>
+									<ion-note slot="end">
+										{{ spotsRemaining(slot) }}
+									</ion-note>
+								</ion-item>
+							}
+						</ion-list>
+					</ion-accordion>
+				}
+			</ion-accordion-group>
+		</section>
+	}
 </ion-content>

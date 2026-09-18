@@ -30,7 +30,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { TimeSlotPipe, timestampToDate } from '@santashop/core';
 import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
 
@@ -121,17 +121,28 @@ export class ChangeDatetimeModalComponent {
 									dateTime: timestampToDate(slot.dateTime),
 								})),
 							),
+							startWith(undefined),
+							catchError(() => of(null)),
 						)
-					: of([]),
+					: of(undefined),
 			),
 		),
-		{ initialValue: [] },
+		{ initialValue: undefined },
+	);
+	public readonly loading = computed(
+		() => this.availableSlotsState() === undefined,
+	);
+	public readonly loadFailed = computed(
+		() => this.availableSlotsState() === null,
 	);
 
 	public readonly filteredSlots = computed(() =>
-		this.availableSlotsState().filter(
+		(this.availableSlotsState() ?? []).filter(
 			(slot) => slot.enabled && (slot.slotsReserved ?? 0) < slot.maxSlots,
 		),
+	);
+	public readonly hasAlternatives = computed(() =>
+		this.filteredSlots().some((slot) => !this.isCurrentSlot(slot)),
 	);
 
 	public readonly availableDays = computed(() => [

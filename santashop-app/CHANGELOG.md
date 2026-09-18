@@ -6,6 +6,9 @@ All notable changes to the main application will be documented in this file.
 
 ### Changed
 
+- Combine appointment-change guidance and date/time selection in one dialog, with reassuring English and Spanish text.
+- Explain when all other appointments are full and link to Denver Santa Claus Shop on Facebook in a new window.
+
 - Direct registration Help to Facebook messaging in English and Spanish. Use Ionic round social buttons with evergreen backgrounds and contrasting Facebook/Instagram logos on all home states.
 
 - Advance the customer application to `2026.09.0-beta.6`.

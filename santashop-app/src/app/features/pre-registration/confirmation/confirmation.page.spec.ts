@@ -206,7 +206,6 @@ describe('ConfirmationPage', () => {
 		const loader = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined) };
 		alertController.create
 			.mockResolvedValueOnce({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }) })
-			.mockResolvedValueOnce({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }) })
 			.mockResolvedValueOnce({ present: vi.fn().mockResolvedValue(undefined) });
 		loadingController.create.mockResolvedValue(loader);
 		modalController.create.mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm', data: { id: 'next-slot' } }) });
@@ -232,6 +231,21 @@ describe('ConfirmationPage', () => {
 		expect(events).toHaveBeenCalledWith('change_registration_datetime');
 		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'registration_cancel', outcome: 'succeeded' });
 		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'appointment_change', outcome: 'succeeded' });
+	});
+
+	it('opens the appointment picker directly and leaves the booking unchanged when dismissed', async (): Promise<void> => {
+		const alerts = TestBed.inject(AlertController);
+		const modals = TestBed.inject(ModalController);
+		const registration = TestBed.inject(PreRegistrationService);
+		vi.mocked(modals.create).mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
+		} as unknown as HTMLIonModalElement);
+		await component.changeRegistration();
+		expect(modals.create).toHaveBeenCalledOnce();
+		expect(alerts.create).not.toHaveBeenCalled();
+		expect(registration.changeRegistrationDateTime).not.toHaveBeenCalled();
+		expect(registration.undoRegistration).not.toHaveBeenCalled();
 	});
 
 	it('handles a cancellation failure without navigating', async (): Promise<void> => {

@@ -539,19 +539,33 @@ test.describe('customer registration lifecycle', () => {
 		await expect(changeButton).toBeVisible({ timeout: 15000 });
 		await changeButton.click();
 
-		const confirmationAlert = page.locator('ion-alert');
-		await expect(confirmationAlert).toContainText(
-			'Changing your registration date/time',
-			{ timeout: 10000 },
-		);
-		await confirmationAlert
-			.getByRole('button', { name: 'Continue', exact: true })
-			.click();
+		await expect(page.locator('ion-alert')).toHaveCount(0);
 
 		const modal = page.locator('ion-modal').filter({
 			has: page.locator('app-change-datetime-modal'),
 		});
 		await expect(modal).toBeVisible({ timeout: 15000 });
+		await expect(modal).toContainText('Your current appointment stays booked');
+		for (const slotsReserved of [10, 1]) {
+			await seedDateTimeSlots([{
+				id: 'submitted-target-slot',
+				programYear: TEST_PROGRAM_YEAR,
+				dateTime: targetSlotDate,
+				lastUpdated: testSlotDate(TEST_PROGRAM_YEAR, 1, 0),
+				maxSlots: 10,
+				slotsReserved,
+				enabled: true,
+			}]);
+			if (slotsReserved === 10) {
+				await expect(modal).toContainText('All other spots are full');
+				await expect(modal.locator('ion-accordion-group')).toHaveCount(0);
+				const facebook = modal.getByRole('link', { name: /Visit our Facebook page/ });
+				await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/denversantaclausshop');
+				await expect(facebook).toHaveAttribute('target', '_blank');
+				const unchanged = await inspectRegistrationQrLifecycle(account.emailAddress);
+				expect(unchanged.registration.dateTimeSlot?.id).toBe('submitted-current-slot');
+			}
+		}
 		const targetDay = new Date(targetSlotDate).toLocaleDateString('en-US', {
 			day: 'numeric',
 			month: 'long',
@@ -584,10 +598,6 @@ test.describe('customer registration lifecycle', () => {
 			timeout: 15000,
 		});
 		await changeButton.click();
-		await page
-			.locator('ion-alert')
-			.getByRole('button', { name: 'Continue', exact: true })
-			.click();
 		const reopenedModal = page.locator('ion-modal').filter({
 			has: page.locator('app-change-datetime-modal'),
 		});

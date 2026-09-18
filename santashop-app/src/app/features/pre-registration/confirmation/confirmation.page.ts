@@ -213,28 +213,6 @@ export class ConfirmationPage {
 			return;
 		}
 
-		const alert = await this.alertController.create({
-			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
-			message: this.translateService.instant(
-				'CONFIRMATION.CONFIRM_DATETIME_CHANGE_MSG',
-			),
-			buttons: [
-				{
-					text: this.translateService.instant('COMMON.GO_BACK'),
-					role: 'cancel',
-				},
-				{
-					text: this.translateService.instant('COMMON.CONTINUE'),
-					role: 'confirm',
-				},
-			],
-		});
-
-		await alert.present();
-		const shouldContinue = await alert.onDidDismiss();
-
-		if (shouldContinue.role !== 'confirm') return;
-
 		// Get the current slot. The modal subscribes to live availability itself.
 		const currentSlot = await firstValueFrom(
 			this.viewService.dateTimeSlot$,

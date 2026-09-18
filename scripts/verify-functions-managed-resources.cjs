@@ -9,6 +9,7 @@ const SCHEDULED_FUNCTIONS = [
 	'scheduledUserStats',
 ];
 const TASK_FUNCTION = 'ownerOperationWorker';
+const TASK_FUNCTIONS = { [TASK_FUNCTION]: 3, waitingListEmailWorker: 5 };
 const EVENT_FUNCTION = 'sendNewRegistrationEmails';
 
 const resourceId = (name) =>
@@ -91,35 +92,38 @@ const verifyManagedResources = ({
 		);
 	}
 
-	const expectedQueue = TASK_FUNCTION;
-	const managedQueues = taskQueues.filter(
-		(queue) => resourceId(queue.name) === expectedQueue,
-	);
-	assertEqual(
-		JSON.stringify(
-			managedQueues.map((queue) => resourceId(queue.name)).sort(),
-		),
-		JSON.stringify([expectedQueue]),
-		'Firebase-managed Cloud Tasks queues do not match the expected set',
-	);
-	const queue = managedQueues[0];
-	assertEqual(queue.state, 'RUNNING', `${expectedQueue} state`);
-	assertEqual(
-		Number(queue.rateLimits?.maxConcurrentDispatches),
-		1,
-		`${expectedQueue} maximum concurrent dispatches`,
-	);
-	assertEqual(
-		Number(queue.rateLimits?.maxDispatchesPerSecond),
-		1,
-		`${expectedQueue} maximum dispatches per second`,
-	);
-	assertEqual(
-		Number(queue.retryConfig?.maxAttempts),
-		3,
-		`${expectedQueue} maximum attempts`,
-	);
+	let verifiedQueueCount = 0;
+	for (const [expectedQueue, attempts] of Object.entries(TASK_FUNCTIONS)) {
+		const managedQueues = taskQueues.filter(
+			(queue) => resourceId(queue.name) === expectedQueue,
+		);
+		assertEqual(
+			JSON.stringify(
+				managedQueues.map((queue) => resourceId(queue.name)).sort(),
+			),
+			JSON.stringify([expectedQueue]),
+			'Firebase-managed Cloud Tasks queues do not match the expected set',
+		);
+		const queue = managedQueues[0];
+		assertEqual(queue.state, 'RUNNING', `${expectedQueue} state`);
+		assertEqual(
+			Number(queue.rateLimits?.maxConcurrentDispatches),
+			1,
+			`${expectedQueue} maximum concurrent dispatches`,
+		);
+		assertEqual(
+			Number(queue.rateLimits?.maxDispatchesPerSecond),
+			1,
+			`${expectedQueue} maximum dispatches per second`,
+		);
+		assertEqual(
+			Number(queue.retryConfig?.maxAttempts),
+			attempts,
+			`${expectedQueue} maximum attempts`,
+		);
 
+		verifiedQueueCount += managedQueues.length;
+	}
 	const managedTriggers = eventarcTriggers.filter(
 		(trigger) => trigger.labels?.['goog-managed-by'] === 'cloudfunctions',
 	);
@@ -153,7 +157,7 @@ const verifyManagedResources = ({
 
 	return {
 		schedulerJobs: managedJobs.length,
-		taskQueues: managedQueues.length,
+		taskQueues: verifiedQueueCount,
 		eventarcTriggers: managedTriggers.length,
 	};
 };
@@ -210,6 +214,7 @@ module.exports = {
 	EVENT_FUNCTION,
 	SCHEDULED_FUNCTIONS,
 	TASK_FUNCTION,
+	TASK_FUNCTIONS,
 	verifyManagedResources,
 };
 

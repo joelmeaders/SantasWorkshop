@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { AppStateService } from './app-state.service';
 import { PUBLIC_PARAMETERS_SOURCE } from '../tokens';
 import { Observable, Subject, throwError } from 'rxjs';
-import type { PublicParameters } from '@santashop/models';
+import type { PublicParameters, WaitingListSettings } from '@santashop/models';
 
 describe('AppStateService', () => {
 	let service: AppStateService;
@@ -46,6 +46,40 @@ describe('AppStateService', () => {
 
 	it('should be created', () => {
 		expect(service).toBeTruthy();
+	});
+
+	it('does not refresh consent when unchanged waiting-list flags arrive', () => {
+		TestBed.resetTestingModule();
+		const waitingListSettings$ = new Subject<WaitingListSettings>();
+		TestBed.configureTestingModule({
+			providers: [
+				AppStateService,
+				{
+					provide: PUBLIC_PARAMETERS_SOURCE,
+					useValue: { publicParameters$, waitingListSettings$ },
+				},
+			],
+		});
+		const received: WaitingListSettings[] = [];
+		TestBed.inject(AppStateService).waitingListSettings$.subscribe((value) =>
+			received.push(value),
+		);
+		waitingListSettings$.next({
+			joiningEnabled: true,
+			emailSendingEnabled: false,
+		});
+		waitingListSettings$.next({
+			joiningEnabled: true,
+			emailSendingEnabled: false,
+		});
+		waitingListSettings$.next({
+			joiningEnabled: false,
+			emailSendingEnabled: false,
+		});
+		expect(received).toEqual([
+			{ joiningEnabled: true, emailSendingEnabled: false },
+			{ joiningEnabled: false, emailSendingEnabled: false },
+		]);
 	});
 
 	it('maps public and admin flags from a shared parameter document', () => {

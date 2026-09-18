@@ -51,6 +51,12 @@ const validInput = (): ManagedResourceInput => ({
 	}),
 	taskQueues: [
 		{
+			name: `projects/${project}/locations/${region}/queues/waitingListEmailWorker`,
+			state: 'RUNNING',
+			rateLimits: { maxConcurrentDispatches: 1, maxDispatchesPerSecond: 1 },
+			retryConfig: { maxAttempts: 5 },
+		},
+		{
 			name: `projects/${project}/locations/${region}/queues/ownerOperationWorker`,
 			state: 'RUNNING',
 			rateLimits: {
@@ -140,7 +146,7 @@ describe('Functions managed deployment resources', () => {
 	it('accepts the complete scheduler, task queue, and Eventarc topology', () => {
 		expect(resources.verifyManagedResources(validInput())).toEqual({
 			schedulerJobs: 5,
-			taskQueues: 1,
+			taskQueues: 2,
 			eventarcTriggers: 1,
 		});
 	});

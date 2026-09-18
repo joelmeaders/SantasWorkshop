@@ -344,6 +344,7 @@ const buildCounts = async (
 			return { requestedSlots: slots?.length ?? 0 };
 		case 'yearly-reset':
 			return {
+				waitingListCampaigns: await countCollection(COLLECTION_SCHEMA.waitingListCampaigns),
 				authUsers: await countCustomerAuthUsers(),
 				users: await countCollection(COLLECTION_SCHEMA.users),
 				registrations: await countCollection(

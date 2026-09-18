@@ -126,6 +126,10 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		value: EmailTemplateDeliveryProfile;
 	}[] = [
 		{
+			label: 'Waiting list capacity',
+			value: DELIVERY_PROFILES.waitingListCapacity,
+		},
+		{
 			label: 'Registration confirmation',
 			value: DELIVERY_PROFILES.registrationConfirmation,
 		},
@@ -139,6 +143,7 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 		},
 	];
 	public readonly starterOptions = [
+		'waiting-list-capacity',
 		'registration-confirmation',
 		'event-reminder',
 		'registration-cancellation',
@@ -461,7 +466,8 @@ export class EmailTemplateEditorPage implements AfterViewInit {
 				? 'Spanish'
 				: 'English';
 		const fallbackNotice =
-			language === 'English'
+			language === 'English' &&
+			this.form.controls['deliveryProfile'].value !== 'waiting-list-capacity'
 				? ' Spanish messages also use this template when no Spanish template is published.'
 				: '';
 		const confirmation = await createAdminAlert(this.alerts, () => ({

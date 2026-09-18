@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
+import './generate-waiting-list-email-templates.mjs';
 import { createRequire } from 'node:module';
 const require = createRequire(
 	new URL('../santashop-functions/package.json', import.meta.url),

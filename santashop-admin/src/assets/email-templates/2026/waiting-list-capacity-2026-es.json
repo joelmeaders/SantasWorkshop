@@ -1,0 +1,32 @@
+{
+	"format": "santashop-email-template",
+	"version": 1,
+	"template": {
+		"key": "waiting-list-capacity-2026-es",
+		"deliveryProfile": "waiting-list-capacity",
+		"displayName": "Waiting list capacity · Español",
+		"language": "es",
+		"awsTemplateName": "waiting-list-capacity-2026-es",
+		"subjectPart": "¡Hay más horarios disponibles!",
+		"html": "<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>¡Hay más horarios disponibles!</title></head>\n<body style=\"margin:0;padding:0;background:#f5f0e8;color:#263d35;font-family:Arial,Helvetica,sans-serif;word-wrap:break-word\">\n<table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"background:#f5f0e8\"><tr><td align=\"center\" style=\"padding:24px 12px\">\n<table role=\"presentation\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\" style=\"width:100%;max-width:600px;background:#fff;border-radius:20px;overflow:hidden\">\n<tr><td align=\"center\" style=\"padding:28px;background:#173e32\"><img src=\"https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png\" width=\"190\" alt=\"Denver Santa Claus Shop\" style=\"display:block;max-width:100%;height:auto;color:white\"><p style=\"margin:20px 0 0;color:#fff;font-size:16px;font-weight:bold\">Denver Santa Claus Shop</p></td></tr>\n<tr><td style=\"padding:32px 28px\"><h1 style=\"margin:0 0 24px;color:#a82b32;font-size:30px;line-height:1.2\">¡Hay más horarios disponibles!</h1><p style=\"font-size:18px;line-height:1.6\">Hola {{firstName}}:</p><p style=\"font-size:18px;line-height:1.6\">Agregamos más lugares en Denver Santa Claus Shop. Se llenarán muy rápido. Entra al sitio ahora para elegir una fecha y hora y terminar tu registro.</p>\n<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin:28px 0\"><tr><td style=\"background:#a82b32;border-radius:8px;text-align:center\"><a href=\"{{registrationUrl}}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;padding:17px 24px;color:#fff;text-decoration:none;font-size:18px;font-weight:bold\">Elegir fecha y hora</a></td></tr></table>\n<p style=\"padding:18px;background:#f7f0de;border-left:4px solid #c09a39;font-size:17px;line-height:1.5\">Este correo no reserva un lugar para ti.</p><p style=\"font-size:16px;line-height:1.6\">Tus voluntarios de Denver Santa Claus Shop</p></td></tr>\n<tr><td style=\"padding:24px 28px;background:#edf2ed;font-size:14px;line-height:1.6\"><p>Recibiste este correo porque te uniste a nuestra lista de espera. Puedes salir de la lista en cualquier momento.</p><a href=\"{{waitingListUrl}}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:#173e32;text-decoration:underline\">Administrar correos de la lista de espera</a></td></tr></table></td></tr></table></body></html>",
+		"textPart": "Hola {{firstName}}:\n\nAgregamos más lugares en Denver Santa Claus Shop. Se llenarán muy rápido. Entra al sitio ahora para elegir una fecha y hora y terminar tu registro.\n\nElegir fecha y hora: {{registrationUrl}}\n\nEste correo no reserva un lugar para ti.\n\nTus voluntarios de Denver Santa Claus Shop\n\nRecibiste este correo porque te uniste a nuestra lista de espera. Puedes salir de la lista en cualquier momento.\nAdministrar correos de la lista de espera: {{waitingListUrl}}",
+		"seasonalReviewRequired": false,
+		"fieldMappings": [
+			{
+				"name": "firstName",
+				"mapping": "firstName",
+				"sampleValue": "María"
+			},
+			{
+				"name": "registrationUrl",
+				"mapping": "registrationUrl",
+				"sampleValue": "https://register.denversantaclausshop.org/pre-registration/overview"
+			},
+			{
+				"name": "waitingListUrl",
+				"mapping": "waitingListUrl",
+				"sampleValue": "https://register.denversantaclausshop.org/?mode=sign-in&waitingList=manage"
+			}
+		]
+	}
+}

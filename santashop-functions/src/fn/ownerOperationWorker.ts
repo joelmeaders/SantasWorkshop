@@ -552,6 +552,7 @@ export const executeYearlyReset = async (
 		});
 	}
 	const collections = [
+		COLLECTION_SCHEMA.waitingListCampaigns,
 		COLLECTION_SCHEMA.users,
 		COLLECTION_SCHEMA.registrations,
 		COLLECTION_SCHEMA.registrationSearchIndex,

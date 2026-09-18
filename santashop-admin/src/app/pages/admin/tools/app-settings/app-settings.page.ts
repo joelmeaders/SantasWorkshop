@@ -27,12 +27,14 @@ import {
 } from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { AppSettingsService } from '../../../../shared/services/app-settings.service';
+import { WaitingListSettingsComponent } from './waiting-list-settings.component';
 
 @Component({
 	selector: 'admin-app-settings',
 	templateUrl: './app-settings.page.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		WaitingListSettingsComponent,
 		AdminTextPipe,
 		ReactiveFormsModule,
 		HeaderComponent,

@@ -2,15 +2,22 @@
 
 All notable changes to the main application will be documented in this file.
 
-## [2026.09.0-beta.6] - Unreleased
+## [2026.09.0-beta.7] - 2026-09-17
 
 ### Changed
 
-- List accepted examples of children's age-proof documents on the ticket in English and Spanish, matching the website FAQ.
-- Shorten the appointment dialog's social link label to "Facebook".
+- Advance the customer application to `2026.09.0-beta.7`.
+- Open the appointment picker directly from the ticket, with friendly English and Spanish guidance that the current booking remains until a new appointment is selected.
+- Explain when all other appointments are full and provide a Facebook button that opens the Denver Santa Claus Shop page in a new window.
+- List accepted age-proof examples on the ticket: birth certificates or copies, birth notifications, school IDs, report cards, school forms, and medical forms.
 
-- Combine appointment-change guidance and date/time selection in one dialog, with reassuring English and Spanish text.
-- Explain when all other appointments are full and link to Denver Santa Claus Shop on Facebook in a new window.
+### Fixed
+
+- Distinguish loading and unavailable appointment data from a full schedule. Do not count the current appointment as an alternative.
+
+## [2026.09.0-beta.6] - Unreleased
+
+### Changed
 
 - Direct registration Help to Facebook messaging in English and Spanish. Use Ionic round social buttons with evergreen backgrounds and contrasting Facebook/Instagram logos on all home states.
 

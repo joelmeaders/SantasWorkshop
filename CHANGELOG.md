@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.7] - 2026-09-17
+
+### Changed
+
+- Advance the workspace and customer application to `2026.09.0-beta.7`.
+- Open the appointment picker directly from the ticket, with friendly English and Spanish guidance that the current booking remains until a new appointment is selected.
+- Explain when all other appointments are full and provide a Facebook button that opens the Denver Santa Claus Shop page in a new window.
+- List accepted age-proof examples on the ticket: birth certificates or copies, birth notifications, school IDs, report cards, school forms, and medical forms.
+
+### Fixed
+
+- Distinguish loading and unavailable appointment data from a full schedule. Do not count the current appointment as an alternative.
+
 ## [2026.09.0-beta.6] - Unreleased
 
 ### Changed

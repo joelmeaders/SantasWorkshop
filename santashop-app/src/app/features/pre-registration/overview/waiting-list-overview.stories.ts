@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/angular-vite';
+import { getDebugNode, type DebugElement } from '@angular/core';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import {
 	getIonButton,
+	CUSTOMER_STORY_CONTROLS,
 	storyRegistration,
 } from '../../../../../../.storybook/registration/customer-story.helpers';
 import {
@@ -66,6 +68,30 @@ export const JoinAndLeave: Story = {
 		await expect(
 			await canvas.findByText('You joined the waiting list.'),
 		).toBeVisible();
+		const element = context.canvasElement.querySelector('app-overview');
+		if (!element) throw new Error('Overview fixture is unavailable.');
+		const controls = (getDebugNode(element) as DebugElement).injector.get(
+			CUSTOMER_STORY_CONTROLS,
+		);
+		controls.updateRegistration({
+			...waitingMember,
+			dateTimeSlot: storyRegistration.dateTimeSlot,
+			waitingList: { ...waitingMember.waitingList!, active: false },
+		});
+		await waitFor(() =>
+			expect(context.canvasElement.querySelector('#leaveWaitingListButton')).toBeNull(),
+		);
+		controls.updateRegistration({
+			...controls.registration$.value,
+			dateTimeSlot: undefined,
+		});
+		await waitFor(() =>
+			expect(context.canvasElement.querySelector('#joinWaitingListButton')).not.toBeNull(),
+		);
+		await join(context);
+		await waitFor(() =>
+			expect(context.canvasElement.querySelector('#leaveWaitingListButton')).not.toBeNull(),
+		);
 		await userEvent.click(
 			getIonButton(context.canvasElement, /Leave the waiting list/),
 		);

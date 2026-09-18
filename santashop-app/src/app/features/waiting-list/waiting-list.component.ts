@@ -111,6 +111,20 @@ export class WaitingListComponent {
 	});
 	constructor() {
 		effect(() => {
+			const registration = this.registration();
+			const override = this.membershipOverride();
+			// Once the live registration catches up, it owns membership again.
+			// Booking followed by cancellation must not revive an optimistic opt-in.
+			if (
+				override !== undefined &&
+				(registration?.waitingList?.active === override ||
+					registration?.dateTimeSlot ||
+					registration?.registrationSubmittedOn ||
+					registration?.hasCheckedIn)
+			)
+				this.membershipOverride.set(undefined);
+		});
+		effect(() => {
 			const uid = this.user()?.uid;
 			this.settings();
 			const local = this.useLoadedData();

@@ -420,6 +420,75 @@ describe('PreRegistrationService', () => {
 		).rejects.toThrow('Appointment ID is required.');
 	});
 
+	it('uses the confirmed cancellation while snapshots are delayed without hiding a later submission', async () => {
+		const completed = observe(service.registrationCompleteResolved$);
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		expect(completed.at(-1)).toBe(true);
+
+		await service.undoRegistration();
+
+		expect(completed.at(-1)).toBe(false);
+		expect(visible.at(-1)?.dateTimeSlot).toBeUndefined();
+		expect(visible.at(-1)?.children).toHaveLength(1);
+		expect(visible.at(-1)?.qrCodeStoragePath).toBe(
+			'registrations/first/ticket.png',
+		);
+		// A stale replay must not restore the ticket or redirect the overview guard.
+		snapshot.next(registration());
+		expect(completed.at(-1)).toBe(false);
+		snapshot.next({
+			...registration(),
+			registrationSubmittedOn: undefined,
+			dateTimeSlot: undefined,
+		});
+		expect(completed.at(-1)).toBe(false);
+		snapshot.next({
+			...registration(),
+			registrationSubmittedOn: new Date('2026-11-02T12:00:00Z'),
+		});
+		expect(completed.at(-1)).toBe(true);
+	});
+
+	it('keeps the ticket when cancellation is rejected', async () => {
+		const completed = observe(service.registrationCompleteResolved$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		vi.mocked(functions.undoRegistration).mockRejectedValue(
+			new Error('Cancellation unavailable'),
+		);
+		await expect(service.undoRegistration()).rejects.toThrow(
+			'Cancellation unavailable',
+		);
+		expect(completed.at(-1)).toBe(true);
+	});
+
+	it('ignores an old cancellation response after the signed-in identity changes', async () => {
+		const completed = observe(service.registrationCompleteResolved$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		let resolve!: (value: { data: true }) => void;
+		vi.mocked(functions.undoRegistration).mockImplementationOnce(
+			() =>
+				new Promise((done) => {
+					resolve = done;
+				}),
+		);
+		const cancellation = service.undoRegistration();
+		await vi.waitFor(() =>
+			expect(functions.undoRegistration).toHaveBeenCalledOnce(),
+		);
+		auth.next(identity('second'));
+		snapshot.next(registration('second'));
+		resolve({ data: true });
+		await cancellation;
+		expect(completed.at(-1)).toBe(true);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		expect(completed.at(-1)).toBe(true);
+	});
+
 	it.each([
 		['en', en],
 		['es', es],

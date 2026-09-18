@@ -24,6 +24,7 @@ export interface EmailTemplateReferenceLike {
 }
 
 export interface EmailTemplateRuntimeData {
+	registrationUrl?: string;
 	firstName: string;
 	eventName: string;
 	qrCodeUrl?: string;

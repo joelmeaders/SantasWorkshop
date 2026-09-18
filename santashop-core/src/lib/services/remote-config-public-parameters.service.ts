@@ -10,10 +10,7 @@ import {
 	type PublicParameters, type PublicParametersStatus,
 } from '@santashop/models';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
-import {
-	activate, ensureInitialized, fetchAndActivate, getRemoteConfig, getValue,
-	isSupported, onConfigUpdate,
-} from 'firebase/remote-config';
+import type { RemoteConfig } from 'firebase/remote-config';
 import { FIREBASE_APP, PUBLIC_PARAMETERS_SOURCE, type PublicParametersSource } from '../tokens';
 
 export interface RemoteConfigPublicParametersOptions {
@@ -60,10 +57,11 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 				};
 		}
 		const app = inject(FIREBASE_APP);
-		let remote: ReturnType<typeof getRemoteConfig> | undefined;
+		let sdk: typeof import('firebase/remote-config') | undefined;
+		let remote: RemoteConfig | undefined;
 		const read = (): PublicParameters => {
-			if (!remote) throw new Error('Remote Config is unavailable.');
-			const value = getValue(remote, PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY);
+			if (!remote || !sdk) throw new Error('Remote Config is unavailable.');
+			const value = sdk.getValue(remote, PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY);
 			if (value.getSource() !== 'remote') throw new Error('Remote settings are missing.');
 			return parsePublicParametersJson(value.asString());
 		};
@@ -71,8 +69,8 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 			local: false,
 				readWaitingList: (): WaitingListSettings => {
 					try {
-						if (!remote) return defaultWaitingListSettings();
-						const value = getValue(remote, WAITING_LIST_REMOTE_CONFIG_KEY);
+						if (!remote || !sdk) return defaultWaitingListSettings();
+						const value = sdk.getValue(remote, WAITING_LIST_REMOTE_CONFIG_KEY);
 						return value.getSource() === 'remote'
 							? parseWaitingListSettings(
 									JSON.parse(value.asString()) as unknown,
@@ -83,21 +81,23 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 					}
 				},
 				initialize: async (): Promise<unknown> => {
-				if (!(await isSupported())) throw new Error('Remote Config is unsupported in this browser.');
-				remote = getRemoteConfig(app);
+				// Keep settings SDK code out of the startup bundle and emulator sessions.
+				sdk = await import('firebase/remote-config');
+				if (!(await sdk.isSupported())) throw new Error('Remote Config is unsupported in this browser.');
+				remote = sdk.getRemoteConfig(app);
 				remote.settings.minimumFetchIntervalMillis = 60_000;
 				remote.settings.fetchTimeoutMillis = 10_000;
-				await ensureInitialized(remote);
+				await sdk.ensureInitialized(remote);
 				// A first visit has no activated value. The source already holds release defaults.
 				try { return read(); } catch { return undefined; }
 			},
 			refresh: async (force = false, fetchTimeoutMillis?: number): Promise<unknown> => {
-				if (!remote) throw new Error('Remote Config is unavailable.');
+				if (!remote || !sdk) throw new Error('Remote Config is unavailable.');
 				const minimumFetchIntervalMillis = remote.settings.minimumFetchIntervalMillis;
 				const configuredFetchTimeoutMillis = remote.settings.fetchTimeoutMillis;
 				if (force) remote.settings.minimumFetchIntervalMillis = 0;
 				if (fetchTimeoutMillis !== undefined) remote.settings.fetchTimeoutMillis = fetchTimeoutMillis;
-				try { await fetchAndActivate(remote); }
+				try { await sdk.fetchAndActivate(remote); }
 				finally {
 					if (force) remote.settings.minimumFetchIntervalMillis = minimumFetchIntervalMillis;
 					if (fetchTimeoutMillis !== undefined) remote.settings.fetchTimeoutMillis = configuredFetchTimeoutMillis;
@@ -105,11 +105,12 @@ export const PUBLIC_PARAMETERS_RUNTIME = new InjectionToken<PublicParametersRunt
 				return read();
 			},
 			listen: (next, error): (() => void) => {
-				if (!remote) return (): void => undefined;
+				if (!remote || !sdk) return (): void => undefined;
 				const activeRemote = remote;
-				return onConfigUpdate(activeRemote, {
+				const activeSdk = sdk;
+				return activeSdk.onConfigUpdate(activeRemote, {
 					next: (): void => {
-						void activate(activeRemote).then(() => next(read())).catch(error);
+						void activeSdk.activate(activeRemote).then(() => next(read())).catch(error);
 					},
 					error,
 					complete: (): void => error(new Error('Real-time settings updates stopped.')),

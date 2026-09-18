@@ -1,6 +1,9 @@
 :host {
 	display: block;
 }
+:host:empty {
+	display: none;
+}
 .waiting-list {
 	text-align: start;
 	margin: 1rem 0;

@@ -18,7 +18,7 @@ const output = fileURLToPath(
 	),
 );
 mkdirSync(output, { recursive: true });
-const app = 'https://register.denversantaclausshop.org/';
+const app = '{{registrationUrl}}';
 const website = 'https://www.denversantaclausshop.org/';
 // Original hosted DSCS logo from the 2025 email.
 const logo =
@@ -168,9 +168,17 @@ for (const language of ['en', 'es']) {
 			kind === 'reminder' ? 'event-reminder' : `registration-${kind}`;
 		const key = `${deliveryProfile}-2026-${language}`;
 		const fieldNames = cancelled
-			? ['firstName', 'eventName', 'dateTime']
-			: ['firstName', 'eventName', 'dateTime', 'qrCodeUrl', 'code'];
+			? ['firstName', 'eventName', 'dateTime', 'registrationUrl']
+			: [
+					'firstName',
+					'eventName',
+					'dateTime',
+					'qrCodeUrl',
+					'code',
+					'registrationUrl',
+				];
 		const samples = {
+			registrationUrl: 'https://test.denversantaclausshop.org/',
 			firstName: language === 'es' ? 'María' : 'Jordan',
 			eventName: '2026 Denver Santa Claus Shop',
 			dateTime:

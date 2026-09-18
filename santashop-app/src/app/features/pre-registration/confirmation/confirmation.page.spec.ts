@@ -197,6 +197,35 @@ describe('ConfirmationPage', () => {
 		expect(component.allowCancelRegistration()).toBe(true);
 	});
 
+	it('returns to the overview after cancellation succeeds even when the registration listener is delayed', async (): Promise<void> => {
+		const alert = {
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+		};
+		const loader = {
+			present: vi.fn().mockResolvedValue(undefined),
+			dismiss: vi.fn().mockResolvedValue(true),
+		};
+		vi.spyOn(TestBed.inject(AlertController), 'create').mockResolvedValue(
+			alert as unknown as HTMLIonAlertElement,
+		);
+		vi.spyOn(TestBed.inject(LoadingController), 'create').mockResolvedValue(
+			loader as unknown as HTMLIonLoadingElement,
+		);
+		const navigate = vi
+			.spyOn(TestBed.inject(Router), 'navigate')
+			.mockResolvedValue(true);
+
+		// The callable commits successfully, but Firestore still reports the old ticket.
+		await component.undoRegistration();
+
+		expect(
+			TestBed.inject(ErrorHandlerService).handleError,
+		).not.toHaveBeenCalled();
+		expect(navigate).toHaveBeenCalledWith(['/pre-registration/overview']);
+		expect(loader.dismiss).toHaveBeenCalledOnce();
+	}, 15000);
+
 	it('confirms cancellation and changes an appointment through the customer workflow', async (): Promise<void> => {
 		const alertController = TestBed.inject(AlertController) as any;
 		const loadingController = TestBed.inject(LoadingController) as any;
@@ -218,8 +247,6 @@ describe('ConfirmationPage', () => {
 		await vi.waitFor(() =>
 			expect(preRegistration.undoRegistration).toHaveBeenCalledOnce(),
 		);
-		expect(router.navigate).not.toHaveBeenCalled();
-		registrationComplete$.next(false);
 		await cancellation;
 		await component.changeRegistration();
 

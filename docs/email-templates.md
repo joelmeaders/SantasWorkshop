@@ -28,11 +28,34 @@ Before publishing a starter, replace the draft venue and opening notes in both H
 
 Signup saves the current app language. Both language controls use one customer service, and signed-in changes update only the authenticated customer's profile through `updatePreferredLanguage`. Login restores the saved preference. A missing preference is initialized from the current app language; older backend clients and profiles default to English. Failed saves show a translated message with a retry action. Admin preregistration offers English or Spanish, with English selected initially.
 
-Delivery reads the current customer profile. For each delivery type it selects the latest published template in that language, with English fallback if Spanish is unavailable. Queue records retain requested language, delivered language, selected template key and revision, and the language fallback reason. Published revision mappings are used. Cancellation retains a localized plain-text fallback until a cancellation template is published.
+Delivery reads the current customer profile. For each delivery type it selects the latest published template in that language, with English fallback if Spanish is unavailable. Queue records retain requested language, delivered language, selected template key and revision, and the language fallback reason. Published revision mappings are used. Cancellation retains a localized HTML and plain-text fallback until a cancellation template is published. Both versions link to the registration app, and HTML includes a registration button.
 
 New queue records contain the appointment timestamp. Registration completion, appointment changes, manual resend, scheduled reminders, admin preregistration, and cancellation use it. Dates are formatted in the delivered language with the configured Denver timezone. Older queue records keep their stored appointment text. Duplicate-send checks, current-registration checks, cancellation checks, QR checks, provider-acceptance records, and retry handling remain in the sender.
 
 `emailTemplateNames` reserves SES names during concurrent template creation. The template delete action releases the matching reservation. The collection contains template metadata, not customer language data.
+
+## Registration links and environments
+
+Use `{{registrationUrl}}` with the `registrationUrl` field mapping for registration
+buttons and plain-text links. All six starters include this mapping. Delivery
+uses the root URL of `SANTASHOP_PASSWORD_RESET_CONTINUE_URL`: TEST uses
+`https://test.denversantaclausshop.org/`, PROD uses
+`https://register.denversantaclausshop.org/`, and local emulators use localhost.
+Password-reset links retain their configured sign-in continuation.
+
+Publication converts hardcoded links for known customer domains and their
+Firebase Hosting aliases to `{{registrationUrl}}`, preserving paths, queries,
+and fragments. This also lets one SES template serve both environments safely.
+Test sends resolve the registration link from the sending environment, even
+when sample data contains another URL. Public website, FAQ, map, Facebook, and
+logo links remain shared. QR download links come from the current project's
+Storage bucket.
+
+Deploy Functions with `registrationUrl` support before publishing these
+templates. Existing SES templates with hardcoded links require republication
+to use runtime links. Updating a starter asset does not update a saved or
+published revision. Review saved content before publishing; imports still
+create drafts and do not publish automatically.
 
 ## Reproduce previews
 

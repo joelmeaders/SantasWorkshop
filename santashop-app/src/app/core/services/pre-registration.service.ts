@@ -2,7 +2,9 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AlertController } from '@ionic/angular/standalone';
 import {
+	BehaviorSubject,
 	catchError,
+	combineLatest,
 	defer,
 	distinctUntilChanged,
 	filter,
@@ -48,11 +50,18 @@ export class PreRegistrationService {
 	private readonly destroyRef = inject(DestroyRef);
 	private registrationUid: string | undefined;
 	private registrationVersion = 0;
+	private readonly acknowledgedCancellation$ = new BehaviorSubject<
+		| {
+				uid: string;
+				submittedOn: number;
+		  }
+		| undefined
+	>(undefined);
 	private activeUnavailableAlert?: Awaited<
 		ReturnType<AlertController['create']>
 	>;
 
-	private readonly registrationState$ = this.authService.currentUser$.pipe(
+	private readonly serverState$ = this.authService.currentUser$.pipe(
 		map((user) => user?.uid),
 		distinctUntilChanged(),
 		switchMap((uid) => {
@@ -88,6 +97,37 @@ export class PreRegistrationService {
 		}),
 		takeUntilDestroyed(this.destroyRef),
 		shareReplay({ bufferSize: 1, refCount: true }),
+	);
+
+	private readonly registrationState$ = combineLatest([
+		this.serverState$,
+		this.acknowledgedCancellation$,
+	]).pipe(
+		map(([state, cancelled]) => {
+			const registration = state.registration;
+			if (
+				!registration ||
+				!cancelled ||
+				registration.uid !== cancelled.uid ||
+				!registration.registrationSubmittedOn ||
+				timestampDateFix(
+					registration.registrationSubmittedOn,
+				).getTime() !== cancelled.submittedOn
+			) {
+				return state;
+			}
+			// The callable has committed. Hide only that submitted ticket while the
+			// listener catches up. A later submission must remain visible.
+			return {
+				...state,
+				registration: {
+					...registration,
+					registrationSubmittedOn: undefined,
+					dateTimeSlot: undefined,
+				},
+			};
+		}),
+		takeUntilDestroyed(this.destroyRef),
 	);
 
 	/** Clears visible data while a different identity is loading. */
@@ -204,10 +244,29 @@ export class PreRegistrationService {
 		return this.afFunctions.completeRegistration(input);
 	}
 
-	public undoRegistration(): Promise<HttpsCallableResult<true>> {
-		return this.afFunctions.undoRegistration({
+	public async undoRegistration(): Promise<HttpsCallableResult<true>> {
+		const { registration } = await firstValueFrom(
+			this.registrationState$.pipe(filter((state) => !state.loading)),
+		);
+		const version = this.registrationVersion;
+		const result = await this.afFunctions.undoRegistration({
 			mutationId: this.createMutationId(),
 		});
+		if (
+			result.data === true &&
+			registration?.uid &&
+			registration.registrationSubmittedOn &&
+			version === this.registrationVersion &&
+			!this.destroyRef.destroyed
+		) {
+			this.acknowledgedCancellation$.next({
+				uid: registration.uid,
+				submittedOn: timestampDateFix(
+					registration.registrationSubmittedOn,
+				).getTime(),
+			});
+		}
+		return result;
 	}
 
 	public changeRegistrationDateTime(

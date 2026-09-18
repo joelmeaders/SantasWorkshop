@@ -25,6 +25,7 @@ import {
 	validateEmailTemplateFieldMappings,
 } from '../utility/email-templates';
 import { SES_REGION } from '../utility/runtime-config';
+import { normalizeEmailAppLinks } from '../utility/email-links';
 import { isEmailSink } from '../../../scripts/load/functions/email-isolation';
 import {
 	requireCallableData,
@@ -71,7 +72,10 @@ const upsertSesTemplate = async (
 			TemplateName: template.awsTemplateName,
 			SubjectPart: revision.subjectPart,
 			HtmlPart: html,
-			TextPart: revision.textPart ?? '',
+			TextPart: normalizeEmailAppLinks(
+				revision.textPart ?? '',
+				'{{registrationUrl}}',
+			),
 		},
 	};
 
@@ -167,7 +171,10 @@ export default async function callablePublishEmailTemplate(
 			'failed-precondition',
 			'Replace the unconfirmed seasonal draft notes before publishing.',
 		);
-	const renderedHtml = prepareEmailTemplateHtmlForSes(html);
+	const renderedHtml = normalizeEmailAppLinks(
+		prepareEmailTemplateHtmlForSes(html),
+		'{{registrationUrl}}',
+	);
 
 	try {
 		await upsertSesTemplate(template, revision, renderedHtml);

@@ -24,8 +24,10 @@ import {
 import {
 	REGISTRATION_EMAIL_RETURN_PATH,
 	REGISTRATION_EMAIL_SOURCE,
+	REGISTRATION_APP_URL,
 	SES_REGION,
 } from '../utility/runtime-config';
+import { normalizeEmailAppLinks } from '../utility/email-links';
 import {
 	requireArray,
 	requireCallableData,
@@ -123,14 +125,23 @@ export default async function callableSendTestEmailTemplate(
 		);
 	});
 	validateDetectedFields(subjectPart, html + textPart, fieldMappings);
+	const previewFields = fieldMappings.map((field) => ({
+		...field,
+		sampleValue:
+			(field.mapping.trim() || field.name) === 'registrationUrl'
+				? REGISTRATION_APP_URL
+				: field.sampleValue,
+	}));
 
 	const renderedSubject = renderTemplateWithFieldValues(
 		subjectPart,
-		fieldMappings,
+		previewFields,
 	);
-	const renderedHtml = renderTemplateWithFieldValues(
-		prepareEmailTemplateHtmlForSes(html),
-		fieldMappings,
+	const renderedHtml = normalizeEmailAppLinks(
+		renderTemplateWithFieldValues(
+			prepareEmailTemplateHtmlForSes(html),
+			previewFields,
+		),
 	);
 
 	const sendCommand = new SendEmailCommand({
@@ -147,9 +158,11 @@ export default async function callableSendTestEmailTemplate(
 					? {
 							Text: {
 								Charset: 'UTF-8',
-								Data: renderTemplateWithFieldValues(
-									textPart,
-									fieldMappings,
+								Data: normalizeEmailAppLinks(
+									renderTemplateWithFieldValues(
+										textPart,
+										previewFields,
+									),
 								),
 							},
 						}

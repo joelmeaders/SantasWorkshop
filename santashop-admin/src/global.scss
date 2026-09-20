@@ -250,12 +250,32 @@ ion-toggle::part(label) {
 	overflow-wrap: anywhere;
 }
 
-/* Modern Ionic fields draw their own underline; do not draw a second item rule. */
+/* Form rows use the field surface, without Ionic's list separators. */
+form ion-item,
+.form-list ion-item,
+ion-item:has(
+	ion-input,
+	ion-textarea,
+	ion-select,
+	ion-checkbox,
+	ion-toggle,
+	ion-radio,
+	ion-range,
+	ion-datetime
+) {
+	--inner-border-width: 0;
+	--border-width: 0;
+	--highlight-height: 0;
+}
+form ion-item-divider,
+.form-list ion-item-divider {
+	border-bottom: 0;
+	--background: transparent;
+}
+
 ion-item:has(> ion-input),
 ion-item:has(> ion-textarea),
 ion-item:has(> ion-select) {
-	--inner-border-width: 0;
-	--border-width: 0;
 	--background: transparent;
 	--padding-start: 8px;
 	--inner-padding-end: 8px;
@@ -271,6 +291,21 @@ ion-select {
 	border: 1px solid var(--admin-border);
 	border-radius: 14px;
 	box-shadow: var(--admin-inset);
+}
+/* The outer field border and focus outline replace Ionic's internal rules. */
+ion-input,
+ion-textarea {
+	--border-width: 0 !important;
+	--highlight-height: 0 !important;
+}
+/* Ionic reserves a padded helper row even when it has no visible content. */
+ion-input .input-bottom:not(:has(> :not(:empty))),
+ion-textarea .textarea-bottom:not(:has(> :not(:empty))) {
+	display: none;
+}
+ion-input .input-bottom:has(> :not(:empty)),
+ion-textarea .textarea-bottom:has(> :not(:empty)) {
+	padding-bottom: 8px;
 }
 /* Ionic removes field padding inside an item. Restore room for inset edges. */
 ion-item ion-input,

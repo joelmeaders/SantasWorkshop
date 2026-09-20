@@ -1,5 +1,18 @@
 # Changelog - @santashop/admin
 
+## [2026.09.0-beta.8] - 2026-09-20
+
+### Changed
+
+- Advance the admin application to `2026.09.0-beta.8`.
+- Restyle the application with responsive neumorphic surfaces, navigation, forms, dialogs, reports, and staff tools.
+- Keep main-screen actions aligned with check-in, admin, and owner permissions.
+
+### Fixed
+
+- Remove Ionic form underlines and empty helper strips, including the line above validation messages.
+- Restore the check-in staff preview after its role-change test so it does not display owner actions.
+
 ## [2026.09.0-beta.6] - Unreleased
 
 ### Changed

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [2026.09.0-beta.8] - 2026-09-20
+
+### Changed
+
+- Advance the workspace and admin application to `2026.09.0-beta.8`.
+- Restyle the admin application with responsive neumorphic surfaces, navigation, forms, dialogs, reports, and staff tools.
+- Keep main-screen actions aligned with check-in, admin, and owner permissions.
+
+### Fixed
+
+- Remove Ionic form underlines and empty helper strips, including the line above validation messages.
+- Restore the check-in staff preview after its role-change test so it does not display owner actions.
+
 ## [2026.09.0-beta.7] - 2026-09-17
 
 ### Changed

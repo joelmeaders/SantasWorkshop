@@ -1,17 +1,22 @@
 <admin-header title="{{ 'Santa Shop' | adminText }}" [showBack]="false" />
 <ion-content class="ion-padding">
 	<div class="home-intro">
-		<p class="eyebrow">{{ 'Staff workspace' | adminText }}</p>
-		<h1>{{ 'Ready to welcome families' | adminText }}</h1>
-		<p>
-			{{
-				'Check in shoppers, find a registration, or manage the event.'
-					| adminText
-			}}
-		</p>
+		<div class="welcome-symbol" aria-hidden="true">
+			<ion-icon name="bag-check-outline" />
+		</div>
+		<div>
+			<p class="eyebrow">{{ 'Staff workspace' | adminText }}</p>
+			<h1>{{ 'Ready to welcome families' | adminText }}</h1>
+			<p>
+				{{
+					'Check in shoppers, find a registration, or manage the event.'
+						| adminText
+				}}
+			</p>
+		</div>
 	</div>
 	<div class="home-sections">
-		<ion-list>
+		<ion-list class="daily-tasks">
 			<ion-list-header> {{ 'Daily tasks' | adminText }} </ion-list-header>
 			<ion-item
 				id="checkInNav"
@@ -21,7 +26,6 @@
 			>
 				<ion-icon
 					name="bag-check-outline"
-					color="success"
 					slot="start"
 					aria-hidden="true"
 				/>
@@ -30,7 +34,6 @@
 			<ion-item id="searchNav" detail routerLink="../search">
 				<ion-icon
 					name="search-outline"
-					color="warning"
 					slot="start"
 					aria-hidden="true"
 				/>
@@ -45,7 +48,6 @@
 				>
 					<ion-icon
 						name="storefront-outline"
-						color="primary"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -59,19 +61,19 @@
 				>
 					<ion-icon
 						name="person-add-outline"
-						color="primary"
 						slot="start"
 						aria-hidden="true"
 					/>
 					{{ 'Pre-Register Customers' | adminText }}
 				</ion-item>
 			}
-			@if (isAdmin()) {
+		</ion-list>
+		@if (isAdmin()) {
+			<ion-list class="tools">
 				<ion-list-header> {{ 'Tools' | adminText }} </ion-list-header>
 				<ion-item detail routerLink="../resend-email">
 					<ion-icon
 						name="mail-outline"
-						color="tertiary"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -84,7 +86,6 @@
 				>
 					<ion-icon
 						name="calendar-outline"
-						color="secondary"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -93,7 +94,6 @@
 				<ion-item detail routerLink="../email-templates">
 					<ion-icon
 						name="document-text-outline"
-						color="secondary"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -102,7 +102,6 @@
 				<ion-item detail routerLink="../users">
 					<ion-icon
 						name="people-outline"
-						color="primary"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -116,7 +115,6 @@
 					>
 						<ion-icon
 							name="settings-outline"
-							color="secondary"
 							slot="start"
 							aria-hidden="true"
 						/>
@@ -129,14 +127,14 @@
 					>
 						<ion-icon
 							name="shield-checkmark-outline"
-							color="danger"
 							slot="start"
 							aria-hidden="true"
 						/>
 						{{ 'Owner Operations' | adminText }}
 					</ion-item>
 				}
-
+			</ion-list>
+			<ion-list class="reports">
 				<ion-list-header> {{ 'Reports' | adminText }} </ion-list-header>
 				<ion-item
 					id="scanRiskReviewNav"
@@ -145,7 +143,6 @@
 				>
 					<ion-icon
 						name="alert-circle-outline"
-						color="danger"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -162,7 +159,6 @@
 				<ion-item detail routerLink="../stats/check-in">
 					<ion-icon
 						name="cart-outline"
-						color="secondary"
 						slot="start"
 						aria-hidden="true"
 					/>
@@ -171,14 +167,15 @@
 				<ion-item detail routerLink="../stats/user">
 					<ion-icon
 						name="people-outline"
-						color="tertiary"
 						slot="start"
 						aria-hidden="true"
 					/>
 					{{ 'Shopper Stats' | adminText }}
 				</ion-item>
-			}
+			</ion-list>
+		}
 
+		<ion-list class="other">
 			<ion-list-header> {{ 'Other' | adminText }} </ion-list-header>
 			<ion-item
 				id="adminSignOutButton"
@@ -188,14 +185,9 @@
 				button
 				tappable
 			>
-				<ion-icon
-					name="exit-outline"
-					color="danger"
-					slot="start"
-					aria-hidden="true"
-				/>
+				<ion-icon name="exit-outline" slot="start" aria-hidden="true" />
 				{{ 'Sign Out' | adminText }}
 			</ion-item>
 		</ion-list>
-	</div></ion-content
->
+	</div>
+</ion-content>

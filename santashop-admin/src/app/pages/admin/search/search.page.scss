@@ -4,16 +4,17 @@ p {
 .search-methods {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
-	margin-block: 24px 12px;
+	gap: 16px;
+	margin-block: 28px;
 }
 button {
 	min-height: 48px;
 	flex: 1 1 140px;
 	padding: 12px;
-	border: 1px solid var(--admin-border);
-	border-radius: 10px;
+	border: 1px solid var(--admin-edge);
+	border-radius: 16px;
 	background: var(--admin-surface);
+	box-shadow: var(--admin-raised-small);
 	color: var(--ion-text-color);
 	font: inherit;
 	font-size: 0.875rem;
@@ -21,12 +22,14 @@ button {
 }
 button[aria-pressed='true'] {
 	color: var(--admin-accent);
-	background: var(--admin-accent-soft);
+	background: var(--admin-surface);
 	border-color: var(--admin-accent);
+	box-shadow: var(--admin-inset);
 	font-weight: 650;
 }
 section {
-	border: 1px solid var(--admin-border);
-	border-radius: 16px;
+	border: 1px solid var(--admin-edge);
+	border-radius: 24px;
 	background: var(--admin-surface);
+	box-shadow: var(--admin-raised);
 }

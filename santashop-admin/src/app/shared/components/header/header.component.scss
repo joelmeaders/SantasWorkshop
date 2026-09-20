@@ -3,6 +3,10 @@
 }
 ion-toolbar {
 	--min-height: 56px;
+	--padding-start: 12px;
+	--padding-end: 12px;
+	--border-width: 0;
+	border-bottom: 1px solid var(--admin-border);
 }
 .page-title {
 	margin: 0;
@@ -13,12 +17,17 @@ ion-toolbar {
 	letter-spacing: 0;
 	overflow-wrap: anywhere;
 }
-.preferences-trigger {
+ion-buttons .preferences-trigger {
+	--background: var(--admin-surface);
+	--box-shadow: var(--admin-raised-small);
+	--border-radius: 12px;
+	--padding-start: 14px;
+	--padding-end: 14px;
 	font-size: 0.75rem;
 	white-space: nowrap;
 }
 .preferences-panel {
-	padding: 12px;
+	padding: 16px;
 	background: var(--admin-surface);
 }
 ion-popover {

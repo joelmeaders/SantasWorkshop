@@ -6,6 +6,56 @@ import {
 } from '../../../../../../.storybook/admin/admin-story.providers';
 import { LandingPage } from './landing.page';
 
+const staffActions = ['Check in customers', 'Search for customers', 'Sign Out'];
+const adminActions = [
+	'Check in customers',
+	'Search for customers',
+	'On-Site Registration',
+	'Pre-Register Customers',
+	'Resend Registration Emails',
+	'Schedule & Capacity Editor',
+	'Email Templates',
+	'User Management',
+	'Scan Risk Review',
+	'Registration Stats',
+	'Check-In Stats',
+	'Shopper Stats',
+	'Sign Out',
+];
+const ownerActions = [
+	'Check in customers',
+	'Search for customers',
+	'On-Site Registration',
+	'Pre-Register Customers',
+	'Resend Registration Emails',
+	'Schedule & Capacity Editor',
+	'Email Templates',
+	'User Management',
+	'App settings',
+	'Owner Operations',
+	'Scan Risk Review',
+	'Registration Stats',
+	'Check-In Stats',
+	'Shopper Stats',
+	'Sign Out',
+];
+
+async function expectActions(
+	canvasElement: HTMLElement,
+	actions: string[],
+): Promise<void> {
+	await waitFor(() =>
+		expect(
+			Array.from(canvasElement.querySelectorAll('ion-item'), (item) =>
+				item.textContent?.trim(),
+			),
+		).toEqual(actions),
+	);
+	for (const item of canvasElement.querySelectorAll('ion-item')) {
+		await expect(item).toBeVisible();
+	}
+}
+
 const meta = {
 	title: 'Admin/Navigation/Landing',
 	component: LandingPage,
@@ -23,10 +73,8 @@ const meta = {
 		await expect(
 			canvas.getByText('Ready to welcome families'),
 		).toBeVisible();
-		await expect(canvas.getByText('Owner Operations')).toBeVisible();
-		await userEvent.click(
-			canvas.getByText('EN / ES'),
-		);
+		await expectActions(canvasElement, ownerActions);
+		await userEvent.click(canvas.getByText('EN / ES'));
 		const appearance = await within(document.body).findByLabelText(
 			'Appearance',
 		);
@@ -61,27 +109,25 @@ export const OwnerNavigation: Story = {};
 export const CheckInStaffNavigation: Story = {
 	decorators: adminStoryDecorators({ isAdmin: false, isOwner: false }),
 	play: async ({ canvasElement }): Promise<void> => {
-		const canvas = within(canvasElement);
-		await expect(canvas.getByText('Check in customers')).toBeVisible();
-		await expect(
-			canvas.queryByText('On-Site Registration'),
-		).not.toBeInTheDocument();
-		await expect(
-			canvas.queryByText('Pre-Register Customers'),
-		).not.toBeInTheDocument();
-		await expect(canvas.queryByText('Tools')).not.toBeInTheDocument();
-		await expect(
-			canvas.queryByText('Owner Operations'),
-		).not.toBeInTheDocument();
+		await expectActions(canvasElement, staffActions);
 		const fixtures = getAdminStoryFixtures(canvasElement);
-		fixtures.isAdmin$.next(true);
-		fixtures.isOwner$.next(true);
-		await waitFor(() => expect(canvas.getByText('Tools')).toBeVisible());
-		await waitFor(() =>
-			expect(canvas.getByText('Owner Operations')).toBeVisible(),
-		);
-		await expect(canvas.getByText('On-Site Registration')).toBeVisible();
-		await expect(canvas.getByText('Pre-Register Customers')).toBeVisible();
+		try {
+			fixtures.isAdmin$.next(true);
+			fixtures.isOwner$.next(true);
+			await expectActions(canvasElement, ownerActions);
+		} finally {
+			// Leave the preview in its named role after testing live role changes.
+			fixtures.isOwner$.next(false);
+			fixtures.isAdmin$.next(false);
+		}
+		await expectActions(canvasElement, staffActions);
+	},
+};
+
+export const AdminNavigation: Story = {
+	decorators: adminStoryDecorators({ isAdmin: true, isOwner: false }),
+	play: async ({ canvasElement }): Promise<void> => {
+		await expectActions(canvasElement, adminActions);
 	},
 };
 

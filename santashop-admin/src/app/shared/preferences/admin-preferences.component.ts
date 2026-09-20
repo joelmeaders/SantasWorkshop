@@ -61,11 +61,14 @@ import { AdminTextPipe } from './admin-text.pipe';
 		.language-choice {
 			display: flex;
 			border: 1px solid var(--admin-border);
-			border-radius: 10px;
-			overflow: hidden;
+			border-radius: 14px;
+			padding: 4px;
+			gap: 4px;
+			box-shadow: var(--admin-inset);
 		}
 		button,
 		select {
+			border-radius: 10px;
 			min-height: 44px;
 			border: 0;
 			padding: 0.6rem 0.7rem;
@@ -77,10 +80,11 @@ import { AdminTextPipe } from './admin-text.pipe';
 		}
 		button[aria-pressed='true'] {
 			color: var(--admin-accent);
-			background: var(--admin-accent-soft);
+			box-shadow: var(--admin-raised-small);
 			font-weight: 700;
 		}
 		select {
+			box-shadow: var(--admin-inset);
 			border: 1px solid var(--admin-border);
 			border-radius: 10px;
 			max-width: 8rem;

@@ -15,11 +15,13 @@
 .scan-symbol {
 	display: grid;
 	place-items: center;
-	width: 88px;
-	height: 88px;
+	width: 104px;
+	height: 104px;
 	margin: 8px auto 28px;
-	border: 2px dashed var(--admin-border);
-	border-radius: 20px;
+	border: 1px solid var(--admin-edge);
+	border-radius: 32px;
+	background: var(--admin-surface);
+	box-shadow: var(--admin-raised);
 	color: var(--admin-accent);
 }
 .scan-symbol ion-icon {
@@ -27,7 +29,7 @@
 }
 .scan-actions {
 	display: grid;
-	gap: 8px;
+	gap: 16px;
 	margin-bottom: 20px;
 }
 .camera-view {

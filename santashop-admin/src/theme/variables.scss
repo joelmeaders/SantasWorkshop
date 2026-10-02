@@ -1,14 +1,17 @@
 :root {
 	--ion-font-family:
 		-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-	--admin-surface: #ffffff;
-	--admin-surface-muted: #efeeeb;
-	--admin-border: #d8d6d2;
-	--admin-muted: #615d58;
+	--admin-surface: #e9e9e6;
+	--admin-surface-muted: #e1e2de;
+	--admin-border: #c6c8c2;
+	--admin-muted: #565b57;
+	--admin-shadow-dark: #c6c8c3;
+	--admin-shadow-light: #ffffff;
+	--admin-edge: #f5f5f1;
 	--admin-accent: #a52336;
-	--admin-accent-soft: #f9e9ec;
-	--ion-background-color: #f6f5f3;
-	--ion-background-color-rgb: 246, 245, 243;
+	--admin-accent-soft: #eee0e1;
+	--ion-background-color: #e9e9e6;
+	--ion-background-color-rgb: 233, 233, 230;
 	--ion-text-color: #242321;
 	--ion-text-color-rgb: 36, 35, 33;
 	--ion-color-primary: #a52336;
@@ -42,13 +45,13 @@
 	--ion-color-danger-contrast: #ffffff;
 	--ion-color-danger-shade: #98212c;
 	--ion-color-danger-tint: #b53c47;
-	--ion-color-medium: #615d58;
-	--ion-color-medium-rgb: 97, 93, 88;
+	--ion-color-medium: #565b57;
+	--ion-color-medium-rgb: 86, 91, 87;
 	--ion-color-medium-contrast: #ffffff;
 	--ion-color-medium-shade: #55524d;
 	--ion-color-medium-tint: #716d69;
-	--ion-color-light: #efeeeb;
-	--ion-color-light-rgb: 239, 238, 235;
+	--ion-color-light: #e1e2de;
+	--ion-color-light-rgb: 225, 226, 222;
 	--ion-color-light-contrast: #242321;
 	--ion-color-light-shade: #d2d1cf;
 	--ion-color-light-tint: #f1f0ed;
@@ -61,14 +64,17 @@
 
 :root[data-admin-theme='dark'],
 body.dark {
-	--admin-surface: #171717;
-	--admin-surface-muted: #242424;
-	--admin-border: #3c3a38;
-	--admin-muted: #c0bab3;
+	--admin-surface: #292d30;
+	--admin-surface-muted: #24282b;
+	--admin-border: #51585c;
+	--admin-muted: #bfc6c7;
+	--admin-shadow-dark: #1d2022;
+	--admin-shadow-light: #353b3e;
+	--admin-edge: #3c4346;
 	--admin-accent: #ff9aaa;
-	--admin-accent-soft: #351c22;
-	--ion-background-color: #000000;
-	--ion-background-color-rgb: 0, 0, 0;
+	--admin-accent-soft: #3c2d33;
+	--ion-background-color: #292d30;
+	--ion-background-color-rgb: 41, 45, 48;
 	--ion-text-color: #f4f1ed;
 	--ion-text-color-rgb: 244, 241, 237;
 	--ion-color-primary: #ff9aaa;
@@ -97,13 +103,13 @@ body.dark {
 	--ion-color-danger-contrast: #330d11;
 	--ion-color-danger-shade: #e0898c;
 	--ion-color-danger-tint: #ffa6a9;
-	--ion-color-medium: #c0bab3;
-	--ion-color-medium-rgb: 192, 186, 179;
+	--ion-color-medium: #bfc6c7;
+	--ion-color-medium-rgb: 191, 198, 199;
 	--ion-color-medium-contrast: #191817;
 	--ion-color-medium-shade: #a9a49e;
 	--ion-color-medium-tint: #c6c1bb;
-	--ion-color-light: #242424;
-	--ion-color-light-rgb: 36, 36, 36;
+	--ion-color-light: #24282b;
+	--ion-color-light-rgb: 36, 40, 43;
 	--ion-color-light-contrast: #f4f1ed;
 	--ion-color-light-shade: #202020;
 	--ion-color-light-tint: #3a3a3a;
@@ -114,6 +120,16 @@ body.dark {
 
 :root,
 body.dark {
+	/* Shared surface depth keeps light and dark controls on the same material. */
+	--admin-raised:
+		8px 8px 18px var(--admin-shadow-dark),
+		-8px -8px 18px var(--admin-shadow-light);
+	--admin-raised-small:
+		4px 4px 9px var(--admin-shadow-dark),
+		-4px -4px 9px var(--admin-shadow-light);
+	--admin-inset:
+		inset 3px 3px 7px var(--admin-shadow-dark),
+		inset -3px -3px 7px var(--admin-shadow-light);
 	--ion-item-background: var(--admin-surface);
 	--ion-card-background: var(--admin-surface);
 	--ion-toolbar-background: var(--admin-surface);

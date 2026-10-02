@@ -158,6 +158,59 @@ describe('app routes', () => {
 		currentUser$.next(user({ owner: true }));
 		await expect(runGuard(guard)).resolves.toBe(true);
 	});
+	it.each([
+		{ role: 'checkin', claims: { roles: ['checkin'], owner: false } },
+		{ role: 'admin', claims: { roles: ['admin'], owner: false } },
+		{ role: 'owner', claims: { owner: true } },
+	])(
+		'enforces every main-screen destination for $role users',
+		async ({ role, claims }) => {
+			currentUser$.next(user(claims));
+			const admin = routes.find((route) => route.path === 'admin');
+			await expect(
+				runGuard(admin?.canMatch?.[0] as CanMatchFn),
+			).resolves.toBe(true);
+			const shell = adminRoutes.find(
+				(route) => route.path === '' && route.loadComponent,
+			);
+			const destinations = [
+				{ path: 'checkin', access: 'checkin' },
+				{ path: 'search', access: 'checkin' },
+				{ path: 'registration', access: 'admin' },
+				{ path: 'pre-registration', access: 'admin' },
+				{ path: 'resend-email', access: 'admin' },
+				{ path: 'schedule-editor', access: 'admin' },
+				{ path: 'email-templates', access: 'admin' },
+				{ path: 'users', access: 'admin' },
+				{ path: 'app-settings', access: 'owner' },
+				{ path: 'owner-operations', access: 'owner' },
+				{ path: 'stats/scan-risk', access: 'admin' },
+				{ path: 'stats/registration', access: 'admin' },
+				{ path: 'stats/check-in', access: 'admin' },
+				{ path: 'stats/user', access: 'admin' },
+			];
+			for (const { path, access } of destinations) {
+				let children = shell?.children;
+				const outcomes: unknown[] = [];
+				for (const segment of path.split('/')) {
+					const route = children?.find(
+						(candidate) => candidate.path === segment,
+					);
+					expect(route, path).toBeDefined();
+					for (const guard of route?.canActivate ?? []) {
+						outcomes.push(await runGuard(guard as CanActivateFn));
+					}
+					children = route?.children;
+				}
+				const allowed =
+					access === 'checkin' || role === 'owner' || access === role;
+				expect(
+					outcomes.every((outcome) => outcome === true),
+					path,
+				).toBe(allowed);
+			}
+		},
+	);
 	it('declares every operational destination inside the lazy admin tree', async () => {
 		const shell = adminRoutes.find(
 			(route) => route.path === '' && route.loadComponent,

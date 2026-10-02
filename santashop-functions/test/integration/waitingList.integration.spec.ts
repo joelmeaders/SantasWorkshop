@@ -82,7 +82,11 @@ describe.sequential('waiting list transactions and campaigns', () => {
 		'keeps first consent time on concurrent duplicates and permits opt-out with joining disabled',
 		{ timeout: 30000 },
 		async () => {
-			await Promise.all([join(), join(), join('another-join', 'weather')]);
+			await Promise.all([
+				join(),
+				join(),
+				join('another-join', 'weather'),
+			]);
 			const first = await membership();
 			expect(first['active']).toBe(true);
 			await join('another-duplicate');
@@ -148,7 +152,8 @@ describe.sequential('waiting list transactions and campaigns', () => {
 		]) {
 			await getFirestore().doc(`registrations/${uid}`).update(change);
 			expect(
-				(await getWaitingListState(createCallableRequest({}, { uid }))).canJoin,
+				(await getWaitingListState(createCallableRequest({}, { uid })))
+					.canJoin,
 			).toBe(false);
 		}
 	});
@@ -168,13 +173,19 @@ describe.sequential('waiting list transactions and campaigns', () => {
 			{ slotsReserved: 2 },
 			{ slotsReserved: 3 },
 		]) {
-			await setDocument('dateTimeSlots', 'slot-1', { ...slot, ...change });
+			await setDocument('dateTimeSlots', 'slot-1', {
+				...slot,
+				...change,
+			});
 			expect(
-				(await getWaitingListState(createCallableRequest({}, { uid }))).canJoin,
+				(await getWaitingListState(createCallableRequest({}, { uid })))
+					.canJoin,
 			).toBe(true);
 		}
 		await setDocument('dateTimeSlots', 'slot-1', slot);
-		await expect(join()).rejects.toMatchObject({ code: 'failed-precondition' });
+		await expect(join()).rejects.toMatchObject({
+			code: 'failed-precondition',
+		});
 	});
 
 	it('clears consent in booking and completion transactions without a separate membership write', async () => {
@@ -229,9 +240,11 @@ describe.sequential('waiting list transactions and campaigns', () => {
 			{ owner: true },
 		);
 		await publishWaitingListSettings(request);
-		await expect(publishWaitingListSettings(request)).rejects.toMatchObject({
-			code: 'aborted',
-		});
+		await expect(publishWaitingListSettings(request)).rejects.toMatchObject(
+			{
+				code: 'aborted',
+			},
+		);
 	});
 
 	const seedCampaign = async (): Promise<void> => {
@@ -290,9 +303,15 @@ describe.sequential('waiting list transactions and campaigns', () => {
 					textPart:
 						'Hello {{firstName}} {{registrationUrl}} {{waitingListUrl}}',
 					htmlStoragePath: path,
-					fieldMappings: ['firstName', 'registrationUrl', 'waitingListUrl'].map(
-						(name) => ({ name, mapping: name, sampleValue: 'sample' }),
-					),
+					fieldMappings: [
+						'firstName',
+						'registrationUrl',
+						'waitingListUrl',
+					].map((name) => ({
+						name,
+						mapping: name,
+						sampleValue: 'sample',
+					})),
 				});
 		}
 	};
@@ -322,7 +341,10 @@ describe.sequential('waiting list transactions and campaigns', () => {
 		const revisions = Object.fromEntries(
 			preview.emails.map((email) => [
 				email.language,
-				{ templateKey: email.templateKey, revisionId: email.revisionId },
+				{
+					templateKey: email.templateKey,
+					revisionId: email.revisionId,
+				},
 			]),
 		);
 		await expect(
@@ -332,7 +354,10 @@ describe.sequential('waiting list transactions and campaigns', () => {
 						mutationId: 'launch-test',
 						revisions: {
 							...revisions,
-							en: { templateKey: 'different-key', revisionId: 'rev-1' },
+							en: {
+								templateKey: 'different-key',
+								revisionId: 'rev-1',
+							},
 						},
 					},
 					{ owner: true },
@@ -344,12 +369,18 @@ describe.sequential('waiting list transactions and campaigns', () => {
 				createCallableRequest({ mutationId: 'launch-test', revisions }),
 			),
 		).rejects.toMatchObject({ code: 'permission-denied' });
-		const campaign = await startWaitingListCampaign(
-			createCallableRequest(
-				{ mutationId: 'launch-test', revisions },
-				{ owner: true },
+		const [campaign, duplicate] = await Promise.all(
+			[0, 1].map(() =>
+				startWaitingListCampaign(
+					createCallableRequest(
+						{ mutationId: 'launch-test', revisions },
+						{ owner: true },
+					),
+				),
 			),
 		);
+		expect(duplicate.id).toBe(campaign.id);
+		expect(enqueue).toHaveBeenCalledTimes(1);
 		expect(campaign).toMatchObject({
 			id: 'launch-test',
 			status: 'queued',
@@ -388,17 +419,25 @@ describe.sequential('waiting list transactions and campaigns', () => {
 					.doc(`waitingListCampaigns/launch-test/deliveries/${uid}`)
 					.get()
 			).data(),
-		).toMatchObject({ state: 'accepted', language: 'en', revisionId: 'rev-1' });
+		).toMatchObject({
+			state: 'accepted',
+			language: 'en',
+			revisionId: 'rev-1',
+		});
 		expect(
 			(
 				await getFirestore()
-					.doc('waitingListCampaigns/launch-test/deliveries/later-member')
+					.doc(
+						'waitingListCampaigns/launch-test/deliveries/later-member',
+					)
 					.get()
 			).exists,
 		).toBe(false);
 		expect(
 			(
-				await getFirestore().doc('waitingListCampaigns/launch-test').get()
+				await getFirestore()
+					.doc('waitingListCampaigns/launch-test')
+					.get()
 			).data()?.['emails'][1].subject,
 		).toBe('More times');
 		expect(
@@ -447,11 +486,14 @@ describe.sequential('waiting list transactions and campaigns', () => {
 			await run();
 			expect(
 				(
-					await getFirestore().doc('waitingListCampaigns/campaign-test').get()
+					await getFirestore()
+						.doc('waitingListCampaigns/campaign-test')
+						.get()
 				).data()?.['status'],
 			).toBe('completed');
 			expect(
-				(await getFirestore().doc('waitingListCampaigns/_lock').get()).exists,
+				(await getFirestore().doc('waitingListCampaigns/_lock').get())
+					.exists,
 			).toBe(false);
 		},
 	);
@@ -480,7 +522,10 @@ describe.sequential('waiting list transactions and campaigns', () => {
 		expect((await membership())['active']).toBe(true);
 		expect(
 			await getWaitingListCampaign(
-				createCallableRequest({ campaignId: 'campaign-test' }, { owner: true }),
+				createCallableRequest(
+					{ campaignId: 'campaign-test' },
+					{ owner: true },
+				),
 			),
 		).toMatchObject({ status: 'completed', accepted: 1 });
 	});
@@ -495,7 +540,9 @@ describe.sequential('waiting list transactions and campaigns', () => {
 		expect(await receipt()).toBeUndefined();
 		expect(
 			(
-				await getFirestore().doc('waitingListCampaigns/campaign-test').get()
+				await getFirestore()
+					.doc('waitingListCampaigns/campaign-test')
+					.get()
 			).data()?.['status'],
 		).toBe('paused');
 		await setDocument('_testConfig', 'waitingList', {
@@ -503,11 +550,64 @@ describe.sequential('waiting list transactions and campaigns', () => {
 			emailSendingEnabled: true,
 		});
 		await resumeWaitingListCampaign(
-			createCallableRequest({ campaignId: 'campaign-test' }, { owner: true }),
+			createCallableRequest(
+				{ campaignId: 'campaign-test' },
+				{ owner: true },
+			),
 		);
 		await run(1); // An old task must not claim the resumed campaign.
 		expect(await receipt()).toBeUndefined();
 		await run(2);
+		expect(await receipt()).toMatchObject({ state: 'accepted' });
+	});
+
+	it('does not pause a running task after an ambiguous enqueue response', async () => {
+		await seedCampaign();
+		enqueue.mockImplementationOnce(
+			async (task: WaitingListWorkerRequest) => {
+				await run(task.generation);
+				throw new Error(
+					'The task was accepted but the response was lost.',
+				);
+			},
+		);
+		const campaign = await resumeWaitingListCampaign(
+			createCallableRequest(
+				{ campaignId: 'campaign-test' },
+				{ owner: true },
+			),
+		);
+		expect(campaign).toMatchObject({ status: 'running', accepted: 1 });
+		await run(2);
+		expect(
+			await getWaitingListCampaign(
+				createCallableRequest(
+					{ campaignId: 'campaign-test' },
+					{ owner: true },
+				),
+			),
+		).toMatchObject({ status: 'completed', accepted: 1 });
+	});
+
+	it('does not let an older failed enqueue pause a newer resume', async () => {
+		await seedCampaign();
+		enqueue.mockImplementationOnce(async () => {
+			await resumeWaitingListCampaign(
+				createCallableRequest(
+					{ campaignId: 'campaign-test' },
+					{ owner: true },
+				),
+			);
+			throw new Error('Old enqueue failed after a newer resume.');
+		});
+		const campaign = await resumeWaitingListCampaign(
+			createCallableRequest(
+				{ campaignId: 'campaign-test' },
+				{ owner: true },
+			),
+		);
+		expect(campaign.status).toBe('queued');
+		await run(3);
 		expect(await receipt()).toMatchObject({ state: 'accepted' });
 	});
 

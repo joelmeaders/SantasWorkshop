@@ -93,6 +93,14 @@ otherwise the reader runtime identity). Verify these grants in TEST
 before enabling delivery; do not grant public invocation or broaden unrelated
 queues. The SES identity must allow `GetSendQuota` and `SendEmail`.
 
+Scope `roles/cloudtasks.enqueuer` to the `us-central1/waitingListEmailWorker`
+queue for the configured reader identity. Scope `roles/iam.serviceAccountUser`
+to the configured task service account for that reader. Scope `roles/run.invoker`
+to the private worker service for the task identity. The reader also needs access
+to the template HTML objects in the environment's Storage bucket. Inspect existing
+bindings first; deployment does not authorize new IAM grants. Keep these grants
+separate from owner-reset/export permissions.
+
 `verify-functions-managed-resources.cjs` checks both task queues and the dedicated
 worker retry/rate limits. Remote Config consumer readiness includes the new
 gateway callers. These checks complement live IAM and indexed-query verification;
@@ -100,6 +108,8 @@ emulators cannot prove cloud IAM, index readiness, or SES provider limits.
 
 Emulator campaign delivery is simulated only when `_testConfig/emailSending`
 contains both `enabled: true` and `simulateWaitingList: true`. It never calls SES.
+Deployed TEST email-isolation mode blocks waiting-list campaigns, including SES
+quota requests. It does not turn them into accepted production deliveries.
 The owner results label simulated campaigns. Use isolated fixtures for customer,
 campaign, and slot-control tests. Do not send customer campaigns or change
 production appointments during validation.

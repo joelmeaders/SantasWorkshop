@@ -29,8 +29,14 @@ const fixture = (
 		await expect(doc.querySelector('a')?.getAttribute('href')).toBe(
 			'https://example.com/pre-registration/overview',
 		);
-		await expect(doc.querySelectorAll('a')[1]?.getAttribute('href')).toBe(
+		const links = Array.from(doc.querySelectorAll('a'), (link) =>
+			link.getAttribute('href'),
+		);
+		await expect(links).toContain(
 			'https://example.com/?mode=sign-in&waitingList=manage',
+		);
+		await expect(links).toContain(
+			`https://denversantaclausshop.org/faq-${language === 'es' ? 'espanol' : 'english'}/`,
 		);
 	},
 });

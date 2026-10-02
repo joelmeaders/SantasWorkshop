@@ -51,12 +51,12 @@ export class AdminThemeService implements OnDestroy {
 			: 'light';
 		document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
 		document.documentElement.style.backgroundColor = dark
-			? '#000000'
-			: '#f6f5f3';
+			? '#292d30'
+			: '#e9e9e6';
 		document.body.classList.toggle('dark', dark);
 		document
 			.querySelector('meta[name="theme-color"]')
-			?.setAttribute('content', dark ? '#000000' : '#f6f5f3');
+			?.setAttribute('content', dark ? '#292d30' : '#e9e9e6');
 	}
 
 	public ngOnDestroy(): void {

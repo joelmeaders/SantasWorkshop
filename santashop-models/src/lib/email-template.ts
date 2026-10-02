@@ -29,11 +29,13 @@ export const EMAIL_TEMPLATE_RUNTIME_FIELDS: Readonly<
 		'waitingListUrl',
 	],
 	[EMAIL_TEMPLATE_DELIVERY_PROFILES.registrationCancellation]: [
+		'registrationUrl',
 		'firstName',
 		'eventName',
 		'dateTime',
 	],
 	[EMAIL_TEMPLATE_DELIVERY_PROFILES.registrationConfirmation]: [
+		'registrationUrl',
 		'firstName',
 		'eventName',
 		'qrCodeUrl',
@@ -41,6 +43,7 @@ export const EMAIL_TEMPLATE_RUNTIME_FIELDS: Readonly<
 		'dateTime',
 	],
 	[EMAIL_TEMPLATE_DELIVERY_PROFILES.eventReminder]: [
+		'registrationUrl',
 		'firstName',
 		'eventName',
 		'qrCodeUrl',

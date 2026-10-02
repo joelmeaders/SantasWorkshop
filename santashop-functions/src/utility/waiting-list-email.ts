@@ -1,5 +1,7 @@
 import admin from '../firebase-admin';
+import { isEmailSink } from '../../../scripts/load/functions/email-isolation';
 import { isEmailSendingEnabled } from './email-sending';
+import { normalizeEmailAppLinks } from './email-links';
 import {
 	GetSendQuotaCommand,
 	SendEmailCommand,
@@ -58,11 +60,14 @@ export const loadWaitingListEmails = async (): Promise<
 			const key = published.templateSummary.key;
 			const revisionId = published.templateSummary.publishedRevisionId;
 			if (!revisionId)
-				throw new Error('A published waiting-list revision is required.');
+				throw new Error(
+					'A published waiting-list revision is required.',
+				);
 			const revision = await getEmailTemplateRevision(key, revisionId);
 			if (
 				!revision ||
-				revision.deliveryProfile !== EMAIL_TEMPLATE_KEYS.waitingListCapacity
+				revision.deliveryProfile !==
+					EMAIL_TEMPLATE_KEYS.waitingListCapacity
 			)
 				throw new Error('The waiting-list revision is unavailable.');
 			const html = await readEmailTemplateHtml(revision.htmlStoragePath);
@@ -72,23 +77,43 @@ export const loadWaitingListEmails = async (): Promise<
 				...waitingListLinks(),
 			};
 			const fields = revision.fieldMappings.map((field) => {
-				const value = runtime[field.mapping as keyof typeof runtime];
+				const value =
+					runtime[
+						(field.mapping.trim() ||
+							field.name) as keyof typeof runtime
+					];
 				if (typeof value !== 'string')
-					throw new Error('Waiting-list template mapping is unavailable.');
+					throw new Error(
+						'Waiting-list template mapping is unavailable.',
+					);
 				return { ...field, sampleValue: value };
 			});
 			return {
 				language,
 				templateKey: key,
 				revisionId,
-				subject: renderTemplateWithFieldValues(revision.subjectPart, fields),
-				html: renderTemplateWithFieldValues(html, fields),
-				text: renderTemplateWithFieldValues(revision.textPart ?? '', fields),
+				subject: renderTemplateWithFieldValues(
+					revision.subjectPart,
+					fields,
+				),
+				html: normalizeEmailAppLinks(
+					renderTemplateWithFieldValues(html, fields),
+				),
+				text: normalizeEmailAppLinks(
+					renderTemplateWithFieldValues(
+						revision.textPart ?? '',
+						fields,
+					),
+				),
 			};
 		}),
 	);
 
 export const waitingListSendRate = async (): Promise<number> => {
+	if (isEmailSink())
+		throw new Error(
+			'Waiting-list campaigns are disabled during email isolation.',
+		);
 	const quota = await ses().send(new GetSendQuotaCommand({}));
 	if (
 		!Number.isFinite(quota.MaxSendRate) ||
@@ -104,15 +129,23 @@ const escapeHtml = (value: string): string =>
 	value.replace(
 		/[&<>"']/g,
 		(character) =>
-			({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[
-				character
-			] ?? character,
+			({
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#39;',
+			})[character] ?? character,
 	);
 export const sendWaitingListEmail = async (
 	email: string,
 	firstName: string,
 	template: WaitingListEmailPreview,
 ): Promise<string> => {
+	if (isEmailSink())
+		throw new Error(
+			'Waiting-list campaigns are disabled during email isolation.',
+		);
 	const replace = (value: string, html = false): string =>
 		value.replace(/{{\s*firstName\s*}}/g, () =>
 			html ? escapeHtml(firstName) : firstName,
@@ -125,13 +158,17 @@ export const sendWaitingListEmail = async (
 			Message: {
 				Subject: { Charset: 'UTF-8', Data: replace(template.subject) },
 				Body: {
-					Html: { Charset: 'UTF-8', Data: replace(template.html, true) },
+					Html: {
+						Charset: 'UTF-8',
+						Data: replace(template.html, true),
+					},
 					Text: { Charset: 'UTF-8', Data: replace(template.text) },
 				},
 			},
 		}),
 	);
-	if (!response.MessageId) throw new Error('SES acceptance was not confirmed.');
+	if (!response.MessageId)
+		throw new Error('SES acceptance was not confirmed.');
 	return response.MessageId;
 };
 
@@ -147,5 +184,5 @@ export const waitingListSendingAllowed = async (): Promise<boolean> => {
 			fixture.data()?.['simulateWaitingList'] === true
 		);
 	}
-	return isEmailSendingEnabled();
+	return !isEmailSink() && isEmailSendingEnabled();
 };

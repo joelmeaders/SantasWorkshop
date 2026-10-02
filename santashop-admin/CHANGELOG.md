@@ -1,5 +1,25 @@
 # Changelog - @santashop/admin
 
+## [Unreleased]
+
+### Added
+
+- Add independent owner controls for waiting-list opt-in and email sending, with preview, confirmation, progress, and resume for manual English/Spanish capacity campaigns.
+- Add waiting-list email starters with environment-specific registration and membership links and bilingual FAQ links.
+
+## [2026.09.0-beta.8] - 2026-09-20
+
+### Changed
+
+- Advance the admin application to `2026.09.0-beta.8`.
+- Restyle the application with responsive neumorphic surfaces, navigation, forms, dialogs, reports, and staff tools.
+- Keep main-screen actions aligned with check-in, admin, and owner permissions.
+
+### Fixed
+
+- Remove Ionic form underlines and empty helper strips, including the line above validation messages.
+- Restore the check-in staff preview after its role-change test so it does not display owner actions.
+
 ## [2026.09.0-beta.6] - Unreleased
 
 ### Changed

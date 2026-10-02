@@ -12,23 +12,41 @@ export class ErrorHandlerService {
 	private readonly loadingController = inject(LoadingController);
 
 	public async handleError(
-		error: IError,
+		error: unknown,
 		title = 'Error Encountered',
 		showAlert = true,
 	): Promise<any> {
 		await this.dismissLoadingOverlay();
+		const candidate =
+			error && typeof error === 'object'
+				? (error as Partial<IError>)
+				: {};
+		const code =
+			typeof candidate.code === 'string' && candidate.code.trim()
+				? candidate.code
+				: undefined;
+		const message =
+			typeof candidate.details === 'string' && candidate.details.trim()
+				? candidate.details
+				: typeof candidate.message === 'string' &&
+					  candidate.message.trim()
+					? candidate.message
+					: 'An unexpected error occurred. Please try again.';
 
 		const alert = await this.alertController.create({
 			header: title,
-			subHeader: `Code: ${error.code}`,
-			message: error.details,
+			...(code ? { subHeader: `Code: ${code}` } : {}),
+			message,
 			buttons: ['Ok'],
 		});
 
 		if (showAlert) await alert.present();
 
 		try {
-			this.analyticsWrapper.logErrorEvent(error.code, error.message);
+			this.analyticsWrapper.logErrorEvent(
+				code ?? 'unknown',
+				candidate.message ?? message,
+			);
 		} catch {
 			// Do nothing
 		}

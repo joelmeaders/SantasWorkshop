@@ -43,7 +43,6 @@ import { manOutline, womanOutline, happyOutline } from 'ionicons/icons';
 import { ChangeDatetimeModalComponent } from './change-datetime-modal/change-datetime-modal.component';
 import { DateTimeSlotsService } from './date-time-slots.service';
 import { firstValueFrom } from 'rxjs';
-import { filter, timeout } from 'rxjs/operators';
 
 @Component({
 	selector: 'app-confirmation',
@@ -181,13 +180,7 @@ export class ConfirmationPage {
 				() => this.viewService.undoRegistration(),
 			);
 			this.analytics.logEvent('cancel_registration');
-			await firstValueFrom(
-				this.viewService.registrationComplete$.pipe(
-					filter((isComplete) => !isComplete),
-					timeout({ first: 10000 }),
-				),
-			);
-			this.router.navigate(['/pre-registration/overview']);
+			await this.router.navigate(['/pre-registration/overview']);
 		} catch (error) {
 			await this.errorHandler.handleError(error as IError);
 		} finally {

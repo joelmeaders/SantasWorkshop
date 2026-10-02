@@ -1,6 +1,10 @@
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { getFunctions } from 'firebase-admin/functions';
-import type { Timestamp, CollectionReference, Query } from 'firebase-admin/firestore';
+import type {
+	Timestamp,
+	CollectionReference,
+	Query,
+} from 'firebase-admin/firestore';
 import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
@@ -71,6 +75,25 @@ export const enqueueWaitingListCampaign = async (
 export const campaignDate = (value: Timestamp | Date): Date =>
 	value instanceof Date ? value : value.toDate();
 
+/** A lost enqueue response must not pause a task that already started or a later resume. */
+const pauseQueuedCampaign = async (
+	id: string,
+	generation: number,
+): Promise<void> => {
+	const ref = campaignCollection().doc(id);
+	await admin.firestore().runTransaction(async (transaction) => {
+		const snapshot = await transaction.get(ref);
+		const record = snapshot.data() as StoredWaitingListCampaign | undefined;
+		if (record?.generation !== generation || record.status !== 'queued')
+			return;
+		transaction.update(ref, {
+			status: 'paused',
+			message: 'The job could not start. Resume this campaign.',
+			updatedAt: new Date(),
+		});
+	});
+};
+
 const preview = async (): Promise<WaitingListCampaignPreview> => {
 	const blockedReasons: string[] = [];
 	const settings = await getWaitingListSettings();
@@ -95,7 +118,9 @@ const preview = async (): Promise<WaitingListCampaignPreview> => {
 			);
 		}
 	} catch {
-		blockedReasons.push('Publish English and Spanish waiting-list templates.');
+		blockedReasons.push(
+			'Publish English and Spanish waiting-list templates.',
+		);
 	}
 	const memberCount = (
 		await activeWaitingListQuery(new Date()).count().get()
@@ -159,39 +184,38 @@ export const startWaitingListCampaign = async (
 	const memberCount = (await activeWaitingListQuery(now).count().get()).data()
 		.count;
 	const lock = campaignCollection().doc('_lock');
-	await admin.firestore().runTransaction(async (transaction) => {
-		const [snapshot, lockSnapshot] = await Promise.all([
-			transaction.get(ref),
-			transaction.get(lock),
-		]);
-		if (snapshot.exists) return;
-		if (lockSnapshot.data()?.['campaignId'])
-			throw new HttpsError(
-				'failed-precondition',
-				'Finish or resume the current waiting-list campaign first.',
-			);
-		transaction.create(ref, {
-			programYear: PROGRAM_YEAR,
-			actorUid: actor.uid,
-			simulated: process.env['FUNCTIONS_EMULATOR'] === 'true',
-			status: 'queued',
-			createdAt: now,
-			updatedAt: now,
-			memberCount,
-			emails: candidate.emails,
-			sendRate,
-			generation: 1,
-		} satisfies StoredWaitingListCampaign);
-		transaction.set(lock, { campaignId: id });
-	});
-	try {
-		await enqueueWaitingListCampaign(id, 1);
-	} catch {
-		await ref.update({
-			status: 'paused',
-			message: 'The job was saved but could not start. Resume this campaign.',
-			updatedAt: new Date(),
+	const created = await admin
+		.firestore()
+		.runTransaction(async (transaction) => {
+			const [snapshot, lockSnapshot] = await Promise.all([
+				transaction.get(ref),
+				transaction.get(lock),
+			]);
+			if (snapshot.exists) return false;
+			if (lockSnapshot.data()?.['campaignId'])
+				throw new HttpsError(
+					'failed-precondition',
+					'Finish or resume the current waiting-list campaign first.',
+				);
+			transaction.create(ref, {
+				programYear: PROGRAM_YEAR,
+				actorUid: actor.uid,
+				simulated: process.env['FUNCTIONS_EMULATOR'] === 'true',
+				status: 'queued',
+				createdAt: now,
+				updatedAt: now,
+				memberCount,
+				emails: candidate.emails,
+				sendRate,
+				generation: 1,
+			} satisfies StoredWaitingListCampaign);
+			transaction.set(lock, { campaignId: id });
+			return true;
 		});
+	try {
+		if (created) await enqueueWaitingListCampaign(id, 1);
+	} catch {
+		await pauseQueuedCampaign(id, 1);
 	}
 	return getWaitingListCampaign({ ...request, data: { campaignId: id } });
 };
@@ -249,7 +273,10 @@ export const listWaitingListCampaigns = async (
 		.get();
 	return Promise.all(
 		snapshot.docs.map((doc) =>
-			getWaitingListCampaign({ ...request, data: { campaignId: doc.id } }),
+			getWaitingListCampaign({
+				...request,
+				data: { campaignId: doc.id },
+			}),
 		),
 	);
 };
@@ -277,7 +304,10 @@ export const resumeWaitingListCampaign = async (
 			if (!snapshot.exists)
 				throw new HttpsError('not-found', 'Campaign was not found.');
 			const record = snapshot.data() as StoredWaitingListCampaign;
-			if (record.programYear !== PROGRAM_YEAR || record.status === 'completed')
+			if (
+				record.programYear !== PROGRAM_YEAR ||
+				record.status === 'completed'
+			)
 				throw new HttpsError(
 					'failed-precondition',
 					'This campaign cannot be resumed.',
@@ -293,6 +323,7 @@ export const resumeWaitingListCampaign = async (
 			transaction.update(ref, {
 				status: 'queued',
 				generation: record.generation + 1,
+				leaseToken: '',
 				updatedAt: new Date(),
 				message: '',
 			});
@@ -301,11 +332,7 @@ export const resumeWaitingListCampaign = async (
 	try {
 		await enqueueWaitingListCampaign(id, generation);
 	} catch {
-		await ref.update({
-			status: 'paused',
-			message: 'The job could not start. Resume this campaign.',
-			updatedAt: new Date(),
-		});
+		await pauseQueuedCampaign(id, generation);
 	}
 	return getWaitingListCampaign(request);
 };

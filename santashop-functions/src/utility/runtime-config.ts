@@ -73,6 +73,10 @@ export const PASSWORD_RESET_CONTINUE_URL = requireEnv(
 	'SANTASHOP_PASSWORD_RESET_CONTINUE_URL',
 );
 
+// All customer email actions return to the same environment as password reset.
+export const REGISTRATION_APP_URL = new URL('/', PASSWORD_RESET_CONTINUE_URL)
+	.href;
+
 export const EVENT_DISPLAY_NAME = requireEnv('SANTASHOP_EVENT_DISPLAY_NAME');
 const configuredEventYear = /\b(?:20\d{2}|2100)\b/u.exec(EVENT_DISPLAY_NAME);
 if (

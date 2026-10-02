@@ -2,6 +2,12 @@
 
 All notable changes to the main application will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Add optional waiting-list consent and membership management to the registration overview and closure notices, including existing-account sign-in and bilingual guidance.
+
 ## [2026.09.0-beta.7] - 2026-09-17
 
 ### Changed

@@ -1,5 +1,5 @@
 import type { RemoteConfigTemplate } from 'firebase-admin/remote-config';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	defaultWaitingListSettings,
 	parseWaitingListSettings,
@@ -13,6 +13,7 @@ import {
 	sendWaitingListEmail,
 	waitingListLinks,
 	waitingListSendRate,
+	waitingListSendingAllowed,
 } from '../../../src/utility/waiting-list-email';
 
 const send = vi.hoisted(() => vi.fn());
@@ -24,6 +25,28 @@ vi.mock('@aws-sdk/client-ses', async (original) => ({
 }));
 describe('waiting list guardrails', () => {
 	beforeEach(() => send.mockReset());
+	afterEach(() => vi.unstubAllEnvs());
+	it('blocks deployed isolated workloads before quota or delivery can contact SES', async () => {
+		vi.stubEnv('FUNCTIONS_EMULATOR', 'false');
+		vi.stubEnv('SANTASHOP_EMAIL_TRANSPORT', 'sink');
+		for (const key of Object.keys(process.env).filter((key) =>
+			key.startsWith('AWS_'),
+		))
+			vi.stubEnv(key, undefined);
+		expect(await waitingListSendingAllowed()).toBe(false);
+		await expect(waitingListSendRate()).rejects.toThrow('email isolation');
+		await expect(
+			sendWaitingListEmail('qa@example.com', 'QA', {
+				language: 'en',
+				templateKey: 'capacity',
+				revisionId: '1',
+				subject: 'Open',
+				html: '<p>Open</p>',
+				text: 'Open',
+			}),
+		).rejects.toThrow('email isolation');
+		expect(send).not.toHaveBeenCalled();
+	});
 	const enabled = { joiningEnabled: true, emailSendingEnabled: true };
 	it('fails closed independently for malformed or conditional waiting-list settings', () => {
 		expect(parseWaitingListSettings(undefined)).toEqual(
@@ -73,8 +96,12 @@ describe('waiting list guardrails', () => {
 	});
 	it('keeps opt-out available after flag or capacity changes and rejects booked accounts first', () => {
 		const draft = { programYear: 2025 } as Registration;
-		expect(waitingListEligibility(draft, enabled, false).canJoin).toBe(true);
-		expect(waitingListEligibility(draft, enabled, true).canJoin).toBe(false);
+		expect(waitingListEligibility(draft, enabled, false).canJoin).toBe(
+			true,
+		);
+		expect(waitingListEligibility(draft, enabled, true).canJoin).toBe(
+			false,
+		);
 		const member = {
 			...draft,
 			waitingList: {
@@ -85,7 +112,8 @@ describe('waiting list guardrails', () => {
 			},
 		};
 		expect(
-			waitingListEligibility(member, defaultWaitingListSettings(), true).active,
+			waitingListEligibility(member, defaultWaitingListSettings(), true)
+				.active,
 		).toBe(true);
 		expect(
 			waitingListEligibility(
@@ -95,8 +123,11 @@ describe('waiting list guardrails', () => {
 			),
 		).toMatchObject({ active: false, canJoin: false });
 		expect(
-			waitingListEligibility({ ...draft, programYear: 2024 }, enabled, false)
-				.canJoin,
+			waitingListEligibility(
+				{ ...draft, programYear: 2024 },
+				enabled,
+				false,
+			).canJoin,
 		).toBe(false);
 	});
 	it('paces below verified SES rate and rejects missing or exhausted quota', async () => {
@@ -141,10 +172,14 @@ describe('waiting list guardrails', () => {
 	});
 	it('requires a provider receipt and never treats unknown failures as safe to retry', async () => {
 		expect(
-			classifyWaitingListSendError({ $metadata: { httpStatusCode: 400 } }),
+			classifyWaitingListSendError({
+				$metadata: { httpStatusCode: 400 },
+			}),
 		).toBe('failed');
 		expect(
-			classifyWaitingListSendError({ $metadata: { httpStatusCode: 503 } }),
+			classifyWaitingListSendError({
+				$metadata: { httpStatusCode: 503 },
+			}),
 		).toBe('uncertain');
 		expect(classifyWaitingListSendError(new Error('timeout'))).toBe(
 			'uncertain',

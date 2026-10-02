@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createBackgroundAdminMock } from '../../helpers/firebase-admin-background.mock';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
@@ -10,7 +10,12 @@ describe('bilingual email delivery', () => {
 	let db: ReturnType<typeof createBackgroundAdminMock>;
 	beforeEach(() => {
 		db = createBackgroundAdminMock();
+		vi.stubEnv(
+			'SANTASHOP_PASSWORD_RESET_CONTINUE_URL',
+			'https://test.denversantaclausshop.org/?mode=sign-in',
+		);
 	});
+	afterEach(() => vi.unstubAllEnvs());
 
 	const prepare = (
 		profile: string,
@@ -92,6 +97,9 @@ describe('bilingual email delivery', () => {
 		const command = sesSendMock.mock.calls[0][0].input;
 		expect(command.Template).toBe(profile + '-' + language);
 		const data = JSON.parse(command.TemplateData);
+		expect(data.registrationUrl).toBe(
+			'https://test.denversantaclausshop.org/',
+		);
 		expect(data.guest).toBe('María');
 		expect(data.dateTime).toContain(
 			language === 'es' ? 'diciembre' : 'December',
@@ -183,6 +191,37 @@ describe('bilingual email delivery', () => {
 		expect(command.Message.Body.Text.Data).toContain('diciembre');
 		expect(command.Message.Body.Text.Data).not.toContain('TICKET26');
 	});
+
+	it.each(
+		['en', 'es'].flatMap((language) => [
+			[language, 'https://test.denversantaclausshop.org/'],
+			[language, 'https://register.denversantaclausshop.org/'],
+		]),
+	)(
+		'adds a cancellation button and text link in %s for %s',
+		async (language, root) => {
+			vi.stubEnv(
+				'SANTASHOP_PASSWORD_RESET_CONTINUE_URL',
+				`${root}?mode=sign-in`,
+			);
+			prepare('registration-cancellation', language, []);
+			const { sendNewRegistrationEmails } =
+				await loadTriggerScheduledHandlers(db);
+			sesSendMock.mockResolvedValue({ MessageId: 'accepted' });
+			await sendNewRegistrationEmails({
+				id: 'message',
+				data: (): object => ({}),
+			} as never);
+			const body = sesSendMock.mock.calls[0][0].input.Message.Body;
+			expect(body.Html.Data).toContain(`href="${root}"`);
+			expect(body.Html.Data).toContain(
+				language === 'es' ? 'Inscribirme de nuevo' : 'Register again',
+			);
+			expect(body.Text.Data).toContain(root);
+			expect(body.Html.Data).not.toContain('TICKET26');
+			expect(body.Html.Data).not.toContain('<img');
+		},
+	);
 
 	it('records a missing template as failed without sending', async () => {
 		prepare('event-reminder', 'es', []);

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to a versioning scheme of `year.minor.patch`.
 
+## [Unreleased]
+
+### Added
+
+- Let existing customers opt in to capacity notifications when no future appointment is available, and leave at any time. Booking or completing registration clears membership.
+- Add owner controls and manual bilingual waiting-list campaigns with frozen audiences, templates, resumable processing, and separate delivery receipts. Both controls default to disabled.
+
+### Fixed
+
+- Preserve current email links and admin styling when integrating the waiting list. Block its SES calls during TEST email isolation and prevent delayed enqueue errors from pausing a newer campaign attempt.
+
+## [2026.09.0-beta.8] - 2026-09-20
+
+### Changed
+
+- Advance the workspace and admin application to `2026.09.0-beta.8`.
+- Restyle the admin application with responsive neumorphic surfaces, navigation, forms, dialogs, reports, and staff tools.
+- Keep main-screen actions aligned with check-in, admin, and owner permissions.
+
+### Fixed
+
+- Remove Ionic form underlines and empty helper strips, including the line above validation messages.
+- Restore the check-in staff preview after its role-change test so it does not display owner actions.
+
 ## [2026.09.0-beta.7] - 2026-09-17
 
 ### Changed

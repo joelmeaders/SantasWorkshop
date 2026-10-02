@@ -22,8 +22,13 @@ import {
 	REMINDER_EMAIL_SENDING_STALE_MINUTES,
 	REGISTRATION_EMAIL_RETURN_PATH,
 	REGISTRATION_EMAIL_SOURCE,
+	REGISTRATION_APP_URL,
 	SES_REGION,
 } from '../utility/runtime-config';
+import {
+	escapeEmailHtml,
+	normalizeEmailAppLinks,
+} from '../utility/email-links';
 import { getRegistrationQrCodeUrl } from '../utility/qrcodes';
 import {
 	buildEmailTemplateDataFromMappings,
@@ -330,8 +335,12 @@ const createCancellationEmailCommand = (
 					Charset: 'UTF-8',
 					Data:
 						language === 'es'
-							? `Hola ${payload.firstName},\n\nTu inscripción para ${EVENT_DISPLAY_NAME} fue cancelada. Tu cita anterior (${payload.dateTime}) ya no está reservada y tu boleto anterior ya no es válido.\n\nSi deseas asistir, inicia sesión y completa una nueva inscripción: https://register.denversantaclausshop.org`
-							: `Hello ${payload.firstName},\n\nYour registration for ${EVENT_DISPLAY_NAME} has been cancelled. Your previous appointment (${payload.dateTime}) is no longer reserved, and the confirmation code from your cancelled registration is no longer valid.\n\nIf you would like to attend, sign in and submit a new registration.`,
+							? `Hola ${payload.firstName},\n\nTu inscripción para ${EVENT_DISPLAY_NAME} fue cancelada. Tu cita anterior (${payload.dateTime}) ya no está reservada y tu boleto anterior ya no es válido.\n\nSi deseas asistir, inicia sesión y completa una nueva inscripción: ${REGISTRATION_APP_URL}`
+							: `Hello ${payload.firstName},\n\nYour registration for ${EVENT_DISPLAY_NAME} has been cancelled. Your previous appointment (${payload.dateTime}) is no longer reserved, and the confirmation code from your cancelled registration is no longer valid.\n\nIf you would like to attend, sign in and submit a new registration: ${REGISTRATION_APP_URL}`,
+				},
+				Html: {
+					Charset: 'UTF-8',
+					Data: `<div style="font-family:Arial,sans-serif;line-height:1.6"><p>${language === 'es' ? 'Hola' : 'Hello'} ${escapeEmailHtml(payload.firstName)},</p><p>${language === 'es' ? `Tu inscripción para ${escapeEmailHtml(EVENT_DISPLAY_NAME)} fue cancelada. Tu cita anterior (${escapeEmailHtml(payload.dateTime)}) ya no está reservada y tu boleto anterior ya no es válido.` : `Your registration for ${escapeEmailHtml(EVENT_DISPLAY_NAME)} has been cancelled. Your previous appointment (${escapeEmailHtml(payload.dateTime)}) is no longer reserved, and your previous ticket is no longer valid.`}</p><p>${language === 'es' ? 'Si deseas asistir, inicia sesión y completa una nueva inscripción.' : 'If you would like to attend, sign in and submit a new registration.'}</p><p><a href="${escapeEmailHtml(REGISTRATION_APP_URL)}" style="display:inline-block;padding:16px 24px;background:#155344;color:#fff;font-weight:bold;text-decoration:none;border-radius:8px">${language === 'es' ? 'Inscribirme de nuevo' : 'Register again'}</a></p></div>`,
 				},
 			},
 		},
@@ -842,7 +851,7 @@ async function processRegistrationEmail(
 	const isCancellation = isCancellationCommunication(context.document);
 	let templateName: string | undefined;
 	let emailCommand: SendTemplatedEmailCommand | SendEmailCommand;
-	let usePlainText = false;
+	let useFallbackEmail = false;
 	let deliveryMetadata: Record<string, unknown>;
 	let renderedSinkContent: unknown;
 	try {
@@ -895,7 +904,7 @@ async function processRegistrationEmail(
 			languageFallbackReason: resolvedTemplate?.fallbackReason ?? false,
 		};
 		if (!resolvedTemplate) {
-			usePlainText = true;
+			useFallbackEmail = true;
 			emailCommand = createCancellationEmailCommand(
 				payload,
 				deliveredLanguage,
@@ -903,6 +912,7 @@ async function processRegistrationEmail(
 		} else {
 			templateName = resolvedTemplate.templateName;
 			const runtimeData = {
+				registrationUrl: REGISTRATION_APP_URL,
 				firstName: payload.firstName,
 				eventName: EVENT_DISPLAY_NAME,
 				dateTime: payload.dateTime,
@@ -954,10 +964,14 @@ async function processRegistrationEmail(
 						revision.subjectPart,
 						fields,
 					),
-					html: renderTemplateWithFieldValues(html, fields),
-					text: renderTemplateWithFieldValues(
-						revision.textPart ?? '',
-						fields,
+					html: normalizeEmailAppLinks(
+						renderTemplateWithFieldValues(html, fields),
+					),
+					text: normalizeEmailAppLinks(
+						renderTemplateWithFieldValues(
+							revision.textPart ?? '',
+							fields,
+						),
 					),
 				};
 			}
@@ -999,7 +1013,7 @@ async function processRegistrationEmail(
 			credentials,
 			region: SES_REGION,
 		} as SESClientConfig);
-		response = usePlainText
+		response = useFallbackEmail
 			? ((await sesClient.send(
 					emailCommand as SendEmailCommand,
 				)) as SendEmailCommandOutput)

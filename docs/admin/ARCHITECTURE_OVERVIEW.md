@@ -25,6 +25,18 @@ Administrative routes use `adminOnlyGuard`; owner routes use `ownerOnlyGuard`.
 Server capability checks remain authoritative when claims change during a session.
 Duplicate check-in protection is enforced in server transactions.
 
+## Presentation
+
+The admin uses a neumorphic surface system in `src/theme/variables.scss`.
+Cards and action controls use paired light and dark shadows. Form fields and
+selected navigation controls use inset shadows. Reuse the `--admin-raised`,
+`--admin-raised-small`, and `--admin-inset` tokens in page styles.
+
+Shadows supplement visible text, borders, focus outlines, and selected-state
+indicators. Keep controls readable in light, dark, and forced-color modes.
+The device-local appearance preference supports System, Light, and Dark.
+Language and appearance changes preserve the current form and route.
+
 ## Data flow
 
 Lookups, reports, staff, and risk views use `AdminReadRepository` with Firestore

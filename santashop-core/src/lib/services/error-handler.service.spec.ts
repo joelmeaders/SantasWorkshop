@@ -1,11 +1,4 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type Mocked,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ErrorHandlerService } from './error-handler.service';
 import { AlertController, LoadingController } from '@ionic/angular/standalone';
@@ -161,9 +154,9 @@ describe('ErrorHandlerService', () => {
 
 	it('shows the retry guidance for registration submission failures', async (): Promise<void> => {
 		const present = vi.fn().mockResolvedValue(undefined);
-		alertControllerService.create.mockResolvedValue(
-			{ present } as unknown as HTMLIonAlertElement,
-		);
+		alertControllerService.create.mockResolvedValue({
+			present,
+		} as unknown as HTMLIonAlertElement);
 
 		await service.completeRegistrationException({
 			code: 'functions/internal',
@@ -176,4 +169,33 @@ describe('ErrorHandlerService', () => {
 		);
 		expect(present).toHaveBeenCalledOnce();
 	});
+
+	it.each([
+		[new Error('Timeout has occurred'), 'Timeout has occurred'],
+		[
+			{ message: 'Unable to load registration information' },
+			'Unable to load registration information',
+		],
+		[
+			{
+				code: 'functions/failed-precondition',
+				message: 'Registration is closed.',
+				details: { reason: 'closed' },
+			},
+			'Registration is closed.',
+		],
+		[undefined, 'An unexpected error occurred. Please try again.'],
+	])(
+		'shows useful text for errors without string details: %s',
+		async (error, message) => {
+			alertControllerService.create.mockResolvedValue({
+				present: vi.fn().mockResolvedValue(undefined),
+				onDidDismiss: vi.fn().mockResolvedValue({}),
+			} as unknown as HTMLIonAlertElement);
+			await service.handleError(error);
+			const options = alertControllerService.create.mock.calls[0][0];
+			expect(options?.message).toBe(message);
+			expect(options?.subHeader ?? '').not.toContain('undefined');
+		},
+	);
 });

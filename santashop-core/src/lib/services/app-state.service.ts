@@ -8,7 +8,9 @@ import {
 	startWith,
 	takeUntil,
 } from 'rxjs/operators';
-import { PublicParameters } from '@santashop/models';
+import { PublicParameters,
+	defaultWaitingListSettings,
+} from '@santashop/models';
 import { filterNil } from '../helpers/rxjs-helpers';
 import { PUBLIC_PARAMETERS_SOURCE } from '../tokens';
 
@@ -21,6 +23,16 @@ import { PUBLIC_PARAMETERS_SOURCE } from '../tokens';
 })
 export class AppStateService implements OnDestroy {
 	private readonly publicParametersSource = inject(PUBLIC_PARAMETERS_SOURCE);
+	public readonly waitingListSettings$ = (
+		this.publicParametersSource.waitingListSettings$ ??
+		of(defaultWaitingListSettings())
+	).pipe(
+		distinctUntilChanged(
+			(previous, current) =>
+				previous.joiningEnabled === current.joiningEnabled &&
+				previous.emailSendingEnabled === current.emailSendingEnabled,
+		),
+	);
 
 	private readonly destroy$ = new Subject<void>();
 

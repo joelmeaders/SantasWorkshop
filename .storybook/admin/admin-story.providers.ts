@@ -397,6 +397,7 @@ export interface AdminStoryOptions {
 	readonly searchResults?: readonly RegistrationSearchIndex[] | null;
 	readonly staffAccounts?: readonly StaffAccount[];
 	readonly slots?: readonly DateTimeSlot[];
+	readonly persistSlotChanges?: boolean;
 	readonly riskSummaries?: readonly RegistrationScanRiskSummary[];
 	readonly riskAttempts?: readonly RegistrationScanAttempt[];
 	readonly routeParams?: Readonly<Record<string, string>>;
@@ -697,7 +698,19 @@ const createProviders = (
 						),
 						add: fn(() => of({})),
 						addById: fn(() => of({})),
-						update: fn(() => of({})),
+						update: fn((id: string, patch: Partial<DateTimeSlot>) => {
+							if (
+								options.persistSlotChanges &&
+								path === COLLECTION_SCHEMA.dateTimeSlots
+							) {
+								fixtures.slots$.next(
+									fixtures.slots$.value.map((slot) =>
+										slot.id === id ? { ...slot, ...patch } : slot,
+									),
+								);
+							}
+							return of({});
+						}),
 						delete: fn(() => of(undefined)),
 					})),
 					randomId: fn(() => 'story-random-id'),

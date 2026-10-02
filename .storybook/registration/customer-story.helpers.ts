@@ -42,11 +42,15 @@ import type {
 	Child,
 	DateTimeSlot,
 	Registration,
+	WaitingListSettings,
 	User,
 } from '@santashop/models';
 import { applicationConfig } from '@storybook/angular-vite';
 import { fn } from 'storybook/test';
-import { BehaviorSubject, firstValueFrom, map, Observable, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, Observable, of,
+	NEVER,
+	throwError,
+} from 'rxjs';
 import enTranslations from '../../santashop-app/src/assets/i18n/en.json';
 import esTranslations from '../../santashop-app/src/assets/i18n/es.json';
 import { ApplicationService } from '../../santashop-app/src/app/core/services/application.service';
@@ -60,6 +64,10 @@ import {
 import { newChangeInfoForm } from '../../santashop-app/src/app/features/pre-registration/profile/change-info/change-info.form';
 
 export interface CustomerStoryOptions {
+	language?: 'en' | 'es';
+	waitingListSettings?: WaitingListSettings;
+	signInResult?: 'success' | 'pending' | 'error';
+	scheduleState?: 'loading' | 'error';
 	allowCancelRegistration?: boolean;
 	allowChangeRegistration?: boolean;
 	controls?: CustomerStoryControls | CustomerStoryControlsFactory;
@@ -381,9 +389,9 @@ function createCustomerStoryProviders(
 			}),
 		),
 		provideAppInitializer((): Promise<void> =>
-			firstValueFrom(inject(TranslateService).use('en')).then(
-				() => undefined,
-			),
+			firstValueFrom(
+				inject(TranslateService).use(options.language ?? 'en'),
+			).then(() => undefined),
 		),
 		{ provide: PROGRAM_YEAR, useValue: 2026 },
 		{
@@ -400,7 +408,18 @@ function createCustomerStoryProviders(
 			useFactory: (controls: CustomerStoryControls): object => ({
 				currentUser$: controls.currentUser$.asObservable(),
 				uid$: controls.currentUser$.pipe(map((user) => user?.uid)),
-				login: fn(async (): Promise<void> => undefined),
+				login: fn(async (): Promise<void> => {
+					if (options.signInResult === 'pending')
+						return new Promise(() => undefined);
+					if (options.signInResult === 'error')
+						throw new Error('Sign in failed');
+					if (options.signInResult === 'success')
+						controls.currentUser$.next({
+							uid: 'storybook-parent',
+							email: 'jordan@example.com',
+							displayName: 'Jordan Garcia',
+						});
+				}),
 				logout: fn(async (): Promise<void> => undefined),
 				resetPassword: fn(async (): Promise<void> => undefined),
 				changeEmailAddress: fn(async (): Promise<void> => undefined),
@@ -412,7 +431,9 @@ function createCustomerStoryProviders(
 		{
 			provide: CustomerLanguageService,
 			useFactory: (translate: TranslateService): object => {
-				const language$ = new BehaviorSubject<'en' | 'es'>('en');
+				const language$ = new BehaviorSubject<'en' | 'es'>(
+					options.language ?? 'en',
+				);
 				return {
 					language$: language$.asObservable(),
 					initialize: fn(),
@@ -433,6 +454,12 @@ function createCustomerStoryProviders(
 		{
 			provide: AppStateService,
 			useFactory: (controls: CustomerStoryControls): object => ({
+				waitingListSettings$: of(
+					options.waitingListSettings ?? {
+						joiningEnabled: false,
+						emailSendingEnabled: false,
+					},
+				),
 				allowCancelRegistration$:
 					controls.allowCancelRegistration$.asObservable(),
 				allowChangeRegistration$:
@@ -470,7 +497,13 @@ function createCustomerStoryProviders(
 							? controls.userProfile$.asObservable()
 							: controls.registration$.asObservable(),
 					),
-					readMany: fn(() => controls.slots$.asObservable()),
+					readMany: fn(() =>
+						options.scheduleState === 'loading'
+							? NEVER
+							: options.scheduleState === 'error'
+								? throwError(() => new Error('Schedule unavailable'))
+								: controls.slots$.asObservable(),
+					),
 				}),
 			}),
 			deps: [CUSTOMER_STORY_CONTROLS],

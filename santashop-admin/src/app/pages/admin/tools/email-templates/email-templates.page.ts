@@ -68,6 +68,8 @@ export class EmailTemplatesPage {
 	}
 
 	public deliveryProfileLabel(template: EmailTemplateSummary): string {
+		if (template.deliveryProfile === 'waiting-list-capacity')
+			return 'Waiting list capacity';
 		if (template.deliveryProfile === 'registration-cancellation')
 			return 'Registration cancellation';
 		return template.deliveryProfile === 'event-reminder'

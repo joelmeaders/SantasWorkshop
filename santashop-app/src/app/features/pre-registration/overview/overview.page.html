@@ -5,18 +5,30 @@
 			<ion-col size="12">
 				<ion-row class="ion-justify-content-center">
 					<ion-col sizeXs="12" sizeSm="9" sizeLg="8">
-						<section class="workspace-intro" aria-labelledby="registration-workspace-title">
+						<section class="workspace-intro" aria-labelledby="registration-workspace-title"
+						>
 							<img
 								src="assets/images/gift-toybox.svg"
 								class="workspace-gift"
 								alt=""
 								aria-hidden="true"
 							/>
-							<h1 id="registration-workspace-title">{{ 'OVERVIEW.WORKSPACE_TITLE' | translate }}</h1>
+							<h1 id="registration-workspace-title">
+								{{ 'OVERVIEW.WORKSPACE_TITLE' | translate }}
+							</h1>
 							<p>{{ 'OVERVIEW.WORKSPACE_INTRO' | translate }}</p>
 						</section>
 
-						<section class="workflow-section children-step" id="children" tabindex="-1" aria-labelledby="children-heading">
+						<app-waiting-list
+							source="overview"
+							[useLoadedData]="true"
+							[registration]="userRegistration()"
+							[slots]="availableSlots()"
+							[dataError]="scheduleError()"
+							(retry)="retrySchedule()"
+						/>
+						<section class="workflow-section children-step" id="children" tabindex="-1" aria-labelledby="children-heading"
+						>
 							<app-children-card
 								[children]="children()"
 								[childCount]="childCount()"
@@ -28,7 +40,8 @@
 							/>
 						</section>
 
-						<section class="workflow-section appointment-step" id="appointment" tabindex="-1" aria-labelledby="appointment-heading">
+						<section class="workflow-section appointment-step" id="appointment" tabindex="-1" aria-labelledby="appointment-heading"
+						>
 							<app-schedule-card
 								[dateTimeSlot]="dateTimeSlot()"
 								[slots]="availableSlots()"
@@ -69,7 +82,8 @@
 						</section>
 						}
 
-						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="workflow-section review-step es-mg-bottom-xxl">
+						<section id="review" tabindex="-1" aria-labelledby="review-heading" class="workflow-section review-step es-mg-bottom-xxl"
+						>
 							<app-submit-card
 								[children]="children()"
 								[dateTimeSlot]="dateTimeSlot()"

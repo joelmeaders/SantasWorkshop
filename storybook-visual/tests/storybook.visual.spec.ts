@@ -67,9 +67,12 @@ async function installBrowserGuards(page: Page): Promise<void> {
 	);
 	page.on('console', (message) => {
 		const text = message.text();
-		const isEmailPreview = new URL(page.url()).searchParams
-			.get('id')
-			?.startsWith('admin-email-templates-template-editor--');
+		const storyId = new URL(page.url()).searchParams.get('id') ?? '';
+		const isEmailPreview = [
+			'admin-email-templates-template-editor--',
+			'admin-waiting-list-email-previews--',
+			'admin-waiting-list-campaigns--',
+		].some((prefix) => storyId.startsWith(prefix));
 		const benignSandboxWarning =
 			isEmailPreview &&
 			(text.startsWith("Blocked script execution in 'about:blank'") ||

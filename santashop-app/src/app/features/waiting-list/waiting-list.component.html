@@ -1,0 +1,75 @@
+@if (
+	user() &&
+	(state()?.active ||
+		state()?.canJoin ||
+		pending() ||
+		error() ||
+		showDataError() ||
+		saved())
+) {
+	<section class="waiting-list" aria-labelledby="waiting-list-heading">
+		<h2 id="waiting-list-heading">{{ 'WAITING_LIST.TITLE' | translate }}</h2>
+		@if (pending()) {
+			<p role="status">
+				<ion-spinner aria-hidden="true" />
+				{{ 'WAITING_LIST.LOADING' | translate }}
+			</p>
+		}
+		@if (error() || showDataError()) {
+			<p role="alert">{{ 'WAITING_LIST.ERROR' | translate }}</p>
+			@if (!state()) {
+				<ion-button fill="outline" (click)="reload()">{{
+					'WAITING_LIST.RETRY' | translate
+				}}</ion-button>
+			}
+		}
+		@if (saved()) {
+			<p role="status">
+				{{
+					(state()?.active ? 'WAITING_LIST.JOINED' : 'WAITING_LIST.LEFT')
+						| translate
+				}}
+			</p>
+		}
+		@if (state()?.active) {
+			<p>{{ 'WAITING_LIST.ACTIVE' | translate }}</p>
+			<p>{{ 'WAITING_LIST.NOT_RESERVED' | translate }}</p>
+			<ion-button
+				id="leaveWaitingListButton"
+				[attr.aria-label]="
+					(busy() ? 'WAITING_LIST.SAVING' : 'WAITING_LIST.LEAVE') | translate
+				"
+				fill="outline"
+				[disabled]="busy()"
+				(click)="change(false)"
+				>{{
+					(busy() ? 'WAITING_LIST.SAVING' : 'WAITING_LIST.LEAVE') | translate
+				}}</ion-button
+			>
+		} @else if (state()?.canJoin) {
+			<p>{{ 'WAITING_LIST.INTRO' | translate }}</p>
+			<p>{{ 'WAITING_LIST.NOT_RESERVED' | translate }}</p>
+			<label class="consent"
+				><input
+					type="checkbox"
+					[checked]="consent()"
+					[disabled]="busy()"
+					(change)="consent.set($any($event.target).checked)"
+				/>
+				<span>{{ 'WAITING_LIST.CONSENT' | translate }}</span></label
+			>
+			<ion-button
+				id="joinWaitingListButton"
+				[attr.aria-label]="
+					(busy() ? 'WAITING_LIST.SAVING' : 'WAITING_LIST.JOIN') | translate
+				"
+				color="xmasred"
+				[disabled]="busy() || !consent()"
+				(click)="change(true)"
+				>{{
+					(busy() ? 'WAITING_LIST.SAVING' : 'WAITING_LIST.JOIN') | translate
+				}}</ion-button
+			>
+		}
+	</section>
+}

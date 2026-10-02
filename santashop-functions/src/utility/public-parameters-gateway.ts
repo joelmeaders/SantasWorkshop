@@ -2,16 +2,21 @@ import type { RemoteConfigTemplate } from 'firebase-admin/remote-config';
 import admin from '../firebase-admin';
 import {
 	parsePublicParameters,
+	defaultWaitingListSettings,
+	type WaitingListSettings,
 	type PublicParameters,
 } from '../models';
 import { createFunctionLogger } from './observability';
-import { settingsFromTemplate, withPublicParametersDeadline } from './public-parameters';
+import { settingsFromTemplate, withPublicParametersDeadline,
+} from './public-parameters';
+import { waitingListSettingsFromTemplate } from './waiting-list-settings';
 
 const REMOTE_CONFIG_API = 'https://firebaseremoteconfig.googleapis.com/v1/projects';
 const FRESH_FOR_MS = 10_000;
 const log = createFunctionLogger('publicParametersGateway');
 
 export interface PublicParametersGatewayResponse {
+	waitingList?: WaitingListSettings;
 	settings: PublicParameters;
 	source: 'fresh' | 'stale';
 	lastFreshAt: number;
@@ -34,6 +39,7 @@ const accessToken = async (): Promise<string> => {
 /** Read one Remote Config template without the Admin SDK retry loop. */
 export const fetchRemoteConfigSettings = async (
 	fetcher: typeof fetch = fetch,
+	onWaitingList?: (settings: WaitingListSettings) => void,
 ): Promise<PublicParameters> => {
 	const signal = AbortSignal.timeout(10_000);
 	const response = await fetcher(
@@ -47,12 +53,17 @@ export const fetchRemoteConfigSettings = async (
 			signal,
 		},
 	);
-	if (!response.ok) throw new Error(`Remote Config request failed with status ${response.status}.`);
-	return settingsFromTemplate((await response.json()) as RemoteConfigTemplate);
+	if (!response.ok) throw new Error(
+			`Remote Config request failed with status ${response.status}.`,
+		);
+	const template = (await response.json()) as RemoteConfigTemplate;
+	onWaitingList?.(waitingListSettingsFromTemplate(template));
+	return settingsFromTemplate(template);
 };
 
 /** Keep one validated value per gateway instance and coalesce concurrent refreshes. */
 export class PublicParametersGatewayCache {
+	private waitingList = defaultWaitingListSettings();
 	private current?: PublicParameters;
 	private lastFreshAt?: number;
 	private nextAttempt = 0;
@@ -60,7 +71,10 @@ export class PublicParametersGatewayCache {
 	private pending?: Promise<PublicParametersGatewayResponse>;
 
 	constructor(
-		private readonly fetchSettings: () => Promise<PublicParameters> = fetchRemoteConfigSettings,
+		private readonly fetchSettings: () => Promise<PublicParameters> = () =>
+			fetchRemoteConfigSettings(fetch, (settings) => {
+				this.waitingList = settings;
+			}),
 		private readonly now: () => number = Date.now,
 	) {}
 
@@ -114,6 +128,10 @@ export class PublicParametersGatewayCache {
 	private response(source: 'fresh' | 'stale'): PublicParametersGatewayResponse {
 		if (!this.current || this.lastFreshAt === undefined) throw new Error('Public settings are not available.');
 		return {
+			waitingList:
+				source === 'fresh'
+					? { ...this.waitingList }
+					: defaultWaitingListSettings(),
 			settings: parsePublicParameters(this.current),
 			source,
 			lastFreshAt: this.lastFreshAt,

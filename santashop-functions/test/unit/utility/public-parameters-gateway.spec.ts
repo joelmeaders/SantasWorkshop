@@ -56,11 +56,13 @@ describe('Public parameters gateway cache', () => {
 				settings: { ...createDefaultPublicParameters(), maintenanceModeEnabled: true },
 				source: 'fresh',
 				lastFreshAt: 1_000,
+				waitingList: { joiningEnabled: false, emailSendingEnabled: false },
 			},
 			{
 				settings: { ...createDefaultPublicParameters(), maintenanceModeEnabled: true },
 				source: 'fresh',
 				lastFreshAt: 1_000,
+				waitingList: { joiningEnabled: false, emailSendingEnabled: false },
 			},
 		]);
 		now = 9_999;

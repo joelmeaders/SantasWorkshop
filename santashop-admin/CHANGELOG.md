@@ -1,5 +1,12 @@
 # Changelog - @santashop/admin
 
+## [Unreleased]
+
+### Added
+
+- Add independent owner controls for waiting-list opt-in and email sending, with preview, confirmation, progress, and resume for manual English/Spanish capacity campaigns.
+- Add waiting-list email starters with environment-specific registration and membership links and bilingual FAQ links.
+
 ## [2026.09.0-beta.8] - 2026-09-20
 
 ### Changed

@@ -375,5 +375,25 @@
 	"REGISTRATION_UNAVAILABLE": {
 		"TITLE": "Registration record unavailable",
 		"MESSAGE": "We could not load your registration record. It may be missing or corrupted. Please contact the Denver Santa Claus Shop for assistance."
+	},
+	"WAITING_LIST": {
+		"TITLE": "Waiting list",
+		"LOADING": "Checking the waiting list…",
+		"ERROR": "We could not update the waiting list. Please try again.",
+		"RETRY": "Try again",
+		"JOINED": "You joined the waiting list.",
+		"LEFT": "You left the waiting list.",
+		"ACTIVE": "We will email you when more appointments open. You can leave this list at any time.",
+		"NOT_RESERVED": "This list does not save a spot for you. You must choose a date and time and finish registration.",
+		"INTRO": "All appointment times are full right now. Join the waiting list for an email when more spots open.",
+		"CONSENT": "Yes, email me when more appointment times open.",
+		"JOIN": "Join the waiting list",
+		"LEAVE": "Leave the waiting list",
+		"SAVING": "Saving…",
+		"ACCOUNT_TITLE": "Already have an account?",
+		"ACCOUNT_HELP": "Sign in to check whether you can join the waiting list. Registration is still closed.",
+		"SIGNING_IN": "Signing in…",
+		"RESET_ERROR": "We could not send the reset email. Try again.",
+		"MANAGE_HELP": "Sign in to manage waiting list emails. Registration is still closed."
 	}
 }

@@ -1,4 +1,5 @@
 export const COLLECTION_SCHEMA = {
+	waitingListCampaigns: 'waitingListCampaigns',
 	checkins: 'checkins',
 	cancellations: 'cancellations',
 	users: 'users',

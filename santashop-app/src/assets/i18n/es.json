@@ -376,5 +376,25 @@
 	"REGISTRATION_UNAVAILABLE": {
 		"TITLE": "No se puede acceder al registro",
 		"MESSAGE": "No pudimos cargar tu registro. Es posible que falte o esté dañado. Comunícate con Denver Santa Claus Shop para obtener ayuda."
+	},
+	"WAITING_LIST": {
+		"TITLE": "Lista de espera",
+		"LOADING": "Revisando la lista de espera…",
+		"ERROR": "No pudimos actualizar la lista de espera. Inténtalo de nuevo.",
+		"RETRY": "Intentar de nuevo",
+		"JOINED": "Te uniste a la lista de espera.",
+		"LEFT": "Saliste de la lista de espera.",
+		"ACTIVE": "Te enviaremos un correo cuando haya más citas. Puedes salir de esta lista en cualquier momento.",
+		"NOT_RESERVED": "Esta lista no reserva un lugar para ti. Debes elegir una fecha y hora y terminar el registro.",
+		"INTRO": "Todos los horarios están llenos por ahora. Únete a la lista de espera para recibir un correo cuando haya más lugares.",
+		"CONSENT": "Sí, envíenme un correo cuando haya más horarios.",
+		"JOIN": "Unirme a la lista de espera",
+		"LEAVE": "Salir de la lista de espera",
+		"SAVING": "Guardando…",
+		"ACCOUNT_TITLE": "¿Ya tienes una cuenta?",
+		"ACCOUNT_HELP": "Inicia sesión para ver si puedes unirte a la lista de espera. El registro sigue cerrado.",
+		"SIGNING_IN": "Iniciando sesión…",
+		"RESET_ERROR": "No pudimos enviar el correo para cambiar tu contraseña. Inténtalo de nuevo.",
+		"MANAGE_HELP": "Inicia sesión para administrar los correos de la lista de espera. El registro sigue cerrado."
 	}
 }

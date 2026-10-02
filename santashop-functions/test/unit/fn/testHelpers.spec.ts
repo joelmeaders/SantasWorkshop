@@ -53,6 +53,7 @@ const createTestHelpersAdminMock = (): TestHelpersAdminMock => {
 			apps: [],
 			initializeApp,
 			firestore: vi.fn(() => ({
+				recursiveDelete: vi.fn(async () => undefined),
 				doc: vi.fn((path: string) => ({ path, set: docSet })),
 				collection,
 				batch: vi.fn(() => batch),

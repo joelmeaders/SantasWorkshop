@@ -1,3 +1,7 @@
+import {
+	AuthService as CustomerAuthService,
+	AppStateService as CustomerAppStateService,
+} from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -91,6 +95,16 @@ describe('OverviewPage', () => {
 		TestBed.configureTestingModule({
 			imports: [OverviewPage],
 			providers: [
+				{ provide: CustomerAuthService, useValue: { currentUser$: of(null) } },
+				{
+					provide: CustomerAppStateService,
+					useValue: {
+						waitingListSettings$: of({
+							joiningEnabled: false,
+							emailSendingEnabled: false,
+						}),
+					},
+				},
 				provideFirestoreMock(),
 				provideAuthMock(),
 				provideFunctionsMock(),

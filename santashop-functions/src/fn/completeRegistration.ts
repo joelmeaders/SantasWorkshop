@@ -71,6 +71,8 @@ export default async function completeRegistration(
 			const registrationData = registrationSnapshot.data() as
 				Registration | undefined;
 			if (registrationData?.registrationSubmittedOn) {
+				if (registrationData.waitingList?.active)
+					transaction.update(registrationRef, { 'waitingList.active': false });
 				transaction.create(receiptRef, {
 					operation: 'completeRegistration',
 					result: true,
@@ -148,6 +150,9 @@ export default async function completeRegistration(
 			const completedRegistration = {
 				...registration,
 				...registrationUpdate,
+				...(registration.waitingList?.active
+					? { waitingList: { ...registration.waitingList, active: false } }
+					: {}),
 			};
 			delete completedRegistration.cancelledOn;
 			delete completedRegistration.cancelledByUid;

@@ -82,8 +82,7 @@
 				<ion-item
 					id="scheduleEditorNav"
 					detail
-					routerLink="../schedule-editor"
-				>
+					routerLink="../schedule-editor">
 					<ion-icon
 						name="calendar-outline"
 						slot="start"
@@ -108,11 +107,13 @@
 					{{ 'User Management' | adminText }}
 				</ion-item>
 				@if (isOwner()) {
-					<ion-item
-						id="appSettingsNav"
+					<ion-item id="waitingListNav" detail routerLink="../waiting-list">
+						<ion-icon name="mail-outline" slot="start" aria-hidden="true" />
+						{{ 'Waiting list' | adminText }}
+					</ion-item>
+					<ion-item id="appSettingsNav"
 						detail
-						routerLink="../app-settings"
-					>
+						routerLink="../app-settings">
 						<ion-icon
 							name="settings-outline"
 							slot="start"
@@ -139,8 +140,7 @@
 				<ion-item
 					id="scanRiskReviewNav"
 					detail
-					routerLink="../stats/scan-risk"
-				>
+					routerLink="../stats/scan-risk">
 					<ion-icon
 						name="alert-circle-outline"
 						slot="start"

@@ -107,9 +107,9 @@ export const publicParametersGatewayUrl = (): string => {
 	return url.origin;
 };
 
-export const fetchPublicParametersFromGateway = async (
+export const fetchPublicParametersEnvelope = async (
 	fetcher: typeof fetch = fetch,
-	): Promise<PublicParameters> => {
+	): Promise<PublicParametersGatewayResponse> => {
 	const gatewayUrl = publicParametersGatewayUrl();
 	const signal = AbortSignal.timeout(10_000);
 	const auth = new GoogleAuth();
@@ -131,8 +131,16 @@ export const fetchPublicParametersFromGateway = async (
 		!Number.isFinite(body.lastFreshAt)
 	)
 		throw new Error('Public settings gateway returned an invalid response.');
-	return parsePublicParameters(body.settings);
+	return {
+		...body,
+		settings: parsePublicParameters(body.settings),
+	} as PublicParametersGatewayResponse;
 };
+
+export const fetchPublicParametersFromGateway = async (
+	fetcher: typeof fetch = fetch,
+): Promise<PublicParameters> =>
+	(await fetchPublicParametersEnvelope(fetcher)).settings;
 
 /** Configuration is independent of Firestore transactions; in-flight work retains its settings. */
 export class PublicParametersCache {

@@ -19,7 +19,14 @@ describe('AppSettingsPage', () => {
 		TestBed.configureTestingModule({
 			providers: [
 				provideRouter([]),
-				{ provide: AppSettingsService, useValue: { read, publish } },
+				{ provide: AppSettingsService, useValue: { read, publish,
+						readWaitingList: async (): Promise<object> => ({
+							settings: { joiningEnabled: false, emailSendingEnabled: false },
+							etag: 'waiting-1',
+							version: '1',
+						}),
+					},
+				},
 			],
 		});
 		component = TestBed.runInInjectionContext(() => new AppSettingsPage());

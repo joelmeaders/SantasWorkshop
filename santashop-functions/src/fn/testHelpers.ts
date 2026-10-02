@@ -369,6 +369,7 @@ export async function clearAllData(): Promise<void> {
 		'staff',
 	];
 
+	await db.recursiveDelete(db.collection('waitingListCampaigns'));
 	for (const collectionName of collections) {
 		const snapshot = await db.collection(collectionName).get();
 		const batch = db.batch();

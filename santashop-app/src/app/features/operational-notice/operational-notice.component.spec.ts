@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AppStateService } from '@santashop/core/customer';
+import { AppStateService, AuthService } from '@santashop/core/customer';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -21,6 +21,10 @@ describe('OperationalNoticeComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [OperationalNoticeComponent],
 			providers: [
+				{
+					provide: AuthService,
+					useValue: { currentUser$: new BehaviorSubject(null) },
+				},
 				{ provide: AppStateService, useValue: { messageDoc$ } },
 				{
 					provide: TranslateService,

@@ -31,6 +31,7 @@ const ownerActions = [
 	'Schedule & Capacity Editor',
 	'Email Templates',
 	'User Management',
+	'Waiting list',
 	'App settings',
 	'Owner Operations',
 	'Scan Risk Review',

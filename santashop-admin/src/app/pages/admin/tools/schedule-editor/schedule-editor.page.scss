@@ -48,6 +48,7 @@
 }
 
 .eyebrow {
+	color: var(--ion-text-color);
 	margin: 0;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
@@ -172,12 +173,11 @@
 	padding: 1rem;
 	border-radius: 18px;
 	border: 1px solid var(--ion-color-step-150, transparent);
-	transition: opacity 0.2s ease;
 	box-shadow: var(--admin-raised-small);
 }
 
 .slot-card--disabled {
-	opacity: 0.5;
+	border-style: dashed;
 }
 
 .slot-card__summary {

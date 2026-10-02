@@ -204,6 +204,13 @@ export function bootstrapAdminApplication(
 				{ provide: ANALYTICS_APP_AREA, useValue: 'admin' },
 				...provideRemoteConfigPublicParameters({
 					useEmulator: !runtimeConfig.production,
+					readLocalWaitingList: async (): Promise<unknown> =>
+						(
+							await httpsCallable(
+								firebaseFunctions,
+								'testReadWaitingListSettings',
+							)()
+						).data,
 					readLocal: async (): Promise<unknown> => {
 						return (
 							await httpsCallable(

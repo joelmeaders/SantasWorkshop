@@ -28,6 +28,11 @@ const meta = {
 				{
 					provide: AppSettingsService,
 					useValue: {
+						readWaitingList: async (): Promise<object> => ({
+							settings: { joiningEnabled: false, emailSendingEnabled: false },
+							etag: 'waiting-1',
+							version: '1',
+						}),
 						read: async (): Promise<typeof response> =>
 							structuredClone(response),
 						publish: async (request: {
@@ -78,6 +83,11 @@ export const Conflict: Story = {
 				{
 					provide: AppSettingsService,
 					useValue: {
+						readWaitingList: async (): Promise<object> => ({
+							settings: { joiningEnabled: false, emailSendingEnabled: false },
+							etag: 'waiting-1',
+							version: '1',
+						}),
 						read: async (): Promise<typeof response> =>
 							structuredClone(response),
 						publish: async (): Promise<never> => {
@@ -113,6 +123,11 @@ export const LoadFailure: Story = {
 				{
 					provide: AppSettingsService,
 					useValue: {
+						readWaitingList: async (): Promise<object> => ({
+							settings: { joiningEnabled: false, emailSendingEnabled: false },
+							etag: 'waiting-1',
+							version: '1',
+						}),
 						read: async (): Promise<never> => {
 							throw new Error(
 								'Settings service is unavailable. Retry shortly.',
@@ -143,6 +158,11 @@ export const Loading: Story = {
 				{
 					provide: AppSettingsService,
 					useValue: {
+						readWaitingList: async (): Promise<object> => ({
+							settings: { joiningEnabled: false, emailSendingEnabled: false },
+							etag: 'waiting-1',
+							version: '1',
+						}),
 						read: (): Promise<never> =>
 							new Promise(() => undefined),
 					},

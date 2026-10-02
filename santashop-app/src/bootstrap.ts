@@ -149,6 +149,13 @@ export const bootstrapCustomerApplication = (
 			{ provide: ANALYTICS_APP_AREA, useValue: 'customer' },
 			...provideRemoteConfigPublicParameters({
 				useEmulator: !appConfig.production,
+				readLocalWaitingList: async (): Promise<unknown> =>
+					(
+						await httpsCallable(
+							firebaseFunctions,
+							'testReadWaitingListSettings',
+						)()
+					).data,
 				readLocal: async (): Promise<unknown> =>
 					(await httpsCallable(firebaseFunctions, 'testReadPublicParameters')()).data,
 			}),

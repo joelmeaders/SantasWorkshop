@@ -17,6 +17,7 @@ implementation or policy changes.
 | Business and acceptance contracts | [Business](requirements/BUSINESS_REQUIREMENTS.md), [functional](requirements/FUNCTIONAL_REQUIREMENTS.md), [non-functional](requirements/NON_FUNCTIONAL_REQUIREMENTS.md) requirements |
 | Configuration and credentials | [Configuration](SECRETS_AND_CONFIGURATION.md), [Remote Config](remote-config.md) |
 | Email authoring and review | [Bilingual templates](email-templates.md) |
+| Waiting-list membership and campaigns | [Waiting list](waiting-list.md) |
 | Test coverage and acceptance | [Test coverage](test-coverage.md), [integrated suite](testing/integrated-test-suite.md) |
 | Browser test procedure | [Browser flows](browser-flow-testing.md), [emulator E2E](testing/e2e.md) |
 | UI development and visual tests | [Storybook](storybook.md) |

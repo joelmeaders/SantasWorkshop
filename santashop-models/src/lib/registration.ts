@@ -1,8 +1,10 @@
 import type { CustomerLanguage } from './language';
 import { Child } from './child';
 import { DateTimeSlot } from './date-time-slot';
+import type { WaitingListMembership } from './waiting-list';
 
 export interface Registration {
+	waitingList?: WaitingListMembership;
 	preferredLanguage?: CustomerLanguage;
 	uid?: string;
 	qrcode?: string;

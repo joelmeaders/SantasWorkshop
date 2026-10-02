@@ -183,7 +183,9 @@ const deliver = async (
 		});
 		// Even MessageRejected can describe a sender/configuration problem.
 		// Pause conservatively instead of consuming the rest of the audience.
-		throw new Error('Waiting-list delivery stopped. Review before resuming.');
+		throw new Error('Waiting-list delivery stopped. Review before resuming.', {
+			cause: error,
+		});
 	}
 	// Persistence errors are not SES errors. Never replace a known acceptance
 	// with failed/uncertain or retry the provider after obtaining its message ID.

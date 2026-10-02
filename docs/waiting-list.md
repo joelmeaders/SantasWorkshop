@@ -66,6 +66,24 @@ uncertain and is never resent automatically in that campaign. Review these
 receipts before starting a later campaign; the campaign tool does not promise
 exactly-once external delivery.
 
+Every SES send error pauses the campaign before another recipient is claimed.
+A definite HTTP 4xx rejection (other than a request timeout) records `failed`
+with `retryable: true` and `rejectedGeneration`. Only an explicit owner **Resume**
+with a newer generation can retry that request, after rereading eligibility.
+Duplicate tasks cannot authorize a retry. Rejections are treated conservatively:
+even `MessageRejected` can indicate a sender or configuration problem rather than
+a bad recipient. Correct the account, quota, configuration, or recipient problem
+before resuming. This does not add automatic provider retries. Older failed
+receipts without the explicit retryable marker remain terminal. Timeouts, server
+errors, and unknown outcomes remain uncertain and are never retried by Resume.
+
+After SES returns a message ID, acceptance persistence is a separate operation.
+The worker retries that identical, update-only Firestore write at most once; it
+never repeats SES to recover a database write. An unresolved persistence error
+pauses the campaign without downgrading a stored acceptance. If neither write
+committed, the existing sending claim becomes uncertain on recovery. No recovery
+write recreates a deleted receipt.
+
 The task worker has one instance, concurrency one, a 540-second timeout, and five
 queue attempts. It checkpoints after 50 members or 420 seconds. The send rate
 is the smaller of five messages per second and half of the verified SES quota.

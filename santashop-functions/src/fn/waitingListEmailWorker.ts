@@ -43,9 +43,24 @@ export const classifyWaitingListSendError = (
 ): 'failed' | 'uncertain' => {
 	const status = (error as { $metadata?: { httpStatusCode?: number } })
 		?.$metadata?.httpStatusCode;
-	return status !== undefined && status >= 400 && status < 500
+	// A request timeout does not prove that the provider rejected the message.
+	return status !== undefined && status >= 400 && status < 500 && status !== 408
 		? 'failed'
 		: 'uncertain';
+};
+
+/** Retry only the identical receipt write, never the provider request. */
+const persistAcceptedReceipt = async (
+	ref: DocumentReference,
+	accepted: Record<string, unknown>,
+): Promise<void> => {
+	try {
+		await ref.update(accepted);
+	} catch {
+		// The first write may already have committed. Repeating it is idempotent.
+		// A second failure escapes to the worker's pause path without weakening it.
+		await ref.update(accepted);
+	}
 };
 
 const deliver = async (
@@ -69,15 +84,31 @@ const deliver = async (
 				]);
 			if (current.data()?.['leaseToken'] !== leaseToken)
 				throw new Error('Campaign worker lease changed.');
+			const previous = receipt.data();
 			if (receipt.exists) {
-				if (receipt.data()?.['state'] === 'sending')
-					transaction.update(receiptRef, {
-						state: 'uncertain',
-						completedAt: new Date(),
-						reason: 'The previous provider request was not confirmed.',
-					});
-				return undefined;
+				if (previous?.['state'] === 'failed' && previous['retryable'] === true) {
+					// Only an explicit owner resume advances the generation. A task
+					// retry or a crash before the campaign pause must not resend.
+					const rejectedGeneration = previous['rejectedGeneration'];
+					if (
+						!Number.isSafeInteger(rejectedGeneration) ||
+						rejectedGeneration >= campaign.generation
+					)
+						throw new Error('Rejected delivery requires a manual resume.');
+				} else {
+					if (previous?.['state'] === 'sending')
+						transaction.update(receiptRef, {
+							state: 'uncertain',
+							completedAt: new Date(),
+							reason: 'The previous provider request was not confirmed.',
+						});
+					return undefined;
+				}
 			}
+			const writeReceipt = (value: Record<string, unknown>): void => {
+				if (receipt.exists) transaction.update(receiptRef, value);
+				else transaction.create(receiptRef, value);
+			};
 			const registration = registrationSnapshot.data() as
 				Registration | undefined;
 			const user = userSnapshot.data() as User | undefined;
@@ -95,16 +126,20 @@ const deliver = async (
 				registration.programYear !== PROGRAM_YEAR ||
 				!user?.emailAddress
 			) {
-				transaction.create(receiptRef, {
+				writeReceipt({
 					state: 'skipped',
+					retryable: false,
 					completedAt: new Date(),
 					reason: 'Member is no longer eligible.',
 					membershipId: member.membershipId,
 				});
 				return undefined;
 			}
-			transaction.create(receiptRef, {
+			writeReceipt({
 				state: 'sending',
+				retryable: false,
+				reason: '',
+				completedAt: null,
 				startedAt: new Date(),
 				membershipId: member.membershipId,
 			});
@@ -128,40 +163,39 @@ const deliver = async (
 	}
 	// A committed Firestore claim cannot make an external provider call atomic.
 	// Keep unknown outcomes terminal for this campaign, including a worker crash.
+	const simulated = process.env['FUNCTIONS_EMULATOR'] === 'true';
+	let messageId: string;
 	try {
-		if (process.env['FUNCTIONS_EMULATOR'] === 'true') {
-			await receiptRef.update({
-				state: 'accepted',
-				simulated: true,
-				providerMessageId: `emulator-${randomUUID()}`,
-				language: payload.language,
-				templateKey: template.templateKey,
-				revisionId: template.revisionId,
-				completedAt: new Date(),
-			});
-			return;
-		}
-		const messageId = await sendWaitingListEmail(
-			payload.email,
-			payload.firstName,
-			template,
-		);
-		await receiptRef.update({
-			state: 'accepted',
-			providerMessageId: messageId,
-			language: payload.language,
-			templateKey: template.templateKey,
-			revisionId: template.revisionId,
-			completedAt: new Date(),
-		});
+		messageId = simulated
+			? `emulator-${randomUUID()}`
+			: await sendWaitingListEmail(payload.email, payload.firstName, template);
 	} catch (error) {
+		const state = classifyWaitingListSendError(error);
 		await receiptRef.update({
-			state: classifyWaitingListSendError(error),
+			state,
+			retryable: state === 'failed',
+			rejectedGeneration: campaign.generation,
 			completedAt: new Date(),
 			reason:
-				'Email delivery was not confirmed. Review before another campaign.',
+				state === 'failed'
+					? 'SES rejected this request. Resolve the delivery problem before resuming.'
+					: 'Provider acceptance is unknown. This recipient will not be retried.',
 		});
+		// Even MessageRejected can describe a sender/configuration problem.
+		// Pause conservatively instead of consuming the rest of the audience.
+		throw new Error('Waiting-list delivery stopped. Review before resuming.');
 	}
+	// Persistence errors are not SES errors. Never replace a known acceptance
+	// with failed/uncertain or retry the provider after obtaining its message ID.
+	await persistAcceptedReceipt(receiptRef, {
+		state: 'accepted',
+		...(simulated ? { simulated: true } : {}),
+		providerMessageId: messageId,
+		language: payload.language,
+		templateKey: template.templateKey,
+		revisionId: template.revisionId,
+		completedAt: new Date(),
+	});
 };
 
 export default async function waitingListEmailWorker(

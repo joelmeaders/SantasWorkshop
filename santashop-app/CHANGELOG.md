@@ -4,6 +4,12 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.9] - 2026-10-02
+
+### Changed
+
+- Advance the customer application to `2026.09.0-beta.9`.
+
 ### Added
 
 - Add optional waiting-list consent and membership management to the registration overview and closure notices, including existing-account sign-in and bilingual guidance.

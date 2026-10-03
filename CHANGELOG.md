@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.9] - 2026-10-02
+
+### Changed
+
+- Advance the workspace and both applications to `2026.09.0-beta.9`.
+
 ### Added
 
 - Let existing customers opt in to capacity notifications when no future appointment is available, and leave at any time. Booking or completing registration clears membership.
@@ -15,6 +21,9 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 ### Fixed
 
 - Preserve current email links and admin styling when integrating the waiting list. Block its SES calls during TEST email isolation and prevent delayed enqueue errors from pausing a newer campaign attempt.
+- Normalize omitted Cloud Tasks IAM bindings during CI deployment with Firebase CLI 15.29.0. Preserve existing policies and deployment guards.
+- Select Firestore rules and indexes when their shared deployment entrypoint changes.
+- Wait for admin preferences to finish closing before the browser test reopens them.
 
 ## [2026.09.0-beta.8] - 2026-09-20
 

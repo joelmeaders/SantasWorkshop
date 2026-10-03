@@ -45,6 +45,9 @@ test.describe('mobile staff preferences', () => {
 			.locator('ion-popover')
 			.getByRole('button', { name: 'Aceptar', exact: true })
 			.click();
+		await expect(
+			page.locator('ion-popover:not(.overlay-hidden)'),
+		).toHaveCount(0);
 		await page.locator('#adminSignInButton').click();
 		await expect(page).toHaveURL(/\/admin\/landing$/);
 		await expect(page.locator('html')).toHaveAttribute(
@@ -78,6 +81,9 @@ test.describe('mobile staff preferences', () => {
 			.locator('ion-popover')
 			.getByRole('button', { name: 'OK', exact: true })
 			.click();
+		await expect(
+			page.locator('ion-popover:not(.overlay-hidden)'),
+		).toHaveCount(0);
 		await expect(lastName).toHaveValue('Muñoz');
 		await expect(
 			search.locator(
@@ -115,6 +121,9 @@ test.describe('mobile staff preferences', () => {
 			.locator('ion-popover')
 			.getByRole('button', { name: 'OK', exact: true })
 			.click();
+		await expect(
+			page.locator('ion-popover:not(.overlay-hidden)'),
+		).toHaveCount(0);
 		await expect(page.locator('ion-footer')).toBeVisible();
 		await expect
 			.poll(() =>

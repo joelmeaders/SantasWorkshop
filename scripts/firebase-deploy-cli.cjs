@@ -16,13 +16,17 @@ const normalizeQueuePolicy = (policy) => {
 
 const installQueuePolicyCompatibility = (cloudTasks, version) => {
 	if (version !== '15.29.0')
-		throw new Error('Review the Cloud Tasks IAM compatibility fix for this Firebase CLI version.');
+		throw new Error(
+			'Review the Cloud Tasks IAM compatibility fix for this Firebase CLI version.',
+		);
 	if (typeof cloudTasks?.getIamPolicy !== 'function')
 		throw new Error('Firebase CLI Cloud Tasks IAM reader is unavailable.');
 	const original = cloudTasks.getIamPolicy;
 	cloudTasks.getIamPolicy = async (...args) =>
 		normalizeQueuePolicy(await original.apply(cloudTasks, args));
-	return () => { cloudTasks.getIamPolicy = original; };
+	return () => {
+		cloudTasks.getIamPolicy = original;
+	};
 };
 
 module.exports = { normalizeQueuePolicy, installQueuePolicyCompatibility };
@@ -31,7 +35,9 @@ if (require.main === module) {
 	try {
 		assertFunctionsDeployFromCi(process.env);
 		if (process.argv[2] !== 'deploy')
-			throw new Error('This CI wrapper only supports Firebase deployment.');
+			throw new Error(
+				'This CI wrapper only supports Firebase deployment.',
+			);
 		const packagePath = require.resolve('firebase-tools/package.json');
 		const cliRoot = path.dirname(packagePath);
 		const { version } = require(packagePath);

@@ -137,14 +137,21 @@ describe('admin bootstrap', () => {
 		).toBeUndefined();
 	});
 
-	it('keys the service-worker script URL to the configured release version', () => {
-		expect(getServiceWorkerScriptUrl(config.version)).toBe(
-			'ngsw-worker.js?v=2026.09.0-beta.8',
-		);
-		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
-			getServiceWorkerScriptUrl(config.version),
-		);
-	});
+	it.each([config.version, 'release /?&='])(
+		'keys the service-worker script URL to release %s',
+		(version) => {
+			const workerUrl = new URL(
+				getServiceWorkerScriptUrl(version),
+				'https://app.example.test',
+			);
+			expect(workerUrl.pathname).toBe('/ngsw-worker.js');
+			expect(workerUrl.searchParams.get('v')).toBe(version);
+			expect([...workerUrl.searchParams.keys()]).toEqual(['v']);
+			expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
+				getServiceWorkerScriptUrl(version),
+			);
+		},
+	);
 
 	it('bootstraps with admin context when analytics initialization is unavailable', async () => {
 		vi.mocked(dependencies.getAnalytics).mockImplementation(() => { throw new Error('Analytics unavailable'); });

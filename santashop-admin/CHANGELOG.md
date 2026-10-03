@@ -2,10 +2,20 @@
 
 ## [Unreleased]
 
+## [2026.09.0-beta.9] - 2026-10-02
+
+### Changed
+
+- Advance the admin application to `2026.09.0-beta.9`.
+
 ### Added
 
 - Add independent owner controls for waiting-list opt-in and email sending, with preview, confirmation, progress, and resume for manual English/Spanish capacity campaigns.
 - Add waiting-list email starters with environment-specific registration and membership links and bilingual FAQ links.
+
+### Fixed
+
+- Wait for preferences dismissal before reopening the popover in the mobile browser test.
 
 ## [2026.09.0-beta.8] - 2026-09-20
 

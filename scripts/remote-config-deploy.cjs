@@ -41,7 +41,7 @@ const deploy = async (
 	};
 	const node = (args) => run(process.execPath, args, options);
 	const firebase = (args) =>
-		run('pnpm', ['exec', 'firebase', ...args], options);
+		node(['scripts/firebase-deploy-cli.cjs', ...args]);
 	if (deployFunctions) {
 		node([
 			'scripts/remote-config-readiness.cjs',

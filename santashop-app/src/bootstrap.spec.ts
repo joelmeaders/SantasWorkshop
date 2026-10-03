@@ -183,14 +183,21 @@ describe('bootstrapCustomerApplication', () => {
 		expect(mocks['connectAuthEmulator']).toHaveBeenCalledTimes(1);
 	});
 
-	it('keys the service-worker script URL to the configured release version', () => {
-		expect(getServiceWorkerScriptUrl(config.version)).toBe(
-			'ngsw-worker.js?v=2026.09.0-beta.7',
-		);
-		expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
-			getServiceWorkerScriptUrl(config.version),
-		);
-	});
+	it.each([config.version, 'release /?&='])(
+		'keys the service-worker script URL to release %s',
+		(version) => {
+			const workerUrl = new URL(
+				getServiceWorkerScriptUrl(version),
+				'https://app.example.test',
+			);
+			expect(workerUrl.pathname).toBe('/ngsw-worker.js');
+			expect(workerUrl.searchParams.get('v')).toBe(version);
+			expect([...workerUrl.searchParams.keys()]).toEqual(['v']);
+			expect(getServiceWorkerScriptUrl('next-release')).not.toBe(
+				getServiceWorkerScriptUrl(version),
+			);
+		},
+	);
 
 	it('reports bootstrap rejection without leaving an unhandled promise', async (): Promise<void> => {
 		const error = new Error('bootstrap failed');

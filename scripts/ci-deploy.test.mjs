@@ -38,6 +38,13 @@ for (const mode of ['test', 'prod'])
 				const deployments = calls.filter((call) =>
 					call.args.includes('deploy'),
 				);
+				for (const call of deployments) {
+					assert.equal(call.command, process.execPath);
+					assert.equal(
+						call.args[0],
+						'scripts/firebase-deploy-cli.cjs',
+					);
+				}
 				assert.deepEqual(
 					deployments.map(
 						(call) => call.args[call.args.indexOf('--only') + 1],

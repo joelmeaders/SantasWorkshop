@@ -173,3 +173,38 @@ for (const [path, expected] of [
 			...expected,
 		}),
 	);
+
+for (const [path, deploy] of [
+	['scripts/remote-config-deploy.cjs', ['functions', 'rules']],
+	['scripts/remote-config-gateway.cjs', ['functions']],
+	['scripts/remote-config-readiness.cjs', ['functions']],
+])
+	test('deployment script selects every owned target: ' + path, () =>
+		assert.deepEqual(selectChanges([path]), {
+			...empty,
+			e2e: ['app', 'admin'],
+			functions: true,
+			deploy,
+		}),
+	);
+
+test('CLI deployment recovery retains all validations and includes rules/indexes', () => {
+	assert.deepEqual(
+		selectChanges([
+			'scripts/firebase-deploy-cli.cjs',
+			'scripts/remote-config-deploy.cjs',
+			'scripts/ui-targets.mjs',
+			'scripts/ui-targets.test.mjs',
+			'santashop-functions/test/unit/utility/firebase-deploy-cli.spec.ts',
+		]),
+		{
+			ui: ['app', 'admin'],
+			e2e: ['app', 'admin'],
+			storybook: ['app', 'admin'],
+			shared: true,
+			functions: true,
+			tooling: true,
+			deploy: ['app', 'admin', 'functions', 'rules'],
+		},
+	);
+});

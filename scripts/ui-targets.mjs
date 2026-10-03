@@ -167,6 +167,9 @@ export function selectChanges(paths) {
 		}
 		if (/^scripts\/remote-config-(deploy|gateway|readiness)/.test(path)) {
 			backend(true);
+			// The deploy entrypoint owns both Functions and rules/indexes.
+			if (path === 'scripts/remote-config-deploy.cjs')
+				selected.deploy.add('rules');
 			continue;
 		}
 		if (

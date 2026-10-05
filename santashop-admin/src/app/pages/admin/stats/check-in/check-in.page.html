@@ -1,28 +1,32 @@
 <admin-header title="{{ 'Check-In Stats' | adminText }}" />
 
-<ion-content>
-	<div class="page-actions">
-	<ion-item>
-		<ion-select
-			okText="{{ 'OK' | adminText }}"
-			cancelText="{{ 'Cancel' | adminText }}"
-			[(ngModel)]="year"
-			(ionChange)="refreshYear.next()"
-		>
-			@for (years of schedule; track years.year) {
-				<ion-select-option [value]="years.year">
-					{{ years.year }}
-				</ion-select-option>
-			}
-		</ion-select>
-	</ion-item>
-	</div>
-	<ion-button class="ion-margin" fill="outline" (click)="refresh()">
-		{{ 'Refresh report' | adminText }}
-	</ion-button>
-	<ion-grid>
-		@let currentState = checkInState();
-		@if (!currentState || currentState.status === 'loading') {
+<ion-content
+	><div class="report-workspace">
+		<div class="page-actions">
+			<ion-item>
+				<ion-select
+					label="{{ 'Program year' | adminText }}"
+					labelPlacement="stacked"
+					okText="{{ 'OK' | adminText }}"
+					cancelText="{{ 'Cancel' | adminText }}"
+					[(ngModel)]="year"
+					(ionChange)="refreshYear.next()"
+				>
+					@for (years of schedule; track years.year) {
+					<ion-select-option [value]="years.year">
+						{{ years.year }}
+					</ion-select-option>
+					}
+				</ion-select>
+			</ion-item>
+			<ion-button class="ion-margin" fill="outline" (click)="refresh()">
+				{{ 'Refresh report' | adminText }}
+			</ion-button>
+		</div>
+
+		<ion-grid>
+			@let currentState = checkInState(); @if (!currentState ||
+			currentState.status === 'loading') {
 			<ion-row
 				data-checkin-stats-loading
 				role="status"
@@ -33,31 +37,25 @@
 					<p>{{ 'Loading check-in statistics…' | adminText }}</p>
 				</ion-col>
 			</ion-row>
-		} @else if (currentState.status === 'empty') {
+			} @else if (currentState.status === 'empty') {
 			<ion-row>
 				<ion-col class="ion-text-center">
 					<ion-title>
-						{{
-							'No check-ins have been recorded for this year.'
-								| adminText
-						}}
+						{{ 'No check-ins have been recorded for this year.' |
+						adminText }}
 					</ion-title>
 					<p>
-						{{
-							'Refresh to load the latest check-in statistics.'
-								| adminText
-						}}
+						{{ 'Refresh to load the latest check-in statistics.' |
+						adminText }}
 					</p>
 				</ion-col>
 			</ion-row>
-		} @else if (currentState.status === 'error') {
+			} @else if (currentState.status === 'error') {
 			<ion-row role="alert">
 				<ion-col class="ion-text-center">
 					<ion-title>
-						{{
-							'Check-in statistics could not be loaded.'
-								| adminText
-						}}
+						{{ 'Check-in statistics could not be loaded.' |
+						adminText }}
 					</ion-title>
 					<ion-button fill="outline" (click)="refresh()">
 						<ion-icon
@@ -69,7 +67,7 @@
 					</ion-button>
 				</ion-col>
 			</ion-row>
-		} @else if (currentState.status === 'ready') {
+			} @else if (currentState.status === 'ready') {
 			<ion-row>
 				<ion-col size="12" class="ion-text-center">
 					<admin-report-freshness
@@ -115,10 +113,8 @@
 						<h1>{{ modifiedCount | adminText }}</h1>
 						<h2>{{ 'Changes (Adjusted)' | adminText }}</h2>
 						<p>
-							{{
-								'Difference from on-site registrations.'
-									| adminText
-							}}
+							{{ 'Difference from on-site registrations.' |
+							adminText }}
 						</p>
 					</div>
 				</ion-col>
@@ -129,12 +125,8 @@
 				<ion-col size="12">
 					<ion-toolbar color="none">
 						<h2 slot="start" class="ion-text-left">
-							{{
-								(graphView() === 'customerCount'
-									? 'Shopper Check-Ins'
-									: 'Children'
-								) | adminText
-							}}
+							{{ (graphView() === 'customerCount' ? 'Shopper
+							Check-Ins' : 'Children' ) | adminText }}
 						</h2>
 						<div slot="end">
 							<ion-button (click)="switchView()">
@@ -148,48 +140,40 @@
 						</div>
 					</ion-toolbar>
 				</ion-col>
-				@for (slot of slots; track slot; let i = $index) {
-					@if (slot.datasets[0].data) {
-						<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
-							<ion-toolbar
-								color="none"
-								class="ion-padding-horizontal"
-							>
-								<h3 slot="start">
-									{{ slot.datasets[0].label }}
-								</h3>
-								<ion-text slot="end">
-									{{ 'Total: {{v0}}' | adminText: {v0:
-									(addValues(slot.datasets[0].data))} }}
-								</ion-text>
-							</ion-toolbar>
-							<canvas
-								baseChart
-								[options]="barChartOptions | adminChartOptions"
-								[data]="
+				@for (slot of slots; track slot; let i = $index) { @if
+				(slot.datasets[0].data) {
+				<ion-col sizeXs="12" sizeSm="12" sizeMd="6" sizeLg="6">
+					<ion-toolbar color="none" class="ion-padding-horizontal">
+						<h3 slot="start">{{ slot.datasets[0].label }}</h3>
+						<ion-text slot="end">
+							{{ 'Total: {{v0}}' | adminText: {v0:
+							(addValues(slot.datasets[0].data))} }}
+						</ion-text>
+					</ion-toolbar>
+					<canvas
+						baseChart
+						[options]="barChartOptions | adminChartOptions"
+						[data]="
 									{
 										datasets: slot.datasets,
 										labels: slot.datasets[0]
 											.dataSeriesLabels,
 									} | adminChart
 								"
-								[legend]="false"
-								type="bar"
-							></canvas>
-						</ion-col>
-					}
-				}
+						[legend]="false"
+						type="bar"
+					></canvas>
+				</ion-col>
+				} }
 			</ion-row>
 			<ion-row>
 				<ion-col size="12">
 					<h2>{{ 'Report details' | adminText }}</h2>
 					@if (hasLegacyDateBuckets()) {
-						<p>
-							{{
-								'Older reports use December when no month was saved.'
-									| adminText
-							}}
-						</p>
+					<p>
+						{{ 'Older reports use December when no month was saved.'
+						| adminText }}
+					</p>
 					}
 					<admin-report-table
 						caption="{{ 'Attendance by hour' | adminText }}"
@@ -201,13 +185,13 @@
 						[exportContext]="exportContext()"
 					/>
 					<p>
-						{{
-							'The adjusted changes summary shows the positive difference between
-          recorded changes and on-site registrations.' | adminText
-						}}
+						{{ 'The adjusted changes summary shows the positive
+						difference between recorded changes and on-site
+						registrations.' | adminText }}
 					</p>
 				</ion-col>
 			</ion-row>
-		}
-	</ion-grid>
-</ion-content>
+			}
+		</ion-grid>
+	</div></ion-content
+>

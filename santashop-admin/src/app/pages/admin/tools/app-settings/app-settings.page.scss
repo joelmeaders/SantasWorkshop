@@ -1,0 +1,35 @@
+form {
+	display: grid;
+	gap: 16px;
+	align-items: start;
+}
+form > ion-list {
+	border: 1px solid var(--admin-border);
+	border-radius: 12px;
+	padding: 8px;
+	background: var(--admin-surface);
+}
+form > ion-button {
+	justify-self: start;
+	margin: 0;
+}
+h1 {
+	margin-top: 0;
+}
+@media (min-width: 900px) {
+	form {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	form > ion-list[formGroupName='globalAlert'],
+	form > ion-button {
+		grid-column: 1 / -1;
+	}
+	ion-list[formGroupName='globalAlert'] {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	ion-list[formGroupName='globalAlert'] > ion-list-header,
+	ion-list[formGroupName='globalAlert'] > ion-item:has(ion-toggle) {
+		grid-column: 1 / -1;
+	}
+}

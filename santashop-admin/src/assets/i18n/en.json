@@ -877,5 +877,10 @@
 	"Waiting list settings could not be loaded. Try again.": "Waiting list settings could not be loaded. Try again.",
 	"Waiting list settings published.": "Waiting list settings published.",
 	"Waiting-list email sending is disabled.": "Waiting-list email sending is disabled.",
-	"Waiting-list templates are too large. Use smaller templates.": "Waiting-list templates are too large. Use smaller templates."
+	"Waiting-list templates are too large. Use smaller templates.": "Waiting-list templates are too large. Use smaller templates.",
+	"Check-in complete": "Check-in complete",
+	"Next shopper": "Next shopper",
+	"Schedule and capacity": "Schedule and capacity",
+	"Edit date / time": "Edit date / time",
+	"Edit schedule": "Edit schedule"
 }

@@ -30,7 +30,7 @@ h3 {
 	flex-direction: column;
 	gap: 12px;
 	box-shadow: var(--admin-raised-small);
-	border-radius: 24px;
+	border-radius: 12px;
 }
 
 .capacity-card h3 {
@@ -78,4 +78,13 @@ h3 {
 	font-size: 1rem;
 	line-height: 1.4;
 	font-weight: 600;
+}
+
+.capacity-card,
+.count-container {
+	border: 1px solid var(--admin-border);
+	background: var(--admin-surface);
+}
+.capacity-card__header {
+	flex-wrap: wrap;
 }

@@ -3,28 +3,14 @@
 <ion-content class="schedule-editor-content">
 	<div class="limited-container schedule-editor">
 		@if (statusMessage) {
-			<p id="scheduleEditorStatus" class="status-message">
-				{{ statusMessage | adminText }}
-			</p>
+		<p id="scheduleEditorStatus" class="status-message">
+			{{ statusMessage | adminText }}
+		</p>
 		}
 
 		<section class="editor-shell">
 			<div class="editor-shell__intro">
-				<div>
-					<p class="eyebrow">{{ 'Schedule tools' | adminText }}</p>
-					<h2>
-						{{
-							'Manage capacity without the scroll maze'
-								| adminText
-						}}
-					</h2>
-					<p>
-						{{
-							'Generate schedules in batches, update selected rows together,
-            and review capacity status at a glance.' | adminText
-						}}
-					</p>
-				</div>
+				<h2>{{ 'Schedule and capacity' | adminText }}</h2>
 				<ion-item class="editor-shell__year" lines="none">
 					<ion-select
 						okText="{{ 'OK' | adminText }}"
@@ -35,13 +21,11 @@
 						[(ngModel)]="year"
 						(ionChange)="onYearChange()"
 					>
-						@for (
-							availableYear of availableYears;
-							track availableYear
-						) {
-							<ion-select-option [value]="availableYear">
-								{{ availableYear }}
-							</ion-select-option>
+						@for ( availableYear of availableYears; track
+						availableYear ) {
+						<ion-select-option [value]="availableYear">
+							{{ availableYear }}
+						</ion-select-option>
 						}
 					</ion-select>
 				</ion-item>
@@ -49,18 +33,16 @@
 
 			<div class="editor-panels">
 				@if (isOwner()) {
-					<ion-card class="editor-panel editor-panel--generator">
-						<ion-card-header>
-							<ion-card-title>
-								{{ 'Generate hourly schedules' | adminText }}
-							</ion-card-title>
-						</ion-card-header>
+				<ion-card class="editor-panel editor-panel--generator"
+					><details class="generator-tools">
+						<summary>
+							{{ 'Generate hourly schedules' | adminText }}
+						</summary>
 						<ion-card-content>
 							<p class="panel-description">
-								{{
-									'Pick a date range, hourly window, and capacity to create a
-              full day of slots in one go.' | adminText
-								}}
+								{{ 'Pick a date range, hourly window, and
+								capacity to create a full day of slots in one
+								go.' | adminText }}
 							</p>
 							<form
 								[formGroup]="generatorForm"
@@ -105,9 +87,9 @@
 										formControlName="startHour"
 									>
 										@for (hour of hourOptions; track hour) {
-											<ion-select-option [value]="hour">
-												{{ formatHour(hour) }}
-											</ion-select-option>
+										<ion-select-option [value]="hour">
+											{{ formatHour(hour) }}
+										</ion-select-option>
 										}
 									</ion-select>
 								</ion-item>
@@ -121,9 +103,9 @@
 										formControlName="endHour"
 									>
 										@for (hour of hourOptions; track hour) {
-											<ion-select-option [value]="hour">
-												{{ formatHour(hour) }}
-											</ion-select-option>
+										<ion-select-option [value]="hour">
+											{{ formatHour(hour) }}
+										</ion-select-option>
 										}
 									</ion-select>
 								</ion-item>
@@ -131,8 +113,8 @@
 
 							<div class="panel-footer">
 								<ion-note>
-									{{ 'Creates one slot every hour for program year {{v0
-									}}.' | adminText: {v0: (year)} }}
+									{{ 'Creates one slot every hour for program
+									year {{v0 }}.' | adminText: {v0: (year)} }}
 								</ion-note>
 								<ion-button
 									id="generateSchedulesButton"
@@ -148,24 +130,23 @@
 								</ion-button>
 							</div>
 						</ion-card-content>
-					</ion-card>
+					</details></ion-card
+				>
 				} @else {
-					<ion-card class="editor-panel editor-panel--generator">
-						<ion-card-header>
-							<ion-card-title>
-								{{ 'Schedule initialization' | adminText }}
-							</ion-card-title>
-						</ion-card-header>
-						<ion-card-content>
-							<ion-note>
-								{{
-									'Only a project owner can generate the initial schedule.
-              Administrators can continue editing existing schedules.'
-										| adminText
-								}}
-							</ion-note>
-						</ion-card-content>
-					</ion-card>
+				<ion-card class="editor-panel editor-panel--generator">
+					<ion-card-header>
+						<ion-card-title>
+							{{ 'Schedule initialization' | adminText }}
+						</ion-card-title>
+					</ion-card-header>
+					<ion-card-content>
+						<ion-note>
+							{{ 'Only a project owner can generate the initial
+							schedule. Administrators can continue editing
+							existing schedules.' | adminText }}
+						</ion-note>
+					</ion-card-content>
+				</ion-card>
 				}
 
 				<ion-card class="editor-panel editor-panel--bulk">
@@ -176,10 +157,8 @@
 					</ion-card-header>
 					<ion-card-content>
 						<p class="panel-description">
-							{{
-								'Use this when several slots need the same capacity or enabled
-              state.' | adminText
-							}}
+							{{ 'Use this when several slots need the same
+							capacity or enabled state.' | adminText }}
 						</p>
 						<form [formGroup]="bulkEditForm" class="bulk-edit-grid">
 							<ion-item>
@@ -254,11 +233,9 @@
 								(selectedCount)} }}
 							</ion-badge>
 							<ion-note color="medium">
-								{{
-									'If multiple rows are selected, changing capacity or enabled
-                state on any selected row applies to the full selection.'
-										| adminText
-								}}
+								{{ 'If multiple rows are selected, changing
+								capacity or enabled state on any selected row
+								applies to the full selection.' | adminText }}
 							</ion-note>
 						</div>
 					</ion-card-content>
@@ -275,18 +252,17 @@
 							{{ 'Schedules' | adminText }}
 						</ion-card-title>
 						<ion-note color="medium">
-							{{
-								'Review each time slot, then use the inline controls below to
-              adjust date, hour, capacity, or status.' | adminText
-							}}
+							{{ 'Review each time slot, then use the inline
+							controls below to adjust date, hour, capacity, or
+							status.' | adminText }}
 						</ion-note>
 					</div>
 					<div class="schedule-surface__controls">
 						@if (hasSelections) {
-							<ion-badge color="primary">
-								{{ '{{v0}} selected' | adminText: {v0:
-								(selectedCount)} }}
-							</ion-badge>
+						<ion-badge color="primary">
+							{{ '{{v0}} selected' | adminText: {v0:
+							(selectedCount)} }}
+						</ion-badge>
 						}
 						<ion-button
 							id="selectAllSchedulesButton"
@@ -300,331 +276,273 @@
 								slot="start"
 								aria-hidden="true"
 							></ion-icon>
-							{{
-								(allLoadedSlotsSelected
-									? 'Clear all'
-									: 'Select all'
-								) | adminText
-							}}
+							{{ (allLoadedSlotsSelected ? 'Clear all' : 'Select
+							all' ) | adminText }}
 						</ion-button>
 					</div>
 				</div>
 			</ion-card-header>
 			<ion-card-content>
-				@let groups = groupedSlots();
-				@if (!groups || groups.length === 0) {
-					<p class="empty-state ion-text-center">
-						{{ 'No schedules found for {{v0}} yet.' | adminText:
-						{v0: (year)} }}
-					</p>
+				@let groups = groupedSlots(); @if (!groups || groups.length ===
+				0) {
+				<p class="empty-state ion-text-center">
+					{{ 'No schedules found for {{v0}} yet.' | adminText: {v0:
+					(year)} }}
+				</p>
 				} @else {
-					<div class="day-groups">
-						@for (
-							group of groups;
-							track trackByDayGroup($index, group)
-						) {
-							<section class="day-group">
-								<div class="day-group__header">
-									<div>
-										<h3>
-											{{
-												group.slots[0].dateTime
-													| adminDate: 'fullDate'
-											}}
-										</h3>
-										<p>
-											{{ group.slots.length }}
-											{{
-												(group.slots.length === 1
-													? 'slot'
-													: 'slots'
-												) | adminText
-											}}
-											@if (
-												countSelectedSlots(
-													group.slots
-												) > 0
-											) {
-												{{ '· {{v0}} selected' |
-												adminText: {v0:
-												(countSelectedSlots(group.slots))}
-												}}
-											}
-										</p>
-									</div>
-								</div>
+				<div class="day-groups">
+					@for ( group of groups; track trackByDayGroup($index, group)
+					) {
+					<section class="day-group">
+						<div class="day-group__header">
+							<div>
+								<h3>
+									{{ group.slots[0].dateTime | adminDate:
+									'fullDate' }}
+								</h3>
+								<p>
+									{{ group.slots.length }} {{
+									(group.slots.length === 1 ? 'slot' : 'slots'
+									) | adminText }} @if ( countSelectedSlots(
+									group.slots ) > 0 ) { {{ '· {{v0}} selected'
+									| adminText: {v0:
+									(countSelectedSlots(group.slots))} }} }
+								</p>
+							</div>
+						</div>
 
-								<div class="day-group__slots">
-									@for (
-										slot of group.slots;
-										track trackBySlot($index, slot)
-									) {
-										<article
-											[attr.id]="'scheduleRow-' + slot.id"
-											class="slot-card"
-											[class.slot-card--disabled]="
+						<div class="day-group__slots">
+							@for ( slot of group.slots; track
+							trackBySlot($index, slot) ) {
+							<article
+								[attr.id]="'scheduleRow-' + slot.id"
+								class="slot-card"
+								[class.slot-card--disabled]="
 												!slot.enabled
 											"
-										>
-											<div class="slot-card__summary">
-												<ion-checkbox
-													[attr.id]="
+							>
+								<div class="slot-card__summary">
+									<ion-checkbox
+										[attr.id]="
 														'selectSchedule-' +
 														slot.id
 													"
-													[attr.aria-label]="
+										[attr.aria-label]="
 														'Select schedule {{id}}'
 															| adminText
 																: {
 																		id: slot.id,
 																  }
 													"
-													[checked]="
+										[checked]="
 														isSelected(slot.id)
 													"
-													(ionChange)="
+										(ionChange)="
 														toggleSelection(
 															slot.id,
 															$event
 														)
 													"
-												></ion-checkbox>
-												<div class="slot-card__heading">
-													<div>
-														<h4>
-															{{
-																slot.dateTime
-																	| adminTimeSlot
-															}}
-														</h4>
-														<p>
-															{{ 'Reserved {{v0}}
-															of {{ v1 }}' |
-															adminText: {v0:
-															(slot.slotsReserved),
-															v1: (slot.maxSlots)}
-															}}
-														</p>
-													</div>
-													<div
-														class="slot-card__badges"
-													>
-														@if (
-															slot.capacityState ===
-															'over-capacity'
-														) {
-															<ion-badge
-																color="danger"
-															>
-																{{
-																	'Over capacity'
-																		| adminText
-																}}
-															</ion-badge>
-														} @else if (
-															slot.capacityState ===
-															'at-capacity'
-														) {
-															<ion-badge
-																color="warning"
-															>
-																{{
-																	'At capacity'
-																		| adminText
-																}}
-															</ion-badge>
-														} @else {
-															<ion-badge
-																color="success"
-															>
-																{{ '{{v0}} left'
-																| adminText:
-																{v0:
-																(slot.remaining)}
-																}}
-															</ion-badge>
-														}
-														@if (!slot.enabled) {
-															<ion-badge
-																color="medium"
-															>
-																{{
-																	'Disabled'
-																		| adminText
-																}}
-															</ion-badge>
-														}
-													</div>
-												</div>
-											</div>
+									></ion-checkbox>
+									<div class="slot-card__heading">
+										<div>
+											<h4>
+												{{ slot.dateTime | adminTimeSlot
+												}}
+											</h4>
+											<p>
+												{{ 'Reserved {{v0}} of {{ v1 }}'
+												| adminText: {v0:
+												(slot.slotsReserved), v1:
+												(slot.maxSlots)} }}
+											</p>
+										</div>
+										<div class="slot-card__badges">
+											@if ( slot.capacityState ===
+											'over-capacity' ) {
+											<ion-badge color="danger">
+												{{ 'Over capacity' | adminText
+												}}
+											</ion-badge>
+											} @else if ( slot.capacityState ===
+											'at-capacity' ) {
+											<ion-badge color="warning">
+												{{ 'At capacity' | adminText }}
+											</ion-badge>
+											} @else {
+											<ion-badge color="success">
+												{{ '{{v0}} left' | adminText:
+												{v0: (slot.remaining)} }}
+											</ion-badge>
+											} @if (!slot.enabled) {
+											<ion-badge color="medium">
+												{{ 'Disabled' | adminText }}
+											</ion-badge>
+											}
+										</div>
+									</div>
+								</div>
 
-											<div class="slot-card__controls">
-												<ion-item lines="none">
-													<ion-input
-														[attr.id]="
+								<details class="slot-editor">
+									<summary>
+										{{ 'Edit schedule' | adminText }}
+									</summary>
+									<div class="slot-card__controls">
+										<ion-item lines="none">
+											<ion-input
+												[attr.id]="
 															'slotDate-' +
 															slot.id
 														"
-														label="{{
+												label="{{
 															'Date' | adminText
 														}}"
-														labelPlacement="stacked"
-														type="date"
-														[value]="
+												labelPlacement="stacked"
+												type="date"
+												[value]="
 															getSlotDraftDate(
 																slot
 															)
 														"
-														(ionChange)="
+												(ionChange)="
 															setSlotDateDraft(
 																slot.id,
 																$event
 															)
 														"
-													></ion-input>
-												</ion-item>
-												<ion-item lines="none">
-													<ion-select
-														okText="{{
+											></ion-input>
+										</ion-item>
+										<ion-item lines="none">
+											<ion-select
+												okText="{{
 															'OK' | adminText
 														}}"
-														cancelText="{{
+												cancelText="{{
 															'Cancel' | adminText
 														}}"
-														[attr.id]="
+												[attr.id]="
 															'slotHour-' +
 															slot.id
 														"
-														label="{{
+												label="{{
 															'Hour' | adminText
 														}}"
-														labelPlacement="stacked"
-														[value]="
+												labelPlacement="stacked"
+												[value]="
 															getSlotDraftHour(
 																slot
 															)
 														"
-														(ionChange)="
+												(ionChange)="
 															setSlotHourDraft(
 																slot.id,
 																$event
 															)
 														"
-													>
-														@for (
-															hour of hourOptions;
-															track hour
-														) {
-															<ion-select-option
-																[value]="hour"
-															>
-																{{
-																	formatHour(
-																		hour
-																	)
-																}}
-															</ion-select-option>
-														}
-													</ion-select>
-												</ion-item>
-												<ion-item lines="none">
-													<ion-input
-														[attr.id]="
+											>
+												@for ( hour of hourOptions;
+												track hour ) {
+												<ion-select-option
+													[value]="hour"
+												>
+													{{ formatHour( hour ) }}
+												</ion-select-option>
+												}
+											</ion-select>
+										</ion-item>
+										<ion-item lines="none">
+											<ion-input
+												[attr.id]="
 															'slotCapacity-' +
 															slot.id
 														"
-														label="{{
+												label="{{
 															'Capacity'
 																| adminText
 														}}"
-														labelPlacement="stacked"
-														type="number"
-														min="0"
-														step="1"
-														[value]="slot.maxSlots"
-														(ionChange)="
+												labelPlacement="stacked"
+												type="number"
+												min="0"
+												step="1"
+												[value]="slot.maxSlots"
+												(ionChange)="
 															updateCapacity(
 																slot,
 																$event
 															)
 														"
-													></ion-input>
-												</ion-item>
-												<div class="slot-card__toggle">
-													<ion-toggle
-														[attr.id]="
+											></ion-input>
+										</ion-item>
+										<div class="slot-card__toggle">
+											<ion-toggle
+												[attr.id]="
 															'slotEnabled-' +
 															slot.id
 														"
-														[checked]="slot.enabled"
-														(ionChange)="
+												[checked]="slot.enabled"
+												(ionChange)="
 															updateEnabled(
 																slot,
 																$event
 															)
 														"
-													>
-														{{
-															'Enabled'
-																| adminText
-														}}
-													</ion-toggle>
-												</div>
-											</div>
+											>
+												{{ 'Enabled' | adminText }}
+											</ion-toggle>
+										</div>
+									</div>
 
-											<div class="slot-card__actions">
-												<ion-button
-													[attr.id]="
+									<div class="slot-card__actions">
+										<ion-button
+											[attr.id]="
 														'saveTimeSlot-' +
 														slot.id
 													"
-													fill="solid"
-													color="primary"
-													(click)="
+											fill="solid"
+											color="primary"
+											(click)="
 														saveSlotDateTime(slot)
 													"
-													(keydown.enter)="
+											(keydown.enter)="
 														saveSlotDateTime(slot)
 													"
-												>
-													<ion-icon
-														name="save-outline"
-														slot="start"
-														aria-hidden="true"
-													></ion-icon>
-													{{
-														'Save time slot'
-															| adminText
-													}}
-												</ion-button>
-												<ion-button
-													[attr.id]="
+										>
+											<ion-icon
+												name="save-outline"
+												slot="start"
+												aria-hidden="true"
+											></ion-icon>
+											{{ 'Save time slot' | adminText }}
+										</ion-button>
+										<ion-button
+											[attr.id]="
 														'deleteSchedule-' +
 														slot.id
 													"
-													fill="outline"
-													color="danger"
-													(click)="
+											fill="outline"
+											color="danger"
+											(click)="
 														confirmDelete(slot)
 													"
-													(keydown.enter)="
+											(keydown.enter)="
 														confirmDelete(slot)
 													"
-												>
-													<ion-icon
-														name="trash-outline"
-														slot="start"
-														aria-hidden="true"
-													></ion-icon>
-													{{ 'Delete' | adminText }}
-												</ion-button>
-											</div>
-										</article>
-									}
-								</div>
-							</section>
-						}
-					</div>
+										>
+											<ion-icon
+												name="trash-outline"
+												slot="start"
+												aria-hidden="true"
+											></ion-icon>
+											{{ 'Delete' | adminText }}
+										</ion-button>
+									</div>
+								</details>
+							</article>
+							}
+						</div>
+					</section>
+					}
+				</div>
 				}
 			</ion-card-content>
 		</ion-card>

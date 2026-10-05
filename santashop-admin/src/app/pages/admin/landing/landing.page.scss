@@ -9,21 +9,21 @@
 .home-intro {
 	display: flex;
 	align-items: center;
-	gap: 28px;
-	padding: 28px 8px 36px;
+	gap: 16px;
+	padding: 16px 8px 24px;
 }
 .welcome-symbol {
 	display: grid;
 	place-items: center;
-	flex: 0 0 92px;
-	height: 92px;
+	flex: 0 0 56px;
+	height: 56px;
 	border: 1px solid var(--admin-edge);
-	border-radius: 28px;
+	border-radius: 12px;
 	color: var(--admin-accent);
 	box-shadow: var(--admin-raised);
 }
 .welcome-symbol ion-icon {
-	font-size: 36px;
+	font-size: 28px;
 }
 .home-intro h1 {
 	margin-block: 8px 12px;
@@ -42,14 +42,14 @@
 }
 .home-sections {
 	display: grid;
-	gap: 24px 32px;
+	gap: 12px 24px;
 	padding: 0 8px 24px;
 }
 ion-list {
 	contain: layout style;
 	display: grid;
 	align-content: start;
-	gap: 14px;
+	gap: 8px;
 	margin: 0;
 	padding: 0;
 	min-width: 0;
@@ -64,15 +64,15 @@ ion-list-header {
 	text-transform: uppercase;
 }
 ion-item {
-	--min-height: 68px;
-	--border-radius: 18px;
+	--min-height: 56px;
+	--border-radius: 10px;
 	--border-width: 0;
 	--inner-border-width: 0;
 	--padding-start: 18px;
 	--background: var(--admin-surface);
 	--color: var(--ion-text-color);
 	border: 1px solid var(--admin-edge);
-	border-radius: 18px;
+	border-radius: 10px;
 	box-shadow: var(--admin-raised-small);
 	font-size: 0.9375rem;
 	transition: box-shadow 160ms ease;
@@ -91,12 +91,12 @@ ion-item ion-icon[slot='start'] {
 	margin-inline-end: 16px;
 }
 .daily-tasks ion-item {
-	--min-height: 80px;
+	--min-height: 48px;
 	font-weight: 600;
 }
 #checkInNav,
 #searchNav {
-	--min-height: 104px;
+	--min-height: 72px;
 	font-size: 1.0625rem;
 	box-shadow: var(--admin-raised);
 }
@@ -106,8 +106,8 @@ ion-item ion-icon[slot='start'] {
 }
 #checkInNav ion-icon[slot='start'],
 #searchNav ion-icon[slot='start'] {
-	padding: 14px;
-	border-radius: 18px;
+	padding: 8px;
+	border-radius: 10px;
 	box-shadow: var(--admin-inset);
 	color: var(--admin-accent);
 	font-size: 28px;
@@ -132,21 +132,25 @@ ion-item ion-icon[slot='start'] {
 @media (max-width: 599px) {
 	.home-intro {
 		align-items: flex-start;
-		flex-direction: column;
-		gap: 24px;
+		flex-direction: row;
+		gap: 12px;
 		padding-top: 16px;
 	}
 	.welcome-symbol {
 		flex-basis: auto;
-		width: 64px;
+		width: 48px;
 		height: 64px;
-		border-radius: 20px;
+		border-radius: 12px;
 	}
 	.welcome-symbol ion-icon {
 		font-size: 28px;
 	}
 	#checkInNav,
 	#searchNav {
-		--min-height: 92px;
+		--min-height: 68px;
 	}
+}
+
+:host ion-list {
+	background: transparent;
 }

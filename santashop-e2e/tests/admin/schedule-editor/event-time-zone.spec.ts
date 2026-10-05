@@ -31,6 +31,7 @@ test.describe('schedule editor outside Denver', () => {
 		await signInAdminViaUi(page, account);
 		await navigateToScheduleEditorViaLanding(page);
 		const row = page.locator('#scheduleRow-denver-slot');
+		await row.locator('.slot-editor > summary').click();
 		await expect(row).toContainText('10:00 AM – 11:00 AM');
 		await expect(page.locator('#slotDate-denver-slot input')).toHaveValue(
 			e2eDate(12, 12),
@@ -41,6 +42,7 @@ test.describe('schedule editor outside Denver', () => {
 			'Updated schedule time slot.',
 		);
 		await page.reload();
+		await row.locator('.slot-editor > summary').click();
 		await expect(page.locator('#slotDate-denver-slot input')).toHaveValue(
 			e2eDate(12, 13),
 		);

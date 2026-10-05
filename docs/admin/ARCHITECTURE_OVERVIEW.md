@@ -28,7 +28,8 @@ Duplicate check-in protection is enforced in server transactions.
 ## Presentation
 
 The admin uses neutral surfaces, restrained red actions, and visible borders in
-`src/theme/variables.scss`. Form fields and navigation controls use flat surfaces.
+`src/theme/variables.scss`. Form fields use transparent backgrounds with visible
+borders and focus outlines. Navigation controls use flat surfaces.
 Large cards use a subtle shadow. Reuse the surface, border, and accent tokens
 in page styles so light and dark modes share the same layout.
 

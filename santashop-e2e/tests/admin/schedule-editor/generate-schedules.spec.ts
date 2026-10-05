@@ -30,6 +30,7 @@ test.describe('admin schedule editor - generate schedules', () => {
 		// Act
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
+		await page.locator('.generator-tools > summary').click();
 		await expect(page.locator('#generateSchedulesButton')).toBeVisible();
 		await fillIonicInput(page, '#generateStartDate', e2eDate(12, 12));
 		await fillIonicInput(page, '#generateEndDate', e2eDate(12, 12));
@@ -76,6 +77,7 @@ test.describe('admin schedule editor - generate schedules', () => {
 		const adminAccount = defaultOwnerAccount();
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
+		await page.locator('.generator-tools > summary').click();
 		await fillIonicInput(page, '#generateStartDate', e2eDate(12, 12));
 		await fillIonicInput(page, '#generateEndDate', e2eDate(12, 12));
 		await fillIonicInput(page, '#generateCapacity', '20');

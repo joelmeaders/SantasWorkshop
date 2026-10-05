@@ -250,7 +250,7 @@ ion-toggle::part(label) {
 	overflow-wrap: anywhere;
 }
 
-/* Form rows use the field surface, without Ionic's list separators. */
+/* Form rows blend into their section, without Ionic's list separators. */
 form ion-item,
 .form-list ion-item,
 ion-item:has(
@@ -263,6 +263,7 @@ ion-item:has(
 	ion-range,
 	ion-datetime
 ) {
+	--background: transparent;
 	--inner-border-width: 0;
 	--border-width: 0;
 	--highlight-height: 0;
@@ -285,7 +286,7 @@ ion-item:has(> ion-select) {
 ion-input,
 ion-textarea,
 ion-select {
-	--background: var(--admin-surface);
+	--background: transparent;
 	--padding-start: 16px;
 	--padding-end: 16px;
 	border: 1px solid var(--admin-border);
@@ -315,7 +316,7 @@ ion-item ion-textarea {
 }
 ion-select {
 	--background: transparent;
-	background: var(--admin-surface);
+	background: transparent;
 	padding-inline: 16px;
 }
 ion-input.has-focus,

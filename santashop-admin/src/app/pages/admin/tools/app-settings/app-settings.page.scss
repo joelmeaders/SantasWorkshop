@@ -4,10 +4,8 @@ form {
 	align-items: start;
 }
 form > ion-list {
-	border: 1px solid var(--admin-border);
-	border-radius: 12px;
 	padding: 8px;
-	background: var(--admin-surface);
+	background: transparent;
 }
 form > ion-button {
 	justify-self: start;

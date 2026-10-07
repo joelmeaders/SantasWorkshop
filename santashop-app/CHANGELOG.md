@@ -4,6 +4,10 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Hide appointments whose start time has arrived in the registration and rescheduling pickers, including while a picker stays open.
+
 ## [2026.09.0-beta.9] - 2026-10-02
 
 ### Changed

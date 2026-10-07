@@ -27,13 +27,22 @@ Duplicate check-in protection is enforced in server transactions.
 
 ## Presentation
 
-The admin uses a neumorphic surface system in `src/theme/variables.scss`.
-Cards and action controls use paired light and dark shadows. Form fields and
-selected navigation controls use inset shadows. Reuse the `--admin-raised`,
-`--admin-raised-small`, and `--admin-inset` tokens in page styles.
+The admin uses neutral surfaces, restrained red actions, and visible borders in
+`src/theme/variables.scss`. Form fields use transparent backgrounds with visible
+borders and focus outlines. Navigation controls use flat surfaces.
+Large cards use a subtle shadow. Reuse the surface, border, and accent tokens
+in page styles so light and dark modes share the same layout.
 
-Shadows supplement visible text, borders, focus outlines, and selected-state
-indicators. Keep controls readable in light, dark, and forced-color modes.
+Schedule generation and per-slot editing use native details controls. The closed
+view shows the time, reservation count, and availability. Opening a row reveals
+its date, hour, capacity, enabled state, save action, and delete confirmation.
+Capacity and enabled changes retain their existing immediate-save behavior.
+Date and hour drafts still require Save time slot.
+
+Registration forms pair name and contact fields on wider screens. Referral,
+children, appointment, and confirmation sections span the form width. Reports
+keep the program year and refresh action together, and tables support horizontal
+scrolling. Keep controls readable in light, dark, and forced-color modes.
 The device-local appearance preference supports System, Light, and Dark.
 Language and appearance changes preserve the current form and route.
 

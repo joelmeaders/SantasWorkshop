@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Use compact bordered surfaces across admin screens, with responsive registration forms, report toolbars, settings groups, and template editor columns.
+- Blend field backgrounds into their section and remove outer settings containers.
+- Collapse schedule generation and per-slot editing until needed, retaining existing save and confirmation behavior.
+- Clarify the coupon handoff and next-shopper action, place cancellation after review content, and compact the appointment picker.
+
 ## [2026.09.0-beta.9] - 2026-10-02
 
 ### Changed

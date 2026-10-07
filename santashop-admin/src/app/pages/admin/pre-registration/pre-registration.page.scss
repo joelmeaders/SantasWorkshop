@@ -34,7 +34,7 @@ ion-item > span > ion-note {
 }
 
 .margin-top {
-	margin-top: 32px;
+	margin-top: 16px;
 }
 
 .review-instructions {
@@ -42,13 +42,13 @@ ion-item > span > ion-note {
 }
 
 .success-divider {
-	margin-top: 32px;
+	margin-top: 16px;
 }
 
 .confirm-button {
 	margin-top: 12px;
 	margin-bottom: 32px;
-	--border-radius: 18px;
+	--border-radius: 10px;
 }
 
 ion-badge {
@@ -60,4 +60,23 @@ ion-badge {
 	margin-inline-start: 15px;
 	top: 4px;
 	position: relative;
+}
+
+@media (min-width: 768px) {
+	.registration-fields {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0 12px;
+	}
+	.registration-fields > ion-item-divider,
+	.registration-fields > ion-note {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (min-width: 768px) {
+	.registration-fields > :not(ion-item),
+	.registration-fields > ion-item:not(:has(> ion-input)) {
+		grid-column: 1 / -1;
+	}
 }

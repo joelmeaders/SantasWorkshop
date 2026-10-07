@@ -1,17 +1,18 @@
 :root {
 	--ion-font-family:
 		-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-	--admin-surface: #e9e9e6;
+	--admin-surface: #ffffff;
+	--admin-success-soft: #e6eee7;
 	--admin-surface-muted: #e1e2de;
 	--admin-border: #c6c8c2;
 	--admin-muted: #565b57;
 	--admin-shadow-dark: #c6c8c3;
 	--admin-shadow-light: #ffffff;
-	--admin-edge: #f5f5f1;
+	--admin-edge: #d8dad5;
 	--admin-accent: #a52336;
 	--admin-accent-soft: #eee0e1;
-	--ion-background-color: #e9e9e6;
-	--ion-background-color-rgb: 233, 233, 230;
+	--ion-background-color: #f5f5f2;
+	--ion-background-color-rgb: 245, 245, 242;
 	--ion-text-color: #242321;
 	--ion-text-color-rgb: 36, 35, 33;
 	--ion-color-primary: #a52336;
@@ -65,6 +66,7 @@
 :root[data-admin-theme='dark'],
 body.dark {
 	--admin-surface: #292d30;
+	--admin-success-soft: #23392d;
 	--admin-surface-muted: #24282b;
 	--admin-border: #51585c;
 	--admin-muted: #bfc6c7;
@@ -120,16 +122,10 @@ body.dark {
 
 :root,
 body.dark {
-	/* Shared surface depth keeps light and dark controls on the same material. */
-	--admin-raised:
-		8px 8px 18px var(--admin-shadow-dark),
-		-8px -8px 18px var(--admin-shadow-light);
-	--admin-raised-small:
-		4px 4px 9px var(--admin-shadow-dark),
-		-4px -4px 9px var(--admin-shadow-light);
-	--admin-inset:
-		inset 3px 3px 7px var(--admin-shadow-dark),
-		inset -3px -3px 7px var(--admin-shadow-light);
+	/* Borders carry hierarchy. Only large surfaces use a subtle shadow. */
+	--admin-raised: 0 2px 8px rgb(0 0 0 / 5%);
+	--admin-raised-small: none;
+	--admin-inset: none;
 	--ion-item-background: var(--admin-surface);
 	--ion-card-background: var(--admin-surface);
 	--ion-toolbar-background: var(--admin-surface);

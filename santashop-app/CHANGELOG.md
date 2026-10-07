@@ -4,6 +4,12 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.10] - 2026-10-07
+
+### Changed
+
+- Advance the customer application to `2026.09.0-beta.10`.
+
 ### Fixed
 
 - Hide appointments whose start time has arrived in the registration and rescheduling pickers, including while a picker stays open.

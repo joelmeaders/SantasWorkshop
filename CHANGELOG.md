@@ -7,6 +7,17 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.10] - 2026-10-07
+
+### Changed
+
+- Advance the workspace and customer application to `2026.09.0-beta.10`.
+- Require explicit user approval for every merge and a version bump with matching changelog entries in every PR.
+
+### Fixed
+
+- Hide expired appointment choices in the registration and rescheduling pickers, including while a picker stays open, and reject selections whose start time has arrived.
+
 ## [2026.09.0-beta.9] - 2026-10-02
 
 ### Changed

@@ -35,6 +35,8 @@ This repository is a `pnpm` monorepo for Santa's Workshop applications and Fireb
 - The user has approved acceptance of the application's terms for labeled QA signup accounts in the deployed test project. This does not authorize unrelated agreements or override a browser tool's required user handoff.
 - This standing authorization does not waive the production data and seasonal restrictions below or authorize unrelated destructive actions.
 
+- Every PR must advance the workspace version in root `package.json` and add a matching dated entry to root `CHANGELOG.md`, including documentation-only PRs. Also advance the version and update the changelog for each affected application or versioned package. Follow the current release series (for example, `2026.09.0-beta.9` to `2026.09.0-beta.10`); use a larger version increment when the change requires it. Keep the version and changelog entries together in the PR, describing its final scope. Further commits to the same PR do not require another increment. Do not change unrelated application versions or fixed Storybook release fixtures solely to match the workspace version. Verify these updates before requesting merge approval.
+
 - Install dependencies with `pnpm install`.
 - Dependency versions are centralized in [`pnpm-workspace.yaml`](pnpm-workspace.yaml) via `catalog:` references. When changing package versions, update the catalog instead of leaf `package.json` files.
 - `santashop-app` and `santashop-admin` depend on fresh builds of `@santashop/models` and `@santashop/core`. Use the root build scripts in [`package.json`](package.json) or run the package `prebuild` script before app/admin builds.

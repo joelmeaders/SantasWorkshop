@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import en from '../../../../../assets/i18n/en.json';
 import es from '../../../../../assets/i18n/es.json';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createModalControllerMock } from '../../../../../test-helpers';
 import { ChangeDatetimeModalComponent } from './change-datetime-modal.component';
 
@@ -25,6 +25,9 @@ describe('ChangeDatetimeModalComponent', () => {
 		}) as DateTimeSlot;
 
 	beforeEach(async (): Promise<void> => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			new Date('2026-11-01T00:00:00Z').valueOf(),
+		);
 		slots.next([]);
 		modalController = createModalControllerMock() as unknown as {
 			dismiss: ReturnType<typeof vi.fn>;
@@ -48,6 +51,34 @@ describe('ChangeDatetimeModalComponent', () => {
 		);
 		fixture.componentRef.setInput('availableSlots', slots.asObservable());
 		await fixture.whenStable();
+	});
+
+	afterEach((): void => {
+		vi.restoreAllMocks();
+	});
+
+	it('hides past and starting-now alternatives and prevents their selection', async (): Promise<void> => {
+		const now = Date.now();
+		const expired = slot('expired', new Date(now - 1));
+		const starting = slot('starting', new Date(now));
+		slots.next([expired, starting, slot('future', new Date(now + 1000))]);
+		await fixture.whenStable();
+		expect(component.filteredSlots().map((value) => value.id)).toEqual([
+			'future',
+		]);
+		expect(
+			fixture.nativeElement.querySelector(
+				'[data-change-slot-id="expired"]',
+			),
+		).toBeNull();
+		expect(
+			fixture.nativeElement.querySelector(
+				'[data-change-slot-id="starting"]',
+			),
+		).toBeNull();
+		await component.selectSlot(expired);
+		await component.selectSlot(starting);
+		expect(modalController.dismiss).not.toHaveBeenCalled();
 	});
 
 	it.each(['en', 'es'])(

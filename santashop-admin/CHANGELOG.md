@@ -2,11 +2,11 @@
 
 ## [Unreleased]
 
-## [2026.09.0-beta.10] - 2026-10-12
+## [2026.09.0-beta.11] - 2026-10-12
 
 ### Changed
 
-- Advance the admin application to `2026.09.0-beta.10`.
+- Advance the admin application to `2026.09.0-beta.11`.
 - Use compact bordered surfaces across admin screens, with responsive registration forms, report toolbars, settings groups, and template editor columns.
 - Blend field backgrounds into their section and remove outer settings containers.
 - Collapse schedule generation and per-slot editing until needed, retaining existing save and confirmation behavior.

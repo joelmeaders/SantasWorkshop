@@ -20,7 +20,7 @@ For test cleanup, identify records by the run's recorded UIDs and paths, not a b
 
 Follow the browser tool's confirmation rules for terms, permissions, credentials, and other sensitive actions. Repository permission does not override a required tool confirmation or user handoff.
 
-On September 7, 2026, the user gave standing approval to accept the application's terms for labeled QA signup accounts in `santas-workshop-test` and to continue authorized work through PR completion. Do not ask again for this same approval. Use administrator merge when needed to bypass a PR review requirement, if the account permits it. Record validation and any bypassed gate; do not impersonate a reviewer or weaken branch protection. Production writes and destructive actions remain subject to the explicit boundaries above.
+The user gave standing approval to accept the application's terms for labeled QA signup accounts in `santas-workshop-test` and to continue authorized work through validation and PR preparation. Do not ask again for the same approval unless required by the browser tool. On October 7, 2026, the user revoked automatic merge authorization: every merge requires the user's explicit approval; do not enable automatic merging. Record validation and any bypassed gate; do not impersonate a reviewer or weaken branch protection. Production writes and destructive actions remain subject to the explicit boundaries above.
 
 ## 2. Establish the target and baseline
 

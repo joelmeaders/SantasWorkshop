@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	provideTranslateServiceMock,
@@ -11,6 +11,9 @@ describe('ScheduleCardComponent', () => {
 	let fixture: ComponentFixture<ScheduleCardComponent>;
 
 	beforeEach(async () => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			new Date('2025-11-01T00:00:00Z').valueOf(),
+		);
 		await TestBed.configureTestingModule({
 			imports: [ScheduleCardComponent],
 			providers: [
@@ -24,8 +27,72 @@ describe('ScheduleCardComponent', () => {
 		await fixture.whenStable();
 	});
 
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it('hides expired and starting-now slots even with ten spots remaining', async () => {
+		const now = Date.now();
+		fixture.componentRef.setInput('canChooseDateTime', true);
+		fixture.componentRef.setInput(
+			'slots',
+			[-1, 0, 1].map((offset) => ({
+				id: String(offset),
+				programYear: 2025,
+				enabled: true,
+				dateTime: new Date(now + offset),
+				maxSlots: 10,
+				slotsReserved: 0,
+			})),
+		);
+		await fixture.whenStable();
+		expect(component.availableSlots().map((slot) => slot.id)).toEqual([
+			'1',
+		]);
+		expect(
+			fixture.nativeElement.querySelectorAll('[data-select-slot-id]'),
+		).toHaveLength(1);
+		const selected = vi.fn();
+		component.selectRequested.subscribe(selected);
+		component.select({
+			id: 'expired',
+			programYear: 2025,
+			enabled: true,
+			dateTime: new Date(now),
+			maxSlots: 10,
+		});
+		expect(selected).not.toHaveBeenCalled();
+	});
+
 	it('should create', () => {
 		expect(component).toBeTruthy();
+	});
+
+	it('removes slots when their start time arrives while the picker stays open', async () => {
+		const start = Date.now() + 1000;
+		fixture.componentRef.setInput('canChooseDateTime', true);
+		fixture.componentRef.setInput('slots', [
+			{
+				id: 'expiring',
+				programYear: 2025,
+				enabled: true,
+				dateTime: new Date(start),
+				maxSlots: 10,
+			},
+		]);
+		component.open();
+		await fixture.whenStable();
+		expect(component.availableSlots()).toHaveLength(1);
+		vi.mocked(Date.now).mockReturnValue(start);
+		await vi.waitFor(() => expect(component.availableSlots()).toEqual([]), {
+			timeout: 2500,
+		});
+		await fixture.whenStable();
+		expect(
+			fixture.nativeElement.querySelector(
+				'[data-select-slot-id="expiring"]',
+			),
+		).toBeNull();
 	});
 
 	it('shows a loading status until appointment availability arrives', async () => {

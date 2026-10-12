@@ -8,6 +8,8 @@ import {
 	output,
 	signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { interval, map } from 'rxjs';
 import type { DateTimeSlot } from '@santashop/models';
 import { getZonedDateKey } from '@santashop/models';
 import { TimeSlotPipe } from '@santashop/core';
@@ -69,6 +71,12 @@ interface ScheduleDay {
 })
 export class ScheduleCardComponent {
 	private readonly translate = inject(TranslateService);
+	private readonly now = toSignal(
+		interval(1000).pipe(map(() => Date.now())),
+		{
+			initialValue: Date.now(),
+		},
+	);
 	public readonly dateTimeSlot = input<DateTimeSlot | null | undefined>();
 	public readonly slots = input<DateTimeSlot[] | null | undefined>();
 	public readonly canChooseDateTime = input(false);
@@ -79,7 +87,10 @@ export class ScheduleCardComponent {
 	public readonly slotsLoading = computed(() => this.slots() == null);
 	public readonly availableSlots = computed(() =>
 		(this.slots() ?? []).filter(
-			(slot) => slot.enabled && (slot.slotsReserved ?? 0) < slot.maxSlots,
+			(slot) =>
+				slot.enabled &&
+				slot.dateTime.valueOf() > this.now() &&
+				(slot.slotsReserved ?? 0) < slot.maxSlots,
 		),
 	);
 	public readonly availableSlotDays = computed<ScheduleDay[]>(() => {
@@ -119,7 +130,12 @@ export class ScheduleCardComponent {
 	}
 
 	public select(slot: DateTimeSlot): void {
-		if (!slot.enabled || this.busy()) return;
+		if (
+			!slot.enabled ||
+			slot.dateTime.valueOf() <= Date.now() ||
+			this.busy()
+		)
+			return;
 		this.selectRequested.emit(slot);
 		this.expanded.set(false);
 	}

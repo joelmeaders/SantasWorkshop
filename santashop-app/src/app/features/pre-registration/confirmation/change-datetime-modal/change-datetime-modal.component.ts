@@ -29,7 +29,7 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslateModule } from '@ngx-translate/core';
 import type { DateTimeSlot } from '@santashop/models';
-import { Observable, of } from 'rxjs';
+import { Observable, interval, of } from 'rxjs';
 import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 import { TimeSlotPipe, timestampToDate } from '@santashop/core';
 import { LocalizedDatePipe } from '../../../../shared/pipes/localized-date.pipe';
@@ -88,6 +88,12 @@ const toEventDayKey = (date: Date): number => {
 })
 export class ChangeDatetimeModalComponent {
 	private readonly modalController = inject(ModalController);
+	private readonly now = toSignal(
+		interval(1000).pipe(map(() => Date.now())),
+		{
+			initialValue: Date.now(),
+		},
+	);
 	private readonly currentSlotInput = signal<DateTimeSlot | undefined>(
 		undefined,
 	);
@@ -138,7 +144,10 @@ export class ChangeDatetimeModalComponent {
 
 	public readonly filteredSlots = computed(() =>
 		(this.availableSlotsState() ?? []).filter(
-			(slot) => slot.enabled && (slot.slotsReserved ?? 0) < slot.maxSlots,
+			(slot) =>
+				slot.enabled &&
+				slot.dateTime.valueOf() > this.now() &&
+				(slot.slotsReserved ?? 0) < slot.maxSlots,
 		),
 	);
 	public readonly hasAlternatives = computed(() =>
@@ -161,6 +170,7 @@ export class ChangeDatetimeModalComponent {
 	}
 
 	public async selectSlot(slot: DateTimeSlot): Promise<void> {
+		if (!slot.enabled || slot.dateTime.valueOf() <= Date.now()) return;
 		await this.modalController.dismiss(slot, 'confirm');
 	}
 

@@ -15,19 +15,13 @@
 <ion-content>
 	<div class="ion-padding">
 		@if (currentSlot) {
-			<ion-card>
-				<ion-card-header>
-					<ion-card-title color="primary">
-						{{ 'Current Date/Time' | adminText }}
-					</ion-card-title>
-				</ion-card-header>
-				<ion-card-content class="ion-text-center">
-					<ion-item lines="none">
-						{{ currentSlot.dateTime | adminDate: 'MMMM d' }},
-						{{ currentSlot.dateTime | adminTimeSlot }}
-					</ion-item>
-				</ion-card-content>
-			</ion-card>
+			<section class="current-appointment">
+				<h2>{{ 'Current Date/Time' | adminText }}</h2>
+				<p>
+					{{ currentSlot.dateTime | adminDate: 'MMMM d' }},
+					{{ currentSlot.dateTime | adminTimeSlot }}
+				</p>
+			</section>
 		}
 
 		<ion-list-header class="ion-padding-top">
@@ -36,9 +30,9 @@
 
 		@let days = availableDays();
 		@if (days.length) {
-			<ion-accordion-group color="light">
+			<ion-accordion-group color="light" [value]="days[0]?.toString()">
 				@for (day of days; track day) {
-					<ion-accordion>
+					<ion-accordion [value]="day.toString()">
 						<ion-item slot="header" color="light">
 							<ion-label>
 								{{ day | adminDate: 'EEEE, MMMM d' }}
@@ -47,7 +41,7 @@
 						<ion-list
 							slot="content"
 							color="light"
-							class="ion-no-padding"
+							class="time-options ion-no-padding"
 						>
 							@for (
 								slot of availableSlotsByDay().get(day) ?? [];
@@ -62,7 +56,7 @@
 								>
 									<ion-label>
 										{{ slot.dateTime | adminTimeSlot }}
-										<br />
+
 										<ion-text color="primary">
 											{{ spotsRemaining(slot) }}
 										</ion-text>

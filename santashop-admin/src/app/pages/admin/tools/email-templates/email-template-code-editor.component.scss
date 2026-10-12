@@ -3,12 +3,12 @@
 	border: 1px solid var(--ion-color-medium-shade);
 	border-radius: 12px;
 	overflow: hidden;
-	background: var(--ion-color-light);
+	background: transparent;
 }
 
 :host ::ng-deep .cm-editor {
 	height: 24rem;
-	background: var(--admin-surface);
+	background: transparent;
 }
 
 :host ::ng-deep .cm-activeLine {

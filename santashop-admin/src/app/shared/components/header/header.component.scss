@@ -19,7 +19,7 @@ ion-toolbar {
 }
 ion-buttons .preferences-trigger {
 	--background: var(--admin-surface);
-	--box-shadow: var(--admin-raised-small);
+	--box-shadow: none;
 	--border-radius: 12px;
 	--padding-start: 14px;
 	--padding-end: 14px;

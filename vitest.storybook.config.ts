@@ -17,22 +17,27 @@ export default defineConfig({
 		projects: [
 			{
 				extends: true,
-				// Prebundle admin dependencies before tests start. Discovering them
-				// during an app-to-admin switch reloads active browser test pages.
+				// Prebundle browser audit and fixture dependencies before tests start.
+				// Discovering them during a run reloads active test pages.
 				optimizeDeps: {
-					include: targets.includes('admin')
-						? [
-								'@codemirror/lang-html',
-								'@codemirror/language',
-								'@codemirror/state',
-								'@codemirror/view',
-								'@lezer/highlight',
-								'@zxing/ngx-scanner',
-								'chartjs-plugin-datalabels',
-								'codemirror',
-								'ng2-charts',
-							]
-						: [],
+					include: [
+						'@storybook/addon-a11y > axe-core',
+						'@angular/common/testing',
+						'firebase/storage',
+						...(targets.includes('admin')
+							? [
+									'@codemirror/lang-html',
+									'@codemirror/language',
+									'@codemirror/state',
+									'@codemirror/view',
+									'@lezer/highlight',
+									'@zxing/ngx-scanner',
+									'chartjs-plugin-datalabels',
+									'codemirror',
+									'ng2-charts',
+								]
+							: []),
+					],
 				},
 				plugins: [
 					storybookAngularVitest({

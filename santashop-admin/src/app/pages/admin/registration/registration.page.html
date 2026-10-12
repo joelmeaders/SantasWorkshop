@@ -7,16 +7,18 @@
 				<span>
 					<h2>{{ 'Instructions' | adminText }}</h2>
 					<ion-note>
-						{{
-							'Fill out all information below. Ensure children are validated
-            with documentation and information is entered correctly.'
-								| adminText
-						}}
+						{{ 'Fill out all information below. Ensure children are
+						validated with documentation and information is entered
+						correctly.' | adminText }}
 					</ion-note>
 				</span>
 			</ion-list-header>
 
-			<form [formGroup]="form" autocomplete="off">
+			<form
+				class="registration-fields"
+				[formGroup]="form"
+				autocomplete="off"
+			>
 				<ion-item-divider>
 					<ion-label>
 						{{ 'Parent / Guardian' | adminText }}
@@ -34,9 +36,9 @@
 						maxlength="20"
 					/>
 					@if (form.controls['firstName'].dirty) {
-						<ion-note color="danger" slot="error">
-							{{ 'Enter between 2-20 characters' | adminText }}
-						</ion-note>
+					<ion-note color="danger" slot="error">
+						{{ 'Enter between 2-20 characters' | adminText }}
+					</ion-note>
 					}
 				</ion-item>
 				<ion-item>
@@ -51,9 +53,9 @@
 						maxlength="25"
 					/>
 					@if (form.controls['lastName'].dirty) {
-						<ion-note color="danger" slot="error">
-							{{ 'Enter between 2-25 characters' | adminText }}
-						</ion-note>
+					<ion-note color="danger" slot="error">
+						{{ 'Enter between 2-25 characters' | adminText }}
+					</ion-note>
 					}
 				</ion-item>
 				<ion-item>
@@ -66,9 +68,9 @@
 						placeholder="{{ 'required' | adminText }}"
 					/>
 					@if (form.controls['lastName'].dirty) {
-						<ion-note color="danger" slot="error">
-							{{ 'Must be a valid email address' | adminText }}
-						</ion-note>
+					<ion-note color="danger" slot="error">
+						{{ 'Must be a valid email address' | adminText }}
+					</ion-note>
 					}
 				</ion-item>
 				<ion-item>
@@ -84,17 +86,15 @@
 						maxlength="5"
 					/>
 					@if (form.controls['lastName'].dirty) {
-						<ion-note color="danger" slot="error">
-							{{ 'Enter 5 digit zip code' | adminText }}
-						</ion-note>
+					<ion-note color="danger" slot="error">
+						{{ 'Enter 5 digit zip code' | adminText }}
+					</ion-note>
 					}
 				</ion-item>
 				<ion-item>
 					<ion-label class="ion-text-wrap">
-						{{
-							'Would you like to get occasional emails about our events &
-            services' | adminText
-						}}
+						{{ 'Would you like to get occasional emails about our
+						events & services' | adminText }}
 					</ion-label>
 					<ion-checkbox
 						slot="end"
@@ -122,23 +122,26 @@
 					</ion-button>
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
-					<ion-label> {{ form.controls['referral'].value ? chosenReferrer() : ('None Selected' | adminText) }} </ion-label>
+					<ion-label>
+						{{ form.controls['referral'].value ? chosenReferrer() :
+						('None Selected' | adminText) }}
+					</ion-label>
 				</ion-item>
 				@if (!form.controls['referral'].value) {
-					<ion-note color="danger" slot="error" class="error-note">
-						{{ 'Choose a referring agency' | adminText }}
-					</ion-note>
+				<ion-note color="danger" slot="error" class="error-note">
+					{{ 'Choose a referring agency' | adminText }}
+				</ion-note>
 				}
 			</form>
 
 			<div class="margin-top">
 				@if (children(); as children) {
-					<admin-manage-children
-						[children]="children"
-						(adddedChild)="addChild($event)"
-						(editedChild)="editChild($event)"
-						(removedChild)="removeChild($event)"
-					/>
+				<admin-manage-children
+					[children]="children"
+					(adddedChild)="addChild($event)"
+					(editedChild)="editChild($event)"
+					(removedChild)="removeChild($event)"
+				/>
 				}
 			</div>
 

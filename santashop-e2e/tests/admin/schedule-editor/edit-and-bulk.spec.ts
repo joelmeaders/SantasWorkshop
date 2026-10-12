@@ -44,6 +44,9 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 		await navigateToScheduleEditorViaLanding(page);
 		await clickIonCheckbox(page, '#selectSchedule-slot-1');
 		await clickIonCheckbox(page, '#selectSchedule-slot-2');
+		await page
+			.locator('#scheduleRow-slot-1 .slot-editor > summary')
+			.click();
 		await fillIonicInput(page, '#slotCapacity-slot-1', '12');
 
 		// Assert
@@ -91,6 +94,9 @@ test.describe('admin schedule editor - edit and bulk update', () => {
 		// Act
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
+		await page
+			.locator('#scheduleRow-slot-1 .slot-editor > summary')
+			.click();
 		await fillIonicInput(page, '#slotDate-slot-1', e2eDate(12, 13));
 		await page.click('#saveTimeSlot-slot-1');
 

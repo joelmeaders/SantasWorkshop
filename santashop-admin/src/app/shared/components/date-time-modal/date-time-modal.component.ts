@@ -28,8 +28,6 @@ import {
 	IonText,
 	IonCard,
 	IonCardHeader,
-	IonCardContent,
-	IonCardTitle,
 	IonNote,
 } from '@ionic/angular/standalone';
 import { Observable, map, of, switchMap, distinctUntilChanged } from 'rxjs';
@@ -60,8 +58,6 @@ import { createZonedDate, getZonedDateKey } from '@santashop/models';
 		IonText,
 		IonCard,
 		IonCardHeader,
-		IonCardContent,
-		IonCardTitle,
 		IonNote,
 	],
 })

@@ -111,13 +111,16 @@ import {
 		}
 		.table-scroll {
 			overflow-x: auto;
+			border: 1px solid var(--admin-border);
+			border-radius: 10px;
+			background: var(--admin-surface);
 		}
 		table {
 			border-collapse: collapse;
 			width: 100%;
 		}
 		caption {
-			font-size: 1.15rem;
+			font-size: 1rem;
 			font-weight: 600;
 			text-align: start;
 			padding: 0.75rem;

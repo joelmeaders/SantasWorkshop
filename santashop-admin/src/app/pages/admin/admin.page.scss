@@ -11,11 +11,11 @@
 }
 ion-tab-bar {
 	max-width: 600px;
-	margin: 12px auto;
+	margin: 8px auto;
 	padding: 6px;
 	gap: 8px;
 	border: 1px solid var(--admin-edge);
-	border-radius: 24px;
+	border-radius: 12px;
 	box-shadow: var(--admin-raised-small);
 }
 ion-footer {
@@ -33,7 +33,7 @@ ion-tab-button {
 	--color: var(--admin-muted);
 	--background: var(--admin-surface);
 	min-height: 56px;
-	border-radius: 18px;
+	border-radius: 8px;
 }
 ion-tab-button.tab-selected {
 	--color: var(--admin-accent);

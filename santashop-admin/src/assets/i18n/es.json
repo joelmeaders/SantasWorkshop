@@ -877,5 +877,10 @@
 	"Waiting list settings could not be loaded. Try again.": "No se pudo cargar la configuración. Inténtalo de nuevo.",
 	"Waiting list settings published.": "Se publicó la configuración de la lista de espera.",
 	"Waiting-list email sending is disabled.": "El envío de correos de la lista de espera está desactivado.",
-	"Waiting-list templates are too large. Use smaller templates.": "Las plantillas de la lista de espera son demasiado grandes. Usa plantillas más pequeñas."
+	"Waiting-list templates are too large. Use smaller templates.": "Las plantillas de la lista de espera son demasiado grandes. Usa plantillas más pequeñas.",
+	"Check-in complete": "Registro de entrada completo",
+	"Next shopper": "Siguiente comprador",
+	"Schedule and capacity": "Horarios y capacidad",
+	"Edit date / time": "Editar fecha / hora",
+	"Edit schedule": "Editar horario"
 }

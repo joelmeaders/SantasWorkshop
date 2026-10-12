@@ -7,27 +7,30 @@
 				<span>
 					<h2>{{ 'Instructions' | adminText }}</h2>
 					<ion-note>
-						{{
-							"Complete the required fields below to register the customer.
-            Submission reserves the appointment and queues a confirmation email
-            with the customer's ticket." | adminText
-						}}
+						{{ "Complete the required fields below to register the
+						customer. Submission reserves the appointment and queues
+						a confirmation email with the customer's ticket." |
+						adminText }}
 					</ion-note>
 					<p>
 						<ion-note>
-							{{
-								'The service creates an account for the customer. If the
-              customer wants to log into their account they need to reset the
-              password.' | adminText
-							}}
+							{{ 'The service creates an account for the customer.
+							If the customer wants to log into their account they
+							need to reset the password.' | adminText }}
 						</ion-note>
 					</p>
 				</span>
 			</ion-list-header>
 
-			<form [formGroup]="form" autocomplete="off" novalidate>
+			<form
+				class="registration-fields"
+				[formGroup]="form"
+				autocomplete="off"
+				novalidate
+			>
 				<ion-item
-					><ion-select labelPlacement="stacked"
+					><ion-select
+						labelPlacement="stacked"
 						okText="{{ 'OK' | adminText }}"
 						cancelText="{{ 'Cancel' | adminText }}"
 						label="{{ 'Email language' | adminText }}"
@@ -104,10 +107,8 @@
 				<ion-item>
 					<ion-checkbox formControlName="newsletter">
 						<span class="ion-text-wrap">
-							{{
-								'Would you like to get occasional emails about our events &
-              services?' | adminText
-							}}
+							{{ 'Would you like to get occasional emails about
+							our events & services?' | adminText }}
 						</span>
 					</ion-checkbox>
 				</ion-item>
@@ -129,55 +130,56 @@
 				</ion-item-divider>
 				<ion-item (click)="chooseReferral()" button detail>
 					<span>
-						<ion-label> {{ form.controls['referredBy'].value ? chosenReferrer() : ('None Selected' | adminText) }} </ion-label>
+						<ion-label>
+							{{ form.controls['referredBy'].value ?
+							chosenReferrer() : ('None Selected' | adminText) }}
+						</ion-label>
 						@if (!form.controls['referredBy'].value) {
-							<ion-note
-								color="danger"
-								slot="error"
-								class="error-note"
-							>
-								{{ 'Choose a referring agency' | adminText }}
-							</ion-note>
+						<ion-note
+							color="danger"
+							slot="error"
+							class="error-note"
+						>
+							{{ 'Choose a referring agency' | adminText }}
+						</ion-note>
 						}
 					</span>
 				</ion-item>
 				<div class="margin-top">
 					@if (children(); as children) {
-						<admin-manage-children
-							[children]="children"
-							(adddedChild)="addChild($event)"
-							(editedChild)="editChild($event)"
-							(removedChild)="removeChild($event)"
-						/>
+					<admin-manage-children
+						[children]="children"
+						(adddedChild)="addChild($event)"
+						(editedChild)="editChild($event)"
+						(removedChild)="removeChild($event)"
+					/>
 					}
 				</div>
 
 				<ion-item-divider class="margin-top">
 					<ion-label> {{ 'Reservation' | adminText }} </ion-label>
 					@if (!form.controls['dateTimeSlot'].value) {
-						<ion-text color="danger" class="error-note" slot="end">
-							{{ 'Pick a date and time' | adminText }}
-						</ion-text>
+					<ion-text color="danger" class="error-note" slot="end">
+						{{ 'Pick a date and time' | adminText }}
+					</ion-text>
 					}
 				</ion-item-divider>
 				@if (availableSlots(); as slots) {
-					<ion-item>
-						<ion-select labelPlacement="stacked"
-							okText="{{ 'OK' | adminText }}"
-							cancelText="{{ 'Cancel' | adminText }}"
-							label="{{ 'Available Days/Times' | adminText }}"
-							formControlName="dateTimeSlot"
-						>
-							@for (
-								slot of slots;
-								track slotIndex($index, slot)
-							) {
-								<ion-select-option [value]="slot">
-									{{ slot.dateTime | adminDate: 'short' }}
-								</ion-select-option>
-							}
-						</ion-select>
-					</ion-item>
+				<ion-item>
+					<ion-select
+						labelPlacement="stacked"
+						okText="{{ 'OK' | adminText }}"
+						cancelText="{{ 'Cancel' | adminText }}"
+						label="{{ 'Available Days/Times' | adminText }}"
+						formControlName="dateTimeSlot"
+					>
+						@for ( slot of slots; track slotIndex($index, slot) ) {
+						<ion-select-option [value]="slot">
+							{{ slot.dateTime | adminDate: 'short' }}
+						</ion-select-option>
+						}
+					</ion-select>
+				</ion-item>
 				}
 			</form>
 

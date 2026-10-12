@@ -1,21 +1,45 @@
-h1 {
-	margin-top: 32px;
-	font-size: 2rem;
-	font-weight: 700;
-	text-align: center;
-}
-
-h2,
-h3 {
-	text-align: center;
-}
-
-.ticket-count {
+.confirmation-receipt {
+	max-width: 32rem;
 	margin: auto;
+	padding: 32px 8px;
+}
+h1 {
+	margin: 0 0 24px;
+	font-size: 1.25rem;
+}
+.ticket-count {
+	display: grid;
+	place-items: center;
 	width: 160px;
-	font-size: 6em;
+	min-height: 160px;
+	margin: auto;
+	border-radius: 24px;
+	background: var(--admin-success-soft);
+	color: var(--ion-color-success);
+	font-size: 5.5rem;
 	font-weight: 700;
-	text-align: center;
-	background-color: var(--ion-color-success);
-	color: var(--ion-color-success-contrast);
+	line-height: 1;
+}
+h2 {
+	margin: 24px 0 16px;
+	font-size: clamp(1.35rem, 4vw, 1.65rem);
+}
+.registration-code {
+	width: fit-content;
+	margin: 0 auto 12px;
+	padding: 10px 24px;
+	border: 1px solid var(--admin-border);
+	border-radius: 8px;
+	background: var(--admin-surface);
+	font: 1.25rem monospace;
+	letter-spacing: 0.1em;
+	overflow-wrap: anywhere;
+}
+.coupon-note {
+	font-size: 0.875rem;
+	color: var(--admin-muted);
+}
+ion-button {
+	min-width: min(250px, 100%);
+	margin-top: 24px;
 }

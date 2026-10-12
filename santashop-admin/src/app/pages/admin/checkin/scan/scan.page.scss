@@ -1,11 +1,11 @@
 .scan-workspace {
 	max-width: 640px;
 	margin: auto;
-	padding: 24px 16px;
+	padding: 16px;
 }
 .scan-intro {
 	text-align: center;
-	padding: 16px 8px 24px;
+	padding: 8px 8px 16px;
 }
 .scan-intro p {
 	color: var(--admin-muted);
@@ -15,11 +15,11 @@
 .scan-symbol {
 	display: grid;
 	place-items: center;
-	width: 104px;
-	height: 104px;
-	margin: 8px auto 28px;
+	width: 64px;
+	height: 64px;
+	margin: 8px auto 16px;
 	border: 1px solid var(--admin-edge);
-	border-radius: 32px;
+	border-radius: 16px;
 	background: var(--admin-surface);
 	box-shadow: var(--admin-raised);
 	color: var(--admin-accent);
@@ -29,7 +29,7 @@
 }
 .scan-actions {
 	display: grid;
-	gap: 16px;
+	gap: 12px;
 	margin-bottom: 20px;
 }
 .camera-view {

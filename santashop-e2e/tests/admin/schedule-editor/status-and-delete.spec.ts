@@ -78,19 +78,23 @@ test.describe('admin schedule editor - status and delete', () => {
 		// Act
 		await signInAdminViaUi(page, adminAccount);
 		await navigateToScheduleEditorViaLanding(page);
+		await page
+			.locator('#scheduleRow-slot-over-capacity .slot-editor > summary')
+			.click();
 		await clickIonToggle(page, '#slotEnabled-slot-over-capacity');
 		await expect(page.locator('#scheduleEditorStatus')).toContainText(
 			'Enabled 1 schedule.',
 		);
 		await expect(
 			page.locator('#scheduleRow-slot-over-capacity'),
-		).not.toHaveClass(/slot-row--disabled/);
+		).not.toHaveClass(/slot-card--disabled/);
 
+		await page
+			.locator('#scheduleRow-slot-delete-me .slot-editor > summary')
+			.click();
 		const deleteButton = page.locator('#deleteSchedule-slot-delete-me');
 		await deleteButton.scrollIntoViewIfNeeded();
-		await deleteButton.evaluate((element) => {
-			(element as HTMLElement).click();
-		});
+		await deleteButton.click();
 		await confirmAlertButton(page, 'Delete');
 
 		// Assert

@@ -12,8 +12,8 @@ h3 {
 	font-weight: 650;
 }
 ion-item.result-item {
-	--inner-padding-top: 16px;
-	--inner-padding-bottom: 16px;
+	--inner-padding-top: 8px;
+	--inner-padding-bottom: 8px;
 	--border-radius: 12px;
 	margin-block: 8px;
 }
@@ -26,4 +26,9 @@ ion-item.result-item {
 	display: block;
 	color: var(--admin-muted);
 	font-size: 0.875rem;
+}
+
+.result-item {
+	border: 1px solid var(--admin-border);
+	border-radius: 10px;
 }

@@ -1,12 +1,38 @@
-ion-card-title {
-	font-weight: bold;
+.current-appointment {
+	padding: 12px 16px;
+	border: 1px solid var(--admin-border);
+	border-radius: 10px;
+	background: var(--admin-surface);
 }
-
+.current-appointment h2 {
+	margin: 0 0 4px;
+	font-size: 0.875rem;
+	color: var(--admin-muted);
+}
+.current-appointment p {
+	margin: 0;
+	font-weight: 650;
+}
 ion-accordion-group {
-	margin: 0 1rem;
+	margin: 8px 0;
 }
-
-ion-title {
-	font-size: 1.2rem;
-	font-weight: bold;
+.time-options {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+	gap: 8px;
+	padding: 12px;
+}
+.time-options ion-item {
+	--background: var(--admin-surface);
+	border: 1px solid var(--admin-border);
+	border-radius: 8px;
+}
+.time-options ion-label {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	justify-content: space-between;
+}
+.time-options ion-text {
+	font-size: 0.875rem;
 }

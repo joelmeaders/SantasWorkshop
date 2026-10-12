@@ -1,13 +1,13 @@
 .waiting-admin {
 	max-width: 1100px;
 	margin: auto;
-	padding: 1.5rem;
+	padding: 1rem;
 }
 section {
-	margin-block: 1.5rem;
-	padding: 1.25rem;
-	border: 1px solid var(--ion-color-medium);
-	border-radius: 1rem;
+	margin-block: 1rem;
+	padding: 1rem;
+	border: 1px solid var(--admin-border);
+	border-radius: 12px;
 }
 .email-grid {
 	display: grid;
@@ -44,4 +44,16 @@ dd {
 }
 ion-button {
 	white-space: normal;
+}
+
+section {
+	background: var(--admin-surface);
+}
+h2 {
+	margin-top: 0;
+}
+@media (max-width: 599px) {
+	.waiting-admin {
+		padding: 16px;
+	}
 }

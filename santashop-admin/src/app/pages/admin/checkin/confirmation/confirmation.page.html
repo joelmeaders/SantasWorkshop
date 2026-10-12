@@ -1,10 +1,11 @@
 <admin-header
-	title="{{ 'Check-In: Review Info' | adminText }}"
+	title="{{ 'Check-in complete' | adminText }}"
 	backRoute="/admin/checkin/scan"
 />
 
-<ion-content fullscreen class="ion-padding-horizontal ion-text-center">
-	@if (checkin(); as checkin) {
+<ion-content class="ion-padding-horizontal ion-text-center">
+	<div class="confirmation-receipt" role="status">
+		@if (checkin(); as checkin) {
 		<h1>
 			<ion-text color="success"> {{ 'Success!' | adminText }} </ion-text>
 		</h1>
@@ -14,16 +15,16 @@
 			(checkin?.count ?? 0), v1: ((checkin?.count === 1 ? 'coupon' :
 			'coupons') | adminText)} }}
 		</h2>
-		<h3>{{ checkin.code }}</h3>
-		<h3>{{ '1 coupon per child' | adminText }}</h3>
-		<br />
+		<p class="registration-code">{{ checkin.code }}</p>
+		<p class="coupon-note">{{ '1 coupon per child' | adminText }}</p>
 		<ion-button routerLink="../scan">
-			{{ 'Start Over' | adminText }}
+			{{ 'Next shopper' | adminText }}
 		</ion-button>
-	} @else {
+		} @else {
 		<h1>
 			<ion-text color="danger"> {{ 'Error' | adminText }} </ion-text>
 		</h1>
 		<h2>{{ 'No check in record' | adminText }}</h2>
-	}
+		}
+	</div>
 </ion-content>

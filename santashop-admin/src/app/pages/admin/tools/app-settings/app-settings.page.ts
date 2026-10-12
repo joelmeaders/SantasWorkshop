@@ -32,6 +32,7 @@ import { WaitingListSettingsComponent } from './waiting-list-settings.component'
 @Component({
 	selector: 'admin-app-settings',
 	templateUrl: './app-settings.page.html',
+	styleUrl: './app-settings.page.scss',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		WaitingListSettingsComponent,

@@ -7,6 +7,13 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.10] - 2026-10-12
+
+### Changed
+
+- Advance the workspace and admin application to `2026.09.0-beta.10`.
+- Use compact admin layouts and expandable schedule controls.
+
 ## [2026.09.0-beta.9] - 2026-10-02
 
 ### Changed

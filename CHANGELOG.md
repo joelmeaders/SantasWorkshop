@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Require authentication within five minutes before changing an account email, reject invalid authentication times, and refresh the client token before the request (#225).
+
 ## [2026.09.0-beta.11] - 2026-10-12
 
 ### Changed

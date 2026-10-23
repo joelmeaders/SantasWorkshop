@@ -3,6 +3,7 @@ import { Auth, COLLECTION_SCHEMA } from '../models';
 import admin from '../firebase-admin';
 import { createFunctionLogger } from '../utility/observability';
 import { serializeError } from '../utility/errors';
+import { requireRecentAuthentication } from '../utility/capabilities';
 import {
 	requireAuthenticatedUid,
 	requireCallableData,
@@ -17,6 +18,7 @@ export default async function updateEmailAddress(
 	request: CallableRequest<Auth>,
 ): Promise<boolean> {
 	const uid = requireAuthenticatedUid(request);
+	requireRecentAuthentication(request.auth!.token);
 	const data = withCallableValidation(() => {
 		const requestData = requireCallableData(request.data);
 		return {

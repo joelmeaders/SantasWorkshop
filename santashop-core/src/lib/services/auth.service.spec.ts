@@ -26,6 +26,7 @@ describe('AuthService', () => {
 		email: 'test@test.com',
 		uid: '12345',
 		reload: vi.fn().mockResolvedValue(undefined),
+		getIdToken: vi.fn().mockResolvedValue('fresh-token'),
 		getIdTokenResult() {
 			return Promise.resolve({});
 		},
@@ -291,7 +292,7 @@ describe('AuthService', () => {
 			authWrapperService.currentUser.mockReturnValue(mockUser);
 
 			const signInSpy = authWrapperService.signInWithEmailAndPassword;
-			signInSpy.mockResolvedValue({} as UserCredential);
+			signInSpy.mockResolvedValue({ user: mockUser } as UserCredential);
 
 			const updateSpy = authWrapperService.updatePassword;
 			updateSpy.mockResolvedValue(undefined);
@@ -343,6 +344,55 @@ describe('AuthService', () => {
 	});
 
 	describe('changeEmailAddress()', () => {
+		it('waits for a fresh token before requesting an email change', async () => {
+			authWrapperService.currentUser.mockReturnValue(mockUser);
+			authWrapperService.signInWithEmailAndPassword.mockResolvedValue({
+				user: mockUser,
+			} as UserCredential);
+			let finishRefresh!: (token: string) => void;
+			vi.spyOn(mockUser, 'getIdToken').mockImplementation(
+				() =>
+					new Promise((resolve) => {
+						finishRefresh = resolve;
+					}),
+			);
+			const change = service.changeEmailAddress(
+				'password',
+				'next@example.com',
+			);
+			await vi.waitFor(() =>
+				expect(finishRefresh).toBeTypeOf('function'),
+			);
+			expect(mockUser.getIdToken).toHaveBeenCalledWith(true);
+			expect(
+				functionsWrapperService.updateEmailAddress,
+			).not.toHaveBeenCalled();
+			finishRefresh('fresh-token');
+			await change;
+			expect(
+				functionsWrapperService.updateEmailAddress,
+			).toHaveBeenCalledWith('next@example.com');
+		});
+
+		it('does not change email when token refresh fails and permits a password retry', async () => {
+			authWrapperService.currentUser.mockReturnValue(mockUser);
+			authWrapperService.signInWithEmailAndPassword.mockResolvedValue({
+				user: mockUser,
+			} as UserCredential);
+			vi.spyOn(mockUser, 'getIdToken')
+				.mockRejectedValueOnce(new Error('token refresh failed'))
+				.mockResolvedValue('fresh-token');
+			await expect(
+				service.changeEmailAddress('password', 'next@example.com'),
+			).rejects.toThrow('token refresh failed');
+			expect(
+				functionsWrapperService.updateEmailAddress,
+			).not.toHaveBeenCalled();
+			await service.changeEmailAddress('password', 'next@example.com');
+			expect(
+				functionsWrapperService.updateEmailAddress,
+			).toHaveBeenCalledOnce();
+		});
 		it('should make expected call', async () => {
 			// Arrange
 			const spy = authWrapperService.currentUser;
@@ -379,7 +429,7 @@ describe('AuthService', () => {
 			authWrapperService.currentUser.mockReturnValue(mockUser);
 
 			const signInSpy = authWrapperService.signInWithEmailAndPassword;
-			signInSpy.mockResolvedValue({} as UserCredential);
+			signInSpy.mockResolvedValue({ user: mockUser } as UserCredential);
 
 			const updateSpy = functionsWrapperService.updateEmailAddress;
 			updateSpy.mockResolvedValue({ data: undefined });
@@ -405,7 +455,7 @@ describe('AuthService', () => {
 	it('login(): should make expected call', async () => {
 		// Arrange
 		const signInSpy = authWrapperService.signInWithEmailAndPassword;
-		signInSpy.mockResolvedValue({} as UserCredential);
+		signInSpy.mockResolvedValue({ user: mockUser } as UserCredential);
 
 		// Act
 		await service.login({ emailAddress: 'test@test.com', password: 'abc' });

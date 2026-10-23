@@ -36,6 +36,38 @@ describe('updateEmailAddress handler', () => {
 		expect(adminMock.batchSet).toHaveBeenCalledTimes(3);
 	});
 
+	it.each([
+		undefined,
+		null,
+		'123',
+		NaN,
+		Infinity,
+		-Infinity,
+		0,
+		Date.now() / 1000 + 600,
+	])(
+		'rejects invalid or stale authentication time %s before any write',
+		async (authTime) => {
+			const { updateEmailAddress } =
+				await loadAccountRegistrationHandlers(adminMock);
+			const request = createCallableRequest(
+				{
+					emailAddress: 'new.email@example.com',
+					auth_time: Date.now() / 1000,
+					password: 'ignored',
+				},
+				{ uid: 'staff-1', roles: ['admin'], owner: true },
+			);
+			Object.assign(request.auth!.token, { auth_time: authTime });
+			await expect(updateEmailAddress(request)).rejects.toMatchObject({
+				code: 'failed-precondition',
+			});
+			expect(adminMock.updateUser).not.toHaveBeenCalled();
+			expect(adminMock.batchSet).not.toHaveBeenCalled();
+			expect(adminMock.batchCommit).not.toHaveBeenCalled();
+		},
+	);
+
 	it('throws an HttpsError when the user is missing from context', async () => {
 		const { updateEmailAddress } =
 			await loadAccountRegistrationHandlers(adminMock);

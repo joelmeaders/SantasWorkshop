@@ -177,7 +177,8 @@ export class AuthService {
 			password,
 		};
 
-		await this.login(auth);
+		const credential = await this.login(auth);
+		await credential.user.getIdToken(true);
 		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
 		await this.login({ emailAddress: newEmailAddress, password });
 		await this.refreshCurrentUser();

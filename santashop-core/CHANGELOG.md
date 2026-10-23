@@ -2,6 +2,12 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Refresh the authenticated token before requesting an email change (#225).
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Added

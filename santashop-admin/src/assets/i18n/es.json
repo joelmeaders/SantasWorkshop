@@ -882,5 +882,7 @@
 	"Next shopper": "Siguiente comprador",
 	"Schedule and capacity": "Horarios y capacidad",
 	"Edit date / time": "Editar fecha / hora",
-	"Edit schedule": "Editar horario"
+	"Edit schedule": "Editar horario",
+	"The result is uncertain. Retry to recover the same family submission.": "El resultado es incierto. Reintenta para recuperar el mismo registro familiar.",
+	"Correct the registration details and submit again.": "Corrige los datos del registro y envíalo de nuevo."
 }

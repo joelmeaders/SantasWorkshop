@@ -48,6 +48,8 @@ All notable changes to the shared models library will be documented in this file
 
 ### Fixed
 
+- Preserve one on-site family submission across retries, prevent duplicate check-ins and totals, and keep uncertain submissions available for recovery (#206).
+
 - Type definitions and exports
 - Build output consistency
 

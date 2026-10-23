@@ -882,5 +882,7 @@
 	"Next shopper": "Next shopper",
 	"Schedule and capacity": "Schedule and capacity",
 	"Edit date / time": "Edit date / time",
-	"Edit schedule": "Edit schedule"
+	"Edit schedule": "Edit schedule",
+	"The result is uncertain. Retry to recover the same family submission.": "The result is uncertain. Retry to recover the same family submission.",
+	"Correct the registration details and submit again.": "Correct the registration details and submit again."
 }

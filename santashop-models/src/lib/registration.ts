@@ -63,3 +63,7 @@ export interface Registration {
 	cancelledByUid?: string;
 	cancellationLogId?: string;
 }
+
+export interface OnSiteRegistrationRequest extends Registration {
+	mutationId: string;
+}

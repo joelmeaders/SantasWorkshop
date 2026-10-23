@@ -156,7 +156,7 @@
 				button
 				color="success"
 				class="confirm-button"
-				[disabled]="form.invalid || !children().length"
+				[disabled]="saving() || form.invalid || !children().length"
 				(click)="checkIn()"
 			>
 				<ion-label>

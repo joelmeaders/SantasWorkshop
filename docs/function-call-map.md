@@ -31,6 +31,13 @@ Deploy the matching client request contract with the backend and refresh older
 clients before retrying. Browser rules do not grant access to the private intent
 subcollection. Annual recursive user deletion also removes its receipts.
 
+On-site submissions require a client mutation ID. The staff-scoped receipt,
+registration, check-in, and annual totals commit in one transaction. Exact retries
+return the original coupon count. Changed payloads with the same ID are rejected.
+The admin form retains the original submission after an uncertain result and
+prevents concurrent clicks. Deploy the admin client and backend together; older
+clients without an ID must refresh before submitting.
+
 Deployed registration handlers read cached public settings through the private
 `publicParametersGateway`. Reader and publisher identities are deliberately
 separate. Local emulator settings are fixtures, not a second deployed source of

@@ -11,6 +11,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Preserve one on-site family submission across retries, prevent duplicate check-ins and totals, and keep uncertain submissions available for recovery (#206).
+
 - Bound each SES payload to one transport attempt and a 25-second send budget. Keep uncertain deliveries for review instead of automatically resending (#210).
 
 - Keep owner-operation browser validation valid after October 15 by checking the seasonal statistics rejection.

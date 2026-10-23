@@ -4,6 +4,7 @@ export const SIGNUP_PASSWORD_MIN_LENGTH = 8;
 export const SIGNUP_PASSWORD_MAX_LENGTH = 40;
 
 export interface OnboardUser {
+	mutationId?: string;
 	preferredLanguage?: CustomerLanguage;
 	firstName: string;
 	lastName: string;

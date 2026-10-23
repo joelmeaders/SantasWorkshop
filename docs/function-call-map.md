@@ -24,6 +24,26 @@ selection or identity session starts a new intent. Recovery displays live
 registration state and does not hide a newer submitted ticket based on an old
 cancellation success. No automatic callable retry loop is added.
 
+Signup requires one client mutation ID for the accepted profile. Before Auth
+creation, a transaction saves the profile and private provisioning intent under
+a stable UID derived from that ID. The intent retains consent timestamps, code,
+and QR path without passwords. Auth creation uses that UID. A duplicate email
+never authorizes recovery; the resume branch of newAccount requires the verified
+caller UID. Registration loading attempts that branch once per identity session
+when the registration is missing or QR setup is incomplete.
+
+Setup has three attempts and a thirty-minute age budget. A crashed invocation
+reserves two minutes against the callable's sixty-second limit. Matching attempt
+tokens protect final status writes and lease release. QR uploads use create-only
+preconditions and ownership metadata; retries reuse the same object. A lost final
+acknowledgement is reconciled from the completion receipt. Recovery preserves
+existing profile, children, and booking fields. No account or QR deletion occurs
+on setup failure. Exhausted, changed, and older incomplete accounts without a
+saved intent remain support cases. Private intents sit below user records and
+follow annual recursive user cleanup. Deploy the matching signup client before
+accepting requests that require its ID. No new callable, background repair job,
+or collection scan is added.
+
 Email changes require a fresh authenticated token, an operation ID, and the
 expected current email. The backend stores the intent and a short invocation
 lease under `users/{uid}/emailChanges` before changing Auth. The final batch

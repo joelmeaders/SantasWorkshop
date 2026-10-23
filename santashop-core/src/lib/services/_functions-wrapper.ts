@@ -37,13 +37,19 @@ export class FunctionsWrapper {
 			'updateEmailAddress',
 		)(request);
 
+	public readonly resumeAccountSetup = (): Promise<
+		_HttpsCallableResult<string>
+	> =>
+		this.callableWrapper<{ resume: true }, string>('newAccount')({
+			resume: true,
+		});
+
 	public readonly requestPasswordReset = (
 		emailAddress: string,
 	): Promise<_HttpsCallableResult<{ accepted: true }>> =>
-		this.callableWrapper<
-			{ emailAddress: string },
-			{ accepted: true }
-		>('requestPasswordReset')({ emailAddress });
+		this.callableWrapper<{ emailAddress: string }, { accepted: true }>(
+			'requestPasswordReset',
+		)({ emailAddress });
 
 	public readonly changeAccountInformation = (
 		data: ChangeUserInfo,
@@ -58,15 +64,15 @@ export class FunctionsWrapper {
 	}): Promise<_HttpsCallableResult<true>> =>
 		this.callableWrapper<typeof data, true>('undoRegistration')(data);
 
-	public readonly changeRegistrationDateTime = (
-		data: {
-			mutationId: string;
-			slotId: string;
+	public readonly changeRegistrationDateTime = (data: {
+		mutationId: string;
+		slotId: string;
 		reviewedDateTime?: string;
-			registrationUid?: string;
-		},
-	): Promise<_HttpsCallableResult<true>> =>
-		this.callableWrapper<typeof data, true>('changeRegistrationDateTime')(data);
+		registrationUid?: string;
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('changeRegistrationDateTime')(
+			data,
+		);
 
 	public readonly saveDraftChild = (data: {
 		mutationId: string;

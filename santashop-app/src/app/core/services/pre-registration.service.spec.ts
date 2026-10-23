@@ -5,6 +5,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
 import {
 	BehaviorSubject,
+	of,
 	from,
 	type Observable,
 	Subject,
@@ -53,6 +54,7 @@ const identity = (uid: string): FirebaseUser =>
 	}) as FirebaseUser;
 const callableFixtures = (): Pick<
 	FunctionsWrapper,
+	| 'resumeAccountSetup'
 	| 'saveDraftChild'
 	| 'deleteDraftChild'
 	| 'setDraftAppointment'
@@ -60,6 +62,9 @@ const callableFixtures = (): Pick<
 	| 'undoRegistration'
 	| 'changeRegistrationDateTime'
 > => ({
+	resumeAccountSetup: vi
+		.fn<FunctionsWrapper['resumeAccountSetup']>()
+		.mockRejectedValue(new Error('No saved signup intent')),
 	saveDraftChild: vi
 		.fn<FunctionsWrapper['saveDraftChild']>()
 		.mockResolvedValue({ data: true }),
@@ -291,15 +296,18 @@ describe('PreRegistrationService', () => {
 		await vi.waitFor(() => expect(createAlert).toHaveBeenCalledTimes(2));
 	});
 
-	it('recovers a failed read for a subsequent identity', () => {
+	it('recovers a failed read for a subsequent identity', async () => {
 		read.mockReturnValueOnce(
 			throwError(() => new Error('unreadable')),
 		).mockReturnValue(snapshot);
 		const visible = observe(service.userRegistration$);
 		auth.next(identity('first'));
-		expect(log).toHaveBeenCalledWith('registration_record_unavailable', {
-			reason: 'unreadable',
-		});
+		await vi.waitFor(() =>
+			expect(log).toHaveBeenCalledWith(
+				'registration_record_unavailable',
+				{ reason: 'unreadable' },
+			),
+		);
 		expect(visible.at(-1)).toBeUndefined();
 		auth.next(identity('second'));
 		snapshot.next(registration('second'));
@@ -646,5 +654,34 @@ describe('PreRegistrationService', () => {
 		expect(visible.at(-1)?.registrationSubmittedOn).toEqual(
 			new Date('2026-11-03T12:00:00Z'),
 		);
+	});
+	it('finishes a saved partial setup once before exposing a usable registration', async () => {
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		vi.mocked(functions.resumeAccountSetup).mockResolvedValue({
+			data: 'first',
+		});
+		read.mockReturnValueOnce(
+			of({ ...registration(), qrCodeGeneratedOn: new Date() }),
+		);
+		snapshot.next(undefined);
+		await vi.waitFor(() => expect(visible.at(-1)?.uid).toBe('first'));
+		expect(functions.resumeAccountSetup).toHaveBeenCalledOnce();
+		expect(createAlert).not.toHaveBeenCalled();
+	});
+	it('recovers setup when rules deny the initial missing-registration read', async () => {
+		const visible = observe(service.userRegistration$);
+		vi.mocked(functions.resumeAccountSetup).mockResolvedValue({
+			data: 'first',
+		});
+		read.mockReturnValueOnce(
+			throwError(() => new Error('permission-denied')),
+		).mockReturnValueOnce(
+			of({ ...registration(), qrCodeGeneratedOn: new Date() }),
+		);
+		auth.next(identity('first'));
+		await vi.waitFor(() => expect(visible.at(-1)?.uid).toBe('first'));
+		expect(functions.resumeAccountSetup).toHaveBeenCalledOnce();
+		expect(createAlert).not.toHaveBeenCalled();
 	});
 });

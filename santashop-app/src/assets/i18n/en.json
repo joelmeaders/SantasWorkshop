@@ -374,7 +374,7 @@
 	},
 	"REGISTRATION_UNAVAILABLE": {
 		"TITLE": "Registration record unavailable",
-		"MESSAGE": "We could not load your registration record. It may be missing or corrupted. Please contact the Denver Santa Claus Shop for assistance."
+		"MESSAGE": "We could not finish or load your account setup. Refresh this page to retry. If setup is still reserved, wait two minutes. If it still fails, contact the Denver Santa Claus Shop for assistance."
 	},
 	"WAITING_LIST": {
 		"TITLE": "Waiting list",

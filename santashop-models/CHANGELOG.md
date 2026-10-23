@@ -48,6 +48,8 @@ All notable changes to the shared models library will be documented in this file
 
 ### Fixed
 
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
 - Bound email event processing to thirty minutes and three preparation attempts, recover temporary pre-send failures, and provide one targeted confirmation recovery with explicit uncertain-delivery acknowledgement (#211).
 
 - Preserve one on-site family submission across retries, prevent duplicate check-ins and totals, and keep uncertain submissions available for recovery (#206).

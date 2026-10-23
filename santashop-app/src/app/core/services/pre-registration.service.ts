@@ -7,6 +7,7 @@ import {
 	combineLatest,
 	defer,
 	distinctUntilChanged,
+	exhaustMap,
 	filter,
 	map,
 	of,
@@ -73,14 +74,43 @@ export class PreRegistrationService {
 				this.hasReportedUnavailableRegistration = false;
 			}
 			if (!uid) return of({ loading: false, registration: undefined });
+			let setupAttempted = false;
+			let readFailed = false;
 			return defer(() =>
 				this.fireRepo
 					.collection<Registration>(COLLECTION_SCHEMA.registrations)
 					.read(uid, 'uid'),
 			).pipe(
+				catchError(() => {
+					readFailed = true;
+					return of(undefined);
+				}),
+				exhaustMap((registration) => {
+					if (
+						registration &&
+						registration.qrCodeGeneratedOn !== false
+					)
+						return of(registration);
+					if (setupAttempted) return of(undefined);
+					setupAttempted = true;
+					return defer(() =>
+						this.afFunctions.resumeAccountSetup(),
+					).pipe(
+						switchMap(() =>
+							this.fireRepo
+								.collection<Registration>(
+									COLLECTION_SCHEMA.registrations,
+								)
+								.read(uid, 'uid'),
+						),
+						catchError(() => of(undefined)),
+					);
+				}),
 				tap((registration) => {
 					if (!registration)
-						void this.reportUnavailableRegistration('missing');
+						void this.reportUnavailableRegistration(
+							readFailed ? 'unreadable' : 'missing',
+						);
 				}),
 				map((registration) => ({
 					loading: false,

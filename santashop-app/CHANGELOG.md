@@ -8,6 +8,8 @@ All notable changes to the main application will be documented in this file.
 
 ### Fixed
 
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
 - Preserve cancellation and appointment-change request identities during recovery. Replay old successes without changing newer bookings (#213).
 
 - Keep the email editor open after an incomplete email change so the customer can retry the same address (#227).

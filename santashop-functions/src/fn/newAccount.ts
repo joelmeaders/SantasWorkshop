@@ -2,23 +2,21 @@ import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	OnboardUser,
-	User,
-	Registration,
-	COLLECTION_SCHEMA,
 	SIGNUP_PASSWORD_MIN_LENGTH,
 	SIGNUP_PASSWORD_MAX_LENGTH,
 } from '../models';
-import { generateId } from '../utility/id-generation';
 import {
-	createQrCodeStoragePath,
-	deleteQrCode,
-	generateQrCode,
-} from '../utility/qrcodes';
+	prepareAccountProvisioning,
+	finalizeAccountProvisioning,
+} from './accountProvisioning';
+import { requireMutationId } from './registrationMutationSupport';
+import { getErrorCode } from '../utility/errors';
 import admin from '../firebase-admin';
 import { createFunctionLogger } from '../utility/observability';
 import {
 	CallableValidationError,
 	requireBoolean,
+	requireAuthenticatedUid,
 	requireCallableData,
 	requireEmailAddress,
 	requireTrimmedString,
@@ -26,13 +24,22 @@ import {
 	throwMappedAuthHttpsError,
 	withCallableValidation,
 } from '../utility/callable-validation';
-import { PROGRAM_YEAR } from '../utility/runtime-config';
 
 const log = createFunctionLogger('newAccount');
 
 export default async function newAccount(
-	request: CallableRequest<OnboardUser>,
+	request: CallableRequest<OnboardUser | { resume: true }>,
 ): Promise<string> {
+	if (
+		typeof request.data === 'object' &&
+		request.data !== null &&
+		'resume' in request.data &&
+		request.data.resume === true
+	) {
+		const uid = requireAuthenticatedUid(request);
+		await finalizeAccountProvisioning(uid);
+		return uid;
+	}
 	const data = withCallableValidation(() => {
 		const requestData = requireCallableData(request.data);
 		const password = requirePassword(requestData['password'], 'Password');
@@ -57,6 +64,7 @@ export default async function newAccount(
 		}
 
 		return {
+			mutationId: requireMutationId(requestData['mutationId']),
 			preferredLanguage: normalizeEmailLanguage(
 				requestData['preferredLanguage'],
 			),
@@ -69,103 +77,37 @@ export default async function newAccount(
 			newsletter: requestData['newsletter'] === true,
 		};
 	});
-	let newUserAccount;
 
 	try {
-		newUserAccount = await admin.auth().createUser({
+		await admin.auth().getUserByEmail(data.emailAddress);
+		throw new HttpsError(
+			'already-exists',
+			'This account already exists. Sign in to continue setup.',
+		);
+	} catch (error) {
+		if (error instanceof HttpsError) throw error;
+		if (getErrorCode(error) !== 'auth/user-not-found')
+			handleAuthError(error);
+	}
+	const { password, mutationId, ...profile } = data;
+	const uid = await prepareAccountProvisioning(mutationId, profile);
+	try {
+		await admin.auth().createUser({
+			uid,
 			email: data.emailAddress,
-			password: data.password,
+			password,
 			disabled: false,
 			displayName: `${data.firstName} ${data.lastName}`,
 		});
 	} catch (error) {
-		log.error(
-			'Failed to create auth user during account onboarding',
-			{},
-			error,
-		);
+		log.warn('Signup Auth creation did not return success', {
+			uid,
+			errorCode: getErrorCode(error),
+		});
 		handleAuthError(error);
 	}
-
-	const acceptedLegal = new Date();
-
-	const user: User = {
-		preferredLanguage: data.preferredLanguage,
-		firstName: data.firstName,
-		lastName: data.lastName,
-		emailAddress: data.emailAddress,
-		zipCode: data.zipCode,
-		acceptedTermsOfService: acceptedLegal,
-		acceptedPrivacyPolicy: acceptedLegal,
-		newsletter: data.newsletter,
-		referredBy: data.referredBy,
-	};
-
-	const confirmationCode = generateId(8);
-	const qrCodeStoragePath = createQrCodeStoragePath(newUserAccount.uid);
-	const registration: Registration = {
-		uid: newUserAccount.uid,
-		firstName: data.firstName,
-		lastName: data.lastName,
-		emailAddress: data.emailAddress,
-		zipCode: data.zipCode,
-		qrcode: confirmationCode,
-		qrCodeStoragePath,
-		programYear: PROGRAM_YEAR,
-		qrCodeGeneratedOn: false,
-	};
-
-	const userDocument = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.users}/${newUserAccount.uid}`);
-
-	const registrationDocument = admin
-		.firestore()
-		.doc(`${COLLECTION_SCHEMA.registrations}/${newUserAccount.uid}`);
-
-	const batch = admin.firestore().batch();
-
-	batch.create(userDocument, user);
-	batch.create(registrationDocument, registration);
-
-	try {
-		await batch.commit();
-	} catch (error) {
-		await admin.auth().deleteUser(newUserAccount.uid);
-		log.error(
-			'Failed to create Firestore account records',
-			{ uid: newUserAccount.uid },
-			error,
-		);
-		throw new HttpsError('internal', 'Unable to create account records');
-	}
-
-	try {
-		await generateQrCode(qrCodeStoragePath, confirmationCode);
-		await registrationDocument.set(
-			{ qrCodeGeneratedOn: new Date(), qrCodeGenerationFailedOn: false },
-			{ merge: true },
-		);
-	} catch (error) {
-		log.error(
-			'Failed to finalize QR code generation for new account',
-			{ uid: newUserAccount.uid },
-			error,
-		);
-		await deleteQrCode(qrCodeStoragePath).catch(() => undefined);
-		await registrationDocument.set(
-			{ qrCodeGenerationFailedOn: new Date() },
-			{ merge: true },
-		);
-		await admin.auth().deleteUser(newUserAccount.uid);
-		await Promise.all([
-			userDocument.delete(),
-			registrationDocument.delete(),
-		]);
-		throw new HttpsError('internal', 'Unable to finalize account setup');
-	}
-
-	return newUserAccount.uid;
+	await finalizeAccountProvisioning(uid);
+	return uid;
 }
 
 const handleAuthError = (error: unknown): never => {

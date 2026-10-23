@@ -881,6 +881,7 @@ export const testSeedAdminUser = emulatorOnly(() =>
 				emailAddress,
 				password,
 				uid,
+				incompleteSignup: data.incompleteSignup === true,
 				owner: ownerClaim,
 				roles,
 			});

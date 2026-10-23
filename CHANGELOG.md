@@ -11,6 +11,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
 - Bound email event processing to thirty minutes and three preparation attempts, recover temporary pre-send failures, and provide one targeted confirmation recovery with explicit uncertain-delivery acknowledgement (#211).
 
 - Preserve cancellation and appointment-change request identities during recovery. Replay old successes without changing newer bookings (#213).

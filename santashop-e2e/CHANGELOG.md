@@ -6,6 +6,8 @@ All notable changes to the E2E testing suite will be documented in this file.
 
 ### Fixed
 
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
 - Assert the owner statistics preview rejection after October 15 instead of expecting a preview outside the permitted season.
 
 ## [2026.09.0-beta.3] - Unreleased

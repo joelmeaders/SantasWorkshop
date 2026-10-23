@@ -17,6 +17,13 @@ created atomically with the update. A successful replay is returned before
 current draft/feature checks. Appointment selection, submission, cancellation,
 and check-in retain their own transaction and authorization rules.
 
+Cancellation returns a successful receipt before reading current feature policy
+or cancellation metadata. Customer cancellation and reschedule actions retain
+one ID and the original payload while their result is uncertain. A changed
+selection or identity session starts a new intent. Recovery displays live
+registration state and does not hide a newer submitted ticket based on an old
+cancellation success. No automatic callable retry loop is added.
+
 Email changes require a fresh authenticated token, an operation ID, and the
 expected current email. The backend stores the intent and a short invocation
 lease under `users/{uid}/emailChanges` before changing Auth. The final batch

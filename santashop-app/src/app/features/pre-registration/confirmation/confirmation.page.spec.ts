@@ -15,7 +15,11 @@ import {
 	LoadingController,
 	ModalController,
 } from '@ionic/angular/standalone';
-import { AnalyticsWrapper, AppStateService, ErrorHandlerService } from '@santashop/core';
+import {
+	AnalyticsWrapper,
+	AppStateService,
+	ErrorHandlerService,
+} from '@santashop/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { DateTimeSlotsService } from './date-time-slots.service';
 import { PreRegistrationService } from '../../../core/services/pre-registration.service';
@@ -28,16 +32,37 @@ describe('ConfirmationPage', () => {
 	const checkedIn$ = new BehaviorSubject<boolean | undefined>(false);
 	const registrationComplete$ = new BehaviorSubject<boolean>(true);
 	const slot$ = new BehaviorSubject<any>({
-		id: 'slot-1', dateTime: new Date('2026-12-20T10:00:00'), enabled: true,
+		id: 'slot-1',
+		dateTime: new Date('2026-12-20T10:00:00'),
+		enabled: true,
 	});
 	const children$ = new BehaviorSubject<any[]>([
-		{ id: 'child-1', firstName: 'Holly', lastName: 'Jolly', toyType: 'girls', dateOfBirth: new Date('2020-01-01') },
-		{ id: 'child-2', firstName: 'Nick', lastName: 'Kringle', toyType: 'boys', dateOfBirth: new Date('2019-01-01') },
-		{ id: 'child-3', firstName: 'Noel', lastName: 'Bell', toyType: 'infants', dateOfBirth: new Date('2025-01-01') },
+		{
+			id: 'child-1',
+			firstName: 'Holly',
+			lastName: 'Jolly',
+			toyType: 'girls',
+			dateOfBirth: new Date('2020-01-01'),
+		},
+		{
+			id: 'child-2',
+			firstName: 'Nick',
+			lastName: 'Kringle',
+			toyType: 'boys',
+			dateOfBirth: new Date('2019-01-01'),
+		},
+		{
+			id: 'child-3',
+			firstName: 'Noel',
+			lastName: 'Bell',
+			toyType: 'infants',
+			dateOfBirth: new Date('2025-01-01'),
+		},
 	]);
 
 	beforeEach(async () => {
 		registrationComplete$.next(true);
+		checkedIn$.next(false);
 		TestBed.configureTestingModule({
 			imports: [ConfirmationPage],
 			providers: [
@@ -103,7 +128,10 @@ describe('ConfirmationPage', () => {
 					},
 				},
 				provideRouter([
-					{ path: 'pre-registration/confirmation', component: ConfirmationPage },
+					{
+						path: 'pre-registration/confirmation',
+						component: ConfirmationPage,
+					},
 				]),
 				provideTranslateService(),
 				provideActivatedRouteMock(),
@@ -146,13 +174,20 @@ describe('ConfirmationPage', () => {
 				host.style.cssText =
 					'position: fixed; inset: 0; display: flex; flex-direction: column;';
 				await fixture.whenStable();
-				const content = host.querySelector('ion-content') as HTMLIonContentElement;
+				const content = host.querySelector(
+					'ion-content',
+				) as HTMLIonContentElement;
 				const scrollElement = await content.getScrollElement();
-				const details = host.querySelector('#event-information') as HTMLElement;
+				const details = host.querySelector(
+					'#event-information',
+				) as HTMLElement;
 				const heading = details.querySelector('h2') as HTMLElement;
-				const button = host.querySelector('#eventInformationButton') as HTMLIonButtonElement;
+				const button = host.querySelector(
+					'#eventInformationButton',
+				) as HTMLIonButtonElement;
 				expect(button.textContent).toContain(
-					(language === 'es' ? es : en).CONFIRMATION.EVENT_INFORMATION,
+					(language === 'es' ? es : en).CONFIRMATION
+						.EVENT_INFORMATION,
 				);
 				for (let attempt = 0; attempt < 2; attempt++) {
 					await content.scrollToTop(0);
@@ -161,14 +196,22 @@ describe('ConfirmationPage', () => {
 						scrollElement.getBoundingClientRect().bottom,
 					);
 					await page.elementLocator(button).click();
-					await vi.waitFor(() => {
-						expect(scrollElement.scrollTop).toBeGreaterThan(0);
-						const bounds = heading.getBoundingClientRect();
-						const visible = scrollElement.getBoundingClientRect();
-						expect(bounds.top).toBeGreaterThanOrEqual(visible.top);
-						expect(bounds.bottom).toBeLessThanOrEqual(visible.bottom);
-						expect(document.activeElement).toBe(details);
-					}, { timeout: 3000 });
+					await vi.waitFor(
+						() => {
+							expect(scrollElement.scrollTop).toBeGreaterThan(0);
+							const bounds = heading.getBoundingClientRect();
+							const visible =
+								scrollElement.getBoundingClientRect();
+							expect(bounds.top).toBeGreaterThanOrEqual(
+								visible.top,
+							);
+							expect(bounds.bottom).toBeLessThanOrEqual(
+								visible.bottom,
+							);
+							expect(document.activeElement).toBe(details);
+						},
+						{ timeout: 3000 },
+					);
 				}
 			} finally {
 				await page.viewport(viewport.width, viewport.height);
@@ -179,10 +222,20 @@ describe('ConfirmationPage', () => {
 	it('renders the registered slot, children, and available ticket actions', async (): Promise<void> => {
 		await fixture.whenStable();
 
-		expect(fixture.nativeElement.querySelector('#registrationQrCode')).toBeTruthy();
-		expect(fixture.nativeElement.querySelector('#changeRegistrationButton')).toBeTruthy();
-		expect(fixture.nativeElement.querySelector('#cancelRegistrationButton')).toBeTruthy();
-		expect(fixture.nativeElement.querySelectorAll('.children-ticket-list ion-item')).toHaveLength(4);
+		expect(
+			fixture.nativeElement.querySelector('#registrationQrCode'),
+		).toBeTruthy();
+		expect(
+			fixture.nativeElement.querySelector('#changeRegistrationButton'),
+		).toBeTruthy();
+		expect(
+			fixture.nativeElement.querySelector('#cancelRegistrationButton'),
+		).toBeTruthy();
+		expect(
+			fixture.nativeElement.querySelectorAll(
+				'.children-ticket-list ion-item',
+			),
+		).toHaveLength(4);
 	});
 
 	it('keeps permission actions disabled while check-in state is unresolved', async (): Promise<void> => {
@@ -232,12 +285,31 @@ describe('ConfirmationPage', () => {
 		const modalController = TestBed.inject(ModalController) as any;
 		const router = TestBed.inject(Router) as any;
 		const preRegistration = TestBed.inject(PreRegistrationService) as any;
-		const loader = { present: vi.fn().mockResolvedValue(undefined), dismiss: vi.fn().mockResolvedValue(undefined) };
+		const loader = {
+			present: vi.fn().mockResolvedValue(undefined),
+			dismiss: vi.fn().mockResolvedValue(undefined),
+		};
 		alertController.create
-			.mockResolvedValueOnce({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }) })
-			.mockResolvedValueOnce({ present: vi.fn().mockResolvedValue(undefined) });
+			.mockResolvedValueOnce({
+				present: vi.fn().mockResolvedValue(undefined),
+				onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+			})
+			.mockResolvedValueOnce({
+				present: vi.fn().mockResolvedValue(undefined),
+			});
 		loadingController.create.mockResolvedValue(loader);
-		modalController.create.mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined), onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm', data: { id: 'next-slot' } }) });
+		modalController.create.mockResolvedValue({
+			present: vi.fn().mockResolvedValue(undefined),
+			onDidDismiss: vi
+				.fn()
+				.mockResolvedValue({
+					role: 'confirm',
+					data: {
+						id: 'next-slot',
+						dateTime: new Date('2026-12-11T18:00:00Z'),
+					},
+				}),
+		});
 		router.navigate = vi.fn().mockResolvedValue(true);
 
 		const analytics = TestBed.inject(AnalyticsWrapper);
@@ -251,13 +323,24 @@ describe('ConfirmationPage', () => {
 		await component.changeRegistration();
 
 		expect(preRegistration.undoRegistration).toHaveBeenCalledOnce();
-		expect(preRegistration.changeRegistrationDateTime).toHaveBeenCalledWith({ id: 'next-slot' });
-		expect(router.navigate).toHaveBeenCalledWith(['/pre-registration/overview']);
+		expect(preRegistration.changeRegistrationDateTime).toHaveBeenCalledWith(
+			{ id: 'next-slot', dateTime: new Date('2026-12-11T18:00:00Z') },
+			expect.any(String),
+		);
+		expect(router.navigate).toHaveBeenCalledWith([
+			'/pre-registration/overview',
+		]);
 		expect(loader.dismiss).toHaveBeenCalledTimes(2);
 		expect(events).toHaveBeenCalledWith('cancel_registration');
 		expect(events).toHaveBeenCalledWith('change_registration_datetime');
-		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'registration_cancel', outcome: 'succeeded' });
-		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'appointment_change', outcome: 'succeeded' });
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', {
+			operation: 'registration_cancel',
+			outcome: 'succeeded',
+		});
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', {
+			operation: 'appointment_change',
+			outcome: 'succeeded',
+		});
 	});
 
 	it('opens the appointment picker directly and leaves the booking unchanged when dismissed', async (): Promise<void> => {
@@ -291,17 +374,99 @@ describe('ConfirmationPage', () => {
 			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
 		});
 		loadingController.create.mockResolvedValue(loader);
-		preRegistration.undoRegistration.mockRejectedValueOnce(cancellationError);
+		preRegistration.undoRegistration.mockRejectedValueOnce(
+			cancellationError,
+		);
 		router.navigate = vi.fn().mockResolvedValue(true);
 
 		const events = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEvent');
-		const outcomes = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEventWithParams');
+		const outcomes = vi.spyOn(
+			TestBed.inject(AnalyticsWrapper),
+			'logEventWithParams',
+		);
 		await component.undoRegistration();
 		expect(events).not.toHaveBeenCalledWith('cancel_registration');
-		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'registration_cancel', outcome: 'failed', error_code: 'unknown' });
+		expect(outcomes).toHaveBeenCalledWith('workflow_action', {
+			operation: 'registration_cancel',
+			outcome: 'failed',
+			error_code: 'unknown',
+		});
 
-		expect(errorHandler.handleError).toHaveBeenCalledWith(cancellationError);
+		expect(errorHandler.handleError).toHaveBeenCalledWith(
+			cancellationError,
+		);
 		expect(router.navigate).not.toHaveBeenCalled();
 		expect(loader.dismiss).toHaveBeenCalledOnce();
+	});
+	it('reuses cancellation identity after a lost response and prevents concurrent confirmations', async () => {
+		const service = TestBed.inject(PreRegistrationService);
+		vi.mocked(TestBed.inject(AlertController).create).mockResolvedValue({
+			present: vi.fn(),
+			onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
+		} as unknown as HTMLIonAlertElement);
+		vi.mocked(TestBed.inject(LoadingController).create).mockResolvedValue({
+			present: vi.fn(),
+			dismiss: vi.fn().mockResolvedValue(true),
+		} as unknown as HTMLIonLoadingElement);
+		vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		vi.mocked(service.undoRegistration).mockRejectedValueOnce(
+			new Error('Lost response'),
+		);
+		const first = component.undoRegistration();
+		await component.undoRegistration();
+		await first;
+		expect(service.undoRegistration).toHaveBeenCalledTimes(1);
+		const id = vi.mocked(service.undoRegistration).mock.calls[0][0];
+		await component.undoRegistration();
+		expect(service.undoRegistration).toHaveBeenLastCalledWith(id, true);
+	});
+
+	it('pins an uncertain appointment request and allocates a new ID for a different selection or identity', async () => {
+		const service = TestBed.inject(PreRegistrationService);
+		const slot = {
+			id: 'slot-B',
+			dateTime: new Date('2026-12-12T18:00:00Z'),
+		};
+		const result = { role: 'confirm', data: slot };
+		vi.mocked(TestBed.inject(ModalController).create).mockResolvedValue({
+			present: vi.fn(),
+			onDidDismiss: vi.fn().mockImplementation(async () => result),
+		} as unknown as HTMLIonModalElement);
+		vi.mocked(TestBed.inject(AlertController).create).mockResolvedValue({
+			present: vi.fn(),
+		} as unknown as HTMLIonAlertElement);
+		vi.mocked(TestBed.inject(LoadingController).create).mockResolvedValue({
+			present: vi.fn(),
+			dismiss: vi.fn().mockResolvedValue(true),
+		} as unknown as HTMLIonLoadingElement);
+		vi.mocked(service.changeRegistrationDateTime).mockRejectedValue(
+			new Error('Lost response'),
+		);
+		await component.changeRegistration();
+		const original = vi.mocked(service.changeRegistrationDateTime).mock
+			.calls[0];
+		slot$.next({
+			id: 'slot-C',
+			dateTime: new Date('2026-12-13T18:00:00Z'),
+		});
+		await component.changeRegistration();
+		expect(
+			vi.mocked(service.changeRegistrationDateTime).mock.calls[1],
+		).toEqual(original);
+		result.data = { ...slot, id: 'slot-D' };
+		await component.changeRegistration();
+		expect(
+			vi.mocked(service.changeRegistrationDateTime).mock.calls[2][1],
+		).not.toBe(original[1]);
+		Object.defineProperty(service, 'currentIdentityKey', {
+			value: 'second-session',
+			configurable: true,
+		});
+		await component.changeRegistration();
+		expect(
+			vi.mocked(service.changeRegistrationDateTime).mock.calls[3][1],
+		).not.toBe(
+			vi.mocked(service.changeRegistrationDateTime).mock.calls[2][1],
+		);
 	});
 });

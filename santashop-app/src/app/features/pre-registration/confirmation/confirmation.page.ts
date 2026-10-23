@@ -5,6 +5,7 @@ import {
 	computed,
 	inject,
 	viewChild,
+	signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -70,6 +71,19 @@ import { firstValueFrom } from 'rxjs';
 	],
 })
 export class ConfirmationPage {
+	public readonly mutationPending = signal(false);
+	private intentUid?: string;
+	private cancellationId?: string;
+	private appointmentIntent?: { mutationId: string; slot: DateTimeSlot };
+	private resetPendingForIdentity(): void {
+		const uid = this.viewService.currentIdentityKey;
+		if (uid !== this.intentUid) {
+			this.intentUid = uid;
+			this.cancellationId = undefined;
+			this.appointmentIntent = undefined;
+		}
+	}
+
 	public readonly calendarDate = dateToCalendarString;
 	public readonly viewService = inject(PreRegistrationService);
 	private readonly loadingController = inject(LoadingController);
@@ -142,136 +156,183 @@ export class ConfirmationPage {
 	}
 
 	public async undoRegistration(): Promise<void> {
-		const alert = await this.alertController.create({
-			header: this.translateService.instant('CONFIRMATION.ARE_YOU_SURE'),
-			message: this.translateService.instant(
-				'CONFIRMATION.CONFIRM_CANCELLATION_MSG',
-			),
-			buttons: [
-				{
-					text: this.translateService.instant('COMMON.GO_BACK'),
-					role: 'cancel',
-					cssClass: 'confirm-delete-button',
-				},
-				{
-					text: this.translateService.instant('COMMON.CONFIRM'),
-					role: 'confirm',
-				},
-			],
-		});
-
-		await alert.present();
-		const shouldContinue = await alert.onDidDismiss();
-
-		if (shouldContinue.role !== 'confirm') return;
-
-		const loader = await this.loadingController.create({
-			message: this.translateService.instant(
-				'CONFIRMATION.CANCELLING_REGISTRATION',
-			),
-		});
-
-		await loader.present();
-
+		if (this.mutationPending()) return;
+		this.mutationPending.set(true);
+		this.resetPendingForIdentity();
 		try {
-			await trackAnalyticsOperation(
-				this.analytics,
-				'registration_cancel',
-				() => this.viewService.undoRegistration(),
-			);
-			this.analytics.logEvent('cancel_registration');
-			await this.router.navigate(['/pre-registration/overview']);
-		} catch (error) {
-			await this.errorHandler.handleError(error as IError);
+			const alert = await this.alertController.create({
+				header: this.translateService.instant(
+					'CONFIRMATION.ARE_YOU_SURE',
+				),
+				message: this.translateService.instant(
+					'CONFIRMATION.CONFIRM_CANCELLATION_MSG',
+				),
+				buttons: [
+					{
+						text: this.translateService.instant('COMMON.GO_BACK'),
+						role: 'cancel',
+						cssClass: 'confirm-delete-button',
+					},
+					{
+						text: this.translateService.instant('COMMON.CONFIRM'),
+						role: 'confirm',
+					},
+				],
+			});
+
+			await alert.present();
+			const shouldContinue = await alert.onDidDismiss();
+
+			if (shouldContinue.role !== 'confirm') return;
+			const recovering = !!this.cancellationId;
+			const mutationId = (this.cancellationId ??= crypto.randomUUID());
+			const uid = this.intentUid;
+
+			const loader = await this.loadingController.create({
+				message: this.translateService.instant(
+					'CONFIRMATION.CANCELLING_REGISTRATION',
+				),
+			});
+
+			await loader.present();
+
+			try {
+				await trackAnalyticsOperation(
+					this.analytics,
+					'registration_cancel',
+					() =>
+						this.viewService.undoRegistration(
+							mutationId,
+							recovering,
+						),
+				);
+				if (uid !== this.viewService.currentIdentityKey) return;
+				this.cancellationId = undefined;
+				this.analytics.logEvent('cancel_registration');
+				await this.router.navigate(['/pre-registration/overview']);
+			} catch (error) {
+				await this.errorHandler.handleError(error as IError);
+			} finally {
+				await loader.dismiss().catch(() => false);
+			}
 		} finally {
-			await loader.dismiss().catch(() => false);
+			this.mutationPending.set(false);
 		}
 	}
 
 	public async changeRegistration(): Promise<void> {
-		// Check if user has already been checked in
-		const hasCheckedIn = await firstValueFrom(
-			this.viewService.hasCheckedIn$,
-		);
-
-		if (hasCheckedIn) {
-			const errorAlert = await this.alertController.create({
-				header: this.translateService.instant('COMMON.ERROR'),
-				message: this.translateService.instant(
-					'CONFIRMATION.CANNOT_CHANGE_AFTER_CHECKIN',
-				),
-				buttons: ['OK'],
-			});
-			await errorAlert.present();
-			return;
-		}
-
-		// Get the current slot. The modal subscribes to live availability itself.
-		const currentSlot = await firstValueFrom(
-			this.viewService.dateTimeSlot$,
-		);
-
-		if (!currentSlot) {
-			await this.errorHandler.handleError({
-				message: 'Unable to load registration information',
-			} as IError);
-			return;
-		}
-
-		// Open modal with date/time selection
-		const modal = await this.modalController.create({
-			component: ChangeDatetimeModalComponent,
-			componentProps: {
-				currentSlot: currentSlot,
-				availableSlots: this.dateTimeService.availableSlots$,
-			},
-		});
-
-		await modal.present();
-		const result = await modal.onDidDismiss<DateTimeSlot>();
-
-		if (result.role !== 'confirm' || !result.data) return;
-
-		const loader = await this.loadingController.create({
-			message: this.translateService.instant(
-				'CONFIRMATION.UPDATING_REGISTRATION',
-			),
-		});
-
-		await loader.present();
-
+		if (this.mutationPending()) return;
+		this.mutationPending.set(true);
+		this.resetPendingForIdentity();
 		try {
-			const selectedSlot = result.data;
-			await trackAnalyticsOperation(
-				this.analytics,
-				'appointment_change',
-				() => this.viewService.changeRegistrationDateTime(selectedSlot),
+			// Check if user has already been checked in
+			const hasCheckedIn = await firstValueFrom(
+				this.viewService.hasCheckedIn$,
 			);
-			this.analytics.logEvent('change_registration_datetime');
 
-			// Show success message
-			const successAlert = await this.alertController.create({
-				header: this.translateService.instant('COMMON.SUCCESS'),
-				message: this.translateService.instant(
-					'CONFIRMATION.REGISTRATION_UPDATED_MSG',
-				),
-				buttons: ['OK'],
-			});
-			await successAlert.present();
-		} catch (error) {
-			const details = (error as { details?: { reason?: string } })
-				?.details;
-			if (details?.reason === 'appointment-review-required') {
-				await this.errorHandler.handleError({
+			if (hasCheckedIn) {
+				const errorAlert = await this.alertController.create({
+					header: this.translateService.instant('COMMON.ERROR'),
 					message: this.translateService.instant(
-						'OVERVIEW.APPOINTMENT_REVIEW_REQUIRED',
+						'CONFIRMATION.CANNOT_CHANGE_AFTER_CHECKIN',
 					),
+					buttons: ['OK'],
+				});
+				await errorAlert.present();
+				return;
+			}
+
+			// Get the current slot. The modal subscribes to live availability itself.
+			const currentSlot = await firstValueFrom(
+				this.viewService.dateTimeSlot$,
+			);
+
+			if (!currentSlot) {
+				await this.errorHandler.handleError({
+					message: 'Unable to load registration information',
 				} as IError);
-			} else {
-				await this.errorHandler.handleError(error as IError);
+				return;
+			}
+
+			// Open modal with date/time selection
+			const modal = await this.modalController.create({
+				component: ChangeDatetimeModalComponent,
+				componentProps: {
+					currentSlot: currentSlot,
+					availableSlots: this.dateTimeService.availableSlots$,
+				},
+			});
+
+			await modal.present();
+			const result = await modal.onDidDismiss<DateTimeSlot>();
+
+			if (result.role !== 'confirm' || !result.data) return;
+			const selected = result.data;
+			if (
+				!this.appointmentIntent ||
+				this.appointmentIntent.slot.id !== selected.id ||
+				this.appointmentIntent.slot.dateTime.getTime() !==
+					selected.dateTime.getTime()
+			) {
+				this.appointmentIntent = {
+					mutationId: crypto.randomUUID(),
+					slot: {
+						...selected,
+						dateTime: new Date(selected.dateTime),
+					},
+				};
+			}
+			const intent = this.appointmentIntent;
+			const uid = this.intentUid;
+
+			const loader = await this.loadingController.create({
+				message: this.translateService.instant(
+					'CONFIRMATION.UPDATING_REGISTRATION',
+				),
+			});
+
+			await loader.present();
+
+			try {
+				await trackAnalyticsOperation(
+					this.analytics,
+					'appointment_change',
+					() =>
+						this.viewService.changeRegistrationDateTime(
+							intent.slot,
+							intent.mutationId,
+						),
+				);
+				if (uid !== this.viewService.currentIdentityKey) return;
+				this.appointmentIntent = undefined;
+				this.analytics.logEvent('change_registration_datetime');
+
+				// Show success message
+				const successAlert = await this.alertController.create({
+					header: this.translateService.instant('COMMON.SUCCESS'),
+					message: this.translateService.instant(
+						'CONFIRMATION.REGISTRATION_UPDATED_MSG',
+					),
+					buttons: ['OK'],
+				});
+				await successAlert.present();
+			} catch (error) {
+				const details = (error as { details?: { reason?: string } })
+					?.details;
+				if (details?.reason === 'appointment-review-required') {
+					await this.errorHandler.handleError({
+						message: this.translateService.instant(
+							'OVERVIEW.APPOINTMENT_REVIEW_REQUIRED',
+						),
+					} as IError);
+				} else {
+					await this.errorHandler.handleError(error as IError);
+				}
+			} finally {
+				await loader.dismiss().catch(() => false);
 			}
 		} finally {
-			await loader.dismiss().catch(() => false);
+			this.mutationPending.set(false);
 		}
 	}
 }

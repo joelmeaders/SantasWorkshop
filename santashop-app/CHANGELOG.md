@@ -8,6 +8,8 @@ All notable changes to the main application will be documented in this file.
 
 ### Fixed
 
+- Preserve cancellation and appointment-change request identities during recovery. Replay old successes without changing newer bookings (#213).
+
 - Keep the email editor open after an incomplete email change so the customer can retry the same address (#227).
 
 ## [2026.09.0-beta.10] - 2026-10-07

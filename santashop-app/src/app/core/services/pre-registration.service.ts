@@ -244,15 +244,19 @@ export class PreRegistrationService {
 		return this.afFunctions.completeRegistration(input);
 	}
 
-	public async undoRegistration(): Promise<HttpsCallableResult<true>> {
+	public async undoRegistration(
+		mutationId: string,
+		recovering = false,
+	): Promise<HttpsCallableResult<true>> {
 		const { registration } = await firstValueFrom(
 			this.registrationState$.pipe(filter((state) => !state.loading)),
 		);
 		const version = this.registrationVersion;
 		const result = await this.afFunctions.undoRegistration({
-			mutationId: this.createMutationId(),
+			mutationId,
 		});
 		if (
+			!recovering &&
 			result.data === true &&
 			registration?.uid &&
 			registration.registrationSubmittedOn &&
@@ -271,12 +275,13 @@ export class PreRegistrationService {
 
 	public changeRegistrationDateTime(
 		newDateTimeSlot: DateTimeSlot,
+		mutationId: string,
 	): Promise<HttpsCallableResult<true>> {
 		if (!newDateTimeSlot.id) {
 			return Promise.reject(new Error('Appointment ID is required.'));
 		}
 		return this.afFunctions.changeRegistrationDateTime({
-			mutationId: this.createMutationId(),
+			mutationId,
 			slotId: newDateTimeSlot.id,
 			reviewedDateTime: newDateTimeSlot.dateTime.toISOString(),
 		});
@@ -296,11 +301,8 @@ export class PreRegistrationService {
 		return !!hasChildren && !!hasDateTime && !isSubmitted;
 	}
 
-	private createMutationId(): string {
-		if (typeof globalThis.crypto?.randomUUID === 'function') {
-			return globalThis.crypto.randomUUID();
-		}
-		return `mutation_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+	public get currentIdentityKey(): string | undefined {
+		return `${this.registrationVersion}:${this.registrationUid ?? ''}`;
 	}
 
 	private async reportUnavailableRegistration(

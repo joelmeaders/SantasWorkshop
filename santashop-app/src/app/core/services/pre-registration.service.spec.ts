@@ -367,14 +367,17 @@ describe('PreRegistrationService', () => {
 			slotId: 'slot-1',
 		});
 		await service.completeRegistration({ mutationId: 'submit-0001' });
-		await service.undoRegistration();
-		await service.changeRegistrationDateTime({
-			id: 'slot-2',
-			dateTime: new Date(),
-			programYear: 2026,
-			maxSlots: 10,
-			enabled: true,
-		});
+		await service.undoRegistration('cancel-client-1');
+		await service.changeRegistrationDateTime(
+			{
+				id: 'slot-2',
+				dateTime: new Date(),
+				programYear: 2026,
+				maxSlots: 10,
+				enabled: true,
+			},
+			'reschedule-client-1',
+		);
 		expect(functions.saveDraftChild).toHaveBeenCalledWith({
 			mutationId: 'save-0001',
 			child: {
@@ -411,12 +414,15 @@ describe('PreRegistrationService', () => {
 			}),
 		).rejects.toThrow('Child ID is required.');
 		await expect(
-			service.changeRegistrationDateTime({
-				dateTime: new Date(),
-				programYear: 2026,
-				enabled: true,
-				maxSlots: 10,
-			}),
+			service.changeRegistrationDateTime(
+				{
+					dateTime: new Date(),
+					programYear: 2026,
+					enabled: true,
+					maxSlots: 10,
+				},
+				'reschedule-client-1',
+			),
 		).rejects.toThrow('Appointment ID is required.');
 	});
 
@@ -427,7 +433,7 @@ describe('PreRegistrationService', () => {
 		snapshot.next(registration());
 		expect(completed.at(-1)).toBe(true);
 
-		await service.undoRegistration();
+		await service.undoRegistration('cancel-client-1');
 
 		expect(completed.at(-1)).toBe(false);
 		expect(visible.at(-1)?.dateTimeSlot).toBeUndefined();
@@ -458,9 +464,9 @@ describe('PreRegistrationService', () => {
 		vi.mocked(functions.undoRegistration).mockRejectedValue(
 			new Error('Cancellation unavailable'),
 		);
-		await expect(service.undoRegistration()).rejects.toThrow(
-			'Cancellation unavailable',
-		);
+		await expect(
+			service.undoRegistration('cancel-client-1'),
+		).rejects.toThrow('Cancellation unavailable');
 		expect(completed.at(-1)).toBe(true);
 	});
 
@@ -475,7 +481,7 @@ describe('PreRegistrationService', () => {
 					resolve = done;
 				}),
 		);
-		const cancellation = service.undoRegistration();
+		const cancellation = service.undoRegistration('cancel-client-1');
 		await vi.waitFor(() =>
 			expect(functions.undoRegistration).toHaveBeenCalledOnce(),
 		);
@@ -625,5 +631,20 @@ describe('PreRegistrationService', () => {
 		resolve({ present, dismiss: vi.fn().mockResolvedValue(true) });
 		await Promise.resolve();
 		expect(present).not.toHaveBeenCalled();
+	});
+	it('does not hide a newer booking when recovering an older cancellation receipt', async () => {
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next({
+			...registration(),
+			registrationSubmittedOn: new Date('2026-11-03T12:00:00Z'),
+		});
+		await service.undoRegistration('original-cancellation', true);
+		expect(functions.undoRegistration).toHaveBeenCalledWith({
+			mutationId: 'original-cancellation',
+		});
+		expect(visible.at(-1)?.registrationSubmittedOn).toEqual(
+			new Date('2026-11-03T12:00:00Z'),
+		);
 	});
 });

@@ -6,6 +6,8 @@ All notable changes to the shared models library will be documented in this file
 
 ### Added
 
+- Allow staff to resolve a targeted email recovery from its queue ID without a customer ID. Ordinary resend requests still identify the customer (#211).
+
 - Add the account-scoped email-change request with an operation ID and expected current address (#227).
 
 - Separate event-reminder admission and delivery timestamps from confirmation status (#226).

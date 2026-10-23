@@ -834,6 +834,103 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		).rejects.toMatchObject({ code: 'failed-precondition' });
 	});
 
+	it.each(['queued', 'sent'] as const)(
+		'rejects recovery of a failed email after a newer request is %s',
+		async (state) => {
+			const uid = 'replaced-email';
+			const original = await completeAndGetQueue(uid);
+			await original.ref.update({ deliveryState: 'failed' });
+			await callableResendRegistrationEmail(
+				createCallableRequest({ customerId: uid }, { uid }),
+			);
+			const db = getFirestore();
+			const jobs = await db
+				.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+				.get();
+			const newer = jobs.docs.find((job) => job.id !== original.id)!;
+			if (state === 'sent') await sendNewRegistrationEmails(newer);
+			const before = await getDocument(
+				COLLECTION_SCHEMA.registrations,
+				uid,
+			);
+			await expect(
+				callableResendRegistrationEmail(
+					createCallableRequest(
+						{ customerId: uid, recoverQueueId: original.id },
+						{ uid },
+					),
+				),
+			).rejects.toMatchObject({ code: 'failed-precondition' });
+			expect(
+				await getDocument(COLLECTION_SCHEMA.registrations, uid),
+			).toEqual(before);
+			expect(
+				(
+					await db
+						.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+						.get()
+				).size,
+			).toBe(2);
+			expect((await original.ref.get()).data()).not.toHaveProperty(
+				'recoveryQueueId',
+			);
+		},
+	);
+
+	it('lets staff recover a cancellation by queue ID after its search index is removed', async () => {
+		const uid = 'cancelled-recovery';
+		await completeAndGetQueue(uid);
+		await undoRegistration(
+			createCallableRequest(
+				{ mutationId: 'cancel-staff-recovery' },
+				{ uid },
+			),
+		);
+		const db = getFirestore();
+		expect(
+			(
+				await db
+					.doc(`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`)
+					.get()
+			).exists,
+		).toBe(false);
+		const cancellations = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('queueSource', '==', 'registration-cancellation')
+			.get();
+		const original = cancellations.docs[0];
+		await original.ref.update({ deliveryState: 'failed' });
+		const request = createCallableRequest(
+			{ recoverQueueId: original.id },
+			{ uid: 'staff-recovery', roles: ['admin'] },
+		);
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest(request.data, { uid }),
+			),
+		).rejects.toMatchObject({ code: 'permission-denied' });
+		await expect(
+			callableResendRegistrationEmail({ ...request, auth: undefined }),
+		).rejects.toMatchObject({ code: 'unauthenticated' });
+		await expect(callableResendRegistrationEmail(request)).resolves.toBe(
+			true,
+		);
+		await expect(callableResendRegistrationEmail(request)).resolves.toBe(
+			true,
+		);
+		const recovered = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('recoveryOfQueueId', '==', original.id)
+			.get();
+		expect(recovered.size).toBe(1);
+		expect(recovered.docs[0].data()).toMatchObject({
+			registrationUid: uid,
+			cancellationLogId: original.data()['cancellationLogId'],
+		});
+		await sendNewRegistrationEmails(recovered.docs[0]);
+		expect(sesSend).toHaveBeenCalledTimes(1);
+	});
+
 	it('requires explicit acknowledgement of an uncertain send and never recovers accepted or obsolete mail', async () => {
 		const uid = 'uncertain-recovery';
 		const snapshot = await completeAndGetQueue(uid);

@@ -69,7 +69,8 @@ export interface OnSiteRegistrationRequest extends Registration {
 }
 
 export interface ResendRegistrationEmailRequest {
-	customerId: string;
+	// Staff may resolve the customer from a known recovery queue ID.
+	customerId?: string;
 	recoverQueueId?: string;
 	acknowledgeUncertainDelivery?: boolean;
 }

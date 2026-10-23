@@ -144,6 +144,19 @@ describe('ResendEmailPage', () => {
 		component.reset();
 		expect(component.form.controls['emailAddress'].value).toBeNull();
 	});
+	it('recovers a known queue job without an active registration search index', async () => {
+		component.form.patchValue({
+			emailAddress: '',
+			recoverQueueId: 'failed-cancellation',
+			acknowledgeUncertainDelivery: true,
+		});
+		await component.searchAndSend();
+		expect(getSearchIndexByEmailAddress$).not.toHaveBeenCalled();
+		expect(callable).toHaveBeenCalledWith({
+			recoverQueueId: 'failed-cancellation',
+			acknowledgeUncertainDelivery: true,
+		});
+	});
 	it('retains targeted recovery details after an uncertain response and forwards explicit acknowledgement', async () => {
 		component.form.patchValue({
 			emailAddress: 'family@example.test',
@@ -160,7 +173,6 @@ describe('ResendEmailPage', () => {
 		);
 		await component.searchAndSend();
 		expect(callable).toHaveBeenNthCalledWith(1, {
-			customerId: 'customer-1',
 			recoverQueueId: 'failed-job-1',
 			acknowledgeUncertainDelivery: true,
 		});

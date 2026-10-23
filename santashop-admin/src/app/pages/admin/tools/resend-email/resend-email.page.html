@@ -45,7 +45,7 @@
 			<ion-button
 				(click)="searchAndSend()"
 				expand="block"
-				[disabled]="!form.valid"
+				[disabled]="!canSend"
 				class="ion-padding-horizontal"
 			>
 				<ion-icon name="mail-outline" slot="start" aria-hidden="true" />

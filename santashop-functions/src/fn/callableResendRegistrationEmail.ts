@@ -13,6 +13,7 @@ import { formatRegistrationDateTime } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
 import { isRegistrationComplete } from '../utility/registrations';
 import { isAdminToken } from '../utility/capabilities';
+import { requireAuthenticatedUid } from '../utility/callable-validation';
 
 interface FirebaseAuthTokenLike {
 	[key: string]: unknown;
@@ -48,6 +49,7 @@ const log = createFunctionLogger('callableResendRegistrationEmail');
 export default async function callableResendRegistrationEmail(
 	request: CallableRequest<ResendRegistrationEmailRequest>,
 ): Promise<boolean> {
+	requireAuthenticatedUid(request);
 	const data = request.data;
 	const recoveryId = data.recoverQueueId;
 	if (recoveryId !== undefined && !/^[A-Za-z0-9_-]{1,128}$/.test(recoveryId))
@@ -60,25 +62,37 @@ export default async function callableResendRegistrationEmail(
 			)
 		: queue.doc();
 	const originalRef = recoveryId ? queue.doc(recoveryId) : undefined;
-	const registrationDocRef = db.doc(
-		`${COLLECTION_SCHEMA.registrations}/${data.customerId}`,
-	);
-	adminOrOwnerGuard(data.customerId, request);
+	if (data.customerId) adminOrOwnerGuard(data.customerId, request);
+	else if (!recoveryId || !isAdminContext(request))
+		throw new HttpsError(
+			'permission-denied',
+			'Only staff can resolve a customer from an email queue ID.',
+		);
 
 	await db.runTransaction(async (transaction) => {
+		const original = originalRef
+			? await transaction.get(originalRef)
+			: undefined;
+		const customerId =
+			data.customerId ??
+			original?.data()?.['registrationUid'] ??
+			original?.id;
+		if (
+			typeof customerId !== 'string' ||
+			!customerId ||
+			customerId.includes('/')
+		)
+			throw new HttpsError('not-found', 'Email job not found.');
+		const registrationDocRef = db.doc(
+			`${COLLECTION_SCHEMA.registrations}/${customerId}`,
+		);
 		const registrationSnapshot = await transaction.get(registrationDocRef);
-		if (recoveryId) {
-			const [original, recovered] = await Promise.all([
-				transaction.get(originalRef!),
-				transaction.get(emailDocRef),
-			]);
+		if (original && originalRef) {
+			const recovered = await transaction.get(emailDocRef);
 			const job = original.data();
 			const registration = registrationSnapshot.data() as
 				Registration | undefined;
-			if (
-				!job ||
-				(job['registrationUid'] ?? original.id) !== data.customerId
-			)
+			if (!job || (job['registrationUid'] ?? original.id) !== customerId)
 				throw new HttpsError(
 					'not-found',
 					'Email job not found for this customer.',
@@ -149,6 +163,25 @@ export default async function callableResendRegistrationEmail(
 					'This email belongs to an older registration.',
 				);
 			}
+			if (!cancellation) {
+				const currentRequestedOn =
+					job['templateKey'] === EMAIL_TEMPLATE_KEYS.eventReminder
+						? (registration.eventReminderQueuedOn ??
+							registration.reminderEmailQueuedOn)
+						: registration.reminderEmailQueuedOn;
+				const originalRequestedOn =
+					job['deliveryRequestedOn'] ?? job['queuedOn'];
+				if (
+					!currentRequestedOn ||
+					!originalRequestedOn ||
+					normalizeDateTime(currentRequestedOn).getTime() !==
+						normalizeDateTime(originalRequestedOn).getTime()
+				)
+					throw new HttpsError(
+						'failed-precondition',
+						'A newer email request replaced this email.',
+					);
+			}
 			if (!cancellation) ensureQrReady(registration);
 			const requestedOn = new Date();
 			transaction.create(emailDocRef, {
@@ -166,7 +199,7 @@ export default async function callableResendRegistrationEmail(
 				lastErrorMessage: false,
 				lastErrorDetails: false,
 			});
-			transaction.update(originalRef!, {
+			transaction.update(originalRef, {
 				recoveryQueueId: emailDocRef.id,
 			});
 			if (!cancellation) {
@@ -198,7 +231,7 @@ export default async function callableResendRegistrationEmail(
 		}
 		const queuedOn = new Date();
 		const emailDoc: ResendEmailDocument = {
-			registrationUid: data.customerId,
+			registrationUid: customerId,
 			code: record.qrcode,
 			qrCodeStoragePath: record.qrCodeStoragePath,
 			email: record.emailAddress,
@@ -258,7 +291,7 @@ function registrationCompleteGuard(record: Registration): void {
 
 function adminOrOwnerGuard(
 	registrationUid: string,
-	request: CallableRequest<{ customerId: string }>,
+	request: CallableRequest<ResendRegistrationEmailRequest>,
 ): void {
 	if (!isAdminContext(request) && registrationUid !== request.auth?.uid) {
 		log.warn('Unauthorized registration email resend attempt', {

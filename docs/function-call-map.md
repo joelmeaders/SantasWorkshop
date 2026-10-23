@@ -23,6 +23,9 @@ one ID and the original payload while their result is uncertain. A changed
 selection or identity session starts a new intent. Recovery displays live
 registration state and does not hide a newer submitted ticket based on an old
 cancellation success. No automatic callable retry loop is added.
+Identity and page lifetime are checked after dialogs and immediately before
+dispatch. Cancellation also checks the identity after resolving registration
+state, before invoking the callable.
 
 Signup requires one client mutation ID for the accepted profile. Before Auth
 creation, a transaction saves the profile and private provisioning intent under
@@ -94,7 +97,12 @@ form. Recovery atomically reserves one child queue ID on the original record.
 It cannot recover that child again, recreate a deleted child, resend accepted
 mail, or bypass contact/appointment checks. Uncertain delivery requires explicit
 acknowledgement. This adds no sweeper or task continuation. Ordinary manual
-resend admission remains the separate scope of issue #212. The thirty-minute
+resend admission remains the separate scope of issue #212. Recovery compares
+the original delivery request with the current request in the transaction and
+cannot replace a newer queued or sent message. Staff may resolve a known queue
+ID without a customer ID or active registration search index; this requires
+staff permission, and ordinary customers must still specify their own UID.
+The thirty-minute
 policy is a finite recovery budget, not a measured bulk-mail delivery SLA.
 
 Confirmation delivery retains the legacy `reminderEmail*` status fields.

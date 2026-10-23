@@ -56,6 +56,12 @@ which template was sent; they do not exclude a first event reminder. This change
 does not clear old flags or launch a campaign. If historical queue evidence was
 deleted, the old flags cannot reconstruct that delivery history.
 
+SES payload clients use one transport attempt, a five-second connection timeout,
+a twenty-second request timeout, and a twenty-five-second abort budget. A lost
+response or stale sending claim requires review rather than automatic resend.
+Known acceptance still permits status repair without sending again. These limits
+apply to registration, password-reset, and template-test payloads.
+
 Both deployed environments ordinarily use SES. The independent email-sending
 control must permit delivery, and emulator delivery remains disabled by default.
 Do not remove these controls when simplifying the queue implementation. See

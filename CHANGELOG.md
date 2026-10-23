@@ -11,6 +11,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Bound each SES payload to one transport attempt and a 25-second send budget. Keep uncertain deliveries for review instead of automatically resending (#210).
+
 - Keep owner-operation browser validation valid after October 15 by checking the seasonal statistics rejection.
 
 - Recover incomplete email changes with saved account-scoped intents, verified outcomes, safe retries, and an editor that stays available for recovery (#227).

@@ -1,4 +1,8 @@
 import {
+	createEmailSendClient,
+	emailSendOptions,
+} from '../utility/email-transport';
+import {
 	customerLanguageOrEnglish,
 	EMAIL_TEMPLATE_KEYS,
 	type CustomerLanguage,
@@ -423,7 +427,8 @@ const getSupersededReason = (
 					// Queues created before the field split still carry the exact
 					// request time in the legacy field. The template proves intent.
 					registration[deliveryField(document, 'QueuedOn')] ??
-						(document.templateKey === EMAIL_TEMPLATE_KEYS.eventReminder
+						(document.templateKey ===
+						EMAIL_TEMPLATE_KEYS.eventReminder
 							? registration.reminderEmailQueuedOn
 							: undefined),
 				))
@@ -620,13 +625,12 @@ const canSkipDelivery = async (
 	}
 
 	if (isStaleSendingDocument(context.document, now)) {
-		await updateQueueDocument(context, {
-			deliveryState: 'queued',
-			failedOn: false,
-			lastErrorMessage: false,
-			lastErrorDetails: false,
-		});
-		context.document.deliveryState = 'queued';
+		await persistDeliveryReviewRequirement(
+			context,
+			now,
+			'Provider acceptance is unknown; automatic resend was skipped.',
+		);
+		return true;
 	}
 
 	return !shouldSendQueuedDocument(context.document);
@@ -1014,6 +1018,7 @@ async function processRegistrationEmail(
 	}
 
 	let response: EmailDeliveryResponse | undefined;
+	let providerAttempted = false;
 
 	try {
 		await updateQueueDocument(context, deliveryMetadata);
@@ -1036,16 +1041,19 @@ async function processRegistrationEmail(
 			});
 			return;
 		}
-		sesClient ??= new SESClient({
+		sesClient ??= createEmailSendClient({
 			credentials,
 			region: SES_REGION,
 		} as SESClientConfig);
+		providerAttempted = true;
 		response = useFallbackEmail
 			? ((await sesClient.send(
 					emailCommand as SendEmailCommand,
+					emailSendOptions(),
 				)) as SendEmailCommandOutput)
 			: ((await sesClient.send(
 					emailCommand as SendTemplatedEmailCommand,
+					emailSendOptions(),
 				)) as SendTemplatedEmailCommandOutput);
 		// SES acceptance records the send request, not recipient delivery.
 		const acceptedOn = new Date();
@@ -1082,6 +1090,19 @@ async function processRegistrationEmail(
 			},
 			err,
 		);
+		if (providerAttempted && !response) {
+			try {
+				await persistDeliveryReviewRequirement(
+					context,
+					new Date(),
+					'Provider acceptance is unknown; automatic resend was skipped.',
+				);
+			} catch (reviewError) {
+				if (!(reviewError instanceof QueueDocumentMissingError))
+					throw reviewError;
+				throw err;
+			}
+		}
 		await persistFailedDelivery(context, queuedOn, response, err);
 	}
 }

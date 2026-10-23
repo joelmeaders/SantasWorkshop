@@ -661,7 +661,7 @@ describe('sendRegistrationEmail handler', () => {
 		);
 	});
 
-	it('requeues stale sending documents instead of abandoning them forever', async () => {
+	it('holds stale sending documents for review without another provider send', async () => {
 		const { sendNewRegistrationEmails } =
 			await loadTriggerScheduledHandlers(backgroundMock);
 		sesSendMock.mockResolvedValue({ $metadata: { httpStatusCode: 200 } });
@@ -705,13 +705,12 @@ describe('sendRegistrationEmail handler', () => {
 			}),
 		} as never);
 
-		expect(sesSendMock).toHaveBeenCalledTimes(1);
+		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
 			backgroundMock.getDocRef('tmp_registrationemails/user-2').update,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
-				deliveryState: 'queued',
-				lastErrorMessage: false,
+				deliveryRequiresReviewOn: expect.any(Date),
 			}),
 		);
 	});

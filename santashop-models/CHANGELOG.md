@@ -2,6 +2,12 @@
 
 All notable changes to the shared models library will be documented in this file.
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Added
+
+- Separate event-reminder admission and delivery timestamps from confirmation status (#226).
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Added

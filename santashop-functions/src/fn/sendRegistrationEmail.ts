@@ -1,5 +1,6 @@
 import {
 	customerLanguageOrEnglish,
+	EMAIL_TEMPLATE_KEYS,
 	type CustomerLanguage,
 } from '@santashop/models';
 import {
@@ -175,6 +176,12 @@ const buildSuccessfulDeliveryUpdates = (sentOn: Date) => ({
 const isCancellationCommunication = (
 	document: QueuedRegistrationEmailDocument,
 ): boolean => document.queueSource === 'registration-cancellation';
+
+const deliveryField = (
+	document: QueuedRegistrationEmailDocument,
+	field: 'QueuedOn' | 'SentOn' | 'FailedOn',
+): keyof Registration =>
+	`${document.templateKey === EMAIL_TEMPLATE_KEYS.eventReminder ? 'eventReminder' : 'reminderEmail'}${field}` as keyof Registration;
 
 const getQueueRequestedOn = (
 	document: QueuedRegistrationEmailDocument,
@@ -413,7 +420,12 @@ const getSupersededReason = (
 			(!document.deliveryRequestedOn ||
 				!datesMatch(
 					document.deliveryRequestedOn,
-					registration.reminderEmailQueuedOn,
+					// Queues created before the field split still carry the exact
+					// request time in the legacy field. The template proves intent.
+					registration[deliveryField(document, 'QueuedOn')] ??
+						(document.templateKey === EMAIL_TEMPLATE_KEYS.eventReminder
+							? registration.reminderEmailQueuedOn
+							: undefined),
 				))
 		) {
 			return 'A newer email delivery request replaced this email.';
@@ -459,12 +471,22 @@ const updateRegistrationDeliveryStatusIfCurrent = async (
 			? (registrationSnapshot.data() as Registration)
 			: undefined;
 		if (
-			(skipWhenAlreadySent && registration?.reminderEmailSentOn) ||
+			(skipWhenAlreadySent &&
+				registration?.[deliveryField(context.document, 'SentOn')]) ||
 			getSupersededReason({ ...context, registration })
 		) {
 			return;
 		}
-		transaction.set(context.registrationDocRef, updates, { merge: true });
+		const status = { ...updates };
+		for (const field of ['QueuedOn', 'SentOn', 'FailedOn'] as const) {
+			const key = `reminderEmail${field}`;
+			if (key in status) {
+				const value = status[key];
+				delete status[key];
+				status[deliveryField(context.document, field)] = value;
+			}
+		}
+		transaction.set(context.registrationDocRef, status, { merge: true });
 	});
 };
 
@@ -551,11 +573,16 @@ const canSkipDelivery = async (
 	if (
 		!context.document.registrationUid &&
 		!isCancellationCommunication(context.document) &&
-		context.registration?.reminderEmailSentOn
+		context.registration?.[deliveryField(context.document, 'SentOn')]
 	) {
 		await syncSentQueueDocument(
 			context,
-			getNormalizedDate(context.registration.reminderEmailSentOn, now),
+			getNormalizedDate(
+				context.registration[
+					deliveryField(context.document, 'SentOn')
+				] as Date,
+				now,
+			),
 		);
 		return true;
 	}

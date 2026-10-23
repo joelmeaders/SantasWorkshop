@@ -32,6 +32,7 @@ describe('bilingual email delivery', () => {
 			qrCodeStoragePath: 'registrations/family/ticket.png',
 			registrationSubmittedOn: now,
 			reminderEmailQueuedOn: now,
+			...(profile === 'event-reminder' ? { eventReminderQueuedOn: now } : {}),
 			dateTimeSlot: { id: 'appointment' },
 			...(profile === 'registration-cancellation'
 				? { cancelledOn: now, cancellationLogId: 'cancel-1' }

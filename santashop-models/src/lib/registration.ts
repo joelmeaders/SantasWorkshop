@@ -40,11 +40,16 @@ export interface Registration {
 
 	referredBy?: string;
 
+	// Legacy delivery fields track confirmations. They do not prove an event reminder was sent.
 	reminderEmailQueuedOn?: false | Date;
 
 	reminderEmailFailedOn?: false | Date;
 
 	reminderEmailSentOn?: false | Date;
+
+	eventReminderQueuedOn?: false | Date;
+	eventReminderSentOn?: false | Date;
+	eventReminderFailedOn?: false | Date;
 
 	qrCodeGeneratedOn?: false | Date;
 

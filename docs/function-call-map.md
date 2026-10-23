@@ -33,6 +33,15 @@ update with `set(..., {merge: true})` can recreate a deleted document and invoke
 the create trigger again. Preserve duplicate/provider-acceptance checks and
 retry semantics; a cloud redelivery need not correspond to a new source edge.
 
+Confirmation delivery retains the legacy `reminderEmail*` status fields.
+Event reminders use separate `eventReminder*` fields. Owner preview and queue
+admission share the same candidate query. A transaction reserves the reminder
+before creating its queue record. Existing queue records with the event-reminder
+template also reserve that allowance. Legacy status flags alone cannot establish
+which template was sent; they do not exclude a first event reminder. This change
+does not clear old flags or launch a campaign. If historical queue evidence was
+deleted, the old flags cannot reconstruct that delivery history.
+
 Both deployed environments ordinarily use SES. The independent email-sending
 control must permit delivery, and emulator delivery remains disabled by default.
 Do not remove these controls when simplifying the queue implementation. See

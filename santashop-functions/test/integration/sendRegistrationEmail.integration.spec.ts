@@ -23,6 +23,9 @@ import sendNewRegistrationEmails from '../../src/fn/sendRegistrationEmail';
 import completeRegistration from '../../src/fn/completeRegistration';
 import changeRegistrationDateTime from '../../src/fn/changeRegistrationDateTime';
 import undoRegistration from '../../src/fn/undoRegistration';
+import queueReminderEmails from '../../src/fn/queueReminderEmails';
+import { previewOwnerOperation } from '../../src/fn/ownerOperations';
+import callableResendRegistrationEmail from '../../src/fn/callableResendRegistrationEmail';
 import { COLLECTION_SCHEMA, EMAIL_TEMPLATE_KEYS } from '@santashop/models';
 import { createRegistration, createUser } from '../fixtures/factories';
 import { createCallableRequest } from '../helpers/callable-context';
@@ -113,7 +116,11 @@ describe.sequential('sendRegistrationEmail integration', () => {
 			setDocument(
 				COLLECTION_SCHEMA.registrations,
 				uid,
-				createRegistration({ uid, qrCodeStoragePath }),
+				createRegistration({
+					uid,
+					qrCodeStoragePath,
+					qrCodeGeneratedOn: new Date('2025-11-01T00:00:00Z'),
+				}),
 			),
 			setDocument(
 				COLLECTION_SCHEMA.users,
@@ -162,6 +169,120 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		});
 		return snapshot;
 	};
+
+	it('keeps a completed and confirmed registration eligible for exactly one event reminder', async () => {
+		const uid = 'confirmation-then-reminder';
+		const confirmation = await completeAndGetQueue(uid);
+		await sendNewRegistrationEmails(confirmation as never);
+		const preview = await previewOwnerOperation(
+			createCallableRequest(
+				{ operation: 'queue-reminder-emails', programYear: 2025 },
+				{ owner: true },
+			),
+		);
+		expect(preview.counts.eligibleRegistrations).toBe(1);
+		const runs = await Promise.all([
+			queueReminderEmails(2025),
+			queueReminderEmails(2025),
+		]);
+		expect(runs.reduce((total, run) => total + run.success, 0)).toBe(1);
+		expect(await queueReminderEmails(2025)).toEqual({
+			success: 0,
+			failed: 0,
+		});
+		const queue = await getFirestore()
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('registrationUid', '==', uid)
+			.get();
+		const reminders = queue.docs.filter(
+			(doc) =>
+				doc.data()['templateKey'] === EMAIL_TEMPLATE_KEYS.eventReminder,
+		);
+		expect(reminders).toHaveLength(1);
+		expect(reminders[0]!.data()).toMatchObject({
+			queueSource: 'scheduled-reminder',
+			deliveryState: 'queued',
+		});
+		await getFirestore()
+			.doc('emailTemplates/reminder/revisions/revision-1')
+			.set({
+				deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder,
+				fieldMappings: [],
+			});
+		await setDocument(COLLECTION_SCHEMA.emailTemplates, 'reminder', {
+			key: 'reminder',
+			displayName: 'Event reminder',
+			deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder,
+			publishedOn: createTimestamp('2025-11-01'),
+			awsTemplateName: 'reminder-published',
+			publishedRevisionId: 'revision-1',
+		});
+		await callableResendRegistrationEmail(
+			createCallableRequest({ customerId: uid }, { roles: ['admin'] }),
+		);
+		await sendNewRegistrationEmails(reminders[0]!);
+		expect(sesSend.mock.calls[1]![0].input.Template).toBe(
+			'reminder-published',
+		);
+		const sent = await getDocument(COLLECTION_SCHEMA.registrations, uid);
+		expect(sent).toMatchObject({
+			eventReminderQueuedOn: reminders[0]!.data()['deliveryRequestedOn'],
+			eventReminderSentOn: expect.anything(),
+			reminderEmailSentOn: false,
+		});
+		await sendNewRegistrationEmails(reminders[0]!);
+		expect(sesSend).toHaveBeenCalledTimes(2);
+		const after = await previewOwnerOperation(
+			createCallableRequest(
+				{ operation: 'queue-reminder-emails', programYear: 2025 },
+				{ owner: true },
+			),
+		);
+		expect(after.counts.eligibleRegistrations).toBe(0);
+	});
+
+	it('delivers a pending event reminder created before the field split and repairs only its event status', async () => {
+		const uid = 'legacy-pending-reminder';
+		const confirmation = await completeAndGetQueue(uid);
+		const db = getFirestore();
+		const legacy = db.collection(COLLECTION_SCHEMA.tmpRegistrationEmails).doc('legacy-pending');
+		await legacy.set({ ...confirmation.data(), templateKey: EMAIL_TEMPLATE_KEYS.eventReminder, queueSource: 'scheduled-reminder' });
+		await db.doc('emailTemplates/reminder/revisions/revision-1').set({ deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder, fieldMappings: [] });
+		await setDocument(COLLECTION_SCHEMA.emailTemplates, 'reminder', { key: 'reminder', displayName: 'Event reminder', deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder, publishedOn: createTimestamp('2025-11-01'), awsTemplateName: 'reminder-published', publishedRevisionId: 'revision-1' });
+		await sendNewRegistrationEmails((await legacy.get()) as never);
+		expect(sesSend).toHaveBeenCalledOnce();
+		expect(await getDocument(COLLECTION_SCHEMA.registrations, uid)).toMatchObject({ eventReminderSentOn: expect.anything(), reminderEmailSentOn: false });
+		expect(await queueReminderEmails(2025)).toEqual({ success: 0, failed: 0 });
+	});
+
+	it('keeps legacy confirmations eligible but preserves durable historical event-reminder admission', async () => {
+		const uid = 'legacy-reminder';
+		const confirmation = await completeAndGetQueue(uid);
+		await sendNewRegistrationEmails(confirmation as never);
+		await setDocument(
+			COLLECTION_SCHEMA.tmpRegistrationEmails,
+			'historical-event-reminder',
+			{
+				registrationUid: uid,
+				templateKey: EMAIL_TEMPLATE_KEYS.eventReminder,
+				deliveryState: 'sent',
+			},
+		);
+		expect(await queueReminderEmails(2025)).toEqual({
+			success: 0,
+			failed: 0,
+		});
+		const preview = await previewOwnerOperation(
+			createCallableRequest(
+				{ operation: 'queue-reminder-emails', programYear: 2025 },
+				{ owner: true },
+			),
+		);
+		expect(preview.counts.eligibleRegistrations).toBe(0);
+		expect(
+			await getDocument(COLLECTION_SCHEMA.registrations, uid),
+		).not.toHaveProperty('eventReminderQueuedOn');
+	});
 
 	it('delivers the actual completion queue with published revision fields and matching registration status', async () => {
 		const uid = 'completion-contract';

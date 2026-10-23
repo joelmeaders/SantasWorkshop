@@ -6,6 +6,7 @@ describe('queueReminderEmails', () => {
 
 	beforeEach(() => {
 		adminMock = createBackgroundAdminMock();
+		adminMock.setCollectionDocs('tmp_registrationemails', []);
 		vi.resetModules();
 		vi.doMock('firebase-admin', () => adminMock.module);
 	});
@@ -35,7 +36,7 @@ describe('queueReminderEmails', () => {
 				id: 'already-sent',
 				data: {
 					...eligible('already-sent'),
-					reminderEmailSentOn: new Date(),
+					eventReminderSentOn: new Date(),
 				},
 			},
 			{
@@ -61,7 +62,7 @@ describe('queueReminderEmails', () => {
 			adminMock.getDocRef('registrations/customer-1').set,
 		).toHaveBeenCalledWith(
 			expect.objectContaining({
-				reminderEmailQueuedOn: expect.any(Date),
+				eventReminderQueuedOn: expect.any(Date),
 			}),
 			{ merge: true },
 		);
@@ -74,7 +75,7 @@ describe('queueReminderEmails', () => {
 		]);
 		adminMock.setDocSnapshot('registrations/customer-1', {
 			...eligible(),
-			reminderEmailSentOn: new Date(),
+			eventReminderSentOn: new Date(),
 		});
 
 		await expect(queue(2025)).resolves.toEqual({ success: 0, failed: 0 });
@@ -132,7 +133,7 @@ describe('queueReminderEmails', () => {
 		expect(
 			adminMock.getDocRef('registrations/customer-1').set,
 		).toHaveBeenCalledWith(
-			{ reminderEmailFailedOn: expect.any(Date) },
+			{ eventReminderFailedOn: expect.any(Date) },
 			{ merge: true },
 		);
 	});

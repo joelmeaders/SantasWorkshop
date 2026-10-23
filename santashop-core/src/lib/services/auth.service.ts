@@ -10,7 +10,12 @@ import {
 } from 'rxjs/operators';
 import { defer, of, merge, Observable, Subject } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
-import { Auth, StaffRole, UserEmailUid } from '@santashop/models';
+import {
+	Auth,
+	StaffRole,
+	UserEmailUid,
+	type EmailChangeRequest,
+} from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
 import {
 	type IdTokenResult,
@@ -25,6 +30,7 @@ export class AuthService {
 	private readonly authWrapper = inject(AuthWrapper);
 	private readonly functionsWrapper = inject(FunctionsWrapper);
 	private readonly refreshedUser$ = new Subject<User | null>();
+	private pendingEmailChange?: EmailChangeRequest & { uid: string };
 
 	/**
 	 * Stream of the current identity, triggered on auth state and refreshes
@@ -179,9 +185,58 @@ export class AuthService {
 
 		const credential = await this.login(auth);
 		await credential.user.getIdToken(true);
-		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
+		const target = newEmailAddress.trim().toLowerCase();
+		if (
+			this.pendingEmailChange?.uid !== currentUser.uid ||
+			this.pendingEmailChange.emailAddress !== target
+		) {
+			this.pendingEmailChange = {
+				uid: currentUser.uid,
+				mutationId: crypto.randomUUID(),
+				emailAddress: target,
+				expectedEmailAddress: currentUser.email!,
+			};
+		}
+		const request: EmailChangeRequest = {
+			mutationId: this.pendingEmailChange.mutationId,
+			emailAddress: target,
+			expectedEmailAddress: this.pendingEmailChange.expectedEmailAddress,
+		};
+		try {
+			await this.functionsWrapper.updateEmailAddress(request);
+		} catch (error) {
+			// Reload even when the response is lost: Auth may already use the new email.
+			const identity = await this.refreshCurrentUser();
+			const details = (
+				error as {
+					details?: {
+						reason?: string;
+						mutationId?: string;
+						targetEmailAddress?: string;
+					};
+				}
+			).details;
+			if (
+				details?.reason === 'email-change-incomplete' &&
+				details.targetEmailAddress === target &&
+				details.mutationId
+			) {
+				this.pendingEmailChange.mutationId = details.mutationId;
+			}
+			if (identity?.email === target) {
+				await this.login({ emailAddress: target, password });
+				throw new Error(
+					'Your sign-in email is ' +
+						target +
+						'. Save the same email again to finish updating your records.',
+					{ cause: error },
+				);
+			}
+			throw error;
+		}
 		await this.login({ emailAddress: newEmailAddress, password });
 		await this.refreshCurrentUser();
+		this.pendingEmailChange = undefined;
 	}
 
 	/**

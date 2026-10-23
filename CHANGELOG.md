@@ -11,6 +11,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Recover incomplete email changes with saved account-scoped intents, verified outcomes, safe retries, and an editor that stays available for recovery (#227).
+
 - Keep confirmed registrations eligible for one event reminder, with matching owner previews, concurrent admission, and historical queue checks (#226).
 
 - Require authentication within five minutes before changing an account email, reject invalid authentication times, and refresh the client token before the request (#225).

@@ -17,6 +17,20 @@ created atomically with the update. A successful replay is returned before
 current draft/feature checks. Appointment selection, submission, cancellation,
 and check-in retain their own transaction and authorization rules.
 
+Email changes require a fresh authenticated token, an operation ID, and the
+expected current email. The backend stores the intent and a short invocation
+lease under `users/{uid}/emailChanges` before changing Auth. The final batch
+updates the user and any existing registration/search records together with
+the completion receipt. A failed batch leaves a retryable intent; a lost batch
+acknowledgement is resolved by reading Auth and that receipt. No rollback to an
+old token email occurs. Completed older operation IDs cannot replace a newer
+intent. An interrupted invocation reserves its intent for two minutes; retain
+the callable's 60-second limit when changing this lease. Recovery remains an
+authenticated customer action, with no background continuation or account scan.
+Deploy the matching client request contract with the backend and refresh older
+clients before retrying. Browser rules do not grant access to the private intent
+subcollection. Annual recursive user deletion also removes its receipts.
+
 Deployed registration handlers read cached public settings through the private
 `publicParametersGateway`. Reader and publisher identities are deliberately
 separate. Local emulator settings are fixtures, not a second deployed source of

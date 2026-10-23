@@ -152,15 +152,13 @@ export class ProfilePageService implements OnDestroy {
 				value.emailAddress!,
 			),
 		)
-			.then(() => {
+			.then(async () => {
 				this.analytics.logEvent('profile_update_email');
-				return this.emailChangedAlert();
+				await this.emailChangedAlert();
+				this.changeEmailForm.reset();
+				await this.router.navigate(['/pre-registration/profile']);
 			})
 			.catch((error) => this.errorHandler.handleError(error));
-
-		this.changeEmailForm.reset();
-
-		this.router.navigate(['/pre-registration/profile']);
 	}
 
 	public async changePassword(): Promise<void> {

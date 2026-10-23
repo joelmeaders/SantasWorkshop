@@ -4,7 +4,11 @@ import {
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from 'firebase/functions';
-import { ChangeUserInfo, ToyType } from '@santashop/models';
+import {
+	ChangeUserInfo,
+	ToyType,
+	type EmailChangeRequest,
+} from '@santashop/models';
 import { FIREBASE_FUNCTIONS } from '../tokens';
 
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
@@ -27,13 +31,11 @@ export class FunctionsWrapper {
 		httpsCallable(this.functions, name);
 
 	public readonly updateEmailAddress = <ResponseData>(
-		newEmailAddress: string,
+		request: EmailChangeRequest,
 	): Promise<_HttpsCallableResult<ResponseData>> =>
-		this.callableWrapper<{ emailAddress: string }, ResponseData>(
+		this.callableWrapper<EmailChangeRequest, ResponseData>(
 			'updateEmailAddress',
-		)({
-			emailAddress: newEmailAddress,
-		});
+		)(request);
 
 	public readonly requestPasswordReset = (
 		emailAddress: string,

@@ -200,6 +200,24 @@ describe('ProfilePageService', () => {
 		},
 	);
 
+	it('keeps the email editor available when an incomplete change needs a retry', async () => {
+		const service = TestBed.inject(ProfilePageService);
+		service.changeEmailForm.setValue({
+			emailAddress: 'next@example.com',
+			password: 'current-secret',
+		});
+		const error = new Error(
+			'Your sign-in email changed. Save the same email again.',
+		);
+		auth.changeEmailAddress.mockRejectedValueOnce(error);
+		await service.changeEmailAddress();
+		expect(errors.handleError).toHaveBeenCalledWith(error);
+		expect(service.changeEmailForm.value.emailAddress).toBe(
+			'next@example.com',
+		);
+		expect(router.navigate).not.toHaveBeenCalled();
+	});
+
 	it('blocks an email change without a valid reauthentication password', async () => {
 		const service = TestBed.inject(ProfilePageService);
 		service.changeEmailForm.patchValue({ emailAddress: 'new@example.com' });

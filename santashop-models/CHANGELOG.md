@@ -6,6 +6,8 @@ All notable changes to the shared models library will be documented in this file
 
 ### Added
 
+- Add the account-scoped email-change request with an operation ID and expected current address (#227).
+
 - Separate event-reminder admission and delivery timestamps from confirmation status (#226).
 
 ## [2026.09.0-beta.3] - Unreleased

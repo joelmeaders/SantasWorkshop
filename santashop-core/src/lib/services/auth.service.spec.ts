@@ -344,6 +344,63 @@ describe('AuthService', () => {
 	});
 
 	describe('changeEmailAddress()', () => {
+		it('recovers the actual email and keeps the same request after a successful response is lost', async () => {
+			const updated = { ...mockUser, email: 'next@example.com' } as User;
+			authWrapperService.currentUser.mockReturnValue(mockUser);
+			authWrapperService.reloadCurrentUser
+				.mockResolvedValueOnce(mockUser)
+				.mockResolvedValue(updated);
+			authWrapperService.signInWithEmailAndPassword.mockResolvedValue({
+				user: mockUser,
+			} as UserCredential);
+			functionsWrapperService.updateEmailAddress
+				.mockRejectedValueOnce(new Error('Response lost'))
+				.mockResolvedValue({ data: true });
+			await expect(
+				service.changeEmailAddress('password', 'next@example.com'),
+			).rejects.toThrow('Your sign-in email is next@example.com');
+			const firstRequest =
+				functionsWrapperService.updateEmailAddress.mock.calls[0]![0];
+			await service.changeEmailAddress('password', 'next@example.com');
+			expect(
+				functionsWrapperService.updateEmailAddress,
+			).toHaveBeenLastCalledWith(firstRequest);
+		});
+		it('refreshes the actual login after partial success and reuses the operation ID on retry', async () => {
+			const updated = { ...mockUser, email: 'next@example.com' } as User;
+			authWrapperService.currentUser.mockReturnValue(mockUser);
+			authWrapperService.reloadCurrentUser
+				.mockResolvedValueOnce(mockUser)
+				.mockResolvedValue(updated);
+			authWrapperService.signInWithEmailAndPassword.mockResolvedValue({
+				user: mockUser,
+			} as UserCredential);
+			functionsWrapperService.updateEmailAddress
+				.mockRejectedValueOnce({
+					code: 'functions/unavailable',
+					details: {
+						reason: 'email-change-incomplete',
+						emailAddress: 'next@example.com',
+						targetEmailAddress: 'next@example.com',
+						mutationId: 'server-operation-id',
+					},
+				})
+				.mockResolvedValue({ data: true });
+			await expect(
+				service.changeEmailAddress('password', 'next@example.com'),
+			).rejects.toThrow('Your sign-in email is next@example.com');
+			expect(
+				authWrapperService.signInWithEmailAndPassword,
+			).toHaveBeenLastCalledWith('next@example.com', 'password');
+			await service.changeEmailAddress('password', 'next@example.com');
+			expect(
+				functionsWrapperService.updateEmailAddress,
+			).toHaveBeenLastCalledWith({
+				mutationId: 'server-operation-id',
+				emailAddress: 'next@example.com',
+				expectedEmailAddress: mockUser.email,
+			});
+		});
 		it('waits for a fresh token before requesting an email change', async () => {
 			authWrapperService.currentUser.mockReturnValue(mockUser);
 			authWrapperService.signInWithEmailAndPassword.mockResolvedValue({
@@ -371,7 +428,13 @@ describe('AuthService', () => {
 			await change;
 			expect(
 				functionsWrapperService.updateEmailAddress,
-			).toHaveBeenCalledWith('next@example.com');
+			).toHaveBeenCalledWith(
+				expect.objectContaining({
+					emailAddress: 'next@example.com',
+					mutationId: expect.any(String),
+					expectedEmailAddress: mockUser.email,
+				}),
+			);
 		});
 
 		it('does not change email when token refresh fails and permits a password retry', async () => {
@@ -448,7 +511,13 @@ describe('AuthService', () => {
 				'test2@test.com',
 				'password',
 			);
-			expect(updateSpy).toHaveBeenCalledWith('test2@test.com');
+			expect(updateSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					emailAddress: 'test2@test.com',
+					mutationId: expect.any(String),
+					expectedEmailAddress: mockUser.email,
+				}),
+			);
 		});
 	});
 

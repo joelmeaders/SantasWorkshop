@@ -4,6 +4,12 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Keep the email editor open after an incomplete email change so the customer can retry the same address (#227).
+
 ## [2026.09.0-beta.10] - 2026-10-07
 
 ### Changed

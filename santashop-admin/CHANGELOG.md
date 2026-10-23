@@ -6,6 +6,8 @@
 
 ### Fixed
 
+- Bound email event processing to thirty minutes and three preparation attempts, recover temporary pre-send failures, and provide one targeted confirmation recovery with explicit uncertain-delivery acknowledgement (#211).
+
 - Retain the same on-site registration request after an uncertain result and prevent concurrent submissions (#206).
 
 ## [2026.09.0-beta.11] - 2026-10-12

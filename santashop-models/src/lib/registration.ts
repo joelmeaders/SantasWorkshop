@@ -67,3 +67,9 @@ export interface Registration {
 export interface OnSiteRegistrationRequest extends Registration {
 	mutationId: string;
 }
+
+export interface ResendRegistrationEmailRequest {
+	customerId: string;
+	recoverQueueId?: string;
+	acknowledgeUncertainDelivery?: boolean;
+}

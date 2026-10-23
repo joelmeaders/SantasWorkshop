@@ -61,6 +61,22 @@ update with `set(..., {merge: true})` can recreate a deleted document and invoke
 the create trigger again. Preserve duplicate/provider-acceptance checks and
 retry semantics; a cloud redelivery need not correspond to a new source edge.
 
+Email create events carry their original ID and time. Events expire after thirty
+minutes, before dependency reads. Preparation uses at most three attempts and a
+150-second lease, longer than the 120-second function timeout. Definite transient
+pre-send failures return the existing job to queued state and throw so the
+platform retries the same create event. Permanent failures stop as failed jobs.
+The provider-send transition checks the preparation attempt in a transaction;
+an old invocation cannot send after a newer attempt takes over.
+
+Staff can recover one known failed or expired email through the resend
+form. Recovery atomically reserves one child queue ID on the original record.
+It cannot recover that child again, recreate a deleted child, resend accepted
+mail, or bypass contact/appointment checks. Uncertain delivery requires explicit
+acknowledgement. This adds no sweeper or task continuation. Ordinary manual
+resend admission remains the separate scope of issue #212. The thirty-minute
+policy is a finite recovery budget, not a measured bulk-mail delivery SLA.
+
 Confirmation delivery retains the legacy `reminderEmail*` status fields.
 Event reminders use separate `eventReminder*` fields. Owner preview and queue
 admission share the same candidate query. A transaction reserves the reminder

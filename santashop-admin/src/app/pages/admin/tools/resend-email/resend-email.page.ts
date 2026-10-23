@@ -23,10 +23,14 @@ import {
 	IonButton,
 	IonIcon,
 	IonLabel,
+	IonCheckbox,
 } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
 import { LookupService } from '../../../../shared/services/lookup.service';
-import { RegistrationSearchIndex } from '@santashop/models';
+import {
+	RegistrationSearchIndex,
+	ResendRegistrationEmailRequest,
+} from '@santashop/models';
 import { HeaderComponent } from '../../../../shared/components/header/header.component';
 import { addIcons } from 'ionicons';
 import { mailOutline } from 'ionicons/icons';
@@ -48,6 +52,7 @@ import { mailOutline } from 'ionicons/icons';
 		IonButton,
 		IonIcon,
 		IonLabel,
+		IonCheckbox,
 	],
 })
 export class ResendEmailPage {
@@ -58,6 +63,8 @@ export class ResendEmailPage {
 	private readonly loading = inject(LoadingController);
 
 	public readonly form = new UntypedFormGroup({
+		recoverQueueId: new UntypedFormControl(''),
+		acknowledgeUncertainDelivery: new UntypedFormControl(false),
 		emailAddress: new UntypedFormControl(undefined, {
 			nonNullable: true,
 			validators: [Validators.required, Validators.email],
@@ -66,10 +73,21 @@ export class ResendEmailPage {
 
 	private readonly sendEmailFn = (
 		customerId: string,
-	): Promise<HttpsCallableResult<number>> =>
-		this.functions.callableWrapper<{ customerId: string }, number>(
+	): Promise<HttpsCallableResult<boolean>> =>
+		this.functions.callableWrapper<ResendRegistrationEmailRequest, boolean>(
 			'callableResendRegistrationEmail',
-		)({ customerId });
+		)({
+			customerId,
+			...(this.form.controls['recoverQueueId'].value?.trim()
+				? {
+						recoverQueueId:
+							this.form.controls['recoverQueueId'].value.trim(),
+						acknowledgeUncertainDelivery:
+							this.form.controls['acknowledgeUncertainDelivery']
+								.value === true,
+					}
+				: {}),
+		});
 
 	constructor() {
 		addIcons({ mailOutline });
@@ -82,9 +100,7 @@ export class ResendEmailPage {
 		const index = await this.searchCustomer(email);
 		if (!index) return;
 
-		await this.sendEmail(index);
-
-		this.form.reset();
+		if (await this.sendEmail(index)) this.form.reset();
 	}
 
 	private async searchCustomer(
@@ -134,7 +150,7 @@ export class ResendEmailPage {
 		return index;
 	}
 
-	private async sendEmail(index: RegistrationSearchIndex): Promise<void> {
+	private async sendEmail(index: RegistrationSearchIndex): Promise<boolean> {
 		try {
 			const loading = await this.loading.create({
 				message: 'Creating email...',
@@ -144,8 +160,7 @@ export class ResendEmailPage {
 
 			await loading.present();
 
-			const result = await this.sendEmailFn(index.customerId);
-			console.log(result);
+			await this.sendEmailFn(index.customerId);
 		} catch (error: unknown) {
 			const err = error as { details?: string; message?: string };
 			const alert = await createAdminAlert(this.alerts, () => ({
@@ -156,7 +171,7 @@ export class ResendEmailPage {
 				buttons: ['OK'],
 			}));
 			await alert.present();
-			return;
+			return false;
 		} finally {
 			if (await this.loading.getTop()) await this.loading.dismiss();
 		}
@@ -174,6 +189,7 @@ export class ResendEmailPage {
 
 		await alert.present();
 		await alert.onDidDismiss();
+		return true;
 	}
 
 	public reset(): void {

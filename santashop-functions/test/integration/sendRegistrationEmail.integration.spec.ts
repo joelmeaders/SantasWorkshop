@@ -19,7 +19,7 @@ vi.mock('@aws-sdk/client-ses', async (importOriginal) => ({
 	},
 }));
 
-import sendNewRegistrationEmails from '../../src/fn/sendRegistrationEmail';
+import processEmailEvent from '../../src/fn/sendRegistrationEmail';
 import completeRegistration from '../../src/fn/completeRegistration';
 import changeRegistrationDateTime from '../../src/fn/changeRegistrationDateTime';
 import undoRegistration from '../../src/fn/undoRegistration';
@@ -37,6 +37,16 @@ import {
 	seedQrCode,
 	setDocument,
 } from '../helpers/admin-emulator';
+
+const sendNewRegistrationEmails: typeof processEmailEvent = (
+	snapshot,
+	metadata = {},
+) =>
+	processEmailEvent(snapshot, {
+		eventId: 'integration-create',
+		eventTime: new Date().toISOString(),
+		...metadata,
+	});
 
 describe.sequential('sendRegistrationEmail integration', () => {
 	beforeAll(async () => {
@@ -245,14 +255,38 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		const uid = 'legacy-pending-reminder';
 		const confirmation = await completeAndGetQueue(uid);
 		const db = getFirestore();
-		const legacy = db.collection(COLLECTION_SCHEMA.tmpRegistrationEmails).doc('legacy-pending');
-		await legacy.set({ ...confirmation.data(), templateKey: EMAIL_TEMPLATE_KEYS.eventReminder, queueSource: 'scheduled-reminder' });
-		await db.doc('emailTemplates/reminder/revisions/revision-1').set({ deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder, fieldMappings: [] });
-		await setDocument(COLLECTION_SCHEMA.emailTemplates, 'reminder', { key: 'reminder', displayName: 'Event reminder', deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder, publishedOn: createTimestamp('2025-11-01'), awsTemplateName: 'reminder-published', publishedRevisionId: 'revision-1' });
+		const legacy = db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.doc('legacy-pending');
+		await legacy.set({
+			...confirmation.data(),
+			templateKey: EMAIL_TEMPLATE_KEYS.eventReminder,
+			queueSource: 'scheduled-reminder',
+		});
+		await db.doc('emailTemplates/reminder/revisions/revision-1').set({
+			deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder,
+			fieldMappings: [],
+		});
+		await setDocument(COLLECTION_SCHEMA.emailTemplates, 'reminder', {
+			key: 'reminder',
+			displayName: 'Event reminder',
+			deliveryProfile: EMAIL_TEMPLATE_KEYS.eventReminder,
+			publishedOn: createTimestamp('2025-11-01'),
+			awsTemplateName: 'reminder-published',
+			publishedRevisionId: 'revision-1',
+		});
 		await sendNewRegistrationEmails((await legacy.get()) as never);
 		expect(sesSend).toHaveBeenCalledOnce();
-		expect(await getDocument(COLLECTION_SCHEMA.registrations, uid)).toMatchObject({ eventReminderSentOn: expect.anything(), reminderEmailSentOn: false });
-		expect(await queueReminderEmails(2025)).toEqual({ success: 0, failed: 0 });
+		expect(
+			await getDocument(COLLECTION_SCHEMA.registrations, uid),
+		).toMatchObject({
+			eventReminderSentOn: expect.anything(),
+			reminderEmailSentOn: false,
+		});
+		expect(await queueReminderEmails(2025)).toEqual({
+			success: 0,
+			failed: 0,
+		});
 	});
 
 	it('keeps legacy confirmations eligible but preserves durable historical event-reminder admission', async () => {
@@ -351,6 +385,7 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		// after the worker has persisted provider acceptance in real Firestore.
 		const transactionSpy = vi
 			.spyOn(db, 'runTransaction')
+			.mockImplementationOnce(runTransaction)
 			.mockImplementationOnce(runTransaction)
 			.mockImplementationOnce(async () => {
 				const persisted = (await snapshot.ref.get()).data()!;
@@ -690,5 +725,286 @@ describe.sequential('sendRegistrationEmail integration', () => {
 				}
 			).toMillis(),
 		).toBe(newerQueuedOn.toMillis());
+	});
+	it('recovers a transient preparation outage on the same create event with one provider send', async () => {
+		const uid = 'preparation-recovery';
+		const snapshot = await completeAndGetQueue(uid);
+		const db = getFirestore();
+		const doc = db.doc.bind(db);
+		let profileReads = 0;
+		const spy = vi.spyOn(db, 'doc').mockImplementation((path) => {
+			const ref = doc(path);
+			if (path === 'users/' + uid && profileReads++ === 0)
+				vi.spyOn(ref, 'get').mockRejectedValueOnce(
+					Object.assign(new Error('Temporary outage'), { code: 14 }),
+				);
+			return ref;
+		});
+		const metadata = {
+			eventId: 'original-create',
+			eventTime: new Date().toISOString(),
+		};
+		await expect(
+			processEmailEvent(snapshot as never, metadata),
+		).rejects.toThrow('Temporary outage');
+		expect(sesSend).not.toHaveBeenCalled();
+		expect((await snapshot.ref.get()).data()).toMatchObject({
+			deliveryState: 'queued',
+			deliveryAttemptCount: 1,
+		});
+		await processEmailEvent(snapshot as never, metadata);
+		spy.mockRestore();
+		expect(sesSend).toHaveBeenCalledTimes(1);
+		expect((await snapshot.ref.get()).data()).toMatchObject({
+			deliveryState: 'sent',
+			deliveryAttemptCount: 2,
+		});
+	});
+
+	it('exhausts preparation after three attempts, then permits one authorized targeted recovery', async () => {
+		const uid = 'preparation-exhausted';
+		const snapshot = await completeAndGetQueue(uid);
+		const db = getFirestore();
+		const doc = db.doc.bind(db);
+		let profileReads = 0;
+		const spy = vi.spyOn(db, 'doc').mockImplementation((path) => {
+			const ref = doc(path);
+			if (path === 'users/' + uid) {
+				profileReads++;
+				vi.spyOn(ref, 'get').mockRejectedValue(
+					Object.assign(new Error('Outage'), { code: 14 }),
+				);
+			}
+			return ref;
+		});
+		const metadata = {
+			eventId: 'original-create',
+			eventTime: new Date().toISOString(),
+		};
+		for (let attempt = 0; attempt < 2; attempt++)
+			await expect(
+				processEmailEvent(snapshot as never, metadata),
+			).rejects.toThrow('Outage');
+		await processEmailEvent(snapshot as never, metadata);
+		await processEmailEvent(snapshot as never, metadata);
+		expect(profileReads).toBe(3);
+		spy.mockRestore();
+		expect(sesSend).not.toHaveBeenCalled();
+		expect((await snapshot.ref.get()).data()).toMatchObject({
+			deliveryState: 'failed',
+			deliveryAttemptCount: 3,
+		});
+		const recover = createCallableRequest(
+			{ customerId: uid, recoverQueueId: snapshot.id },
+			{ uid },
+		);
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest(recover.data, { uid: 'wrong-user' }),
+			),
+		).rejects.toMatchObject({ code: 'permission-denied' });
+		await Promise.all([
+			callableResendRegistrationEmail(recover),
+			callableResendRegistrationEmail(recover),
+		]);
+		const jobs = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('recoveryOfQueueId', '==', snapshot.id)
+			.get();
+		expect(jobs.size).toBe(1);
+		await sendNewRegistrationEmails(jobs.docs[0]);
+		expect(sesSend).toHaveBeenCalledTimes(1);
+		await callableResendRegistrationEmail(recover);
+		expect(
+			(await db.collection(COLLECTION_SCHEMA.tmpRegistrationEmails).get())
+				.size,
+		).toBe(2);
+		await jobs.docs[0].ref.update({
+			deliveryState: 'failed',
+			deliveryProviderAcceptedOn: false,
+			deliveryProviderMessageId: false,
+		});
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest(
+					{ customerId: uid, recoverQueueId: jobs.docs[0].id },
+					{ uid },
+				),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+	});
+
+	it('requires explicit acknowledgement of an uncertain send and never recovers accepted or obsolete mail', async () => {
+		const uid = 'uncertain-recovery';
+		const snapshot = await completeAndGetQueue(uid);
+		await snapshot.ref.update({
+			deliveryState: 'failed',
+			deliveryRequiresReviewOn: new Date(),
+		});
+		const data = { customerId: uid, recoverQueueId: snapshot.id };
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest(data, { uid }),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+		await snapshot.ref.update({ deliveryProviderMessageId: 'accepted' });
+		await expect(
+			callableResendRegistrationEmail(
+				createCallableRequest(
+					{ ...data, acknowledgeUncertainDelivery: true },
+					{ uid },
+				),
+			),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+		await snapshot.ref.update({ deliveryProviderMessageId: false });
+		await callableResendRegistrationEmail(
+			createCallableRequest(
+				{ ...data, acknowledgeUncertainDelivery: true },
+				{ uid },
+			),
+		);
+		expect(sesSend).not.toHaveBeenCalled();
+	});
+	it('preserves reminder and cancellation purposes during targeted recovery and never recreates a deleted recovery job', async () => {
+		const uid = 'purpose-recovery';
+		const reminder = await completeAndGetQueue(uid);
+		await reminder.ref.update({
+			templateKey: EMAIL_TEMPLATE_KEYS.eventReminder,
+			deliveryState: 'failed',
+		});
+		const request = createCallableRequest(
+			{ customerId: uid, recoverQueueId: reminder.id },
+			{ uid },
+		);
+		await callableResendRegistrationEmail(request);
+		const db = getFirestore();
+		const reminders = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('recoveryOfQueueId', '==', reminder.id)
+			.get();
+		expect(reminders.docs[0].data()['templateKey']).toBe(
+			EMAIL_TEMPLATE_KEYS.eventReminder,
+		);
+		await reminders.docs[0].ref.delete();
+		await callableResendRegistrationEmail(request);
+		expect((await reminders.docs[0].ref.get()).exists).toBe(false);
+		await undoRegistration(
+			createCallableRequest({ mutationId: 'cancel-recovery-1' }, { uid }),
+		);
+		const cancellations = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('queueSource', '==', 'registration-cancellation')
+			.get();
+		const cancellation = cancellations.docs[0];
+		await cancellation.ref.update({ deliveryState: 'failed' });
+		await callableResendRegistrationEmail(
+			createCallableRequest(
+				{ customerId: uid, recoverQueueId: cancellation.id },
+				{ uid },
+			),
+		);
+		const recovered = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('recoveryOfQueueId', '==', cancellation.id)
+			.get();
+		expect(recovered.docs[0].data()).toMatchObject({
+			templateKey: 'registration-cancellation',
+			cancellationLogId: cancellation.data()['cancellationLogId'],
+		});
+		expect(
+			await getDocument(COLLECTION_SCHEMA.registrations, uid),
+		).not.toHaveProperty('registrationSubmittedOn');
+	});
+
+	it('prevents an expired preparation attempt from sending after another attempt finishes', async () => {
+		const uid = 'preparation-fence';
+		const snapshot = await completeAndGetQueue(uid);
+		const db = getFirestore();
+		const doc = db.doc.bind(db);
+		let release!: () => void;
+		let started!: () => void;
+		const preparing = new Promise<void>((resolve) => {
+			started = resolve;
+		});
+		const blocked = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		let first = true;
+		const spy = vi.spyOn(db, 'doc').mockImplementation((path) => {
+			const ref = doc(path);
+			if (path === 'users/' + uid && first) {
+				first = false;
+				const get = ref.get.bind(ref);
+				vi.spyOn(ref, 'get').mockImplementationOnce(async () => {
+					started();
+					await blocked;
+					return get();
+				});
+			}
+			return ref;
+		});
+		const metadata = {
+			eventId: 'same-create',
+			eventTime: new Date().toISOString(),
+		};
+		const old = processEmailEvent(snapshot as never, metadata);
+		await preparing;
+		await snapshot.ref.update({
+			deliveryAttemptedOn: new Date(Date.now() - 151_000),
+		});
+		await processEmailEvent(snapshot as never, metadata);
+		await doc('emailTemplates/confirmation').update({
+			publishedRevisionId: 'revision-after-send',
+		});
+		await doc(
+			'emailTemplates/confirmation/revisions/revision-after-send',
+		).set({ fieldMappings: [] });
+		release();
+		await old;
+		spy.mockRestore();
+		expect(sesSend).toHaveBeenCalledTimes(1);
+		expect((await snapshot.ref.get()).data()).toMatchObject({
+			deliveryState: 'sent',
+			deliveryAttemptCount: 2,
+			selectedRevisionId: 'revision-1',
+		});
+	});
+	it('does not send when contact changes while a claimed email is being prepared', async () => {
+		const uid = 'contact-during-preparation';
+		const snapshot = await completeAndGetQueue(uid);
+		const db = getFirestore();
+		const doc = db.doc.bind(db);
+		let release!: () => void;
+		let started!: () => void;
+		const preparing = new Promise<void>((resolve) => {
+			started = resolve;
+		});
+		const blocked = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const spy = vi.spyOn(db, 'doc').mockImplementation((path) => {
+			const ref = doc(path);
+			if (path === 'users/' + uid) {
+				const get = ref.get.bind(ref);
+				vi.spyOn(ref, 'get').mockImplementationOnce(async () => {
+					started();
+					await blocked;
+					return get();
+				});
+			}
+			return ref;
+		});
+		const delivery = sendNewRegistrationEmails(snapshot as never);
+		await preparing;
+		await doc('registrations/' + uid).update({
+			emailAddress: 'changed@example.test',
+		});
+		release();
+		await delivery;
+		spy.mockRestore();
+		expect(sesSend).not.toHaveBeenCalled();
+		expect((await snapshot.ref.get()).data()).toMatchObject({
+			deliveryState: 'superseded',
+		});
 	});
 });

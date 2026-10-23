@@ -884,5 +884,7 @@
 	"Edit date / time": "Edit date / time",
 	"Edit schedule": "Edit schedule",
 	"The result is uncertain. Retry to recover the same family submission.": "The result is uncertain. Retry to recover the same family submission.",
-	"Correct the registration details and submit again.": "Correct the registration details and submit again."
+	"Correct the registration details and submit again.": "Correct the registration details and submit again.",
+	"Failed email queue ID (optional)": "Failed email queue ID (optional)",
+	"I reviewed the uncertain delivery and accept that recovery can send a duplicate.": "I reviewed the uncertain delivery and accept that recovery can send a duplicate."
 }

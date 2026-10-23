@@ -118,9 +118,16 @@ describe('sendRegistrationEmail handler', () => {
 		const queue = backgroundMock.getDocRef('tmp_registrationemails/user-1');
 		queue.update
 			.mockResolvedValueOnce(undefined)
-			.mockRejectedValueOnce(
-				Object.assign(new Error('Queue no longer exists'), { code: 5 }),
-			);
+			.mockImplementationOnce(async () => {
+				backgroundMock.setDocSnapshot(
+					'tmp_registrationemails/user-1',
+					{},
+					false,
+				);
+				throw Object.assign(new Error('Queue no longer exists'), {
+					code: 5,
+				});
+			});
 
 		await expect(
 			sendNewRegistrationEmails(snapshot as never),
@@ -200,7 +207,7 @@ describe('sendRegistrationEmail handler', () => {
 		);
 	});
 
-	it('does not suppress a NOT_FOUND error from a profile read', async () => {
+	it('records a permanent profile-read failure as a terminal job', async () => {
 		const { sendNewRegistrationEmails } =
 			await loadTriggerScheduledHandlers(backgroundMock);
 		const snapshot = prepareQueuedEmail();
@@ -211,9 +218,9 @@ describe('sendRegistrationEmail handler', () => {
 			.getDocRef('users/user-1')
 			.get.mockRejectedValueOnce(missingProfile);
 
-		await expect(sendNewRegistrationEmails(snapshot as never)).rejects.toBe(
-			missingProfile,
-		);
+		await expect(
+			sendNewRegistrationEmails(snapshot as never),
+		).resolves.toBeUndefined();
 
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
@@ -747,6 +754,7 @@ describe('sendRegistrationEmail handler', () => {
 		}
 		backgroundMock.runTransaction
 			.mockImplementationOnce(transactionImplementation)
+			.mockImplementationOnce(transactionImplementation)
 			.mockRejectedValueOnce(new Error('registration write failed'));
 		backgroundMock
 			.getDocRef('tmp_registrationemails/user-1')
@@ -783,7 +791,7 @@ describe('sendRegistrationEmail handler', () => {
 				deliveryCompletedOn: expect.any(Date),
 			}),
 		);
-		expect(backgroundMock.runTransaction).toHaveBeenCalledTimes(2);
+		expect(sesSendMock).toHaveBeenCalledTimes(1);
 
 		backgroundMock.setDocSnapshot(
 			'tmp_registrationemails/user-1',
@@ -1058,5 +1066,25 @@ describe('sendRegistrationEmail handler', () => {
 				firstName: 'Noelle',
 			}),
 		);
+	});
+	it('stops expired or malformed create events before any dependency read', async () => {
+		sesSendMock.mockResolvedValue({ MessageId: 'unexpected' });
+		const { sendNewRegistrationEmails } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const snapshot = prepareQueuedEmail();
+		sesSendMock.mockResolvedValue({ MessageId: 'unexpected' });
+		for (const eventTime of [
+			new Date(Date.now() - 31 * 60_000).toISOString(),
+			'bad-time',
+		]) {
+			await sendNewRegistrationEmails(snapshot as never, {
+				eventId: 'old-create',
+				eventTime,
+			});
+		}
+		expect(
+			backgroundMock.getDocRef('tmp_registrationemails/user-1').get,
+		).not.toHaveBeenCalled();
+		expect(sesSendMock).not.toHaveBeenCalled();
 	});
 });

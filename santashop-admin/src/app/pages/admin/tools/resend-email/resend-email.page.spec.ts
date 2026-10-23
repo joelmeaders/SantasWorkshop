@@ -144,4 +144,26 @@ describe('ResendEmailPage', () => {
 		component.reset();
 		expect(component.form.controls['emailAddress'].value).toBeNull();
 	});
+	it('retains targeted recovery details after an uncertain response and forwards explicit acknowledgement', async () => {
+		component.form.patchValue({
+			emailAddress: 'family@example.test',
+			recoverQueueId: 'failed-job-1',
+			acknowledgeUncertainDelivery: true,
+		});
+		getSearchIndexByEmailAddress$.mockReturnValue(
+			of({ customerId: 'customer-1' }),
+		);
+		callable.mockRejectedValueOnce(new Error('Lost response'));
+		await component.searchAndSend();
+		expect(component.form.controls['recoverQueueId'].value).toBe(
+			'failed-job-1',
+		);
+		await component.searchAndSend();
+		expect(callable).toHaveBeenNthCalledWith(1, {
+			customerId: 'customer-1',
+			recoverQueueId: 'failed-job-1',
+			acknowledgeUncertainDelivery: true,
+		});
+		expect(callable.mock.calls[1]).toEqual(callable.mock.calls[0]);
+	});
 });

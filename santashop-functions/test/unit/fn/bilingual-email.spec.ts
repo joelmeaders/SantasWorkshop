@@ -32,7 +32,9 @@ describe('bilingual email delivery', () => {
 			qrCodeStoragePath: 'registrations/family/ticket.png',
 			registrationSubmittedOn: now,
 			reminderEmailQueuedOn: now,
-			...(profile === 'event-reminder' ? { eventReminderQueuedOn: now } : {}),
+			...(profile === 'event-reminder'
+				? { eventReminderQueuedOn: now }
+				: {}),
 			dateTimeSlot: { id: 'appointment' },
 			...(profile === 'registration-cancellation'
 				? { cancelledOn: now, cancellationLogId: 'cancel-1' }
@@ -233,7 +235,7 @@ describe('bilingual email delivery', () => {
 				id: 'message',
 				data: (): object => ({}),
 			} as never),
-		).rejects.toThrow('published SES template');
+		).resolves.toBeUndefined();
 		expect(sesSendMock).not.toHaveBeenCalled();
 		expect(
 			db.getDocRef('tmp_registrationemails/message').update,

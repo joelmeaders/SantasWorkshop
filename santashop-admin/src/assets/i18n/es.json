@@ -884,5 +884,7 @@
 	"Edit date / time": "Editar fecha / hora",
 	"Edit schedule": "Editar horario",
 	"The result is uncertain. Retry to recover the same family submission.": "El resultado es incierto. Reintenta para recuperar el mismo registro familiar.",
-	"Correct the registration details and submit again.": "Corrige los datos del registro y envíalo de nuevo."
+	"Correct the registration details and submit again.": "Corrige los datos del registro y envíalo de nuevo.",
+	"Failed email queue ID (optional)": "ID del correo fallido en la cola (opcional)",
+	"I reviewed the uncertain delivery and accept that recovery can send a duplicate.": "Revisé el envío incierto y acepto que la recuperación puede enviar un duplicado."
 }

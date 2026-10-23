@@ -11,6 +11,8 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Keep owner-operation browser validation valid after October 15 by checking the seasonal statistics rejection.
+
 - Recover incomplete email changes with saved account-scoped intents, verified outcomes, safe retries, and an editor that stays available for recovery (#227).
 
 - Keep confirmed registrations eligible for one event reminder, with matching owner previews, concurrent admission, and historical queue checks (#226).

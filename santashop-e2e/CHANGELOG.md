@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Assert the owner statistics preview rejection after October 15 instead of expecting a preview outside the permitted season.
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Added

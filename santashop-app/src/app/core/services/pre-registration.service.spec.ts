@@ -478,6 +478,17 @@ describe('PreRegistrationService', () => {
 		expect(completed.at(-1)).toBe(true);
 	});
 
+	it('does not dispatch a cancellation if identity changes while registration state resolves', async () => {
+		observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		const cancellation = service.undoRegistration('cancel-before-dispatch');
+		auth.next(identity('second'));
+		snapshot.next(registration('second'));
+		await expect(cancellation).rejects.toThrow('Account changed');
+		expect(functions.undoRegistration).not.toHaveBeenCalled();
+	});
+
 	it('ignores an old cancellation response after the signed-in identity changes', async () => {
 		const completed = observe(service.registrationCompleteResolved$);
 		auth.next(identity('first'));

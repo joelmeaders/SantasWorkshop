@@ -300,15 +300,13 @@ describe('ConfirmationPage', () => {
 		loadingController.create.mockResolvedValue(loader);
 		modalController.create.mockResolvedValue({
 			present: vi.fn().mockResolvedValue(undefined),
-			onDidDismiss: vi
-				.fn()
-				.mockResolvedValue({
-					role: 'confirm',
-					data: {
-						id: 'next-slot',
-						dateTime: new Date('2026-12-11T18:00:00Z'),
-					},
-				}),
+			onDidDismiss: vi.fn().mockResolvedValue({
+				role: 'confirm',
+				data: {
+					id: 'next-slot',
+					dateTime: new Date('2026-12-11T18:00:00Z'),
+				},
+			}),
 		});
 		router.navigate = vi.fn().mockResolvedValue(true);
 
@@ -398,6 +396,59 @@ describe('ConfirmationPage', () => {
 		expect(router.navigate).not.toHaveBeenCalled();
 		expect(loader.dismiss).toHaveBeenCalledOnce();
 	});
+	it.each(['dialog', 'loader'] as const)(
+		'does not cancel or reschedule another account after identity changes during the %s',
+		async (stage) => {
+			const service = TestBed.inject(PreRegistrationService);
+			let identity = 'account-A';
+			Object.defineProperty(service, 'currentIdentityKey', {
+				get: () => identity,
+				configurable: true,
+			});
+			const changeIdentity = (): void => {
+				identity = 'account-B';
+			};
+			const dialogResult = async (): Promise<{
+				role: string;
+				data: { id: string; dateTime: Date };
+			}> => {
+				if (stage === 'dialog') changeIdentity();
+				return {
+					role: 'confirm',
+					data: {
+						id: 'slot-B',
+						dateTime: new Date('2026-12-12T18:00:00Z'),
+					},
+				};
+			};
+			vi.mocked(TestBed.inject(AlertController).create).mockResolvedValue(
+				{
+					present: vi.fn(),
+					onDidDismiss: dialogResult,
+				} as unknown as HTMLIonAlertElement,
+			);
+			vi.mocked(TestBed.inject(ModalController).create).mockResolvedValue(
+				{
+					present: vi.fn(),
+					onDidDismiss: dialogResult,
+				} as unknown as HTMLIonModalElement,
+			);
+			vi.mocked(
+				TestBed.inject(LoadingController).create,
+			).mockResolvedValue({
+				present: async (): Promise<void> => {
+					if (stage === 'loader') changeIdentity();
+				},
+				dismiss: vi.fn().mockResolvedValue(true),
+			} as unknown as HTMLIonLoadingElement);
+			await component.undoRegistration();
+			expect(service.undoRegistration).not.toHaveBeenCalled();
+			identity = 'account-A';
+			await component.changeRegistration();
+			expect(service.changeRegistrationDateTime).not.toHaveBeenCalled();
+		},
+	);
+
 	it('reuses cancellation identity after a lost response and prevents concurrent confirmations', async () => {
 		const service = TestBed.inject(PreRegistrationService);
 		vi.mocked(TestBed.inject(AlertController).create).mockResolvedValue({

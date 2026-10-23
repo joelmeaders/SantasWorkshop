@@ -1,6 +1,7 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	DestroyRef,
 	ElementRef,
 	computed,
 	inject,
@@ -87,6 +88,7 @@ export class ConfirmationPage {
 	public readonly calendarDate = dateToCalendarString;
 	public readonly viewService = inject(PreRegistrationService);
 	private readonly loadingController = inject(LoadingController);
+	private readonly destroyRef = inject(DestroyRef);
 	private readonly alertController = inject(AlertController);
 	private readonly modalController = inject(ModalController);
 	private readonly router = inject(Router);
@@ -159,6 +161,7 @@ export class ConfirmationPage {
 		if (this.mutationPending()) return;
 		this.mutationPending.set(true);
 		this.resetPendingForIdentity();
+		const uid = this.intentUid;
 		try {
 			const alert = await this.alertController.create({
 				header: this.translateService.instant(
@@ -184,9 +187,9 @@ export class ConfirmationPage {
 			const shouldContinue = await alert.onDidDismiss();
 
 			if (shouldContinue.role !== 'confirm') return;
+			if (!this.isCurrentIdentity(uid)) return;
 			const recovering = !!this.cancellationId;
 			const mutationId = (this.cancellationId ??= crypto.randomUUID());
-			const uid = this.intentUid;
 
 			const loader = await this.loadingController.create({
 				message: this.translateService.instant(
@@ -197,6 +200,7 @@ export class ConfirmationPage {
 			await loader.present();
 
 			try {
+				if (!this.isCurrentIdentity(uid)) return;
 				await trackAnalyticsOperation(
 					this.analytics,
 					'registration_cancel',
@@ -206,7 +210,7 @@ export class ConfirmationPage {
 							recovering,
 						),
 				);
-				if (uid !== this.viewService.currentIdentityKey) return;
+				if (!this.isCurrentIdentity(uid)) return;
 				this.cancellationId = undefined;
 				this.analytics.logEvent('cancel_registration');
 				await this.router.navigate(['/pre-registration/overview']);
@@ -224,6 +228,7 @@ export class ConfirmationPage {
 		if (this.mutationPending()) return;
 		this.mutationPending.set(true);
 		this.resetPendingForIdentity();
+		const uid = this.intentUid;
 		try {
 			// Check if user has already been checked in
 			const hasCheckedIn = await firstValueFrom(
@@ -267,6 +272,7 @@ export class ConfirmationPage {
 			const result = await modal.onDidDismiss<DateTimeSlot>();
 
 			if (result.role !== 'confirm' || !result.data) return;
+			if (!this.isCurrentIdentity(uid)) return;
 			const selected = result.data;
 			if (
 				!this.appointmentIntent ||
@@ -283,7 +289,6 @@ export class ConfirmationPage {
 				};
 			}
 			const intent = this.appointmentIntent;
-			const uid = this.intentUid;
 
 			const loader = await this.loadingController.create({
 				message: this.translateService.instant(
@@ -294,6 +299,7 @@ export class ConfirmationPage {
 			await loader.present();
 
 			try {
+				if (!this.isCurrentIdentity(uid)) return;
 				await trackAnalyticsOperation(
 					this.analytics,
 					'appointment_change',
@@ -303,7 +309,7 @@ export class ConfirmationPage {
 							intent.mutationId,
 						),
 				);
-				if (uid !== this.viewService.currentIdentityKey) return;
+				if (!this.isCurrentIdentity(uid)) return;
 				this.appointmentIntent = undefined;
 				this.analytics.logEvent('change_registration_datetime');
 
@@ -334,5 +340,12 @@ export class ConfirmationPage {
 		} finally {
 			this.mutationPending.set(false);
 		}
+	}
+
+	private isCurrentIdentity(identity: string | undefined): boolean {
+		return (
+			!this.destroyRef.destroyed &&
+			identity === this.viewService.currentIdentityKey
+		);
 	}
 }

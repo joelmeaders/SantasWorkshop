@@ -278,10 +278,13 @@ export class PreRegistrationService {
 		mutationId: string,
 		recovering = false,
 	): Promise<HttpsCallableResult<true>> {
-		const { registration } = await firstValueFrom(
+		const registrationState = firstValueFrom(
 			this.registrationState$.pipe(filter((state) => !state.loading)),
 		);
 		const version = this.registrationVersion;
+		const { registration } = await registrationState;
+		if (version !== this.registrationVersion || this.destroyRef.destroyed)
+			throw new Error('Account changed before cancellation.');
 		const result = await this.afFunctions.undoRegistration({
 			mutationId,
 		});

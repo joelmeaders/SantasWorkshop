@@ -8,6 +8,7 @@ All notable changes to the main application will be documented in this file.
 
 ### Fixed
 
+- Reopen the profile email editor after verified recovery from either customer flow, restore the target address, and require password re-entry without weakening account-change teardown (#227).
 - Acknowledge only the original submitted ticket after successful cancellation recovery so the overview guard does not redirect to a stale ticket (#213).
 
 - Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).

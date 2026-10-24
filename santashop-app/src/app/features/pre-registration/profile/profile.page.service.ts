@@ -1,4 +1,5 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, OnDestroy, inject, signal } from '@angular/core';
+import { EmailChangeRecoveryService } from '../../../core/services/email-change-recovery.service';
 import { Router } from '@angular/router';
 import {
 	ErrorHandlerService,
@@ -36,6 +37,7 @@ import { changeEmailForm, changePasswordForm } from './profile.form';
 export class ProfilePageService implements OnDestroy {
 	private readonly httpService = inject(FireRepoLite);
 	private readonly authService = inject(AuthService);
+	private readonly emailRecovery = inject(EmailChangeRecoveryService);
 	private readonly functions = inject(FunctionsWrapper);
 	private readonly errorHandler = inject(ErrorHandlerService);
 	private readonly alertController = inject(AlertController);
@@ -52,6 +54,7 @@ export class ProfilePageService implements OnDestroy {
 	public readonly profileForm = newChangeInfoForm();
 
 	public readonly changeEmailForm = changeEmailForm();
+	public readonly recoveringEmail = signal(false);
 
 	public readonly changePasswordForm = changePasswordForm();
 
@@ -66,7 +69,15 @@ export class ProfilePageService implements OnDestroy {
 				this.profileUpdates$.next({});
 				this.profileForm.reset();
 				this.changeEmailForm.reset();
+				this.recoveringEmail.set(false);
 				this.changePasswordForm.reset();
+			}
+			const recovery = this.authService.emailChangeRecovery;
+			if (recovery && recovery.uid === user?.uid) {
+				this.changeEmailForm.reset({
+					emailAddress: recovery.emailAddress,
+				});
+				this.recoveringEmail.set(true);
 			}
 			return user
 				? combineLatest([
@@ -154,11 +165,15 @@ export class ProfilePageService implements OnDestroy {
 		)
 			.then(async () => {
 				this.analytics.logEvent('profile_update_email');
+				this.recoveringEmail.set(false);
 				await this.emailChangedAlert();
 				this.changeEmailForm.reset();
 				await this.router.navigate(['/pre-registration/profile']);
 			})
-			.catch((error) => this.errorHandler.handleError(error));
+			.catch(async (error) => {
+				await this.emailRecovery.recover(error);
+				await this.errorHandler.handleError(error);
+			});
 	}
 
 	public async changePassword(): Promise<void> {

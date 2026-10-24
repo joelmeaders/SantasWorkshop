@@ -11,6 +11,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Restore the email recovery editor and target after verified sign-in recovery, clear its password, and preserve teardown for genuine sign-out or account changes (#227).
 - Recover the original account after an email change invalidates its Firebase session, without losing the operation ID or original failure (#227).
 - Reconcile the original submitted ticket after a successful cancellation retry before delayed snapshots arrive (#213).
 - Make an email's original preparation non-sendable when reserving recovery, and reject stale names or QR paths before consuming the recovery allowance (#211).

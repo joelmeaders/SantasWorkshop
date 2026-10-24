@@ -7,6 +7,7 @@ import {
 	map,
 	shareReplay,
 	switchMap,
+	tap,
 } from 'rxjs/operators';
 import { defer, of, merge, Observable, Subject } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
@@ -31,6 +32,14 @@ export class AuthService {
 	private readonly functionsWrapper = inject(FunctionsWrapper);
 	private readonly refreshedUser$ = new Subject<User | null>();
 	private pendingEmailChange?: EmailChangeRequest & { uid: string };
+	private recoveredEmail?: { uid: string; emailAddress: string };
+
+	public get emailChangeRecovery():
+		{ uid: string; emailAddress: string } | undefined {
+		return this.authWrapper.currentUser()?.uid === this.recoveredEmail?.uid
+			? this.recoveredEmail
+			: undefined;
+	}
 
 	/**
 	 * Stream of the current identity, triggered on auth state and refreshes
@@ -38,7 +47,13 @@ export class AuthService {
 	public readonly currentUser$: Observable<User | null> = merge(
 		this.authWrapper.authState().pipe(distinctUntilChanged()),
 		this.refreshedUser$,
-	).pipe(shareReplay(1));
+	).pipe(
+		tap((user) => {
+			if (user?.uid !== this.recoveredEmail?.uid)
+				this.recoveredEmail = undefined;
+		}),
+		shareReplay(1),
+	);
 
 	public async refreshCurrentUser(): Promise<User | null> {
 		const user = await this.authWrapper.reloadCurrentUser();
@@ -172,6 +187,7 @@ export class AuthService {
 		password: string,
 		newEmailAddress: string,
 	): Promise<void> {
+		this.recoveredEmail = undefined;
 		const user = this.authWrapper.currentUser();
 
 		if (!user) throw new Error('User cannot be null');
@@ -253,11 +269,21 @@ export class AuthService {
 						{ cause: error },
 					);
 				}
-				throw new Error(
-					'Your sign-in email is ' +
-						target +
-						'. Save the same email again to finish updating your records.',
-					{ cause: error },
+				if (this.authWrapper.currentUser()?.uid !== currentUser.uid)
+					throw error;
+				this.recoveredEmail = {
+					uid: recovered.user.uid,
+					emailAddress: target,
+				};
+				this.refreshedUser$.next(recovered.user);
+				throw Object.assign(
+					new Error(
+						'Your sign-in email is ' +
+							target +
+							'. Save the same email again to finish updating your records.',
+						{ cause: error },
+					),
+					{ emailChangeRecovery: this.recoveredEmail },
 				);
 			}
 			throw error;

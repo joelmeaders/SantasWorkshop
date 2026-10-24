@@ -67,6 +67,10 @@ signs in at the requested address with the entered password. It verifies the
 original UID before offering the same-operation retry. Recovery does not store
 the password and does not replace the original callable error with a reload or
 recovery-login error.
+After verification, non-secret recovery context restores the customer shell and
+opens the profile email editor from either email-change flow. The target is
+restored with an empty password. A genuine sign-out or different UID clears this
+context and still removes the customer outlet and private form values.
 Deploy the matching client request contract with the backend and refresh older
 clients before retrying. Browser rules do not grant access to the private intent
 subcollection. Annual recursive user deletion also removes its receipts.

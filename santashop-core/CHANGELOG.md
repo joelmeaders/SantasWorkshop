@@ -6,6 +6,7 @@ All notable changes to the core library will be documented in this file.
 
 ### Fixed
 
+- Publish non-secret email recovery context only after verifying the original UID, and clear it on a new attempt or identity change (#227).
 - Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
 
 - Recover sign-in when an Admin email change invalidates the Firebase session. Verify the original UID and retain the original failure and email-change operation for retry (#227).

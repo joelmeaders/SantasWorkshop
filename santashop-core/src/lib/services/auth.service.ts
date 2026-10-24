@@ -205,8 +205,6 @@ export class AuthService {
 		try {
 			await this.functionsWrapper.updateEmailAddress(request);
 		} catch (error) {
-			// Reload even when the response is lost: Auth may already use the new email.
-			const identity = await this.refreshCurrentUser();
 			const details = (
 				error as {
 					details?: {
@@ -223,8 +221,38 @@ export class AuthService {
 			) {
 				this.pendingEmailChange.mutationId = details.mutationId;
 			}
-			if (identity?.email === target) {
-				await this.login({ emailAddress: target, password });
+			// Admin email changes can invalidate the token and make reload sign out.
+			let identity: User | null = null;
+			let sessionInvalidated = false;
+			try {
+				identity = await this.refreshCurrentUser();
+			} catch (reloadError) {
+				const code = (reloadError as { code?: string })?.code;
+				if (
+					code !== 'auth/user-token-expired' &&
+					code !== 'auth/invalid-user-token'
+				)
+					throw error;
+				sessionInvalidated = true;
+			}
+			if (identity && identity.uid !== currentUser.uid) throw error;
+			if (identity?.email === target || sessionInvalidated) {
+				let recovered: UserCredential;
+				try {
+					recovered = await this.login({
+						emailAddress: target,
+						password,
+					});
+				} catch {
+					throw error;
+				}
+				if (recovered.user.uid !== currentUser.uid) {
+					await this.authWrapper.signOut();
+					throw new Error(
+						'Email recovery did not match the original account. Sign in again.',
+						{ cause: error },
+					);
+				}
 				throw new Error(
 					'Your sign-in email is ' +
 						target +

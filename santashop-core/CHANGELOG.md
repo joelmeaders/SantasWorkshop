@@ -8,7 +8,7 @@ All notable changes to the core library will be documented in this file.
 
 - Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
 
-- Refresh the actual sign-in email after a failed or lost response and reuse the same email-change operation when retrying (#227).
+- Recover sign-in when an Admin email change invalidates the Firebase session. Verify the original UID and retain the original failure and email-change operation for retry (#227).
 
 - Refresh the authenticated token before requesting an email change (#225).
 

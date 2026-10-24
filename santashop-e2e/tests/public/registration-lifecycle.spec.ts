@@ -1112,6 +1112,130 @@ test.describe('customer registration lifecycle', () => {
 		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
 	});
 
+	for (const origin of ['profile', 'overview'] as const) {
+		test(`PROFILE-005 restores a usable email retry after token invalidation from ${origin}`, async ({
+			page,
+			inspectRegistrationBoundary,
+			seedDateTimeSlots,
+		}) => {
+			const account = randomAccount();
+			const target = randomAccount().emailAddress;
+			await createAccountViaUi(page, account);
+			const before = await inspectRegistrationBoundary(
+				account.emailAddress,
+			);
+			if (origin === 'overview') {
+				await seedDateTimeSlots([
+					{
+						id: 'recovery-ui-slot',
+						programYear: TEST_PROGRAM_YEAR,
+						dateTime: testSlotDate(TEST_PROGRAM_YEAR, 7, 16),
+						maxSlots: 10,
+						slotsReserved: 0,
+						enabled: true,
+					},
+				]);
+				await addChildViaUi(page, defaultTestChild());
+				await selectAppointmentViaUi(page, 'recovery-ui-slot');
+				await page.goto('/pre-registration/overview#review');
+				await page.locator('#reviewAndSubmitButton').click();
+				await page
+					.getByRole('button', { name: 'Update email', exact: true })
+					.click();
+			} else {
+				await page.goto('/pre-registration/profile');
+				await page
+					.locator('details')
+					.filter({
+						has: page.locator(
+							'ion-input[formControlName="emailAddress"]',
+						),
+					})
+					.locator('summary')
+					.click();
+			}
+			const requests: unknown[] = [];
+			const invalidatedSession = page.waitForResponse(
+				(response) =>
+					response.url().includes('accounts:lookup') &&
+					response.status() === 400,
+			);
+			await page.route('**/updateEmailAddress', async (route) => {
+				requests.push(route.request().postDataJSON().data);
+				if (requests.length === 1) {
+					// Let the real callable commit after the token's issuance second.
+					await new Promise((resolve) => setTimeout(resolve, 1_100));
+					const response = await route.fetch();
+					expect(response.ok()).toBe(true);
+					expect(await response.json()).toMatchObject({
+						result: true,
+					});
+					await route.abort('failed');
+				} else await route.continue();
+			});
+			await page
+				.locator('ion-input[formControlName="emailAddress"] input')
+				.fill(target);
+			await page
+				.locator('ion-input[formControlName="password"] input')
+				.fill(account.password);
+			await page
+				.locator(origin === 'overview' ? 'app-submit-card' : 'details')
+				.filter({
+					has: page.locator(
+						'ion-input[formControlName="emailAddress"]',
+					),
+				})
+				.getByRole('button', {
+					name: origin === 'overview' ? 'Save email' : 'Save Changes',
+					exact: true,
+				})
+				.click();
+			expect(await (await invalidatedSession).json()).toMatchObject({
+				error: { message: 'TOKEN_EXPIRED' },
+			});
+			await expect(page).toHaveURL(/\/pre-registration\/profile$/, {
+				timeout: 30_000,
+			});
+			const panel = page
+				.locator('details')
+				.filter({
+					has: page.locator(
+						'ion-input[formControlName="emailAddress"]',
+					),
+				});
+			await expect(panel).toHaveAttribute('open', '');
+			await expect(
+				panel.locator(
+					'ion-input[formControlName="emailAddress"] input',
+				),
+			).toHaveValue(target);
+			await expect(
+				panel.locator('ion-input[formControlName="password"] input'),
+			).toHaveValue('');
+			const alert = page.locator('ion-alert');
+			if (origin === 'profile') await expect(alert).toBeVisible();
+			if (await alert.isVisible())
+				await alert
+					.getByRole('button', { name: 'Ok', exact: true })
+					.click();
+			await panel
+				.locator('ion-input[formControlName="password"] input')
+				.fill(account.password);
+			await panel
+				.getByRole('button', { name: 'Save Changes', exact: true })
+				.click();
+			await expect(page.locator('ion-alert')).toContainText(
+				'Your email address was updated',
+			);
+			expect(requests).toHaveLength(2);
+			expect(requests[1]).toEqual(requests[0]);
+			const after = await inspectRegistrationBoundary(target);
+			expect(after.uid).toBe(before.uid);
+			expect(after.registration.emailAddress).toBe(target);
+		});
+	}
+
 	test('PROFILE-004 changes the password and accepts the new credential', async ({
 		page,
 	}) => {

@@ -7,6 +7,33 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Restore the email recovery editor and target after verified sign-in recovery, clear its password, and preserve teardown for genuine sign-out or account changes (#227).
+- Recover the original account after an email change invalidates its Firebase session, without losing the operation ID or original failure (#227).
+- Reconcile the original submitted ticket after a successful cancellation retry before delayed snapshots arrive (#213).
+- Make an email's original preparation non-sendable when reserving recovery, and reject stale names or QR paths before consuming the recovery allowance (#211).
+
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
+- Bound email event processing to thirty minutes and three preparation attempts. Recover one current failed message with explicit uncertain-delivery acknowledgement, reject replaced requests, and let staff recover cancellation mail by queue ID without an active search index (#211).
+
+- Preserve cancellation and appointment-change request identities during recovery. Stop dispatch after identity changes during dialogs or registration reads, and replay old successes without changing newer bookings (#213).
+
+- Preserve one on-site family submission across retries, prevent duplicate check-ins and totals, and keep uncertain submissions available for recovery (#206).
+
+- Bound each SES payload to one transport attempt and a 25-second send budget. Keep uncertain deliveries for review instead of automatically resending (#210).
+
+- Keep owner-operation browser validation valid after October 15 by checking the seasonal statistics rejection.
+
+- Recover incomplete email changes with saved account-scoped intents, verified outcomes, safe retries, and an editor that stays available for recovery (#227).
+
+- Keep confirmed registrations eligible for one event reminder, with matching owner previews, concurrent admission, and historical queue checks (#226).
+
+- Require authentication within five minutes before changing an account email, reject invalid authentication times, and refresh the client token before the request (#225).
+
 ## [2026.09.0-beta.11] - 2026-10-12
 
 ### Changed

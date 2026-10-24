@@ -35,6 +35,7 @@ import {
 import { filter, map, take, timeout } from 'rxjs/operators';
 import { where } from 'firebase/firestore';
 import { PreRegistrationService } from '../../../core';
+import { EmailChangeRecoveryService } from '../../../core/services/email-change-recovery.service';
 import {
 	ChildSaveRequest,
 	ChildrenCardComponent,
@@ -81,6 +82,7 @@ import { arrowDownCircleOutline } from 'ionicons/icons';
 export class OverviewPage implements AfterViewInit, OnDestroy {
 	private readonly preregistrationService = inject(PreRegistrationService);
 	private readonly authService = inject(AuthService);
+	private readonly emailRecovery = inject(EmailChangeRecoveryService);
 	private readonly fireRepo = inject(FireRepoLite);
 	private readonly router = inject(Router);
 	private readonly analytics = inject(AnalyticsWrapper);
@@ -477,6 +479,13 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 			await this.presentWorkspaceToast(successMessage, 'success');
 			return true;
 		} catch (error) {
+			if (await this.emailRecovery.recover(error)) {
+				await this.presentWorkspaceToast(
+					(error as Error).message,
+					'danger',
+				);
+				return false;
+			}
 			if (await this.recoverAppointment(error)) return false;
 			if (this.registrationSubmitted()) {
 				this.pendingCompletionId = undefined;

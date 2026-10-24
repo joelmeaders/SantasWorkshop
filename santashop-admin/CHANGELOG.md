@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Recover a failed email by queue ID without requiring an active registration search index or email address. Keep explicit uncertain-delivery acknowledgement and confirm the recovered queue ID (#211).
+
+- Retain the same on-site registration request after an uncertain result and prevent concurrent submissions (#206).
+
 ## [2026.09.0-beta.11] - 2026-10-12
 
 ### Changed

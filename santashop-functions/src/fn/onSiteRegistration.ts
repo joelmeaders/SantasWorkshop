@@ -1,10 +1,7 @@
+import { createHash } from 'node:crypto';
+import type { OnSiteRegistrationRequest } from '@santashop/models';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
-import {
-	CheckIn,
-	CheckInAggregatedStats,
-	COLLECTION_SCHEMA,
-	Registration,
-} from '../models';
+import { CheckIn, CheckInAggregatedStats, COLLECTION_SCHEMA } from '../models';
 import {
 	calculateRegistrationStats,
 	isRegistrationComplete,
@@ -14,16 +11,22 @@ import { getErrorMessage, getErrorStatus } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import { getStatsDocumentId, PROGRAM_YEAR } from '../utility/runtime-config';
 import { isAdminToken } from '../utility/capabilities';
-import { requireZipCodeValue, withCallableValidation } from '../utility/callable-validation';
+import {
+	requireZipCodeValue,
+	withCallableValidation,
+} from '../utility/callable-validation';
 import { addCheckInToAggregatedStats } from '../utility/checkin-stats';
-import { requireCanonicalChildren } from './registrationMutationSupport';
+import {
+	requireCanonicalChildren,
+	requireMutationId,
+} from './registrationMutationSupport';
 
 const log = createFunctionLogger('onSiteRegistration');
 
 export default async function onSiteRegistration(
-	request: CallableRequest<Registration>,
+	request: CallableRequest<OnSiteRegistrationRequest>,
 ): Promise<number> {
-	const record = request.data;
+	const { mutationId: inputMutationId, ...record } = request.data;
 
 	if (!isAdminToken(request.auth?.token)) {
 		log.warn('Non-admin attempted an on-site registration', {
@@ -37,6 +40,13 @@ export default async function onSiteRegistration(
 		);
 	}
 
+	const mutationId = requireMutationId(inputMutationId);
+	if (!request.auth?.uid)
+		throw new HttpsError('unauthenticated', 'Sign in again.');
+	const receiptRef = admin
+		.firestore()
+		.doc(`users/${request.auth.uid}/onSiteRegistrations/${mutationId}`);
+
 	if (!isRegistrationComplete(record)) {
 		log.warn('Attempted on-site registration with incomplete data', {
 			uid: record.uid ?? null,
@@ -47,9 +57,24 @@ export default async function onSiteRegistration(
 			'Incomplete registration. Cannot continue.',
 		);
 	}
-	record.zipCode = withCallableValidation(() => requireZipCodeValue(record.zipCode));
+	record.zipCode = withCallableValidation(() =>
+		requireZipCodeValue(record.zipCode),
+	);
 	const children = requireCanonicalChildren(record.children);
 	const canonicalRecord = { ...record, children };
+	const fingerprint = createHash('sha256')
+		.update(
+			JSON.stringify(canonicalRecord, (_key, value: unknown): unknown =>
+				value && typeof value === 'object' && !Array.isArray(value)
+					? Object.fromEntries(
+							Object.entries(value).sort(([a], [b]) =>
+								a.localeCompare(b),
+							),
+						)
+					: value,
+			),
+		)
+		.digest('hex');
 
 	const id = admin
 		.firestore()
@@ -89,7 +114,17 @@ export default async function onSiteRegistration(
 		.doc(`${COLLECTION_SCHEMA.stats}/${getStatsDocumentId('checkin')}`);
 
 	try {
-		await admin.firestore().runTransaction(async (transaction) => {
+		return await admin.firestore().runTransaction(async (transaction) => {
+			const receipt = await transaction.get(receiptRef);
+			if (receipt.exists) {
+				const stored = receipt.data()!;
+				if (stored['fingerprint'] !== fingerprint)
+					throw new HttpsError(
+						'already-exists',
+						'This submission ID belongs to different family data.',
+					);
+				return stored['childCount'] as number;
+			}
 			const statsDocument = await transaction.get(statsDocRef);
 			transaction.create(registrationDocRef, updatedRegistration);
 			transaction.create(checkinDocRef, checkin);
@@ -103,9 +138,16 @@ export default async function onSiteRegistration(
 				),
 				{ merge: false },
 			);
+			transaction.create(receiptRef, {
+				fingerprint,
+				childCount: checkin.stats!.children,
+				registrationId: id,
+				completedOn: new Date(),
+			});
+			return checkin.stats!.children;
 		});
-		return checkin.stats!.children;
 	} catch (error) {
+		if (error instanceof HttpsError) throw error;
 		throw new HttpsError(
 			getErrorStatus(error) ?? 'internal',
 			getErrorMessage(error),

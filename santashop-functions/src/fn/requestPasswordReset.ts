@@ -1,3 +1,7 @@
+import {
+	createEmailSendClient,
+	emailSendOptions,
+} from '../utility/email-transport';
 import { createHash } from 'node:crypto';
 import {
 	SendEmailCommand,
@@ -50,7 +54,7 @@ interface PasswordResetRateLimitRecord {
 }
 
 const getSesClient = (): SESClient => {
-	sesClient ??= new SESClient({
+	sesClient ??= createEmailSendClient({
 		credentials,
 		region: SES_REGION,
 	} as SESClientConfig);
@@ -168,6 +172,7 @@ const sendPasswordResetEmail = async (
 				},
 			},
 		}),
+		emailSendOptions(),
 	);
 	return true;
 };

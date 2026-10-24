@@ -4,6 +4,19 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Reopen the profile email editor after verified recovery from either customer flow, restore the target address, and require password re-entry without weakening account-change teardown (#227).
+- Acknowledge only the original submitted ticket after successful cancellation recovery so the overview guard does not redirect to a stale ticket (#213).
+
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
+- Preserve cancellation and appointment-change request identities during recovery. Stop dispatch after an account change during dialogs or registration reads, and replay old successes without changing newer bookings (#213).
+
+- Keep the email editor open after an incomplete email change so the customer can retry the same address (#227).
+
 ## [2026.09.0-beta.10] - 2026-10-07
 
 ### Changed

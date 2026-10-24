@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { mockUsers } from '../../../../../../test-helpers/mock-data';
@@ -13,6 +14,7 @@ const createProfileFixture = (): Pick<
 	ProfilePageService,
 	| 'profileForm'
 	| 'changeEmailForm'
+	| 'recoveringEmail'
 	| 'changePasswordForm'
 	| 'updatePublicProfile'
 	| 'changeEmailAddress'
@@ -22,6 +24,7 @@ const createProfileFixture = (): Pick<
 } => ({
 	profileForm: newChangeInfoForm(),
 	changeEmailForm: changeEmailForm(),
+	recoveringEmail: signal(false),
 	changePasswordForm: changePasswordForm(),
 	userProfile$: new BehaviorSubject(mockUsers().user1),
 	updatePublicProfile: vi
@@ -71,6 +74,28 @@ describe('ProfilePage', () => {
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).toContain('Another Family');
 		expect(fixture.nativeElement.textContent).not.toContain('Jesse Doe');
+	});
+
+	it('opens the recovered email editor with its target and an empty password', async () => {
+		service.changeEmailForm.reset({
+			emailAddress: 'recovered@example.test',
+		});
+		service.recoveringEmail.set(true);
+		await fixture.whenStable();
+		const panel = fixture.nativeElement.querySelectorAll(
+			'details',
+		)[1] as HTMLDetailsElement;
+		expect(panel.open).toBe(true);
+		expect(
+			panel.querySelector<HTMLIonInputElement>(
+				'ion-input[formControlName="emailAddress"]',
+			)?.value,
+		).toBe('recovered@example.test');
+		expect(
+			panel.querySelector<HTMLIonInputElement>(
+				'ion-input[formControlName="password"]',
+			)?.value,
+		).toBeFalsy();
 	});
 
 	it('clears the email reauthentication password when the new email is edited', async () => {

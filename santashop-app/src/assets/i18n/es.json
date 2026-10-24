@@ -375,7 +375,7 @@
 	},
 	"REGISTRATION_UNAVAILABLE": {
 		"TITLE": "No se puede acceder al registro",
-		"MESSAGE": "No pudimos cargar tu registro. Es posible que falte o esté dañado. Comunícate con Denver Santa Claus Shop para obtener ayuda."
+		"MESSAGE": "No pudimos completar o cargar tu cuenta. Actualiza esta página para reintentar. Si la configuración sigue reservada, espera dos minutos. Si vuelve a fallar, comunícate con Denver Santa Claus Shop."
 	},
 	"WAITING_LIST": {
 		"TITLE": "Lista de espera",

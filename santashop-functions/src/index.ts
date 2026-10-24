@@ -464,7 +464,9 @@ export const setWaitingListMembership = onCall(
 export const readWaitingListSettings = onCall(
 	{ ...LOW_VOLUME_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
 	observeCallableHandler('readWaitingListSettings', async (request) =>
-		(await import('./fn/waitingListSettings')).readWaitingListSettings(request),
+		(await import('./fn/waitingListSettings')).readWaitingListSettings(
+			request,
+		),
 	),
 );
 export const publishWaitingListSettings = onCall(
@@ -494,7 +496,9 @@ export const startWaitingListCampaign = onCall(
 export const getWaitingListCampaign = onCall(
 	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('getWaitingListCampaign', async (request) =>
-		(await import('./fn/waitingListCampaigns')).getWaitingListCampaign(request),
+		(await import('./fn/waitingListCampaigns')).getWaitingListCampaign(
+			request,
+		),
 	),
 );
 export const listWaitingListCampaigns = onCall(
@@ -567,7 +571,7 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 
 		await (
 			await import('./fn/sendRegistrationEmail')
-		).default(event.data, { eventId: event.id });
+		).default(event.data, { eventId: event.id, eventTime: event.time });
 	}),
 );
 
@@ -877,6 +881,7 @@ export const testSeedAdminUser = emulatorOnly(() =>
 				emailAddress,
 				password,
 				uid,
+				incompleteSignup: data.incompleteSignup === true,
 				owner: ownerClaim,
 				roles,
 			});
@@ -1220,14 +1225,17 @@ export const testReadWaitingListSettings = emulatorOnly(() =>
 );
 
 export const testSeedWaitingListSettings = emulatorOnly(() =>
-	onCall({ ...LOW_VOLUME_OPTIONS, enforceAppCheck: false }, async (request) => {
-		assertEmulatorOnly();
-		const { parseWaitingListSettings } = await import('./models');
-		const { default: admin } = await import('./firebase-admin');
-		await admin
-			.firestore()
-			.doc('_testConfig/waitingList')
-			.set(parseWaitingListSettings(request.data));
-		return true;
-	}),
+	onCall(
+		{ ...LOW_VOLUME_OPTIONS, enforceAppCheck: false },
+		async (request) => {
+			assertEmulatorOnly();
+			const { parseWaitingListSettings } = await import('./models');
+			const { default: admin } = await import('./firebase-admin');
+			await admin
+				.firestore()
+				.doc('_testConfig/waitingList')
+				.set(parseWaitingListSettings(request.data));
+			return true;
+		},
+	),
 );

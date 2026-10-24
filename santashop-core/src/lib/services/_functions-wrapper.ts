@@ -4,7 +4,11 @@ import {
 	HttpsCallable as _HttpsCallable,
 	HttpsCallableResult as _HttpsCallableResult,
 } from 'firebase/functions';
-import { ChangeUserInfo, ToyType } from '@santashop/models';
+import {
+	ChangeUserInfo,
+	ToyType,
+	type EmailChangeRequest,
+} from '@santashop/models';
 import { FIREBASE_FUNCTIONS } from '../tokens';
 
 export type HttpsCallable<RequestData, ResponseData> = _HttpsCallable<
@@ -27,21 +31,25 @@ export class FunctionsWrapper {
 		httpsCallable(this.functions, name);
 
 	public readonly updateEmailAddress = <ResponseData>(
-		newEmailAddress: string,
+		request: EmailChangeRequest,
 	): Promise<_HttpsCallableResult<ResponseData>> =>
-		this.callableWrapper<{ emailAddress: string }, ResponseData>(
+		this.callableWrapper<EmailChangeRequest, ResponseData>(
 			'updateEmailAddress',
-		)({
-			emailAddress: newEmailAddress,
+		)(request);
+
+	public readonly resumeAccountSetup = (): Promise<
+		_HttpsCallableResult<string>
+	> =>
+		this.callableWrapper<{ resume: true }, string>('newAccount')({
+			resume: true,
 		});
 
 	public readonly requestPasswordReset = (
 		emailAddress: string,
 	): Promise<_HttpsCallableResult<{ accepted: true }>> =>
-		this.callableWrapper<
-			{ emailAddress: string },
-			{ accepted: true }
-		>('requestPasswordReset')({ emailAddress });
+		this.callableWrapper<{ emailAddress: string }, { accepted: true }>(
+			'requestPasswordReset',
+		)({ emailAddress });
 
 	public readonly changeAccountInformation = (
 		data: ChangeUserInfo,
@@ -56,15 +64,15 @@ export class FunctionsWrapper {
 	}): Promise<_HttpsCallableResult<true>> =>
 		this.callableWrapper<typeof data, true>('undoRegistration')(data);
 
-	public readonly changeRegistrationDateTime = (
-		data: {
-			mutationId: string;
-			slotId: string;
+	public readonly changeRegistrationDateTime = (data: {
+		mutationId: string;
+		slotId: string;
 		reviewedDateTime?: string;
-			registrationUid?: string;
-		},
-	): Promise<_HttpsCallableResult<true>> =>
-		this.callableWrapper<typeof data, true>('changeRegistrationDateTime')(data);
+		registrationUid?: string;
+	}): Promise<_HttpsCallableResult<true>> =>
+		this.callableWrapper<typeof data, true>('changeRegistrationDateTime')(
+			data,
+		);
 
 	public readonly saveDraftChild = (data: {
 		mutationId: string;

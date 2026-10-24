@@ -81,8 +81,10 @@ describe('undoRegistration handler', () => {
 			expect.objectContaining({
 				supersededConfirmationCode: 'ABCD2345',
 				replacementConfirmationCode: 'ABCD2345',
-				supersededQrCodeStoragePath: 'registrations/user-4/original.png',
-				replacementQrCodeStoragePath: 'registrations/user-4/original.png',
+				supersededQrCodeStoragePath:
+					'registrations/user-4/original.png',
+				replacementQrCodeStoragePath:
+					'registrations/user-4/original.png',
 			}),
 		);
 		expect(generateQrCodeMock).not.toHaveBeenCalled();
@@ -216,7 +218,7 @@ describe('undoRegistration handler', () => {
 		});
 	});
 
-	it('refuses a retry-safe cancellation when its immutable cancellation log is unavailable', async () => {
+	it('refuses a new equivalent cancellation when its immutable cancellation log is unavailable', async () => {
 		const { undoRegistration } =
 			await loadAccountRegistrationHandlers(adminMock);
 		adminMock.setDocSnapshot('_testConfig/publicParameters', {
@@ -224,7 +226,8 @@ describe('undoRegistration handler', () => {
 		});
 		adminMock.setDocSnapshot(
 			'registrations/user-4/mutationReceipts/cancel-user-0001',
-			{ operation: 'undoRegistration', result: true },
+			{},
+			false,
 		);
 		adminMock.setDocSnapshot('registrations/user-4', {
 			uid: 'user-4',
@@ -283,5 +286,32 @@ describe('undoRegistration handler', () => {
 				qrCodeStoragePath: 'registrations/user-4/original.png',
 			}),
 		);
+	});
+	it('replays an earlier cancellation after a new submission without reading current policy or changing it', async () => {
+		const { undoRegistration } =
+			await loadAccountRegistrationHandlers(adminMock);
+		adminMock.setDocSnapshot('registrations/user-4', {
+			uid: 'user-4',
+			registrationSubmittedOn: new Date(),
+			dateTimeSlot: { id: 'new-slot' },
+		});
+		adminMock.setDocSnapshot(
+			'registrations/user-4/mutationReceipts/cancel-user-0001',
+			{ operation: 'undoRegistration', result: true },
+		);
+		adminMock.setDocSnapshot('_testConfig/publicParameters', {
+			admin: { allowCancelRegistration: false },
+		});
+		await expect(
+			undoRegistration(
+				createCallableRequest(
+					{ mutationId: 'cancel-user-0001' },
+					{ uid: 'user-4' },
+				),
+			),
+		).resolves.toBe(true);
+		expect(adminMock.transactionSet).not.toHaveBeenCalled();
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+		expect(adminMock.transactionDelete).not.toHaveBeenCalled();
 	});
 });

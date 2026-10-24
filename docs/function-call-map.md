@@ -17,6 +17,71 @@ created atomically with the update. A successful replay is returned before
 current draft/feature checks. Appointment selection, submission, cancellation,
 and check-in retain their own transaction and authorization rules.
 
+Cancellation returns a successful receipt before reading current feature policy
+or cancellation metadata. Customer cancellation and reschedule actions retain
+one ID and the original payload while their result is uncertain. A changed
+selection or identity session starts a new intent. Recovery displays live
+registration state and does not hide a newer submitted ticket based on an old
+cancellation success. No automatic callable retry loop is added.
+Identity and page lifetime are checked after dialogs and immediately before
+dispatch. Cancellation also checks the identity after resolving registration
+state, before invoking the callable.
+Cancellation retains the original submitted-ticket timestamp with its mutation
+ID. A successful retry acknowledges only that ticket before navigation, even
+when its live cancellation snapshot is delayed. A newer submitted ticket remains
+visible, and identity changes clear this pending acknowledgement intent.
+
+Signup requires one client mutation ID for the accepted profile. Before Auth
+creation, a transaction saves the profile and private provisioning intent under
+a stable UID derived from that ID. The intent retains consent timestamps, code,
+and QR path without passwords. Auth creation uses that UID. A duplicate email
+never authorizes recovery; the resume branch of newAccount requires the verified
+caller UID. Registration loading attempts that branch once per identity session
+when the registration is missing or QR setup is incomplete.
+
+Setup has three attempts and a thirty-minute age budget. A crashed invocation
+reserves two minutes against the callable's sixty-second limit. Matching attempt
+tokens protect final status writes and lease release. QR uploads use create-only
+preconditions and ownership metadata; retries reuse the same object. A lost final
+acknowledgement is reconciled from the completion receipt. Recovery preserves
+existing profile, children, and booking fields. No account or QR deletion occurs
+on setup failure. Exhausted, changed, and older incomplete accounts without a
+saved intent remain support cases. Private intents sit below user records and
+follow annual recursive user cleanup. Deploy the matching signup client before
+accepting requests that require its ID. No new callable, background repair job,
+or collection scan is added.
+
+Email changes require a fresh authenticated token, an operation ID, and the
+expected current email. The backend stores the intent and a short invocation
+lease under `users/{uid}/emailChanges` before changing Auth. The final batch
+updates the user and any existing registration/search records together with
+the completion receipt. A failed batch leaves a retryable intent; a lost batch
+acknowledgement is resolved by reading Auth and that receipt. No rollback to an
+old token email occurs. Completed older operation IDs cannot replace a newer
+intent. An interrupted invocation reserves its intent for two minutes; retain
+the callable's 60-second limit when changing this lease. Recovery remains an
+authenticated customer action, with no background continuation or account scan.
+An Admin email change can invalidate the Firebase client token. The client keeps
+the server recovery details before reloading, handles token invalidation, and
+signs in at the requested address with the entered password. It verifies the
+original UID before offering the same-operation retry. Recovery does not store
+the password and does not replace the original callable error with a reload or
+recovery-login error.
+After verification, non-secret recovery context restores the customer shell and
+opens the profile email editor from either email-change flow. The target is
+restored with an empty password. A genuine sign-out or different UID clears this
+context and still removes the customer outlet and private form values.
+Deploy the matching client request contract with the backend and refresh older
+clients before retrying. Browser rules do not grant access to the private intent
+subcollection. Annual recursive user deletion also removes its receipts.
+
+On-site submissions require a client mutation ID. The staff-scoped receipt,
+registration, check-in, and annual totals commit in one transaction. Exact retries
+return the original coupon count. Changed payloads with the same ID are rejected.
+The admin form retains the original submission after an uncertain result and
+prevents concurrent clicks. Deploy the admin client and backend together; older
+clients without an ID must refresh before submitting.
+
 Deployed registration handlers read cached public settings through the private
 `publicParametersGateway`. Reader and publisher identities are deliberately
 separate. Local emulator settings are fixtures, not a second deployed source of
@@ -32,6 +97,46 @@ Its status/receipt writes must update existing queue records only. Replacing an
 update with `set(..., {merge: true})` can recreate a deleted document and invoke
 the create trigger again. Preserve duplicate/provider-acceptance checks and
 retry semantics; a cloud redelivery need not correspond to a new source edge.
+
+Email create events carry their original ID and time. Events expire after thirty
+minutes, before dependency reads. Preparation uses at most three attempts and a
+150-second lease, longer than the 120-second function timeout. Definite transient
+pre-send failures return the existing job to queued state and throw so the
+platform retries the same create event. Permanent failures stop as failed jobs.
+The provider-send transition checks the preparation attempt in a transaction;
+an old invocation cannot send after a newer attempt takes over.
+
+Staff can recover one known failed or expired email through the resend
+form. Recovery atomically reserves one child queue ID on the original record.
+It cannot recover that child again, recreate a deleted child, resend accepted
+mail, or bypass contact/appointment checks. Uncertain delivery requires explicit
+acknowledgement. This adds no sweeper or task continuation. Ordinary manual
+resend admission remains the separate scope of issue #212. Recovery compares
+the original delivery request with the current request in the transaction and
+cannot replace a newer queued or sent message. Staff may resolve a known queue
+ID without a customer ID or active registration search index; this requires
+staff permission, and ordinary customers must still specify their own UID.
+Reserving a recovery child also makes its original queue record superseded in
+the same transaction, fencing any still-preparing original invocation. A send
+that already started still requires explicit uncertainty acknowledgement.
+Recovery applies the sender's full stale-payload rules, including first name and
+QR path, before reserving its one child. The thirty-minute policy is a finite
+recovery budget, not a measured bulk-mail delivery SLA.
+
+Confirmation delivery retains the legacy `reminderEmail*` status fields.
+Event reminders use separate `eventReminder*` fields. Owner preview and queue
+admission share the same candidate query. A transaction reserves the reminder
+before creating its queue record. Existing queue records with the event-reminder
+template also reserve that allowance. Legacy status flags alone cannot establish
+which template was sent; they do not exclude a first event reminder. This change
+does not clear old flags or launch a campaign. If historical queue evidence was
+deleted, the old flags cannot reconstruct that delivery history.
+
+SES payload clients use one transport attempt, a five-second connection timeout,
+a twenty-second request timeout, and a twenty-five-second abort budget. A lost
+response or stale sending claim requires review rather than automatic resend.
+Known acceptance still permits status repair without sending again. These limits
+apply to registration, password-reset, and template-test payloads.
 
 Both deployed environments ordinarily use SES. The independent email-sending
 control must permit delivery, and emulator delivery remains disabled by default.

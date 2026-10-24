@@ -26,6 +26,7 @@ import { createFunctionLogger } from '../utility/observability';
 import { FUNCTION_REGION } from '../utility/function-region';
 import { SHOP_TIME_ZONE } from '../utility/runtime-config';
 import { customerAuthUserBatches } from './ownerOperationAuthUsers';
+import { loadReminderCandidates } from './queueReminderEmails';
 
 const PREVIEW_TTL_MS = 10 * 60 * 1000;
 const EXPORT_URL_TTL_MS = 15 * 60 * 1000;
@@ -296,13 +297,6 @@ const loadRegistrationsForYear = async (
 	return snapshot.docs.map((doc) => doc.data());
 };
 
-const reminderEligible = (record: Record<string, unknown>): boolean =>
-	Boolean(record['registrationSubmittedOn']) &&
-	!record['reminderEmailSentOn'] &&
-	!record['reminderEmailQueuedOn'] &&
-	Boolean(record['qrCodeGeneratedOn']) &&
-	!record['qrCodeGenerationFailedOn'];
-
 const buildCounts = async (
 	operation: OwnerOperationType,
 	programYear: number | undefined,
@@ -310,12 +304,11 @@ const buildCounts = async (
 ): Promise<OwnerOperationCounts> => {
 	switch (operation) {
 		case 'queue-reminder-emails': {
-			const registrations = await loadRegistrationsForYear(
+			const registrations = await loadReminderCandidates(
 				programYear as number,
 			);
 			return {
-				eligibleRegistrations:
-					registrations.filter(reminderEligible).length,
+				eligibleRegistrations: registrations.length,
 			};
 		}
 		case 'export-marketing-emails':

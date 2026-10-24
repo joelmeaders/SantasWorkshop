@@ -57,7 +57,10 @@ describe('email sender disable control', () => {
 		background.setDocSnapshot('tmp_registrationemails/message', queued);
 		const { default: handler } =
 			await import('../../../src/fn/sendRegistrationEmail');
-		await handler({ id: 'message', data: () => queued } as never);
+		await handler({ id: 'message', data: () => queued } as never, {
+			eventId: 'fixture-create',
+			eventTime: new Date().toISOString(),
+		});
 		expect(
 			background.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
@@ -78,7 +81,10 @@ describe('email sender disable control', () => {
 			...queued,
 			deliveryState: 'suppressed',
 		});
-		await handler({ id: 'message', data: () => queued } as never);
+		await handler({ id: 'message', data: () => queued } as never, {
+			eventId: 'fixture-create',
+			eventTime: new Date().toISOString(),
+		});
 		expect(send).not.toHaveBeenCalled();
 	});
 
@@ -105,7 +111,10 @@ describe('email sender disable control', () => {
 		background.setDocSnapshot('tmp_registrationemails/message', queued);
 		const { default: handler } =
 			await import('../../../src/fn/sendRegistrationEmail');
-		await handler({ id: 'message', data: () => queued } as never);
+		await handler({ id: 'message', data: () => queued } as never, {
+			eventId: 'fixture-create',
+			eventTime: new Date().toISOString(),
+		});
 		expect(enabled).toHaveBeenCalledTimes(2);
 		expect(send).not.toHaveBeenCalled();
 		expect(

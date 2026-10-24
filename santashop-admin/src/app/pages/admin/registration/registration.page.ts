@@ -28,7 +28,7 @@ import {
 	IonButton,
 	IonIcon,
 } from '@ionic/angular/standalone';
-import { Child, Registration } from '@santashop/models';
+import { Child, OnSiteRegistrationRequest } from '@santashop/models';
 import { ReferralModalComponent } from '../../../shared/components/referral-modal/referral-modal.component';
 import { CheckInContextService } from '../../../shared/services/check-in-context.service';
 import { CheckInService } from '../../../shared/services/check-in.service';
@@ -67,6 +67,8 @@ export class RegistrationPage {
 	private readonly router = inject(Router);
 	private readonly alertController = inject(AlertController);
 
+	public readonly saving = signal(false);
+	private pendingSubmission?: OnSiteRegistrationRequest;
 	public readonly children = signal<Child[]>([]);
 	public readonly chosenReferrer = signal('None Selected');
 
@@ -120,11 +122,13 @@ export class RegistrationPage {
 	}
 
 	public async removeChild(childId: number): Promise<void> {
+		if (this.pendingSubmission) return;
 		const children = this.children().filter((e) => e.id !== childId);
 		this.children.set(children);
 	}
 
 	public async editChild(child: Child): Promise<void> {
+		if (this.pendingSubmission) return;
 		const children = this.children().filter((e) => e.id !== child.id);
 
 		children.push(child);
@@ -132,10 +136,12 @@ export class RegistrationPage {
 	}
 
 	public async addChild(child: Child): Promise<void> {
+		if (this.pendingSubmission) return;
 		this.children.update((children) => [...children, child]);
 	}
 
 	public async chooseReferral(): Promise<void> {
+		if (this.pendingSubmission) return;
 		const modal = await this.modalController.create({
 			component: ReferralModalComponent,
 		});
@@ -148,13 +154,17 @@ export class RegistrationPage {
 	}
 
 	public async checkIn(): Promise<void> {
-		const registration = {
+		if (this.saving()) return;
+		this.saving.set(true);
+		const registration = (this.pendingSubmission ??= {
 			...this.form.value,
+			mutationId: crypto.randomUUID(),
 			children: this.children(),
 			uid: 'onsite',
 			qrcode: 'onsite',
 			dateTimeSlot: { id: 'onsite' },
-		} as Registration;
+		} as OnSiteRegistrationRequest);
+		this.form.disable();
 
 		try {
 			const result: number =
@@ -164,13 +174,23 @@ export class RegistrationPage {
 				result,
 				registration.qrcode ?? 'onsite',
 			);
-			this.router.navigate(['/admin/checkin/confirmation']);
+			await this.router.navigate(['/admin/checkin/confirmation']);
 		} catch (error: unknown) {
 			const err = error as {
 				details?: { code?: number };
 				code?: string;
 				message?: string;
 			};
+			if (
+				[
+					'functions/invalid-argument',
+					'functions/permission-denied',
+					'functions/failed-precondition',
+				].includes(err.code ?? '')
+			) {
+				this.pendingSubmission = undefined;
+				this.form.enable();
+			}
 			if (err.details?.code === 6) {
 				this.checkinContext.reset();
 				this.router.navigate([
@@ -185,19 +205,29 @@ export class RegistrationPage {
 				subHeader: this.language.text('code: {{v0}}', {
 					v0: err.code ?? 'unknown',
 				}),
-				message: err?.message ?? String(error),
+				message:
+					this.language.text(
+						this.pendingSubmission
+							? 'The result is uncertain. Retry to recover the same family submission.'
+							: 'Correct the registration details and submit again.',
+					) +
+					' ' +
+					(err?.message ?? String(error)),
 			}));
 
 			await alert.present();
 			this.checkinContext.reset();
 			await alert.onDidDismiss();
-			await this.router.navigate(['/admin']);
+		} finally {
+			this.saving.set(false);
 		}
 	}
 
 	public reset(): void {
+		this.pendingSubmission = undefined;
 		this.children.set([]);
 		this.chosenReferrer.set('None Selected');
 		this.form.reset();
+		this.form.enable();
 	}
 }

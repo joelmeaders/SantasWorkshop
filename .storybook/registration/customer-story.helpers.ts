@@ -3,6 +3,7 @@ import {
 	inject,
 	importProvidersFrom,
 	provideAppInitializer,
+	signal,
 	type EnvironmentProviders,
 	type Provider,
 } from '@angular/core';
@@ -617,6 +618,7 @@ function createProfilePageService(
 	ProfilePageService,
 	| 'profileForm'
 	| 'changeEmailForm'
+	| 'recoveringEmail'
 	| 'changePasswordForm'
 	| 'userProfile$'
 	| 'updatePublicProfile'
@@ -628,6 +630,7 @@ function createProfilePageService(
 	return {
 		profileForm,
 		changeEmailForm: changeEmailForm(),
+		recoveringEmail: signal(false),
 		changePasswordForm: changePasswordForm(),
 		userProfile$: controls.userProfile$.asObservable(),
 		updatePublicProfile: fn(async () => undefined),

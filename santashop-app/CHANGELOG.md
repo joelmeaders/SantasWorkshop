@@ -8,6 +8,7 @@ All notable changes to the main application will be documented in this file.
 
 ### Fixed
 
+- Supply the email recovery signal in the shared profile story fixture so both account settings stories render (#227).
 - Reopen the profile email editor after verified recovery from either customer flow, restore the target address, and require password re-entry without weakening account-change teardown (#227).
 - Acknowledge only the original submitted ticket after successful cancellation recovery so the overview guard does not redirect to a stale ticket (#213).
 

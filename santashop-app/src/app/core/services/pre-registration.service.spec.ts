@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { RegistrationCompleteGuard } from '../guards/registration-complete.guard';
 import { AlertController } from '@ionic/angular/standalone';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
 import {
 	BehaviorSubject,
+	firstValueFrom,
 	of,
 	from,
 	type Observable,
@@ -128,6 +131,7 @@ describe('PreRegistrationService', () => {
 		functions = callableFixtures();
 		TestBed.configureTestingModule({
 			providers: [
+				provideRouter([]),
 				{
 					provide: AuthWrapper,
 					useValue: {
@@ -461,6 +465,32 @@ describe('PreRegistrationService', () => {
 		snapshot.next({
 			...registration(),
 			registrationSubmittedOn: new Date('2026-11-02T12:00:00Z'),
+		});
+		expect(completed.at(-1)).toBe(true);
+	});
+
+	it('acknowledges the original ticket after a failed first cancellation and successful retry before snapshots arrive', async () => {
+		const completed = observe(service.registrationCompleteResolved$);
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		vi.mocked(functions.undoRegistration).mockRejectedValueOnce(
+			new Error('Failed before commit'),
+		);
+		await expect(
+			service.undoRegistration('retry-cancel-original'),
+		).rejects.toThrow('Failed before commit');
+		expect(completed.at(-1)).toBe(true);
+		await service.undoRegistration('retry-cancel-original', true);
+		expect(completed.at(-1)).toBe(false);
+		const guard = TestBed.runInInjectionContext(
+			() => new RegistrationCompleteGuard(),
+		);
+		expect(await firstValueFrom(guard.canActivate())).toBe(true);
+		expect(visible.at(-1)?.dateTimeSlot).toBeUndefined();
+		snapshot.next({
+			...registration(),
+			registrationSubmittedOn: new Date('2026-11-05T12:00:00Z'),
 		});
 		expect(completed.at(-1)).toBe(true);
 	});

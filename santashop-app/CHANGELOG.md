@@ -8,6 +8,8 @@ All notable changes to the main application will be documented in this file.
 
 ### Fixed
 
+- Acknowledge only the original submitted ticket after successful cancellation recovery so the overview guard does not redirect to a stale ticket (#213).
+
 - Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
 
 - Preserve cancellation and appointment-change request identities during recovery. Stop dispatch after an account change during dialogs or registration reads, and replay old successes without changing newer bookings (#213).

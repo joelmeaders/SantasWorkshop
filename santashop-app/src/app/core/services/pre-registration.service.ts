@@ -51,6 +51,12 @@ export class PreRegistrationService {
 	private readonly destroyRef = inject(DestroyRef);
 	private registrationUid: string | undefined;
 	private registrationVersion = 0;
+	private cancellationIntent?: {
+		mutationId: string;
+		version: number;
+		uid: string;
+		submittedOn: number;
+	};
 	private readonly acknowledgedCancellation$ = new BehaviorSubject<
 		| {
 				uid: string;
@@ -69,6 +75,7 @@ export class PreRegistrationService {
 			if (uid !== this.registrationUid) {
 				this.registrationUid = uid;
 				this.registrationVersion++;
+				this.cancellationIntent = undefined;
 				void this.activeUnavailableAlert?.dismiss();
 				this.activeUnavailableAlert = undefined;
 				this.hasReportedUnavailableRegistration = false;
@@ -285,22 +292,33 @@ export class PreRegistrationService {
 		const { registration } = await registrationState;
 		if (version !== this.registrationVersion || this.destroyRef.destroyed)
 			throw new Error('Account changed before cancellation.');
-		const result = await this.afFunctions.undoRegistration({
-			mutationId,
-		});
 		if (
 			!recovering &&
-			result.data === true &&
 			registration?.uid &&
-			registration.registrationSubmittedOn &&
-			version === this.registrationVersion &&
-			!this.destroyRef.destroyed
+			registration.registrationSubmittedOn
 		) {
-			this.acknowledgedCancellation$.next({
+			this.cancellationIntent = {
+				mutationId,
+				version,
 				uid: registration.uid,
 				submittedOn: timestampDateFix(
 					registration.registrationSubmittedOn,
 				).getTime(),
+			};
+		}
+		const intent = this.cancellationIntent;
+		const result = await this.afFunctions.undoRegistration({
+			mutationId,
+		});
+		if (
+			result.data === true &&
+			intent?.mutationId === mutationId &&
+			intent.version === this.registrationVersion &&
+			!this.destroyRef.destroyed
+		) {
+			this.acknowledgedCancellation$.next({
+				uid: intent.uid,
+				submittedOn: intent.submittedOn,
 			});
 		}
 		return result;

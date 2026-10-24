@@ -26,6 +26,10 @@ cancellation success. No automatic callable retry loop is added.
 Identity and page lifetime are checked after dialogs and immediately before
 dispatch. Cancellation also checks the identity after resolving registration
 state, before invoking the callable.
+Cancellation retains the original submitted-ticket timestamp with its mutation
+ID. A successful retry acknowledges only that ticket before navigation, even
+when its live cancellation snapshot is delayed. A newer submitted ticket remains
+visible, and identity changes clear this pending acknowledgement intent.
 
 Signup requires one client mutation ID for the accepted profile. Before Auth
 creation, a transaction saves the profile and private provisioning intent under
@@ -57,6 +61,12 @@ old token email occurs. Completed older operation IDs cannot replace a newer
 intent. An interrupted invocation reserves its intent for two minutes; retain
 the callable's 60-second limit when changing this lease. Recovery remains an
 authenticated customer action, with no background continuation or account scan.
+An Admin email change can invalidate the Firebase client token. The client keeps
+the server recovery details before reloading, handles token invalidation, and
+signs in at the requested address with the entered password. It verifies the
+original UID before offering the same-operation retry. Recovery does not store
+the password and does not replace the original callable error with a reload or
+recovery-login error.
 Deploy the matching client request contract with the backend and refresh older
 clients before retrying. Browser rules do not grant access to the private intent
 subcollection. Annual recursive user deletion also removes its receipts.
@@ -102,8 +112,12 @@ the original delivery request with the current request in the transaction and
 cannot replace a newer queued or sent message. Staff may resolve a known queue
 ID without a customer ID or active registration search index; this requires
 staff permission, and ordinary customers must still specify their own UID.
-The thirty-minute
-policy is a finite recovery budget, not a measured bulk-mail delivery SLA.
+Reserving a recovery child also makes its original queue record superseded in
+the same transaction, fencing any still-preparing original invocation. A send
+that already started still requires explicit uncertainty acknowledgement.
+Recovery applies the sender's full stale-payload rules, including first name and
+QR path, before reserving its one child. The thirty-minute policy is a finite
+recovery budget, not a measured bulk-mail delivery SLA.
 
 Confirmation delivery retains the legacy `reminderEmail*` status fields.
 Event reminders use separate `eventReminder*` fields. Owner preview and queue

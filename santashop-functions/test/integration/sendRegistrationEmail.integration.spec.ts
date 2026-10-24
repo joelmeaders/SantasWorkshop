@@ -22,6 +22,7 @@ vi.mock('@aws-sdk/client-ses', async (importOriginal) => ({
 import processEmailEvent from '../../src/fn/sendRegistrationEmail';
 import completeRegistration from '../../src/fn/completeRegistration';
 import changeRegistrationDateTime from '../../src/fn/changeRegistrationDateTime';
+import changeAccountInformation from '../../src/fn/changeAccountInformation';
 import undoRegistration from '../../src/fn/undoRegistration';
 import queueReminderEmails from '../../src/fn/queueReminderEmails';
 import { previewOwnerOperation } from '../../src/fn/ownerOperations';
@@ -35,6 +36,7 @@ import {
 	getDocument,
 	getFirestore,
 	seedQrCode,
+	seedAuthUser,
 	setDocument,
 } from '../helpers/admin-emulator';
 
@@ -1104,4 +1106,128 @@ describe.sequential('sendRegistrationEmail integration', () => {
 			deliveryState: 'superseded',
 		});
 	});
+	it('fences original cancellation preparation when recovery crosses the event deadline', async () => {
+		const uid = 'cancellation-recovery-fence';
+		await completeAndGetQueue(uid);
+		await undoRegistration(
+			createCallableRequest(
+				{ mutationId: 'cancel-before-age-limit' },
+				{ uid },
+			),
+		);
+		const db = getFirestore();
+		const cancellations = await db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('queueSource', '==', 'registration-cancellation')
+			.get();
+		const original = cancellations.docs[0];
+		const createdOn = original.createTime.toMillis();
+		let now = createdOn + 29 * 60_000 + 59_000;
+		vi.spyOn(Date, 'now').mockImplementation(() => now);
+		const doc = db.doc.bind(db);
+		let release!: () => void;
+		let started!: () => void;
+		const preparing = new Promise<void>((resolve) => {
+			started = resolve;
+		});
+		const blocked = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		let paused = false;
+		vi.spyOn(db, 'doc').mockImplementation((path) => {
+			const ref = doc(path);
+			if (path === 'users/' + uid && !paused) {
+				paused = true;
+				const get = ref.get.bind(ref);
+				vi.spyOn(ref, 'get').mockImplementationOnce(async () => {
+					started();
+					await blocked;
+					return get();
+				});
+			}
+			return ref;
+		});
+		const oldDelivery = processEmailEvent(original as never, {
+			eventId: 'original-cancellation',
+			eventTime: new Date(createdOn).toISOString(),
+		});
+		await preparing;
+		try {
+			now += 2_000;
+			await callableResendRegistrationEmail(
+				createCallableRequest(
+					{ customerId: uid, recoverQueueId: original.id },
+					{ uid },
+				),
+			);
+			const recovered = await db
+				.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+				.where('recoveryOfQueueId', '==', original.id)
+				.get();
+			expect(recovered.size).toBe(1);
+			await processEmailEvent(recovered.docs[0] as never, {
+				eventId: 'recovery-cancellation',
+				eventTime: new Date(now).toISOString(),
+			});
+		} finally {
+			release();
+			await oldDelivery;
+		}
+		expect(sesSend).toHaveBeenCalledTimes(1);
+		expect((await original.ref.get()).data()).toMatchObject({
+			deliveryState: 'superseded',
+		});
+	});
+
+	it.each(['name', 'qr-path'] as const)(
+		'rejects a corrected %s before consuming recovery allowance',
+		async (field) => {
+			const uid = 'corrected-recovery-payload';
+			const original = await completeAndGetQueue(uid);
+			await original.ref.update({ deliveryState: 'failed' });
+			const db = getFirestore();
+			if (field === 'name') {
+				await seedAuthUser({
+					uid,
+					email: 'profile-correction@example.test',
+				});
+				await changeAccountInformation(
+					createCallableRequest(
+						{
+							firstName: 'Corrected',
+							lastName: 'Family',
+							zipCode: '80202',
+						},
+						{ uid },
+					),
+				);
+			} else {
+				await db
+					.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`)
+					.update({
+						qrCodeStoragePath: `registrations/${uid}/corrected.png`,
+					});
+			}
+			const request = createCallableRequest(
+				{ customerId: uid, recoverQueueId: original.id },
+				{ uid: 'review-staff', roles: ['admin'] },
+			);
+			for (let click = 0; click < 2; click++)
+				await expect(
+					callableResendRegistrationEmail(request),
+				).rejects.toMatchObject({ code: 'failed-precondition' });
+			expect((await original.ref.get()).data()).not.toHaveProperty(
+				'recoveryQueueId',
+			);
+			expect(
+				(
+					await db
+						.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+						.where('recoveryOfQueueId', '==', original.id)
+						.get()
+				).size,
+			).toBe(0);
+			expect(sesSend).not.toHaveBeenCalled();
+		},
+	);
 });

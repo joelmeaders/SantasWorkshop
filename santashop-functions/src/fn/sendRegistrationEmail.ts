@@ -406,8 +406,8 @@ const loadEmailTriggerContext = async (
 	};
 };
 
-const getSupersededReason = (
-	context: LoadedEmailTriggerContext,
+export const getSupersededReason = (
+	context: Pick<LoadedEmailTriggerContext, 'document' | 'registration'>,
 ): string | undefined => {
 	const { document, registration } = context;
 	if (!registration) {

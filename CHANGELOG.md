@@ -11,6 +11,10 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Recover the original account after an email change invalidates its Firebase session, without losing the operation ID or original failure (#227).
+- Reconcile the original submitted ticket after a successful cancellation retry before delayed snapshots arrive (#213).
+- Make an email's original preparation non-sendable when reserving recovery, and reject stale names or QR paths before consuming the recovery allowance (#211).
+
 - Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
 
 - Bound email event processing to thirty minutes and three preparation attempts. Recover one current failed message with explicit uncertain-delivery acknowledgement, reject replaced requests, and let staff recover cancellation mail by queue ID without an active search index (#211).

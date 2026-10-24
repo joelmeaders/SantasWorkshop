@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
 import type { ResendRegistrationEmailRequest } from '@santashop/models';
 import { normalizeDateTime } from '../utility/date-time-format';
-import { EMAIL_EVENT_MAX_AGE_MS } from './sendRegistrationEmail';
+import {
+	EMAIL_EVENT_MAX_AGE_MS,
+	getSupersededReason,
+} from './sendRegistrationEmail';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
 	COLLECTION_SCHEMA,
@@ -138,6 +141,12 @@ export default async function callableResendRegistrationEmail(
 
 			const cancellation =
 				job['queueSource'] === 'registration-cancellation';
+			const staleReason = getSupersededReason({
+				document: job,
+				registration,
+			});
+			if (staleReason)
+				throw new HttpsError('failed-precondition', staleReason);
 			if (
 				!registration ||
 				job['code'] !== registration.qrcode ||
@@ -201,6 +210,9 @@ export default async function callableResendRegistrationEmail(
 			});
 			transaction.update(originalRef, {
 				recoveryQueueId: emailDocRef.id,
+				deliveryState: 'superseded',
+				deliveryCompletedOn: requestedOn,
+				deliveryRequiresReviewReason: 'Replaced by targeted recovery.',
 			});
 			if (!cancellation) {
 				const prefix =

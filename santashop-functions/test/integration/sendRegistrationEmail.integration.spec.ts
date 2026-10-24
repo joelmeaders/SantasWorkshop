@@ -67,7 +67,10 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		expect(emulators).not.toHaveProperty('functions');
 	});
 
-	afterEach(() => vi.unstubAllEnvs());
+	afterEach(() => {
+		vi.unstubAllEnvs();
+		vi.useRealTimers();
+	});
 
 	beforeEach(async () => {
 		vi.stubEnv('FUNCTIONS_EMULATOR', 'true');
@@ -1123,7 +1126,8 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		const original = cancellations.docs[0];
 		const createdOn = original.createTime.toMillis();
 		let now = createdOn + 29 * 60_000 + 59_000;
-		vi.spyOn(Date, 'now').mockImplementation(() => now);
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(now);
 		const doc = db.doc.bind(db);
 		let release!: () => void;
 		let started!: () => void;
@@ -1154,6 +1158,12 @@ describe.sequential('sendRegistrationEmail integration', () => {
 		await preparing;
 		try {
 			now += 2_000;
+			vi.setSystemTime(now);
+			const preparingJob = (await original.ref.get()).data()!;
+			expect(preparingJob['deliveryState']).toBe('preparing');
+			expect(now - preparingJob['deliveryAttemptedOn'].toMillis()).toBe(
+				2_000,
+			);
 			await callableResendRegistrationEmail(
 				createCallableRequest(
 					{ customerId: uid, recoverQueueId: original.id },

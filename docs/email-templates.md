@@ -18,11 +18,13 @@ template; test sink mode records the revision without calling AWS. An older publ
 
 ## Seasonal review is required
 
-Starter venues and event dates are draft content. Confirm each season's venue,
-opening, eligibility copy, and both language versions before publishing. Do not
-use a prior season's address or date as confirmation for a new season.
+The 2026 starters use the confirmed venue at 1812 35th Street, Denver, CO 80216,
+on the corner of Brighton Blvd. and 35th Street. Parking is on the west side of
+the building off Brighton Blvd. Event dates are December 11, 12, 14, and 15,
+from 10 a.m. to 3 p.m. Verify future seasonal changes and both language versions
+before publishing. Do not reuse these details for another season.
 
-Before publishing a starter, replace the draft venue and opening notes in both HTML and plain text with confirmed information. Review both languages, mark the seasonal review complete, then save that revision. Editing content clears review approval. The backend rejects publication of unreviewed seasonal revisions and revisions that still contain the supplied draft markers. Cancellation also requires review, but the cancellation message contains no active ticket or QR code. The customer's QR artifact remains stable for later re-registration.
+Before publishing a starter, review the venue, map, parking, dates, and both language versions in HTML and plain text. Mark the seasonal review complete, then save that revision. Editing content clears review approval. The backend rejects publication of unreviewed seasonal revisions and revisions that still contain draft markers. Cancellation also requires review, but the cancellation message contains no active ticket or QR code. The customer's QR artifact remains stable for later re-registration.
 
 ## Customer language and delivery
 

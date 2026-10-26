@@ -27,7 +27,7 @@ process.env['SCHEDULED_DATETIME_SLOT_COUNTERS'] = '*/5 * * 11,12 *';
 process.env['SCHEDULED_REGISTRATION_STATS'] = '59 23 * * *';
 process.env['SCHEDULED_USER_STATS'] = '55 23 * 11,12 *';
 process.env['SCHEDULED_CHECKIN_STATS'] =
-	'*/5 10,11,12,13,14,15,16 12,13,15,16 12 *';
+	'*/5 10,11,12,13,14,15,16 11,12,14,15 12 *';
 
 afterEach(() => {
 	vi.restoreAllMocks();

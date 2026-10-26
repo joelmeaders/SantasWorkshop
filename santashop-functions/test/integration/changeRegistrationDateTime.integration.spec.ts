@@ -106,4 +106,60 @@ describe.sequential('changeRegistrationDateTime integration', () => {
 			appointmentSlotId: 'slot-new',
 		});
 	});
+	it('keeps a newer appointment when an earlier committed change is recovered after a lost response', async () => {
+		const uid = 'reordered-user';
+		await seedPublicParameters({
+			admin: { allowChangeRegistration: true },
+		});
+		await setDocument(COLLECTION_SCHEMA.registrations, uid, {
+			uid,
+			qrcode: 'ABCD2345',
+			qrCodeStoragePath: 'registrations/reordered-user/code.png',
+			firstName: 'Buddy',
+			emailAddress: 'buddy@example.com',
+			registrationSubmittedOn: new Date('2025-11-30'),
+			dateTimeSlot: { id: 'slot-A' },
+		});
+		for (const id of ['slot-B', 'slot-C'])
+			await setDocument(COLLECTION_SCHEMA.dateTimeSlots, id, {
+				programYear: 2025,
+				enabled: true,
+				maxSlots: 10,
+				dateTime: createTimestamp('2025-12-11T18:00:00Z'),
+			});
+		const original = createCallableRequest(
+			{ mutationId: 'original-change', slotId: 'slot-B' },
+			{ uid },
+		);
+		const db = getFirestore();
+		const transact = db.runTransaction.bind(db);
+		const spy = vi
+			.spyOn(db, 'runTransaction')
+			.mockImplementationOnce(
+				async (...args: Parameters<typeof db.runTransaction>) => {
+					await transact(...args);
+					throw new Error('Lost response after commit');
+				},
+			);
+		await expect(changeRegistrationDateTime(original)).rejects.toThrow();
+		spy.mockRestore();
+		await changeRegistrationDateTime(
+			createCallableRequest(
+				{ mutationId: 'newer-change', slotId: 'slot-C' },
+				{ uid },
+			),
+		);
+		const current = await getDocument(COLLECTION_SCHEMA.registrations, uid);
+		const emails = (
+			await db.collection(COLLECTION_SCHEMA.tmpRegistrationEmails).get()
+		).size;
+		expect(await changeRegistrationDateTime(original)).toBe(true);
+		expect(await getDocument(COLLECTION_SCHEMA.registrations, uid)).toEqual(
+			current,
+		);
+		expect(
+			(await db.collection(COLLECTION_SCHEMA.tmpRegistrationEmails).get())
+				.size,
+		).toBe(emails);
+	});
 });

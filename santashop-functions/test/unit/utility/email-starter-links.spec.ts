@@ -46,6 +46,31 @@ describe('all bilingual email starter links', () => {
 				),
 			);
 			const body = sesSendMock.mock.calls[0][0].input.Message.Body;
+			if (
+				['registration-confirmation', 'event-reminder'].includes(
+					template.deliveryProfile,
+				)
+			) {
+				for (const content of [body.Html.Data, body.Text.Data]) {
+					expect(content).toContain('1812 35th Street');
+					expect(content).toContain('80216');
+					expect(content).toContain('Brighton Blvd.');
+					expect(content).toContain(
+						template.language === 'es' ? 'lado oeste' : 'west side',
+					);
+					expect(content).toContain(
+						template.language === 'es'
+							? '11, 12, 14 y 15'
+							: '11, 12, 14, and 15',
+					);
+					expect(content).not.toMatch(
+						/Leetsdale|80224|South Lowry|TO BE CONFIRMED|POR CONFIRMAR|TODO/,
+					);
+				}
+				expect(body.Html.Data).toContain(
+					'query=1812%2035th%20Street%20Denver%20CO%2080216',
+				);
+			}
 			expect(body.Html.Data).toContain(`href="${root}"`);
 			expect(body.Text.Data).toContain(root);
 			expect(body.Html.Data).not.toContain('{{');

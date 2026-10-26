@@ -11,7 +11,7 @@ process.env['FIREBASE_CONFIG'] = JSON.stringify({
 });
 process.env['SANTASHOP_PROGRAM_YEAR'] = '2025';
 process.env['SANTASHOP_TIME_ZONE'] = 'America/Denver';
-process.env['SANTASHOP_SHOP_DAYS'] = '12-12,12-13,12-15,12-16';
+process.env['SANTASHOP_SHOP_DAYS'] = '12-11,12-12,12-14,12-15';
 process.env['SANTASHOP_DEFAULT_MAX_SLOTS'] = '350';
 process.env['FIRESTORE_BACKUP_BUCKET'] = 'gs://santashop-backups';
 process.env['SES_REGION'] = 'us-west-2';
@@ -27,7 +27,7 @@ process.env['SCHEDULED_DATETIME_SLOT_COUNTERS'] = '*/5 * * 11,12 *';
 process.env['SCHEDULED_REGISTRATION_STATS'] = '59 23 * * *';
 process.env['SCHEDULED_USER_STATS'] = '55 23 * 11,12 *';
 process.env['SCHEDULED_CHECKIN_STATS'] =
-	'*/5 10,11,12,13,14,15,16 12,13,15,16 12 *';
+	'*/5 10,11,12,13,14,15,16 11,12,14,15 12 *';
 
 afterEach(() => {
 	vi.restoreAllMocks();

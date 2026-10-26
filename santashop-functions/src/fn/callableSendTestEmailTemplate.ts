@@ -1,4 +1,8 @@
 import {
+	createEmailSendClient,
+	emailSendOptions,
+} from '../utility/email-transport';
+import {
 	SendEmailCommand,
 	SESClient,
 	SESClientConfig,
@@ -56,7 +60,7 @@ const assertAdmin = (request: CallableRequest<unknown>): void => {
 };
 
 const getSesClient = (): SESClient => {
-	sesClient ??= new SESClient({
+	sesClient ??= createEmailSendClient({
 		credentials,
 		region: SES_REGION,
 	} as SESClientConfig);
@@ -187,7 +191,7 @@ export default async function callableSendTestEmailTemplate(
 		if (isEmailSink()) {
 			await recordSimulatedEmail('template-test', sendCommand.input);
 		} else {
-			await getSesClient().send(sendCommand);
+			await getSesClient().send(sendCommand, emailSendOptions());
 		}
 	} catch (error) {
 		throw new HttpsError(

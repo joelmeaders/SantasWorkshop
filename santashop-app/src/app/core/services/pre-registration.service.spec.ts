@@ -1,10 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { RegistrationCompleteGuard } from '../guards/registration-complete.guard';
 import { AlertController } from '@ionic/angular/standalone';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { Timestamp } from 'firebase/firestore';
 import {
 	BehaviorSubject,
+	firstValueFrom,
+	of,
 	from,
 	type Observable,
 	Subject,
@@ -53,6 +57,7 @@ const identity = (uid: string): FirebaseUser =>
 	}) as FirebaseUser;
 const callableFixtures = (): Pick<
 	FunctionsWrapper,
+	| 'resumeAccountSetup'
 	| 'saveDraftChild'
 	| 'deleteDraftChild'
 	| 'setDraftAppointment'
@@ -60,6 +65,9 @@ const callableFixtures = (): Pick<
 	| 'undoRegistration'
 	| 'changeRegistrationDateTime'
 > => ({
+	resumeAccountSetup: vi
+		.fn<FunctionsWrapper['resumeAccountSetup']>()
+		.mockRejectedValue(new Error('No saved signup intent')),
 	saveDraftChild: vi
 		.fn<FunctionsWrapper['saveDraftChild']>()
 		.mockResolvedValue({ data: true }),
@@ -123,6 +131,7 @@ describe('PreRegistrationService', () => {
 		functions = callableFixtures();
 		TestBed.configureTestingModule({
 			providers: [
+				provideRouter([]),
 				{
 					provide: AuthWrapper,
 					useValue: {
@@ -291,15 +300,18 @@ describe('PreRegistrationService', () => {
 		await vi.waitFor(() => expect(createAlert).toHaveBeenCalledTimes(2));
 	});
 
-	it('recovers a failed read for a subsequent identity', () => {
+	it('recovers a failed read for a subsequent identity', async () => {
 		read.mockReturnValueOnce(
 			throwError(() => new Error('unreadable')),
 		).mockReturnValue(snapshot);
 		const visible = observe(service.userRegistration$);
 		auth.next(identity('first'));
-		expect(log).toHaveBeenCalledWith('registration_record_unavailable', {
-			reason: 'unreadable',
-		});
+		await vi.waitFor(() =>
+			expect(log).toHaveBeenCalledWith(
+				'registration_record_unavailable',
+				{ reason: 'unreadable' },
+			),
+		);
 		expect(visible.at(-1)).toBeUndefined();
 		auth.next(identity('second'));
 		snapshot.next(registration('second'));
@@ -367,14 +379,17 @@ describe('PreRegistrationService', () => {
 			slotId: 'slot-1',
 		});
 		await service.completeRegistration({ mutationId: 'submit-0001' });
-		await service.undoRegistration();
-		await service.changeRegistrationDateTime({
-			id: 'slot-2',
-			dateTime: new Date(),
-			programYear: 2026,
-			maxSlots: 10,
-			enabled: true,
-		});
+		await service.undoRegistration('cancel-client-1');
+		await service.changeRegistrationDateTime(
+			{
+				id: 'slot-2',
+				dateTime: new Date(),
+				programYear: 2026,
+				maxSlots: 10,
+				enabled: true,
+			},
+			'reschedule-client-1',
+		);
 		expect(functions.saveDraftChild).toHaveBeenCalledWith({
 			mutationId: 'save-0001',
 			child: {
@@ -411,12 +426,15 @@ describe('PreRegistrationService', () => {
 			}),
 		).rejects.toThrow('Child ID is required.');
 		await expect(
-			service.changeRegistrationDateTime({
-				dateTime: new Date(),
-				programYear: 2026,
-				enabled: true,
-				maxSlots: 10,
-			}),
+			service.changeRegistrationDateTime(
+				{
+					dateTime: new Date(),
+					programYear: 2026,
+					enabled: true,
+					maxSlots: 10,
+				},
+				'reschedule-client-1',
+			),
 		).rejects.toThrow('Appointment ID is required.');
 	});
 
@@ -427,7 +445,7 @@ describe('PreRegistrationService', () => {
 		snapshot.next(registration());
 		expect(completed.at(-1)).toBe(true);
 
-		await service.undoRegistration();
+		await service.undoRegistration('cancel-client-1');
 
 		expect(completed.at(-1)).toBe(false);
 		expect(visible.at(-1)?.dateTimeSlot).toBeUndefined();
@@ -451,6 +469,32 @@ describe('PreRegistrationService', () => {
 		expect(completed.at(-1)).toBe(true);
 	});
 
+	it('acknowledges the original ticket after a failed first cancellation and successful retry before snapshots arrive', async () => {
+		const completed = observe(service.registrationCompleteResolved$);
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		vi.mocked(functions.undoRegistration).mockRejectedValueOnce(
+			new Error('Failed before commit'),
+		);
+		await expect(
+			service.undoRegistration('retry-cancel-original'),
+		).rejects.toThrow('Failed before commit');
+		expect(completed.at(-1)).toBe(true);
+		await service.undoRegistration('retry-cancel-original', true);
+		expect(completed.at(-1)).toBe(false);
+		const guard = TestBed.runInInjectionContext(
+			() => new RegistrationCompleteGuard(),
+		);
+		expect(await firstValueFrom(guard.canActivate())).toBe(true);
+		expect(visible.at(-1)?.dateTimeSlot).toBeUndefined();
+		snapshot.next({
+			...registration(),
+			registrationSubmittedOn: new Date('2026-11-05T12:00:00Z'),
+		});
+		expect(completed.at(-1)).toBe(true);
+	});
+
 	it('keeps the ticket when cancellation is rejected', async () => {
 		const completed = observe(service.registrationCompleteResolved$);
 		auth.next(identity('first'));
@@ -458,10 +502,21 @@ describe('PreRegistrationService', () => {
 		vi.mocked(functions.undoRegistration).mockRejectedValue(
 			new Error('Cancellation unavailable'),
 		);
-		await expect(service.undoRegistration()).rejects.toThrow(
-			'Cancellation unavailable',
-		);
+		await expect(
+			service.undoRegistration('cancel-client-1'),
+		).rejects.toThrow('Cancellation unavailable');
 		expect(completed.at(-1)).toBe(true);
+	});
+
+	it('does not dispatch a cancellation if identity changes while registration state resolves', async () => {
+		observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next(registration());
+		const cancellation = service.undoRegistration('cancel-before-dispatch');
+		auth.next(identity('second'));
+		snapshot.next(registration('second'));
+		await expect(cancellation).rejects.toThrow('Account changed');
+		expect(functions.undoRegistration).not.toHaveBeenCalled();
 	});
 
 	it('ignores an old cancellation response after the signed-in identity changes', async () => {
@@ -475,7 +530,7 @@ describe('PreRegistrationService', () => {
 					resolve = done;
 				}),
 		);
-		const cancellation = service.undoRegistration();
+		const cancellation = service.undoRegistration('cancel-client-1');
 		await vi.waitFor(() =>
 			expect(functions.undoRegistration).toHaveBeenCalledOnce(),
 		);
@@ -625,5 +680,49 @@ describe('PreRegistrationService', () => {
 		resolve({ present, dismiss: vi.fn().mockResolvedValue(true) });
 		await Promise.resolve();
 		expect(present).not.toHaveBeenCalled();
+	});
+	it('does not hide a newer booking when recovering an older cancellation receipt', async () => {
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		snapshot.next({
+			...registration(),
+			registrationSubmittedOn: new Date('2026-11-03T12:00:00Z'),
+		});
+		await service.undoRegistration('original-cancellation', true);
+		expect(functions.undoRegistration).toHaveBeenCalledWith({
+			mutationId: 'original-cancellation',
+		});
+		expect(visible.at(-1)?.registrationSubmittedOn).toEqual(
+			new Date('2026-11-03T12:00:00Z'),
+		);
+	});
+	it('finishes a saved partial setup once before exposing a usable registration', async () => {
+		const visible = observe(service.userRegistration$);
+		auth.next(identity('first'));
+		vi.mocked(functions.resumeAccountSetup).mockResolvedValue({
+			data: 'first',
+		});
+		read.mockReturnValueOnce(
+			of({ ...registration(), qrCodeGeneratedOn: new Date() }),
+		);
+		snapshot.next(undefined);
+		await vi.waitFor(() => expect(visible.at(-1)?.uid).toBe('first'));
+		expect(functions.resumeAccountSetup).toHaveBeenCalledOnce();
+		expect(createAlert).not.toHaveBeenCalled();
+	});
+	it('recovers setup when rules deny the initial missing-registration read', async () => {
+		const visible = observe(service.userRegistration$);
+		vi.mocked(functions.resumeAccountSetup).mockResolvedValue({
+			data: 'first',
+		});
+		read.mockReturnValueOnce(
+			throwError(() => new Error('permission-denied')),
+		).mockReturnValueOnce(
+			of({ ...registration(), qrCodeGeneratedOn: new Date() }),
+		);
+		auth.next(identity('first'));
+		await vi.waitFor(() => expect(visible.at(-1)?.uid).toBe('first'));
+		expect(functions.resumeAccountSetup).toHaveBeenCalledOnce();
+		expect(createAlert).not.toHaveBeenCalled();
 	});
 });

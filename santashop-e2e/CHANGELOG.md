@@ -2,6 +2,22 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.26] - 2026-10-26
+
+### Changed
+
+- Release the confirmed 2026 event details: 1812 35th Street, Denver, CO 80216, parking off Brighton Blvd., and December 11, 12, 14, and 15.
+- Advance the affected packages to stable version `2026.10.26`.
+
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Verify a lost email-change response and real token invalidation restore a usable editor from profile and registration review, then finish with the original request and account (#227).
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
+- Assert the owner statistics preview rejection after October 15 instead of expecting a preview outside the permitted season.
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Added

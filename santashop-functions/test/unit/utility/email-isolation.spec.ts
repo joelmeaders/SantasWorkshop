@@ -107,7 +107,10 @@ describe('isolated test email delivery', () => {
 		background.setDocSnapshot('tmp_registrationemails/message', queued);
 		const { default: send } =
 			await import('../../../src/fn/sendRegistrationEmail');
-		await send({ id: 'message', data: () => queued } as never);
+		await send({ id: 'message', data: () => queued } as never, {
+			eventId: 'fixture-create',
+			eventTime: new Date().toISOString(),
+		});
 		expect(
 			background.getDocRef('tmp_registrationemails/message').update,
 		).toHaveBeenCalledWith(
@@ -284,7 +287,10 @@ describe('isolated test email delivery', () => {
 		background.setDocSnapshot('tmp_registrationemails/message', queued);
 		const { default: send } =
 			await import('../../../src/fn/sendRegistrationEmail');
-		await send({ id: 'message', data: () => queued } as never);
+		await send({ id: 'message', data: () => queued } as never, {
+			eventId: 'fixture-create',
+			eventTime: new Date().toISOString(),
+		});
 		expect(
 			background.getFileRef('templates/rev-1.html').download,
 		).toHaveBeenCalled();

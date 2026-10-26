@@ -12,7 +12,7 @@ test.describe('owner protected operations', () => {
 		await seedAdminUser(defaultOwnerAccount());
 	});
 
-	test('OWNER-003 previews every listed safe owner operation and displays its exact confirmation phrase', async ({
+	test('OWNER-003 previews safe owner operations and enforces the seasonal statistics window', async ({
 		page,
 	}) => {
 		await signInAdminViaUi(page, defaultOwnerAccount());
@@ -40,6 +40,22 @@ test.describe('owner protected operations', () => {
 				.click();
 			await expect(alert).toBeHidden();
 			await page.locator('#ownerOperationPreview').click();
+			const shopDate = new Intl.DateTimeFormat('en-US', {
+				timeZone: 'America/Denver',
+				month: '2-digit',
+				day: '2-digit',
+			}).format(new Date());
+			if (
+				operation === 'Rebuild check-in statistics' &&
+				shopDate > '10/15'
+			) {
+				await expect(page.getByRole('alert')).toContainText(
+					'This operation is available only from January 1 through October 15.',
+					{ timeout: 15000 },
+				);
+				await expect(page.locator('#previewHeading')).toHaveCount(0);
+				continue;
+			}
 			await expect(page.locator('#previewHeading')).toBeVisible({
 				timeout: 15000,
 			});
@@ -93,7 +109,9 @@ test.describe('owner protected operations', () => {
 		).toBeVisible({
 			timeout: 15000,
 		});
-		await expect(page.getByText('Stage: Completed', { exact: true })).toBeVisible();
+		await expect(
+			page.getByText('Stage: Completed', { exact: true }),
+		).toBeVisible();
 	});
 
 	test('OWNER-004 rejects a mistyped confirmation phrase before any protected operation starts', async ({

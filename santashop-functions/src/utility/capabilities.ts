@@ -13,8 +13,7 @@ export const isOwnerToken = (token: AuthToken | undefined): boolean =>
 	token?.['owner'] === true;
 
 export const isAdminToken = (token: AuthToken | undefined): boolean =>
-	isOwnerToken(token) ||
-	rolesFromToken(token ?? {}).includes('admin');
+	isOwnerToken(token) || rolesFromToken(token ?? {}).includes('admin');
 
 export const canCheckInToken = (token: AuthToken | undefined): boolean =>
 	isAdminToken(token) || rolesFromToken(token ?? {}).includes('checkin');
@@ -47,6 +46,9 @@ export const requireRecentAuthentication = (
 	const authTime = token['auth_time'];
 	if (
 		typeof authTime !== 'number' ||
+		!Number.isFinite(authTime) ||
+		authTime <= 0 ||
+		authTime > now.getTime() / 1000 ||
 		now.getTime() / 1000 - authTime > maxAgeSeconds
 	) {
 		throw new HttpsError(

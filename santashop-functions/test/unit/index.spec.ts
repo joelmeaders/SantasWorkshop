@@ -140,11 +140,13 @@ describe('functions index exports', () => {
 
 		await trigger.handler({
 			id: 'emulator-event',
+			time: '2026-10-23T14:00:00.000Z',
 			data: snapshot,
 		});
 
 		expect(sendNewRegistrationEmailsMock).toHaveBeenCalledWith(snapshot, {
 			eventId: 'emulator-event',
+			eventTime: '2026-10-23T14:00:00.000Z',
 		});
 		expect(trigger.options).toMatchObject({
 			document: 'tmp_registrationemails/{docId}',

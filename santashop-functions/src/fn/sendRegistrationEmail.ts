@@ -1,5 +1,10 @@
 import {
+	createEmailSendClient,
+	emailSendOptions,
+} from '../utility/email-transport';
+import {
 	customerLanguageOrEnglish,
+	EMAIL_TEMPLATE_KEYS,
 	type CustomerLanguage,
 } from '@santashop/models';
 import {
@@ -42,7 +47,7 @@ import {
 	recordSimulatedEmail,
 } from '../../../scripts/load/functions/email-isolation';
 import { isEmailSendingEnabled } from '../utility/email-sending';
-import { serializeError } from '../utility/errors';
+import { getErrorCode, serializeError } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
 import {
 	normalizeDateTime,
@@ -51,6 +56,9 @@ import {
 } from '../utility/date-time-format';
 
 const log = createFunctionLogger('sendRegistrationEmail');
+export const EMAIL_EVENT_MAX_AGE_MS = 30 * 60_000;
+export const EMAIL_PREPARATION_MAX_ATTEMPTS = 3;
+const PREPARATION_LEASE_MS = 150_000;
 
 const credentials = {
 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -59,6 +67,7 @@ const credentials = {
 let sesClient: SESClient | undefined = undefined;
 
 interface EmailTriggerMetadata {
+	eventTime?: string;
 	eventId?: string;
 }
 
@@ -85,6 +94,7 @@ interface QueuedRegistrationEmailDocument {
 	deliveryRequiresReviewReason?: string;
 	deliveryCompletedOn?: Date;
 	deliveryState?:
+		| 'preparing'
 		| 'queued'
 		| 'sending'
 		| 'accepted'
@@ -176,6 +186,12 @@ const isCancellationCommunication = (
 	document: QueuedRegistrationEmailDocument,
 ): boolean => document.queueSource === 'registration-cancellation';
 
+const deliveryField = (
+	document: QueuedRegistrationEmailDocument,
+	field: 'QueuedOn' | 'SentOn' | 'FailedOn',
+): keyof Registration =>
+	`${document.templateKey === EMAIL_TEMPLATE_KEYS.eventReminder ? 'eventReminder' : 'reminderEmail'}${field}` as keyof Registration;
+
 const getQueueRequestedOn = (
 	document: QueuedRegistrationEmailDocument,
 	fallback: Date,
@@ -231,7 +247,14 @@ const shouldSendQueuedDocument = (
 
 	return (
 		document.deliveryState === undefined ||
-		document.deliveryState === 'queued'
+		document.deliveryState === 'queued' ||
+		(document.deliveryState === 'preparing' &&
+			Date.now() -
+				getNormalizedDate(
+					document.deliveryAttemptedOn,
+					new Date(),
+				).getTime() >=
+				PREPARATION_LEASE_MS)
 	);
 };
 
@@ -383,8 +406,8 @@ const loadEmailTriggerContext = async (
 	};
 };
 
-const getSupersededReason = (
-	context: LoadedEmailTriggerContext,
+export const getSupersededReason = (
+	context: Pick<LoadedEmailTriggerContext, 'document' | 'registration'>,
 ): string | undefined => {
 	const { document, registration } = context;
 	if (!registration) {
@@ -413,7 +436,13 @@ const getSupersededReason = (
 			(!document.deliveryRequestedOn ||
 				!datesMatch(
 					document.deliveryRequestedOn,
-					registration.reminderEmailQueuedOn,
+					// Queues created before the field split still carry the exact
+					// request time in the legacy field. The template proves intent.
+					registration[deliveryField(document, 'QueuedOn')] ??
+						(document.templateKey ===
+						EMAIL_TEMPLATE_KEYS.eventReminder
+							? registration.reminderEmailQueuedOn
+							: undefined),
 				))
 		) {
 			return 'A newer email delivery request replaced this email.';
@@ -459,12 +488,22 @@ const updateRegistrationDeliveryStatusIfCurrent = async (
 			? (registrationSnapshot.data() as Registration)
 			: undefined;
 		if (
-			(skipWhenAlreadySent && registration?.reminderEmailSentOn) ||
+			(skipWhenAlreadySent &&
+				registration?.[deliveryField(context.document, 'SentOn')]) ||
 			getSupersededReason({ ...context, registration })
 		) {
 			return;
 		}
-		transaction.set(context.registrationDocRef, updates, { merge: true });
+		const status = { ...updates };
+		for (const field of ['QueuedOn', 'SentOn', 'FailedOn'] as const) {
+			const key = `reminderEmail${field}`;
+			if (key in status) {
+				const value = status[key];
+				delete status[key];
+				status[deliveryField(context.document, field)] = value;
+			}
+		}
+		transaction.set(context.registrationDocRef, status, { merge: true });
 	});
 };
 
@@ -551,11 +590,16 @@ const canSkipDelivery = async (
 	if (
 		!context.document.registrationUid &&
 		!isCancellationCommunication(context.document) &&
-		context.registration?.reminderEmailSentOn
+		context.registration?.[deliveryField(context.document, 'SentOn')]
 	) {
 		await syncSentQueueDocument(
 			context,
-			getNormalizedDate(context.registration.reminderEmailSentOn, now),
+			getNormalizedDate(
+				context.registration[
+					deliveryField(context.document, 'SentOn')
+				] as Date,
+				now,
+			),
 		);
 		return true;
 	}
@@ -593,15 +637,22 @@ const canSkipDelivery = async (
 	}
 
 	if (isStaleSendingDocument(context.document, now)) {
-		await updateQueueDocument(context, {
-			deliveryState: 'queued',
-			failedOn: false,
-			lastErrorMessage: false,
-			lastErrorDetails: false,
-		});
-		context.document.deliveryState = 'queued';
+		await persistDeliveryReviewRequirement(
+			context,
+			now,
+			'Provider acceptance is unknown; automatic resend was skipped.',
+		);
+		return true;
 	}
 
+	if (
+		context.document.deliveryState === 'preparing' &&
+		!shouldSendQueuedDocument(context.document)
+	) {
+		throw new Error(
+			'Email preparation is still reserved. Retry this event later.',
+		);
+	}
 	return !shouldSendQueuedDocument(context.document);
 };
 
@@ -643,7 +694,7 @@ const resolveEmailPayload = (
 	};
 };
 
-const markQueueSending = async (
+const reserveEmailPreparation = async (
 	context: LoadedEmailTriggerContext,
 	attemptedOn: Date,
 	triggerMetadata: EmailTriggerMetadata,
@@ -677,9 +728,21 @@ const markQueueSending = async (
 			if (!shouldSendQueuedDocument(currentDocument)) {
 				return { currentRegistration };
 			}
+			if (
+				(currentDocument.deliveryAttemptCount ?? 0) >=
+				EMAIL_PREPARATION_MAX_ATTEMPTS
+			) {
+				transaction.update(context.emailDocRef, {
+					deliveryState: 'failed',
+					failedOn: attemptedOn,
+					lastErrorMessage:
+						'Email preparation attempt budget exhausted.',
+				});
+				return { currentRegistration };
+			}
 			const claimed = {
 				...currentDocument,
-				deliveryState: queueProcessingState.sending,
+				deliveryState: 'preparing' as const,
 				deliveryAttemptedOn: attemptedOn,
 				deliveryAttemptEventId: triggerMetadata.eventId ?? false,
 				deliveryAttemptCount:
@@ -804,6 +867,81 @@ const persistFailedDelivery = async (
 		: new Error('Failed to send queued registration email');
 };
 
+const updatePreparationClaim = async (
+	context: LoadedEmailTriggerContext,
+	updates: Record<string, unknown>,
+): Promise<boolean> =>
+	admin.firestore().runTransaction(async (transaction) => {
+		const snapshot = await transaction.get(context.emailDocRef);
+		if (!snapshot.exists)
+			throw new QueueDocumentMissingError(
+				'The queued email was deleted.',
+			);
+		const current = snapshot.data() as QueuedRegistrationEmailDocument;
+		if (
+			current.deliveryState !== 'preparing' ||
+			current.deliveryAttemptCount !==
+				context.document.deliveryAttemptCount
+		)
+			return false;
+		if (updates['deliveryState'] === 'sending') {
+			const registration = await transaction.get(
+				context.registrationDocRef,
+			);
+			const reason = getSupersededReason({
+				...context,
+				document: current,
+				registration: registration.data() as Registration | undefined,
+			});
+			if (reason) {
+				transaction.update(
+					context.emailDocRef,
+					buildSupersededUpdates(reason, new Date()),
+				);
+				return false;
+			}
+		}
+		transaction.update(context.emailDocRef, updates);
+		return true;
+	});
+
+const recordPreparationFailure = async (
+	context: LoadedEmailTriggerContext,
+	error: unknown,
+): Promise<void> => {
+	if (error instanceof QueueDocumentMissingError) throw error;
+	const code = getErrorCode(error);
+	const transient = [
+		4,
+		8,
+		10,
+		14,
+		'4',
+		'8',
+		'10',
+		'14',
+		'unavailable',
+		'deadline-exceeded',
+		'aborted',
+		'resource-exhausted',
+		'ECONNRESET',
+		'ETIMEDOUT',
+	].includes(code ?? '');
+	const retry =
+		transient &&
+		(context.document.deliveryAttemptCount ?? 0) <
+			EMAIL_PREPARATION_MAX_ATTEMPTS;
+	const retained = await updatePreparationClaim(context, {
+		deliveryState: retry ? 'queued' : 'failed',
+		failedOn: retry ? false : new Date(),
+		lastErrorMessage: retry
+			? 'Temporary email preparation failure; retry pending.'
+			: 'Email preparation failed or exhausted its attempt budget. Targeted recovery is required.',
+		lastErrorDetails: false,
+	});
+	if (retained && retry) throw error;
+};
+
 const suppressDeliveryIfDisabled = async (
 	context: LoadedEmailTriggerContext,
 ): Promise<boolean> => {
@@ -836,6 +974,12 @@ async function processRegistrationEmail(
 
 	const payload = resolveEmailPayload(context);
 	if (!payload) {
+		await updateQueueDocument(context, {
+			deliveryState: 'failed',
+			failedOn: new Date(),
+			lastErrorMessage:
+				'Incomplete email payload. Targeted recovery is required.',
+		});
 		return;
 	}
 
@@ -844,7 +988,9 @@ async function processRegistrationEmail(
 	const attemptedOn = new Date();
 	const queuedOn = getQueueRequestedOn(context.document, attemptedOn);
 
-	if (!(await markQueueSending(context, attemptedOn, triggerMetadata))) {
+	if (
+		!(await reserveEmailPreparation(context, attemptedOn, triggerMetadata))
+	) {
 		return;
 	}
 
@@ -977,19 +1123,14 @@ async function processRegistrationEmail(
 			}
 		}
 	} catch (error) {
-		await persistFailedDelivery(
-			context,
-			getQueueRequestedOn(context.document, new Date()),
-			undefined,
-			error,
-		);
+		await recordPreparationFailure(context, error);
 		return;
 	}
 
 	let response: EmailDeliveryResponse | undefined;
+	let providerAttempted = false;
 
 	try {
-		await updateQueueDocument(context, deliveryMetadata);
 		// Rendering can outlive the cached permission. Check again at the send boundary.
 		if (await suppressDeliveryIfDisabled(context)) return;
 		if (simulated) {
@@ -999,6 +1140,7 @@ async function processRegistrationEmail(
 				triggeredSnapshot.id,
 			);
 			await updateQueueDocument(context, {
+				...deliveryMetadata,
 				deliveryState: 'simulated',
 				deliveryTransport: 'test-sink',
 				deliveryCompletedOn: new Date(),
@@ -1009,16 +1151,27 @@ async function processRegistrationEmail(
 			});
 			return;
 		}
-		sesClient ??= new SESClient({
+		sesClient ??= createEmailSendClient({
 			credentials,
 			region: SES_REGION,
 		} as SESClientConfig);
+		if (
+			!(await updatePreparationClaim(context, {
+				...deliveryMetadata,
+				deliveryState: 'sending',
+				deliveryAttemptedOn: new Date(),
+			}))
+		)
+			return;
+		providerAttempted = true;
 		response = useFallbackEmail
 			? ((await sesClient.send(
 					emailCommand as SendEmailCommand,
+					emailSendOptions(),
 				)) as SendEmailCommandOutput)
 			: ((await sesClient.send(
 					emailCommand as SendTemplatedEmailCommand,
+					emailSendOptions(),
 				)) as SendTemplatedEmailCommandOutput);
 		// SES acceptance records the send request, not recipient delivery.
 		const acceptedOn = new Date();
@@ -1046,6 +1199,10 @@ async function processRegistrationEmail(
 		await persistSuccessfulDelivery(context, queuedOn, sentOn);
 	} catch (err) {
 		if (err instanceof QueueDocumentMissingError) throw err;
+		if (!providerAttempted) {
+			await recordPreparationFailure(context, err);
+			return;
+		}
 		log.error(
 			'Failed to send queued registration email',
 			{
@@ -1055,6 +1212,25 @@ async function processRegistrationEmail(
 			},
 			err,
 		);
+		const status =
+			typeof err === 'object' && err !== null && '$metadata' in err
+				? (err as { $metadata?: { httpStatusCode?: number } }).$metadata
+						?.httpStatusCode
+				: undefined;
+		const rejected = status !== undefined && status >= 400 && status < 500;
+		if (providerAttempted && !response && !rejected) {
+			try {
+				await persistDeliveryReviewRequirement(
+					context,
+					new Date(),
+					'Provider acceptance is unknown; automatic resend was skipped.',
+				);
+			} catch (reviewError) {
+				if (!(reviewError instanceof QueueDocumentMissingError))
+					throw reviewError;
+				throw err;
+			}
+		}
 		await persistFailedDelivery(context, queuedOn, response, err);
 	}
 }
@@ -1063,6 +1239,31 @@ export default async function sendRegistrationEmail(
 	triggeredSnapshot: QueryDocumentSnapshot,
 	triggerMetadata: EmailTriggerMetadata = {},
 ): Promise<void> {
+	const eventTime =
+		typeof triggerMetadata.eventTime === 'string'
+			? Date.parse(triggerMetadata.eventTime)
+			: NaN;
+	const age = Date.now() - eventTime;
+	if (
+		typeof triggerMetadata.eventId !== 'string' ||
+		triggerMetadata.eventId.length === 0 ||
+		triggerMetadata.eventId.length > 512 ||
+		!Number.isFinite(age) ||
+		age < 0 ||
+		age >= EMAIL_EVENT_MAX_AGE_MS
+	) {
+		log.warn(
+			'Email event stopped before dependency reads; targeted review is required.',
+			{
+				queueDocumentId: triggeredSnapshot.id,
+				eventId: triggerMetadata.eventId ?? null,
+				reason: Number.isFinite(age)
+					? 'event-age-budget'
+					: 'invalid-event-metadata',
+			},
+		);
+		return;
+	}
 	try {
 		await processRegistrationEmail(triggeredSnapshot, triggerMetadata);
 	} catch (error) {

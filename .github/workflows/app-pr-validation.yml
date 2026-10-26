@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TEST_SANTASHOP_PROGRAM_YEAR: '2026'
-      TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+      TEST_SANTASHOP_SHOP_DAYS: 12-11,12-12,12-14,12-15
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

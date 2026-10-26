@@ -4,6 +4,13 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.10.26] - 2026-10-26
+
+### Changed
+
+- Release the confirmed 2026 event details: 1812 35th Street, Denver, CO 80216, parking off Brighton Blvd., and December 11, 12, 14, and 15.
+- Advance the affected packages to stable version `2026.10.26`.
+
 ## [2026.09.0-beta.12] - 2026-10-23
 
 ### Fixed

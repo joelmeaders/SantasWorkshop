@@ -63,10 +63,10 @@ From the workspace root:
 
 ```text
 node scripts/generate-2026-email-templates.mjs
-node scripts/render-2026-email-previews.mjs
+node scripts/render-2026-email-previews.mjs "C:\Users\joelm\OneDrive\Documents\Notes\Joel's Obsidian Vault\Denver Santas Claus Shop\Archive\QA\2026-email-previews"
 ```
 
-Open `.artifacts/email-templates-2026/index.html`. The renderer also writes each starter’s unrendered `*.source.html` and `*.txt` beside the previews. These are optional exports from the JSON packages; edit the generator/source package, not a second tracked HTML/TXT copy. The gallery includes six rendered emails and desktop/phone screenshots. QR codes, confirmation codes, names, and appointments in these previews are fictional. The preview checker covers 360px and 800px widths, horizontal overflow, long names, Spanish dates, and essential text with images blocked. Browser rendering does not establish Outlook, Gmail, Apple Mail, or real recipient delivery behavior.
+Open `index.html` in the specified output directory. The renderer also writes each starter’s unrendered `*.source.html` and `*.txt` beside the previews. These are optional exports from the JSON packages; edit the generator/source package, not a second tracked HTML/TXT copy. The gallery includes six rendered emails and desktop/phone screenshots. QR codes, confirmation codes, names, and appointments in these previews are fictional. The preview checker covers 360px and 800px widths, horizontal overflow, long names, Spanish dates, and essential text with images blocked. Browser rendering does not establish Outlook, Gmail, Apple Mail, or real recipient delivery behavior.
 
 ## Content references
 

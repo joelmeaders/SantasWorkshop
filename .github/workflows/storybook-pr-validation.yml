@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 30
     env:
       TEST_SANTASHOP_PROGRAM_YEAR: '2026'
-      TEST_SANTASHOP_SHOP_DAYS: 12-12,12-13,12-15,12-16
+      TEST_SANTASHOP_SHOP_DAYS: 12-11,12-12,12-14,12-15
       STORYBOOK_TARGETS: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v7

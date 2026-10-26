@@ -5,11 +5,11 @@ export const config = {
 	production: false,
 	label: "LOCAL",
 	name: "@santashop/app",
-	version: "2026.09.0-beta.12",
+	version: "2026.10.26",
 	appCheckKey: "2839440c-0a91-4c48-921a-451020157001",
 	appCheckEnabled: false,
 	programYear: 2026,
-	shopDays: [12,13,15,16],
+	shopDays: [11,12,14,15],
 	emulatorPorts: {
 		auth: 9099,
 		functions: 5001,

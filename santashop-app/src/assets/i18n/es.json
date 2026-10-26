@@ -160,7 +160,7 @@
 		"SAVE_EMAIL": "Guardar correo electrónico"
 	},
 	"CONFIRMATION": {
-		"FREE_PARKING": "El aparcamiento es gratuito",
+		"PARKING_DIRECTIONS": "El estacionamiento está en el lado oeste del edificio, con acceso desde Brighton Blvd.",
 		"EVENT_INFORMATION": "Haga clic aquí para obtener información sobre el evento",
 		"QR_CODE": "Código QR",
 		"THIS_IS_YOUR_TICKET": "Esta es tu entrada al evento",
@@ -245,12 +245,13 @@
 		"INSTAGRAM": "Visitar Santa Shop en Instagram"
 	},
 	"EVENT_INFO": {
-		"DATETIME": "Diciembre 12, 13, 15, 16 de 10am a 3pm",
+		"DATETIME": "11, 12, 14 y 15 de diciembre de 2026, de 10 a. m. a 3 p. m.",
 		"RESEND_EMAIL": "Reenviar el correo electrónico",
 		"GOOGLE_MAPS": "Cómo llegar con Google Maps",
 		"APPLE_MAPS": "Cómo llegar con Apple Maps",
-		"EVENT_ADDRESS1": "7150 Leetsdale Drive, Unit 380",
-		"EVENT_ADDRESS2": "Denver, CO 80224",
+		"EVENT_ADDRESS1": "1812 35th Street",
+		"EVENT_ADDRESS2": "Denver, CO 80216",
+		"EVENT_CORNER": "En la esquina de Brighton Blvd. y 35th Street.",
 		"PRINT_PAGE": "Imprima o guarde esta página y el correo electrónico que le enviamos.",
 		"YOUR_TICKET": "Este es su boleto para el evento",
 		"EVENT_INFO_TITLE": "Información del evento",

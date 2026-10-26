@@ -26,7 +26,7 @@ const logo =
 	'https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png';
 const facebook = 'https://www.facebook.com/denversantaclausshop/';
 const map =
-	'https://www.google.com/maps/search/?api=1&query=7150%20Leetsdale%20Drive%20Unit%20380%20Denver%20CO%2080224';
+	'https://www.google.com/maps/search/?api=1&query=1812%2035th%20Street%20Denver%20CO%2080216';
 const copies = {
 	en: {
 		tradition: 'A Denver holiday tradition',
@@ -73,10 +73,11 @@ const copies = {
 		register: 'Register again',
 		again: 'If you would still like to attend, sign in and complete a new registration. You’ll receive a new ticket after registering.',
 		venue: 'Shop Venue',
-		draft: 'DRAFT · CONFIRM 2026 DETAILS BEFORE PUBLISHING',
-		venueNote: 'Shop Venue — not yet confirmed for 2026:',
+		corner: 'On the corner of Brighton Blvd. and 35th Street.',
+		parking:
+			'Parking is on the west side of the building off of Brighton Blvd.',
 		opening:
-			'2026 opening date and time: TO BE CONFIRMED. Replace this note with the confirmed information before publishing.',
+			'December 11, 12, 14, and 15, 2026, from 10 a.m. to 3 p.m. Please arrive at your scheduled appointment time.',
 		map: 'View Shop Venue on map',
 		faq: 'What to expect',
 		help: 'A question before your visit?',
@@ -134,10 +135,11 @@ const copies = {
 		register: 'Inscribirme de nuevo',
 		again: 'Si todavía deseas asistir, inicia sesión y completa una nueva inscripción. Recibirás un nuevo boleto después de inscribirte.',
 		venue: 'Lugar de la tienda',
-		draft: 'BORRADOR · CONFIRMAR LOS DATOS DE 2026 ANTES DE PUBLICAR',
-		venueNote: 'Lugar de la tienda; aún no está confirmado para 2026:',
+		corner: 'En la esquina de Brighton Blvd. y 35th Street.',
+		parking:
+			'El estacionamiento está en el lado oeste del edificio, con acceso desde Brighton Blvd.',
 		opening:
-			'Fecha y hora de apertura de 2026: POR CONFIRMAR. Reemplaza esta nota con la información confirmada antes de publicar.',
+			'11, 12, 14 y 15 de diciembre de 2026, de 10 a. m. a 3 p. m. Llega a la hora de tu cita.',
 		map: 'Ver el lugar de la tienda en el mapa',
 		faq: 'Qué puedes esperar',
 		help: '¿Tienes alguna pregunta?',
@@ -197,7 +199,7 @@ for (const language of ['en', 'es']) {
 			: `${heading(c.bring)}<ol style="padding-left:24px;margin:0 0 24px;font-size:16px;line-height:1.9">${c.items.map((item) => `<li>${item}</li>`).join('')}</ol>${paragraph(c.punctual)}${button(c.manage, app)}`;
 		const venue = cancelled
 			? ''
-			: `<tr><td class="pad" style="padding:28px 36px;background:#f6f0e6">${heading(c.venue)}<p style="color:#7b2338;font-size:12px;font-weight:bold;line-height:1.5">${c.draft}</p>${paragraph(c.venueNote)}<p style="font-size:18px;line-height:1.6;margin:0 0 12px"><strong>South Lowry Marketplace</strong><br>7150 Leetsdale Drive, Unit 380<br>Denver, CO 80224</p>${paragraph(c.opening)}<a href="${map}" style="color:#155344;font-weight:bold;line-height:1.6">${c.map}</a></td></tr>`;
+			: `<tr><td class="pad" style="padding:28px 36px;background:#f6f0e6">${heading(c.venue)}<p style="font-size:18px;line-height:1.6;margin:0 0 12px"><strong>1812 35th Street</strong><br>Denver, CO 80216<br>${c.corner}</p>${paragraph(c.parking)}${paragraph(c.opening)}<a href="${map}" style="color:#155344;font-weight:bold;line-height:1.6">${c.map}</a></td></tr>`;
 		const html = `<!doctype html>
 <html lang="${language}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${copy.subject}</title>
 <style>@media only screen and (max-width:620px){.shell{width:100%!important}.pad{padding-left:22px!important;padding-right:22px!important}.hero-title{font-size:32px!important} }</style></head>
@@ -224,9 +226,8 @@ ${ticket}<tr><td class="pad" style="padding:32px 36px">${body}</td></tr>${venue}
 			...(cancelled
 				? []
 				: [
-						c.draft,
-						c.venueNote +
-							'\nSouth Lowry Marketplace\n7150 Leetsdale Drive, Unit 380\nDenver, CO 80224',
+						'1812 35th Street\nDenver, CO 80216\n' + c.corner,
+						c.parking,
 						c.opening,
 						c.map + ': ' + map,
 					]),
@@ -242,8 +243,8 @@ ${ticket}<tr><td class="pad" style="padding:32px 36px">${body}</td></tr>${venue}
 			displayName: `2026 ${kind} · ${language === 'es' ? 'Español' : 'English'}`,
 			awsTemplateName: `dscs-${key}`,
 			description:
-				'2026 starter. Review seasonal details before publishing.',
-			notes: 'Based on the 2025 email. Appointment preview is fictional.',
+				'2026 event email with confirmed venue, parking, and dates.',
+			notes: 'Venue and dates confirmed for 2026. Appointment preview is fictional.',
 			subjectPart: copy.subject,
 			html,
 			textPart,

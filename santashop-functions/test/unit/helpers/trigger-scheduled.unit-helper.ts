@@ -47,7 +47,19 @@ export const loadTriggerScheduledHandlers = async (
 	]);
 
 	return {
-		sendNewRegistrationEmails: sendNewRegistrationEmailsModule.default,
+		sendNewRegistrationEmails: (
+			snapshot: Parameters<
+				typeof sendNewRegistrationEmailsModule.default
+			>[0],
+			metadata: Parameters<
+				typeof sendNewRegistrationEmailsModule.default
+			>[1] = {},
+		) =>
+			sendNewRegistrationEmailsModule.default(snapshot, {
+				eventId: 'unit-create',
+				eventTime: new Date().toISOString(),
+				...metadata,
+			}),
 		scheduledFirestoreBackup: scheduledFirestoreBackupModule.default,
 		scheduledDateTimeSlotCounters:
 			scheduledDateTimeSlotCountersModule.default,

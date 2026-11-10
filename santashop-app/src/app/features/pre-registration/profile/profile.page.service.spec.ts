@@ -5,12 +5,15 @@ import { TranslateService } from '@ngx-translate/core';
 import {
 	AnalyticsWrapper,
 	AuthService,
+	AuthWrapper,
 	ErrorHandlerService,
 	FireRepoLite,
 	FunctionsWrapper,
 } from '@santashop/core';
 import type { User } from '@santashop/models';
-import { Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
+import type { User as FirebaseUser, UserCredential } from 'firebase/auth';
+import { PreRegistrationPage } from '../pre-registration.page';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProfilePageService } from './profile.page.service';
 
@@ -200,6 +203,24 @@ describe('ProfilePageService', () => {
 		},
 	);
 
+	it('keeps the email editor available when an incomplete change needs a retry', async () => {
+		const service = TestBed.inject(ProfilePageService);
+		service.changeEmailForm.setValue({
+			emailAddress: 'next@example.com',
+			password: 'current-secret',
+		});
+		const error = new Error(
+			'Your sign-in email changed. Save the same email again.',
+		);
+		auth.changeEmailAddress.mockRejectedValueOnce(error);
+		await service.changeEmailAddress();
+		expect(errors.handleError).toHaveBeenCalledWith(error);
+		expect(service.changeEmailForm.value.emailAddress).toBe(
+			'next@example.com',
+		);
+		expect(router.navigate).not.toHaveBeenCalled();
+	});
+
 	it('blocks an email change without a valid reauthentication password', async () => {
 		const service = TestBed.inject(ProfilePageService);
 		service.changeEmailForm.patchValue({ emailAddress: 'new@example.com' });
@@ -208,6 +229,123 @@ describe('ProfilePageService', () => {
 		expect(router.navigate).not.toHaveBeenCalled();
 		expect(service.changeEmailForm.controls.password.touched).toBe(true);
 	});
+	it.each(['retry', 'sign-out', 'account-switch'])(
+		'restores the real shell and profile editor after token invalidation, then handles %s',
+		async (nextAction) => {
+			const original = {
+				uid: 'recover-ui',
+				email: 'before@example.test',
+				getIdToken: vi.fn().mockResolvedValue('token'),
+			} as unknown as FirebaseUser;
+			const updated = {
+				...original,
+				email: 'after@example.test',
+			} as FirebaseUser;
+			let sdkUser: FirebaseUser | null = original;
+			const identities = new BehaviorSubject<FirebaseUser | null>(
+				original,
+			);
+			let reloads = 0;
+			const wrapper = {
+				authState: (): BehaviorSubject<FirebaseUser | null> =>
+					identities,
+				currentUser: (): FirebaseUser | null => sdkUser,
+				reloadCurrentUser: async (): Promise<FirebaseUser | null> => {
+					if (++reloads === 2) {
+						sdkUser = null;
+						identities.next(null);
+						throw { code: 'auth/user-token-expired' };
+					}
+					return sdkUser;
+				},
+				signInWithEmailAndPassword: async (
+					email: string,
+				): Promise<UserCredential> => {
+					sdkUser = email === updated.email ? updated : original;
+					identities.next(sdkUser);
+					return { user: sdkUser } as UserCredential;
+				},
+			};
+			const requests: unknown[] = [];
+			const callable = vi.fn(async (request: unknown) => {
+				requests.push(request);
+				if (requests.length === 1)
+					throw new Error('Lost committed response');
+				return { data: true };
+			});
+			const navigateByUrl = vi.fn().mockResolvedValue(true);
+			TestBed.overrideProvider(AuthWrapper, { useValue: wrapper });
+			TestBed.overrideProvider(AuthService, {
+				useFactory: () => new AuthService(),
+			});
+			TestBed.overrideProvider(FunctionsWrapper, {
+				useValue: { updateEmailAddress: callable },
+			});
+			TestBed.overrideProvider(Router, {
+				useValue: { navigate: router.navigate, navigateByUrl },
+			});
+			read.mockReturnValue(
+				of({
+					firstName: 'Family',
+					lastName: 'Account',
+					zipCode: '80202',
+				}),
+			);
+			alert.create.mockResolvedValue({
+				present: vi.fn(),
+				onDidDismiss: vi.fn().mockResolvedValue({}),
+			});
+			const shell = TestBed.runInInjectionContext(
+				() => new PreRegistrationPage(),
+			);
+			const service = TestBed.inject(ProfilePageService);
+			service.changeEmailForm.setValue({
+				emailAddress: updated.email!,
+				password: 'test-password',
+			});
+			await service.changeEmailAddress();
+			expect(shell.sessionActive()).toBe(true);
+			expect(service.changeEmailForm.controls.emailAddress.value).toBe(
+				updated.email,
+			);
+			expect(service.changeEmailForm.controls.password.value).toBeFalsy();
+			expect(navigateByUrl).toHaveBeenLastCalledWith(
+				'/pre-registration/profile',
+				expect.any(Object),
+			);
+			if (nextAction !== 'retry') {
+				sdkUser =
+					nextAction === 'sign-out'
+						? null
+						: { ...original, uid: 'another-account' };
+				identities.next(sdkUser);
+				expect(shell.sessionActive()).toBe(false);
+				expect(
+					service.changeEmailForm.controls.emailAddress.value,
+				).toBeNull();
+				expect(service.recoveringEmail()).toBe(false);
+				sdkUser = original;
+				identities.next(original);
+				expect(shell.sessionActive()).toBe(false);
+				expect(
+					service.changeEmailForm.controls.emailAddress.value,
+				).toBeNull();
+				service.ngOnDestroy();
+				return;
+			}
+			service.changeEmailForm.controls.password.setValue('test-password');
+			await service.changeEmailAddress();
+			expect(requests).toHaveLength(2);
+			expect(requests[1]).toEqual(requests[0]);
+			sdkUser = null;
+			identities.next(null);
+			expect(shell.sessionActive()).toBe(false);
+			expect(
+				service.changeEmailForm.controls.emailAddress.value,
+			).toBeNull();
+			service.ngOnDestroy();
+		},
+	);
 
 	it('clears profile and password forms and ignores a late prior-account read', () => {
 		const first = new Subject<User | undefined>();

@@ -4,20 +4,20 @@
 	<div class="limited-container">
 		<ion-card-header class="ion-padding-vertical">
 			<p>
-				{{ "Enter the customer's email address, then select Send Email." | adminText }}
+				{{ "Enter the customer's email address, then select Send Email."
+				| adminText }}
 			</p>
 			<p>
-				{{
-					'This sends the email only if the customer has an account and their
-        registration has been completed.' | adminText
-				}}
+				{{ 'This sends the email only if the customer has an account and
+				their registration has been completed.' | adminText }}
 			</p>
 		</ion-card-header>
 
 		<form [formGroup]="form">
 			<ion-list>
 				<ion-item>
-					<ion-input labelPlacement="stacked"
+					<ion-input
+						labelPlacement="stacked"
 						label="{{ 'Email' | adminText }}"
 						formControlName="emailAddress"
 						type="email"
@@ -25,11 +25,27 @@
 						placeholder="{{ 'required' | adminText }}"
 					/>
 				</ion-item>
+				<ion-item>
+					<ion-input
+						label="{{ 'Failed email queue ID (optional)' | adminText }}"
+						labelPlacement="stacked"
+						formControlName="recoverQueueId"
+					/>
+				</ion-item>
+				<ion-item>
+					<ion-checkbox
+						formControlName="acknowledgeUncertainDelivery"
+						class="ion-text-wrap"
+						>{{ 'I reviewed the uncertain delivery and accept that
+						recovery can send a duplicate.' | adminText
+						}}</ion-checkbox
+					>
+				</ion-item>
 			</ion-list>
 			<ion-button
 				(click)="searchAndSend()"
 				expand="block"
-				[disabled]="!form.valid"
+				[disabled]="!canSend"
 				class="ion-padding-horizontal"
 			>
 				<ion-icon name="mail-outline" slot="start" aria-hidden="true" />

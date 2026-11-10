@@ -1,5 +1,8 @@
+import completeRegistration from '../../src/fn/completeRegistration';
+import setDraftAppointment from '../../src/fn/setDraftAppointment';
+import { createRegistration, createUser } from '../fixtures/factories';
 import { seedPublicParameters } from '../../src/fn/testHelpers';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import undoRegistration from '../../src/fn/undoRegistration';
 import { COLLECTION_SCHEMA } from '@santashop/models';
 import {
@@ -119,5 +122,75 @@ describe.sequential('undoRegistration integration', () => {
 			queueSource: 'registration-cancellation',
 			code: 'ABCD2345',
 		});
+	});
+	it('replays cancellation after real re-completion without changing the new booking or its email and index', async () => {
+		vi.spyOn(Date, 'now').mockReturnValue(
+			Date.parse('2025-12-01T00:00:00Z'),
+		);
+		const uid = 'rebook-user';
+		await seedPublicParameters({
+			registrationEnabled: true,
+			admin: {
+				preRegistrationEnabled: true,
+				allowCancelRegistration: true,
+			},
+		});
+		await setDocument(COLLECTION_SCHEMA.users, uid, createUser());
+		await setDocument(
+			COLLECTION_SCHEMA.registrations,
+			uid,
+			createRegistration({
+				uid,
+				registrationSubmittedOn: new Date('2025-11-30'),
+			}),
+		);
+		await setDocument(COLLECTION_SCHEMA.dateTimeSlots, 'slot-2', {
+			programYear: 2025,
+			enabled: true,
+			maxSlots: 10,
+			dateTime: new Date('2025-12-11T18:00:00Z'),
+		});
+		const old = createCallableRequest(
+			{ mutationId: 'cancel-original' },
+			{ uid },
+		);
+		await undoRegistration(old);
+		await setDraftAppointment(
+			createCallableRequest(
+				{
+					mutationId: 'rebook-slot',
+					slotId: 'slot-2',
+					reviewedDateTime: '2025-12-11T18:00:00.000Z',
+				},
+				{ uid },
+			),
+		);
+		await completeRegistration(
+			createCallableRequest({ mutationId: 'rebook-complete' }, { uid }),
+		);
+		const current = await getDocument(COLLECTION_SCHEMA.registrations, uid);
+		const index = await getDocument(
+			COLLECTION_SCHEMA.registrationSearchIndex,
+			uid,
+		);
+		const emails = await getCollectionCount(
+			COLLECTION_SCHEMA.tmpRegistrationEmails,
+		);
+		await seedPublicParameters({
+			admin: { allowCancelRegistration: false },
+		});
+		expect(await undoRegistration(old)).toBe(true);
+		expect(await getDocument(COLLECTION_SCHEMA.registrations, uid)).toEqual(
+			current,
+		);
+		expect(
+			await getDocument(COLLECTION_SCHEMA.registrationSearchIndex, uid),
+		).toEqual(index);
+		expect(
+			await getCollectionCount(COLLECTION_SCHEMA.tmpRegistrationEmails),
+		).toBe(emails);
+		expect(await getCollectionCount(COLLECTION_SCHEMA.cancellations)).toBe(
+			1,
+		);
 	});
 });

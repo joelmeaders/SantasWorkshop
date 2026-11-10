@@ -44,6 +44,7 @@ describe('owner operation callables', () => {
 
 	beforeEach(() => {
 		adminMock = createBackgroundAdminMock();
+		adminMock.setCollectionDocs('tmp_registrationemails', []);
 		(adminMock.module as unknown as { app: ReturnType<typeof vi.fn> }).app =
 			vi.fn(() => ({ options: { projectId: 'santas-workshop-test' } }));
 		getFunctionsMock.mockReset();
@@ -238,8 +239,8 @@ describe('owner operation callables', () => {
 	it('counts eligible reminders and registered-email exports from authoritative records', async () => {
 		const { previewOwnerOperation } = await loadHandlers();
 		adminMock.setCollectionDocs('registrations', [
-			{ id: 'eligible', data: { registrationSubmittedOn: true, qrCodeGeneratedOn: true } },
-			{ id: 'queued', data: { registrationSubmittedOn: true, qrCodeGeneratedOn: true, reminderEmailQueuedOn: true } },
+			{ id: 'eligible', data: { registrationSubmittedOn: true, qrCodeGeneratedOn: true, qrCodeStoragePath: "qr.png" } },
+			{ id: 'queued', data: { registrationSubmittedOn: true, qrCodeGeneratedOn: true, qrCodeStoragePath: "qr.png", eventReminderQueuedOn: true } },
 			{ id: 'not-submitted', data: { qrCodeGeneratedOn: true } },
 		]);
 		const now = new Date('2026-01-10T00:00:00.000Z');

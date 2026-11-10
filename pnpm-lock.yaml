@@ -280,6 +280,9 @@ catalogs:
     eslint:
       specifier: ^10.10.0
       version: 10.10.0
+    express:
+      specifier: 5.2.1
+      version: 5.2.1
     firebase:
       specifier: ^12.18.0
       version: 12.18.0
@@ -791,6 +794,9 @@ importers:
       eslint:
         specifier: catalog:functions
         version: 10.10.0
+      express:
+        specifier: catalog:functions
+        version: 5.2.1
       globals:
         specifier: 'catalog:'
         version: 17.12.0

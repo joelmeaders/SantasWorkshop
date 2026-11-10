@@ -160,7 +160,7 @@
 		"SAVE_EMAIL": "Save email"
 	},
 	"CONFIRMATION": {
-		"FREE_PARKING": "Parking is free",
+		"PARKING_DIRECTIONS": "Parking is on the west side of the building off of Brighton Blvd.",
 		"EVENT_INFORMATION": "Click here for event Information",
 		"QR_CODE": "QR Code",
 		"THIS_IS_YOUR_TICKET": "This is your ticket to the event",
@@ -245,12 +245,13 @@
 		"INSTAGRAM": "Visit Santa Shop on Instagram"
 	},
 	"EVENT_INFO": {
-		"DATETIME": "December 12, 13, 15, 16 at 10am - 3pm",
+		"DATETIME": "December 11, 12, 14, and 15, 2026, from 10 a.m. to 3 p.m.",
 		"RESEND_EMAIL": "Resend Email",
 		"GOOGLE_MAPS": "Directions in Google Maps",
 		"APPLE_MAPS": "Directions in Apple Maps",
-		"EVENT_ADDRESS1": "7150 Leetsdale Drive, Unit 380",
-		"EVENT_ADDRESS2": "Denver, CO 80224",
+		"EVENT_ADDRESS1": "1812 35th Street",
+		"EVENT_ADDRESS2": "Denver, CO 80216",
+		"EVENT_CORNER": "On the corner of Brighton Blvd. and 35th Street.",
 		"PRINT_PAGE": "Print or save this page or the email we sent you!",
 		"YOUR_TICKET": "This is your ticket to the event.",
 		"EVENT_INFO_TITLE": "Event information",
@@ -374,7 +375,7 @@
 	},
 	"REGISTRATION_UNAVAILABLE": {
 		"TITLE": "Registration record unavailable",
-		"MESSAGE": "We could not load your registration record. It may be missing or corrupted. Please contact the Denver Santa Claus Shop for assistance."
+		"MESSAGE": "We could not finish or load your account setup. Refresh this page to retry. If setup is still reserved, wait two minutes. If it still fails, contact the Denver Santa Claus Shop for assistance."
 	},
 	"WAITING_LIST": {
 		"TITLE": "Waiting list",

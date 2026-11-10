@@ -4,6 +4,27 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.10.26] - 2026-10-26
+
+### Changed
+
+- Release the confirmed 2026 event details: 1812 35th Street, Denver, CO 80216, parking off Brighton Blvd., and December 11, 12, 14, and 15.
+- Advance the affected packages to stable version `2026.10.26`.
+
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Supply the email recovery signal in the shared profile story fixture so both account settings stories render (#227).
+- Reopen the profile email editor after verified recovery from either customer flow, restore the target address, and require password re-entry without weakening account-change teardown (#227).
+- Acknowledge only the original submitted ticket after successful cancellation recovery so the overview guard does not redirect to a stale ticket (#213).
+
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
+- Preserve cancellation and appointment-change request identities during recovery. Stop dispatch after an account change during dialogs or registration reads, and replay old successes without changing newer bookings (#213).
+
+- Keep the email editor open after an incomplete email change so the customer can retry the same address (#227).
+
 ## [2026.09.0-beta.10] - 2026-10-07
 
 ### Changed

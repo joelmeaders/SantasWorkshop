@@ -9,7 +9,7 @@ The headers use the hosted DSCS logo, localized alt text, and a link to the shop
 
 ## Use the templates
 
-Open **Admin → Email Templates → Create**. Choose one of the six 2026 starters or import a JSON package. The starters cover registration confirmation, event reminder, and cancellation in English and Spanish. The six canonical JSON packages are in `santashop-admin/src/assets/email-templates/2026/`; each includes HTML and plain text. Standalone copies are generated for review/export, not tracked as additional application assets.
+Open **Admin → Email Templates → Create**. Choose one of the six 2026 starters or import a JSON package. The starters cover registration confirmation, event reminder, and cancellation in English and Spanish. Two additional waiting-list capacity starters use the same seasonal details. The eight canonical JSON packages are in `santashop-admin/src/assets/email-templates/2026/`; each includes HTML and plain text. Standalone copies are generated for review/export, not tracked as additional application assets.
 
 JSON import creates an unsaved draft. Choose a unique key and SES name. A saved template keeps its language, delivery type, and SES name. HTML import replaces only the body after confirmation. Invalid files leave the editor unchanged. Export JSON to transfer metadata, mappings, samples, plain text, language, and review state; export HTML to transfer source with placeholders intact. Imports do not publish.
 
@@ -18,11 +18,16 @@ template; test sink mode records the revision without calling AWS. An older publ
 
 ## Seasonal review is required
 
-Starter venues and event dates are draft content. Confirm each season's venue,
-opening, eligibility copy, and both language versions before publishing. Do not
-use a prior season's address or date as confirmation for a new season.
+The 2026 starters use December 11, 12, 14, and 15, 2026 at 1812 35th Street,
+Denver, CO 80216, at Brighton Blvd and 35th Street. Parking is on the west side,
+off Brighton Blvd. Confirmation and reminder emails show the customer's runtime
+appointment time; these dates do not establish general shopping hours. Waiting-list
+emails require the customer to choose an available appointment before attending.
 
-Before publishing a starter, replace the draft venue and opening notes in both HTML and plain text with confirmed information. Review both languages, mark the seasonal review complete, then save that revision. Editing content clears review approval. The backend rejects publication of unreviewed seasonal revisions and revisions that still contain the supplied draft markers. Cancellation also requires review, but the cancellation message contains no active ticket or QR code. The customer's QR artifact remains stable for later re-registration.
+Confirm each season's venue, dates, eligibility copy, and both language versions
+before publishing. Do not carry prior-season details forward without review.
+
+Before publishing a starter, verify the seasonal information in both HTML and plain text. Review both languages, mark the seasonal review complete, then save that revision. Editing content clears review approval. The backend rejects publication of unreviewed seasonal revisions and revisions that still contain the supplied draft markers. Cancellation also requires review, but the cancellation message contains no active ticket, QR code, venue invitation, or shop dates. Its registration link invites the customer to register again without promising availability. The customer's QR artifact remains stable for later re-registration.
 
 ## Customer language and delivery
 
@@ -63,10 +68,11 @@ From the workspace root:
 
 ```text
 node scripts/generate-2026-email-templates.mjs
+node --test scripts/email-template-starters.test.mjs
 node scripts/render-2026-email-previews.mjs
 ```
 
-Open `.artifacts/email-templates-2026/index.html`. The renderer also writes each starter’s unrendered `*.source.html` and `*.txt` beside the previews. These are optional exports from the JSON packages; edit the generator/source package, not a second tracked HTML/TXT copy. The gallery includes six rendered emails and desktop/phone screenshots. QR codes, confirmation codes, names, and appointments in these previews are fictional. The preview checker covers 360px and 800px widths, horizontal overflow, long names, Spanish dates, and essential text with images blocked. Browser rendering does not establish Outlook, Gmail, Apple Mail, or real recipient delivery behavior.
+Open `index.html` in the specified output directory. The renderer also writes each starter’s unrendered `*.source.html` and `*.txt` beside the previews. These are optional exports from the JSON packages; edit the generator/source package, not a second tracked HTML/TXT copy. The gallery includes six rendered emails and desktop/phone screenshots. QR codes, confirmation codes, names, and appointments in these previews are fictional. The preview checker covers 360px and 800px widths, horizontal overflow, long names, Spanish dates, and essential text with images blocked. Browser rendering does not establish Outlook, Gmail, Apple Mail, or real recipient delivery behavior.
 
 ## Content references
 

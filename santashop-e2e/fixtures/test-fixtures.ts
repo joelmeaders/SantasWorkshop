@@ -43,6 +43,7 @@ export interface E2eDateTimeSlotUpdate {
 }
 
 export interface E2eAdminSeedUser {
+	incompleteSignup?: boolean;
 	uid?: string;
 	emailAddress: string;
 	password: string;

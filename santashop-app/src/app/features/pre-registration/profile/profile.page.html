@@ -26,7 +26,7 @@
 					</form>
 				</details>
 
-				<details class="settings-panel">
+				<details class="settings-panel" [open]="recoveringEmail()">
 					<summary>
 						<span>{{ 'PROFILE.CHANGE_EMAIL' | translate }}</span>
 						<small>{{ user.emailAddress }}</small>

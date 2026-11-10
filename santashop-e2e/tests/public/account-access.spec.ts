@@ -54,6 +54,42 @@ test.describe('customer account and session access', () => {
 		await seedScenario('create-account-enabled');
 	});
 
+	test('AUTH-022 resumes interrupted account setup after normal UI sign-in', async ({
+		page,
+		seedAdminUser,
+		inspectRegistrationBoundary,
+	}) => {
+		const account = randomAccount();
+		await seedAdminUser({
+			emailAddress: account.emailAddress,
+			password: account.password,
+			roles: [],
+			incompleteSignup: true,
+		});
+		await signInViaUi(page, account);
+		await expect(page).toHaveURL(/\/pre-registration\/overview$/);
+		await expect(page.locator('#children-heading')).toBeVisible();
+		await expect
+			.poll(async () => {
+				const state = await inspectRegistrationBoundary(
+					account.emailAddress,
+				);
+				return [
+					state.authUserCount,
+					state.userDocumentCount,
+					state.registrationCount,
+					state.ownedQrObjectCount,
+				];
+			})
+			.toEqual([1, 1, 1, 1]);
+		const before = await inspectRegistrationBoundary(account.emailAddress);
+		await page.reload();
+		await expect(page.locator('#children-heading')).toBeVisible();
+		expect(
+			(await inspectRegistrationBoundary(account.emailAddress)).qrPaths,
+		).toEqual(before.qrPaths);
+	});
+
 	test('AUTH-001 creates an account and enters authenticated registration', async ({
 		page,
 	}) => {
@@ -83,12 +119,18 @@ test.describe('customer account and session access', () => {
 		await page.fill('#zipCode input', account.zipCode);
 		await page.fill('#emailAddress input', account.emailAddress);
 		await page.fill('#password input', account.password);
-		const passwordInput = page.locator('#password input:not(.cloned-input)');
+		const passwordInput = page.locator(
+			'#password input:not(.cloned-input)',
+		);
 		await expect(passwordInput).toHaveAttribute('type', 'password');
-		await page.getByRole('button', { name: 'Show password', exact: true }).click();
+		await page
+			.getByRole('button', { name: 'Show password', exact: true })
+			.click();
 		await expect(passwordInput).toHaveAttribute('type', 'text');
 		await expect(passwordInput).toHaveValue(account.password);
-		await page.getByRole('button', { name: 'Hide password', exact: true }).click();
+		await page
+			.getByRole('button', { name: 'Hide password', exact: true })
+			.click();
 		await expect(passwordInput).toHaveAttribute('type', 'password');
 		await expect(page.locator('#password2')).toHaveCount(0);
 		await expect(submitButton).toHaveClass(/button-disabled/);
@@ -499,7 +541,9 @@ test.describe('customer account and session access', () => {
 			{ timeout: 15000 },
 		);
 		await page.locator('#submitButton').click();
-		await page.locator('ion-alert button.alert-button-role-confirm').click();
+		await page
+			.locator('ion-alert button.alert-button-role-confirm')
+			.click();
 		// The request gates keep each phase visible after form submission.
 		await expect(page.locator('ion-loading')).toContainText(
 			'Creando tu cuenta...',
@@ -540,7 +584,7 @@ test.describe('customer account and session access', () => {
 		const alert = page.locator('ion-alert');
 		await expect(alert).toContainText('No se puede acceder al registro');
 		await expect(alert).toContainText(
-			'Comunícate con Denver Santa Claus Shop para obtener ayuda.',
+			'Actualiza esta página para reintentar.',
 		);
 		const acknowledge = alert.getByRole('button', {
 			name: 'Aceptar',

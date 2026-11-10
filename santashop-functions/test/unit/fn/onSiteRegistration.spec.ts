@@ -10,6 +10,11 @@ import {
 } from '../helpers/checkin-admin.unit-helper';
 import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
 
+const onsite = (overrides: Parameters<typeof createRegistration>[0] = {}) => ({
+	...createRegistration(overrides),
+	mutationId: 'onsite-test-1',
+});
+
 describe('onSiteRegistration handler', () => {
 	let adminMock: CheckInAdminMock;
 
@@ -20,21 +25,31 @@ describe('onSiteRegistration handler', () => {
 		generateIdMock.mockReturnValue('ZXCV2345');
 	});
 
+	it('rejects requests without a stable submission ID before writes', async () => {
+		const { onSiteRegistration } =
+			await loadCheckInAdminHandlers(adminMock);
+		await expect(
+			onSiteRegistration(
+				createCallableRequest(createRegistration(), {
+					roles: ['admin'],
+				}) as never,
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
+	});
+
 	it('creates an onsite registration and check-in using a generated id', async () => {
 		const { onSiteRegistration } =
 			await loadCheckInAdminHandlers(adminMock);
 
 		const result = await onSiteRegistration(
-			createCallableRequest(
-				createRegistration({ uid: 'ignored-input' }),
-				{
-					roles: ['admin', 'checkin'],
-				},
-			),
+			createCallableRequest(onsite({ uid: 'ignored-input' }), {
+				roles: ['admin', 'checkin'],
+			}),
 		);
 
 		expect(result).toBe(1);
-		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(2);
+		expect(adminMock.transactionCreate).toHaveBeenCalledTimes(3);
 		expect(adminMock.transactionSet).toHaveBeenCalledWith(
 			adminMock.getDocRef(`stats/checkin-${PROGRAM_YEAR}`),
 			expect.objectContaining({
@@ -60,9 +75,7 @@ describe('onSiteRegistration handler', () => {
 			await loadCheckInAdminHandlers(adminMock);
 
 		await expect(
-			onSiteRegistration(
-				createCallableRequest(createRegistration(), { roles: [] }),
-			),
+			onSiteRegistration(createCallableRequest(onsite(), { roles: [] })),
 		).rejects.toMatchObject({ code: 'permission-denied', message: '-99' });
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
 	});
@@ -73,7 +86,7 @@ describe('onSiteRegistration handler', () => {
 
 		await expect(
 			onSiteRegistration(
-				createCallableRequest(createRegistration({ children: [] }), {
+				createCallableRequest(onsite({ children: [] }), {
 					roles: ['admin'],
 				}),
 			),
@@ -84,15 +97,19 @@ describe('onSiteRegistration handler', () => {
 	it('rejects an age 12 child before creating onsite records', async () => {
 		const { onSiteRegistration } =
 			await loadCheckInAdminHandlers(adminMock);
-		const registration = createRegistration();
-		registration.children = [{
-			...registration.children[0],
-			dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
-		}];
+		const registration = onsite();
+		registration.children = [
+			{
+				...registration.children[0],
+				dateOfBirth: new Date(PROGRAM_YEAR - 12, 11, 31),
+			},
+		];
 
 		await expect(
 			onSiteRegistration(
-				createCallableRequest(registration, { roles: ['admin', 'checkin'] }),
+				createCallableRequest(registration, {
+					roles: ['admin', 'checkin'],
+				}),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
 		expect(adminMock.transactionCreate).not.toHaveBeenCalled();
@@ -108,7 +125,7 @@ describe('onSiteRegistration handler', () => {
 
 		await expect(
 			onSiteRegistration(
-				createCallableRequest(createRegistration(), { owner: true }),
+				createCallableRequest(onsite(), { owner: true }),
 			),
 		).rejects.toMatchObject({
 			code: 'already-exists',

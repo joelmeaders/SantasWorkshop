@@ -37,6 +37,7 @@ import { CheckedInGuard } from '../../core/guards/checked-in.guard';
 import { RegistrationCompleteGuard } from '../../core/guards/registration-complete.guard';
 import { RegistrationIncompleteGuard } from '../../core/guards/registration-incomplete.guard';
 import { CheckinService } from '../../core/services/checkin.service';
+import { EmailChangeRecoveryService } from '../../core/services/email-change-recovery.service';
 import { PreRegistrationService } from '../../core/services/pre-registration.service';
 import { QrCodeService } from '../../core/services/qrcode.service';
 import { CUSTOMER_APP_CONFIG } from '../../core/tokens/customer-runtime.token';
@@ -78,6 +79,7 @@ export const FULL_FIRESTORE_ROUTE_PROVIDERS: Provider[] = [
 	QrCodeService,
 	CheckinService,
 	ProfilePageService,
+	EmailChangeRecoveryService,
 	CheckedInGuard,
 	RegistrationCompleteGuard,
 	RegistrationIncompleteGuard,

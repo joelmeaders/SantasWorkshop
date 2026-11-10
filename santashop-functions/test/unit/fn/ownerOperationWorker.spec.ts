@@ -463,7 +463,13 @@ describe('ownerOperationWorker yearly reset', () => {
 
 		const worker = (await import('../../../src/fn/ownerOperationWorker'))
 			.default;
-		await worker({ data: { operationId: 'stats' } });
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2026-09-01T12:00:00Z'));
+		try {
+			await worker({ data: { operationId: 'stats' } });
+		} finally {
+			vi.useRealTimers();
+		}
 
 		expect(writerSet).toHaveBeenCalledWith(
 			includedRef,

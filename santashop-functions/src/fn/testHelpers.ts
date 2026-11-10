@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { prepareAccountProvisioning } from './accountProvisioning';
 import { parsePublicParameters } from '../models';
 import type {
 	RegistrationDailySnapshot,
@@ -16,6 +18,7 @@ import { getCancelledRegistrationAsset } from '../utility/bundled-assets';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 
 export interface TestAdminUserSeed {
+	incompleteSignup?: boolean;
 	uid?: string;
 	emailAddress: string;
 	password: string;
@@ -430,8 +433,18 @@ export async function seedAdminUser(
 		}
 	}
 
+	const pendingUid = user.incompleteSignup
+		? await prepareAccountProvisioning(randomUUID(), {
+				firstName: 'Recovery',
+				lastName: 'Family',
+				emailAddress,
+				zipCode: '80205',
+				newsletter: false,
+				referredBy: 'Emulator QA',
+			})
+		: user.uid;
 	const createdUser = await auth.createUser({
-		uid: user.uid,
+		uid: pendingUid,
 		email: emailAddress,
 		password: user.password,
 		emailVerified: true,

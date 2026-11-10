@@ -25,6 +25,8 @@ export class SignUpPageService implements OnDestroy {
 	private readonly alertController = inject(AlertController);
 	private readonly translateService = inject(TranslateService);
 
+	private signupIntent?: { profile: string; mutationId: string };
+	private signupInFlight = false;
 	public readonly form = newOnboardUserForm();
 	private readonly subscriptions = new Array<Subscription>();
 
@@ -50,82 +52,90 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	public async onboardUser(): Promise<void> {
+		if (this.signupInFlight) return;
 		if (this.form.invalid) {
 			this.form.markAllAsTouched();
 			return;
 		}
-		// Keep the deployed callable contract while collecting the password only once.
-		const onboardInfo = {
-			...this.form.value,
-			password2: this.form.controls.password.value,
-		} as OnboardUser;
-
-		const loader = await this.loadingController.create({
-			message: await firstValueFrom(
-				this.translateService.get('SIGNUP.CREATING_ACCOUNT'),
-			),
-		});
-
-		await loader.present();
-
-		let accountCreated = false;
-		let authenticated = false;
+		this.signupInFlight = true;
 		try {
-			await trackAnalyticsOperation(
-				this.analytics,
-				'create_account',
-				() => this.createAccount(onboardInfo),
-			);
-			this.analytics.logEvent('account_created');
-			accountCreated = true;
-			loader.message = await firstValueFrom(
-				this.translateService.get('SIGNUP.SIGNING_IN'),
-			);
-			await trackAnalyticsOperation(
-				this.analytics,
-				'signup_sign_in',
-				() => this.signIn(onboardInfo),
-			);
-			authenticated = true;
-			await this.router.navigate(['pre-registration/overview']);
-		} catch (incomingError) {
-			const error = incomingError as IError;
+			// Keep the deployed callable contract while collecting the password only once.
+			const onboardInfo = {
+				...this.form.value,
+				password2: this.form.controls.password.value,
+			} as OnboardUser;
 
-			if (accountCreated && !authenticated) {
-				this.analytics.logEventWithParams('signup_recovery_shown', {
-					reason: 'sign_in_failed',
-				});
-				await loader.dismiss().catch(() => false);
-				await this.showAccountRecoveryAlert(
-					onboardInfo.emailAddress,
-					'SIGNUP.ACCOUNT_CREATED',
-					'SIGNUP.ACCOUNT_CREATED_MESSAGE',
+			const loader = await this.loadingController.create({
+				message: await firstValueFrom(
+					this.translateService.get('SIGNUP.CREATING_ACCOUNT'),
+				),
+			});
+
+			await loader.present();
+
+			let accountCreated = false;
+			let authenticated = false;
+			try {
+				await trackAnalyticsOperation(
+					this.analytics,
+					'create_account',
+					() => this.createAccount(onboardInfo),
 				);
-			} else if (error?.code === 'functions/already-exists') {
-				this.analytics.logEventWithParams('signup_recovery_shown', {
-					reason: 'account_exists',
-				});
-				await loader.dismiss().catch(() => false);
-				await this.showAccountRecoveryAlert(
-					onboardInfo.emailAddress,
-					'SIGNUP.ACCOUNT_EXISTS',
-					'SIGNUP.ACCOUNT_EXISTS_MESSAGE',
+				this.analytics.logEvent('account_created');
+				accountCreated = true;
+				loader.message = await firstValueFrom(
+					this.translateService.get('SIGNUP.SIGNING_IN'),
 				);
-			} else if (error?.code === 'functions/unauthenticated') {
-				await this.errorHandler.handleError(
-					{
-						...error,
-						details: this.translateService.instant(
-							'SIGNUP.VERIFICATION_FAILED_MESSAGE',
+				await trackAnalyticsOperation(
+					this.analytics,
+					'signup_sign_in',
+					() => this.signIn(onboardInfo),
+				);
+				authenticated = true;
+				await this.router.navigate(['pre-registration/overview']);
+			} catch (incomingError) {
+				const error = incomingError as IError;
+
+				if (accountCreated && !authenticated) {
+					this.analytics.logEventWithParams('signup_recovery_shown', {
+						reason: 'sign_in_failed',
+					});
+					await loader.dismiss().catch(() => false);
+					await this.showAccountRecoveryAlert(
+						onboardInfo.emailAddress,
+						'SIGNUP.ACCOUNT_CREATED',
+						'SIGNUP.ACCOUNT_CREATED_MESSAGE',
+					);
+				} else if (error?.code === 'functions/already-exists') {
+					this.analytics.logEventWithParams('signup_recovery_shown', {
+						reason: 'account_exists',
+					});
+					await loader.dismiss().catch(() => false);
+					await this.showAccountRecoveryAlert(
+						onboardInfo.emailAddress,
+						'SIGNUP.ACCOUNT_EXISTS',
+						'SIGNUP.ACCOUNT_EXISTS_MESSAGE',
+					);
+				} else if (error?.code === 'functions/unauthenticated') {
+					await this.errorHandler.handleError(
+						{
+							...error,
+							details: this.translateService.instant(
+								'SIGNUP.VERIFICATION_FAILED_MESSAGE',
+							),
+						},
+						this.translateService.instant(
+							'SIGNUP.VERIFICATION_FAILED',
 						),
-					},
-					this.translateService.instant('SIGNUP.VERIFICATION_FAILED'),
-				);
-			} else {
-				await this.errorHandler.handleError(error);
+					);
+				} else {
+					await this.errorHandler.handleError(error);
+				}
+			} finally {
+				await loader.dismiss().catch(() => false);
 			}
 		} finally {
-			await loader.dismiss().catch(() => false);
+			this.signupInFlight = false;
 		}
 	}
 
@@ -171,12 +181,26 @@ export class SignUpPageService implements OnDestroy {
 	}
 
 	private async createAccount(value: OnboardUser): Promise<void> {
+		const preferredLanguage =
+			this.translateService.getCurrentLang() === 'es' ? 'es' : 'en';
+		const profile = JSON.stringify([
+			value.firstName,
+			value.lastName,
+			value.emailAddress,
+			value.zipCode,
+			value.referredBy,
+			value.newsletter,
+			value.legal,
+			preferredLanguage,
+		]);
+		if (this.signupIntent?.profile !== profile)
+			this.signupIntent = { profile, mutationId: crypto.randomUUID() };
 		const accountStatusFunction =
 			this.functions.callableWrapper('newAccount');
 		await accountStatusFunction({
 			...value,
-			preferredLanguage:
-				this.translateService.getCurrentLang() === 'es' ? 'es' : 'en',
+			mutationId: this.signupIntent.mutationId,
+			preferredLanguage,
 		});
 	}
 

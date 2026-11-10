@@ -35,6 +35,7 @@
 		"uuid": "catalog:functions"
 	},
 	"devDependencies": {
+		"express": "catalog:functions",
 		"@babel/core": "catalog:functions",
 		"@babel/preset-env": "catalog:functions",
 		"@babel/preset-typescript": "catalog:functions",

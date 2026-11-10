@@ -7,6 +7,15 @@ const meta = {
 	title: 'Registration/Account/Home and Sign In',
 	component: HomePage,
 	decorators: customerStoryDecorators({ mode: 'sign-in' }),
+	// Release metadata is fixture data, as in the staff sign-in story.
+	render: (): {
+		props: { environmentName: string; environmentVersion: string };
+	} => ({
+		props: {
+			environmentName: '@santashop/app_LOCAL',
+			environmentVersion: '2026.09.0-beta.7',
+		},
+	}),
 	parameters: {
 		layout: 'fullscreen',
 		docs: {

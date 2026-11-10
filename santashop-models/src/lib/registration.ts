@@ -40,11 +40,16 @@ export interface Registration {
 
 	referredBy?: string;
 
+	// Legacy delivery fields track confirmations. They do not prove an event reminder was sent.
 	reminderEmailQueuedOn?: false | Date;
 
 	reminderEmailFailedOn?: false | Date;
 
 	reminderEmailSentOn?: false | Date;
+
+	eventReminderQueuedOn?: false | Date;
+	eventReminderSentOn?: false | Date;
+	eventReminderFailedOn?: false | Date;
 
 	qrCodeGeneratedOn?: false | Date;
 
@@ -57,4 +62,15 @@ export interface Registration {
 	cancelledOn?: Date;
 	cancelledByUid?: string;
 	cancellationLogId?: string;
+}
+
+export interface OnSiteRegistrationRequest extends Registration {
+	mutationId: string;
+}
+
+export interface ResendRegistrationEmailRequest {
+	// Staff may resolve the customer from a known recovery queue ID.
+	customerId?: string;
+	recoverQueueId?: string;
+	acknowledgeUncertainDelivery?: boolean;
 }

@@ -113,7 +113,17 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 		): ReturnType<MockDocRef['create']> => ref.create(value),
 	);
 	const transactionUpdate = vi.fn(
-		(ref: MockDocRef, value: Record<string, unknown>) => ref.update(value),
+		async (ref: MockDocRef, value: Record<string, unknown>) => {
+			const snapshot = await ref.get();
+			await ref.update(value);
+			if (
+				ref.path.startsWith('tmp_registrationemails/') &&
+				snapshot.exists
+			) {
+				const data = { ...snapshot.data(), ...value };
+				ref.get.mockResolvedValue({ exists: true, data: () => data });
+			}
+		},
 	);
 	const transactionDelete = vi.fn((ref: MockDocRef) => ref.delete());
 	const runTransaction = vi.fn(
@@ -125,11 +135,15 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 				}>;
 				create: typeof transactionCreate;
 				set: typeof transactionSet;
-				update: typeof transactionUpdate;
+				update: (
+					ref: MockDocRef,
+					value: Record<string, unknown>,
+				) => ReturnType<typeof transactionUpdate>;
 				delete: typeof transactionDelete;
 			}) => Promise<void> | void,
-		) =>
-			callback({
+		) => {
+			const updates: Promise<void>[] = [];
+			const result = await callback({
 				get: async (ref: MockDocRef) => {
 					const snapshot = await ref.get();
 					return {
@@ -139,9 +153,17 @@ export const createBackgroundAdminMock = (): BackgroundAdminMock => {
 				},
 				create: transactionCreate,
 				set: transactionSet,
-				update: transactionUpdate,
+				update: (ref, value) => {
+					const update = transactionUpdate(ref, value);
+					updates.push(update);
+					void update.catch(() => undefined);
+					return update;
+				},
 				delete: transactionDelete,
-			}),
+			});
+			await Promise.all(updates);
+			return result;
+		},
 	);
 	const listUsers = vi.fn();
 	const deleteUsers = vi.fn();

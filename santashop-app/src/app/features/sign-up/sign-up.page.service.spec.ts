@@ -349,4 +349,29 @@ describe('SignUpPageService', () => {
 		});
 		expect(service.form.valid).toBe(true);
 	});
+	it('retains one signup request after a lost response and blocks concurrent submissions', async () => {
+		const service = createService();
+		let reject!: (error: Error) => void;
+		accountCallable.mockImplementationOnce(
+			() =>
+				new Promise((_resolve, fail) => {
+					reject = fail;
+				}),
+		);
+		const first = service.onboardUser();
+		await service.onboardUser();
+		await vi.waitFor(() => expect(accountCallable).toHaveBeenCalledOnce());
+		const original = accountCallable.mock.calls[0][0];
+		reject(new Error('Lost response'));
+		await first;
+		await service.onboardUser();
+		expect(accountCallable.mock.calls[1][0].mutationId).toBe(
+			original.mutationId,
+		);
+		service.form.controls.firstName.setValue('Changed');
+		await service.onboardUser();
+		expect(accountCallable.mock.calls[2][0].mutationId).not.toBe(
+			original.mutationId,
+		);
+	});
 });

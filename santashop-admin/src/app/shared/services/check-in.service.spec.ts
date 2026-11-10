@@ -111,10 +111,16 @@ describe('CheckInService', () => {
 	it('submits the complete on-site registration and returns its coupon count', async () => {
 		const service = TestBed.inject(CheckInService);
 
-		await expect(service.onSiteRegistration(registration)).resolves.toBe(4);
+		await expect(
+			service.onSiteRegistration({
+				...registration,
+				mutationId: 'onsite-1',
+			}),
+		).resolves.toBe(4);
 		expect(callableWrapper).toHaveBeenCalledWith('onSiteRegistration');
 		expect(onSiteRegistration).toHaveBeenCalledWith({
 			...registration,
+			mutationId: 'onsite-1',
 			children: [
 				expect.objectContaining({
 					id: 1,

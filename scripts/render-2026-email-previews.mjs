@@ -1,5 +1,6 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 import Handlebars from 'handlebars';
 
@@ -9,9 +10,9 @@ const source = fileURLToPath(
 		import.meta.url,
 	),
 );
-const output = fileURLToPath(
-	new URL('../.artifacts/email-templates-2026/', import.meta.url),
-);
+if (!process.argv[2])
+	throw new Error('Specify an output directory for the email previews.');
+const output = resolve(process.argv[2]) + sep;
 mkdirSync(output, { recursive: true });
 const browser = await chromium.launch();
 const results = [];
@@ -76,7 +77,7 @@ try {
 			)
 				throw new Error('Missing greeting with images blocked.');
 			if (
-				template.deliveryProfile !== 'registration-cancellation' &&
+				['registration-confirmation', 'event-reminder'].includes(template.deliveryProfile) &&
 				!(await page.locator('body').innerText()).includes(data.code)
 			)
 				throw new Error('Missing text ticket with images blocked.');
@@ -96,7 +97,7 @@ try {
 writeFileSync(output + 'results.json', JSON.stringify(results, null, 2));
 writeFileSync(
 	output + 'index.html',
-	`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2026 email collection</title><body style="background:#eee8de;color:#243c34;font-family:Arial;padding:24px"><h1>2026 email collection</h1><p>Drafts for review. The venue and opening details are unconfirmed. All QR codes and appointments are fictional preview data.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">${results.map(({ key }) => `<article><h2 style="font-size:18px">${key}</h2><a href="${key}.html">Open email</a><br><a href="${key}-mobile.png">Phone screenshot</a><br><img alt="Preview of ${key}" src="${key}-desktop.png" style="width:100%;max-width:400px;border:1px solid #ddccb3"></article>`).join('')}</div></body></html>`,
+	`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2026 email collection</title><body style="background:#eee8de;color:#243c34;font-family:Arial;padding:24px"><h1>2026 email collection</h1><p>Confirmed 2026 venue and event dates. All QR codes and individual appointments are fictional preview data.</p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">${results.map(({ key }) => `<article><h2 style="font-size:18px">${key}</h2><a href="${key}.html">Open email</a><br><a href="${key}-mobile.png">Phone screenshot</a><br><img alt="Preview of ${key}" src="${key}-desktop.png" style="width:100%;max-width:400px;border:1px solid #ddccb3"></article>`).join('')}</div></body></html>`,
 );
 console.log(
 	`Rendered and checked ${results.length} templates at desktop and phone widths: ${output}`,

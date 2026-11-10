@@ -2,6 +2,24 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2026.10.26] - 2026-10-26
+
+### Changed
+
+- Release the confirmed 2026 event details: 1812 35th Street, Denver, CO 80216, parking off Brighton Blvd., and December 11, 12, 14, and 15.
+- Advance the affected packages to stable version `2026.10.26`.
+
+## [2026.09.0-beta.12] - 2026-10-23
+
+### Fixed
+
+- Publish non-secret email recovery context only after verifying the original UID, and clear it on a new attempt or identity change (#227).
+- Resume interrupted signup from a saved non-secret intent, preserve one identity and owned QR object, and recover setup through normal customer sign-in (#207).
+
+- Recover sign-in when an Admin email change invalidates the Firebase session. Verify the original UID and retain the original failure and email-change operation for retry (#227).
+
+- Refresh the authenticated token before requesting an email change (#225).
+
 ## [2026.09.0-beta.3] - Unreleased
 
 ### Added

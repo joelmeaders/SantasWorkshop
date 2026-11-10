@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { HttpsError } from 'firebase-functions/v2/https';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDefaultPublicParameters } from '../../../src/models';
 import { createOnboardUser } from '../../fixtures/factories';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
@@ -7,138 +7,164 @@ import {
 	type FirebaseAdminMock,
 } from '../../helpers/firebase-admin.mock';
 
-const generateQrCode = vi.fn();
-const generateId = vi.fn();
-const deleteQrCode = vi.fn();
-const createQrCodeStoragePath = vi.fn();
-
+const prepare = vi.fn();
+const finalize = vi.fn();
+const getPublicParameters = vi.fn();
 const loadSubject = async (
 	adminMock: FirebaseAdminMock,
 ): Promise<typeof import('../../../src/fn/newAccount')> => {
 	vi.resetModules();
-
 	vi.doMock('firebase-admin', () => adminMock.module);
-	vi.doMock('../../../src/utility/qrcodes', () => ({
-		generateQrCode,
-		deleteQrCode,
-		createQrCodeStoragePath,
+	vi.doMock('../../../src/fn/accountProvisioning', () => ({
+		prepareAccountProvisioning: prepare,
+		finalizeAccountProvisioning: finalize,
 	}));
-	vi.doMock('../../../src/utility/id-generation', () => ({
-		generateId,
+	vi.doMock('../../../src/utility/public-parameters', () => ({
+		getPublicParameters,
 	}));
-
 	return import('../../../src/fn/newAccount');
 };
 
 describe('newAccount handler', () => {
+	afterEach(() => vi.unstubAllEnvs());
 	let adminMock: FirebaseAdminMock;
-
 	beforeEach(() => {
 		adminMock = createFirebaseAdminMock();
-		generateQrCode.mockResolvedValue(undefined);
-		deleteQrCode.mockResolvedValue(undefined);
-		generateId.mockReturnValue('ABCD2345');
-		createQrCodeStoragePath.mockImplementation(
-			(uid: string) => `registrations/${uid}/test-asset.png`,
-		);
+		const auth = adminMock.module.auth();
+		adminMock.module.auth.mockReturnValue({
+			...auth,
+			getUserByEmail: vi
+				.fn()
+				.mockRejectedValue({ code: 'auth/user-not-found' }),
+		});
+		prepare.mockReset().mockResolvedValue('new-user-123');
+		finalize.mockReset().mockResolvedValue(undefined);
+		getPublicParameters.mockReset().mockResolvedValue(createDefaultPublicParameters());
+		adminMock.createUser.mockResolvedValue({ uid: 'new-user-123' });
 	});
-
+	it.each([
+		['true', { createAccountEnabled: false }],
+		['true', { maintenanceModeEnabled: true }],
+		['true', { weatherModeEnabled: true }],
+		['false', { createAccountEnabled: false }],
+		['false', { maintenanceModeEnabled: true }],
+		['false', { weatherModeEnabled: true }],
+	] as const)('rejects closed public signup before account writes (emulator=%s): %j', async (emulator, settings) => {
+		vi.stubEnv('FUNCTIONS_EMULATOR', emulator);
+		getPublicParameters.mockResolvedValue({
+			...createDefaultPublicParameters(),
+			...settings,
+		});
+		const { default: newAccount } = await loadSubject(adminMock);
+		await expect(
+			newAccount(createCallableRequest(createOnboardUser())),
+		).rejects.toMatchObject({ code: 'failed-precondition' });
+		expect(prepare).not.toHaveBeenCalled();
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+		expect(finalize).not.toHaveBeenCalled();
+	});
+	it('does not create an account when settings cannot be loaded', async () => {
+		getPublicParameters.mockRejectedValue(new Error('Settings unavailable'));
+		const { default: newAccount } = await loadSubject(adminMock);
+		await expect(
+			newAccount(createCallableRequest(createOnboardUser())),
+		).rejects.toThrow('Settings unavailable');
+		expect(prepare).not.toHaveBeenCalled();
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+	});
+	it('allows account creation separately from appointment registration', async () => {
+		const settings = createDefaultPublicParameters();
+		settings.registrationEnabled = false;
+		settings.admin.preRegistrationEnabled = false;
+		getPublicParameters.mockResolvedValue(settings);
+		const { default: newAccount } = await loadSubject(adminMock);
+		await expect(
+			newAccount(createCallableRequest(createOnboardUser())),
+		).resolves.toBe('new-user-123');
+	});
+	it('preserves authenticated setup recovery while new public signup is closed', async () => {
+		getPublicParameters.mockResolvedValue({
+			...createDefaultPublicParameters(),
+			createAccountEnabled: false,
+			maintenanceModeEnabled: true,
+			weatherModeEnabled: true,
+		});
+		const { default: newAccount } = await loadSubject(adminMock);
+		await expect(
+			newAccount(createCallableRequest({ resume: true }, { uid: 'existing-user' })),
+		).resolves.toBe('existing-user');
+		expect(getPublicParameters).not.toHaveBeenCalled();
+		expect(prepare).not.toHaveBeenCalled();
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+		expect(finalize).toHaveBeenCalledWith('existing-user');
+	});
 	it.each([undefined, 'en', 'es'] as const)(
-		'creates profiles with language %s and defaults older clients to English',
+		'preserves accepted signup data and language %s without persisting a password',
 		async (language) => {
-			const onboardUser = createOnboardUser({
-				preferredLanguage: language,
-			});
-			adminMock.createUser.mockResolvedValue({ uid: 'new-user-123' });
-			adminMock.batchCommit.mockResolvedValue(undefined);
-
+			const input = createOnboardUser({ preferredLanguage: language });
 			const { default: newAccount } = await loadSubject(adminMock);
-
-			const result = await newAccount(createCallableRequest(onboardUser));
-
-			expect(result).toBe('new-user-123');
-			expect(adminMock.createUser).toHaveBeenCalledWith({
-				email: 'buddy.elf@example.com',
-				password: onboardUser.password,
-				disabled: false,
-				displayName: 'Buddy Elf',
-			});
-			expect(adminMock.doc).toHaveBeenCalledWith('users/new-user-123');
-			expect(adminMock.doc).toHaveBeenCalledWith(
-				'registrations/new-user-123',
+			expect(await newAccount(createCallableRequest(input))).toBe(
+				'new-user-123',
 			);
-			expect(adminMock.batchCreate).toHaveBeenCalledWith(
-				expect.objectContaining({ path: 'users/new-user-123' }),
+			expect(prepare).toHaveBeenCalledWith(
+				input.mutationId,
 				expect.objectContaining({
-					referredBy: 'Denver Human Services DHS',
 					preferredLanguage: language ?? 'en',
+					referredBy: input.referredBy,
 				}),
 			);
-			expect(adminMock.batchCreate).toHaveBeenCalledTimes(2);
-			expect(generateId).toHaveBeenCalledWith(8);
-			expect(generateQrCode).toHaveBeenCalledWith(
-				'registrations/new-user-123/test-asset.png',
-				'ABCD2345',
+			expect(JSON.stringify(prepare.mock.calls)).not.toContain(
+				input.password,
 			);
-			expect(
-				adminMock.getDocRef('registrations/new-user-123').set,
-			).toHaveBeenCalledWith(
+			expect(adminMock.createUser).toHaveBeenCalledWith(
 				expect.objectContaining({
-					qrCodeGeneratedOn: expect.any(Date),
-					qrCodeGenerationFailedOn: false,
+					uid: 'new-user-123',
+					password: input.password,
 				}),
-				{ merge: true },
 			);
+			expect(finalize).toHaveBeenCalledWith('new-user-123');
 		},
 	);
-
-	it('maps auth creation failures to an HttpsError', async () => {
-		const onboardUser = createOnboardUser();
+	it('preserves the created identity when final setup fails', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+		finalize.mockRejectedValue(
+			new Error('Firestore or Storage unavailable'),
+		);
+		await expect(
+			newAccount(createCallableRequest(createOnboardUser())),
+		).rejects.toThrow('unavailable');
+		expect(adminMock.deleteUser).not.toHaveBeenCalled();
+		expect(adminMock.deleteFile).not.toHaveBeenCalled();
+	});
+	it('does not create Auth when saving the provisioning intent fails', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+		prepare.mockRejectedValue(new Error('Intent write failed'));
+		await expect(
+			newAccount(createCallableRequest(createOnboardUser())),
+		).rejects.toThrow('Intent write failed');
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+	});
+	it('maps duplicate Auth identities without finalizing them for an unauthenticated caller', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
 		adminMock.createUser.mockRejectedValue({
 			code: 'auth/email-already-exists',
-			message: 'The email address is already in use by another account.',
 		});
-
-		const { default: newAccount } = await loadSubject(adminMock);
-
 		await expect(
-			newAccount(createCallableRequest(onboardUser)),
-		).rejects.toSatisfy(
-			(error: unknown) =>
-				error instanceof HttpsError && error.code === 'already-exists',
+			newAccount(createCallableRequest(createOnboardUser())),
+		).rejects.toMatchObject({ code: 'already-exists' });
+		expect(finalize).not.toHaveBeenCalled();
+	});
+	it('requires authentication before resuming setup and scopes recovery to the token UID', async () => {
+		const { default: newAccount } = await loadSubject(adminMock);
+		await expect(
+			newAccount({ data: { resume: true } } as never),
+		).rejects.toMatchObject({ code: 'unauthenticated' });
+		await newAccount(
+			createCallableRequest({ resume: true }, { uid: 'signed-in-owner' }),
 		);
+		expect(finalize).toHaveBeenCalledWith('signed-in-owner');
+		expect(adminMock.createUser).not.toHaveBeenCalled();
 	});
-
-	it('rolls back the auth user when firestore persistence fails', async () => {
-		const onboardUser = createOnboardUser();
-		adminMock.createUser.mockResolvedValue({ uid: 'new-user-rollback' });
-		adminMock.batchCommit.mockRejectedValue(new Error('batch failed'));
-
-		const { default: newAccount } = await loadSubject(adminMock);
-
-		await expect(
-			newAccount(createCallableRequest(onboardUser)),
-		).rejects.toMatchObject({ code: 'internal' });
-		expect(adminMock.deleteUser).toHaveBeenCalledWith('new-user-rollback');
-	});
-
-	it('rolls back persisted data when qr generation fails after persistence', async () => {
-		const onboardUser = createOnboardUser();
-		adminMock.createUser.mockResolvedValue({ uid: 'new-user-qr' });
-		adminMock.batchCommit.mockResolvedValue(undefined);
-		generateQrCode.mockRejectedValue(new Error('qr failed'));
-
-		const { default: newAccount } = await loadSubject(adminMock);
-
-		await expect(
-			newAccount(createCallableRequest(onboardUser)),
-		).rejects.toMatchObject({ code: 'internal' });
-		expect(adminMock.deleteUser).toHaveBeenCalledWith('new-user-qr');
-		expect(deleteQrCode).toHaveBeenCalledWith(
-			'registrations/new-user-qr/test-asset.png',
-		);
-	});
-
 	it('rejects malformed onboarding requests with invalid-argument', async () => {
 		const { default: newAccount } = await loadSubject(adminMock);
 
@@ -182,23 +208,18 @@ describe('newAccount handler', () => {
 		expect(adminMock.createUser).not.toHaveBeenCalled();
 	});
 
-	it('normalizes and validates Other referral answers before auth creation', async () => {
-		const onboardUser = createOnboardUser({
-			referredBy: ' Other:  Neighbor  ',
-		});
-		adminMock.createUser.mockResolvedValue({ uid: 'new-user-other' });
-		adminMock.batchCommit.mockResolvedValue(undefined);
-
+	it('normalizes the Other referral answer before saving intent', async () => {
 		const { default: newAccount } = await loadSubject(adminMock);
-
-		await newAccount(createCallableRequest(onboardUser));
-
-		expect(adminMock.batchCreate).toHaveBeenCalledWith(
-			expect.objectContaining({ path: 'users/new-user-other' }),
+		await newAccount(
+			createCallableRequest(
+				createOnboardUser({ referredBy: ' Other:  Neighbor  ' }),
+			),
+		);
+		expect(prepare).toHaveBeenCalledWith(
+			expect.any(String),
 			expect.objectContaining({ referredBy: 'Other:Neighbor' }),
 		);
 	});
-
 	it('rejects an invalid Other referral answer before creating the auth user', async () => {
 		const { default: newAccount } = await loadSubject(adminMock);
 

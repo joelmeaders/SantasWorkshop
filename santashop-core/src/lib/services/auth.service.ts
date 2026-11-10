@@ -7,10 +7,16 @@ import {
 	map,
 	shareReplay,
 	switchMap,
+	tap,
 } from 'rxjs/operators';
 import { defer, of, merge, Observable, Subject } from 'rxjs';
 import { AuthWrapper } from './_auth-wrapper';
-import { Auth, StaffRole, UserEmailUid } from '@santashop/models';
+import {
+	Auth,
+	StaffRole,
+	UserEmailUid,
+	type EmailChangeRequest,
+} from '@santashop/models';
 import { FunctionsWrapper } from './_functions-wrapper';
 import {
 	type IdTokenResult,
@@ -25,6 +31,15 @@ export class AuthService {
 	private readonly authWrapper = inject(AuthWrapper);
 	private readonly functionsWrapper = inject(FunctionsWrapper);
 	private readonly refreshedUser$ = new Subject<User | null>();
+	private pendingEmailChange?: EmailChangeRequest & { uid: string };
+	private recoveredEmail?: { uid: string; emailAddress: string };
+
+	public get emailChangeRecovery():
+		{ uid: string; emailAddress: string } | undefined {
+		return this.authWrapper.currentUser()?.uid === this.recoveredEmail?.uid
+			? this.recoveredEmail
+			: undefined;
+	}
 
 	/**
 	 * Stream of the current identity, triggered on auth state and refreshes
@@ -32,7 +47,13 @@ export class AuthService {
 	public readonly currentUser$: Observable<User | null> = merge(
 		this.authWrapper.authState().pipe(distinctUntilChanged()),
 		this.refreshedUser$,
-	).pipe(shareReplay(1));
+	).pipe(
+		tap((user) => {
+			if (user?.uid !== this.recoveredEmail?.uid)
+				this.recoveredEmail = undefined;
+		}),
+		shareReplay(1),
+	);
 
 	public async refreshCurrentUser(): Promise<User | null> {
 		const user = await this.authWrapper.reloadCurrentUser();
@@ -166,6 +187,7 @@ export class AuthService {
 		password: string,
 		newEmailAddress: string,
 	): Promise<void> {
+		this.recoveredEmail = undefined;
 		const user = this.authWrapper.currentUser();
 
 		if (!user) throw new Error('User cannot be null');
@@ -177,10 +199,98 @@ export class AuthService {
 			password,
 		};
 
-		await this.login(auth);
-		await this.functionsWrapper.updateEmailAddress(newEmailAddress);
+		const credential = await this.login(auth);
+		await credential.user.getIdToken(true);
+		const target = newEmailAddress.trim().toLowerCase();
+		if (
+			this.pendingEmailChange?.uid !== currentUser.uid ||
+			this.pendingEmailChange.emailAddress !== target
+		) {
+			this.pendingEmailChange = {
+				uid: currentUser.uid,
+				mutationId: crypto.randomUUID(),
+				emailAddress: target,
+				expectedEmailAddress: currentUser.email!,
+			};
+		}
+		const request: EmailChangeRequest = {
+			mutationId: this.pendingEmailChange.mutationId,
+			emailAddress: target,
+			expectedEmailAddress: this.pendingEmailChange.expectedEmailAddress,
+		};
+		try {
+			await this.functionsWrapper.updateEmailAddress(request);
+		} catch (error) {
+			const details = (
+				error as {
+					details?: {
+						reason?: string;
+						mutationId?: string;
+						targetEmailAddress?: string;
+					};
+				}
+			).details;
+			if (
+				details?.reason === 'email-change-incomplete' &&
+				details.targetEmailAddress === target &&
+				details.mutationId
+			) {
+				this.pendingEmailChange.mutationId = details.mutationId;
+			}
+			// Admin email changes can invalidate the token and make reload sign out.
+			let identity: User | null = null;
+			let sessionInvalidated = false;
+			try {
+				identity = await this.refreshCurrentUser();
+			} catch (reloadError) {
+				const code = (reloadError as { code?: string })?.code;
+				if (
+					code !== 'auth/user-token-expired' &&
+					code !== 'auth/invalid-user-token'
+				)
+					throw error;
+				sessionInvalidated = true;
+			}
+			if (identity && identity.uid !== currentUser.uid) throw error;
+			if (identity?.email === target || sessionInvalidated) {
+				let recovered: UserCredential;
+				try {
+					recovered = await this.login({
+						emailAddress: target,
+						password,
+					});
+				} catch {
+					throw error;
+				}
+				if (recovered.user.uid !== currentUser.uid) {
+					await this.authWrapper.signOut();
+					throw new Error(
+						'Email recovery did not match the original account. Sign in again.',
+						{ cause: error },
+					);
+				}
+				if (this.authWrapper.currentUser()?.uid !== currentUser.uid)
+					throw error;
+				this.recoveredEmail = {
+					uid: recovered.user.uid,
+					emailAddress: target,
+				};
+				this.refreshedUser$.next(recovered.user);
+				throw Object.assign(
+					new Error(
+						'Your sign-in email is ' +
+							target +
+							'. Save the same email again to finish updating your records.',
+						{ cause: error },
+					),
+					{ emailChangeRecovery: this.recoveredEmail },
+				);
+			}
+			throw error;
+		}
 		await this.login({ emailAddress: newEmailAddress, password });
 		await this.refreshCurrentUser();
+		this.pendingEmailChange = undefined;
 	}
 
 	/**

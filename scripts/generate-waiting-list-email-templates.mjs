@@ -13,6 +13,8 @@ const copies = {
 		title: 'More appointment times are open!',
 		greeting: 'Hello {{firstName}},',
 		intro: 'We added more spots at the Denver Santa Claus Shop. These spots will fill very fast. Visit the site now to choose a date and time and finish your registration.',
+		dates: 'Shop dates: December 11, 12, 14, and 15, 2026. Choose an available appointment time when registering.',
+		venue: '1812 35th Street, Denver, CO 80216. At the corner of Brighton Blvd and 35th Street. Parking is on the west side, off Brighton Blvd.',
 		notice: 'This email does not save a spot for you.',
 		button: 'Choose a date and time',
 		manage: 'Manage waiting list emails',
@@ -26,6 +28,8 @@ const copies = {
 		title: '¡Hay más horarios disponibles!',
 		greeting: 'Hola {{firstName}}:',
 		intro: 'Agregamos más lugares en Denver Santa Claus Shop. Se llenarán muy rápido. Entra al sitio ahora para elegir una fecha y hora y terminar tu registro.',
+		dates: 'Fechas de la tienda: 11, 12, 14 y 15 de diciembre de 2026. Elige una hora de cita disponible al inscribirte.',
+		venue: '1812 35th Street, Denver, CO 80216. En la esquina de Brighton Blvd y 35th Street. El estacionamiento está en el lado oeste, con entrada por Brighton Blvd.',
 		notice: 'Este correo no reserva un lugar para ti.',
 		button: 'Elegir fecha y hora',
 		manage: 'Administrar correos de la lista de espera',
@@ -42,7 +46,7 @@ for (const [language, copy] of Object.entries(copies)) {
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f0e8"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;background:#fff;border-radius:20px;overflow:hidden">
 <tr><td align="center" style="padding:28px;background:#173e32"><img src="https://storage.googleapis.com/santas-workshop-193b5.appspot.com/public/dscs_logo_email.png" width="190" alt="${copy.logo}" style="display:block;max-width:100%;height:auto;color:white"><p style="margin:20px 0 0;color:#fff;font-size:16px;font-weight:bold">Denver Santa Claus Shop</p></td></tr>
-<tr><td style="padding:32px 28px"><h1 style="margin:0 0 24px;color:#a82b32;font-size:30px;line-height:1.2">${copy.title}</h1><p style="font-size:18px;line-height:1.6">${copy.greeting}</p><p style="font-size:18px;line-height:1.6">${copy.intro}</p>
+<tr><td style="padding:32px 28px"><h1 style="margin:0 0 24px;color:#a82b32;font-size:30px;line-height:1.2">${copy.title}</h1><p style="font-size:18px;line-height:1.6">${copy.greeting}</p><p style="font-size:18px;line-height:1.6">${copy.intro}</p><p style="font-size:16px;line-height:1.6">${copy.dates}</p><p style="font-size:16px;line-height:1.6">${copy.venue}</p>
 <table role="presentation" cellspacing="0" cellpadding="0" style="margin:28px 0"><tr><td style="background:#a82b32;border-radius:8px;text-align:center"><a href="{{registrationUrl}}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:17px 24px;color:#fff;text-decoration:none;font-size:18px;font-weight:bold">${copy.button}</a></td></tr></table>
 <p style="padding:18px;background:#f7f0de;border-left:4px solid #c09a39;font-size:17px;line-height:1.5">${copy.notice}</p><p style="font-size:16px;line-height:1.6">${copy.team}</p></td></tr>
 <tr><td style="padding:24px 28px;background:#edf2ed;font-size:14px;line-height:1.6"><p><a href="${copy.faqUrl}" target="_blank" rel="noopener noreferrer" style="color:#173e32;text-decoration:underline">${copy.faq}</a></p><p>${copy.footer}</p><a href="{{waitingListUrl}}" target="_blank" rel="noopener noreferrer" style="color:#173e32;text-decoration:underline">${copy.manage}</a></td></tr></table></td></tr></table></body></html>`;
@@ -61,8 +65,9 @@ for (const [language, copy] of Object.entries(copies)) {
 		awsTemplateName: `waiting-list-capacity-2026-${language}`,
 		subjectPart: copy.title,
 		html,
-		textPart: `${copy.greeting}\n\n${copy.intro}\n\n${copy.button}: {{registrationUrl}}\n\n${copy.notice}\n\n${copy.team}\n\n${copy.faq}: ${copy.faqUrl}\n\n${copy.footer}\n${copy.manage}: {{waitingListUrl}}`,
-		seasonalReviewRequired: false,
+		textPart: `${copy.greeting}\n\n${copy.intro}\n\n${copy.dates}\n\n${copy.venue}\n\n${copy.button}: {{registrationUrl}}\n\n${copy.notice}\n\n${copy.team}\n\n${copy.faq}: ${copy.faqUrl}\n\n${copy.footer}\n${copy.manage}: {{waitingListUrl}}`,
+		seasonalReviewRequired: true,
+		seasonalDetailsReviewed: false,
 		fieldMappings: Object.entries(samples).map(([name, sampleValue]) => ({
 			name,
 			mapping: name,

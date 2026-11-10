@@ -62,7 +62,6 @@ export default async function undoRegistration(
 	const indexRef = db.doc(
 		`${COLLECTION_SCHEMA.registrationSearchIndex}/${uid}`,
 	);
-	const parameters = await getPublicParameters();
 	const receiptRef = registrationRef
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
@@ -78,6 +77,7 @@ export default async function undoRegistration(
 					: undefined,
 				'undoRegistration',
 			);
+			if (cached) return;
 			const registration = registrationSnapshot.data() as
 				Registration | undefined;
 			if (!registration) {
@@ -86,7 +86,7 @@ export default async function undoRegistration(
 					`Registration not found for ${uid}.`,
 				);
 			}
-			if (cached || registration.cancelledOn) {
+			if (registration.cancelledOn) {
 				if (!registration.cancellationLogId) {
 					throw new HttpsError(
 						'internal',
@@ -106,16 +106,15 @@ export default async function undoRegistration(
 						'Cancellation record is unavailable.',
 					);
 				}
-				if (!cached) {
-					transaction.create(receiptRef, {
-						operation: 'undoRegistration',
-						result: true,
-						completedOn: new Date(),
-					} satisfies MutationReceipt);
-				}
+				transaction.create(receiptRef, {
+					operation: 'undoRegistration',
+					result: true,
+					completedOn: new Date(),
+				} satisfies MutationReceipt);
 				return;
 			}
 
+			const parameters = await getPublicParameters();
 			if (!parameters?.admin?.allowCancelRegistration) {
 				throw new HttpsError(
 					'failed-precondition',

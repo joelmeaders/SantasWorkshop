@@ -40,15 +40,15 @@ interface ReminderEmailDocument {
 const shouldQueueReminderEmail = (
 	registration: ReminderQueueRegistration,
 ): boolean => {
-	if (!registration.registrationSubmittedOn) {
+	if (!registration.registrationSubmittedOn || registration.cancelledOn) {
 		return false;
 	}
 
-	if (registration.reminderEmailSentOn) {
+	if (registration.eventReminderSentOn) {
 		return false;
 	}
 
-	if (registration.reminderEmailQueuedOn) {
+	if (registration.eventReminderQueuedOn) {
 		return false;
 	}
 
@@ -63,24 +63,39 @@ const shouldQueueReminderEmail = (
 	return true;
 };
 
+// Both preview and execution use durable event-reminder evidence. Old confirmation
+// flags are ambiguous, so they cannot consume the event-reminder allowance.
+export async function loadReminderCandidates(
+	programYear: number,
+): Promise<Registration[]> {
+	const db = admin.firestore();
+	const [registrations, reminders] = await Promise.all([
+		db
+			.collection(COLLECTION_SCHEMA.registrations)
+			.where('programYear', '==', programYear)
+			.get(),
+		db
+			.collection(COLLECTION_SCHEMA.tmpRegistrationEmails)
+			.where('templateKey', '==', EMAIL_TEMPLATE_KEYS.eventReminder)
+			.get(),
+	]);
+	const previousRecipients = new Set(
+		reminders.docs.map((doc) => doc.data()['registrationUid'] ?? doc.id),
+	);
+	return registrations.docs
+		.map((doc) => doc.data() as Registration)
+		.filter(
+			(record) =>
+				shouldQueueReminderEmail(record) &&
+				!previousRecipients.has(record.uid),
+		);
+}
+
 export default async function queueReminderEmails(
 	programYear: number,
 ): Promise<ReminderQueueResult> {
 	try {
-		const completedRegistrationsQuery = await admin
-			.firestore()
-			.collection('registrations')
-			.where('programYear', '==', programYear)
-			.get();
-
-		const allRegistrations: ReminderQueueRegistration[] =
-			completedRegistrationsQuery.docs.map(
-				(doc) => doc.data() as ReminderQueueRegistration,
-			);
-
-		const registrations = allRegistrations.filter((registration) =>
-			shouldQueueReminderEmail(registration),
-		);
+		const registrations = await loadReminderCandidates(programYear);
 
 		const result = await queueReminderEmailRecords(registrations);
 		log.info('Processed reminder email queue run', {
@@ -148,8 +163,8 @@ async function queueReminderEmailRecords(
 				transaction.set(
 					registrationDocRef,
 					{
-						reminderEmailQueuedOn: emailDoc.queuedOn,
-						reminderEmailFailedOn: false,
+						eventReminderQueuedOn: emailDoc.queuedOn,
+						eventReminderFailedOn: false,
 					},
 					{ merge: true },
 				);
@@ -196,7 +211,7 @@ async function recordReminderQueueFailure(
 		}
 		transaction.set(
 			registrationDocRef,
-			{ reminderEmailFailedOn: new Date() },
+			{ eventReminderFailedOn: new Date() },
 			{ merge: true },
 		);
 	});

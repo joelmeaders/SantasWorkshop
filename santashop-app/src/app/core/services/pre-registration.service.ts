@@ -7,6 +7,7 @@ import {
 	combineLatest,
 	defer,
 	distinctUntilChanged,
+	exhaustMap,
 	filter,
 	map,
 	of,
@@ -50,6 +51,12 @@ export class PreRegistrationService {
 	private readonly destroyRef = inject(DestroyRef);
 	private registrationUid: string | undefined;
 	private registrationVersion = 0;
+	private cancellationIntent?: {
+		mutationId: string;
+		version: number;
+		uid: string;
+		submittedOn: number;
+	};
 	private readonly acknowledgedCancellation$ = new BehaviorSubject<
 		| {
 				uid: string;
@@ -68,19 +75,49 @@ export class PreRegistrationService {
 			if (uid !== this.registrationUid) {
 				this.registrationUid = uid;
 				this.registrationVersion++;
+				this.cancellationIntent = undefined;
 				void this.activeUnavailableAlert?.dismiss();
 				this.activeUnavailableAlert = undefined;
 				this.hasReportedUnavailableRegistration = false;
 			}
 			if (!uid) return of({ loading: false, registration: undefined });
+			let setupAttempted = false;
+			let readFailed = false;
 			return defer(() =>
 				this.fireRepo
 					.collection<Registration>(COLLECTION_SCHEMA.registrations)
 					.read(uid, 'uid'),
 			).pipe(
+				catchError(() => {
+					readFailed = true;
+					return of(undefined);
+				}),
+				exhaustMap((registration) => {
+					if (
+						registration &&
+						registration.qrCodeGeneratedOn !== false
+					)
+						return of(registration);
+					if (setupAttempted) return of(undefined);
+					setupAttempted = true;
+					return defer(() =>
+						this.afFunctions.resumeAccountSetup(),
+					).pipe(
+						switchMap(() =>
+							this.fireRepo
+								.collection<Registration>(
+									COLLECTION_SCHEMA.registrations,
+								)
+								.read(uid, 'uid'),
+						),
+						catchError(() => of(undefined)),
+					);
+				}),
 				tap((registration) => {
 					if (!registration)
-						void this.reportUnavailableRegistration('missing');
+						void this.reportUnavailableRegistration(
+							readFailed ? 'unreadable' : 'missing',
+						);
 				}),
 				map((registration) => ({
 					loading: false,
@@ -244,26 +281,44 @@ export class PreRegistrationService {
 		return this.afFunctions.completeRegistration(input);
 	}
 
-	public async undoRegistration(): Promise<HttpsCallableResult<true>> {
-		const { registration } = await firstValueFrom(
+	public async undoRegistration(
+		mutationId: string,
+		recovering = false,
+	): Promise<HttpsCallableResult<true>> {
+		const registrationState = firstValueFrom(
 			this.registrationState$.pipe(filter((state) => !state.loading)),
 		);
 		const version = this.registrationVersion;
-		const result = await this.afFunctions.undoRegistration({
-			mutationId: this.createMutationId(),
-		});
+		const { registration } = await registrationState;
+		if (version !== this.registrationVersion || this.destroyRef.destroyed)
+			throw new Error('Account changed before cancellation.');
 		if (
-			result.data === true &&
+			!recovering &&
 			registration?.uid &&
-			registration.registrationSubmittedOn &&
-			version === this.registrationVersion &&
-			!this.destroyRef.destroyed
+			registration.registrationSubmittedOn
 		) {
-			this.acknowledgedCancellation$.next({
+			this.cancellationIntent = {
+				mutationId,
+				version,
 				uid: registration.uid,
 				submittedOn: timestampDateFix(
 					registration.registrationSubmittedOn,
 				).getTime(),
+			};
+		}
+		const intent = this.cancellationIntent;
+		const result = await this.afFunctions.undoRegistration({
+			mutationId,
+		});
+		if (
+			result.data === true &&
+			intent?.mutationId === mutationId &&
+			intent.version === this.registrationVersion &&
+			!this.destroyRef.destroyed
+		) {
+			this.acknowledgedCancellation$.next({
+				uid: intent.uid,
+				submittedOn: intent.submittedOn,
 			});
 		}
 		return result;
@@ -271,12 +326,13 @@ export class PreRegistrationService {
 
 	public changeRegistrationDateTime(
 		newDateTimeSlot: DateTimeSlot,
+		mutationId: string,
 	): Promise<HttpsCallableResult<true>> {
 		if (!newDateTimeSlot.id) {
 			return Promise.reject(new Error('Appointment ID is required.'));
 		}
 		return this.afFunctions.changeRegistrationDateTime({
-			mutationId: this.createMutationId(),
+			mutationId,
 			slotId: newDateTimeSlot.id,
 			reviewedDateTime: newDateTimeSlot.dateTime.toISOString(),
 		});
@@ -296,11 +352,8 @@ export class PreRegistrationService {
 		return !!hasChildren && !!hasDateTime && !isSubmitted;
 	}
 
-	private createMutationId(): string {
-		if (typeof globalThis.crypto?.randomUUID === 'function') {
-			return globalThis.crypto.randomUUID();
-		}
-		return `mutation_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+	public get currentIdentityKey(): string | undefined {
+		return `${this.registrationVersion}:${this.registrationUid ?? ''}`;
 	}
 
 	private async reportUnavailableRegistration(

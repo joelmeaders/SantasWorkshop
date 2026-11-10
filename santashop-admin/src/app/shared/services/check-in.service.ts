@@ -2,11 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { LoadingController } from '@ionic/angular/standalone';
 import {
 	type CheckInRequest,
+	type OnSiteRegistrationRequest,
 	Registration,
 	type ScanInputMethod,
 } from '@santashop/models';
-import { FunctionsWrapper,
-	dateToCalendarString, HttpsCallableResult } from '@santashop/core/admin/firestore';
+import {
+	FunctionsWrapper,
+	dateToCalendarString,
+	HttpsCallableResult,
+} from '@santashop/core/admin/firestore';
 
 @Injectable({
 	providedIn: 'root',
@@ -30,9 +34,9 @@ export class CheckInService {
 		)(request);
 
 	private readonly onSiteRegistrationFn = (
-		registration: Registration,
+		registration: OnSiteRegistrationRequest,
 	): Promise<HttpsCallableResult<number>> =>
-		this.functions.callableWrapper<Registration, number>(
+		this.functions.callableWrapper<OnSiteRegistrationRequest, number>(
 			'onSiteRegistration',
 		)(registration);
 
@@ -88,7 +92,7 @@ export class CheckInService {
 	}
 
 	public async onSiteRegistration(
-		registration: Registration,
+		registration: OnSiteRegistrationRequest,
 	): Promise<number> {
 		const loading = await this.loadingController.create({
 			message: 'Saving registration...',
@@ -99,9 +103,10 @@ export class CheckInService {
 		await loading.present();
 
 		try {
-			const response = await this.onSiteRegistrationFn(
-				this.normalizeBirthDates(registration),
-			);
+			const response = await this.onSiteRegistrationFn({
+				...this.normalizeBirthDates(registration),
+				mutationId: registration.mutationId,
+			});
 			return response.data;
 		} finally {
 			if (await this.loadingController.getTop())

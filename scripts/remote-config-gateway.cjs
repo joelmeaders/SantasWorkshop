@@ -3,12 +3,17 @@ const { getModePrefix, FUNCTION_PROJECT_IDS } = require('../config.functions.cjs
 
 const GATEWAY_FUNCTION = 'publicParametersGateway';
 const REGION = 'us-central1';
-const GATEWAY_CONSUMERS = ['completeRegistration', 'saveDraftChild', 'deleteDraftChild', 'setDraftAppointment', 'undoRegistration', 'changeRegistrationDateTime', 'getWaitingListState', 'setWaitingListMembership', 'previewWaitingListCampaign', 'startWaitingListCampaign', 'resumeWaitingListCampaign', 'waitingListEmailWorker'];
+const GATEWAY_CONSUMERS = ['newAccount', 'completeRegistration', 'saveDraftChild', 'deleteDraftChild', 'setDraftAppointment', 'undoRegistration', 'changeRegistrationDateTime', 'getWaitingListState', 'setWaitingListMembership', 'previewWaitingListCampaign', 'startWaitingListCampaign', 'resumeWaitingListCampaign', 'waitingListEmailWorker'];
 // Keep this shape aligned with publicParametersGatewayUrl in the Functions client.
 const GATEWAY_HOST = /^publicparametersgateway-[a-z0-9-]+\.a\.run\.app$/u;
 const gatewayReader = (projectId, env = process.env) => {
 	const prefix = getModePrefix(projectId === FUNCTION_PROJECT_IDS.test ? 'test' : 'prod');
 	return env[`${prefix}_SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT`] || `remote-config-reader@${projectId}.iam.gserviceaccount.com`;
+};
+
+const gatewaySignupRuntime = (projectId, env = process.env) => {
+	const prefix = getModePrefix(projectId === FUNCTION_PROJECT_IDS.test ? 'test' : 'prod');
+	return env[`${prefix}_SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT`]?.trim();
 };
 
 const assessGateway = (projectId, fn, policy, env = process.env, service) => {
@@ -25,10 +30,15 @@ const assessGateway = (projectId, fn, policy, env = process.env, service) => {
 		if (url.protocol !== 'https:' || !GATEWAY_HOST.test(url.hostname) || url.username || url.password || url.port || url.pathname !== '/' || url.search || url.hash) throw new Error();
 	} catch { problems.push('Settings gateway requires the canonical HTTPS Cloud Run URI.'); }
 	const invoker = `serviceAccount:${gatewayReader(projectId, env)}`;
+	const signupRuntime = gatewaySignupRuntime(projectId, env);
+	const signupInvoker = signupRuntime ? `serviceAccount:${signupRuntime}` : undefined;
+	const allowedInvokers = [invoker, signupInvoker].filter(Boolean);
+	if (!signupRuntime) problems.push('Settings gateway requires an explicitly configured signup runtime identity.');
 	const bindings = policy.bindings ?? [];
 	if (!bindings.some(binding => binding.role === 'roles/run.invoker' && !binding.condition && binding.members?.includes(invoker))) problems.push('Settings gateway must grant its reader service account unconditional Run Invoker.');
+	if (signupInvoker && !bindings.some(binding => binding.role === 'roles/run.invoker' && !binding.condition && binding.members?.includes(signupInvoker))) problems.push('Settings gateway must grant its configured signup runtime unconditional Run Invoker.');
 	if (bindings.some(binding => binding.members?.some(member => member === 'allUsers' || member === 'allAuthenticatedUsers'))) problems.push('Settings gateway must not have a public IAM binding.');
-	if (bindings.some(binding => binding.role === 'roles/run.invoker' && binding.members?.some(member => member !== invoker))) problems.push('Settings gateway has an unexpected invoker; review access before release.');
+	if (bindings.some(binding => binding.role === 'roles/run.invoker' && binding.members?.some(member => !allowedInvokers.includes(member)))) problems.push('Settings gateway has an unexpected invoker; review access before release.');
 	if (!service || service.name !== config.service || service.uri !== config.uri) problems.push('The live Cloud Run service must match the discovered gateway.');
 	if (service) {
 		if (service.invokerIamDisabled === true) problems.push('Settings gateway IAM permission checks are disabled.');
@@ -70,8 +80,9 @@ const inspectGateway = async (projectId, env = process.env, verifyConsumers = fa
 const assessConsumers = (projectId, functions, gatewayUri, env = process.env) => GATEWAY_CONSUMERS.flatMap(id => {
 	const expectedName = `projects/${projectId}/locations/${REGION}/functions/${id}`;
 	const fn = functions.find(item => item.name === expectedName);
-	return !fn || fn.state !== 'ACTIVE' || fn.serviceConfig?.serviceAccountEmail !== gatewayReader(projectId, env) || !gatewayUri || fn.serviceConfig?.environmentVariables?.SANTASHOP_REMOTE_CONFIG_GATEWAY_URL !== gatewayUri
-		? [`Consumer ${id} is not ACTIVE with the exact gateway URI and reader identity.`] : [];
+	const expectedIdentity = id === 'newAccount' ? gatewaySignupRuntime(projectId, env) : gatewayReader(projectId, env);
+	return !expectedIdentity || !fn || fn.state !== 'ACTIVE' || fn.serviceConfig?.serviceAccountEmail !== expectedIdentity || !gatewayUri || fn.serviceConfig?.environmentVariables?.SANTASHOP_REMOTE_CONFIG_GATEWAY_URL !== gatewayUri
+		? [`Consumer ${id} is not ACTIVE with the exact gateway URI and expected runtime identity.`] : [];
 });
 
 module.exports = { GATEWAY_FUNCTION, GATEWAY_CONSUMERS, REGION, gatewayReader, assessGateway, assessConsumers, inspectGateway };

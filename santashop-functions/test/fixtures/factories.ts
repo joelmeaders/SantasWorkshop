@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
 	AgeGroup,
 	OnboardUser,
@@ -11,6 +12,7 @@ const TEST_ONBOARD_PASSWORD = ['Candy', 'Cane', '123!'].join('');
 export const createOnboardUser = (
 	overrides: Partial<OnboardUser> = {},
 ): OnboardUser => ({
+	mutationId: randomUUID(),
 	firstName: 'Buddy',
 	lastName: 'Elf',
 	emailAddress: 'buddy.elf@example.com',

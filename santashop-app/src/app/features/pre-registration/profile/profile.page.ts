@@ -49,6 +49,7 @@ export class ProfilePage {
 	public readonly profileForm = this.viewService.profileForm;
 
 	public readonly changeEmailForm = this.viewService.changeEmailForm;
+	public readonly recoveringEmail = this.viewService.recoveringEmail;
 
 	public readonly changePasswordForm = this.viewService.changePasswordForm;
 

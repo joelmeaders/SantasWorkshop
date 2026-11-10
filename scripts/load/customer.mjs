@@ -147,6 +147,7 @@ export class CustomerApi {
 			phase,
 		});
 		fixture.uid = await this.call(phase, 'newAccount', {
+			mutationId: fixture.signupMutationId ??= randomUUID(),
 			firstName: fixture.firstName,
 			lastName: fixture.lastName,
 			emailAddress: fixture.emailAddress,

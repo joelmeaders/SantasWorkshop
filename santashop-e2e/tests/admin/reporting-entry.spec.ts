@@ -76,7 +76,7 @@ test.describe('admin reporting routes', () => {
 	}) => {
 		await seedScheduleStats({
 			programYear: E2E_PROGRAM_YEAR,
-			dateTimeCounts: [12, 13, 15, 16].map((day, index) => ({
+			dateTimeCounts: [11, 12, 14, 15].map((day, index) => ({
 				dateTime: e2eDateTime(12, day, 16),
 				count: index + 1,
 			})),
@@ -98,10 +98,10 @@ test.describe('admin reporting routes', () => {
 			page.getByRole('heading', { name: 'Capacity by Day', exact: true }),
 		).toHaveCount(0);
 		await expect(
-			page.getByRole('heading', { name: '12th - Total: 1' }),
+			page.getByRole('heading', { name: '11th - Total: 1' }),
 		).toBeVisible();
 		await expect(
-			page.getByRole('heading', { name: '16th - Total: 4' }),
+			page.getByRole('heading', { name: '15th - Total: 4' }),
 		).toBeVisible();
 		expect(pageErrors).toEqual([]);
 	});

@@ -25,12 +25,22 @@ export class PreRegistrationPage {
 	constructor() {
 		this.auth.currentUser$
 			.pipe(
-				map((user) => user?.uid),
-				distinctUntilChanged(),
+				map((user) => ({
+					uid: user?.uid,
+					recovery: this.auth.emailChangeRecovery,
+				})),
+				distinctUntilChanged(
+					(a, b) => a.uid === b.uid && a.recovery === b.recovery,
+				),
 				pairwise(),
 				takeUntilDestroyed(),
 			)
-			.subscribe(() => {
+			.subscribe(([previous, current]) => {
+				if (current.recovery && current.recovery.uid === current.uid) {
+					this.sessionActive.set(true);
+					return;
+				}
+				if (previous.uid === current.uid) return;
 				this.sessionActive.set(false);
 				void this.router.navigateByUrl('/', { replaceUrl: true });
 			});

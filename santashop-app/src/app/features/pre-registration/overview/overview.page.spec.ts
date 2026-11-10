@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
-import { AnalyticsWrapper, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
+import { AnalyticsWrapper, AuthService, FireRepoLite, PROGRAM_YEAR } from '@santashop/core';
 import { DateTimeSlot, Registration } from '@santashop/models';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AlertController, ToastController } from '@ionic/angular/standalone';
@@ -433,6 +433,37 @@ describe('OverviewPage', () => {
 		expect(
 			fixture.nativeElement.querySelector('.completion-nudge'),
 		).toBeNull();
+	});
+
+	it('keeps the overview email editor open after partial success and closes it after a successful retry', async () => {
+		const auth = TestBed.inject(AuthService);
+		const change = vi.spyOn(auth, 'changeEmailAddress');
+		change
+			.mockRejectedValueOnce(
+				new Error(
+					'Your sign-in email is next@example.com. Save the same email again.',
+				),
+			)
+			.mockResolvedValue(undefined);
+		fixture.detectChanges();
+		const card = fixture.debugElement.query(
+			By.directive(SubmitCardComponent),
+		).componentInstance as SubmitCardComponent;
+		const complete = vi.spyOn(card, 'completeEmailUpdate');
+		const request = {
+			emailAddress: 'next@example.com',
+			password: 'current-secret',
+		};
+		await component.updateEmailAddress(request);
+		expect(complete).not.toHaveBeenCalled();
+		expect(toastController.create).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				color: 'danger',
+				message: expect.stringContaining('Save the same email again'),
+			}),
+		);
+		await component.updateEmailAddress(request);
+		expect(complete).toHaveBeenCalledOnce();
 	});
 
 	it('saves an enabled appointment and rejects unavailable selections', async (): Promise<void> => {

@@ -11,6 +11,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ### Fixed
 
+- Refresh reviewed waiting-list email preview baselines for the confirmed 2026 dates, address, and parking directions.
 - Use confirmed 2026 shop dates, address, and parking directions in English and Spanish appointment and waiting-list email starters without asserting general shopping hours.
 - Preserve runtime registration links and cancellation semantics, require seasonal review for dated waiting-list starters, and add starter-content regression tests.
 - Enforce account-creation, maintenance, and weather controls before new public signup writes. Preserve authenticated setup recovery and the signup runtime identity, with narrowly scoped access to the private settings gateway.

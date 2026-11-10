@@ -4,6 +4,11 @@
 
 ## [2026.10.26] - 2026-10-26
 
+### Fixed
+
+- Use confirmed 2026 shop dates, address, and parking directions in English and Spanish appointment and waiting-list email starters without asserting general shopping hours.
+- Preserve runtime registration links and cancellation semantics, require seasonal review for dated waiting-list starters, and add starter-content regression tests.
+
 ### Changed
 
 - Release the confirmed 2026 event details: 1812 35th Street, Denver, CO 80216, parking off Brighton Blvd., and December 11, 12, 14, and 15.

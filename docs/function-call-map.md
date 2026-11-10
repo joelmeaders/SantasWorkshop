@@ -31,6 +31,9 @@ ID. A successful retry acknowledges only that ticket before navigation, even
 when its live cancellation snapshot is delayed. A newer submitted ticket remains
 visible, and identity changes clear this pending acknowledgement intent.
 
+New public signup checks account-creation, maintenance, and weather controls before
+any account or provisioning writes. Authenticated recovery of an existing signup
+remains available when new signup is closed; it cannot create a new Auth identity.
 Signup requires one client mutation ID for the accepted profile. Before Auth
 creation, a transaction saves the profile and private provisioning intent under
 a stable UID derived from that ID. The intent retains consent timestamps, code,

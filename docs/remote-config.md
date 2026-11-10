@@ -40,7 +40,9 @@ The gateway permits up to two instances with concurrency 80 each. Each instance
 has an in-memory cache and waits for one refresh when its settings are at least
 ten seconds old. Concurrent requests on that instance share the refresh. This avoids stacking two stale cache
 windows. Caller ID tokens use the verified canonical Cloud Run URI as audience.
-Only the configured reader service account receives Run Invoker on the gateway.
+Only the configured reader and existing signup runtime service accounts receive
+Run Invoker on the gateway. Signup keeps its existing Auth-capable runtime; the
+configuration reader does not gain Auth administration.
 Client startup and watchdog fetches use the Remote Config client fetch endpoint.
 The 60 template reads per minute release gate measures the gateway's server-side
 management API reads. It is separate from those client fetches.
@@ -50,6 +52,19 @@ predicates and idempotency receipt handling are unchanged. In-flight actions can
 finish after a switch changes. Outages can extend stale settings. Background
 work also depends on the Functions instance receiving CPU time; ten seconds is
 a refresh eligibility interval, not a delivery guarantee.
+
+New public account creation checks `createAccountEnabled`, maintenance, and weather
+controls before writing any provisioning records or creating an Auth user. Existing
+authenticated signup recovery remains available. Closing appointment registration
+alone does not close account creation; the two switches remain independent. The
+same signup predicate runs in local emulators, test, and production. Functions
+configuration aliases `dev`, `development`, and `qa` select the test project;
+`production` selects production. There is no separate deployed development project.
+Signup uses the same cache behavior above: a cold instance can reject a first
+signup under closed release defaults until the asynchronous refresh completes.
+Conversely, previously open cached settings and already-admitted work can outlive
+a closure, especially during an outage. Verify backend convergence after closing
+controls; publishing a switch is not an instantaneous global write lock.
 
 ## Owner editing
 
@@ -120,7 +135,7 @@ template before compiling matching fallback defaults; they do not publish it.
 
 ## Identities and capacity
 
-The gateway, six migrated mutation functions, and owner read callable use
+The gateway, registration mutation functions, waiting-list consumers, and owner read callable use
 `remote-config-reader@PROJECT_ID.iam.gserviceaccount.com`. Grant that account:
 
 - Project `roles/cloudconfig.viewer`, `roles/datastore.user`, and
@@ -130,6 +145,13 @@ The gateway, six migrated mutation functions, and owner read callable use
   The readiness gate requires an unconditional binding because it does not
   evaluate IAM conditions. A narrower grant restricted to `registrations/`
   requires separate permission evidence and a reviewed gate update.
+
+The `newAccount` callable retains `SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT`, which must
+be configured explicitly in each deployed environment. Grant that existing signup
+runtime `roles/run.invoker` on the private gateway service only, alongside the
+reader. Do not grant it a new project-wide role or give the reader Auth access.
+The deployment declares both gateway invokers. Review and approve that access
+change before release; the readiness gate rejects missing or unexpected invokers.
 
 The publish callable uses `remote-config-publisher@PROJECT_ID.iam.gserviceaccount.com`.
 Grant it project `roles/cloudconfig.admin` and `roles/logging.logWriter`.
@@ -147,8 +169,8 @@ identity overrides.
 CI discovers `SANTASHOP_REMOTE_CONFIG_GATEWAY_URL` from the deployed function.
 Do not guess the Cloud Run host or substitute another project's endpoint.
 After consumer deployment, `remote-config-readiness.cjs --project PROJECT_ID
---consumers` verifies all six consumers are active with that exact URI and the
-reader identity. The gate also checks the actual Cloud Run revision and rejects
+--consumers` verifies all consumers are active with that exact URI and their expected
+identities, including the existing signup runtime for `newAccount`. The gate also checks the actual Cloud Run revision and rejects
 disabled IAM checks, so a private policy alone is insufficient evidence.
 
 If phase one succeeds but phase two fails, the private gateway can remain

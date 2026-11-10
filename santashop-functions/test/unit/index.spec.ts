@@ -234,12 +234,31 @@ describe('functions index exports', () => {
 			concurrency: 80,
 			maxInstances: 2,
 			minInstances: 0,
-			invoker:
+			invoker: [
 				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
 				'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
+				...(process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT']
+					? [process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT']] : []),
+			],
 		});
 		expect(onRequestMock).toHaveBeenCalledTimes(1);
 		expect(subject.emailIsolationProbe).toBeUndefined();
+	});
+
+	it('allows only the configured existing signup runtime alongside the gateway reader', async () => {
+		delete process.env.FUNCTIONS_EMULATOR;
+		vi.stubEnv('SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT', 'signup-runtime@example.iam.gserviceaccount.com');
+		try {
+			const subject = await import('../../src/index');
+			const gateway = subject.publicParametersGateway as unknown as { options: Record<string, unknown> };
+			expect(gateway.options.invoker).toEqual([
+				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ?? 'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
+				'signup-runtime@example.iam.gserviceaccount.com',
+			]);
+			expect((subject.newAccount as unknown as { options: Record<string, unknown> }).options).not.toHaveProperty('serviceAccount');
+		} finally {
+			vi.unstubAllEnvs();
+		}
 	});
 	it('does not attach Remote Config identities in the emulator', async () => {
 		process.env.FUNCTIONS_EMULATOR = 'true';

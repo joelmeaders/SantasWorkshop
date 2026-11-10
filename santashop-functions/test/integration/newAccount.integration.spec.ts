@@ -10,7 +10,7 @@ import {
 	vi,
 } from 'vitest';
 import newAccount from '../../src/fn/newAccount';
-import { COLLECTION_SCHEMA } from '@santashop/models';
+import { COLLECTION_SCHEMA, createDefaultPublicParameters } from '@santashop/models';
 import { createOnboardUser } from '../fixtures/factories';
 import { createCallableRequest } from '../helpers/callable-context';
 import {
@@ -29,12 +29,31 @@ describe.sequential('newAccount integration', () => {
 
 	beforeEach(async () => {
 		await clearEmulatorData();
+		await getFirestore().doc('_testConfig/publicParameters').set({
+			...createDefaultPublicParameters(),
+			createAccountEnabled: true,
+			maintenanceModeEnabled: false,
+			weatherModeEnabled: false,
+		});
 	});
 
 	afterAll(async () => {
 		await clearEmulatorData();
 	});
 
+
+	it.each([
+		{ createAccountEnabled: false },
+		{ maintenanceModeEnabled: true },
+		{ weatherModeEnabled: true },
+	])('rejects closed signup without creating Auth, profile, registration or QR data: %j', async settings => {
+		await getFirestore().doc('_testConfig/publicParameters').update(settings);
+		await expect(newAccount(createCallableRequest(createOnboardUser()))).rejects.toMatchObject({ code: 'failed-precondition' });
+		expect((await getAuth().listUsers()).users).toHaveLength(0);
+		expect(await getCollectionCount(COLLECTION_SCHEMA.users)).toBe(0);
+		expect(await getCollectionCount(COLLECTION_SCHEMA.registrations)).toBe(0);
+		expect((await getAdminApp().storage().bucket().getFiles({ prefix: 'registrations/' }))[0]).toHaveLength(0);
+	});
 	it('creates auth and firestore records when creating a new account', async () => {
 		const onboardUser = createOnboardUser({
 			emailAddress: 'integration.buddy.elf@example.com',
@@ -241,6 +260,7 @@ describe.sequential('newAccount integration', () => {
 				dateTimeSlot: { id: 'keep-slot' },
 				registrationSubmittedOn: new Date(),
 			});
+		await db.doc('_testConfig/publicParameters').update({ createAccountEnabled: false, maintenanceModeEnabled: true, weatherModeEnabled: true });
 		const request = createCallableRequest({ resume: true }, { uid });
 		const outcomes = await Promise.allSettled([
 			newAccount(request),

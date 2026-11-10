@@ -1,3 +1,4 @@
+import { getPublicParameters } from '../utility/public-parameters';
 import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
@@ -77,6 +78,18 @@ export default async function newAccount(
 			newsletter: requestData['newsletter'] === true,
 		};
 	});
+
+	const parameters = await getPublicParameters();
+	if (
+		!parameters?.createAccountEnabled ||
+		parameters.maintenanceModeEnabled ||
+		parameters.weatherModeEnabled
+	) {
+		throw new HttpsError(
+			'failed-precondition',
+			'Account creation is currently unavailable.',
+		);
+	}
 
 	try {
 		await admin.auth().getUserByEmail(data.emailAddress);

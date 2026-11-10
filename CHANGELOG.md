@@ -9,6 +9,10 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [2026.10.26] - 2026-10-26
 
+### Fixed
+
+- Enforce account-creation, maintenance, and weather controls before new public signup writes. Preserve authenticated setup recovery and the signup runtime identity, with narrowly scoped access to the private settings gateway.
+
 ### Changed
 
 - Release the confirmed 2026 event details: 1812 35th Street, Denver, CO 80216, parking off Brighton Blvd., and December 11, 12, 14, and 15.

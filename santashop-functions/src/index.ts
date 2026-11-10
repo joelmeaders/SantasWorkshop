@@ -172,7 +172,13 @@ export const publicParametersGateway = onRequest(
 		maxInstances: 2,
 		minInstances: 0,
 		timeoutSeconds: 15,
-		invoker: REMOTE_CONFIG_READER_IDENTITY.serviceAccount ?? 'private',
+		// Signup keeps its Auth-capable runtime; configuration readers gain no Auth permissions.
+		invoker: RUNNING_IN_FUNCTIONS_EMULATOR
+			? 'private'
+			: [
+					REMOTE_CONFIG_READER_IDENTITY.serviceAccount!,
+					...(FUNCTIONS_SERVICE_ACCOUNT ? [FUNCTIONS_SERVICE_ACCOUNT] : []),
+				],
 	},
 	publicParametersGatewayHandler,
 );

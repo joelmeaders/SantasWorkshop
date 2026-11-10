@@ -85,10 +85,15 @@ The admin form retains the original submission after an uncertain result and
 prevents concurrent clicks. Deploy the admin client and backend together; older
 clients without an ID must refresh before submitting.
 
-Deployed registration handlers read cached public settings through the private
-`publicParametersGateway`. Reader and publisher identities are deliberately
-separate. Local emulator settings are fixtures, not a second deployed source of
-truth. See [Remote Config](remote-config.md) for caching and fail-closed behavior.
+Deployed registration mutation guards await fresh validated public settings through
+the private `publicParametersGateway`, with a ten-second total read deadline. They
+reject unavailable or stale settings rather than using build defaults. Successful
+receipt replays and existing completed-operation no-ops precede the settings read;
+one request-local promise retains the admitted settings across transaction retries.
+Informational reads retain their background-refresh cache. Reader and publisher
+identities remain separate. Local emulator settings are fixtures, not a second
+deployed source of truth. See [Remote Config](remote-config.md) for caching and
+fail-closed behavior.
 
 ## Email queue: never recreate a triggering document
 

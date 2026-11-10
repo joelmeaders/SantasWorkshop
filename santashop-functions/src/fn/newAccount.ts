@@ -1,4 +1,4 @@
-import { getPublicParameters } from '../utility/public-parameters';
+import { getPublicParametersForMutation } from '../utility/public-parameters';
 import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
@@ -79,7 +79,7 @@ export default async function newAccount(
 		};
 	});
 
-	const parameters = await getPublicParameters();
+	const parameters = await getPublicParametersForMutation();
 	if (
 		!parameters?.createAccountEnabled ||
 		parameters.maintenanceModeEnabled ||

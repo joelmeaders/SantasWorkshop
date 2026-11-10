@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { HttpsError } from 'firebase-functions/v2/https';
 import { createDefaultPublicParameters } from '../../../src/models';
 import { createOnboardUser } from '../../fixtures/factories';
 import { createCallableRequest } from '../../helpers/callable-context';
@@ -7,9 +8,21 @@ import {
 	type FirebaseAdminMock,
 } from '../../helpers/firebase-admin.mock';
 
+const openSettings = (): ReturnType<typeof createDefaultPublicParameters> => {
+	const defaults = createDefaultPublicParameters();
+	return {
+		...defaults,
+		createAccountEnabled: true,
+		registrationEnabled: true,
+		maintenanceModeEnabled: false,
+		weatherModeEnabled: false,
+		admin: { ...defaults.admin, preRegistrationEnabled: true },
+	};
+};
+
 const prepare = vi.fn();
 const finalize = vi.fn();
-const getPublicParameters = vi.fn();
+const getPublicParametersForMutation = vi.fn();
 const loadSubject = async (
 	adminMock: FirebaseAdminMock,
 ): Promise<typeof import('../../../src/fn/newAccount')> => {
@@ -20,7 +33,7 @@ const loadSubject = async (
 		finalizeAccountProvisioning: finalize,
 	}));
 	vi.doMock('../../../src/utility/public-parameters', () => ({
-		getPublicParameters,
+		getPublicParametersForMutation,
 	}));
 	return import('../../../src/fn/newAccount');
 };
@@ -39,7 +52,9 @@ describe('newAccount handler', () => {
 		});
 		prepare.mockReset().mockResolvedValue('new-user-123');
 		finalize.mockReset().mockResolvedValue(undefined);
-		getPublicParameters.mockReset().mockResolvedValue(createDefaultPublicParameters());
+		getPublicParametersForMutation
+			.mockReset()
+			.mockResolvedValue(openSettings());
 		adminMock.createUser.mockResolvedValue({ uid: 'new-user-123' });
 	});
 	it.each([
@@ -49,51 +64,102 @@ describe('newAccount handler', () => {
 		['false', { createAccountEnabled: false }],
 		['false', { maintenanceModeEnabled: true }],
 		['false', { weatherModeEnabled: true }],
-	] as const)('rejects closed public signup before account writes (emulator=%s): %j', async (emulator, settings) => {
-		vi.stubEnv('FUNCTIONS_EMULATOR', emulator);
-		getPublicParameters.mockResolvedValue({
-			...createDefaultPublicParameters(),
-			...settings,
-		});
+	] as const)(
+		'rejects closed public signup before account writes (emulator=%s): %j',
+		async (emulator, settings) => {
+			vi.stubEnv('FUNCTIONS_EMULATOR', emulator);
+			getPublicParametersForMutation.mockResolvedValue({
+				...openSettings(),
+				...settings,
+			});
+			const { default: newAccount } = await loadSubject(adminMock);
+			await expect(
+				newAccount(createCallableRequest(createOnboardUser())),
+			).rejects.toMatchObject({ code: 'failed-precondition' });
+			expect(prepare).not.toHaveBeenCalled();
+			expect(adminMock.createUser).not.toHaveBeenCalled();
+			expect(finalize).not.toHaveBeenCalled();
+		},
+	);
+	it('does not create an account when settings cannot be loaded', async () => {
+		getPublicParametersForMutation.mockRejectedValue(
+			new HttpsError('unavailable', 'Settings unavailable'),
+		);
 		const { default: newAccount } = await loadSubject(adminMock);
 		await expect(
 			newAccount(createCallableRequest(createOnboardUser())),
-		).rejects.toMatchObject({ code: 'failed-precondition' });
+		).rejects.toMatchObject({ code: 'unavailable' });
 		expect(prepare).not.toHaveBeenCalled();
 		expect(adminMock.createUser).not.toHaveBeenCalled();
 		expect(finalize).not.toHaveBeenCalled();
 	});
-	it('does not create an account when settings cannot be loaded', async () => {
-		getPublicParameters.mockRejectedValue(new Error('Settings unavailable'));
+	it('waits for open settings on the first signup request before creating any account data', async () => {
+		let resolveSettings!: (
+			settings: ReturnType<typeof createDefaultPublicParameters>,
+		) => void;
+		getPublicParametersForMutation.mockReturnValue(
+			new Promise((resolve) => {
+				resolveSettings = resolve;
+			}),
+		);
 		const { default: newAccount } = await loadSubject(adminMock);
-		await expect(
-			newAccount(createCallableRequest(createOnboardUser())),
-		).rejects.toThrow('Settings unavailable');
+		const result = newAccount(createCallableRequest(createOnboardUser()));
+		await vi.waitFor(() =>
+			expect(getPublicParametersForMutation).toHaveBeenCalledOnce(),
+		);
 		expect(prepare).not.toHaveBeenCalled();
 		expect(adminMock.createUser).not.toHaveBeenCalled();
+		expect(finalize).not.toHaveBeenCalled();
+		resolveSettings(openSettings());
+		await expect(result).resolves.toBe('new-user-123');
+		expect(prepare).toHaveBeenCalledOnce();
+		expect(adminMock.createUser).toHaveBeenCalledOnce();
+	});
+	it('resumes authenticated setup without reading unavailable settings', async () => {
+		getPublicParametersForMutation.mockRejectedValue(
+			new HttpsError('unavailable', 'Settings unavailable'),
+		);
+		const { default: newAccount } = await loadSubject(adminMock);
+		await expect(
+			newAccount(
+				createCallableRequest(
+					{ resume: true },
+					{ uid: 'existing-user' },
+				),
+			),
+		).resolves.toBe('existing-user');
+		expect(getPublicParametersForMutation).not.toHaveBeenCalled();
+		expect(prepare).not.toHaveBeenCalled();
+		expect(adminMock.createUser).not.toHaveBeenCalled();
+		expect(finalize).toHaveBeenCalledWith('existing-user');
 	});
 	it('allows account creation separately from appointment registration', async () => {
-		const settings = createDefaultPublicParameters();
+		const settings = openSettings();
 		settings.registrationEnabled = false;
 		settings.admin.preRegistrationEnabled = false;
-		getPublicParameters.mockResolvedValue(settings);
+		getPublicParametersForMutation.mockResolvedValue(settings);
 		const { default: newAccount } = await loadSubject(adminMock);
 		await expect(
 			newAccount(createCallableRequest(createOnboardUser())),
 		).resolves.toBe('new-user-123');
 	});
 	it('preserves authenticated setup recovery while new public signup is closed', async () => {
-		getPublicParameters.mockResolvedValue({
-			...createDefaultPublicParameters(),
+		getPublicParametersForMutation.mockResolvedValue({
+			...openSettings(),
 			createAccountEnabled: false,
 			maintenanceModeEnabled: true,
 			weatherModeEnabled: true,
 		});
 		const { default: newAccount } = await loadSubject(adminMock);
 		await expect(
-			newAccount(createCallableRequest({ resume: true }, { uid: 'existing-user' })),
+			newAccount(
+				createCallableRequest(
+					{ resume: true },
+					{ uid: 'existing-user' },
+				),
+			),
 		).resolves.toBe('existing-user');
-		expect(getPublicParameters).not.toHaveBeenCalled();
+		expect(getPublicParametersForMutation).not.toHaveBeenCalled();
 		expect(prepare).not.toHaveBeenCalled();
 		expect(adminMock.createUser).not.toHaveBeenCalled();
 		expect(finalize).toHaveBeenCalledWith('existing-user');

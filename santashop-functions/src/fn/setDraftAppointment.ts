@@ -1,5 +1,5 @@
 import { getBookingNow } from '../utility/booking-clock';
-import { getPublicParameters } from '../utility/public-parameters';
+import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
@@ -50,6 +50,7 @@ export default async function setDraftAppointment(
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
 
+	const readParameters = createMutationPublicParametersReader();
 	await db.runTransaction(async (transaction) => {
 		const [registrationSnapshot, slotSnapshot, receiptSnapshot] =
 			await Promise.all([
@@ -64,7 +65,7 @@ export default async function setDraftAppointment(
 			'setDraftAppointment',
 		);
 		if (cached) return;
-		const parameters = await getPublicParameters();
+		const parameters = await readParameters();
 		const now = await getBookingNow(db);
 		requireOpenPreRegistration(parameters);
 		const registration = requireDraftRegistration(

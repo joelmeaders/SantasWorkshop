@@ -13,6 +13,7 @@ import {
 } from '../models';
 import { createFunctionLogger } from './observability';
 import { GoogleAuth } from 'google-auth-library';
+import { HttpsError } from 'firebase-functions/v2/https';
 import type { PublicParametersGatewayResponse } from './public-parameters-gateway';
 
 export const PUBLIC_PARAMETERS_GATEWAY_URL_ENV =
@@ -196,4 +197,44 @@ export const getPublicParameters = async (): Promise<PublicParameters> => {
 			: createDefaultPublicParameters();
 	}
 	return cache.read();
+};
+
+/** Mutations wait for validated settings; unavailable or stale settings never authorize writes. */
+export async function getPublicParametersForMutation(): Promise<PublicParameters> {
+	try {
+		return await withPublicParametersDeadline(
+			Promise.resolve().then(async () => {
+				if (isLocalPublicParameters()) {
+					const snapshot = await admin
+						.firestore()
+						.doc('_testConfig/publicParameters')
+						.get();
+					if (!snapshot.exists)
+						throw new Error('Public settings fixture is missing.');
+					return parsePublicParameters(snapshot.data());
+				}
+
+				const response = await fetchPublicParametersEnvelope();
+				if (response.source !== 'fresh')
+					throw new Error('Public settings are stale.');
+				return response.settings;
+			}),
+		);
+	} catch {
+		log.warn(
+			'Authoritative public settings are unavailable; rejecting the mutation.',
+		);
+		throw new HttpsError(
+			'unavailable',
+			'Public settings are temporarily unavailable. Please try again.',
+		);
+	}
+}
+
+/** Resolve after replay checks, and keep one settings snapshot across transaction retries. */
+export const createMutationPublicParametersReader = (): (
+	() => Promise<PublicParameters>
+) => {
+	let pending: Promise<PublicParameters> | undefined;
+	return () => (pending ??= getPublicParametersForMutation());
 };

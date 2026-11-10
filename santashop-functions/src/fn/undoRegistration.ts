@@ -1,4 +1,4 @@
-import { getPublicParameters } from '../utility/public-parameters';
+import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
@@ -65,6 +65,7 @@ export default async function undoRegistration(
 	const receiptRef = registrationRef
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
+	const readParameters = createMutationPublicParametersReader();
 	try {
 		await db.runTransaction(async (transaction) => {
 			const [registrationSnapshot, receiptSnapshot] = await Promise.all([
@@ -114,7 +115,7 @@ export default async function undoRegistration(
 				return;
 			}
 
-			const parameters = await getPublicParameters();
+			const parameters = await readParameters();
 			if (!parameters?.admin?.allowCancelRegistration) {
 				throw new HttpsError(
 					'failed-precondition',

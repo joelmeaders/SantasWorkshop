@@ -8,6 +8,7 @@ import type {
 import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
+	type PublicParameters,
 	type WaitingListCampaign,
 	type WaitingListCampaignPreview,
 	type WaitingListEmailPreview,
@@ -15,7 +16,7 @@ import {
 import { requireOwner } from '../utility/capabilities';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 import { FUNCTION_REGION } from '../utility/function-region';
-import { getPublicParameters } from '../utility/public-parameters';
+import { getPublicParameters, getPublicParametersForMutation } from '../utility/public-parameters';
 import { getWaitingListSettings } from '../utility/waiting-list-settings';
 import { waitingListSendingAllowed } from '../utility/waiting-list-email';
 import {
@@ -94,7 +95,9 @@ const pauseQueuedCampaign = async (
 	});
 };
 
-const preview = async (): Promise<WaitingListCampaignPreview> => {
+const preview = async (
+	readParameters: () => Promise<PublicParameters> = getPublicParameters,
+): Promise<WaitingListCampaignPreview> => {
 	const blockedReasons: string[] = [];
 	const settings = await getWaitingListSettings();
 	if (!settings.emailSendingEnabled)
@@ -102,7 +105,7 @@ const preview = async (): Promise<WaitingListCampaignPreview> => {
 	if (!(await waitingListSendingAllowed()))
 		blockedReasons.push('Email delivery is disabled or unavailable.');
 	try {
-		requireOpenPreRegistration(await getPublicParameters());
+		requireOpenPreRegistration(await readParameters());
 	} catch {
 		blockedReasons.push('Registration is currently closed.');
 	}
@@ -153,7 +156,7 @@ export const startWaitingListCampaign = async (
 	const existing = await ref.get();
 	if (existing.exists)
 		return getWaitingListCampaign({ ...request, data: { campaignId: id } });
-	const candidate = await preview();
+	const candidate = await preview(getPublicParametersForMutation);
 	if (!candidate.canSend)
 		throw new HttpsError(
 			'failed-precondition',

@@ -159,15 +159,26 @@ export const createAccountAdminMock = (): AccountAdminMock => {
 
 export const loadAccountRegistrationHandlers = async (
 	adminMock: AccountAdminMock,
+	options: { useRealPublicParameters?: boolean } = {},
 ) => {
 	vi.resetModules();
 	vi.doMock('firebase-admin', () => adminMock.module);
-	vi.doMock('../../../src/utility/public-parameters', () => ({
-		getPublicParameters: async () =>
+	if (options.useRealPublicParameters) {
+		vi.doUnmock('../../../src/utility/public-parameters');
+	} else {
+		const readSettings = async () =>
 			(
 				await adminMock.getDocRef('_testConfig/publicParameters').get()
-			).data(),
-	}));
+			).data();
+		vi.doMock('../../../src/utility/public-parameters', () => ({
+			getPublicParameters: readSettings,
+			getPublicParametersForMutation: readSettings,
+			createMutationPublicParametersReader: () => {
+				let pending: ReturnType<typeof readSettings> | undefined;
+				return () => (pending ??= readSettings());
+			},
+		}));
+	}
 	vi.doMock('dateformat', () => ({
 		default: vi.fn(() => FORMATTED_DATETIME),
 	}));

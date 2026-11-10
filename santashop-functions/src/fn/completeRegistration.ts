@@ -1,5 +1,5 @@
 import { getBookingNow } from '../utility/booking-clock';
-import { getPublicParameters } from '../utility/public-parameters';
+import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import {
@@ -51,6 +51,7 @@ export default async function completeRegistration(
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
 
+	const readParameters = createMutationPublicParametersReader();
 	try {
 		await db.runTransaction(async (transaction) => {
 			const [registrationSnapshot, userSnapshot, receiptSnapshot] =
@@ -66,8 +67,6 @@ export default async function completeRegistration(
 				'completeRegistration',
 			);
 			if (cached) return;
-			const parameters = await getPublicParameters();
-			const now = await getBookingNow(db);
 			const registrationData = registrationSnapshot.data() as
 				Registration | undefined;
 			if (registrationData?.registrationSubmittedOn) {
@@ -80,6 +79,8 @@ export default async function completeRegistration(
 				} satisfies MutationReceipt);
 				return;
 			}
+			const parameters = await readParameters();
+			const now = await getBookingNow(db);
 			requireOpenPreRegistration(parameters);
 			const registration = requireDraftRegistration(registrationData);
 			const user = userSnapshot.data() as User | undefined;

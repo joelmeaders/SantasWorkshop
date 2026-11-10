@@ -1,6 +1,6 @@
 import admin from '../firebase-admin';
 import { COLLECTION_SCHEMA, type Child, type Registration } from '../models';
-import { getPublicParameters } from '../utility/public-parameters';
+import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
 	getStoredMutationResult,
@@ -18,7 +18,7 @@ export async function mutateDraftChildren(
 ): Promise<true> {
 	const db = admin.firestore();
 	const registrationRef = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
-	const parameters = await getPublicParameters();
+	const readParameters = createMutationPublicParametersReader();
 	const receiptRef = registrationRef
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
@@ -37,7 +37,7 @@ export async function mutateDraftChildren(
 			)
 		)
 			return;
-		requireOpenPreRegistration(parameters);
+		requireOpenPreRegistration(await readParameters());
 		const registration = requireDraftRegistration(
 			registrationSnapshot.data() as Registration | undefined,
 		);

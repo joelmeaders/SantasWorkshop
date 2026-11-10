@@ -31,10 +31,14 @@ templates, and runtime environment settings remain in their existing stores.
 
 Backend mutation checks use the **same client template** through an IAM-private
 `publicParametersGateway` function. They do not use the separate server-template
-feature or a persistent configuration copy. Each consumer instance returns its
-cached settings and starts a background gateway request after ten seconds.
-Cold consumers return release defaults while fetching. Failures retain the
-previous object and use the retry backoff above.
+feature or a persistent configuration copy. Mutation guards await one validated
+gateway response, including on the first cold request. They accept only a `fresh`
+response and reject stale, malformed, or unavailable settings with `unavailable`.
+A ten-second total deadline covers authentication, transport, and response parsing.
+They never fall back to build defaults or a previously open consumer cache.
+Informational consumers still return cached settings and start a background gateway
+request after ten seconds. Those reads retain defaults or the last valid settings
+on failure and use the retry backoff above.
 
 The gateway permits up to two instances with concurrency 80 each. Each instance
 has an in-memory cache and waits for one refresh when its settings are at least
@@ -47,11 +51,14 @@ Client startup and watchdog fetches use the Remote Config client fetch endpoint.
 The 60 template reads per minute release gate measures the gateway's server-side
 management API reads. It is separate from those client fetches.
 
-The controls are no longer part of a Firestore transaction. Existing operation
-predicates and idempotency receipt handling are unchanged. In-flight actions can
-finish after a switch changes. Outages can extend stale settings. Background
-work also depends on the Functions instance receiving CPU time; ten seconds is
-a refresh eligibility interval, not a delivery guarantee.
+The controls are not part of a Firestore transaction. Mutation handlers resolve
+settings only after checking completed receipts and existing completed-operation
+no-ops. A request-local lazy promise shares one result across transaction retries.
+An unavailable settings service therefore cannot block an already-completed replay.
+Existing operation predicates remain unchanged. The gateway can return a validated
+snapshot cached for up to ten seconds; already-admitted work can finish after a
+switch changes. A stale response after a failed refresh cannot authorize a new
+mutation. Informational background refresh still depends on instance CPU time.
 
 New public account creation checks `createAccountEnabled`, maintenance, and weather
 controls before writing any provisioning records or creating an Auth user. Existing
@@ -60,11 +67,14 @@ alone does not close account creation; the two switches remain independent. The
 same signup predicate runs in local emulators, test, and production. Functions
 configuration aliases `dev`, `development`, and `qa` select the test project;
 `production` selects production. There is no separate deployed development project.
-Signup uses the same cache behavior above: a cold instance can reject a first
-signup under closed release defaults until the asynchronous refresh completes.
-Conversely, previously open cached settings and already-admitted work can outlive
-a closure, especially during an outage. Verify backend convergence after closing
-controls; publishing a switch is not an instantaneous global write lock.
+Signup uses the same awaited mutation read as draft-child edits, appointment
+selection, submission, appointment changes, cancellation, and new waiting-list
+campaign admission. Read-only campaign previews keep their cached behavior;
+starting a campaign performs its own authoritative check. Existing campaign-resume
+policy is unchanged. Emulator mutation reads require a complete, existing
+`_testConfig/publicParameters` fixture and reject missing or malformed fixtures.
+Verify backend convergence after closing controls; the gateway's ten-second cache
+and already-admitted work mean publication is not an instantaneous global write lock.
 
 ## Owner editing
 
@@ -191,8 +201,8 @@ An instance limit is not an absolute quota guarantee during replacement or
 failure. Cold-start churn and operator activity can exceed this estimate. Check
 actual request rates, errors, and settings convergence under load and replacement
 before release. The browser fetch quota is separate. The gateway is a new
-configuration dependency; consumers keep validated settings or release defaults
-when it is unavailable.
+configuration dependency. Informational consumers retain validated settings or
+release defaults when it is unavailable; new mutation admission fails closed.
 
 The readiness script checks their direct project bindings, QR bucket permission, published
 settings, template-read quota, and the deployed private gateway. Its `--preflight`

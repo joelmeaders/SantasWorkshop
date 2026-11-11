@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.27] - 2026-11-11
+
+### Changed
+
+- Match the clearer already-used ticket warning while preserving blocked-entry and risk-history assertions.
+
 ## [2026.10.26] - 2026-10-26
 
 ### Changed

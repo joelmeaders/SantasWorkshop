@@ -11,9 +11,7 @@
 				<span>
 					<h2>{{ 'Instructions' | adminText }}</h2>
 					<ion-note>
-						{{ 'Review all registration information. Validate
-						children names and birth dates with documentation. Add,
-						edit and remove children if needed before continuing.' |
+						{{ 'Review the registration details. Check each child’s name and date of birth against their documents. Add, edit, or remove children if needed before checking in.' |
 						adminText }}
 					</ion-note>
 				</span>
@@ -90,8 +88,8 @@
 		</div>
 		} @else {
 		<div class="no-info ion-text-center ion-padding-top">
-			<h1>{{ 'No information loaded...' | adminText }}</h1>
-			<p>{{ 'Did you get here by mistake?' | adminText }}</p>
+			<h1>{{ 'No registration is open.' | adminText }}</h1>
+			<p>{{ 'Go back to scan a ticket or enter a code.' | adminText }}</p>
 			<ion-button [routerLink]="['..']">
 				{{ 'Go Back' | adminText }}
 			</ion-button>

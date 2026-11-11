@@ -197,11 +197,11 @@ export class ResendEmailPage {
 		}
 
 		const alert = await createAdminAlert(this.alerts, () => ({
-			header: 'Email queued',
+			header: 'Email queued for sending',
 			message: this.language.text(
 				recoveryId
-					? 'Recovery queued for email job {{v0}}.'
-					: 'Registration email queued for {{v0}}.',
+					? 'Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.'
+					: 'The registration email is queued for {{v0}}. Delivery has not yet been confirmed.',
 				{ v0: recoveryId || emailAddress },
 			),
 			buttons: ['OK'],

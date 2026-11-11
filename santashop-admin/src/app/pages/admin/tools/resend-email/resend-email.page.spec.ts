@@ -104,8 +104,9 @@ describe('ResendEmailPage', () => {
 		expect(callable).toHaveBeenCalledWith({ customerId: 'customer-1' });
 		expect(createAlert).toHaveBeenLastCalledWith(
 			expect.objectContaining({
-				header: 'Email queued',
-				message: 'Registration email queued for family@example.test.',
+				header: 'Email queued for sending',
+				message:
+					'The registration email is queued for family@example.test. Delivery has not yet been confirmed.',
 			}),
 		);
 		expect(component.form.controls['emailAddress'].value).toBeNull();

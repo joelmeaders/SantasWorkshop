@@ -325,7 +325,7 @@ describe('ScanPage', () => {
 
 		expect(create).toHaveBeenCalledWith(
 			expect.objectContaining({
-				header: 'Oh No!',
+				header: 'Registration is incomplete',
 				message:
 					'That registration is incomplete and cannot be checked in.',
 			}),

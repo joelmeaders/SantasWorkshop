@@ -328,7 +328,9 @@ export class ScanPage {
 		incomplete = false,
 	): Promise<void> {
 		const alert = await createAdminAlert(this.alertController, () => ({
-			header: 'Oh No!',
+			header: incomplete
+				? 'Registration is incomplete'
+				: 'Registration not found',
 			message: incomplete
 				? 'That registration is incomplete and cannot be checked in.'
 				: 'That registration could not be found',

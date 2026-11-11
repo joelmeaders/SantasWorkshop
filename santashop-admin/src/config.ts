@@ -5,7 +5,7 @@ export const config = {
 	production: false,
 	label: "LOCAL",
 	name: "@santashop/admin",
-	version: "2026.10.26",
+	version: "2026.10.28",
 	appCheckKey: "2839440c-0a91-4c48-921a-451020157001",
 	appCheckEnabled: false,
 	programYear: 2026,

@@ -129,7 +129,7 @@ export function provideActivatedRouteMock(): Provider { return { provide: Activa
 
 export function createScannerServiceMock(): object {
 	return {
-		scan: vi.fn(), stopScan: vi.fn(), onCamerasFound: vi.fn(), onDeviceSelectChange: vi.fn(),
+		setCurrentDevice: vi.fn(), selectInitialDevice: vi.fn(), scan: vi.fn(), stopScan: vi.fn(), onCamerasFound: vi.fn(), onDeviceSelectChange: vi.fn(),
 		onDeviceChange: vi.fn().mockReturnValue({ subscribe: (): { unsubscribe: () => undefined } => ({ unsubscribe: (): undefined => undefined }) }),
 		onHasPermission: vi.fn(), onScanError: vi.fn(), formatsEnabled: [],
 		$deviceId: of(''), $availableDevices: of([]), $deviceToUse: of(undefined), $hasPermissions: of(false),

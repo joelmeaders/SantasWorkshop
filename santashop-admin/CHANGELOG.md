@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2026.10.28] - 2026-11-11
+
+### Fixed
+
+- Submit admin sign-in from the password field with Enter using the form submit path.
+- Remember the chosen scanner camera in this browser across scans and reloads, without overwriting it during automatic camera startup or reset.
+
 ## [2026.10.27] - 2026-11-10
 
 ### Changed

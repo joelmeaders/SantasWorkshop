@@ -3,6 +3,7 @@ import { createAdminAlert } from '../../../../shared/preferences/admin-overlays'
 import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import {
 	Component,
+	effect,
 	ChangeDetectionStrategy,
 	inject,
 	signal,
@@ -165,6 +166,15 @@ export class ScanPage {
 
 	constructor() {
 		addIcons({ camera });
+		effect((onCleanup) => {
+			const scanner = this.scanner();
+			if (!scanner || !this.cameraEnabled()) return;
+			let cancelled = false;
+			onCleanup(() => {
+				cancelled = true;
+			});
+			void this.initializeScanner(scanner, () => cancelled);
+		});
 	}
 
 	public ionViewWillEnter(): void {
@@ -228,7 +238,24 @@ export class ScanPage {
 	}
 
 	public enableCamera(): void {
+		this.scannerService.setCurrentDevice(undefined);
 		this.cameraEnabled.set(true);
+	}
+
+	private async initializeScanner(
+		scanner: ZXingScannerComponent,
+		cancelled: () => boolean,
+	): Promise<void> {
+		try {
+			const permitted = await scanner.askForPermission();
+			if (!permitted || cancelled()) return;
+			const devices = await scanner.updateVideoInputDevices();
+			if (cancelled()) return;
+			this.scannerService.onCamerasFound(devices);
+			this.scannerService.selectInitialDevice();
+		} catch (error) {
+			if (!cancelled()) this.scanError.next(error as Error);
+		}
 	}
 
 	private async invalidCodeAlert(): Promise<void> {

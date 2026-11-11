@@ -4,10 +4,8 @@
 		<div class="sign-in-intro">
 			<h1>{{ 'Welcome back' | adminText }}</h1>
 			<p>
-				{{
-					'Tools for the people who make the season happen.'
-						| adminText
-				}}
+				{{ 'Tools for the people who make the season happen.' |
+				adminText }}
 			</p>
 		</div>
 		<ion-card>
@@ -15,7 +13,7 @@
 				<ion-card-title> {{ 'Sign in' | adminText }} </ion-card-title>
 			</ion-card-header>
 			<ion-card-content>
-				<form [formGroup]="form">
+				<form [formGroup]="form" (ngSubmit)="login()">
 					<ion-item>
 						<ion-input
 							id="adminSignInEmail"
@@ -26,9 +24,9 @@
 							type="email"
 						/>
 						@if (form.controls['emailAddress'].dirty) {
-							<ion-note slot="error" color="danger">
-								{{ 'Invalid email address' | adminText }}
-							</ion-note>
+						<ion-note slot="error" color="danger">
+							{{ 'Invalid email address' | adminText }}
+						</ion-note>
 						}
 					</ion-item>
 					<ion-item>
@@ -37,27 +35,27 @@
 							label="{{ 'Password' | adminText }}"
 							labelPlacement="stacked"
 							formControlName="password"
-							autocomplete="password"
+							autocomplete="current-password"
 							type="password"
+							(keydown.enter)="submitFromPassword($event)"
 						/>
 						@if (form.controls['password'].dirty) {
-							<ion-note slot="error" color="danger">
-								{{ 'Password is required' | adminText }}
-							</ion-note>
+						<ion-note slot="error" color="danger">
+							{{ 'Password is required' | adminText }}
+						</ion-note>
 						}
 					</ion-item>
+					<ion-toolbar color="none">
+						<ion-button
+							id="adminSignInButton"
+							slot="end"
+							[disabled]="form.invalid || isSubmitting()"
+							type="submit"
+						>
+							{{ 'Login' | adminText }}
+						</ion-button>
+					</ion-toolbar>
 				</form>
-				<ion-toolbar color="none">
-					<ion-button
-						id="adminSignInButton"
-						slot="end"
-						[disabled]="form.invalid || isSubmitting()"
-						(click)="login()"
-						(keydown.enter)="login()"
-					>
-						{{ 'Login' | adminText }}
-					</ion-button>
-				</ion-toolbar>
 			</ion-card-content>
 		</ion-card>
 	</div>

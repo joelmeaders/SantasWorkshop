@@ -151,6 +151,10 @@ export class EmailTemplateCodeEditorComponent
 					}),
 				],
 			}),
+			// Ionic projects light-DOM content through shadow slots. CodeMirror's
+			// slot-aware inference can mount styles in the wrong shadow root.
+			root: this.editorHost.nativeElement.getRootNode() as
+				Document | ShadowRoot,
 			parent: this.editorHost.nativeElement,
 		});
 	}

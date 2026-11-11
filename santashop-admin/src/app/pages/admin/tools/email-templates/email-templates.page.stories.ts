@@ -27,7 +27,7 @@ const meta = {
 		await expect(
 			await canvas.findByText('2026 Event Reminder (English) · English'),
 		).toBeVisible();
-		await expect(canvas.getByText('Published')).toBeVisible();
+		await expect(canvas.getByText('Current delivery')).toBeVisible();
 		await userEvent.click(canvas.getByTitle('Create template'));
 	},
 } satisfies Meta<EmailTemplatesPage>;

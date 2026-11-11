@@ -41,6 +41,8 @@ class ZXingScannerStubComponent {
 	public readonly scanSuccess = output<string>();
 	public readonly scanError = output<Error>();
 
+	public readonly askForPermission = vi.fn().mockResolvedValue(true);
+	public readonly updateVideoInputDevices = vi.fn().mockResolvedValue([]);
 	public readonly scanStop = vi.fn();
 }
 
@@ -178,6 +180,41 @@ describe('ScanPage', () => {
 		expect(component.cameraEnabled()).toBe(false);
 	});
 
+	it('selects a camera only after permission and skips library autostart', async () => {
+		vi.spyOn(
+			fixture.debugElement.injector.get(ScannerService),
+			'selectInitialDevice',
+		);
+		component.enableCamera();
+		await fixture.whenStable();
+		const scanner = fixture.debugElement.query(
+			By.directive(ZXingScannerStubComponent),
+		).componentInstance as ZXingScannerStubComponent;
+		expect(scanner.autostart()).toBe(false);
+		expect(scanner.askForPermission).toHaveBeenCalledOnce();
+		expect(scanner.updateVideoInputDevices).toHaveBeenCalledOnce();
+		expect(
+			fixture.debugElement.injector.get(ScannerService)
+				.selectInitialDevice,
+		).toHaveBeenCalledOnce();
+	});
+
+	it('does not select a device after camera startup has been cancelled', async () => {
+		vi.spyOn(
+			fixture.debugElement.injector.get(ScannerService),
+			'selectInitialDevice',
+		);
+		component.enableCamera();
+		fixture.detectChanges();
+		component.disableScanner();
+		fixture.detectChanges();
+		await fixture.whenStable();
+		expect(
+			fixture.debugElement.injector.get(ScannerService)
+				.selectInitialDevice,
+		).not.toHaveBeenCalled();
+	});
+
 	it('keeps the active scanner instance when the staff language changes', async () => {
 		component.cameraEnabled.set(true);
 		fixture.detectChanges();
@@ -288,7 +325,7 @@ describe('ScanPage', () => {
 
 		expect(create).toHaveBeenCalledWith(
 			expect.objectContaining({
-				header: 'Oh No!',
+				header: 'Registration is incomplete',
 				message:
 					'That registration is incomplete and cannot be checked in.',
 			}),

@@ -7,6 +7,19 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.10.29] - 2026-11-11
+
+### Fixed
+
+- Submit admin sign-in from the password field with Enter using the form submit path.
+- Restore HTML editor styling in Ionic slotted layouts, including dark mode.
+- Distinguish the current delivery template from older published templates and drafts.
+- Remember the chosen scanner camera in this browser across scans and reloads, without overwriting it during automatic camera startup or reset.
+
+### Changed
+
+- Use clearer English and Spanish admin instructions while preserving duplicate-scan warnings and distinguishing queued email from confirmed delivery.
+
 ## [2026.10.28] - 2026-11-10
 
 ### Changed

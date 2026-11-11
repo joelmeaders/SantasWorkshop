@@ -81,7 +81,7 @@ test.describe('check-in and staff registration operations', () => {
 		await alert.getByRole('button', { name: 'OK', exact: true }).click();
 		await expect(page).toHaveURL(/\/admin\/checkin\/review$/);
 		await expect(
-			page.getByText('Review all registration information.'),
+			page.getByText('Review the registration details.'),
 		).toBeVisible();
 		await expect(
 			page.getByText('Test Child', { exact: true }),
@@ -200,7 +200,7 @@ test.describe('check-in and staff registration operations', () => {
 		});
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await scanManualCode(page, 'E2ELATE1');
-		await expect(page.getByText('Suspicious duplicate scan')).toBeVisible();
+		await expect(page.getByText('This ticket was already used.')).toBeVisible();
 		await expect(
 			page.getByText('Contact a DSCS member to resolve this attempt.'),
 		).toBeVisible();
@@ -307,7 +307,7 @@ test.describe('check-in and staff registration operations', () => {
 		});
 		await scanManualCode(page, 'E2ENEW01');
 		await expect(
-			page.getByText('Suspicious duplicate scan', { exact: true }),
+			page.getByText('This ticket was already used.', { exact: true }),
 		).toBeVisible();
 
 		await page.goto('/admin/stats/scan-risk');

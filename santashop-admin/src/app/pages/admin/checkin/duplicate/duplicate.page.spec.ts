@@ -52,7 +52,7 @@ describe('DuplicatePage', () => {
 
 		await fixture.whenStable();
 
-		expect(fixture.nativeElement.textContent).toContain('Suspicious duplicate scan');
+		expect(fixture.nativeElement.textContent).toContain('This ticket was already used.');
 		expect(logEventWithParams).toHaveBeenCalledWith('admin_blocked_scan_view', {
 			disposition: 'duplicate-risk',
 		});

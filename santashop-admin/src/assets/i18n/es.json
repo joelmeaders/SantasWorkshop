@@ -1,4 +1,7 @@
 {
+	"Current delivery": "En uso para envíos",
+	"Older published": "Publicada anteriormente",
+	"Saved r{{v0}}": "Guardada r{{v0}}",
 	" Shoppers": " clientes",
 	" Spanish messages also use this template when no Spanish template is published.": " Los mensajes en español también usan esta plantilla cuando no hay una plantilla publicada en español.",
 	"· {{v0}} selected": "· {{v0}} seleccionados",
@@ -887,5 +890,18 @@
 	"Correct the registration details and submit again.": "Corrige los datos del registro y envíalo de nuevo.",
 	"Failed email queue ID (optional)": "ID del correo fallido en la cola (opcional)",
 	"Recovery queued for email job {{v0}}.": "Se puso en cola la recuperación del correo {{v0}}.",
-	"I reviewed the uncertain delivery and accept that recovery can send a duplicate.": "Revisé el envío incierto y acepto que la recuperación puede enviar un duplicado."
+	"I reviewed the uncertain delivery and accept that recovery can send a duplicate.": "Revisé el envío incierto y acepto que la recuperación puede enviar un duplicado.",
+	"Review the registration details. Check each child’s name and date of birth against their documents. Add, edit, or remove children if needed before checking in.": "Revise los datos de la inscripción. Verifique el nombre y la fecha de nacimiento de cada niño con sus documentos. Agregue, edite o quite niños si es necesario antes de registrar la llegada.",
+	"No registration is open.": "No hay ninguna inscripción abierta.",
+	"Go back to scan a ticket or enter a code.": "Vuelva para escanear un boleto o ingresar un código.",
+	"This ticket was already used.": "Este boleto ya se usó.",
+	"No staff accounts yet. Select Add user to create one.": "Aún no hay cuentas de personal. Seleccione Agregar usuario para crear una.",
+	"Choose what information to insert for each placeholder, such as the shopper’s name.": "Elija qué información insertar en cada campo de la plantilla, como el nombre de la persona inscrita.",
+	"Notify the waiting list": "Notificar a la lista de espera",
+	"Who may receive this email": "Quiénes podrían recibir este correo",
+	"Email queued for sending": "Correo en cola para envío",
+	"The registration email is queued for {{v0}}. Delivery has not yet been confirmed.": "El correo de inscripción está en cola para {{v0}}. La entrega aún no se ha confirmado.",
+	"Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.": "La recuperación del envío {{v0}} está en cola. La entrega aún no se ha confirmado.",
+	"Registration is incomplete": "La inscripción está incompleta",
+	"Registration not found": "No se encontró la inscripción"
 }

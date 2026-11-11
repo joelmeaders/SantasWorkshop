@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { AlertController } from '@ionic/angular/standalone';
 import { firstValueFrom } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScannerService } from './scanner.service';
 
 describe('ScannerService', () => {
@@ -16,7 +16,13 @@ describe('ScannerService', () => {
 		toJSON: () => ({}),
 	});
 
+	const preferenceKey = 'santashop-admin-scanner-camera';
+	afterEach(() => {
+		localStorage.removeItem(preferenceKey);
+		vi.restoreAllMocks();
+	});
 	beforeEach(() => {
+		localStorage.removeItem(preferenceKey);
 		present.mockClear();
 		createAlert.mockClear();
 		TestBed.configureTestingModule({
@@ -38,12 +44,16 @@ describe('ScannerService', () => {
 		service.onHasPermission(true);
 		service.onDeviceSelectChange({ detail: { value: 'rear' } });
 
-		await expect(firstValueFrom(service.$availableDevices)).resolves.toEqual(
-			cameras,
+		await expect(
+			firstValueFrom(service.$availableDevices),
+		).resolves.toEqual(cameras);
+		await expect(firstValueFrom(service.$hasPermissions)).resolves.toBe(
+			true,
 		);
-		await expect(firstValueFrom(service.$hasPermissions)).resolves.toBe(true);
 		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('rear');
-		await expect(firstValueFrom(service.$deviceToUse)).resolves.toBe(cameras[1]);
+		await expect(firstValueFrom(service.$deviceToUse)).resolves.toBe(
+			cameras[1],
+		);
 	});
 
 	it('ignores an absent selection and preserves the current camera', async () => {
@@ -65,6 +75,59 @@ describe('ScannerService', () => {
 		await expect(firstValueFrom(service.$currentDevice)).resolves.toBe(
 			rearCamera,
 		);
+	});
+
+	it('restores a saved choice after automatic startup without saving the default', async () => {
+		localStorage.setItem(preferenceKey, 'rear');
+		const service = TestBed.inject(ScannerService);
+		service.onCamerasFound([camera('front'), camera('rear')]);
+		service.onDeviceChange(camera('front'));
+		service.selectInitialDevice();
+		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('rear');
+		expect(localStorage.getItem(preferenceKey)).toBe('rear');
+		service.onDeviceSelectChange({ detail: { value: 'front' } });
+		expect(localStorage.getItem(preferenceKey)).toBe('front');
+		service.setCurrentDevice(undefined);
+		service.onDeviceChange(camera('rear'));
+		service.selectInitialDevice();
+		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('front');
+	});
+
+	it('keeps the available default when the saved camera is disconnected', async () => {
+		localStorage.setItem(preferenceKey, 'missing');
+		const service = TestBed.inject(ScannerService);
+		service.onCamerasFound([camera('front')]);
+		service.onDeviceChange(camera('front'));
+		service.selectInitialDevice();
+		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('front');
+		service.onDeviceSelectChange({ detail: { value: 'unknown' } });
+		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('front');
+		expect(localStorage.getItem(preferenceKey)).toBe('missing');
+	});
+
+	it('works without persistent storage and retains the choice for this session', async () => {
+		vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+			throw new Error('blocked');
+		});
+		vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+			throw new Error('blocked');
+		});
+		const service = TestBed.inject(ScannerService);
+		service.onCamerasFound([camera('front'), camera('rear')]);
+		service.onDeviceSelectChange({ detail: { value: 'rear' } });
+		service.setCurrentDevice(undefined);
+		service.onDeviceChange(camera('front'));
+		service.selectInitialDevice();
+		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('rear');
+	});
+
+	it('handles an empty device list without forgetting the preferred camera', async () => {
+		localStorage.setItem(preferenceKey, 'rear');
+		const service = TestBed.inject(ScannerService);
+		service.onCamerasFound([]);
+		service.selectInitialDevice();
+		await expect(firstValueFrom(service.$deviceId)).resolves.toBe('');
+		expect(localStorage.getItem(preferenceKey)).toBe('rear');
 	});
 
 	it('shows scan errors and clears the selected device', async () => {

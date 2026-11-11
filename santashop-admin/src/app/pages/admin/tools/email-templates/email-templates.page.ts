@@ -1,6 +1,7 @@
+import { currentDeliveryTemplateKeys } from './email-template-status';
 import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
 	IonBadge,
@@ -46,6 +47,16 @@ export class EmailTemplatesPage {
 
 	public readonly templates = signal<EmailTemplateSummary[]>([]);
 	public readonly isLoading = signal(true);
+	public readonly currentKeys = computed(() =>
+		currentDeliveryTemplateKeys(this.templates()),
+	);
+
+	public deliveryStateLabel(template: EmailTemplateSummary): string {
+		if (!template.publishedRevisionId) return 'Draft only';
+		return this.currentKeys().has(template.key)
+			? 'Current delivery'
+			: 'Older published';
+	}
 
 	constructor() {
 		addIcons({ add });
@@ -61,10 +72,6 @@ export class EmailTemplatesPage {
 
 	public async createTemplate(): Promise<void> {
 		await this.router.navigate(['/admin/email-templates/create']);
-	}
-
-	public publishStateLabel(template: EmailTemplateSummary): string {
-		return template.publishedRevisionId ? 'Published' : 'Draft only';
 	}
 
 	public deliveryProfileLabel(template: EmailTemplateSummary): string {

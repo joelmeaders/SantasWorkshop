@@ -1,3 +1,7 @@
+import {
+	readAdminPreference,
+	saveAdminPreference,
+} from '../../../../shared/preferences/admin-theme.service';
 import { createAdminAlert } from '../../../../shared/preferences/admin-overlays';
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { AlertController } from '@ionic/angular/standalone';
@@ -31,9 +35,8 @@ export class ScannerService implements OnDestroy {
 		shareReplay(1),
 	);
 
-	private readonly previousDevice = new BehaviorSubject<
-		MediaDeviceInfo | undefined
-	>(undefined);
+	private readonly cameraPreferenceKey = 'santashop-admin-scanner-camera';
+	private preferredDeviceId = readAdminPreference(this.cameraPreferenceKey);
 
 	private readonly currentDevice = new BehaviorSubject<
 		MediaDeviceInfo | undefined
@@ -61,10 +64,6 @@ export class ScannerService implements OnDestroy {
 	}
 
 	public setCurrentDevice(device: MediaDeviceInfo | undefined): void {
-		if (!device && this.currentDevice.getValue()) {
-			this.previousDevice.next(this.currentDevice.getValue());
-		}
-
 		this.currentDevice.next(device);
 	}
 
@@ -72,11 +71,24 @@ export class ScannerService implements OnDestroy {
 		this.availableDevices.next(devices);
 	}
 
+	public selectInitialDevice(): void {
+		// Select before starting a stream, so a broken default camera cannot override the preference.
+		const preferred = this.availableDevices
+			.getValue()
+			?.find((device) => device.deviceId === this.preferredDeviceId);
+		const devices = this.availableDevices.getValue() ?? [];
+		const fallback =
+			devices.find((device) =>
+				/back|trás|rear|traseira|environment|ambiente/i.test(device.label),
+			) ?? devices.at(-1);
+		this.setCurrentDevice(preferred ?? fallback);
+	}
+
 	public onDeviceSelectChange($event: { detail?: { value?: string } }): void {
 		// deviceId
 		const deviceId = $event?.detail?.value;
 
-		if (deviceId === undefined || null) {
+		if (deviceId == null) {
 			return;
 		}
 
@@ -89,6 +101,12 @@ export class ScannerService implements OnDestroy {
 		const devices = this.availableDevices.getValue();
 		const device = devices?.find((d) => d.deviceId === deviceId);
 
+		if (!device && deviceId !== '') return;
+		if (device) {
+			this.preferredDeviceId = device.deviceId;
+			// Store only the opaque ID locally, never camera labels or scanned data.
+			saveAdminPreference(this.cameraPreferenceKey, device.deviceId);
+		}
 		this.setCurrentDevice(device);
 	}
 

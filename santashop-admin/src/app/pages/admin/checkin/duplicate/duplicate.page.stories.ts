@@ -18,7 +18,7 @@ const meta = {
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		await expect(await canvas.findByRole('alert')).toHaveTextContent(
-			'Suspicious duplicate scan',
+			'This ticket was already used.',
 		);
 		await expect(canvas.getByText('Do not issue tickets or coupons.')).toBeVisible();
 		await expect(canvas.getByRole('list', { name: 'Blocked scan timeline' })).toBeVisible();

@@ -28,8 +28,14 @@
 			<ion-list>
 				@for (template of templates; track template.key) {
 					<ion-item
+						[class.older-template]="
+							!currentKeys().has(template.key)
+						"
 						detail
 						button
+						[attr.aria-describedby]="
+							'delivery-state-' + template.key
+						"
 						[attr.aria-label]="
 							'Edit template {{name}}'
 								| adminText: { name: template.displayName }
@@ -55,13 +61,20 @@
 											| adminText
 									}}
 								</ion-badge>
-								<ion-badge color="primary">
+								<ion-badge
+									[id]="'delivery-state-' + template.key"
+									[color]="
+										currentKeys().has(template.key)
+											? 'success'
+											: 'medium'
+									"
+								>
 									{{
-										publishStateLabel(template) | adminText
+										deliveryStateLabel(template) | adminText
 									}}
 								</ion-badge>
 								<ion-badge color="secondary">
-									{{ 'Current r{{v0}}' | adminText: {v0:
+									{{ 'Saved r{{v0}}' | adminText: {v0:
 									(template.currentRevisionNumber ?? 0)} }}
 								</ion-badge>
 								@if (template.publishedRevisionNumber) {

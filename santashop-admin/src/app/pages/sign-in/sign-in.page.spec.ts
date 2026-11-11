@@ -1,3 +1,4 @@
+import { userEvent } from 'vitest/browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SignInPage } from './sign-in.page';
@@ -62,6 +63,80 @@ describe('SignInPage', () => {
 			'Email Address',
 			'Password',
 		]);
+	});
+
+	it('submits once with Enter from the real password input', async () => {
+		login.mockResolvedValue(undefined);
+		vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const email = await (
+			fixture.nativeElement.querySelector(
+				'#adminSignInEmail',
+			) as HTMLIonInputElement
+		).getInputElement();
+		const password = await (
+			fixture.nativeElement.querySelector(
+				'#adminSignInPassword',
+			) as HTMLIonInputElement
+		).getInputElement();
+		await userEvent.fill(email, 'staff@example.test');
+		await userEvent.fill(password, 'secret');
+		await userEvent.keyboard('{Enter}');
+		await fixture.whenStable();
+		expect(login).toHaveBeenCalledOnce();
+	});
+
+	it('submits once by clicking the login button', async () => {
+		login.mockResolvedValue(undefined);
+		vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+		const email = await (
+			fixture.nativeElement.querySelector(
+				'#adminSignInEmail',
+			) as HTMLIonInputElement
+		).getInputElement();
+		const password = await (
+			fixture.nativeElement.querySelector(
+				'#adminSignInPassword',
+			) as HTMLIonInputElement
+		).getInputElement();
+		await userEvent.fill(email, 'staff@example.test');
+		await userEvent.fill(password, 'secret');
+		await userEvent.click(
+			fixture.nativeElement.querySelector('#adminSignInButton'),
+		);
+		await fixture.whenStable();
+		expect(login).toHaveBeenCalledOnce();
+	});
+
+	it('does not submit invalid or composing password input', async () => {
+		const password = await (
+			fixture.nativeElement.querySelector(
+				'#adminSignInPassword',
+			) as HTMLIonInputElement
+		).getInputElement();
+		await userEvent.click(password);
+		await userEvent.keyboard('{Enter}');
+		expect(login).not.toHaveBeenCalled();
+		const submit = vi.spyOn(
+			fixture.nativeElement.querySelector('form') as HTMLFormElement,
+			'requestSubmit',
+		);
+		password.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: 'Enter',
+				isComposing: true,
+				bubbles: true,
+				composed: true,
+			}),
+		);
+		password.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: 'Enter',
+				keyCode: 229,
+				bubbles: true,
+				composed: true,
+			}),
+		);
+		expect(submit).not.toHaveBeenCalled();
 	});
 
 	it('authenticates a valid staff user and opens the admin landing route', async () => {

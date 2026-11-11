@@ -78,6 +78,14 @@ export class SignInPage {
 
 	protected readonly isSubmitting = signal(false);
 
+	public submitFromPassword(event: Event): void {
+		const key = event as KeyboardEvent;
+		// Ionic's shadow-DOM submit button does not provide native implicit submission.
+		key.preventDefault();
+		if (key.isComposing || key.keyCode === 229) return;
+		(event.target as HTMLElement).closest('form')?.requestSubmit();
+	}
+
 	public async login(): Promise<void> {
 		if (this.form.invalid || this.isSubmitting()) return;
 

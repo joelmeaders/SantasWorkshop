@@ -313,7 +313,7 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await manualAlert
 			.getByRole('button', { name: 'OK', exact: true })
 			.click();
-		await expect(page.getByText('Suspicious duplicate scan')).toBeVisible();
+		await expect(page.getByText('This ticket was already used.')).toBeVisible();
 
 		const [adminToken, checkinToken] = await Promise.all([
 			getFirestoreIdToken(request, admin),

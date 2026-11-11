@@ -1,4 +1,7 @@
 {
+	"Current delivery": "Current delivery",
+	"Older published": "Older published",
+	"Saved r{{v0}}": "Saved r{{v0}}",
 	" Shoppers": " Shoppers",
 	" Spanish messages also use this template when no Spanish template is published.": " Spanish messages also use this template when no Spanish template is published.",
 	"· {{v0}} selected": "· {{v0}} selected",
@@ -887,5 +890,18 @@
 	"Correct the registration details and submit again.": "Correct the registration details and submit again.",
 	"Failed email queue ID (optional)": "Failed email queue ID (optional)",
 	"Recovery queued for email job {{v0}}.": "Recovery queued for email job {{v0}}.",
-	"I reviewed the uncertain delivery and accept that recovery can send a duplicate.": "I reviewed the uncertain delivery and accept that recovery can send a duplicate."
+	"I reviewed the uncertain delivery and accept that recovery can send a duplicate.": "I reviewed the uncertain delivery and accept that recovery can send a duplicate.",
+	"Review the registration details. Check each child’s name and date of birth against their documents. Add, edit, or remove children if needed before checking in.": "Review the registration details. Check each child’s name and date of birth against their documents. Add, edit, or remove children if needed before checking in.",
+	"No registration is open.": "No registration is open.",
+	"Go back to scan a ticket or enter a code.": "Go back to scan a ticket or enter a code.",
+	"This ticket was already used.": "This ticket was already used.",
+	"No staff accounts yet. Select Add user to create one.": "No staff accounts yet. Select Add user to create one.",
+	"Choose what information to insert for each placeholder, such as the shopper’s name.": "Choose what information to insert for each placeholder, such as the shopper’s name.",
+	"Notify the waiting list": "Notify the waiting list",
+	"Who may receive this email": "Who may receive this email",
+	"Email queued for sending": "Email queued for sending",
+	"The registration email is queued for {{v0}}. Delivery has not yet been confirmed.": "The registration email is queued for {{v0}}. Delivery has not yet been confirmed.",
+	"Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.": "Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.",
+	"Registration is incomplete": "Registration is incomplete",
+	"Registration not found": "Registration not found"
 }

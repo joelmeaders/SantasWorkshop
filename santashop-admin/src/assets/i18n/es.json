@@ -903,5 +903,16 @@
 	"The registration email is queued for {{v0}}. Delivery has not yet been confirmed.": "El correo de inscripción está en cola para {{v0}}. La entrega aún no se ha confirmado.",
 	"Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.": "La recuperación del envío {{v0}} está en cola. La entrega aún no se ha confirmado.",
 	"Registration is incomplete": "La inscripción está incompleta",
-	"Registration not found": "No se encontró la inscripción"
+	"Registration not found": "No se encontró la inscripción",
+	"Reset your password": "Restablezca su contraseña",
+	"Enter the email address you use to sign in to the admin app.": "Ingrese la dirección de correo electrónico que usa para iniciar sesión en la aplicación de administración.",
+	"Enter a valid email address.": "Ingrese una dirección de correo electrónico válida.",
+	"Requesting reset...": "Solicitando restablecimiento...",
+	"Send reset instructions": "Enviar instrucciones",
+	"If an account exists for this email address, you will receive password reset instructions. Check your inbox and spam folder.": "Si existe una cuenta con esta dirección de correo electrónico, recibirá instrucciones para restablecer la contraseña. Revise su bandeja de entrada y la carpeta de correo no deseado.",
+	"After resetting your password, return here to sign in to the admin app.": "Después de restablecer la contraseña, vuelva aquí para iniciar sesión en la aplicación de administración.",
+	"Unable to request a password reset right now. Check your connection and try again later.": "No se puede solicitar el restablecimiento de la contraseña en este momento. Revise su conexión e inténtelo más tarde.",
+	"Back to sign in": "Volver a iniciar sesión",
+	"Forgot your password?": "¿Olvidó su contraseña?",
+	"Use a different email": "Usar otro correo electrónico"
 }

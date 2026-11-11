@@ -12,7 +12,7 @@ import {
 	Validators,
 	ReactiveFormsModule,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@santashop/core/admin';
 import { config } from '../../../config';
 import { HeaderComponent } from '../../shared/components/header/header.component';
@@ -40,6 +40,7 @@ import {
 	styleUrls: ['./sign-in.page.scss'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
+		RouterLink,
 		AdminTextPipe,
 		HeaderComponent,
 		ReactiveFormsModule,

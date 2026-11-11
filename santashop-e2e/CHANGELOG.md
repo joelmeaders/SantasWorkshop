@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.28] - 2026-11-11
+
+### Added
+
+- Verify admin self-service password recovery with emulator reset completion, maintenance-mode access, and account-private unknown-email confirmation.
+
 ## [2026.10.27] - 2026-11-11
 
 ### Changed

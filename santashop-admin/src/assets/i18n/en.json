@@ -903,5 +903,16 @@
 	"The registration email is queued for {{v0}}. Delivery has not yet been confirmed.": "The registration email is queued for {{v0}}. Delivery has not yet been confirmed.",
 	"Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.": "Recovery is queued for email job {{v0}}. Delivery has not yet been confirmed.",
 	"Registration is incomplete": "Registration is incomplete",
-	"Registration not found": "Registration not found"
+	"Registration not found": "Registration not found",
+	"Reset your password": "Reset your password",
+	"Enter the email address you use to sign in to the admin app.": "Enter the email address you use to sign in to the admin app.",
+	"Enter a valid email address.": "Enter a valid email address.",
+	"Requesting reset...": "Requesting reset...",
+	"Send reset instructions": "Send reset instructions",
+	"If an account exists for this email address, you will receive password reset instructions. Check your inbox and spam folder.": "If an account exists for this email address, you will receive password reset instructions. Check your inbox and spam folder.",
+	"After resetting your password, return here to sign in to the admin app.": "After resetting your password, return here to sign in to the admin app.",
+	"Unable to request a password reset right now. Check your connection and try again later.": "Unable to request a password reset right now. Check your connection and try again later.",
+	"Back to sign in": "Back to sign in",
+	"Forgot your password?": "Forgot your password?",
+	"Use a different email": "Use a different email"
 }

@@ -613,6 +613,7 @@ const createProviders = (
 					isCheckin$: of(true),
 					roles$: of(['admin']),
 					login: fn(async (): Promise<object> => ({})),
+					resetPassword: fn(async (): Promise<void> => undefined),
 					logout: fn(async (): Promise<void> => undefined),
 					reauthenticate: fn(async (): Promise<void> => undefined),
 					getCurrentUserToken: fn(async () => ({

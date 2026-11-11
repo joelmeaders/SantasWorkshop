@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.10.30] - 2026-11-11
+
+### Added
+
+- Add bilingual self-service admin password recovery using the existing rate-limited, account-private reset endpoint, available without sign-in or registration access.
+
 ## [2026.10.29] - 2026-11-11
 
 ### Fixed

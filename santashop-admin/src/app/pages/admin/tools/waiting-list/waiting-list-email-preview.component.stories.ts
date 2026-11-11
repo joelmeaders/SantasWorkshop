@@ -26,12 +26,20 @@ const fixture = (
 	},
 	play: async ({ args }): Promise<void> => {
 		const doc = new DOMParser().parseFromString(args.html, 'text/html');
-		await expect(doc.querySelector('a')?.getAttribute('href')).toBe(
+		const registrationLink = Array.from(doc.querySelectorAll('a')).find(
+			(link) =>
+				link.textContent?.trim() ===
+				(language === 'es'
+					? 'Elegir fecha y hora'
+					: 'Choose a date and time'),
+		);
+		await expect(registrationLink?.getAttribute('href')).toBe(
 			'https://example.com/pre-registration/overview',
 		);
 		const links = Array.from(doc.querySelectorAll('a'), (link) =>
 			link.getAttribute('href'),
 		);
+		await expect(links).toContain('https://www.rtd-denver.com/');
 		await expect(links).toContain(
 			'https://example.com/?mode=sign-in&waitingList=manage',
 		);

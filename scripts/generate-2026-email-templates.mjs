@@ -65,17 +65,22 @@ const copies = {
 		items: [
 			'This ticket and QR code',
 			'Your photo ID',
-			'Proof of each child’s age',
+			'Proof of each child’s age, such as a birth certificate or a school or medical form. Bring a copy or photo of the birth certificate, not the original.',
 		],
 		punctual:
-			'Please arrive at your scheduled time. Need a different day or time? Update your registration in advance so we know when to welcome you.',
+			'Please arrive at your scheduled time. You can view available appointments before changing your appointment. Shoppers cannot cancel their own appointments.',
+		alternate:
+			'If another adult shops for your family, they must bring your QR code, their own photo ID, and proof of each child’s age.',
+		account:
+			'Your username is the email address this message was sent to. We do not have access to your password.',
+		transit: 'Plan your trip with RTD',
 		manage: 'View or change registration',
 		register: 'Register again',
 		again: 'If you would still like to attend, sign in and complete a new registration. You’ll receive a new ticket after registering.',
 		venue: 'Shop Venue',
 		venueNote: '1812 35th Street, Denver, CO 80216',
 		directions:
-			'At the corner of Brighton Blvd and 35th Street. Parking is on the west side, off Brighton Blvd.',
+			'At the corner of Brighton Blvd and 35th Street. Parking is free on the west side, off Brighton Blvd.',
 		opening:
 			'Shop dates: December 11, 12, 14, and 15, 2026. Please arrive at your scheduled appointment time.',
 		map: 'View Shop Venue on map',
@@ -127,17 +132,22 @@ const copies = {
 		items: [
 			'Este boleto y código QR',
 			'Tu identificación con foto',
-			'Un comprobante de la edad de cada niño',
+			'Un comprobante de la edad de cada niño, como un acta de nacimiento o un formulario escolar o médico. Trae una copia o foto del acta de nacimiento, no el original.',
 		],
 		punctual:
-			'Por favor, llega a la hora de tu cita. ¿Necesitas otro día u otra hora? Cambia tu inscripción con anticipación para que sepamos cuándo recibirte.',
+			'Por favor, llega a la hora de tu cita. Puedes ver las citas disponibles antes de cambiar tu cita. Los compradores no pueden cancelar sus propias citas.',
+		alternate:
+			'Si otro adulto hace las compras para tu familia, debe traer tu código QR, su propia identificación con foto y un comprobante de la edad de cada niño.',
+		account:
+			'Tu nombre de usuario es la dirección de correo electrónico a la que se envió este mensaje. No tenemos acceso a tu contraseña.',
+		transit: 'Planifica tu viaje con RTD',
 		manage: 'Ver o cambiar mi inscripción',
 		register: 'Inscribirme de nuevo',
 		again: 'Si todavía deseas asistir, inicia sesión y completa una nueva inscripción. Recibirás un nuevo boleto después de inscribirte.',
 		venue: 'Lugar de la tienda',
 		venueNote: '1812 35th Street, Denver, CO 80216',
 		directions:
-			'En la esquina de Brighton Blvd y 35th Street. El estacionamiento está en el lado oeste, con entrada por Brighton Blvd.',
+			'En la esquina de Brighton Blvd y 35th Street. El estacionamiento es gratuito en el lado oeste, con entrada por Brighton Blvd.',
 		opening:
 			'Fechas de la tienda: 11, 12, 14 y 15 de diciembre de 2026. Llega a la hora de tu cita programada.',
 		map: 'Ver el lugar de la tienda en el mapa',
@@ -195,11 +205,11 @@ for (const language of ['en', 'es']) {
 			? ''
 			: `<tr><td align="center" style="padding:28px 24px;background:#ffffff;border-bottom:2px dashed #ddccb3">${heading(c.ticket)}${paragraph(c.ticketHelp)}<img src="{{qrCodeUrl}}" width="432" height="432" alt="${c.qrAlt}" style="display:block;width:100%;height:auto;max-width:432px;margin:20px auto;background:#fff;color:#243c34;font-size:14px"><p style="font-size:11px;letter-spacing:2px;margin:12px 0 8px;color:#53645d">${c.code}</p><p style="margin:0;color:#8e233c;font:700 28px/1.4 'Courier New',monospace;letter-spacing:3px">{{code}}</p></td></tr>`;
 		const body = cancelled
-			? `${paragraph(c.again)}${button(c.register, app)}`
-			: `${heading(c.bring)}<ol style="padding-left:24px;margin:0 0 24px;font-size:16px;line-height:1.9">${c.items.map((item) => `<li>${item}</li>`).join('')}</ol>${paragraph(c.punctual)}${button(c.manage, app)}`;
+			? `${paragraph(c.again)}${paragraph(c.account)}${button(c.register, app)}`
+			: `${heading(c.bring)}<ol style="padding-left:24px;margin:0 0 24px;font-size:16px;line-height:1.9">${c.items.map((item) => `<li>${item}</li>`).join('')}</ol>${paragraph(c.alternate)}${paragraph(c.punctual)}${paragraph(c.account)}${button(c.manage, app)}`;
 		const venue = cancelled
 			? ''
-			: `<tr><td class="pad" style="padding:28px 36px;background:#f6f0e6">${heading(c.venue)}${paragraph(c.venueNote)}${paragraph(c.directions)}${paragraph(c.opening)}<a href="${map}" style="color:#155344;font-weight:bold;line-height:1.6">${c.map}</a></td></tr>`;
+			: `<tr><td class="pad" style="padding:28px 36px;background:#f6f0e6">${heading(c.venue)}${paragraph(c.venueNote)}${paragraph(c.directions)}${paragraph(c.opening)}<a href="${map}" style="color:#155344;font-weight:bold;line-height:1.6">${c.map}</a><br><a href="https://www.rtd-denver.com/" style="color:#155344;font-weight:bold;line-height:1.6">${c.transit}</a></td></tr>`;
 		const html = `<!doctype html>
 <html lang="${language}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${copy.subject}</title>
 <style>@media only screen and (max-width:620px){.shell{width:100%!important}.pad{padding-left:22px!important;padding-right:22px!important}.hero-title{font-size:32px!important} }</style></head>
@@ -221,11 +231,18 @@ ${ticket}<tr><td class="pad" style="padding:32px 36px">${body}</td></tr>${venue}
 			`${cancelled ? c.previous : c.appointment}\n{{dateTime}}\n${c.timezone}`,
 			cancelled
 				? c.again
-				: `${c.ticket}\n${c.code}: {{code}}\n{{qrCodeUrl}}\n\n${c.bring}\n${c.items.map((item) => '- ' + item).join('\n')}\n\n${c.punctual}`,
+				: `${c.ticket}\n${c.code}: {{code}}\n{{qrCodeUrl}}\n\n${c.bring}\n${c.items.map((item) => '- ' + item).join('\n')}\n\n${c.alternate}\n\n${c.punctual}`,
+			c.account,
 			`${cancelled ? c.register : c.manage}: ${app}`,
 			...(cancelled
 				? []
-				: [c.venueNote, c.directions, c.opening, c.map + ': ' + map]),
+				: [
+						c.venueNote,
+						c.directions,
+						c.opening,
+						c.map + ': ' + map,
+						c.transit + ': https://www.rtd-denver.com/',
+					]),
 			c.faqButton + ': ' + faq,
 			c.contact + ': ' + facebook,
 			c.closing + '\n' + c.team,

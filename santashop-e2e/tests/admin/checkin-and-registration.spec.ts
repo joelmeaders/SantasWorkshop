@@ -81,7 +81,7 @@ test.describe('check-in and staff registration operations', () => {
 		await alert.getByRole('button', { name: 'OK', exact: true }).click();
 		await expect(page).toHaveURL(/\/admin\/checkin\/review$/);
 		await expect(
-			page.getByText('Review all registration information.'),
+			page.getByText('Review the registration details.'),
 		).toBeVisible();
 		await expect(
 			page.getByText('Test Child', { exact: true }),

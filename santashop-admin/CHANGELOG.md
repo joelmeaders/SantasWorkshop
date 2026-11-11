@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2026.10.27] - 2026-11-10
+
+### Changed
+
+- Clarify English and Spanish shopper emails with age-proof examples, birth-certificate copy/photo guidance, alternate-adult requirements, free parking, and RTD trip information.
+- Explain email-address sign-in, password privacy, appointment availability preview, and the absence of shopper self-cancellation without changing runtime fields or cancellation semantics.
+- Assert registration and RTD links independently in email preview stories and refresh reviewed local and hosted Windows waiting-list preview baselines.
+
 ## [2026.10.26] - 2026-10-26
 
 ### Fixed

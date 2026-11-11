@@ -96,3 +96,76 @@ for (const filename of filenames) {
 		}
 	});
 }
+for (const filename of filenames) {
+	const { template } = JSON.parse(
+		readFileSync(new URL(filename, directory), 'utf8'),
+	);
+	test(`${filename}: shopper guidance matches account and visit rules`, () => {
+		const english = template.language === 'en';
+		const cancellation =
+			template.deliveryProfile === 'registration-cancellation';
+		const waitingList =
+			template.deliveryProfile === 'waiting-list-capacity';
+		for (const content of [template.html, template.textPart]) {
+			assert.match(
+				content,
+				english
+					? /Your username is the email address this message was sent to/
+					: /Tu nombre de usuario es la dirección de correo electrónico a la que se envió este mensaje/,
+			);
+			assert.match(
+				content,
+				english
+					? /We do not have access to your password/
+					: /No tenemos acceso a tu contraseña/,
+			);
+			assert.doesNotMatch(content, /\{\{(?:email|username|password)\}\}/);
+			if (cancellation) {
+				assert.doesNotMatch(
+					content,
+					/rtd-denver|Parking is free|estacionamiento es gratuito|another adult|otro adulto/,
+				);
+			} else {
+				assert.match(content, /https:\/\/www\.rtd-denver\.com\//);
+				assert.match(
+					content,
+					english
+						? /Parking is free/
+						: /El estacionamiento es gratuito/,
+				);
+				if (!waitingList) {
+					assert.match(
+						content,
+						english
+							? /such as a birth certificate or a school or medical form/
+							: /como un acta de nacimiento o un formulario escolar o médico/,
+					);
+					assert.match(
+						content,
+						english
+							? /copy or photo of the birth certificate, not the original/
+							: /copia o foto del acta de nacimiento, no el original/,
+					);
+					assert.match(
+						content,
+						english
+							? /another adult.*your QR code, their own photo ID, and proof of each child’s age/
+							: /otro adulto.*tu código QR, su propia identificación con foto y un comprobante de la edad de cada niño/,
+					);
+					assert.match(
+						content,
+						english
+							? /view available appointments before changing your appointment/
+							: /ver las citas disponibles antes de cambiar tu cita/,
+					);
+					assert.match(
+						content,
+						english
+							? /Shoppers cannot cancel their own appointments/
+							: /Los compradores no pueden cancelar sus propias citas/,
+					);
+				}
+			}
+		}
+	});
+}

@@ -19,7 +19,7 @@ template; test sink mode records the revision without calling AWS. An older publ
 ## Seasonal review is required
 
 The 2026 starters use December 11, 12, 14, and 15, 2026 at 1812 35th Street,
-Denver, CO 80216, at Brighton Blvd and 35th Street. Parking is on the west side,
+Denver, CO 80216, at Brighton Blvd and 35th Street. Parking is free on the west side,
 off Brighton Blvd. Confirmation and reminder emails show the customer's runtime
 appointment time; these dates do not establish general shopping hours. Waiting-list
 emails require the customer to choose an available appointment before attending.
@@ -28,6 +28,18 @@ Confirm each season's venue, dates, eligibility copy, and both language versions
 before publishing. Do not carry prior-season details forward without review.
 
 Before publishing a starter, verify the seasonal information in both HTML and plain text. Review both languages, mark the seasonal review complete, then save that revision. Editing content clears review approval. The backend rejects publication of unreviewed seasonal revisions and revisions that still contain the supplied draft markers. Cancellation also requires review, but the cancellation message contains no active ticket, QR code, venue invitation, or shop dates. Its registration link invites the customer to register again without promising availability. The customer's QR artifact remains stable for later re-registration.
+
+## Shopper guidance
+
+Confirmation and reminder starters explain accepted age-proof examples, including
+copies or photos of birth certificates rather than originals. Another adult shopping
+for the family must bring the family's QR code, their own photo ID, and each child's
+age proof. Shoppers can view availability before changing an appointment but cannot
+cancel their own appointments. Non-cancellation templates link to RTD trip information.
+
+Sign-in guidance identifies the recipient email address as the username and explains
+that the Shop does not have access to passwords. Do not add password or account-email
+placeholders to the template mappings.
 
 ## Customer language and delivery
 

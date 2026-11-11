@@ -120,7 +120,7 @@ test.describe('admin refresh navigation and recovery', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await page.locator('ion-item[routerLink="../users"]').click();
 		await expect(
-			page.getByText('No elevated user accounts yet.', { exact: false }),
+			page.getByText('No staff accounts yet.', { exact: false }),
 		).toBeVisible();
 		const documentStarted = await page.evaluate(
 			() => performance.timeOrigin,

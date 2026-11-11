@@ -19,14 +19,14 @@ test.describe('admin staff user management', () => {
 		await page.goto('/admin/users');
 		await expect(
 			page.getByText(
-				'No elevated user accounts yet. Use the button below to add one.',
+				'No staff accounts yet. Select Add user to create one.',
 			),
 		).toBeVisible({ timeout: 15000 });
 
 		const otherView = await page.context().newPage();
 		await otherView.goto('/admin/users');
 		await expect(
-			otherView.getByText('No elevated user accounts yet.', {
+			otherView.getByText('No staff accounts yet.', {
 				exact: false,
 			}),
 		).toBeVisible();

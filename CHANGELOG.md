@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.10.31] - 2026-11-14
+
+### Fixed
+
+- Show white shopper sign-in fields and keep the floating email label visible on password reset.
+
 ## [2026.10.30] - 2026-11-11
 
 ### Added

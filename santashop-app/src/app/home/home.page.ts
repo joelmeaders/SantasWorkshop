@@ -24,8 +24,6 @@ import {
 	IonCardHeader,
 	IonCardTitle,
 	IonInput,
-	IonItem,
-	IonList,
 	IonText,
 	LoadingController,
 } from '@ionic/angular/standalone';
@@ -62,8 +60,6 @@ import { map } from 'rxjs/operators';
 		IonCardHeader,
 		IonCardTitle,
 		IonInput,
-		IonItem,
-		IonList,
 		IonText,
 		LanguageToggleComponent,
 		RouterLink,

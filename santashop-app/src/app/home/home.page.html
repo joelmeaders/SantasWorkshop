@@ -78,14 +78,14 @@
 					<ion-card-header><ion-card-title>{{ "COMMON.SIGN_IN" | translate }}</ion-card-title></ion-card-header>
 					<ion-card-content>
 						<form [formGroup]="signInForm" (ngSubmit)="onSignIn()" novalidate>
-							<ion-list lines="none">
-								<ion-item><ion-input id="signInEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" formControlName="emailAddress" /></ion-item>
-								<ion-item><ion-input #signInPasswordInput id="signInPassword" fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password" autocapitalize="off" [spellcheck]="false">
+							<div class="entry-fields">
+								<ion-input id="signInEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" formControlName="emailAddress" />
+								<ion-input #signInPasswordInput id="signInPassword" fill="outline" [label]="'COMMON.PASSWORD' | translate" labelPlacement="floating" type="password" autocomplete="current-password" formControlName="password" autocapitalize="off" [spellcheck]="false">
 									<button slot="end" type="button" class="password-toggle" (pointerdown)="$event.preventDefault()" (click)="signInPasswordInput.type = signInPasswordInput.type === 'password' ? 'text' : 'password'" [attr.aria-label]="(signInPasswordInput.type === 'password' ? 'COMMON.SHOW_PASSWORD' : 'COMMON.HIDE_PASSWORD') | translate">
 										{{ (signInPasswordInput.type === 'password' ? 'COMMON.SHOW' : 'COMMON.HIDE') | translate }}
 									</button>
-								</ion-input></ion-item>
-							</ion-list>
+								</ion-input>
+							</div>
 							<ion-button id="signInButton" type="submit" expand="block" size="large" color="xmasred" [disabled]="signInForm.invalid">{{ "COMMON.SIGN_IN" | translate }}</ion-button>
 						</form>
 						<ion-button fill="clear" expand="block" [routerLink]="['/']" [queryParams]="{ mode: 'reset' }">{{ "SIGNIN.FORGOT_PASSWORD" | translate }}</ion-button>
@@ -101,7 +101,9 @@
 					<ion-card-content>
 						@if (resetEmailSent() === false) {
 						<p>{{ "FORGOTPASS.INSTRUCTIONS" | translate }}</p>
-						<ion-item><ion-input id="resetPasswordEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" /></ion-item>
+						<div class="entry-fields">
+							<ion-input id="resetPasswordEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" />
+						</div>
 						<ion-button id="resetPasswordButton" expand="block" color="xmasred" [disabled]="resetEmail.invalid" (click)="resetPassword()">{{ "FORGOTPASS.RESET_PASSWORD" | translate }}</ion-button>
 						} @else {
 						<ion-text role="status" aria-live="polite"><h2>{{ "FORGOTPASS.EMAIL_SENT" | translate }}</h2><p>{{ "FORGOTPASS.EMAIL_SENT_2" | translate }}</p></ion-text>

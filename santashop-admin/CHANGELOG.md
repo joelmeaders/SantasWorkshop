@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.14] - 2026-11-14
+
+### Changed
+
+- Align the admin app version with the November 14 release.
+
 ## [2026.10.29] - 2026-11-11
 
 ### Added

@@ -4,7 +4,7 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
-## [2026.10.31] - 2026-11-14
+## [2026.11.14] - 2026-11-14
 
 ### Fixed
 

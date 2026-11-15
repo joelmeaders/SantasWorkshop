@@ -7,7 +7,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
-## [2026.10.31] - 2026-11-14
+## [2026.11.14] - 2026-11-14
 
 ### Fixed
 
@@ -16,6 +16,10 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 - Wait for initial settings to settle before showing a shopper closure notice.
 - Use a direction-neutral alert icon in the final registration step reminder.
 - Give appointment times a white background while keeping the date headers tan.
+
+### Changed
+
+- Align the shopper and admin app versions with the November 14 release.
 
 ## [2026.10.30] - 2026-11-11
 

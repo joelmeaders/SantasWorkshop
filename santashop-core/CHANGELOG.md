@@ -2,7 +2,7 @@
 
 All notable changes to the core library will be documented in this file.
 
-## [2026.10.31] - 2026-11-14
+## [2026.11.14] - 2026-11-14
 
 ### Fixed
 

@@ -30,6 +30,10 @@ ion-accordion-group {
 	overflow: hidden;
 }
 
+ion-accordion > ion-list[slot='content'] {
+	background: var(--santa-snow);
+}
+
 .schedule-loading {
 	align-items: center;
 	color: var(--santa-muted);

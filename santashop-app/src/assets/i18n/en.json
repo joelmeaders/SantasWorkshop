@@ -218,8 +218,10 @@
 		"RESET_YOUR_PASSWORD": "Forgot your Password?",
 		"INSTRUCTIONS": "Enter your registered email to reset your password.",
 		"RESET_PASSWORD": "Reset password",
+		"SENDING": "Sending request…",
 		"EMAIL_SENT": "Password reset request received",
-		"EMAIL_SENT_2": "If an account uses this email address, reset instructions may arrive shortly.",
+		"EMAIL_SENT_2": "If an account uses this email address, an email with reset instructions will be sent shortly.",
+		"CHECK_SPAM": "Check your spam folder if you don't see it in a few minutes.",
 		"RESET_PASSWORD_AGAIN": "Reset password again",
 		"UNABLE_TO_RESET": "Unable to reset password",
 		"TRY_AGAIN": "We could not start password reset. Please try again later."

@@ -2,6 +2,12 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2026.11.14] - 2026-11-14
+
+### Fixed
+
+- Expose operational notices from one public configuration snapshot after initial settings loading settles.
+
 ## [2026.10.26] - 2026-10-26
 
 ### Changed

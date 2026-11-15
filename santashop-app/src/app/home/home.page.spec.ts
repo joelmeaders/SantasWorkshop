@@ -187,6 +187,8 @@ describe('HomePage', () => {
 		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'sign_in', outcome: 'failed', error_code: 'unknown' });
 		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'password_reset_request', outcome: 'failed', error_code: 'unknown' });
 
+		expect(component.isResettingPassword()).toBe(false);
+		expect(component.resetEmailSent()).toBe(false);
 		expect(errorHandler.handleError).toHaveBeenCalledTimes(2);
 		expect(errorHandler.handleError).toHaveBeenNthCalledWith(
 			1,
@@ -207,13 +209,29 @@ describe('HomePage', () => {
 		expect(loader.dismiss).toHaveBeenCalledOnce();
 	});
 
-	it('marks a successful reset request as sent and can start another request', async (): Promise<void> => {
+	it('shows password reset progress, skips duplicate requests, and confirms success', async (): Promise<void> => {
 		const authService = TestBed.inject(AuthService);
-		vi.spyOn(authService, 'resetPassword').mockResolvedValue(undefined);
+		let resolveRequest!: () => void;
+		const request = new Promise<void>((resolve) => { resolveRequest = resolve; });
+		const reset = vi.spyOn(authService, 'resetPassword').mockReturnValue(request);
+		queryParamMap$.next(convertToParamMap({ mode: 'reset' }));
 		component.resetEmail.setValue('parent@example.com');
 		const outcomes = vi.spyOn(TestBed.inject(AnalyticsWrapper), 'logEventWithParams');
 
+		const firstRequest = component.resetPassword();
 		await component.resetPassword();
+		fixture.detectChanges();
+		const button = fixture.nativeElement.querySelector(
+			'#resetPasswordButton',
+		) as HTMLIonButtonElement;
+		expect(button.disabled).toBe(true);
+		expect(button.querySelector('ion-spinner')).not.toBeNull();
+		expect(reset).toHaveBeenCalledOnce();
+		expect(component.resetEmailSent()).toBe(false);
+
+		resolveRequest();
+		await firstRequest;
+		expect(component.isResettingPassword()).toBe(false);
 		expect(outcomes).toHaveBeenCalledWith('workflow_action', { operation: 'password_reset_request', outcome: 'succeeded' });
 		await fixture.whenStable();
 

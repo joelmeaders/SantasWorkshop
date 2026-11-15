@@ -218,8 +218,10 @@
 		"RESET_YOUR_PASSWORD": "¿Olvidó su contraseña?",
 		"INSTRUCTIONS": "Ingrese su correo electrónico registrado para restablecer su contraseña.",
 		"RESET_PASSWORD": "Restablecer contraseña",
+		"SENDING": "Enviando solicitud…",
 		"EMAIL_SENT": "Solicitud de restablecimiento recibida",
-		"EMAIL_SENT_2": "Si una cuenta usa este correo electrónico, las instrucciones pueden llegar en breve.",
+		"EMAIL_SENT_2": "Si hay una cuenta asociada a este correo electrónico, recibirá en breve un mensaje con instrucciones para restablecer su contraseña.",
+		"CHECK_SPAM": "Si no recibe el mensaje en unos minutos, revise su carpeta de correo no deseado.",
 		"RESET_PASSWORD_AGAIN": "Restablecer contraseña de nuevo",
 		"UNABLE_TO_RESET": "No se pudo restablecer la contraseña",
 		"TRY_AGAIN": "No pudimos iniciar el restablecimiento de la contraseña. Inténtelo de nuevo más tarde."

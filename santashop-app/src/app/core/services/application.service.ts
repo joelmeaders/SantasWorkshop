@@ -1,11 +1,10 @@
 import { Injectable, inject, OnDestroy } from '@angular/core';
 import { ModalController } from '@ionic/angular/standalone';
-import { combineLatest, from, ReplaySubject, Subject } from 'rxjs';
+import { from, ReplaySubject, Subject } from 'rxjs';
 import {
 	distinctUntilChanged,
 	concatMap,
 	takeUntil,
-	tap,
 } from 'rxjs/operators';
 import { AppStateService } from '@santashop/core/customer';
 import {
@@ -39,33 +38,9 @@ export class ApplicationService implements OnDestroy {
 	 * Subscription that monitors app closure states and manages modals.
 	 * Auto-subscribes when the service is instantiated.
 	 */
-	public readonly appClosureSubscription = combineLatest([
-		this.appStateService.isMaintenanceModeEnabled$,
-		this.appStateService.shopClosedWeather$,
-		this.appStateService.isRegistrationEnabled$,
-	])
-		.pipe(
-			takeUntil(this.destroy$),
-			tap(([maintenance, weather, registration]) => {
-				if (maintenance) {
-					this.setModal('maintenance');
-					return;
-				}
-
-				if (weather) {
-					this.setModal('weather');
-					return;
-				}
-
-				if (!registration) {
-					this.setModal('registration-closed');
-					return;
-				}
-
-				this.setModal(undefined);
-			}),
-		)
-		.subscribe();
+	public readonly appClosureSubscription = this.appStateService.operationalNotice$
+		.pipe(takeUntil(this.destroy$))
+		.subscribe((mode) => this.setModal(mode));
 
 	/**
 	 * Subscription that manages modal display/dismissal based on current modal state.

@@ -1,5 +1,5 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject, combineLatest, of } from 'rxjs';
 import {
 	catchError,
 	distinctUntilChanged,
@@ -117,6 +117,22 @@ export class AppStateService implements OnDestroy {
 		);
 
 	// Public app-specific observables
+	/** Select the notice from a single resolved settings snapshot. */
+	public readonly operationalNotice$: Observable<
+		'maintenance' | 'weather' | 'registration-closed' | undefined
+	> = combineLatest([
+		this.publicParametersSource.startupSettled$ ?? of(undefined),
+		this.publicDoc$,
+	]).pipe(
+		map(([, settings]) => {
+			if (settings.maintenanceModeEnabled) return 'maintenance';
+			if (settings.weatherModeEnabled) return 'weather';
+			if (!settings.registrationEnabled) return 'registration-closed';
+			return undefined;
+		}),
+		distinctUntilChanged(),
+		takeUntil(this.destroy$),
+	);
 	/**
 	 * Whether maintenance mode is enabled (public app).
 	 */

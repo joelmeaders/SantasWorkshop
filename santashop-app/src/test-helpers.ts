@@ -108,7 +108,7 @@ export function createAnalyticsMock(): object {
 
 export function createAppStateServiceMock(): object {
 	return {
-		globalAlert$: of({ enabled: false }), message$: of(null), isMaintenanceModeEnabled$: of(false),
+		globalAlert$: of({ enabled: false }), message$: of(null), operationalNotice$: of(undefined), isMaintenanceModeEnabled$: of(false),
 		isRegistrationEnabled$: of(true), shopClosedWeather$: of(false), createAccountEnabled$: of(true),
 		setModal: vi.fn(), openModal: vi.fn().mockResolvedValue(undefined), closeExistingModals: vi.fn().mockResolvedValue(undefined),
 	};

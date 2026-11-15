@@ -9,7 +9,7 @@ import {
 	PUBLIC_PARAMETERS_REMOTE_CONFIG_KEY, PUBLIC_PARAMETERS_RETRY_DELAYS_MS,
 	type PublicParameters, type PublicParametersStatus,
 } from '@santashop/models';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, ReplaySubject } from 'rxjs';
 import type { RemoteConfig } from 'firebase/remote-config';
 import { FIREBASE_APP, PUBLIC_PARAMETERS_SOURCE, type PublicParametersSource } from '../tokens';
 
@@ -147,6 +147,8 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 		);
 	private readonly status = new BehaviorSubject<PublicParametersStatus>({ source: 'defaults', refreshing: true,
 	});
+	private readonly startupSettled = new ReplaySubject<void>(1);
+	public readonly startupSettled$ = this.startupSettled.asObservable();
 	private pending?: Promise<void>;
 	private retryTimer?: ReturnType<typeof setTimeout>;
 	private startupRetryTimer?: ReturnType<typeof setTimeout>;
@@ -205,6 +207,10 @@ export class RemoteConfigPublicParametersSource implements PublicParametersSourc
 				await this.performStartupRefresh();
 			}
 		} catch (error) { if (!this.destroyed) this.fail(error); }
+		finally {
+			if (!this.destroyed) this.startupSettled.next();
+			this.startupSettled.complete();
+		}
 	}
 
 	private async performStartupRefresh(): Promise<void> {

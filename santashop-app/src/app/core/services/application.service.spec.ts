@@ -43,7 +43,7 @@ describe('ApplicationService', () => {
 		expect(service).toBeTruthy();
 	});
 
-	it('displays a closure modal from synchronous release defaults', async (): Promise<void> => {
+	it('displays a resolved closure modal', async (): Promise<void> => {
 		TestBed.resetTestingModule();
 		const present = vi.fn().mockResolvedValue(undefined);
 		modalController.getTop.mockResolvedValue(undefined);
@@ -55,9 +55,7 @@ describe('ApplicationService', () => {
 				{
 					provide: AppStateService,
 					useValue: {
-						isMaintenanceModeEnabled$: of(true),
-						shopClosedWeather$: of(false),
-						isRegistrationEnabled$: of(true),
+						operationalNotice$: of('maintenance'),
 					},
 				},
 			],

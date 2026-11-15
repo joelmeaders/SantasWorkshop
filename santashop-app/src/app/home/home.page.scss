@@ -94,6 +94,33 @@
 	margin-block: 0.85rem 0.5rem;
 }
 
+.reset-status-announcement {
+	clip-path: inset(50%);
+	height: 1px;
+	overflow: hidden;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+}
+
+.entry-card .reset-confirmation {
+	background: #f1f6f1;
+	border: 1px solid var(--santa-line);
+	border-radius: var(--santa-radius-sm);
+	padding: 1rem;
+	text-align: center;
+}
+
+.reset-confirmation h2 {
+	color: var(--santa-evergreen-deep);
+	font-size: 1.2rem;
+	margin: 0;
+}
+
+.entry-card .reset-confirmation p {
+	margin-block: 0.5rem 0;
+}
+
 @media (max-width: 600px) {
 	.home-shell {
 		padding-inline: 0.25rem;

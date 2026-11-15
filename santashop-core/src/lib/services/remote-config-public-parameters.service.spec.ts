@@ -10,6 +10,7 @@ describe('RemoteConfigPublicParametersSource', () => {
 	let source: RemoteConfigPublicParametersSource;
 	let current: PublicParameters | undefined;
 	let status: PublicParametersStatus | undefined;
+	let startupSettled: boolean;
 	const unsubscribe = vi.fn();
 	const changed = (): PublicParameters => ({ ...createDefaultPublicParameters(), messageEn: 'Maintenance notice' });
 	const settle = async (): Promise<void> => { for (let index = 0; index < 8; index++) await Promise.resolve(); };
@@ -18,9 +19,11 @@ describe('RemoteConfigPublicParametersSource', () => {
 		source = TestBed.inject(RemoteConfigPublicParametersSource);
 		source.publicParameters$.subscribe((value) => { current = value; });
 		source.status$.subscribe((value) => { status = value; });
+		source.startupSettled$.subscribe(() => { startupSettled = true; });
 		await settle();
 	};
 	beforeEach(() => {
+		startupSettled = false;
 		vi.useFakeTimers();
 		vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
 		unsubscribe.mockReset();
@@ -46,6 +49,7 @@ describe('RemoteConfigPublicParametersSource', () => {
 		await start();
 		expect(current).toEqual(changed());
 		expect(status?.source).toBe('remote');
+		expect(startupSettled).toBe(false);
 	});
 
 	it('keeps release defaults available while the startup fetch is pending', async () => {
@@ -62,11 +66,13 @@ describe('RemoteConfigPublicParametersSource', () => {
 			.mockResolvedValueOnce(changed());
 		await start();
 		expect(runtime.refresh).toHaveBeenNthCalledWith(1, false, 3_000);
+		expect(startupSettled).toBe(false);
 		await vi.advanceTimersByTimeAsync(1_999);
 		expect(runtime.refresh).toHaveBeenCalledTimes(1);
 		await vi.advanceTimersByTimeAsync(1);
 		await settle();
 		expect(runtime.refresh).toHaveBeenNthCalledWith(2, false, 3_000);
+		expect(startupSettled).toBe(true);
 		expect(current).toEqual(changed());
 		expect(status?.error).toBeUndefined();
 	});

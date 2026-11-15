@@ -58,7 +58,7 @@ import {
 } from '@ionic/angular/standalone';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { addIcons } from 'ionicons';
-import { arrowDownCircleOutline } from 'ionicons/icons';
+import { alertCircleOutline } from 'ionicons/icons';
 
 @Component({
 	selector: 'app-overview',
@@ -128,7 +128,7 @@ export class OverviewPage implements AfterViewInit, OnDestroy {
 	private completionUid?: string;
 
 	constructor() {
-		addIcons({ arrowDownCircleOutline });
+		addIcons({ alertCircleOutline });
 		effect(() => {
 			const uid = this.userRegistration()?.uid;
 			if (uid !== this.completionUid) {

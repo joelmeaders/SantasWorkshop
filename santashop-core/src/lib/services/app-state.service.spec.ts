@@ -125,6 +125,45 @@ describe('AppStateService', () => {
 		});
 	});
 
+	it('waits for startup and selects one operational notice per settings snapshot', () => {
+		TestBed.resetTestingModule();
+		const startupSettled$ = new Subject<void>();
+		TestBed.configureTestingModule({
+			providers: [
+				AppStateService,
+				{
+					provide: PUBLIC_PARAMETERS_SOURCE,
+					useValue: { publicParameters$, startupSettled$ },
+				},
+			],
+		});
+		const notices: (string | undefined)[] = [];
+		TestBed.inject(AppStateService).operationalNotice$.subscribe((notice) =>
+			notices.push(notice),
+		);
+
+		publicParameters$.next(parameters({ registrationEnabled: false }));
+		const open = parameters({
+			maintenanceModeEnabled: false,
+			weatherModeEnabled: false,
+		});
+		publicParameters$.next(open);
+		expect(notices).toEqual([]);
+
+		startupSettled$.next();
+		publicParameters$.next(parameters({ registrationEnabled: false }));
+		publicParameters$.next(open);
+		publicParameters$.next({ ...open, weatherModeEnabled: true, registrationEnabled: false });
+		publicParameters$.next({ ...open, registrationEnabled: false });
+		expect(notices).toEqual([
+			undefined,
+			'maintenance',
+			undefined,
+			'weather',
+			'registration-closed',
+		]);
+	});
+
 	it('deduplicates identical documents and exposes localized messages and alerts', () => {
 		const registrations: boolean[] = [];
 		const messages: unknown[] = [];

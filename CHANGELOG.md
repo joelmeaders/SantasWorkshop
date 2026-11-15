@@ -12,6 +12,9 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 ### Fixed
 
 - Show white shopper sign-in fields and keep the floating email label visible on password reset.
+- Show progress for shopper password reset requests, prevent repeated submissions, and clarify what to expect next.
+- Wait for initial settings to settle before showing a shopper closure notice.
+- Use a direction-neutral alert icon in the final registration step reminder.
 
 ## [2026.10.30] - 2026-11-11
 

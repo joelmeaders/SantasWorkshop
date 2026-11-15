@@ -99,14 +99,37 @@
 				<ion-card class="entry-card">
 					<ion-card-header><ion-card-title>{{ "FORGOTPASS.RESET_YOUR_PASSWORD" | translate }}</ion-card-title></ion-card-header>
 					<ion-card-content>
-						@if (resetEmailSent() === false) {
+						<div role="status" aria-atomic="true">
+							@if (resetEmailSent()) {
+							<div class="reset-confirmation">
+								<h2>{{ "FORGOTPASS.EMAIL_SENT" | translate }}</h2>
+								<p>{{ "FORGOTPASS.EMAIL_SENT_2" | translate }}</p>
+								<p>{{ "FORGOTPASS.CHECK_SPAM" | translate }}</p>
+							</div>
+							} @else if (isResettingPassword()) {
+							<span class="reset-status-announcement">{{ "FORGOTPASS.SENDING" | translate }}</span>
+							}
+						</div>
+						@if (!resetEmailSent()) {
 						<p>{{ "FORGOTPASS.INSTRUCTIONS" | translate }}</p>
 						<div class="entry-fields">
 							<ion-input id="resetPasswordEmail" fill="outline" [label]="'COMMON.EMAIL_ADDRESS' | translate" labelPlacement="floating" type="email" autocomplete="email" [formControl]="resetEmail" />
 						</div>
-						<ion-button id="resetPasswordButton" expand="block" color="xmasred" [disabled]="resetEmail.invalid" (click)="resetPassword()">{{ "FORGOTPASS.RESET_PASSWORD" | translate }}</ion-button>
+						<ion-button
+							id="resetPasswordButton"
+							expand="block"
+							color="xmasred"
+							[disabled]="resetEmail.invalid || isResettingPassword()"
+							(click)="resetPassword()"
+						>
+							@if (isResettingPassword()) {
+							<ion-spinner slot="start" name="crescent" aria-hidden="true" />
+							{{ "FORGOTPASS.SENDING" | translate }}
+							} @else {
+							{{ "FORGOTPASS.RESET_PASSWORD" | translate }}
+							}
+						</ion-button>
 						} @else {
-						<ion-text role="status" aria-live="polite"><h2>{{ "FORGOTPASS.EMAIL_SENT" | translate }}</h2><p>{{ "FORGOTPASS.EMAIL_SENT_2" | translate }}</p></ion-text>
 						<ion-button expand="block" fill="clear" (click)="resetPasswordForm()">{{ "FORGOTPASS.RESET_PASSWORD_AGAIN" | translate }}</ion-button>
 						}
 						<ion-button id="returnToSignInButton" fill="clear" expand="block" [routerLink]="['/']" [queryParams]="{ mode: 'sign-in' }">{{ "COMMON.SIGN_IN" | translate }}</ion-button>

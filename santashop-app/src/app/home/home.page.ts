@@ -24,7 +24,6 @@ import {
 	IonCardHeader,
 	IonCardTitle,
 	IonInput,
-	IonText,
 	LoadingController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -60,7 +59,6 @@ import { map } from 'rxjs/operators';
 		IonCardHeader,
 		IonCardTitle,
 		IonInput,
-		IonText,
 		LanguageToggleComponent,
 		RouterLink,
 		ReactiveFormsModule,
@@ -89,6 +87,7 @@ export class HomePage {
 		validators: [Validators.required, Validators.email],
 	});
 	public readonly resetEmailSent = signal(false);
+	public readonly isResettingPassword = signal(false);
 	public readonly mode = toSignal(this.route.queryParamMap.pipe(
 		map((params) => {
 			const mode = params.get('mode');
@@ -130,7 +129,8 @@ export class HomePage {
 	}
 
 	public async resetPassword(): Promise<void> {
-		if (this.resetEmail.invalid) return;
+		if (this.resetEmail.invalid || this.isResettingPassword()) return;
+		this.isResettingPassword.set(true);
 		try {
 			await trackAnalyticsOperation(this.analytics, 'password_reset_request', () => this.authService.resetPassword(this.resetEmail.value));
 			this.resetEmailSent.set(true);
@@ -143,6 +143,8 @@ export class HomePage {
 				},
 				this.translate.instant('FORGOTPASS.UNABLE_TO_RESET'),
 			);
+		} finally {
+			this.isResettingPassword.set(false);
 		}
 	}
 

@@ -4,6 +4,16 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.11.15] - 2026-11-15
+
+### Added
+
+- Show a bilingual disabled-account notice after sign-in or when an open session refreshes. Include a copyable support email address and show cancellation guidance only for an active registration. This is a UI restriction, not a change to Firebase access rules.
+
+### Fixed
+
+- Give Manage Account form fields a white background in light mode.
+
 ## [2026.11.14] - 2026-11-14
 
 ### Fixed

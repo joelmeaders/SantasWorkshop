@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.15] - 2026-11-15
+
+### Added
+
+- Let admins and owners disable or re-enable shopper access from registration review with a required disable reason and an audit record. The controls are not available to check-in-only staff and do not send email or change the registration.
+
 ## [2026.11.14] - 2026-11-14
 
 ### Changed

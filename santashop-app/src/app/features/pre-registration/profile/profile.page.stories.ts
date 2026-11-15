@@ -51,6 +51,13 @@ export const AccountSettings: Story = {
 		await userEvent.click(
 			within(passwordPanel).getByText(/change password/i),
 		);
+		const fields = canvasElement.querySelectorAll('ion-input');
+		expect(fields).toHaveLength(7);
+		for (const field of fields) {
+			expect(
+				getComputedStyle(field).getPropertyValue('--background').trim(),
+			).toBe('#ffffff');
+		}
 		const newPassword = passwordPanel.querySelector(
 			'ion-input[formControlName="newPassword"]',
 		) as HTMLIonInputElement;

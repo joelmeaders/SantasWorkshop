@@ -3,7 +3,12 @@ import { createAdminAlert } from '../../../../shared/preferences/admin-overlays'
 import { AdminDatePipe } from '../../../../shared/preferences/admin-date.pipe';
 import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
 
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	inject,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
@@ -50,6 +55,7 @@ import { DateTimeModalComponent } from '../../../../shared/components/date-time-
 import { DateTimeModalService } from '../../../../shared/components/date-time-modal/date-time-modal.service';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
+import { ShopperAccessPanelComponent } from './shopper-access-panel.component';
 
 @Component({
 	selector: 'admin-review',
@@ -60,6 +66,7 @@ import { checkmarkCircle } from 'ionicons/icons';
 		AdminTextPipe,
 		HeaderComponent,
 		ManageChildrenComponent,
+		ShopperAccessPanelComponent,
 		RouterLink,
 		AdminDatePipe,
 		IonContent,
@@ -77,6 +84,12 @@ export class ReviewPage {
 	public readonly isAdmin = toSignal(inject(AuthService).isAdmin$, {
 		initialValue: false,
 	});
+	public readonly isOwner = toSignal(inject(AuthService).isOwner$, {
+		initialValue: false,
+	});
+	public readonly canManageShopperAccess = computed(
+		() => this.isAdmin() || this.isOwner(),
+	);
 	public readonly language = inject(AdminLanguageService);
 	private readonly checkinContext = inject(CheckInContextService);
 	private readonly lookupService = inject(LookupService);

@@ -233,6 +233,27 @@ export const newAccount = onCall(
 	}),
 );
 
+export const getShopperAccessStatus = onCall(
+	STANDARD_CUSTOMER_OPTIONS,
+	observeCallableHandler('getShopperAccessStatus', async (request) =>
+		(await import('./fn/shopperAccess')).getShopperAccessStatus(request),
+	),
+);
+
+export const callableSetShopperAccess = onCall(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('callableSetShopperAccess', async (request) =>
+		(await import('./fn/shopperAccess')).setShopperAccess(request),
+	),
+);
+
+export const callableGetShopperAccess = onCall(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('callableGetShopperAccess', async (request) =>
+		(await import('./fn/shopperAccess')).getAdminShopperAccess(request),
+	),
+);
+
 export const undoRegistration = onCall(
 	{ ...STANDARD_CUSTOMER_OPTIONS, ...REMOTE_CONFIG_READER_IDENTITY },
 	observeCallableHandler('undoRegistration', async (request) => {

@@ -56,7 +56,7 @@ export const AccountSettings: Story = {
 		for (const field of fields) {
 			expect(
 				getComputedStyle(field).getPropertyValue('--background').trim(),
-			).toBe('#ffffff');
+			).toMatch(/^#(?:fff|ffffff)$/i);
 		}
 		const newPassword = passwordPanel.querySelector(
 			'ion-input[formControlName="newPassword"]',

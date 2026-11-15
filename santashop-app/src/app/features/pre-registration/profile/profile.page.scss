@@ -96,6 +96,10 @@
 	padding: 1rem 1.35rem 1.35rem;
 }
 
+.settings-panel form ion-input {
+	--background: var(--santa-snow);
+}
+
 .settings-panel form ion-button[type='submit'] {
 	margin-top: 0.75rem;
 }

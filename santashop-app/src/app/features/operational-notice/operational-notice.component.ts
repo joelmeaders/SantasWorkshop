@@ -1,6 +1,7 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	Injector,
 	Input,
 	inject,
 	signal,
@@ -22,6 +23,7 @@ import { IonButton, IonContent, IonIcon,
 import { addIcons } from 'ionicons';
 import { logoFacebook, logoInstagram } from 'ionicons/icons';
 import { map } from 'rxjs/operators';
+import { ShopperAccessService } from '../../core/services/shopper-access.service';
 
 export type OperationalNoticeMode =
 	'maintenance'
@@ -45,6 +47,7 @@ export class OperationalNoticeComponent {
 	private readonly appState = inject(AppStateService);
 	private readonly translate = inject(TranslateService);
 	private readonly auth = inject(AuthService);
+	private readonly injector = inject(Injector);
 	public readonly user = toSignal(this.auth.currentUser$, {
 		initialValue: null,
 	});
@@ -67,10 +70,18 @@ export class OperationalNoticeComponent {
 		this.signInError.set(false);
 		try {
 			const value = this.signInForm.getRawValue();
-			await this.auth.login({
+			const credential = await this.auth.login({
 				emailAddress: value.emailAddress ?? '',
 				password: value.password ?? '',
 			});
+			if (credential?.user) {
+				try {
+					await this.injector.get(ShopperAccessService).verify(credential.user.uid);
+				} catch (error) {
+					await this.auth.logout(false);
+					throw error;
+				}
+			}
 		} catch {
 			this.signInError.set(true);
 		} finally {

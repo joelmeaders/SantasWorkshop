@@ -12,6 +12,7 @@ All notable changes to the main application will be documented in this file.
 - Show progress for shopper password reset requests, prevent repeated submissions, and clarify what to expect next.
 - Wait for initial settings to settle before showing a shopper closure notice.
 - Use a direction-neutral alert icon in the final registration step reminder.
+- Give appointment times a white background while keeping the date headers tan.
 
 ## [2026.10.26] - 2026-10-26
 

@@ -17,6 +17,7 @@ export const COLLECTION_SCHEMA = {
 	tmpRegistrationEmails: 'tmp_registrationemails',
 	parameters: 'parameters',
 	staff: 'staff',
+	shopperAccess: 'shopperAccess',
 	ownerOperationPreviews: 'ownerOperationPreviews',
 	ownerOperations: 'ownerOperations',
 	ownerOperationLocks: 'ownerOperationLocks',

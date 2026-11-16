@@ -4,11 +4,21 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
-## [2026.11.17] - 2026-11-16
+## [2026.11.16] - 2026-11-15
 
-### Removed
+### Fixed
 
-- Remove the unreleased shopper-access disable screen and customer-side status checks.
+- Send hosted shopper access checks to Firebase Functions so that valid shoppers can proceed after sign-in.
+
+## [2026.11.15] - 2026-11-15
+
+### Added
+
+- Show a bilingual disabled-account notice after sign-in or when an open session refreshes. Include a copyable support email address and show cancellation guidance only for an active registration. This is a UI restriction, not a change to Firebase access rules.
+
+### Fixed
+
+- Give Manage Account form fields a white background in light mode.
 
 ## [2026.11.14] - 2026-11-14
 

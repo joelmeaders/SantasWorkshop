@@ -214,6 +214,16 @@
 		"PASSWORD_CHANGED": "Password Changed",
 		"PASSWORD_CHANGED_TEXT": "Remember to use your new password next time you sign in"
 	},
+	"SHOPPER_ACCESS": {
+		"TITLE": "Your account has been disabled",
+		"HELP": "If you think this is a mistake, contact us at:",
+		"CANCELLATION": "Otherwise, we will cancel your current registration.",
+		"COPY_EMAIL": "Copy email address",
+		"CLOSE": "Close",
+		"COPIED": "Email address copied.",
+		"COPY_FAILED": "Could not copy. You can select and copy the email address above.",
+		"VERIFICATION_FAILED": "We couldn’t verify your account access. Please try signing in again."
+	},
 	"FORGOTPASS": {
 		"RESET_YOUR_PASSWORD": "Forgot your Password?",
 		"INSTRUCTIONS": "Enter your registered email to reset your password.",

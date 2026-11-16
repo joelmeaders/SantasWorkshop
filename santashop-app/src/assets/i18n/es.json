@@ -214,6 +214,16 @@
 		"PASSWORD_CHANGED": "Contraseña cambiada",
 		"PASSWORD_CHANGED_TEXT": "Recuerda usar tu nueva contraseña la próxima vez que inicies sesión"
 	},
+	"SHOPPER_ACCESS": {
+		"TITLE": "Su cuenta ha sido desactivada",
+		"HELP": "Si cree que se trata de un error, comuníquese con nosotros a:",
+		"CANCELLATION": "De lo contrario, cancelaremos su inscripción actual.",
+		"COPY_EMAIL": "Copiar correo electrónico",
+		"CLOSE": "Cerrar",
+		"COPIED": "Se copió el correo electrónico.",
+		"COPY_FAILED": "No se pudo copiar. Puede seleccionar y copiar el correo electrónico que aparece arriba.",
+		"VERIFICATION_FAILED": "No pudimos verificar el acceso a su cuenta. Intente iniciar sesión de nuevo."
+	},
 	"FORGOTPASS": {
 		"RESET_YOUR_PASSWORD": "¿Olvidó su contraseña?",
 		"INSTRUCTIONS": "Ingrese su correo electrónico registrado para restablecer su contraseña.",

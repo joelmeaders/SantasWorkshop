@@ -26,6 +26,7 @@ const registration = (): Record<string, unknown> => ({
 describe('ReviewPage', () => {
 	let component: ReviewPage;
 	const isAdmin$ = new BehaviorSubject(true);
+	const isOwner$ = new BehaviorSubject(false);
 	let fixture: ComponentFixture<ReviewPage>;
 	let currentRegistration: BehaviorSubject<Record<string, unknown>>;
 	const setRegistration = vi.fn();
@@ -34,7 +35,12 @@ describe('ReviewPage', () => {
 	const reset = vi.fn();
 	const checkIn = vi.fn();
 	const callable = vi.fn();
-	const callableWrapper = vi.fn().mockReturnValue(callable);
+	const shopperAccess = vi.fn(async () => ({
+		data: { disabled: false, audit: null },
+	}));
+	const callableWrapper = vi.fn((name: string) =>
+		name === 'callableGetShopperAccess' ? shopperAccess : callable,
+	);
 	const alert = {
 		present: vi.fn().mockResolvedValue(undefined),
 		onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
@@ -48,6 +54,7 @@ describe('ReviewPage', () => {
 
 	beforeEach(async () => {
 		isAdmin$.next(true);
+		isOwner$.next(false);
 		currentRegistration = new BehaviorSubject(registration());
 		setRegistration.mockReset();
 		setRegistration.mockImplementation((value) =>
@@ -72,7 +79,7 @@ describe('ReviewPage', () => {
 			imports: [ReviewPage],
 			providers: [
 				provideActivatedRouteMock(),
-				{ provide: AuthService, useValue: { isAdmin$ } },
+				{ provide: AuthService, useValue: { isAdmin$, isOwner$ } },
 				{
 					provide: CheckInContextService,
 					useValue: {
@@ -92,6 +99,7 @@ describe('ReviewPage', () => {
 					},
 				},
 				{ provide: CheckInService, useValue: { checkIn } },
+
 				{
 					provide: DateTimeModalService,
 					useValue: { availableSlots$: of([]) },
@@ -113,6 +121,22 @@ describe('ReviewPage', () => {
 		fixture = TestBed.createComponent(ReviewPage);
 		component = fixture.componentInstance;
 		await fixture.whenStable();
+	});
+
+	it('shows read-only shopper access to admins and owners, but not check-in-only staff', async () => {
+		const panel = (): HTMLElement | null =>
+			fixture.nativeElement.querySelector('admin-shopper-access-panel');
+		expect(panel()).not.toBeNull();
+		expect(panel()?.querySelector('[data-testid=change-shopper-access]')).toBeNull();
+
+		isAdmin$.next(false);
+		await fixture.whenStable();
+		expect(panel()).toBeNull();
+
+		isOwner$.next(true);
+		await fixture.whenStable();
+		expect(panel()).not.toBeNull();
+		expect(panel()?.querySelector('[data-testid=change-shopper-access]')).toBeNull();
 	});
 
 	it('hides forbidden reservation actions for check-in staff and clears them when roles change', async () => {

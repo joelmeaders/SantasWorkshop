@@ -560,6 +560,7 @@ export const executeYearlyReset = async (
 		COLLECTION_SCHEMA.checkins,
 		COLLECTION_SCHEMA.cancellations,
 		COLLECTION_SCHEMA.registrationScanAttempts,
+		COLLECTION_SCHEMA.shopperAccess,
 		COLLECTION_SCHEMA.registrationScanRiskSummaries,
 		COLLECTION_SCHEMA.editedRegistrations,
 		COLLECTION_SCHEMA.onSiteRegistrations,

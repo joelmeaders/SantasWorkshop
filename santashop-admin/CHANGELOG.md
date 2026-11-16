@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.16] - 2026-11-15
+
+### Fixed
+
+- Route hosted shopper access review and update requests to Firebase Functions.
+
 ## [2026.11.15] - 2026-11-15
 
 ### Added

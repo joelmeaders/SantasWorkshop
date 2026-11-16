@@ -26,4 +26,3 @@ export * from './lib/user';
 
 export * from './lib/language';
 export * from './lib/waiting-list';
-export * from './lib/shopper-access';

@@ -914,22 +914,5 @@
 	"Unable to request a password reset right now. Check your connection and try again later.": "No se puede solicitar el restablecimiento de la contraseña en este momento. Revise su conexión e inténtelo más tarde.",
 	"Back to sign in": "Volver a iniciar sesión",
 	"Forgot your password?": "¿Olvidó su contraseña?",
-	"Use a different email": "Usar otro correo electrónico",
-	"Shopper access": "Acceso del comprador",
-	"Access is disabled": "El acceso está deshabilitado",
-	"Access is enabled": "El acceso está habilitado",
-	"Reviewed and cleared": "Revisado y autorizado",
-	"Changed by {{v0}}": "Cambio realizado por {{v0}}",
-	"Disable access": "Deshabilitar acceso",
-	"Re-enable access": "Restablecer acceso",
-	"Could not load shopper access.": "No se pudo cargar el acceso del comprador.",
-	"Loading shopper access…": "Cargando acceso del comprador…",
-	"Could not update shopper access. Try again.": "No se pudo actualizar el acceso del comprador. Inténtelo de nuevo.",
-	"Disable shopper access?": "¿Deshabilitar el acceso del comprador?",
-	"Re-enable shopper access?": "¿Restablecer el acceso del comprador?",
-	"Select a reason. This does not cancel a registration or send an email.": "Seleccione un motivo. Esto no cancela ninguna inscripción ni envía un correo electrónico.",
-	"This restores access only. It does not restore a canceled registration.": "Esto solo restablece el acceso. No recupera una inscripción cancelada.",
-	"Duplicate registration": "Inscripción duplicada",
-	"Suspected automated signup": "Posible registro automatizado",
-	"Registration information couldn’t be verified": "No se pudo verificar la información de inscripción"
+	"Use a different email": "Usar otro correo electrónico"
 }

@@ -43,7 +43,6 @@ import { QrCodeService } from '../../core/services/qrcode.service';
 import { CUSTOMER_APP_CONFIG } from '../../core/tokens/customer-runtime.token';
 import { ProfilePageService } from './profile/profile.page.service';
 import { initializeFullFirestore } from './initialize-full-firestore';
-import { provideShopperAccessWatch } from './shopper-access-watch';
 
 export const FULL_FIRESTORE_ROUTE_PROVIDERS: Provider[] = [
 	{ provide: FIREBASE_APP, useExisting: CUSTOMER_FIREBASE_APP },
@@ -74,7 +73,6 @@ export const FULL_FIRESTORE_ROUTE_PROVIDERS: Provider[] = [
 				{ connectFirestoreEmulator, getFirestore },
 			),
 	},
-	provideShopperAccessWatch(),
 	FirestoreWrapper,
 	FireRepoLite,
 	PreRegistrationService,

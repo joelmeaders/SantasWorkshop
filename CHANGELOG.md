@@ -7,27 +7,11 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
-## [2026.11.16] - 2026-11-15
+## [2026.11.17] - 2026-11-16
 
 ### Fixed
 
-- Route the deployed shopper and admin access calls to Firebase Functions instead of the app shell.
-
-### Added
-
-- Test that warm Firebase handlers keep each household’s draft, submission and logs separate across requests.
-
-## [2026.11.15] - 2026-11-15
-
-### Added
-
-- Let admins and owners disable or re-enable shopper access from a submitted registration's review page, with a required reason and an audit record. Check-in-only staff do not get these controls.
-- Show a bilingual disabled-account notice with a copyable support email address. The shopper restriction applies in the app UI only; existing Firebase access rules are unchanged.
-- Preview shopper notices and admin review states in Storybook with demo data.
-
-### Fixed
-
-- Give Manage Account form fields a white background in light mode.
+- Let eligible customers join the waiting list during maintenance, even when future appointments have space. Remove the unreleased shopper-access disable feature and its hosting routes.
 
 ## [2026.11.14] - 2026-11-14
 

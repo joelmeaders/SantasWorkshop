@@ -158,7 +158,7 @@ describe.sequential('waiting list transactions and campaigns', () => {
 		}
 	});
 
-	it('counts only future current-year enabled slots with available counters', async () => {
+	it('counts only bookable current-year capacity and allows joining during maintenance', async () => {
 		const slot = {
 			programYear: 2025,
 			dateTime: new Date('2025-12-10T18:00:00Z'),
@@ -183,8 +183,28 @@ describe.sequential('waiting list transactions and campaigns', () => {
 			).toBe(true);
 		}
 		await setDocument('dateTimeSlots', 'slot-1', slot);
+		const checkEligibility = (): ReturnType<typeof getWaitingListState> =>
+			getWaitingListState(createCallableRequest({}, { uid }));
+		await expect(checkEligibility()).resolves.toMatchObject({
+			canJoin: false,
+			reason: 'capacity-available',
+		});
 		await expect(join()).rejects.toMatchObject({
 			code: 'failed-precondition',
+			details: { reason: 'capacity-available' },
+		});
+
+		await getFirestore().doc('_testConfig/publicParameters').update({
+			maintenanceModeEnabled: true,
+		});
+		await expect(checkEligibility()).resolves.toMatchObject({
+			canJoin: true,
+			reason: 'eligible',
+		});
+		await join('join-during-maintenance', 'maintenance');
+		expect(await membership()).toMatchObject({
+			active: true,
+			source: 'maintenance',
 		});
 	});
 

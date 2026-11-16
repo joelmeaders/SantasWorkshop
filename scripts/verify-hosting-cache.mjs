@@ -10,11 +10,6 @@ const [firebaseConfigPath = 'firebase.json', ...outputRoots] = rawArguments.filt
 const HASHED_BUNDLE_SOURCE = '**/*-????????*.@(css|js)';
 const IMMUTABLE_CACHE_CONTROL = 'public,max-age=31536000,immutable';
 const STATIC_CACHE_CONTROL = 'public,max-age=3600';
-// Deployed clients call these functions on the Hosting origin. Emulator E2E calls Functions directly.
-const SHOPPER_ACCESS_CALLABLES = {
-	'santashop-app': ['getShopperAccessStatus'],
-	'santashop-admin': ['callableGetShopperAccess', 'callableSetShopperAccess'],
-};
 const STATIC_CACHE_SOURCES = new Set([
 	'**/assets/**',
 	'**/svg/**',
@@ -36,22 +31,6 @@ for (const targetName of ['santashop-app', 'santashop-admin']) {
 		(candidate) => candidate.target === targetName,
 	);
 	assert.ok(target, `Missing Firebase Hosting target: ${targetName}`);
-
-	const fallbackIndex = target.rewrites.findIndex(
-		(rewrite) => rewrite.source === '**',
-	);
-	for (const name of SHOPPER_ACCESS_CALLABLES[targetName]) {
-		const path = `/${name}`;
-		const index = target.rewrites.findIndex(
-			(rewrite) => rewrite.source === path,
-		);
-		assert.ok(
-			index >= 0 && index < fallbackIndex,
-			`${targetName}: ${path} must route to Functions before the SPA fallback`,
-		);
-		assert.equal(target.rewrites[index].function?.functionId, name);
-		assert.equal(target.rewrites[index].function?.region, 'us-central1');
-	}
 
 	const cacheRules = target.headers.flatMap((definition, index) =>
 		definition.headers

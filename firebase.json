@@ -98,13 +98,6 @@
 					}
 				},
 				{
-					"source": "/getShopperAccessStatus",
-					"function": {
-						"functionId": "getShopperAccessStatus",
-						"region": "us-central1"
-					}
-				},
-				{
 					"source": "/getWaitingListState",
 					"function": {
 						"functionId": "getWaitingListState",
@@ -484,20 +477,6 @@
 					"source": "/callableGetOwnerExportUrl",
 					"function": {
 						"functionId": "callableGetOwnerExportUrl",
-						"region": "us-central1"
-					}
-				},
-				{
-					"source": "/callableGetShopperAccess",
-					"function": {
-						"functionId": "callableGetShopperAccess",
-						"region": "us-central1"
-					}
-				},
-				{
-					"source": "/callableSetShopperAccess",
-					"function": {
-						"functionId": "callableSetShopperAccess",
 						"region": "us-central1"
 					}
 				},

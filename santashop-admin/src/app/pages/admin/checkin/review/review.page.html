@@ -51,13 +51,6 @@
 					}
 				</ion-label>
 			</ion-item>
-			@if (canManageShopperAccess() && registration.uid) {
-			<admin-shopper-access-panel
-				[uid]="registration.uid!"
-				[emailAddress]="registration.emailAddress"
-				[canManageAccess]="canManageShopperAccess()"
-			/>
-			}
 			<admin-manage-children
 				[children]="registration?.children ?? []"
 				(adddedChild)="addChild($event)"

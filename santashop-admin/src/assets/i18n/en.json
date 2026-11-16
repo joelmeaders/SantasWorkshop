@@ -914,22 +914,5 @@
 	"Unable to request a password reset right now. Check your connection and try again later.": "Unable to request a password reset right now. Check your connection and try again later.",
 	"Back to sign in": "Back to sign in",
 	"Forgot your password?": "Forgot your password?",
-	"Use a different email": "Use a different email",
-	"Shopper access": "Shopper access",
-	"Access is disabled": "Access is disabled",
-	"Access is enabled": "Access is enabled",
-	"Reviewed and cleared": "Reviewed and cleared",
-	"Changed by {{v0}}": "Changed by {{v0}}",
-	"Disable access": "Disable access",
-	"Re-enable access": "Re-enable access",
-	"Could not load shopper access.": "Could not load shopper access.",
-	"Loading shopper access…": "Loading shopper access…",
-	"Could not update shopper access. Try again.": "Could not update shopper access. Try again.",
-	"Disable shopper access?": "Disable shopper access?",
-	"Re-enable shopper access?": "Re-enable shopper access?",
-	"Select a reason. This does not cancel a registration or send an email.": "Select a reason. This does not cancel a registration or send an email.",
-	"This restores access only. It does not restore a canceled registration.": "This restores access only. It does not restore a canceled registration.",
-	"Duplicate registration": "Duplicate registration",
-	"Suspected automated signup": "Suspected automated signup",
-	"Registration information couldn’t be verified": "Registration information couldn’t be verified"
+	"Use a different email": "Use a different email"
 }

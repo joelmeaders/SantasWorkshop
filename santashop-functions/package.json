@@ -1,6 +1,6 @@
 {
 	"name": "@santashop/functions",
-	"version": "2026.10.27",
+	"version": "2026.10.28",
 	"scripts": {
 		"config:dev": "node ../config.functions.cjs dev",
 		"config:test": "node ../config.functions.cjs test",

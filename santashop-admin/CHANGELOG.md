@@ -2,17 +2,11 @@
 
 ## [Unreleased]
 
-## [2026.11.16] - 2026-11-15
+## [2026.11.17] - 2026-11-16
 
-### Fixed
+### Removed
 
-- Route hosted shopper access review and update requests to Firebase Functions.
-
-## [2026.11.15] - 2026-11-15
-
-### Added
-
-- Let admins and owners disable or re-enable shopper access from registration review with a required disable reason and an audit record. The controls are not available to check-in-only staff and do not send email or change the registration.
+- Remove the unreleased shopper-access controls from registration review.
 
 ## [2026.11.14] - 2026-11-14
 

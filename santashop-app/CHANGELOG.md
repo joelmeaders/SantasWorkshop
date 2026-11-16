@@ -4,6 +4,12 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.11.16] - 2026-11-15
+
+### Fixed
+
+- Send hosted shopper access checks to Firebase Functions so that valid shoppers can proceed after sign-in.
+
 ## [2026.11.15] - 2026-11-15
 
 ### Added

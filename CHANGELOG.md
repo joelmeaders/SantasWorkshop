@@ -7,6 +7,16 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.16] - 2026-11-15
+
+### Fixed
+
+- Route the deployed shopper and admin access calls to Firebase Functions instead of the app shell.
+
+### Added
+
+- Test that warm Firebase handlers keep each household’s draft, submission and logs separate across requests.
+
 ## [2026.11.15] - 2026-11-15
 
 ### Added

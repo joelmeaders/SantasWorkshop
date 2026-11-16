@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.17] - 2026-11-15
+
+### Added
+
+- Support optional keyed submission evidence on new, successful shopper registration receipts. It stays off until a key is securely configured.
+
 ## [2026.11.16] - 2026-11-15
 
 ### Fixed

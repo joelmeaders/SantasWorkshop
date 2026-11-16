@@ -57,6 +57,23 @@ The disposable Functions deploy artifact includes only the generated file for
 the selected project. It never includes `santashop-functions/.env` or the root
 developer-local `.env`; neither local file is required on a GitHub runner.
 
+### Optional registration submission fingerprint
+
+This release does not provision or bind a key. With either input missing,
+shopper registration behaves exactly as before and no fingerprint is saved.
+To turn it on later, arrange a separately authorized Secret Manager binding
+for the completion function, rather than placing the key in an ordinary
+revision environment setting, generated dotenv file or GitHub workflow log.
+
+- SANTASHOP_SUBMISSION_FINGERPRINT_KEY: 32 cryptographically random bytes
+  encoded as canonical padded base64. Use different keys for TEST and PROD.
+- SANTASHOP_SUBMISSION_FINGERPRINT_KEY_ID: a non-secret rotation label of
+  1–32 letters, digits, underscores or hyphens, starting with a letter or digit.
+
+Rotate the key and ID together. Keep the old key protected for as long as
+its receipt evidence may need verification. Rotation does not change existing
+receipts. Neither key material nor input data is recorded by this feature.
+
 ## GitHub repository secrets
 
 The `scripts/github-secrets.ps1` synchronization helper requires these eight

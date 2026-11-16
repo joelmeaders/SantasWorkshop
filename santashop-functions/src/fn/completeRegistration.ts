@@ -15,6 +15,10 @@ import { formatRegistrationDateTime } from '../utility/date-time-format';
 import { createFunctionLogger } from '../utility/observability';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
 import {
+	createSubmissionFingerprint,
+	type SubmissionFingerprint,
+} from '../utility/submission-fingerprint';
+import {
 	MUTATION_RECEIPTS_SUBCOLLECTION,
 	getStoredMutationResult,
 	requireCanonicalChildren,
@@ -29,6 +33,10 @@ import {
 } from './registrationMutationSupport';
 
 const log = createFunctionLogger('completeRegistration');
+
+type SubmissionReceipt = MutationReceipt & {
+	submissionFingerprint?: SubmissionFingerprint;
+};
 
 interface CompleteRegistrationData {
 	mutationId: string;
@@ -190,6 +198,11 @@ export default async function completeRegistration(
 				zip: canonicalContact.zipCode,
 			};
 
+			const submissionFingerprint = createSubmissionFingerprint(
+				uid,
+				completedRegistration,
+			);
+
 			// This transaction deliberately never writes the shared slot document.
 			// reconcileAppointmentCounters reconciles capacity after submissions.
 			transaction.set(registrationRef, completedRegistration);
@@ -199,7 +212,8 @@ export default async function completeRegistration(
 				operation: 'completeRegistration',
 				result: true,
 				completedOn: submittedOn,
-			} satisfies MutationReceipt);
+				...(submissionFingerprint ? { submissionFingerprint } : {}),
+			} satisfies SubmissionReceipt);
 		});
 		return true;
 	} catch (error) {

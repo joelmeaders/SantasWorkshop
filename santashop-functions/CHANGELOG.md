@@ -6,6 +6,12 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.28] - 2026-11-15
+
+### Added
+
+- Support optional keyed submission evidence on new, successful shopper registration receipts. It stays off until a key is securely configured.
+
 ## [2026.10.27] - 2026-11-09
 
 ### Fixed

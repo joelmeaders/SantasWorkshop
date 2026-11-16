@@ -17,6 +17,26 @@ created atomically with the update. A successful replay is returned before
 current draft/feature checks. Appointment selection, submission, cancellation,
 and check-in retain their own transaction and authorization rules.
 
+### Optional registration submission evidence
+
+A shopper transition from draft to submitted may add a versioned HMAC to its
+server-only mutation receipt in the same transaction. The HMAC covers the
+authenticated registration UID, program year, submission instant, persisted
+adult first and last names, email and ZIP, selected slot ID and exact instant,
+and each child’s ID, first and last names, exact birth date and enabled status,
+in stored roster order. It excludes derived age and toy groups, ticket codes,
+tokens and mutable operational flags. It is not a fraud decision, client
+contract, comparison across household UIDs or automatic validation of later edits.
+
+When the key is absent, invalid or unusable, registration completes unchanged.
+An existing receipt replay and the already-submitted no-op write never create
+fingerprint evidence. Cancellations and genuine later submissions retain their
+normal behavior; no existing registrations or old receipts are backfilled.
+Receipts follow their parent records’ retention, including the normal annual
+reset. See [key configuration](SECRETS_AND_CONFIGURATION.md#optional-registration-submission-fingerprint).
+
+### Cancellation and appointment changes
+
 Cancellation returns a successful receipt before reading current feature policy
 or cancellation metadata. Customer cancellation and reschedule actions retain
 one ID and the original payload while their result is uncertain. A changed

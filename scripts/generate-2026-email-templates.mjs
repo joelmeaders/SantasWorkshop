@@ -68,7 +68,7 @@ const copies = {
 			'Proof of each child’s age, such as a birth certificate or a school or medical form. Bring a copy or photo of the birth certificate, not the original.',
 		],
 		punctual:
-			'Please arrive at your scheduled time. You can view available appointments before changing your appointment. Shoppers cannot cancel their own appointments.',
+			'Please arrive at your scheduled time. You can view available appointments before changing your appointment. Before you check in, sign in and choose Cancel Registration on your confirmation page if that option is available. Canceling releases your appointment.',
 		alternate:
 			'If another adult shops for your family, they must bring your QR code, their own photo ID, and proof of each child’s age.',
 		account:
@@ -135,7 +135,7 @@ const copies = {
 			'Un comprobante de la edad de cada niño, como un acta de nacimiento o un formulario escolar o médico. Trae una copia o foto del acta de nacimiento, no el original.',
 		],
 		punctual:
-			'Por favor, llega a la hora de tu cita. Puedes ver las citas disponibles antes de cambiar tu cita. Los compradores no pueden cancelar sus propias citas.',
+			'Por favor, llega a la hora de tu cita. Puedes ver las citas disponibles antes de cambiar tu cita. Antes de registrarte al llegar al evento, inicia sesión y selecciona Cancelar registro en la página de confirmación si la opción está disponible. Al cancelar, liberas tu cita.',
 		alternate:
 			'Si otro adulto hace las compras para tu familia, debe traer tu código QR, su propia identificación con foto y un comprobante de la edad de cada niño.',
 		account:

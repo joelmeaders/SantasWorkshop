@@ -34,8 +34,10 @@ Before publishing a starter, verify the seasonal information in both HTML and pl
 Confirmation and reminder starters explain accepted age-proof examples, including
 copies or photos of birth certificates rather than originals. Another adult shopping
 for the family must bring the family's QR code, their own photo ID, and each child's
-age proof. Shoppers can view availability before changing an appointment but cannot
-cancel their own appointments. Non-cancellation templates link to RTD trip information.
+age proof. Shoppers can view availability before changing an appointment. The confirmation
+and reminder starters explain how to cancel from the confirmation page before check-in
+when self-service cancellation is available. Canceling releases the appointment.
+Non-cancellation templates link to RTD trip information.
 
 Sign-in guidance identifies the recipient email address as the username and explains
 that the Shop does not have access to passwords. Do not add password or account-email

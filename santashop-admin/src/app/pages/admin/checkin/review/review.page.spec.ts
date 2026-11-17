@@ -123,10 +123,11 @@ describe('ReviewPage', () => {
 		await fixture.whenStable();
 	});
 
-	it('shows shopper access to admins and owners, but not check-in-only staff', async () => {
+	it('shows read-only shopper access to admins and owners, but not check-in-only staff', async () => {
 		const panel = (): HTMLElement | null =>
 			fixture.nativeElement.querySelector('admin-shopper-access-panel');
 		expect(panel()).not.toBeNull();
+		expect(panel()?.querySelector('[data-testid=change-shopper-access]')).toBeNull();
 
 		isAdmin$.next(false);
 		await fixture.whenStable();
@@ -135,6 +136,7 @@ describe('ReviewPage', () => {
 		isOwner$.next(true);
 		await fixture.whenStable();
 		expect(panel()).not.toBeNull();
+		expect(panel()?.querySelector('[data-testid=change-shopper-access]')).toBeNull();
 	});
 
 	it('hides forbidden reservation actions for check-in staff and clears them when roles change', async () => {

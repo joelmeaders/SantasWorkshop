@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.29] - 2026-11-16
+
+### Fixed
+
+- Verify that shopper access is read-only from registration review.
+
 ## [2026.10.28] - 2026-11-11
 
 ### Added

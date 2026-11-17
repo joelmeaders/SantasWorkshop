@@ -17,17 +17,19 @@
 					@if (state.updatedAt) { · {{ state.updatedAt | adminDate:'medium' }} }
 				</ion-note>
 			}
-			<div>
-				<ion-button
-					[disabled]="busy()"
-					data-testid="change-shopper-access"
-					[color]="state.disabled ? 'primary' : 'danger'"
-					fill="outline"
-					(click)="changeAccess(!state.disabled)"
-				>
-					{{ (state.disabled ? 'Re-enable access' : 'Disable access') | adminText }}
-				</ion-button>
-			</div>
+			@if (canManageAccess()) {
+				<div>
+					<ion-button
+						[disabled]="busy()"
+						data-testid="change-shopper-access"
+						[color]="state.disabled ? 'primary' : 'danger'"
+						fill="outline"
+						(click)="changeAccess(!state.disabled)"
+					>
+						{{ (state.disabled ? 'Re-enable access' : 'Disable access') | adminText }}
+					</ion-button>
+				</div>
+			}
 		} @else if (state.uid === uid() && state.kind === 'error') {
 			<p>{{ 'Could not load shopper access.' | adminText }}</p>
 			<ion-button fill="clear" (click)="loadAgain()">{{ 'Try Again' | adminText }}</ion-button>

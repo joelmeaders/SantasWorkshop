@@ -77,7 +77,7 @@ export const ShopperAccessInContext: Story = {
 		await expect(
 			await access.findByText('Access is enabled'),
 		).toBeVisible();
-		await expect(access.getByText('Disable access')).toBeVisible();
+		await expect(access.queryByTestId('change-shopper-access')).not.toBeInTheDocument();
 		await expect(canvas.getByText('Ava Rivera')).toBeVisible();
 	},
 };

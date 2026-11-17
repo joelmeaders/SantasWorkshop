@@ -8,6 +8,7 @@ import {
 import admin from '../firebase-admin';
 import {
 	fetchPublicParametersEnvelope,
+	getPublicParameters,
 	isLocalPublicParameters,
 } from './public-parameters';
 
@@ -40,40 +41,58 @@ export const waitingListSettingsFromTemplate = (
 	}
 };
 
-let current = defaultWaitingListSettings();
-let expiresAt = 0;
-let pending: Promise<WaitingListSettings> | undefined;
+interface WaitingListAccess {
+	settings: WaitingListSettings;
+	maintenanceModeEnabled: boolean;
+}
 
-export const getWaitingListSettings =
-	async (): Promise<WaitingListSettings> => {
-		if (isLocalPublicParameters()) {
-			const snapshot = await admin
-				.firestore()
-				.doc('_testConfig/waitingList')
-				.get();
-			try {
-				return parseWaitingListSettings(snapshot.data());
-			} catch {
-				return defaultWaitingListSettings();
-			}
+const defaultWaitingListAccess = (): WaitingListAccess => ({
+	settings: defaultWaitingListSettings(),
+	maintenanceModeEnabled: false,
+});
+
+let current = defaultWaitingListAccess();
+let expiresAt = 0;
+let pending: Promise<WaitingListAccess> | undefined;
+
+export const getWaitingListAccess = async (): Promise<WaitingListAccess> => {
+	if (isLocalPublicParameters()) {
+		const [snapshot, parameters] = await Promise.all([
+			admin.firestore().doc('_testConfig/waitingList').get(),
+			getPublicParameters(),
+		]);
+		try {
+			return {
+				settings: parseWaitingListSettings(snapshot.data()),
+				maintenanceModeEnabled: parameters.maintenanceModeEnabled,
+			};
+		} catch {
+			return defaultWaitingListAccess();
 		}
-		if (Date.now() < expiresAt) return { ...current };
-		pending ??= fetchPublicParametersEnvelope()
-			.then((response) => {
-				current =
-					response.source === 'fresh'
-						? parseWaitingListSettings(response.waitingList)
-						: defaultWaitingListSettings();
-				expiresAt = Date.now() + 10_000;
-				return { ...current };
-			})
-			.catch(() => {
-				current = defaultWaitingListSettings();
-				expiresAt = Date.now() + 10_000;
-				return { ...current };
-			})
-			.finally(() => {
-				pending = undefined;
-			});
-		return pending;
-	};
+	}
+	if (Date.now() < expiresAt) return current;
+	pending ??= fetchPublicParametersEnvelope()
+		.then((response) => {
+			current =
+				response.source === 'fresh'
+					? {
+							settings: parseWaitingListSettings(response.waitingList),
+							maintenanceModeEnabled: response.settings.maintenanceModeEnabled,
+						}
+					: defaultWaitingListAccess();
+			expiresAt = Date.now() + 10_000;
+			return current;
+		})
+		.catch(() => {
+			current = defaultWaitingListAccess();
+			expiresAt = Date.now() + 10_000;
+			return current;
+		})
+		.finally(() => {
+			pending = undefined;
+		});
+	return pending;
+};
+
+export const getWaitingListSettings = async (): Promise<WaitingListSettings> =>
+	({ ...(await getWaitingListAccess()).settings });

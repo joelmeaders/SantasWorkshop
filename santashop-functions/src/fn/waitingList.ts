@@ -12,7 +12,7 @@ import {
 import { requireAuthenticatedUid } from '../utility/callable-validation';
 import { getBookingNow } from '../utility/booking-clock';
 import { PROGRAM_YEAR } from '../utility/runtime-config';
-import { getWaitingListSettings } from '../utility/waiting-list-settings';
+import { getWaitingListAccess } from '../utility/waiting-list-settings';
 import {
 	requireObject,
 	requireOnlyKeys,
@@ -76,13 +76,13 @@ export const getWaitingListState = async (
 ): Promise<WaitingListState> => {
 	const uid = requireAuthenticatedUid(request);
 	requireOnlyKeys(requireObject(request.data), []);
-	const [snapshot, settings] = await Promise.all([
+	const [snapshot, { settings, maintenanceModeEnabled }] = await Promise.all([
 		admin.firestore().doc(`${COLLECTION_SCHEMA.registrations}/${uid}`).get(),
-		getWaitingListSettings(),
+		getWaitingListAccess(),
 	]);
 	const registration = snapshot.data() as Registration | undefined;
 	const initial = waitingListEligibility(registration, settings, false);
-	if (!initial.canJoin) return initial;
+	if (!initial.canJoin || maintenanceModeEnabled) return initial;
 	return waitingListEligibility(
 		registration,
 		settings,
@@ -112,7 +112,7 @@ export const setWaitingListMembership = async (
 	const receiptRef = ref
 		.collection(MUTATION_RECEIPTS_SUBCOLLECTION)
 		.doc(mutationId);
-	const settings = await getWaitingListSettings();
+	const { settings, maintenanceModeEnabled } = await getWaitingListAccess();
 	const now = await getBookingNow(db);
 	await db.runTransaction(async (transaction) => {
 		const [snapshot, receipt] = await Promise.all([
@@ -141,7 +141,7 @@ export const setWaitingListMembership = async (
 			if (!initial.active) {
 				if (
 					!initial.canJoin ||
-					(await hasWaitingListCapacity(now, transaction))
+					(!maintenanceModeEnabled && (await hasWaitingListCapacity(now, transaction)))
 				)
 					throw new HttpsError(
 						'failed-precondition',

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.17] - 2026-11-16
+
+### Fixed
+
+- Show shopper access status without the disable or re-enable button on registration review.
+
 ## [2026.11.16] - 2026-11-15
 
 ### Fixed

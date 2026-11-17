@@ -2,7 +2,9 @@
 
 The waiting list is optional. An existing customer account can join only when
 its current-year registration has no appointment, completed registration, or
-check-in, and no operator-enabled future appointment has available capacity.
+check-in, and no operator-enabled future appointment has available capacity. Maintenance
+mode pauses booking, so future slots do not prevent eligible customers from
+joining while maintenance is active.
 Capacity uses the existing scheduled `slotsReserved` counters. This feature
 does not add a hard booking limit, priority, or a reserved appointment.
 

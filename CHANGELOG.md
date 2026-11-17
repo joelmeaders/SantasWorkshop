@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.17] - 2026-11-16
+
+### Fixed
+
+- Allow eligible signed-in shoppers to join the waiting list during maintenance. Hide the shopper access action on admin registration review.
+
 ## [2026.11.16] - 2026-11-15
 
 ### Fixed

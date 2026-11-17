@@ -48,7 +48,7 @@ test.describe('shopper access on registration review', () => {
 		},
 	);
 
-	test('lets an admin disable a shopper with a reason and restore access separately', async ({
+	test('shows shopper access to an admin without allowing changes', async ({
 		page,
 		seedAdminUser,
 	}) => {
@@ -59,36 +59,10 @@ test.describe('shopper access on registration review', () => {
 		const panel = page.getByTestId('shopper-access-panel');
 		await expect(panel).toContainText('Access is enabled');
 
-		await panel.getByTestId('change-shopper-access').click();
-		const dialog = page.locator('ion-alert').last();
-		await expect(dialog).toContainText(
-			'This does not cancel a registration or send an email.',
-		);
-		const disable = dialog.getByRole('button', {
-			name: 'Disable access',
-			exact: true,
-		});
-		await disable.click();
-		await expect(dialog).toBeVisible();
-		await dialog
-			.getByRole('radio', { name: 'Suspected automated signup' })
-			.click();
-		await disable.click();
-		await expect(panel).toContainText('Access is disabled');
-		await expect(panel).toContainText('Suspected automated signup');
-
-		await panel.getByTestId('change-shopper-access').click();
-		const restore = page.locator('ion-alert').last();
-		await expect(restore).toContainText('This restores access only.');
-		await restore
-			.getByRole('button', { name: 'Re-enable access', exact: true })
-			.click();
-		await expect(panel).toContainText('Access is enabled');
-		await expect(panel).toContainText('Reviewed and cleared');
-		await expect(panel).toContainText(admin.uid!);
+		await expect(panel.getByTestId('change-shopper-access')).toHaveCount(0);
 	});
 
-	test('shows the registration control to an owner but leaves email search unchanged', async ({
+	test('shows read-only shopper access to an owner but leaves email search unchanged', async ({
 		page,
 		seedAdminUser,
 	}) => {

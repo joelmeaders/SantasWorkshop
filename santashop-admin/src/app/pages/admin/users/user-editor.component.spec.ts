@@ -67,21 +67,87 @@ describe('UserEditorComponent', () => {
 	it('updates an existing account, including an optional password, and can cancel', async () => {
 		const modalController = TestBed.inject(ModalController);
 		component.account = {
-			uid: 'staff-2', displayName: 'Check-In Staff', emailAddress: 'staff@example.com',
-			roles: ['checkin'], disabled: false, createdOn: new Date(), updatedOn: new Date(),
+			uid: 'staff-2',
+			displayName: 'Check-In Staff',
+			emailAddress: 'staff@example.com',
+			roles: ['checkin'],
+			disabled: false,
+			createdOn: new Date(),
+			updatedOn: new Date(),
 		};
 		component.isOwner = true;
 		component.ngOnInit();
-		component.form.patchValue({ displayName: 'Updated Staff', roles: ['admin'], password: 'NewPassword!' });
+		component.form.patchValue({
+			displayName: 'Updated Staff',
+			roles: ['admin'],
+			password: 'NewPassword!',
+		});
 
 		await component.save();
 		await component.dismiss();
 
-		expect(component.roleOptions.map((option) => option.value)).toEqual(['admin', 'checkin']);
-		expect(modalController.dismiss).toHaveBeenNthCalledWith(1, {
-			uid: 'staff-2', displayName: 'Updated Staff', roles: ['admin', 'checkin'], disabled: false, newPassword: 'NewPassword!',
-		}, 'update');
-		expect(modalController.dismiss).toHaveBeenNthCalledWith(2, undefined, 'cancelled');
+		expect(component.roleOptions.map((option) => option.value)).toEqual([
+			'admin',
+			'checkin',
+		]);
+		expect(modalController.dismiss).toHaveBeenNthCalledWith(
+			1,
+			{
+				uid: 'staff-2',
+				displayName: 'Updated Staff',
+				roles: ['admin', 'checkin'],
+				disabled: false,
+				newPassword: 'NewPassword!',
+			},
+			'update',
+		);
+		expect(modalController.dismiss).toHaveBeenNthCalledWith(
+			2,
+			undefined,
+			'cancelled',
+		);
+	});
+
+	it('preserves a delegated review permission on an existing account and requires Admin', async () => {
+		const modalController = TestBed.inject(ModalController);
+		component.isOwner = true;
+		component.account = {
+			uid: 'reviewer-fixture',
+			displayName: 'Demo Reviewer',
+			emailAddress: 'reviewer@example.test',
+			roles: ['admin', 'registration-review'],
+			disabled: false,
+			createdOn: new Date(),
+			updatedOn: new Date(),
+		};
+		component.ngOnInit();
+		expect(component.roleOptions.map((option) => option.value)).toContain(
+			'registration-review',
+		);
+		component.form.controls['roles'].setValue([
+			'checkin',
+			'registration-review',
+		]);
+		expect(
+			component.form.controls['roles'].hasError('reviewRequiresAdmin'),
+		).toBe(true);
+		await component.save();
+		expect(modalController.dismiss).not.toHaveBeenCalled();
+		component.form.controls['roles'].setValue([
+			'admin',
+			'registration-review',
+		]);
+		await component.save();
+		expect(modalController.dismiss).toHaveBeenCalledWith(
+			expect.objectContaining({
+				roles: ['admin', 'registration-review', 'checkin'],
+			}),
+			'update',
+		);
+		component.isOwner = false;
+		expect(
+			component.roleOptions.map((option) => option.value),
+		).not.toContain('registration-review');
 	});
 
 	it('marks invalid create forms as touched without dismissing', async () => {

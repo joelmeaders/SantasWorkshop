@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { createHash, randomUUID } from 'node:crypto';
 import { HttpsError } from 'firebase-functions/v2/https';
 import type { Registration, User } from '../models';
@@ -138,6 +139,16 @@ export const finalizeAccountProvisioning = async (
 					'failed-precondition',
 					'Registration details changed. Contact support to finish setup.',
 				);
+			await assertRegistrationReviewAllowed(
+				db,
+				{
+					uid,
+					email:
+						(user.data() as User | undefined)?.emailAddress ??
+						saved.user.emailAddress,
+				},
+				transaction,
+			);
 			if (!user.exists) transaction.create(userRef, saved.user);
 			if (!registration.exists) {
 				const profile = user.exists

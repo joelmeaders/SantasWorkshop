@@ -2,6 +2,12 @@
 
 All notable changes to the shared models library will be documented in this file.
 
+## [2026.09.0-beta.13] - 2026-11-16
+
+### Added
+
+- Add the Registration Review delegation role for administrators.
+
 ## [2026.09.0-beta.12] - 2026-10-23
 
 ### Added

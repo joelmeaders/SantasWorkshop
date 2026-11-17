@@ -120,7 +120,6 @@ describe('callableUpdateStaffUser handler', () => {
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['admin', 'checkin'],
-
 		});
 	});
 
@@ -137,7 +136,6 @@ describe('callableUpdateStaffUser handler', () => {
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['admin', 'checkin'],
-
 		});
 	});
 
@@ -210,5 +208,64 @@ describe('callableUpdateStaffUser handler', () => {
 				),
 			),
 		).rejects.toMatchObject({ code: 'invalid-argument' });
+	});
+	it('only allows the owner to grant review on an admin and preserves unrelated claims upon grant and revocation', async () => {
+		const { callableUpdateStaffUser } =
+			await loadStaffAdminHandlers(adminMock);
+		const request = {
+			uid: 'staff-1',
+			roles: ['admin', 'registration-review'],
+		} satisfies UpdateStaffUser;
+		await expect(
+			callableUpdateStaffUser(
+				createCallableRequest(request, { roles: ['admin'] }),
+			),
+		).rejects.toMatchObject({ code: 'permission-denied' });
+		await expect(
+			callableUpdateStaffUser(
+				createCallableRequest(
+					{
+						uid: 'staff-1',
+						roles: ['checkin', 'registration-review'],
+					},
+					{ owner: true },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		adminMock.setUserClaims('staff-1', {
+			roles: ['admin', 'checkin'],
+			existingClaim: true,
+		});
+		await callableUpdateStaffUser(
+			createCallableRequest(request, { owner: true }),
+		);
+		expect(adminMock.setCustomUserClaims).toHaveBeenLastCalledWith(
+			'staff-1',
+			{
+				roles: ['admin', 'registration-review', 'checkin'],
+				existingClaim: true,
+			},
+		);
+		expect(
+			adminMock.getDocRef('staff/staff-1').set,
+		).toHaveBeenLastCalledWith(
+			expect.objectContaining({
+				roles: ['admin', 'registration-review', 'checkin'],
+			}),
+			{ merge: true },
+		);
+		await callableUpdateStaffUser(
+			createCallableRequest(
+				{ uid: 'staff-1', roles: ['admin'] },
+				{ owner: true },
+			),
+		);
+		expect(adminMock.setCustomUserClaims).toHaveBeenLastCalledWith(
+			'staff-1',
+			{
+				roles: ['admin', 'checkin'],
+				existingClaim: true,
+			},
+		);
 	});
 });

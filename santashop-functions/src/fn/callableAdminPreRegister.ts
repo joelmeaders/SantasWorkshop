@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import {
@@ -97,6 +98,9 @@ export default async function callableAdminPreRegister(
 	);
 	record.children = requireCanonicalChildren(record.children);
 
+	await assertRegistrationReviewAllowed(admin.firestore(), {
+		email: emailAddress,
+	});
 	// Create Account
 	let newUserAccount;
 

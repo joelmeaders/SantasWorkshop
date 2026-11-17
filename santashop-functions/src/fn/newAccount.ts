@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { getPublicParametersForMutation } from '../utility/public-parameters';
 import { normalizeEmailLanguage } from '../utility/email-templates';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
@@ -91,6 +92,9 @@ export default async function newAccount(
 		);
 	}
 
+	await assertRegistrationReviewAllowed(admin.firestore(), {
+		email: data.emailAddress,
+	});
 	try {
 		await admin.auth().getUserByEmail(data.emailAddress);
 		throw new HttpsError(

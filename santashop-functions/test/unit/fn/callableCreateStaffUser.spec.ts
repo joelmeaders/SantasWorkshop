@@ -115,7 +115,6 @@ describe('callableCreateStaffUser handler', () => {
 		);
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['checkin', 'admin'],
-
 		});
 		expect(adminMock.getDocRef('staff/staff-1').set).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -141,7 +140,6 @@ describe('callableCreateStaffUser handler', () => {
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['admin', 'checkin'],
-
 		});
 	});
 
@@ -150,12 +148,13 @@ describe('callableCreateStaffUser handler', () => {
 			await loadStaffAdminHandlers(adminMock);
 
 		await callableCreateStaffUser(
-			createCallableRequest(validPayload(), { roles: ['admin', 'checkin'] }),
+			createCallableRequest(validPayload(), {
+				roles: ['admin', 'checkin'],
+			}),
 		);
 
 		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
 			roles: ['checkin'],
-
 		});
 	});
 
@@ -196,9 +195,44 @@ describe('callableCreateStaffUser handler', () => {
 
 		await expect(
 			callableCreateStaffUser(
-				createCallableRequest(validPayload(), { roles: ['admin', 'checkin'] }),
+				createCallableRequest(validPayload(), {
+					roles: ['admin', 'checkin'],
+				}),
 			),
 		).rejects.toMatchObject({ code: 'internal' });
 		expect(adminMock.deleteUser).toHaveBeenCalledWith('staff-1');
+	});
+	it('allows explicit registration review only on an owner-created administrator', async () => {
+		const { callableCreateStaffUser } =
+			await loadStaffAdminHandlers(adminMock);
+		const request = {
+			...validPayload(),
+			roles: ['admin', 'registration-review'] as const,
+		};
+		await expect(
+			callableCreateStaffUser(
+				createCallableRequest(
+					{ ...request, roles: [...request.roles] },
+					{ roles: ['admin'] },
+				),
+			),
+		).rejects.toMatchObject({ code: 'permission-denied' });
+		await expect(
+			callableCreateStaffUser(
+				createCallableRequest(
+					{ ...request, roles: ['checkin', 'registration-review'] },
+					{ owner: true },
+				),
+			),
+		).rejects.toMatchObject({ code: 'invalid-argument' });
+		await callableCreateStaffUser(
+			createCallableRequest(
+				{ ...request, roles: [...request.roles] },
+				{ owner: true },
+			),
+		);
+		expect(adminMock.setCustomUserClaims).toHaveBeenCalledWith('staff-1', {
+			roles: ['admin', 'registration-review', 'checkin'],
+		});
 	});
 });

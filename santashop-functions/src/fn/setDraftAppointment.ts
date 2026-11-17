@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { getBookingNow } from '../utility/booking-clock';
 import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
@@ -65,12 +66,17 @@ export default async function setDraftAppointment(
 			'setDraftAppointment',
 		);
 		if (cached) return;
+		const registrationData = registrationSnapshot.data() as
+			Registration | undefined;
+		await assertRegistrationReviewAllowed(
+			db,
+			{ uid, email: registrationData?.emailAddress },
+			transaction,
+		);
 		const parameters = await readParameters();
 		const now = await getBookingNow(db);
 		requireOpenPreRegistration(parameters);
-		const registration = requireDraftRegistration(
-			registrationSnapshot.data() as Registration | undefined,
-		);
+		const registration = requireDraftRegistration(registrationData);
 		requireCanonicalChildren(registration.children);
 		const slot = requireEnabledCurrentSlot(
 			slotSnapshot.data() as DateTimeSlot | undefined,
@@ -82,9 +88,15 @@ export default async function setDraftAppointment(
 			requireReviewedAppointment(data['reviewedDateTime'], slot.dateTime);
 		transaction.set(
 			registrationRef,
-			{ dateTimeSlot: { id: slot.id, dateTime: slot.dateTime },
+			{
+				dateTimeSlot: { id: slot.id, dateTime: slot.dateTime },
 				...(registration.waitingList?.active
-					? { waitingList: { ...registration.waitingList, active: false } }
+					? {
+							waitingList: {
+								...registration.waitingList,
+								active: false,
+							},
+						}
 					: {}),
 			},
 			{ merge: true },

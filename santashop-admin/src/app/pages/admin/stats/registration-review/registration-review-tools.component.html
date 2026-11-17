@@ -1,0 +1,165 @@
+@if (steps().length || recovery().length) {
+	<section class="tool-panel" aria-labelledby="review-tools-title">
+		<h3 id="review-tools-title">{{ 'Review tools' | adminText }}</h3>
+		<p>
+			{{
+				'Use the least disruptive action that resolves the case.'
+					| adminText
+			}}
+		</p>
+		<div class="tool-list">
+			@for (option of steps(); track option) {
+				<button type="button" (click)="open(option)">
+					<strong>{{ labels[option.action] | adminText }}</strong>
+					<small
+						>{{ option.record.name }} ({{ option.record.id }})
+						@if (option.child) {
+							· {{ option.child.name }}
+						}
+					</small>
+				</button>
+			}
+		</div>
+		@if (recovery().length) {
+			<h4>{{ 'Recovery options' | adminText }}</h4>
+			<div class="tool-list">
+				@for (option of recovery(); track option) {
+					<button type="button" (click)="open(option)">
+						<strong>{{ labels[option.action] | adminText }}</strong>
+						<small
+							>{{ option.record.name }} ({{ option.record.id }})
+							@if (option.child) {
+								· {{ option.child.name }}
+							}
+						</small>
+					</button>
+				}
+			</div>
+		}
+	</section>
+}
+@if (prompt(); as option) {
+	<dialog
+		#actionDialog
+		aria-labelledby="review-action-title"
+		(cancel)="close($event)"
+	>
+		<form (submit)="confirm($event)">
+			<h3 id="review-action-title">
+				{{ labels[option.action] | adminText }}
+			</h3>
+			<p>
+				{{ option.record.name }} ({{ option.record.id }})
+				@if (option.child) {
+					· {{ option.child.name }}
+				}
+			</p>
+			@if (option.action === 'unblacklist') {
+				<p class="action-caution">
+					{{
+						'This removes the cross-season email block only. It will not re-enable a Firebase Auth account. Verify or recover sign-in separately.'
+							| adminText
+					}}
+				</p>
+			} @else if (option.action === 'blacklist') {
+				<p class="action-caution">
+					{{
+						'This blocks the shopper email across seasons and restricts their sign-in.'
+							| adminText
+					}}
+				</p>
+			}
+			@if (option.action === 'editChild') {
+				<label
+					>{{ 'First name' | adminText }}
+					<input
+						[value]="firstName()"
+						maxlength="80"
+						(input)="firstName.set($any($event.target).value)"
+						required
+				/></label>
+				<label
+					>{{ 'Last name' | adminText }}
+					<input
+						[value]="lastName()"
+						maxlength="80"
+						(input)="lastName.set($any($event.target).value)"
+						required
+				/></label>
+				<label
+					>{{ 'Birth date' | adminText }}
+					<input
+						type="date"
+						[value]="birthDate()"
+						(input)="birthDate.set($any($event.target).value)"
+						required
+				/></label>
+			}
+			<label
+				>{{ 'Reason (internal only)' | adminText }}
+				<textarea
+					rows="2"
+					maxlength="500"
+					[value]="reason()"
+					(input)="reason.set($any($event.target).value)"
+					required
+				></textarea>
+			</label>
+			@if (option.record.email) {
+				@if (option.action !== 'contact') {
+					<label class="choice"
+						><input
+							type="checkbox"
+							[checked]="notify()"
+							(change)="notify.set($any($event.target).checked)"
+						/>
+						{{ 'Also send a shopper email' | adminText }}</label
+					>
+				}
+				@if (notify()) {
+					<p>
+						{{ 'Recipient' | adminText }}:
+						<strong>{{ option.record.email }}</strong>
+					</p>
+					<p>
+						{{ 'Reply-to' | adminText }}:
+						<strong>{{ replyTo }}</strong>
+					</p>
+					<label
+						>{{ 'Custom message (optional)' | adminText }}
+						<textarea
+							rows="3"
+							maxlength="1000"
+							[value]="message()"
+							(input)="message.set($any($event.target).value)"
+						></textarea>
+					</label>
+					<small>{{
+						'Do not include details from the other registration or internal notes.'
+							| adminText
+					}}</small>
+				}
+			}
+			@if (error()) {
+				<p role="alert">{{ error() | adminText }}</p>
+			}
+			<div class="dialog-footer">
+				<button type="button" (click)="close()" [disabled]="pending()">
+					{{ 'Keep unchanged' | adminText }}
+				</button>
+				<button
+					type="submit"
+					class="confirm"
+					[disabled]="!canConfirm()"
+				>
+					{{
+						(notify()
+							? 'Confirm and queue email'
+							: 'Confirm without email'
+						) | adminText
+					}}
+				</button>
+			</div>
+		</form>
+	</dialog>
+}

@@ -1,9 +1,14 @@
 import type { UpdatePreferredLanguageRequest } from '@santashop/models';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import {
+	onDocumentCreated,
+	onDocumentWritten,
+} from 'firebase-functions/v2/firestore';
 import { HttpsError, onCall, onRequest } from 'firebase-functions/v2/https';
 import { RESET_VALUE, setGlobalOptions } from 'firebase-functions/v2/options';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { onTaskDispatched } from 'firebase-functions/v2/tasks';
+import type { ReviewStatus } from './utility/registration-review';
+import type { ReviewQueueRequest } from './utility/registration-review-store';
 import { FUNCTION_REGION } from './utility/function-region';
 import {
 	observeCallableHandler,
@@ -177,7 +182,9 @@ export const publicParametersGateway = onRequest(
 			? 'private'
 			: [
 					REMOTE_CONFIG_READER_IDENTITY.serviceAccount!,
-					...(FUNCTIONS_SERVICE_ACCOUNT ? [FUNCTIONS_SERVICE_ACCOUNT] : []),
+					...(FUNCTIONS_SERVICE_ACCOUNT
+						? [FUNCTIONS_SERVICE_ACCOUNT]
+						: []),
 				],
 	},
 	publicParametersGatewayHandler,
@@ -251,6 +258,56 @@ export const callableGetShopperAccess = onCall(
 	LOW_VOLUME_OPTIONS,
 	observeCallableHandler('callableGetShopperAccess', async (request) =>
 		(await import('./fn/shopperAccess')).getAdminShopperAccess(request),
+	),
+);
+
+export const listRegistrationReviewCases = onCall<ReviewQueueRequest>(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('listRegistrationReviewCases', async (request) =>
+		(await import('./fn/registrationReview')).listRegistrationReviewCases(
+			request,
+		),
+	),
+);
+
+export const getRegistrationReviewCase = onCall<{ id: string }>(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('getRegistrationReviewCase', async (request) =>
+		(await import('./fn/registrationReview')).getRegistrationReviewCase(
+			request,
+		),
+	),
+);
+
+export const setRegistrationReviewStatus = onCall<{
+	id: string;
+	status: ReviewStatus;
+}>(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('setRegistrationReviewStatus', async (request) =>
+		(await import('./fn/registrationReview')).setRegistrationReviewStatus(
+			request,
+		),
+	),
+);
+
+export const addRegistrationReviewNote = onCall<{
+	id: string;
+	noteId: string;
+	text: string;
+}>(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('addRegistrationReviewNote', async (request) =>
+		(await import('./fn/registrationReview')).addRegistrationReviewNote(
+			request,
+		),
+	),
+);
+
+export const performRegistrationReviewAction = onCall(
+	LOW_VOLUME_OPTIONS,
+	observeCallableHandler('performRegistrationReviewAction', async (request) =>
+		(await import('./fn/performRegistrationReviewAction')).default(request),
 	),
 );
 
@@ -602,12 +659,70 @@ export const sendNewRegistrationEmails = onDocumentCreated(
 	}),
 );
 
+export const sendRegistrationReviewEmail = onDocumentCreated(
+	{
+		labels: MANAGED_RESOURCE_LABELS,
+		document:
+			'registrationReviewSeasons/{season}/cases/{caseId}/actions/{actionId}/email/{jobId}',
+		retry: false,
+		memory: '256MiB',
+		maxInstances: 2,
+		minInstances: 0,
+		timeoutSeconds: 120,
+	},
+	observeDocumentHandler('sendRegistrationReviewEmail', async (event) => {
+		if (
+			!event.data ||
+			(RUNNING_IN_FUNCTIONS_EMULATOR &&
+				!SEND_EMAILS_FROM_FUNCTIONS_EMULATOR)
+		)
+			return;
+		await (
+			await import('./fn/sendRegistrationReviewEmail')
+		).default(event.data, event.time);
+	}),
+);
+
 // ------------------------------------- SCHEDULED FUNCTIONS
 
 /**
  * Backs up firestore db every night to storage bucket
  * At 00:00 in November and December
  */
+export const captureRegistrationReviewChange = onDocumentWritten(
+	{
+		document: 'registrations/{registrationId}',
+		retry: true,
+		maxInstances: 3,
+		memory: '256MiB',
+		timeoutSeconds: 30,
+		labels: MANAGED_RESOURCE_LABELS,
+	},
+	observeDocumentHandler('captureRegistrationReviewChange', async (event) =>
+		(
+			await import('./fn/scheduledRegistrationReview')
+		).captureRegistrationReviewChange(event),
+	),
+);
+
+export const scheduledRegistrationReview = onSchedule(
+	{
+		schedule: '0 2 * * *',
+		timeZone: SHOP_TIME_ZONE,
+		maxInstances: 1,
+		concurrency: 1,
+		timeoutSeconds: 180,
+		retryCount: 0,
+		memory: '256MiB',
+		labels: MANAGED_RESOURCE_LABELS,
+	},
+	observeScheduledHandler('scheduledRegistrationReview', async () =>
+		(
+			await import('./fn/scheduledRegistrationReview')
+		).runScheduledRegistrationReview(),
+	),
+);
+
 export const scheduledFirestoreBackup = onSchedule(
 	{
 		labels: MANAGED_RESOURCE_LABELS,
@@ -892,9 +1007,14 @@ export const testSeedAdminUser = emulatorOnly(() =>
 					: false;
 			const roles = Array.isArray((data as { roles?: unknown }).roles)
 				? ((data as { roles: unknown[] }).roles.filter(
-						(role): role is 'admin' | 'checkin' =>
-							role === 'admin' || role === 'checkin',
-					) as ('admin' | 'checkin')[])
+						(
+							role,
+						): role is
+							'admin' | 'checkin' | 'registration-review' =>
+							role === 'admin' ||
+							role === 'checkin' ||
+							role === 'registration-review',
+					) as ('admin' | 'checkin' | 'registration-review')[])
 				: undefined;
 
 			if (!password) {

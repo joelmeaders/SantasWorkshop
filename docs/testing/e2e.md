@@ -98,6 +98,17 @@ To run the whole prepared target in terminal 3, use `pnpm run e2e:run:app`
 or `pnpm run e2e:run:admin`. These commands wait for services and run the
 callable readiness probe before Playwright.
 
+### Registration Review
+
+Registration Review is off by default. `pnpm run e2e:test:admin` opts in inside
+the synthetic demo suite only. For a manual targeted run, set
+`SANTASHOP_REGISTRATION_REVIEW_ENABLED=true` in the shell that prepares the
+Admin build, starts the Functions emulator, and runs
+`pnpm --filter @santashop/e2e exec playwright test tests/admin/registration-review.spec.ts`
+after manually preparing the Admin app and verifying emulator readiness. These
+tests use only the demo project and synthetic registrations. The review email
+worker suppresses real delivery in the emulators.
+
 ### Interactive debugging
 
 After preparing the target, starting its server and emulators, and completing

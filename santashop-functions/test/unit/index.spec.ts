@@ -5,6 +5,7 @@ const setGlobalOptionsMock = vi.fn();
 const onCallMock = vi.fn();
 const onRequestMock = vi.fn();
 const onDocumentCreatedMock = vi.fn();
+const onDocumentWrittenMock = vi.fn();
 const onScheduleMock = vi.fn();
 const onTaskDispatchedMock = vi.fn();
 const sendNewRegistrationEmailsMock = vi.fn();
@@ -25,6 +26,7 @@ vi.mock('firebase-functions/v2/https', () => ({
 
 vi.mock('firebase-functions/v2/firestore', () => ({
 	onDocumentCreated: onDocumentCreatedMock,
+	onDocumentWritten: onDocumentWrittenMock,
 }));
 
 vi.mock('firebase-functions/v2/scheduler', () => ({
@@ -45,6 +47,7 @@ describe('functions index exports', () => {
 		onCallMock.mockClear();
 		onRequestMock.mockClear();
 		onDocumentCreatedMock.mockClear();
+		onDocumentWrittenMock.mockClear();
 		onScheduleMock.mockClear();
 		onTaskDispatchedMock.mockClear();
 		sendNewRegistrationEmailsMock.mockClear();
@@ -59,6 +62,10 @@ describe('functions index exports', () => {
 			handler,
 		}));
 		onDocumentCreatedMock.mockImplementation((options, handler) => ({
+			options,
+			handler,
+		}));
+		onDocumentWrittenMock.mockImplementation((options, handler) => ({
 			options,
 			handler,
 		}));
@@ -101,6 +108,37 @@ describe('functions index exports', () => {
 							process.env.SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT,
 					}
 				: {}),
+		});
+	});
+
+	it('keeps registration review endpoints App Check protected when deployed and bounds the nightly trigger', async () => {
+		delete process.env.FUNCTIONS_EMULATOR;
+		const subject = await import('../../src/index');
+		for (const endpoint of [
+			subject.listRegistrationReviewCases,
+			subject.getRegistrationReviewCase,
+			subject.setRegistrationReviewStatus,
+			subject.addRegistrationReviewNote,
+			subject.performRegistrationReviewAction,
+		]) {
+			expect(endpoint).toMatchObject({
+				options: { enforceAppCheck: true, minInstances: 0 },
+			});
+		}
+		expect(subject.captureRegistrationReviewChange).toMatchObject({
+			options: {
+				document: 'registrations/{registrationId}',
+				retry: true,
+				maxInstances: 3,
+			},
+		});
+		expect(subject.scheduledRegistrationReview).toMatchObject({
+			options: {
+				schedule: '0 2 * * *',
+				timeZone: 'America/Denver',
+				maxInstances: 1,
+				retryCount: 0,
+			},
 		});
 	});
 
@@ -236,9 +274,10 @@ describe('functions index exports', () => {
 			minInstances: 0,
 			invoker: [
 				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
-				'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
+					'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
 				...(process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT']
-					? [process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT']] : []),
+					? [process.env['SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT']]
+					: []),
 			],
 		});
 		expect(onRequestMock).toHaveBeenCalledTimes(1);
@@ -247,15 +286,27 @@ describe('functions index exports', () => {
 
 	it('allows only the configured existing signup runtime alongside the gateway reader', async () => {
 		delete process.env.FUNCTIONS_EMULATOR;
-		vi.stubEnv('SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT', 'signup-runtime@example.iam.gserviceaccount.com');
+		vi.stubEnv(
+			'SANTASHOP_FUNCTIONS_SERVICE_ACCOUNT',
+			'signup-runtime@example.iam.gserviceaccount.com',
+		);
 		try {
 			const subject = await import('../../src/index');
-			const gateway = subject.publicParametersGateway as unknown as { options: Record<string, unknown> };
+			const gateway = subject.publicParametersGateway as unknown as {
+				options: Record<string, unknown>;
+			};
 			expect(gateway.options.invoker).toEqual([
-				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ?? 'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
+				process.env['SANTASHOP_REMOTE_CONFIG_READER_SERVICE_ACCOUNT'] ??
+					'remote-config-reader@santas-workshop-test.iam.gserviceaccount.com',
 				'signup-runtime@example.iam.gserviceaccount.com',
 			]);
-			expect((subject.newAccount as unknown as { options: Record<string, unknown> }).options).not.toHaveProperty('serviceAccount');
+			expect(
+				(
+					subject.newAccount as unknown as {
+						options: Record<string, unknown>;
+					}
+				).options,
+			).not.toHaveProperty('serviceAccount');
 		} finally {
 			vi.unstubAllEnvs();
 		}

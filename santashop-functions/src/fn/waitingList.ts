@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import type { Transaction } from 'firebase-admin/firestore';
 import admin from '../firebase-admin';
@@ -55,7 +56,9 @@ export const hasWaitingListCapacity = async (
 		.limit(50);
 	let query = base;
 	for (;;) {
-		const page = transaction ? await transaction.get(query) : await query.get();
+		const page = transaction
+			? await transaction.get(query)
+			: await query.get();
 		if (
 			page.docs.some((doc) => {
 				const slot = doc.data();
@@ -105,8 +108,14 @@ export const setWaitingListMembership = async (
 	const mutationId = requireMutationId(data['mutationId']);
 	const source = data['source'] as WaitingListSource;
 	if (active && !WAITING_LIST_SOURCES.includes(source))
-		throw new HttpsError('invalid-argument', 'Waiting list source is invalid.');
-	const signature = JSON.stringify({ active, source: active ? source : null });
+		throw new HttpsError(
+			'invalid-argument',
+			'Waiting list source is invalid.',
+		);
+	const signature = JSON.stringify({
+		active,
+		source: active ? source : null,
+	});
 	const db = admin.firestore();
 	const ref = db.doc(`${COLLECTION_SCHEMA.registrations}/${uid}`);
 	const receiptRef = ref
@@ -137,7 +146,16 @@ export const setWaitingListMembership = async (
 				'Account registration record is unavailable.',
 			);
 		if (active) {
-			const initial = waitingListEligibility(registration, settings, false);
+			await assertRegistrationReviewAllowed(
+				db,
+				{ uid, email: registration.emailAddress },
+				transaction,
+			);
+			const initial = waitingListEligibility(
+				registration,
+				settings,
+				false,
+			);
 			if (!initial.active) {
 				if (
 					!initial.canJoin ||
@@ -146,7 +164,11 @@ export const setWaitingListMembership = async (
 					throw new HttpsError(
 						'failed-precondition',
 						'The waiting list is not available for this account.',
-						{ reason: initial.canJoin ? 'capacity-available' : initial.reason },
+						{
+							reason: initial.canJoin
+								? 'capacity-available'
+								: initial.reason,
+						},
 					);
 				transaction.update(ref, {
 					waitingList: {

@@ -5,6 +5,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService, AppStateService } from '@santashop/core/admin/firestore';
 
 import { RouterLink } from '@angular/router';
+import { map, of } from 'rxjs';
+import {
+	REGISTRATION_REVIEW_READER,
+	canReadRegistrationReview,
+} from '../stats/registration-review/registration-review-reader';
 import { addIcons } from 'ionicons';
 import {
 	bagCheckOutline,
@@ -52,6 +57,12 @@ import {
 })
 export class LandingPage {
 	private readonly authService = inject(AuthService);
+	public readonly showRegistrationReview = toSignal(
+		inject(REGISTRATION_REVIEW_READER, { optional: true })
+			? this.authService.claimsResolved$.pipe(map((claims) => canReadRegistrationReview(claims ?? undefined)))
+			: of(false),
+		{ initialValue: false },
+	);
 
 	protected readonly appStateService = inject(AppStateService);
 

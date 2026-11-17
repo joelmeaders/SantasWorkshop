@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
+import { ADMIN_REVIEW_CALLABLES } from './verify-admin-hosted-callables.mjs';
 
 const rawArguments = process.argv.slice(2);
 const allowUnhashedOutput = rawArguments.includes('--allow-unhashed');
@@ -17,11 +18,7 @@ const SAME_ORIGIN_CALLABLES = {
 		'callableGetShopperAccess',
 		'callableSetShopperAccess',
 		'requestPasswordReset',
-		'listRegistrationReviewCases',
-		'getRegistrationReviewCase',
-		'setRegistrationReviewStatus',
-		'addRegistrationReviewNote',
-		'performRegistrationReviewAction',
+		...ADMIN_REVIEW_CALLABLES,
 	],
 };
 const STATIC_CACHE_SOURCES = new Set([

@@ -109,6 +109,22 @@ after manually preparing the Admin app and verifying emulator readiness. These
 tests use only the demo project and synthetic registrations. The review email
 worker suppresses real delivery in the emulators.
 
+#### Deployed Admin TEST routing smoke
+
+After the Admin and Functions TEST deploy jobs both succeed for the same exact
+commit, pass that verified SHA to each argument:
+
+```text
+node scripts/verify-admin-hosted-callables.mjs --project santas-workshop-test --scope registration-review --admin-test-sha <sha> --functions-test-sha <sha>
+```
+
+For a Hosting-only password reset fix, use `--scope reset-only` and omit
+`--functions-test-sha` after the Admin TEST deploy succeeds. This manual check
+uses unauthenticated GETs with no body against the fixed Admin TEST origin. It
+expects Firebase's JSON invalid-method rejection instead of the SPA HTML. It
+verifies routing, not the supplied SHA, sign-in, feature enablement, or email
+delivery. It never sends a reset request and is not part of either deploy job.
+
 ### Interactive debugging
 
 After preparing the target, starting its server and emulators, and completing

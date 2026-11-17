@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.20] - 2026-11-16
+
+### Fixed
+
+- Route staff password-reset requests from Admin Hosting to the existing password-reset function.
+
 ## [2026.11.17] - 2026-11-16
 
 ### Fixed

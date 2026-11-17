@@ -136,7 +136,11 @@ export function selectChanges(paths) {
 			}
 			continue;
 		}
-		if (/^scripts\/(?:ci-|ui-targets|release-|github-secrets)/.test(path)) {
+		if (
+			/^scripts\/(?:ci-|ui-targets|release-|github-secrets)/.test(path) ||
+			path === 'scripts/generate-2026-email-templates.mjs' ||
+			path === 'scripts/email-template-starters.test.mjs'
+		) {
 			selected.tooling = true;
 			continue;
 		}

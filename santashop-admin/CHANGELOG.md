@@ -2,11 +2,23 @@
 
 ## [Unreleased]
 
-## [2026.11.19] - 2026-11-16
+## [2026.11.22] - 2026-11-16
 
 ### Added
 
 - Add the theme-matched Reports review queue, paginated email and ID search, delegated reviewer access, and action controls.
+
+## [2026.11.21] - 2026-11-16
+
+### Fixed
+
+- Correct self-service cancellation instructions in English and Spanish confirmation and reminder email starters.
+
+## [2026.11.20] - 2026-11-16
+
+### Fixed
+
+- Route staff password-reset requests from Admin Hosting to the existing password-reset function.
 
 ## [2026.11.17] - 2026-11-16
 

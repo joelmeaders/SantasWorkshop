@@ -7,11 +7,23 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
-## [2026.11.19] - 2026-11-16
+## [2026.11.22] - 2026-11-16
 
 ### Added
 
 - Add an opt-in, permissioned Registration Review queue in the Admin app, with overnight detection, private notes, and audited shopper actions.
+
+## [2026.11.21] - 2026-11-16
+
+### Fixed
+
+- Correct self-service cancellation instructions in English and Spanish confirmation and reminder email starters.
+
+## [2026.11.20] - 2026-11-16
+
+### Fixed
+
+- Route staff password-reset requests from Admin Hosting to the existing password-reset function.
 
 ## [2026.11.17] - 2026-11-16
 

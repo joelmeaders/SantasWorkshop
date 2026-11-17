@@ -551,6 +551,13 @@
 					}
 				},
 				{
+					"source": "/requestPasswordReset",
+					"function": {
+						"functionId": "requestPasswordReset",
+						"region": "us-central1"
+					}
+				},
+				{
 					"source": "**",
 					"destination": "/index.html"
 				}

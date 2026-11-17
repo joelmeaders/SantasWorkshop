@@ -12,6 +12,7 @@ import {
 	type RegistrationReviewReader,
 	type ReviewCaseDetail,
 	type ReviewQueueSummary,
+	type ReviewMutationResult,
 } from './registration-review-reader';
 
 const evidence = {
@@ -61,10 +62,10 @@ const meta = {
 	decorators: adminStoryDecorators(),
 	parameters: { layout: 'fullscreen' },
 	args: { enabled: true, claims: { owner: true } },
-} satisfies Meta<typeof RegistrationReviewPageComponent>;
+} satisfies Meta<RegistrationReviewPageComponent>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<RegistrationReviewPageComponent>;
 
 let forbiddenReadCount = 0;
 function forbiddenRead(): never {
@@ -176,7 +177,7 @@ export const QueueJourney: Story = {
 			await canvas.findByRole('button', { name: /TEST-RV-01/ }),
 		).toBeVisible();
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Resolved', exact: true }),
+			canvas.getByRole('button', { name: /^Resolved$/ }),
 		);
 		await expect(
 			await canvas.findByText('No cases in this view.'),
@@ -475,7 +476,7 @@ export const SearchAcrossManyCases: Story = {
 			await canvas.findByText('No cases match that search in this view.'),
 		).toBeVisible();
 		await userEvent.click(
-			canvas.getByRole('button', { name: 'Resolved', exact: true }),
+			canvas.getByRole('button', { name: /^Resolved$/ }),
 		);
 		await expect(await byCase('197')).toBeVisible();
 		await userEvent.click(
@@ -483,9 +484,7 @@ export const SearchAcrossManyCases: Story = {
 		);
 		await expect(search).toHaveValue('');
 		await expect(await byCase('197')).toBeVisible();
-		await userEvent.click(
-			canvas.getByRole('button', { name: 'Open', exact: true }),
-		);
+		await userEvent.click(canvas.getByRole('button', { name: /^Open$/ }));
 		await expect(await byCase('001')).toBeVisible();
 	},
 };
@@ -556,7 +555,7 @@ export const ReviewActionJourney: Story = {
 						);
 					}
 					revision += 1;
-					return of({
+					return of<ReviewMutationResult>({
 						action: request.action,
 						registrationId: request.registrationId,
 						notification: request.notification

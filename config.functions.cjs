@@ -31,7 +31,14 @@ const REQUIRED_FUNCTION_ENV_KEYS = [
 	'SCHEDULED_CHECKIN_STATS',
 ];
 
+const REGISTRATION_REVIEW_FLAG = 'SANTASHOP_REGISTRATION_REVIEW_ENABLED';
+const REGISTRATION_REVIEW_SECRET_DEPENDENT_FLAGS = [
+	'SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED',
+	'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
+];
+
 const OPTIONAL_FUNCTION_ENV_KEYS = [
+	REGISTRATION_REVIEW_FLAG,
 	'SANTASHOP_EMAIL_TRANSPORT',
 	'SANTASHOP_EMAIL_VPC_CONNECTOR',
 	'SANTASHOP_SHOP_DAYS',
@@ -118,6 +125,22 @@ const buildFunctionsConfig = (mode) => {
 		const value = getEnvValue(mode, key);
 		if (value !== undefined && value !== '') {
 			config[key] = value;
+		}
+	}
+
+	const reviewEnabled = config[REGISTRATION_REVIEW_FLAG];
+	if (reviewEnabled !== undefined && !['true', 'false'].includes(reviewEnabled)) {
+		throw new Error(`Invalid boolean: ${getModePrefix(mode)}_${REGISTRATION_REVIEW_FLAG}`);
+	}
+
+	if (mode !== 'local') {
+		for (const key of REGISTRATION_REVIEW_SECRET_DEPENDENT_FLAGS) {
+			const value = getEnvValue(mode, key);
+			if (value && value !== 'false') {
+				throw new Error(
+					`${getModePrefix(mode)}_${key} must remain off until the release binds its runtime secret securely.`,
+				);
+			}
 		}
 	}
 

@@ -29,6 +29,23 @@ for (const [name, paths, expected] of [
 	['app only', ['santashop-app/src/main.ts'], app],
 	['admin only', ['santashop-admin/src/main.ts'], admin],
 	[
+		'email template starter scripts are tooling only',
+		[
+			'scripts/generate-2026-email-templates.mjs',
+			'scripts/email-template-starters.test.mjs',
+		],
+		{ ...empty, tooling: true },
+	],
+	[
+		'email template starter scripts and assets deploy only Admin Hosting',
+		[
+			'scripts/generate-2026-email-templates.mjs',
+			'scripts/email-template-starters.test.mjs',
+			'santashop-admin/src/assets/email-templates/2026/registration-confirmation-2026-en.json',
+		],
+		{ ...admin, tooling: true },
+	],
+	[
 		'app plus README',
 		[
 			'santashop-app/src/main.ts',

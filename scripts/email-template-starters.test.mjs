@@ -161,8 +161,8 @@ for (const filename of filenames) {
 					assert.match(
 						content,
 						english
-							? /Shoppers cannot cancel their own appointments/
-							: /Los compradores no pueden cancelar sus propias citas/,
+							? /Before you check in, sign in and choose Cancel Registration on your confirmation page if that option is available\. Canceling releases your appointment\./
+							: /Antes de registrarte al llegar al evento, inicia sesión y selecciona Cancelar registro en la página de confirmación si la opción está disponible\. Al cancelar, liberas tu cita\./,
 					);
 				}
 			}

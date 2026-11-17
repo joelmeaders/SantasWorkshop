@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.21] - 2026-11-16
+
+### Fixed
+
+- Correct self-service cancellation instructions in English and Spanish confirmation and reminder email starters.
+
 ## [2026.11.20] - 2026-11-16
 
 ### Fixed

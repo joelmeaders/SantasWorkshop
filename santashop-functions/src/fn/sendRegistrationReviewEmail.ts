@@ -17,9 +17,11 @@ import {
 	REGISTRATION_EMAIL_SOURCE,
 	SES_REGION,
 } from '../utility/runtime-config';
-import { REVIEW_REPLY_TO } from '../utility/registration-review-actions';
 import { getRegistrationReviewDenylist } from '../utility/registration-review-denylist-access';
-import type { ReviewEmailAction } from '../utility/registration-review-email';
+import {
+	REVIEW_REPLY_TO,
+	type ReviewEmailAction,
+} from '../utility/registration-review-email';
 
 type DeliveryState =
 	| 'queued'

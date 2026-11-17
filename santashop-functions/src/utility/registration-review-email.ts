@@ -1,5 +1,6 @@
 import { escapeEmailHtml } from './email-links';
-import { REVIEW_REPLY_TO } from './registration-review-actions';
+
+export const REVIEW_REPLY_TO = 'president@denversantaclausshop.org';
 
 export const reviewEmailActions = [
 	'contact',

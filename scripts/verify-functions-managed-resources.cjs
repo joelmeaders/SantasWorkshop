@@ -5,12 +5,27 @@ const SCHEDULED_FUNCTIONS = [
 	'scheduledCheckInStats',
 	'scheduledDateTimeSlotCounters',
 	'scheduledFirestoreBackup',
+	'scheduledRegistrationReview',
 	'scheduledRegistrationStats',
 	'scheduledUserStats',
 ];
 const TASK_FUNCTION = 'ownerOperationWorker';
 const TASK_FUNCTIONS = { [TASK_FUNCTION]: 3, waitingListEmailWorker: 5 };
-const EVENT_FUNCTION = 'sendNewRegistrationEmails';
+const EVENT_FUNCTIONS = {
+	sendNewRegistrationEmails: {
+		type: 'google.cloud.firestore.document.v1.created',
+		document: 'tmp_registrationemails/{docId}',
+	},
+	captureRegistrationReviewChange: {
+		type: 'google.cloud.firestore.document.v1.written',
+		document: 'registrations/{registrationId}',
+	},
+	sendRegistrationReviewEmail: {
+		type: 'google.cloud.firestore.document.v1.created',
+		document:
+			'registrationReviewSeasons/{season}/cases/{caseId}/actions/{actionId}/email/{jobId}',
+	},
+};
 
 const resourceId = (name) =>
 	String(name || '')
@@ -53,7 +68,9 @@ const verifyManagedResources = ({
 		assertEqual(job.state, 'ENABLED', `${jobName} state`);
 		assertEqual(
 			job.schedule,
-			schedules[functionName],
+			functionName === 'scheduledRegistrationReview'
+				? '0 2 * * *'
+				: schedules[functionName],
 			`${jobName} schedule`,
 		);
 		assertEqual(job.timeZone, timeZone, `${jobName} time zone`);
@@ -127,33 +144,31 @@ const verifyManagedResources = ({
 	const managedTriggers = eventarcTriggers.filter(
 		(trigger) => trigger.labels?.['goog-managed-by'] === 'cloudfunctions',
 	);
+	const eventFunctions = Object.entries(EVENT_FUNCTIONS);
 	assertEqual(
 		managedTriggers.length,
-		1,
+		eventFunctions.length,
 		'Cloud Functions-managed Eventarc trigger count',
 	);
-	const trigger = managedTriggers[0];
-	assertEqual(
-		trigger.destination?.cloudFunction,
-		`projects/${project}/locations/${region}/functions/${EVENT_FUNCTION}`,
-		`${EVENT_FUNCTION} destination`,
-	);
-	const filters = Object.fromEntries(
-		(trigger.eventFilters || []).map((filter) => [
-			filter.attribute,
-			filter.value,
-		]),
-	);
-	assertEqual(
-		filters.type,
-		'google.cloud.firestore.document.v1.created',
-		`${EVENT_FUNCTION} event type`,
-	);
-	assertEqual(
-		filters.document,
-		'tmp_registrationemails/{docId}',
-		`${EVENT_FUNCTION} document filter`,
-	);
+	for (const [functionName, expected] of eventFunctions) {
+		const destination = `projects/${project}/locations/${region}/functions/${functionName}`;
+		const triggers = managedTriggers.filter(
+			(trigger) => trigger.destination?.cloudFunction === destination,
+		);
+		assertEqual(triggers.length, 1, `${functionName} destination count`);
+		const filters = Object.fromEntries(
+			(triggers[0].eventFilters || []).map((filter) => [
+				filter.attribute,
+				filter.value,
+			]),
+		);
+		assertEqual(filters.type, expected.type, `${functionName} event type`);
+		assertEqual(
+			filters.document,
+			expected.document,
+			`${functionName} document filter`,
+		);
+	}
 
 	return {
 		schedulerJobs: managedJobs.length,
@@ -211,7 +226,7 @@ const main = () => {
 };
 
 module.exports = {
-	EVENT_FUNCTION,
+	EVENT_FUNCTIONS,
 	SCHEDULED_FUNCTIONS,
 	TASK_FUNCTION,
 	TASK_FUNCTIONS,

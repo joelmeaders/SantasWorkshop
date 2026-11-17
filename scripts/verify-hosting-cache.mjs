@@ -11,9 +11,13 @@ const HASHED_BUNDLE_SOURCE = '**/*-????????*.@(css|js)';
 const IMMUTABLE_CACHE_CONTROL = 'public,max-age=31536000,immutable';
 const STATIC_CACHE_CONTROL = 'public,max-age=3600';
 // Deployed clients call these functions on the Hosting origin. Emulator E2E calls Functions directly.
-const SHOPPER_ACCESS_CALLABLES = {
-	'santashop-app': ['getShopperAccessStatus'],
-	'santashop-admin': ['callableGetShopperAccess', 'callableSetShopperAccess'],
+const SAME_ORIGIN_CALLABLES = {
+	'santashop-app': ['getShopperAccessStatus', 'requestPasswordReset'],
+	'santashop-admin': [
+		'callableGetShopperAccess',
+		'callableSetShopperAccess',
+		'requestPasswordReset',
+	],
 };
 const STATIC_CACHE_SOURCES = new Set([
 	'**/assets/**',
@@ -40,7 +44,7 @@ for (const targetName of ['santashop-app', 'santashop-admin']) {
 	const fallbackIndex = target.rewrites.findIndex(
 		(rewrite) => rewrite.source === '**',
 	);
-	for (const name of SHOPPER_ACCESS_CALLABLES[targetName]) {
+	for (const name of SAME_ORIGIN_CALLABLES[targetName]) {
 		const path = `/${name}`;
 		const index = target.rewrites.findIndex(
 			(rewrite) => rewrite.source === path,

@@ -121,6 +121,10 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /registrationReviewSeasons/{document=**} {
+      allow read, write: if false;
+    }
+
     match /ownerOperationPreviews/{document=**} {
       allow read, write: if false;
     }

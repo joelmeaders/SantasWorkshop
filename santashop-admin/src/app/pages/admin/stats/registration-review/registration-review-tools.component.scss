@@ -1,0 +1,83 @@
+.tool-panel,
+dialog {
+	border: 1px solid var(--admin-border);
+	border-radius: 0.65rem;
+	padding: 0.75rem;
+	color: var(--ion-text-color);
+	background: var(--admin-surface);
+}
+.tool-panel {
+	margin-block: 0.65rem;
+}
+.tool-panel h3,
+dialog h3 {
+	margin: 0;
+}
+.tool-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+	gap: 0.45rem;
+}
+button {
+	color: var(--ion-text-color);
+	background: var(--admin-surface);
+	border: 1px solid var(--admin-border);
+	border-radius: 0.5rem;
+	padding: 0.5rem 0.65rem;
+	text-align: start;
+}
+button:hover {
+	border-color: var(--ion-color-primary);
+	background: var(--admin-accent-soft);
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+	outline: 2px solid var(--ion-color-primary);
+	outline-offset: 2px;
+}
+button small {
+	display: block;
+	margin-block-start: 0.3rem;
+}
+dialog {
+	width: min(94vw, 33rem);
+	padding: 1rem;
+}
+dialog::backdrop {
+	background: rgb(0 0 0 / 45%);
+}
+dialog form {
+	display: grid;
+	gap: 0.65rem;
+}
+dialog form p {
+	margin: 0;
+}
+dialog label:not(.choice) {
+	display: grid;
+	gap: 0.2rem;
+}
+dialog input:not([type='checkbox']),
+dialog textarea {
+	width: 100%;
+	padding: 0.45rem;
+	color: var(--ion-text-color);
+	background: var(--admin-surface);
+	border: 1px solid var(--admin-border);
+	border-radius: 0.4rem;
+}
+.dialog-footer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	justify-content: end;
+}
+.confirm,
+.confirm:hover {
+	background: var(--ion-color-primary);
+	color: var(--ion-color-primary-contrast);
+}
+button:disabled {
+	opacity: 0.55;
+}

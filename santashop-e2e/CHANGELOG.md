@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.30] - 2026-11-16
+
+### Added
+
+- Exercise Registration Review permissions, search, notes, notifications, cancel/reinstate, and email block controls with local Firebase emulators.
+
 ## [2026.10.29] - 2026-11-16
 
 ### Fixed

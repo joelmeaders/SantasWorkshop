@@ -1,0 +1,606 @@
+<main aria-labelledby="review-title">
+	<header class="intro">
+		<p class="eyebrow">{{ 'Staff workspace' | adminText }}</p>
+		<h1 id="review-title">{{ 'Registration review' | adminText }}</h1>
+		<p>
+			{{
+				'These are possible matches, not confirmed duplicate registrations.'
+					| adminText
+			}}
+		</p>
+	</header>
+	@if (!available()) {
+		<p>{{ 'Registration review is unavailable.' | adminText }}</p>
+	} @else {
+		<div class="review-layout">
+			<section class="panel" aria-labelledby="queue-title">
+				<h2 id="queue-title">{{ 'Case queue' | adminText }}</h2>
+				<div role="group" aria-label="Case filter">
+					@for (filter of scopes; track filter.id) {
+						<button
+							type="button"
+							[attr.aria-pressed]="scope() === filter.id"
+							(click)="changeScope(filter.id)"
+						>
+							{{ filter.label | adminText }}
+						</button>
+					}
+				</div>
+				<form class="queue-search" (submit)="submitSearch($event)">
+					<label for="review-search">{{
+						'Search by case ID, registration ID, or email'
+							| adminText
+					}}</label>
+					<label for="review-search-mode">{{
+						'Search type' | adminText
+					}}</label>
+					<select
+						id="review-search-mode"
+						[value]="searchModeDraft()"
+						(change)="updateSearchMode($any($event.target).value)"
+					>
+						<option value="exact">
+							{{ 'Full ID or email' | adminText }}
+						</option>
+						<option value="email-prefix">
+							{{ 'Email starts with' | adminText }}
+						</option>
+					</select>
+					<div class="search-controls">
+						<input
+							id="review-search"
+							type="search"
+							autocomplete="off"
+							autocapitalize="none"
+							spellcheck="false"
+							[attr.maxlength]="searchMaxLength"
+							[attr.aria-invalid]="searchError() ? 'true' : null"
+							[attr.aria-describedby]="
+								searchError()
+									? 'review-search-hint review-search-error'
+									: 'review-search-hint'
+							"
+							[value]="searchDraft()"
+							(input)="updateSearch($any($event.target).value)"
+						/>
+						<button type="submit">
+							{{ 'Search' | adminText }}
+						</button>
+					</div>
+					<small id="review-search-hint">{{
+						(searchModeDraft() === 'email-prefix'
+							? 'Enter at least 3 characters from the start of the shopper email. Search uses the selected status filter.'
+							: 'Enter a full ID (case-sensitive) or email address. Search uses the selected status filter.'
+						) | adminText
+					}}</small>
+					@if (searchError()) {
+						<p id="review-search-error" role="alert">
+							{{
+								(searchModeDraft() === 'email-prefix'
+									? 'Enter at least 3 characters with no spaces.'
+									: 'Enter a complete email address or an ID with letters, numbers, hyphens, or underscores.'
+								) | adminText
+							}}
+						</p>
+					}
+					@if (search() || searchDraft()) {
+						<button type="button" (click)="clearSearch()">
+							{{ 'Clear search' | adminText }}
+						</button>
+					}
+				</form>
+				@if (search()) {
+					<p class="active-search">
+						@if (
+							searchMode() === 'email-prefix' ||
+							search().includes('@')
+						) {
+							{{ 'Email filter applied' | adminText }}
+						} @else {
+							{{ 'Exact ID' | adminText }}:
+							<strong>{{ search() }}</strong>
+						}
+					</p>
+				}
+				@if (listing(); as listState) {
+					<nav
+						class="queue-paging"
+						aria-label="Case queue pagination"
+					>
+						<button
+							type="button"
+							[disabled]="
+								pageNumber() === 1 ||
+								listState.state === 'loading'
+							"
+							(click)="previous()"
+						>
+							{{ 'Previous page' | adminText }}
+						</button>
+						<span aria-live="polite"
+							>{{ 'Page' | adminText }} {{ pageNumber() }}</span
+						>
+						<button
+							type="button"
+							[disabled]="
+								listState.state !== 'ready' ||
+								!listState.value.nextCursor
+							"
+							(click)="next()"
+						>
+							{{ 'Next page' | adminText }}
+						</button>
+					</nav>
+					@if (listState.state === 'refine') {
+						<p role="alert">
+							{{
+								'Too many results. Enter more of the email address to narrow your search.'
+									| adminText
+							}}
+						</p>
+					} @else if (listState.state === 'loading') {
+						<p role="status">
+							{{ 'Loading review cases…' | adminText }}
+						</p>
+					} @else if (listState.state === 'error') {
+						<p role="alert">
+							{{
+								'Review cases could not be loaded.' | adminText
+							}}
+						</p>
+						<button type="button" (click)="retryList()">
+							{{ 'Retry queue' | adminText }}
+						</button>
+					} @else if (listState.state === 'ready') {
+						@if (!listState.value.cases.length) {
+							<p role="status">
+								{{
+									(search()
+										? 'No cases match that search in this view.'
+										: 'No cases in this view.'
+									) | adminText
+								}}
+							</p>
+						} @else {
+							<ul class="queue-list">
+								@for (
+									entry of listState.value.cases;
+									track entry.id
+								) {
+									<li>
+										<button
+											type="button"
+											class="case"
+											[attr.aria-current]="
+												selectedId() === entry.id
+													? 'true'
+													: null
+											"
+											(click)="open(entry.id)"
+										>
+											<strong>{{ entry.id }}</strong>
+											<span>{{
+												labels[entry.status] | adminText
+											}}</span>
+											<small
+												>{{ 'Last action' | adminText }}
+												{{
+													formatTime(
+														entry.lastActionAt
+													)
+												}}</small
+											>
+										</button>
+									</li>
+								}
+							</ul>
+						}
+					}
+				}
+			</section>
+			<section class="panel" aria-labelledby="detail-title">
+				<h2 id="detail-title">{{ 'Case details' | adminText }}</h2>
+				@if (feedback()) {
+					<p class="case-feedback" role="status">
+						{{ feedback() | adminText }}
+					</p>
+				}
+				@if (detail(); as detailState) {
+					@if (detailState.state === 'loading') {
+						<p role="status">
+							{{ 'Loading case details…' | adminText }}
+						</p>
+					} @else if (
+						detailState.state === 'error' ||
+						detailState.state === 'refine'
+					) {
+						<p role="alert">
+							{{
+								'Case details could not be loaded.' | adminText
+							}}
+						</p>
+						<button type="button" (click)="retryDetail()">
+							{{ 'Retry case' | adminText }}
+						</button>
+					} @else if (detailState.state === 'ready') {
+						@if (detailState.value.id === selectedId()) {
+							<h3>{{ detailState.value.id }}</h3>
+							@if (statusWritable()) {
+								<div class="case-status">
+									<label for="review-case-status">{{
+										'Review status' | adminText
+									}}</label>
+									<select
+										id="review-case-status"
+										[value]="detailState.value.status"
+										[disabled]="statusSaving()"
+										(change)="changeStatus($event)"
+									>
+										@for (
+											option of statusOptions;
+											track option
+										) {
+											<option
+												[value]="option"
+												[selected]="
+													option ===
+													detailState.value.status
+												"
+											>
+												{{ labels[option] | adminText }}
+											</option>
+										}
+									</select>
+									@if (statusError()) {
+										<p role="alert">
+											{{
+												'The status change was not confirmed. Reload the case or retry.'
+													| adminText
+											}}
+										</p>
+									}
+								</div>
+							}
+							<p>
+								{{
+									detailState.value.registrations.join(' / ')
+								}}
+							</p>
+							<dl class="evidence">
+								<div>
+									<dt>
+										{{ 'First-name matches' | adminText }}
+									</dt>
+									<dd>
+										{{
+											detailState.value.evidence
+												.firstNameMatches | adminText
+										}}
+									</dd>
+								</div>
+								<div>
+									<dt>
+										{{
+											'First name and birth date matches'
+												| adminText
+										}}
+									</dt>
+									<dd>
+										{{
+											detailState.value.evidence
+												.exactDateMatches | adminText
+										}}
+									</dd>
+								</div>
+							</dl>
+							@if (detailState.value.records; as records) {
+								<div class="comparison">
+									@for (record of records; track $index) {
+										@if (record) {
+											<article
+												class="record"
+												[attr.aria-label]="record.id"
+											>
+												<p class="eyebrow">
+													{{ record.id }}
+												</p>
+												<header class="record-heading">
+													<h3>{{ record.name }}</h3>
+													<span class="roster-count"
+														>{{
+															includedChildCount(
+																record.children
+															)
+														}}
+														{{
+															(includedChildCount(
+																record.children
+															) === 1
+																? 'child'
+																: 'children'
+															) | adminText
+														}}</span
+													>
+												</header>
+												@if (
+													record.canceled ||
+													record.checkedIn ||
+													record.accessDisabled ||
+													record.blacklisted ||
+													record.blockOperationPhase
+												) {
+													<ul
+														class="record-states"
+														aria-label="Registration status"
+													>
+														@if (record.canceled) {
+															<li>
+																{{
+																	'Canceled'
+																		| adminText
+																}}
+															</li>
+														}
+														@if (record.checkedIn) {
+															<li>
+																{{
+																	'Checked in'
+																		| adminText
+																}}
+															</li>
+														}
+														@if (
+															record.accessDisabled
+														) {
+															<li>
+																{{
+																	'Shopper access disabled'
+																		| adminText
+																}}
+															</li>
+														}
+														@if (
+															record.blacklisted
+														) {
+															<li>
+																{{
+																	'Email blocked'
+																		| adminText
+																}}
+															</li>
+														}
+														@if (
+															record.blockOperationPhase ===
+															'applying'
+														) {
+															<li>
+																{{
+																	'Sign-in restriction pending'
+																		| adminText
+																}}
+															</li>
+														}
+														@if (
+															record.blockOperationPhase ===
+															'failed'
+														) {
+															<li>
+																{{
+																	'Sign-in restriction needs review'
+																		| adminText
+																}}
+															</li>
+														}
+														@if (
+															record.blockOperationPhase ===
+															'cleared'
+														) {
+															<li>
+																{{
+																	'Verify sign-in separately'
+																		| adminText
+																}}
+															</li>
+														}
+													</ul>
+												}
+												<dl>
+													<dt>
+														{{
+															'Email' | adminText
+														}}
+													</dt>
+													<dd>{{ record.email }}</dd>
+													<dt>
+														{{
+															'Appointment'
+																| adminText
+														}}
+													</dt>
+													<dd>
+														{{
+															formatAppointment(
+																record.appointment
+															)
+														}}
+													</dd>
+												</dl>
+												<strong>{{
+													'Children on this registration'
+														| adminText
+												}}</strong>
+												<ul>
+													@for (
+														child of record.children;
+														track $index
+													) {
+														<li>
+															{{ child.name }} ·
+															{{
+																child.birthDate
+															}}
+															@if (
+																child.removed ===
+																	true ||
+																child.enabled ===
+																	false
+															) {
+																<small>{{
+																	'Removed'
+																		| adminText
+																}}</small>
+															}
+														</li>
+													}
+												</ul>
+											</article>
+										} @else {
+											<article class="record">
+												<p>
+													{{
+														'Registration unavailable'
+															| adminText
+													}}
+												</p>
+											</article>
+										}
+									}
+								</div>
+								<admin-registration-review-tools
+									[caseId]="detailState.value.id"
+									[records]="records"
+									[claims]="claims()"
+									(updated)="refreshAfterAction($event)"
+								/>
+							}
+							<section
+								class="history"
+								aria-labelledby="case-notes-title"
+							>
+								<h3 id="case-notes-title">
+									{{ 'Internal notes' | adminText }}
+								</h3>
+								<p>
+									{{
+										'Only reviewers can see these notes. They are never emailed to shoppers.'
+											| adminText
+									}}
+								</p>
+								@if (detailState.value.notes?.length) {
+									<ol class="notes-list">
+										@for (
+											entry of detailState.value.notes;
+											track entry.id
+										) {
+											<li>
+												<strong>{{
+													entry.author
+												}}</strong
+												><time
+													[attr.datetime]="entry.at"
+													>{{
+														formatTime(entry.at)
+													}}</time
+												>
+												<p>{{ entry.text }}</p>
+											</li>
+										}
+									</ol>
+								} @else {
+									<p>{{ 'No notes yet.' | adminText }}</p>
+								}
+								@if (notesWritable()) {
+									<form
+										(submit)="
+											$event.preventDefault();
+											appendNote()
+										"
+									>
+										<label for="case-note">{{
+											'Add an internal note' | adminText
+										}}</label>
+										<textarea
+											id="case-note"
+											[value]="note()"
+											[maxLength]="noteMaxLength"
+											(input)="
+												note.set(
+													$any($event.target).value
+												)
+											"
+											rows="3"
+										></textarea>
+										@if (noteError()) {
+											<p role="alert">
+												{{
+													'The note could not be saved. Try again.'
+														| adminText
+												}}
+											</p>
+										}
+										<button
+											type="submit"
+											[disabled]="
+												!noteValid() || noteSaving()
+											"
+										>
+											{{ 'Add note' | adminText }}
+										</button>
+									</form>
+								}
+							</section>
+							<div class="history">
+								<h3>{{ 'Activity history' | adminText }}</h3>
+								<ol>
+									@for (
+										event of detailState.value.history;
+										track $index
+									) {
+										<li>
+											@if (event.type === 'flagged') {
+												{{
+													'Flagged for review'
+														| adminText
+												}}
+											} @else if (
+												event.type === 'action-taken'
+											) {
+												{{
+													actionLabels[event.action]
+														| adminText
+												}}: {{ event.registrationId }}
+											} @else {
+												{{
+													'Status changed'
+														| adminText
+												}}:
+												{{
+													labels[event.from]
+														| adminText
+												}}
+												→
+												{{
+													labels[event.to] | adminText
+												}}
+											}
+											<time [attr.datetime]="event.at">{{
+												formatTime(event.at)
+											}}</time>
+										</li>
+									}
+								</ol>
+							</div>
+						}
+					} @else {
+						<p>
+							{{
+								'Select a case to review its evidence and history.'
+									| adminText
+							}}
+						</p>
+					}
+				}
+			</section>
+		</div>
+	}
+</main>

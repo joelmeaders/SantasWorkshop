@@ -7,10 +7,7 @@ import {
 	serializeError,
 } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import {
-	isAdminToken,
-	isOwnerToken,
-} from '../utility/capabilities';
+import { isAdminToken, isOwnerToken } from '../utility/capabilities';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
 
@@ -22,7 +19,11 @@ interface StaffAuthUpdate {
 
 const log = createFunctionLogger('callableUpdateStaffUser');
 
-const VALID_ROLES = new Set<StaffRole>(['admin', 'checkin']);
+const VALID_ROLES = new Set<StaffRole>([
+	'admin',
+	'checkin',
+	'registration-review',
+]);
 
 const sanitizeRoles = (roles: StaffRole[]): StaffRole[] => {
 	for (const role of roles) {
@@ -35,6 +36,16 @@ const sanitizeRoles = (roles: StaffRole[]): StaffRole[] => {
 	}
 
 	const normalizedRoles = new Set<StaffRole>(roles);
+	if (
+		normalizedRoles.has('registration-review') &&
+		!normalizedRoles.has('admin')
+	) {
+		throw new HttpsError(
+			'invalid-argument',
+			'Registration review requires the administrator role.',
+		);
+	}
+
 	if (normalizedRoles.has('admin')) {
 		normalizedRoles.add('checkin');
 	}
@@ -92,6 +103,7 @@ const persistStaffChanges = async (
 	uid: string,
 	authUpdate: StaffAuthUpdate,
 	roles: StaffRole[] | undefined,
+	priorClaims: FirebaseAuthTokenLike | undefined,
 ): Promise<void> => {
 	if (Object.keys(authUpdate).length > 0) {
 		await admin.auth().updateUser(uid, authUpdate);
@@ -99,6 +111,7 @@ const persistStaffChanges = async (
 
 	if (roles !== undefined) {
 		await admin.auth().setCustomUserClaims(uid, {
+			...priorClaims,
 			roles,
 		});
 	}
@@ -163,11 +176,15 @@ export default async function callableUpdateStaffUser(
 
 	const targetUser = await admin.auth().getUser(uid);
 	const targetClaims = targetUser.customClaims as
-		| FirebaseAuthTokenLike
-		| undefined;
+		FirebaseAuthTokenLike | undefined;
+	if (data.roles !== undefined && !Array.isArray(data.roles)) {
+		throw new HttpsError(
+			'invalid-argument',
+			'Staff roles must be an array.',
+		);
+	}
 	const requestedAdmin =
-		data.roles?.includes('admin') ??
-		isAdminToken(targetClaims);
+		data.roles?.includes('admin') ?? isAdminToken(targetClaims);
 	if (
 		(isOwnerToken(targetClaims) ||
 			isAdminToken(targetClaims) ||
@@ -185,7 +202,7 @@ export default async function callableUpdateStaffUser(
 		data.roles !== undefined ? resolveRoles(data.roles) : undefined;
 
 	try {
-		await persistStaffChanges(uid, authUpdate, roles);
+		await persistStaffChanges(uid, authUpdate, roles, targetClaims);
 	} catch (error) {
 		log.error('Failed to update staff account', { uid }, error);
 

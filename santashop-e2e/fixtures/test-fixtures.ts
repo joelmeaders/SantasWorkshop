@@ -48,7 +48,7 @@ export interface E2eAdminSeedUser {
 	emailAddress: string;
 	password: string;
 	owner?: boolean;
-	roles?: ('admin' | 'checkin')[];
+	roles?: import('@santashop/models').StaffRole[];
 }
 
 export interface E2eSeedDateTimeSlot {

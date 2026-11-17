@@ -137,6 +137,12 @@
 			</ion-list>
 			<ion-list class="reports">
 				<ion-list-header> {{ 'Reports' | adminText }} </ion-list-header>
+				@if (showRegistrationReview()) {
+					<ion-item id="registrationReviewNav" detail routerLink="../stats/registration-review">
+						<ion-icon name="document-text-outline" slot="start" aria-hidden="true" />
+						{{ 'Registration review' | adminText }}
+					</ion-item>
+				}
 				<ion-item
 					id="scanRiskReviewNav"
 					detail

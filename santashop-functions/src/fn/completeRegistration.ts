@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { getBookingNow } from '../utility/booking-clock';
 import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
@@ -69,9 +70,21 @@ export default async function completeRegistration(
 			if (cached) return;
 			const registrationData = registrationSnapshot.data() as
 				Registration | undefined;
+			await assertRegistrationReviewAllowed(
+				db,
+				{
+					uid,
+					email: registrationData?.emailAddress,
+					additionalEmail: (userSnapshot.data() as User | undefined)
+						?.emailAddress,
+				},
+				transaction,
+			);
 			if (registrationData?.registrationSubmittedOn) {
 				if (registrationData.waitingList?.active)
-					transaction.update(registrationRef, { 'waitingList.active': false });
+					transaction.update(registrationRef, {
+						'waitingList.active': false,
+					});
 				transaction.create(receiptRef, {
 					operation: 'completeRegistration',
 					result: true,
@@ -152,7 +165,12 @@ export default async function completeRegistration(
 				...registration,
 				...registrationUpdate,
 				...(registration.waitingList?.active
-					? { waitingList: { ...registration.waitingList, active: false } }
+					? {
+							waitingList: {
+								...registration.waitingList,
+								active: false,
+							},
+						}
 					: {}),
 			};
 			delete completedRegistration.cancelledOn;

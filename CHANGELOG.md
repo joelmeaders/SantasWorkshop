@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.22] - 2026-11-16
+
+### Added
+
+- Add an opt-in, permissioned Registration Review queue in the Admin app, with overnight detection, private notes, and audited shopper actions.
+
 ## [2026.11.21] - 2026-11-16
 
 ### Fixed

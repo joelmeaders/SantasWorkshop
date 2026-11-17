@@ -132,6 +132,8 @@ jobs:
       - run: pnpm run e2e:browser:setup:ci
         if: ${{ !inputs.skip_tests && inputs.mode != 'prod' }}
       - run: pnpm run "config:$UI_TARGET:$UI_MODE"
+        env:
+          SANTASHOP_REGISTRATION_REVIEW_ENABLED: ${{ inputs.deploy && inputs.target == 'admin' && (inputs.mode == 'prod' && vars.PROD_SANTASHOP_REGISTRATION_REVIEW_ENABLED == 'true' || inputs.mode == 'test' && vars.TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED == 'true') && 'true' || 'false' }}
       - name: Prepare shared libraries before unit tests
         run: pnpm run storybook:prepare
       - name: Run shared core tests for this standalone release
@@ -173,6 +175,8 @@ jobs:
       - name: Restore release source configuration after emulator tests
         if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: pnpm run "config:$UI_TARGET:$UI_MODE"
+        env:
+          SANTASHOP_REGISTRATION_REVIEW_ENABLED: ${{ inputs.target == 'admin' && vars.TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED == 'true' && 'true' || 'false' }}
       - name: Require unchanged verified Hosting output
         if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: |

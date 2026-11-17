@@ -80,6 +80,7 @@ export class UsersPage {
 	private readonly roleLabels: Readonly<Record<StaffRole, string>> = {
 		admin: 'Administrator',
 		checkin: 'Check-In',
+		'registration-review': 'Registration review',
 	};
 
 	constructor() {
@@ -91,7 +92,11 @@ export class UsersPage {
 	}
 
 	public canManage(account: StaffAccount, isOwner: boolean): boolean {
-		return isOwner || !account.roles.includes('admin');
+		return (
+			isOwner ||
+			(!account.roles.includes('admin') &&
+				!account.roles.includes('registration-review'))
+		);
 	}
 
 	public async addUser(): Promise<void> {

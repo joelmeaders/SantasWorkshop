@@ -12,16 +12,17 @@ import {
 	serializeError,
 } from '../utility/errors';
 import { createFunctionLogger } from '../utility/observability';
-import {
-	isAdminToken,
-	isOwnerToken,
-} from '../utility/capabilities';
+import { isAdminToken, isOwnerToken } from '../utility/capabilities';
 
 type FirebaseAuthTokenLike = Record<string, unknown>;
 
 const log = createFunctionLogger('callableCreateStaffUser');
 
-const VALID_ROLES = new Set<StaffRole>(['admin', 'checkin']);
+const VALID_ROLES = new Set<StaffRole>([
+	'admin',
+	'checkin',
+	'registration-review',
+]);
 
 const sanitizeRoles = (roles: StaffRole[] | undefined): StaffRole[] => {
 	if (!Array.isArray(roles)) {
@@ -38,6 +39,16 @@ const sanitizeRoles = (roles: StaffRole[] | undefined): StaffRole[] => {
 	}
 
 	const normalizedRoles = new Set<StaffRole>(roles);
+	if (
+		normalizedRoles.has('registration-review') &&
+		!normalizedRoles.has('admin')
+	) {
+		throw new HttpsError(
+			'invalid-argument',
+			'Registration review requires the administrator role.',
+		);
+	}
+
 	if (normalizedRoles.has('admin')) {
 		normalizedRoles.add('checkin');
 	}

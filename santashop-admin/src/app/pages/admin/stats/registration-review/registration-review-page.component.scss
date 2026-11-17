@@ -1,0 +1,318 @@
+:host {
+	display: block;
+}
+main {
+	max-width: 86rem;
+	margin: 0 auto;
+}
+.intro {
+	border: 1px solid var(--ion-color-primary-shade);
+	border-radius: 1rem;
+	padding: 1.3rem 1.45rem;
+	margin-bottom: 1rem;
+	background: linear-gradient(
+		115deg,
+		var(--ion-color-primary-shade),
+		var(--ion-color-primary)
+	);
+	color: var(--ion-color-primary-contrast);
+}
+.intro h1 {
+	margin: 0.25rem 0;
+	font-family: Georgia, serif;
+	font-weight: 700;
+	letter-spacing: -0.025em;
+}
+.intro p {
+	margin: 0.35rem 0 0;
+}
+.eyebrow {
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	font-size: 0.72rem;
+	font-weight: 750;
+}
+.review-layout {
+	display: grid;
+	grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+	gap: 1rem;
+	align-items: start;
+}
+.panel {
+	border: 1px solid var(--admin-border);
+	background: var(--admin-surface);
+	border-radius: 0.9rem;
+	padding: 1rem;
+	box-shadow: 0 8px 24px
+		color-mix(in srgb, var(--admin-shadow-dark) 30%, transparent);
+}
+.panel h2 {
+	margin: 0 0 0.45rem;
+	font-size: 1.25rem;
+	font-weight: 740;
+}
+button {
+	margin: 0.16rem;
+	color: inherit;
+	padding: 0.47rem 0.64rem;
+	background: transparent;
+	border: 1px solid var(--ion-color-medium);
+	border-radius: 0.52rem;
+}
+button:hover {
+	background: var(--admin-surface-muted);
+}
+button:focus-visible {
+	outline: 2px solid var(--ion-color-primary);
+	outline-offset: 2px;
+}
+button[aria-pressed='true'],
+.case[aria-current='true'] {
+	border-color: var(--ion-color-primary);
+	background: var(--admin-accent-soft);
+	font-weight: 700;
+}
+ul,
+ol {
+	padding-inline-start: 1.25rem;
+}
+.queue-list {
+	list-style: none;
+	padding: 0;
+}
+.case {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	text-align: left;
+	width: 100%;
+	gap: 0.3rem;
+	padding: 0.62rem;
+	margin: 0.3rem 0 0;
+}
+.case small {
+	grid-column: 1 / -1;
+}
+.case span {
+	font-size: 0.77rem;
+}
+.evidence {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+	gap: 0.35rem;
+	margin: 0.7rem 0;
+}
+.evidence div,
+.record,
+.history {
+	border: 1px solid var(--admin-border);
+	border-radius: 0.65rem;
+	padding: 0.7rem;
+}
+.evidence div {
+	background: var(--admin-accent-soft);
+}
+.evidence dt {
+	font-size: 0.82rem;
+}
+.evidence dd {
+	font-size: 1.17rem;
+	font-weight: 750;
+}
+dd {
+	margin-inline-start: 0;
+}
+.comparison {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.6rem;
+	margin: 0.65rem 0;
+}
+.record h3 {
+	margin: 0.23rem 0 0.5rem;
+	font-size: 1.05rem;
+}
+.record dl {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	gap: 0.24rem 0.5rem;
+	font-size: 0.88rem;
+}
+.record dd {
+	overflow-wrap: anywhere;
+}
+.record ul {
+	padding-inline-start: 1.15rem;
+}
+.record li {
+	margin: 0.25rem 0;
+}
+.history {
+	margin-top: 0.65rem;
+}
+.history h3 {
+	margin: 0;
+	font-size: 1.03rem;
+	font-weight: 740;
+}
+.history li {
+	padding-block: 0.25rem;
+}
+.history time {
+	display: block;
+	font-size: 0.8rem;
+}
+@media (max-width: 54rem) {
+	.review-layout {
+		grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+	}
+	.comparison {
+		grid-template-columns: 1fr;
+	}
+}
+@media (max-width: 40rem) {
+	.review-layout {
+		grid-template-columns: 1fr;
+	}
+}
+
+.notes-list p {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	margin: 0.25rem 0;
+}
+textarea {
+	display: block;
+	width: 100%;
+	margin-block: 0.25rem;
+	padding: 0.5rem;
+	background: var(--admin-surface);
+	color: var(--ion-text-color);
+	border: 1px solid var(--admin-border);
+	border-radius: 0.5rem;
+}
+
+.queue-search {
+	display: grid;
+	gap: 0.4rem;
+	margin-block: 0.85rem;
+	padding: 0.65rem;
+	border: 1px solid var(--admin-border);
+	border-radius: 0.65rem;
+	background: var(--admin-accent-soft);
+}
+.queue-search label {
+	font-size: 0.87rem;
+	font-weight: 700;
+}
+.search-controls,
+.queue-paging {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+.queue-search select,
+.search-controls input {
+	width: 100%;
+	min-width: 0;
+	color: inherit;
+	background: var(--admin-surface);
+	border: 1px solid var(--ion-color-medium);
+	border-radius: 0.52rem;
+	padding: 0.48rem;
+}
+.search-controls button {
+	margin: 0;
+	border-color: var(--ion-color-primary);
+	background: var(--ion-color-primary);
+	color: var(--ion-color-primary-contrast);
+}
+.search-controls button:hover {
+	background: var(--ion-color-primary-shade);
+}
+.queue-search > button {
+	justify-self: start;
+}
+.queue-search p,
+.active-search {
+	margin-block: 0.25rem;
+	overflow-wrap: anywhere;
+}
+.queue-paging {
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding-block-end: 0.35rem;
+	font-size: 0.78rem;
+}
+.queue-paging button {
+	margin-inline: 0;
+}
+button:disabled {
+	opacity: 0.55;
+	cursor: default;
+}
+.case strong {
+	overflow-wrap: anywhere;
+}
+
+.record-heading {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.45rem;
+	flex-wrap: wrap;
+}
+.roster-count {
+	border-radius: 2rem;
+	padding: 0.25rem 0.55rem;
+	font-size: 0.76rem;
+	font-weight: 750;
+	background: var(--admin-accent-soft);
+	border: 1px solid var(--admin-border);
+	white-space: nowrap;
+}
+@media (min-width: 40.01rem) {
+	.queue-list {
+		max-block-size: 33rem;
+		overflow-y: auto;
+		padding: 0.2rem;
+		margin-inline: -0.2rem;
+	}
+}
+
+.case-status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	margin-block: 0.5rem;
+}
+.case-status select {
+	color: var(--ion-text-color);
+	background: var(--admin-surface);
+	border: 1px solid var(--admin-border);
+	border-radius: 0.45rem;
+	padding: 0.35rem;
+}
+.case-feedback {
+	padding: 0.5rem;
+	border-radius: 0.4rem;
+	background: var(--admin-accent-soft);
+}
+
+.record .record-states {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem;
+	list-style: none;
+	padding: 0;
+	margin-block: 0.45rem;
+}
+.record .record-states li {
+	margin: 0;
+	padding: 0.2rem 0.5rem;
+	border-radius: 2rem;
+	font-size: 0.76rem;
+	font-weight: 700;
+	background: var(--admin-accent-soft);
+	border: 1px solid var(--admin-border);
+}

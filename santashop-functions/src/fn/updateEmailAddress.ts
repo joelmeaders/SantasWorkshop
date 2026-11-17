@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { randomUUID } from 'node:crypto';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
 import { COLLECTION_SCHEMA, type EmailChangeRequest } from '../models';
@@ -111,6 +112,11 @@ export default async function updateEmailAddress(
 				'Your sign-in email changed. Refresh your account before trying again.',
 			);
 		}
+		await assertRegistrationReviewAllowed(
+			db,
+			{ uid, email: currentEmail, additionalEmail: data.emailAddress },
+			transaction,
+		);
 		const intent: EmailChangeIntent = {
 			mutationId: data.mutationId,
 			emailAddress: data.emailAddress,

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.22] - 2026-11-16
+
+### Added
+
+- Add the theme-matched Reports review queue, paginated email and ID search, delegated reviewer access, and action controls.
+
 ## [2026.11.21] - 2026-11-16
 
 ### Fixed

@@ -6,6 +6,12 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.29] - 2026-11-16
+
+### Added
+
+- Add gated review case management, incremental overnight matching, reversible registration actions, and optional bilingual notifications.
+
 ## [2026.10.28] - 2026-11-16
 
 ### Fixed

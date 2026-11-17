@@ -1,6 +1,156 @@
 {
 	"indexes": [
 		{
+			"collectionGroup": "cases",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "tierRank",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "evidence.exactDateMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "evidence.firstNameMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "fullRosterFraction",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "leftId",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "rightId",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "cases",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "hasOpenStatus",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "tierRank",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "evidence.exactDateMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "evidence.firstNameMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "fullRosterFraction",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "leftId",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "rightId",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "cases",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "searchReferences",
+					"arrayConfig": "CONTAINS"
+				},
+				{
+					"fieldPath": "tierRank",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "evidence.exactDateMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "evidence.firstNameMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "fullRosterFraction",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "leftId",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "rightId",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "cases",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "hasOpenStatus",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "searchReferences",
+					"arrayConfig": "CONTAINS"
+				},
+				{
+					"fieldPath": "tierRank",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "evidence.exactDateMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "evidence.firstNameMatches",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "fullRosterFraction",
+					"order": "DESCENDING"
+				},
+				{
+					"fieldPath": "leftId",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "rightId",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
+			"collectionGroup": "registrations",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "programYear",
+					"order": "ASCENDING"
+				},
+				{
+					"fieldPath": "emailAddress",
+					"order": "ASCENDING"
+				}
+			]
+		},
+		{
 			"collectionGroup": "registrationScanRiskSummaries",
 			"queryScope": "COLLECTION",
 			"fields": [

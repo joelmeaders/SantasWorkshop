@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminOnlyGuard, ownerOnlyGuard } from './auth.guards';
+import { registrationReviewGuard } from './pages/admin/stats/registration-review/registration-review-route.guard';
 
 export const adminRoutes: Routes = [
 	{
@@ -212,6 +213,15 @@ export const adminRoutes: Routes = [
 				path: 'stats',
 				canActivate: [adminOnlyGuard],
 				children: [
+					{
+						path: 'registration-review',
+						title: 'DSCS: Registration review',
+						canActivate: [registrationReviewGuard],
+						loadComponent: () =>
+							import('./pages/admin/stats/registration-review/registration-review-route.page').then(
+								(m) => m.RegistrationReviewRoutePage,
+							),
+					},
 					{
 						path: 'scan-risk',
 						loadComponent: () =>

@@ -23,7 +23,7 @@ export interface TestAdminUserSeed {
 	emailAddress: string;
 	password: string;
 	owner?: boolean;
-	roles?: ('admin' | 'checkin')[];
+	roles?: ('admin' | 'checkin' | 'registration-review')[];
 }
 
 export interface TestDateTimeSlotSeed {

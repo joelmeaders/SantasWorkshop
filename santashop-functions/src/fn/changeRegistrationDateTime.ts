@@ -1,3 +1,4 @@
+import { assertRegistrationReviewAllowed } from '../utility/registration-review-denylist-access';
 import { getBookingNow } from '../utility/booking-clock';
 import { createMutationPublicParametersReader } from '../utility/public-parameters';
 import { HttpsError, type CallableRequest } from 'firebase-functions/v2/https';
@@ -98,8 +99,7 @@ export default async function changeRegistrationDateTime(
 				'changeRegistrationDateTime',
 			);
 			if (cached) return;
-			const parameters = await readParameters();
-			const now = await getBookingNow(db);
+
 			const registration = registrationSnapshot.data() as
 				Registration | undefined;
 			if (!registration) {
@@ -108,6 +108,11 @@ export default async function changeRegistrationDateTime(
 					`Registration not found for ${uid}.`,
 				);
 			}
+			await assertRegistrationReviewAllowed(
+				db,
+				{ uid, email: registration.emailAddress },
+				transaction,
+			);
 			if (!registration.registrationSubmittedOn) {
 				throw new HttpsError(
 					'failed-precondition',
@@ -127,6 +132,8 @@ export default async function changeRegistrationDateTime(
 				);
 			}
 
+			const parameters = await readParameters();
+			const now = await getBookingNow(db);
 			if (!parameters?.admin?.allowChangeRegistration) {
 				throw new HttpsError(
 					'failed-precondition',

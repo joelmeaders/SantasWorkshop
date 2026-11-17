@@ -57,3 +57,26 @@ export const requireRecentAuthentication = (
 		);
 	}
 };
+
+export const canManageRegistrationReviewToken = (
+	token: AuthToken | undefined,
+): boolean =>
+	isOwnerToken(token) ||
+	(isAdminToken(token) &&
+		rolesFromToken(token ?? {}).includes('registration-review'));
+
+export const requireRegistrationReviewAccess = (
+	request: CallableRequest<unknown>,
+): string => {
+	const uid = request.auth?.uid;
+	if (!uid) {
+		throw new HttpsError('unauthenticated', 'Authentication is required.');
+	}
+	if (!canManageRegistrationReviewToken(request.auth?.token)) {
+		throw new HttpsError(
+			'permission-denied',
+			'Registration review permission is required.',
+		);
+	}
+	return uid;
+};

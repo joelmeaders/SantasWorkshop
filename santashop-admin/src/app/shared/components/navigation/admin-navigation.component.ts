@@ -3,6 +3,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AppStateService, AuthService } from '@santashop/core/admin/firestore';
 import { AdminTextPipe } from '../../preferences/admin-text.pipe';
+import { map, of } from 'rxjs';
+import { REGISTRATION_REVIEW_READER, canReadRegistrationReview } from '../../../pages/admin/stats/registration-review/registration-review-reader';
 
 @Component({
 	selector: 'admin-navigation',
@@ -63,6 +65,11 @@ import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 					routerLinkActive="selected"
 					>{{ 'Scan Risk Review' | adminText }}</a
 				>
+				@if (showRegistrationReview()) {
+					<a routerLink="/admin/stats/registration-review" routerLinkActive="selected" ariaCurrentWhenActive="page">
+						{{ 'Registration review' | adminText }}
+					</a>
+				}
 				<p>{{ 'Tools' | adminText }}</p>
 				<a
 					routerLink="/admin/resend-email"
@@ -150,6 +157,12 @@ import { AdminTextPipe } from '../../preferences/admin-text.pipe';
 })
 export class AdminNavigationComponent {
 	private readonly auth = inject(AuthService);
+	public readonly showRegistrationReview = toSignal(
+		inject(REGISTRATION_REVIEW_READER, { optional: true })
+			? this.auth.claimsResolved$.pipe(map((claims) => canReadRegistrationReview(claims ?? undefined)))
+			: of(false),
+		{ initialValue: false },
+	);
 	private readonly settings = inject(AppStateService);
 	public readonly isAdmin = toSignal(this.auth.isAdmin$, {
 		initialValue: false,

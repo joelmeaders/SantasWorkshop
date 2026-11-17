@@ -1,6 +1,10 @@
-export type StaffRole = 'admin' | 'checkin';
+export type StaffRole = 'admin' | 'checkin' | 'registration-review';
 
-export const STAFF_ROLES: readonly StaffRole[] = ['admin', 'checkin'];
+export const STAFF_ROLES: readonly StaffRole[] = [
+	'admin',
+	'checkin',
+	'registration-review',
+];
 
 export interface StaffAccount {
 	uid: string;

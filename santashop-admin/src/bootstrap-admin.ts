@@ -41,6 +41,7 @@ import {
 } from '@santashop/core/admin';
 import { AppComponent } from './app/app.component';
 import { provideAdminLanguage } from './app/shared/preferences/admin-language.providers';
+import { provideRegistrationReview } from './app/pages/admin/stats/registration-review/registration-review-callables';
 import { routes } from './app/app.routes';
 import { config } from './config';
 import { firebaseConfig } from './firebase.config';
@@ -58,7 +59,7 @@ export type AdminBootstrapConfig = Pick<
 	| 'production'
 	| 'programYear'
 	| 'shopDays'
->;
+> & { readonly registrationReviewEnabled?: boolean };
 
 export interface AdminBootstrapDependencies {
 	readonly bootstrapApplication: typeof bootstrapApplication;
@@ -201,6 +202,9 @@ export function bootstrapAdminApplication(
 				}),
 				provideAdminLanguage(),
 				...firebaseProviders,
+				...(runtimeConfig.registrationReviewEnabled === true
+					? [provideRegistrationReview()]
+					: []),
 				{ provide: ANALYTICS_APP_AREA, useValue: 'admin' },
 				...provideRemoteConfigPublicParameters({
 					useEmulator: !runtimeConfig.production,

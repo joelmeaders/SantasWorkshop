@@ -7,6 +7,8 @@ import {
 	inject,
 } from '@angular/core';
 import {
+	type AbstractControl,
+	type ValidationErrors,
 	ReactiveFormsModule,
 	UntypedFormControl,
 	UntypedFormGroup,
@@ -33,6 +35,19 @@ import type {
 	StaffRole,
 	UpdateStaffUser,
 } from '@santashop/models';
+
+import { REGISTRATION_REVIEW_READER } from '../stats/registration-review/registration-review-reader';
+
+function requiresAdminForReview(
+	control: AbstractControl,
+): ValidationErrors | null {
+	const roles: unknown = control.value;
+	return Array.isArray(roles) &&
+		roles.includes('registration-review') &&
+		!roles.includes('admin')
+		? { reviewRequiresAdmin: true }
+		: null;
+}
 
 interface RoleOption {
 	readonly value: StaffRole;
@@ -62,6 +77,8 @@ interface RoleOption {
 })
 export class UserEditorComponent implements OnInit {
 	private readonly modalController = inject(ModalController);
+	private readonly reviewConfigured =
+		inject(REGISTRATION_REVIEW_READER, { optional: true }) !== null;
 
 	@Input() public account?: StaffAccount;
 	@Input() public isOwner = false;
@@ -69,7 +86,21 @@ export class UserEditorComponent implements OnInit {
 	public get roleOptions(): readonly RoleOption[] {
 		return [
 			...(this.isOwner
-				? [{ value: 'admin', label: 'Administrator' } as RoleOption]
+				? [
+						{
+							value: 'admin',
+							label: 'Administrator',
+						} as RoleOption,
+						...(this.reviewConfigured ||
+						this.account?.roles.includes('registration-review')
+							? [
+									{
+										value: 'registration-review',
+										label: 'Registration review',
+									} as RoleOption,
+								]
+							: []),
+					]
 				: []),
 			{ value: 'checkin', label: 'Check-In' },
 		];
@@ -95,6 +126,7 @@ export class UserEditorComponent implements OnInit {
 			roles: new UntypedFormControl(initialRoles, [
 				Validators.required,
 				Validators.minLength(1),
+				requiresAdminForReview,
 			]),
 			password: new UntypedFormControl(
 				'',

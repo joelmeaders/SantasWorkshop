@@ -48,6 +48,10 @@ export default {
 	},
 	externals: {
 		'firebase-admin': 'firebase-admin',
+		// Keep modular and namespaced Admin SDK entry points on the same runtime instance.
+		'firebase-admin/app': 'firebase-admin/app',
+		'firebase-admin/auth': 'firebase-admin/auth',
+		'firebase-admin/firestore': 'firebase-admin/firestore',
 		'firebase-functions': 'firebase-functions',
 	},
 	plugins: [

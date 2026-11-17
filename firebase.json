@@ -285,6 +285,41 @@
 			],
 			"rewrites": [
 				{
+					"source": "/listRegistrationReviewCases",
+					"function": {
+						"functionId": "listRegistrationReviewCases",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/getRegistrationReviewCase",
+					"function": {
+						"functionId": "getRegistrationReviewCase",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/setRegistrationReviewStatus",
+					"function": {
+						"functionId": "setRegistrationReviewStatus",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/addRegistrationReviewNote",
+					"function": {
+						"functionId": "addRegistrationReviewNote",
+						"region": "us-central1"
+					}
+				},
+				{
+					"source": "/performRegistrationReviewAction",
+					"function": {
+						"functionId": "performRegistrationReviewAction",
+						"region": "us-central1"
+					}
+				},
+				{
 					"source": "/resumeWaitingListCampaign",
 					"function": {
 						"functionId": "resumeWaitingListCampaign",

@@ -57,6 +57,25 @@ The disposable Functions deploy artifact includes only the generated file for
 the selected project. It never includes `santashop-functions/.env` or the root
 developer-local `.env`; neither local file is required on a GitHub runner.
 
+### Registration review rollout
+
+The Registration Review Admin UI and its API are off by default. The standard
+release reads the same non-secret `TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED`
+or `PROD_SANTASHOP_REGISTRATION_REVIEW_ENABLED` value for both the Admin Hosting
+build and the Functions deployment. Roll out and test the Functions API first,
+then deploy the matching Admin build. Enabling TEST does not enable production.
+The Functions TEST job reads the repository-level TEST variable, so do not
+shadow it in the Admin Hosting `test` environment. Both PROD jobs read the
+same protected `production` environment.
+
+Leave the nightly and denylist flags unset or false in both environments.
+Standard cloud deployment rejects an attempt to enable either until a separate
+release securely binds its runtime HMAC secret. Do not put either HMAC key in
+GitHub workflow dotenv inputs, browser configuration, or release logs.
+The nightly pipeline also needs a verified existing-registration baseline before
+it can be enabled. Local demo emulator fixtures are separate from these cloud
+release settings.
+
 ## GitHub repository secrets
 
 The `scripts/github-secrets.ps1` synchronization helper requires these eight

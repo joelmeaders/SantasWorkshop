@@ -64,6 +64,12 @@
 					}
 				</ion-select>
 			</ion-item>
+			@if (form.get('roles')?.hasError('reviewRequiresAdmin')) {
+				<ion-note color="danger" class="ion-padding-start">{{
+					'Registration review also requires the Administrator role.'
+						| adminText
+				}}</ion-note>
+			}
 
 			<ion-item>
 				<ion-input

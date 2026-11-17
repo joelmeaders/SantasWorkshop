@@ -1,6 +1,6 @@
 {
 	"name": "@santashop/admin",
-	"version": "2026.11.21",
+	"version": "2026.11.22",
 	"description": "",
 	"scripts": {
 		"lint": "ng lint santashop-admin --fix --cache",

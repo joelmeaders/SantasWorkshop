@@ -32,7 +32,8 @@ extra opt-in test flags or dedicated ports are required.
 
 The browser CI workflow typechecks the Playwright suite before downloading its
 browser or starting emulators. The E2E TypeScript library includes ES2023 APIs
-available in its Node 24 runtime; this does not change application compilation.
+available in its Node 24 runtime. Its models type imports resolve directly to
+shared source so the check also works before library builds on a fresh checkout.
 
 Browser tests use the Firebase emulators and disposable seeded data. They cover
 account access, registration, QR state, staff workflows, reports, refresh and

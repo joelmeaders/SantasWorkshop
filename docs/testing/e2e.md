@@ -44,7 +44,8 @@ pnpm --filter @santashop/e2e typecheck
 
 The browser CI workflow runs this check before installing Chromium or starting
 the application and emulators. Playwright itself transpiles tests without
-typechecking them.
+typechecking them. The typecheck resolves shared models from source and does not
+require existing build outputs.
 
 Run both suites sequentially:
 

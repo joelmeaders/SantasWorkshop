@@ -5,6 +5,9 @@
 		"moduleResolution": "node",
 		"target": "ES2022",
 		"lib": ["ES2023", "DOM"],
+		"paths": {
+			"@santashop/models": ["../santashop-models/src/index.ts"]
+		},
 		"types": ["node", "@playwright/test"],
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,

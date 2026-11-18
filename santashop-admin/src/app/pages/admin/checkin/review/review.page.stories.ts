@@ -6,7 +6,6 @@ import {
 	getAdminStoryFixtures,
 } from '../../../../../../../.storybook/admin/admin-story.providers';
 import { ReviewPage } from './review.page';
-import { shopperAccessStoryFixtures } from './shopper-access.story-fixtures';
 
 const meta = {
 	title: 'Admin/Check-In/Review',
@@ -60,25 +59,19 @@ export const CheckInClosed: Story = {
 };
 
 export const ShopperAccessInContext: Story = {
-	decorators: [
-		...adminStoryDecorators({
-			isAdmin: true,
-			isOwner: false,
-			registration: demoRegistration,
-		}),
-		shopperAccessStoryFixtures('enabled'),
-	],
+	name: 'Administrator Check-in Review',
+	decorators: adminStoryDecorators({
+		isAdmin: true,
+		isOwner: false,
+		registration: demoRegistration,
+	}),
 	play: async ({ canvasElement }): Promise<void> => {
 		const canvas = within(canvasElement);
 		await expect(await canvas.findByText(/Elena Rivera/)).toBeVisible();
-		const access = within(
-			await canvas.findByTestId('shopper-access-panel'),
-		);
-		await expect(
-			await access.findByText('Access is enabled'),
-		).toBeVisible();
-		await expect(access.queryByTestId('change-shopper-access')).not.toBeInTheDocument();
 		await expect(canvas.getByText('Ava Rivera')).toBeVisible();
+		await expect(
+			canvas.queryByTestId('shopper-access-panel'),
+		).not.toBeInTheDocument();
 	},
 };
 

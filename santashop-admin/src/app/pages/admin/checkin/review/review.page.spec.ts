@@ -35,12 +35,7 @@ describe('ReviewPage', () => {
 	const reset = vi.fn();
 	const checkIn = vi.fn();
 	const callable = vi.fn();
-	const shopperAccess = vi.fn(async () => ({
-		data: { disabled: false, audit: null },
-	}));
-	const callableWrapper = vi.fn((name: string) =>
-		name === 'callableGetShopperAccess' ? shopperAccess : callable,
-	);
+	const callableWrapper = vi.fn(() => callable);
 	const alert = {
 		present: vi.fn().mockResolvedValue(undefined),
 		onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
@@ -123,11 +118,10 @@ describe('ReviewPage', () => {
 		await fixture.whenStable();
 	});
 
-	it('shows read-only shopper access to admins and owners, but not check-in-only staff', async () => {
+	it('omits shopper access for all Check-in roles without loading access data', async () => {
 		const panel = (): HTMLElement | null =>
 			fixture.nativeElement.querySelector('admin-shopper-access-panel');
-		expect(panel()).not.toBeNull();
-		expect(panel()?.querySelector('[data-testid=change-shopper-access]')).toBeNull();
+		expect(panel()).toBeNull();
 
 		isAdmin$.next(false);
 		await fixture.whenStable();
@@ -135,8 +129,10 @@ describe('ReviewPage', () => {
 
 		isOwner$.next(true);
 		await fixture.whenStable();
-		expect(panel()).not.toBeNull();
-		expect(panel()?.querySelector('[data-testid=change-shopper-access]')).toBeNull();
+		expect(panel()).toBeNull();
+		expect(callableWrapper).not.toHaveBeenCalledWith(
+			'callableGetShopperAccess',
+		);
 	});
 
 	it('hides forbidden reservation actions for check-in staff and clears them when roles change', async () => {

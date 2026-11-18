@@ -4,6 +4,7 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import {
 	COLLECTION_SCHEMA,
+	isRegistrationReviewReason,
 	customerLanguageOrEnglish,
 	type Registration,
 } from '../models';
@@ -213,6 +214,22 @@ export async function performRegistrationReviewDenylistAction(
 					);
 				}
 				return receipt.get('result') as ReviewDenylistActionResult;
+			}
+			// Only an exact retry of a legacy block may finish an existing operation.
+			if (
+				!isRegistrationReviewReason(action, reason) &&
+				!(
+					isBlock &&
+					bindingMatches &&
+					marker.get('operationId') === operationId &&
+					marker.get('digest') === digest &&
+					(state === 'failed' || (finishAuth && state === 'applying'))
+				)
+			) {
+				throw new HttpsError(
+					'invalid-argument',
+					'Choose a valid reason for this action.',
+				);
 			}
 			const time = current.updateTime;
 			const revision = time ? time.seconds + ':' + time.nanoseconds : '';

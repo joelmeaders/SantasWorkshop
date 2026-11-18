@@ -109,7 +109,7 @@ describe('registration review callable adapter', () => {
 			registrationId: 'DEMO-R1',
 			expectedRevision: '01:0',
 			mutationId: 'DEMO-MUTATION',
-			reason: 'Synthetic test reason',
+			reason: 'duplicate-registration',
 		};
 		expect(await firstValueFrom(reader.performAction(mutation))).toEqual(
 			action,

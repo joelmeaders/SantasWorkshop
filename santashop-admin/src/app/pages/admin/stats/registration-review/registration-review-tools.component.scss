@@ -7,16 +7,37 @@ dialog {
 	background: var(--admin-surface);
 }
 .tool-panel {
-	margin-block: 0.65rem;
+	margin-block-start: 0.75rem;
+	overflow-wrap: anywhere;
 }
-.tool-panel h3,
+.tool-panel h4,
 dialog h3 {
 	margin: 0;
 }
+.tool-panel h4 {
+	font-size: 1rem;
+}
+.tool-panel h5 {
+	margin-block: 0.4rem;
+	font-size: 0.88rem;
+}
 .tool-list {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+	display: flex;
+	flex-wrap: wrap;
 	gap: 0.45rem;
+}
+.child-actions {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.child-actions li {
+	border-top: 1px solid var(--admin-border);
+	padding-block: 0.4rem;
+}
+.child-actions small {
+	display: block;
+	margin-block-end: 0.3rem;
 }
 button {
 	color: var(--ion-text-color);
@@ -35,10 +56,6 @@ input:focus-visible,
 textarea:focus-visible {
 	outline: 2px solid var(--ion-color-primary);
 	outline-offset: 2px;
-}
-button small {
-	display: block;
-	margin-block-start: 0.3rem;
 }
 dialog {
 	width: min(94vw, 33rem);
@@ -59,6 +76,7 @@ dialog label:not(.choice) {
 	gap: 0.2rem;
 }
 dialog input:not([type='checkbox']),
+dialog select,
 dialog textarea {
 	width: 100%;
 	padding: 0.45rem;

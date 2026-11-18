@@ -82,7 +82,7 @@ export class ShopperAccessPanelComponent {
 								kind: 'ready',
 								disabled: data.disabled,
 								reason: data.audit?.reason
-									? reasons[data.audit.reason]
+									? this.auditReasonLabel(data.audit.reason)
 									: undefined,
 								disposition: data.audit?.disposition,
 								updatedBy: data.audit?.updatedBy,
@@ -102,6 +102,14 @@ export class ShopperAccessPanelComponent {
 	);
 	public readonly busy = signal(false);
 	public readonly failedUid = signal<string | undefined>(undefined);
+
+	private auditReasonLabel(
+		reason: NonNullable<ShopperAccessAudit['reason']>,
+	): string {
+		return reason === 'both-parents-registered-same-children'
+			? 'Same children registered by both parents'
+			: reasons[reason];
+	}
 
 	public loadAgain(): void {
 		this.refresh.next();

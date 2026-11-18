@@ -64,11 +64,7 @@ describe('RegistrationReviewToolsComponent', () => {
 		});
 		fixture = TestBed.createComponent(RegistrationReviewToolsComponent);
 		fixture.componentRef.setInput('caseId', 'DEMO-CASE');
-		fixture.componentRef.setInput('records', [
-			record,
-			{ ...record, id: 'DEMO-R2', expectedRevision: undefined },
-			null,
-		]);
+		fixture.componentRef.setInput('record', record);
 		fixture.componentRef.setInput('claims', { owner: true });
 		fixture.detectChanges();
 		component = fixture.componentInstance;
@@ -112,8 +108,14 @@ describe('RegistrationReviewToolsComponent', () => {
 		if (!option) throw new Error('Missing synthetic child option.');
 		component.open(option);
 		fixture.detectChanges();
+		const dialog = (fixture.nativeElement as HTMLElement).querySelector(
+			'dialog',
+		);
+		expect(dialog?.querySelector('input[type=checkbox]')).toBeNull();
+		expect(dialog?.querySelectorAll('textarea')).toHaveLength(0);
 		expect(component.canConfirm()).toBe(false);
-		component.reason.set('  Synthetic reason  ');
+		component.reason.set('correct-child-information');
+		component.notify.set(true);
 		component.birthDate.set('malformed');
 		component.confirm(new Event('submit'));
 		expect(performAction).not.toHaveBeenCalled();
@@ -129,7 +131,7 @@ describe('RegistrationReviewToolsComponent', () => {
 			registrationId: 'DEMO-R1',
 			expectedRevision: '10:0',
 			mutationId: expect.any(String),
-			reason: 'Synthetic reason',
+			reason: 'correct-child-information',
 			childIndex: 0,
 			child: {
 				firstName: 'Ariella',
@@ -162,15 +164,16 @@ describe('RegistrationReviewToolsComponent', () => {
 			);
 		const option = component.steps()[0];
 		component.open(option);
-		component.reason.set('Verify duplicate');
+		component.reason.set('verify-registration');
 		component.message.set('  Selected shopper only  ');
-		fixture.componentRef.setInput('records', [
-			{ ...record, expectedRevision: '11:0' },
-		]);
+		fixture.componentRef.setInput('record', {
+			...record,
+			expectedRevision: '11:0',
+		});
 		component.confirm(new Event('submit'));
 		expect(component.error()).toContain('Registration changed');
 		expect(performAction).not.toHaveBeenCalled();
-		fixture.componentRef.setInput('records', [record]);
+		fixture.componentRef.setInput('record', record);
 		component.confirm(new Event('submit'));
 		expect(component.error()).toContain('not confirmed');
 		component.confirm(new Event('submit'));
@@ -211,14 +214,14 @@ describe('RegistrationReviewToolsComponent', () => {
 				}),
 			);
 		component.open(block);
-		component.reason.set('Synthetic block');
+		component.reason.set('both-parents-registered-same-children');
 		component.confirm(new Event('submit'));
 		expect(component.error()).toContain(
 			'block is active, but sign-in restriction could not be verified',
 		);
 		component.close();
 		component.open(unblock);
-		component.reason.set('Synthetic unblock');
+		component.reason.set('reviewed-and-cleared');
 		component.confirm(new Event('submit'));
 		expect(updated).toHaveBeenCalledWith(
 			'Email block removed. Verify sign-in separately.',

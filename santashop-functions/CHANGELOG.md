@@ -6,6 +6,12 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.30] - 2026-11-17
+
+### Changed
+
+- Validate action-specific Registration Review reason codes and reject shopper email for child changes.
+
 ## [2026.10.29] - 2026-11-16
 
 ### Added

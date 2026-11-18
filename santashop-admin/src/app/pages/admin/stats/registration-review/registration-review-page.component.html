@@ -225,42 +225,6 @@
 					} @else if (detailState.state === 'ready') {
 						@if (detailState.value.id === selectedId()) {
 							<h3>{{ detailState.value.id }}</h3>
-							@if (statusWritable()) {
-								<div class="case-status">
-									<label for="review-case-status">{{
-										'Review status' | adminText
-									}}</label>
-									<select
-										id="review-case-status"
-										[value]="detailState.value.status"
-										[disabled]="statusSaving()"
-										(change)="changeStatus($event)"
-									>
-										@for (
-											option of statusOptions;
-											track option
-										) {
-											<option
-												[value]="option"
-												[selected]="
-													option ===
-													detailState.value.status
-												"
-											>
-												{{ labels[option] | adminText }}
-											</option>
-										}
-									</select>
-									@if (statusError()) {
-										<p role="alert">
-											{{
-												'The status change was not confirmed. Reload the case or retry.'
-													| adminText
-											}}
-										</p>
-									}
-								</div>
-							}
 							<p>
 								{{
 									detailState.value.registrations.join(' / ')
@@ -453,6 +417,18 @@
 														</li>
 													}
 												</ul>
+												<admin-registration-review-tools
+													[caseId]="
+														detailState.value.id
+													"
+													[record]="record"
+													[claims]="claims()"
+													(updated)="
+														refreshAfterAction(
+															$event
+														)
+													"
+												/>
 											</article>
 										} @else {
 											<article class="record">
@@ -466,88 +442,134 @@
 										}
 									}
 								</div>
-								<admin-registration-review-tools
-									[caseId]="detailState.value.id"
-									[records]="records"
-									[claims]="claims()"
-									(updated)="refreshAfterAction($event)"
-								/>
 							}
 							<section
 								class="history"
-								aria-labelledby="case-notes-title"
+								aria-labelledby="case-actions-title"
 							>
-								<h3 id="case-notes-title">
-									{{ 'Internal notes' | adminText }}
+								<h3 id="case-actions-title">
+									{{ 'Case actions' | adminText }}
 								</h3>
-								<p>
-									{{
-										'Only reviewers can see these notes. They are never emailed to shoppers.'
-											| adminText
-									}}
-								</p>
-								@if (detailState.value.notes?.length) {
-									<ol class="notes-list">
-										@for (
-											entry of detailState.value.notes;
-											track entry.id
-										) {
-											<li>
-												<strong>{{
-													entry.author
-												}}</strong
-												><time
-													[attr.datetime]="entry.at"
-													>{{
-														formatTime(entry.at)
-													}}</time
-												>
-												<p>{{ entry.text }}</p>
-											</li>
-										}
-									</ol>
-								} @else {
-									<p>{{ 'No notes yet.' | adminText }}</p>
-								}
-								@if (notesWritable()) {
-									<form
-										(submit)="
-											$event.preventDefault();
-											appendNote()
-										"
-									>
-										<label for="case-note">{{
-											'Add an internal note' | adminText
+								@if (statusWritable()) {
+									<div class="case-status">
+										<label for="review-case-status">{{
+											'Case status' | adminText
 										}}</label>
-										<textarea
-											id="case-note"
-											[value]="note()"
-											[maxLength]="noteMaxLength"
-											(input)="
-												note.set(
-													$any($event.target).value
-												)
-											"
-											rows="3"
-										></textarea>
-										@if (noteError()) {
+										<select
+											id="review-case-status"
+											[value]="detailState.value.status"
+											[disabled]="statusSaving()"
+											(change)="changeStatus($event)"
+										>
+											@for (
+												option of statusOptions;
+												track option
+											) {
+												<option
+													[value]="option"
+													[selected]="
+														option ===
+														detailState.value.status
+													"
+												>
+													{{
+														labels[option]
+															| adminText
+													}}
+												</option>
+											}
+										</select>
+										@if (statusError()) {
 											<p role="alert">
 												{{
-													'The note could not be saved. Try again.'
+													'The status change was not confirmed. Reload the case or retry.'
 														| adminText
 												}}
 											</p>
 										}
-										<button
-											type="submit"
-											[disabled]="
-												!noteValid() || noteSaving()
+									</div>
+								}
+								<section
+									class="history"
+									aria-labelledby="case-notes-title"
+								>
+									<h3 id="case-notes-title">
+										{{ 'Internal notes' | adminText }}
+									</h3>
+									<p>
+										{{
+											'Only reviewers can see these notes. They are never emailed to shoppers.'
+												| adminText
+										}}
+									</p>
+									@if (detailState.value.notes?.length) {
+										<ol class="notes-list">
+											@for (
+												entry of detailState.value
+													.notes;
+												track entry.id
+											) {
+												<li>
+													<strong>{{
+														entry.author
+													}}</strong
+													><time
+														[attr.datetime]="
+															entry.at
+														"
+														>{{
+															formatTime(entry.at)
+														}}</time
+													>
+													<p>{{ entry.text }}</p>
+												</li>
+											}
+										</ol>
+									} @else {
+										<p>{{ 'No notes yet.' | adminText }}</p>
+									}
+									@if (notesWritable()) {
+										<form
+											(submit)="
+												$event.preventDefault();
+												appendNote()
 											"
 										>
-											{{ 'Add note' | adminText }}
-										</button>
-									</form>
-								}
+											<label for="case-note">{{
+												'Add an internal note'
+													| adminText
+											}}</label>
+											<textarea
+												id="case-note"
+												[value]="note()"
+												[maxLength]="noteMaxLength"
+												(input)="
+													note.set(
+														$any($event.target)
+															.value
+													)
+												"
+												rows="3"
+											></textarea>
+											@if (noteError()) {
+												<p role="alert">
+													{{
+														'The note could not be saved. Try again.'
+															| adminText
+													}}
+												</p>
+											}
+											<button
+												type="submit"
+												[disabled]="
+													!noteValid() || noteSaving()
+												"
+											>
+												{{ 'Add note' | adminText }}
+											</button>
+										</form>
+									}
+								</section>
 							</section>
 							<div class="history">
 								<h3>{{ 'Activity history' | adminText }}</h3>

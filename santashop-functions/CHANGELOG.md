@@ -11,6 +11,7 @@
 ### Changed
 
 - Allow Registration Reviewers to manage email bans; retain the private email ban table across seasonal resets and verify Firebase Auth is disabled when banning.
+- Capture daily registration snapshots only from November 14 through December 20 in the shop time zone; continue refreshing aggregate statistics year-round.
 
 ## [2026.10.31] - 2026-11-17
 

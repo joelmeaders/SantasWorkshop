@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ownerOperationWorker, {
 	executeYearlyReset,
 } from '../../src/fn/ownerOperationWorker';
 import { previewOwnerOperation } from '../../src/fn/ownerOperations';
+import { applyRegistrationReviewAuthDenylist } from '../../src/utility/registration-review-denylist-auth';
 import {
 	clearEmulatorData,
 	getAdminApp,
@@ -51,6 +52,73 @@ describe.sequential('owner operation terminal lock cleanup integration', () => {
 		await lock.set({ operationId: 'new-reset' });
 		await ownerOperationWorker({ data: { operationId: 'old-reset' } });
 		expect((await lock.get()).data()).toEqual({ operationId: 'new-reset' });
+	});
+
+	it('retains active registration-review bans when yearly reset deletes seasonal records and Auth accounts', async () => {
+		const db = getFirestore();
+		const auth = getAuth();
+		const now = new Date('2026-09-10T12:00:00Z');
+		const uid = 'banned-seasonal-shopper';
+		const email = 'yearly-reset-ban@example.com';
+		await auth.createUser({ uid, email, emailVerified: true });
+		await db.doc('users/' + uid).set({ uid });
+		await db.doc('registrations/' + uid).set({ uid, programYear: 2025 });
+		await db.doc('cancellations/yearly-reset-cancellation').set({ uid });
+		const operationId = 'yearly-reset-block';
+		const emailBlock = db.doc('registrationReviewEmailBlocks/' + email);
+		const uidBlock = db.doc('registrationReviewUidBlocks/' + uid);
+		const audit = db.doc('registrationReviewBlockAudit/' + operationId);
+		await emailBlock.set({ email, active: true, shopperUid: uid });
+		await uidBlock.set({ active: true, shopperUid: uid });
+		await audit.set({ kind: 'block', active: true });
+		const revoke = vi.spyOn(auth, 'revokeRefreshTokens');
+		await applyRegistrationReviewAuthDenylist({ uid, email }, auth);
+		expect((await auth.getUser(uid)).disabled).toBe(true);
+		expect(revoke).toHaveBeenCalledExactlyOnceWith(uid);
+		const authOperation = db.doc('registrationReviewAuthOperations/' + uid);
+		await authOperation.set({ state: 'confirmed', operationId });
+
+		// Start at the already-verified purge stage (the emulator cannot export).
+		const result = await executeYearlyReset('ban-retention-reset', {
+			operation: 'yearly-reset',
+			status: 'running',
+			stage: 'purging-firestore',
+			projectId: 'santas-workshop-test',
+			programYear: 2025,
+			actorUid: 'owner',
+			createdAt: now,
+			purgeStartedAt: now,
+			backupOperationName: 'emulator/verified-backup',
+			progress: {},
+		});
+
+		expect(result.deletedAuthUsers).toBe(1);
+		await expect(auth.getUser(uid)).rejects.toMatchObject({
+			code: 'auth/user-not-found',
+		});
+		expect((await db.doc('registrations/' + uid).get()).exists).toBe(false);
+		expect(
+			(await db.doc('cancellations/yearly-reset-cancellation').get())
+				.exists,
+		).toBe(false);
+		// No original Auth UID is needed to reject this email in a new season.
+		expect((await emailBlock.get()).data()).toEqual({
+			email,
+			active: true,
+			shopperUid: uid,
+		});
+		expect((await uidBlock.get()).data()).toEqual({
+			active: true,
+			shopperUid: uid,
+		});
+		expect((await audit.get()).data()).toEqual({
+			kind: 'block',
+			active: true,
+		});
+		expect((await authOperation.get()).data()).toEqual({
+			state: 'confirmed',
+			operationId,
+		});
 	});
 
 	it('purges paginated inventories and nested records while retaining staff and archives', async () => {

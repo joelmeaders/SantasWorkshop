@@ -317,7 +317,6 @@ describe.skipIf(
 			action: 'contact',
 			reason: 'verify-registration',
 			mutationId: 'contact-shopper',
-			reason: 'verify-registration',
 		};
 		await expect(
 			performRegistrationReviewAction(

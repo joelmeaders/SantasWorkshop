@@ -143,7 +143,7 @@ describe('ReviewPage', () => {
 		expect(fixture.nativeElement.textContent).toContain('Change Date/Time');
 		expect(
 			fixture.nativeElement.querySelector('.page-actions').textContent,
-		).toContain('Delete');
+		).toContain('Cancel Registration');
 		isAdmin$.next(false);
 		await fixture.whenStable();
 		expect(fixture.nativeElement.textContent).not.toContain(
@@ -151,7 +151,7 @@ describe('ReviewPage', () => {
 		);
 		expect(
 			fixture.nativeElement.querySelector('.page-actions').textContent,
-		).not.toContain('Delete');
+		).not.toContain('Cancel Registration');
 		expect(fixture.nativeElement.textContent).toContain('Yes, check in');
 		await component.cancelReservation();
 		await component.editDateTime();

@@ -590,9 +590,9 @@ export const ReviewActionJourney: Story = {
 		await expect(
 			dialog.getByRole('checkbox', { name: 'Also send a shopper email' }),
 		).not.toBeChecked();
-		await userEvent.type(
-			dialog.getByRole('textbox', { name: 'Reason (internal only)' }),
-			'Confirmed issue',
+		await userEvent.selectOptions(
+			dialog.getByRole('combobox', { name: 'Reason (internal only)' }),
+			'duplicate-registration',
 		);
 		await userEvent.click(
 			dialog.getByRole('button', { name: 'Confirm without email' }),
@@ -609,9 +609,9 @@ export const ReviewActionJourney: Story = {
 			}),
 		);
 		dialog = within(canvas.getByRole('dialog'));
-		await userEvent.type(
-			dialog.getByRole('textbox', { name: 'Reason (internal only)' }),
-			'Reviewed with shopper',
+		await userEvent.selectOptions(
+			dialog.getByRole('combobox', { name: 'Reason (internal only)' }),
+			'reviewed-and-cleared',
 		);
 		await userEvent.click(
 			dialog.getByRole('checkbox', { name: 'Also send a shopper email' }),

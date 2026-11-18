@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.23] - 2026-11-17
+
+### Changed
+
+- Group Registration Review actions by registration and child, use structured reasons, and keep child changes email-free.
+
 ## [2026.11.22] - 2026-11-16
 
 ### Added

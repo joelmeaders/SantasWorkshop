@@ -931,5 +931,19 @@
 	"This restores access only. It does not restore a canceled registration.": "This restores access only. It does not restore a canceled registration.",
 	"Duplicate registration": "Duplicate registration",
 	"Suspected automated signup": "Suspected automated signup",
-	"Registration information couldn’t be verified": "Registration information couldn’t be verified"
+	"Registration information couldn’t be verified": "Registration information couldn’t be verified",
+	"Registration actions": "Registration actions",
+	"Child actions": "Child actions",
+	"Case actions": "Case actions",
+	"Case status": "Case status",
+	"Select a reason": "Select a reason",
+	"Same children registered by both parents": "Same children registered by both parents",
+	"Verify registration information": "Verify registration information",
+	"Follow up on this review": "Follow up on this review",
+	"Correct child information": "Correct child information",
+	"Duplicate child entry": "Duplicate child entry",
+	"Child removed in error": "Child removed in error",
+	"Cancellation requested by shopper": "Cancellation requested by shopper",
+	"Registration canceled in error": "Registration canceled in error",
+	"Email blocked in error": "Email blocked in error"
 }

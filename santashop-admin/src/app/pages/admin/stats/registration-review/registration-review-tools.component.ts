@@ -11,6 +11,13 @@ import {
 	signal,
 	viewChild,
 } from '@angular/core';
+import {
+	REGISTRATION_REVIEW_REASON_CODES,
+	isRegistrationReviewChildAction,
+	isRegistrationReviewReason,
+	type RegistrationReviewReasonCode,
+} from '@santashop/models';
+import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { defer, finalize, of, take } from 'rxjs';
 import { AdminTextPipe } from '../../../../shared/preferences/admin-text.pipe';
@@ -37,6 +44,24 @@ export const reviewActionLabels: Record<ReviewMutationAction, string> = {
 	unblacklist: 'Remove email block',
 };
 
+const reasonLabels: Record<RegistrationReviewReasonCode, string> = {
+	'duplicate-registration': 'Duplicate registration',
+	'both-parents-registered-same-children':
+		'Same children registered by both parents',
+	'suspected-automated-signup': 'Suspected automated signup',
+	'registration-information-unverified':
+		"Registration information couldn't be verified",
+	'reviewed-and-cleared': 'Reviewed and cleared',
+	'verify-registration': 'Verify registration information',
+	'follow-up': 'Follow up on this review',
+	'correct-child-information': 'Correct child information',
+	'duplicate-child-entry': 'Duplicate child entry',
+	'child-removed-in-error': 'Child removed in error',
+	'cancellation-requested-by-shopper': 'Cancellation requested by shopper',
+	'cancellation-in-error': 'Registration canceled in error',
+	'block-in-error': 'Email blocked in error',
+};
+
 interface ActionOption {
 	readonly action: ReviewMutationAction;
 	readonly record: ReviewCaseRegistration;
@@ -46,7 +71,7 @@ interface ActionOption {
 @Component({
 	selector: 'admin-registration-review-tools',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [AdminTextPipe],
+	imports: [AdminTextPipe, NgTemplateOutlet],
 	templateUrl: './registration-review-tools.component.html',
 	styleUrl: './registration-review-tools.component.scss',
 })
@@ -56,11 +81,13 @@ export class RegistrationReviewToolsComponent {
 	});
 	private readonly destroyRef = inject(DestroyRef);
 	public readonly caseId = input.required<string>();
-	public readonly records =
-		input.required<readonly (ReviewCaseRegistration | null)[]>();
+	public readonly record = input.required<ReviewCaseRegistration>();
 	public readonly claims = input<ReviewClaims>();
 	public readonly updated = output<string>();
 	public readonly labels = reviewActionLabels;
+	public readonly reasonLabels = reasonLabels;
+	public readonly reasonChoices = REGISTRATION_REVIEW_REASON_CODES;
+	public readonly isChildAction = isRegistrationReviewChildAction;
 	public readonly replyTo = 'president@denversantaclausshop.org';
 	public readonly prompt = signal<ActionOption | null>(null);
 	public readonly reason = signal('');
@@ -88,9 +115,30 @@ export class RegistrationReviewToolsComponent {
 	public readonly recovery = computed(() =>
 		this.options(['restoreChild', 'enable', 'reinstate', 'unblacklist']),
 	);
+	public readonly registrationSteps = computed(() =>
+		this.steps().filter((option) => !option.child),
+	);
+	public readonly registrationRecovery = computed(() =>
+		this.recovery().filter((option) => !option.child),
+	);
+	public readonly childActions = computed(() => {
+		const grouped = new Map<ReviewCaseChild, ActionOption[]>();
+		for (const option of [...this.steps(), ...this.recovery()]) {
+			if (!option.child) continue;
+			const options = grouped.get(option.child);
+			if (options) options.push(option);
+			else grouped.set(option.child, [option]);
+		}
+		return [...grouped].map(([child, options]) => ({ child, options }));
+	});
 	public readonly canConfirm = computed(() => {
 		const option = this.prompt();
-		if (!option || !this.reason().trim() || this.pending()) return false;
+		if (
+			!option ||
+			!isRegistrationReviewReason(option.action, this.reason()) ||
+			this.pending()
+		)
+			return false;
 		if (option.action === 'editChild')
 			return (
 				!!this.firstName().trim() &&
@@ -116,6 +164,7 @@ export class RegistrationReviewToolsComponent {
 			!canReadRegistrationReview(this.claims())
 		)
 			return [];
+		const record = this.record();
 		const choices: ActionOption[] = [];
 		for (const action of actions) {
 			if (
@@ -123,39 +172,42 @@ export class RegistrationReviewToolsComponent {
 				this.claims()?.owner !== true
 			)
 				continue;
-			for (const record of this.records()) {
-				if (
-					!record?.expectedRevision ||
-					!record.availableActions?.includes(action)
-				)
-					continue;
-				if (action === 'contact' && !record.email) continue;
-				if (
-					action === 'editChild' ||
-					action === 'removeChild' ||
-					action === 'restoreChild'
-				) {
-					for (const child of record.children) {
-						if (
-							child.childIndex === undefined ||
-							(child.removed === true ||
-								child.enabled === false) !==
-								(action === 'restoreChild')
-						)
-							continue;
-						choices.push({ action, record, child });
-					}
-				} else {
-					choices.push({ action, record });
+			if (
+				!record?.expectedRevision ||
+				!record.availableActions?.includes(action)
+			)
+				continue;
+			if (action === 'contact' && !record.email) continue;
+			if (
+				action === 'editChild' ||
+				action === 'removeChild' ||
+				action === 'restoreChild'
+			) {
+				for (const child of record.children) {
+					if (
+						child.childIndex === undefined ||
+						(child.removed === true || child.enabled === false) !==
+							(action === 'restoreChild')
+					)
+						continue;
+					choices.push({ action, record, child });
 				}
+			} else {
+				choices.push({ action, record });
 			}
 		}
 		return choices;
 	}
 
+	public actionLabel(option: ActionOption): string {
+		return this.labels[option.action];
+	}
+
 	public open(option: ActionOption): void {
 		this.prompt.set(option);
-		this.reason.set('');
+		this.reason.set(
+			option.action === 'enable' ? 'reviewed-and-cleared' : '',
+		);
 		this.notify.set(option.action === 'contact');
 		this.message.set('');
 		this.error.set('');
@@ -177,12 +229,11 @@ export class RegistrationReviewToolsComponent {
 		event.preventDefault();
 		const option = this.prompt();
 		const reader = this.reader;
-		const current = this.records().find(
-			(record) => record?.id === option?.record.id,
-		);
+		const current = this.record();
 		if (
 			!option ||
-			!current?.expectedRevision ||
+			current.id !== option.record.id ||
+			!current.expectedRevision ||
 			!reader?.performAction ||
 			!this.canConfirm() ||
 			!canReadRegistrationReview(this.claims())
@@ -203,7 +254,9 @@ export class RegistrationReviewToolsComponent {
 			this.claims()?.owner !== true
 		)
 			return;
-		const notification = option.action === 'contact' || this.notify();
+		const notification =
+			!this.isChildAction(option.action) &&
+			(option.action === 'contact' || this.notify());
 		if (notification && !current.email) return;
 		const customMessage = this.message().trim();
 		const request: ReviewMutationRequest = {
@@ -212,7 +265,7 @@ export class RegistrationReviewToolsComponent {
 			expectedRevision: current.expectedRevision,
 			mutationId: '',
 			action: option.action,
-			reason: this.reason().trim(),
+			reason: this.reason(),
 			...(notification
 				? {
 						notification: {

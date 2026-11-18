@@ -271,8 +271,9 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				notes.getByText('Synthetic second-review note.'),
 			).toBeVisible();
 
-			const reviewTools = detail.getByRole('region', {
-				name: /review tools/i,
+			const target = detail.getByRole('article', { name: left });
+			const reviewTools = target.getByRole('region', {
+				name: /registration actions/i,
 			});
 			const disable = reviewTools.getByRole('button', {
 				name: new RegExp('Disable shopper access.*' + left, 'i'),
@@ -288,8 +289,8 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				dialog.getByRole('button', { name: /confirm without email/i }),
 			).toBeDisabled();
 			await dialog
-				.getByRole('textbox', { name: /reason/i })
-				.fill('Synthetic stale target check.');
+				.getByRole('combobox', { name: /reason/i })
+				.selectOption('duplicate-registration');
 			await replaceDocument(
 				request,
 				'registrations/' + left,
@@ -316,8 +317,8 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				.click();
 			await disable.click();
 			await dialog
-				.getByRole('textbox', { name: /reason/i })
-				.fill('Synthetic access hold.');
+				.getByRole('combobox', { name: /reason/i })
+				.selectOption('duplicate-registration');
 			await dialog
 				.getByRole('button', { name: /confirm without email/i })
 				.click();
@@ -350,9 +351,9 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 			const restore = page.getByRole('dialog', {
 				name: /restore shopper access/i,
 			});
-			await restore
-				.getByRole('textbox', { name: /reason/i })
-				.fill('Synthetic restore reason.');
+			await expect(
+				restore.getByText('Reviewed and cleared'),
+			).toBeVisible();
 			await restore.getByRole('checkbox', { name: /also send/i }).check();
 			await expect(
 				restore.getByText(leftEmail, { exact: true }),
@@ -408,7 +409,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 						rightEmail,
 					);
 					expect(result.fields['text'].stringValue).not.toContain(
-						'Synthetic restore reason.',
+						'reviewed-and-cleared',
 					);
 					return result.fields['state'].stringValue;
 				})
@@ -428,15 +429,19 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				const confirmation = page.getByRole('dialog', {
 					name: actionLabel,
 				});
+				const reason = /reinstate|remove email block/i.test(
+					actionLabel.source,
+				)
+					? 'reviewed-and-cleared'
+					: 'duplicate-registration';
 				await confirmation
-					.getByRole('textbox', { name: /reason/i })
-					.fill('Synthetic approval for the selected case only.');
+					.getByRole('combobox', { name: /reason/i })
+					.selectOption(reason);
 				await confirmation
 					.getByRole('button', { name: /confirm without email/i })
 					.click();
 				await expect(confirmation).toHaveCount(0);
 			};
-			const target = detail.getByRole('article', { name: left });
 			await runWithoutEmail(/^Cancel registration$/i);
 			await expect(
 				target.getByText('Canceled', { exact: true }),

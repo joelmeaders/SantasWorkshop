@@ -127,7 +127,7 @@ describe.skipIf(
 				expectedRevision: registrationReviewRevision(
 					await person.get(),
 				),
-				reason: 'Confirmed with shopper',
+				reason: 'duplicate-registration',
 			},
 		};
 	}
@@ -199,6 +199,7 @@ describe.skipIf(
 			...request,
 			expectedRevision: registrationReviewRevision(registration),
 			action: 'reinstate',
+			reason: 'reviewed-and-cleared',
 			mutationId: 'reinstate-booking',
 		};
 		const prepareQr = vi
@@ -240,6 +241,71 @@ describe.skipIf(
 		expect((await caseRef.collection('actions').get()).size).toBe(2);
 	});
 
+	it('rejects plaintext, cross-action reasons, and child email without recording any action', async () => {
+		const { caseRef, email, person, request } = await fixture();
+		const base = {
+			...request,
+			action: 'removeChild',
+			reason: 'duplicate-child-entry',
+			mutationId: 'remove-child',
+			childIndex: 0,
+		};
+		for (const payload of [
+			{ ...base, reason: 'Private freetext' },
+			{ ...base, reason: 'reviewed-and-cleared' },
+			{
+				...base,
+				action: 'editChild',
+				reason: 'correct-child-information',
+				child: {
+					firstName: 'Synthetic',
+					lastName: 'Child',
+					birthDate: '2018-11-18',
+				},
+				notification: { recipient: email },
+			},
+			{
+				...base,
+				action: 'restoreChild',
+				reason: 'child-removed-in-error',
+				notification: { recipient: email },
+			},
+			{
+				...base,
+				reason: 'duplicate-child-entry',
+				notification: {
+					recipient: email,
+					customMessage: 'Do not queue',
+				},
+			},
+		]) {
+			await expect(
+				performRegistrationReviewAction(
+					createCallableRequest(payload, reviewer),
+					app,
+					at,
+				),
+			).rejects.toMatchObject({ code: 'invalid-argument' });
+		}
+		expect((await caseRef.collection('actions').get()).empty).toBe(true);
+		expect((await person.get()).get('children')).toHaveLength(2);
+		await expect(
+			performRegistrationReviewAction(
+				createCallableRequest(
+					{ ...base, reason: 'duplicate-child-entry' },
+					reviewer,
+				),
+				app,
+				at,
+			),
+		).resolves.toMatchObject({ notification: 'not-requested' });
+		const action = caseRef.collection('actions').doc('remove-child');
+		expect((await action.get()).get('reason')).toBe(
+			'duplicate-child-entry',
+		);
+		expect((await action.collection('email').get()).empty).toBe(true);
+	});
+
 	it('records reviewer contact as opt-in to the affected recipient only and protects private history', async () => {
 		const { caseRef, email, person, other, request } = await fixture();
 		await caseRef
@@ -249,8 +315,9 @@ describe.skipIf(
 		const base = {
 			...request,
 			action: 'contact',
+			reason: 'verify-registration',
 			mutationId: 'contact-shopper',
-			reason: 'Reviewers only',
+			reason: 'verify-registration',
 		};
 		await expect(
 			performRegistrationReviewAction(
@@ -298,7 +365,7 @@ describe.skipIf(
 		});
 		expect(job?.['html']).toContain('&lt;Please reply&gt;');
 		expect(JSON.stringify(job)).not.toMatch(
-			/Never include|Reviewers only|Sample Child|other@review\.test/u,
+			/Never include|verify-registration|Sample Child|other@review\.test/u,
 		);
 		await expect(
 			performRegistrationReviewAction(
@@ -324,6 +391,7 @@ describe.skipIf(
 					{
 						...request,
 						action: 'contact',
+						reason: 'verify-registration',
 						mutationId,
 						notification: {
 							recipient: email,
@@ -390,6 +458,7 @@ describe.skipIf(
 			...request,
 			expectedRevision: registrationReviewRevision(current),
 			action: 'reinstate',
+			reason: 'reviewed-and-cleared',
 			mutationId: 'reinstate-retry',
 		};
 		const prepare = vi
@@ -439,6 +508,7 @@ describe.skipIf(
 		const disable = {
 			...request,
 			action: 'disable',
+			reason: 'both-parents-registered-same-children',
 			mutationId: 'pause-access',
 		};
 		await performRegistrationReviewAction(
@@ -452,12 +522,23 @@ describe.skipIf(
 		expect((await accessRef.get()).get('disabled')).toBe(true);
 		let current = await person.get();
 		expect(current.get('dateTimeSlot.id')).toBe(slot.id);
+		expect(
+			(
+				await db
+					.collection(COLLECTION_SCHEMA.shopperAccess)
+					.doc(person.id)
+					.collection('audit')
+					.doc('current')
+					.get()
+			).get('reason'),
+		).toBe('both-parents-registered-same-children');
 		await performRegistrationReviewAction(
 			createCallableRequest(
 				{
 					...request,
 					expectedRevision: registrationReviewRevision(current),
 					action: 'enable',
+					reason: 'reviewed-and-cleared',
 					mutationId: 'restore-access',
 				},
 				reviewer,
@@ -474,6 +555,7 @@ describe.skipIf(
 					...request,
 					expectedRevision: registrationReviewRevision(current),
 					action: 'editChild',
+					reason: 'correct-child-information',
 					mutationId: 'edit-child',
 					childIndex: 0,
 					child: {
@@ -604,6 +686,7 @@ describe.skipIf(
 			const clear = {
 				...request,
 				action: 'unblacklist',
+				reason: 'reviewed-and-cleared',
 				mutationId: 'owner-unblock-01',
 				expectedRevision: registrationReviewRevision(
 					await person.get(),
@@ -698,6 +781,7 @@ describe.skipIf(
 				invoke({
 					...base,
 					action: 'unblacklist',
+					reason: 'reviewed-and-cleared',
 					mutationId: 'overlap-unblock',
 				}),
 			).rejects.toMatchObject({ code: 'failed-precondition' });
@@ -727,6 +811,7 @@ describe.skipIf(
 		const remove = {
 			...request,
 			action: 'removeChild',
+			reason: 'duplicate-child-entry',
 			mutationId: 'remove-child',
 			childIndex: 0,
 		};
@@ -763,6 +848,7 @@ describe.skipIf(
 					...remove,
 					expectedRevision: registrationReviewRevision(current),
 					action: 'restoreChild',
+					reason: 'child-removed-in-error',
 					mutationId: 'restore-child',
 				},
 				reviewer,

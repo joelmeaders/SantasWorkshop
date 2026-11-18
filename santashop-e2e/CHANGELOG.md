@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.31] - 2026-11-17
+
+### Changed
+
+- Exercise record-scoped Registration Review controls and structured reasons.
+
 ## [2026.10.30] - 2026-11-16
 
 ### Added

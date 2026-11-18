@@ -940,7 +940,7 @@ describe.skipIf(process.env['REGISTRATION_REVIEW_EMULATOR_TEST'] !== 'true')(
 					actorUid: owner.uid,
 					caseId: review.id,
 					cancellationId,
-					reason: 'Synthetic block visibility',
+					reason: 'duplicate-registration',
 				};
 				await db.runTransaction((tx) =>
 					policy.apply(tx, {

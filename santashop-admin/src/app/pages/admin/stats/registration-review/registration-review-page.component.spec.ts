@@ -39,6 +39,9 @@ describe('RegistrationReviewPageComponent', () => {
 	const setStatus =
 		vi.fn<NonNullable<RegistrationReviewReader['setStatus']>>();
 
+	const performAction =
+		vi.fn<NonNullable<RegistrationReviewReader['performAction']>>();
+
 	async function settle(): Promise<void> {
 		fixture.detectChanges();
 		await fixture.whenStable();
@@ -57,7 +60,13 @@ describe('RegistrationReviewPageComponent', () => {
 			providers: [
 				{
 					provide: REGISTRATION_REVIEW_READER,
-					useValue: { list, detail, appendNote, setStatus },
+					useValue: {
+						list,
+						detail,
+						appendNote,
+						setStatus,
+						performAction,
+					},
 				},
 			],
 		});
@@ -135,6 +144,57 @@ describe('RegistrationReviewPageComponent', () => {
 		component.retryDetail();
 		await settle();
 		expect(component.detail().state).toBe('ready');
+	});
+
+	it('puts registration and child actions inside the matching card and leaves notes at the case level', async () => {
+		const record = (id: string, index: number) => ({
+			id,
+			name: index ? 'Second Parent' : 'First Parent',
+			email: 'parent' + index + '@example.test',
+			appointment: '',
+			expectedRevision: '10:0',
+			availableActions: ['cancel', 'removeChild'] as const,
+			children: [
+				{
+					name: index ? 'Second Child' : 'First Child',
+					birthDate: '2018-05-01',
+					childIndex: 0,
+				},
+			],
+		});
+		const records = [record('DEMO-R1', 0), record('DEMO-R2', 1)] as const;
+		detail.mockReturnValueOnce(of({ ...entry, records }));
+		await enable();
+		component.open(entry.id);
+		await settle();
+		const page = fixture.nativeElement as HTMLElement;
+		const [first, second] = page.querySelectorAll<HTMLElement>(
+			'.comparison .record',
+		);
+		expect(
+			first
+				.querySelector('[aria-label^="Cancel registration"]')
+				?.getAttribute('aria-label'),
+		).toContain('First Parent (DEMO-R1)');
+		expect(
+			second.querySelector('.child-actions li')?.textContent,
+		).toContain('Second Child');
+		expect(
+			second
+				.querySelector('[aria-label^="Remove child"]')
+				?.getAttribute('aria-label'),
+		).toContain('Second Parent (DEMO-R2) Second Child');
+		expect(second.querySelector('[aria-label*="DEMO-R1"]')).toBeNull();
+		expect(page.querySelectorAll('.comparison textarea')).toHaveLength(0);
+		expect(
+			page.querySelector(
+				'[aria-labelledby="case-actions-title"] textarea',
+			)?.id,
+		).toBe('case-note');
+		expect(
+			page.querySelector('[aria-labelledby="case-actions-title"] select')
+				?.id,
+		).toBe('review-case-status');
 	});
 
 	it('keeps a stable note ID on a lost receipt and clears detail after resolving from the open queue', async () => {

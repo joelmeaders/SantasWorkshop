@@ -931,5 +931,19 @@
 	"This restores access only. It does not restore a canceled registration.": "Esto solo restablece el acceso. No recupera una inscripción cancelada.",
 	"Duplicate registration": "Inscripción duplicada",
 	"Suspected automated signup": "Posible registro automatizado",
-	"Registration information couldn’t be verified": "No se pudo verificar la información de inscripción"
+	"Registration information couldn’t be verified": "No se pudo verificar la información de inscripción",
+	"Registration actions": "Acciones de inscripción",
+	"Child actions": "Acciones por menor",
+	"Case actions": "Acciones del caso",
+	"Case status": "Estado del caso",
+	"Select a reason": "Seleccione un motivo",
+	"Same children registered by both parents": "Ambos padres inscribieron a los mismos menores",
+	"Verify registration information": "Verificar la información de inscripción",
+	"Follow up on this review": "Dar seguimiento a esta revisión",
+	"Correct child information": "Corregir la información del menor",
+	"Duplicate child entry": "Entrada duplicada del menor",
+	"Child removed in error": "Menor eliminado por error",
+	"Cancellation requested by shopper": "Cancelación solicitada por la persona inscrita",
+	"Registration canceled in error": "Inscripción cancelada por error",
+	"Email blocked in error": "Correo electrónico bloqueado por error"
 }

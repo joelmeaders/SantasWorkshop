@@ -1,57 +1,98 @@
 @if (steps().length || recovery().length) {
-	<section class="tool-panel" aria-labelledby="review-tools-title">
-		<h3 id="review-tools-title">{{ 'Review tools' | adminText }}</h3>
-		<p>
-			{{
-				'Use the least disruptive action that resolves the case.'
-					| adminText
-			}}
-		</p>
+	<section
+		class="tool-panel"
+		[attr.aria-labelledby]="'registration-actions-' + record().id"
+	>
+		<h4 [id]="'registration-actions-' + record().id">
+			{{ 'Registration actions' | adminText }}
+		</h4>
 		<div class="tool-list">
-			@for (option of steps(); track option) {
-				<button type="button" (click)="open(option)">
-					<strong>{{ labels[option.action] | adminText }}</strong>
-					<small
-						>{{ option.record.name }} ({{ option.record.id }})
-						@if (option.child) {
-							· {{ option.child.name }}
-						}
-					</small>
-				</button>
+			@for (option of registrationSteps(); track option.action) {
+				<ng-container
+					*ngTemplateOutlet="
+						actionButton;
+						context: { $implicit: option }
+					"
+				/>
 			}
 		</div>
-		@if (recovery().length) {
-			<h4>{{ 'Recovery options' | adminText }}</h4>
+		@if (registrationRecovery().length) {
+			<h5>{{ 'Recovery options' | adminText }}</h5>
 			<div class="tool-list">
-				@for (option of recovery(); track option) {
-					<button type="button" (click)="open(option)">
-						<strong>{{ labels[option.action] | adminText }}</strong>
-						<small
-							>{{ option.record.name }} ({{ option.record.id }})
-							@if (option.child) {
-								· {{ option.child.name }}
-							}
-						</small>
-					</button>
+				@for (option of registrationRecovery(); track option.action) {
+					<ng-container
+						*ngTemplateOutlet="
+							actionButton;
+							context: { $implicit: option }
+						"
+					/>
 				}
 			</div>
 		}
+		@if (childActions().length) {
+			<h5>{{ 'Child actions' | adminText }}</h5>
+			<ul class="child-actions">
+				@for (group of childActions(); track group.child) {
+					<li>
+						<strong>{{ group.child.name }}</strong>
+						<small>{{ group.child.birthDate }}</small>
+						<div class="tool-list">
+							@for (
+								option of group.options;
+								track option.action
+							) {
+								<ng-container
+									*ngTemplateOutlet="
+										actionButton;
+										context: { $implicit: option }
+									"
+								/>
+							}
+						</div>
+					</li>
+				}
+			</ul>
+		}
 	</section>
 }
+<ng-template #actionButton let-option>
+	<button
+		type="button"
+		(click)="open(option)"
+		[attr.aria-label]="
+			(actionLabel(option) | adminText) +
+			' ' +
+			option.record.name +
+			' (' +
+			option.record.id +
+			')' +
+			(option.child
+				? ' ' + option.child.name + ' ' + option.child.birthDate
+				: '')
+		"
+	>
+		{{ actionLabel(option) | adminText }}
+	</button>
+</ng-template>
+
 @if (prompt(); as option) {
 	<dialog
 		#actionDialog
-		aria-labelledby="review-action-title"
+		[attr.aria-labelledby]="'review-action-title-' + record().id"
+		[attr.aria-describedby]="'review-action-target-' + record().id"
 		(cancel)="close($event)"
 	>
 		<form (submit)="confirm($event)">
-			<h3 id="review-action-title">
+			<h3 [id]="'review-action-title-' + record().id">
 				{{ labels[option.action] | adminText }}
 			</h3>
-			<p>
+			<p [id]="'review-action-target-' + record().id">
 				{{ option.record.name }} ({{ option.record.id }})
 				@if (option.child) {
 					· {{ option.child.name }}
+					@if (option.child.birthDate) {
+						({{ option.child.birthDate }})
+					}
 				}
 			</p>
 			@if (option.action === 'unblacklist') {
@@ -95,17 +136,36 @@
 						required
 				/></label>
 			}
-			<label
-				>{{ 'Reason (internal only)' | adminText }}
-				<textarea
-					rows="2"
-					maxlength="500"
-					[value]="reason()"
-					(input)="reason.set($any($event.target).value)"
-					required
-				></textarea>
-			</label>
-			@if (option.record.email) {
+			@if (option.action === 'enable') {
+				<p>
+					{{ 'Reason (internal only)' | adminText }}:
+					<strong>{{
+						reasonLabels['reviewed-and-cleared'] | adminText
+					}}</strong>
+				</p>
+			} @else {
+				<label>
+					{{ 'Reason (internal only)' | adminText }}
+					<select
+						[value]="reason()"
+						(change)="reason.set($any($event.target).value)"
+						required
+					>
+						<option value="" disabled [selected]="!reason()">
+							{{ 'Select a reason' | adminText }}
+						</option>
+						@for (
+							choice of reasonChoices[option.action];
+							track choice
+						) {
+							<option [value]="choice">
+								{{ reasonLabels[choice] | adminText }}
+							</option>
+						}
+					</select>
+				</label>
+			}
+			@if (option.record.email && !isChildAction(option.action)) {
 				@if (option.action !== 'contact') {
 					<label class="choice"
 						><input
@@ -153,7 +213,7 @@
 					[disabled]="!canConfirm()"
 				>
 					{{
-						(notify()
+						(notify() && !isChildAction(option.action)
 							? 'Confirm and queue email'
 							: 'Confirm without email'
 						) | adminText

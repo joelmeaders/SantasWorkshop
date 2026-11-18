@@ -22,7 +22,8 @@ export type SetShopperAccessRequest =
 
 export interface ShopperAccessAudit {
 	disabled: boolean;
-	reason: ShopperAccessReason | null;
+	reason:
+		ShopperAccessReason | 'both-parents-registered-same-children' | null;
 	evidenceId: string | null;
 	disposition: 'disabled' | 'reviewed-and-cleared';
 	updatedBy: string;

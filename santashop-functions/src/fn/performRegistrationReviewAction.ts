@@ -12,6 +12,8 @@ import admin from '../firebase-admin';
 import {
 	COLLECTION_SCHEMA,
 	customerLanguageOrEnglish,
+	isRegistrationReviewChildAction,
+	isRegistrationReviewReason,
 	type Child,
 	type Registration,
 	type RegistrationSearchIndex,
@@ -326,6 +328,10 @@ export default async function performRegistrationReviewAction(
 					);
 				return prior.get('result') as ReviewActionResult;
 			}
+			if (!isRegistrationReviewReason(action, input.reason))
+				return invalid('Choose a valid reason for this action.');
+			if (notification && isRegistrationReviewChildAction(action))
+				return invalid('Child changes do not send shopper email.');
 			const registration = current.data() as Registration | undefined;
 			if (
 				!registration ||
@@ -563,7 +569,7 @@ export default async function performRegistrationReviewAction(
 					transaction.set(accessRef, { disabled }, { merge: true });
 					const audit = {
 						disabled,
-						reason: disabled ? 'duplicate-registration' : null,
+						reason: disabled ? input.reason : null,
 						evidenceId: null,
 						disposition: disabled
 							? 'disabled'

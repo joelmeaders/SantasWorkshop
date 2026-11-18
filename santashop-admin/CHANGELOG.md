@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.23] - 2026-11-17
+
+### Changed
+
+- Place registration and child actions with their targets. Keep status and internal notes at case level and use a separate internal reason choice.
+
 ## [2026.11.22] - 2026-11-16
 
 ### Added

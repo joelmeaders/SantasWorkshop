@@ -244,7 +244,7 @@ describe.skipIf(process.env['REGISTRATION_REVIEW_INGRESS_TEST'] !== 'true')(
 							registrationId: shopper.uid,
 							mutationId: 'fixture-reinstate-op',
 							action: 'reinstate',
-							reason: 'Fixture attempted reinstatement.',
+							reason: 'reviewed-and-cleared',
 							expectedRevision: `${latest.updateTime.seconds}:${latest.updateTime.nanoseconds}`,
 						},
 						owner,

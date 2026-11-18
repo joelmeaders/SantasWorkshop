@@ -2,6 +2,12 @@
 
 All notable changes to the shared models library will be documented in this file.
 
+## [2026.09.0-beta.14] - 2026-11-17
+
+### Changed
+
+- Share Registration Review reason codes and support the same-children, both-parents reason in access audits.
+
 ## [2026.09.0-beta.13] - 2026-11-16
 
 ### Added

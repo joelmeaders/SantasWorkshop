@@ -25,12 +25,6 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		page,
 		seedPublicParams,
 	}) => {
-		await page.goto('/');
-		const signOut = page.locator('#adminSignOutButton');
-		await signOut.click({ timeout: 3000 }).then(
-			async () => page.waitForURL('**/', { timeout: 30000 }),
-			() => undefined,
-		);
 		await seedPublicParams({});
 		await page.goto('/admin/landing');
 		await expect(page).toHaveURL(/\/$/);
@@ -69,6 +63,12 @@ test.describe('staff identity, authorization, and runtime controls', () => {
 		await fillAdminSignInForm(page, account);
 		await page.click('#adminSignInButton');
 
+		const accessDenied = page.locator('ion-alert');
+		await expect(accessDenied).toBeVisible({ timeout: 15000 });
+		await expect(accessDenied).toContainText('Access Denied');
+		await expect(accessDenied).toContainText(
+			'Your account is signed in, but it does not have staff access.',
+		);
 		await expect(page).toHaveURL(/\/$/, { timeout: 30000 });
 		await expect(page.locator('#adminSignInButton')).toBeVisible({
 			timeout: 15000,

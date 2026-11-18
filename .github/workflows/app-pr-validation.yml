@@ -92,7 +92,7 @@ jobs:
           node-version: 24.18.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: node --test scripts/ci-*.test.mjs scripts/ui-targets.test.mjs scripts/release-*.test.mjs scripts/storybook-targets.test.mjs scripts/load/*.test.mjs
+      - run: node --test scripts/*.test.mjs scripts/load/*.test.mjs
       - name: Test secret synchronization without credentials or network writes
         shell: pwsh
         run: ./scripts/github-secrets.test.ps1

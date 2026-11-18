@@ -1,7 +1,13 @@
 import { getAuth } from 'firebase-admin/auth';
-import { deleteApp, initializeApp, type App } from 'firebase-admin/app';
+import {
+	deleteApp,
+	initializeApp,
+	type App,
+	type AppOptions,
+} from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { clearEmulatorData, getAdminApp } from '../helpers/admin-emulator';
 import { createDefaultPublicParameters, ToyType } from '@santashop/models';
 import { createRegistrationReviewDenylist } from '../../src/utility/registration-review-denylist';
 import { assertRegistrationReviewAllowed } from '../../src/utility/registration-review-denylist-access';
@@ -21,20 +27,26 @@ const unavailable = {
 };
 let app: App;
 let db: ReturnType<typeof getFirestore>;
+let originalOptions: AppOptions | undefined;
 
-describe.skipIf(process.env['REGISTRATION_REVIEW_INGRESS_TEST'] !== 'true')(
+describe(
 	'registration-review denylist shopper ingress',
 	() => {
 		beforeAll(async () => {
-			if (
-				process.env['FIRESTORE_EMULATOR_HOST'] !== '127.0.0.1:18181' ||
-				process.env['FIREBASE_AUTH_EMULATOR_HOST'] !== '127.0.0.1:18191'
-			) {
-				throw new Error(
-					'Expected dedicated loopback Firestore and Auth emulators.',
-				);
-			}
-			vi.stubEnv('FUNCTIONS_EMULATOR', 'true');
+			// Shopper handlers use the default app. Replace and restore it only
+			// after the shared helper has verified every SDK endpoint is loopback.
+			const previousApp = getAdminApp();
+			const options = previousApp.options;
+			await deleteApp(previousApp);
+			originalOptions = options;
+			app = initializeApp({
+				projectId: project,
+				storageBucket: `${project}.appspot.com`,
+			});
+			db = getFirestore(app);
+		});
+
+		beforeEach(async () => {
 			vi.stubEnv('GCLOUD_PROJECT', project);
 			vi.stubEnv(
 				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
@@ -45,8 +57,7 @@ describe.skipIf(process.env['REGISTRATION_REVIEW_INGRESS_TEST'] !== 'true')(
 				secret.toString('base64'),
 			);
 			vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
-			app = initializeApp({ projectId: project });
-			db = getFirestore(app);
+			await clearEmulatorData(app);
 			const policy = createRegistrationReviewDenylist(db, secret);
 			await db.runTransaction((tx) =>
 				policy.apply(tx, {
@@ -69,8 +80,17 @@ describe.skipIf(process.env['REGISTRATION_REVIEW_INGRESS_TEST'] !== 'true')(
 		});
 
 		afterAll(async () => {
-			if (app) await deleteApp(app);
-			vi.unstubAllEnvs();
+			try {
+				if (app) {
+					try {
+						await clearEmulatorData(app);
+					} finally {
+						await deleteApp(app);
+					}
+				}
+			} finally {
+				if (originalOptions) initializeApp(originalOptions);
+			}
 		});
 
 		it('denies fresh and staff signup by address before creating any Auth user', async () => {

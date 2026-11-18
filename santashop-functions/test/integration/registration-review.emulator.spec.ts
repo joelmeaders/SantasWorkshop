@@ -1,7 +1,11 @@
 import { createRegistrationReviewDenylist } from '../../src/utility/registration-review-denylist';
 import { deleteApp, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	assertEmulatorEnvironment,
+	clearEmulatorData,
+} from '../helpers/admin-emulator';
 import { createCallableRequest } from '../helpers/callable-context';
 import {
 	detectRegistrationReviewPairs,
@@ -61,21 +65,30 @@ async function postChange(
 		.create({ cursor, registration });
 }
 
-describe.skipIf(process.env['REGISTRATION_REVIEW_EMULATOR_TEST'] !== 'true')(
+describe(
 	'registration review isolated Firestore integration',
 	() => {
 		beforeAll(() => {
-			if (process.env['FIRESTORE_EMULATOR_HOST'] !== '127.0.0.1:18081') {
-				throw new Error(
-					'Expected the dedicated localhost review emulator on port 18081.',
-				);
-			}
-			app = initializeApp({ projectId: PROJECT }, PROJECT);
+			assertEmulatorEnvironment();
+			app = initializeApp(
+				{ projectId: PROJECT, storageBucket: `${PROJECT}.appspot.com` },
+				'registration-review',
+			);
 			db = getFirestore(app);
 		});
 
+		beforeEach(async () => {
+			await clearEmulatorData(app);
+		});
+
 		afterAll(async () => {
-			if (app) await deleteApp(app);
+			if (app) {
+				try {
+					await clearEmulatorData(app);
+				} finally {
+					await deleteApp(app);
+				}
+			}
 		});
 
 		it('resumes a bounded page and links a late registration without duplicating a flagged case', async () => {

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.24] - 2026-11-17
+
+### Changed
+
+- Verify appointment query filters, shared live subscriptions, and listener cleanup on service destruction.
+
 ## [2026.11.23] - 2026-11-17
 
 ### Changed

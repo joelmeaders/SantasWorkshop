@@ -10,7 +10,18 @@ import {
 	loadAccountRegistrationHandlers,
 } from '../helpers/account-registration.unit-helper';
 
+const authMocks = vi.hoisted(() => ({
+	getIdTokenClient: vi.fn(),
+	fetchIdToken: vi.fn(),
+}));
+vi.mock('google-auth-library', () => ({
+	GoogleAuth: class {
+		public getIdTokenClient = authMocks.getIdTokenClient;
+	},
+}));
+
 const gatewayFetch = vi.fn();
+const gatewayUrl = 'https://publicparametersgateway-test.a.run.app';
 const uid = 'settings-customer';
 const mutationId = 'settings-mutation-001';
 const registrationPath = `registrations/${uid}`;
@@ -64,6 +75,24 @@ const gatewayResponse = (
 		},
 	);
 
+const expectGatewayCalls = (count: number): void => {
+	expect(gatewayFetch).toHaveBeenCalledTimes(count);
+	expect(authMocks.getIdTokenClient).toHaveBeenCalledTimes(count);
+	expect(authMocks.fetchIdToken).toHaveBeenCalledTimes(count);
+	if (count === 0) return;
+	expect(authMocks.getIdTokenClient).toHaveBeenLastCalledWith(gatewayUrl);
+	expect(authMocks.fetchIdToken).toHaveBeenLastCalledWith(gatewayUrl);
+	expect(gatewayFetch).toHaveBeenLastCalledWith(
+		gatewayUrl,
+		expect.objectContaining({
+			headers: {
+				Accept: 'application/json',
+				Authorization: 'Bearer test-token',
+			},
+		}),
+	);
+};
+
 const invoke = (handlers: Handlers, operation: Operation): Promise<true> => {
 	const payload = {
 		mutationId,
@@ -91,22 +120,14 @@ describe('registration mutations use authoritative public settings', () => {
 		vi.stubEnv('FUNCTIONS_EMULATOR', 'false');
 		vi.stubEnv(
 			'SANTASHOP_REMOTE_CONFIG_GATEWAY_URL',
-			'https://publicparametersgateway-test.a.run.app',
+			gatewayUrl,
 		);
 		vi.stubGlobal('fetch', gatewayFetch);
 		gatewayFetch.mockResolvedValue(gatewayResponse());
-		vi.doMock('google-auth-library', () => ({
-			GoogleAuth: class {
-				public async getIdTokenClient(): Promise<object> {
-					return {
-						idTokenProvider: {
-							fetchIdToken: async (): Promise<string> =>
-								'test-token',
-						},
-					};
-				}
-			},
-		}));
+		authMocks.getIdTokenClient.mockResolvedValue({
+			idTokenProvider: { fetchIdToken: authMocks.fetchIdToken },
+		});
+		authMocks.fetchIdToken.mockResolvedValue('test-token');
 		adminMock = createAccountAdminMock();
 		handlers = await loadAccountRegistrationHandlers(adminMock, {
 			useRealPublicParameters: true,
@@ -116,7 +137,6 @@ describe('registration mutations use authoritative public settings', () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
 		vi.unstubAllEnvs();
-		vi.doUnmock('google-auth-library');
 	});
 
 	const seed = (operation: Operation): void => {
@@ -187,6 +207,7 @@ describe('registration mutations use authoritative public settings', () => {
 			expectNoWrites();
 			resolveResponse(gatewayResponse());
 			await expect(result).resolves.toBe(true);
+			expectGatewayCalls(1);
 			expect(adminMock.transactionCreate).toHaveBeenCalledWith(
 				expect.objectContaining({ path: receiptPath }),
 				expect.objectContaining({ operation, result: true }),
@@ -210,6 +231,7 @@ describe('registration mutations use authoritative public settings', () => {
 				await expect(invoke(handlers, operation)).rejects.toMatchObject(
 					{ code: 'unavailable' },
 				);
+				expectGatewayCalls(1);
 				expectNoWrites();
 			},
 		);
@@ -219,7 +241,7 @@ describe('registration mutations use authoritative public settings', () => {
 			adminMock.setDocSnapshot(receiptPath, { operation, result: true });
 			gatewayFetch.mockRejectedValue(new Error('Gateway unavailable'));
 			await expect(invoke(handlers, operation)).resolves.toBe(true);
-			expect(gatewayFetch).not.toHaveBeenCalled();
+			expectGatewayCalls(0);
 			expectNoWrites();
 		});
 
@@ -233,10 +255,10 @@ describe('registration mutations use authoritative public settings', () => {
 			});
 			// The fixture retries callbacks without committing state, as in the draft tests.
 			await expect(invoke(handlers, operation)).resolves.toBe(true);
-			expect(gatewayFetch).toHaveBeenCalledOnce();
+			expectGatewayCalls(1);
 			gatewayFetch.mockResolvedValue(gatewayResponse());
 			await expect(invoke(handlers, operation)).resolves.toBe(true);
-			expect(gatewayFetch).toHaveBeenCalledTimes(2);
+			expectGatewayCalls(2);
 		});
 	});
 
@@ -258,6 +280,7 @@ describe('registration mutations use authoritative public settings', () => {
 			await expect(invoke(handlers, operation)).rejects.toMatchObject({
 				code: 'failed-precondition',
 			});
+			expectGatewayCalls(1);
 			expectNoWrites();
 		});
 	});
@@ -274,6 +297,7 @@ describe('registration mutations use authoritative public settings', () => {
 			await expect(invoke(handlers, operation)).rejects.toMatchObject({
 				code: 'failed-precondition',
 			});
+			expectGatewayCalls(1);
 			expectNoWrites();
 		},
 	);
@@ -291,7 +315,7 @@ describe('registration mutations use authoritative public settings', () => {
 			await expect(
 				invoke(handlers, 'completeRegistration'),
 			).resolves.toBe(true);
-			expect(gatewayFetch).not.toHaveBeenCalled();
+			expectGatewayCalls(0);
 			expect(adminMock.transactionSet).not.toHaveBeenCalled();
 			expect(adminMock.transactionCreate).toHaveBeenCalledOnce();
 			expect(adminMock.transactionCreate).toHaveBeenCalledWith(

@@ -1,7 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { deleteApp, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+	assertEmulatorEnvironment,
+	clearEmulatorData,
+} from '../helpers/admin-emulator';
 import {
 	createRegistrationReviewDenylist,
 	type ReviewDenylistIntent,
@@ -30,25 +34,34 @@ const apply = (
 ): Promise<{ active: boolean; replayed: boolean }> =>
 	db.runTransaction((tx) => store.apply(tx, intent));
 
-describe.skipIf(process.env['REGISTRATION_REVIEW_DENYLIST_TEST'] !== 'true')(
+describe(
 	'isolated cross-season review denylist',
 	() => {
 		beforeAll(() => {
-			if (process.env['FIRESTORE_EMULATOR_HOST'] !== '127.0.0.1:18082') {
-				throw new Error(
-					'Expected dedicated localhost review denylist emulator on port 18082.',
-				);
-			}
+			assertEmulatorEnvironment();
 			app = initializeApp(
-				{ projectId: 'demo-registration-review' },
+				{
+					projectId: 'demo-registration-review',
+					storageBucket: 'demo-registration-review.appspot.com',
+				},
 				'review-denylist',
 			);
 			db = getFirestore(app);
 			store = createRegistrationReviewDenylist(db, Buffer.alloc(32, 89));
 		});
 
+		beforeEach(async () => {
+			await clearEmulatorData(app);
+		});
+
 		afterAll(async () => {
-			if (app) await deleteApp(app);
+			if (app) {
+				try {
+					await clearEmulatorData(app);
+				} finally {
+					await deleteApp(app);
+				}
+			}
 		});
 
 		it('blocks the exact normalized address and UID without storing the email', async () => {

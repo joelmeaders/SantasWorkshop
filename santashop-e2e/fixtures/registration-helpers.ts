@@ -113,8 +113,6 @@ export const removeChildViaUi = async (
 
 /**
  * Selects a current-availability appointment in the progressive overview.
- * Older builds exposed data-select-slot-id; the consolidated card exposes
- * semantic buttons, so use the numeric suffix as the stable fallback index.
  */
 export const selectAppointmentViaUi = async (
 	page: Page,
@@ -125,25 +123,14 @@ export const selectAppointmentViaUi = async (
 	await expect(schedule).toBeVisible({ timeout: 15000 });
 
 	const explicitSlot = schedule.locator(`[data-select-slot-id="${slotId}"]`);
-	if (await explicitSlot.count()) {
-		const dateAccordion = explicitSlot.locator('xpath=ancestor::ion-accordion');
-		await dateAccordion.locator('ion-item[slot="header"]').click();
-		await expect(explicitSlot).toBeVisible({ timeout: 15000 });
-		await explicitSlot.click();
-	} else {
-		const changeButton = schedule.getByRole('button', {
-			name: /change time|cambiar hora/i,
-		});
-		if (await changeButton.count()) await changeButton.click();
-
-		const firstDateAccordion = schedule.locator('ion-accordion').first();
-		await firstDateAccordion.locator('ion-item[slot="header"]').click();
-		const slotItems = firstDateAccordion.locator('ion-list [data-select-slot-id]');
-		await expect(slotItems.first()).toBeVisible({ timeout: 15000 });
-		const suffix = /(?:^|[-_])(\d+)$/.exec(slotId)?.[1];
-		const index = suffix ? Math.max(0, Number(suffix) - 1) : 0;
-		await slotItems.nth(index).click();
-	}
+	await expect(
+		explicitSlot,
+		`Expected appointment "${slotId}" to be available.`,
+	).toHaveCount(1, { timeout: 15000 });
+	const dateAccordion = explicitSlot.locator('xpath=ancestor::ion-accordion');
+	await dateAccordion.locator('ion-item[slot="header"]').click();
+	await expect(explicitSlot).toBeVisible({ timeout: 15000 });
+	await explicitSlot.click();
 
 	await expect(schedule.locator('ion-badge')).toBeVisible({ timeout: 15000 });
 	await page.reload();
@@ -188,11 +175,9 @@ const fillIonicInput = async (
 	await input.fill(value);
 	await expect(input).toHaveValue(value, { timeout: 10000 });
 	await input.blur();
-	// The child name inputs intentionally debounce ionInput by 500 ms.
-	await new Promise((resolve) => setTimeout(resolve, 550));
 };
 
-const setBirthDate = async (
+export const setBirthDate = async (
 	host: Locator,
 	value: string,
 ): Promise<void> => {

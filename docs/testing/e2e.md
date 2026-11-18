@@ -36,6 +36,16 @@ the readiness probe reads its URL in [wait-for-functions.mjs](../../santashop-e2
 
 ## Automated suites
 
+Typecheck all browser tests without starting services:
+
+```text
+pnpm --filter @santashop/e2e typecheck
+```
+
+The browser CI workflow runs this check before installing Chromium or starting
+the application and emulators. Playwright itself transpiles tests without
+typechecking them.
+
 Run both suites sequentially:
 
 ```text

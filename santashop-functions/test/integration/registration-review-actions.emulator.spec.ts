@@ -1,7 +1,11 @@
 import { randomBytes } from 'node:crypto';
 import { deleteApp, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type DocumentReference } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	assertEmulatorEnvironment,
+	clearEmulatorData,
+} from '../helpers/admin-emulator';
 import performRegistrationReviewAction, {
 	registrationReviewRevision,
 } from '../../src/fn/performRegistrationReviewAction';
@@ -10,7 +14,7 @@ import { PROGRAM_YEAR } from '../../src/utility/runtime-config';
 import { AgeGroup, COLLECTION_SCHEMA, ToyType } from '../../src/models';
 import { createCallableRequest } from '../helpers/callable-context';
 
-const projectId = 'demo-registration-review-actions';
+const projectId = 'demo-registration-review';
 const owner = { uid: 'fixture-owner', owner: true };
 const reviewer = {
 	uid: 'fixture-reviewer',
@@ -21,23 +25,30 @@ const at = new Date(PROGRAM_YEAR + '-11-16T20:45:00Z');
 const original = new Date(PROGRAM_YEAR + '-11-15T12:00:00Z');
 const appointment = new Date(PROGRAM_YEAR + '-12-10T20:00:00Z');
 
-describe.skipIf(
-	process.env['REGISTRATION_REVIEW_ACTIONS_EMULATOR_TEST'] !== 'true',
-)('manual registration review actions, isolated Firestore', () => {
+describe('manual registration review actions, isolated Firestore', () => {
 	let app: ReturnType<typeof initializeApp>;
 	let db: ReturnType<typeof getFirestore>;
 	beforeAll(() => {
-		if (process.env['FIRESTORE_EMULATOR_HOST'] !== '127.0.0.1:18482')
-			throw new Error(
-				'This suite requires the dedicated actions emulator.',
-			);
-		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
-		app = initializeApp({ projectId }, projectId);
+		assertEmulatorEnvironment();
+		app = initializeApp(
+			{ projectId, storageBucket: `${projectId}.appspot.com` },
+			'registration-review-actions',
+		);
 		db = getFirestore(app);
 	});
+	beforeEach(async () => {
+		vi.stubEnv('GCLOUD_PROJECT', projectId);
+		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
+		await clearEmulatorData(app);
+	});
 	afterAll(async () => {
-		if (app) await deleteApp(app);
-		vi.unstubAllEnvs();
+		if (app) {
+			try {
+				await clearEmulatorData(app);
+			} finally {
+				await deleteApp(app);
+			}
+		}
 	});
 
 	async function fixture(): Promise<{
@@ -416,6 +427,9 @@ describe.skipIf(
 			sink: vi.fn(),
 			send,
 		};
+		// Exercise provider completion through the injected send stub only.
+		// Firestore still uses the verified loopback emulator.
+		vi.stubEnv('FUNCTIONS_EMULATOR', 'false');
 		await submitContact('first-contact');
 		const firstQueue = caseRef
 			.collection('actions')

@@ -1,6 +1,11 @@
 import type { App } from 'firebase-admin/app';
-import type { Auth } from 'firebase-admin/auth';
-import type { Firestore, Timestamp } from 'firebase-admin/firestore';
+import { getAuth as getAppAuth, type Auth } from 'firebase-admin/auth';
+import {
+	getFirestore as getAppFirestore,
+	type Firestore,
+	type Timestamp,
+} from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 import { afterEach, beforeEach, vi } from 'vitest';
 import admin from '../../src/firebase-admin';
 
@@ -15,7 +20,7 @@ const EMULATOR_HOST_ENV_VARS = [
 const isLoopbackEndpoint = (value: string | undefined): boolean =>
 	/^(?:127\.0\.0\.1|::1|\[::1\]):\d+$/u.test(value ?? '');
 
-const assertEmulatorEnvironment = (): void => {
+export const assertEmulatorEnvironment = (): void => {
 	if (
 		EMULATOR_HOST_ENV_VARS.every((name) =>
 			isLoopbackEndpoint(process.env[name]),
@@ -118,10 +123,12 @@ export const getCollectionCount = async (
 	return snapshot.size;
 };
 
-export const clearEmulatorData = async (): Promise<void> => {
+export const clearEmulatorData = async (
+	app: App = getAdminApp(),
+): Promise<void> => {
 	assertEmulatorEnvironment();
-	const db = getFirestore();
-	const auth = getAuth();
+	const db = getAppFirestore(app);
+	const auth = getAppAuth(app);
 	const collections = await db.listCollections();
 
 	for (const collection of collections) {
@@ -139,5 +146,5 @@ export const clearEmulatorData = async (): Promise<void> => {
 	} while (pageToken);
 	await Promise.all(users.map((uid) => auth.deleteUser(uid)));
 
-	await getAdminApp().storage().bucket().deleteFiles({ force: true });
+	await getStorage(app).bucket().deleteFiles({ force: true });
 };

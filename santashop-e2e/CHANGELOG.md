@@ -2,6 +2,14 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.32] - 2026-11-17
+
+### Changed
+
+- Remove obsolete child-input and fresh-session sign-out waits and select appointments by their exact IDs.
+- Assert persisted referrals, blocked incomplete registrations, invalid birth-date behavior, and completed staff-access denial.
+- Add a suite typecheck command using the ES2023 declarations supported by Node 24.
+
 ## [2026.10.31] - 2026-11-17
 
 ### Changed

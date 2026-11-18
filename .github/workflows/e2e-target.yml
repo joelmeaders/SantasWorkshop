@@ -69,6 +69,8 @@ jobs:
           distribution: temurin
           java-version: '21'
       - run: pnpm install --frozen-lockfile
+      - name: Typecheck browser tests before emulator and browser setup
+        run: pnpm --filter @santashop/e2e typecheck
       - run: pnpm run e2e:browser:setup:ci
       - name: Customer or staff E2E tests
         run: pnpm run "e2e:test:$E2E_TARGET"

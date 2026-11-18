@@ -8,7 +8,6 @@ import {
 } from 'firebase-admin/firestore';
 import type { CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
-import { isOwnerToken } from '../utility/capabilities';
 import { getRegistrationReviewDenylist } from '../utility/registration-review-denylist-access';
 import { requireEnabledRegistrationReviewAccess } from './registrationReviewAccess';
 import {
@@ -139,7 +138,6 @@ async function readReviewBlock(
 	db: Firestore,
 	snapshot: DocumentSnapshot | undefined,
 	caseId: string,
-	isOwner: boolean,
 ): Promise<ReviewBlockVisibility> {
 	const data = snapshot?.data();
 	if (!snapshot || !data || data['programYear'] !== PROGRAM_YEAR)
@@ -176,7 +174,7 @@ async function readReviewBlock(
 			? state
 			: undefined;
 	let action: ReviewBlockVisibility['action'];
-	if (isOwner && canceled && email) {
+	if (canceled && email) {
 		if (uidBlock && emailBlock && phase === 'failed') action = 'blacklist';
 		if (uidBlock && emailBlock && phase === 'confirmed')
 			action = 'unblacklist';
@@ -274,7 +272,6 @@ function registrationDetails(
 async function hydrateCase(
 	root: DocumentReference,
 	review: ReviewCaseDetail,
-	isOwner: boolean,
 ): Promise<RegistrationReviewCaseResult> {
 	const db = root.firestore;
 	const [
@@ -309,8 +306,8 @@ async function hydrateCase(
 		),
 	);
 	const [leftBlock, rightBlock] = await Promise.all([
-		readReviewBlock(db, left, review.id, isOwner),
-		readReviewBlock(db, right, review.id, isOwner),
+		readReviewBlock(db, left, review.id),
+		readReviewBlock(db, right, review.id),
 	]);
 	return {
 		...review,
@@ -345,11 +342,7 @@ export async function getRegistrationReviewCase(
 	app: App = admin.app(),
 ): Promise<RegistrationReviewCaseResult> {
 	const root = scope(request, app);
-	return hydrateCase(
-		root,
-		await getReviewCase(root, request),
-		isOwnerToken(request.auth?.token),
-	);
+	return hydrateCase(root, await getReviewCase(root, request));
 }
 
 export async function setRegistrationReviewStatus(
@@ -358,11 +351,7 @@ export async function setRegistrationReviewStatus(
 ): Promise<RegistrationReviewCaseResult> {
 	const root = scope(request, app);
 	await setReviewStatus(root, request, new Date().toISOString());
-	return hydrateCase(
-		root,
-		await getReviewCase(root, request),
-		isOwnerToken(request.auth?.token),
-	);
+	return hydrateCase(root, await getReviewCase(root, request));
 }
 
 export async function addRegistrationReviewNote(
@@ -371,5 +360,5 @@ export async function addRegistrationReviewNote(
 ): Promise<RegistrationReviewCaseResult> {
 	const root = scope(request, app);
 	const review = await addReviewNote(root, request, new Date().toISOString());
-	return hydrateCase(root, review, isOwnerToken(request.auth?.token));
+	return hydrateCase(root, review);
 }

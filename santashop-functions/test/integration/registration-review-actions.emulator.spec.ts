@@ -593,7 +593,7 @@ describe('manual registration review actions, isolated Firestore', () => {
 		).toBe('Sample Child A');
 	});
 
-	it('requires an Owner/current cancellation and leaves the policy active during an explicit Auth retry', async () => {
+	it('requires reviewer permission and a current cancellation and leaves the policy active during an explicit Auth retry', async () => {
 		const { person, caseRef, email, request } = await fixture();
 		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED', 'true');
 		vi.stubEnv(
@@ -620,7 +620,7 @@ describe('manual registration review actions, isolated Firestore', () => {
 		};
 		const invoke = (
 			input: Record<string, unknown>,
-			actor = owner,
+			actor = reviewer,
 		): ReturnType<typeof performRegistrationReviewAction> =>
 			performRegistrationReviewAction(
 				createCallableRequest(input, actor),
@@ -633,12 +633,12 @@ describe('manual registration review actions, isolated Firestore', () => {
 			const block = {
 				...request,
 				action: 'blacklist',
-				mutationId: 'owner-block-01',
+				mutationId: 'reviewer-block-01',
 				notification: { recipient: email },
 			};
 			await expect(
 				performRegistrationReviewAction(
-					createCallableRequest(block, reviewer),
+					createCallableRequest(block, ordinary),
 					app,
 					at,
 					undefined,
@@ -652,7 +652,7 @@ describe('manual registration review actions, isolated Firestore', () => {
 			await invoke({
 				...request,
 				action: 'cancel',
-				mutationId: 'owner-cancel-01',
+				mutationId: 'reviewer-cancel-01',
 			});
 			const activeBlock = {
 				...block,
@@ -680,7 +680,7 @@ describe('manual registration review actions, isolated Firestore', () => {
 				(
 					await caseRef
 						.collection('actions')
-						.doc('owner-block-01')
+						.doc('reviewer-block-01')
 						.get()
 				).exists,
 			).toBe(false);
@@ -700,7 +700,7 @@ describe('manual registration review actions, isolated Firestore', () => {
 				...request,
 				action: 'unblacklist',
 				reason: 'reviewed-and-cleared',
-				mutationId: 'owner-unblock-01',
+				mutationId: 'reviewer-unblock-01',
 				expectedRevision: registrationReviewRevision(
 					await person.get(),
 				),

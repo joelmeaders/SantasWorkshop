@@ -19,7 +19,6 @@ import {
 	type RegistrationSearchIndex,
 } from '../models';
 import { requireEnabledRegistrationReviewAccess } from './registrationReviewAccess';
-import { isOwnerToken } from '../utility/capabilities';
 import {
 	performRegistrationReviewDenylistAction,
 	type ReviewDenylistActionResult,
@@ -245,12 +244,6 @@ export default async function performRegistrationReviewAction(
 	const input = parseInput(request.data);
 	const { caseId, registrationId, mutationId, action, notification } = input;
 	if (action === 'blacklist' || action === 'unblacklist') {
-		if (!isOwnerToken(request.auth?.token)) {
-			throw new HttpsError(
-				'permission-denied',
-				'Only an owner may manage email blocks.',
-			);
-		}
 		return performRegistrationReviewDenylistAction(
 			getFirestore(app),
 			auth ?? getAuth(app),

@@ -946,6 +946,10 @@ describe(
 					(await getRegistrationReviewCase(ownerRequest, app))
 						.registrationDetails[0]?.availableActions,
 				).toContain('blacklist');
+				expect(
+					(await getRegistrationReviewCase(req, app))
+						.registrationDetails[0]?.availableActions,
+				).toContain('blacklist');
 				const policy = createRegistrationReviewDenylist(db, key);
 				const binding = {
 					email: 'morgan@example.invalid',
@@ -965,7 +969,7 @@ describe(
 				const operation = db.doc(
 					'registrationReviewAuthOperations/' + uidA,
 				);
-				for (const [state, ownerAction] of [
+				for (const [state, expectedAction] of [
 					['applying', undefined],
 					['failed', 'blacklist'],
 					['confirmed', 'unblacklist'],
@@ -985,18 +989,15 @@ describe(
 						blacklisted: true,
 						blockOperationPhase: state,
 					});
-					expect(reviewerRecord?.availableActions).not.toEqual(
-						expect.arrayContaining(['reinstate']),
-					);
 					expect(reviewerRecord?.availableActions).not.toContain(
-						'blacklist',
+						'reinstate',
 					);
-					expect(reviewerRecord?.availableActions).not.toContain(
-						'unblacklist',
+					expect(reviewerRecord?.availableActions).toEqual(
+						ownerRecord?.availableActions,
 					);
-					if (ownerAction)
+					if (expectedAction)
 						expect(ownerRecord?.availableActions).toContain(
-							ownerAction,
+							expectedAction,
 						);
 					else {
 						expect(ownerRecord?.availableActions).not.toContain(

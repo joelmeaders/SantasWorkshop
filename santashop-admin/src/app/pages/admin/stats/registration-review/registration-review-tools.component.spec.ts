@@ -86,12 +86,12 @@ describe('RegistrationReviewToolsComponent', () => {
 		fixture.componentRef.setInput('claims', {
 			roles: ['admin', 'registration-review'],
 		});
-		expect(
-			component.steps().some(({ action }) => action === 'blacklist'),
-		).toBe(false);
+		expect(component.steps().map(({ action }) => action)).toEqual(
+			expect.arrayContaining(['cancel', 'blacklist']),
+		);
 		expect(
 			component.recovery().some(({ action }) => action === 'unblacklist'),
-		).toBe(false);
+		).toBe(true);
 		fixture.componentRef.setInput('claims', { roles: ['admin'] });
 		expect(component.steps()).toEqual([]);
 		expect(component.recovery()).toEqual([]);
@@ -186,7 +186,10 @@ describe('RegistrationReviewToolsComponent', () => {
 		});
 	});
 
-	it('distinguishes confirmed policy with unverified sign-in from a completed unblock', () => {
+	it('lets a reviewer distinguish unverified sign-in from a completed unblock', () => {
+		fixture.componentRef.setInput('claims', {
+			roles: ['admin', 'registration-review'],
+		});
 		const updated = vi.fn();
 		component.updated.subscribe(updated);
 		const block = component
@@ -196,7 +199,7 @@ describe('RegistrationReviewToolsComponent', () => {
 			.recovery()
 			.find(({ action }) => action === 'unblacklist');
 		if (!block || !unblock)
-			throw new Error('Missing synthetic owner options.');
+			throw new Error('Missing synthetic reviewer options.');
 		performAction
 			.mockReturnValueOnce(
 				throwError(() => ({

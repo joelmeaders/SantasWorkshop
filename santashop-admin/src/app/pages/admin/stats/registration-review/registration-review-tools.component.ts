@@ -168,11 +168,6 @@ export class RegistrationReviewToolsComponent {
 		const choices: ActionOption[] = [];
 		for (const action of actions) {
 			if (
-				(action === 'blacklist' || action === 'unblacklist') &&
-				this.claims()?.owner !== true
-			)
-				continue;
-			if (
 				!record?.expectedRevision ||
 				!record.availableActions?.includes(action)
 			)
@@ -248,12 +243,6 @@ export class RegistrationReviewToolsComponent {
 			);
 			return;
 		}
-		if (
-			(option.action === 'blacklist' ||
-				option.action === 'unblacklist') &&
-			this.claims()?.owner !== true
-		)
-			return;
 		const notification =
 			!this.isChildAction(option.action) &&
 			(option.action === 'contact' || this.notify());

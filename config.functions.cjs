@@ -32,13 +32,14 @@ const REQUIRED_FUNCTION_ENV_KEYS = [
 ];
 
 const REGISTRATION_REVIEW_FLAG = 'SANTASHOP_REGISTRATION_REVIEW_ENABLED';
-const REGISTRATION_REVIEW_SECRET_DEPENDENT_FLAGS = [
-	'SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED',
-	'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-];
+const REGISTRATION_REVIEW_NIGHTLY_FLAG =
+	'SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED';
+const REGISTRATION_REVIEW_DENYLIST_FLAG =
+	'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED';
 
 const OPTIONAL_FUNCTION_ENV_KEYS = [
 	REGISTRATION_REVIEW_FLAG,
+	REGISTRATION_REVIEW_DENYLIST_FLAG,
 	'SANTASHOP_EMAIL_TRANSPORT',
 	'SANTASHOP_EMAIL_VPC_CONNECTOR',
 	'SANTASHOP_SHOP_DAYS',
@@ -129,19 +130,40 @@ const buildFunctionsConfig = (mode) => {
 	}
 
 	const reviewEnabled = config[REGISTRATION_REVIEW_FLAG];
-	if (reviewEnabled !== undefined && !['true', 'false'].includes(reviewEnabled)) {
-		throw new Error(`Invalid boolean: ${getModePrefix(mode)}_${REGISTRATION_REVIEW_FLAG}`);
+	if (
+		reviewEnabled !== undefined &&
+		!['true', 'false'].includes(reviewEnabled)
+	) {
+		throw new Error(
+			`Invalid boolean: ${getModePrefix(mode)}_${REGISTRATION_REVIEW_FLAG}`,
+		);
 	}
 
-	if (mode !== 'local') {
-		for (const key of REGISTRATION_REVIEW_SECRET_DEPENDENT_FLAGS) {
-			const value = getEnvValue(mode, key);
-			if (value && value !== 'false') {
-				throw new Error(
-					`${getModePrefix(mode)}_${key} must remain off until the release binds its runtime secret securely.`,
-				);
-			}
-		}
+	const nightlyEnabled = getEnvValue(mode, REGISTRATION_REVIEW_NIGHTLY_FLAG);
+	if (mode !== 'local' && nightlyEnabled && nightlyEnabled !== 'false') {
+		throw new Error(
+			`${getModePrefix(mode)}_${REGISTRATION_REVIEW_NIGHTLY_FLAG} must remain off until the release binds its runtime secret securely.`,
+		);
+	}
+
+	const denylistEnabled = config[REGISTRATION_REVIEW_DENYLIST_FLAG];
+	if (
+		denylistEnabled !== undefined &&
+		!['true', 'false'].includes(denylistEnabled)
+	) {
+		throw new Error(
+			`Invalid boolean: ${getModePrefix(mode)}_${REGISTRATION_REVIEW_DENYLIST_FLAG}`,
+		);
+	}
+	if (denylistEnabled === 'true' && mode === 'local') {
+		throw new Error(
+			`${getModePrefix(mode)}_${REGISTRATION_REVIEW_DENYLIST_FLAG} must remain off in generated local configuration.`,
+		);
+	}
+	if (denylistEnabled === 'true' && reviewEnabled !== 'true') {
+		throw new Error(
+			`The ${getModePrefix(mode)} denylist requires Registration Review to be enabled.`,
+		);
 	}
 
 	for (const key of ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']) {

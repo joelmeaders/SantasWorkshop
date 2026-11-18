@@ -28,7 +28,7 @@ async function openReview(page: Page): Promise<void> {
 	await expect(page).toHaveURL(/\/admin\/checkin\/review$/);
 }
 
-test.describe('shopper access on registration review', () => {
+test.describe('shopper access is not shown on Check-in review', () => {
 	test.beforeEach(
 		async ({
 			clearData,
@@ -48,7 +48,7 @@ test.describe('shopper access on registration review', () => {
 		},
 	);
 
-	test('shows shopper access to an admin without allowing changes', async ({
+	test('omits shopper access for an admin', async ({
 		page,
 		seedAdminUser,
 	}) => {
@@ -56,13 +56,13 @@ test.describe('shopper access on registration review', () => {
 		await seedAdminUser(admin);
 		await signInAdminViaUi(page, admin);
 		await openReview(page);
-		const panel = page.getByTestId('shopper-access-panel');
-		await expect(panel).toContainText('Access is enabled');
-
-		await expect(panel.getByTestId('change-shopper-access')).toHaveCount(0);
+		await expect(
+			page.getByText('Casey Shopper', { exact: true }),
+		).toBeVisible();
+		await expect(page.getByTestId('shopper-access-panel')).toHaveCount(0);
 	});
 
-	test('shows read-only shopper access to an owner but leaves email search unchanged', async ({
+	test('omits shopper access for an owner and leaves email search unchanged', async ({
 		page,
 		seedAdminUser,
 	}) => {
@@ -76,9 +76,10 @@ test.describe('shopper access on registration review', () => {
 		await expect(page.getByTestId('find-shopper-account')).toHaveCount(0);
 		await expect(page.getByTestId('shopper-access-panel')).toHaveCount(0);
 		await openReview(page);
-		await expect(page.getByTestId('shopper-access-panel')).toContainText(
-			'Access is enabled',
-		);
+		await expect(
+			page.getByText('Casey Shopper', { exact: true }),
+		).toBeVisible();
+		await expect(page.getByTestId('shopper-access-panel')).toHaveCount(0);
 	});
 
 	test('hides the control from check-in-only staff without affecting registration review', async ({

@@ -51,13 +51,6 @@
 					}
 				</ion-label>
 			</ion-item>
-			@if (canManageShopperAccess() && registration.uid) {
-			<admin-shopper-access-panel
-				[uid]="registration.uid!"
-				[emailAddress]="registration.emailAddress"
-				[canManageAccess]="false"
-			/>
-			}
 			<admin-manage-children
 				[children]="registration?.children ?? []"
 				(adddedChild)="addChild($event)"
@@ -106,7 +99,7 @@
 			@if (registration(); as registration) { @if (isAdmin() &&
 			allowCancelRegistration()) {
 			<ion-button color="danger" (click)="cancelReservation()">
-				{{ 'Delete' | adminText }}
+				{{ 'Cancel Registration' | adminText }}
 			</ion-button>
 			} }
 		</div>

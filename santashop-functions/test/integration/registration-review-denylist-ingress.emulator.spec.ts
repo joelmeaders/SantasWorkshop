@@ -16,7 +16,6 @@ import { createCallableRequest } from '../helpers/callable-context';
 import { createOnboardUser } from '../fixtures/factories';
 
 const project = 'demo-registration-review';
-const secret = Buffer.alloc(32, 118);
 const shopper = { uid: 'blocked-test-shopper' };
 const owner = { uid: 'fixture-owner', owner: true };
 const caseId = 'c'.repeat(64);
@@ -52,13 +51,9 @@ describe(
 				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
 				'true',
 			);
-			vi.stubEnv(
-				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-				secret.toString('base64'),
-			);
 			vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
 			await clearEmulatorData(app);
-			const policy = createRegistrationReviewDenylist(db, secret);
+			const policy = createRegistrationReviewDenylist(db);
 			await db.runTransaction((tx) =>
 				policy.apply(tx, {
 					kind: 'block',
@@ -275,36 +270,24 @@ describe(
 			expect((await registration.get()).get('cancelledOn')).toBeDefined();
 		});
 
-		it('defaults off without accessing policy and fails closed for unresolved key when enabled', async () => {
-			const key =
-				process.env['SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY'];
-			vi.stubEnv(
-				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-				undefined,
-			);
+		it('defaults off and fails closed if an enabled emulator targets an unknown project', async () => {
+			vi.stubEnv('GCLOUD_PROJECT', 'demo-unrelated-project');
 			try {
 				await expect(
-					assertRegistrationReviewAllowed(db, {
-						email: blockedEmail,
-					}),
+					assertRegistrationReviewAllowed(db, { email: blockedEmail }),
 				).rejects.toMatchObject({ code: 'unavailable' });
 				vi.stubEnv(
 					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
 					undefined,
 				);
 				await expect(
-					assertRegistrationReviewAllowed(db, {
-						email: blockedEmail,
-					}),
+					assertRegistrationReviewAllowed(db, { email: blockedEmail }),
 				).resolves.toBeUndefined();
 			} finally {
+				vi.stubEnv('GCLOUD_PROJECT', project);
 				vi.stubEnv(
 					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
 					'true',
-				);
-				vi.stubEnv(
-					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-					key,
 				);
 			}
 		});

@@ -6,6 +6,13 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.32] - 2026-11-17
+
+### Changed
+
+- Allow Registration Reviewers to manage email bans; retain the private email ban table across seasonal resets and verify Firebase Auth is disabled when banning.
+- Capture daily registration snapshots only from November 14 through December 20 in the shop time zone; continue refreshing aggregate statistics year-round.
+
 ## [2026.10.31] - 2026-11-17
 
 ### Changed

@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import type {
 	DocumentReference,
 	Firestore,
@@ -29,12 +29,8 @@ type DenylistScope = {
 // Check isEmailBlocked/isUidBlocked before any separate enforcement work.
 type DenylistResult = { readonly active: boolean; readonly replayed: boolean };
 
-// Private, server-only, cross-season collections. No Function or Firebase Auth
-// integration imports this store yet. Do not add these paths to seasonal purge.
-export function createRegistrationReviewDenylist(
-	db: Firestore,
-	secret: Buffer,
-): {
+// These private, server-only collections are retained across seasons.
+export function createRegistrationReviewDenylist(db: Firestore): {
 	isEmailBlocked: (email: string, tx?: Transaction) => Promise<boolean>;
 	isUidBlocked: (uid: string, tx?: Transaction) => Promise<boolean>;
 	apply: (
@@ -42,11 +38,8 @@ export function createRegistrationReviewDenylist(
 		intent: ReviewDenylistIntent,
 	) => Promise<DenylistResult>;
 } {
-	if (secret.length < 32)
-		throw new Error('Review denylist key must be at least 32 bytes.');
-	const key = Buffer.from(secret);
 	const digest = (domain: string, value: string): string =>
-		createHmac('sha256', key)
+		createHash('sha256')
 			.update(domain)
 			.update('\0')
 			.update(value)
@@ -60,16 +53,18 @@ export function createRegistrationReviewDenylist(
 			(snapshot) => snapshot.get('active') === true,
 		);
 	const emailKeyFor = (email: string): string =>
-		digest('email-v1', normalizeEmail(email));
+		digest('email-v2', email);
 
 	return {
-		isEmailBlocked: (email, tx) => get(emailRef(emailKeyFor(email)), tx),
+		isEmailBlocked: (email, tx) =>
+			get(emailRef(emailKeyFor(normalizeEmail(email))), tx),
 		isUidBlocked: (uid, tx) => get(uidRef(uid), tx),
-		// The caller authenticates an Owner, loads and verifies authoritative case,
+		// The caller authorizes the reviewer, loads and verifies authoritative case,
 		// cancellation and Auth email in the same operation, then calls apply before
 		// staging other Firestore writes. This store never mutates Firebase Auth.
 		apply: async (tx, intent) => {
-			const emailKey = emailKeyFor(intent.email);
+			const email = normalizeEmail(intent.email);
+			const emailKey = emailKeyFor(email);
 			const shopperUid = identifier(intent.shopperUid);
 			const actorUid = identifier(intent.actorUid);
 			const caseId = identifier(intent.caseId);
@@ -89,7 +84,7 @@ export function createRegistrationReviewDenylist(
 				.doc(identifier(intent.operationId));
 			const binding = { emailKey, shopperUid, caseId, cancellationId };
 			const fingerprint = digest(
-				'operation-v1',
+				'operation-v2',
 				JSON.stringify([intent.kind, binding, actorUid, reason]),
 			);
 			const [block, marker, previous] = await tx.getAll(
@@ -145,7 +140,7 @@ export function createRegistrationReviewDenylist(
 			const active = intent.kind === 'block';
 			const at = new Date();
 			const state = { ...binding, active, actorUid, updatedAt: at };
-			tx.set(blockRef, state);
+			tx.set(blockRef, { ...state, email });
 			tx.set(markerRef, state);
 			tx.create(auditRef, {
 				...state,

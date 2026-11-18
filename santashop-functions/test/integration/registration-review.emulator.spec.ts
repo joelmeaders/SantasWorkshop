@@ -923,15 +923,10 @@ describe(
 					),
 				).resolves.toEqual(note);
 
-				const key = Buffer.alloc(32, 93);
 				const cancellationId = 'projection-fixture-cancellation';
 				vi.stubEnv(
 					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
 					'true',
-				);
-				vi.stubEnv(
-					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-					key.toString('base64'),
 				);
 				await registration.update({
 					cancelledOn: new Date(),
@@ -946,7 +941,11 @@ describe(
 					(await getRegistrationReviewCase(ownerRequest, app))
 						.registrationDetails[0]?.availableActions,
 				).toContain('blacklist');
-				const policy = createRegistrationReviewDenylist(db, key);
+				expect(
+					(await getRegistrationReviewCase(req, app))
+						.registrationDetails[0]?.availableActions,
+				).toContain('blacklist');
+				const policy = createRegistrationReviewDenylist(db);
 				const binding = {
 					email: 'morgan@example.invalid',
 					shopperUid: uidA,
@@ -965,7 +964,7 @@ describe(
 				const operation = db.doc(
 					'registrationReviewAuthOperations/' + uidA,
 				);
-				for (const [state, ownerAction] of [
+				for (const [state, expectedAction] of [
 					['applying', undefined],
 					['failed', 'blacklist'],
 					['confirmed', 'unblacklist'],
@@ -985,18 +984,15 @@ describe(
 						blacklisted: true,
 						blockOperationPhase: state,
 					});
-					expect(reviewerRecord?.availableActions).not.toEqual(
-						expect.arrayContaining(['reinstate']),
-					);
 					expect(reviewerRecord?.availableActions).not.toContain(
-						'blacklist',
+						'reinstate',
 					);
-					expect(reviewerRecord?.availableActions).not.toContain(
-						'unblacklist',
+					expect(reviewerRecord?.availableActions).toEqual(
+						ownerRecord?.availableActions,
 					);
-					if (ownerAction)
+					if (expectedAction)
 						expect(ownerRecord?.availableActions).toContain(
-							ownerAction,
+							expectedAction,
 						);
 					else {
 						expect(ownerRecord?.availableActions).not.toContain(

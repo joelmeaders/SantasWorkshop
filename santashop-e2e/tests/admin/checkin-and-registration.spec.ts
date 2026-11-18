@@ -634,7 +634,9 @@ test.describe('check-in and staff registration operations', () => {
 		await signInAdminViaUi(page, defaultAdminAccount());
 		await scanManualCode(page, 'E2ECAN01');
 		await expect(page).toHaveURL(/\/admin\/checkin\/review$/);
-		await page.getByRole('button', { name: 'Delete', exact: true }).click();
+		await page
+			.getByRole('button', { name: 'Cancel Registration', exact: true })
+			.click();
 		const confirm = page.locator('ion-alert').last();
 		await expect(confirm).toContainText(
 			'Deleting this reservation cannot be undone',

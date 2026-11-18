@@ -68,13 +68,19 @@ The Functions TEST job reads the repository-level TEST variable, so do not
 shadow it in the Admin Hosting `test` environment. Both PROD jobs read the
 same protected `production` environment.
 
-Leave the nightly and denylist flags unset or false in both environments.
-Standard cloud deployment rejects an attempt to enable either until a separate
-release securely binds its runtime HMAC secret. Do not put either HMAC key in
-GitHub workflow dotenv inputs, browser configuration, or release logs.
-The nightly pipeline also needs a verified existing-registration baseline before
-it can be enabled. Local demo emulator fixtures are separate from these cloud
-release settings.
+Leave the nightly flag off in all cloud environments. The email denylist is
+off by default. To enable it, turn on Registration Review and explicitly set
+`TEST_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED` at the repository level
+for TEST or `PROD_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED` in the
+protected `production` environment for PROD. The settings are independent.
+The denylist does not require a secret. Only the server-only, cross-season
+`registrationReviewEmailBlocks` collection stores normalized email addresses;
+UID markers and audit receipts do not store the address.
+
+The nightly pipeline separately requires a securely bound runtime HMAC key
+and a verified existing-registration baseline. Do not put its key in GitHub
+workflow dotenv inputs, browser configuration, or release logs. Local demo
+emulator fixtures use separate configuration.
 
 ## GitHub repository secrets
 

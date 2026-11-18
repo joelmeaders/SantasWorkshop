@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2026.11.25] - 2026-11-17
+
+### Changed
+
+- Show the email ban workflow to Registration Reviewers on eligible registrations.
+- Rename the bottom Check-in action to Cancel Registration and remove the Shopper Access section from Check-in.
+
 ## [2026.11.24] - 2026-11-17
 
 ### Changed

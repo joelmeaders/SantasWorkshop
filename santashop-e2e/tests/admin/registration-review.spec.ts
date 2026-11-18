@@ -121,6 +121,64 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 		await expect(page.getByText(/no cases in this view/i)).toBeVisible();
 	});
 
+	test('REVIEW-004 keeps plaintext email blocks private from shopper and staff clients', async ({
+		request,
+		seedAdminUser,
+		clearData,
+	}) => {
+		expect(E2E_PROJECT_ID).toBe('demo-santashop');
+		expect(new URL(E2E_AUTH_EMULATOR_URL).hostname).toBe('127.0.0.1');
+		expect(new URL(E2E_FIRESTORE_EMULATOR_URL).hostname).toBe('127.0.0.1');
+		await clearData();
+		const suffix = randomUUID();
+		const path = 'registrationReviewEmailBlocks/rules-' + suffix;
+		const blockedEmail = 'blocked-' + suffix + '@example.test';
+		await replaceDocument(request, path, {
+			email: blockedEmail,
+			active: true,
+		});
+		try {
+			for (const account of [
+				defaultAdminAccount({
+					uid: 'rules-shopper-' + suffix,
+					emailAddress: 'shopper-' + suffix + '@example.test',
+					roles: [],
+				}),
+				defaultAdminAccount({
+					uid: 'rules-reviewer-' + suffix,
+					emailAddress: 'reviewer-' + suffix + '@example.test',
+					roles: ['admin', 'registration-review'],
+				}),
+			]) {
+				await seedAdminUser(account);
+				const signIn = await request.post(
+					E2E_AUTH_EMULATOR_URL +
+						'/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',
+					{
+						data: {
+							email: account.emailAddress,
+							password: account.password,
+							returnSecureToken: true,
+						},
+					},
+				);
+				expect(signIn.ok()).toBe(true);
+				const { idToken } = (await signIn.json()) as { idToken: string };
+				const response = await request.get(
+					`${E2E_FIRESTORE_EMULATOR_URL}${documents}/${path}`,
+					{ headers: { Authorization: `Bearer ${idToken}` } },
+				);
+				expect(response.status()).toBe(403);
+				expect(await response.text()).not.toContain(blockedEmail);
+			}
+		} finally {
+			await request.delete(
+				`${E2E_FIRESTORE_EMULATOR_URL}${documents}/${path}`,
+				{ headers: fixtureHeader },
+			);
+		}
+	});
+
 	test('REVIEW-002 uses real prefix search and safely applies review actions', async ({
 		page,
 		request,

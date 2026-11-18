@@ -596,10 +596,6 @@ describe('manual registration review actions, isolated Firestore', () => {
 	it('requires reviewer permission and a current cancellation and leaves the policy active during an explicit Auth retry', async () => {
 		const { person, caseRef, email, request } = await fixture();
 		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED', 'true');
-		vi.stubEnv(
-			'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-			Buffer.alloc(32, 29).toString('base64'),
-		);
 		const principal = {
 			uid: person.id,
 			email,
@@ -733,10 +729,6 @@ describe('manual registration review actions, isolated Firestore', () => {
 	it('does not remove policy while confirmed Auth disable is still in flight', async () => {
 		const { person, request, email } = await fixture();
 		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED', 'true');
-		vi.stubEnv(
-			'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-			Buffer.alloc(32, 29).toString('base64'),
-		);
 		const principal = {
 			uid: person.id,
 			email,

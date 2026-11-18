@@ -47,7 +47,7 @@ describe(
 				'review-denylist',
 			);
 			db = getFirestore(app);
-			store = createRegistrationReviewDenylist(db, Buffer.alloc(32, 89));
+			store = createRegistrationReviewDenylist(db);
 		});
 
 		beforeEach(async () => {
@@ -64,10 +64,12 @@ describe(
 			}
 		});
 
-		it('blocks the exact normalized address and UID without storing the email', async () => {
+		it('stores the normalized email only in its private block record and blocks the email and UID', async () => {
 			const block = fixture();
 			expect(await store.isEmailBlocked(block.email)).toBe(false);
-			expect(await apply(block)).toEqual({
+			expect(
+				await apply({ ...block, email: ' ' + block.email.toUpperCase() + ' ' }),
+			).toEqual({
 				active: true,
 				replayed: false,
 			});
@@ -94,9 +96,10 @@ describe(
 				.doc(block.shopperUid)
 				.get();
 			expect(keyed.id).toMatch(/^[a-f0-9]{64}$/u);
-			expect(
-				JSON.stringify([audit.data(), keyed.data(), marker.data()]),
-			).not.toContain(block.email);
+			expect(keyed.get('email')).toBe(block.email);
+			expect(JSON.stringify([audit.data(), marker.data()])).not.toContain(
+				block.email,
+			);
 		});
 
 		it('retains immutable audit events and never reactivates on an old replay', async () => {

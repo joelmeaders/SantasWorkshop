@@ -26,15 +26,7 @@ export function getRegistrationReviewDenylist(
 			);
 		}
 	}
-	const secret =
-		process.env['SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY'] ?? '';
-	if (!/^[A-Za-z0-9+/]{43}=$/u.test(secret)) {
-		throw new HttpsError(
-			'unavailable',
-			'Registration access cannot be verified.',
-		);
-	}
-	return createRegistrationReviewDenylist(db, Buffer.from(secret, 'base64'));
+	return createRegistrationReviewDenylist(db);
 }
 
 export async function assertRegistrationReviewAllowed(

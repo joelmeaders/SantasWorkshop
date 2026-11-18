@@ -1,5 +1,4 @@
 import { spawn } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
 
 // Only the fixed demo suite gets this flag, never a deployment command.
 const isWindows = process.platform === 'win32';
@@ -22,8 +21,6 @@ const child = spawn(command, args, {
 		SANTASHOP_SEND_EMAILS_FROM_EMULATOR: 'false',
 		SANTASHOP_REGISTRATION_REVIEW_ENABLED: 'true',
 		SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED: 'true',
-		SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY:
-			randomBytes(32).toString('base64'),
 	},
 });
 child.once('error', (error) => {

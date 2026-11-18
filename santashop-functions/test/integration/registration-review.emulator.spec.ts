@@ -923,15 +923,10 @@ describe(
 					),
 				).resolves.toEqual(note);
 
-				const key = Buffer.alloc(32, 93);
 				const cancellationId = 'projection-fixture-cancellation';
 				vi.stubEnv(
 					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
 					'true',
-				);
-				vi.stubEnv(
-					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY',
-					key.toString('base64'),
 				);
 				await registration.update({
 					cancelledOn: new Date(),
@@ -950,7 +945,7 @@ describe(
 					(await getRegistrationReviewCase(req, app))
 						.registrationDetails[0]?.availableActions,
 				).toContain('blacklist');
-				const policy = createRegistrationReviewDenylist(db, key);
+				const policy = createRegistrationReviewDenylist(db);
 				const binding = {
 					email: 'morgan@example.invalid',
 					shopperUid: uidA,

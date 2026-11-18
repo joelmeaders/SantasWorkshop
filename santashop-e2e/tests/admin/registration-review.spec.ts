@@ -518,7 +518,8 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				expect(await shopperSignIn()).toBe(400);
 			}
 			await detail
-				.getByRole('combobox', { name: /review status/i })
+				.getByRole('region', { name: 'Case actions' })
+				.getByRole('combobox', { name: 'Case status' })
 				.selectOption('resolved');
 			await expect(
 				queue.getByRole('button', { name: new RegExp(caseId) }),

@@ -7,6 +7,13 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.26] - 2026-11-17
+
+### Changed
+
+- Let Registration Reviewers ban an email after cancellation. Preserve bans across annual resets and disable banned shopper accounts.
+- Rename the bottom Check-in action to Cancel Registration and remove the Shopper Access section from Check-in.
+
 ## [2026.11.25] - 2026-11-17
 
 ### Changed

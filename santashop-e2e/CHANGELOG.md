@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.33] - 2026-11-17
+
+### Changed
+
+- Cover the explicit cancellation label, the removal of the Check-in Shopper Access section, and private ban storage.
+
 ## [2026.10.32] - 2026-11-17
 
 ### Changed

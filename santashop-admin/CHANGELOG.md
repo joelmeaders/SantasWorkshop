@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2026.11.26] - 2026-11-18
+
+### Changed
+
+- Recalibrate startup bundle size limits for Angular's corrected shared-chunk accounting and the measured dependency update growth.
+- Read Angular's renamed browser-stats.json output in bundle analysis and the admin CI verification gate.
+- Update Angular, Ionic, Firebase, charts, editor libraries, and shared build tooling within their current major versions.
+
 ## [2026.11.25] - 2026-11-17
 
 ### Changed

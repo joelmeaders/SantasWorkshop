@@ -106,7 +106,7 @@ const prepareDeployArtifact = () => {
 		overrides: {
 			// npm resolves this artifact independently of the workspace lockfile.
 			// Fix GHSA-m9gg-hp2v-232j and GHSA-f596-whhp-79r4 in deployed SDKs.
-			'@grpc/grpc-js': '1.14.5',
+			'@grpc/grpc-js': '1.14.7',
 			'uuid@<11.1.1': '11.1.1',
 		},
 	};

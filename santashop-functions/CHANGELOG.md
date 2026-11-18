@@ -6,6 +6,13 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.33] - 2026-11-18
+
+### Changed
+
+- Update Firebase, AWS SDK, runtime utilities, and Functions build and test tooling within their current major versions.
+- Adopt the Firebase CLI's upstream handling of empty Cloud Tasks IAM policies and update the deployment artifact gRPC override.
+
 ## [2026.10.32] - 2026-11-17
 
 ### Changed

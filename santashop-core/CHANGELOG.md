@@ -2,6 +2,12 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2026.11.16] - 2026-11-18
+
+### Changed
+
+- Update shared Angular and Firebase peer dependencies, TypeScript helpers, and library build tooling within their current major versions.
+
 ## [2026.11.15] - 2026-11-17
 
 ### Changed

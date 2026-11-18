@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.34] - 2026-11-18
+
+### Changed
+
+- Update Playwright and accessibility test dependencies within their current major versions.
+
 ## [2026.10.33] - 2026-11-17
 
 ### Changed

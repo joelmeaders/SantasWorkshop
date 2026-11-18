@@ -25,8 +25,8 @@ santasworkshop/
 
 ## Prerequisites
 
-- **Node.js 24.15+**: Install Node.js 24 locally for general shell usage. Versions below Node 24.15 are unsupported in this repository. The repo pins `24.18.0` in `.nvmrc`, and `.npmrc` enforces it during package-manager operations with `engine-strict=true` plus `use-node-version=24.18.0`. When running workspace scripts through pnpm, the root `devEngines.runtime` setting can also auto-download a compatible Node.js version.
-- **pnpm**: v10.14 or later (required for `devEngines.runtime` feature)
+- **Node.js 24.15+**: Install Node.js 24 locally for general shell usage. Versions below Node 24.15 are unsupported in this repository. The repo pins `24.22.3` in `.nvmrc`, and `.npmrc` enforces it during package-manager operations with `engine-strict=true` plus `use-node-version=24.22.3`. When running workspace scripts through pnpm, the root `devEngines.runtime` setting can also auto-download a compatible Node.js version.
+- **pnpm**: v10.34.9 within major version 10, matching CI and the workspace override format
 
 `pnpm-lock.yaml` may still contain `node >=20` or `^20` ranges inside third-party package metadata. Those are upstream dependency compatibility declarations, not this repository's runtime policy.
 

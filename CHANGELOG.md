@@ -15,6 +15,7 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 - Replace the real email timeout delay with controlled cancellation and reduce reset fixtures while preserving pagination and retention checks.
 - Keep public-settings unit tests isolated from real Google authentication through a stable provider mock.
 - Remove obsolete browser delays, require the requested appointment, and strengthen registration, staff-access, query, and subscription assertions.
+- Verify shared Firebase wrappers release their SDK listeners after completion, errors, and cancellation.
 - Typecheck browser tests before CI setup and align their TypeScript library with the supported Node runtime.
 
 ## [2026.11.24] - 2026-11-17

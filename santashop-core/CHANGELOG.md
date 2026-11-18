@@ -2,6 +2,12 @@
 
 All notable changes to the core library will be documented in this file.
 
+## [2026.11.15] - 2026-11-17
+
+### Changed
+
+- Verify Firebase Auth and Firestore listener cleanup after a value, an error, or explicit subscription cancellation.
+
 ## [2026.11.14] - 2026-11-14
 
 ### Fixed

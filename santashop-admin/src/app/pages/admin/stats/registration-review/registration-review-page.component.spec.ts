@@ -173,6 +173,16 @@ describe('RegistrationReviewPageComponent', () => {
 		);
 		expect(
 			first
+				.querySelector('section.tool-panel')
+				?.getAttribute('aria-label'),
+		).toBe('Registration actions First Parent (DEMO-R1)');
+		expect(
+			second
+				.querySelector('section.tool-panel')
+				?.getAttribute('aria-label'),
+		).toBe('Registration actions Second Parent (DEMO-R2)');
+		expect(
+			first
 				.querySelector('[aria-label^="Cancel registration"]')
 				?.getAttribute('aria-label'),
 		).toContain('First Parent (DEMO-R1)');

@@ -1,9 +1,16 @@
 @if (steps().length || recovery().length) {
 	<section
 		class="tool-panel"
-		[attr.aria-labelledby]="'registration-actions-' + record().id"
+		[attr.aria-label]="
+			('Registration actions' | adminText) +
+			' ' +
+			record().name +
+			' (' +
+			record().id +
+			')'
+		"
 	>
-		<h4 [id]="'registration-actions-' + record().id">
+		<h4>
 			{{ 'Registration actions' | adminText }}
 		</h4>
 		<div class="tool-list">

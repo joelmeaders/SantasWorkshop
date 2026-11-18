@@ -637,10 +637,64 @@ for (const target of ['app', 'admin'])
 				name === 'Run target unit tests with prepared shared libraries',
 		);
 		const build = trace.commands.findIndex(
-			({ run }) => run === 'pnpm run "ci:$UI_TARGET:build:$UI_MODE"',
+			({ run }) =>
+				run === 'pnpm run "ci:$UI_TARGET:build:$UI_MODE:prepared"',
 		);
 		const e2e = trace.commands.findIndex(
 			({ name }) => name === 'Customer or staff E2E tests',
 		);
 		assert.ok(unit >= 0 && unit < build && build < e2e);
 	});
+
+test('UI build entrypoints prepare libraries once and preserve standalone commands', () => {
+	const { scripts } = JSON.parse(readFileSync('package.json', 'utf8'));
+	const expand = (name) =>
+		scripts[name].split(' && ').flatMap((command) => {
+			const nested = command.match(/^pnpm run ([\w:.-]+)$/);
+			return nested ? expand(nested[1]) : [command];
+		});
+	const libraries = expand('storybook:prepare');
+	assert.deepEqual(libraries, [
+		'pnpm --filter @santashop/models build',
+		'pnpm --filter @santashop/core build:prod',
+	]);
+	for (const target of ['app', 'admin'])
+		for (const mode of ['test', 'prod']) {
+			const entrypoint = 'ci:' + target + ':build:' + mode;
+			const standalone = expand(entrypoint);
+			const prepared = expand(entrypoint + ':prepared');
+			assert.deepEqual([...libraries, ...prepared], standalone);
+			for (const library of libraries) {
+				assert.equal(
+					standalone.filter((command) => command === library).length,
+					1,
+				);
+				assert.ok(!prepared.includes(library));
+			}
+			assert.deepEqual(
+				prepared
+					.filter((command) => command.startsWith('ng build '))
+					.map(
+						(command) => command.match(/--configuration=(\w+)/)[1],
+					),
+				mode === 'test'
+					? ['production', 'development']
+					: ['production'],
+			);
+		}
+	const steps = readWorkflow('.github/workflows/ui-target.yml').jobs
+		.validate_release.steps;
+	const preparations = steps.filter(
+		({ run }) => run === 'pnpm run storybook:prepare',
+	);
+	assert.equal(preparations.length, 1);
+	assert.equal(preparations[0].if, undefined);
+	const defaults = steps.findIndex(
+		({ name }) => name === 'Load validated Remote Config release defaults',
+	);
+	const preparation = steps.indexOf(preparations[0]);
+	const build = steps.findIndex(
+		({ run }) => run === 'pnpm run "ci:$UI_TARGET:build:$UI_MODE:prepared"',
+	);
+	assert.ok(defaults >= 0 && defaults < preparation && preparation < build);
+});

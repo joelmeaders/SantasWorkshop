@@ -29,6 +29,14 @@ A backend change can affect both applications, so it validates both browser
 journeys. It does not publish unchanged Hosting bundles. E2E jobs build local
 Functions to run the emulators. That build is not a cloud deployment.
 
+Each UI job builds the shared models and core libraries once for its unit tests
+and Hosting builds. Release jobs load their validated Remote Config defaults
+before that preparation so the compiled models contain the selected project's
+settings. The job then uses the `ci:app:build:*:prepared` or
+`ci:admin:build:*:prepared` commands; ordinary build commands still prepare their
+own libraries. Preparation is not shared across jobs or environments, and E2E
+keeps its separate emulator preparation.
+
 Shared JSON and YAML files receive content comparison. Root scripts select their
 named consumer. Angular project changes select the changed project. Firebase
 Hosting configuration selects its site. Lockfile changes follow each importer's

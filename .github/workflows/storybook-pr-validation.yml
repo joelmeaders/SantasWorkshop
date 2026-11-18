@@ -60,6 +60,8 @@ jobs:
     env:
       STORYBOOK_SNAPSHOT_PLATFORM: windows-2022
       STORYBOOK_TARGETS: ${{ matrix.target }}
+      # Desktop and mobile use isolated pages and separate snapshot paths.
+      STORYBOOK_WORKERS: '2'
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -70,7 +72,7 @@ jobs:
           node-version: 24.18.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install chromium
+      - run: pnpm exec playwright install chromium --only-shell
       - run: pnpm run storybook:build
       - name: Compare all story images with reviewed Windows baselines
         id: compare

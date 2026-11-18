@@ -134,14 +134,6 @@ jobs:
       - run: pnpm run "config:$UI_TARGET:$UI_MODE"
         env:
           SANTASHOP_REGISTRATION_REVIEW_ENABLED: ${{ inputs.deploy && inputs.target == 'admin' && (inputs.mode == 'prod' && vars.PROD_SANTASHOP_REGISTRATION_REVIEW_ENABLED == 'true' || inputs.mode == 'test' && vars.TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED == 'true') && 'true' || 'false' }}
-      - name: Prepare shared libraries before unit tests
-        run: pnpm run storybook:prepare
-      - name: Run shared core tests for this standalone release
-        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' && inputs.shared_tests }}
-        run: pnpm run ci:core:test
-      - name: Run target unit tests with prepared shared libraries
-        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' }}
-        run: pnpm --filter "@santashop/$UI_TARGET" test
       - name: Load validated Remote Config release defaults
         if: ${{ inputs.deploy }}
         env:
@@ -150,7 +142,15 @@ jobs:
           project=santas-workshop-test
           if [ "$UI_MODE" = prod ]; then project=santas-workshop-193b5; fi
           node scripts/remote-config.cjs release-defaults --project "$project"
-      - run: pnpm run "ci:$UI_TARGET:build:$UI_MODE"
+      - name: Prepare shared libraries for unit tests and builds
+        run: pnpm run storybook:prepare
+      - name: Run shared core tests for this standalone release
+        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' && inputs.shared_tests }}
+        run: pnpm run ci:core:test
+      - name: Run target unit tests with prepared shared libraries
+        if: ${{ !inputs.skip_tests && inputs.mode != 'prod' }}
+        run: pnpm --filter "@santashop/$UI_TARGET" test
+      - run: pnpm run "ci:$UI_TARGET:build:$UI_MODE:prepared"
       - name: Record verified Hosting output before emulator tests
         if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: |

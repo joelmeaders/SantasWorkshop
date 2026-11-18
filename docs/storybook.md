@@ -15,7 +15,7 @@ Use the Registration and Admin groups to find a page or component. Choose a name
 
 ## Validate changes
 
-Install the test browser once with `pnpm exec playwright install chromium`. Linux CI uses `pnpm exec playwright install --with-deps chromium`.
+Install the test browser once with `pnpm exec playwright install chromium`. Linux CI uses `pnpm exec playwright install --with-deps chromium --only-shell` because its browser suites run headlessly without a browser channel override. Windows visual CI also installs only the headless shell.
 
 ```sh
 pnpm run storybook:typecheck
@@ -78,6 +78,12 @@ pnpm run storybook:visual
 ```
 
 The visual suite reads every named story from the static Storybook index. It compares desktop and mobile screenshots after the story's play function and render audit pass. Use `pnpm run storybook:visual:report` to inspect local failures.
+
+Windows PR checks use two workers so the desktop and mobile projects can run
+concurrently. Tests within each project remain sequential, and snapshot paths
+include the project name. Local visual runs default to one worker; use
+`STORYBOOK_WORKERS` to choose a different limit. Emulator E2E tests continue to
+use one worker because they share seeded Firebase data.
 
 Release metadata is fixture data in visual stories. The admin sign-in story fixes its displayed environment and version independently of generated application configuration. Do not update those fixture values for a normal release bump. Its page unit test verifies that the real application renders `config.version` and the configured environment. This preserves visual coverage of the version label without requiring new images for every release.
 

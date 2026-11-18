@@ -7,6 +7,13 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.24] - 2026-11-17
+
+### Changed
+
+- Run desktop and mobile Storybook visual checks concurrently and install only the Chromium headless shell in CI.
+- Reuse shared library builds within UI validation and release jobs while preserving standalone build commands and release checks.
+
 ## [2026.11.23] - 2026-11-17
 
 ### Changed

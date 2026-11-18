@@ -68,10 +68,12 @@ The Functions TEST job reads the repository-level TEST variable, so do not
 shadow it in the Admin Hosting `test` environment. Both PROD jobs read the
 same protected `production` environment.
 
-Leave the nightly flag off in all cloud environments and the denylist flag off
-in production. Registration Review must already be enabled before enabling
-`TEST_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED`. The TEST denylist does
-not require a secret. Only the server-only, cross-season
+Leave the nightly flag off in all cloud environments. The email denylist is
+off by default. To enable it, turn on Registration Review and explicitly set
+`TEST_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED` at the repository level
+for TEST or `PROD_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED` in the
+protected `production` environment for PROD. The settings are independent.
+The denylist does not require a secret. Only the server-only, cross-season
 `registrationReviewEmailBlocks` collection stores normalized email addresses;
 UID markers and audit receipts do not store the address.
 

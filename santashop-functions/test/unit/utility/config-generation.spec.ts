@@ -402,23 +402,19 @@ describe('config.functions.cjs', () => {
 	});
 
 	it.each(['test', 'prod'] as const)(
-		'refuses secret-dependent registration-review rollout in %s',
+		'rejects nightly rollout and never emits review secrets in %s',
 		(mode) => {
 			const prefix = mode.toUpperCase();
 			const hmac = 'SANTASHOP_REGISTRATION_REVIEW_HMAC_KEY';
 			const denylistHmac = 'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_HMAC_KEY';
 			process.env[`${prefix}_${hmac}`] = 'synthetic-review-only';
 			process.env[`${prefix}_${denylistHmac}`] = 'synthetic-denylist-only';
-			for (const suffix of mode === 'test'
-				? ['NIGHTLY']
-				: ['NIGHTLY', 'DENYLIST']) {
-				const key = `${prefix}_SANTASHOP_REGISTRATION_REVIEW_${suffix}_ENABLED`;
-				process.env[key] = 'true';
-				expect(() => configFunctions.buildFunctionsConfig(mode)).toThrow(
-					`${key} must remain off`,
-				);
-				process.env[key] = 'false';
-			}
+			const nightly = `${prefix}_SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED`;
+			process.env[nightly] = 'true';
+			expect(() => configFunctions.buildFunctionsConfig(mode)).toThrow(
+				`${nightly} must remain off`,
+			);
+			process.env[nightly] = 'false';
 			const file = configFunctions.renderFunctionsEnvFile(
 				mode,
 				configFunctions.FUNCTION_PROJECT_IDS[mode],
@@ -430,26 +426,40 @@ describe('config.functions.cjs', () => {
 		},
 	);
 
-	it('renders the TEST denylist toggle only with Registration Review enabled', () => {
-		const flag = 'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED';
-		process.env[`TEST_${flag}`] = 'yes';
-		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
-			`Invalid boolean: TEST_${flag}`,
-		);
+	it.each(['test', 'prod'] as const)(
+		'only enables the denylist with explicit opt-in and review enabled in %s',
+		(mode) => {
+			const prefix = mode.toUpperCase();
+			const otherPrefix = mode === 'test' ? 'PROD' : 'TEST';
+			const flag = 'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED';
+			const modeFlag = `${prefix}_${flag}`;
+			process.env[`${otherPrefix}_SANTASHOP_REGISTRATION_REVIEW_ENABLED`] =
+				'true';
+			process.env[`${otherPrefix}_${flag}`] = 'true';
+			expect(
+				configFunctions.buildFunctionsConfig(mode)[flag],
+			).toBeUndefined();
 
-		process.env[`TEST_${flag}`] = 'true';
-		expect(() => configFunctions.buildFunctionsConfig('test')).toThrow(
-			'The TEST denylist requires Registration Review to be enabled.',
-		);
-		process.env.TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED = 'true';
-		expect(
-			configFunctions.renderFunctionsEnvFile(
-				'test',
-				configFunctions.FUNCTION_PROJECT_IDS.test,
-				configFunctions.buildFunctionsConfig('test'),
-			),
-		).toContain(`${flag}="true"`);
-	});
+			process.env[modeFlag] = 'yes';
+			expect(() => configFunctions.buildFunctionsConfig(mode)).toThrow(
+				`Invalid boolean: ${modeFlag}`,
+			);
+
+			process.env[modeFlag] = 'true';
+			expect(() => configFunctions.buildFunctionsConfig(mode)).toThrow(
+				`The ${prefix} denylist requires Registration Review to be enabled.`,
+			);
+			process.env[`${prefix}_SANTASHOP_REGISTRATION_REVIEW_ENABLED`] =
+				'true';
+			expect(
+				configFunctions.renderFunctionsEnvFile(
+					mode,
+					configFunctions.FUNCTION_PROJECT_IDS[mode],
+					configFunctions.buildFunctionsConfig(mode),
+				),
+			).toContain(`${flag}="true"`);
+		},
+	);
 
 	it('maps development-style aliases to the test project and defaults to prod', () => {
 		expect(configFunctions.parseMode('development')).toBe('test');

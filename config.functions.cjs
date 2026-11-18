@@ -155,14 +155,14 @@ const buildFunctionsConfig = (mode) => {
 			`Invalid boolean: ${getModePrefix(mode)}_${REGISTRATION_REVIEW_DENYLIST_FLAG}`,
 		);
 	}
-	if (denylistEnabled === 'true' && mode !== 'test') {
+	if (denylistEnabled === 'true' && mode === 'local') {
 		throw new Error(
-			`${getModePrefix(mode)}_${REGISTRATION_REVIEW_DENYLIST_FLAG} must remain off outside the TEST cloud release.`,
+			`${getModePrefix(mode)}_${REGISTRATION_REVIEW_DENYLIST_FLAG} must remain off in generated local configuration.`,
 		);
 	}
 	if (denylistEnabled === 'true' && reviewEnabled !== 'true') {
 		throw new Error(
-			'The TEST denylist requires Registration Review to be enabled.',
+			`The ${getModePrefix(mode)} denylist requires Registration Review to be enabled.`,
 		);
 	}
 

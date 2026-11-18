@@ -35,6 +35,8 @@ export function selectChanges(paths) {
 		if (isDocumentationPath(path)) continue;
 		const app = path.match(/^santashop-(app|admin)\//)?.[1];
 		if (app) {
+			if (path.startsWith('santashop-admin/src/assets/email-templates/'))
+				selected.tooling = true;
 			if (/\.stories\.[^/]+$/.test(path)) selected.storybook.add(app);
 			else if (
 				/\.spec\.[^/]+$/.test(path) ||
@@ -138,14 +140,16 @@ export function selectChanges(paths) {
 		}
 		if (
 			/^scripts\/(?:ci-|ui-targets|release-|github-secrets)/.test(path) ||
-			path === 'scripts/generate-2026-email-templates.mjs' ||
-			path === 'scripts/email-template-starters.test.mjs'
+			/^scripts\/[^/]+\.test\.mjs$/.test(path) ||
+			path === 'scripts/generate-2026-email-templates.mjs'
 		) {
 			selected.tooling = true;
 			continue;
 		}
 
 		if (path.startsWith('scripts/verify-admin-')) {
+			if (path === 'scripts/verify-admin-hosted-callables.mjs')
+				selected.tooling = true;
 			ui(['admin']);
 			continue;
 		}

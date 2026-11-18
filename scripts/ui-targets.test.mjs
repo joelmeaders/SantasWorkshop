@@ -29,6 +29,34 @@ for (const [name, paths, expected] of [
 	['app only', ['santashop-app/src/main.ts'], app],
 	['admin only', ['santashop-admin/src/main.ts'], admin],
 	[
+		'root tooling tests are selected without publishing application code',
+		['scripts/verify-admin-hosted-callables.test.mjs'],
+		{ ...empty, tooling: true },
+	],
+	[
+		'new root tooling tests are selected automatically',
+		['scripts/new-tool.test.mjs'],
+		{ ...empty, tooling: true },
+	],
+	[
+		'hosted callable verifier selects its regression tests',
+		['scripts/verify-admin-hosted-callables.mjs'],
+		{
+			...empty,
+			ui: ['admin'],
+			e2e: ['admin'],
+			storybook: ['admin'],
+			tooling: true,
+		},
+	],
+	[
+		'email template assets select their content checks',
+		[
+			'santashop-admin/src/assets/email-templates/2026/registration-confirmation-2026-en.json',
+		],
+		{ ...admin, tooling: true },
+	],
+	[
 		'email template starter scripts are tooling only',
 		[
 			'scripts/generate-2026-email-templates.mjs',

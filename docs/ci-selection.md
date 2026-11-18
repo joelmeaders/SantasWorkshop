@@ -23,6 +23,8 @@ A failed Git comparison fails selection and blocks deployment.
 | Functions test input                             | Functions unit/integration                                                         | None                                 |
 | Firebase rules or indexes                        | Functions integration coverage and both E2E suites                                 | Rules and indexes, without Functions |
 | CI selection or release policy                   | Workflow and release contract tests                                                | None                                 |
+| Root tooling test                                | All root tooling and load regression tests                                         | None                                 |
+| Admin email template asset                       | Admin checks and email template content tests                                      | Admin Hosting                        |
 | Maintained README, changelog, or documentation   | Selection and final status only                                                    | None                                 |
 
 A backend change can affect both applications, so it validates both browser
@@ -63,7 +65,7 @@ jobs never count as successful test or deployment evidence.
 Run the selection and workflow regression checks from the root:
 
 ```sh
-node --test scripts/ci-*.test.mjs scripts/ui-targets.test.mjs scripts/release-*.test.mjs scripts/storybook-targets.test.mjs
+node --test scripts/*.test.mjs scripts/load/*.test.mjs
 ```
 
 The suite evaluates the real workflow job conditions with successful, failed,

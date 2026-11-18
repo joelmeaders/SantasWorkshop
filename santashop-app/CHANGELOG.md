@@ -4,6 +4,12 @@ All notable changes to the main application will be documented in this file.
 
 ## [Unreleased]
 
+## [2026.11.17] - 2026-11-17
+
+### Changed
+
+- Verify that appointment queries use both the current program year and enabled-slot filter.
+
 ## [2026.11.16] - 2026-11-15
 
 ### Fixed

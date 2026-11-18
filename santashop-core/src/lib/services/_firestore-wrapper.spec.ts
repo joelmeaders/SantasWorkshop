@@ -91,6 +91,7 @@ describe('FirestoreWrapper', () => {
 	});
 
 	it('maps collection snapshots with and without document ids', async () => {
+		const unsubscribe = vi.fn();
 		const snapshot = {
 			docs: [
 				{ id: 'one', data: (): RecordData => ({ name: 'First' }) },
@@ -99,31 +100,35 @@ describe('FirestoreWrapper', () => {
 		} as unknown as QuerySnapshot<RecordData>;
 		vi.mocked(onSnapshot).mockImplementation((_, next) => {
 			(next as (value: QuerySnapshot<RecordData>) => void)(snapshot);
-			return vi.fn();
+			return unsubscribe;
 		});
 
 		await expect(firstValueFrom(service.collectionQuery(queryRef))).resolves.toEqual([
 			{ name: 'First' },
 			{ name: 'Second' },
 		]);
+		expect(unsubscribe).toHaveBeenCalledOnce();
 		await expect(
 			firstValueFrom(service.collectionQuery(queryRef, 'id')),
 		).resolves.toEqual([
 			{ id: 'one', name: 'First' },
 			{ id: 'two', name: 'Second' },
 		]);
+		expect(unsubscribe).toHaveBeenCalledTimes(2);
 	});
 
 	it('forwards collection subscription errors', async () => {
 		const expected = new Error('collection failed');
+		const unsubscribe = vi.fn();
 		vi.mocked(onSnapshot).mockImplementation((_, __, error) => {
 			(error as unknown as (value: Error) => void)(expected);
-			return vi.fn();
+			return unsubscribe;
 		});
 
 		await expect(firstValueFrom(service.collectionQuery(queryRef))).rejects.toBe(
 			expected,
 		);
+		expect(unsubscribe).toHaveBeenCalledOnce();
 	});
 
 	it.each([
@@ -134,6 +139,7 @@ describe('FirestoreWrapper', () => {
 	] as const)(
 		'maps document snapshots (exists=%s, data=%s)',
 		async (exists, data, expected, idField) => {
+			const unsubscribe = vi.fn();
 			const snapshot = {
 				id: 'one',
 				exists: () => exists,
@@ -141,7 +147,7 @@ describe('FirestoreWrapper', () => {
 			} as unknown as DocumentSnapshot<RecordData>;
 			vi.mocked(onSnapshot).mockImplementation((_, next) => {
 				(next as (value: DocumentSnapshot<RecordData>) => void)(snapshot);
-				return vi.fn();
+				return unsubscribe;
 			});
 
 			await expect(
@@ -152,20 +158,39 @@ describe('FirestoreWrapper', () => {
 					),
 				),
 			).resolves.toEqual(expected);
+			expect(unsubscribe).toHaveBeenCalledOnce();
 		},
 	);
 
 	it('forwards document subscription errors', async () => {
 		const expected = new Error('document failed');
+		const unsubscribe = vi.fn();
 		vi.mocked(onSnapshot).mockImplementation((_, __, error) => {
 			(error as unknown as (value: Error) => void)(expected);
-			return vi.fn();
+			return unsubscribe;
 		});
 
 		await expect(firstValueFrom(service.docData(documentRef))).rejects.toBe(
 			expected,
 		);
+		expect(unsubscribe).toHaveBeenCalledOnce();
 	});
+
+	it.each(['collection', 'document'] as const)(
+		'detaches the %s listener when a live subscription is cancelled',
+		(kind) => {
+			const unsubscribe = vi.fn();
+			vi.mocked(onSnapshot).mockReturnValue(unsubscribe);
+			const subscription =
+				kind === 'collection'
+					? service.collectionQuery(queryRef).subscribe()
+					: service.docData(documentRef).subscribe();
+			expect(onSnapshot).toHaveBeenCalledOnce();
+			expect(unsubscribe).not.toHaveBeenCalled();
+			subscription.unsubscribe();
+			expect(unsubscribe).toHaveBeenCalledOnce();
+		},
+	);
 
 	it('forwards document writes and deletes, with optional set options', async () => {
 		vi.mocked(addDoc).mockResolvedValue(documentRef);

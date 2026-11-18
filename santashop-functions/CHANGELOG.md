@@ -6,6 +6,14 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.31] - 2026-11-17
+
+### Changed
+
+- Run all Registration Review emulator suites in the normal integration command with isolated fixtures and shared loopback guards.
+- Test email timeout cancellation without waiting for the production timeout and reduce yearly-reset fixture size while preserving pagination boundaries.
+- Stabilize the public-settings authentication mock so unit tests cannot fall through to real Google credential discovery.
+
 ## [2026.10.30] - 2026-11-17
 
 ### Changed

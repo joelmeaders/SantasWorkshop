@@ -11,12 +11,16 @@ import {
 	editChildFirstNameViaUi,
 	removeChildViaUi,
 	selectAppointmentViaUi,
+	setBirthDate,
 	submitRegistrationViaUi,
 } from '../../fixtures/registration-helpers';
 import type { Page } from '@playwright/test';
 import {
 	E2E_PROGRAM_YEAR,
+	E2E_FIRESTORE_EMULATOR_URL,
+	E2E_PROJECT_ID,
 	e2eCalendarDateLabel,
+	e2eDate,
 	e2eDateTime,
 } from '../../fixtures/season';
 
@@ -26,6 +30,21 @@ const testSlotDate = (year: number, day: number, hour: number): string =>
 
 const refreshPublicParameters = async (page: Page): Promise<void> => {
 	await page.evaluate(() => window.dispatchEvent(new Event('online')));
+};
+
+const expectPersistedReferral = async (
+	page: Page,
+	uid: string,
+	referredBy: string,
+): Promise<void> => {
+	const profile = await page.request.get(
+		`${E2E_FIRESTORE_EMULATOR_URL}/v1/projects/${E2E_PROJECT_ID}/databases/(default)/documents/users/${encodeURIComponent(uid)}`,
+		{ headers: { Authorization: 'Bearer owner' } },
+	);
+	expect(profile.ok()).toBe(true);
+	expect(await profile.json()).toMatchObject({
+		fields: { referredBy: { stringValue: referredBy } },
+	});
 };
 
 const requireQrDownloadToken = (source: string | null): string => {
@@ -237,43 +256,73 @@ test.describe('customer registration lifecycle', () => {
 
 	test('REG-001 and REG-002 persist a listed referral and reveal registration progress', async ({
 		page,
+		inspectRegistrationBoundary,
 	}) => {
-		await createAccountViaUi(
-			page,
-			randomAccount(),
-			'School - Denver Public Schools (DPS)',
-		);
+		const account = randomAccount();
+		const referral = 'School - Denver Public Schools (DPS)';
+		await createAccountViaUi(page, account, referral);
+		await page.reload();
 
 		await expect(page.locator('#children-heading')).toBeVisible({
 			timeout: 15000,
 		});
 		await expect(page.locator('#appointment-heading')).toBeVisible();
 		await expect(page.locator('#review-heading')).toBeVisible();
+		const { uid } = await inspectRegistrationBoundary(account.emailAddress);
+		await expectPersistedReferral(page, uid, referral);
 	});
 
-	test('REG-003 persists an alternate referral value', async ({ page }) => {
+	test('REG-003 persists an alternate referral value', async ({
+		page,
+		inspectRegistrationBoundary,
+	}) => {
+		const account = randomAccount();
 		await createAccountViaUi(
 			page,
-			randomAccount(),
+			account,
 			'Other',
 			'Neighborhood friend',
 		);
+		await page.reload();
 
 		await expect(page.locator('#children-heading')).toBeVisible({
 			timeout: 15000,
 		});
+		const { uid } = await inspectRegistrationBoundary(account.emailAddress);
+		await expectPersistedReferral(page, uid, 'Other:Neighborhood friend');
 	});
 
 	test('REG-004 blocks final review until required registration data exists', async ({
 		page,
+		inspectRegistrationBoundary,
 	}) => {
-		await createAccountViaUi(page, randomAccount());
+		const account = randomAccount();
+		await createAccountViaUi(page, account);
 		await page.goto('/pre-registration/overview#review');
 
 		await expect(page).toHaveURL(/\/pre-registration\/overview(?:#review)?$/);
 		await expect(page.locator('#review-heading')).toBeVisible({
 			timeout: 15000,
 		});
+		const submitCard = page.locator('app-submit-card');
+		await expect(submitCard).toContainText(
+			'Add a valid child and choose an appointment before reviewing your registration.',
+		);
+		await expect(page.locator('#reviewAndSubmitButton')).toHaveCount(0);
+		await expect(
+			submitCard.getByRole('button', {
+				name: 'Review registration',
+				exact: true,
+			}),
+		).toHaveCount(0);
+		await expect(page.locator('#completeRegistrationButton')).toHaveCount(0);
+		const state = await inspectRegistrationBoundary(account.emailAddress);
+		expect(state.registration).toMatchObject({
+			children: [],
+			dateTimeSlot: null,
+			registrationSubmittedOn: null,
+		});
+		expect(state.emailCount).toBe(0);
 	});
 
 	test('CHILD-001 through CHILD-003 add, edit, and remove an eligible child', async ({
@@ -305,21 +354,14 @@ test.describe('customer registration lifecycle', () => {
 		const birthDate = childForm.locator(
 			'ion-input[formControlName="dateOfBirth"]',
 		);
-		await birthDate.locator('input').first().fill('2014-12-31');
-		await birthDate.evaluate((element) => {
-			element.dispatchEvent(
-				new CustomEvent('ionChange', {
-					bubbles: true,
-					detail: { value: '2014-12-31' },
-				}),
-			);
-		});
+		const saveButton = childForm.locator('ion-button[type="submit"]');
+		await setBirthDate(birthDate, e2eDate(6, 15, TEST_PROGRAM_YEAR - 8));
+		await childForm.locator('ion-radio[value="boys"]').click();
+		await expect(saveButton).not.toHaveClass(/button-disabled/);
 
-		await expect(
-			childForm.locator('ion-button[type="submit"]'),
-		).toHaveClass(
-			/button-disabled/,
-		);
+		await setBirthDate(birthDate, e2eDate(12, 31, TEST_PROGRAM_YEAR - 12));
+		await expect(saveButton).toHaveClass(/button-disabled/);
+		await expect(childForm.locator('ion-radio-group')).toHaveCount(0);
 	});
 
 	test('APPT-001 through SUB-002 complete a valid reservation and show confirmation', async ({

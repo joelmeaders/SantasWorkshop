@@ -60,25 +60,45 @@ describe('AuthWrapper', () => {
 	});
 
 	it('emits auth state changes inside the Angular zone', async () => {
+		const unsubscribe = vi.fn();
 		vi.mocked(onAuthStateChanged).mockImplementation((_, next) => {
 			(next as (value: User | null) => void)(user);
-			return vi.fn();
+			return unsubscribe;
 		});
 
 		await expect(firstValueFrom(service.authState())).resolves.toBe(user);
 		expect(auth.authStateReady).toHaveBeenCalled();
+		expect(unsubscribe).toHaveBeenCalledOnce();
 	});
 
 	it('forwards auth state errors', async () => {
 		const expected = new Error('auth failed');
+		const unsubscribe = vi.fn();
 		vi.mocked(onAuthStateChanged).mockImplementation((_, __, error) => {
 			error?.(expected);
-			return vi.fn();
+			return unsubscribe;
 		});
 
 		await expect(firstValueFrom(service.authState())).rejects.toBe(
 			expected,
 		);
+		expect(unsubscribe).toHaveBeenCalledOnce();
+	});
+
+	it('detaches the auth listener when a live subscription is cancelled', async () => {
+		const unsubscribe = vi.fn();
+		vi.mocked(onAuthStateChanged).mockReturnValue(unsubscribe);
+		const subscription = service.authState().subscribe();
+		try {
+			await vi.waitFor(() =>
+				expect(onAuthStateChanged).toHaveBeenCalledOnce(),
+			);
+			expect(unsubscribe).not.toHaveBeenCalled();
+			subscription.unsubscribe();
+			expect(unsubscribe).toHaveBeenCalledOnce();
+		} finally {
+			subscription.unsubscribe();
+		}
 	});
 
 	it('returns the current user and token, including the signed-out case', async () => {

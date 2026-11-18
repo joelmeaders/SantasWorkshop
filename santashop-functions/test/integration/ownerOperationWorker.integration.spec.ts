@@ -77,11 +77,11 @@ describe.sequential('owner operation terminal lock cleanup integration', () => {
 		await db
 			.doc('users/orphan/resetNested/child')
 			.set({ payload: 'nested' });
-		const payload = 'x'.repeat(16 * 1024);
+			// Cross the SDK's 5,000-document recursive-delete page boundary.
 		for (let offset = 0; offset < 6_001; offset += 100) {
 			const batch = db.batch();
 			for (let i = offset; i < Math.min(offset + 100, 6_001); i++) {
-				batch.set(db.doc(`users/customer-${i}`), { payload });
+					batch.set(db.doc(`users/customer-${i}`), { payload: 'fixture' });
 			}
 			await batch.commit();
 		}
@@ -101,9 +101,10 @@ describe.sequential('owner operation terminal lock cleanup integration', () => {
 		await bucket
 			.file('owner-exports/marketing/retained.csv')
 			.save('retained', { resumable: false });
-		for (let offset = 0; offset < 12_501; offset += 25) {
+			// Two full 250-file pages plus a remainder exercise real Storage paging.
+			for (let offset = 0; offset < 501; offset += 25) {
 			await Promise.all(
-				Array.from({ length: Math.min(25, 12_501 - offset) }, (_, i) =>
+					Array.from({ length: Math.min(25, 501 - offset) }, (_, i) =>
 					bucket
 						.file(
 							`registrations/qr-${String(offset + i).padStart(4, '0')}.png`,
@@ -123,12 +124,6 @@ describe.sequential('owner operation terminal lock cleanup integration', () => {
 		expect(preview.counts).not.toHaveProperty('qrImages');
 
 		// The emulator cannot export backups. Seed the already-verified purge stage.
-		const baselineRss = process.memoryUsage().rss;
-		let peakRss = baselineRss;
-		const sample = setInterval(() => {
-			peakRss = Math.max(peakRss, process.memoryUsage().rss);
-		}, 20);
-		try {
 			const result = await executeYearlyReset('reset-fixture', {
 				operation: 'yearly-reset',
 				status: 'running',
@@ -144,13 +139,6 @@ describe.sequential('owner operation terminal lock cleanup integration', () => {
 			});
 			expect(result.deletedAuthUsers).toBe(601);
 			expect(result).not.toHaveProperty('deletedQrImages');
-		} finally {
-			clearInterval(sample);
-			console.info('Yearly reset emulator memory sample', {
-				baselineRssMiB: Math.ceil(baselineRss / 1024 ** 2),
-				peakRssMiB: Math.ceil(peakRss / 1024 ** 2),
-			});
-		}
 		expect((await db.collection('users').count().get()).data().count).toBe(
 			0,
 		);

@@ -1,6 +1,10 @@
 import { deleteApp, initializeApp, type App } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import {
+	assertEmulatorEnvironment,
+	clearEmulatorData,
+} from '../helpers/admin-emulator';
 import {
 	recordRegistrationReviewDelta,
 	runRegistrationReviewEmulatorBaseline,
@@ -11,26 +15,36 @@ const SEASON = 2041;
 const KEY = Buffer.alloc(32, 37);
 const SUBMITTED_AT = new Date('2041-11-15T15:00:00Z');
 
-describe.skipIf(process.env['REGISTRATION_REVIEW_NIGHTLY_TEST'] !== 'true')(
+describe(
 	'registration review nightly change intake and candidate index',
 	() => {
 		let app: App;
 		let db: Firestore;
 
 		beforeAll(() => {
-			if (process.env['FIRESTORE_EMULATOR_HOST'] !== '127.0.0.1:18082')
-				throw new Error(
-					'Expected isolated review emulator on localhost:18082.',
-				);
+			assertEmulatorEnvironment();
 			app = initializeApp(
-				{ projectId: 'demo-registration-review' },
+				{
+					projectId: 'demo-registration-review',
+					storageBucket: 'demo-registration-review.appspot.com',
+				},
 				'nightly-review-test',
 			);
 			db = getFirestore(app);
 		});
 
+		beforeEach(async () => {
+			await clearEmulatorData(app);
+		});
+
 		afterAll(async () => {
-			if (app) await deleteApp(app);
+			if (app) {
+				try {
+					await clearEmulatorData(app);
+				} finally {
+					await deleteApp(app);
+				}
+			}
 		});
 
 		const source = (

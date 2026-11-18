@@ -94,12 +94,21 @@ describe('AppSettingsPage', () => {
 		expect(component.form.dirty).toBe(true);
 	});
 	it('discards edits only after an explicit successful reload', async () => {
+		const savedBanner = 'Published test banner';
+		read.mockResolvedValue({
+			settings: {
+				...createDefaultPublicParameters(),
+				messageEn: savedBanner,
+			},
+			etag: 'etag-1',
+			version: '1',
+		});
 		await component.reload();
 		component.form.controls.messageEn.setValue('Discard');
 		component.form.markAsDirty();
 		await component.reload();
 		expect(component.form.pristine).toBe(true);
-		expect(component.form.getRawValue().messageEn).toBe('');
+		expect(component.form.getRawValue().messageEn).toBe(savedBanner);
 	});
 	it('coalesces user actions while a request is pending', async () => {
 		let resolveRead!: (value: unknown) => void;

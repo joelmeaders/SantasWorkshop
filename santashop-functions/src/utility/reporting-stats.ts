@@ -112,6 +112,9 @@ export const appendDailyRegistrationSnapshot = (
 ): RegistrationDailySnapshot[] => {
 	const snapshots = [...(previous ?? [])];
 	const dateKey = getZonedDateKey(now, timeZone);
+	const monthAndDay = dateKey.slice(5);
+	// Only record daily observations in season; keep the existing history intact.
+	if (monthAndDay < '11-14' || monthAndDay > '12-20') return snapshots;
 	// The annual document has at most one new snapshot per day of its program year.
 	if (
 		dateKey.startsWith(`${programYear}-`) &&

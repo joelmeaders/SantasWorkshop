@@ -9,14 +9,63 @@ describe('scheduledRegistrationStats handler', () => {
 	let backgroundMock: TriggerScheduledAdminMock;
 
 	beforeEach(() => {
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2025-12-12T06:59:00Z'));
 		backgroundMock = createBackgroundAdminMock();
 		backgroundMock.batchCommit.mockResolvedValue(undefined);
 		backgroundMock.exportDocuments.mockResolvedValue([{ name: 'op-123' }]);
+		backgroundMock.setCollectionDocs('registrations', []);
 		backgroundMock.setCollectionDocs('checkins', []);
 		backgroundMock.setCollectionDocs('cancellations', []);
 	});
 
-	afterEach(() => vi.useRealTimers());
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.unstubAllEnvs();
+	});
+
+	it.each([
+		['2025-07-14T12:00:00Z', undefined],
+		['2025-11-14T06:59:00Z', undefined], // Nov 13 in Denver
+		['2025-11-14T07:00:00Z', '2025-11-14'],
+		['2025-12-21T06:59:00Z', '2025-12-20'],
+		['2025-12-21T07:00:00Z', undefined],
+		['2026-11-14T06:59:00Z', undefined], // Denver boundary recurs annually
+		['2026-11-14T07:00:00Z', '2026-11-14'],
+	])('applies the Denver snapshot season at %s', async (instant, dateKey) => {
+		const programYear = instant.slice(0, 4);
+		vi.stubEnv('SANTASHOP_PROGRAM_YEAR', programYear);
+		vi.stubEnv(
+			'SANTASHOP_EVENT_DISPLAY_NAME',
+			programYear + ' Denver Santa Claus Shop',
+		);
+		const { scheduledRegistrationStats } =
+			await loadTriggerScheduledHandlers(backgroundMock);
+		const stats = backgroundMock.getDocRef(
+			'stats/registration-' + programYear,
+		);
+		const historical = {
+			dateKey: programYear + '-11-01',
+			registrationRecords: 999,
+		};
+		backgroundMock.setDocSnapshot('stats/registration-' + programYear, {
+			dailySnapshots: [historical],
+		});
+		vi.setSystemTime(new Date(instant));
+
+		await scheduledRegistrationStats();
+
+		// Off-season refreshes still publish the aggregate but preserve snapshot history.
+		expect(stats.set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				completedRegistrations: 0,
+				dailySnapshots: dateKey
+					? [historical, expect.objectContaining({ dateKey })]
+					: [historical],
+			}),
+			{ merge: false },
+		);
+	});
 
 	it('classifies submissions, attendance and cancellations using time after all source reads', async () => {
 		const { scheduledRegistrationStats } =
@@ -24,7 +73,6 @@ describe('scheduledRegistrationStats handler', () => {
 		const beforeRead = new Date('2025-12-11T12:00:00Z');
 		const committedDuringRead = new Date('2025-12-11T12:00:01Z');
 		const afterRead = new Date('2025-12-11T12:00:02Z');
-		vi.useFakeTimers({ toFake: ['Date'] });
 		vi.setSystemTime(beforeRead);
 		backgroundMock
 			.getCollectionRef('registrations')

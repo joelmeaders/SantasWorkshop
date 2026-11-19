@@ -2,11 +2,11 @@ import { readFile, unlink } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const [metafilePath] = process.argv.slice(2);
-const MAX_STATIC_BYTES = 1_350_000;
+const MAX_STATIC_BYTES = 1_400_000;
 
 if (!metafilePath) {
 	throw new Error(
-		'Usage: node scripts/verify-admin-initial-bundle.mjs <stats.json>',
+		'Usage: node scripts/verify-admin-initial-bundle.mjs <browser-stats.json>',
 	);
 }
 

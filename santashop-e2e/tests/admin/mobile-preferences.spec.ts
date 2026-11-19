@@ -26,7 +26,7 @@ test.describe('mobile staff preferences', () => {
 			)
 			.toBeLessThanOrEqual(60);
 		await page
-			.getByRole('button', { name: 'Language', exact: true })
+			.getByRole('button', { name: 'EN / ES: Language', exact: true })
 			.click();
 		await page
 			.getByRole('button', { name: 'Español', exact: true })
@@ -72,7 +72,7 @@ test.describe('mobile staff preferences', () => {
 			)
 			.fill('01234');
 		await search
-			.getByRole('button', { name: 'Idioma', exact: true })
+			.getByRole('button', { name: 'EN / ES: Idioma', exact: true })
 			.click();
 		await page
 			.getByRole('button', { name: 'English', exact: true })
@@ -103,7 +103,7 @@ test.describe('mobile staff preferences', () => {
 			.click();
 		await expect(lastName).toHaveValue('Muñoz');
 		await search
-			.getByRole('button', { name: 'Language', exact: true })
+			.getByRole('button', { name: 'EN / ES: Language', exact: true })
 			.click();
 		await page
 			.getByRole('combobox', { name: 'Appearance', exact: true })

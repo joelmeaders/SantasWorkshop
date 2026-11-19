@@ -52,7 +52,7 @@ export default defineConfig({
 					browser: {
 						enabled: true,
 						headless: true,
-						// pnpm resolves two Vitest 4.1.10 peer contexts (Node type versions).
+						// pnpm resolves two Vitest peer contexts (Node type versions).
 						// Their private TypeScript identities differ; the provider API is identical.
 						provider: playwright(
 							{},

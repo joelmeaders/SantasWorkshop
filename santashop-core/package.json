@@ -1,6 +1,6 @@
 {
 	"name": "@santashop/core",
-	"version": "2026.11.15",
+	"version": "2026.11.16",
 	"author": "Joel Meaders",
 	"scripts": {
 		"lint": "ng lint santashop-core --fix --cache",

@@ -5,7 +5,7 @@ import { analyzeMetafile } from 'esbuild';
 const [metafilePath] = process.argv.slice(2);
 
 if (!metafilePath) {
-	console.error('Usage: node scripts/analyze-esbuild-metafile.mjs <stats.json>');
+	console.error('Usage: node scripts/analyze-esbuild-metafile.mjs <browser-stats.json>');
 	process.exitCode = 1;
 } else {
 	const resolvedPath = resolve(metafilePath);

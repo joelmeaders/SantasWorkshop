@@ -2,6 +2,12 @@
 
 All notable changes to the shared models library will be documented in this file.
 
+## [2026.09.0-beta.15] - 2026-11-18
+
+### Changed
+
+- Update TypeScript runtime helpers and shared library build tooling within their current major versions.
+
 ## [2026.09.0-beta.14] - 2026-11-17
 
 ### Changed

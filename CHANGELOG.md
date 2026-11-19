@@ -7,6 +7,16 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.27] - 2026-11-18
+
+### Changed
+
+- Recalibrate startup bundle size limits for Angular's corrected shared-chunk accounting and the measured dependency update growth.
+- Read Angular's renamed browser-stats.json output in bundle analysis and the admin CI verification gate.
+- Update workspace dependency catalogs, transitive overrides, and the lockfile to the latest compatible minor and patch releases within their existing major versions.
+- Use Node.js 24.22.3 and pnpm 10.34.9 consistently in local tooling and CI.
+- Use the Firebase CLI's upstream Cloud Tasks IAM fix instead of the version-specific compatibility wrapper, retaining deployment guards and regression coverage.
+
 ## [2026.11.26] - 2026-11-17
 
 ### Changed

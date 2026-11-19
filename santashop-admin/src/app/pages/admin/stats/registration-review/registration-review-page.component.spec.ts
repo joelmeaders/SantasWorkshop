@@ -249,11 +249,27 @@ describe('RegistrationReviewPageComponent', () => {
 		select.value = 'resolved';
 		select.dispatchEvent(new Event('change'));
 		await settle();
+		expect(setStatus).not.toHaveBeenCalled();
+		const save = (
+			fixture.nativeElement as HTMLElement
+		).querySelector<HTMLButtonElement>(
+			'.case-status button[type="submit"]',
+		);
+		component.note.set('Unsaved handoff');
+		await settle();
+		expect(save?.disabled).toBe(true);
+		component.note.set('');
+		await settle();
+		expect(save?.disabled).toBe(false);
+		save?.click();
+		await settle();
 		expect(setStatus).toHaveBeenCalledWith({
 			id: entry.id,
 			status: 'resolved',
 		});
 		expect(component.selectedId()).toBeUndefined();
-		expect(component.feedback()).toBe('Review status updated.');
+		expect(component.feedback()).toBe(
+			'Review resolved. Find this case under Resolved or All.',
+		);
 	});
 });

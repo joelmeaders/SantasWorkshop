@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2026.11.27] - 2026-11-19
+
+### Changed
+
+- Guide first-time Registration Review staff through finding a case, comparing registrations, and saving the outcome. Clarify what each action changes and when an email is queued.
+- Add interactive, email-free child editing, removal, and restoration to the Registration Review Storybook practice case.
+
 ## [2026.11.26] - 2026-11-18
 
 ### Changed

@@ -2,10 +2,12 @@ import {
 	ChangeDetectionStrategy,
 	DestroyRef,
 	Component,
+	ElementRef,
 	computed,
 	inject,
 	input,
 	signal,
+	viewChild,
 } from '@angular/core';
 import {
 	takeUntilDestroyed,
@@ -71,8 +73,8 @@ function load<T>(start: () => Observable<T>): Observable<ReadState<T>> {
 
 const labels: Record<ReviewQueueStatus, string> = {
 	new: 'New',
-	'pending-shopper-response': 'Pending Shopper Response',
-	hold: 'Hold',
+	'pending-shopper-response': 'Waiting for shopper',
+	hold: 'On hold',
 	resolved: 'Resolved',
 };
 
@@ -99,12 +101,27 @@ export class RegistrationReviewPageComponent {
 	public readonly labels = labels;
 	public readonly actionLabels = reviewActionLabels;
 	public readonly statusOptions = Object.keys(labels) as ReviewQueueStatus[];
+	public readonly statusHelp: Record<ReviewQueueStatus, string> = {
+		new: 'Put this case back in the queue for an initial review.',
+		'pending-shopper-response':
+			'Use after reaching out when you still need a reply.',
+		hold: 'Leave this case open while you get more information.',
+		resolved:
+			'Use when no further review is needed. Find the case under Resolved afterward.',
+	};
+	public readonly statusDraft = signal<ReviewQueueStatus | null>(null);
 	public readonly scopes = [
 		{ id: 'open', label: 'Open' },
 		{ id: 'resolved', label: 'Resolved' },
 		{ id: 'all', label: 'All' },
 	] as const;
 	public readonly scope = signal<ReviewQueueScope>('open');
+	private readonly queueTitle =
+		viewChild<ElementRef<HTMLElement>>('queueTitle');
+	public readonly finishNoteFirst = computed(() => {
+		const status = this.statusDraft();
+		return !!status && this.leavesScope(status) && !!this.note().trim();
+	});
 	public readonly searchDraft = signal('');
 	public readonly searchError = signal(false);
 	public readonly search = signal('');
@@ -312,21 +329,25 @@ export class RegistrationReviewPageComponent {
 			});
 	}
 
-	public changeStatus(event: Event): void {
-		const field = event.target;
-		if (!(field instanceof HTMLSelectElement)) return;
-		const value = field.value;
+	public updateStatusDraft(value: string): void {
+		this.statusDraft.set(
+			this.statusOptions.find((option) => option === value) ?? null,
+		);
+		this.statusError.set(false);
+	}
+
+	public saveStatus(): void {
 		const reader = this.reader;
 		const id = this.selectedId();
 		const current = this.detail();
-		if (current.state === 'ready') field.value = current.value.status;
-		const status = this.statusOptions.find((option) => option === value);
+		const status = this.statusDraft();
 		if (
 			!id ||
 			!status ||
 			!reader?.setStatus ||
 			!this.statusWritable() ||
 			this.statusSaving() ||
+			this.finishNoteFirst() ||
 			current.state !== 'ready' ||
 			current.value.id !== id ||
 			current.value.status === status
@@ -343,12 +364,16 @@ export class RegistrationReviewPageComponent {
 			.subscribe({
 				next: () => {
 					if (id !== this.selectedId() || !this.available()) return;
-					if (
-						(status === 'resolved' && this.scope() === 'open') ||
-						(status !== 'resolved' && this.scope() === 'resolved')
-					)
+					this.statusDraft.set(null);
+					if (this.leavesScope(status)) {
 						this.resetQueue();
-					this.refreshAfterAction('Review status updated.');
+						this.queueTitle()?.nativeElement.focus();
+					}
+					this.refreshAfterAction(
+						status === 'resolved'
+							? 'Review resolved. Find this case under Resolved or All.'
+							: 'Review status updated.',
+					);
 				},
 				error: () => {
 					if (id === this.selectedId() && this.available())
@@ -363,6 +388,13 @@ export class RegistrationReviewPageComponent {
 		this.retryDetail();
 	}
 
+	private leavesScope(status: ReviewQueueStatus): boolean {
+		return (
+			(status === 'resolved' && this.scope() === 'open') ||
+			(status !== 'resolved' && this.scope() === 'resolved')
+		);
+	}
+
 	public includedChildCount(children: readonly ReviewCaseChild[]): number {
 		return children.filter(
 			(child) => child.removed !== true && child.enabled !== false,
@@ -370,6 +402,7 @@ export class RegistrationReviewPageComponent {
 	}
 
 	private clearNote(): void {
+		this.statusDraft.set(null);
 		this.noteIntent = null;
 		this.feedback.set('');
 		this.statusError.set(false);

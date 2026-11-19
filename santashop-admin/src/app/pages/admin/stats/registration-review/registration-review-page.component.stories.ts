@@ -1,5 +1,6 @@
 import {
 	applicationConfig,
+	componentWrapperDecorator,
 	type Meta,
 	type StoryObj,
 } from '@storybook/angular-vite';
@@ -11,6 +12,8 @@ import {
 	REGISTRATION_REVIEW_READER,
 	type RegistrationReviewReader,
 	type ReviewCaseDetail,
+	type ReviewCaseChild,
+	type ReviewCaseRegistration,
 	type ReviewQueueSummary,
 	type ReviewMutationResult,
 } from './registration-review-reader';
@@ -59,7 +62,14 @@ function readerDecorator(
 const meta = {
 	title: 'Admin/Reports/Registration Review Reader',
 	component: RegistrationReviewPageComponent,
-	decorators: adminStoryDecorators(),
+	decorators: [
+		...adminStoryDecorators(),
+		// Ionic locks document scrolling; the live route supplies an ion-content scroller.
+		componentWrapperDecorator(
+			(story) =>
+				`<div data-review-preview-scroll style="block-size: 100dvh; overflow: auto; padding: 1rem">${story}</div>`,
+		),
+	],
 	parameters: { layout: 'fullscreen' },
 	args: { enabled: true, claims: { owner: true } },
 } satisfies Meta<RegistrationReviewPageComponent>;
@@ -89,7 +99,7 @@ export const DisabledByDefault: Story = {
 			canvas.getByText('Registration review is unavailable.'),
 		).toBeVisible();
 		await expect(
-			canvas.queryByRole('heading', { name: 'Case queue' }),
+			canvas.queryByRole('heading', { name: 'Find a case' }),
 		).not.toBeInTheDocument();
 		await expect(forbiddenReadCount).toBe(0);
 	},
@@ -155,12 +165,24 @@ export const QueueJourney: Story = {
 			canvas.getByRole('button', { name: /TEST-RV-02/ }),
 		);
 		await expect(
-			await canvas.findByText('TEST-REG-C / TEST-REG-D'),
+			await canvas.findByText('Registration ID: TEST-REG-C'),
 		).toBeVisible();
+		await expect(
+			canvas.getByRole('heading', { name: 'Compare registrations' }),
+		).toHaveFocus();
+		await userEvent.click(
+			canvas.getByText('Activity history', { exact: true }),
+		);
 		await expect(canvas.getByText('Flagged for review')).toBeVisible();
 		await expect(
-			canvas.queryByText('TEST-REG-A / TEST-REG-B'),
+			canvas.queryByText('Registration ID: TEST-REG-A'),
 		).not.toBeInTheDocument();
+		await userEvent.click(
+			canvas.getByRole('button', { name: 'Back to cases' }),
+		);
+		await expect(
+			canvas.getByRole('heading', { name: 'Find a case' }),
+		).toHaveFocus();
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Next page' }),
 		);
@@ -168,7 +190,7 @@ export const QueueJourney: Story = {
 			await canvas.findByRole('button', { name: /TEST-RV-03/ }),
 		).toBeVisible();
 		await expect(
-			canvas.queryByText('TEST-REG-C / TEST-REG-D'),
+			canvas.queryByText('Registration ID: TEST-REG-C'),
 		).not.toBeInTheDocument();
 		await userEvent.click(
 			canvas.getByRole('button', { name: 'Previous page' }),
@@ -220,7 +242,7 @@ export const RetryJourney: Story = {
 			canvas.getByRole('button', { name: 'Retry case' }),
 		);
 		await expect(
-			await canvas.findByText('TEST-REG-A / TEST-REG-B'),
+			await canvas.findByText('Registration ID: TEST-REG-A'),
 		).toBeVisible();
 	},
 };
@@ -411,7 +433,7 @@ export const SearchAcrossManyCases: Story = {
 		).not.toBeInTheDocument();
 		await userEvent.click(await byCase('190'));
 		await expect(
-			await canvas.findByRole('heading', { name: 'PAGED-RV-190' }),
+			await canvas.findByText('Case ID: PAGED-RV-190'),
 		).toBeVisible();
 
 		const firstRegistration = within(
@@ -487,6 +509,222 @@ export const SearchAcrossManyCases: Story = {
 		await userEvent.click(canvas.getByRole('button', { name: /^Open$/ }));
 		await expect(await byCase('001')).toBeVisible();
 	},
+};
+
+function practiceChild(
+	childIndex: number,
+	firstName: string,
+	birthDate: string,
+): ReviewCaseChild {
+	return {
+		childIndex,
+		firstName,
+		lastName: 'Sample',
+		name: firstName + ' Sample',
+		birthDate,
+	};
+}
+
+export const VolunteerPractice: Story = {
+	decorators: [
+		readerDecorator(() => {
+			let entry = detail(caseA);
+			let records: [ReviewCaseRegistration, ReviewCaseRegistration] = [
+				{
+					id: 'TEST-REG-A',
+					name: 'Sample Parent A',
+					email: 'sample-parent-a@review.test',
+					appointment: 'Dec 8, 10:00 AM',
+					children: [
+						practiceChild(0, 'Riley', '2016-07-18'),
+						practiceChild(1, 'Jordan', '2019-03-06'),
+					],
+				},
+				{
+					id: 'TEST-REG-B',
+					name: 'Sample Parent B',
+					email: 'sample-parent-b@review.test',
+					appointment: 'Dec 10, 1:30 PM',
+					children: [
+						practiceChild(0, 'Riley', '2016-07-18'),
+						practiceChild(1, 'Jordan', '2019-03-06'),
+						practiceChild(2, 'Casey', '2021-09-12'),
+					],
+				},
+			];
+			const withActions = (
+				record: ReviewCaseRegistration,
+			): ReviewCaseRegistration => ({
+				...record,
+				expectedRevision: String(entry.history.length),
+				availableActions: [
+					'contact',
+					record.canceled ? 'reinstate' : 'cancel',
+					record.blacklisted ? 'unblacklist' : 'blacklist',
+					...(record.canceled
+						? []
+						: [
+								'editChild',
+								...(record.children.filter(
+									(child) => !child.removed,
+								).length > 1
+									? ['removeChild']
+									: []),
+								'restoreChild',
+							]),
+				],
+			});
+			return {
+				list: ({
+					scope,
+					search,
+					searchMode,
+				}): ReturnType<RegistrationReviewReader['list']> => {
+					const matchesScope =
+						scope === 'all' ||
+						(scope === 'resolved') ===
+							(entry.status === 'resolved');
+					const matchesSearch =
+						!search ||
+						(searchMode === 'email-prefix'
+							? records.some(({ email }) =>
+									email.startsWith(search),
+								)
+							: entry.id === search ||
+								records.some(
+									({ id, email }) =>
+										id === search || email === search,
+								));
+					return of({
+						cases: matchesScope && matchesSearch ? [entry] : [],
+						nextCursor: null,
+					});
+				},
+				detail: () =>
+					of({
+						...entry,
+						records: [
+							withActions(records[0]),
+							withActions(records[1]),
+						],
+					}),
+				setStatus: ({
+					status,
+				}): ReturnType<
+					NonNullable<RegistrationReviewReader['setStatus']>
+				> => {
+					entry = {
+						...entry,
+						status,
+						history: [
+							...entry.history,
+							{
+								type: 'status-changed',
+								actorUid: 'PRACTICE',
+								at: entry.lastActionAt,
+								from: entry.status,
+								to: status,
+							},
+						],
+					};
+					return of(entry);
+				},
+				appendNote: ({
+					noteId,
+					text,
+				}): ReturnType<
+					NonNullable<RegistrationReviewReader['appendNote']>
+				> => {
+					const note = {
+						id: noteId,
+						text,
+						author: 'Practice Reviewer',
+						at: entry.lastActionAt,
+					};
+					entry = { ...entry, notes: [...(entry.notes ?? []), note] };
+					return of(note);
+				},
+				performAction: ({
+					action,
+					registrationId,
+					notification,
+					childIndex,
+					child: fields,
+				}): ReturnType<
+					NonNullable<RegistrationReviewReader['performAction']>
+				> => {
+					const isChildAction =
+						action === 'editChild' ||
+						action === 'removeChild' ||
+						action === 'restoreChild';
+					if (isChildAction && notification) {
+						return throwError(
+							() => new Error('Child actions do not send email.'),
+						);
+					}
+					const update = (
+						record: ReviewCaseRegistration,
+					): ReviewCaseRegistration => {
+						if (record.id !== registrationId) return record;
+						if (isChildAction) {
+							return {
+								...record,
+								children: record.children.map((child) => {
+									if (child.childIndex !== childIndex)
+										return child;
+									if (action === 'editChild' && fields) {
+										return {
+											...child,
+											...fields,
+											name:
+												fields.firstName +
+												' ' +
+												fields.lastName,
+										};
+									}
+									return {
+										...child,
+										removed: action === 'removeChild',
+									};
+								}),
+							};
+						}
+						if (action === 'cancel' || action === 'reinstate')
+							return { ...record, canceled: action === 'cancel' };
+						if (action === 'blacklist' || action === 'unblacklist')
+							return {
+								...record,
+								blacklisted: action === 'blacklist',
+							};
+						return record;
+					};
+					records = [update(records[0]), update(records[1])];
+					entry = {
+						...entry,
+						status:
+							action === 'contact' && entry.status !== 'resolved'
+								? 'pending-shopper-response'
+								: entry.status,
+						history: [
+							...entry.history,
+							{
+								type: 'action-taken',
+								at: entry.lastActionAt,
+								actorUid: 'PRACTICE',
+								action,
+								registrationId,
+							},
+						],
+					};
+					return of({
+						action,
+						registrationId,
+						notification: notification ? 'queued' : 'not-requested',
+					});
+				},
+			};
+		}),
+	],
 };
 
 export const ReviewActionJourney: Story = {
@@ -575,13 +813,28 @@ export const ReviewActionJourney: Story = {
 			canvas.findByRole('button', {
 				name: /Cancel registration.*Sample Parent A/,
 			});
+		await userEvent.click(
+			await canvas.findByRole('button', {
+				name: /Contact shopper.*Sample Parent A/,
+			}),
+		);
+		const contact = within(canvas.getByRole('dialog'));
+		await expect(
+			contact.getByText(/status changes to Waiting for shopper/),
+		).toBeVisible();
+		await expect(
+			contact.getByText('sample-parent-a@review.test'),
+		).toBeVisible();
+		await userEvent.click(
+			contact.getByRole('button', { name: 'Go back without saving' }),
+		);
 		await userEvent.click(await beginCancel());
 		let dialog = within(canvas.getByRole('dialog'));
 		await expect(
-			dialog.getByRole('button', { name: 'Confirm without email' }),
+			dialog.getByRole('button', { name: 'Cancel registration' }),
 		).toBeDisabled();
 		await userEvent.click(
-			dialog.getByRole('button', { name: 'Keep unchanged' }),
+			dialog.getByRole('button', { name: 'Go back without saving' }),
 		);
 		await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();
 
@@ -595,7 +848,7 @@ export const ReviewActionJourney: Story = {
 			'duplicate-registration',
 		);
 		await userEvent.click(
-			dialog.getByRole('button', { name: 'Confirm without email' }),
+			dialog.getByRole('button', { name: 'Cancel registration' }),
 		);
 		await expect(
 			await canvas.findByText(
@@ -627,7 +880,9 @@ export const ReviewActionJourney: Story = {
 			'Review message only',
 		);
 		await userEvent.click(
-			dialog.getByRole('button', { name: 'Confirm and queue email' }),
+			dialog.getByRole('button', {
+				name: 'Reinstate registration and queue email',
+			}),
 		);
 		await expect(await beginCancel()).toBeVisible();
 		await expect(canvas.queryByRole('dialog')).not.toBeInTheDocument();

@@ -85,6 +85,33 @@ export class RegistrationReviewToolsComponent {
 	public readonly claims = input<ReviewClaims>();
 	public readonly updated = output<string>();
 	public readonly labels = reviewActionLabels;
+	public readonly actionHelp: Record<ReviewMutationAction, string> = {
+		contact:
+			'Queue an email to ask this shopper for more information. This does not change either registration. If the review is still open, its status changes to Waiting for shopper.',
+		editChild:
+			'Correct this child’s name or birth date on this registration only. No email is sent.',
+		removeChild:
+			'Remove this child from this registration only. No email is sent.',
+		restoreChild:
+			'Add this child back to this registration only. No email is sent.',
+		disable:
+			'Stop this shopper from using the registration site without canceling their appointment or blocking their email for future seasons.',
+		enable: 'Restore access to the registration site. This does not remove an email block.',
+		cancel: 'Cancel this shopper’s current appointment. The registration stays in the system for staff to review.',
+		reinstate:
+			'Put this canceled registration back on the schedule if the original appointment is still available.',
+		blacklist:
+			'Block this email from registering this season and in future seasons, and disable the shopper’s sign-in. This does not cancel their appointment.',
+		unblacklist:
+			'Allow this email to be used for registration again. This does not turn sign-in back on. Ask an administrator to check sign-in separately.',
+	};
+	public readonly confirmLabels: Record<ReviewMutationAction, string> = {
+		...reviewActionLabels,
+		contact: 'Queue email',
+		editChild: 'Save child details',
+		removeChild: 'Remove child',
+		restoreChild: 'Restore child',
+	};
 	public readonly reasonLabels = reasonLabels;
 	public readonly reasonChoices = REGISTRATION_REVIEW_REASON_CODES;
 	public readonly isChildAction = isRegistrationReviewChildAction;

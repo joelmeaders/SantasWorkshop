@@ -13,6 +13,12 @@
 		<h4>
 			{{ 'Registration actions' | adminText }}
 		</h4>
+		<p class="tool-help">
+			{{
+				'These tools affect only this shopper or registration. Choose an action to review it before saving.'
+					| adminText
+			}}
+		</p>
 		<div class="tool-list">
 			@for (option of registrationSteps(); track option.action) {
 				<ng-container
@@ -24,7 +30,7 @@
 			}
 		</div>
 		@if (registrationRecovery().length) {
-			<h5>{{ 'Recovery options' | adminText }}</h5>
+			<h5>{{ 'Undo a previous change' | adminText }}</h5>
 			<div class="tool-list">
 				@for (option of registrationRecovery(); track option.action) {
 					<ng-container
@@ -37,7 +43,7 @@
 			</div>
 		}
 		@if (childActions().length) {
-			<h5>{{ 'Child actions' | adminText }}</h5>
+			<h5>{{ 'Update children on this registration' | adminText }}</h5>
 			<ul class="child-actions">
 				@for (group of childActions(); track group.child) {
 					<li>
@@ -65,6 +71,7 @@
 <ng-template #actionButton let-option>
 	<button
 		type="button"
+		[class.contact-action]="option.action === 'contact'"
 		(click)="open(option)"
 		[attr.aria-label]="
 			(actionLabel(option) | adminText) +
@@ -86,7 +93,12 @@
 	<dialog
 		#actionDialog
 		[attr.aria-labelledby]="'review-action-title-' + record().id"
-		[attr.aria-describedby]="'review-action-target-' + record().id"
+		[attr.aria-describedby]="
+			'review-action-target-' +
+			record().id +
+			' review-action-help-' +
+			record().id
+		"
 		(cancel)="close($event)"
 	>
 		<form (submit)="confirm($event)">
@@ -102,19 +114,15 @@
 					}
 				}
 			</p>
-			@if (option.action === 'unblacklist') {
-				<p class="action-caution">
-					{{
-						'This removes the cross-season email block only. It will not re-enable a Firebase Auth account. Verify or recover sign-in separately.'
-							| adminText
-					}}
-				</p>
-			} @else if (option.action === 'blacklist') {
-				<p class="action-caution">
-					{{
-						'This blocks the shopper email across seasons and restricts their sign-in.'
-							| adminText
-					}}
+			<p class="action-help" [id]="'review-action-help-' + record().id">
+				{{ actionHelp[option.action] | adminText }}
+			</p>
+			@if (
+				option.action === 'blacklist' || option.action === 'unblacklist'
+			) {
+				<p>
+					{{ 'Email address' | adminText }}:
+					<strong>{{ option.record.email }}</strong>
 				</p>
 			}
 			@if (option.action === 'editChild') {
@@ -212,19 +220,21 @@
 			}
 			<div class="dialog-footer">
 				<button type="button" (click)="close()" [disabled]="pending()">
-					{{ 'Keep unchanged' | adminText }}
+					{{ 'Go back without saving' | adminText }}
 				</button>
 				<button
 					type="submit"
 					class="confirm"
 					[disabled]="!canConfirm()"
 				>
-					{{
-						(notify() && !isChildAction(option.action)
-							? 'Confirm and queue email'
-							: 'Confirm without email'
-						) | adminText
-					}}
+					{{ confirmLabels[option.action] | adminText }}
+					@if (
+						notify() &&
+						option.action !== 'contact' &&
+						!isChildAction(option.action)
+					) {
+						{{ 'and queue email' | adminText }}
+					}
 				</button>
 			</div>
 		</form>

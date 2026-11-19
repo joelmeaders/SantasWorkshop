@@ -33,13 +33,6 @@
 						"
 						detail
 						button
-						[attr.aria-describedby]="
-							'delivery-state-' + template.key
-						"
-						[attr.aria-label]="
-							'Edit template {{name}}'
-								| adminText: { name: template.displayName }
-						"
 						(click)="openTemplate(template.key)"
 						(keydown.enter)="openTemplate(template.key)"
 					>
@@ -62,7 +55,6 @@
 									}}
 								</ion-badge>
 								<ion-badge
-									[id]="'delivery-state-' + template.key"
 									[color]="
 										currentKeys().has(template.key)
 											? 'success'

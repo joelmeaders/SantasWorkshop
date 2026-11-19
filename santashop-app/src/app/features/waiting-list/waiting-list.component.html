@@ -36,9 +36,6 @@
 			<p>{{ 'WAITING_LIST.NOT_RESERVED' | translate }}</p>
 			<ion-button
 				id="leaveWaitingListButton"
-				[attr.aria-label]="
-					(busy() ? 'WAITING_LIST.SAVING' : 'WAITING_LIST.LEAVE') | translate
-				"
 				fill="outline"
 				[disabled]="busy()"
 				(click)="change(false)"
@@ -60,9 +57,6 @@
 			>
 			<ion-button
 				id="joinWaitingListButton"
-				[attr.aria-label]="
-					(busy() ? 'WAITING_LIST.SAVING' : 'WAITING_LIST.JOIN') | translate
-				"
 				color="xmasred"
 				[disabled]="busy() || !consent()"
 				(click)="change(true)"

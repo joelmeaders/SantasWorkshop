@@ -34,5 +34,14 @@ test.describe('desktop staff workspace', () => {
 				),
 			)
 			.toBe(true);
+
+		const sidebar = page.getByRole('complementary');
+		await sidebar.getByRole('button', { name: 'Log out' }).click();
+		await expect(page).toHaveURL(/\/$/);
+		await expect(page.locator('#adminSignInButton')).toBeVisible();
+
+		await page.goto('/admin/landing');
+		await expect(page).toHaveURL(/\/$/);
+		await expect(page.locator('#adminSignInButton')).toBeVisible();
 	});
 });

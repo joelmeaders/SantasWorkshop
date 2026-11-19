@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.29] - 2026-11-19
+
+### Fixed
+
+- Add a Log out button to the bottom of the Admin sidebar.
+
 ## [2026.11.28] - 2026-11-19
 
 ### Changed

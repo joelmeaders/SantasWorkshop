@@ -104,17 +104,42 @@ import { REGISTRATION_REVIEW_READER, canReadRegistrationReview } from '../../../
 				}
 			}
 		</nav>
+		<div class="account-actions">
+			<button type="button" (click)="signOut()">{{ 'Log out' | adminText }}</button>
+		</div>
 	`,
 	styles: `
 		:host {
-			display: block;
+			display: flex;
+			flex-direction: column;
 			height: 100%;
-			overflow: auto;
 			background: var(--admin-surface);
 			border-right: 1px solid var(--admin-border);
 		}
 		nav {
+			flex: 1;
+			min-height: 0;
+			overflow-y: auto;
 			padding: 24px 16px;
+		}
+		.account-actions {
+			padding: 8px 16px;
+			border-top: 1px solid var(--admin-border);
+		}
+		button {
+			width: 100%;
+			min-height: 44px;
+			padding: 12px;
+			color: var(--ion-text-color);
+			background: transparent;
+			border-radius: 10px;
+			text-align: start;
+			font-size: 0.875rem;
+			font-weight: 600;
+		}
+		button:hover,
+		button:focus-visible {
+			background: var(--admin-accent-soft);
 		}
 		a {
 			display: block;
@@ -157,6 +182,11 @@ import { REGISTRATION_REVIEW_READER, canReadRegistrationReview } from '../../../
 })
 export class AdminNavigationComponent {
 	private readonly auth = inject(AuthService);
+
+	public async signOut(): Promise<void> {
+		await this.auth.logout();
+	}
+
 	public readonly showRegistrationReview = toSignal(
 		inject(REGISTRATION_REVIEW_READER, { optional: true })
 			? this.auth.claimsResolved$.pipe(map((claims) => canReadRegistrationReview(claims ?? undefined)))

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.28] - 2026-11-19
+
+### Fixed
+
+- Add a Log out button to the bottom of the Admin sidebar.
+
 ## [2026.11.27] - 2026-11-19
 
 ### Changed

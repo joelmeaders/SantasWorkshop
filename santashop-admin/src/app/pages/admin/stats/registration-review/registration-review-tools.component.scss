@@ -8,6 +8,9 @@ dialog {
 }
 .tool-panel {
 	margin-block-start: 0.75rem;
+	padding: 0.8rem 0 0;
+	border-width: 1px 0 0;
+	border-radius: 0;
 	overflow-wrap: anywhere;
 }
 .tool-panel h4,
@@ -16,6 +19,16 @@ dialog h3 {
 }
 .tool-panel h4 {
 	font-size: 1rem;
+}
+.tool-help {
+	font-size: 0.85rem;
+	line-height: 1.4;
+	margin-block: 0.32rem 0.65rem;
+}
+.action-help {
+	background: var(--admin-accent-soft);
+	border-radius: 0.45rem;
+	padding: 0.65rem;
 }
 .tool-panel h5 {
 	margin-block: 0.4rem;
@@ -50,6 +63,10 @@ button {
 button:hover {
 	border-color: var(--ion-color-primary);
 	background: var(--admin-accent-soft);
+}
+.contact-action {
+	background: var(--admin-accent-soft);
+	font-weight: 680;
 }
 button:focus-visible,
 input:focus-visible,

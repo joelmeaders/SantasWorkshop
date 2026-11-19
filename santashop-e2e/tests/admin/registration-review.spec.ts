@@ -116,7 +116,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 		await page.locator('#registrationReviewNav').click();
 		await expect(page).toHaveURL(/\/admin\/stats\/registration-review$/);
 		await expect(
-			page.getByRole('heading', { name: 'Case queue' }),
+			page.getByRole('heading', { name: 'Find a case' }),
 		).toBeVisible();
 		await expect(page.getByText(/no cases in this view/i)).toBeVisible();
 	});
@@ -163,7 +163,9 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 					},
 				);
 				expect(signIn.ok()).toBe(true);
-				const { idToken } = (await signIn.json()) as { idToken: string };
+				const { idToken } = (await signIn.json()) as {
+					idToken: string;
+				};
 				const response = await request.get(
 					`${E2E_FIRESTORE_EMULATOR_URL}${documents}/${path}`,
 					{ headers: { Authorization: `Bearer ${idToken}` } },
@@ -293,7 +295,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 			await expect(page).toHaveURL(
 				/\/admin\/stats\/registration-review$/,
 			);
-			const queue = page.getByRole('region', { name: 'Case queue' });
+			const queue = page.getByRole('region', { name: 'Find a case' });
 			const search = queue.getByRole('searchbox', {
 				name: /search by case id, registration id, or email/i,
 			});
@@ -310,7 +312,9 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				.getByRole('button', { name: new RegExp(caseId) })
 				.click();
 			expect(page.url()).not.toContain(suffix);
-			const detail = page.getByRole('region', { name: 'Case details' });
+			const detail = page.getByRole('region', {
+				name: 'Compare registrations',
+			});
 			await expect(
 				detail.getByText('2 Children', { exact: false }),
 			).toBeVisible();
@@ -344,7 +348,9 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				dialog.getByRole('checkbox', { name: /also send/i }),
 			).not.toBeChecked();
 			await expect(
-				dialog.getByRole('button', { name: /confirm without email/i }),
+				dialog.getByRole('button', {
+					name: /^Disable shopper access$/i,
+				}),
 			).toBeDisabled();
 			await dialog
 				.getByRole('combobox', { name: /reason/i })
@@ -356,7 +362,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				'firstName',
 			);
 			await dialog
-				.getByRole('button', { name: /confirm without email/i })
+				.getByRole('button', { name: /^Disable shopper access$/i })
 				.click();
 			await expect(dialog.getByRole('alert')).toContainText(
 				/not confirmed/i,
@@ -367,7 +373,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 			)) as { documents?: { name: string }[] };
 			expect(actions.documents ?? []).toHaveLength(0);
 			await dialog
-				.getByRole('button', { name: /keep unchanged/i })
+				.getByRole('button', { name: /go back without saving/i })
 				.click();
 			await page.reload();
 			await queue
@@ -378,7 +384,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				.getByRole('combobox', { name: /reason/i })
 				.selectOption('duplicate-registration');
 			await dialog
-				.getByRole('button', { name: /confirm without email/i })
+				.getByRole('button', { name: /^Disable shopper access$/i })
 				.click();
 			await expect(
 				detail.getByText(
@@ -423,7 +429,9 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				.getByRole('textbox', { name: /custom message/i })
 				.fill('Synthetic note for this shopper only.');
 			await restore
-				.getByRole('button', { name: /confirm and queue email/i })
+				.getByRole('button', {
+					name: /^Restore shopper access and queue email$/i,
+				})
 				.click();
 			await expect(
 				detail.getByText(/action recorded. shopper email queued./i),
@@ -496,7 +504,7 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 					.getByRole('combobox', { name: /reason/i })
 					.selectOption(reason);
 				await confirmation
-					.getByRole('button', { name: /confirm without email/i })
+					.getByRole('button', { name: actionLabel })
 					.click();
 				await expect(confirmation).toHaveCount(0);
 			};
@@ -576,12 +584,21 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				expect(await shopperSignIn()).toBe(400);
 			}
 			await detail
-				.getByRole('region', { name: 'Case actions' })
-				.getByRole('combobox', { name: 'Case status' })
+				.getByRole('region', { name: 'Record the outcome' })
+				.getByRole('combobox', { name: 'Review status' })
 				.selectOption('resolved');
+			await detail
+				.getByRole('button', { name: 'Save review status' })
+				.click();
 			await expect(
 				queue.getByRole('button', { name: new RegExp(caseId) }),
 			).toHaveCount(0);
+			await expect(
+				queue.getByRole('heading', { name: 'Find a case' }),
+			).toBeFocused();
+			await expect(detail.getByRole('status')).toContainText(
+				'Find this case under Resolved or All',
+			);
 			await queue.getByRole('button', { name: /^resolved$/i }).click();
 			await expect(
 				queue.getByRole('button', { name: new RegExp(caseId) }),

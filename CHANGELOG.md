@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.28] - 2026-11-19
+
+### Changed
+
+- Guide first-time Registration Review staff through finding a case, comparing registrations, and saving the outcome. Clarify what each action changes and when an email is queued.
+
 ## [2026.11.27] - 2026-11-18
 
 ### Changed

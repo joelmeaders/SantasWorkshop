@@ -12,6 +12,7 @@ import {
 	REGISTRATION_REVIEW_READER,
 	type RegistrationReviewReader,
 	type ReviewCaseDetail,
+	type ReviewCaseChild,
 	type ReviewCaseRegistration,
 	type ReviewQueueSummary,
 	type ReviewMutationResult,
@@ -510,6 +511,20 @@ export const SearchAcrossManyCases: Story = {
 	},
 };
 
+function practiceChild(
+	childIndex: number,
+	firstName: string,
+	birthDate: string,
+): ReviewCaseChild {
+	return {
+		childIndex,
+		firstName,
+		lastName: 'Sample',
+		name: firstName + ' Sample',
+		birthDate,
+	};
+}
+
 export const VolunteerPractice: Story = {
 	decorators: [
 		readerDecorator(() => {
@@ -521,8 +536,8 @@ export const VolunteerPractice: Story = {
 					email: 'sample-parent-a@review.test',
 					appointment: 'Dec 8, 10:00 AM',
 					children: [
-						{ name: 'Riley Sample', birthDate: '2016-07-18' },
-						{ name: 'Jordan Sample', birthDate: '2019-03-06' },
+						practiceChild(0, 'Riley', '2016-07-18'),
+						practiceChild(1, 'Jordan', '2019-03-06'),
 					],
 				},
 				{
@@ -531,9 +546,9 @@ export const VolunteerPractice: Story = {
 					email: 'sample-parent-b@review.test',
 					appointment: 'Dec 10, 1:30 PM',
 					children: [
-						{ name: 'Riley Sample', birthDate: '2016-07-18' },
-						{ name: 'Jordan Sample', birthDate: '2019-03-06' },
-						{ name: 'Casey Sample', birthDate: '2021-09-12' },
+						practiceChild(0, 'Riley', '2016-07-18'),
+						practiceChild(1, 'Jordan', '2019-03-06'),
+						practiceChild(2, 'Casey', '2021-09-12'),
 					],
 				},
 			];
@@ -546,6 +561,17 @@ export const VolunteerPractice: Story = {
 					'contact',
 					record.canceled ? 'reinstate' : 'cancel',
 					record.blacklisted ? 'unblacklist' : 'blacklist',
+					...(record.canceled
+						? []
+						: [
+								'editChild',
+								...(record.children.filter(
+									(child) => !child.removed,
+								).length > 1
+									? ['removeChild']
+									: []),
+								'restoreChild',
+							]),
 				],
 			});
 			return {
@@ -622,13 +648,47 @@ export const VolunteerPractice: Story = {
 					action,
 					registrationId,
 					notification,
+					childIndex,
+					child: fields,
 				}): ReturnType<
 					NonNullable<RegistrationReviewReader['performAction']>
 				> => {
+					const isChildAction =
+						action === 'editChild' ||
+						action === 'removeChild' ||
+						action === 'restoreChild';
+					if (isChildAction && notification) {
+						return throwError(
+							() => new Error('Child actions do not send email.'),
+						);
+					}
 					const update = (
 						record: ReviewCaseRegistration,
 					): ReviewCaseRegistration => {
 						if (record.id !== registrationId) return record;
+						if (isChildAction) {
+							return {
+								...record,
+								children: record.children.map((child) => {
+									if (child.childIndex !== childIndex)
+										return child;
+									if (action === 'editChild' && fields) {
+										return {
+											...child,
+											...fields,
+											name:
+												fields.firstName +
+												' ' +
+												fields.lastName,
+										};
+									}
+									return {
+										...child,
+										removed: action === 'removeChild',
+									};
+								}),
+							};
+						}
 						if (action === 'cancel' || action === 'reinstate')
 							return { ...record, canceled: action === 'cancel' };
 						if (action === 'blacklist' || action === 'unblacklist')

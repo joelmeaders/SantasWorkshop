@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createRegistration } from '../../fixtures/factories';
 import { createCallableRequest } from '../../helpers/callable-context';
 import {
@@ -10,6 +10,10 @@ import {
 	loadCheckInAdminHandlers,
 } from '../helpers/checkin-admin.unit-helper';
 import { PROGRAM_YEAR } from '../../../src/utility/runtime-config';
+
+vi.mock('../../../src/utility/registration-review-denylist-access', () => ({
+	assertRegistrationReviewAllowed: vi.fn().mockResolvedValue(undefined),
+}));
 
 describe('callableAdminPreRegister handler', () => {
 	let adminMock: CheckInAdminMock;

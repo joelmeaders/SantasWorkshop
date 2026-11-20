@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.30] - 2026-11-19
+
+### Changed
+
+- Enable nightly Registration Review by default. Build the queue from saved match classifications, reuse analyzed roster revisions, and limit the first-season backfill.
+
 ## [2026.11.29] - 2026-11-19
 
 ### Fixed

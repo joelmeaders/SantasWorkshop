@@ -2,6 +2,12 @@
 
 All notable changes to the E2E testing suite will be documented in this file.
 
+## [2026.10.35] - 2026-11-19
+
+### Changed
+
+- Exercise Registration Review and denylist access without feature flags.
+
 ## [2026.10.34] - 2026-11-18
 
 ### Changed

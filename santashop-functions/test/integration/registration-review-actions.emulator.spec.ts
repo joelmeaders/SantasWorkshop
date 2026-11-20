@@ -1,7 +1,15 @@
 import { randomBytes } from 'node:crypto';
 import { deleteApp, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type DocumentReference } from 'firebase-admin/firestore';
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from 'vitest';
 import {
 	assertEmulatorEnvironment,
 	clearEmulatorData,
@@ -38,7 +46,6 @@ describe('manual registration review actions, isolated Firestore', () => {
 	});
 	beforeEach(async () => {
 		vi.stubEnv('GCLOUD_PROJECT', projectId);
-		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
 		await clearEmulatorData(app);
 	});
 	afterAll(async () => {
@@ -390,7 +397,7 @@ describe('manual registration review actions, isolated Firestore', () => {
 				app,
 				at,
 			),
-		).rejects.toMatchObject({ code: 'failed-precondition' });
+		).rejects.toMatchObject({ code: 'unavailable' });
 	});
 
 	it('delivers an authorized message only once and supersedes a changed recipient', async () => {
@@ -595,7 +602,6 @@ describe('manual registration review actions, isolated Firestore', () => {
 
 	it('requires reviewer permission and a current cancellation and leaves the policy active during an explicit Auth retry', async () => {
 		const { person, caseRef, email, request } = await fixture();
-		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED', 'true');
 		const principal = {
 			uid: person.id,
 			email,
@@ -625,110 +631,94 @@ describe('manual registration review actions, isolated Firestore', () => {
 				undefined,
 				auth,
 			);
-		try {
-			const block = {
-				...request,
-				action: 'blacklist',
-				mutationId: 'reviewer-block-01',
-				notification: { recipient: email },
-			};
-			await expect(
-				performRegistrationReviewAction(
-					createCallableRequest(block, ordinary),
-					app,
-					at,
-					undefined,
-					auth,
-				),
-			).rejects.toMatchObject({ code: 'permission-denied' });
-			await expect(invoke(block)).rejects.toMatchObject({
-				code: 'failed-precondition',
-			});
-			expect(auth.updateUser).not.toHaveBeenCalled();
-			await invoke({
-				...request,
-				action: 'cancel',
-				mutationId: 'reviewer-cancel-01',
-			});
-			const activeBlock = {
-				...block,
-				expectedRevision: registrationReviewRevision(
-					await person.get(),
-				),
-			};
-			await expect(invoke(activeBlock)).rejects.toMatchObject({
-				code: 'unavailable',
-				details: { reviewActionState: 'block-active-auth-unverified' },
-			});
-			const marker = db
-				.collection('registrationReviewAuthOperations')
-				.doc(person.id);
-			expect((await marker.get()).get('state')).toBe('failed');
-			expect(
-				(
-					await db
-						.collection('registrationReviewUidBlocks')
-						.doc(person.id)
-						.get()
-				).get('active'),
-			).toBe(true);
-			expect(
-				(
-					await caseRef
-						.collection('actions')
-						.doc('reviewer-block-01')
-						.get()
-				).exists,
-			).toBe(false);
-			expect(principal.disabled).toBe(true);
-			await expect(invoke(activeBlock)).resolves.toMatchObject({
-				authAccess: 'disabled-and-revoked',
-				notification: 'queued',
-			});
-			expect((await marker.get()).get('state')).toBe('confirmed');
-			expect(auth.updateUser).toHaveBeenCalledTimes(1);
-			expect(auth.revokeRefreshTokens).toHaveBeenCalledTimes(2);
-			await expect(invoke(activeBlock)).resolves.toMatchObject({
-				authAccess: 'disabled-and-revoked',
-			});
-			expect(auth.revokeRefreshTokens).toHaveBeenCalledTimes(2);
-			const clear = {
-				...request,
-				action: 'unblacklist',
-				reason: 'reviewed-and-cleared',
-				mutationId: 'reviewer-unblock-01',
-				expectedRevision: registrationReviewRevision(
-					await person.get(),
-				),
-			};
-			await expect(invoke(clear)).resolves.toMatchObject({
-				authAccess: 'requires-manual-review',
-			});
-			expect(principal.disabled).toBe(true);
-			expect((await marker.get()).get('state')).toBe('cleared');
-			expect(
-				(
-					await db
-						.collection('registrationReviewUidBlocks')
-						.doc(person.id)
-						.get()
-				).get('active'),
-			).toBe(false);
-			await expect(invoke(activeBlock)).rejects.toMatchObject({
-				code: 'aborted',
-			});
-			expect(auth.revokeRefreshTokens).toHaveBeenCalledTimes(2);
-		} finally {
-			vi.stubEnv(
-				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-				'false',
-			);
-		}
+		const block = {
+			...request,
+			action: 'blacklist',
+			mutationId: 'reviewer-block-01',
+			notification: { recipient: email },
+		};
+		await expect(
+			performRegistrationReviewAction(
+				createCallableRequest(block, ordinary),
+				app,
+				at,
+				undefined,
+				auth,
+			),
+		).rejects.toMatchObject({ code: 'permission-denied' });
+		await expect(invoke(block)).rejects.toMatchObject({
+			code: 'failed-precondition',
+		});
+		expect(auth.updateUser).not.toHaveBeenCalled();
+		await invoke({
+			...request,
+			action: 'cancel',
+			mutationId: 'reviewer-cancel-01',
+		});
+		const activeBlock = {
+			...block,
+			expectedRevision: registrationReviewRevision(await person.get()),
+		};
+		await expect(invoke(activeBlock)).rejects.toMatchObject({
+			code: 'unavailable',
+			details: { reviewActionState: 'block-active-auth-unverified' },
+		});
+		const marker = db
+			.collection('registrationReviewAuthOperations')
+			.doc(person.id);
+		expect((await marker.get()).get('state')).toBe('failed');
+		expect(
+			(
+				await db
+					.collection('registrationReviewUidBlocks')
+					.doc(person.id)
+					.get()
+			).get('active'),
+		).toBe(true);
+		expect(
+			(await caseRef.collection('actions').doc('reviewer-block-01').get())
+				.exists,
+		).toBe(false);
+		expect(principal.disabled).toBe(true);
+		await expect(invoke(activeBlock)).resolves.toMatchObject({
+			authAccess: 'disabled-and-revoked',
+			notification: 'queued',
+		});
+		expect((await marker.get()).get('state')).toBe('confirmed');
+		expect(auth.updateUser).toHaveBeenCalledTimes(1);
+		expect(auth.revokeRefreshTokens).toHaveBeenCalledTimes(2);
+		await expect(invoke(activeBlock)).resolves.toMatchObject({
+			authAccess: 'disabled-and-revoked',
+		});
+		expect(auth.revokeRefreshTokens).toHaveBeenCalledTimes(2);
+		const clear = {
+			...request,
+			action: 'unblacklist',
+			reason: 'reviewed-and-cleared',
+			mutationId: 'reviewer-unblock-01',
+			expectedRevision: registrationReviewRevision(await person.get()),
+		};
+		await expect(invoke(clear)).resolves.toMatchObject({
+			authAccess: 'requires-manual-review',
+		});
+		expect(principal.disabled).toBe(true);
+		expect((await marker.get()).get('state')).toBe('cleared');
+		expect(
+			(
+				await db
+					.collection('registrationReviewUidBlocks')
+					.doc(person.id)
+					.get()
+			).get('active'),
+		).toBe(false);
+		await expect(invoke(activeBlock)).rejects.toMatchObject({
+			code: 'aborted',
+		});
+		expect(auth.revokeRefreshTokens).toHaveBeenCalledTimes(2);
 	});
 
 	it('does not remove policy while confirmed Auth disable is still in flight', async () => {
 		const { person, request, email } = await fixture();
-		vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED', 'true');
 		const principal = {
 			uid: person.id,
 			email,
@@ -804,10 +794,6 @@ describe('manual registration review actions, isolated Firestore', () => {
 			});
 		} finally {
 			settle?.();
-			vi.stubEnv(
-				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-				'false',
-			);
 		}
 	});
 

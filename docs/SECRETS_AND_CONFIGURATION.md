@@ -59,28 +59,11 @@ developer-local `.env`; neither local file is required on a GitHub runner.
 
 ### Registration review rollout
 
-The Registration Review Admin UI and its API are off by default. The standard
-release reads the same non-secret `TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED`
-or `PROD_SANTASHOP_REGISTRATION_REVIEW_ENABLED` value for both the Admin Hosting
-build and the Functions deployment. Roll out and test the Functions API first,
-then deploy the matching Admin build. Enabling TEST does not enable production.
-The Functions TEST job reads the repository-level TEST variable, so do not
-shadow it in the Admin Hosting `test` environment. Both PROD jobs read the
-same protected `production` environment.
-
-Leave the nightly flag off in all cloud environments. The email denylist is
-off by default. To enable it, turn on Registration Review and explicitly set
-`TEST_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED` at the repository level
-for TEST or `PROD_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED` in the
-protected `production` environment for PROD. The settings are independent.
-The denylist does not require a secret. Only the server-only, cross-season
-`registrationReviewEmailBlocks` collection stores normalized email addresses;
-UID markers and audit receipts do not store the address.
-
-The nightly pipeline separately requires a securely bound runtime HMAC key
-and a verified existing-registration baseline. Do not put its key in GitHub
-workflow dotenv inputs, browser configuration, or release logs. Local demo
-emulator fixtures use separate configuration.
+Registration Review, nightly case generation and the email denylist are built
+in. No deploy flags are needed. The Admin UI and API still require the
+appropriate staff role, and the callable endpoints enforce App Check.
+Only the server-only, cross-season collection of email blocks stores
+normalized email addresses; UID markers and audit receipts do not.
 
 ## GitHub repository secrets
 

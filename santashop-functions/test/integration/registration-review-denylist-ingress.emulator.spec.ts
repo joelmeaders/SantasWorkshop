@@ -47,11 +47,6 @@ describe(
 
 		beforeEach(async () => {
 			vi.stubEnv('GCLOUD_PROJECT', project);
-			vi.stubEnv(
-				'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-				'true',
-			);
-			vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
 			await clearEmulatorData(app);
 			const policy = createRegistrationReviewDenylist(db);
 			await db.runTransaction((tx) =>
@@ -270,25 +265,14 @@ describe(
 			expect((await registration.get()).get('cancelledOn')).toBeDefined();
 		});
 
-		it('defaults off and fails closed if an enabled emulator targets an unknown project', async () => {
+		it('fails closed if the emulator targets an unknown project', async () => {
 			vi.stubEnv('GCLOUD_PROJECT', 'demo-unrelated-project');
 			try {
 				await expect(
 					assertRegistrationReviewAllowed(db, { email: blockedEmail }),
 				).rejects.toMatchObject({ code: 'unavailable' });
-				vi.stubEnv(
-					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-					undefined,
-				);
-				await expect(
-					assertRegistrationReviewAllowed(db, { email: blockedEmail }),
-				).resolves.toBeUndefined();
 			} finally {
 				vi.stubEnv('GCLOUD_PROJECT', project);
-				vi.stubEnv(
-					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-					'true',
-				);
 			}
 		});
 	},

@@ -6,6 +6,12 @@
 
 - Add authenticated shopper status reads and admin/owner status and audit callables for the shopper-access UI. Existing Firestore and Storage rules and registration permissions are unchanged.
 
+## [2026.10.34] - 2026-11-19
+
+### Changed
+
+- Run nightly Registration Review with a one-time bounded backfill, processed-revision markers, and no separate keys. Keep shopper bans active by default.
+
 ## [2026.10.33] - 2026-11-18
 
 ### Changed

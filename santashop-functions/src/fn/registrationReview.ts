@@ -9,7 +9,7 @@ import {
 import type { CallableRequest } from 'firebase-functions/v2/https';
 import admin from '../firebase-admin';
 import { getRegistrationReviewDenylist } from '../utility/registration-review-denylist-access';
-import { requireEnabledRegistrationReviewAccess } from './registrationReviewAccess';
+import { requireRegistrationReviewRequestAccess } from './registrationReviewAccess';
 import {
 	addReviewNote,
 	getRegistrationReviewSeason,
@@ -60,7 +60,7 @@ export type RegistrationReviewCaseResult = ReviewCaseDetail & {
 };
 
 function scope(request: CallableRequest<unknown>, app: App): DocumentReference {
-	requireEnabledRegistrationReviewAccess(request);
+	requireRegistrationReviewRequestAccess(request);
 	return getRegistrationReviewSeason(getFirestore(app), PROGRAM_YEAR);
 }
 
@@ -143,7 +143,6 @@ async function readReviewBlock(
 	if (!snapshot || !data || data['programYear'] !== PROGRAM_YEAR)
 		return { active: false };
 	const denylist = getRegistrationReviewDenylist(db);
-	if (!denylist) return { active: false };
 
 	const email = safeString(data['emailAddress']).trim().toLowerCase();
 	const cancellationId = safeString(data['cancellationLogId']);

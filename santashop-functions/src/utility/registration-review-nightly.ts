@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import type { App } from 'firebase-admin/app';
 import {
 	FieldPath,
@@ -7,14 +6,11 @@ import {
 	Timestamp,
 	type DocumentSnapshot,
 	type Firestore,
-	type QueryDocumentSnapshot,
-	type Transaction,
 } from 'firebase-admin/firestore';
 import { COLLECTION_SCHEMA } from '../models';
 import {
 	detectRegistrationReviewPairs,
-	prepareReviewRegistration,
-	registrationReviewCaseId,
+	prepareTransientReviewRegistration,
 	type PreparedRegistration,
 	type ReviewRegistration,
 } from './registration-review';
@@ -23,16 +19,16 @@ import {
 	makeStoredReviewCase,
 } from './registration-review-store';
 
-export const REGISTRATION_REVIEW_NIGHTLY_MAX_STEPS = 250;
+export const REGISTRATION_REVIEW_NIGHTLY_MAX_STEPS = 1_000;
+const BASELINE_PAGES_PER_RUN = 20;
+const BASELINE_PAGE_SIZE = 50;
 const CANDIDATE_PAGE_SIZE = 40;
-const MAX_KEYS_PER_QUERY = 30;
-const WORK_BUDGET_MS = 120_000;
+const WORK_BUDGET_MS = 300_000;
 const TRANSACTION_OPTIONS = { maxAttempts: 3 };
 
-type IndexedRoster = {
-	registration: PreparedRegistration;
-	revision: string;
-	firstNameKeys: string[];
+type CandidateIndex = {
+	byName: ReadonlyMap<string, readonly PreparedRegistration[]>;
+	readTime: Timestamp;
 };
 
 type PendingRoster = {
@@ -112,22 +108,29 @@ export async function recordRegistrationReviewDelta(
 		after: DocumentSnapshot;
 	},
 ): Promise<boolean> {
-	const before = rosterSource(event.before, season);
-	const after = rosterSource(event.after, season);
+	const before = prepareRoster(event.before, season);
+	const after = prepareRoster(event.after, season);
 	if (JSON.stringify(before) === JSON.stringify(after)) return false;
-	const pending = getRegistrationReviewSeason(db, season)
-		.collection('pendingRosters')
-		.doc(event.after.id);
+	const root = getRegistrationReviewSeason(db, season);
+	const pending = root.collection('pendingRosters').doc(event.after.id);
 
 	return db.runTransaction(async (transaction) => {
 		const previous = (await transaction.get(pending)).data() as
 			PendingRoster | undefined;
-		if (previous?.eventId === event.id) return false;
-		if (previous) {
-			// Keep the original queue position and a cursor that still matches
-			// the current projection; the worker resets it if the roster changed.
-			transaction.update(pending, { eventId: event.id });
-			return true;
+		// A queued ID is enough. The worker reads the current roster and
+		// resumes its cursor only if the matching fields are still unchanged.
+		if (previous) return false;
+		const eventRevision = event.after.updateTime;
+		if (eventRevision) {
+			const processed = await transaction.get(
+				root.collection('rosterIndex').doc(event.after.id),
+			);
+			const sourceRevision: unknown = processed.get('sourceUpdateTime');
+			if (
+				sourceRevision instanceof Timestamp &&
+				eventRevision.valueOf() <= sourceRevision.valueOf()
+			)
+				return false;
 		}
 		transaction.set(pending, {
 			eventId: event.id,
@@ -137,66 +140,95 @@ export async function recordRegistrationReviewDelta(
 	}, TRANSACTION_OPTIONS);
 }
 
-function prepareIndexedRoster(
+function prepareRoster(
 	snapshot: DocumentSnapshot,
 	season: number,
-	key: Buffer,
-): IndexedRoster | undefined {
+): PreparedRegistration | undefined {
 	const source = rosterSource(snapshot, season);
 	if (!source) return undefined;
-
-	const prepared = prepareReviewRegistration(source, key);
-	// A reorder-only or case-only source edit need not compare the roster again.
-	const children = [...prepared.children].sort(
-		(a, b) =>
-			a.first.localeCompare(b.first) ||
-			a.last.localeCompare(b.last) ||
-			a.dob.localeCompare(b.dob),
-	);
-	const registration = { ...prepared, children };
+	const registration = prepareTransientReviewRegistration(source);
 	return {
-		registration,
-		revision: createHash('sha256')
-			.update(JSON.stringify(registration))
-			.digest('hex'),
-		firstNameKeys: [
-			...new Set(children.map(({ first }) => first).filter(Boolean)),
-		],
+		...registration,
+		children: [...registration.children].sort((a, b) =>
+			Buffer.compare(
+				Buffer.from(JSON.stringify(a)),
+				Buffer.from(JSON.stringify(b)),
+			),
+		),
 	};
 }
 
-async function nextCandidatePage(
-	transaction: Transaction,
+async function loadCandidateIndex(
 	db: Firestore,
 	season: number,
-	firstNameKeys: string[],
-	after: string | undefined,
-): Promise<QueryDocumentSnapshot[]> {
-	const candidates = getRegistrationReviewSeason(db, season).collection(
-		'rosterIndex',
-	);
-	const queries = [];
-	for (
-		let start = 0;
-		start < firstNameKeys.length;
-		start += MAX_KEYS_PER_QUERY
-	) {
-		const query = candidates
-			.where(
-				'firstNameKeys',
-				'array-contains-any',
-				firstNameKeys.slice(start, start + MAX_KEYS_PER_QUERY),
-			)
-			.orderBy(FieldPath.documentId())
-			.limit(CANDIDATE_PAGE_SIZE + 1);
-		queries.push(transaction.get(after ? query.startAfter(after) : query));
+): Promise<CandidateIndex> {
+	const population = await db
+		.collection(COLLECTION_SCHEMA.registrations)
+		.where('programYear', '==', season)
+		.select(
+			'programYear',
+			'registrationSubmittedOn',
+			'cancelledOn',
+			'children',
+			'firstName',
+			'lastName',
+			'zipCode',
+		)
+		.get();
+	const byName = new Map<string, PreparedRegistration[]>();
+	for (const row of population.docs) {
+		const registration = prepareRoster(row, season);
+		if (!registration) continue;
+		for (const first of new Set(
+			registration.children.map(({ first }) => first).filter(Boolean),
+		)) {
+			const candidates = byName.get(first) ?? [];
+			candidates.push(registration);
+			byName.set(first, candidates);
+		}
 	}
+	return { byName, readTime: population.readTime };
+}
 
-	const unique = new Map<string, QueryDocumentSnapshot>();
-	for (const result of await Promise.all(queries))
-		for (const candidate of result.docs)
-			unique.set(candidate.id, candidate);
-	return [...unique.values()]
+function nextCandidatePage(
+	index: CandidateIndex,
+	registration: PreparedRegistration,
+	after: string | undefined,
+): PreparedRegistration[] {
+	const names = new Map<string, number>();
+	for (const child of registration.children) {
+		if (child.first)
+			names.set(child.first, (names.get(child.first) ?? 0) + 1);
+	}
+	const candidates = new Map<string, PreparedRegistration>();
+	for (const name of names.keys()) {
+		for (const candidate of index.byName.get(name) ?? []) {
+			if (
+				candidate.id === registration.id ||
+				(after &&
+					Buffer.compare(
+						Buffer.from(candidate.id),
+						Buffer.from(after),
+					) <= 0)
+			)
+				continue;
+			candidates.set(candidate.id, candidate);
+		}
+	}
+	// No pair with fewer than two shared first names can be classified.
+	return [...candidates.values()]
+		.filter((candidate) => {
+			const remaining = new Map(names);
+			let overlap = 0;
+			for (const { first } of candidate.children) {
+				const count = remaining.get(first) ?? 0;
+				if (count > 0) {
+					if (++overlap >= 2) return true;
+					remaining.set(first, count - 1);
+				}
+			}
+			return false;
+		})
 		.sort((a, b) => Buffer.compare(Buffer.from(a.id), Buffer.from(b.id)))
 		.slice(0, CANDIDATE_PAGE_SIZE + 1);
 }
@@ -204,7 +236,7 @@ async function nextCandidatePage(
 async function runNightlyStep(
 	db: Firestore,
 	season: number,
-	key: Buffer,
+	index: CandidateIndex,
 	cutoff: Timestamp,
 	at: string,
 ): Promise<NightlyStep> {
@@ -227,61 +259,60 @@ async function runNightlyStep(
 			registrations.doc(pending.id),
 			projectionRef,
 		);
-		const indexed = prepareIndexedRoster(source, season, key);
-		if (!indexed || indexed.revision === previous.get('revision')) {
-			if (!indexed && previous.exists) transaction.delete(projectionRef);
+		// A source edited after the population snapshot could only be matched
+		// against stale counterparts. Move it past this run's cutoff so the
+		// next run sees both new versions before marking either processed.
+		if (
+			source.updateTime &&
+			source.updateTime.valueOf() > index.readTime.valueOf()
+		) {
+			transaction.update(pending.ref, {
+				queuedAt: FieldValue.serverTimestamp(),
+			});
+			return { created: 0 };
+		}
+		const registration = prepareRoster(source, season);
+		const revision = source.updateTime?.valueOf();
+		const processed: unknown = previous.get('sourceUpdateTime');
+		if (
+			!registration ||
+			!revision ||
+			(processed instanceof Timestamp && revision <= processed.valueOf())
+		) {
+			if (!registration && previous.exists)
+				transaction.delete(projectionRef);
 			transaction.delete(pending.ref);
 			return { created: 0 };
 		}
 
 		const marker = pending.data() as PendingRoster;
-		const after =
-			marker.revision === indexed.revision ? marker.after : undefined;
-		const candidates = await nextCandidatePage(
-			transaction,
-			db,
-			season,
-			indexed.firstNameKeys,
-			after,
-		);
-		const page = candidates.slice(0, CANDIDATE_PAGE_SIZE);
-		const records = page
-			.filter(({ id }) => id !== pending.id)
-			.map((doc) => doc.data() as IndexedRoster);
+		const after = marker.revision === revision ? marker.after : undefined;
+		const candidates = nextCandidatePage(index, registration, after);
+		const records = candidates.slice(0, CANDIDATE_PAGE_SIZE);
 		const cases = root.collection('cases');
-		const known = records.length
-			? await transaction.getAll(
-					...records.map(({ registration }) =>
-						cases.doc(
-							registrationReviewCaseId(
-								season,
-								pending.id,
-								registration.id,
-							),
-						),
-					),
-					{ fieldMask: [] },
-				)
-			: [];
 		const proposals = detectRegistrationReviewPairs({
 			season,
 			changedIds: new Set([pending.id]),
-			population: [
-				indexed.registration,
-				...records.map(({ registration }) => registration),
-			],
-			knownCaseIds: new Set(
-				known.filter(({ exists }) => exists).map(({ id }) => id),
-			),
+			population: [registration, ...records],
+			knownCaseIds: new Set(),
 			at,
 		});
+		// Most candidate rosters share a name but do not classify as matches.
+		// Do not spend a case lookup on those non-matches.
+		const known = proposals.length
+			? await transaction.getAll(
+					...proposals.map(({ id }) => cases.doc(id)),
+					{ fieldMask: [] },
+				)
+			: [];
+		const newCases = proposals.filter((_, index) => !known[index]?.exists);
 
 		// A candidate could have changed or canceled before its delta was
 		// delivered. Reread only new matches from the canonical collection.
 		const byId = new Map(
-			records.map((row) => [row.registration.id, row.revision]),
+			records.map((row) => [row.id, JSON.stringify(row)]),
 		);
-		const otherIds = proposals.map((review) =>
+		const otherIds = newCases.map((review) =>
 			review.registrations.find((id) => id !== pending.id)!,
 		);
 		const live = otherIds.length
@@ -293,12 +324,12 @@ async function runNightlyStep(
 			live
 				.filter(
 					(doc) =>
-						prepareIndexedRoster(doc, season, key)?.revision ===
+						JSON.stringify(prepareRoster(doc, season)) ===
 						byId.get(doc.id),
 				)
 				.map(({ id }) => id),
 		);
-		const confirmed = proposals.filter((_, index) =>
+		const confirmed = newCases.filter((_, index) =>
 			current.has(otherIds[index]),
 		);
 		for (const review of confirmed)
@@ -309,34 +340,41 @@ async function runNightlyStep(
 
 		if (candidates.length > CANDIDATE_PAGE_SIZE) {
 			transaction.update(pending.ref, {
-				revision: indexed.revision,
-				after: page.at(-1)!.id,
+				revision,
+				after: records.at(-1)!.id,
 			});
 		} else {
-			transaction.set(projectionRef, indexed);
+			transaction.set(projectionRef, {
+				sourceUpdateTime: source.updateTime,
+			});
 			transaction.delete(pending.ref);
 		}
 		return { created: confirmed.length };
 	}, TRANSACTION_OPTIONS);
 }
 
-/** Drain only queued changes present at the start; no baseline or full-roster scan. */
+/** Only queued revisions initiate comparisons; the population is read once per nonempty run. */
 export async function runRegistrationReviewNightly(
 	db: Firestore,
 	season: number,
-	key: Buffer,
 	cutoff: Date,
 	maxSteps = REGISTRATION_REVIEW_NIGHTLY_MAX_STEPS,
 ): Promise<{ steps: number; created: number; mayHaveMore: boolean }> {
-	if (key.length < 32)
-		throw new Error('Registration review requires a 32-byte key.');
 	const at = cutoff.toISOString();
 	const highWater = Timestamp.fromDate(cutoff);
 	const deadline = Date.now() + WORK_BUDGET_MS;
+	const pending = await getRegistrationReviewSeason(db, season)
+		.collection('pendingRosters')
+		.where('queuedAt', '<=', highWater)
+		.orderBy('queuedAt')
+		.limit(1)
+		.get();
+	if (pending.empty) return { steps: 0, created: 0, mayHaveMore: false };
+	const index = await loadCandidateIndex(db, season);
 	let steps = 0;
 	let created = 0;
 	while (steps < maxSteps && Date.now() < deadline) {
-		const result = await runNightlyStep(db, season, key, highWater, at);
+		const result = await runNightlyStep(db, season, index, highWater, at);
 		if (!result) return { steps, created, mayHaveMore: false };
 		steps++;
 		created += result.created;
@@ -344,7 +382,6 @@ export async function runRegistrationReviewNightly(
 	return { steps, created, mayHaveMore: true };
 }
 
-// Explicit local dry-run setup only. The scheduler never calls this.
 export async function runRegistrationReviewEmulatorBaseline(
 	app: App,
 	season: number,
@@ -360,11 +397,19 @@ export async function runRegistrationReviewEmulatorBaseline(
 		);
 	}
 
-	const db = getFirestore(app);
+	return seedRegistrationReviewBaselinePage(getFirestore(app), season);
+}
+
+/** Resume a one-time backfill of submitted registrations that predate capture. */
+async function seedRegistrationReviewBaselinePage(
+	db: Firestore,
+	season: number,
+	cutoff?: Timestamp,
+): Promise<{ scanned: number; queued: number; mayHaveMore: boolean }> {
 	const root = getRegistrationReviewSeason(db, season);
 	const baseline = root.collection('run').doc('baseline');
 	const pending = root.collection('pendingRosters');
-	const pageSize = 50;
+	const index = root.collection('rosterIndex');
 
 	return db.runTransaction(async (transaction) => {
 		const checkpoint = await transaction.get(baseline);
@@ -376,7 +421,7 @@ export async function runRegistrationReviewEmulatorBaseline(
 			.where('programYear', '==', season)
 			.orderBy(FieldPath.documentId())
 			.select('programYear', 'registrationSubmittedOn', 'cancelledOn')
-			.limit(pageSize);
+			.limit(BASELINE_PAGE_SIZE);
 		const after = checkpoint.get('after') as string | undefined;
 		const page = await transaction.get(
 			after ? query.startAfter(after) : query,
@@ -385,23 +430,68 @@ export async function runRegistrationReviewEmulatorBaseline(
 		const existing = active.length
 			? await transaction.getAll(
 					...active.map(({ id }) => pending.doc(id)),
+					...active.map(({ id }) => index.doc(id)),
+					{ fieldMask: [] },
 				)
 			: [];
 		let queued = 0;
-		for (const marker of existing) {
-			if (marker.exists) continue;
-			transaction.create(marker.ref, {
-				eventId: 'local-baseline',
-				queuedAt: FieldValue.serverTimestamp(),
+		for (const [i, { id }] of active.entries()) {
+			if (existing[i]?.exists || existing[i + active.length]?.exists)
+				continue;
+			transaction.create(pending.doc(id), {
+				eventId: 'baseline',
+				queuedAt: cutoff ?? FieldValue.serverTimestamp(),
 			});
 			queued++;
 		}
 
-		const mayHaveMore = page.size === pageSize;
+		const mayHaveMore = page.size === BASELINE_PAGE_SIZE;
 		transaction.set(baseline, {
 			done: !mayHaveMore,
 			after: page.docs.at(-1)?.id ?? after ?? null,
 		});
 		return { scanned: page.size, queued, mayHaveMore };
 	}, TRANSACTION_OPTIONS);
+}
+
+/** Seed existing registrations once, then classify only pending revisions. */
+export async function buildNightlyRegistrationReview(
+	db: Firestore,
+	season: number,
+	cutoff: Date,
+): Promise<{
+	steps: number;
+	created: number;
+	mayHaveMore: boolean;
+	baselineScanned: number;
+	baselineQueued: number;
+}> {
+	const seedDeadline = Date.now() + 20_000;
+	const highWater = Timestamp.fromDate(cutoff);
+	let baselineScanned = 0;
+	let baselineQueued = 0;
+	let baselinePending = true;
+	for (
+		let page = 0;
+		page < BASELINE_PAGES_PER_RUN &&
+		baselinePending &&
+		Date.now() < seedDeadline;
+		page++
+	) {
+		const result = await seedRegistrationReviewBaselinePage(
+			db,
+			season,
+			highWater,
+		);
+		baselineScanned += result.scanned;
+		baselineQueued += result.queued;
+		baselinePending = result.mayHaveMore;
+	}
+	const reviewed = await runRegistrationReviewNightly(db, season, cutoff);
+	return {
+		...reviewed,
+		mayHaveMore: baselinePending || reviewed.mayHaveMore,
+		baselineScanned,
+		baselineQueued,
+	};
 }

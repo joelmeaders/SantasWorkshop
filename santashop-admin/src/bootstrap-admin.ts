@@ -59,7 +59,7 @@ export type AdminBootstrapConfig = Pick<
 	| 'production'
 	| 'programYear'
 	| 'shopDays'
-> & { readonly registrationReviewEnabled?: boolean };
+>;
 
 export interface AdminBootstrapDependencies {
 	readonly bootstrapApplication: typeof bootstrapApplication;
@@ -202,9 +202,7 @@ export function bootstrapAdminApplication(
 				}),
 				provideAdminLanguage(),
 				...firebaseProviders,
-				...(runtimeConfig.registrationReviewEnabled === true
-					? [provideRegistrationReview()]
-					: []),
+				provideRegistrationReview(),
 				{ provide: ANALYTICS_APP_AREA, useValue: 'admin' },
 				...provideRemoteConfigPublicParameters({
 					useEmulator: !runtimeConfig.production,

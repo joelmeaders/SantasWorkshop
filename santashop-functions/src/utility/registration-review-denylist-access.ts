@@ -2,23 +2,26 @@ import type { Firestore, Transaction } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { createRegistrationReviewDenylist } from './registration-review-denylist';
 
-export function getRegistrationReviewDenylist(
-	db: Firestore,
-): ReturnType<typeof createRegistrationReviewDenylist> | null {
-	if (
-		process.env['SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED'] !== 'true'
-	)
-		return null;
+export function assertRegistrationReviewEmulatorIsolation(): void {
 	if (process.env['FUNCTIONS_EMULATOR'] === 'true') {
 		const project =
 			process.env['GCLOUD_PROJECT'] ?? process.env['GCP_PROJECT'];
+		const isLoopback = (name: string): boolean =>
+			/^(?:127\.0\.0\.1|localhost|\[?::1\]?):\d+$/u.test(
+				process.env[name] ?? '',
+			);
+		const demo = ['demo-registration-review', 'demo-santashop'].includes(
+			project ?? '',
+		);
+		// The integration command selects the TEST name but redirects every
+		// SDK service to loopback. Never permit a partial emulator for it.
+		const isolatedTest =
+			project === 'santas-workshop-test' &&
+			isLoopback('FIREBASE_AUTH_EMULATOR_HOST') &&
+			isLoopback('FIREBASE_STORAGE_EMULATOR_HOST');
 		if (
-			!['demo-registration-review', 'demo-santashop'].includes(
-				project ?? '',
-			) ||
-			!/^(?:127\.0\.0\.1|localhost):\d+$/u.test(
-				process.env['FIRESTORE_EMULATOR_HOST'] ?? '',
-			)
+			(!demo && !isolatedTest) ||
+			!isLoopback('FIRESTORE_EMULATOR_HOST')
 		) {
 			throw new HttpsError(
 				'unavailable',
@@ -26,6 +29,10 @@ export function getRegistrationReviewDenylist(
 			);
 		}
 	}
+}
+
+export function getRegistrationReviewDenylist(db: Firestore) {
+	assertRegistrationReviewEmulatorIsolation();
 	return createRegistrationReviewDenylist(db);
 }
 
@@ -35,7 +42,6 @@ export async function assertRegistrationReviewAllowed(
 	transaction?: Transaction,
 ): Promise<void> {
 	const denylist = getRegistrationReviewDenylist(db);
-	if (!denylist) return;
 	const emails = new Set(
 		[identity.email, identity.additionalEmail]
 			.map((email) =>

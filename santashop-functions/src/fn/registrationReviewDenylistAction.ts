@@ -43,11 +43,6 @@ export async function performRegistrationReviewDenylistAction(
 	now: Date,
 ): Promise<ReviewDenylistActionResult> {
 	const list = getRegistrationReviewDenylist(db);
-	if (!list)
-		throw new HttpsError(
-			'failed-precondition',
-			'Cross-season email block changes are not available.',
-		);
 	const {
 		caseId,
 		registrationId,

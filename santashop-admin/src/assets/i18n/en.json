@@ -948,5 +948,6 @@
 	"Child removed in error": "Child removed in error",
 	"Cancellation requested by shopper": "Cancellation requested by shopper",
 	"Registration canceled in error": "Registration canceled in error",
-	"Email blocked in error": "Email blocked in error"
+	"Email blocked in error": "Email blocked in error",
+	"Potential matches are added nightly. Case actions take effect immediately. A match is a clue, not proof.": "Potential matches are added nightly. Case actions take effect immediately. A match is a clue, not proof."
 }

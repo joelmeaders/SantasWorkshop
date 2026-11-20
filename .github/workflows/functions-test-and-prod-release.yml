@@ -234,7 +234,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run ci:functions:deploy:test
-        env:
       - uses: google-github-actions/setup-gcloud@v3
       - name: Verify live test Functions match source
         shell: bash
@@ -339,7 +338,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run ci:functions:deploy:prod
-        env:
       - uses: google-github-actions/setup-gcloud@v3
       - name: Verify live production Functions match source
         shell: bash

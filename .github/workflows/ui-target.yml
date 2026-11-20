@@ -132,7 +132,6 @@ jobs:
       - run: pnpm run e2e:browser:setup:ci
         if: ${{ !inputs.skip_tests && inputs.mode != 'prod' }}
       - run: pnpm run "config:$UI_TARGET:$UI_MODE"
-        env:
       - name: Load validated Remote Config release defaults
         if: ${{ inputs.deploy }}
         env:
@@ -174,7 +173,6 @@ jobs:
       - name: Restore release source configuration after emulator tests
         if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: pnpm run "config:$UI_TARGET:$UI_MODE"
-        env:
       - name: Require unchanged verified Hosting output
         if: ${{ inputs.deploy && !inputs.skip_tests && inputs.mode != 'prod' }}
         run: |

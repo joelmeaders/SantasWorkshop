@@ -109,7 +109,7 @@ export type ReviewCheckpoint = {
 const name = (value = ''): string =>
 	value.normalize('NFC').toLowerCase().trim().replace(/\s+/gu, ' ');
 
-export function prepareReviewRegistration(
+function prepareRegistration(
 	{
 		id,
 		accountId,
@@ -121,13 +121,15 @@ export function prepareReviewRegistration(
 		zip,
 		reliableEmail,
 	}: ReviewRegistration,
-	secret: Buffer,
+	secret?: Buffer,
 ): PreparedRegistration {
 	const sign = (field: string, ...values: string[]): string =>
 		values.every(Boolean)
-			? createHmac('sha256', secret)
-					.update(JSON.stringify([season, field, ...values]))
-					.digest('hex')
+			? secret
+				? createHmac('sha256', secret)
+						.update(JSON.stringify([season, field, ...values]))
+						.digest('hex')
+				: JSON.stringify(values)
 			: '';
 	return {
 		id,
@@ -149,6 +151,21 @@ export function prepareReviewRegistration(
 			: '',
 		zip: active ? sign('zip', zip?.match(/^\d{5}/u)?.[0] ?? '') : '',
 	};
+}
+
+/** Preserve the keyed representation for offline tools that persist it. */
+export function prepareReviewRegistration(
+	registration: ReviewRegistration,
+	secret: Buffer,
+): PreparedRegistration {
+	return prepareRegistration(registration, secret);
+}
+
+/** Normalized values are only for comparisons within the nightly invocation. */
+export function prepareTransientReviewRegistration(
+	registration: ReviewRegistration,
+): PreparedRegistration {
+	return prepareRegistration(registration);
 }
 
 function dobKey(value = ''): string {

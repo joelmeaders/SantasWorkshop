@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.29] - 2026-11-19
+
+### Changed
+
+- Make Registration Review available to authorized staff by default and explain when new matches arrive.
+
 ## [2026.11.28] - 2026-11-19
 
 ### Fixed

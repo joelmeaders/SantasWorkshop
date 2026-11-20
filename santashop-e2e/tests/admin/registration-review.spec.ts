@@ -76,14 +76,7 @@ async function replaceDocument(
 	expect(response.ok()).toBe(true);
 }
 
-// Execute with SANTASHOP_REGISTRATION_REVIEW_ENABLED=true for both the
-// prepared Admin build and the demo-santashop Functions emulator.
 test.describe('registration review through the signed-in Admin workspace', () => {
-	test.skip(
-		process.env['SANTASHOP_REGISTRATION_REVIEW_ENABLED'] !== 'true',
-		'Registration review E2E requires explicit emulator opt-in.',
-	);
-
 	test('REVIEW-001 rejects a plain Admin in both navigation and direct route', async ({
 		page,
 		seedPublicParams,
@@ -222,19 +215,14 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				enabled: true,
 			},
 		]);
-		const testDenylist =
-			process.env['SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED'] ===
-			'true';
 		const shopperPassword = 'FixturePass123!';
-		if (testDenylist) {
-			expect(new URL(E2E_AUTH_EMULATOR_URL).hostname).toBe('127.0.0.1');
-			await seedAdminUser({
-				uid: left,
-				emailAddress: leftEmail,
-				password: shopperPassword,
-				roles: [],
-			});
-		}
+		expect(new URL(E2E_AUTH_EMULATOR_URL).hostname).toBe('127.0.0.1');
+		await seedAdminUser({
+			uid: left,
+			emailAddress: leftEmail,
+			password: shopperPassword,
+			roles: [],
+		});
 		const leftChildren = ['Ari', 'Jules'].map((firstName) => ({
 			firstName,
 			lastName: 'Fixture',
@@ -548,41 +536,39 @@ test.describe('registration review through the signed-in Admin workspace', () =>
 				Number(overCapacitySlot.fields['maxSlots'].integerValue),
 			);
 
-			if (testDenylist) {
-				await runWithoutEmail(/^Cancel registration$/i);
-				await expect(
-					target.getByText('Canceled', { exact: true }),
-				).toBeVisible();
-				await runWithoutEmail(/^Block email for future seasons$/i);
-				await expect(
-					target.getByText('Email blocked', { exact: true }),
-				).toBeVisible();
-				const shopperSignIn = async (): Promise<number> =>
-					(
-						await request.post(
-							E2E_AUTH_EMULATOR_URL +
-								'/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key',
-							{
-								data: {
-									email: leftEmail,
-									password: shopperPassword,
-									returnSecureToken: true,
-								},
+			await runWithoutEmail(/^Cancel registration$/i);
+			await expect(
+				target.getByText('Canceled', { exact: true }),
+			).toBeVisible();
+			await runWithoutEmail(/^Block email for future seasons$/i);
+			await expect(
+				target.getByText('Email blocked', { exact: true }),
+			).toBeVisible();
+			const shopperSignIn = async (): Promise<number> =>
+				(
+					await request.post(
+						E2E_AUTH_EMULATOR_URL +
+							'/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key',
+						{
+							data: {
+								email: leftEmail,
+								password: shopperPassword,
+								returnSecureToken: true,
 							},
-						)
-					).status();
-				expect(await shopperSignIn()).toBe(400);
-				await runWithoutEmail(/^Remove email block$/i);
-				await expect(
-					detail.getByText(
-						/Email block removed. Verify sign-in separately./i,
-					),
-				).toBeVisible();
-				await expect(
-					target.getByText('Email blocked', { exact: true }),
-				).toHaveCount(0);
-				expect(await shopperSignIn()).toBe(400);
-			}
+						},
+					)
+				).status();
+			expect(await shopperSignIn()).toBe(400);
+			await runWithoutEmail(/^Remove email block$/i);
+			await expect(
+				detail.getByText(
+					/Email block removed. Verify sign-in separately./i,
+				),
+			).toBeVisible();
+			await expect(
+				target.getByText('Email blocked', { exact: true }),
+			).toHaveCount(0);
+			expect(await shopperSignIn()).toBe(400);
 			await detail
 				.getByRole('region', { name: 'Record the outcome' })
 				.getByRole('combobox', { name: 'Review status' })

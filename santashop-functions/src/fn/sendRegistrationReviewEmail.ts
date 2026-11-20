@@ -5,7 +5,6 @@ import {
 	isEmailSink,
 	recordSimulatedEmail,
 } from '../../../scripts/load/functions/email-isolation';
-import { registrationReviewEnabled } from './registrationReviewAccess';
 import { COLLECTION_SCHEMA, type Registration } from '../models';
 import { isEmailSendingEnabled } from '../utility/email-sending';
 import {
@@ -17,7 +16,10 @@ import {
 	REGISTRATION_EMAIL_SOURCE,
 	SES_REGION,
 } from '../utility/runtime-config';
-import { getRegistrationReviewDenylist } from '../utility/registration-review-denylist-access';
+import {
+	assertRegistrationReviewEmulatorIsolation,
+	getRegistrationReviewDenylist,
+} from '../utility/registration-review-denylist-access';
 import {
 	REVIEW_REPLY_TO,
 	type ReviewEmailAction,
@@ -113,6 +115,7 @@ export default async function sendRegistrationReviewEmail(
 	deps: DeliveryDependencies = defaults,
 	now: Date = new Date(),
 ): Promise<void> {
+	assertRegistrationReviewEmulatorIsolation();
 	const ref = trigger.ref;
 	const db = ref.firestore;
 	const ageMs = now.getTime() - Date.parse(eventTime);
@@ -133,8 +136,7 @@ export default async function sendRegistrationReviewEmail(
 			});
 		});
 	};
-	const allowed =
-		isNewEvent && registrationReviewEnabled() && (await deps.enabled());
+	const allowed = isNewEvent && (await deps.enabled());
 	const sink = allowed && deps.isSink();
 	// Emulator real email is never enabled for this worker. An explicitly configured sink is allowed.
 	const deliveryAllowed =
@@ -163,27 +165,21 @@ export default async function sendRegistrationReviewEmail(
 				latest.operationId
 			) {
 				const policy = getRegistrationReviewDenylist(db);
-				if (policy) {
-					const [marker, emailBlocked, uidBlocked] =
-						await Promise.all([
-							tx.get(
-								db
-									.collection(
-										'registrationReviewAuthOperations',
-									)
-									.doc(latest.registrationId),
-							),
-							policy.isEmailBlocked(latest.recipient, tx),
-							policy.isUidBlocked(latest.registrationId, tx),
-						]);
-					const block = latest.action === 'blacklist';
-					matchesDenylistPolicy =
-						marker.get('operationId') === latest.operationId &&
-						marker.get('state') ===
-							(block ? 'confirmed' : 'cleared') &&
-						emailBlocked === block &&
-						uidBlocked === block;
-				}
+				const [marker, emailBlocked, uidBlocked] = await Promise.all([
+					tx.get(
+						db
+							.collection('registrationReviewAuthOperations')
+							.doc(latest.registrationId),
+					),
+					policy.isEmailBlocked(latest.recipient, tx),
+					policy.isUidBlocked(latest.registrationId, tx),
+				]);
+				const block = latest.action === 'blacklist';
+				matchesDenylistPolicy =
+					marker.get('operationId') === latest.operationId &&
+					marker.get('state') === (block ? 'confirmed' : 'cleared') &&
+					emailBlocked === block &&
+					uidBlocked === block;
 			}
 			if (
 				!matchesCurrentState(

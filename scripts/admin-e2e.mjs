@@ -19,8 +19,6 @@ const child = spawn(command, args, {
 		E2E_FUNCTIONS_PORT: '5001',
 		E2E_STORAGE_PORT: '9199',
 		SANTASHOP_SEND_EMAILS_FROM_EMULATOR: 'false',
-		SANTASHOP_REGISTRATION_REVIEW_ENABLED: 'true',
-		SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED: 'true',
 	},
 });
 child.once('error', (error) => {

@@ -8,6 +8,10 @@ import {
 	type FirebaseAdminMock,
 } from '../../helpers/firebase-admin.mock';
 
+vi.mock('../../../src/utility/registration-review-denylist-access', () => ({
+	assertRegistrationReviewAllowed: vi.fn().mockResolvedValue(undefined),
+}));
+
 const openSettings = (): ReturnType<typeof createDefaultPublicParameters> => {
 	const defaults = createDefaultPublicParameters();
 	return {

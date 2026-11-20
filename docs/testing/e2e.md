@@ -111,12 +111,9 @@ callable readiness probe before Playwright.
 
 ### Registration Review
 
-Registration Review is off by default. `pnpm run e2e:test:admin` opts in inside
-the synthetic demo suite only. For a manual targeted run, set
-`SANTASHOP_REGISTRATION_REVIEW_ENABLED=true` in the shell that prepares the
-Admin build, starts the Functions emulator, and runs
-`pnpm --filter @santashop/e2e exec playwright test tests/admin/registration-review.spec.ts`
-after manually preparing the Admin app and verifying emulator readiness. These
+Registration Review runs by default. For a targeted run after preparing the
+Admin app and verifying emulator readiness, run
+`pnpm --filter @santashop/e2e exec playwright test tests/admin/registration-review.spec.ts`. These
 tests use only the demo project and synthetic registrations. The review email
 worker suppresses real delivery in the emulators.
 

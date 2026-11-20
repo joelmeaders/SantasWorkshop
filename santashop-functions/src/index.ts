@@ -711,7 +711,7 @@ export const scheduledRegistrationReview = onSchedule(
 		timeZone: SHOP_TIME_ZONE,
 		maxInstances: 1,
 		concurrency: 1,
-		timeoutSeconds: 180,
+		timeoutSeconds: 360,
 		retryCount: 0,
 		memory: '256MiB',
 		labels: MANAGED_RESOURCE_LABELS,

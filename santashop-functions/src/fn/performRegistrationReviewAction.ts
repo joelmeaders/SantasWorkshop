@@ -18,7 +18,7 @@ import {
 	type Registration,
 	type RegistrationSearchIndex,
 } from '../models';
-import { requireEnabledRegistrationReviewAccess } from './registrationReviewAccess';
+import { requireRegistrationReviewRequestAccess } from './registrationReviewAccess';
 import {
 	performRegistrationReviewDenylistAction,
 	type ReviewDenylistActionResult,
@@ -240,7 +240,7 @@ export default async function performRegistrationReviewAction(
 	prepareQr: typeof ensureSignupQrCode = ensureSignupQrCode,
 	auth?: Parameters<typeof performRegistrationReviewDenylistAction>[1],
 ): Promise<ReviewActionResult | ReviewDenylistActionResult> {
-	const actorUid = requireEnabledRegistrationReviewAccess(request);
+	const actorUid = requireRegistrationReviewRequestAccess(request);
 	const input = parseInput(request.data);
 	const { caseId, registrationId, mutationId, action, notification } = input;
 	if (action === 'blacklist' || action === 'unblacklist') {

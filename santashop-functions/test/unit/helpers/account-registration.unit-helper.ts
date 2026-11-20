@@ -163,6 +163,10 @@ export const loadAccountRegistrationHandlers = async (
 ) => {
 	vi.resetModules();
 	vi.doMock('firebase-admin', () => adminMock.module);
+	// Policy is exercised end to end in the denylist ingress emulator suite.
+	vi.doMock('../../../src/utility/registration-review-denylist-access', () => ({
+		assertRegistrationReviewAllowed: vi.fn().mockResolvedValue(undefined),
+	}));
 	if (options.useRealPublicParameters) {
 		vi.doUnmock('../../../src/utility/public-parameters');
 	} else {

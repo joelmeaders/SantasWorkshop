@@ -173,30 +173,27 @@ leases, receipt semantics, and emulator-only simulated delivery.
 
 ## Registration Review: incremental overnight matching
 
-When enabled, the `registrations/{registrationId}` write trigger marks only
-changes to current-season, submitted online shopper rosters or comparison
-fields. Draft changes and unrelated updates such as appointment counters do not
-enqueue roster work. The trigger only writes private dirty markers, not
-registration records, so it cannot trigger itself.
+The registration write trigger marks only changes to current-season submitted
+online rosters or comparison fields. Drafts and unrelated updates such as
+appointment counters do not enqueue work. It writes only private dirty
+markers, never source registration records, so it cannot trigger itself.
 
-The 2 a.m. Denver job freezes a handoff cutoff and processes only queued
-changes in bounded transactions (up to 250 steps or a two-minute work budget).
-It reads the canonical registration, queries the season's compact HMAC-keyed
-first-name index in pages, skips existing case IDs before comparing rosters,
-and verifies new matches against the current canonical counterpart. A
-generation-specific cursor advances after each candidate page; ending a run
-leaves pending work for the next schedule. An empty eligible queue ends the
-run. Already flagged rosters remain matchable; cancellation or deletion only
-removes their candidate projection, not existing cases or staff history.
+At 2 a.m. Denver time, the job first stages a bounded page sequence for the
+season's one-time backfill. A persistent checkpoint prevents scanning those
+registrations again. It then processes queued work in bounded transactions (up
+to 1,000 steps or a five-minute processing budget), leaving any remainder for
+the next run. A saved roster revision marks completed analysis; unchanged
+rosters remain available as possible matches without being reprocessed.
 
-Nightly capture and processing default off independently of the reviewer UI.
-Before enabling the nightly feature in a deployed environment, verify
-the stable season key is provisioned, the query indexes and service permissions
-are ready, and an approved baseline process has indexed preexisting active
-registrations. The trigger does not retroactively backfill existing records. On the isolated
-demo emulator only, the explicit baseline helper can stage up to 50 current-year
-source records per call using a persistent cursor. It is not called by the
-scheduler or exposed in a deployed environment.
+On nights with pending work, one projected current-season read builds an
+in-memory lookup. Only queued revisions initiate comparisons. Neither names
+nor other identity fields are copied to a persistent matching index, and no
+key or secret setup is required. The stored completion marker is the source
+document revision. The worker checks case IDs only for actual matches and
+verifies new pairs against live records before saving. A cursor resumes
+partially processed candidate pages. Existing cases and staff history are
+never overwritten by the job. The review queue reads saved results; staff
+actions use live eligibility checks.
 The automatic source does not infer a verified email from a registration or
 include the separate on-site-only collection.
 

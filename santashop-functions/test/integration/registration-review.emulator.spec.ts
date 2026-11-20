@@ -802,15 +802,10 @@ describe(
 			try {
 				vi.stubEnv('FUNCTIONS_EMULATOR', 'true');
 				vi.stubEnv('GCLOUD_PROJECT', PROJECT);
-				vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'false');
+				vi.stubEnv('GCLOUD_PROJECT', 'demo-unrelated-project');
 				await expect(
 					getRegistrationReviewCase(req, app),
-				).rejects.toMatchObject({ code: 'failed-precondition' });
-				vi.stubEnv('SANTASHOP_REGISTRATION_REVIEW_ENABLED', 'true');
-				vi.stubEnv('GCLOUD_PROJECT', 'santas-workshop-test');
-				await expect(
-					getRegistrationReviewCase(req, app),
-				).rejects.toMatchObject({ code: 'failed-precondition' });
+				).rejects.toMatchObject({ code: 'unavailable' });
 				vi.stubEnv('GCLOUD_PROJECT', PROJECT);
 				await expect(
 					getRegistrationReviewCase(
@@ -924,10 +919,6 @@ describe(
 				).resolves.toEqual(note);
 
 				const cancellationId = 'projection-fixture-cancellation';
-				vi.stubEnv(
-					'SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED',
-					'true',
-				);
 				await registration.update({
 					cancelledOn: new Date(),
 					cancellationLogId: cancellationId,

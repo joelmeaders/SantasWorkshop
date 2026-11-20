@@ -235,9 +235,6 @@ jobs:
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run ci:functions:deploy:test
         env:
-          TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED: ${{ vars.TEST_SANTASHOP_REGISTRATION_REVIEW_ENABLED }}
-          TEST_SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED: ${{ vars.TEST_SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED }}
-          TEST_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED: ${{ vars.TEST_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED }}
       - uses: google-github-actions/setup-gcloud@v3
       - name: Verify live test Functions match source
         shell: bash
@@ -343,9 +340,6 @@ jobs:
       - run: pnpm --filter @santashop/functions run lint:check
       - run: pnpm run ci:functions:deploy:prod
         env:
-          PROD_SANTASHOP_REGISTRATION_REVIEW_ENABLED: ${{ vars.PROD_SANTASHOP_REGISTRATION_REVIEW_ENABLED }}
-          PROD_SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED: ${{ vars.PROD_SANTASHOP_REGISTRATION_REVIEW_NIGHTLY_ENABLED }}
-          PROD_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED: ${{ vars.PROD_SANTASHOP_REGISTRATION_REVIEW_DENYLIST_ENABLED }}
       - uses: google-github-actions/setup-gcloud@v3
       - name: Verify live production Functions match source
         shell: bash

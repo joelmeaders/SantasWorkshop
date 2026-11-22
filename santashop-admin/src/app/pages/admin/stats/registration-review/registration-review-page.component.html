@@ -326,14 +326,10 @@
 							</section>
 							<div class="comparison">
 								@for (
-									registrationId of detailState.value
-										.registrations;
-									track registrationId
+									entry of comparisonRecords();
+									track entry.id
 								) {
-									@if (
-										detailState.value.records?.[$index];
-										as record
-									) {
+									@if (entry.record; as record) {
 										<article
 											class="record"
 											[attr.aria-label]="record.id"
@@ -464,6 +460,19 @@
 														)
 													}}
 												</dd>
+												<dt>
+													{{
+														'Submitted' | adminText
+													}}
+												</dt>
+												<dd>
+													{{
+														formatTime(
+															record.submitted ??
+																''
+														) | adminText
+													}}
+												</dd>
 											</dl>
 											<h4 class="roster-heading">
 												{{
@@ -515,7 +524,7 @@
 												{{
 													'Registration ID'
 														| adminText
-												}}: {{ registrationId }}
+												}}: {{ entry.id }}
 											</p>
 											<p>
 												{{

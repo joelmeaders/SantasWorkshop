@@ -77,6 +77,7 @@ export interface ReviewCaseRegistration {
 	readonly name: string;
 	readonly email: string;
 	readonly appointment: string;
+	readonly submitted?: string;
 	readonly expectedRevision?: string;
 	readonly canceled?: boolean;
 	readonly checkedIn?: boolean;

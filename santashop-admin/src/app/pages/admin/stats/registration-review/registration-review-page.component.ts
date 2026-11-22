@@ -210,6 +210,27 @@ export class RegistrationReviewPageComponent {
 		{ initialValue: { state: 'idle' } as ReadState<ReviewCaseDetail> },
 	);
 
+	public readonly comparisonRecords = computed(() => {
+		const detail = this.detail();
+		if (detail.state !== 'ready') return [];
+		const { registrations, records } = detail.value;
+		return registrations
+			.map((id, index) => {
+				const record = records?.[index];
+				const submitted = Date.parse(record?.submitted ?? '');
+				return {
+					id,
+					record,
+					sortTime: Number.isFinite(submitted) ? submitted : Infinity,
+				};
+			})
+			.sort((left, right) =>
+				left.sortTime === right.sortTime
+					? 0
+					: left.sortTime - right.sortTime,
+			);
+	});
+
 	public changeScope(scope: ReviewQueueScope): void {
 		if (scope === this.scope()) return;
 		this.resetQueue();

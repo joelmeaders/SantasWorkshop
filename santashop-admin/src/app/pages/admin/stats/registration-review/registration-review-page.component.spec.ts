@@ -151,7 +151,10 @@ describe('RegistrationReviewPageComponent', () => {
 			id,
 			name: index ? 'Second Parent' : 'First Parent',
 			email: 'parent' + index + '@example.test',
-			appointment: '',
+			appointment: index ? 'Dec 8, 10:00 AM' : 'Dec 10, 1:30 PM',
+			submitted: index
+				? '2026-11-16T19:47:00.000Z'
+				: '2026-11-15T16:12:00.000Z',
 			expectedRevision: '10:0',
 			availableActions: ['cancel', 'removeChild'] as const,
 			children: [
@@ -162,8 +165,10 @@ describe('RegistrationReviewPageComponent', () => {
 				},
 			],
 		});
-		const records = [record('DEMO-R1', 0), record('DEMO-R2', 1)] as const;
-		detail.mockReturnValueOnce(of({ ...entry, records }));
+		const records = [record('DEMO-R2', 1), record('DEMO-R1', 0)] as const;
+		detail.mockReturnValueOnce(
+			of({ ...entry, registrations: ['DEMO-R2', 'DEMO-R1'], records }),
+		);
 		await enable();
 		component.open(entry.id);
 		await settle();
@@ -171,6 +176,23 @@ describe('RegistrationReviewPageComponent', () => {
 		const [first, second] = page.querySelectorAll<HTMLElement>(
 			'.comparison .record',
 		);
+		const facts = (card: HTMLElement): string[] =>
+			Array.from(
+				card.querySelectorAll('.record-facts dt, .record-facts dd'),
+				(field) => field.textContent.trim(),
+			);
+		expect(facts(first).slice(-4)).toEqual([
+			'Appointment',
+			'Dec 10, 1:30 PM',
+			'Submitted',
+			'Nov 15, 2026, 9:12 AM MT',
+		]);
+		expect(facts(second).slice(-4)).toEqual([
+			'Appointment',
+			'Dec 8, 10:00 AM',
+			'Submitted',
+			'Nov 16, 2026, 12:47 PM MT',
+		]);
 		expect(
 			first
 				.querySelector('section.tool-panel')
@@ -206,6 +228,52 @@ describe('RegistrationReviewPageComponent', () => {
 				?.id,
 		).toBe('review-case-status');
 	});
+
+	it.each([
+		{ firstSubmitted: '', expectedFirst: 'DEMO-R2' },
+		{
+			firstSubmitted: '2026-11-15T16:12:00.000Z',
+			expectedFirst: 'DEMO-R1',
+		},
+	])(
+		'orders unknown times last and keeps ties stable ($firstSubmitted)',
+		async ({ firstSubmitted, expectedFirst }) => {
+			const record = (id: string, submitted: string) => ({
+				id,
+				name: id,
+				email: '',
+				appointment: '',
+				submitted,
+				children: [],
+			});
+			detail.mockReturnValueOnce(
+				of({
+					...entry,
+					registrations: ['DEMO-R1', 'DEMO-R2'],
+					records: [
+						record('DEMO-R1', firstSubmitted),
+						record('DEMO-R2', '2026-11-15T16:12:00.000Z'),
+					],
+				}),
+			);
+			await enable();
+			component.open(entry.id);
+			await settle();
+			const page = fixture.nativeElement as HTMLElement;
+			expect(
+				page
+					.querySelector('.comparison .record')
+					?.getAttribute('aria-label'),
+			).toBe(expectedFirst);
+			if (!firstSubmitted) {
+				expect(
+					page.querySelector(
+						'[aria-label="DEMO-R1"] .record-facts dd:last-child',
+					)?.textContent,
+				).toContain('Not available');
+			}
+		},
+	);
 
 	it('keeps a stable note ID on a lost receipt and clears detail after resolving from the open queue', async () => {
 		await enable();

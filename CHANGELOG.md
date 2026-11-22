@@ -7,6 +7,12 @@ and this project adheres to a versioning scheme of `year.minor.patch`.
 
 ## [Unreleased]
 
+## [2026.11.31] - 2026-11-22
+
+### Changed
+
+- Show registration submission times in Registration Review and put the earlier submission first.
+
 ## [2026.11.30] - 2026-11-19
 
 ### Changed

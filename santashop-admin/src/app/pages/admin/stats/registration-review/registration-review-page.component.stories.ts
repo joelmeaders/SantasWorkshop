@@ -535,6 +535,7 @@ export const VolunteerPractice: Story = {
 					name: 'Sample Parent A',
 					email: 'sample-parent-a@review.test',
 					appointment: 'Dec 8, 10:00 AM',
+					submitted: '2026-11-15T16:12:00.000Z',
 					children: [
 						practiceChild(0, 'Riley', '2016-07-18'),
 						practiceChild(1, 'Jordan', '2019-03-06'),
@@ -545,6 +546,7 @@ export const VolunteerPractice: Story = {
 					name: 'Sample Parent B',
 					email: 'sample-parent-b@review.test',
 					appointment: 'Dec 10, 1:30 PM',
+					submitted: '2026-11-16T19:47:00.000Z',
 					children: [
 						practiceChild(0, 'Riley', '2016-07-18'),
 						practiceChild(1, 'Jordan', '2019-03-06'),

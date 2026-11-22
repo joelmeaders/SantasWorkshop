@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2026.11.30] - 2026-11-22
+
+### Changed
+
+- Show each registration’s submission time below its appointment in Mountain Time and put the earlier submission first.
+
 ## [2026.11.29] - 2026-11-19
 
 ### Changed
